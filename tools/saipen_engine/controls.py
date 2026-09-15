@@ -41,9 +41,10 @@ from .operations import (
     _claim_move,
     _docs_preconditions,
     _event_line,
-    _fold_handover,
+    _actor_provenance,
     _identity,
     _insert_todo,
+    _log_targets,
     _now,
     _read,
     _render_plan,
@@ -352,7 +353,14 @@ def _plan_directive(
     if queued_behind:
         message += f"; queued at next legal boundary behind active {queued_behind}"
     event, event_line = _event_line(
-        docs, log_tail, "DEC", ticket, agent, _fold_handover(state, agent, message), _now(), op_id
+        docs,
+        log_tail,
+        "DEC",
+        ticket,
+        agent,
+        _actor_provenance(state, agent, message),
+        _now(),
+        op_id,
     )
     log_text = docs["log"].text_norm.rstrip("\n") + "\n" + event_line + "\n"
     owned = {"last_event": event, "updated": _utc_iso(), "agent": agent}
@@ -400,7 +408,7 @@ def _plan_directive(
     if errors:
         return _refuse("VALIDATION_FAILED", "; ".join(errors[:5]))
     targets = [
-        _target(docs["log"], ".saipen/LOG.md", "log", log_text),
+        *_log_targets(docs, log_text),
         _target(docs["board"], ".saipen/BOARD.md", "board", board_text),
         _target(docs["state"], ".saipen/STATE.md", "state", state_text),
     ]
@@ -1088,7 +1096,7 @@ def plan_milestone(
         "DEC",
         work_ids[0] if work_ids else None,
         agent,
-        _fold_handover(
+        _actor_provenance(
             state, agent, f"restore milestone {checkpoint} created -- {manifest['label']}"
         ),
         _now(),
@@ -1143,7 +1151,7 @@ def plan_milestone(
     )
     targets.extend(
         [
-            _target(docs["log"], ".saipen/LOG.md", "log", log_text),
+            *_log_targets(docs, log_text),
             _target(docs["state"], ".saipen/STATE.md", "state", state_text),
         ]
     )
@@ -1822,7 +1830,7 @@ def undo_confirm(
         "DEC",
         None,
         agent,
-        _fold_handover(state, agent, f"undo {current_id}->{target_id} -- reason: {safe_reason}"),
+        _actor_provenance(state, agent, f"undo {current_id}->{target_id} -- reason: {safe_reason}"),
         _now(),
         op_id,
     )
@@ -1832,7 +1840,7 @@ def undo_confirm(
         {"last_event": event, "updated": _utc_iso(), "agent": agent},
     )
     for planned in (
-        _target(docs["log"], ".saipen/LOG.md", "log", log_text),
+        *_log_targets(docs, log_text),
         _target(docs["state"], ".saipen/STATE.md", "state", state_text),
     ):
         preconditions[planned.path] = planned.before_hash

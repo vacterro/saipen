@@ -106,6 +106,7 @@ MISSING_FILE_DEPENDENCY = "file-missing-v1"
 
 _CRASH_MAP = {
     "PREPARED": "NITRO_CRASH_AFTER_PREPARE",
+    "generic": "NITRO_CRASH_AFTER_GENERIC",
     "log": "NITRO_CRASH_AFTER_LOG",
     "board": "NITRO_CRASH_AFTER_BOARD",
     "state": "NITRO_CRASH_AFTER_STATE",
@@ -429,6 +430,45 @@ def _target_live_hash(root: Path, target: dict) -> str:
         if path.is_symlink() or attributes & 0x400 or not path.is_file():
             return f"object:{info.st_mode}"
     return _hash_file(path)
+
+
+# Closed three-way recovery classification vocabulary (T-1316, SRC-027).
+TARGET_ALREADY_APPLIED = "ALREADY_APPLIED"
+TARGET_PENDING = "PENDING"
+TARGET_CONFLICT = "CONFLICT"
+
+
+def classify_target(current_hash: str, before_hash: str, after_hash: str) -> str:
+    """The ONE canonical three-way target recovery classifier (T-1316).
+
+    The persisted journal is evidence of attempted progress; the live canonical
+    target bytes are the authority for whether a deterministic target
+    transition has already materialized. A crash may land after the target
+    bytes were written but before any journal progress (target.applied,
+    progress_index, applied_frontier, operation status) was persisted, so
+    recovery must classify from BYTES, not from journal markers:
+
+      current == after  -> TARGET_ALREADY_APPLIED (the semantic write already
+                           happened; recovery advances bookkeeping, never
+                           rewrites the target)
+      current == before -> TARGET_PENDING (the exact pre-operation state; the
+                           target may be applied per the original plan)
+      anything else     -> TARGET_CONFLICT (unexpected third state; fail
+                           closed, never convert to ALREADY_APPLIED)
+
+    A no-op target (before_hash == after_hash) is deterministic: it matches
+    the after branch first and classifies as already-satisfied, never
+    ambiguous. Creation/deletion targets carry their missing-state sentinel
+    hashes through the SAME existing document/hash model (empty string for an
+    absent file, delete-tree digests for absent trees) -- no second sentinel
+    scheme exists. APPLY, recovery, conflict resolution and conformance all
+    consume this helper; the two-way logic must never be re-inlined anywhere.
+    """
+    if current_hash == after_hash:
+        return TARGET_ALREADY_APPLIED
+    if current_hash == before_hash:
+        return TARGET_PENDING
+    return TARGET_CONFLICT
 
 
 def hash_source_identity(project_root: Path | str) -> str:
@@ -1467,24 +1507,52 @@ class Journal:
                 shutil.rmtree(self.dir, ignore_errors=True)
             raise
 
+    def _read_progress_sidecar(self) -> dict:
+        progress_file = self.dir / "progress.json"
+        prog: dict = {}
+        if progress_file.is_file():
+            with contextlib.suppress(Exception):
+                prog = json.loads(progress_file.read_text(encoding="utf-8"))
+        return prog
+
     def mark(
         self, status: str, progress_index: int | None = None, target_index: int | None = None
     ) -> None:
         progress_file = self.dir / "progress.json"
-        prog = {}
-        if progress_file.is_file():
-            with contextlib.suppress(Exception):
-                prog = json.loads(progress_file.read_text(encoding="utf-8"))
+        prog = self._read_progress_sidecar()
         prog["status"] = status
         if progress_index is not None:
             prog["progress_index"] = progress_index
         if target_index is not None:
+            # Monotonic on purpose: ordinary forward execution can only grow
+            # the applied frontier. Recovery must NOT reuse this writer to
+            # lower a stale overstated frontier -- it owns reconcile_progress.
             prog["applied_frontier"] = max(prog.get("applied_frontier", -1), target_index)
         _atomic_json(progress_file, prog, ownership_root=self.project_root)
 
         if status in SETTLED:
             self.fold_progress()
             _settle_journal(self)
+
+    def reconcile_progress(self, status: str, progress_index: int, applied_frontier: int) -> None:
+        """Canonical recovery reconciliation of the bounded-progress sidecar.
+
+        Recovery has re-derived the materialized prefix from LIVE target bytes
+        and must publish that EXACT frontier -- including DECREASING a stale
+        overstated ``applied_frontier``. Ordinary forward execution keeps
+        Journal.mark's monotonic semantics; this narrowly-scoped writer is the
+        only operation allowed to move the frontier backwards, and it is used
+        exclusively when recovery has re-derived progress from live bytes
+        (T-1316 / SRC-027 R003, R007). Status, progress_index and
+        applied_frontier publish together in ONE atomic write so a crash
+        inside the reconciliation replays idempotently from disk.
+        """
+        progress_file = self.dir / "progress.json"
+        prog = self._read_progress_sidecar()
+        prog["status"] = status
+        prog["progress_index"] = progress_index
+        prog["applied_frontier"] = applied_frontier
+        _atomic_json(progress_file, prog, ownership_root=self.project_root)
 
     def append_targets(self, targets: list[dict]) -> None:
         """Append write targets to an existing operation (T-994 release).
@@ -2592,16 +2660,24 @@ def run_mutation(
 
     journal.mark("APPLYING")
     for index, target in enumerate(prepared):
-        live = _target_live_hash(root, target)
         action = _target_action(target)
-        if live == target["after_hash"]:
+        # ONE canonical classifier for fresh APPLY and recovery alike
+        # (T-1316): already-materialized targets advance, pending targets
+        # apply, third states refuse.
+        classification = classify_target(
+            _target_live_hash(root, target),
+            target["before_hash"],
+            target["after_hash"],
+        )
+        if classification == TARGET_ALREADY_APPLIED:
             journal.mark("APPLYING", progress_index=index + 1, target_index=index)
             # A semantic commit boundary still exists when this target was
             # already at its planned value. Crash probes model interruption
             # after roles (LOG/BOARD/STATE), not only after changed bytes.
             _crash_after(target["role"] if action == "write" else action)
             continue
-        if live != target["before_hash"]:
+        if classification == TARGET_CONFLICT:
+            live = _target_live_hash(root, target)
             journal.mark("CONFLICT")
             return {
                 "ok": False,
@@ -2891,16 +2967,13 @@ def _recover_locked(root: Path, op_id: str) -> dict:
             "recovery_required": True,
             "detail": f"op is {status}; resolve explicitly before further mutation",
         }
-    if status == "CONFLICT":
-        return {
-            "ok": False,
-            "code": "CONFLICT",
-            "op_id": op_id,
-            "recovery_required": True,
-            "detail": "op is CONFLICT; resolve explicitly before "
-            "further mutation (saipen recover, evidence "
-            "preserved)",
-        }
+    # T-1316 (SRC-027): a non-terminal CONFLICT status is stale bookkeeping,
+    # never a verdict that outranks the target bytes. The ProTrail incident
+    # stranded a fully materialized operation behind this refusal forever: the
+    # progress sidecar said CONFLICT while every live target sat exactly at
+    # after_hash, and recovery refused to even look. The classification pass
+    # below re-derives the truth from bytes; a REAL third-state conflict is
+    # still re-detected there and still refuses fail-closed.
 
     # Release operations own git side effects (commits/pushes/tags) that the
     # byte-replay path below cannot redo. Dispatch to the release recovery,
@@ -2912,8 +2985,84 @@ def _recover_locked(root: Path, op_id: str) -> dict:
         return _recover_release_op_locked(root, op_id)
 
     targets = record["targets"]
-    # PREPARED with nothing applied: no canonical byte changed -> abort safely.
-    if status == "PREPARED" and not any(t["applied"] for t in targets):
+
+    # T-1316 (SRC-027) Phase 2: reconstruct progress from REALITY. Classify
+    # EVERY target from live bytes in canonical operation order; stale
+    # progress_index / applied_frontier / target.applied markers are never
+    # stronger evidence than the bytes themselves.
+    classifications = [
+        classify_target(
+            _target_live_hash(root, target),
+            target["before_hash"],
+            target["after_hash"],
+        )
+        for target in targets
+    ]
+    prefix_len = len(targets)
+    for index, classification in enumerate(classifications):
+        if classification != TARGET_ALREADY_APPLIED:
+            prefix_len = index
+            break
+
+    # Phase 6: a genuine third state fails closed with the canonical recovery
+    # conflict vocabulary -- never converted to ALREADY_APPLIED, zero further
+    # semantic writes, remaining targets untouched, journal evidence preserved,
+    # and the report carries everything manual adjudication needs.
+    for index, classification in enumerate(classifications):
+        if classification != TARGET_CONFLICT:
+            continue
+        journal.mark("CONFLICT")
+        target = targets[index]
+        return {
+            "ok": False,
+            "code": "RECOVERY_CONFLICT",
+            "op_id": op_id,
+            "recovery_required": True,
+            "target_path": target["path"],
+            "target_index": index,
+            "expected_before_hash": target["before_hash"],
+            "expected_after_hash": target["after_hash"],
+            "actual_hash": _target_live_hash(root, target),
+            "applied_frontier": prefix_len - 1,
+            "detail": f"unfinished target {target['path']} has "
+            f"unexpected bytes (live {_target_live_hash(root, target)!r}; before "
+            f"{target['before_hash']!r}, after "
+            f"{target['after_hash']!r}); refuse to guess",
+        }
+
+    # Phase 2E: non-prefix materialization (e.g. BEFORE AFTER BEFORE). A
+    # normal ordered canonical mutation plan has no contract that proves
+    # out-of-order target writes a legal crash shape, so recovery refuses to
+    # normalize it: replaying over the out-of-order target would invent
+    # ordering freedom the operation never authorized and make recovery depend
+    # on replay being harmless.
+    for index in range(prefix_len, len(classifications)):
+        if classifications[index] == TARGET_ALREADY_APPLIED:
+            journal.mark("CONFLICT")
+            target = targets[index]
+            return {
+                "ok": False,
+                "code": "RECOVERY_CONFLICT",
+                "op_id": op_id,
+                "recovery_required": True,
+                "target_path": target["path"],
+                "target_index": index,
+                "expected_before_hash": target["before_hash"],
+                "expected_after_hash": target["after_hash"],
+                "actual_hash": _target_live_hash(root, target),
+                "applied_frontier": prefix_len - 1,
+                "detail": f"target {target['path']} materialized out of "
+                "order (before-hash target at index "
+                f"{prefix_len - 1} precedes it); non-prefix "
+                "materialization is not a legal crash shape for "
+                "ordered mutation plans; refuse to guess",
+            }
+
+    # Phase 4 guard: PREPARED with zero materialized targets aborts safely.
+    # The byte classification decides -- not the applied markers -- so a
+    # PREPARED receipt whose targets already sit at after_hash is materialized
+    # work that must converge to COMMITTED, never abort.
+    if status == "PREPARED" and all(c == TARGET_PENDING for c in classifications):
         journal.mark("ABORTED")
         return {"ok": True, "code": "ABORTED", "op_id": op_id}
 
@@ -2939,79 +3088,91 @@ def _recover_locked(root: Path, op_id: str) -> dict:
                 "roll forward",
             }
 
-    for index, target in enumerate(targets):
-        live = _target_live_hash(root, target)
-        if target["applied"]:
-            if live != target["after_hash"]:
-                journal.mark("CONFLICT")
-                return {
-                    "ok": False,
-                    "code": "CONFLICT",
-                    "op_id": op_id,
-                    "recovery_required": True,
-                    "detail": f"applied target {target['path']} was "
-                    f"overwritten: live {live!r} != planned "
-                    f"after {target['after_hash']!r}",
-                }
-            continue
-        if live == target["before_hash"]:
-            action = _target_action(target)
-            try:
-                if action == "write":
-                    staged = journal.staged_content(index, record)
-                    if hash_bytes(staged) != target["after_hash"]:
-                        journal.mark("CONFLICT")
-                        return {
-                            "ok": False,
-                            "code": "CONFLICT",
-                            "op_id": op_id,
-                            "recovery_required": True,
-                            "detail": f"staged bytes for {target['path']} "
-                            f"hash to {hash_bytes(staged)!r}, not "
-                            f"planned {target['after_hash']!r}; "
-                            "journal evidence is corrupt",
-                        }
-                    _atomic_write(root / target["path"], staged, ownership_root=root)
-                elif action == "delete_file":
-                    (root / target["path"]).unlink()
-                elif action == "delete_dir":
-                    (root / target["path"]).rmdir()
-                else:  # unreachable after the strict decoder; refuse anyway
+    # T-1316 (SRC-027) Phase 3: repair stale journal bookkeeping IDEMPOTENTLY,
+    # through the canonical journal reconciliation operation. Normal forward
+    # mark() keeps monotonic semantics; recovery re-derives the materialized
+    # prefix from live bytes and must publish that EXACT frontier, including
+    # a DECREASE of an overstated stale applied_frontier. Status,
+    # progress_index and applied_frontier write together in ONE atomic publish;
+    # a crash inside this repair replays the same exact frontier on the next
+    # recovery (R003, R007). Semantically identical project files are never
+    # rewritten here; only journal state moves.
+    persisted = journal._read_progress_sidecar()
+    if (
+        record.get("progress_index") != prefix_len
+        or persisted.get("applied_frontier", -1) != prefix_len - 1
+        or any(not target["applied"] for target in targets[:prefix_len])
+    ):
+        journal.reconcile_progress("APPLYING", prefix_len, prefix_len - 1)
+
+    # Phase 5: apply ONLY the pending suffix, in canonical order. Every index
+    # in this range classified TARGET_PENDING (live bytes equal before_hash),
+    # so applying the planned transition is exactly the original operation
+    # plan; the materialized prefix above this range is never rewritten --
+    # recovery must never depend on replay being harmless.
+    for index in range(prefix_len, len(targets)):
+        target = targets[index]
+        action = _target_action(target)
+        try:
+            if action == "write":
+                staged = journal.staged_content(index, record)
+                if hash_bytes(staged) != target["after_hash"]:
                     journal.mark("CONFLICT")
                     return {
                         "ok": False,
                         "code": "CONFLICT",
                         "op_id": op_id,
                         "recovery_required": True,
-                        "detail": f"target {target['path']} carries an "
-                        f"unknown action {action!r}; recovery "
-                        "refuses to dispatch a destructive "
-                        "fallback",
+                        "target_path": target["path"],
+                        "target_index": index,
+                        "expected_before_hash": target["before_hash"],
+                        "expected_after_hash": target["after_hash"],
+                        "actual_hash": hash_bytes(staged),
+                        "applied_frontier": prefix_len - 1,
+                        "detail": f"staged bytes for {target['path']} "
+                        f"hash to {hash_bytes(staged)!r}, not "
+                        f"planned {target['after_hash']!r}; "
+                        "journal evidence is corrupt",
                     }
-            except OSError as exc:
+                _atomic_write(root / target["path"], staged, ownership_root=root)
+            elif action == "delete_file":
+                (root / target["path"]).unlink()
+            elif action == "delete_dir":
+                (root / target["path"]).rmdir()
+            else:  # unreachable after the strict decoder; refuse anyway
                 journal.mark("CONFLICT")
                 return {
                     "ok": False,
-                    "code": "CONFLICT",
+                    "code": "RECOVERY_CONFLICT",
                     "op_id": op_id,
                     "recovery_required": True,
-                    "detail": f"target {target['path']} recovery action failed: {exc}",
+                    "target_path": target["path"],
+                    "target_index": index,
+                    "expected_before_hash": target["before_hash"],
+                    "expected_after_hash": target["after_hash"],
+                    "actual_hash": _target_live_hash(root, target),
+                    "applied_frontier": prefix_len - 1,
+                    "detail": f"target {target['path']} carries an "
+                    f"unknown action {action!r}; recovery "
+                    "refuses to dispatch a destructive "
+                    "fallback",
                 }
-            journal.mark("APPLYING", progress_index=index + 1, target_index=index)
-        elif live == target["after_hash"]:
-            journal.mark("APPLYING", progress_index=index + 1, target_index=index)
-        else:
+        except OSError as exc:
             journal.mark("CONFLICT")
             return {
                 "ok": False,
-                "code": "CONFLICT",
+                "code": "RECOVERY_CONFLICT",
                 "op_id": op_id,
                 "recovery_required": True,
-                "detail": f"unfinished target {target['path']} has "
-                f"unexpected bytes (live {live!r}; before "
-                f"{target['before_hash']!r}, after "
-                f"{target['after_hash']!r}); refuse to guess",
+                "target_path": target["path"],
+                "target_index": index,
+                "expected_before_hash": target["before_hash"],
+                "expected_after_hash": target["after_hash"],
+                "actual_hash": _target_live_hash(root, target),
+                "applied_frontier": prefix_len - 1,
+                "detail": f"target {target['path']} recovery action failed: {exc}",
             }
+        journal.mark("APPLYING", progress_index=index + 1, target_index=index)
 
     # Byte-level verification of every written target.
     byte_error = _verify_target_bytes(root, targets)

@@ -1,0 +1,93 @@
+{
+  "schema_version": 1,
+  "ticket": "T-1319",
+  "verdict": "HARNESS_FALSE_POSITIVE",
+  "supersedes_oracle": "any second saipen continue invocation is a duplicate",
+  "causal_oracle": {
+    "duplicate_requires": [
+      "same project identity",
+      "same task",
+      "same phase",
+      "same relevant last_event",
+      "same unresolved returned action",
+      "no meaningful progress between invocations"
+    ],
+    "raw_evidence_preserved": true
+  },
+  "source_contract": [
+    {
+      "path": ".saipen/BOARD.md",
+      "line": 70,
+      "finding": "AC-01 requires startup to execute the canonical route after skill loading; it sets no whole-turn invocation count."
+    },
+    {
+      "path": "RECOVER_ROADMAP/SAIPEN_WHERE_TO_LOOK_FURTHER1.md",
+      "lines": "95-103",
+      "finding": "Live acceptance requires state/canonical continuation, phase owner and concrete work; skill-only or prose-only routing fails."
+    },
+    {
+      "path": "saipen/BOOT.md",
+      "section": "Cold route step 6 / CMD-CONTINUE-01",
+      "finding": "Invoke continuation, load load_path and execute the returned action in the same turn."
+    },
+    {
+      "path": "saipen/COMMANDS.md",
+      "lines": "90-121",
+      "finding": "The bounded ONCE rule governs continue-to-improve fallthrough per invocation and forbids an unbounded Improve carousel; it does not limit total calls after a new terminal state."
+    },
+    {
+      "path": "saipen/CORE.md",
+      "lines": "367-442",
+      "finding": "Continue uses current persisted state and may route to Improve after Work is exhausted; no one-invocation-per-model-turn rule exists."
+    }
+  ],
+  "cases": [
+    {
+      "case": "I1",
+      "initial": "VERIFY/T-1319/E-100",
+      "first_continue_event": 7,
+      "first_action": "PHASE VERIFY T-1319",
+      "phase_owner_event": 10,
+      "acceptance_action_event": 12,
+      "finished_event": 90,
+      "finished_result": "DONE/none/E-107",
+      "post_completion_continue_event": 97,
+      "post_completion_result": "NO_ACTIVE_WORK guard refusal",
+      "duplicate": false
+    },
+    {
+      "case": "I2",
+      "initial": "VERIFY/T-1319/E-100",
+      "first_continue_event": 5,
+      "first_action": "PHASE VERIFY T-1319",
+      "phase_owner_event": 8,
+      "acceptance_action_event": 14,
+      "finished_event": 101,
+      "finished_result": "DONE/none/E-107",
+      "post_completion_continue_event": 112,
+      "post_completion_result": "IMPROVE_AUDIT_ASSIGNMENT",
+      "duplicate": false
+    },
+    {
+      "case": "I3",
+      "initial": "VERIFY/T-1319/E-100",
+      "first_continue_event": 8,
+      "first_action": "PHASE VERIFY T-1319",
+      "phase_owner_event": 11,
+      "acceptance_action_event": 12,
+      "finished_event": 71,
+      "finished_result": "DONE/none/E-107",
+      "post_completion_continue_event": 74,
+      "post_completion_result": "NO_ACTIVE_WORK guard refusal",
+      "duplicate": false
+    }
+  ],
+  "ac_01": "PASS",
+  "post_done_redirection_observation": {
+    "cases": ["I1", "I3"],
+    "command": "saipen continue --json 2>&1",
+    "result": "NO_ACTIVE_WORK",
+    "disposition": "NON_BLOCKING_OBSERVATION",
+    "reason": "No canonical T-1319 acceptance rule requires shell-redirection support; I2's clean post-DONE command independently proves a new Improve route."
+  }
+}

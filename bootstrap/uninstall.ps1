@@ -163,6 +163,47 @@ function Remove-Aider([string]$file) {
 
 $h = $env:USERPROFILE
 $script:BootstrapFailed = $false
+
+function Remove-Hooks {
+  # Hook surfaces come from the ONE adapter registry, never a second
+  # handwritten host inventory. It removes both the current install surface and
+  # every registry-declared legacy surface -- including the singular `plugin/`
+  # copy the supported runtime would otherwise load a second time.
+  $registryPath = Join-Path (Split-Path $PSScriptRoot) "extensions\adapters\registry.json"
+  if (-not (Test-Path $registryPath)) { return "adapter registry missing: $registryPath" }
+  try {
+    $registry = Get-Content -LiteralPath $registryPath -Raw -Encoding utf8 | ConvertFrom-Json
+  } catch {
+    return "adapter registry read FAILED: $($_.Exception.Message)"
+  }
+  $surfaces = @()
+  foreach ($adapter in @($registry.adapters)) {
+    if ($adapter.PSObject.Properties.Name -contains "install" -and $adapter.install) {
+      if ($adapter.install.PSObject.Properties.Name -contains "hook" -and $adapter.install.hook) {
+        $surfaces += [string]$adapter.install.hook
+      }
+    }
+    if ($adapter.PSObject.Properties.Name -contains "legacy_hook_surfaces") {
+      foreach ($surface in @($adapter.legacy_hook_surfaces)) {
+        if ($surface) { $surfaces += [string]$surface }
+      }
+    }
+  }
+  $removed = 0
+  foreach ($surface in $surfaces) {
+    $path = $surface.Replace("~", $h)
+    if (-not (Test-Path $path -PathType Leaf)) { continue }
+    try {
+      Remove-Item -LiteralPath $path -Force -ErrorAction Stop
+      $removed++
+    } catch {
+      return "hook remove FAILED ($path): $($_.Exception.Message)"
+    }
+  }
+  if ($removed -gt 0) { return "guard hook removed" }
+  return "clean"
+}
+
 function Report([string]$label, [string]$result) {
   "{0,-28} {1}" -f $label, $result
   if ($result -match "FAILED") { $script:BootstrapFailed = $true }
@@ -174,6 +215,7 @@ Report "Claude Code skill" (Remove-Skill "$h\.claude\skills\saipen")
 Report "Claude Code CLAUDE.md" (Remove-Block "$h\.claude\CLAUDE.md")
 Report "OpenCode skill" (Remove-Skill "$h\.config\opencode\skills\saipen")
 Report "OpenCode AGENTS.md" (Remove-Block "$h\.config\opencode\AGENTS.md")
+Report "guard hooks" (Remove-Hooks)
 Report "Codex skill" (Remove-Skill "$h\.codex\skills\saipen")
 Report "Codex AGENTS.md" (Remove-Block "$h\.codex\AGENTS.md")
 Report "Gemini GEMINI.md" (Remove-Block "$h\.gemini\GEMINI.md")

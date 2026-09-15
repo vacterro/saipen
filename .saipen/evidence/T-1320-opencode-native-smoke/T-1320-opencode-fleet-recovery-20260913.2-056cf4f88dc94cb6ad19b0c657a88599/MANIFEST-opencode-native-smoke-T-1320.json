@@ -1,0 +1,49 @@
+{
+ "producer": "opencode-native-smoke",
+ "ticket": "T-1320",
+ "created": "2026-09-14T20:22:26Z",
+ "verdict": "VERIFIED",
+ "temp_root": "V:\\_TEMP_\\saipen-evidence-opencode-native-smoke-yjzs6193",
+ "durable_dir": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\T-1320-opencode-native-smoke\\T-1320-opencode-fleet-recovery-20260913.2-056cf4f88dc94cb6ad19b0c657a88599",
+ "retained": [
+  {
+   "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\T-1320-opencode-native-smoke\\T-1320-opencode-fleet-recovery-20260913.2-056cf4f88dc94cb6ad19b0c657a88599\\native-smoke-proof.json",
+   "bytes": 3832,
+   "sha256": "5f979efd3f10420d79f564537a15bcd0b3ad50728f3e769725015916de04be46",
+   "class": "DURABLE_REQUIRED",
+   "large_evidence_required": null
+  }
+ ],
+ "discarded_ephemeral": [
+  {
+   "path": "V:\\_TEMP_\\saipen-evidence-opencode-native-smoke-yjzs6193\\home",
+   "class": "EPHEMERAL_REPRODUCIBLE",
+   "reason": "registered run-owned runtime data"
+  },
+  {
+   "path": "V:\\_TEMP_\\saipen-evidence-opencode-native-smoke-yjzs6193\\cache",
+   "class": "EPHEMERAL_REPRODUCIBLE",
+   "reason": "registered run-owned runtime data"
+  },
+  {
+   "path": "V:\\_TEMP_\\saipen-evidence-opencode-native-smoke-yjzs6193\\workdir",
+   "class": "EPHEMERAL_REPRODUCIBLE",
+   "reason": "registered run-owned runtime data"
+  },
+  {
+   "path": "V:\\_TEMP_\\saipen-evidence-opencode-native-smoke-yjzs6193",
+   "class": "EPHEMERAL_REPRODUCIBLE",
+   "reason": "exact run-owned temporary root"
+  }
+ ],
+ "retained_bytes": 5575,
+ "limits": {
+  "max_artifact_bytes": 26214400,
+  "warn_bytes_per_ticket": 104857600,
+  "hard_bytes_per_ticket": 262144000
+ },
+ "thresholds": {
+  "warning": false,
+  "hard_exceeded": false
+ }
+}

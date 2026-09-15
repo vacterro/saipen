@@ -494,6 +494,11 @@ VALID_TAXONOMIES = frozenset(
     }
 )
 
+# Applies to events created after this contract.  Historical oversized events
+# remain readable and append-only.  Detail must move to a durable evidence
+# artifact; the writer refuses rather than silently cutting proof.
+MAX_NEW_EVENT_BYTES = 1024
+
 
 def build_event(
     tail: int | None,
@@ -519,6 +524,75 @@ def build_event(
     `now` is a "dd.MM.yy HH:mm" timestamp; the caller supplies it so PLAN and
     APPLY of one operation share one frozen clock.
     """
+    line = render_event(
+        tail,
+        taxonomy,
+        message,
+        ticket=ticket,
+        agent=agent,
+        now=now,
+        op_id=op_id,
+    )
+    size = len(line.encode("utf-8"))
+    if size > MAX_NEW_EVENT_BYTES:
+        raise ValueError(
+            f"LOG_EVENT_OVERSIZE: new event is {size} bytes, cap is "
+            f"{MAX_NEW_EVENT_BYTES}; retain full detail as a durable evidence "
+            "artifact and write a compact summary with detail_ref -- no bytes "
+            "were truncated"
+        )
+    return (tail or 0) + 1, line
+
+
+def prepare_bounded_event(
+    root: Path | str,
+    tail: int | None,
+    taxonomy: str,
+    message: str,
+    *,
+    ticket: str | None = None,
+    agent: str | None = None,
+    now: str | None = None,
+    op_id: str | None = None,
+) -> tuple[int, str, tuple]:
+    """The ONE bounded LOG producer every canonical writer uses.
+
+    T-1326 P0: lossless construction is a property of the checkpoint writer, NOT
+    an opt-in caller convention. Redaction and the byte cap are both applied
+    here, and an event above `MAX_NEW_EVENT_BYTES` is preserved byte-for-byte as
+    journaled detail artifacts instead of raising `LOG_EVENT_OVERSIZE` -- which
+    used to make a lawful verb crash on the very DEC it exists to write.
+
+    Returns `(event, line, targets)`; the caller MUST include `targets` in the
+    SAME journaled commit as LOG/STATE/BOARD. A provably bounded message (a
+    literal or an integer interpolation) still yields no targets at all.
+    """
+    from . import codec
+    from .log_compaction import prepare_event
+
+    prepared = prepare_event(
+        Path(root).resolve(),
+        tail,
+        taxonomy,
+        codec.redact_credentials(message),
+        ticket=ticket,
+        agent=agent,
+        now=now,
+        op_id=op_id,
+    )
+    return prepared.event, prepared.line, prepared.targets
+
+
+def render_event(
+    tail: int | None,
+    taxonomy: str,
+    message: str,
+    ticket: str | None = None,
+    agent: str | None = None,
+    now: str | None = None,
+    op_id: str | None = None,
+) -> str:
+    """Render one complete event without applying the new-event byte cap."""
     if taxonomy not in VALID_TAXONOMIES:
         raise ValueError(f"taxonomy {taxonomy!r} outside {sorted(VALID_TAXONOMIES)}")
     if now is None:
@@ -536,7 +610,7 @@ def build_event(
     if op_id:
         parts.append(f"[op: {op_id}]")
     parts.append(f"{taxonomy}: {message}")
-    return event, " ".join(parts)
+    return " ".join(parts)
 
 
 _VERIFY_BOUNDARY_RE = re.compile(r"^transition to VERIFY(?: -- .*)?$")
@@ -902,4 +976,90 @@ def bulk_verification_evidence(
                 if tid not in boundary_seen
                 else "unproven/failed",
             )
+    return verdicts
+
+
+# ---------------------------------------------------------------------------
+# Pre-closure-contract (LEGACY generation) completion evidence.
+#
+# `bulk_verification_evidence` above encodes the MODERN closure contract: a
+# ticket is proven only by a VERIFY boundary event plus a decisive `conf: high`
+# PASS after it. That grammar is younger than the projects it is now asked to
+# judge. A record completed before the VERIFY-boundary/confidence grammar
+# existed carries real execution evidence in a shape that predates it -- a
+# ticket-scoped `RUN: BUILD ...` / `RUN: SHIP ...` narrating the work and its
+# proof -- and reading its absence of a FUTURE field as proof of fabrication is
+# how a recovery engine proposes to destroy valid history.
+#
+# This classifier answers a DIFFERENT question from the modern one, and is used
+# ONLY for records the caller has already classified as legacy-generation:
+# "did this ticket ever execute, under the grammar that existed then?"
+# ---------------------------------------------------------------------------
+
+#: The execution markers the pre-closure-contract generation actually wrote.
+#: Deliberately narrow: an allocation/claim `DEC` is bookkeeping, never
+#: execution, and only `RUN` taxonomy is consulted at all.
+_LEGACY_EXECUTION_RE = re.compile(r"\b(BUILD|SHIP|VERIFY|PASS)\b")
+
+#: An explicit operator attestation of a legacy completion (`saipen recover
+#: --attest-legacy-done`). It fabricates no historical closure_mode and
+#: rewrites no historical LOG; it records a NOW-dated decision that the
+#: historical completion stands.
+LEGACY_DONE_ATTESTATION = "legacy completion attested"
+
+
+def legacy_done_attestation_text(ticket_id: str) -> str:
+    """The exact DEC text one legacy-completion attestation writes."""
+    return (
+        f"{LEGACY_DONE_ATTESTATION} for {ticket_id} -- operator decision; the "
+        "historical completion stands as recorded. No closure_mode is "
+        "fabricated for a generation that had none and no historical LOG line "
+        "is rewritten."
+    )
+
+
+def bulk_legacy_completion_evidence(
+    events: list[dict], ticket_ids: Iterable[str]
+) -> dict[str, tuple[bool, str]]:
+    """ONE backward pass: did each legacy-generation ticket actually execute?
+
+    Grammar, newest-first, first decisive event per ticket wins:
+
+    - an explicit operator attestation (`LEGACY_DONE_ATTESTATION`) proves it;
+    - a FAILURE CLAIM (`_claims_failure`) is negative evidence and wins over an
+      older success exactly as in the modern classifier;
+    - a ticket-scoped `RUN` carrying a legacy execution marker
+      (`BUILD`/`SHIP`/`VERIFY`/`PASS`) proves it;
+    - regression-describing prose is skipped, not read as a verdict.
+
+    No VERIFY boundary is required and no `conf:` token is required: neither
+    existed when these records were written. Absence of decisive evidence is
+    reported as ambiguity for an operator, never as proof of fabrication.
+    """
+    wanted = set(ticket_ids)
+    verdicts: dict[str, tuple[bool, str]] = {}
+    for ev in reversed(events or ()):
+        tid = ev.get("ticket")
+        if tid not in wanted or tid in verdicts:
+            continue
+        txt = ev.get("text", "")
+        if LEGACY_DONE_ATTESTATION in txt:
+            verdicts[tid] = (True, txt)
+            continue
+        if ev.get("taxonomy") != "RUN":
+            continue
+        if _is_regression_evidence(txt):
+            continue
+        if _claims_failure(txt):
+            verdicts[tid] = (False, txt)
+        elif _LEGACY_EXECUTION_RE.search(txt):
+            verdicts[tid] = (True, txt)
+    for tid in wanted:
+        verdicts.setdefault(
+            tid,
+            (
+                False,
+                "no historical execution evidence in the complete history",
+            ),
+        )
     return verdicts

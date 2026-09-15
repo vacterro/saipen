@@ -180,6 +180,17 @@ In `mode: full` with Python available, covered maintenance MUST use SAIOPS;
 manual structural editing is FALLBACK / RECOVERY ONLY and must record why the
 mechanical path was unavailable.
 
+### Dependency continuation transaction
+
+`saipen ticket block-for A B REASON` is the sole active-parent handoff. PLAN
+requires A to be the owned DOING ticket and B to be a workable TODO ticket.
+APPLY journals and commits A→BLOCKED, `A needs B`, `blocked_on: B`, and A's
+saved phase tuple together. While that reservation exists, B wins the Pick
+Rule and `CONTINUATION_RESERVED` refuses every unrelated claim including
+`--explicit`. Finishing B commits B→DONE and A→DOING with the restored tuple in
+one operation. A failed/blocked B leaves A parked. Ordinary journal recovery
+therefore cannot expose an intermediate second owner or two DOING tickets.
+
 ## 5. Locks
 
 One project-local lock file, `.saipen/locks/core.lock`, using real OS file
@@ -211,7 +222,7 @@ CLI prints concise human text by default; `--json` emits JSON only. Every error
 message names one exact refusal and the executable next action. Stable error
 codes: STALE_STATE, TICKET_NOT_FOUND, TICKET_NOT_WORKABLE,
 TICKET_ALREADY_DONE, ILLEGAL_TICKET_LIFECYCLE, NOT_TOP_WORKABLE,
-ACTIVE_TICKET_MISMATCH, ALREADY_CLAIMED, ACTIVE_CLAIM_FOREIGN, ILLEGAL_TRANSITION,
+ACTIVE_TICKET_MISMATCH, ALREADY_CLAIMED, CONTINUATION_RESERVED, ACTIVE_CLAIM_FOREIGN, ILLEGAL_TRANSITION,
 ILLEGAL_PHASE, WRITER_BUSY, VALIDATION_FAILED, RECOVERY_REQUIRED,
 RECOVERY_CONFLICT, CORRUPT_JOURNAL, DESTRUCTIVE_CONFIRMATION_REQUIRED, CONFLICT,
 NEEDS_REPAIR, PATH_ESCAPE, INVALID_ID, ACTIVE_IMPROVE_CYCLE,

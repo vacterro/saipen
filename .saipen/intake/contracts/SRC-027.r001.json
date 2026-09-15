@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-027:R001": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Three-way target recovery classifier: one canonical helper classify_target(current_hash, before_hash, after_hash) returns ALREADY_APPLIED when current==after, PENDING when current==before, CONFLICT otherwise; the three-way logic is centralized and never duplicated across resume, apply or conformance paths; before_hash==after_hash no-op target classifies deterministically as already-satisfied; missing-file creation and deletion states classify through the existing document and hash model with no second sentinel scheme --verification unit tests cover all three outcomes plus the no-op and missing-file shapes through the one helper"
+    }
+  },
+  "derived_at": "2026-09-11T06:33:03Z",
+  "derived_from": "SRC-027",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "3d7cb9f56b9e0c363735e70397cf7e923387f6ab029c154612f87b73440f1444"
+}

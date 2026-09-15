@@ -187,6 +187,58 @@ rm_task() {
   if [ "$removed" -eq 1 ]; then echo "scheduler artifacts removed"; else echo "clean"; fi
 }
 
+SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+SAIPEN_ROOT=$(cd "$SCRIPT_DIR/.." && pwd)
+ADAPTER_REGISTRY="$SAIPEN_ROOT/extensions/adapters/registry.json"
+
+json_reader() {
+  local candidate
+  for candidate in "${PYTHON_BIN:-}" python3 python py; do
+    [ -n "$candidate" ] || continue
+    command -v "$candidate" >/dev/null 2>&1 && { printf '%s\n' "$candidate"; return 0; }
+  done
+  return 1
+}
+
+remove_hooks() {
+  # Hook surfaces come from the ONE adapter registry, never a second
+  # handwritten host inventory. A machine with no JSON reader cannot prove
+  # which blocking guard hooks it installed, so that is reported as a failure
+  # instead of claiming the machine is clean while a hook remains.
+  local reader surfaces surface removed=0
+  reader=$(json_reader) \
+    || { echo "no JSON reader: cannot identify installed guard hooks"; return 1; }
+  [ -f "$ADAPTER_REGISTRY" ] \
+    || { echo "adapter registry missing: $ADAPTER_REGISTRY"; return 1; }
+  surfaces=$("$reader" - "$ADAPTER_REGISTRY" <<'PY'
+import json
+import sys
+
+with open(sys.argv[1], encoding="utf-8") as handle:
+    registry = json.load(handle)
+for adapter in registry.get("adapters") or []:
+    install = adapter.get("install") or {}
+    hook = install.get("hook")
+    if isinstance(hook, str) and hook:
+        print(hook)
+    legacy = adapter.get("legacy_hook_surfaces") or []
+    if isinstance(legacy, list):
+        for surface in legacy:
+            if isinstance(surface, str) and surface:
+                print(surface)
+PY
+  ) || { echo "adapter registry read FAILED"; return 1; }
+  while IFS= read -r surface; do
+    [ -n "$surface" ] || continue
+    surface="${surface/#\~/$HOME}"
+    [ -e "$surface" ] || continue
+    rm -f "$surface" \
+      || { echo "hook remove FAILED ($surface)"; return 1; }
+    removed=1
+  done <<< "$surfaces"
+  if [ "$removed" -eq 1 ]; then echo "guard hook removed"; else echo "clean"; fi
+}
+
 report() { # $1=label, remaining=function + args
   local label="$1" output status
   shift
@@ -202,6 +254,9 @@ report "Claude Code skill" rm_skill "$HOME/.claude/skills/saipen"
 report "Claude Code CLAUDE.md" strip_block "$HOME/.claude/CLAUDE.md"
 report "OpenCode skill" rm_skill "$HOME/.config/opencode/skills/saipen"
 report "OpenCode AGENTS.md" strip_block "$HOME/.config/opencode/AGENTS.md"
+# Removes every registry-declared guard hook surface, including the legacy
+# singular `plugin/` copy that the supported runtime would load a second time.
+report "guard hooks" remove_hooks
 report "Codex skill" rm_skill "$HOME/.codex/skills/saipen"
 report "Codex AGENTS.md" strip_block "$HOME/.codex/AGENTS.md"
 report "Gemini GEMINI.md" strip_block "$HOME/.gemini/GEMINI.md"

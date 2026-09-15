@@ -1,0 +1,113 @@
+{
+  "requirements": {
+    "SRC-031:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "this run: partial BUILD work checkpointed through canonical source disp operations and one pending canonical BUILD checkpoint; ownership lease refreshed by acting agent codex",
+      "text": "Current lifecycle: checkpoint already-present partial BUILD work once, refresh owner lease, persist truthful next_action and human digest before further implementation; do not invent historical events.",
+      "verification": "coverage ledger updates returned COVERAGE_UPDATED through intake.set_disposition under project_writer_lock",
+      "work": "T-1317"
+    },
+    "SRC-031:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "CLOSE-1 13 controls proven by hostile matrix rows 1-14, 20-28 (compound shell, recovery, adapter init, output.args, protected/traversal/patch/move blocks, namespaced no-trust, actor binding, detached binding, broken-state blocks, diagnostics)",
+      "text": "CLOSE-1: prove all 13 listed P0 controls, using real host runtime evidence for the OpenCode boundary where available.",
+      "verification": "test_guard_hostile_matrix 34/34 + test_unknown_tool_fail_closed 8/8 + test_actor_binding_lifecycle 7/7 green",
+      "work": "T-1317"
+    },
+    "SRC-031:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "native Windows hostile matrix run this tree: 34/34 OK with junction test_10 PASS natively (cmd.exe mklink /J)",
+      "text": "CLOSE-2: native Windows hostile matrix including junction must PASS; non-Windows junction explicitly SKIP; retain symlink and normalization coverage.",
+      "verification": "test_guard_hostile_matrix run output: OK, junction case ok, no SKIP for junction on this host",
+      "work": "T-1317"
+    },
+    "SRC-031:R004": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "full CLOSE-3 chain on the real OpenCode runtime: allowed write, protected write block, multi-file patch (src/app.py + .saipen/BOARD.md) prevented, exact saipen recover usable under debt, compound recover+rm blocked, plus new unknown-tool refusal and byte-level bypass red control (test_4_chain_bytes_prove_prevention_and_a_bypass_changes_them)",
+      "text": "CLOSE-3: actual OpenCode global discovery, factory/startup probe, allowed effect, protected write block, multi-file patch block, exact standalone recovery usability.",
+      "verification": "test_opencode_host_smoke 4/4 OK (opencode debug config: global plugin origin + startup probe); transcripts in .saipen/evidence/T-1317-target-a-b-evidence-20260912.md",
+      "work": "T-1317"
+    },
+    "SRC-031:R005": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "SRC-028 R005-R015 individually reconciled this run via canonical source disp with per-requirement evidence: R005-R009, R011-R015 VERIFIED; R010 (Kiro) explicitly non-terminal DEFERRED pending native proof; no bulk promotion",
+      "text": "CLOSE-4: reconcile SRC-028 R005-R015 against executable evidence; no mechanical VERIFIED for Kiro/Gemini.",
+      "verification": "coverage ledger reflects one-by-one dispositions with named executable proof",
+      "work": "T-1317"
+    },
+    "SRC-031:R006": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "DEFERRED",
+      "evidence": "executable Kiro transport implemented and translated (CLOSE-5 architecture complete, fail-closed, idempotent install, diagnostics preserved) but the required real Kiro runtime refused-effect proof is unavailable in this environment; SRC-028:R010 kept non-terminal",
+      "text": "CLOSE-5: executable Kiro PreToolUse translation, common guard, native refusal, fail closed, diagnostics, preserving idempotent installation, separate installed/current/effective fields; actual Kiro refused effect required for R010 VERIFIED.",
+      "verification": "effective_strength('kiro') remains ENFORCEMENT_GAP; no instruction-only or transport-only BLOCKING claim",
+      "work": "T-1317"
+    },
+    "SRC-031:R007": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "DEFERRED",
+      "evidence": "executable Gemini BeforeTool translation ships (tools/host_guard.py --host gemini) and the real Gemini CLI transcript proves one native refused effect (write_file .saipen/STATE.md blocked); remaining CLOSE-6 acceptance is a fuller native smoke suite analogous to the OpenCode smoke, tracked as the remaining gap rather than a false VERIFIED",
+      "text": "CLOSE-6: executable Gemini BeforeTool translation to common guard and native hard block; actual Gemini refused effect required for R011 VERIFIED.",
+      "verification": "SRC-028:R011 VERIFIED on the transcript + current-tree re-proof; the broader native Gemini smoke remains an open audit item",
+      "work": "T-1317"
+    },
+    "SRC-031:R008": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "DEFERRED",
+      "evidence": "FastPrompter 0.8.67 source inspected read-only at V:/___VAC/__K/__CODE/_PY/_FastPrompter: no SAIHANDOFF/SAIPEN_PROJECT/SAIPEN_AGENT carrier exists in src/fastprompter (only core/silo_export.py _SCRATCH='fastprompter_drag'); the original detached-handoff incident therefore cannot close from the producer side; canonical cross-project handoff recorded at KNOWLEDGE/HANDOFF-fastprompter-detached-launch-carrier.md",
+      "text": "CLOSE-7: real FastPrompter staged spawn cwd and/or root-lineage-actor carrier evidence; otherwise canonical cross-project implementation handoff and explicit non-terminal closure blocker; do not modify FastPrompter here.",
+      "verification": "grep over the FastPrompter tree this run; SRC-029:R012 remains non-terminal by contract; no FastPrompter file modified",
+      "work": "T-1317"
+    },
+    "SRC-031:R009": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "distribution freshness reads the real declared surfaces (registry.json instruction/skill/hook surfaces; autoinject --stamp-only; schedule-run.ps1) and effective_strength separates capability/installed/current/health/effective; missing/stale/unobservable can never be BLOCKING",
+      "text": "CLOSE-8: actual declared distribution surfaces; separate capability/installed/current/health/effective; missing, stale or unobservable cannot be BLOCKING.",
+      "verification": "test_16..test_19 + test_inject_digest green this run",
+      "work": "T-1317"
+    },
+    "SRC-031:R010": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "DEFERRED",
+      "evidence": "BUILD checkpoint this run records exact suite counts and remaining blockers; lifecycle stays BUILD until Kiro native proof (CLOSE-5) and FastPrompter producer evidence (CLOSE-7) close; REVIEW will not be skipped",
+      "text": "CLOSE-9: current BUILD checkpoint, exact focused/native/static/full suite results, then only lawful BUILD/VERIFY/REVIEW/SHIP/DONE transitions with every linked requirement terminal; independent REVIEW blocking-control rerun required.",
+      "verification": "canonical checkpoint pending through saipen CLI this run",
+      "work": "T-1317"
+    },
+    "SRC-031:R011": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "T-1307 AUTHORITY_CONFLICT preserved untouched this run (no saitranslate writes, no authority choice, no mirror writes); .saipen/extensions/subs surfaces left as found",
+      "text": "CLOSE-10: T-1307 owns AUTHORITY_CONFLICT between saitranslate producer/charter roots; preserve both, no guessed authority, no mirror/migration writes, checkpoint and return authority to Core.",
+      "verification": "no writes outside T-1317-owned surfaces; conflict remains owned by T-1307",
+      "work": "T-1317"
+    },
+    "SRC-031:R012": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "non-goals held: no new features, no T-1307 repair, no manual STATE/BOARD/LOG edits (all canonical writes went through saipen CLI operations), no weakened recovery/ownership, no false BLOCKING",
+      "text": "Closure/non-goals: no unrelated feature or broad validator refactor, no manual canonical edits or false dispositions, no weakened recovery/ownership; final STATE/LOG and durable evidence must agree; unresolved linked requirements block closure.",
+      "verification": "working-tree diff this run is confined to guard/adapters/tests/evidence + canonical coverage ledgers",
+      "work": "T-1317"
+    }
+  },
+  "schema_version": 1
+}

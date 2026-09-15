@@ -106,6 +106,11 @@
         "owner": "saipen/SOURCES.md",
         "test": "tools/test_audit_enqueue.py",
         "subject": "shared producer enqueue: monotonic never-reused ids, atomic placement, idempotent retry, optional untrusted envelope"
+      },
+      "EVIDENCE-RETENTION-01": {
+        "owner": "saipen/CORE.md",
+        "test": "tools/test_evidence_hygiene.py",
+        "subject": "bounded durable proof, run-owned ephemeral cleanup, conservative historical classification and retention manifests"
       }
     }
   },
@@ -128,7 +133,33 @@
     "CONFORMANCE-CORPUS-01": "tests/conformance_cases.jsonl",
     "CONTEXT-BUDGET-01": "saipen/CORE.md",
     "SOURCE-AUDIT-INBOX-01": "saipen/SOURCES.md",
-    "SOURCE-AUDIT-ENQUEUE-01": "saipen/SOURCES.md"
+    "SOURCE-AUDIT-ENQUEUE-01": "saipen/SOURCES.md",
+    "EVIDENCE-RETENTION-01": "saipen/CORE.md"
+  },
+  "evidence_retention": {
+    "max_artifact_bytes": 26214400,
+    "warn_bytes_per_ticket": 104857600,
+    "review_bytes_per_ticket": 262144000,
+    "classifications": [
+      "DURABLE_REQUIRED",
+      "EPHEMERAL_REPRODUCIBLE",
+      "SUPERSEDED",
+      "UNKNOWN"
+    ]
+  },
+  "cold_agent_truth": {
+    "orientation_read_budget_bytes": 65536,
+    "state_read_cap_bytes": 8192,
+    "board_prefix_cap_bytes": 24576,
+    "log_tail_cap_bytes": 24576,
+    "handoff_read_cap_bytes": 8192,
+    "new_log_event_cap_bytes": 1024,
+    "new_live_board_record_cap_chars": 1200,
+    "handoff_statuses": ["NOT_PROVIDED", "CURRENT", "STALE", "FOREIGN", "CONFLICT"],
+    "workspace_statuses": ["SAME", "DIFFERENT", "UNKNOWN"],
+    "witness_levels": ["UNIT", "INTEGRATION", "EFFECT_PATH", "LIVE", "MANUAL"],
+    "owner": "tools/saipen_engine/cold_truth.py",
+    "test": "tools/test_cold_agent_truth.py"
   },
   "shortcuts": {
     "gg": "saipen goal",
@@ -303,9 +334,11 @@
       "next",
       "permissions",
       "explain-next",
-      "runtime",
-      "knowledge",
+            "runtime",
+            "launch",
+            "knowledge",
       "recover",
+      "search",
       "claim",
       "transition",
       "checkpoint",
@@ -325,7 +358,9 @@
       "attempt",
       "brief",
       "hush",
-      "improve"
+      "improve",
+      "user-request",
+      "cohort"
     ],
     "improve_actions": [
       "bare",
@@ -376,7 +411,8 @@
       "role_revision",
       "paused_from_phase",
       "paused_from_na",
-      "transition_from"
+      "transition_from",
+      "stop_reason"
     ],
     "string_fields": [
       "task",
@@ -391,7 +427,8 @@
       "first_publish_confirmation",
       "role_revision",
       "paused_from_phase",
-      "paused_from_na"
+      "paused_from_na",
+      "stop_reason"
     ],
     "integer_fields": {
       "saipen_version": null,
@@ -737,6 +774,7 @@
     "ACTIVE_TICKET_MISMATCH",
     "ACTIVE_CLAIM_FOREIGN",
     "ALREADY_CLAIMED",
+    "CONTINUATION_RESERVED",
     "ILLEGAL_TRANSITION",
     "ILLEGAL_PHASE",
     "WRITER_BUSY",
@@ -744,6 +782,7 @@
     "RECOVERY_REQUIRED",
     "RECOVERY_CONFLICT",
     "CORRUPT_JOURNAL",
+    "HISTORY_LEDGER_CORRUPT",
     "NEEDS_REPAIR",
     "DESTRUCTIVE_CONFIRMATION_REQUIRED",
     "CONFLICT",
@@ -758,6 +797,7 @@
     "INVALID_GOAL",
     "HOME_REQUIRED",
     "CREW_BLOCKED",
+    "COHORT_NOT_READY",
     "CREW_NOT_READY",
     "INVALID_SOURCE_HOME",
     "STALE_PLAN",
@@ -767,7 +807,11 @@
     "NO_PUBLISH_MODE",
     "SOURCE_UNRESOLVED",
     "SOURCE_SCOPE_MISSING",
-    "RELEASE_FAILED"
+    "RELEASE_FAILED",
+    "ACTOR_UNBOUND",
+    "HOST_LAUNCH_REFUSED",
+    "LOG_EVENT_OVERSIZE",
+    "BOARD_RECORD_OVERSIZE"
   ],
   "continue_fallback": {
     "invariant": "continue may fall through to improve ONLY after recovery, blocked/retryable, queued and required-follow-up routing are exhausted; it resumes an existing active Improve cycle and never creates an unbounded improve carousel",

@@ -122,6 +122,22 @@ STATE_REQUIRED_FIELDS = require_string_list(_STATE_REGISTRY, "required_fields")
 # refuses -- the same FAIL the release gate raises.
 STATE_KNOWN_FIELDS = frozenset(require_string_list(_STATE_REGISTRY, "known_fields"))
 
+# CLOSED allowlist of proven OUTPUT-ONLY STATE vocabulary (T-1322). These are
+# fields the engine COMPUTES and emits in the status/next/context projections,
+# never canonical STATE frontmatter INPUT. A live STATE that carries one is the
+# engine's own output pasted back into the input document (the W2-003 class:
+# internal/public diagnostic vocabulary leaking into the wrong domain). Only
+# fields whose historical semantics are PROVEN output-only belong here; the
+# canonical recovery may then migrate them by exact-key removal. This set is
+# the ONLY migration authority: every other unknown field stays a strict error.
+#
+# `parked_work` is proven: it is produced solely by
+# `tools/saipen.py::_parked_work(board_tickets, state)` and consumed only by
+# the status/next/context JSON payloads; every occurrence in protocol history
+# is that function, a JSON payload, an evidence/backup copy, or a live STATE
+# that pasted it in (SAITULS, 13.09.26) -- it is defined by no STATE schema.
+STATE_OUTPUT_ONLY_FIELDS = frozenset({"parked_work"})
+
 STATE_PHASE_ENUM = require_string_list(require_mapping(_REGISTRY, "phases"), "all")
 
 STATE_MODE_ENUM = require_string_list(_STATE_REGISTRY, "mode_enum")
@@ -317,6 +333,54 @@ def binding_wait(
         return "markhunt"
     if category == "user brake":
         return "user brake"
+    return None
+
+
+def binding_brake(state: dict, *, empty_todo: bool = False) -> tuple[str, str] | None:
+    """The ONE authoritative hard-stop truth (T-1322).
+
+    Both the continuation router (`router.route_next`) and the mutation
+    admission guard (`admission.protocol_snapshot`) consume THIS function, so
+    `continue` and a consequential tool can never disagree about whether the
+    project is runnable or WAIT/BLOCKED.
+
+    A hard stop is present when ANY of these holds:
+
+      * `phase == "BLOCKED"`;
+      * `blocker` is a non-empty, non-`none` value -- the persisted binding
+        brake the admission guard has always honoured. The router used to
+        ignore it, which is exactly how a STATE like SCOUT + an EXTERNAL
+        `blocker` routed as runnable while the guard refused the mutation
+        (the AUDAPACK disagreement);
+      * `next_action` is a WAIT that BINDS in this exact context
+        (`binding_wait`), preserving CORE's DONE + empty-TODO UNBLOCK
+        exception rather than stopping on every `WAIT:` prefix.
+
+    Returns `(kind, detail)` where `kind` is `"wait"` for a binding persisted
+    WAIT, `"blocker"` for a non-empty STATE.blocker, and `"blocked"` for
+    `phase: BLOCKED`; returns None when no brake binds.
+    """
+    phase = str(state.get("phase") or "")
+    blocker = str(state.get("blocker") or "").strip()
+    na = str(state.get("next_action") or "")
+    if phase.upper() == "BLOCKED":
+        return (
+            "blocked",
+            f"phase BLOCKED: blocker={blocker!r} next_action={na[:60]!r}",
+        )
+    if blocker and blocker.lower() != "none":
+        return (
+            "blocker",
+            f"binding WAIT/BLOCKED state: blocker={blocker!r} "
+            f"next_action={na[:60]!r}",
+        )
+    if na.startswith("WAIT:") and binding_wait(
+        na,
+        phase=phase,
+        empty_todo=empty_todo,
+        intent=state.get("execution_intent"),
+    ):
+        return ("wait", f"persisted WAIT binds in this context: {na[:60]!r}")
     return None
 
 

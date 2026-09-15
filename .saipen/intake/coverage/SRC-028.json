@@ -1,0 +1,158 @@
+{
+  "requirements": {
+    "SRC-028:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "tools/test_t1316_recovery_already_applied.py, audit_route.py, router.py, validate.py",
+      "text": "repair canonical SRC-027/T-1316 truth",
+      "verification": "python -m unittest tools/test_t1316_recovery_already_applied.py tools/test_audit_route.py -> 58 tests OK",
+      "work": "T-1317"
+    },
+    "SRC-028:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "release._recovery_preflight debt detection and pass after recovery in test_t1316_recovery_already_applied.py",
+      "text": "truthful R008 evidence",
+      "verification": "python -m unittest tools.test_t1316_recovery_already_applied -> 31 tests OK",
+      "work": "T-1317"
+    },
+    "SRC-028:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "direct/auto/cli/router entry point test matrix in test_t1316_recovery_already_applied.py",
+      "text": "truthful R013 evidence",
+      "verification": "python -m unittest tools.test_t1316_recovery_already_applied -> 31 tests OK",
+      "work": "T-1317"
+    },
+    "SRC-028:R004": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "SRC-027:R014 preserved as non-terminal DEFERRED in intake coverage",
+      "text": "truthful R014 disposition",
+      "verification": "cat .saipen/intake/coverage/SRC-027.json shows DEFERRED",
+      "work": "T-1317"
+    },
+    "SRC-028:R005": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "tools/saipen_engine/admission.py evaluate_admission is the single admission authority; tools/saipen.py _guard_event routes every host event through it; no second admission parser exists (verified by code search this run)",
+      "text": "one admission authority",
+      "verification": "hostile matrix 34/34 + focused enforcement suites 129/129 green on the live tree; saipen guard --event-json drives evaluate_admission end to end",
+      "work": "T-1317"
+    },
+    "SRC-028:R006": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "tools/saipen.py guard command is read-only (never writes/repairs/checkpoints); SRC-030 Part 6 event mode + legacy file mode both read-only",
+      "text": "read-only saipen guard",
+      "verification": "test_guard_admission + test_guard_events green; guard produced zero canonical writes across 129-test focused run",
+      "work": "T-1317"
+    },
+    "SRC-028:R007": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "admission.PROTECTED_CANONICAL_NAMESPACES enforced via canonicalize_target (resolve + namespace membership); hostile rows 8-10 direct/traversal/symlink/junction all refused",
+      "text": "protected canonical state namespace",
+      "verification": "test_guard_hostile_matrix rows 8-10 green natively on Windows incl. junction test_10; symlink test_10b green",
+      "work": "T-1317"
+    },
+    "SRC-028:R008": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "extensions/adapters/registry.json is the single declarative host inventory; admission, injectors, autoinject and tests all read it (_load_registry RuntimeError on missing/malformed)",
+      "text": "central host adapter registry",
+      "verification": "test_adapter_parity + test_guard_admission green; bootstrap injectors consume the same registry file",
+      "work": "T-1317"
+    },
+    "SRC-028:R009": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "saipen/ACTIVATION_BLOCK.md is the one activation template; registry activation_template points at it; bootstrap injectors render it for both shells",
+      "text": "unified always-on instruction template",
+      "verification": "test_adapter_parity green; single template file confirmed present and referenced by registry.json this run",
+      "work": "T-1317"
+    },
+    "SRC-028:R010": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "BLOCKED",
+      "evidence": "extensions/adapters/registry.json Kiro runtime_commands=[kiro], home=~/.kiro; read-only probe 2026-09-13 found command absent and declared home absent; no real refused-effect proof exists",
+      "text": "Kiro blocking adapter",
+      "verification": "source status SRC-028: R010 is sole unresolved requirement; native transport tests are capability-only and cannot prove host blocking",
+      "work": "T-1317"
+    },
+    "SRC-028:R011": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "real Gemini CLI transcript .saipen/kitchen/t1317-gemini-live.stdout: native write_file allowed-smoke.txt allowed (success), native write_file .saipen/STATE.md BLOCKED-SENTINEL refused by the guard ('Tool execution blocked: PROTECTED_CANONICAL_NAMESPACE'); refused effect did not execute and protected bytes unchanged",
+      "text": "Gemini blocking adapter",
+      "verification": "current-tree re-proof this run: the same write_file -> .saipen/STATE.md event maps to write/protected and returns PROTECTED_CANONICAL_NAMESPACE admitted=False (test_guard_admission + test_native_host_guard gemini rows green)",
+      "work": "T-1317"
+    },
+    "SRC-028:R012": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "extensions/adapters/opencode/saipen-guard.js + tools/test_opencode_host_smoke.py: real OpenCode runtime discovered the installed plugin, invoked its factory (startup probe), and the hook blocked a protected .saipen/STATE.md write before host execution",
+      "text": "OpenCode blocking adapter",
+      "verification": "OpenCodeHostSmoke 4/4 OK on the live runtime (opencode debug config); red control proved refused bytes change only under bypass",
+      "work": "T-1317"
+    },
+    "SRC-028:R013": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "admission.effective_strength ladders capability/installed/current/health/effective; missing or stale adapter cannot report BLOCKING; unobservable is UNKNOWN",
+      "text": "truthful enforcement-strength model",
+      "verification": "hostile rows 15-19 green (test_16..test_19): kiro GAP, gemini ADVISORY, missing/stale GAP, current-without-health UNKNOWN",
+      "work": "T-1317"
+    },
+    "SRC-028:R014": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "tools/autoinject.py + schedule-run.ps1 stamp freshness from manifest-owned surfaces with CRLF/LF content digest (tools/test_inject_digest.py); --check reports installed/current per surface",
+      "text": "distribution freshness truth",
+      "verification": "test_inject_digest 6/6 green; injectors consumed registry-declared surfaces (test_adapter_parity green)",
+      "work": "T-1317"
+    },
+    "SRC-028:R015": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "tools/test_guard_hostile_matrix.py: 34 deterministic red controls over protocol-state, ownership, bypass, binding, host-event fail-closed (incl. T-1317 Target A healthy-fixture test_14c), adapter evidence, compound shell, multi-target, actor binding, session stability",
+      "text": "hostile forgetful-agent matrix",
+      "verification": "34/34 green natively on Windows including junction test_10 PASS",
+      "work": "T-1317"
+    },
+    "SRC-028:R016": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "admission.py: latency < 5ms budget verified over 20 iterations",
+      "text": "guard performance budget",
+      "verification": "tools/test_guard_admission.py:test_performance_budget PASS",
+      "work": "T-1317"
+    },
+    "SRC-028:R017": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "honest test-debt and audit route authority classification",
+      "text": "current test-debt classification",
+      "verification": "python -m unittest tools.test_audit_route -> 27 tests OK",
+      "work": "T-1317"
+    }
+  },
+  "schema_version": 1
+}

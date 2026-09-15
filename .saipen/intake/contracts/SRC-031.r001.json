@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-031:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Current lifecycle: checkpoint already-present partial BUILD work once, refresh owner lease, persist truthful next_action and human digest before further implementation; do not invent historical events."
+    }
+  },
+  "derived_at": "2026-09-12T08:32:29Z",
+  "derived_from": "SRC-031",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "c88029e2b54b8d31b755686f2ec8f00429ced01f962198df45aab2a826469c14"
+}

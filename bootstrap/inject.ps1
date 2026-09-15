@@ -1,8 +1,21 @@
 # saipen injector -- installs saipen as default protocol on every agentic system found.
 # Run from the clone dir:  powershell -ExecutionPolicy Bypass -File .\inject.ps1
 # Idempotent: safe to re-run any time (skips what's already installed).
+#
+# Host inventory law (SRC-028:R008 / SRC-030 Part 7): every installed host,
+# its surfaces and its blocking hook come from extensions/adapters/registry.json.
+# This script contains NO handwritten host list; the per-adapter loop below is
+# data-driven, and only the three registry-declared bespoke installers
+# (freebuff-backstop, aider-conf, antigravity-plugins) keep hand-written bodies.
 
-param([string]$SkillHome = (Join-Path (Split-Path $PSScriptRoot) "saipen"))
+# Optional host filter (T-1319 TARGET 1): with -AdapterId NAME the injector
+# updates ONLY that registered adapter's surfaces plus the common ones it
+# declares. Default (empty) retains the all-host behavior. The host inventory
+# stays extensions/adapters/registry.json; this is a filter, not a second list.
+param(
+  [string]$SkillHome = (Join-Path (Split-Path $PSScriptRoot) "saipen"),
+  [string]$AdapterId = ""
+)
 
 $ErrorActionPreference = "Stop"
 $Utf8NoBom = New-Object System.Text.UTF8Encoding($false)
@@ -35,6 +48,26 @@ try {
 } catch {
   Write-Host "FATAL: runtime manifest unreadable at $ManifestPath`: $($_.Exception.Message)" -ForegroundColor Red
   exit 1
+}
+$RegistryPath = Join-Path $Root "extensions\adapters\registry.json"
+try {
+  $AdapterRegistry = Get-Content -LiteralPath $RegistryPath -Raw -Encoding utf8 | ConvertFrom-Json
+} catch {
+  Write-Host "FATAL: adapter registry unreadable at $RegistryPath`: $($_.Exception.Message)" -ForegroundColor Red
+  exit 1
+}
+if (-not $AdapterRegistry.adapters -or @($AdapterRegistry.adapters).Count -eq 0) {
+  Write-Host "FATAL: adapter registry has no adapters: $RegistryPath" -ForegroundColor Red
+  exit 1
+}
+# T-1319 TARGET 1: an optional host filter resolves against the registry ONLY.
+# An unknown id is a hard failure, never a silent all-host run.
+if (-not [string]::IsNullOrWhiteSpace($AdapterId)) {
+  $knownAdapterIds = @($AdapterRegistry.adapters | ForEach-Object { [string]$_.id })
+  if ($knownAdapterIds -notcontains $AdapterId) {
+    Write-Host "FATAL: unknown adapter id '$AdapterId'; registry declares: $($knownAdapterIds -join ', ')" -ForegroundColor Red
+    exit 1
+  }
 }
 function Get-InstallRelativePath([string]$sourcePath) {
   $normalized = $sourcePath.Replace('\', '/')
@@ -113,42 +146,21 @@ try {
   exit 1
 }
 
-$blockCore = @"
-<!-- SAIPEN:BEGIN -->
-## saipen protocol (global)
-SHORTCUT ACTIVATION GATE: a whole-message token that is a declared SAIPEN
-shortcut (gg, hh, ff, xx, vv, zz, cc, ccc, st, sss, dd, aa, qq, qqq, ee, eee, pp, tt, sc, or
-a Cyrillic twin) is a COMMAND, never a greeting and never a style token. It
-MUST activate SAIPEN and resolve through CORE.md 1.10's shortcut table BEFORE
-any conversational acknowledgement, style-mode interpretation, or remembered
-expansion. `sc` is `saipen crew`, never "stop caveman". A shortcut inside a
-compound instruction (`saipen push + build ccc`) resolves identically as one
-ordered segment. Style commands (`stop caveman`/`normal mode`) stay legal, but
-a full-token shortcut match ALWAYS wins over style interpretation.
-FIRST-OUTPUT LANGUAGE GATE: when project root contains .saipen/, SAIPEN is
-active for the entire session including ordinary Q&A. BEFORE composing ANY
-assistant response (acknowledgement, explanation, or tool preamble), read
-STYLE.md and resolve its single reply_language: value. A pinned value (et,
-en, or ru) is the absolute chat language for EVERY response including the
-first, and incoming user language MUST NOT override it. Language detection
-precedence applies ONLY when reply_language is auto. Missing, duplicated,
-invalid, or unreadable STYLE language authority is a deterministic
-bootstrap/style failure -- never guess a language and emit substantive output.
-On "saipen set" / "saipen ..." commands, or when project root contains
-.saipen/: read $SkillHome\BOOT.md (cold-start kernel) + $SkillHome\STYLE.md
-and follow them. BOOT.md routes on to INDEX.md, and to CORE.md when a rule
-question comes up. RFC.md is a redirect stub - it holds no rules.
-Chat tone: caveman-ded (STYLE.md) - compressed + blunt, on by default,
-off only on "stop caveman"/"normal mode".
-Memory: .saipen/ at project root - read .saipen/STATE.md before work;
-checkpoint BOARD + STATE after every ticket, LOG line after every run.
-Path missing (new machine)? clone github.com/vacterro/saipen.
-Crew: a bare subSaipen name (saihunt/saipython/saiwiki) = adopt that role and
-start working (extensions/subs/crew.md); saipen crew = the serial
-full-platoon convergence circuit (never a window layout).
-UI work: also obey $SkillHome\UI.md (Win95 dark golden, Verdana, no AA).
-<!-- SAIPEN:END -->
-"@
+# ONE activation template (SRC-028:R009 / SRC-030 Part 8): the semantic block
+# is rendered from saipen/ACTIVATION_BLOCK.md; only the SAIPEN home path is
+# substituted. This script no longer carries its own copy of the block.
+$TemplateSource = [string]$AdapterRegistry.activation_template
+if ([string]::IsNullOrWhiteSpace($TemplateSource)) {
+  Write-Host "FATAL: adapter registry names no activation_template" -ForegroundColor Red
+  exit 1
+}
+$TemplatePath = Get-SourcePath $TemplateSource
+if (-not (Test-Path $TemplatePath -PathType Leaf)) {
+  Write-Host "FATAL: activation template missing: $TemplatePath" -ForegroundColor Red
+  exit 1
+}
+$blockCore = [System.IO.File]::ReadAllText((Get-NativePath $TemplatePath), $Utf8NoBom)
+$blockCore = $blockCore.Replace('{{SAIPEN_HOME}}', $SkillHome)
 $blockCore = $blockCore.Trim([char[]]"`r`n")
 
 function Get-Newline([string]$text) {
@@ -184,6 +196,57 @@ function Add-Block([string]$file) {
   Write-NoBom $file ($blockCore + "`n")
   return "file created"
 }
+
+# SAIPEN-CLI-LAUNCHER-OWNERSHIP:BEGIN
+# The canonical installer OWNS the installed `saipen` launcher surface: the
+# `bin/saipen` / `bin/saipen.cmd` files are rendered from the ONE source owner
+# (bootstrap/cli_launcher.py) into the STAGED skill before the atomic swap, so a
+# render failure aborts the install and preserves the active copy. The OpenCode
+# guard only verifies them, never writes them.
+function Get-PythonBin {
+  # Selected interpreter for the installed launcher: explicit override FIRST,
+  # then PATH, then the per-user CPython layout. Never a guess that is not a file.
+  $candidates = New-Object System.Collections.ArrayList
+  if (-not [string]::IsNullOrWhiteSpace($env:SAIPEN_PYTHON)) { [void]$candidates.Add($env:SAIPEN_PYTHON) }
+  foreach ($name in @("python", "python3")) {
+    $cmd = Get-Command $name -ErrorAction SilentlyContinue
+    if ($cmd -and $cmd.Source) { [void]$candidates.Add([string]$cmd.Source) }
+  }
+  if (-not [string]::IsNullOrWhiteSpace($env:LOCALAPPDATA)) {
+    Get-ChildItem "$env:LOCALAPPDATA\Programs\Python\Python*\python.exe" -ErrorAction SilentlyContinue |
+      ForEach-Object { [void]$candidates.Add($_.FullName) }
+  }
+  foreach ($candidate in $candidates) {
+    if (-not [string]::IsNullOrWhiteSpace($candidate) -and (Test-Path $candidate -PathType Leaf)) {
+      return (Resolve-Path $candidate).Path
+    }
+  }
+  return $null
+}
+
+function Write-CliLaunchers([string]$StageDir, [string]$SkillDir) {
+  if ([string]::IsNullOrWhiteSpace($StageDir) -or [string]::IsNullOrWhiteSpace($SkillDir)) {
+    return "FAILED: launcher stage/skill dir missing"
+  }
+  try {
+    $pythonBin = Get-PythonBin
+    if ([string]::IsNullOrWhiteSpace($pythonBin)) { return "FAILED: no Python runtime for launcher" }
+    $renderer = Get-SourcePath "bootstrap/cli_launcher.py"
+    if (-not (Test-Path $renderer -PathType Leaf)) { return "FAILED: launcher renderer missing" }
+    $cli = Get-NativePath (Join-Path $SkillDir "tools\saipen.py")
+    $outDir = Get-NativePath (Join-Path $StageDir "bin")
+    $output = & $pythonBin $renderer --python $pythonBin --cli $cli --out-dir $outDir 2>&1
+    if ($LASTEXITCODE -ne 0) { return "FAILED: launcher render ($output)" }
+    if (-not (Test-Path (Join-Path $outDir "saipen.cmd") -PathType Leaf) -or
+        -not (Test-Path (Join-Path $outDir "saipen") -PathType Leaf)) {
+      return "FAILED: launcher files missing after render"
+    }
+    return "ok"
+  } catch {
+    return "FAILED: launcher render: $($_.Exception.Message)"
+  }
+}
+# SAIPEN-CLI-LAUNCHER-OWNERSHIP:END
 
 function Copy-Skill([string]$dst) {
   # MANIFEST.json owns every copied file/tree and replaced destination. Any
@@ -246,6 +309,10 @@ function Copy-Skill([string]$dst) {
         throw "installed phase document missing: $phase"
       }
     }
+    # SAIPEN-CLI-LAUNCHER-OWNERSHIP:BEGIN
+    $launcher = Write-CliLaunchers -StageDir $stage -SkillDir $dst
+    if ($launcher -ne "ok") { throw "cli launcher render failed: $launcher" }
+    # SAIPEN-CLI-LAUNCHER-OWNERSHIP:END
     if (Test-Path $dst) { Move-Item -LiteralPath $dst -Destination $backup -ErrorAction Stop }
     try {
       Move-Item -LiteralPath $stage -Destination $dst -ErrorAction Stop
@@ -270,104 +337,274 @@ function Copy-Skill([string]$dst) {
   }
 }
 
-$h = $env:USERPROFILE
-$report = New-Object System.Collections.ArrayList
+function Expand-Home([string]$path) {
+  if ([string]::IsNullOrWhiteSpace($path)) { return $null }
+  return Get-NativePath ($path.Replace('~', $env:USERPROFILE))
+}
 
-# --- Claude Code ---
-if (Test-Path "$h\.claude") {
-  [void]$report.Add(@("Claude Code skill",     (Copy-Skill "$h\.claude\skills\saipen")))
-  [void]$report.Add(@("Claude Code CLAUDE.md", (Add-Block  "$h\.claude\CLAUDE.md")))
-} else { [void]$report.Add(@("Claude Code", "not installed - skip")) }
-
-# --- OpenCode ---
-if (Test-Path "$h\.config\opencode") {
-  [void]$report.Add(@("OpenCode skill",     (Copy-Skill "$h\.config\opencode\skills\saipen")))
-  [void]$report.Add(@("OpenCode AGENTS.md", (Add-Block  "$h\.config\opencode\AGENTS.md")))
-} else { [void]$report.Add(@("OpenCode", "not installed - skip")) }
-
-# --- Codex CLI ---
-if (Test-Path "$h\.codex") {
-  [void]$report.Add(@("Codex skill",     (Copy-Skill "$h\.codex\skills\saipen")))
-  [void]$report.Add(@("Codex AGENTS.md", (Add-Block  "$h\.codex\AGENTS.md")))
-} else { [void]$report.Add(@("Codex", "not installed - skip")) }
-
-# --- Gemini CLI ---
-if (Test-Path "$h\.gemini") {
-  [void]$report.Add(@("Gemini skill",     (Copy-Skill "$h\.gemini\skills\saipen")))
-  [void]$report.Add(@("Gemini GEMINI.md", (Add-Block  "$h\.gemini\GEMINI.md")))
-} else { [void]$report.Add(@("Gemini", "not installed - skip")) }
-
-# --- CodeBuddy Code ---
-if (Test-Path "$h\.codebuddy") {
-  [void]$report.Add(@("CodeBuddy skill",  (Copy-Skill "$h\.codebuddy\skills\saipen")))
-} else { [void]$report.Add(@("CodeBuddy", "not installed - skip")) }
-
-# --- Generic ~/.agents/skills (FreeBuff etc.) ---
-# Copy, lowercase: these readers skip junctions and uppercase dirs.
-# Positive host detection (not directory-exists-only): create parent when a supported host is present.
-$agentsSupported = (Test-Path "$h\.config\opencode") -or (Test-Path "$h\.codex") -or (Test-Path "$h\.gemini") -or (Test-Path "$h\.codebuddy") -or (Test-Path "$h\.claude") -or (Test-Path "$h\.agents") -or (Get-Command freebuff -ErrorAction SilentlyContinue) -or (Get-Command codebuddy -ErrorAction SilentlyContinue)
-if (Test-Path "$h\.agents\skills") {
-  [void]$report.Add(@("~/.agents skills", (Copy-Skill "$h\.agents\skills\saipen")))
-} elseif ($agentsSupported) {
-  # Host supports generic skill root but hasn't created the directory yet -- create it.
-  [void]$report.Add(@("~/.agents skills", (Copy-Skill "$h\.agents\skills\saipen")))
-} else { [void]$report.Add(@("~/.agents", "not installed - skip")) }
-
-# --- FreeBuff always-on activation backstop ---
-# FreeBuff loads generic ~/.agents/skills on demand; weak models need a small always-on gate.
-# Use supported user-level knowledge surface when FreeBuff is positively detected.
-$freebuffDetected = (Test-Path "$h\.agents") -or (Get-Command freebuff -ErrorAction SilentlyContinue) -or (Test-Path "$h\.agents\skills")
-if ($freebuffDetected) {
-  # Prefer ~/.knowledge.md where supported, fallback to ~/.AGENTS.md -- both are documented FreeBuff user-knowledge surfaces.
-  $fbKnowledge = "$h\.knowledge.md"
-  $fbAgents = "$h\.AGENTS.md"
-  # Create at least one always-on surface if neither exists yet, preferring knowledge.md
-  if (-not (Test-Path $fbKnowledge) -and -not (Test-Path $fbAgents)) {
-    [void]$report.Add(@("FreeBuff knowledge", (Add-Block $fbKnowledge)))
-  } elseif (Test-Path $fbKnowledge) {
-    [void]$report.Add(@("FreeBuff knowledge", (Add-Block $fbKnowledge)))
-  } elseif (Test-Path $fbAgents) {
-    [void]$report.Add(@("FreeBuff AGENTS.md", (Add-Block $fbAgents)))
-  }
-} else { [void]$report.Add(@("FreeBuff", "not installed - skip")) }
-
-# --- Antigravity plugins (copy: IDE locks dirs, junction impossible while open) ---
-$plugRoot = "$h\.gemini\config\plugins"
-if (Test-Path $plugRoot) {
-  Get-ChildItem $plugRoot -Directory | ForEach-Object {
-    $skillsDir = Join-Path $_.FullName "skills"
-    if (Test-Path $skillsDir) {
-      [void]$report.Add(@("Antigravity [$($_.Name)]", (Copy-Skill (Join-Path $skillsDir "saipen"))))
+function Copy-Hook($adapter) {
+  # One artifact file, copied over by digest on every run (idempotent);
+  # uninstall removes exactly this file and nothing else.
+  try {
+    if ((Has-Prop $adapter 'hook_installer') -and $adapter.hook_installer) {
+      $installer = Get-SourcePath ([string]$adapter.hook_installer)
+      $result = & python $installer ([string]$adapter.id) --home $env:USERPROFILE 2>&1
+      if ($LASTEXITCODE -ne 0) { throw "native hook installer failed: $result" }
+      return "guard hook and configuration installed; health unproven"
     }
+    $source = Get-SourcePath ([string]$adapter.hook_artifact)
+    $destination = Expand-Home ([string]$adapter.install.hook)
+    if ([string]::IsNullOrWhiteSpace($destination)) { throw "registry hook surface is empty" }
+    $parent = Split-Path $destination
+    if (-not (Test-Path $parent)) { New-Item -ItemType Directory -Force $parent -ErrorAction Stop | Out-Null }
+    Copy-Item -LiteralPath $source -Destination $destination -Force -ErrorAction Stop
+    $shippedHash = (Get-FileHash -LiteralPath $source -Algorithm SHA256 -ErrorAction Stop).Hash.ToLowerInvariant()
+    $installedHash = (Get-FileHash -LiteralPath $destination -Algorithm SHA256 -ErrorAction Stop).Hash.ToLowerInvariant()
+    if ($installedHash -ne $shippedHash) { throw "installed SHA-256 differs from shipped artifact" }
+    if ([string]$adapter.id -eq 'opencode') {
+      return "guard hook installed sha256=$installedHash; already-running OpenCode processes require restart"
+    }
+    return "guard hook installed sha256=$installedHash"
+  } catch {
+    return "hook FAILED ($($adapter.id)): $($_.Exception.Message)"
   }
 }
 
-# --- Aider (boot set is BOOT.md + STYLE.md, same promise as every platform) ---
-$aider = "$h\.aider.conf.yml"
-$skillPath = Join-Path $SkillHome "BOOT.md"
-$stylePath = Join-Path $SkillHome "STYLE.md"
-if (Get-Command aider -ErrorAction SilentlyContinue) {
-  if (Test-Path $aider) {
-    $conf = Get-Content $aider -Raw -Encoding utf8
-    if (($conf -match [regex]::Escape($skillPath)) -and ($conf -match [regex]::Escape($stylePath))) {
-      [void]$report.Add(@("Aider conf", "already"))
-    } elseif ($conf -notmatch '(?m)^read:') {
-      if (-not (Test-Path "$aider.bak")) { Copy-Item $aider "$aider.bak" -Force -ErrorAction Stop }
-      $original = [System.IO.File]::ReadAllBytes((Get-NativePath $aider))
-      $addition = $Utf8NoBom.GetBytes("`n# saipen protocol auto-loaded`nread:`n  - $skillPath`n  - $stylePath`n")
-      $combined = New-Object byte[] ($original.Length + $addition.Length)
-      [System.Buffer]::BlockCopy($original, 0, $combined, 0, $original.Length)
-      [System.Buffer]::BlockCopy($addition, 0, $combined, $original.Length, $addition.Length)
-      [System.IO.File]::WriteAllBytes((Get-NativePath $aider), $combined)
-      [void]$report.Add(@("Aider conf", "read: appended"))
-    } else {
-      [void]$report.Add(@("Aider conf", "has own read: - add manually: $skillPath + $stylePath"))
+function Remove-LegacyHook($adapter) {
+  # The supported OpenCode runtime discovers BOTH the singular `plugin/` and
+  # the plural `plugins/` global directories, so a stale copy of this one
+  # artifact on the legacy surface would load the guard hook twice. The
+  # injector removes that exact stale copy -- never a directory, never
+  # anything else.
+  try {
+    if (-not (Has-Prop $adapter 'legacy_hook_surfaces')) { return "clean" }
+    $removed = 0
+    foreach ($surface in @($adapter.legacy_hook_surfaces)) {
+      $legacy = Expand-Home ([string]$surface)
+      if ([string]::IsNullOrWhiteSpace($legacy)) { continue }
+      if (Test-Path $legacy -PathType Leaf) {
+        Remove-Item -LiteralPath $legacy -Force -ErrorAction Stop
+        $removed++
+      }
     }
-  } else {
-    Write-NoBom $aider "# saipen protocol auto-loaded`nread:`n  - $skillPath`n  - $stylePath`n"
-    [void]$report.Add(@("Aider conf", "created"))
+    if ($removed -gt 0) { return "legacy hook removed" }
+    return "clean"
+  } catch {
+    return "legacy hook remove FAILED ($($adapter.id)): $($_.Exception.Message)"
   }
-} else { [void]$report.Add(@("Aider", "not installed - skip")) }
+}
+
+function Has-Prop($object, [string]$name) {
+  return ($object.PSObject.Properties.Name -contains $name)
+}
+
+# --- T-1319 TARGET 2: install-time runtime provenance ---------------------
+# A stale installed runtime cannot discover canonical source from its own
+# __file__ (that is the INSTALLED tree). The canonical installer therefore
+# stamps each installed skill home with one small machine-readable record the
+# runtime reads back before it mutates anything. Project state is NEVER stored
+# here; this is install provenance only.
+$ProvenanceName = ".saipen_runtime.json"
+$InstallerGeneration = "T-1327-runtime-prelaunch-20260914.1"
+$ProvenanceSurface = @(
+  "tools/saipen.py",
+  "extensions/adapters/registry.json",
+  "saipen/MANIFEST.json"
+)
+
+function Get-RuntimeFingerprint {
+  $rels = New-Object System.Collections.ArrayList
+  foreach ($rel in $ProvenanceSurface) { [void]$rels.Add($rel) }
+  $engine = Join-Path $Root "tools\saipen_engine"
+  if (Test-Path $engine -PathType Container) {
+    Get-ChildItem -LiteralPath $engine -Recurse -File -Force -ErrorAction SilentlyContinue |
+      Where-Object { $_.Extension -eq ".py" } | ForEach-Object {
+        [void]$rels.Add($_.FullName.Substring($Root.Length).TrimStart('\', '/').Replace('\', '/'))
+      }
+  }
+  $lines = New-Object System.Collections.ArrayList
+  foreach ($rel in ($rels | Sort-Object -Unique)) {
+    $abs = Join-Path $Root ($rel.Replace('/', [System.IO.Path]::DirectorySeparatorChar))
+    try {
+      $sha = (Get-FileHash -LiteralPath $abs -Algorithm SHA256 -ErrorAction Stop).Hash.ToLowerInvariant()
+    } catch { continue }
+    [void]$lines.Add("$rel=$sha")
+  }
+  if ($lines.Count -eq 0) { return "" }
+  $bytes = [System.Text.Encoding]::UTF8.GetBytes(($lines -join "`n"))
+  $digest = [System.Security.Cryptography.SHA256]::Create().ComputeHash($bytes)
+  return ([System.BitConverter]::ToString($digest).Replace('-', '').ToLowerInvariant())
+}
+
+function Write-RuntimeProvenance($adapter, [string]$skillDir) {
+  # Provenance is REQUIRED recovery state, not optional diagnostics: the caller
+  # records this result and a failure makes the host-scoped migration
+  # non-successful. Never swallow the error.
+  if ([string]::IsNullOrWhiteSpace($skillDir) -or -not (Test-Path $skillDir -PathType Container)) {
+    return "FAILED: provenance skill dir missing"
+  }
+  try {
+    $version = ""
+    $versionFile = Join-Path $Root "VERSION"
+    if (Test-Path $versionFile -PathType Leaf) {
+      $version = ([System.IO.File]::ReadAllText((Get-NativePath $versionFile))).Trim()
+    }
+    $head = ""
+    try {
+      $headOut = & git -C $Root rev-parse HEAD 2>$null
+      if ($LASTEXITCODE -eq 0 -and $headOut) { $head = ([string]$headOut).Trim() }
+    } catch { $head = "" }
+    $expectedRoot = [System.IO.Path]::GetFullPath($Root)
+    $expectedFp = Get-RuntimeFingerprint
+    $record = [ordered]@{
+      schema_version        = 1
+      adapter_id            = [string]$adapter.id
+      canonical_source_root = $expectedRoot
+      source_version        = $version
+      source_build          = $head
+      runtime_fingerprint   = $expectedFp
+      installer_generation  = $InstallerGeneration
+    }
+    $json = ($record | ConvertTo-Json -Depth 4)
+    $markerPath = Get-NativePath (Join-Path $skillDir $ProvenanceName)
+    [System.IO.File]::WriteAllText($markerPath, $json, $Utf8NoBom)
+    if (-not (Test-Path $markerPath -PathType Leaf)) {
+      return "FAILED: provenance marker not written"
+    }
+    $doc = [System.IO.File]::ReadAllText($markerPath) | ConvertFrom-Json
+    $problems = @()
+    if ([string]$doc.adapter_id -ne [string]$adapter.id) { $problems += "adapter_id" }
+    if ([string]$doc.canonical_source_root -ne $expectedRoot) { $problems += "canonical_source_root" }
+    if ([string]$doc.installer_generation -ne $InstallerGeneration) { $problems += "installer_generation" }
+    if ([string]::IsNullOrWhiteSpace([string]$doc.runtime_fingerprint)) {
+      $problems += "runtime_fingerprint-missing"
+    } elseif ($expectedFp -and ([string]$doc.runtime_fingerprint -ne $expectedFp)) {
+      $problems += "runtime_fingerprint-mismatch"
+    }
+    if ($problems.Count -gt 0) {
+      return ("FAILED: provenance invalid: " + ($problems -join ","))
+    }
+    return "verified"
+  } catch {
+    return ("FAILED: provenance write/validate: " + $_.Exception.Message)
+  }
+}
+
+$h = $env:USERPROFILE
+$report = New-Object System.Collections.ArrayList
+
+# --- Data-driven host loop (extensions/adapters/registry.json is the only
+# --- host inventory). Adapters without an `install` object are documented
+# --- surfaces only and install nothing.
+foreach ($adapter in @($AdapterRegistry.adapters)) {
+  if (-not [string]::IsNullOrWhiteSpace($AdapterId) -and ([string]$adapter.id) -ne $AdapterId) { continue }
+  if (-not (Has-Prop $adapter 'install') -or $null -eq $adapter.install) { continue }
+  $install = $adapter.install
+  $label = [string]$adapter.name
+
+  if ((Has-Prop $install 'bespoke') -and $install.bespoke) {
+    switch ([string]$install.bespoke) {
+      'freebuff-backstop' {
+        # --- Generic ~/.agents/skills (FreeBuff etc.) ---
+        # Copy, lowercase: these readers skip junctions and uppercase dirs.
+        # Positive host detection (not directory-exists-only): create parent when a supported host is present.
+        $agentsSupported = (Test-Path "$h\.config\opencode") -or (Test-Path "$h\.codex") -or (Test-Path "$h\.gemini") -or (Test-Path "$h\.codebuddy") -or (Test-Path "$h\.claude") -or (Test-Path "$h\.agents") -or (Get-Command freebuff -ErrorAction SilentlyContinue) -or (Get-Command codebuddy -ErrorAction SilentlyContinue)
+        if (Test-Path "$h\.agents\skills") {
+          [void]$report.Add(@("~/.agents skills", (Copy-Skill "$h\.agents\skills\saipen")))
+        } elseif ($agentsSupported) {
+          # Host supports generic skill root but hasn't created the directory yet -- create it.
+          [void]$report.Add(@("~/.agents skills", (Copy-Skill "$h\.agents\skills\saipen")))
+        } else { [void]$report.Add(@("~/.agents", "not installed - skip")) }
+
+        # --- FreeBuff always-on activation backstop ---
+        # FreeBuff loads generic ~/.agents/skills on demand; weak models need a small always-on gate.
+        # Use supported user-level knowledge surface when FreeBuff is positively detected.
+        $freebuffDetected = (Test-Path "$h\.agents") -or (Get-Command freebuff -ErrorAction SilentlyContinue) -or (Test-Path "$h\.agents\skills")
+        if ($freebuffDetected) {
+          # Prefer ~/.knowledge.md where supported, fallback to ~/.AGENTS.md -- both are documented FreeBuff user-knowledge surfaces.
+          $fbKnowledge = "$h\.knowledge.md"
+          $fbAgents = "$h\.AGENTS.md"
+          # Create at least one always-on surface if neither exists yet, preferring knowledge.md
+          if (-not (Test-Path $fbKnowledge) -and -not (Test-Path $fbAgents)) {
+            [void]$report.Add(@("FreeBuff knowledge", (Add-Block $fbKnowledge)))
+          } elseif (Test-Path $fbKnowledge) {
+            [void]$report.Add(@("FreeBuff knowledge", (Add-Block $fbKnowledge)))
+          } elseif (Test-Path $fbAgents) {
+            [void]$report.Add(@("FreeBuff AGENTS.md", (Add-Block $fbAgents)))
+          }
+        } else { [void]$report.Add(@("FreeBuff", "not installed - skip")) }
+      }
+      'aider-conf' {
+        # --- Aider (boot set is BOOT.md + STYLE.md, same promise as every platform) ---
+        $aider = "$h\.aider.conf.yml"
+        $skillPath = Join-Path $SkillHome "BOOT.md"
+        $stylePath = Join-Path $SkillHome "STYLE.md"
+        if (Get-Command aider -ErrorAction SilentlyContinue) {
+          if (Test-Path $aider) {
+            $conf = Get-Content $aider -Raw -Encoding utf8
+            if (($conf -match [regex]::Escape($skillPath)) -and ($conf -match [regex]::Escape($stylePath))) {
+              [void]$report.Add(@("Aider conf", "already"))
+            } elseif ($conf -notmatch '(?m)^read:') {
+              if (-not (Test-Path "$aider.bak")) { Copy-Item $aider "$aider.bak" -Force -ErrorAction Stop }
+              $original = [System.IO.File]::ReadAllBytes((Get-NativePath $aider))
+              $addition = $Utf8NoBom.GetBytes("`n# saipen protocol auto-loaded`nread:`n  - $skillPath`n  - $stylePath`n")
+              $combined = New-Object byte[] ($original.Length + $addition.Length)
+              [System.Buffer]::BlockCopy($original, 0, $combined, 0, $original.Length)
+              [System.Buffer]::BlockCopy($addition, 0, $combined, $original.Length)
+              [System.IO.File]::WriteAllBytes((Get-NativePath $aider), $combined)
+              [void]$report.Add(@("Aider conf", "read: appended"))
+            } else {
+              [void]$report.Add(@("Aider conf", "has own read: - add manually: $skillPath + $stylePath"))
+            }
+          } else {
+            Write-NoBom $aider "# saipen protocol auto-loaded`nread:`n  - $skillPath`n  - $stylePath`n"
+            [void]$report.Add(@("Aider conf", "created"))
+          }
+        } else { [void]$report.Add(@("Aider", "not installed - skip")) }
+      }
+      'antigravity-plugins' {
+        # --- Antigravity plugins (copy: IDE locks dirs, junction impossible while open) ---
+        $plugRoot = "$h\.gemini\config\plugins"
+        if (Test-Path $plugRoot) {
+          Get-ChildItem $plugRoot -Directory | ForEach-Object {
+            $skillsDir = Join-Path $_.FullName "skills"
+            if (Test-Path $skillsDir) {
+              [void]$report.Add(@("Antigravity [$($_.Name)]", (Copy-Skill (Join-Path $skillsDir "saipen"))))
+            }
+          }
+        }
+      }
+      default {
+        [void]$report.Add(@($label, "unknown bespoke installer '$($install.bespoke)' - skip"))
+      }
+    }
+    continue
+  }
+
+  # NOT $home: $HOME is a read-only automatic variable in PowerShell, so the
+  # old spelling failed the whole host loop for every adapter (reproduced on
+  # pwsh 7 during the T-1317 audit).
+  $hostHome = Expand-Home ([string]$install.home)
+  if ([string]::IsNullOrWhiteSpace($hostHome) -or -not (Test-Path $hostHome)) {
+    [void]$report.Add(@($label, "not installed - skip"))
+    continue
+  }
+  if ((Has-Prop $install 'skill') -and $install.skill) {
+    $skillDst = Expand-Home ([string]$install.skill)
+    $skillResult = Copy-Skill $skillDst
+    [void]$report.Add(@("$label skill", $skillResult))
+    if ($skillResult -match '^(copied|already)') {
+      [void]$report.Add(@("$label provenance", (Write-RuntimeProvenance $adapter $skillDst)))
+    }
+  }
+  if ((Has-Prop $install 'instruction') -and $install.instruction) {
+    [void]$report.Add(@("$label instructions", (Add-Block (Expand-Home ([string]$install.instruction)))))
+  }
+  if ((Has-Prop $install 'hook') -and $install.hook) {
+    [void]$report.Add(@("$label guard hook", (Copy-Hook $adapter)))
+    [void]$report.Add(@("$label legacy hook", (Remove-LegacyHook $adapter)))
+  }
+}
 
 # --- Report ---
 Write-Host ""

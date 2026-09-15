@@ -20,10 +20,42 @@ reported.
 
 from __future__ import annotations
 
+import datetime
 import re
 
 #: `PHASE <NAME> <T-N>` -- the shape of a live phase-owned continuation.
 _CONTINUATION = re.compile(r"PHASE\s+[A-Z]+\s+(T-\d+)\s*$")
+
+
+def audit_route_owns(
+    projection: object,
+    tickets: dict | None = None,
+    agent: str | None = None,
+    now: datetime.datetime | None = None,
+) -> bool:
+    """Does the audit inbox own continuation right now?
+
+    True when:
+    1. projection is a dict with an 'action'
+    2. not invalid_only and not residue_only
+    3. if the action is a PHASE action bound to a work ticket:
+       when tickets is provided, that work ticket must be workable.
+       A blocked or unworkable ticket must not own continuation -- the router
+       falls through to the Pick Rule, and the validator must agree.
+    """
+    if not isinstance(projection, dict) or not projection.get("action"):
+        return False
+    if projection.get("invalid_only") or projection.get("residue_only"):
+        return False
+    work = projection.get("work")
+    action_str = str(projection.get("action", ""))
+    if work and action_str.startswith("PHASE ") and tickets is not None:
+        from saipen_engine.board import ticket_is_workable
+
+        ticket = tickets.get(work, {})
+        if not ticket_is_workable(ticket, tickets, agent=agent, now=now):
+            return False
+    return True
 
 
 def route_applies(projection: object) -> bool:
@@ -35,9 +67,7 @@ def route_applies(projection: object) -> bool:
     so a check that fired on them would demand an agent follow a route that
     does not exist.
     """
-    if not isinstance(projection, dict) or not projection.get("action"):
-        return False
-    return not projection.get("invalid_only") and not projection.get("residue_only")
+    return audit_route_owns(projection)
 
 
 def live_continuation(next_action: str, doing_ids) -> str | None:
@@ -59,15 +89,18 @@ def route_violation(
     next_action: str,
     doing_ids=(),
     wait_categories=(),
+    tickets: dict | None = None,
+    agent: str | None = None,
+    now: datetime.datetime | None = None,
 ) -> str | None:
     """Why the audit route was not followed, or None when it was.
 
     The returned text always NAMES the routed action, because a diagnostic that
     says only "wrong" leaves the agent exactly as stuck as it was.
     """
-    if not route_applies(projection):
+    if not audit_route_owns(projection, tickets=tickets, agent=agent, now=now):
         return None
-    assert isinstance(projection, dict)  # narrowed by route_applies
+    assert isinstance(projection, dict)  # narrowed by audit_route_owns
     routed = str(projection["action"])
     current = (next_action or "").strip()
     if current == routed or live_continuation(current, doing_ids):

@@ -10,19 +10,51 @@ human ownership map lives in `INDEX.md`.
    `reply_language:` value and style contract govern the first token. Invalid or unreadable style
    authority is a bootstrap failure, never permission to guess.
 
-2. **Bind the project and installation.** Explicit target wins; otherwise use
-   the Git worktree root, then the nearest ancestor containing `.saipen/`.
-   Project memory is exactly `<project_root>/.saipen/`. Bind `saipen_home` from
-   the loaded skill/STATE anchor, then resolve `protocol_dir` as either
-   `<saipen_home>/saipen` or `<saipen_home>`. Do not scan for another install.
-   If neither layout contains this file, route to BLOCKED. A root without
-   `.saipen/` routes to INIT.
+2. **Bind the project and installation.** Explicit target wins; then a verified
+   host/session project-root carrier (`SAIPEN_PROJECT_ROOT` validated against
+   optional `SAIPEN_PROJECT_LINEAGE` and `.saipen/IDENTITY.md`); then the Git
+   worktree root, then the nearest ancestor containing `.saipen/`. Project memory
+   is exactly `<project_root>/.saipen/`. Bind `saipen_home` from the loaded
+   skill/STATE anchor, then resolve `protocol_dir` as either `<saipen_home>/saipen`
+   or `<saipen_home>`. Do not scan for another install. A deterministic locator
+   is preferred over any search: `saipen status --json` reports a `cold_route`
+   block naming the bound root, `protocol_dir`, `boot`, `style`,
+   `phase_module` and the `.saipen/` memory files, with
+   `search_required: false`. Resolve the cold route from it; never use the
+   host's grep/glob/search tool to find protocol documents, and never treat a
+   host search fault (for example a ripgrep error) as a SAIPEN binding failure.
+   When a search IS genuinely needed and the host's own search tool fails with a
+   transport error (not zero matches), use `saipen search --hex
+   <hex-encoded-utf8>` — the canonical, read-only, bounded search transport,
+   which the guard admits even while protocol state is invalid. Zero matches is
+   a normal result and must never be retried as a failure. Never fall back to
+   generic `grep`/`bash` search: the guard correctly refuses it under recovery
+   debt, and that was the deadlock this transport removes.
+   If neither layout contains this file, route to BLOCKED. When a recognized local SAIHANDOFF transport is
+   present, inspect the transport binding before concluding that a staging cwd is
+   not a SAIPEN project; never ask the user for the root when a valid host/session
+   root binding is available. A root without `.saipen/` routes to INIT.
+
+   Actor binding is separate from project binding. `SAIPEN_AGENT`, when present,
+   is an optional explicit actor/provenance carrier and is ownership-checked; it
+   is not authentication. When absent inside a valid SAIPEN project, the single
+   canonical protocol snapshot inherits `STATE.agent` and still applies normal
+   ownership, recovery, protected-path and operation-safety checks. A host
+   session id and host metadata are diagnostic context, never actors, and a host
+   identity is never a seat: the optional explicit launcher refuses a seat that
+   names the host it is launching. Invalid
+   or contradictory canonical ownership fails closed. See `KNOWLEDGE/ADR-0003`
+   § 8.
 
 3. **Read and validate `.saipen/STATE.md`.** Check the registry-owned STATE
    shape, phase and `last_event`/style bindings. Corrupt or contradictory state
    routes to recovery before any ordinary work (`RECOVERY-01`, `OPS.md`). A
    legacy readable schema is upgraded only through the next canonical
-   checkpoint. Files outrank model memory.
+   checkpoint. Files outrank model memory. For zero-context orientation use
+   `saipen context orient --json` (optionally `--handoff <JSON>`). It reads a
+   bounded STATE/current-ticket/LOG-tail projection, reports measured bytes,
+   and classifies handoff freshness by identity, lineage and `based_on_event`.
+   It never uses mtime or handoff prose as authority.
 
 4. **Activate only applicable context.**
 
@@ -37,7 +69,9 @@ human ownership map lives in `INDEX.md`.
    - Runtime identity/capabilities are needed: query the runtime projection and
      load `RUNTIME.md`.
 
-5. **Read `.saipen/BOARD.md`, then the active `LOG.md` tail.** Sealed log
+5. **Read the current BOARD record, then the active `LOG.md` tail.** The bounded
+   orientation projection is sufficient for the first route; open the complete
+   current BOARD/source record only when the selected Work requires it. Sealed log
    segments stay cold unless a parent-chain check needs them. Apply a pending
    `human_note` once through the canonical operation. If another actor wrote a
    newer checkpoint, discard remembered state and use the files.
@@ -54,6 +88,11 @@ human ownership map lives in `INDEX.md`.
    - A recognized command/shortcut resolves mechanically from `REGISTRY.json`.
      Human semantics come from `COMMANDS.md` (`CMD-ROUTING-01`,
      `CMD-COMPOUND-01`), never from CORE command prose.
+     For bare `saipen` / `saipen continue` / `cc` / `сс`, invoke
+     `saipen continue --json`, open `load_path` when supplied, and execute
+     the returned action in this turn (`CMD-CONTINUE-01`). Skill loading and
+     routing output alone do not execute the work. "State not checked" means
+     perform the missing read, never an exit or a question about the command.
    - A substantial audit, mission, specification, review handoff or correction
      is captured before interpretation; route details to `SOURCES.md`.
    - An actionable objective routes to goal execution in `MAINTENANCE.md`

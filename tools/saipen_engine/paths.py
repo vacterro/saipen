@@ -1,28 +1,33 @@
 """Project resolution and the canonical paths under `.saipen/`.
 
-Behaviour is `tools/validate.py._resolve_project_root`, moved rather than
-rewritten: explicit selection wins, then the ACTIVE Git worktree, then the main
-worktree via `--git-common-dir`, then the nearest ancestor carrying `.saipen/`.
-The worktree-before-common order is not a detail — asking git-common first once
-made the validator read a different tree than the agent was editing and report
-green for the wrong repository.
+Precedence is explicit `--project-root`, then verified host/session project carrier
+(`SAIPEN_PROJECT_ROOT` / `SAIPEN_PROJECT_LINEAGE`), then the ACTIVE Git worktree,
+then the main worktree via `--git-common-dir`, then the nearest ancestor carrying
+`.saipen/`. The worktree-before-common order is not a detail — asking git-common
+first once made the validator read a different tree than the agent was editing
+and report green for the wrong repository.
 
-TWO identities, never one (T-1003 carrier-loss wave):
+THREE distinct identities, never conflated (T-1003 carrier-loss / T-1318):
 
-1. `project_identity` / `runtime_lock_identity` — machine-local
-   (`os.path.realpath` + `normcase`). It exists for the lock and journal
-   runtime binding: two paths that reach the same project (a symlink, a
-   substituted drive, a case-different Windows path) must produce ONE identity,
-   or the single-writer guarantee is a single writer per spelling. It is NEVER
-   durable portable evidence: moving the project changes it.
+1. `protocol_installation` (`saipen_home` / loaded skill anchor / `protocol_dir`)
+   The canonical SAIPEN installation owning the engine (`tools/saipen.py`),
+   normative protocol documentation (`BOOT.md`, `STYLE.md`, `CORE.md`), and
+   execution machinery. The installed skill path (e.g.
+   `~/.config/opencode/skills/saipen` or `~/.gemini/...`) does NOT identify the
+   target project's `.saipen` directory.
 
-2. `project_lineage_identity` — a durable PORTABLE lineage stored canonically
-   in the tracked `.saipen/IDENTITY.md`. It survives directory moves, machine
-   replacement, Git clone and `saipen export`, and differs between unrelated
-   initialized projects (a random lineage id, so two no-git projects sharing a
-   folder name or two forks sharing a remote are still distinct). Journals,
-   evidence and recovery bind to THIS identity. Moving the carrier must not
-   change the meaning of the project.
+2. `portable_project_identity` (`project_lineage` from `.saipen/IDENTITY.md`)
+   A durable PORTABLE lineage stored canonically in `.saipen/IDENTITY.md`.
+   Survives directory moves, machine replacement, Git clone and `saipen export`,
+   and differs between unrelated initialized projects (a random lineage id).
+   Cold handoffs, receipts, and host session bindings bind to THIS identity.
+
+3. `local_working_tree_location` (`project_root`)
+   The machine-local path on disk containing the project working tree and
+   `.saipen/`. A detached handoff staging directory (e.g. `%TEMP%/...`) is
+   transport state, NOT the project working tree.
+   Locking and single-writer guarantees use `runtime_lock_identity`
+   (`os.path.realpath` + `normcase` of this root) to collapse path aliases.
 """
 
 from __future__ import annotations
@@ -68,9 +73,7 @@ def resolve_tool_root(loaded_skill_root: Path | str | None = None) -> Path:
     return Path(__file__).resolve().parent.parent.parent
 
 
-def resolve_tool_path(
-    name: str = "saipen.py", loaded_skill_root: Path | str | None = None
-) -> Path:
+def resolve_tool_path(name: str = "saipen.py", loaded_skill_root: Path | str | None = None) -> Path:
     """Resolve one engine tool from the loaded installation, safely."""
     if not re.fullmatch(r"[A-Za-z0-9_.-]+\.py", name):
         raise ValueError(f"invalid SAIPEN tool name: {name!r}")
@@ -160,10 +163,7 @@ def update_digest_regular_bytes(
     descriptor = os.open(path, flags)
     try:
         opened_before = os.fstat(descriptor)
-        if (
-            not stat.S_ISREG(opened_before.st_mode)
-            or identity(opened_before) != identity(expected)
-        ):
+        if not stat.S_ISREG(opened_before.st_mode) or identity(opened_before) != identity(expected):
             raise ValueError(f"authority node changed before open: {path}")
         total = 0
         while True:
@@ -434,40 +434,220 @@ def _nearest_checkpoint_root(start: Path) -> Path | None:
     return None
 
 
+ENV_PROJECT_ROOT = "SAIPEN_PROJECT_ROOT"
+ENV_PROJECT_LINEAGE = "SAIPEN_PROJECT_LINEAGE"
+#: Optional explicit actor/provenance carrier. It is a process environment
+#: value, not authentication. When absent, admission's canonical protocol
+#: snapshot inherits STATE.agent and still enforces ownership and protocol
+#: state. A host session id or other host metadata is never an actor.
+ENV_AGENT = "SAIPEN_AGENT"
+PROVENANCE_EXPLICIT = "explicit"
+PROVENANCE_HOST_SESSION = "host-session"
+PROVENANCE_GIT_WORKTREE = "git-worktree"
+PROVENANCE_GIT_COMMON = "git-common"
+PROVENANCE_ANCESTOR = "ancestor"
+
+
+class ResolvedProjectRoot(tuple):
+    """Result of project root resolution, preserving the 2-tuple (root, source) contract.
+
+    Unpacks as `(root, source)` for full backward compatibility, while exposing
+    structured fields: `root`, `source`, `provenance`, `code`, `detail`, `lineage`,
+    and `diagnostics()`.
+    """
+
+    def __new__(
+        cls,
+        root: Path | None,
+        source: str,
+        *,
+        code: str | None = None,
+        lineage: str | None = None,
+        context_kind: str | None = None,
+    ) -> ResolvedProjectRoot:
+        inst = super().__new__(cls, (root, source))
+        inst._code = code
+        inst._lineage = lineage
+        inst._context_kind = context_kind
+        return inst
+
+    @property
+    def ok(self) -> bool:
+        return self[0] is not None
+
+    @property
+    def root(self) -> Path | None:
+        return self[0]
+
+    @property
+    def source(self) -> str:
+        return self[1]
+
+    @property
+    def provenance(self) -> str:
+        return self[1]
+
+    @property
+    def detail(self) -> str:
+        return self[1]
+
+    @property
+    def reason(self) -> str:
+        return self[1]
+
+    @property
+    def code(self) -> str | None:
+        return getattr(self, "_code", None)
+
+    @property
+    def lineage(self) -> str | None:
+        return getattr(self, "_lineage", None)
+
+    @property
+    def context_kind(self) -> str | None:
+        return getattr(self, "_context_kind", None)
+
+    def diagnostics(self) -> dict[str, str | None]:
+        return {
+            "project_root": str(self.root) if self.root is not None else None,
+            "project_root_source": self.source,
+            "project_lineage": self.lineage,
+        }
+
+
+def format_binding_diagnostics(
+    resolved: ResolvedProjectRoot | tuple[Path | None, str],
+) -> str:
+    """Concise read-only diagnostic for operator/debug visibility."""
+    if isinstance(resolved, ResolvedProjectRoot):
+        root = resolved.root
+        source = resolved.source
+        lineage = resolved.lineage
+    else:
+        root, source = resolved
+        lineage = project_lineage_identity(root) if root is not None else None
+    lines = [
+        f"project_root: {root if root is not None else 'none'}",
+        f"project_root_source: {source}",
+        f"project_lineage: {lineage or 'none'}",
+    ]
+    return "\n".join(lines)
+
+
 def resolve_project_root(
-    start: Path | None = None, explicit: str | Path | None = None
-) -> tuple[Path | None, str]:
+    start: Path | None = None,
+    explicit: str | Path | None = None,
+    *,
+    host_root: str | Path | None = None,
+    host_lineage: str | None = None,
+    honor_environment: bool = True,
+) -> ResolvedProjectRoot:
     """Resolve the one root whose checkpoint files this run may touch.
 
-    Returns `(root, source)` on success and `(None, reason)` on refusal. It
-    refuses rather than creating a `.saipen/`: inventing a second checkpoint
-    directory is how a session's history silently forks.
-    """
-    start = (start or Path.cwd()).resolve()
+    Returns `ResolvedProjectRoot(root, provenance)` on success and
+    `ResolvedProjectRoot(None, reason, code=...)` on refusal.
 
+    Resolution precedence (T-1318 / Milestone 3):
+    1. Explicit --project-root
+    2. Verified host/session project-root carrier (SAIPEN_PROJECT_ROOT / SAIPEN_PROJECT_LINEAGE)
+    3. Git worktree
+    4. Git common/main worktree
+    5. Nearest ancestor .saipen
+    6. Refusal (fails closed)
+
+    Never scans arbitrary drives. Never infers a project by basename alone.
+    On host carrier error/mismatch, fails closed immediately without falling
+    back to ambient CWD or foreign repositories.
+    """
+    start = Path(start).resolve() if start is not None else Path.cwd().resolve()
+    expected_lineage = host_lineage
+    if expected_lineage is None and honor_environment:
+        expected_lineage = os.environ.get(ENV_PROJECT_LINEAGE, "").strip() or None
+
+    # 1. explicit --project-root
     if explicit is not None:
         root = Path(explicit).expanduser()
         if not root.is_absolute():
             root = start / root
         root = root.resolve()
         if not root.is_dir():
-            return None, f"explicit --project-root is not a directory: {root}"
+            return ResolvedProjectRoot(
+                None,
+                f"explicit --project-root is not a directory: {root}",
+                code="PROJECT_BINDING_INVALID",
+            )
         if not _valid_saipen_dir(root):
-            return None, f"explicit --project-root has no .saipen/ directory: {root}"
-        return root, "explicit"
+            return ResolvedProjectRoot(
+                None,
+                f"explicit --project-root has no .saipen/ directory: {root}",
+                code="PROJECT_BINDING_INVALID",
+            )
+        lineage = project_lineage_identity(root)
+        if expected_lineage is not None and lineage != expected_lineage:
+            return ResolvedProjectRoot(
+                None,
+                f"explicit project lineage {lineage!r} does not match "
+                f"expected {expected_lineage!r}: {root}",
+                code="PROJECT_LINEAGE_MISMATCH",
+                lineage=lineage,
+            )
+        return ResolvedProjectRoot(root, PROVENANCE_EXPLICIT, lineage=lineage)
 
-    rc, top_text = _git_from(start, "rev-parse", "--show-toplevel")
+    # 2. verified host/session project-root carrier
+    carrier_root = host_root
+    if carrier_root is None and honor_environment:
+        carrier_root = os.environ.get(ENV_PROJECT_ROOT, "").strip() or None
+    if carrier_root is not None:
+        candidate = Path(carrier_root).expanduser()
+        if not candidate.is_absolute():
+            candidate = start / candidate
+        candidate = candidate.resolve()
+        if not candidate.is_dir():
+            return ResolvedProjectRoot(
+                None,
+                f"{ENV_PROJECT_ROOT} is not an existing directory: {candidate}",
+                code="PROJECT_BINDING_INVALID",
+            )
+        if not _valid_saipen_dir(candidate):
+            return ResolvedProjectRoot(
+                None,
+                f"{ENV_PROJECT_ROOT} has no valid owned .saipen/ directory: {candidate}",
+                code="PROJECT_BINDING_INVALID",
+            )
+        lineage = project_lineage_identity(candidate)
+        if not lineage:
+            return ResolvedProjectRoot(
+                None,
+                f"{ENV_PROJECT_ROOT} has missing or invalid .saipen/IDENTITY.md: {candidate}",
+                code="PROJECT_BINDING_INVALID",
+            )
+        if expected_lineage is not None and lineage != expected_lineage:
+            return ResolvedProjectRoot(
+                None,
+                f"{ENV_PROJECT_ROOT} lineage {lineage!r} does not match "
+                f"expected {expected_lineage!r}: {candidate}",
+                code="PROJECT_LINEAGE_MISMATCH",
+                lineage=lineage,
+            )
+        return ResolvedProjectRoot(candidate, PROVENANCE_HOST_SESSION, lineage=lineage)
+
+    # 3. Git worktree & 4. Git common/main worktree
+    has_git = any((p / ".git").exists() for p in (start, *start.parents))
+    if has_git:
+        rc, top_text = _git_from(start, "rev-parse", "--show-toplevel")
+    else:
+        rc, top_text = 1, ""
     if rc == 0 and top_text:
         worktree_root = Path(top_text).resolve()
         common_rc, common_text = _git_from(start, "rev-parse", "--git-common-dir")
-        candidates: list[tuple[Path, str]] = [(worktree_root, "git-worktree")]
+        candidates: list[tuple[Path, str]] = [(worktree_root, PROVENANCE_GIT_WORKTREE)]
         if common_rc == 0 and common_text:
             common_dir = Path(common_text)
             if not common_dir.is_absolute():
                 common_dir = start / common_dir
             common_dir = common_dir.resolve()
             if common_dir.name.lower() == ".git":
-                candidates.append((common_dir.parent, "git-common"))
+                candidates.append((common_dir.parent, PROVENANCE_GIT_COMMON))
         seen: set[str] = set()
         for root, source in candidates:
             key = os.path.normcase(str(root))
@@ -475,21 +655,48 @@ def resolve_project_root(
                 continue
             seen.add(key)
             if _valid_saipen_dir(root):
-                return root, source
-        return None, (
+                lineage = project_lineage_identity(root)
+                if expected_lineage is not None and lineage != expected_lineage:
+                    return ResolvedProjectRoot(
+                        None,
+                        f"resolved {source} root lineage {lineage!r} does not match "
+                        f"expected {expected_lineage!r}: {root}",
+                        code="PROJECT_LINEAGE_MISMATCH",
+                        lineage=lineage,
+                    )
+                return ResolvedProjectRoot(root, source, lineage=lineage)
+        return ResolvedProjectRoot(
+            None,
             f"cwd belongs to Git worktree {worktree_root} but its "
             f"owning repository has no .saipen/; refusing to guess "
             f"or create a second .saipen/. Run from the intended "
-            f"project or pass --project-root PATH"
+            f"project or pass --project-root PATH",
+            code="NOT_SAIPEN_PROJECT",
+            context_kind="git-non-saipen",
         )
 
+    # 5. Nearest ancestor .saipen
     root = _nearest_checkpoint_root(start)
     if root is not None:
-        return root, "ancestor"
-    return None, (
+        lineage = project_lineage_identity(root)
+        if expected_lineage is not None and lineage != expected_lineage:
+            return ResolvedProjectRoot(
+                None,
+                f"resolved ancestor root lineage {lineage!r} does not match "
+                f"expected {expected_lineage!r}: {root}",
+                code="PROJECT_LINEAGE_MISMATCH",
+                lineage=lineage,
+            )
+        return ResolvedProjectRoot(root, PROVENANCE_ANCESTOR, lineage=lineage)
+
+    # 6. Refusal
+    return ResolvedProjectRoot(
+        None,
         "cwd has no owning .saipen/; refusing to guess or create "
         "one. Run from the intended project or pass "
-        "--project-root PATH"
+        "--project-root PATH",
+        code="NOT_SAIPEN_PROJECT",
+        context_kind="detached",
     )
 
 
@@ -664,3 +871,11 @@ class ProjectPaths:
     @property
     def recovery_ops(self) -> Path:
         return self.saipen / RECOVERY_OPS_DIR
+
+
+if __name__ == "__main__":
+    import sys
+
+    _resolved = resolve_project_root()
+    print(format_binding_diagnostics(_resolved))
+    sys.exit(0 if _resolved.root is not None else 1)

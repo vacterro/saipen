@@ -1167,7 +1167,7 @@ def consume_layer(root: Path | str, rel: str, agent: str, *, dry_run: bool = Fal
         "RUN",
         gate.get("linked_work"),
         agent,
-        operations._fold_handover(state, agent, _closure_message(gate)),
+        operations._actor_provenance(state, agent, _closure_message(gate)),
         now,
         op_id,
     )

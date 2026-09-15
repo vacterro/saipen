@@ -1,0 +1,5 @@
+{
+  "classification": "HARNESS_INVALID",
+  "reason": "saipen_home absent; cold_route.phase_module was null",
+  "process_interrupted_before matrix completion": true
+}

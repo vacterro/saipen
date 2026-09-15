@@ -60,8 +60,22 @@ examples and rationale remain traceable without becoming fake requirements.
 Every actionable clause carries disposition, linked Work, evidence and
 verification. `IMPLEMENTED`/`VERIFIED` require both evidence and verification;
 other terminal dispositions require evidence. `BLOCKED`, `DEFERRED` and
-`UNKNOWN` are not terminal. Parent Work cannot reach DONE and SHIP cannot pass
-while linked active source integrity, contract provenance or coverage is red.
+`UNKNOWN` are not terminal. `DEFERRED` means work was postponed by choice; it
+can never waive closure. A failed required validation stays nonterminal
+`BLOCKED` with the failure evidence. `NOT_APPLICABLE` is terminal only when the
+clause genuinely does not apply.
+
+`UNAVAILABLE_ENVIRONMENT` is terminal only for a clause normalized in advance
+with structured `when_environment: <host>` conditionality. Setting it requires
+the same host identity plus a successful read-only registry probe proving every
+declared runtime command and host home absent. A present command/home, an
+unregistered host, a clause without that conditional, or a hand-written proof
+refuses; an agent cannot retrofit environmental optionality onto unfinished
+work. An unconditional external requirement that cannot run is `BLOCKED` in
+source coverage and `BLOCKED_EXTERNAL` at Work lifecycle level.
+
+Parent Work cannot reach DONE and SHIP cannot pass while linked active source
+integrity, contract provenance or coverage is red.
 
 The original body, contract and coverage are reread/checked at intake,
 implementation entry, review convergence, Work DONE, source closure and ship
@@ -86,8 +100,8 @@ only when a real receipt was committed.
 
 - `saipen source capture --file SPEC [--kind KIND] [--work T-N] [--amends SRC-N]`
 - `saipen source status SRC-N` / `show SRC-N` / `recover`
-- `saipen source req SRC-N RNNN CLASS TEXT`
-- `saipen source disp SRC-N RNNN STATUS --evidence REF [--verification REF]`
+- `saipen source req SRC-N RNNN CLASS [--when-environment HOST] TEXT`
+- `saipen source disp SRC-N RNNN STATUS --evidence REF [--verification REF] [--environment HOST]`
 - `saipen source close SRC-N` / `archive SRC-N`
 - `saipen source purge SRC-N --confirm`
 

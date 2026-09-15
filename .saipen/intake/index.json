@@ -8,12 +8,72 @@
       "linked_work": null,
       "source_sha256": "504306b4cf43ed1622e96909fec7f233bee124a718c99b42c3a530a2039c4a13"
     },
-    "SRC-025": {
-      "linked_work": "T-1298",
-      "source_sha256": "27efc70fdac11489d24b336758fe1adef00de6bb6144517276f127e17ced68ef"
+    "SRC-026": {
+      "linked_work": "T-1304",
+      "source_sha256": "a3e683b3247f15098436bd9cc3431223308a6c0ae7088ea73dc1113b02ab0cca"
+    },
+    "SRC-027": {
+      "linked_work": "T-1316",
+      "source_sha256": "3d7cb9f56b9e0c363735e70397cf7e923387f6ab029c154612f87b73440f1444"
+    },
+    "SRC-028": {
+      "linked_work": "T-1317",
+      "source_sha256": "77bdefd1848e99de604ffb93c8c4458be4d6227f8ad444646f9b89ed30ffe196"
+    },
+    "SRC-029": {
+      "linked_work": "T-1317",
+      "source_sha256": "78863db5d7ab7b63de1c2d6a514e046449044f929b7402f8e5a24315ac2d2861"
+    },
+    "SRC-030": {
+      "linked_work": "T-1317",
+      "source_sha256": "8463721a55720e0b9dbe2dde3831b0a74138c5213117e043e70eb9189a420119"
+    },
+    "SRC-031": {
+      "linked_work": "T-1317",
+      "source_sha256": "c88029e2b54b8d31b755686f2ec8f00429ced01f962198df45aab2a826469c14"
+    },
+    "SRC-032": {
+      "linked_work": "T-1317",
+      "source_sha256": "e2cd044681f15e97e6ffda4fecd5e645593ae59a9038bdefd7c526b4d5b6bed9"
+    },
+    "SRC-033": {
+      "linked_work": "T-1317",
+      "source_sha256": "54eca8f1d333fbf4bdafca20f1d681ad68122f626160d8cbd12b6cc3067e5e77"
+    },
+    "SRC-034": {
+      "linked_work": "T-1317",
+      "source_sha256": "1bc411eb4f8babd52a73ef7eb27cf2371876a41cb7f6d5e383f8d23cccdc85d5"
+    },
+    "SRC-035": {
+      "linked_work": "T-1317",
+      "source_sha256": "10d9b373453c4fba3837e5ff23ac892626e149c314ca687fec1fbd61830c7f49"
+    },
+    "SRC-036": {
+      "linked_work": "T-1320",
+      "source_sha256": "5d3ef5467e40427175a373250fb5d4aa931305eec32ee3c91761c401006494b5"
+    },
+    "SRC-037": {
+      "linked_work": "T-1320",
+      "source_sha256": "b1393000bdf7f0b78d4e0ce970505b948059224c48d16b75fc3d14855db3656d"
+    },
+    "SRC-039": {
+      "linked_work": null,
+      "source_sha256": "34d25941c910436dfc4d23ad9a21291f2a08bf7ca54c82fa8e53a53610ce2872"
+    },
+    "SRC-040": {
+      "linked_work": "T-1324",
+      "source_sha256": "ec9066bafe79214f9dfbd661d3f87159117066c4a3f69f223968fa4a0712fe3b"
+    },
+    "SRC-042": {
+      "linked_work": null,
+      "source_sha256": "5fc82e2bf36e37038c6e5bcd109866cd2c0569fda5df3fb5c34c5b0915c6282c"
+    },
+    "SRC-043": {
+      "linked_work": null,
+      "source_sha256": "c352fc7a51fc8f59e7f5897264a053638c7d817bcb89eec5cef48d007c0867ca"
     }
   },
-  "next_id": 26,
+  "next_id": 44,
   "schema_version": 1,
   "tombstones": {
     "SRC-001": {
@@ -299,6 +359,45 @@
       "requirements": 6,
       "schema_version": 1,
       "source_sha256": "29382825df1167091bc5ca10c1983b5b3a4da608f6ddf28bdb247cf752b6be8c",
+      "status": "CLOSED",
+      "unresolved": 0
+    },
+    "SRC-025": {
+      "actionable": 13,
+      "archive_ref": ".saipen/archive/source/SRC-025.md",
+      "closed_at": "2026-09-09T00:40:09Z",
+      "closure_event": null,
+      "linked_work": "T-1298",
+      "receipt_id": "SRC-025",
+      "requirements": 13,
+      "schema_version": 1,
+      "source_sha256": "27efc70fdac11489d24b336758fe1adef00de6bb6144517276f127e17ced68ef",
+      "status": "CLOSED",
+      "unresolved": 0
+    },
+    "SRC-038": {
+      "actionable": 27,
+      "archive_ref": ".saipen/archive/source/SRC-038.md",
+      "closed_at": "2026-09-13T20:55:15Z",
+      "closure_event": null,
+      "linked_work": "T-1322",
+      "receipt_id": "SRC-038",
+      "requirements": 27,
+      "schema_version": 1,
+      "source_sha256": "4f25fa12ec117ef41687550f181d829f2b679ff71a51e02fa1ab51d5ca3bbb7d",
+      "status": "CLOSED",
+      "unresolved": 0
+    },
+    "SRC-041": {
+      "actionable": 12,
+      "archive_ref": ".saipen/archive/source/SRC-041.md",
+      "closed_at": "2026-09-13T23:05:42Z",
+      "closure_event": null,
+      "linked_work": "T-1325",
+      "receipt_id": "SRC-041",
+      "requirements": 12,
+      "schema_version": 1,
+      "source_sha256": "ffadc172a9896c5657bb40b8cd531399c215f7c80d3ed31717cf00f931d119f4",
       "status": "CLOSED",
       "unresolved": 0
     }

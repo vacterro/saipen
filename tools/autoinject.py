@@ -47,14 +47,55 @@ from saipen_engine.manifest import (
 HOME = Path(__file__).resolve().parent.parent
 STAMP = ".saipen_injected"
 
+_REGISTRY_PATH = HOME / "extensions" / "adapters" / "registry.json"
+ACTIVATION_TEMPLATE = "saipen/ACTIVATION_BLOCK.md"
+
+
+def load_adapter_registry() -> dict:
+    """The one declarative host adapter authority (SRC-028:R008).
+
+    Distribution targets, freshness surfaces and enforcement capability are
+    registry data, never a handwritten list in this module.
+    """
+    try:
+        registry = json.loads(_REGISTRY_PATH.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        raise RuntimeError(f"cannot read adapter registry {_REGISTRY_PATH}: {exc}") from exc
+    if not isinstance(registry.get("adapters"), list) or not registry["adapters"]:
+        raise RuntimeError(f"adapter registry has no adapters: {_REGISTRY_PATH}")
+    return registry
+
+
+def _expand_home(surface: str) -> Path:
+    return Path(surface).expanduser()
+
+
+def registry_home_adapters() -> dict[str, dict]:
+    """Map each installed home path (string) to its declaring adapter entry."""
+    mapping: dict[str, dict] = {}
+    for adapter in load_adapter_registry()["adapters"]:
+        for surface in adapter.get("skill_surfaces") or []:
+            mapping[str(_expand_home(surface).resolve())] = adapter
+    return mapping
+
+
+def registry_targets() -> list[Path]:
+    """Installed skill homes, derived from the registry skill surfaces."""
+    seen: dict[str, Path] = {}
+    for adapter in load_adapter_registry()["adapters"]:
+        for surface in adapter.get("skill_surfaces") or []:
+            path = _expand_home(surface)
+            seen.setdefault(str(path.resolve()), path)
+    return list(seen.values())
+
+
 # Where the injector installs. Absence is normal -- an agent home that is not
-# installed on this machine is skipped, never created.
-TARGETS = [
-    Path.home() / ".claude" / "skills" / "saipen",
-    Path.home() / ".config" / "opencode" / "skills" / "saipen",
-    Path.home() / ".codex" / "skills" / "saipen",
-    Path.home() / ".agents" / "skills" / "saipen",
-]
+# installed on this machine is skipped, never created. Derived from the
+# adapter registry; the old four-entry handwritten list is gone.
+TARGETS = registry_targets()
+
+# Ordered home -> adapter lookup for freshness reporting.
+_HOME_ADAPTERS = registry_home_adapters()
 
 # How many divergent files `--check` names before it stops. Enough to see the
 # shape of a drift, few enough that a never-installed home does not print two
@@ -256,8 +297,10 @@ def _source_head() -> str | None:
     return out.strip() if rc == 0 and out.strip() else None
 
 
-def _run(cmd: list[str], cwd: Path = HOME) -> tuple[int, str]:
+def _run(cmd: list[str], cwd: Path = HOME, env: dict | None = None) -> tuple[int, str]:
     kwargs = dict(capture_output=True, text=True, errors="replace", timeout=300)
+    if env is not None:
+        kwargs["env"] = env
     if os.name == "nt":
         kwargs["creationflags"] = subprocess.CREATE_NO_WINDOW
     try:
@@ -279,7 +322,9 @@ def inject() -> tuple[bool, str]:
         ]
     else:
         cmd = ["bash", str(HOME / "bootstrap" / "inject.sh")]
-    rc, out = _run(cmd)
+    # The installer renders the installed launcher with the SELECTED Python;
+    # hand it the interpreter running this runner.
+    rc, out = _run(cmd, env={**os.environ, "SAIPEN_PYTHON": sys.executable})
     return rc == 0, "\n".join(out.splitlines()[-12:])
 
 
@@ -409,6 +454,161 @@ def last_inject_run(log: Path | None = None) -> dict | None:
     return run
 
 
+# ---------------------------------------------------------------------------
+# Surface freshness from the adapter registry (SRC-030 Part 12)
+# ---------------------------------------------------------------------------
+#
+# A stamp alone proves the SKILL copy. A declared surface that IS installed
+# must also be current; an installed-but-unobservable surface is UNKNOWN and
+# never reads as fresh.
+
+
+def activation_template_path() -> Path:
+    """The canonical activation template for THIS home, layout-aware.
+
+    The registry names the template by its SOURCE-relative path
+    (`saipen/ACTIVATION_BLOCK.md`). In the repository clone that path exists
+    verbatim; in an installed agent home the injector has already stripped the
+    leading `saipen/` component (see `installed_relpath`), so the same relative
+    string resolved naively points at `<home>/saipen/ACTIVATION_BLOCK.md` --
+    which never exists -- and every distribution/instruction report on an
+    installed home failed with FileNotFoundError (T-1323). Resolve through the
+    one owner: verbatim when present, else the installed landing path.
+    """
+    registry = load_adapter_registry()
+    relative = registry.get("activation_template") or ACTIVATION_TEMPLATE
+    source = HOME / relative
+    if source.is_file():
+        return source
+    landed = HOME / installed_relpath(relative)
+    return landed if landed.is_file() else source
+
+
+def activation_parity(target: Path) -> dict:
+    """Deterministic source -> installed mapping proof for the template.
+
+    Proves the chain the release certification depends on: the manifest names
+    the template, it resolves to bytes in THIS home, the injector maps it to
+    `installed_relpath`, and the installed bytes in `target` equal the source
+    bytes. Any missing leg is reported with its exact path -- never a silent
+    pass.
+    """
+    source = activation_template_path()
+    if not source.is_file():
+        return {"ok": False, "code": "SOURCE_MISSING", "source": str(source)}
+    relative = (load_adapter_registry().get("activation_template") or ACTIVATION_TEMPLATE)
+    landed = Path(target) / installed_relpath(relative)
+    if not landed.is_file():
+        return {
+            "ok": False,
+            "code": "INSTALLED_MISSING",
+            "source": str(source),
+            "installed": str(landed),
+        }
+    if _content_bytes(source) != _content_bytes(landed):
+        return {
+            "ok": False,
+            "code": "INSTALLED_DRIFT",
+            "source": str(source),
+            "installed": str(landed),
+        }
+    return {
+        "ok": True,
+        "code": "ACTIVATION_PARITY",
+        "source": str(source),
+        "installed": str(landed),
+    }
+
+
+def rendered_activation_block(skill_install_dir: Path) -> str:
+    """The canonical block as the injector would install it for this home."""
+    template = activation_template_path().read_text(encoding="utf-8")
+    return template.replace("{{SAIPEN_HOME}}", str(skill_install_dir))
+
+
+def _extract_block(text: str) -> str | None:
+    match = re.search(r"<!-- SAIPEN:BEGIN -->.*?<!-- SAIPEN:END -->", text, re.DOTALL)
+    if not match:
+        return None
+    return match.group(0).replace("\r\n", "\n").strip()
+
+
+def instruction_status(adapter: dict, skill_install_dir: Path) -> str:
+    """current | stale | absent for the always-on instruction block."""
+    expected = _extract_block(rendered_activation_block(skill_install_dir))
+    for surface in adapter.get("instruction_surfaces") or []:
+        path = _expand_home(surface)
+        if not path.is_file():
+            continue
+        try:
+            installed = _extract_block(_content_bytes(path).decode("utf-8", errors="replace"))
+        except OSError:
+            return "unknown"
+        if installed is None:
+            return "stale"
+        if expected is not None and installed == expected.replace("\r\n", "\n").strip():
+            return "current"
+        return "stale"
+    return "absent"
+
+
+def hook_status(adapter: dict) -> str:
+    """current | stale | absent | unknown for the installed blocking hook.
+
+    A registry-declared LEGACY surface that still holds a copy of the artifact
+    reads STALE: the supported OpenCode runtime discovers both the singular
+    `plugin/` and the plural `plugins/` global plugin directories, so a stale
+    copy there would load the same guard hook twice. Capability truth is not
+    enough -- a duplicate load is not fresh.
+    """
+    surface = adapter.get("hook_install_surface")
+    artifact = adapter.get("hook_artifact")
+    for legacy in adapter.get("legacy_hook_surfaces") or []:
+        if isinstance(legacy, str) and legacy and _expand_home(legacy).is_file():
+            return "stale"
+    if not surface or not artifact:
+        return "absent"
+    installed_path = _expand_home(surface)
+    if not installed_path.is_file():
+        return "absent"
+    if adapter.get("hook_installer"):
+        from install_host_guard import install
+
+        try:
+            status = install(adapter["id"], _expand_home("~"), HOME, check=True)
+        except (OSError, ValueError, KeyError):
+            return "unknown"
+        return "current" if status["current"] else "stale"
+    try:
+        installed = _content_bytes(installed_path)
+        shipped = _content_bytes(HOME / artifact)
+    except OSError:
+        # Installed but unobservable is UNKNOWN, never fresh (SRC-030 Part 12).
+        return "unknown"
+    return "current" if installed == shipped else "stale"
+
+
+def home_surface_status(target: Path) -> dict:
+    """Per-declared-surface freshness for one installed home."""
+    adapter = _HOME_ADAPTERS.get(str(target.resolve()))
+    if adapter is None:
+        return {"adapter": None, "surfaces": {}, "ok": True}
+    surfaces: dict[str, str] = {}
+    # The skill copy's freshness is the stamp comparison already reported;
+    # declared non-skill surfaces are checked here.
+    if "instruction" in (adapter.get("freshness_surfaces") or []):
+        surfaces["instruction"] = instruction_status(adapter, target)
+    if "hook" in (adapter.get("freshness_surfaces") or []):
+        surfaces["hook"] = hook_status(adapter)
+    problems = [name for name, state in surfaces.items() if state in ("stale", "unknown")]
+    return {
+        "adapter": adapter.get("id"),
+        "surfaces": surfaces,
+        "ok": not problems,
+        "problems": problems,
+    }
+
+
 def distribution_report(source_head: str | None = None) -> dict:
     """Read-only answer to: do the installed agent homes run current SAIPEN?
 
@@ -426,13 +626,17 @@ def distribution_report(source_head: str | None = None) -> dict:
         name = next((p for p in target.parts if p.startswith(".")), str(target))
         record = read_stamp(target) or {}
         carried = record.get("source_head")
+        surface = home_surface_status(target)
         homes.append(
             {
                 "home": name,
+                "adapter": surface["adapter"],
                 "source_head": carried,
                 "installed_at": record.get("installed_at"),
-                "stale": bool(head) and carried != head,
+                "stale": (bool(head) and carried != head) or not surface["ok"],
                 "unknown": not carried,
+                "surfaces": surface["surfaces"],
+                "surface_problems": surface.get("problems", []),
             }
         )
     heads = [h for h in (item["source_head"] for item in homes) if h]
@@ -448,12 +652,16 @@ def distribution_report(source_head: str | None = None) -> dict:
     if run is not None and (run.get("skip") or (run.get("rc") not in (0, None))):
         blocked = run.get("skip") or f"rc={run.get('rc')}"
     stale = [item["home"] for item in homes if item["stale"]]
+    surface_unknown = len(
+        [item for item in homes if any(s == "unknown" for s in item["surfaces"].values())]
+    )
     return {
         "source_head": head,
         "installed": len(homes),
         "stale": len(stale),
         "stale_homes": stale,
         "unknown": len([item for item in homes if item["unknown"]]),
+        "surface_unknown": surface_unknown,
         "newest_installed_head": newest,
         "homes": homes,
         "blocked": blocked,
@@ -463,7 +671,9 @@ def distribution_report(source_head: str | None = None) -> dict:
         # AC-04: a fully current set is a POSITIVE answer, not an empty
         # section. "Nothing printed" and "everything is current" have to be
         # distinguishable or the report is only trustworthy when it complains.
-        "fresh": bool(homes) and not stale and not blocked,
+        # SRC-030 Part 12: an installed-but-unobservable surface is UNKNOWN,
+        # so a home can read stale with a perfectly current stamp.
+        "fresh": bool(homes) and not stale and not blocked and surface_unknown == 0,
     }
 
 

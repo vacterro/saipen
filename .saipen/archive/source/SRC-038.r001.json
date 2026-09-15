@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-038:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Determine whether parked_work is a known field emitted by an older SAIPEN generation."
+    }
+  },
+  "derived_at": "2026-09-13T20:35:30Z",
+  "derived_from": "SRC-038",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "4f25fa12ec117ef41687550f181d829f2b679ff71a51e02fa1ab51d5ca3bbb7d"
+}

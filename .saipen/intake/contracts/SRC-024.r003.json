@@ -1,0 +1,24 @@
+{
+  "clauses": {
+    "SRC-024:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Shortcut migration contract: st routes EXACTLY to saipen stop (same implementation path, no second STOP implementation); sss remains EXACTLY saipen status; saipen stop and saipen status long-form semantics unchanged --verification REGISTRY.json shortcuts row ss->stop becomes st->stop; dispatch tuple stop/ss becomes stop/st; COMMANDS.md/SKILL.md updated"
+    },
+    "SRC-024:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Retired ss tombstone: ss MUST NOT execute STOP, MUST NOT execute STATUS, MUST NOT alias anywhere; it returns a deterministic non-mutating retired-shortcut refusal naming st=stop and sss=status, fail-closed with non-success exit; zero project bytes written --verification test proves ss reaches neither stop nor status implementation, tree-digest unchanged, migration guidance emitted"
+    },
+    "SRC-024:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Cyrillic safety: codepoint normalization table unchanged; Cyrillic \u0441\u0441 remains Latin cc (continue) and NEVER normalizes to ss, st, or stop; no Cyrillic twin is introduced for st; regression proves no normalization resurrects the retired ss route --verification existing CYRILLIC_CONFUSABLES map untouched (no fold target for s or t beyond declared); test asserts \u0441\u0441->cc and Cyrillic twins of ss/st cannot exist"
+    }
+  },
+  "derived_at": "2026-09-06T18:40:55Z",
+  "derived_from": "SRC-024",
+  "interpretation_revision": 3,
+  "schema_version": 1,
+  "source_sha256": "29382825df1167091bc5ca10c1983b5b3a4da608f6ddf28bdb247cf752b6be8c"
+}

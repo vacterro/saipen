@@ -1,0 +1,41 @@
+{
+  "requirements": {
+    "SRC-037:R001": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/T-1320-fleet-acceptance.md#historical-ownership",
+      "text": "A later-ticket OpenCode smoke must not overwrite durable evidence owned by an earlier ticket.",
+      "verification": "7 host and ownership tests PASS with unchanged T-1317 hashes",
+      "work": "T-1320"
+    },
+    "SRC-037:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "NOT_APPLICABLE",
+      "evidence": ".saipen/evidence/T-1317-opencode-native-smoke/OWNERSHIP-NOTICE.md",
+      "text": "Preserve original T-1317 native-smoke evidence if recoverable from archive or Git history.",
+      "verification": null,
+      "work": "T-1320"
+    },
+    "SRC-037:R003": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/T-1320-opencode-native-smoke/T-1320-opencode-fleet-recovery-20260913.2-05b7e3ceaa4144a988761a8d8a554e6a/native-smoke-proof.json",
+      "text": "Fresh OpenCode proof is retained under correct T-1320 evidence ownership.",
+      "verification": "fresh host smoke 7 PASS and source installed loaded hash equal",
+      "work": "T-1320"
+    },
+    "SRC-037:R004": {
+      "actionable": true,
+      "class": "non-goal",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/T-1320-fleet-acceptance.md#AC-01..AC-12",
+      "text": "Do not begin Production Hardening in this session.",
+      "verification": "No Production Hardening command or ticket was started",
+      "work": "T-1320"
+    }
+  },
+  "schema_version": 1
+}

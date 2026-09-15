@@ -1,0 +1,26 @@
+{
+  "schema_version": 1,
+  "producer": "t1318-current-generation-probe",
+  "ticket": "T-1318",
+  "acceptance": "AC-05",
+  "verdict": "PASS",
+  "requested_model": "sairoute/SAIOPP",
+  "guard_build": "T-1319-opencode-continue-entry-20260913.7",
+  "retained": [
+    {
+      "path": "proof-20260913T161742Z.json",
+      "bytes": 3321,
+      "sha256": "17ae4aaf71af86c98addb0a1393999e70e4d3253a790fe8af51a774e87aff147"
+    },
+    {
+      "path": "raw-20260913T161742Z.jsonl",
+      "bytes": 6882,
+      "sha256": "c686a90600544f0fb7d42e3aae31340d18d86248a4ab1be0d7d8bc80e53be374"
+    },
+    {
+      "path": "startup-20260913T161742Z.jsonl",
+      "bytes": 989,
+      "sha256": "1dd6b10d9af0de9b1fa2e9e72746228ad7b5b44abbb3c1dbbb6bb18d0855d0be"
+    }
+  ]
+}

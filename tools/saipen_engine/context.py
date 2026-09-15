@@ -793,6 +793,9 @@ def context_audit(project_root: Path | str) -> Result:
         "log_tail_event": inputs["log_tail"],
         "recovery_pending": pending,
     }
+    from .cold_truth import generated_handoff_provenance
+
+    audit["provenance"] = generated_handoff_provenance(root, inputs["state"])
     return Result(ok=True, code="CONTEXT_AUDIT", data=audit)
 
 
@@ -953,21 +956,25 @@ def brief_projection(project_root: Path | str) -> Result:
             view["stop_reason"] = None
         return view
 
-    blockers: list[str] = []
+    blockers_all: list[str] = []
     state_blocker = str(state.get("blocker") or "").strip()
     if state_blocker and state_blocker.lower() not in ("none", ""):
-        blockers.append(f"STATE: {state_blocker}")
+        blockers_all.append(f"STATE: {state_blocker}")
     for ticket in board["tickets"].values():
         if ticket["section"] == "## BLOCKED":
             b = ticket["fields"].get("blocker") or ""
-            blockers.append(f"{ticket['id']}: {b}".strip())
+            blockers_all.append(f"{ticket['id']}: {b}".strip())
+    blockers = [item[:200] for item in blockers_all[:8]]
+    blockers_omitted = max(0, len(blockers_all) - len(blockers))
 
-    unknowns: list[str] = []
+    unknowns_all: list[str] = []
     for rec in reversed(ordered):
         if work_id and rec["ticket"] != work_id:
             continue
         if rec.get("unknown"):
-            unknowns.append(f"{rec['id']}: {rec['unknown']}")
+            unknowns_all.append(f"{rec['id']}: {rec['unknown']}")
+    unknowns = [item[:200] for item in unknowns_all[:8]]
+    unknowns_omitted = max(0, len(unknowns_all) - len(unknowns))
 
     tail = inputs["log_tail"]
     context_refs = [".saipen/STATE.md", ".saipen/BOARD.md"]
@@ -990,13 +997,22 @@ def brief_projection(project_root: Path | str) -> Result:
     if source_receipts:
         source_meta = {
             "active": len(source_receipts),
-            "receipts": source_receipts,
+            "receipts": source_receipts[:8],
+            "omitted": max(0, len(source_receipts) - 8),
             "load": "saipen source show <SRC-ID> --json",
         }
         context_refs.append("active SOURCE RECEIPTS (original reread required)")
 
+    from .paths import project_lineage_identity
+    from .cold_truth import generated_handoff_provenance
+
+    project_lineage = project_lineage_identity(root)
+
+    handoff_provenance = generated_handoff_provenance(root, state)
     payload = {
         "project": root.name,
+        "project_identity": handoff_provenance["project_identity"],
+        "project_lineage": project_lineage,
         "phase": state.get("phase"),
         "work_id": work_id or "none",
         "objective": objective,
@@ -1004,15 +1020,20 @@ def brief_projection(project_root: Path | str) -> Result:
         "previous_attempt": _attempt_view(previous),
         "previous_stop": previous["stop"] if previous else None,
         "blockers": blockers,
+        "blockers_omitted": blockers_omitted,
         "context": context_refs,
         "unknowns": unknowns,
+        "unknowns_omitted": unknowns_omitted,
         "next_action": state.get("next_action"),
         "userperson": userperson_meta,
         "source_receipts": source_meta,
-        "provenance": {
-            "state_updated": state.get("updated"),
-            "last_event": state.get("last_event"),
-        },
+        "last_event": state.get("last_event"),
+        "state_updated": state.get("updated"),
+        "based_on_event": handoff_provenance["based_on_event"],
+        "generated_at": handoff_provenance["generated_at"],
+        "runtime_generation": handoff_provenance["runtime_generation"],
+        "implementation_checkpoint": handoff_provenance["implementation_checkpoint"],
+        "provenance": handoff_provenance,
     }
 
     def _or_none(value):
@@ -1020,6 +1041,7 @@ def brief_projection(project_root: Path | str) -> Result:
 
     lines = [
         f"PROJECT: {payload['project']}",
+        f"LINEAGE: {_or_none(payload['project_lineage'])}",
         f"PHASE: {_or_none(payload['phase'])}",
         f"WORK: {payload['work_id']}",
         f"OBJECTIVE: {_or_none(payload['objective'])}",
@@ -1039,7 +1061,10 @@ def brief_projection(project_root: Path | str) -> Result:
     lines.append(
         f"PREVIOUS_STOP: {payload['previous_stop'] or 'none'}"
     )
-    lines.append(f"BLOCKERS: {'; '.join(blockers) if blockers else 'none'}")
+    blocker_line = "; ".join(blockers) if blockers else "none"
+    if blockers_omitted:
+        blocker_line += f"; +{blockers_omitted} more"
+    lines.append(f"BLOCKERS: {blocker_line}")
     if userperson_meta is not None:
         lines.append(
             "USERPERSON: active "
@@ -1049,7 +1074,8 @@ def brief_projection(project_root: Path | str) -> Result:
     if source_meta is not None:
         lines.append(
             "SOURCE_RECEIPTS: active "
-            + ", ".join(item["receipt"] for item in source_receipts)
+            + ", ".join(item["receipt"] for item in source_meta["receipts"])
+            + (f", +{source_meta['omitted']} more" if source_meta["omitted"] else "")
             + " (load: saipen source show <SRC-ID> --json)"
         )
     lines.append("")
@@ -1061,6 +1087,8 @@ def brief_projection(project_root: Path | str) -> Result:
     if unknowns:
         for item in unknowns:
             lines.append(f"- {item}")
+        if unknowns_omitted:
+            lines.append(f"- +{unknowns_omitted} more")
     else:
         lines.append("- none recorded")
     lines.append("")

@@ -2775,7 +2775,12 @@ def sub_pause(
     actor = agent or "saipen-cli"
     targets.extend(
         _sub_trace_targets(
-            name, "pause", f"paused by main agent (from {st.get('phase')})", log_raw, agent=actor
+            root,
+            name,
+            "pause",
+            f"paused by main agent (from {st.get('phase')})",
+            log_raw,
+            agent=actor,
         )
     )
     lifecycle_reads = _lifecycle_read_preconditions(
@@ -2896,7 +2901,9 @@ def sub_resume(
     log_raw = _read_bytes_maybe(root / log_rel)
     actor = agent or "saipen-cli"
     targets.extend(
-        _sub_trace_targets(name, "resume", f"resumed to {prior_phase}", log_raw, agent=actor)
+        _sub_trace_targets(
+            root, name, "resume", f"resumed to {prior_phase}", log_raw, agent=actor
+        )
     )
     lifecycle_reads = _lifecycle_read_preconditions(
         root, name, manifest_raw, st.get("saipen_home") or ""
@@ -2939,29 +2946,61 @@ def sub_resume(
     )
 
 
+def _target_dict(plan) -> dict:
+    """The journal TARGET SHAPE for one prepared write target.
+
+    T-1326 P0: a prepared LOG detail artifact is a `TargetPlan`, while the
+    sub-lifecycle planners commit plain target dicts -- so the ONE conversion
+    lives here instead of at each producer.
+    """
+    return {
+        "path": plan.path,
+        "role": plan.role,
+        "content": plan.content,
+        "before_hash": plan.before_hash,
+        "after_hash": plan.after_hash,
+    }
+
+
 def _sub_trace_targets(
-    name: str, action: str, message: str, log_raw: bytes | None, agent: str = "saipen-cli"
+    root: Path,
+    name: str,
+    action: str,
+    message: str,
+    log_raw: bytes | None,
+    agent: str = "saipen-cli",
 ) -> list[dict]:
-    """One trace line appended to the sub's own LOG (PROTOCOL traceability)."""
+    """One trace line appended to the sub's own LOG (PROTOCOL traceability).
+
+    T-1326 P0: the trace message carries caller-supplied text, so this producer
+    goes through the ONE shared bounded LOG builder. An oversized trace is
+    externalized losslessly into the same journaled commit -- never truncated
+    and never a hard refusal of the lifecycle verb that produced it.
+    """
+    from .log import log_tail_event, prepare_bounded_event
+
     log_rel = f"{SUBS_REL}/{name}/LOG.md"
     text = _decode_captured(log_raw, log_rel)
-    from .log import log_tail_event
-
     tail = log_tail_event(text)
-    from .log import build_event
-
-    _event, line = build_event(
-        tail, "DEC", f"main agent {action}: {message}", ticket=None, agent=agent, now=_now()
+    _event, line, detail_targets = prepare_bounded_event(
+        root,
+        tail,
+        "DEC",
+        f"main agent {action}: {message}",
+        ticket=None,
+        agent=agent,
+        now=_now(),
     )
     new_log = (text.rstrip("\n") + "\n" + line + "\n") if text else ("# Log\n\n" + line + "\n")
     return [
+        *(_target_dict(plan) for plan in detail_targets),
         {
             "path": log_rel,
             "role": "log",
             "content": new_log.encode("utf-8"),
             "before_hash": _captured_hash(log_raw),
             "after_hash": hash_bytes(new_log.encode("utf-8")),
-        }
+        },
     ]
 
 
@@ -3611,7 +3650,7 @@ def sub_collect(
     """
     from .board import escape_ticket_description, parse_board
     from .fast_check import validate_texts
-    from .log import build_event, log_tail_event
+    from .log import log_tail_event, prepare_bounded_event
     from .operations import next_ticket_id
 
     root = Path(project_root)
@@ -3913,7 +3952,8 @@ def sub_collect(
         # hardcoded CLI identity and never the evidence producer. The producer
         # identity is structured provenance in the ticket/receipt, not the LOG
         # writer's identity.
-        event, log_line = build_event(
+        event, log_line, log_detail_targets = prepare_bounded_event(
+            root,
             tail,
             "RUN",
             f"collect {producer}/{package.package_id} -> {ticket}; "
@@ -3957,6 +3997,10 @@ def sub_collect(
         )
 
     targets = [
+        # T-1326 P0: any externalized LOG detail is part of the SAME journaled
+        # commit as LOG/STATE/BOARD/MANIFEST -- a compact `detail_ref` may never
+        # name bytes this transaction did not write.
+        *(_target_dict(plan) for plan in log_detail_targets),
         {"path": ".saipen/LOG.md", "role": "log", "content": log_doc.encode(new_log)},
         {"path": ".saipen/BOARD.md", "role": "board", "content": board_doc.encode(new_board)},
         {"path": ".saipen/STATE.md", "role": "state", "content": state_doc.encode(new_state)},
@@ -4056,7 +4100,7 @@ def sub_disposition(
     until then the role is REVIEW_PENDING.
     """
     from .fast_check import validate_texts
-    from .log import build_event, log_tail_event
+    from .log import log_tail_event, prepare_bounded_event
 
     root = Path(project_root)
     try:
@@ -4176,7 +4220,8 @@ def sub_disposition(
     op_id = "sub-disposition-" + __import__("uuid").uuid4().hex[:8]
     # T-1006: the Core disposition event names the canonical acting seat
     # (inherited STATE.agent or explicit --agent), never a hardcoded identity.
-    event, log_line = build_event(
+    event, log_line, log_detail_targets = prepare_bounded_event(
+        root,
         tail,
         "DEC",
         f"disposition {name}/{package.package_id} reviewed after Core "
@@ -4203,6 +4248,8 @@ def sub_disposition(
             "proposed disposition fails fast validation: " + "; ".join(errors[:5]),
         )
     targets = [
+        # T-1326 P0: the disposition's externalized detail joins this commit.
+        *(_target_dict(plan) for plan in log_detail_targets),
         {"path": ".saipen/LOG.md", "role": "log", "content": log_doc.encode(new_log)},
         {"path": ".saipen/STATE.md", "role": "state", "content": state_doc.encode(new_state)},
         {"path": rel, "role": "report", "content": outbox_doc.encode(reviewed_text)},

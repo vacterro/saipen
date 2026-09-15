@@ -92,7 +92,7 @@ AUDIT_TAGS_MODE = "SAIPEN_AUDIT_TAGS_MODE"
 #: ledger is intact did not move when a check arrived with no control (T-1292).
 #: Raise this in the same change that adds the control, or that records why the
 #: new check has none.
-VALIDATOR_FAIL_SITES = 324
+VALIDATOR_FAIL_SITES = 327
 
 #: The honest half. Counting fail sites binds VOLUME, not identity: it cannot
 #: say WHICH check is uncovered, and a change that adds one check while
@@ -1440,6 +1440,39 @@ def _t551_bypass(t: str) -> str:
 
 
 # (label, file, mutation, expected substring in the validator's output)
+def add_state_field(line: str):
+    """Insert one frontmatter line before the closing fence."""
+
+    def mutate(text: str) -> str:
+        marker = "\n---\n"
+        index = text.rfind(marker)
+        if index == -1:
+            return text
+        return text[:index] + "\n" + line + text[index + 1 :]
+
+    return mutate
+
+
+def inherit_from_nothing(text: str) -> str:
+    """Make the first DONE ticket claim an unresolvable implementation source."""
+    lines = text.splitlines(keepends=True)
+    in_done = False
+    for i, line in enumerate(lines):
+        if line.startswith("## "):
+            in_done = line.startswith("## DONE")
+            continue
+        if in_done and line.startswith("- [x] "):
+            lines[i] = (
+                line.rstrip("\n")
+                + " | closure_mode: inherited_verified"
+                + " | implementation_delta: none"
+                + " | implementation_source: T-99999999"
+                + "\n"
+            )
+            break
+    return "".join(lines)
+
+
 CASES: list[tuple[str, str, object, str]] = [
     # --- STATE shape -----------------------------------------------------
     ("STATE.md deleted", STATE, DELETE, "STATE.md missing"),
@@ -1586,6 +1619,40 @@ CASES: list[tuple[str, str, object, str]] = [
             ],
         ),
         "STATE is behind BOARD",
+    ),
+    # CORE-001 (SRC-026:R001). The execution seat and the BOARD claim are ONE
+    # fact. E-5941 committed `STATE.task=T-1298, STATE.agent=buffy` against a
+    # BOARD whose active ticket was still owned by `opencode`, because the
+    # transactional gate had no owner invariant at all -- only this canonical
+    # gate refused it, and only later, at a release boundary. The control
+    # rewrites STATE.agent alone: BOARD keeps the real owner, so the pair is
+    # exactly the split the invariant exists to refuse.
+    (
+        "STATE.agent stops being the active BOARD owner",
+        STATE,
+        sub_line("agent", "seat-thief"),
+        "is not the owner of the active ticket",
+    ),
+    # CORE-003 (SRC-026:R003). A stop reason is an instruction to an
+    # unattended loop, so it must be TRUE while it is persisted. GOAL_BLOCKED
+    # says "no safe useful work remains"; recorded beside workable Work it
+    # parks a run that had things to do -- which is the FastPrompter stall in
+    # one field.
+    (
+        "GOAL_BLOCKED persisted while the board still has workable Work",
+        STATE,
+        add_state_field("stop_reason: GOAL_BLOCKED"),
+        "stop_reason: GOAL_BLOCKED while the board still",
+    ),
+    # CORE-003. `inherited_verified` is the closure that adds no code, so its
+    # named authority is the ONLY thing standing between "verified" and
+    # "nobody ever published this". An authority that resolves to nothing must
+    # FAIL, not read as a closed ticket.
+    (
+        "DONE Work inherits from an authority that does not exist",
+        BOARD,
+        inherit_from_nothing,
+        "closure provenance does not resolve",
     ),
     # The changelog-unarchived warning names the header's "~10" claim as its
     # reason; a header edited to a looser number would silently make that

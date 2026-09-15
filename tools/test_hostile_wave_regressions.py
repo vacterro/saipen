@@ -146,7 +146,11 @@ class Wave1InjectorTests(unittest.TestCase):
         canonical = set(CM.load_shortcut_table().keys())
         self.assertEqual(len(canonical), 19)
         for path in [TOOLS.parent / "bootstrap" / "inject.ps1", TOOLS.parent / "bootstrap" / "inject.sh"]:
-            text = path.read_text(encoding="utf-8")
+            self.assertIn("activation_template", path.read_text(encoding="utf-8"))
+            # The registry-selected template now owns the shared instruction
+            # block. Runtime injector parity separately checks landed bytes.
+            registry = json.loads((TOOLS.parent / "extensions/adapters/registry.json").read_text())
+            text = (TOOLS.parent / registry["activation_template"]).read_text(encoding="utf-8")
             normalized = text.replace('\\"', '"').replace("\\`", "`")
             m = re.search(r"shortcut\s*\(([^)]*)\)", normalized, re.IGNORECASE | re.DOTALL)
             self.assertIsNotNone(m, f"{path.name} missing shortcut list")
@@ -156,7 +160,9 @@ class Wave1InjectorTests(unittest.TestCase):
 
     def test_new_shortcuts_ff_xx_vv_zz_present(self):
         for path in [TOOLS.parent / "bootstrap" / "inject.ps1", TOOLS.parent / "bootstrap" / "inject.sh"]:
-            text = path.read_text(encoding="utf-8")
+            self.assertIn("activation_template", path.read_text(encoding="utf-8"))
+            registry = json.loads((TOOLS.parent / "extensions/adapters/registry.json").read_text())
+            text = (TOOLS.parent / registry["activation_template"]).read_text(encoding="utf-8")
             for tok in ("ff", "xx", "vv", "zz"):
                 self.assertIn(tok, text, f"{path.name} missing {tok}")
 

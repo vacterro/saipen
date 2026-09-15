@@ -1,0 +1,44 @@
+{
+  "clauses": {
+    "SRC-027:R001": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Three-way target recovery classifier: one canonical helper classify_target(current_hash, before_hash, after_hash) returns ALREADY_APPLIED when current==after, PENDING when current==before, CONFLICT otherwise; the three-way logic is centralized and never duplicated across resume, apply or conformance paths; before_hash==after_hash no-op target classifies deterministically as already-satisfied; missing-file creation and deletion states classify through the existing document and hash model with no second sentinel scheme --verification unit tests cover all three outcomes plus the no-op and missing-file shapes through the one helper"
+    },
+    "SRC-027:R002": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Recovery reconstructs progress from live target bytes, not from stale progress_index, applied_frontier or target.applied markers: targets are inspected in canonical operation order, every target classified, and the effective applied frontier rebuilt from actual target states; a legal prefix materialization resumes at the first pending target; non-prefix materialization such as BEFORE AFTER BEFORE fails closed with RECOVERY_CONFLICT unless the existing operation contract proves that state a legal crash shape --verification fixture matrix covers AFTER AFTER AFTER, AFTER AFTER BEFORE, AFTER BEFORE BEFORE, AFTER THIRD BEFORE and BEFORE AFTER BEFORE with deterministic outcomes"
+    },
+    "SRC-027:R003": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Journal metadata repair is idempotent and goes through the canonical journal writer: already-applied targets get target.applied=true and the effective progress and frontier agree with the real materialized prefix; semantically identical project files are never rewritten merely to satisfy the journal; no ad-hoc write_text JSON edits where Journal owns persistence; a crash during the bookkeeping repair is safely repeatable --verification instrumentation proves repair writes touch only recovery journal state and a mid-repair crash re-run converges"
+    },
+    "SRC-027:R004": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "All-targets-already-applied recovery performs zero semantic replays: canonical post-apply verification runs, on success the operation advances through the ordinary legal terminal state machine to the current protocol terminal state, ordinary settlement and compaction run, and an exact retry returns the existing idempotent success result instead of creating another operation; no special terminal state is invented and verification is never bypassed because hashes match --verification ProTrail-shaped fixture converges to the normal committed terminal state and second recovery performs no new writes"
+    },
+    "SRC-027:R005": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Partial already-applied prefix resume: for a legal prefix recovery repairs journal progress, applies only the pending suffix targets, never rewrites materialized targets, then completes verification and commit; recovery must never depend on replay being harmless --verification write-instrumented fixture proves target 1 and 2 are not physically written and exactly target 3 is applied"
+    },
+    "SRC-027:R006": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Real conflicts stay conflicts: any target whose current hash is neither before_hash nor after_hash yields a deterministic RECOVERY_CONFLICT with operation_id, target path, expected before_hash, expected after_hash, actual hash, target index and recovered applied frontier reported; zero additional mutations after the conflict is discovered and remaining targets are untouched; CAS before_hash safety for fresh APPLY is not weakened --verification hostile fixture preserves unexpected bytes, returns the canonical conflict family and leaves conformance non-green"
+    },
+    "SRC-027:R007": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Status convergence rule: after successful recovery operation.json, progress.json and per-target applied markers agree through one canonical transition finalizer; a successful recovery never leaves PREPARED operation.json beside a terminal progress.json --verification split-brain regression asserts representation agreement after recovery"
+    }
+  },
+  "derived_at": "2026-09-11T06:33:07Z",
+  "derived_from": "SRC-027",
+  "interpretation_revision": 7,
+  "schema_version": 1,
+  "source_sha256": "3d7cb9f56b9e0c363735e70397cf7e923387f6ab029c154612f87b73440f1444"
+}

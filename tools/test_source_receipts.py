@@ -23,6 +23,68 @@ SCENARIO = ROOT / "tests" / "scenarios" / "stale-state-reconciliation" / ".saipe
 
 
 class SourceReceiptTests(unittest.TestCase):
+    def test_environment_present_cannot_be_labeled_unavailable(self) -> None:
+        receipt = self.capture("conditional host check")["receipt"]
+        self.assertTrue(
+            intake.add_requirement(
+                self.root,
+                receipt,
+                rid="R001",
+                text="validate Kiro when its runtime is available",
+                when_environment="kiro",
+            )["ok"]
+        )
+        with patch.object(
+            intake,
+            "_probe_environment_absence",
+            return_value={"ok": False, "code": "ENVIRONMENT_PRESENT", "detail": "kiro exists"},
+        ):
+            result = intake.set_disposition(
+                self.root, receipt, "R001", "UNAVAILABLE_ENVIRONMENT", environment="kiro"
+            )
+        self.assertFalse(result["ok"])
+        self.assertEqual(result["code"], "ENVIRONMENT_PRESENT")
+
+    def test_mechanically_absent_conditional_environment_is_terminal(self) -> None:
+        receipt = self.capture("conditional host check")["receipt"]
+        self.assertTrue(
+            intake.add_requirement(
+                self.root,
+                receipt,
+                rid="R001",
+                text="validate Kiro when its runtime is available",
+                when_environment="kiro",
+            )["ok"]
+        )
+        proof = {
+            "schema_version": 1,
+            "kind": "environment_absence",
+            "environment": "kiro",
+            "commands": [{"name": "kiro", "path": None}],
+            "homes": [{"path": "~/.kiro", "exists": False}],
+            "unavailable": True,
+            "observed_at": "2026-09-13T00:00:00Z",
+        }
+        with patch.object(
+            intake,
+            "_probe_environment_absence",
+            return_value={"ok": True, "code": "ENVIRONMENT_ABSENT", "proof": proof},
+        ):
+            result = intake.set_disposition(
+                self.root, receipt, "R001", "UNAVAILABLE_ENVIRONMENT", environment="kiro"
+            )
+        self.assertTrue(result["ok"], result)
+        self.assertEqual(intake.coverage_summary(self.root, receipt)["unresolved"], [])
+
+    def test_unfinished_requirement_cannot_self_waive_as_environment_unavailable(self) -> None:
+        receipt = self.capture("unconditional work")["receipt"]
+        self.normalized(receipt)
+        result = intake.set_disposition(
+            self.root, receipt, "R001", "UNAVAILABLE_ENVIRONMENT", environment="kiro"
+        )
+        self.assertFalse(result["ok"])
+        self.assertEqual(result["code"], "ENVIRONMENT_WAIVER_REFUSED")
+
     def test_source_recovery_commands_refuse_structurally_when_unavailable(self) -> None:
         for arguments in (("reconcile", "SRC-001"), ("normalize",)):
             with self.subTest(arguments=arguments):

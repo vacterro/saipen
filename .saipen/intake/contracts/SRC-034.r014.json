@@ -1,0 +1,79 @@
+{
+  "clauses": {
+    "SRC-034:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Supersede SRC-032:R004, R006, R008, and R009 where they require an explicit seat or ACTOR_UNBOUND solely because a normal host actor is absent; preserve the original receipt as historical evidence."
+    },
+    "SRC-034:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "For a consequential OpenCode event with an explicit SAIPEN_AGENT, evaluate that explicit actor through canonical ownership and protocol-state checks."
+    },
+    "SRC-034:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "For a consequential OpenCode event without SAIPEN_AGENT in a valid SAIPEN project, use the existing protocol snapshot to inherit STATE.agent and run normal ownership, recovery, path, and operation-safety checks."
+    },
+    "SRC-034:R004": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Never use OpenCode sessionID, AUDAPACK UI slots, launcher slots, process numbers, window titles, ports, or arbitrary host metadata as actor identity."
+    },
+    "SRC-034:R005": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Keep unknown consequential tools, protected canonical mutations, path escapes, recovery debt, invalid protocol state, root binding failures, and foreign live-owner conflicts fail closed."
+    },
+    "SRC-034:R006": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Keep exact built-in read, glob, grep, list, webfetch, and exact skill bootstrap usable without actor binding; do not widen trust by suffix, namespace segment, or name substring."
+    },
+    "SRC-034:R007": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Keep non-SAIPEN projects non-interfering and do not require SAIPEN configuration, state, actors, seats, or launchers for generic OpenCode and Cline launches."
+    },
+    "SRC-034:R008": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Keep saipen --agent <seat> launch opencode as an optional explicit handover, pinned actor, detached-context, diagnostic, and strict-test path, not the routine launch requirement."
+    },
+    "SRC-034:R009": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Document canonical actor, explicit actor, host session ID, and SAIPEN_AGENT distinctly; SAIPEN_AGENT is optional process-environment provenance, not authentication or a security credential."
+    },
+    "SRC-034:R010": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Prove the A-J actor-resolution regression matrix, separating valid canonical inheritance, contradictory canonical ownership, explicit correct actor, and explicit foreign actor."
+    },
+    "SRC-034:R011": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Run a real Windows OpenCode launch without manually setting SAIPEN_AGENT and prove exact skill bootstrap, inspection, ordinary writes and shell workflow while protected, unknown, and foreign actor cases remain refused."
+    },
+    "SRC-034:R012": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Inspect SAITULS as a generic launcher and preserve its public Agent and WorkDir interface without SAIPEN-specific mandatory parameters or routing."
+    },
+    "SRC-034:R013": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Inspect AUDAPACK launch behavior and preserve project-path resolution, generic external launcher use, direct OpenCode fallback, and non-actor meaning of UI and process identifiers."
+    },
+    "SRC-034:R014": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Compare the installed AI_AGENT_LAUNCHER.PS1 used by AUDAPACK with the SAITULS source and repair deployment only if evidence shows it is necessary; never add SAIPEN behavior to either copy."
+    }
+  },
+  "derived_at": "2026-09-13T04:41:47Z",
+  "derived_from": "SRC-034",
+  "interpretation_revision": 14,
+  "schema_version": 1,
+  "source_sha256": "1bc411eb4f8babd52a73ef7eb27cf2371876a41cb7f6d5e383f8d23cccdc85d5"
+}

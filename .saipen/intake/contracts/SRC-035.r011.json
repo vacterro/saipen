@@ -1,0 +1,64 @@
+{
+  "clauses": {
+    "SRC-035:R001": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "Provide a legal canonical active-parent to blocker handoff without weakening the single-DOING invariant"
+    },
+    "SRC-035:R002": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "Make the required blocker claimable while the parent remains honestly unfinished"
+    },
+    "SRC-035:R003": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "Resume the parent deterministically and atomically after the blocker reaches DONE"
+    },
+    "SRC-035:R004": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "Keep the parent BLOCKED when the blocker is failed or remains blocked"
+    },
+    "SRC-035:R005": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "Represent conditional environment absence explicitly with mechanical non-abusable evidence"
+    },
+    "SRC-035:R006": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "Keep discretionary DEFERRED nonterminal and distinct from environment absence"
+    },
+    "SRC-035:R007": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "Reconcile T-1318 against its actual acceptance and evidence"
+    },
+    "SRC-035:R008": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "Move T-1317 out of DOING to DONE or precise BLOCKED_EXTERNAL after blocker reconciliation"
+    },
+    "SRC-035:R009": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "Allow safe diagnostics and reads while Work is blocked"
+    },
+    "SRC-035:R010": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "Refuse consequential project mutation without active Work authority"
+    },
+    "SRC-035:R011": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "Preserve project root identity and lineage isolation for foreign mutations"
+    }
+  },
+  "derived_at": "2026-09-13T09:56:53Z",
+  "derived_from": "SRC-035",
+  "interpretation_revision": 11,
+  "schema_version": 1,
+  "source_sha256": "10d9b373453c4fba3837e5ff23ac892626e149c314ca687fec1fbd61830c7f49"
+}

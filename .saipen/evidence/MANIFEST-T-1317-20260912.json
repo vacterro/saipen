@@ -1,0 +1,50 @@
+{
+  "schema_version": 1,
+  "ticket": "T-1317",
+  "verdict": "UNRESOLVED_BUILD",
+  "retained": [
+    {
+      "path": ".saipen/evidence/T-1317-target-a-b-evidence-20260912.md",
+      "class": "DURABLE_REQUIRED",
+      "bytes": 10564,
+      "sha256": "ceb918fd0b0c4d9de5f26cbfe856f388e09e5ffb5a5220e0ac8f15731d25a018",
+      "reason": "bounded red-green, native-host, retention, and non-terminal dependency transcript"
+    }
+  ],
+  "discarded_classes": [
+    {
+      "class": "EPHEMERAL_REPRODUCIBLE",
+      "result": "none retained",
+      "reason": "native HOME/cache and synthetic matrix roots were run-owned OS-temporary data and removed after compact proof capture"
+    },
+    {
+      "class": "SUPERSEDED",
+      "result": "none removed",
+      "reason": "no historical duplicate was proven superseded"
+    },
+    {
+      "class": "UNKNOWN",
+      "result": "none removed",
+      "reason": "automatic cleanup is forbidden without classification authority"
+    }
+  ],
+  "limits": {
+    "ordinary_artifact_target_bytes": 26214400,
+    "ticket_warning_bytes": 104857600,
+    "retention_review_bytes": 262144000
+  },
+  "largest_retained_paths": [
+    {
+      "path": ".saipen/evidence/T-1317-target-a-b-evidence-20260912.md",
+      "bytes": 10564
+    }
+  ],
+  "terminal_cleanup": false,
+  "open_requirements": [
+    "SRC-032:R008",
+    "SRC-033:R001",
+    "SRC-033:R002",
+    "SRC-033:R003",
+    "SRC-033:R004"
+  ]
+}

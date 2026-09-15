@@ -1,5 +1,5 @@
 {
-  "next_id": 17,
+  "next_id": 18,
   "operations": {
     "audapack 4c7110b5-5d59-55b4-ad15-937ba00677a9": {
       "created_at": "2026-09-08T02:02:32Z",
@@ -17,6 +17,15 @@
       "producer_item_id": "4d363b58-69eb-5a09-9b1b-5c6facb80956",
       "producer_operation_id": "4d363b58-69eb-5a09-9b1b-5c6facb80956",
       "sha256": "d1baa4e874f811c055641f23b9894cea180fb8e9122a8c5e54c6a31c0ae330a3",
+      "state": "COMMITTED"
+    },
+    "audapack c76dcebd-6642-5ecb-9981-3f479d7e6cd0": {
+      "created_at": "2026-09-09T16:01:42Z",
+      "layer": 17,
+      "producer": "audapack",
+      "producer_item_id": "c76dcebd-6642-5ecb-9981-3f479d7e6cd0",
+      "producer_operation_id": "c76dcebd-6642-5ecb-9981-3f479d7e6cd0",
+      "sha256": "6d1ee46d9e8557da38b4ae294fb2cb296864014f01b732f4efb9585c83d015f1",
       "state": "COMMITTED"
     },
     "manual trajectory-delta-2026-08-31": {

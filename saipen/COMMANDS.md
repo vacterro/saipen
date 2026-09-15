@@ -47,13 +47,27 @@ global authority and deterministic priority rules.
 | `saipen push` | SHIP | CMD-ROUTING-01 |
 | `saipen improve [action]` | meta | CMD-CONTINUE-01 |
 | `saipen status` | read-only | CMD-ROUTING-01 |
+| `saipen context orient [--handoff JSON]` | bounded current-truth orientation | CONTEXT-BUDGET-01 |
+| `saipen brief` | generated handoff with identity/lineage/event provenance | CONTEXT-BUDGET-01 |
 | `saipen acceptance <T-###>` | read-only | CMD-ROUTING-01 |
 | `saipen runtime` | read-only | CMD-ROUTING-01 |
+| `saipen search <pattern>` | read-only bounded search | CMD-ROUTING-01 |
+| `saipen --agent <seat> launch opencode -- [args]` | optional explicit-actor host process | CMD-ROUTING-01 |
 | `saipen knowledge [status\|index\|retrieve]` | project knowledge | CMD-ROUTING-01 |
+| `saipen user-request <text>` | USER_INTERRUPT ingress | CMD-ROUTING-01 |
+| `saipen cohort [status\|ship] <C-###>` | batch publication authority | CMD-ROUTING-01 |
 | `saipen source` | intake | CMD-ROUTING-01 |
 | `saipen audit [status\|inspect\|ingest]` | intake transport | CMD-CONTINUE-01 |
 | `saipen userperson` | meta | CMD-ROUTING-01 |
 | `saipen sub <verb> <name>` | sub | CMD-ROUTING-01 |
+
+This optional advanced `launch opencode` command requires its explicit global
+`--agent` seat. It exports that actor plus resolved project root and portable
+lineage before starting the host; host arguments follow `--`. Missing actor on
+this explicit-envelope command fails `ACTOR_UNBOUND`. Routine generic OpenCode
+launches do not route through it and need no manual seat: Core inherits the
+project's canonical `STATE.agent`. Neither path treats a host session id as an
+actor.
 
 ## Compound parsing
 
@@ -78,6 +92,16 @@ use `st` to checkpoint and stop, or `sss` for read-only status.
 ## Continue→improve fallthrough
 
 <!-- RULE-OWNER: CMD-CONTINUE-01 -->
+
+**Skill-only no-op is not continuation.** A skill tool returns instructions,
+never a Git result or execution receipt. For `saipen continue`, bare `saipen`,
+`cc` and `сс`, finish BOOT's required reads, invoke `saipen continue --json`,
+then open `load_path` when present and execute `action` under its owner in the
+same turn. `cold_route` names the bound memory and protocol paths without
+search. A successful routing response is not completion evidence. If state
+has not been read, read it; do not ask the user to define a registered command.
+A clean Git tree does not imply a completed BOARD. Recovery remains bounded
+by OPS; WAIT and actual refusals retain their existing meaning.
 
 `saipen continue` routes: recovery -> WAIT -> active phase-owned continuation
 -> Audit Inbox -> ordinary BOARD Pick Rule -> maintenance -> bounded Improve

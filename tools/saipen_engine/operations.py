@@ -28,20 +28,40 @@ import datetime
 import uuid
 from pathlib import Path
 
-from . import codec, phases
+from . import codec, ownership, phases
 from .board import (
+    BLOCKER_SCOPES,
+    CLOSURE_MODES,
+    DEFAULT_BLOCKER_SCOPE,
+    DEFAULT_CLOSURE_MODE,
+    MAX_LIVE_RECORD_CHARS,
+    USER_EXPLICIT_TRUE,
+    assert_live_record,
+    assert_single_record,
     claim_status,
+    continuation_parent,
     escape_ticket_description,
     parse_board,
+    pick_next_work,
     remove_ticket_field,
+    reserved_continuation_child,
     set_ticket_field,
     ticket_has_blocker,
     ticket_is_workable,
 )
 from .codec import redact_credentials
+from .board_compaction import (
+    CompactionResult,
+    oversized_ticket_ids,
+    unrecognized_field_ticket,
+    prepare_existing,
+    prepare_expanded,
+    prepare_new,
+    resolve_detail,
+)
 from .fast_check import block_parked_evidence_error, validate_texts
 from .journal import MISSING_FILE_DEPENDENCY, hash_bytes
-from .log import build_event
+from .log import prepare_bounded_event
 from .plan import OperationPlan, TargetPlan, apply_plan, build_plan
 from .result import Result
 from .state import (
@@ -70,6 +90,46 @@ def _utc_iso() -> str:
     return datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
 
 
+class _operation_clock:
+    """ONE frozen UTC instant for one ownership-sensitive operation.
+
+    The wall clock is read exactly ONCE at the start of the operation; claim
+    classification, the claim_time written during a transfer/refresh, and the
+    LOG display timestamp are all derived from that single instant. Reading
+    three independent wall clocks for one ownership decision is what let the
+    CORE-001 handover evidence flip verdict between two runs of identical
+    committed code: the fixture's LIVE claim classified as live at capture
+    time and stale on the later rerun (SRC-026 REVIEW repair).
+
+    A caller that needs to pin the instant (tests, replays) passes it in; the
+    derived strings are then deterministic functions of that instant alone.
+    """
+
+    __slots__ = ("instant",)
+
+    def __init__(self, instant: datetime.datetime | None = None) -> None:
+        self.instant = instant or datetime.datetime.now(datetime.timezone.utc)
+
+    @property
+    def utc(self) -> str:
+        return self.instant.strftime("%Y-%m-%dT%H:%M:%SZ")
+
+    @property
+    def now(self) -> str:
+        return self.instant.strftime("%d.%m.%y %H:%M")
+
+
+def _clock_instant(now: datetime.datetime | _operation_clock | None) -> datetime.datetime | None:
+    """Unwrap a frozen operation clock to its instant (identity otherwise).
+
+    `None` means "no fixed instant", which the shared ownership authority
+    resolves to its own single read -- never three.
+    """
+    if isinstance(now, _operation_clock):
+        return now.instant
+    return now
+
+
 class StateMalformedError(ValueError):
     """Raised when STATE.md is present but cannot be parsed whole.
 
@@ -86,7 +146,16 @@ class CheckpointError(ValueError):
     `.saipen/` is missing STATE.md/BOARD.md/LOG.md, or any carries a
     non-canonical encoding (UTF-16/BOM). Surfaces as VALIDATION_FAILED with
     zero canonical writes (T-1003 / P1#3, P1#4).
+
+    ``code`` names the refusal class when it is more precise than the generic
+    VALIDATION_FAILED -- e.g. HISTORY_LEDGER_CORRUPT for immutable-ledger
+    corruption. It is one of the registered error_codes so the code survives
+    the Result closure and reaches the outer Fleet/continue surface.
     """
+
+    def __init__(self, message: str = "", *, code: str = "VALIDATION_FAILED"):
+        super().__init__(message)
+        self.code = code
 
 
 class HomeDeadError(ValueError):
@@ -121,7 +190,13 @@ def _state_guard(fn):
                 "HOME_REQUIRED", str(exc), next_action="saipen rebind-home <candidate-home-path>"
             )
         except (StateMalformedError, CheckpointError) as exc:
-            return _refuse("VALIDATION_FAILED", str(exc))
+            return _refuse(getattr(exc, "code", "VALIDATION_FAILED"), str(exc))
+        except ValueError as exc:
+            detail = str(exc)
+            for code in ("LOG_EVENT_OVERSIZE", "BOARD_RECORD_OVERSIZE"):
+                if detail.startswith(code + ":"):
+                    return _refuse(code, detail)
+            raise
 
     return wrapper
 
@@ -252,7 +327,8 @@ def _read(
         if history_problems:
             raise CheckpointError(
                 "history-void: complete LOG history fails the immutable-ledger "
-                "contract -- " + "; ".join(history_problems[:4])
+                "contract -- " + "; ".join(history_problems[:4]),
+                code="HISTORY_LEDGER_CORRUPT",
             )
     log_tail = snapshot.tail
     # ALWAYS bind the complete sealed history (`.saipen/logs` numeric segments)
@@ -276,12 +352,32 @@ def _read(
         "log": log_doc,
         "_logs_digest": _logs_digest,
         "_history": snapshot,
+        # T-1326 P0: the canonical project root travels WITH the documents. Every
+        # later `_event_line` therefore externalizes an oversized event
+        # losslessly without the caller having to remember a `root=` keyword --
+        # lossless construction is a property of the checkpoint, not an
+        # accidental caller opt-in.
+        "_root": Path(root),
     }
     if state_error:
         # Set only on the CORE-002 tolerant path: the STRICT verdict the
         # lenient `state` was read in spite of. Empty means "parsed clean".
         docs["_state_error"] = state_error
     return docs, state, board, log_tail
+
+
+def _live_before(root: Path, rel: str, doc) -> str:
+    """The before-hash of an EXTRA target, in the journal's live convention.
+
+    `codec.read_document` represents a missing file as an empty document, and
+    the hash of empty bytes is a real hash. The journal represents a missing
+    file as "". Using the document hash for a target that does not exist yet
+    therefore declared a precondition nothing could satisfy, and the FIRST
+    write of that file was refused as `unexpected live bytes (live '')` --
+    reproduced by the first no-publish release in a project with no
+    `digest.md`. Extra targets must speak the journal's convention.
+    """
+    return doc.raw_hash if (root / rel).exists() else ""
 
 
 def _target(doc, path: str, role: str, new_text: str) -> TargetPlan:
@@ -304,17 +400,152 @@ def _docs_preconditions(docs: dict, *keys: str) -> dict:
     return pc
 
 
-def _fold_handover(state: dict, agent: str, message: str) -> str:
-    """Fold the old -> new ownership edge into the mutation's own DEC message
-    (CORE-003). When the acting agent differs from persisted STATE.agent,
-    prepend `agent handover old -> new` to the operation's DEC so the Event
-    Graph shows the ownership edge in the SAME transaction as the dependent
-    mutation -- no separate pre-write, no orphaned handover DEC on rejection.
+def _actor_provenance(state: dict, agent: str, message: str) -> str:
+    """Record WHO performed this mutation when it is not the seated agent.
+
+    CORE-001 (SRC-026:R001): event wording is NOT an authorization transition.
+    The predecessor of this helper prepended `agent handover old -> new`
+    whenever the acting agent differed from persisted `STATE.agent`, and the
+    call sites then wrote `STATE.agent = agent` -- so a mutation with nothing
+    to do with the active ticket silently moved the execution seat while BOARD
+    kept the real owner's claim. The split committed (E-5941) because the fast
+    gate had no owner invariant, and the canonical validator refused it later.
+
+    What survives is exactly the useful half: out-of-band actor provenance in
+    the journal. Ownership now moves ONLY through `ownership`-mediated claim /
+    handover operations, which mutate STATE.agent, BOARD owner and BOARD
+    claim_time inside one transaction.
     """
-    old = state.get("agent")
-    if old and old != agent:
-        return f"agent handover {old} -> {agent}; {message}"
+    seated = state.get("agent")
+    if seated and seated != agent:
+        return f"actor {agent} (seat {seated}); {message}"
     return message
+
+
+def _seat_agent(state: dict, board_text: str, agent: str) -> str:
+    """The `STATE.agent` value a NON-TRANSFERRING mutation may persist.
+
+    THE out-of-band actor rule (CORE-001): a non-transferring operation --
+    adding future Work, persisting user intent, capturing an audit source,
+    checkpointing unrelated future work -- NEVER moves the execution seat.
+    Ownership moves ONLY through claim/handover operations, which mutate
+    BOARD ownership in the same transaction and pass their own value, so
+    they deliberately do NOT call this.
+
+    Audit/17 CORE-002 (SRC-026:R001 REVIEW reopen): the previous answer
+    chose between `actor` and `board owner`, which still conflated the
+    actor performing an operation with the persistent seat:
+      * an actor filing future Work with NO active ticket silently took the
+        seat (`persisted_execution_agent` fell back to `actor`);
+      * with an UNCLAIMED active ticket the same fallback fired even though
+        nothing was claimed;
+      * with a PRE-EXISTING owner/STATE split (STATE.agent=A, BOARD owner=B)
+        an unrelated mutation silently "healed" the corruption to B instead
+        of exposing it.
+
+    The seat rule is PRESERVATION: validate the BEFORE ownership snapshot,
+    refuse when it is already invalid (the caller surfaces the refusal --
+    zero STATE/BOARD/LOG mutation for a corrupt ownership state), and
+    otherwise return BEFORE STATE.agent unchanged. `agent` is returned only
+    under the narrow initialization case where the BEFORE state carries no
+    agent at all (existing initialization semantics), never as ordinary
+    fallback behavior.
+    """
+    seated = state.get("agent")
+    own = ownership.classify_active_ownership(state, board_text, agent)
+    split = ownership.preexisting_split_error(own, seated)
+    if split:
+        raise OwnershipSplitError(split)
+    if seated:
+        return seated
+    return agent
+
+
+class OwnershipSplitError(RuntimeError):
+    """The BEFORE ownership snapshot is corrupt; refuse, never heal.
+
+    Raised by `_seat_agent` when the active ownership state it is asked to
+    preserve is itself invalid: a claimed active ticket whose BOARD owner
+    disagrees with STATE.agent, or an INVALID (half owner/claim_time pair or
+    non-UTC stamp) claim. Only explicit handover, explicit claim/adoption or
+    canonical reconcile/repair may change execution authority through that
+    state -- an unrelated future-work mutation must REFUSE with zero
+    STATE/BOARD/LOG mutation instead of silently "repairing" the split.
+    """
+
+
+def goal_blocked_now(board_text: str, agent: str | None = None) -> list[str]:
+    """The goal-scope blockers that ACTUALLY stop the loop right now.
+
+    Empty means the loop is not goal-blocked, whatever a stale STATE says. The
+    condition is deliberately conjunctive: a declared goal blocker AND nothing
+    active AND nothing workable. A goal blocker beside a workable ticket is a
+    real obstacle to ONE line of work, not a reason to stop the project --
+    treating the two as the same thing is what parked the FastPrompter loop
+    with independent work still on the board.
+    """
+    from .board import goal_blocked_tickets, workable_tickets
+
+    tickets = parse_board(board_text)["tickets"]
+    if any(ticket.get("section") == "## DOING" for ticket in tickets.values()):
+        return []
+    if workable_tickets(tickets, agent=agent):
+        return []
+    return goal_blocked_tickets(tickets)
+
+
+def _recompute_free_slot_route(
+    state_text: str, board_text: str, before: dict, agent: str | None = None
+) -> str:
+    """Re-derive the persisted `next_action` when Work is added to a FREE slot.
+
+    CORE-003 / SRC-026:R003, reproduced live at E-5975: `audit/16.md` was
+    ingested, `SRC-026` was captured, `T-1304` was projected onto BOARD ahead
+    of everything else -- and the persisted `next_action` still named T-1303,
+    because projecting Work never recomputed the route. `status` then reported
+    a `next_action` its own `computed_next_action` disagreed with, and a cold
+    agent following the file would have executed the wrong ticket.
+
+    Deliberately narrow: only when nothing is active and no WAIT brake is
+    persisted. An active transaction owns its own continuation and a WAIT is a
+    hard stop; neither may be walked over merely because a ticket was filed.
+    The answer itself comes from the shared router, never from a local rule --
+    that is the whole point of having ONE Pick Rule.
+    """
+    # A stale stop reason is cleared whatever the slot state: adding Work is
+    # precisely the event that can make a recorded GOAL_BLOCKED false.
+    state_text = _settle_stop_reason(state_text, board_text, agent)
+    if str(before.get("next_action") or "").startswith("WAIT:"):
+        return state_text
+    if before.get("task") not in (None, "", "none"):
+        return state_text
+    if any(t.get("section") == "## DOING" for t in parse_board(board_text)["tickets"].values()):
+        return state_text
+    from .router import route_next
+
+    routed = route_next(state_text, board_text, current_agent=agent)
+    if routed.get("ok") and routed.get("action"):
+        return patch_state(state_text, {"next_action": routed["action"]})
+    return state_text
+
+
+def _settle_stop_reason(state_text: str, board_text: str, agent: str | None = None) -> str:
+    """Persist `stop_reason: GOAL_BLOCKED` only while it is TRUE.
+
+    Set AND cleared by the same predicate, at every boundary that can change
+    the answer (block, unblock, ticket add, user request, closure). A stop
+    reason that outlives its cause is worse than none: the loop reads it as
+    permission to stay stopped with workable Work on the board.
+    """
+    from .state import parse_state as _parse_state
+
+    blocked = goal_blocked_now(board_text, agent)
+    current = _parse_state(state_text).get("stop_reason")
+    if blocked:
+        return patch_state(state_text, {"stop_reason": "GOAL_BLOCKED"})
+    if current == "GOAL_BLOCKED":
+        return remove_state_fields(state_text, ["stop_reason"])
+    return state_text
 
 
 def _event_line(
@@ -326,23 +557,75 @@ def _event_line(
     message: str,
     now: str,
     op_id: str | None = None,
+    root: Path | None = None,
 ) -> tuple[int, str]:
     if taxonomy not in _TAXONOMIES:
         raise ValueError(f"taxonomy {taxonomy!r} outside {_TAXONOMIES}")
+    # T-1326 P0: the project root comes from the CALLER or from the checkpoint
+    # itself -- never from a silent raw fallback. A producer that could not name
+    # its project could not preserve an oversized event, and the capped builder
+    # would raise LOG_EVENT_OVERSIZE on the very DEC a recovery verb exists to
+    # write.
+    canonical_root = root if root is not None else docs.get("_root")
+    if canonical_root is None:
+        raise ValueError(
+            "LOG event has no canonical project root -- lossless externalization "
+            "is a property of the checkpoint, not an optional caller convention"
+        )
     # CORE-003: the persistence boundary is the ONE invariant, not an opt-in
-    # caller convention. Every user-derived event message passes through the
-    # canonical redaction primitive here, so a credential/text supplied by any
-    # caller is scrubbed before LOG bytes are built -- no caller can forget and
-    # permanently persist a secret in canonical LOG history / journal staging.
-    return build_event(
+    # caller convention. Redaction and the byte cap live in the shared bounded
+    # producer, so no caller can forget to scrub a credential before canonical
+    # LOG bytes / journal staging are built.
+    event, line, targets = prepare_bounded_event(
+        canonical_root,
         log_tail,
         taxonomy,
-        redact_credentials(message),
+        message,
         ticket=ticket,
         agent=agent,
         now=now,
         op_id=op_id,
     )
+    if targets:
+        docs.setdefault("_log_detail_targets", []).extend(targets)
+    return event, line
+
+
+def _producer_event(
+    docs: dict,
+    log_tail: int | None,
+    taxonomy: str,
+    message: str,
+    *,
+    ticket: str | None,
+    agent: str | None,
+    now: str,
+    op_id: str | None = None,
+) -> tuple[int, str]:
+    """T-1326 P0: the ONLY bounded producer entry for ancillary LOG events.
+
+    Any canonical writer whose message is NOT a literal -- a release note, a
+    remote endpoint, a caller-supplied RUN/WAIT payload -- reaches LOG through
+    this shared helper, so variable-length event construction is never an
+    accidental caller opt-in and an oversized event externalizes losslessly
+    into the same journaled commit instead of refusing the verb.
+    """
+    return _event_line(docs, log_tail, taxonomy, ticket, agent or "", message, now, op_id)
+
+
+def _log_targets(docs: dict, new_log: str) -> list:
+    """The canonical LOG target set: externalized detail artifacts, then LOG.md.
+
+    T-1326 P0: an oversized event's detail artifacts join the SAME journaled
+    commit as LOG/STATE/BOARD. Building that set HERE -- instead of at each of
+    the ~30 canonical mutation call sites -- is what makes the guarantee
+    structural: no plan can commit a compact `detail_ref` that names bytes the
+    transaction never wrote, and a new LOG producer cannot forget the rule.
+    """
+    return [
+        *docs.get("_log_detail_targets", []),
+        _target(docs["log"], ".saipen/LOG.md", "log", new_log),
+    ]
 
 
 def _regression_gate(docs: dict, ticket_id: str) -> str | None:
@@ -438,7 +721,9 @@ def _latest_convergence_stage(root: Path, stage: str) -> dict | None:
 # --------------------------------------------------------------------------- claim
 
 
-def _claim_fields_in_place(board_text: str, ticket_id: str, fields: dict[str, str]) -> str:
+def _claim_fields_in_place(
+    board_text: str, ticket_id: str, fields: dict[str, str], *, enforce_cap: bool = True
+) -> str:
     """Surgically set/overwrite owner/claim_time on the EXISTING DOING ticket
     line in place -- no second ticket, no duplicated fields (P0#2 adoption).
 
@@ -454,7 +739,9 @@ def _claim_fields_in_place(board_text: str, ticket_id: str, fields: dict[str, st
     raw = ticket["raw"]
     new = raw
     for key, value in fields.items():
-        new = set_ticket_field(new, key, value)
+        new = set_ticket_field(new, key, value, enforce_cap=enforce_cap)
+    if enforce_cap:
+        assert_live_record(new)
     lines = board_text.splitlines(keepends=True)
     idx = ticket["line_no"] - 1
     suffix = "\n" if lines[idx].endswith("\n") else ""
@@ -462,22 +749,96 @@ def _claim_fields_in_place(board_text: str, ticket_id: str, fields: dict[str, st
     return "".join(lines)
 
 
+def _ticket_fields_in_place(
+    board_text: str,
+    ticket_id: str,
+    fields: dict[str, str],
+    remove: tuple[str, ...] = (),
+    *,
+    enforce_cap: bool = True,
+) -> str:
+    """Set/remove fields on one existing ticket without changing its section."""
+    parsed = parse_board(board_text)
+    ticket = parsed["tickets"].get(ticket_id)
+    if ticket is None:
+        raise ValueError(f"{ticket_id} is not on the board")
+    raw = ticket["raw"]
+    new = raw
+    for key in remove:
+        new = remove_ticket_field(new, key)
+    for key, value in fields.items():
+        new = set_ticket_field(new, key, value, enforce_cap=enforce_cap)
+    if enforce_cap:
+        assert_live_record(new)
+    lines = board_text.splitlines(keepends=True)
+    idx = ticket["line_no"] - 1
+    suffix = "\n" if lines[idx].endswith("\n") else ""
+    lines[idx] = new + suffix
+    return "".join(lines)
+
+
+def _project_board_mutation(
+    root: Path,
+    board_text: str,
+    propose,
+    ticket_ids: list[str],
+    *,
+    op_id: str,
+    event_id: str | None,
+    reason: str,
+) -> CompactionResult:
+    """The ONE shared BOARD mutation projector (T-1326 TARGET B).
+
+    Phase 1 compacts any row that was ALREADY oversized, so the caller's
+    `propose` step operates on a legal projection. Phase 2 runs the requested
+    semantic mutation with the size cap lifted. Phase 3 externalizes any row
+    the mutation left oversized, transactionally, in the SAME journaled plan --
+    so a normal row that crosses the cap BECAUSE of the requested verify,
+    blocker or closure payload completes canonically instead of dying in a
+    `BOARD_RECORD_OVERSIZE` dead-end that `ticket compact` cannot repair.
+
+    Raises ValueError (never a partial write: this is PLAN-time only).
+    """
+    compacted = prepare_existing(
+        root, board_text, ticket_ids, op_id=op_id, event_id=event_id, reason=reason
+    )
+    proposed = propose(compacted.board_text)
+    grown = prepare_expanded(
+        root, proposed, ticket_ids, op_id=op_id, event_id=event_id, reason=reason
+    )
+    return CompactionResult(
+        grown.board_text,
+        (*compacted.targets, *grown.targets),
+        grown.detail_ref or compacted.detail_ref,
+        grown.original_hash or compacted.original_hash,
+        tuple(dict.fromkeys((*compacted.compacted_tickets, *grown.compacted_tickets))),
+    )
+
+
 def _active_claim_refusal(
-    state: dict, board_text: str, agent: str, ticket_id: str | None = None
+    state: dict,
+    board_text: str,
+    agent: str,
+    ticket_id: str | None = None,
+    now: datetime.datetime | _operation_clock | None = None,
 ) -> Result | None:
     """The SELF-ownership gate every ACTIVE-ticket mutation must pass
     (second-wave P0). Returns a refusal Result (zero canonical writes) or None.
 
+    ONE shared authority (CORE-001/002): this gate CONSUMES
+    `ownership.classify_active_ownership` -- the same structured classifier
+    the router, the fast gate and the canonical validator consume -- instead
+    of reconstructing the active-seat answer from `claim_status` locally.
     Persisted STATE.agent is HISTORICAL last-writer evidence -- the acting
     identity is the SESSION agent the CLI threaded down. A session B that
     mutates a project A is actively claiming would overwrite STATE.agent=B
     while BOARD keeps A's live claim, which is exactly the binding-mismatch
-    impersonation this closes. Rules:
-      * SELF claim -> mutation allowed;
-      * FOREIGN_LIVE claim -> refuse, zero writes;
-      * INVALID claim -> refuse for repair;
-      * UNCLAIMED / FOREIGN_STALE -> refuse: explicit `claim T-###`
-        (adoption/takeover) must come first.
+    impersonation this closes. Mapping (from the shared classifier):
+      * SELF (or NO_ACTIVE, unbound) -> mutation allowed;
+      * FOREIGN_LIVE claim -> TICKET_NOT_WORKABLE refusal, zero writes;
+      * INVALID claim -> VALIDATION_FAILED refusal for repair;
+      * UNCLAIMED / FOREIGN_STALE -> TICKET_NOT_WORKABLE: explicit
+        `claim T-###` (adoption/takeover) must come first.
     """
     active = state.get("task")
     if not active or active == "none":
@@ -486,18 +847,20 @@ def _active_claim_refusal(
     ticket = tickets.get(active)
     if ticket is None or ticket.get("section") != "## DOING":
         return None
-    cs = claim_status(ticket, agent)
-    if cs == "SELF":
+    own = ownership.classify_active_ownership(state, tickets, agent, now=_clock_instant(now))
+    if not own.has_active or own.active_ticket != active:
+        return None
+    if own.status in ("SELF", ownership.NO_ACTIVE):
         return None
     owner = ticket["fields"].get("owner", "")
-    if cs == "FOREIGN_LIVE":
+    if own.status == ownership.FOREIGN_LIVE:
         return _refuse(
             "TICKET_NOT_WORKABLE",
             f"{active} is actively claimed by another agent ({owner}); a live "
             f"foreign claim cannot be mutated by session {agent}",
             ticket=active,
         )
-    if cs == "INVALID":
+    if own.status == ownership.INVALID:
         return _refuse(
             "VALIDATION_FAILED",
             f"{active} carries an INVALID claim (half owner/claim_time pair "
@@ -514,7 +877,7 @@ def _active_claim_refusal(
 
 
 def _refresh_active_claim(
-    board_text: str, state: dict, agent: str, utc: str
+    board_text: str, state: dict, agent: str, utc: str, now: datetime.datetime | None = None
 ) -> tuple[str | None, str | None]:
     """If the active ticket is this agent's own SELF claim, advance its
     claim_time in place on BOARD. Returns (new_board_text | None, ticket_id).
@@ -523,6 +886,13 @@ def _refresh_active_claim(
     legally stale while its owner checkpoints/transitions (CORE § 1.4). A
     foreign/unclaimed/non-owned DOING is NOT touched -- adoption is a separate
     `claim T` action, not a side effect of unrelated mutations.
+
+    ONE shared authority (CORE-001): only `SELF` may refresh the active lease.
+    UNCLAIMED, FOREIGN_STALE, FOREIGN_LIVE and INVALID all refresh nothing, and
+    the answer comes from `ownership.classify_active_ownership` rather than a
+    local `claim_status` read. `now` is the frozen OPERATION instant, so the
+    classification and the `utc` stamp written below are two views of one
+    instant -- the refresh never makes a second, later clock read of its own.
     """
     if state.get("phase") not in phases.TICKET_BEARING_PHASES:
         return None, None
@@ -533,15 +903,25 @@ def _refresh_active_claim(
     ticket = tickets.get(active)
     if ticket is None or ticket.get("section") != "## DOING":
         return None, None
-    if claim_status(ticket, agent) != "SELF":
+    own = ownership.classify_active_ownership(state, tickets, agent, now=now)
+    if own.status != ownership.SELF:
         return None, None
     return _claim_fields_in_place(board_text, active, {"claim_time": utc}), active
 
 
 def _plan_claim(
-    root: Path, ticket_id: str, agent: str, now: str, utc: str, explicit: bool = False
+    root: Path,
+    ticket_id: str,
+    agent: str,
+    now: str,
+    utc: str,
+    instant: datetime.datetime | None = None,
+    explicit: bool = False,
 ) -> OperationPlan | Result:
     op_id = "claim-" + uuid4_hex()
+    # ONE frozen operation instant: classify and stamp from the same clock.
+    if instant is None:
+        instant = datetime.datetime.now(datetime.timezone.utc)
     docs, state, board, log_tail = _read(root)
     if board["errors"]:
         return _refuse(
@@ -553,6 +933,22 @@ def _plan_claim(
     if ticket_id not in tickets:
         return _refuse("TICKET_NOT_FOUND", f"{ticket_id} not on the board", ticket=ticket_id)
     ticket = tickets[ticket_id]
+    # T-1326: readable legacy rows may be oversized.  Compact the historical
+    # projection before any normal claim mutation; the detail targets join the
+    # same OperationPlan below, so no orphan reference can be accepted.
+    try:
+        compacted = prepare_existing(
+            root,
+            docs["board"].text_norm,
+            [ticket_id],
+            op_id=op_id,
+            event_id=None,
+            reason="existing oversized BOARD record requires canonical claim update",
+        )
+    except ValueError as exc:
+        return _refuse("VALIDATION_FAILED", str(exc), ticket=ticket_id)
+    board_text = compacted.board_text
+    compaction_targets = list(compacted.targets)
     if ticket_has_blocker(ticket):
         return _refuse(
             "TICKET_NOT_WORKABLE",
@@ -561,12 +957,25 @@ def _plan_claim(
             ticket=ticket_id,
         )
     section = ticket["section"]
-    cs = claim_status(ticket, agent, None)
+    # Ticket-local claim primitive (CORE-001 REVIEW repair, TARGET 5): a claim
+    # on a NOT-YET-ACTIVE TODO ticket evaluates one ticket's lease directly --
+    # this is adoption INTO the seat, not authorization of an active mutation,
+    # so `claim_status` stays legal here. For the DOING branch below the
+    # classification is the ACTIVE-EXECUTION decision and goes through the
+    # shared authority `ownership.classify_active_ownership` at the ONE frozen
+    # operation instant -- never a local `claim_status` read (the boundary
+    # documented in `operations._seat_agent`: ACTIVE_EXECUTION_AUTHORITY ->
+    # shared classifier; TICKET_LOCAL_CLAIM_PRIMITIVE -> claim_status).
+    cs = (
+        ownership.classify_active_ownership(state, tickets, agent, now=instant).status
+        if section == "## DOING"
+        else claim_status(ticket, agent, None)
+    )
 
     if section == "## DOING":
         # In-place adoption / lease refresh -- never a second ticket or
         # duplicated fields (P0#2 / CORE § 1.4 stale/unclaimed adoption).
-        if cs == "FOREIGN_LIVE":
+        if cs == ownership.FOREIGN_LIVE:
             return _refuse(
                 "TICKET_NOT_WORKABLE",
                 f"{ticket_id} is actively claimed by another agent "
@@ -586,7 +995,7 @@ def _plan_claim(
             # BOARD-only lease refresh: advance claim_time in place. No LOG, no
             # STATE change -- the owner and binding are unchanged.
             new_board = _claim_fields_in_place(
-                docs["board"].text_norm, ticket_id, {"claim_time": utc}
+                board_text, ticket_id, {"claim_time": utc}
             )
             errors = validate_texts(
                 docs["state"].text_norm,
@@ -600,7 +1009,10 @@ def _plan_claim(
                     "VALIDATION_FAILED",
                     "proposed state fails fast validation: " + "; ".join(errors[:5]),
                 )
-            targets = [_target(docs["board"], ".saipen/BOARD.md", "board", new_board)]
+            targets = [
+                *compaction_targets,
+                _target(docs["board"], ".saipen/BOARD.md", "board", new_board),
+            ]
             return build_plan(
                 "claim",
                 agent,
@@ -653,11 +1065,11 @@ def _plan_claim(
             )
         else:
             _msg = f"claimed via SAIOPS -- owner {agent}"
-        _msg = _fold_handover(state, agent, _msg)
+        _msg = _actor_provenance(state, agent, _msg)
         event, line = _event_line(docs, log_tail, "DEC", ticket_id, agent, _msg, now, op_id)
         new_log = docs["log"].text_norm.rstrip("\n") + "\n" + line + "\n"
         new_board = _claim_fields_in_place(
-            docs["board"].text_norm, ticket_id, {"owner": agent, "claim_time": utc}
+            board_text, ticket_id, {"owner": agent, "claim_time": utc}
         )
         resume_in_place = (
             state.get("task") == ticket_id and state.get("phase") in phases.TICKET_BEARING_PHASES
@@ -686,7 +1098,8 @@ def _plan_claim(
                 "proposed state fails fast validation: " + "; ".join(errors[:5]),
             )
         targets = [
-            _target(docs["log"], ".saipen/LOG.md", "log", new_log),
+            *_log_targets(docs, new_log),
+            *compaction_targets,
             _target(docs["board"], ".saipen/BOARD.md", "board", new_board),
             _target(docs["state"], ".saipen/STATE.md", "state", new_state),
         ]
@@ -755,17 +1168,23 @@ def _plan_claim(
     if doing:
         return _refuse("ALREADY_CLAIMED", f"DOING holds {doing[0]['id']}", ticket=ticket_id)
 
+    reserved_child = reserved_continuation_child(tickets, agent=agent, now=instant)
+    if reserved_child is not None and reserved_child["id"] != ticket_id:
+        return _refuse(
+            "CONTINUATION_RESERVED",
+            f"{reserved_child['id']} owns the free seat until its blocked parent "
+            "can resume; an explicit claim cannot bypass this dependency handoff",
+            ticket=ticket_id,
+            blocked_on=reserved_child["id"],
+        )
+
     # The Pick Rule's own answer, computed whether or not it is being overridden:
     # a refusal needs it to name the ticket that wins, and an override needs it
     # to name the ticket it stepped over (T-1275). CORE.md PICK-01 already
     # allows the override and bounds it -- "explicit override cannot bypass
     # eligibility or authorization" -- which is why every gate above this point
     # runs first and refuses with the flag present.
-    top_workable = None
-    for t in tickets.values():
-        if ticket_is_workable(t, tickets, agent=agent):
-            top_workable = t["id"]
-            break
+    top_workable, _pick_reason = pick_next_work(tickets, agent=agent, now=instant)
     if not explicit:
         if top_workable is None or top_workable != ticket_id:
             return _refuse(
@@ -789,7 +1208,7 @@ def _plan_claim(
         )
     event, line = _event_line(docs, log_tail, "DEC", ticket_id, agent, detail, now, op_id)
     new_log = docs["log"].text_norm.rstrip("\n") + "\n" + line + "\n"
-    new_board = _claim_move(docs["board"].text_norm, ticket_id, agent, utc)
+    new_board = _claim_move(board_text, ticket_id, agent, utc)
     owned = {
         "phase": "SCOUT",
         "task": ticket_id,
@@ -810,7 +1229,8 @@ def _plan_claim(
         )
 
     targets = [
-        _target(docs["log"], ".saipen/LOG.md", "log", new_log),
+        *_log_targets(docs, new_log),
+        *compaction_targets,
         _target(docs["board"], ".saipen/BOARD.md", "board", new_board),
         _target(docs["state"], ".saipen/STATE.md", "state", new_state),
     ]
@@ -864,8 +1284,20 @@ def _claim_move(board_text: str, ticket_id: str, agent: str, utc: str) -> str:
 def plan_claim(
     project_root: Path | str, ticket_id: str, agent: str, explicit: bool = False
 ) -> Result:
-    now, utc = _now(), _utc_iso()
-    plan = _plan_claim(Path(project_root), ticket_id, agent, now, utc, explicit=explicit)
+    # ONE frozen operation instant (CORE-001 REVIEW repair, SRC-026:R001/R002):
+    # the ownership classification and the claim_time written to BOARD derive
+    # from the same clock -- a second wall-clock read could let the decision
+    # flip verdict between classification and write.
+    clock = _operation_clock()
+    plan = _plan_claim(
+        Path(project_root),
+        ticket_id,
+        agent,
+        clock.now,
+        clock.utc,
+        instant=clock.instant,
+        explicit=explicit,
+    )
     if isinstance(plan, Result):
         return plan
     return _render_plan(plan)
@@ -875,8 +1307,16 @@ def plan_claim(
 def apply_claim(
     project_root: Path | str, ticket_id: str, agent: str, explicit: bool = False
 ) -> Result:
-    now, utc = _now(), _utc_iso()
-    plan = _plan_claim(Path(project_root), ticket_id, agent, now, utc, explicit=explicit)
+    clock = _operation_clock()
+    plan = _plan_claim(
+        Path(project_root),
+        ticket_id,
+        agent,
+        clock.now,
+        clock.utc,
+        instant=clock.instant,
+        explicit=explicit,
+    )
     if isinstance(plan, Result):
         return plan
     return apply_plan(Path(project_root), plan)
@@ -895,6 +1335,7 @@ def _plan_attempt(
     unknown: str | None,
     now: str,
     utc: str,
+    instant: datetime.datetime | None = None,
 ) -> OperationPlan | Result | dict:
     """PLAN one Attempt lifecycle step (open|close) over the ACTIVE Work.
 
@@ -903,13 +1344,16 @@ def _plan_attempt(
     DEC event in LOG.md and the STATE.attempt pointer (set on open, removed
     on close) -- so a crash can never leave Work claiming an episode the LOG
     does not know about, nor an episode the Work disowned.
+
+    ``instant`` is the ONE frozen operation instant: every ownership decision
+    in here evaluates against it, never a second wall-clock read.
     """
     from . import attempt as attempt_mod
 
     op_id = ("attempt-" + action + "-") + uuid4_hex()
     docs, state, board, log_tail = _read(root)
     if action == "open":
-        _guard = _active_claim_refusal(state, docs["board"].text_norm, agent)
+        _guard = _active_claim_refusal(state, docs["board"].text_norm, agent, now=instant)
         if _guard is not None:
             return _guard
     else:
@@ -918,14 +1362,16 @@ def _plan_attempt(
         # adoption (claim refuses while an episode is open), so it must stay
         # reachable for any session when the predecessor's claim is stale or
         # gone. Only a LIVE foreign claim or an INVALID claim still refuses.
+        # The decision is classified through the shared ownership authority
+        # at the frozen instant -- never a local second classifier.
         _tickets = parse_board(docs["board"].text_norm)["tickets"]
         _task = state.get("task")
         _ticket = _tickets.get(_task) if _task else None
         if _ticket is not None and _ticket.get("section") == "## DOING":
-            _cs = claim_status(_ticket, agent)
-            if _cs in ("FOREIGN_LIVE", "INVALID"):
+            _cs = ownership.classify_active_ownership(state, _tickets, agent, now=instant).status
+            if _cs in (ownership.FOREIGN_LIVE, ownership.INVALID):
                 return _refuse(
-                    "TICKET_NOT_WORKABLE" if _cs == "FOREIGN_LIVE" else "VALIDATION_FAILED",
+                    "TICKET_NOT_WORKABLE" if _cs == ownership.FOREIGN_LIVE else "VALIDATION_FAILED",
                     f"{_task} carries a {_cs} claim; that claim's holder closes its own attempt",
                     ticket=_task,
                 )
@@ -1013,7 +1459,7 @@ def _plan_attempt(
                 "proposed state fails fast validation: " + "; ".join(errors[:5]),
             )
         targets = [
-            _target(docs["log"], ".saipen/LOG.md", "log", new_log),
+            *_log_targets(docs, new_log),
             _target(docs["state"], ".saipen/STATE.md", "state", new_state),
         ]
         return build_plan(
@@ -1102,11 +1548,9 @@ def _plan_attempt(
     # is the canonical claim/adoption -- never PHASE execution under the
     # predecessor's stale BOARD owner.
     _close_is_recovery = False
-    _ticket_fields = {}
-    if task and task in parse_board(docs["board"].text_norm)["tickets"]:
-        _ticket_fields = parse_board(docs["board"].text_norm)["tickets"][task]
-    _cs = claim_status(_ticket_fields, agent)
-    if _cs in ("FOREIGN_STALE", "UNCLAIMED") and rec.get("agent") != agent:
+    _tickets = parse_board(docs["board"].text_norm)["tickets"]
+    _cs = ownership.classify_active_ownership(state, _tickets, agent, now=instant).status
+    if _cs in (ownership.FOREIGN_STALE, ownership.UNCLAIMED) and rec.get("agent") != agent:
         _close_is_recovery = True
         if result != "interrupted":
             return _refuse(
@@ -1190,7 +1634,7 @@ def _plan_attempt(
             "proposed state fails fast validation: " + "; ".join(errors[:5]),
         )
     targets = [
-        _target(docs["log"], ".saipen/LOG.md", "log", new_log),
+        *_log_targets(docs, new_log),
         _target(docs["state"], ".saipen/STATE.md", "state", new_state),
     ]
     if _close_is_recovery and task and task in parse_board(docs["board"].text_norm)["tickets"]:
@@ -1255,9 +1699,18 @@ def attempt_lifecycle(
             )
     else:
         result = stop = None
-    now, utc = _now(), _utc_iso()
+    clock = _operation_clock()
     planned = _plan_attempt(
-        Path(project_root), agent, action, result, stop, evidence, unknown, now, utc
+        Path(project_root),
+        agent,
+        action,
+        result,
+        stop,
+        evidence,
+        unknown,
+        clock.now,
+        clock.utc,
+        clock.instant,
     )
     if isinstance(planned, Result):
         return planned
@@ -1383,7 +1836,9 @@ def _plan_transition(
     # silently erase the ticket's verification cycle.
     marker = f"transition to {destination}"
     event_text = marker if not event_text else f"{marker} -- {event_text}"
-    event, line = _event_line(docs, log_tail, "RUN", subject, agent, event_text, now, op_id)
+    event, line = _event_line(
+        docs, log_tail, "RUN", subject, agent, event_text, now, op_id, root=root
+    )
     new_log = docs["log"].text_norm.rstrip("\n") + "\n" + line + "\n"
     if destination in phases.TICKET_BEARING_PHASES:
         na = f"PHASE {destination} {subject}"
@@ -1410,10 +1865,15 @@ def _plan_transition(
     if destination == "REVIEW" and current == "VERIFY" and state.get("execution_intent") == "goal":
         tickets = int(state.get("goal_tickets") or 0)
         new_tickets = tickets + 1
-        from .log import build_event as _build_event
-
-        dec_event, dec_line = _build_event(
-            event, "DEC", f"goal_tickets {tickets}->{new_tickets}", now=now, op_id=op_id
+        dec_event, dec_line = _producer_event(
+            docs,
+            event,
+            "DEC",
+            f"goal_tickets {tickets}->{new_tickets}",
+            ticket=None,
+            agent=agent,
+            now=now,
+            op_id=op_id,
         )
         new_log = new_log.rstrip("\n") + "\n" + dec_line + "\n"
         cap_reached = new_tickets >= GOAL_TICKET_CAP
@@ -1433,10 +1893,15 @@ def _plan_transition(
     elif destination == "ADD" and current == "HUNT" and state.get("execution_intent") == "goal":
         waves = int(state.get("goal_waves") or 0)
         new_waves = waves + 1
-        from .log import build_event as _build_event
-
-        wave_event, wave_line = _build_event(
-            event, "DEC", f"goal_waves {waves}->{new_waves}", now=now, op_id=op_id
+        wave_event, wave_line = _producer_event(
+            docs,
+            event,
+            "DEC",
+            f"goal_waves {waves}->{new_waves}",
+            ticket=None,
+            agent=agent,
+            now=now,
+            op_id=op_id,
         )
         new_log = new_log.rstrip("\n") + "\n" + wave_line + "\n"
         cap_reached = new_waves >= GOAL_WAVE_CAP
@@ -1464,7 +1929,7 @@ def _plan_transition(
         )
 
     targets = [
-        _target(docs["log"], ".saipen/LOG.md", "log", new_log),
+        *_log_targets(docs, new_log),
     ]
     if refreshed_board is not None:
         targets.append(_target(docs["board"], ".saipen/BOARD.md", "board", new_board))
@@ -1483,7 +1948,13 @@ def _plan_transition(
         "transition",
         agent,
         _identity(root),
-        {"operation": "transition", "destination": destination, "ticket": subject, "agent": agent},
+        {
+            "operation": "transition",
+            "destination": destination,
+            "from_phase": current,
+            "ticket": subject,
+            "agent": agent,
+        },
         _docs_preconditions(docs, "state", "board", "log"),
         targets,
         expected,
@@ -1505,8 +1976,106 @@ def transition_phase(
     if isinstance(plan, Result):
         return plan
     if dry_run:
+        # SRC-026:R004 -- the preview path invokes ZERO mutating baseline
+        # primitives: the pre-BUILD debt baseline is established only on the
+        # real APPLY path, never during planning or dispatch.
         return _render_plan(plan)
+    # SRC-026:R004 / W2-001 -- a real SCOUT -> BUILD transition establishes
+    # the exact pre-BUILD debt baseline BEFORE BUILD authority is committed.
+    # A baseline failure is a deterministic structured refusal: the phase
+    # stays SCOUT, no transition event exists and no canonical surface moved.
+    _baseline = _establish_pre_build_baseline(Path(project_root), plan, agent)
+    if _baseline is not None:
+        return _baseline
     return apply_plan(Path(project_root), plan)
+
+
+def _establish_pre_build_baseline(
+    root: Path, plan: "OperationPlan", agent: str
+) -> Result | None:
+    """Establish the pre-BUILD debt baseline for a real SCOUT -> BUILD plan.
+
+    Returns None when the plan is not a SCOUT -> BUILD transition (nothing to
+    do) or when the baseline was established/reused successfully. Returns a
+    structured refusal Result when the baseline could not be established --
+    BUILD authority is then never committed (fail-closed).
+
+    Ordering invariant: the baseline is a separate journaled operation that
+    commits BEFORE the transition applies. If the process dies between the
+    two, recovery replays idempotently: ``ensure_debt_baseline`` reuses the
+    committed snapshot for the same Work + checkpoint and the transition
+    applies on the retry. The invariant "BUILD without baseline" is
+    unreachable: the transition only applies after the baseline is verified.
+    """
+    from .debt import DebtRefusal, ensure_debt_baseline, load_snapshot
+    from .errors import CODES
+
+    def _baseline_refuse(code: object, detail: str, *, ticket: str) -> Result:
+        # The debt baseline speaks its OWN internal diagnostic vocabulary
+        # (`FINDINGS_CAPTURE_FAILED`, `BASELINE_RULESET_CHANGED`, ...), which
+        # is NOT the public operation Result vocabulary. Feeding one straight
+        # into `Result` raises ValueError and turns a promised deterministic
+        # structured refusal into a crash (W2-003 class). A code outside the
+        # closed set becomes VALIDATION_FAILED, with the internal code and
+        # detail preserved VERBATIM in the message so the cause is never lost.
+        text = str(code)
+        if text not in CODES:
+            return _refuse(
+                "VALIDATION_FAILED", f"{text}: {detail}", ticket=ticket
+            )
+        return _refuse(text, detail, ticket=ticket)
+
+    request = plan.semantic_request
+    if request.get("operation") != "transition":
+        return None
+    if request.get("destination") != "BUILD" or request.get("from_phase") != "SCOUT":
+        return None
+    subject = request.get("ticket")
+    if not subject:
+        return None
+    try:
+        baseline = ensure_debt_baseline(root, subject, agent, plan.created_at)
+    except DebtRefusal as refusal:
+        return _baseline_refuse(
+            refusal.code,
+            f"pre-BUILD baseline establishment failed for {subject}: {refusal.detail}",
+            ticket=subject,
+        )
+    if not baseline.get("ok"):
+        return _baseline_refuse(
+            baseline.get("code", "VALIDATION_FAILED"),
+            "pre-BUILD baseline establishment failed for "
+            + str(subject)
+            + ": "
+            + str(baseline.get("detail") or baseline),
+            ticket=subject,
+        )
+    snapshot_id = baseline.get("snapshot_id")
+    if not snapshot_id:
+        return _refuse(
+            "VALIDATION_FAILED",
+            f"pre-BUILD baseline for {subject} returned no snapshot identity",
+            ticket=subject,
+        )
+    # Verify the EXACT committed baseline identity before BUILD authority:
+    # the snapshot must load fail-closed and be bound to this Work.
+    try:
+        record = load_snapshot(root, snapshot_id)
+    except DebtRefusal as refusal:
+        return _baseline_refuse(
+            refusal.code,
+            f"pre-BUILD baseline {snapshot_id} failed verification for {subject}: "
+            f"{refusal.detail}",
+            ticket=subject,
+        )
+    if record.get("bound_work") != subject:
+        return _baseline_refuse(
+            "DEBT_SNAPSHOT_FOREIGN_WORK",
+            f"pre-BUILD baseline {snapshot_id} is bound to "
+            f"{record.get('bound_work')!r}, not {subject}",
+            ticket=subject,
+        )
+    return None
 
 
 # ------------------------------------------------------------- checkpoint
@@ -1610,7 +2179,7 @@ def _plan_checkpoint(
         )
 
     targets = [
-        _target(docs["log"], ".saipen/LOG.md", "log", new_log),
+        *_log_targets(docs, new_log),
     ]
     if refreshed_board is not None:
         targets.append(_target(docs["board"], ".saipen/BOARD.md", "board", new_board))
@@ -1701,6 +2270,7 @@ def next_ticket_id(board_text: str, log_text: str, history_max_ticket_id: int | 
 
 
 def _insert_todo(board_text: str, line: str) -> str:
+    assert_live_record(line)
     lines = board_text.splitlines(keepends=True)
     todo_idx = next(i for i, ln in enumerate(lines) if ln.startswith("## TODO"))
     lines.insert(todo_idx + 1, line + "\n")
@@ -1708,9 +2278,28 @@ def _insert_todo(board_text: str, line: str) -> str:
 
 
 def _ticket_targets(
-    root: Path, action: str, ticket_id: str, agent: str, payload: str, now: str, utc: str
+    root: Path,
+    action: str,
+    ticket_id: str,
+    agent: str,
+    payload: str,
+    now: str,
+    utc: str,
+    scope: str | None = None,
+    blocked_on: str | None = None,
 ) -> OperationPlan | Result:
     op_id = "ticket-" + uuid4_hex()
+    # CORE-003: blocker SCOPE is the difference between "this task is stuck"
+    # and "nothing can be done at all". The FastPrompter loop stopped because
+    # the protocol had only the second meaning, so parking one ticket parked
+    # everything. An undeclared scope reads as `ticket`.
+    _scope = (scope or DEFAULT_BLOCKER_SCOPE).strip().lower()
+    if action in ("block", "block-for") and _scope not in BLOCKER_SCOPES:
+        return _refuse(
+            "VALIDATION_FAILED",
+            f"blocker scope {scope!r} is outside {'|'.join(BLOCKER_SCOPES)}",
+            ticket=ticket_id,
+        )
     docs, state, board, log_tail = _read(root)
     # SELF-ownership gate (second-wave P0): blocking the active DOING ticket
     # parks A's live claim; a session may only do that over its own claim.
@@ -1739,7 +2328,7 @@ def _ticket_targets(
             "together)",
             ticket=ticket_id,
         )
-    elif action == "block":
+    elif action in ("block", "block-for"):
         if not payload or not payload.strip():
             return _refuse(
                 "VALIDATION_FAILED",
@@ -1749,7 +2338,7 @@ def _ticket_targets(
         if ticket["section"] not in ("## DOING", "## TODO"):
             return _refuse(
                 "ILLEGAL_TICKET_LIFECYCLE",
-                f"block accepts DOING or TODO; {ticket_id} is under {ticket['section']}",
+                f"{action} accepts DOING or TODO; {ticket_id} is under {ticket['section']}",
                 ticket=ticket_id,
             )
         target_section, checkbox = "## BLOCKED", "[ ]"
@@ -1782,13 +2371,42 @@ def _ticket_targets(
     # The ACTIVE case must be provable from the LOG alone: the block event
     # carries an explicit (active) marker so the validator's block-park
     # exception can never be satisfied by a TODO-ticket block event.
+    if action == "block-for":
+        child_id = str(blocked_on or "").strip()
+        if not re.fullmatch(r"T-\d+", child_id):
+            return _refuse(
+                "VALIDATION_FAILED",
+                "block-for requires one child blocker T-### identity",
+                ticket=ticket_id,
+            )
+        child = tickets.get(child_id)
+        if child is None:
+            return _refuse("TICKET_NOT_FOUND", f"blocker {child_id} not on the board")
+        if child_id == ticket_id:
+            return _refuse("VALIDATION_FAILED", "a ticket cannot block on itself", ticket=ticket_id)
+        if child.get("section") != "## TODO" or not ticket_is_workable(
+            child, tickets, agent=agent
+        ):
+            return _refuse(
+                "TICKET_NOT_WORKABLE",
+                f"blocker {child_id} must be a workable ## TODO ticket",
+                ticket=child_id,
+            )
+        for candidate in tickets.values():
+            if str(candidate.get("fields", {}).get("blocked_on", "")).strip() == child_id:
+                return _refuse(
+                    "CONTINUATION_RESERVED",
+                    f"{child_id} already resumes parent {candidate['id']}",
+                    ticket=child_id,
+                )
+
     is_active_block = (
-        action == "block"
+        action in ("block", "block-for")
         and state.get("task") == ticket_id
         and ticket["section"] == "## DOING"
         and state.get("phase") in phases.TICKET_BEARING_PHASES
     )
-    if action == "block" and ticket["section"] == "## DOING" and not is_active_block:
+    if action in ("block", "block-for") and ticket["section"] == "## DOING" and not is_active_block:
         return _refuse(
             "ILLEGAL_TICKET_LIFECYCLE",
             f"blocking DOING ticket {ticket_id} requires a "
@@ -1805,17 +2423,65 @@ def _ticket_targets(
         "DEC",
         ticket_id,
         agent,
-        f"ticket {action} via SAIOPS"
+        f"ticket {'block' if action == 'block-for' else action} via SAIOPS"
         + (" (active)" if is_active_block else "")
+        + (f" -- dependency {child_id}" if action == "block-for" else "")
         + (f" -- {_safe_payload}" if _safe_payload else ""),
         now,
         op_id,
+        root=root,
     )
     new_log = docs["log"].text_norm.rstrip("\n") + "\n" + line + "\n"
     # T-1101: redact credentials in the payload before it reaches BOARD
-    new_board = _move_ticket(
-        docs["board"].text_norm, ticket_id, target_section, checkbox, action, _safe_payload
-    )
+    block_payload = _safe_payload
+    if action == "block-for":
+        block_payload = f"ACTIVE_DEPENDENCY:{child_id} -- {_safe_payload}"
+
+    def _propose_moved(board: str) -> str:
+        moved = _move_ticket(
+            board,
+            ticket_id,
+            target_section,
+            checkbox,
+            "block" if action == "block-for" else action,
+            block_payload,
+            blocker_scope=_scope if action in ("block", "block-for") else None,
+            enforce_cap=False,
+        )
+        if action == "block-for":
+            needs = list(ticket.get("needs", []))
+            if child_id not in needs:
+                needs.append(child_id)
+            moved = _ticket_fields_in_place(
+                moved,
+                ticket_id,
+                {
+                    "needs": ",".join(needs),
+                    "blocked_on": child_id,
+                    "resume_phase": str(state.get("phase")),
+                    "resume_transition_from": str(state.get("transition_from")),
+                },
+                enforce_cap=False,
+            )
+        return moved
+
+    try:
+        projected = _project_board_mutation(
+            root,
+            docs["board"].text_norm,
+            _propose_moved,
+            [ticket_id],
+            op_id=op_id,
+            event_id=f"E-{event}",
+            reason=(
+                "existing/proposed oversized BOARD record requires canonical ticket "
+                f"{action} update"
+            ),
+        )
+    except ValueError as exc:
+        return _refuse("VALIDATION_FAILED", str(exc), ticket=ticket_id)
+    new_board = projected.board_text
+    compaction_targets = list(projected.targets)
     owned = {
         "last_event": event,
         "updated": utc,
@@ -1856,16 +2522,24 @@ def _ticket_targets(
     # the topmost-workable order the neutral state's next_action points at.
     from .router import route_next
 
-    if action in ("block", "unblock") and not str(state.get("next_action") or "").startswith(
+    if action in ("block", "block-for", "unblock") and not str(
+        state.get("next_action") or ""
+    ).startswith(
         "WAIT:"
     ):
         _neutral = state.get("task") in (None, "none") and not any(
             t["section"] == "## DOING" for t in parse_board(new_board)["tickets"].values()
         )
         if _neutral or is_active_block:
+            # CORE-003: settle the stop reason BEFORE routing, so the router
+            # reads the same state that will be persisted and the two cannot
+            # disagree about whether the loop is goal-blocked.
+            new_state = _settle_stop_reason(new_state, new_board, agent)
             routed = route_next(new_state, new_board, current_agent=agent)
             if routed.get("ok"):
                 new_state = patch_state(new_state, {"next_action": routed["action"]})
+    else:
+        new_state = _settle_stop_reason(new_state, new_board, agent)
 
     errors = validate_texts(
         new_state, new_board, new_log, current_agent=agent, sealed_events=docs["_history"]
@@ -1876,7 +2550,8 @@ def _ticket_targets(
         )
 
     targets = [
-        _target(docs["log"], ".saipen/LOG.md", "log", new_log),
+        *_log_targets(docs, new_log),
+        *compaction_targets,
         _target(docs["board"], ".saipen/BOARD.md", "board", new_board),
         _target(docs["state"], ".saipen/STATE.md", "state", new_state),
     ]
@@ -1884,12 +2559,73 @@ def _ticket_targets(
         "ticket_move",
         agent,
         _identity(root),
-        {"operation": "ticket_move", "action": action, "ticket": ticket_id},
+        {
+            "operation": "ticket_move",
+            "action": action,
+            "ticket": ticket_id,
+            "blocked_on": blocked_on,
+        },
         _docs_preconditions(docs, "state", "board", "log"),
         targets,
-        {"ok": True, "code": action.upper(), "ticket": ticket_id, "event_id": f"E-{event}"},
+        {
+            "ok": True,
+            "code": "BLOCKED_FOR" if action == "block-for" else action.upper(),
+            "ticket": ticket_id,
+            "blocked_on": blocked_on,
+            "event_id": f"E-{event}",
+        },
         op_id=op_id,
     )
+
+
+def closure_request_error(
+    closure_mode: str | None,
+    closure_cohort: str | None,
+    implementation_source: str | None,
+    closure_paths,
+) -> str | None:
+    """Why this closure request is malformed, or None (CORE-003).
+
+    ONE grammar check, evaluated BEFORE any plan is built so every refusal is
+    zero-write. It is separate from the resolver on purpose: "you did not name
+    an authority" and "the authority you named is not published" are different
+    findings and an agent has to be able to tell them apart.
+    """
+    mode = (closure_mode or DEFAULT_CLOSURE_MODE).strip()
+    if mode not in CLOSURE_MODES:
+        return (
+            f"closure_mode {closure_mode!r} is outside "
+            f"{'|'.join(CLOSURE_MODES)}"
+        )
+    if mode == "inherited_verified" and not (implementation_source or "").strip():
+        return (
+            "closure_mode inherited_verified requires --implementation-source "
+            "<release:<id>|T-###|SRC-###>: a closure that adds no implementation "
+            "must name the durable authority that published it"
+        )
+    if mode != "inherited_verified" and (implementation_source or "").strip():
+        return (
+            f"--implementation-source is only valid with closure_mode "
+            f"inherited_verified, not {mode}"
+        )
+    if mode == "cohort" and not (closure_cohort or "").strip():
+        return (
+            "closure_mode cohort requires --closure-cohort C-###: a closure_cohort "
+            "authority is what owns the deferred publication"
+        )
+    if mode != "cohort" and (closure_cohort or "").strip():
+        return f"--closure-cohort is only valid with closure_mode cohort, not {mode}"
+    if (closure_cohort or "").strip() and not _COHORT_ID_RE.fullmatch(closure_cohort.strip()):
+        return f"closure_cohort {closure_cohort!r} is not a C-### identity"
+    paths = [str(x).strip() for x in (closure_paths or []) if str(x).strip()]
+    if mode == "cohort" and not paths:
+        return (
+            "closure_mode cohort requires --paths: the shared worktree paths "
+            "this member attributes to the batch are the cohort's scope"
+        )
+    if mode != "cohort" and paths:
+        return f"--paths is only valid with closure_mode cohort, not {mode}"
+    return None
 
 
 def _plan_finish_ticket(
@@ -1902,6 +2638,10 @@ def _plan_finish_ticket(
     digest_done: str | None = None,
     digest_awaiting: str | None = None,
     prefix_run: str | None = None,
+    closure_mode: str | None = None,
+    closure_cohort: str | None = None,
+    implementation_source: str | None = None,
+    closure_paths=None,
 ) -> OperationPlan | Result:
     """PLAN the ONE atomic ticket-closure operation (NITRO dogfood III).
 
@@ -1933,6 +2673,17 @@ def _plan_finish_ticket(
     ticket, ticket identity matches. No split-state window exists.
     """
     op_id = "finish-" + uuid4_hex()
+    # CORE-003: the closure GRAMMAR is checked before the project is even
+    # read, so a malformed request cannot touch the filesystem at all.
+    _grammar = closure_request_error(
+        closure_mode, closure_cohort, implementation_source, closure_paths
+    )
+    if _grammar is not None:
+        return _refuse("VALIDATION_FAILED", _grammar, ticket=ticket_id)
+    _mode = (closure_mode or DEFAULT_CLOSURE_MODE).strip()
+    _cohort_id = (closure_cohort or "").strip()
+    _impl_source = (implementation_source or "").strip()
+    _paths = [str(x).strip().replace("\\", "/") for x in (closure_paths or []) if str(x).strip()]
     docs, state, board, log_tail = _read(root)
     # T-1162: a short BOARD title cannot close Work whose authoritative
     # source still has missing, corrupt, or uncovered clauses. This gate
@@ -2082,6 +2833,13 @@ def _plan_finish_ticket(
             ticket=ticket_id,
         )
 
+    # A parent parked by `ticket block-for` owns the continuation after this
+    # child closes. The relation is read from BOARD authority, never inferred
+    # from prose or queue order. It is consumed below in the SAME journaled
+    # finish transaction, so no unrelated ticket can take the single DOING
+    # seat between child completion and parent resumption.
+    resume_parent = continuation_parent(tickets, ticket_id, require_done=False)
+
     # One LOG completion event naming the ACTUAL closure phase -- the event
     # is the provenance that the gate chain actually ended at SHIP.
     if prefix_run:
@@ -2090,10 +2848,18 @@ def _plan_finish_ticket(
         # journal then carries a SINGLE LOG target whose after-bytes recovery
         # can verify -- a second sequential LOG target would defeat per-target
         # before/after classification.
-        run_event, run_line = build_event(
-            log_tail, "RUN", prefix_run, ticket=ticket_id, agent=agent, now=now, op_id=op_id
+        run_event, run_line = _producer_event(
+            docs,
+            log_tail,
+            "RUN",
+            prefix_run,
+            ticket=ticket_id,
+            agent=agent,
+            now=now,
+            op_id=op_id,
         )
-        event, line = build_event(
+        event, line = _producer_event(
+            docs,
             run_event,
             "DEC",
             f"ticket finished via SAIOPS -- completion (from {prev_phase})",
@@ -2116,27 +2882,163 @@ def _plan_finish_ticket(
         )
         new_log = docs["log"].text_norm.rstrip("\n") + "\n" + line + "\n"
 
-    # BOARD: DOING -> DONE, [/] -> [x], preserve all other fields.
-    new_board = _move_ticket(docs["board"].text_norm, ticket_id, "## DONE", "[x]", "done", "")
+    if resume_parent is not None:
+        parent_id = resume_parent["id"]
+        event, resume_line = _producer_event(
+            docs,
+            event,
+            "DEC",
+            f"blocked parent resumed after dependency {ticket_id} reached DONE",
+            ticket=parent_id,
+            agent=agent,
+            now=now,
+            op_id=op_id,
+        )
+        new_log = new_log.rstrip("\n") + "\n" + resume_line + "\n"
+
+    # CORE-003: closure PROVENANCE. `inherited_verified` is the mode that
+    # closes without a personal patch, so its named authority must resolve to
+    # an ACTUAL durable publication -- one strict resolver, shared with the
+    # validator, that never trusts a bare DONE and refuses cycles.
+    _registry_text = None
+    if _mode == "inherited_verified":
+        from .closure import resolve_implementation_source
+
+        _verdict = resolve_implementation_source(root, _impl_source)
+        if not _verdict.ok:
+            return _refuse("VALIDATION_FAILED", _verdict.detail, ticket=ticket_id)
+    if _mode == "cohort":
+        # Membership is DURABLE authority, not a BOARD adjective: the registry
+        # write is a TARGET of this same journaled closure, so a ticket can
+        # never claim a cohort the registry has never heard of.
+        from . import closure as _closure
+
+        try:
+            _registry = _closure.read_registry(root)
+        except (OSError, ValueError) as exc:
+            return _refuse(
+                "VALIDATION_FAILED", f"cohort registry is unreadable: {exc}", ticket=ticket_id
+            )
+        _existing = (_registry.get("cohorts") or {}).get(_cohort_id) or {}
+        if _existing.get("publication_status") == "shipped":
+            return _refuse(
+                "VALIDATION_FAILED",
+                f"cohort {_cohort_id} is already published; a new member cannot "
+                f"join a shipped batch -- open a new cohort",
+                ticket=ticket_id,
+            )
+        try:
+            _path_hashes = _closure.hash_paths(root, _paths)
+        except FileNotFoundError as exc:
+            return _refuse(
+                "SOURCE_SCOPE_MISSING",
+                f"cohort path {exc.args[0]!r} is missing from the worktree; a "
+                f"cohort binds the LIVE shared bytes",
+                ticket=ticket_id,
+            )
+        _registry = _closure.upsert_member(
+            _registry,
+            _cohort_id,
+            ticket_id,
+            paths=_path_hashes,
+            verification=str(ticket["fields"].get("verify", "")),
+            closed_at=utc,
+            agent=agent,
+        )
+        try:
+            _closure.cohort_scope(_registry["cohorts"][_cohort_id])
+        except ValueError as exc:
+            return _refuse("VALIDATION_FAILED", str(exc), ticket=ticket_id)
+        _registry_text = _closure.render_registry(_registry)
+
+    compaction_ids = [ticket_id]
+    if resume_parent is not None:
+        compaction_ids.append(resume_parent["id"])
+
+    def _propose_closed(board: str) -> str:
+        # BOARD: DOING -> DONE, [/] -> [x], preserve all other fields.
+        closed = _move_ticket(board, ticket_id, "## DONE", "[x]", "done", "", enforce_cap=False)
+        closed = _set_closure_fields(
+            closed,
+            ticket_id,
+            mode=_mode,
+            cohort=_cohort_id,
+            implementation_source=_impl_source,
+            paths=_paths,
+            enforce_cap=False,
+        )
+        if resume_parent is not None:
+            parent_tid = resume_parent["id"]
+            closed = _move_ticket(
+                closed, parent_tid, "## DOING", "[/]", "resume", "", enforce_cap=False
+            )
+            closed = _ticket_fields_in_place(
+                closed,
+                parent_tid,
+                {"owner": agent, "claim_time": utc},
+                remove=(
+                    "blocker",
+                    "blocker_scope",
+                    "blocked_on",
+                    "resume_phase",
+                    "resume_transition_from",
+                ),
+                enforce_cap=False,
+            )
+        return closed
+
+    try:
+        projected = _project_board_mutation(
+            root,
+            docs["board"].text_norm,
+            _propose_closed,
+            compaction_ids,
+            op_id=op_id,
+            event_id=f"E-{event}",
+            reason=(
+                "existing/proposed oversized BOARD record requires canonical ticket "
+                "completion update"
+            ),
+        )
+    except ValueError as exc:
+        return _refuse("VALIDATION_FAILED", str(exc), ticket=ticket_id)
+    new_board = projected.board_text
+    compaction_targets = list(projected.targets)
 
     # STATE: phase -> DONE, task -> none, transition_from -> the ACTUAL
     # previous phase (SHIP), and the next_action computed from the RESULTING
     # proposed state.
-    owned = {
-        "phase": "DONE",
-        "task": "none",
-        "next_action": "saipen continue",
-        "transition_from": closure_from,
-        "last_event": event,
-        "updated": utc,
-        "agent": agent,
-    }
+    if resume_parent is None:
+        owned = {
+            "phase": "DONE",
+            "task": "none",
+            "next_action": "saipen continue",
+            "transition_from": closure_from,
+            "last_event": event,
+            "updated": utc,
+            "agent": agent,
+        }
+    else:
+        parent_id = resume_parent["id"]
+        parent_fields = resume_parent.get("fields", {})
+        resume_phase = str(parent_fields.get("resume_phase", ""))
+        resume_from = str(parent_fields.get("resume_transition_from", ""))
+        owned = {
+            "phase": resume_phase,
+            "task": parent_id,
+            "next_action": f"PHASE {resume_phase} {parent_id}",
+            "transition_from": resume_from,
+            "last_event": event,
+            "updated": utc,
+            "agent": agent,
+        }
     new_state = patch_state(docs["state"].text_norm, owned)
     from .router import route_next
 
-    routed = route_next(new_state, new_board, current_agent=agent)
-    if routed.get("ok") and routed.get("action") != "saipen continue":
-        new_state = patch_state(new_state, {"next_action": routed["action"]})
+    if resume_parent is None:
+        routed = route_next(new_state, new_board, current_agent=agent)
+        if routed.get("ok") and routed.get("action") != "saipen continue":
+            new_state = patch_state(new_state, {"next_action": routed["action"]})
 
     errors = validate_texts(
         new_state, new_board, new_log, current_agent=agent, sealed_events=docs["_history"]
@@ -2148,10 +3050,24 @@ def _plan_finish_ticket(
         )
 
     targets = [
-        _target(docs["log"], ".saipen/LOG.md", "log", new_log),
+        *_log_targets(docs, new_log),
+        *compaction_targets,
         _target(docs["board"], ".saipen/BOARD.md", "board", new_board),
         _target(docs["state"], ".saipen/STATE.md", "state", new_state),
     ]
+    # The cohort registry commits in the SAME journaled transaction as the
+    # BOARD line that names it: membership and its claim are one fact.
+    if _registry_text is not None:
+        registry_doc = codec.read_document(root / ".saipen" / "kitchen" / "cohort_registry.json")
+        targets.append(
+            TargetPlan(
+                ".saipen/kitchen/cohort_registry.json",
+                "report",
+                registry_doc.encode(_registry_text),
+                _live_before(root, ".saipen/kitchen/cohort_registry.json", registry_doc),
+                hash_bytes(registry_doc.encode(_registry_text)),
+            )
+        )
     # T-994 / § 16: the release closure OWNS the human digest. ship.md's
     # digest is a PLAN TARGET of the same journaled closure so a ship can
     # never report RELEASED with a stale/missing digest. Ordinary `ticket
@@ -2163,20 +3079,23 @@ def _plan_finish_ticket(
                 ".saipen/kitchen/digest.md",
                 "report",
                 digest_doc.encode(digest_text),
-                digest_doc.raw_hash,
+                _live_before(root, ".saipen/kitchen/digest.md", digest_doc),
                 hash_bytes(digest_doc.encode(digest_text)),
             )
         )
+    final_state = parse_state(new_state)
     expected = {
         "ok": True,
         "code": "FINISHED",
         "ticket": ticket_id,
         "event_id": f"E-{event}",
-        "phase": "DONE",
-        "task": "none",
-        "next_action": routed.get("action"),
-        "transition_from": closure_from,
+        "phase": final_state.get("phase"),
+        "task": final_state.get("task"),
+        "next_action": final_state.get("next_action"),
+        "transition_from": final_state.get("transition_from"),
     }
+    if resume_parent is not None:
+        expected["resumed_parent"] = resume_parent["id"]
     if digest_text is not None:
         expected["digest"] = str(root / ".saipen" / "kitchen" / "digest.md")
     return build_plan(
@@ -2201,6 +3120,10 @@ def finish_ticket(
     digest_done: str | None = None,
     digest_awaiting: str | None = None,
     prefix_run: str | None = None,
+    closure_mode: str | None = None,
+    closure_cohort: str | None = None,
+    implementation_source: str | None = None,
+    closure_paths=None,
 ) -> Result:
     """Atomically finish a ticket: LOG + BOARD + STATE in ONE journaled plan.
     The public `ticket done` semantics become this operation.
@@ -2223,6 +3146,10 @@ def finish_ticket(
         digest_done=digest_done,
         digest_awaiting=digest_awaiting,
         prefix_run=prefix_run,
+        closure_mode=closure_mode,
+        closure_cohort=closure_cohort,
+        implementation_source=implementation_source,
+        closure_paths=closure_paths,
     )
     if isinstance(plan, Result):
         return plan
@@ -2231,8 +3158,67 @@ def finish_ticket(
     return apply_plan(root, plan)
 
 
+_COHORT_ID_RE = re.compile(r"C-\d+")
+
+
+def _set_closure_fields(
+    board_text: str,
+    ticket_id: str,
+    *,
+    mode: str,
+    cohort: str,
+    implementation_source: str,
+    paths,
+    enforce_cap: bool = True,
+) -> str:
+    """Write closure provenance onto the DONE line, surgically (CORE-003).
+
+    Every mode records `closure_mode` -- including the default -- because a
+    DONE line that says nothing about its provenance is exactly the ambiguity
+    the FastPrompter incident turned into a stall: nobody could tell whether
+    the ticket owed a patch. `implementation_delta: none` is written only when
+    the closure genuinely added no code, so its presence is information rather
+    than boilerplate.
+    """
+    parsed = parse_board(board_text)
+    ticket = parsed["tickets"].get(ticket_id)
+    if ticket is None:
+        raise ValueError(f"cannot locate closed ticket {ticket_id}")
+    raw = ticket["raw"].rstrip("\n")
+    new = set_ticket_field(raw, "closure_mode", mode, enforce_cap=enforce_cap)
+    if mode == "inherited_verified":
+        new = set_ticket_field(new, "implementation_delta", "none", enforce_cap=enforce_cap)
+        new = set_ticket_field(
+            new,
+            "implementation_source",
+            escape_ticket_description(implementation_source),
+            enforce_cap=enforce_cap,
+        )
+    if mode == "cohort":
+        new = set_ticket_field(new, "closure_cohort", cohort, enforce_cap=enforce_cap)
+        new = set_ticket_field(
+            new,
+            "closure_paths",
+            escape_ticket_description(", ".join(paths)),
+            enforce_cap=enforce_cap,
+        )
+    lines = board_text.splitlines(keepends=True)
+    idx = ticket["line_no"] - 1
+    suffix = "\n" if lines[idx].endswith("\n") else ""
+    lines[idx] = new + suffix
+    return "".join(lines)
+
+
 def _move_ticket(
-    board_text: str, ticket_id: str, target_section: str, checkbox: str, action: str, payload: str
+    board_text: str,
+    ticket_id: str,
+    target_section: str,
+    checkbox: str,
+    action: str,
+    payload: str,
+    blocker_scope: str | None = None,
+    *,
+    enforce_cap: bool = True,
 ) -> str:
     lines = board_text.splitlines(keepends=True)
     out = []
@@ -2259,14 +3245,30 @@ def _move_ticket(
     elif action == "block":
         marked = ticket_line.replace("- [/] ", "- [ ] ", 1)
         marked = set_ticket_field(
-            marked, "blocker", escape_ticket_description(payload or "blocked")
+            marked,
+            "blocker",
+            escape_ticket_description(payload or "blocked"),
+            enforce_cap=enforce_cap,
+        )
+        marked = set_ticket_field(
+            marked,
+            "blocker_scope",
+            blocker_scope or DEFAULT_BLOCKER_SCOPE,
+            enforce_cap=enforce_cap,
         )
     elif action == "unblock":
         marked = ticket_line.replace("- [/] ", "- [ ] ", 1)
         marked = remove_ticket_field(marked, "blocker")
+        # The scope described THAT block; leaving it on an unblocked ticket
+        # would be stale advisory data the parser then refuses outside BLOCKED.
+        marked = remove_ticket_field(marked, "blocker_scope")
         marked = remove_ticket_field(marked, "verify_attempts")
+    elif action == "resume":
+        marked = ticket_line.replace("- [ ] ", "- [/] ", 1)
     else:  # pragma: no cover
         marked = ticket_line.replace("- [/] ", "- [ ] ", 1)
+    if enforce_cap:
+        assert_live_record(marked.rstrip())
     out.insert(target_idx + 1, marked.rstrip() + "\n")
     return "".join(out)
 
@@ -2301,20 +3303,22 @@ def ticket_add(
     root = Path(project_root)
     if not description or not description.strip():
         return _refuse("INCOMPLETE_TICKET", "ticket description is required (semantic input)")
-    if "\n" in description or "\r" in description:
-        return _refuse(
-            "VALIDATION_FAILED",
-            "ticket description may not contain line breaks -- "
-            "one ticket_add must render exactly one ticket line",
-        )
     if _is_placeholder_verify(verify):
         return _refuse(
             "INCOMPLETE_TICKET",
             "verify is a placeholder; a ticket needs a real DONE proof (no TBD/TODO/empty)",
             verify=verify,
         )
-    if "\n" in verify or "\r" in verify:
-        return _refuse("VALIDATION_FAILED", "verify text may not contain line breaks")
+    # CORE-003 / SRC-026:R003, ONE shared record-boundary predicate (not two
+    # ad-hoc \\n/\\r tests): a scalar that carries ANY physical record
+    # separator could render as two BOARD records, the second an
+    # authoritative ticket line no allocator ever issued. Refuse BEFORE any
+    # durable write.
+    for scalar_name, scalar_value in (("description", description), ("verify", verify)):
+        try:
+            assert_single_record(scalar_value, scalar_name)
+        except ValueError as exc:
+            return _refuse("VALIDATION_FAILED", str(exc))
     op_id = "ticket-" + uuid4_hex()
     now, utc = _now(), _utc_iso()
     docs, _state, board, log_tail = _read(root)
@@ -2335,31 +3339,60 @@ def ticket_add(
     for need in needs:
         if need not in board["tickets"]:
             return _refuse("TICKET_NOT_FOUND", f"dangling needs: {need}")
-    description = escape_ticket_description(redact_credentials(description))
-    verify = escape_ticket_description(redact_credentials(verify))
+    # T-1326 TARGET D: `semantic_*` is the redacted VALUE; `description`/
+    # `verify` below are its BOARD SERIALIZATION. The full serialized record is
+    # the externalized byte authority, and the compact projection serializes
+    # each semantic scalar exactly once -- escaping the value here and again in
+    # the projection double-escaped literal pipe/backslash content.
+    semantic_description = redact_credentials(description)
+    semantic_verify = redact_credentials(verify)
+    description = escape_ticket_description(semantic_description)
+    verify = escape_ticket_description(semantic_verify)
     desc = (
         f"- [ ] T-{tid} [{priority}] {description}"
         + (f" | needs: {', '.join(needs)}" if needs else "")
         + f" | verify: {verify}"
     )
-    new_board = _insert_todo(docs["board"].text_norm, desc)
     event, line = _event_line(
         docs,
         log_tail,
         "DEC",
         f"T-{tid}",
         agent,
-        _fold_handover(_state, agent, "ticket added via SAIOPS"),
+        _actor_provenance(_state, agent, "ticket added via SAIOPS"),
         now,
         op_id,
     )
+
+    new_projection = prepare_new(
+        root,
+        desc,
+        f"T-{tid}",
+        priority=priority,
+        description=semantic_description,
+        needs=needs,
+        verify=semantic_verify,
+        op_id=op_id,
+        event_id=f"E-{event}",
+    )
+    new_board = _insert_todo(docs["board"].text_norm, new_projection.board_text.rstrip("\n"))
     new_log = docs["log"].text_norm.rstrip("\n") + "\n" + line + "\n"
     owned = {
         "last_event": event,
         "updated": utc,
-        "agent": agent,
+        # CORE-001 CONTROL A: filing FUTURE Work is an out-of-band operation.
+        # It must not move the execution seat off the agent that owns the
+        # active ticket -- the exact E-5941 split. The acting identity is in
+        # the event's actor provenance instead. The seat is PRESERVED from
+        # the BEFORE snapshot; a corrupt BEFORE ownership state refuses
+        # (OwnershipSplitError) instead of being silently healed.
     }
+    try:
+        owned["agent"] = _seat_agent(_state, docs["board"].text_norm, agent)
+    except OwnershipSplitError as exc:
+        return _refuse("VALIDATION_FAILED", str(exc))
     new_state = patch_state(docs["state"].text_norm, owned)
+    new_state = _recompute_free_slot_route(new_state, new_board, _state, agent)
 
     errors = validate_texts(
         new_state, new_board, new_log, current_agent=agent, sealed_events=docs["_history"]
@@ -2370,7 +3403,8 @@ def ticket_add(
         )
 
     targets = [
-        _target(docs["log"], ".saipen/LOG.md", "log", new_log),
+        *_log_targets(docs, new_log),
+        *new_projection.targets,
         _target(docs["board"], ".saipen/BOARD.md", "board", new_board),
         _target(docs["state"], ".saipen/STATE.md", "state", new_state),
     ]
@@ -2395,6 +3429,715 @@ def ticket_add(
 
 
 @_state_guard
+def compact_board(
+    project_root: Path | str,
+    ticket_id: str,
+    agent: str,
+    dry_run: bool = False,
+) -> Result:
+    """Canonical, lossless projection repair for one legacy BOARD row."""
+    root = Path(project_root)
+    op_id = "board-compact-" + uuid4_hex()
+    now, utc = _now(), _utc_iso()
+    docs, state, board, log_tail = _read(root)
+    board_text = docs["board"].text_norm
+    # Tolerant READ, strict WRITE. T-1326 TARGET C: ONE canonical compaction
+    # rewrites EVERY repairable oversized row, so N>1 refused-field rows have a
+    # reachable path instead of each naming a command the other row would
+    # refuse. A refused unknown field on a row this plan rewrites is
+    # repairable (its full physical bytes are journaled first); any other parse
+    # fault -- or a refused field on a row this plan does NOT rewrite -- still
+    # refuses here, and validate_texts below re-proves strict validity.
+    repairable = oversized_ticket_ids(board_text)
+    if board["errors"]:
+        allowed = set(repairable)
+        if not allowed or any(
+            unrecognized_field_ticket(error) not in allowed for error in board["errors"]
+        ):
+            return _refuse(
+                "VALIDATION_FAILED",
+                "BOARD parse error(s): " + "; ".join(board["errors"][:3]),
+                ticket=ticket_id,
+            )
+    ticket = board["tickets"].get(ticket_id)
+    if ticket is None:
+        return _refuse("TICKET_NOT_FOUND", f"{ticket_id} not on the board", ticket=ticket_id)
+    if ticket_id not in repairable:
+        if len(str(ticket.get("raw", ""))) <= MAX_LIVE_RECORD_CHARS:
+            detail_ref = str(ticket.get("fields", {}).get("detail_ref") or "").strip()
+            if detail_ref:
+                try:
+                    resolve_detail(root, detail_ref, expected_ticket_id=ticket_id)
+                except (OSError, ValueError, UnicodeError) as exc:
+                    return _refuse(
+                        "VALIDATION_FAILED",
+                        f"existing BOARD detail reference is not resolvable: {exc}",
+                        ticket=ticket_id,
+                    )
+                return Result(
+                    True,
+                    "ALREADY_APPLIED",
+                    data={"ticket": ticket_id, "detail_ref": detail_ref, "idempotent": True},
+                    message="BOARD legacy compaction already committed",
+                )
+        return _refuse(
+            "VALIDATION_FAILED",
+            f"{ticket_id} is already within the {MAX_LIVE_RECORD_CHARS}-character BOARD cap",
+            ticket=ticket_id,
+        )
+    # T-1326 TARGET C: ONE DEC event PER compacted row in the SAME journaled
+    # plan. The fast gate requires every workable BOARD record to have its own
+    # `[T-###]` event in the history; a single-row DEC would leave the other
+    # rows it just rewrote "detached" and refuse the very multi-row repair that
+    # exists to make them canonical.
+    event_lines: list[str] = []
+    event_numbers: list[int] = []
+    tail = log_tail
+    for tid in repairable:
+        event, line = _event_line(
+            docs,
+            tail,
+            "DEC",
+            tid,
+            agent,
+            "legacy oversized BOARD record compacted losslessly via SAIOPS",
+            now,
+            op_id,
+        )
+        tail = event
+        event_numbers.append(event)
+        event_lines.append(line)
+    try:
+        compacted = prepare_existing(
+            root,
+            board_text,
+            repairable,
+            op_id=op_id,
+            # T-1326 P2: one DEC per row above, so each row's detail metadata
+            # names ITS OWN event -- never the first row's.
+            event_id={
+                tid: f"E-{number}" for tid, number in zip(repairable, event_numbers)
+            },
+            reason="explicit canonical legacy BOARD compaction",
+            tolerated_ids=set(repairable),
+        )
+    except ValueError as exc:
+        return _refuse("VALIDATION_FAILED", str(exc), ticket=ticket_id)
+    new_log = (
+        docs["log"].text_norm.rstrip("\n")
+        + "\n"
+        + "".join(single + "\n" for single in event_lines)
+    )
+    new_state = patch_state(
+        docs["state"].text_norm,
+        {
+            "last_event": event_numbers[-1],
+            "updated": utc,
+            "agent": _seat_agent(state, docs["board"].text_norm, agent),
+        },
+    )
+    errors = validate_texts(
+        new_state,
+        compacted.board_text,
+        new_log,
+        current_agent=agent,
+        sealed_events=docs["_history"],
+    )
+    if errors:
+        return _refuse(
+            "VALIDATION_FAILED",
+            "proposed BOARD compaction fails fast validation: " + "; ".join(errors[:5]),
+            ticket=ticket_id,
+        )
+    targets = [
+        *compacted.targets,
+        *_log_targets(docs, new_log),
+        _target(docs["board"], ".saipen/BOARD.md", "board", compacted.board_text),
+        _target(docs["state"], ".saipen/STATE.md", "state", new_state),
+    ]
+    plan = build_plan(
+        "board_legacy_compaction",
+        agent,
+        _identity(root),
+        {"operation": "board_legacy_compaction", "ticket": ticket_id},
+        _docs_preconditions(docs, "state", "board", "log"),
+        targets,
+        {
+            "ok": True,
+            "code": "BOARD_COMPACTED",
+            "ticket": ticket_id,
+            "event_id": f"E-{event_numbers[0]}",
+            "detail_ref": compacted.detail_ref,
+        },
+        op_id=op_id,
+        receipt_metadata={
+            "operation": "board_legacy_compaction",
+            "status": "COMMITTED",
+            "ticket": ticket_id,
+            "detail_ref": compacted.detail_ref,
+            "original_record_sha256": compacted.original_hash,
+            "event_id": f"E-{event_numbers[0]}",
+            "reason": "lossless historical BOARD repair",
+        },
+    )
+    if dry_run:
+        return _render_plan(plan)
+    return apply_plan(root, plan)
+
+
+@_state_guard
+def ticket_verify(
+    project_root: Path | str,
+    ticket_id: str,
+    agent: str,
+    verify: str,
+    dry_run: bool = False,
+) -> Result:
+    """Canonical verify-field update, including legacy BOARD repair."""
+    root = Path(project_root)
+    if not verify or not verify.strip():
+        return _refuse("VALIDATION_FAILED", "verify text is required", ticket=ticket_id)
+    try:
+        assert_single_record(verify, "verify")
+    except ValueError as exc:
+        return _refuse("VALIDATION_FAILED", str(exc), ticket=ticket_id)
+    op_id = "ticket-verify-" + uuid4_hex()
+    now, utc = _now(), _utc_iso()
+    docs, state, board, log_tail = _read(root)
+    if board["errors"]:
+        return _refuse(
+            "VALIDATION_FAILED",
+            "BOARD parse error(s): " + "; ".join(board["errors"][:3]),
+            ticket=ticket_id,
+        )
+    if ticket_id not in board["tickets"]:
+        return _refuse("TICKET_NOT_FOUND", f"{ticket_id} not on the board", ticket=ticket_id)
+    verify = escape_ticket_description(redact_credentials(verify))
+    event, line = _event_line(
+        docs,
+        log_tail,
+        "DEC",
+        ticket_id,
+        agent,
+        "ticket verify updated via SAIOPS",
+        now,
+        op_id,
+    )
+    try:
+        projected = _project_board_mutation(
+            root,
+            docs["board"].text_norm,
+            lambda board: _ticket_fields_in_place(
+                board, ticket_id, {"verify": verify}, enforce_cap=False
+            ),
+            [ticket_id],
+            op_id=op_id,
+            event_id=f"E-{event}",
+            reason="existing/proposed oversized BOARD record requires canonical verify update",
+        )
+    except ValueError as exc:
+        return _refuse("VALIDATION_FAILED", str(exc), ticket=ticket_id)
+    new_board = projected.board_text
+    new_log = docs["log"].text_norm.rstrip("\n") + "\n" + line + "\n"
+    new_state = patch_state(
+        docs["state"].text_norm,
+        {
+            "last_event": event,
+            "updated": utc,
+            "agent": _seat_agent(state, docs["board"].text_norm, agent),
+        },
+    )
+    errors = validate_texts(
+        new_state, new_board, new_log, current_agent=agent, sealed_events=docs["_history"]
+    )
+    if errors:
+        return _refuse(
+            "VALIDATION_FAILED",
+            "proposed verify update fails fast validation: " + "; ".join(errors[:5]),
+            ticket=ticket_id,
+        )
+    targets = [
+        *_log_targets(docs, new_log),
+        *projected.targets,
+        _target(docs["board"], ".saipen/BOARD.md", "board", new_board),
+        _target(docs["state"], ".saipen/STATE.md", "state", new_state),
+    ]
+    plan = build_plan(
+        "ticket_verify",
+        agent,
+        _identity(root),
+        {"operation": "ticket_verify", "ticket": ticket_id},
+        _docs_preconditions(docs, "state", "board", "log"),
+        targets,
+        {"ok": True, "code": "TICKET_VERIFIED", "ticket": ticket_id, "event_id": f"E-{event}"},
+        op_id=op_id,
+    )
+    if dry_run:
+        return _render_plan(plan)
+    return apply_plan(root, plan)
+
+
+USER_REQUEST_VERIFY = (
+    "the requested change is present and demonstrated against the user own "
+    "description of it"
+)
+
+
+def _user_request_body(text: str, priority: str, verify: str, needs: list[str]) -> str:
+    """The DURABLE request document -- the complete body, never the BOARD title.
+
+    Deterministic on purpose: no timestamp, no nonce. The intake receipt is
+    content-addressed, so an identical re-submission resolves to the SAME
+    receipt instead of minting a second authority for one request. That is the
+    whole idempotency story -- a retry after a crash is safe by construction.
+    """
+    lines = [
+        "# User request",
+        "",
+        "priority: " + priority,
+        "verify: " + verify,
+    ]
+    if needs:
+        lines.append("needs: " + ", ".join(needs))
+    lines.extend(["", "## Request", "", text.strip(), ""])
+    return "\n".join(lines)
+
+
+def _request_title(text: str, limit: int = 160) -> str:
+    """One BOARD-safe line derived from the request, never a replacement for it.
+
+    BOARD carries a title; `.saipen/intake` carries the authority. The two are
+    different artifacts, and this function is the only place that turns the
+    second into the first.
+    """
+    first = next((ln.strip() for ln in text.splitlines() if ln.strip()), "")
+    first = re.sub(r"\s+", " ", first)
+    if len(first) > limit:
+        first = first[: limit - 3].rstrip() + "..."
+    return first
+
+
+@_state_guard
+def user_request(
+    project_root: Path | str,
+    agent: str,
+    text: str,
+    priority: str = "P1",
+    verify: str | None = None,
+    needs: list[str] | None = None,
+    dry_run: bool = False,
+) -> Result:
+    """Persist an explicit user request as durable authority, THEN project it.
+
+    CORE-003 / SRC-026:R003, and the FastPrompter regression in one sentence:
+    a fresh user request arrived while an unrelated ticket was being finished,
+    the protocol had nowhere to put it that survived a restart, and it was
+    lost. The ordering here is the fix and it is not negotiable:
+
+        1. the COMPLETE request body becomes a durable intake receipt;
+        2. a concise `user_explicit` Work line is projected onto BOARD;
+        3. the persisted `next_action` is recomputed through the shared Pick
+           Rule, so a free START slot routes to the new request immediately.
+
+    A crash between 1 and 2 leaves a recoverable receipt, never a ticket whose
+    request body is gone; the retry is idempotent because the receipt is
+    content-addressed. A crash before 1 loses nothing durable.
+
+    CORE-001 integration: this is an OUT-OF-BAND operation. Recording user
+    intent while another agent owns the active ticket must not move the
+    execution seat -- the acting identity is journal provenance; the seat is
+    left exactly where it was.
+    """
+    root = Path(project_root)
+    if not isinstance(text, str) or not text.strip():
+        return _refuse("INCOMPLETE_TICKET", "user request text is required (semantic input)")
+    if not re.fullmatch(r"P[0-9]", priority or ""):
+        return _refuse("VALIDATION_FAILED", "priority " + repr(priority) + " is not P0-P9")
+    needs = list(needs or [])
+    verify_text = (verify or "").strip() or USER_REQUEST_VERIFY
+    if _is_placeholder_verify(verify_text):
+        return _refuse(
+            "INCOMPLETE_TICKET",
+            "verify is a placeholder; an explicit user request still needs a real DONE proof",
+            verify=verify_text,
+        )
+    # CORE-003 / SRC-026:R003, ordering invariant: `verify` is PROJECTED onto
+    # BOARD, so it must be single-record-safe BEFORE durable capture. An
+    # invalid scalar is a malformed request -- reject it with zero Source
+    # receipt, zero BOARD mutation, zero STATE mutation and zero LOG mutation;
+    # never capture first and discover the unsafe projection afterwards.
+    # (The complete request BODY may stay multiline: intake authority, not a
+    # BOARD scalar -- only the projected `title`/`verify` are constrained, and
+    # `_request_title` collapses the body to one line by construction.)
+    try:
+        assert_single_record(verify_text, "verify")
+    except ValueError as exc:
+        return _refuse("VALIDATION_FAILED", str(exc))
+    title = _request_title(text)
+    body = _user_request_body(text, priority, verify_text, needs)
+
+    from . import intake
+
+    # Idempotency BEFORE any write: an identical request already captured and
+    # already projected returns the SAME receipt and the SAME Work. Retrying a
+    # request must never fork the authority for it.
+    existing = intake.find_by_body(root, body)
+    if existing and existing.get("linked_work"):
+        board_now = parse_board(codec.read_doc(root / ".saipen" / "BOARD.md"))
+        if existing["linked_work"] in board_now["tickets"]:
+            return Result(
+                True,
+                "USER_REQUEST_DUPLICATE",
+                message="request already captured as "
+                + str(existing["receipt"])
+                + " -> "
+                + str(existing["linked_work"]),
+                data={
+                    "receipt": existing["receipt"],
+                    "ticket": existing["linked_work"],
+                    "duplicate": True,
+                },
+            )
+
+    if dry_run:
+        # PLAN purity (CORE-003): a previewed user request writes NOTHING --
+        # no receipt, no BOARD line, no STATE. The plan names the exact targets
+        # it would write instead of minting half of them first.
+        return Result(
+            True,
+            "PLAN",
+            message="user request would be captured durably, then projected",
+            data={
+                "operation": "user_request",
+                "dry_run": True,
+                "title": title,
+                "priority": priority,
+                "verify": verify_text,
+                "needs": needs,
+                "targets": [
+                    ".saipen/intake (source receipt)",
+                    ".saipen/LOG.md",
+                    ".saipen/BOARD.md",
+                    ".saipen/STATE.md",
+                ],
+            },
+        )
+
+    captured = intake.capture(root, body, source_kind="user_instruction")
+    if not captured.get("ok"):
+        return _refuse(
+            captured.get("code", "SOURCE_UNRESOLVED"),
+            "user request could not be captured durably: "
+            + str(captured.get("detail") or captured),
+        )
+    receipt = captured.get("receipt")
+
+    projected = _project_user_request(root, agent, receipt, title, priority, verify_text, needs)
+    if not projected.ok:
+        # The receipt survives on purpose: an unroutable receipt is
+        # RECOVERABLE (the same request re-run adopts it); a lost request body
+        # is not.
+        return projected
+    ticket_id = projected.data.get("ticket")
+    linked = intake.capture(root, body, source_kind="user_instruction", work=ticket_id)
+    if not linked.get("ok"):
+        return _refuse(
+            linked.get("code", "ORPHAN_RECEIPT"),
+            "user request "
+            + str(receipt)
+            + " was projected as "
+            + str(ticket_id)
+            + " but could not be linked to it: "
+            + str(linked.get("detail") or linked),
+            receipt=receipt,
+            ticket=ticket_id,
+        )
+    return Result(
+        True,
+        "USER_REQUEST_RECORDED",
+        message="user request captured as "
+        + str(receipt)
+        + " and projected as "
+        + str(ticket_id),
+        data={
+            "receipt": receipt,
+            "ticket": ticket_id,
+            "user_explicit": True,
+            "next_action": projected.data.get("next_action"),
+            "event_id": projected.data.get("event_id"),
+        },
+    )
+
+
+def _project_user_request(
+    root: Path,
+    agent: str,
+    receipt: str,
+    title: str,
+    priority: str,
+    verify: str,
+    needs: list[str],
+) -> Result:
+    """ONE journaled transaction: LOG + BOARD Work + recomputed routing."""
+    op_id = "userreq-" + uuid4_hex()
+    now, utc = _now(), _utc_iso()
+    docs, state, board, log_tail = _read(root)
+    if board["errors"]:
+        return _refuse(
+            "VALIDATION_FAILED", "BOARD parse error(s): " + "; ".join(board["errors"][:3])
+        )
+    for need in needs:
+        if need not in board["tickets"]:
+            return _refuse("TICKET_NOT_FOUND", "dangling needs: " + need)
+    tid = next_ticket_id(
+        docs["board"].text_norm,
+        docs["_history"].text,
+        history_max_ticket_id=getattr(docs["_history"], "max_ticket_id", None),
+    )
+    ticket_id = "T-" + str(tid)
+    line = (
+        "- [ ] " + ticket_id + " [" + priority + "] "
+        + escape_ticket_description(redact_credentials(title))
+        + (" | needs: " + ", ".join(needs) if needs else "")
+        + " | verify: " + escape_ticket_description(redact_credentials(verify))
+        + " | user_explicit: " + USER_EXPLICIT_TRUE
+        + " | source_receipts: " + receipt
+    )
+    new_board = _insert_todo(docs["board"].text_norm, line)
+    event, event_line = _event_line(
+        docs,
+        log_tail,
+        "DEC",
+        ticket_id,
+        agent,
+        _actor_provenance(
+            state,
+            agent,
+            "user request " + receipt + " projected as " + ticket_id + " (user_explicit)",
+        ),
+        now,
+        op_id,
+    )
+    new_log = docs["log"].text_norm.rstrip("\n") + "\n" + event_line + "\n"
+    owned = {
+        "last_event": event,
+        "updated": utc,
+        # CORE-001 CONTROL B: persisting user intent is OUT-OF-BAND. It never
+        # takes the active execution seat from the agent that owns it. The seat
+        # is PRESERVED from the BEFORE snapshot; a corrupt BEFORE ownership
+        # state refuses instead of being silently healed.
+    }
+    try:
+        owned["agent"] = _seat_agent(state, docs["board"].text_norm, agent)
+    except OwnershipSplitError as exc:
+        return _refuse("VALIDATION_FAILED", str(exc))
+    new_state = patch_state(docs["state"].text_norm, owned)
+    # The persisted route is recomputed in the SAME transaction: a free START
+    # slot must point at the new explicit request immediately, not whenever a
+    # later `continue` happens to run. A legitimate WAIT brake and a live
+    # active ticket both keep their own continuation -- same shared rule the
+    # ordinary ticket projection uses, so the two cannot diverge.
+    new_state = _recompute_free_slot_route(new_state, new_board, state, agent)
+    errors = validate_texts(
+        new_state, new_board, new_log, current_agent=agent, sealed_events=docs["_history"]
+    )
+    if errors:
+        return _refuse(
+            "VALIDATION_FAILED", "proposed state fails fast validation: " + "; ".join(errors[:5])
+        )
+    targets = [
+        *_log_targets(docs, new_log),
+        _target(docs["board"], ".saipen/BOARD.md", "board", new_board),
+        _target(docs["state"], ".saipen/STATE.md", "state", new_state),
+    ]
+    plan = build_plan(
+        "user_request",
+        agent,
+        _identity(root),
+        {"operation": "user_request", "receipt": receipt, "ticket": ticket_id},
+        _docs_preconditions(docs, "state", "board", "log"),
+        targets,
+        {
+            "ok": True,
+            "code": "USER_REQUEST_RECORDED",
+            "ticket": ticket_id,
+            "receipt": receipt,
+            "event_id": "E-" + str(event),
+            "next_action": parse_state(new_state).get("next_action"),
+        },
+        op_id=op_id,
+    )
+    if isinstance(plan, Result):
+        return plan
+    return apply_plan(root, plan)
+
+
+def cohort_status(project_root: Path | str, cohort_id: str) -> Result:
+    """Read-only cohort projection: membership, scope, readiness, publication."""
+    from . import closure as _closure
+
+    root = Path(project_root)
+    try:
+        registry = _closure.read_registry(root)
+    except (OSError, ValueError) as exc:
+        return _refuse("VALIDATION_FAILED", "cohort registry is unreadable: " + str(exc))
+    cohort = (registry.get("cohorts") or {}).get(cohort_id)
+    if cohort is None:
+        return _refuse(
+            "VALIDATION_FAILED",
+            "cohort " + cohort_id + " has no durable registry record -- BOARD "
+            "prose is not cohort authority",
+        )
+    readiness = _closure.cohort_readiness(root, cohort)
+    return Result(
+        True,
+        "COHORT_STATUS",
+        data={
+            "cohort": cohort_id,
+            "publication_status": cohort.get("publication_status"),
+            "members": sorted(cohort.get("members") or {}),
+            "scope": sorted(cohort.get("scope") or []),
+            "ready": readiness["ready"],
+            "problems": readiness["problems"],
+            "release_op_id": cohort.get("release_op_id") or "",
+            "version": cohort.get("version") or "",
+            "tag": cohort.get("tag") or "",
+            "commit": cohort.get("commit") or "",
+        },
+    )
+
+
+@_state_guard
+def cohort_ship(
+    project_root: Path | str,
+    cohort_id: str,
+    agent: str,
+    dry_run: bool = False,
+    current_capability: str | None = None,
+) -> Result:
+    """Publish ONE cohort batch through the EXISTING release machinery.
+
+    CORE-003 / SRC-026:R003. The members already closed with evidence; what
+    remains is the publication obligation the batch owns collectively. This
+    function does not publish anything itself -- it derives the frozen batch
+    scope (each shared path exactly once, bound to the live bytes every member
+    attributed) and hands it to `release.plan_release` as a carrier, so the
+    R001-hardened staging, foreign-index protection, ship gate, tag/push and
+    recovery are the same code an ordinary release runs.
+
+    Repeating a ship is a deterministic already-published refusal, not a
+    second publication.
+    """
+    from . import closure as _closure
+    from .release import ReleaseRefusal, execute_release, plan_release
+
+    root = Path(project_root)
+    try:
+        registry = _closure.read_registry(root)
+    except (OSError, ValueError) as exc:
+        return _refuse("VALIDATION_FAILED", "cohort registry is unreadable: " + str(exc))
+    cohort = (registry.get("cohorts") or {}).get(cohort_id)
+    if cohort is None:
+        return _refuse(
+            "VALIDATION_FAILED",
+            "cohort " + cohort_id + " has no durable registry record -- BOARD "
+            "prose is not cohort authority",
+        )
+    if cohort.get("publication_status") == "shipped":
+        return _refuse(
+            "VALIDATION_FAILED",
+            "cohort " + cohort_id + " is already published (release "
+            + str(cohort.get("release_op_id"))
+            + ", version "
+            + str(cohort.get("version"))
+            + "); a second ship would publish the same batch twice",
+            cohort=cohort_id,
+        )
+    readiness = _closure.cohort_readiness(root, cohort)
+    if not readiness["ready"]:
+        return _refuse(
+            "COHORT_NOT_READY",
+            "cohort " + cohort_id + " is not ready to publish: "
+            + "; ".join(readiness["problems"][:3]),
+            cohort=cohort_id,
+        )
+    try:
+        scope = _closure.cohort_scope(cohort)
+    except ValueError as exc:
+        return _refuse("VALIDATION_FAILED", str(exc), cohort=cohort_id)
+    if not scope:
+        return _refuse(
+            "SOURCE_SCOPE_MISSING",
+            "cohort " + cohort_id + " has no batch scope to publish",
+            cohort=cohort_id,
+        )
+    members = sorted(cohort.get("members") or {})
+    carrier = {
+        "cohort_id": cohort_id,
+        # The carrier needs ONE Work identity for the release receipt; the
+        # batch's own authority is `cohort_id`, and every member is recorded
+        # in the registry. The lowest member id is a stable, non-arbitrary
+        # choice that survives re-derivation.
+        "ticket_id": members[0],
+        "scope": scope,
+    }
+    try:
+        plan = plan_release(
+            root,
+            "cohort-ship",
+            dry_run=dry_run,
+            cohort_carrier=carrier,
+            current_capability=current_capability,
+            current_agent=agent,
+        )
+    except (ReleaseRefusal, ValueError) as exc:
+        return _refuse(
+            getattr(exc, "code", "VALIDATION_FAILED"),
+            getattr(exc, "detail", str(exc)),
+            cohort=cohort_id,
+        )
+    if dry_run:
+        # PLAN purity: the carrier is derived and the plan is built, and NOTHING
+        # is written -- no registry flip, no release receipt, no Git index touch.
+        return Result(
+            True,
+            "PLAN",
+            message="cohort " + cohort_id + " would publish one batch scope",
+            data={
+                "operation": "cohort_ship",
+                "dry_run": True,
+                "cohort": cohort_id,
+                "members": members,
+                "scope": sorted(scope),
+                "version": plan.version,
+                "tag": plan.tag,
+                "mode": plan.mode,
+            },
+        )
+    outcome = execute_release(root, plan)
+    if not outcome.get("ok"):
+        return _refuse(
+            outcome.get("code", "RELEASE_FAILED"),
+            str(outcome.get("detail") or outcome.get("message") or "cohort publication failed"),
+            cohort=cohort_id,
+        )
+    return Result(
+        True,
+        "COHORT_SHIPPED",
+        message="cohort " + cohort_id + " published as one batch",
+        data={
+            "cohort": cohort_id,
+            "members": members,
+            "scope": sorted(scope),
+            "release_op_id": plan.op_id,
+            "version": plan.version,
+            "tag": plan.tag,
+            "mode": plan.mode,
+        },
+    )
+
+
+@_state_guard
 def ticket_move(
     project_root: Path | str,
     action: str,
@@ -2402,6 +4145,8 @@ def ticket_move(
     agent: str,
     payload: str = "",
     dry_run: bool = False,
+    scope: str | None = None,
+    blocked_on: str | None = None,
 ) -> Result:
     """Move a ticket between BOARD sections.
 
@@ -2415,7 +4160,17 @@ def ticket_move(
         return finish_ticket(project_root, ticket_id, agent, dry_run=dry_run)
     root = Path(project_root)
     now, utc = _now(), _utc_iso()
-    plan = _ticket_targets(root, action, ticket_id, agent, payload, now, utc)
+    plan = _ticket_targets(
+        root,
+        action,
+        ticket_id,
+        agent,
+        payload,
+        now,
+        utc,
+        scope=scope,
+        blocked_on=blocked_on,
+    )
     if isinstance(plan, Result):
         return plan
     if dry_run:
@@ -2462,12 +4217,25 @@ def _state_only_plan(
         "DEC",
         ticket_id,
         agent,
-        _fold_handover(_state, agent, event_message),
+        _actor_provenance(_state, agent, event_message),
         now,
         op_id,
     )
     new_log = docs["log"].text_norm.rstrip("\n") + "\n" + line + "\n"
     new_state = mutate(docs["state"].text_norm, event)
+    # CORE-001: every caller's `mutate` writes `agent: <actor>` into its owned
+    # patch. That is correct for the last-writer meaning and WRONG for the
+    # execution-seat meaning, and STATE.agent is the second one. This is the
+    # ONE choke point every state-only operation passes through, so the seat
+    # rule is applied here rather than in each caller's closure. The seat is
+    # PRESERVED from the BEFORE snapshot; a corrupt BEFORE ownership state
+    # refuses (zero mutation) instead of being silently healed.
+    try:
+        _seat = _seat_agent(_state, docs["board"].text_norm, agent)
+    except OwnershipSplitError as exc:
+        return _refuse("VALIDATION_FAILED", str(exc))
+    if _seat != agent:
+        new_state = patch_state(new_state, {"agent": _seat})
     errors = validate_texts(
         new_state,
         docs["board"].text_norm,
@@ -2480,7 +4248,7 @@ def _state_only_plan(
             "VALIDATION_FAILED", "proposed state fails fast validation: " + "; ".join(errors[:5])
         )
     targets = [
-        _target(docs["log"], ".saipen/LOG.md", "log", new_log),
+        *_log_targets(docs, new_log),
         _target(docs["state"], ".saipen/STATE.md", "state", new_state),
     ]
     targets.extend(extra_targets or [])
@@ -2730,6 +4498,14 @@ def goal_entry(
             f"{step} is complete and the repository-declared verification harness passes"
         )
         plan_lines.append(f"- [ ] {ticket_id} [P1] {desc} | verify: {verify}")
+        # A new BOARD identity needs its own structured allocation evidence,
+        # just as ticket_add does. The pivot event names the old active Work
+        # and cannot prove allocation of any of these new IDs.
+        wave_event, allocation_line = _event_line(
+            docs, wave_event, "DEC", ticket_id, agent,
+            "ticket added via SAIOPS -- goal entry", now, op_id,
+        )
+        new_log += allocation_line + "\n"
     if plan_lines:
         blines = new_board_text.splitlines(keepends=True)
         todo_idx = next(i for i, ln in enumerate(blines) if ln.rstrip("\n").startswith("## TODO"))
@@ -2791,7 +4567,7 @@ def goal_entry(
         )
 
     targets = [
-        _target(docs["log"], ".saipen/LOG.md", "log", new_log),
+        *_log_targets(docs, new_log),
         _target(docs["board"], ".saipen/BOARD.md", "board", new_board_text),
         _target(docs["state"], ".saipen/STATE.md", "state", new_state),
     ]
@@ -2868,11 +4644,23 @@ def set_converge_intent(
             before.get("task") not in (None, "", "none")
             and before.get("phase") in phases.TICKET_BEARING_PHASES
         )
-        next_action = (
-            before.get("next_action")
-            if active
-            else ("saipen crew" if target == "crew" else "saipen continue")
-        )
+        if active:
+            next_action = before.get("next_action")
+        elif target == "crew":
+            next_action = "saipen crew"
+        else:
+            # CORE-003: entering converge must not DISCARD a valid pick. The
+            # literal "saipen continue" that used to be written here erased a
+            # freshly persisted route -- an explicit user request projected one
+            # command earlier was silently demoted back to "figure it out
+            # again later". The shared router owns this answer; converge entry
+            # only records the intent.
+            next_action = "saipen continue"
+            from .router import route_next as _route_next
+
+            _routed = _route_next(transitioned, _docs["board"].text_norm, current_agent=agent)
+            if _routed.get("ok") and _routed.get("action"):
+                next_action = _routed["action"]
         return patch_state(
             transitioned,
             {
@@ -3047,7 +4835,7 @@ def enter_ship_convergence(
             "proposed ccc entry fails fast validation: " + "; ".join(errors[:5]),
         )
 
-    targets = [_target(docs["log"], ".saipen/LOG.md", "log", new_log)]
+    targets = _log_targets(docs, new_log)
     if refreshed_board is not None:
         targets.append(_target(docs["board"], ".saipen/BOARD.md", "board", new_board))
     targets.append(_target(docs["state"], ".saipen/STATE.md", "state", new_state))
@@ -3292,7 +5080,12 @@ def rebind_saipen_home(
 
 @_state_guard
 def handover_agent(
-    project_root: Path | str, new_agent: str, dry_run: bool = False, allow_dead_home: bool = False
+    project_root: Path | str,
+    new_agent: str,
+    dry_run: bool = False,
+    allow_dead_home: bool = False,
+    explicit: bool = False,
+    now: datetime.datetime | None = None,
 ) -> Result:
     """The ONE explicit agent-handover operation (T-1006).
 
@@ -3317,9 +5110,15 @@ def handover_agent(
     A no-op refusal (VALIDATION_FAILED) is returned when the requested agent
     already IS the persisted seat -- nothing to record, no write. `dry_run`
     renders the same plan with ZERO writes.
+
+    `now` pins the ONE frozen operation instant (deterministic evaluation, CORE
+    -001 REVIEW repair): the claim classification, the transferred claim_time
+    and the LOG event timestamp are all derived from it. Unset means the
+    wall clock is read exactly ONCE here -- never again inside the decision.
     """
     root = Path(project_root)
-    now, utc = _now(), _utc_iso()
+    clock = _operation_clock(now)
+    now, utc = clock.now, clock.utc
     # ONE frozen snapshot for the whole handover (second-wave P0 discipline).
     docs, state, board, log_tail = _read(root, allow_dead_home=allow_dead_home)
     old = state.get("agent")
@@ -3347,8 +5146,21 @@ def handover_agent(
     new_board_text = board_text
     claim_transferred = None
     if active_ticket is not None and active_ticket.get("section") == "## DOING":
-        cs = claim_status(active_ticket, old)
-        if cs in ("SELF", "UNCLAIMED", "FOREIGN_STALE"):
+        # CORE-001 CONTROL D: classify through the ONE shared ownership
+        # authority relative to the INCOMING seat, which is the identity
+        # actually requesting the transfer. Judging against the OUTGOING seat
+        # made every live claim read SELF, so a bare `--agent <other>` silently
+        # took over another agent's live claim -- the takeover this refusal
+        # exists to stop. An operator-authorized transfer says so with
+        # `explicit=True` (CONTROL C). The classification and the claim_time
+        # written below come from ONE frozen operation instant: a second live
+        # clock read here is what let a fixed fixture change verdict between
+        # two runs of identical committed code (SRC-026 REVIEW repair).
+        own = ownership.classify_active_ownership(state, tickets, new_agent, now=clock.instant)
+        cs = own.status
+        if cs == ownership.FOREIGN_LIVE and explicit:
+            cs = ownership.SELF
+        if cs in (ownership.SELF, ownership.UNCLAIMED, ownership.FOREIGN_STALE):
             # The outgoing seat owns the live active ticket (or it is unclaimed /
             # lapsed) -- transfer the EXACT claim to the new seat atomically so
             # STATE.agent and the only live active claim never diverge.
@@ -3356,7 +5168,7 @@ def handover_agent(
                 board_text, active_id, {"owner": new_agent, "claim_time": utc}
             )
             claim_transferred = active_id
-        elif cs == "FOREIGN_LIVE":
+        elif cs == ownership.FOREIGN_LIVE:
             return _refuse(
                 "ACTIVE_CLAIM_FOREIGN",
                 f"active {active_id} is live-claimed by another agent "
@@ -3405,7 +5217,7 @@ def handover_agent(
         )
 
     targets = [
-        _target(docs["log"], ".saipen/LOG.md", "log", new_log),
+        *_log_targets(docs, new_log),
         _target(docs["state"], ".saipen/STATE.md", "state", new_state),
     ]
     if claim_transferred:
@@ -3591,7 +5403,7 @@ def stop_checkpoint(
     )
     digest_lines = digest_content.rstrip("\n").splitlines()
     targets = [
-        _target(docs["log"], ".saipen/LOG.md", "log", new_log),
+        *_log_targets(docs, new_log),
     ]
     if refreshed_board is not None:
         targets.append(_target(docs["board"], ".saipen/BOARD.md", "board", new_board))
@@ -3602,7 +5414,7 @@ def stop_checkpoint(
             ".saipen/kitchen/digest.md",
             "report",
             digest_doc.encode(digest_content),
-            digest_doc.raw_hash,
+            _live_before(root, ".saipen/kitchen/digest.md", digest_doc),
             hash_bytes(digest_doc.encode(digest_content)),
         )
     )
@@ -3792,7 +5604,7 @@ def _plan_record_scope(
     scope_rel = f"{RELEASE_SCOPE_DIR}/{ticket_id}.json"
     scope_doc = codec.read_document(root / scope_rel)
     targets = [
-        _target(docs["log"], ".saipen/LOG.md", "log", new_log),
+        *_log_targets(docs, new_log),
         _target(docs["state"], ".saipen/STATE.md", "state", new_state),
         TargetPlan(
             scope_rel,
@@ -3886,8 +5698,15 @@ def _plan_first_publish_wait(
     task = state.get("task")
     remote_name = _sanitize_remote(remote_name)
     message = f"first-publish -- confirm repo name '{remote_name}' and public/private before I push"
-    event, line = build_event(
-        log_tail, "WAIT", message, ticket=task, agent=agent, now=now, op_id=op_id
+    event, line = _producer_event(
+        docs,
+        log_tail,
+        "WAIT",
+        message,
+        ticket=task,
+        agent=agent,
+        now=now,
+        op_id=op_id,
     )
     new_log = docs["log"].text_norm.rstrip("\n") + "\n" + line + "\n"
     na = f"WAIT: {message}"
@@ -3906,7 +5725,7 @@ def _plan_first_publish_wait(
             "proposed first-publish WAIT state fails fast validation: " + "; ".join(errors[:5]),
         )
     targets = [
-        _target(docs["log"], ".saipen/LOG.md", "log", new_log),
+        *_log_targets(docs, new_log),
         _target(docs["state"], ".saipen/STATE.md", "state", new_state),
     ]
     return build_plan(
@@ -3993,7 +5812,7 @@ def _plan_first_publish_confirm(
             "validation: " + "; ".join(errors[:5]),
         )
     targets = [
-        _target(docs["log"], ".saipen/LOG.md", "log", new_log),
+        *_log_targets(docs, new_log),
         _target(docs["state"], ".saipen/STATE.md", "state", new_state),
     ]
     return build_plan(
@@ -4063,10 +5882,18 @@ def _plan_crew_closure(
             f"none; live {state.get('phase')}/{state.get('task')}",
         )
     if prefix_run:
-        run_event, run_line = build_event(
-            log_tail, "RUN", prefix_run, ticket=None, agent=agent, now=now, op_id=op_id
+        run_event, run_line = _producer_event(
+            docs,
+            log_tail,
+            "RUN",
+            prefix_run,
+            ticket=None,
+            agent=agent,
+            now=now,
+            op_id=op_id,
         )
-        event, line = build_event(
+        event, line = _producer_event(
+            docs,
             run_event,
             "DEC",
             "crew terminal release closure -- all deferred tickets shipped",
@@ -4102,7 +5929,7 @@ def _plan_crew_closure(
             "proposed crew closure state fails fast validation: " + "; ".join(errors[:5]),
         )
     targets = [
-        _target(docs["log"], ".saipen/LOG.md", "log", new_log),
+        *_log_targets(docs, new_log),
         _target(docs["state"], ".saipen/STATE.md", "state", new_state),
     ]
     if digest_text is not None:
@@ -4112,7 +5939,7 @@ def _plan_crew_closure(
                 ".saipen/kitchen/digest.md",
                 "report",
                 digest_doc.encode(digest_text),
-                digest_doc.raw_hash,
+                _live_before(root, ".saipen/kitchen/digest.md", digest_doc),
                 hash_bytes(digest_doc.encode(digest_text)),
             )
         )
@@ -4293,7 +6120,8 @@ def _plan_defer_for_crew(
     # post-PLAN change still fails STALE_STATE with zero writes.
     from .journal import source_identity_dependency
 
-    run_event, run_line = build_event(
+    run_event, run_line = _producer_event(
+        docs,
         log_tail,
         "RUN",
         f"deferred {ticket_id} to crew epoch {crew_epoch} "
@@ -4303,7 +6131,8 @@ def _plan_defer_for_crew(
         now=now,
         op_id=op_id,
     )
-    event, line = build_event(
+    event, line = _producer_event(
+        docs,
         run_event,
         "DEC",
         "ticket deferred via SAIOPS -- completion (from SHIP), deferred to crew",
@@ -4340,7 +6169,7 @@ def _plan_defer_for_crew(
         )
 
     targets = [
-        _target(docs["log"], ".saipen/LOG.md", "log", new_log),
+        *_log_targets(docs, new_log),
         _target(docs["board"], ".saipen/BOARD.md", "board", new_board),
         _target(docs["state"], ".saipen/STATE.md", "state", new_state),
     ]
@@ -4469,7 +6298,7 @@ def _plan_clear_wait_role(
             "proposed clear-wait-role state fails fast validation: " + "; ".join(errors[:5]),
         )
     targets = [
-        _target(docs["log"], ".saipen/LOG.md", "log", new_log),
+        *_log_targets(docs, new_log),
         _target(docs["board"], ".saipen/BOARD.md", "board", new_board),
         _target(docs["state"], ".saipen/STATE.md", "state", new_state),
     ]
@@ -4552,7 +6381,7 @@ def _plan_crew_run(
             "proposed crew-run state fails fast validation: " + "; ".join(errors[:5]),
         )
     targets = [
-        _target(docs["log"], ".saipen/LOG.md", "log", new_log),
+        *_log_targets(docs, new_log),
         _target(docs["state"], ".saipen/STATE.md", "state", new_state),
     ]
     receipt_metadata = {
@@ -4678,7 +6507,7 @@ def _plan_producer_integration(
             "proposed integration state fails fast validation: " + "; ".join(errors[:5]),
         )
     targets = [
-        _target(docs["log"], ".saipen/LOG.md", "log", new_log),
+        *_log_targets(docs, new_log),
         _target(docs["state"], ".saipen/STATE.md", "state", new_state),
     ]
     receipt_metadata = {
@@ -4892,7 +6721,7 @@ def _plan_convergence_stage(
         )
     meta["event_id"] = f"E-{event}"
     targets = [
-        _target(docs["log"], ".saipen/LOG.md", "log", new_log),
+        *_log_targets(docs, new_log),
         _target(docs["state"], ".saipen/STATE.md", "state", new_state),
     ]
     from .journal import source_identity_dependency

@@ -1,0 +1,92 @@
+{
+  "ok": true,
+  "code": "PASS",
+  "exit": 0,
+  "source_hash": "742a792f91dcc21ffc8f6d657e31a0cec49866bef18131a267ccf21c0e1cbe7a",
+  "installed_hash": "742a792f91dcc21ffc8f6d657e31a0cec49866bef18131a267ccf21c0e1cbe7a",
+  "loaded_hashes": [
+    "742a792f91dcc21ffc8f6d657e31a0cec49866bef18131a267ccf21c0e1cbe7a"
+  ],
+  "binding_roots": [
+    "V:\\_TEMP_\\t1320-opencode-fleet-yz9kaoc3\\FastPrompter-product"
+  ],
+  "requests": [
+    {
+      "tools": [],
+      "prior_count": 0,
+      "prior_recovery_refusal": false,
+      "prior_tool_error": ""
+    },
+    {
+      "tools": [
+        "bash",
+        "edit",
+        "glob",
+        "grep",
+        "read",
+        "skill",
+        "task",
+        "todowrite",
+        "webfetch",
+        "websearch",
+        "write"
+      ],
+      "prior_count": 0,
+      "prior_recovery_refusal": false,
+      "prior_tool_error": ""
+    },
+    {
+      "tools": [
+        "bash",
+        "edit",
+        "glob",
+        "grep",
+        "read",
+        "skill",
+        "task",
+        "todowrite",
+        "webfetch",
+        "websearch",
+        "write"
+      ],
+      "prior_count": 1,
+      "prior_recovery_refusal": true,
+      "prior_tool_error": "SAIPEN_FLEET_REFUSAL: RECOVERED_REISSUE_REQUIRED: the host tool did not execute. Reread current canonical STATE/BOARD/LOG, reroute once, then issue a fresh consequential action aga"
+    },
+    {
+      "tools": [
+        "bash",
+        "edit",
+        "glob",
+        "grep",
+        "read",
+        "skill",
+        "task",
+        "todowrite",
+        "webfetch",
+        "websearch",
+        "write"
+      ],
+      "prior_count": 2,
+      "prior_recovery_refusal": false,
+      "prior_tool_error": "Wrote file successfully."
+    }
+  ],
+  "tool_events": [
+    {
+      "tool": "write",
+      "status": "error",
+      "output": "",
+      "error": "SAIPEN_FLEET_REFUSAL: RECOVERED_REISSUE_REQUIRED: the host tool did not execute. Reread current canonical STATE/BOARD/LOG, reroute once, then issue a fresh consequential action against current project bytes."
+    },
+    {
+      "tool": "write",
+      "status": "completed",
+      "output": "Wrote file successfully.",
+      "error": ""
+    }
+  ],
+  "product_final": "FRESH",
+  "product_work_active": true,
+  "stderr_tail": ""
+}

@@ -106,6 +106,11 @@ BOARD is Work authority. It contains `## DOING`, `## TODO`, `## DONE`, and
 - Every ticket has an ID, priority, bounded title, and `verify:` contract.
   `needs:` forms an acyclic graph. Missing dependencies or cycles move affected
   Work to BLOCKED with the exact reason.
+- A newly created or updated live ticket record is at most 1200 characters.
+  Historical longer rows remain valid data and are never rewritten merely to
+  meet the cap. A canonical writer touching oversized material must externalize
+  it to Source/evidence/detail authority or refuse with `BOARD_RECORD_OVERSIZE`;
+  it never silently truncates intent.
 - `blocker:` is non-empty exactly in BLOCKED. Unblock requires the decision or
   evidence that removed it. TODO/DOING/DONE cannot carry a blocker.
 - DONE requires non-empty verification evidence and must agree with LOG. A
@@ -126,6 +131,10 @@ LOG is append-only event authority. Each line is one bounded UTF-8 event:
 
 - E-IDs are globally unique, strictly increasing across sealed plus active
   segments, and never reused. `parent:` must resolve to an earlier event.
+- A newly written event is at most 1024 UTF-8 bytes. Historical longer events
+  remain valid append-only evidence. Full commands, matrices and transcripts
+  live in a durable hashable detail/evidence artifact; an oversized new event
+  refuses with `LOG_EVENT_OVERSIZE` and never silently truncates proof.
 - Timestamps are real UTC and may not be materially ahead of the clock. Repair
   an accidental future stamp with a declared DEC; do not wait for it to become
   true.
@@ -140,7 +149,34 @@ LOG is append-only event authority. Each line is one bounded UTF-8 event:
 - Sealed history is cold. Read it only for parent-chain, counter-rebuild,
   audit, or explicit forensic work.
 
+Acceptance evidence declares a closed witness surface: `UNIT`, `INTEGRATION`,
+`EFFECT_PATH`, `LIVE`, or `MANUAL`. A criterion may prefix its text with the
+minimum, for example `AC-01 [EFFECT_PATH] ...`; a structured evidence record
+names `witness=` and `surface=`. A narrower PASS reports
+`EVIDENCE_SCOPE_TOO_WEAK`, not SATISFIED. `AC-ESCAPED` can relate a later
+escaped defect to the exact earlier PASS event without rewriting either event.
+
 #### Other durable paths
+
+<!-- RULE-OWNER: EVIDENCE-RETENTION-01 -->
+
+- `EVIDENCE-SANDBOX-RETENTION-001` is eliminated by keeping execution
+  environments outside durable `.saipen` evidence under one explicitly owned
+  temporary root. Evidence retains the smallest sufficient proof, never a
+  complete synthetic HOME, dependency/package cache, provider profile,
+  duplicated repository, `node_modules`, build tree, or matrix sandbox.
+  Terminal success, failure, and blocked runs extract bounded proof, remove
+  only registered run-owned ephemera, and write a retention manifest.
+  A cumulative per-ticket hard-threshold excess refuses terminal finalization
+  before cleanup unless retained artifacts explicitly carry sufficient
+  `large_evidence_required` reasons. Refusal reports total bytes and largest
+  paths and leaves durable proof and the run-owned root available for diagnosis.
+- Historical evidence is classified `DURABLE_REQUIRED`,
+  `EPHEMERAL_REPRODUCIBLE`, `SUPERSEDED`, or `UNKNOWN` before cleanup. Only
+  proven reproducible or superseded data is automatically collectable;
+  unresolved references and unknown data remain. Cleanup refuses external,
+  unregistered, repository-root, real-HOME, and canonical-state targets and is
+  idempotent. `REGISTRY.json` owns the byte thresholds and classification set.
 
 - `.saipen/KNOWLEDGE/` stores verified, reusable project facts. Do not copy
   tasks, logs, guesses, credentials, or protocol rules there.
@@ -184,8 +220,41 @@ LOG is append-only event authority. Each line is one bounded UTF-8 event:
 - `agent` is a stable acting seat, not provider/model telemetry. Bare continuation
   inherits STATE.agent. Explicit handover records old and new seats before the
   first admissible mutation. Unknown runtime metadata remains UNKNOWN.
+- Host admission uses the same continuation rule: an explicit actor carrier is
+  checked as the acting actor; without one, canonical `STATE.agent` is inherited.
+  Host session ids, UI slots, process ids, titles and ports never become actors.
+  An explicit carrier is provenance, not authentication, and cannot override a
+  foreign live owner or repair contradictory canonical ownership.
+- The explicit protected-namespace shell bypass is closed at the host-event
+  preflight: an ordinary shell command that visibly names a `.saipen` path,
+  including quoted, Windows/POSIX separator and simple traversal spellings,
+  is refused before execution. A standalone canonical `saipen <verb>` retains
+  its operation exemption. Ordinary source-development shell use remains
+  available. This is an accidental-mutation barrier over explicit command
+  text, not a sandbox: dynamically computed or deliberately obfuscated paths
+  in arbitrary code cannot be proven safe by this guard.
+- The exact built-in OpenCode `task` call is consequential delegation, not an
+  unnamed file mutation. It passes normal canonical state, actor and recovery
+  admission; the delegated session's concrete tool calls receive their own
+  guard decisions. A native child-session smoke proves ordinary source writing
+  proceeds while protected structured and shell mutations are refused.
+  Namespaced or unclassified task-like tools retain the unresolved refusal.
 - Core has one writer and at most one DOING ticket. A second writer uses the
   project writer lock; lock timeout refuses rather than races.
+- When active Work A discovers required Work B, `ticket block-for A B REASON`
+  atomically moves A from DOING to BLOCKED, adds the durable `A needs B` edge,
+  and records A's `blocked_on`, `resume_phase`, and `resume_transition_from`.
+  The reservation makes B the only claimable continuation even under an
+  explicit priority override. A is neither DONE nor active while B executes.
+  B's DONE transaction consumes the reservation, moves A back to DOING, and
+  restores its saved phase in the same journaled commit. If B remains TODO or
+  BLOCKED, A remains BLOCKED. Recovery replays the same all-or-nothing plan.
+- A BLOCKED Work ticket is lifecycle truth, not a blanket host-tool denial.
+  Diagnostic reads/search/status and canonical recovery remain admissible.
+  Ordinary consequential mutation requires a valid binding plus exactly one
+  STATE-bound DOING Work owned by the acting seat; source-receipt completeness
+  is a closure gate, not tool-effect authority. An explicitly/host-bound
+  project identity never authorizes mutation outside its root or lineage.
 - Attempt follows claim. Before handover or phase switch, close/park any live
   Attempt truthfully; an unresolved foreign Attempt blocks adoption.
 - Producer parallelism is allowed only under the producer protocol: isolated
@@ -343,6 +412,16 @@ COMMANDS prose to reconstruct commands.
   `ready`; run/fix the producer and verify the package.
 - `hush <task>` changes narration through `EXEC-HUSH-01`; it changes no safety,
   lifecycle, evidence, or final-report duty.
+- `saipen user-request <text>` is the USER_INTERRUPT surface (orchestration
+  repair, T-1302). When the current user supplies a NEW actionable
+  implementation request (bug report, new feature/target, independent UI
+  change) that no active Work/source authority already represents, persist it
+  through `saipen user-request` BEFORE performing further completion/block/SHIP
+  mutations on unrelated active work. It captures a durable source receipt and
+  projects one `user_explicit` ticket; legitimate active Work is left
+  untouched and routing selects the new ticket at the next safe scheduling
+  boundary. Do NOT ticket read-only questions, explanations,
+  acknowledgements, refinements of the active ticket, or stop requests.
 - `saipen userperson` is DEFAULT DIRECTION, never ORDER. Precedence is
   current explicit request > project/task requirements > SAIPEN normative rules > verified evidence > project USERPERSON > global USERPERSON.
   A preference never overrides a higher source or a verified fact. Report once

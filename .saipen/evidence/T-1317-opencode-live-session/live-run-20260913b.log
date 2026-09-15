@@ -1,0 +1,52 @@
+....F..                                                                  [100%]
+================================== FAILURES ===================================
+_ OpenCodeLiveSession.test_5_staging_read_ordinary_write_and_protected_refusal _
+
+self = <test_opencode_live_session.OpenCodeLiveSession testMethod=test_5_staging_read_ordinary_write_and_protected_refusal>
+
+    def test_5_staging_read_ordinary_write_and_protected_refusal(self):
+        record = self.sessions["good"]
+        reads = [item for item in record["tools"] if item["tool"] == "read"]
+        self.assertTrue(reads, record["tools"])
+        # The staging path is a detached drag directory OUTSIDE the project: the
+        # read must resolve it and be admitted (bounded external read).
+        resolved = [
+            item for item in reads
+            if item["status"] == "completed"
+            and str(item["input"].get("filePath", "")).endswith(self.audit_good.name)
+        ]
+        self.assertTrue(resolved, reads)
+        note = self.good / "src" / "agent_note.txt"
+        self.assertTrue(note.is_file(), "an admitted ordinary write did not land")
+        self.assertEqual(note.read_text(encoding="utf-8").strip(), "ok")
+    
+        malformed = self.sessions["malformed"]
+        # A READ of protected canonical state is diagnostic access and stays
+        # available; a MUTATION of it is refused before host execution.
+        protected_reads = [
+            item for item in malformed["tools"]
+            if item["tool"] == "read" and ".saipen" in str(item["input"].get("filePath", ""))
+        ]
+        for item in protected_reads:
+            self.assertEqual(item["status"], "completed", item)
+        protected_mutations = [
+            item for item in malformed["tools"]
+            if item["tool"] == "bash"
+            and ".saipen" in str(item["input"].get("command", ""))
+        ]
+        self.assertTrue(protected_mutations, malformed["tools"])
+        for item in protected_mutations:
+            self.assertEqual(item["status"], "error", item)
+            self.assertIn("PROTECTED_CANONICAL_NAMESPACE", item["error"], item)
+>       self.assertEqual(_sha256(self.bad / ".saipen" / "STATE.md"), self.malformed_state_sha,
+                         "a refused protected mutation still changed STATE.md")
+E       AssertionError: '525d4983ce13c80b700d9e8b68490cfc6a759d29662362274c6bcea1cbb7007f' != '3a6b3d0ddb7e755a953fd3806e58f4137923fed8da5e2ee41516add5d2fc1719'
+E       - 525d4983ce13c80b700d9e8b68490cfc6a759d29662362274c6bcea1cbb7007f
+E       + 3a6b3d0ddb7e755a953fd3806e58f4137923fed8da5e2ee41516add5d2fc1719
+E        : a refused protected mutation still changed STATE.md
+
+tools\test_opencode_live_session.py:521: AssertionError
+=========================== short test summary info ===========================
+FAILED tools/test_opencode_live_session.py::OpenCodeLiveSession::test_5_staging_read_ordinary_write_and_protected_refusal
+1 failed, 6 passed in 94.10s (0:01:34)
+EXIT=1

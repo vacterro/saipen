@@ -55,7 +55,7 @@ def main() -> None:
         base_source_head=identity.source_head,
         base_source_tree_fingerprint=identity.source_tree_fingerprint,
         base_discovery_model=identity.discovery_model,
-        scope="force-fresh-all-real-docs-32-locales-no-ui-v7.231.3",
+        scope="force-fresh-all-real-docs-32-locales-no-ui-v7.249.0",
         read_set=producer_api.read_set_from(ROOT, read_paths),
         write_set=producer_api.write_set_before(ROOT, write_paths),
         epoch=epoch,

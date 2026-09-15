@@ -1,0 +1,12 @@
+{
+ "producer": "opencode-live-session",
+ "ticket": "T-1317",
+ "verdict": "OBSERVED",
+ "retained": [
+  {
+   "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\.saipen\\evidence\\T-1317-opencode-live-session\\live-session-proof.json",
+   "bytes": 50489,
+   "sha256": "75ef802769d96557365a0a6fc0ecfdebad1ec1deed181889457382ab5e4159ab"
+  }
+ ]
+}

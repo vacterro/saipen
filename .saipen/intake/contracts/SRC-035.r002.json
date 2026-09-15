@@ -1,0 +1,19 @@
+{
+  "clauses": {
+    "SRC-035:R001": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "Provide a legal canonical active-parent to blocker handoff without weakening the single-DOING invariant"
+    },
+    "SRC-035:R002": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "Make the required blocker claimable while the parent remains honestly unfinished"
+    }
+  },
+  "derived_at": "2026-09-13T09:56:49Z",
+  "derived_from": "SRC-035",
+  "interpretation_revision": 2,
+  "schema_version": 1,
+  "source_sha256": "10d9b373453c4fba3837e5ff23ac892626e149c314ca687fec1fbd61830c7f49"
+}

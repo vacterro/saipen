@@ -31,10 +31,12 @@ Invariants:
 
 from __future__ import annotations
 
+import contextlib
 import hashlib
 import json
 import os
 import re
+import shutil
 import stat
 from datetime import datetime, timezone
 from pathlib import Path
@@ -89,6 +91,7 @@ TERMINAL_DISPOSITIONS = {
     "DUPLICATE",
     "SUPERSEDED",
     "NOT_APPLICABLE",
+    "UNAVAILABLE_ENVIRONMENT",
 }
 ALL_DISPOSITIONS = TERMINAL_DISPOSITIONS | {"BLOCKED", "DEFERRED", "UNKNOWN"}
 ACTIONABLE_CLASSES = {
@@ -540,10 +543,49 @@ def _write_tombstone(root: Path, receipt_id: str, tombstone: dict) -> None:
     _atomic_write(path, _json_bytes(tombstone), ownership_root=root)
 
 
-def _link_board_projection(root: Path, work: str, receipt_id: str) -> dict:
-    """Compact BOARD link written only after source authority is durable."""
+def _strip_source_receipts_pseudo_link(ticket: dict) -> str | None:
+    """Cleaned `verify` value with an embedded `source_receipts:` pseudo-link
+    removed, or None when the value carries none (T-1316 authorized repair).
+
+    A pseudo-link (`verify: ... ; source_receipts: SRC-027`) is malformed
+    structured state: the parser rejects it, validation refuses the record,
+    and nothing may silently normalize it ON READ. The ONE permitted writer
+    is the authorized source-linkage projection below -- the same canonical
+    operation that binds the receipt properly. The pseudo-marker is stripped
+    only when it names the exact receipt being linked, so this can never
+    launder an unrelated or fabricated reference.
+    """
+    verify = str((ticket.get("fields") or {}).get("verify") or "")
+    pattern = re.compile(
+        r"\s*[;,]?\s*source_receipts:\s*(?P<ids>[A-Za-z0-9][A-Za-z0-9, \\-]*)"
+    )
+    match = pattern.search(verify)
+    if not match:
+        return None
+    named = {part.strip() for part in match.group("ids").split(",") if part.strip()}
+    if match.group("ids").strip() not in named:
+        return None
+    cleaned = verify[: match.start()] + verify[match.end() :]
+    cleaned = cleaned.rstrip(" ;,") + (" " if verify[: match.start()].rstrip() else "")
+    return cleaned.strip()
+
+
+def _board_link_proposal(root: Path, work: str, receipt_id: str, *, op_id: str) -> dict:
+    """PROPOSE the canonical BOARD receipt projection (read-only).
+
+    T-1326 P1 (intake half-commit): the projection is computed -- including the
+    shared resulting-row compaction -- BEFORE anything is written. The previous
+    implementation wrote the durable metadata `linked_work` and the intake index
+    link first and only then discovered that the BOARD row could not accept the
+    receipt (`BOARD_RECORD_OVERSIZE`), leaving three authorities in disagreement:
+    durable state said linked, BOARD said nothing.
+
+    Returns the complete commit set for `_commit_source_link`, or a refusal that
+    writes nothing at all.
+    """
     from . import codec
     from .board import parse_board, set_ticket_field
+    from .board_compaction import MAX_LIVE_RECORD_CHARS, prepare_existing, prepare_expanded
 
     path = _safe_path(root, ".saipen/BOARD.md", expect_file=True)
     try:
@@ -551,35 +593,171 @@ def _link_board_projection(root: Path, work: str, receipt_id: str) -> dict:
             root, ".saipen/BOARD.md", kind="source BOARD authority", max_bytes=_BOARD_MAX
         )
         document = codec.read_document(path, raw=raw)
-        text = document.text_norm
     except (OSError, ValueError) as exc:
         return {"ok": False, "code": "ORPHAN_RECEIPT", "detail": str(exc)}
-    board = parse_board(text)
-    ticket = board.get("tickets", {}).get(work)
-    if not ticket:
+    board_text = document.text_norm
+
+    def project(text: str) -> tuple[str, bool]:
+        board = parse_board(text)
+        ticket = board.get("tickets", {}).get(work)
+        if not ticket:
+            raise KeyError(f"source durable but linked Work {work} is missing")
+        existing = [
+            value.strip()
+            for value in str(ticket.get("fields", {}).get("source_receipts") or "").split(",")
+            if value.strip()
+        ]
+        # Authorized normalization (T-1316): the projection that binds receipt_id
+        # is also the only writer allowed to remove the matching pseudo-link from
+        # `verify` -- read-side normalization stays forbidden. The ORIGINAL raw
+        # line stays the replace anchor; only the replacement carries the strip.
+        original_raw = ticket["raw"]
+        cleaned_verify = _strip_source_receipts_pseudo_link(ticket)
+        already_linked = receipt_id in existing
+        if already_linked and cleaned_verify is None:
+            return text, True
+        if not already_linked:
+            existing.append(receipt_id)
+        # The size ceiling is lifted for the PROPOSED mutation only: phase 3
+        # externalizes an oversized result losslessly in this SAME journaled
+        # transaction. The record boundary (never a second physical ticket) is
+        # still enforced by `set_ticket_field` itself.
+        if cleaned_verify is not None:
+            replacement = set_ticket_field(
+                original_raw, "verify", cleaned_verify, enforce_cap=False
+            )
+        else:
+            replacement = original_raw
+        replacement = set_ticket_field(
+            replacement, "source_receipts", ",".join(existing), enforce_cap=False
+        )
+        updated = text.replace(original_raw, replacement, 1)
+        if updated == text:
+            raise KeyError(f"could not project {receipt_id} onto BOARD {work}")
+        return updated, False
+
+    targets: list = []
+    try:
+        # Phase 1: a readable but oversized historical row is compacted FIRST, so
+        # the projection edits a legal record. Phase 2: the mutation itself is
+        # run with the cap lifted. Phase 3: a row the projection left oversized
+        # (the near-cap reproduction) is externalized LOSSLESSLY in the same
+        # transaction instead of refusing the receipt.
+        compacted = prepare_existing(
+            root,
+            board_text,
+            [work],
+            op_id=op_id,
+            event_id=None,
+            reason="existing oversized BOARD record requires canonical source receipt link",
+        )
+        targets.extend(compacted.targets)
+        proposed, already_linked = project(compacted.board_text)
+        if already_linked and not compacted.targets:
+            return {"ok": True, "already_linked": True, "board_text": proposed, "targets": []}
+        grown = prepare_expanded(
+            root,
+            proposed,
+            [work],
+            op_id=op_id,
+            event_id=None,
+            reason="source receipt link grew the BOARD record past the live cap",
+        )
+        targets.extend(grown.targets)
+    except KeyError as exc:
+        return {"ok": False, "code": "ORPHAN_RECEIPT", "detail": str(exc.args[0])}
+    except ValueError as exc:
+        # Covers the compaction refusal for machine truth that cannot fit: the
+        # exact receipt token is never truncated, and nothing is linked.
+        return {
+            "ok": False,
+            "code": (
+                "BOARD_RECORD_OVERSIZE"
+                if "oversize" in str(exc).lower()
+                else "VALIDATION_FAILED"
+            ),
+            "detail": str(exc),
+        }
+    return {
+        "ok": True,
+        "already_linked": False,
+        "board_text": grown.board_text,
+        "targets": targets,
+        "oversize_limit": MAX_LIVE_RECORD_CHARS,
+    }
+
+
+def _commit_source_link(root: Path, work: str, receipt_id: str, *, op_id: str) -> dict:
+    """ONE linkage transaction: metadata + index + BOARD (or none of them).
+
+    Commit order is BOARD first (its projection carries the only operator-visible
+    truth and it is the step that can fail), then the durable metadata and the
+    intake index. If either durable write fails the BOARD projection is ROLLED
+    BACK, so every failure leaves all three authorities agreeing that the source
+    is NOT linked -- which is exactly what a retry needs to converge from.
+    """
+    proposal = _board_link_proposal(root, work, receipt_id, op_id=op_id)
+    if not proposal.get("ok"):
+        return {
+            "ok": False,
+            "code": proposal.get("code", "ORPHAN_RECEIPT"),
+            "detail": proposal.get("detail"),
+            "linked_work": None,
+        }
+    if proposal.get("already_linked") and not proposal.get("targets"):
+        linked = _relink_authorities(root, work, receipt_id)
+        return {
+            "ok": bool(linked.get("ok")),
+            "code": "SOURCE_LINKED" if linked.get("ok") else "ORPHAN_RECEIPT",
+            "linked_work": work if linked.get("ok") else None,
+            "detail": linked.get("detail"),
+        }
+    path = _safe_path(root, ".saipen/BOARD.md", expect_file=True)
+    before = _read_owned_file(
+        root, ".saipen/BOARD.md", kind="source BOARD authority", max_bytes=_BOARD_MAX
+    )
+    board_written = False
+    try:
+        from . import codec
+
+        document = codec.read_document(path, raw=before)
+        for target in proposal["targets"]:
+            owned_target_path(root, target.path, kind="source BOARD compaction detail")
+            _atomic_write(root / target.path, target.content, ownership_root=root)
+        _atomic_write(path, document.encode(proposal["board_text"]), ownership_root=root)
+        board_written = True
+        linked = _relink_authorities(root, work, receipt_id)
+        if not linked.get("ok"):
+            raise OSError(str(linked.get("detail") or "durable linkage refused"))
+    except (OSError, ValueError) as exc:
+        if board_written:
+            # pragma: no cover - rollback is best effort
+            with contextlib.suppress(OSError, ValueError):
+                _atomic_write(path, before, ownership_root=root)
         return {
             "ok": False,
             "code": "ORPHAN_RECEIPT",
-            "detail": f"source durable but linked Work {work} is missing",
+            "linked_work": None,
+            "detail": f"source linkage transaction did not commit: {exc}",
         }
-    existing = [
-        value.strip()
-        for value in str(ticket.get("fields", {}).get("source_receipts") or "").split(",")
-        if value.strip()
-    ]
-    if receipt_id in existing:
-        return {"ok": True, "code": "SOURCE_LINKED", "work": work}
-    existing.append(receipt_id)
-    replacement = set_ticket_field(ticket["raw"], "source_receipts", ",".join(existing))
-    updated = text.replace(ticket["raw"], replacement, 1)
-    if updated == text:
-        return {
-            "ok": False,
-            "code": "ORPHAN_RECEIPT",
-            "detail": f"could not project {receipt_id} onto BOARD {work}",
-        }
-    _atomic_write(path, document.encode(updated), ownership_root=root)
-    return {"ok": True, "code": "SOURCE_LINKED", "work": work}
+    return {"ok": True, "code": "SOURCE_LINKED", "work": work, "linked_work": work}
+
+
+def _relink_authorities(root: Path, work: str, receipt_id: str) -> dict:
+    """Durably record the link in the metadata and the intake index."""
+    try:
+        meta = _read_meta(root, receipt_id)
+        meta["linked_work"] = work
+        _write_meta(root, receipt_id, meta)
+        index = _read_index(root)
+        entry = index.setdefault("active", {}).get(receipt_id)
+        if entry is None:
+            return {"ok": False, "detail": f"{receipt_id} is not in the active intake index"}
+        entry["linked_work"] = work
+        _write_index(root, index)
+    except (OSError, ValueError) as exc:
+        return {"ok": False, "detail": str(exc)}
+    return {"ok": True}
 
 
 def _board_source_links(root: Path) -> dict[str, set[str]]:
@@ -812,6 +990,11 @@ def _find_exact_duplicate(root: Path, digest: str) -> dict | None:
             receipt_id = body_path.stem
             if not INTENT_RE.fullmatch(receipt_id) or _is_link_or_reparse(body_path):
                 continue
+            # T-1323: a leftover active body whose id is ALREADY a tombstone is
+            # stale residue from a completed close, never an adoptable orphan.
+            # Adopting it would resurrect a closed receipt with its old id.
+            if receipt_id in index.get("tombstones", {}):
+                continue
             try:
                 raw = _read_owned_file(
                     root,
@@ -824,6 +1007,28 @@ def _find_exact_duplicate(root: Path, digest: str) -> dict | None:
             except (OSError, ValueError):
                 continue
     return None
+
+
+def find_by_body(root: Path | str, body: str) -> dict | None:
+    """The existing receipt for these EXACT bytes, or None (read-only).
+
+    The public idempotency probe. `capture` is already content-addressed, but
+    a caller that also projects Work (CORE-003 `user_request`) has to know
+    BEFORE it writes whether this request already has an authority AND a Work
+    line -- otherwise a retry mints a second ticket for one request.
+    """
+    root = Path(root)
+    found = _find_exact_duplicate(root, _sha256(body))
+    if not found:
+        return None
+    meta = found.get("meta") or {}
+    return {
+        "receipt": found.get("receipt_id"),
+        "linked_work": meta.get("linked_work"),
+        "status": meta.get("status") or (CLOSED_STATUS if found.get("closed") else None),
+        "orphan": bool(found.get("orphan")),
+        "invalid": found.get("invalid"),
+    }
 
 
 def _next_receipt_id(root: Path, index: dict) -> str:
@@ -935,23 +1140,29 @@ def capture(
                                 "detail": f"linked Work {work} is missing from BOARD",
                             }
                         linked_work = work
-                        meta["linked_work"] = work
-                        _write_meta(root, existing["receipt_id"], meta)
-                        index = _read_index(root)
-                        index["active"][existing["receipt_id"]]["linked_work"] = work
-                        _write_index(root, index)
-                    linkage = (
-                        _link_board_projection(root, linked_work, existing["receipt_id"])
-                        if linked_work
-                        else {"ok": True}
-                    )
-                    if not linkage.get("ok"):
-                        return {
-                            "ok": False,
-                            "code": "ORPHAN_RECEIPT",
-                            "receipt": existing["receipt_id"],
-                            "detail": linkage.get("detail"),
-                        }
+                    if linked_work:
+                        # ONE linkage transaction: BOARD, metadata and index move
+                        # together, or the source stays unlinked everywhere
+                        # (T-1326 P1).
+                        linkage = _commit_source_link(
+                            root,
+                            linked_work,
+                            existing["receipt_id"],
+                            op_id="source-link-"
+                            + hashlib.sha256(
+                                f"{existing['receipt_id']}:{linked_work}".encode("utf-8")
+                            ).hexdigest()[:16],
+                        )
+                        if not linkage.get("ok"):
+                            return {
+                                "ok": False,
+                                "code": linkage.get("code", "ORPHAN_RECEIPT"),
+                                "receipt": existing["receipt_id"],
+                                "linked_work": None,
+                                "detail": linkage.get("detail"),
+                            }
+                        linked_work = linkage.get("linked_work") or linked_work
+                        meta["linked_work"] = linked_work
                     return {
                         "ok": True,
                         "code": "SOURCE_DUPLICATE",
@@ -979,7 +1190,13 @@ def capture(
             # missing/invalid Work leaves the captured source recoverably
             # UNLINKED (linked_work stays None in durable metadata + index);
             # a later exact retry with the correct Work attaches it.
-            linked_work = work if (work and _board_has_work(root, work)) else None
+            # T-1326 P1: the source becomes durable as UNLINKED. The linkage is
+            # committed only after the BOARD projection (including any required
+            # resulting-row compaction) has been computed and can actually
+            # succeed, so no failure can leave metadata/index claiming a link the
+            # BOARD does not carry.
+            intended_work = work if (work and _board_has_work(root, work)) else None
+            linked_work = None
             meta = {
                 "receipt_id": receipt_id,
                 "received_at": _utc(),
@@ -1056,11 +1273,19 @@ def capture(
             current_next = int(index.get("next_id", 0))
             index["next_id"] = max(current_next, adopted_numeric + 1)
             _write_index(root, index)
-            linkage = (
-                _link_board_projection(root, linked_work, receipt_id)
-                if linked_work is not None
-                else {"ok": True}
-            )
+            if intended_work is not None:
+                linkage = _commit_source_link(
+                    root,
+                    intended_work,
+                    receipt_id,
+                    op_id="source-link-"
+                    + hashlib.sha256(
+                        f"{receipt_id}:{intended_work}".encode("utf-8")
+                    ).hexdigest()[:16],
+                )
+                linked_work = linkage.get("linked_work")
+            else:
+                linkage = {"ok": True, "detail": None}
             return {
                 "ok": bool(linkage.get("ok")),
                 "code": "ORPHAN_RECEIPT_RECOVERED"
@@ -1086,7 +1311,13 @@ def capture(
 
 
 def add_requirement(
-    root: Path | str, receipt_id: str, *, rid: str, text: str, clause_class: str = "requirement"
+    root: Path | str,
+    receipt_id: str,
+    *,
+    rid: str,
+    text: str,
+    clause_class: str = "requirement",
+    when_environment: str | None = None,
 ) -> dict:
     """Persist one new requirement clause as ONE recoverable transaction.
 
@@ -1112,6 +1343,12 @@ def add_requirement(
             "ok": False,
             "code": "VALIDATION_FAILED",
             "detail": f"unknown clause class {clause_class!r}",
+        }
+    if when_environment is not None and not re.fullmatch(r"[a-z0-9_-]+", when_environment):
+        return {
+            "ok": False,
+            "code": "VALIDATION_FAILED",
+            "detail": f"invalid environment identity {when_environment!r}",
         }
     try:
         meta = _read_meta(root, receipt_id)
@@ -1147,6 +1384,8 @@ def add_requirement(
             "evidence": None,
             "verification": None,
         }
+        if when_environment:
+            clause["when_environment"] = when_environment
         ledger["requirements"][rid] = clause
         contract = _read_contract(root, receipt_id)
         if not contract or contract.get("source_sha256") != meta.get("source_sha256"):
@@ -1158,11 +1397,14 @@ def add_requirement(
         new_revision = int(contract.get("interpretation_revision", 0)) + 1
         contract["interpretation_revision"] = new_revision
         contract["derived_at"] = _utc()
-        contract.setdefault("clauses", {})[rid] = {
+        contract_clause = {
             "class": clause_class,
             "text": text,
             "actionable": clause_class in ACTIONABLE_CLASSES,
         }
+        if when_environment:
+            contract_clause["when_environment"] = when_environment
+        contract.setdefault("clauses", {})[rid] = contract_clause
         # CORE-001: build the exact future bytes for all three targets so a
         # single OperationPlan binds them under one writer lock and one
         # journal. Direct sequential _write_* are never called here.
@@ -1199,6 +1441,7 @@ def add_requirement(
                 "rid": rid,
                 "class": clause_class,
                 "revision": new_revision,
+                "when_environment": when_environment,
             },
             preconditions={
                 contract_rel: _before(contract_path),
@@ -1256,6 +1499,64 @@ def add_requirement(
         return {"ok": False, "code": "VALIDATION_FAILED", "detail": str(exc)}
 
 
+def _probe_environment_absence(environment: str) -> dict:
+    """Mechanically prove a registry-declared host runtime is absent.
+
+    Absence requires BOTH every declared runtime command to be missing and
+    every declared host home to be absent. A stale home is conservative:
+    UNKNOWN/PRESENT, never a waiver. The probe is read-only.
+    """
+    registry_path = (
+        Path(__file__).resolve().parents[2] / "extensions" / "adapters" / "registry.json"
+    )
+    try:
+        registry = json.loads(registry_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        return {"ok": False, "code": "ENVIRONMENT_PROOF_UNAVAILABLE", "detail": str(exc)}
+    adapter = next(
+        (item for item in registry.get("adapters", []) if item.get("id") == environment), None
+    )
+    if not isinstance(adapter, dict):
+        return {
+            "ok": False,
+            "code": "ENVIRONMENT_PROOF_UNAVAILABLE",
+            "detail": f"environment {environment!r} is not registry-declared",
+        }
+    commands = adapter.get("runtime_commands") or []
+    home = (adapter.get("install") or {}).get("home")
+    homes = [home] if isinstance(home, str) and home.strip() else []
+    if not commands or not homes:
+        return {
+            "ok": False,
+            "code": "ENVIRONMENT_PROOF_UNAVAILABLE",
+            "detail": f"environment {environment} lacks command+home absence probes",
+        }
+    command_rows = [{"name": name, "path": shutil.which(name)} for name in commands]
+    home_rows = [
+        {"path": value, "exists": Path(value).expanduser().exists()} for value in homes
+    ]
+    unavailable = all(row["path"] is None for row in command_rows) and all(
+        not row["exists"] for row in home_rows
+    )
+    proof = {
+        "schema_version": 1,
+        "kind": "environment_absence",
+        "environment": environment,
+        "commands": command_rows,
+        "homes": home_rows,
+        "unavailable": unavailable,
+        "observed_at": _utc(),
+    }
+    if not unavailable:
+        return {
+            "ok": False,
+            "code": "ENVIRONMENT_PRESENT",
+            "detail": f"{environment} runtime command or host home exists",
+            "proof": proof,
+        }
+    return {"ok": True, "code": "ENVIRONMENT_ABSENT", "proof": proof}
+
+
 def set_disposition(
     root: Path | str,
     receipt_id: str,
@@ -1265,6 +1566,7 @@ def set_disposition(
     work: str | None = None,
     evidence: str | None = None,
     verification: str | None = None,
+    environment: str | None = None,
 ) -> dict:
     root = Path(root)
     if not _valid_receipt_id(receipt_id):
@@ -1286,6 +1588,25 @@ def set_disposition(
                     "detail": f"unknown requirement {rid}",
                 }
             entry = ledger["requirements"][rid]
+            environment_proof = None
+            if disposition == "UNAVAILABLE_ENVIRONMENT":
+                contract = _read_contract(root, receipt_id) or {}
+                clause = (contract.get("clauses") or {}).get(rid) or {}
+                declared = str(clause.get("when_environment") or "").strip()
+                if not environment or declared != environment:
+                    return {
+                        "ok": False,
+                        "code": "ENVIRONMENT_WAIVER_REFUSED",
+                        "detail": (
+                            "UNAVAILABLE_ENVIRONMENT requires a matching structured "
+                            "when_environment clause and --environment probe"
+                        ),
+                    }
+                probed = _probe_environment_absence(environment)
+                if not probed.get("ok"):
+                    return probed
+                environment_proof = probed["proof"]
+                evidence = evidence or f"mechanical environment absence probe: {environment}"
             if disposition in TERMINAL_DISPOSITIONS and entry.get("actionable", True):
                 if not evidence:
                     return {
@@ -1306,6 +1627,10 @@ def set_disposition(
                 entry["evidence"] = evidence
             if verification:
                 entry["verification"] = verification
+            if environment_proof is not None:
+                entry["environment_evidence"] = environment_proof
+            elif disposition != "UNAVAILABLE_ENVIRONMENT":
+                entry.pop("environment_evidence", None)
             _write_coverage(root, receipt_id, ledger)
             return {
                 "ok": True,
@@ -1350,6 +1675,25 @@ def _coverage_summary_from_ledger(receipt_id: str, ledger: dict) -> dict:
             value = entry.get(field)
             if value is not None and (not isinstance(value, str) or not value.strip()):
                 raise ValueError(f"coverage {receipt_id} requirement {rid} has invalid {field}")
+        when_environment = entry.get("when_environment")
+        if when_environment is not None and (
+            not isinstance(when_environment, str)
+            or not re.fullmatch(r"[a-z0-9_-]+", when_environment)
+        ):
+            raise ValueError(f"coverage {receipt_id} requirement {rid} has invalid environment")
+        if disp == "UNAVAILABLE_ENVIRONMENT":
+            proof = entry.get("environment_evidence")
+            if (
+                not isinstance(proof, dict)
+                or proof.get("kind") != "environment_absence"
+                or proof.get("environment") != when_environment
+                or proof.get("unavailable") is not True
+                or not proof.get("commands")
+                or not proof.get("homes")
+            ):
+                raise ValueError(
+                    f"coverage {receipt_id} requirement {rid} lacks mechanical environment proof"
+                )
         counts[disp] = counts.get(disp, 0) + 1
     actionable = {
         rid: entry
@@ -2081,14 +2425,70 @@ def _archive_closed_locked(root: Path, receipt_id: str, meta: dict) -> dict:
     }
 
 
+def _settle_closed_residue_locked(root: Path, receipt_id: str, tomb: dict) -> dict:
+    """Remove stale `active/` bytes for a receipt that is ALREADY closed.
+
+    The close transaction archives the body, then unlinks the active body and
+    metadata. A crash between those steps (or a foreign restore of the hot
+    surface) leaves `active/<SRC>.md`(+meta) beside a valid tombstone. The
+    receipt is fully reconstructed in the archive, so this is residue, never a
+    deletion of SRC-024. Proof is the archived body digest against the
+    tombstone's recorded digest; a mismatch is corruption, not a cleanup.
+    Caller holds the project writer lock.
+    """
+    try:
+        raw = _read_owned_file(
+            root,
+            f".saipen/archive/source/{receipt_id}.md",
+            kind="source body",
+            max_bytes=_BODY_MAX,
+        )
+    except (FileNotFoundError, OSError, ValueError) as exc:
+        return {"ok": False, "code": "SOURCE_CORRUPTION", "detail": str(exc)}
+    if hashlib.sha256(raw).hexdigest() != tomb.get("source_sha256"):
+        return {
+            "ok": False,
+            "code": "SOURCE_CORRUPTION",
+            "detail": f"closed receipt {receipt_id} archived body digest mismatch",
+        }
+    removed = False
+    for rel, kind in (
+        (f".saipen/intake/active/{receipt_id}.md", "active source body"),
+        (f".saipen/intake/active/{receipt_id}.meta.json", "active source metadata"),
+    ):
+        path = _safe_path(root, rel, expect_file=True)
+        if path.is_file() and not _is_link_or_reparse(path):
+            safe_unlink_owned(path, kind=kind, ownership_root=root)
+            removed = True
+    return {
+        "ok": True,
+        "code": "SOURCE_CLOSED",
+        "receipt": receipt_id,
+        "status": CLOSED_STATUS,
+        "archive_ref": tomb.get("archive_ref"),
+        "recovered": True,
+        "residue_removed": removed,
+    }
+
+
 def close_receipt(root: Path | str, receipt_id: str, *, closure_event: str | None = None) -> dict:
-    """Close only with full terminal coverage; then leave the hot surface."""
+    """Close only with full terminal coverage; then leave the hot surface.
+
+    Idempotent and self-healing for its own residue: if the receipt is ALREADY a
+    tombstone, closure is a done fact, so the only remaining action is to
+    deterministically settle any stale `active/` bytes left behind by the
+    original close crash window (T-1323) -- verified against the archived body
+    digest,     never inferred from the residue alone.
+    """
     root = Path(root)
     if not _valid_receipt_id(receipt_id):
         return _invalid_receipt_id(receipt_id)
     try:
         with project_writer_lock(root):
             index = _read_index(root)
+            tomb = index.get("tombstones", {}).get(receipt_id)
+            if tomb is not None:
+                return _settle_closed_residue_locked(root, receipt_id, tomb)
             if _is_archive_commit_pending(root, receipt_id, index):
                 settled = _settle_archive_commit(root, receipt_id, index)
                 if settled is not None:
@@ -2572,6 +2972,12 @@ def recover_orphans(root: Path | str) -> dict:
     if active.is_dir() and not _is_link_or_reparse(active):
         for body in sorted(active.glob("SRC-*.md")):
             receipt_id = body.stem
+            # T-1323: stale active residue of a receipt that is ALREADY a
+            # tombstone is not an orphan -- the receipt is reconstructed in the
+            # archive. Only a body with no active meta AND no tombstone is a
+            # genuine unreconstructed orphan.
+            if receipt_id in index.get("tombstones", {}):
+                continue
             if receipt_id not in indexed or not _read_meta(root, receipt_id):
                 try:
                     raw = _read_owned_file(
@@ -2811,3 +3217,553 @@ def validate_project(root: Path | str) -> list[str]:
     for orphan in recover_orphans(root)["orphans"]:
         errors.append(f"ORPHAN_RECEIPT {orphan['receipt']}")
     return errors
+
+
+# ---------------------------------------------------------------------------
+# Terminal recovered-source attribution proof (SAIPEN T-1315 / AUDAPACK T-183)
+#
+# WHY THIS EXISTS: a terminal TOMBSTONE_AUTHORITATIVE recovery can leave an
+# INTENTIONALLY PRESERVED INVALID original Contract as durable residue. Strict
+# Core correctly reports it forever -- the archive is immutable and no clause
+# may be fabricated to make it valid. Work-delta then classifies the finding
+# GLOBAL because it cannot prove who owns the residue, which permanently
+# blocks unrelated Work whose only sin is living in a project with honest
+# historical debt.
+#
+# The fix is ATTRIBUTION, never a waiver. This helper is READ-ONLY: it never
+# mutates the project, never repairs the contract, never suppresses the strict
+# finding and never throws for ordinary invalid evidence. It answers exactly
+# one question: "can this recovered source's residue be PROVEN to belong to
+# that one terminal linked Work?" Anything unproven returns NOT_ATTRIBUTABLE
+# with a machine-readable reason, and the caller keeps the finding blocking.
+# ---------------------------------------------------------------------------
+
+RECOVERY_SCHEMA_VERSION = 1
+_WORK_ID_RE = re.compile(r"\AT-\d+\Z")
+
+# Only recovery methods whose contract is fully understood by this proof are
+# accepted. Arbitrary strings are never trusted.
+PRESERVING_RECOVERY_METHODS = frozenset({"TOMBSTONE_AUTHORITATIVE"})
+
+# Fields that exist only in the LEGACY rich tombstone shape the recovery verb
+# normalized into the canonical compact form. Their disappearance is the
+# documented normalization, never a mutation of closure identity; the identity
+# itself is compared through `_closure_identity_view`.
+RICH_TOMBSTONE_ONLY_FIELDS = frozenset({"closure", "consumption", "kind", "layer", "transport"})
+
+# Fields the recovery method is allowed to ADD to a tombstone file after the
+# original tombstone was embedded. They are journaled recovery metadata, not
+# closure identity, so their presence is never corruption.
+RECOVERY_ADDITIVE_TOMBSTONE_FIELDS = frozenset({"recovery"})
+
+RECOVERY_INTEGRITY_REQUIRED = (
+    "schema_version",
+    "receipt_id",
+    "source_sha256",
+    "method",
+    "recovered_at",
+)
+
+
+def _b64_sha256(text: object) -> str | None:
+    """Digest of one embedded base64 payload, or None when undecodable."""
+    import base64
+    import binascii
+
+    if not isinstance(text, str) or not text.strip():
+        return None
+    try:
+        raw = base64.b64decode(text.encode("ascii"), validate=True)
+    except (binascii.Error, ValueError):
+        return None
+    return hashlib.sha256(raw).hexdigest()
+
+
+def _load_json_artifact(root: Path, rel: str, *, max_bytes: int = _LEDGER_MAX):
+    """Read one owned JSON artifact; returns (doc, error_reason)."""
+    try:
+        raw = _read_owned_file(root, rel, kind="source recovery artifact", max_bytes=max_bytes)
+    except FileNotFoundError:
+        return None, f"{rel} is missing"
+    except (OSError, ValueError) as exc:
+        return None, f"{rel} unreadable: {exc}"
+    try:
+        doc = json.loads(raw.decode("utf-8-sig"))
+    except (UnicodeDecodeError, ValueError) as exc:
+        return None, f"{rel} is not valid JSON: {exc}"
+    if not isinstance(doc, dict):
+        return None, f"{rel} root is not an object"
+    return doc, None
+
+
+def _recovered_requirement_truth(receipt_id: str, coverage: dict) -> tuple[dict | None, str]:
+    """Tolerant coverage truth for a PRESERVED (possibly legacy-shaped) ledger.
+
+    Strict `_coverage_summary_from_ledger` deliberately refuses coverage whose
+    requirement entries lack canonical clause structure -- that refusal is the
+    contract residue this proof is about and must stay. Attribution still needs
+    the counts, so this reader computes them without raising:
+    actionable = every requirement except ones explicitly marked
+    ``actionable: false``; terminal = terminal disposition + evidence (+ a
+    verification string for IMPLEMENTED/VERIFIED).
+    """
+    requirements = coverage.get("requirements") if isinstance(coverage, dict) else None
+    if not isinstance(requirements, dict):
+        return None, "coverage requirements is not an object"
+    if not requirements:
+        return None, "coverage has no requirements"
+    works: set[str] = set()
+    actionable = 0
+    terminal = 0
+    for rid, entry in requirements.items():
+        if not isinstance(rid, str) or not re.fullmatch(rf"{re.escape(receipt_id)}:R\d+", rid):
+            return None, f"coverage has invalid requirement id {rid!r}"
+        if not isinstance(entry, dict):
+            return None, f"coverage requirement {rid} is not an object"
+        linked = entry.get("linked_work")
+        if not isinstance(linked, str) or not _WORK_ID_RE.match(linked):
+            return None, f"coverage requirement {rid} has no canonical linked_work"
+        works.add(linked)
+        if entry.get("actionable", True) is not False:
+            actionable += 1
+            disp = entry.get("disposition")
+            evidence = entry.get("evidence")
+            verification = entry.get("verification")
+            if disp not in TERMINAL_DISPOSITIONS:
+                continue
+            if not isinstance(evidence, str) or not evidence.strip():
+                continue
+            if disp in {"IMPLEMENTED", "VERIFIED"} and (
+                not isinstance(verification, str) or not verification.strip()
+            ):
+                continue
+            terminal += 1
+    return {
+        "requirements": len(requirements),
+        "actionable": actionable,
+        "terminal": terminal,
+        "linked_works": works,
+    }, None
+
+
+def _recovery_record_path(root: Path, receipt_id: str, tombstone: dict) -> str:
+    """The journaled recovery record location, from the tombstone when present."""
+    recovery = tombstone.get("recovery")
+    if isinstance(recovery, dict):
+        declared = recovery.get("record")
+        if isinstance(declared, str) and declared.strip():
+            return declared.strip()
+    return f".saipen/archive/source/{receipt_id}.recovery.json"
+
+
+def _recovery_record_integrity(receipt_id: str, record: dict, tombstone: dict) -> str | None:
+    """Canonical schema/integrity check for one recovery record."""
+    for field in RECOVERY_INTEGRITY_REQUIRED:
+        if field not in record:
+            return f"recovery record missing {field}"
+    if record.get("schema_version") != RECOVERY_SCHEMA_VERSION:
+        return "recovery record has an unsupported schema_version"
+    if record.get("receipt_id") != receipt_id:
+        return "recovery record receipt_id mismatch"
+    if record.get("source_sha256") != tombstone.get("source_sha256"):
+        return "recovery record source_sha256 mismatch"
+    method = record.get("method")
+    if not isinstance(method, str) or method not in PRESERVING_RECOVERY_METHODS:
+        return f"recovery method {method!r} is not supported"
+    for field in ("original_contract", "original_coverage", "original_tombstone"):
+        block = record.get(field)
+        if not isinstance(block, dict):
+            return f"recovery record missing {field}"
+        if not isinstance(block.get("bytes"), str) or not isinstance(block.get("sha256"), str):
+            return f"recovery record {field} is malformed"
+    declared = tombstone.get("recovery")
+    if isinstance(declared, dict) and declared.get("method") != method:
+        return "recovery method disagrees with the tombstone declaration"
+    return None
+
+
+def _closure_identity_view(tombstone: dict) -> dict:
+    """Canonical IMMUTABLE closure identity of one tombstone.
+
+    The recovery verb normalized the legacy rich tombstone into the compact
+    canonical shape, so the two files are NOT field-for-field identical: the
+    rich-only carriers (closure/consumption/kind/layer/transport) exist before
+    the recovery and not after. What must never change is the closure identity
+    they both carry -- receipt id, source digest, linked Work, the closure
+    event/run, closed_at, the requirement/actionable counts and the work_done
+    identity -- plus, when the legacy block declares it, the consumption file
+    identity. Rich-block fields that the current tombstone DOES carry must
+    still agree when they are present in both shapes.
+    """
+    identity: dict[str, object] = {
+        "receipt_id": tombstone.get("receipt_id"),
+        "source_sha256": tombstone.get("source_sha256"),
+        "linked_work": tombstone.get("linked_work"),
+        "closed_at": tombstone.get("closed_at"),
+        "schema_version": tombstone.get("schema_version"),
+        "requirements": tombstone.get("requirements"),
+        "actionable": tombstone.get("actionable"),
+        "unresolved": tombstone.get("unresolved"),
+    }
+    closure = tombstone.get("closure")
+    if isinstance(closure, dict):
+        identity["closure.work_done"] = closure.get("work_done")
+        identity["closure.run"] = closure.get("run")
+        identity["closure.terminal_clauses"] = closure.get("terminal_clauses")
+        identity["closure.actionable_clauses"] = closure.get("actionable_clauses")
+    consumption = tombstone.get("consumption")
+    if isinstance(consumption, dict):
+        # Consumption file identity is immutable when the recovery schema
+        # records it: the same file, the same digest, one generation.
+        for field in ("file", "file_sha256", "generation"):
+            if field in consumption:
+                identity[f"consumption.{field}"] = consumption[field]
+    return identity
+
+
+def _closure_identity(original: dict, current: dict) -> str | None:
+    """Semantic equality of IMMUTABLE tombstone closure identity.
+
+    The current tombstone may legitimately carry additive journaled recovery
+    metadata, and the legacy rich carriers may have been normalized away. Any
+    OTHER field appearing out of nowhere, or any change to closure identity,
+    is a refusal. Extra unknown fields are never waved through.
+    """
+    original_is_rich = bool(RICH_TOMBSTONE_ONLY_FIELDS & set(original))
+    current_is_compact = not (RICH_TOMBSTONE_ONLY_FIELDS & set(current))
+    if original_is_rich and current_is_compact:
+        # Documented recovery normalization: the legacy rich tombstone was
+        # rewritten into the canonical compact form. Only the closure identity
+        # (compared below) and the shared raw fields are authoritative.
+        shared = set(original) & set(current) - RECOVERY_ADDITIVE_TOMBSTONE_FIELDS
+        for field in sorted(shared):
+            if current[field] != original[field]:
+                return f"tombstone immutable field {field} changed"
+    else:
+        extra = set(current) - set(original) - RECOVERY_ADDITIVE_TOMBSTONE_FIELDS
+        if extra:
+            return f"tombstone gained undocumented fields: {','.join(sorted(extra))}"
+        dropped = set(original) - set(current) - RECOVERY_ADDITIVE_TOMBSTONE_FIELDS
+        if dropped:
+            return f"tombstone lost immutable field(s): {','.join(sorted(dropped))}"
+        for field, expected in original.items():
+            if field == "recovery":
+                continue
+            if current.get(field) != expected:
+                return f"tombstone immutable field {field} changed"
+    before = _closure_identity_view(original)
+    after = _closure_identity_view(current)
+    for field, expected in before.items():
+        if expected is None:
+            continue
+        actual = after.get(field)
+        if actual is None:
+            # A legacy carrier that the current compact tombstone no longer
+            # repeats is the documented normalization, not a lost identity --
+            # but the counts it carried are compared directly below.
+            if field in (
+                "closure.run",
+                "closure.work_done",
+                "closure.terminal_clauses",
+                "closure.actionable_clauses",
+                "consumption.file",
+                "consumption.file_sha256",
+                "consumption.generation",
+                "unresolved",
+                "requirements",
+                "actionable",
+            ):
+                continue
+            return f"tombstone lost immutable closure identity {field}"
+        if actual != expected:
+            return f"tombstone immutable closure identity {field} changed"
+    # counts declared inside the legacy closure block are immutable truth
+    closure = original.get("closure")
+    current_closure = current.get("closure")
+    if isinstance(closure, dict) and not isinstance(current_closure, dict):
+        for field, key in (
+            ("actionable_clauses", "actionable"),
+            ("terminal_clauses", "actionable"),
+        ):
+            value = closure.get(field)
+            if isinstance(value, int) and current.get(key) != value:
+                return f"tombstone closure {field} disagrees with {key}"
+        if isinstance(closure.get("terminal_clauses"), int) and (
+            current.get("unresolved") != 0
+        ):
+            return "tombstone unresolved count contradicts terminal closure"
+    return None
+
+
+def evaluate_terminal_recovered_source_attribution(root: Path | str, receipt_id: str) -> dict:
+    """Fail-closed proof that a recovered source's residue belongs to one Work.
+
+    Returns ``{"attributable": True, "linked_work": <T-###>, "recovery_class":
+    "terminal_recovered_source_residue", ...}`` only when EVERY condition in
+    the attribution contract holds, otherwise ``{"attributable": False,
+    "reason": <machine-readable code>, "detail": ...}``.
+
+    Never raises for ordinary invalid evidence. Never mutates the project.
+    Never repairs, rewrites or fabricates a Contract clause. This is
+    PROVENANCE, never correctness: the strict finding stays exactly as it was.
+    """
+    root = Path(root)
+    if not _valid_receipt_id(receipt_id):
+        return {"attributable": False, "reason": "INVALID_RECEIPT_ID", "receipt_id": receipt_id}
+    try:
+        index = _read_index(root)
+    except (OSError, ValueError) as exc:
+        return {
+            "attributable": False,
+            "reason": "INDEX_UNREADABLE",
+            "receipt_id": receipt_id,
+            "detail": str(exc),
+        }
+    tombstones = index.get("tombstones", {})
+    if not isinstance(tombstones, dict) or receipt_id not in tombstones:
+        return {"attributable": False, "reason": "NO_TOMBSTONE", "receipt_id": receipt_id}
+    # -- 27/28: a recovered terminal source must be OFF the active surface.
+    if receipt_id in index.get("active", {}):
+        return {"attributable": False, "reason": "SOURCE_ACTIVE", "receipt_id": receipt_id}
+    active_dir = _active_dir(root)
+    if active_dir.is_dir() and not _is_link_or_reparse(active_dir):
+        for pattern in (f"{receipt_id}.*", f"{receipt_id}.md"):
+            if any(active_dir.glob(pattern)):
+                return {
+                    "attributable": False,
+                    "reason": "ACTIVE_ARTIFACT_PRESENT",
+                    "receipt_id": receipt_id,
+                }
+    tombstone, reason = _load_json_artifact(
+        root, f".saipen/intake/tombstones/{receipt_id}.json", max_bytes=_META_MAX
+    )
+    if tombstone is None:
+        return {
+            "attributable": False,
+            "reason": "TOMBSTONE_UNREADABLE",
+            "receipt_id": receipt_id,
+            "detail": reason,
+        }
+    if tombstone.get("receipt_id") != receipt_id:
+        return {
+            "attributable": False,
+            "reason": "TOMBSTONE_RECEIPT_MISMATCH",
+            "receipt_id": receipt_id,
+        }
+    if tombstone.get("status") != CLOSED_STATUS:
+        return {"attributable": False, "reason": "TOMBSTONE_NOT_CLOSED", "receipt_id": receipt_id}
+    linked_work = tombstone.get("linked_work")
+    if not isinstance(linked_work, str) or not _WORK_ID_RE.match(linked_work):
+        return {"attributable": False, "reason": "LINKED_WORK_MISSING", "receipt_id": receipt_id}
+
+    # -- archived metadata must agree with the tombstone on identity.
+    meta, meta_reason = _load_json_artifact(
+        root, f".saipen/archive/source/{receipt_id}.meta.json", max_bytes=_META_MAX
+    )
+    if meta is None:
+        return {
+            "attributable": False,
+            "reason": "ARCHIVE_META_UNREADABLE",
+            "receipt_id": receipt_id,
+            "detail": meta_reason,
+        }
+    if meta.get("receipt_id") != receipt_id:
+        return {
+            "attributable": False,
+            "reason": "ARCHIVE_RECEIPT_MISMATCH",
+            "receipt_id": receipt_id,
+        }
+    if meta.get("status") != CLOSED_STATUS or meta.get("storage_status") != ARCHIVED_STATUS:
+        return {"attributable": False, "reason": "ARCHIVE_NOT_CLOSED", "receipt_id": receipt_id}
+    if meta.get("linked_work") != linked_work:
+        return {"attributable": False, "reason": "ARCHIVE_WORK_MISMATCH", "receipt_id": receipt_id}
+    digest = tombstone.get("source_sha256")
+    if not isinstance(digest, str) or not re.fullmatch(r"[0-9a-f]{64}", digest):
+        return {"attributable": False, "reason": "SOURCE_SHA_INVALID", "receipt_id": receipt_id}
+    if meta.get("source_sha256") != digest:
+        return {"attributable": False, "reason": "ARCHIVE_SHA_MISMATCH", "receipt_id": receipt_id}
+
+    # -- archived body digest must agree too (the source is what it claims).
+    try:
+        body = _read_owned_file(
+            root,
+            f".saipen/archive/source/{receipt_id}.md",
+            kind="source archive body",
+            max_bytes=_BODY_MAX,
+        )
+    except FileNotFoundError:
+        return {"attributable": False, "reason": "ARCHIVE_BODY_MISSING", "receipt_id": receipt_id}
+    except (OSError, ValueError) as exc:
+        return {
+            "attributable": False,
+            "reason": "ARCHIVE_BODY_UNREADABLE",
+            "receipt_id": receipt_id,
+            "detail": str(exc),
+        }
+    if hashlib.sha256(body).hexdigest() != digest:
+        return {
+            "attributable": False,
+            "reason": "ARCHIVE_BODY_SHA_MISMATCH",
+            "receipt_id": receipt_id,
+        }
+
+    # -- 29: no newer generation may amend this receipt.
+    for other_id in sorted(set(index.get("active", {})) | set(tombstones)):
+        if other_id == receipt_id:
+            continue
+        other_meta = _read_meta(root, other_id)
+        if other_meta and other_meta.get("amends") == receipt_id:
+            return {
+                "attributable": False,
+                "reason": "NEWER_GENERATION_EXISTS",
+                "receipt_id": receipt_id,
+                "detail": other_id,
+            }
+        other_tomb = tombstones.get(other_id) if isinstance(other_id, str) else None
+        if isinstance(other_tomb, dict) and other_tomb.get("amends") == receipt_id:
+            return {
+                "attributable": False,
+                "reason": "NEWER_GENERATION_EXISTS",
+                "receipt_id": receipt_id,
+                "detail": other_id,
+            }
+
+    # -- recovery record: existence, schema, integrity, provenance.
+    rel = _recovery_record_path(root, receipt_id, tombstone)
+    record, record_reason = _load_json_artifact(root, rel)
+    if record is None:
+        return {
+            "attributable": False,
+            "reason": "RECOVERY_RECORD_MISSING",
+            "receipt_id": receipt_id,
+            "detail": record_reason,
+        }
+    integrity_reason = _recovery_record_integrity(receipt_id, record, tombstone)
+    if integrity_reason:
+        return {
+            "attributable": False,
+            "reason": "RECOVERY_INTEGRITY_INVALID",
+            "receipt_id": receipt_id,
+            "detail": integrity_reason,
+        }
+
+    # -- C1/C2/C3: every embedded original must match its recorded digest.
+    decoded: dict[str, object] = {}
+    for field in ("original_contract", "original_coverage", "original_tombstone"):
+        block = record.get(field)
+        declared = block.get("sha256")
+        if not isinstance(declared, str) or not re.fullmatch(r"[0-9a-f]{64}", declared or ""):
+            return {
+                "attributable": False,
+                "reason": "RECOVERY_EMBEDDED_DIGEST_INVALID",
+                "receipt_id": receipt_id,
+                "detail": field,
+            }
+        actual = _b64_sha256(block.get("bytes"))
+        if actual is None:
+            return {
+                "attributable": False,
+                "reason": "RECOVERY_EMBEDDED_BYTES_INVALID",
+                "receipt_id": receipt_id,
+                "detail": field,
+            }
+        if actual != declared:
+            return {
+                "attributable": False,
+                "reason": "RECOVERY_EMBEDDED_DIGEST_MISMATCH",
+                "receipt_id": receipt_id,
+                "detail": field,
+            }
+        import base64
+
+        decoded[field] = json.loads(base64.b64decode(block["bytes"].encode("ascii")))
+
+    original_tombstone = decoded["original_tombstone"]
+    if not isinstance(original_tombstone, dict):
+        return {
+            "attributable": False,
+            "reason": "ORIGINAL_TOMBSTONE_MALFORMED",
+            "receipt_id": receipt_id,
+        }
+    identity_reason = _closure_identity(original_tombstone, tombstone)
+    if identity_reason:
+        return {
+            "attributable": False,
+            "reason": "TOMBSTONE_CLOSURE_IDENTITY_CHANGED",
+            "receipt_id": receipt_id,
+            "detail": identity_reason,
+        }
+
+    # -- 18/19: current archived Contract/coverage must still be the preserved
+    # originals. Byte-identical is the only thing that proves no fabrication.
+    for field, suffix in (("original_contract", "contract"), ("original_coverage", "coverage")):
+        try:
+            current_raw = _read_owned_file(
+                root,
+                f".saipen/archive/source/{receipt_id}.{suffix}.json",
+                kind="source archive artifact",
+                max_bytes=_LEDGER_MAX,
+            )
+        except FileNotFoundError:
+            return {
+                "attributable": False,
+                "reason": "ARCHIVE_ARTIFACT_MISSING",
+                "receipt_id": receipt_id,
+                "detail": suffix,
+            }
+        except (OSError, ValueError) as exc:
+            return {
+                "attributable": False,
+                "reason": "ARCHIVE_ARTIFACT_UNREADABLE",
+                "receipt_id": receipt_id,
+                "detail": f"{suffix}: {exc}",
+            }
+        import base64
+
+        if current_raw != base64.b64decode(record[field]["bytes"].encode("ascii")):
+            return {
+                "attributable": False,
+                "reason": "PRESERVED_ORIGINAL_REPLACED",
+                "receipt_id": receipt_id,
+                "detail": suffix,
+            }
+
+    coverage = decoded["original_coverage"]
+    truth, truth_reason = _recovered_requirement_truth(receipt_id, coverage)
+    if truth is None:
+        return {
+            "attributable": False,
+            "reason": "COVERAGE_UNINTERPRETABLE",
+            "receipt_id": receipt_id,
+            "detail": truth_reason,
+        }
+    if truth["requirements"] != tombstone.get("requirements"):
+        return {
+            "attributable": False,
+            "reason": "COVERAGE_COUNT_MISMATCH",
+            "receipt_id": receipt_id,
+        }
+    if truth["terminal"] != tombstone.get("actionable"):
+        return {
+            "attributable": False,
+            "reason": "COVERAGE_TERMINAL_MISMATCH",
+            "receipt_id": receipt_id,
+        }
+    if truth["terminal"] != truth["actionable"]:
+        return {"attributable": False, "reason": "COVERAGE_NOT_TERMINAL", "receipt_id": receipt_id}
+    if len(truth["linked_works"]) != 1 or linked_work not in truth["linked_works"]:
+        return {"attributable": False, "reason": "COVERAGE_SPLIT_WORK", "receipt_id": receipt_id}
+    if not _work_is_done(root, linked_work):
+        return {"attributable": False, "reason": "LINKED_WORK_NOT_DONE", "receipt_id": receipt_id}
+    return {
+        "attributable": True,
+        "reason": None,
+        "receipt_id": receipt_id,
+        "linked_work": linked_work,
+        "recovery_class": "terminal_recovered_source_residue",
+        "recovery_method": record.get("method"),
+        "recovery_record": rel,
+        "source_sha256": digest,
+        "requirements": truth["requirements"],
+        "terminal": truth["terminal"],
+    }

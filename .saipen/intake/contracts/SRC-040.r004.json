@@ -1,0 +1,29 @@
+{
+  "clauses": {
+    "SRC-040:R0001": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Every enumerated hard-stop fixture resolves to valid/runnable state, at least one admitted exact canonical repair/control operation, or an explicit external/forensic zero-local-mutation terminal result."
+    },
+    "SRC-040:R0002": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "No fixture has needs_local_mutation=true together with all local repair operations refused."
+    },
+    "SRC-040:R0003": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "AUDAPACK stale-blocker recovery reaches canonical repair or an exact operator-decision command with zero manual STATE edits and zero guard disabling."
+    },
+    "SRC-040:R0004": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "SAITULS legacy next_action and unattested-ticket recovery fixtures reach canonical repair or an exact operator-decision command; immutable history failure remains a zero-write terminal path."
+    }
+  },
+  "derived_at": "2026-09-13T22:34:53Z",
+  "derived_from": "SRC-040",
+  "interpretation_revision": 4,
+  "schema_version": 1,
+  "source_sha256": "ec9066bafe79214f9dfbd661d3f87159117066c4a3f69f223968fa4a0712fe3b"
+}

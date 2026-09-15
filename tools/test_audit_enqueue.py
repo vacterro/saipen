@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import contextlib
 import hashlib
+import io
 import json
 import os
 import shutil
@@ -543,6 +544,56 @@ class BoundedAllocatorWait(EnqueueFixture):
                 self.assertEqual(
                     audit_enqueue.lock_timeout(), audit_enqueue.DEFAULT_LOCK_TIMEOUT
                 )
+
+
+class CliDryRunParityTests(EnqueueFixture):
+    """T-1322: `saipen audit enqueue --dry-run` must plan against the SAME
+    allocator authority the real call uses. It used to call a non-existent
+    `read_operation_record`/`OPERATION_RECORD_CORRUPT` and raised AttributeError,
+    so no plan was produced at all."""
+
+    def _plan(self, operation_id: str = "op-dry") -> dict:
+        import saipen  # the CLI module (tools/saipen.py)
+
+        buffer = io.StringIO()
+        with contextlib.redirect_stdout(buffer):
+            rc = saipen._audit_enqueue(
+                self.root,
+                [
+                    "--producer",
+                    "tester",
+                    "--operation-id",
+                    operation_id,
+                    "--text",
+                    "dry audit",
+                ],
+                True,
+                True,
+            )
+        self.assertEqual(rc, 0, buffer.getvalue())
+        return json.loads(buffer.getvalue())
+
+    def test_dry_run_plans_purely_and_matches_the_real_allocator(self) -> None:
+        plan = self._plan()
+        self.assertEqual(plan["code"], "PLAN")
+        self.assertFalse(plan["idempotent"])
+        self.assertEqual(plan["writes"], [])
+        self.assertEqual(plan["rel"], f"audit/{plan['layer']}.md")
+        # the plan did NOT record the operation (pure read)
+        doc, allocator_state = audit_enqueue.read_allocator_state(self.root)
+        self.assertNotEqual(allocator_state, audit_enqueue.ALLOCATOR_CORRUPT)
+        self.assertNotIn(
+            audit_enqueue._op_key("tester", "op-dry"), doc["operations"]
+        )
+
+        real = self.enqueue("op-dry", body=b"dry audit\n", producer="tester")
+        self.assertTrue(real["ok"], real)
+        self.assertEqual(real["layer"], plan["layer"])
+        self.assertEqual(real["sha256"], plan["sha256"])
+
+        again = self._plan()
+        self.assertTrue(again["idempotent"])
+        self.assertEqual(again["layer"], plan["layer"])
 
 
 if __name__ == "__main__":

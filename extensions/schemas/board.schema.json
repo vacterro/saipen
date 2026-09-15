@@ -24,6 +24,10 @@
       "verify": {
         "type": "string"
       },
+      "detail_ref": {
+        "type": "string",
+        "description": "Canonical lossless external detail artifact for a compact BOARD projection."
+      },
       "blocker": {
         "type": "string",
         "description": "Active facts + dead ends. Present and non-empty exactly when status is BLOCKED; absent for every other status."
@@ -70,6 +74,65 @@
       "regression": {
         "type": "string",
         "description": "CORE-001: `required` declares that this ticket owes a regression PAIR -- a FAIL against the pre-fix subject and a PASS against the post-fix one under the SAME verifier -- and arms the extra gate in VERIFY -> REVIEW and finish. A machine-owned field, never inferred from prose."
+      },
+      "blocker_scope": {
+        "type": "string",
+        "enum": [
+          "ticket",
+          "goal"
+        ],
+        "description": "Orchestration repair (T-1302): scope of a BLOCKED ticket. 'ticket' = this task cannot progress but independent work may continue; 'goal' = no safe useful work remains without an external/operator dependency. Absent reads as 'ticket'."
+      },
+      "closure_mode": {
+        "type": "string",
+        "enum": [
+          "own_patch",
+          "inherited_verified",
+          "cohort"
+        ],
+        "description": "Orchestration repair (T-1302): closure provenance on DONE tickets. own_patch = attributable implementation diff; inherited_verified = no new implementation added, verification-only closeout against a durable publication authority; cohort = evidence complete but publication deferred to a C-### cohort. Absent reads as 'own_patch'."
+      },
+      "closure_cohort": {
+        "type": "string",
+        "pattern": "^C-\\d+$",
+        "description": "Orchestration repair (T-1302): C-### cohort id, valid only with closure_mode cohort."
+      },
+      "user_explicit": {
+        "type": "string",
+        "enum": [
+          "true"
+        ],
+        "description": "Orchestration repair (T-1302): marks a ticket created from an explicit user request (USER_INTERRUPT). Only 'true' arms the scheduler signal."
+      },
+      "implementation_delta": {
+        "type": "string",
+        "enum": [
+          "none",
+          "patch"
+        ],
+        "description": "Orchestration repair (T-1302): records whether BUILD produced a code delta. 'none' = implementation already existed/verified, no new source touched."
+      },
+      "implementation_source": {
+        "type": "string",
+        "description": "Orchestration repair (T-1302): the DURABLE publication authority an inherited_verified closure resolves against -- release:<id>, T-###, or SRC-###. Resolved by one strict resolver shared by the closure operation and the validator; an unresolvable or unpublished authority REFUSES the closure."
+      },
+      "closure_paths": {
+        "type": "string",
+        "description": "Orchestration repair (T-1302 FINDING 4): comma-separated worktree paths this COHORT-mode member attributes to its C-### batch; publication belongs to the cohort authority, never to an imaginary per-ticket diff."
+      },
+      "blocked_on": {
+        "type": "string",
+        "pattern": "^T-\\d+$",
+        "description": "Child Work whose DONE transition atomically resumes this BLOCKED parent."
+      },
+      "resume_phase": {
+        "type": "string",
+        "enum": ["SCOUT", "BUILD", "VERIFY", "REVIEW", "SHIP"],
+        "description": "Ticket-bearing phase restored when blocked_on reaches DONE."
+      },
+      "resume_transition_from": {
+        "type": "string",
+        "description": "The parent's prior transition_from value, restored with resume_phase."
       }
     },
     "allOf": [
@@ -100,6 +163,117 @@
           "not": {
             "required": [
               "blocker"
+            ]
+          }
+        }
+      },
+      {
+        "description": "orchestration repair (T-1302): blocker_scope is ACTIVE blocked-state data -- it may appear only on a BLOCKED ticket",
+        "if": {
+          "properties": {
+            "status": {
+              "const": "BLOCKED"
+            }
+          },
+          "required": [
+            "status"
+          ]
+        },
+        "then": {
+          "properties": {
+            "blocker_scope": {
+              "type": "string",
+              "enum": [
+                "ticket",
+                "goal"
+              ]
+            }
+          }
+        },
+        "else": {
+          "not": {
+            "required": [
+              "blocker_scope"
+            ]
+          }
+        }
+      },
+      {
+        "description": "A dependency continuation reservation is complete and exists only on a BLOCKED parent.",
+        "if": {
+          "required": ["blocked_on"]
+        },
+        "then": {
+          "properties": {"status": {"const": "BLOCKED"}},
+          "required": ["resume_phase", "resume_transition_from"]
+        },
+        "else": {
+          "not": {
+            "anyOf": [
+              {"required": ["resume_phase"]},
+              {"required": ["resume_transition_from"]}
+            ]
+          }
+        }
+      },
+      {
+        "description": "orchestration repair (T-1302): closure provenance describes a COMPLETED ticket, so it may appear only under DONE",
+        "if": {
+          "properties": {
+            "status": {
+              "const": "DONE"
+            }
+          },
+          "required": [
+            "status"
+          ]
+        },
+        "then": {
+          "properties": {
+            "closure_mode": {
+              "type": "string",
+              "enum": [
+                "own_patch",
+                "inherited_verified",
+                "cohort"
+              ]
+            },
+            "closure_cohort": {
+              "type": "string",
+              "pattern": "^C-\\d+$"
+            },
+            "implementation_delta": {
+              "type": "string",
+              "enum": [
+                "none",
+                "patch"
+              ]
+            }
+          }
+        },
+        "else": {
+          "not": {
+            "anyOf": [
+              {
+                "required": [
+                  "closure_mode"
+                ]
+              },
+              {
+                "required": [
+                  "closure_cohort"
+                ]
+              },
+              {
+                "required": [
+                  "implementation_delta"
+                ]
+              },
+              {
+                "required": [
+                  "closure_paths"
+                ]
+              }
             ]
           }
         }

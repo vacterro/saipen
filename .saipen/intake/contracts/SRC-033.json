@@ -1,0 +1,29 @@
+{
+  "clauses": {
+    "SRC-033:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Treat AUDAPACK at V:___VAC__K__CODE_PY_AUDAPACK as the actual supported OpenCode producer used by the operator and integrate its production launch path."
+    },
+    "SRC-033:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "AUDAPACK must derive SAIPEN_AGENT automatically from its explicit trusted worker or seat identity; the operator must not type a seat on every launch."
+    },
+    "SRC-033:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Route AUDAPACK OpenCode process creation through the single canonical SAIPEN launch-envelope implementation so actor, project root, and lineage exist before tools execute."
+    },
+    "SRC-033:R004": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Prove the ordinary AUDAPACK user flow works while direct genuinely unbound sessions, foreign-owner mutations, protected writes, and unknown consequential tools remain fail closed."
+    }
+  },
+  "derived_at": "2026-09-12T15:56:41Z",
+  "derived_from": "SRC-033",
+  "interpretation_revision": 4,
+  "schema_version": 1,
+  "source_sha256": "54eca8f1d333fbf4bdafca20f1d681ad68122f626160d8cbd12b6cc3067e5e77"
+}

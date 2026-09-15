@@ -1,0 +1,89 @@
+{
+  "clauses": {
+    "SRC-028:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "repair canonical SRC-027/T-1316 truth"
+    },
+    "SRC-028:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "truthful R008 evidence"
+    },
+    "SRC-028:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "truthful R013 evidence"
+    },
+    "SRC-028:R004": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "truthful R014 disposition"
+    },
+    "SRC-028:R005": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "one admission authority"
+    },
+    "SRC-028:R006": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "read-only saipen guard"
+    },
+    "SRC-028:R007": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "protected canonical state namespace"
+    },
+    "SRC-028:R008": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "central host adapter registry"
+    },
+    "SRC-028:R009": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "unified always-on instruction template"
+    },
+    "SRC-028:R010": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Kiro blocking adapter"
+    },
+    "SRC-028:R011": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Gemini blocking adapter"
+    },
+    "SRC-028:R012": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "OpenCode blocking adapter"
+    },
+    "SRC-028:R013": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "truthful enforcement-strength model"
+    },
+    "SRC-028:R014": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "distribution freshness truth"
+    },
+    "SRC-028:R015": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "hostile forgetful-agent matrix"
+    },
+    "SRC-028:R016": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "guard performance budget"
+    }
+  },
+  "derived_at": "2026-09-12T03:33:25Z",
+  "derived_from": "SRC-028",
+  "interpretation_revision": 16,
+  "schema_version": 1,
+  "source_sha256": "77bdefd1848e99de604ffb93c8c4458be4d6227f8ad444646f9b89ed30ffe196"
+}

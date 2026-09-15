@@ -32,6 +32,27 @@ SCENARIO = ROOT / "tests" / "scenarios" / "userperson-valid" / ".saipen"
 STATE_DONE = SCENARIO.joinpath("STATE.md").read_text(encoding="utf-8")
 BOARD_EMPTY = "# Board\n## DOING\n## TODO\n## DONE\n## BLOCKED\n"
 
+def _live_claim_time() -> str:
+    """A claim_time inside CORE section 1.4's liveness window, fixed at import."""
+    import datetime
+
+    return datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+
+# A LIVE active ticket, spelled the way section 1.4 spells one: an owner AND a
+# fresh claim_time, owned by the identity these routing probes run as. The
+# earlier fixture wrote a bare `- [/] T-400` and called it live. It was not: an
+# unclaimed DOING ticket is an ADOPTABLE orphan, and routing it to a phase
+# continuation advertises a mutation the authorization gate refuses until an
+# explicit `claim` happens (CORE-002). These tests are about audit-inbox
+# precedence, so their "live ticket" has to actually be one.
+BOARD_LIVE = (
+    "# Board\n## DOING\n"
+    "- [/] T-400 [P1] live | verify: proof | owner: probe | "
+    "claim_time: " + _live_claim_time() + "\n"
+    "## TODO\n## DONE\n## BLOCKED\n"
+)
+
 
 def _state(
     phase: str = "DONE",
@@ -255,7 +276,7 @@ class RoutingTests(unittest.TestCase):
         self.assertEqual(routed["reason"], "recovery-conflict")
 
     def test_active_build_work_is_never_preempted_by_a_new_audit(self) -> None:
-        board = "# Board\n## DOING\n- [/] T-400 [P1] live | verify: proof\n## TODO\n## DONE\n## BLOCKED\n"  # noqa: E501
+        board = BOARD_LIVE
         routed = route_next(
             _state(
                 phase="BUILD",
@@ -270,7 +291,7 @@ class RoutingTests(unittest.TestCase):
         self.assertEqual(routed["ticket"], "T-400")
 
     def test_active_verify_continuation_is_never_preempted(self) -> None:
-        board = "# Board\n## DOING\n- [/] T-400 [P1] live | verify: proof\n## TODO\n## DONE\n## BLOCKED\n"  # noqa: E501
+        board = BOARD_LIVE
         routed = route_next(
             _state(
                 phase="VERIFY",
@@ -380,7 +401,7 @@ class RoutingTests(unittest.TestCase):
         self.assertEqual(routed["reason"], "start")
 
     def test_residue_never_preempts_a_live_ticket(self) -> None:
-        board = "# Board\n## DOING\n- [/] T-400 [P1] live | verify: proof\n## TODO\n## DONE\n## BLOCKED\n"  # noqa: E501
+        board = BOARD_LIVE
         routed = route_next(
             _state(
                 phase="BUILD",

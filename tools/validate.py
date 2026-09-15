@@ -87,8 +87,10 @@ from saipen_engine.board import (
     KNOWN_FIELDS,
     REQUIRED_HEADINGS,
     board_semantic_errors,
+    detached_ticket_id_known_ids,
     parse_board,
     ticket_has_blocker,
+    pick_next_work,
     ticket_is_workable,
     claim_status,
     board_graph_errors,
@@ -98,6 +100,7 @@ from saipen_engine.paths import (
     project_lineage_identity,
     read_bound_regular_bytes,
     resolve_project_root,
+    resolve_protocol_dir,
 )
 from saipen_engine.log import (
     LOG_RE,
@@ -350,11 +353,30 @@ def home_doc(name):
     the repository shape finds nothing. The 13h contract checks quietly SKIP
     a missing file and were therefore vacuous in every install; this one
     FAILs, and would have turned every injected install red.
+
+    The layout decision is DELEGATED to the one canonical owner,
+    `saipen_engine.paths.resolve_protocol_dir`, so source layout and flattened
+    install cannot drift apart again (T-1332). A home with no BOOT.md in either
+    layout resolves to None rather than raising, exactly as before.
     """
-    for candidate in (_tools_parent / "saipen" / name, _tools_parent / name):
-        if candidate.is_file():
-            return candidate
-    return None
+    try:
+        base = resolve_protocol_dir(_tools_parent)
+    except ValueError:
+        return None
+    candidate = base / name
+    return candidate if candidate.is_file() else None
+
+
+def home_path(name):
+    """`home_doc` as a total function for callers that only need a Path.
+
+    Returns the resolved document when present, otherwise the source-layout
+    path (which an `.is_file()` caller then treats as absent). Every layout
+    decision still lives in the single owner above; this adds no branch of
+    its own beyond the already-existing not-found case.
+    """
+    resolved = home_doc(name)
+    return resolved if resolved is not None else _tools_parent / "saipen" / name
 
 
 def style_contract_token(text):
@@ -393,6 +415,13 @@ def _parse_cli(argv):
     project_root = None
     gate, gate_producer = "core", None
     require_release_index = False
+    findings_json = None
+    # READ-ONLY CAPTURE (SRC-026:R004): when present, this run emits NO
+    # conformance receipt and performs zero project writes. It is the explicit
+    # internal preview mode the debt engine uses for dry-run planning; it is
+    # never passed by an ordinary validator execution, so the normal
+    # receipt-on-every-exit contract is untouched.
+    no_receipt = False
     i = 0
     while i < len(argv):
         arg = argv[i]
@@ -417,6 +446,19 @@ def _parse_cli(argv):
             gate, gate_producer = _parse_gate(argv[i])
         elif arg.startswith("--gate="):
             gate, gate_producer = _parse_gate(arg.split("=", 1)[1])
+        elif arg == "--findings-json":
+            i += 1
+            if i >= len(argv):
+                print("FAIL: --findings-json requires a path")
+                sys.exit(2)
+            findings_json = argv[i]
+        elif arg.startswith("--findings-json="):
+            findings_json = arg.split("=", 1)[1]
+            if not findings_json:
+                print("FAIL: --findings-json requires a path")
+                sys.exit(2)
+        elif arg == "--no-receipt":
+            no_receipt = True
         elif arg == "--require-release-index":
             require_release_index = True
         else:
@@ -432,7 +474,15 @@ def _parse_cli(argv):
     # ship gate run that passes with an empty index.
     if gate == "ship":
         require_release_index = True
-    return (strict, project_root, gate, gate_producer, require_release_index)
+    return (
+        strict,
+        project_root,
+        gate,
+        gate_producer,
+        require_release_index,
+        findings_json,
+        no_receipt,
+    )
 
 
 def _git_from(cwd, *args):
@@ -445,41 +495,53 @@ def _git_from(cwd, *args):
     return result.returncode, result.stdout.strip()
 
 
-STRICT, _requested_root, GATE, GATE_PRODUCER, REQUIRE_RELEASE_INDEX = _parse_cli(sys.argv[1:])
+STRICT, _requested_root, GATE, GATE_PRODUCER, REQUIRE_RELEASE_INDEX, FINDINGS_JSON, NO_RECEIPT = (
+    _parse_cli(sys.argv[1:])
+)
 #: The one parsed gate context every producer severity decision reads. Built
 #: once; the policy function is pure, so nothing can drift around it.
 GATE_CONTEXT = GateContext(GATE, GATE_PRODUCER)
-PROJECT_ROOT, PROJECT_ROOT_SOURCE = resolve_project_root(Path.cwd().resolve(), _requested_root)
+PROJECT_ROOT_RES = resolve_project_root(Path.cwd().resolve(), _requested_root)
+PROJECT_ROOT, PROJECT_ROOT_SOURCE = PROJECT_ROOT_RES.root, PROJECT_ROOT_RES.source
 if PROJECT_ROOT is None:
-    print(f"FAIL: {PROJECT_ROOT_SOURCE}")
+    fail_code = getattr(PROJECT_ROOT_RES, "code", None)
+    prefix = f"FAIL [{fail_code}]: " if fail_code else "FAIL: "
+    print(f"{prefix}{PROJECT_ROOT_SOURCE}")
     sys.exit(1)
 os.chdir(PROJECT_ROOT)
 
-# §2 Conformance Closure: every validator run -- PASS or FAIL -- emits ONE
-# structured conformance receipt via the canonical engine. We wrap sys.exit so
-# the verdict (0 == PASS, else FAIL) is the ONLY input to the receipt's verdict;
-# no caller can inject `verdict="PASS"`. The wrapper is best-effort: a receipt
-# write failure MUST NEVER change the validator's real exit code.
+# §2 Conformance Closure: every ordinary validator run -- PASS or FAIL --
+# emits ONE structured conformance receipt via the canonical engine. We wrap
+# sys.exit so the verdict (0 == PASS, else FAIL) is the ONLY input to the
+# receipt's verdict; no caller can inject `verdict="PASS"`. The wrapper is
+# best-effort: a receipt write failure MUST NEVER change the validator's real
+# exit code.
+#
+# SRC-026:R004 (read-only capture): `--no-receipt` is the ONE explicit escape.
+# It is the internal preview mode the debt engine uses for dry-run planning;
+# the ordinary validator contract (receipt on every exit) is untouched for
+# every run that does not pass the flag.
 _orig_sys_exit = sys.exit
 
 
 def _saipen_exit(code=0):
-    try:
-        from saipen_engine.conformance import generate_conformance_receipt
+    if not NO_RECEIPT:
+        try:
+            from saipen_engine.conformance import generate_conformance_receipt
 
-        # PERF-004 (audit ed1f86e8): reuse the source identity already
-        # captured during validation instead of a second full Git-query
-        # capture. generate_conformance_receipt revalidates the supplied
-        # identity race-safely and falls back to a fresh capture when the
-        # source moved, so reuse can never bind a receipt to stale source.
-        generate_conformance_receipt(
-            PROJECT_ROOT,
-            gate=GATE,
-            exit_code=int(code or 0),
-            source_identity=_source_identity,
-        )
-    except Exception:
-        pass
+            # PERF-004 (audit ed1f86e8): reuse the source identity already
+            # captured during validation instead of a second full Git-query
+            # capture. generate_conformance_receipt revalidates the supplied
+            # identity race-safely and falls back to a fresh capture when the
+            # source moved, so reuse can never bind a receipt to stale source.
+            generate_conformance_receipt(
+                PROJECT_ROOT,
+                gate=GATE,
+                exit_code=int(code or 0),
+                source_identity=_source_identity,
+            )
+        except Exception:
+            pass
     _orig_sys_exit(code)
 
 
@@ -747,6 +809,45 @@ else:
         if _source_marker not in _source_contract_text:
             fail(f"source receipts -- SOURCES.md missing {_source_marker!r}")
 
+# T-1323: the activation template is an installer/runtime SURFACE, not inert
+# prose. The injector maps its SOURCE-relative path `saipen/ACTIVATION_BLOCK.md`
+# into an installed home by stripping exactly one leading `saipen/` component
+# (`installed_relpath`), and the runtime must resolve that same landed file.
+# Both halves are asserted here so a template that loses its substitution
+# placeholder, or a mapping that stops agreeing with `installed_relpath`, FAILs
+# on the clone instead of surfacing as a FileNotFoundError on a user's
+# installed home. The installed-bytes-equal-source half is proven by
+# `autoinject.activation_parity` during install certification.
+_activation_relpath = "saipen/ACTIVATION_BLOCK.md"
+_activation_doc = home_doc("ACTIVATION_BLOCK.md")
+if _activation_doc is None:
+    fail("activation template -- saipen/ACTIVATION_BLOCK.md missing")
+else:
+    try:
+        from autoinject import installed_relpath as _installed_relpath
+
+        _activation_landed = _installed_relpath(_activation_relpath)
+    except Exception as _activation_exc:
+        fail(f"activation template -- installed_relpath unavailable: {_activation_exc}")
+    else:
+        if _activation_landed != "ACTIVATION_BLOCK.md":
+            fail(
+                "activation template -- installed_relpath maps "
+                f"{_activation_relpath!r} to {_activation_landed!r}, not "
+                "'ACTIVATION_BLOCK.md'"
+            )
+    _activation_text = _activation_doc.read_text(encoding="utf-8-sig")
+    for _activation_marker in (
+        "<!-- SAIPEN:BEGIN -->",
+        "<!-- SAIPEN:END -->",
+        "{{SAIPEN_HOME}}",
+    ):
+        if _activation_marker not in _activation_text:
+            fail(
+                "activation template -- ACTIVATION_BLOCK.md missing "
+                f"{_activation_marker!r}"
+            )
+
 
 # ---------------------------------------------------------------- frontmatter
 
@@ -927,6 +1028,9 @@ def check_against_schema(fields, schema, label):
 
 print(color("36", "saipen conformance validation starting (tools/validate.py)..."))
 print(f"Project root: {PROJECT_ROOT} ({PROJECT_ROOT_SOURCE})")
+_binding_lineage = getattr(PROJECT_ROOT_RES, "lineage", None) or project_lineage_identity(PROJECT_ROOT)
+if _binding_lineage:
+    print(f"Project lineage: {_binding_lineage}")
 
 state_path = Path(".saipen/STATE.md")
 if not state_path.is_file():
@@ -2399,21 +2503,22 @@ if state.get("phase") == "BLOCKED" and intent == "goal":
 
 if _na_pick and not any(t["section"] == "## DOING" for t in tickets.values()):
     _named = _na_pick.group(1)
-    _workable = [
-        (t["line_no"], tid)
-        for tid, t in tickets.items()
-        if ticket_is_workable(t, tickets, agent=state.get("agent"))
-    ]
-    _top = min(_workable)[1] if _workable else None
+    # CORE-003 (SRC-026:R003): ONE Pick Rule. This block used to compute its
+    # own `min(line_no)` answer, which is BOARD order and nothing else -- so a
+    # validator that had never heard of explicit-user precedence could call a
+    # correct route stale, and the router and the gate could disagree about
+    # the same board. The shared selector decides here too.
+    _top, _pick_reason = pick_next_work(tickets, agent=state.get("agent"))
     if _top is not None and _named != _top:
         fail(
-            f"STATE.md next_action picks {_named}, but the topmost workable "
-            f"## TODO ticket is {_top} -- board order is priority (RFC "
-            f"§ 1.11), so a ticket filed above the named one makes this pick "
-            f"stale. Repoint next_action or move the line"
+            f"STATE.md next_action picks {_named}, but the shared Pick Rule "
+            f"selects {_top} ({_pick_reason}) -- explicit user intent first, "
+            f"then board order (RFC § 1.11). A ticket filed above the named "
+            f"one, or an explicit user request, makes this pick stale. "
+            f"Repoint next_action or move the line"
         )
     elif _top is not None:
-        ok(f"next_action picks the topmost workable ticket ({_top})")
+        ok(f"next_action picks the shared Pick Rule's ticket ({_top}, {_pick_reason})")
 
 # RFC § 2.1 ZERO-PROMPT AUTO-TRANSITION: DONE + empty TODO + no MARKHUNT
 # blockers = MUST auto-transition HUNT->ADD, never WAIT at DONE.
@@ -2484,6 +2589,11 @@ for tid, t in tickets.items():
         else:
             fail(f"BOARD.md:{t['line_no']} ticket {tid} {_semantic} (RFC § 1.2)")
 
+# Allocation-frontier identity (CORE-003 / SRC-026:R003): canonical ticket
+# identity comes from next_ticket_id over the COMPLETE history and is
+# journaled as a [T-###] event in the same transaction. A BOARD record above
+# the history's max ticket id was never allocated -- a detached phantom that
+# must not become canonical authority merely because it looks like a ticket.
 # RFC § 1.11: at most one ticket in ## DOING per agent. Shipped as prose in
 # v7.86.0 with nothing enforcing it until v7.90.0 -- which is exactly the
 # ticket-hopping this invariant exists to stop (claim T-12, drift, claim
@@ -2505,6 +2615,23 @@ for tid, t in tickets.items():
             f"real file:line or command output per finding ('no cite, no "
             f"ticket'), not a bare 'unvetted audit'"
         )
+
+# Allocation identity (CORE-003 / SRC-026:R003): every BOARD record must be
+# backed by a structured [T-###] event in the complete history -- canonical
+# allocation journals the ticket in the SAME transaction that creates it, so
+# a detached hand-injected record never becomes canonical authority merely
+# because it looks like a ticket. Arms only when the project has ever
+# allocated a ticket (nonzero history-wide max id), which keeps
+# hand-authored fresh fixtures legal. Existing authority, no second
+# allocator.
+if _canonical_history_snapshot and _canonical_history_snapshot.max_ticket_id:
+    _known_ticket_ids = detached_ticket_id_known_ids(_canonical_history_snapshot.events)
+    for tid in tickets:
+        if tid not in _known_ticket_ids:
+            fail(
+                f"BOARD.md: {tid} has no [T-###] allocation event in the "
+                f"complete history (CORE-003 / SRC-026:R003)"
+            )
 
 doing = [tid for tid, t in tickets.items() if t["section"] == "## DOING"]
 self_agent = state.get("agent")
@@ -2576,6 +2703,93 @@ for tid in doing:
             f"pair or non-UTC stamp) -- repair before validating"
         )
 
+# CORE-003 (SRC-026:R003): a stop reason must be TRUE while it is persisted.
+# `GOAL_BLOCKED` says "no safe useful work remains"; recorded beside workable
+# Work it is an instruction to stay stopped that the board itself contradicts,
+# and an unattended loop believes the file. The predicate is the engine's, so
+# the gate and the router cannot disagree about whether the project is stopped.
+from saipen_engine.operations import goal_blocked_now as _goal_blocked_now  # noqa: E402
+
+if state.get("stop_reason") == "GOAL_BLOCKED":
+    if not _goal_blocked_now(read_doc(board_path), state.get("agent")):
+        fail(
+            "STATE.md records stop_reason: GOAL_BLOCKED while the board still "
+            "holds active or workable Work -- a goal block is only legal with "
+            "no workable remainder, and a stale one parks an unattended run "
+            "that had things to do (CORE-003)"
+        )
+    else:
+        ok("stop_reason: GOAL_BLOCKED matches the board (no workable remainder)")
+
+# CORE-003: closure provenance on DONE Work must RESOLVE. `inherited_verified`
+# without a source, a source that names nothing published, an inheritance
+# cycle, a cohort with no registry record and a cohort claiming `shipped`
+# without a release identity are all ways to record publication that never
+# happened. One strict resolver, shared with the closure operation.
+from saipen_engine.board import (  # noqa: E402
+    closure_cohort as _closure_cohort,
+    closure_mode as _closure_mode,
+    implementation_source as _implementation_source,
+)
+from saipen_engine.closure import (  # noqa: E402
+    read_registry as _read_cohort_registry,
+    resolve_implementation_source as _resolve_impl_source,
+)
+
+_closure_problems: list[str] = []
+try:
+    _cohort_registry = _read_cohort_registry(PROJECT_ROOT)
+except (OSError, ValueError) as _cohort_exc:
+    _cohort_registry = {"cohorts": {}}
+    _closure_problems.append(f"cohort registry is unreadable: {_cohort_exc}")
+for _tid, _t in sorted(tickets.items()):
+    if _t["section"] != "## DONE":
+        continue
+    _mode = _closure_mode(_t)
+    if _mode == "inherited_verified":
+        _named_source = _implementation_source(_t)
+        if not _named_source:
+            _closure_problems.append(
+                f"{_tid} closed inherited_verified with no | implementation_source:"
+            )
+        else:
+            _verdict = _resolve_impl_source(PROJECT_ROOT, _named_source)
+            if not _verdict.ok:
+                _closure_problems.append(f"{_tid}: {_verdict.detail}")
+    elif _mode == "cohort":
+        _cid = _closure_cohort(_t)
+        _record = (_cohort_registry.get("cohorts") or {}).get(_cid or "")
+        if not _cid:
+            _closure_problems.append(f"{_tid} closed as cohort with no C-### authority")
+        elif _record is None:
+            _closure_problems.append(
+                f"{_tid} names cohort {_cid}, which has no durable registry record"
+            )
+        elif _record.get("publication_status") == "shipped" and not _record.get("release_op_id"):
+            _closure_problems.append(
+                f"cohort {_cid} claims shipped without a release identity"
+            )
+if _closure_problems:
+    fail(
+        "closure provenance does not resolve: "
+        + "; ".join(_closure_problems[:5])
+        + " -- a DONE line may record HOW it closed, never that something was "
+        "published when it was not (CORE-003)"
+    )
+elif any(_t["section"] == "## DONE" for _t in tickets.values()):
+    ok("every DONE closure provenance resolves to durable publication authority")
+
+# CORE-001 (SRC-026:R001): the SAME active-execution-owner predicate the
+# transactional gate runs, imported rather than restated. The pair used to
+# disagree by construction -- fast_check had no owner rule and this file
+# derived the equivalent conclusion from `next_action` only -- so a mutation
+# could commit a split that only surfaced at a later release gate. One
+# predicate, one sentence, both gates.
+from saipen_engine.ownership import ownership_invariant_errors as _ownership_errors  # noqa: E402
+
+for _own_problem in _ownership_errors(state, parsed_board, self_agent):
+    fail(_own_problem)
+
 # AUDIT ROUTE (T-1270). The route is deterministic in law and in code:
 # SOURCES.md gives ingest the lowest workable layer and ordinary BOARD
 # priority for the derived Work, and the router reaches that stage whenever no
@@ -2589,7 +2803,10 @@ for tid in doing:
 _audit_route_projection = None
 try:
     from saipen_engine.audit_inbox import projection as _audit_inbox_projection
-    from saipen_engine.audit_route import route_violation as _audit_route_violation
+    from saipen_engine.audit_route import (
+        audit_route_owns as _audit_route_owns,
+        route_violation as _audit_route_violation,
+    )
 
     _audit_route_projection = _audit_inbox_projection(PROJECT_ROOT)
 except Exception as _audit_route_exc:  # pragma: no cover - defensive
@@ -2606,10 +2823,14 @@ if _audit_route_projection is not None:
         state.get("next_action") if isinstance(state.get("next_action"), str) else "",
         [tid for tid, t in tickets.items() if t["section"] == "## DOING"],
         WAIT_CATEGORIES,
+        tickets=tickets,
+        agent=self_agent,
     )
     if _audit_route_why:
         fail(f"STATE.md audit route not followed -- {_audit_route_why} (SOURCE-AUDIT-INBOX-01)")
-    elif _audit_route_projection.get("action"):
+    elif _audit_route_projection.get("action") and _audit_route_owns(
+        _audit_route_projection, tickets=tickets, agent=self_agent
+    ):
         ok("the audit inbox's routed action owns continuation")
 
 # ----------------------------------------------------------------------- LOG
@@ -3205,13 +3426,46 @@ if log_files:
                 continue
             _ev_ok, _ev_reason = _closure_evidence(_done_id, _closure_events)
             if not _ev_ok:
-                fail(
-                    f"closure-evidence -- ticket {_done_id} is ## DONE but "
-                    "carries no current-cycle verification evidence "
-                    f"(classifier: {_ev_reason}); an unproven closure is "
-                    "never protocol-green -- re-verify with real evidence "
-                    "before DONE"
-                )
+                # DONE-work re-verification (T-158 Stage 2): an already-DONE
+                # Work may satisfy current-tree closure evidence through EITHER
+                # a legitimate current VERIFY boundary OR a valid current-tree
+                # PASS re-verification receipt. The receipt is machine-owned
+                # (debt.reverify_work / `saipen work reverify`) and bound to
+                # project identity, lineage, ruleset and the current source
+                # checkpoint; DONE still stays DONE -- no lifecycle edge is
+                # created here. A missing, FAIL, stale, foreign-project,
+                # foreign-lineage or foreign-ruleset receipt is not evidence.
+                #
+                # NOTE (T-158 repair): `current_tree_reverify` returns the
+                # STORED receipt record, not a result envelope -- it carries
+                # `receipt_id`/`verdict`, never `ok`/`code`/`detail`. Presence
+                # of a receipt IS the PASS verdict: the helper already filters
+                # to PASS / PASS_WITH_CARRIED_DEBT, hides a newer FAIL and
+                # rejects stale tree/project/lineage/ruleset bindings.
+                _reverify_ok = False
+                _reverify_note = "no current-tree PASS re-verification receipt"
+                try:
+                    from saipen_engine import debt as _debt_mod
+
+                    _receipt = _debt_mod.current_tree_reverify(PROJECT_ROOT, _done_id)
+                    _reverify_ok = _receipt is not None
+                    if _receipt is not None:
+                        _reverify_note = "{0} verdict={1}".format(
+                            _receipt.get("receipt_id"), _receipt.get("verdict")
+                        )
+                except Exception as _reverify_exc:
+                    _reverify_note = (
+                        f"re-verification receipt unavailable: "
+                        f"{type(_reverify_exc).__name__}"
+                    )
+                if not _reverify_ok:
+                    fail(
+                        f"closure-evidence -- ticket {_done_id} is ## DONE but "
+                        "carries no current-cycle verification evidence "
+                        f"(classifier: {_ev_reason}; reverify: {_reverify_note}); "
+                        "an unproven closure is never protocol-green -- re-verify "
+                        "with real evidence before DONE"
+                    )
 
     # [attempt-contract] (T-1148): Work vs Attempt separation. An Attempt is
     # one bounded execution episode of one agent on one ticket; its failure
@@ -5160,8 +5414,8 @@ if (
         # and the CLI executes exactly the same public set. Parse structured
         # declarations and the executor AST; source-text action greps proved
         # only that old names occurred somewhere, not that parity held.
-        _core_improve_t = (_tools_parent / "saipen" / "CORE.md").read_text(encoding="utf-8-sig")
-        _improve_doc_p = _tools_parent / "saipen" / "IMPROVE.md"
+        _core_improve_t = home_path("CORE.md").read_text(encoding="utf-8-sig")
+        _improve_doc_p = home_path("IMPROVE.md")
         _imp_doc = (
             _improve_doc_p.read_text(encoding="utf-8-sig") if _improve_doc_p.is_file() else ""
         )
@@ -5293,11 +5547,11 @@ if (
         # T-622: SAICRITIC owns one canonical ordered five-level vocabulary.
         # Assignment must call the canonical reader directly; slicing or
         # replacing that result is command-contract drift.
-        _saicritic_p = _tools_parent / "saipen" / "SAICRITIC.md"
-        _saicritic_index = (_tools_parent / "saipen" / "INDEX.md").read_text(encoding="utf-8-sig")
+        _saicritic_p = home_path("SAICRITIC.md")
+        _saicritic_index = home_path("INDEX.md").read_text(encoding="utf-8-sig")
         try:
             _saicritic_manifest = json.loads(
-                (_tools_parent / "saipen" / "MANIFEST.json").read_text(encoding="utf-8-sig")
+                home_path("MANIFEST.json").read_text(encoding="utf-8-sig")
             )
         except (OSError, ValueError):
             _saicritic_manifest = {}
@@ -5351,7 +5605,7 @@ if (
         # B. Every runtime file the protocol references must exist in the home.
         # Canonical source is saipen/MANIFEST.json; the hardcoded list below
         # is the fallback for homes that predate the manifest (v7.190.0+).
-        _manifest_json = _tools_parent / "saipen" / "MANIFEST.json"
+        _manifest_json = home_path("MANIFEST.json")
         _runtime_tracked_set = None
         if _manifest_json.is_file():
             try:
@@ -5373,13 +5627,30 @@ if (
                 for _pf in _mj.get("phase_docs", {}).get("files", []):
                     _mj_files.append(f"{_phase_dir}/{_pf}")
                 for tree in _mj.get("copy_trees", []):
+                    # T-1332: the manifest names SOURCE-relative trees. A
+                    # flattened install keeps `saipen/phases` as `phases`, so
+                    # the tree root is resolved in THIS home's layout while the
+                    # member is recorded back in source-relative form -- the
+                    # form the existence and git-tracking checks below consume.
+                    _tree_rel = tree["src"]
+                    _tree_base_rel = _tree_rel
+                    if _tree_rel.startswith("saipen/"):
+                        _tree_flat_rel = _tree_rel[len("saipen/") :]
+                        if not (_tools_parent / _tree_rel).is_dir() and (
+                            _tools_parent / _tree_flat_rel
+                        ).is_dir():
+                            _tree_base_rel = _tree_flat_rel
                     try:
-                        _tree_src, _tree_members = copy_tree_members(_tools_parent, tree["src"])
+                        _tree_src, _tree_members = copy_tree_members(
+                            _tools_parent, _tree_base_rel
+                        )
                     except RuntimeError as exc:
                         fail(f"runtime manifest copy tree broken: {exc}")
                         continue
                     for _member in _tree_members:
                         _member_rel = _member.relative_to(_tools_parent).as_posix()
+                        if _tree_base_rel != _tree_rel:
+                            _member_rel = _tree_rel[: -len(_tree_base_rel)] + _member_rel
                         if (
                             _runtime_tracked_set is None
                             or GATE != "ship"
@@ -7055,14 +7326,23 @@ else:
         for p in _tools_parent.iterdir()
         if _is_repo_clone and p.is_file() and p.name != ".git"
     }
-    _ignored = subprocess.run(
-        ["git", "check-ignore", "--stdin"],
-        cwd=str(_tools_parent),
-        input="\n".join(sorted(_root_files)),
-        capture_output=True,
-        text=True,
-    )
-    if _ignored.returncode in (0, 1):
+    try:
+        _ignored = subprocess.run(
+            ["git", "check-ignore", "--stdin"],
+            cwd=str(_tools_parent),
+            input="\n".join(sorted(_root_files)),
+            capture_output=True,
+            text=True,
+        )
+    except FileNotFoundError:
+        # T-1322: `git` is ABSENT here, not "git present but not a clone". The
+        # comment below already contemplates the gitless export layout, but the
+        # call itself was unguarded: a missing executable raised out of the
+        # validator and the run produced NO findings artifact at all. That is a
+        # crash, not a conformance verdict, and it blocks every pre-BUILD
+        # baseline on a gitless host. Fall through to the .gitignore fallback.
+        _ignored = None
+    if _ignored is not None and _ignored.returncode in (0, 1):
         _root_files -= set(_ignored.stdout.split())
     # Fallback for the gitless audit layout (the export copies the tree WITHOUT
     # `.git/`, so `git check-ignore` cannot answer). A root file excluded by
@@ -7828,6 +8108,10 @@ else:
             "source-receipt lifecycle markers + tools/test_source_receipts.py hostile matrix",
         ),
         (
+            "saipen/ACTIVATION_BLOCK.md",
+            "activation template markers + installed_relpath mapping + installed-bytes parity (T-1323)",
+        ),
+        (
             "saipen/COMMANDS.md",
             "compact shortcut table cross-checked against saipen/REGISTRY.json (the machine authority)",
         ),
@@ -7889,8 +8173,28 @@ else:
             "architecture decision rationale; executable attempt invariants are enforced by CORE.md, saipen_engine/attempt.py and tools/continuity_probes.py",
         ),
         (
+            "KNOWLEDGE/ADR-0003-detached-handoff-project-binding.md",
+            "architecture decision rationale for detached-handoff project binding and launch envelopes; enforced by paths.py and tools/test_project_root_session_binding.py",
+        ),
+        (
             "KNOWLEDGE/HABITS-vs-buildtools-install-fix.md",
             "cross-agent habit note, not a rule source",
+        ),
+        (
+            "KNOWLEDGE/audits/*.md",
+            "preserved audit/handoff reports moved out of the canonical audit inbox; historical evidence, not a rule source",
+        ),
+        (
+            "KNOWLEDGE/HANDOFF-*.md",
+            "preserved cross-agent handoff carrier notes; historical evidence, not a rule source",
+        ),
+        (
+            "RECOVER_ROADMAP/*.md",
+            "recovery-roadmap working notes; historical evidence, not a rule source",
+        ),
+        (
+            "future_gate/*.md",
+            "recorded future-gate work: reference-only, explicitly not authorized for implementation while an active ticket holds the seat, and not a rule source",
         ),
         ("SPEC.md", "design intent and rationale, deliberately not normative"),
         ("audit/*.md", "user audit reference copies (mojibake re-encode of the SRC-009 roadmap); content owned by .saipen/intake/active/SRC-009.md"),
@@ -8595,7 +8899,7 @@ else:
         except ValueError:
             return _p.name
 
-    _ui = _tools_parent / "saipen" / "UI.md"
+    _ui = home_path("UI.md")
     if _ui.is_file():
         _ui_body = _ui.read_text(encoding="utf-8-sig")
         _design_language = "Vintage Golden"
@@ -8864,7 +9168,7 @@ else:
         '"stop caveman" or "normal mode".'
     )
     _contract_docs = {
-        name: _tools_parent / "saipen" / name
+        name: home_path(name)
         for name in ("RFC.md", "BOOT.md", "STYLE.md", "SKILL.md")
     }
     for _name, _path in _contract_docs.items():
@@ -9234,7 +9538,7 @@ else:
     #      `phases/plan.md` cited § 1.2 for it too, and 72 of this repo's own
     #      tickets carry it. The citation checker could not see this: it proves
     #      a cited section EXISTS, never that it says the thing being cited.
-    _rfc_p2 = _tools_parent / "saipen" / "RFC.md"
+    _rfc_p2 = home_path("RFC.md")
     if _rfc_p2.is_file():
         _rfc_t = _read_rfc(_rfc_p2)
         _i = _rfc_t.find("### 1.10")
@@ -9255,7 +9559,7 @@ else:
             # only the table proved that a route existed, not that `focus`
             # stayed read-only or that the command named `build` did NOT jump
             # to the BUILD phase.
-            _controls_path = _tools_parent / "saipen" / "CONTROLS.md"
+            _controls_path = home_path("CONTROLS.md")
             _controls_t = (
                 _controls_path.read_text(encoding="utf-8-sig") if _controls_path.is_file() else ""
             )
@@ -9288,7 +9592,7 @@ else:
             # reads as both "runs nothing in parallel" and "multi-agent
             # concurrency" is precisely the ambiguity a weak model resolves
             # wrongly while believing it followed SAIPEN.
-            _commands_p = _tools_parent / "saipen" / "COMMANDS.md"
+            _commands_p = home_path("COMMANDS.md")
             _commands_t = (
                 _commands_p.read_text(encoding="utf-8-sig")
                 if _commands_p.is_file()
@@ -9381,7 +9685,7 @@ else:
             # replaced by a menu. Both documents that describe the command
             # must carry the with-text half, and it must say where those
             # tickets land, because "priority" here means board position.
-            _plan_doc = _tools_parent / "saipen" / "phases" / "plan.md"
+            _plan_doc = home_path("phases/plan.md")
             for _doc, _body in (
                 (
                     "phases/plan.md",
@@ -9588,7 +9892,7 @@ else:
             # diverges from the registry means the compact surface drifted from
             # the machine authority -- the exact duplicate-source failure this
             # compression wave exists to prevent (SRC-009:R0007).
-            _commands_path = _tools_parent / "saipen" / "COMMANDS.md"
+            _commands_path = home_path("COMMANDS.md")
             if _commands_path.is_file():
                 _commands_text = _commands_path.read_text(encoding="utf-8-sig")
                 _commands_rows = re.findall(
@@ -9826,12 +10130,12 @@ else:
 
             _package_docs = {
                 "RFC.md": _rfc_t,
-                "phases/prepare.md": (_tools_parent / "saipen" / "phases" / "prepare.md").read_text(
+                "phases/prepare.md": home_path("phases/prepare.md").read_text(
                     encoding="utf-8-sig"
                 ),
-                "phases/translate.md": (
-                    _tools_parent / "saipen" / "phases" / "translate.md"
-                ).read_text(encoding="utf-8-sig"),
+                "phases/translate.md": home_path("phases/translate.md").read_text(
+                    encoding="utf-8-sig"
+                ),
                 "extensions/subs/PROTOCOL.md": (
                     _tools_parent / "extensions" / "subs" / "PROTOCOL.md"
                 ).read_text(encoding="utf-8-sig"),
@@ -9905,7 +10209,7 @@ else:
             # only in the RFC works by accident when `.saipen/` forces the
             # skill to load, then silently misses everywhere else. Derive the
             # Latin rows and their Cyrillic-confusable twins from the table.
-            _skill_p = _tools_parent / "saipen" / "SKILL.md"
+            _skill_p = home_path("SKILL.md")
             if not _skill_p.is_file():
                 warn("cross-doc-drift",
                     "cross-doc drift [skill-triggers] -- saipen/SKILL.md is "
@@ -10133,8 +10437,8 @@ else:
             drift_ok = False
 
         # 14. HABITS.md citations must be real.
-    _habits_p = _tools_parent / "saipen" / "HABITS.md"
-    _rfc_p = _tools_parent / "saipen" / "RFC.md"
+    _habits_p = home_path("HABITS.md")
+    _rfc_p = home_path("RFC.md")
     if _rfc_p.is_file() and _habits_p.is_file():
         _habits_b = _habits_p.read_text(encoding="utf-8-sig")
         _rfc_b = _read_rfc(_rfc_p)
@@ -10166,7 +10470,7 @@ else:
     #      unaccounted for. A behavioral rule no validator can test still gets
     #      a row saying so; the row is how the protocol admits the limit
     #      instead of leaving a silent hole.
-    _rfc_p = _tools_parent / "saipen" / "RFC.md"
+    _rfc_p = home_path("RFC.md")
     _corpus_p = _tools_parent / "tests" / "conformance_cases.jsonl"
     if _rfc_p.is_file() and _corpus_p.is_file():
         _rfc_b = _read_rfc(_rfc_p)
@@ -10288,6 +10592,35 @@ for category, msgs in warnings.items():
 if STRICT:
     for msgs in warnings.values():
         failures.extend(msgs)
+
+# --findings-json: the structured side artifact the Work delta gate and the
+# DONE-Work reverify receipt consume. It is written BEFORE the verdict is
+# printed/exited and reflects exactly the classified sets above: STRICT
+# promotion of warnings into failures is included, and the real exit code is
+# never affected by this write (best-effort by design -- a missing artifact
+# keeps `capture_findings` FAILING rather than inventing an empty green set).
+if FINDINGS_JSON:
+    try:
+        from saipen_engine import findings as _findings_mod
+
+        _problems = [_findings_mod.classify("problem", msg) for msg in failures]
+        _warnings = [
+            _findings_mod.classify("warning", msg, category=category)
+            for category, msgs in warnings.items()
+            for msg in msgs
+        ]
+        _doc = {
+            "schema_version": _findings_mod.RULESET_VERSION,
+            "ruleset_fingerprint": _findings_mod.ruleset_fingerprint(),
+            "gate": GATE,
+            "problems": _problems,
+            "warnings": _warnings,
+        }
+        Path(FINDINGS_JSON).write_text(
+            json.dumps(_doc, indent=2, sort_keys=True), encoding="utf-8"
+        )
+    except Exception:
+        pass
 
 if failures:
     print(

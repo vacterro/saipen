@@ -1,0 +1,79 @@
+{
+  "clauses": {
+    "SRC-032:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Add only the exact verified OpenCode built-in skill identity to the bounded adapter read fast-path so bootstrap works without Python or guard reachability."
+    },
+    "SRC-032:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Do not grant skill trust by suffix or namespace; plugin.skill, mcp__x__skill, and every unknown or namespaced identity still enter the guard and fail closed when unreachable."
+    },
+    "SRC-032:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Keep exact built-in repository reads usable without actor binding or guard reachability and retain a red-green regression for the exact skill gap."
+    },
+    "SRC-032:R004": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Provide one canonical production OpenCode launcher that requires an explicit trusted SAIPEN seat and creates SAIPEN_AGENT before OpenCode starts."
+    },
+    "SRC-032:R005": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "The canonical launcher exports the resolved project root and portable lineage when present, and all supported OpenCode launch callers reuse this single environment builder."
+    },
+    "SRC-032:R006": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Never use OpenCode sessionID as actor, never inherit STATE.agent for an unbound host launch, and never turn ACTOR_UNBOUND into allow."
+    },
+    "SRC-032:R007": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Capture the launch actor once per OpenCode plugin factory so sequential calls retain one stable seat; independent launches and projects must not leak bindings."
+    },
+    "SRC-032:R008": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Prove Target A through the real supported OpenCode launch path without individual tool cases injecting SAIPEN_AGENT: skill, read, actor presence, admitted source writes, protected write block, unknown consequential block, stable sequence, independent binding, and no GUARD_UNREACHABLE or ACTOR_UNBOUND."
+    },
+    "SRC-032:R009": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Keep a negative control where a genuinely unbound unsupported consequential OpenCode call fails with ACTOR_UNBOUND, and prove a foreign-owner mutation is refused."
+    },
+    "SRC-032:R010": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Do not begin evidence-retention implementation until the real production OpenCode launch path passes Target A."
+    },
+    "SRC-032:R011": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Create bulky runtime HOME, caches, provider profiles, copied repositories, node_modules, build trees, and matrix sandboxes only under an explicitly owned temporary root outside durable .saipen evidence."
+    },
+    "SRC-032:R012": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Retain only bounded proof artifacts such as compact transcripts, verdict JSON, hashes, diffs, byte controls, command and environment metadata, screenshots, non-reproducible artifacts, and a retention manifest."
+    },
+    "SRC-032:R013": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "On verified success remove the exact registered run-owned temporary sandbox after proof extraction; on failure or blocked disposition retain compact failure reproduction proof and remove the bulk sandbox too."
+    },
+    "SRC-032:R014": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Retain unresolved active proof, collect only proven superseded duplicates, refuse unsafe or unregistered cleanup paths, and make cleanup idempotent."
+    }
+  },
+  "derived_at": "2026-09-12T15:46:05Z",
+  "derived_from": "SRC-032",
+  "interpretation_revision": 14,
+  "schema_version": 1,
+  "source_sha256": "e2cd044681f15e97e6ffda4fecd5e645593ae59a9038bdefd7c526b4d5b6bed9"
+}

@@ -1,0 +1,65 @@
+.....FF                                                                  [100%]
+================================== FAILURES ===================================
+_ OpenCodeLiveSession.test_6_malformed_protocol_keeps_the_root_known_through_a_real_session _
+
+self = <test_opencode_live_session.OpenCodeLiveSession testMethod=test_6_malformed_protocol_keeps_the_root_known_through_a_real_session>
+
+    def test_6_malformed_protocol_keeps_the_root_known_through_a_real_session(self):
+        record = self.sessions["malformed"]
+        diagnostics = record["factory_diagnostics"]
+        self.assertTrue(diagnostics, record)
+        for item in diagnostics:
+            self.assertEqual(item["binding_code"], "ADMITTED", item)
+            self.assertEqual(Path(item["project_root"]).resolve(), self.bad.resolve(), item)
+    
+        ordinary = self._bash(record, "pwd")
+        self.assertEqual(ordinary["status"], "error", ordinary)
+        self.assertIn("PROTOCOL_STATE_INVALID", ordinary["error"], ordinary)
+    
+        self.assertNotIn("question", record["tool_names"], record["tool_names"])
+        text = record["text"]
+>       self.assertIn(str(self.bad), text, text)
+E       AssertionError: 'V:\\_TEMP_\\tmpclj1vgwy' not found in '**Step 1:** From `SAIPEN_BOOTSTRAP_BINDING`: `binding_code = "ADMITTED"`, `project_root = "V:\\\\_TEMP_\\\\tmpclj1vgwy"`\n\n**Step 2:** `pwd` was refused. Decision code: `SAIPEN_GUARD_REFUSAL: PROTOCOL_STATE_INVALID: the saipen guard refused tool \'bash\'; the host tool did not execute`\n\n**Step 3:** `saipen recover` printed no output (empty/no result line).\n\n**Step 4:** `echo POST_RECOVERY_ORDINARY_OK` was **refused** with: `SAIPEN_GUARD_REFUSAL: PROTOCOL_STATE_INVALID: the saipen guard refused tool \'bash\'; the host tool did not execute`\n\n**Step 5:** `rm -f .saipen/STATE.md` was refused with: `SAIPEN_GUARD_REFUSAL: PROTECTED_CANONICAL_NAMESPACE: the saipen guard refused tool \'bash\'; the host tool did not execute`\n\n**Step 6:** `ROOT_KNOWN_RECOVERY_REQUIRED` — binding_code is "ADMITTED" and project_root is explicitly "V:\\\\_TEMP_\\\\tmpclj1vgwy", so the root is known; the invalid protocol state requires recovery.\n\nPROBE_DONE' : **Step 1:** From `SAIPEN_BOOTSTRAP_BINDING`: `binding_code = "ADMITTED"`, `project_root = "V:\\_TEMP_\\tmpclj1vgwy"`
+E       
+E       **Step 2:** `pwd` was refused. Decision code: `SAIPEN_GUARD_REFUSAL: PROTOCOL_STATE_INVALID: the saipen guard refused tool 'bash'; the host tool did not execute`
+E       
+E       **Step 3:** `saipen recover` printed no output (empty/no result line).
+E       
+E       **Step 4:** `echo POST_RECOVERY_ORDINARY_OK` was **refused** with: `SAIPEN_GUARD_REFUSAL: PROTOCOL_STATE_INVALID: the saipen guard refused tool 'bash'; the host tool did not execute`
+E       
+E       **Step 5:** `rm -f .saipen/STATE.md` was refused with: `SAIPEN_GUARD_REFUSAL: PROTECTED_CANONICAL_NAMESPACE: the saipen guard refused tool 'bash'; the host tool did not execute`
+E       
+E       **Step 6:** `ROOT_KNOWN_RECOVERY_REQUIRED` — binding_code is "ADMITTED" and project_root is explicitly "V:\\_TEMP_\\tmpclj1vgwy", so the root is known; the invalid protocol state requires recovery.
+E       
+E       PROBE_DONE
+
+tools\test_opencode_live_session.py:544: AssertionError
+_ OpenCodeLiveSession.test_7_canonical_recovery_repairs_a_fresh_malformed_session _
+
+self = <test_opencode_live_session.OpenCodeLiveSession testMethod=test_7_canonical_recovery_repairs_a_fresh_malformed_session>
+
+    def test_7_canonical_recovery_repairs_a_fresh_malformed_session(self):
+        """T-1318 AC-05: BOUND + INVALID -> canonical repair -> BOUND + VALID.
+    
+        Every step is host evidence from a genuinely new process. The repair is
+        invoked by the MODEL through the guard, never by this test, so the
+        reachability of the canonical surface is proven rather than assumed.
+        """
+        record = self.sessions["malformed"]
+        recover = [
+            item for item in record["tools"]
+            if item["tool"] == "bash" and "saipen recover" in str(item["input"].get("command", ""))
+        ]
+        self.assertTrue(recover, f"the model never invoked canonical recovery: {record['tool_names']}")
+        call = recover[0]
+        self.assertNotIn("SAIPEN_GUARD_REFUSAL", call["error"], call)
+        self.assertEqual(call["status"], "completed", call)
+>       self.assertIn("REPAIRED", call["output"], call)
+E       AssertionError: 'REPAIRED' not found in '(no output)' : {'tool': 'bash', 'status': 'completed', 'input': {'command': 'saipen recover'}, 'output': '(no output)', 'error': '', 'start_ms': 1789286843785}
+
+tools\test_opencode_live_session.py:565: AssertionError
+=========================== short test summary info ===========================
+FAILED tools/test_opencode_live_session.py::OpenCodeLiveSession::test_6_malformed_protocol_keeps_the_root_known_through_a_real_session
+FAILED tools/test_opencode_live_session.py::OpenCodeLiveSession::test_7_canonical_recovery_repairs_a_fresh_malformed_session
+2 failed, 5 passed in 72.95s (0:01:12)
+EXIT=1

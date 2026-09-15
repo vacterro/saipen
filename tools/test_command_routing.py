@@ -303,26 +303,30 @@ class CommandRoutingTests(unittest.TestCase):
         self.assertEqual(commands_doc.count("RULE-OWNER: CMD-COMPOUND-01"), 1)
         self.assertIn("sc", table())
 
-    def test_injectors_declare_shortcut_gate(self):
-        ps = (TOOLS.parent / "bootstrap" / "inject.ps1").read_text(encoding="utf-8")
-        sh = (TOOLS.parent / "bootstrap" / "inject.sh").read_text(encoding="utf-8")
+    def test_activation_template_declares_shortcut_gate(self):
+        """The ONE activation template carries the shortcut gate.
+
+        T-1317 P1-3: the semantic block lives in
+        `saipen/ACTIVATION_BLOCK.md` since centralization, so searching the
+        injector scripts for activation prose tests the pre-registry
+        architecture. The contract is the canonical template AND everything
+        rendered from it -- both injectors render that one file.
+        """
+        template_path = PROTOCOL_DIR / "ACTIVATION_BLOCK.md"
+        template = template_path.read_text(encoding="utf-8")
+        rendered = template.replace("{{SAIPEN_HOME}}", str(PROTOCOL_DIR))
         canonical = set(table().keys())
-        for text in (ps, sh):
-            # inject.sh embeds the block in a double-quoted shell string, so
-            # its double quotes and backticks carry literal backslashes.
-            # Unescape both forms so the marker assertions compare wording,
-            # not each platform's quoting mechanics.
-            normalized_text = text.replace('\\"', '"').replace("\\`", "`")
-            self.assertIn("SHORTCUT ACTIVATION GATE", normalized_text)
-            self.assertIn("sc", normalized_text)
-            self.assertIn('never "stop caveman"', normalized_text)
-            self.assertIn("a full-token shortcut match ALWAYS wins", normalized_text)
+        for label, text in (("template", template), ("rendered", rendered)):
+            self.assertIn("SHORTCUT ACTIVATION GATE", text, label)
+            self.assertIn("sc", text, label)
+            self.assertIn('never "stop caveman"', text, label)
+            self.assertIn("a full-token shortcut match ALWAYS wins", text, label)
             # Exact-set conformance: the activation gate must advertise
             # every canonical shortcut and no stale one. The block phrases
             # the list as `shortcut (gg, hh, ... , sc, or ...)` -- extract
             # tokens inside the parentheses and compare to the live table.
-            m = re.search(r"shortcut\s*\(([^)]*)\)", normalized_text, re.IGNORECASE | re.DOTALL)
-            self.assertIsNotNone(m, "SHORTCUT ACTIVATION GATE lacks token list parentheses")
+            m = re.search(r"shortcut\s*\(([^)]*)\)", text, re.IGNORECASE | re.DOTALL)
+            self.assertIsNotNone(m, f"{label} gate lacks token list parentheses")
             advertised_raw = m.group(1)
             # The list is `<tokens>, or a Cyrillic twin` -- isolate the token
             # segment before the generic phrase so locale words do not pollute.
@@ -330,12 +334,23 @@ class CommandRoutingTests(unittest.TestCase):
             tokens = set(re.findall(r"[a-z]{2,3}", token_segment.lower()))
             # The gate covers twins generically via "Cyrillic twin" phrase,
             # not by enumerating them -- ensure phrase present and not double-counted.
-            self.assertIn("cyrillic twin", normalized_text.lower())
+            self.assertIn("cyrillic twin", text.lower(), label)
             self.assertEqual(
                 tokens,
                 canonical,
-                f"injector gate drift: {sorted(tokens)} vs {sorted(canonical)}",
+                f"{label} gate drift: {sorted(tokens)} vs {sorted(canonical)}",
             )
+
+    def test_both_injectors_render_the_one_activation_template(self):
+        """Both injectors must render the template, never embed a copy.
+
+        T-1317 P1-3: the semantic block is centralized. A red here means an
+        injector has grown a second, divergent copy of the activation gate.
+        """
+        for filename in ("inject.ps1", "inject.sh"):
+            text = (TOOLS.parent / "bootstrap" / filename).read_text(encoding="utf-8")
+            self.assertIn("ACTIVATION_BLOCK.md", text, filename)
+            self.assertNotIn("SHORTCUT ACTIVATION GATE", text, filename)
 
     def test_boot_declares_compound_first(self):
         boot = (PROTOCOL_DIR / "BOOT.md").read_text(encoding="utf-8")
@@ -912,6 +927,27 @@ class CommandSemanticsTests(unittest.TestCase):
         self.assertEqual(payload["detail"], "Use: gg <objective text>")
         # Zero-write: a tripped valve must NOT be cleared by bare gg.
         self.assertEqual(self._state(proj)["goal_waves"], 3)
+
+    def test_goal_plan_allocates_each_new_ticket_in_the_committed_history(self):
+        proj = self._make(
+            "goal-allocation", intent="goal", state_extra="goal_waves: 0\ngoal_tickets: 0\n"
+        )
+        rc, payload, _raw = self._cli(
+            proj, "gg", "Build feature X then verify feature X", dry_run=False
+        )
+        self.assertEqual(rc, 0, payload)
+        self.assertEqual(len(payload["plan_tickets"]), 2)
+        from saipen_engine.log import parse_log_line
+        events = [parse_log_line(line) for line in
+                  (proj / ".saipen/LOG.md").read_text(encoding="utf-8").splitlines()
+                  if line.startswith("- ")]
+        for ticket in payload["plan_tickets"]:
+            self.assertTrue(any(e.get("ticket") == ticket for e in events), ticket)
+        self.assertEqual(int(self._state(proj)["last_event"]), events[-1]["event"])
+        # A fresh public read must accept those identities and resume the new Work.
+        rc, resumed, _raw = self._cli(proj, "next")
+        self.assertEqual(rc, 0, resumed)
+        self.assertEqual(resumed["ticket"], payload["plan_tickets"][0])
 
     # ---- no accidental goal mutation on cc --------------------------
     def test_cc_never_creates_or_pivots_a_goal(self):

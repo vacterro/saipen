@@ -1,0 +1,140 @@
+{
+  "requirements": {
+    "SRC-027:R001": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "tools/test_t1316_recovery_already_applied.py:ClassifierUnitTests -- classify_target 3 outcomes + no-op + missing-file sentinels",
+      "text": "Three-way target recovery classifier: one canonical helper classify_target(current_hash, before_hash, after_hash) returns ALREADY_APPLIED when current==after, PENDING when current==before, CONFLICT otherwise; the three-way logic is centralized and never duplicated across resume, apply or conformance paths; before_hash==after_hash no-op target classifies deterministically as already-satisfied; missing-file creation and deletion states classify through the existing document and hash model with no second sentinel scheme --verification unit tests cover all three outcomes plus the no-op and missing-file shapes through the one helper",
+      "verification": "python -m unittest tools.test_t1316_recovery_already_applied -> Ran 23 tests OK",
+      "work": null
+    },
+    "SRC-027:R002": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "tools/test_t1316_recovery_already_applied.py:PartialPrefixTests + HostileThirdStateTests.test_non_prefix_materialization_fails_closed -- AFT/AFT/AFT, AFT/AFT/BEF, AFT/BEF/BEF, AFT/THIRD/BEF, BEF/AFT/BEF all classified from bytes",
+      "text": "Recovery reconstructs progress from live target bytes, not from stale progress_index, applied_frontier or target.applied markers: targets are inspected in canonical operation order, every target classified, and the effective applied frontier rebuilt from actual target states; a legal prefix materialization resumes at the first pending target; non-prefix materialization such as BEFORE AFTER BEFORE fails closed with RECOVERY_CONFLICT unless the existing operation contract proves that state a legal crash shape --verification fixture matrix covers AFTER AFTER AFTER, AFTER AFTER BEFORE, AFTER BEFORE BEFORE, AFTER THIRD BEFORE and BEFORE AFTER BEFORE with deterministic outcomes",
+      "verification": "python -m unittest tools.test_t1316_recovery_already_applied -> Ran 23 tests OK",
+      "work": null
+    },
+    "SRC-027:R003": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "tools/test_t1316_recovery_already_applied.py:BookkeepingRepairCrashTests.test_crash_at_reconciliation_publication_is_repeatable -- crash injected at the Journal.reconcile_progress publication boundary (_atomic_json on progress.json); target bytes byte-identical, op stays visible in pending_ops, restart from disk re-derives the same frontier, zero target writes, COMMITTED, third recover ALREADY_APPLIED",
+      "text": "Journal metadata repair is idempotent and goes through the canonical journal writer: already-applied targets get target.applied=true and the effective progress and frontier agree with the real materialized prefix; semantically identical project files are never rewritten merely to satisfy the journal; no ad-hoc write_text JSON edits where Journal owns persistence; a crash during the bookkeeping repair is safely repeatable --verification instrumentation proves repair writes touch only recovery journal state and a mid-repair crash re-run converges",
+      "verification": "focused tools.test_t1316_recovery_already_applied 26 tests OK; pre-fix control: same 26 tests against restored pre-fix journal.py -> 17 FAIL 4 ERROR; related tools.test_settled_projection+tools.test_audit_2026_08_28_all3 79 tests OK; ruff + py_compile clean",
+      "work": null
+    },
+    "SRC-027:R004": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "tools/test_t1316_recovery_already_applied.py:ProTrailIncidentTests.test_fully_materialized_conflict_op_converges_without_rewrites + test_crash_after_all_marked_applied_before_verify + test_exact_apply_retry_reports_existing_success -- ordinary COMMITTED via settlement, verifier reruns before terminal, retry returns ALREADY_APPLIED",
+      "text": "All-targets-already-applied recovery performs zero semantic replays: canonical post-apply verification runs, on success the operation advances through the ordinary legal terminal state machine to the current protocol terminal state, ordinary settlement and compaction run, and an exact retry returns the existing idempotent success result instead of creating another operation; no special terminal state is invented and verification is never bypassed because hashes match --verification ProTrail-shaped fixture converges to the normal committed terminal state and second recovery performs no new writes",
+      "verification": "python -m unittest tools.test_t1316_recovery_already_applied -> Ran 23 tests OK",
+      "work": null
+    },
+    "SRC-027:R005": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "tools/test_t1316_recovery_already_applied.py:PartialPrefixTests.test_prefix_resume_applies_only_pending_suffix -- writes exactly beta.txt,gamma.txt after crash on beta; alpha/beta bytes unchanged",
+      "text": "Partial already-applied prefix resume: for a legal prefix recovery repairs journal progress, applies only the pending suffix targets, never rewrites materialized targets, then completes verification and commit; recovery must never depend on replay being harmless --verification write-instrumented fixture proves target 1 and 2 are not physically written and exactly target 3 is applied",
+      "verification": "python -m unittest tools.test_t1316_recovery_already_applied -> Ran 23 tests OK",
+      "work": null
+    },
+    "SRC-027:R006": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "tools/test_t1316_recovery_already_applied.py:HostileThirdStateTests -- RECOVERY_CONFLICT with target_path/target_index/actual_hash/applied_frontier and zero target mutation",
+      "text": "Real conflicts stay conflicts: any target whose current hash is neither before_hash nor after_hash yields a deterministic RECOVERY_CONFLICT with operation_id, target path, expected before_hash, expected after_hash, actual hash, target index and recovered applied frontier reported; zero additional mutations after the conflict is discovered and remaining targets are untouched; CAS before_hash safety for fresh APPLY is not weakened --verification hostile fixture preserves unexpected bytes, returns the canonical conflict family and leaves conformance non-green",
+      "verification": "python -m unittest tools.test_t1316_recovery_already_applied -> Ran 23 tests OK",
+      "work": null
+    },
+    "SRC-027:R007": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "tools/test_t1316_recovery_already_applied.py:RecoveryFixture.assert_committed_terminal -- settled receipt exists, status COMMITTED, no progress.json, progress_index==len(targets), every target.applied true, no competing ops receipt",
+      "text": "Status convergence rule: after successful recovery operation.json, progress.json and per-target applied markers agree through one canonical transition finalizer; a successful recovery never leaves PREPARED operation.json beside a terminal progress.json --verification split-brain regression asserts representation agreement after recovery",
+      "verification": "python -m unittest tools.test_t1316_recovery_already_applied -> Ran 23 tests OK",
+      "work": null
+    },
+    "SRC-027:R008": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "tools/test_t1316_recovery_already_applied.py:RecoveryFixture.test_conformance_reports_debt_before_recovery_and_passes_after -- release._recovery_preflight raises ReleaseRefusal before recovery, zero repair writes while refusing, passes after canonical recovery converges",
+      "text": "Conformance keeps detecting unresolved recovery debt: PREPARED plus targets equal to after_hash is not permanently valid; before recovery conformance may report debt, canonical recovery reconciles, after recovery conformance passes; the validator does not become an alternative recovery engine and mutation and validation authority stay separated --verification conformance regression shows debt before recovery and PASS only after canonical recovery",
+      "verification": "python -m unittest tools.test_t1316_recovery_already_applied -> Ran 31 tests OK",
+      "work": "T-1316"
+    },
+    "SRC-027:R009": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "tools/test_t1316_recovery_already_applied.py:CrashWindowMatrixTests windows A(test_crash_before_prepared_is_durable_leaves_nothing_pending) B(test_crash_after_prepared_before_first_write) C(test_crash_windows_alpha_beta_gamma) D(test_crash_after_progress_durable_before_next_write) E(test_crash_windows_alpha_beta_gamma gamma window) F(test_crash_after_all_represented_applied_before_verify) G(test_crash_after_verify_durable_before_terminal_committed) H(TerminalSettlementTests) I(HostileThirdStateTests); each restarts from disk, no prefix rewrite, COMMITTED, retry idempotent",
+      "text": "Deterministic fault-injection regressions around one multi-target operation covering crashes before PREPARED is durable, after PREPARED before first write, after target bytes before target journal progress, after journal progress, after all bytes before final frontier, after all applied before VERIFY, after VERIFY before terminal, and after terminal before settlement; every crash restarts recovery from disk with no duplicate semantic mutation, no target regression, deterministic final state, idempotent exact retry and convergence to the terminal committed state while third-state conflicts stay conflicts --verification fault-injection test matrix enumerates every listed window with restart-from-disk assertions",
+      "verification": "focused tools.test_t1316_recovery_already_applied 26 tests OK; pre-fix control: same 26 tests against restored pre-fix journal.py -> 17 FAIL 4 ERROR; related tools.test_settled_projection+tools.test_audit_2026_08_28_all3 79 tests OK; ruff + py_compile clean",
+      "work": null
+    },
+    "SRC-027:R010": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "tools/test_t1316_recovery_already_applied.py:ProTrailIncidentTests -- incident shape reproduced then converged",
+      "text": "Exact ProTrail incident regression fixture: three-target operation with PREPARED operation metadata, stale journal target markers, interrupted or CONFLICT progress state, and all three live targets exactly equal to after_hash; canonical recovery asserts zero project target rewrites, all three targets ALREADY_APPLIED, journal metadata convergence, ordinary terminal committed state, normal settlement, no new writes on second recovery, idempotent exact retry success, and conformance PASS; the fixture fails on the pre-fix implementation --verification test constructs the unrepaired incident journal and asserts the full convergence list",
+      "verification": "python -m unittest tools.test_t1316_recovery_already_applied -> Ran 23 tests OK",
+      "work": null
+    },
+    "SRC-027:R011": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "tools/test_t1316_recovery_already_applied.py:test_convergence_is_idempotent_and_exact_retry_is_idempotent, test_repeated_third_state_recovery_is_stable, PublicRecoveryEntryPointTests.test_auto_recover_entry_point_produces_no_second_terminal_state -- second and third recovery ALREADY_APPLIED with byte-identical tree",
+      "text": "Repeated recovery idempotence: recover(recover(x)) equals recover(x) for canonical semantic state at every recoverable state, with no duplicate receipts, no extra event ids, no target rewrite solely because recovery runs again and no journal state regression --verification idempotence test runs recovery at least twice per recoverable fixture state",
+      "verification": "python -m unittest tools.test_t1316_recovery_already_applied -> Ran 23 tests OK",
+      "work": null
+    },
+    "SRC-027:R012": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "tools/test_t1316_recovery_already_applied.py:TerminalSettlementTests.test_committed_manifest_with_failed_settle_move_still_idempotent -- os.rename failure at the settle boundary keeps durable COMMITTED authority in recovery/ops, pending_ops empty, later settle moves the same authority, retry ALREADY_APPLIED",
+      "text": "Terminal settlement interaction preserved: a durable committed operation stays committed even if bounded receipt settlement cleanup fails; exact retry still locates canonical terminal authority and returns idempotent success; existing Journal terminal-settlement semantics are reused, no second path --verification settlement-failure regression asserts committed authority and idempotent retry",
+      "verification": "python -m unittest tools.test_t1316_recovery_already_applied -> Ran 23 tests OK",
+      "work": null
+    },
+    "SRC-027:R013": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "tools/test_t1316_recovery_already_applied.py:PublicRecoveryEntryPointTests.test_each_entry_point_reaches_the_same_terminal_representation + test_hostile_third_state_through_each_entry_point -- 4 entry points (direct, auto, cli, router) converge to identical COMMITTED terminal representation and fail closed on hostile third-state with RECOVERY_CONFLICT",
+      "text": "One semantic recovery implementation: startup or continue recovery, any explicit recovery command and any conformance-triggered recovery workflow all use the same classifier and reconciliation path; consolidation is limited to establishing that single path with no broad CLI redesign --verification entry-point regression drives recovery through each canonical entry point and asserts identical outcomes",
+      "verification": "python -m unittest tools.test_t1316_recovery_already_applied -> Ran 31 tests OK",
+      "work": "T-1316"
+    },
+    "SRC-027:R014": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "DEFERRED",
+      "evidence": "Transcript: focused tools.test_t1316_recovery_already_applied 26/26 OK; related test_settled_projection+test_audit_2026_08_28_all3 79/79 OK; pre-fix control 26 tests -> 17 FAIL 4 ERROR; ruff + py_compile clean; full per-module sweep 1511 run / 1468 PASS / 31 FAIL / 10 ERROR / 2 SKIPPED with both skips reported as SKIPPED and never converted to PASS; canonical tools/validate.py on a clean fixture copied OUTSIDE the git worktree -> 'Validation complete. Agent is conformant.' 0 problems / 18 warnings. UNMET ITEM: complete discover green, blocked by 6 modules owned by other in-flight tickets (test_check_inventory 5F, test_command_routing 1F, test_concurrency_independence 1E, test_explicit_claim 5F, test_recovered_attribution 20F+1E, test_t1304_r004_transition 8E).",
+      "text": "Targeted recovery and journal tests pass first, then the complete repository test suite with exact PASS FAIL SKIPPED counts reported and environmental skips never converted to PASS; canonical project validation or conformance runs on a clean fixture --verification test transcript reports journal unit, recovery, mutation apply, source requirement add, conformance validate, idempotent retry and hostile fault-injection counts",
+      "verification": null,
+      "work": null
+    },
+    "SRC-027:R015": {
+      "actionable": true,
+      "class": "non-goal",
+      "disposition": "VERIFIED",
+      "evidence": "git diff -- tools/saipen_engine/journal.py -- no journal schema redesign, no database, no recovery-evidence deletion, no ProTrail branch (classify_target is generic), no manual recovery JSON edits, no new recovery command, fresh-APPLY before_hash CAS preserved",
+      "text": "No journal schema redesign, no database, no validator auto-heal of arbitrary corruption, no deletion of recovery evidence, no weakening of before_hash CAS for normal fresh APPLY, no treating unexpected target content as success, no ProTrail special-casing, no manual recovery JSON patches, no new recovery commands unless no canonical entry point exists --verification diff inspection confirms none of the forbidden changes",
+      "verification": "python -m unittest tools.test_t1316_recovery_already_applied -> Ran 23 tests OK",
+      "work": null
+    }
+  },
+  "schema_version": 1
+}

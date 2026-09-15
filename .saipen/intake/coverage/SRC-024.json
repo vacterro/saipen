@@ -1,0 +1,59 @@
+{
+  "requirements": {
+    "SRC-024:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/kitchen/t1297-repair/focused-final.log: 71 tests PASS; inspection.log: STOP branch body and _status AST identical to b71590b5; REGISTRY st=stop and sss=status verified",
+      "text": "Shortcut migration contract: st routes EXACTLY to saipen stop (same implementation path, no second STOP implementation); sss remains EXACTLY saipen status; saipen stop and saipen status long-form semantics unchanged --verification REGISTRY.json shortcuts row ss->stop becomes st->stop; dispatch tuple stop/ss becomes stop/st; COMMANDS.md/SKILL.md updated",
+      "verification": "CliShortcutRoutingTests.test_cli_st_is_stop_and_matches_saipen_stop; test_cli_sss_is_real_status_surface; StopAuditTests 5 tests",
+      "work": "T-1297"
+    },
+    "SRC-024:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/kitchen/t1297-repair/focused-final.log: repeated real ss calls without dry-run return identical exit 1 SHORTCUT_RETIRED and unchanged whole-project digests; handler spies remain unfired",
+      "text": "Retired ss tombstone: ss MUST NOT execute STOP, MUST NOT execute STATUS, MUST NOT alias anywhere; it returns a deterministic non-mutating retired-shortcut refusal naming st=stop and sss=status, fail-closed with non-success exit; zero project bytes written --verification test proves ss reaches neither stop nor status implementation, tree-digest unchanged, migration guidance emitted",
+      "verification": "RetiredShortcutMigrationTests.test_retired_ss_is_zero_mutation_refusal; test_instrumented_ss_reaches_neither_stop_nor_status_implementation; red-control.log intentionally exits 1 on stop_checkpoint",
+      "work": "T-1297"
+    },
+    "SRC-024:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/kitchen/t1297-repair/inspection.log: saipen_engine/commands.py unchanged; focused-final.log: Cyrillic twin resolver and public CLI cases PASS",
+      "text": "Cyrillic safety: codepoint normalization table unchanged; Cyrillic \u0441\u0441 remains Latin cc (continue) and NEVER normalizes to ss, st, or stop; no Cyrillic twin is introduced for st; regression proves no normalization resurrects the retired ss route --verification existing CYRILLIC_CONFUSABLES map untouched (no fold target for s or t beyond declared); test asserts \u0441\u0441->cc and Cyrillic twins of ss/st cannot exist",
+      "verification": "Cyrillic \u0441\u0441 resolves cc only; no s fold target; st and sss have no twins; active key count 19",
+      "work": "T-1297"
+    },
+    "SRC-024:R004": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/kitchen/t1297-review.md; t1297-repair/focused-final.log 71 PASS; red-control.log real unchanged F/G verifier exits 1 on ss-to-stop; fixture-tests.log 36 PASS; audit-checks.log isolates sole skipped control, tools/audit_checks.py fixture anchor now st with expected missing-sss diagnostic unchanged",
+      "text": "Deterministic test matrix: st->STOP, saipen stop unchanged, sss->STATUS read-only, saipen status unchanged, retired ss refuses with guidance, ss cannot reach stop or status implementations (instrumented), st surplus args refused per stop contract, sss surplus retained, Cyrillic \u0441\u0441->cc safety, active registry contains st not ss, skill parity, doc parity, mutation-difference test on a temp project (sss/ss zero mutation, st checkpoint mutation), red control that reintroducing ss->stop fails a test and sss->stop fails a test, stop!=status repeated-letter assertion --verification tools/test_command_routing.py + new tests in this wave",
+      "verification": "All A-N migration cases executed, no-dry-run determinism/zero-write and both handler spies; copied actual registry negative controls; broad fixture no-op reproduced then repaired without oracle weakening.",
+      "work": "T-1297"
+    },
+    "SRC-024:R005": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/kitchen/t1297-repair/inspection.log: 70 current/generated/localized surfaces bounded to shortcut callout and badge; canonical producer sync_shortcut_callouts re-executed; validator-final.log PASS; conformance_corpus --check PASS",
+      "text": "Canonical surface parity: REGISTRY.json shortcut table, SKILL.md trigger list, COMMANDS.md table, validator shortcut-callout check (_shortcut_tokens, ordering, derived count), README shortcut paragraphs and their locale translations updated through their canonical owners; derived numbers (shortcut count) recomputed from the table, never hand-patched; historical CHANGELOG_ARCHIVE and archived evidence untouched --verification validator rebinding: shortcut-callout check expects st not ss; locale README callouts teach st stop; count derived",
+      "verification": "COMMANDS/SKILL/bootstrap/README/locales/GUIDE/guides aligned; semantic golden only ss key becomes st; corpus row 177 current prose and generated digest aligned; CHANGELOG T-1297 exactly once",
+      "work": "T-1297"
+    },
+    "SRC-024:R006": {
+      "actionable": true,
+      "class": "non-goal",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/kitchen/t1297-repair/initial-path-classification.json: all 109 initial tracked changed paths classified; inspection.log: seven unrelated paths preserved and restored, historical hashes unchanged, long-form bodies unchanged",
+      "text": "No long-form redesign, no new error framework, no new phase, no second STOP implementation, no keyboard-layout fuzzy matching, no history rewriting, no unrelated command-system refactor; persisted historical records containing raw ss stay untouched; persisted state never stores raw shortcut tokens as executable intent (verified by inspection) --verification diff inspection this wave",
+      "verification": "No shortcut redesign, extra alias, normalization change, archive rewrite or unrelated refactor; prior SRC-023 source closure movement retained as journal state; audit12-15 untouched",
+      "work": "T-1297"
+    }
+  },
+  "schema_version": 1
+}

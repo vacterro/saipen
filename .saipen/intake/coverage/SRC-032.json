@@ -1,0 +1,185 @@
+{
+  "requirements": {
+    "SRC-032:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-6038",
+      "text": "Add only the exact verified OpenCode built-in skill identity to the bounded adapter read fast-path so bootstrap works without Python or guard reachability.",
+      "verification": "Focused 169-test PASS plus static checks; bounded transcript .saipen/evidence/T-1317-target-a-b-evidence-20260912.md. AUDAPACK end-to-end remains excluded from this disposition.",
+      "work": "T-1317"
+    },
+    "SRC-032:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-6038",
+      "text": "Do not grant skill trust by suffix or namespace; plugin.skill, mcp__x__skill, and every unknown or namespaced identity still enter the guard and fail closed when unreachable.",
+      "verification": "Focused 169-test PASS plus static checks; bounded transcript .saipen/evidence/T-1317-target-a-b-evidence-20260912.md. AUDAPACK end-to-end remains excluded from this disposition.",
+      "work": "T-1317"
+    },
+    "SRC-032:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-6038",
+      "text": "Keep exact built-in repository reads usable without actor binding or guard reachability and retain a red-green regression for the exact skill gap.",
+      "verification": "Focused 169-test PASS plus static checks; bounded transcript .saipen/evidence/T-1317-target-a-b-evidence-20260912.md. AUDAPACK end-to-end remains excluded from this disposition.",
+      "work": "T-1317"
+    },
+    "SRC-032:R004": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "SUPERSEDED",
+      "evidence": "SRC-034 contract amendment",
+      "text": "Provide one canonical production OpenCode launcher that requires an explicit trusted SAIPEN seat and creates SAIPEN_AGENT before OpenCode starts.",
+      "verification": "Focused 169-test PASS plus static checks; bounded transcript .saipen/evidence/T-1317-target-a-b-evidence-20260912.md. AUDAPACK end-to-end remains excluded from this disposition.",
+      "work": "T-1317"
+    },
+    "SRC-032:R005": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-6038",
+      "text": "The canonical launcher exports the resolved project root and portable lineage when present, and all supported OpenCode launch callers reuse this single environment builder.",
+      "verification": "Focused 169-test PASS plus static checks; bounded transcript .saipen/evidence/T-1317-target-a-b-evidence-20260912.md. AUDAPACK end-to-end remains excluded from this disposition.",
+      "work": "T-1317"
+    },
+    "SRC-032:R006": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "SUPERSEDED",
+      "evidence": "SRC-034 contract amendment",
+      "text": "Never use OpenCode sessionID as actor, never inherit STATE.agent for an unbound host launch, and never turn ACTOR_UNBOUND into allow.",
+      "verification": "Focused 169-test PASS plus static checks; bounded transcript .saipen/evidence/T-1317-target-a-b-evidence-20260912.md. AUDAPACK end-to-end remains excluded from this disposition.",
+      "work": "T-1317"
+    },
+    "SRC-032:R007": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-6038",
+      "text": "Capture the launch actor once per OpenCode plugin factory so sequential calls retain one stable seat; independent launches and projects must not leak bindings.",
+      "verification": "Focused 169-test PASS plus static checks; bounded transcript .saipen/evidence/T-1317-target-a-b-evidence-20260912.md. AUDAPACK end-to-end remains excluded from this disposition.",
+      "work": "T-1317"
+    },
+    "SRC-032:R008": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "SUPERSEDED",
+      "evidence": "SRC-034 contract amendment",
+      "text": "Prove Target A through the real supported OpenCode launch path without individual tool cases injecting SAIPEN_AGENT: skill, read, actor presence, admitted source writes, protected write block, unknown consequential block, stable sequence, independent binding, and no GUARD_UNREACHABLE or ACTOR_UNBOUND.",
+      "verification": null,
+      "work": "T-1317"
+    },
+    "SRC-032:R009": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "SUPERSEDED",
+      "evidence": "SRC-034 contract amendment",
+      "text": "Keep a negative control where a genuinely unbound unsupported consequential OpenCode call fails with ACTOR_UNBOUND, and prove a foreign-owner mutation is refused.",
+      "verification": "Focused 169-test PASS plus static checks; bounded transcript .saipen/evidence/T-1317-target-a-b-evidence-20260912.md. AUDAPACK end-to-end remains excluded from this disposition.",
+      "work": "T-1317"
+    },
+    "SRC-032:R010": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-6038",
+      "text": "Do not begin evidence-retention implementation until the real production OpenCode launch path passes Target A.",
+      "verification": "Focused 169-test PASS plus static checks; bounded transcript .saipen/evidence/T-1317-target-a-b-evidence-20260912.md. AUDAPACK end-to-end remains excluded from this disposition.",
+      "work": "T-1317"
+    },
+    "SRC-032:R011": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-6038",
+      "text": "Create bulky runtime HOME, caches, provider profiles, copied repositories, node_modules, build trees, and matrix sandboxes only under an explicitly owned temporary root outside durable .saipen evidence.",
+      "verification": "Focused 169-test PASS plus static checks; bounded transcript .saipen/evidence/T-1317-target-a-b-evidence-20260912.md. AUDAPACK end-to-end remains excluded from this disposition.",
+      "work": "T-1317"
+    },
+    "SRC-032:R012": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-6038",
+      "text": "Retain only bounded proof artifacts such as compact transcripts, verdict JSON, hashes, diffs, byte controls, command and environment metadata, screenshots, non-reproducible artifacts, and a retention manifest.",
+      "verification": "Focused 169-test PASS plus static checks; bounded transcript .saipen/evidence/T-1317-target-a-b-evidence-20260912.md. AUDAPACK end-to-end remains excluded from this disposition.",
+      "work": "T-1317"
+    },
+    "SRC-032:R013": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-6038",
+      "text": "On verified success remove the exact registered run-owned temporary sandbox after proof extraction; on failure or blocked disposition retain compact failure reproduction proof and remove the bulk sandbox too.",
+      "verification": "Focused 169-test PASS plus static checks; bounded transcript .saipen/evidence/T-1317-target-a-b-evidence-20260912.md. AUDAPACK end-to-end remains excluded from this disposition.",
+      "work": "T-1317"
+    },
+    "SRC-032:R014": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-6038",
+      "text": "Retain unresolved active proof, collect only proven superseded duplicates, refuse unsafe or unregistered cleanup paths, and make cleanup idempotent.",
+      "verification": "Focused 169-test PASS plus static checks; bounded transcript .saipen/evidence/T-1317-target-a-b-evidence-20260912.md. AUDAPACK end-to-end remains excluded from this disposition.",
+      "work": "T-1317"
+    },
+    "SRC-032:R015": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-6038",
+      "text": "Classify historical evidence as DURABLE_REQUIRED, EPHEMERAL_REPRODUCIBLE, SUPERSEDED, or UNKNOWN before cleanup; automatically remove only proven reproducible or superseded data and never blindly purge.",
+      "verification": "Focused 169-test PASS plus static checks; bounded transcript .saipen/evidence/T-1317-target-a-b-evidence-20260912.md. AUDAPACK end-to-end remains excluded from this disposition.",
+      "work": "T-1317"
+    },
+    "SRC-032:R016": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-6038",
+      "text": "Use defaults of 25 MiB per ordinary artifact, 100 MiB ticket warning, and 250 MiB retention review; report largest retained paths and require a recorded reason for unusually large durable proof.",
+      "verification": "Focused 169-test PASS plus static checks; bounded transcript .saipen/evidence/T-1317-target-a-b-evidence-20260912.md. AUDAPACK end-to-end remains excluded from this disposition.",
+      "work": "T-1317"
+    },
+    "SRC-032:R017": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-6038",
+      "text": "Prove a representative hundreds-of-MiB runtime matrix leaves bounded durable evidence and a manifest explaining retained and discarded classes.",
+      "verification": "Focused 169-test PASS plus static checks; bounded transcript .saipen/evidence/T-1317-target-a-b-evidence-20260912.md. AUDAPACK end-to-end remains excluded from this disposition.",
+      "work": "T-1317"
+    },
+    "SRC-032:R018": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-6038",
+      "text": "Correct the stale contradiction in .saipen/evidence/T-1317-target-a-b-evidence-20260912.md through the evidence workflow and never treat test-injected SAIPEN_AGENT as launch-binding closure.",
+      "verification": "Focused 169-test PASS plus static checks; bounded transcript .saipen/evidence/T-1317-target-a-b-evidence-20260912.md. AUDAPACK end-to-end remains excluded from this disposition.",
+      "work": "T-1317"
+    },
+    "SRC-032:R019": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-6038",
+      "text": "Preserve truthful dispositions: admission semantics implemented; production binding closes only on Target A proof; Kiro and FastPrompter remain external non-terminal; Gemini broader smoke keeps its current truthful disposition.",
+      "verification": "Focused 169-test PASS plus static checks; bounded transcript .saipen/evidence/T-1317-target-a-b-evidence-20260912.md. AUDAPACK end-to-end remains excluded from this disposition.",
+      "work": "T-1317"
+    },
+    "SRC-032:R020": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-6038",
+      "text": "Re-run focused suites with exact PASS FAIL ERROR SKIP counts and remain BUILD while any linked closure requirement is non-terminal; do not touch T-1307 authority or fabricate external proof.",
+      "verification": "Focused 169-test PASS plus static checks; bounded transcript .saipen/evidence/T-1317-target-a-b-evidence-20260912.md. AUDAPACK end-to-end remains excluded from this disposition.",
+      "work": "T-1317"
+    }
+  },
+  "schema_version": 1
+}

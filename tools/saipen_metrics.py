@@ -84,6 +84,8 @@ from collections import Counter, defaultdict
 from datetime import datetime, timezone
 from pathlib import Path
 
+from saipen_engine.acceptance import ESCAPED_CLASSES
+
 REPO = Path(__file__).resolve().parent.parent
 
 # The SAIPEN self-surface: everything here is the protocol working on itself. A
@@ -416,25 +418,6 @@ def scan_transcripts(directory: Path, since: str | None = None) -> dict:
 #
 # Every class below is grounded in this repository's own history rather than
 # invented, which is the only reason a closed set is defensible here.
-ESCAPED_CLASSES = (
-    # nothing claimed the behaviour at all -- the gap was outside the promise
-    "NOT_COVERED",
-    # a criterion claimed more than its evidence actually exercised
-    "SCOPE_NARROWER_THAN_CLAIM",
-    # the proof was a restatement of the claim, so no input could have failed it
-    "PROOF_RESTATES_CLAIM",
-    # the proof ran, and then the tree moved under it
-    "EVIDENCE_STALE",
-    # prose declared behaviour that nothing implements, so nothing could fail
-    "LAW_WITHOUT_MACHINERY",
-    # implemented and routed, but no control can observe a violation
-    "RULE_WITHOUT_DETECTOR",
-    # a detector existed and had quietly stopped being able to go red
-    "CONTROL_DISARMED",
-    # each side proven alone; the contract between them never exercised
-    "INTEGRATION_SEAM",
-)
-
 # Carried on the FOLLOW-UP ticket's own text. No new file, no new state, no new
 # subsystem: the ticket that fixes the escape is the record that it escaped.
 ESCAPED_RE = re.compile(r"\bescaped:\s*([A-Za-z_][A-Za-z0-9_]*)")

@@ -15,7 +15,13 @@ from __future__ import annotations
 import re
 
 from . import phases
-from .board import board_semantic_errors, parse_board, claim_status, board_graph_errors
+from .board import (
+    board_semantic_errors,
+    detached_ticket_id_known_ids,
+    parse_board,
+    claim_status,
+    board_graph_errors,
+)
 from .state import _current_schema_version, is_absolute_home
 
 
@@ -339,6 +345,14 @@ def validate_checkpoint_surface(
         for semantic in board_semantic_errors(ticket):
             errors.append(f"BOARD proposed {semantic}")
         for need in ticket["needs"]:
+            # A DANGLING `needs:` edge is already reported by board_graph_errors
+            # above. Indexing it here anyway crashed the whole validator with a
+            # KeyError, so a contradictory BOARD produced a traceback instead of
+            # the structured refusal the caller is entitled to -- and on the
+            # recovery path that meant no refusal at all. Report once, never
+            # raise (T-1318 red/green matrix).
+            if need not in tickets:
+                continue
             if ticket["section"] == "## DOING" and tickets[need]["section"] != "## DONE":
                 errors.append(f"BOARD proposed {ticket['id']} needs {need} which is not DONE")
 
@@ -545,6 +559,10 @@ def validate_texts(
         for semantic in board_semantic_errors(ticket):
             errors.append(f"BOARD proposed {semantic}")
         for need in ticket["needs"]:
+            # Dangling edge: board_graph_errors already reported it; never
+            # raise a KeyError out of the validator (T-1318).
+            if need not in tickets:
+                continue
             if ticket["section"] == "## DOING" and tickets[need]["section"] != "## DONE":
                 errors.append(f"BOARD proposed {ticket['id']} needs {need} which is not DONE")
 
@@ -573,6 +591,39 @@ def validate_texts(
     if parked_error is not None:
         errors.append(f"STATE proposed {parked_error}")
 
+    # Allocation identity (CORE-003 / SRC-026:R003): canonical ticket
+    # identity comes from next_ticket_id over structured records and is
+    # journaled as a [T-###] event in the SAME transaction. So every BOARD
+    # record must be backed by a [T-###] event in the complete history or
+    # the proposed transaction's own LOG tail -- a detached, hand-injected
+    # ticket-shaped record never becomes canonical authority merely because
+    # it looks like a ticket. Enforcement arms only when the project HAS an
+    # allocation authority (a nonzero history-wide max ticket id): a project
+    # that has never allocated a ticket cannot be judged, which keeps
+    # hand-authored fresh fixtures legal while catching detached records in
+    # any real project. The structured [T-###] events are the existing
+    # authority -- no second allocator is invented here.
+    _frontier = getattr(sealed_events, "max_ticket_id", 0) if sealed_events is not None else 0
+    if _frontier:
+        _known = {"T-none"}
+        for ev in active_events:
+            if ev.get("ticket"):
+                _known.add(ev["ticket"])
+        _known.update(detached_ticket_id_known_ids(sealed_events.events))
+        # Scope to WORKABLE sections: a detached record in ## BLOCKED is a
+        # parked foreign finding the canonical validator already reports --
+        # it can never be claimed or executed, so it does not gate the
+        # repository's mutations. Only a record in ## TODO / ## DOING could
+        # become execution authority, so only those refuse here.
+        for tid, t in tickets.items():
+            if t.get("section") in ("## TODO", "## DOING") and tid not in _known:
+                errors.append(
+                    f"BOARD: {tid} has no [T-###] allocation event in the "
+                    f"complete history -- ticket identity comes from "
+                    f"canonical allocation, never from a record that merely "
+                    f"looks like a ticket (CORE-003 / SRC-026:R003)"
+                )
+
     errors.extend(f"LOG: {e}" for e in log_analysis.errors)
 
     tail = log_analysis.tail
@@ -598,6 +649,21 @@ def validate_texts(
     if _csv is not None and state.get("schema_version") == _csv and _home:
         if not is_absolute_home(str(_home)):
             errors.append(f"current-schema STATE requires absolute saipen_home, got {_home!r}")
+
+    # CORE-001 (SRC-026:R001): the ACTIVE EXECUTION OWNER invariant, absent
+    # from this gate until now. E-5941 committed `STATE.task=T-1298,
+    # STATE.agent=buffy` against `BOARD active owner opencode` because nothing
+    # here compared the two; `validate.py --gate core` refused the same bytes
+    # afterwards, so a mutation could commit a state the release gate rejects.
+    # The predicate is IMPORTED, not restated, so the transactional gate and
+    # the canonical validator cannot drift apart again. A transitional value
+    # may exist inside an uncommitted transaction (the handover plan builds
+    # STATE and BOARD before either is written); no COMMITTED state may hold
+    # the split, and every plan passes through here before its bytes are
+    # journaled.
+    from .ownership import ownership_invariant_errors
+
+    errors.extend(ownership_invariant_errors(state, board, current_agent))
 
     # Active-ticket binding (NITRO dogfood III, T-591): the one-way check
     # "BOARD has DOING and STATE has task and they differ" is not a proof of

@@ -531,6 +531,11 @@ class ReleasePlan:
     crew_epoch: str = ""
     crew_closure: bool = False
     crew_scope: tuple[str, str] = ()  # (path, expected_hash) pairs
+    # CORE-003: a COHORT batch publication reuses this exact carrier shape.
+    # A cohort and a crew closure are the same publication problem -- several
+    # units of Work sharing one unpublishable-per-unit scope -- so they share
+    # one planner and one executor rather than growing a second publisher.
+    cohort_id: str = ""
     # A targeted producer shortcut owns one reviewed Core ticket. Persisted
     # crew intent must not replace that route between PLAN and APPLY.
     targeted_ticket: bool = False
@@ -595,6 +600,7 @@ class ReleasePlan:
             self.crew_epoch,
             self.crew_closure,
             self.crew_scope,
+            self.cohort_id,
             self.targeted_ticket,
             self.targeted_integration_op,
         )
@@ -665,6 +671,7 @@ def plan_release(
     *,
     dry_run: bool = False,
     crew_carrier: dict | None = None,
+    cohort_carrier: dict | None = None,
     targeted_ticket: bool = False,
     current_capability: str | None = None,
     current_agent: str | None = None,
@@ -789,7 +796,13 @@ def plan_release(
                     "crew is terminal but no deferred crew scope is "
                     "derivable -- DEFER_FOR_CREW ran for zero tickets?",
                 )
-    if crew_carrier is not None:
+    # CORE-003: a cohort carrier is the SAME batch-publication shape as a crew
+    # carrier -- an owned scope of shared paths, closed at local DONE / task
+    # none. It routes to the same planner (and therefore the same executor,
+    # the same index/foreign-staging protections and the same recovery) with a
+    # cohort identity instead of a crew epoch.
+    _batch_carrier = crew_carrier if crew_carrier is not None else cohort_carrier
+    if _batch_carrier is not None:
         return _plan_crew_release(
             root,
             invocation,
@@ -804,11 +817,12 @@ def plan_release(
             fingerprint,
             source_model,
             tag,
-            crew_carrier,
+            _batch_carrier,
             dry_run,
             source_paths=_source_paths,
             current_capability=current_capability,
             current_agent=release_actor,
+            cohort_id=str((cohort_carrier or {}).get("cohort_id") or ""),
         )
 
     # ---- no-publish needs NO git facts at all (T-994 / § 10) --------------
@@ -1092,6 +1106,7 @@ def _plan_crew_release(
     source_paths: list[Path] | None = None,
     current_capability: str | None = None,
     current_agent: str | None = None,
+    cohort_id: str = "",
 ) -> "ReleasePlan":
     """Plan the terminal crew release from a derived crew carrier.
 
@@ -1117,9 +1132,12 @@ def _plan_crew_release(
     crew_epoch = crew_carrier.get("crew_epoch") or ""
     scope = crew_carrier.get("scope") or {}
     ticket_id = crew_carrier.get("ticket_id") or ""
-    if not crew_epoch or not ticket_id or not scope:
+    # Exactly one batch identity must be present: a crew epoch or a cohort id.
+    # An anonymous batch could not be recovered or re-verified afterwards.
+    if not (crew_epoch or cohort_id) or not ticket_id or not scope:
         raise ReleaseRefusal(
-            "VALIDATION_FAILED", "crew terminal carrier is missing crew_epoch/ticket_id/scope"
+            "VALIDATION_FAILED",
+            "terminal batch carrier is missing crew_epoch/cohort_id, ticket_id or scope",
         )
     # Deferred ownership is an edge: the CURRENT bytes MUST equal the bytes
     # the latest owning review approved (item 5 -- later unreviewed mutation
@@ -1196,6 +1214,7 @@ def _plan_crew_release(
             crew_epoch=crew_epoch,
             crew_closure=True,
             crew_scope=tuple(sorted(scope.items())),
+            cohort_id=cohort_id,
             source_manifest=_source_authority_manifest(root, source_paths),
             current_agent=release_actor,
         )
@@ -1312,6 +1331,7 @@ def _plan_crew_release(
         crew_epoch=crew_epoch,
         crew_closure=True,
         crew_scope=tuple(sorted(scope.items())),
+        cohort_id=cohort_id,
         current_agent=release_actor,
     )
 
@@ -3017,7 +3037,51 @@ def _apply_finish_targets(
     # to construct it raises ReleaseRefusal before closure targets are applied.
     receipt_target = _release_receipt_target(root, plan)
     targets.append(receipt_target)
+    # CORE-003: the cohort registry flips to `shipped` in the SAME journaled
+    # closure that writes the release receipt. A separate write afterwards
+    # would leave a crash window in which the batch is published but still
+    # records itself as owing publication -- and the retry would publish twice.
+    if plan.cohort_id:
+        targets.append(_cohort_registry_target(root, plan))
     _apply_closure_targets(root, journal, targets)
+
+
+def _cohort_registry_target(root: Path, plan: ReleasePlan) -> dict:
+    """The durable cohort record, flipped to its exact release identity."""
+    from . import closure as _closure
+
+    try:
+        registry = _closure.read_registry(root)
+    except (OSError, ValueError) as exc:
+        raise ReleaseRefusal(
+            "RECEIPT_IO_FAILURE", f"cohort registry is unreadable: {exc}"
+        ) from exc
+    cohort = (registry.get("cohorts") or {}).get(plan.cohort_id)
+    if cohort is None:
+        raise ReleaseRefusal(
+            "VALIDATION_FAILED",
+            f"cohort {plan.cohort_id} vanished from the registry mid-publication",
+        )
+    commit = ""
+    if plan.mode != "no-publish":
+        head = _git(root, "rev-parse", "HEAD")
+        commit = head.stdout if head.ok else ""
+    cohort["publication_status"] = "shipped"
+    cohort["release_op_id"] = plan.op_id
+    cohort["version"] = plan.version
+    cohort["tag"] = plan.tag
+    cohort["commit"] = commit
+    cohort["scope"] = sorted(dict(plan.crew_scope))
+    content = _closure.render_registry(registry)
+    path = root / ".saipen" / "kitchen" / "cohort_registry.json"
+    doc = codec.read_document(path)
+    return {
+        "path": ".saipen/kitchen/cohort_registry.json",
+        "role": "report",
+        "content": doc.encode(content),
+        "before_hash": doc.raw_hash if path.is_file() else "",
+        "after_hash": _quick_hash(doc.encode(content)),
+    }
 
 
 def _release_receipt_target(root: Path, plan: ReleasePlan) -> dict:
@@ -3064,6 +3128,7 @@ def _release_receipt_target(root: Path, plan: ReleasePlan) -> dict:
                 "source_tree_fingerprint": plan.source_tree_fingerprint,
                 "mode": plan.mode,
                 "crew_epoch": plan.crew_epoch,
+                "cohort_id": plan.cohort_id,
                 "project_lineage": project_lineage_identity(root),
                 "recorded_at": now,
             },
@@ -3082,8 +3147,18 @@ def _release_receipt_target(root: Path, plan: ReleasePlan) -> dict:
 
 
 def _apply_closure_targets(root: Path, journal, targets: list[dict]) -> None:
-    """Append + apply closure targets THROUGH the release op journal."""
-    from .journal import _atomic_write, owned_target_path
+    """Append + apply closure targets THROUGH the release op journal.
+
+    The three-way live-bytes decision routes through the ONE canonical
+    classifier (T-1316, SRC-027 R001); no second inline copy of the rule.
+    ReleaseRefusal codes and messages are unchanged."""
+    from .journal import (
+        TARGET_ALREADY_APPLIED,
+        TARGET_CONFLICT,
+        _atomic_write,
+        classify_target,
+        owned_target_path,
+    )
     from .safeid import InvalidIdError
 
     try:
@@ -3097,10 +3172,11 @@ def _apply_closure_targets(root: Path, journal, targets: list[dict]) -> None:
     for offset, target in enumerate(targets):
         index = start_index + offset
         live = _hash_file(root / target["path"])
-        if live == target["after_hash"]:
+        classification = classify_target(live, target["before_hash"], target["after_hash"])
+        if classification == TARGET_ALREADY_APPLIED:
             _mark_target(journal, index)
             continue
-        if live != target["before_hash"]:
+        if classification == TARGET_CONFLICT:
             raise ReleaseRefusal(
                 "RECOVERY_CONFLICT",
                 f"closure target {target['path']} has unexpected live bytes "
@@ -3936,9 +4012,16 @@ def _recover_no_publish(root: Path, journal, record: dict) -> dict:
 
 
 def _replay_targets(root: Path, journal, record: dict) -> str | None:
-    """Replay unapplied journal targets with before/after classification.
-    Returns the first conflict detail or None when every target is settled."""
-    from .journal import _atomic_write, owned_target_path
+    """Replay unapplied journal targets through the ONE canonical three-way
+    classifier (T-1316). Returns the first conflict detail or None when every
+    target is settled."""
+    from .journal import (
+        _atomic_write,
+        TARGET_ALREADY_APPLIED,
+        TARGET_CONFLICT,
+        classify_target,
+        owned_target_path,
+    )
     from .safeid import InvalidIdError
 
     targets = record.get("targets", [])
@@ -3947,32 +4030,50 @@ def _replay_targets(root: Path, journal, record: dict) -> str | None:
             owned_target_path(root, target["path"])
     except InvalidIdError as exc:
         return f"journal target path escapes the project: {exc}"
-    for index, target in enumerate(targets):
-        live = _hash_file(root / target["path"])
-        if target.get("applied"):
-            if live != target["after_hash"]:
-                return (
-                    f"applied target {target['path']} was overwritten: "
-                    f"live {live!r} != planned {target['after_hash']!r}"
-                )
-            continue
-        if live == target["before_hash"]:
-            staged = journal.staged_content(index, record)
-            if hashlib.sha256(staged).hexdigest()[:16] != target["after_hash"]:
-                return (
-                    f"staged bytes for {target['path']} do not match the "
-                    "planned after hash; journal evidence is corrupt"
-                )
-            _atomic_write(root / target["path"], staged, ownership_root=root)
-            _mark_target(journal, index)
-        elif live == target["after_hash"]:
-            _mark_target(journal, index)
-        else:
+    classifications = [
+        classify_target(
+            _hash_file(root / target["path"]), target["before_hash"], target["after_hash"]
+        )
+        for target in targets
+    ]
+    prefix_len = len(targets)
+    for index, classification in enumerate(classifications):
+        if classification != TARGET_ALREADY_APPLIED:
+            prefix_len = index
+            break
+    for index, classification in enumerate(classifications):
+        target = targets[index]
+        if classification == TARGET_CONFLICT:
             return (
                 f"unfinished target {target['path']} has unexpected bytes "
-                f"(live {live!r}; before {target['before_hash']!r}, after "
+                f"(live {_hash_file(root / target['path'])!r}; before "
+                f"{target['before_hash']!r}, after "
                 f"{target['after_hash']!r}); refuse to guess"
             )
+        if index >= prefix_len and classification == TARGET_ALREADY_APPLIED:
+            return (
+                f"target {target['path']} materialized out of order "
+                f"(before-hash target at index {prefix_len - 1} precedes it); "
+                "non-prefix materialization is not a legal crash shape for "
+                "ordered mutation plans; refuse to guess"
+            )
+    if prefix_len and any(not targets[i].get("applied") for i in range(prefix_len)):
+        # Repair stale journal markers for the materialized prefix through the
+        # canonical journal writer (T-1316 Phase 3): idempotent on re-entry.
+        _mark_target(journal, prefix_len - 1)
+    for index in range(prefix_len, len(targets)):
+        target = targets[index]
+        # classifications[index] is TARGET_PENDING here: live bytes equal
+        # before_hash, so the planned replay is exactly the original plan and
+        # the materialized prefix is never rewritten (T-1316 Phase 5).
+        staged = journal.staged_content(index, record)
+        if hashlib.sha256(staged).hexdigest()[:16] != target["after_hash"]:
+            return (
+                f"staged bytes for {target['path']} do not match the "
+                "planned after hash; journal evidence is corrupt"
+            )
+        _atomic_write(root / target["path"], staged, ownership_root=root)
+        _mark_target(journal, index)
     return None
 
 

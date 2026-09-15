@@ -14,20 +14,27 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from . import phases
-from .board import parse_board, ticket_is_workable, claim_status, board_graph_errors
+from . import ownership, phases
+from .audit_route import audit_route_owns
+from .board import (
+    board_graph_errors,
+    goal_blocked_tickets,
+    parse_board,
+    pick_next_work,
+)
 from .result import Result
-from .state import binding_wait
+from .state import binding_brake
 
 
-def _top_workable(board: dict, agent: str | None = None) -> str | None:
-    """Deterministic Pick Rule: topmost TODO ticket whose needs are all DONE
-    and which no other agent holds under a live claim."""
-    tickets = board["tickets"]
-    for ticket in tickets.values():
-        if ticket_is_workable(ticket, tickets, agent=agent):
-            return ticket["id"]
-    return None
+def _top_workable(board: dict, agent: str | None = None, now=None) -> str | None:
+    """Backward-compatible name for the BOARD Pick Rule's chosen ticket.
+
+    CORE-003: the rule itself now lives in `board.pick_next_work` -- ONE pure
+    selector the router, the projection, the persisted-`next_action`
+    recomputation and the validator all consume. This wrapper keeps existing
+    callers working while the decision has exactly one home.
+    """
+    return pick_next_work(board["tickets"], agent=agent, now=now)[0]
 
 
 def route_next(
@@ -214,6 +221,45 @@ def route_next(
     doing = [t for t in board["tickets"].values() if t["section"] == "## DOING"]
     active = doing[0]["id"] if doing else None
 
+    # BINDING BRAKE (T-1322, parity T-1324/H): the ONE authoritative hard-stop
+    # truth, shared with the mutation admission guard (`state.binding_brake`).
+    # It is evaluated BEFORE any board reasoning: a braked project is not a
+    # work surface, so the router must never advertise a board mutation
+    # (`saipen claim`, `PHASE ...`) that the guard -- which admits only
+    # `recover` while braked -- would refuse. The guard used to honour a
+    # non-empty STATE.blocker while the router only looked at phase==BLOCKED
+    # and a persisted WAIT, so `continue` advertised work the guard refused
+    # (AUDAPACK: SCOUT with an EXTERNAL blocker routed as runnable). The brake
+    # carries the same contextual `binding_wait` rule the WAIT branch always
+    # used, so CORE's DONE+empty-TODO UNBLOCK exception is preserved.
+    _empty_todo = not any(t["section"] == "## TODO" for t in board["tickets"].values())
+    _brake = binding_brake(state, empty_todo=_empty_todo)
+    if _brake is not None:
+        _kind, _detail = _brake
+        if _kind == "wait":
+            # CORE-004: the safety valve is an AUTHORIZATION boundary, not a
+            # resumable yield. Once the 3-wave / 20-ticket budget is exhausted,
+            # the persisted WAIT is a HARD STOP (RESTATE_AND_STOP) until the
+            # documented re-authorization operation durably resets the counters.
+            return {
+                "ok": True,
+                "action": na,
+                "reason": "wait",
+                "executable_behavior": "RESTATE_AND_STOP",
+                "detail": "persisted WAIT is a hard stop; do not route past it",
+            }
+        # phase BLOCKED or a non-empty STATE.blocker: a hard stop, whatever the
+        # board holds. UNBLOCK is a routing-priority NAME (CORE 1.11), not
+        # necessarily a `ticket unblock` command -- the router must not emit a
+        # mutation the executor refuses.
+        return {
+            "ok": True,
+            "action": "saipen status",
+            "reason": "unblock",
+            "executable_behavior": "RESTATE_AND_STOP",
+            "detail": _detail,
+        }
+
     # BINDING (hostile-regression, P0): STATE.task binds BOARD.DOING only where
     # this agent actually OWNS or ADOPTS the active ticket. The ONE
     # claim_status classifier decides: a runtime-fresh FOREIGN_LIVE or INVALID
@@ -226,7 +272,13 @@ def route_next(
     #   - UNCLAIMED / FOREIGN_STALE: adoptable orphan/stale DOING; task:none is
     #     fine and routes to ADOPT it.
     if active:
-        cs = claim_status(board["tickets"][active], session_agent, now)
+        # CORE-002 (SRC-026:R002): the ownership decision comes from the ONE
+        # shared classifier the active-mutation authorization gate consumes,
+        # evaluated at the SAME instant. Two independent readings of the same
+        # snapshot are how `route_next` came to advertise `PHASE BUILD T-1298`
+        # while `_active_claim_refusal` refused that exact mutation.
+        _own = ownership.classify_active_ownership(state, board, session_agent, now=now)
+        cs = _own.status
         if cs == "INVALID":
             return {
                 "ok": False,
@@ -253,7 +305,7 @@ def route_next(
                 "detail": f"BOARD.DOING {active} is actively owned by "
                 f"another agent; observe, do not take over",
             }
-        if task and task != "none" and task != active:
+        if _own.misbound:
             return {
                 "ok": False,
                 "action": "saipen status",
@@ -261,23 +313,38 @@ def route_next(
                 "detail": f"STATE.task={task} but BOARD.DOING={active}; "
                 "repair the split before routing",
             }
-        if cs == "SELF" and (not task or task == "none"):
+        if cs in ("UNCLAIMED", "FOREIGN_STALE"):
+            # CORE-002: an adoptable orphan/stale DOING routes to the EXPLICIT
+            # claim action whether or not a stale STATE.task still names it.
+            # The old rule only fired at `task: none`, so a stale foreign
+            # owner with the ticket still bound fell through to the ordinary
+            # FINISH branch and advertised `PHASE <phase> T-###` -- a mutation
+            # `_active_claim_refusal` refuses until adoption happens. The
+            # advertised string is the authorization gate's own remedy, from
+            # `ownership.adoption_action`, so router and executor cannot word
+            # the same requirement two ways.
+            _owner = _own.board_owner
+            return {
+                "ok": True,
+                "action": ownership.adoption_action(active),
+                "reason": "adopt",
+                "ticket": active,
+                "ownership": cs,
+                "detail": (
+                    f"BOARD.DOING {active} carries no live claim of this "
+                    f"session's own (owner {_owner or 'none'!r}, {cs}); "
+                    f"explicit adoption is required before any active-ticket "
+                    f"mutation"
+                ),
+                "load": load_for_action(ownership.adoption_action(active)),
+            }
+        if cs == "SELF" and not _own.bound:
             return {
                 "ok": False,
                 "action": "saipen status",
                 "reason": "binding-mismatch",
                 "detail": f"STATE.task is none but BOARD.DOING={active} is "
                 f"this agent's own SELF claim; bind STATE.task",
-            }
-        if cs in ("UNCLAIMED", "FOREIGN_STALE") and (not task or task == "none"):
-            # Adoptable orphan/stale DOING: route to claim it in place.
-            return {
-                "ok": True,
-                "action": f"PHASE SCOUT {active}",
-                "reason": "adopt",
-                "ticket": active,
-                "detail": "DOING ticket carries no live own claim; adopt it",
-                "load": load_for_action(f"PHASE SCOUT {active}"),
             }
     elif task and task != "none":
         return {
@@ -286,55 +353,6 @@ def route_next(
             "reason": "binding-mismatch",
             "detail": f"STATE.task={task} but no BOARD.DOING ticket; "
             "repair the split before routing",
-        }
-
-    # WAIT: a legitimate persisted WAIT is a HARD STOP (CORE 1.11 OBEY/UNBLOCK
-    # priority). It must never be walked through merely because TODO has
-    # workable tickets. The narrow exception is exactly CORE's: DONE + empty
-    # TODO + a WAIT that is not one of the explicitly legal DONE brakes may
-    # route onward -- a genuine user brake remains a stop with 100 workable
-    # tickets.
-    if na.startswith("WAIT:"):
-        # THE contextual brake classifier (hostile-regression, P1#5). A WAIT
-        # that `binding_wait` recognizes is a HARD STOP (RESTATE_AND_STOP); one
-        # it does not bind in this exact context may route onward. Outside
-        # DONE+empty-TODO every legal WAIT binds (a user brake is a stop with
-        # one hundred workable tickets). At DONE+empty-TODO only the three
-        # fixed § 1.2 brakes bind; any other legal WAIT there is a question
-        # about work in flight that does not exist, so CORE's UNBLOCK exception
-        # routes it to documented repair rather than a stop. A malformed WAIT
-        # never reaches here: parse_state_or_error already refused it.
-        _empty_todo = not any(t["section"] == "## TODO" for t in board["tickets"].values())
-        _brake = binding_wait(
-            na, phase=phase, empty_todo=_empty_todo, intent=state.get("execution_intent")
-        )
-        if _brake:
-            # CORE-004: the safety valve is an AUTHORIZATION boundary, not a
-            # resumable yield. Once the 3-wave / 20-ticket budget is exhausted,
-            # the persisted WAIT is a HARD STOP (RESTATE_AND_STOP) until the
-            # documented re-authorization operation durably resets the counters.
-            # A resumed automated run MUST NOT continue merely because TODO/DOING
-            # work remains -- the prior 'valve-yield' branch let it, defeating
-            # the runaway-work protection on long-running goal loops.
-            return {
-                "ok": True,
-                "action": na,
-                "reason": "wait",
-                "executable_behavior": "RESTATE_AND_STOP",
-                "detail": "persisted WAIT is a hard stop; do not route past it",
-            }
-
-    # BLOCKED phase: a hard stop, whatever the board holds. UNBLOCK is a
-    # routing-priority NAME (CORE 1.11), not necessarily a `ticket unblock`
-    # command -- the router must not emit a mutation the executor refuses.
-    if phase == "BLOCKED":
-        return {
-            "ok": True,
-            "action": "saipen status",
-            "reason": "unblock",
-            "executable_behavior": "RESTATE_AND_STOP",
-            "detail": "phase BLOCKED; resolve the blocker before any "
-            "further work (saipen sub list / status to inspect)",
         }
 
     # FINISH: phase in a ticket-bearing phase with an active ticket -> the
@@ -403,49 +421,40 @@ def route_next(
     # layer and an uncaptured leftover are diagnostics that must not outrank
     # real workable BOARD Work (both are surfaced below, before the project
     # can call itself idle).
-    if not active and audit_inbox and audit_inbox.get("action"):
-        # BOARD policy stays HERE, not in the inbox module: the inbox answers
-        # structurally ("this layer's Work owns continuation"), and the router
-        # is the only place that knows whether that ticket is workable. An
-        # audit whose Work is blocked or claimed elsewhere must fall through to
-        # the ordinary Pick Rule instead of routing to a ticket the executor
-        # would refuse.
-        _audit_work = audit_inbox.get("work")
-        _audit_blocked = bool(
-            _audit_work
-            and str(audit_inbox.get("action", "")).startswith("PHASE ")
-            and not ticket_is_workable(
-                board["tickets"].get(_audit_work, {}), board["tickets"], agent=session_agent
-            )
-        )
-        if (
-            not audit_inbox.get("invalid_only")
-            and not audit_inbox.get("residue_only")
-            and not _audit_blocked
-        ):
-            routed_audit = {
-                "ok": True,
-                "action": audit_inbox["action"],
-                "reason": "audit-inbox",
-                "detail": audit_inbox.get("detail", "audit inbox owns continuation"),
-                "audit_layer": audit_inbox.get("layer"),
-                "audit_path": audit_inbox.get("path"),
-                "load": load_for_action(audit_inbox["action"]),
-            }
-            if audit_inbox.get("work"):
-                routed_audit["ticket"] = audit_inbox["work"]
-            return routed_audit
+    if not active and audit_inbox and audit_route_owns(
+        audit_inbox, board["tickets"], agent=session_agent, now=now
+    ):
+        routed_audit = {
+            "ok": True,
+            "action": audit_inbox["action"],
+            "reason": "audit-inbox",
+            "detail": audit_inbox.get("detail", "audit inbox owns continuation"),
+            "audit_layer": audit_inbox.get("layer"),
+            "audit_path": audit_inbox.get("path"),
+            "load": load_for_action(audit_inbox["action"]),
+        }
+        if audit_inbox.get("work"):
+            routed_audit["ticket"] = audit_inbox["work"]
+        return routed_audit
 
-    # START: no DOING + a workable TODO -> Pick Rule claims the top ticket.
+    # START: no DOING + a workable TODO -> the ONE shared Pick Rule chooses.
+    # CORE-003: explicit user intent outranks speculative backlog inside this
+    # stage; the selector is `board.pick_next_work`, the same function the
+    # projection, the persisted-`next_action` recomputation and the validator
+    # call, so a persisted pick and a fresh route cannot name different work.
     if not active:
-        top = _top_workable(board, agent=session_agent)
+        top, pick_reason = pick_next_work(board["tickets"], agent=session_agent, now=now)
         if top is not None:
             return {
                 "ok": True,
                 "action": f"PHASE SCOUT {top}",
-                "reason": "start",
+                "reason": pick_reason,
                 "ticket": top,
-                "detail": "topmost workable ticket",
+                "detail": (
+                    "topmost workable explicit user request"
+                    if pick_reason == "start-user-explicit"
+                    else "topmost workable ticket"
+                ),
                 "load": load_for_action(f"PHASE SCOUT {top}"),
             }
         # A cyclic or dangling `needs:` graph with NOTHING workable is corrupt
@@ -463,6 +472,31 @@ def route_next(
                 "reason": "board-graph-invalid",
                 "detail": "BOARD needs: graph invalid with no workable "
                 "ticket: " + "; ".join(_graph_errors[:3]),
+            }
+
+        # GOAL_BLOCKED (CORE-003): a clean stop, and ONLY when it is true --
+        # nothing active, nothing workable, and at least one blocker that
+        # explicitly claims GOAL scope. A ticket-scope blocker never reaches
+        # here with work still available, which is the whole point: the
+        # FastPrompter loop stopped because one parked ticket was read as a
+        # global halt.
+        _goal_blocked = goal_blocked_tickets(board["tickets"])
+        if _goal_blocked:
+            _blocked = [
+                t["id"] for t in board["tickets"].values() if t["section"] == "## BLOCKED"
+            ]
+            return {
+                "ok": True,
+                "action": "saipen status",
+                "reason": "goal-blocked",
+                "stop_reason": "GOAL_BLOCKED",
+                "executable_behavior": "RESTATE_AND_STOP",
+                "blocked": _blocked,
+                "goal_blocked": _goal_blocked,
+                "detail": "no workable Work remains and "
+                + ", ".join(_goal_blocked[:3])
+                + " declares a GOAL-scope blocker; this is a legitimate stop, "
+                "not an idle project",
             }
 
     # A deliberately unreadable audit layer is NOT an idle project. Nothing

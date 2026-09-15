@@ -24,6 +24,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "tools"))
 
 from saipen_engine.audit_route import (  # noqa: E402
+    audit_route_owns,
     live_continuation,
     route_applies,
     route_violation,
@@ -171,7 +172,76 @@ class WaitHasNoScopeCategoryTests(unittest.TestCase):
 
 
 # ---------------------------------------------------------------------------
-# AC-05 -- the red control exists in the mutation suite
+# AC-05 -- audit route workability authority (T-1317 audit route split fix)
+# ---------------------------------------------------------------------------
+
+
+class AuditRouteWorkabilityTests(unittest.TestCase):
+    def setUp(self) -> None:
+        self.workable_ticket = {
+            "id": "T-900",
+            "section": "## TODO",
+            "checkbox": " ",
+            "fields": {},
+        }
+        self.blocked_ticket = {
+            "id": "T-900",
+            "section": "## BLOCKED",
+            "checkbox": " ",
+            "fields": {"blocker": "waiting on upstream"},
+        }
+        self.phase_projection = {
+            "action": "PHASE SCOUT T-900",
+            "layer": 2,
+            "path": "audit/2.md",
+            "work": "T-900",
+        }
+
+    def test_workable_ticket_owns_continuation(self) -> None:
+        tickets = {"T-900": self.workable_ticket}
+        self.assertTrue(audit_route_owns(self.phase_projection, tickets=tickets))
+
+    def test_blocked_ticket_does_not_own_continuation(self) -> None:
+        tickets = {"T-900": self.blocked_ticket}
+        self.assertFalse(audit_route_owns(self.phase_projection, tickets=tickets))
+
+    def test_missing_ticket_does_not_own_continuation(self) -> None:
+        tickets = {}
+        self.assertFalse(audit_route_owns(self.phase_projection, tickets=tickets))
+
+    def test_blocked_audit_work_does_not_trip_route_violation(self) -> None:
+        tickets = {
+            "T-900": self.blocked_ticket,
+            "T-901": {"id": "T-901", "section": "## TODO", "checkbox": " ", "fields": {}},
+        }
+        # Router fell through to T-901; validator must agree and produce no violation.
+        why = route_violation(
+            self.phase_projection,
+            "PHASE SCOUT T-901",
+            [],
+            WAIT_CATEGORIES,
+            tickets=tickets,
+        )
+        self.assertIsNone(why)
+
+    def test_workable_audit_work_trips_route_violation_when_wandering(self) -> None:
+        tickets = {
+            "T-900": self.workable_ticket,
+            "T-901": {"id": "T-901", "section": "## TODO", "checkbox": " ", "fields": {}},
+        }
+        why = route_violation(
+            self.phase_projection,
+            "PHASE SCOUT T-901",
+            [],
+            WAIT_CATEGORIES,
+            tickets=tickets,
+        )
+        self.assertIsNotNone(why)
+        self.assertIn("PHASE SCOUT T-900", why)
+
+
+# ---------------------------------------------------------------------------
+# AC-06 -- the red control exists in the mutation suite
 # ---------------------------------------------------------------------------
 
 

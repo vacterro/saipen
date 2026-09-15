@@ -1,0 +1,10 @@
+{
+  "classification": "HARNESS_INVALID",
+  "reason": "fixture IDENTITY.md lacked canonical fenced frontmatter",
+  "affected": [
+    "I1",
+    "I2",
+    "I3"
+  ],
+  "raw_evidence_preserved": true
+}

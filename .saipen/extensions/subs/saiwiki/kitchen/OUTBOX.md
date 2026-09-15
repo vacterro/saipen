@@ -1,7 +1,58 @@
 # OUTBOX
 
+## W-046: FORCE-FRESH re-bind to c53b5d85 (v8.0.1 closure + ee/saitranslate packages), zero content drift
+- **status:** ready
+- **summary:** W-045 re-bound again after the ee/saitranslate SAIT-030 publication moved the working-tree fingerprint (b6b8f5da -> c53b5d85); HEAD unchanged at 71455482. Zero page-content change: badges v8.0.1, Home shortcut row st/ss-retired, audit bullet current, Scenarios 1-257 mirror marker sha256:43ab86d596572a90 unchanged, _Footer v8.0.1.
+- **main_project_refs:** [VERSION, README.md, CHANGELOG.md, tests/conformance_cases.jsonl, saipen/CORE.md, saipen/CONFORMANCE.md, extensions/subs/saiwiki.md, extensions/subs/saitranslate.md, tools/validate.py, tools/freshness.py, tools/saipen_engine/producer.py, tools/saipen_engine/corpus.py]
+- **critical:** false
+- **severity:** P2
+- **producer:** saiwiki
+- **source_head:** 7145548211d2ee3ca9babf5e8b251960ea8f0527
+- **source_tree_fingerprint:** git-delta-v1:c53b5d85ed1b470590003e1d5c2b0f531fd55a6d730f3c20bcdf1b01b4d1025a
+- **role_revision:** sha256:54a42475a124ab0f27e83d600a284a9cc54d9668029c4828cfc48512b031df13
+- **coverage:** 9/9 maintained pages; 257 scenario IDs unique/contiguous by canonical ID; badges v8.0.1; stop-key truth current
+- **payload:** [.saipen/extensions/subs/saiwiki/kitchen/wiki/Home.md, Phases.md, Getting-Started.md, SubSaipen.md, Tutorials.md, Use-Cases.md, Scenarios.md, _Footer.md, _Sidebar.md]
+- **verified:** PASS -- strict READY sha256:2da5a6d14740e288854b59e0da1d717acd92f3ede481e15cdb14154c6070f74f published at producer epoch 7 with 52 exact read dependencies and 9 authenticated payload entries; Scenarios marker sha256:43ab86d596572a90 equals the canonical corpus digest for rows 1-257; zero page-content delta vs W-044/W-045; no integration, commit, tag, push, or remote write performed
+- **instructions:** Run `python -B tools/validate.py --gate collect:saiwiki`; integrate only the 9 declared payload pages through Core's named saiwiki collect path; publish the wiki only through an authorized SHIP path; then verify Home badge v8.0.1, Scenarios 257 rows, _Footer v8.0.1 live.
+- **details:** Second triple-only rebind in this session: the SAIT-030 publication (its own READY staging) and saitranslate's mirror-OUTBOX sync moved the tree fingerprint after W-045 published. Package is fresh at publish instant; if the in-flight T-1304 audit execution or T-1303 lands mutations before collection, qq must rerun. Main tree and wiki remote untouched.
+
+## W-045: FORCE-FRESH re-bind to 71455482 (v8.0.1), zero content drift
+- **status:** stale
+- **superseded_by:** W-046 -- ee/SAIT-030 publication moved the tree fingerprint after W-045 published; W-045 re-bound without content change
+- **summary:** W-044 re-bound to the current source triple with zero page-content change. HEAD moved 35ca656e -> 71455482 (v8.0.0 ship -> v8.0.1 ship/closure) plus a live working-tree delta in tools/ and saipen/ (T-1303/T-1301/T-1302 debt/verify engine work staged for the next release); no CONFORMANCE row, wiki-facing doc or repo doc surface changed. All 9 kitchen pages re-verified: badges v8.0.1, Home shortcut row st/ss-retired, Home audit-release-integrity bullet, Scenarios 1-257 mirror marker sha256:43ab86d596572a90 unchanged (payload rule: id|setup lines joined by newline), _Footer v8.0.1, Phases range v7.104.0-v8.0.1.
+- **main_project_refs:** [VERSION, README.md, CHANGELOG.md, tests/conformance_cases.jsonl, saipen/CORE.md, saipen/CONFORMANCE.md, extensions/subs/saiwiki.md, extensions/subs/saitranslate.md, tools/validate.py, tools/freshness.py, tools/saipen_engine/producer.py, tools/saipen_engine/corpus.py]
+- **critical:** false
+- **severity:** P2
+- **producer:** saiwiki
+- **source_head:** 7145548211d2ee3ca9babf5e8b251960ea8f0527
+- **source_tree_fingerprint:** git-delta-v1:b6b8f5daca2a8373945b15c3f42e5f14a5d31f9d3962c49f084a68b2385798d0
+- **role_revision:** sha256:54a42475a124ab0f27e83d600a284a9cc54d9668029c4828cfc48512b031df13
+- **coverage:** 9/9 maintained pages; 257 scenario IDs unique/contiguous by canonical ID; badges v8.0.1; stop-key truth current
+- **payload:** [.saipen/extensions/subs/saiwiki/kitchen/wiki/Home.md, Phases.md, Getting-Started.md, SubSaipen.md, Tutorials.md, Use-Cases.md, Scenarios.md, _Footer.md, _Sidebar.md]
+- **verified:** PASS -- strict READY sha256:01cab8d2feceed8638a4de9c7e352e260d694b38f18da157d232fbbeafa44b9b published at producer epoch 6 with 52 exact read dependencies and 9 authenticated payload entries; Scenarios marker sha256:43ab86d596572a90 equals the canonical corpus digest for rows 1-257 (payload rule: id|setup lines joined by newline); zero page-content delta vs W-044; no integration, commit, tag, push, or remote write performed
+- **instructions:** Run `python -B tools/validate.py --gate collect:saiwiki`; integrate only the 9 declared payload pages through Core's named saiwiki collect path; publish the wiki only through an authorized SHIP path; then verify Home badge v8.0.1, Scenarios 257 rows, _Footer v8.0.1 live.
+- **details:** W-044 (35ca656e/v8.0.1-ship) went stale on the freshness triple alone: v8.0.1 ship (380b30f6) + closure (71455482) landed, and the worktree carries the next release's in-flight engine delta (tools/saipen_engine/debt.py etc.), both of which move source_head/source_tree_fingerprint without touching any wiki-facing byte. W-044 marked stale; package re-published through kitchen/_publish_package.py (ProducerEpoch.claim epoch 6, StagingGeneration, atomic READY). Note: if the in-flight T-1304 audit execution or T-1303 lands mutations before collection, the triple moves again and qq must rerun -- package is fresh at publish instant, guaranteed nothing more. Main tree and wiki remote untouched.
+
+## W-044: FORCE-FRESH wiki v8.0.1 -- scenarios rebuilt by ID, stop key, audit release truth
+- **status:** stale
+- **superseded_by:** W-045 -- FORCE-FRESH re-bind to 71455482/b6b8f5da after v8.0.1 closure; zero content drift
+- **summary:** Rebuilt all 257 Scenarios.md rows by canonical ID from tests/conformance_cases.jsonl (246 titles had drifted into paraphrase; marker sha256:43ab86d596572a90 recomputed and verified against the corpus payload rule). Home badge/features v8.0.1 + 2 new bullets (v8.0.0 st-stop key T-1297/SRC-024; v8.0.1 audit release integrity + bounded receipt lookups T-1298/SRC-025). Home shortcut row now names `st` with `ss` retired. Tutorials shortcut table ss->st. _Footer v8.0.1. Phases range header v7.104.0-v8.0.1. SubSaipen saiwiki row W-044 / saitranslate row corrected to SAIT-028-stale truth.
+- **main_project_refs:** [VERSION, README.md, CHANGELOG.md, tests/conformance_cases.jsonl, saipen/CORE.md, saipen/CONFORMANCE.md, extensions/subs/saiwiki.md, extensions/subs/saitranslate.md, tools/validate.py, tools/freshness.py, tools/saipen_engine/producer.py, tools/saipen_engine/corpus.py]
+- **critical:** false
+- **severity:** P2
+- **producer:** saiwiki
+- **source_head:** 35ca656e7a9bcee92f3fed6ecde58fee1c9795de
+- **source_tree_fingerprint:** git-delta-v1:763699b617e97ff6b839c0dc013b56343865cc8dff5a0791866f72cde5759f43
+- **role_revision:** sha256:54a42475a124ab0f27e83d600a284a9cc54d9668029c4828cfc48512b031df13
+- **coverage:** 9/9 maintained pages; 257 scenario IDs unique/contiguous by canonical ID; badges v8.0.1; stop-key truth current
+- **payload:** [.saipen/extensions/subs/saiwiki/kitchen/wiki/Home.md, Phases.md, Getting-Started.md, SubSaipen.md, Tutorials.md, Use-Cases.md, Scenarios.md, _Footer.md, _Sidebar.md]
+- **verified:** PASS -- strict READY sha256:e1bf2dc14cbae72a500d8dde9a6529ecafbe8c56d173f7b79541a0da2de786ba published at producer epoch 5 with 52 exact read dependencies and 9 authenticated payload entries; Scenarios marker sha256:43ab86d596572a90 equals the canonical corpus digest for rows 1-257 (payload rule: id|setup lines joined by newline); validator wiki-mirror checks clean; wiki diff --check clean; no integration, commit, tag, push, or remote write performed
+- **instructions:** Run `python -B tools/validate.py --gate collect:saiwiki`; integrate only the 9 declared payload pages through Core's named saiwiki collect path; publish the wiki only through an authorized SHIP path; then verify Home badge v8.0.1, Scenarios 257 rows, _Footer v8.0.1 live.
+- **details:** W-041 (c7ea5b1b/v7.231.9) went stale after many releases (v7.234.0-v8.0.1). During the gap the Scenarios page title paraphrases drifted from the canonical corpus (246/256 titles no longer matched; old marker 61c6c71a1d6bbc1f predated row 257). Rows regenerated BY ID with notes kept only where provably authored against the same invariant; 243 notes dropped as unverifiable, canonical titles verbatim. v8.0.0's ss->st rename (T-1297) and v8.0.1's release-integrity wave (T-1298) are reflected in Home/Tutorials. saitranslate row corrected: SAIT-028 is stale against the v8.0.1 tree, collect refuses it until a fresh ee run. Main tree and wiki remote untouched.
+
 ## W-041: FORCE-FRESH wiki v7.231.9 -- badges, feature bullets, phase range
 - **status:** stale
+- **superseded_by:** W-044 -- FORCE-FRESH re-bound and rebuilt rows to the v8.0.1 corpus
 - **summary:** Rebound all 9 maintained wiki pages to current v7.231.9 source triple (HEAD c7ea5b1b, tree git-delta-v1:f6607050). Home badge/features v7.231.9 with 6 new bullets (v7.231.4-v7.231.9: bootstrap activation parity, shortcut payload routing, runtime manifest completeness, CCC ship control, repeated cc hardening, SRC-003 audit repair wave). _Footer v7.231.9. Phases range header v7.231.9. SubSaipen saiwiki/saitranslate status rows refreshed. Scenarios 256 IDs verified against CONFORMANCE; canonical mirror sha256:46f20ddd1cd655be current.
 - **main_project_refs:** [VERSION, README.md, CHANGELOG.md, KNOWLEDGE/ADR-0001-v7-producer-parallelism.md, saipen/BOOT.md, saipen/CORE.md, saipen/STYLE.md, saipen/CONFORMANCE.md, saipen/CONVERGE.md, saipen/OPS.md, saipen/phases/*.md, extensions/subs/PROTOCOL.md, extensions/subs/crew.md, extensions/subs/sai*.md, tools/freshness.py, tools/validate.py, tools/saipen_engine/producer.py, tools/saipen_engine/intent.py, tools/saipen_engine/journal.py, tools/saipen_engine/crew.py, tools/saipen_engine/release.py, tools/saipen_engine/subs.py]
 - **critical:** false

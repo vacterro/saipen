@@ -93,8 +93,66 @@ KNOWN_FIELDS = frozenset(
         # "this is a bug fix" from the description would make the gate depend
         # on prose, which is the one thing this whole rule exists to stop.
         "regression",
+        # ---- orchestration repair (T-1302 / CORE-003, SRC-026:R003) -------
+        # These seven are declared by the Board schema and the DONE/SHIP phase
+        # contracts while the parser still rejected them as unrecognized, so a
+        # board written to the documented contract failed to PARSE. Docs and
+        # schema must never advertise a value the runtime ignores -- here it
+        # did worse than ignore it, it refused the whole record.
+        #
+        # blocker_scope         ticket | goal -- a ticket block parks one
+        #                       ticket; only a goal block may stop the loop.
+        # closure_mode          own_patch | inherited_verified | cohort --
+        #                       the provenance of a DONE closure.
+        # closure_cohort        C-### batch identity for cohort closure.
+        # user_explicit         `true` marks Work created from an explicit
+        #                       user request; it arms scheduler precedence.
+        # implementation_delta  none | patch -- did BUILD produce code?
+        # implementation_source the durable publication authority an
+        #                       inherited_verified closure resolves against.
+        # closure_paths         the shared worktree paths a cohort member
+        #                       attributes to its batch.
+        "blocker_scope",
+        "closure_mode",
+        "closure_cohort",
+        "user_explicit",
+        "implementation_delta",
+        "implementation_source",
+        "closure_paths",
+        # Active-parent dependency handoff. These fields exist only while the
+        # parent is BLOCKED on one child Work item; finish_ticket consumes
+        # them atomically when that child reaches DONE.
+        "blocked_on",
+        "resume_phase",
+        "resume_transition_from",
+        # T-1326: a compact execution-index pointer to losslessly externalized
+        # historical detail.  The resolver is canonical; the pointer itself
+        # carries no authority beyond naming that artifact.
+        "detail_ref",
     }
 )
+
+#: Closed blocker-scope vocabulary. Absent reads as `ticket`: a block whose
+#: scope was never declared parks exactly its own ticket, which is the safe
+#: half -- the loop keeps working instead of stopping on an unstated claim.
+BLOCKER_SCOPES = ("ticket", "goal")
+DEFAULT_BLOCKER_SCOPE = "ticket"
+
+#: Closed closure-mode vocabulary. Absent reads as `own_patch`: the ticket
+#: owns and publishes its implementation delta, which is the strict half.
+CLOSURE_MODES = ("own_patch", "inherited_verified", "cohort")
+DEFAULT_CLOSURE_MODE = "own_patch"
+
+#: The ONLY value that arms explicit-user scheduling precedence. Anything else
+#: is a declaration the parser keeps and the scheduler ignores, so a typo can
+#: never silently promote ordinary Work to the front of the queue.
+USER_EXPLICIT_TRUE = "true"
+
+# New or updated live records must remain an execution index.  Historical
+# rows are still parsed exactly as written; a canonical writer touching an
+# oversized row refuses with an externalization route instead of deleting or
+# truncating prose.
+MAX_LIVE_RECORD_CHARS = 1200
 
 #: The only value that turns the extra gate on. Anything else is a declaration
 #: the parser keeps and the gate ignores, so a typo cannot silently arm or
@@ -115,6 +173,20 @@ def parse_board(text: str) -> dict:
     Returns {"tickets": {tid: {...}}, "headings": [...], "errors": [...]}.
     Mirrors the validator's walk exactly so the engine and validate.py cannot
     drift apart. A ticket line preserves its raw text for surgical mutation.
+
+    Physical grammar is CLOSED (CORE-003 / SRC-026:R003 parser defense):
+    inside a machine-owned section (``## DOING``/``## TODO``/``## DONE``/
+    ``## BLOCKED``) the only legal physical records are the section heading,
+    a canonical ticket record, and an empty line. Any other non-empty record
+    -- an injected physical separator's detached continuation, a malformed
+    scalar tail, an unexpected list item, detached metadata, a record
+    fragment -- is a parse error naming the line, section and record. The
+    bytes are already ambiguous or corrupt: fail closed, never silently skip,
+    never glue the continuation back to the prior ticket (the separator no
+    longer exists in the parsed field, so the record can never be
+    truthfully reconstructed). Before the first ``##`` heading a documented
+    preamble (title, HTML comments, legacy banner lines) is legal --
+    arbitrary prose there is an unknown record too.
     """
     tickets = {}
     headings = []
@@ -185,6 +257,29 @@ def parse_board(text: str) -> dict:
                 "raw": line,
                 "description": parts[0] if parts else "",
             }
+            continue
+        # Not a heading, not empty, not ticket-shaped: an unknown physical
+        # record. Inside the four machine-owned sections this is a detached
+        # continuation -- an injected record separator (NEL, U+2028/U+2029,
+        # CR/LF, ...) is consumed by splitlines BEFORE the field is parsed,
+        # so the tail surfaces HERE, not inside the parsed field. A detached
+        # continuation silently ignored is a field whose bytes were lost while
+        # validation accepted the record. Fail closed (CORE-003 / SRC-026:R003).
+        # Before any section and under unknown headings we keep the historical
+        # permissive skip: the grammar for those zones is documented separately
+        # (sub boards, template documentation) and does not form the attack
+        # surface for ticket identity injection.
+        if section is None or section not in REQUIRED_HEADINGS:
+            continue
+        # section is one of the four required: an unexpected physical record
+        # here is a detached continuation or fragment.
+        errors.append(
+            f"BOARD.md:{line_no} unexpected physical BOARD record "
+            f"under {section} ({line.strip()[:80]!r}) -- a detached "
+            f"continuation or record fragment never becomes "
+            f"authority; the board grammar is closed and the bytes "
+            f"are ambiguous or corrupt, refuse them"
+        )
     for heading in REQUIRED_HEADINGS:
         if headings.count(heading) != 1:
             errors.append(
@@ -194,6 +289,108 @@ def parse_board(text: str) -> dict:
                 f"no operation can mutate it into a crash"
             )
     return {"tickets": tickets, "headings": headings, "errors": errors}
+
+
+# Reserved structural BOARD fields (T-1316 handoff): a field marker for one of
+# these embedded inside ANOTHER field's value is a pseudo-link -- prose trying
+# to borrow the authority of a structured field. Real incident: a ticket written
+# with `verify: ... ; source_receipts: SRC-027` parsed `fields.verify` as prose
+# carrying a receipt name while `fields.source_receipts` stayed absent, so the
+# source-closure gate saw ZERO linked receipts and answered
+# SOURCE_COVERAGE_COMPLETE for work that had an unresolved actionable
+# requirement. Normalizing on read would be a hidden auto-healer; the machine
+# refuses instead, and only an explicitly authorized writer may normalize.
+RESERVED_FIELD_MARKERS = ("source_receipts", "owner", "claim_time", "needs")
+#: Matches `field:` or `; field:` or `, field:` inside a value -- the shapes a
+#: pseudo-link takes when prose imitates the pipe-field grammar. A value that
+#: legitimately NEEDS the literal text `owner:` (rare) must escape or reword it;
+#: ambiguity resolves toward refusal, not toward guessing which half is data.
+_PSEUDO_FIELD_MARKER_RE = re.compile(r"(?:^|[;,])\s*(%s)\s*:" % "|".join(RESERVED_FIELD_MARKERS))
+
+
+def board_scalar_errors(fields: dict, ticket_id: str) -> list[str]:
+    """ONE shared parse-side BOARD scalar scan (CORE-003 / SRC-026:R003).
+
+    A parsed field value that still carries a physical record separator can
+    only exist if the bytes were written out-of-band (a hand edit, a corrupt
+    tool, or a pre-repair writer): the canonical writers refuse separators,
+    so the only safe reading is to refuse the record too. This is the parse
+    side of the same invariant `assert_single_record` writes -- one
+    predicate, both directions, no drift.
+    """
+    errors = []
+    for name, value in (fields or {}).items():
+        sep = record_separator_in(value)
+        if sep is not None:
+            errors.append(
+                f"{ticket_id} field {name!r} carries a physical record "
+                f"separator -- the canonical writers refuse separators, so "
+                f"these bytes are out-of-band authority"
+            )
+        # T-1316: a reserved field marker inside another field's value is a
+        # pseudo-link, not prose. The parser read `fields.verify` while the
+        # machine authority `fields.source_receipts` stayed empty, and the
+        # closure gate then claimed coverage that did not exist.
+        for marker in _PSEUDO_FIELD_MARKER_RE.finditer(str(value or "")):
+            errors.append(
+                f"{ticket_id} field {name!r} embeds reserved field marker "
+                f"{marker.group(1)!r} -- a structured field marker inside "
+                "another field's value is a pseudo-link, not authority; "
+                "write `| source_receipts:` as its own field through the "
+                "canonical source-capture authority"
+            )
+    return errors
+
+
+def detached_ticket_id_errors(tickets: dict, allocated_max_ticket_id: object) -> list[str]:
+    """Allocation-frontier check retained as the cheap first tell.
+
+    Any BOARD record above the history's max allocated id is detached
+    outright. (Below-frontier detached records need the stronger
+    per-ticket-event backing the fast gate and validate.py check; this
+    frontier pass is the shared vocabulary for both.)
+    """
+    try:
+        frontier = int(allocated_max_ticket_id)
+    except (TypeError, ValueError):
+        return []
+    errors = []
+    for tid in tickets:
+        m = re.fullmatch(r"T-(\d+)", str(tid))
+        if not m:
+            continue
+        if int(m.group(1)) > frontier:
+            errors.append(
+                f"{tid} sits above the allocation frontier ({frontier}) -- "
+                f"ticket identity comes from canonical allocation "
+                f"(next_ticket_id + a journaled [T-###] event), never from "
+                f"a record that merely looks like a ticket"
+            )
+    return errors
+
+
+def detached_ticket_id_known_ids(events: object) -> set[str]:
+    """Structured ticket identities named by complete-history events.
+
+    The allocation-event half of the identity check: ``parse_log_line``
+    structured ``[T-###]`` slots are ticket identity, prose mentions are
+    not. Events may be a HistorySnapshot (with ``.events``), a plain
+    iterable of parsed events, or None.
+    """
+    if events is None:
+        return set()
+    if hasattr(events, "events"):
+        events = events.events
+    try:
+        iterator = list(events)
+    except TypeError:
+        return set()
+    known = set()
+    for ev in iterator:
+        tid = (ev or {}).get("ticket") if isinstance(ev, dict) else None
+        if tid and re.fullmatch(r"T-\d+", str(tid)):
+            known.add(str(tid))
+    return known
 
 
 def board_semantic_errors(ticket: dict) -> list[str]:
@@ -245,6 +442,112 @@ def board_semantic_errors(ticket: dict) -> list[str]:
     status_error = ticket_status_error(ticket)
     if status_error:
         errors.append(f"{tid} {status_error}")
+    # Parse-side half of the record invariant (CORE-003 / SRC-026:R003): a
+    # writer-prevented separator that reached the bytes anyway is
+    # out-of-band authority, and a parsed record built on it must be refused
+    # rather than projected into routing decisions.
+    scalars = dict(ticket.get("fields", {}))
+    if isinstance(ticket.get("description"), str):
+        scalars["description"] = ticket["description"]
+    errors.extend(board_scalar_errors(scalars, tid))
+    errors.extend(closure_metadata_errors(ticket))
+    return errors
+
+
+def closure_metadata_errors(ticket: dict) -> list[str]:
+    """Orchestration-metadata placement + vocabulary (T-1302 / CORE-003).
+
+    The schema already said where these fields may live and which values they
+    admit; nothing enforced it, so a board could carry `closure_mode: cohort`
+    on a TODO ticket, or `blocker_scope: gaol`, and validate clean while the
+    runtime read a default that contradicted the line a human was reading.
+    A declaration the machine ignores is worse than no declaration.
+    """
+    errors: list[str] = []
+    fields = ticket.get("fields", {})
+    section = ticket.get("section")
+    tid = ticket.get("id", "?")
+
+    scope = str(fields.get("blocker_scope", "")).strip()
+    if scope:
+        if section != "## BLOCKED":
+            errors.append(
+                f"{tid} carries | blocker_scope: outside ## BLOCKED ({section}) "
+                "-- scope describes an ACTIVE block and is stale anywhere else"
+            )
+        elif scope.lower() not in BLOCKER_SCOPES:
+            errors.append(
+                f"{tid} declares blocker_scope {scope!r}, outside "
+                f"{'|'.join(BLOCKER_SCOPES)} -- an unreadable scope would be "
+                "silently downgraded to ticket while the line claims otherwise"
+            )
+
+    closure_fields = ("closure_mode", "closure_cohort", "implementation_delta", "closure_paths")
+    declared = [name for name in closure_fields if str(fields.get(name, "")).strip()]
+    if declared and section != "## DONE":
+        errors.append(
+            f"{tid} carries closure metadata ({', '.join(declared)}) under "
+            f"{section} -- closure provenance describes a COMPLETED ticket"
+        )
+
+    mode = str(fields.get("closure_mode", "")).strip()
+    if mode and mode.lower() not in CLOSURE_MODES:
+        errors.append(
+            f"{tid} declares closure_mode {mode!r}, outside "
+            f"{'|'.join(CLOSURE_MODES)}"
+        )
+    delta = str(fields.get("implementation_delta", "")).strip()
+    if delta and delta.lower() not in ("none", "patch"):
+        errors.append(f"{tid} declares implementation_delta {delta!r}, outside none|patch")
+    cohort = str(fields.get("closure_cohort", "")).strip()
+    if cohort and not re.fullmatch(r"C-\d+", cohort):
+        errors.append(f"{tid} declares closure_cohort {cohort!r}, which is not a C-### identity")
+    if mode.lower() == "cohort" and not cohort:
+        errors.append(f"{tid} closes as cohort with no | closure_cohort: C-### authority")
+    if cohort and mode.lower() != "cohort":
+        errors.append(
+            f"{tid} names closure_cohort {cohort} but closes as "
+            f"{mode or DEFAULT_CLOSURE_MODE} -- cohort membership is only "
+            "valid with closure_mode cohort"
+        )
+    explicit = str(fields.get("user_explicit", "")).strip()
+    if explicit and explicit.lower() != USER_EXPLICIT_TRUE:
+        errors.append(
+            f"{tid} declares user_explicit {explicit!r}; only 'true' arms "
+            "explicit-user scheduling, so any other value is a declaration "
+            "the scheduler ignores"
+        )
+
+    reservation_fields = ("blocked_on", "resume_phase", "resume_transition_from")
+    reservation = {name: str(fields.get(name, "")).strip() for name in reservation_fields}
+    present = [name for name, value in reservation.items() if value]
+    if present and section != "## BLOCKED":
+        errors.append(
+            f"{tid} carries continuation reservation ({', '.join(present)}) under "
+            f"{section} -- only a BLOCKED parent may reserve continuation"
+        )
+    if present and len(present) != len(reservation_fields):
+        missing = [name for name, value in reservation.items() if not value]
+        errors.append(
+            f"{tid} carries a partial continuation reservation; missing "
+            + ", ".join(missing)
+        )
+    if reservation["blocked_on"] and not re.fullmatch(r"T-\d+", reservation["blocked_on"]):
+        errors.append(f"{tid} blocked_on {reservation['blocked_on']!r} is not T-###")
+    if reservation["resume_phase"]:
+        from . import phases
+
+        if reservation["resume_phase"] not in phases.TICKET_BEARING_PHASES:
+            errors.append(
+                f"{tid} resume_phase {reservation['resume_phase']!r} is not ticket-bearing"
+            )
+        elif not phases.transition_legal(
+            reservation["resume_transition_from"], reservation["resume_phase"]
+        ):
+            errors.append(
+                f"{tid} continuation snapshot has illegal transition "
+                f"{reservation['resume_transition_from']} -> {reservation['resume_phase']}"
+            )
     return errors
 
 
@@ -276,6 +579,22 @@ def board_graph_errors(tickets: dict) -> list[str]:
         for need in ticket.get("needs", []):
             if need not in ids:
                 errors.append(f"{tid} needs nonexistent {need} (line {ticket.get('line_no')})")
+    reserved_children: dict[str, str] = {}
+    for tid, ticket in tickets.items():
+        blocked_on = str(ticket.get("fields", {}).get("blocked_on", "")).strip()
+        if not blocked_on:
+            continue
+        if blocked_on not in ids:
+            errors.append(f"{tid} blocked_on nonexistent {blocked_on}")
+            continue
+        if blocked_on not in ticket.get("needs", []):
+            errors.append(f"{tid} blocked_on {blocked_on} is missing from its needs graph")
+        prior = reserved_children.get(blocked_on)
+        if prior is not None and prior != tid:
+            errors.append(
+                f"{blocked_on} has multiple continuation parents: {prior}, {tid}"
+            )
+        reserved_children[blocked_on] = tid
     # Cycle detection over the needs: dependency DAG (iterative three-color).
     WHITE, GRAY, BLACK = 0, 1, 2
     color = {tid: WHITE for tid in tickets}
@@ -447,6 +766,7 @@ _NON_CLOSURE_BLOCKER_TOKENS = frozenset(
         "WAIT_USER_DECISION",
         "ACTIVE",
         "WAIT_ROLE",
+        "BLOCKED_EXTERNAL",
     }
 )
 _CLOSURE_EXEMPT_BLOCKER_CLASSES = frozenset(
@@ -458,6 +778,171 @@ _CLOSURE_EXEMPT_BLOCKER_CLASSES = frozenset(
         "WAIT_USER_DECISION",
     }
 )
+
+
+def _field(ticket: dict, name: str) -> str:
+    """One canonical accessor: the trimmed field value, or "" when absent."""
+    return str(((ticket or {}).get("fields") or {}).get(name) or "").strip()
+
+
+def is_user_explicit(ticket: dict) -> bool:
+    """True when this Work came from an EXPLICIT user request (T-1302).
+
+    The scheduler precedence this arms is the FastPrompter regression: a fresh
+    user request must not sit behind speculative Work that was merely filed
+    earlier. Only the exact token `true` arms it -- prose never decides
+    control flow, and a typo must not silently reorder the queue.
+    """
+    return _field(ticket, "user_explicit").lower() == USER_EXPLICIT_TRUE
+
+
+def blocker_scope(ticket: dict) -> str:
+    """The declared blocker scope, defaulting to `ticket`.
+
+    An undeclared or unrecognized scope reads as `ticket` ON PURPOSE: the
+    dangerous direction is a ticket-level obstacle silently stopping the whole
+    loop, which is exactly what the FastPrompter incident did. An unreadable
+    declaration therefore parks one ticket and keeps working.
+    """
+    value = _field(ticket, "blocker_scope").lower()
+    return value if value in BLOCKER_SCOPES else DEFAULT_BLOCKER_SCOPE
+
+
+def closure_mode(ticket: dict) -> str:
+    """The declared closure provenance, defaulting to `own_patch`.
+
+    Defaults the strict way round: an unreadable declaration means the ticket
+    owes an attributable implementation delta, never that publication may be
+    inherited from something nobody named.
+    """
+    value = _field(ticket, "closure_mode").lower()
+    return value if value in CLOSURE_MODES else DEFAULT_CLOSURE_MODE
+
+
+def closure_cohort(ticket: dict) -> str | None:
+    """The C-### cohort this DONE ticket published through, or None."""
+    value = _field(ticket, "closure_cohort")
+    return value if re.fullmatch(r"C-\d+", value) else None
+
+
+def implementation_source(ticket: dict) -> str | None:
+    """The durable publication authority named by this closure, or None."""
+    return _field(ticket, "implementation_source") or None
+
+
+def closure_paths(ticket: dict) -> list[str]:
+    """The shared worktree paths a cohort member attributes to its batch."""
+    raw = _field(ticket, "closure_paths")
+    return [part.strip() for part in raw.replace(",", " ").split() if part.strip()]
+
+
+def goal_blocked_tickets(tickets: dict) -> list[str]:
+    """Every ## BLOCKED ticket whose blocker explicitly claims GOAL scope."""
+    return [
+        ticket["id"]
+        for ticket in tickets.values()
+        if ticket.get("section") == "## BLOCKED" and blocker_scope(ticket) == "goal"
+    ]
+
+
+def workable_tickets(tickets: dict, agent: str | None = None, now=None) -> list[str]:
+    """Every workable ticket in BOARD order -- the Pick Rule's candidate set."""
+    return [
+        ticket["id"]
+        for ticket in tickets.values()
+        if ticket_is_workable(ticket, tickets, agent=agent, now=now)
+    ]
+
+
+def pick_next_work(tickets: dict, agent: str | None = None, now=None) -> tuple[str | None, str]:
+    """THE one BOARD-level Pick Rule (T-1302 / CORE-003, SRC-026:R003).
+
+    Returns ``(ticket_id, reason)``; ``(None, "none")`` when no BOARD Work is
+    workable. Router, ticket/source projection, persisted `next_action`
+    recomputation and the validator all call THIS -- the validator used to
+    keep its own `min(line_no)` fallback, which is how a persisted pick and a
+    freshly routed pick could name different tickets from the same board.
+
+    Precedence inside the BOARD stage (the outer stages -- recovery/WAIT,
+    active continuation, audit-inbox authority -- are the router's and sit
+    above this call):
+
+      1. workable `user_explicit` Work, topmost first;
+      2. ordinary workable Work, topmost first.
+
+    Explicit user intent outranking speculative backlog IS the FastPrompter
+    fix: the incident lost a live user request behind work filed earlier.
+    """
+    reserved = reserved_continuation_child(tickets, agent=agent, now=now)
+    if reserved is not None:
+        return reserved["id"], "dependency-continuation"
+    workable = workable_tickets(tickets, agent=agent, now=now)
+    for tid in workable:
+        if is_user_explicit(tickets[tid]):
+            return tid, "start-user-explicit"
+    if workable:
+        return workable[0], "start"
+    return None, "none"
+
+
+def reserved_continuation_child(
+    tickets: dict, agent: str | None = None, now=None
+) -> dict | None:
+    """Return the one workable child reserved by a BLOCKED parent.
+
+    The BOARD validator rejects duplicate child reservations.  A reservation
+    outranks ordinary queue order and cannot be bypassed with an explicit
+    claim: it is the durable continuation edge that prevents unrelated Work
+    from taking the temporarily free single-DOING seat.
+    """
+    children = []
+    for parent in tickets.values():
+        if parent.get("section") != "## BLOCKED":
+            continue
+        child_id = str(parent.get("fields", {}).get("blocked_on", "")).strip()
+        child = tickets.get(child_id)
+        if (
+            child is not None
+            and child_id in parent.get("needs", [])
+            and ticket_is_workable(child, tickets, agent=agent, now=now)
+        ):
+            children.append(child)
+    return children[0] if len(children) == 1 else None
+
+
+def continuation_parent(tickets: dict, child_id: str, *, require_done: bool = True) -> dict | None:
+    """Return the one BLOCKED parent reserved on ``child_id``.
+
+    The structural validator rejects duplicate reservations; this helper stays
+    pure and returns no parent when the child has not reached the required
+    terminal state.
+    """
+    child = tickets.get(child_id)
+    if child is None or (require_done and child.get("section") != "## DONE"):
+        return None
+    found = [
+        ticket
+        for ticket in tickets.values()
+        if ticket.get("section") == "## BLOCKED"
+        and str(ticket.get("fields", {}).get("blocked_on", "")).strip() == child_id
+        and child_id in ticket.get("needs", [])
+    ]
+    return found[0] if len(found) == 1 else None
+
+
+def resumable_parent(tickets: dict) -> dict | None:
+    """Return the unique continuation parent whose child is DONE."""
+    parents = [
+        ticket
+        for ticket in tickets.values()
+        if ticket.get("section") == "## BLOCKED"
+        and continuation_parent(
+            tickets,
+            str(ticket.get("fields", {}).get("blocked_on", "")).strip(),
+        )
+        is ticket
+    ]
+    return parents[0] if len(parents) == 1 else None
 
 
 def blocker_class(blocker: str) -> str | None:
@@ -530,13 +1015,111 @@ def convergence_closure_problems(
     return errors
 
 
+#: Every character Python's ``str.splitlines()`` treats as a line boundary.
+#: ONE PHYSICAL BOARD RECORD == ONE TICKET IDENTITY, so a scalar that carries
+#: any of these can render as two records: the tail becomes an authoritative
+#: ticket line that no allocator ever issued (CORE-003 / SRC-026:R003, T-999
+#: injection through ``\n``, ``\r`` and ``U+2028``). The tuple is the
+#: canonical predicate -- not ``len(value.splitlines()) > 1``, which a
+#: TRAILING separator fools (``"x\\n".splitlines()`` has length 1 while the
+#: value still terminates a physical record).
+RECORD_SEPARATORS: tuple[str, ...] = (
+    "\n",  # LF
+    "\r",  # CR
+    "\x0b",  # VT
+    "\x0c",  # FF
+    "\x1c",  # FS
+    "\x1d",  # GS
+    "\x1e",  # RS
+    "\x85",  # NEL
+    "\u2028",  # LINE SEPARATOR
+    "\u2029",  # PARAGRAPH SEPARATOR
+)
+
+#: Human-readable names for the separator set, in the same order -- a refusal
+#: has to NAME the character it refused, not point at an index.
+RECORD_SEPARATOR_NAMES: tuple[str, ...] = (
+    "LF (\\n)",
+    "CR (\\r)",
+    "VT (\\x0b)",
+    "FF (\\x0c)",
+    "FS (\\x1c)",
+    "GS (\\x1d)",
+    "RS (\\x1e)",
+    "NEL (\\x85)",
+    "U+2028",
+    "U+2029",
+)
+
+
+def record_separator_in(value: object) -> str | None:
+    """The FIRST physical record separator inside ``value``, or None.
+
+    The canonical predicate every writer-side check consumes, so the BOARD
+    record boundary is enforced in ONE place instead of nine ad-hoc
+    ``"\\n" in x`` tests that each cover a different subset. Non-str values
+    are rejected as separators on the safe side: a scalar that is not text
+    has no business reaching a BOARD field at all.
+    """
+    if not isinstance(value, str):
+        return None
+    for sep in RECORD_SEPARATORS:
+        if sep in value:
+            return sep
+    return None
+
+
+def assert_single_record(value: object, field: str) -> str:
+    """Validate ONE BOARD-projected scalar: return it, or raise ValueError.
+
+    The record boundary owns the invariant (CORE-003 / SRC-026:R003). Every
+    writer that projects a scalar onto BOARD calls this first, so an
+    injection cannot choose its way past the gate by picking a writer whose
+    ad-hoc check only knew about ``\\n`` and ``\\r``. Legal backslash and
+    pipe escaping is untouched -- that is `escape_ticket_description`'s job
+    and it runs after this, never instead of it.
+    """
+    if not isinstance(value, str):
+        raise ValueError(f"BOARD field {field!r} must be a string, got {type(value).__name__}")
+    sep = record_separator_in(value)
+    if sep is not None:
+        name = RECORD_SEPARATOR_NAMES[RECORD_SEPARATORS.index(sep)]
+        raise ValueError(
+            f"BOARD field {field!r} carries a physical record separator "
+            f"({name}); one BOARD scalar must render as exactly one ticket "
+            f"record -- a separator can inject a ticket identity no allocator "
+            f"ever issued"
+        )
+    return value
+
+
+def assert_live_record(record: str) -> str:
+    """Admit one newly created/updated BOARD record, or refuse losslessly."""
+    assert_single_record(record, "ticket_record")
+    if len(record) > MAX_LIVE_RECORD_CHARS:
+        raise ValueError(
+            f"BOARD_RECORD_OVERSIZE: new/updated live ticket record is "
+            f"{len(record)} characters, cap is {MAX_LIVE_RECORD_CHARS}; "
+            "retain the full specification in its source receipt/evidence/detail "
+            "artifact and keep only a compact verify/blocker reference on BOARD"
+        )
+    return record
+
+
 def escape_ticket_description(description: str) -> str:
     """Reversibly escape payload text so it renders as ONE ticket field.
 
     Backslash first, pipe second: a literal backslash becomes `\\\\` and a
     literal pipe becomes `\\|`, so a value that itself contains `\\|` cannot
     lose its backslash on the parse round-trip.
+
+    The record boundary is checked FIRST (CORE-003 / SRC-026:R003): escaping
+    only neutralises the pipe and the backslash, so a value carrying a
+    separator would survive this call intact and split the ticket line into
+    two physical records -- the second an authoritative ticket nobody
+    allocated. Refusing here is the ONE place every writer shares.
     """
+    assert_single_record(description, "description")
     return description.replace("\\", "\\\\").replace("|", "\\|")
 
 
@@ -577,9 +1160,23 @@ def _reject_duplicate_fields(raw: str) -> None:
         seen.add(fm.group(1))
 
 
-def set_ticket_field(raw: str, field: str, value: str) -> str:
+def set_ticket_field(raw: str, field: str, value: str, *, enforce_cap: bool = True) -> str:
     """Replace or append `field: value` on a ticket line, preserving every
-    other field byte-for-byte."""
+    other field byte-for-byte.
+
+    ``enforce_cap=False`` skips ONLY the size ceiling, never the record-boundary
+    check: a caller that will losslessly externalize an oversized PROPOSED
+    record through `board_compaction` in the same journaled plan passes it, so
+    the mutation can be built before its compact projection is computed. Every
+    other writer keeps the default and still refuses an oversized record.
+    """
+    # The record boundary owns the invariant (CORE-003 / SRC-026:R003). This
+    # is the ONE generic BOARD field mutator, so every field written through
+    # it -- owner, claim_time, blocker, verify, closure metadata -- is
+    # single-record-safe by construction: a separator in `value` would turn
+    # one physical ticket record into two, the tail an authoritative ticket
+    # line no allocator issued.
+    assert_single_record(value, field)
     _reject_duplicate_fields(raw)
     parts = _fields_split(raw)
     out = []
@@ -597,7 +1194,10 @@ def set_ticket_field(raw: str, field: str, value: str) -> str:
         out.append(part)
     if not replaced:
         out.append(f"{field}: {value}")
-    return _fields_join(out)
+    joined = _fields_join(out)
+    if enforce_cap:
+        return assert_live_record(joined)
+    return assert_single_record(joined, "ticket_record")
 
 
 def remove_ticket_field(raw: str, field: str) -> str:

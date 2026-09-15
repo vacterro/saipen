@@ -17,9 +17,21 @@ if str(TOOLS) not in sys.path:
 
 from saipen_engine.runtime import (  # noqa: E402
     CAPABILITY_NAMES,
+    CHILD_PACKET_CEILINGS,
+    CONTEXT_BUDGET_CLASSES,
+    DEFAULT_STRATEGY,
+    DEFAULT_TASK_CLASS,
+    DEPTH_ENFORCEMENT,
+    HELPER_JUSTIFICATIONS,
+    MAX_SUBAGENT_DEPTH,
+    STRATEGIES,
+    TASK_CLASSES,
     RuntimeInfoError,
+    StrategyError,
     load_runtime_info,
     runtime_projection,
+    select_strategy,
+    strategy_projection,
 )
 import saipen as cli  # noqa: E402
 
@@ -234,6 +246,215 @@ class AdaptiveRuntimeTests(unittest.TestCase):
         self.assertTrue(payload["ok"])
         self.assertEqual("cc", payload["route"])
         self.assertEqual(before, self._tree())
+
+
+class AdaptiveRuntimeWave2Tests(unittest.TestCase):
+    """Wave 2: the strategy decision is executable, bounded and read-only."""
+
+    setUp = AdaptiveRuntimeTests.setUp
+    _write_info = AdaptiveRuntimeTests._write_info
+    _tree = AdaptiveRuntimeTests._tree
+    _cli = AdaptiveRuntimeTests._cli
+
+    # -- the decision ------------------------------------------------------
+
+    def test_default_is_long_build_with_zero_helpers(self):
+        decision = select_strategy()
+        self.assertEqual(DEFAULT_TASK_CLASS, decision["task_class"])
+        self.assertEqual(DEFAULT_STRATEGY, "LONG_BUILD")
+        self.assertEqual(0, decision["helper_ceiling"])
+        self.assertIsNone(decision["helper_justification"])
+        self.assertEqual("ORDINARY", decision["context_budget_class"])
+        self.assertIn("no helper justification was supplied", decision["why"])
+
+    def test_red_control_the_zero_helper_default_is_load_bearing(self):
+        # The default MUST be zero helpers. Tamper with the rule's own answer
+        # and prove the assertion that guards it actually goes red, so a future
+        # edit that makes helpers reflexive cannot pass this suite silently.
+        decision = select_strategy(DEFAULT_TASK_CLASS)
+        tampered = {**decision, "helper_ceiling": decision["helper_ceiling"] + 1}
+        self.assertNotEqual(0, tampered["helper_ceiling"])
+        self.assertRaises(AssertionError, self.assertEqual, 0, tampered["helper_ceiling"])
+
+    def test_task_class_matrix_selects_the_declared_strategy(self):
+        expected = {
+            "IMPLEMENT": "LONG_BUILD",
+            "MAINTENANCE": "LONG_BUILD",
+            "REPAIR": "LONG_BUILD",
+            "RESEARCH": "BOUNDED_RESEARCH",
+            "VERIFY": "VERIFY_ONLY",
+            "AUDIT": "VERIFY_ONLY",
+        }
+        self.assertEqual(set(TASK_CLASSES), set(expected))
+        for work, strategy in expected.items():
+            with self.subTest(work=work):
+                decision = select_strategy(work)
+                self.assertEqual(strategy, decision["strategy"])
+                self.assertIn(decision["strategy"], STRATEGIES)
+
+    def test_control_plane_repair_is_recovery_not_ordinary_implementation(self):
+        ordinary = select_strategy("REPAIR")
+        self.assertEqual("LONG_BUILD", ordinary["strategy"])
+        recovery = select_strategy("REPAIR", control_plane=True)
+        self.assertEqual("RECOVERY", recovery["strategy"])
+        self.assertEqual(0, recovery["helper_ceiling"])
+        self.assertEqual("RECOVERY", recovery["context_budget_class"])
+        self.assertIn("never ordinary feature implementation", recovery["why"])
+
+    def test_helpers_require_a_declared_justification(self):
+        self.assertEqual(0, select_strategy("IMPLEMENT", helper_reason=None)["helper_ceiling"])
+        for reason, ceiling in HELPER_JUSTIFICATIONS.items():
+            with self.subTest(reason=reason):
+                decision = select_strategy("IMPLEMENT", helper_reason=reason)
+                self.assertEqual(ceiling, decision["helper_ceiling"])
+                self.assertEqual(reason, decision["helper_justification"])
+        # An UNNAMED reason is refused, never quietly treated as "no helpers".
+        with self.assertRaises(StrategyError):
+            select_strategy("IMPLEMENT", helper_reason="more-agents-might-be-faster")
+        with self.assertRaises(RuntimeInfoError):
+            select_strategy("IMPLEMENT", helper_reason="")
+        # An out-of-vocabulary task class is refused, never coerced to default.
+        with self.assertRaises(StrategyError):
+            select_strategy("SWARM")
+
+    def test_helper_ceiling_and_depth_are_bounded(self):
+        highest = max(HELPER_JUSTIFICATIONS.values())
+        self.assertEqual(2, highest)
+        for reason in HELPER_JUSTIFICATIONS:
+            decision = select_strategy("IMPLEMENT", helper_reason=reason)
+            self.assertLessEqual(decision["helper_ceiling"], 2)
+            self.assertEqual(MAX_SUBAGENT_DEPTH, decision["max_subagent_depth"])
+        self.assertEqual(1, MAX_SUBAGENT_DEPTH)
+        self.assertEqual("DENIED_BY_POLICY", decision["recursive_helpers"])
+        # VERIFY/AUDIT get an independent verifier ONLY for that exact reason.
+        self.assertEqual(
+            1,
+            select_strategy("VERIFY", helper_reason="independent-verification")["helper_ceiling"],
+        )
+        self.assertEqual(
+            0,
+            select_strategy("VERIFY", helper_reason="isolated-research")["helper_ceiling"],
+        )
+
+    def test_depth_enforcement_is_reported_unknown_not_claimed(self):
+        # SAIPEN states the POLICY and reports the host ENFORCEMENT honestly.
+        self.assertEqual("UNKNOWN", DEPTH_ENFORCEMENT)
+        decision = select_strategy("RESEARCH")
+        self.assertEqual("UNKNOWN", decision["depth_enforcement"])
+
+    def test_context_budgets_are_bounded_and_child_packets_are_smaller(self):
+        expected = {
+            "LONG_BUILD": "ORDINARY",
+            "BOUNDED_RESEARCH": "MINIMAL",
+            "VERIFY_ONLY": "BOUNDED",
+            "RECOVERY": "RECOVERY",
+        }
+        self.assertEqual(set(STRATEGIES), set(expected))
+        for name, ceiling in CONTEXT_BUDGET_CLASSES.items():
+            with self.subTest(name=name):
+                self.assertLess(CHILD_PACKET_CEILINGS[name], ceiling)
+        for strategy, budget in expected.items():
+            with self.subTest(strategy=strategy):
+                decision = _strategy_for(strategy)
+                self.assertEqual(budget, decision["context_budget_class"])
+                self.assertEqual(
+                    CONTEXT_BUDGET_CLASSES[budget], decision["context_budget_bytes"]
+                )
+
+    # -- the projection ---------------------------------------------------
+
+    def test_unknown_capabilities_are_reported_not_read_as_false(self):
+        decision = strategy_projection()
+        self.assertTrue(decision["unknown_capabilities"])
+        self.assertTrue(all(value is None for value in decision["capabilities"].values()))
+
+    def test_an_explicit_subagents_false_collapses_the_helper_ceiling(self):
+        decision = strategy_projection(
+            task_class="RESEARCH", capabilities={"subagents": False}
+        )
+        self.assertEqual(0, decision["helper_ceiling"])
+        self.assertIn("subagents=false", decision["why"])
+        still = strategy_projection(task_class="RESEARCH", capabilities={"subagents": True})
+        self.assertEqual(1, still["helper_ceiling"])
+
+    # -- the CLI surface --------------------------------------------------
+
+    def test_cli_runtime_defaults_to_long_build_and_writes_nothing(self):
+        before = self._tree()
+        process, payload = self._cli("runtime")
+        self.assertEqual(0, process.returncode, process.stderr + process.stdout)
+        self.assertEqual("LONG_BUILD", payload["strategy"]["strategy"])
+        self.assertEqual(0, payload["strategy"]["helper_ceiling"])
+        self.assertEqual(before, self._tree(), "runtime strategy wrote project state")
+
+    def test_cli_runtime_accepts_a_task_class_and_a_helper_reason(self):
+        before = self._tree()
+        process, payload = self._cli(
+            "runtime", "--task-class", "research", "--helper-reason", "isolated-research"
+        )
+        self.assertEqual(0, process.returncode, process.stderr + process.stdout)
+        self.assertEqual("RESEARCH", payload["strategy"]["task_class"])
+        self.assertEqual("BOUNDED_RESEARCH", payload["strategy"]["strategy"])
+        self.assertEqual(before, self._tree())
+
+    def test_cli_runtime_refuses_unknown_input_with_zero_writes(self):
+        before = self._tree()
+        # A usage error (a malformed flag) is exit 2; an out-of-vocabulary
+        # VALUE is the same semantic refusal every other read-only command
+        # makes and is exit 1. Both are VALIDATION_FAILED with zero writes.
+        for bad, rc in (
+            (("runtime", "--task-class", "SWARM"), 1),
+            (("runtime", "--helper-reason", "just-because"), 1),
+            (("runtime", "--task-class"), 2),
+            (("runtime", "--nonsense"), 2),
+        ):
+            with self.subTest(args=bad):
+                process, payload = self._cli(*bad)
+                self.assertEqual(rc, process.returncode, process.stdout)
+                self.assertEqual("VALIDATION_FAILED", payload["code"])
+                self.assertNotIn("Traceback", process.stderr + process.stdout)
+        self.assertEqual(before, self._tree())
+
+    def test_strategy_never_becomes_canonical_project_truth(self):
+        info = self._write_info(
+            "wave2.json",
+            {
+                "harness": "opencode",
+                "provider": "provider-z",
+                "model": "secret-model",
+                "capabilities": {"subagents": True},
+            },
+        )
+        before = self._tree()
+        process, payload = self._cli(
+            "runtime",
+            "--task-class",
+            "IMPLEMENT",
+            "--helper-reason",
+            "genuinely-parallel",
+            "--runtime-info",
+            str(info),
+        )
+        self.assertEqual(0, process.returncode, process.stderr)
+        self.assertEqual(2, payload["strategy"]["helper_ceiling"])
+        self.assertEqual(before, self._tree(), "strategy/runtime identity was persisted")
+        for name, raw in self._tree().items():
+            text = raw.decode("utf-8", errors="replace")
+            self.assertNotIn("secret-model", text, name)
+            self.assertNotIn("provider-z", text, name)
+            self.assertNotIn("genuinely-parallel", text, name)
+
+
+def _strategy_for(strategy: str) -> dict:
+    """Reach a given Wave-2 strategy through its declared work class."""
+    if strategy == "RECOVERY":
+        return select_strategy("REPAIR", control_plane=True)
+    work = {
+        "LONG_BUILD": "IMPLEMENT",
+        "BOUNDED_RESEARCH": "RESEARCH",
+        "VERIFY_ONLY": "VERIFY",
+    }[strategy]
+    return select_strategy(work)
 
 
 if __name__ == "__main__":

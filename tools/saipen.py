@@ -33,10 +33,12 @@ from saipen_engine.journal import auto_recover_pending
 from saipen_engine.operations import (
     apply_claim,
     checkpoint,
+    compact_board,
     finish_ticket,
     plan_claim,
     ticket_add,
     ticket_move,
+    ticket_verify,
     transition_phase,
 )
 from saipen_engine.paths import resolve_project_root, resolve_protocol_dir, resolve_tool_root
@@ -54,9 +56,24 @@ PROTOCOL_DIR = resolve_protocol_dir(HOME)
 
 # The ONE canonical actor resolver (T-1006): bare CLI INHERITS STATE.agent
 # -- the seat CORE.md section 1.4 defines -- and an explicit `--agent <id>`
-# is a genuine-handover request that MUST log a DEC naming old -> new before
-# any mutation. STATE.agent is never invented by the CLI; only an explicit
-# override replaces the inherited seat.
+# names the ACTING actor for this invocation. CORE-001 (SRC-026:R001) resolved
+# the long-standing ambiguity in favour of ACTING ACTOR, NOT automatic
+# handover:
+#
+#   * `--agent B` identifies who is running the command. It is recorded as
+#     journal provenance (`actor B (seat A)`) on every mutation B performs
+#     out of band.
+#   * It does NOT by itself steal A's LIVE active execution seat. Active
+#     execution ownership transfers only through an explicit authorized path:
+#     `saipen claim <T-###> [--explicit]` (adoption/lease refresh) or the
+#     authorized handover operation `operations.handover_agent(...,
+#     explicit=True)`.
+#
+# The pre-CORE-001 comment claiming "an explicit --agent is a genuine
+# handover request" described a fold (`_ensure_handover`) that is now a
+# deliberate no-op: an out-of-band actor recording future Work must not move
+# the seat. STATE.agent is never invented by the CLI; only an explicit
+# ownership operation replaces the inherited seat.
 _AGENT_OVERRIDE: str | None = None
 
 # Adaptive Runtime Wave 1: optional runtime metadata is telemetry for this
@@ -76,12 +93,13 @@ _ROUTE_ECHO: str | None = None
 
 
 def _agent_for(project_root: Path) -> str:
-    """The canonical acting seat (T-1006).
+    """The canonical acting actor for this invocation (T-1006, CORE-001).
 
-    An explicit `--agent <id>` override wins (the handover is logged by
-    `handover_agent` before any mutation); otherwise the seat is INHERITED
-    from persisted STATE.agent -- a returning agent keeps the seat, and only a
-    genuinely different actor changes it (CORE.md section 1.4, BOOT.md).
+    An explicit `--agent <id>` override names the ACTING ACTOR (not an
+    automatic handover: it never steals A's live active seat -- that transfer
+    goes through `saipen claim` or an explicit authorized handover).
+    Otherwise the actor is INHERITED from persisted STATE.agent -- a
+    returning agent keeps the seat (CORE.md section 1.4, BOOT.md).
     `AGENT` is the fallback only for a project with no persisted agent."""
     if _AGENT_OVERRIDE is not None:
         return _AGENT_OVERRIDE
@@ -94,14 +112,15 @@ def _agent_for(project_root: Path) -> str:
 
 
 # T-1006: ONE canonical, subcommand-aware mutation classifier. This table is
-# the SINGLE authority the handover gate consults to decide whether a command
-# may write canonical state (and therefore must perform the A -> B handover
-# before its dependent writes). The dispatcher below still routes each command
-# through its own branch -- the classifier is NOT a second dispatcher, it is
-# the gate the dispatcher defers to for the handover decision. Keep the two in
-# agreement: the table-driven regression in run_scenarios.py proves every
-# public command's classification matches the dispatcher's read-only vs
-# mutating behavior, so a drift between them fails loudly.
+# the SINGLE authority for whether a command writes canonical state (and
+# therefore journals its acting actor as provenance). It does NOT trigger any
+# handover: since CORE-001 (SRC-026:R001) a mutating command under `--agent B`
+# never transfers A's live seat -- the mutations fold the acting actor into
+# the journal instead. The dispatcher below still routes each command
+# through its own branch -- the classifier is NOT a second dispatcher. Keep
+# the two in agreement: the table-driven regression in run_scenarios.py
+# proves every public command's classification matches the dispatcher's
+# read-only vs mutating behavior, so a drift between them fails loudly.
 #
 # Authoritative public-surface semantics (verified against the dispatcher):
 #   status / next / context / runtime / recover inspect  READ_ONLY
@@ -136,6 +155,10 @@ _MUTATING_TOPLEVEL = frozenset(
         "checkpoint",
         "ticket",
         "goal",
+        # CORE-003: the public USER_INTERRUPT ingress and the cohort batch
+        # publisher both mutate canonical state.
+        "user-request",
+        "cohort",
         # CORE § 1.10 shortcut rows with mutating destinations: gg -> goal,
         # hh -> hunt, aa -> markhunt, pp -> sub spawn saipython. `sss` is
         # read-only (status) and deliberately absent; st routes through the
@@ -188,15 +211,16 @@ _READ_ONLY_RECOVER = frozenset({"inspect"})
 
 
 def _command_mutates(command: str, rest: list[str]) -> bool:
-    """Does this invocation write canonical state? (T-1006 handover gate.)
+    """Does this invocation write canonical state? (T-1006 mutation gate.)
 
     Subcommand-aware and authoritative: the dispatcher routes AFTER this
-    verdict, so a read-only projection under `--agent B` never hands over
-    persistent ownership, never appends LOG, never updates STATE, and never
-    creates recovery operations. Mutating invocations perform the canonical
-    A -> B handover immediately before their dependent writes (T-1014: only
-    after the concrete action's syntax/arity validation has passed, so a
-    malformed invocation stays zero-write).
+    verdict, so a read-only projection under `--agent B` never writes
+    canonical state, never appends LOG, never updates STATE, and never
+    creates recovery operations. Mutating invocations do NOT perform any
+    seat transfer (T-1014 fold removed, CORE-001/SRC-026:R001): the acting
+    actor is journaled as provenance inside the op's own admissible
+    transaction (T-1014: only after the concrete action's syntax/arity
+    validation has passed, so a malformed invocation stays zero-write).
     """
     sub = rest[0] if rest and not rest[0].startswith("-") else None
     if command in ("focus", "ff"):
@@ -244,15 +268,18 @@ def _command_mutates(command: str, rest: list[str]) -> bool:
 def _ensure_handover(
     project_root: Path, as_json: bool, dry_run: bool, allow_dead_home: bool = False
 ) -> int | None:
-    """Deferred handover hook (CORE-003).
+    """Deferred handover hook (CORE-003) -- deliberately a NO-OP.
 
-    The A -> B seat handover is FOLDED into each admitting mutation
-    transaction by the operations layer: when the acting agent differs
-    from persisted STATE.agent, the mutation's own DEC includes the
-    old -> new ownership edge. This avoids a separate pre-write that
-    could orphan a handover DEC when the dependent mutation is rejected.
-    This helper is retained for import stability and performs no disk
-    write; the fold is implemented in operations._event_line_with_handover.
+    CORE-001 (SRC-026:R001) made the seat semantics explicit: `--agent B`
+    names the acting actor, it does not transfer A's live execution seat.
+    An out-of-band actor recording future Work/user intent/checkpoints keeps
+    the seat where it is (`operations._actor_provenance` /
+    `operations._seat_agent`); the mutations fold the acting actor into the
+    journal instead of stealing STATE.agent. The real explicit transfer
+    surfaces are `operations.handover_agent(..., explicit=True)` and
+    `saipen claim <T-###>`. Retained for call-site stability; performs no
+    disk write and delegates no fold (the historical reference to
+    `operations._event_line_with_handover` was removed with that fold).
     """
     return None
 
@@ -493,7 +520,7 @@ def _capability_refusal(as_json: bool) -> int:
     """Emit the read-only capability refusal and return exit 1 (CORE-002).
 
     Called AFTER the concrete command's syntax/arity validation has passed
-    but BEFORE any real write/handover/journal creation, so a malformed
+    but BEFORE any real write/journal creation, so a malformed
     mutating invocation still gets its specific VALIDATION_FAILED message
     and stays zero-write, while a syntactically valid mutating invocation
     under a read-only session is refused deterministically.
@@ -606,13 +633,191 @@ def _permissions(project_root: Path, as_json: bool) -> int:
     return 0
 
 
-def _runtime(project_root: Path, as_json: bool) -> int:
-    """Adaptive Runtime Wave-1 read-only identity/capability projection."""
-    from saipen_engine.runtime import RuntimeInfoError, runtime_projection
+def _hex_decode(text: str) -> str | None:
+    """Strict even-length hex token -> UTF-8 text, or None.
+
+    Free-form search text travels HEX-ENCODED through the canonical surface
+    because the guard's canonical argument alphabet (`_SAIPEN_ARG_CHARS`) and
+    its shell-syntax refusal exist on purpose, and a regex like
+    `CommitSnapshot|FlushSyncUnderGate` is mostly shell metacharacters. Hex is
+    also the reason the transport is shell-agnostic: PowerShell, cmd and bash
+    cannot reinterpret `616263` as a pipe, quote or variable.
+    """
+    if not text or len(text) % 2 != 0:
+        return None
+    try:
+        return bytes.fromhex(text).decode("utf-8")
+    except (ValueError, UnicodeDecodeError):
+        return None
+
+
+def _search(project_root: Path, args: list[str], as_json: bool) -> int:
+    """Canonical bounded search transport (T-1320). STRICTLY READ-ONLY.
+
+    This exists because mandatory work had two single points of failure: the
+    host's ripgrep-backed Grep tool, and generic shell admission. When the host
+    transport broke and the protocol state was invalid, the worker's `grep`
+    fallback was correctly refused (`PROTOCOL_STATE_INVALID`) and search died
+    exactly where a bound project needed it.
+
+    The `saipen` surface is admitted by the guard as a canonical operation
+    *even while protocol state is invalid*, so this verb is reachable in the
+    state that broke search. It never shells out and never writes: the search
+    primitive itself is pure `pathlib`/`re` (`saipen_engine/search.py`).
+    """
+    from saipen_engine import search as search_engine
+
+    pattern: str | None = None
+    scope: str | None = None
+    include: str | None = None
+    literal = False
+    native_failed = False
+    max_matches = search_engine.DEFAULT_MAX_MATCHES
+    max_files = search_engine.DEFAULT_MAX_FILES
+    error: str | None = None
+    positional: list[str] = []
+
+    rest = args[1:]
+    i = 0
+    while i < len(rest):
+        token = rest[i]
+        has_eq = "=" in token
+        flag = token.split("=", 1)[0] if has_eq else token
+        value = token.split("=", 1)[1] if has_eq else (rest[i + 1] if i + 1 < len(rest) else "")
+        # Only a VALUE flag may consume the following token; a boolean flag
+        # that swallowed its neighbour would silently demote the next argument
+        # to a positional pattern (`--native-failed --hex <h>`).
+        step = 1 if has_eq else 2
+
+        if flag in ("--hex", "--scope-hex", "--include-hex"):
+            decoded = _hex_decode(value)
+            if decoded is None:
+                error = f"{flag} takes an even-length hex-encoded UTF-8 value"
+                break
+            if flag == "--hex":
+                pattern = decoded
+            elif flag == "--scope-hex":
+                scope = decoded
+            else:
+                include = decoded
+            i += step
+        elif flag == "--scope":
+            if not value:
+                error = "--scope takes a relative path"
+                break
+            scope = value
+            i += step
+        elif flag in ("--max-matches", "--max-files"):
+            if not value.isdigit() or int(value) < 1:
+                error = f"{flag} takes a positive integer"
+                break
+            if flag == "--max-matches":
+                max_matches = int(value)
+            else:
+                max_files = int(value)
+            i += step
+        elif flag == "--literal":
+            literal = True
+            i += 1
+        elif flag == "--native-failed":
+            native_failed = True
+            i += 1
+        elif flag.startswith("--"):
+            error = f"search does not accept {flag}"
+            break
+        else:
+            positional.append(token)
+            i += 1
+
+    if error is None and pattern is None and positional:
+        if len(positional) > 1:
+            error = (
+                "search takes ONE positional pattern; use --hex for text "
+                "containing shell-syntax characters"
+            )
+        else:
+            pattern = positional[0]
+    if error is None and pattern is None:
+        error = (
+            "search needs a pattern: `saipen search <token>` for a plain "
+            "token, or `saipen search --hex <hex-encoded-utf8>` for anything "
+            "containing shell-syntax characters"
+        )
+    if error is not None:
+        _emit({"ok": False, "code": "VALIDATION_FAILED", "detail": error}, as_json)
+        return 2
+
+    if native_failed:
+        # Session-scoped degradation memory: one proven-broken host transport
+        # must not become fifty identical failing tool calls (T-1320 Q).
+        search_engine.record_native_search(project_root, search_engine.DEGRADED)
+
+    payload = search_engine.search(
+        project_root,
+        pattern or "",
+        scope=scope,
+        literal=literal,
+        include=include,
+        max_matches=max_matches,
+        max_files=max_files,
+    )
+    # Runtime capability distinction (T-1320 P): host-transport health is
+    # session/runtime diagnostic, never canonical project truth.
+    payload["native_search"] = search_engine.native_search_state(project_root)
+    if as_json or not payload.get("ok"):
+        _emit(payload, as_json)
+        return 0 if payload.get("ok") else 2
+    # Bounded human view. The shared `_emit` renderer knows the canonical
+    # singular keys only, and a search answer that prints NOTHING would be
+    # indistinguishable from the host transport's own silent failure.
+    print(
+        f"engine: {payload['engine']}  status: {payload['status']}"
+        f"  native: {payload['native_search']}"
+    )
+    print(f"root: {payload['root']}")
+    print(f"scope: {payload['scope']}  query: {payload['query']}  mode: {payload['mode']}")
+    summary = (
+        f"matches: {payload['matches_returned']} "
+        f"({payload['files_scanned']} file(s) scanned of {payload['files_considered']} considered)"
+    )
+    if payload["truncated"]:
+        summary += "  TRUNCATED: " + ",".join(payload["truncation_reasons"])
+    print(summary)
+    for match in payload["matches"]:
+        print(f"{match['path']}:{match['line']}: {match['excerpt']}")
+    return 0
+
+
+def _runtime(
+    project_root: Path,
+    as_json: bool,
+    task_class: str | None = None,
+    helper_reason: str | None = None,
+    control_plane: bool = False,
+) -> int:
+    """Adaptive Runtime read-only identity/capability/strategy projection.
+
+    Wave 1 supplies identity + capabilities; Wave 2 supplies the executable
+    strategy decision for a declared work class.  Both are READ-ONLY: nothing
+    here is written to STATE, BOARD, LOG, a cache, or a handover, and no
+    provider/model identity is ever persisted into canonical Work truth.
+    """
+    from saipen_engine.runtime import (
+        DEFAULT_TASK_CLASS,
+        RuntimeInfoError,
+        runtime_projection,
+        strategy_projection,
+    )
 
     try:
         projection = runtime_projection(
             _agent_for(project_root), explicit_path=_RUNTIME_INFO_OVERRIDE
+        )
+        strategy = strategy_projection(
+            task_class=task_class or DEFAULT_TASK_CLASS,
+            helper_reason=helper_reason,
+            control_plane=control_plane,
+            capabilities=projection["capabilities"],
         )
     except RuntimeInfoError as exc:
         _emit(
@@ -625,7 +830,7 @@ def _runtime(project_root: Path, as_json: bool) -> int:
         )
         return 1
 
-    payload = {"ok": True, "code": "RUNTIME", **projection}
+    payload = {"ok": True, "code": "RUNTIME", **projection, "strategy": strategy}
     if as_json:
         _emit(payload, True)
         return 0
@@ -638,7 +843,280 @@ def _runtime(project_root: Path, as_json: bool) -> int:
     for name, value in projection["capabilities"].items():
         rendered = "UNKNOWN" if value is None else str(value).lower()
         print(f"  {name:<28} {rendered}")
+    print("strategy:")
+    print(f"  task class : {strategy['task_class']}")
+    print(f"  strategy   : {strategy['strategy']}")
+    print(f"  why        : {strategy['why']}")
+    print(
+        f"  helpers    : max {strategy['helper_ceiling']} "
+        f"(depth {strategy['max_subagent_depth']}, "
+        f"enforcement {strategy['depth_enforcement']})"
+    )
+    print(
+        f"  context    : {strategy['context_budget_class']} "
+        f"({strategy['context_budget_bytes']} bytes, "
+        f"child packet <= {strategy['child_packet_ceiling_bytes']})"
+    )
+    if strategy["unknown_capabilities"]:
+        print(f"  unknown    : {', '.join(strategy['unknown_capabilities'])}")
     return 0
+
+
+def _guard_event(project_root_opt: str | None, args: list[str], as_json: bool) -> int:
+    """Structured host-event guard (SRC-030 Part 6), routed BEFORE project-root
+    resolution: a host adapter invokes the guard from the SESSION cwd carried in
+    the event, and that cwd may legitimately be a detached staging directory.
+    The ordinary main gate would refuse such a process before the guard could
+    ever speak. The event -- then the optional explicit root -- decides binding.
+    """
+    from saipen_engine import guard_events
+    from saipen_engine.admission import (
+        effective_strength,
+        evaluate_admission,
+    )
+
+    event_json = None
+    i = 0
+    while i < len(args):
+        arg = args[i]
+        if arg == "--event-json" and i + 1 < len(args):
+            event_json = args[i + 1]
+            i += 2
+        elif arg.startswith("--event-json="):
+            event_json = arg.split("=", 1)[1]
+            i += 1
+        elif arg in ("--json", "--dry-run"):
+            i += 1
+        else:
+            i += 1
+    if event_json is None:
+        _emit(
+            {
+                "ok": False,
+                "code": "VALIDATION_FAILED",
+                "detail": "guard event mode requires --event-json PATH|-|INLINE",
+            },
+            as_json,
+        )
+        return 2
+    try:
+        if event_json == "-":
+            raw = sys.stdin.read()
+        elif "\n" in event_json or event_json.lstrip().startswith("{"):
+            raw = event_json
+        else:
+            raw = Path(event_json).read_text(encoding="utf-8", errors="replace")
+        event = guard_events.load_event(raw)
+    except (OSError, guard_events.EventError) as exc:
+        # A malformed host event is fail-closed material for a blocking
+        # adapter: the nonzero exit is the block signal.
+        _emit(
+            {
+                "ok": False,
+                "code": "GUARD_EVENT_INVALID",
+                "admitted": False,
+                "detail": str(exc),
+            },
+            as_json,
+        )
+        return 1
+    mapped = guard_events.map_event(event)
+    admission_result = evaluate_admission(
+        event["cwd"] if not project_root_opt else None,
+        target_path=mapped["target_path"],
+        action=mapped["action"],
+        agent=mapped["actor"],
+        explicit_root=project_root_opt,
+        target_paths=mapped["target_paths"],
+        targets_unresolved=mapped["targets_unresolved"],
+        shell_protected_namespace=mapped["shell_protected_namespace"],
+    )
+    admission_result["event"] = {
+        "event": mapped["event"],
+        "host": mapped["host"],
+        "cwd": mapped["cwd"],
+        "tool_name": mapped["tool_name"],
+        "action": mapped["action"],
+        "target_path": mapped["target_path"],
+        "target_paths": mapped["target_paths"],
+        "targets_unresolved": mapped["targets_unresolved"],
+        "shell_protected_namespace": mapped["shell_protected_namespace"],
+        "actor": mapped["actor"],
+        "saipen_verb": mapped["saipen_verb"],
+        "detail": mapped["detail"],
+    }
+    if isinstance(event.get("session_id"), str):
+        # Host session identity is DIAGNOSTIC context, never an actor binding.
+        admission_result["event"]["session_id"] = event["session_id"]
+    admission_result["strength"] = effective_strength(mapped["host"])
+    _emit(admission_result, as_json)
+    return 0 if admission_result.get("admitted") else 1
+
+
+def _guard(project_root: Path, args: list[str], as_json: bool) -> int:
+    """Read-only admission guard (SRC-028 / T-1317).
+
+    Legacy file-action form: `--file`/`--action`/`--agent` evaluate one
+    proposed file action. The structured host-event contract lives in
+    `_guard_event`, routed before project-root resolution.
+    """
+    from saipen_engine.admission import ADAPTER_REGISTRY, effective_strength, evaluate_admission
+
+    target_path = None
+    action = "write"
+    agent = None
+    i = 0
+    while i < len(args):
+        arg = args[i]
+        if arg == "--file" and i + 1 < len(args):
+            target_path = args[i + 1]
+            i += 2
+        elif arg.startswith("--file="):
+            target_path = arg.split("=", 1)[1]
+            i += 1
+        elif arg == "--action" and i + 1 < len(args):
+            action = args[i + 1]
+            i += 2
+        elif arg.startswith("--action="):
+            action = arg.split("=", 1)[1]
+            i += 1
+        elif arg == "--agent" and i + 1 < len(args):
+            agent = args[i + 1]
+            i += 2
+        elif arg.startswith("--agent="):
+            agent = arg.split("=", 1)[1]
+            i += 1
+        elif not arg.startswith("--") and target_path is None:
+            target_path = arg
+            i += 1
+        else:
+            _emit(
+                {
+                    "ok": False,
+                    "code": "VALIDATION_FAILED",
+                    "detail": f"unexpected argument for guard: {arg}",
+                },
+                as_json,
+            )
+            return 2
+
+    # No target is the guard's diagnostic status projection, not a request to
+    # mutate an unnamed file. Keep it usable while Work is BLOCKED/absent.
+    if target_path is None and action == "write":
+        action = "read"
+    admission_result = evaluate_admission(
+        project_root,
+        target_path=target_path,
+        action=action,
+        agent=agent or _agent_for(project_root),
+    )
+
+    if target_path is None:
+        # Status view: declared capability vs truthful effective enforcement
+        # (SRC-030 Part 11). Never aspirational.
+        admission_result["adapters"] = {
+            name: {
+                "declared": entry.get("declared_strength"),
+                "effective": effective_strength(name)["effective"],
+                "reason": effective_strength(name)["reason"],
+            }
+            for name, entry in ADAPTER_REGISTRY.items()
+        }
+
+    _emit(admission_result, as_json)
+    return 0 if admission_result.get("admitted", admission_result.get("ok")) else 1
+
+
+# T-1319: the cold route must be NAMEABLE without the host's search layer.
+# OpenCode's grep/glob run through a ripgrep-backed service, and every failure
+# inside that service collapses into one generic string --
+# `ripgrep execution failed` -- which the operator sees instead of the real
+# defect. A host fault there may not be allowed to stop protocol startup, so
+# the exact files the kernel reads are resolved here with pathlib alone.
+#
+# Bounded by construction: a fixed document-name list inside two known
+# directories, plus a `phases/<phase>.md` probe. No directory walk, no
+# drive/profile scan, no recursion into unrelated repositories.
+_COLD_ROUTE_DOCS = (
+    "STYLE.md",
+    "BOOT.md",
+    "INDEX.md",
+    "COMMANDS.md",
+    "OPS.md",
+    "SOURCES.md",
+    "EXECUTION.md",
+    "MAINTENANCE.md",
+    "CORE.md",
+    "RUNTIME.md",
+)
+
+
+def _cold_route(project_root: Path, state: dict | None, state_text: str = "") -> dict:
+    """Deterministic cold-route locator (T-1319). Read-only, never searches.
+
+    Names the bound project, the protocol owner, and the exact documents the
+    kernel reads, so a skill entry can open them by path rather than asking the
+    host to search for them.
+
+    `state` may be None: a MALFORMED checkpoint is precisely when the located
+    route matters most (recovery is found from it), so the two fields the
+    locator needs are read back from the bounded head of the raw STATE text
+    instead of being surrendered to the parse failure. Still no search, still
+    no walk -- two anchored regexes over a bounded prefix.
+    """
+    root = Path(project_root).resolve()
+    fields = state or {}
+    home_text = str(fields.get("saipen_home") or "").strip()
+    phase = str(fields.get("phase") or "").strip()
+    if (not home_text or not phase) and state_text:
+        head = state_text[:4096]
+        if not home_text:
+            match = re.search(
+                r'^saipen_home:\s*"?([^"\r\n]+?)"?\s*$', head, re.MULTILINE | re.IGNORECASE
+            )
+            home_text = match.group(1).strip() if match else ""
+        if not phase:
+            match = re.search(r'^phase:\s*"?([^"\r\n]+?)"?\s*$', head, re.MULTILINE | re.IGNORECASE)
+            phase = match.group(1).strip() if match else ""
+    home = Path(home_text).expanduser() if home_text else None
+    protocol_dir = None
+    if home is not None:
+        try:
+            from saipen_engine.paths import resolve_protocol_dir
+
+            protocol_dir = resolve_protocol_dir(home)
+        except (OSError, ValueError):
+            protocol_dir = None
+    documents: dict[str, str] = {}
+    if protocol_dir is not None:
+        for name in _COLD_ROUTE_DOCS:
+            candidate = protocol_dir / name
+            if candidate.is_file():
+                documents[name] = str(candidate)
+    phase_module = None
+    if protocol_dir is not None and phase:
+        candidate = protocol_dir / "phases" / f"{phase.lower()}.md"
+        if candidate.is_file():
+            phase_module = str(candidate)
+    project_memory: dict[str, str] = {}
+    for name in ("STATE.md", "BOARD.md", "LOG.md"):
+        candidate = root / ".saipen" / name
+        if candidate.is_file():
+            project_memory[name] = str(candidate)
+    return {
+        "project_root": str(root),
+        "saipen_home": str(home) if home is not None else None,
+        "protocol_dir": str(protocol_dir) if protocol_dir is not None else None,
+        "phase": phase or None,
+        "phase_module": phase_module,
+        "boot": documents.get("BOOT.md"),
+        "style": documents.get("STYLE.md"),
+        "documents": documents,
+        "project_memory": project_memory,
+        # A false here is the contract: the cold route is nameable without the
+        # host search layer, so a broken ripgrep cannot stop skill startup.
+        "search_required": False,
+    }
 
 
 def _status(project_root: Path, as_json: bool) -> int:
@@ -659,7 +1137,15 @@ def _status(project_root: Path, as_json: bool) -> int:
     state, state_error = parse_state_or_error(state_text)
     if state_error:
         _emit(
-            {"ok": False, "code": "VALIDATION_FAILED", "detail": f"state-malformed: {state_error}"},
+            {
+                "ok": False,
+                "code": "VALIDATION_FAILED",
+                "detail": f"state-malformed: {state_error}",
+                # A malformed checkpoint must not cost the caller its locator:
+                # the route is how the recovery command and the protocol
+                # documents are found WITHOUT the host search layer (T-1320 J).
+                "cold_route": _cold_route(project_root, state, state_text),
+            },
             as_json,
         )
         return 1
@@ -819,6 +1305,9 @@ def _status(project_root: Path, as_json: bool) -> int:
     from saipen_engine.controls import milestone_status
 
     payload["milestone"] = milestone_status(project_root)
+    # T-1319: name the cold route deterministically so skill startup never has
+    # to ask the host search layer where the protocol documents are.
+    payload["cold_route"] = _cold_route(project_root, state, state_text)
 
     # T-1249: an agent that boots an INSTALLED copy of the protocol has no way
     # to know how old it is -- the digest needs the clone to compare against,
@@ -893,11 +1382,7 @@ def _status(project_root: Path, as_json: bool) -> int:
                 None,
             ),
             "bound_work": next(
-                (
-                    item["work"]
-                    for item in _inbox.get("pending") or []
-                    if item["state"] == "ACTIVE"
-                ),
+                (item["work"] for item in _inbox.get("pending") or [] if item["state"] == "ACTIVE"),
                 None,
             ),
             "closed_pending_delete": len(_inbox.get("closed_pending_delete") or []),
@@ -1263,15 +1748,16 @@ def _next_action(
     # A `--dry-run` is purely observational -- the spec forbids the
     # fallthrough from generating work, and observers must see the
     # same idle-maintain verdict the prior release carried.
-    if (
-        fallthrough_to_improve
-        and not dry_run
-        and _is_idle_maintain_route(routed, board)
-    ):
+    if fallthrough_to_improve and not dry_run and _is_idle_maintain_route(routed, board):
         return _continue_improve_fallthrough(
             project_root, as_json, dry_run, routed, parked, pending, reconciliation
         )
     load = load_for_action(routed.get("action"))
+    cold_route = _cold_route(project_root, state, state_text)
+    protocol_dir = cold_route.get("protocol_dir")
+    load_path = (
+        str(Path(protocol_dir) / load.removeprefix("saipen/")) if protocol_dir and load else None
+    )
     _emit(
         {
             "ok": True,
@@ -1279,6 +1765,13 @@ def _next_action(
             "ticket": routed.get("ticket") or subject,
             "reason": routed.get("reason"),
             "load": load,
+            "load_path": load_path,
+            "cold_route": cold_route,
+            "execution_instruction": (
+                "Routing is not completion evidence. Read load_path when present, "
+                "then execute action under its owner in this turn; respect WAIT and "
+                "actual refusals. If --dry-run was requested, this is a preview only."
+            ),
             "execution_intent": state.get("execution_intent") or "normal",
             "converge_target": state.get("converge_target"),
             "goal_waves": state.get("goal_waves"),
@@ -1401,6 +1894,113 @@ def _explain_next(project_root: Path, as_json: bool) -> int:
 
 
 def _recover(project_root: Path, args: list[str], as_json: bool, dry_run: bool = False) -> int:
+    args = list(args)
+    adopt_legacy: list[str] = []
+    attest_legacy_done: list[str] = []
+    resolve_blocker: str | None = None
+    approved_repair_id: str | None = None
+
+    def _refuse(detail: str) -> int:
+        _emit({"ok": False, "code": "VALIDATION_FAILED", "detail": detail}, as_json)
+        return 2
+
+    # Target B/E/C repair-control plane: `recover` owns the exact-match,
+    # bounded-argument forms that stay reachable while ordinary work is blocked.
+    # Closed grammar (hostile-regression rule): every token is consumed by a
+    # known flag or the invocation is refused -- no shell tails, no surplus
+    # tokens, no substring matching. The two flags may be combined so a single
+    # idempotent pass can repair a multi-defect braked surface.
+    #
+    #   --adopt-legacy <T-###[,T-###...]>       Target E (legacy BOARD adoption)
+    #   --attest-legacy-done <T-###[,T-###...]> legacy terminal completion
+    #   resolve-blocker "<decision>"            Target C (operator-gated blocker)
+    #
+    # `--attest-legacy-done` is the operator's answer to a `legacy-done-review`
+    # refusal: a `## DONE` record older than this project's closure contract,
+    # with no execution evidence in either generation's grammar. It writes ONE
+    # NOW-dated DEC recording that the historical completion stands. It
+    # fabricates no `closure_mode` for a generation that had none and rewrites
+    # no historical LOG line.
+    #
+    # `resolve-blocker` is NOT a generic unblock: it requires non-empty decision
+    # text, owns ONLY an ACTIVE-phase STATE.blocker, records the authority in the
+    # LOG, and archives the original bytes. `inspect <op_id>` / `resolve <op_id>`
+    # / bare are handled further down.
+    rest: list[str] = []
+    index = 0
+    while index < len(args):
+        token = args[index]
+        if token == "--adopt-legacy":
+            if index + 1 >= len(args):
+                return _refuse(
+                    "usage: recover --adopt-legacy <T-###[,T-###...]> (missing id list)"
+                )
+            ids = [t.strip() for t in args[index + 1].split(",") if t.strip()]
+            if not ids or any(re.fullmatch(r"T-\d+", t) is None for t in ids):
+                return _refuse(
+                    "recover --adopt-legacy ids must be T-### (digits), "
+                    "comma-separated when several"
+                )
+            adopt_legacy = list(dict.fromkeys(ids))
+            index += 2
+            continue
+        if token == "--attest-legacy-done":
+            if index + 1 >= len(args):
+                return _refuse(
+                    "usage: recover --attest-legacy-done <T-###[,T-###...]> "
+                    "(missing id list)"
+                )
+            ids = [t.strip() for t in args[index + 1].split(",") if t.strip()]
+            if not ids or any(re.fullmatch(r"T-\d+", t) is None for t in ids):
+                return _refuse(
+                    "recover --attest-legacy-done ids must be T-### (digits), "
+                    "comma-separated when several"
+                )
+            attest_legacy_done = list(dict.fromkeys(ids))
+            index += 2
+            continue
+        if token == "--apply-approved-repair":
+            if index + 1 >= len(args):
+                return _refuse(
+                    "usage: recover --apply-approved-repair <repair_id> (missing id)"
+                )
+            candidate = args[index + 1].strip()
+            if re.fullmatch(r"[0-9a-f]{64}", candidate) is None:
+                return _refuse(
+                    "recover --apply-approved-repair requires the 64-hex repair id "
+                    "printed by a prior `saipen recover` plan"
+                )
+            approved_repair_id = candidate
+            index += 2
+            continue
+        if token == "resolve-blocker":
+            if index + 1 >= len(args):
+                return _refuse(
+                    'usage: recover resolve-blocker "<decision>" (missing decision text)'
+                )
+            decision = args[index + 1].strip()
+            if not decision:
+                return _refuse(
+                    "recover resolve-blocker requires non-empty decision/authority "
+                    "text; there is no generic unblock-anything path"
+                )
+            resolve_blocker = decision
+            index += 2
+            continue
+        rest.append(token)
+        index += 1
+    args = rest
+    if args and args[0] not in ("inspect", "resolve"):
+        # Closed grammar: no unknown/surplus token is silently treated as a bare
+        # `recover`. `inspect` and `resolve` carry their own arity checks below.
+        return _refuse(
+            f"unknown recover argument(s) {args!r}; usage: recover "
+            '[--adopt-legacy <T-###[,T-###...]>] '
+            '[--attest-legacy-done <T-###[,T-###...]>] '
+            '[resolve-blocker "<decision>"] '
+            "[--apply-approved-repair <repair_id>] "
+            "| recover inspect <op_id> | recover resolve <op_id> [--resolution <mode>]"
+        )
     # `saipen recover inspect <op_id>` -- read-only conflict inspection.
     # Closed grammar: exactly one positional <op_id> (hostile-regression, P0#1).
     if args and args[0] == "inspect":
@@ -1512,7 +2112,7 @@ def _recover(project_root: Path, args: list[str], as_json: bool, dry_run: bool =
             as_json,
         )
         return 2
-    pending, conflicts, _corrupt = _scan_full(project_root)
+    pending, _conflicts, _corrupt = _scan_full(project_root)
     # CORE-003: corrupt recovery evidence checked FIRST, before conflicts
     # (hostile-regression, P1#6): a scan_pending record marked corrupt:true --
     # e.g. a symlinked OPS_DIR or an unreadable entry -- must never be replayed
@@ -1521,23 +2121,6 @@ def _recover(project_root: Path, args: list[str], as_json: bool, dry_run: bool =
     # projection uses (already scanned above by `_scan_full`, T-1014).
     if _corrupt:
         _emit(_corrupt_refusal(_corrupt), as_json)
-        return 1
-    if conflicts:
-        _emit(
-            {
-                "ok": False,
-                "code": "CONFLICT",
-                "op_ids": conflicts,
-                "recovery_required": True,
-                "detail": "unresolved conflict(s): "
-                + ", ".join(conflicts)
-                + "; evidence preserved, resolve explicitly (saipen "
-                "recover inspect <op_id> / resolve <op_id> "
-                "--resolution accept_live|replan) before further "
-                "mutation",
-            },
-            as_json,
-        )
         return 1
     if not pending:
         # CLEAN is a statement about the whole recovery responsibility, not
@@ -1550,7 +2133,13 @@ def _recover(project_root: Path, args: list[str], as_json: bool, dry_run: bool =
         if _negotiate_capability(project_root) == "read-only":
             return _capability_refusal(as_json)
         reconciliation = reconcile_protocol_state(
-            project_root, _agent_for(project_root), dry_run=dry_run
+            project_root,
+            _agent_for(project_root),
+            dry_run=dry_run,
+            adopt_legacy=adopt_legacy,
+            attest_legacy_done=attest_legacy_done,
+            resolve_blocker=resolve_blocker,
+            approved_repair_id=approved_repair_id,
         )
         _emit(reconciliation, as_json)
         return 0 if reconciliation.get("ok") else 1
@@ -1575,9 +2164,7 @@ def _recover(project_root: Path, args: list[str], as_json: bool, dry_run: bool =
                         "operation": record.get("operation"),
                         "stage": record.get("status"),
                         "targets": [
-                            t.get("path")
-                            for t in record.get("targets", [])
-                            if isinstance(t, dict)
+                            t.get("path") for t in record.get("targets", []) if isinstance(t, dict)
                         ],
                     }
                 )
@@ -1588,6 +2175,9 @@ def _recover(project_root: Path, args: list[str], as_json: bool, dry_run: bool =
                 "action": "recover",
                 "pending_ops": pending,
                 "plan": plan_ops,
+                "adopt_legacy": adopt_legacy,
+                "attest_legacy_done": attest_legacy_done,
+                "resolve_blocker": resolve_blocker,
                 "detail": "planned replay targets; no writes",
             },
             as_json,
@@ -1599,6 +2189,51 @@ def _recover(project_root: Path, args: list[str], as_json: bool, dry_run: bool =
     if _ho is not None:
         return _ho
     result = auto_recover_pending(project_root)
+    # T-1318 Phase H: replaying an interrupted operation SETTLES THE JOURNAL, but
+    # it does not by itself have to leave the CHECKPOINT valid -- a crash between
+    # PREPARE and APPLY leaves the malformed phase exactly where it was, and the
+    # replay legitimately reports success. `saipen recover` promises a ONE-SHOT
+    # convergence to a valid protocol state, so when the replay succeeded and the
+    # checkpoint is still blocked, fall through to the ordinary reconciliation in
+    # the same invocation. Bounded: at most one extra reconciliation, and it
+    # never runs when the protocol state is already sound.
+    if result.get("ok"):
+        from saipen_engine.admission import protocol_snapshot
+        from saipen_engine.reconcile import reconcile_protocol_state
+
+        snapshot = protocol_snapshot(project_root, _agent_for(project_root))
+        block = snapshot.get("block")
+        # A checkpoint surface that does not exist has nothing to reconcile and
+        # cannot be reconciled: `reconcile` would only re-report the absence. The
+        # journal replay is then the terminal answer (a journal-only project has
+        # no STATE/BOARD/LOG to repair), so the fallback is gated on the surface
+        # actually being present. An operator-supplied repair flag always runs,
+        # so an explicit decision against a broken surface still reports truth.
+        checkpoint_present = (project_root / ".saipen" / "STATE.md").is_file()
+        blocked_checkpoint = block in ("PROTOCOL_STATE_INVALID", "RECOVERY_REQUIRED")
+        if adopt_legacy or attest_legacy_done or resolve_blocker or approved_repair_id or (
+            blocked_checkpoint and checkpoint_present
+        ):
+            reconciliation = reconcile_protocol_state(
+                project_root,
+                _agent_for(project_root),
+                dry_run=dry_run,
+                adopt_legacy=adopt_legacy,
+                attest_legacy_done=attest_legacy_done,
+                resolve_blocker=resolve_blocker,
+                approved_repair_id=approved_repair_id,
+            )
+            merged = dict(result)
+            merged["code"] = reconciliation.get("code", result.get("code"))
+            merged["ok"] = bool(reconciliation.get("ok"))
+            merged["checkpoint"] = {
+                "block": block,
+                "detail": str(snapshot.get("detail", ""))[:200],
+            }
+            for key in ("changed", "targets", "detail", "adopted"):
+                if reconciliation.get(key) is not None:
+                    merged[key] = reconciliation.get(key)
+            result = merged
     _emit(result, as_json)
     return 0 if result.get("ok") else 1
 
@@ -1711,9 +2346,10 @@ def _sub(project_root: Path, args: list[str], as_json: bool, dry_run: bool) -> i
         a zero-write VALIDATION_FAILED refusal, never a traceback.
 
         T-1014: mutating sub actions previously performed the seat handover
-        here, but the acting seat now folds into the op's own admissible
-        transaction (W2-001) -- a rejected command writes nothing.
-        list/status are read-only and never hand over."""
+        here, but the acting actor now folds into the op's own admissible
+        transaction (W2-001) -- a rejected command writes nothing and no
+        sub action moves the active seat.
+        list/status are read-only and touch no ownership."""
         try:
             result = thunk()
         except OSError as exc:
@@ -2235,34 +2871,31 @@ def _audit_enqueue(project_root: Path, rest: list[str], as_json: bool, dry_run: 
 
     if dry_run:
         # PLAN parity: validate exactly like the real call, name the layer the
-        # allocator would hand out, write nothing. Identity comes from the
-        # same authorities the real path consults: the durable operation
-        # record first (SRC-025:R005), then the allocator projection. A plan
-        # that says "fresh layer N" where the real call would recover or
-        # refuse would be exactly the dry-run-certifies-invalid-input defect.
-        doc = audit_enqueue._reconcile(project_root, audit_enqueue.read_allocator(project_root))
-        existing = doc["operations"].get(audit_enqueue._op_key(producer, operation_id))
-        durable, durable_state = audit_enqueue.read_operation_record(
-            project_root, producer, operation_id
-        )
-        if durable_state == audit_enqueue.OPERATION_RECORD_CORRUPT:
+        # allocator would hand out, write nothing. The SOLE idempotence
+        # authority is the allocator's `producer + operation -> layer` map
+        # (REGISTRY.audit_enqueue), the same read the real `enqueue` consults --
+        # a plan that says "fresh layer N" where the real call would recover or
+        # refuse is exactly the dry-run-certifies-invalid-input defect. A
+        # corrupt allocator refuses here precisely as the real path does
+        # (`read_allocator_state`, never the tolerant reader).
+        doc, allocator_state = audit_enqueue.read_allocator_state(project_root)
+        if allocator_state == audit_enqueue.ALLOCATOR_CORRUPT:
             _emit(
                 {
                     "ok": False,
-                    "code": "OPERATION_RECORD_CORRUPT",
+                    "code": "ALLOCATOR_CORRUPT",
                     "operation": "audit_enqueue",
                     "detail": (
-                        "the durable operation record for this operation exists "
-                        "but cannot be decoded; the real enqueue would refuse"
+                        f"{audit_enqueue.ALLOCATOR_REL} exists but cannot be read "
+                        "as an allocator document; the real enqueue would refuse"
                     ),
                 },
                 as_json,
             )
             return 1
-        if durable is not None and durable.get("state") != audit_enqueue.ABORTED:
-            layer = durable["layer"]
-            idempotent = True
-        elif isinstance(existing, dict):
+        doc = audit_enqueue._reconcile(project_root, doc)
+        existing = doc["operations"].get(audit_enqueue._op_key(producer, operation_id))
+        if isinstance(existing, dict) and isinstance(existing.get("layer"), int):
             layer = existing["layer"]
             idempotent = True
         else:
@@ -2298,6 +2931,65 @@ def _audit_enqueue(project_root: Path, rest: list[str], as_json: bool, dry_run: 
     return 0 if result.get("ok") else 1
 
 
+def _audit_manifest(project_root: Path, rest: list[str], as_json: bool, dry_run: bool) -> int:
+    """`saipen audit manifest [--write [--force]]`.
+
+    The protocol declaring its own audit evidence. Read-only by default,
+    because a packager must be able to ASK without mutating the project it
+    is about to snapshot.
+    """
+    from saipen_engine import audit_manifest
+
+    write = force = False
+    for token in rest:
+        if token == "--write":
+            write = True
+        elif token == "--force":
+            force = True
+        else:
+            _emit(
+                {
+                    "ok": False,
+                    "code": "VALIDATION_FAILED",
+                    "detail": f"unknown flag {token!r}; expected --write [--force]",
+                },
+                as_json,
+            )
+            return 2
+    if force and not write:
+        _emit(
+            {"ok": False, "code": "VALIDATION_FAILED", "detail": "--force requires --write"},
+            as_json,
+        )
+        return 2
+
+    if not write:
+        result = audit_manifest.status(project_root, protocol_dir=PROTOCOL_DIR)
+        result["manifest"] = audit_manifest.build(project_root, protocol_dir=PROTOCOL_DIR)
+        # The read-only projection also answers the question a packager asks
+        # first: WOULD this project enroll, and if not, why not. Read-only by
+        # construction (dry_run) -- asking never mutates the project.
+        result["enrollment"] = audit_manifest.ensure(
+            project_root, protocol_dir=PROTOCOL_DIR, dry_run=True
+        )
+        _emit(result, as_json)
+        return 0 if result.get("ok") else 1
+
+    if dry_run:
+        _emit(
+            audit_manifest.ensure(project_root, protocol_dir=PROTOCOL_DIR, dry_run=True),
+            as_json,
+        )
+        return 0
+    if _negotiate_capability(project_root) == "read-only":
+        return _capability_refusal(as_json)
+    result = audit_manifest.ensure(
+        project_root, protocol_dir=PROTOCOL_DIR, force=force
+    )
+    _emit(result, as_json)
+    return 0 if result.get("ok") else 1
+
+
 def _audit(project_root: Path, args: list[str], as_json: bool, dry_run: bool) -> int:
     """Audit Inbox admin surface (SOURCE-AUDIT-INBOX-01).
 
@@ -2310,6 +3002,16 @@ def _audit(project_root: Path, args: list[str], as_json: bool, dry_run: bool) ->
                         layer and derive its canonical Work (mutating)
       enqueue           place one producer audit as the next canonical layer
                         (mutating; SOURCE-AUDIT-ENQUEUE-01)
+      manifest [--write [--force]]
+                        the protocol's own audit-evidence contract: what a
+                        packager must capture for a snapshot to represent
+                        current lifecycle truth. Read-only by default;
+                        `--write` enrolls/migrates `.saipen/MANIFEST.json`
+                        idempotently (a current manifest is left untouched; a
+                        newer contract, or one that is not this contract, is
+                        refused unless `--force`). Enrollment also happens on
+                        its own: every canonical state transition heals it
+                        through `reconcile_protocol_state`.
 
     Ordinary operation needs NONE of these: `cc` routes through the same
     projection. They exist for inspection and for the executable action the
@@ -2319,6 +3021,9 @@ def _audit(project_root: Path, args: list[str], as_json: bool, dry_run: bool) ->
 
     action = args[0] if args else "status"
     rest = args[1:]
+
+    if action == "manifest":
+        return _audit_manifest(project_root, rest, as_json, dry_run)
 
     if action == "status":
         _emit(audit_inbox.status(project_root), as_json)
@@ -2357,7 +3062,10 @@ def _audit(project_root: Path, args: list[str], as_json: bool, dry_run: bool) ->
             {
                 "ok": False,
                 "code": "VALIDATION_FAILED",
-                "detail": "audit needs a subcommand: status|inspect|trace|ingest|enqueue",
+                "detail": (
+                    "audit needs a subcommand: "
+                    "status|inspect|trace|ingest|enqueue|manifest"
+                ),
             },
             as_json,
         )
@@ -2659,6 +3367,160 @@ def _work_for_source_receipt(project_root: Path, receipt: str) -> str | None:
     return None
 
 
+#: Closure/scope option grammar for the public ticket commands (CORE-003).
+#: One table, so `--help`, the parser and the refusal messages cannot drift.
+_TICKET_DONE_OPTIONS = {
+    "--closure-mode": "closure_mode",
+    "--closure-cohort": "closure_cohort",
+    "--implementation-source": "implementation_source",
+    "--paths": "closure_paths",
+}
+_TICKET_BLOCK_OPTIONS = {"--scope": "scope"}
+
+
+def _parse_value_options(tokens: list[str], spec: dict[str, str]) -> tuple[dict, list[str], str]:
+    """Split ``tokens`` into declared ``--opt value`` pairs and positionals.
+
+    Returns ``(values, positionals, error)``. The grammar is deliberately
+    strict and its refusals are distinct sentences, because an agent has to be
+    able to tell "you typed it twice", "that option does not exist" and "you
+    left the value off" apart from each other -- CONTROL B asserts exactly
+    those three. Every refusal is zero-write: parsing happens before any
+    project read.
+    """
+    values: dict[str, str] = {}
+    positionals: list[str] = []
+    idx = 0
+    while idx < len(tokens):
+        token = tokens[idx]
+        if token in spec:
+            key = spec[token]
+            if key in values:
+                return {}, [], "duplicate option " + token
+            if idx + 1 >= len(tokens) or tokens[idx + 1] in spec:
+                return {}, [], "option " + token + " needs a value"
+            values[key] = tokens[idx + 1]
+            idx += 2
+            continue
+        if token.startswith("--"):
+            return {}, [], "unknown option " + token
+        positionals.append(token)
+        idx += 1
+    return values, positionals, ""
+
+
+def _cohort(project_root: Path, args: list[str], as_json: bool, dry_run: bool) -> int:
+    """`saipen cohort status|ship C-###` -- durable batch publication (CORE-003).
+
+    A cohort exists because several tickets can legitimately share ONE
+    unpublished implementation. Its publication is a single batch through the
+    EXISTING release machinery -- there is no second publisher here, only a
+    carrier handed to `plan_release`.
+    """
+    from saipen_engine import closure as _closure
+
+    if len(args) < 2:
+        _emit(
+            {
+                "ok": False,
+                "code": "VALIDATION_FAILED",
+                "detail": "cohort needs an action and an id: cohort status|ship C-###",
+            },
+            as_json,
+        )
+        return 2
+    action, cohort_id = args[0], args[1]
+    if len(args) > 2:
+        _emit(
+            {
+                "ok": False,
+                "code": "VALIDATION_FAILED",
+                "detail": "cohort "
+                + action
+                + " takes exactly one C-### id; surplus: "
+                + " ".join(args[2:]),
+            },
+            as_json,
+        )
+        return 2
+    if not _closure.COHORT_ID_RE.match(cohort_id):
+        _emit(
+            {
+                "ok": False,
+                "code": "VALIDATION_FAILED",
+                "detail": "cohort id " + repr(cohort_id) + " is not a C-### identity",
+            },
+            as_json,
+        )
+        return 2
+    try:
+        registry = _closure.read_registry(project_root)
+    except (OSError, ValueError) as exc:
+        _emit(
+            {
+                "ok": False,
+                "code": "VALIDATION_FAILED",
+                "detail": "cohort registry is unreadable: " + str(exc),
+            },
+            as_json,
+        )
+        return 1
+    cohort = (registry.get("cohorts") or {}).get(cohort_id)
+    if cohort is None:
+        _emit(
+            {
+                "ok": False,
+                "code": "VALIDATION_FAILED",
+                "detail": "cohort " + cohort_id + " has no durable registry record",
+            },
+            as_json,
+        )
+        return 1
+    if action == "status":
+        readiness = _closure.cohort_readiness(project_root, cohort)
+        _emit(
+            {
+                "ok": True,
+                "code": "COHORT_STATUS",
+                "cohort": cohort_id,
+                "publication_status": cohort.get("publication_status"),
+                "members": sorted(cohort.get("members") or {}),
+                "scope": sorted(cohort.get("scope") or []),
+                "ready": readiness["ready"],
+                "problems": readiness["problems"],
+                "release_op_id": cohort.get("release_op_id") or "",
+                "version": cohort.get("version") or "",
+                "tag": cohort.get("tag") or "",
+                "commit": cohort.get("commit") or "",
+            },
+            as_json,
+        )
+        return 0
+    if action != "ship":
+        _emit(
+            {
+                "ok": False,
+                "code": "VALIDATION_FAILED",
+                "detail": "unknown cohort action " + repr(action) + "; use status|ship",
+            },
+            as_json,
+        )
+        return 2
+    if not dry_run and _negotiate_capability(project_root) == "read-only":
+        return _capability_refusal(as_json)
+    from saipen_engine.operations import cohort_ship
+
+    result = cohort_ship(
+        project_root,
+        cohort_id,
+        _agent_for(project_root),
+        dry_run=dry_run,
+        current_capability=_negotiate_capability(project_root),
+    )
+    _emit(result.to_dict(), as_json)
+    return 0 if result.ok else 1
+
+
 def _source(project_root: Path, args: list[str], as_json: bool, dry_run: bool) -> int:
     """T-1162: lossless source receipts.
 
@@ -2667,8 +3529,9 @@ def _source(project_root: Path, args: list[str], as_json: bool, dry_run: bool) -
       status <SRC>      read-only projection (identity, work, coverage)
       show <SRC>        forensic body retrieval (active or archived)
       recover           read-only orphan-receipt crash diagnostic
-      req <SRC> <RID> <class> <text...>   add a normalized requirement
+      req <SRC> <RID> <class> [--when-environment HOST] <text...>
       disp <SRC> <RID> <DISPOSITION> [--work T-x] [--evidence E-y]
+           [--environment HOST]
       close <SRC>       close ONLY when coverage is terminal (mutating)
       archive <SRC>     move a CLOSED receipt to cold storage (mutating)
       purge <SRC>       hard purge, tombstone retained (mutating, explicit)
@@ -2882,13 +3745,29 @@ def _source(project_root: Path, args: list[str], as_json: bool, dry_run: bool) -
             )
             return 2
         receipt_id, rid, clause_class = rest[0], rest[1], rest[2]
-        text = " ".join(rest[3:])
+        when_environment = None
+        text_tokens = rest[3:]
+        if text_tokens[:1] == ["--when-environment"]:
+            if len(text_tokens) < 3:
+                _emit(
+                    {
+                        "ok": False,
+                        "code": "VALIDATION_FAILED",
+                        "detail": "--when-environment needs HOST and clause text",
+                    },
+                    as_json,
+                )
+                return 2
+            when_environment = text_tokens[1]
+            text_tokens = text_tokens[2:]
+        text = " ".join(text_tokens)
         result = intake.add_requirement(
             project_root,
             receipt_id,
             rid=rid,
             text=text,
             clause_class=clause_class,
+            when_environment=when_environment,
         )
         _emit(result, as_json)
         return 0 if result.get("ok") else 1
@@ -2907,7 +3786,7 @@ def _source(project_root: Path, args: list[str], as_json: bool, dry_run: bool) -
             )
             return 2
         receipt_id, rid, disposition = rest[0], rest[1], rest[2]
-        work = evidence = verification = None
+        work = evidence = verification = environment = None
         i = 3
         while i < len(rest):
             if rest[i] == "--work" and i + 1 < len(rest):
@@ -2918,6 +3797,9 @@ def _source(project_root: Path, args: list[str], as_json: bool, dry_run: bool) -
                 i += 2
             elif rest[i] == "--verification" and i + 1 < len(rest):
                 verification = rest[i + 1]
+                i += 2
+            elif rest[i] == "--environment" and i + 1 < len(rest):
+                environment = rest[i + 1]
                 i += 2
             else:
                 _emit(
@@ -2937,6 +3819,7 @@ def _source(project_root: Path, args: list[str], as_json: bool, dry_run: bool) -
             work=work,
             evidence=evidence,
             verification=verification,
+            environment=environment,
         )
         _emit(result, as_json)
         return 0 if result.get("ok") else 1
@@ -2997,9 +3880,7 @@ def _source(project_root: Path, args: list[str], as_json: bool, dry_run: bool) -
     return 2
 
 
-def _source_dry_run_plan(
-    project_root: Path, action: str, rest: list[str], as_json: bool
-) -> int:
+def _source_dry_run_plan(project_root: Path, action: str, rest: list[str], as_json: bool) -> int:
     """CORE-002: semantic PLAN for a source mutation under --dry-run.
 
     Parses and validates the request exactly like the real mutation path
@@ -3020,13 +3901,38 @@ def _source_dry_run_plan(
             )
             return 2
         receipt_id, rid, clause_class = rest[0], rest[1], rest[2]
-        text = " ".join(rest[3:])
+        when_environment = None
+        text_tokens = rest[3:]
+        if text_tokens[:1] == ["--when-environment"]:
+            if len(text_tokens) < 3:
+                _emit(
+                    {
+                        "ok": False,
+                        "code": "VALIDATION_FAILED",
+                        "detail": "--when-environment needs HOST and clause text",
+                    },
+                    as_json,
+                )
+                return 2
+            when_environment = text_tokens[1]
+            text_tokens = text_tokens[2:]
+        text = " ".join(text_tokens)
         if not re.fullmatch(r"SRC-\d+", receipt_id):
             _emit({"ok": False, "code": "INVALID_ID", "detail": receipt_id}, as_json)
             return 1
         if not text.strip():
             _emit(
                 {"ok": False, "code": "VALIDATION_FAILED", "detail": "empty clause text"},
+                as_json,
+            )
+            return 1
+        if when_environment is not None and not re.fullmatch(r"[a-z0-9_-]+", when_environment):
+            _emit(
+                {
+                    "ok": False,
+                    "code": "VALIDATION_FAILED",
+                    "detail": f"invalid environment identity {when_environment!r}",
+                },
                 as_json,
             )
             return 1
@@ -3058,6 +3964,7 @@ def _source_dry_run_plan(
                 "receipt": receipt_id,
                 "rid": f"{receipt_id}:{rid}" if re.fullmatch(r"R\d+", rid) else rid,
                 "revision": new_revision,
+                "when_environment": when_environment,
                 "targets": [
                     f".saipen/intake/contracts/{receipt_id}.json",
                     f".saipen/intake/contracts/{receipt_id}.r{new_revision:03d}.json",
@@ -3080,6 +3987,40 @@ def _source_dry_run_plan(
             )
             return 2
         receipt_id, rid, disposition = rest[0], rest[1], rest[2]
+        work = evidence = verification = environment = None
+        i = 3
+        while i < len(rest):
+            if rest[i] in ("--work", "--evidence", "--verification", "--environment"):
+                if i + 1 >= len(rest):
+                    _emit(
+                        {
+                            "ok": False,
+                            "code": "VALIDATION_FAILED",
+                            "detail": f"{rest[i]} needs a value",
+                        },
+                        as_json,
+                    )
+                    return 2
+                value = rest[i + 1]
+                if rest[i] == "--work":
+                    work = value
+                elif rest[i] == "--evidence":
+                    evidence = value
+                elif rest[i] == "--verification":
+                    verification = value
+                else:
+                    environment = value
+                i += 2
+                continue
+            _emit(
+                {
+                    "ok": False,
+                    "code": "VALIDATION_FAILED",
+                    "detail": f"unknown flag {rest[i]!r}",
+                },
+                as_json,
+            )
+            return 2
         from saipen_engine.intake import ALL_DISPOSITIONS
 
         if disposition not in ALL_DISPOSITIONS:
@@ -3092,6 +4033,27 @@ def _source_dry_run_plan(
                 as_json,
             )
             return 1
+        if disposition == "UNAVAILABLE_ENVIRONMENT":
+            contract = intake._read_contract(Path(project_root), receipt_id) or {}
+            full_rid = f"{receipt_id}:{rid}" if re.fullmatch(r"R\d+", rid) else rid
+            clause = (contract.get("clauses") or {}).get(full_rid) or {}
+            if not environment or clause.get("when_environment") != environment:
+                _emit(
+                    {
+                        "ok": False,
+                        "code": "ENVIRONMENT_WAIVER_REFUSED",
+                        "detail": (
+                            "UNAVAILABLE_ENVIRONMENT requires a matching structured "
+                            "when_environment clause and --environment probe"
+                        ),
+                    },
+                    as_json,
+                )
+                return 1
+            probed = intake._probe_environment_absence(environment)
+            if not probed.get("ok"):
+                _emit(probed, as_json)
+                return 1
         _emit(
             {
                 "ok": True,
@@ -3100,6 +4062,10 @@ def _source_dry_run_plan(
                 "receipt": receipt_id,
                 "rid": rid,
                 "disposition": disposition,
+                "work": work,
+                "evidence": evidence,
+                "verification": verification,
+                "environment": environment,
                 "targets": [f".saipen/intake/coverage/{receipt_id}.json"],
                 "detail": "planned coverage ledger update; no writes",
             },
@@ -3253,38 +4219,52 @@ def _source_dry_run_plan(
 
 
 def _context(project_root: Path, args: list[str], as_json: bool, dry_run: bool) -> int:
-    """saipen context cold|hot|audit (NITRO M9, read-only)."""
+    """saipen context cold|hot|audit|orient (read-only)."""
     if not args:
         _emit(
             {
                 "ok": False,
                 "code": "VALIDATION_FAILED",
-                "detail": "context needs a mode: cold|hot|audit",
+                "detail": "context needs a mode: cold|hot|audit|orient",
             },
             as_json,
         )
         return 2
-    if len(args) > 1:
+    mode = args[0]
+    handoff_path = None
+    surplus = args[1:]
+    if mode == "orient" and surplus[:1] == ["--handoff"] and len(surplus) >= 2:
+        handoff_path = surplus[1]
+        surplus = surplus[2:]
+    if surplus:
         _emit(
             {
                 "ok": False,
                 "code": "VALIDATION_FAILED",
-                "detail": f"context accepts exactly one mode; surplus: {' '.join(args[1:])}",
+                "detail": f"context {mode} has surplus: {' '.join(surplus)}",
             },
             as_json,
         )
         return 2
+    if mode == "orient":
+        from saipen_engine.cold_truth import orientation_projection, render_orientation
+
+        result = orientation_projection(project_root, handoff_path=handoff_path)
+        if as_json or not result.get("ok"):
+            _emit(result, as_json)
+        else:
+            print(render_orientation(result), end="")
+        return 0 if result.get("ok") else 1
     from saipen_engine.context import context_audit, context_cold, context_hot
     from saipen_engine.log import HistoryOwnershipError
 
-    mode = args[0]
     fn = {"cold": context_cold, "hot": context_hot, "audit": context_audit}.get(mode)
     if fn is None:
         _emit(
             {
                 "ok": False,
                 "code": "VALIDATION_FAILED",
-                "detail": f"unknown context mode {mode!r}; use cold|hot|audit",
+                "detail": f"unknown context mode {mode!r}; use cold|hot|audit|orient",
             },
             as_json,
         )
@@ -3475,8 +4455,8 @@ def _attempt(project_root: Path, args: list[str], as_json: bool, dry_run: bool) 
         )
         return 2
 
-    # Fail fast on the closed vocabularies BEFORE any capability/handover work,
-    # so a typo'd result never burns an op_id or a handover DEC.
+    # Fail fast on the closed vocabularies BEFORE any capability/mutation work,
+    # so a typo'd result never burns an op_id or a DEC.
     if action == "close":
         if result not in RESULTS:
             _emit(
@@ -3581,9 +4561,9 @@ def _acceptance(project_root: Path, args: list[str], as_json: bool) -> int:
         return 2
 
     events = []
-    segments = sorted((saipen_dir / "logs").glob("LOG-*.md")) if (
-        saipen_dir / "logs"
-    ).is_dir() else []
+    segments = (
+        sorted((saipen_dir / "logs").glob("LOG-*.md")) if (saipen_dir / "logs").is_dir() else []
+    )
     for path in [*segments, saipen_dir / "LOG.md"]:
         if not path.is_file():
             continue
@@ -3945,6 +4925,14 @@ def _userperson(project_root: Path | None, args: list[str], as_json: bool, dry_r
 
 
 def _emit(payload: dict, as_json: bool) -> None:
+    # ONE public refusal shape. CLI-side refusals have always carried
+    # `detail`; engine `Result` refusals carry `message`, so the same public
+    # command answered "why" under two different keys depending on which layer
+    # refused, and a caller had to know the internal boundary to read the
+    # reason. `detail` is the published key -- fill it from `message` when the
+    # engine is the refuser. `message` is preserved, never replaced.
+    if not payload.get("ok") and payload.get("message") and not payload.get("detail"):
+        payload = {**payload, "detail": payload["message"]}
     if _ROUTE_ECHO is not None:
         # Route echo: the invocation resolved through the shared shortcut
         # resolver, so every emitted payload names its canonical route. This
@@ -3963,6 +4951,8 @@ def _emit(payload: dict, as_json: bool) -> None:
         "ticket",
         "route",
         "load",
+        "load_path",
+        "execution_instruction",
         "phase",
         "task",
         "next_action",
@@ -4033,9 +5023,7 @@ def _runtime_identity() -> str:
     return value
 
 
-def _improve_dry_run_plan(
-    project_root: Path, action: str, rest: list[str], as_json: bool
-) -> int:
+def _improve_dry_run_plan(project_root: Path, action: str, rest: list[str], as_json: bool) -> int:
     """CORE-002: semantic PLAN for an improve mutator under --dry-run.
 
     Validates the closed grammar of `submit` / `complete` / `cycle-complete` /
@@ -4338,9 +5326,7 @@ def _improve(project_root: Path, args: list[str], as_json: bool, dry_run: bool) 
     # previous `DRY_RUN_UNSUPPORTED` short-circuit hid the plan and made
     # dry-run observationally different from a real submission.
     if dry_run and action in ("submit", "complete", "cycle-complete", "abort"):
-        return _improve_dry_run_plan(
-            project_root, action, args[1:] if action else [], as_json
-        )
+        return _improve_dry_run_plan(project_root, action, args[1:] if action else [], as_json)
     if action is None:
         # DOGFOOD V (T-617): bare `saipen improve` is the documented
         # meta-control -- it PREPARES the current seat's bounded audit
@@ -4930,6 +5916,302 @@ def _public_improve(project_root: Path, args: list[str], as_json: bool, dry_run:
         raise
 
 
+#: Install-scoped `runtime` flags: they act on the INSTALLED adapter surface,
+#: never on project memory, and must therefore run outside a bound project.
+_RUNTIME_INSTALL_FLAGS = ("--bootstrap", "--check-freshness", "--check", "--prelaunch")
+
+
+def _runtime_install_flags(tokens: list[str]) -> bool:
+    return any(token in _RUNTIME_INSTALL_FLAGS for token in tokens)
+
+
+def _runtime_install_command(tokens: list[str], as_json: bool) -> int:
+    """`saipen runtime --prelaunch|--bootstrap|--check-freshness [--adapter ID]`.
+
+    ONE stable machine-readable prelaunch operation (TARGET C). Consumer
+    contract: exit 0 with `code` in {RUNTIME_CURRENT, RUNTIME_RESYNCED} means
+    the installed generation is proven current and a host may now be started;
+    any other code means it is NOT, and the caller must not start the host.
+    `requires_host_restart` is true exactly when bytes changed under an
+    already-running process -- the supported launcher consumes that by starting
+    the host after this call, never by hot-replacing a loaded module.
+    """
+    from saipen_engine.runtime_bootstrap import (
+        CanonicalSourceUnproven,
+        check_freshness,
+        prelaunch,
+        run_bootstrap,
+    )
+
+    adapter: str | None = None
+    mode: str | None = None
+    no_resync = False
+    index = 0
+    while index < len(tokens):
+        token = tokens[index]
+        if token in ("--check-freshness", "--check"):
+            mode = mode or "freshness"
+            index += 1
+        elif token == "--bootstrap":
+            mode = mode or "bootstrap"
+            index += 1
+        elif token == "--prelaunch":
+            mode = "prelaunch"
+            index += 1
+        elif token == "--no-resync":
+            no_resync = True
+            index += 1
+        elif token == "--adapter" and index + 1 < len(tokens):
+            adapter = tokens[index + 1]
+            index += 2
+        elif token.startswith("--adapter="):
+            adapter = token.split("=", 1)[1]
+            index += 1
+        else:
+            _emit(
+                {
+                    "ok": False,
+                    "code": "VALIDATION_FAILED",
+                    "detail": (
+                        "runtime install flags are --prelaunch [--adapter ID] [--no-resync], "
+                        "--bootstrap and --check-freshness; surplus: " + token
+                    ),
+                },
+                as_json,
+            )
+            return 2
+    if adapter is not None and not re.fullmatch(r"[a-z0-9][a-z0-9_-]{0,63}", adapter):
+        _emit(
+            {"ok": False, "code": "VALIDATION_FAILED", "detail": "invalid --adapter id"},
+            as_json,
+        )
+        return 2
+    if adapter is not None and mode != "prelaunch":
+        _emit(
+            {
+                "ok": False,
+                "code": "VALIDATION_FAILED",
+                "detail": "--adapter applies only to runtime --prelaunch",
+            },
+            as_json,
+        )
+        return 2
+    if no_resync and mode != "prelaunch":
+        _emit(
+            {
+                "ok": False,
+                "code": "VALIDATION_FAILED",
+                "detail": "--no-resync applies only to runtime --prelaunch",
+            },
+            as_json,
+        )
+        return 2
+    try:
+        if mode == "prelaunch":
+            payload = prelaunch(adapter, resync=not no_resync)
+        elif mode == "bootstrap":
+            payload = run_bootstrap()
+        else:
+            payload = check_freshness()
+    except CanonicalSourceUnproven as exc:
+        _emit(
+            {"ok": False, "code": "CANONICAL_RUNTIME_SOURCE_UNPROVEN", "detail": str(exc)},
+            as_json,
+        )
+        return 1
+    _emit(payload, as_json)
+    return 0 if payload.get("ok", True) else 1
+
+
+#: T-1327 TARGET D: the exact fields the OpenCode guard requires of EVERY Fleet
+#: result before it will read one. A branch that emitted a bare
+#: `{ok, code, detail}` -- a grammar refusal, or an unhandled exception that
+#: printed nothing at all -- was indistinguishable from a broken runtime, and
+#: the guard could only collapse it into FLEET_OUTPUT_INVALID. Every exit from
+#: `_fleet_command` now leaves through `_fleet_emit`, so the schema is a
+#: property of the command, not of whichever branch happened to be taken.
+_FLEET_GUARD_SCHEMA = ("classification", "code", "requires_reissue")
+
+
+def _fleet_envelope(payload: dict) -> dict:
+    """Complete one Fleet record to the guard-required schema without lying."""
+    record = dict(payload)
+    record.setdefault("ok", False)
+    record.setdefault("code", "VALIDATION_FAILED")
+    # A record that never classified a project is UNBOUND for the host: it
+    # carries no verdict about the project, which is exactly fail-closed.
+    record.setdefault("classification", "UNBOUND")
+    record.setdefault("requires_reissue", False)
+    record.setdefault("recovered", False)
+    record.setdefault("recovery_attempts", 0)
+    record.setdefault("reason_code", record["code"])
+    record.setdefault("reason", record.get("detail") or record["code"])
+    return record
+
+
+def _fleet_emit(payload: dict, as_json: bool) -> None:
+    _emit(_fleet_envelope(payload), as_json)
+
+
+def _fleet_command(
+    args: list[str], project_root_opt: str | None, as_json: bool, dry_run: bool
+) -> int:
+    """Closed Fleet CLI grammar; dispatch before ordinary root resolution.
+
+    Wrapped so that NO failure mode of the engine below can reach the host as
+    empty stdout: an unexpected exception is a bounded, schema-complete
+    `FLEET_INTERNAL_ERROR` record, which the guard can refuse deliberately
+    instead of misreading as an invalid contract.
+    """
+    try:
+        return _fleet_command_inner(args, project_root_opt, as_json, dry_run)
+    except Exception as exc:  # the boundary IS the contract: never empty stdout
+        _fleet_emit(
+            {
+                "ok": False,
+                "code": "FLEET_INTERNAL_ERROR",
+                "detail": f"{type(exc).__name__}: {exc}"[:512],
+            },
+            as_json,
+        )
+        return 1
+
+
+def _fleet_command_inner(
+    args: list[str], project_root_opt: str | None, as_json: bool, dry_run: bool
+) -> int:
+    from saipen_engine.fleet import preflight, prepare, scan
+
+    if len(args) < 2 or args[1] not in ("preflight", "scan", "prepare"):
+        _fleet_emit(
+            {
+                "ok": False,
+                "code": "VALIDATION_FAILED",
+                "detail": "use fleet preflight|scan|prepare",
+            },
+            as_json,
+        )
+        return 2
+    verb = args[1]
+    options: dict[str, str] = {}
+    roots: list[str] = []
+    require_binding = False
+    index = 2
+    while index < len(args):
+        key = args[index]
+        if key == "--require-binding":
+            if require_binding:
+                _fleet_emit(
+                    {
+                        "ok": False,
+                        "code": "VALIDATION_FAILED",
+                        "detail": "duplicate fleet option: --require-binding",
+                    },
+                    as_json,
+                )
+                return 2
+            require_binding = True
+            index += 1
+            continue
+        if key not in (
+            "--root",
+            "--cwd",
+            "--host-root",
+            "--host-lineage",
+            "--attempted-condition",
+        ) or index + 1 >= len(args):
+            _fleet_emit(
+                {
+                    "ok": False,
+                    "code": "VALIDATION_FAILED",
+                    "detail": "unknown or incomplete fleet option: " + key,
+                },
+                as_json,
+            )
+            return 2
+        value = args[index + 1]
+        if value.startswith("--") or not value.strip():
+            _fleet_emit(
+                {
+                    "ok": False,
+                    "code": "VALIDATION_FAILED",
+                    "detail": "fleet option has no value: " + key,
+                },
+                as_json,
+            )
+            return 2
+        if key == "--root":
+            roots.append(value)
+        elif key in options:
+            _fleet_emit(
+                {
+                    "ok": False,
+                    "code": "VALIDATION_FAILED",
+                    "detail": "duplicate fleet option: " + key,
+                },
+                as_json,
+            )
+            return 2
+        else:
+            options[key] = value
+        index += 2
+    if verb == "scan":
+        if (
+            project_root_opt
+            or dry_run
+            or require_binding
+            or any(key != "--root" for key in options)
+        ):
+            _fleet_emit(
+                {
+                    "ok": False,
+                    "code": "VALIDATION_FAILED",
+                    "detail": "fleet scan accepts only repeated --root absolute paths",
+                },
+                as_json,
+            )
+            return 2
+        result = scan(roots)
+        _fleet_emit(result, as_json)
+        return 0 if result.get("ok") else 2
+    if roots or (verb == "prepare" and dry_run):
+        _fleet_emit(
+            {
+                "ok": False,
+                "code": "VALIDATION_FAILED",
+                "detail": "fleet preflight/prepare do not accept --root; prepare is not a dry-run",
+            },
+            as_json,
+        )
+        return 2
+    if verb == "preflight" and "--attempted-condition" in options:
+        _fleet_emit(
+            {
+                "ok": False,
+                "code": "VALIDATION_FAILED",
+                "detail": "attempted condition applies only to fleet prepare",
+            },
+            as_json,
+        )
+        return 2
+    kwargs = {
+        "explicit_root": project_root_opt,
+        "host_root": options.get("--host-root"),
+        "host_lineage": options.get("--host-lineage"),
+        "require_binding": require_binding,
+    }
+    start = options.get("--cwd") or Path.cwd()
+    result = (
+        preflight(start, **kwargs)
+        if verb == "preflight"
+        else prepare(start, **kwargs, attempted_condition=options.get("--attempted-condition"))
+    )
+    if verb == "preflight":
+        result = {**result, "ok": True, "code": result["classification"], "read_only": True}
+    _fleet_emit(result, as_json)
+    return 0 if result.get("ok") else 1
+
+
 def main(argv: list[str] | None = None) -> int:
     global _ROUTE_ECHO  # noqa: PLW0603
     # ``main`` is normally one process/one invocation, but tests and embedded
@@ -5012,10 +6294,12 @@ def main(argv: list[str] | None = None) -> int:
 
     args = clean_before + (["--", *after_dashdash] if "--" in raw_args else [])
 
-    # T-1006: an explicit `--agent <id>` is a GENUINE-HANDOVER request; the
-    # bare CLI (override None) inherits the persisted STATE.agent seat. The
-    # mandatory old -> new DEC is written by handover_agent before the first
-    # mutating command below dispatches.
+    # T-1006: an explicit `--agent <id>` names the ACTING ACTOR for this
+    # invocation (CORE-001, SRC-026:R001): it does not by itself transfer the
+    # active seat -- an out-of-band actor's mutations keep STATE.agent bound to
+    # the live BOARD claim and record the actor in the journal. Ownership
+    # transfers only through the explicit authorized paths: `saipen claim
+    # <T-###>` adoption or `operations.handover_agent(..., explicit=True)`.
     global _AGENT_OVERRIDE, _RUNTIME_INFO_OVERRIDE  # noqa: PLW0603
     _AGENT_OVERRIDE = agent_opt.strip() if agent_opt and agent_opt.strip() else None
     _RUNTIME_INFO_OVERRIDE = runtime_info_opt
@@ -5029,11 +6313,20 @@ def main(argv: list[str] | None = None) -> int:
     # Explicit `-h`/`--help` stays a usage/exit-2 path and does NOT resume.
     if args and args[0] in ("-h", "--help"):
         usage_msg = (
-            "usage: saipen (continue|status|next|runtime|recover|claim <T-###> [--explicit]|"
+            "usage: saipen (continue|status|next|runtime [--prelaunch [--adapter ID] "
+            "[--no-resync]|--bootstrap|--check-freshness]|search [--hex HEX]|"
+            "recover|fleet preflight|scan|prepare|claim <T-###> [--explicit]|"
             "transition <PHASE> [T-###] [text]|checkpoint <TAXONOMY> "
-            "[T-###] [text]|goal <text>|ticket add <PRIORITY> <text>|ticket "
-            "done <T-###>|ticket block <T-###> <reason>|ticket "
-            "unblock <T-###> <decision>|improve|improve "
+            "[T-###] [text]|goal <text>|user-request <text> [--priority P#] "
+            "[--verify <text>] [--needs T-X,T-Y]|ticket add <PRIORITY> <text>|ticket "
+            "done <T-###> [--closure-mode own_patch|inherited_verified|cohort] "
+            "[--closure-cohort C-###] [--implementation-source "
+            "<release:<id>|T-###|SRC-###>] [--paths <p1,p2>]|"
+             "ticket compact <T-###>|ticket block <T-###> <reason> [--scope ticket|goal]|ticket "
+            "block-for <parent T-###> <blocker T-###> <reason> "
+            "[--scope ticket|goal]|ticket "
+            "unblock <T-###> <decision>|cohort status <C-###>|cohort ship "
+            "<C-###>|improve|improve "
             "status|improve sweep <cycle> <RUN-N/IMP-NNN> <DISPOSITION> "
             "|improve sweep-queue <cycle>|improve submit <cycle> <seat> "
             "<project> <findings.json>|improve complete <cycle> <seat> "
@@ -5044,9 +6337,10 @@ def main(argv: list[str] | None = None) -> int:
             "[--project|--global|--effective]|userperson add|remove <text> "
             "[--category NAME] [--project|--global]|userperson reset "
             "[--project|--global] --confirm|sub|rebind-home "
-            "<candidate-home>|context|acceptance <T-###>|attempt open|attempt close <RESULT> "
+            "<candidate-home>|context cold|hot|audit|orient [--handoff JSON]|"
+            "acceptance <T-###>|attempt open|attempt close <RESULT> "
             "<STOP>|brief|focus [text]|build <directive>|knowledge "
-            "status|index|retrieve <objective>|cut <target>|"
+            "status|index|retrieve <objective>|launch opencode [-- HOST-ARGS]|cut <target>|"
             "cut confirm <CUT-ID>|undo|undo confirm <CP-ID> --reason <text>) "
             "[--dry-run] "
             "[--json] [--project-root PATH] [--agent ID] [--runtime-info JSON-FILE]"
@@ -5065,11 +6359,30 @@ def main(argv: list[str] | None = None) -> int:
         if _scope == "global" or _scope_error:
             return _userperson(None, args[1:], as_json, dry_run)
 
-    project_root, root_reason = resolve_project_root(
-        Path.cwd().resolve(), explicit=project_root_opt
-    )
+    # The structured guard event (SRC-030 Part 6) binds from the SESSION cwd
+    # carried in the event, which may be a detached staging directory the
+    # ordinary project-root gate would refuse before the guard could speak.
+    if args and args[0] == "guard" and any(a.startswith("--event-json") for a in args[1:]):
+        return _guard_event(project_root_opt, args[1:], as_json)
+
+    if args and args[0] == "fleet":
+        return _fleet_command(args, project_root_opt, as_json, dry_run)
+
+    # T-1327 TARGET C: the runtime INSTALL surface is not project state. A
+    # stale installed generation is exactly the condition under which no
+    # project can be resolved yet (and the launcher runs from the canonical
+    # clone, which is not a project at all), so these flags dispatch here --
+    # before project-root resolution -- or the freshness operation is
+    # unreachable in the only situation that needs it.
+    if args and args[0] == "runtime" and _runtime_install_flags(args[1:]):
+        return _runtime_install_command(args[1:], as_json)
+
+    project_root_res = resolve_project_root(Path.cwd().resolve(), explicit=project_root_opt)
+    project_root = project_root_res.root
+    root_reason = project_root_res.source
     if project_root is None:
-        _emit({"ok": False, "code": "NOT_SAIPEN_PROJECT", "detail": root_reason}, as_json)
+        fail_code = getattr(project_root_res, "code", None) or "NOT_SAIPEN_PROJECT"
+        _emit({"ok": False, "code": fail_code, "detail": root_reason}, as_json)
         return 3
 
     # CORE-004: a genuinely bare invocation (no command after global option
@@ -5106,6 +6419,54 @@ def main(argv: list[str] | None = None) -> int:
         )
         return 2
 
+    if command == "launch":
+        # This optional explicit-envelope command pins one actor before host
+        # startup. Routine generic host launches do not use this command; Core
+        # applies canonical continuation semantics to their guard events.
+        if _AGENT_OVERRIDE is None:
+            _emit(
+                {
+                    "ok": False,
+                    "code": "ACTOR_UNBOUND",
+                    "detail": (
+                        "optional explicit host launch requires a SAIPEN seat: "
+                        "saipen --agent <seat> launch opencode -- [host args]"
+                    ),
+                },
+                as_json,
+            )
+            return 1
+        rest = args[1:]
+        if not rest:
+            _emit(
+                {
+                    "ok": False,
+                    "code": "VALIDATION_FAILED",
+                    "detail": "Use: saipen --agent <seat> launch opencode -- [host args]",
+                },
+                as_json,
+            )
+            return 2
+        host = rest[0]
+        if len(rest) > 1 and rest[1] != "--":
+            _emit(
+                {
+                    "ok": False,
+                    "code": "VALIDATION_FAILED",
+                    "detail": "host arguments must follow the -- separator",
+                },
+                as_json,
+            )
+            return 2
+        host_args = rest[2:] if len(rest) > 1 else []
+        from saipen_engine.host_launch import HostLaunchRefusal, launch_host
+
+        try:
+            return launch_host(host, project_root, _AGENT_OVERRIDE, host_args)
+        except HostLaunchRefusal as exc:
+            _emit({"ok": False, "code": "HOST_LAUNCH_REFUSED", "detail": str(exc)}, as_json)
+            return 1
+
     # CORE § 1.10 (Cyrillic-twin incident): whole-message shortcut resolution
     # is MECHANICAL and happens FIRST -- before any dispatch branch, before
     # any conversational interpretation. The raw token is normalized through
@@ -5126,12 +6487,13 @@ def main(argv: list[str] | None = None) -> int:
         command = _canonical_shortcut
         _ROUTE_ECHO = _canonical_shortcut
 
-    # T-1006/T-1014: an explicit --agent override is a genuine handover, but
-    # it is deferred -- `_ensure_handover` runs only immediately before an
-    # admissible mutation, after the concrete action's syntax/arity
-    # validation has passed. A malformed/unknown invocation therefore stays
-    # ownership-zero-write; read-only projections route under the resolved
-    # actor without touching disk.
+    # T-1006/T-1014: an explicit --agent override names the acting actor
+    # (CORE-001, SRC-026:R001); it is NOT an automatic seat transfer. The
+    # no-op `_ensure_handover` calls are retained purely for call-site
+    # stability; an admissible mutation journals the acting actor as
+    # provenance, and ownership moves only through `saipen claim` or
+    # `operations.handover_agent(..., explicit=True)`. Read-only projections
+    # route under the resolved actor without touching disk.
 
     if command == "status":
         if len(args) > 1:
@@ -5145,19 +6507,68 @@ def main(argv: list[str] | None = None) -> int:
             )
             return 2
         return _status(project_root, as_json)
+    if command == "search":
+        return _search(project_root, args, as_json)
     if command == "runtime":
-        if len(args) > 1:
+        task_class = None
+        helper_reason = None
+        control_plane = False
+        bootstrap = False
+        check_freshness = False
+        runtime_error = None
+        runtime_args = args[1:]
+        i = 0
+        while i < len(runtime_args):
+            token = runtime_args[i]
+            if token == "--task-class" and i + 1 < len(runtime_args):
+                task_class = runtime_args[i + 1]
+                i += 2
+            elif token.startswith("--task-class="):
+                task_class = token.split("=", 1)[1]
+                i += 1
+            elif token == "--helper-reason" and i + 1 < len(runtime_args):
+                helper_reason = runtime_args[i + 1]
+                i += 2
+            elif token.startswith("--helper-reason="):
+                helper_reason = token.split("=", 1)[1]
+                i += 1
+            elif token == "--control-plane":
+                control_plane = True
+                i += 1
+            elif token == "--bootstrap":
+                bootstrap = True
+                i += 1
+            elif token in ("--check-freshness", "--check"):
+                check_freshness = True
+                i += 1
+            elif token == "--prelaunch":
+                bootstrap = True
+                i += 1
+            elif token == "--no-resync":
+                i += 1
+            elif token == "--adapter" and i + 1 < len(runtime_args):
+                i += 2
+            elif token.startswith("--adapter="):
+                i += 1
+            else:
+                runtime_error = (
+                    "runtime accepts only --task-class NAME, --helper-reason NAME, "
+                    "--control-plane, --bootstrap and --check-freshness; surplus: " + token
+                )
+                break
+        if runtime_error:
             _emit(
-                {
-                    "ok": False,
-                    "code": "VALIDATION_FAILED",
-                    "detail": "runtime accepts no command arguments; surplus: "
-                    + " ".join(args[1:]),
-                },
+                {"ok": False, "code": "VALIDATION_FAILED", "detail": runtime_error},
                 as_json,
             )
             return 2
-        return _runtime(project_root, as_json)
+        if bootstrap or check_freshness:
+            # Reached only when a project WAS resolvable; the install-scoped
+            # dispatch above owns the stale/unbound case. One implementation.
+            return _runtime_install_command(args[1:], as_json)
+        return _runtime(project_root, as_json, task_class, helper_reason, control_plane)
+    if command == "guard":
+        return _guard(project_root, args[1:], as_json)
     if command == "permissions":
         if len(args) > 1:
             _emit(
@@ -5452,13 +6863,59 @@ def main(argv: list[str] | None = None) -> int:
                 {
                     "ok": False,
                     "code": "VALIDATION_FAILED",
-                    "detail": "ticket needs an action: add|done|block|unblock",
+                "detail": "ticket needs an action: add|compact|verify|done|block|block-for|unblock",
                 },
                 as_json,
             )
             return 2
         action = args[1]
         rest = args[2:]
+        if action == "compact":
+            if len(rest) != 1 or not re.fullmatch(r"T-\d+", rest[0], re.IGNORECASE):
+                _emit(
+                    {
+                        "ok": False,
+                        "code": "VALIDATION_FAILED",
+                        "detail": "ticket compact needs exactly <T-###>",
+                    },
+                    as_json,
+                )
+                return 2
+            if not dry_run and _negotiate_capability(project_root) == "read-only":
+                return _capability_refusal(as_json)
+            _ho = _ensure_handover(project_root, as_json, dry_run)
+            if _ho is not None:
+                return _ho
+            result = compact_board(
+                project_root, rest[0].upper(), _agent_for(project_root), dry_run=dry_run
+            )
+            _emit(result.to_dict(), as_json)
+            return 0 if result.ok else 1
+        if action == "verify":
+            if len(rest) < 2 or not re.fullmatch(r"T-\d+", rest[0], re.IGNORECASE):
+                _emit(
+                    {
+                        "ok": False,
+                        "code": "VALIDATION_FAILED",
+                        "detail": "ticket verify needs <T-###> <text>",
+                    },
+                    as_json,
+                )
+                return 2
+            if not dry_run and _negotiate_capability(project_root) == "read-only":
+                return _capability_refusal(as_json)
+            _ho = _ensure_handover(project_root, as_json, dry_run)
+            if _ho is not None:
+                return _ho
+            result = ticket_verify(
+                project_root,
+                rest[0].upper(),
+                _agent_for(project_root),
+                " ".join(rest[1:]),
+                dry_run=dry_run,
+            )
+            _emit(result.to_dict(), as_json)
+            return 0 if result.ok else 1
         if action == "add":
             if len(rest) < 2:
                 _emit(
@@ -5588,31 +7045,74 @@ def main(argv: list[str] | None = None) -> int:
                     as_json,
                 )
                 return 2
-            if len(rest) > 1:
+            # CORE-003: closure provenance is part of the PUBLIC grammar.
+            # An engine-only closure mode is unusable -- the FastPrompter
+            # failure happened to an agent running `saipen ...`, not to a
+            # Python caller.
+            _opts, _pos, _opt_err = _parse_value_options(rest[1:], _TICKET_DONE_OPTIONS)
+            if _opt_err:
+                _emit({"ok": False, "code": "VALIDATION_FAILED", "detail": _opt_err}, as_json)
+                return 2
+            if _pos:
                 _emit(
                     {
                         "ok": False,
                         "code": "VALIDATION_FAILED",
-                        "detail": f"ticket done takes <T-###>; surplus: {' '.join(rest[1:])}",
+                        "detail": f"ticket done takes <T-###>; surplus: {' '.join(_pos)}",
                     },
                     as_json,
                 )
                 return 2
+            _paths = [
+                part.strip()
+                for part in str(_opts.get("closure_paths", "")).replace(",", " ").split()
+                if part.strip()
+            ]
             if not dry_run and _negotiate_capability(project_root) == "read-only":
                 return _capability_refusal(as_json)
             _ho = _ensure_handover(project_root, as_json, dry_run)
             if _ho is not None:
                 return _ho
-            result = finish_ticket(project_root, rest[0], _agent_for(project_root), dry_run=dry_run)
+            result = finish_ticket(
+                project_root,
+                rest[0],
+                _agent_for(project_root),
+                dry_run=dry_run,
+                closure_mode=_opts.get("closure_mode"),
+                closure_cohort=_opts.get("closure_cohort"),
+                implementation_source=_opts.get("implementation_source"),
+                closure_paths=_paths,
+            )
             _emit(result.to_dict(), as_json)
             return 0 if result.ok else 1
-        if action in ("block", "unblock"):
-            if not rest:
+        if action in ("block", "block-for", "unblock"):
+            if not rest or (action == "block-for" and len(rest) < 2):
                 _emit(
                     {
                         "ok": False,
                         "code": "VALIDATION_FAILED",
-                        "detail": f"ticket {action} needs <T-###> [reason/decision]",
+                        "detail": (
+                            "ticket block-for needs <parent T-###> <blocker T-###> <reason>"
+                            if action == "block-for"
+                            else f"ticket {action} needs <T-###> [reason/decision]"
+                        ),
+                    },
+                    as_json,
+                )
+                return 2
+            # `--scope ticket|goal` (CORE-003) may appear anywhere after the
+            # ticket id; everything else stays the free-text reason/decision.
+            option_input = rest[2:] if action == "block-for" else rest[1:]
+            _opts, _pos, _opt_err = _parse_value_options(option_input, _TICKET_BLOCK_OPTIONS)
+            if _opt_err:
+                _emit({"ok": False, "code": "VALIDATION_FAILED", "detail": _opt_err}, as_json)
+                return 2
+            if action == "unblock" and _opts.get("scope"):
+                _emit(
+                    {
+                        "ok": False,
+                        "code": "VALIDATION_FAILED",
+                        "detail": "--scope describes a BLOCK; unblock takes no scope",
                     },
                     as_json,
                 )
@@ -5627,8 +7127,10 @@ def main(argv: list[str] | None = None) -> int:
                 action,
                 rest[0],
                 _agent_for(project_root),
-                " ".join(rest[1:]),
+                " ".join(_pos),
                 dry_run=dry_run,
+                scope=_opts.get("scope"),
+                blocked_on=rest[1] if action == "block-for" else None,
             )
             _emit(result.to_dict(), as_json)
             return 0 if result.ok else 1
@@ -5641,6 +7143,52 @@ def main(argv: list[str] | None = None) -> int:
             as_json,
         )
         return 2
+    if command == "user-request":
+        # CORE-003: the USER_INTERRUPT ingress. The complete request becomes
+        # durable Source authority BEFORE the concise BOARD projection, so a
+        # crash can never leave a ticket whose request body was lost.
+        _opts, _pos, _opt_err = _parse_value_options(
+            args[1:], {"--priority": "priority", "--verify": "verify", "--needs": "needs"}
+        )
+        if _opt_err:
+            _emit({"ok": False, "code": "VALIDATION_FAILED", "detail": _opt_err}, as_json)
+            return 2
+        if not _pos:
+            _emit(
+                {
+                    "ok": False,
+                    "code": "VALIDATION_FAILED",
+                    "detail": "Use: saipen user-request <request text> "
+                    "[--priority P#] [--verify <text>] [--needs T-X,T-Y]",
+                },
+                as_json,
+            )
+            return 2
+        if not dry_run and _negotiate_capability(project_root) == "read-only":
+            return _capability_refusal(as_json)
+        _ho = _ensure_handover(project_root, as_json, dry_run)
+        if _ho is not None:
+            return _ho
+        from saipen_engine.operations import user_request as _user_request
+
+        _needs = [
+            part.strip()
+            for part in str(_opts.get("needs", "")).replace(",", " ").split()
+            if part.strip()
+        ]
+        result = _user_request(
+            project_root,
+            _agent_for(project_root),
+            " ".join(_pos),
+            priority=_opts.get("priority") or "P1",
+            verify=_opts.get("verify"),
+            needs=_needs,
+            dry_run=dry_run,
+        )
+        _emit(result.to_dict(), as_json)
+        return 0 if result.ok else 1
+    if command == "cohort":
+        return _cohort(project_root, args[1:], as_json, dry_run)
     if command in ("goal", "gg"):
         if len(args) < 2 or not args[1].strip():
             # CORE-005: bare `goal`/`gg` is zero-write and emits exactly
