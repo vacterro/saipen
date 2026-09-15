@@ -19,6 +19,84 @@ ROOT = Path(__file__).resolve().parent.parent
 NAME = "saipen-guard"
 
 
+def content_bytes(raw: bytes) -> bytes:
+    """The artifact's CONTENT, line endings normalised to LF.
+
+    Same rule and same reason as `autoinject._content_bytes` (T-1253), applied
+    to the hook artifact, which that fix never reached: the clone holds LF
+    while the snapshot git produces for the scheduled injector holds CRLF, so
+    `tools/host_guard.py` is 3971 bytes in one and 4079 in the other without a
+    character of difference. Comparing raw bytes reported a hook installed
+    seconds ago as stale. A file that is not valid UTF-8 is compared verbatim:
+    it is not text, so there are no line endings to normalise.
+    """
+    try:
+        raw.decode("utf-8")
+    except UnicodeDecodeError:
+        return raw
+    return raw.replace(b"\r\n", b"\n").replace(b"\r", b"\n")
+
+
+def saipen_root_of(invocation: str) -> str | None:
+    """The SAIPEN root a configured hook command names, or None.
+
+    `--saipen-root` is the LAST argument `command` emits, so everything after
+    the flag is the path -- quoted by `list2cmdline`/`shlex.join` exactly the
+    way they quoted it on the way in.
+    """
+    if not invocation:
+        return None
+    marker = "--saipen-root"
+    index = invocation.rfind(marker)
+    if index < 0:
+        return None
+    tail = invocation[index + len(marker) :].strip()
+    if not tail:
+        return None
+    if tail[0] == '"' and tail.endswith('"') and len(tail) > 1:
+        return tail[1:-1]
+    if tail[0] == "'" and tail.endswith("'") and len(tail) > 1:
+        return tail[1:-1]
+    return tail
+
+
+def root_resolves(root: str | None) -> bool:
+    """Does the named SAIPEN root actually hold protocol documents?
+
+    The half the exact-string comparison never asked. A hook pointing at a home
+    that no longer exists is genuinely broken however well-formed its command
+    line is -- and a hook pointing at a DIFFERENT real home is genuinely fine,
+    which is the case that used to read stale forever (T-1338).
+    """
+    if not root or not root.strip():
+        return False
+    try:
+        base = Path(root.strip())
+        return (base / "saipen" / "BOOT.md").is_file() or (base / "BOOT.md").is_file()
+    except OSError:
+        return False
+
+
+def _same_invocation(configured: str, expected: str) -> bool:
+    """Same hook command, with the SAIPEN root treated as the variable it is.
+
+    The supported scheduled injector installs from its published snapshot while
+    `autoinject.hook_status` checks against the repository clone. Comparing the
+    embedded root as contract makes those two spellings permanently unequal, so
+    a correct, enforcing hook reported stale on every run and the freshness
+    surface became noise. Everything EXCEPT the root must still match exactly.
+    """
+    root = saipen_root_of(configured)
+    if root is None or not root_resolves(root):
+        return False
+    marker = "--saipen-root"
+    return (
+        configured[: configured.rfind(marker)] == expected[: expected.rfind(marker)]
+        if marker in expected
+        else False
+    )
+
+
 def command(host: str, artifact: Path, root: Path) -> str:
     argv = [sys.executable, str(artifact), "--host", host, "--saipen-root", str(root)]
     if os.name == "nt":
@@ -87,7 +165,15 @@ def install(host: str, home: Path, root: Path = ROOT, *, check: bool = False) ->
                     remaining.append(hook)
             if remaining or not group["hooks"]:
                 preserved.append({**group, "hooks": remaining})
-        configured = owned == [(".*", expected["hooks"][0])]
+        configured = owned == [(".*", expected["hooks"][0])] or (
+            len(owned) == 1
+            and owned[0][0] == ".*"
+            and {k: v for k, v in owned[0][1].items() if k != "command"}
+            == {k: v for k, v in expected["hooks"][0].items() if k != "command"}
+            and _same_invocation(
+                str(owned[0][1].get("command", "")), expected["hooks"][0]["command"]
+            )
+        )
         hooks["BeforeTool"] = [*preserved, expected]
     else:
         expected = {
@@ -107,10 +193,31 @@ def install(host: str, home: Path, root: Path = ROOT, *, check: bool = False) ->
         ):
             raise ValueError("reserved SAIPEN hook file contains unrelated configuration")
         configured = data == expected
+        if not configured and isinstance(data, dict) and len(data.get("hooks") or []) == 1:
+            # Same rule as the Gemini branch: the SAIPEN root is a variable,
+            # everything else is contract (T-1338).
+            entry_now = data["hooks"][0]
+            entry_want = expected["hooks"][0]
+            action_now = entry_now.get("action") or {}
+            action_want = entry_want["action"]
+            configured = (
+                data.get("version") == expected["version"]
+                and {k: v for k, v in entry_now.items() if k != "action"}
+                == {k: v for k, v in entry_want.items() if k != "action"}
+                and {k: v for k, v in action_now.items() if k != "command"}
+                == {k: v for k, v in action_want.items() if k != "command"}
+                and _same_invocation(
+                    str(action_now.get("command", "")), action_want["command"]
+                )
+            )
         data = expected
     shipped = (root / entry["hook_artifact"]).read_bytes()
     installed = artifact.is_file()
-    current = installed and artifact.read_bytes() == shipped and configured
+    current = (
+        installed
+        and content_bytes(artifact.read_bytes()) == content_bytes(shipped)
+        and configured
+    )
     if not check:
         # Preserve original settings once by content identity; never overwrite
         # a user's earlier backup. Malformed config is refused before writes.
