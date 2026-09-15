@@ -533,9 +533,77 @@ def _extract_block(text: str) -> str | None:
     return match.group(0).replace("\r\n", "\n").strip()
 
 
+def _activation_home(template_block: str, installed_block: str) -> str | None:
+    """The SAIPEN home an installed block names, or None if it is not this
+    template.
+
+    `{{SAIPEN_HOME}}` is a VARIABLE. Matching the rendered block byte-for-byte
+    treats one particular substitution as part of the contract, which is how a
+    healthy install reported stale forever (T-1337): a block pointing at the
+    source clone differs from a block pointing at the installed skill copy in
+    the home and nowhere else, and no amount of re-injection can make the two
+    spellings equal. Split on the placeholder, require every literal segment to
+    match in order, and require every gap to carry the SAME home.
+    """
+    segments = template_block.split("{{SAIPEN_HOME}}")
+    if len(segments) == 1:
+        return "" if installed_block == template_block else None
+    home: str | None = None
+    rest = installed_block
+    for index, segment in enumerate(segments):
+        if index == 0:
+            if not rest.startswith(segment):
+                return None
+            rest = rest[len(segment) :]
+            continue
+        if index == len(segments) - 1:
+            if not rest.endswith(segment):
+                return None
+            candidate = rest[: len(rest) - len(segment)]
+        else:
+            position = rest.find(segment)
+            if position < 0:
+                return None
+            candidate = rest[:position]
+            rest = rest[position + len(segment) :]
+        if home is None:
+            home = candidate
+        elif home != candidate:
+            return None
+    return home
+
+
+def _names_a_real_home(home: str) -> bool:
+    """Does the block's home actually resolve to protocol documents?
+
+    This is the half of the contract that matters and that the byte comparison
+    never checked: a block is useful when the path it sends every agent to
+    holds `BOOT.md`. A pointer at a home that does not exist is stale no matter
+    how current its prose is.
+    """
+    if not home.strip():
+        return False
+    try:
+        base = Path(home.strip())
+        return (base / "BOOT.md").is_file() or (base / "saipen" / "BOOT.md").is_file()
+    except OSError:
+        return False
+
+
 def instruction_status(adapter: dict, skill_install_dir: Path) -> str:
-    """current | stale | absent for the always-on instruction block."""
-    expected = _extract_block(rendered_activation_block(skill_install_dir))
+    """current | stale | absent for the always-on instruction block.
+
+    Current means BOTH halves: the block's prose is this generation's template,
+    and the home it names resolves to real protocol documents. Which home that
+    is belongs to whoever installed it -- the installed skill copy the injector
+    writes, or a source clone an operator deliberately points at so the agent
+    always reads live documents. Reporting the second as stale forever taught
+    the operator to ignore the freshness surface, which is how a genuine
+    staleness gets ignored too.
+    """
+    rendered = rendered_activation_block(skill_install_dir)
+    expected = _extract_block(rendered)
+    template_block = _extract_block(activation_template_path().read_text(encoding="utf-8"))
     for surface in adapter.get("instruction_surfaces") or []:
         path = _expand_home(surface)
         if not path.is_file():
@@ -548,6 +616,12 @@ def instruction_status(adapter: dict, skill_install_dir: Path) -> str:
             return "stale"
         if expected is not None and installed == expected.replace("\r\n", "\n").strip():
             return "current"
+        if template_block is not None:
+            named = _activation_home(
+                template_block.replace("\r\n", "\n").strip(), installed
+            )
+            if named is not None and _names_a_real_home(named):
+                return "current"
         return "stale"
     return "absent"
 
