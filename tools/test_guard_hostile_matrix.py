@@ -32,7 +32,7 @@ from saipen_engine.admission import (  # noqa: E402
 )
 from saipen_engine.paths import identity_file_content, new_project_lineage  # noqa: E402
 
-from test_hermetic_env import isolate_host_session  # noqa: E402
+from test_hermetic_env import isolate_host_session, retained_fixtures  # noqa: E402
 
 
 def setUpModule() -> None:
@@ -45,7 +45,15 @@ CLAIM_NOW = datetime.now(timezone.utc)
 
 #: TemporaryDirectory handles are retained so the OS reclaims them at exit
 #: instead of the suite rmtree-ing fixtures other assertions may still read.
-_TEMP: list = []
+#:
+#: T-1353: the list is PROCESS-GLOBAL, not module-global. `python -m unittest
+#: tools.test_a tools.test_b` loads named modules under the dotted spelling
+#: while they flat-import their siblings, so this file can be two live module
+#: objects at once -- measured -- and a module-global list would then be two
+#: lists. Whichever copy went out of scope first would take its handles'
+#: directories with it while the other copy's assertions were still reading
+#: them, which is the exact failure this list exists to prevent.
+_TEMP: list = retained_fixtures()
 
 STATE_TEMPLATE = """---
 phase: {phase}

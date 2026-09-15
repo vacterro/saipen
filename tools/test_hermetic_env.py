@@ -29,6 +29,7 @@ import os
 import subprocess
 import sys
 import tempfile
+import types
 import unittest
 from pathlib import Path
 
@@ -59,6 +60,32 @@ HOST_SESSION_VARIABLES = (
 FORBID_HOST_SPAWN = "SAIPEN_FORBID_HOST_SPAWN"
 
 
+#: T-1353. The isolation snapshot lives HERE, in one process-global record,
+#: not in this module's globals.
+#:
+#: `python -m unittest tools.test_a tools.test_b` loads the named modules under
+#: the DOTTED spelling while those modules flat-import their siblings, so this
+#: file can be two live module objects in one interpreter -- measured: the mix
+#: produces two `test_hermetic_env`. Two copies each holding their own snapshot
+#: each strip and each restore, and the second restore puts back what the first
+#: already restored: the environment is repaired twice from two different
+#: pictures of "before", inside the layer every other fixture trusts for its
+#: isolation. A registry keyed in `sys.modules` is reached identically by every
+#: copy, so they cooperate instead of racing.
+_REGISTRY_NAME = "_saipen_hermetic_isolation"
+
+
+def _registry() -> types.SimpleNamespace:
+    record = sys.modules.get(_REGISTRY_NAME)
+    if record is None:
+        record = types.ModuleType(_REGISTRY_NAME)
+        record.depth = 0
+        record.removed = {}
+        record.previous_interlock = None
+        sys.modules[_REGISTRY_NAME] = record
+    return record
+
+
 def isolate_host_session() -> dict[str, str]:
     """Remove host-session carriers now; restore them when the module ends.
 
@@ -68,24 +95,61 @@ def isolate_host_session() -> dict[str, str]:
 
     It also arms the real-host spawn interlock for the lifetime of the module
     (see `FORBID_HOST_SPAWN`); that too is undone by the cleanup.
+
+    Reference-counted across every copy of this file (see `_REGISTRY_NAME`):
+    the FIRST call takes the picture and strips, later calls only raise the
+    count, and the environment is restored exactly once, by the last cleanup
+    to run. Nesting is therefore safe, and so is being imported twice.
     """
-    removed = {
-        key: os.environ.pop(key) for key in HOST_SESSION_VARIABLES if key in os.environ
-    }
-    previous_interlock = os.environ.get(FORBID_HOST_SPAWN)
+    record = _registry()
+    if record.depth == 0:
+        record.removed = {
+            key: os.environ.pop(key) for key in HOST_SESSION_VARIABLES if key in os.environ
+        }
+        record.previous_interlock = os.environ.get(FORBID_HOST_SPAWN)
+    else:
+        for key in HOST_SESSION_VARIABLES:
+            os.environ.pop(key, None)
+    record.depth += 1
     os.environ[FORBID_HOST_SPAWN] = "1"
 
     def restore() -> None:
+        record.depth -= 1
+        # An intermediate cleanup still STRIPS. Only the restore of the
+        # original picture waits for the last one. A module that sets a
+        # carrier on purpose -- the binding-inheritance tests do -- must not
+        # leak it into whatever module runs next just because another
+        # isolation is still open, which is what returning early here without
+        # stripping would have caused.
         for key in HOST_SESSION_VARIABLES:
             os.environ.pop(key, None)
-        os.environ.update(removed)
-        if previous_interlock is None:
+        if record.depth > 0:
+            os.environ[FORBID_HOST_SPAWN] = "1"
+            return
+        os.environ.update(record.removed)
+        if record.previous_interlock is None:
             os.environ.pop(FORBID_HOST_SPAWN, None)
         else:
-            os.environ[FORBID_HOST_SPAWN] = previous_interlock
+            os.environ[FORBID_HOST_SPAWN] = record.previous_interlock
+        record.removed = {}
+        record.previous_interlock = None
 
     unittest.addModuleCleanup(restore)
-    return removed
+    return dict(record.removed)
+
+
+def retained_fixtures() -> list:
+    """The process-global list that keeps disposable fixtures alive.
+
+    T-1353, same reason as the isolation registry: a module that holds its
+    `TemporaryDirectory` handles in its own globals holds them once PER COPY,
+    and a copy that goes out of scope takes its handles' directories with it
+    while another copy's assertions are still reading them.
+    """
+    record = _registry()
+    if not hasattr(record, "fixtures"):
+        record.fixtures = []
+    return record.fixtures
 
 
 def hermetic_env(base: dict[str, str] | None = None, **overrides: str | None) -> dict[str, str]:
