@@ -37,6 +37,7 @@ import zipfile
 from pathlib import Path
 
 TOOLS = Path(__file__).resolve().parent
+REPO = TOOLS.parent
 if str(TOOLS) not in sys.path:
     sys.path.insert(0, str(TOOLS))
 
@@ -177,6 +178,58 @@ class ForeignProjectPackagingTests(unittest.TestCase):
                 f"delivery gate:\n{completed.stdout[-1500:]}",
             )
             self.assertEqual(completed.returncode, 0, completed.stdout[-2500:])
+
+
+class ThisRepositorysInventoryTests(unittest.TestCase):
+    """T-1350: a declared sandbox must not arrive as delivery content.
+
+    `.gitignore` already ruled on this once for saiwiki's `wiki/`, in its own
+    words: a kitchen is a sandbox, and a nested git repository inside one
+    becomes "a 160000 entry pointing at a commit no clone of this repo can
+    fetch, with none of the content". saipython's `pen/` is the other sandbox
+    -- its own tracked marker calls it scratch holding CLONES of target files
+    -- and it was missed, so it had grown two nested repositories and 1534
+    untracked files, including whole copies of this repository's own engine,
+    all of which the whole-project inventory was collecting as real content.
+
+    The check is on the INVENTORY rather than on the ignore file, so it stays
+    true however the exclusion is spelled, and it is measured on this
+    repository because that is where the sandboxes are.
+    """
+
+    def _inventory(self) -> list[str]:
+        result = _git(REPO, "ls-files", "--others", "--exclude-standard", "-z")
+        tracked = _git(REPO, "ls-files", "-z")
+        entries: list[str] = []
+        for completed in (result, tracked):
+            self.assertEqual(completed.returncode, 0, completed.stderr[-400:])
+            entries.extend(e for e in completed.stdout.split("\0") if e.strip())
+        return entries
+
+    def test_no_kitchen_sandbox_scratch_enters_the_delivery_inventory(self) -> None:
+        entries = self._inventory()
+        self.assertGreater(len(entries), 100, "the inventory probe found nothing to check")
+        scratch = [
+            entry
+            for entry in entries
+            if "/kitchen/pen/" in entry and not entry.endswith("/pen/_gitkeep")
+        ]
+        self.assertEqual(scratch[:10], [], f"{len(scratch)} sandbox file(s) in the inventory")
+
+    def test_the_sandbox_marker_itself_stays_tracked(self) -> None:
+        """Ignoring the contents must not erase what says the area is scratch."""
+        tracked = _git(REPO, "ls-files", "-z").stdout.split("\0")
+        markers = [entry for entry in tracked if entry.endswith("/kitchen/pen/_gitkeep")]
+        self.assertTrue(markers, "the pen's marker stopped being tracked")
+
+    def test_no_inventory_entry_is_a_directory(self) -> None:
+        """A directory entry means git collapsed something it will not descend.
+
+        Today that is only ever an embedded repository, and it is the shape
+        that made the packager refuse this repository outright.
+        """
+        collapsed = [entry for entry in self._inventory() if entry.endswith("/")]
+        self.assertEqual(collapsed, [], "git collapsed a directory into the inventory")
 
 
 class ProtocolSourceBranchTests(unittest.TestCase):

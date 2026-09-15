@@ -29,6 +29,17 @@ thoughts/
 # fetch, with none of the content. It landed in v7.122.0 exactly that way.
 .saipen/extensions/subs/*/kitchen/wiki/
 
+# T-1350: the same rule, one directory over. saipython's `pen/` is the other
+# kitchen sandbox -- its own tracked marker says "Clones of target files land
+# here (read from the main tree, edited only as copies). Never the originals.
+# Scratch" -- and it was missed when the wiki case was ruled on. It had grown
+# two nested git repositories and 1534 untracked scratch files, including whole
+# copies of this repository's tools/saipen.py and tools/saipen_engine/, all of
+# which the whole-project delivery inventory was collecting as real content.
+# The marker itself stays tracked, so the directory keeps saying what it is.
+.saipen/extensions/subs/*/kitchen/pen/*
+!.saipen/extensions/subs/*/kitchen/pen/_gitkeep
+
 # Per-machine agent permissions. Untracked and unshared on purpose: it is
 # local trust, not project content, and `git add -A` would otherwise publish
 # one machine's allowlist as everyone's.
