@@ -54,7 +54,7 @@ import json
 import time
 from pathlib import Path
 
-from .paths import PROVENANCE_EXPLICIT, PROVENANCE_HOST_SESSION, resolve_project_root
+from .paths import resolve_project_root
 
 PROTECTED_CANONICAL_NAMESPACES = (
     ".saipen/STATE.md",
@@ -841,27 +841,19 @@ def evaluate_admission(
 
     if targets and all(cls == "outside" for cls, _c in resolved):
         # T-1351 handled the foreign-canonical case per target in the
-        # classification loop above, so everything reaching here is an
-        # ordinary file outside the root and jurisdiction decides it.
-        if root_res.provenance in (PROVENANCE_EXPLICIT, PROVENANCE_HOST_SESSION):
-            return result(
-                ok=False,
-                code="PROJECT_IDENTITY_MISMATCH",
-                admitted=False,
-                applicable=True,
-                project_root=str(root),
-                target=canonical_targets[0],
-                targets=canonical_targets,
-                action=action_name,
-                effect=effect,
-                outside_root=True,
-                provenance=root_res.provenance,
-                project_lineage=root_res.lineage,
-                detail=(
-                    "a bound project identity cannot authorize mutation outside its root; "
-                    "resolve and admit the target project independently"
-                ),
-            )
+        # classification loop above, so everything reaching here is an ordinary
+        # file that belongs to NO SAIPEN project.
+        #
+        # T-1354: it is admitted whoever is asking. The invariant this branch
+        # once carried -- "a bound project identity cannot authorize mutation
+        # outside its root" -- is about ANOTHER PROJECT'S lifecycle, and that
+        # is now refused on every surface and under every provenance, which is
+        # strictly stronger than the provenance test that used to stand here.
+        # What was left behind was friction, not protection: a bound OpenCode
+        # session could not write its own scratch file under V:/_TEMP_ while a
+        # shell command wrote the identical path freely -- one question, two
+        # answers, measured on the installed runtime. Refuse the minimum unsafe
+        # operation: a directory that is no project has no lifecycle to protect.
         return result(
             ok=True,
             code="ADMITTED_EXTERNAL",

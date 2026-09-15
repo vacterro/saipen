@@ -505,7 +505,14 @@ class FleetRecoveryBindingTests(unittest.TestCase):
             recover=lambda *_args: calls.append(1) or {"ok": True, "code": "REPAIRED"},
         )
         self.assertEqual(len(calls), 1)
-        self.assertEqual(result["code"], "RECOVERY_FAILED")
+        # T-1354: the code now says WHY there is no second attempt. The repair
+        # ran, the state still asks for the same repair, so the automatic route
+        # is exhausted -- and an exhausted route does not ask for a reissue,
+        # because reissuing points the caller back at the same bytes. That loop
+        # was measured live: every consequential tool in a real session refused
+        # forever with "reread and reissue".
+        self.assertEqual(result["code"], "RECOVERY_EXHAUSTED")
+        self.assertFalse(result["requires_reissue"], result)
         again = prepare(
             root,
             host_root=root,
@@ -513,7 +520,8 @@ class FleetRecoveryBindingTests(unittest.TestCase):
             attempted_condition=result["attempted_condition"],
             recover=lambda *_args: calls.append(2) or {"ok": True, "code": "REPAIRED"},
         )
-        self.assertEqual(again["code"], "RECOVERY_FAILED")
+        self.assertEqual(again["code"], "RECOVERY_EXHAUSTED")
+        self.assertFalse(again["requires_reissue"], again)
         self.assertEqual(again["recovery_attempts"], 0)
         self.assertEqual(calls, [1])
         self.assertEqual(

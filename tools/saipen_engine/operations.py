@@ -3536,6 +3536,28 @@ def compact_board(
             "agent": _seat_agent(state, docs["board"].text_norm, agent),
         },
     )
+    # T-1354 RECOVERY LIVENESS. This gate judged the WHOLE proposed board, so a
+    # repair scoped to ONE record was refused by unrelated records that were
+    # already invalid before anybody touched anything. Measured on three real
+    # projects at once: `saipen ticket compact T-195` -- the canonical repair
+    # the protocol itself names and Fleet itself dispatches -- answered
+    # "BOARD: T-196 has no [T-###] allocation event", so the named route could
+    # never run, Fleet reported RECOVERY_FAILED forever, and every consequential
+    # tool in those sessions was refused. A repair that cannot be executed from
+    # the state that asks for it is not a recovery route.
+    #
+    # The fix is not a weaker gate: it is a gate that judges the REPAIR instead
+    # of the repository's history. An error the proposal INTRODUCES still
+    # refuses, exactly as before. An error that was already there, unchanged,
+    # is pre-existing residue -- it is carried in the result so nothing is
+    # silently legitimized, and it is not this repair's veto.
+    before_errors = validate_texts(
+        docs["state"].text_norm,
+        docs["board"].text_norm,
+        docs["log"].text_norm,
+        current_agent=agent,
+        sealed_events=docs["_history"],
+    )
     errors = validate_texts(
         new_state,
         compacted.board_text,
@@ -3543,12 +3565,15 @@ def compact_board(
         current_agent=agent,
         sealed_events=docs["_history"],
     )
-    if errors:
+    inherited = set(before_errors)
+    introduced = [error for error in errors if error not in inherited]
+    if introduced:
         return _refuse(
             "VALIDATION_FAILED",
-            "proposed BOARD compaction fails fast validation: " + "; ".join(errors[:5]),
+            "proposed BOARD compaction fails fast validation: " + "; ".join(introduced[:5]),
             ticket=ticket_id,
         )
+    carried_findings = [error for error in errors if error in inherited]
     targets = [
         *compacted.targets,
         *_log_targets(docs, new_log),
@@ -3568,6 +3593,11 @@ def compact_board(
             "ticket": ticket_id,
             "event_id": f"E-{event_numbers[0]}",
             "detail_ref": compacted.detail_ref,
+            # T-1354: pre-existing findings this repair did not touch travel
+            # WITH the success, so a repaired record never reads as a clean
+            # board and the legacy records stay visible and unlegitimized.
+            "carried_findings": carried_findings[:10],
+            "carried_finding_count": len(carried_findings),
         },
         op_id=op_id,
         receipt_metadata={
@@ -3578,6 +3608,11 @@ def compact_board(
             "original_record_sha256": compacted.original_hash,
             "event_id": f"E-{event_numbers[0]}",
             "reason": "lossless historical BOARD repair",
+            # T-1354: the findings this repair INHERITED, declared so the
+            # post-write verifier can judge the write instead of the
+            # repository's history -- and journaled, so the exemption is
+            # auditable and belongs to this one operation.
+            "inherited_findings": before_errors[:50],
         },
     )
     if dry_run:

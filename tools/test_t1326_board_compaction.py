@@ -187,9 +187,20 @@ class CompactionAtomicityTests(unittest.TestCase):
         root, _ = _legacy_project()
         before = (root / ".saipen" / "BOARD.md").read_bytes()
         ops = _live_ops()
-        with patch.object(
-            ops, "validate_texts", return_value=["injected final validation failure"]
-        ):
+        # T-1354: the failure has to be one the PROPOSAL introduces. Compaction
+        # now judges the repair rather than the repository's history -- an
+        # error that was already there, unchanged, is pre-existing residue and
+        # no longer this repair's veto -- so a stub that fails every call would
+        # be indistinguishable from a legacy board and would prove nothing
+        # about atomicity. First call is the BEFORE picture, second is the
+        # proposal.
+        calls = {"n": 0}
+
+        def failing_proposal(*_args, **_kwargs):
+            calls["n"] += 1
+            return [] if calls["n"] == 1 else ["injected final validation failure"]
+
+        with patch.object(ops, "validate_texts", side_effect=failing_proposal):
             result = ops.compact_board(root, "T-1315", "test-agent")
         self.assertFalse(result.ok)
         self.assertEqual(result.code, "VALIDATION_FAILED")

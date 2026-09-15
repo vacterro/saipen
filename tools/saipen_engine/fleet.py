@@ -806,16 +806,29 @@ def prepare(
             "requires_reissue": False,
         }
     if attempted_condition is not None and attempted_condition == before.get("condition_id"):
+        # T-1354. The automatic route is EXHAUSTED, not pending. This
+        # generation already had its one attempt and did not move, so asking
+        # for a reissue "against current bytes" points at the same bytes and
+        # the next action lands here again -- the very cycle this branch exists
+        # to stop, expressed as an instruction to repeat it. Measured live: a
+        # user project answered RECOVERY_FAILED with requires_reissue true on
+        # every call once the host started carrying the attempted condition,
+        # so every consequential tool in that session was refused forever.
+        #
+        # `requires_reissue` means THE BYTES MOVED. They did not. The condition
+        # and its canonical next command still travel, so the gate can decide
+        # what is still safe and a human can see the route.
         return {
             **before,
             "ok": False,
-            "code": "RECOVERY_FAILED",
+            "code": "RECOVERY_EXHAUSTED",
             "recovered": False,
             "recovery_attempts": 0,
-            "requires_reissue": True,
+            "requires_reissue": False,
             "reason": (
                 "unchanged canonical generation already received one automatic "
-                "recovery attempt"
+                "recovery attempt; the automatic route is exhausted and the "
+                "named canonical command is the remaining route"
             ),
         }
     plan = plan_repair(before.get("canonical_next_command"))
@@ -874,16 +887,63 @@ def prepare(
         "event": operation.get("event"),
     }
     if not operation.get("ok"):
+        # T-1354: `requires_reissue` means THE BYTES MOVED, so the payload you
+        # were holding is stale. A repair that refused and changed nothing has
+        # moved nothing, and telling the model to "reissue against current
+        # bytes" sends it back to the SAME bytes -- the next action hits the
+        # identical wall, forever. The unbounded loop this file already refuses
+        # to run INSIDE one call (below) simply moved across calls, and it was
+        # measured on three separate real projects at once: a BOARD record is
+        # oversized, the canonical repair is `saipen ticket compact T-###`, and
+        # it refuses because OTHER records on the same board predate the
+        # allocation contract. The route is named, reachable and impossible.
+        #
+        # The honest answer is that the AUTOMATIC route is exhausted. The
+        # condition and its canonical next command still travel, so a human --
+        # or the gate deciding what is still safe -- has everything it needs.
+        # T-1354: exhaustion is keyed on the REPAIR, not on a condition hash.
+        #
+        # `attempted_condition` was meant to stop the loop, but a failed repair
+        # perturbs the generation it is keyed on -- recovery evidence, journal
+        # churn -- so the key never matches twice and the cycle
+        # `prepare -> SAFE repair -> validation refusal -> prepare -> same
+        # repair` runs forever. Measured live on two user projects: every
+        # consequential tool refused, on every call, with "reissue against
+        # current bytes".
+        #
+        # If the SAME named repair is still what the state asks for, the
+        # automatic route has been tried and did not work. Reissuing cannot
+        # change that, so the loop ends here and the named command travels on
+        # for the operator.
+        after_plan = plan_repair(after.get("canonical_next_command"))
+        same_repair = (
+            after_plan is not None
+            and after_plan.get("operation") == plan.get("operation")
+            and after_plan.get("ticket") == plan.get("ticket")
+        )
         return {
             **after,
             "ok": False,
-            "code": "RECOVERY_FAILED",
+            "code": "RECOVERY_EXHAUSTED" if same_repair else "RECOVERY_FAILED",
             "recovered": False,
             "recovery_attempts": 1,
-            "requires_reissue": True,
+            # A FAILED repair never earns a reissue, whatever it perturbed on
+            # the way down. `requires_reissue` promises the caller that
+            # rereading and reissuing will meet a changed, better state; a
+            # repair that refused promises nothing of the sort. Keying this on
+            # a delta let boards with several oversized records loop forever:
+            # each call picked a DIFFERENT record, failed the same way, and
+            # moved both the condition and the named command, so no key ever
+            # matched twice. Measured on two user projects.
+            "requires_reissue": False,
             "attempted_condition": before.get("condition_id"),
             "recovery_result": {**repair_evidence, "detail": operation.get("detail")},
-            "reason": "canonical repair failed",
+            "reason": (
+                "the named canonical repair failed and the state still asks for the "
+                "same repair: the automatic route is exhausted"
+                if same_repair
+                else "canonical repair failed"
+            ),
         }
     if after["classification"] == CLASS_SAFE:
         if after.get("condition_id") == before.get("condition_id"):
@@ -893,15 +953,18 @@ def prepare(
             return {
                 **after,
                 "ok": False,
-                "code": "RECOVERY_FAILED",
+                # T-1354: one vocabulary for "the automatic route ran and the
+                # state still asks for the same thing". Nothing moved, so
+                # nothing can be reissued against.
+                "code": "RECOVERY_EXHAUSTED",
                 "recovered": False,
                 "recovery_attempts": 1,
-                "requires_reissue": True,
+                "requires_reissue": False,
                 "attempted_condition": before.get("condition_id"),
                 "recovery_result": repair_evidence,
                 "reason": (
                     "canonical repair reported success but the canonical generation "
-                    "did not change"
+                    "did not change; the automatic route is exhausted"
                 ),
             }
         # Converged one brick. The FRESH canonical state travels with the
@@ -925,7 +988,8 @@ def prepare(
             "code": "RECOVERY_FAILED",
             "recovered": False,
             "recovery_attempts": 1,
-            "requires_reissue": True,
+            # T-1354: only stale when the generation actually moved.
+            "requires_reissue": after.get("condition_id") != before.get("condition_id"),
             "attempted_condition": before.get("condition_id"),
             "recovery_result": repair_evidence,
             "reason": "current state did not become BOUND_VALID after the canonical repair",

@@ -145,6 +145,41 @@ class TestAdmissionAuthority(unittest.TestCase):
         self.assertEqual(write["code"], "NO_ACTIVE_WORK")
 
     def test_bound_project_cannot_authorize_foreign_root_mutation(self):
+        """T-1354: the invariant is about ANOTHER PROJECT, so the fixture is one.
+
+        This case used to hand the guard a bare `NamedTemporaryFile` -- an
+        ordinary file belonging to no project at all -- and call refusing it
+        proof that a bound identity cannot reach a foreign root. The two are
+        not the same thing, and the difference was not academic: a bound
+        OpenCode session could not write its own scratch file under
+        `V:/_TEMP_` while a shell command wrote the identical path freely.
+        The invariant is kept and now tested against what it names.
+        """
+        with tempfile.TemporaryDirectory(prefix="saipen-foreign-") as tmp:
+            foreign = Path(tmp) / "other-project"
+            (foreign / ".saipen").mkdir(parents=True)
+            (foreign / ".saipen" / "STATE.md").write_text(
+                (self.saipen_dir / "STATE.md").read_text(encoding="utf-8"), encoding="utf-8"
+            )
+            (foreign / ".saipen" / "IDENTITY.md").write_text(
+                identity_file_content(new_project_lineage()), encoding="utf-8"
+            )
+            result = evaluate_admission(
+                self.root,
+                target_path=str(foreign / ".saipen" / "STATE.md"),
+                explicit_root=self.root,
+                action="write",
+            )
+        self.assertFalse(result["admitted"], result)
+        self.assertEqual(result["code"], "PROTECTED_CANONICAL_NAMESPACE")
+
+    def test_a_file_belonging_to_no_project_is_not_a_foreign_root(self):
+        """The other half: refuse the minimum unsafe operation.
+
+        A directory that is no SAIPEN project has no lifecycle to protect, and
+        the shell surface already writes it, so refusing the file tool was
+        friction rather than protection.
+        """
         with tempfile.NamedTemporaryFile() as ext_file:
             result = evaluate_admission(
                 self.root,
@@ -152,8 +187,8 @@ class TestAdmissionAuthority(unittest.TestCase):
                 explicit_root=self.root,
                 action="write",
             )
-        self.assertFalse(result["admitted"], result)
-        self.assertEqual(result["code"], "PROJECT_IDENTITY_MISMATCH")
+        self.assertTrue(result["admitted"], result)
+        self.assertEqual(result["code"], "ADMITTED_EXTERNAL")
 
     def test_performance_budget(self):
         # Warmup

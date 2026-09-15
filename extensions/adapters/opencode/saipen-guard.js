@@ -683,8 +683,34 @@ const SaipenGuard = async (context) => {
             "consequential action against current project bytes.",
           );
         }
-        if (fleetResult.status !== 0 || !fleet.ok ||
-            !["BOUND_VALID", "NON_SAIPEN"].includes(fleet.classification)) {
+        // T-1354. A project condition is not a licence to stop the agent.
+        //
+        // This used to continue only on BOUND_VALID/NON_SAIPEN, so ANY
+        // recovery classification became a process-wide execution ban: a live
+        // OpenCode session in a project whose only unresolved fact was one
+        // 2026-09-02 ticket could read, glob and grep indefinitely and do
+        // nothing else -- including writing an unrelated file under
+        // V:\_TEMP_. It is permanent in two ways: an operator-only condition
+        // cannot clear itself, and an automatable one whose repair can never
+        // succeed keeps the ban too.
+        //
+        // The ban was also redundant. Asked about the SAME blocked project,
+        // `evaluate_admission` already answers per operation and already
+        // refuses the minimum unsafe one -- protected canonical paths, another
+        // project's canonical state, recovery debt, invalid protocol state, no
+        // active Work. That verdict is computed above and is thrown on right
+        // below. What this gate adds, and keeps, is the part admission cannot
+        // see: a stale payload (`requires_reissue`, above) and an identity that
+        // does not resolve at all.
+        //
+        // Closed set, so an unrecognised classification still fails closed.
+        const CONTINUE_ON = [
+          "BOUND_VALID",
+          "NON_SAIPEN",
+          "BOUND_RECOVERY_REQUIRED_SAFE",
+          "BOUND_RECOVERY_REQUIRED_BLOCKED",
+        ];
+        if (!CONTINUE_ON.includes(fleet.classification)) {
           throw new Error(
             `SAIPEN_FLEET_REFUSAL: ${verdict.block ? verdict.code : fleet.reason_code}: ` +
             `the host tool did not execute (${fleet.code}: ` +

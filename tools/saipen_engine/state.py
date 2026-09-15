@@ -12,8 +12,47 @@ from .board import strict_iso_utc
 from .registry import load_registry, require_mapping, require_string_list
 
 
+def _decode_single_quoted(raw: str) -> str | None:
+    """Decode a SINGLE-quoted scalar exactly, or None when not quoted.
+
+    T-1354. This writer only ever emits double quotes, so its own files always
+    round-tripped and the gap stayed invisible -- until a STATE written by
+    something else arrived. A real project carried `blocker: ''`, YAML's
+    single-quoted empty string, and it decoded to the two-character string
+    `''`, which is truthy: the shared binding brake then refused every
+    consequential tool in that project with WAIT_BLOCKED, for a blocker no
+    human had set and no operation could clear. An agent that could read the
+    repository and do nothing else, stopped by two apostrophes.
+
+    Single-quoted YAML has exactly one escape: a doubled apostrophe inside the
+    body is one apostrophe. Nothing else is special -- no backslash escapes --
+    which is why this decodes verbatim rather than approximately.
+    """
+    if not (len(raw) >= 2 and raw[0] == "'" and raw[-1] == "'"):
+        return None
+    body = raw[1:-1]
+    # An odd run of apostrophes cannot be a well-formed single-quoted scalar
+    # (`'''` is an opening quote, an escape half and nothing else). Refusing to
+    # guess keeps a malformed scalar verbatim instead of inventing a value.
+    i = 0
+    out: list[str] = []
+    while i < len(body):
+        if body[i] == "'":
+            if i + 1 < len(body) and body[i + 1] == "'":
+                out.append("'")
+                i += 2
+                continue
+            return None
+        out.append(body[i])
+        i += 1
+    return "".join(out)
+
+
 def _decode_quoted(raw: str) -> str | None:
-    """Decode a double-quoted scalar exactly, or None when not quoted."""
+    """Decode a quoted scalar exactly, or None when not quoted."""
+    single = _decode_single_quoted(raw)
+    if single is not None:
+        return single
     if not (len(raw) >= 2 and raw[0] == '"' and raw[-1] == '"'):
         return None
     body = raw[1:-1]

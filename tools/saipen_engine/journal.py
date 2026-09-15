@@ -3235,7 +3235,32 @@ def _verifier_for(policy: str):
     if policy == "core_fast":
         from . import fast_check
 
-        return lambda root, targets, receipt_metadata=None: fast_check.validate_project(root)
+        def _core_fast(root, targets, receipt_metadata=None) -> list[str]:
+            """Judge the WRITE, not the repository's history (T-1354).
+
+            A legacy repository can carry findings that predate every rule now
+            in force. Blaming a repair for them made the protocol's OWN named
+            recovery unreachable: `saipen ticket compact T-195`, dispatched by
+            Fleet itself, refused with "BOARD: T-196 has no [T-###] allocation
+            event" -- a record it never touched -- so three real projects could
+            never converge and every consequential tool in those sessions was
+            refused.
+
+            Subtraction is never inferred. An operation must DECLARE the
+            findings it inherited, in its journaled receipt, where the
+            exemption is auditable after the fact and belongs to that one
+            operation. Anything the write INTRODUCES still fails here exactly
+            as before, and the declared residue is carried, not cleared: the
+            legacy records stay reported and stay unlegitimized.
+            """
+            errors = fast_check.validate_project(root) or []
+            inherited = (receipt_metadata or {}).get("inherited_findings")
+            if not isinstance(inherited, (list, tuple)) or not inherited:
+                return errors
+            declared = {str(item) for item in inherited}
+            return [error for error in errors if str(error) not in declared]
+
+        return _core_fast
     if policy == "improve_atomic_file":
         return verify_improve
     if policy == "userperson":
