@@ -213,6 +213,45 @@ def is_protected_canonical_path(rel_path: str | Path) -> bool:
     return False
 
 
+def foreign_protected_canonical(canonical_absolute: str | Path) -> str | None:
+    """The protected canonical path an OUTSIDE target names in ANOTHER project.
+
+    T-1351. Jurisdiction-by-root is right for ordinary files outside the root:
+    a session working in one repository may legitimately edit a sibling, and
+    the protocol has nothing to say about it. It is not right for another
+    SAIPEN project's canonical state, which is that project's LIFECYCLE and
+    belongs to that project's own admission -- never to this session's
+    jurisdiction, whoever asked.
+
+    Without this the same question had two answers. A shell command naming
+    anything under `.saipen` was refused by PATH SHAPE regardless of root,
+    while a file tool handed the identical absolute path was admitted by ROOT
+    JURISDICTION, so an agent reaching for `edit` succeeded where an agent
+    reaching for `bash` failed. Measured against two real foreign projects.
+
+    Returns the project-relative protected path, or None when the target is an
+    ordinary file (or lives in no SAIPEN project at all).
+    """
+    path = Path(canonical_absolute)
+    for ancestor in path.parents:
+        try:
+            if not (ancestor / ".saipen").is_dir():
+                continue
+        except OSError:
+            # An unreadable ancestor is not evidence of innocence, but it is
+            # also not this predicate's call: the caller's escape/refusal
+            # paths own unresolvable input.
+            return None
+        try:
+            relative = path.relative_to(ancestor).as_posix()
+        except ValueError:  # pragma: no cover - parents() guarantees this holds
+            return None
+        # The NEAREST enclosing project decides. Climbing past it would judge
+        # the path against an outer project whose namespace it is not in.
+        return relative if is_protected_canonical_path(relative) else None
+    return None
+
+
 def get_adapter(name: str) -> dict | None:
     """Retrieve adapter metadata from the central registry."""
     entry = ADAPTER_REGISTRY.get(str(name).lower())
@@ -690,6 +729,44 @@ def evaluate_admission(
                     "forbidden; mutations must go through canonical saipen commands"
                 ),
             )
+        if classification == "outside" and effect != "read":
+            # T-1351: namespace before jurisdiction, and PER TARGET.
+            #
+            # Jurisdiction-by-root is right for ordinary files outside the
+            # root -- a session working in one repository may legitimately
+            # edit a sibling. It is not right for another SAIPEN project's
+            # canonical state, which is that project's LIFECYCLE and is
+            # admitted by its own root, never by this session's jurisdiction.
+            # The shell surface already refused those paths by shape, so a
+            # file tool admitting them meant one question had two answers and
+            # the agent picked the surface.
+            #
+            # The check lives in this loop rather than in the all-outside
+            # branch below because a multi-file effect refuses on ANY target:
+            # batching the foreign canonical path beside an ordinary in-root
+            # file would otherwise skip that branch entirely and be admitted.
+            foreign_relative = foreign_protected_canonical(canonical)
+            if foreign_relative:
+                return result(
+                    ok=False,
+                    code="PROTECTED_CANONICAL_NAMESPACE",
+                    admitted=False,
+                    project_root=str(root),
+                    target=canonical,
+                    targets=[canon for _cls, canon in resolved],
+                    action=action_name,
+                    effect=effect,
+                    protected=True,
+                    outside_root=True,
+                    foreign_project=True,
+                    foreign_target=foreign_relative,
+                    provenance=root_res.provenance,
+                    detail=(
+                        "target is another SAIPEN project's protected canonical state "
+                        f"('{foreign_relative}'); that project's lifecycle is admitted "
+                        "by its own root, never by this session's jurisdiction"
+                    ),
+                )
         if classification == "escape":
             if effect == "read":
                 continue
@@ -763,6 +840,9 @@ def evaluate_admission(
         )
 
     if targets and all(cls == "outside" for cls, _c in resolved):
+        # T-1351 handled the foreign-canonical case per target in the
+        # classification loop above, so everything reaching here is an
+        # ordinary file outside the root and jurisdiction decides it.
         if root_res.provenance in (PROVENANCE_EXPLICIT, PROVENANCE_HOST_SESSION):
             return result(
                 ok=False,
