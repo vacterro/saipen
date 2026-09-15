@@ -292,6 +292,68 @@ class OrdinaryWorkOutsideTheBlockedSurfaceTests(unittest.TestCase):
         )
 
 
+class RecoveryDebtScopeTests(unittest.TestCase):
+    """Point 4: unfinished work blocks the files it will write, not the agent.
+
+    An interrupted canonical write is real debt. It is debt against the FILES
+    the replay is going to touch, and those are recorded exactly in the
+    operation. Refusing every consequential tool for it made one interrupted
+    BOARD compaction turn a whole repository read-only, measured in the field.
+    """
+
+    def setUp(self) -> None:
+        self._tmp = tempfile.TemporaryDirectory(prefix="t1354-debt-")
+        self.addCleanup(self._tmp.cleanup)
+        self.base = Path(self._tmp.name)
+
+    def _with_pending(self, paths: list[str], *, readable: bool = True) -> Path:
+        root = project(self.base, "debt")
+        op_dir = root / ".saipen" / "recovery" / "ops" / "op-fixture"
+        op_dir.mkdir(parents=True)
+        (op_dir / "operation.json").write_text(
+            "not json at all"
+            if not readable
+            else json.dumps(
+                {
+                    "op_id": "op-fixture",
+                    "created_at": "2026-09-12T00:00:00Z",
+                    "status": "APPLIED",
+                    "targets": [{"path": path} for path in paths],
+                }
+            ),
+            encoding="utf-8",
+        )
+        return root
+
+    def test_work_outside_the_unfinished_write_proceeds(self) -> None:
+        root = self._with_pending([".saipen/BOARD.md", ".saipen/LOG.md"])
+        result = evaluate_admission(root, target_path="src/app.py", action="edit")
+        self.assertTrue(
+            result["admitted"],
+            "an interrupted BOARD write stopped an edit to a source file no "
+            f"replay will ever touch: {result}",
+        )
+
+    def test_the_files_the_replay_will_write_stay_refused(self) -> None:
+        root = self._with_pending(["src/app.py"])
+        result = evaluate_admission(root, target_path="src/app.py", action="edit")
+        self.assertFalse(result["admitted"], result)
+        self.assertEqual(result["code"], "RECOVERY_REQUIRED")
+
+    def test_an_unresolved_target_set_still_fails_closed(self) -> None:
+        """A shell command's effect is unknown, and unknown scope refuses."""
+        root = self._with_pending([".saipen/BOARD.md"])
+        result = evaluate_admission(root, action="shell")
+        self.assertFalse(result["admitted"], result)
+
+    def test_an_unreadable_operation_record_refuses_everything(self) -> None:
+        """Unknown scope is not evidence of safety."""
+        root = self._with_pending([".saipen/BOARD.md"], readable=False)
+        result = evaluate_admission(root, target_path="src/app.py", action="edit")
+        self.assertFalse(result["admitted"], result)
+        self.assertEqual(result["code"], "RECOVERY_REQUIRED")
+
+
 @unittest.skipUnless(NODE, "node runtime unavailable")
 class PluginGateScopeTests(unittest.TestCase):
     """The gate as the host loads it, driving the real plugin through node."""

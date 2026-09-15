@@ -363,11 +363,45 @@ def _log_tail_event(root: Path) -> int | None:
     return None
 
 
-def protocol_snapshot(root: Path, actor: str | None = None) -> dict:
+def _pending_operation_targets(root: Path, ops) -> set[str] | None:
+    """The canonical paths an unfinished operation is going to write.
+
+    T-1354. Returns None when any record cannot be read: an unreadable
+    operation is unknown scope, and unknown scope refuses everything, exactly
+    as before this function existed.
+    """
+    paths: set[str] = set()
+    for op in ops or ():
+        op_id = str(op.get("op_id", "") or "")
+        if not op_id:
+            return None
+        record_path = root / ".saipen" / "recovery" / "ops" / op_id / "operation.json"
+        try:
+            record = json.loads(record_path.read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            return None
+        entries = record.get("targets")
+        if not isinstance(entries, list):
+            return None
+        for entry in entries:
+            if not isinstance(entry, dict) or not isinstance(entry.get("path"), str):
+                return None
+            paths.add(entry["path"].replace("\\", "/").strip().lstrip("/").lower())
+    return paths
+
+
+def protocol_snapshot(
+    root: Path, actor: str | None = None, proposed_targets: "list[str] | None" = None
+) -> dict:
     """Read-only canonical machine-state snapshot used by admission (Part 4).
 
     Never repairs anything. Returns a dict with a ``block`` code (None when
     the protocol state is sound), plus the parsed facts the decision used.
+
+    `proposed_targets` are the caller's already-canonicalized targets. They
+    scope the RECOVERY_REQUIRED refusal to the operations that can actually
+    collide with an unfinished write (T-1354); with none supplied the refusal
+    keeps its old, unscoped meaning.
     """
     from .board import claim_status, parse_board
     from .journal import scan_pending
@@ -410,7 +444,22 @@ def protocol_snapshot(root: Path, actor: str | None = None) -> dict:
     if pending or conflicts:
         names = ", ".join(str(op.get("op_id", "?")) for op in (conflicts or pending)[:5])
         snapshot["recovery_pending"] = [str(op.get("op_id", "?")) for op in pending]
-        return refuse("RECOVERY_REQUIRED", f"unresolved recovery operation(s): {names}")
+        # T-1354: an unfinished canonical write is real debt, and it is debt
+        # against the FILES it is going to write. Refusing every consequential
+        # tool for it left an agent unable to edit a source file that no
+        # replay will ever touch -- measured in the field, where one
+        # interrupted BOARD compaction made an entire repository read-only.
+        #
+        # The recorded targets are exact, so the collision test is exact.
+        # Unknown scope still refuses everything: an unreadable operation
+        # record is not evidence of safety.
+        blocked_paths = _pending_operation_targets(root, (conflicts or []) + (pending or []))
+        proposed = {
+            str(item).replace("\\", "/").strip().lstrip("/").lower()
+            for item in (proposed_targets or [])
+        }
+        if blocked_paths is None or not proposed or (proposed & blocked_paths):
+            return refuse("RECOVERY_REQUIRED", f"unresolved recovery operation(s): {names}")
 
     if str(state.get("mode", "")).strip().lower() == "read-only":
         return refuse("PROTOCOL_MODE_READONLY", "STATE mode is read-only")
@@ -903,7 +952,7 @@ def evaluate_admission(
 
     # The canonical protocol state must be sound first. Canonical saipen
     # operations are the repair path and stay admissible under debt.
-    snapshot = protocol_snapshot(root, actor=agent)
+    snapshot = protocol_snapshot(root, actor=agent, proposed_targets=canonical_targets)
     if snapshot["block"] is not None and action_name != "saipen_op":
         return result(
             ok=False,

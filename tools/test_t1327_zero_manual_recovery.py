@@ -270,8 +270,14 @@ class TargetBOneRepairPerGenerationTests(unittest.TestCase):
         result = prepare(
             root, **_kwargs(root), recover=lambda *_a: {"ok": True, "code": "NOOP"}
         )
-        self.assertEqual(result["code"], "RECOVERY_FAILED")
-        self.assertTrue(result["requires_reissue"])
+        # T-1354: the repair ran, changed nothing, and the state still asks
+        # for the same command -- the automatic route is exhausted, and an
+        # exhausted route earns no reissue. Promising one here is what sent a
+        # caller back into the same wall forever against bytes that never
+        # moved, so the old `RECOVERY_FAILED` + `requires_reissue` pair is the
+        # defect, not the contract.
+        self.assertEqual(result["code"], "RECOVERY_EXHAUSTED")
+        self.assertFalse(result["requires_reissue"])
         again = prepare(
             root,
             **_kwargs(root),
