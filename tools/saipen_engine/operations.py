@@ -4973,10 +4973,38 @@ def _candidate_home_errors(root: Path, state: dict, candidate_home: str) -> list
     core BOOT layout is present, and the required protocol files exist. No
     disk search, no guessing a home -- the caller names the candidate.
     """
+    errors, major = _home_layout_errors(candidate_home)
+    if major is not None:
+        expected = str(state.get("saipen_version") or 7)
+        if major != expected:
+            errors.append(
+                f"candidate home protocol major {major or 'unreadable'} != "
+                f"project saipen_version {expected}; refuse to rebind onto "
+                "an incompatible protocol. If the project's declared major is "
+                "simply stale -- the home moved generation and the field did "
+                "not -- record it first with `saipen recover "
+                "--migrate-generation`; a refusal that names no exit strands "
+                "the project, because EVERY candidate then fails this same "
+                "comparison (T-1352)"
+            )
+    return errors
+
+
+def _home_layout_errors(candidate_home: str) -> tuple[list[str], str | None]:
+    """Prove a candidate SAIPEN install, WITHOUT judging its generation.
+
+    Returns `(errors, major)`. `major` is None when the layout is so broken
+    that no generation could be read from it; otherwise it is the parsed
+    major (or `""` when VERSION is present but unreadable), so a caller can
+    decide what to do about a generation difference instead of having that
+    decision baked in here. `_candidate_home_errors` refuses on a difference;
+    `migrate_saipen_generation` is the sanctioned way to record one.
+    """
     errors: list[str] = []
     home = Path(candidate_home)
     if not candidate_home or not home.is_dir():
-        return [f"candidate home {candidate_home!r} is not a directory"]
+        return [f"candidate home {candidate_home!r} is not a directory"], None
+    major: str | None = None
     version_file = home / "VERSION"
     if not version_file.is_file():
         errors.append(f"candidate home {candidate_home!r} has no readable VERSION file")
@@ -4987,13 +5015,6 @@ def _candidate_home_errors(root: Path, state: dict, candidate_home: str) -> list
             version_text = ""
         match = re.match(r"v?(\d+)\.", version_text)
         major = match.group(1) if match else ""
-        expected = str(state.get("saipen_version") or 7)
-        if major != expected:
-            errors.append(
-                f"candidate home protocol major {major or 'unreadable'} != "
-                f"project saipen_version {expected}; refuse to rebind onto "
-                "an incompatible protocol"
-            )
     if not ((home / "saipen" / "BOOT.md").is_file() or (home / "BOOT.md").is_file()):
         errors.append(
             f"candidate home {candidate_home!r} has no saipen/BOOT.md (core layout invalid)"
@@ -5004,10 +5025,100 @@ def _candidate_home_errors(root: Path, state: dict, candidate_home: str) -> list
             "extensions/subs/PROTOCOL.md (required protocol "
             "files)"
         )
-    return errors
+    return errors, major
 
 
 @_state_guard
+@_state_guard
+def migrate_saipen_generation(
+    project_root: Path | str, agent: str, dry_run: bool = False
+) -> Result:
+    """Record that this project's state belongs to its home's generation.
+
+    T-1352. `saipen_version` is the protocol MAJOR the state was written
+    against, and nothing in the engine could ever move it. That was survivable
+    while it only produced a validator warning, and it is not a warning: a
+    project whose declared major has fallen behind every home that exists can
+    never rebind, because `_candidate_home_errors` refuses every candidate on
+    that same comparison, and the only escape left is editing a protected
+    canonical file by hand -- which the guard correctly forbids. A guard whose
+    refusal has no exit is a dead end, so this is the exit.
+
+    It RECORDS, it does not upgrade: no state is rewritten into another
+    generation's shape, because the engine has been applying the home's rules
+    to this state all along (that is exactly what the warning says). What
+    changes is one field and the LOG line that says which generation it left
+    and which it joined. The home is PROVEN first -- readable VERSION, core
+    BOOT layout, required protocol files -- so the recorded major is never a
+    guess, and an equal major refuses rather than writing a no-op.
+    """
+    root = Path(project_root)
+    now, utc = _now(), _utc_iso()
+    # Same allowance as `rebind_saipen_home`: the pointer this reads may be
+    # exactly what is stale, and proving the home is this operation's job.
+    _docs, state, _board, _tail = _read(root, allow_dead_home=True)
+    home = str(state.get("saipen_home") or "").strip()
+    if not home:
+        return _refuse(
+            "HOME_REQUIRED",
+            "STATE.saipen_home is unset, so there is no proven generation to record",
+            next_action="saipen rebind-home <candidate-home-path>",
+        )
+    errors, major = _home_layout_errors(home)
+    if errors or not major:
+        return _refuse(
+            "HOME_REQUIRED",
+            "cannot read a generation from the bound home: "
+            + ("; ".join(errors[:4]) if errors else f"VERSION in {home!r} is unreadable"),
+            next_action="saipen rebind-home <candidate-home-path>",
+        )
+    declared = str(state.get("saipen_version") or 7)
+    if major == declared:
+        return _refuse(
+            "VALIDATION_FAILED",
+            f"STATE.saipen_version is already {declared} and the bound home is at "
+            f"major {major}; nothing to record",
+        )
+    task = state.get("task")
+
+    def mutate(text: str, event: int) -> str:
+        return patch_state(
+            text,
+            {
+                "saipen_version": int(major),
+                "last_event": event,
+                "updated": utc,
+                "agent": agent,
+            },
+        )
+
+    plan = _state_only_plan(
+        root,
+        "migrate_generation",
+        agent,
+        mutate,
+        f"saipen_version recorded {declared} -> {major} from the proven home {home}",
+        {
+            "ok": True,
+            "code": "GENERATION_RECORDED",
+            "saipen_version": int(major),
+            "previous_saipen_version": int(declared) if declared.isdigit() else declared,
+            "saipen_home": home,
+        },
+        now,
+        utc,
+        {"saipen_version", "last_event", "updated", "agent"},
+        ticket_id=task if task not in (None, "", "none") else None,
+        allow_dead_home=True,
+        read_once=(_docs, state, _board, _tail),
+    )
+    if isinstance(plan, Result):
+        return plan
+    if dry_run:
+        return _render_plan(plan)
+    return apply_plan(root, plan)
+
+
 def rebind_saipen_home(
     project_root: Path | str, agent: str, candidate_home: str, dry_run: bool = False
 ) -> Result:

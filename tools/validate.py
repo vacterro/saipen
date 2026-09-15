@@ -1949,7 +1949,11 @@ if IS_SAIPEN_HOME and Path("VERSION").is_file():
             f"STATE.md saipen_version is {_sv_major} but saipen_home is at "
             f"major {_home_major} -- this state was written against a "
             f"different protocol generation, and every rule below is being "
-            f"applied to it regardless",
+            f"applied to it regardless. Record it with `saipen recover "
+            f"--migrate-generation` (T-1352). Left stale it is not only a "
+            f"warning: `rebind-home` refuses every candidate whose major "
+            f"differs from this field, so the project cannot rebind at all "
+            f"and the whole-project delivery path cannot package it",
         )
 
 sub_state_files = sorted(

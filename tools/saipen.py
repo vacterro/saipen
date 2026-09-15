@@ -1899,6 +1899,7 @@ def _recover(project_root: Path, args: list[str], as_json: bool, dry_run: bool =
     attest_legacy_done: list[str] = []
     resolve_blocker: str | None = None
     approved_repair_id: str | None = None
+    migrate_generation = False
 
     def _refuse(detail: str) -> int:
         _emit({"ok": False, "code": "VALIDATION_FAILED", "detail": detail}, as_json)
@@ -1959,6 +1960,17 @@ def _recover(project_root: Path, args: list[str], as_json: bool, dry_run: bool =
             attest_legacy_done = list(dict.fromkeys(ids))
             index += 2
             continue
+        if token == "--migrate-generation":
+            # T-1352: the exit for a project whose declared protocol major has
+            # fallen behind every home that exists. `_candidate_home_errors`
+            # refuses each candidate on that comparison, so without this the
+            # only escape is editing a protected canonical file by hand.
+            # It takes no argument: the generation is READ from the bound
+            # home, never supplied, so nobody can name a generation the
+            # install does not actually carry.
+            migrate_generation = True
+            index += 1
+            continue
         if token == "--apply-approved-repair":
             if index + 1 >= len(args):
                 return _refuse(
@@ -1997,10 +2009,31 @@ def _recover(project_root: Path, args: list[str], as_json: bool, dry_run: bool =
             f"unknown recover argument(s) {args!r}; usage: recover "
             '[--adopt-legacy <T-###[,T-###...]>] '
             '[--attest-legacy-done <T-###[,T-###...]>] '
+            "[--migrate-generation] "
             '[resolve-blocker "<decision>"] '
             "[--apply-approved-repair <repair_id>] "
             "| recover inspect <op_id> | recover resolve <op_id> [--resolution <mode>]"
         )
+    if migrate_generation:
+        # T-1352: a targeted repair, not a journal replay, so it runs before
+        # the pending-operation machinery and combines with nothing.
+        if args:
+            return _refuse(
+                "recover --migrate-generation takes no other argument; it reads "
+                "the generation from the bound home"
+            )
+        if not dry_run and _negotiate_capability(project_root) == "read-only":
+            return _capability_refusal(as_json)
+        _ho = _ensure_handover(project_root, as_json, dry_run)
+        if _ho is not None:
+            return _ho
+        from saipen_engine.operations import migrate_saipen_generation
+
+        migrated = migrate_saipen_generation(
+            project_root, _agent_for(project_root), dry_run=dry_run
+        )
+        _emit(migrated.to_dict(), as_json)
+        return 0 if migrated.ok else 1
     # `saipen recover inspect <op_id>` -- read-only conflict inspection.
     # Closed grammar: exactly one positional <op_id> (hostile-regression, P0#1).
     if args and args[0] == "inspect":
