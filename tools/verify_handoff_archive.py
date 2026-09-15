@@ -41,11 +41,16 @@ _WINDOWS_RESERVED = frozenset(
 
 
 def _git(project: Path, *args: str) -> subprocess.CompletedProcess[str]:
+    # T-1349: git writes path bytes as UTF-8; `text=True` alone decodes them
+    # with the machine's locale encoding. The verifier has to see the same
+    # bytes the builder saw, or Gate A reports a member "missing" that is
+    # sitting in the archive under the name git actually reported.
     return subprocess.run(
         ["git", *list(args)],
         cwd=str(project),
         capture_output=True,
         text=True,
+        encoding="utf-8",
         errors="replace",
     )
 
@@ -58,7 +63,12 @@ def _delivery_inventory(project: Path) -> set[str]:
     same set the builder captured, or a tracked-only Gate A/F would certify
     an archive that silently dropped untracked source files.
     """
-    r = _git(project, "ls-files")
+    # T-1349: `-z`, matching the builder. Without it git QUOTES and escapes any
+    # path carrying non-ASCII, and the verifier then looks for that escaped
+    # spelling in the archive: Gate A reported a packaged file as missing and
+    # Gate F could not even open it ("Invalid argument" on the literal
+    # backslash name), so a correct archive failed the delivery gate.
+    r = _git(project, "ls-files", "-z")
     if r.returncode != 0:
         print("FAIL: this whole-project handoff path requires a Git repository.")
         print("UNSUPPORTED: whole-project handoff is not supported without Git.")
@@ -68,12 +78,12 @@ def _delivery_inventory(project: Path) -> set[str]:
         print("  bootstrap/export.ps1       (Windows)")
         print("which archives ONLY the .saipen directory.")
         sys.exit(1)
-    tracked = {line.strip() for line in r.stdout.splitlines() if line.strip()}
+    tracked = {entry for entry in r.stdout.split("\0") if entry.strip()}
     u = _git(project, "ls-files", "--others", "--exclude-standard", "-z")
     if u.returncode != 0:
         print("FAIL: cannot enumerate untracked working-tree files for verification.")
         sys.exit(1)
-    untracked = {line.strip() for line in u.stdout.split("\0") if line.strip()}
+    untracked = {entry for entry in u.stdout.split("\0") if entry.strip()}
     return tracked | untracked
 
 
@@ -341,6 +351,82 @@ def gate_d_extract_roundtrip(archive_path: Path, tracked: set[str]) -> Path | No
     return extract_dir
 
 
+def gate_h_project_snapshot(extract_dir: Path) -> bool:
+    """Gate H for an archive that carries no protocol source (T-1349).
+
+    A project snapshot cannot boot itself, so the gate is run by the protocol
+    installation this verifier belongs to, pointed at the extracted copy. What
+    it proves is what a cold consumer actually needs: the canonical snapshot is
+    complete and the engine can read it without the live repository.
+
+    It can fail -- an incomplete `.saipen/` or a snapshot the engine refuses to
+    parse both exit non-zero here -- which is the difference between a gate
+    that does not apply and a gate that was quietly dropped.
+    """
+    print("  archive carries no tools/saipen.py: this is a PROJECT SNAPSHOT, not a")
+    print("  protocol-source delivery, so the BOOT contract does not apply to it.")
+    print("  Gating it with the protocol installation instead:")
+
+    protocol_cli = Path(__file__).resolve().parent / "saipen.py"
+    if not protocol_cli.is_file():
+        print(f"FAIL: the protocol CLI is missing at {protocol_cli}")
+        return False
+
+    saipen_dir = extract_dir / ".saipen"
+    mandatory = ("STATE.md", "BOARD.md", "LOG.md", "IDENTITY.md")
+    missing = [name for name in mandatory if not (saipen_dir / name).is_file()]
+    if missing:
+        print(f"FAIL: extracted snapshot is missing mandatory canonical file(s): {missing}")
+        return False
+    print(f"  PASS: mandatory canonical files present ({', '.join(mandatory)})")
+
+    # READABLE, not healthy. A project is packaged precisely when someone has
+    # to hand it over, and that is often exactly when its canonical state is
+    # blocked, contradictory or mid-recovery. Requiring a green `status` would
+    # refuse to package the snapshots a consumer most needs, so the gate is:
+    # the protocol produces a STRUCTURED ANSWER about this snapshot and does
+    # not crash on it. An unparseable answer or a traceback is a real failure.
+    import json as _json
+
+    for command in ("status", "next"):
+        r = subprocess.run(
+            [
+                sys.executable,
+                str(protocol_cli),
+                "--project-root",
+                str(extract_dir),
+                command,
+                "--json",
+            ],
+            cwd=str(extract_dir),
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            timeout=300,
+        )
+        combined = r.stdout + r.stderr
+        if "Traceback (most recent call last)" in combined:
+            print(f"FAIL: the protocol CRASHED reading the extracted snapshot ('{command}')")
+            for line in combined.splitlines()[-6:]:
+                print(f"  {line[:160]}")
+            return False
+        try:
+            answer = _json.loads(r.stdout)
+        except ValueError:
+            print(f"FAIL: '{command}' produced no structured answer for the extracted snapshot")
+            for line in combined.splitlines()[-6:]:
+                print(f"  {line[:160]}")
+            return False
+        if not isinstance(answer, dict):
+            print(f"FAIL: '{command}' answered with {type(answer).__name__}, not a record")
+            return False
+        print(f"  '{command}' answered (ok={answer.get('ok')}) for the extracted copy")
+
+    print("\nPASS: extracted project snapshot is readable by the protocol (BOOT contract N/A)")
+    return True
+
+
 def gate_h_semantic_validation(extract_dir: Path) -> bool:
     """Check H: run canonical validator + BOOT contract against the extracted copy.
 
@@ -352,8 +438,17 @@ def gate_h_semantic_validation(extract_dir: Path) -> bool:
 
     saipen_cli = extract_dir / "tools" / "saipen.py"
     if not saipen_cli.is_file():
-        print("FAIL: saipen.py not found in extracted copy. Cannot verify BOOT contract.")
-        return False
+        # T-1349: two different things arrive here. A PROTOCOL-SOURCE delivery
+        # carries `tools/saipen.py`, and the BOOT contract is a statement about
+        # that source. A PROJECT SNAPSHOT -- any repository that merely USES
+        # SAIPEN, which is what `--project-root <other project>` produces --
+        # carries no protocol source at all, and demanding one made every
+        # cross-repository snapshot fail a gate it can never satisfy.
+        #
+        # Not applicable is not the same as skipped: the archive is still
+        # gated, by the PROTOCOL's own tools against the extracted copy, and
+        # the substitution is printed rather than assumed.
+        return gate_h_project_snapshot(extract_dir)
 
     # H-1: Canonical rebind-home inside the disposable copy.
     # Unconditionally invoke canonical rebind to align the copy with its temp path.

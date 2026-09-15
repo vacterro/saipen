@@ -35,11 +35,16 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 
 def _git(project: Path, *args: str) -> subprocess.CompletedProcess[str]:
+    # T-1349: git writes path bytes as UTF-8. `text=True` alone decodes them
+    # with the machine's locale encoding, so a path carrying U+2014 comes back
+    # mojibake on a Windows console codepage and never matches the file it
+    # names. The delivery inventory has to be the paths git actually reported.
     return subprocess.run(
         ["git", *list(args)],
         cwd=str(project),
         capture_output=True,
         text=True,
+        encoding="utf-8",
         errors="replace",
     )
 
@@ -63,7 +68,13 @@ def _delivery_inventory(project: Path) -> set[str]:
     untracked, non-ignored working-tree files. Ignored build/cache material
     stays excluded by Git's own exclude rules.
     """
-    r = _git(project, "ls-files")
+    # T-1349: `-z`, exactly like the untracked half below. Without it git
+    # QUOTES any path carrying non-ASCII and escapes it (`SAIPEN \342\200\224
+    # ...`), and that escaped spelling is then stat-ed as if it were the file
+    # name: four regular files with U+2014 in their names were reported as
+    # "symlinks or non-regular files" by a containment gate firing on git's
+    # own quoting convention.
+    r = _git(project, "ls-files", "-z")
     if r.returncode != 0:
         print("FAIL: this whole-project handoff path requires a Git repository.")
         print("UNSUPPORTED: whole-project handoff is not supported without Git.")
@@ -73,7 +84,7 @@ def _delivery_inventory(project: Path) -> set[str]:
         print("  bootstrap/export.ps1       (Windows)")
         print("which archives ONLY the .saipen directory.")
         sys.exit(1)
-    tracked = {line.strip() for line in r.stdout.splitlines() if line.strip()}
+    tracked = {entry for entry in r.stdout.split("\0") if entry.strip()}
     # W2-001: untracked + non-ignored working-tree files. `--others` lists
     # untracked files; `--exclude-standard` applies .gitignore/.git/info/exclude
     # so ignored build/cache/runtime garbage never enters the archive. Using
@@ -82,11 +93,7 @@ def _delivery_inventory(project: Path) -> set[str]:
     if u.returncode != 0:
         print("FAIL: cannot enumerate untracked working-tree files for delivery.")
         sys.exit(1)
-    untracked = {
-        line.strip()
-        for line in u.stdout.split("\0")
-        if line.strip()
-    }
+    untracked = {entry for entry in u.stdout.split("\0") if entry.strip()}
     return tracked | untracked
 
 
@@ -198,9 +205,17 @@ def build_archive(output: Path, project: Path) -> None:
         )
         sys.exit(1)
 
-    verifier = project / "tools" / "verify_handoff_archive.py"
+    # T-1349: the delivery gate ships with the PROTOCOL, beside this builder --
+    # never `project/"tools"/...`. Resolving it inside the target made
+    # `--project-root <any other project>` impossible, because the verifier is
+    # not a file an arbitrary project has; measured on two real foreign SAIPEN
+    # roots, both exited here. It was also the wrong trust boundary: the gate
+    # that clears a snapshot would have been code the snapshot supplies, so a
+    # packaged project could pass itself by shipping a verifier that exits 0.
+    verifier = Path(__file__).resolve().parent / "verify_handoff_archive.py"
     if not verifier.is_file():
-        print(f"FAIL: verifier not found at {verifier}")
+        print(f"FAIL: the protocol's delivery verifier is missing at {verifier}")
+        print("This is an incomplete SAIPEN installation, not a problem with the target.")
         sys.exit(1)
 
     # --- Pre-packaging checks ---
@@ -264,7 +279,21 @@ def build_archive(output: Path, project: Path) -> None:
             import stat as _stat
 
             if not _stat.S_ISREG(st.st_mode):
-                link_escapes.append(f"{rel} (not a regular file)")
+                # T-1349: name the thing, not the symptom. Git never descends
+                # into another repository, so an embedded one arrives as a
+                # single collapsed DIRECTORY entry and lands here reading
+                # "not a regular file" -- true, and useless. It is real content
+                # with a real decision behind it (vendor it, remove it, or
+                # ignore it), and the message has to say so.
+                if _stat.S_ISDIR(st.st_mode) and (src / ".git").exists():
+                    link_escapes.append(
+                        f"{rel} (embedded Git repository -- git enumerates it as one "
+                        "directory and never lists its files, so it cannot be packaged; "
+                        "remove it, vendor its files into this repository, or add it to "
+                        ".gitignore)"
+                    )
+                else:
+                    link_escapes.append(f"{rel} (not a regular file)")
             else:
                 member_lstats[rel] = (st.st_dev, st.st_ino, st.st_mode, st.st_mtime)
     if link_escapes:
