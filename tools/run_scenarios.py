@@ -14491,7 +14491,14 @@ def run_nitro_integrity_probes() -> tuple[list[str], int]:
     )
     expect(
         "saipen recover --json returns structured JSON",
-        rec_proc.returncode == 0 and '"code": "CLEAN"' in rec_proc.stdout,
+        rec_proc.returncode == 0
+        and (
+            '"code": "CLEAN"' in rec_proc.stdout
+            # T-1340: on a project with no audit manifest yet, the first
+            # mutating lifecycle call enrolls it and must say so instead of
+            # claiming CLEAN over the write it just performed.
+            or '"code": "AUDIT_MANIFEST_WRITTEN"' in rec_proc.stdout
+        ),
         repr(rec_proc.stdout[:160]),
     )
 

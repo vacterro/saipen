@@ -89,11 +89,40 @@ class Core002ReconciliationTests(ControlFixture):
 
     def test_clean_surface_reports_clean_and_writes_nothing(self) -> None:
         root = self.make_project()
+        manifest = root / ".saipen" / "MANIFEST.json"
+
+        # A dry-run is the zero-write projection, even with no manifest yet.
         before = _tree_bytes(root)
-        result = reconcile_protocol_state(root, "tester", dry_run=True)
-        self.assertEqual(result["code"], "CLEAN", result)
-        self.assertEqual(reconcile_protocol_state(root, "tester")["code"], "CLEAN")
+        preview = reconcile_protocol_state(root, "tester", dry_run=True)
+        self.assertEqual(preview["code"], "CLEAN", preview)
         self.assertEqual(_tree_bytes(root), before)
+        self.assertFalse(manifest.exists())
+
+        # ABSENT manifest: the mutating lifecycle path enrolls it, and that
+        # mutation must be OBSERVABLE -- never reported as CLEAN.
+        first = reconcile_protocol_state(root, "tester")
+        self.assertTrue(first["ok"], first)
+        self.assertEqual(first["code"], "AUDIT_MANIFEST_WRITTEN", first)
+        self.assertTrue(first["audit_manifest"]["changed"], first)
+        self.assertTrue(manifest.is_file())
+        settled = _tree_bytes(root)
+
+        # Only the NEXT steady-state call is CLEAN, and it writes nothing.
+        self.assertEqual(reconcile_protocol_state(root, "tester")["code"], "CLEAN")
+        self.assertEqual(_tree_bytes(root), settled)
+
+        # STALE manifest: rewritten, and again the upgrade is observable.
+        manifest.write_text(
+            '{"kind": "saipen_audit_manifest", "contract_version": 0}\n',
+            encoding="utf-8",
+        )
+        stale = reconcile_protocol_state(root, "tester")
+        self.assertTrue(stale["ok"], stale)
+        self.assertEqual(stale["code"], "AUDIT_MANIFEST_UPGRADED", stale)
+        self.assertTrue(stale["audit_manifest"]["changed"], stale)
+        upgraded = _tree_bytes(root)
+        self.assertEqual(reconcile_protocol_state(root, "tester")["code"], "CLEAN")
+        self.assertEqual(_tree_bytes(root), upgraded)
 
     def test_dry_run_writes_zero_bytes_while_reporting_the_real_plan(self) -> None:
         root = self.make_project()
@@ -253,6 +282,9 @@ class Core002ReconciliationTests(ControlFixture):
         self._patch_state(root, "last_event", str(tail))
         self._patch_state(root, "goal_waves", "0")
         self._patch_state(root, "goal_tickets", "0")
+        # Settle the one-time audit-manifest enrollment first: this test owns
+        # the reauthorization rebuild window, not the lifecycle migration.
+        reconcile_protocol_state(root, "tester")
         before = _tree_bytes(root)
         result = reconcile_protocol_state(root, "tester", dry_run=True)
         self.assertEqual(result["code"], "CLEAN", result)

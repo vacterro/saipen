@@ -498,10 +498,16 @@ class TestLifecycleEnrollment(ControlFixture):
         self.assertFalse(audit_manifest.manifest_path(project).exists())
         result = reconcile_protocol_state(project, "tester")
         self.assertTrue(result["ok"], result)
-        self.assertEqual(result["code"], "CLEAN")
+        # Enrollment IS a canonical mutation, so the first mutating call must
+        # NEVER claim CLEAN (T-1340); it names the enrollment action instead.
+        self.assertEqual(result["code"], "AUDIT_MANIFEST_WRITTEN")
         self.assertTrue(audit_manifest.manifest_path(project).is_file())
         self.assertTrue(audit_manifest.is_current(project))
         self.assertTrue(result["audit_manifest"]["changed"])
+        # Only the next steady-state call -- which writes nothing -- is CLEAN.
+        again = reconcile_protocol_state(project, "tester")
+        self.assertEqual(again["code"], "CLEAN", again)
+        self.assertNotIn("audit_manifest", again)
 
     def test_steady_state_transition_is_unchanged_and_silent(self):
         project = self.make_project()

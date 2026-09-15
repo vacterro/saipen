@@ -1389,6 +1389,15 @@ def _ensure_audit_contract(result: dict, project_root: Path) -> dict:
 
     The result key is added only when the enrollment CHANGED something or was
     refused: a steady-state reconciliation output stays exactly what it was.
+
+    ZERO-WRITE CLEAN (T-1340). `code == CLEAN` is a statement about the WHOLE
+    canonical surface, so it may only be reported over a surface this operation
+    left byte-identical. Enrollment IS a mutation: when it writes or upgrades
+    `.saipen/MANIFEST.json`, the result code is upgraded to the enrollment's own
+    explicit code (`AUDIT_MANIFEST_WRITTEN` / `AUDIT_MANIFEST_UPGRADED`) and the
+    `changed` block names the file. Only the NEXT steady-state call -- whose
+    enrollment finds a CURRENT manifest and writes nothing -- returns CLEAN.
+    A refusal that wrote nothing keeps the reconciliation's own code.
     """
     if result.get("dry_run"):
         return result
@@ -1416,7 +1425,24 @@ def _ensure_audit_contract(result: dict, project_root: Path) -> dict:
             },
         }
     if outcome.get("changed") or not outcome.get("ok"):
-        return {**result, "audit_manifest": outcome}
+        merged = {**result, "audit_manifest": outcome}
+        if outcome.get("changed") and result.get("code") == "CLEAN":
+            # The mutation is real, so CLEAN would be a lie. Name the enrollment
+            # action itself and declare the mutated surface.
+            manifest_path = outcome.get("path")
+            merged["code"] = str(outcome.get("code") or "AUDIT_MANIFEST_WRITTEN")
+            merged["changed"] = {
+                "board": [],
+                "state": [],
+                "audit_manifest": [manifest_path] if manifest_path else [],
+            }
+            merged["detail"] = (
+                "audit manifest "
+                + str(outcome.get("code") or "written")
+                + " -- reconciliation mutated the canonical surface, so this is "
+                "not CLEAN; the next steady-state call may be CLEAN"
+            )
+        return merged
     return result
 
 

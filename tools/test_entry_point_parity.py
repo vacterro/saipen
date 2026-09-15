@@ -33,8 +33,10 @@ from __future__ import annotations
 import ast
 import importlib.util
 import json
+import os
 import subprocess
 import sys
+import tempfile
 import unittest
 from pathlib import Path
 
@@ -154,6 +156,59 @@ class TestModuleFormTests(unittest.TestCase):
                 self.assertNotIn("ModuleNotFoundError", completed.stderr)
                 self.assertNotIn("Failed to import test module", completed.stderr)
                 self.assertEqual(completed.returncode, 0, completed.stderr[-1200:])
+
+
+class HostileForeignEngineTests(unittest.TestCase):
+    """T-1341: a foreign same-named package must never shadow the local engine.
+
+    Resolvability is not identity. Placing a hostile `saipen_engine` earlier on
+    `PYTHONPATH` used to capture the module form only, so the two supported
+    entry forms could execute DIFFERENT engines. The bounded package alias in
+    `tools/__init__.py` must make both forms load the repository's own engine:
+    the foreign package is never imported (its sentinel file stays absent) and
+    both forms report the same status.
+    """
+
+    def _hostile_path(self, base: Path) -> tuple[str, Path]:
+        foreign = base / "saipen_engine"
+        foreign.mkdir(parents=True)
+        sentinel = base / "foreign-executed.txt"
+        (foreign / "__init__.py").write_text(
+            "from pathlib import Path\n"
+            f"Path(r'{sentinel}').write_text('executed')\n"
+            "raise RuntimeError('foreign saipen_engine executed')\n",
+            encoding="utf-8",
+        )
+        return str(base), sentinel
+
+    def _status(self, argv: list[str], env: dict) -> subprocess.CompletedProcess:
+        return subprocess.run(
+            [sys.executable, *argv, "status", "--json"],
+            cwd=str(REPO),
+            capture_output=True,
+            text=True,
+            timeout=600,
+            env=env,
+        )
+
+    def test_both_forms_ignore_a_foreign_package(self):
+        with tempfile.TemporaryDirectory(prefix="saipen-shadow-") as tmp:
+            shadow, sentinel = self._hostile_path(Path(tmp))
+            env = dict(os.environ)
+            existing = env.get("PYTHONPATH", "")
+            env["PYTHONPATH"] = shadow + (os.pathsep + existing if existing else "")
+            script = self._status(["tools/saipen.py"], env)
+            module = self._status(["-m", "tools.saipen"], env)
+            self.assertEqual(script.returncode, 0, script.stderr[-1500:])
+            self.assertEqual(module.returncode, 0, module.stderr[-1500:])
+            self.assertFalse(
+                sentinel.exists(),
+                "a foreign saipen_engine on PYTHONPATH was executed",
+            )
+            script_data = json.loads(script.stdout)
+            module_data = json.loads(module.stdout)
+            for field in ("ok", "protocol_version", "phase", "task", "head"):
+                self.assertEqual(script_data.get(field), module_data.get(field), field)
 
 
 if __name__ == "__main__":

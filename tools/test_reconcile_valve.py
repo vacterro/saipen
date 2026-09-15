@@ -487,6 +487,12 @@ class InvalidPhaseCrashConvergenceTests(unittest.TestCase):
         shutil.move(str(legal / ".saipen"), str(root / ".saipen"))
         shutil.rmtree(legal, ignore_errors=True)
 
+        # Settle the one-time audit-manifest enrollment first: it writes only
+        # `.saipen/MANIFEST.json`, so the canonical STATE/BOARD/LOG bytes below
+        # are untouched, and only THEN may CLEAN mean a zero-write no-op
+        # (T-1340: a mutating enrollment is never reported as CLEAN).
+        enrolled = self._recover(root)
+        self.assertEqual(enrolled.returncode, 0, enrolled.stdout + enrolled.stderr)
         before = {
             name: (root / ".saipen" / name).read_bytes()
             for name in ("STATE.md", "BOARD.md", "LOG.md")

@@ -35,3 +35,26 @@ if _TOOLS not in sys.path:
     # directory, so a module form still resolves `tools.x` as `tools.x` and
     # this only ADDS the flat `saipen_engine` spelling the modules use.
     sys.path.append(_TOOLS)
+
+# T-1341: bounded PACKAGE ALIAS, not a path-order bet.
+#
+# `sys.path.append(_TOOLS)` (T-1339) makes the flat `saipen_engine` spelling
+# resolvable, but it is APPENDED -- every external search location (cwd,
+# PYTHONPATH, site-packages) is consulted first. So `python tools/saipen.py`
+# (script form, script dir = sys.path[0]) and `python -m tools.saipen` (module
+# form, repo root = sys.path[0]) can resolve DIFFERENT engines: a foreign
+# package named `saipen_engine` earlier on the path shadows the repository's
+# for the module form only, and script/module parity becomes
+# environment-dependent.
+#
+# Registering the repository's OWN subpackage under the flat name in
+# `sys.modules` resolves it before a single path entry is consulted, so both
+# entry forms import `tools.saipen_engine` -- the same repository-owned module
+# -- regardless of any same-named package later OR earlier on PYTHONPATH /
+# site-packages. Submodule imports (`from saipen_engine.paths import ...`) walk
+# this alias's own `__path__`, so they land in the repository too. This is
+# deliberately an alias of the package we already own, never a broad path
+# mutation, and no explicit override contract is being bypassed: none exists.
+from . import saipen_engine as _saipen_engine  # noqa: E402
+
+sys.modules["saipen_engine"] = _saipen_engine
