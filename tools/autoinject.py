@@ -13,10 +13,12 @@ exactly like one that is current. The standing instruction was "re-run
 inject after every git pull", which is a rule with no witness -- the class
 this repository keeps closing everywhere else.
 
-So: stamp the installed copy with a digest of what was installed, compare it
-against the source on every run, and re-inject only on a real difference.
-The digest covers file CONTENT, so a pull that changes nothing changes
-nothing, and a local edit to a shipped doc is picked up without a commit.
+So: prove every installed copy's shipped runtime CONTENT against the source on
+every run, and re-inject only on a real difference. The identity covers file
+CONTENT (`saipen_engine.runtime_surface`, T-1342), so a pull that changes
+nothing changes nothing, and a local edit to a shipped file is picked up
+without a commit. The stamp beside each copy records what was installed and
+when; it is provenance, never the verdict.
 
 Second half: an agent driving this project needs to know where it stands
 before it acts. That is `saipen status`'s job in a live session, and this is
@@ -28,7 +30,6 @@ Never blocks. Exit 0 unless `--check` is asked for and the copies are stale.
 from __future__ import annotations
 
 import argparse
-import hashlib
 import json
 import os
 import re
@@ -37,11 +38,20 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-from saipen_engine.manifest import (
+from saipen_engine.manifest import (  # noqa: F401  (the one prune rule, re-exported)
     CACHE_DIRS,
     GENERATED_SUFFIXES,
-    copy_tree_members,
-    manifest_source,
+)
+from saipen_engine.runtime_bootstrap import launcher_problems
+from saipen_engine.runtime_surface import (
+    content_bytes as _owner_content_bytes,
+    identity_session,
+    installed_relpath,
+    protocol_home_runtime_root,
+    require_runtime_generation_identity,
+    runtime_generation_identity,
+    same_runtime_generation,
+    surface_delta,
 )
 
 HOME = Path(__file__).resolve().parent.parent
@@ -103,126 +113,26 @@ _HOME_ADAPTERS = registry_home_adapters()
 DRIFT_REPORT_LIMIT = 12
 
 
-def _manifest_source(raw: object) -> Path:
-    return manifest_source(HOME, raw)
-
-
-def _is_within(path: Path, parent: Path) -> bool:
-    try:
-        path.relative_to(parent)
-    except ValueError:
-        return False
-    return True
-
-
-def _manifest_surface() -> list[tuple[Path, bool]]:
-    """Return exactly what injectors copy, derived from the runtime manifest."""
-    manifest_path = HOME / "saipen" / "MANIFEST.json"
-    try:
-        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
-    except (OSError, json.JSONDecodeError) as exc:
-        raise RuntimeError(f"cannot read runtime manifest {manifest_path}: {exc}") from exc
-
-    try:
-        trees = manifest["copy_trees"]
-        entries = manifest["files"]
-        if not isinstance(trees, list) or not trees or not isinstance(entries, list):
-            raise TypeError("copy_trees/files must be nonempty arrays")
-        surface: list[tuple[Path, bool]] = []
-        tree_roots: list[Path] = []
-        for entry in trees:
-            source, _members = copy_tree_members(HOME, entry["src"])
-            surface.append((source, True))
-            tree_roots.append(source)
-        for entry in entries:
-            if entry.get("required") is not True:
-                continue
-            source = _manifest_source(entry["src"])
-            if any(_is_within(source, tree) for tree in tree_roots):
-                continue
-            if not source.is_file() or source.is_symlink():
-                raise RuntimeError(f"runtime manifest file missing or symlinked: {entry['src']}")
-            surface.append((source, False))
-    except (KeyError, TypeError) as exc:
-        raise RuntimeError(f"runtime manifest shape invalid: {exc}") from exc
-    return surface
-
-
-def _content_bytes(path: Path) -> bytes:
-    """The file's CONTENT, with line endings normalised to LF (T-1253).
-
-    The digest is a content digest -- that is what it has always claimed to be
-    -- and a line ending is transport, not content. It has to be, because the
-    two sides of the comparison come through different transports: the clone
-    holds LF while the snapshot git produces for the scheduled injector holds
-    CRLF, so `saipen/BOOT.md` is 4972 bytes here and 5063 bytes there with not
-    one character of difference. Hashing raw bytes made a home refreshed
-    seconds ago report STALE forever, which is the same as having no witness.
-
-    A file that is not valid UTF-8 is hashed byte-for-byte: it is not text, so
-    there are no line endings to normalise and guessing would be worse.
-    """
-    raw = path.read_bytes()
-    try:
-        raw.decode("utf-8")
-    except UnicodeDecodeError:
-        return raw
-    return raw.replace(b"\r\n", b"\n").replace(b"\r", b"\n")
+_content_bytes = _owner_content_bytes
 
 
 def _digest() -> str:
-    """Content digest of the shipped surface, path-order stable."""
-    h = hashlib.sha256()
+    """The ONE shipped-runtime generation identity, over this home.
 
-    def frame(kind: bytes, path: Path, payload: bytes = b"") -> None:
-        relative = path.relative_to(HOME.resolve()).as_posix().encode("utf-8")
-        for part in (kind, relative, payload):
-            h.update(len(part).to_bytes(8, "big"))
-            h.update(part)
-
-    def generated(path: Path) -> bool:
-        # Same rule as the copier, from the same constant: a file the
-        # injector would never ship must not move the digest that decides
-        # whether what it shipped is current.
-        relative = path.relative_to(HOME.resolve())
-        return bool(CACHE_DIRS.intersection(relative.parts)) or (
-            path.suffix in GENERATED_SUFFIXES
-        )
-
-    for path, is_tree in _manifest_surface():
-        if is_tree:
-            members = sorted(
-                path.rglob("*"),
-                key=lambda item: item.relative_to(HOME.resolve()).as_posix().encode(),
-            )
-        else:
-            members = [path]
-        for member in members:
-            if generated(member):
-                continue
-            if member.is_symlink():
-                raise RuntimeError(
-                    f"runtime manifest surface contains unsupported symlink: {member}"
-                )
-            if member.is_dir():
-                frame(b"D", member)
-            elif member.is_file():
-                frame(b"F", member, _content_bytes(member))
-            else:
-                raise RuntimeError(f"runtime manifest surface contains unsupported entry: {member}")
-    return h.hexdigest()[:16]
-
-
-def installed_relpath(source_relative: str) -> str:
-    """Where a shipped source path lands inside an installed agent home.
-
-    The injectors strip exactly one leading `saipen/` component and keep
-    everything else: `saipen/BOOT.md` installs as `BOOT.md`, `saipen/phases/`
-    as `phases/`, while `tools/`, `bootstrap/` and `extensions/` keep theirs.
+    T-1342: the stamp no longer witnesses a self-made digest. It records
+    `runtime_surface.runtime_generation_identity(HOME)` -- the same content
+    identity the guard `--saipen-root` check, the instruction-home check, the
+    distribution report and the runtime prelaunch compare against -- so a
+    current stamp proves the shipped bytes, not a private parallel scheme.
     """
-    if source_relative.startswith("saipen/"):
-        return source_relative[len("saipen/") :]
-    return source_relative
+    return require_runtime_generation_identity(HOME)
+
+
+def _size(path: Path) -> str:
+    try:
+        return f"{path.stat().st_size}B"
+    except OSError:
+        return "unreadable"
 
 
 def surface_drift(target: Path, limit: int | None = None) -> list[tuple[str, str, str]]:
@@ -234,33 +144,27 @@ def surface_drift(target: Path, limit: int | None = None) -> list[tuple[str, str
     that disagreed with the repository, grepped for a rule that had moved, and
     answered from the older generation without anything naming the divergence.
 
-    Comparison runs through `_content_bytes`, the same normaliser the digest
-    uses, or every text file on the surface would read as divergent across the
-    CRLF boundary T-1253 closed -- `saipen/BOOT.md` is 4972 bytes in the clone
-    and 5063 in the snapshot with no character of difference. Byte counts are
-    reported RAW, because that is what a human comparing two files sees.
+    T-1342: the inventory and the comparison are `runtime_surface.surface_delta`
+    -- the owner of the identity this report explains -- so the drift can never
+    list a different surface than the verdict hashed. It runs the one content
+    normaliser (a CRLF snapshot is not drift) and also names a file the home
+    carries but this source does not ship (`absent` on the source side). Byte
+    counts are reported RAW, because that is what a human comparing two files
+    sees.
     """
     findings: list[tuple[str, str, str]] = []
-    root = HOME.resolve()
-    for path, is_tree in _manifest_surface():
-        members = sorted(path.rglob("*")) if is_tree else [path]
-        for member in members:
-            if not member.is_file() or member.is_symlink():
-                continue
-            relative = member.relative_to(root).as_posix()
-            if CACHE_DIRS.intersection(member.relative_to(root).parts) or (
-                member.suffix in GENERATED_SUFFIXES
-            ):
-                continue
-            landed = target / installed_relpath(relative)
-            if not landed.is_file():
-                findings.append((relative, f"{member.stat().st_size}B", "missing"))
-            elif _content_bytes(landed) != _content_bytes(member):
-                findings.append(
-                    (relative, f"{member.stat().st_size}B", f"{landed.stat().st_size}B")
-                )
-            if limit is not None and len(findings) >= limit:
-                return findings
+    for name, source, landed in surface_delta(HOME, target):
+        if source is None and landed is None:
+            continue  # an unprovable-candidate reason row, not a file
+        findings.append(
+            (
+                name,
+                _size(source) if source is not None else "absent",
+                _size(landed) if landed is not None else "missing",
+            )
+        )
+        if limit is not None and len(findings) >= limit:
+            break
     return findings
 
 
@@ -574,18 +478,23 @@ def _activation_home(template_block: str, installed_block: str) -> str | None:
 
 
 def _names_a_real_home(home: str) -> bool:
-    """Does the block's home actually resolve to protocol documents?
+    """Does the block's home prove the SAME accepted generation as this install?
 
-    This is the half of the contract that matters and that the byte comparison
-    never checked: a block is useful when the path it sends every agent to
-    holds `BOOT.md`. A pointer at a home that does not exist is stale no matter
-    how current its prose is.
+    T-1342: the half the byte comparison never checked was "does the path
+    resolve", but the half THAT check missed is the real one -- a directory
+    merely holding `BOOT.md` is not a SAIPEN home, because any directory can
+    hold one and the block would send every agent to a DIFFERENT (or unknown)
+    generation. The named home is accepted only when its runtime root proves
+    the running install's own generation (`HOME`). The block names a PROTOCOL
+    directory -- a flattened install root, or `<root>/saipen` in a source clone
+    or the published snapshot -- so it is re-rooted through the one owner before
+    it is proven. An unresolvable, too-thin or stale root is STALE, never
+    CURRENT.
     """
     if not home.strip():
         return False
     try:
-        base = Path(home.strip())
-        return (base / "BOOT.md").is_file() or (base / "saipen" / "BOOT.md").is_file()
+        return same_runtime_generation(HOME, protocol_home_runtime_root(Path(home.strip())))
     except OSError:
         return False
 
@@ -615,7 +524,10 @@ def instruction_status(adapter: dict, skill_install_dir: Path) -> str:
         if installed is None:
             return "stale"
         if expected is not None and installed == expected.replace("\r\n", "\n").strip():
-            return "current"
+            # The exact rendering names this skill copy; it is current only
+            # when that copy IS the accepted generation (T-1342), the same
+            # proof every other spelling of the home has to pass.
+            return "current" if _names_a_real_home(str(skill_install_dir)) else "stale"
         if template_block is not None:
             named = _activation_home(
                 template_block.replace("\r\n", "\n").strip(), installed
@@ -626,6 +538,58 @@ def instruction_status(adapter: dict, skill_install_dir: Path) -> str:
     return "absent"
 
 
+def _hook_state(adapter: dict) -> dict:
+    """The installed blocking hook: wrapper freshness AND the engine it runs.
+
+    A current wrapper proves only that its bytes were written once. The hook
+    EXECUTES an engine elsewhere, so the verdict also names that delegated root
+    and whether it proves the accepted generation (T-1342):
+
+    * installer-managed hooks (Kiro/Gemini) run `<--saipen-root>/tools/saipen.py`,
+      and the configured root is read back from the host's own configuration;
+    * the OpenCode plugin runs the skill copy beside it
+      (`<config>/opencode/skills/saipen`, the adapter's `install.skill`).
+    """
+    state: dict = {"status": "absent", "delegated_root": None, "delegated_current": None}
+    surface = adapter.get("hook_install_surface")
+    artifact = adapter.get("hook_artifact")
+    for legacy in adapter.get("legacy_hook_surfaces") or []:
+        if isinstance(legacy, str) and legacy and _expand_home(legacy).is_file():
+            return {**state, "status": "stale"}
+    if not surface or not artifact:
+        return state
+    installed_path = _expand_home(surface)
+    if not installed_path.is_file():
+        return state
+    if adapter.get("hook_installer"):
+        from install_host_guard import install
+
+        try:
+            status = install(adapter["id"], _expand_home("~"), HOME, check=True)
+        except (OSError, ValueError, KeyError):
+            return {**state, "status": "unknown"}
+        return {
+            "status": "current" if status["current"] else "stale",
+            "delegated_root": status.get("saipen_root"),
+            "delegated_current": bool(status.get("root_current")),
+        }
+    try:
+        installed = _content_bytes(installed_path)
+        shipped = _content_bytes(HOME / artifact)
+    except OSError:
+        # Installed but unobservable is UNKNOWN, never fresh (SRC-030 Part 12).
+        return {**state, "status": "unknown"}
+    install_plan = adapter.get("install") if isinstance(adapter.get("install"), dict) else {}
+    skill = install_plan.get("skill")
+    delegated = _expand_home(skill) if isinstance(skill, str) and skill else None
+    delegated_current = delegated is not None and same_runtime_generation(HOME, delegated)
+    return {
+        "status": "current" if installed == shipped and delegated_current else "stale",
+        "delegated_root": str(delegated) if delegated is not None else None,
+        "delegated_current": delegated_current,
+    }
+
+
 def hook_status(adapter: dict) -> str:
     """current | stale | absent | unknown for the installed blocking hook.
 
@@ -633,53 +597,33 @@ def hook_status(adapter: dict) -> str:
     reads STALE: the supported OpenCode runtime discovers both the singular
     `plugin/` and the plural `plugins/` global plugin directories, so a stale
     copy there would load the same guard hook twice. Capability truth is not
-    enough -- a duplicate load is not fresh.
+    enough -- a duplicate load is not fresh. Neither is a current wrapper that
+    delegates to an engine at another generation (`_hook_state`).
     """
-    surface = adapter.get("hook_install_surface")
-    artifact = adapter.get("hook_artifact")
-    for legacy in adapter.get("legacy_hook_surfaces") or []:
-        if isinstance(legacy, str) and legacy and _expand_home(legacy).is_file():
-            return "stale"
-    if not surface or not artifact:
-        return "absent"
-    installed_path = _expand_home(surface)
-    if not installed_path.is_file():
-        return "absent"
-    if adapter.get("hook_installer"):
-        from install_host_guard import install
-
-        try:
-            status = install(adapter["id"], _expand_home("~"), HOME, check=True)
-        except (OSError, ValueError, KeyError):
-            return "unknown"
-        return "current" if status["current"] else "stale"
-    try:
-        installed = _content_bytes(installed_path)
-        shipped = _content_bytes(HOME / artifact)
-    except OSError:
-        # Installed but unobservable is UNKNOWN, never fresh (SRC-030 Part 12).
-        return "unknown"
-    return "current" if installed == shipped else "stale"
+    return _hook_state(adapter)["status"]
 
 
 def home_surface_status(target: Path) -> dict:
     """Per-declared-surface freshness for one installed home."""
     adapter = _HOME_ADAPTERS.get(str(target.resolve()))
     if adapter is None:
-        return {"adapter": None, "surfaces": {}, "ok": True}
+        return {"adapter": None, "surfaces": {}, "ok": True, "problems": [], "hook": None}
     surfaces: dict[str, str] = {}
-    # The skill copy's freshness is the stamp comparison already reported;
+    hook: dict | None = None
+    # The skill copy's own generation is proven by `distribution_report`;
     # declared non-skill surfaces are checked here.
     if "instruction" in (adapter.get("freshness_surfaces") or []):
         surfaces["instruction"] = instruction_status(adapter, target)
     if "hook" in (adapter.get("freshness_surfaces") or []):
-        surfaces["hook"] = hook_status(adapter)
+        hook = _hook_state(adapter)
+        surfaces["hook"] = hook["status"]
     problems = [name for name, state in surfaces.items() if state in ("stale", "unknown")]
     return {
         "adapter": adapter.get("id"),
         "surfaces": surfaces,
         "ok": not problems,
         "problems": problems,
+        "hook": hook,
     }
 
 
@@ -691,28 +635,54 @@ def distribution_report(source_head: str | None = None) -> dict:
     head-recording carries no `source_head`; that is reported as UNKNOWN, never
     silently counted fresh, because a copy that cannot say what it is built
     from is exactly the case the stamp exists to expose.
+
+    T-1342: the stamp and the head are PROVENANCE. A home is current only when
+    the runtime it actually holds proves this source's generation
+    (`runtime_generation` == `expected_generation`, both from the one owner),
+    its installed launcher runs that engine, and every declared surface -- the
+    instruction block's home and the guard hook's delegated engine included --
+    proves the same generation. A current stamp over different bytes, or a
+    matching head over a dirty tree, is never fresh.
     """
     head = source_head or _source_head()
     homes: list[dict] = []
-    for target in TARGETS:
-        if not target.is_dir():
-            continue
-        name = next((p for p in target.parts if p.startswith(".")), str(target))
-        record = read_stamp(target) or {}
-        carried = record.get("source_head")
-        surface = home_surface_status(target)
-        homes.append(
-            {
-                "home": name,
-                "adapter": surface["adapter"],
-                "source_head": carried,
-                "installed_at": record.get("installed_at"),
-                "stale": (bool(head) and carried != head) or not surface["ok"],
-                "unknown": not carried,
-                "surfaces": surface["surfaces"],
-                "surface_problems": surface.get("problems", []),
-            }
-        )
+    with identity_session():
+        expected = runtime_generation_identity(HOME)
+        for target in TARGETS:
+            if not target.is_dir():
+                continue
+            name = next((p for p in target.parts if p.startswith(".")), str(target))
+            record = read_stamp(target) or {}
+            carried = record.get("source_head")
+            actual = runtime_generation_identity(target)
+            generation_current = expected is not None and actual == expected
+            launchers = launcher_problems(target)
+            surface = home_surface_status(target)
+            hook = surface.get("hook") or {}
+            delegated_stale = hook.get("delegated_current") is False
+            homes.append(
+                {
+                    "home": name,
+                    "path": str(target),
+                    "adapter": surface["adapter"],
+                    "source_head": carried,
+                    "installed_at": record.get("installed_at"),
+                    "runtime_generation": actual,
+                    "expected_generation": expected,
+                    "generation_current": generation_current,
+                    "launcher_problems": launchers,
+                    "delegated_root": hook.get("delegated_root"),
+                    "delegated_current": hook.get("delegated_current"),
+                    "stale": (bool(head) and carried != head)
+                    or not generation_current
+                    or bool(launchers)
+                    or delegated_stale
+                    or not surface["ok"],
+                    "unknown": not carried,
+                    "surfaces": surface["surfaces"],
+                    "surface_problems": surface.get("problems", []),
+                }
+            )
     heads = [h for h in (item["source_head"] for item in homes) if h]
     newest = None
     if homes:
@@ -731,6 +701,7 @@ def distribution_report(source_head: str | None = None) -> dict:
     )
     return {
         "source_head": head,
+        "expected_generation": expected,
         "installed": len(homes),
         "stale": len(stale),
         "stale_homes": stale,
@@ -747,7 +718,13 @@ def distribution_report(source_head: str | None = None) -> dict:
         # distinguishable or the report is only trustworthy when it complains.
         # SRC-030 Part 12: an installed-but-unobservable surface is UNKNOWN,
         # so a home can read stale with a perfectly current stamp.
-        "fresh": bool(homes) and not stale and not blocked and surface_unknown == 0,
+        # T-1342: fresh implies every installed home -- and every engine its
+        # hook delegates to -- holds the accepted runtime generation's bytes.
+        "fresh": bool(homes)
+        and expected is not None
+        and not stale
+        and not blocked
+        and surface_unknown == 0,
     }
 
 
@@ -860,7 +837,15 @@ def main(argv: list[str] | None = None) -> int:
         print(f"INJECT FAILED (runtime manifest): {exc}")
         return 1 if args.check else 0
     present = [t for t in TARGETS if t.is_dir()]
-    stale = [t for t in present if _installed(t) != digest]
+    # T-1342: staleness is the CONTENT a home holds, proven by the one owner.
+    # The stamp is a self-declared record written into the candidate itself; a
+    # copied or leftover stamp over different bytes must never read current,
+    # and a current tree whose stamp merely predates this scheme needs a new
+    # stamp, not a reinstall.
+    with identity_session():
+        actual = {t: runtime_generation_identity(t) for t in present}
+    stale = [t for t in present if actual[t] != digest]
+    unstamped = [t for t in present if t not in stale and _installed(t) != digest]
 
     if not present:
         print("no agent home installed on this machine -- nothing to inject")
@@ -883,7 +868,10 @@ def main(argv: list[str] | None = None) -> int:
 
     if args.check:
         for t in stale:
-            print(f"STALE: {t} (installed {_installed(t) or 'unstamped'}, source {digest})")
+            print(
+                f"STALE: {t} (runtime {actual[t] or 'unprovable'}, "
+                f"stamp {_installed(t) or 'unstamped'}, source {digest})"
+            )
             # A digest names no file. Name them: an agent stranded by a stale
             # copy needs to know WHAT it is reading, and one path with two byte
             # counts is the whole diagnosis. Bounded, because a home that was
@@ -894,7 +882,12 @@ def main(argv: list[str] | None = None) -> int:
             if len(drift) > DRIFT_REPORT_LIMIT:
                 print(f"    ... and more; {DRIFT_REPORT_LIMIT} shown")
             if not drift:
-                print("    no file differs -- the stamp is stale, the content is not")
+                print("    no declared file differs -- the home's runtime surface is unprovable")
+        for t in unstamped:
+            print(
+                f"UNSTAMPED: {t} (runtime current at {digest}; "
+                f"stamp {_installed(t) or 'absent'})"
+            )
         if not stale:
             print(f"fresh: {len(present)} agent home(s) at {digest}")
         return 1 if stale else 0
@@ -911,6 +904,8 @@ def main(argv: list[str] | None = None) -> int:
                 stamp_targets(digest)
             else:
                 print(f"INJECT FAILED ({why}):\n{tail}")
+        elif unstamped:
+            stamp_targets(digest)
         return 0
 
     if stale or args.force:
@@ -926,6 +921,9 @@ def main(argv: list[str] | None = None) -> int:
         stamped = stamp_targets(digest)
         print(f"injected ({why}) -> {digest}; stamped: {', '.join(stamped)}")
     elif not args.quiet_when_fresh:
+        if unstamped:
+            stamped = stamp_targets(digest)
+            print(f"restamped (runtime already current): {', '.join(stamped)}")
         print(f"fresh: {len(present)} agent home(s) at {digest}")
 
     if stale or args.force or not args.quiet_when_fresh:

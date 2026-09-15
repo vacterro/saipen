@@ -15,26 +15,15 @@ import subprocess
 import sys
 import tempfile
 
+from saipen_engine.runtime_surface import (
+    identity_session,
+    normalize_content as content_bytes,
+    runtime_generation_identity,  # noqa: F401  (re-exported for parity tests)
+    same_runtime_generation,
+)
+
 ROOT = Path(__file__).resolve().parent.parent
 NAME = "saipen-guard"
-
-
-def content_bytes(raw: bytes) -> bytes:
-    """The artifact's CONTENT, line endings normalised to LF.
-
-    Same rule and same reason as `autoinject._content_bytes` (T-1253), applied
-    to the hook artifact, which that fix never reached: the clone holds LF
-    while the snapshot git produces for the scheduled injector holds CRLF, so
-    `tools/host_guard.py` is 3971 bytes in one and 4079 in the other without a
-    character of difference. Comparing raw bytes reported a hook installed
-    seconds ago as stale. A file that is not valid UTF-8 is compared verbatim:
-    it is not text, so there are no line endings to normalise.
-    """
-    try:
-        raw.decode("utf-8")
-    except UnicodeDecodeError:
-        return raw
-    return raw.replace(b"\r\n", b"\n").replace(b"\r", b"\n")
 
 
 def saipen_root_of(invocation: str) -> str | None:
@@ -60,21 +49,37 @@ def saipen_root_of(invocation: str) -> str | None:
     return tail
 
 
-def root_resolves(root: str | None) -> bool:
-    """Does the named SAIPEN root actually hold protocol documents?
+def root_resolves(root: str | None, expected: Path | str | None = None) -> bool:
+    """Does the named SAIPEN root prove the SAME accepted generation?
 
-    The half the exact-string comparison never asked. A hook pointing at a home
-    that no longer exists is genuinely broken however well-formed its command
-    line is -- and a hook pointing at a DIFFERENT real home is genuinely fine,
-    which is the case that used to read stale forever (T-1338).
+    T-1342: `BOOT.md exists` is NOT identity. Any directory can hold a
+    `BOOT.md`, and the hook delegates enforcement to `<root>/tools/saipen.py`,
+    so a root that merely "looks like SAIPEN" can run an engine from another
+    release while the wrapper bytes look current. A different PATH is fine; a
+    different GENERATION is not. The named root is accepted only when its
+    bounded generation fingerprint matches the distribution/source authority
+    (`ROOT`, or `expected` when supplied). Missing, unreadable and
+    BOOT.md-only roots are STALE/UNKNOWN, never CURRENT.
     """
     if not root or not root.strip():
         return False
     try:
-        base = Path(root.strip())
-        return (base / "saipen" / "BOOT.md").is_file() or (base / "BOOT.md").is_file()
+        return same_runtime_generation(ROOT if expected is None else expected, Path(root.strip()))
     except OSError:
         return False
+
+
+def _named_root_is_current(command: str) -> bool:
+    """Must the hook command's `--saipen-root` name the ACCEPTED generation?
+
+    T-1342: an exact command-string match only proves the wrapper bytes were
+    written once. The hook executes `<root>/tools/saipen.py guard`, so a
+    byte-current entry that delegates to a root carrying a stale engine is
+    still not current. This check is unconditional; the T-1338 soft compare
+    exists for a different root SPELLING, never for a different generation.
+    """
+    root = saipen_root_of(command)
+    return root is not None and root_resolves(root)
 
 
 def _same_invocation(configured: str, expected: str) -> bool:
@@ -123,6 +128,18 @@ def atomic_write(path: Path, data: bytes) -> None:
 
 
 def install(host: str, home: Path, root: Path = ROOT, *, check: bool = False) -> dict:
+    """Install (or with `check`, only observe) one native guard hook.
+
+    The result names the SAIPEN root the configured hook delegates to
+    (`saipen_root`) and whether that root proves the accepted generation
+    (`root_current`): the wrapper executes `<saipen_root>/tools/saipen.py`, so a
+    current wrapper over a stale delegated engine is not a current hook.
+    """
+    with identity_session():
+        return _install(host, home, root, check=check)
+
+
+def _install(host: str, home: Path, root: Path, *, check: bool) -> dict:
     registry = json.loads((root / "extensions/adapters/registry.json").read_text())
     entry = next(item for item in registry["adapters"] if item["id"] == host)
     artifact = home / entry["hook_install_surface"].removeprefix("~/")
@@ -165,13 +182,21 @@ def install(host: str, home: Path, root: Path = ROOT, *, check: bool = False) ->
                     remaining.append(hook)
             if remaining or not group["hooks"]:
                 preserved.append({**group, "hooks": remaining})
-        configured = owned == [(".*", expected["hooks"][0])] or (
+        named = str(owned[0][1].get("command", "")) if len(owned) == 1 else ""
+        named_root = saipen_root_of(named)
+        configured = (
             len(owned) == 1
             and owned[0][0] == ".*"
-            and {k: v for k, v in owned[0][1].items() if k != "command"}
-            == {k: v for k, v in expected["hooks"][0].items() if k != "command"}
-            and _same_invocation(
-                str(owned[0][1].get("command", "")), expected["hooks"][0]["command"]
+            and (
+                (
+                    owned == [(".*", expected["hooks"][0])]
+                    and _named_root_is_current(named)
+                )
+                or (
+                    {k: v for k, v in owned[0][1].items() if k != "command"}
+                    == {k: v for k, v in expected["hooks"][0].items() if k != "command"}
+                    and _same_invocation(named, expected["hooks"][0]["command"])
+                )
             )
         )
         hooks["BeforeTool"] = [*preserved, expected]
@@ -192,27 +217,32 @@ def install(host: str, home: Path, root: Path = ROOT, *, check: bool = False) ->
             data.get("version") != "v1" or any(h.get("name") != NAME for h in data.get("hooks", []))
         ):
             raise ValueError("reserved SAIPEN hook file contains unrelated configuration")
-        configured = data == expected
-        if not configured and isinstance(data, dict) and len(data.get("hooks") or []) == 1:
+        configured = False
+        named_root = None
+        if isinstance(data, dict) and len(data.get("hooks") or []) == 1:
             # Same rule as the Gemini branch: the SAIPEN root is a variable,
-            # everything else is contract (T-1338).
+            # everything else is contract (T-1338) -- and the generation it
+            # names is contract too (T-1342).
             entry_now = data["hooks"][0]
             entry_want = expected["hooks"][0]
             action_now = entry_now.get("action") or {}
             action_want = entry_want["action"]
+            named_command = str(action_now.get("command", ""))
+            named_root = saipen_root_of(named_command)
             configured = (
+                data == expected and _named_root_is_current(named_command)
+            ) or (
                 data.get("version") == expected["version"]
                 and {k: v for k, v in entry_now.items() if k != "action"}
                 == {k: v for k, v in entry_want.items() if k != "action"}
                 and {k: v for k, v in action_now.items() if k != "command"}
                 == {k: v for k, v in action_want.items() if k != "command"}
-                and _same_invocation(
-                    str(action_now.get("command", "")), action_want["command"]
-                )
+                and _same_invocation(named_command, action_want["command"])
             )
         data = expected
     shipped = (root / entry["hook_artifact"]).read_bytes()
     installed = artifact.is_file()
+    root_current = named_root is not None and root_resolves(named_root)
     current = (
         installed
         and content_bytes(artifact.read_bytes()) == content_bytes(shipped)
@@ -233,12 +263,16 @@ def install(host: str, home: Path, root: Path = ROOT, *, check: bool = False) ->
         atomic_write(artifact, shipped)
         atomic_write(config, encoded)
         installed = current = configured = True
+        named_root = str(root)
+        root_current = root_resolves(named_root)
     return {
         "host": host,
         "capability": True,
         "installed": installed,
         "current": current,
         "configured": configured,
+        "saipen_root": named_root,
+        "root_current": root_current,
         "health": None,
         "effective": "UNKNOWN" if current else "ENFORCEMENT_GAP",
         "artifact": str(artifact),

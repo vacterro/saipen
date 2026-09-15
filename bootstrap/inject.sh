@@ -452,25 +452,19 @@ expand_home() { # $1=registry path starting with ~
 
 # --- T-1319 TARGET 2: install-time runtime provenance (mirrors inject.ps1) --
 PROVENANCE_NAME=".saipen_runtime.json"
-INSTALLER_GENERATION="T-1327-runtime-prelaunch-20260914.1"
 
-runtime_fingerprint() {
-  "$PYTHON_BIN" - "$ROOT" <<'PY'
-import hashlib, pathlib, sys
-root = pathlib.Path(sys.argv[1])
-rels = ["tools/saipen.py", "extensions/adapters/registry.json", "saipen/MANIFEST.json"]
-engine = root / "tools" / "saipen_engine"
-if engine.is_dir():
-    rels += [p.relative_to(root).as_posix() for p in engine.rglob("*.py")]
-h = hashlib.sha256()
-for rel in sorted(set(rels)):
-    path = root / rel
-    if path.is_file():
-        h.update(rel.encode())
-        h.update(b"=")
-        h.update(hashlib.sha256(path.read_bytes()).hexdigest().encode())
-        h.update(b"\n")
-print(h.hexdigest())
+# T-1342: the installer generation label and the runtime fingerprint come from
+# the ONE owner in this source tree's engine (runtime_bootstrap.GENERATION and
+# runtime_surface), never from a private inventory here. Prints
+# "<generation> <fingerprint>" for the root in $1; -I isolates the interpreter
+# from PYTHONPATH/user site, -B keeps bytecode out of the tree being proven.
+runtime_identity() { # $1=runtime root to prove
+  "$PYTHON_BIN" -I -B - "$ROOT/tools" "$1" <<'PY'
+import sys
+sys.path.insert(0, sys.argv[1])
+from saipen_engine.runtime_bootstrap import GENERATION
+from saipen_engine.runtime_surface import require_runtime_generation_identity
+print(GENERATION, require_runtime_generation_identity(sys.argv[2]))
 PY
 }
 
@@ -478,16 +472,24 @@ write_provenance() { # $1=skill dst, $2=adapter id
   # Provenance is REQUIRED recovery state, not optional diagnostics: this
   # function surfaces a write/read-back failure so `report` marks the host
   # migration non-successful. Never `|| true` away the failure.
-  local dst="$1" id="$2" version="" head="" fp=""
+  local dst="$1" id="$2" version="" head="" fp="" generation="" source_id="" installed_id=""
   if [ -z "$dst" ] || [ ! -d "$dst" ]; then
     echo "provenance FAILED: skill dir missing"; return 1
   fi
   [ -f "$ROOT/VERSION" ] && version="$(tr -d '\r\n' < "$ROOT/VERSION")"
   head="$(git -C "$ROOT" rev-parse HEAD 2>/dev/null)" || head=""
-  fp="$(runtime_fingerprint 2>/dev/null)" \
-    || { echo "provenance FAILED: fingerprint unreadable"; return 1; }
+  source_id="$(runtime_identity "$ROOT" 2>/dev/null)" \
+    || { echo "provenance FAILED: source runtime identity unprovable"; return 1; }
+  installed_id="$(runtime_identity "$dst" 2>/dev/null)" \
+    || { echo "provenance FAILED: installed runtime identity unprovable"; return 1; }
+  generation="${source_id%% *}"
+  fp="${source_id#* }"
+  # The copy just made must BE the source generation, proven over its own
+  # declared surface -- not assumed from a successful cp.
+  [ "${installed_id#* }" = "$fp" ] \
+    || { echo "provenance FAILED: installed runtime identity differs from source"; return 1; }
   SKILL_DST="$dst" ADAPTER_ID="$id" SOURCE_ROOT="$ROOT" SRC_VERSION="$version" \
-    SRC_HEAD="$head" RUNTIME_FP="$fp" GENERATION="$INSTALLER_GENERATION" \
+    SRC_HEAD="$head" RUNTIME_FP="$fp" GENERATION="$generation" \
     PROV_NAME="$PROVENANCE_NAME" "$PYTHON_BIN" - <<'PY'
 import json, os, pathlib, sys
 

@@ -56,6 +56,15 @@ if str(TOOLS) not in sys.path:
 
 from saipen_engine.paths import identity_file_content, new_project_lineage  # noqa: E402
 
+from test_hermetic_env import isolate_host_session  # noqa: E402
+
+
+def setUpModule() -> None:
+    # An outer host session (SAIPEN_PROJECT_ROOT/LINEAGE, SAIPEN_AGENT, ...)
+    # must never bind this module's disposable fixtures (test_hermetic_env).
+    isolate_host_session()
+
+
 _VALIDATOR = "tools/validate.py"
 _CAPTURE_TIMEOUT = 1800
 
@@ -95,14 +104,12 @@ def _manifest_members() -> list[tuple[Path, str]]:
     on top -- an archive manifest, a build receipt, an operator's scratch file
     -- is outside this set by construction and cannot reach the oracle.
     """
-    from autoinject import _manifest_surface
+    from saipen_engine.runtime_surface import runtime_surface_items
 
-    members: list[tuple[Path, str]] = []
-    for source, is_tree in _manifest_surface():
-        files = [m for m in source.rglob("*") if m.is_file()] if is_tree else [source]
-        for member in files:
-            members.append((member, member.relative_to(HOME).as_posix()))
-    return members
+    # T-1342: the one runtime-surface owner, the same inventory the generation
+    # identity hashes. In the source layout a declared name IS the
+    # repository-relative path.
+    return [(member, declared) for declared, member in runtime_surface_items(HOME)]
 
 
 def _build_home(destination: Path, *, flatten: bool) -> None:

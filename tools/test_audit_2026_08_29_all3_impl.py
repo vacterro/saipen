@@ -22,6 +22,14 @@ from test_control_primitives import ControlFixture  # noqa: E402
 from saipen_engine import fast_check, journal  # noqa: E402
 from saipen_engine.reconcile import reconcile_protocol_state  # noqa: E402
 
+from test_hermetic_env import isolate_host_session  # noqa: E402
+
+
+def setUpModule() -> None:
+    # An outer host session (SAIPEN_PROJECT_ROOT/LINEAGE, SAIPEN_AGENT, ...)
+    # must never bind this module's disposable fixtures (test_hermetic_env).
+    isolate_host_session()
+
 
 def _tree_bytes(root: Path) -> dict[str, bytes]:
     """Every byte under the project's `.saipen` surface, for zero-write proofs."""

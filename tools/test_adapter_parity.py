@@ -205,6 +205,9 @@ class RegistryParityTests(unittest.TestCase):
             "hook_install_surface": str(install_dir / "plugins" / "saipen-guard.js"),
             "hook_artifact": "extensions/adapters/opencode/saipen-guard.js",
             "legacy_hook_surfaces": [str(legacy)],
+            # T-1342: the plugin executes this skill's engine; here the
+            # repository itself, which IS the accepted generation.
+            "install": {"skill": str(REPO)},
         }
         self.assertEqual(autoinject.hook_status(adapter), "absent")
         legacy.write_bytes(b"// stale singular copy\n")
@@ -334,8 +337,10 @@ class GuardHookInstallTests(unittest.TestCase):
 
 class FreshnessTests(unittest.TestCase):
     def test_instruction_surface_states(self):
-        skill_dir = Path(tempfile.mkdtemp())
-        target = skill_dir / "INSTR.md"
+        # T-1342: the home a current block names must prove the accepted
+        # generation; the repository's own protocol directory does.
+        skill_dir = REPO / "saipen"
+        target = Path(tempfile.mkdtemp()) / "INSTR.md"
         current = autoinject.rendered_activation_block(skill_dir)
         adapter = {"instruction_surfaces": [str(target)]}
         target.write_text(current, encoding="utf-8")
@@ -363,6 +368,7 @@ class FreshnessTests(unittest.TestCase):
         adapter = {
             "hook_install_surface": str(hook),
             "hook_artifact": artifact,
+            "install": {"skill": str(REPO)},
         }
         self.assertEqual(autoinject.hook_status(adapter), "absent")
         hook.write_bytes(shipped)
@@ -371,6 +377,33 @@ class FreshnessTests(unittest.TestCase):
         self.assertEqual(autoinject.hook_status(adapter), "stale")
         missing = dict(adapter, hook_artifact="extensions/adapters/opencode/does-not-exist.js")
         self.assertEqual(autoinject.hook_status(missing), "unknown")
+
+    def test_a_current_plugin_over_a_stale_delegated_engine_is_stale(self):
+        """T-1342: the wrapper bytes are current; the engine it runs is not."""
+        from test_distribution_report import install_copy, mini_source
+
+        artifact = "extensions/adapters/opencode/saipen-guard.js"
+        base = Path(tempfile.mkdtemp())
+        hook = base / "plugins" / "saipen-guard.js"
+        hook.parent.mkdir(parents=True)
+        hook.write_bytes((REPO / artifact).read_bytes())
+        source = mini_source(base / "source")
+        skill = install_copy(source, base / "skills" / "saipen")
+        adapter = {
+            "hook_install_surface": str(hook),
+            "hook_artifact": artifact,
+            "install": {"skill": str(skill)},
+        }
+        shipped = (REPO / artifact).read_bytes()
+        (source / artifact).parent.mkdir(parents=True, exist_ok=True)
+        (source / artifact).write_bytes(shipped)
+        with unittest.mock.patch.object(autoinject, "HOME", source):
+            self.assertEqual(autoinject.hook_status(adapter), "current")
+            (skill / "tools" / "saipen.py").write_text("# stale engine\n", encoding="utf-8")
+            state = autoinject._hook_state(adapter)
+        self.assertEqual(state["status"], "stale", state)
+        self.assertFalse(state["delegated_current"], state)
+        self.assertEqual(state["delegated_root"], str(skill))
 
     def test_an_unobservable_hook_makes_a_stamped_home_not_fresh(self):
         skill_dir = Path(tempfile.mkdtemp())
@@ -400,13 +433,17 @@ class FreshnessTests(unittest.TestCase):
         self.assertEqual(report["surface_unknown"], 1)
         self.assertEqual(report["homes"][0]["surfaces"]["hook"], "unknown")
 
-    def test_a_fully_absent_surface_set_stays_stamp_fresh(self):
+    def test_a_fully_absent_surface_set_stays_fresh(self):
         # T-1317 P1-3: "fully absent" means the declared surface is a path that
         # was never created -- a fixture that mkdir()s the target is testing an
-        # installed-but-empty surface, not an absent one.
+        # installed-but-empty surface, not an absent one. T-1342: the skill copy
+        # itself must hold the accepted runtime; a stamp alone is not a home.
+        from test_distribution_report import install_copy, mini_source
+
         base = Path(tempfile.mkdtemp())
-        skill_dir = base / "installed-skill"
-        skill_dir.mkdir()
+        source = mini_source(base / "source")
+        (source / "saipen" / "ACTIVATION_BLOCK.md").write_bytes(TEMPLATE.read_bytes())
+        skill_dir = install_copy(source, base / "installed-skill")
         (skill_dir / autoinject.STAMP).write_text(
             json.dumps(
                 {"digest": "x", "source_head": "head", "installed_at": "2026-09-12T00:00:00Z"}
@@ -427,6 +464,7 @@ class FreshnessTests(unittest.TestCase):
                 unittest.mock.patch.object(
                     autoinject, "_HOME_ADAPTERS", {str(skill_dir.resolve()): adapter}
                 ), \
+                unittest.mock.patch.object(autoinject, "HOME", source), \
                 unittest.mock.patch.object(autoinject, "last_inject_run", return_value=None):
             report = autoinject.distribution_report(source_head="head")
         self.assertEqual(report["homes"][0]["surfaces"]["instruction"], "absent")

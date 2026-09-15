@@ -15,7 +15,31 @@ with a stable message; they are never silently skipped.
 from __future__ import annotations
 
 import os
+import stat
 from pathlib import Path, PurePosixPath
+
+#: Windows FILE_ATTRIBUTE_REPARSE_POINT. A junction is not a symlink to
+#: `Path.is_symlink()` on every supported Python, yet a walk or a copy follows
+#: it out of the declared tree exactly like one.
+REPARSE_POINT = 0x400
+
+
+def is_link(path: Path) -> bool:
+    """True for a symlink OR a Windows junction/reparse point.
+
+    An absent path is not a link (existence is the caller's own check); an
+    entry whose metadata cannot be read raises, because "could not tell" must
+    never read as "plain file".
+    """
+    try:
+        info = os.lstat(path)
+    except FileNotFoundError:
+        return False
+    except OSError as exc:
+        raise RuntimeError(f"runtime manifest entry unreadable: {path}: {exc}") from exc
+    if stat.S_ISLNK(info.st_mode):
+        return True
+    return bool(getattr(info, "st_file_attributes", 0) & REPARSE_POINT)
 
 
 # T-1254: the ONE cache-prune rule. It lived as a local inside
@@ -53,13 +77,21 @@ def copy_tree_members(root: Path, raw: object) -> tuple[Path, list[Path]]:
 
     Members are enumerated exactly the way the injectors copy them:
     build/test caches (__pycache__, .pytest_cache) are pruned, .pyc/.pyo files
-    are skipped, and any symlink anywhere in the surface is refused (a copy
-    would follow it). A missing or symlinked tree root is refused too: a
-    declared tree that is absent is a broken manifest, never a silent skip.
+    are skipped, and any symlink or junction/reparse point anywhere in the
+    surface is refused (a copy would follow it; `bootstrap/inject.ps1` refuses
+    reparse points for the same reason). A missing or symlinked tree root is
+    refused too: a declared tree that is absent is a broken manifest, never a
+    silent skip. An unreadable directory inside the tree raises instead of
+    being skipped: `os.walk` ignores listing errors unless told otherwise, and
+    a silently shorter member list is a partial surface that still looks whole.
     """
     source = manifest_source(root, raw)
     if not source.is_dir() or source.is_symlink():
         raise RuntimeError(f"runtime manifest tree missing or symlinked: {raw}")
+
+    def _unreadable(exc: OSError) -> None:
+        raise RuntimeError(f"runtime manifest tree unreadable: {raw}: {exc}") from exc
+
     # Regenerable build/test caches that sit inside a copy_trees source (e.g.
     # tools/) but are NEVER part of the shipped runtime surface. Sweeping them
     # into the manifest makes an untracked machine-local cache file fail the
@@ -67,10 +99,10 @@ def copy_tree_members(root: Path, raw: object) -> tuple[Path, list[Path]]:
     # local state (CORE-009).
     _CACHE_DIRS = CACHE_DIRS
     members: list[Path] = []
-    for _walk_root, _dirs, _files in os.walk(source):
+    for _walk_root, _dirs, _files in os.walk(source, onerror=_unreadable):
         for _d in list(_dirs):
             _d_path = Path(_walk_root) / _d
-            if _d_path.is_symlink():
+            if is_link(_d_path):
                 raise RuntimeError(
                     "runtime manifest tree contains symlink: "
                     f"{_d_path.relative_to(root.resolve()).as_posix()}"
@@ -81,7 +113,7 @@ def copy_tree_members(root: Path, raw: object) -> tuple[Path, list[Path]]:
             if _file.endswith((".pyc", ".pyo")):
                 continue
             _f_path = Path(_walk_root) / _file
-            if _f_path.is_symlink():
+            if is_link(_f_path):
                 raise RuntimeError(
                     "runtime manifest tree contains symlink: "
                     f"{_f_path.relative_to(root.resolve()).as_posix()}"

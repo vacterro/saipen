@@ -41,6 +41,11 @@ from contextlib import suppress
 from dataclasses import dataclass
 from pathlib import Path
 
+from .runtime_surface import (  # noqa: F401  (re-exported: one owner, see below)
+    runtime_generation_identity as generation_identity,
+    same_runtime_generation as same_generation,
+)
+
 SAIPEN_DIR = ".saipen"
 STATE_NAME = "STATE.md"
 BOARD_NAME = "BOARD.md"
@@ -834,6 +839,15 @@ def project_lineage_identity(root: Path | str) -> str | None:
         return None
     lineage, _error = parse_identity_content(text)
     return lineage
+
+
+# T-1342: there is exactly ONE shipped-runtime generation identity definition,
+# in `saipen_engine.runtime_surface`. `generation_identity`/`same_generation`
+# remain importable here as aliases of that owner so existing callers and
+# protocol imports keep working; they are never a second implementation.
+# (The document-only fingerprint that used to live here hashed protocol
+# DOCUMENTS, so a stale executable engine could pass as CURRENT -- itself the
+# defect T-1342 removes.)
 
 
 @dataclass(frozen=True)

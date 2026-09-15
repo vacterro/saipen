@@ -42,14 +42,38 @@ from saipen_engine import runtime_bootstrap as rb  # noqa: E402
 from saipen_engine.admission import evaluate_admission  # noqa: E402
 from saipen_engine.paths import identity_file_content, new_project_lineage  # noqa: E402
 
+from test_hermetic_env import isolate_host_session  # noqa: E402
+
+
+def setUpModule() -> None:
+    # An outer host session (SAIPEN_PROJECT_ROOT/LINEAGE, SAIPEN_AGENT, ...)
+    # must never bind this module's disposable fixtures (test_hermetic_env).
+    isolate_host_session()
+
+
 _TEMP: list[tempfile.TemporaryDirectory] = []
 
 _RUNTIME_FILES = (
+    "saipen/MANIFEST.json",
+    "saipen/BOOT.md",
+    "VERSION",
     "tools/saipen.py",
     "extensions/adapters/registry.json",
-    "saipen/MANIFEST.json",
 )
 _ENGINE_FILES = {"board.py": "BOARD PARSER V1", "state.py": "STATE PARSER V1"}
+#: T-1342: the freshness inventory IS the manifest-declared shipped surface.
+#: These fixtures declare a small manifest so the same rules can be exercised
+#: with the same owner as the real repository.
+_MINI_MANIFEST = {
+    "copy_trees": [{"src": "tools/saipen_engine", "dst": "tools/saipen_engine"}],
+    "files": [
+        {"src": "saipen/MANIFEST.json", "required": True},
+        {"src": "saipen/BOOT.md", "required": True},
+        {"src": "VERSION", "required": True},
+        {"src": "tools/saipen.py", "required": True},
+        {"src": "extensions/adapters/registry.json", "required": True},
+    ],
+}
 
 
 def _find_powershell() -> str | None:
@@ -81,7 +105,10 @@ def _write_source(root: Path) -> None:
     (root / "tools" / "saipen_engine").mkdir(parents=True, exist_ok=True)
     (root / "extensions" / "adapters").mkdir(parents=True, exist_ok=True)
     (root / "bootstrap").mkdir(parents=True, exist_ok=True)
-    for rel in ("saipen/MANIFEST.json", "saipen/BOOT.md", "VERSION", "tools/saipen.py"):
+    (root / "saipen" / "MANIFEST.json").write_text(
+        json.dumps(_MINI_MANIFEST, indent=2) + "\n", encoding="utf-8", newline="\n"
+    )
+    for rel in ("saipen/BOOT.md", "VERSION", "tools/saipen.py"):
         (root / rel).write_text(f"marker {rel}\n", encoding="utf-8")
     for name, body in _ENGINE_FILES.items():
         (root / "tools" / "saipen_engine" / name).write_text(body, encoding="utf-8")
@@ -320,7 +347,11 @@ def _installer_result(returncode: int):
     )
 
 
-def _write_valid_marker(skill: Path, source: Path, adapter: str = "opencode") -> None:
+def _write_valid_marker(
+    skill: Path, source: Path, adapter: str = "opencode", fingerprint: str | None = None
+) -> None:
+    # T-1342: a valid marker names the canonical generation it installed --
+    # the one runtime identity, not an arbitrary non-empty token.
     (skill / rb.PROVENANCE_FILENAME).write_text(
         json.dumps(
             {
@@ -328,7 +359,7 @@ def _write_valid_marker(skill: Path, source: Path, adapter: str = "opencode") ->
                 "adapter_id": adapter,
                 "canonical_source_root": str(source),
                 "installer_generation": rb.GENERATION,
-                "runtime_fingerprint": "d" * 64,
+                "runtime_fingerprint": fingerprint or rb.surface_fingerprint(source),
             }
         ),
         encoding="utf-8",
@@ -372,6 +403,33 @@ class BootstrapSuccessGateTests(unittest.TestCase):
         self.assertTrue(result["ok"], result)
         self.assertEqual(result["code"], "RUNTIME_BOOTSTRAPPED")
         self.assertEqual(result["provenance_problems"], [])
+
+    def test_a_marker_naming_another_generation_is_not_success(self):
+        """T-1342: provenance must describe the tree it sits in."""
+        source, installed, _other = make_world()
+        _write_valid_marker(installed, source, fingerprint="gen-sha256:" + "0" * 64)
+        with _PatchSkillRoot(installed), unittest.mock.patch.object(
+            rb, "_invoke_installer", return_value=_installer_result(0)
+        ):
+            result = rb.run_bootstrap()
+        self.assertFalse(result["ok"], result)
+        self.assertEqual(result["code"], "BOOTSTRAP_PROVENANCE_INVALID")
+        self.assertIn("runtime_fingerprint", result["provenance_problems"])
+
+    def test_an_extra_installed_module_is_not_success(self):
+        """The diff walk used the canonical inventory; the identity does not."""
+        source, installed, _other = make_world()
+        _write_valid_marker(installed, source)
+        (installed / "tools" / "saipen_engine" / "leftover.py").write_text(
+            "LEFTOVER MODULE", encoding="utf-8"
+        )
+        with _PatchSkillRoot(installed), unittest.mock.patch.object(
+            rb, "_invoke_installer", return_value=_installer_result(0)
+        ):
+            result = rb.run_bootstrap()
+        self.assertFalse(result["ok"], result)
+        self.assertEqual(result["code"], "BOOTSTRAP_INCOMPLETE")
+        self.assertIn("tools/saipen_engine/leftover.py", result["diff"])
 
 
 _LAUNCHER_BLOCK_RE = re.compile(

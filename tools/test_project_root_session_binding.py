@@ -47,6 +47,14 @@ from saipen_engine.paths import (  # noqa: E402
 from saipen_engine.fleet import preflight, prepare, scan  # noqa: E402
 from test_reconcile_valve import _t1318_project  # noqa: E402
 
+from test_hermetic_env import isolate_host_session  # noqa: E402
+
+
+def setUpModule() -> None:
+    # An outer host session (SAIPEN_PROJECT_ROOT/LINEAGE, SAIPEN_AGENT, ...)
+    # must never bind this module's disposable fixtures (test_hermetic_env).
+    isolate_host_session()
+
 
 def _init_saipen_project(root: Path, *, lineage: str | None = None) -> str:
     """Create a minimal valid .saipen project structure with an IDENTITY.md."""

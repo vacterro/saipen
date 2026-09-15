@@ -29,6 +29,15 @@ from saipen_engine.reconcile import (
     reconcile_protocol_state,
 )
 
+from test_hermetic_env import isolate_host_session
+
+
+def setUpModule() -> None:
+    # An outer host session (SAIPEN_PROJECT_ROOT/LINEAGE, SAIPEN_AGENT, ...)
+    # must never bind this module's disposable fixtures (test_hermetic_env).
+    isolate_host_session()
+
+
 _TRANSITION_OP = "transition-" + "1" * 32
 
 WAIT_FORM = "WAIT: safety valve reached (0 waves / 20 tickets) -- run 'cc' to continue"

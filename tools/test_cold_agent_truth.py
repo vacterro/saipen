@@ -25,6 +25,14 @@ from saipen_engine.cold_truth import (
 )
 from saipen_engine.log import MAX_NEW_EVENT_BYTES, build_event
 
+from test_hermetic_env import isolate_host_session
+
+
+def setUpModule() -> None:
+    # An outer host session (SAIPEN_PROJECT_ROOT/LINEAGE, SAIPEN_AGENT, ...)
+    # must never bind this module's disposable fixtures (test_hermetic_env).
+    isolate_host_session()
+
 
 LINEAGE = "lineage-0123456789abcdef0123456789abcdef"
 ROOT = Path(__file__).resolve().parents[1]

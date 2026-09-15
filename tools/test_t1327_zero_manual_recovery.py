@@ -48,6 +48,15 @@ from saipen_engine.fleet import (  # noqa: E402
 from test_guard_hostile_matrix import fresh_project  # noqa: E402
 from test_opencode_adapter import run_cases  # noqa: E402
 
+from test_hermetic_env import isolate_host_session  # noqa: E402
+
+
+def setUpModule() -> None:
+    # An outer host session (SAIPEN_PROJECT_ROOT/LINEAGE, SAIPEN_AGENT, ...)
+    # must never bind this module's disposable fixtures (test_hermetic_env).
+    isolate_host_session()
+
+
 CLI = REPO / "tools" / "saipen.py"
 PLUGIN = REPO / "extensions" / "adapters" / "opencode" / "saipen-guard.js"
 _GUARD_ENV = {
@@ -545,14 +554,11 @@ class TargetCRuntimeFreshnessTests(unittest.TestCase):
 
     def test_installed_fingerprint_mismatch_is_deterministic(self) -> None:
         skill = self._install_surface()
-        self.assertEqual(
-            rb._installed_fingerprint(REPO, skill), rb.surface_fingerprint(REPO)
-        )
+        # T-1342: the installed side is proven over its OWN declared inventory.
+        self.assertEqual(rb.surface_fingerprint(skill), rb.surface_fingerprint(REPO))
         target = skill / "tools" / "saipen_engine" / "fleet.py"
         target.write_bytes(target.read_bytes() + b"\n# stale\n")
-        self.assertNotEqual(
-            rb._installed_fingerprint(REPO, skill), rb.surface_fingerprint(REPO)
-        )
+        self.assertNotEqual(rb.surface_fingerprint(skill), rb.surface_fingerprint(REPO))
         self.assertIn("tools/saipen_engine/fleet.py", rb.surface_diff(REPO, skill))
 
     def test_launcher_surface_is_verified_not_assumed(self) -> None:
@@ -692,24 +698,45 @@ class TargetCRuntimeFreshnessTests(unittest.TestCase):
         self.assertEqual(report["code"], rb.PRELAUNCH_HOST_UNIDENTIFIED)
 
     def test_supported_launch_refuses_to_start_a_host_on_unproven_bytes(self) -> None:
-        from saipen_engine.host_launch import HostLaunchRefusal, launch_host
+        import importlib
+        import unittest.mock
 
-        project = fresh_project(agent="test-agent")
-        original = rb.prelaunch
-        rb.prelaunch = lambda *_a, **_k: {
+        from saipen_engine import host_launch
+
+        # Patch the EXACT module `prelaunch_runtime` imports. The package alias
+        # in tools/__init__.py gives engine modules two import spellings, so
+        # `rb` (from `from saipen_engine import runtime_bootstrap`) and the
+        # module host_launch reaches through its relative import can be two
+        # different objects: patching `rb` then missed, the REAL prelaunch
+        # resynced the operator's installed runtime and the REAL host started
+        # with no timeout -- the suite hung until the process was killed.
+        bootstrap = importlib.import_module(".runtime_bootstrap", host_launch.__package__)
+        refused = {
             "ok": False,
-            "code": rb.PRELAUNCH_FAILED,
+            "code": bootstrap.PRELAUNCH_FAILED,
             "detail": "injected",
             "engine_diff": ["tools/saipen.py"],
             "hook_problems": [],
             "launcher_problems": [],
             "provenance_problems": [],
         }
-        try:
-            with self.assertRaises(HostLaunchRefusal) as caught:
-                launch_host("opencode", project, "tester")
-        finally:
-            rb.prelaunch = original
+
+        def never(what: str):
+            def _fail(*_a, **_k):
+                raise AssertionError(f"a disposable launch test reached the real {what}")
+
+            return _fail
+
+        project = fresh_project(agent="test-agent")
+        with unittest.mock.patch.object(bootstrap, "prelaunch", return_value=refused), \
+                unittest.mock.patch.object(
+                    bootstrap, "_invoke_installer", side_effect=never("installer")
+                ), \
+                unittest.mock.patch.object(
+                    host_launch.subprocess, "run", side_effect=never("host process")
+                ), \
+                self.assertRaises(host_launch.HostLaunchRefusal) as caught:
+            host_launch.launch_host("opencode", project, "tester")
         self.assertIn("not the canonical generation", str(caught.exception))
 
     def test_the_prelaunch_cli_is_reachable_outside_any_project(self) -> None:

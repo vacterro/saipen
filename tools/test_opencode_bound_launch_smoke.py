@@ -31,6 +31,15 @@ from test_adapter_parity import BASH  # noqa: E402
 from test_guard_hostile_matrix import project_with_doing_owner  # noqa: E402
 from test_opencode_adapter import run_cases  # noqa: E402
 
+from test_hermetic_env import isolate_host_session  # noqa: E402
+
+
+def setUpModule() -> None:
+    # An outer host session (SAIPEN_PROJECT_ROOT/LINEAGE, SAIPEN_AGENT, ...)
+    # must never bind this module's disposable fixtures (test_hermetic_env).
+    isolate_host_session()
+
+
 OPENCODE = shutil.which("opencode")
 PYTHON = shutil.which("python") or shutil.which("python3")
 INSTALL_RELATIVE = Path(".config") / "opencode" / "plugins" / "saipen-guard.js"

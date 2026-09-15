@@ -24,6 +24,15 @@ from saipen_engine.acceptance import (
     render,
 )
 
+from test_hermetic_env import isolate_host_session
+
+
+def setUpModule() -> None:
+    # An outer host session (SAIPEN_PROJECT_ROOT/LINEAGE, SAIPEN_AGENT, ...)
+    # must never bind this module's disposable fixtures (test_hermetic_env).
+    isolate_host_session()
+
+
 T = "T-900"
 
 

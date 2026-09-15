@@ -34,6 +34,15 @@ import unittest
 
 from saipen_engine.fast_check import _analyze_log, _ledger_gap_amnesties
 
+from test_hermetic_env import isolate_host_session
+
+
+def setUpModule() -> None:
+    # An outer host session (SAIPEN_PROJECT_ROOT/LINEAGE, SAIPEN_AGENT, ...)
+    # must never bind this module's disposable fixtures (test_hermetic_env).
+    isolate_host_session()
+
+
 MARKER = "LEDGER-GAP AMNESTY "
 
 

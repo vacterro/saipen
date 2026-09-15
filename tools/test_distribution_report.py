@@ -10,6 +10,11 @@ and every scheduled run since 18:31 had skipped with SKIP DIRTY_SOURCE.
 
 The guard that stalls distribution on a dirty source is correct. The defect was
 that one uncommitted edit could stall it indefinitely and only a log file knew.
+
+T-1342: a stamp and a head are provenance. Every fixture home here holds a real
+(miniature) shipped runtime, because `fresh` now means the bytes an agent would
+execute ARE the accepted generation -- a directory holding only a stamp is not
+an installed home at all.
 """
 
 from __future__ import annotations
@@ -27,11 +32,56 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "tools"))
 
 import autoinject as A  # noqa: E402
+from saipen_engine.runtime_surface import (  # noqa: E402
+    installed_relpath,
+    runtime_generation_identity,
+    runtime_surface_items,
+)
 
 HEAD = "a" * 40
 OLD = "b" * 40
 
 RUN = "=== saipen scheduled inject run=deadbeef ==="
+
+#: A miniature manifest: the identity is derived from the manifest in the root
+#: under test, so a small declared surface exercises every rule.
+MINI_MANIFEST = {
+    "copy_trees": [{"src": "tools", "dst": "tools"}],
+    "files": [
+        {"src": "saipen/MANIFEST.json", "required": True},
+        {"src": "saipen/BOOT.md", "required": True},
+        {"src": "VERSION", "required": True},
+    ],
+}
+
+
+def mini_source(root: Path) -> Path:
+    """A source-layout SAIPEN home with a complete miniature runtime."""
+    (root / "saipen").mkdir(parents=True)
+    (root / "saipen" / "MANIFEST.json").write_text(
+        json.dumps(MINI_MANIFEST), encoding="utf-8", newline="\n"
+    )
+    (root / "saipen" / "BOOT.md").write_text("# BOOT\n", encoding="utf-8", newline="\n")
+    (root / "VERSION").write_text("9.9.9\n", encoding="utf-8", newline="\n")
+    (root / "tools" / "saipen_engine").mkdir(parents=True)
+    (root / "tools" / "saipen.py").write_text("# engine v1\n", encoding="utf-8", newline="\n")
+    (root / "tools" / "saipen_engine" / "board.py").write_text(
+        "# parser v1\n", encoding="utf-8", newline="\n"
+    )
+    return root
+
+
+def install_copy(source: Path, target: Path) -> Path:
+    """What the injector lands: flattened surface plus rendered launchers."""
+    for declared, member in runtime_surface_items(source):
+        landed = target / installed_relpath(declared)
+        landed.parent.mkdir(parents=True, exist_ok=True)
+        landed.write_bytes(member.read_bytes())
+    cli = (target / "tools" / "saipen.py").resolve()
+    (target / "bin").mkdir(parents=True, exist_ok=True)
+    (target / "bin" / "saipen").write_text(f'#!/bin/sh\nexec python "{cli}" "$@"\n', "utf-8")
+    (target / "bin" / "saipen.cmd").write_text(f'@echo off\r\npython "{cli}" %*\r\n', "utf-8")
+    return target
 
 
 class DistributionFixture(unittest.TestCase):
@@ -42,17 +92,20 @@ class DistributionFixture(unittest.TestCase):
         (self.appdata / "saipen").mkdir(parents=True)
         self.env = patch.dict(os.environ, {"LOCALAPPDATA": str(self.appdata)})
         self.env.start()
+        self.source = mini_source(self.base / "source")
+        self.home_patch = patch.object(A, "HOME", self.source)
+        self.home_patch.start()
 
     def tearDown(self) -> None:
+        self.home_patch.stop()
         self.env.stop()
         self.tmp.cleanup()
 
     # helpers -------------------------------------------------------------
 
     def home(self, name: str, head: str | None, at: str = "2026-09-03T00:00:00Z") -> Path:
-        target = self.base / name / "skills" / "saipen"
-        target.mkdir(parents=True, exist_ok=True)
-        record: dict = {"digest": "d" * 16}
+        target = install_copy(self.source, self.base / name / "skills" / "saipen")
+        record: dict = {"digest": runtime_generation_identity(self.source)}
         if head:
             record["source_head"] = head
         if at:
@@ -256,6 +309,72 @@ class FreshIsAnAnswerTests(DistributionFixture):
         self.assertNotEqual(fresh, stale)
         self.assertIn("current", fresh)
         self.assertIn("stale", stale)
+
+
+# ---------------------------------------------------------------------------
+# T-1342 -- fresh means the executed bytes, not the stamp or the head
+# ---------------------------------------------------------------------------
+
+
+class RuntimeContentTests(DistributionFixture):
+    def test_a_current_stamp_and_head_over_a_stale_engine_is_stale(self) -> None:
+        target = self.home(".opencode", HEAD)
+        (target / "tools" / "saipen_engine" / "board.py").write_text(
+            "# parser v0 -- an older generation\n", encoding="utf-8"
+        )
+        report = self.report([target])
+        home = report["homes"][0]
+        self.assertEqual(home["source_head"], HEAD)
+        self.assertFalse(home["generation_current"], home)
+        self.assertNotEqual(home["runtime_generation"], home["expected_generation"])
+        self.assertEqual(report["stale"], 1)
+        self.assertFalse(report["fresh"])
+
+    def test_a_stamp_without_a_runtime_is_never_fresh(self) -> None:
+        target = self.base / ".claude" / "skills" / "saipen"
+        target.mkdir(parents=True)
+        (target / A.STAMP).write_text(
+            json.dumps(
+                {
+                    "digest": runtime_generation_identity(self.source),
+                    "source_head": HEAD,
+                    "installed_at": "2026-09-03T00:00:00Z",
+                }
+            ),
+            encoding="utf-8",
+        )
+        report = self.report([target])
+        self.assertIsNone(report["homes"][0]["runtime_generation"])
+        self.assertEqual(report["stale"], 1)
+        self.assertFalse(report["fresh"])
+
+    def test_a_dirty_source_with_the_same_head_is_not_fresh(self) -> None:
+        target = self.home(".codex", HEAD)
+        self.assertTrue(self.report([target])["fresh"])
+        (self.source / "tools" / "saipen.py").write_text("# engine v2 (uncommitted)\n", "utf-8")
+        report = self.report([target], head=HEAD)
+        self.assertFalse(report["fresh"])
+        self.assertEqual(report["stale_homes"], [".codex"])
+
+    def test_an_extra_installed_module_is_a_different_generation(self) -> None:
+        target = self.home(".gemini", HEAD)
+        (target / "tools" / "saipen_engine" / "leftover.py").write_text("# stray\n", "utf-8")
+        self.assertFalse(self.report([target])["fresh"])
+
+    def test_a_launcher_that_does_not_run_the_installed_engine_is_stale(self) -> None:
+        target = self.home(".kiro", HEAD)
+        (target / "bin" / "saipen.cmd").write_text(
+            '@echo off\r\npython "V:\\elsewhere\\tools\\saipen.py" %*\r\n', encoding="utf-8"
+        )
+        report = self.report([target])
+        self.assertIn("wrong-target:bin/saipen.cmd", report["homes"][0]["launcher_problems"])
+        self.assertFalse(report["fresh"])
+
+    def test_crlf_transport_of_the_same_runtime_stays_fresh(self) -> None:
+        target = self.home(".agents", HEAD)
+        boot = target / "BOOT.md"
+        boot.write_bytes(boot.read_bytes().replace(b"\n", b"\r\n"))
+        self.assertTrue(self.report([target])["fresh"])
 
 
 if __name__ == "__main__":

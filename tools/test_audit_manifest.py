@@ -39,6 +39,15 @@ from saipen_engine import audit_manifest
 from saipen_engine.reconcile import reconcile_protocol_state
 from test_control_primitives import ControlFixture
 
+from test_hermetic_env import isolate_host_session
+
+
+def setUpModule() -> None:
+    # An outer host session (SAIPEN_PROJECT_ROOT/LINEAGE, SAIPEN_AGENT, ...)
+    # must never bind this module's disposable fixtures (test_hermetic_env).
+    isolate_host_session()
+
+
 TOOL = Path(__file__).resolve().parent / "saipen.py"
 
 

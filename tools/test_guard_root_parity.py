@@ -27,6 +27,7 @@ import json
 import sys
 import tempfile
 import unittest
+import unittest.mock
 from pathlib import Path
 
 TOOLS = Path(__file__).resolve().parent
@@ -36,11 +37,45 @@ if str(TOOLS) not in sys.path:
 
 import install_host_guard as G  # noqa: E402
 
+_TEMP: list[tempfile.TemporaryDirectory] = []
+
+#: T-1342: generation identity is the manifest-declared shipped runtime
+#: surface, so a fixture brings its own (small) manifest instead of copying
+#: documents only. PATH is the variable; these bytes are the generation.
+_MINI_MANIFEST = {
+    "copy_trees": [
+        {"src": "tools", "dst": "tools"},
+        {"src": "extensions/adapters", "dst": "extensions/adapters"},
+    ],
+    "files": [
+        {"src": "saipen/MANIFEST.json", "required": True},
+        {"src": "saipen/BOOT.md", "required": True},
+        {"src": "saipen/CORE.md", "required": True},
+        {"src": "VERSION", "required": True},
+    ],
+}
+
+
+def _tempdir(prefix: str) -> Path:
+    tmp = tempfile.TemporaryDirectory(prefix=prefix)
+    _TEMP.append(tmp)
+    return Path(tmp.name)
+
 
 def _fake_root(base: Path) -> Path:
-    """A directory that looks like a SAIPEN source root to the resolver."""
+    """A directory that proves a COMPLETE accepted generation to the resolver.
+
+    T-1342: freshness binds to the runtime generation, not to existence, so a
+    fixture carries the manifest-declared surface (docs, engine artifact, host
+    registry) -- a bare `BOOT.md` is not a home.
+    """
     (base / "saipen").mkdir(parents=True, exist_ok=True)
+    (base / "saipen" / "MANIFEST.json").write_text(
+        json.dumps(_MINI_MANIFEST, indent=2) + "\n", encoding="utf-8", newline="\n"
+    )
     (base / "saipen" / "BOOT.md").write_text("# BOOT\n", encoding="utf-8")
+    (base / "saipen" / "CORE.md").write_text("# CORE\n", encoding="utf-8")
+    (base / "VERSION").write_text("7.t\n", encoding="utf-8")
     (base / "extensions" / "adapters").mkdir(parents=True, exist_ok=True)
     (base / "extensions" / "adapters" / "registry.json").write_bytes(
         (REPO / "extensions" / "adapters" / "registry.json").read_bytes()
@@ -52,7 +87,30 @@ def _fake_root(base: Path) -> Path:
     return base
 
 
-class RootExtractionTests(unittest.TestCase):
+#: The distribution/source authority these tests compare against. `G.ROOT` is
+#: patched to it so the real repository's (much larger) surface is not needed.
+AUTHORITY = _fake_root(_tempdir("saipen-guard-authority-"))
+
+
+class AuthorityPatch:
+    """Patch the guard's accepted-generation authority for one test."""
+
+    def setUp(self):
+        super().setUp()
+        patch = unittest.mock.patch.object(G, "ROOT", AUTHORITY)
+        patch.start()
+        self.addCleanup(patch.stop)
+
+
+def _flatten(home: Path) -> Path:
+    """Move a fake root's `saipen/` surface to the flattened install layout."""
+    for member in sorted((home / "saipen").iterdir()):
+        if member.is_file():
+            member.replace(home / member.name)
+    return home
+
+
+class RootExtractionTests(AuthorityPatch, unittest.TestCase):
     def test_a_plain_root_is_recovered(self):
         self.assertEqual(
             G.saipen_root_of("python guard.py --host gemini --saipen-root /opt/saipen"),
@@ -69,17 +127,27 @@ class RootExtractionTests(unittest.TestCase):
         self.assertIsNone(G.saipen_root_of("python guard.py --host gemini"))
         self.assertIsNone(G.saipen_root_of(""))
 
-    def test_a_root_resolves_only_when_it_holds_boot(self):
+    def test_a_root_resolves_only_with_the_accepted_generation(self):
         with tempfile.TemporaryDirectory(prefix="saipen-guardroot-") as tmp:
             base = Path(tmp)
             self.assertFalse(G.root_resolves(str(base)))
             self.assertFalse(G.root_resolves(""))
             self.assertFalse(G.root_resolves(None))
             self.assertTrue(G.root_resolves(str(_fake_root(base / "src"))))
-            flat = base / "flat"
-            flat.mkdir()
-            (flat / "BOOT.md").write_text("# BOOT\n", encoding="utf-8")
-            self.assertTrue(G.root_resolves(str(flat)))
+            self.assertTrue(G.root_resolves(str(_flatten(_fake_root(base / "flat")))))
+            # A bare BOOT.md is NOT a generation proof (T-1342).
+            boot_only = base / "bootonly"
+            boot_only.mkdir()
+            (boot_only / "BOOT.md").write_text("# BOOT\n", encoding="utf-8")
+            self.assertFalse(G.root_resolves(str(boot_only)))
+
+    def test_a_different_generation_does_not_resolve(self):
+        with tempfile.TemporaryDirectory(prefix="saipen-guardgen-") as tmp:
+            base = Path(tmp)
+            clone = _fake_root(base / "clone")
+            self.assertTrue(G.root_resolves(str(clone)))
+            (clone / "saipen" / "CORE.md").write_text("stale generation\n", encoding="utf-8")
+            self.assertFalse(G.root_resolves(str(clone)))
 
 
 class ContentBytesTests(unittest.TestCase):
@@ -92,7 +160,7 @@ class ContentBytesTests(unittest.TestCase):
         self.assertEqual(G.content_bytes(blob), blob)
 
 
-class GeminiCheckTests(unittest.TestCase):
+class GeminiCheckTests(AuthorityPatch, unittest.TestCase):
     """The whole check, driven through a temp HOME and a temp SAIPEN root."""
 
     def _install_from(self, home: Path, root: Path) -> dict:
@@ -113,6 +181,28 @@ class GeminiCheckTests(unittest.TestCase):
             status = self._check_against(home, clone)
             self.assertTrue(status["configured"], status)
             self.assertTrue(status["current"], status)
+
+    def test_a_stale_delegated_engine_reads_stale_with_a_current_artifact(self):
+        """T-1342 matrix #8: the wrapper bytes are not the enforcement.
+
+        The hook executes `<configured-root>/tools/saipen.py guard`, so a
+        current artifact delegating to a DIFFERENT generation must never read
+        fresh. Only the artifact bytes match here; the engine generation does
+        not, and the install check must say so.
+        """
+        with tempfile.TemporaryDirectory(prefix="saipen-guard-engine-") as tmp:
+            base = Path(tmp)
+            home = base / "home"
+            home.mkdir()
+            snapshot = _fake_root(base / "snapshot")
+            clone = _fake_root(base / "clone")
+            self._install_from(home, snapshot)
+            # The artifact bytes are untouched; only the engine under the NAMED
+            # root moves to a different generation.
+            (snapshot / "saipen" / "CORE.md").write_text("stale engine\n", encoding="utf-8")
+            status = self._check_against(home, clone)
+            self.assertFalse(status["configured"], status)
+            self.assertFalse(status["current"], status)
 
     def test_a_hook_naming_a_root_that_does_not_resolve_reads_stale(self):
         with tempfile.TemporaryDirectory(prefix="saipen-guard-dead-root-") as tmp:
@@ -196,7 +286,7 @@ class GeminiCheckTests(unittest.TestCase):
             self.assertTrue(self._check_against(home, clone)["configured"])
 
 
-class KiroCheckTests(unittest.TestCase):
+class KiroCheckTests(AuthorityPatch, unittest.TestCase):
     def test_the_reserved_file_branch_follows_the_same_rule(self):
         with tempfile.TemporaryDirectory(prefix="saipen-guard-kiro-") as tmp:
             base = Path(tmp)

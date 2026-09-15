@@ -28,7 +28,6 @@ no project mutation.
 
 from __future__ import annotations
 
-import hashlib
 import json
 import os
 import shutil
@@ -36,21 +35,25 @@ import subprocess
 import sys
 from pathlib import Path
 
-#: Generation identity. Bumped whenever the bootstrap/guard surface changes so
-#: a running host can tell its loaded module from the installed bytes.
-GENERATION = "T-1327-runtime-prelaunch-20260914.1"
+from .runtime_surface import (
+    RuntimeSurfaceError,
+    content_bytes,
+    identity_session,
+    installed_relpath as _installed_relpath,  # noqa: F401  (re-exported for fixtures)
+    runtime_generation_identity as surface_fingerprint,
+    runtime_surface_items as _surface_paths,  # noqa: F401  (re-exported for fixtures)
+    surface_delta,
+)
+
+#: Installer generation LABEL. Bumped whenever the bootstrap/guard contract
+#: changes so a marker written by an older installer reads as such. It is
+#: provenance, never content identity: the generation a runtime actually runs
+#: is `surface_fingerprint` (the one manifest-derived identity), and both
+#: injectors read this label from here instead of carrying their own copy.
+GENERATION = "T-1342-runtime-surface-identity-20260915.1"
 
 #: The installer-owned provenance record, one per installed skill home.
 PROVENANCE_FILENAME = ".saipen_runtime.json"
-
-#: The runtime semantic surface freshness compares: the CLI entry, the whole
-#: engine grammar (this is what catches a stale ``board.py``), the host registry
-#: and the runtime manifest. A single-file compare cannot see a stale parser.
-_RUNTIME_FILES = (
-    "tools/saipen.py",
-    "extensions/adapters/registry.json",
-    "saipen/MANIFEST.json",
-)
 
 #: The installed CLI launcher surface the canonical installer OWNS
 #: (bootstrap/cli_launcher.py renders it into the staged skill). The runtime
@@ -70,13 +73,6 @@ _SOURCE_MARKERS = (
 
 class CanonicalSourceUnproven(RuntimeError):
     """The provenance marker names no provable canonical source; mutate nothing."""
-
-
-def _sha256(path: Path) -> str | None:
-    try:
-        return hashlib.sha256(path.read_bytes()).hexdigest()
-    except OSError:
-        return None
 
 
 def _skill_root() -> Path:
@@ -146,33 +142,20 @@ def _adapter_skill(adapter: dict) -> str | None:
     return skill if isinstance(skill, str) and skill.strip() else None
 
 
-def _surface_paths(root: Path) -> list[tuple[str, Path]]:
-    pairs: list[tuple[str, Path]] = []
-    for rel in _RUNTIME_FILES:
-        pairs.append((rel, root / rel))
-    engine = root / "tools/saipen_engine"
-    if engine.is_dir():
-        for path in sorted(engine.rglob("*.py")):
-            pairs.append((path.relative_to(root).as_posix(), path))
-    return pairs
-
-
-def _installed_relpath(rel: str) -> str:
-    """Map a canonical runtime path to the installer's flattened layout."""
-    prefix = "saipen/"
-    return rel[len(prefix) :] if rel.startswith(prefix) else rel
-
-
 def surface_diff(canonical: Path, installed: Path, limit: int = 20) -> list[str]:
-    """Relative paths whose installed bytes differ from canonical (or are absent)."""
-    diffs: list[str] = []
-    for rel, src in _surface_paths(canonical):
-        dst = installed / _installed_relpath(rel)
-        if not dst.is_file() or _sha256(dst) != _sha256(src):
-            diffs.append(rel)
-            if len(diffs) >= limit:
-                break
-    return diffs
+    """Declared runtime names that differ between canonical and installed homes.
+
+    T-1342: naming only -- the verdict is the generation identity comparison
+    (`surface_fingerprint` on both sides). The inventory AND the comparison
+    belong to `runtime_surface.surface_delta`, which also names a file present
+    on one side only: a leftover module in an installed engine is a difference
+    a canonical-inventory walk could never see.
+    """
+    try:
+        delta = surface_delta(canonical, installed, limit=limit)
+    except (RuntimeSurfaceError, OSError) as exc:
+        return [f"canonical-runtime-surface-unproven: {exc}"]
+    return [name for name, _expected, _candidate in delta]
 
 
 def _current_adapter(registry: dict, skill_root: Path | None = None) -> str | None:
@@ -195,12 +178,17 @@ def _current_adapter(registry: dict, skill_root: Path | None = None) -> str | No
     return None
 
 
-def marker_problems(record: dict | None, host: str, source: Path) -> list[str]:
+def marker_problems(
+    record: dict | None, host: str, source: Path, expected_fingerprint: str | None = None
+) -> list[str]:
     """Fields an installer-owned marker MUST carry for a legal success.
 
     Provenance is REQUIRED recovery state, not optional diagnostics: a missing
     or malformed marker makes a host-scoped migration non-successful even when
-    the file surface happens to match.
+    the file surface happens to match. When the canonical generation is known,
+    the marker must name THAT generation: the fingerprint an installer records
+    is the one runtime identity, so a marker from an older installer (or one
+    naming another generation) is provenance that no longer describes the tree.
     """
     if not isinstance(record, dict):
         return ["marker-missing"]
@@ -212,14 +200,23 @@ def marker_problems(record: dict | None, host: str, source: Path) -> list[str]:
         problems.append("canonical_source_root")
     if str(record.get("installer_generation", "")) != GENERATION:
         problems.append("installer_generation")
-    if not str(record.get("runtime_fingerprint", "")).strip():
+    recorded = str(record.get("runtime_fingerprint", "")).strip()
+    if not recorded or (expected_fingerprint is not None and recorded != expected_fingerprint):
         problems.append("runtime_fingerprint")
     return problems
 
 
-def _freshness(installed: Path, canonical: Path) -> dict:
+def _freshness(installed: Path, canonical: Path, expected: str | None) -> dict:
+    """One home's freshness: the identity decides, the diff only names files."""
+    actual = surface_fingerprint(installed)
     diff = surface_diff(canonical, installed)
-    return {"surface": str(installed), "stale": bool(diff), "diff": diff}
+    return {
+        "surface": str(installed),
+        "stale": expected is None or actual != expected or bool(diff),
+        "diff": diff,
+        "runtime_generation": actual,
+        "expected_generation": expected,
+    }
 
 
 def check_freshness() -> dict:
@@ -252,23 +249,25 @@ def check_freshness() -> dict:
 
     host = _current_adapter(registry)
     current = None
-    if host:
-        adapter = next(
-            (a for a in registry.get("adapters", []) if str(a.get("id")) == host), None
-        )
-        skill = _adapter_skill(adapter) if adapter else None
-        if skill:
-            current = {"adapter": host, **_freshness(_expand(skill), source)}
+    with identity_session():
+        expected = surface_fingerprint(source)
+        if host:
+            adapter = next(
+                (a for a in registry.get("adapters", []) if str(a.get("id")) == host), None
+            )
+            skill = _adapter_skill(adapter) if adapter else None
+            if skill:
+                current = {"adapter": host, **_freshness(_expand(skill), source, expected)}
 
-    fleet: list[dict] = []
-    for adapter in registry.get("adapters", []):
-        skill = _adapter_skill(adapter)
-        if not skill:
-            continue
-        installed = _expand(skill)
-        if not installed.is_dir():
-            continue
-        fleet.append({"adapter": adapter.get("id"), **_freshness(installed, source)})
+        fleet: list[dict] = []
+        for adapter in registry.get("adapters", []):
+            skill = _adapter_skill(adapter)
+            if not skill:
+                continue
+            installed = _expand(skill)
+            if not installed.is_dir():
+                continue
+            fleet.append({"adapter": adapter.get("id"), **_freshness(installed, source, expected)})
 
     if current is None:
         code = "HOST_UNIDENTIFIED"
@@ -364,8 +363,10 @@ def run_bootstrap() -> dict:
     proc = _invoke_installer(source, host)
     installed = _expand(skill)
     diff = surface_diff(source, installed)
+    expected = surface_fingerprint(source)
+    actual = surface_fingerprint(installed)
     marker = read_provenance(installed)
-    problems = marker_problems(marker, host, source)
+    problems = marker_problems(marker, host, source, expected)
 
     started = proc is not None
     rc = proc.returncode if proc is not None else None
@@ -375,6 +376,8 @@ def run_bootstrap() -> dict:
         "surface": str(installed),
         "generation": GENERATION,
         "diff": diff,
+        "canonical_fingerprint": expected,
+        "installed_fingerprint": actual,
         "installer_rc": rc,
         "provenance_problems": problems,
     }
@@ -391,9 +394,9 @@ def run_bootstrap() -> dict:
     elif rc != 0:
         code = "BOOTSTRAP_INSTALL_FAILED"
         detail = f"installer returned {rc}"
-    elif diff:
+    elif diff or expected is None or actual != expected:
         code = "BOOTSTRAP_INCOMPLETE"
-        detail = "installed runtime surface still differs from canonical"
+        detail = "installed runtime generation is not the canonical generation"
     elif problems:
         code = "BOOTSTRAP_PROVENANCE_INVALID"
         detail = "installer provenance marker invalid: " + ",".join(problems)
@@ -428,37 +431,13 @@ PRELAUNCH_UNPROVEN = "CANONICAL_RUNTIME_SOURCE_UNPROVEN"
 PRELAUNCH_HOST_UNIDENTIFIED = "HOST_UNIDENTIFIED"
 
 
-def surface_fingerprint(root: Path | str) -> str | None:
-    """One deterministic digest over the whole runtime semantic surface.
-
-    Computed by THIS code on both sides, so a canonical/installed comparison is
-    an identity check rather than a re-implementation of the installer's
-    PowerShell digest. Ordering is ordinal and explicit; a missing file is part
-    of the identity (recorded as an empty hash) so a truncated install can
-    never accidentally fingerprint-match a complete one.
-    """
-    base = Path(root)
-    lines: list[str] = []
-    for rel, src in sorted(_surface_paths(base), key=lambda pair: pair[0]):
-        lines.append(f"{rel}={_sha256(src) or ''}")
-    if not lines:
-        return None
-    return hashlib.sha256("\n".join(lines).encode("utf-8")).hexdigest()
-
-
-def _installed_fingerprint(canonical: Path, installed: Path) -> str | None:
-    """Fingerprint the installed tree over the CANONICAL surface inventory.
-
-    The installed layout is flattened (`saipen/MANIFEST.json` -> `MANIFEST.json`),
-    so the inventory must come from the source and be mapped, or a correct
-    install would look like a different surface.
-    """
-    lines: list[str] = []
-    for rel, _src in sorted(_surface_paths(canonical), key=lambda pair: pair[0]):
-        lines.append(f"{rel}={_sha256(installed / _installed_relpath(rel)) or ''}")
-    if not lines:
-        return None
-    return hashlib.sha256("\n".join(lines).encode("utf-8")).hexdigest()
+#: T-1342: `surface_fingerprint` is the ONE shipped-runtime identity from
+#: `runtime_surface` (imported above as an alias), never a second framing. BOTH
+#: sides are digested over their OWN declared inventory: a flattened correct
+#: install and its source clone are one identity, and an installed tree that
+#: carries a file the canonical tree does not is a different one. (Digesting the
+#: installed tree over the CANONICAL inventory made an extra installed module
+#: invisible to the verdict.)
 
 
 def adapter_entry(registry: dict, adapter_id: str) -> dict | None:
@@ -507,7 +486,14 @@ def hook_problems(adapter: dict, source: Path) -> list[str]:
         return ["hook-artifact-missing"]
     if not installed.is_file():
         return ["hook-not-installed"]
-    if _sha256(installed) != _sha256(shipped):
+    try:
+        # The one content policy (runtime_surface.content_bytes), the same one
+        # autoinject.hook_status and install_host_guard apply to this artifact:
+        # a CRLF transport of identical source is not a stale hook.
+        current = content_bytes(installed) == content_bytes(shipped)
+    except OSError:
+        return ["hook-unreadable"]
+    if not current:
         return ["hook-stale"]
     problems: list[str] = []
     for legacy in adapter.get("legacy_hook_surfaces") or []:
@@ -601,36 +587,47 @@ def prelaunch(
         return result
     installed = _expand(skill)
     result["surface"] = str(installed)
-    result["canonical_fingerprint"] = surface_fingerprint(source)
+    canonical = surface_fingerprint(source)
+    result["canonical_fingerprint"] = canonical
+    if canonical is None:
+        # Never install FROM a source whose shipped surface cannot be proven:
+        # the installer would copy an unprovable tree and every later identity
+        # check would compare against nothing.
+        result["detail"] = "canonical runtime surface cannot be proven; nothing was installed"
+        result["engine_diff"] = surface_diff(source, installed)
+        return result
 
     def _measure() -> dict:
         marker = read_provenance(installed)
-        installed_fp = _installed_fingerprint(source, installed)
+        installed_fp = surface_fingerprint(installed)
         return {
             "installed_fingerprint": installed_fp,
             # The rolled-up scalar the operator no longer has to compute by
-            # hand. Both sides are digested by THIS code over the canonical
-            # inventory, so the comparison is an identity, not an estimate.
-            "fingerprint_match": bool(
-                installed_fp is not None and installed_fp == result["canonical_fingerprint"]
-            ),
+            # hand, and the VERDICT: both sides are digested by the one owner
+            # over their own declared inventories, so a match is an identity,
+            # not an estimate.
+            "fingerprint_match": bool(installed_fp is not None and installed_fp == canonical),
             "marker_fingerprint": (
                 str(marker.get("runtime_fingerprint")) if isinstance(marker, dict) else None
             ),
             "engine_diff": surface_diff(source, installed),
             "hook_problems": hook_problems(adapter, source),
             "launcher_problems": launcher_problems(installed),
-            "provenance_problems": marker_problems(marker, host, source),
+            "provenance_problems": marker_problems(marker, host, source, canonical),
         }
+
+    def _stale(measured: dict) -> bool:
+        return bool(
+            not measured["fingerprint_match"]
+            or measured["engine_diff"]
+            or measured["hook_problems"]
+            or measured["launcher_problems"]
+            or measured["provenance_problems"]
+        )
 
     observed = _measure()
     result.update(observed)
-    stale = bool(
-        observed["engine_diff"]
-        or observed["hook_problems"]
-        or observed["launcher_problems"]
-        or observed["provenance_problems"]
-    )
+    stale = _stale(observed)
     result["stale_before"] = stale
     if not stale:
         # TARGET C requirement 11: an already-current runtime performs NO
@@ -660,12 +657,7 @@ def prelaunch(
         result["code"] = PRELAUNCH_FAILED
         result["detail"] = f"canonical installer returned {rc}"
         return result
-    if (
-        after["engine_diff"]
-        or after["hook_problems"]
-        or after["launcher_problems"]
-        or after["provenance_problems"]
-    ):
+    if _stale(after):
         result["code"] = PRELAUNCH_FAILED
         result["detail"] = "installed runtime still differs from canonical after resync"
         return result

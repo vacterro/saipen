@@ -55,6 +55,15 @@ from test_reconcile_valve import _t1318_project  # noqa: E402
 from saipen_engine.evidence import EvidenceRun, HARD_BYTES_PER_TICKET  # noqa: E402
 from saipen_engine.paths import identity_file_content, new_project_lineage  # noqa: E402
 
+from test_hermetic_env import isolate_host_session  # noqa: E402
+
+
+def setUpModule() -> None:
+    # An outer host session (SAIPEN_PROJECT_ROOT/LINEAGE, SAIPEN_AGENT, ...)
+    # must never bind this module's disposable fixtures (test_hermetic_env).
+    isolate_host_session()
+
+
 OPENCODE = shutil.which("opencode")
 POWERSHELL = shutil.which("pwsh")
 INSTALL_RELATIVE = Path(".config") / "opencode" / "plugins" / "saipen-guard.js"

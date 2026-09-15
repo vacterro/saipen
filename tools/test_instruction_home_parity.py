@@ -23,9 +23,12 @@ The contract this suite pins has two halves, both of which matter:
 
 from __future__ import annotations
 
+import json
+import shutil
 import sys
 import tempfile
 import unittest
+import unittest.mock
 from pathlib import Path
 
 TOOLS = Path(__file__).resolve().parent
@@ -35,6 +38,58 @@ if str(TOOLS) not in sys.path:
 
 import autoinject  # noqa: E402
 
+_TEMP: list[tempfile.TemporaryDirectory] = []
+
+#: T-1342: the accepted generation is the manifest-declared shipped runtime
+#: surface, so a fixture carries its own small manifest. A directory holding a
+#: `BOOT.md` is not a home, and neither is one at another generation.
+_MINI_MANIFEST = {
+    "copy_trees": [{"src": "extensions/adapters", "dst": "extensions/adapters"}],
+    "files": [
+        {"src": "saipen/MANIFEST.json", "required": True},
+        {"src": "saipen/BOOT.md", "required": True},
+        {"src": "saipen/CORE.md", "required": True},
+        {"src": "saipen/ACTIVATION_BLOCK.md", "required": True},
+        {"src": "VERSION", "required": True},
+    ],
+}
+
+
+def _tempdir(prefix: str) -> Path:
+    tmp = tempfile.TemporaryDirectory(prefix=prefix)
+    _TEMP.append(tmp)
+    return Path(tmp.name)
+
+
+def _authority(base: Path) -> Path:
+    """A source-layout authority that answers every autoinject lookup."""
+    (base / "saipen").mkdir(parents=True, exist_ok=True)
+    (base / "saipen" / "MANIFEST.json").write_text(
+        json.dumps(_MINI_MANIFEST, indent=2) + "\n", encoding="utf-8", newline="\n"
+    )
+    (base / "saipen" / "BOOT.md").write_text("# BOOT\n", encoding="utf-8")
+    (base / "saipen" / "CORE.md").write_text("# CORE\n", encoding="utf-8")
+    (base / "saipen" / "ACTIVATION_BLOCK.md").write_bytes(
+        (REPO / "saipen" / "ACTIVATION_BLOCK.md").read_bytes()
+    )
+    (base / "VERSION").write_text("7.t\n", encoding="utf-8")
+    (base / "extensions" / "adapters").mkdir(parents=True, exist_ok=True)
+    (base / "extensions" / "adapters" / "registry.json").write_bytes(
+        (REPO / "extensions" / "adapters" / "registry.json").read_bytes()
+    )
+    return base
+
+
+AUTHORITY = _authority(_tempdir("saipen-instr-authority-"))
+
+
+class AuthorityPatch:
+    def setUp(self):
+        super().setUp()
+        patch = unittest.mock.patch.object(autoinject, "HOME", AUTHORITY)
+        patch.start()
+        self.addCleanup(patch.stop)
+
 
 def _template_block() -> str:
     raw = autoinject.activation_template_path().read_text(encoding="utf-8")
@@ -42,13 +97,26 @@ def _template_block() -> str:
 
 
 def _home(root: Path) -> Path:
-    """A directory that looks like a real SAIPEN protocol home."""
+    """A flattened installed home at the SAME accepted generation.
+
+    T-1342: freshness binds to generation, so a fixture must carry the
+    manifest-declared surface (flattened layout) -- a bare `BOOT.md` is not a
+    home.
+    """
     root.mkdir(parents=True, exist_ok=True)
-    (root / "BOOT.md").write_text("# BOOT\n", encoding="utf-8")
+    for name in ("MANIFEST.json", "BOOT.md", "CORE.md", "ACTIVATION_BLOCK.md", "VERSION"):
+        source = AUTHORITY / "saipen" / name if name != "VERSION" else AUTHORITY / name
+        if source.is_file():
+            shutil.copyfile(source, root / name)
+    shutil.copytree(
+        AUTHORITY / "extensions" / "adapters",
+        root / "extensions" / "adapters",
+        dirs_exist_ok=True,
+    )
     return root
 
 
-class ActivationHomeExtractionTests(unittest.TestCase):
+class ActivationHomeExtractionTests(AuthorityPatch, unittest.TestCase):
     def test_the_home_is_recovered_from_a_rendered_block(self):
         block = _template_block()
         rendered = block.replace("{{SAIPEN_HOME}}", r"X:\some\where\saipen")
@@ -72,15 +140,27 @@ class ActivationHomeExtractionTests(unittest.TestCase):
         ) if len(segments) > 2 else ""
         self.assertIsNone(autoinject._activation_home(block, mixed))
 
-    def test_a_real_home_is_the_one_holding_boot(self):
+    def test_a_home_needs_the_accepted_generation_not_just_boot(self):
         with tempfile.TemporaryDirectory(prefix="saipen-instr-home-") as tmp:
             root = Path(tmp)
             self.assertFalse(autoinject._names_a_real_home(str(root / "nope")))
             self.assertFalse(autoinject._names_a_real_home(""))
+            boot_only = root / "bootonly"
+            boot_only.mkdir()
+            (boot_only / "BOOT.md").write_text("# BOOT\n", encoding="utf-8")
+            self.assertFalse(autoinject._names_a_real_home(str(boot_only)))
             self.assertTrue(autoinject._names_a_real_home(str(_home(root / "skill"))))
 
+    def test_a_stale_generation_is_not_a_real_home(self):
+        with tempfile.TemporaryDirectory(prefix="saipen-instr-gen-") as tmp:
+            root = Path(tmp)
+            stale = _home(root / "stale")
+            self.assertTrue(autoinject._names_a_real_home(str(stale)))
+            (stale / "CORE.md").write_text("different generation\n", encoding="utf-8")
+            self.assertFalse(autoinject._names_a_real_home(str(stale)))
 
-class InstructionStatusTests(unittest.TestCase):
+
+class InstructionStatusTests(AuthorityPatch, unittest.TestCase):
     def _surface(self, tmp: Path, block_home: str) -> tuple[dict, Path]:
         target = tmp / "INSTR.md"
         rendered = _template_block().replace("{{SAIPEN_HOME}}", block_home)
@@ -112,6 +192,16 @@ class InstructionStatusTests(unittest.TestCase):
             root = Path(tmp)
             skill = _home(root / "skill")
             adapter, _ = self._surface(root, str(root / "moved-away" / "saipen"))
+            self.assertEqual(autoinject.instruction_status(adapter, skill), "stale")
+
+    def test_a_stale_generation_home_is_stale(self):
+        """T-1342: a DIFFERENT generation is never CURRENT, however real."""
+        with tempfile.TemporaryDirectory(prefix="saipen-instr-stale-") as tmp:
+            root = Path(tmp)
+            skill = _home(root / "skill")
+            clone = _home(root / "clone" / "saipen")
+            (clone / "CORE.md").write_text("older generation\n", encoding="utf-8")
+            adapter, _ = self._surface(root, str(clone))
             self.assertEqual(autoinject.instruction_status(adapter, skill), "stale")
 
     def test_changed_block_prose_is_still_stale(self):

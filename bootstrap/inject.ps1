@@ -197,15 +197,10 @@ function Add-Block([string]$file) {
   return "file created"
 }
 
-# SAIPEN-CLI-LAUNCHER-OWNERSHIP:BEGIN
-# The canonical installer OWNS the installed `saipen` launcher surface: the
-# `bin/saipen` / `bin/saipen.cmd` files are rendered from the ONE source owner
-# (bootstrap/cli_launcher.py) into the STAGED skill before the atomic swap, so a
-# render failure aborts the install and preserves the active copy. The OpenCode
-# guard only verifies them, never writes them.
 function Get-PythonBin {
-  # Selected interpreter for the installed launcher: explicit override FIRST,
-  # then PATH, then the per-user CPython layout. Never a guess that is not a file.
+  # The selected interpreter, shared by the launcher renderer and the runtime
+  # identity proof: explicit override FIRST, then PATH, then the per-user
+  # CPython layout. Never a guess that is not a file.
   $candidates = New-Object System.Collections.ArrayList
   if (-not [string]::IsNullOrWhiteSpace($env:SAIPEN_PYTHON)) { [void]$candidates.Add($env:SAIPEN_PYTHON) }
   foreach ($name in @("python", "python3")) {
@@ -224,6 +219,12 @@ function Get-PythonBin {
   return $null
 }
 
+# SAIPEN-CLI-LAUNCHER-OWNERSHIP:BEGIN
+# The canonical installer OWNS the installed `saipen` launcher surface: the
+# `bin/saipen` / `bin/saipen.cmd` files are rendered from the ONE source owner
+# (bootstrap/cli_launcher.py) into the STAGED skill before the atomic swap, so a
+# render failure aborts the install and preserves the active copy. The OpenCode
+# guard only verifies them, never writes them.
 function Write-CliLaunchers([string]$StageDir, [string]$SkillDir) {
   if ([string]::IsNullOrWhiteSpace($StageDir) -or [string]::IsNullOrWhiteSpace($SkillDir)) {
     return "FAILED: launcher stage/skill dir missing"
@@ -404,36 +405,49 @@ function Has-Prop($object, [string]$name) {
 # stamps each installed skill home with one small machine-readable record the
 # runtime reads back before it mutates anything. Project state is NEVER stored
 # here; this is install provenance only.
+#
+# T-1342: the installer generation label and the runtime fingerprint are NOT
+# defined here. Both come from the ONE owner in the source tree's own engine
+# (tools/saipen_engine/runtime_bootstrap.py GENERATION and
+# tools/saipen_engine/runtime_surface.py), so the fingerprint a marker records
+# is the same manifest-derived identity every freshness check compares. The
+# private inventory this script used to hash (saipen.py + registry + manifest +
+# engine *.py) was a second definition that could call a stale validator,
+# phase document or hook artifact current.
 $ProvenanceName = ".saipen_runtime.json"
-$InstallerGeneration = "T-1327-runtime-prelaunch-20260914.1"
-$ProvenanceSurface = @(
-  "tools/saipen.py",
-  "extensions/adapters/registry.json",
-  "saipen/MANIFEST.json"
-)
+$script:SourceRuntimeIdentity = $null
 
-function Get-RuntimeFingerprint {
-  $rels = New-Object System.Collections.ArrayList
-  foreach ($rel in $ProvenanceSurface) { [void]$rels.Add($rel) }
-  $engine = Join-Path $Root "tools\saipen_engine"
-  if (Test-Path $engine -PathType Container) {
-    Get-ChildItem -LiteralPath $engine -Recurse -File -Force -ErrorAction SilentlyContinue |
-      Where-Object { $_.Extension -eq ".py" } | ForEach-Object {
-        [void]$rels.Add($_.FullName.Substring($Root.Length).TrimStart('\', '/').Replace('\', '/'))
-      }
+function Get-RuntimeIdentity([string]$candidate) {
+  $pythonBin = Get-PythonBin
+  if ([string]::IsNullOrWhiteSpace($pythonBin)) { throw "no Python runtime to prove the runtime identity" }
+  $tools = Join-Path $Root "tools"
+  # -I: isolated (no PYTHONPATH/user site, no cwd on sys.path), -B: never write
+  # bytecode into the tree being proven. The engine is imported from THIS
+  # source tree only.
+  $code = "import json,sys;sys.path.insert(0,sys.argv[1]);" +
+    "from saipen_engine.runtime_bootstrap import GENERATION;" +
+    "from saipen_engine.runtime_surface import require_runtime_generation_identity as identity;" +
+    "print(json.dumps({'installer_generation':GENERATION,'runtime_fingerprint':identity(sys.argv[2])}))"
+  $output = @(& $pythonBin -I -B -c $code $tools $candidate)
+  if ($LASTEXITCODE -ne 0 -or $output.Count -eq 0) {
+    throw "runtime identity unprovable for $candidate (exit $LASTEXITCODE)"
   }
-  $lines = New-Object System.Collections.ArrayList
-  foreach ($rel in ($rels | Sort-Object -Unique)) {
-    $abs = Join-Path $Root ($rel.Replace('/', [System.IO.Path]::DirectorySeparatorChar))
-    try {
-      $sha = (Get-FileHash -LiteralPath $abs -Algorithm SHA256 -ErrorAction Stop).Hash.ToLowerInvariant()
-    } catch { continue }
-    [void]$lines.Add("$rel=$sha")
+  $identity = ([string]$output[-1]) | ConvertFrom-Json
+  if ([string]::IsNullOrWhiteSpace([string]$identity.runtime_fingerprint) -or
+      [string]::IsNullOrWhiteSpace([string]$identity.installer_generation)) {
+    throw "runtime identity for $candidate is incomplete"
   }
-  if ($lines.Count -eq 0) { return "" }
-  $bytes = [System.Text.Encoding]::UTF8.GetBytes(($lines -join "`n"))
-  $digest = [System.Security.Cryptography.SHA256]::Create().ComputeHash($bytes)
-  return ([System.BitConverter]::ToString($digest).Replace('-', '').ToLowerInvariant())
+  return $identity
+}
+
+function Get-SourceRuntimeIdentity {
+  # The source tree is immutable for one run (the scheduled runner injects
+  # from a published snapshot), so it is proven once; every installed copy is
+  # still proven on its own.
+  if ($null -eq $script:SourceRuntimeIdentity) {
+    $script:SourceRuntimeIdentity = Get-RuntimeIdentity $Root
+  }
+  return $script:SourceRuntimeIdentity
 }
 
 function Write-RuntimeProvenance($adapter, [string]$skillDir) {
@@ -455,7 +469,15 @@ function Write-RuntimeProvenance($adapter, [string]$skillDir) {
       if ($LASTEXITCODE -eq 0 -and $headOut) { $head = ([string]$headOut).Trim() }
     } catch { $head = "" }
     $expectedRoot = [System.IO.Path]::GetFullPath($Root)
-    $expectedFp = Get-RuntimeFingerprint
+    $sourceIdentity = Get-SourceRuntimeIdentity
+    $expectedFp = [string]$sourceIdentity.runtime_fingerprint
+    $installerGeneration = [string]$sourceIdentity.installer_generation
+    # The copy just made must BE the source generation, proven over its own
+    # declared surface -- not assumed from a successful Copy-Item.
+    $installedFp = [string](Get-RuntimeIdentity $skillDir).runtime_fingerprint
+    if ($installedFp -ne $expectedFp) {
+      return "FAILED: installed runtime identity $installedFp differs from source $expectedFp"
+    }
     $record = [ordered]@{
       schema_version        = 1
       adapter_id            = [string]$adapter.id
@@ -463,7 +485,7 @@ function Write-RuntimeProvenance($adapter, [string]$skillDir) {
       source_version        = $version
       source_build          = $head
       runtime_fingerprint   = $expectedFp
-      installer_generation  = $InstallerGeneration
+      installer_generation  = $installerGeneration
     }
     $json = ($record | ConvertTo-Json -Depth 4)
     $markerPath = Get-NativePath (Join-Path $skillDir $ProvenanceName)
@@ -475,7 +497,7 @@ function Write-RuntimeProvenance($adapter, [string]$skillDir) {
     $problems = @()
     if ([string]$doc.adapter_id -ne [string]$adapter.id) { $problems += "adapter_id" }
     if ([string]$doc.canonical_source_root -ne $expectedRoot) { $problems += "canonical_source_root" }
-    if ([string]$doc.installer_generation -ne $InstallerGeneration) { $problems += "installer_generation" }
+    if ([string]$doc.installer_generation -ne $installerGeneration) { $problems += "installer_generation" }
     if ([string]::IsNullOrWhiteSpace([string]$doc.runtime_fingerprint)) {
       $problems += "runtime_fingerprint-missing"
     } elseif ($expectedFp -and ([string]$doc.runtime_fingerprint -ne $expectedFp)) {

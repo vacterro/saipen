@@ -127,7 +127,7 @@ Consumer contract, stable and machine-readable:
 | `RUNTIME_RESYNCED` | installed generation was stale and the canonical installer restored it; verified | yes |
 | `RUNTIME_STALE` | stale, and `--no-resync` was requested | no |
 | `RUNTIME_RESYNC_FAILED` | the installer did not run, failed, or left a surface that still differs | no |
-| `CANONICAL_RUNTIME_SOURCE_UNPROVEN` | no provenance marker and the executing tree fails the architecture proof | no |
+| `CANONICAL_RUNTIME_SOURCE_UNPROVEN` | no provenance marker and the executing tree fails the architecture proof, or the canonical shipped surface cannot be proven (nothing is installed from it) | no |
 | `HOST_UNIDENTIFIED` | no adapter named and none inferable from provenance | no |
 
 `ok` is true exactly for the two green codes. `requires_host_restart` is true
@@ -141,6 +141,19 @@ Evidence carried on every result: `canonical_fingerprint`,
 Freshness covers the ENGINE surface, the blocking guard plugin, the installed
 `bin/` launchers (which must name the INSTALLED `tools/saipen.py`, never the
 clone) and the installer-written provenance marker.
+
+Both fingerprints are the ONE shipped-runtime generation identity
+(`tools/saipen_engine/runtime_surface.py`): every `copy_trees` member and
+required `files` entry of `MANIFEST.json`, LF-normalised text and byte-exact
+binary, source and flattened layouts under one logical name. Each side is
+digested over its OWN declared inventory, so an extra module in an installed
+engine is a different generation, and `fingerprint_match` is the verdict --
+`engine_diff` only names the files. The marker's `runtime_fingerprint` must be
+that same canonical identity; a stamp or marker written into a tree never
+proves the tree. The distribution report (`saipen status`) applies the same
+rule: a home is current only when the bytes it holds, the engine its guard
+hook delegates to, and the home its instruction block names all prove the
+source's generation -- a matching stamp or Git head is provenance, not proof.
 
 Authority is proven, never guessed, and PATH is never identity: the installer's
 `.saipen_runtime.json` marker first, otherwise the executing tree when it

@@ -20,6 +20,12 @@ import unittest
 from pathlib import Path
 
 import autoinject
+from saipen_engine.runtime_surface import runtime_surface_items
+
+
+def _shipped() -> list[tuple[str, Path]]:
+    """The declared shipped surface, from the ONE owner the drift report uses."""
+    return runtime_surface_items(autoinject.HOME)
 
 
 class InstalledPathTests(unittest.TestCase):
@@ -38,13 +44,7 @@ class InstalledPathTests(unittest.TestCase):
 class SurfaceMembershipTests(unittest.TestCase):
     def test_the_routing_documents_are_on_the_shipped_surface(self):
         """A document off the manifest is one the injector never refreshes."""
-        shipped = set()
-        root = autoinject.HOME.resolve()
-        for path, is_tree in autoinject._manifest_surface():
-            members = path.rglob("*") if is_tree else [path]
-            for member in members:
-                if member.is_file():
-                    shipped.add(member.relative_to(root).as_posix())
+        shipped = {declared for declared, _path in _shipped()}
         for required in (
             "saipen/BOOT.md",
             "saipen/INDEX.md",
@@ -59,21 +59,11 @@ class DriftReportTests(unittest.TestCase):
         """A fake installed home; `overrides` maps installed path -> bytes."""
         tmp = tempfile.mkdtemp()
         target = Path(tmp)
-        root = autoinject.HOME.resolve()
         if seed_all:
-            for path, is_tree in autoinject._manifest_surface():
-                members = path.rglob("*") if is_tree else [path]
-                for member in members:
-                    if not member.is_file() or member.is_symlink():
-                        continue
-                    relative = member.relative_to(root)
-                    if autoinject.CACHE_DIRS.intersection(relative.parts):
-                        continue
-                    if member.suffix in autoinject.GENERATED_SUFFIXES:
-                        continue
-                    landed = target / autoinject.installed_relpath(relative.as_posix())
-                    landed.parent.mkdir(parents=True, exist_ok=True)
-                    landed.write_bytes(member.read_bytes())
+            for declared, member in _shipped():
+                landed = target / autoinject.installed_relpath(declared)
+                landed.parent.mkdir(parents=True, exist_ok=True)
+                landed.write_bytes(member.read_bytes())
         for relative, payload in (overrides or {}).items():
             landed = target / relative
             landed.parent.mkdir(parents=True, exist_ok=True)
@@ -103,6 +93,12 @@ class DriftReportTests(unittest.TestCase):
         _, source_size, installed_size = named["saipen/CORE.md"]
         self.assertTrue(source_size.endswith("B"))
         self.assertEqual(installed_size, "42B")
+
+    def test_an_extra_installed_module_is_named(self):
+        """T-1342: a file the home carries but the source does not ship is drift."""
+        target = self._home({"tools/saipen_engine/leftover.py": b"# not shipped\n"})
+        named = {row[0]: row for row in autoinject.surface_drift(target)}
+        self.assertEqual(named["tools/saipen_engine/leftover.py"][1:], ("absent", "14B"))
 
     def test_a_missing_file_is_named_as_missing(self):
         target = self._home({"INDEX.md": None})

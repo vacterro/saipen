@@ -14,6 +14,14 @@ if str(TOOLS) not in sys.path:
 from install_host_guard import install  # noqa: E402
 from test_guard_hostile_matrix import active_project, recovery_debt_project  # noqa: E402
 
+from test_hermetic_env import isolate_host_session  # noqa: E402
+
+
+def setUpModule() -> None:
+    # An outer host session (SAIPEN_PROJECT_ROOT/LINEAGE, SAIPEN_AGENT, ...)
+    # must never bind this module's disposable fixtures (test_hermetic_env).
+    isolate_host_session()
+
 
 class NativeHookTests(unittest.TestCase):
     def invoke(self, host, root, name, args, skill=None):

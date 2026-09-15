@@ -38,6 +38,15 @@ from test_guard_hostile_matrix import (  # noqa: E402
     recovery_debt_project,
 )
 
+from test_hermetic_env import isolate_host_session  # noqa: E402
+
+
+def setUpModule() -> None:
+    # An outer host session (SAIPEN_PROJECT_ROOT/LINEAGE, SAIPEN_AGENT, ...)
+    # must never bind this module's disposable fixtures (test_hermetic_env).
+    isolate_host_session()
+
+
 SAIPEN = TOOLS / "saipen.py"
 HOST_GUARD = TOOLS / "host_guard.py"
 
