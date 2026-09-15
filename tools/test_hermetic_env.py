@@ -45,6 +45,19 @@ HOST_SESSION_VARIABLES = (
     "SAIPEN_GUARD_STARTUP_PROBE",
 )
 
+#: T-1343. The interlock `saipen_engine.host_launch` checks before it creates a
+#: host process. It is SET by the harness rather than stripped by it: a fixture
+#: that reaches the spawn boundary did so because a stub was missed, and a
+#: missed stub is exactly the case that cannot be caught by inspecting the
+#: fixture. The T-1327 launch test patched a different module object of the
+#: same file, the real prelaunch ran, and the operator's real OpenCode host
+#: started and hung the suite.
+#:
+#: A module that MEANS to start a real host clears it in the child environment
+#: it builds (`hermetic_env(..., SAIPEN_FORBID_HOST_SPAWN=None)`), so the
+#: intent is one reviewable line instead of a silent default.
+FORBID_HOST_SPAWN = "SAIPEN_FORBID_HOST_SPAWN"
+
 
 def isolate_host_session() -> dict[str, str]:
     """Remove host-session carriers now; restore them when the module ends.
@@ -52,15 +65,24 @@ def isolate_host_session() -> dict[str, str]:
     Call from `setUpModule`. The removed values are returned for diagnostics
     and put back by a module cleanup, so the next module -- and the operator's
     shell -- sees the environment exactly as it was.
+
+    It also arms the real-host spawn interlock for the lifetime of the module
+    (see `FORBID_HOST_SPAWN`); that too is undone by the cleanup.
     """
     removed = {
         key: os.environ.pop(key) for key in HOST_SESSION_VARIABLES if key in os.environ
     }
+    previous_interlock = os.environ.get(FORBID_HOST_SPAWN)
+    os.environ[FORBID_HOST_SPAWN] = "1"
 
     def restore() -> None:
         for key in HOST_SESSION_VARIABLES:
             os.environ.pop(key, None)
         os.environ.update(removed)
+        if previous_interlock is None:
+            os.environ.pop(FORBID_HOST_SPAWN, None)
+        else:
+            os.environ[FORBID_HOST_SPAWN] = previous_interlock
 
     unittest.addModuleCleanup(restore)
     return removed
@@ -71,10 +93,16 @@ def hermetic_env(base: dict[str, str] | None = None, **overrides: str | None) ->
 
     `overrides` are applied last; a value of None removes the key. Use it where
     a subprocess must be hermetic independent of module setup.
+
+    The real-host spawn interlock travels INTO the child by default, because a
+    child that reaches the spawn boundary is the same accident as a parent that
+    does. Pass `SAIPEN_FORBID_HOST_SPAWN=None` to run a deliberate real-host
+    smoke.
     """
     env = dict(os.environ if base is None else base)
     for key in HOST_SESSION_VARIABLES:
         env.pop(key, None)
+    env[FORBID_HOST_SPAWN] = "1"
     for key, value in overrides.items():
         if value is None:
             env.pop(key, None)

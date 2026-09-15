@@ -210,6 +210,12 @@ class BoundOpenCodeNativeSmoke(unittest.TestCase):
             "USERPROFILE": str(active_home),
             "SAIPEN_GUARD_STARTUP_PROBE": str(probe),
         }
+        # T-1343. This module is the ONE fixture that means to start a real
+        # OpenCode: a disposable HOME, a scripted provider, bounded host args
+        # and a timeout. Every other fixture keeps the interlock armed, so an
+        # accidental spawn -- the T-1327 shape, where a monkeypatch missed --
+        # is refused before the process exists instead of hanging the suite.
+        env.pop("SAIPEN_FORBID_HOST_SPAWN", None)
         # Measured host fact: OpenCode takes the session directory from the
         # shell's PWD when it is set, NOT from the child's working directory.
         # An inherited PWD would run the session against the AUDITOR's cwd and

@@ -703,13 +703,19 @@ class TargetCRuntimeFreshnessTests(unittest.TestCase):
 
         from saipen_engine import host_launch
 
-        # Patch the EXACT module `prelaunch_runtime` imports. The package alias
-        # in tools/__init__.py gives engine modules two import spellings, so
-        # `rb` (from `from saipen_engine import runtime_bootstrap`) and the
-        # module host_launch reaches through its relative import can be two
-        # different objects: patching `rb` then missed, the REAL prelaunch
-        # resynced the operator's installed runtime and the REAL host started
-        # with no timeout -- the suite hung until the process was killed.
+        # Patch the EXACT module `prelaunch_runtime` imports. Since T-1343 that
+        # is `rb` -- the engine has one module identity per file, so a patch
+        # through any spelling is the patch host_launch's relative import sees.
+        # Reaching it through host_launch's own package keeps the assertion
+        # about the LAUNCH PATH rather than about an import spelling, which is
+        # what this test is for; the identity itself is pinned by
+        # tools/test_engine_module_identity.py.
+        #
+        # Before that repair the two were different objects for the same file:
+        # patching `rb` missed, the REAL prelaunch resynced the operator's
+        # installed runtime, the REAL host started with no timeout, and the
+        # suite hung until the process tree was killed by hand. The interlock in
+        # tools/test_host_launch_net.py now refuses that spawn outright.
         bootstrap = importlib.import_module(".runtime_bootstrap", host_launch.__package__)
         refused = {
             "ok": False,

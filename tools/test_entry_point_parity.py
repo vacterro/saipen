@@ -90,12 +90,54 @@ class PackagePathContractTests(unittest.TestCase):
             "tools/__init__.py did not make `saipen_engine` resolvable",
         )
 
-    def test_the_repository_root_stays_ahead_of_the_tools_directory(self):
-        """Appended, never prepended: `tools.x` must still resolve as `tools.x`."""
+    def test_the_package_appends_its_directory_and_never_prepends_it(self):
+        """Appended, never prepended: `tools.x` must still resolve as `tools.x`.
+
+        T-1343: this pins what `tools/__init__.py` DOES, not what the resulting
+        `sys.path` looks like. The old assertion compared the live positions of
+        the repository root and this directory, which the package does not own:
+        `python -m unittest discover -s tools` -- the repository's OWN canonical
+        core-unit family (`saipen_engine/test_runner.py`) -- puts the start
+        directory at `sys.path[0]` before any of this runs, so the assertion was
+        false in the harness that runs it and had been red there since T-1339
+        added it. A contract that is only true under some invocations is not the
+        owner's contract; the owner's contract is the append.
+        """
         import tools  # noqa: F401
 
-        if str(REPO) in sys.path:
-            self.assertLess(sys.path.index(str(REPO)), sys.path.index(str(TOOLS)))
+        self.assertIn(str(TOOLS), sys.path)
+        source = (TOOLS / "__init__.py").read_text(encoding="utf-8")
+        self.assertIn("sys.path.append(_TOOLS_PATH)", source)
+        self.assertNotIn("sys.path.insert", source)
+
+    def test_a_fresh_interpreter_keeps_the_repository_root_ahead(self):
+        """In the invocation the package DOES own, the order still holds.
+
+        `python -m tools.x` from the repository root is the form the append was
+        written for: the root is `sys.path[0]` and this directory must land
+        behind it, so `tools.x` keeps resolving as `tools.x`.
+        """
+        probe = (
+            "import sys, json, os;"
+            "import tools;"
+            # `python -c` writes the cwd into sys.path[0] as the empty string.
+            "print(json.dumps([os.path.normcase(os.path.abspath(p or os.getcwd()))"
+            " for p in sys.path]))"
+        )
+        completed = subprocess.run(
+            [sys.executable, "-c", probe],
+            cwd=str(REPO),
+            capture_output=True,
+            text=True,
+            timeout=600,
+        )
+        self.assertEqual(completed.returncode, 0, completed.stderr[-1000:])
+        path = json.loads(completed.stdout.splitlines()[-1])
+        root = os.path.normcase(str(REPO))
+        tools_dir = os.path.normcase(str(TOOLS))
+        self.assertIn(root, path)
+        self.assertIn(tools_dir, path)
+        self.assertLess(path.index(root), path.index(tools_dir))
 
     def test_the_contract_covers_every_module_that_needs_it(self):
         """The fix is one owner, so the set it serves is measured, not listed."""

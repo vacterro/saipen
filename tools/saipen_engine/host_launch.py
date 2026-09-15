@@ -25,6 +25,25 @@ from .paths import ENV_AGENT, ENV_PROJECT_LINEAGE, ENV_PROJECT_ROOT, project_lin
 SUPPORTED_HOSTS = {"opencode": "opencode"}
 _SEAT_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_.:@-]{0,127}$")
 
+#: T-1343. An interlock, not a feature: set to ``1`` it refuses to create a host
+#: process, naming the executable that would have been started.
+#:
+#: A test harness cannot prove by inspection that every path into this function
+#: is stubbed. The T-1327 launch fixture believed it had replaced `prelaunch`
+#: and had replaced a DIFFERENT module object of the same file, so the real
+#: prelaunch ran, `subprocess.run` was reached and the operator's real OpenCode
+#: host started -- with its own MCP children -- and the suite hung until the
+#: process tree was killed by hand. A timeout would have been a slower way to
+#: find that out; this fails BEFORE the process exists.
+#:
+#: It is read from the PROCESS environment on purpose. The launch environment
+#: this module builds is fixture-controlled and gets scrubbed; the process
+#: environment belongs to whoever started the interpreter, so a fixture cannot
+#: drop the interlock by accident. A run that means to start a real host
+#: (`tools/test_opencode_bound_launch_smoke.py`) clears the variable in the
+#: child environment it builds, which makes the intent reviewable.
+ENV_FORBID_HOST_SPAWN = "SAIPEN_FORBID_HOST_SPAWN"
+
 #: A host identity is never a SAIPEN seat. It names the process being launched,
 #: not an acting actor, so a launch that injects it as seat authority would make
 #: `SAIPEN_AGENT` contradict canonical ownership. Both the registry key and the
@@ -142,6 +161,13 @@ def launch_host(
     executable = shutil.which(executable_name, path=env.get("PATH"))
     if executable is None:
         raise HostLaunchRefusal(f"supported host executable is unavailable: {executable_name}")
+
+    if os.environ.get(ENV_FORBID_HOST_SPAWN, "").strip() == "1":
+        raise HostLaunchRefusal(
+            f"{ENV_FORBID_HOST_SPAWN}=1 forbids starting a real host process; "
+            f"this launch had selected {executable} for host {host_id!r}. "
+            "No process was created."
+        )
 
     try:
         completed = subprocess.run(
