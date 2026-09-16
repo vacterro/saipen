@@ -361,6 +361,7 @@
       "hush",
       "improve",
       "user-request",
+      "start",
       "cohort"
     ],
     "improve_actions": [
@@ -375,6 +376,11 @@
       "abort",
       "clean"
     ]
+  },
+  "command_effects": {
+    "rule_id": "CMD-EFFECT-01",
+    "owner": "tools/saipen_engine/command_effects.py",
+    "table": "COMMAND_EFFECTS.json"
   },
   "state": {
     "required_fields": [

@@ -48,3 +48,18 @@
 - **instructions:** Core to collect via `saipen sub collect saihunt` as SC-2 evidence; no payload changes are required
 - **details:** Sweep is bound to the current source triple above. Historical warning records and legacy package history remain historical; this package reports only current-source observations and does not fabricate closure evidence.
 
+## HUNT-012: 6-signal sweep at 005a8ac2 — no new defects
+- **status:** ready
+- **summary:** Current-source six-signal sweep found no new actionable defect; test suite green, validate.py PASS, ruff clean
+- **main_project_refs:** []
+- **critical:** false
+- **severity:** P2
+- **producer:** saihunt
+- **source_head:** 005a8ac2bdc0bd01fb78a6b693aeac8405283cc7
+- **source_tree_fingerprint:** git-delta-v1:728bf9859f927b777aef7a962819e4f731adafc2fbb314669fcec29a98ed2f8b
+- **role_revision:** sha256:4edb04181cb07e0946afd06fbe711166fa9dcc403e56b52e9be3844f0a71b0a5
+- **coverage:** six-signal sweep: failing tests, unverified commit claims, stale TODO/FIXME/HACK, silent failures, symmetry gaps, dead/orphaned code
+- **payload:** []
+- **verified:** PASS -- 6-signal sweep clean; validate.py PASS, ruff clean, test suite green, no new TODO/FIXME/HACK, no silent catch, no dead code beyond KNOWN
+- **instructions:** Core to collect via `saipen sub collect saihunt` as SC-2 evidence; no payload changes are required
+- **details:** Sweep is bound to current source head 005a8ac2bdc0bd01fb78a6b693aeac8405283cc7. All signals green.

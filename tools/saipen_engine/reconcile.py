@@ -32,6 +32,17 @@ from pathlib import Path
 
 from .board import parse_board
 
+#: T-1363: the structured discriminator of a RECONCILE_REAUTH_REQUIRED
+#: refusal. That one code is produced for a tripped safety valve AND for four
+#: kinds of operator decision (a gated blocker, an unexecutable next_action, an
+#: approval-gated lifecycle plan, a legacy DONE attestation, an unallocated
+#: record's adoption). `continue` routed every one of them to the valve
+#: reauthorization, which then answered "valve has not tripped" -- a route that
+#: can never succeed, measured live. A caller routes on `remediation`; the
+#: code only says that something needs authority.
+SAFETY_VALVE_TRIPPED = "SAFETY_VALVE_TRIPPED"
+OPERATOR_DECISION = "OPERATOR_DECISION"
+
 _SECTION_BOX = {
     "## TODO": " ",
     "## BLOCKED": " ",
@@ -941,8 +952,13 @@ def _plan_repair_id(
                 "remove": bool(r.get("remove")),
                 "blocked": bool(r.get("blocked")),
             }
+            # T-1363: an operator-authorized repair carries its own explicit
+            # decision, so it stays out of the approval digest. Otherwise the
+            # approval id printed while the decision was still pending could
+            # never match the run that supplies both, and the two decisions
+            # could not share the one invocation that commits them.
             for r in state_repairs
-            if not r.get("refuse") and not r.get("blocked")
+            if not r.get("refuse") and not r.get("blocked") and not r.get("operator_authorized")
         ],
         "lifecycle_repairs": [
             {
@@ -1043,6 +1059,7 @@ def _state_counter_repairs(state: dict, events) -> list[dict]:
                     "refuse": True,
                     "operator_decision_available": True,
                     "canonical_next_command": "saipen continue",
+                    "remediation": SAFETY_VALVE_TRIPPED,
                 }
             )
             continue
@@ -1125,6 +1142,7 @@ def _tripped_valve_repairs(state: dict) -> list[dict]:
             "refuse": True,
             "operator_decision_available": True,
             "canonical_next_command": "saipen continue",
+            "remediation": SAFETY_VALVE_TRIPPED,
         }
     ]
 
@@ -1330,6 +1348,7 @@ def _blocked_recovery_fields(
     terminal_disposition: str | None = None,
     evidence_reference: str | None = None,
     reason_code: str | None = None,
+    decisions: list[dict] | None = None,
 ) -> dict:
     """One T-1324 remediation vocabulary for every non-repairing result.
 
@@ -1343,9 +1362,15 @@ def _blocked_recovery_fields(
         for item in repairs
         if item.get("terminal_disposition")
     }
+    # T-1363: a tripped valve beside a real decision is not a second exit.
+    # `continue` reauthorizes the valve by itself, so the command a refusal
+    # names is the decision's; counting both made two "commands", and two
+    # commands used to mean none at all -- a terminal refusal with no route.
+    pending = decisions
+    decisions = [item for item in repairs if item.get("remediation") != SAFETY_VALVE_TRIPPED]
     commands = {
         str(item.get("canonical_next_command"))
-        for item in repairs
+        for item in (decisions or repairs)
         if item.get("canonical_next_command")
     }
     surfaces = {str(item.get("surface")) for item in repairs if item.get("surface")}
@@ -1397,7 +1422,115 @@ def _blocked_recovery_fields(
     }
     if reason_code:
         result["reason_code"] = reason_code
+    if reason_code == "RECONCILE_REAUTH_REQUIRED":
+        valve = len(decisions) != len(repairs)
+        result["remediation"] = (
+            SAFETY_VALVE_TRIPPED if valve and not decisions else OPERATOR_DECISION
+        )
+        result["safety_valve_tripped"] = valve
+        result["operator_decisions"] = (
+            pending
+            if pending is not None
+            else [
+                {
+                    "field": item.get("field"),
+                    "surface": item.get("surface"),
+                    "tickets": [item["ticket"]] if item.get("ticket") else [],
+                    "command": command or item.get("canonical_next_command"),
+                    "reason": str(item.get("reason") or "")[:400],
+                }
+                for item in decisions
+            ]
+        )
     return result
+
+
+def _decision(field: str, surface: str, tickets: list[str], command: str, reason: object) -> dict:
+    return {
+        "field": field,
+        "surface": surface,
+        "tickets": tickets,
+        "command": command,
+        "reason": str(reason or "")[:400],
+    }
+
+
+def _combined_decisions(
+    state_repairs: list[dict],
+    approval_id: str | None,
+    lifecycle_refusals: list[dict],
+    adoption_refusals: list[dict],
+    *,
+    approval_detail: list[dict] | None = None,
+) -> tuple[str | None, list[dict]]:
+    """ONE `saipen recover` invocation that answers every pending decision.
+
+    T-1363. The refusal branches below return one at a time and each named only
+    its own flag. But `recover` validates the WHOLE repair set before it commits
+    anything, so the named command could not succeed while another decision was
+    still open: `--attest-legacy-done` refused because an adoption was pending,
+    the retry named attestation again, and the operator was walked round the
+    same question -- measured on two real projects. Every flag below combines in
+    one invocation, so the exit named is one that can actually commit.
+
+    An approval already adopts every record its plan names, so adoption is not
+    repeated beside it. A tripped valve is not a decision here: `continue`
+    reauthorizes it. `resolve-blocker` and `resolve-next-action` each take the
+    rest of the line, so only one of them fits; the blocker is named first and
+    the other surfaces on the next pass.
+    """
+    decisions: list[dict] = []
+    parts = ["saipen", "recover"]
+    adopt_ids = sorted({str(r["ticket"]) for r in adoption_refusals if r.get("ticket")})
+    attest_ids = sorted({str(r["ticket"]) for r in lifecycle_refusals if r.get("ticket")})
+    if adopt_ids and approval_id is None:
+        parts += ["--adopt-legacy", ",".join(adopt_ids)]
+        decisions.append(
+            _decision(
+                "board", "log", adopt_ids,
+                "saipen recover --adopt-legacy " + ",".join(adopt_ids),
+                adoption_refusals[0].get("reason"),
+            )
+        )
+    if attest_ids:
+        parts += ["--attest-legacy-done", ",".join(attest_ids)]
+        decisions.append(
+            _decision(
+                "board", "board", attest_ids,
+                "saipen recover --attest-legacy-done " + ",".join(attest_ids),
+                lifecycle_refusals[0].get("reason"),
+            )
+        )
+    if approval_id is not None:
+        parts += ["--apply-approved-repair", approval_id]
+        approved = approval_detail or []
+        decisions.append(
+            _decision(
+                "board", "board",
+                sorted({str(r["ticket"]) for r in approved if r.get("ticket")}),
+                "saipen recover --apply-approved-repair " + approval_id,
+                "; ".join(str(r.get("reason") or "") for r in approved),
+            )
+        )
+    worded = None
+    for field_name in ("blocker", "next_action"):
+        for repair in state_repairs:
+            if (
+                repair.get("field") != field_name
+                or not repair.get("refuse")
+                or repair.get("remediation") == SAFETY_VALVE_TRIPPED
+                or not repair.get("canonical_next_command")
+            ):
+                continue
+            command = str(repair["canonical_next_command"])
+            decisions.append(_decision(field_name, "state", [], command, repair.get("reason")))
+            if worded is None:
+                worded = command.split(" ", 2)[2]
+    if worded is not None:
+        parts.append(worded)
+    if len(parts) == 2:
+        return None, decisions
+    return " ".join(parts), decisions
 
 
 def _ensure_audit_contract(result: dict, project_root: Path) -> dict:
@@ -1636,6 +1769,13 @@ def reconcile_protocol_state(
             adoption_repairs = _board_adoption_repairs(
                 _board, docs.get("_history"), tuple(attest_ids)
             )
+    decision_command, decision_list = _combined_decisions(
+        state_repairs,
+        repair_id if approval_needed and approved_repair_id is None else None,
+        lifecycle_refusals,
+        [r for r in adoption_repairs if r.get("refuse")],
+        approval_detail=approval_needed,
+    )
     operator_authorized = [r for r in state_repairs if r.get("operator_authorized")]
     if resolve_blocker and not operator_authorized:
         # The verb owns ONLY an ACTIVE-phase gated STATE.blocker. A phase BLOCKED
@@ -1708,8 +1848,10 @@ def reconcile_protocol_state(
             "dry_run": dry_run,
             **_blocked_recovery_fields(
                 refused_repairs,
+                command=decision_command,
                 evidence_reference=".saipen/STATE.md",
                 reason_code="RECONCILE_REAUTH_REQUIRED",
+                decisions=decision_list,
             ),
         }
     if approval_needed and approved_repair_id is None:
@@ -1731,9 +1873,10 @@ def reconcile_protocol_state(
             "dry_run": dry_run,
             **_blocked_recovery_fields(
                 approval_needed,
-                command=f"saipen recover --apply-approved-repair {repair_id}",
+                command=decision_command,
                 evidence_reference=".saipen/BOARD.md",
                 reason_code="RECONCILE_REAUTH_REQUIRED",
+                decisions=decision_list,
             ),
         }
     if lifecycle_refusals:
@@ -1743,7 +1886,6 @@ def reconcile_protocol_state(
         # destroy history on the strength of a field that did not exist when it
         # was written, so it stops here as an operator decision with an exact
         # command -- never as a deterministic repair atom.
-        review_ids = sorted(r["ticket"] for r in lifecycle_refusals)
         return {
             "ok": False,
             "code": "RECONCILE_REAUTH_REQUIRED",
@@ -1759,11 +1901,10 @@ def reconcile_protocol_state(
             "dry_run": dry_run,
             **_blocked_recovery_fields(
                 lifecycle_refusals,
-                command=(
-                    "saipen recover --attest-legacy-done " + ",".join(review_ids)
-                ),
+                command=decision_command,
                 evidence_reference=".saipen/BOARD.md",
                 reason_code="RECONCILE_REAUTH_REQUIRED",
+                decisions=decision_list,
             ),
         }
     adoption_refusals = [r for r in adoption_repairs if r.get("refuse")]
@@ -1771,7 +1912,6 @@ def reconcile_protocol_state(
         # Target E: an unattested workable BOARD record whose provenance the
         # engine cannot prove refuses as an explicit operator decision -- never
         # silently auto-adopted, never auto-deleted, never laundered.
-        adoption_ids = sorted(r["ticket"] for r in adoption_refusals)
         return {
             "ok": False,
             "code": "RECONCILE_REAUTH_REQUIRED",
@@ -1783,11 +1923,10 @@ def reconcile_protocol_state(
             "dry_run": dry_run,
             **_blocked_recovery_fields(
                 adoption_refusals,
-                command=(
-                    "saipen recover --adopt-legacy " + ",".join(adoption_ids)
-                ),
+                command=decision_command,
                 evidence_reference=".saipen/LOG.md",
                 reason_code="RECONCILE_REAUTH_REQUIRED",
+                decisions=decision_list,
             ),
         }
     adoptions = [r for r in adoption_repairs if r.get("kind") == "adopt"]

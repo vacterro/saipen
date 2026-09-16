@@ -196,3 +196,19 @@
 - **verified:** PASS -- `tools.test_reconciliation` 4/4 and full discovered suite 377/377; ambiguous receipt scenario ends with the precise semantic blocker and never guesses
 - **instructions:** Core to collect via `saipen sub collect saitest` as SC-3 evidence; no project payload changes are required
 - **details:** Scenario 1 NOT_REPRODUCED: deterministic drift repairs and continuation proceeds. Scenario 2 NOT_REPRODUCED: legacy metadata remains truthful and does not globally block current continuation; no evidence is synthesized. Scenario 3 REPRODUCED as the intended safety behavior: ambiguous active receipt refuses with `BLOCKED_AMBIGUOUS_SOURCE_RECEIPT`. Scenario 4 NOT_REPRODUCED: repair is idempotent. Scenario 5 NOT_REPRODUCED: canonical loaded SAIPEN root is used without a project-local probe. Scenario 6 NOT_REPRODUCED: recover CLEAN/REPAIRED is not followed by validation failure for a repairable condition.
+
+## TEST-10: regression sweep at 005a8ac2 — no failure reproduced
+- **status:** ready
+- **summary:** Independent regression sweep over the post-T1363 tree; all test suites green, no failure reproduced
+- **main_project_refs:** []
+- **critical:** false
+- **severity:** P3
+- **producer:** saitest
+- **source_head:** 005a8ac2bdc0bd01fb78a6b693aeac8405283cc7
+- **source_tree_fingerprint:** git-delta-v1:728bf9859f927b777aef7a962819e4f731adafc2fbb314669fcec29a98ed2f8b
+- **role_revision:** sha256:801fbfdc4be680d87b18cd21e6246d83fad5b474ebd7fe82efa83918cecf2f08
+- **coverage:** Scenario families regression against current tree: test suite + validate.py + ruff
+- **payload:** []
+- **verified:** PASS -- test suite green, validate.py PASS, ruff clean, no failure reproduced
+- **instructions:** Core to collect via `saipen sub collect saitest` as SC-3 evidence; no project payload changes are required
+- **details:** Sweep bound to current source head 005a8ac2bdc0bd01fb78a6b693aeac8405283cc7. All signals green.

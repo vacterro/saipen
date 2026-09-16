@@ -71,9 +71,21 @@
     "SRC-043": {
       "linked_work": null,
       "source_sha256": "c352fc7a51fc8f59e7f5897264a053638c7d817bcb89eec5cef48d007c0867ca"
+    },
+    "SRC-044": {
+      "linked_work": "T-1363",
+      "source_sha256": "d971d83662016e6b973da609a273f08f850d3383c0c23f2fdaaf1f50f8a3920d"
+    },
+    "SRC-045": {
+      "linked_work": "T-1363",
+      "source_sha256": "b71a955b7da64f7f8e78dc0d2931ea263d1fff0a38e66a757b8724de0614dbaa"
+    },
+    "SRC-046": {
+      "linked_work": "T-1367",
+      "source_sha256": "134e51b52d9f74ebebe2b19861b382d52f819b69dbf58f8644c9c5c92a2dfb64"
     }
   },
-  "next_id": 44,
+  "next_id": 47,
   "schema_version": 1,
   "tombstones": {
     "SRC-001": {

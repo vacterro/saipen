@@ -378,10 +378,23 @@ class OpenCodeAdapterIntegration(unittest.TestCase):
                 "output": {"args": {"todos": []}},
             },
             {
+                # T-1363: `pwd` is now a PROVABLY read-only probe, so it no
+                # longer demonstrates that a consequential effect stays closed.
+                # An ordinary mutating shell line does.
                 "id": "malformed_state_root_probe_stays_closed",
                 "project": str(cls.malformed),
                 "env": cls._env(SAIPEN_AGENT=None),
                 "input": {"tool": "bash", "sessionID": "ses_malformed"},
+                "output": {"args": {"command": "npm install"}},
+            },
+            {
+                # ... and the read probe that used to be refused with it must
+                # now answer: a model asking where it is should never have to
+                # repair the protocol first (T-1363).
+                "id": "malformed_state_read_probe_stays_alive",
+                "project": str(cls.malformed),
+                "env": cls._env(SAIPEN_AGENT=None),
+                "input": {"tool": "bash", "sessionID": "ses_malformed_read"},
                 "output": {"args": {"command": "pwd"}},
             },
             {
@@ -631,6 +644,8 @@ class OpenCodeAdapterIntegration(unittest.TestCase):
         payload = self._binding(record["system"][0])
         self.assertEqual(payload["binding_code"], "ADMITTED", payload)
         self.assertEqual(payload["project_root"], str(self.malformed.resolve()), payload)
+        alive = self.by_id["malformed_state_read_probe_stays_alive"]
+        self.assertEqual(alive["outcome"], "allowed", alive)
 
     def test_non_saipen_stays_non_interfering_and_claimed_invalid_root_stays_closed(self):
         ordinary = self.by_id["non_saipen_shell"]

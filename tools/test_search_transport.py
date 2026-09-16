@@ -271,8 +271,18 @@ class CanonicalClassificationTests(unittest.TestCase):
             self.assertNotEqual(mapped["action"], "saipen_op", (command, mapped))
 
     def test_generic_shell_search_is_not_canonical(self):
+        # T-1363: a shell `grep` is a PROVABLY read-only probe and now earns
+        # the read class, which is exactly what the native search tool gets.
+        # The property this control owns is unchanged and is asserted below:
+        # it is never a CANONICAL saipen operation, so it never inherits the
+        # bounded-transport exemption `saipen search` carries.
         mapped = map_event(shell_event('grep -n "CommitSnapshot" src/app.py'))
-        self.assertEqual(mapped["action"], "shell", mapped)
+        self.assertNotEqual(mapped["action"], "saipen_op", mapped)
+        self.assertIsNone(mapped["saipen_verb"], mapped)
+        self.assertEqual(mapped["action"], "read", mapped)
+        # A search that writes its output is not a probe at all.
+        written = map_event(shell_event('grep -n "x" src/app.py > /tmp/hits'))
+        self.assertEqual(written["action"], "shell", written)
 
     def test_lookalike_search_tools_inherit_no_privilege(self):
         for tool in ("foo.grep", "plugin.search", "mcp__x__grep", "fake-rg", "rg"):

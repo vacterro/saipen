@@ -57,6 +57,7 @@ import stat
 import time
 from pathlib import Path, PurePosixPath, PureWindowsPath
 
+from .command_effects import SHELL_CANONICAL_VERBS
 from .paths import resolve_project_root
 
 PROTECTED_CANONICAL_NAMESPACES = (
@@ -135,54 +136,11 @@ ACTION_EFFECT = {action: ("read" if action == "read" else "mutating") for action
 ACTION_EFFECT["saipen_op"] = "canonical"
 
 #: Canonical saipen CLI verbs recognized in shell commands. Exact token
-#: equality on a closed set -- never pattern inference over free text.
-SAIPEN_CLI_VERBS = frozenset(
-    {
-        "continue",
-        "status",
-        "next",
-        "runtime",
-        "search",
-        "validate",
-        "recover",
-        "fleet",
-        "claim",
-        "transition",
-        "checkpoint",
-        "goal",
-        "user-request",
-        "ticket",
-        "cohort",
-        "improve",
-        "ship",
-        "push",
-        "scope",
-        "sub",
-        "context",
-        "acceptance",
-        "attempt",
-        "brief",
-        "focus",
-        "build",
-        "knowledge",
-        "cut",
-        "undo",
-        "source",
-        "audit",
-        "guard",
-        "userperson",
-        "rebind-home",
-        "set",
-        "hunt",
-        "plan",
-        "markhunt",
-        "prepare",
-        "collect",
-        "test",
-        "crew",
-        "stop",
-    }
-)
+#: equality on a closed set -- never pattern inference over free text. The set
+#: is read from `REGISTRY.json.command_effects` (T-1363), the one owner that
+#: also classifies what each verb does, so the guard can no longer recognize a
+#: verb the classifier has never heard of.
+SAIPEN_CLI_VERBS = SHELL_CANONICAL_VERBS - frozenset({"help"})
 
 
 #: Refusal codes introduced by the target-set and actor-binding contracts.

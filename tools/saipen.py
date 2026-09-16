@@ -111,103 +111,19 @@ def _agent_for(project_root: Path) -> str:
     return AGENT
 
 
-# T-1006: ONE canonical, subcommand-aware mutation classifier. This table is
-# the SINGLE authority for whether a command writes canonical state (and
-# therefore journals its acting actor as provenance). It does NOT trigger any
-# handover: since CORE-001 (SRC-026:R001) a mutating command under `--agent B`
-# never transfers A's live seat -- the mutations fold the acting actor into
-# the journal instead. The dispatcher below still routes each command
-# through its own branch -- the classifier is NOT a second dispatcher. Keep
-# the two in agreement: the table-driven regression in run_scenarios.py
-# proves every public command's classification matches the dispatcher's
-# read-only vs mutating behavior, so a drift between them fails loudly.
+# T-1006 / T-1363: ONE canonical, subcommand-aware effect classifier decides
+# whether an invocation writes canonical state (and therefore journals its
+# acting actor as provenance). It does NOT trigger any handover: since CORE-001
+# (SRC-026:R001) a mutating command under `--agent B` never transfers A's live
+# seat -- the mutations fold the acting actor into the journal instead.
 #
-# Authoritative public-surface semantics (verified against the dispatcher):
-#   status / next / context / runtime / recover inspect  READ_ONLY
-#   acceptance <T-###> ................................ READ_ONLY
-#   claim / transition / checkpoint / ticket * ........ MUTATING
-#   userperson show ................................... READ_ONLY
-#   userperson add|remove|reset ....................... MUTATING
-#   sub list|status .................................. READ_ONLY
-#   sub sync|spawn|adopt|pause|resume|clean|
-#      collect|dispose ............................... MUTATING
-#   recover resolve / bare recover (replay) .......... MUTATING
-#   rebind-home / crew / scope / fpc / ship / push ... MUTATING
-#   improve (bare prepare) / submit / complete / sweep /
-#      cycle-complete / abort / clean ................ MUTATING
-#   improve status / sweep-queue / verify ............ READ_ONLY
-#   focus / ff ........................................ READ_ONLY
-#   cut / xx target ................................... READ_ONLY preview
-#   cut / xx confirm .................................. MUTATING
-#   build / vv ........................................ MUTATING
-#   undo / zz ......................................... READ_ONLY preview
-#   undo / zz confirm ................................. MUTATING
-#   permissions ....................................... READ_ONLY
-#   explain-next ...................................... READ_ONLY
-#   source status|show ................................ READ_ONLY
-#   source capture|req|disp|close|archive|purge ....... MUTATING
-#   knowledge status|retrieve ......................... READ_ONLY
-#   knowledge index ................................... MUTATING (projection only)
-_MUTATING_TOPLEVEL = frozenset(
-    {
-        "claim",
-        "transition",
-        "checkpoint",
-        "ticket",
-        "goal",
-        # CORE-003: the public USER_INTERRUPT ingress and the cohort batch
-        # publisher both mutate canonical state.
-        "user-request",
-        "cohort",
-        # CORE § 1.10 shortcut rows with mutating destinations: gg -> goal,
-        # hh -> hunt, aa -> markhunt, pp -> sub spawn saipython. `sss` is
-        # read-only (status) and deliberately absent; st routes through the
-        # mutating stop branch while retired ss/dd/tt/ccc refuse before any
-        # write.
-        "gg",
-        "hh",
-        "aa",
-        "pp",
-        "continue",
-        "cc",
-        "rebind-home",
-        "crew",
-        "autonomous-crew",
-        "sc",
-        "prepare",
-        "prepare-translate",
-        "qq",
-        "ee",
-        "ship-wiki",
-        "ship-translate",
-        "qqq",
-        "eee",
-        "scope",
-        "first-publish-confirm",
-        "fpc",
-        "ship",
-        "push",
-        # AUTO-003: CORE section 1.10 phase-trigger verbs mutate STATE (phase
-        # transition). They are recognized canonical commands -- never rejected
-        # as unknown, which previously tempted a weak model to improvise a
-        # destructive substitute (`saipen clean` -> `sub clean saihunt`).
-        "clean",
-        "hunt",
-        "markhunt",
-        "translate",
-        "validate",
-        "plan",
-        "build",
-        "vv",
-    }
-)
-_MUTATING_USERPERSON = frozenset({"add", "remove", "reset"})
-_MUTATING_SUB = frozenset(
-    {"sync", "spawn", "adopt", "pause", "resume", "clean", "collect", "dispose"}
-)
-_MUTATING_IMPROVE = frozenset({"submit", "complete", "sweep", "cycle-complete", "abort", "clean"})
-_MUTATING_KNOWLEDGE = frozenset({"index"})
-_READ_ONLY_RECOVER = frozenset({"inspect"})
+# The verb taxonomy is `REGISTRY.json.command_effects`, read by
+# `saipen_engine.command_effects`; the guard and the host adapters consume the
+# same table. This CLI kept a second copy of it, and the copies disagreed:
+# `validate` stayed "mutating" here after it became a read-only gate, and
+# `attempt`/`stop` were "read-only" here while both journal. A DIAGNOSTIC class
+# is the only read-only answer; the confirm/directive arity below is the one
+# refinement the table cannot express -- a malformed confirm writes nothing.
 
 
 def _command_mutates(command: str, rest: list[str]) -> bool:
@@ -222,9 +138,9 @@ def _command_mutates(command: str, rest: list[str]) -> bool:
     transaction (T-1014: only after the concrete action's syntax/arity
     validation has passed, so a malformed invocation stays zero-write).
     """
+    from saipen_engine.command_effects import DIAGNOSTIC, classify_invocation
+
     sub = rest[0] if rest and not rest[0].startswith("-") else None
-    if command in ("focus", "ff"):
-        return False
     if command in ("cut", "xx"):
         return (
             sub == "confirm"
@@ -242,27 +158,7 @@ def _command_mutates(command: str, rest: list[str]) -> bool:
         )
     if command in ("build", "vv"):
         return bool(" ".join(rest).strip())
-    if command in _MUTATING_TOPLEVEL:
-        return True
-    if command == "userperson":
-        # `show` is a read-only projection; add/remove/reset mutate.
-        return sub in _MUTATING_USERPERSON
-    if command == "sub":
-        # list/status are read-only; the rest mutate the sub roster.
-        return sub in _MUTATING_SUB
-    if command == "recover":
-        # inspect is read-only; `resolve` mutates recovery state, and a bare
-        # `recover` may replay pending operations and therefore mutate.
-        return sub not in _READ_ONLY_RECOVER
-    if command == "improve":
-        if sub is None:
-            # Bare `improve` PREPARES the audit seat/cycle/report -- mutating.
-            return True
-        # verify/status/sweep-queue are read-only; the rest mutate.
-        return sub in _MUTATING_IMPROVE
-    if command == "knowledge":
-        return sub in _MUTATING_KNOWLEDGE
-    return False
+    return classify_invocation(command, rest) != DIAGNOSTIC
 
 
 def _ensure_handover(
@@ -940,10 +836,6 @@ def _guard_event(project_root_opt: str | None, args: list[str], as_json: bool) -
     ever speak. The event -- then the optional explicit root -- decides binding.
     """
     from saipen_engine import guard_events
-    from saipen_engine.admission import (
-        effective_strength,
-        evaluate_admission,
-    )
 
     event_json = None
     i = 0
@@ -990,39 +882,7 @@ def _guard_event(project_root_opt: str | None, args: list[str], as_json: bool) -
             as_json,
         )
         return 1
-    mapped = guard_events.map_event(event)
-    admission_result = evaluate_admission(
-        event["cwd"] if not project_root_opt else None,
-        target_path=mapped["target_path"],
-        action=mapped["action"],
-        agent=mapped["actor"],
-        explicit_root=project_root_opt,
-        target_paths=mapped["target_paths"],
-        targets_unresolved=mapped["targets_unresolved"],
-        shell_protected_namespace=mapped["shell_protected_namespace"],
-        shell_effects=mapped["shell_effects"],
-        shell_effects_unresolved=mapped["shell_effects_unresolved"],
-    )
-    admission_result["event"] = {
-        "event": mapped["event"],
-        "host": mapped["host"],
-        "cwd": mapped["cwd"],
-        "tool_name": mapped["tool_name"],
-        "action": mapped["action"],
-        "target_path": mapped["target_path"],
-        "target_paths": mapped["target_paths"],
-        "targets_unresolved": mapped["targets_unresolved"],
-        "shell_protected_namespace": mapped["shell_protected_namespace"],
-        "shell_effects": mapped["shell_effects"],
-        "shell_effects_unresolved": mapped["shell_effects_unresolved"],
-        "actor": mapped["actor"],
-        "saipen_verb": mapped["saipen_verb"],
-        "detail": mapped["detail"],
-    }
-    if isinstance(event.get("session_id"), str):
-        # Host session identity is DIAGNOSTIC context, never an actor binding.
-        admission_result["event"]["session_id"] = event["session_id"]
-    admission_result["strength"] = effective_strength(mapped["host"])
+    admission_result = guard_events.evaluate_event(event, project_root_opt)
     _emit(admission_result, as_json)
     return 0 if admission_result.get("admitted") else 1
 
@@ -2705,6 +2565,110 @@ def _crew_liveness(
     return {}
 
 
+def _start_actor(project_root: Path) -> tuple[str, str]:
+    """(seat, where it came from) for START, never a question to the operator.
+
+    BOOT's order made mechanical: an explicit `--agent`, then the launcher's
+    `SAIPEN_AGENT` carrier, then the project's own `STATE.agent`, then the CLI
+    default for a genuinely unseated project. A host session id is none of
+    these and is never consulted. Ownership contradictions are judged later by
+    the canonical claim, which is the only place a seat can be refused.
+    """
+    if _AGENT_OVERRIDE is not None:
+        return _AGENT_OVERRIDE, "explicit"
+    carrier = (os.environ.get("SAIPEN_AGENT") or "").strip()
+    if carrier:
+        return carrier, "launcher"
+    inherited = _agent_for(project_root)
+    return inherited, ("inherited" if inherited != AGENT else "default")
+
+
+def _start(project_root: Path, args: list[str], as_json: bool, dry_run: bool) -> int:
+    """`saipen start <task>`: the ONE entry command for a new actionable task."""
+    from saipen_engine.entry import USAGE, start_work
+
+    opts, positional, option_error = _parse_value_options(
+        args,
+        {"--priority": "priority", "--verify": "verify", "--hex": "hex", "--receipt": "receipt"},
+    )
+    if option_error:
+        _emit(
+            {"ok": False, "code": "VALIDATION_FAILED", "detail": option_error, "usage": USAGE},
+            as_json,
+        )
+        return 2
+    text = " ".join(positional).strip() or None
+    if opts.get("hex") is not None:
+        decoded = _hex_decode(opts["hex"])
+        if decoded is None or text:
+            _emit(
+                {
+                    "ok": False,
+                    "code": "VALIDATION_FAILED",
+                    "detail": "--hex needs even-length UTF-8 hex and no other task text",
+                    "usage": USAGE,
+                },
+                as_json,
+            )
+            return 2
+        text = decoded
+    receipt = opts.get("receipt")
+    if receipt and text:
+        _emit(
+            {
+                "ok": False,
+                "code": "VALIDATION_FAILED",
+                "detail": "--receipt resumes a captured request; give no new task text",
+                "usage": USAGE,
+            },
+            as_json,
+        )
+        return 2
+    if not text and not receipt:
+        _emit({"ok": False, "code": "VALIDATION_FAILED", "detail": USAGE, "usage": USAGE}, as_json)
+        return 2
+    priority = opts.get("priority") or "P1"
+    if not re.fullmatch(r"P[0-9]", priority):
+        _emit(
+            {
+                "ok": False,
+                "code": "VALIDATION_FAILED",
+                "detail": f"priority {priority!r} is not P0-P9",
+            },
+            as_json,
+        )
+        return 2
+    if not dry_run and _negotiate_capability(project_root) == "read-only":
+        return _capability_refusal(as_json)
+    actor, actor_source = _start_actor(project_root)
+    result = start_work(
+        project_root,
+        actor,
+        actor_source=actor_source,
+        text=text,
+        receipt=receipt,
+        priority=priority,
+        verify=opts.get("verify"),
+        dry_run=dry_run,
+    )
+    if result.get("code") == "STARTED":
+        state_path = _state_path(project_root)
+        state, _error = parse_state_or_error(codec.read_doc(state_path))
+        route = _cold_route(project_root, state)
+        result["load_path"] = route.get("phase_module")
+        result["load"] = (
+            f"saipen/phases/{str(result.get('phase') or 'SCOUT').lower()}.md"
+            if route.get("phase_module")
+            else None
+        )
+        result["execution_instruction"] = (
+            "The task is claimed Work. Read load_path, then execute action now under that "
+            "phase; do not run status, continue, source or recover first."
+        )
+    _emit(result, as_json)
+    return 0 if result.get("ok") else 1
+
+
 def _exact_no_args(command: str, args: list[str], as_json: bool) -> int | None:
     """Fail a closed zero-argument command grammar before its handler runs."""
     if not args:
@@ -2880,24 +2844,44 @@ def _continue(
     # reauthorization, so the refusal must not stop continuation cold --
     # reauthorize and emit the reauth outcome (the rest of the run already
     # sees the cleared STATE).
-    if reconciliation.get("code") == "RECONCILE_REAUTH_REQUIRED":
+    #
+    # T-1363: route on the refusal's REMEDIATION, never on its code. The same
+    # RECONCILE_REAUTH_REQUIRED carries four kinds of operator decision, and
+    # sending every one of them here answered "valve has not tripped; no fresh
+    # budget is owed" -- measured on five real projects. Only a proven valve
+    # is reauthorized; every other decision leaves with its exact command.
+    from saipen_engine.reconcile import SAFETY_VALVE_TRIPPED
+
+    if reconciliation.get("code") == "RECONCILE_REAUTH_REQUIRED" and reconciliation.get(
+        "safety_valve_tripped"
+    ):
         from saipen_engine.operations import reauthorize_valve
 
         reauth = reauthorize_valve(project_root, _agent_for(project_root), dry_run=dry_run)
         if not reauth.ok:
             _emit(reauth.to_dict(), as_json)
             return 1
-        # Surface the reauthorization as the canonical outcome of this
-        # ``cc`` invocation. The post-reauth reconciliation runs downstream
-        # of the reauth it just executed; the caller already saw the reason
-        # the valve tripped and that it is now cleared.
-        reauth_dict = reauth.to_dict()
-        reauth_dict["execution_intent"] = "goal"
-        reauth_dict["goal_waves"] = 0
-        reauth_dict["goal_tickets"] = 0
-        reauth_dict["reconciliation"] = reconciliation
-        _emit(reauth_dict, as_json)
-        return 0
+        if reconciliation.get("remediation") == SAFETY_VALVE_TRIPPED:
+            # Surface the reauthorization as the canonical outcome of this
+            # ``cc`` invocation. The post-reauth reconciliation runs
+            # downstream of the reauth it just executed; the caller already
+            # saw the reason the valve tripped and that it is now cleared.
+            reauth_dict = reauth.to_dict()
+            reauth_dict["execution_intent"] = "goal"
+            reauth_dict["goal_waves"] = 0
+            reauth_dict["goal_tickets"] = 0
+            reauth_dict["reconciliation"] = reconciliation
+            _emit(reauth_dict, as_json)
+            return 0
+        if dry_run:
+            # The valve shares the refusal with a real decision. A preview
+            # cannot clear the valve and then observe what remains, so it
+            # reports both: the planned reauthorization and the decision.
+            _emit({**reconciliation, "planned_valve_reauthorization": reauth.to_dict()}, as_json)
+            return 1
+        reconciliation = reconcile_protocol_state(
+            project_root, _agent_for(project_root), dry_run=dry_run
+        )
     if not reconciliation.get("ok"):
         _emit(reconciliation, as_json)
         return 1
@@ -5117,6 +5101,47 @@ def _userperson(project_root: Path | None, args: list[str], as_json: bool, dry_r
     return 2
 
 
+#: T-1363: how much of a refusal's reason the human form prints. JSON stays the
+#: authority and carries everything; the human form is the cheap interface a
+#: model reads first, so it says why and what next, never a payload dump.
+_HUMAN_REASON_CHARS = 300
+
+
+def _human_refusal_lines(payload: dict) -> list[str]:
+    """`reason:` / `next:` / `then:` for a refusal, when the payload has them.
+
+    `REFUSE [CODE]` alone was the whole human answer, while the JSON beside it
+    named the exact command that would clear the refusal. A model shown only
+    the code grepped the installation and asked the user about "auth".
+    """
+    lines: list[str] = []
+    detail = payload.get("detail") or payload.get("message")
+    if isinstance(detail, str) and detail.strip():
+        text = " ".join(detail.split())
+        if len(text) > _HUMAN_REASON_CHARS:
+            text = text[: _HUMAN_REASON_CHARS - 3].rstrip() + "..."
+        lines.append(f"reason: {text}")
+    command = payload.get("canonical_next_command")
+    if not command:
+        decisions = [
+            item.get("command")
+            for item in payload.get("operator_decisions") or []
+            if isinstance(item, dict) and item.get("command")
+        ]
+        command = decisions[0] if decisions else None
+    if not command:
+        next_action = payload.get("next_action")
+        if isinstance(next_action, str) and next_action.startswith("saipen "):
+            command = next_action
+    if isinstance(command, str) and command.strip():
+        suffix = " (operator decision)" if payload.get("operator_decision_available") else ""
+        lines.append(f"next: {' '.join(command.split())}{suffix}")
+    resume = payload.get("resume_command")
+    if isinstance(resume, str) and resume.strip():
+        lines.append(f"then: {resume}")
+    return lines
+
+
 def _emit(payload: dict, as_json: bool) -> None:
     # ONE public refusal shape. CLI-side refusals have always carried
     # `detail`; engine `Result` refusals carry `message`, so the same public
@@ -5136,12 +5161,19 @@ def _emit(payload: dict, as_json: bool) -> None:
         return
     if not payload.get("ok"):
         print(f"REFUSE [{payload.get('code', 'ERROR')}]")
+        for line in _human_refusal_lines(payload):
+            print(line)
         return
     if payload.get("code") == "NOT_SAIPEN_PROJECT":
         return
     for key in (
         "action",
         "ticket",
+        # T-1363: the receipt is the durable authority for the COMPLETE
+        # request, and a projected BOARD row is a compact reference to it. A
+        # human answer that names the ticket and hides the receipt sends a
+        # reader to the row that was shortened.
+        "receipt",
         "route",
         "load",
         "load_path",
@@ -6503,10 +6535,17 @@ def main(argv: list[str] | None = None) -> int:
 
     # CORE-004: bare `saipen` (only global options, no command) is the
     # canonical resume family -- equivalent to `continue`/`cc` (CORE § 1.10).
-    # Explicit `-h`/`--help` stays a usage/exit-2 path and does NOT resume.
-    if args and args[0] in ("-h", "--help"):
+    # Explicit help does NOT resume. T-1363: help is a DIAGNOSTIC that answers
+    # and writes nothing wherever it appears before `--` -- `saipen goal --help`
+    # once became a goal named "--help" (T-1321) and `saipen user-request
+    # --help` a refusal. It exits 0: a usage probe that "fails" teaches a weak
+    # model the tool is broken.
+    if (args and args[0] == "help") or any(
+        token in ("-h", "--help") for token in clean_before
+    ):
         usage_msg = (
-            "usage: saipen (continue|status|next|runtime [--prelaunch [--adapter ID] "
+            "usage: saipen (start '<task in one line>' [--hex HEX] [--receipt SRC-###]|"
+            "continue|status|next|runtime [--prelaunch [--adapter ID] "
             "[--no-resync]|--bootstrap|--check-freshness]|search [--hex HEX]|"
             "validate|recover|fleet preflight|scan|prepare|claim <T-###> [--explicit]|"
             "transition <PHASE> [T-###] [text]|checkpoint <TAXONOMY> "
@@ -6539,10 +6578,10 @@ def main(argv: list[str] | None = None) -> int:
             "[--json] [--project-root PATH] [--agent ID] [--runtime-info JSON-FILE]"
         )
         if as_json:
-            _emit({"ok": False, "code": "VALIDATION_FAILED", "detail": usage_msg}, as_json)
+            _emit({"ok": True, "code": "USAGE", "usage": usage_msg}, as_json)
         else:
             print(usage_msg)
-        return 2
+        return 0
 
     # Global USERPERSON belongs to user configuration, not project memory.
     # Dispatch it before project-root resolution so it works from an ordinary
@@ -7348,6 +7387,9 @@ def main(argv: list[str] | None = None) -> int:
             as_json,
         )
         return 2
+    if command == "start":
+        # T-1363: the one entry command for a new actionable task.
+        return _start(project_root, args[1:], as_json, dry_run)
     if command == "user-request":
         # CORE-003: the USER_INTERRUPT ingress. The complete request becomes
         # durable Source authority BEFORE the concise BOARD projection, so a

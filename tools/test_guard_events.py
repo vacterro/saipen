@@ -99,7 +99,12 @@ class MapEventTests(unittest.TestCase):
         self.assertEqual(guard_events.map_event(_event(tool_name="mv"))["action"], "move")
 
     def test_shell_tools_map_to_shell(self):
-        mapped = guard_events.map_event(_event(tool_name="bash", tool_input={"command": "ls -la"}))
+        # T-1363: `ls -la` is now a PROVABLY read-only probe and earns the read
+        # class by its closed verb set, so it no longer demonstrates the
+        # property this control owns. An ordinary shell effect does.
+        mapped = guard_events.map_event(
+            _event(tool_name="bash", tool_input={"command": "npm install"})
+        )
         self.assertEqual(mapped["action"], "shell")
         self.assertIsNone(mapped["target_path"])
 

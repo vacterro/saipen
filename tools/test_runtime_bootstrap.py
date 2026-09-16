@@ -302,9 +302,23 @@ class BootstrapAuthorityTests(unittest.TestCase):
 
     def test_D_arbitrary_shell_refused(self):
         root = _invalid_project()
-        res = _admit(root, "bash", {"command": "ls -la"})
+        res = _admit(root, "bash", {"command": "npm install"})
         self.assertFalse(res["admitted"], res)
         self.assertEqual(res["code"], "PROTOCOL_STATE_INVALID")
+
+    def test_D_a_provably_read_only_probe_still_answers(self):
+        """T-1363: an invalid protocol state must not blind the agent.
+
+        `read` of the same file was always ADMITTED_READ_ONLY here; the shell
+        spelling of the same question was refused, so a model that had to look
+        before it could repair spent its turn working around the guard. The
+        refusal above is what still matters: an effect nothing can prove
+        read-only stays closed.
+        """
+        root = _invalid_project()
+        res = _admit(root, "bash", {"command": "ls -la"})
+        self.assertTrue(res["admitted"], res)
+        self.assertEqual(res["action"], "read", res)
 
     def test_E_arbitrary_powershell_installer_refused(self):
         root = _invalid_project()

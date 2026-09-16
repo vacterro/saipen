@@ -55,6 +55,7 @@ global authority and deterministic priority rules.
 | `saipen validate` | read-only fast-gate verdict on the canonical documents | CMD-ROUTING-01 |
 | `saipen --agent <seat> launch opencode -- [args]` | optional explicit-actor host process | CMD-ROUTING-01 |
 | `saipen knowledge [status\|index\|retrieve]` | project knowledge | CMD-ROUTING-01 |
+| `saipen start '<task>' [--hex HEX] [--receipt SRC-###]` | THE entry command for a new actionable task: capture, recover, seat, claim | CMD-ROUTING-01 |
 | `saipen user-request <text>` | USER_INTERRUPT ingress | CMD-ROUTING-01 |
 | `saipen cohort [status\|ship] <C-###>` | batch publication authority | CMD-ROUTING-01 |
 | `saipen source` | intake | CMD-ROUTING-01 |

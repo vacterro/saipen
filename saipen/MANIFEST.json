@@ -74,6 +74,10 @@
       "required": true
     },
     {
+      "src": "saipen/COMMAND_EFFECTS.json",
+      "required": true
+    },
+    {
       "src": "saipen/MAINTENANCE.md",
       "required": true
     },

@@ -3748,13 +3748,28 @@ USER_REQUEST_VERIFY = (
 )
 
 
-def _user_request_body(text: str, priority: str, verify: str, needs: list[str]) -> str:
+def _user_request_body(
+    text: str,
+    priority: str,
+    verify: str,
+    needs: list[str],
+    supersedes: str | None = None,
+) -> str:
     """The DURABLE request document -- the complete body, never the BOARD title.
 
     Deterministic on purpose: no timestamp, no nonce. The intake receipt is
     content-addressed, so an identical re-submission resolves to the SAME
     receipt instead of minting a second authority for one request. That is the
     whole idempotency story -- a retry after a crash is safe by construction.
+
+    T-1363: content equality is a TRANSPORT identity, not an ACTION identity.
+    "run the nightly cleanup" asked again next week is a new instruction, and
+    the old digest answered it with `TICKET_ALREADY_DONE` -- so the only way
+    to ask again was to reword the request, which is the user changing their
+    words to defeat a hash. `supersedes` records the durable fact that makes
+    the two different: THIS request follows a previous identical one that is
+    finished. It is derived, never invented, so a retry of the new action
+    renders the identical body and still resolves to its own single receipt.
     """
     lines = [
         "# User request",
@@ -3764,6 +3779,8 @@ def _user_request_body(text: str, priority: str, verify: str, needs: list[str]) 
     ]
     if needs:
         lines.append("needs: " + ", ".join(needs))
+    if supersedes:
+        lines.append("supersedes: " + supersedes)
     lines.extend(["", "## Request", "", text.strip(), ""])
     return "\n".join(lines)
 
@@ -3791,6 +3808,7 @@ def user_request(
     verify: str | None = None,
     needs: list[str] | None = None,
     dry_run: bool = False,
+    supersedes: str | None = None,
 ) -> Result:
     """Persist an explicit user request as durable authority, THEN project it.
 
@@ -3839,7 +3857,7 @@ def user_request(
     except ValueError as exc:
         return _refuse("VALIDATION_FAILED", str(exc))
     title = _request_title(text)
-    body = _user_request_body(text, priority, verify_text, needs)
+    body = _user_request_body(text, priority, verify_text, needs, supersedes)
 
     from . import intake
 
@@ -3897,7 +3915,9 @@ def user_request(
         )
     receipt = captured.get("receipt")
 
-    projected = _project_user_request(root, agent, receipt, title, priority, verify_text, needs)
+    projected = _project_user_request(
+        root, agent, receipt, title, priority, verify_text, needs
+    )
     if not projected.ok:
         # The receipt survives on purpose: an unroutable receipt is
         # RECOVERABLE (the same request re-run adopts it); a lost request body
@@ -3960,14 +3980,71 @@ def _project_user_request(
         history_max_ticket_id=getattr(docs["_history"], "max_ticket_id", None),
     )
     ticket_id = "T-" + str(tid)
-    line = (
-        "- [ ] " + ticket_id + " [" + priority + "] "
-        + escape_ticket_description(redact_credentials(title))
-        + (" | needs: " + ", ".join(needs) if needs else "")
-        + " | verify: " + escape_ticket_description(redact_credentials(verify))
-        + " | user_explicit: " + USER_EXPLICIT_TRUE
-        + " | source_receipts: " + receipt
-    )
+
+    def render(title_text: str, verify_text: str) -> str:
+        return (
+            "- [ ] " + ticket_id + " [" + priority + "] "
+            + escape_ticket_description(redact_credentials(title_text))
+            + (" | needs: " + ", ".join(needs) if needs else "")
+            + " | verify: " + escape_ticket_description(redact_credentials(verify_text))
+            + " | user_explicit: " + USER_EXPLICIT_TRUE
+            + " | source_receipts: " + receipt
+        )
+
+    # A projected Work that cannot be CLAIMED is the same dead end SRC-044
+    # was: the receipt is durable, the row exists, and the next canonical step
+    # refuses. Claiming appends exactly ` | owner: <agent> | claim_time:
+    # <ISO-8601 Z>`, so that much of the cap belongs to the claim, not to the
+    # projection, and the shrink below must leave it.
+    cap = MAX_LIVE_RECORD_CHARS - len(" | owner: " + agent + " | claim_time: ") - 20
+
+    def shrink(text: str, current: str, other: str, first: bool) -> tuple[str, str]:
+        """Trim `text` until the rendered row fits, or until nothing is left.
+
+        Escaping and redaction change lengths, so each step shrinks by the
+        MEASURED excess and re-renders; predicting the rendered size is how a
+        loop like this stops converging.
+        """
+        pointer = " ... [full text: " + receipt + "]"
+        keep = len(text)
+        while keep > 0:
+            candidate = text[:keep].rstrip() + pointer
+            rendered = render(candidate, other) if first else render(other, candidate)
+            if len(rendered) <= cap:
+                return candidate, rendered
+            keep -= max(1, len(rendered) - cap)
+        pointer = "see " + receipt
+        return pointer, (render(pointer, other) if first else render(other, pointer))
+
+    line = render(title, verify)
+    board_title, board_verify = title, verify
+    if len(line) > cap:
+        # T-1363 / SRC-044: the request is already durable in `receipt`, the
+        # complete verify clause included. Refusing the projection here left
+        # that receipt linked to nothing -- measured live -- and a retry of the
+        # same request refused the same way, so the user's intent had no Work
+        # at all. BOARD carries a compact reference instead, exactly what the
+        # cap's own refusal asks for; the receipt stays the authority.
+        board_verify, line = shrink(verify, line, title, first=False)
+    if len(line) > cap:
+        # An enormous TITLE can overflow the row on its own. Shrink it the same
+        # way rather than looping on a verify that is already at its floor.
+        board_title, line = shrink(title, line, board_verify, first=True)
+    if len(line) > cap:
+        # Nothing the projection owns is left to trim: `needs` and the ticket
+        # identity are the remainder. ONE bounded answer that names the durable
+        # receipt and the exact way forward -- never a retry that loops.
+        return _refuse(
+            "BOARD_RECORD_OVERSIZE",
+            f"the request is durable as {receipt}, but even a minimum BOARD row is "
+            f"{len(line)} characters against a claimable budget of {cap} because "
+            f"`needs` names {len(needs)} ticket(s); resubmit it with fewer `needs`",
+            receipt=receipt,
+            canonical_next_command=f"saipen start --receipt {receipt}",
+            needs=needs,
+        )
+    verify = board_verify
+    title = board_title
     new_board = _insert_todo(docs["board"].text_norm, line)
     event, event_line = _event_line(
         docs,

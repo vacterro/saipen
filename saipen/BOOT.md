@@ -4,6 +4,28 @@ BOOT defines no protocol rule. It decides what evidence and which single owner
 must be loaded next. Rule IDs and machine facts live in `REGISTRY.json`; the
 human ownership map lives in `INDEX.md`.
 
+## Entry -- which command runs first
+
+    NEW ACTIONABLE USER INPUT         ->  saipen start '<the task, one line>'
+    NO NEW USER INPUT                 ->  saipen continue
+    STATUS REQUEST / DIAGNOSTIC NEED  ->  saipen status --json
+
+**NEW TASK -> START FIRST.** For a new task, do NOT run `status`, `continue`,
+`source`, `recover` or any seat/role/auth negotiation first. START performs
+the capture, the recovery preflight, the seat and the claim itself, and
+returns the phase and the action to execute now. Run one of those commands
+only when START's own answer names it.
+
+START answers in one of three ways, and each one names what to do next:
+
+- `STARTED` -- read `load_path`, execute `action` now. Nothing else first.
+- `next: <command>` -- run that exact command, then `saipen start --receipt
+  SRC-###`. One question, one answer, then work.
+- a refusal whose `next:` names `saipen start --hex <hex>` -- run that exact
+  command. The task text could not survive the shell as typed, so the guard
+  computed the transport that carries it. Never reword the user's task to get
+  past a refusal.
+
 ## Cold route
 
 1. **Load `STYLE.md` beside this BOOT.md before user-visible output.** Its
@@ -78,7 +100,9 @@ human ownership map lives in `INDEX.md`.
 
 6. **Resolve current input before persisted continuation.**
 
-   Current input wins: the user's own message outranks the file. A persisted
+   The Entry table above decides the FIRST command; this step decides what
+   the input means once it is not a new actionable task. Current input wins:
+   the user's own message outranks the file. A persisted
    `next_action` is the
    previous checkpoint's pre-computed pick; where the mechanical router cannot
    re-derive it, confirm it against BOARD. Immediate means without asking, never without looking.

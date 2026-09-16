@@ -1371,17 +1371,31 @@ def recovery_preflight(project_root: Path | str, exclude_op_id: str | None = Non
     # operation id: otherwise a same-id retry can overwrite and erase it.
     corrupt = [op for op in pending if op.get("corrupt")]
     if corrupt:
+        corrupt_id = corrupt[0]["op_id"]
+        # T-1355's termination oracle, applied to this refusal (T-1363). A
+        # corrupt receipt is the ONE journal state no command can settle: its
+        # `status` lives inside the bytes that cannot be read, so nothing can
+        # prove whether the operation ever reached a target, and discarding it
+        # could hide a half-applied write. So this names no settling command
+        # -- naming one that reproduces this refusal is the loop -- and
+        # instead names the read-only inspection and the exact receipt an
+        # operator must look at. It is an operator decision by construction.
         return {
             "ok": False,
             "code": "CORRUPT_JOURNAL",
             "op_ids": [op["op_id"] for op in corrupt],
             "recovery_required": True,
+            "operator_decision_available": True,
+            "inspect_command": f"saipen recover inspect {corrupt_id}",
+            "receipt_path": f".saipen/recovery/ops/{corrupt_id}",
             "detail": (
-                f"corrupt journal evidence {corrupt[0]['op_id']} "
+                f"corrupt journal evidence {corrupt_id} "
                 "blocks new mutation: "
-                f"{corrupt[0].get('detail', '')} -- resolve the "
-                "corrupt receipt explicitly before any further "
-                "canonical write"
+                f"{corrupt[0].get('detail', '')} -- the receipt's own status is "
+                "unreadable, so no command can prove what it applied. Look with "
+                f"`saipen recover inspect {corrupt_id}`; the receipt is "
+                f".saipen/recovery/ops/{corrupt_id} and settling it is an "
+                "operator decision (OPERATOR_DECISION_REQUIRED)"
             ),
         }
     conflicts = [op for op in conflicts if op["op_id"] != exclude_op_id]

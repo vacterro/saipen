@@ -41,7 +41,8 @@ import re
 import shlex
 from pathlib import Path, PurePosixPath, PureWindowsPath
 
-from .admission import SAIPEN_CLI_VERBS, normalize_action
+from . import command_effects
+from .admission import normalize_action
 
 #: The guard accepts a bounded JSON document, never arbitrary structures.
 MAX_EVENT_BYTES = 256 * 1024
@@ -874,7 +875,126 @@ def _extract_targets(tool_input: dict) -> tuple[list[str], bool]:
     return list(dict.fromkeys(targets)), patch_unresolved
 
 
-def _saipen_cli_verb(command: str) -> str | None:
+#: T-1363: characters an INGRESS payload may not carry INSIDE its quotes.
+#: Measured against the three shells a real request travels through -- bash,
+#: PowerShell 5.1/7, and the cmd.exe a PowerShell host forwards `saipen.cmd`
+#: through. Inside a single-quoted argument bash and PowerShell expand
+#: NOTHING, and PowerShell re-quotes the argument for cmd, which neutralises
+#: `& | < > ^`. Three things survive that and are refused here:
+#:
+#: * the quote characters themselves -- one ends the argument, the other
+#:   breaks PowerShell 5.1's re-quoting into cmd;
+#: * a SECOND `%`, because `%NAME%` needs a pair and cmd expands it even
+#:   inside double quotes (a lone `50%` is literal everywhere);
+#: * control characters, including the newline no single argument can carry.
+#:
+#: Everything else -- `$`, backtick, `&`, `|`, `<`, `>`, `^`, backslashes,
+#: every non-ASCII script -- is literal in all three, so a Windows path, a
+#: shell-looking word and Cyrillic or Estonian prose all travel as typed. A
+#: trailing backslash is refused separately: it would escape the closing quote
+#: the C runtime sees.
+#: ... and the EXTRA characters a DOUBLE-quoted payload may not carry, because
+#: bash and PowerShell both expand inside `"`: `$`, backtick, and the
+#: backslash bash reads as an escape there. A single-quoted payload expands
+#: nothing in either shell and keeps the wide alphabet.
+_INGRESS_PAYLOAD_FORBIDDEN = frozenset("'\"")
+_INGRESS_DOUBLE_QUOTE_FORBIDDEN = frozenset("$`\\")
+#: Task text longer than this is not refused -- it stops being quotable, and
+#: `--hex` carries it. The bound exists so a refusal can never print an
+#: unbounded machine fact back to the host.
+MAX_INGRESS_REWRITE_CHARS = 4096
+
+
+def ingress_payload_literal(payload: str, quote: str = "'") -> bool:
+    """Whether these exact bytes survive ONE quoted shell argument as typed."""
+    if not payload.strip() or payload.lstrip().startswith("-"):
+        return False
+    forbidden = _INGRESS_PAYLOAD_FORBIDDEN
+    if quote == '"':
+        forbidden = forbidden | _INGRESS_DOUBLE_QUOTE_FORBIDDEN
+    if any(ch in forbidden or ord(ch) < 32 or ord(ch) == 127 for ch in payload):
+        return False
+    return payload.count("%") <= 1 and not payload.endswith("\\")
+
+
+def ingress_rewrite(command: str) -> str | None:
+    """The exact command that carries THIS request when quoting cannot.
+
+    A weak model must never be told to re-encode anything itself. When the
+    payload of a `saipen start`/`user-request` line cannot travel literally,
+    the guard computes the transport that does and names it -- `saipen start
+    --hex <utf-8 hex>` -- so the next step is a command to run, not a puzzle.
+    `start` is the route for both ingress verbs: it persists the identical
+    request and claims it, which is what either caller wanted.
+    """
+    text = command.strip()
+    head = text.split(" ", 2)
+    if len(head) < 3 or head[0] != "saipen" or head[1] not in (
+        command_effects.INGRESS_PAYLOAD_VERBS
+    ):
+        return None
+    payload = head[2].strip()
+    if len(payload) >= 2 and payload[0] in "'\"" and payload[-1] == payload[0]:
+        payload = payload[1:-1]
+    payload = payload.strip()
+    if not payload or len(payload) > MAX_INGRESS_REWRITE_CHARS or payload.startswith("-"):
+        return None
+    return "saipen start --hex " + payload.encode("utf-8").hex()
+
+
+def _ingress_payload_tokens(command: str) -> list[str] | None:
+    """Tokens of `saipen <ingress verb> ...` carrying ONE quoted request.
+
+    The canonical grammar refuses every quote, which made the one operation
+    whose job is to persist a user's request unreachable for any real request:
+    `saipen user-request 'fix the login bug'` read as an ordinary shell effect
+    and was refused behind unrelated debt. The exemption stays all-or-nothing:
+    bare words keep the canonical argument alphabet, at most one token may be
+    quoted, the quoted text may not start an option, may not touch another
+    token, and may not carry a character any supported shell expands.
+    """
+    text = command.strip()
+    tokens: list[str] = []
+    quoted = False
+    index = 0
+    while index < len(text):
+        char = text[index]
+        if char == " ":
+            index += 1
+            continue
+        if char in "'\"":
+            end = text.find(char, index + 1)
+            if quoted or end < 0:
+                return None
+            payload = text[index + 1 : end]
+            if not ingress_payload_literal(payload, char):
+                return None
+            if end + 1 < len(text) and text[end + 1] != " ":
+                return None
+            tokens.append(payload)
+            quoted = True
+            index = end + 1
+            continue
+        end = index
+        while end < len(text) and text[end] != " ":
+            end += 1
+        word = text[index:end]
+        if not _SAIPEN_ARG_CHARS.issuperset(word):
+            return None
+        tokens.append(word)
+        index = end
+    if (
+        not quoted
+        or len(tokens) < 3
+        or len(tokens) > _SAIPEN_MAX_TOKENS
+        or tokens[0] != "saipen"
+        or tokens[1] not in command_effects.INGRESS_PAYLOAD_VERBS
+    ):
+        return None
+    return tokens
+
+
+def _saipen_cli_tokens(command: str) -> list[str] | None:
     """Canonical `saipen <verb>` recognition over the WHOLE command line.
 
     The exemption is granted only when the entire shell expression is one
@@ -884,13 +1004,13 @@ def _saipen_cli_verb(command: str) -> str | None:
     substitution, subshell, background job, quoting/escaping, glob or a second
     newline-separated command -- is an ordinary SHELL effect for the whole
     line, so `saipen recover && rm -f .saipen/STATE.md` can never inherit the
-    canonical recovery exemption.
+    canonical recovery exemption. The one quoted form admitted is an INGRESS
+    request payload (`_ingress_payload_tokens`).
     """
     if not isinstance(command, str) or not command.strip():
         return None
-    for char in command:
-        if char in _SHELL_SYNTAX_CHARS:
-            return None
+    if any(char in _SHELL_SYNTAX_CHARS for char in command):
+        return _ingress_payload_tokens(command)
     try:
         tokens = shlex.split(command)
     except ValueError:
@@ -904,12 +1024,127 @@ def _saipen_cli_verb(command: str) -> str | None:
     for token in tokens:
         if not token or not _SAIPEN_ARG_CHARS.issuperset(token):
             return None
+    if len(tokens) > 1 and not command_effects.is_shell_canonical_verb(tokens[1]):
+        return None
+    return tokens
+
+
+def _saipen_cli_verb(command: str) -> str | None:
+    tokens = _saipen_cli_tokens(command)
+    if tokens is None:
+        return None
     if len(tokens) == 1:
         return "bare"
-    verb = tokens[1]
-    if verb in SAIPEN_CLI_VERBS:
-        return verb
-    return None
+    # `saipen --help` / `saipen -h` are the help verb: a usage probe whose
+    # first token is a flag must not fall out of the canonical grammar and be
+    # judged as an ordinary shell effect behind whatever the project owes.
+    return "help" if tokens[1] in command_effects.HELP_TOKENS else tokens[1]
+
+
+# ---- T-1363: provably read-only shell probes ---------------------------------
+#
+# Native `read` of `.saipen/STATE.md` is diagnostic access; `Test-Path
+# '.saipen/MANIFEST.json'` asked the same question and was refused as
+# PROTECTED_CANONICAL_NAMESPACE because the text named the namespace. One
+# question, two answers, and the model spent its turn working around the
+# refusal. A shell line earns the read class only when EVERY simple command in
+# it is a verb from this closed set, nothing is substituted, redirected into a
+# file, wrapped, evaluated or scripted, and nothing names a verb outside it.
+_READ_ONLY_SHELL_VERBS = frozenset(
+    {
+        # PowerShell cmdlets and their stock aliases
+        "test-path",
+        "get-content",
+        "gc",
+        "type",
+        "get-childitem",
+        "gci",
+        "dir",
+        "ls",
+        "get-item",
+        "gi",
+        "resolve-path",
+        "rvpa",
+        "split-path",
+        "select-string",
+        "sls",
+        "measure-object",
+        "measure",
+        "select-object",
+        "select",
+        "format-list",
+        "fl",
+        "format-table",
+        "ft",
+        "get-filehash",
+        "write-output",
+        "echo",
+        # POSIX
+        "cat",
+        "head",
+        "tail",
+        "wc",
+        "stat",
+        "grep",
+        "pwd",
+        "realpath",
+        "basename",
+        "dirname",
+        "git",
+    }
+)
+#: git subcommands that only report. No `-c` override is accepted in front of
+#: them, and no option that writes a file or runs an external program.
+_READ_ONLY_GIT = frozenset(
+    {"rev-parse", "status", "log", "show", "ls-files", "diff", "blame", "cat-file"}
+)
+_GIT_WRITING_OPTIONS = ("--output", "--ext-diff", "--textconv", "-o")
+#: Structure that can compute, call or script something the verb check never
+#: sees -- variables, subexpressions, script blocks, type literals, splatting
+#: -- and every redirection character. `cat a>b` tokenizes as one word, so a
+#: redirection is refused by its character, never by recognizing its shape.
+_PROBE_FORBIDDEN_TEXT = frozenset("$`(){}[]@%<>")
+#: The only redirections a probe may carry: discarding or merging error output.
+_PROBE_SAFE_REDIRECTIONS = frozenset({"2>$null", "2>/dev/null", "2>nul", "2>&1"})
+
+
+def _read_only_git(args: list[str]) -> bool:
+    if args[:1] == ["-C"] and len(args) >= 2:
+        args = args[2:]
+    if not args or args[0] not in _READ_ONLY_GIT:
+        return False
+    return not any(
+        word == option or word.startswith(option + "=")
+        for word in args[1:]
+        for option in _GIT_WRITING_OPTIONS
+    )
+
+
+def provably_read_only_shell(command: str) -> bool:
+    """True only when the whole line is a closed-set read-only probe."""
+    if not isinstance(command, str) or not command.strip():
+        return False
+    stripped = command
+    for token in _PROBE_SAFE_REDIRECTIONS:
+        stripped = stripped.replace(" " + token, " ")
+    if any(char in _PROBE_FORBIDDEN_TEXT for char in stripped):
+        return False
+    segments, nested = _shell_segments(stripped)
+    if nested or not segments:
+        return False
+    for segment, _piped in segments:
+        words = _shell_words(segment)
+        if not words:
+            return False
+        # The verb is the bare name exactly: `_shell_verb` forgives a directory
+        # and an executable suffix, and `./cat.ps1` or `C:\tmp\git.exe` is
+        # whatever program sits at that path, not the read-only command.
+        verb = words[0].lower()
+        if verb != _shell_verb(words[0]) or verb not in _READ_ONLY_SHELL_VERBS:
+            return False
+        if verb == "git" and not _read_only_git(words[1:]):
+            return False
+    return True
 
 
 def map_event(event: dict) -> dict:
@@ -933,6 +1168,8 @@ def map_event(event: dict) -> dict:
     targets, targets_unresolved = _extract_targets(tool_input)
     detail = ""
     verb: str | None = None
+    command_class: str | None = None
+    ingress_route: str | None = None
     action: str
     shell_protected_namespace = False
     shell_effects: list[dict] = []
@@ -963,10 +1200,23 @@ def map_event(event: dict) -> dict:
         detail = "exact OpenCode task delegation; child tool effects require their own admission"
     elif tool in _SHELL_TOOLS:
         command = tool_input.get("command") if isinstance(tool_input.get("command"), str) else None
-        verb = _saipen_cli_verb(command) if command else None
+        cli_tokens = _saipen_cli_tokens(command) if command else None
+        verb = _saipen_cli_verb(command) if cli_tokens is not None else None
+        if verb is None and command:
+            # T-1363: an ingress line whose payload no shell can carry
+            # literally still has an exact transport. Compute it here, beside
+            # the parser that rejected the payload, so the refusal downstream
+            # can name a command instead of a rule.
+            ingress_route = ingress_rewrite(command)
         if verb is not None:
             action = "saipen_op"
-            detail = f"canonical saipen operation ({verb})"
+            command_class = command_effects.classify_tokens(cli_tokens)
+            detail = f"canonical saipen operation ({verb}, {command_class})"
+        elif command and provably_read_only_shell(command):
+            # T-1363: the same answer native `read` gets. No target is
+            # invented; the closed verb set is the proof, not a path list.
+            action = "read"
+            detail = "provably read-only shell probe"
         else:
             action = "shell"
             if not command or not command.strip():
@@ -1016,7 +1266,25 @@ def map_event(event: dict) -> dict:
         # shape: an unnamed destination could be protected state.
         targets_unresolved = True
 
+    if command_class is None:
+        # CMD-EFFECT-01: only a read is diagnostic outside the canonical
+        # grammar; every other host effect is ordinary execution. The one
+        # exception is a line that IS an ingress attempt and failed only on
+        # transport: it is refused below with its exact replacement command, so
+        # making it pay Fleet preparation would run recovery for a request
+        # that never executes -- the precise shape of the bug T-1363 closes.
+        command_class = (
+            command_effects.INGRESS
+            if ingress_route
+            else command_effects.DIAGNOSTIC
+            if action == "read"
+            else command_effects.EXECUTION
+        )
+
     return {
+        "command_class": command_class,
+        "fleet_preflight": command_effects.fleet_preflight_required(command_class),
+        "canonical_next_command": ingress_route,
         "action": normalize_action(action),
         "target_path": targets[0] if targets else None,
         "target_paths": targets,
@@ -1032,3 +1300,84 @@ def map_event(event: dict) -> dict:
         "saipen_verb": verb,
         "detail": detail,
     }
+
+
+#: Refusals an ingress transport route may never re-label: they are facts
+#: about the TARGET or the ACTOR, not about how the text travelled.
+_INTRINSIC_REFUSALS = frozenset(
+    {
+        "PROTECTED_CANONICAL_NAMESPACE",
+        "PATH_ESCAPES_PROJECT",
+        "TARGET_UNRESOLVED",
+        "PROJECT_BINDING_INVALID",
+        "PROJECT_LINEAGE_MISMATCH",
+        "OWNERSHIP_CONFLICT",
+    }
+)
+
+
+def evaluate_event(event: dict, project_root: str | None = None) -> dict:
+    """One host event -> one admission verdict carrying its mapped event.
+
+    The guard CLI and every in-process caller share this, so the effect class a
+    host consumes (`event.command_class`, `event.fleet_preflight`) is always the
+    class the verdict was computed with.
+    """
+    from .admission import effective_strength, evaluate_admission
+
+    mapped = map_event(event)
+    verdict = evaluate_admission(
+        event["cwd"] if not project_root else None,
+        target_path=mapped["target_path"],
+        action=mapped["action"],
+        agent=mapped["actor"],
+        explicit_root=project_root,
+        target_paths=mapped["target_paths"],
+        targets_unresolved=mapped["targets_unresolved"],
+        shell_protected_namespace=mapped["shell_protected_namespace"],
+        shell_effects=mapped["shell_effects"],
+        shell_effects_unresolved=mapped["shell_effects_unresolved"],
+    )
+    if mapped.get("canonical_next_command"):
+        # T-1363: an ingress line whose payload cannot travel literally is not
+        # admitted as an ordinary shell effect. Running it would hand the
+        # shell a request it mangles (or cannot parse) and hand the model no
+        # route; refusing it names the exact transport that carries these
+        # bytes. An intrinsic refusal keeps its own code and gains the route.
+        verdict["canonical_next_command"] = mapped["canonical_next_command"]
+        verdict["ingress_transport"] = "hex"
+        if verdict.get("code") not in _INTRINSIC_REFUSALS:
+            # Whatever ordinary admission made of the line, the answer the
+            # caller needs is the transport: the ingress itself is reachable,
+            # these bytes are not. An intrinsically forbidden effect keeps its
+            # own code -- recovery cannot make such a payload safe, and the
+            # route would read as a way around it.
+            verdict["admitted"] = False
+            verdict["code"] = "INGRESS_TRANSPORT_UNSAFE"
+            verdict["detail"] = (
+                "the request text cannot survive one quoted shell argument "
+                "unchanged; run the command in canonical_next_command instead"
+            )
+    verdict["event"] = {
+        "event": mapped["event"],
+        "host": mapped["host"],
+        "cwd": mapped["cwd"],
+        "tool_name": mapped["tool_name"],
+        "action": mapped["action"],
+        "command_class": mapped["command_class"],
+        "fleet_preflight": mapped["fleet_preflight"],
+        "target_path": mapped["target_path"],
+        "target_paths": mapped["target_paths"],
+        "targets_unresolved": mapped["targets_unresolved"],
+        "shell_protected_namespace": mapped["shell_protected_namespace"],
+        "shell_effects": mapped["shell_effects"],
+        "shell_effects_unresolved": mapped["shell_effects_unresolved"],
+        "actor": mapped["actor"],
+        "saipen_verb": mapped["saipen_verb"],
+        "detail": mapped["detail"],
+    }
+    if isinstance(event.get("session_id"), str):
+        # Host session identity is DIAGNOSTIC context, never an actor binding.
+        verdict["event"]["session_id"] = event["session_id"]
+    verdict["strength"] = effective_strength(mapped["host"])
+    return verdict

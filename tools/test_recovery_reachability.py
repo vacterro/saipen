@@ -1052,18 +1052,32 @@ class GuardParityTests(unittest.TestCase):
     )
 
     def test_the_guard_exempts_the_one_verb_the_fleet_names(self):
+        # T-1363: this used to read the exemption out of the ADAPTER's own
+        # regex list. There is now ONE owner -- REGISTRY.json's command-effect
+        # table -- and the adapter consumes its verdict, so the property is
+        # asserted where it is decided. Asserting it against the adapter's
+        # source is what let the two taxonomies drift in the first place.
+        from saipen_engine import command_effects
+
+        for verb, rest in (("recover", []), ("ticket", ["compact", "T-9"])):
+            with self.subTest(verb=verb):
+                effect = command_effects.classify_invocation(verb, rest)
+                self.assertEqual(effect, command_effects.RECOVERY)
+                self.assertFalse(command_effects.fleet_preflight_required(effect))
+        # T-1326 narrowness survives the move: bare `ticket` and every other
+        # subcommand stay ordinary execution and keep the strict fleet path.
+        for rest in ([], ["compact"], ["compact", "T-9", "T-10"], ["unblock", "T-9"]):
+            with self.subTest(rest=rest):
+                effect = command_effects.classify_invocation("ticket", rest)
+                self.assertEqual(effect, command_effects.EXECUTION)
+                self.assertTrue(command_effects.fleet_preflight_required(effect))
         source = self._GUARD.read_text(encoding="utf-8")
-        self.assertIn('canonicalVerb === "recover"', source)
         self.assertIn("preflight|scan", source)
-        # T-1326: the Fleet-named BOARD compaction repair is admitted too, but
-        # ONLY the exact `saipen ticket compact T-###` form -- bare `ticket` and
-        # every other subcommand stay on the strict fleet path.
-        self.assertRegex(
-            source,
-            r'canonicalVerb === "ticket"\s*&&\s*/\^saipen ticket compact T-\\d\+',
-        )
+        self.assertIn("fleet_preflight", source)
 
     def test_the_named_board_compaction_repair_is_guard_admitted(self):
+        from saipen_engine import command_effects
+
         command = _result(
             CLASS_SAFE,
             reason_code="BOARD_RECORD_OVERSIZE",
@@ -1071,7 +1085,12 @@ class GuardParityTests(unittest.TestCase):
             snapshot={"board": {"tickets": {"T-9": {"raw": "z" * 3000}}}},
         )["canonical_next_command"]
         self.assertEqual(command, "saipen ticket compact T-9")
-        self.assertRegex(self._GUARD.read_text(encoding="utf-8"), r"saipen ticket compact T-\\d\+")
+        # The command Fleet NAMES must be one the canonical table exempts,
+        # computed from that exact command line rather than matched by shape.
+        self.assertEqual(
+            command_effects.classify_tokens(command.split()),
+            command_effects.RECOVERY,
+        )
 
     def test_every_braked_fleet_command_uses_a_guard_admitted_verb(self):
         admitted = {"recover", "continue"}

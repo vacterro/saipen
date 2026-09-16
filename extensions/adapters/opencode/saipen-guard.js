@@ -654,16 +654,21 @@ const SaipenGuard = async (context) => {
           "SAIPEN_GUARD_REFUSAL: FLEET_INSPECTION_UNTRUSTED: the host tool did not execute",
         );
       }
-      const isCanonicalRecoveryOrInspection =
-        canonicalVerb === "recover" ||
-        // T-1326: Fleet names the BOARD compaction verb as the canonical repair
-        // for an oversized/refused-field record, so the guard must admit THAT
-        // command or the named repair is unreachable. Narrow: exact verb,
-        // exact subcommand, exactly one ticket id. Bare `saipen ticket` and
-        // every other verb stay on the strict fleet path below.
-        (canonicalVerb === "ticket" && /^saipen ticket compact T-\d+(?:\s|$)/.test(command)) ||
-        (canonicalVerb === "fleet" && /^saipen fleet (?:preflight|scan)(?:\s|$)/.test(command));
-      if (!isCanonicalRecoveryOrInspection) {
+      // T-1363 / CMD-EFFECT-01: the CANONICAL owner decides whether this
+      // effect needs Fleet preparation. This adapter used to keep its own
+      // answer -- a hard-coded list of `recover`, `ticket compact T-###` and
+      // `fleet preflight|scan` -- and ran Fleet (which can execute `saipen
+      // recover`) for everything else. Python meanwhile classified `status`,
+      // `validate`, `--help` and `start` as effects that need nothing. The two
+      // taxonomies drifted, and the drift IS the field bug: a read probe paid
+      // the project's recovery debt and a new user request was unreachable
+      // behind old debt. There is now ONE table, in REGISTRY.json, and the
+      // guard event carries its verdict. A missing or non-boolean value is a
+      // guard that did not answer, so it fails closed onto the Fleet path.
+      const effect = guardPayload && guardPayload.event ? guardPayload.event : null;
+      const fleetPreflight =
+        effect && typeof effect.fleet_preflight === "boolean" ? effect.fleet_preflight : true;
+      if (fleetPreflight) {
         const fleetResult = await runFleetPrepare(
           pythonBin, saipenPy, bootstrapBinding, eventCwd, attemptedCondition,
           /^saipen(?:\s|$)/.test(command),
@@ -719,10 +724,18 @@ const SaipenGuard = async (context) => {
         }
       }
       if (verdict.block) {
+        // T-1363: when the guard computed the exact command that carries this
+        // request, the refusal names it. A bounded machine fact, capped like
+        // every other one the adapter forwards -- never guard prose.
+        const route =
+          guardPayload && typeof guardPayload.canonical_next_command === "string"
+            ? guardPayload.canonical_next_command.slice(0, MAX_EVENT_BYTES)
+            : "";
         throw new Error(
           `SAIPEN_GUARD_REFUSAL: ${verdict.code}: the saipen guard refused tool '${toolName}'; ` +
             `the host tool did not execute` +
-            (verdict.diagnostic ? ` (${verdict.diagnostic})` : ""),
+            (verdict.diagnostic ? ` (${verdict.diagnostic})` : "") +
+            (route ? ` next: ${route}` : ""),
         );
       }
     },
