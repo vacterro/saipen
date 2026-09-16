@@ -3303,6 +3303,778 @@ def _move_ticket(
     return "".join(out)
 
 
+# ----------------------------------------------------------- retirement
+
+
+def _remove_ticket(board_text: str, ticket_id: str) -> tuple[str, str, str]:
+    """Delete one ticket's physical BOARD record.
+
+    Returns (new_board, exact_record, section_heading). BOARD is a scheduling
+    projection, not history -- CLEAN already prunes rows once durable evidence
+    exists (CORE.md, BOARD.md contract). This helper is the mechanical
+    implementation of that rule for retirement, and it HANDS BACK the exact
+    bytes it removed so the caller can journal them into the forensic record
+    in the same transaction. A prune whose bytes were not preserved first is
+    an erasure, and erasure is the one thing retirement must never become.
+    """
+    lines = board_text.splitlines(keepends=True)
+    out: list[str] = []
+    record: str | None = None
+    section = ""
+    seen_section = ""
+    openers = (
+        "- [/] " + ticket_id + " ",
+        "- [ ] " + ticket_id + " ",
+        "- [x] " + ticket_id + " ",
+    )
+    for line in lines:
+        stripped = line.rstrip("\n")
+        for heading in ("## DOING", "## TODO", "## DONE", "## BLOCKED"):
+            if stripped.startswith(heading):
+                seen_section = heading
+        if stripped.startswith(openers):
+            record = stripped
+            section = seen_section
+            continue
+        out.append(line)
+    if record is None:
+        raise ValueError(f"cannot locate ticket {ticket_id}")
+    return "".join(out), record, section
+
+
+def _retire_targets(
+    root: Path,
+    ticket_id: str,
+    agent: str,
+    reason: str,
+    evidence: str,
+    authority: str,
+    now: str,
+    utc: str,
+    discovery_event: str | None = None,
+    note: str | None = None,
+) -> OperationPlan | Result:
+    """PLAN one canonical retirement. Writes zero bytes.
+
+    Every gate below is a fail-closed refusal evaluated BEFORE any target is
+    built, in the order a hostile reader attacks them: grammar, then proof of
+    operator authority, then proof of evidence, then proof of identity, then
+    lifecycle and seat.
+    """
+    from . import intake as _intake
+    from . import retirement as _ret
+
+    if not re.fullmatch(r"T-\d+", ticket_id):
+        return _refuse("INVALID_ID", f"ticket {ticket_id!r}")
+    if reason not in _ret.RETIREMENT_REASONS:
+        return _refuse(
+            "RETIREMENT_REASON_UNKNOWN",
+            f"reason {reason!r} is outside the registered set "
+            f"{'|'.join(_ret.RETIREMENT_REASONS)}; retirement never accepts a free-text reason",
+            ticket=ticket_id,
+        )
+    if not isinstance(evidence, str) or not evidence.strip():
+        return _refuse(
+            "VALIDATION_FAILED",
+            "retirement requires --evidence: a canonical event E-### or an owned "
+            f"artifact under {_ret.EVIDENCE_DIR}/",
+            ticket=ticket_id,
+        )
+    note_problem = _ret.note_error(note)
+    if note_problem:
+        return _refuse("VALIDATION_FAILED", note_problem, ticket=ticket_id)
+    if not authority or not str(authority).strip():
+        return _refuse(
+            "RETIREMENT_AUTHORITY_REQUIRED",
+            "retirement requires --authority SRC-### naming the operator decision "
+            "whose capsule grants this retirement -- " + _ret.grammar_hint(),
+            ticket=ticket_id,
+        )
+    authority = str(authority).strip().upper()
+    evidence = evidence.strip()
+    note = note.strip() if isinstance(note, str) else None
+    if isinstance(discovery_event, str) and discovery_event.strip():
+        discovery_event = discovery_event.strip().upper()
+    else:
+        discovery_event = None
+
+    op_id = "retire-" + uuid4_hex()
+    docs, state, board, log_tail = _read(root)
+    if board["errors"]:
+        return _refuse(
+            "VALIDATION_FAILED",
+            "BOARD parse error(s): " + "; ".join(board["errors"][:3]),
+            ticket=ticket_id,
+        )
+    tickets = board["tickets"]
+    events = {item["event"]: item for item in docs["_history"].events}
+    next_event = (log_tail or 0) + 1
+    ticket = tickets.get(ticket_id)
+    record, record_errors, record_exists = _ret.load_ticket_retirement(root, ticket_id)
+    if ticket is None:
+        if not record_exists:
+            return _refuse("TICKET_NOT_FOUND", f"{ticket_id} not on the board", ticket=ticket_id)
+        if record is not None and not record_errors:
+            return Result(
+                ok=True,
+                code="ALREADY_RETIRED",
+                message=(
+                    f"{ticket_id} was retired at {record.get('retired_at')} "
+                    f"({record.get('reason')}), event {record.get('retirement_event')}"
+                ),
+                data={
+                    "ticket": ticket_id,
+                    "reason": record.get("reason"),
+                    "retirement_event": record.get("retirement_event"),
+                    "evidence_bound_event": record.get("evidence_bound_event"),
+                    "record": _ret.retired_ticket_ref(ticket_id),
+                },
+            )
+        if (
+            isinstance(record, dict)
+            and record.get("schema_version") == _ret.LEGACY_SCHEMA_VERSION
+            and not _ret.legacy_ticket_record_errors(ticket_id, record)
+        ):
+            return _bind_legacy_retirement(
+                root,
+                docs,
+                state,
+                log_tail,
+                events,
+                op_id,
+                ticket_id=ticket_id,
+                record=record,
+                agent=agent,
+                reason=reason,
+                evidence=evidence,
+                authority=authority,
+                discovery_event=discovery_event,
+                note=note,
+                now=now,
+                utc=utc,
+            )
+        return _refuse(
+            "VALIDATION_FAILED",
+            f"{ticket_id} owns a retirement record that fails validation -- the forensic "
+            "archive was altered and cannot answer for it: " + "; ".join(record_errors[:3]),
+            ticket=ticket_id,
+        )
+    if record_exists:
+        return _refuse(
+            "VALIDATION_FAILED",
+            f"{ticket_id} already owns a retirement record but is still on BOARD -- "
+            "run `saipen recover` before retiring it again",
+            ticket=ticket_id,
+        )
+
+    # A finished ticket is history. Retirement answers "this never belonged
+    # here"; a DONE row already asserts the opposite and carries verification
+    # evidence, so rewriting it as misrouted would falsify the ledger in the
+    # other direction.
+    section = ticket.get("section")
+    if section == "## DONE":
+        return _refuse(
+            "TICKET_ALREADY_DONE",
+            f"{ticket_id} is completed Work with closure evidence; retirement "
+            "cannot rewrite finished history as misrouted",
+            ticket=ticket_id,
+        )
+    if section not in _ret.RETIRABLE_SECTIONS:
+        return _refuse(
+            "VALIDATION_FAILED",
+            f"{ticket_id} sits under {section!r}, which is not a retirable BOARD section",
+            ticket=ticket_id,
+        )
+
+    receipts = [
+        part.strip().upper()
+        for part in str(ticket.get("fields", {}).get("source_receipts") or "").split(",")
+        if part.strip()
+    ]
+
+    # AUTHORITY. A GRANT, not a mention: the operator's own stored bytes must
+    # carry a capsule granting this ticket with exactly the receipts it drags
+    # along. A live foreign claim needs no separate gate for the same reason --
+    # Work another seat is running is retired only when the operator granted
+    # exactly that, in writing.
+    authority_problem, authority_binding = _ret.authority_error(
+        root, authority, ticket_id=ticket_id, receipts=receipts
+    )
+    if authority_problem:
+        return _refuse("RETIREMENT_AUTHORITY_REQUIRED", authority_problem, ticket=ticket_id)
+
+    # EVIDENCE. A canonical event that precedes this retirement, or an owned
+    # artifact whose digest is bound into every record. Free text is a claim.
+    evidence_binding, evidence_problem = _ret.resolve_evidence(
+        root, evidence, events, before_event=next_event
+    )
+    if evidence_problem:
+        return _refuse("VALIDATION_FAILED", evidence_problem, ticket=ticket_id)
+    discovery_problem = _ret.discovery_error(discovery_event, events, before_event=next_event)
+    if discovery_problem:
+        return _refuse("VALIDATION_FAILED", discovery_problem, ticket=ticket_id)
+
+    # IDENTITY. Digest and linkage, both directions, fail closed on either.
+    index = _intake._read_index(root)
+    for receipt_id in receipts:
+        if receipt_id not in index.get("active", {}):
+            return _refuse(
+                "VALIDATION_FAILED",
+                f"{ticket_id} names receipt {receipt_id}, which is not on the active "
+                "intake surface; retirement refuses an unresolvable linkage",
+                ticket=ticket_id,
+            )
+        integrity = _intake.verify_integrity(root, receipt_id)
+        if not integrity["ok"]:
+            return _refuse(
+                "VALIDATION_FAILED",
+                f"receipt {receipt_id}: {integrity['code']} -- retirement refuses to "
+                "archive bytes it cannot prove are the ones received",
+                ticket=ticket_id,
+            )
+        meta = _intake._read_meta(root, receipt_id) or {}
+        if meta.get("linked_work") != ticket_id:
+            return _refuse(
+                "VALIDATION_FAILED",
+                f"receipt {receipt_id} is linked to {meta.get('linked_work')!r}, not "
+                f"{ticket_id}; retirement refuses a crossed ticket/receipt linkage",
+                ticket=ticket_id,
+            )
+
+    # SEAT. Retirement is a non-transferring mutation (CORE-001): the seat is
+    # PRESERVED, and a corrupt ownership snapshot is refused rather than
+    # carried forward or silently healed.
+    try:
+        seat = _seat_agent(state, docs["board"].text_norm, agent)
+    except OwnershipSplitError as exc:
+        return _refuse(
+            "VALIDATION_FAILED",
+            f"retirement refuses a corrupt ownership snapshot: {exc}",
+            ticket=ticket_id,
+        )
+
+    # A parent parked on THIS ticket owns the continuation. Retirement is not
+    # "the dependency succeeded" -- the dependency EDGE was invalid, because
+    # the child was never this project's Work. The parent therefore returns to
+    # the exact phase tuple it saved, inside this same transaction.
+    #
+    # RESTORE, NEVER TRANSFER. The parent goes back to the seat its own
+    # reservation names. Being authorized to retire the child grants nothing
+    # over the parent: a foreign actor restores the owner's claim verbatim --
+    # including its claim_time, because forging another seat's liveness would
+    # be a transfer by other means -- and only the owner itself acting now
+    # refreshes the claim. An unowned reservation is restored to the actor,
+    # since there is nobody to take it from.
+    resume_parent = continuation_parent(tickets, ticket_id, require_done=False)
+    parent_id = resume_parent["id"] if resume_parent is not None else None
+    restored_owner: str | None = None
+    parent_claim = ""
+    if parent_id:
+        parent_fields = resume_parent.get("fields", {})
+        resume_phase = str(parent_fields.get("resume_phase", ""))
+        if resume_phase not in phases.TICKET_BEARING_PHASES:
+            return _refuse(
+                "VALIDATION_FAILED",
+                f"{parent_id} is parked on {ticket_id} with resume_phase "
+                f"{resume_phase!r}; restoring it would fabricate a phase",
+                ticket=ticket_id,
+            )
+        saved_owner = str(parent_fields.get("owner") or "").strip()
+        saved_claim = str(parent_fields.get("claim_time") or "").strip()
+        restored_owner = saved_owner or agent
+        parent_claim = utc if restored_owner == agent else saved_claim
+        if not parent_claim:
+            return _refuse(
+                "VALIDATION_FAILED",
+                f"{parent_id} is reserved for seat {restored_owner} without a claim_time; "
+                "restoring it would forge that seat's claim",
+                ticket=ticket_id,
+            )
+
+    message = _actor_provenance(
+        state,
+        agent,
+        _ret.retirement_message(
+            ticket_id=ticket_id,
+            reason=reason,
+            authority=authority,
+            receipts=receipts,
+            evidence=evidence_binding,
+            discovery_event=discovery_event,
+            restored_parent=parent_id,
+            restored_parent_owner=restored_owner,
+            note=note,
+        ),
+    )
+    oversize = _retirement_event_oversize(docs, log_tail, message, ticket_id, agent, now, op_id)
+    if oversize:
+        return _refuse("VALIDATION_FAILED", oversize, ticket=ticket_id)
+    event, line = _producer_event(
+        docs,
+        log_tail,
+        "DEC",
+        message,
+        ticket=ticket_id,
+        agent=agent,
+        now=now,
+        op_id=op_id,
+    )
+    new_log = docs["log"].text_norm.rstrip("\n") + "\n" + line + "\n"
+    event_id = f"E-{event}"
+
+    try:
+        new_board, record_text, _section = _remove_ticket(docs["board"].text_norm, ticket_id)
+    except ValueError as exc:
+        return _refuse("VALIDATION_FAILED", str(exc), ticket=ticket_id)
+    if parent_id:
+        new_board = _move_ticket(
+            new_board, parent_id, "## DOING", "[/]", "resume", "", enforce_cap=False
+        )
+        parent_needs = [n for n in resume_parent.get("needs", []) if n != ticket_id]
+        fields = {"owner": restored_owner, "claim_time": parent_claim}
+        remove = [
+            "blocker",
+            "blocker_scope",
+            "blocked_on",
+            "resume_phase",
+            "resume_transition_from",
+        ]
+        if parent_needs:
+            fields["needs"] = ",".join(parent_needs)
+        else:
+            remove.append("needs")
+        new_board = _ticket_fields_in_place(
+            new_board, parent_id, fields, remove=tuple(remove), enforce_cap=False
+        )
+
+    if parent_id:
+        parent_fields = resume_parent.get("fields", {})
+        owned = {
+            "phase": str(parent_fields.get("resume_phase", "")),
+            "task": parent_id,
+            "next_action": f"PHASE {parent_fields.get('resume_phase', '')} {parent_id}",
+            "transition_from": str(parent_fields.get("resume_transition_from", "")),
+            "last_event": event,
+            "updated": utc,
+            # The restored active ticket's owner IS the seat: STATE and BOARD
+            # never commit an execution-owner split (CORE § 1.4).
+            "agent": restored_owner,
+        }
+    else:
+        owned = {"last_event": event, "updated": utc, "agent": seat}
+        if state.get("task") == ticket_id:
+            owned.update(
+                {
+                    "phase": "DONE",
+                    "task": "none",
+                    "transition_from": str(state.get("phase") or "DONE"),
+                    "next_action": "saipen continue",
+                }
+            )
+    new_state = patch_state(docs["state"].text_norm, owned)
+    if parent_id is None:
+        new_state = _settle_stop_reason(new_state, new_board, agent)
+        if not str(parse_state(new_state).get("next_action") or "").startswith("WAIT:"):
+            from .router import route_next
+
+            routed = route_next(new_state, new_board, current_agent=agent)
+            if routed.get("ok"):
+                new_state = patch_state(new_state, {"next_action": routed["action"]})
+
+    errors = validate_texts(
+        new_state, new_board, new_log, current_agent=agent, sealed_events=docs["_history"]
+    )
+    if errors:
+        return _refuse(
+            "VALIDATION_FAILED",
+            "proposed retirement state fails fast validation: " + "; ".join(errors[:5]),
+            ticket=ticket_id,
+        )
+
+    shared = _ret.shared_fields(
+        reason=reason,
+        evidence=evidence_binding,
+        evidence_note=note,
+        authority=authority_binding,
+        retired_at=utc,
+        retired_by=agent,
+        retirement_event=event_id,
+        discovery_event=discovery_event,
+        evidence_bound_event=event_id,
+    )
+    ticket_target, _ticket_record = _ret.ticket_retirement_target(
+        root,
+        ticket_id,
+        board_record=record_text,
+        section=section,
+        receipts=receipts,
+        shared=shared,
+        restored_parent=parent_id,
+        restored_parent_owner=restored_owner,
+    )
+    source_targets: list[TargetPlan] = []
+    tombstones: dict[str, dict] = {}
+    try:
+        for receipt_id in receipts:
+            planned, tomb = _ret.source_retirement_targets(
+                root,
+                receipt_id,
+                ticket_id=ticket_id,
+                board_record=record_text,
+                shared=shared,
+            )
+            source_targets.extend(planned)
+            tombstones[receipt_id] = tomb
+        if tombstones:
+            # ONE index write for every receipt: a write per receipt would be
+            # computed from the same before-bytes and the last would erase the
+            # tombstones the earlier ones added.
+            source_targets.append(_ret.index_target(root, tombstones))
+    except ValueError as exc:
+        return _refuse("VALIDATION_FAILED", str(exc), ticket=ticket_id)
+
+    targets = [
+        *_log_targets(docs, new_log),
+        ticket_target,
+        *source_targets,
+        _target(docs["board"], ".saipen/BOARD.md", "board", new_board),
+        _target(docs["state"], ".saipen/STATE.md", "state", new_state),
+    ]
+    return build_plan(
+        "ticket_retire",
+        agent,
+        _identity(root),
+        {
+            "operation": "ticket_retire",
+            "ticket": ticket_id,
+            "reason": reason,
+            "authority": authority,
+            "receipts": receipts,
+        },
+        _docs_preconditions(docs, "state", "board", "log"),
+        targets,
+        {
+            "ok": True,
+            "code": "RETIRED",
+            "ticket": ticket_id,
+            "reason": reason,
+            "authority": authority,
+            "authority_grant": authority_binding["authority_grant"],
+            "evidence": evidence_binding,
+            "receipts": receipts,
+            "restored_parent": parent_id,
+            "restored_parent_owner": restored_owner,
+            "record": _ret.retired_ticket_ref(ticket_id),
+            "event_id": event_id,
+        },
+        op_id=op_id,
+    )
+
+
+def _retirement_event_oversize(
+    docs: dict,
+    log_tail: int | None,
+    message: str,
+    ticket_id: str,
+    agent: str,
+    now: str,
+    op_id: str,
+) -> str | None:
+    """Refuse an event the LOG would externalize.
+
+    Every other producer may move an oversized event into a `detail_ref`
+    artifact. A retirement event may not: the validator proves each forensic
+    record against the INLINE text of the event it cites, and a compact
+    summary would leave that proof pointing at a second file instead of at
+    the append-only ledger.
+    """
+    from .log import MAX_NEW_EVENT_BYTES, render_event
+
+    rendered = render_event(
+        log_tail,
+        "DEC",
+        redact_credentials(message),
+        ticket=ticket_id,
+        agent=agent,
+        now=now,
+        op_id=op_id,
+    )
+    size = len(rendered.encode("utf-8"))
+    if size > MAX_NEW_EVENT_BYTES:
+        return (
+            f"the retirement event would be {size} bytes (cap {MAX_NEW_EVENT_BYTES}); "
+            "shorten --note or --evidence -- the permanent LOG line must carry the whole "
+            "binding inline"
+        )
+    if redact_credentials(message) != message:
+        return (
+            "the retirement event text would be credential-redacted, so the LOG could "
+            "no longer prove the record verbatim; cite evidence that carries no secret"
+        )
+    return None
+
+
+def _bind_legacy_retirement(
+    root: Path,
+    docs: dict,
+    state: dict,
+    log_tail: int | None,
+    events: dict,
+    op_id: str,
+    *,
+    ticket_id: str,
+    record: dict,
+    agent: str,
+    reason: str,
+    evidence: str,
+    authority: str,
+    discovery_event: str | None,
+    note: str | None,
+    now: str,
+    utc: str,
+) -> OperationPlan | Result:
+    """Re-affirm a schema-1 retirement under the current contract.
+
+    Schema 1 is what the first T-1370 slice wrote: free-text evidence and an
+    authority proven by identifier presence. Such a record is not valid
+    project state, and it is not rewritten either. This transaction re-runs
+    today's gates against the SAME decision -- the capsule must grant the
+    retired ticket with exactly its receipts, the evidence must resolve -- and
+    records the binding as a NEW event. The historical retirement event, time,
+    actor, BOARD row and restored parent stay verbatim; the old free-text
+    evidence survives as the note.
+    """
+    from . import intake as _intake
+    from . import retirement as _ret
+
+    if note is not None:
+        return _refuse(
+            "VALIDATION_FAILED",
+            f"{ticket_id} is a legacy retirement: re-affirmation keeps its original "
+            "evidence text verbatim as the note and accepts no new --note",
+            ticket=ticket_id,
+        )
+    if reason != record.get("reason"):
+        return _refuse(
+            "VALIDATION_FAILED",
+            f"{ticket_id} was retired as {record.get('reason')}; re-affirmation cannot "
+            "change the reason",
+            ticket=ticket_id,
+        )
+    if authority != record.get("authority_receipt"):
+        return _refuse(
+            "RETIREMENT_AUTHORITY_REQUIRED",
+            f"{ticket_id} was retired under {record.get('authority_receipt')}; "
+            "re-affirmation must cite that same operator decision",
+            ticket=ticket_id,
+        )
+    receipts = list(record.get("source_receipts") or [])
+    authority_problem, authority_binding = _ret.authority_error(
+        root, authority, ticket_id=ticket_id, receipts=receipts
+    )
+    if authority_problem:
+        return _refuse("RETIREMENT_AUTHORITY_REQUIRED", authority_problem, ticket=ticket_id)
+    evidence_binding, evidence_problem = _ret.resolve_evidence(
+        root, evidence, events, before_event=(log_tail or 0) + 1
+    )
+    if evidence_problem:
+        return _refuse("VALIDATION_FAILED", evidence_problem, ticket=ticket_id)
+    recorded_discovery = record.get("discovery_event")
+    if recorded_discovery is not None and discovery_event not in (None, recorded_discovery):
+        return _refuse(
+            "VALIDATION_FAILED",
+            f"{ticket_id} already records discovery event {recorded_discovery}; "
+            "re-affirmation never replaces recorded history",
+            ticket=ticket_id,
+        )
+    discovery = discovery_event or recorded_discovery
+    retirement_event = str(record["retirement_event"])
+    retired_number = int(retirement_event[2:])
+    discovery_problem = _ret.discovery_error(discovery, events, before_event=retired_number)
+    if discovery_problem:
+        return _refuse("VALIDATION_FAILED", discovery_problem, ticket=ticket_id)
+
+    # The ledger must back the legacy record before anything is bound to it: a
+    # hand-written schema-1 file would otherwise be laundered into schema 2.
+    historical = events.get(retired_number) or {}
+    historical_text = str(historical.get("text") or "")
+    if (
+        historical.get("taxonomy") != "DEC"
+        or historical.get("ticket") != ticket_id
+        or historical.get("agent") != record.get("retired_by")
+        or not str(historical.get("op_id") or "").startswith("retire-")
+        or _ret.retirement_head(ticket_id, reason, authority) not in historical_text
+        or f" -- {record.get('evidence')}" not in historical_text
+    ):
+        return _refuse(
+            "VALIDATION_FAILED",
+            f"{ticket_id}'s legacy record does not match {retirement_event} in LOG; "
+            "re-affirmation refuses to bind evidence to a record the ledger does not back",
+            ticket=ticket_id,
+        )
+    index = _intake._read_index(root)
+    for receipt_id in receipts:
+        tomb = index.get("tombstones", {}).get(receipt_id)
+        if not _ret.is_retired_tombstone(tomb) or tomb.get("linked_work") != ticket_id:
+            return _refuse(
+                "VALIDATION_FAILED",
+                f"{ticket_id}'s legacy record lists {receipt_id}, which is not its retired "
+                "tombstone",
+                ticket=ticket_id,
+            )
+        archive_problems = _ret.retired_archive_errors(root, receipt_id, tomb)
+        if archive_problems:
+            return _refuse(
+                "VALIDATION_FAILED",
+                f"retired receipt {receipt_id} is not intact: " + "; ".join(archive_problems[:3]),
+                ticket=ticket_id,
+            )
+
+    message = _actor_provenance(
+        state,
+        agent,
+        _ret.binding_message(
+            ticket_id=ticket_id,
+            retirement_event=retirement_event,
+            authority=authority,
+            grant=authority_binding["authority_grant"],
+            evidence=evidence_binding,
+            discovery_event=discovery,
+        ),
+    )
+    oversize = _retirement_event_oversize(docs, log_tail, message, ticket_id, agent, now, op_id)
+    if oversize:
+        return _refuse("VALIDATION_FAILED", oversize, ticket=ticket_id)
+    event, line = _producer_event(
+        docs,
+        log_tail,
+        "DEC",
+        message,
+        ticket=ticket_id,
+        agent=agent,
+        now=now,
+        op_id=op_id,
+    )
+    new_log = docs["log"].text_norm.rstrip("\n") + "\n" + line + "\n"
+    event_id = f"E-{event}"
+    try:
+        seat = _seat_agent(state, docs["board"].text_norm, agent)
+    except OwnershipSplitError as exc:
+        return _refuse(
+            "VALIDATION_FAILED",
+            f"re-affirmation refuses a corrupt ownership snapshot: {exc}",
+            ticket=ticket_id,
+        )
+    new_state = patch_state(
+        docs["state"].text_norm, {"last_event": event, "updated": utc, "agent": seat}
+    )
+    errors = validate_texts(
+        new_state,
+        docs["board"].text_norm,
+        new_log,
+        current_agent=agent,
+        sealed_events=docs["_history"],
+    )
+    if errors:
+        return _refuse(
+            "VALIDATION_FAILED",
+            "proposed re-affirmation state fails fast validation: " + "; ".join(errors[:5]),
+            ticket=ticket_id,
+        )
+    shared = _ret.shared_fields(
+        reason=reason,
+        evidence=evidence_binding,
+        evidence_note=str(record["evidence"]),
+        authority=authority_binding,
+        retired_at=str(record["retired_at"]),
+        retired_by=str(record["retired_by"]),
+        retirement_event=retirement_event,
+        discovery_event=discovery,
+        evidence_bound_event=event_id,
+    )
+    try:
+        record_targets, _upgraded = _ret.legacy_rebind_targets(
+            root, ticket_id, record, shared=shared
+        )
+    except (OSError, ValueError, KeyError) as exc:
+        return _refuse("VALIDATION_FAILED", f"re-affirmation cannot plan: {exc}", ticket=ticket_id)
+    targets = [
+        *_log_targets(docs, new_log),
+        *record_targets,
+        _target(docs["state"], ".saipen/STATE.md", "state", new_state),
+    ]
+    return build_plan(
+        "ticket_retire",
+        agent,
+        _identity(root),
+        {
+            "operation": "ticket_retire",
+            "ticket": ticket_id,
+            "reason": reason,
+            "authority": authority,
+            "receipts": receipts,
+            "reaffirm": retirement_event,
+        },
+        _docs_preconditions(docs, "state", "board", "log"),
+        targets,
+        {
+            "ok": True,
+            "code": "RETIREMENT_EVIDENCE_BOUND",
+            "ticket": ticket_id,
+            "reason": reason,
+            "authority": authority,
+            "authority_grant": authority_binding["authority_grant"],
+            "evidence": evidence_binding,
+            "discovery_event": discovery,
+            "retirement_event": retirement_event,
+            "record": _ret.retired_ticket_ref(ticket_id),
+            "event_id": event_id,
+        },
+        op_id=op_id,
+    )
+
+
+@_state_guard
+def retire_ticket(
+    project_root: Path | str,
+    ticket_id: str,
+    agent: str,
+    *,
+    reason: str,
+    evidence: str,
+    authority: str,
+    discovery_event: str | None = None,
+    note: str | None = None,
+    dry_run: bool = False,
+) -> Result:
+    """Retire misrouted/invalid Work without ever claiming it was done.
+
+    The third verdict the protocol was missing (see `retirement.py`). It is
+    NOT `ticket done` and NOT `source close`: nothing reaches DONE, no
+    coverage is fabricated, the request bytes survive in forensic cold
+    storage, and the BOARD row stops being schedulable Work.
+    """
+    root = Path(project_root)
+    now, utc = _now(), _utc_iso()
+    plan = _retire_targets(
+        root,
+        ticket_id.upper(),
+        agent,
+        reason,
+        evidence,
+        authority,
+        now,
+        utc,
+        discovery_event=discovery_event,
+        note=note,
+    )
+    if isinstance(plan, Result):
+        return plan
+    if dry_run:
+        return _render_plan(plan)
+    return apply_plan(root, plan)
+
+
 def _is_placeholder_verify(verify: str) -> bool:
     """A verify value that proves nothing about DONE (NITRO dogfood II).
 

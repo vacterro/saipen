@@ -1,0 +1,180 @@
+{
+  "subject": "SRC-049/SRC-050 G -- real repository proof of the T-1368/T-1369 retirement",
+  "generator": ".saipen/evidence/T-1370-retirement-20260916/real_repository_proof.py",
+  "all_ok": true,
+  "checks": [
+    {
+      "check": "SRC-047 absent from ACTIVE intake index",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "check": "SRC-047 active body/meta absent",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "check": "SRC-047 INVALID retirement tombstone present (schema 2)",
+      "ok": true,
+      "detail": {
+        "errors": [],
+        "status": "INVALID",
+        "reason": "MISROUTED_PROJECT_BINDING",
+        "linked_work": "T-1368",
+        "retirement_event": "E-6804",
+        "evidence_bound_event": "E-6810",
+        "discovery_event": "E-6801",
+        "authority_grant": "T-1368 / SRC-047"
+      }
+    },
+    {
+      "check": "SRC-047 original request bytes exactly retrievable",
+      "ok": true,
+      "detail": {
+        "archive_ref": ".saipen/archive/retired/SRC-047.md",
+        "sha256": "c643705ceac2bb2477784c07e4d6c9df04159d844a63c3c85931d2b8b1cdce94",
+        "tombstone_sha256": "c643705ceac2bb2477784c07e4d6c9df04159d844a63c3c85931d2b8b1cdce94",
+        "text": "# User request\n\npriority: P1\nverify: the requested change is present and demonstrated against the user own description of it\n\n## Request\n\nadd a one-line docstring to the top of src/app.py\n"
+      }
+    },
+    {
+      "check": "SRC-047 archived meta agrees with the tombstone",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "check": "SRC-047 no fabricated coverage",
+      "ok": true,
+      "detail": {
+        "dispositions": [],
+        "requirements": 0
+      }
+    },
+    {
+      "check": "T-1368 absent from schedulable BOARD",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "check": "T-1368 forensic record retrievable and valid",
+      "ok": true,
+      "detail": {
+        "errors": [],
+        "legacy_schema": true,
+        "retirement_event": "E-6804",
+        "evidence": {
+          "kind": "artifact",
+          "ref": ".saipen/evidence/T-1363-1367-zero-manual-entry-20260916/README.md",
+          "sha256": "e9baf0ac8932575c79112bb5bcf40fd224be1891ed0f39cf706e6d779408705b"
+        },
+        "restored_parent": "T-1367"
+      }
+    },
+    {
+      "check": "T-1368 no DONE claim anywhere in LOG history",
+      "ok": true,
+      "detail": []
+    },
+    {
+      "check": "T-1368 no DONE row on BOARD",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "check": "SRC-048 absent from ACTIVE intake index",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "check": "SRC-048 active body/meta absent",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "check": "SRC-048 INVALID retirement tombstone present (schema 2)",
+      "ok": true,
+      "detail": {
+        "errors": [],
+        "status": "INVALID",
+        "reason": "MISROUTED_PROJECT_BINDING",
+        "linked_work": "T-1369",
+        "retirement_event": "E-6803",
+        "evidence_bound_event": "E-6809",
+        "discovery_event": "E-6798",
+        "authority_grant": "T-1369 / SRC-048"
+      }
+    },
+    {
+      "check": "SRC-048 original request bytes exactly retrievable",
+      "ok": true,
+      "detail": {
+        "archive_ref": ".saipen/archive/retired/SRC-048.md",
+        "sha256": "9a70e5fe7e0429d0a651567b8c5e95e8c19697c09da10fcb17304752b4cee8fa",
+        "tombstone_sha256": "9a70e5fe7e0429d0a651567b8c5e95e8c19697c09da10fcb17304752b4cee8fa",
+        "text": "# User request\n\npriority: P1\nverify: the requested change is present and demonstrated against the user own description of it\n\n## Request\n\nadd a docstring to the top of src/app.py explaining what it does; the original notes are in V:\\_TEMP_\\fastprompter_drag\\SAIPENVIEW_main.py\n"
+      }
+    },
+    {
+      "check": "SRC-048 archived meta agrees with the tombstone",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "check": "SRC-048 no fabricated coverage",
+      "ok": true,
+      "detail": {
+        "dispositions": [],
+        "requirements": 0
+      }
+    },
+    {
+      "check": "T-1369 absent from schedulable BOARD",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "check": "T-1369 forensic record retrievable and valid",
+      "ok": true,
+      "detail": {
+        "errors": [],
+        "legacy_schema": true,
+        "retirement_event": "E-6803",
+        "evidence": {
+          "kind": "artifact",
+          "ref": ".saipen/evidence/T-1363-1367-zero-manual-entry-20260916/README.md",
+          "sha256": "e9baf0ac8932575c79112bb5bcf40fd224be1891ed0f39cf706e6d779408705b"
+        },
+        "restored_parent": "T-1368"
+      }
+    },
+    {
+      "check": "T-1369 no DONE claim anywhere in LOG history",
+      "ok": true,
+      "detail": []
+    },
+    {
+      "check": "T-1369 no DONE row on BOARD",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "check": "src/app.py absent",
+      "ok": true,
+      "detail": null
+    },
+    {
+      "check": "residue preserves the removed fixture bytes",
+      "ok": true,
+      "detail": {
+        "sha256": "0d757fdddad6f3a23938239f0639f1efee71d9440c62c13e2924b2b004766716",
+        "provenance_sha256": "0d757fdddad6f3a23938239f0639f1efee71d9440c62c13e2924b2b004766716",
+        "bytes": 88
+      }
+    },
+    {
+      "check": "intake validation green",
+      "ok": true,
+      "detail": []
+    }
+  ]
+}

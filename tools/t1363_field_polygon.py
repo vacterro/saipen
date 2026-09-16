@@ -119,14 +119,47 @@ def _captured_unprojected(case) -> Path:
     return root
 
 
+#: Every canonical carrier a wrong-project session can damage. `intake/index.json`
+#: is on this list because the incident's FIRST durable trace was a receipt, not a
+#: BOARD row -- a watcher that saw only STATE/BOARD/LOG would have reported the
+#: contaminating run clean (T-1370, SRC-049:R011).
+CANONICAL_CARRIERS = ("STATE.md", "BOARD.md", "LOG.md", "intake/index.json")
+
+
 def _canonical_hashes(root: Path) -> dict:
     out = {}
-    for name in ("STATE.md", "BOARD.md", "LOG.md"):
+    for name in CANONICAL_CARRIERS:
         path = root / ".saipen" / name
         out[name] = (
-            hashlib.sha256(path.read_bytes()).hexdigest() if path.exists() else None
+            hashlib.sha256(path.read_bytes()).hexdigest() if path.is_file() else None
         )
     return out
+
+
+def _owning_ledger(root: Path) -> dict:
+    """What this project's OWN ledger says it owns.
+
+    A model reporting "T-1371 created" is not evidence that T-1371 belongs to
+    the fixture. This reads the fixture's files instead of believing the
+    transcript.
+    """
+    from saipen_engine.board import parse_board
+
+    board = root / ".saipen" / "BOARD.md"
+    index = root / ".saipen" / "intake" / "index.json"
+    tickets: list[str] = []
+    receipts: list[str] = []
+    if board.is_file():
+        try:
+            tickets = sorted(parse_board(board.read_text(encoding="utf-8-sig"))["tickets"])
+        except (OSError, ValueError):
+            tickets = []
+    if index.is_file():
+        try:
+            receipts = sorted(json.loads(index.read_text(encoding="utf-8-sig")).get("active", {}))
+        except (OSError, ValueError):
+            receipts = []
+    return {"tickets": tickets, "receipts": receipts}
 
 
 def _tool_events(events: list[dict]) -> list[dict]:
@@ -224,10 +257,11 @@ def measure(tools: list[dict]) -> dict:
 
 def session(model: str, project: Path, task: str, timeout: int) -> dict:
     began = time.time()
+    env = _host_env(project)
     proc = subprocess.run(
         [OPENCODE, "run", task, "--format", "json", "--auto", "--model", model],
         cwd=str(project),
-        env=_host_env(project),
+        env=env,
         capture_output=True,
         text=True,
         encoding="utf-8",
@@ -248,6 +282,16 @@ def session(model: str, project: Path, task: str, timeout: int) -> dict:
         "model": model,
         "returncode": proc.returncode,
         "elapsed_s": round(time.time() - began, 1),
+        # SRC-049:R011 -- the binding a session actually ran under, recorded
+        # from the environment that was HANDED to the host, not from prose.
+        "binding": {
+            "cwd": str(project),
+            "PWD": env.get("PWD"),
+            "SAIPEN_PROJECT_ROOT": env.get("SAIPEN_PROJECT_ROOT"),
+            "OLDPWD": env.get("OLDPWD"),
+            "INIT_CWD": env.get("INIT_CWD"),
+            "resolved_project_root": str(project),
+        },
         "text": "\n".join(
             (event.get("part") or {}).get("text", "")
             for event in events
@@ -290,16 +334,42 @@ def main() -> int:
             project = built[name]
             task = FIELD_TASK if name == "windows_path_task" else SIMPLE_TASK
             before = _canonical_hashes(project)
+            # SRC-049:R011 -- the MAIN repository is measured too. "the model
+            # edited the fixture's file" is not isolation; "this repository's
+            # canonical carriers are byte-identical" is.
+            repo_before = _canonical_hashes(REPO)
+            owned_before = _owning_ledger(project)
             try:
                 record = session(model, project, task, args.timeout)
             except subprocess.TimeoutExpired:
                 record = {"model": model, "timeout": True}
             after = _canonical_hashes(project)
+            repo_after = _canonical_hashes(REPO)
+            owned_after = _owning_ledger(project)
             record["condition"] = name
             record["task"] = task
             record["project"] = str(project)
             record["canonical_changed"] = sorted(
                 key for key in before if before[key] != after[key]
+            )
+            record["repository_canonical_changed"] = sorted(
+                key for key in repo_before if repo_before[key] != repo_after[key]
+            )
+            record["fixture_minted"] = {
+                "tickets": [
+                    t for t in owned_after["tickets"] if t not in owned_before["tickets"]
+                ],
+                "receipts": [
+                    r for r in owned_after["receipts"] if r not in owned_before["receipts"]
+                ],
+            }
+            # The verdict. A session passes ONLY if the fixture moved and this
+            # repository did not -- and the ticket it claims to have made is
+            # read back out of the fixture's own ledger, never believed.
+            record["isolation"] = (
+                "PASS"
+                if record["canonical_changed"] and not record["repository_canonical_changed"]
+                else "FAIL"
             )
             report["sessions"].append(record)
             print(
@@ -307,7 +377,9 @@ def main() -> int:
                 f"protocol_before={record.get('protocol_commands_before_productive')} "
                 f"productive={record.get('productive_action')} "
                 f"refusals={record.get('refusal_sequence')} "
-                f"repeated={record.get('repeated_refusal')}"
+                f"repeated={record.get('repeated_refusal')} "
+                f"isolation={record.get('isolation')} "
+                f"minted={record.get('fixture_minted')}"
             )
     if args.out:
         out = Path(args.out)

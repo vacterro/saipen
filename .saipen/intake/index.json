@@ -84,16 +84,28 @@
       "linked_work": "T-1367",
       "source_sha256": "134e51b52d9f74ebebe2b19861b382d52f819b69dbf58f8644c9c5c92a2dfb64"
     },
-    "SRC-047": {
-      "linked_work": "T-1368",
-      "source_sha256": "c643705ceac2bb2477784c07e4d6c9df04159d844a63c3c85931d2b8b1cdce94"
+    "SRC-049": {
+      "linked_work": "T-1370",
+      "source_sha256": "af050bd0e97d165c6acd7c144e9f034c7b44148a733f517b475a5ef06f3d4738"
     },
-    "SRC-048": {
-      "linked_work": "T-1369",
-      "source_sha256": "9a70e5fe7e0429d0a651567b8c5e95e8c19697c09da10fcb17304752b4cee8fa"
+    "SRC-050": {
+      "linked_work": "T-1367",
+      "source_sha256": "c03687aa91914f38bcd1a77c58a11617d30ea97eb068f86a7982610ca4834391"
+    },
+    "SRC-051": {
+      "linked_work": "T-1367",
+      "source_sha256": "c25394e0e4b00f863cb0f8b727d61e0a9b07a7ca8157636ad4afea2d3a1a2322"
+    },
+    "SRC-052": {
+      "linked_work": null,
+      "source_sha256": "8ca49a3bc6e011c57d544b60ddea8ab5967c210e0c87dc4e50fbb7b0e38ae02b"
+    },
+    "SRC-053": {
+      "linked_work": null,
+      "source_sha256": "1998b2fa2dbf4df4f61366a1639146bd686c5e3f617cb32c9a9156b02f35d16f"
     }
   },
-  "next_id": 49,
+  "next_id": 54,
   "schema_version": 1,
   "tombstones": {
     "SRC-001": {
@@ -420,6 +432,54 @@
       "source_sha256": "ffadc172a9896c5657bb40b8cd531399c215f7c80d3ed31717cf00f931d119f4",
       "status": "CLOSED",
       "unresolved": 0
+    },
+    "SRC-047": {
+      "archive_ref": ".saipen/archive/retired/SRC-047.md",
+      "authority_grant": "T-1368 / SRC-047",
+      "authority_receipt": "SRC-049",
+      "authority_sha256": "af050bd0e97d165c6acd7c144e9f034c7b44148a733f517b475a5ef06f3d4738",
+      "discovery_event": "E-6801",
+      "evidence": {
+        "kind": "artifact",
+        "ref": ".saipen/evidence/T-1363-1367-zero-manual-entry-20260916/README.md",
+        "sha256": "e9baf0ac8932575c79112bb5bcf40fd224be1891ed0f39cf706e6d779408705b"
+      },
+      "evidence_bound_event": "E-6810",
+      "evidence_note": "field-fixture PWD incident: .saipen/evidence/T-1363-1367-zero-manual-entry-20260916/README.md 'Harness defect found by the same run'; fixture cwd + repository PWD minted this here; fixed at 306299cc (PWD bound to fixture, OLDPWD/INIT_CWD stripped)",
+      "linked_work": "T-1368",
+      "reason": "MISROUTED_PROJECT_BINDING",
+      "receipt_id": "SRC-047",
+      "retired_at": "2026-09-16T13:59:23Z",
+      "retired_by": "claude",
+      "retirement_event": "E-6804",
+      "schema_version": 2,
+      "source_sha256": "c643705ceac2bb2477784c07e4d6c9df04159d844a63c3c85931d2b8b1cdce94",
+      "status": "INVALID",
+      "ticket_ref": ".saipen/archive/retired/T-1368.json"
+    },
+    "SRC-048": {
+      "archive_ref": ".saipen/archive/retired/SRC-048.md",
+      "authority_grant": "T-1369 / SRC-048",
+      "authority_receipt": "SRC-049",
+      "authority_sha256": "af050bd0e97d165c6acd7c144e9f034c7b44148a733f517b475a5ef06f3d4738",
+      "discovery_event": "E-6798",
+      "evidence": {
+        "kind": "artifact",
+        "ref": ".saipen/evidence/T-1363-1367-zero-manual-entry-20260916/README.md",
+        "sha256": "e9baf0ac8932575c79112bb5bcf40fd224be1891ed0f39cf706e6d779408705b"
+      },
+      "evidence_bound_event": "E-6809",
+      "evidence_note": "field-fixture PWD incident: .saipen/evidence/T-1363-1367-zero-manual-entry-20260916/README.md 'Harness defect found by the same run'; fixture cwd + repository PWD minted this here; fixed at 306299cc (PWD bound to fixture, OLDPWD/INIT_CWD stripped)",
+      "linked_work": "T-1369",
+      "reason": "MISROUTED_PROJECT_BINDING",
+      "receipt_id": "SRC-048",
+      "retired_at": "2026-09-16T13:59:15Z",
+      "retired_by": "claude",
+      "retirement_event": "E-6803",
+      "schema_version": 2,
+      "source_sha256": "9a70e5fe7e0429d0a651567b8c5e95e8c19697c09da10fcb17304752b4cee8fa",
+      "status": "INVALID",
+      "ticket_ref": ".saipen/archive/retired/T-1369.json"
     }
   }
 }

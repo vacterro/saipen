@@ -69,6 +69,10 @@
         "compact": {
           "class": "RECOVERY",
           "operands": "one_ticket_id"
+        },
+        "retire": {
+          "class": "RECOVERY",
+          "operands": "one_ticket_id"
         }
       }
     },

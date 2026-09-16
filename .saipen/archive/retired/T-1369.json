@@ -1,0 +1,27 @@
+{
+  "authority_grant": "T-1369 / SRC-048",
+  "authority_receipt": "SRC-049",
+  "authority_sha256": "af050bd0e97d165c6acd7c144e9f034c7b44148a733f517b475a5ef06f3d4738",
+  "board_record": "- [ ] T-1369 [P1] add a docstring to the top of src/app.py explaining what it does; the original notes are in V:\\\\_TEMP_\\\\fastprompter_drag\\\\SAIPENVIEW_main.py | verify: the requested change is present and demonstrated against the user own description of it | user_explicit: true | source_receipts: SRC-048 | owner: claude | claim_time: 2026-09-16T13:04:26Z",
+  "board_record_sha256": "e7db7e9dd016f0cd831beffef645fac6dd423f54e1e451bf1e02fcf0fe7885bd",
+  "discovery_event": "E-6798",
+  "evidence": {
+    "kind": "artifact",
+    "ref": ".saipen/evidence/T-1363-1367-zero-manual-entry-20260916/README.md",
+    "sha256": "e9baf0ac8932575c79112bb5bcf40fd224be1891ed0f39cf706e6d779408705b"
+  },
+  "evidence_bound_event": "E-6809",
+  "evidence_note": "field-fixture PWD incident: .saipen/evidence/T-1363-1367-zero-manual-entry-20260916/README.md 'Harness defect found by the same run'; fixture cwd + repository PWD minted this here; fixed at 306299cc (PWD bound to fixture, OLDPWD/INIT_CWD stripped)",
+  "reason": "MISROUTED_PROJECT_BINDING",
+  "restored_parent": "T-1368",
+  "restored_parent_owner": "claude",
+  "retired_at": "2026-09-16T13:59:15Z",
+  "retired_by": "claude",
+  "retirement_event": "E-6803",
+  "schema_version": 2,
+  "section": "## TODO",
+  "source_receipts": [
+    "SRC-048"
+  ],
+  "ticket": "T-1369"
+}

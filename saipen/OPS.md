@@ -191,6 +191,102 @@ Rule and `CONTINUATION_RESERVED` refuses every unrelated claim including
 one operation. A failed/blocked B leaves A parked. Ordinary journal recovery
 therefore cannot expose an intermediate second owner or two DOING tickets.
 
+### Retirement transaction
+
+`saipen ticket retire T-### --reason CODE --evidence REF --authority SRC-###
+[--discovery-event E-###] [--note TEXT]` is the canonical disposition for Work
+that was minted into the WRONG PROJECT. It is not `ticket done` and not
+`source close`. It asserts exactly one thing:
+
+    THIS WORK NEVER BELONGED TO THIS PROJECT'S EXECUTION HISTORY.
+
+Nothing reaches `## DONE`, no coverage is fabricated, no disposition is
+upgraded, and the request text is never rewritten. PLAN refuses -- zero
+writes -- unless all of these hold:
+
+- `--reason` is in the registered closed set (`RETIREMENT_REASONS`;
+  `MISROUTED_PROJECT_BINDING` today). A free-text reason is
+  `RETIREMENT_REASON_UNKNOWN`;
+- `--authority` is an ACTIVE operator-ingress receipt (not an imported spec or
+  external audit, not linked to the Work being retired) whose OWN STORED BYTES
+  carry an operator-authority capsule GRANTING this ticket with exactly the
+  receipts it carries. Naming Work is not authorizing it: "DO NOT retire
+  T-1369 / SRC-048" grants nothing (`RETIREMENT_AUTHORITY_REQUIRED`). The
+  capsule is a closed line grammar lifted verbatim from the first operator
+  grant, so that decision (SRC-049) stays representable as written:
+
+      This message supplies operator authority for:
+
+          T-1368 / SRC-047
+          T-1369 / SRC-048
+
+      only.
+
+  One item line per Work (`T-###` alone for Work without receipts), blank
+  lines allowed, anything else inside makes the capsule malformed. A capsule
+  inside a fenced code block is a quotation; two grants of one ticket with
+  different receipt sets grant nothing. The grammar is consumed by
+  retirement only;
+- `--evidence` RESOLVES: a canonical LOG event `E-###` that precedes the
+  retirement, or an owned regular artifact under `.saipen/evidence/` whose
+  sha256 (CRLF folded to LF, so a checkout's line-ending policy is not a
+  content change) is bound into every retirement carrier. Free text is a
+  claim, not evidence;
+- `--discovery-event` is OPTIONAL. Null means no canonical event ever recorded
+  the discovery and the bound evidence alone carries the proof; when given it
+  is a real LOG event that precedes the retirement. `--note` is an optional
+  single bounded line;
+- every named receipt is active, still hashes to its recorded digest, and is
+  linked back to this exact ticket;
+- the ticket is not under `## DONE` (`TICKET_ALREADY_DONE`): completed Work
+  with closure evidence is history and cannot be rewritten as misrouted.
+
+APPLY commits ONE journaled transaction: the LOG `DEC: RETIRE ...` event
+(which carries the evidence binding inline and is never externalized), the
+ticket's forensic record, the receipt's cold-storage bundle, the INVALID
+tombstone, one intake index write, the BOARD row removal, and -- when a parent
+was parked on this ticket by `block-for` -- that parent's restoration to its
+saved phase tuple. Retirement is NOT "the dependency succeeded": the dependency
+EDGE was invalid, because the child was never this project's Work. A crash
+converges to the complete old set or the complete new set; a repeat returns
+`ALREADY_RETIRED` and writes nothing.
+
+RESTORE, NEVER TRANSFER. Retirement is a non-transferring mutation (CORE-001).
+A restored parent goes back to the seat its own reservation names, and
+`STATE.agent` follows that owner so STATE and BOARD never split. A foreign
+actor restores the owner's claim verbatim, `claim_time` included -- forging
+another seat's liveness would be a transfer by other means -- and is recorded
+only as `actor B (seat A)` provenance; the owner acting itself refreshes its
+claim. Without a restored parent the seat is preserved unchanged.
+
+The BOARD row disappears from schedulable Work. The permanent evidence is LOG
+plus `.saipen/archive/retired/`, which still answers what the ticket was, who
+retired it, under which grant, which Source created it and what proved it
+invalid. That archive is itself evidence and validates itself: every ticket
+record and tombstone is checked structurally (schema, identity, BOARD row
+digest, receipt/event/timestamp grammar, retirable section, restored parent),
+the tombstone's `ticket_ref` must resolve to a regular non-reparse record for
+the same Work telling the same story, the archived metadata must agree, the
+namespace may hold no stray or linked artifact, retired Work may not be back
+on BOARD, a bound artifact must still hash to its digest, and the events a
+record cites must exist in LOG and say what the record says.
+
+Schema-1 records (the first T-1370 slice: free-text evidence, authority by
+identifier presence) are never valid state. Running the same `ticket retire`
+on such a ticket RE-AFFIRMS it: today's authority and evidence gates run
+against the SAME decision and reason, the ledger must back the old record, and
+`RETIREMENT_EVIDENCE_BOUND` records the binding as a NEW event. The retirement
+event, time, actor, BOARD row and restored parent stay verbatim; the old
+free-text evidence survives as the note.
+
+The retired namespace is `-text` in `.gitattributes`, like `intake/` and
+`archive/source/`: its bodies are bound by raw digest, and a text-normalizing
+checkout would otherwise report every retirement in a Windows clone as
+tampered.
+
+Retirement never deletes repository files: residue found alongside it goes
+through CLEAN's own recovery gate.
+
 ## 5. Locks
 
 One project-local lock file, `.saipen/locks/core.lock`, using real OS file
@@ -229,7 +325,8 @@ NEEDS_REPAIR, PATH_ESCAPE, INVALID_ID, ACTIVE_IMPROVE_CYCLE,
 INVALID_DISPOSITION, PACKAGE_INCOMPLETE, MALFORMED_PACKAGE,
 INCOMPLETE_TICKET, INVALID_MANIFEST, INVALID_GOAL, STALE_PLAN, RELEASE_CLOSURE_PENDING,
 TAG_CONFLICT, FIRST_PUBLISH_WAIT, NO_PUBLISH_MODE,
-SOURCE_SCOPE_MISSING, RELEASE_FAILED.
+SOURCE_SCOPE_MISSING, RELEASE_FAILED, RETIREMENT_AUTHORITY_REQUIRED,
+RETIREMENT_REASON_UNKNOWN, ALREADY_RETIRED, RETIRED, RETIREMENT_EVIDENCE_BOUND.
 
 The codes whose meaning is not self-evident from the name:
 

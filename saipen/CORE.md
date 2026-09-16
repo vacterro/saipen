@@ -122,6 +122,15 @@ BOARD is Work authority. It contains `## DOING`, `## TODO`, `## DONE`, and
 - BOARD is not append-only. CLEAN prunes closed prose after durable evidence
   exists in LOG/CHANGELOG. The validator warns when cold-start size exceeds its
   soft budget.
+- Work minted into the WRONG PROJECT is RETIRED, never finished. Retirement is
+  a third terminal verdict beside DONE and BLOCKED: the row leaves schedulable
+  Work, the request bytes move to forensic cold storage, and no completion,
+  coverage or disposition is ever fabricated to get there. `saipen ticket
+  retire` (OPS.md) is its only mechanical implementation and it requires a
+  registered reason, evidence that resolves to a canonical event or an owned
+  artifact, and an operator authority receipt whose own text GRANTS the Work --
+  a mention is not an authorization. It restores a parked parent to its own
+  seat; it never transfers Work to whoever ran it.
 
 #### LOG.md
 

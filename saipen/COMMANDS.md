@@ -57,6 +57,7 @@ global authority and deterministic priority rules.
 | `saipen knowledge [status\|index\|retrieve]` | project knowledge | CMD-ROUTING-01 |
 | `saipen start '<task>' [--file PATH] [--hex HEX] [--receipt SRC-###]` | THE entry command for a new actionable task: capture, recover, seat, claim | CMD-ROUTING-01 |
 | `saipen user-request <text>` | USER_INTERRUPT ingress | CMD-ROUTING-01 |
+| `saipen ticket retire <T-###> --reason <CODE> --evidence <E-###\|.saipen/evidence/PATH> --authority <SRC-###> [--discovery-event E-###] [--note TEXT]` | canonical retirement of misrouted/invalid Work -- NOT done, NOT close; the authority must GRANT it (OPS.md) | CMD-ROUTING-01 |
 | `saipen cohort [status\|ship] <C-###>` | batch publication authority | CMD-ROUTING-01 |
 | `saipen source` | intake | CMD-ROUTING-01 |
 | `saipen audit [status\|inspect\|ingest]` | intake transport | CMD-CONTINUE-01 |

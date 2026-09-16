@@ -1,0 +1,131 @@
+{
+  "requirements": {
+    "SRC-049:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-6808",
+      "text": "Add ONE canonical retirement semantic: saipen ticket retire T-### --reason <code> --evidence <ref>, explicitly NOT ticket done and NOT source close, meaning the Work never belonged to this project's execution history.",
+      "verification": "python -m unittest tools.test_ticket_retirement -- RedSubjectTests.test_finishing_the_bogus_child_is_refused + test_closing_the_bogus_source_is_refused + GreenPathTests (55 tests OK): retire is a third outcome, neither ticket done nor source close",
+      "work": "T-1370"
+    },
+    "SRC-049:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-6811",
+      "text": "Bound the reason class (MISROUTED_PROJECT_BINDING) and refuse an open-ended delete hatch: retirement requires strong proof plus explicit operator authority covering the named Work.",
+      "verification": "tools.test_ticket_retirement.AuthorityCapsuleTests (11 cases) -- a negative mention naming both identities is REFUSED, fenced/unterminated/prose-polluted/foreign-receipt/bare/conflicting capsules grant nothing, imported_spec cannot carry operator authority; HostileControlTests.test_control_6_unknown_reason_fails_closed; RETIREMENT_REASONS is the closed tuple ('MISROUTED_PROJECT_BINDING',) at tools/saipen_engine/retirement.py:109",
+      "work": "T-1370"
+    },
+    "SRC-049:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-6808",
+      "text": "Reuse the existing source status model and invent no fake terminal coverage: retire to INVALID, preserving receipt id, exact source bytes, digest, original linked Work, reason, evidence, operator decision and the discovery/retirement events in forensic cold storage through one canonical owner; never purge the bodies.",
+      "verification": "tools.test_ticket_retirement.GreenPathTests.test_the_source_bytes_survive_verbatim_and_stay_retrievable + test_the_ledger_can_still_answer_what_the_ticket_was; real repository: .saipen/evidence/T-1370-retirement-20260916/real-repository-proof.json checks 'SRC-047/SRC-048 INVALID retirement tombstone present (schema 2)' and 'original request bytes exactly retrievable' green against current bytes (23/23)",
+      "work": "T-1370"
+    },
+    "SRC-049:R004": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-6808",
+      "text": "BOARD semantics RETIRED != DONE: no fake DONE checkbox; the active BOARD row leaves schedulable Work through the SAIOPS-owned mechanical implementation of the CLEAN prune rule, with permanent evidence in LOG plus a retirement tombstone that still answers what the ticket was, why it disappeared, who retired it, which Source created it and what proved it invalid.",
+      "verification": "tools.test_ticket_retirement.GreenPathTests.test_nothing_is_marked_done_and_no_coverage_is_invented + TamperControlTests.test_10_retired_work_back_on_board; real repository proof checks 'T-1368/T-1369 absent from schedulable BOARD', 'no DONE claim anywhere in LOG history', 'no DONE row on BOARD' -- all green, and the red control kills a resurrected BOARD row and an appended DONE claim",
+      "work": "T-1370"
+    },
+    "SRC-049:R005": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-6808",
+      "text": "Unwind the dependency chain atomically and honestly in causal order: retiring the child restores the parent to its saved phase tuple, retirement never means the dependency implementation succeeded, the removal/restoration is journaled, and a crash between ticket retirement and parent restoration recovers idempotently.",
+      "verification": "tools.test_ticket_retirement.GreenPathTests.test_retiring_the_child_restores_the_parent_to_its_saved_phase + test_the_whole_chain_unwinds_in_causal_order; HostileControlTests.test_control_8_a_crash_mid_transaction_converges; ParentOwnershipTests.test_cross_seat_retirement_restores_the_reserved_seat_verbatim + test_same_seat_retirement_refreshes_its_own_claim",
+      "work": "T-1370"
+    },
+    "SRC-049:R006": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-6808",
+      "text": "Prove the pre-change surface RED on a fixture (parent P0 blocked for a bogus child that owns an ACTIVE user_instruction source), then GREEN through retirement, and hold the eight hostile controls: ordinary TODO refused without authority, completed Work not rewritable as misrouted, foreign live owner refused unless authority covers it, receipt digest mismatch fails closed, ticket/receipt linkage mismatch fails closed, unknown reason fails closed, a repeated retire is deterministic, and a crash mid-transaction converges to one result.",
+      "verification": "tools.test_ticket_retirement.RedSubjectTests (4 RED-before cases incl. test_reserved_bogus_child_deadlocks_every_claim) then GreenPathTests; HostileControlTests controls 1-8 all green -- 55 tests OK in the VERIFY re-run from current bytes",
+      "work": "T-1370"
+    },
+    "SRC-049:R007": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-6803",
+      "text": "Use the new canonical operation on the actual repository: retire T-1369/SRC-048 then T-1368/SRC-047 with reason MISROUTED_PROJECT_BINDING and evidence citing the measured polygon/PWD investigation, with no manual edits to BOARD/STATE/LOG/intake, after which T-1367 automatically resumes BUILD.",
+      "verification": "E-6803 retired T-1369/SRC-048 and E-6804 retired T-1368/SRC-047 through 'saipen ticket retire' with reason MISROUTED_PROJECT_BINDING and evidence .saipen/evidence/T-1363-1367-zero-manual-entry-20260916/README.md sha256:e9baf0ac8932575c79112bb5bcf40fd224be1891ed0f39cf706e6d779408705b; E-6804 restored T-1367 to BUILD with no manual BOARD/STATE/LOG/intake edit; re-proved from current bytes by .saipen/evidence/T-1370-retirement-20260916/real_repository_proof.py (23/23 ok), whose red control kills 8/8 known-bad repositories",
+      "work": "T-1370"
+    },
+    "SRC-049:R008": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-6808",
+      "text": "Treat src/app.py as separate foreign residue: prove git history, pre-incident ownership, reference sweep and polygon session attribution before removal; classify proven residue FIELD_FIXTURE_RESIDUE and remove it through the CLEAN recoverable-deletion path; quarantine instead of deleting when provenance is ambiguous; the retirement operation must not become a generic file deleter.",
+      "verification": ".saipen/evidence/T-1370-retirement-20260916/src-app-provenance.json: git tracked_now false, zero commits on any branch, zero importers, every path literal a guard/probe ARGUMENT; pre-incident absence and the minting write both read out of polygon-saifren-first-pass.json sessions t1363-robi8mj6 and t1363-rgdmqem1; classified FIELD_FIXTURE_RESIDUE, bytes preserved at src-app.py.residue sha256:0d757fdddad6f3a23938239f0639f1efee71d9440c62c13e2924b2b004766716 then removed. retirement.py deletes no file: TargetPlan delete_file is driven by CLEAN, not by retire",
+      "work": "T-1370"
+    },
+    "SRC-049:R009": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-6808",
+      "text": "Preserve this incident as the retirement oracle: a regression carrying the exact real chain (main repo, fixture worktree, subprocess cwd = fixture, PWD = main repo, weak model, saipen start, wrong-project Source and Work minted) and the fixed environment, asserting canonical ledger isolation rather than merely the target file location.",
+      "verification": "tools.test_field_fixture_isolation (4 controls, Ran 4 OK): test_red_inherited_pwd_mints_into_the_other_project reproduces the exact chain (main repo + fixture worktree, subprocess cwd=fixture, PWD=main repo) and asserts the MAIN canonical ledger moved; test_green_bound_pwd_keeps_the_other_project_byte_identical asserts byte-identity after the 306299cc fix; test_the_harness_environment_strips_every_stale_project_carrier pins _host_env; test_the_polygon_watches_every_canonical_carrier pins intake/index.json into CANONICAL_CARRIERS -- the assertion is canonical LEDGER isolation, not target-file location",
+      "work": "T-1370"
+    },
+    "SRC-049:R010": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-6804",
+      "text": "Resume T-1367 BUILD immediately after retirement and do not wander into T-1361; T-1367 still owes the acceptance T-1363 falsely claimed (LIVE SAIFREN, INSTALLED runtime, real OpenCode host).",
+      "verification": "E-6804 restored T-1367 to phase BUILD automatically as part of the retirement transaction (retirement record restored_parent: T-1367; operations.py parent-restore path at tools/saipen_engine/operations.py:3000-3060 rewrites owner/claim_time and strips blocker/blocked_on/resume_phase); ParentOwnershipTests.test_cross_seat_retirement_restores_the_reserved_seat_verbatim pins it. T-1361 stays parked on BOARD and was not touched in this wave; SRC-051 section 8 carries the forward obligation that T-1367 is next and T-1361 is not",
+      "work": "T-1370"
+    },
+    "SRC-049:R011": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "SUPERSEDED",
+      "evidence": "SRC-051",
+      "text": "Use the real polygon (9router -> SAIRoute -> sairoute/SAIFREN) with weak/free models and, for every field session, capture before/after hashes of the MAIN repository .saipen/STATE.md, BOARD.md, LOG.md and intake/index.json plus the fixture equivalents, passing only when the fixture state changes AND the main canonical hashes stay identical; also record model/provider, cwd, PWD, SAIPEN_PROJECT_ROOT, resolved project root, first SAIPEN command, resulting ticket id and the repository that owns that ticket, proven from the fixture ledger rather than the model's claim.",
+      "verification": "The live multi-model field sweep this clause asks for is NOT claimed for T-1370. SRC-051 sections 10-11 restate it strictly stronger (provider/model, cwd, PWD, OLDPWD, INIT_CWD, SAIPEN_PROJECT_ROOT, resolved root, installed generation, first SAIPEN command, resulting receipt/ticket and the repository that owns it; before/after hashes of STATE/BOARD/LOG/intake index for MAIN and fixture; fixture ledger over model prose) and SRC-051 is linked to T-1367, which owns it. T-1370 delivered only the harness half: tools/t1363_field_polygon.py now hashes CANONICAL_CARRIERS incl intake/index.json and reads _owning_ledger from the fixture's own BOARD/intake, pinned by tools.test_field_fixture_isolation.test_the_polygon_watches_every_canonical_carrier. The existing .saipen/evidence/T-1363-1367-zero-manual-entry-20260916/polygon-isolation-proof.json records only fixture canonical_changed and no MAIN hashes, so claiming this clause on T-1370 would be fabricated coverage",
+      "work": "T-1370"
+    },
+    "SRC-049:R012": {
+      "actionable": true,
+      "class": "non-goal",
+      "disposition": "VERIFIED",
+      "evidence": "E-6811",
+      "text": "Do not implement the full foreign-change Inquest system inside T-1370/T-1367; register it as backlog after current liveness is restored, with this incident as one of its later canonical cases.",
+      "verification": "Non-goal honored: no Inquest subsystem exists in the T-1370 diff (19 paths, none of them an inquest module); the foreign file future_gate/'FUTURE GATE - AUDIT CONTRACT OMITS EVIDENCE DIR_20260916.md' is PRESERVED untracked and deliberately excluded from the T-1370 commit rather than implemented, and SRC-051 section 12 lists Foreign Inquest as backlog-only for a later wave with this incident as one of its cases",
+      "work": "T-1370"
+    },
+    "SRC-049:R013": {
+      "actionable": true,
+      "class": "non-goal",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "No push, no tag, no public release.",
+      "verification": null,
+      "work": "T-1370"
+    },
+    "SRC-049:R014": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "T-1370 is DONE only when misrouted Work has a truthful non-DONE retirement path, no fake Source coverage is required, source bytes remain forensics-recoverable, T-1369 and T-1368 are retired canonically, the dependency chain is unwound, T-1367 automatically resumes BUILD, focused recovery/crash/idempotency tests are green, the validator is conformant, PATCH_OWNED = 0 and UNKNOWN = 0.",
+      "verification": null,
+      "work": "T-1370"
+    }
+  },
+  "schema_version": 1
+}

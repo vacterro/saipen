@@ -1,0 +1,19 @@
+{
+  "clauses": {
+    "SRC-050:R001": {
+      "actionable": false,
+      "class": "context",
+      "text": "Current canonical state at handoff: T-1370 BUILD at E-6808 owned by claude; T-1370 implementation exists; T-1368/SRC-047 and T-1369/SRC-048 already retired (E-6804/E-6803); src/app.py contamination proven, preserved and removed; T-1367 blocked on T-1370; T-1361 parked."
+    },
+    "SRC-050:R002": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not restart T-1370 or redo its work from scratch; do not recreate, mark DONE or restore to BOARD T-1368/T-1369; do not redo the PWD investigation; inspect current bytes before changing anything."
+    }
+  },
+  "derived_at": "2026-09-16T15:42:58Z",
+  "derived_from": "SRC-050",
+  "interpretation_revision": 2,
+  "schema_version": 1,
+  "source_sha256": "c03687aa91914f38bcd1a77c58a11617d30ea97eb068f86a7982610ca4834391"
+}

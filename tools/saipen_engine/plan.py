@@ -40,6 +40,14 @@ class TargetPlan:
     `content` is the EXACT final bytes -- encoding/BOM/newline already applied
     by the codec before the plan exists. The journal stores these bytes and
     recovery replays them; nothing re-encodes during APPLY.
+
+    `action` is the journal's target action (`write`, `delete_file`,
+    `delete_dir`). It defaults to `write`, so every existing plan builder is
+    unchanged, and it exists because an operation that RETIRES canonical
+    Work has to remove the hot-surface bytes in the SAME journaled
+    transaction that writes their forensic replacement -- a second,
+    unjournaled delete pass would reintroduce exactly the half-applied state
+    the journal exists to prevent.
     """
 
     path: str
@@ -47,6 +55,7 @@ class TargetPlan:
     content: bytes
     before_hash: str
     after_hash: str
+    action: str = "write"
 
 
 @dataclass(frozen=True)
@@ -148,6 +157,7 @@ def apply_plan(project_root: Path | str, plan: OperationPlan) -> Result:
                     {
                         "path": t.path,
                         "role": t.role,
+                        "action": t.action,
                         "content": t.content,
                         "before_hash": t.before_hash,
                         "after_hash": t.after_hash,

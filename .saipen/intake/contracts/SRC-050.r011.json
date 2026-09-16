@@ -1,0 +1,64 @@
+{
+  "clauses": {
+    "SRC-050:R001": {
+      "actionable": false,
+      "class": "context",
+      "text": "Current canonical state at handoff: T-1370 BUILD at E-6808 owned by claude; T-1370 implementation exists; T-1368/SRC-047 and T-1369/SRC-048 already retired (E-6804/E-6803); src/app.py contamination proven, preserved and removed; T-1367 blocked on T-1370; T-1361 parked."
+    },
+    "SRC-050:R002": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not restart T-1370 or redo its work from scratch; do not recreate, mark DONE or restore to BOARD T-1368/T-1369; do not redo the PWD investigation; inspect current bytes before changing anything."
+    },
+    "SRC-050:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "A: retirement authority must distinguish mention from authorization with a bounded positive machine-recognizable operator-authority capsule owned by the retirement mechanism, not a fuzzy NLP heuristic; an authority Source containing 'DO NOT retire T-999 / SRC-999' (negative text naming both identities) is an explicit RED control refused RETIREMENT_AUTHORITY_REQUIRED; SRC-049 stays representable as legitimate authority without falsifying history or fabricating new operator intent."
+    },
+    "SRC-050:R004": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "B: ONE structural validator for retired ticket records proving filename ticket == record.ticket, valid schema_version, registered reason, board_record present with sha256 == board_record_sha256, valid SRC source_receipts and authority_receipt, valid E-id retirement_event, valid retired_at timestamp, legal BOARD section, restored_parent null or valid T-id; a Source tombstone ticket_ref must exist, be regular/non-reparse, parse, identify the same linked Work and carry the same reason/event/authority; no dangling forensic links."
+    },
+    "SRC-050:R005": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "C: post-retirement tamper controls turn validation RED or fail closed: mutated archived ticket identity, board_record mutated without digest, deleted ticket record behind a live tombstone, reason changed in the ticket record only, retirement_event changed in the Source tombstone only, replaced archived source body, and symlink/reparse retirement artifacts where supported."
+    },
+    "SRC-050:R006": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "D: choose one explicit parent ownership contract for retirement (restore the original parent seat/claim from the saved reservation, or refuse cross-seat restoration) and prove with a test that a parent reserved for seat A is never silently transferred to seat B/operator carrier merely because B was authorized to retire the child."
+    },
+    "SRC-050:R007": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "E: make discovery_event semantics explicit (OPTIONAL with content-bound evidence sufficient, or REQUIRED repaired through canonical history without inventing an event), and make --evidence resolve to a canonical event or owned evidence artifact so an arbitrary string such as 'trust me this was wrong' is never equivalent to evidence."
+    },
+    "SRC-050:R008": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "F: after A-E run tools/test_ticket_retirement.py and tools/test_field_fixture_isolation.py plus the intake/source integrity, journal/recovery, continuation/block-resume, board/router and guard canonical-command reachability families, the validator and ruff on changed Python, then the declared full core-unit family A/B with PATCH_OWNED = 0 and UNKNOWN = 0, no baseline laundering, and every new failure fixed or classified with evidence."
+    },
+    "SRC-050:R009": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "G: prove on the real repository that SRC-047/SRC-048/T-1368/T-1369 are absent from ACTIVE intake and schedulable BOARD, carry INVALID retirement tombstones, have exactly retrievable original request bytes and retrievable ticket forensic records, with no fabricated coverage and no DONE claim; src/app.py is absent and .saipen/evidence/T-1370-retirement-20260916/src-app.py.residue preserves the removed fixture bytes."
+    },
+    "SRC-050:R010": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "H: only after A-G close T-1370 through BUILD checkpoint, VERIFY, REVIEW, SHIP and DONE with one narrow local T-1370 commit if not already committed; T-1370 DONE must automatically release T-1367 back to BUILD without any manual edit of T-1367 lifecycle."
+    },
+    "SRC-050:R011": {
+      "actionable": true,
+      "class": "non-goal",
+      "text": "No push, no tag, no public release."
+    }
+  },
+  "derived_at": "2026-09-16T15:43:05Z",
+  "derived_from": "SRC-050",
+  "interpretation_revision": 11,
+  "schema_version": 1,
+  "source_sha256": "c03687aa91914f38bcd1a77c58a11617d30ea97eb068f86a7982610ca4834391"
+}

@@ -4,7 +4,7 @@
 
 Read-only commands: `saipen status`, `saipen next`. Mutating commands run
 PLAN/APPLY through the engine's lock + journal + recovery machinery:
-`claim`, `transition`, `checkpoint`, `ticket add/done/block/unblock`.
+`claim`, `transition`, `checkpoint`, `ticket add/done/retire/block/unblock`.
 `saipen recover` lists and resolves pending operation journals; status and
 next derive `recovery_pending` from the real journal state, never a hardcoded
 false.
@@ -3591,6 +3591,19 @@ _TICKET_DONE_OPTIONS = {
     "--paths": "closure_paths",
 }
 _TICKET_BLOCK_OPTIONS = {"--scope": "scope"}
+#: `ticket retire` grammar. The first three are MANDATORY and each one is a
+#: separate refusal: a reason outside the registered set, evidence that does
+#: not resolve to a canonical event or an owned artifact, and an authority
+#: receipt whose capsule does not grant this Work are three different mistakes
+#: and a weak model has to be able to tell them apart. `--discovery-event` and
+#: `--note` are optional.
+_TICKET_RETIRE_OPTIONS = {
+    "--reason": "reason",
+    "--evidence": "evidence",
+    "--authority": "authority",
+    "--discovery-event": "discovery_event",
+    "--note": "note",
+}
 
 
 def _parse_value_options(tokens: list[str], spec: dict[str, str]) -> tuple[dict, list[str], str]:
@@ -7146,7 +7159,8 @@ def main(argv: list[str] | None = None) -> int:
                 {
                     "ok": False,
                     "code": "VALIDATION_FAILED",
-                "detail": "ticket needs an action: add|compact|verify|done|block|block-for|unblock",
+                "detail": "ticket needs an action: "
+                "add|compact|verify|done|retire|block|block-for|unblock",
                 },
                 as_json,
             )
@@ -7313,6 +7327,58 @@ def main(argv: list[str] | None = None) -> int:
                 " ".join(clean_rest[1:]),
                 needs_arg,
                 verify_arg,
+                dry_run=dry_run,
+            )
+            _emit(result.to_dict(), as_json)
+            return 0 if result.ok else 1
+        if action == "retire":
+            # CORE: retirement is NOT completion. It is the canonical verdict
+            # for Work that was minted into the WRONG PROJECT, and it refuses
+            # without a registered reason, resolvable evidence and an operator
+            # authority receipt whose own bytes carry a capsule granting this
+            # ticket.
+            _opts, _pos, _opt_err = _parse_value_options(rest[1:], _TICKET_RETIRE_OPTIONS)
+            if not rest or not re.fullmatch(r"T-\d+", rest[0], re.IGNORECASE):
+                _emit(
+                    {
+                        "ok": False,
+                        "code": "VALIDATION_FAILED",
+                        "detail": "ticket retire needs <T-###> --reason <CODE> "
+                        "--evidence <E-###|.saipen/evidence/PATH> --authority SRC-### "
+                        "[--discovery-event E-###] [--note TEXT]",
+                    },
+                    as_json,
+                )
+                return 2
+            if _opt_err:
+                _emit({"ok": False, "code": "VALIDATION_FAILED", "detail": _opt_err}, as_json)
+                return 2
+            if _pos:
+                _emit(
+                    {
+                        "ok": False,
+                        "code": "VALIDATION_FAILED",
+                        "detail": f"ticket retire takes <T-###>; surplus: {' '.join(_pos)}",
+                    },
+                    as_json,
+                )
+                return 2
+            if not dry_run and _negotiate_capability(project_root) == "read-only":
+                return _capability_refusal(as_json)
+            _ho = _ensure_handover(project_root, as_json, dry_run)
+            if _ho is not None:
+                return _ho
+            from saipen_engine.operations import retire_ticket as _retire_ticket
+
+            result = _retire_ticket(
+                project_root,
+                rest[0].upper(),
+                _agent_for(project_root),
+                reason=str(_opts.get("reason") or "").strip().upper(),
+                evidence=str(_opts.get("evidence") or ""),
+                authority=str(_opts.get("authority") or ""),
+                discovery_event=(_opts.get("discovery_event") or None),
+                note=_opts.get("note"),
                 dry_run=dry_run,
             )
             _emit(result.to_dict(), as_json)

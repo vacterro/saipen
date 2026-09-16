@@ -92,6 +92,31 @@ moves them to cold archive, and leaves a tiny tombstone. `purge --confirm` is an
 explicit destructive retention option: it removes cold bodies but retains the
 digest and closure tombstone, so full forensic reproduction is honestly lost.
 
+### Retirement -- terminal without being successful
+
+A receipt reaches a tombstone by exactly two routes, and they mean opposite
+things. CLOSED means the request was implemented and proven here. INVALID
+means it never belonged to this project's execution history at all: the
+ingress resolved the wrong project root and minted Work in the wrong
+repository. A misrouted receipt has no terminal coverage and must never be
+given any -- inventing a disposition to reach CLOSED is the fraud retirement
+exists to remove.
+
+`saipen ticket retire` (OPS.md) is the only writer of the INVALID tombstone.
+It preserves the receipt id, the exact source bytes and their digest, the
+untouched Contract and coverage ledgers, the original linked Work, the reason
+code, the resolved evidence binding, the operator authority receipt with its
+digest and exact grant line, the optional discovery event and the retirement
+event, in `.saipen/archive/retired/`. `saipen source status SRC-N` reports
+`location: retired` with that record and `saipen source show SRC-N` still
+returns the body verbatim. Nothing is purged: what the rogue fixture injected
+stays exactly readable.
+
+Unlike a closed archive, a retired bundle IS read by ordinary validation: it is
+the only evidence that Work vanished honestly, so its body digest, metadata,
+ticket record, bound evidence artifact and the LOG events it cites are
+re-proven every time, and any drift is a validation failure.
+
 Legacy Work remains readable with unavailable/unknown source provenance. A
 BOARD title is never converted into a fake verbatim receipt. Guarantees start
 only when a real receipt was committed.

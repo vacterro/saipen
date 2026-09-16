@@ -1,0 +1,24 @@
+{
+  "clauses": {
+    "SRC-049:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Add ONE canonical retirement semantic: saipen ticket retire T-### --reason <code> --evidence <ref>, explicitly NOT ticket done and NOT source close, meaning the Work never belonged to this project's execution history."
+    },
+    "SRC-049:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Bound the reason class (MISROUTED_PROJECT_BINDING) and refuse an open-ended delete hatch: retirement requires strong proof plus explicit operator authority covering the named Work."
+    },
+    "SRC-049:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Reuse the existing source status model and invent no fake terminal coverage: retire to INVALID, preserving receipt id, exact source bytes, digest, original linked Work, reason, evidence, operator decision and the discovery/retirement events in forensic cold storage through one canonical owner; never purge the bodies."
+    }
+  },
+  "derived_at": "2026-09-16T14:00:12Z",
+  "derived_from": "SRC-049",
+  "interpretation_revision": 3,
+  "schema_version": 1,
+  "source_sha256": "af050bd0e97d165c6acd7c144e9f034c7b44148a733f517b475a5ef06f3d4738"
+}

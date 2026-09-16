@@ -2,3 +2,6 @@
 *.sh text eol=lf
 .saipen/intake/** -text
 .saipen/archive/source/** -text
+.saipen/archive/retired/** -text
+.saipen/evidence/**/*.residue -text
+.saipen/evidence/**/*.txt -whitespace

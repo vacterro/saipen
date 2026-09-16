@@ -1,0 +1,124 @@
+{
+ "schema_version": 1,
+ "subject": "src/app.py",
+ "classification": "FIELD_FIXTURE_RESIDUE",
+ "sha256": "0d757fdddad6f3a23938239f0639f1efee71d9440c62c13e2924b2b004766716",
+ "bytes": 88,
+ "content": "\"\"\"Define the SAIPEN application entry point and its top-level application behavior.\"\"\"\n",
+ "preserved_copy": ".saipen/evidence/T-1370-retirement-20260916/src-app.py.residue",
+ "git": {
+  "tracked_now": false,
+  "commits_all_branches": [],
+  "status": "?? src/app.py",
+  "ignored": false,
+  "tracked_siblings": [
+   "src/allowed-one.py",
+   "src/allowed-two.py",
+   "src/child-admitted.py",
+   "src/global-installed-write.py"
+  ]
+ },
+ "pre_incident_existence_proof": "polygon-saifren-first-pass.json session t1363-robi8mj6 reported 'src/app.py puudub; src/ sisaldab ainult nelja muud faili' -- the model was reading THIS repository through the leaked PWD and measured that src/app.py did not exist and src/ held exactly the four tracked guard fixtures",
+ "creation_proof": "polygon-saifren-first-pass.json session t1363-rgdmqem1 reported 'src/app.py:1 added one-line docstring. py_compile PASS.' with canonical_changed [] in its own fixture -- the write landed here",
+ "reference_sweep": {
+  "importers": [],
+  "path_literals_that_do_not_require_the_file": [
+   "tools/t1363_field_polygon.py -- the polygon TASK TEXT handed to models",
+   "tools/test_actor_binding_lifecycle.py -- guard-verdict probe payload",
+   ".saipen/evidence/T-1329-guard_surface_matrix.py -- guard-verdict probe payload",
+   "tools/saipen_engine/admission.py -- docstring example"
+  ],
+  "note": "every hit is a guard/probe PATH ARGUMENT or prose; none opens or imports the file"
+ },
+ "polygon_sessions": [
+  {
+   "file": "polygon-saifren-first-pass.json",
+   "model": "sairoute/SAIFREN",
+   "project": "V:\\_TEMP_\\t1363-robi8mj6",
+   "canonical_changed": [],
+   "reported": "`src/app.py` puudub; `src/` sisaldab ainult nelja muud faili. Loo fail või anna õige tee."
+  },
+  {
+   "file": "polygon-saifren-first-pass.json",
+   "model": "sairoute/SAIFREN",
+   "project": "V:\\_TEMP_\\t1363-rgdmqem1",
+   "canonical_changed": [],
+   "reported": "`src/app.py:1` added one-line docstring. `py_compile` PASS."
+  },
+  {
+   "file": "polygon-saifren-first-pass.json",
+   "model": "sairoute/SAIFREN",
+   "project": "V:\\_TEMP_\\t1363-79752gpg",
+   "canonical_changed": [],
+   "reported": "`src/app.py:1` already has one-line docstring: `\"\"\"Application entry point.\"\"\"` No change needed."
+  },
+  {
+   "file": "polygon-saifren-first-pass.json",
+   "model": "sairoute/SAIFREN",
+   "project": "V:\\_TEMP_\\t1363-8fbhi610",
+   "canonical_changed": [],
+   "reported": "Already present in `src/app.py:1`:\n\n```python\n\"\"\"Application entry point.\"\"\"\n```"
+  },
+  {
+   "file": "polygon-saifren-first-pass.json",
+   "model": "sairoute/SAIFREN",
+   "project": "V:\\_TEMP_\\t1363-0irkdk2z",
+   "canonical_changed": [],
+   "reported": "`src/app.py:1` already has one-line docstring: `\"\"\"Application entry point.\"\"\"`"
+  },
+  {
+   "file": "polygon-saifren-first-pass.json",
+   "model": "sairoute/SAIFREN",
+   "project": "V:\\_TEMP_\\t1363-jp5sizzx",
+   "canonical_changed": [],
+   "reported": "`src/app.py:1` already has one-line docstring. No change needed."
+  },
+  {
+   "file": "polygon-saifren-first-pass.json",
+   "model": "sairoute/SAIFREN",
+   "project": "V:\\_TEMP_\\t1363-tzwelat5",
+   "canonical_changed": [],
+   "reported": "Juba olemas: `src/app.py:1` sisaldab üherealist docstring’i."
+  },
+  {
+   "file": "polygon-saifren-first-pass.json",
+   "model": "sairoute/SAIFREN",
+   "project": "V:\\_TEMP_\\t1363-zvqchkda",
+   "canonical_changed": [],
+   "reported": "Updated `src/app.py:1`:\n\n```python\n\"\"\"Application entry point for the SAIPEN project.\"\"\"\n```\n\nVerified with `python -m py_compile src/app.py` and `ruff check sr"
+  },
+  {
+   "file": "polygon-isolation-proof.json",
+   "model": "sairoute/SAIFREN",
+   "project": "V:\\_TEMP_\\t1363-tcv6e6r8",
+   "canonical_changed": [
+    "BOARD.md",
+    "LOG.md",
+    "STATE.md"
+   ],
+   "reported": "`src/app.py:1` updated."
+  },
+  {
+   "file": "polygon-saifren-after-fix.json",
+   "model": "sairoute/SAIFREN",
+   "project": "V:\\_TEMP_\\t1363-2g4lp5fj",
+   "canonical_changed": [],
+   "reported": "Updated `src/app.py:1` with explanatory module docstring.\n\nValidation: `python -m py_compile`, `ruff check`, core validator PASS.  \nReferenced notes file missin"
+  },
+  {
+   "file": "polygon-saifren-after-fix.json",
+   "model": "sairoute/SAIFREN",
+   "project": "V:\\_TEMP_\\t1363-azd2om2r",
+   "canonical_changed": [],
+   "reported": "Töö blokeeritud: T-1368 vajab operaatori otsust. `src/app.py:1` sisaldab juba ühe-realilist docstring’i.  \nJärgmine samm: `saipen ticket unblock T-1368 <decisio"
+  },
+  {
+   "file": "polygon-saifren-after-fix.json",
+   "model": "sairoute/SAIFREN",
+   "project": "V:\\_TEMP_\\t1363-qu3m1axl",
+   "canonical_changed": [],
+   "reported": "Töö blokeeritud: T-1368 vajab operaatori otsust.\n\nKäivita:\n```text\nsaipen ticket unblock T-1368 <decision>\n```\nSeejärel: `saipen start --receipt SRC-047`"
+  }
+ ],
+ "disposition": "Removed under phases/clean.md. The file is UNTRACKED, so git is NOT a recovery proof -- the operator's 'git-tracked bytes are recoverable' premise does not hold for it. The exact 88 bytes are therefore preserved verbatim in this evidence directory FIRST, and that artifact is the named recovery proof for the deletion."
+}

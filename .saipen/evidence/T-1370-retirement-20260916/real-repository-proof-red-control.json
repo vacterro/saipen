@@ -1,0 +1,89 @@
+{
+  "subject": "red control for real_repository_proof.py",
+  "known_good_exit": 0,
+  "mutations": 8,
+  "killed": 8,
+  "results": [
+    {
+      "mutation": "(none) known-good control",
+      "exit": 0,
+      "failed": []
+    },
+    {
+      "mutation": "SRC-047 back in ACTIVE index",
+      "expected_red_check": "SRC-047 absent from ACTIVE intake index",
+      "exit": 1,
+      "expected_check_went_red": true,
+      "failed": [
+        "SRC-047 absent from ACTIVE intake index",
+        "intake validation green"
+      ]
+    },
+    {
+      "mutation": "archived source body edited",
+      "expected_red_check": "SRC-047 original request bytes exactly retrievable",
+      "exit": 1,
+      "expected_check_went_red": true,
+      "failed": [
+        "SRC-047 original request bytes exactly retrievable",
+        "intake validation green"
+      ]
+    },
+    {
+      "mutation": "T-1368 row back on BOARD",
+      "expected_red_check": "T-1368 absent from schedulable BOARD",
+      "exit": 1,
+      "expected_check_went_red": true,
+      "failed": [
+        "T-1368 absent from schedulable BOARD",
+        "intake validation green"
+      ]
+    },
+    {
+      "mutation": "src/app.py recreated",
+      "expected_red_check": "src/app.py absent",
+      "exit": 1,
+      "expected_check_went_red": true,
+      "failed": [
+        "src/app.py absent"
+      ]
+    },
+    {
+      "mutation": "residue truncated",
+      "expected_red_check": "residue preserves the removed fixture bytes",
+      "exit": 1,
+      "expected_check_went_red": true,
+      "failed": [
+        "residue preserves the removed fixture bytes"
+      ]
+    },
+    {
+      "mutation": "ticket record reason mutated",
+      "expected_red_check": "T-1368 forensic record retrievable and valid",
+      "exit": 1,
+      "expected_check_went_red": true,
+      "failed": [
+        "T-1368 forensic record retrievable and valid",
+        "intake validation green"
+      ]
+    },
+    {
+      "mutation": "coverage fabricated",
+      "expected_red_check": "SRC-047 no fabricated coverage",
+      "exit": 1,
+      "expected_check_went_red": true,
+      "failed": [
+        "SRC-047 no fabricated coverage"
+      ]
+    },
+    {
+      "mutation": "DONE claim appended to LOG",
+      "expected_red_check": "T-1368 no DONE claim anywhere in LOG history",
+      "exit": 1,
+      "expected_check_went_red": true,
+      "failed": [
+        "T-1368 no DONE claim anywhere in LOG history"
+      ]
+    }
+  ]
+}

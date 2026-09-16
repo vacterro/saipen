@@ -818,7 +818,12 @@
     "ACTOR_UNBOUND",
     "HOST_LAUNCH_REFUSED",
     "LOG_EVENT_OVERSIZE",
-    "BOARD_RECORD_OVERSIZE"
+    "BOARD_RECORD_OVERSIZE",
+    "RETIREMENT_AUTHORITY_REQUIRED",
+    "RETIREMENT_REASON_UNKNOWN",
+    "ALREADY_RETIRED",
+    "RETIRED",
+    "RETIREMENT_EVIDENCE_BOUND"
   ],
   "continue_fallback": {
     "invariant": "continue may fall through to improve ONLY after recovery, blocked/retryable, queued and required-follow-up routing are exhausted; it resumes an existing active Improve cycle and never creates an unbounded improve carousel",

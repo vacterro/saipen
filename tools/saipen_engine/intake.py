@@ -413,9 +413,18 @@ def _decode_index(doc: object) -> dict:
                     raise ValueError(
                         f"source intake index corrupt: tombstone {receipt_id} has invalid digest"
                     )
-                if entry.get("status") != CLOSED_STATUS:
+                # A tombstone is terminal, not necessarily SUCCESSFUL. CLOSED
+                # means "implemented and proven"; INVALID means the Work never
+                # belonged to this project at all and was RETIRED with operator
+                # authority (`retirement.py`). Refusing the second shape here
+                # would force a retirement to masquerade as a closure, which is
+                # the exact fabrication the retirement path exists to remove.
+                from .retirement import is_retired_tombstone
+
+                if entry.get("status") != CLOSED_STATUS and not is_retired_tombstone(entry):
                     raise ValueError(
-                        f"source intake index corrupt: tombstone {receipt_id} is not CLOSED"
+                        f"source intake index corrupt: tombstone {receipt_id} is neither "
+                        f"CLOSED nor a retired (INVALID) receipt"
                     )
             checked[receipt_id] = entry
         decoded[field] = checked
@@ -1106,12 +1115,18 @@ def capture(
                 if existing.get("invalid"):
                     return existing["invalid"]
                 if existing.get("closed"):
+                    # Terminal, but not necessarily SUCCESSFUL: a retired
+                    # receipt is terminal because the request never belonged
+                    # here. Reporting CLOSED for it would tell the caller the
+                    # work was done, which is the exact lie this whole path
+                    # exists to make impossible.
+                    _tomb = existing.get("tombstone") or {}
                     return {
                         "ok": True,
                         "code": "SOURCE_DUPLICATE_CLOSED",
                         "receipt": existing["receipt_id"],
                         "source_sha256": digest,
-                        "status": CLOSED_STATUS,
+                        "status": _tomb.get("status") or CLOSED_STATUS,
                         "closure": existing.get("tombstone"),
                     }
                 if not existing.get("orphan"):
@@ -2743,16 +2758,29 @@ def read_body(root: Path | str, receipt_id: str) -> dict:
         rel = f".saipen/intake/active/{receipt_id}.md"
         if not meta:
             # Tombstoned/archived: look in cold storage only on explicit request.
-            archive_meta_rel = f".saipen/archive/source/{receipt_id}.meta.json"
-            try:
-                raw_meta = _read_owned_file(
-                    root, archive_meta_rel, kind="source archive metadata", max_bytes=_META_MAX
-                )
-                meta = json.loads(raw_meta.decode("utf-8-sig"))
-                location = "archive"
-                rel = f".saipen/archive/source/{receipt_id}.md"
-            except (FileNotFoundError, OSError, ValueError):
-                meta = None
+            # Two cold namespaces, one lookup: `archive/source` holds CLOSED
+            # receipts, `archive/retired` holds RETIRED ones. Forensic
+            # retrieval must reach both, or "the bytes are preserved" would be
+            # a promise no reader could cash.
+            from .retirement import RETIRED_DIR
+
+            for location_name, prefix in (
+                ("archive", ".saipen/archive/source"),
+                ("retired", RETIRED_DIR),
+            ):
+                try:
+                    raw_meta = _read_owned_file(
+                        root,
+                        f"{prefix}/{receipt_id}.meta.json",
+                        kind="source archive metadata",
+                        max_bytes=_META_MAX,
+                    )
+                    meta = json.loads(raw_meta.decode("utf-8-sig"))
+                    location = location_name
+                    rel = f"{prefix}/{receipt_id}.md"
+                    break
+                except (FileNotFoundError, OSError, ValueError):
+                    meta = None
     except (ValueError, OSError) as exc:
         return {"ok": False, "code": "SOURCE_CORRUPTION", "detail": str(exc)}
     if not meta:
@@ -2817,6 +2845,29 @@ def status(root: Path | str, receipt_id: str) -> dict:
         except (FileNotFoundError, OSError, ValueError):
             tomb = _read_index(root).get("tombstones", {}).get(receipt_id)
             if tomb:
+                from .retirement import is_retired_tombstone
+
+                if is_retired_tombstone(tomb):
+                    return {
+                        "ok": True,
+                        "receipt": receipt_id,
+                        "status": tomb.get("status"),
+                        "location": "retired",
+                        "source_sha256": tomb.get("source_sha256"),
+                        "linked_work": tomb.get("linked_work"),
+                        "reason": tomb.get("reason"),
+                        "evidence": tomb.get("evidence"),
+                        "evidence_note": tomb.get("evidence_note"),
+                        "authority_receipt": tomb.get("authority_receipt"),
+                        "authority_grant": tomb.get("authority_grant"),
+                        "retirement_event": tomb.get("retirement_event"),
+                        "discovery_event": tomb.get("discovery_event"),
+                        "evidence_bound_event": tomb.get("evidence_bound_event"),
+                        "retired_at": tomb.get("retired_at"),
+                        "retired_by": tomb.get("retired_by"),
+                        "archive_ref": tomb.get("archive_ref"),
+                        "ticket_ref": tomb.get("ticket_ref"),
+                    }
                 if not tomb.get("purged"):
                     try:
                         _closed_archive_bundle(
@@ -3159,10 +3210,15 @@ def validate_project(root: Path | str) -> list[str]:
         if not isinstance(tomb, dict):
             errors.append(f"tombstone {receipt_id} projection is not an object")
             continue
-        if tomb.get("status") != CLOSED_STATUS or tomb.get("unresolved") != 0:
+        from .retirement import is_retired_tombstone, retirement_tombstone_errors
+
+        retired = is_retired_tombstone(tomb)
+        if retired:
+            errors.extend(retirement_tombstone_errors(receipt_id, tomb))
+        elif tomb.get("status") != CLOSED_STATUS or tomb.get("unresolved") != 0:
             errors.append(f"tombstone {receipt_id} lacks verified closed coverage")
         expected_archive = f".saipen/archive/source/{receipt_id}.md"
-        if tomb.get("archive_ref") != expected_archive:
+        if not retired and tomb.get("archive_ref") != expected_archive:
             errors.append(f"tombstone {receipt_id} has invalid archive_ref")
         tomb_path = _tombstone_dir(root) / f"{receipt_id}.json"
         if not tomb_path.is_file() or _is_link_or_reparse(tomb_path):
@@ -3179,7 +3235,16 @@ def validate_project(root: Path | str) -> list[str]:
                     errors.append(f"tombstone {receipt_id} differs from index projection")
             except (OSError, ValueError) as exc:
                 errors.append(f"tombstone {receipt_id} unreadable: {exc}")
-        if not tomb.get("purged"):
+        if retired:
+            # A retired bundle is verified against its OWN carriers: the exact
+            # body bytes, the archived metadata's retirement block and the
+            # ticket record its `ticket_ref` names. `_closed_archive_bundle`
+            # would refuse it for lacking terminal coverage, which is the truth
+            # about it, not a defect in it.
+            from .retirement import retired_archive_errors
+
+            errors.extend(retired_archive_errors(root, receipt_id, tomb))
+        elif not tomb.get("purged"):
             try:
                 _meta, _contract, _coverage, archive_summary = _closed_archive_bundle(
                     root, receipt_id, tomb
@@ -3196,6 +3261,12 @@ def validate_project(root: Path | str) -> list[str]:
                         )
             except (FileNotFoundError, OSError, ValueError) as exc:
                 errors.append(f"closed receipt {receipt_id} archive bundle invalid: {exc}")
+    # The forensic namespace itself: a ticket record nobody points at, a stray
+    # bundle, a linked node, or retired Work still on BOARD is invisible to the
+    # per-tombstone checks above.
+    from .retirement import retired_namespace_errors
+
+    errors.extend(retired_namespace_errors(root, index, board_tickets))
     try:
         credential_gate = _legacy_sensitive_source_gate(root)
     except (OSError, ValueError) as exc:
