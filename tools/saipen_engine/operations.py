@@ -61,7 +61,7 @@ from .board_compaction import (
 )
 from .fast_check import block_parked_evidence_error, validate_texts
 from .journal import MISSING_FILE_DEPENDENCY, hash_bytes
-from .log import prepare_bounded_event
+from .log import VALID_TAXONOMIES, prepare_bounded_event
 from .plan import OperationPlan, TargetPlan, apply_plan, build_plan
 from .result import Result
 from .state import (
@@ -75,7 +75,10 @@ from .state import (
     is_absolute_home,
 )
 
-_TAXONOMIES = {"DEC", "RUN"}
+#: What the `saipen checkpoint` COMMAND SURFACE accepts. Deliberately narrower
+#: than the LOG grammar: an operator typing a checkpoint writes a decision or a
+#: run, and the other record types are produced by the operations that own them.
+_CHECKPOINT_TAXONOMIES = {"DEC", "RUN"}
 
 
 def _now() -> str:
@@ -575,8 +578,16 @@ def _event_line(
     op_id: str | None = None,
     root: Path | None = None,
 ) -> tuple[int, str]:
-    if taxonomy not in _TAXONOMIES:
-        raise ValueError(f"taxonomy {taxonomy!r} outside {_TAXONOMIES}")
+    # T-1361 CL-04: the WRITER asks the LOG grammar, which is the one owner of
+    # what a LOG event may be. It used to consult the command surface's own
+    # narrower set, so `_plan_first_publish_wait` -- which correctly asks for a
+    # `WAIT` event, a taxonomy `log.VALID_TAXONOMIES` has always accepted --
+    # raised ValueError out of the CLI. `saipen ship` on a first publish died
+    # with rc=1 and no JSON at all, and TEN release-executor checks reported a
+    # parse error with an empty detail. Two sets for one fact, and the narrower
+    # copy silently killed a whole verb.
+    if taxonomy not in VALID_TAXONOMIES:
+        raise ValueError(f"taxonomy {taxonomy!r} outside {sorted(VALID_TAXONOMIES)}")
     # T-1326 P0: the project root comes from the CALLER or from the checkpoint
     # itself -- never from a silent raw fallback. A producer that could not name
     # its project could not preserve an oversized event, and the capped builder
@@ -2226,8 +2237,11 @@ def checkpoint(
     description: str,
     dry_run: bool = False,
 ) -> Result:
-    if taxonomy.upper() not in _TAXONOMIES:
-        return _refuse("VALIDATION_FAILED", f"taxonomy {taxonomy!r} outside {sorted(_TAXONOMIES)}")
+    if taxonomy.upper() not in _CHECKPOINT_TAXONOMIES:
+        return _refuse(
+            "VALIDATION_FAILED",
+            f"taxonomy {taxonomy!r} outside {sorted(_CHECKPOINT_TAXONOMIES)}",
+        )
     now, utc = _now(), _utc_iso()
     plan = _plan_checkpoint(Path(project_root), agent, taxonomy, ticket_id, description, now, utc)
     if isinstance(plan, Result):
@@ -5999,7 +6013,15 @@ def _plan_first_publish_wait(
     """
     op_id = "wait-" + uuid4_hex()
     docs, state, _board, log_tail = _read(root)
+    # T-1361 CL-04: `none` is the canonical NO-TASK value and it is a string,
+    # so passing it straight through rendered the event's ticket slot as
+    # `[none]` -- not a legal event line, which fast validation then refused
+    # for a reason that has nothing to do with the WAIT. Every other reader of
+    # STATE.task in this module already carries this guard; this one did not,
+    # so a first publish from a project with no active task could not be
+    # parked at all.
     task = state.get("task")
+    task = task if task and task != "none" else None
     remote_name = _sanitize_remote(remote_name)
     message = f"first-publish -- confirm repo name '{remote_name}' and public/private before I push"
     event, line = _producer_event(

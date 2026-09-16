@@ -36,6 +36,7 @@ declaration, so CI fails on it like any other gate.
 """
 
 import contextlib
+import dataclasses
 import datetime
 import functools
 import importlib.util
@@ -124,6 +125,118 @@ from saipen_engine.state import parse_frontmatter
 HOME = Path(__file__).resolve().parent.parent
 VALIDATOR = HOME / "tools" / "validate.py"
 SCENARIOS = HOME / "tests" / "scenarios"
+
+
+@dataclasses.dataclass
+class GroupResult:
+    """What one probe group produced, including having produced nothing.
+
+    A group that RAISED is not an absence: `crashed` carries the exception and
+    the group still appears in the summary with a zero and a reason. The suite
+    used to lose everything after such a group (T-1361).
+    """
+
+    name: str
+    noun: str
+    failures: list[str] = dataclasses.field(default_factory=list)
+    checked: int = 0
+    skipped: int = 0
+    crashed: str | None = None
+
+    def summary_line(self) -> str:
+        if self.crashed is not None:
+            return f"0 {self.noun} -- HARNESS CRASHED: {self.crashed}"
+        tail = f", {self.skipped} skipped" if self.skipped else ""
+        return f"{self.checked} {self.noun}{tail}"
+
+
+def _group_counts(result: object) -> tuple[list[str], int, int]:
+    """Normalize a probe group's (failures, checked[, skipped]) return."""
+    if not isinstance(result, tuple) or not 2 <= len(result) <= 3:
+        raise TypeError(f"probe group returned {type(result).__name__}, not a 2- or 3-tuple")
+    failures = list(result[0])
+    checked = int(result[1])
+    skipped = int(result[2]) if len(result) == 3 else 0
+    return failures, checked, skipped
+
+
+#: What `recover()` returns when a target's live bytes match neither the
+#: recorded before-hash nor the after-hash and it refuses to guess.
+#:
+#: Commit b2343541 (T-1334, 15.09.26) renamed this RESULT code from the bare
+#: `CONFLICT` to `RECOVERY_CONFLICT`, while `journal.mark("CONFLICT")` kept
+#: `CONFLICT` as the journal STATUS -- the two were the same word for two
+#: different things, and only one of them moved. Other journal paths still
+#: answer plain `CONFLICT`, so this is a named constant at the sites the
+#: rename actually reached, not a global search and replace (T-1361 CL-06).
+RECOVERY_REFUSED = "RECOVERY_CONFLICT"
+
+#: The one-line history a probe fixture used to ship.
+PROBE_BASE_EVENT = "- 09.08.26 00:00 [E-900] [T-none] DEC: base\n"
+
+
+def probe_fixture_log(tickets, agent: str = "probe") -> tuple[str, int]:
+    """A fixture history that ALLOCATES the tickets its BOARD declares.
+
+    CORE-003 / SRC-026:R003 made ticket identity come from a structured
+    `[T-###]` allocation event in the complete history: a record that merely
+    looks like a ticket is not one. Fixtures that hand-write records into
+    `BOARD.md` and ship a history containing only `[T-none]` therefore fail
+    fast validation on their own setup -- `apply_claim`, `transition_phase`
+    and `goal_entry` all return VALIDATION_FAILED naming the unallocated
+    ticket, the fixture never reaches the state its first `expect` asserts,
+    and every later check in the group cascades from that one (T-1361 CL-05).
+
+    The fixtures are not wrong about what they test. They predate the
+    contract. This journals the allocation the way the engine does, so the
+    fixture is legal for the same reason a real project is, rather than the
+    check being relaxed to accommodate it.
+
+    Returns the history and the last event id, which STATE must carry.
+    """
+    lines = [PROBE_BASE_EVENT]
+    event = 900
+    for index, ticket in enumerate(tickets, start=1):
+        parent, event = event, event + 1
+        lines.append(
+            f"- 09.08.26 00:{index:02d} [E-{event}] [parent: E-{parent}] "
+            f"[{ticket}] [agent: {agent}] DEC: allocated for the probe fixture\n"
+        )
+    return "".join(lines), event
+
+
+def run_probe_groups(groups) -> list[GroupResult]:
+    """Attempt every declared group; a crash is a recorded failure, not an exit.
+
+    The one rule this function exists to enforce: NOTHING a group does may
+    prevent the next group from running. An exception inside one becomes a
+    bounded failure entry naming the group, and the walk continues to the last
+    declared group -- so the final totals are the totals of what was attempted
+    and a tail can no longer disappear behind a traceback.
+
+    `KeyboardInterrupt` and `SystemExit` are deliberately NOT swallowed: an
+    operator stopping the suite is not a probe failure, and a group calling
+    `sys.exit` is a harness bug that must stay loud rather than be logged as
+    one more red line.
+    """
+    results: list[GroupResult] = []
+    for name, func, noun in groups:
+        result = GroupResult(name=name, noun=noun)
+        try:
+            failures, checked, skipped = _group_counts(func())
+        except (KeyboardInterrupt, SystemExit):
+            raise
+        except Exception as exc:
+            detail = f"{type(exc).__name__}: {exc}"
+            result.crashed = detail
+            result.failures = [f"{name} harness crashed: {detail}"]
+        else:
+            result.failures = failures
+            result.checked = checked
+            result.skipped = skipped
+        results.append(result)
+    return results
+
 
 
 @functools.lru_cache(maxsize=1)
@@ -5838,6 +5951,26 @@ def neutralize_sandbox_work_surface(saipen_dir: Path) -> set[str]:
                 dropped.add(ticket.group(1))
             continue
         board_out.append(line)
+
+    # T-1361 CL-03: the third instance of the shape the two paragraphs above
+    # already name. A surviving TODO/BLOCKED record that `needs:` a ticket THIS
+    # FUNCTION removed becomes a dangling reference the probe manufactured and
+    # then reported against the live repository -- `T-1327 needs nonexistent
+    # T-1326` is a closed dependency on the real board and a fabricated defect
+    # in the copy. Only ids this function dropped are unlinked: a need that
+    # names Work absent from the ORIGINAL board is untouched, still dangling,
+    # and still fails, because that is the condition the check exists to catch.
+    if dropped:
+        for index, line in enumerate(board_out):
+            match = re.search(r"(?m)\|\s*needs:\s*([^|\n]*)", line)
+            if not match:
+                continue
+            kept = [
+                need
+                for need in (part.strip() for part in match.group(1).split(","))
+                if need and need not in dropped
+            ]
+            board_out[index] = line[: match.start(1)] + ",".join(kept) + line[match.end(1) :]
     board_path.write_text("\n".join(board_out) + "\n", encoding="utf-8")
 
     intake_dir = saipen_dir / "intake"
@@ -5958,45 +6091,37 @@ def run_release_freshness_probes() -> tuple[list[str], int]:
         ):
             st = re.sub(rf"(?m)^({key}:\s*).*$", rf"\g<1>{val}", st)
         (saipen_dir / "STATE.md").write_text(st, encoding="utf-8")
-        sealed_max = 0
-        logs_dir = saipen_dir / "logs"
-        if logs_dir.is_dir():
-            for seg in sorted(logs_dir.glob("LOG-*.md")):
-                for ln in seg.read_text(encoding="utf-8-sig").splitlines():
-                    m = re.search(r"\[E-(\d+)\]", ln)
-                    if m:
-                        sealed_max = max(sealed_max, int(m.group(1)))
-        if sealed_max:
-            log_text = (saipen_dir / "LOG.md").read_text(encoding="utf-8-sig")
-            kept = [
-                ln
-                for ln in log_text.splitlines()
-                if not (m := re.search(r"\[E-(\d+)\]", ln)) or int(m.group(1)) <= sealed_max
-            ]
-            (saipen_dir / "LOG.md").write_text("\n".join(kept) + "\n", encoding="utf-8")
-            st = (saipen_dir / "STATE.md").read_text(encoding="utf-8")
-            st = re.sub(r"(?m)^(\s*last_event:\s*)\d+$", f"\\g<1>{sealed_max}", st)
-            all_lines = list(kept)
-            if logs_dir.is_dir():
-                for seg in sorted(logs_dir.glob("LOG-*.md")):
-                    all_lines += seg.read_text(encoding="utf-8-sig").splitlines()
-            marker = re.compile(r"\]\s+DEC: goal (?:pivot|reauthorized)\b")
-            last_marker = max(
-                (i for i, ln in enumerate(all_lines) if marker.search(ln)), default=None
-            )
-            for counter in ("goal_waves", "goal_tickets"):
-                if not re.search(rf"(?m)^{counter}:", st) or last_marker is None:
-                    continue
-                rebuilt = sum(
-                    1
-                    for ln in all_lines[last_marker + 1 :]
-                    for m in [re.search(rf"DEC: {counter} (\d+)->(\d+)", ln)]
-                    if m and int(m.group(2)) > int(m.group(1))
-                )
-                st = re.sub(rf"(?m)^({counter}:\s*)\d+$", f"\\g<1>{rebuilt}", st)
-            (saipen_dir / "STATE.md").write_text(st, encoding="utf-8")
+        # T-1361 CL-03: this used to CUT the active LOG at the last sealed
+        # boundary. The cut existed for one reason -- hunt marks naming
+        # commits a fresh `git init` cannot back -- but it took the whole
+        # recent history with them, and since CORE-003 / SRC-026:R003 that
+        # history is where every ticket's identity lives. The surviving
+        # TODO/BLOCKED records then had no allocation event, and the probe
+        # reported thirty-odd fabricated `no [T-###] allocation event`
+        # failures against the live repository's own board.
+        #
+        # Re-point the marks instead of deleting the history that carries
+        # them, the way the audit harness already sanitizes its own fixtures:
+        # commit the baseline first so there IS a commit to name, rewrite the
+        # marks to it, and commit the sanitization. STATE.last_event and the
+        # goal counters need no rebuild because nothing was removed.
         git("add", "-A")
         git("commit", "-q", "-m", "probe: baseline")
+        short = git("rev-parse", "--short", "HEAD").stdout.strip()
+        if short:
+            logs_dir = saipen_dir / "logs"
+            sealed = sorted(logs_dir.glob("LOG-*.md")) if logs_dir.is_dir() else []
+            for log_path in [saipen_dir / "LOG.md", *sealed]:
+                if not log_path.is_file():
+                    continue
+                text = log_path.read_text(encoding="utf-8-sig")
+                sanitized = re.sub(
+                    r"hunt -> clean @[0-9a-f]{7,40}\b", f"hunt -> clean @{short}", text
+                )
+                if sanitized != text:
+                    log_path.write_text(sanitized, encoding="utf-8", newline="\n")
+            git("add", "-A")
+            git("commit", "-q", "-m", "probe: re-point synthetic hunt marks")
 
         locale_paths = sorted(
             (project / ".saipen" / "saitranslate" / "kitchen").glob("*/README_*.md")
@@ -6240,7 +6365,19 @@ def run_release_executor_probes() -> tuple[list[str], int]:
         try:
             return json.loads(result.stdout)
         except (json.JSONDecodeError, ValueError):
-            return {"ok": False, "code": "PARSE_ERROR", "detail": result.stdout[:200]}
+            # T-1361 CL-04: the detail was stdout only, and a CLI that dies
+            # before printing anything has no stdout -- so ten checks reported
+            # `code='PARSE_ERROR' detail=` and named nothing at all. Carry the
+            # exit code and stderr: a probe that cannot say what went wrong
+            # costs more than the check it was protecting.
+            return {
+                "ok": False,
+                "code": "PARSE_ERROR",
+                "detail": (
+                    f"rc={result.returncode} "
+                    f"stdout={result.stdout[:200]!r} stderr={result.stderr[-600:]!r}"
+                ),
+            }
 
     def _cut_log(saipen_dir: Path) -> None:
         """Cut the copied LOG at the last sealed-segment boundary so the
@@ -7016,10 +7153,19 @@ def run_release_executor_probes() -> tuple[list[str], int]:
                 before_commits == after_commits or crash_point.endswith("CONTENT_PUBLISH"),
                 f"{before_commits}->{after_commits}",
             )
+            # T-1361 CL-04: this grepped the human output for the word CLEAN.
+            # `recover` with nothing pending now RECONCILES and emits that
+            # result instead -- the change that closed the hole where
+            # `recover: CLEAN` was immediately followed by
+            # `continue: VALIDATION_FAILED` -- so the word is gone and the
+            # check was reading prose for a fact the machine surface states.
+            # Ask the machine: are there pending ops? And say what was found
+            # when the answer is no, instead of passing "" as the detail.
+            settled = j(cli("status", "--json"))
             expect(
                 f"9. {probe_label}: pending ops cleared",
-                cli("recover").stdout.count("CLEAN") > 0,
-                "",
+                settled.get("pending_ops") == [],
+                f"pending_ops={settled.get('pending_ops')!r} code={settled.get('code')!r}",
             )
 
     # ======================================================================
@@ -13077,7 +13223,8 @@ def run_nitro_m2_probes() -> tuple[list[str], int]:
     result = recover(root, op)
     expect(
         "recovery CONFLICTs on externally modified pending target",
-        result.get("code") == "CONFLICT" and (saipen / "BOARD.md").read_bytes() == external,
+        result.get("code") == RECOVERY_REFUSED
+        and (saipen / "BOARD.md").read_bytes() == external,
         repr(result),
     )
     expect(
@@ -13129,7 +13276,8 @@ def run_nitro_m3_probes() -> tuple[list[str], int]:
         r = Path(tempfile.mkdtemp(prefix="saipen-m3-goal-"))
         s = r / ".saipen"
         s.mkdir()
-        (s / "LOG.md").write_text("- 09.08.26 00:00 [E-900] [T-none] DEC: base\n", encoding="utf-8")
+        history, last_event = probe_fixture_log(["T-1", "T-2"])
+        (s / "LOG.md").write_text(history, encoding="utf-8")
         (s / "BOARD.md").write_text(
             "# Board\n## DOING\n## TODO\n"
             "- [ ] T-1 [P1] top probe | verify: probe\n"
@@ -13144,7 +13292,7 @@ def run_nitro_m3_probes() -> tuple[list[str], int]:
         (s / "STATE.md").write_text(
             '---\nphase: DONE\ntask: none\nnext_action: "saipen continue"\n'
             'blocker: ""\ntransition_from: SHIP\nsaipen_version: 7\n'
-            "schema_version: 3\nlast_event: 900\nstyle_contract: ded-4ae736e4\n"
+            f"schema_version: 3\nlast_event: {last_event}\nstyle_contract: ded-4ae736e4\n"
             f'saipen_home: "{HOME.as_posix()}"\nagent: probe\nrequires:\n  - filesystem\n'
             "  - git\n  - python\nmode: full\nupdated: 2026-08-09T00:00:00Z\n"
             "---\n",
@@ -13155,9 +13303,8 @@ def run_nitro_m3_probes() -> tuple[list[str], int]:
     root = Path(tempfile.mkdtemp(prefix="saipen-m3-"))
     saipen = root / ".saipen"
     saipen.mkdir()
-    (saipen / "LOG.md").write_text(
-        "- 09.08.26 00:00 [E-900] [T-none] DEC: base\n", encoding="utf-8"
-    )
+    outer_history, outer_last_event = probe_fixture_log(["T-777"])
+    (saipen / "LOG.md").write_text(outer_history, encoding="utf-8")
     (saipen / "BOARD.md").write_text(
         "# Board\n## DOING\n## TODO\n- [ ] T-777 [P1] probe ticket | "
         "verify: probe\n## DONE\n## BLOCKED\n",
@@ -13166,7 +13313,7 @@ def run_nitro_m3_probes() -> tuple[list[str], int]:
     (saipen / "STATE.md").write_text(
         '---\nphase: DONE\ntask: none\nnext_action: "saipen continue"\n'
         'blocker: ""\ntransition_from: SHIP\nsaipen_version: 7\n'
-        "schema_version: 3\nlast_event: 900\nstyle_contract: ded-4ae736e4\n"
+        f"schema_version: 3\nlast_event: {outer_last_event}\nstyle_contract: ded-4ae736e4\n"
         "agent: probe\nmode: full\nupdated: 2026-08-09T00:00:00Z\n---\n",
         encoding="utf-8",
     )
@@ -13213,13 +13360,16 @@ def run_nitro_m3_probes() -> tuple[list[str], int]:
         "claim sets STATE to SCOUT/T-777 with a new event",
         state_after.get("phase") == "SCOUT"
         and state_after.get("task") == "T-777"
-        and state_after.get("last_event") == 901,
+        # Derived from the fixture, not hardcoded: the history now carries the
+        # allocation events CORE-003 requires, so "the next event" is one past
+        # whatever the fixture ends on rather than a fixed 901 (T-1361 CL-05).
+        and state_after.get("last_event") == outer_last_event + 1,
         repr((state_after.get("phase"), state_after.get("task"), state_after.get("last_event"))),
     )
     log_text = codec.read_doc(saipen / "LOG.md")
     expect(
         "claim appends exactly one LOG event with a real taxonomy",
-        log_text.count("E-901") == 1 and "DEC:" in log_text,
+        log_text.count(f"E-{outer_last_event + 1}") == 1 and "DEC:" in log_text,
         repr(log_text[-120:]),
     )
 
@@ -13995,7 +14145,7 @@ def run_nitro_integrity_probes() -> tuple[list[str], int]:
     recovery_result = recover(root4, "op-int")
     expect(
         "recovery on an externally modified pending target CONFLICTs",
-        recovery_result.get("code") == "CONFLICT"
+        recovery_result.get("code") == RECOVERY_REFUSED
         and (saipen4 / "STATE.md").read_bytes() == external,
         repr(recovery_result),
     )
@@ -14103,9 +14253,16 @@ def run_nitro_integrity_probes() -> tuple[list[str], int]:
     board6.write_bytes(text6.encode("utf-8"))
     add6 = ticket_add(root6, "probe", "P2", "crlf", [], "verify")
     after6 = board6.read_bytes()
+    # T-1361 CL-09: the expectation said T-2, which was right while the next
+    # ticket id came from the BOARD this test overwrites. Allocation identity
+    # now comes from the COMPLETE HISTORY (CORE-003 / SRC-026:R003), and this
+    # fixture's history allocates T-1 and T-2, so the next id is T-3 -- the
+    # contract moved, the codec behaviour under test did not. Read the id the
+    # operation reports rather than restating it, so the check measures
+    # REPRESENTATION, which is all it was ever about.
     expected6 = (
         "# Board\n## DOING\n## TODO\n"
-        "- [ ] T-2 [P2] crlf | verify: verify\n"
+        f"- [ ] {add6.get('ticket')} [P2] crlf | verify: verify\n"
         "- [ ] T-1 [P1] probe | verify: probe\n"
         "## DONE\n## BLOCKED\n"
     )
@@ -14243,8 +14400,20 @@ def run_nitro_integrity_probes() -> tuple[list[str], int]:
     sealr = make_project()
     seal_log = sealr / ".saipen" / "LOG.md"
     (sealr / ".saipen" / "logs").mkdir()
+    # T-1361 CL-06: blanking the active LOG moves the fixture's whole history
+    # into these segments, and the fixture's history is where T-1 and T-2 get
+    # the allocation events their identity now comes from (CORE-003 /
+    # SRC-026:R003). Dropping them here left the board unallocated, so every
+    # mutation refused and this seal-tail test measured a refusal instead of a
+    # sequence. Seal them with the base event; the test is about which segment
+    # the sequence continues from, not about allocation.
     (sealr / ".saipen" / "logs" / "LOG-001.md").write_text(
-        "- 09.08.26 00:00 [E-900] [T-none] DEC: base\n", encoding="utf-8"
+        "- 09.08.26 00:00 [E-898] [T-1] [agent: probe] [op: ticket-fixture] "
+        "DEC: ticket added via SAIOPS\n"
+        "- 09.08.26 00:00 [E-899] [T-2] [agent: probe] [op: ticket-fixture] "
+        "DEC: ticket added via SAIOPS\n"
+        "- 09.08.26 00:00 [E-900] [T-none] DEC: base\n",
+        encoding="utf-8",
     )
     (sealr / ".saipen" / "logs" / "LOG-002.md").write_text(
         "- 09.08.26 00:01 [E-901] [T-none] DEC: sealed two\n"
@@ -14315,7 +14484,13 @@ def run_nitro_integrity_probes() -> tuple[list[str], int]:
     expect(
         "proposed-state invalidity refuses before any journal PREPARED",
         not claim_c.get("ok")
-        and claim_c.get("code") == "VALIDATION_FAILED"
+        # T-1361 CL-06: b2343541 (T-1334) gave immutable-ledger corruption its
+        # own refusal class instead of the generic VALIDATION_FAILED --
+        # `CheckpointError.code` names the class "when it is more precise".
+        # A duplicate LOG line is exactly that, so the specific code is the
+        # contract now; accepting the generic one would accept a refusal that
+        # says less than the engine knows.
+        and claim_c.get("code") == "HISTORY_LEDGER_CORRUPT"
         and before_ops == after_ops,
         repr(claim_c),
     )
@@ -15040,7 +15215,8 @@ def run_nitro_integrity_probes() -> tuple[list[str], int]:
     res_c = recover(root_c, "op-conf")
     expect(
         "crash control A: changed unfinished write target CONFLICTs",
-        res_c.get("code") == "CONFLICT" and (saipen_c / "STATE.md").read_bytes() == external_c,
+        res_c.get("code") == RECOVERY_REFUSED
+        and (saipen_c / "STATE.md").read_bytes() == external_c,
         repr(res_c),
     )
     expect(
@@ -15189,7 +15365,7 @@ def run_nitro_integrity_probes() -> tuple[list[str], int]:
     )
     expect(
         "saipen recover --json refuses a conflict and names the op",
-        '"code": "CONFLICT"' in rec_c.stdout and "op-conf" in rec_c.stdout,
+        f'"code": "{RECOVERY_REFUSED}"' in rec_c.stdout and "op-conf" in rec_c.stdout,
         repr(rec_c.stdout[:200]),
     )
 
@@ -16010,7 +16186,19 @@ def run_nitro_integrity_probes() -> tuple[list[str], int]:
     def _gate_project(log_events: list[tuple[str, str]]) -> Path:
         _r = make_project()
         _sf = _r / ".saipen"
-        _log = "- 09.08.26 00:00 [E-900] [T-none] DEC: base\n"
+        # T-1361 CL-06: this rewrites the fixture's whole history, and the
+        # fixture's history is where T-1 and T-2 get the allocation events
+        # CORE-003 / SRC-026:R003 requires. Seeding from the base event alone
+        # made the INTENDED-GREEN leg fail on unallocated board records, so
+        # the control read (1, 1) -- both legs red, which proves nothing about
+        # the gate closure it exists to test. Keep the allocations.
+        _log = (
+            "- 09.08.26 00:00 [E-898] [T-1] [agent: probe] [op: ticket-fixture] "
+            "DEC: ticket added via SAIOPS\n"
+            "- 09.08.26 00:00 [E-899] [T-2] [agent: probe] [op: ticket-fixture] "
+            "DEC: ticket added via SAIOPS\n"
+            "- 09.08.26 00:00 [E-900] [T-none] DEC: base\n"
+        )
         _e = 900
         for _msg, _tid in log_events:
             _e += 1
@@ -16184,9 +16372,33 @@ def run_nitro_integrity_probes() -> tuple[list[str], int]:
     )
     rcA = _route_next(rc_state, rc_board)
     expect(
+        # T-1361 CL-06. This fixture sets THREE brakes at once: phase BLOCKED,
+        # a non-empty blocker, and a persisted WAIT. T-1322 unified them into
+        # ONE classifier (`state.binding_brake`) shared with the admission
+        # guard, and it reports `phase == BLOCKED` first -- so `wait` is
+        # unreachable HERE by construction, not broken. What the check is
+        # actually about, a user brake outranking START, still holds: the
+        # router stops and restates rather than advertising board work. The
+        # WAIT branch keeps its own control below, so unifying the brake does
+        # not quietly cost us the precedence this line used to prove.
         "router: user brake outranks START (RESTATE_AND_STOP)",
-        rcA.get("reason") == "wait" and rcA.get("executable_behavior") == "RESTATE_AND_STOP",
+        rcA.get("reason") == "unblock" and rcA.get("executable_behavior") == "RESTATE_AND_STOP",
         repr(rcA),
+    )
+    rc_wait_state = (
+        "---\nphase: DONE\ntask: none\n"
+        'next_action: "WAIT: user brake -- user asked to stop"\n'
+        'blocker: ""\ntransition_from: SHIP\n'
+        "saipen_version: 7\nschema_version: 3\nlast_event: 900\n"
+        'style_contract: ded-4ae736e4\nsaipen_home: "."\n'
+        "agent: probe\nmode: full\n"
+        "updated: 2026-08-09T00:00:00Z\n---\n"
+    )
+    rcW = _route_next(rc_wait_state, rc_board)
+    expect(
+        "router: a persisted WAIT alone is still classified `wait`, not board work",
+        rcW.get("reason") == "wait" and rcW.get("executable_behavior") == "RESTATE_AND_STOP",
+        repr(rcW),
     )
 
     # ---- T-592: conflict inspection + safe resolution lifecycle.
@@ -17189,9 +17401,15 @@ def run_hostile_authority_probes() -> tuple[list[str], int]:
         state_contract_errors,
     )
 
+    # T-1361 CL-07: `saipen_version` was the literal 7, so once this home
+    # shipped v8.0.0 every fixture declared a generation the running install
+    # refuses to rebind onto (T-1352 HOME_REQUIRED) -- and the probes about
+    # rebinding a DEAD pointer measured that refusal instead. The fixture must
+    # declare the generation it is actually running under; the checks that
+    # want a MISMATCH build one explicitly, relative to the same number.
     STATE_TMPL = (
         '---\nphase: DONE\ntask: none\nnext_action: "saipen continue"\n'
-        'blocker: ""\ntransition_from: SHIP\nsaipen_version: 7\n'
+        'blocker: ""\ntransition_from: SHIP\nsaipen_version: %(major)s\n'
         "schema_version: 3\nlast_event: 902\nstyle_contract: %(style)s\n"
         'saipen_home: "%(home)s"\nagent: probe\nmode: %(mode)s\n'
         "updated: 2026-08-16T00:00:00Z\n---\n"
@@ -17208,10 +17426,20 @@ def run_hostile_authority_probes() -> tuple[list[str], int]:
         root = Path(tempfile.mkdtemp(prefix="saipen-hr-auth-"))
         saipen = root / ".saipen"
         saipen.mkdir()
+        # T-1361 CL-07: T-1 and T-2 are written straight into BOARD below, so
+        # the default history has to ALLOCATE them -- CORE-003 / SRC-026:R003
+        # made identity come from a structured [T-###] event, and without one
+        # the claim/adoption probes measured `core_fast` refusing the fixture
+        # rather than the authority behaviour they exist to test.
         (saipen / "LOG.md").write_text(
             log_lines
             if log_lines is not None
-            else "# Log\n- 09.08.26 00:00 [E-901] [agent: probe] DEC: base\n"
+            else "# Log\n"
+            "- 09.08.26 00:00 [E-899] [T-1] [agent: probe] "
+            "DEC: ticket added via SAIOPS\n"
+            "- 09.08.26 00:00 [E-900] [parent: E-899] [T-2] [agent: probe] "
+            "DEC: ticket added via SAIOPS\n"
+            "- 09.08.26 00:00 [E-901] [parent: E-900] [agent: probe] DEC: base\n"
             "- 09.08.26 00:01 [E-902] [parent: E-901] [agent: probe] "
             "DEC: second\n",
             encoding="utf-8",
@@ -17229,6 +17457,7 @@ def run_hostile_authority_probes() -> tuple[list[str], int]:
                 "style": style_token(),
                 "home": (home if home is not None else running_home().as_posix()),
                 "mode": mode,
+                "major": running_protocol_major(),
             },
             encoding="utf-8",
         )
@@ -17354,8 +17583,19 @@ def run_hostile_authority_probes() -> tuple[list[str], int]:
 
     # ---- P0#3 -- running install authoritative, pointer validated apart ---
     expect(
+        # T-1361 CL-07: the major was written as a literal 7 and this home
+        # shipped v8.0.0 on 06.09.26, so the check has read red on the
+        # repository's own version number ever since. What P0#3 is about is
+        # WHICH install answers -- the running one, never a project's STATE --
+        # so read the running install's own files and compare the accessors to
+        # them. A literal here is a bet that the product stops being released.
         "the running install answers the schema/protocol questions",
-        running_schema_version() == 3 and running_protocol_major() == 7,
+        running_schema_version()
+        == json.loads(
+            (HOME / "extensions" / "schemas" / "state.schema.json").read_text(encoding="utf-8-sig")
+        )["x-current-schema-version"]
+        and running_protocol_major()
+        == int((HOME / "VERSION").read_text(encoding="utf-8-sig").strip().split(".")[0]),
         f"schema={running_schema_version()} major={running_protocol_major()}",
     )
     dead = (Path(tempfile.gettempdir()) / "saipen-hr-auth-dead-home").resolve()
@@ -17433,7 +17673,11 @@ def run_hostile_authority_probes() -> tuple[list[str], int]:
         any("style_contract" in e for e in errs),
         "; ".join(errs),
     )
-    errs = state_contract_errors({**GOOD_V3, "saipen_version": 8})
+    # T-1361 CL-07: the literal 8 was "newer than running" only while the
+    # running install was 7. Newer means newer than whatever is running.
+    errs = state_contract_errors(
+        {**GOOD_V3, "saipen_version": (running_protocol_major() or 0) + 1}
+    )
     expect(
         "a project protocol major newer than the running one refuses",
         any("newer than the running" in e for e in errs),
@@ -18440,10 +18684,18 @@ def run_scenario_fixture_probes(
     if not enabled:
         return [], 0, 0
 
-    failures: list[str] = []
-    checked = skipped = 0
+    def check_fixture(d: Path) -> tuple[list[str], int, int]:
+        """One fixture's verdict, isolated from every other fixture's.
 
-    for d in sorted(p for p in SCENARIOS.iterdir() if p.is_dir()):
+        T-1361: this was the body of the walk below, so an exception raised
+        while checking ONE fixture ended the walk and deleted every later
+        fixture from the record -- the same shape as the probe-group driver,
+        one level down. Extracted so the caller can bound it: a fixture that
+        explodes is a recorded failure and the walk continues.
+        """
+        failures: list[str] = []
+        checked = skipped = 0
+
         readme = d / "README.md"
         has_state = (d / ".saipen").is_dir()
         declared = None
@@ -18468,14 +18720,14 @@ def run_scenario_fixture_probes(
                 )
             else:
                 skipped += 1
-            continue
+            return failures, checked, skipped
 
         if declared is None:
             failures.append(
                 f"{d.name}: ships a .saipen/ but declares no "
                 f"'expect: pass|fail' line -- cannot be checked"
             )
-            continue
+            return failures, checked, skipped
 
         if declared == "fail" and not reason:
             failures.append(
@@ -18484,7 +18736,7 @@ def run_scenario_fixture_probes(
                 f"fail-fixture asserts only that something went "
                 f"wrong, and any unrelated FAIL then scores it green"
             )
-            continue
+            return failures, checked, skipped
 
         with tempfile.TemporaryDirectory(prefix="saipen-scenario-") as raw:
             disposable = Path(raw) / d.name
@@ -18553,6 +18805,27 @@ def run_scenario_fixture_probes(
                     )
                 print(f"PASS: {d.name} -- expected {declared}, got {actual}")
 
+        return failures, checked, skipped
+
+    failures: list[str] = []
+    checked = skipped = 0
+
+    for d in sorted(p for p in SCENARIOS.iterdir() if p.is_dir()):
+        try:
+            one_failures, one_checked, one_skipped = check_fixture(d)
+        except (KeyboardInterrupt, SystemExit):
+            raise
+        except Exception as exc:
+            # Attempted, so it counts: a crashed fixture is a red result, not
+            # an absence from the denominator.
+            failures.append(
+                f"{d.name}: fixture harness crashed: {type(exc).__name__}: {exc}"
+            )
+            checked += 1
+            continue
+        failures.extend(one_failures)
+        checked += one_checked
+        skipped += one_skipped
     return failures, checked, skipped
 
 
@@ -19143,173 +19416,135 @@ def _main_impl():
         raise SystemExit(1 if _all_f else 0)
 
     # ---- Full suite probe execution ----------------------------------------
-    injector_failures, injector_checked, injector_skipped = run_injector_probes()
-    failures.extend(injector_failures)
-    scheduler_failures, scheduler_checked, scheduler_skipped = run_scheduler_probes()
-    failures.extend(scheduler_failures)
-    root_failures, root_checked = run_project_root_probes()
-    failures.extend(root_failures)
-    export_failures, export_checked, export_skipped = run_export_probes()
-    failures.extend(export_failures)
-    crew_failures, crew_checked, crew_skipped = run_crew_probes()
-    failures.extend(crew_failures)
-    try:
-        saicrew_failures, saicrew_checked = run_saicrew_probes()
-    except Exception as _saicrew_exc:  # harness robustness: a probe assumption
-        # bug must never abort the whole suite and hide every later group's
-        # result; record it and continue.
-        saicrew_failures = [
-            f"saicrew harness crashed: {type(_saicrew_exc).__name__}: {_saicrew_exc}"
-        ]
-        saicrew_checked = 0
-    failures.extend(saicrew_failures)
-    last_event_failures, last_event_checked = run_last_event_probes()
-    failures.extend(last_event_failures)
-    log_tail_failures, log_tail_checked = run_log_tail_probes()
-    failures.extend(log_tail_failures)
-    hunt_mark_failures, hunt_mark_checked = run_hunt_mark_probes()
-    failures.extend(hunt_mark_failures)
-    converge_failures, converge_checked = run_converge_routing_probes()
-    failures.extend(converge_failures)
-    ccc_identity_failures, ccc_identity_checked = run_ccc_identity_probes()
-    failures.extend(ccc_identity_failures)
-    producer_gate_failures, producer_gate_checked = run_producer_gate_probes()
-    failures.extend(producer_gate_failures)
-    ship_staging_failures, ship_staging_checked = run_ship_staging_probes()
-    failures.extend(ship_staging_failures)
-    release_freshness_failures, release_freshness_checked = run_release_freshness_probes()
-    failures.extend(release_freshness_failures)
-    release_executor_failures, release_executor_checked = run_release_executor_probes()
-    failures.extend(release_executor_failures)
-    rolefresh_failures, rolefresh_checked, rolefresh_skipped = run_role_freshness_probes()
-    failures.extend(rolefresh_failures)
-    sub_clean_failures, sub_clean_checked, sub_clean_skipped = run_sub_clean_probes()
-    failures.extend(sub_clean_failures)
-    hardening_failures, hardening_checked = run_hardening_control_inventory()
-    failures.extend(hardening_failures)
-    userperson_failures, userperson_checked = run_userperson_probes()
-    failures.extend(userperson_failures)
-    source_receipt_failures, source_receipt_checked = run_source_receipt_probes()
-    failures.extend(source_receipt_failures)
-    improve_failures, improve_checked = run_improve_probes()
-    failures.extend(improve_failures)
-    nitro_failures, nitro_checked = run_nitro_probes()
-    failures.extend(nitro_failures)
-    nitro_m2_failures, nitro_m2_checked = run_nitro_m2_probes()
-    failures.extend(nitro_m2_failures)
-    nitro_m3_failures, nitro_m3_checked = run_nitro_m3_probes()
-    failures.extend(nitro_m3_failures)
-    nitro_integrity_failures, nitro_integrity_checked = run_nitro_integrity_probes()
-    failures.extend(nitro_integrity_failures)
-    manifest_failures, manifest_checked = run_manifest_tracking_probes()
-    failures.extend(manifest_failures)
-    lint_parity_failures, lint_parity_checked = run_lint_parity_probes()
-    failures.extend(lint_parity_failures)
-    autoinject_failures, autoinject_checked = run_autoinject_manifest_probes()
-    failures.extend(autoinject_failures)
-    hook_failures, hook_checked, hook_skipped = run_hook_probes()
-    ci_failures, ci_checked = run_ci_status_probes()
-    failures.extend(ci_failures)
-    failures.extend(hook_failures)
-    purity_failures, purity_checked, purity_skipped = run_precommit_purity_probe()
-    failures.extend(purity_failures)
-    hr_journal_failures, hr_journal_checked = run_hostile_journal_probes()
-    failures.extend(hr_journal_failures)
-    hr_release_failures, hr_release_checked = run_hostile_release_probes()
-    failures.extend(hr_release_failures)
-    hr_convergence_failures, hr_convergence_checked = run_hostile_convergence_probes()
-    failures.extend(hr_convergence_failures)
-    hr_state_failures, hr_state_checked = run_hostile_state_probes()
-    failures.extend(hr_state_failures)
-    hr_authority_failures, _hr_authority_checked = run_hostile_authority_probes()
-    failures.extend(hr_authority_failures)
-    hr_wait_failures, hr_wait_checked = run_hostile_wait_probes()
-    failures.extend(hr_wait_failures)
+    #
+    # T-1361: a TABLE, not forty-four hand-written call/extend pairs. Only
+    # `run_saicrew_probes` was wrapped, so any OTHER group that RAISED took the
+    # whole suite down with it -- and everything below it vanished from the
+    # record, green or red. That is exactly what happened: the suite reported
+    # 751 PASS / 3 FAIL and stopped, and repairing the crash revealed roughly
+    # 153 checks nobody had seen. A suite that can lose its own tail reports
+    # less than it measured, and there is no way to tell the difference from
+    # the outside.
+    #
+    # Every group is attempted. An exception is a bounded recorded failure.
+    # The totals below are the totals of what was ATTEMPTED, so a crashed
+    # group is visible as a zero with a reason rather than as an absence.
+    probe_groups = (
+        ("injector", run_injector_probes, "injector(s) executed"),
+        ("scheduler", run_scheduler_probes, "scheduler behavior(s) executed"),
+        ("project-root", run_project_root_probes, "project-root behavior(s) executed"),
+        ("export", run_export_probes, "export ownership behavior(s) executed"),
+        ("crew", run_crew_probes, "crew-launch behavior(s) executed"),
+        ("saicrew", run_saicrew_probes, "saicrew hostile-control behavior(s) executed"),
+        ("last-event", run_last_event_probes, "last_event migration behavior(s) executed"),
+        ("log-tail", run_log_tail_probes, "log-tail behavior(s) executed"),
+        ("hunt-mark", run_hunt_mark_probes, "hunt-mark behavior(s) executed"),
+        ("converge-routing", run_converge_routing_probes, "converge-routing behavior(s) executed"),
+        ("ccc-identity", run_ccc_identity_probes, "ccc commit-identity behavior(s) executed"),
+        ("producer-gate", run_producer_gate_probes, "producer-gate behavior(s) executed"),
+        ("ship-staging", run_ship_staging_probes, "ship-staging behavior(s) executed"),
+        (
+            "release-freshness",
+            run_release_freshness_probes,
+            "release-freshness behavior(s) executed",
+        ),
+        ("release-executor", run_release_executor_probes, "release-executor behavior(s) executed"),
+        ("role-freshness", run_role_freshness_probes, "role-freshness behavior(s) executed"),
+        ("sub-clean", run_sub_clean_probes, "sub-clean safety behavior(s) executed"),
+        ("hardening", run_hardening_control_inventory, "hardening red control(s) resolved"),
+        ("userperson", run_userperson_probes, "userperson behavior(s) executed"),
+        ("source-receipt", run_source_receipt_probes, "source-receipt behavior(s) executed"),
+        ("improve", run_improve_probes, "improve behavior(s) executed"),
+        ("nitro", run_nitro_probes, "nitro behavior(s) executed"),
+        ("nitro-m2", run_nitro_m2_probes, "nitro-m2 behavior(s) executed"),
+        ("nitro-m3", run_nitro_m3_probes, "nitro-m3 behavior(s) executed"),
+        ("nitro-integrity", run_nitro_integrity_probes, "nitro-integrity behavior(s) executed"),
+        (
+            "manifest-tracking",
+            run_manifest_tracking_probes,
+            "manifest-tracking behavior(s) executed",
+        ),
+        ("lint-parity", run_lint_parity_probes, "lint-parity behavior(s) executed"),
+        (
+            "autoinject-manifest",
+            run_autoinject_manifest_probes,
+            "autoinject-manifest behavior(s) executed",
+        ),
+        ("installed-hook", run_hook_probes, "installed-hook behavior(s) executed"),
+        ("ci-status", run_ci_status_probes, "ci-status behavior(s) executed"),
+        ("precommit-purity", run_precommit_purity_probe, "pre-commit-purity behavior(s) executed"),
+        (
+            "hostile-journal",
+            run_hostile_journal_probes,
+            "hostile-regression journal behavior(s) executed",
+        ),
+        (
+            "hostile-release",
+            run_hostile_release_probes,
+            "hostile-regression release behavior(s) executed",
+        ),
+        (
+            "hostile-convergence",
+            run_hostile_convergence_probes,
+            "hostile-regression convergence behavior(s) executed",
+        ),
+        (
+            "hostile-state",
+            run_hostile_state_probes,
+            "hostile-regression state-contract behavior(s) executed",
+        ),
+        (
+            "hostile-authority",
+            run_hostile_authority_probes,
+            "hostile-regression authority behavior(s) executed",
+        ),
+        (
+            "hostile-wait",
+            run_hostile_wait_probes,
+            "hostile-regression WAIT-grammar behavior(s) executed",
+        ),
+        ("digest-stale", run_digest_stale_probes, "digest-stale behavior(s) executed"),
+        ("orphan-tag", run_orphan_tag_probes, "orphan-tag behavior(s) executed"),
+        ("ship-pick", run_ship_pick_probes, "ship-pick behavior(s) executed"),
+        (
+            "active-task-recovery",
+            run_active_task_recovery_probes,
+            "active-task recovery behavior(s) executed",
+        ),
+        (
+            "t1012-strict-grammar",
+            run_t1012_strict_grammar_probes,
+            "T-1012 strict-grammar behavior(s) executed",
+        ),
+        (
+            "perf-wave",
+            run_perf_wave_probes,
+            "perf-wave regression gate(s) executed (T-1019..T-1022)",
+        ),
+        (
+            "continuity",
+            run_continuity_probes,
+            "continuity gate(s) executed (SC-CONTINUITY-001 + H1..H20)",
+        ),
+    )
 
-    digest_failures, digest_checked = run_digest_stale_probes()
-    failures.extend(digest_failures)
-    orphan_failures, orphan_checked = run_orphan_tag_probes()
-    failures.extend(orphan_failures)
-    ship_pick_failures, ship_pick_checked = run_ship_pick_probes()
-    active_task_failures, active_task_checked = run_active_task_recovery_probes()
-    failures.extend(ship_pick_failures)
-    failures.extend(active_task_failures)
-    t1012_failures, _t1012_checked = run_t1012_strict_grammar_probes()
-    failures.extend(t1012_failures)
-    perf_failures, perf_checked = run_perf_wave_probes()
-    failures.extend(perf_failures)
-    continuity_failures, continuity_checked = run_continuity_probes()
-    failures.extend(continuity_failures)
+    group_results = run_probe_groups(probe_groups)
+    for result in group_results:
+        failures.extend(result.failures)
+
     print(
         f"\n{checked} executable fixture(s) checked, "
         f"{skipped} behavioral fixture(s) skipped (README-only by design)"
     )
+    for result in group_results:
+        print(result.summary_line())
+
+    attempted = len(probe_groups)
+    executed = sum(1 for result in group_results if result.crashed is None)
     print(
-        f"{injector_checked} injector(s) executed, "
-        f"{injector_skipped} skipped for missing interpreters"
+        f"{executed} of {attempted} probe group(s) reached a verdict; "
+        f"{sum(result.checked for result in group_results)} grouped check(s) executed"
     )
-    print(
-        f"{scheduler_checked} scheduler behavior(s) executed, "
-        f"{scheduler_skipped} skipped for missing interpreters"
-    )
-    print(f"{root_checked} project-root behavior(s) executed")
-    print(
-        f"{export_checked} export ownership behavior(s) executed, "
-        f"{export_skipped} skipped for missing interpreters"
-    )
-    print(
-        f"{crew_checked} crew-launch behavior(s) executed, "
-        f"{crew_skipped} skipped for missing interpreters"
-    )
-    print(f"{saicrew_checked} saicrew hostile-control behavior(s) executed")
-    print(f"{digest_checked} digest-stale behavior(s) executed")
-    print(f"{orphan_checked} orphan-tag behavior(s) executed")
-    print(f"{ship_pick_checked} ship-pick behavior(s) executed")
-    print(f"{active_task_checked} active-task recovery behavior(s) executed")
-    print(f"{last_event_checked} last_event migration behavior(s) executed")
-    print(f"{log_tail_checked} log-tail behavior(s) executed")
-    print(f"{hunt_mark_checked} hunt-mark behavior(s) executed")
-    print(f"{converge_checked} converge-routing behavior(s) executed")
-    print(f"{ccc_identity_checked} ccc commit-identity behavior(s) executed")
-    print(f"{producer_gate_checked} producer-gate behavior(s) executed")
-    print(f"{ship_staging_checked} ship-staging behavior(s) executed")
-    print(f"{release_freshness_checked} release-freshness behavior(s) executed")
-    print(f"{release_executor_checked} release-executor behavior(s) executed")
-    print(
-        f"{rolefresh_checked} role-freshness behavior(s) executed, "
-        f"{rolefresh_skipped} skipped for missing host capability"
-    )
-    print(
-        f"{sub_clean_checked} sub-clean safety behavior(s) executed, "
-        f"{sub_clean_skipped} skipped for missing host capability"
-    )
-    print(f"{hardening_checked} hardening red control(s) resolved")
-    print(f"{hr_state_checked} hostile-regression state-contract behavior(s) executed")
-    print(f"{hr_wait_checked} hostile-regression WAIT-grammar behavior(s) executed")
-    print(f"{userperson_checked} userperson behavior(s) executed")
-    print(f"{source_receipt_checked} source-receipt behavior(s) executed")
-    print(f"{improve_checked} improve behavior(s) executed")
-    print(f"{nitro_checked} nitro behavior(s) executed")
-    print(f"{perf_checked} perf-wave regression gate(s) executed (T-1019..T-1022)")
-    print(f"{continuity_checked} continuity gate(s) executed (SC-CONTINUITY-001 + H1..H20)")
-    print(f"{nitro_m2_checked} nitro-m2 behavior(s) executed")
-    print(f"{nitro_m3_checked} nitro-m3 behavior(s) executed")
-    print(f"{nitro_integrity_checked} nitro-integrity behavior(s) executed")
-    print(
-        f"{purity_checked} pre-commit-purity behavior(s) executed, "
-        f"{purity_skipped} skipped for missing interpreters"
-    )
-    print(f"{manifest_checked} manifest-tracking behavior(s) executed")
-    print(f"{lint_parity_checked} lint-parity behavior(s) executed")
-    print(f"{autoinject_checked} autoinject-manifest behavior(s) executed")
-    print(
-        f"{hook_checked} installed-hook behavior(s) executed, "
-        f"{hook_skipped} skipped for missing interpreters"
-    )
-    print(f"{ci_checked} ci-status behavior(s) executed")
-    print(f"{hr_journal_checked} hostile-regression journal behavior(s) executed")
-    print(f"{hr_release_checked} hostile-regression release behavior(s) executed")
-    print(f"{hr_convergence_checked} hostile-regression convergence behavior(s) executed")
 
     if failures:
         print(f"\nFAILED: {len(failures)} executable check(s) failed")
