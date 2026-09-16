@@ -26,10 +26,16 @@ from pathlib import Path
 TOOLS = Path(__file__).resolve().parent
 REPO = TOOLS.parent
 MODULE = "tools/test_t1363_zero_manual_entry.py"
+#: The commit BEFORE the T-1363 slice. Pinned, not `HEAD`: once the slice is
+#: committed, `HEAD` carries the fix and the subject stops being red -- which
+#: would quietly retire the oracle exactly when it starts mattering.
+BASE = "005a8ac2"
 
 #: Files the T-1363 slice CHANGES. Each goes back to its HEAD bytes.
 REVERTED = (
     "saipen/BOOT.md",
+    "saipen/COMMANDS.md",
+    "saipen/MANIFEST.json",
     "saipen/REGISTRY.json",
     "tools/saipen.py",
     "tools/saipen_engine/admission.py",
@@ -37,6 +43,14 @@ REVERTED = (
     "tools/saipen_engine/journal.py",
     "tools/saipen_engine/operations.py",
     "tools/saipen_engine/reconcile.py",
+    # Adjacent controls the slice MOVED: each measured a property against the
+    # old owner, and reverting them proves this module is the only verifier
+    # that changed.
+    "tools/test_guard_events.py",
+    "tools/test_opencode_adapter.py",
+    "tools/test_recovery_reachability.py",
+    "tools/test_runtime_bootstrap.py",
+    "tools/test_search_transport.py",
     "extensions/adapters/opencode/saipen-guard.js",
 )
 #: Files the T-1363 slice ADDS. Each is removed from the subject.
@@ -51,7 +65,7 @@ COPIED = ("tools", "saipen", "extensions", "bootstrap")
 _IGNORE = shutil.ignore_patterns("__pycache__", "*.pyc", "node_modules", ".git")
 
 
-def build(destination: Path) -> Path:
+def build(destination: Path, base: str = BASE) -> Path:
     shutil.rmtree(destination, ignore_errors=True)
     destination.mkdir(parents=True)
     for name in COPIED:
@@ -60,7 +74,7 @@ def build(destination: Path) -> Path:
             shutil.copytree(source, destination / name, ignore=_IGNORE)
     for relative in REVERTED:
         head = subprocess.run(
-            ["git", "show", f"HEAD:{relative}"],
+            ["git", "show", f"{base}:{relative}"],
             cwd=REPO,
             capture_output=True,
             check=True,
@@ -100,17 +114,18 @@ def classes(output: str) -> dict[str, int]:
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--keep", action="store_true")
+    parser.add_argument("--base", default=BASE)
     args = parser.parse_args()
 
     base = Path(tempfile.mkdtemp(prefix="t1363-red-"))
     try:
-        subject = build(base / "subject")
+        subject = build(base / "subject", args.base)
         code, output = run(subject)
         red = classes(output)
         total = re.search(r"^Ran (\d+) tests", output, re.MULTILINE)
         print(f"subject: {subject}")
         print(f"verifier: {MODULE} (verbatim from the working tree)")
-        print(f"reverted: {len(REVERTED)} file(s) to HEAD; removed: {len(REMOVED)}")
+        print(f"reverted: {len(REVERTED)} file(s) to {args.base}; removed: {len(REMOVED)}")
         print(f"exit: {code}; ran {total.group(1) if total else '?'} test(s)")
         if code == 0:
             print("RED SUBJECT FAILED: the module passes WITHOUT the T-1363 slice.")

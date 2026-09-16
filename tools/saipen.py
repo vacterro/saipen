@@ -2589,7 +2589,13 @@ def _start(project_root: Path, args: list[str], as_json: bool, dry_run: bool) ->
 
     opts, positional, option_error = _parse_value_options(
         args,
-        {"--priority": "priority", "--verify": "verify", "--hex": "hex", "--receipt": "receipt"},
+        {
+            "--priority": "priority",
+            "--verify": "verify",
+            "--hex": "hex",
+            "--file": "file",
+            "--receipt": "receipt",
+        },
     )
     if option_error:
         _emit(
@@ -2612,6 +2618,38 @@ def _start(project_root: Path, args: list[str], as_json: bool, dry_run: bool) ->
             )
             return 2
         text = decoded
+    if opts.get("file") is not None:
+        # T-1363 field finding: a long request cannot be transcribed as hex by
+        # a weak model -- measured, twice, corrupted both times. A file written
+        # with the host's own write tool passes through no shell, so there is
+        # no quoting to get wrong and nothing to copy by hand.
+        source = Path(opts["file"])
+        if not source.is_absolute():
+            source = project_root / source
+        try:
+            text = source.read_text(encoding="utf-8-sig")
+        except (OSError, UnicodeDecodeError) as exc:
+            _emit(
+                {
+                    "ok": False,
+                    "code": "VALIDATION_FAILED",
+                    "detail": f"--file {opts['file']!r} is not a readable UTF-8 file: {exc}",
+                    "usage": USAGE,
+                },
+                as_json,
+            )
+            return 2
+        if opts.get("hex") is not None or positional:
+            _emit(
+                {
+                    "ok": False,
+                    "code": "VALIDATION_FAILED",
+                    "detail": "--file carries the whole task; give no other task text",
+                    "usage": USAGE,
+                },
+                as_json,
+            )
+            return 2
     receipt = opts.get("receipt")
     if receipt and text:
         _emit(
@@ -6544,7 +6582,8 @@ def main(argv: list[str] | None = None) -> int:
         token in ("-h", "--help") for token in clean_before
     ):
         usage_msg = (
-            "usage: saipen (start '<task in one line>' [--hex HEX] [--receipt SRC-###]|"
+            "usage: saipen (start '<task in one line>' [--file PATH] [--hex HEX] "
+            "[--receipt SRC-###]|"
             "continue|status|next|runtime [--prelaunch [--adapter ID] "
             "[--no-resync]|--bootstrap|--check-freshness]|search [--hex HEX]|"
             "validate|recover|fleet preflight|scan|prepare|claim <T-###> [--explicit]|"

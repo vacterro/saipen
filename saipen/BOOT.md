@@ -19,12 +19,13 @@ only when START's own answer names it.
 START answers in one of three ways, and each one names what to do next:
 
 - `STARTED` -- read `load_path`, execute `action` now. Nothing else first.
-- `next: <command>` -- run that exact command, then `saipen start --receipt
-  SRC-###`. One question, one answer, then work.
-- a refusal whose `next:` names `saipen start --hex <hex>` -- run that exact
-  command. The task text could not survive the shell as typed, so the guard
-  computed the transport that carries it. Never reword the user's task to get
-  past a refusal.
+- `next: <command>` -- run it, then `saipen start --receipt SRC-###`.
+- `next: saipen start --hex <hex>` -- run exactly that; the shell could not
+  carry the task text, so the guard computed the transport that does.
+- `next: saipen start --file <path>` -- write the task text VERBATIM to a
+  UTF-8 file with your write tool (no shell, no quoting), then run it.
+
+Never reword the user's task to get past a refusal.
 
 ## Cold route
 
@@ -49,9 +50,7 @@ START answers in one of three ways, and each one names what to do next:
    transport error (not zero matches), use `saipen search --hex
    <hex-encoded-utf8>` — the canonical, read-only, bounded search transport,
    which the guard admits even while protocol state is invalid. Zero matches is
-   a normal result and must never be retried as a failure. Never fall back to
-   generic `grep`/`bash` search: the guard correctly refuses it under recovery
-   debt, and that was the deadlock this transport removes.
+   a normal result and must never be retried as a failure.
    If neither layout contains this file, route to BLOCKED. When a recognized local SAIHANDOFF transport is
    present, inspect the transport binding before concluding that a staging cwd is
    not a SAIPEN project; never ask the user for the root when a valid host/session

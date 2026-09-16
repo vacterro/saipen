@@ -43,7 +43,11 @@ from .state import parse_state_or_error
 STARTED = "STARTED"
 WAIT_OPERATOR = "WAIT_OPERATOR"
 WAIT_FOREIGN_OWNER = "WAIT_FOREIGN_OWNER"
-USAGE = "Use: saipen start '<task in one line>'  (or --hex <utf-8 hex>, or --receipt SRC-###)"
+USAGE = (
+    "Use: saipen start '<task in one line>'  "
+    "(or --file PATH, "
+    "--hex <utf-8 hex>, or --receipt SRC-###)"
+)
 
 #: The canonical execution phases a claimed ticket can be resumed in.
 _WORK_PHASES = frozenset({"SCOUT", "BUILD", "VERIFY", "REVIEW", "SHIP"})

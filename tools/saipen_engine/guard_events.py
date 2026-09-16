@@ -894,15 +894,41 @@ def _extract_targets(tool_input: dict) -> tuple[list[str], bool]:
 #: trailing backslash is refused separately: it would escape the closing quote
 #: the C runtime sees.
 #: ... and the EXTRA characters a DOUBLE-quoted payload may not carry, because
-#: bash and PowerShell both expand inside `"`: `$`, backtick, and the
-#: backslash bash reads as an escape there. A single-quoted payload expands
-#: nothing in either shell and keeps the wide alphabet.
+#: bash and PowerShell both expand inside `"`: `$` and the backtick. A
+#: single-quoted payload expands nothing in either shell and keeps the wide
+#: alphabet.
 _INGRESS_PAYLOAD_FORBIDDEN = frozenset("'\"")
-_INGRESS_DOUBLE_QUOTE_FORBIDDEN = frozenset("$`\\")
+_INGRESS_DOUBLE_QUOTE_FORBIDDEN = frozenset("$`")
+#: Inside `"..."` bash treats a backslash as an escape ONLY before these; every
+#: other backslash is literal there, and PowerShell and cmd never escape with
+#: one at all. Measured on the field incident: a task naming
+#: `V:\_TEMP_astprompter_drag\SAIPENVIEW_main.py` carries three backslashes
+#: and not one of them precedes a character any shell would act on, so refusing
+#: the whole line as unquotable cost a route the request never needed.
+_BASH_DQ_ESCAPES = frozenset('$`"\
+')
+
+
+def _backslashes_are_literal(payload: str) -> bool:
+    for index, char in enumerate(payload):
+        if char != "\\":
+            continue
+        following = payload[index + 1] if index + 1 < len(payload) else ""
+        if following == "" or following in _BASH_DQ_ESCAPES:
+            return False
+    return True
 #: Task text longer than this is not refused -- it stops being quotable, and
-#: `--hex` carries it. The bound exists so a refusal can never print an
-#: unbounded machine fact back to the host.
+#: another transport carries it. The bound exists so a refusal can never print
+#: an unbounded machine fact back to the host.
 MAX_INGRESS_REWRITE_CHARS = 4096
+#: How much text `--hex` may carry in a refusal. MEASURED in the field, not
+#: chosen: a free routed model given a 700-character hex blob transcribed it
+#: twice and corrupted it both times (once by inserting a literal ` app` into
+#: the middle of the digits). A route a weak model cannot copy is not a route,
+#: so past this size the refusal names the transport that needs no
+#: transcription at all -- a file written with the host's own write tool,
+#: where no shell quoting exists to get wrong.
+MAX_INGRESS_HEX_PAYLOAD = 96
 
 
 def ingress_payload_literal(payload: str, quote: str = "'") -> bool:
@@ -912,6 +938,8 @@ def ingress_payload_literal(payload: str, quote: str = "'") -> bool:
     forbidden = _INGRESS_PAYLOAD_FORBIDDEN
     if quote == '"':
         forbidden = forbidden | _INGRESS_DOUBLE_QUOTE_FORBIDDEN
+        if not _backslashes_are_literal(payload):
+            return False
     if any(ch in forbidden or ord(ch) < 32 or ord(ch) == 127 for ch in payload):
         return False
     return payload.count("%") <= 1 and not payload.endswith("\\")
@@ -939,7 +967,10 @@ def ingress_rewrite(command: str) -> str | None:
     payload = payload.strip()
     if not payload or len(payload) > MAX_INGRESS_REWRITE_CHARS or payload.startswith("-"):
         return None
-    return "saipen start --hex " + payload.encode("utf-8").hex()
+    encoded = payload.encode("utf-8")
+    if len(encoded) > MAX_INGRESS_HEX_PAYLOAD:
+        return "saipen start --file <path>"
+    return "saipen start --hex " + encoded.hex()
 
 
 def _ingress_payload_tokens(command: str) -> list[str] | None:
@@ -1354,9 +1385,17 @@ def evaluate_event(event: dict, project_root: str | None = None) -> dict:
             # route would read as a way around it.
             verdict["admitted"] = False
             verdict["code"] = "INGRESS_TRANSPORT_UNSAFE"
+            route = str(verdict["canonical_next_command"])
             verdict["detail"] = (
                 "the request text cannot survive one quoted shell argument "
                 "unchanged; run the command in canonical_next_command instead"
+                + (
+                    ". Write the task text VERBATIM to a UTF-8 file with your own "
+                    "write/edit tool -- no shell, so no quoting to get wrong -- then "
+                    "run that command with the file's project-relative path"
+                    if route.endswith("--file <path>")
+                    else ""
+                )
             )
     verdict["event"] = {
         "event": mapped["event"],

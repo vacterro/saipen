@@ -607,15 +607,99 @@ class IngressGrammarTests(unittest.TestCase):
                 self.assertEqual(mapped["command_class"], "INGRESS")
                 self.assertFalse(mapped["fleet_preflight"])
 
+    def test_the_field_incident_text_survives_double_quotes_too(self):
+        """A weak model quotes with `"` as readily as `'`.
+
+        Measured on the polygon: the free model typed the field task inside
+        double quotes. Bash escapes with a backslash there ONLY before
+        ``$ ` " \\`` or a newline, and PowerShell and cmd never do, so the
+        three backslashes in a Windows path are literal in all of them.
+        Refusing the whole line cost a route the request never needed.
+        """
+        from saipen_engine.guard_events import ingress_payload_literal
+
+        for task in LITERAL_TASKS:
+            with self.subTest(task=task):
+                mapped = self._mapped('saipen start "' + task + '"')
+                if "$" in task:
+                    # `$` DOES expand inside double quotes: single quotes only.
+                    self.assertNotEqual(mapped["action"], "saipen_op", mapped)
+                    continue
+                self.assertEqual(mapped["saipen_verb"], "start", mapped["detail"])
+                self.assertEqual(mapped["command_class"], "INGRESS")
+        for unsafe in ("a \\$b", 'a \\" b', "a b\\", "a `b`", "a $HOME b"):
+            with self.subTest(unsafe=unsafe):
+                self.assertFalse(ingress_payload_literal(unsafe, '"'), unsafe)
+
+    def test_a_long_request_is_routed_to_a_transport_nobody_transcribes(self):
+        """A route a weak model cannot COPY is not a route.
+
+        Measured on the polygon: given a ~700 character hex blob the free
+        model transcribed it twice and corrupted it both times -- once by
+        inserting a literal ` app` into the middle of the digits -- then
+        abandoned the route and improvised twelve refusals. Past a size a
+        model can copy, the refusal names the file transport instead: written
+        with the host's own write tool, it passes through no shell at all.
+        """
+        from saipen_engine.guard_events import MAX_INGRESS_HEX_PAYLOAD, ingress_rewrite
+
+        long_task = "fix the user's profile page and " + ("keep the CSV export intact " * 6)
+        self.assertGreater(len(long_task.encode("utf-8")), MAX_INGRESS_HEX_PAYLOAD)
+        self.assertEqual(
+            ingress_rewrite("saipen start '" + long_task + "'"),
+            "saipen start --file <path>",
+        )
+        short = "fix the user's page"
+        route = ingress_rewrite("saipen start '" + short + "'")
+        self.assertTrue(route.startswith("saipen start --hex "), route)
+        self.assertLessEqual(len(route), 2 * MAX_INGRESS_HEX_PAYLOAD + 40)
+
+    def test_the_file_transport_carries_what_no_shell_argument_can(self):
+        root = healthy(self)
+        task = (
+            "fix the user's profile page\n\n"
+            'keep the "quoted" label, the 100% width and the C:\\tmp\\ prefix\n'
+        )
+        (root / "task.txt").write_text(task, encoding="utf-8")
+        rc, payload, text = cli(root, "start", "--file", "task.txt", "--json")
+        self.assertEqual(rc, 0, text)
+        self.assertEqual(payload.get("code"), "STARTED", text)
+        body = (
+            root / ".saipen" / "intake" / "active" / f"{payload['receipt']}.md"
+        ).read_text(encoding="utf-8")
+        self.assertIn(task.strip(), body)
+
+    def test_the_file_transport_refuses_what_it_cannot_read(self):
+        root = healthy(self)
+        rc, payload, text = cli(root, "start", "--file", "no-such-file.txt", "--json")
+        self.assertEqual(rc, 2, text)
+        self.assertEqual(payload.get("code"), "VALIDATION_FAILED", text)
+        (root / "task.txt").write_text("a task", encoding="utf-8")
+        rc, payload, text = cli(root, "start", "--file", "task.txt", "other text", "--json")
+        self.assertEqual(rc, 2, text)
+
     def test_the_route_is_a_bounded_machine_fact(self):
         """A refusal may never print an unbounded fact back to the host."""
-        from saipen_engine.guard_events import MAX_INGRESS_REWRITE_CHARS, ingress_rewrite
+        from saipen_engine.guard_events import (
+            MAX_INGRESS_HEX_PAYLOAD,
+            MAX_INGRESS_REWRITE_CHARS,
+            ingress_rewrite,
+        )
 
         fits = "fix the exporter's column " * 60
         self.assertLessEqual(len(fits), MAX_INGRESS_REWRITE_CHARS)
-        self.assertTrue((ingress_rewrite("saipen start '" + fits + "'") or "").startswith(
-            "saipen start --hex "
-        ))
+        # Long but still within the request bound: routed to the transport
+        # that needs no transcription, never to an unbounded hex blob.
+        self.assertEqual(
+            ingress_rewrite("saipen start '" + fits + "'"), "saipen start --file <path>"
+        )
+        short = "fix the user's page"
+        self.assertLessEqual(len(short.encode("utf-8")), MAX_INGRESS_HEX_PAYLOAD)
+        self.assertTrue(
+            (ingress_rewrite("saipen start '" + short + "'") or "").startswith(
+                "saipen start --hex "
+            )
+        )
         too_long = "x" * (MAX_INGRESS_REWRITE_CHARS + 1)
         self.assertIsNone(ingress_rewrite("saipen start '" + too_long + "'"))
 
