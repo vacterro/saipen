@@ -3548,7 +3548,17 @@ def _git_object_count(root: Path) -> int:
 def _installed_version(root: Path) -> str:
     version = root / "VERSION"
     if not version.is_file():
-        raise ReleaseRefusal("VALIDATION_FAILED", "VERSION is missing from the repository root")
+        # T-1377: measured in three field sessions -- a model finishing ordinary
+        # work reached for `saipen ship`, was told a file is missing, and asked
+        # again. `ship` publishes a versioned release of a repository that HAS a
+        # VERSION; an ordinary project closes its Work instead, and the refusal
+        # says which command that is.
+        raise ReleaseRefusal(
+            "VALIDATION_FAILED",
+            "VERSION is missing from the repository root: `saipen ship` publishes a "
+            "versioned release and does not apply to a project without one. To close "
+            "finished Work run: saipen ticket done <T-###> --closure-mode own_patch",
+        )
     return version.read_text(encoding="utf-8-sig").strip().split("\n")[0]
 
 

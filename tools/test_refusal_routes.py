@@ -207,5 +207,100 @@ class BlockedProjectNamesItsExitTests(unittest.TestCase):
         self.assertTrue(verdict["admitted"], verdict)
 
 
+class TheSecondWaveOfRepeatsTests(unittest.TestCase):
+    """What the first re-run exposed once the first five classes had routes."""
+
+    def test_ship_in_a_project_without_a_version_names_the_closing_command(self):
+        """Three sessions reached for `ship` to finish ordinary Work."""
+        root = started(self)
+        code, payload, text = cli(root, "ship", "--json")
+        self.assertNotEqual(code, 0, text)
+        blob = text + str(payload)
+        self.assertIn("saipen ticket done <T-###> --closure-mode own_patch", blob)
+        self.assertIn("does not apply to a project without one", blob)
+
+    def test_a_surplus_argument_prints_the_command_without_it(self):
+        root = started(self)
+        code, payload, text = cli(root, "validate", "--gate", "core", "--json")
+        self.assertNotEqual(code, 0, text)
+        self.assertEqual(payload["canonical_next_command"], "saipen validate")
+
+    def test_no_active_work_names_the_entry_command(self):
+        root = healthy(self)  # nothing claimed: the guard's own NO_ACTIVE_WORK
+        verdict = guard_events.evaluate_event(
+            shell_event("echo hi > note.txt", root), project_root=str(root)
+        )
+        self.assertFalse(verdict["admitted"], verdict)
+        self.assertEqual(verdict["code"], "NO_ACTIVE_WORK")
+        self.assertEqual(
+            verdict["canonical_next_command"], "saipen start '<the task, one line>'"
+        )
+
+
+class RefusalIdentityIsNotACodeBucketTests(unittest.TestCase):
+    """The harness half: two different problems are not one repeated refusal."""
+
+    @staticmethod
+    def tool(command: str, output: str) -> dict:
+        return {
+            "tool": "bash",
+            "status": "completed",
+            "input": {"command": command},
+            "output": output,
+            "error": "",
+        }
+
+    def test_two_different_validation_errors_are_not_a_repeat(self):
+        import t1363_field_polygon as polygon
+
+        seen = polygon.measure(
+            [
+                self.tool("saipen ship --json", '{"ok": false, "code": "VALIDATION_FAILED",'
+                          ' "detail": "VERSION is missing"}'),
+                self.tool("saipen validate --gate core", '{"ok": false, "code":'
+                          ' "VALIDATION_FAILED", "detail": "validate accepts no arguments"}'),
+            ],
+            measured=True,
+        )
+        self.assertEqual(seen["refusal_sequence"], ["VALIDATION_FAILED", "VALIDATION_FAILED"])
+        self.assertEqual(seen["repeated_refusal"], [])
+
+    def test_the_same_refusal_twice_is_a_repeat(self):
+        import t1363_field_polygon as polygon
+
+        payload = '{"ok": false, "code": "VALIDATION_FAILED", "detail": "VERSION is missing"}'
+        seen = polygon.measure(
+            [self.tool("saipen ship --json", payload), self.tool("saipen ship --json", payload)],
+            measured=True,
+        )
+        self.assertEqual(seen["repeated_refusal"], ["VALIDATION_FAILED"])
+
+    def test_a_refusal_the_session_only_read_about_is_not_one_it_received(self):
+        """Measured: three sessions grepped this repository and the harness
+        scored the `REFUSE [CODE]` in a docstring as a refusal they got."""
+        import t1363_field_polygon as polygon
+
+        seen = polygon.measure(
+            [
+                self.tool(
+                    'Get-Content tools/test_t1363_zero_manual_entry.py',
+                    "* human-mode refusals printed `REFUSE [CODE]` and nothing else",
+                )
+            ],
+            measured=True,
+        )
+        self.assertEqual(seen["refusal_sequence"], [])
+
+    def test_the_guard_marker_counts_whatever_the_command_was(self):
+        import t1363_field_polygon as polygon
+
+        seen = polygon.measure(
+            [self.tool("echo hi > note.txt",
+                       "SAIPEN_GUARD_REFUSAL: WAIT_BLOCKED: the saipen guard refused tool")],
+            measured=True,
+        )
+        self.assertEqual(seen["refusal_sequence"], ["WAIT_BLOCKED"])
+
+
 if __name__ == "__main__":
     unittest.main()

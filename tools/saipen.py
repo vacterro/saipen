@@ -2722,6 +2722,8 @@ def _exact_no_args(command: str, args: list[str], as_json: bool) -> int | None:
             "ok": False,
             "code": "VALIDATION_FAILED",
             "detail": f"{command} accepts no arguments; surplus: {' '.join(args)}",
+            # T-1377: the command without the surplus IS the next command.
+            "canonical_next_command": f"saipen {command}",
         },
         as_json,
     )
@@ -4684,6 +4686,7 @@ def _attempt(project_root: Path, args: list[str], as_json: bool, dry_run: bool) 
                 "ok": False,
                 "code": "VALIDATION_FAILED",
                 "detail": f"attempt open accepts no arguments; surplus: {' '.join(rest)}",
+                "canonical_next_command": "saipen attempt open",
             },
             as_json,
         )
@@ -4960,6 +4963,7 @@ def _userperson(project_root: Path | None, args: list[str], as_json: bool, dry_r
                     "ok": False,
                     "code": "VALIDATION_FAILED",
                     "detail": f"userperson show accepts no arguments; surplus: {' '.join(args[1:])}",  # noqa: E501
+                    "canonical_next_command": "saipen userperson show",
                 },
                 as_json,
             )
@@ -6792,6 +6796,7 @@ def main(argv: list[str] | None = None) -> int:
                     "ok": False,
                     "code": "VALIDATION_FAILED",
                     "detail": f"status accepts no arguments; surplus: {' '.join(args[1:])}",
+                    "canonical_next_command": "saipen status",
                 },
                 as_json,
             )
@@ -6806,6 +6811,7 @@ def main(argv: list[str] | None = None) -> int:
                     "ok": False,
                     "code": "VALIDATION_FAILED",
                     "detail": f"validate accepts no arguments; surplus: {' '.join(args[1:])}",
+                    "canonical_next_command": "saipen validate",
                 },
                 as_json,
             )
@@ -6905,6 +6911,7 @@ def main(argv: list[str] | None = None) -> int:
                     "ok": False,
                     "code": "VALIDATION_FAILED",
                     "detail": f"sss accepts no arguments; surplus: {' '.join(args[1:])}",
+                    "canonical_next_command": "saipen sss",
                 },
                 as_json,
             )
@@ -6917,6 +6924,7 @@ def main(argv: list[str] | None = None) -> int:
                     "ok": False,
                     "code": "VALIDATION_FAILED",
                     "detail": f"next accepts no arguments; surplus: {' '.join(args[1:])}",
+                    "canonical_next_command": "saipen next",
                 },
                 as_json,
             )
@@ -7655,6 +7663,7 @@ def main(argv: list[str] | None = None) -> int:
                     "ok": False,
                     "code": "VALIDATION_FAILED",
                     "detail": f"brief accepts no arguments; surplus: {' '.join(surplus)}",
+                    "canonical_next_command": "saipen brief",
                 },
                 as_json,
             )
@@ -7958,6 +7967,7 @@ def main(argv: list[str] | None = None) -> int:
                     "ok": False,
                     "code": "VALIDATION_FAILED",
                     "detail": f"stop accepts no arguments; surplus: {' '.join(args[1:])}",
+                    "canonical_next_command": "saipen stop",
                 },
                 as_json,
             )
@@ -7994,6 +8004,7 @@ def main(argv: list[str] | None = None) -> int:
                     "ok": False,
                     "code": "VALIDATION_FAILED",
                     "detail": f"test accepts no arguments; surplus: {' '.join(args[1:])}",
+                    "canonical_next_command": "saipen test",
                 },
                 as_json,
             )
@@ -8044,6 +8055,7 @@ def main(argv: list[str] | None = None) -> int:
                     "ok": False,
                     "code": "VALIDATION_FAILED",
                     "detail": f"ccc accepts no arguments; surplus: {' '.join(args[1:])}",
+                    "canonical_next_command": "saipen ccc",
                 },
                 as_json,
             )

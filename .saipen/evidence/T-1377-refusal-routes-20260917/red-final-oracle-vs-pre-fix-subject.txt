@@ -1,10 +1,10 @@
 subject tools/saipen_engine/operations.py: 019adda3d9381f5f -> 2463ede7337724de
-subject tools/saipen_engine/admission.py: ee3ed033cb8bd6dd -> 3222ad3108caa287
-oracle  sha256 8c5e920868a4cffd (identical copy: True)
+subject tools/saipen_engine/admission.py: ebd9d5bb0f4ae84c -> 387bbeedf81a4cd3
+oracle  sha256 98ab67098ba9026e (identical copy: True)
 --- pre-fix subject run ---
--------
+------
 Traceback (most recent call last):
-  File "V:\_TEMP_\t1377-red-c0q2dvh6\subject\tools\test_refusal_routes.py", line 151, in test_the_checkpoint_ticket_ref_prints_the_form
+  File "V:\_TEMP_\t1377-red-mtbg77q_\subject\tools\test_refusal_routes.py", line 151, in test_the_checkpoint_ticket_ref_prints_the_form
     payload["canonical_next_command"],
     ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
 KeyError: 'canonical_next_command'
@@ -13,7 +13,7 @@ KeyError: 'canonical_next_command'
 ERROR: test_running_that_shape_opens_the_gate (tools.test_refusal_routes.VerificationEvidenceNamesItsShapeTests.test_running_that_shape_opens_the_gate)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "V:\_TEMP_\t1377-red-c0q2dvh6\subject\tools\test_refusal_routes.py", line 116, in test_running_that_shape_opens_the_gate
+  File "V:\_TEMP_\t1377-red-mtbg77q_\subject\tools\test_refusal_routes.py", line 116, in test_running_that_shape_opens_the_gate
     self.assertIn("conf: high", payload["canonical_next_command"])
                                 ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
 KeyError: 'canonical_next_command'
@@ -22,7 +22,7 @@ KeyError: 'canonical_next_command'
 ERROR: test_the_finish_refusal_prints_the_same_shape (tools.test_refusal_routes.VerificationEvidenceNamesItsShapeTests.test_the_finish_refusal_prints_the_same_shape)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "V:\_TEMP_\t1377-red-c0q2dvh6\subject\tools\test_refusal_routes.py", line 137, in test_the_finish_refusal_prints_the_same_shape
+  File "V:\_TEMP_\t1377-red-mtbg77q_\subject\tools\test_refusal_routes.py", line 137, in test_the_finish_refusal_prints_the_same_shape
     self.assertIn("verify -> PASS [target: T-1]", payload["canonical_next_command"])
                                                   ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
 KeyError: 'canonical_next_command'
@@ -31,7 +31,7 @@ KeyError: 'canonical_next_command'
 ERROR: test_the_transition_refusal_prints_the_checkpoint_that_satisfies_it (tools.test_refusal_routes.VerificationEvidenceNamesItsShapeTests.test_the_transition_refusal_prints_the_checkpoint_that_satisfies_it)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "V:\_TEMP_\t1377-red-c0q2dvh6\subject\tools\test_refusal_routes.py", line 108, in test_the_transition_refusal_prints_the_checkpoint_that_satisfies_it
+  File "V:\_TEMP_\t1377-red-mtbg77q_\subject\tools\test_refusal_routes.py", line 108, in test_the_transition_refusal_prints_the_checkpoint_that_satisfies_it
     route = payload["canonical_next_command"]
             ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
 KeyError: 'canonical_next_command'
@@ -40,12 +40,12 @@ KeyError: 'canonical_next_command'
 FAIL: test_an_operator_blocker_names_the_command_that_resolves_it (tools.test_refusal_routes.BlockedProjectNamesItsExitTests.test_an_operator_blocker_names_the_command_that_resolves_it)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "V:\_TEMP_\t1377-red-c0q2dvh6\subject\tools\test_refusal_routes.py", line 196, in test_an_operator_blocker_names_the_command_that_resolves_it
+  File "V:\_TEMP_\t1377-red-mtbg77q_\subject\tools\test_refusal_routes.py", line 196, in test_an_operator_blocker_names_the_command_that_resolves_it
     self.assertEqual(
 AssertionError: None != 'saipen recover resolve-blocker <decision>'
 
 ----------------------------------------------------------------------
-Ran 9 tests in 6.258s
+Ran 16 tests in 7.200s
 
 FAILED (failures=1, errors=7)
 

@@ -424,15 +424,48 @@ def _shell_commands(tools: list[dict]) -> list[str]:
 #: session of the one thing it did right.
 _JSON_REFUSAL = re.compile(r'"ok"\s*:\s*false.{0,400}?"code"\s*:\s*"([A-Z_]+)"', re.DOTALL)
 
+#: The guard's own marker: it is emitted for ANY tool, so it counts whatever
+#: command the session ran.
+_GUARD_REFUSAL = re.compile(r"SAIPEN_(?:GUARD|FLEET)_REFUSAL: ([A-Z_]+):?([^\r\n]{0,160})")
 
-def _refusal_codes(tools: list[dict]) -> list[str]:
-    codes = []
+#: Human-mode `REFUSE [CODE] reason`, counted only when the tool that produced
+#: it actually ran `saipen`.
+_HUMAN_REFUSAL = re.compile(r"REFUSE \[([A-Z_]+)\]([^\r\n]{0,160})")
+
+
+def _refusal_texts(tools: list[dict]) -> list[tuple[str, str]]:
+    """``(code, the message that came with it)`` for refusals this session GOT.
+
+    Two things this refuses to count, both measured on 17.09:
+
+    * a refusal the session merely READ. Three sessions grepped this
+      repository's own files, one of which documents `REFUSE [CODE]` in a
+      docstring, and the harness scored `CODE` as a refusal they received. A
+      refusal arrives as the result of running `saipen`, or as the guard's own
+      marker -- which the guard emits for any tool, so it is counted whatever
+      the command was.
+    * a success. `_JSON_REFUSAL` already requires `"ok": false`.
+    """
+    out: list[tuple[str, str]] = []
     for item in tools:
         blob = item["output"] + " " + item["error"]
-        codes += re.findall(r"REFUSE \[([A-Z_]+)\]", blob)
-        codes += re.findall(r"SAIPEN_(?:GUARD|FLEET)_REFUSAL: ([A-Z_]+)", blob)
-        codes += _JSON_REFUSAL.findall(blob)
-    return codes
+        command = item["input"].get("command")
+        ran_saipen = isinstance(command, str) and _PROTOCOL.search(command) is not None
+        for match in _GUARD_REFUSAL.finditer(blob):
+            out.append((match.group(1), match.group(2).strip()))
+        if not ran_saipen:
+            continue
+        for match in _HUMAN_REFUSAL.finditer(blob):
+            out.append((match.group(1), match.group(2).strip()))
+        for match in _JSON_REFUSAL.finditer(blob):
+            tail = blob[match.end() : match.end() + 400]
+            message = re.search(r'"(?:message|detail)":\s*"([^"]{0,160})', tail)
+            out.append((match.group(1), (message.group(1) if message else "").strip()))
+    return out
+
+
+def _refusal_codes(tools: list[dict]) -> list[str]:
+    return [code for code, _message in _refusal_texts(tools)]
 
 
 #: Shell verbs that look at the project without moving it. SRC-051 section 11
@@ -510,11 +543,18 @@ def measure(tools: list[dict], *, measured: bool = True) -> dict:
         if isinstance(command, str) and productive_shell(command):
             productive_at = "shell"
             break
-    refusals = _refusal_codes(tools)
+    # SRC-051 section 11 bans "the same refusal repeating with nothing changed".
+    # A CODE is a bucket, not an answer: VALIDATION_FAILED covers a malformed
+    # ticket ref, a surplus argument and a missing VERSION file, and scoring
+    # two different problems as a repeat convicts a session that was making
+    # progress through three distinct errors. Identity is the code AND the
+    # sentence that came with it.
+    identities = _refusal_texts(tools)
+    refusals = [code for code, _message in identities]
     repeated = [
         code
-        for index, code in enumerate(refusals[1:], start=1)
-        if code == refusals[index - 1]
+        for index, (code, message) in enumerate(identities[1:], start=1)
+        if (code, message) == identities[index - 1]
     ]
     return {
         "measurement": MEASURED,
