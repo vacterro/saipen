@@ -233,6 +233,19 @@ escaped defect to the exact earlier PASS event without rewriting either event.
   available. This is an accidental-mutation barrier over explicit command
   text, not a sandbox: dynamically computed or deliberately obfuscated paths
   in arbitrary code cannot be proven safe by this guard.
+- Command text is not the only evidence. The same preflight resolves a shell
+  command's destructive EFFECTS -- a bounded delete/move/rename verb set with
+  its documented flags, the explicit `bash -c` / `powershell -Command` /
+  `cmd /c` / `eval` wrappers, command substitution, and the working directory
+  as `cd`, `pushd` and `popd` move it -- and admission judges each resolved
+  effect exactly as the file-tool effect it is. Without this one effect had
+  two answers: `rm -rf .` named no `.saipen` path and was admitted, while the
+  native delete of the same directory was refused by containment, so an agent
+  changed the outcome by changing surface. An effect whose operands or working
+  directory cannot be proven -- a variable, a pipeline, an encoded command, a
+  directory stack deeper than the guard tracks -- is refused as unresolved,
+  never admitted as ordinary shell. What falls outside that bounded
+  resolution stays outside this guard's proof, exactly as above.
 - The exact built-in OpenCode `task` call is consequential delegation, not an
   unnamed file mutation. It passes normal canonical state, actor and recovery
   admission; the delegated session's concrete tool calls receive their own

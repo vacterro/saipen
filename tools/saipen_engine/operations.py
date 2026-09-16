@@ -202,7 +202,11 @@ def _state_guard(fn):
 
 
 def _read(
-    root: Path, *, allow_dead_home: bool = False, allow_malformed_state: bool = False
+    root: Path,
+    *,
+    allow_dead_home: bool = False,
+    allow_malformed_state: bool = False,
+    allow_illegal_log: bool = False,
 ) -> tuple[dict, dict, dict, dict]:
     """Read STATE/BOARD/LOG docs + their parsed forms (normalised view).
 
@@ -324,6 +328,18 @@ def _read(
         and Path(str(_home)).resolve() == running_home()
     ):
         history_problems = snapshot_contract_errors(snapshot)
+        if allow_illegal_log:
+            # T-1356: `normalize_log` is the repair for illegal LOG LINES, and
+            # it cannot read the state it repairs if line syntax refuses the
+            # read -- the deadlock measured live, where every mutation was
+            # refused and no canonical route rewrote a line. It sees past that
+            # one class and nothing else: duplicate, out-of-order or broken
+            # parent edges are ledger damage this operation does not repair and
+            # must never plan on top of.
+            illegal = set(snapshot.illegal_lines)
+            history_problems = [
+                problem for problem in history_problems if problem not in illegal
+            ]
         if history_problems:
             raise CheckpointError(
                 "history-void: complete LOG history fails the immutable-ledger "
@@ -4233,7 +4249,13 @@ def _state_only_plan(
     op_id: str | None = None,
     allow_dead_home: bool = False,
     read_once: tuple | None = None,
+    log_text: str | None = None,
 ) -> OperationPlan | Result:
+    # `log_text` REPLACES the LOG this plan appends its event to. Exactly one
+    # caller supplies it -- `normalize_log`, whose whole point is that the bytes
+    # on disk are not a legal ledger -- and the proposed text still passes
+    # `validate_texts` below, so the append-only contract is proved on the
+    # result rather than assumed from the input.
     op_id = op_id or (operation + "-" + uuid4_hex())
     # ONE frozen read (second-wave P0): an operation that already read the
     # project for its authorization/derivation decision MUST hand that exact
@@ -4256,7 +4278,8 @@ def _state_only_plan(
         now,
         op_id,
     )
-    new_log = docs["log"].text_norm.rstrip("\n") + "\n" + line + "\n"
+    base_log = docs["log"].text_norm if log_text is None else log_text
+    new_log = base_log.rstrip("\n") + "\n" + line + "\n"
     new_state = mutate(docs["state"].text_norm, event)
     # CORE-001: every caller's `mutate` writes `agent: <actor>` into its owned
     # patch. That is correct for the last-writer meaning and WRONG for the
@@ -5063,7 +5086,142 @@ def _home_layout_errors(candidate_home: str) -> tuple[list[str], str | None]:
     return errors, major
 
 
+#: Where `normalize_log` preserves the bytes it rewrote.
+NORMALIZE_EVIDENCE_ROOT = ".saipen/recovery/log-normalize"
+
+
+def _normalized_log_lines(log_text: str) -> tuple[list[str], list[str], list[str]]:
+    """`(lines, repairs, refusals)` for one active LOG text (T-1356).
+
+    Two bounded repairs, each named, and everything else refuses:
+
+    * a line that parses once a leading ``- `` is restored -- the shape a
+      hand-edit or a tool that strips the bullet leaves behind;
+    * a line carrying no event id at all -- a free-text note -- which becomes a
+      comment, so its bytes survive in place and stop being read as a forged
+      event.
+
+    A line that CARRIES an id and still will not parse is not repaired. Its id
+    is ledger identity and guessing at the rest would fabricate history, which
+    is the one thing a repair for a corrupt ledger must never do.
+    """
+    from .log import parse_log_line
+
+    lines: list[str] = []
+    repairs: list[str] = []
+    refusals: list[str] = []
+    for lineno, line in enumerate(log_text.splitlines(), 1):
+        if not line.strip() or line.lstrip().startswith("#") or parse_log_line(line):
+            lines.append(line)
+            continue
+        bulleted = "- " + line.lstrip()
+        if parse_log_line(bulleted):
+            lines.append(bulleted)
+            repairs.append(f"LOG.md:{lineno} restored the leading bullet")
+            continue
+        if re.search(r"\[E-\d+\]", line):
+            refusals.append(
+                f"LOG.md:{lineno} carries an event id and still does not parse; its "
+                f"id is ledger identity and the rest cannot be guessed: {line.strip()[:70]!r}"
+            )
+            lines.append(line)
+            continue
+        lines.append("# " + line)
+        repairs.append(f"LOG.md:{lineno} kept a non-event note as a comment")
+    return lines, repairs, refusals
+
+
 @_state_guard
+def normalize_log(project_root: Path | str, agent: str, dry_run: bool = False) -> Result:
+    """Make an illegal LOG line legal again, under the writer lock (T-1356).
+
+    Measured live on a bound project: five lines in `.saipen/LOG.md` did not
+    match `LOG_RE` -- three had lost their leading ``- `` and two were free-text
+    notes -- and from then on `fast_check` put them on every mutation's error
+    list, so SAIOPS refused before the journal was ever PREPARED. `saipen
+    recover` was admitted and returned a sanctioned plan; applying it failed on
+    those same five lines and wrote zero bytes. No canonical verb rewrote a LOG
+    line, and a direct edit of `.saipen/LOG.md` is terminally refused by the
+    guard, so the ONE sanctioned mutation could never succeed while the LOG was
+    malformed. Reads, globs and greps worked; nothing else did, forever.
+
+    This is the exit. It repairs SYNTAX and nothing else: the two shapes above,
+    with the original bytes preserved beside the journal as evidence, and a
+    refusal that names the line whenever the repair is not provable. A ledger
+    defect that is not line syntax -- a duplicate id, an out-of-order event, a
+    broken parent edge -- is refused by the ordinary read and stays refused.
+    """
+    root = Path(project_root)
+    now, utc = _now(), _utc_iso()
+    read_once = _read(root, allow_illegal_log=True)
+    docs, state, _board, _tail = read_once
+    original = docs["log"].text_norm
+    lines, repairs, refusals = _normalized_log_lines(original)
+    if refusals:
+        return _refuse(
+            "CONFLICT",
+            "LOG normalization refuses to guess: " + "; ".join(refusals[:4]),
+        )
+    if not repairs:
+        return _refuse(
+            "VALIDATION_FAILED",
+            "every line in .saipen/LOG.md is already a legal event, a comment or blank",
+        )
+    normalized = "\n".join(lines).rstrip("\n") + "\n"
+    # The repair's own DEC must be allocated above the NORMALIZED tail. A
+    # bulletless line is invisible to the parser, so its id does not count
+    # toward the pre-repair tail; restoring the bullet brings the id back and a
+    # DEC allocated from the old tail collides with it. That refused the repair
+    # with `duplicate event id` -- the same deadlock, one line deep.
+    docs, state, board, log_tail = read_once
+    from .log import parse_log_line as _parse
+
+    revealed = [_parse(line) for line in normalized.splitlines()]
+    tail = max(
+        [log_tail or 0] + [parsed["event"] for parsed in revealed if parsed]
+    )
+    read_once = (docs, state, board, tail)
+    op_id = "normalize-log-" + uuid4_hex()
+    evidence = f"{NORMALIZE_EVIDENCE_ROOT}/{op_id}/LOG.md"
+    preserved_bytes = docs["log"].encode(original)
+    preserved = TargetPlan(
+        evidence, "generic", preserved_bytes, "", hash_bytes(preserved_bytes)
+    )
+    task = state.get("task")
+
+    def mutate(text: str, event: int) -> str:
+        return patch_state(text, {"last_event": event, "updated": utc, "agent": agent})
+
+    plan = _state_only_plan(
+            root,
+            "normalize_log",
+            agent,
+            mutate,
+            f"LOG normalized: {len(repairs)} line(s) repaired -- "
+            + "; ".join(repairs[:4])
+            + f". Original bytes preserved at {evidence}",
+            {
+                "ok": True,
+                "code": "LOG_NORMALIZED",
+                "repairs": repairs,
+                "evidence_path": evidence,
+            },
+            now,
+            utc,
+            {"last_event", "updated", "agent"},
+            ticket_id=task if isinstance(task, str) and task.startswith("T-") else None,
+            extra_targets=[preserved],
+            op_id=op_id,
+            read_once=read_once,
+            log_text=normalized,
+    )
+    if isinstance(plan, Result):
+        return plan
+    if dry_run:
+        return _render_plan(plan)
+    return apply_plan(root, plan)
+
+
 @_state_guard
 def migrate_saipen_generation(
     project_root: Path | str, agent: str, dry_run: bool = False

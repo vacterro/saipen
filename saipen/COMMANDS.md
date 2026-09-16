@@ -52,6 +52,7 @@ global authority and deterministic priority rules.
 | `saipen acceptance <T-###>` | read-only | CMD-ROUTING-01 |
 | `saipen runtime` | read-only | CMD-ROUTING-01 |
 | `saipen search <pattern>` | read-only bounded search | CMD-ROUTING-01 |
+| `saipen validate` | read-only fast-gate verdict on the canonical documents | CMD-ROUTING-01 |
 | `saipen --agent <seat> launch opencode -- [args]` | optional explicit-actor host process | CMD-ROUTING-01 |
 | `saipen knowledge [status\|index\|retrieve]` | project knowledge | CMD-ROUTING-01 |
 | `saipen user-request <text>` | USER_INTERRUPT ingress | CMD-ROUTING-01 |

@@ -896,8 +896,16 @@ def work_delta(
             if baseline is None:
                 raise DebtRefusal(
                     "DEBT_BASELINE_MISSING",
-                    f"no debt baseline exists for {work}; capture one pre-BUILD with "
-                    "'saipen debt snapshot <T-###>' or adjudicate legacy debt with "
+                    # T-1357: this used to name `saipen debt snapshot <T-###>`,
+                    # which no CLI verb implements -- an instruction whose route
+                    # does not exist is the same dead end as one the guard
+                    # refuses. The baseline is captured automatically by
+                    # `ensure_debt_baseline` on the SCOUT -> BUILD edge, so the
+                    # two real routes are re-entering through SCOUT and the
+                    # adjudication flag this message already named.
+                    f"no debt baseline exists for {work}; it is captured "
+                    "automatically when the Work enters BUILD from SCOUT, so "
+                    "re-enter through SCOUT, or adjudicate legacy debt with "
                     "--claim-boundary",
                 )
 

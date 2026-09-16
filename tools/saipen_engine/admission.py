@@ -51,8 +51,11 @@ The guard itself is read-only. It never repairs, recovers, or checkpoints.
 from __future__ import annotations
 
 import json
+import os
+import socket
+import stat
 import time
-from pathlib import Path
+from pathlib import Path, PurePosixPath, PureWindowsPath
 
 from .paths import resolve_project_root
 
@@ -140,6 +143,7 @@ SAIPEN_CLI_VERBS = frozenset(
         "next",
         "runtime",
         "search",
+        "validate",
         "recover",
         "fleet",
         "claim",
@@ -213,6 +217,103 @@ def is_protected_canonical_path(rel_path: str | Path) -> bool:
     return False
 
 
+def contains_protected_canonical_path(rel_path: str | Path) -> bool:
+    """True when an already-canonical RELATIVE target IS or CONTAINS protected state.
+
+    `is_protected_canonical_path` answers membership, and a DIRECTORY effect
+    needs containment: deleting or moving `.saipen` -- or the project root
+    itself -- destroys every protected document below it while naming none of
+    them, so a predicate that only asked "is this path inside the namespace"
+    admitted the one effect that removes the whole namespace at once.
+    """
+    normalized = str(rel_path).replace("\\", "/").strip().strip("/")
+    if normalized in ("", "."):
+        return True
+    if is_protected_canonical_path(normalized):
+        return True
+    prefix = normalized.lower() + "/"
+    return any(
+        protected.lower().startswith(prefix) for protected in PROTECTED_CANONICAL_NAMESPACES
+    )
+
+
+#: Directory-capable effects: the only ones whose single target can remove or
+#: relocate a whole subtree, and so the only ones that need containment checks
+#: outside the root.
+_SUBTREE_ACTIONS = frozenset({"delete", "move", "rename"})
+
+#: File-effect actions whose target is judged for namespace containment inside
+#: the root. Shell/delegate/canonical operations carry no subtree target here.
+_CONTAINMENT_ACTIONS = frozenset({"write", "create", "edit"}) | _SUBTREE_ACTIONS
+
+#: Directories visited while proving an OUTSIDE subtree holds no SAIPEN project.
+#: A subtree larger than this cannot be proven clean and is refused, never
+#: assumed empty.
+_CONTAINMENT_SCAN_DIRS = 2000
+
+
+def _outside_subtree_namespace(root: Path, canonical_absolute: str | Path) -> str | None:
+    """Why deleting or moving an OUTSIDE directory would take a SAIPEN namespace with it.
+
+    T-1354 admits ordinary paths outside the root whoever asks, on the premise
+    that a directory belonging to no project has no lifecycle to protect. A
+    directory that CONTAINS a project -- this session's own root, or another
+    project's -- does. Ancestry of this root is decided exactly; the target's
+    own subtree is searched breadth-first without following links, bounded by
+    `_CONTAINMENT_SCAN_DIRS`. Returns a reason, or None when the subtree is
+    proven to hold no `.saipen` directory (or the target is not a directory).
+    """
+    target = Path(canonical_absolute)
+    try:
+        Path(root).relative_to(target)
+    except ValueError:
+        pass
+    else:
+        return "the target contains this project's root and its protected canonical state"
+    queue: list[Path] = [target]
+    visited = 0
+    while queue:
+        current = queue.pop(0)
+        try:
+            if (current / ".saipen").is_dir():
+                return f"the target contains the SAIPEN project at '{current.as_posix()}'"
+            with os.scandir(current) as entries:
+                children = [
+                    Path(entry.path)
+                    for entry in entries
+                    if entry.is_dir(follow_symlinks=False)
+                    and not _is_reparse_point(Path(entry.path))
+                ]
+        except (FileNotFoundError, NotADirectoryError):
+            continue
+        except OSError:
+            return "the target subtree cannot be read to prove it holds no SAIPEN project"
+        visited += len(children)
+        if visited > _CONTAINMENT_SCAN_DIRS:
+            return (
+                f"the target subtree exceeds {_CONTAINMENT_SCAN_DIRS} directories and cannot "
+                "be proven to hold no SAIPEN project"
+            )
+        queue.extend(children)
+    return None
+
+
+def _is_reparse_point(path: Path) -> bool:
+    """A symlink or junction: a subtree scan never follows one out of the target.
+
+    Deleting a link removes the link, not what it points at, so a project
+    reachable only through one is not inside the target's subtree.
+    """
+    try:
+        info = os.lstat(path)
+    except OSError:
+        return True
+    if stat.S_ISLNK(info.st_mode):
+        return True
+    reparse = getattr(stat, "FILE_ATTRIBUTE_REPARSE_POINT", 0x400)
+    return bool(getattr(info, "st_file_attributes", 0) & reparse)
+
+
 def foreign_protected_canonical(canonical_absolute: str | Path) -> str | None:
     """The protected canonical path an OUTSIDE target names in ANOTHER project.
 
@@ -248,7 +349,9 @@ def foreign_protected_canonical(canonical_absolute: str | Path) -> str | None:
             return None
         # The NEAREST enclosing project decides. Climbing past it would judge
         # the path against an outer project whose namespace it is not in.
-        return relative if is_protected_canonical_path(relative) else None
+        # Containment, not membership: that project's `.saipen` directory is
+        # every protected document at once (T-1354).
+        return relative if contains_protected_canonical_path(relative) else None
     return None
 
 
@@ -261,6 +364,161 @@ def get_adapter(name: str) -> dict | None:
 def list_adapters() -> list[dict]:
     """List all registered host adapters."""
     return [dict(v) for v in ADAPTER_REGISTRY.values()]
+
+
+#: Host names that address THIS machine in a UNC path. `\\\\localhost\\C$` is
+#: the root of drive C here, by Windows' own definition of the admin share.
+_LOOPBACK_HOSTS = frozenset({"localhost", "127.0.0.1", "::1"})
+
+
+def _names_this_machine(host: str) -> bool:
+    name = host.strip("[]").lower()
+    if name in _LOOPBACK_HOSTS:
+        return True
+    own = {os.environ.get("COMPUTERNAME", ""), socket.gethostname()}
+    return name in {entry.lower() for entry in own if entry} | {
+        entry.split(".", 1)[0].lower() for entry in own if entry
+    }
+
+
+def _win32_spelling(target: str) -> str:
+    """The ordinary spelling of the file Windows opens for `target` (T-1354).
+
+    `Path.resolve` keeps these Win32 shapes verbatim, so the root-relative test
+    judged the spelling instead of the file:
+
+    - the extended and device prefixes, `\\\\?\\X:\\...` and `\\\\.\\X:\\...`, and
+      `\\\\?\\UNC\\host\\share` / `\\\\.\\UNC\\host\\share` for `\\\\host\\share` --
+      an in-root file spelled this way classified OUTSIDE and skipped every
+      block an in-root path answers to, recovery debt on that very file
+      included;
+    - an administrative share of this machine -- `localhost`, a loopback
+      address or the machine's own name, `\\\\host\\X$\\...` -- which is drive X;
+    - NTFS stream syntax, `name:stream[:type]`, which writes the file `name`
+      (`::$DATA` is its main stream): `.saipen/IDENTITY.md::$DATA` created a
+      protected document while classifying as an ordinary in-root file.
+
+    Mapping only ever moves a spelling onto the file Windows itself opens. What
+    no lexical rule can map -- a custom share, a volume-GUID or device path --
+    is decided by file identity instead (`_alias_identity`), and fails closed
+    when identity cannot be proven.
+    """
+    if os.name != "nt":
+        return target
+    text = target.replace("/", "\\")
+    if text[:8].upper() in ("\\\\?\\UNC\\", "\\\\.\\UNC\\"):
+        text = "\\\\" + text[8:]
+    elif text[:4] in ("\\\\?\\", "\\\\.\\") and len(text) > 5 and text[5] == ":":
+        text = text[4:]
+    if text.startswith("\\\\") and text[2:3] not in ("?", "."):
+        host, _sep, rest = text[2:].partition("\\")
+        share, _sep, tail = rest.partition("\\")
+        if (
+            len(share) == 2
+            and share[0].isalpha()
+            and share[1] == "$"
+            and _names_this_machine(host)
+        ):
+            text = f"{share[0]}:\\{tail}"
+    path = PureWindowsPath(text)
+    parts = list(path.parts)
+    first = 1 if path.anchor else 0
+    named = [part.split(":", 1)[0] for part in parts[first:]]
+    return str(PureWindowsPath(*parts[:first], *[part for part in named if part]))
+
+
+def _alias_identity(root: Path, canonical: Path) -> tuple[str, str] | None:
+    """Containment by FILE IDENTITY, for a spelling no lexical rule maps.
+
+    T-1354. `Path.resolve` turns every ordinary drive path into its one final
+    spelling, so a drive path that is not under the root really is outside. A
+    UNC, volume-GUID or device path is different: it can name this project's
+    files through a share or a volume name, and nothing about its text says so
+    -- `\\\\?\\Volume{...}\\...\\src\\app.py` was ADMITTED_EXTERNAL while recovery
+    debt refused `src/app.py` itself.
+
+    Returns `("inside", relative)` when some component is the project root by
+    (device, inode); `("unresolved", reason)` when that cannot be decided --
+    the path cannot be reached, or its filesystem reports no identity -- which
+    admission refuses for any consequential effect; None when the path was
+    reached, compared, and is not this project.
+    """
+    if os.name != "nt":
+        return None
+    drive = PureWindowsPath(str(canonical)).drive
+    if len(drive) == 2 and drive[1] == ":":
+        return None
+    try:
+        anchor = os.stat(root)
+        os.stat(canonical.anchor or canonical)
+    except OSError as exc:
+        return (
+            "unresolved",
+            f"'{canonical}' cannot be reached ({exc.strerror or exc}), so it cannot be "
+            "proven not to be this project",
+        )
+    for node in (canonical, *canonical.parents):
+        try:
+            info = os.stat(node)
+        except (FileNotFoundError, NotADirectoryError):
+            continue
+        except OSError as exc:
+            return (
+                "unresolved",
+                f"'{node}' cannot be read ({exc.strerror or exc}), so '{canonical}' cannot "
+                "be proven not to be this project",
+            )
+        if not info.st_ino:
+            return (
+                "unresolved",
+                f"the filesystem at '{node}' reports no file identity, so '{canonical}' "
+                "cannot be proven not to be this project",
+            )
+        if (info.st_dev, info.st_ino) == (anchor.st_dev, anchor.st_ino):
+            return "inside", canonical.relative_to(node).as_posix()
+    return None
+
+
+#: Effects that rewrite an existing file's CONTENT in place -- the ones a hard
+#: link turns into a write to every other name of that file.
+_CONTENT_ACTIONS = frozenset({"write", "create", "edit", "unknown"})
+
+#: The protected documents a hard link most plausibly aliases, checked by
+#: identity when a content target has more than one name.
+_PROTECTED_DOCUMENTS = ("STATE.md", "BOARD.md", "LOG.md", "IDENTITY.md")
+
+
+def _hard_link_alias(root: Path, absolute: Path) -> tuple[str, str] | None:
+    """A content effect on a file with more than one name (T-1354).
+
+    Writing any name of a hard-linked file writes all of them, and no path
+    spelling reveals the others. Returns ("protected", detail) when the file
+    IS one of this project's protected documents, ("unresolved", detail) when
+    it has other names that cannot be enumerated, None for an ordinary file
+    with one name or no file at all.
+    """
+    try:
+        info = os.stat(absolute)
+    except OSError:
+        return None
+    if not stat.S_ISREG(info.st_mode) or info.st_nlink <= 1:
+        return None
+    for name in _PROTECTED_DOCUMENTS:
+        try:
+            document = os.stat(root / ".saipen" / name)
+        except OSError:
+            continue
+        if (document.st_dev, document.st_ino) == (info.st_dev, info.st_ino):
+            return (
+                "protected",
+                f"'{absolute}' is a hard link to the protected canonical document "
+                f".saipen/{name}",
+            )
+    return (
+        "unresolved",
+        f"'{absolute}' has {info.st_nlink} hard links; a content write reaches every one "
+        "of them, and they cannot be proven to exclude protected canonical state",
+    )
 
 
 def canonicalize_target(root: Path, target_path: str | Path) -> tuple[str, str, str]:
@@ -276,13 +534,19 @@ def canonicalize_target(root: Path, target_path: str | Path) -> tuple[str, str, 
     - ``escape``      -- the RELATIVE spelling carries a ``..`` that leaves the
       root: a traversal shape, never read as an ordinary project-relative
       target.
+    - ``unresolved``  -- a spelling whose identity with this project can be
+      neither proven nor excluded (`_alias_identity`); consequential effects
+      on it are refused.
 
     Symlinks and Windows reparse points are resolved, so an alias that lands
     inside the protected namespace is classified protected regardless of how
-    it was spelled. ``..`` substrings are never deleted; `Path.resolve`
-    semantics decide.
+    it was spelled; Win32 namespace prefixes, this machine's admin shares and
+    stream suffixes are reduced to the file they open first
+    (`_win32_spelling`), and any other non-drive spelling is decided by file
+    identity. ``..`` substrings are never deleted; `Path.resolve` semantics
+    decide.
     """
-    raw = Path(str(target_path))
+    raw = Path(_win32_spelling(str(target_path)))
     absolute = raw if raw.is_absolute() else Path(root) / raw
     try:
         canonical = absolute.resolve(strict=False)
@@ -299,7 +563,12 @@ def canonicalize_target(root: Path, target_path: str | Path) -> tuple[str, str, 
                 canonical.as_posix(),
                 "relative traversal spelling leaves the project root",
             )
-        return "outside", canonical.as_posix(), "target path is outside project root"
+        identity = _alias_identity(Path(root), canonical)
+        if identity is None:
+            return "outside", canonical.as_posix(), "target path is outside project root"
+        if identity[0] == "unresolved":
+            return "unresolved", canonical.as_posix(), identity[1]
+        rel = PurePosixPath(identity[1])
     rel_posix = rel.as_posix()
     if is_protected_canonical_path(rel_posix):
         return "protected", rel_posix, "target resolves into the protected canonical namespace"
@@ -363,12 +632,53 @@ def _log_tail_event(root: Path) -> int | None:
     return None
 
 
+def _comparable_target(path: str) -> str:
+    """One spelling for one file, on both sides of the overlap test.
+
+    Case-folded because the hosts this runs on are case-insensitive, and
+    applied to CANONICAL paths only -- it is the last step after
+    `canonicalize_target`, never a substitute for it.
+    """
+    return path.strip().lower()
+
+
+def _targets_overlap(proposed: set[str], blocked: set[str]) -> bool:
+    """True when a proposed target IS, CONTAINS, or LIES INSIDE a blocked target.
+
+    Equality alone is the wrong question for a filesystem. Deleting or moving
+    `src` removes `src/app.py` exactly as surely as writing it, a replay that
+    owns a directory owns every file below it, and the project root (`.`)
+    contains everything. Both sides are canonical and comparable already.
+    """
+    for want in proposed:
+        want_dir = "" if want in ("", ".") else want.rstrip("/") + "/"
+        for owned in blocked:
+            owned_dir = "" if owned in ("", ".") else owned.rstrip("/") + "/"
+            if (
+                want == owned
+                or not want_dir
+                or not owned_dir
+                or owned.startswith(want_dir)
+                or want.startswith(owned_dir)
+            ):
+                return True
+    return False
+
+
 def _pending_operation_targets(root: Path, ops) -> set[str] | None:
     """The canonical paths an unfinished operation is going to write.
 
     T-1354. Returns None when any record cannot be read: an unreadable
     operation is unknown scope, and unknown scope refuses everything, exactly
     as before this function existed.
+
+    Both sides of the overlap test go through `canonicalize_target`, because
+    two spellings of one file must not read as two files. A target recorded
+    absolutely, with a `./` prefix, or with a `..` segment compared unequal to
+    the same file spelled plainly, and the mismatch ADMITTED a write to a path
+    the replay is going to write -- fail-open, out of a record that parsed
+    perfectly well. Reusing the proposal's own normalizer is what makes the
+    two sides answer the same question.
     """
     paths: set[str] = set()
     for op in ops or ():
@@ -386,7 +696,13 @@ def _pending_operation_targets(root: Path, ops) -> set[str] | None:
         for entry in entries:
             if not isinstance(entry, dict) or not isinstance(entry.get("path"), str):
                 return None
-            paths.add(entry["path"].replace("\\", "/").strip().lstrip("/").lower())
+            classification, canonical, _detail = canonicalize_target(root, entry["path"])
+            if classification in ("escape", "outside", "unresolved"):
+                # A recorded target that resolves outside this root, or that
+                # cannot be resolved at all, is scope this function cannot
+                # describe. Unknown scope refuses everything.
+                return None
+            paths.add(_comparable_target(canonical))
     return paths
 
 
@@ -454,11 +770,8 @@ def protocol_snapshot(
         # Unknown scope still refuses everything: an unreadable operation
         # record is not evidence of safety.
         blocked_paths = _pending_operation_targets(root, (conflicts or []) + (pending or []))
-        proposed = {
-            str(item).replace("\\", "/").strip().lstrip("/").lower()
-            for item in (proposed_targets or [])
-        }
-        if blocked_paths is None or not proposed or (proposed & blocked_paths):
+        proposed = {_comparable_target(str(item)) for item in (proposed_targets or [])}
+        if blocked_paths is None or not proposed or _targets_overlap(proposed, blocked_paths):
             return refuse("RECOVERY_REQUIRED", f"unresolved recovery operation(s): {names}")
 
     if str(state.get("mode", "")).strip().lower() == "read-only":
@@ -664,12 +977,19 @@ def evaluate_admission(
     target_paths: "list[str] | tuple[str, ...] | None" = None,
     targets_unresolved: bool = False,
     shell_protected_namespace: bool = False,
+    shell_effects: "list[dict] | None" = None,
+    shell_effects_unresolved: str | None = None,
 ) -> dict:
     """Evaluate admission for a proposed tool call or file modification.
 
     ``target_paths`` carries the FULL target set of one proposed effect (a
     multi-file patch, both endpoints of a move). ``targets_unresolved`` marks
     a consequential mutation whose target set could not be trusted.
+    ``shell_effects`` are the destructive filesystem effects a shell command
+    was resolved to (`guard_events.destructive_shell_effects`): each is judged
+    exactly as the file-tool effect it is, so one effect gets one answer
+    whichever surface proposed it. ``shell_effects_unresolved`` names a
+    destructive shell effect whose operands could not be resolved.
     Performance budget: evaluates in < 5ms on a warm project.
     Returns a structured admission decision. The guard is read-only.
     """
@@ -734,6 +1054,49 @@ def evaluate_admission(
             ),
         )
 
+    if action_name == "shell" and shell_effects_unresolved:
+        # T-1354: a destructive command whose operands cannot be resolved is
+        # not proven safe by the absence of the literal text `.saipen`.
+        return result(
+            ok=False,
+            code=CODE_TARGET_UNRESOLVED,
+            admitted=False,
+            project_root=str(root),
+            target=None,
+            targets=targets,
+            action=action_name,
+            effect=effect,
+            surface="shell",
+            provenance=root_res.provenance,
+            detail=(
+                f"destructive shell effect cannot be resolved ({shell_effects_unresolved}); "
+                "refused before host execution"
+            ),
+        )
+    for shell_effect in shell_effects or ():
+        # The SAME decision the file tools get for the same effect: a shell
+        # `rm -rf .` and a native delete of `.` answer one question.
+        verdict = evaluate_admission(
+            project_root_or_start,
+            target_paths=list(shell_effect.get("targets") or []),
+            action=str(shell_effect.get("action") or "unknown"),
+            agent=agent,
+            explicit_root=explicit_root,
+        )
+        if not verdict.get("admitted"):
+            refused = {key: value for key, value in verdict.items() if key != "duration_ms"}
+            refused.update(
+                action=action_name,
+                effect=effect,
+                surface="shell",
+                shell_effect={
+                    "action": shell_effect.get("action"),
+                    "verb": shell_effect.get("verb"),
+                    "targets": list(shell_effect.get("targets") or []),
+                },
+            )
+            return result(**refused)
+
     if targets_unresolved and effect == "mutating":
         # A consequential mutation that cannot name its targets is not an
         # ordinary healthy mutation (T-1317 P0-6): fail closed.
@@ -778,6 +1141,51 @@ def evaluate_admission(
                     "forbidden; mutations must go through canonical saipen commands"
                 ),
             )
+        if (
+            classification == "inside"
+            and action_name in _CONTAINMENT_ACTIONS
+            and contains_protected_canonical_path(canonical)
+        ):
+            # T-1354: containment, not membership. The project root and the
+            # `.saipen` directory name no protected document, yet deleting or
+            # moving either removes all of them at once -- admitted as an
+            # ordinary in-root mutation until this check existed.
+            return result(
+                ok=False,
+                code="PROTECTED_CANONICAL_NAMESPACE",
+                admitted=False,
+                project_root=str(root),
+                target=canonical,
+                targets=[canon for _cls, canon in resolved],
+                action=action_name,
+                effect=effect,
+                protected=True,
+                provenance=root_res.provenance,
+                detail=(
+                    f"'{canonical}' contains the protected canonical namespace; a "
+                    f"{action_name} of it would mutate protected state without naming it"
+                ),
+            )
+        if classification == "outside" and action_name in _SUBTREE_ACTIONS:
+            containment = _outside_subtree_namespace(root, canonical)
+            if containment:
+                return result(
+                    ok=False,
+                    code="PROTECTED_CANONICAL_NAMESPACE",
+                    admitted=False,
+                    project_root=str(root),
+                    target=canonical,
+                    targets=[canon for _cls, canon in resolved],
+                    action=action_name,
+                    effect=effect,
+                    protected=True,
+                    outside_root=True,
+                    provenance=root_res.provenance,
+                    detail=(
+                        f"{action_name} of '{canonical}' refused: {containment}; a directory "
+                        "that holds a SAIPEN project is that project's lifecycle"
+                    ),
+                )
         if classification == "outside" and effect != "read":
             # T-1351: namespace before jurisdiction, and PER TARGET.
             #
@@ -837,6 +1245,47 @@ def evaluate_admission(
                     "refused, never interpreted as an ordinary project-relative target"
                 ),
             )
+        if classification == "unresolved":
+            if effect == "read":
+                continue
+            # T-1354: a spelling that may be this project and cannot be proven
+            # either way is not "outside". Admitting it as external mutation
+            # was the bypass; refusing it is the only answer that cannot be
+            # wrong about protected state.
+            return result(
+                ok=False,
+                code=CODE_TARGET_UNRESOLVED,
+                admitted=False,
+                project_root=str(root),
+                target=canonical,
+                targets=[canon for _cls, canon in resolved],
+                action=action_name,
+                effect=effect,
+                provenance=root_res.provenance,
+                detail=f"{_detail}; a consequential effect on it is refused",
+            )
+        if action_name in _CONTENT_ACTIONS and classification in ("inside", "outside"):
+            linked = _hard_link_alias(
+                root, root / canonical if classification == "inside" else Path(canonical)
+            )
+            if linked:
+                return result(
+                    ok=False,
+                    code=(
+                        "PROTECTED_CANONICAL_NAMESPACE"
+                        if linked[0] == "protected"
+                        else CODE_TARGET_UNRESOLVED
+                    ),
+                    admitted=False,
+                    project_root=str(root),
+                    target=canonical,
+                    targets=[canon for _cls, canon in resolved],
+                    action=action_name,
+                    effect=effect,
+                    protected=linked[0] == "protected",
+                    provenance=root_res.provenance,
+                    detail=linked[1],
+                )
 
     canonical_targets = [canonical for _cls, canonical in resolved]
 
@@ -857,7 +1306,7 @@ def evaluate_admission(
                 project_lineage=root_res.lineage,
                 detail="read of protected canonical state is diagnostic access, permitted",
             )
-        if targets and all(cls in ("outside", "escape") for cls, _c in resolved):
+        if targets and all(cls in ("outside", "escape", "unresolved") for cls, _c in resolved):
             return result(
                 ok=True,
                 code="ADMITTED_EXTERNAL",

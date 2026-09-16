@@ -288,6 +288,7 @@ def _state_blocker_repairs(
                     "to": "none",
                     "surface": "state",
                     "operator_authorized": True,
+                    "authority": decision,
                     "follow_up": (
                         f'saipen ticket unblock {live_blocked[0]} "<decision>"'
                         if live_blocked
@@ -311,13 +312,13 @@ def _state_blocker_repairs(
                 "surface": "state",
                 "refuse": True,
                 "operator_decision_available": True,
-                "canonical_next_command": 'saipen recover resolve-blocker "<decision>"',
+                "canonical_next_command": "saipen recover resolve-blocker <decision>",
                 "reason": (
                     f"phase {phase!r} carries blocker {blocker!r} with {authority}; "
                     "the engine cannot infer whether that gate still applies, so "
                     "clearing it requires an explicit operator decision "
                     '(OPERATOR_DECISION_REQUIRED): run `saipen recover '
-                    'resolve-blocker "<decision>"`'
+                    'resolve-blocker <decision>`'
                     + (
                         f' or `saipen ticket unblock {live_blocked[0]} "<decision>"`'
                         if live_blocked
@@ -366,7 +367,12 @@ def _legacy_next_action(na: str) -> bool:
 
 
 def _state_next_action_repairs(
-    state: dict, state_text: str, board_text: str, agent: str, project_root: Path
+    state: dict,
+    state_text: str,
+    board_text: str,
+    agent: str,
+    project_root: Path,
+    resolve_next_action: str | None = None,
 ) -> list[dict]:
     """Target D: repair a legacy `next_action` ONLY when the router proves it.
 
@@ -392,6 +398,15 @@ def _state_next_action_repairs(
         return []
 
     def refuse(reason: str) -> list[dict]:
+        # T-1358: this used to carry `terminal_disposition: RECOVERY_BLOCKED`,
+        # which makes `_blocked_recovery_fields` suppress the command line
+        # entirely -- so a project whose `next_action` the router cannot
+        # project reported `operator_decision_available: False` and
+        # `canonical_next_command: null` and had no exit at all. Measured on a
+        # live project at phase DONE: every phase command refused, the only
+        # transition was ILLEGAL, and no verb owned the field. A refusal that
+        # names no route is the dead end CORE forbids, so this one names the
+        # same operator gate `blocker` already has.
         return [
             {
                 "field": "next_action",
@@ -399,8 +414,36 @@ def _state_next_action_repairs(
                 "to": None,
                 "surface": "state",
                 "refuse": True,
-                "terminal_disposition": "RECOVERY_BLOCKED",
+                "operator_decision_available": True,
+                "canonical_next_command": "saipen recover resolve-next-action <next-action>",
                 "reason": reason + " (OPERATOR_DECISION_REQUIRED)",
+            }
+        ]
+
+    if isinstance(resolve_next_action, str) and resolve_next_action.strip():
+        proposed = resolve_next_action.strip()
+        if _legacy_next_action(proposed):
+            return refuse(
+                f"the supplied next_action {proposed!r} is not executable either: it "
+                f"must start with one of {_LEGAL_NEXT_PREFIXES} or be a legal "
+                "`PHASE <phase> <T-###>` line. The operator decides the VALUE; the "
+                "grammar is not theirs to waive"
+            )
+        return [
+            {
+                "field": "next_action",
+                "from": na,
+                "to": proposed,
+                "surface": "state",
+                "operator_authorized": True,
+                "authority": proposed,
+                "reason": (
+                    f"legacy next_action {na!r} has no executable form and the router "
+                    f"cannot project one; set to {proposed!r} by EXPLICIT operator "
+                    "authority. Only STATE.next_action is owned here, the original "
+                    "bytes are archived as recovery evidence, and the supplied value "
+                    "passes the executable grammar (OPERATOR_AUTHORIZED)"
+                ),
             }
         ]
 
@@ -1453,6 +1496,7 @@ def reconcile_protocol_state(
     dry_run: bool = False,
     adopt_legacy: tuple | list = (),
     resolve_blocker: str | None = None,
+    resolve_next_action: str | None = None,
     approved_repair_id: str | None = None,
     attest_legacy_done: tuple | list = (),
 ) -> dict:
@@ -1530,7 +1574,9 @@ def reconcile_protocol_state(
         + _tripped_valve_repairs(state)
         + _state_phase_repairs(state, events, _board)
         + _state_blocker_repairs(state, _board, resolve_blocker)
-        + _state_next_action_repairs(state, state_text, board_text, agent, project_root)
+        + _state_next_action_repairs(
+            state, state_text, board_text, agent, project_root, resolve_next_action
+        )
     )
     adoption_repairs = _board_adoption_repairs(_board, docs.get("_history"), adopt_legacy)
     lifecycle_all = _board_lifecycle_repairs(
@@ -1652,7 +1698,11 @@ def reconcile_protocol_state(
                 f"{r['field']} {r['from']!r}->{r['to']!r} ({r['reason']})"
                 for r in refused_repairs
             ),
-            "changed": {"board": [], "state": state_repairs},
+            # T-1358: the board findings this refusal pre-empts are
+            # REPORTED, not blanked. An operator whose state field
+            # cannot be repaired still needs to see what else is
+            # wrong, and every other branch here reports them.
+            "changed": {"board": board_drifts, "state": state_repairs},
             "refused": refused_repairs,
             "strict_state_error": strict_state_error or None,
             "dry_run": dry_run,
@@ -1786,13 +1836,17 @@ def reconcile_protocol_state(
     # tail AFTER this trace is appended, because the repair's own DEC is then
     # the newest event; the drift it reports is the one it was asked to fix.
     description = "reconcile protocol state -- " + _repair_summary(board_drifts, state_repairs)
-    if operator_authorized:
+    # T-1358: the DEC names the field each decision actually authorized. It
+    # said `STATE.blocker clear` for every operator-authorized repair and read
+    # `resolve_blocker` directly, so the moment a second field gained an
+    # operator gate the trace was either wrong or a crash -- it was the crash.
+    for _repair in operator_authorized:
         description += (
-            f"; operator-authorized STATE.blocker clear: {resolve_blocker.strip()!r}"
+            f"; operator-authorized STATE.{_repair.get('field')}: "
+            f"{_repair.get('authority')!r}"
         )
-        for _repair in operator_authorized:
-            if _repair.get("follow_up"):
-                description += f"; follow-up: {_repair['follow_up']}"
+        if _repair.get("follow_up"):
+            description += f"; follow-up: {_repair['follow_up']}"
     if adoptions:
         description += "; adopt legacy " + ", ".join(r["ticket"] for r in adoptions)
     if lifecycle_attestations:

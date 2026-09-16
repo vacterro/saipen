@@ -34,9 +34,12 @@ Closed mapping, three hard rules (SRC-028:R012 / T-1317 P0-1, P0-5, P0-8):
 
 from __future__ import annotations
 
+import fnmatch
 import json
+import os
 import re
 import shlex
+from pathlib import Path, PurePosixPath, PureWindowsPath
 
 from .admission import SAIPEN_CLI_VERBS, normalize_action
 
@@ -197,6 +200,593 @@ _PROTECTED_SHELL_SEGMENT = re.compile(
     r"(?<![A-Za-z0-9_.-])\.saipen(?![A-Za-z0-9_.-])", re.IGNORECASE
 )
 
+# ---- T-1354: destructive filesystem effects of a shell command -------------
+#
+# The literal text `.saipen` is not what makes a command dangerous. `rm -rf .`
+# names no protected path and removes all of it, while the native delete of
+# `.` is refused by containment -- one effect, two answers, the agent picks the
+# surface. So a shell command's DESTRUCTIVE filesystem effects are resolved to
+# targets here and admission judges each one exactly as the file-tool effect it
+# is. Bounded on purpose: the verbs below, their documented flags, the
+# explicit `bash -c` / `powershell -Command` / `cmd /c` / `eval` wrappers and
+# command substitutions. A destructive verb whose operands cannot be resolved
+# (variables, expressions, piped or encoded input, an unknown working
+# directory) is reported UNRESOLVED and refused; everything else a shell
+# program can do stays outside this proof, as CORE 1.4 says.
+
+#: Normalized verb names (lower case, no directory, no executable extension).
+_SHELL_DELETE_VERBS = frozenset(
+    {"rm", "rmdir", "unlink", "shred", "del", "erase", "rd", "remove-item", "ri"}
+)
+_SHELL_MOVE_VERBS = frozenset({"mv", "move", "move-item", "mi"})
+_SHELL_RENAME_VERBS = frozenset({"ren", "rename", "rename-item", "rni"})
+_SHELL_MIRROR_VERBS = frozenset({"robocopy", "rsync"})
+_POSIX_SHELL_VERBS = frozenset({"bash", "sh", "zsh", "dash", "ksh", "busybox"})
+_POWERSHELL_VERBS = frozenset({"powershell", "pwsh"})
+_EVAL_VERBS = frozenset({"eval", "iex", "invoke-expression"})
+_CD_VERBS = frozenset({"cd", "chdir", "set-location", "sl"})
+_PUSHD_VERBS = frozenset({"pushd", "push-location"})
+_POPD_VERBS = frozenset({"popd", "pop-location"})
+#: Words that run ANOTHER command rather than doing anything themselves. The
+#: guard drops them to reach the real verb; when it cannot, the segment fails
+#: closed below rather than being read as the launcher's own harmless effect.
+_PREFIX_WORDS = frozenset(
+    {
+        "sudo",
+        "doas",
+        "command",
+        "builtin",
+        "exec",
+        "nohup",
+        "time",
+        "call",
+        "env",
+        "timeout",
+        "nice",
+        "ionice",
+        "stdbuf",
+        "setsid",
+        "chrt",
+        "taskset",
+        "&",
+        ".",
+    }
+)
+#: PowerShell parameters that take a value, matched by unambiguous prefix the
+#: way PowerShell binds them. Everything else spelled `-Name` is a switch.
+_PS_VALUE_PARAMETERS = (
+    "path",
+    "literalpath",
+    "destination",
+    "newname",
+    "include",
+    "exclude",
+    "filter",
+    "erroraction",
+    "warningaction",
+    "informationaction",
+    "errorvariable",
+    "warningvariable",
+    "informationvariable",
+    "outvariable",
+    "outbuffer",
+    "pipelinevariable",
+    "credential",
+    "stream",
+)
+_PS_ONLY_VERBS = frozenset({"remove-item", "ri", "move-item", "mi", "rename-item", "rni"})
+#: A destructive verb spelled anywhere in a segment the parser could not read.
+#: Used to fail closed rather than report an unread segment as read.
+_DESTRUCTIVE_TEXT = re.compile(
+    r"(?i)\b(rm|rmdir|rd|del|erase|remove-item|move-item|mv|move)\b"
+)
+#: A backslash-escaped quote. `_shell_words` runs `shlex` with escaping
+#: disabled, so these tokenize into nonsense rather than raising.
+_ESCAPED_QUOTE = re.compile(r"\\[\"']")
+#: An operand carrying run-time syntax: variables, substitutions, expressions.
+_COMPUTED_OPERAND = re.compile(r"[$`%]|^[(@{]")
+_GLOB_CHARACTERS = frozenset("*?[")
+_MAX_SHELL_NESTING = 3
+_MAX_GLOB_ENTRIES = 2000
+_MAX_REPO_WALK = 64
+_MAX_CWD_STACK = 16
+
+
+def _shell_segments(text: str) -> tuple[list[tuple[str, bool]], list[str]]:
+    """Top-level simple commands (with "was piped into") and substitutions."""
+    segments: list[tuple[str, bool]] = []
+    nested: list[str] = []
+    current: list[str] = []
+    quote: str | None = None
+    piped = False
+    index = 0
+
+    def close(next_piped: bool) -> None:
+        nonlocal piped
+        segment = "".join(current).strip()
+        if segment:
+            segments.append((segment, piped))
+        current.clear()
+        piped = next_piped
+
+    while index < len(text):
+        char = text[index]
+        if quote == "'":
+            current.append(char)
+            if char == "'":
+                quote = None
+            index += 1
+            continue
+        if char == "$" and text[index + 1 : index + 2] == "(":
+            depth, end = 1, index + 2
+            while end < len(text) and depth:
+                depth += {"(": 1, ")": -1}.get(text[end], 0)
+                end += 1
+            nested.append(text[index + 2 : end - 1])
+            current.append("$(...)")
+            index = end
+            continue
+        if char == "`" and quote != '"':
+            end = text.find("`", index + 1)
+            if end > index:
+                nested.append(text[index + 1 : end])
+                current.append("$(...)")
+                index = end + 1
+                continue
+        if quote == '"':
+            current.append(char)
+            if char == '"':
+                quote = None
+            index += 1
+            continue
+        if char in "'\"":
+            quote = char
+            current.append(char)
+            index += 1
+            continue
+        if char in ";\r\n":
+            close(False)
+            index += 1
+            continue
+        if char == "|":
+            doubled = text[index + 1 : index + 2] == "|"
+            close(not doubled)
+            index += 2 if doubled else 1
+            continue
+        if char == "&" and not (current and current[-1] in "<>"):
+            close(False)
+            index += 2 if text[index + 1 : index + 2] == "&" else 1
+            continue
+        current.append(char)
+        index += 1
+    close(False)
+    return segments, nested
+
+
+def _shell_words(segment: str) -> list[str] | None:
+    lexer = shlex.shlex(segment, posix=True)
+    lexer.whitespace_split = True
+    lexer.escape = ""
+    lexer.commenters = ""
+    try:
+        words = list(lexer)
+    except ValueError:
+        return None
+    if words:
+        words[0] = words[0].lstrip("({")
+        words[-1] = words[-1].rstrip(")}") or words[-1]
+    return [word for word in words if word]
+
+
+def _shell_verb(word: str) -> str:
+    name = re.split(r"[\\/]", word)[-1].lower()
+    for suffix in (".exe", ".cmd", ".bat", ".com", ".ps1"):
+        if name.endswith(suffix):
+            return name[: -len(suffix)]
+    return name
+
+
+def _ps_parameter(name: str) -> str | None:
+    matches = [full for full in _PS_VALUE_PARAMETERS if full.startswith(name)]
+    return matches[0] if len(matches) == 1 or name in _PS_VALUE_PARAMETERS else None
+
+
+def _is_redirection(word: str) -> bool:
+    return bool(re.fullmatch(r"\d?(>>?|<)(&\d)?", word)) or bool(
+        re.fullmatch(r"\d?>>?\S+|<\S+", word)
+    )
+
+
+def _parse_arguments(verb: str, words: list[str]) -> tuple[list[str], dict, set]:
+    """Operands, PowerShell named values and switches of one simple command."""
+    operands: list[str] = []
+    named: dict[str, list[str]] = {}
+    switches: set[str] = set()
+    powershell = verb in _PS_ONLY_VERBS
+    index = 0
+    options_done = False
+    while index < len(words):
+        word = words[index]
+        index += 1
+        if options_done:
+            operands.append(word)
+            continue
+        if word == "--":
+            options_done = True
+            continue
+        if _is_redirection(word):
+            if re.fullmatch(r"\d?(>>?|<)", word):
+                index += 1
+            continue
+        if word.startswith("-") and len(word) > 1:
+            name, _sep, bound = word[1:].partition(":")
+            lowered = name.lower().lstrip("-")
+            parameter = (
+                _ps_parameter(lowered) if (powershell or len(lowered) >= 3) and lowered else None
+            )
+            if parameter:
+                if bound:
+                    named.setdefault(parameter, []).append(bound)
+                elif index < len(words):
+                    named.setdefault(parameter, []).append(words[index])
+                    index += 1
+            else:
+                switches.add(lowered)
+            continue
+        if re.fullmatch(r"/[A-Za-z?](:.*)?", word):
+            switches.add(word[1:2].lower())
+            continue
+        if verb in _SHELL_MIRROR_VERBS and re.fullmatch(r"/[A-Za-z]{2,}(:.*)?", word):
+            # Robocopy spells its switches as whole words. Reading only the
+            # single-letter DOS form made `/MIR` an operand, so the one verb in
+            # the mirror set that empties a directory resolved no effect at all
+            # and the whole branch was unreachable. The form stays scoped to
+            # the mirror verbs: on POSIX `/tmp` is a path, not a switch.
+            switches.add(word[1:].partition(":")[0].lower())
+            continue
+        operands.append(word)
+    return operands, named, switches
+
+
+def _absolute(token: str, cwd: str | None) -> str | None:
+    windows = os.name == "nt"
+    if windows and re.fullmatch(r"/[A-Za-z](/.*)?", token):
+        token = f"{token[1]}:\\{token[3:]}"
+    pure = PureWindowsPath(token) if windows else PurePosixPath(token)
+    if pure.is_absolute() or (windows and pure.root):
+        return str(Path(token))
+    if cwd is None:
+        return None
+    return str(Path(cwd) / token)
+
+
+def _resolve_operand(token: str, cwd: str | None) -> tuple[list[str], str | None]:
+    """The absolute paths one operand names, or why they cannot be known."""
+    if _COMPUTED_OPERAND.search(token) or ("{" in token and "," in token):
+        return [], f"operand '{token}' is computed when the command runs"
+    if token.startswith("~"):
+        token = os.path.expanduser(token)
+    pure = PureWindowsPath(token) if os.name == "nt" else PurePosixPath(token)
+    parts = pure.parts
+    wild = next((i for i, part in enumerate(parts) if _GLOB_CHARACTERS & set(part)), None)
+    if wild is None:
+        absolute = _absolute(token, cwd)
+        if absolute is None:
+            return [], f"operand '{token}' is relative to a working directory that is not known"
+        return [absolute], None
+    base_text = str(type(pure)(*parts[:wild])) if wild else "."
+    base = _absolute(base_text, cwd)
+    if base is None:
+        return [], f"operand '{token}' is relative to a working directory that is not known"
+    try:
+        with os.scandir(base) as entries:
+            names = []
+            for entry in entries:
+                names.append(entry.name)
+                if len(names) > _MAX_GLOB_ENTRIES:
+                    return [], f"'{token}' matches in a directory too large to enumerate"
+    except FileNotFoundError:
+        return [], None
+    except OSError as exc:
+        return [], f"'{token}' cannot be expanded ({exc.strerror or exc})"
+    # Case-insensitive and dot-inclusive: the widest reading any of the three
+    # shells gives the pattern, so a match is never missed.
+    pattern = parts[wild].lower()
+    rest = parts[wild + 1 :]
+    matched = [name for name in names if fnmatch.fnmatchcase(name.lower(), pattern)]
+    targets = []
+    for name in matched:
+        if rest and not any(_GLOB_CHARACTERS & set(part) for part in rest):
+            targets.append(str(Path(base, name, *rest)))
+        else:
+            targets.append(str(Path(base, name)))
+    return targets, None
+
+
+def _repository_top(cwd: str | None) -> str | None:
+    if cwd is None:
+        return None
+    current = Path(cwd)
+    for _ in range(_MAX_REPO_WALK):
+        if (current / ".git").exists():
+            return str(current)
+        if current.parent == current:
+            break
+        current = current.parent
+    return cwd
+
+
+def _git_effect(words: list[str], cwd: str | None) -> tuple[dict | None, str | None]:
+    """The worktree a git subcommand destroys, for the few that do."""
+    index = 0
+    while index < len(words) and words[index].startswith("-"):
+        option = words[index]
+        if option in ("-C", "-c") and index + 1 < len(words):
+            if option == "-C":
+                cwd = _absolute(words[index + 1], cwd)
+            index += 2
+            continue
+        if option.startswith(("--git-dir", "--work-tree")):
+            return None, "git runs against a worktree named by an option"
+        index += 1
+    if index >= len(words):
+        return None, None
+    subcommand, args = words[index].lower(), words[index + 1 :]
+    operands, _named, switches = _parse_arguments("git", args)
+    flags = "".join(sorted(switches))
+    top = _repository_top(cwd)
+
+    def scope(paths: list[str]) -> tuple[dict | None, str | None]:
+        if not paths:
+            if top is None:
+                return None, "git runs in a working directory that is not known"
+            return {"action": "delete", "verb": f"git {subcommand}", "targets": [top]}, None
+        targets: list[str] = []
+        for token in paths:
+            resolved, why = _resolve_operand(token, cwd)
+            if why:
+                return None, why
+            targets.extend(resolved)
+        return {"action": "delete", "verb": f"git {subcommand}", "targets": targets}, None
+
+    if subcommand == "clean":
+        if "force" in switches or any("f" in flag for flag in switches if len(flag) <= 4):
+            return scope(operands)
+        return None, None
+    if subcommand == "rm":
+        return (scope(operands) if "cached" not in switches and operands else (None, None))
+    if subcommand == "reset":
+        return scope([]) if "hard" in switches else (None, None)
+    if subcommand in ("checkout", "restore"):
+        if subcommand == "restore" and "staged" in switches and not {"worktree", "w"} & switches:
+            return None, None
+        if "--" in args or subcommand == "restore":
+            return scope(operands) if operands else (None, None)
+        if any(token == "." or _GLOB_CHARACTERS & set(token) for token in operands):
+            return scope(operands)
+        return None, None
+    if subcommand == "stash":
+        action = operands[0].lower() if operands else "push"
+        if action in ("push", "save", "apply", "pop") or not operands:
+            paths = args[args.index("--") + 1 :] if "--" in args else []
+            return scope(paths)
+        return None, None
+    del flags
+    return None, None
+
+
+def _navigate(verb: str, args: list[str], cwd: str | None, stack: list[str | None]) -> str | None:
+    """The working directory after one navigation word; `stack` is the dir stack.
+
+    A parser that models `pushd` and not `popd` attributes every later relative
+    operand to the directory the shell already left, so
+    `pushd <external>; popd; rm -rf .` reads as a safe external delete when it
+    deletes the project root. An unprovable move -- `cd -`, a bare POSIX
+    `pushd` swap, a computed operand, a stack deeper than the guard tracks --
+    yields an unknown directory, which makes later relative destructive
+    operands unresolved instead of guessed.
+    """
+    if verb in _POPD_VERBS:
+        return stack.pop() if stack else None
+    operands, named, _switches = _parse_arguments(verb, args)
+    tokens = named.get("path") or named.get("literalpath") or operands
+    if verb in _PUSHD_VERBS:
+        if len(stack) >= _MAX_CWD_STACK:
+            # Depth beyond the bound is no longer tracked, so no entry below
+            # it can be trusted to restore a directory either.
+            stack[:] = [None] * len(stack)
+            return None
+        stack.append(cwd)
+        if not tokens:
+            return None
+    destination = (tokens or ["~"])[0]
+    if destination == "-" or _COMPUTED_OPERAND.search(destination):
+        return None
+    return _absolute(os.path.expanduser(destination), cwd)
+
+
+def destructive_shell_effects(command: str, cwd: str | None, _depth: int = 0) -> dict:
+    """Resolve the delete/move effects of one shell command line (T-1354).
+
+    Returns ``{"effects": [{"action", "verb", "targets"}...], "unresolved": str
+    | None}``. Targets are absolute. An effect is reported whenever a bounded
+    destructive verb runs; ``unresolved`` names the first one whose targets
+    cannot be known, and admission refuses the command for it.
+    """
+    effects: list[dict] = []
+    unresolved: str | None = None
+    cwd_stack: list[str | None] = []
+    if _depth > _MAX_SHELL_NESTING:
+        return {"effects": [], "unresolved": "shell wrappers nest deeper than the guard reads"}
+    segments, nested = _shell_segments(command)
+    for script in nested:
+        inner = destructive_shell_effects(script, cwd, _depth + 1)
+        effects.extend(inner["effects"])
+        unresolved = unresolved or inner["unresolved"]
+    for segment, piped in segments:
+        words = _shell_words(segment)
+        if words is None:
+            if _DESTRUCTIVE_TEXT.search(segment):
+                unresolved = unresolved or f"destructive command cannot be parsed: {segment[:80]}"
+            continue
+        if _ESCAPED_QUOTE.search(segment) and _DESTRUCTIVE_TEXT.search(segment):
+            # Escaping is disabled in the lexer, so `\"` does not raise -- it
+            # tokenizes into nonsense, and the guard then reports a reading it
+            # never made. Measured: `rm -rf \".\"` resolved to the single path
+            # `\` rather than the project root, and one wrapper level deeper
+            # the command disappeared, leaving no effect and no complaint. A
+            # segment the guard cannot read whole is not a segment it read.
+            unresolved = unresolved or (
+                f"escaped quoting the guard cannot read whole: {segment[:80]}"
+            )
+            continue
+        launched = False
+        while words and (re.fullmatch(r"[A-Za-z_][A-Za-z0-9_]*=.*", words[0]) or
+                         words[0].lower() in _PREFIX_WORDS):
+            launched = launched or words[0].lower() in _PREFIX_WORDS
+            words = words[1:]
+        if not words:
+            continue
+        verb, args = _shell_verb(words[0]), words[1:]
+        if verb in _POSIX_SHELL_VERBS or verb in _POWERSHELL_VERBS or verb == "cmd":
+            script = _wrapped_script(verb, args)
+            if script is _ENCODED:
+                unresolved = unresolved or f"{verb} runs an encoded command the guard cannot read"
+            elif script:
+                inner = destructive_shell_effects(script, cwd, _depth + 1)
+                effects.extend(inner["effects"])
+                unresolved = unresolved or inner["unresolved"]
+            continue
+        if verb in _EVAL_VERBS:
+            inner = destructive_shell_effects(" ".join(args), cwd, _depth + 1)
+            effects.extend(inner["effects"])
+            unresolved = unresolved or inner["unresolved"]
+            continue
+        if verb in _CD_VERBS or verb in _PUSHD_VERBS or verb in _POPD_VERBS:
+            cwd = _navigate(verb, args, cwd, cwd_stack)
+            continue
+        if verb == "xargs":
+            if any(_shell_verb(word) in _SHELL_DELETE_VERBS | _SHELL_MOVE_VERBS for word in args):
+                unresolved = unresolved or (
+                    "xargs takes its destructive operands from standard input"
+                )
+            continue
+        if verb == "find":
+            starts = []
+            for word in args:
+                if word.startswith(("-", "(", "!")):
+                    break
+                starts.append(word)
+            lowered = [word.lower() for word in args]
+            deletes = "-delete" in lowered or any(
+                word in ("-exec", "-execdir", "-ok", "-okdir")
+                and position + 1 < len(args)
+                and _shell_verb(args[position + 1]) in _SHELL_DELETE_VERBS | _SHELL_MOVE_VERBS
+                for position, word in enumerate(lowered)
+            )
+            if deletes:
+                effect, why = _operand_effect("delete", "find", starts or ["."], cwd)
+                effects.extend([effect] if effect else [])
+                unresolved = unresolved or why
+            continue
+        if verb == "git":
+            effect, why = _git_effect(args, cwd)
+            effects.extend([effect] if effect else [])
+            unresolved = unresolved or why
+            continue
+        if verb not in (
+            _SHELL_DELETE_VERBS | _SHELL_MOVE_VERBS | _SHELL_RENAME_VERBS | _SHELL_MIRROR_VERBS
+        ):
+            if launched and _DESTRUCTIVE_TEXT.search(segment):
+                # A launcher ran something the guard could not reduce to a
+                # verb it knows -- `timeout 5 rm -rf .`, `sudo -u root rm -rf .`
+                # -- so the destructive word in the line is unaccounted for.
+                # Reading that as the launcher's own harmless effect is how
+                # `env FOO=1 rm -rf .` was admitted on a healthy project.
+                unresolved = unresolved or (
+                    f"a launcher runs a destructive command the guard cannot "
+                    f"reduce: {segment[:80]}"
+                )
+            continue
+        operands, named, switches = _parse_arguments(verb, args)
+        paths = named.get("path", []) + named.get("literalpath", []) + operands
+        if verb in _SHELL_MIRROR_VERBS:
+            mirror = {"mir", "purge", "delete", "delete-before", "delete-after", "delete-during"}
+            if switches & mirror and len(operands) >= 2:
+                target = operands[1] if verb == "robocopy" else operands[-1]
+                effect, why = _operand_effect("delete", verb, [target], cwd)
+                effects.extend([effect] if effect else [])
+                unresolved = unresolved or why
+            continue
+        if verb in _SHELL_RENAME_VERBS:
+            new_name = (named.get("newname") or operands[1:2] or [None])[0]
+            paths = (named.get("path") or named.get("literalpath") or operands[:1])
+            if not paths or new_name is None:
+                if piped:
+                    unresolved = unresolved or f"{verb} takes its target from the pipeline"
+                continue
+            effect, why = _operand_effect("move", verb, [paths[0]], cwd)
+            if effect:
+                parent = str(Path(effect["targets"][0]).parent)
+                renamed, why = _operand_effect("move", verb, [new_name], parent)
+                if renamed:
+                    effect["targets"].extend(renamed["targets"])
+                effects.append(effect)
+            unresolved = unresolved or why
+            continue
+        if verb in _SHELL_MOVE_VERBS:
+            paths = paths + named.get("destination", [])
+        if not paths:
+            if piped:
+                unresolved = unresolved or f"{verb} takes its targets from the pipeline"
+            continue
+        action = "move" if verb in _SHELL_MOVE_VERBS else "delete"
+        effect, why = _operand_effect(action, verb, paths, cwd)
+        effects.extend([effect] if effect else [])
+        unresolved = unresolved or why
+    return {"effects": effects, "unresolved": unresolved}
+
+
+_ENCODED = object()
+
+
+def _wrapped_script(verb: str, args: list[str]):
+    """The script a shell wrapper runs, `_ENCODED` for an unreadable one."""
+    lowered = [word.lower() for word in args]
+    if verb in _POSIX_SHELL_VERBS:
+        for index, word in enumerate(lowered):
+            if word.startswith("-") and not word.startswith("--") and "c" in word[1:]:
+                return args[index + 1] if index + 1 < len(args) else None
+        return None
+    if verb in _POWERSHELL_VERBS:
+        for index, word in enumerate(lowered):
+            name = word.lstrip("-/")
+            if word.startswith(("-", "/")) and name and "encodedcommand".startswith(name) and (
+                len(name) >= 2 or name == "e"
+            ):
+                return _ENCODED
+            if word.startswith(("-", "/")) and name and "command".startswith(name):
+                return " ".join(args[index + 1 :])
+        return None
+    for index, word in enumerate(lowered):
+        if word in ("/c", "/k", "/r"):
+            return " ".join(args[index + 1 :])
+    return None
+
+
+def _operand_effect(
+    action: str, verb: str, tokens: list[str], cwd: str | None
+) -> tuple[dict | None, str | None]:
+    targets: list[str] = []
+    for token in tokens:
+        resolved, why = _resolve_operand(token, cwd)
+        if why:
+            return None, why
+        targets.extend(resolved)
+    if not targets:
+        return None, None
+    return {"action": action, "verb": verb, "targets": targets}, None
+
 
 class EventError(ValueError):
     """The event document is not a legal bounded guard event."""
@@ -326,9 +916,16 @@ def map_event(event: dict) -> dict:
     """Map a validated event onto the admission action/effect model.
 
     Returns ``{"action", "target_path", "target_paths", "targets_unresolved",
+    "shell_protected_namespace", "shell_effects", "shell_effects_unresolved",
     "actor", "host", "event", "tool_name", "cwd", "saipen_verb", "detail"}``.
     The ACTION decides nothing by itself; `admission.evaluate_admission`
     decides -- and it decides over EVERY target, refusing if any is refused.
+
+    An ordinary shell command carries its resolved destructive effects
+    (`destructive_shell_effects`) in `shell_effects`, so the host-event path
+    hands admission the same effect a native delete or move would declare.
+    Without them the guard judged `rm -rf .` on nothing but the absence of the
+    literal text `.saipen` and admitted it.
     """
     tool = _tool_identity(event["tool_name"])
     tool_input = event.get("tool_input", {})
@@ -338,6 +935,8 @@ def map_event(event: dict) -> dict:
     verb: str | None = None
     action: str
     shell_protected_namespace = False
+    shell_effects: list[dict] = []
+    shell_effects_unresolved: str | None = None
 
     if tool in _READ_TOOLS:
         action = "read"
@@ -373,12 +972,23 @@ def map_event(event: dict) -> dict:
             if not command or not command.strip():
                 targets_unresolved = True
                 detail = "shell tool supplied no inspectable command line"
-            elif _PROTECTED_SHELL_SEGMENT.search(command):
-                # Shell preflight covers the whole .saipen namespace, whereas
-                # structured target protection remains its narrower canonical
-                # path list. Carry the finding separately: no fake file target.
-                shell_protected_namespace = True
-                detail = "shell command explicitly references the protected .saipen namespace"
+            else:
+                if _PROTECTED_SHELL_SEGMENT.search(command):
+                    # Shell preflight covers the whole .saipen namespace, whereas
+                    # structured target protection remains its narrower canonical
+                    # path list. Carry the finding separately: no fake file target.
+                    shell_protected_namespace = True
+                    detail = (
+                        "shell command explicitly references the protected .saipen namespace"
+                    )
+                resolved = destructive_shell_effects(command, event["cwd"])
+                shell_effects = resolved["effects"]
+                shell_effects_unresolved = resolved["unresolved"]
+                if not detail and (shell_effects or shell_effects_unresolved):
+                    detail = (
+                        "shell command carries destructive filesystem effects; each is "
+                        "judged as the file effect it is"
+                    )
     elif tool in _WRITE_TOOLS:
         action = "write"
     elif tool in _DELETE_TOOLS:
@@ -412,6 +1022,8 @@ def map_event(event: dict) -> dict:
         "target_paths": targets,
         "targets_unresolved": targets_unresolved,
         "shell_protected_namespace": shell_protected_namespace,
+        "shell_effects": shell_effects,
+        "shell_effects_unresolved": shell_effects_unresolved,
         "actor": actor,
         "host": event["host"],
         "event": event["event"],

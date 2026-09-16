@@ -63,7 +63,10 @@ _BOARD_COMPACTION_COMMAND = "saipen ticket compact"
 # T-1324 Target C/G: a gated STATE.blocker has an OPERATOR DECISION verb, not a
 # generic unblock. The exact command is the reachable one; the operator supplies
 # the decision text (there is no defaulted authority).
-_BLOCKER_DECISION_COMMAND = 'saipen recover resolve-blocker "<decision>"'
+#: T-1357: printed UNQUOTED. A quote character disqualifies the whole line
+#: from the guard's canonical grammar, so a quoted form is a command the
+#: engine advertises and its own guard can never admit.
+_BLOCKER_DECISION_COMMAND = 'saipen recover resolve-blocker <decision>'
 
 #: T-1327 TARGET A: the CLOSED set of canonical repairs Fleet may execute by
 #: itself. A `canonical_next_command` is never run as a shell string and never

@@ -36,7 +36,7 @@ import stat
 import sys
 import datetime
 from dataclasses import dataclass
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 
 from .board import strict_iso_utc, iso_utc_sort_key
 
@@ -469,6 +469,58 @@ def classify_target(current_hash: str, before_hash: str, after_hash: str) -> str
     if current_hash == before_hash:
         return TARGET_PENDING
     return TARGET_CONFLICT
+
+
+def is_noop_target(target: dict) -> bool:
+    """A target whose plan changes nothing: `before_hash == after_hash` (T-1355).
+
+    `classify_target` reads it as ALREADY_APPLIED, correctly and deterministically
+    -- it IS already in its planned state, and always was. What that must never
+    become is EVIDENCE about ordering. A no-op writes nothing, so its state says
+    nothing about whether a later target was written before an earlier one, and
+    treating it as proof of out-of-order materialization made its POSITION in
+    the plan decide the verdict: measured, the identical operation rolled
+    forward with the no-op first and refused RECOVERY_CONFLICT with it second
+    or third. A `saipen stop` that failed before its first effective write then
+    reported a conflict on an untouched file, every surface named `saipen
+    recover`, and `saipen recover` refused again.
+    """
+    return target.get("before_hash") == target.get("after_hash")
+
+
+def defer_unreached_targets(targets: list[dict], classifications: list[str]) -> list[str]:
+    """Re-read a CONFLICT that the plan's OWN pending work explains (T-1360).
+
+    `classify_target` compares a target's live bytes against the before/after
+    it recorded, and that comparison is only due at the target's own place in
+    the sequence. An ordered cleanup plan deletes a directory's files and then
+    the emptied directory, so every `delete_dir` records the digest of an EMPTY
+    directory -- true only once the earlier targets have run. Classifying every
+    target up front therefore read each not-yet-reached directory as tampering,
+    and a crashed `sub_clean` could never recover: the operation stayed pending
+    forever, `recovery_required` never cleared, and admission then refused every
+    consequential tool in the project.
+
+    A target whose path CONTAINS an earlier target that has not materialized is
+    not tampered with, it is not due yet, so it stays PENDING until the frontier
+    reaches it. Nothing is forgiven: `rmdir` refuses a directory that is not
+    empty and `_verify_target_bytes` reruns over every target after roll-forward,
+    so bytes no pending target accounts for still fail closed -- at the point
+    where the plan actually arrives at them.
+    """
+    resolved = list(classifications)
+    for index, classification in enumerate(resolved):
+        if classification != TARGET_CONFLICT:
+            continue
+        owner = PurePosixPath(str(targets[index]["path"]).replace("\\", "/"))
+        for earlier in range(index):
+            if resolved[earlier] == TARGET_ALREADY_APPLIED:
+                continue
+            inner = PurePosixPath(str(targets[earlier]["path"]).replace("\\", "/"))
+            if owner in inner.parents:
+                resolved[index] = TARGET_PENDING
+                break
+    return resolved
 
 
 def hash_source_identity(project_root: Path | str) -> str:
@@ -1334,14 +1386,28 @@ def recovery_preflight(project_root: Path | str, exclude_op_id: str | None = Non
         }
     conflicts = [op for op in conflicts if op["op_id"] != exclude_op_id]
     if conflicts:
+        # Bound to a local so the command strings below carry no nested quote:
+        # a literal the source cannot be read through is a literal no reachability
+        # check can measure (T-1357's harvest).
+        conflict_id = conflicts[0]["op_id"]
         return {
             "ok": False,
             "code": "RECOVERY_CONFLICT",
             "op_ids": [op["op_id"] for op in conflicts],
             "recovery_required": True,
-            "detail": f"unresolved conflict {conflicts[0]['op_id']} "
-            "blocks new mutation; resolve it explicitly (saipen "
-            "recover) before any further canonical write",
+            # T-1355 termination oracle: this used to advertise bare `saipen
+            # recover`, and bare `saipen recover` on an unresolved conflict
+            # returns this same refusal -- measured byte-identical twice in a
+            # row. A surface that names a command reproducing its own state is
+            # the loop, not the exit. Name the two commands that settle it.
+            "canonical_next_command": (
+                f"saipen recover resolve {conflict_id} --resolution <accept_live|replan>"
+            ),
+            "inspect_command": f"saipen recover inspect {conflict_id}",
+            "detail": f"unresolved conflict {conflict_id} blocks new mutation; look "
+            f"with `saipen recover inspect {conflict_id}` and settle it with "
+            f"`saipen recover resolve {conflict_id} --resolution "
+            "<accept_live|replan>` before any further canonical write",
         }
     pending = [op for op in pending if op["op_id"] != exclude_op_id]
     if not pending:
@@ -2990,14 +3056,17 @@ def _recover_locked(root: Path, op_id: str) -> dict:
     # EVERY target from live bytes in canonical operation order; stale
     # progress_index / applied_frontier / target.applied markers are never
     # stronger evidence than the bytes themselves.
-    classifications = [
-        classify_target(
-            _target_live_hash(root, target),
-            target["before_hash"],
-            target["after_hash"],
-        )
-        for target in targets
-    ]
+    classifications = defer_unreached_targets(
+        targets,
+        [
+            classify_target(
+                _target_live_hash(root, target),
+                target["before_hash"],
+                target["after_hash"],
+            )
+            for target in targets
+        ],
+    )
     prefix_len = len(targets)
     for index, classification in enumerate(classifications):
         if classification != TARGET_ALREADY_APPLIED:
@@ -3037,7 +3106,9 @@ def _recover_locked(root: Path, op_id: str) -> dict:
     # ordering freedom the operation never authorized and make recovery depend
     # on replay being harmless.
     for index in range(prefix_len, len(classifications)):
-        if classifications[index] == TARGET_ALREADY_APPLIED:
+        if classifications[index] == TARGET_ALREADY_APPLIED and not is_noop_target(
+            targets[index]
+        ):
             journal.mark("CONFLICT")
             target = targets[index]
             return {
@@ -3051,18 +3122,38 @@ def _recover_locked(root: Path, op_id: str) -> dict:
                 "expected_after_hash": target["after_hash"],
                 "actual_hash": _target_live_hash(root, target),
                 "applied_frontier": prefix_len - 1,
-                "detail": f"target {target['path']} materialized out of "
-                "order (before-hash target at index "
-                f"{prefix_len - 1} precedes it); non-prefix "
-                "materialization is not a legal crash shape for "
-                "ordered mutation plans; refuse to guess",
+                "canonical_next_command": (
+                    f"saipen recover resolve {op_id} --resolution <accept_live|replan>"
+                ),
+                "inspect_command": f"saipen recover inspect {op_id}",
+                "detail": f"target {target['path']} materialized out of order ("
+                + (
+                    "nothing before it has materialized"
+                    if prefix_len == 0
+                    # `index -1` named a target that does not exist whenever the
+                    # frontier was empty, which is exactly when a reader most
+                    # needs the message to make sense (T-1355).
+                    else f"the unfinished target at index {prefix_len - 1} precedes it"
+                )
+                + "); non-prefix materialization is not a legal crash shape for "
+                "ordered mutation plans; refuse to guess. Settle it with "
+                f"`saipen recover resolve {op_id} --resolution <accept_live|replan>`",
             }
 
     # Phase 4 guard: PREPARED with zero materialized targets aborts safely.
     # The byte classification decides -- not the applied markers -- so a
     # PREPARED receipt whose targets already sit at after_hash is materialized
     # work that must converge to COMMITTED, never abort.
-    if status == "PREPARED" and all(c == TARGET_PENDING for c in classifications):
+    # T-1355: a no-op is transparent HERE too. This branch's rule is that a
+    # target already sitting at `after_hash` is materialized work, and that was
+    # written about a REAL write that landed before the crash -- a no-op never
+    # wrote anything and sits there by definition. Counting it as materialized
+    # made the presence of one decide whether an operation that had written
+    # nothing aborted or silently completed the work its caller abandoned.
+    if status == "PREPARED" and all(
+        classification == TARGET_PENDING or is_noop_target(target)
+        for classification, target in zip(classifications, targets)
+    ):
         journal.mark("ABORTED")
         return {"ok": True, "code": "ABORTED", "op_id": op_id}
 

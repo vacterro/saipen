@@ -651,6 +651,76 @@ def _hex_decode(text: str) -> str | None:
         return None
 
 
+def _validate(project_root: Path, as_json: bool) -> int:
+    """Why the canonical gate refuses this project, if it does. READ-ONLY.
+
+    T-1357. The router already told operators to "run 'saipen validate' before
+    crew work", and no such verb existed; the real gate is an ordinary shell
+    command, which the guard correctly refuses once the protocol state is
+    invalid. So the one question a blocked operator needs answered -- WHAT is
+    wrong -- had no canonical answer, and the refusal that named the problem
+    could not be read from the session it was refusing.
+
+    Like `search`, this is reachable in the state that broke: it reads the
+    three canonical documents through the codec, runs the same `validate_texts`
+    the mutation path runs, and writes nothing. It reports; it never repairs.
+    """
+    from saipen_engine import codec
+    from saipen_engine.fast_check import validate_texts
+
+    saipen = project_root / ".saipen"
+    missing = [
+        f".saipen/{name}"
+        for name in ("STATE.md", "BOARD.md", "LOG.md")
+        if not (saipen / name).is_file()
+    ]
+    if missing:
+        _emit(
+            {
+                "ok": False,
+                "code": "VALIDATION_FAILED",
+                "detail": "canonical document(s) missing: " + ", ".join(missing),
+                "errors": missing,
+            },
+            as_json,
+        )
+        return 1
+    try:
+        errors = validate_texts(
+            codec.read_doc(saipen / "STATE.md"),
+            codec.read_doc(saipen / "BOARD.md"),
+            codec.read_doc(saipen / "LOG.md"),
+            current_agent=_agent_for(project_root),
+        )
+    except Exception as exc:
+        # A gate that cannot run is not a gate that passed: report the
+        # instrument failure as itself rather than as a clean project.
+        _emit(
+            {
+                "ok": False,
+                "code": "VALIDATION_UNAVAILABLE",
+                "detail": f"the fast gate could not run ({type(exc).__name__}: {exc})",
+            },
+            as_json,
+        )
+        return 1
+    _emit(
+        {
+            "ok": not errors,
+            "code": "VALID" if not errors else "VALIDATION_FAILED",
+            "error_count": len(errors),
+            "errors": errors,
+            "detail": (
+                "canonical STATE/BOARD/LOG pass the fast gate"
+                if not errors
+                else "; ".join(errors[:8])
+            ),
+        },
+        as_json,
+    )
+    return 0 if not errors else 1
+
+
 def _search(project_root: Path, args: list[str], as_json: bool) -> int:
     """Canonical bounded search transport (T-1320). STRICTLY READ-ONLY.
 
@@ -930,6 +1000,8 @@ def _guard_event(project_root_opt: str | None, args: list[str], as_json: bool) -
         target_paths=mapped["target_paths"],
         targets_unresolved=mapped["targets_unresolved"],
         shell_protected_namespace=mapped["shell_protected_namespace"],
+        shell_effects=mapped["shell_effects"],
+        shell_effects_unresolved=mapped["shell_effects_unresolved"],
     )
     admission_result["event"] = {
         "event": mapped["event"],
@@ -941,6 +1013,8 @@ def _guard_event(project_root_opt: str | None, args: list[str], as_json: bool) -
         "target_paths": mapped["target_paths"],
         "targets_unresolved": mapped["targets_unresolved"],
         "shell_protected_namespace": mapped["shell_protected_namespace"],
+        "shell_effects": mapped["shell_effects"],
+        "shell_effects_unresolved": mapped["shell_effects_unresolved"],
         "actor": mapped["actor"],
         "saipen_verb": mapped["saipen_verb"],
         "detail": mapped["detail"],
@@ -1898,8 +1972,10 @@ def _recover(project_root: Path, args: list[str], as_json: bool, dry_run: bool =
     adopt_legacy: list[str] = []
     attest_legacy_done: list[str] = []
     resolve_blocker: str | None = None
+    resolve_next_action: str | None = None
     approved_repair_id: str | None = None
     migrate_generation = False
+    normalize_log_requested = False
 
     def _refuse(detail: str) -> int:
         _emit({"ok": False, "code": "VALIDATION_FAILED", "detail": detail}, as_json)
@@ -1971,6 +2047,14 @@ def _recover(project_root: Path, args: list[str], as_json: bool, dry_run: bool =
             migrate_generation = True
             index += 1
             continue
+        if token == "normalize-log":
+            # T-1356: the exit for a LOG whose line syntax refuses every
+            # mutation, including the sanctioned repair that would fix it.
+            # It takes no argument: the repairs are READ from the file, never
+            # supplied, so nobody can name a line the LOG does not carry.
+            normalize_log_requested = True
+            index += 1
+            continue
         if token == "--apply-approved-repair":
             if index + 1 >= len(args):
                 return _refuse(
@@ -1985,19 +2069,69 @@ def _recover(project_root: Path, args: list[str], as_json: bool, dry_run: bool =
             approved_repair_id = candidate
             index += 2
             continue
-        if token == "resolve-blocker":
-            if index + 1 >= len(args):
+        if token == "resolve-next-action":
+            # T-1358: the operator gate for a `next_action` the router cannot
+            # project. Same shape as `resolve-blocker` and for the same reason:
+            # tokens up to the next flag, unquoted, because a quote character
+            # disqualifies the whole line from the canonical grammar.
+            words: list[str] = []
+            index += 1
+            # A real flag ends the decision; a BARE `--` does not. The
+            # canonical WAIT grammar is `WAIT: <category> -- <text>`, so
+            # treating the separator as a flag boundary made every legal WAIT
+            # value unsuppliable and dropped the rest of the line, `--json`
+            # included, into the unknown-argument refusal.
+            while index < len(args) and not (
+                args[index].startswith("--") and len(args[index]) > 2
+            ):
+                words.append(args[index])
+                index += 1
+            proposed = " ".join(words).strip()
+            if not proposed:
                 return _refuse(
-                    'usage: recover resolve-blocker "<decision>" (missing decision text)'
+                    "recover resolve-next-action requires the next_action to set; "
+                    "usage: saipen [--json] recover resolve-next-action "
+                    "<next-action words>. The decision runs to the end of the "
+                    "line, so global flags go BEFORE it -- a WAIT value carries a "
+                    "bare -- separator, which ends flag parsing. The operator "
+                    "decides the VALUE, and the engine still checks it against "
+                    "the executable grammar"
                 )
-            decision = args[index + 1].strip()
+            resolve_next_action = proposed
+            continue
+        if token == "resolve-blocker":
+            # T-1357: the decision is every following token up to the next
+            # flag, joined by single spaces -- NOT one quoted argument. The
+            # guard's canonical grammar refuses any command containing a quote
+            # character, deliberately, because quoting is how a compound
+            # expression hides inside one that looks canonical. So the engine's
+            # own `saipen recover resolve-blocker "<decision>"` could never
+            # classify as a canonical operation: it became an ordinary shell
+            # effect and was refused under the very invalid state it was
+            # printed to repair. Widening the grammar would reopen that hole;
+            # the command fits the grammar instead.
+            words: list[str] = []
+            index += 1
+            # A real flag ends the decision; a BARE `--` does not. The
+            # canonical WAIT grammar is `WAIT: <category> -- <text>`, so
+            # treating the separator as a flag boundary made every legal WAIT
+            # value unsuppliable and dropped the rest of the line, `--json`
+            # included, into the unknown-argument refusal.
+            while index < len(args) and not (
+                args[index].startswith("--") and len(args[index]) > 2
+            ):
+                words.append(args[index])
+                index += 1
+            decision = " ".join(words).strip()
             if not decision:
                 return _refuse(
                     "recover resolve-blocker requires non-empty decision/authority "
-                    "text; there is no generic unblock-anything path"
+                    "text; usage: recover resolve-blocker <decision words>. There "
+                    "is no generic unblock-anything path, and no quoting: a quote "
+                    "character disqualifies the whole line from the canonical "
+                    "grammar the guard admits"
                 )
             resolve_blocker = decision
-            index += 2
             continue
         rest.append(token)
         index += 1
@@ -2010,10 +2144,32 @@ def _recover(project_root: Path, args: list[str], as_json: bool, dry_run: bool =
             '[--adopt-legacy <T-###[,T-###...]>] '
             '[--attest-legacy-done <T-###[,T-###...]>] '
             "[--migrate-generation] "
-            '[resolve-blocker "<decision>"] '
+            "[normalize-log] "
+            "[resolve-blocker <decision>] "
+            "[resolve-next-action <next-action>] "
             "[--apply-approved-repair <repair_id>] "
             "| recover inspect <op_id> | recover resolve <op_id> [--resolution <mode>]"
         )
+    if normalize_log_requested:
+        # T-1356: a targeted repair, not a journal replay. It runs before the
+        # pending-operation machinery for the same reason `--migrate-generation`
+        # does -- that machinery reads the LOG this repair exists to make
+        # readable -- and combines with nothing.
+        if args or migrate_generation:
+            return _refuse(
+                "recover normalize-log takes no other argument; it reads the "
+                "repairs from the LOG itself"
+            )
+        if not dry_run and _negotiate_capability(project_root) == "read-only":
+            return _capability_refusal(as_json)
+        _ho = _ensure_handover(project_root, as_json, dry_run)
+        if _ho is not None:
+            return _ho
+        from saipen_engine.operations import normalize_log
+
+        normalized = normalize_log(project_root, _agent_for(project_root), dry_run=dry_run)
+        _emit(normalized.to_dict(), as_json)
+        return 0 if normalized.ok else 1
     if migrate_generation:
         # T-1352: a targeted repair, not a journal replay, so it runs before
         # the pending-operation machinery and combines with nothing.
@@ -2172,6 +2328,7 @@ def _recover(project_root: Path, args: list[str], as_json: bool, dry_run: bool =
             adopt_legacy=adopt_legacy,
             attest_legacy_done=attest_legacy_done,
             resolve_blocker=resolve_blocker,
+            resolve_next_action=resolve_next_action,
             approved_repair_id=approved_repair_id,
         )
         _emit(reconciliation, as_json)
@@ -2244,7 +2401,9 @@ def _recover(project_root: Path, args: list[str], as_json: bool, dry_run: bool =
         # so an explicit decision against a broken surface still reports truth.
         checkpoint_present = (project_root / ".saipen" / "STATE.md").is_file()
         blocked_checkpoint = block in ("PROTOCOL_STATE_INVALID", "RECOVERY_REQUIRED")
-        if adopt_legacy or attest_legacy_done or resolve_blocker or approved_repair_id or (
+        if adopt_legacy or attest_legacy_done or resolve_blocker or resolve_next_action or (
+            approved_repair_id
+        ) or (
             blocked_checkpoint and checkpoint_present
         ):
             reconciliation = reconcile_protocol_state(
@@ -2254,6 +2413,7 @@ def _recover(project_root: Path, args: list[str], as_json: bool, dry_run: bool =
                 adopt_legacy=adopt_legacy,
                 attest_legacy_done=attest_legacy_done,
                 resolve_blocker=resolve_blocker,
+                resolve_next_action=resolve_next_action,
                 approved_repair_id=approved_repair_id,
             )
             merged = dict(result)
@@ -6348,7 +6508,7 @@ def main(argv: list[str] | None = None) -> int:
         usage_msg = (
             "usage: saipen (continue|status|next|runtime [--prelaunch [--adapter ID] "
             "[--no-resync]|--bootstrap|--check-freshness]|search [--hex HEX]|"
-            "recover|fleet preflight|scan|prepare|claim <T-###> [--explicit]|"
+            "validate|recover|fleet preflight|scan|prepare|claim <T-###> [--explicit]|"
             "transition <PHASE> [T-###] [text]|checkpoint <TAXONOMY> "
             "[T-###] [text]|goal <text>|user-request <text> [--priority P#] "
             "[--verify <text>] [--needs T-X,T-Y]|ticket add <PRIORITY> <text>|ticket "
@@ -6542,6 +6702,18 @@ def main(argv: list[str] | None = None) -> int:
         return _status(project_root, as_json)
     if command == "search":
         return _search(project_root, args, as_json)
+    if command == "validate":
+        if len(args) > 1:
+            _emit(
+                {
+                    "ok": False,
+                    "code": "VALIDATION_FAILED",
+                    "detail": f"validate accepts no arguments; surplus: {' '.join(args[1:])}",
+                },
+                as_json,
+            )
+            return 2
+        return _validate(project_root, as_json)
     if command == "runtime":
         task_class = None
         helper_reason = None

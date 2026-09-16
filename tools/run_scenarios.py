@@ -5263,7 +5263,18 @@ def run_saicrew_probes() -> tuple[list[str], int]:
             .replace("task: none", "task: T-1")
             .replace('next_action: "saipen continue"', 'next_action: "RUN: binding tests"')
         )
-        active_board = "# Board\n## DOING\n- [/] T-1 work\n## TODO\n## DONE\n## BLOCKED\n"
+        # The DOING line carries this session's own claim. Without it the
+        # ticket is UNCLAIMED, and since b2343541 (router.py, "carries no live
+        # claim of this session's own") an unclaimed active ticket routes to
+        # adoption whether or not STATE.task names it -- deliberately, because
+        # the old rule fired only at `task: none` and let a stale foreign owner
+        # reach the ordinary FINISH branch. This fixture predates that contract
+        # (94814c73, v7.224.0) and its point is continuation vs outer crew
+        # routing, not whether an unowned ticket may be continued.
+        active_board = (
+            "# Board\n## DOING\n- [/] T-1 work | owner: probe "
+            "| claim_time: 2026-01-01T00:00:00Z\n## TODO\n## DONE\n## BLOCKED\n"
+        )
         active_route = route_next(active_state, active_board)
         idle_route = route_next(converged, "# Board\n## DOING\n## TODO\n## DONE\n## BLOCKED\n")
         expect(
@@ -13519,8 +13530,19 @@ def run_nitro_integrity_probes() -> tuple[list[str], int]:
         root = Path(tempfile.mkdtemp(prefix="saipen-integrity-"))
         saipen = root / ".saipen"
         saipen.mkdir()
+        # T-1 and T-2 are written straight into BOARD below, so they need the
+        # allocation events their identity now comes from (CORE-003 /
+        # SRC-026:R003, b2343541). Without them `core_fast` refuses EVERY
+        # mutation on this board, and the probe that used the refusal's result
+        # raised KeyError -- which aborted the suite rather than failing one
+        # check, hiding every scenario after it.
         (saipen / "LOG.md").write_text(
-            "- 09.08.26 00:00 [E-900] [T-none] DEC: base\n", encoding="utf-8"
+            "- 09.08.26 00:00 [E-898] [T-1] [agent: probe] [op: ticket-fixture] "
+            "DEC: ticket added via SAIOPS\n"
+            "- 09.08.26 00:00 [E-899] [T-2] [agent: probe] [op: ticket-fixture] "
+            "DEC: ticket added via SAIOPS\n"
+            "- 09.08.26 00:00 [E-900] [T-none] DEC: base\n",
+            encoding="utf-8",
         )
         (saipen / "BOARD.md").write_text(
             "# Board\n## DOING\n## TODO\n"
@@ -13734,8 +13756,13 @@ def run_nitro_integrity_probes() -> tuple[list[str], int]:
 
     # Mutation: restore old Pick Rule by ignoring blocker. Forbidden ticket is
     # immediately routed, proving the controls are coupled to blocker defense.
+    # The predicate moved to `board` when CORE-003 gave the Pick Rule one home
+    # (`board.pick_next_work`), and the router stopped importing it. Patching
+    # the old name raised AttributeError, which is not a probe failure but an
+    # abort: every scenario after this line stopped running, and the suite
+    # reported one opaque nonzero exit. Patch where the decision lives.
     with mock.patch(
-        "saipen_engine.router.ticket_is_workable",
+        "saipen_engine.board.ticket_is_workable",
         side_effect=lambda ticket, tickets, agent=None, now=None: (
             ticket.get("section") == "## TODO"
             and all(

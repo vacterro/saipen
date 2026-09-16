@@ -392,7 +392,10 @@ class RemediationPreflightTests(unittest.TestCase):
         # unblock and not a bare `recover` that would only refuse again.
         self.assertEqual(
             result["canonical_next_command"],
-            'saipen recover resolve-blocker "<decision>"',
+            # T-1357: printed UNQUOTED. A quote character disqualifies the
+            # whole line from the guard's canonical grammar, so the quoted form
+            # was a command the engine advertised and its own guard refused.
+            "saipen recover resolve-blocker <decision>",
             result,
         )
         self.assertEqual(result["blocking_surface"], "state")
@@ -509,10 +512,20 @@ class LegacyNextActionRepairTests(unittest.TestCase):
         result = reconcile_protocol_state(root, "tester", dry_run=False)
         self.assertFalse(result["ok"], result)
         self.assertEqual(result["code"], "RECONCILE_REAUTH_REQUIRED", result)
-        self.assertEqual(result["terminal_disposition"], "RECOVERY_BLOCKED", result)
+        # T-1358: this used to require a TERMINAL disposition with no command
+        # -- `operator_decision_available: False`, `canonical_next_command:
+        # None` -- and that was the defect, not the contract. A live project
+        # sat there with every phase command refused and no verb owning the
+        # field. An ambiguous legacy `next_action` is still not AUTO-repaired;
+        # it now names the operator gate the field beside it already had.
+        self.assertIsNone(result["terminal_disposition"], result)
         self.assertFalse(result["needs_local_mutation"], result)
-        self.assertFalse(result["operator_decision_available"], result)
-        self.assertIsNone(result["canonical_next_command"], result)
+        self.assertTrue(result["operator_decision_available"], result)
+        self.assertEqual(
+            result["canonical_next_command"],
+            "saipen recover resolve-next-action <next-action>",
+            result,
+        )
         self.assertEqual(result["blocking_surface"], "state", result)
         self.assertEqual(result["blocking_field"], "next_action", result)
         self.assertEqual(result["evidence_reference"], ".saipen/STATE.md", result)
@@ -538,10 +551,17 @@ class LegacyNextActionRepairTests(unittest.TestCase):
 
         self.assertEqual(result["classification"], CLASS_BLOCKED, result)
         self.assertEqual(result["reason_code"], "RECONCILE_REAUTH_REQUIRED", result)
-        self.assertEqual(result["terminal_disposition"], "RECOVERY_BLOCKED", result)
+        # T-1358: no longer terminal. `preflight` surfaces whatever the
+        # reconciliation surfaced, and an ambiguous legacy `next_action` now
+        # names its operator gate instead of terminating with no route.
+        self.assertIsNone(result.get("terminal_disposition"), result)
         self.assertFalse(result["needs_local_mutation"], result)
-        self.assertFalse(result["operator_decision_available"], result)
-        self.assertIsNone(result["canonical_next_command"], result)
+        self.assertTrue(result["operator_decision_available"], result)
+        self.assertEqual(
+            result["canonical_next_command"],
+            "saipen recover resolve-next-action <next-action>",
+            result,
+        )
         self.assertEqual(result["blocking_field"], "next_action", result)
 
     def test_public_recover_emits_the_same_terminal_remediation_fields(self):
@@ -567,10 +587,20 @@ class LegacyNextActionRepairTests(unittest.TestCase):
         )
         self.assertNotEqual(run.returncode, 0, run.stdout + run.stderr)
         result = json.loads(run.stdout)
-        self.assertEqual(result["terminal_disposition"], "RECOVERY_BLOCKED", result)
+        # T-1358: this used to require a TERMINAL disposition with no command
+        # -- `operator_decision_available: False`, `canonical_next_command:
+        # None` -- and that was the defect, not the contract. A live project
+        # sat there with every phase command refused and no verb owning the
+        # field. An ambiguous legacy `next_action` is still not AUTO-repaired;
+        # it now names the operator gate the field beside it already had.
+        self.assertIsNone(result["terminal_disposition"], result)
         self.assertFalse(result["needs_local_mutation"], result)
-        self.assertFalse(result["operator_decision_available"], result)
-        self.assertIsNone(result["canonical_next_command"], result)
+        self.assertTrue(result["operator_decision_available"], result)
+        self.assertEqual(
+            result["canonical_next_command"],
+            "saipen recover resolve-next-action <next-action>",
+            result,
+        )
         self.assertEqual(result["blocking_surface"], "state", result)
         self.assertEqual(result["blocking_field"], "next_action", result)
         self.assertEqual(result["evidence_reference"], ".saipen/STATE.md", result)

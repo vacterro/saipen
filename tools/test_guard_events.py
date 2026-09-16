@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import sys
+import tempfile
 import unittest
 from pathlib import Path
 
@@ -251,6 +252,322 @@ class MapEventTests(unittest.TestCase):
         for key in ("path", "file", "notebook_path", "absolute_path"):
             mapped = guard_events.map_event(_event(tool_name="write", tool_input={key: "a.py"}))
             self.assertEqual(mapped["target_path"], "a.py", key)
+
+
+class DestructiveShellEffectTests(unittest.TestCase):
+    """`destructive_shell_effects` resolves what a command line destroys.
+
+    Defect class: a destructive command was judged on the absence of the
+    literal text `.saipen`, so `rm -rf .` named no protected path and removed
+    every one of them.
+    """
+
+    def setUp(self) -> None:
+        self._tmp = tempfile.TemporaryDirectory(prefix="t1354-parser-")
+        self.addCleanup(self._tmp.cleanup)
+        self.base = Path(self._tmp.name).resolve()
+        self.project = self.base / "project"
+        (self.project / "src").mkdir(parents=True)
+        self.external = self.base / "external"
+        self.external.mkdir()
+
+    def effects(self, command: str) -> dict:
+        return guard_events.destructive_shell_effects(command, str(self.project))
+
+    def targets(self, command: str) -> list[str]:
+        resolved = self.effects(command)
+        self.assertIsNone(resolved["unresolved"], command)
+        return [target for effect in resolved["effects"] for target in effect["targets"]]
+
+    def test_the_project_root_is_resolved_however_it_is_spelled(self):
+        for command in (
+            "rm -rf .",
+            "Remove-Item -Recurse .",
+            "Remove-Item -LiteralPath {root} -Recurse",
+            "cmd /c rd /s /q .",
+            "rm -rf {root}",
+            "bash -c 'rm -rf .'",
+        ):
+            spelled = command.format(root=self.project)
+            with self.subTest(command=spelled):
+                self.assertEqual(self.targets(spelled), [str(self.project)], spelled)
+
+    def test_an_ancestor_deletion_resolves_to_the_ancestor(self):
+        # The parser promises an ABSOLUTE target, not a normalized one:
+        # `canonicalize_target` is the single canonicalizer, and a second one
+        # here would be a second answer to the same question.
+        for command in ("rm -rf ..", "rm -rf {base}"):
+            spelled = command.format(base=self.base)
+            with self.subTest(command=spelled):
+                resolved = [Path(target).resolve() for target in self.targets(spelled)]
+                self.assertEqual(resolved, [self.base], spelled)
+
+    def test_a_non_destructive_command_resolves_to_no_effect(self):
+        for command in ("echo hello", "git status", "ls -la", "python -V", "cat src/app.py"):
+            with self.subTest(command=command):
+                resolved = self.effects(command)
+                self.assertEqual(resolved["effects"], [], command)
+                self.assertIsNone(resolved["unresolved"], command)
+
+    def test_an_external_destructive_operand_stays_external(self):
+        self.assertEqual(self.targets(f"rm -rf {self.external}"), [str(self.external)])
+
+    def test_a_mirror_copy_resolves_the_directory_it_empties(self):
+        # `/MIR` is a whole word, and a single-letter-only reading of DOS
+        # switches made it an operand -- so robocopy sat in the mirror verb
+        # set while its branch could never fire.
+        for command in ("robocopy src . /MIR", "robocopy src . /PURGE", "rsync --delete src/ ./"):
+            with self.subTest(command=command):
+                self.assertEqual(self.targets(command), [str(self.project)], command)
+
+    def test_a_copy_that_deletes_nothing_is_not_an_effect(self):
+        for command in ("robocopy src dst /E", "rsync -a src/ dst/"):
+            with self.subTest(command=command):
+                resolved = self.effects(command)
+                self.assertEqual(resolved["effects"], [], command)
+                self.assertIsNone(resolved["unresolved"], command)
+
+    def test_escaped_quoting_is_unread_rather_than_misread(self):
+        """`shlex` runs with escaping off, so `\\"` mis-tokenizes silently.
+
+        Defect class: the guard reported a reading it never made. `rm -rf \\".\\"`
+        resolved to the single path `\\` instead of the project root, and one
+        wrapper level deeper the command vanished entirely -- no effect, no
+        complaint, admitted.
+        """
+        for command in (
+            r'rm -rf \".\"',
+            r'bash -c "rm -rf \".\""',
+            r"""bash -c 'bash -c "bash -c \"rm -rf .\""'""",
+            r'powershell -Command "Remove-Item -Recurse \".\""',
+        ):
+            with self.subTest(command=command):
+                resolved = self.effects(command)
+                self.assertTrue(resolved["unresolved"], command)
+                self.assertEqual(resolved["effects"], [], command)
+
+    def test_a_launcher_never_hides_the_verb_behind_it(self):
+        """A word that runs ANOTHER command is not the command.
+
+        Defect class: `env FOO=1 rm -rf .` was admitted because `env` headed
+        the segment, was not a destructive verb, and nothing looked past it.
+        """
+        for command in ("env FOO=1 rm -rf .", "sudo rm -rf .", "command rm -rf ."):
+            with self.subTest(command=command):
+                self.assertEqual(self.targets(command), [str(self.project)], command)
+
+    def test_an_unreducible_launcher_fails_closed(self):
+        """Its options are not a grammar the guard claims to parse."""
+        for command in (
+            "env -i rm -rf .",
+            "timeout 5 rm -rf .",
+            "sudo -u root rm -rf .",
+            "nice -n 10 rm -rf .",
+        ):
+            with self.subTest(command=command):
+                resolved = self.effects(command)
+                self.assertTrue(resolved["unresolved"], command)
+
+    def test_a_launcher_running_something_harmless_is_still_clean(self):
+        for command in ("sudo systemctl restart nginx", "env FOO=1 python -V"):
+            with self.subTest(command=command):
+                resolved = self.effects(command)
+                self.assertEqual(resolved["effects"], [], command)
+                self.assertIsNone(resolved["unresolved"], command)
+
+    def test_ordinary_quoting_and_wrappers_still_resolve(self):
+        """The fix must not refuse the spellings people actually use."""
+        for command in ("bash -c 'rm -rf .'", 'bash -c "rm -rf ."', "sh -c 'rm -rf .'"):
+            with self.subTest(command=command):
+                self.assertEqual(self.targets(command), [str(self.project)], command)
+        clean = self.effects(r"echo \"hello\"")
+        self.assertEqual(clean["effects"], [])
+        self.assertIsNone(clean["unresolved"], "escaped quoting alone is not destructive")
+
+    def test_a_computed_operand_is_unresolved_rather_than_guessed(self):
+        for command in (
+            "rm -rf $TARGET",
+            'rm -rf "$(cat list.txt)"',
+            "Remove-Item -Recurse $env:BUILD",
+            "cat list.txt | xargs rm -rf",
+            "powershell -EncodedCommand cgBtACAALQByAGYAIAAuAA==",
+        ):
+            with self.subTest(command=command):
+                resolved = self.effects(command)
+                self.assertTrue(resolved["unresolved"], command)
+
+
+class DestructiveVerbReachabilityTests(unittest.TestCase):
+    """Every verb the tables list must be able to produce an effect.
+
+    Defect class: a verb sits in a table and its branch can never fire, so the
+    table reads like coverage while the command is admitted. `robocopy` was
+    exactly that -- it was in `_SHELL_MIRROR_VERBS` while `/MIR` parsed as an
+    operand rather than a switch, so the only mirror verb that empties a
+    directory resolved no effect at all. A membership list is not reachability;
+    this test is the difference.
+    """
+
+    def setUp(self) -> None:
+        self._tmp = tempfile.TemporaryDirectory(prefix="t1354-verbs-")
+        self.addCleanup(self._tmp.cleanup)
+        self.project = Path(self._tmp.name).resolve() / "project"
+        (self.project / "src").mkdir(parents=True)
+        (self.project / "src" / "app.py").write_text("x = 1\n", encoding="utf-8")
+
+    def effects(self, command: str) -> list[dict]:
+        resolved = guard_events.destructive_shell_effects(command, str(self.project))
+        self.assertIsNone(resolved["unresolved"], command)
+        return resolved["effects"]
+
+    def test_every_listed_verb_resolves_an_effect(self):
+        #: One minimal, realistic invocation per verb -- the documented form a
+        #: person would actually type, not a form chosen to make the parser win.
+        invocations = {
+            "rm": "rm -rf src",
+            "rmdir": "rmdir src",
+            "unlink": "unlink src/app.py",
+            "shred": "shred -u src/app.py",
+            "del": "del src/app.py",
+            "erase": "erase src/app.py",
+            "rd": "rd /s /q src",
+            "remove-item": "Remove-Item -Recurse src",
+            "ri": "ri -Recurse src",
+            "mv": "mv src lib",
+            "move": "move src lib",
+            "move-item": "Move-Item -Path src -Destination lib",
+            "mi": "mi -Path src -Destination lib",
+            "ren": "ren src lib",
+            "rename": "rename src lib",
+            "rename-item": "Rename-Item -Path src -NewName lib",
+            "rni": "rni -Path src -NewName lib",
+            "robocopy": "robocopy other src /MIR",
+            "rsync": "rsync --delete other/ src/",
+        }
+        listed = (
+            guard_events._SHELL_DELETE_VERBS
+            | guard_events._SHELL_MOVE_VERBS
+            | guard_events._SHELL_RENAME_VERBS
+            | guard_events._SHELL_MIRROR_VERBS
+        )
+        self.assertEqual(
+            listed - set(invocations),
+            set(),
+            "a verb joined a table without a reachability case; the table would "
+            "then claim coverage this test never measured",
+        )
+        for verb, command in sorted(invocations.items()):
+            with self.subTest(verb=verb):
+                self.assertTrue(
+                    self.effects(command),
+                    f"{verb!r} is in a destructive-verb table but {command!r} "
+                    "resolved no effect at all, so the whole branch is unreachable",
+                )
+
+
+class ShellWorkingDirectoryStackTests(unittest.TestCase):
+    """`popd` returns the shell to the directory `pushd` left.
+
+    Defect class: the parser modelled `pushd` and not `popd`, so every later
+    relative operand was attributed to a directory the shell had already left
+    -- which turns a protected project-root delete into an apparently safe
+    external one.
+    """
+
+    def setUp(self) -> None:
+        self._tmp = tempfile.TemporaryDirectory(prefix="t1354-cwd-")
+        self.addCleanup(self._tmp.cleanup)
+        base = Path(self._tmp.name).resolve()
+        self.project = base / "project"
+        self.project.mkdir()
+        self.external = base / "external"
+        self.external.mkdir()
+
+    def resolve(self, command: str) -> dict:
+        return guard_events.destructive_shell_effects(command, str(self.project))
+
+    def assertTargets(self, command: str, expected: Path) -> None:
+        resolved = self.resolve(command)
+        self.assertIsNone(resolved["unresolved"], command)
+        self.assertEqual(
+            [target for effect in resolved["effects"] for target in effect["targets"]],
+            [str(expected)],
+            command,
+        )
+
+    def test_popd_returns_to_the_project(self):
+        for command in (
+            "pushd {external} ; popd ; rm -rf .",
+            "pushd {external} && popd && rm -rf .",
+            "Push-Location {external} ; Pop-Location ; Remove-Item -Recurse .",
+        ):
+            spelled = command.format(external=self.external)
+            with self.subTest(command=spelled):
+                self.assertTargets(spelled, self.project)
+
+    def test_pushd_without_popd_stays_external(self):
+        self.assertTargets(f"pushd {self.external} ; rm -rf .", self.external)
+
+    def test_cd_stays_external(self):
+        self.assertTargets(f"cd {self.external} ; rm -rf .", self.external)
+
+    def test_unprovable_navigation_fails_closed(self):
+        for command in (
+            "cd {external} ; cd - ; rm -rf .",
+            "pushd {external} ; popd ; popd ; rm -rf .",
+            "pushd ; rm -rf .",
+            "cd $TARGET ; rm -rf .",
+        ):
+            spelled = command.format(external=self.external)
+            with self.subTest(command=spelled):
+                resolved = self.resolve(spelled)
+                self.assertEqual(resolved["effects"], [], spelled)
+                self.assertTrue(resolved["unresolved"], spelled)
+
+    def test_a_stack_deeper_than_the_bound_fails_closed(self):
+        deep = " ; ".join([f"pushd {self.external}"] * 40 + ["popd", "rm -rf ."])
+        resolved = self.resolve(deep)
+        self.assertEqual(resolved["effects"], [])
+        self.assertTrue(resolved["unresolved"])
+
+
+class MapEventShellEffectTests(unittest.TestCase):
+    """The mapped event carries the effects; no adapter re-parses the line."""
+
+    def setUp(self) -> None:
+        self._tmp = tempfile.TemporaryDirectory(prefix="t1354-map-")
+        self.addCleanup(self._tmp.cleanup)
+        self.root = Path(self._tmp.name).resolve()
+
+    def mapped(self, command: str) -> dict:
+        return guard_events.map_event(
+            _event(tool_name="bash", cwd=str(self.root), tool_input={"command": command})
+        )
+
+    def test_a_destructive_command_carries_its_resolved_effect(self):
+        mapped = self.mapped("rm -rf .")
+        self.assertEqual(mapped["action"], "shell")
+        self.assertIsNone(mapped["shell_effects_unresolved"])
+        self.assertEqual(
+            mapped["shell_effects"],
+            [{"action": "delete", "verb": "rm", "targets": [str(self.root)]}],
+        )
+
+    def test_an_unresolved_destructive_command_names_why(self):
+        mapped = self.mapped("rm -rf $TARGET")
+        self.assertEqual(mapped["shell_effects"], [])
+        self.assertTrue(mapped["shell_effects_unresolved"])
+
+    def test_an_ordinary_command_carries_no_effect(self):
+        mapped = self.mapped("git status")
+        self.assertEqual(mapped["shell_effects"], [])
+        self.assertIsNone(mapped["shell_effects_unresolved"])
+
+    def test_a_canonical_saipen_operation_keeps_its_own_path(self):
+        mapped = self.mapped("saipen status --json")
+        self.assertEqual(mapped["action"], "saipen_op")
+        self.assertEqual(mapped["shell_effects"], [])
+        self.assertIsNone(mapped["shell_effects_unresolved"])
 
 
 if __name__ == "__main__":

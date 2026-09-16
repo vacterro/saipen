@@ -292,6 +292,8 @@ def _admit(root: Path, tool: str, tool_input: dict) -> dict:
         target_paths=mapped["target_paths"],
         targets_unresolved=mapped["targets_unresolved"],
         shell_protected_namespace=mapped["shell_protected_namespace"],
+        shell_effects=mapped["shell_effects"],
+        shell_effects_unresolved=mapped["shell_effects_unresolved"],
     )
 
 

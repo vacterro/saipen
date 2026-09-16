@@ -5,6 +5,7 @@ from __future__ import annotations
 import re
 
 import hashlib
+import json
 import os
 import stat
 from dataclasses import dataclass
@@ -182,6 +183,94 @@ def _normalised_doc_text(raw: bytes) -> str:
     return text.replace("\r\n", "\n").replace("\r", "\n")
 
 
+#: The message a compacted event carries in place of its own text.
+_DETAIL_REF_MESSAGE = re.compile(r"^detail_ref:\s*(\S+)$")
+#: Where `log_compaction` is allowed to have put those bytes, and nowhere else.
+_DETAIL_ROOT = ".saipen/recovery/log-detail/"
+#: Externalized detail is immutable by contract, so one read per path is enough.
+_DETAIL_CACHE: dict[str, str | None] = {}
+
+
+def _restored_detail_text(root: Path, parsed: dict) -> str | None:
+    """The original message of a compacted event, or None if it cannot be proved.
+
+    `log_compaction` replaces any event over `MAX_NEW_EVENT_BYTES` with the one
+    line `detail_ref: <metadata>` and calls that lossless -- which it is on
+    disk, and was not for any reader. `verification_evidence`,
+    `regression_evidence` and `structural_marker_events` all classify on event
+    TEXT, so a verdict long enough to be compacted carried no PASS token, no
+    `conf: high` and no evidence marker, and the ticket read as unproven. The
+    more a pass recorded, the less it counted.
+
+    Decoding is proof, not trust: the reference must sit inside the compaction
+    directory, the bytes must hash to the digest the metadata recorded, and the
+    restored line must be the SAME event id. Anything else leaves the compacted
+    text standing, so a missing or tampered detail file can never invent a
+    verdict -- it only fails the way it already failed.
+    """
+    match = _DETAIL_REF_MESSAGE.match((parsed.get("text") or "").strip())
+    if match is None:
+        return None
+    reference = match.group(1)
+    # The key is the RESOLVED root: two projects reached by the same spelling
+    # -- `read_history_events(".")` from two working directories in one process
+    # -- would otherwise share entries, and the digest is checked when the file
+    # is read, not when the cache is hit, so a collision would serve another
+    # project's verdict rather than refuse it.
+    try:
+        identity = root.resolve().as_posix()
+    except OSError:
+        return None
+    cache_key = f"{identity}|{reference}|{parsed.get('event')}"
+    if cache_key in _DETAIL_CACHE:
+        return _DETAIL_CACHE[cache_key]
+    restored = _read_detail_text(root, reference, parsed)
+    _DETAIL_CACHE[cache_key] = restored
+    return restored
+
+
+def _owned_detail_bytes(root: Path, reference: str) -> bytes | None:
+    """One detail node's bytes, under the rule every history node already obeys.
+
+    Containment and the digest bound what the path may SAY and what it must
+    CONTAIN; neither says where the node resolves to. `_validate_history_ownership`
+    lstats each LOG segment and refuses a symlink, junction, reparse point or
+    non-regular file before reading a byte, exactly so history cannot consume
+    evidence from outside the project, and a detail file is history.
+    """
+    normalized = reference.replace("\\", "/").lstrip("/")
+    if ".." in normalized.split("/") or not normalized.startswith(_DETAIL_ROOT):
+        return None
+    node = root / normalized
+    try:
+        info = node.lstat()
+        if os.path.islink(node) or _is_reparse(info) or not stat.S_ISREG(info.st_mode):
+            return None
+        return node.read_bytes()
+    except OSError:
+        return None
+
+
+def _read_detail_text(root: Path, reference: str, parsed: dict) -> str | None:
+    metadata_raw = _owned_detail_bytes(root, reference)
+    if metadata_raw is None:
+        return None
+    try:
+        metadata = json.loads(metadata_raw.decode("utf-8"))
+    except (UnicodeDecodeError, ValueError):
+        return None
+    raw = _owned_detail_bytes(root, str(metadata.get("original_event_path") or ""))
+    if raw is None:
+        return None
+    if hashlib.sha256(raw).hexdigest() != metadata.get("original_event_sha256"):
+        return None
+    line = _normalised_doc_text(raw).splitlines()[0] if raw else ""
+    full = parse_log_line(line)
+    if full is None or full.get("event") != parsed.get("event"):
+        return None
+    return full.get("text")
+
+
 def read_history_snapshot(
     project_root: Path | str, *, lean: bool = False
 ) -> HistorySnapshot:
@@ -238,6 +327,9 @@ def read_history_snapshot(
         for idx, line in enumerate(text.splitlines()):
             parsed = parse_log_line(line)
             if parsed is not None:
+                restored = _restored_detail_text(root, parsed)
+                if restored is not None:
+                    parsed["text"] = restored
                 events.append(parsed)
                 # Retain the ORIGINAL legal raw line in the same pass (T-1014)
                 # so context projections reuse it verbatim -- no second parse.
@@ -335,6 +427,9 @@ def read_history_snapshot_and_logs_digest(
         for idx, line in enumerate(text.splitlines()):
             parsed = parse_log_line(line)
             if parsed is not None:
+                restored = _restored_detail_text(root, parsed)
+                if restored is not None:
+                    parsed["text"] = restored
                 events.append(parsed)
                 for candidate in re.findall(r"\[T-(\d+)\]", line):
                     tid = int(candidate)

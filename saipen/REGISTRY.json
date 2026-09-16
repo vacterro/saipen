@@ -339,6 +339,7 @@
             "knowledge",
       "recover",
       "search",
+      "validate",
       "claim",
       "transition",
       "checkpoint",
