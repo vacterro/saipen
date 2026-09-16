@@ -153,19 +153,27 @@ def clear(root: Path | str, reason: str) -> bool:
     return bool(reason)
 
 
-def enforce(root: Path | str, text: str, *, supersede: bool = False) -> dict | None:
+def enforce(
+    root: Path | str, text: str, *, supersede: bool = False, commit: bool = True
+) -> dict | None:
     """None when this ingress may proceed; a refusal payload when it may not.
 
     Clearing is part of proceeding: bytes that answer the obligation discharge
     it, and so does an explicit operator supersede. What never proceeds is
     different text arriving silently while the refused bytes are still owed.
+
+    `commit=False` answers the same question and writes nothing. A PLAN that
+    discharged the obligation would let `--dry-run` -- the one call whose
+    contract is that it changes nothing -- spend the operator's own guarantee
+    on a preview.
     """
     found = pending(root)
     if found is None:
         return None
     if found.get("malformed"):
         if supersede:
-            clear(root, "operator superseded an unreadable pending ingress")
+            if commit:
+                clear(root, "operator superseded an unreadable pending ingress")
             return None
         return {
             "code": CODE_UNREADABLE,
@@ -182,10 +190,12 @@ def enforce(root: Path | str, text: str, *, supersede: bool = False) -> dict | N
             "supersede_command": "saipen start " + SUPERSEDE_FLAG + " <task>",
         }
     if supersede:
-        clear(root, "operator superseded the refused request")
+        if commit:
+            clear(root, "operator superseded the refused request")
         return None
     if ingress_digest(text) == found["digest"]:
-        clear(root, "the refused bytes arrived through their own transport")
+        if commit:
+            clear(root, "the refused bytes arrived through their own transport")
         return None
     route = str(found.get("route") or "saipen start --file <path>")
     return {

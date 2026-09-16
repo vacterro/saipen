@@ -1502,13 +1502,29 @@ class PluginFleetRoutingTests(unittest.TestCase):
         """
         import t1363_field_polygon as polygon
 
-        source = Path(polygon.__file__).read_text(encoding="utf-8")
-        self.assertIn("_git_worktree", source)
-        self.assertIn("_git_worktree(maker(holder))", source)
         if not shutil.which("git"):
             self.skipTest("git unavailable")
         built = polygon._git_worktree(healthy(self))
         self.assertTrue((built / ".git").exists(), built)
+
+        # The control used to assert the literal call `_git_worktree(maker(holder))`
+        # in the module's own source. The builder was refactored to
+        # `build[name](holder)` and the string stopped matching, so a control
+        # named for a sandbox boundary went red over a rename while the
+        # boundary itself was intact. A control that pins a SPELLING measures
+        # the spelling. This one asks the function what it builds: every
+        # condition must come back a worktree, whatever the expression that
+        # produced it looks like.
+        one = next(iter(polygon.CONDITION_NAMES))
+        maker = polygon.condition_builders()[one]
+
+        class _Holder:
+            def addCleanup(self, _fn):
+                return None
+
+        made = polygon._git_worktree(maker(_Holder()))
+        self.assertTrue((made / ".git").exists(), made)
+        shutil.rmtree(made, ignore_errors=True)
 
     def test_a_field_session_environment_agrees_with_its_directory(self):
         """`subprocess` sets cwd and leaves `PWD` -- that gap IS the escape.

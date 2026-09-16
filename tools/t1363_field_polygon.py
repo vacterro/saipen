@@ -285,6 +285,90 @@ def _owning_ledger(root: Path) -> dict:
     return {"tickets": tickets, "receipts": receipts}
 
 
+#: OpenCode's own session store. It is the SECOND source for the same facts,
+#: and it exists here because the first one is not always there: measured on
+#: `long_file_task`, a session ran the entire protocol chain and closed its
+#: ticket -- its fixture ledger proves it -- while `--format json` put nothing
+#: parseable on stdout. The metrics then read as a model that sat still, and
+#: `protocol_commands_before_productive: 0` is the STRONG acceptance number, so
+#: an unreadable transcript scored a perfect run. Reading the host's own store
+#: does not make the transcript optional; it makes UNMEASURED rare enough to
+#: be a real finding rather than the usual outcome.
+HOST_STORE = HOME / ".local" / "share" / "opencode" / "opencode.db"
+
+#: Where a session's facts came from. Recorded per session, because a metric
+#: whose provenance is unknown cannot be argued with.
+SOURCE_STDOUT = "stdout_events"
+SOURCE_HOST_STORE = "host_session_store"
+SOURCE_NONE = "none"
+
+
+def _same_directory(left: str | None, right: Path) -> bool:
+    if not left:
+        return False
+    try:
+        return Path(left).resolve() == right.resolve()
+    except (OSError, ValueError):
+        return False
+
+
+def _host_store_parts(
+    project: Path, since_ms: int, session_id: str | None, store: Path | None = None
+) -> list[dict]:
+    """Part payloads the host recorded for THIS session, read-only.
+
+    Bound by identity first: the session id the stdout stream named, when it
+    named one. Without it, only a session whose own `directory` IS this
+    fixture and which began after this run started can be adopted -- a
+    harness that picked "the newest session" would happily measure another
+    project's work and report it as this condition's result.
+    """
+    import sqlite3
+
+    path = store or HOST_STORE
+    if not path.is_file():
+        return []
+    try:
+        con = sqlite3.connect(f"file:{path.as_posix()}?mode=ro", uri=True)
+    except sqlite3.Error:
+        return []
+    try:
+        if session_id is None:
+            rows = con.execute(
+                "select id, directory from session where time_created >= ? "
+                "order by time_created desc limit 50",
+                (since_ms,),
+            ).fetchall()
+            match = next(
+                (row[0] for row in rows if _same_directory(row[1], project)), None
+            )
+            if match is None:
+                return []
+            session_id = match
+        parts = con.execute(
+            "select data from part where session_id = ? order by time_created",
+            (session_id,),
+        ).fetchall()
+    except sqlite3.Error:
+        return []
+    finally:
+        con.close()
+    out = []
+    for (raw,) in parts:
+        try:
+            out.append(json.loads(raw))
+        except (json.JSONDecodeError, TypeError):
+            continue
+    return out
+
+
+def _part_tool_events(parts: list[dict]) -> list[dict]:
+    """The same tool facts `_tool_events` extracts, from stored parts."""
+    return _tool_events(
+        [{"type": "tool_use", "part": part} for part in parts if part.get("type") == "tool"]
+    )
+
+
 def _tool_events(events: list[dict]) -> list[dict]:
     out = []
     for event in events:
@@ -331,13 +415,23 @@ def _shell_commands(tools: list[dict]) -> list[str]:
     return commands
 
 
+#: A refusal in JSON is an object whose `ok` is false; `code` alone is not one.
+#: Measured on the 17.09 smoke: the old rule scraped EVERY `"code"` field, so a
+#: healthy session that checkpointed twice reported `repeated_refusal:
+#: ['CHECKPOINTED']` and a session that claimed its ticket reported a refusal
+#: called `CLAIMED`. SRC-051 §11 bans "the same refusal repeating with nothing
+#: changed", and a metric that counts successes as refusals can convict a
+#: session of the one thing it did right.
+_JSON_REFUSAL = re.compile(r'"ok"\s*:\s*false.{0,400}?"code"\s*:\s*"([A-Z_]+)"', re.DOTALL)
+
+
 def _refusal_codes(tools: list[dict]) -> list[str]:
     codes = []
     for item in tools:
         blob = item["output"] + " " + item["error"]
         codes += re.findall(r"REFUSE \[([A-Z_]+)\]", blob)
         codes += re.findall(r"SAIPEN_(?:GUARD|FLEET)_REFUSAL: ([A-Z_]+)", blob)
-        codes += re.findall(r'"code":\s*"([A-Z_]+)"', blob)
+        codes += _JSON_REFUSAL.findall(blob)
     return codes
 
 
@@ -436,6 +530,7 @@ def measure(tools: list[dict], *, measured: bool = True) -> dict:
 
 def session(model: str, project: Path, task: str, timeout: int) -> dict:
     began = time.time()
+    since_ms = int(began * 1000)
     env = _host_env(project)
     proc = subprocess.run(
         [OPENCODE, "run", task, "--format", "json", "--auto", "--model", model],
@@ -457,6 +552,18 @@ def session(model: str, project: Path, task: str, timeout: int) -> dict:
         except json.JSONDecodeError:
             continue
     tools = _tool_events(events)
+    source = SOURCE_STDOUT if events else SOURCE_NONE
+    session_id = next(
+        (event["sessionID"] for event in events if isinstance(event.get("sessionID"), str)),
+        None,
+    )
+    stored_parts: list[dict] = []
+    if not events:
+        stored_parts = _host_store_parts(project, since_ms, session_id)
+        if stored_parts:
+            tools = _part_tool_events(stored_parts)
+            source = SOURCE_HOST_STORE
+    measured = source != SOURCE_NONE
     return {
         "model": model,
         "returncode": proc.returncode,
@@ -480,8 +587,11 @@ def session(model: str, project: Path, task: str, timeout: int) -> dict:
         "events_parsed": len(events),
         "stdout_chars": len(proc.stdout),
         "stderr_chars": len(proc.stderr),
-        **measure(tools, measured=bool(events)),
-        "tool_names": [item["tool"] for item in tools] if events else None,
+        "measurement_source": source,
+        "host_store_parts": len(stored_parts),
+        "session_id": session_id,
+        **measure(tools, measured=measured),
+        "tool_names": [item["tool"] for item in tools] if measured else None,
     }
 
 
@@ -499,13 +609,30 @@ ISOLATION_INCONCLUSIVE = "INCONCLUSIVE_CONCURRENT_MAIN_WRITE"
 
 
 def isolation_verdict(record: dict, repo: Path) -> str:
-    if not record.get("canonical_changed"):
+    """Did this session leak into THIS repository? Nothing else.
+
+    The old rule opened with "the fixture's canonical files did not move ->
+    FAIL", which answers a different question: a session that did nothing at
+    all contaminates nothing, and on the 17.09 smoke `windows_path_task` --
+    no tool calls, no minted id, this repository byte-identical -- was
+    convicted of contamination it could not have committed. Whether the
+    fixture moved is productivity (`fixture_moved`, and the target bytes), and
+    `matrix_verdict.py` already judges that.
+
+    Contamination has exactly two witnesses, and both are read from ledgers
+    rather than prose: an id THIS repository minted while a fixture session
+    ran, or an id the fixture minted that THIS repository's own ledger also
+    holds.
+    """
+    if record.get("main_minted", {}).get("tickets") or record.get("main_minted", {}).get(
+        "receipts"
+    ):
         return ISOLATION_FAIL
-    if not record.get("repository_canonical_changed"):
-        return ISOLATION_PASS
     owners = record.get("owner_repository") or {}
     if any(str(repo) in places for places in owners.values()):
         return ISOLATION_FAIL
+    if not record.get("repository_canonical_changed"):
+        return ISOLATION_PASS
     return ISOLATION_INCONCLUSIVE
 
 
@@ -573,16 +700,28 @@ def main() -> int:
             # canonical carriers are byte-identical" is.
             repo_before = _canonical_hashes(REPO)
             owned_before = _owning_ledger(project)
+            repo_owned_before = _owning_ledger(REPO)
             # SRC-051 section 11 -- "the requested target bytes actually
             # change". A model can drive the whole protocol chain, close the
             # ticket, and never touch the file it was asked about.
             target_before = _target_digest(project)
+            began_ms = int(time.time() * 1000)
             try:
                 record = session(model, project, task, args.timeout)
             except subprocess.TimeoutExpired:
-                # A killed session measured nothing either -- the metrics must
-                # not read as a run that chose to do nothing.
-                record = {"model": model, "timeout": True, **measure([], measured=False)}
+                # A killed session's stdout is lost, but the host wrote its
+                # parts down as it went: the work it DID do before the wall
+                # clock ran out is a measurement, not a blank. Only when that
+                # store is empty too does the session go UNMEASURED -- which
+                # must never read as a run that chose to do nothing.
+                stored = _host_store_parts(project, began_ms, None)
+                record = {
+                    "model": model,
+                    "timeout": True,
+                    "measurement_source": SOURCE_HOST_STORE if stored else SOURCE_NONE,
+                    "host_store_parts": len(stored),
+                    **measure(_part_tool_events(stored), measured=bool(stored)),
+                }
             after = _canonical_hashes(project)
             repo_after = _canonical_hashes(REPO)
             owned_after = _owning_ledger(project)
@@ -603,6 +742,20 @@ def main() -> int:
                     r for r in owned_after["receipts"] if r not in owned_before["receipts"]
                 ],
             }
+            repo_owned_after = _owning_ledger(REPO)
+            record["main_minted"] = {
+                "tickets": [
+                    t
+                    for t in repo_owned_after["tickets"]
+                    if t not in repo_owned_before["tickets"]
+                ],
+                "receipts": [
+                    r
+                    for r in repo_owned_after["receipts"]
+                    if r not in repo_owned_before["receipts"]
+                ],
+            }
+            record["fixture_moved"] = bool(record["canonical_changed"])
             record["owner_repository"] = _owner_repository(
                 record["fixture_minted"], project
             )

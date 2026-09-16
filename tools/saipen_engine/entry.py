@@ -229,7 +229,9 @@ def start_work(
     # T-1372: a transport refusal names a command AND owes specific bytes. A
     # request that is not those bytes cannot enter here silently -- that is how
     # a model's paraphrase earned a receipt asserting the operator's own words.
-    owed = pending_ingress.enforce(root, text, supersede=supersede_ingress)
+    owed = pending_ingress.enforce(
+        root, text, supersede=supersede_ingress, commit=not dry_run
+    )
     if owed is not None:
         return _refuse(owed.pop("code"), owed.pop("detail"), **owed)
     verify_text = (verify or "").strip() or USER_REQUEST_VERIFY

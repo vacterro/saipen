@@ -390,12 +390,35 @@ class MatrixCompletenessTests(unittest.TestCase):
             polygon.isolation_verdict(concurrent, repo), polygon.ISOLATION_INCONCLUSIVE
         )
 
+    def test_a_session_that_did_nothing_is_not_contamination(self):
+        """Measured 2026-09-17: `windows_path_task` ran 137s, called no tool,
+        minted nothing, and left this repository byte-identical -- and the old
+        rule opened with "the fixture did not move -> FAIL", convicting it of
+        contamination it could not have committed. Whether the fixture moved is
+        productivity, and `matrix_verdict.py` already judges that."""
+        repo = Path("V:/repo")
         nothing = {
             "canonical_changed": [],
             "repository_canonical_changed": [],
             "owner_repository": {},
+            "main_minted": {"tickets": [], "receipts": []},
         }
-        self.assertEqual(polygon.isolation_verdict(nothing, repo), polygon.ISOLATION_FAIL)
+        self.assertEqual(polygon.isolation_verdict(nothing, repo), polygon.ISOLATION_PASS)
+
+    def test_an_id_minted_in_this_repository_is_contamination(self):
+        """The incident's own signature: the session's work landed HERE. The
+        fixture's ledger cannot show it -- the fixture never got the write --
+        so the witness is this repository's own ledger gaining an id while a
+        fixture session ran."""
+        repo = Path("V:/repo")
+        leaked = {
+            "canonical_changed": [],
+            "repository_canonical_changed": ["BOARD.md", "intake/index.json"],
+            "owner_repository": {},
+            "main_minted": {"tickets": ["T-1371"], "receipts": ["SRC-047"]},
+        }
+        self.assertEqual(polygon.isolation_verdict(leaked, repo), polygon.ISOLATION_FAIL)
+
 
     def test_each_condition_gets_the_task_its_name_promises(self):
         self.assertEqual(polygon.CONDITION_TASKS["long_file_task"], polygon.LONG_TASK)
@@ -404,6 +427,175 @@ class MatrixCompletenessTests(unittest.TestCase):
             if name not in polygon.CONDITION_TASKS:
                 self.assertEqual(polygon.CONDITION_TASKS.get(name, polygon.SIMPLE_TASK),
                                  polygon.SIMPLE_TASK)
+
+
+class HostStoreMeasurementTests(unittest.TestCase):
+    """The second source for the same facts, and the traps it must not fall in.
+
+    A transcript the host did not print is not a session that did nothing:
+    OpenCode writes every part it produces into its own store as it goes. The
+    harness reads that store ONLY as a fallback, and only for a session it can
+    prove is this one -- a fallback that adopts whatever ran most recently
+    would quietly report another project's work as this condition's result.
+    """
+
+    SCHEMA = (
+        "create table session (id text, project_id text, workspace_id text, "
+        "parent_id text, slug text, directory text, path text, title text, "
+        "version text, time_created integer, time_updated integer)",
+        "create table part (id text, message_id text, session_id text, "
+        "time_created integer, time_updated integer, data text)",
+    )
+
+    def store(self, rows, parts) -> Path:
+        import sqlite3
+
+        path = Path(tempfile.mkdtemp(prefix="t1367-store-")) / "opencode.db"
+        self.addCleanup(lambda: shutil.rmtree(path.parent, ignore_errors=True))
+        con = sqlite3.connect(path)
+        for statement in self.SCHEMA:
+            con.execute(statement)
+        for session_id, directory, created in rows:
+            con.execute(
+                "insert into session (id, directory, time_created) values (?, ?, ?)",
+                (session_id, directory, created),
+            )
+        for index, (session_id, data) in enumerate(parts):
+            con.execute(
+                "insert into part (id, message_id, session_id, time_created, data) "
+                "values (?, ?, ?, ?, ?)",
+                (f"prt_{index}", "msg_1", session_id, index, json.dumps(data)),
+            )
+        con.commit()
+        con.close()
+        return path
+
+    @staticmethod
+    def tool_part(command: str) -> dict:
+        return {
+            "type": "tool",
+            "tool": "bash",
+            "state": {"status": "completed", "input": {"command": command}, "output": ""},
+        }
+
+    def test_the_store_measures_a_session_whose_stdout_said_nothing(self):
+        project = Path(tempfile.mkdtemp(prefix="t1367-fixture-"))
+        self.addCleanup(lambda: shutil.rmtree(project, ignore_errors=True))
+        store = self.store(
+            [("ses_this", str(project), 5000)],
+            [
+                ("ses_this", self.tool_part("saipen start 'x'")),
+                ("ses_this", self.tool_part("python -m pip list")),
+            ],
+        )
+        parts = polygon._host_store_parts(project, 1000, None, store=store)
+        self.assertEqual(len(parts), 2)
+        seen = polygon.measure(polygon._part_tool_events(parts), measured=bool(parts))
+        self.assertEqual(seen["measurement"], polygon.MEASURED)
+        self.assertEqual(seen["first_saipen_command"], "saipen start 'x'")
+        self.assertEqual(seen["protocol_commands_before_productive"], 1)
+        self.assertEqual(seen["productive_action"], "shell")
+
+    def test_a_session_in_another_project_is_never_adopted(self):
+        """The trap: 'the newest session' is not 'this session'."""
+        project = Path(tempfile.mkdtemp(prefix="t1367-fixture-"))
+        other = Path(tempfile.mkdtemp(prefix="t1367-other-"))
+        for path in (project, other):
+            self.addCleanup(lambda p=path: shutil.rmtree(p, ignore_errors=True))
+        store = self.store(
+            [("ses_other", str(other), 9000)],
+            [("ses_other", self.tool_part("saipen start 'not ours'"))],
+        )
+        self.assertEqual(polygon._host_store_parts(project, 1000, None, store=store), [])
+
+    def test_a_session_older_than_this_run_is_never_adopted(self):
+        project = Path(tempfile.mkdtemp(prefix="t1367-fixture-"))
+        self.addCleanup(lambda: shutil.rmtree(project, ignore_errors=True))
+        store = self.store(
+            [("ses_old", str(project), 500)],
+            [("ses_old", self.tool_part("saipen start 'yesterday'"))],
+        )
+        self.assertEqual(polygon._host_store_parts(project, 1000, None, store=store), [])
+
+    def test_a_named_session_is_read_by_identity_not_by_recency(self):
+        project = Path(tempfile.mkdtemp(prefix="t1367-fixture-"))
+        self.addCleanup(lambda: shutil.rmtree(project, ignore_errors=True))
+        store = self.store(
+            [("ses_ours", str(project), 5000), ("ses_newer", str(project), 9000)],
+            [
+                ("ses_ours", self.tool_part("saipen start 'ours'")),
+                ("ses_newer", self.tool_part("saipen start 'newer'")),
+            ],
+        )
+        parts = polygon._host_store_parts(project, 1000, "ses_ours", store=store)
+        self.assertEqual(len(parts), 1)
+        events = polygon._part_tool_events(parts)
+        self.assertEqual(events[0]["input"]["command"], "saipen start 'ours'")
+
+    def test_an_empty_store_leaves_the_session_unmeasured(self):
+        """The known-blind half: no stdout AND no store is still UNMEASURED."""
+        project = Path(tempfile.mkdtemp(prefix="t1367-fixture-"))
+        self.addCleanup(lambda: shutil.rmtree(project, ignore_errors=True))
+        store = self.store([], [])
+        parts = polygon._host_store_parts(project, 1000, None, store=store)
+        self.assertEqual(parts, [])
+        blind = polygon.measure(polygon._part_tool_events(parts), measured=bool(parts))
+        self.assertEqual(blind["measurement"], polygon.UNMEASURED)
+        self.assertIsNone(blind["protocol_commands_before_productive"])
+
+    def test_a_missing_store_is_not_a_crash(self):
+        project = Path(tempfile.mkdtemp(prefix="t1367-fixture-"))
+        self.addCleanup(lambda: shutil.rmtree(project, ignore_errors=True))
+        absent = project / "no-such-store.db"
+        self.assertEqual(polygon._host_store_parts(project, 0, None, store=absent), [])
+
+
+class RefusalCountingTests(unittest.TestCase):
+    """A success code is not a refusal, and a repeat of one is not a loop.
+
+    Measured on the 17.09 smoke: the extractor scraped every `"code"` field out
+    of tool output, so `healthy` reported a refusal called `CLAIMED` and
+    `long_file_task` reported `repeated_refusal: ['CHECKPOINTED']` -- the model
+    convicted of looping on the two operations that mean it was working.
+    """
+
+    @staticmethod
+    def tool(output: str) -> dict:
+        return {"tool": "bash", "status": "completed", "input": {}, "output": output, "error": ""}
+
+    def test_a_successful_operation_is_not_a_refusal(self):
+        codes = polygon._refusal_codes(
+            [
+                self.tool('{"ok": true, "code": "CHECKPOINTED", "event_id": "E-1"}'),
+                self.tool('{"ok": true, "code": "CLAIMED", "phase": "SCOUT"}'),
+                self.tool('{"ok": true, "code": "TRANSITIONED"}'),
+            ]
+        )
+        self.assertEqual(codes, [])
+
+    def test_a_refused_operation_is_counted_however_it_is_spelled(self):
+        codes = polygon._refusal_codes(
+            [
+                self.tool('{"ok": false, "code": "NO_ACTIVE_WORK", "detail": "x"}'),
+                self.tool("REFUSE [SOURCE_UNRESOLVED] the request could not be captured"),
+                self.tool("SAIPEN_GUARD_REFUSAL: PROTECTED_CANONICAL_NAMESPACE"),
+            ]
+        )
+        self.assertEqual(
+            codes, ["NO_ACTIVE_WORK", "SOURCE_UNRESOLVED", "PROTECTED_CANONICAL_NAMESPACE"]
+        )
+
+    def test_a_mixed_transcript_counts_only_the_refusals(self):
+        seen = polygon.measure(
+            [
+                self.tool('{"ok": false, "code": "NO_ACTIVE_WORK"}'),
+                self.tool('{"ok": true, "code": "CHECKPOINTED"}'),
+                self.tool('{"ok": false, "code": "NO_ACTIVE_WORK"}'),
+            ],
+            measured=True,
+        )
+        self.assertEqual(seen["refusal_sequence"], ["NO_ACTIVE_WORK", "NO_ACTIVE_WORK"])
+        self.assertEqual(seen["repeated_refusal"], ["NO_ACTIVE_WORK"])
 
 
 if __name__ == "__main__":  # pragma: no cover

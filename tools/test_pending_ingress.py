@@ -271,6 +271,35 @@ class TheObligationCannotBeDeletedAwayTests(unittest.TestCase):
         self.assertIsNotNone(pending_ingress.pending(root))
 
 
+class PlanPurityTests(unittest.TestCase):
+    """A preview cannot spend the obligation it is previewing."""
+
+    def test_dry_run_answers_without_discharging_the_record(self):
+        root = healthy(self)
+        refuse_the_request(root)
+        task = root / "task.txt"
+        task.write_text(OPERATOR_REQUEST, encoding="utf-8")
+
+        code, payload, output = cli(root, "start", "--file", str(task), "--dry-run", "--json")
+        self.assertEqual(code, 0, output)
+        self.assertEqual(payload["code"], "PLAN", output)
+        self.assertIsNotNone(
+            pending_ingress.pending(root), "a dry run discharged the operator's guarantee"
+        )
+
+        code, payload, output = cli(root, "start", "--file", str(task), "--json")
+        self.assertEqual(payload["code"], "STARTED", output)
+        self.assertIsNone(pending_ingress.pending(root))
+
+    def test_dry_run_still_refuses_a_paraphrase(self):
+        root = healthy(self)
+        refuse_the_request(root)
+        code, payload, output = cli(root, "start", PARAPHRASE, "--dry-run", "--json")
+        self.assertNotEqual(code, 0, output)
+        self.assertEqual(payload["code"], "INGRESS_PARAPHRASE_REFUSED")
+        self.assertIsNotNone(pending_ingress.pending(root))
+
+
 class InstrumentControlTests(unittest.TestCase):
     """The gate can fail: without the record, the same paraphrase is admitted."""
 

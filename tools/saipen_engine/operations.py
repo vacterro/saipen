@@ -4615,7 +4615,9 @@ def user_request(
     # leave the paraphrase a door with a different name on it.
     from . import pending_ingress
 
-    owed = pending_ingress.enforce(root, text.strip(), supersede=supersede_ingress)
+    owed = pending_ingress.enforce(
+        root, text.strip(), supersede=supersede_ingress, commit=not dry_run
+    )
     if owed is not None:
         return _refuse(owed.pop("code"), owed.pop("detail"), **owed)
     verify_text = (verify or "").strip() or USER_REQUEST_VERIFY
