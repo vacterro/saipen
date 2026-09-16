@@ -64,7 +64,18 @@ model cannot copy is not a route.
 ## Harness defect found by the same run
 
 The first matrix run minted REAL tickets in this repository (T-1368, T-1369,
-receipts SRC-047/SRC-048) and wrote `src/app.py` here. The fixtures were
-temporary directories and not git worktrees, so the host did not resolve them
-as projects and the model's shell reached the repository instead. The fixtures
-are worktrees now. The rows stay: the ledger is append-only.
+receipts SRC-047/SRC-048) and wrote `src/app.py` here.
+
+Two causes, and only the second was decisive. The fixtures were not git
+worktrees, so the host did not resolve them as projects; they are worktrees
+now. That alone did NOT close it: `subprocess` sets the child's working
+directory and leaves `PWD` alone, so the host kept a `PWD` naming the
+repository the harness ran from, and the model's shell believed it. Proven by
+the probe in between -- the fixture's own canonical files did not change
+(`canonical_changed: []`) while the model reported this repository's `T-1368`.
+
+With `PWD` bound to the fixture the sandbox holds: the fixture's BOARD carries
+its own `T-1`, its own `src/app.py` was the file edited, its STATE/BOARD/LOG
+all moved, and this repository's LOG did not grow by one line.
+
+The two residue rows stay. The ledger is append-only.

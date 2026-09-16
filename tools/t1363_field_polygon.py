@@ -148,11 +148,21 @@ def _tool_events(events: list[dict]) -> list[dict]:
     return out
 
 
-def _host_env() -> dict:
+def _host_env(project: Path) -> dict:
+    """The child's environment must agree with its cwd about where it is.
+
+    `subprocess` sets the real working directory and leaves `PWD` alone, so a
+    harness launched from the repository hands the host a `PWD` naming the
+    REPOSITORY while its cwd is the fixture. Measured: the model's shell
+    resolved to `PWD`, read the repository's files and ran `saipen start`
+    against the repository's ledger -- a sandbox that fails silently, because
+    every command succeeds against the wrong project.
+    """
     env = {**os.environ}
     for key in ("SAIPEN_PROJECT_ROOT", "SAIPEN_PROJECT_LINEAGE", "SAIPEN_AGENT",
-                "SAIPEN_SKILL_ROOT"):
+                "SAIPEN_SKILL_ROOT", "OLDPWD", "INIT_CWD"):
         env.pop(key, None)
+    env["PWD"] = str(project)
     return env
 
 
@@ -217,7 +227,7 @@ def session(model: str, project: Path, task: str, timeout: int) -> dict:
     proc = subprocess.run(
         [OPENCODE, "run", task, "--format", "json", "--auto", "--model", model],
         cwd=str(project),
-        env=_host_env(),
+        env=_host_env(project),
         capture_output=True,
         text=True,
         encoding="utf-8",

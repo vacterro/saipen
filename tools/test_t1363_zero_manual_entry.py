@@ -1510,6 +1510,24 @@ class PluginFleetRoutingTests(unittest.TestCase):
         built = polygon._git_worktree(healthy(self))
         self.assertTrue((built / ".git").exists(), built)
 
+    def test_a_field_session_environment_agrees_with_its_directory(self):
+        """`subprocess` sets cwd and leaves `PWD` -- that gap IS the escape.
+
+        Measured after the worktree fix had NOT closed it: the child kept a
+        `PWD` naming the repository the harness ran from, the model's shell
+        believed it, and `saipen start` reached the repository's ledger while
+        the fixture's own canonical files never changed. A sandbox is only a
+        sandbox when the child's environment and its directory name the same
+        project.
+        """
+        import t1363_field_polygon as polygon
+
+        root = healthy(self)
+        env = polygon._host_env(root)
+        self.assertEqual(env.get("PWD"), str(root))
+        for leaked in ("OLDPWD", "INIT_CWD", "SAIPEN_PROJECT_ROOT", "SAIPEN_SKILL_ROOT"):
+            self.assertNotIn(leaked, env, leaked)
+
     def test_the_plugin_keeps_no_second_command_taxonomy(self):
         # Comments may still NAME the retired list -- that is the record of
         # why it went. Executable lines may not carry a verb rule.
