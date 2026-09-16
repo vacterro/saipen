@@ -215,5 +215,196 @@ class LedgerIsolationTests(unittest.TestCase):
         self.assertEqual(watched, set(CANONICAL), "the polygon stopped watching a carrier")
 
 
+class MatrixCompletenessTests(unittest.TestCase):
+    """The matrix must build every condition it claims (T-1367, SRC-051 §11).
+
+    `conditions()` built eight while the matrix named nine, and its own
+    docstring said "eight", so a run that printed a row per built condition
+    looked complete while the `--file` transport -- the one BOOT offers for a
+    request the shell cannot carry -- was never driven by a model at all. The
+    defect class: a matrix whose coverage is whatever the builder happened to
+    write, checked against nothing.
+    """
+
+    #: Verbatim from SRC-051 section 11, in its order.
+    DECLARED = (
+        "healthy",
+        "operator_decision",
+        "safety_valve",
+        "repairable_debt",
+        "captured_unprojected",
+        "already_done",
+        "foreign_owner",
+        "windows_path_task",
+        "long_file_task",
+    )
+
+    def test_the_declared_matrix_still_equals_the_source(self):
+        self.assertEqual(polygon.CONDITION_NAMES, self.DECLARED)
+
+    def test_every_declared_condition_has_a_builder(self):
+        self.assertEqual(set(polygon.condition_builders()), set(self.DECLARED))
+
+    def test_a_builder_the_matrix_does_not_name_is_refused(self):
+        """The check runs inside the builder, so it cannot be skipped."""
+        original = polygon.CONDITION_NAMES
+        polygon.CONDITION_NAMES = original[:-1]
+        try:
+            with self.assertRaises(ValueError) as caught:
+                polygon.condition_builders()
+        finally:
+            polygon.CONDITION_NAMES = original
+        self.assertIn("long_file_task", str(caught.exception))
+
+    def test_the_long_request_routes_to_the_file_transport(self):
+        """Not merely long -- long enough that the guard names `--file`."""
+        from saipen_engine import guard_events
+
+        payload = polygon.LONG_TASK
+        self.assertGreater(len(payload.encode("utf-8")), guard_events.MAX_INGRESS_HEX_PAYLOAD)
+        self.assertEqual(
+            guard_events.ingress_rewrite(f"saipen start '{payload}'"),
+            "saipen start --file <path>",
+        )
+
+    def test_an_unreadable_transcript_is_not_a_perfect_run(self):
+        """Measured on `long_file_task`: the session drove the whole chain and
+        closed T-1 at E-13 -- its own fixture ledger proves it -- while the
+        host's JSON stream gave the harness nothing. The old metrics answered
+        `protocol_commands_before_productive: 0`, which IS the strong
+        acceptance number, so an unreadable transcript scored perfect."""
+        blind = polygon.measure([], measured=False)
+        self.assertEqual(blind["measurement"], polygon.UNMEASURED)
+        for field in (
+            "tools",
+            "first_saipen_command",
+            "protocol_commands_before_productive",
+            "productive_action",
+            "refusal_sequence",
+            "repeated_refusal",
+        ):
+            self.assertIsNone(blind[field], field)
+
+    def test_a_readable_transcript_still_measures(self):
+        """The known-good control: the same call with events present."""
+        seen = polygon.measure(
+            [{"tool": "bash", "status": "completed",
+              "input": {"command": "saipen start 'x'"}, "output": "", "error": ""}],
+            measured=True,
+        )
+        self.assertEqual(seen["measurement"], polygon.MEASURED)
+        self.assertEqual(seen["first_saipen_command"], "saipen start 'x'")
+        self.assertEqual(seen["protocol_commands_before_productive"], 1)
+
+    def test_looking_at_the_project_is_not_doing_the_work(self):
+        """SRC-051 §11: status/read/git-status/test-only shell is not
+        productivity. The old rule counted every non-`saipen` shell line, so
+        `git status` scored a session productive at command one."""
+        for inert in (
+            "git status --porcelain",
+            "git log --oneline -5",
+            "ls -la src",
+            "cat src/app.py",
+            "pwd",
+            "grep -rn docstring src",
+            "python -m unittest discover -s tools",
+            "ruff check tools/",
+            "Get-Content src/app.py",
+            "saipen status --json",
+        ):
+            self.assertFalse(polygon.productive_shell(inert), inert)
+        for real in (
+            "python -c \"open('src/app.py','w').write('x')\"",
+            "sed -i '1i \"\"\"doc.\"\"\"' src/app.py",
+            "git commit -m 'doc'",
+            "npm run build",
+        ):
+            self.assertTrue(polygon.productive_shell(real), real)
+
+    def test_an_inert_shell_line_does_not_score_a_session_productive(self):
+        """The known-bad input the rule exists for, through `measure`."""
+        looked = polygon.measure(
+            [{"tool": "bash", "status": "completed",
+              "input": {"command": "git status"}, "output": "", "error": ""}],
+            measured=True,
+        )
+        self.assertIsNone(looked["productive_action"])
+
+    def test_a_console_codec_cannot_kill_the_run(self):
+        """The known-bad input: a cp1251 stream and a u-umlaut.
+
+        That pair ended a nine-session matrix at session five with
+        UnicodeEncodeError and threw away four measured sessions.
+        """
+        import io
+
+        raw = io.BytesIO()
+        stream = io.TextIOWrapper(raw, encoding="cp1251", errors="strict")
+        with self.assertRaises(UnicodeEncodeError):
+            stream.write("für")
+            stream.flush()
+
+        raw = io.BytesIO()
+        stream = io.TextIOWrapper(raw, encoding="cp1251", errors="strict")
+        polygon.force_utf8_console(stream)
+        stream.write("für")
+        stream.flush()
+        self.assertIn("f", raw.getvalue().decode("utf-8"))
+
+    def test_the_report_is_on_disk_before_the_next_session_can_crash(self):
+        """Live model time is the expensive part; a run that persists only at
+        the end loses all of it to any crash in the loop."""
+        out = Path(tempfile.mkdtemp(prefix="polygon-out-"))
+        self.addCleanup(shutil.rmtree, out, True)
+        report = {"sessions": [{"condition": "healthy", "note": "für"}]}
+        self.assertTrue(polygon._write_report(str(out), report))
+        written = json.loads((out / "polygon.json").read_text(encoding="utf-8"))
+        self.assertEqual(written["sessions"][0]["note"], "für")
+        self.assertFalse(polygon._write_report(None, report))
+
+    def test_isolation_separates_contamination_from_a_concurrent_operator(self):
+        """Measured 2026-09-16: an operator checkpointing in the main
+        repository while the matrix ran scored a clean `healthy` session
+        isolation=FAIL. "this repository moved" answers two questions."""
+        repo = Path("V:/repo")
+        clean = {
+            "canonical_changed": ["BOARD.md"],
+            "repository_canonical_changed": [],
+            "owner_repository": {"T-1": ["V:/fixture"]},
+        }
+        self.assertEqual(polygon.isolation_verdict(clean, repo), polygon.ISOLATION_PASS)
+
+        contaminated = {
+            "canonical_changed": ["BOARD.md"],
+            "repository_canonical_changed": ["BOARD.md", "LOG.md"],
+            "owner_repository": {"T-1": ["V:/fixture", str(repo)]},
+        }
+        self.assertEqual(polygon.isolation_verdict(contaminated, repo), polygon.ISOLATION_FAIL)
+
+        concurrent = {
+            "canonical_changed": ["BOARD.md"],
+            "repository_canonical_changed": ["LOG.md"],
+            "owner_repository": {"T-1": ["V:/fixture"]},
+        }
+        self.assertEqual(
+            polygon.isolation_verdict(concurrent, repo), polygon.ISOLATION_INCONCLUSIVE
+        )
+
+        nothing = {
+            "canonical_changed": [],
+            "repository_canonical_changed": [],
+            "owner_repository": {},
+        }
+        self.assertEqual(polygon.isolation_verdict(nothing, repo), polygon.ISOLATION_FAIL)
+
+    def test_each_condition_gets_the_task_its_name_promises(self):
+        self.assertEqual(polygon.CONDITION_TASKS["long_file_task"], polygon.LONG_TASK)
+        self.assertEqual(polygon.CONDITION_TASKS["windows_path_task"], polygon.FIELD_TASK)
+        for name in self.DECLARED:
+            if name not in polygon.CONDITION_TASKS:
+                self.assertEqual(polygon.CONDITION_TASKS.get(name, polygon.SIMPLE_TASK),
+                                 polygon.SIMPLE_TASK)
+
+
 if __name__ == "__main__":  # pragma: no cover
     unittest.main()

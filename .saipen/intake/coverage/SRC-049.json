@@ -111,19 +111,19 @@
     "SRC-049:R013": {
       "actionable": true,
       "class": "non-goal",
-      "disposition": "UNKNOWN",
-      "evidence": null,
+      "disposition": "VERIFIED",
+      "evidence": "E-6821",
       "text": "No push, no tag, no public release.",
-      "verification": null,
+      "verification": "Local commit f73edf8a only. git tag --points-at HEAD is empty and the tag count is unchanged at 394; git status -sb reports 'main...origin/main [ahead 26]' and git log origin/main..HEAD counts 26, so nothing left this machine. tools/validate.py --gate ship deliberately FAILs ('cannot read staged release metadata') because no release is staged -- that refusal is the clause holding, not a bypassed gate",
       "work": "T-1370"
     },
     "SRC-049:R014": {
       "actionable": true,
       "class": "acceptance-criterion",
-      "disposition": "UNKNOWN",
-      "evidence": null,
+      "disposition": "VERIFIED",
+      "evidence": "E-6818",
       "text": "T-1370 is DONE only when misrouted Work has a truthful non-DONE retirement path, no fake Source coverage is required, source bytes remain forensics-recoverable, T-1369 and T-1368 are retired canonically, the dependency chain is unwound, T-1367 automatically resumes BUILD, focused recovery/crash/idempotency tests are green, the validator is conformant, PATCH_OWNED = 0 and UNKNOWN = 0.",
-      "verification": null,
+      "verification": "Every sub-condition measured: non-DONE retirement path exists and is neither ticket done nor source close (R001); no fabricated coverage -- SRC-047/SRC-048 carry 0 requirements and 0 dispositions, checked from current bytes; source bytes forensics-recoverable byte-exact from .saipen/archive/retired/ against the tombstone digest; T-1368/T-1369 retired canonically at E-6804/E-6803 with evidence bound at E-6810/E-6809; chain unwound with the parent restored to its own saved phase; T-1367 auto-resumed BUILD at E-6804 through the same mechanism that fires again at this close (operations.py resume_parent path, pinned by ParentOwnershipTests); recovery/crash/idempotency green (HostileControlTests controls 7 and 8 across NITRO_CRASH_AFTER_LOG and NITRO_CRASH_AFTER_DELETE_FILE, 55/55 module OK); tools/validate.py Agent is conformant with 0 FAIL; core-unit A/B PATCH_OWNED = 0 and UNKNOWN = 0 at .saipen/evidence/T-1370-retirement-20260916/core-unit-ab-verdict.json",
       "work": "T-1370"
     }
   },

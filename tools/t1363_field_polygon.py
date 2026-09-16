@@ -36,6 +36,7 @@ import shutil
 import subprocess
 import sys
 import time
+from contextlib import suppress
 from pathlib import Path
 
 TOOLS = Path(__file__).resolve().parent
@@ -80,20 +81,66 @@ FIELD_TASK = (
 )
 SIMPLE_TASK = "add a one-line docstring to the top of src/app.py"
 
+#: A request no shell carries: multi-line, several hundred bytes, the shape a
+#: user actually pastes. `guard_events.ingress_rewrite` answers
+#: `saipen start --file <path>` above MAX_INGRESS_HEX_PAYLOAD, so the session
+#: has to write the text with its OWN write tool and run that command. The
+#: matrix named this condition (SRC-051 section 11) and the polygon did not
+#: build it, so a complete-looking run never exercised the one transport BOOT
+#: offers for a task the shell cannot carry -- the transport measured twice as
+#: the only one a weak model gets right, because hex re-encoding corrupted it
+#: both times.
+LONG_TASK = (
+    "add a docstring to the top of src/app.py.\n"
+    "\n"
+    "it should say what the module is for, not repeat the function names, and\n"
+    "it should stay one paragraph. keep the wording plain -- no marketing, no\n"
+    "'this module provides', no bullet list.\n"
+    "\n"
+    "context you may need: this file is the application entry point, it is the\n"
+    "first thing a reader opens, and the notes I wrote earlier are scattered\n"
+    "across several places, so do not go looking for them -- write the summary\n"
+    "from what the file itself says.\n"
+    "\n"
+    "when it is in, say which line you put it on.\n"
+)
+
+#: Every condition the field matrix names, in its order. Declared here rather
+#: than left implicit in the builder below, because the builder covered eight
+#: of the nine for a whole wave and printed a row per BUILT condition -- so the
+#: run read complete while `long_file_task` had never been driven at all. A
+#: matrix that is whatever its builder happens to contain is checked by nothing.
+CONDITION_NAMES = (
+    "healthy",
+    "operator_decision",
+    "safety_valve",
+    "repairable_debt",
+    "captured_unprojected",
+    "already_done",
+    "foreign_owner",
+    "windows_path_task",
+    "long_file_task",
+)
+
+#: The task each condition hands the model. Absent means SIMPLE_TASK.
+CONDITION_TASKS = {
+    "windows_path_task": FIELD_TASK,
+    "long_file_task": LONG_TASK,
+}
+
 #: Commands that are PROTOCOL, not product. A session that runs many of these
 #: before touching the work is the failure this ticket measures.
 _PROTOCOL = re.compile(r"^\s*saipen\b")
 
 
-def conditions() -> dict:
-    """The eight project conditions the field matrix names."""
+def condition_builders() -> dict:
+    """Name -> the callable that makes that condition's project.
+
+    Separate from `conditions()` so the covered set can be checked without
+    building nine git worktrees: the completeness control reads THIS.
+    """
     import test_t1363_zero_manual_entry as fixtures
 
-    class _Case:
-        def addCleanup(self, _fn):  # fixtures keep themselves; we keep the tree
-            return None
-
-    holder = _Case()
     build = {
         "healthy": fixtures.healthy,
         "operator_decision": fixtures.blocker_project,
@@ -103,8 +150,27 @@ def conditions() -> dict:
         "already_done": lambda case: fixtures.completed_request_project(case, SIMPLE_TASK),
         "foreign_owner": fixtures.foreign_owner_project,
         "windows_path_task": fixtures.healthy,
+        "long_file_task": fixtures.healthy,
     }
-    return {name: _git_worktree(maker(holder)) for name, maker in build.items()}
+    missing = [name for name in CONDITION_NAMES if name not in build]
+    extra = [name for name in build if name not in CONDITION_NAMES]
+    if missing or extra:
+        raise ValueError(
+            f"condition builders disagree with CONDITION_NAMES: missing={missing} extra={extra}"
+        )
+    return build
+
+
+def conditions() -> dict:
+    """The nine project conditions the field matrix names, built."""
+
+    class _Case:
+        def addCleanup(self, _fn):  # fixtures keep themselves; we keep the tree
+            return None
+
+    holder = _Case()
+    build = condition_builders()
+    return {name: _git_worktree(build[name](holder)) for name in CONDITION_NAMES}
 
 
 def _captured_unprojected(case) -> Path:
@@ -133,6 +199,63 @@ def _canonical_hashes(root: Path) -> dict:
         out[name] = (
             hashlib.sha256(path.read_bytes()).hexdigest() if path.is_file() else None
         )
+    return out
+
+
+#: The file every field task names. Its bytes are the product; the ledger is
+#: only the bookkeeping around it.
+TARGET_FILE = "src/app.py"
+
+
+def _target_digest(root: Path) -> str | None:
+    path = root / TARGET_FILE
+    return hashlib.sha256(path.read_bytes()).hexdigest() if path.is_file() else None
+
+
+def _installed_generation() -> dict:
+    """Which runtime the models are actually about to drive.
+
+    SRC-051 section 10 asks for the installed generation per session, and a
+    field result is only attributable to a runtime that can be named. Reading
+    it from the distribution projection rather than from the session's prose
+    keeps it a measurement.
+    """
+    try:
+        import autoinject
+    except ImportError as exc:  # pragma: no cover -- tools/ is on sys.path
+        return {"error": f"autoinject unavailable: {exc}"}
+    report = autoinject.distribution_report()
+    home = next(
+        (item for item in report["homes"] if Path(item["path"]) == INSTALLED),
+        None,
+    )
+    return {
+        "installed_home": str(INSTALLED),
+        "expected_generation": report.get("expected_generation"),
+        "runtime_generation": (home or {}).get("runtime_generation"),
+        "source_head": (home or {}).get("source_head"),
+        "generation_current": (home or {}).get("generation_current"),
+        "installed_at": (home or {}).get("installed_at"),
+    }
+
+
+def _owner_repository(ids: dict, fixture: Path) -> dict:
+    """Which repository's OWN ledger holds each id the session minted.
+
+    "the model said it created T-1 in the fixture" is prose. This asks both
+    ledgers and reports the answer they give.
+    """
+    fixture_ledger = _owning_ledger(fixture)
+    repo_ledger = _owning_ledger(REPO)
+    out = {}
+    for kind, key in (("tickets", "tickets"), ("receipts", "receipts")):
+        for ident in ids.get(kind, []):
+            owners = []
+            if ident in fixture_ledger[key]:
+                owners.append(str(fixture))
+            if ident in repo_ledger[key]:
+                owners.append(str(REPO))
+            out[ident] = owners
     return out
 
 
@@ -218,8 +341,63 @@ def _refusal_codes(tools: list[dict]) -> list[str]:
     return codes
 
 
-def measure(tools: list[dict]) -> dict:
+#: Shell verbs that look at the project without moving it. SRC-051 section 11
+#: is explicit -- "Do not count status/read/git-status/test-only shell as
+#: productivity" -- and the old rule counted ANY non-`saipen` shell line, so a
+#: session that ran `git status` and then argued with the protocol for twenty
+#: minutes scored "productive at command 1". The defect class: a productivity
+#: metric that counts looking as doing can never report a stalled session.
+_INERT_SHELL = re.compile(
+    r"""^\s*(?:
+        (?:ls|dir|pwd|cd|echo|cat|type|head|tail|wc|find|where|which|tree|stat)\b
+      | (?:grep|rg|sls|select-string|findstr)\b
+      | git\s+(?:status|log|diff|show|branch|remote|rev-parse|ls-files|check-attr)\b
+      | (?:python|python3|py)\s+(?:-[A-Za-z]+\s+)*-m\s+(?:unittest|pytest|ruff)\b
+      | (?:pytest|ruff)\b
+      | (?:get-content|get-childitem|get-location|test-path|measure-object)\b
+    )""",
+    re.IGNORECASE | re.VERBOSE,
+)
+
+
+def productive_shell(command: str) -> bool:
+    """True when this shell line moves the project rather than inspects it."""
+    text = command.strip()
+    if not text or _PROTOCOL.match(text):
+        return False
+    return not _INERT_SHELL.match(text)
+
+
+#: What a session's UX metrics are worth. `MEASURED` means the host's event
+#: stream was readable; `UNMEASURED_NO_EVENT_STREAM` means it was not, and
+#: every transcript metric below is None rather than zero.
+MEASURED = "MEASURED"
+UNMEASURED = "UNMEASURED_NO_EVENT_STREAM"
+
+#: The shape returned when the host produced no readable events. Measured on
+#: `long_file_task`: the session ran the whole protocol chain and finished
+#: T-1 at E-13 -- its own ledger proves it -- while `--format json` put
+#: nothing parseable on stdout, so the metrics read `tools: 0,
+#: first_saipen_command: None, protocol_commands_before_productive: 0,
+#: productive_action: None, refusal_sequence: []`. That is indistinguishable
+#: from a model that sat there, and `protocol_commands_before_productive: 0`
+#: is the STRONG acceptance number, so an unreadable transcript scored as a
+#: perfect run. A metric that cannot say "I did not see this" lies.
+_UNMEASURED_METRICS = {
+    "tools": None,
+    "first_saipen_command": None,
+    "protocol_commands": None,
+    "protocol_commands_before_productive": None,
+    "productive_action": None,
+    "refusal_sequence": None,
+    "repeated_refusal": None,
+}
+
+
+def measure(tools: list[dict], *, measured: bool = True) -> dict:
     """The transcript facts the acceptance is stated in."""
+    if not measured:
+        return {"measurement": UNMEASURED, **_UNMEASURED_METRICS}
     commands = _shell_commands(tools)
     protocol = [c for c in commands if _PROTOCOL.match(c)]
     first = protocol[0] if protocol else None
@@ -235,7 +413,7 @@ def measure(tools: list[dict]) -> dict:
         if item["tool"] in ("write", "edit", "patch", "apply_patch", "multiedit"):
             productive_at = item["tool"]
             break
-        if isinstance(command, str) and command.strip():
+        if isinstance(command, str) and productive_shell(command):
             productive_at = "shell"
             break
     refusals = _refusal_codes(tools)
@@ -245,6 +423,7 @@ def measure(tools: list[dict]) -> dict:
         if code == refusals[index - 1]
     ]
     return {
+        "measurement": MEASURED,
         "tools": len(tools),
         "first_saipen_command": first,
         "protocol_commands": protocol,
@@ -297,10 +476,62 @@ def session(model: str, project: Path, task: str, timeout: int) -> dict:
             for event in events
             if event.get("type") == "text"
         )[:2000],
-        "stderr_tail": proc.stderr[-800:],
-        **measure(tools),
-        "tool_names": [item["tool"] for item in tools],
+        "stderr_tail": proc.stderr[-4000:],
+        "events_parsed": len(events),
+        "stdout_chars": len(proc.stdout),
+        "stderr_chars": len(proc.stderr),
+        **measure(tools, measured=bool(events)),
+        "tool_names": [item["tool"] for item in tools] if events else None,
     }
+
+
+#: Isolation outcomes. INCONCLUSIVE exists because "this repository's bytes
+#: moved" answers TWO different questions and the old verdict collapsed them.
+#: Measured: an operator checkpointing in the main repository while the matrix
+#: ran turned a clean `healthy` session into isolation=FAIL -- a contamination
+#: verdict against a model that never touched this project. The discriminator
+#: is the one already available: a session that wrote HERE leaves the ids it
+#: minted in THIS ledger. No minted id here means somebody else did the
+#: writing, and the isolation question is simply unanswered for that session.
+ISOLATION_PASS = "PASS"
+ISOLATION_FAIL = "FAIL"
+ISOLATION_INCONCLUSIVE = "INCONCLUSIVE_CONCURRENT_MAIN_WRITE"
+
+
+def isolation_verdict(record: dict, repo: Path) -> str:
+    if not record.get("canonical_changed"):
+        return ISOLATION_FAIL
+    if not record.get("repository_canonical_changed"):
+        return ISOLATION_PASS
+    owners = record.get("owner_repository") or {}
+    if any(str(repo) in places for places in owners.values()):
+        return ISOLATION_FAIL
+    return ISOLATION_INCONCLUSIVE
+
+
+def force_utf8_console(*streams) -> None:
+    """The console must never be able to kill a run.
+
+    A model answers in whatever language it likes, and a redirected stdout on
+    this Windows host is cp1251. Measured: the fifth session of a nine-session
+    matrix printed a u-umlaut and the WHOLE RUN died with UnicodeEncodeError --
+    forty minutes of live model time and four measured sessions thrown away by
+    a console codec. The transcript is DATA; it does not get a veto.
+    """
+    for stream in streams:
+        with suppress(AttributeError, ValueError):
+            stream.reconfigure(encoding="utf-8", errors="replace")
+
+
+def _write_report(out_dir: str | None, report: dict) -> bool:
+    if not out_dir:
+        return False
+    out = Path(out_dir)
+    out.mkdir(parents=True, exist_ok=True)
+    (out / "polygon.json").write_text(
+        json.dumps(report, indent=1, ensure_ascii=False), encoding="utf-8", newline="\n"
+    )
+    return True
 
 
 def main() -> int:
@@ -310,6 +541,8 @@ def main() -> int:
     parser.add_argument("--timeout", type=int, default=1200)
     parser.add_argument("--out", default=None)
     args = parser.parse_args()
+
+    force_utf8_console(sys.stdout, sys.stderr)
 
     if not OPENCODE:
         print("opencode runtime unavailable")
@@ -326,23 +559,30 @@ def main() -> int:
     selected = args.conditions or list(built)
     report = {
         "installed_runtime": INSTALLED.exists(),
+        "installed_generation": _installed_generation(),
         "runtime_probe": generation[:4000],
         "sessions": [],
     }
     for model in args.models:
         for name in selected:
             project = built[name]
-            task = FIELD_TASK if name == "windows_path_task" else SIMPLE_TASK
+            task = CONDITION_TASKS.get(name, SIMPLE_TASK)
             before = _canonical_hashes(project)
             # SRC-049:R011 -- the MAIN repository is measured too. "the model
             # edited the fixture's file" is not isolation; "this repository's
             # canonical carriers are byte-identical" is.
             repo_before = _canonical_hashes(REPO)
             owned_before = _owning_ledger(project)
+            # SRC-051 section 11 -- "the requested target bytes actually
+            # change". A model can drive the whole protocol chain, close the
+            # ticket, and never touch the file it was asked about.
+            target_before = _target_digest(project)
             try:
                 record = session(model, project, task, args.timeout)
             except subprocess.TimeoutExpired:
-                record = {"model": model, "timeout": True}
+                # A killed session measured nothing either -- the metrics must
+                # not read as a run that chose to do nothing.
+                record = {"model": model, "timeout": True, **measure([], measured=False)}
             after = _canonical_hashes(project)
             repo_after = _canonical_hashes(REPO)
             owned_after = _owning_ledger(project)
@@ -363,31 +603,36 @@ def main() -> int:
                     r for r in owned_after["receipts"] if r not in owned_before["receipts"]
                 ],
             }
-            # The verdict. A session passes ONLY if the fixture moved and this
-            # repository did not -- and the ticket it claims to have made is
-            # read back out of the fixture's own ledger, never believed.
-            record["isolation"] = (
-                "PASS"
-                if record["canonical_changed"] and not record["repository_canonical_changed"]
-                else "FAIL"
+            record["owner_repository"] = _owner_repository(
+                record["fixture_minted"], project
             )
+            target_after = _target_digest(project)
+            record["target"] = {
+                "path": TARGET_FILE,
+                "before": target_before,
+                "after": target_after,
+                "changed": target_before != target_after,
+            }
+            record["isolation"] = isolation_verdict(record, REPO)
             report["sessions"].append(record)
+            # Write after EVERY session. Live model time is the expensive part
+            # of this harness, and a run that only persists at the end throws
+            # all of it away on any crash in the loop -- which is exactly how
+            # four measured sessions were lost to a console codec.
+            _write_report(args.out, report)
             print(
-                f"{model} :: {name:22s} first={record.get('first_saipen_command')!r} "
+                f"{model} :: {name:22s} measurement={record.get('measurement')} "
+                f"first={record.get('first_saipen_command')!r} "
                 f"protocol_before={record.get('protocol_commands_before_productive')} "
                 f"productive={record.get('productive_action')} "
+                f"target_changed={record['target']['changed']} "
                 f"refusals={record.get('refusal_sequence')} "
                 f"repeated={record.get('repeated_refusal')} "
                 f"isolation={record.get('isolation')} "
                 f"minted={record.get('fixture_minted')}"
             )
-    if args.out:
-        out = Path(args.out)
-        out.mkdir(parents=True, exist_ok=True)
-        (out / "polygon.json").write_text(
-            json.dumps(report, indent=1, ensure_ascii=False), encoding="utf-8"
-        )
-        print(f"wrote {out / 'polygon.json'}")
+    if _write_report(args.out, report):
+        print(f"wrote {Path(args.out) / 'polygon.json'}")
     return 0
 
 

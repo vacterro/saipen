@@ -1843,3 +1843,14 @@
 - 16.09.26 17:07 [E-6819] [parent: E-6818] [T-1370] [agent: claude] [op: transition-00e03f565258450caf2c13b72a530701] RUN: transition to REVIEW -- VERIFY green from current bytes; adversarial sweep next
 - 16.09.26 17:08 [E-6820] [parent: E-6819] [T-1370] [agent: claude] [op: checkpoint-d228f9166d93440198501e1bd0f6456e] DEC: detail_ref: .saipen/recovery/log-detail/E-6820-9b93f02ba23049d30387d7f2.json
 - 16.09.26 17:08 [E-6821] [parent: E-6820] [T-1370] [agent: claude] [op: transition-f5ebeadcd0dd431e9070e76214d10e63] RUN: transition to SHIP -- review passed; ONE narrow local commit of owned paths only, no push, no tag, no release
+- 16.09.26 17:09 [E-6822] [parent: E-6821] [T-1370] [agent: claude] [op: checkpoint-56fe45f918aa484b9b36a9f4662cd23b] RUN: detail_ref: .saipen/recovery/log-detail/E-6822-275c7b34ee5e6ac7c3447229.json
+- 16.09.26 17:09 [E-6823] [parent: E-6822] [T-1370] [agent: claude] [op: finish-201bfa3e6ee54b26ac514a85706c16cd] DEC: ticket finished via SAIOPS -- completion (from SHIP)
+- 16.09.26 17:09 [E-6824] [parent: E-6823] [T-1367] [agent: claude] [op: finish-201bfa3e6ee54b26ac514a85706c16cd] DEC: blocked parent resumed after dependency T-1370 reached DONE
+- 16.09.26 17:10 [E-6825] [parent: E-6824] [T-1367] [agent: claude] [op: checkpoint-b08296150152437990ca04631d7d6cde] RUN: detail_ref: .saipen/recovery/log-detail/E-6825-e3e1470d2fbca7e8cd7f5e28.json
+- 16.09.26 17:11 [E-6826] [parent: E-6825] [T-1367] [agent: claude] [op: checkpoint-1e5da4739e69476e87ea1ca51e71cd38] RUN: detail_ref: .saipen/recovery/log-detail/E-6826-8f031b37718a474562fe04c8.json
+- 16.09.26 17:11 [E-6827] [parent: E-6826] [T-1371] [agent: claude] [op: ticket-35f1a721cd854cad8b20ad56b65efd1a] DEC: ticket added via SAIOPS
+- 16.09.26 17:12 [E-6828] [parent: E-6827] [T-1367] [agent: claude] [op: checkpoint-5fa8043f10cc4cb2b2b8494c4656cf0b] RUN: detail_ref: .saipen/recovery/log-detail/E-6828-a4103436dc3ec3577d7eb0e3.json
+- 16.09.26 18:24 [E-6829] [parent: E-6828] [T-1367] [agent: claude] [op: checkpoint-07a2039956f8441281a7d428bed968d3] RUN: detail_ref: .saipen/recovery/log-detail/E-6829-35da2651a295d71f6b07f7f3.json
+- 16.09.26 18:24 [E-6830] [parent: E-6829] [T-1367] [agent: claude] [op: checkpoint-7c4448cc2c0d4d4db843e91f97072c7a] RUN: detail_ref: .saipen/recovery/log-detail/E-6830-92066e688fe5521174f06311.json
+- 16.09.26 18:24 [E-6831] [parent: E-6830] [T-1372] [agent: claude] [op: ticket-ece88e76dd9c4727867576bb5231be4d] DEC: ticket added via SAIOPS
+- 16.09.26 18:43 [E-6832] [parent: E-6831] [T-1367] [agent: claude] [op: checkpoint-e6cfbff077ba4f13a1e1952c47eaec3b] RUN: detail_ref: .saipen/recovery/log-detail/E-6832-2459c11bb1eac9918b19e052.json
