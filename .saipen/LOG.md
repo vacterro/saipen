@@ -1763,3 +1763,5 @@
 - 16.09.26 02:51 [E-6739] [parent: E-6738] [T-1355] [agent: claude] [op: transition-b29624ab29e7414d9837ba5013ade124] RUN: transition to SHIP -- SHIP: rides with the slice; no release cut
 - 16.09.26 02:51 [E-6740] [parent: E-6739] [T-1355] [agent: claude] [op: finish-ce3d0ea1af4e403c99fe95fec31fe0f4] DEC: ticket finished via SAIOPS -- completion (from SHIP)
 - 16.09.26 02:51 [E-6741] [parent: E-6740] [T-1359] [agent: claude] [op: claim-e722b6651ccf4da2a7c782fffcfe0928] DEC: claimed via SAIOPS -- owner claude -- EXPLICIT claim over PICK-01: topmost workable was T-1361
+- 16.09.26 06:18 [E-6742] [parent: E-6741] [T-1359] [agent: claude] [op: checkpoint-ab92ce670f5544a29321b9797fe9163a] RUN: detail_ref: .saipen/recovery/log-detail/E-6742-d517682131c22e43215c8ff6.json
+- 16.09.26 06:19 [E-6743] [parent: E-6742] [T-1359] [agent: claude] [op: checkpoint-c48adf3e442641998278a9ca5b293608] RUN: detail_ref: .saipen/recovery/log-detail/E-6743-5488bbb1c407484da4006aab.json
