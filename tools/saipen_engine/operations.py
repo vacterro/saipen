@@ -1777,10 +1777,21 @@ def _plan_transition(
             phase=destination,
         )
     if not phases.transition_legal(current, destination):
+        # T-1377: a refusal that names the rule and not the move is measured as
+        # a loop. `already_done` asked SCOUT -> VERIFY, was told the edge is
+        # illegal, and asked BUILD -> REVIEW next; neither answer said which
+        # edge leaves the phase the project is actually in.
+        legal = phases.VALID_TRANSITIONS.get(current) or []
+        subject_hint = (ticket_id or state.get("task") or "<T-###>").strip() or "<T-###>"
         return _refuse(
             "ILLEGAL_TRANSITION",
-            f"{current} -> {destination} is not a legal edge",
+            f"{current} -> {destination} is not a legal edge"
+            + (f"; from {current} the legal edges are {', '.join(legal)}" if legal else ""),
             phase=destination,
+            legal_destinations=legal,
+            canonical_next_command=(
+                f"saipen transition {legal[0]} {subject_hint} '<why>'" if legal else None
+            ),
         )
 
     subject = None
@@ -1841,11 +1852,15 @@ def _plan_transition(
         history_events = docs["_history"].events
         ok, reason = verification_evidence(subject, history_events)
         if not ok:
+            # T-1377: measured -- a session asked twice and got the same
+            # sentence twice. The evidence has an exact shape, so the refusal
+            # prints the command that writes it.
             return _refuse(
                 "INCOMPLETE_TICKET",
                 f"VERIFY -> REVIEW requires explicit verification evidence for ticket {subject} (got: {reason})",  # noqa: E501
                 phase=destination,
                 ticket=subject,
+                canonical_next_command=_verification_command(subject),
             )
         regression_problem = _regression_gate(docs, subject)
         if regression_problem is not None:
@@ -2159,11 +2174,14 @@ def _plan_checkpoint(
     # (hostile-regression, P1#3). Ticket-LESS session checkpoints stay legal.
     if ticket_id is not None:
         if not re.fullmatch(r"T-\d+", str(ticket_id)):
+            # T-1377: measured -- a model passed the whole event text where the
+            # ticket goes and got the rule back, not the shape.
             return _refuse(
                 "VALIDATION_FAILED",
                 f"checkpoint ticket_id {ticket_id!r} is not a valid "
-                f"T-### ref (expected T-<digits>)",
+                f"T-### ref (expected T-<digits>): the ticket comes BEFORE the text",
                 ticket=ticket_id,
+                canonical_next_command='saipen checkpoint RUN <T-###> "<what happened>"',
             )
         if ticket_id not in _board["tickets"]:
             return _refuse(
@@ -2608,6 +2626,40 @@ def _ticket_targets(
     )
 
 
+def _only_request_clauses_await(root: Path, source_gate: dict) -> bool:
+    """True when the ONLY thing the coverage gate wants is the request's clause.
+
+    That case is not a coverage problem at all: the request's clause is
+    discharged by the Work's own verification evidence, so the honest refusal
+    is the missing evidence, with the command that writes it.
+    """
+    from .intake import ensure_request_clause, is_request_clause
+
+    receipt = source_gate.get("receipt")
+    if not receipt:
+        return False
+    unresolved = list((source_gate.get("coverage") or {}).get("unresolved") or [])
+    if not unresolved:
+        # A receipt whose contract has no clauses at all is the same case: the
+        # clause it is missing IS its own request.
+        return bool(ensure_request_clause(root, receipt).get("ok"))
+    return all(is_request_clause(root, receipt, rid) for rid in unresolved)
+
+
+def _verification_command(ticket_id: str) -> str:
+    """The exact checkpoint that satisfies the verification-evidence gate.
+
+    `log.verification_evidence` accepts a RUN event after the current VERIFY
+    boundary carrying the PASS token and `conf: high`. That is a SHAPE, and
+    printing the rule instead of the shape is what the field measured as a
+    loop -- twice in one session, and twice more in this repository's own work.
+    """
+    return (
+        f'saipen checkpoint RUN {ticket_id} "verify -> PASS [target: {ticket_id}] '
+        f'conf: high -- <the command that ran and what it reported>"'
+    )
+
+
 def closure_request_error(
     closure_mode: str | None,
     closure_cohort: str | None,
@@ -2644,7 +2696,10 @@ def closure_request_error(
             "authority is what owns the deferred publication"
         )
     if mode != "cohort" and (closure_cohort or "").strip():
-        return f"--closure-cohort is only valid with closure_mode cohort, not {mode}"
+        return (
+            f"--closure-cohort is only valid with closure_mode cohort, not {mode}; "
+            f"run: saipen ticket done <T-###> --closure-mode {mode}"
+        )
     if (closure_cohort or "").strip() and not _COHORT_ID_RE.fullmatch(closure_cohort.strip()):
         return f"closure_cohort {closure_cohort!r} is not a C-### identity"
     paths = [str(x).strip() for x in (closure_paths or []) if str(x).strip()]
@@ -2654,7 +2709,13 @@ def closure_request_error(
             "this member attributes to the batch are the cohort's scope"
         )
     if mode != "cohort" and paths:
-        return f"--paths is only valid with closure_mode cohort, not {mode}"
+        # T-1377: measured twice in the field -- the refusal named the rule and
+        # the sessions retried the same line. The corrected command is one
+        # deletion away, so it is printed.
+        return (
+            f"--paths is only valid with closure_mode cohort, not {mode}; "
+            f"run: saipen ticket done <T-###> --closure-mode {mode}"
+        )
     return None
 
 
@@ -2709,7 +2770,16 @@ def _plan_finish_ticket(
         closure_mode, closure_cohort, implementation_source, closure_paths
     )
     if _grammar is not None:
-        return _refuse("VALIDATION_FAILED", _grammar, ticket=ticket_id)
+        # T-1377: the grammar sentence already knows the corrected command;
+        # carrying it in the machine field is what a weak model can act on.
+        route = None
+        if "; run: " in _grammar:
+            route = _grammar.split("; run: ", 1)[1].strip().replace(
+                "<T-###>", ticket_id or "<T-###>"
+            )
+        return _refuse(
+            "VALIDATION_FAILED", _grammar, ticket=ticket_id, canonical_next_command=route
+        )
     _mode = (closure_mode or DEFAULT_CLOSURE_MODE).strip()
     _cohort_id = (closure_cohort or "").strip()
     _impl_source = (implementation_source or "").strip()
@@ -2745,11 +2815,26 @@ def _plan_finish_ticket(
             )
             if settled:
                 source_gate = work_closure_gate(root, ticket_id)
+        elif _only_request_clauses_await(root, source_gate):
+            # T-1377: name the ROOT cause, not the symptom. The coverage is not
+            # what is missing here -- the Work's own verification evidence is,
+            # and once it exists this gate settles the request's clause itself.
+            # Answering SOURCE_UNRESOLVED sent the model to a ledger it cannot
+            # edit instead of to the checkpoint it can write.
+            return _refuse(
+                "INCOMPLETE_TICKET",
+                f"finish requires explicit verification evidence for ticket {ticket_id} "
+                f"(got: {reason}); the linked request's own clause is settled from it",
+                ticket=ticket_id,
+                receipt=source_gate.get("receipt"),
+                canonical_next_command=_verification_command(ticket_id),
+            )
     if not source_gate.get("ok"):
         return _refuse(
             source_gate.get("code", "SOURCE_UNRESOLVED"),
             f"source coverage gate for {ticket_id}: {source_gate}",
             receipt=source_gate.get("receipt"),
+            unresolved=(source_gate.get("coverage") or {}).get("unresolved"),
         )
     # SELF-ownership gate (second-wave P0): finishing a ticket is THE active
     # mutation -- it closes the DOING claim and rewrites STATE.agent.
@@ -2877,6 +2962,7 @@ def _plan_finish_ticket(
             "INCOMPLETE_TICKET",
             f"finish requires explicit verification evidence for ticket {ticket_id} (got: {reason})",  # noqa: E501
             ticket=ticket_id,
+            canonical_next_command=_verification_command(ticket_id),
         )
     regression_problem = _regression_gate(docs, ticket_id)
     if regression_problem is not None:

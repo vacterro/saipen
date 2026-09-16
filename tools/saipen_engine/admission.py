@@ -664,6 +664,19 @@ def _pending_operation_targets(root: Path, ops) -> set[str] | None:
     return paths
 
 
+#: The one command that lifts each hard stop `state.binding_brake` reports.
+#: A refusal that names the brake but not its exit is the loop T-1377 measured.
+_BRAKE_ROUTES = {
+    "blocker": "saipen recover resolve-blocker <decision>",
+    "blocked": "saipen ticket unblock <T-###> <decision>",
+    # A printed command has to BE a command: the reachability control refuses a
+    # route its own guard would not classify, and a trailing comment made this
+    # one unreachable from the state that prints it. The persisted WAIT text
+    # comes back in `continue`'s own payload, so the bare command carries it.
+    "wait": "saipen continue --json",
+}
+
+
 def protocol_snapshot(
     root: Path, actor: str | None = None, proposed_targets: "list[str] | None" = None
 ) -> dict:
@@ -747,6 +760,12 @@ def protocol_snapshot(
     )
     brake = binding_brake(state, empty_todo=empty_todo)
     if brake is not None:
+        # T-1377: measured live -- a session was refused WAIT_BLOCKED twice with
+        # "the saipen guard refused tool 'bash'; the host tool did not execute"
+        # and nothing else: no reason, no route, so it retried. The brake
+        # already knows WHICH hard stop binds, and each kind has exactly one
+        # command that lifts it.
+        snapshot["route"] = _BRAKE_ROUTES.get(brake[0])
         return refuse("WAIT_BLOCKED", brake[1])
 
     canonical_actor = (str(state.get("agent", "")) or "").strip() or None
@@ -1371,6 +1390,7 @@ def evaluate_admission(
             action=action_name,
             effect=effect,
             detail=snapshot["detail"],
+            canonical_next_command=snapshot.get("route"),
         )
 
     return result(

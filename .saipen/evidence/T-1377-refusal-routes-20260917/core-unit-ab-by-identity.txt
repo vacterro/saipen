@@ -1,0 +1,17 @@
+# T-1377 core-unit A/B by TEST IDENTITY
+
+before this ticket: Ran 2651, 34 red identities
+with it (first run): Ran 2660, 35 red identities
+
+The one PATCH_OWNED red was real and is fixed:
+  test_canonical_command_reachability::test_every_printed_command_classifies_as_canonical
+  -- the WAIT route printed 'saipen continue --json   # the persisted WAIT names what it needs'.
+  A printed command has to BE a command; the trailing comment made the route its own
+  guard would refuse. The route is now the bare command and the control is green.
+
+re-run of that control plus the focused family: Ran 16 OK
+
+## Final A/B (after the route fix)
+before this ticket: Ran 2651, 34 red identities
+with it           : Ran 2660, 34 red identities -- the same ones
+PATCH_OWNED = 0, UNKNOWN = 0. The 9 added tests are tools/test_refusal_routes.py.
