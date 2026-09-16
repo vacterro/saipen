@@ -2719,9 +2719,32 @@ def _plan_finish_ticket(
     # source still has missing, corrupt, or uncovered clauses. This gate
     # rereads the original body and verifies its digest; model memory and a
     # green umbrella ticket are not closure evidence.
-    from .intake import work_closure_gate
+    from .intake import discharge_request_clauses, work_closure_gate
 
     source_gate = work_closure_gate(root, ticket_id)
+    if not source_gate.get("ok") and source_gate.get("code") == "SOURCE_UNRESOLVED":
+        # T-1379: the request's own clause is discharged by the Work's own
+        # verification evidence, here, at the one moment both exist. Measured
+        # live: `saipen start` captured a receipt with an empty contract, so
+        # this gate answered SOURCE_UNRESOLVED forever and the ticket the
+        # canonical entry command created could not be finished by any command
+        # the CLI offers. The evidence gate below still decides whether this
+        # Work proved anything -- nothing is settled without it.
+        from .log import verification_evidence
+
+        proven, reason = verification_evidence(ticket_id, docs["_history"].events)
+        if proven:
+            settled = discharge_request_clauses(
+                root,
+                ticket_id,
+                evidence=f"{ticket_id} closed with verification evidence in LOG: {reason[:400]}",
+                verification=(
+                    f"the Work this request created reached its own verification gate; "
+                    f"see the {ticket_id} VERIFY cycle in .saipen/LOG.md"
+                ),
+            )
+            if settled:
+                source_gate = work_closure_gate(root, ticket_id)
     if not source_gate.get("ok"):
         return _refuse(
             source_gate.get("code", "SOURCE_UNRESOLVED"),

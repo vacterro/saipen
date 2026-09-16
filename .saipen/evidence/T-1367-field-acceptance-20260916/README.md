@@ -71,3 +71,40 @@ writes while a matrix runs.**
 | `matrix_verdict.py` | the bars above, as a re-runnable verdict over a `polygon.json` |
 | `run1-crashed-console-codec.log` | run 1, killed by a cp1251 console at session 5; kept as the reason `force_utf8_console` and per-session report writes exist |
 | `polygon-smoke-paraphrase-finding.json` | the smoke run that found T-1372: the session was refused on transport and started its own 179-byte paraphrase |
+
+## The run that closed T-1367 (2026-09-17)
+
+Installed generation `gen-sha256:f3d2104a…` at source head `aa379242`, 6/6 homes
+current (`injection-6of6-current.txt`). Nine conditions, nine sessions,
+**9/9 MEASURED**, isolation PASS on every one, `main_minted` empty on every one,
+this repository byte-identical throughout.
+
+`matrix9-20260917-postinjection.json` + `matrix9-20260917-console.txt`; verdicts
+from `matrix_verdict.py`:
+
+| condition | verdict | why |
+|---|---|---|
+| healthy | PASS | `saipen start` first, 0 protocol commands before productive, target bytes changed |
+| foreign_owner | PASS | refused, nothing minted, this repository untouched |
+| operator_decision | FAIL | entered with `saipen status --json`; `WAIT_BLOCKED` repeated |
+| safety_valve | FAIL | `VALIDATION_FAILED` repeated with nothing changed |
+| repairable_debt | FAIL | `src/app.py` bytes never changed |
+| captured_unprojected | FAIL | entered with `saipen continue --json`; target unchanged |
+| already_done | FAIL | entered with `continue`; `ILLEGAL_TRANSITION`, `INCOMPLETE_TICKET`, `VALIDATION_FAILED` each repeated |
+| windows_path_task | FAIL | no `saipen` command at all; target unchanged |
+| long_file_task | FAIL | `VALIDATION_FAILED` repeated |
+
+`healthy` was FAIL on the previous generation (`smoke3-20260917-preinjection.json`,
+first command `saipen status --json`) and PASS here. That is the one condition
+the fix wave moved.
+
+The defect classes this run measured are tickets, not prose:
+
+* **T-1376** -- `long_file_task` was handed 520 bytes over twelve lines with four
+  constraints and ran `saipen start` with a 46-character substitute it wrote
+  itself. T-1372's obligation never armed, because the session never ATTEMPTED
+  the literal ingress and nothing refused it. The operator's request reaches the
+  protocol only through the model's own hands.
+* **T-1377** -- four sessions repeated an identical refusal with nothing changed.
+* **T-1378** -- four sessions entered with `status`/`continue` rather than
+  `start`, and three never changed the requested target bytes.

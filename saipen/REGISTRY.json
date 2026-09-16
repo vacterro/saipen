@@ -72,6 +72,11 @@
         "test": "tools/test_pending_ingress.py",
         "subject": "a refused ingress owes its own bytes"
       },
+      "REQUEST-CLAUSE-01": {
+        "owner": "saipen/SOURCES.md",
+        "test": "tools/test_request_clause_closure.py",
+        "subject": "a request is one requirement, discharged by the Work's own proof"
+      },
       "OPS-EFFECT-01": {
         "owner": "saipen/OPS.md",
         "test": "tools/test_intent_audit_fixes.py",
@@ -132,6 +137,7 @@
     "CMD-CONTINUE-01": "saipen/COMMANDS.md",
     "SOURCE-AUTHORITY-01": "saipen/SOURCES.md",
     "INGRESS-AUTHORITY-01": "saipen/SOURCES.md",
+    "REQUEST-CLAUSE-01": "saipen/SOURCES.md",
     "OPS-EFFECT-01": "saipen/OPS.md",
     "GOAL-01": "saipen/MAINTENANCE.md",
     "EXEC-HUSH-01": "saipen/EXECUTION.md",

@@ -1658,6 +1658,65 @@ def set_disposition(
         return {"ok": False, "code": "VALIDATION_FAILED", "detail": str(exc)}
 
 
+#: The header the durable request document puts the operator's own words under
+#: (`operations._user_request_body`). The seeded clause below IS that text, so
+#: no new schema field is needed to recognize it later: a clause whose text
+#: equals the request is the request's own clause, and one that does not is a
+#: derived clause an agent wrote and owns.
+REQUEST_HEADER = "## Request"
+
+
+def request_clause_text(body: str) -> str:
+    """The operator's own words inside a durable request document, or ""."""
+    if REQUEST_HEADER not in body:
+        return ""
+    return body.split(REQUEST_HEADER, 1)[1].strip()
+
+
+def ensure_request_clause(root: Path | str, receipt_id: str) -> dict:
+    """Give a user request the one clause it always had: itself.
+
+    The defect this ends, measured live on 2026-09-17: `saipen start` captured
+    its receipt with an EMPTY contract, `coverage_complete` requires
+    `actionable > 0`, so `work_closure_gate` answered SOURCE_UNRESOLVED for
+    that receipt forever and the ticket the canonical entry command created
+    could never be finished. Two field sessions drove the whole chain, edited
+    their target, and then looped on `requirements 0, actionable 0`.
+
+    A request is not zero requirements. It is exactly one, and it is the text
+    the operator wrote. Deriving further clauses from a large specification
+    stays an agent's semantic job; this only refuses to pretend that a request
+    with no derived clauses asked for nothing.
+    """
+    root = Path(root)
+    meta = _read_meta(root, receipt_id)
+    if not meta or meta.get("source_kind") != "user_instruction":
+        return {"ok": False, "code": "NOT_A_USER_REQUEST", "receipt": receipt_id}
+    contract = _read_contract(root, receipt_id) or {}
+    if contract.get("clauses"):
+        return {"ok": True, "code": "ALREADY_DERIVED", "receipt": receipt_id}
+    body = read_body(root, receipt_id)
+    if not body.get("ok"):
+        return body
+    text = request_clause_text(body.get("body") or "")
+    if not text:
+        return {"ok": False, "code": "VALIDATION_FAILED", "detail": "request body has no request"}
+    return add_requirement(root, receipt_id, rid="R001", text=text, clause_class="requirement")
+
+
+def is_request_clause(root: Path | str, receipt_id: str, rid: str) -> bool:
+    """True when this clause IS the request, not something an agent derived."""
+    contract = _read_contract(Path(root), receipt_id) or {}
+    clause = (contract.get("clauses") or {}).get(rid)
+    if not isinstance(clause, dict):
+        return False
+    body = read_body(root, receipt_id)
+    if not body.get("ok"):
+        return False
+    text = request_clause_text(body.get("body") or "")
+    return bool(text) and clause.get("text", "").strip() == text
+
+
 def coverage_summary(root: Path | str, receipt_id: str) -> dict:
     root = Path(root)
     ledger = _read_coverage(root, receipt_id)
@@ -1780,6 +1839,57 @@ def _work_is_done(root: Path, work: str | None) -> bool:
         return False
     ticket = board.get("tickets", {}).get(work)
     return bool(ticket and ticket.get("section") == "## DONE")
+
+
+def discharge_request_clauses(
+    root: Path | str, work: str, *, evidence: str, verification: str
+) -> list[str]:
+    """Settle each linked request's OWN clause from the Work's own proof.
+
+    One proof, not two. The ticket gate already demands explicit verification
+    evidence for this Work; the clause being settled is the request that Work
+    exists to answer, so asking an agent to restate the same proof in a second
+    ledger -- through an API no CLI exposes -- was a ritual, and the ritual is
+    what made the ticket unclosable.
+
+    Only a clause that IS the request is touched (`is_request_clause`), and
+    only while it is nonterminal. A clause an agent derived from a large
+    specification is its own claim and is never settled from here.
+    """
+    root = Path(root)
+    settled: list[str] = []
+    try:
+        board_links = _board_source_links(root).get(work, set())
+    except (OSError, ValueError):
+        return settled
+    for receipt_id in sorted(board_links):
+        if not _valid_receipt_id(receipt_id):
+            continue
+        meta = _read_meta(root, receipt_id)
+        if not meta or meta.get("linked_work") != work:
+            continue
+        if meta.get("source_kind") != "user_instruction":
+            continue
+        ensure_request_clause(root, receipt_id)
+        try:
+            summary = coverage_summary(root, receipt_id)
+        except ValueError:
+            continue
+        for rid in summary["unresolved"]:
+            if not is_request_clause(root, receipt_id, rid):
+                continue
+            outcome = set_disposition(
+                root,
+                receipt_id,
+                rid,
+                "VERIFIED",
+                work=work,
+                evidence=evidence,
+                verification=verification,
+            )
+            if outcome.get("ok"):
+                settled.append(rid)
+    return settled
 
 
 def work_closure_gate(root: Path | str, work: str) -> dict:

@@ -111,6 +111,29 @@ when release-affecting. Mechanical gates verify exact digest and structural
 coverage; agents own semantic clause extraction. Model memory is navigation,
 never authority.
 
+### A request is one requirement, and the Work's own proof discharges it
+
+<!-- RULE-OWNER: REQUEST-CLAUSE-01 -->
+
+The defect class this ends, measured live on 2026-09-17: `saipen start`
+captured its receipt with an empty Contract, `coverage_complete` requires at
+least one actionable clause, so the closure gate answered `SOURCE_UNRESOLVED`
+for that receipt forever and **the ticket the canonical entry command creates
+could not be finished by any command the CLI offers** -- the two functions that
+could have changed it are Python-only. Two independent field sessions drove the
+whole chain, edited their target, and looped there.
+
+A request is not zero requirements. It is exactly one: the text the operator
+wrote. At closure, each linked `user_instruction` receipt gets that clause if it
+has none, and the clause is settled from the SAME verification evidence the Work
+gate already demands -- one proof, not two. Nothing is settled when that
+evidence is absent, and a clause an agent DERIVED from a larger specification is
+never settled from here: it is that agent's own claim, and it keeps the closure
+gate red until the agent settles it with its own evidence. A clause counts as
+the request's own exactly when its text equals the request body's own
+`## Request` section, so the distinction is read from bytes rather than
+declared.
+
 ## Closure and retention
 
 Closure requires: digest PASS, contract bound to that digest, every actionable
