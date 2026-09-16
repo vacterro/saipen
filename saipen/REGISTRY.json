@@ -67,6 +67,11 @@
         "test": "tools/test_source_receipts.py",
         "subject": "exact receipt authority and coverage"
       },
+      "INGRESS-AUTHORITY-01": {
+        "owner": "saipen/SOURCES.md",
+        "test": "tools/test_pending_ingress.py",
+        "subject": "a refused ingress owes its own bytes"
+      },
       "OPS-EFFECT-01": {
         "owner": "saipen/OPS.md",
         "test": "tools/test_intent_audit_fixes.py",
@@ -126,6 +131,7 @@
     "CMD-COMPOUND-01": "saipen/COMMANDS.md",
     "CMD-CONTINUE-01": "saipen/COMMANDS.md",
     "SOURCE-AUTHORITY-01": "saipen/SOURCES.md",
+    "INGRESS-AUTHORITY-01": "saipen/SOURCES.md",
     "OPS-EFFECT-01": "saipen/OPS.md",
     "GOAL-01": "saipen/MAINTENANCE.md",
     "EXEC-HUSH-01": "saipen/EXECUTION.md",

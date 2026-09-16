@@ -310,12 +310,19 @@ class InstrumentControlTests(unittest.TestCase):
         refuse_the_request(root)
         self.assertIsNotNone(pending_ingress.pending(root))
 
-        original = pending_ingress.pending
-        pending_ingress.pending = lambda _root: None  # the engine before this ticket
+        # Patch the module OBJECT the engine itself holds, not the one this
+        # test imported: `unittest discover -s tools` imports the package as
+        # `saipen_engine.*` and `python -m unittest tools.test_pending_ingress`
+        # imports it as `tools.saipen_engine.*`, so a control that patches its
+        # own copy silently stops reverting anything under one of the two and
+        # reports the gate green for the wrong reason.
+        module = entry.pending_ingress
+        original = module.pending
+        module.pending = lambda _root: None  # the engine before this ticket
         try:
             result = entry.start_work(root, "test-agent", actor_source="explicit", text=PARAPHRASE)
         finally:
-            pending_ingress.pending = original
+            module.pending = original
         self.assertEqual(result.get("code"), "STARTED", result)
         self.assertEqual(len(receipts_of(root)), 1)
 

@@ -119,7 +119,13 @@ def verdict(session: dict) -> dict:
         if not session.get("productive_action"):
             reasons.append("never reached a productive action after the decision")
     elif name in REFUSAL:
-        if session.get("repository_canonical_changed"):
+        # SRC-051 §10: "MAIN hashes MUST NOT move". The hashes are the bar; the
+        # ids name WHAT moved, which is the difference between "somebody
+        # checkpointed here" and "this session wrote here".
+        minted = session.get("main_minted") or {}
+        if minted.get("tickets") or minted.get("receipts"):
+            reasons.append(f"this repository minted {minted} while the session ran")
+        elif session.get("repository_canonical_changed"):
             reasons.append("this repository moved, which is the whole failure")
 
     return {
