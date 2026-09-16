@@ -44,8 +44,34 @@ if str(TOOLS) not in sys.path:
     sys.path.insert(0, str(TOOLS))
 
 OPENCODE = shutil.which("opencode")
+GIT = shutil.which("git")
 HOME = Path(os.path.expanduser("~"))
 INSTALLED = HOME / ".config" / "opencode" / "skills" / "saipen"
+
+
+def _git_worktree(root: Path) -> Path:
+    """Make the fixture a REAL git worktree before any model sees it.
+
+    Measured the hard way: a fixture that is not a worktree does not bind as a
+    project for the host, and a session started in it resolved its shell to the
+    REPOSITORY instead -- so a free model ran `saipen start` against the live
+    project and minted real tickets there. The sandbox is only a sandbox when
+    the host can see its boundary.
+    """
+    env = {
+        **os.environ,
+        "GIT_AUTHOR_NAME": "fixture",
+        "GIT_AUTHOR_EMAIL": "fixture@example.invalid",
+        "GIT_COMMITTER_NAME": "fixture",
+        "GIT_COMMITTER_EMAIL": "fixture@example.invalid",
+    }
+    for args in (
+        [GIT, "init", "-q", str(root)],
+        [GIT, "-C", str(root), "add", "-A"],
+        [GIT, "-C", str(root), "commit", "-qm", "fixture"],
+    ):
+        subprocess.run(args, check=True, capture_output=True, env=env, timeout=300)
+    return root
 
 #: The EXACT shape the field incident carried: a Windows path in the task text.
 FIELD_TASK = (
@@ -78,7 +104,7 @@ def conditions() -> dict:
         "foreign_owner": fixtures.foreign_owner_project,
         "windows_path_task": fixtures.healthy,
     }
-    return {name: maker(holder) for name, maker in build.items()}
+    return {name: _git_worktree(maker(holder)) for name, maker in build.items()}
 
 
 def _captured_unprojected(case) -> Path:
@@ -233,6 +259,9 @@ def main() -> int:
 
     if not OPENCODE:
         print("opencode runtime unavailable")
+        return 3
+    if not GIT:
+        print("git unavailable: a fixture that is not a worktree is not a sandbox")
         return 3
     generation = subprocess.run(
         [sys.executable, str(INSTALLED / "tools" / "saipen.py"), "runtime", "--json"],

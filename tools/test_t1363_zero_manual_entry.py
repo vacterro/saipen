@@ -1491,6 +1491,25 @@ class PluginFleetRoutingTests(unittest.TestCase):
             bytes.fromhex(payload.split()[0]).decode("utf-8"), "fix the user's page"
         )
 
+    def test_a_field_fixture_is_a_worktree_before_a_model_sees_it(self):
+        """A sandbox the host cannot see the edge of is not a sandbox.
+
+        Measured: the field matrix ran its first pass against temporary
+        directories that were not git worktrees. The host did not resolve them
+        as projects, the model's shell reached THIS repository instead, and a
+        free model minted real tickets and wrote a real file here. The fixture
+        is a worktree now, and this control is what keeps it one.
+        """
+        import t1363_field_polygon as polygon
+
+        source = Path(polygon.__file__).read_text(encoding="utf-8")
+        self.assertIn("_git_worktree", source)
+        self.assertIn("_git_worktree(maker(holder))", source)
+        if not shutil.which("git"):
+            self.skipTest("git unavailable")
+        built = polygon._git_worktree(healthy(self))
+        self.assertTrue((built / ".git").exists(), built)
+
     def test_the_plugin_keeps_no_second_command_taxonomy(self):
         # Comments may still NAME the retired list -- that is the record of
         # why it went. Executable lines may not carry a verb rule.
