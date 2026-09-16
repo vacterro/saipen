@@ -1,0 +1,80 @@
+# SRC-054 SAIPEN red control against the PRE-FIX subject
+command: python -m unittest tools.test_audit_manifest.TestEvidenceSurfaceIsCanonical tools.test_audit_manifest.TestEvidenceSurfaceSurvivesRegeneration
+verifier: 714c6add9ba953e2
+subject: 56a44d2a5ac5a038
+git HEAD: e7ab966fe4f23f7d00a28a06a70ddf38c70bdb09
+subject diff vs HEAD (empty = pre-fix):
+--- output ---
+EFEEFFE
+======================================================================
+ERROR: test_citation_surfaces_are_declared_evidence (tools.test_audit_manifest.TestEvidenceSurfaceIsCanonical.test_citation_surfaces_are_declared_evidence)
+A cited file that exists must also be something the contract collects.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_audit_manifest.py", line 670, in test_citation_surfaces_are_declared_evidence
+    for surface in manifest["references"]["surfaces"]:
+                   ~~~~~~~~^^^^^^^^^^^^^^
+KeyError: 'references'
+
+======================================================================
+ERROR: test_generator_declares_the_records_that_cite_evidence (tools.test_audit_manifest.TestEvidenceSurfaceIsCanonical.test_generator_declares_the_records_that_cite_evidence)
+Directory collection alone cannot prove a cited file was packed.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_audit_manifest.py", line 649, in test_generator_declares_the_records_that_cite_evidence
+    references = audit_manifest.build(self.root)["references"]
+                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^
+KeyError: 'references'
+
+======================================================================
+ERROR: test_user_prose_is_never_a_citation_carrier (tools.test_audit_manifest.TestEvidenceSurfaceIsCanonical.test_user_prose_is_never_a_citation_carrier)
+Source bodies and contract clauses quote the user, not a closure.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_audit_manifest.py", line 680, in test_user_prose_is_never_a_citation_carrier
+    carriers = [item["path"] for item in audit_manifest.build(self.root)["references"]["carriers"]]
+                                         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^
+KeyError: 'references'
+
+======================================================================
+ERROR: test_regeneration_names_every_declaration_it_drops (tools.test_audit_manifest.TestEvidenceSurfaceSurvivesRegeneration.test_regeneration_names_every_declaration_it_drops)
+Narrowing a declared evidence surface is never silent.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_audit_manifest.py", line 828, in test_regeneration_names_every_declaration_it_drops
+    self.assertEqual(result["dropped_declarations"], ["conditional:custom-proof"])
+                     ~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+KeyError: 'dropped_declarations'
+
+======================================================================
+FAIL: test_generator_declares_evidence_as_bounded_conditional_surface (tools.test_audit_manifest.TestEvidenceSurfaceIsCanonical.test_generator_declares_evidence_as_bounded_conditional_surface)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_audit_manifest.py", line 630, in test_generator_declares_evidence_as_bounded_conditional_surface
+    self.assertIn("evidence", conditional)
+AssertionError: 'evidence' not found in {'logs': {'path': 'logs', 'kind': 'dir', 'recursive': True, 'max_files': 4000}, 'intake': {'path': 'intake', 'kind': 'dir', 'recursive': True, 'max_files': 8000}, 'archive/source': {'path': 'archive/source', 'kind': 'dir', 'recursive': True, 'max_files': 8000}, 'KNOWLEDGE': {'path': 'KNOWLEDGE', 'kind': 'dir', 'recursive': True, 'max_files': 4000}, 'audit': {'path': 'audit', 'kind': 'dir', 'recursive': False, 'max_files': 500}}
+
+======================================================================
+FAIL: test_lifecycle_regeneration_keeps_evidence_declared_and_packed (tools.test_audit_manifest.TestEvidenceSurfaceSurvivesRegeneration.test_lifecycle_regeneration_keeps_evidence_declared_and_packed)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_audit_manifest.py", line 773, in test_lifecycle_regeneration_keeps_evidence_declared_and_packed
+    self._assert_regenerated_with_evidence(project, "reconcile")
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_audit_manifest.py", line 762, in _assert_regenerated_with_evidence
+    self.assertIn("evidence", _declared_conditional(project), step)
+AssertionError: 'evidence' not found in ['logs', 'intake', 'archive/source', 'KNOWLEDGE', 'audit'] : reconcile
+
+======================================================================
+FAIL: test_project_without_evidence_still_enrolls_and_packs (tools.test_audit_manifest.TestEvidenceSurfaceSurvivesRegeneration.test_project_without_evidence_still_enrolls_and_packs)
+SRC-054 TARGET E: the surface is conditional, never a new obligation.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_audit_manifest.py", line 801, in test_project_without_evidence_still_enrolls_and_packs
+    self.assertIn("evidence", _declared_conditional(project))
+AssertionError: 'evidence' not found in ['logs', 'intake', 'archive/source', 'KNOWLEDGE', 'audit']
+
+----------------------------------------------------------------------
+Ran 7 tests in 0.118s
+
+FAILED (failures=3, errors=4)
+exit=1

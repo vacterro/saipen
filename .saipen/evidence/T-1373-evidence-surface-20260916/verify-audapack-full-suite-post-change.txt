@@ -1,0 +1,293 @@
+........................................................................ [  4%]
+........................................................................ [  8%]
+........................................................................ [ 12%]
+........................................................................ [ 16%]
+........................................................................ [ 20%]
+........................................................................ [ 24%]
+........................................................................ [ 28%]
+........................................................................ [ 32%]
+........................................................................ [ 36%]
+........................................................................ [ 41%]
+...........................................FF........F.................. [ 45%]
+...s.................................................................... [ 49%]
+.................................sss.................................... [ 53%]
+........................................................................ [ 57%]
+........................................................................ [ 61%]
+........................................................................ [ 65%]
+....................F................................................... [ 69%]
+..............................................................F......... [ 73%]
+...............F..FF.........s.......................................... [ 78%]
+........................................................................ [ 82%]
+........................................................................ [ 86%]
+........................................................................ [ 90%]
+........................................................................ [ 94%]
+........................................................................ [ 98%]
+.........................                                                [100%]
+================================== FAILURES ===================================
+_ TestSyntheticSaipalFidelityRegression.test_saipal_realistic_session_corpus_trimmed_under_standard _
+
+self = <test_fidelity.TestSyntheticSaipalFidelityRegression testMethod=test_saipal_realistic_session_corpus_trimmed_under_standard>
+
+    def test_saipal_realistic_session_corpus_trimmed_under_standard(self):
+        # 1. Canonical SAIPEN control plane
+        self._write(".saipen/state.md", 128)
+        self._write(".saipen/board.md", 256)
+        self._write(".saipen/log.md", 512)
+        self._write(".saipen/intake/active/SRC-004.md", 256)
+    
+        # 2. Canonical active audit layer
+        self._write("audit/3.md", 128)
+    
+        # 3. Project-owned MANIFEST.json and required files
+        m_path = self.source / "saipal" / "MANIFEST.json"
+        m_path.parent.mkdir(parents=True, exist_ok=True)
+        m_path.write_text(
+            json.dumps({
+                "name": "saipal",
+                "required": [
+                    "REQUIRED_01.md",
+                    "REQUIRED_02.md",
+                    "sub/REQUIRED_03.md",
+                ],
+            }),
+            encoding="utf-8",
+        )
+        self._write("saipal/REQUIRED_01.md", 128)
+        self._write("saipal/REQUIRED_02.md", 128)
+        self._write("saipal/sub/REQUIRED_03.md", 128)
+    
+        # 4. Root active checkpoint
+        self._write("WAVE_I_CHECKPOINT.md", 256)
+    
+        # 5. Large session / historical corpus exceeding STANDARD budget (30 MiB)
+        # Two large JSON files totaling ~34 MiB
+        self._write("corpus/session_01.json", 17 * 1024 * 1024)
+        self._write("corpus/session_02.json", 17 * 1024 * 1024)
+    
+        # 6. Ordinary optional prose
+        self._write("docs/intro.md", 2048)
+    
+        # 7. Ordinary binary/media bulk
+        self._write("assets/audio.wav", 1_000_000)
+    
+        # Pack under STANDARD profile (30 MiB budget)
+        packing = self._packing(fidelity_profile=PROFILE_STANDARD, manifest_enabled=True)
+        res = self._pack(packing)
+>       self.assertTrue(res.success, res.error_message)
+E       AssertionError: False is not true : SAIPEN audit-manifest precondition failed (AUDIT_MANIFEST_GENERATION_FAILED): saipen.cmd: executable not found. Run `saipen audit manifest --write` in the project (or repair the owning SAIPEN protocol component) and repack; no archive was produced.
+
+tests\test_fidelity.py:1810: AssertionError
+_ TestSyntheticSaipalFidelityRegression.test_saipal_synthetic_when_mandatory_itself_exceeds_budget _
+
+self = <test_fidelity.TestSyntheticSaipalFidelityRegression testMethod=test_saipal_synthetic_when_mandatory_itself_exceeds_budget>
+
+    def test_saipal_synthetic_when_mandatory_itself_exceeds_budget(self):
+        """If true mandatory material itself exceeds STANDARD, report truthful budget_feasible=False."""
+        # 1. Canonical SAIPEN control plane
+        self._write(".saipen/state.md", 128)
+        self._write(".saipen/board.md", 256)
+        self._write(".saipen/log.md", 512)
+        self._write(".saipen/intake/active/SRC-004.md", 256)
+        self._write("audit/3.md", 128)
+        self._write("WAVE_I_CHECKPOINT.md", 256)
+    
+        # Manifest required file that by ITSELF exceeds STANDARD budget (30 MiB)
+        m_path = self.source / "saipal" / "MANIFEST.json"
+        m_path.parent.mkdir(parents=True, exist_ok=True)
+        m_path.write_text(
+            json.dumps({
+                "name": "saipal",
+                "required": ["HUGE_REQUIRED.md"],
+            }),
+            encoding="utf-8",
+        )
+        self._write("saipal/HUGE_REQUIRED.md", 32 * 1024 * 1024)
+    
+        packing = self._packing(fidelity_profile=PROFILE_STANDARD, manifest_enabled=True)
+        res = self._pack(packing)
+>       self.assertTrue(res.success)
+E       AssertionError: False is not true
+
+tests\test_fidelity.py:1909: AssertionError
+_ TestRoleAwareJsonClassification.test_09_load_bearing_saipal_files_survive_pressure _
+
+self = <test_fidelity.TestRoleAwareJsonClassification testMethod=test_09_load_bearing_saipal_files_survive_pressure>
+
+    def test_09_load_bearing_saipal_files_survive_pressure(self):
+        self._write(".saipen/state.md", 100)
+        self._write("audit/1.md", 100)
+        self._write("corpus/session.json", 2 * 1024 * 1024)
+        packing = self._packing(fidelity_profile=PROFILE_COMPACT, fidelity_max_mb=1)
+        res = self._pack(packing)
+>       self.assertTrue(res.success)
+E       AssertionError: False is not true
+
+tests\test_fidelity.py:2001: AssertionError
+_ TestProtectedControlPlaneEndToEnd.test_ignored_protected_control_plane_reaches_archive_with_honest_accounting _
+
+self = <test_packing_git_inventory.TestProtectedControlPlaneEndToEnd testMethod=test_ignored_protected_control_plane_reaches_archive_with_honest_accounting>
+
+    def test_ignored_protected_control_plane_reaches_archive_with_honest_accounting(self):
+        (self.repo / "app.py").write_text("print('x')", encoding="utf-8")
+        (self.repo / ".gitignore").write_text(
+            ".saipen/intake/\naudit/\n.saipen/recovery/\n", encoding="utf-8"
+        )
+        _git(self.repo, "add", "-A")
+        _git(self.repo, "commit", "-q", "-m", "init")
+    
+        intake_payload = "SRC-044 RECEIPT BYTES"
+        intake = self.repo / ".saipen" / "intake" / "active"
+        intake.mkdir(parents=True)
+        (intake / "SRC-044.md").write_text(intake_payload, encoding="utf-8")
+        audit_payload = "AUDIT LAYER TEN BYTES"
+        audit = self.repo / "audit"
+        audit.mkdir()
+        (audit / "10.md").write_text(audit_payload, encoding="utf-8")
+        recovery = self.repo / ".saipen" / "recovery" / "deep"
+        recovery.mkdir(parents=True)
+        for i in range(12):
+            (recovery / f"junk{i}.bin").write_bytes(b"x" * 64)
+    
+        result = self._pack()
+>       self.assertTrue(result.success, result.error_message)
+E       AssertionError: False is not true : SAIPEN audit-manifest precondition failed (AUDIT_MANIFEST_GENERATION_FAILED): saipen.cmd: executable not found. Run `saipen audit manifest --write` in the project (or repair the owning SAIPEN protocol component) and repack; no archive was produced.
+
+tests\test_packing_git_inventory.py:238: AssertionError
+___ TestArchiveProvenance.test_incomplete_snapshot_does_not_claim_authority ___
+
+self = <test_saipen_evidence.TestArchiveProvenance testMethod=test_incomplete_snapshot_does_not_claim_authority>
+
+    def test_incomplete_snapshot_does_not_claim_authority(self):
+        sp = self.write_saipen()
+        (sp / "STATE.md").unlink()
+        self.ignore(".saipen/*")
+        self.commit()
+        result = self._pack()
+>       self.assertTrue(result.success, result.error_message)
+E       AssertionError: False is not true : SAIPEN audit-manifest precondition failed (AUDIT_MANIFEST_STALE_REGENERATION_FAILED): manifest is stale (declared mandatory evidence no longer matches disk: declared=['.saipen/BOARD.md', '.saipen/IDENTITY.md', '.saipen/LOG.md', '.saipen/STATE.md'] on_disk=['.saipen/BOARD.md', '.saipen/IDENTITY.md', '.saipen/LOG.md']); regeneration failed: saipen.cmd: executable not found. Run `saipen audit manifest --write` in the project (or repair the owning SAIPEN protocol component) and repack; no archive was produced.
+
+tests\test_saipen_evidence.py:518: AssertionError
+_ TestMissingManifestRegression.test_pack_auto_generates_manifest_and_archive_is_authoritative _
+
+self = <test_saipen_manifest_gate.TestMissingManifestRegression testMethod=test_pack_auto_generates_manifest_and_archive_is_authoritative>
+
+    def test_pack_auto_generates_manifest_and_archive_is_authoritative(self):
+        self.assertFalse((self.repo / ".saipen" / "MANIFEST.json").exists())
+        res = self.pack()
+        self.assertTrue(res.success, res.error_message)
+        # The canonical workflow created the contract artifact itself.
+        manifest_path = self.repo / ".saipen" / "MANIFEST.json"
+        self.assertTrue(manifest_path.exists())
+        contract = json.loads(manifest_path.read_text(encoding="utf-8"))
+        self.assertEqual(contract["kind"], "saipen_audit_manifest")
+        # The archive carries both the contract and its evidence.
+        with self.archive() as zf:
+            names = set(zf.namelist())
+        self.assertIn(".saipen/MANIFEST.json", names)
+        for rel in (
+            ".saipen/STATE.md",
+            ".saipen/BOARD.md",
+            ".saipen/LOG.md",
+            ".saipen/IDENTITY.md",
+            ".saipen/logs/LOG-001.md",
+        ):
+>           self.assertIn(rel, names)
+E           AssertionError: '.saipen/logs/LOG-001.md' not found in {'.saipen/LOG.md', '_AUDAPACK_MANIFEST.json', '.saipen/cache/runtime.bin', '.saipen/recovery/op.json', '.saipen/IDENTITY.md', '.audapack/manifest.json', '.saipen/BOARD.md', '.saipen/locks/core.lock', '.saipen/STATE.md', 'app.py', '.saipen/LOCAL_STATE.json', '.saipen/MANIFEST.json'}
+
+tests\test_saipen_manifest_gate.py:257: AssertionError
+_ TestStaleManifestRegression.test_pack_after_evidence_mutation_regenerates_not_blind_trusts _
+
+self = <test_saipen_manifest_gate.TestStaleManifestRegression testMethod=test_pack_after_evidence_mutation_regenerates_not_blind_trusts>
+
+    def test_pack_after_evidence_mutation_regenerates_not_blind_trusts(self):
+        first = self.pack()
+        self.assertTrue(first.success, first.error_message)
+        first_generated_at = self.source_manifest_from_archive()["generated_at"]
+        self.assertTrue(first_generated_at)
+    
+        state = self.repo / ".saipen" / "STATE.md"
+        state.write_text("phase: SCOUT\nsaipen_home: ...\n", encoding="utf-8")
+        # Coarse filesystems quantize mtime; force the mutation to be strictly
+        # newer than the existing contract without any wall-clock sleeping.
+        st = state.stat()
+        os.utime(state, ns=(st.st_atime_ns, st.st_mtime_ns + 1_000_000))
+    
+        # Gate level (airtight): the stale contract is REGENERATED.
+        gate = sg.prepare(self.repo)
+>       self.assertTrue(gate.ok, gate.detail)
+E       AssertionError: False is not true : manifest is stale (mandatory evidence mutated after the manifest was written: ['.saipen/STATE.md']); regeneration failed: saipen.cmd: executable not found
+
+tests\test_saipen_manifest_gate.py:300: AssertionError
+_ TestIgnoredManifestRegression.test_ignored_contract_and_evidence_still_authoritative _
+
+self = <test_saipen_manifest_gate.TestIgnoredManifestRegression testMethod=test_ignored_contract_and_evidence_still_authoritative>
+
+    def test_ignored_contract_and_evidence_still_authoritative(self):
+        self.ignore(".saipen/*", ".venv/")
+        self.commit()
+        # Git really is hiding the memory root: that is the precondition.
+        listed = subprocess.run(
+            ["git", "ls-files", ".saipen"], cwd=str(self.repo), capture_output=True
+        )
+        self.assertEqual(listed.stdout.strip(), b"")
+        # Unrelated ignored runtime state that must NOT leak.
+        venv = self.repo / ".venv"
+        venv.mkdir()
+        (venv / "pyvenv.cfg").write_text("stub\n", encoding="utf-8")
+    
+        res = self.pack()
+        self.assertTrue(res.success, res.error_message)
+        with self.archive() as zf:
+            names = set(zf.namelist())
+        # The contract and every declared tier survive Git invisibility.
+        for rel in (
+            ".saipen/MANIFEST.json",
+            ".saipen/STATE.md",
+            ".saipen/BOARD.md",
+            ".saipen/LOG.md",
+            ".saipen/IDENTITY.md",
+            ".saipen/logs/LOG-001.md",
+        ):
+            self.assertIn(rel, names)
+        # Non-exportable + undeclared runtime state stays excluded.
+        for banned in (
+            ".saipen/locks/core.lock",
+            ".saipen/recovery/op.json",
+            ".saipen/LOCAL_STATE.json",
+            ".saipen/cache/runtime.bin",
+            ".venv/pyvenv.cfg",
+        ):
+            self.assertNotIn(banned, names)
+        snapshot = self.legacy_manifest()["saipen_snapshot"]
+        self.assertTrue(snapshot["authoritative_state"])
+>       self.assertEqual(snapshot["non_exportable"], ["locks/", "recovery/", "LOCAL_STATE.json"])
+E       AssertionError: Lists differ: ['.saipen/locks', '.saipen/recovery', '.saipen/LOCAL_STATE.json'] != ['locks/', 'recovery/', 'LOCAL_STATE.json']
+E       
+E       First differing element 0:
+E       '.saipen/locks'
+E       'locks/'
+E       
+E       - ['.saipen/locks', '.saipen/recovery', '.saipen/LOCAL_STATE.json']
+E       ?   --------         --------            --------
+E       
+E       + ['locks/', 'recovery/', 'LOCAL_STATE.json']
+E       ?        +            +
+
+tests\test_saipen_manifest_gate.py:369: AssertionError
+============================== warnings summary ===============================
+tests/test_context_menu.py::TestSeamlessProjectOperations::test_direct_add_move_and_delete_no_popups
+  V:\___VAC\__K\__CODE\_PY\_AUDAPACK\tests\test_context_menu.py:327: DeprecationWarning: Function: 'QMouseEvent.QMouseEvent(QEvent.Type type, const QPointF &localPos, Qt.MouseButton button, QFlags<Qt.MouseButton> buttons, QFlags<Qt.KeyboardModifier> modifiers, const QPointingDevice *device)' is marked as deprecated, please check the documentation for more information.
+    event = QMouseEvent(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ===========================
+FAILED tests/test_fidelity.py::TestSyntheticSaipalFidelityRegression::test_saipal_realistic_session_corpus_trimmed_under_standard
+FAILED tests/test_fidelity.py::TestSyntheticSaipalFidelityRegression::test_saipal_synthetic_when_mandatory_itself_exceeds_budget
+FAILED tests/test_fidelity.py::TestRoleAwareJsonClassification::test_09_load_bearing_saipal_files_survive_pressure
+FAILED tests/test_packing_git_inventory.py::TestProtectedControlPlaneEndToEnd::test_ignored_protected_control_plane_reaches_archive_with_honest_accounting
+FAILED tests/test_saipen_evidence.py::TestArchiveProvenance::test_incomplete_snapshot_does_not_claim_authority
+FAILED tests/test_saipen_manifest_gate.py::TestMissingManifestRegression::test_pack_auto_generates_manifest_and_archive_is_authoritative
+FAILED tests/test_saipen_manifest_gate.py::TestStaleManifestRegression::test_pack_after_evidence_mutation_regenerates_not_blind_trusts
+FAILED tests/test_saipen_manifest_gate.py::TestIgnoredManifestRegression::test_ignored_contract_and_evidence_still_authoritative
+8 failed, 1740 passed, 5 skipped, 1 warning in 444.52s (0:07:24)
+exit=139

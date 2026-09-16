@@ -1,0 +1,96 @@
+{
+  "schema_version": 1,
+  "kind": "saipen_audit_manifest",
+  "contract_version": 1,
+  "protocol_version": "8.0.1",
+  "generated_at": "2026-09-16T21:19:14Z",
+  "generator": "saipen-audit-manifest/1",
+  "memory_root": ".saipen",
+  "required": [
+    "STATE.md",
+    "BOARD.md",
+    "LOG.md",
+    "IDENTITY.md"
+  ],
+  "evidence": {
+    "mandatory": [
+      {
+        "path": "STATE.md",
+        "kind": "file"
+      },
+      {
+        "path": "BOARD.md",
+        "kind": "file"
+      },
+      {
+        "path": "LOG.md",
+        "kind": "file"
+      },
+      {
+        "path": "IDENTITY.md",
+        "kind": "file"
+      }
+    ],
+    "conditional": [
+      {
+        "path": "logs",
+        "kind": "dir",
+        "recursive": true,
+        "max_files": 4000
+      },
+      {
+        "path": "intake",
+        "kind": "dir",
+        "recursive": true,
+        "max_files": 8000
+      },
+      {
+        "path": "archive/source",
+        "kind": "dir",
+        "recursive": true,
+        "max_files": 8000
+      },
+      {
+        "path": "KNOWLEDGE",
+        "kind": "dir",
+        "recursive": true,
+        "max_files": 4000
+      },
+      {
+        "path": "audit",
+        "kind": "dir",
+        "recursive": false,
+        "max_files": 500
+      }
+    ],
+    "optional": [
+      {
+        "path": "extensions",
+        "kind": "dir",
+        "recursive": true,
+        "max_files": 4000
+      },
+      {
+        "path": "kitchen",
+        "kind": "dir",
+        "recursive": true,
+        "max_files": 500
+      },
+      {
+        "path": "saitranslate",
+        "kind": "dir",
+        "recursive": true,
+        "max_files": 500
+      }
+    ],
+    "non_exportable": [
+      "locks/",
+      "recovery/",
+      "LOCAL_STATE.json"
+    ]
+  },
+  "compatibility": {
+    "unknown_contract_version": "refuse",
+    "note": "A consumer reading contract_version greater than it implements MUST report the snapshot as protocol-unknown rather than reinterpreting this document."
+  }
+}

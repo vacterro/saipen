@@ -1,0 +1,42 @@
+# SRC-054 AUDAPACK red control, FINAL oracle (with case43) vs ORIGINAL PRE-FIX subject
+Supersedes audapack-red-pre-fix.txt and audapack-red-final-oracle.txt: case43 was added after both.
+Isolated copy; pre-fix subject recovered byte-exact from _AUDAPACK_16.09.26-T22-56-13.zip.
+command: python -m pytest tests/test_saipen_evidence.py -q -p no:cacheprovider
+verifier: 5f95780fc0cb76b6
+subject: b2aacd7666a70709
+--- output ---
+E       AssertionError: False is not true : SAIPEN audit-manifest precondition failed (AUDIT_MANIFEST_STALE_REGENERATION_FAILED): manifest is stale (declared mandatory evidence no longer matches disk: declared=['.saipen/BOARD.md', '.saipen/IDENTITY.md', '.saipen/LOG.md', '.saipen/STATE.md'] on_disk=['.saipen/BOARD.md', '.saipen/IDENTITY.md', '.saipen/LOG.md']); regeneration failed: saipen.cmd: executable not found. Run `saipen audit manifest --write` in the project (or repair the owning SAIPEN protocol component) and repack; no archive was produced.
+E       KeyError: 'evidence_citations'
+E       AssertionError: '.saipen/evidence/proof.md' not found in {'.saipen/KNOWLEDGE/evidence.md', 'app.py', '_AUDAPACK_MANIFEST.json', '.audapack/manifest.json', '.saipen/LOG.md', '.saipen/BOARD.md', '.saipen/logs/LOG-001.md', '.saipen/STATE.md', '.saipen/archive/source/SRC-002.coverage.json', '.saipen/intake/active/SRC-007.md', '.gitignore', '.saipen/IDENTITY.md', '.saipen/archive/source/SRC-008.md', '.saipen/MANIFEST.json'}
+E       AssertionError: 'COMPLETE' != 'PROTOCOL_INCOMPLETE'
+E       - COMPLETE
+E       + PROTOCOL_INCOMPLETE
+E       KeyError: 'cited_by'
+E       AssertionError: 'COMPLETE' != 'PROTOCOL_INCOMPLETE'
+E       - COMPLETE
+E       + PROTOCOL_INCOMPLETE
+E       KeyError: 'evidence_citations'
+E       KeyError: 'evidence_citations'
+E       KeyError: 'evidence_citations'
+E       AssertionError: '.saipen/evidence/T-9-run/a.json' not found in {'.saipen/KNOWLEDGE/evidence.md', 'app.py', '.saipen/LOG.md', '.saipen/BOARD.md', '.saipen/logs/LOG-001.md', '.saipen/STATE.md', '.saipen/intake/active/SRC-007.md', '.gitignore', '.saipen/IDENTITY.md', '.saipen/archive/source/SRC-008.md', '.saipen/MANIFEST.json'}
+E       KeyError: 'evidence_citations'
+E       AssertionError: 'COMPLETE' != 'PROTOCOL_MANIFEST_MALFORMED'
+E       - COMPLETE
+E       + PROTOCOL_MANIFEST_MALFORMED
+E           KeyError: '.saipen/evidence/proof.md'
+E       KeyError: 'evidence_citations'
+FAILED tests/test_saipen_evidence.py::TestArchiveProvenance::test_incomplete_snapshot_does_not_claim_authority
+FAILED tests/test_saipen_evidence.py::TestCitedEvidence::test_case31_cited_evidence_travels_and_the_snapshot_is_complete
+FAILED tests/test_saipen_evidence.py::TestCitedEvidence::test_case32_pre_src054_contract_still_packs_cited_evidence
+FAILED tests/test_saipen_evidence.py::TestCitedEvidence::test_case33_undiscovered_cited_evidence_can_never_read_complete
+FAILED tests/test_saipen_evidence.py::TestCitedEvidence::test_case34_declared_and_cited_evidence_excluded_names_the_citation
+FAILED tests/test_saipen_evidence.py::TestCitedEvidence::test_case35_cited_evidence_absent_on_disk_is_not_complete
+FAILED tests/test_saipen_evidence.py::TestCitedEvidence::test_case36_project_without_evidence_packs_unchanged
+FAILED tests/test_saipen_evidence.py::TestCitedEvidence::test_case37_foreign_hypothetical_and_escaping_paths_are_not_citations
+FAILED tests/test_saipen_evidence.py::TestCitedEvidence::test_case38_citation_spellings_normalise
+FAILED tests/test_saipen_evidence.py::TestCitedEvidence::test_case39_cited_directory_travels_under_a_pre_src054_contract
+FAILED tests/test_saipen_evidence.py::TestCitedEvidence::test_case40_citation_discovery_is_bounded_and_fails_closed
+FAILED tests/test_saipen_evidence.py::TestCitedEvidence::test_case41_malformed_citation_rules_are_refused
+FAILED tests/test_saipen_evidence.py::TestCitedEvidence::test_case42_repeated_export_cycles_keep_cited_evidence
+FAILED tests/test_saipen_evidence.py::TestCitedEvidence::test_case43_citation_case_resolves_to_the_file_on_disk
+14 failed, 36 passed in 14.34s

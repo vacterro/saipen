@@ -1,0 +1,70 @@
+{
+ "results": [
+  {
+   "check": "0",
+   "result": "PASS",
+   "detail": "Problip proof sha256 7856719211E999FA.. matches the recorded closure hash"
+  },
+  {
+   "check": "A",
+   "result": "PASS",
+   "detail": "fixture starts from Problip's pre-SRC-054 contract: conditional=logs,intake,archive/source,KNOWLEDGE,audit"
+  },
+  {
+   "check": "B",
+   "result": "PASS",
+   "detail": "`saipen continue` rc=0 audit_manifest=None -> conditional=logs,intake,archive/source,KNOWLEDGE,audit,evidence"
+  },
+  {
+   "check": "C",
+   "result": "PASS",
+   "detail": "pack 1 success=True proof_in_zip=True sha_equal=True status=COMPLETE_WITH_OPTIONAL_OMISSIONS collected/in_archive=143/115 cited=['.saipen/evidence/PERF-001_WINDOWS_EVIDENCE.md']"
+  },
+  {
+   "check": "D",
+   "result": "PASS",
+   "detail": "older-protocol rewrite then `saipen recover` rc=0 audit_manifest=AUDIT_MANIFEST_UPGRADED evidence_declared=True; `saipen status` rc=0 left the manifest byte-identical=True"
+  },
+  {
+   "check": "E",
+   "result": "PASS",
+   "detail": "pack 2 success=True proof_in_zip=True status=COMPLETE_WITH_OPTIONAL_OMISSIONS"
+  },
+  {
+   "check": "F",
+   "result": "PASS",
+   "detail": "proof excluded: status=PROTOCOL_INCOMPLETE required_evidence_omitted=True omission={'path': '.saipen/evidence/PERF-001_WINDOWS_EVIDENCE.md', 'tier': 'conditional', 'reason': 'configured_ignore', 'cited_by': ['.saipen/LOG.md', '.saipen/archive/source/SRC-002.coverage.json']}"
+  },
+  {
+   "check": "G",
+   "result": "PASS",
+   "detail": "pre-SRC-054 contract packed as-is: proof_in_zip=True status=COMPLETE_WITH_OPTIONAL_OMISSIONS rules=consumer_default cited_by=['.saipen/LOG.md', '.saipen/archive/source/SRC-002.coverage.json']"
+  },
+  {
+   "check": "H",
+   "result": "PASS",
+   "detail": "proof deleted on disk: status=PROTOCOL_INCOMPLETE omission={'path': '.saipen/evidence/PERF-001_WINDOWS_EVIDENCE.md', 'tier': 'cited', 'reason': 'evidence_absent_on_disk', 'cited_by': ['.saipen/LOG.md', '.saipen/archive/source/SRC-002.coverage.json']}"
+  },
+  {
+   "check": "I",
+   "result": "PASS",
+   "detail": "no evidence dir: continue rc=0 status=COMPLETE omitted=[]"
+  },
+  {
+   "check": "J",
+   "result": "PASS",
+   "detail": "_PROBLIP_historical_equivalent_no_proof.zip (shipped COMPLETE) re-judged: status=PROTOCOL_INCOMPLETE omission={'path': '.saipen/evidence/PERF-001_WINDOWS_EVIDENCE.md', 'tier': 'conditional', 'reason': 'evidence_not_in_inventory', 'cited_by': ['.saipen/LOG.md', '.saipen/archive/source/SRC-002.coverage.json']}"
+  },
+  {
+   "check": "K",
+   "result": "PASS",
+   "detail": "live Problip read-only projection: on-disk contract declares evidence+references=True -> declared=CURRENT enrollment=AUDIT_MANIFEST_CURRENT rc=0 manifest_unchanged=True"
+  },
+  {
+   "check": "L",
+   "result": "PASS",
+   "detail": "Problip .saipen files changed=0; SAIPEN checkout canonical files unchanged=True"
+  }
+ ],
+ "failed": 0
+}

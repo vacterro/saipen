@@ -1,0 +1,16 @@
+# SRC-054 SAIPEN green, FINAL oracle vs POST-FIX subject (same isolated copy; only the subject differs)
+command: python -m unittest tools.test_audit_manifest.TestEvidenceSurfaceIsCanonical tools.test_audit_manifest.TestEvidenceSurfaceSurvivesRegeneration
+verifier: a2f2453a23fda5b9
+subject: 4508d3d81af52505
+--- output ---
+Ran 7 tests in 2.127s
+
+OK
+--- whole module in the same copy ---
+Ran 40 tests in 4.364s
+
+OK
+--- whole module in the live working tree ---
+Ran 40 tests in 3.925s
+
+OK

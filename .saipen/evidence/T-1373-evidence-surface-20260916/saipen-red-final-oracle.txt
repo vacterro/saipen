@@ -1,0 +1,24 @@
+# SRC-054 SAIPEN red control, FINAL oracle vs PRE-FIX subject
+Supersedes saipen-red-pre-fix.txt: a lint-only rewrap of tools/test_audit_manifest.py changed the
+verifier digest, which spends the earlier FAIL. Run in an isolated git-archive copy of HEAD e7ab966f
+(tools saipen VERSION extensions bootstrap bin) with only the final test file copied in.
+command: python -m unittest tools.test_audit_manifest.TestEvidenceSurfaceIsCanonical tools.test_audit_manifest.TestEvidenceSurfaceSurvivesRegeneration
+verifier: a2f2453a23fda5b9
+subject: e2eace60cf34f2d1
+--- output ---
+ERROR: test_citation_surfaces_are_declared_evidence (tools.test_audit_manifest.TestEvidenceSurfaceIsCanonical.test_citation_surfaces_are_declared_evidence)
+KeyError: 'references'
+ERROR: test_generator_declares_the_records_that_cite_evidence (tools.test_audit_manifest.TestEvidenceSurfaceIsCanonical.test_generator_declares_the_records_that_cite_evidence)
+KeyError: 'references'
+ERROR: test_user_prose_is_never_a_citation_carrier (tools.test_audit_manifest.TestEvidenceSurfaceIsCanonical.test_user_prose_is_never_a_citation_carrier)
+KeyError: 'references'
+ERROR: test_regeneration_names_every_declaration_it_drops (tools.test_audit_manifest.TestEvidenceSurfaceSurvivesRegeneration.test_regeneration_names_every_declaration_it_drops)
+KeyError: 'dropped_declarations'
+FAIL: test_generator_declares_evidence_as_bounded_conditional_surface (tools.test_audit_manifest.TestEvidenceSurfaceIsCanonical.test_generator_declares_evidence_as_bounded_conditional_surface)
+AssertionError: 'evidence' not found in {'logs': {'path': 'logs', 'kind': 'dir', 'recursive': True, 'max_files': 4000}, 'intake': {'path': 'intake', 'kind': 'dir', 'recursive': True, 'max_files': 8000}, 'archive/source': {'path': 'archive/source', 'kind': 'dir', 'recursive': True, 'max_files': 8000}, 'KNOWLEDGE': {'path': 'KNOWLEDGE', 'kind': 'dir', 'recursive': True, 'max_files': 4000}, 'audit': {'path': 'audit', 'kind': 'dir', 'recursive': False, 'max_files': 500}}
+FAIL: test_lifecycle_regeneration_keeps_evidence_declared_and_packed (tools.test_audit_manifest.TestEvidenceSurfaceSurvivesRegeneration.test_lifecycle_regeneration_keeps_evidence_declared_and_packed)
+AssertionError: 'evidence' not found in ['logs', 'intake', 'archive/source', 'KNOWLEDGE', 'audit'] : reconcile
+FAIL: test_project_without_evidence_still_enrolls_and_packs (tools.test_audit_manifest.TestEvidenceSurfaceSurvivesRegeneration.test_project_without_evidence_still_enrolls_and_packs)
+AssertionError: 'evidence' not found in ['logs', 'intake', 'archive/source', 'KNOWLEDGE', 'audit']
+Ran 7 tests in 0.171s
+FAILED (failures=3, errors=4)

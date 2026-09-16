@@ -1,0 +1,95 @@
+{
+  "requirements": {
+    "SRC-054:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-6836 SCOUT: audit_manifest.build() is the canonical regeneration owner; CONDITIONAL_DIRS omitted 'evidence' and ensure() (reconcile_protocol_state on continue/recover/fleet, and the AUDAPACK gate via `audit manifest --write`) rewrites any drifted manifest from build(), so Problip's hand-added evidence declaration (its E-73) was erased at 14:59:30Z. Code: tools/saipen_engine/audit_manifest.py CONDITIONAL_DIRS/ensure().",
+      "text": "Prove the root cause: name the canonical source that regenerates .saipen/MANIFEST.json and show why a local evidence/ declaration did not survive it.",
+      "verification": ".saipen/evidence/T-1373-evidence-surface-20260916/verify-problip-red-control-prefix-producer.txt: the SAME oracle run against the PRE-FIX producer (worktree at e7ab966f) goes red on B and D -- `saipen continue`/`saipen recover` regenerate a manifest whose conditional set is logs,intake,archive/source,KNOWLEDGE,audit with no evidence -- while current bytes are green (.saipen/evidence/T-1373-evidence-surface-20260916/verify-problip-equivalent-repro.txt 13/13).",
+      "work": "T-1373"
+    },
+    "SRC-054:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "tools/saipen_engine/audit_manifest.py: CONDITIONAL_DIRS gains ('evidence', True, 4000) -- recursive, bounded by an explicit max_files -- in the canonical generator, plus the REFERENCE_SURFACES/REFERENCE_CARRIERS/REFERENCE_MAX_* contract and the `references` block emitted by build(). No project MANIFEST.json was hand-edited.",
+      "text": "The canonical SAIPEN audit-evidence contract/generator (not a generated project MANIFEST.json) declares evidence/ as an authoritative conditional closure-evidence surface, recursive and bounded by an explicit max_files.",
+      "verification": "tools.test_audit_manifest Ran 40 OK from current bytes (.saipen/evidence/T-1373-evidence-surface-20260916/verify-saipen-adjacent.txt); E-6839 red/green oracle FAIL(3F+4E) -> OK 7 on the focused controls.",
+      "work": "T-1373"
+    },
+    "SRC-054:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "ensure() reports dropped_declarations instead of silently narrowing a declared surface (audit_manifest.py _dropped_declarations); regeneration keeps the declaration across continue/recover/status. Reproduction cases B (continue upgrades an old contract), D (recover restores it and read-only status leaves the manifest byte-identical), E (second pack still carries the proof) in .saipen/evidence/T-1373-evidence-surface-20260916/verify-problip-equivalent-repro.txt.",
+      "text": "Newly initialized projects declare evidence/, existing manifests refreshed by SAIPEN retain or add it, and later lifecycle/reconcile/status/cc/converge operations cannot silently remove it.",
+      "verification": "Adjacent SAIPEN family Ran 326 OK (.saipen/evidence/T-1373-evidence-surface-20260916/verify-saipen-adjacent.txt: audit manifest, reconcile, recover, legacy lifecycle, validator layout parity, public closure CLI); red control shows the pre-fix producer failing exactly B/D (.saipen/evidence/T-1373-evidence-surface-20260916/verify-problip-red-control-prefix-producer.txt).",
+      "work": "T-1373"
+    },
+    "SRC-054:R004": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "AUDAPACK audapack/saipen_evidence.py: anchored citation discovery over declared closure carriers (_citation_pattern/_discover_citations/_carrier_files), TIER_CITED with cited_by, cited_missing accounting, and evaluate() turning any cited-but-absent or cited-but-omitted file into STATUS_PROTOCOL_INCOMPLETE with required_evidence_omitted.",
+      "text": "When an authoritative SAIPEN closure record (LOG, coverage, STATE, BOARD or another closure record) references an evidence path, the exporter detects that the referenced file is absent from the archive; referenced + omitted + required_evidence_omitted=false is impossible, via explicit referenced-evidence discovery rather than directory collection alone.",
+      "verification": "Focused consumer family 49 passed (case31-case43) with one BASELINE red attributed in .saipen/evidence/T-1373-evidence-surface-20260916/verify-audapack-known-failure-attribution.txt; reproduction F (configured exclusion), H (absent on disk) and J (historical archive re-judged) in .saipen/evidence/T-1373-evidence-surface-20260916/verify-problip-equivalent-repro.txt.",
+      "work": "T-1373"
+    },
+    "SRC-054:R005": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "Deterministic regeneration regression: .saipen/evidence/T-1373-evidence-surface-20260916/problip_equivalent_repro.py drives generate -> lifecycle -> regenerate -> pack twice on a Problip-equivalent fixture pinned to the PRE-SRC-054 contract (.saipen/evidence/T-1373-evidence-surface-20260916/problip-pre-src054-manifest.json, sha256 b01a35ade435153b7d68c7bf73e49f6c83ac75c81f0623ee74260b77bdd6fcc1, generated by the pre-fix producer).",
+      "text": "Deterministic regeneration regression: project with evidence proof file referenced from closure coverage/log, generate MANIFEST, run lifecycle operations that regenerate protocol metadata, regenerate again, evidence/ still declared, pack, ZIP contains the proof file, accounting complete; a pre-fix red control shows the generated contract losing evidence/ after canonical regeneration.",
+      "verification": "Green on current bytes 13/13 (.saipen/evidence/T-1373-evidence-surface-20260916/verify-problip-equivalent-repro.txt); red on the pre-fix producer 10/13 with B, D and K failing (.saipen/evidence/T-1373-evidence-surface-20260916/verify-problip-red-control-prefix-producer.txt) -- the gate can still fail.",
+      "work": "T-1373"
+    },
+    "SRC-054:R006": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "False-complete regression: reproduction case F packs with the proof deliberately excluded -> status=PROTOCOL_INCOMPLETE, required_evidence_omitted=True, omission names the path with reason configured_ignore and cited_by [.saipen/LOG.md, .saipen/archive/source/SRC-002.coverage.json] (.saipen/evidence/T-1373-evidence-surface-20260916/verify-problip-equivalent-repro.txt); case J re-judges an archive that shipped without the proof as PROTOCOL_INCOMPLETE.",
+      "text": "False-complete regression: closure metadata references the proof file, the exported ZIP deliberately omits it, and accounting reports required_evidence_omitted=true or an equivalent authoritative incomplete state; evidence_files_collected == evidence_files_in_archive never implies completeness when discovery itself is incomplete.",
+      "verification": "AUDAPACK case34 (declared and cited evidence excluded names the citation) and case35 (cited evidence absent on disk is not complete) green in the focused family (49 passed).",
+      "work": "T-1373"
+    },
+    "SRC-054:R007": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "Backward compatibility: reproduction case I builds a project with no .saipen/evidence/ -- `saipen continue` rc=0, pack status=COMPLETE, omitted_required=[] and the directory is never created (.saipen/evidence/T-1373-evidence-surface-20260916/verify-problip-equivalent-repro.txt); the surface is conditional in CONDITIONAL_DIRS, never mandatory.",
+      "text": "Backward compatibility: projects without .saipen/evidence/ still export normally; the directory is conditional (collected and accounted when present or referenced), never mandatory.",
+      "verification": "AUDAPACK case36 (project without evidence packs unchanged) green; case32/case39 prove a pre-SRC-054 contract still packs cited evidence under consumer_default rules.",
+      "work": "T-1373"
+    },
+    "SRC-054:R008": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "Validation runs from CURRENT bytes on 2026-09-17: SAIPEN focused tools.test_audit_manifest Ran 40 OK; adjacent 18-module family Ran 326 OK (.saipen/evidence/T-1373-evidence-surface-20260916/verify-saipen-adjacent.txt); tools/validate.py -> Agent is conformant, 0 FAIL, 32 pre-existing WARN (.saipen/evidence/T-1373-evidence-surface-20260916/verify-validate.txt); python -m ruff check tools/ tests/ -> All checks passed (ruff 0.16.0).",
+      "text": "Validation runs: focused manifest/generator tests, AUDAPACK collector/export tests, SAIPEN validator tests, lifecycle/reconcile regeneration tests.",
+      "verification": "AUDAPACK focused tests/test_saipen_evidence.py 1 failed (BASELINE) 49 passed (.saipen/evidence/T-1373-evidence-surface-20260916/verify-audapack-focused.txt); full declared suite A/B by test identity: 8 red pre-change and the SAME 8 post-change, PATCH_OWNED=0 UNKNOWN=0, passed 1727->1740 = +13 new cases (.saipen/evidence/T-1373-evidence-surface-20260916/verify-audapack-full-ab-classification.txt).",
+      "work": "T-1373"
+    },
+    "SRC-054:R009": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "Problip reproduction 13/13 PASS from current bytes (.saipen/evidence/T-1373-evidence-surface-20260916/verify-problip-equivalent-repro.txt, json alongside): proof sha256 7856719211E999FA.. matches the recorded closure hash, archive/source hashes equal, the declaration survives recover and a second pack, and the live read-only projection leaves Problip's .saipen byte-identical (case L: 0 files changed).",
+      "text": "Reproduce against Problip or an equivalent fixture: evidence file exists, generated MANIFEST declares evidence/, archive contains it with source/archive hash equality, a later lifecycle command does not erase the declaration, a second archive still contains it, and required_evidence_omitted is false only when the evidence is genuinely present.",
+      "verification": "Live production proof: the fleet archive _PROBLIP_16.09.26-T23-41-20.zip packed by the fixed consumer carries Problip's proof entry PERF-001_WINDOWS_EVIDENCE.md on its own memory-root evidence surface; the same archive with that one entry removed is re-judged PROTOCOL_INCOMPLETE (case J, .saipen/evidence/T-1373-evidence-surface-20260916/verify-problip-equivalent-repro.txt). NOTE: the foreign path is deliberately NOT spelled in full here -- an anchored memory-root spelling inside this project's own closure record binds it as THIS project's required evidence, which is the defect this REVIEW found and filed separately.",
+      "work": "T-1373"
+    },
+    "SRC-054:R010": {
+      "actionable": true,
+      "class": "non-goal",
+      "disposition": "VERIFIED",
+      "evidence": "Non-goals held: Problip working tree shows only its own pre-existing dirty path (tests/smoke2_liveaudio.ps1) and nothing modified by this work; PERF-001 is not recreated and is not special-cased -- 0 occurrences in tools/saipen_engine/audit_manifest.py and 1 docstring mention in audapack/saipen_evidence.py:57 naming the incident; the fix lives in the canonical generator and the consumer, not in any generated project MANIFEST.json.",
+      "text": "Non-goals: no Problip production code change, no recreated PERF-001, no special case for the PERF-001 filename, no single generated project MANIFEST patch, no weakening of existing evidence accounting.",
+      "verification": "No weakening of evidence accounting: full AUDAPACK A/B PATCH_OWNED=0, UNKNOWN=0 over identical failing identities (.saipen/evidence/T-1373-evidence-surface-20260916/verify-audapack-full-ab-classification.txt). The only oracle edits are in .saipen/evidence/T-1373-evidence-surface-20260916/problip_equivalent_repro.py (pinned pre-fix contract, COMPLETE_WITH_OPTIONAL_OMISSIONS accepted while omitted_required must stay empty, case K compares declared against the on-disk contract); each is documented in the file and covered by the pre-fix-producer red control that still fails B, D and K.",
+      "work": "T-1373"
+    }
+  },
+  "schema_version": 1
+}

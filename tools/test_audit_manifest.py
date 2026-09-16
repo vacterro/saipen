@@ -31,6 +31,7 @@ import subprocess
 import sys
 import tempfile
 import unittest
+import zipfile
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -602,6 +603,234 @@ class TestLifecycleEnrollment(ControlFixture):
         self.assertEqual(out["declared"], audit_manifest.DECLARED_ABSENT)
         self.assertEqual(out["enrollment"]["code"], audit_manifest.CODE_PLAN)
         self.assertFalse(audit_manifest.manifest_path(project).exists())
+
+
+class TestEvidenceSurfaceIsCanonical(unittest.TestCase):
+    """SRC-054: `.saipen/evidence/` is declared by the generator, not by hand.
+
+    `.saipen/evidence/` is the store EVIDENCE-RETENTION-01 names for durable
+    closure proof. The contract never declared it, so a faithful consumer
+    packed a Problip snapshot as COMPLETE without the PERF-001 proof its own
+    LOG cited. A project-local repair added the entry and the next lifecycle
+    run regenerated the manifest from `build()` and removed it again: the
+    declaration only lasts if the generator owns it.
+    """
+
+    def setUp(self):
+        self._tmp = tempfile.TemporaryDirectory()
+        self.root = Path(self._tmp.name)
+        _make_project(self.root)
+
+    def tearDown(self):
+        self._tmp.cleanup()
+
+    def test_generator_declares_evidence_as_bounded_conditional_surface(self):
+        manifest = audit_manifest.build(self.root)
+        conditional = {rule["path"]: rule for rule in manifest["evidence"]["conditional"]}
+        self.assertIn("evidence", conditional)
+        rule = conditional["evidence"]
+        self.assertEqual(rule["kind"], "dir")
+        self.assertTrue(rule["recursive"])
+        self.assertIsInstance(rule["max_files"], int)
+        self.assertGreater(rule["max_files"], 0)
+        # Conditional, never mandatory: a project that never produced
+        # evidence is not an incomplete project.
+        self.assertNotIn("evidence", manifest["required"])
+        for tier in ("mandatory", "optional"):
+            self.assertNotIn("evidence", [item["path"] for item in manifest["evidence"][tier]])
+
+    def test_generator_declares_the_records_that_cite_evidence(self):
+        """Directory collection alone cannot prove a cited file was packed.
+
+        A consumer only learns that a closure depends on a particular proof
+        file by reading the records that cite it, and which records are
+        closure records is protocol knowledge, so the contract names them.
+        """
+        references = audit_manifest.build(self.root)["references"]
+        self.assertEqual(references["surfaces"], ["evidence"])
+        carriers = {item["path"]: item for item in references["carriers"]}
+        for name in ("STATE.md", "BOARD.md", "LOG.md"):
+            self.assertEqual(carriers[name]["kind"], "file", name)
+        self.assertEqual(carriers["logs"]["suffix"], ".md")
+        self.assertTrue(carriers["logs"]["recursive"])
+        self.assertEqual(carriers["intake/coverage"]["suffix"], ".json")
+        self.assertEqual(carriers["archive/source"]["suffix"], ".coverage.json")
+        for item in carriers.values():
+            if item["kind"] == "dir":
+                self.assertIsInstance(item["max_files"], int)
+                self.assertGreater(item["max_files"], 0)
+        for bound in ("max_carrier_bytes", "max_total_bytes", "max_references"):
+            self.assertIsInstance(references[bound], int, bound)
+            self.assertGreater(references[bound], 0, bound)
+
+    def test_citation_surfaces_are_declared_evidence(self):
+        """A cited file that exists must also be something the contract collects."""
+        manifest = audit_manifest.build(self.root)
+        conditional = {rule["path"] for rule in manifest["evidence"]["conditional"]}
+        for surface in manifest["references"]["surfaces"]:
+            self.assertIn(surface, conditional)
+
+    def test_user_prose_is_never_a_citation_carrier(self):
+        """Source bodies and contract clauses quote the user, not a closure.
+
+        A handoff that says "create `.saipen/evidence/proof.md`" describes a
+        fixture; reading it as a citation would make every later snapshot of
+        the project incomplete over a file nobody claimed to have produced.
+        """
+        manifest = audit_manifest.build(self.root)
+        carriers = [item["path"] for item in manifest["references"]["carriers"]]
+        for prose in ("intake", "intake/active", "intake/contracts", "archive"):
+            self.assertNotIn(prose, carriers)
+        banned = manifest["evidence"]["non_exportable"]
+        for path in carriers:
+            self.assertFalse(path.startswith("/"), path)
+            self.assertNotIn("..", path.split("/"), path)
+            for prefix in banned:
+                self.assertFalse(path.startswith(prefix.rstrip("/")), path)
+
+
+def _declared_conditional(project: Path) -> list[str]:
+    manifest = json.loads(audit_manifest.manifest_path(project).read_text(encoding="utf-8"))
+    return [rule["path"] for rule in manifest["evidence"]["conditional"]]
+
+
+def _hand_repaired_manifest(project: Path) -> None:
+    """What the Problip closure repair wrote: the contract plus `evidence`.
+
+    The protocol version is stamped stale so the next lifecycle call has to
+    regenerate the document; a call that merely left it alone would prove
+    nothing about regeneration.
+    """
+    manifest = audit_manifest.build(project)
+    rules = manifest["evidence"]["conditional"]
+    if not any(rule["path"] == "evidence" for rule in rules):
+        rules.append({"path": "evidence", "kind": "dir", "recursive": True, "max_files": 4000})
+    manifest["protocol_version"] = "0.0.0-hand-repaired"
+    audit_manifest.manifest_path(project).write_bytes(audit_manifest.render(manifest))
+
+
+def _pack_declared_evidence(project: Path, archive: Path) -> dict:
+    """A contract-faithful snapshot: exactly what the on-disk manifest declares."""
+    manifest = json.loads(audit_manifest.manifest_path(project).read_text(encoding="utf-8"))
+    memory = project / manifest["memory_root"]
+    collected: list[Path] = []
+    truncated: list[str] = []
+    for tier in ("mandatory", "conditional"):
+        for rule in manifest["evidence"][tier]:
+            target = memory.joinpath(*rule["path"].split("/"))
+            if rule["kind"] == "file":
+                if target.is_file():
+                    collected.append(target)
+                continue
+            if not target.is_dir():
+                continue
+            walk = target.rglob("*") if rule["recursive"] else target.iterdir()
+            files = sorted(path for path in walk if path.is_file())
+            if len(files) > rule["max_files"]:
+                truncated.append(rule["path"])
+            collected.extend(files[: rule["max_files"]])
+    with zipfile.ZipFile(archive, "w") as zf:
+        for path in collected:
+            zf.write(path, path.relative_to(project).as_posix())
+    return {"collected": len(collected), "truncated": truncated}
+
+
+class TestEvidenceSurfaceSurvivesRegeneration(ControlFixture):
+    """SRC-054 TARGET C: the declaration survives every regenerating lifecycle call.
+
+    Red control, measured before the fix: the Problip-shaped hand repair is
+    rewritten by the first reconciliation and `evidence` is gone, exactly as
+    the live project lost it between its E-74 and the next lifecycle run.
+    """
+
+    PROOF = b"# closure proof\nsmoke PASS\n"
+
+    def _closure_project(self) -> Path:
+        project = self.make_project()
+        evidence = project / ".saipen" / "evidence"
+        evidence.mkdir()
+        (evidence / "proof.md").write_bytes(self.PROOF)
+        (project / ".saipen" / "LOG.md").write_text(
+            "- 24.08.26 00:00 [E-001] [agent: tester] RUN: closure proof retained "
+            "at .saipen/evidence/proof.md -> PASS\n",
+            encoding="utf-8",
+        )
+        return project
+
+    def _assert_regenerated_with_evidence(self, project: Path, step: str) -> None:
+        manifest = json.loads(audit_manifest.manifest_path(project).read_text(encoding="utf-8"))
+        self.assertNotEqual(manifest["protocol_version"], "0.0.0-hand-repaired", step)
+        self.assertIn("evidence", _declared_conditional(project), step)
+        self.assertTrue(audit_manifest.is_current(project), step)
+
+    def test_lifecycle_regeneration_keeps_evidence_declared_and_packed(self):
+        project = self._closure_project()
+        # Start where Problip stood after its repair: evidence declared locally.
+        _hand_repaired_manifest(project)
+        self.assertIn("evidence", _declared_conditional(project))
+        reconciled = reconcile_protocol_state(project, "tester")
+        self.assertTrue(reconciled["ok"], reconciled)
+        self.assertEqual(reconciled["code"], audit_manifest.CODE_UPGRADED, reconciled)
+        self._assert_regenerated_with_evidence(project, "reconcile")
+
+        for command in (("continue",), ("recover",), ("audit", "manifest", "--write")):
+            _hand_repaired_manifest(project)
+            self.cli(project, *command)
+            self._assert_regenerated_with_evidence(project, " ".join(command))
+
+        # A read-only projection must neither regenerate nor narrow anything.
+        before = audit_manifest.manifest_path(project).read_bytes()
+        self.cli(project, "status")
+        self.assertEqual(audit_manifest.manifest_path(project).read_bytes(), before)
+
+        again = audit_manifest.ensure(project)
+        self.assertEqual(again["code"], audit_manifest.CODE_CURRENT, again)
+        self.assertIn("evidence", _declared_conditional(project))
+
+        archive = project.parent / "snapshot.zip"
+        accounting = _pack_declared_evidence(project, archive)
+        self.assertEqual(accounting["truncated"], [])
+        with zipfile.ZipFile(archive) as zf:
+            self.assertIn(".saipen/evidence/proof.md", zf.namelist())
+            self.assertEqual(zf.read(".saipen/evidence/proof.md"), self.PROOF)
+
+    def test_project_without_evidence_still_enrolls_and_packs(self):
+        """SRC-054 TARGET E: the surface is conditional, never a new obligation."""
+        project = self.make_project()
+        result = reconcile_protocol_state(project, "tester")
+        self.assertTrue(result["ok"], result)
+        self.assertIn("evidence", _declared_conditional(project))
+        self.assertFalse((project / ".saipen" / "evidence").exists())
+        archive = project.parent / "snapshot.zip"
+        accounting = _pack_declared_evidence(project, archive)
+        self.assertEqual(accounting["truncated"], [])
+        with zipfile.ZipFile(archive) as zf:
+            names = zf.namelist()
+        self.assertIn(".saipen/STATE.md", names)
+        self.assertFalse([name for name in names if name.startswith(".saipen/evidence/")])
+
+    def test_regeneration_names_every_declaration_it_drops(self):
+        """Narrowing a declared evidence surface is never silent.
+
+        Regeneration is allowed to replace a drifted document -- that is how a
+        project reaches the current contract -- but a surface the old document
+        declared and the canonical contract does not is reported by name, so
+        the next lost surface is visible in the reconciliation output instead
+        of being discovered in an audit archive days later.
+        """
+        project = self.make_project()
+        manifest = audit_manifest.build(project)
+        manifest["evidence"]["conditional"].append(
+            {"path": "custom-proof", "kind": "dir", "recursive": True, "max_files": 10}
+        )
+        audit_manifest.manifest_path(project).write_bytes(audit_manifest.render(manifest))
+        result = audit_manifest.ensure(project)
+        self.assertEqual(result["code"], audit_manifest.CODE_UPGRADED, result)
+        self.assertEqual(result["dropped_declarations"], ["conditional:custom-proof"])
+        self.assertNotIn("custom-proof", _declared_conditional(project))
+
+        clean = audit_manifest.ensure(project)
+        self.assertNotIn("dropped_declarations", clean)
 
 
 if __name__ == "__main__":  # pragma: no cover

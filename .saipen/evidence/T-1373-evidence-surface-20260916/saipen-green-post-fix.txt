@@ -1,0 +1,9 @@
+# SRC-054 SAIPEN green, same oracle vs POST-FIX subject
+command: python -m unittest tools.test_audit_manifest.TestEvidenceSurfaceIsCanonical tools.test_audit_manifest.TestEvidenceSurfaceSurvivesRegeneration
+verifier: 714c6add9ba953e2
+subject: 651982b5f45a597d
+--- output ---
+----------------------------------------------------------------------
+Ran 7 tests in 2.060s
+
+OK

@@ -36,7 +36,19 @@ CLASSIFICATION
     KNOWLEDGE holds the durable detail artifacts that bounded LOG events
     reference by `detail_ref` (CORE.md: a new event is at most 1024 bytes
     and full proof lives in a hashable evidence artifact) -- without them
-    an oversized proof is a dangling pointer.
+    an oversized proof is a dangling pointer. `evidence/` is the durable
+    closure-proof store EVIDENCE-RETENTION-01 names; it was missing here, so
+    a consumer packed a project as complete without the proof its LOG cited,
+    and a project-local declaration was erased by the next regeneration.
+
+`references`
+    The closure records that cite evidence BY PATH (STATE, BOARD, LOG, sealed
+    segments, active and archived coverage) and the surfaces a citation may
+    point into. A cited file is required evidence even when no directory rule
+    found it, so a consumer can prove the archive holds what closures claim
+    instead of trusting equal counts over an incomplete discovery set. Source
+    bodies and derived contracts are NOT carriers: they quote user prose, and
+    a hypothetical path in a handoff is not a claim that proof exists.
 
 `optional`
     Supporting material. Absence is honest, not degrading.
@@ -89,7 +101,32 @@ CONDITIONAL_DIRS = (
     ("archive/source", True, 8000),
     ("KNOWLEDGE", True, 4000),
     ("audit", False, 500),
+    ("evidence", True, 4000),
 )
+
+#: Surfaces a closure record may cite by path (`<memory_root>/<surface>/...`).
+#: Each one is also a CONDITIONAL_DIRS entry, so a cited file that exists is
+#: collected by its directory rule as well.
+REFERENCE_SURFACES = ("evidence",)
+
+#: (relative path, kind, recursive, name suffix, max_files): the closure
+#: records whose citations a consumer must resolve. Files carry no cap; a
+#: directory carrier is walked only for names ending in its suffix.
+REFERENCE_CARRIERS = (
+    (STATE_NAME, "file", False, "", 0),
+    (BOARD_NAME, "file", False, "", 0),
+    (LOG_NAME, "file", False, "", 0),
+    (LOGS_DIR, "dir", True, ".md", 4000),
+    ("intake/coverage", "dir", False, ".json", 8000),
+    ("archive/source", "dir", False, ".coverage.json", 8000),
+)
+
+#: Reading bounds for citation discovery. The carrier cap matches the intake
+#: ledger cap; a consumer that hits any bound must report the snapshot
+#: incomplete, because a citation it did not read is one it cannot account for.
+REFERENCE_MAX_CARRIER_BYTES = 8 * 1024 * 1024
+REFERENCE_MAX_TOTAL_BYTES = 64 * 1024 * 1024
+REFERENCE_MAX_REFERENCES = 20000
 
 OPTIONAL_DIRS = (
     ("extensions", True, 4000),
@@ -197,6 +234,18 @@ def build(root: Path | str, *, protocol_dir: Path | str | None = None) -> dict[s
                 for p, r, cap in OPTIONAL_DIRS
             ],
             "non_exportable": list(NON_EXPORTABLE),
+        },
+        "references": {
+            "surfaces": list(REFERENCE_SURFACES),
+            "carriers": [
+                {"path": p, "kind": kind}
+                if kind == "file"
+                else {"path": p, "kind": kind, "recursive": r, "suffix": suffix, "max_files": cap}
+                for p, kind, r, suffix, cap in REFERENCE_CARRIERS
+            ],
+            "max_carrier_bytes": REFERENCE_MAX_CARRIER_BYTES,
+            "max_total_bytes": REFERENCE_MAX_TOTAL_BYTES,
+            "max_references": REFERENCE_MAX_REFERENCES,
         },
         "compatibility": {
             "unknown_contract_version": "refuse",
@@ -474,6 +523,10 @@ def ensure(
 
     upgrading = current["state"] in (DECLARED_STALE, DECLARED_UNSUPPORTED)
     code = CODE_UPGRADED if upgrading else CODE_WRITTEN
+    # Regeneration may legally replace a drifted document, but never narrow
+    # the declared evidence without saying which surface it removed.
+    dropped = _dropped_declarations(root, build(root, protocol_dir=protocol_dir))
+    narrowing = {"dropped_declarations": dropped} if dropped else {}
     if dry_run:
         return {
             **result,
@@ -483,6 +536,7 @@ def ensure(
             "would_change": True,
             "declared": current["state"],
             "changed_files": [path.as_posix()],
+            **narrowing,
         }
 
     written = write(root, protocol_dir=protocol_dir, force=True)
@@ -502,7 +556,28 @@ def ensure(
         "manifest_present": True,
         "manifest_current": True,
         "detail": current["detail"],
+        **narrowing,
     }
+
+
+def _dropped_declarations(root: Path, wanted: dict[str, Any]) -> list[str]:
+    """`tier:path` evidence declarations on disk that `wanted` no longer makes."""
+    try:
+        on_disk = json.loads(manifest_path(root).read_text(encoding="utf-8"))
+    except (OSError, ValueError, UnicodeDecodeError):
+        return []
+    evidence = on_disk.get("evidence") if isinstance(on_disk, dict) else None
+    if not isinstance(evidence, dict):
+        return []
+    dropped: list[str] = []
+    for tier in ("mandatory", "conditional", "optional"):
+        kept = {item["path"] for item in wanted["evidence"][tier]}
+        items = evidence.get(tier)
+        for item in items if isinstance(items, list) else ():
+            declared_path = item.get("path") if isinstance(item, dict) else item
+            if isinstance(declared_path, str) and declared_path not in kept:
+                dropped.append(f"{tier}:{declared_path}")
+    return dropped
 
 
 def is_current(root: Path | str, *, protocol_dir: Path | str | None = None) -> bool:
@@ -628,6 +703,11 @@ __all__ = [
     "REASON_CONTRACT_UNSUPPORTED",
     "REASON_LAYOUT_MALFORMED",
     "REASON_MEMORY_ABSENT",
+    "REFERENCE_CARRIERS",
+    "REFERENCE_MAX_CARRIER_BYTES",
+    "REFERENCE_MAX_REFERENCES",
+    "REFERENCE_MAX_TOTAL_BYTES",
+    "REFERENCE_SURFACES",
     "build",
     "classify_layout",
     "declared",

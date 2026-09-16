@@ -1,0 +1,21 @@
+# T-1373 AUDAPACK full declared A/B (python -m pytest -q, testpaths=tests)
+pre-change  : 8 failed, 1727 passed, 5 skipped
+post-change : 8 failed, 1740 passed, 5 skipped
+
+classification by TEST IDENTITY (not counts):
+  BASELINE                 tests/test_fidelity.py::TestRoleAwareJsonClassification::test_09_load_bearing_saipal_files_survive_pressure
+  BASELINE                 tests/test_fidelity.py::TestSyntheticSaipalFidelityRegression::test_saipal_realistic_session_corpus_trimmed_under_standard
+  BASELINE                 tests/test_fidelity.py::TestSyntheticSaipalFidelityRegression::test_saipal_synthetic_when_mandatory_itself_exceeds_budget
+  BASELINE                 tests/test_packing_git_inventory.py::TestProtectedControlPlaneEndToEnd::test_ignored_protected_control_plane_reaches_archive_with_honest_accounting
+  BASELINE                 tests/test_saipen_evidence.py::TestArchiveProvenance::test_incomplete_snapshot_does_not_claim_authority
+  BASELINE                 tests/test_saipen_manifest_gate.py::TestIgnoredManifestRegression::test_ignored_contract_and_evidence_still_authoritative
+  BASELINE                 tests/test_saipen_manifest_gate.py::TestMissingManifestRegression::test_pack_auto_generates_manifest_and_archive_is_authoritative
+  BASELINE                 tests/test_saipen_manifest_gate.py::TestStaleManifestRegression::test_pack_after_evidence_mutation_regenerates_not_blind_trusts
+
+PATCH_OWNED = 0
+UNKNOWN     = 0  (every post-change red has a pre-change identity)
+BASELINE    = 8
+FIXED       = 0
+
+passed 1727 -> 1740 = +13, exactly the cited-evidence cases case31-case43 added by T-1373.
+exit=139 on both runs (Qt teardown at interpreter exit), unchanged by this patch.
