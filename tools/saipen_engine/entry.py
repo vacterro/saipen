@@ -33,7 +33,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from . import codec, intake, ownership
+from . import codec, intake, ownership, pending_ingress
 from .board import parse_board
 from .errors import EngineError
 from .journal import recovery_preflight, scan_pending
@@ -201,6 +201,7 @@ def start_work(
     priority: str = "P1",
     verify: str | None = None,
     dry_run: bool = False,
+    supersede_ingress: bool = False,
 ) -> dict:
     from .operations import (
         USER_REQUEST_VERIFY,
@@ -225,6 +226,12 @@ def start_work(
     if not isinstance(text, str) or not text.strip():
         return _refuse("VALIDATION_FAILED", USAGE, usage=USAGE)
     text = text.strip()
+    # T-1372: a transport refusal names a command AND owes specific bytes. A
+    # request that is not those bytes cannot enter here silently -- that is how
+    # a model's paraphrase earned a receipt asserting the operator's own words.
+    owed = pending_ingress.enforce(root, text, supersede=supersede_ingress)
+    if owed is not None:
+        return _refuse(owed.pop("code"), owed.pop("detail"), **owed)
     verify_text = (verify or "").strip() or USER_REQUEST_VERIFY
 
     def render(supersedes: str | None) -> str:

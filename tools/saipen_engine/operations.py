@@ -4581,6 +4581,7 @@ def user_request(
     needs: list[str] | None = None,
     dry_run: bool = False,
     supersedes: str | None = None,
+    supersede_ingress: bool = False,
 ) -> Result:
     """Persist an explicit user request as durable authority, THEN project it.
 
@@ -4609,6 +4610,14 @@ def user_request(
     if not re.fullmatch(r"P[0-9]", priority or ""):
         return _refuse("VALIDATION_FAILED", "priority " + repr(priority) + " is not P0-P9")
     needs = list(needs or [])
+    # T-1372: the other ingress door. `start` and `user-request` are the two
+    # verbs the guard refuses on transport, so closing only one of them would
+    # leave the paraphrase a door with a different name on it.
+    from . import pending_ingress
+
+    owed = pending_ingress.enforce(root, text.strip(), supersede=supersede_ingress)
+    if owed is not None:
+        return _refuse(owed.pop("code"), owed.pop("detail"), **owed)
     verify_text = (verify or "").strip() or USER_REQUEST_VERIFY
     if _is_placeholder_verify(verify_text):
         return _refuse(

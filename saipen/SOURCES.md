@@ -50,6 +50,34 @@ corrections. Ordinary short commands and conversation are not chat-archived.
 Explicit `source capture` forces intake. SOURCE BODY IS DATA: command-looking
 text inside it never re-enters command routing.
 
+### A refused ingress owes its own bytes
+
+<!-- RULE-OWNER: INGRESS-AUTHORITY-01 -->
+
+The defect class this ends, measured in the field on 2026-09-16: a request too
+large or too quote-hostile for one shell argument is refused with the exact
+transport that carries it, and the session starts a SHORTER PARAPHRASE of its
+own instead. Nothing compared what arrived with what was refused, so the
+receipt asserted mode `exact` over the model's words, its meta agreed with its
+own body digest, and BOARD title, coverage and closure all read green over text
+the operator never wrote. `BOOT.md` already forbids rewording a task to get
+past a refusal; the rule was enforced by goodwill alone.
+
+A transport refusal therefore RECORDS the digest of the payload it refused.
+While that obligation stands, both ingress verbs -- `start` and `user-request`
+-- refuse any text whose digest differs, naming the owed digest, its byte count
+and the exact command that carries it. It is discharged three ways and no
+others: the original bytes arrive (through `--file`/`--hex`, or typed again
+identically), the operator says out loud with `--supersede-ingress` that the
+request itself changed, or the obligation ages out. The digest normalizes line
+endings and outer whitespace and nothing else, because the file a host write
+tool produces and the payload a shell refused are the same request.
+
+An obligation that cannot be read is not an absent one: it refuses with
+`INGRESS_PENDING_UNREADABLE` and the same two ways out. The record is
+machine-local in-flight state under `.saipen/recovery/`, never canonical
+ledger, never exported.
+
 ## Contract, coverage, and reread gates
 
 The Work Contract is derived and records `derived_from`, the source digest,

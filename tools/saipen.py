@@ -2587,6 +2587,11 @@ def _start(project_root: Path, args: list[str], as_json: bool, dry_run: bool) ->
     """`saipen start <task>`: the ONE entry command for a new actionable task."""
     from saipen_engine.entry import USAGE, start_work
 
+    # T-1372: the ONE way to say "the request itself changed" out loud. It is a
+    # flag and not a heuristic on purpose -- every silent way to supersede a
+    # refused request is a way to launder a paraphrase into the operator's seat.
+    supersede_ingress = "--supersede-ingress" in args
+    args = [token for token in args if token != "--supersede-ingress"]
     opts, positional, option_error = _parse_value_options(
         args,
         {
@@ -2688,6 +2693,7 @@ def _start(project_root: Path, args: list[str], as_json: bool, dry_run: bool) ->
         priority=priority,
         verify=opts.get("verify"),
         dry_run=dry_run,
+        supersede_ingress=supersede_ingress,
     )
     if result.get("code") == "STARTED":
         state_path = _state_path(project_root)
@@ -7499,8 +7505,10 @@ def main(argv: list[str] | None = None) -> int:
         # CORE-003: the USER_INTERRUPT ingress. The complete request becomes
         # durable Source authority BEFORE the concise BOARD projection, so a
         # crash can never leave a ticket whose request body was lost.
+        _supersede_ingress = "--supersede-ingress" in args[1:]
         _opts, _pos, _opt_err = _parse_value_options(
-            args[1:], {"--priority": "priority", "--verify": "verify", "--needs": "needs"}
+            [token for token in args[1:] if token != "--supersede-ingress"],
+            {"--priority": "priority", "--verify": "verify", "--needs": "needs"},
         )
         if _opt_err:
             _emit({"ok": False, "code": "VALIDATION_FAILED", "detail": _opt_err}, as_json)
@@ -7536,6 +7544,7 @@ def main(argv: list[str] | None = None) -> int:
             verify=_opts.get("verify"),
             needs=_needs,
             dry_run=dry_run,
+            supersede_ingress=_supersede_ingress,
         )
         _emit(result.to_dict(), as_json)
         return 0 if result.ok else 1

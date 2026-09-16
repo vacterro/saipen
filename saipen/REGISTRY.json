@@ -823,7 +823,9 @@
     "RETIREMENT_REASON_UNKNOWN",
     "ALREADY_RETIRED",
     "RETIRED",
-    "RETIREMENT_EVIDENCE_BOUND"
+    "RETIREMENT_EVIDENCE_BOUND",
+    "INGRESS_PARAPHRASE_REFUSED",
+    "INGRESS_PENDING_UNREADABLE"
   ],
   "continue_fallback": {
     "invariant": "continue may fall through to improve ONLY after recovery, blocked/retryable, queued and required-follow-up routing are exhausted; it resumes an existing active Improve cycle and never creates an unbounded improve carousel",

@@ -945,15 +945,14 @@ def ingress_payload_literal(payload: str, quote: str = "'") -> bool:
     return payload.count("%") <= 1 and not payload.endswith("\\")
 
 
-def ingress_rewrite(command: str) -> str | None:
-    """The exact command that carries THIS request when quoting cannot.
+def ingress_payload(command: str) -> str | None:
+    """The request text an ingress line carries, exactly as typed.
 
-    A weak model must never be told to re-encode anything itself. When the
-    payload of a `saipen start`/`user-request` line cannot travel literally,
-    the guard computes the transport that does and names it -- `saipen start
-    --hex <utf-8 hex>` -- so the next step is a command to run, not a puzzle.
-    `start` is the route for both ingress verbs: it persists the identical
-    request and claims it, which is what either caller wanted.
+    `ingress_rewrite` computed this and threw it away, so the refusal could
+    name a transport but never say which BYTES that transport owed. T-1372
+    gives the payload a name: a refusal that records what it refused is the
+    only thing that can tell the operator's request from a model's rewrite
+    of it.
     """
     text = command.strip()
     head = text.split(" ", 2)
@@ -966,6 +965,22 @@ def ingress_rewrite(command: str) -> str | None:
         payload = payload[1:-1]
     payload = payload.strip()
     if not payload or len(payload) > MAX_INGRESS_REWRITE_CHARS or payload.startswith("-"):
+        return None
+    return payload
+
+
+def ingress_rewrite(command: str) -> str | None:
+    """The exact command that carries THIS request when quoting cannot.
+
+    A weak model must never be told to re-encode anything itself. When the
+    payload of a `saipen start`/`user-request` line cannot travel literally,
+    the guard computes the transport that does and names it -- `saipen start
+    --hex <utf-8 hex>` -- so the next step is a command to run, not a puzzle.
+    `start` is the route for both ingress verbs: it persists the identical
+    request and claims it, which is what either caller wanted.
+    """
+    payload = ingress_payload(command)
+    if payload is None:
         return None
     encoded = payload.encode("utf-8")
     if len(encoded) > MAX_INGRESS_HEX_PAYLOAD:
@@ -1347,6 +1362,39 @@ _INTRINSIC_REFUSALS = frozenset(
 )
 
 
+def _record_pending_ingress(event: dict, project_root: str | None, mapped: dict) -> None:
+    """Remember WHICH bytes this transport refusal refused (T-1372).
+
+    A refusal that names a command but not the request it owes is how a
+    paraphrase bought an `exact` receipt in the field. Recording is
+    best-effort by design: the guard is a classifier, and a project it cannot
+    resolve or a disk it cannot write is not a reason to turn a transport
+    refusal into a crash.
+    """
+    from .paths import resolve_project_root
+    from .pending_ingress import record
+
+    payload = ingress_payload(
+        (event.get("tool_input") or {}).get("command")
+        if isinstance((event.get("tool_input") or {}).get("command"), str)
+        else ""
+    )
+    if not payload:
+        return
+    try:
+        resolved = resolve_project_root(
+            Path(event["cwd"]) if event.get("cwd") else None,
+            explicit=project_root,
+            honor_environment=False,
+        )
+    except (OSError, ValueError):
+        return
+    root = getattr(resolved, "root", None)
+    if root is None:
+        return
+    record(root, payload, str(mapped["canonical_next_command"]))
+
+
 def evaluate_event(event: dict, project_root: str | None = None) -> dict:
     """One host event -> one admission verdict carrying its mapped event.
 
@@ -1385,6 +1433,7 @@ def evaluate_event(event: dict, project_root: str | None = None) -> dict:
             # route would read as a way around it.
             verdict["admitted"] = False
             verdict["code"] = "INGRESS_TRANSPORT_UNSAFE"
+            _record_pending_ingress(event, project_root, mapped)
             route = str(verdict["canonical_next_command"])
             verdict["detail"] = (
                 "the request text cannot survive one quoted shell argument "
