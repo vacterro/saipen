@@ -48,9 +48,12 @@ import shutil
 import subprocess
 import sys
 import tempfile
+from collections.abc import Callable
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from dataclasses import dataclass
 from pathlib import Path
 
+import fail_site_inventory as inventory
 from freshness import compute_role_revision, compute_source_identity
 from saipen_engine.paths import project_lineage_identity
 from saipen_engine.release_contract import locale_readme_paths
@@ -74,6 +77,11 @@ CHANGELOG = "CHANGELOG.md"
 CORE = "saipen/CORE.md"
 IMPROVE = "saipen/IMPROVE.md"
 INDEX = "saipen/INDEX.md"
+ACTIVATION = "saipen/ACTIVATION_BLOCK.md"
+CONVERGE = "saipen/CONVERGE.md"
+COMMANDS = "saipen/COMMANDS.md"
+RUNTIME_SURFACE = "tools/saipen_engine/runtime_surface.py"
+AUTOINJECT = "tools/autoinject.py"
 CREW_BACKLOG = ".saipen/KNOWLEDGE/crew-v8-backlog.md"
 KNOWLEDGE_CARD = ".saipen/KNOWLEDGE/cards/red-control-before-green.md"
 STATE_SCHEMA = "extensions/schemas/state.schema.json"
@@ -84,24 +92,28 @@ TAG_QUERY = ("git", "tag", "-l", "v*")
 AUDIT_TAGS_GIT_SHIM = "SAIPEN_AUDIT_TAGS_GIT_SHIM"
 AUDIT_TAGS_MODE = "SAIPEN_AUDIT_TAGS_MODE"
 
-#: Fail sites `tools/validate.py` declares, recorded here so a NEW validator
-#: check cannot arrive uncovered in silence. `CASES` below is hand-maintained
-#: and nothing bound it to the validator: the KNOWLEDGE structured-surface
-#: check landed in v7.254.0 and the closing sweep line read the same total
-#: before and after, so the one number a checkpoint quotes as proof the control
-#: ledger is intact did not move when a check arrived with no control (T-1292).
-#: Raise this in the same change that adds the control, or that records why the
-#: new check has none.
-VALIDATOR_FAIL_SITES = 327
+#: The adjudicated fail surface of `tools/validate.py`, by identity. Owned by
+#: `tools/fail_site_inventory.py` and recorded in `tools/validator_fail_sites.json`.
+#:
+#: This used to be one integer. A scalar binds VOLUME, not identity: the
+#: KNOWLEDGE structured-surface check landed in v7.254.0 and the closing sweep
+#: line read the same total before and after a check arrived with no control
+#: (T-1292), and a change that removes one check while adding another keeps the
+#: total forever. `test_check_inventory.py` proved that blind spot instead of
+#: closing it. T-1359 closed it: every fail site now carries a semantic id, and
+#: an added, removed or same-count SWAPPED site is named individually.
+VALIDATOR_FAIL_SITE_LEDGER = inventory.LEDGER_REL
 
-#: The honest half. Counting fail sites binds VOLUME, not identity: it cannot
-#: say WHICH check is uncovered, and a change that adds one check while
-#: deleting another leaves the count intact and passes. It is a tripwire that
-#: forces a decision when the surface grows, not a coverage proof.
+#: The honest half, restated for what the gate now actually binds. Identity
+#: says WHICH checks exist and refuses a surface that silently became a
+#: different surface. It still does not claim every check has a control: a
+#: `BASELINE` record is inherited and never individually adjudicated, and the
+#: ledger says so per site rather than hiding it behind a total.
 CHECK_INVENTORY_LIMITATION = (
-    "the count binds how many fail sites tools/validate.py declares, never "
-    "which of them has a control -- a change that adds one check and removes "
-    "another keeps the total and is NOT detected here"
+    "identity binds WHICH fail sites tools/validate.py declares, so an added, "
+    "removed or same-count swapped site is named -- but a BASELINE record is "
+    "inherited surface that was never individually adjudicated, which is "
+    "recorded per site and is NOT detected here as missing coverage"
 )
 
 
@@ -391,8 +403,69 @@ def release_ledger_probe(source: Path, destination: Path) -> str | None:
 # probe never tested. The owning line is therefore present in every leg and
 # only its slug token changes, so the three boards are byte-identical in
 # length by construction.
+#: T-1359: this used to name `log-missing-date` outright, and a live BLOCKED
+#: ticket (T-1313) now names that slug in its own prose -- so the RED leg's
+#: "aged AND unowned" condition became unreachable and the probe proved
+#: nothing. The slug is DERIVED per run instead: whatever this copy actually
+#: emits and no live board line owns. A hard-coded subject of a control is a
+#: bet that the repository will not change around it, and this one lost.
 WARN_PROBE_OWNER_SLUG = "log-missing-date"
+
+#: The agent name the probe's own journal entry is attributed to.
+WARN_PROBE_AGENT = "claude"
+
+#: The ticket the probe files to own a slug. Hand-filed, so it needs its own
+#: allocation event -- see `journal_probe_allocation`.
+WARN_PROBE_TICKET = "T-990"
 WARN_PROBE_NEUTRAL_SLUG = "zzz-absent-slug0"
+
+#: Width the slug token is padded to inside the owning line, so ANY derived
+#: slug leaves the board byte-identical across all three legs (T-1247) without
+#: the neutral and owner slugs having to be the same length by hand.
+WARN_PROBE_SLUG_FIELD = 32
+
+#: How many consecutive releases a WARN slug must survive before it is
+#: standing debt. Mirrors `tools/validate.py`'s `WARN_OWNER_SPAN`; the probe
+#: only needs it to refuse a fixture whose history is too short to age one.
+WARN_OWNER_SPAN = 3
+
+#: Slugs the probe must not adopt: each is already tracked with its own
+#: rationale, and re-aging one would rewrite a real ledger record rather than
+#: measure this control.
+WARN_PROBE_RESERVED_SLUGS = frozenset({"board-soft-cap", "log-soft-cap"})
+
+
+def live_board_slug_lines(board_text: str) -> list[str]:
+    """The board lines the ownership check reads: DOING, TODO and BLOCKED."""
+    live: list[str] = []
+    section = ""
+    for line in board_text.splitlines():
+        if line.startswith("## "):
+            section = line.strip()
+            continue
+        if section in ("## DOING", "## TODO", "## BLOCKED") and line.startswith("- ["):
+            live.append(line)
+    return live
+
+
+def select_warn_probe_slug(emitted: set[str], board_text: str, tracked) -> str | None:
+    """An emitted WARN slug no live BOARD line already owns.
+
+    Deterministic (sorted), so two runs of this gate choose the same subject.
+    Returns None when every emitted slug is already owned -- which the caller
+    must report, because a control with no available subject has to be loud
+    rather than quietly green.
+    """
+    live = live_board_slug_lines(board_text)
+    candidates = [
+        slug
+        for slug in sorted(emitted)
+        if slug not in tracked
+        and slug not in WARN_PROBE_RESERVED_SLUGS
+        and len(slug) <= WARN_PROBE_SLUG_FIELD
+        and not any(slug in line for line in live)
+    ]
+    return candidates[0] if candidates else None
 
 
 def warn_probe_ticket(slug: str) -> str:
@@ -410,12 +483,40 @@ def warn_probe_ticket(slug: str) -> str:
     board size.
     """
     return (
-        f"- [ ] T-990 [P2] Own the persistent `{slug}` warning: "
+        f"- [ ] {WARN_PROBE_TICKET} [P2] Own the persistent "
+        f"`{slug.ljust(WARN_PROBE_SLUG_FIELD)}` warning: "
         "125 sealed pre-DATE entries are immutable by append-only, so it "
         "warns forever; keep this ticket live while it emits. | "
         "verify: warn ownership probe passes with this ticket live | "
         "blocker: warn-ownership-probe fixture -- permanently held\n"
     )
+
+
+def journal_probe_allocation(tree: Path, ticket: str) -> str | None:
+    """Give a copied tree an allocation event for a hand-filed fixture ticket.
+
+    CORE-003 made every BOARD record need a structured `[T-###]` event in the
+    complete history, so a probe that hand-files its own ticket -- which this
+    one must, because RED and GREEN have to differ by one slug and nothing
+    else -- files a record the validator correctly refuses. The event is
+    appended the way a checkpoint appends one: next id, parent the current
+    tail (T-1359).
+    """
+    log = tree / LOG
+    if not log.is_file():
+        return f"copied tree has no {LOG} to journal {ticket} into"
+    text = log.read_text(encoding="utf-8-sig")
+    events = re.findall(r"(?m)^- (\d\d\.\d\d\.\d\d \d\d:\d\d) \[E-(\d+)\]", text)
+    if not events:
+        return f"copied {LOG} carries no parsable event to continue from"
+    stamp, last = events[-1]
+    entry = (
+        f"- {stamp} [E-{int(last) + 1}] [parent: E-{last}] [{ticket}] "
+        f"[agent: {WARN_PROBE_AGENT}] [op: alloc-{'0' * 32}] "
+        f"DEC: allocated for the warn-ownership probe fixture\n"
+    )
+    log.write_text(text.rstrip("\n") + "\n" + entry, encoding="utf-8", newline="\n")
+    return None
 
 
 def warn_probe_board(board_text: str, slug: str) -> str | None:
@@ -519,6 +620,13 @@ def warn_ownership_probe(source: Path, destination: Path) -> str | None:
             errors="replace",
         )
 
+    # T-1359: and the ticket this probe files needs the allocation event
+    # CORE-003 requires of every BOARD record, or the control leg fails on the
+    # fixture's own hand-filed line instead of on warn ownership.
+    alloc_error = journal_probe_allocation(tree, WARN_PROBE_TICKET)
+    if alloc_error:
+        return alloc_error
+
     # T-1247: file the ownership-neutral line first, so CONTROL, RED and GREEN
     # all measure a board of the same size and the only thing the green leg
     # changes is which slug that line names.
@@ -549,11 +657,29 @@ def warn_ownership_probe(source: Path, destination: Path) -> str | None:
 
     control_slugs = _warn_slugs(control.stdout + control.stderr)
 
-    # Age an unowned slug: log-missing-date emits in every clean copy (125
-    # sealed pre-DATE entries are immutable), and no ticket names it.
-    baseline["warn_slugs"][WARN_PROBE_OWNER_SLUG] = {
-        "first_seen": "7.1.0",
-        "last_seen": "7.160.0",
+    # T-1359: the subject is whatever THIS copy emits and no live board line
+    # already owns, chosen from the control run rather than named in advance.
+    # The window is the copy's own release history for the same reason: a
+    # hand-written `7.1.0 -> 7.160.0` ages out of the ledger the day those
+    # releases stop being in it, and an age below the span silently skips the
+    # check instead of failing it.
+    owner_slug = select_warn_probe_slug(control_slugs, neutral_board, baseline["warn_slugs"])
+    if owner_slug is None:
+        return (
+            "no emitted WARN slug is available as this probe's subject: every "
+            f"one of {sorted(control_slugs)} is already tracked, reserved, or "
+            f"named by a live BOARD line, so the aged-and-unowned condition "
+            f"cannot be built"
+        )
+    releases = sorted(tuple(int(part) for part in v.split(".")) for v in changelog_versions)
+    if len(releases) < WARN_OWNER_SPAN:
+        return (
+            f"copied release history holds {len(releases)} version(s), fewer "
+            f"than the {WARN_OWNER_SPAN} an aged slug needs"
+        )
+    baseline["warn_slugs"][owner_slug] = {
+        "first_seen": ".".join(str(part) for part in releases[0]),
+        "last_seen": ".".join(str(part) for part in releases[-1]),
         "rationale": "ownership probe: aged, unowned",
     }
     baseline_path.write_text(
@@ -564,9 +690,12 @@ def warn_ownership_probe(source: Path, destination: Path) -> str | None:
     if (
         red.returncode == 0
         or "no live BOARD ticket names it" not in red_text
-        or WARN_PROBE_OWNER_SLUG not in red_text
+        or owner_slug not in red_text
     ):
-        return "aged unowned slug did not fail the validator: " + red_text.strip()[-300:]
+        return (
+            f"aged unowned slug {owner_slug!r} did not fail the validator: "
+            + red_text.strip()[-300:]
+        )
     # T-639: aging the target slug must not disturb the WARN slug set beyond
     # the target slug itself -- the probe's own mutation introduces no
     # unrelated warning.
@@ -581,7 +710,7 @@ def warn_ownership_probe(source: Path, destination: Path) -> str | None:
     # the ones CONTROL and RED already measured (T-1247).
     owned_board = neutral_board.replace(
         warn_probe_ticket(WARN_PROBE_NEUTRAL_SLUG),
-        warn_probe_ticket(WARN_PROBE_OWNER_SLUG),
+        warn_probe_ticket(owner_slug),
     )
     if len(owned_board) != len(neutral_board):
         return (
@@ -889,69 +1018,143 @@ def duplicate_tag_query(path: Path) -> str | None:
 
 
 def count_fail_sites(source: str) -> int:
-    """How many `fail(...)` sites the canonical validator declares."""
-    return sum(
-        1
-        for node in ast.walk(ast.parse(source))
-        if isinstance(node, ast.Call) and isinstance(node.func, ast.Name) and node.func.id == "fail"
-    )
+    """How many `fail(...)` sites the canonical validator declares.
+
+    Reporting metadata now, not the gate. `fail_site_inventory` owns identity.
+    """
+    return inventory.count_fail_sites(source)
 
 
 def add_fail_site(source: str) -> str:
-    """Append one synthetic fail site, as the red control for the tripwire."""
+    """Append one synthetic fail site, as a red control for the inventory."""
     if not source.endswith("\n"):
         source += "\n"
     return source + 'if False:\n    fail("synthetic red-control fail site")\n'
 
 
+def remove_fail_site(source: str) -> str:
+    """Disarm the first fail site, as the other direction's red control."""
+    disarmed = source.replace('fail("', 'ok("', 1)
+    if disarmed == source:
+        raise AssertionError("red-control setup found no literal fail site to disarm")
+    return disarmed
+
+
+def swap_fail_site(source: str) -> str:
+    """Remove one fail site and add another. THE control.
+
+    This is the exact change the old counting tripwire could not see: the
+    total is unchanged, so a gate bound to volume stays green while the
+    validator's fail surface underneath it is a different surface.
+    """
+    return add_fail_site(remove_fail_site(source))
+
+
+def pad_above_fail_sites(source: str) -> str:
+    """Insert unrelated lines, moving every line number below them.
+
+    The green control for identity: this changes what a line-numbered
+    inventory records and must change nothing the identity gate reads.
+    """
+    marker = "\nimport sys\n"
+    if marker not in source:
+        raise AssertionError("green-control setup found no import to pad below")
+    return source.replace(marker, "\nimport sys\n\n# padding inserted by the identity control\n", 1)
+
+
+def _inventory_control(destination: Path, name: str, source: str, ledger: str) -> list[str]:
+    """Run the identity gate over a deliberately altered validator copy."""
+    probe = destination / f"inventory-{name}"
+    (probe / "tools").mkdir(parents=True, exist_ok=True)
+    try:
+        (probe / inventory.VALIDATOR_REL).write_text(source, encoding="utf-8", newline="\n")
+        (probe / inventory.LEDGER_REL).write_text(ledger, encoding="utf-8", newline="\n")
+        return inventory.inventory_errors(probe)
+    finally:
+        shutil.rmtree(probe, ignore_errors=True)
+
+
 def check_inventory_probe(root: Path, destination: Path) -> str | None:
-    """Detect a validator check arriving with no control in this file.
+    """Detect a validator check arriving, leaving, or being swapped, with no control.
 
     `CASES` is hand-maintained and nothing bound it to the validator, so the
     KNOWLEDGE structured-surface check landed with the sweep total unchanged --
     the closing line read 230 of 230 both before and after a check arrived
-    uncovered (T-1292). This is the tripwire: the validator's fail surface is
-    recorded, and growing it without a decision here is a failure rather than
-    a silent one.
+    uncovered (T-1292). The first repair was a counter, and a counter binds
+    volume: remove one check, add another, and the total never moves. T-1359
+    replaced it with identity, and the swap below is the control that proves
+    the old blind spot is dead rather than merely documented.
 
-    Bounded on purpose, and the bound is stated in
-    `CHECK_INVENTORY_LIMITATION`: a count binds volume, never identity.
+    The bound that remains is stated in `CHECK_INVENTORY_LIMITATION`.
     """
-    validator = root / "tools" / "validate.py"
+    errors = inventory.inventory_errors(root)
+    # A record claiming COVERED has to name a control this file still ships.
+    # Without this, deleting a CASE leaves its site recorded as covered and
+    # the ledger becomes the thing it replaced: a number nobody can check.
     try:
-        source = validator.read_text(encoding="utf-8-sig")
+        labels = {case[0] for case in CASES}
+        for record in inventory.load_ledger(root)["sites"]:
+            named = record.get("case")
+            if record.get("disposition") == inventory.COVERED and named not in labels:
+                errors.append(
+                    f"fail site {record['site_id']} claims COVERED by {named!r}, "
+                    f"which is not a CASE in tools/audit_checks.py"
+                )
+    except (OSError, ValueError, KeyError):
+        pass  # already reported by inventory_errors
+    if errors:
+        return "; ".join(errors[:6]) + (f" (+{len(errors) - 6} more)" if len(errors) > 6 else "")
+
+    try:
+        source = (root / inventory.VALIDATOR_REL).read_text(encoding="utf-8-sig")
+        ledger = (root / inventory.LEDGER_REL).read_text(encoding="utf-8-sig")
     except OSError as exc:
-        return f"cannot read the canonical validator: {exc}"
-    try:
-        observed = count_fail_sites(source)
-    except SyntaxError as exc:
-        return f"canonical validator does not parse: {exc}"
-    if observed != VALIDATOR_FAIL_SITES:
-        direction = "grew to" if observed > VALIDATOR_FAIL_SITES else "shrank to"
+        return f"cannot read the inventory subject: {exc}"
+
+    # The controls. A gate that cannot notice a changed fail surface would
+    # report this baseline green forever, which is the disarmed-control shape
+    # the inventory exists to catch. Each names what it must see.
+    for name, mutate, must_detect in (
+        ("added", add_fail_site, "ADDED"),
+        ("removed", remove_fail_site, "REMOVED"),
+        ("swapped", swap_fail_site, "ADDED"),
+    ):
+        try:
+            mutated = mutate(source)
+        except AssertionError as exc:
+            return f"{name} red control could not be built: {exc}"
+        found = _inventory_control(destination, name, mutated, ledger)
+        if not found:
+            return (
+                f"the {name} red control was not detected -- the inventory "
+                f"cannot see a validator whose fail surface changed"
+            )
+        if not any(must_detect in line for line in found):
+            return (
+                f"the {name} red control was detected without naming a "
+                f"{must_detect} site: {found[0]}"
+            )
+    # The swap has to report BOTH halves, or it is a count in disguise.
+    swapped = _inventory_control(destination, "swapped-pair", swap_fail_site(source), ledger)
+    if not (
+        any("ADDED" in line for line in swapped) and any("REMOVED" in line for line in swapped)
+    ):
         return (
-            f"tools/validate.py {direction} {observed} fail site(s) against the "
-            f"recorded {VALIDATOR_FAIL_SITES}. A new check needs a CASE in this "
-            f"file, or a recorded reason it has none; a removed check needs its "
-            f"CASE removed. Update VALIDATOR_FAIL_SITES in the same change"
+            "the same-count swap control named only one half; identity must "
+            f"report the added AND the removed site: {swapped}"
         )
 
-    # The control. A counter that cannot notice a new fail site would report
-    # this baseline green forever, which is precisely the disarmed-control
-    # shape the tripwire exists to catch.
-    probe = destination / "check-inventory-probe"
-    probe.mkdir(parents=True, exist_ok=True)
-    mutated = probe / "validate.py"
-    mutated.write_text(add_fail_site(source), encoding="utf-8", newline="\n")
+    # The green control. Identity must be insensitive to unrelated movement,
+    # or the gate becomes noise every time a line is inserted anywhere above.
     try:
-        red = count_fail_sites(mutated.read_text(encoding="utf-8"))
-    except SyntaxError as exc:
-        return f"red control did not parse: {exc}"
-    finally:
-        shutil.rmtree(probe, ignore_errors=True)
-    if red != observed + 1:
+        padded = pad_above_fail_sites(source)
+    except AssertionError as exc:
+        return f"green control could not be built: {exc}"
+    drift = _inventory_control(destination, "padded", padded, ledger)
+    if drift:
         return (
-            f"an added fail site moved the count to {red}; expected "
-            f"{observed + 1}, so the tripwire cannot see a new check"
+            "inserting unrelated lines moved the inventory, so identity is "
+            f"positional after all: {drift[0]}"
         )
     return None
 
@@ -1448,9 +1651,79 @@ def add_state_field(line: str):
         index = text.rfind(marker)
         if index == -1:
             return text
-        return text[:index] + "\n" + line + text[index + 1 :]
+        # T-1359: this used to slice `text[index + 1 :]`, which ate the newline
+        # that separates the inserted field from the closing fence and produced
+        # `stop_reason: X---`. The validator then FAILed on a missing fence --
+        # a shape no case expects -- so the control read dead while the check it
+        # names was alive. Invisible until audit_checks stopped returning at its
+        # first failing probe.
+        return text[:index] + "\n" + line + text[index:]
 
     return mutate
+
+
+def unblock_parked_work(text: str) -> str:
+    """File every `## BLOCKED` record back into `## TODO` as workable Work.
+
+    The audit route is correctly silent when the layer it routes binds a
+    ticket nobody can work, and this repository's inbox routes one that is
+    parked -- so the control that exists to prove the route is followed ran
+    green for every session, on a condition it never reached (T-1359). Derived
+    from section headers alone: no ticket id, nothing to rot.
+    """
+    lines = text.splitlines(keepends=True)
+    try:
+        blocked = next(i for i, line in enumerate(lines) if line.startswith("## BLOCKED"))
+    except StopIteration:
+        return text
+    end = next(
+        (i for i in range(blocked + 1, len(lines)) if lines[i].startswith("## ")), len(lines)
+    )
+    parked = [i for i in range(blocked + 1, end) if lines[i].startswith("- [")]
+    if not parked:
+        return text
+    moved = [
+        re.sub(r"\s*\|\s*(blocked|owner|claim_time):\s*[^|\n]*", "", lines[i].rstrip("\n"))
+        .replace("- [!]", "- [ ]", 1)
+        .replace("- [/]", "- [ ]", 1)
+        + "\n"
+        for i in parked
+    ]
+    for index in reversed(parked):
+        lines.pop(index)
+    todo = next(i for i, line in enumerate(lines) if line.startswith("## TODO"))
+    lines[todo + 1 : todo + 1] = moved
+    return "".join(lines)
+
+
+def release_claimed_work(text: str) -> str:
+    """Empty `## DOING` by filing its claimed ticket back into `## TODO`.
+
+    Derived from the board it is handed: no ticket id appears here, so a
+    control that needs an unclaimed board does not rot the next time the
+    board moves (T-1359).
+    """
+    lines = text.splitlines(keepends=True)
+    try:
+        doing = next(i for i, line in enumerate(lines) if line.startswith("## DOING"))
+        todo = next(i for i, line in enumerate(lines) if line.startswith("## TODO"))
+    except StopIteration:
+        return text
+    claimed = [i for i in range(doing + 1, todo) if lines[i].startswith("- [")]
+    if not claimed:
+        return text
+    moved = [
+        re.sub(r"\s*\|\s*(owner|claim_time):\s*[^|\n]*", "", lines[i].rstrip("\n")).replace(
+            "- [/]", "- [ ]", 1
+        )
+        + "\n"
+        for i in claimed
+    ]
+    for index in reversed(claimed):
+        lines.pop(index)
+    todo = next(i for i, line in enumerate(lines) if line.startswith("## TODO"))
+    lines[todo + 1 : todo + 1] = moved
+    return "".join(lines)
 
 
 def inherit_from_nothing(text: str) -> str:
@@ -1462,8 +1735,13 @@ def inherit_from_nothing(text: str) -> str:
             in_done = line.startswith("## DONE")
             continue
         if in_done and line.startswith("- [x] "):
+            # T-1359: DONE records now carry `closure_mode: own_patch`, so
+            # APPENDING a second one made the BOARD unparsable and the parse
+            # error pre-empted the check this case exists to drive. Replace the
+            # field the record already has instead of adding a rival copy.
+            body = re.sub(r"\s*\|\s*closure_mode:\s*[^|\n]*", "", line.rstrip("\n"))
             lines[i] = (
-                line.rstrip("\n")
+                body
                 + " | closure_mode: inherited_verified"
                 + " | implementation_delta: none"
                 + " | implementation_source: T-99999999"
@@ -2008,7 +2286,10 @@ CASES: list[tuple[str, str, object, str]] = [
     (
         "manifest stops installing SAICRITIC",
         "saipen/MANIFEST.json",
-        lambda t: t.replace('    {"src": "saipen/SAICRITIC.md", "required": true},\n', ""),
+        # T-1359: the anchor was one pretty-printed JSON line, so reformatting
+        # the manifest silently disarmed the control. Rename the source path
+        # instead: it survives any layout the file is written in.
+        lambda t: t.replace('"saipen/SAICRITIC.md"', '"saipen/SAICRITIC-UNINSTALLED.md"'),
         "saicritic-reachability",
     ),
     # T-607: the SubSaipen write boundary is continuously mechanical -- a sub
@@ -2033,13 +2314,19 @@ CASES: list[tuple[str, str, object, str]] = [
     ),
     ("last_event below the log tail", STATE, sub_line("last_event", "1"), "lower than the log"),
     (
-        "next_action picks a ticket that is not the topmost workable",
+        # T-1359: the expectation named a message the validator stopped
+        # printing when CORE-003 unified the router and the gate on ONE Pick
+        # Rule -- `topmost workable ## TODO` is not what the selector computes
+        # any more. The mutation still drives the right check red; only the
+        # words it waited for had moved, so the control read dead while the
+        # check was alive.
+        "next_action picks a ticket the shared Pick Rule does not select",
         BOARD,
         (
             "MULTI",
             [(BOARD, demote_the_pick), (STATE, sub_line("next_action", '"PHASE SCOUT T-998"'))],
         ),
-        "but the topmost workable ## TODO ticket is",
+        "but the shared Pick Rule selects",
     ),
     (
         "T-576-style drift moves a blocker ticket under TODO",
@@ -3812,17 +4099,142 @@ CASES.append(
         # T-1270. The condition needs a file the pristine tree does not have,
         # which is why MULTI learned to carry a creating member: an inbox with
         # no layer routes nothing, so there is no route to ignore.
+        #
+        # T-1359: and the route only OWNS continuation when the layer it picks
+        # binds workable Work. This repository's inbox routes `PHASE SCOUT
+        # T-1304`, a ticket parked in `## BLOCKED`, so `audit_route_owns` said
+        # no and the control proved nothing -- green on a condition it never
+        # reached, for however many releases. The board member releases parked
+        # Work so the routed layer is workable, which is the very state the
+        # label claims ("a workable layer waits"). Derived from section
+        # headers: no ticket id, nothing to rot.
         "audit route ignored while a workable layer waits",
         STATE,
         (
             "MULTI",
             [
                 ("audit/1.md", write_new("# audit\n\nfinding one\n")),
+                (BOARD, unblock_parked_work),
                 (STATE, sub_line("next_action", '"saipen improve"')),
             ],
         ),
         "audit route not followed",
     )
+)
+
+
+# --- T-1359: the eight validator sites the inventory found uncovered --------
+#
+# `tools/fail_site_inventory.py` names every `fail(...)` site in
+# `tools/validate.py` by identity, and the nine it reported with no control
+# are closed here. The two activation sites the previous session recorded as
+# "not file-mutable" ARE mutable: the validator imports `installed_relpath`
+# from the tree under audit, so deleting or misprogramming the module the
+# import resolves to expresses exactly the condition the site tests. Measured,
+# not assumed -- both go red on a pristine copy.
+#
+# None of these anchors on a ticket id. Three of the conditions are about
+# board shape, and CASES run against a copy of the LIVE home, so a control
+# naming a fixed id rots the next time the board moves: the board mutations
+# below read the board they are handed and derive their own target.
+
+
+def drop_home_placeholder(text: str) -> str:
+    """Strip the substitution marker the injector rewrites per home."""
+    return text.replace("{{SAIPEN_HOME}}", "SAIPEN_HOME")
+
+
+def extra_converge_target(text: str) -> str:
+    """Give CONVERGE.md a stage CORE.md never declared."""
+    return re.sub(
+        r"(?m)^converge_targets:(.*)$",
+        lambda match: f"converge_targets:{match.group(1)} | polish",
+        text,
+        count=1,
+    )
+
+
+def divert_shortcut_route(text: str) -> str:
+    """Point the first shortcut row at a command the registry does not own."""
+    return re.sub(
+        r"(?m)^\| `([a-z]{2,3})` \| `([^`]*)` \|",
+        lambda match: f"| `{match.group(1)}` | `saipen not-a-command` |",
+        text,
+        count=1,
+    )
+
+
+def unallocated_board_ticket(text: str) -> str:
+    """File a record no allocation event ever journalled."""
+    marker = "## TODO\n"
+    if marker not in text:
+        return text
+    return text.replace(
+        marker,
+        marker + "- [ ] T-9998 [P3] synthetic allocation control | needs:  | verify: n/a\n",
+        1,
+    )
+
+
+def misland_activation_template(text: str) -> str:
+    """Make the source->installed path mapping disagree with the runtime."""
+    anchor = (
+        "    if relative.startswith(_SOURCE_PREFIX):\n"
+        "        return relative[len(_SOURCE_PREFIX) :]\n"
+    )
+    return text.replace(
+        anchor,
+        "    if relative.startswith(_SOURCE_PREFIX):\n"
+        "        return relative[len(_SOURCE_PREFIX) :] + '.landed'\n",
+        1,
+    )
+
+
+CASES.extend(
+    [
+        (
+            "activation template deleted",
+            ACTIVATION,
+            DELETE,
+            "activation template -- saipen/ACTIVATION_BLOCK.md missing",
+        ),
+        (
+            "activation template loses its home placeholder",
+            ACTIVATION,
+            drop_home_placeholder,
+            "ACTIVATION_BLOCK.md missing '{{SAIPEN_HOME}}'",
+        ),
+        (
+            "the module the activation check imports disappears",
+            AUTOINJECT,
+            DELETE,
+            "activation template -- installed_relpath unavailable",
+        ),
+        (
+            "installed_relpath stops mapping the activation template home",
+            RUNTIME_SURFACE,
+            misland_activation_template,
+            "activation template -- installed_relpath maps",
+        ),
+        (
+            "CONVERGE.md gains a target CORE.md does not declare",
+            CONVERGE,
+            extra_converge_target,
+            "CONVERGE.md `converge_targets:` set differs from CORE.md by",
+        ),
+        (
+            "COMMANDS.md shortcut row leaves the registry behind",
+            COMMANDS,
+            divert_shortcut_route,
+            "cross-doc drift [commands-vs-registry]",
+        ),
+        (
+            "BOARD record with no allocation event",
+            BOARD,
+            unallocated_board_ticket,
+            "has no [T-###] allocation event in the complete history",
+        ),
+    ]
 )
 
 
@@ -4076,29 +4488,86 @@ def select_cases(cases, changed: frozenset[str]) -> list:
     return chosen
 
 
-def main() -> int:
-    changed = scoped_paths(sys.argv[1:])
-    cases = select_cases(CASES, changed) if changed is not None else CASES
-    if changed is not None:
-        for line in scoped_banner(len(cases), changed):
-            print(line)
+class ProbeContext:
+    """What an always-on probe is handed, plus what earlier probes produced.
 
-    tmp = Path(tempfile.mkdtemp(prefix="audit_checks_"))
-    device_error = root_device_ignore_probe(tmp)
-    if device_error:
-        print(f"FAIL: root `nul` snapshot control -- {device_error}")
-        shutil.rmtree(tmp, ignore_errors=True)
-        return 1
-    print("PASS: a real root `nul` entry is excluded from audit snapshots")
+    `sandbox` is this probe's own scratch directory: the runner creates it,
+    the runner deletes it, and no probe can leave a fixture behind for the
+    next one to trip over. `pristine` and `control` are built by probes that
+    later probes DECLARE as prerequisites, so a probe never silently reads a
+    fixture that was never built.
+    """
 
-    restore_error = symlink_restore_probe(tmp)
-    if restore_error:
-        print(f"FAIL: symlink mutation restoration control -- {restore_error}")
-        shutil.rmtree(tmp, ignore_errors=True)
-        return 1
-    print("PASS: mutation restoration unlinks symlinks before restoring owned bytes")
+    def __init__(self, tmp: Path, cases: list, changed: frozenset[str] | None) -> None:
+        self.tmp = tmp
+        self.cases = cases
+        self.changed = changed
+        self.sandbox = tmp
+        self.pristine: Path | None = None
+        self.control: str | None = None
+        self.extra: list[str] = []
 
-    pristine = tmp / "pristine"
+
+@dataclass(frozen=True)
+class Probe:
+    """One always-on check, isolated from every other one.
+
+    `requires` names the probes whose product this one reads. A probe with no
+    prerequisite is INDEPENDENT and always runs -- that is the whole point:
+    `main` used to be a chain of `if error: return 1`, so the first failure
+    hid every check behind it and the validator fail-site drift that opened
+    T-1359 sat invisible behind an earlier probe for an unknown number of
+    releases. A dependent probe whose prerequisite failed is SKIPPED OUT LOUD,
+    naming the prerequisite, rather than disappearing.
+    """
+
+    name: str
+    run: "Callable[[ProbeContext], str | None]"
+    passed: str
+    requires: tuple[str, ...] = ()
+
+
+def run_probes(probes, context: ProbeContext, out=print) -> dict[str, str]:
+    """Give every probe a verdict in one invocation. Never stop at the first.
+
+    Returns {probe name: PASS|FAIL|SKIP}. The caller derives rc from it, once,
+    at the end -- there is no early exit anywhere in this layer.
+    """
+    verdicts: dict[str, str] = {}
+    for probe in probes:
+        blocked = next((name for name in probe.requires if verdicts.get(name) != "PASS"), None)
+        if blocked is not None:
+            verdicts[probe.name] = "SKIP"
+            out(f"SKIP: {probe.name} because prerequisite {blocked} failed")
+            continue
+        sandbox = context.tmp / f"probe-{probe.name}"
+        context.sandbox = sandbox
+        context.extra = []
+        try:
+            sandbox.mkdir(parents=True, exist_ok=True)
+            error = probe.run(context)
+        except Exception as exc:  # a probe that explodes is a failed probe
+            error = f"{type(exc).__name__}: {exc}"
+        finally:
+            # The probe owns its cleanup whatever happened inside it, so a
+            # failure cannot poison the fixture the next probe is handed.
+            shutil.rmtree(sandbox, ignore_errors=True)
+            context.sandbox = context.tmp
+        if error:
+            verdicts[probe.name] = "FAIL"
+            out(f"FAIL: {probe.name} -- {error}")
+        else:
+            verdicts[probe.name] = "PASS"
+            out(f"PASS: {probe.passed}")
+        for line in context.extra:
+            out(line)
+    return verdicts
+
+
+def build_pristine(context: ProbeContext) -> str | None:
+    """The known-good copy every mutation control is measured against."""
+    pristine = context.tmp / "pristine"
+    shutil.rmtree(pristine, ignore_errors=True)
     shutil.copytree(HOME, pristine, ignore=IGNORE)
     rebind_synthetic_milestones(pristine)
     freshen_synthetic_outboxes(pristine)
@@ -4111,64 +4580,38 @@ def main() -> int:
         text = text.replace("**status:** ready", "**status:** stale")
         text = re.sub(r"(?m)^status:\s*ready\s*$", "status: stale", text)
         outbox.write_text(text, encoding="utf-8", newline="\n")
+    context.pristine = pristine
+    return None
 
-    ledger_error = release_ledger_probe(pristine, tmp)
-    if ledger_error:
-        print(f"FAIL: release-ledger divergence probe -- {ledger_error}")
-        shutil.rmtree(tmp, ignore_errors=True)
-        return 1
-    print(
-        "PASS: release-ledger clean/new-tag/new-changelog/stale-baseline controls behave distinctly"
+
+def inventory_probe(context: ProbeContext) -> str | None:
+    error = check_inventory_probe(context.pristine, context.sandbox)
+    if error:
+        return error
+    source = (context.pristine / inventory.VALIDATOR_REL).read_text(encoding="utf-8-sig")
+    context.extra.append(
+        f"NOTE: {count_fail_sites(source)} fail site(s) recorded by identity in "
+        f"{VALIDATOR_FAIL_SITE_LEDGER}"
     )
+    context.extra.append(f"NOTE: known limitation -- {CHECK_INVENTORY_LIMITATION}")
+    return None
 
-    inventory_error = check_inventory_probe(pristine, tmp)
-    if inventory_error:
-        print(f"FAIL: validator check inventory -- {inventory_error}")
-        shutil.rmtree(tmp, ignore_errors=True)
-        return 1
-    print(
-        f"PASS: tools/validate.py declares the recorded {VALIDATOR_FAIL_SITES} "
-        f"fail site(s) and an added one is detected"
-    )
-    print(f"NOTE: known limitation -- {CHECK_INVENTORY_LIMITATION}")
 
-    owner_error = warn_ownership_probe(pristine, tmp)
-    if owner_error:
-        print(f"FAIL: warn-slug ownership probe -- {owner_error}")
-        shutil.rmtree(tmp, ignore_errors=True)
-        return 1
-    print(
-        "PASS: aged unowned WARN slug fails; identical aged slug with a "
-        "live naming ticket passes; baseline data, never validator wording"
-    )
+def tag_query_probe(context: ProbeContext) -> str | None:
+    """The release-ledger query is observed exactly once, and both controls fire.
 
-    rename_error = phase_rename_probe(pristine, tmp)
-    if rename_error:
-        print(f"FAIL: phase-rename probe -- {rename_error}")
-        shutil.rmtree(tmp, ignore_errors=True)
-        return 1
-    print(
-        "PASS: consistent SCOUT->SCOUTX rename stays green across the DFA, "
-        "RFC table, schema enum and phase doc -- edge gates catch drift, "
-        "not deliberate renames"
-    )
-
-    batch_error = audit_tags_batch_probe(HOME, tmp)
-    if batch_error:
-        print(f"FAIL: audit-tags batch process probe -- {batch_error}")
-        shutil.rmtree(tmp, ignore_errors=True)
-        return 1
-    print(
-        "PASS: audit-tags missing-Git skip plus enumeration, nonzero, "
-        "malformed, truncated, and surplus fail-closed controls behave"
-    )
-
+    Also refuses to bless a stuck-red validator: a validator that FAILs for an
+    unrelated reason would make "the query ran" meaningless, so the pristine
+    STATE is deliberately broken, an error is required, and the bytes go back
+    in a `finally` -- this probe used to restore by hand after the check, so an
+    early return between the two left the shared tree mutated.
+    """
+    pristine = context.pristine
     query_count, query_error = observed_tag_queries(pristine)
-    red_tree = tmp / "duplicate-tag-query"
+    red_tree = context.sandbox / "duplicate-tag-query"
     shutil.copytree(pristine, red_tree)
     setup_error = duplicate_tag_query(red_tree / "tools" / "validate.py")
     red_count, red_error = observed_tag_queries(red_tree)
-    shutil.rmtree(red_tree, ignore_errors=True)
     if query_error or setup_error or red_error or query_count != 1 or red_count != 2:
         problem = query_error or setup_error or red_error
         if problem is None:
@@ -4177,100 +4620,92 @@ def main() -> int:
                 if query_count != 1
                 else f"duplicate red-control observed {red_count}; expected 2"
             )
-        print(f"FAIL: release-ledger runtime query probe -- {problem}")
-        shutil.rmtree(tmp, ignore_errors=True)
-        return 1
+        return problem
 
-    # The observation itself must not bless a stuck-red validator merely
-    # because Git still launched. Break the pristine STATE, require a control
-    # error, then restore it before the mutation table starts.
     state_path = pristine / STATE
     state_source = state_path.read_text(encoding="utf-8-sig")
-    state_path.write_text(
-        re.sub(r"^phase:.*$", "phase: NOT-A-PHASE", state_source, count=1, flags=re.MULTILINE),
-        encoding="utf-8",
-        newline="\n",
-    )
-    _, invalid_control_error = observed_tag_queries(pristine)
-    state_path.write_text(state_source, encoding="utf-8", newline="\n")
+    try:
+        state_path.write_text(
+            re.sub(r"^phase:.*$", "phase: NOT-A-PHASE", state_source, count=1, flags=re.MULTILINE),
+            encoding="utf-8",
+            newline="\n",
+        )
+        _, invalid_control_error = observed_tag_queries(pristine)
+    finally:
+        state_path.write_text(state_source, encoding="utf-8", newline="\n")
     if invalid_control_error is None:
-        print(
-            "FAIL: release-ledger runtime query probe accepted a validator "
-            "control that was deliberately stuck red"
-        )
-        shutil.rmtree(tmp, ignore_errors=True)
-        return 1
+        return "a validator control that was deliberately stuck red was accepted"
+    return None
 
-    # The control. Every expectation below must be ABSENT here, or the case
-    # proves nothing -- a message that is always present is not evidence.
-    control = validator_output(pristine)
+
+def validator_baseline_probe(context: ProbeContext) -> str | None:
+    """Every expectation in the mutation table must be ABSENT here."""
+    control = validator_output(context.pristine)
     if "Traceback" in control:
-        print(
-            "FAIL: the validator crashes on an unmodified copy -- fix that "
-            "before trusting any case below"
+        return (
+            "the validator crashes on an unmodified copy -- fix that before "
+            f"trusting any case below: {control[-400:]}"
         )
-        print(control[-800:])
-        shutil.rmtree(tmp, ignore_errors=True)
-        return 1
-    control_failure = next((line for line in control.splitlines() if line.startswith("FAIL")), None)
-    if control_failure:
-        print(
-            "FAIL: the validator rejects an unmodified copy -- fix the "
-            "known-good control before trusting mutation results"
+    failure = next((line for line in control.splitlines() if line.startswith("FAIL")), None)
+    if failure:
+        return (
+            "the validator rejects an unmodified copy -- fix the known-good "
+            f"control before trusting mutation results: {failure[:400]}"
         )
-        print(control_failure[:800])
-        shutil.rmtree(tmp, ignore_errors=True)
-        return 1
+    context.control = control
+    return None
 
-    # A callable that changes nothing is not an applied mutation. The
-    # goal-counter case once hard-coded the exact integer live STATE already
-    # carried, so the validator saw an untouched tree and the suite still
-    # counted the case as evidence. Keep this harness guard red-test inside
-    # the harness: removing the equality check above makes this control fail.
-    if apply_case(pristine, STATE, lambda text: text):
-        print("FAIL: callable no-op mutation was accepted as applied")
-        shutil.rmtree(tmp, ignore_errors=True)
-        return 1
-    print("PASS: callable no-op mutations are rejected before validation")
 
-    # A producer-package case that names no gate is a case running where its
-    # finding is only a WARN, and this harness keeps WARN lines -- so it would
-    # pass while measuring nothing. Structural, because the weakening is
-    # invisible in the result: the count stays 218 either way.
+def no_op_mutation_probe(context: ProbeContext) -> str | None:
+    """A callable that changes nothing is not an applied mutation.
+
+    The goal-counter case once hard-coded the exact integer live STATE already
+    carried, so the validator saw an untouched tree and the suite still counted
+    the case as evidence. Removing the equality check in `apply_case` makes
+    this control fail.
+    """
+    if apply_case(context.pristine, STATE, lambda text: text):
+        return "callable no-op mutation was accepted as applied"
+    return None
+
+
+def gated_producer_probe(context: ProbeContext) -> str | None:
+    """A producer-package case naming no gate measures nothing (T-568).
+
+    Structural, because the weakening is invisible in the result: the sweep
+    total is the same either way. Reads only the case table, so it is
+    independent of every fixture.
+    """
     ungated = [
         parts[0]
-        for parts in map(case_parts, cases)
+        for parts in map(case_parts, context.cases)
         if isinstance(parts[1], str) and parts[1].endswith("OUTBOX.md") and parts[4] is None
     ]
     if ungated:
-        for label in ungated:
-            print(
-                f"FAIL: {label!r} mutates a producer OUTBOX but names no "
-                f"gate -- producer findings are WARNs outside "
-                f"`--gate collect:<producer>`, so this case would pass on a "
-                f"warning and prove no refusal (T-568)"
-            )
-        shutil.rmtree(tmp, ignore_errors=True)
-        return 1
-    print("PASS: every producer-OUTBOX control runs at a gate where its finding is hard")
+        return (
+            "producer findings are WARNs outside `--gate collect:<producer>`, so "
+            "these cases would pass on a warning and prove no refusal (T-568): "
+            + ", ".join(repr(label) for label in sorted(ungated))
+        )
+    return None
 
+
+def case_availability_probe(context: ProbeContext) -> str | None:
+    """The mutation suite cannot start with a changing denominator."""
     unavailable = [
         parts[0]
-        for parts in map(case_parts, cases)
-        if not case_available(pristine, parts[1], parts[2])
+        for parts in map(case_parts, context.cases)
+        if not case_available(context.pristine, parts[1], parts[2])
     ]
     if unavailable:
-        for label in unavailable:
-            print(f"FAIL: skipped canonical mutation: {label}")
-        print("FAIL: canonical mutation suite cannot start with a changing denominator")
-        shutil.rmtree(tmp, ignore_errors=True)
-        return 1
+        return "skipped canonical mutation(s): " + ", ".join(sorted(unavailable))
+    return None
 
-    # One copy, not one per case. Every case touches exactly one file, so
-    # saving that file's bytes and putting them back is equivalent to a fresh
-    # tree and turns 41 copytrees of a repo carrying 32 locale directories into
-    # one. The difference is four minutes against twenty seconds, which is the
-    # difference between a gate CI runs and a gate someone deletes.
+
+def mutation_sweep_probe(context: ProbeContext) -> str | None:
+    """Every case breaks the copy in one way; the validator must name it."""
+    pristine, control, cases = context.pristine, context.control, context.cases
+
     # One control per gate in use, measured on the UNMODIFIED copy. A gated
     # case must be judged against its own gate's baseline: a finding the
     # pristine tree already prints at that gate proves nothing there either.
@@ -4302,11 +4737,17 @@ def main() -> int:
             continue
         runnable.append((label, rel, mutation, expected, gate))
 
-    worker_count = min(8, max(1, os.cpu_count() or 1), len(runnable))
+    worker_count = min(8, max(1, os.cpu_count() or 1), max(1, len(runnable)))
     chunks = [runnable[index::worker_count] for index in range(worker_count)]
 
+    # One copy per worker, not one per case. Every case touches exactly one
+    # file, so saving that file's bytes and putting them back is equivalent to
+    # a fresh tree and turns 41 copytrees of a repo carrying 32 locale
+    # directories into one. The difference is four minutes against twenty
+    # seconds, which is the difference between a gate CI runs and a gate
+    # someone deletes.
     def run_chunk(index, chunk):
-        worker_root = tmp / f"cases-{index:02d}"
+        worker_root = context.sandbox / f"cases-{index:02d}"
         local_dead = []
         local_skipped = []
         try:
@@ -4355,17 +4796,13 @@ def main() -> int:
                 worker_errors.append(f"worker {index}: {chunk_error}")
 
     if worker_errors:
-        for error in sorted(worker_errors):
-            print(f"FAIL: parallel mutation worker -- {error}")
-        shutil.rmtree(tmp, ignore_errors=True)
-        return 1
+        return "parallel mutation worker -- " + "; ".join(sorted(worker_errors))
     dead.sort()
     skipped.sort()
     always.sort()
-    shutil.rmtree(tmp, ignore_errors=True)
 
     for label, expected in always:
-        print(
+        context.extra.append(
             f"FAIL: {label!r} expects {expected!r}, which the UNMODIFIED "
             f"repository already prints -- the case proves nothing"
         )
@@ -4374,7 +4811,7 @@ def main() -> int:
         # a present file whose ANCHOR moved -- a LOG line sealed into a
         # segment at the next cap crossing being the usual way. That message
         # sent its own author hunting for a file that was sitting right there.
-        print(
+        context.extra.append(
             f"SKIP: {label} -- the mutation changed nothing: the file is "
             f"missing, or its anchor text is (a LOG anchor sealed into "
             f".saipen/logs/ is the usual cause)"
@@ -4390,24 +4827,144 @@ def main() -> int:
                 f" -- its anchor appears {occurrences} times in the target, and "
                 f"`replace` mutates only the first; use `replace_all`"
             )
-        print(
+        context.extra.append(
             f"FAIL: {label} -- the validator did not report {expected!r}. "
             f"That check no longer goes red on its own condition{why}"
         )
 
     live = len(cases) - len(dead) - len(skipped) - len(always)
     broken = len(dead) + len(always) + len(skipped)
+    context.extra.extend(sweep_report(context.changed, len(cases), live, len(skipped), broken))
     if broken:
-        for line in sweep_report(changed, len(cases), live, len(skipped), broken):
-            print(line)
-        return 1
-    print(
-        "PASS: release-ledger tag query is observed once; duplicate-query "
-        "and invalid-validator controls both go red"
+        return f"{broken} of {len(cases)} mutation control(s) no longer prove anything"
+    return None
+
+
+def always_on_probes() -> tuple[Probe, ...]:
+    """The probe table `main` runs. Order is dependency order, not priority.
+
+    The first four read no shared fixture at all, so nothing above them can
+    stop them running -- which is the property T-1359 exists to restore.
+    """
+    return (
+        Probe(
+            "root-nul-snapshot",
+            lambda ctx: root_device_ignore_probe(ctx.sandbox),
+            "a real root `nul` entry is excluded from audit snapshots",
+        ),
+        Probe(
+            "symlink-restore",
+            lambda ctx: symlink_restore_probe(ctx.sandbox),
+            "mutation restoration unlinks symlinks before restoring owned bytes",
+        ),
+        Probe(
+            "audit-tags-batch",
+            lambda ctx: audit_tags_batch_probe(HOME, ctx.sandbox),
+            "audit-tags missing-Git skip plus enumeration, nonzero, malformed, "
+            "truncated, and surplus fail-closed controls behave",
+        ),
+        Probe(
+            "gated-producer-cases",
+            gated_producer_probe,
+            "every producer-OUTBOX control runs at a gate where its finding is hard",
+        ),
+        Probe(
+            "pristine-fixture",
+            build_pristine,
+            "a known-good copy of this repository is built for the mutation controls",
+        ),
+        Probe(
+            "release-ledger",
+            lambda ctx: release_ledger_probe(ctx.pristine, ctx.sandbox),
+            "release-ledger clean/new-tag/new-changelog/stale-baseline controls "
+            "behave distinctly",
+            requires=("pristine-fixture",),
+        ),
+        Probe(
+            "validator-check-inventory",
+            inventory_probe,
+            "tools/validate.py declares exactly the adjudicated fail sites, and "
+            "added, removed and same-count SWAPPED sites are each named",
+            requires=("pristine-fixture",),
+        ),
+        Probe(
+            "warn-slug-ownership",
+            lambda ctx: warn_ownership_probe(ctx.pristine, ctx.sandbox),
+            "aged unowned WARN slug fails; identical aged slug with a live "
+            "naming ticket passes; baseline data, never validator wording",
+            requires=("pristine-fixture",),
+        ),
+        Probe(
+            "phase-rename",
+            lambda ctx: phase_rename_probe(ctx.pristine, ctx.sandbox),
+            "consistent SCOUT->SCOUTX rename stays green across the DFA, RFC "
+            "table, schema enum and phase doc -- edge gates catch drift, not "
+            "deliberate renames",
+            requires=("pristine-fixture",),
+        ),
+        Probe(
+            "release-ledger-runtime-query",
+            tag_query_probe,
+            "release-ledger tag query is observed once; duplicate-query and "
+            "invalid-validator controls both go red",
+            requires=("pristine-fixture",),
+        ),
+        Probe(
+            "validator-baseline",
+            validator_baseline_probe,
+            "the unmodified copy validates clean, so every expectation below "
+            "is absent before its mutation",
+            requires=("pristine-fixture",),
+        ),
+        Probe(
+            "callable-no-op-mutation",
+            no_op_mutation_probe,
+            "callable no-op mutations are rejected before validation",
+            requires=("pristine-fixture",),
+        ),
+        Probe(
+            "case-availability",
+            case_availability_probe,
+            "every canonical mutation has its target, so the denominator holds still",
+            requires=("pristine-fixture",),
+        ),
+        Probe(
+            "mutation-sweep",
+            mutation_sweep_probe,
+            "every canonical mutation still drives its own check red",
+            requires=("pristine-fixture", "validator-baseline"),
+        ),
     )
-    for line in sweep_report(changed, len(cases), live, len(skipped), broken):
-        print(line)
-    return 0
+
+
+def main() -> int:
+    changed = scoped_paths(sys.argv[1:])
+    cases = select_cases(CASES, changed) if changed is not None else CASES
+    if changed is not None:
+        for line in scoped_banner(len(cases), changed):
+            print(line)
+
+    tmp = Path(tempfile.mkdtemp(prefix="audit_checks_"))
+    try:
+        verdicts = run_probes(always_on_probes(), ProbeContext(tmp, cases, changed))
+    finally:
+        shutil.rmtree(tmp, ignore_errors=True)
+
+    # One exit, computed from the report. Not a style preference: an early
+    # `return 1` anywhere above is exactly the shape that hid the validator
+    # fail-site drift, and `test_check_inventory.py` asserts this function
+    # contains none.
+    failed = sorted(name for name, verdict in verdicts.items() if verdict == "FAIL")
+    skipped = sorted(name for name, verdict in verdicts.items() if verdict == "SKIP")
+    if failed or skipped:
+        print(
+            f"AUDIT: {len(verdicts) - len(failed) - len(skipped)} of {len(verdicts)} "
+            f"probes passed; failed: {', '.join(failed) or 'none'}; "
+            f"skipped: {', '.join(skipped) or 'none'}"
+        )
+    else:
+        print(f"AUDIT: all {len(verdicts)} always-on probes passed")
+    return 0 if not (failed or skipped) else 1
 
 
 if __name__ == "__main__":
