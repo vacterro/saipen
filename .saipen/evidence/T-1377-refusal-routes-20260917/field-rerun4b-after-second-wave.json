@@ -1,0 +1,484 @@
+{
+ "installed_runtime": true,
+ "installed_generation": {
+  "installed_home": "C:\\Users\\vac34\\.config\\opencode\\skills\\saipen",
+  "expected_generation": "gen-sha256:caba3969fc5201085bd5016587f94c1d9056572836f1438f629ff74361463342",
+  "runtime_generation": "gen-sha256:caba3969fc5201085bd5016587f94c1d9056572836f1438f629ff74361463342",
+  "source_head": "2855eca1d01df4084eabe978b56a8856c1a76be4",
+  "generation_current": true,
+  "installed_at": "2026-09-16T23:50:35Z"
+ },
+ "runtime_probe": "{\n  \"ok\": true,\n  \"code\": \"RUNTIME\",\n  \"agent\": \"claude\",\n  \"runtime_info_source\": \"unknown\",\n  \"runtime_info_present\": false,\n  \"schema_version\": 1,\n  \"harness\": null,\n  \"provider\": null,\n  \"model\": null,\n  \"variant\": null,\n  \"capabilities\": {\n    \"shell\": null,\n    \"filesystem\": null,\n    \"patch\": null,\n    \"browser\": null,\n    \"web\": null,\n    \"subagents\": null,\n    \"parallel_subagents\": null,\n    \"skills\": null,\n    \"mcp\": null,\n    \"structured_output\": null,\n    \"persistent_session\": null,\n    \"context_compaction\": null,\n    \"reasoning_effort\": null,\n    \"tool_search\": null,\n    \"programmatic_tool_calling\": null\n  },\n  \"strategy\": {\n    \"task_class\": \"IMPLEMENT\",\n    \"strategy\": \"LONG_BUILD\",\n    \"why\": \"ordinary implementation is LONG_BUILD: one primary worker, no reflexive subagents; no helper justification was supplied, so helpers are 0\",\n    \"helper_justification\": null,\n    \"helper_ceiling\": 0,\n    \"max_subagent_depth\": 1,\n    \"recursive_helpers\": \"DENIED_BY_POLICY\",\n    \"depth_enforcement\": \"UNKNOWN\",\n    \"context_budget_class\": \"ORDINARY\",\n    \"context_budget_bytes\": 40960,\n    \"child_packet_ceiling_bytes\": 16384,\n    \"capabilities\": {\n      \"subagents\": null,\n      \"parallel_subagents\": null,\n      \"skills\": null,\n      \"structured_output\": null,\n      \"context_compaction\": null,\n      \"persistent_session\": null\n    },\n    \"unknown_capabilities\": [\n      \"subagents\",\n      \"parallel_subagents\",\n      \"skills\",\n      \"structured_output\",\n      \"context_compaction\",\n      \"persistent_session\"\n    ]\n  }\n}\n",
+ "sessions": [
+  {
+   "model": "sairoute/SAIFREN",
+   "returncode": 0,
+   "elapsed_s": 20.4,
+   "binding": {
+    "cwd": "V:\\_TEMP_\\t1363-ha951h6r",
+    "PWD": "V:\\_TEMP_\\t1363-ha951h6r",
+    "SAIPEN_PROJECT_ROOT": null,
+    "OLDPWD": null,
+    "INIT_CWD": null,
+    "resolved_project_root": "V:\\_TEMP_\\t1363-ha951h6r"
+   },
+   "text": "Blocked. Guard refuses `edit` — STATE.md phase BUILD, `blocker: BLOCKED_EXTERNAL -- upstream API contract unconfirmed` (`.saipen/STATE.md:5`). Protocol requires clearing blocker before writes.\nGuard blocks write tools (`edit`, `bash`) until blocker resolved. Need your call.\n\nState: `.saipen/STATE.md:5` — `BLOCKED_EXTERNAL -- upstream API contract unconfirmed`.\n\nOptions:\n- Resolve blocker (e.g. `saipen recover resolve-blocker <decision>`) — then I retry edit\n- Unblock/close task in `.saipen/STATE.md` manually (edit that file; may also be guarded)\n- Tell me the blocker is stale and what decision to record\n\nWhich?",
+   "stderr_tail": "",
+   "events_parsed": 18,
+   "stdout_chars": 29073,
+   "stderr_chars": 0,
+   "measurement_source": "stdout_events",
+   "host_store_parts": 0,
+   "session_id": "ses_f535ea94dffex2OnEucjpu4vYS",
+   "measurement": "MEASURED",
+   "tools": 6,
+   "first_saipen_command": "saipen recover --help 2>&1; if (-not $?) { saipen recover resolve-blocker --help 2>&1 }",
+   "protocol_commands": [
+    "saipen recover --help 2>&1; if (-not $?) { saipen recover resolve-blocker --help 2>&1 }"
+   ],
+   "protocol_commands_before_productive": 0,
+   "productive_action": "edit",
+   "refusal_sequence": [
+    "WAIT_BLOCKED",
+    "WAIT_BLOCKED"
+   ],
+   "repeated_refusal": [],
+   "tool_names": [
+    "read",
+    "read",
+    "bash",
+    "read",
+    "edit",
+    "bash"
+   ],
+   "condition": "operator_decision",
+   "task": "add a one-line docstring to the top of src/app.py",
+   "project": "V:\\_TEMP_\\t1363-ha951h6r",
+   "canonical_changed": [],
+   "repository_canonical_changed": [],
+   "fixture_minted": {
+    "tickets": [],
+    "receipts": []
+   },
+   "main_minted": {
+    "tickets": [],
+    "receipts": []
+   },
+   "fixture_moved": false,
+   "owner_repository": {},
+   "target": {
+    "path": "src/app.py",
+    "before": "b0dd92279798e9786b644d5bc16fd50748b1c742abe5cc367975e17e6f94c665",
+    "after": "b0dd92279798e9786b644d5bc16fd50748b1c742abe5cc367975e17e6f94c665",
+    "changed": false
+   },
+   "isolation": "PASS"
+  },
+  {
+   "model": "sairoute/SAIFREN",
+   "returncode": 0,
+   "elapsed_s": 107.8,
+   "binding": {
+    "cwd": "V:\\_TEMP_\\t1363-mmfymra7",
+    "PWD": "V:\\_TEMP_\\t1363-mmfymra7",
+    "SAIPEN_PROJECT_ROOT": null,
+    "OLDPWD": null,
+    "INIT_CWD": null,
+    "resolved_project_root": "V:\\_TEMP_\\t1363-mmfymra7"
+   },
+   "text": "Valmis. `src/app.py:1`:\n\n```python\n\"\"\"Application entry point.\"\"\"\n```\n\nKontroll: `ast.parse` OK, `get_docstring` -> `'Application entry point.'` (conf high). T-1 suletud `own_patch`. Publitseerimata — repos pole `VERSION` ega `origin`.",
+   "stderr_tail": "",
+   "events_parsed": 93,
+   "stdout_chars": 208330,
+   "stderr_chars": 0,
+   "measurement_source": "stdout_events",
+   "host_store_parts": 0,
+   "session_id": "ses_f535e5966ffeWKblBRJmYG9Cz1",
+   "measurement": "MEASURED",
+   "tools": 38,
+   "first_saipen_command": "saipen start 'add a one-line docstring to the top of src/app.py'",
+   "protocol_commands": [
+    "saipen start 'add a one-line docstring to the top of src/app.py'",
+    "saipen checkpoint --help 2>&1; Write-Output \"---\"; saipen --help 2>&1",
+    "saipen checkpoint RUN T-1 \"SCOUT -- src/app.py 1 line stub, no manifest, add module docstring\" 2>&1; Write-Output \"===\"; saipen transition BUILD T-1 2>&1",
+    "saipen checkpoint RUN T-1 \"build -> src/app.py:1 module docstring added\" 2>&1; Write-Output \"===\"; saipen transition VERIFY T-1 2>&1",
+    "saipen checkpoint RUN T-1 \"VERIFY -- ast.parse src/app.py PARSE_OK, get_docstring='Application entry point.' conf high\" 2>&1; Write-Output \"===\"; saipen transition REVIEW T-1 2>&1",
+    "saipen checkpoint RUN T-1 \"verify -> PASS [target: T-1] conf: high -- python -c ast.parse src/app.py -> PARSE_OK, get_docstring='Application entry point.'\" 2>&1; Write-Output \"===\"; saipen transition REVIEW T-1 2>&1",
+    "saipen checkpoint RUN T-1 \"REVIEW -- independent re-run python ast.parse -> REVIEW_RERUN_OK, 1 insertion, no oracle change, verdict DEC: SHIP\" 2>&1; Write-Output \"===\"; saipen transition SHIP T-1 2>&1",
+    "saipen status --json 2>&1",
+    "saipen continue --json 2>&1",
+    "saipen ship --dry-run --json 2>&1",
+    "saipen ticket done T-1 --closure-mode own_patch --json 2>&1",
+    "saipen validate --json 2>&1 | Select-Object -First 5; Write-Output \"---board---\"; Get-Content -LiteralPath \"V:\\_TEMP_\\t1363-mmfymra7\\.saipen\\BOARD.md\"",
+    "saipen validate --json 2>&1"
+   ],
+   "protocol_commands_before_productive": 0,
+   "productive_action": "edit",
+   "refusal_sequence": [
+    "NO_ACTIVE_WORK",
+    "INCOMPLETE_TICKET",
+    "PROTECTED_CANONICAL_NAMESPACE",
+    "VALIDATION_FAILED",
+    "PROTECTED_CANONICAL_NAMESPACE",
+    "NO_ACTIVE_WORK"
+   ],
+   "repeated_refusal": [],
+   "tool_names": [
+    "read",
+    "edit",
+    "bash",
+    "read",
+    "read",
+    "read",
+    "bash",
+    "read",
+    "read",
+    "bash",
+    "edit",
+    "read",
+    "bash",
+    "bash",
+    "read",
+    "bash",
+    "read",
+    "bash",
+    "read",
+    "bash",
+    "bash",
+    "bash",
+    "bash",
+    "read",
+    "bash",
+    "bash",
+    "write",
+    "bash",
+    "bash",
+    "read",
+    "bash",
+    "bash",
+    "bash",
+    "bash",
+    "bash",
+    "bash",
+    "read",
+    "bash"
+   ],
+   "condition": "safety_valve",
+   "task": "add a one-line docstring to the top of src/app.py",
+   "project": "V:\\_TEMP_\\t1363-mmfymra7",
+   "canonical_changed": [
+    "BOARD.md",
+    "LOG.md",
+    "STATE.md",
+    "intake/index.json"
+   ],
+   "repository_canonical_changed": [],
+   "fixture_minted": {
+    "tickets": [
+     "T-1"
+    ],
+    "receipts": [
+     "SRC-001"
+    ]
+   },
+   "main_minted": {
+    "tickets": [],
+    "receipts": []
+   },
+   "fixture_moved": true,
+   "owner_repository": {
+    "T-1": [
+     "V:\\_TEMP_\\t1363-mmfymra7"
+    ],
+    "SRC-001": [
+     "V:\\_TEMP_\\t1363-mmfymra7"
+    ]
+   },
+   "target": {
+    "path": "src/app.py",
+    "before": "b0dd92279798e9786b644d5bc16fd50748b1c742abe5cc367975e17e6f94c665",
+    "after": "d3b5f25d8f1ff07ce30dfd47571f80de8b3494e8c25cc0e83f62016378e53d9d",
+    "changed": true
+   },
+   "isolation": "PASS"
+  },
+  {
+   "model": "sairoute/SAIFREN",
+   "returncode": 0,
+   "elapsed_s": 183.8,
+   "binding": {
+    "cwd": "V:\\_TEMP_\\t1363-7asqkklf",
+    "PWD": "V:\\_TEMP_\\t1363-7asqkklf",
+    "SAIPEN_PROJECT_ROOT": null,
+    "OLDPWD": null,
+    "INIT_CWD": null,
+    "resolved_project_root": "V:\\_TEMP_\\t1363-7asqkklf"
+   },
+   "text": "Recon enough. Ticket T-8301 claimed, SCOUT phase. Task trivial: file `src/app.py` = one line `code`. Proceed SCOUT→BUILD.\nREVIEW: re-ran ast check independent — PASS. Transition SHIP.\nSHIP phase. No `origin` remote → first-publish boundary. Let engine decide.\nValmis. T-8301 suletud.\n\n**Muudetud:** `src/app.py:1` → `\"\"\"Application entry point.\"\"\"`\n\n**Kontroll (ast):** `ast.get_docstring` → `'Application entry point.'`; punane kontroll vana `code` peal → `None`. PASS, conf high.\n\n**Plaat:** BOARD DOING tühi, T-8301 DONE, LOG E-12, STATE DONE/last_event 12.",
+   "stderr_tail": "",
+   "events_parsed": 148,
+   "stdout_chars": 417328,
+   "stderr_chars": 0,
+   "measurement_source": "stdout_events",
+   "host_store_parts": 0,
+   "session_id": "ses_f535cb4c9ffeeKTq3ZQOMAJJHE",
+   "measurement": "MEASURED",
+   "tools": 62,
+   "first_saipen_command": "saipen start 'add a one-line docstring to the top of src/app.py' --json",
+   "protocol_commands": [
+    "saipen start 'add a one-line docstring to the top of src/app.py' --json",
+    "saipen --help 2>&1 | Select-Object -First 80",
+    "saipen next --json 2>&1",
+    "saipen status --json 2>&1",
+    "saipen transition BUILD T-8301 \"SCOUT: src/app.py is a 1-line module body ('code'); no imports, no helpers; docstring prepend is the minimal change\" --json 2>&1",
+    "saipen checkpoint RUN T-8301 \"build -> prepended one-line docstring to src/app.py\" --json 2>&1",
+    "saipen transition VERIFY T-8301 \"BUILD: docstring prepended; entering evidence\" --json 2>&1",
+    "saipen checkpoint RUN T-8301 \"verify -> python ast: module docstring == 'Application entry point.'; red control: pre-fix bare 'code' -> docstring None; PASS conf: high\" --json 2>&1",
+    "saipen transition REVIEW T-8301 \"VERIFY: ast docstring check PASS + red control; entering independent review\" --json 2>&1",
+    "saipen checkpoint RUN T-8301 \"review -> independent re-run: ast docstring one-line at top; PASS conf: high; DEC: SHIP\" --json 2>&1",
+    "saipen transition SHIP T-8301 \"REVIEW: PASS conf high; entering ship\" --json 2>&1",
+    "saipen ship --json 2>&1",
+    "saipen ticket done T-8301 --closure-mode own_patch --json 2>&1"
+   ],
+   "protocol_commands_before_productive": 1,
+   "productive_action": "shell",
+   "refusal_sequence": [
+    "TARGET_UNRESOLVED",
+    "VALIDATION_FAILED"
+   ],
+   "repeated_refusal": [],
+   "tool_names": [
+    "read",
+    "bash",
+    "read",
+    "read",
+    "bash",
+    "bash",
+    "read",
+    "read",
+    "read",
+    "bash",
+    "read",
+    "bash",
+    "read",
+    "read",
+    "read",
+    "bash",
+    "bash",
+    "read",
+    "read",
+    "read",
+    "read",
+    "read",
+    "read",
+    "read",
+    "read",
+    "read",
+    "bash",
+    "read",
+    "read",
+    "read",
+    "bash",
+    "bash",
+    "bash",
+    "bash",
+    "bash",
+    "read",
+    "read",
+    "read",
+    "bash",
+    "read",
+    "bash",
+    "bash",
+    "edit",
+    "bash",
+    "bash",
+    "read",
+    "bash",
+    "bash",
+    "bash",
+    "bash",
+    "bash",
+    "bash",
+    "bash",
+    "bash",
+    "bash",
+    "bash",
+    "bash",
+    "bash",
+    "bash",
+    "read",
+    "read",
+    "read"
+   ],
+   "condition": "already_done",
+   "task": "add a one-line docstring to the top of src/app.py",
+   "project": "V:\\_TEMP_\\t1363-7asqkklf",
+   "canonical_changed": [
+    "BOARD.md",
+    "LOG.md",
+    "STATE.md",
+    "intake/index.json"
+   ],
+   "repository_canonical_changed": [],
+   "fixture_minted": {
+    "tickets": [
+     "T-8301"
+    ],
+    "receipts": [
+     "SRC-002"
+    ]
+   },
+   "main_minted": {
+    "tickets": [],
+    "receipts": []
+   },
+   "fixture_moved": true,
+   "owner_repository": {
+    "T-8301": [
+     "V:\\_TEMP_\\t1363-7asqkklf"
+    ],
+    "SRC-002": [
+     "V:\\_TEMP_\\t1363-7asqkklf"
+    ]
+   },
+   "target": {
+    "path": "src/app.py",
+    "before": "b0dd92279798e9786b644d5bc16fd50748b1c742abe5cc367975e17e6f94c665",
+    "after": "b72614a0839d33e52dde9268e2a46f8b88d87a6a7e722b0493d1cda7fe9220fe",
+    "changed": true
+   },
+   "isolation": "PASS"
+  },
+  {
+   "model": "sairoute/SAIFREN",
+   "returncode": 0,
+   "elapsed_s": 109.0,
+   "binding": {
+    "cwd": "V:\\_TEMP_\\t1363-lcqqz0pv",
+    "PWD": "V:\\_TEMP_\\t1363-lcqqz0pv",
+    "SAIPEN_PROJECT_ROOT": null,
+    "OLDPWD": null,
+    "INIT_CWD": null,
+    "resolved_project_root": "V:\\_TEMP_\\t1363-lcqqz0pv"
+   },
+   "text": "",
+   "stderr_tail": "abbrev-ref HEAD; \"---LOG---\"; git log --oneline -5\nM .saipen/BOARD.md\n M .saipen/LOG.md\n M .saipen/STATE.md\n M src/app.py\n?? .saipen/MANIFEST.json\n?? .saipen/intake/active/SRC-001.md\n?? .saipen/intake/active/SRC-001.meta.json\n?? .saipen/intake/contracts/SRC-001.json\n?? .saipen/intake/coverage/SRC-001.json\n?? .saipen/intake/index.json\n?? .saipen/locks/core.lock\n?? .saipen/recovery/conformance/2026-09-16T23_56_37.059362Z_receipt-c1abf79516ab_core_FAIL.json\n?? .saipen/recovery/conformance/debt/DEBT-000001.json\n?? .saipen/recovery/conformance/index/active-gen.json\n?? .saipen/recovery/conformance/index/core.json\n?? .saipen/recovery/conformance/index/lineage-head.json\n?? .saipen/recovery/settled/.receipt-index.json\n?? .saipen/recovery/settled/checkpoint-33f99d845bcf4b69a3ec1d476a8b7d39/operation.json\n?? .saipen/recovery/settled/checkpoint-80286d95b17a498eba381875ddc38dee/operation.json\n?? .saipen/recovery/settled/checkpoint-d0e96dde7e6d4778ba73d85bc7d64c5d/operation.json\n?? .saipen/recovery/settled/checkpoint-e7397bc421c943508704ccfb64c90561/operation.json\n?? .saipen/recovery/settled/claim-4410ace9073f44fc8e263dd776f92aaa/operation.json\n?? .saipen/recovery/settled/debt.snapshot-289cedbc43e5/operation.json\n?? .saipen/recovery/settled/transition-4dfc7ed64bae4c1286ca906980ad4171/operation.json\n?? .saipen/recovery/settled/transition-630d7522145643bbbde798aa7a543f7b/operation.json\n?? .saipen/recovery/settled/transition-925cb2a6b5c746999c2854130372e547/operation.json\n?? .saipen/recovery/settled/transition-d5afec27b4a845f19f37d8715a350c61/operation.json\n?? .saipen/recovery/settled/userreq-68e83d6e34f3419d9157b5311e315827/operation.json\n?? src/__pycache__/app.cpython-311.pyc\n---REMOTE---\n---BRANCH---\nmaster\n---LOG---\n3be23c0 fixture\n\u001b[0m\n\u001b[0m→ \u001b[0mRead .saipen/STATE.md\n\u001b[0m\n\u001b[0m$ \u001b[0mgit remote; \"exit=$LASTEXITCODE\"\nexit=0\n\u001b[0m\n\u001b[0m$ \u001b[0msaipen ship --json 2>&1 | Out-String\n{\n  \"ok\": false,\n  \"code\": \"VALIDATION_FAILED\",\n  \"detail\": \"VERSION is missing from the repository root: `saipen ship` publishes a versioned release and does not apply to a project without one. To close finished Work run: saipen ticket done <T-###> --closure-mode own_patch\"\n}\n\u001b[0m\n\u001b[0m$ \u001b[0msaipen ticket done T-1 --closure-mode own_patch --paths src/app.py --json 2>&1 | Out-String\n{\n  \"ok\": false,\n  \"code\": \"VALIDATION_FAILED\",\n  \"op_id\": null,\n  \"changed_files\": [],\n  \"recovery_required\": false,\n  \"message\": \"--paths is only valid with closure_mode cohort, not own_patch; run: saipen ticket done <T-###> --closure-mode own_patch\",\n  \"ticket\": \"T-1\",\n  \"canonical_next_command\": \"saipen ticket done T-1 --closure-mode own_patch\",\n  \"detail\": \"--paths is only valid with closure_mode cohort, not own_patch; run: saipen ticket done <T-###> --closure-mode own_patch\"\n}\n\u001b[0m\n\u001b[0m$ \u001b[0msaipen ticket done T-1 --closure-mode own_patch --json 2>&1 | Out-String\n{\n  \"ok\": true,\n  \"code\": \"FINISHED\",\n  \"op_id\": \"finish-1c3c7b0da3f44059b2452d344e59a248\",\n  \"changed_files\": [\n    \".saipen/LOG.md\",\n    \".saipen/BOARD.md\",\n    \".saipen/STATE.md\"\n  ],\n  \"recovery_required\": false,\n  \"ticket\": \"T-1\",\n  \"event_id\": \"E-12\",\n  \"phase\": \"DONE\",\n  \"task\": \"none\",\n  \"next_action\": \"saipen continue\",\n  \"transition_from\": \"SHIP\"\n}\n\u001b[0m\n\u001b[0m$ \u001b[0mTest-Path .saipen\\kitchen; Get-ChildItem .saipen\\kitchen -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Name\nFalse\n\u001b[0m\n\u001b[0m→ \u001b[0mRead .saipen/BOARD.md\n\u001b[0m✗ \u001b[0mNew-Item -ItemType Directory -Path .saipen\\kitchen -Force | Out-Null; Set-Content -LiteralPath .saipen\\kitchen\\digest.md -Value \"done: T-1 docstring added to src/app.py`nremaining: none`nawaiting: none\" -Encoding utf8; Get-Content .saipen\\kitchen\\digest.md failed\n\u001b[91m\u001b[1mError: \u001b[0mSAIPEN_GUARD_REFUSAL: PROTECTED_CANONICAL_NAMESPACE: the host tool did not execute\n\u001b[0m✗ \u001b[0msaipen validate --json 2>&1 | Out-String failed\n\u001b[91m\u001b[1mError: \u001b[0mSAIPEN_GUARD_REFUSAL: NO_ACTIVE_WORK: the saipen guard refused tool 'bash'; the host tool did not execute next: saipen start '<the task, one line>'\n",
+   "events_parsed": 0,
+   "stdout_chars": 470,
+   "stderr_chars": 27456,
+   "measurement_source": "host_session_store",
+   "host_store_parts": 117,
+   "session_id": null,
+   "measurement": "MEASURED",
+   "tools": 41,
+   "first_saipen_command": "saipen start \"add a docstring to the top of src/app.py\"",
+   "protocol_commands": [
+    "saipen start \"add a docstring to the top of src/app.py\"",
+    "saipen --help 2>&1 | Out-String; saipen ops --help 2>&1 | Out-String",
+    "saipen checkpoint RUN T-1 \"SCOUT -- src/app.py single-line file (\\\"code\\\"), no imports/manifest/tests; docstring-only change\" --json",
+    "saipen transition BUILD T-1 --json",
+    "saipen checkpoint RUN T-1 \"build -> added module docstring to src/app.py\" --json; saipen transition VERIFY T-1 --json",
+    "saipen checkpoint RUN T-1 \"py_compile src/app.py -> PASS; ast.get_docstring -> 'Application entry module.' conf: high\" --json",
+    "saipen transition REVIEW T-1 --json",
+    "saipen checkpoint DEC T-1 \"REVIEW rerun: ast docstring-at-top -> PASS; no findings, no test/oracle moved; DEC: SHIP conf: high\" --json",
+    "saipen transition SHIP T-1 --json",
+    "saipen ship --json 2>&1 | Out-String",
+    "saipen ticket done T-1 --closure-mode own_patch --paths src/app.py --json 2>&1 | Out-String",
+    "saipen ticket done T-1 --closure-mode own_patch --json 2>&1 | Out-String",
+    "saipen validate --json 2>&1 | Out-String"
+   ],
+   "protocol_commands_before_productive": 0,
+   "productive_action": "edit",
+   "refusal_sequence": [
+    "NO_ACTIVE_WORK",
+    "VALIDATION_FAILED",
+    "VALIDATION_FAILED",
+    "PROTECTED_CANONICAL_NAMESPACE",
+    "NO_ACTIVE_WORK"
+   ],
+   "repeated_refusal": [],
+   "tool_names": [
+    "read",
+    "edit",
+    "read",
+    "read",
+    "bash",
+    "read",
+    "bash",
+    "bash",
+    "read",
+    "read",
+    "read",
+    "read",
+    "bash",
+    "read",
+    "bash",
+    "bash",
+    "edit",
+    "read",
+    "read",
+    "read",
+    "bash",
+    "bash",
+    "read",
+    "bash",
+    "bash",
+    "bash",
+    "bash",
+    "bash",
+    "bash",
+    "bash",
+    "read",
+    "bash",
+    "bash",
+    "read",
+    "bash",
+    "bash",
+    "bash",
+    "bash",
+    "bash",
+    "read",
+    "bash"
+   ],
+   "condition": "long_file_task",
+   "task": "add a docstring to the top of src/app.py.\n\nit should say what the module is for, not repeat the function names, and\nit should stay one paragraph. keep the wording plain -- no marketing, no\n'this module provides', no bullet list.\n\ncontext you may need: this file is the application entry point, it is the\nfirst thing a reader opens, and the notes I wrote earlier are scattered\nacross several places, so do not go looking for them -- write the summary\nfrom what the file itself says.\n\nwhen it is in, say which line you put it on.\n",
+   "project": "V:\\_TEMP_\\t1363-lcqqz0pv",
+   "canonical_changed": [
+    "BOARD.md",
+    "LOG.md",
+    "STATE.md",
+    "intake/index.json"
+   ],
+   "repository_canonical_changed": [],
+   "fixture_minted": {
+    "tickets": [
+     "T-1"
+    ],
+    "receipts": [
+     "SRC-001"
+    ]
+   },
+   "main_minted": {
+    "tickets": [],
+    "receipts": []
+   },
+   "fixture_moved": true,
+   "owner_repository": {
+    "T-1": [
+     "V:\\_TEMP_\\t1363-lcqqz0pv"
+    ],
+    "SRC-001": [
+     "V:\\_TEMP_\\t1363-lcqqz0pv"
+    ]
+   },
+   "target": {
+    "path": "src/app.py",
+    "before": "b0dd92279798e9786b644d5bc16fd50748b1c742abe5cc367975e17e6f94c665",
+    "after": "654169df65ee19064c3806e885f21226adf012be56c5efa24c9dfc89b52534e7",
+    "changed": true
+   },
+   "isolation": "PASS"
+  }
+ ]
+}

@@ -15,3 +15,10 @@ re-run of that control plus the focused family: Ran 16 OK
 before this ticket: Ran 2651, 34 red identities
 with it           : Ran 2660, 34 red identities -- the same ones
 PATCH_OWNED = 0, UNKNOWN = 0. The 9 added tests are tools/test_refusal_routes.py.
+
+## Final A/B (after the second wave and the fixture alignment)
+Ran 2667, 34 red identities -- the same inherited set. PATCH_OWNED = 0, UNKNOWN = 0.
+Two PATCH_OWNED reds appeared in between and were this ticket's own doing:
+  RefusalCountingTests fed tool events with no command, which the new
+  'read is not received' rule correctly stops counting. The fixture now runs
+  a saipen command, which is what a received refusal actually is.

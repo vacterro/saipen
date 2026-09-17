@@ -560,8 +560,21 @@ class RefusalCountingTests(unittest.TestCase):
     """
 
     @staticmethod
-    def tool(output: str) -> dict:
-        return {"tool": "bash", "status": "completed", "input": {}, "output": output, "error": ""}
+    def tool(output: str, command: str = "saipen checkpoint RUN T-1 'x' --json") -> dict:
+        """One tool event that RAN a saipen command and got `output` back.
+
+        The command matters: after T-1377 a refusal counts as received only when
+        the session ran `saipen` (or the guard emitted its own marker), because
+        three field sessions grepped this repository and the old extractor
+        scored the `REFUSE [CODE]` in a docstring as a refusal they got.
+        """
+        return {
+            "tool": "bash",
+            "status": "completed",
+            "input": {"command": command},
+            "output": output,
+            "error": "",
+        }
 
     def test_a_successful_operation_is_not_a_refusal(self):
         codes = polygon._refusal_codes(

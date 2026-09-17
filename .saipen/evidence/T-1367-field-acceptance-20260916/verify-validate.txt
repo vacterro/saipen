@@ -32,12 +32,12 @@ PASS: KNOWLEDGE/ structured surface valid (4 card(s), 4 active, index fresh)
 PASS: README.md badge matches VERSION
 PASS: conformance corpus schema + IDs valid (257 rows, exactly 1..257)
 PASS: CONFORMANCE.md matches the generated corpus index
-PASS: no stray control characters in shipped text (262 files swept)
+PASS: no stray control characters in shipped text (260 files swept)
 PASS: core docs text lint clean (no U+FFFD/split keywords/fence drift)
 PASS: phase enum <-> phases/ docs in sync (16 phases)
 PASS: INDEX.md phase list matches enum + files (16 phases)
 PASS: CORE / IMPROVE / CLI Improve action sets match exactly
-PASS: runtime manifest complete (382 files, all tracked)
+PASS: runtime manifest complete (380 files, all tracked)
 PASS: adapter cross-references valid (checking saipen/ paths in all 10 adapters)
 PASS: no adapter or injector treats RFC.md as normative (13 checked, RFC stub is redirect-only)
 PASS: 32 locale README badge(s) match VERSION (8.0.1)
@@ -48,11 +48,11 @@ PASS: doc coverage accounted for (394 shipped documents, 24 checked patterns, 34
 PASS: release ledger has no unexpected divergence (9 historical exception(s) verified)
 PASS: warn slug ownership verified for 4 tracked slug(s)
 PASS: Golden Default palette integrity verified (21 Wintage tokens, sha256:271ba26cd75948e8)
-WARN [board-soft-cap]: BOARD.md is 105 KB (soft cap ~16 KB), of which 62 KB is closed-ticket text -- that content already lives in LOG.md/CHANGELOG.md, so scrub ## DONE at the next CLEAN (RFC § 1.2, phases/clean.md step 1)
+WARN [board-soft-cap]: BOARD.md is 105 KB (soft cap ~16 KB), of which 61 KB is closed-ticket text -- that content already lives in LOG.md/CHANGELOG.md, so scrub ## DONE at the next CLEAN (RFC § 1.2, phases/clean.md step 1)
 WARN [log-missing-date]: 125 sealed LOG entr(y/ies) predate the mandatory DATE (earliest .saipen/logs/LOG-001.md:3). Immutable by append-only; new entries are FAILed instead
-WARN [log-soft-cap]: .saipen/LOG.md is 1916 lines / 721 KB, past the ~300 line / ~64 KB soft cap -- seal it into .saipen/logs/LOG-<NNN>.md at the next checkpoint (RFC § 1.2, phases/clean.md)
-WARN [producer-package-stale]: .saipen/extensions/subs/saihunt/kitchen/OUTBOX.md [HUNT-012] carries source_head '005a8ac2bdc0bd01fb78a6b693aeac8405283cc7' but current source_head is '2855eca1d01df4084eabe978b56a8856c1a76be4' -- package is stale and MUST NOT be collected -- reported under `--gate core`, where this producer is not being consumed; it FAILs under `--gate collect:saihunt` and blocks nothing else
-WARN [producer-package-stale]: .saipen/extensions/subs/saihunt/kitchen/OUTBOX.md [HUNT-012] carries source_tree_fingerprint 'git-delta-v1:728bf9859f927b777aef7a962819e4f731adafc2fbb314669fcec29a98ed2f8b' but the current tree computes 'git-delta-v1:639f333506b3f12d13dce0f2f89bf5d91dd9effc173f7b37e1b5f36a16c3f9b4' -- the tree changed since the package was produced (same HEAD or not), so it is stale and MUST NOT be collected (PROTOCOL.md § 6, T-543) -- reported under `--gate core`, where this producer is not being consumed; it FAILs under `--gate collect:saihunt` and blocks nothing else
+WARN [log-soft-cap]: .saipen/LOG.md is 1895 lines / 714 KB, past the ~300 line / ~64 KB soft cap -- seal it into .saipen/logs/LOG-<NNN>.md at the next checkpoint (RFC § 1.2, phases/clean.md)
+WARN [producer-package-stale]: .saipen/extensions/subs/saihunt/kitchen/OUTBOX.md [HUNT-012] carries source_head '005a8ac2bdc0bd01fb78a6b693aeac8405283cc7' but current source_head is 'c2461e24c1a38948841d8399b312a9efc1d240f3' -- package is stale and MUST NOT be collected -- reported under `--gate core`, where this producer is not being consumed; it FAILs under `--gate collect:saihunt` and blocks nothing else
+WARN [producer-package-stale]: .saipen/extensions/subs/saihunt/kitchen/OUTBOX.md [HUNT-012] carries source_tree_fingerprint 'git-delta-v1:728bf9859f927b777aef7a962819e4f731adafc2fbb314669fcec29a98ed2f8b' but the current tree computes 'git-delta-v1:34b65220a2e7880416c222549e896cc8bf2908082b5ef7d8dc633ea23e3907b3' -- the tree changed since the package was produced (same HEAD or not), so it is stale and MUST NOT be collected (PROTOCOL.md § 6, T-543) -- reported under `--gate core`, where this producer is not being consumed; it FAILs under `--gate collect:saihunt` and blocks nothing else
 WARN [producer-package-stale]: ... and 10 more like the above
 WARN [subsaipen-uncollected]: 5 subSaipen OUTBOX entr(y/ies) sit at `status: ready` -- that is a finding waiting on `saipen sub collect`, visible only when someone runs it (extensions/subs/PROTOCOL.md § 4)
 WARN [cross-doc-drift]: cross-doc drift [ahead-stamp-repair] -- CORE.md must say a future-stamped LOG line is restamped to a defensible bound with a DEC naming the original, the replacement, and that the minute is inherited rather than measured. Without it the only sanctioned response is waiting, which keeps a false record and reds every gate until the clock catches up

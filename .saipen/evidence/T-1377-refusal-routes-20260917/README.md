@@ -52,3 +52,42 @@ The PATCH_OWNED red is worth keeping in view: the first WAIT route printed
 `saipen continue --json   # the persisted WAIT names what it needs`, and
 `test_every_printed_command_classifies_as_canonical` refused it — a printed
 command has to BE a command. The route is the bare command now.
+
+## The live proof: the repeats are gone
+
+Three live runs of the same four conditions, each on a freshly injected
+installed runtime, `repeated_refusal` per condition:
+
+| condition | matrix (f3d2104a) | re-run 1 (c90c61d6) | re-run 2 (caba3969) |
+|---|---|---|---|
+| `operator_decision` | `['WAIT_BLOCKED']` | `[]` | `[]` |
+| `safety_valve` | `['VALIDATION_FAILED']` | `['NO_ACTIVE_WORK','PROTECTED_CANONICAL_NAMESPACE','VALIDATION_FAILED']` | `[]` |
+| `already_done` | `['ILLEGAL_TRANSITION','INCOMPLETE_TICKET','VALIDATION_FAILED']` | `['VALIDATION_FAILED']` | `[]` |
+| `long_file_task` | `['VALIDATION_FAILED']` | `['VALIDATION_FAILED']` | `[]` |
+
+Re-run 1 is why this ticket has two commits: clearing the first five classes
+exposed `saipen ship` in a project with no VERSION (three sessions asked
+twice), and the harness itself was scoring three different `VALIDATION_FAILED`
+problems as one repeated refusal.
+
+The routes are visible in the live payloads, read back from the host's own
+store rather than from the report:
+
+```
+WAIT_BLOCKED :: the saipen guard refused tool 'edit'; the host tool did not
+                execute next: saipen recover resolve-blocker <decision>
+NO_ACTIVE_WORK :: … next: saipen start '<the task, one line>'
+VALIDATION_FAILED :: --paths is only valid with closure_mode cohort, not
+                own_patch; run: saipen ticket done <T-###> --closure-mode own_patch
+VALIDATION_FAILED :: VERSION is missing from the repository root: `saipen ship`
+                publishes a versioned release and does not apply to a project …
+```
+
+`operator_decision` shows two `WAIT_BLOCKED` refusals in re-run 2 and no repeat:
+the payloads differ (`tool 'edit'` and `tool 'bash'`), which is two events, not a
+loop. That distinction is the harness half of this ticket.
+
+| file | what it is |
+|---|---|
+| `field-rerun4-after-routes.json` | re-run 1, the first five classes routed |
+| `field-rerun4b-after-second-wave.json` | re-run 2, all four conditions with an empty repeat set |

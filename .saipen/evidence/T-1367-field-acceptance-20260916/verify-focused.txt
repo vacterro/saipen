@@ -1,0 +1,7 @@
+# T-1367 VERIFY: focused families from current bytes (2026-09-17)
+command: python -m unittest tools.test_field_fixture_isolation tools.test_t1363_zero_manual_entry tools.test_pending_ingress tools.test_protocol_registry
+...................................................................................................................................
+----------------------------------------------------------------------
+Ran 131 tests in 33.598s
+
+OK
