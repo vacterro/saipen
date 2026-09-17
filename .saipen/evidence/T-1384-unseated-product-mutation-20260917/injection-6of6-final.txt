@@ -1,0 +1,7 @@
+STALE: C:\Users\vac34\.agents\skills\saipen (runtime gen-sha256:fcb2eca48bf96f21f0b4c554474ae13fd11112e3cbe59bc3781a6980f813a573, stamp gen-sha256:fcb2eca48bf96f21f0b4c554474ae13fd11112e3cbe59bc3781a6980f813a573, source gen-sha256:420e04e7cb47d94ad7bf4eacf187286a1441f9bdcc2da61accf870df9aadecdf)
+    tools/test_core_ownership_routing.py: source 37091B, installed 37072B
+UNSTAMPED: C:\Users\vac34\.config\opencode\skills\saipen (runtime current at gen-sha256:420e04e7cb47d94ad7bf4eacf187286a1441f9bdcc2da61accf870df9aadecdf; stamp absent)
+UNSTAMPED: C:\Users\vac34\.claude\skills\saipen (runtime current at gen-sha256:420e04e7cb47d94ad7bf4eacf187286a1441f9bdcc2da61accf870df9aadecdf; stamp absent)
+UNSTAMPED: C:\Users\vac34\.codex\skills\saipen (runtime current at gen-sha256:420e04e7cb47d94ad7bf4eacf187286a1441f9bdcc2da61accf870df9aadecdf; stamp absent)
+UNSTAMPED: C:\Users\vac34\.gemini\skills\saipen (runtime current at gen-sha256:420e04e7cb47d94ad7bf4eacf187286a1441f9bdcc2da61accf870df9aadecdf; stamp absent)
+UNSTAMPED: C:\Users\vac34\.codebuddy\skills\saipen (runtime current at gen-sha256:420e04e7cb47d94ad7bf4eacf187286a1441f9bdcc2da61accf870df9aadecdf; stamp absent)

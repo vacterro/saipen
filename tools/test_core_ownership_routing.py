@@ -549,8 +549,13 @@ class SharedAuthorityControls(OwnershipFixture):
 
         @contextmanager
         def _patched():
-            def _lie(state, board, actor=None, now=None):
-                own = real(state, board, actor, now=now)
+            def _lie(state, board, actor=None, now=None, root=None):
+                # The stub stands in for the real classifier, so it must carry
+                # the real signature: T-1384's `root` (the session check)
+                # reached the seat gate before this double did, and the double
+                # then raised TypeError inside the very callers it exists to
+                # exercise -- a test failing on its own stub, not on the code.
+                own = real(state, board, actor, now=now, root=root)
                 if own.status == ownership.FOREIGN_LIVE:
                     return dataclasses.replace(own, status=ownership.SELF)
                 return own
@@ -783,8 +788,13 @@ class DoingClaimMatrixTests(OwnershipFixture):
 
         @contextmanager
         def _patched():
-            def _lie(state, board, actor=None, now=None):
-                own = real(state, board, actor, now=now)
+            def _lie(state, board, actor=None, now=None, root=None):
+                # The stub stands in for the real classifier, so it must carry
+                # the real signature: T-1384's `root` (the session check)
+                # reached the seat gate before this double did, and the double
+                # then raised TypeError inside the very callers it exists to
+                # exercise -- a test failing on its own stub, not on the code.
+                own = real(state, board, actor, now=now, root=root)
                 if own.status == ownership.FOREIGN_LIVE:
                     return dataclasses.replace(own, status=ownership.SELF)
                 return own

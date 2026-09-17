@@ -1236,7 +1236,8 @@ def map_event(event: dict) -> dict:
 
     Returns ``{"action", "target_path", "target_paths", "targets_unresolved",
     "shell_protected_namespace", "shell_effects", "shell_effects_unresolved",
-    "actor", "host", "event", "tool_name", "cwd", "saipen_verb", "detail"}``.
+    "actor", "host", "event", "tool_name", "cwd", "session_id", "saipen_verb",
+    "detail"}``.
     The ACTION decides nothing by itself; `admission.evaluate_admission`
     decides -- and it decides over EVERY target, refusing if any is refused.
 
@@ -1381,6 +1382,14 @@ def map_event(event: dict) -> dict:
         "event": event["event"],
         "tool_name": event["tool_name"],
         "cwd": event["cwd"],
+        # T-1384 slice 1 -- WITNESS ONLY, decides nothing. The adapter has
+        # carried `session_id` from `input.sessionID` since T-1318
+        # (saipen-guard.js:625) and the mapping dropped it, so no measurement
+        # could ever show whether the host supplies it on every consequential
+        # tool event. A binding built on a field nobody has watched arrive is
+        # a guess; echoing it first makes the carrier provable before anything
+        # depends on it. Absent stays None -- never a fabricated identity.
+        "session_id": event.get("session_id") or None,
         "saipen_verb": verb,
         "detail": detail,
     }
@@ -1454,6 +1463,7 @@ def evaluate_event(event: dict, project_root: str | None = None) -> dict:
         shell_protected_namespace=mapped["shell_protected_namespace"],
         shell_effects=mapped["shell_effects"],
         shell_effects_unresolved=mapped["shell_effects_unresolved"],
+        session_id=mapped["session_id"],
     )
     if mapped.get("canonical_next_command"):
         # T-1363: an ingress line whose payload cannot travel literally is not

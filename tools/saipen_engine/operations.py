@@ -23,6 +23,7 @@ There is no `_render_state` anymore.
 from __future__ import annotations
 
 import json
+import os
 import re
 import datetime
 import uuid
@@ -748,8 +749,28 @@ def _latest_convergence_stage(root: Path, stage: str) -> dict | None:
 # --------------------------------------------------------------------------- claim
 
 
+#: The host session identity the adapter exports before it runs the tool that
+#: carries this command (T-1384). Plain environment, exactly like the PATH the
+#: same adapter prepends -- this is a WITNESS of which process is acting, never
+#: a credential and never an actor.
+HOST_SESSION_ENV = "SAIPEN_HOST_SESSION"
+
+
+def host_session_binding(root: Path) -> str | None:
+    """This process's claim binding for `root`, or None when unprovable."""
+    from .board import claim_session_digest
+    from .paths import project_lineage_identity
+
+    return claim_session_digest(project_lineage_identity(root), os.environ.get(HOST_SESSION_ENV))
+
+
 def _claim_fields_in_place(
-    board_text: str, ticket_id: str, fields: dict[str, str], *, enforce_cap: bool = True
+    board_text: str,
+    ticket_id: str,
+    fields: dict[str, str],
+    *,
+    enforce_cap: bool = True,
+    session_binding: str | None = None,
 ) -> str:
     """Surgically set/overwrite owner/claim_time on the EXISTING DOING ticket
     line in place -- no second ticket, no duplicated fields (P0#2 adoption).
@@ -758,6 +779,13 @@ def _claim_fields_in_place(
     than appending a duplicate and refuses (via _reject_duplicate_fields) a
     malformed line that already repeats the field. Every other field on the
     line is preserved byte-for-byte.
+
+    Every caller of this function is a seat being taken or refreshed BY THIS
+    PROCESS now, which is exactly when the session binding is knowable, so
+    T-1384 writes it here rather than at four call sites that would drift.
+    A process that cannot prove its session REMOVES the field instead of
+    leaving it: a claim carrying some other window's binding would lock its
+    own owner out of the Work it just claimed.
     """
     parsed = parse_board(board_text)
     ticket = parsed["tickets"].get(ticket_id)
@@ -765,6 +793,10 @@ def _claim_fields_in_place(
         raise ValueError(f"{ticket_id} is not a ## DOING ticket")
     raw = ticket["raw"]
     new = raw
+    if session_binding:
+        new = set_ticket_field(new, "claim_session", session_binding, enforce_cap=enforce_cap)
+    else:
+        new = remove_ticket_field(new, "claim_session")
     for key, value in fields.items():
         new = set_ticket_field(new, key, value, enforce_cap=enforce_cap)
     if enforce_cap:
@@ -904,7 +936,12 @@ def _active_claim_refusal(
 
 
 def _refresh_active_claim(
-    board_text: str, state: dict, agent: str, utc: str, now: datetime.datetime | None = None
+    board_text: str,
+    state: dict,
+    agent: str,
+    utc: str,
+    now: datetime.datetime | None = None,
+    root: Path | None = None,
 ) -> tuple[str | None, str | None]:
     """If the active ticket is this agent's own SELF claim, advance its
     claim_time in place on BOARD. Returns (new_board_text | None, ticket_id).
@@ -933,7 +970,13 @@ def _refresh_active_claim(
     own = ownership.classify_active_ownership(state, tickets, agent, now=now)
     if own.status != ownership.SELF:
         return None, None
-    return _claim_fields_in_place(board_text, active, {"claim_time": utc}), active
+    return (
+        _claim_fields_in_place(
+            board_text, active, {"claim_time": utc},
+            session_binding=host_session_binding(root) if root is not None else None,
+        ),
+        active,
+    )
 
 
 def _plan_claim(
@@ -994,7 +1037,9 @@ def _plan_claim(
     # documented in `operations._seat_agent`: ACTIVE_EXECUTION_AUTHORITY ->
     # shared classifier; TICKET_LOCAL_CLAIM_PRIMITIVE -> claim_status).
     cs = (
-        ownership.classify_active_ownership(state, tickets, agent, now=instant).status
+        ownership.classify_active_ownership(
+            state, tickets, agent, now=instant, root=root
+        ).status
         if section == "## DOING"
         else claim_status(ticket, agent, None)
     )
@@ -1022,7 +1067,8 @@ def _plan_claim(
             # BOARD-only lease refresh: advance claim_time in place. No LOG, no
             # STATE change -- the owner and binding are unchanged.
             new_board = _claim_fields_in_place(
-                board_text, ticket_id, {"claim_time": utc}
+                board_text, ticket_id, {"claim_time": utc},
+                session_binding=host_session_binding(root),
             )
             errors = validate_texts(
                 docs["state"].text_norm,
@@ -1096,7 +1142,8 @@ def _plan_claim(
         event, line = _event_line(docs, log_tail, "DEC", ticket_id, agent, _msg, now, op_id)
         new_log = docs["log"].text_norm.rstrip("\n") + "\n" + line + "\n"
         new_board = _claim_fields_in_place(
-            board_text, ticket_id, {"owner": agent, "claim_time": utc}
+            board_text, ticket_id, {"owner": agent, "claim_time": utc},
+            session_binding=host_session_binding(root),
         )
         resume_in_place = (
             state.get("task") == ticket_id and state.get("phase") in phases.TICKET_BEARING_PHASES
@@ -1235,7 +1282,9 @@ def _plan_claim(
         )
     event, line = _event_line(docs, log_tail, "DEC", ticket_id, agent, detail, now, op_id)
     new_log = docs["log"].text_norm.rstrip("\n") + "\n" + line + "\n"
-    new_board = _claim_move(board_text, ticket_id, agent, utc)
+    new_board = _claim_move(
+        board_text, ticket_id, agent, utc, session_binding=host_session_binding(root)
+    )
     owned = {
         "phase": "SCOUT",
         "task": ticket_id,
@@ -1280,8 +1329,22 @@ def _plan_claim(
     )
 
 
-def _claim_move(board_text: str, ticket_id: str, agent: str, utc: str) -> str:
-    """Surgical claim move: target ticket TODO -> DOING with [/] owner."""
+def _claim_move(
+    board_text: str,
+    ticket_id: str,
+    agent: str,
+    utc: str,
+    session_binding: str | None = None,
+) -> str:
+    """Surgical claim move: target ticket TODO -> DOING with [/] owner.
+
+    T-1384: a fresh TODO -> DOING claim is the OTHER place a seat is taken by
+    this process, so it binds the host session the same way the in-place
+    claim writer does. A TODO line may still carry an old binding from a
+    previous DOING episode; it is replaced or removed here for the same
+    reason the owner/claim_time pair is -- claim truth lives in DOING, and a
+    leftover binding would be a false witness rather than merely stale.
+    """
     lines = board_text.splitlines(keepends=True)
     out = []
     ticket_line = None
@@ -1303,6 +1366,10 @@ def _claim_move(board_text: str, ticket_id: str, agent: str, utc: str) -> str:
     marked = ticket_line.replace("- [ ] ", "- [/] ", 1).rstrip()
     marked = set_ticket_field(marked, "owner", agent)
     marked = set_ticket_field(marked, "claim_time", utc)
+    if session_binding:
+        marked = set_ticket_field(marked, "claim_session", session_binding)
+    else:
+        marked = remove_ticket_field(marked, "claim_session")
     out.insert(doing_idx + 1, marked + "\n")
     return "".join(out)
 
@@ -1965,7 +2032,9 @@ def _plan_transition(
 
     # SELF-owned active ticket: refresh its claim lease in place (CORE § 1.4).
     # Target order LOG -> BOARD -> STATE.
-    refreshed_board, _active = _refresh_active_claim(docs["board"].text_norm, state, agent, utc)
+    refreshed_board, _active = _refresh_active_claim(
+        docs["board"].text_norm, state, agent, utc, root=root
+    )
     new_board = refreshed_board if refreshed_board is not None else docs["board"].text_norm
 
     errors = validate_texts(
@@ -2218,7 +2287,9 @@ def _plan_checkpoint(
     # SELF-owned active ticket: refresh its claim lease in place (CORE § 1.4)
     # so an actively worked ticket never goes legally stale while its owner
     # checkpoints. Target order LOG -> BOARD -> STATE.
-    refreshed_board, _active = _refresh_active_claim(docs["board"].text_norm, _state, agent, utc)
+    refreshed_board, _active = _refresh_active_claim(
+        docs["board"].text_norm, _state, agent, utc, root=root
+    )
     new_board = refreshed_board if refreshed_board is not None else docs["board"].text_norm
 
     errors = validate_texts(
@@ -5608,7 +5679,10 @@ def goal_entry(
     # establishes an actionable first step bound to this agent.
     first_id = plan_ids[0] if plan_ids else None
     if first_id is not None:
-        new_board_text = _claim_move(new_board_text, first_id, agent, utc)
+        new_board_text = _claim_move(
+            new_board_text, first_id, agent, utc,
+            session_binding=host_session_binding(root),
+        )
 
     # --- STATE: record Entry PLAN exactly once (wave 1) --------------------
     # CORE-009: when the current phase is a ticket-bearing phase (BUILD,
@@ -5910,6 +5984,7 @@ def enter_ship_convergence(
         state,
         agent,
         utc,
+        root=root,
     )
     new_board = refreshed_board or docs["board"].text_norm
     errors = validate_texts(
@@ -6501,7 +6576,8 @@ def handover_agent(
             # lapsed) -- transfer the EXACT claim to the new seat atomically so
             # STATE.agent and the only live active claim never diverge.
             new_board_text = _claim_fields_in_place(
-                board_text, active_id, {"owner": new_agent, "claim_time": utc}
+                board_text, active_id, {"owner": new_agent, "claim_time": utc},
+                session_binding=host_session_binding(root),
             )
             claim_transferred = active_id
         elif cs == ownership.FOREIGN_LIVE:
@@ -6712,7 +6788,9 @@ def stop_checkpoint(
     # CORE-002: a SELF-owned active ticket gets its claim lease refreshed and
     # BOARD joins the journaled mutation so ownership stays coherent with
     # STATE.agent after the stop. Target order LOG -> BOARD -> STATE.
-    refreshed_board, _active = _refresh_active_claim(docs["board"].text_norm, state, agent, utc)
+    refreshed_board, _active = _refresh_active_claim(
+        docs["board"].text_norm, state, agent, utc, root=root
+    )
     new_board = refreshed_board if refreshed_board is not None else docs["board"].text_norm
     errors = validate_texts(
         new_state,

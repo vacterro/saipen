@@ -46,6 +46,11 @@
         "type": "string",
         "format": "date-time"
       },
+      "claim_session": {
+        "type": "string",
+        "pattern": "^[0-9a-f]{32}$",
+        "description": "T-1384: which HOST SESSION holds this claim, as a lineage-salted sha256 prefix of the host session id. `owner` is a name, and a name is not a process: an arriving window reads the same name and inherits it, which let an unseated agent mutate product bytes while the ledger stayed clean. A consequential mutation must present the same session or be refused UNSEATED_MUTATION. Never the session id itself, so BOARD and the audit archives built from it carry no reusable bearer value. Absent means the claim predates the binding and is judged as before."
+      },
       "review_passes": {
         "type": "integer",
         "description": "RFC 1.2 recognized optional ticket field; phases/review.md uses it to enforce its two-pass cap mechanically rather than from memory. Absent from this schema until v7.101.0."

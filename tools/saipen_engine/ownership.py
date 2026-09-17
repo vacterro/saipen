@@ -130,12 +130,22 @@ def classify_active_ownership(
     board,
     actor: str | None = None,
     now: datetime.datetime | None = None,
+    root=None,
 ) -> ActiveOwnership:
     """Classify the active execution seat at a FIXED instant.
 
     ``now`` is threaded end to end so a matrix test evaluates the router and
     the authorization gate against the very same instant; two calls that read
     ``datetime.now()`` independently are not the same snapshot.
+
+    ``root`` opts this call into the T-1384 session check. Ownership is
+    otherwise decided on `owner`, a NAME, which an arriving window reads out
+    of the same ledger and inherits -- so the seat question "is this me?"
+    answers itself. With a root, a LIVE claim bound to a session this process
+    cannot present reads FOREIGN_LIVE whatever the name says. It is optional
+    because only the seat-TAKING paths need it; every other caller keeps the
+    exact behaviour it had, and a claim carrying no binding is unaffected
+    either way.
     """
     if now is None:
         now = datetime.datetime.now(datetime.timezone.utc)
@@ -164,8 +174,14 @@ def classify_active_ownership(
     ticket = doing[0]
     fields = ticket.get("fields") or {}
     active = ticket.get("id")
+    status = claim_status(ticket, actor, now)
+    if root is not None and status == SELF:
+        from .board import session_locked_out
+
+        if session_locked_out(ticket, root, now):
+            status = FOREIGN_LIVE
     return ActiveOwnership(
-        status=claim_status(ticket, actor, now),
+        status=status,
         active_ticket=active,
         state_task=state_task,
         state_agent=state_agent,

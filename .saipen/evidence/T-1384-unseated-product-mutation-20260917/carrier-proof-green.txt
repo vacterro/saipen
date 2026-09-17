@@ -1,0 +1,16 @@
+## Session
+project    : V:\_TEMP_\t1363-n0cyrwb7
+returncode : 0
+stderr tail: ''
+
+## Carrier
+events judged            : 33
+consequential events     : 31
+  carrying a session_id  : 31
+  distinct values        : ['ses_f505d6ab5ffeAFxt0xzPYUoHh1']
+  missing on             : []
+read/other events        : 2
+
+## Verdict
+GREEN: every consequential event carried the same session identity;
+       the carrier survives the real adapter path and is bindable

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import datetime
+import hashlib
 import re
 
 REQUIRED_HEADINGS = ["## DOING", "## TODO", "## DONE", "## BLOCKED"]
@@ -129,8 +130,73 @@ KNOWN_FIELDS = frozenset(
         # historical detail.  The resolver is canonical; the pointer itself
         # carries no authority beyond naming that artifact.
         "detail_ref",
+        # T-1384: which HOST SESSION holds this claim, as a salted digest.
+        # `owner` says who, and a name is not a process -- an arriving window
+        # reads the same `owner` the incumbent wrote and inherits it, which
+        # is how an unseated agent mutated product bytes while the ledger
+        # stayed clean. This field is the half `owner` cannot carry: proof
+        # that the CURRENT process is the one that claimed. It is a digest,
+        # never the session id, so BOARD and every audit archive built from
+        # it carry no reusable bearer value.
+        "claim_session",
     }
 )
+
+
+def claim_session_digest(project_lineage: str | None, session_id: str | None) -> str | None:
+    """The non-secret binding written beside a claim, or None when unprovable.
+
+    Salted with the project lineage so one window's digest cannot be replayed
+    into another project, and truncated because this is an equality check
+    between two values the verifier already holds, not a secret.
+
+    Returns None for a missing session id ON PURPOSE: absence must stay
+    absence all the way to the comparison. A digest of the empty string would
+    be a value, and a value is something a later check can accidentally treat
+    as proof.
+    """
+    if not session_id or not str(session_id).strip():
+        return None
+    material = f"{(project_lineage or '').strip()}\0{str(session_id).strip()}"
+    return hashlib.sha256(material.encode("utf-8")).hexdigest()[:32]
+
+
+#: The host session identity the adapter exports just before it runs the tool
+#: that carries this command (T-1384). Plain environment, exactly like the PATH
+#: the same adapter prepends -- a WITNESS of which process is acting, never a
+#: credential and never an actor.
+HOST_SESSION_ENV = "SAIPEN_HOST_SESSION"
+
+
+def host_session_binding(root) -> str | None:
+    """This process's claim binding for ``root``, or None when unprovable."""
+    import os
+
+    from .paths import project_lineage_identity
+
+    return claim_session_digest(project_lineage_identity(root), os.environ.get(HOST_SESSION_ENV))
+
+
+def session_locked_out(ticket: dict, root, now=None) -> bool:
+    """Does a LIVE claim on ``ticket`` belong to a session this process is not?
+
+    The SEAT gate needs the same answer the mutation gate reaches, or the two
+    doors disagree -- and measured live on 2026-09-17 they did. A second
+    window was refused UNSEATED_MUTATION once, then ran `saipen start`,
+    inherited `STATE.agent`, parked the foreign owner's Work as if it were its
+    own, rebound the claim to itself, and every later mutation was legal.
+    Nothing was stolen: the name was simply assumed, which is the same
+    tautology one layer up.
+
+    Liveness is asked WITHOUT an actor on purpose. With one, a matching name
+    short-circuits to SELF before the clock is ever read, so a dead owner's
+    binding would freeze the ticket forever instead of reaching takeover.
+    """
+    bound = str((ticket.get("fields") or {}).get("claim_session") or "").strip()
+    if not bound or claim_status(ticket, None, now) != "FOREIGN_LIVE":
+        return False
+    return host_session_binding(root) != bound
+
 
 #: Closed blocker-scope vocabulary. Absent reads as `ticket`: a block whose
 #: scope was never declared parks exactly its own ticket, which is the safe

@@ -45,6 +45,18 @@ Layers (SRC-030 Parts 2-5):
    and applies the same ownership, recovery, and protocol-state checks. A host
    session id never enters actor resolution.
 
+7. Session binding (T-1384) -- inheriting `STATE.agent` makes the ownership
+   test ask whether the incumbent is the incumbent, so it can only say yes,
+   and an unseated second window mutated product bytes under a live foreign
+   owner. A claim may therefore carry `claim_session`, a lineage-salted
+   DIGEST of the host session that made it. Where one is present, a
+   consequential mutation must present the same session or be refused
+   `UNSEATED_MUTATION`; absent proof is never read as the owner. This is not
+   actor resolution -- the seat is still the name in `owner` -- it is the
+   separate question of whether THIS PROCESS holds it. A claim written
+   without a binding is judged exactly as before, so upgrading a project
+   never freezes it.
+
 The guard itself is read-only. It never repairs, recovers, or checkpoints.
 """
 
@@ -59,7 +71,7 @@ from pathlib import Path, PurePosixPath, PureWindowsPath
 
 from .command_effects import SHELL_CANONICAL_VERBS
 from .phases import ENTRY_COMMAND
-from .paths import resolve_project_root
+from .paths import project_lineage_identity, resolve_project_root
 
 PROTECTED_CANONICAL_NAMESPACES = (
     ".saipen/STATE.md",
@@ -679,7 +691,10 @@ _BRAKE_ROUTES = {
 
 
 def protocol_snapshot(
-    root: Path, actor: str | None = None, proposed_targets: "list[str] | None" = None
+    root: Path,
+    actor: str | None = None,
+    proposed_targets: "list[str] | None" = None,
+    session_id: str | None = None,
 ) -> dict:
     """Read-only canonical machine-state snapshot used by admission (Part 4).
 
@@ -691,7 +706,7 @@ def protocol_snapshot(
     collide with an unfinished write (T-1354); with none supplied the refusal
     keeps its old, unscoped meaning.
     """
-    from .board import claim_status, parse_board
+    from .board import claim_session_digest, claim_status, parse_board
     from .journal import scan_pending
     from .state import binding_brake, parse_state_or_error
 
@@ -823,6 +838,46 @@ def protocol_snapshot(
                 else f"Work {ticket['id']} carries an INVALID claim pair; fail closed"
             )
             return refuse("OWNERSHIP_CONFLICT", detail)
+
+        # T-1384. Everything above adjudicates ownership against `owner`, a
+        # NAME -- and the name is read out of the same ledger the arriving
+        # process just read. An agent that declares nothing inherits
+        # STATE.agent, so `claim_status` is asked whether the incumbent is
+        # the incumbent and can only answer yes. That tautology is how a
+        # second window mutated product bytes while the canonical ledger
+        # stayed byte-identical (measured in the T-1367 final matrix).
+        #
+        # A session binding is the half a name cannot carry. It is checked
+        # ONLY against a claim that actually recorded one: a claim written
+        # before this existed proves nothing either way, and inventing a
+        # verdict from its silence would freeze every project mid-upgrade.
+        bound = str(ticket.get("fields", {}).get("claim_session") or "").strip()
+        # Liveness is asked WITHOUT an actor on purpose. With one, a name that
+        # matches short-circuits to SELF before the clock is ever read, so an
+        # arrival inheriting `STATE.agent` would look live forever and a dead
+        # owner's binding would freeze the project permanently. Nameless, the
+        # answer is pure time: FOREIGN_STALE means the claim lapsed, and a
+        # lapsed claim belongs to the existing takeover path, not to this one.
+        if bound and claim_status(ticket) == "FOREIGN_LIVE":
+            presented = claim_session_digest(project_lineage_identity(root), session_id)
+            if presented != bound:
+                owner = ticket.get("fields", {}).get("owner", "?")
+                # MISSING SESSION PROOF != CURRENT OWNER. Absent and wrong are
+                # reported apart because they are different mistakes: one is a
+                # window that never established an identity, the other is a
+                # window that established a different one.
+                why = (
+                    "this host session presented no identity"
+                    if presented is None
+                    else "this host session is not the one that claimed it"
+                )
+                snapshot["route"] = ENTRY_COMMAND
+                return refuse(
+                    "UNSEATED_MUTATION",
+                    f"live Work {ticket['id']} is claimed by {owner!r} in another "
+                    f"host session; {why}, so this mutation is not authorized. "
+                    "Read-only inspection stays available.",
+                )
     snapshot["actor"] = effective_actor
     return snapshot
 
@@ -960,6 +1015,7 @@ def evaluate_admission(
     shell_protected_namespace: bool = False,
     shell_effects: "list[dict] | None" = None,
     shell_effects_unresolved: str | None = None,
+    session_id: str | None = None,
 ) -> dict:
     """Evaluate admission for a proposed tool call or file modification.
 
@@ -1382,7 +1438,9 @@ def evaluate_admission(
 
     # The canonical protocol state must be sound first. Canonical saipen
     # operations are the repair path and stay admissible under debt.
-    snapshot = protocol_snapshot(root, actor=agent, proposed_targets=canonical_targets)
+    snapshot = protocol_snapshot(
+        root, actor=agent, proposed_targets=canonical_targets, session_id=session_id
+    )
     if snapshot["block"] is not None and action_name != "saipen_op":
         return result(
             ok=False,

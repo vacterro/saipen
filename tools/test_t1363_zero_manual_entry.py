@@ -151,11 +151,14 @@ def project(
     return root
 
 
-def _doing(ticket: str, title: str, owner: str, hours: int) -> str:
+def _doing(
+    ticket: str, title: str, owner: str, hours: int, claim_session: str | None = None
+) -> str:
+    binding = f" | claim_session: {claim_session}" if claim_session else ""
     return (
         "## DOING\n"
         f"- [/] {ticket} [P1] {title} | verify: it holds | owner: {owner} "
-        f"| claim_time: {_stamp(hours)}\n"
+        f"| claim_time: {_stamp(hours)}{binding}\n"
         "## TODO\n## DONE\n## BLOCKED\n"
     )
 
@@ -201,8 +204,23 @@ def valve_and_blocker_project(case: unittest.TestCase) -> Path:
     )
 
 
+#: The binding `foreign_owner_project` puts on its live claim. It stands for
+#: the OTHER window's host session, and the arriving session can never present
+#: it -- which is the whole point. T-1384 measured a second agent changing
+#: product bytes in this exact condition while the ledger stayed clean,
+#: because `owner` is a NAME and an arrival with no declared actor inherits
+#: it. A claim with no binding models a project written before that existed,
+#: not a foreign owner, so leaving this fixture unbound would keep scoring
+#: the old hole as normal behaviour.
+FOREIGN_CLAIM_SESSION = "f0" * 16
+
+
 def foreign_owner_project(case: unittest.TestCase) -> Path:
-    """Another agent holds a LIVE claim. START must never take that seat."""
+    """Another agent holds a LIVE claim, in ITS OWN host session.
+
+    START must never take that seat -- and no host tool may reach the product
+    past it either.
+    """
     return project(
         case,
         agent="codex",
@@ -210,7 +228,13 @@ def foreign_owner_project(case: unittest.TestCase) -> Path:
         task="T-9200",
         next_action="PHASE BUILD T-9200",
         transition_from="SCOUT",
-        board=_doing("T-9200", "work owned elsewhere", "codex", 0),
+        board=_doing(
+            "T-9200",
+            "work owned elsewhere",
+            "codex",
+            0,
+            claim_session=FOREIGN_CLAIM_SESSION,
+        ),
         log=_allocation_log("T-9200"),
     )
 

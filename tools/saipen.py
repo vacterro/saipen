@@ -893,8 +893,41 @@ def _guard_event(project_root_opt: str | None, args: list[str], as_json: bool) -
         )
         return 1
     admission_result = guard_events.evaluate_event(event, project_root_opt)
+    _guard_event_probe(event, admission_result)
     _emit(admission_result, as_json)
     return 0 if admission_result.get("admitted") else 1
+
+
+def _guard_event_probe(event: dict, result: dict) -> None:
+    """Append one bounded line per judged event when a probe file is named.
+
+    T-1384: the session identity the adapter carries has never been observed
+    arriving, because nothing on the engine side ever wrote it down. A
+    measurement that reads the adapter's SOURCE proves the field is sent, not
+    that the host fills it -- and the difference is the whole question. This
+    is the same shape as `SAIPEN_GUARD_STARTUP_PROBE`, per event instead of
+    per process, and like it a probe failure never changes a verdict.
+    """
+    target = os.environ.get("SAIPEN_GUARD_EVENT_PROBE")
+    if not target:
+        return
+    mapped = result.get("event") if isinstance(result.get("event"), dict) else {}
+    line = json.dumps(
+        {
+            "tool_name": event.get("tool_name"),
+            "session_id": mapped.get("session_id"),
+            "actor": mapped.get("actor"),
+            "action": mapped.get("action"),
+            "code": result.get("code"),
+            "admitted": result.get("admitted"),
+        }
+    )
+    try:
+        with open(target, "a", encoding="utf-8") as handle:
+            handle.write(line + "\n")
+    except OSError:
+        # Diagnostic only. A guard that fails to journal still judges.
+        pass
 
 
 def _guard(project_root: Path, args: list[str], as_json: bool) -> int:

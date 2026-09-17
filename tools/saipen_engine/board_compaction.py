@@ -65,6 +65,12 @@ COMPACTION_DISPOSITION = {
     "blocker": "head",
     "blocker_scope": "inline",
     "claim_time": "inline",
+    # T-1384. Inline beside `owner`/`claim_time` because admission reads it on
+    # the live record to decide a mutation: a binding moved out to an
+    # externalized detail file would be a gate the gate cannot see, and the
+    # answer would silently become "unbound". It is 32 hex characters, so it
+    # costs the live line nothing worth reclaiming.
+    "claim_session": "inline",
     "closure_cohort": "inline",
     "closure_mode": "inline",
     "closure_paths": "tokenized",

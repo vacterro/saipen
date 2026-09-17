@@ -92,7 +92,7 @@ def main() -> int:
     for tool_name, tool_input in probes.items():
         verdict = probe(project, tool_name, tool_input)
         code = verdict.get("code")
-        allowed = bool(verdict.get("ok")) and code not in ("OWNERSHIP_CONFLICT",)
+        allowed = bool(verdict.get("ok")) and code not in ("OWNERSHIP_CONFLICT", "UNSEATED_MUTATION")
         print(f"{tool_name:<6} ok={verdict.get('ok')!s:<5} code={code!r} actor={verdict.get('actor')!r}")
         print(f"       detail={str(verdict.get('detail'))[:160]!r}")
         if allowed:
@@ -102,10 +102,10 @@ def main() -> int:
     print("## Verdict")
     if reds:
         print(f"RED: guard ADMITS unseated product mutation via {','.join(reds)}")
-        print("expected: OWNERSHIP_CONFLICT on all three -- a live foreign owner")
+        print("expected: a refusal on all three -- a live foreign owner")
         print("          must block product bytes, not only the canonical ledger")
         return 1
-    print("GREEN: every unseated product mutation refused with OWNERSHIP_CONFLICT")
+    print("GREEN: every unseated product mutation refused (UNSEATED_MUTATION)")
     return 0
 
 

@@ -619,10 +619,22 @@ const SaipenGuard = async (context) => {
         );
       }
 
+      // T-1384: export this session's identity for the command that is about
+      // to run. The canonical CLI writes it beside the claim as a salted
+      // digest, which is the only way a later window can be told apart from
+      // the owner returning -- BOARD's `owner` is a NAME, and a name is not a
+      // process. Set per event, from THIS event's own sessionID, immediately
+      // before the tool executes, the same way and for the same reason this
+      // adapter already puts the installed `bin/` on PATH (T-1318 AC-05).
+      // A session the host did not name clears the value rather than leaving
+      // the previous one: a stale identity would be a false witness.
+      const hostSession = input && input.sessionID;
+      if (hostSession) process.env.SAIPEN_HOST_SESSION = String(hostSession);
+      else delete process.env.SAIPEN_HOST_SESSION;
       const payload = JSON.stringify(
         buildEvent(context, toolName, args, {
           actor: launchActor,
-          sessionId: input && input.sessionID,
+          sessionId: hostSession,
           cwd: eventCwd,
         }),
       );
