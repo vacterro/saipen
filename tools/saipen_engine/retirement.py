@@ -106,7 +106,15 @@ LEGACY_SCHEMA_VERSION = 1
 #:       resolved the wrong project root (a stale `PWD`/carrier out-stating
 #:       the real working directory). The request may be perfectly valid --
 #:       somewhere else.
-RETIREMENT_REASONS = ("MISROUTED_PROJECT_BINDING",)
+#:
+#:   TEST_FIXTURE_CONTAMINATION
+#:       The Work and its Source receipt were minted into THIS project by
+#:       SAIPEN's OWN test fixtures: a test run invoked `saipen start` with a
+#:       fixture payload and this project's canonical ledger was written
+#:       (request provenance `model_supplied`, no operator carrier). The
+#:       request was never the operator's; it must never be implemented,
+#:       completed, or closed with coverage.
+RETIREMENT_REASONS = ("MISROUTED_PROJECT_BINDING", "TEST_FIXTURE_CONTAMINATION")
 
 #: Forensic cold storage. Deliberately NOT `.saipen/archive/source/`: that
 #: namespace means "closed with proven terminal coverage" and every reader of

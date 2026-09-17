@@ -432,6 +432,35 @@ def _valid_saipen_dir(root: Path) -> bool:
     return True
 
 
+def _same_path(left: Path, right: Path) -> bool:
+    return os.path.normcase(str(left)) == os.path.normcase(str(right))
+
+
+def unbound_environment(base: dict | None = None, **overrides) -> dict:
+    """A child-process environment carrying NO inherited project binding.
+
+    Every name in `PROJECT_BINDING_ENV` is removed, so the child resolves the
+    project from what the caller actually gave it -- its `cwd`, or an explicit
+    `--project-root`. `overrides` are applied afterwards and win, which is how
+    a test that WANTS a carrier (a red control, a host-binding contract) states
+    that intent in one visible place instead of inheriting it by accident; an
+    override of `None` removes the name.
+
+    This is the one owner of the question. A caller that writes
+    `dict(os.environ)` and pops the names it remembers has re-opened the
+    16.09.26 and 17.09.26 incidents by hand.
+    """
+    env = dict(os.environ if base is None else base)
+    for name in PROJECT_BINDING_ENV:
+        env.pop(name, None)
+    for key, value in overrides.items():
+        if value is None:
+            env.pop(key, None)
+        else:
+            env[key] = str(value)
+    return env
+
+
 def _nearest_checkpoint_root(start: Path) -> Path | None:
     for candidate in (start, *start.parents):
         if _valid_saipen_dir(candidate):
@@ -446,6 +475,34 @@ ENV_PROJECT_LINEAGE = "SAIPEN_PROJECT_LINEAGE"
 #: snapshot inherits STATE.agent and still enforces ownership and protocol
 #: state. A host session id or other host metadata is never an actor.
 ENV_AGENT = "SAIPEN_AGENT"
+#: The protocol installation carrier and the seat carrier. They are named here,
+#: beside the project carriers, because `PROJECT_BINDING_ENV` below is the one
+#: place that answers "what does a process inherit that decides WHICH project,
+#: WHICH install and WHICH seat it is" -- and an answer scattered over sixteen
+#: test files is the defect this constant exists to close.
+ENV_SKILL_ROOT = "SAIPEN_SKILL_ROOT"
+ENV_HOST_SESSION = "SAIPEN_HOST_SESSION"
+
+#: Every environment carrier that BINDS a process to one project, one protocol
+#: installation or one seat -- including the two POSIX shell carriers, because
+#: `PWD` is the one that caused the 16.09.26 incident (SRC-047/T-1368,
+#: SRC-048/T-1369) and `SAIPEN_PROJECT_ROOT` is the one that caused its
+#: 17.09.26 twin (SRC-059/T-1390, SRC-060/T-1391).
+#:
+#: A child process that must resolve its OWN project -- a test fixture, a
+#: launched host, an agent in another tree -- inherits NONE of them. Use
+#: `unbound_environment()` to build that child's environment; do not hand-roll
+#: a `dict(os.environ)` and pop the two names you happen to remember, which is
+#: exactly how both incidents were written.
+PROJECT_BINDING_ENV = (
+    ENV_PROJECT_ROOT,
+    ENV_PROJECT_LINEAGE,
+    ENV_SKILL_ROOT,
+    ENV_HOST_SESSION,
+    "PWD",
+    "OLDPWD",
+    "INIT_CWD",
+)
 PROVENANCE_EXPLICIT = "explicit"
 PROVENANCE_HOST_SESSION = "host-session"
 PROVENANCE_GIT_WORKTREE = "git-worktree"
@@ -600,8 +657,16 @@ def resolve_project_root(
 
     # 2. verified host/session project-root carrier
     carrier_root = host_root
+    #: An explicit `host_root` is the caller's own verified binding -- the fleet
+    #: and the preflight pass it on purpose, from a project they already
+    #: classified, and they are entitled to bind a root that is not the working
+    #: directory. An AMBIENT one is a leftover: nobody in this process chose it,
+    #: it simply survived a `dict(os.environ)` into a child. The two are not the
+    #: same authority and only the second one is checked against `cwd` below.
+    carrier_is_ambient = False
     if carrier_root is None and honor_environment:
         carrier_root = os.environ.get(ENV_PROJECT_ROOT, "").strip() or None
+        carrier_is_ambient = carrier_root is not None
     if carrier_root is not None:
         candidate = Path(carrier_root).expanduser()
         if not candidate.is_absolute():
@@ -634,6 +699,31 @@ def resolve_project_root(
                 code="PROJECT_LINEAGE_MISMATCH",
                 lineage=lineage,
             )
+        # An AMBIENT carrier out-ranks the working directory so a host can bind
+        # a session launched from a staging directory that owns no project at
+        # all -- the detached `_TEMP_/fastprompter_drag` case. It must NOT
+        # out-rank a working directory that IS a different project: nobody in
+        # this process chose that value, and silently preferring it is how a
+        # fixture run mints its receipts, its tickets and its canonical events
+        # into the repository the harness happened to be launched from.
+        # Measured twice: `PWD` on 16.09.26 and `SAIPEN_PROJECT_ROOT` on
+        # 17.09.26. Same lineage is the same project seen through another
+        # worktree and stays legal; an explicit `host_root` is the caller's own
+        # verified binding and is never second-guessed here.
+        cwd_root = _nearest_checkpoint_root(start) if carrier_is_ambient else None
+        if cwd_root is not None and not _same_path(cwd_root, candidate):
+            cwd_lineage = project_lineage_identity(cwd_root)
+            if cwd_lineage and cwd_lineage != lineage:
+                return ResolvedProjectRoot(
+                    None,
+                    f"{ENV_PROJECT_ROOT} names {candidate} (lineage {lineage!r}) "
+                    f"but the working directory belongs to {cwd_root} "
+                    f"(lineage {cwd_lineage!r}); two different projects claim this "
+                    f"run. Pass --project-root with the one you mean, or clear "
+                    f"{ENV_PROJECT_ROOT}",
+                    code="PROJECT_BINDING_AMBIGUOUS",
+                    lineage=lineage,
+                )
         return ResolvedProjectRoot(candidate, PROVENANCE_HOST_SESSION, lineage=lineage)
 
     # 3. Git worktree & 4. Git common/main worktree

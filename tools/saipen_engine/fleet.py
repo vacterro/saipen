@@ -93,6 +93,7 @@ _BLOCKING_SURFACE = {
     "BOARD_RECORD_OVERSIZE": "board",
     "BOARD_DETAIL_UNRESOLVABLE": "board",
     "PROJECT_BINDING_INVALID": "binding",
+    "PROJECT_BINDING_AMBIGUOUS": "binding",
 }
 _SURFACE_EVIDENCE = {
     "state": ".saipen/STATE.md",

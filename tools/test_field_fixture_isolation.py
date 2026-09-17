@@ -46,6 +46,7 @@ if str(TOOLS) not in sys.path:
 import t1363_field_polygon as polygon  # noqa: E402
 from saipen_engine.board import parse_board  # noqa: E402
 from saipen_engine.journal import ensure_project_lineage  # noqa: E402
+from saipen_engine.paths import unbound_environment  # noqa: E402
 
 #: Every canonical carrier a wrong-project session can damage. `intake/index.json`
 #: is on the list because the incident's first durable trace was a RECEIPT, and a
@@ -175,6 +176,95 @@ class LedgerIsolationTests(unittest.TestCase):
         # And the claim a model makes is never the proof: the FIXTURE ledger is.
         self.assertEqual(self.owning_ledger(repository), ([], 0))
 
+    # ------------------------------------------------------------------
+    # The 17.09.26 twin: the same class through an ENVIRONMENT carrier.
+    #
+    # `PWD` (above) is read by the host's shell. `SAIPEN_PROJECT_ROOT` is read
+    # by the protocol itself and RANKS ABOVE `cwd` (paths.resolve_project_root
+    # precedence 2 vs 3), so a fixture subprocess that inherits it never
+    # consults the directory it was given. Measured: SRC-059/T-1390 and
+    # SRC-060/T-1391 were minted into the repository by SAIPEN's own tests.
+    # ------------------------------------------------------------------
+
+    def run_cli(self, *, cwd: Path, env: dict) -> dict:
+        done = subprocess.run(
+            [sys.executable, str(ROOT / "tools" / "saipen.py"), "start", TASK, "--json"],
+            cwd=str(cwd), env={**env, "PYTHONDONTWRITEBYTECODE": "1"},
+            capture_output=True, text=True, encoding="utf-8", errors="replace",
+            timeout=300,
+        )
+        return json.loads(done.stdout or "{}")
+
+    def test_a_stale_project_root_carrier_cannot_mint_into_the_other_project(self):
+        """The exact contaminating call shape: full host env, cwd = fixture."""
+        repository = self.make_project("repository")
+        fixture = self.make_project("fixture")
+        repo_before = canonical_hashes(repository)
+        fixture_before = canonical_hashes(fixture)
+
+        polluted = dict(os.environ)
+        polluted["SAIPEN_PROJECT_ROOT"] = str(repository)
+        polluted.pop("SAIPEN_PROJECT_LINEAGE", None)
+        answer = self.run_cli(cwd=fixture, env=polluted)
+
+        self.assertFalse(answer.get("ok"), answer)
+        self.assertEqual(answer.get("code"), "PROJECT_BINDING_AMBIGUOUS", answer)
+        self.assertEqual(
+            canonical_hashes(repository), repo_before,
+            "the carrier's project was mutated by a run whose cwd was the fixture",
+        )
+        self.assertEqual(
+            canonical_hashes(fixture), fixture_before,
+            "an ambiguous binding must write nowhere, not merely elsewhere",
+        )
+        self.assertEqual(self.owning_ledger(repository), ([], 0))
+        self.assertEqual(self.owning_ledger(fixture), ([], 0))
+
+    def test_the_unbound_environment_binds_the_fixture_it_was_given(self):
+        """The harness fix: with the owner's environment, cwd decides."""
+        repository = self.make_project("repository")
+        fixture = self.make_project("fixture")
+        repo_before = canonical_hashes(repository)
+
+        os.environ["SAIPEN_PROJECT_ROOT"] = str(repository)
+        self.addCleanup(os.environ.pop, "SAIPEN_PROJECT_ROOT", None)
+        answer = self.run_cli(cwd=fixture, env=unbound_environment())
+
+        self.assertEqual(answer.get("code"), "STARTED", answer)
+        self.assertEqual(
+            canonical_hashes(repository), repo_before,
+            "canonical ledger isolation broken: the untargeted project changed",
+        )
+        tickets, receipts = self.owning_ledger(fixture)
+        self.assertTrue(tickets, "the fixture minted no Work, so this proves nothing")
+        self.assertEqual(receipts, 1)
+        self.assertEqual(self.owning_ledger(repository), ([], 0))
+
+    def test_a_carrier_still_binds_a_staging_directory_that_owns_no_project(self):
+        """The carrier exists for this case and must keep working."""
+        repository = self.make_project("repository")
+        staging = Path(tempfile.mkdtemp(prefix="saipen-staging-"))
+        self.addCleanup(lambda: shutil.rmtree(staging, ignore_errors=True))
+
+        answer = self.run_cli(
+            cwd=staging,
+            env=unbound_environment(SAIPEN_PROJECT_ROOT=str(repository)),
+        )
+        self.assertEqual(answer.get("code"), "STARTED", answer)
+        self.assertEqual(Path(answer["project_root"]), repository.resolve())
+        tickets, receipts = self.owning_ledger(repository)
+        self.assertTrue(tickets)
+        self.assertEqual(receipts, 1)
+
+    def test_one_worktree_of_the_same_project_is_not_an_ambiguous_binding(self):
+        """Same lineage is the same project; only a DIFFERENT one is ambiguous."""
+        project = self.make_project("project")
+        answer = self.run_cli(
+            cwd=project,
+            env=unbound_environment(SAIPEN_PROJECT_ROOT=str(project)),
+        )
+        self.assertEqual(answer.get("code"), "STARTED", answer)
+
     def test_the_harness_environment_strips_every_stale_project_carrier(self):
         """`_host_env` is the fix's single point of truth -- pin its contract."""
         fixture = self.make_project("fixture")
@@ -183,6 +273,7 @@ class LedgerIsolationTests(unittest.TestCase):
             "SAIPEN_PROJECT_LINEAGE": "stale",
             "SAIPEN_AGENT": "someone-else",
             "SAIPEN_SKILL_ROOT": str(ROOT),
+            "SAIPEN_HOST_SESSION": "stale-seat",
             "OLDPWD": str(ROOT),
             "INIT_CWD": str(ROOT),
             "PWD": str(ROOT),
@@ -203,6 +294,7 @@ class LedgerIsolationTests(unittest.TestCase):
             "SAIPEN_PROJECT_LINEAGE",
             "SAIPEN_AGENT",
             "SAIPEN_SKILL_ROOT",
+            "SAIPEN_HOST_SESSION",
             "OLDPWD",
             "INIT_CWD",
         ):

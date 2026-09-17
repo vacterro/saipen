@@ -523,7 +523,7 @@ class HostileControlTests(RetirementFixture):
             self.assertFalse(refused.ok, bogus)
             self.assertEqual(refused.code, "RETIREMENT_REASON_UNKNOWN", bogus)
         self.assertIn(child, self.board(project)["tickets"])
-        self.assertEqual(RETIREMENT_REASONS, (REASON,))
+        self.assertEqual(RETIREMENT_REASONS, (REASON, "TEST_FIXTURE_CONTAMINATION"))
 
     def test_control_7_repeating_a_retirement_is_deterministic(self):
         project = self.make_project()

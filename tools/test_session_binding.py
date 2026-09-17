@@ -32,6 +32,7 @@ import test_t1363_zero_manual_entry as fixtures
 from saipen_engine import guard_events
 from saipen_engine.board import claim_session_digest
 from saipen_engine.operations import HOST_SESSION_ENV
+from saipen_engine.paths import unbound_environment
 
 SAIPEN = Path(__file__).resolve().parent / "saipen.py"
 OWNER = "ses_owner_window"
@@ -209,10 +210,13 @@ class SeatGateTests(unittest.TestCase):
     """
 
     def _start(self, project: Path, session_id: str | None) -> dict:
-        env = dict(os.environ)
-        env.pop(HOST_SESSION_ENV, None)
-        if session_id:
-            env[HOST_SESSION_ENV] = session_id
+        # The environment comes from the ONE owner of project binding. Written
+        # by hand as `dict(os.environ)` with the session id popped, this call
+        # inherited `SAIPEN_PROJECT_ROOT` from whatever launched the harness --
+        # which out-ranks `cwd` -- and minted SRC-060/T-1391 into that project
+        # instead of the fixture. The seat is this test's own subject, so the
+        # session id stays an explicit override here.
+        env = unbound_environment(SAIPEN_HOST_SESSION=session_id or None)
         done = subprocess.run(
             [sys.executable, str(SAIPEN), "start", "add a trailing comment", "--json"],
             cwd=str(project),

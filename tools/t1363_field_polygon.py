@@ -480,13 +480,17 @@ def _host_env(project: Path) -> dict:
     resolved to `PWD`, read the repository's files and ran `saipen start`
     against the repository's ledger -- a sandbox that fails silently, because
     every command succeeds against the wrong project.
+
+    The carrier list itself is NOT kept here. `paths.PROJECT_BINDING_ENV` owns
+    the answer to "what binds a process to a project"; this function owns only
+    the two decisions that are the polygon's own: the actor carrier is dropped
+    so the child inherits `STATE.agent` like a real cold session, and `PWD` is
+    re-pointed at the fixture instead of merely removed, because the measured
+    host reads it.
     """
-    env = {**os.environ}
-    for key in ("SAIPEN_PROJECT_ROOT", "SAIPEN_PROJECT_LINEAGE", "SAIPEN_AGENT",
-                "SAIPEN_SKILL_ROOT", "OLDPWD", "INIT_CWD"):
-        env.pop(key, None)
-    env["PWD"] = str(project)
-    return env
+    from saipen_engine.paths import unbound_environment
+
+    return unbound_environment(SAIPEN_AGENT=None, PWD=str(project))
 
 
 def _task_env(project: Path, task: str) -> dict:
