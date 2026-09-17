@@ -236,6 +236,7 @@ class StaleBlockerEndToEndTests(unittest.TestCase):
 
 
 SAIPEN_CLI = Path(__file__).resolve().parent / "saipen.py"
+_HOME = Path(__file__).resolve().parent.parent
 
 
 class StaleBlockerCliTests(unittest.TestCase):
@@ -1212,6 +1213,160 @@ class DeadlockReachabilityMatrixTests(unittest.TestCase):
                     self.assertTrue(result["operator_decision_available"], result)
                     self.assertEqual(result["diagnosis"], "READ_ONLY_DIAGNOSIS_ONLY", result)
                 self.assertEqual(result["canonical_next_command"].split()[1], "recover", result)
+
+
+# ---------------------------------------------------------------------------
+# T-1382: the repair the READER made unreachable
+# ---------------------------------------------------------------------------
+
+#: The SAIPAL shape, measured live 16.09.26 at `last_event` 951: `phase: DONE`
+#: reached from `VERIFY` with no canonical active-block DEC behind it. The
+#: block-parked exception is the ONLY legal mid-flight `-> DONE`, so the pair is
+#: invalid -- and `operations._read` raised on it before `reconcile` could reach
+#: `_state_phase_repairs`, which has derived the correct pair from the
+#: transition chain since T-1318. Repair present, reader standing in front of
+#: it, every verb INCLUDING `recover` answering VALIDATION_FAILED with no route.
+_UNBOUND_HISTORY_LOG = (
+    "- 16.09.26 00:00 [E-001] [T-042] [agent: buffy] "
+    "[op: claim-aaaaaaaaaaaa4aaaaaaaaaaaaaaaaaaa] DEC: claimed via SAIOPS -- owner buffy\n"
+    "- 16.09.26 00:01 [E-002] [parent: E-001] [T-042] [agent: buffy] "
+    "[op: transition-bbbbbbbbbbbb4bbbbbbbbbbbbbbbbbbb] RUN: transition to BUILD -- the work\n"
+    "- 16.09.26 00:02 [E-003] [parent: E-002] [T-042] [agent: buffy] "
+    "[op: transition-cccccccccccc4cccccccccccccccccccc] RUN: transition to VERIFY -- the work\n"
+    "- 16.09.26 00:03 [E-004] [parent: E-003] [T-042] [agent: buffy] "
+    "[op: checkpoint-dddddddddddd4dddddddddddddddddddd] RUN: VERIFY -- the session died here\n"
+)
+
+_UNBOUND_HISTORY_STATE = (
+    "---\n"
+    "phase: DONE\n"
+    "task: T-042\n"
+    'next_action: "saipen continue"\n'
+    'blocker: ""\n'
+    "transition_from: VERIFY\n"
+    "saipen_version: 8\n"
+    "schema_version: 3\n"
+    "last_event: 4\n"
+    "style_contract: ded-4ae736e4\n"
+    'saipen_home: "{home}"\n'
+    "agent: buffy\n"
+    "requires:\n  - filesystem\n  - python\n"
+    "mode: full\n"
+    'updated: "2026-09-16T00:00:00Z"\n'
+    "---\n"
+)
+
+
+def _unbound_history_project() -> Path:
+    from saipen_engine.journal import ensure_project_lineage
+
+    root = Path(tempfile.mkdtemp(prefix="saipen-t1382-")) / "SAIPAL"
+    (root / ".saipen").mkdir(parents=True)
+    (root / ".saipen" / "STATE.md").write_text(
+        _UNBOUND_HISTORY_STATE.format(home=str(_HOME).replace(chr(92), chr(92) * 2)),
+        encoding="utf-8",
+    )
+    (root / ".saipen" / "BOARD.md").write_text(
+        "## DOING\n"
+        "- [/] T-042 [P1] the work that was mid-flight | verify: it works | owner: buffy\n"
+        "## TODO\n## DONE\n## BLOCKED\n",
+        encoding="utf-8",
+    )
+    (root / ".saipen" / "LOG.md").write_text(_UNBOUND_HISTORY_LOG, encoding="utf-8")
+    ensure_project_lineage(root)
+    subprocess.run(["git", "init"], cwd=str(root), capture_output=True)
+    return root
+
+
+class UnboundHistoryDeadlockTests(unittest.TestCase):
+    """A repair that exists must be REACHABLE from the state that needs it."""
+
+    def setUp(self) -> None:
+        self.root = _unbound_history_project()
+        self.addCleanup(lambda: shutil.rmtree(self.root.parent, ignore_errors=True))
+
+    def cli(self, *args) -> dict:
+        from saipen_engine.paths import unbound_environment
+
+        run = subprocess.run(
+            [sys.executable, str(SAIPEN_CLI), *args, "--json"],
+            cwd=str(self.root),
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            env=unbound_environment(),
+            timeout=600,
+        )
+        try:
+            return json.loads(run.stdout or "{}")
+        except json.JSONDecodeError:
+            return {"_raw": (run.stdout + run.stderr)[:400]}
+
+    def test_the_reader_lets_the_repair_planner_see_the_unbound_shape(self):
+        """Strict callers still refuse; only a declared observer may look."""
+        from saipen_engine.operations import REPAIR_OBSERVABLE, CheckpointError, _read
+
+        with self.assertRaises(CheckpointError) as strict:
+            _read(self.root)
+        self.assertIn("state-history-binding", str(strict.exception))
+
+        docs, _state, _board, _tail = _read(self.root, observe=REPAIR_OBSERVABLE)
+        self.assertIn("history_binding", docs["_observed"])
+        self.assertIn("invalid phase transition", docs["_observed"]["history_binding"])
+
+    def test_recover_names_one_command_the_stranded_session_can_run(self):
+        answer = self.cli("recover")
+        self.assertFalse(answer.get("ok"), answer)
+        route = answer.get("canonical_next_command")
+        self.assertTrue(route, "recover named no route out of the deadlock")
+        self.assertEqual(route.split()[:3], ["saipen", "recover", "--apply-approved-repair"])
+        # Reachable from the verbs a stranded session actually reaches for,
+        # not only from the one that computed it.
+        self.assertEqual(self.cli("continue").get("canonical_next_command"), route)
+        self.assertEqual(self.cli("start", "a new task").get("canonical_next_command"), route)
+
+    def test_the_named_route_converges_and_is_idempotent(self):
+        route = self.cli("recover")["canonical_next_command"].split()[1:]
+        applied = self.cli(*route)
+        self.assertTrue(applied.get("ok"), applied)
+        self.assertEqual(applied.get("code"), "REPAIRED", applied)
+
+        state = (self.root / ".saipen" / "STATE.md").read_text(encoding="utf-8")
+        # Not a guess: E-003 proves the destination VERIFY and E-002 the source.
+        self.assertIn("\nphase: VERIFY\n", state)
+        self.assertIn("\ntransition_from: BUILD\n", state)
+
+        self.assertEqual(self.cli("validate").get("code"), "VALID")
+        self.assertEqual(self.cli("recover").get("code"), "CLEAN")
+        self.assertTrue(self.cli("status").get("ok"))
+        self.assertTrue(self.cli("continue").get("ok"))
+        # Replaying the same approval is refused, never applied twice.
+        self.assertEqual(self.cli(*route).get("code"), "STALE_APPROVED_REPAIR")
+
+    def test_the_original_bytes_survive_as_recovery_evidence(self):
+        before = (self.root / ".saipen" / "STATE.md").read_bytes()
+        route = self.cli("recover")["canonical_next_command"].split()[1:]
+        self.assertTrue(self.cli(*route).get("ok"))
+        kept = list((self.root / ".saipen" / "recovery").rglob("*.STATE.md"))
+        self.assertTrue(kept, "the repair kept no evidence of what it replaced")
+        self.assertIn(before, [path.read_bytes() for path in kept])
+
+    def test_observing_damage_is_not_authority_to_mutate(self):
+        """The safety boundary: a relaxed READ never relaxes a WRITE."""
+        from saipen_engine.operations import REPAIR_OBSERVABLE, _read
+
+        docs, _state, _board, _tail = _read(self.root, observe=REPAIR_OBSERVABLE)
+        self.assertIn("history_binding", docs["_observed"])
+        before = (self.root / ".saipen" / "STATE.md").read_bytes()
+        for verb in (
+            ["transition", "BUILD"],
+            ["checkpoint", "RUN", "T-042", "probe"],
+            ["claim", "T-042"],
+        ):
+            with self.subTest(verb=verb[0]):
+                self.assertFalse(self.cli(*verb).get("ok"))
+        self.assertEqual((self.root / ".saipen" / "STATE.md").read_bytes(), before)
 
 
 if __name__ == "__main__":

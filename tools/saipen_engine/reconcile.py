@@ -1658,6 +1658,7 @@ def reconcile_protocol_state(
             _event_line,
             _identity,
             _log_targets,
+            REPAIR_OBSERVABLE,
             _read,
             _target,
         )
@@ -1668,7 +1669,7 @@ def reconcile_protocol_state(
         return {"ok": False, "code": "VALIDATION_FAILED", "detail": str(exc)}
 
     try:
-        docs, state, _board, log_tail = _read(project_root, allow_malformed_state=True)
+        docs, state, _board, log_tail = _read(project_root, observe=REPAIR_OBSERVABLE)
     except Exception as exc:
         # CheckpointError / HomeDeadError / OSError all mean the surface cannot
         # be reconciled mechanically. Refuse loudly -- none of them is the

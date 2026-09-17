@@ -115,9 +115,16 @@ def route_next(
             _state_error=state_error,
         )
         if errors:
+            # The route is `recover`, never `status`. Naming the command that
+            # just refused is the self-loop measured in the field: a stranded
+            # session reads `action` as an instruction, runs it, gets the same
+            # refusal and the same instruction, and stops. `recover` is the one
+            # canonical entry that owns an invalid checkpoint surface, and it
+            # answers with either the exact approval command or a named
+            # operator decision -- both of which are somewhere to GO.
             return {
                 "ok": False,
-                "action": "saipen status",
+                "action": "saipen recover",
                 "reason": "checkpoint-invalid",
                 "detail": "checkpoint invalid: " + "; ".join(errors[:3]),
             }
@@ -127,7 +134,7 @@ def route_next(
     if state_error:
         return {
             "ok": False,
-            "action": "saipen status",
+            "action": "saipen recover",
             "reason": "state-malformed",
             "detail": f"STATE parse error: {state_error}",
         }

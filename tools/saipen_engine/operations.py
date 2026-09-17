@@ -205,12 +205,37 @@ def _state_guard(fn):
     return wrapper
 
 
+#: Damage classes a REPAIR PLANNER is allowed to OBSERVE.
+#:
+#: Each name is a defect `_read` would otherwise raise on, and each one is a
+#: defect some canonical repair already knows how to fix. Raising on it is what
+#: makes that repair unreachable -- the reader refuses, so the repair never
+#: runs, so the reader keeps refusing -- and that loop has now been measured
+#: three times in the field, on three different surfaces, which is why the set
+#: is a named constant instead of a third boolean keyword:
+#:
+#:   `state`             an unparseable reconciliation-owned STATE field
+#:                       (`last_event`, a goal counter, the schema/style
+#:                       markers). FastPrompter, 13.09.26.
+#:   `log`              illegal LOG LINE SYNTAX, the class `normalize_log`
+#:                       repairs and could not read. T-1356.
+#:   `history_binding`  a `phase: DONE` whose block-parked evidence is not in
+#:                       the history at or before `last_event`. SAIPAL,
+#:                       16.09.26 -- every verb including `recover` refused.
+#:
+#: What is NOT on this list is the point of the list. Ledger corruption
+#: (duplicate, out-of-order or dangling E-IDs), a dead `saipen_home`, history
+#: OWNERSHIP and every protected-path and seat gate stay armed for every
+#: caller: those are not damage a planner repairs by looking harder, and
+#: relaxing a READ must never become relaxing an AUTHORITY.
+REPAIR_OBSERVABLE = ("state", "log", "history_binding")
+
+
 def _read(
     root: Path,
     *,
     allow_dead_home: bool = False,
-    allow_malformed_state: bool = False,
-    allow_illegal_log: bool = False,
+    observe: tuple[str, ...] = (),
 ) -> tuple[dict, dict, dict, dict]:
     """Read STATE/BOARD/LOG docs + their parsed forms (normalised view).
 
@@ -221,19 +246,21 @@ def _read(
     raises the same shape so a corrupt checkpoint can never reach patch_state
     and leak a ValueError traceback through the public CLI (T-1003 / P1#4).
 
-    `allow_malformed_state=True` is the CORE-002 reconciliation escape hatch --
-    the ONLY consumer is `reconcile.reconcile_protocol_state`. A STATE whose
-    defect is a reconciliation-owned field (`last_event`, a goal counter, the
-    schema/style markers) is unparseable by the STRICT contract and would
-    otherwise be unreadable by the one operation whose entire job is to repair
-    it: the reader refuses, so the repair never happens, so the reader keeps
-    refusing. Tolerating the parse keeps every OTHER gate (dead home, history
-    ownership, parked evidence, void history) fully armed and hands the caller
-    the lenient fields plus the strict verdict in `docs["_state_error"]`. The
-    caller must then PROVE its repaired proposal against the same strict
-    validator before a single byte is written -- a proposal that cannot pass is
-    refused, never committed.
+    `observe` names the damage classes a REPAIR PLANNER may look at --
+    `REPAIR_OBSERVABLE` above is the closed set and the reason each one is on
+    it. The rule it encodes is one sentence: a defect the reader refuses to
+    read is a defect no repair can ever reach, because the repair lives behind
+    the read. Every class not named stays fully armed, and a caller that names
+    a class gets the strict verdict handed back in `docs["_observed"]` rather
+    than an exception. Observing is NOT authority: the caller must still PROVE
+    its repaired proposal against the same strict validator before a single
+    byte is written, and a proposal that cannot pass is refused, never
+    committed.
     """
+    allow_malformed_state = "state" in observe
+    allow_illegal_log = "log" in observe
+    allow_unbound_history = "history_binding" in observe
+    observed: dict[str, str] = {}
     # PERFORMANCE (PERF-003): each canonical checkpoint document is read ONCE.
     # ``read_checkpoint_doc`` folds the old two-step ``checkpoint_preflight``
     # (encoding check) + ``read_document`` (decode) into a single filesystem read,
@@ -256,6 +283,8 @@ def _read(
     state, state_error = parse_state_or_error(state_doc.text_norm)
     if state_error and not allow_malformed_state:
         raise StateMalformedError(f"state-malformed: {state_error}")
+    if state_error:
+        observed["state"] = state_error
     if state_error:
         # CORE-002 reconciliation path: fall back to the lenient frontmatter
         # parse so the repair set can be derived at all. `state_error` is the
@@ -320,7 +349,19 @@ def _read(
         raise CheckpointError(f"history-ownership: {exc}")
     parked_error = block_parked_evidence_error(state, board, snapshot.events)
     if parked_error is not None:
-        raise CheckpointError(f"state-history-binding: {parked_error}")
+        # The measured deadlock (T-1382, SAIPAL 16.09.26, last_event 951): this
+        # raise is unconditional, `reconcile` reads through this same path, and
+        # `_state_phase_repairs` -- which already derives the correct pair from
+        # the transition chain -- sits on the other side of it. So the project
+        # had a repair and no way to run it: status, next, continue, recover,
+        # every recover subcommand, transition, claim, checkpoint and start all
+        # answered VALIDATION_FAILED and named no command that could help.
+        # The planner may now SEE the unbound shape. It still may not commit
+        # one: its proposal is proved against this same binding rule by
+        # `validate_texts` before any write.
+        if not allow_unbound_history:
+            raise CheckpointError(f"state-history-binding: {parked_error}")
+        observed["history_binding"] = parked_error
     _home = state.get("saipen_home")
     # T-1010: the cross-platform absolute classifier -- a foreign-OS absolute
     # home must not read as legacy-relative on this host and skip the
@@ -372,6 +413,10 @@ def _read(
         "log": log_doc,
         "_logs_digest": _logs_digest,
         "_history": snapshot,
+        # Every damage class the caller ASKED to observe and that was actually
+        # present, as the strict verdict text. A caller that named a class and
+        # finds nothing here read a surface that is clean on that class.
+        "_observed": observed,
         # T-1326 P0: the canonical project root travels WITH the documents. Every
         # later `_event_line` therefore externalizes an oversized event
         # losslessly without the caller having to remember a `root=` keyword --
@@ -1282,9 +1327,34 @@ def _plan_claim(
         )
     event, line = _event_line(docs, log_tail, "DEC", ticket_id, agent, detail, now, op_id)
     new_log = docs["log"].text_norm.rstrip("\n") + "\n" + line + "\n"
-    new_board = _claim_move(
-        board_text, ticket_id, agent, utc, session_binding=host_session_binding(root)
-    )
+    # T-1326 TARGET B for the CLAIM path: claiming APPENDS `owner`/`claim_time`
+    # (and the session binding), so a row that was legal can cross the live cap
+    # BECAUSE of the claim itself. Asserting the cap on that proposed row made
+    # the ticket unclaimable AND unreachable by `ticket compact` (the row was
+    # under the cap before the claim, so compact reports ALREADY_APPLIED) -- the
+    # exact frozen-seat dead end other lifecycle writers already closed by
+    # routing through the ONE shared externalizing projector.
+    try:
+        projected = _project_board_mutation(
+            root,
+            docs["board"].text_norm,
+            lambda board: _claim_move(
+                board,
+                ticket_id,
+                agent,
+                utc,
+                session_binding=host_session_binding(root),
+                enforce_cap=False,
+            ),
+            [ticket_id],
+            op_id=op_id,
+            event_id=f"E-{event}",
+            reason=("existing/proposed oversized BOARD record requires canonical claim update"),
+        )
+    except ValueError as exc:
+        return _refuse("VALIDATION_FAILED", str(exc), ticket=ticket_id)
+    new_board = projected.board_text
+    compaction_targets = list(projected.targets)
     owned = {
         "phase": "SCOUT",
         "task": ticket_id,
@@ -1335,6 +1405,8 @@ def _claim_move(
     agent: str,
     utc: str,
     session_binding: str | None = None,
+    *,
+    enforce_cap: bool = True,
 ) -> str:
     """Surgical claim move: target ticket TODO -> DOING with [/] owner.
 
@@ -1364,10 +1436,10 @@ def _claim_move(
     # REPLACE the existing pair, never append a second one -- a duplicate field
     # is a parse error that rejects the whole board (hostile-regression, P1#5).
     marked = ticket_line.replace("- [ ] ", "- [/] ", 1).rstrip()
-    marked = set_ticket_field(marked, "owner", agent)
-    marked = set_ticket_field(marked, "claim_time", utc)
+    marked = set_ticket_field(marked, "owner", agent, enforce_cap=enforce_cap)
+    marked = set_ticket_field(marked, "claim_time", utc, enforce_cap=enforce_cap)
     if session_binding:
-        marked = set_ticket_field(marked, "claim_session", session_binding)
+        marked = set_ticket_field(marked, "claim_session", session_binding, enforce_cap=enforce_cap)
     else:
         marked = remove_ticket_field(marked, "claim_session")
     out.insert(doing_idx + 1, marked + "\n")
@@ -6260,7 +6332,7 @@ def normalize_log(project_root: Path | str, agent: str, dry_run: bool = False) -
     """
     root = Path(project_root)
     now, utc = _now(), _utc_iso()
-    read_once = _read(root, allow_illegal_log=True)
+    read_once = _read(root, observe=("log",))
     docs, state, _board, _tail = read_once
     original = docs["log"].text_norm
     lines, repairs, refusals = _normalized_log_lines(original)
