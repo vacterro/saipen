@@ -146,6 +146,53 @@ def witness(text: str, *, obligation_met: bool = False, env: dict | None = None)
     }
 
 
+def unstarted(root: Path | str, env: dict | None = None) -> dict | None:
+    """The task this session was launched with that this project has not taken.
+
+    Returns ``{"digest", "source", "command"}`` when a carrier declares a task
+    and NO receipt here already holds those bytes; None otherwise (including
+    when nothing was declared, which is most sessions).
+
+    Measured 2026-09-17: four of nine field sessions opened with `saipen status`
+    or `saipen continue` although BOOT's entry table says a new actionable task
+    goes to `saipen start`. `status` answered `next_action: saipen continue`,
+    and `continue` answered IMPROVE_AUDIT_ASSIGNMENT -- it sent a session that
+    was handed a user task into an improvement audit. The table was right and
+    the runtime's own answer did not agree with it, which is a protocol defect
+    rather than a model one: the session asked the project what to do and the
+    project did not say "start the task you were given".
+    """
+    import json as _json
+
+    record = declared(env)
+    if not record or record.get("error"):
+        return None
+    root = Path(root)
+    index = root / ".saipen" / "intake" / "index.json"
+    active: dict = {}
+    try:
+        active = (_json.loads(index.read_text(encoding="utf-8")) or {}).get("active") or {}
+    except (OSError, ValueError):
+        active = {}
+    for receipt_id in active:
+        meta_path = root / ".saipen" / "intake" / "active" / f"{receipt_id}.meta.json"
+        try:
+            meta = _json.loads(meta_path.read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            continue
+        provenance = meta.get("request_provenance")
+        if isinstance(provenance, dict) and provenance.get("compared_digest") == record["digest"]:
+            return None
+    env = os.environ if env is None else env
+    task_file = (env.get(ENV_TASK_FILE) or "").strip()
+    command = (
+        f"saipen start --file {task_file}"
+        if task_file
+        else "saipen start '<the task you were given, one line>'"
+    )
+    return {"digest": record["digest"], "source": record["source"], "command": command}
+
+
 __all__ = [
     "CODE_CARRIER_INVALID",
     "CODE_MISMATCH",
@@ -156,5 +203,6 @@ __all__ = [
     "WITNESS_MODEL",
     "WITNESS_OBLIGATION",
     "declared",
+    "unstarted",
     "witness",
 ]

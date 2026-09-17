@@ -91,6 +91,16 @@ _RUNTIME_INFO_OVERRIDE: str | None = None
 # invocation was not a declared shortcut (direct verbs stay untagged).
 _ROUTE_ECHO: str | None = None
 
+#: T-1378. The project root whose DIAGNOSTIC answer must also name the entry
+#: command when this session was launched with a task it has not started.
+#: Measured 2026-09-17: four of nine field sessions opened with `status` or
+#: `continue` although BOOT's entry table sends a new actionable task to
+#: `start`. `status` answered `next_action: saipen continue`, and `continue`
+#: answered IMPROVE_AUDIT_ASSIGNMENT -- a session handed a user task was routed
+#: into an improvement audit. The table was right; the runtime's own answer to
+#: the question the model actually asked did not agree with it.
+_ENTRY_HINT_ROOT: Path | None = None
+
 
 def _agent_for(project_root: Path) -> str:
     """The canonical acting actor for this invocation (T-1006, CORE-001).
@@ -5212,6 +5222,24 @@ def _emit(payload: dict, as_json: bool) -> None:
     # engine is the refuser. `message` is preserved, never replaced.
     if not payload.get("ok") and payload.get("message") and not payload.get("detail"):
         payload = {**payload, "detail": payload["message"]}
+    if _ENTRY_HINT_ROOT is not None and payload.get("ok") is not False:
+        from saipen_engine import operator_task as _operator_task
+
+        _unstarted = _operator_task.unstarted(_ENTRY_HINT_ROOT)
+        if _unstarted:
+            payload = {
+                **payload,
+                "unstarted_operator_task": {
+                    "digest": _unstarted["digest"],
+                    "declared_by": _unstarted["source"],
+                },
+                "canonical_next_command": payload.get("canonical_next_command")
+                or _unstarted["command"],
+                "entry_hint": (
+                    "this session was launched with a task this project has not taken; "
+                    "BOOT's entry table routes a new actionable task to `saipen start`"
+                ),
+            }
     if _ROUTE_ECHO is not None:
         # Route echo: the invocation resolved through the shared shortcut
         # resolver, so every emitted payload names its canonical route. This
@@ -6788,6 +6816,12 @@ def main(argv: list[str] | None = None) -> int:
     # provenance, and ownership moves only through `saipen claim` or
     # `operations.handover_agent(..., explicit=True)`. Read-only projections
     # route under the resolved actor without touching disk.
+
+    if command in ("status", "cc", "continue"):
+        # T-1378: these are the two questions a session asks when it does not
+        # know what to do. Their answer must agree with BOOT's entry table.
+        global _ENTRY_HINT_ROOT  # noqa: PLW0603
+        _ENTRY_HINT_ROOT = project_root
 
     if command == "status":
         if len(args) > 1:

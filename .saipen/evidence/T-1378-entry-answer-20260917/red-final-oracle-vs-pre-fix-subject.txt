@@ -1,0 +1,44 @@
+oracle  sha256 2ee438bfbcf05c99 (identical copy: True)
+subject 89f119b3fdf0d631 -> 9a17ba17e76c86da (unstarted() reverted)
+--- pre-fix subject run ---
+sNameTheEntryCommandTests.test_a_task_file_carrier_names_the_file_transport)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\t1378-red-e7j9_r04\subject\tools\test_entry_answer_agrees.py", line 112, in test_a_task_file_carrier_names_the_file_transport
+    answer["canonical_next_command"], f"saipen start --file {task_file}"
+    ~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+KeyError: 'canonical_next_command'
+
+======================================================================
+ERROR: test_continue_names_it_too_instead_of_an_improvement_audit (tools.test_entry_answer_agrees.BothDiagnosticsNameTheEntryCommandTests.test_continue_names_it_too_instead_of_an_improvement_audit)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\t1378-red-e7j9_r04\subject\tools\test_entry_answer_agrees.py", line 102, in test_continue_names_it_too_instead_of_an_improvement_audit
+    answer["canonical_next_command"], "saipen start '<the task you were given, one line>'"
+    ~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+KeyError: 'canonical_next_command'
+
+======================================================================
+ERROR: test_status_names_the_entry_command (tools.test_entry_answer_agrees.BothDiagnosticsNameTheEntryCommandTests.test_status_names_the_entry_command)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\t1378-red-e7j9_r04\subject\tools\test_entry_answer_agrees.py", line 92, in test_status_names_the_entry_command
+    answer["canonical_next_command"], "saipen start '<the task you were given, one line>'"
+    ~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+KeyError: 'canonical_next_command'
+
+======================================================================
+FAIL: test_a_receipt_with_another_digest_does_not_silence_the_hint (tools.test_entry_answer_agrees.UnstartedReadsTheLedgerTests.test_a_receipt_with_another_digest_does_not_silence_the_hint)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\t1378-red-e7j9_r04\subject\tools\test_entry_answer_agrees.py", line 171, in test_a_receipt_with_another_digest_does_not_silence_the_hint
+    self.assertIsNotNone(found)
+AssertionError: unexpectedly None
+
+----------------------------------------------------------------------
+Ran 9 tests in 5.395s
+
+FAILED (failures=1, errors=3)
+
+classes red against the pre-fix subject: ['BothDiagnosticsNameTheEntryCommandTests', 'UnstartedReadsTheLedgerTests']
+RED CONTROL OK: the diagnostics stop naming the entry command
