@@ -3362,8 +3362,17 @@ def _verifier_for(policy: str):
             inherited = (receipt_metadata or {}).get("inherited_findings")
             if not isinstance(inherited, (list, tuple)) or not inherited:
                 return errors
-            declared = {str(item) for item in inherited}
-            return [error for error in errors if str(error) not in declared]
+            # Matched by DEFECT, not by string. A repair that removes or adds a
+            # line moves every finding below it, so comparing raw text read the
+            # same inherited defect at a new line number as a NEW one and
+            # refused the write anyway -- the declaration was accepted and then
+            # defeated by an off-by-one in the report.
+            declared = {fast_check.defect_signature(str(item)) for item in inherited}
+            return [
+                error
+                for error in errors
+                if fast_check.defect_signature(str(error)) not in declared
+            ]
 
         return _core_fast
     if policy == "improve_atomic_file":

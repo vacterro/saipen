@@ -410,25 +410,46 @@ class InvalidPhaseEndToEndTests(unittest.TestCase):
         reconcile_protocol_state(root, "tester")
         self.assertEqual(artifact.read_bytes(), preserved)
 
-    def test_a_contradictory_board_refuses_with_zero_writes(self):
+    def test_a_contradictory_board_does_not_hold_the_phase_repair_hostage(self):
+        """T-1382: a repair is judged on its DELTA, not on what it walked into.
+
+        This control used to assert the opposite -- that a dangling `needs:`
+        edge refuses the whole reconciliation with zero writes. That rule is
+        what made a set of repairs mutually unreachable: the phase repair is
+        derived from the LOG's own transition chain and has nothing to do with
+        the BOARD graph, while the BOARD defect's own owner needs a readable
+        STATE. Each refused over the other's damage and neither ever ran.
+
+        What must still hold, and is asserted below: the inherited defect is
+        not laundered. The surface this repair does not own is untouched, the
+        defect stays reported, and the project does NOT reach CLEAN.
+        """
         root = self._make_project()
         (root / ".saipen" / "BOARD.md").write_text(
             "## DOING\n- [/] T-001 [P1] fix | verify: test | needs: T-999\n"
             "## TODO\n## DONE\n## BLOCKED\n",
             encoding="utf-8",
         )
-        before = {
-            name: (root / ".saipen" / name).read_bytes()
-            for name in ("STATE.md", "BOARD.md", "LOG.md")
-        }
+        board_before = (root / ".saipen" / "BOARD.md").read_bytes()
+
         result = reconcile_protocol_state(root, "tester", dry_run=False)
-        self.assertFalse(result["ok"], result)
-        self.assertEqual(result["code"], "VALIDATION_FAILED", result)
-        for name, raw in before.items():
-            self.assertEqual((root / ".saipen" / name).read_bytes(), raw, name)
-        self.assertFalse(
-            list((root / ".saipen" / "recovery").rglob("*.STATE.md")),
-            "a refused repair must not preserve anything",
+        self.assertTrue(result["ok"], result)
+        self.assertEqual(result["code"], "REPAIRED", result)
+        self.assertEqual(
+            [repair["field"] for repair in result["changed"]["state"]],
+            ["phase", "transition_from"],
+            result,
+        )
+        # The surface it does not own is not touched.
+        self.assertEqual((root / ".saipen" / "BOARD.md").read_bytes(), board_before)
+
+        # And the damage it inherited is not laundered: still reported, and the
+        # project does NOT reach CLEAN on the strength of a partial repair.
+        after = reconcile_protocol_state(root, "tester", dry_run=True)
+        self.assertNotEqual(after.get("code"), "CLEAN", after)
+        self.assertTrue(
+            any("T-999" in str(item) for item in after.get("residual_defects") or []),
+            after,
         )
 
 

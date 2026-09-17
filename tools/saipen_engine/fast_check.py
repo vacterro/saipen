@@ -47,7 +47,7 @@ def _analyze_log(log_text: str) -> "LogAnalysis":
     independent implementation, so a parser bug is still caught by the second
     invariant layer.
     """
-    from .log import parse_log_line
+    from .log import declared_event_id, parse_log_line
 
     events: list[dict] = []
     errors: list[str] = []
@@ -75,6 +75,22 @@ def _analyze_log(log_text: str) -> "LogAnalysis":
         parsed = parse_log_line(line)
         if parsed is None:
             errors.append(f"LOG.md:{lineno} not a legal event line")
+            # The line is malformed, and the id it CLAIMS is still spent: an
+            # append-only ledger never gives a number back. Stepping over the
+            # slot keeps the next allocation from reusing it and keeps the
+            # consecutive check from reading a damaged line as a HOLE -- which
+            # is how _SAITULS (17.09.26) ended up with a `recover` whose own
+            # proposal was refused for a gap the repair had just created by
+            # jumping over three lines it could not parse.
+            claimed = declared_event_id(line)
+            if claimed is not None:
+                if claimed in seen:
+                    errors.append(f"LOG.md:{lineno} duplicate event E-{claimed}")
+                seen.add(claimed)
+                if prev is None or claimed > prev:
+                    prev = claimed
+                if highest is None or claimed > highest:
+                    highest = claimed
             continue
         events.append(parsed)
         event = parsed["event"]
@@ -266,7 +282,17 @@ def validate_checkpoint_surface(
     else:
         state, state_error = parse_state_or_error(state_text)
     if state_error:
+        # A STATE the parser refuses stops the checks that READ state fields.
+        # It must not stop the ones that do not: returning here is what let a
+        # project be reported as one unknown field away from healthy while the
+        # write gate refused every proposal over a duplicate ticket id, a
+        # blocker outside `## BLOCKED` and three malformed LOG lines. A
+        # diagnostic surface may say "I cannot judge this"; it may not imply
+        # health it has not checked. The LOG verdict comes from the snapshot
+        # this surface was already handed, not from a second read.
         errors.append(f"STATE proposed malformed: {state_error}")
+        errors.extend(board_surface_errors(board_text))
+        errors.extend(f"LOG: {problem}" for problem in getattr(snap, "illegal_lines", ()))
         return errors
     missing = [
         k
@@ -428,6 +454,83 @@ def validate_checkpoint_surface(
     return errors
 
 
+#: The identity of a DEFECT, independent of where it currently sits.
+#:
+#: Repair proposals move lines, so the same defect is reported at a different
+#: line number before and after a repair. Comparing raw strings would therefore
+#: read every inherited defect as a NEW one, and a repair that fixed its own
+#: surface would be refused for damage it never touched. Only the position is
+#: dropped -- the file stays in the signature, because the same sentence about
+#: two different files is two different defects.
+_DEFECT_POSITION_RE = re.compile(r"\b([A-Za-z_][A-Za-z_0-9]*\.md):\d+:?")
+
+
+def defect_signature(error: str) -> str:
+    """One validator error, reduced to what makes it THAT defect."""
+    return _DEFECT_POSITION_RE.sub(r"\g<1>:", error).strip()
+
+
+def defect_delta(before: list[str], after: list[str]) -> tuple[list[str], list[str]]:
+    """(introduced, inherited) for a proposed change.
+
+    `introduced` is damage the proposal ADDS and is always disqualifying.
+    `inherited` is damage that was there first: it must stay visible and must
+    keep the project out of CLEAN, but it is not a reason to refuse a repair
+    that strictly improves the surface it owns. Measured on _SAITULS, 17.09.26:
+    the STATE repair was refused for a duplicate BOARD id, two stale blockers
+    and three malformed LOG lines it had never proposed to touch, so the one
+    repair that could have made the next repair runnable never ran.
+    """
+    seen = {}
+    for error in before:
+        seen[defect_signature(error)] = seen.get(defect_signature(error), 0) + 1
+    introduced: list[str] = []
+    inherited: list[str] = []
+    for error in after:
+        key = defect_signature(error)
+        if seen.get(key):
+            seen[key] -= 1
+            inherited.append(error)
+        else:
+            introduced.append(error)
+    return introduced, inherited
+
+
+def board_surface_errors(board_text: str) -> list[str]:
+    """Every BOARD defect that does not depend on STATE parsing.
+
+    Extracted so the malformed-STATE path and the ordinary path answer with
+    the SAME list. They used not to: a STATE the parser refused made
+    `validate_texts` return immediately, so a duplicate ticket id and a blocker
+    outside `## BLOCKED` were invisible to `saipen validate` while the write
+    gate refused every proposal over them. Measured on _SAITULS, 17.09.26:
+    `validate --json` reported one unknown STATE field and nothing else, and
+    the operator was told the project was one field away from healthy.
+    """
+    errors: list[str] = []
+    board = parse_board(board_text)
+    errors.extend(f"BOARD: {e}" for e in board["errors"])
+    tickets = board["tickets"]
+    for ge in board_graph_errors(tickets):
+        errors.append(f"BOARD: {ge}")
+    if len([t for t in tickets.values() if t["section"] == "## DOING"]) > 1:
+        errors.append("BOARD proposed has more than one ## DOING ticket")
+    for ticket in tickets.values():
+        for semantic in board_semantic_errors(ticket):
+            errors.append(f"BOARD proposed {semantic}")
+        for need in ticket["needs"]:
+            if need not in tickets:
+                continue
+            if ticket["section"] == "## DOING" and tickets[need]["section"] != "## DONE":
+                errors.append(f"BOARD proposed {ticket['id']} needs {need} which is not DONE")
+    return errors
+
+
+def log_surface_errors(log_text: str) -> list[str]:
+    """Every LOG-grammar defect that does not depend on STATE parsing."""
+    return [f"LOG: {e}" for e in _analyze_log(log_text).errors]
+
+
 def validate_texts(
     state_text: str,
     board_text: str,
@@ -467,7 +570,16 @@ def validate_texts(
 
     state, state_error = parse_state_or_error(state_text)
     if state_error:
+        # A STATE the parser refuses stops the checks that READ state fields.
+        # It must not stop the ones that do not. Returning here is what let a
+        # project be reported as one unknown field away from healthy while the
+        # write gate refused every proposal over a duplicate ticket id, a
+        # blocker outside `## BLOCKED` and three malformed LOG lines (_SAITULS,
+        # 17.09.26). A diagnostic surface may say "I cannot judge this"; it may
+        # not imply health it never checked.
         errors.append(f"STATE proposed malformed: {state_error}")
+        errors.extend(board_surface_errors(board_text))
+        errors.extend(log_surface_errors(log_text))
         return errors
     missing = [
         k
@@ -540,31 +652,9 @@ def validate_texts(
             errors.append(f"STATE proposed transition_from {tf!r} outside the enum")
 
     board = parse_board(board_text)
-    errors.extend(f"BOARD: {e}" for e in board["errors"])
     tickets = board["tickets"]
-    # ONE shared DAG primitive (hostile-regression, 4th-wave P1#4): dangling
-    # needs: references AND needs: cycles, used here, in validate.py and in the
-    # router before Pick Rule evaluation. A cyclic all-TODO graph is corrupt work
-    # state, never merely 'no workable ticket'.
-    for ge in board_graph_errors(tickets):
-        errors.append(f"BOARD: {ge}")
     doing = [t for t in tickets.values() if t["section"] == "## DOING"]
-    if len(doing) > 1:
-        errors.append("BOARD proposed has more than one ## DOING ticket")
-    for ticket in tickets.values():
-        # ONE shared BOARD lifecycle invariant set (T-1003): the
-        # transactional verifier and the canonical validator must reject the
-        # same checkbox/section/evidence mismatches, or an unrelated mutation
-        # can COMMIT a board the release gate later rejects.
-        for semantic in board_semantic_errors(ticket):
-            errors.append(f"BOARD proposed {semantic}")
-        for need in ticket["needs"]:
-            # Dangling edge: board_graph_errors already reported it; never
-            # raise a KeyError out of the validator (T-1318).
-            if need not in tickets:
-                continue
-            if ticket["section"] == "## DOING" and tickets[need]["section"] != "## DONE":
-                errors.append(f"BOARD proposed {ticket['id']} needs {need} which is not DONE")
+    errors.extend(board_surface_errors(board_text))
 
     # PERF-007: ONE single-pass LOG analysis replaces three separate parsings
     # (active-events comprehension + _log_errors + log_tail_event). The
@@ -624,7 +714,7 @@ def validate_texts(
                     f"looks like a ticket (CORE-003 / SRC-026:R003)"
                 )
 
-    errors.extend(f"LOG: {e}" for e in log_analysis.errors)
+    errors.extend(log_surface_errors(log_text))
 
     tail = log_analysis.tail
     last_event = state.get("last_event")

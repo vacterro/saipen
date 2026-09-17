@@ -401,9 +401,21 @@ class TargetBFailClosedTests(unittest.TestCase):
         state = root / ".saipen" / "STATE.md"
         state.write_text(
             state.read_text(encoding="utf-8").replace(
-                'blocker: ""', 'blocker: "AUTH -- operator decision required"'
+                'blocker: ""', 'blocker: "WAIT_USER_DECISION -- operator decision required"'
             ),
             encoding="utf-8",
+        )
+        # The token has to be a RECOGNISED gate class, or this control proves
+        # nothing about operator decisions. It read "AUTH", which `blocker_class`
+        # does not know, so the blocker was an ordinary stale one -- and the
+        # BLOCKED verdict the assertion below checks came from an unrelated
+        # floor failure in the same fixture, not from the gate. Pinning the
+        # recogniser here is what makes the rest of the test mean what it says.
+        from saipen_engine.board import blocker_class
+
+        self.assertEqual(
+            blocker_class("WAIT_USER_DECISION -- operator decision required"),
+            "WAIT_USER_DECISION",
         )
         report = preflight(root, **_kwargs(root))
         self.assertEqual(report["classification"], CLASS_BLOCKED)

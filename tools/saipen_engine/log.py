@@ -23,6 +23,25 @@ LOG_RE = re.compile(
 )
 
 
+#: An id a line CLAIMS, even when the line is otherwise illegal.
+#:
+#: The history is append-only, so an id that appears anywhere in it is spent --
+#: the same rule this module already applies to ticket ids ("its ID reserved
+#: forever"). A malformed line does not give its id back. Measured on _SAITULS,
+#: 17.09.26: three checkpoint lines had lost their leading `- `, so the parser
+#: filed them as illegal and the tail was computed from the parsable events
+#: alone. The next allocation therefore handed out E-1300 a SECOND time, and
+#: `recover`'s own repair proposal was refused FLOOR duplicate event id -- the
+#: repair could name itself but could never apply. Reserving what a damaged
+#: line claims costs a gap in the numbering; reusing it costs the ledger.
+_DECLARED_EVENT_RE = re.compile(r"\[E-(\d+)\]")
+
+
+def declared_event_id(line: str) -> int | None:
+    match = _DECLARED_EVENT_RE.search(line)
+    return int(match.group(1)) if match else None
+
+
 def parse_log_line(line: str) -> dict | None:
     """Parse one LOG line into {date, event, parent, ticket, agent, op_id,
     taxonomy, text} or None. The optional RFC § 1.2 date is captured (not
@@ -354,6 +373,10 @@ def read_history_snapshot(
     for ev in events:
         if tail is None or ev["event"] > tail:
             tail = ev["event"]
+    for problem in illegal:
+        claimed = declared_event_id(problem)
+        if claimed is not None and (tail is None or claimed > tail):
+            tail = claimed
     return HistorySnapshot(
         hash=h.hexdigest()[:16],
         text="" if lean else "\n".join(chunks),
@@ -448,6 +471,10 @@ def read_history_snapshot_and_logs_digest(
     for ev in events:
         if tail is None or ev["event"] > tail:
             tail = ev["event"]
+    for problem in illegal:
+        claimed = declared_event_id(problem)
+        if claimed is not None and (tail is None or claimed > tail):
+            tail = claimed
     snapshot = HistorySnapshot(
         hash=h.hexdigest()[:16],
         text="\n".join(chunks) if retain_text else "",
@@ -503,12 +530,25 @@ def snapshot_contract_errors(snapshot: "HistorySnapshot") -> list[str]:
         errors.append(
             "duplicate E-ID(s) in complete history: " + ", ".join(f"E-{e}" for e in dupes[:10])
         )
+    # An id a DAMAGED line claims still exists in this ledger: the line is
+    # broken, the slot is taken. Parentage is an EXISTENCE question, so it is
+    # answered from what the history contains rather than from what this parser
+    # could decode. Without this, the repair's own DEC -- whose parent is the
+    # newest event, damaged or not -- was rejected as a fabricated parent edge,
+    # so the only write that could fix the malformed lines was refused BY the
+    # malformed lines (_SAITULS, 17.09.26). The line itself stays reported as
+    # illegal; nothing here legitimizes it.
+    claimed = {
+        cid
+        for cid in (declared_event_id(problem) for problem in snapshot.illegal_lines)
+        if cid is not None
+    }
     prev: int | None = None
     for ev in snapshot.events:
         eid = ev["event"]
         parent = ev["parent"]
         if parent is not None:
-            if parent not in seen:
+            if parent not in seen and parent not in claimed:
                 errors.append(f"E-{eid} parent E-{parent} does not exist in the ledger")
             elif parent >= eid:
                 errors.append(f"E-{eid} parent E-{parent} is not older than E-{eid}")

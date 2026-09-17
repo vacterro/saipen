@@ -5425,7 +5425,18 @@ def _state_only_plan(
     allow_dead_home: bool = False,
     read_once: tuple | None = None,
     log_text: str | None = None,
+    repair: bool = False,
 ) -> OperationPlan | Result:
+    # `repair=True` marks an operation whose SUBJECT is damage. Ordinary work
+    # must still refuse on a project that fails validation -- that is the write
+    # gate doing its job -- but a repair walks in on damage by definition, and
+    # several damage classes have separate owners that each need the others'
+    # surface to parse. Judging a repair on the whole project is what made that
+    # set of repairs mutually unreachable: `normalize-log`, the one owner of a
+    # malformed LOG line, refused over a duplicate BOARD id it does not repair
+    # and cannot reach (_SAITULS, 17.09.26). A repair is judged on its DELTA;
+    # what it inherits is declared, exempted for this one operation, and still
+    # reported everywhere else.
     # `log_text` REPLACES the LOG this plan appends its event to. Exactly one
     # caller supplies it -- `normalize_log`, whose whole point is that the bytes
     # on disk are not a legal ledger -- and the proposed text still passes
@@ -5476,9 +5487,28 @@ def _state_only_plan(
         current_agent=agent,
         sealed_events=docs["_history"],
     )
+    if errors and repair:
+        from .fast_check import defect_delta, validate_project
+
+        before = validate_texts(
+            docs["state"].text_norm,
+            docs["board"].text_norm,
+            docs["log"].text_norm,
+            current_agent=agent,
+            sealed_events=docs["_history"],
+        )
+        errors, _inherited = defect_delta(before, errors)
+        inherited_findings = list(validate_project(root) or [])
+        if inherited_findings:
+            receipt_metadata = {
+                **(receipt_metadata or {}),
+                "inherited_findings": inherited_findings,
+            }
     if errors:
         return _refuse(
-            "VALIDATION_FAILED", "proposed state fails fast validation: " + "; ".join(errors[:5])
+            "VALIDATION_FAILED",
+            ("repair INTRODUCES defects the surface did not have: " if repair else
+             "proposed state fails fast validation: ") + "; ".join(errors[:5]),
         )
     targets = [
         *_log_targets(docs, new_log),
@@ -6393,6 +6423,7 @@ def normalize_log(project_root: Path | str, agent: str, dry_run: bool = False) -
             op_id=op_id,
             read_once=read_once,
             log_text=normalized,
+            repair=True,
     )
     if isinstance(plan, Result):
         return plan

@@ -721,6 +721,38 @@ def _board_lifecycle_repairs(
             continue
         fields = ticket.get("fields", {})
         section = ticket.get("section")
+        # STALE BLOCKER METADATA. `## BLOCKED` is the status; the rule that
+        # rejects this shape already calls the field what it is -- "stale
+        # advisory data" (board.ticket_status_error). It had no repair owner,
+        # so a row that had been unblocked or closed years ago kept a blocker
+        # field that every write-path validation refused and no canonical
+        # command could remove. Measured on _SAITULS, 17.09.26: two DONE rows,
+        # and every repair for every OTHER surface refused over them.
+        # Deterministic, never a guess: the section IS the status, and the
+        # original bytes are preserved as recovery evidence like any repair.
+        stale_blocker = [
+            field
+            for field in ("blocker", "blocker_scope", "blocked_on")
+            if section != "## BLOCKED" and field in fields
+        ]
+        if stale_blocker:
+            repairs.append(
+                {
+                    "field": "board",
+                    "kind": "claim-clear",
+                    "_class": "stale-blocker-metadata",
+                    "ticket": tid,
+                    "surface": "board",
+                    "section": section,
+                    "fields": stale_blocker,
+                    "reason": (
+                        f"{tid} carries {', '.join('| ' + f + ':' for f in stale_blocker)} "
+                        f"outside ## BLOCKED ({section}); the section is the status, so the "
+                        "field is stale advisory data and the deterministic repair removes "
+                        "exactly those keys"
+                    ),
+                }
+            )
         owner = str(fields.get("owner", "") or "").strip()
         claim_time = str(fields.get("claim_time", "") or "").strip()
         if bool(owner) == bool(claim_time):
@@ -740,6 +772,7 @@ def _board_lifecycle_repairs(
                 "surface": "board",
                 "section": section,
                 "fields": ["owner", "claim_time"],
+                "_class": "incomplete-claim-pair",
                 "reason": (
                     f"{tid} carries a half claim pair (owner={owner!r}, "
                     f"claim_time={claim_time!r}) on claimable Work; CORE's "
@@ -875,6 +908,79 @@ def _board_lifecycle_repairs(
                 }
             )
     return repairs
+
+
+#: What a residual defect belongs to. The point is not the mapping -- it is that
+#: a verdict which stops short of CLEAN must still name somewhere to GO. A class
+#: with no canonical repair owner resolves to None on purpose: that is an
+#: operator decision, and saying so is honest where a fabricated command is not.
+_RESIDUE_ROUTES = (
+    ("not a legal event line", "saipen recover normalize-log"),
+    ("duplicate event E-", "saipen recover normalize-log"),
+)
+
+#: Which surface a reader should open first for this residue.
+_RESIDUE_EVIDENCE = (
+    ("LOG", ".saipen/LOG.md"),
+    ("BOARD", ".saipen/BOARD.md"),
+    ("STATE", ".saipen/STATE.md"),
+)
+
+
+#: Residue classes with no canonical repair, and the ONE question that decides
+#: each. A duplicate ticket id cannot be mechanized: two records claim the same
+#: identity, the history references the id and not the row, and picking a
+#: survivor is a judgement about which piece of work is real. Naming the choice
+#: is the whole obligation -- recovery liveness allows one exact operator
+#: decision, never a dead end and never a guess dressed as a repair.
+_RESIDUE_DECISIONS = (
+    (
+        "duplicate ticket ID",
+        "two BOARD records claim the same ticket id. Decide which record keeps "
+        "the id and give the other one a free id, then re-run `saipen recover`; "
+        "no repair may choose for you, because the history references the id "
+        "and not the row",
+    ),
+)
+
+
+#: The stranded claim, measured live on AUDAPACK: `STATE.task` names Work that
+#: `## DOING` does not hold. `start` refused and pointed at itself, `status` was
+#: invalid, `recover` reported CLEAN -- and `saipen claim <id>` repaired the
+#: floor in one command. The repair existed and nothing named it.
+_STRANDED_TASK_RE = re.compile(r"STATE\.task=(T-\d+) but BOARD DOING is empty")
+
+
+def _residue_route(residue: list[str], board: dict | None = None) -> str | None:
+    for marker, command in _RESIDUE_ROUTES:
+        if any(marker in item for item in residue):
+            return command
+    for item in residue:
+        match = _STRANDED_TASK_RE.search(item)
+        if not match:
+            continue
+        # Only when the Work is actually claimable. A `task` naming a DONE or
+        # missing record is a different question with two legitimate answers
+        # (re-open it, or clear the field), and guessing between them is the
+        # thing this whole ticket exists to stop.
+        ticket = ((board or {}).get("tickets") or {}).get(match.group(1))
+        if isinstance(ticket, dict) and ticket.get("section") == "## TODO":
+            return f"saipen claim {match.group(1)}"
+    return None
+
+
+def _residue_decision(residue: list[str]) -> str | None:
+    for marker, question in _RESIDUE_DECISIONS:
+        if any(marker in item for item in residue):
+            return question
+    return None
+
+
+def _residue_evidence(residue: list[str]) -> str:
+    for prefix, path in _RESIDUE_EVIDENCE:
+        if any(str(item).startswith(prefix) for item in residue):
+            return path
+    return ".saipen/STATE.md"
 
 
 def _apply_lifecycle_repairs(board_text: str, repairs: list[dict]) -> str:
@@ -1855,6 +1961,34 @@ def reconcile_protocol_state(
                 decisions=decision_list,
             ),
         }
+    # Asked BEFORE the approval is offered. A plan that cannot be aimed is not
+    # a plan to approve, and sending the session to fetch an approval for it
+    # costs one round trip to arrive at the same decision.
+    if board_drifts or lifecycle_candidates:
+        _unaddressable = [
+            error
+            for error in parse_board(board_text)["errors"]
+            if "duplicate ticket ID" in error
+        ]
+        if _unaddressable:
+            return {
+                "ok": False,
+                "code": "OPERATOR_DECISION_REQUIRED",
+                "detail": (
+                    "a BOARD repair cannot be aimed through an unaddressable record: "
+                    + "; ".join(_unaddressable[:3])
+                ),
+                "residual_defects": _unaddressable,
+                "operator_decision": _residue_decision(_unaddressable),
+                "changed": {"board": board_drifts, "state": state_repairs},
+                "strict_state_error": strict_state_error or None,
+                "dry_run": dry_run,
+                **_blocked_recovery_fields(
+                    terminal_disposition="OPERATOR_DECISION_REQUIRED",
+                    evidence_reference=".saipen/BOARD.md",
+                    reason_code="BOARD_RECORD_UNADDRESSABLE",
+                ),
+            }
     if approval_needed and approved_repair_id is None:
         # One approval authorizes the whole plan. Bare recover never reopens a
         # phantom DONE silently; it names the exact trusted command instead.
@@ -1956,6 +2090,40 @@ def reconcile_protocol_state(
                     reason_code="PROTOCOL_STATE_INVALID",
                 ),
             }
+        # CLEAN is a claim about the PROJECT, not about this function's own
+        # repair set. "I found nothing I own" is not "nothing is wrong", and
+        # reporting the second when it measured the first is how a session was
+        # told the project was healthy while `validate` listed six defects and
+        # every ordinary verb refused (_SAITULS, 17.09.26). What is left is
+        # damage recovery does not own -- so it is named, with the command that
+        # does own it, and the verdict is not CLEAN.
+        from .fast_check import validate_project as _validate_project
+
+        residue = list(_validate_project(project_root) or [])
+        board = parse_board(board_text)
+        if residue:
+            return _ensure_audit_contract(
+                {
+                    "ok": False,
+                    "code": "RESIDUAL_DEFECTS",
+                    "detail": (
+                        "reconciliation has no repair left to make and the project "
+                        "is still invalid: " + "; ".join(residue[:5])
+                    ),
+                    "changed": [],
+                    "residual_defects": residue,
+                    "strict_state_error": None,
+                    "dry_run": dry_run,
+                    **_blocked_recovery_fields(
+                        terminal_disposition="RECOVERY_BLOCKED",
+                        evidence_reference=_residue_evidence(residue),
+                        reason_code="RESIDUAL_DEFECTS",
+                    ),
+                    "canonical_next_command": _residue_route(residue, board),
+                    "operator_decision": _residue_decision(residue),
+                },
+                project_root,
+            )
         return _ensure_audit_contract(
             {
                 "ok": True,
@@ -2041,6 +2209,41 @@ def reconcile_protocol_state(
         docs, tail, "DEC", None, agent, description, stamp, op_id, root=project_root
     )
     new_log += line + "\n"
+    # Inheriting damage is tolerable; AIMING A WRITE THROUGH IT is not. A
+    # duplicate ticket id leaves two records under one key, so line surgery
+    # edits whichever row the parser kept and silently leaves the other: the
+    # repair would be pointed at a row it cannot name.
+    #
+    # Dropping just the unaimable repairs was tried and is worse: the BOARD
+    # repairs in this plan are what make the repaired STATE consistent with the
+    # board, so a state-only remainder commits a contradiction the next gate
+    # refuses. An unaddressable record is therefore a root, not a nuisance, and
+    # the honest answer is the one decision that unblocks everything after it.
+    if board_drifts or lifecycle_repairs:
+        unaddressable = [
+            error
+            for error in parse_board(board_text)["errors"]
+            if "duplicate ticket ID" in error
+        ]
+        if unaddressable:
+            return {
+                "ok": False,
+                "code": "OPERATOR_DECISION_REQUIRED",
+                "detail": (
+                    "a BOARD repair cannot be aimed through an unaddressable record: "
+                    + "; ".join(unaddressable[:3])
+                ),
+                "residual_defects": unaddressable,
+                "operator_decision": _residue_decision(unaddressable),
+                "changed": {"board": board_drifts, "state": state_repairs},
+                "strict_state_error": strict_state_error or None,
+                "dry_run": dry_run,
+                **_blocked_recovery_fields(
+                    terminal_disposition="OPERATOR_DECISION_REQUIRED",
+                    evidence_reference=".saipen/BOARD.md",
+                    reason_code="BOARD_RECORD_UNADDRESSABLE",
+                ),
+            }
     new_board = _apply_checkbox_repairs(board_text, board_drifts) if board_drifts else board_text
     if lifecycle_repairs:
         new_board = _apply_lifecycle_repairs(new_board, lifecycle_repairs)
@@ -2073,11 +2276,36 @@ def reconcile_protocol_state(
         current_agent=agent,
         sealed_events=docs.get("_history"),
     )
-    if errors:
+    # A repair is judged on what it CHANGED, not on what it walked into. The
+    # surface a recovery reads is damaged by definition, and several damage
+    # classes have separate repair owners that each need the others' surface to
+    # parse: asking every proposal to leave the whole project clean is what made
+    # that set of repairs mutually unreachable (_SAITULS, 17.09.26 -- the STATE
+    # repair was refused for a duplicate BOARD id, two stale blockers on DONE
+    # rows and three malformed LOG lines it had never proposed to touch).
+    #
+    # Introduced damage is still disqualifying, and inherited damage still
+    # travels out of here so nothing can report this project CLEAN.
+    from .fast_check import defect_delta
+
+    before = validate_texts(
+        state_text,
+        board_text,
+        docs["log"].text_norm,
+        current_agent=agent,
+        sealed_events=docs.get("_history"),
+    )
+    introduced, inherited = defect_delta(before, errors)
+    if introduced:
         return {
             "ok": False,
             "code": "VALIDATION_FAILED",
-            "detail": "proposed reconciliation fails fast validation: " + "; ".join(errors[:5]),
+            "detail": (
+                "proposed reconciliation INTRODUCES defects the surface did not "
+                "have: " + "; ".join(introduced[:5])
+            ),
+            "introduced": introduced,
+            "inherited": inherited,
             "changed": {"board": board_drifts, "state": state_repairs},
             "strict_state_error": strict_state_error or None,
             "dry_run": dry_run,
@@ -2131,6 +2359,18 @@ def reconcile_protocol_state(
         )
         preserved_path = preserved_rel
 
+    # T-1354's mechanism, finally used by the verb that needs it most. The
+    # post-write verifier judges the whole project, so a repair that strictly
+    # improves its own surface was still refused CONFLICT for damage it walked
+    # in on -- and the write it had already made was rolled back. An operation
+    # must DECLARE what it inherited; these are the findings the live project
+    # had BEFORE this repair touched it, measured with the same verifier that
+    # will run afterwards, so the exemption is exact, bounded and auditable in
+    # the journaled receipt. Anything the repair INTRODUCES still fails.
+    from . import fast_check as _fast_check
+
+    inherited_findings = list(_fast_check.validate_project(project_root) or [])
+
     plan = build_plan(
         "reconcile",
         agent,
@@ -2149,6 +2389,9 @@ def reconcile_protocol_state(
         targets,
         {"ok": True, "code": "REPAIRED", "event_id": f"E-{event}"},
         op_id=op_id,
+        receipt_metadata=(
+            {"inherited_findings": inherited_findings} if inherited_findings else None
+        ),
     )
 
     if dry_run:

@@ -1369,5 +1369,322 @@ class UnboundHistoryDeadlockTests(unittest.TestCase):
         self.assertEqual((self.root / ".saipen" / "STATE.md").read_bytes(), before)
 
 
+# ---------------------------------------------------------------------------
+# T-1382 specimen B: four damaged surfaces, each repair behind another's parse
+# ---------------------------------------------------------------------------
+
+#: _SAITULS, 17.09.26. STATE carries a retired output-only field; three LOG
+#: lines lost their leading `- ` and one is free text with no event tag at all;
+#: BOARD has a duplicate ticket id and two DONE rows still carrying `blocker:`.
+#:
+#: Each repair needed another damaged surface to already parse: reconcile's
+#: proposal validation tripped over the LOG and BOARD damage it does not own,
+#: `normalize-log` needed a strict STATE it could not have, and the BOARD rows
+#: were unaddressable through a duplicated id. Individual repairs existed; no
+#: EXECUTABLE ORDERING did.
+_SAITULS_STATE = (
+    "---\n"
+    "phase: BUILD\n"
+    "task: T-176\n"
+    'next_action: "PHASE BUILD T-176"\n'
+    'blocker: ""\n'
+    "transition_from: SCOUT\n"
+    "saipen_version: 8\n"
+    "schema_version: 3\n"
+    "last_event: 1303\n"
+    "style_contract: ded-4ae736e4\n"
+    'saipen_home: "{home}"\n'
+    "agent: buffy\n"
+    "parked_work: T-999\n"
+    "requires:\n  - filesystem\n  - python\n"
+    "mode: full\n"
+    'updated: "2026-09-17T00:00:00Z"\n'
+    "---\n"
+)
+
+_SAITULS_BOARD = (
+    "## DOING\n"
+    "- [/] T-176 [P1] the live one | verify: it works | owner: buffy\n"
+    "## TODO\n"
+    "## DONE\n"
+    "- [x] T-176 [P1] the duplicate id | verify: it works | blocker: STALE -- long gone\n"
+    "- [x] T-177 [P1] another done row | verify: it works | blocker: STALE -- also gone\n"
+    "## BLOCKED\n"
+)
+
+_SAITULS_LOG = (
+    "- 17.09.26 00:00 [E-1299] [T-176] [agent: buffy] "
+    "[op: claim-aaaaaaaaaaaa4aaaaaaaaaaaaaaaaaaa] DEC: claimed via SAIOPS -- owner buffy\n"
+    "17.09.26 00:01 [E-1300] [parent: E-1299] [T-176] [agent: buffy] "
+    "[op: checkpoint-bbbbbbbbbbbb4bbbbbbbbbbbbbbbbbbb] RUN: SCOUT -- lost its bullet\n"
+    "17.09.26 00:02 [E-1301] [parent: E-1300] [T-176] [agent: buffy] "
+    "[op: checkpoint-cccccccccccc4cccccccccccccccccccc] RUN: SCOUT -- lost its bullet\n"
+    "17.09.26 00:03 [E-1302] [parent: E-1301] [T-176] [agent: buffy] "
+    "[op: transition-dddddddddddd4dddddddddddddddddddd] RUN: transition to BUILD -- the work\n"
+    "SAIPATCH checkpoint written by hand, no canonical event tag at all\n"
+    "17.09.26 00:04 [E-1303] [parent: E-1302] [T-176] [agent: buffy] "
+    "[op: checkpoint-eeeeeeeeeeee4eeeeeeeeeeeeeeeeeeee] RUN: BUILD -- lost its bullet\n"
+)
+
+
+class CyclicRepairDependencyTests(unittest.TestCase):
+    """Every recoverable state has a finite executable path, or one decision."""
+
+    def setUp(self) -> None:
+        from saipen_engine.journal import ensure_project_lineage
+
+        self.root = Path(tempfile.mkdtemp(prefix="saipen-saituls-")) / "SAITULS"
+        (self.root / ".saipen").mkdir(parents=True)
+        (self.root / ".saipen" / "STATE.md").write_text(
+            _SAITULS_STATE.format(home=str(_HOME).replace(chr(92), chr(92) * 2)),
+            encoding="utf-8",
+        )
+        (self.root / ".saipen" / "BOARD.md").write_text(_SAITULS_BOARD, encoding="utf-8")
+        (self.root / ".saipen" / "LOG.md").write_text(_SAITULS_LOG, encoding="utf-8")
+        ensure_project_lineage(self.root)
+        subprocess.run(["git", "init"], cwd=str(self.root), capture_output=True)
+        self.addCleanup(lambda: shutil.rmtree(self.root.parent, ignore_errors=True))
+
+    def cli(self, *args) -> dict:
+        from saipen_engine.paths import unbound_environment
+
+        run = subprocess.run(
+            [sys.executable, str(SAIPEN_CLI), *args, "--json"],
+            cwd=str(self.root), capture_output=True, text=True, encoding="utf-8",
+            errors="replace", env=unbound_environment(), timeout=600,
+        )
+        try:
+            return json.loads(run.stdout or "{}")
+        except json.JSONDecodeError:
+            return {"_raw": (run.stdout + run.stderr)[:400]}
+
+    def resolve_the_duplicate_id(self) -> None:
+        board = self.root / ".saipen" / "BOARD.md"
+        board.write_text(
+            board.read_text(encoding="utf-8").replace(
+                "- [x] T-176 [P1] the duplicate id", "- [x] T-901 [P1] the duplicate id"
+            ),
+            encoding="utf-8",
+        )
+
+    def drive(self, limit: int = 8) -> list[str]:
+        """Follow the route the protocol names, and record what it named."""
+        trail: list[str] = []
+        for _ in range(limit):
+            answer = self.cli("recover")
+            if answer.get("ok") and answer.get("code") == "CLEAN":
+                trail.append("CLEAN")
+                return trail
+            route = answer.get("canonical_next_command")
+            if not route:
+                trail.append(str(answer.get("code")))
+                return trail
+            applied = self.cli(*route.split()[1:])
+            trail.append(str(applied.get("code")))
+            if not applied.get("ok"):
+                return trail
+        trail.append("DID_NOT_CONVERGE")
+        return trail
+
+    def test_the_validator_does_not_hide_what_the_write_gate_refuses(self):
+        """The diagnostic surface reported ONE of eight defects."""
+        answer = self.cli("validate")
+        self.assertFalse(answer.get("ok"))
+        reported = " ".join(answer.get("errors") or [])
+        self.assertIn("parked_work", reported)
+        self.assertIn("duplicate ticket ID T-176", reported)
+        self.assertIn("blocker: outside ## BLOCKED", reported)
+        self.assertIn("not a legal event line", reported)
+
+    def test_an_unaddressable_record_is_one_decision_not_a_dead_end(self):
+        answer = self.cli("recover")
+        self.assertEqual(answer.get("code"), "OPERATOR_DECISION_REQUIRED", answer)
+        self.assertIn("duplicate ticket ID", answer.get("detail", ""))
+        decision = answer.get("operator_decision") or ""
+        self.assertIn("which record keeps the id", decision)
+        # Asked once, and the same question every time until it is answered --
+        # never a different one, and never silently repaired for the operator.
+        self.assertEqual(self.cli("recover").get("operator_decision"), decision)
+
+    def test_one_decision_makes_the_whole_sequence_executable(self):
+        self.resolve_the_duplicate_id()
+        self.assertEqual(self.drive()[-1], "CLEAN", self.cli("recover"))
+
+        self.assertEqual(self.cli("validate").get("code"), "VALID")
+        self.assertTrue(self.cli("status").get("ok"))
+        continued = self.cli("continue")
+        self.assertTrue(continued.get("ok"), continued)
+
+        log_text = (self.root / ".saipen" / "LOG.md").read_text(encoding="utf-8")
+        self.assertNotIn("\n17.09.26 00:01", log_text, "a bullet was never restored")
+        self.assertIn("# SAIPATCH checkpoint", log_text, "free text was not neutralised")
+        state_text = (self.root / ".saipen" / "STATE.md").read_text(encoding="utf-8")
+        self.assertNotIn("parked_work", state_text)
+        board_text = (self.root / ".saipen" / "BOARD.md").read_text(encoding="utf-8")
+        self.assertNotIn("blocker: STALE", board_text)
+
+    def test_repair_is_idempotent_and_the_route_is_never_a_loop(self):
+        self.resolve_the_duplicate_id()
+        trail = self.drive()
+        self.assertEqual(trail[-1], "CLEAN", trail)
+        # Nothing in the sequence was the same command twice in a row failing.
+        self.assertNotIn("STALE_APPROVED_REPAIR", trail[:-1], trail)
+        self.assertEqual(self.cli("recover").get("code"), "CLEAN")
+        self.assertEqual(self.cli("recover").get("code"), "CLEAN")
+
+    def test_clean_is_a_claim_about_the_project_not_about_the_repair_set(self):
+        """`recover` may not certify CLEAN over damage it does not own."""
+        self.resolve_the_duplicate_id()
+        # Stop one repair short: apply the reconciliations, leave the LOG.
+        for _ in range(4):
+            answer = self.cli("recover")
+            route = answer.get("canonical_next_command") or ""
+            if "normalize-log" in route or not route:
+                break
+            self.cli(*route.split()[1:])
+        answer = self.cli("recover")
+        self.assertNotEqual(answer.get("code"), "CLEAN", answer)
+        self.assertFalse(self.cli("validate").get("ok"))
+        # And it points at the owner of what is left, not at itself.
+        self.assertEqual(
+            answer.get("canonical_next_command"), "saipen recover normalize-log", answer
+        )
+
+    def test_the_original_bytes_of_every_repaired_surface_survive(self):
+        """Each repair preserves what IT replaced -- not a pristine snapshot."""
+        self.resolve_the_duplicate_id()
+        state_before = (self.root / ".saipen" / "STATE.md").read_bytes()
+        self.assertEqual(self.drive()[-1], "CLEAN")
+        kept = [
+            path.read_bytes()
+            for path in (self.root / ".saipen" / "recovery").rglob("*")
+            if path.is_file()
+        ]
+        self.assertIn(state_before, kept, "the original STATE was not preserved")
+        # The damaged LOG lines are gone from the live ledger and recoverable
+        # from the copy `normalize-log` took of the bytes it rewrote.
+        damaged = b"\n17.09.26 00:01 [E-1300]"
+        self.assertNotIn(
+            damaged, (self.root / ".saipen" / "LOG.md").read_bytes().replace(b"\r", b"")
+        )
+        self.assertTrue(
+            any(damaged in raw.replace(b"\r", b"") for raw in kept),
+            "the damaged LOG lines were rewritten with no forensic copy",
+        )
+
+
+# ---------------------------------------------------------------------------
+# T-1382: the stranded claim -- a repair that existed and nothing named
+# ---------------------------------------------------------------------------
+
+
+class StrandedClaimTests(unittest.TestCase):
+    """AUDAPACK, live: `STATE.task` names Work `## DOING` does not hold.
+
+    Measured before this ticket: `start` refused and pointed back at itself,
+    `start --receipt` did the same, `status` was invalid, `recover` reported
+    CLEAN -- and `saipen claim T-188` repaired the floor in one command. The
+    repair was there; every surface that could have named it either said the
+    project was healthy or sent the session to the command that had just
+    refused.
+    """
+
+    def setUp(self) -> None:
+        from saipen_engine.journal import ensure_project_lineage
+
+        self.root = Path(tempfile.mkdtemp(prefix="saipen-stranded-")) / "AUDAPACK"
+        (self.root / ".saipen").mkdir(parents=True)
+        (self.root / ".saipen" / "STATE.md").write_text(
+            "---\nphase: SCOUT\ntask: T-188\n"
+            'next_action: "PHASE SCOUT T-188"\n'
+            'blocker: ""\ntransition_from: DONE\n'
+            "saipen_version: 8\nschema_version: 3\nlast_event: 2\n"
+            "style_contract: ded-4ae736e4\n"
+            'saipen_home: "{}"\n'.format(str(_HOME).replace(chr(92), chr(92) * 2))
+            + "agent: buffy\nrequires:\n  - filesystem\n  - python\nmode: full\n"
+            'updated: "2026-09-17T00:00:00Z"\n---\n',
+            encoding="utf-8",
+        )
+        (self.root / ".saipen" / "BOARD.md").write_text(
+            "## DOING\n## TODO\n- [ ] T-188 [P1] the stranded one | verify: it works\n"
+            "## DONE\n## BLOCKED\n",
+            encoding="utf-8",
+        )
+        (self.root / ".saipen" / "LOG.md").write_text(
+            "- 17.09.26 00:00 [E-001] [T-188] [agent: buffy] "
+            "[op: ticket-aaaaaaaaaaaa4aaaaaaaaaaaaaaaaaaa] DEC: ticket added via SAIOPS\n"
+            "- 17.09.26 00:01 [E-002] [parent: E-001] [agent: buffy] "
+            "[op: checkpoint-bbbbbbbbbbbb4bbbbbbbbbbbbbbbbbbb] RUN: SCOUT -- seat never made\n",
+            encoding="utf-8",
+        )
+        ensure_project_lineage(self.root)
+        subprocess.run(["git", "init"], cwd=str(self.root), capture_output=True)
+        self.addCleanup(lambda: shutil.rmtree(self.root.parent, ignore_errors=True))
+
+    def cli(self, *args) -> dict:
+        from saipen_engine.paths import unbound_environment
+
+        run = subprocess.run(
+            [sys.executable, str(SAIPEN_CLI), *args, "--json"],
+            cwd=str(self.root), capture_output=True, text=True, encoding="utf-8",
+            errors="replace", env=unbound_environment(), timeout=600,
+        )
+        try:
+            return json.loads(run.stdout or "{}")
+        except json.JSONDecodeError:
+            return {"_raw": (run.stdout + run.stderr)[:400]}
+
+    def test_recover_does_not_certify_a_project_the_write_gate_refuses(self):
+        answer = self.cli("recover")
+        self.assertNotEqual(answer.get("code"), "CLEAN", answer)
+        self.assertEqual(answer.get("code"), "RESIDUAL_DEFECTS", answer)
+        self.assertTrue(
+            any("BOARD DOING is empty" in item for item in answer["residual_defects"]),
+            answer,
+        )
+        self.assertFalse(self.cli("validate").get("ok"))
+
+    def test_no_surface_points_back_at_the_command_that_refused(self):
+        for verb in (["status"], ["next"]):
+            with self.subTest(verb=verb[0]):
+                answer = self.cli(*verb)
+                self.assertFalse(answer.get("ok"), answer)
+                self.assertNotEqual(answer.get("action"), f"saipen {verb[0]}", answer)
+
+    def test_the_route_is_the_command_that_actually_repairs_the_floor(self):
+        route = self.cli("recover").get("canonical_next_command")
+        self.assertEqual(route, "saipen claim T-188")
+        self.assertEqual(self.cli("continue").get("canonical_next_command"), route)
+
+        self.assertEqual(self.cli(*route.split()[1:]).get("code"), "CLAIMED")
+        self.assertEqual(self.cli("validate").get("code"), "VALID")
+        self.assertEqual(self.cli("recover").get("code"), "CLEAN")
+        self.assertTrue(self.cli("status").get("ok"))
+        self.assertTrue(self.cli("continue").get("ok"))
+
+    def test_a_task_that_is_not_claimable_gets_no_fabricated_route(self):
+        """Two legitimate answers is an operator's call, not a guess."""
+        board = self.root / ".saipen" / "BOARD.md"
+        board.write_text(
+            board.read_text(encoding="utf-8").replace(
+                "## TODO\n- [ ] T-188 [P1] the stranded one | verify: it works\n",
+                "## TODO\n",
+            ).replace(
+                "## DONE\n",
+                "## DONE\n- [x] T-188 [P1] the stranded one | verify: it works\n",
+            ),
+            encoding="utf-8",
+        )
+        answer = self.cli("recover")
+        self.assertNotEqual(answer.get("code"), "CLEAN", answer)
+        # Not the stranded-claim shortcut: re-claiming a DONE record would
+        # decide, in passing, that its completion was fake.
+        self.assertNotIn("saipen claim", answer.get("canonical_next_command") or "", answer)
+        # It is still not a dead end -- the phantom-DONE owner asks for its own
+        # approval instead, which is the legitimate decision for this shape.
+        self.assertTrue(answer.get("operator_decision_available"), answer)
+        self.assertTrue(answer.get("canonical_next_command"), answer)
+
+
 if __name__ == "__main__":
     unittest.main()
