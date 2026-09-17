@@ -96,6 +96,36 @@ def transition_legal(source: str, destination: str) -> bool:
     return destination in VALID_TRANSITIONS.get(source, [])
 
 
+#: The one move that turns "no Work here" into Work. The guard's own
+#: NO_ACTIVE_WORK answer prints it, and so does every CLI refusal that would
+#: otherwise name a transition for a ticket that does not exist.
+ENTRY_COMMAND = "saipen start '<the task, one line>'"
+
+_TICKET_REF = re.compile(r"T-\d+")
+
+
+def forward_route(phase: str | None, ticket: str | None) -> str | None:
+    """The command that moves `ticket`'s Work out of `phase` along the DFA.
+
+    The first destination of every row is that phase's forward edge (SCOUT ->
+    BUILD -> VERIFY -> REVIEW -> SHIP), which is what a refusal owes a session
+    that tried to skip ahead. Measured (T-1380): a route computed any other way
+    was typed from the state that printed it and refused there -- finishing
+    from BUILD printed `transition REVIEW`, and a project with no Work printed
+    its STATE.task literal `none` as the ticket.
+
+    `ticket` must be the ACTIVE Work, never an operand the caller typed. With
+    none there is no transition to make, and the route is the entry command.
+    """
+    subject = (ticket or "").strip()
+    if not _TICKET_REF.fullmatch(subject):
+        return ENTRY_COMMAND
+    legal = VALID_TRANSITIONS.get(phase or "") or []
+    if not legal:
+        return None
+    return f"saipen transition {legal[0]} {subject} '<why>'"
+
+
 def phase_document(phase: str) -> str:
     """The phase doc a given phase requires, relative to `protocol_dir`.
 

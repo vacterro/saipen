@@ -58,6 +58,7 @@ import time
 from pathlib import Path, PurePosixPath, PureWindowsPath
 
 from .command_effects import SHELL_CANONICAL_VERBS
+from .phases import ENTRY_COMMAND
 from .paths import resolve_project_root
 
 PROTECTED_CANONICAL_NAMESPACES = (
@@ -777,9 +778,7 @@ def protocol_snapshot(
     if len(doing) != 1:
         # T-1377: "found 0" is a fact, not a move. With no active Work the entry
         # command is the whole answer; with several, the board is the problem.
-        snapshot["route"] = (
-            "saipen start '<the task, one line>'" if not doing else "saipen status --json"
-        )
+        snapshot["route"] = ENTRY_COMMAND if not doing else "saipen status --json"
         return refuse(
             "NO_ACTIVE_WORK" if not doing else "PROTOCOL_STATE_INVALID",
             "consequential mutation requires exactly one active DOING Work; "

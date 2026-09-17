@@ -1,0 +1,12 @@
+STALE: C:\Users\vac34\.config\opencode\skills\saipen (runtime gen-sha256:71e72cd460d5bebf6374e1d0ac86b54d3e37817d901cf4838b78d2888111150a, stamp gen-sha256:71e72cd460d5bebf6374e1d0ac86b54d3e37817d901cf4838b78d2888111150a, source gen-sha256:5d76c4b2d90552159155ea0ccdd21686ed7b2f0f60c371520ec1e3a4e2427c9a)
+    tools/t1363_field_polygon.py: source 43997B, installed 43616B
+    tools/test_field_fixture_isolation.py: source 37163B, installed 36943B
+    tools/test_refusal_routes.py: source 24227B, installed 22797B
+STALE: C:\Users\vac34\.claude\skills\saipen (runtime gen-sha256:71e72cd460d5bebf6374e1d0ac86b54d3e37817d901cf4838b78d2888111150a, stamp gen-sha256:71e72cd460d5bebf6374e1d0ac86b54d3e37817d901cf4838b78d2888111150a, source gen-sha256:5d76c4b2d90552159155ea0ccdd21686ed7b2f0f60c371520ec1e3a4e2427c9a)
+    tools/t1363_field_polygon.py: source 43997B, installed 43616B
+    tools/test_field_fixture_isolation.py: source 37163B, installed 36943B
+    tools/test_refusal_routes.py: source 24227B, installed 22797B
+STALE: C:\Users\vac34\.codex\skills\saipen (runtime gen-sha256:71e72cd460d5bebf6374e1d0ac86b54d3e37817d901cf4838b78d2888111150a, stamp gen-sha256:71e72cd460d5bebf6374e1d0ac86b54d3e37817d901cf4838b78d2888111150a, source gen-sha256:5d76c4b2d90552159155ea0ccdd21686ed7b2f0f60c371520ec1e3a4e2427c9a)
+    tools/t1363_field_polygon.py: source 43997B, installed 43616B
+    tools/test_field_fixture_isolation.py: source 37163B, installed 36943B
+    tools/test_refusal_routes.py: source 24227B, installed 22797B

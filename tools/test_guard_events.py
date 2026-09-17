@@ -575,5 +575,47 @@ class MapEventShellEffectTests(unittest.TestCase):
         self.assertIsNone(mapped["shell_effects_unresolved"])
 
 
+class WindowsPathIsACanonicalArgumentTests(unittest.TestCase):
+    """T-1380: the entry command the protocol prints must survive its own guard.
+
+    Measured twice on 2026-09-17. BOOT names `saipen start --file <path>` as the
+    transport for a request the shell cannot carry; T-1380 made the refusal
+    print it with the declared task file's REAL path; and on this platform that
+    path is drive-rooted with backslashes, which are in `_SHELL_SYNTAX_CHARS`
+    because POSIX shells escape with them. The guard read the canonical entry
+    command as an ordinary shell effect and refused it NO_ACTIVE_WORK -- a field
+    session ran the exact printed command twice and was refused twice.
+    """
+
+    def verb(self, command: str):
+        mapped = guard_events.map_event(
+            _event(tool_name="bash", tool_input={"command": command})
+        )
+        return mapped["saipen_verb"], mapped["command_class"]
+
+    def test_a_windows_path_argument_stays_canonical(self):
+        verb, klass = self.verb(r"saipen start --file V:\_TEMP_\t1363-a\task.txt")
+        self.assertEqual(verb, "start")
+        self.assertEqual(klass, "INGRESS")
+
+    def test_a_drive_rooted_path_on_another_verb_stays_canonical(self):
+        verb, _klass = self.verb(r"saipen validate C:\Users\x\spec.md")
+        self.assertEqual(verb, "validate")
+
+    def test_a_compound_line_with_a_path_is_still_shell(self):
+        """The exemption is for a path, never for a second command."""
+        verb, _klass = self.verb(r"saipen recover && rm -rf V:\_TEMP_\x")
+        self.assertIsNone(verb)
+
+    def test_a_backslash_a_shell_would_act_on_is_still_shell(self):
+        """A backslash before `$` is an escape in a double-quoted word."""
+        verb, _klass = self.verb("saipen start --file C:\\a\\$b.txt")
+        self.assertIsNone(verb)
+
+    def test_a_pipeline_after_a_path_is_still_shell(self):
+        verb, _klass = self.verb(r"saipen status --json V:\x | Out-String")
+        self.assertIsNone(verb)
+
+
 if __name__ == "__main__":
     unittest.main()

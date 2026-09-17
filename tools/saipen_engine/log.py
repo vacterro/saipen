@@ -710,6 +710,11 @@ def render_event(
 
 _VERIFY_BOUNDARY_RE = re.compile(r"^transition to VERIFY(?: -- .*)?$")
 _VERIFY_BOUNDARY_PREFIX = "transition to VERIFY -- "
+#: The evidence verdict for a ticket that never entered its VERIFY cycle. A
+#: named value, because it asks for a different move than a cycle that ran and
+#: proved nothing: no checkpoint can count before the boundary exists, so a
+#: refusal routes this one to the phase edge instead (T-1380).
+NO_VERIFY_BOUNDARY = "no current-cycle VERIFY boundary"
 _NEGATION_RE = re.compile(r"\bNOT\s+(?:PASS|MANUAL-VERIFY)\b", re.IGNORECASE)
 _PASS_TOKEN_RE = re.compile(r"\bPASS\b")
 
@@ -870,7 +875,7 @@ def regression_evidence(ticket_id: str, events: list[dict]) -> tuple[bool, str]:
             boundary = i
             break
     if boundary is None:
-        return False, "no current-cycle VERIFY boundary"
+        return False, NO_VERIFY_BOUNDARY
 
     records = []
     for ev in events[boundary:]:
@@ -971,7 +976,7 @@ def verification_evidence(ticket_id: str, events: list[dict]) -> tuple[bool, str
                 verify_start_idx = i
                 break
     if verify_start_idx is None:
-        return False, "no current-cycle VERIFY boundary"
+        return False, NO_VERIFY_BOUNDARY
 
     for i in range(len(events) - 1, verify_start_idx - 1, -1):
         ev = events[i]
@@ -1067,7 +1072,7 @@ def bulk_verification_evidence(
         if tid not in verdicts:
             verdicts[tid] = (
                 False,
-                "no current-cycle VERIFY boundary"
+                NO_VERIFY_BOUNDARY
                 if tid not in boundary_seen
                 else "unproven/failed",
             )

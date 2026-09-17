@@ -1782,7 +1782,11 @@ def _plan_transition(
         # illegal, and asked BUILD -> REVIEW next; neither answer said which
         # edge leaves the phase the project is actually in.
         legal = phases.VALID_TRANSITIONS.get(current) or []
-        subject_hint = (ticket_id or state.get("task") or "<T-###>").strip() or "<T-###>"
+        # T-1380: the subject is the ACTIVE Work, not the operand or STATE.task.
+        # Measured: a project with no Work printed `transition SCOUT none`, the
+        # STATE.task literal, and the guard refused that line there. Several
+        # DOING rows are a board problem no transition answers.
+        doing = [t["id"] for t in board["tickets"].values() if t["section"] == "## DOING"]
         return _refuse(
             "ILLEGAL_TRANSITION",
             f"{current} -> {destination} is not a legal edge"
@@ -1790,7 +1794,9 @@ def _plan_transition(
             phase=destination,
             legal_destinations=legal,
             canonical_next_command=(
-                f"saipen transition {legal[0]} {subject_hint} '<why>'" if legal else None
+                phases.forward_route(current, doing[0] if doing else None)
+                if len(doing) <= 1
+                else None
             ),
         )
 
@@ -2660,6 +2666,27 @@ def _verification_command(ticket_id: str) -> str:
     )
 
 
+#: The phases whose checkpoints fall after a VERIFY boundary, so a PASS written
+#: there can count. Before VERIFY nothing written can.
+_EVIDENCE_PHASES = frozenset({"VERIFY", "REVIEW", "SHIP"})
+
+
+def _evidence_route(ticket_id: str, reason: str, phase: str | None) -> str | None:
+    """The move that discharges a missing-verification refusal FROM `phase`.
+
+    T-1380, measured by running the old route: finish from BUILD answered
+    `no current-cycle VERIFY boundary` with the PASS checkpoint, the checkpoint
+    succeeded, and the refusal came back byte-identical -- evidence counts only
+    after the boundary, and BUILD has none. Before the cycle exists the move is
+    the phase edge; inside it, the evidence shape.
+    """
+    from .log import NO_VERIFY_BOUNDARY
+
+    if reason == NO_VERIFY_BOUNDARY and phase not in _EVIDENCE_PHASES:
+        return phases.forward_route(phase, ticket_id)
+    return _verification_command(ticket_id)
+
+
 def closure_request_error(
     closure_mode: str | None,
     closure_cohort: str | None,
@@ -2827,7 +2854,7 @@ def _plan_finish_ticket(
                 f"(got: {reason}); the linked request's own clause is settled from it",
                 ticket=ticket_id,
                 receipt=source_gate.get("receipt"),
-                canonical_next_command=_verification_command(ticket_id),
+                canonical_next_command=_evidence_route(ticket_id, reason, state.get("phase")),
             )
     if not source_gate.get("ok"):
         return _refuse(
@@ -2895,6 +2922,12 @@ def _plan_finish_ticket(
             "laundering the phase history",
             ticket=ticket_id,
             phase=prev_phase,
+            # T-1380, measured live: a session in REVIEW ran `ticket done`
+            # twice. The sentence says which gates are missing; this says which
+            # command supplies the next one -- the DFA's forward edge out of the
+            # phase the ticket is actually in, because REVIEW can send Work back
+            # to BUILD and `transition REVIEW` is not an edge from there.
+            canonical_next_command=phases.forward_route(prev_phase, ticket_id),
         )
     closure_from = prev_phase  # the ACTUAL phase: SHIP.
 
@@ -2962,7 +2995,7 @@ def _plan_finish_ticket(
             "INCOMPLETE_TICKET",
             f"finish requires explicit verification evidence for ticket {ticket_id} (got: {reason})",  # noqa: E501
             ticket=ticket_id,
-            canonical_next_command=_verification_command(ticket_id),
+            canonical_next_command=_evidence_route(ticket_id, reason, prev_phase),
         )
     regression_problem = _regression_gate(docs, ticket_id)
     if regression_problem is not None:

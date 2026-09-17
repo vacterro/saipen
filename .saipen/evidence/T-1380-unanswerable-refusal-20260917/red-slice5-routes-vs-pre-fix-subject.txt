@@ -1,0 +1,87 @@
+# T-1380 slice 5 red control: the SAME new/changed controls against the PRE-FIX subject (E-6938 bytes)
+# command: python -m unittest tools.test_refusal_routes.EveryRouteRunsFromTheStateThatPrintedItTests tools.test_refusal_routes.TheThirdWaveOfRepeatsTests
+
+FFFFFF.F
+======================================================================
+FAIL: test_a_finish_with_no_verify_boundary_routes_to_the_edge_not_the_checkpoint (tools.test_refusal_routes.EveryRouteRunsFromTheStateThatPrintedItTests.test_a_finish_with_no_verify_boundary_routes_to_the_edge_not_the_checkpoint)
+The checkpoint cannot open this gate: evidence counts only after a
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_refusal_routes.py", line 386, in test_a_finish_with_no_verify_boundary_routes_to_the_edge_not_the_checkpoint
+    self.assertEqual(
+AssertionError: 'saipen checkpoint RUN T-1 "verify -> PAS[70 chars]ed>"' != "saipen transition VERIFY T-1 '<why>'"
+- saipen checkpoint RUN T-1 "verify -> PASS [target: T-1] conf: high -- <the command that ran and what it reported>"
++ saipen transition VERIFY T-1 '<why>'
+
+
+======================================================================
+FAIL: test_an_illegal_transition_with_no_work_names_the_entry_command (tools.test_refusal_routes.EveryRouteRunsFromTheStateThatPrintedItTests.test_an_illegal_transition_with_no_work_names_the_entry_command)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_refusal_routes.py", line 417, in test_an_illegal_transition_with_no_work_names_the_entry_command
+    self.assertNotIn("none", route)
+AssertionError: 'none' unexpectedly found in "saipen transition SCOUT none '<why>'"
+
+======================================================================
+FAIL: test_illegal_phase_names_the_edge_that_leaves_the_phase_it_is_in (tools.test_refusal_routes.EveryRouteRunsFromTheStateThatPrintedItTests.test_illegal_phase_names_the_edge_that_leaves_the_phase_it_is_in)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_refusal_routes.py", line 372, in test_illegal_phase_names_the_edge_that_leaves_the_phase_it_is_in
+    self.assertEqual(
+AssertionError: "saipen transition REVIEW T-1 '<why>'" != "saipen transition VERIFY T-1 '<why>'"
+- saipen transition REVIEW T-1 '<why>'
+?                    -- ^^
++ saipen transition VERIFY T-1 '<why>'
+?                   ++  ^^
+
+
+======================================================================
+FAIL: test_ship_names_the_active_ticket_and_that_close_runs_from_ship (tools.test_refusal_routes.EveryRouteRunsFromTheStateThatPrintedItTests.test_ship_names_the_active_ticket_and_that_close_runs_from_ship)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_refusal_routes.py", line 443, in test_ship_names_the_active_ticket_and_that_close_runs_from_ship
+    self.assertEqual(route, "saipen ticket done T-1 --closure-mode own_patch")
+AssertionError: 'saipen ticket done <T-###> --closure-mode own_patch' != 'saipen ticket done T-1 --closure-mode own_patch'
+- saipen ticket done <T-###> --closure-mode own_patch
+?                    -  ^^^^
++ saipen ticket done T-1 --closure-mode own_patch
+?                      ^
+
+
+======================================================================
+FAIL: test_ship_with_no_active_ticket_prints_no_route_it_cannot_resolve (tools.test_refusal_routes.EveryRouteRunsFromTheStateThatPrintedItTests.test_ship_with_no_active_ticket_prints_no_route_it_cannot_resolve)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_refusal_routes.py", line 426, in test_ship_with_no_active_ticket_prints_no_route_it_cannot_resolve
+    self.assertIsNone(refused["canonical_next_command"], refused)
+AssertionError: 'saipen ticket done <T-###> --closure-mode own_patch' is not None : {'ok': False, 'code': 'VALIDATION_FAILED', 'detail': 'VERSION is missing from the repository root: `saipen ship` publishes a versioned release and does not apply to a project without one. To close finished Work run: saipen ticket done <T-###> --closure-mode own_patch', 'canonical_next_command': 'saipen ticket done <T-###> --closure-mode own_patch'}
+
+======================================================================
+FAIL: test_the_same_refusal_from_scout_names_the_edge_out_of_scout (tools.test_refusal_routes.EveryRouteRunsFromTheStateThatPrintedItTests.test_the_same_refusal_from_scout_names_the_edge_out_of_scout)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_refusal_routes.py", line 405, in test_the_same_refusal_from_scout_names_the_edge_out_of_scout
+    self.assertEqual(
+AssertionError: 'saipen checkpoint RUN T-1 "verify -> PAS[70 chars]ed>"' != "saipen transition BUILD T-1 '<why>'"
+- saipen checkpoint RUN T-1 "verify -> PASS [target: T-1] conf: high -- <the command that ran and what it reported>"
++ saipen transition BUILD T-1 '<why>'
+
+
+======================================================================
+FAIL: test_ship_carries_its_route_in_the_machine_field (tools.test_refusal_routes.TheThirdWaveOfRepeatsTests.test_ship_carries_its_route_in_the_machine_field)
+Measured: a session ran `saipen ship` twice in a project with no
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_refusal_routes.py", line 252, in test_ship_carries_its_route_in_the_machine_field
+    self.assertEqual(
+AssertionError: 'saipen ticket done <T-###> --closure-mode own_patch' != 'saipen ticket done T-1 --closure-mode own_patch'
+- saipen ticket done <T-###> --closure-mode own_patch
+?                    -  ^^^^
++ saipen ticket done T-1 --closure-mode own_patch
+?                      ^
+
+
+----------------------------------------------------------------------
+Ran 8 tests in 8.410s
+
+FAILED (failures=7)

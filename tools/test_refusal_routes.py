@@ -237,6 +237,214 @@ class TheSecondWaveOfRepeatsTests(unittest.TestCase):
         )
 
 
+class TheThirdWaveOfRepeatsTests(unittest.TestCase):
+    """What the live re-runs exposed once the earlier classes had routes."""
+
+    def test_ship_carries_its_route_in_the_machine_field(self):
+        """Measured: a session ran `saipen ship` twice in a project with no
+        VERSION. The sentence named the right command and the machine field did
+        not, so nothing a host reads could act on it. The machine field names
+        the ticket the project is working on: `<T-###>` typed into PowerShell is
+        a redirection error, not a command."""
+        root = started(self)
+        code, payload, text = cli(root, "ship", "--json")
+        self.assertNotEqual(code, 0, text)
+        self.assertEqual(
+            payload["canonical_next_command"],
+            "saipen ticket done T-1 --closure-mode own_patch",
+        )
+
+    def test_finishing_before_ship_names_the_transition(self):
+        """Measured: a session in REVIEW ran `ticket done` twice."""
+        root = started(self)
+        for args in (
+            ("transition", "BUILD", "T-1", "scout done", "--json"),
+            ("checkpoint", "RUN", "T-1", "build -> added it", "--json"),
+            ("transition", "VERIFY", "T-1", "build done", "--json"),
+            (
+                "checkpoint",
+                "RUN",
+                "T-1",
+                "verify -> PASS [target: T-1] conf: high -- python -m compileall src/app.py",
+                "--json",
+            ),
+            ("transition", "REVIEW", "T-1", "verify green", "--json"),
+        ):
+            code, _payload, text = cli(root, *args)
+            self.assertEqual(code, 0, text)
+
+        code, payload, text = cli(
+            root, "ticket", "done", "T-1", "--closure-mode", "own_patch", "--json"
+        )
+        self.assertNotEqual(code, 0, text)
+        self.assertEqual(payload["code"], "ILLEGAL_PHASE")
+        self.assertEqual(payload["canonical_next_command"], "saipen transition SHIP T-1 '<why>'")
+
+        # Run exactly what it printed, then the close it was blocking.
+        code, moved, text = cli(root, "transition", "SHIP", "T-1", "review passed", "--json")
+        self.assertEqual(code, 0, text)
+        self.assertEqual(moved["phase"], "SHIP")
+        code, done, text = cli(
+            root, "ticket", "done", "T-1", "--closure-mode", "own_patch", "--json"
+        )
+        self.assertEqual(code, 0, text)
+        self.assertEqual(done["code"], "FINISHED", text)
+
+
+PASS_EVIDENCE = "verify -> PASS [target: T-1] conf: high -- python -m compileall src/app.py"
+
+
+class EveryRouteRunsFromTheStateThatPrintedItTests(unittest.TestCase):
+    """A printed route is a command the session can run FROM HERE, and it moves.
+
+    Measured by running rather than reading (T-1380, E-6940): four routes in the
+    finish, transition and ship family classified as canonical literals and
+    failed the moment they were typed from the state that printed them --
+
+    * ILLEGAL_PHASE from BUILD (REVIEW had sent the ticket back) printed
+      `transition REVIEW`, and BUILD -> REVIEW is not an edge;
+    * finish from BUILD answered "no current-cycle VERIFY boundary" with the
+      PASS checkpoint, which RUNS and leaves the refusal byte-identical;
+    * ILLEGAL_TRANSITION in a project with no Work printed the STATE.task
+      literal `none` as the ticket, and the guard refused the line;
+    * ship with no active ticket printed `<T-###>` with nothing to resolve it.
+
+    The harvest control in test_canonical_command_reachability classifies each
+    literal and never types one, so it passed all four. A route that carries
+    free text (`'<why>'`, `"<what happened>"`) is not a canonical grammar line
+    and never was -- T-1357 keeps quotes out of that grammar on purpose -- so
+    the proof for those is the guard admitting the typed line in the state
+    that printed it, which always holds the caller's own claim. A route printed
+    where no Work exists must be admitted there too, which only the canonical
+    grammar can do.
+    """
+
+    def typed(self, route: str, why: str) -> str:
+        """The line a session types: every placeholder filled, nothing else changed."""
+        return (
+            route.replace("<why>", why)
+            .replace("<the task, one line>", TASK)
+        )
+
+    def run_route(self, root: Path, route: str, why: str = "review fix is in") -> dict:
+        """Guard first, then the CLI -- exactly the path a host session takes."""
+        import shlex
+
+        line = self.typed(route, why)
+        self.assertNotIn("<", line, f"unresolved placeholder in {route!r}")
+        verdict = guard_events.evaluate_event(shell_event(line, root), project_root=str(root))
+        self.assertTrue(
+            verdict["admitted"],
+            f"the guard refuses the route {line!r} in the state that printed it: {verdict}",
+        )
+        argv = shlex.split(line)
+        self.assertEqual(argv[0], "saipen", line)
+        code, payload, text = cli(root, *argv[1:], "--json")
+        self.assertEqual(code, 0, f"{line!r} did not run: {text}")
+        return payload
+
+    def reach(self, root: Path, *steps: tuple) -> None:
+        for args in steps:
+            code, _payload, text = cli(root, *args, "--json")
+            self.assertEqual(code, 0, text)
+
+    def finish(self, root: Path) -> dict:
+        code, payload, text = cli(
+            root, "ticket", "done", "T-1", "--closure-mode", "own_patch", "--json"
+        )
+        self.assertNotEqual(code, 0, text)
+        return payload
+
+    def test_illegal_phase_names_the_edge_that_leaves_the_phase_it_is_in(self):
+        root = started(self)
+        self.reach(
+            root,
+            ("transition", "BUILD", "T-1", "scout done"),
+            ("checkpoint", "RUN", "T-1", "build -> added it"),
+            ("transition", "VERIFY", "T-1", "build done"),
+            ("checkpoint", "RUN", "T-1", PASS_EVIDENCE),
+            ("transition", "REVIEW", "T-1", "verify green"),
+            ("transition", "BUILD", "T-1", "review wants the wording fixed"),
+            ("checkpoint", "RUN", "T-1", "build -> reworded the docstring"),
+        )
+        refused = self.finish(root)
+        self.assertEqual(refused["code"], "ILLEGAL_PHASE", refused)
+        self.assertEqual(
+            refused["canonical_next_command"], "saipen transition VERIFY T-1 '<why>'"
+        )
+        moved = self.run_route(root, refused["canonical_next_command"])
+        self.assertEqual(moved["phase"], "VERIFY", moved)
+
+    def test_a_finish_with_no_verify_boundary_routes_to_the_edge_not_the_checkpoint(self):
+        """The checkpoint cannot open this gate: evidence counts only after a
+        VERIFY boundary, and BUILD has none. Printing it guaranteed a repeat."""
+        root = started(self)
+        self.reach(root, ("transition", "BUILD", "T-1", "scout done"))
+        refused = self.finish(root)
+        self.assertEqual(refused["code"], "INCOMPLETE_TICKET", refused)
+        self.assertIn("no current-cycle VERIFY boundary", refused["detail"])
+        self.assertEqual(
+            refused["canonical_next_command"], "saipen transition VERIFY T-1 '<why>'"
+        )
+        moved = self.run_route(root, refused["canonical_next_command"], why="build done")
+        self.assertEqual(moved["phase"], "VERIFY", moved)
+
+        again = self.finish(root)
+        self.assertNotEqual(
+            (again["code"], again["detail"]),
+            (refused["code"], refused["detail"]),
+            "running the printed route left the refusal byte-identical",
+        )
+        # Inside the VERIFY cycle the missing thing IS the evidence shape.
+        self.assertIn("verify -> PASS [target: T-1]", again["canonical_next_command"])
+
+    def test_the_same_refusal_from_scout_names_the_edge_out_of_scout(self):
+        root = started(self)
+        refused = self.finish(root)
+        self.assertEqual(refused["code"], "INCOMPLETE_TICKET", refused)
+        self.assertEqual(
+            refused["canonical_next_command"], "saipen transition BUILD T-1 '<why>'"
+        )
+        moved = self.run_route(root, refused["canonical_next_command"], why="scout done")
+        self.assertEqual(moved["phase"], "BUILD", moved)
+
+    def test_an_illegal_transition_with_no_work_names_the_entry_command(self):
+        root = healthy(self)  # phase DONE, task none, nothing claimed
+        code, refused, text = cli(root, "transition", "VERIFY", "--json")
+        self.assertNotEqual(code, 0, text)
+        self.assertEqual(refused["code"], "ILLEGAL_TRANSITION", refused)
+        route = refused["canonical_next_command"]
+        self.assertNotIn("none", route)
+        self.assertEqual(route, "saipen start '<the task, one line>'")
+        started_payload = self.run_route(root, route)
+        self.assertEqual(started_payload["code"], "STARTED", started_payload)
+
+    def test_ship_with_no_active_ticket_prints_no_route_it_cannot_resolve(self):
+        root = healthy(self)
+        code, refused, text = cli(root, "ship", "--json")
+        self.assertNotEqual(code, 0, text)
+        self.assertIsNone(refused["canonical_next_command"], refused)
+        self.assertIn("does not apply to a project without one", refused["detail"])
+
+    def test_ship_names_the_active_ticket_and_that_close_runs_from_ship(self):
+        root = started(self)
+        self.reach(
+            root,
+            ("transition", "BUILD", "T-1", "scout done"),
+            ("checkpoint", "RUN", "T-1", "build -> added it"),
+            ("transition", "VERIFY", "T-1", "build done"),
+            ("checkpoint", "RUN", "T-1", PASS_EVIDENCE),
+            ("transition", "REVIEW", "T-1", "verify green"),
+            ("transition", "SHIP", "T-1", "review passed"),
+        )
+        code, refused, text = cli(root, "ship", "--json")
+        self.assertNotEqual(code, 0, text)
+        route = refused["canonical_next_command"]
+        self.assertEqual(route, "saipen ticket done T-1 --closure-mode own_patch")
+        done = self.run_route(root, route)
+        self.assertEqual(done["code"], "FINISHED", done)
+
+
 class RefusalIdentityIsNotACodeBucketTests(unittest.TestCase):
     """The harness half: two different problems are not one repeated refusal."""
 
@@ -292,14 +500,43 @@ class RefusalIdentityIsNotACodeBucketTests(unittest.TestCase):
         self.assertEqual(seen["refusal_sequence"], [])
 
     def test_the_guard_marker_counts_whatever_the_command_was(self):
+        """The host's own shape for a before-tool refusal: status error, the
+        marker in the error text, nothing executed."""
         import t1363_field_polygon as polygon
 
-        seen = polygon.measure(
-            [self.tool("echo hi > note.txt",
-                       "SAIPEN_GUARD_REFUSAL: WAIT_BLOCKED: the saipen guard refused tool")],
-            measured=True,
-        )
+        refused = {
+            "tool": "bash",
+            "status": "error",
+            "input": {"command": "echo hi > note.txt"},
+            "output": "",
+            "error": "SAIPEN_GUARD_REFUSAL: WAIT_BLOCKED: the saipen guard refused tool 'bash'",
+        }
+        seen = polygon.measure([refused], measured=True)
         self.assertEqual(seen["refusal_sequence"], ["WAIT_BLOCKED"])
+
+    def test_a_guard_marker_in_what_a_tool_read_is_not_a_refusal(self):
+        """Measured on the T-1380 re-run: `operator_decision` grepped this
+        repository for the marker, the completed grep listed source lines that
+        carry it, and the harness scored three PROTOCOL_STATE_INVALID -- one
+        'repeated' -- that the session never received."""
+        import t1363_field_polygon as polygon
+
+        grep = {
+            "tool": "grep",
+            "status": "completed",
+            "input": {"pattern": "WAIT_BLOCKED|guard refused|SAIPEN_GUARD_REFUSAL"},
+            "output": (
+                "Found 100 matches\n"
+                "V:\\repo\\tools\\test_opencode_adapter.py:\n"
+                "  Line 412: \"SAIPEN_GUARD_REFUSAL: PROTOCOL_STATE_INVALID: \",\n"
+                "  Line 413: \"SAIPEN_GUARD_REFUSAL: PROTOCOL_STATE_INVALID: \",\n"
+                "  Line 530: `SAIPEN_GUARD_REFUSAL: PLUGIN_RESTART_REQUIRED: loaded build`\n"
+            ),
+            "error": "",
+        }
+        seen = polygon.measure([grep, grep], measured=True)
+        self.assertEqual(seen["refusal_sequence"], [])
+        self.assertEqual(seen["repeated_refusal"], [])
 
 
 if __name__ == "__main__":

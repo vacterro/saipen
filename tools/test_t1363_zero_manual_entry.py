@@ -1465,6 +1465,19 @@ class PluginFleetRoutingTests(unittest.TestCase):
                 prepared, result = self._run(root, command)
                 self.assertEqual(prepared, 0, f"{command}: {result}")
 
+    def test_a_guard_refusal_names_the_command_it_refused(self):
+        """T-1380: a refusal that does not say WHAT it refused reads identically
+        for every effect one standing project state stops, so two different
+        commands were measured as the same refusal repeating with nothing
+        changed. Measured on the final matrix: three conditions."""
+        root = healthy(self)  # nothing claimed -> the guard's NO_ACTIVE_WORK
+        for command in ("echo one > a.txt", "echo two > b.txt"):
+            with self.subTest(command=command):
+                _prepared, result = self._run(root, command)
+                message = str(result.get("message") or "")
+                self.assertIn("SAIPEN_GUARD_REFUSAL", message, result)
+                self.assertIn(f"attempted: {command}", message, result)
+
     def test_an_ordinary_execution_still_takes_the_fleet_path(self):
         root = healthy(self)
         prepared, result = self._run(root, "saipen checkpoint RUN build -> green")

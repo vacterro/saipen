@@ -1,0 +1,19 @@
+# T-1380 REVIEW pass 1 -- what each supported shell hands a program for the printed --file route
+# python shell_route_probe.py (PowerShell 5, pwsh 7, cmd) + shell_route_probe_bash.py (Git Bash, typed line in a script file)
+
+unquoted plain         powershell intact=True  argv=['--file', 'V:\\_TEMP_\\t1363-abc\\.saipen-launched-task.txt']
+unquoted plain         pwsh       intact=True  argv=['--file', 'V:\\_TEMP_\\t1363-abc\\.saipen-launched-task.txt']
+unquoted plain         cmd        intact=True  argv=['--file', 'V:\\_TEMP_\\t1363-abc\\.saipen-launched-task.txt']
+double-quoted plain    powershell intact=True  argv=['--file', 'V:\\_TEMP_\\t1363-abc\\.saipen-launched-task.txt']
+double-quoted plain    pwsh       intact=True  argv=['--file', 'V:\\_TEMP_\\t1363-abc\\.saipen-launched-task.txt']
+double-quoted plain    cmd        intact=True  argv=['--file', 'V:\\_TEMP_\\t1363-abc\\.saipen-launched-task.txt']
+unquoted spaced        powershell intact=False argv=['--file', 'V:\\_TEMP_\\operator', 'notes\\launched', 'task.txt']
+unquoted spaced        pwsh       intact=False argv=['--file', 'V:\\_TEMP_\\operator', 'notes\\launched', 'task.txt']
+unquoted spaced        cmd        intact=False argv=['--file', 'V:\\_TEMP_\\operator', 'notes\\launched', 'task.txt']
+double-quoted spaced   powershell intact=True  argv=['--file', 'V:\\_TEMP_\\operator notes\\launched task.txt']
+double-quoted spaced   pwsh       intact=True  argv=['--file', 'V:\\_TEMP_\\operator notes\\launched task.txt']
+double-quoted spaced   cmd        intact=True  argv=['--file', 'V:\\_TEMP_\\operator notes\\launched task.txt']
+unquoted plain         git-bash   intact=False argv=['--file', 'V:_TEMP_t1363-abc.saipen-launched-task.txt']
+double-quoted plain    git-bash   intact=True  argv=['--file', 'V:\\_TEMP_\\t1363-abc\\.saipen-launched-task.txt']
+unquoted spaced        git-bash   intact=False argv=['--file', 'V:_TEMP_operator', 'noteslaunched', 'task.txt']
+double-quoted spaced   git-bash   intact=True  argv=['--file', 'V:\\_TEMP_\\operator notes\\launched task.txt']

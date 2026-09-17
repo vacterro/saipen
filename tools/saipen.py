@@ -7797,7 +7797,15 @@ def main(argv: list[str] | None = None) -> int:
                 current_agent=_agent_for(project_root),
             )
         except ReleaseRefusal as exc:
-            _emit({"ok": False, "code": exc.code, "detail": exc.detail}, as_json)
+            _emit(
+                {
+                    "ok": False,
+                    "code": exc.code,
+                    "detail": exc.detail,
+                    "canonical_next_command": getattr(exc, "next_command", None),
+                },
+                as_json,
+            )
             return 1
         except ValueError as exc:
             _emit({"ok": False, "code": "VALIDATION_FAILED", "detail": str(exc)}, as_json)

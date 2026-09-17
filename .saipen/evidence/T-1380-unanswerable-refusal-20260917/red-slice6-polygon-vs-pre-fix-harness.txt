@@ -1,0 +1,12 @@
+oracle  sha256 e007da6aec520f54 (identical copy: True)
+subject 47cd8d11f2ef7b2c -> a70c54b61fec93f8 (polygon reverted)
+FAIL: test_a_measured_attempt_ends_the_retries (tools.test_field_fixture_isolation.InfrastructureFailureTests.test_a_measured_attempt_ends_the_retries)
+FAIL: test_a_provider_error_before_any_tool_is_infrastructure (tools.test_field_fixture_isolation.InfrastructureFailureTests.test_a_provider_error_before_any_tool_is_infrastructure)
+FAIL: test_an_error_event_with_a_clean_exit_is_still_infrastructure (tools.test_field_fixture_isolation.InfrastructureFailureTests.test_an_error_event_with_a_clean_exit_is_still_infrastructure)
+FAIL: test_failures_are_retried_a_bounded_number_of_times (tools.test_field_fixture_isolation.InfrastructureFailureTests.test_failures_are_retried_a_bounded_number_of_times)
+FAIL: test_each_fixture_holds_its_own_value (tools.test_field_fixture_isolation.WindowsPathAuthorityTests.test_each_fixture_holds_its_own_value)
+FAIL: test_the_positive_task_names_a_real_readable_file (tools.test_field_fixture_isolation.WindowsPathAuthorityTests.test_the_positive_task_names_a_real_readable_file)
+Ran 42 tests in 1.813s
+FAILED (failures=6)
+classes red against the pre-fix harness: ['InfrastructureFailureTests', 'WindowsPathAuthorityTests']
+RED CONTROL OK: the reverted harness fails both new control classes

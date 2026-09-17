@@ -109,7 +109,7 @@ class BothDiagnosticsNameTheEntryCommandTests(unittest.TestCase):
             self.root, "status", "--json", **{operator_task.ENV_TASK_FILE: str(task_file)}
         )
         self.assertEqual(
-            answer["canonical_next_command"], f"saipen start --file {task_file}"
+            answer["canonical_next_command"], f'saipen start --file "{task_file}"'
         )
 
 

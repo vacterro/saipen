@@ -190,6 +190,12 @@ _SAIPEN_ARG_CHARS = frozenset(
     "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_.,:/=+-@"
 )
 
+#: The same alphabet plus the one character Windows spells paths with. A
+#: backslash is in `_SHELL_SYNTAX_CHARS` because POSIX shells escape with it;
+#: on this platform it is a path separator, and `_backslashes_are_literal`
+#: already owns that distinction for ingress payloads.
+_SAIPEN_PATH_ARG_CHARS = _SAIPEN_ARG_CHARS | {"\\"}
+
 #: A canonical operation never needs an unbounded argument list.
 _SAIPEN_MAX_TOKENS = 12
 
@@ -1040,6 +1046,35 @@ def _ingress_payload_tokens(command: str) -> list[str] | None:
     return tokens
 
 
+def _windows_path_tokens(command: str) -> list[str] | None:
+    """Tokens of a canonical line whose ONLY metacharacter is a literal `\`.
+
+    MEASURED 2026-09-17, twice over. BOOT names `saipen start --file <path>` as
+    the transport for a request the shell cannot carry, T-1380 made the refusal
+    print that command with the declared task file's real path -- and on this
+    platform that path is `V:\_TEMP_\...`, whose backslashes put the whole line
+    in `_SHELL_SYNTAX_CHARS`. The guard then read the canonical entry command as
+    an ordinary shell effect and refused it NO_ACTIVE_WORK. A field session ran
+    the exact printed command twice and was refused twice.
+
+    `shlex.split` is not usable here: it eats the separators. The line is split
+    on whitespace, and it qualifies only when no OTHER shell metacharacter is
+    present and no backslash precedes a character a shell would turn into
+    another effect (`_backslashes_are_literal`), so `saipen recover && rm -rf x`
+    and `saipen start --file a\$b` stay ordinary shell effects. This decides
+    what the guard ADMITS, not what arrives: Git Bash still consumes an unquoted
+    backslash, which is why the engine prints the path double-quoted
+    (`operator_task.file_route`).
+    """
+    if "\\" not in command:
+        return None
+    if any(char in _SHELL_SYNTAX_CHARS and char != "\\" for char in command):
+        return None
+    if not _backslashes_are_literal(command):
+        return None
+    return command.split()
+
+
 def _saipen_cli_tokens(command: str) -> list[str] | None:
     """Canonical `saipen <verb>` recognition over the WHOLE command line.
 
@@ -1056,11 +1091,14 @@ def _saipen_cli_tokens(command: str) -> list[str] | None:
     if not isinstance(command, str) or not command.strip():
         return None
     if any(char in _SHELL_SYNTAX_CHARS for char in command):
-        return _ingress_payload_tokens(command)
-    try:
-        tokens = shlex.split(command)
-    except ValueError:
-        return None
+        tokens = _windows_path_tokens(command)
+        if tokens is None:
+            return _ingress_payload_tokens(command)
+    else:
+        try:
+            tokens = shlex.split(command)
+        except ValueError:
+            return None
     if not tokens or len(tokens) > _SAIPEN_MAX_TOKENS:
         return None
     if tokens[0] != "saipen":
@@ -1068,7 +1106,7 @@ def _saipen_cli_tokens(command: str) -> list[str] | None:
         # wrapper invocations (`bash -lc 'saipen ...'`) are never canonical.
         return None
     for token in tokens:
-        if not token or not _SAIPEN_ARG_CHARS.issuperset(token):
+        if not token or not _SAIPEN_PATH_ARG_CHARS.issuperset(token):
             return None
     if len(tokens) > 1 and not command_effects.is_shell_canonical_verb(tokens[1]):
         return None

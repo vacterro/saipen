@@ -1,0 +1,11 @@
+healthy                recorded=['VALIDATION_FAILED'] rederived=[]   <-- changed
+operator_decision      recorded=['WAIT_BLOCKED'] rederived=['WAIT_BLOCKED']
+safety_valve           recorded=[] rederived=[]
+repairable_debt        recorded=[] rederived=[]
+captured_unprojected   recorded=['NO_ACTIVE_WORK'] rederived=['NO_ACTIVE_WORK']
+already_done           recorded=['VALIDATION_FAILED'] rederived=[]   <-- changed
+foreign_owner          recorded=[] rederived=[]
+windows_path_task      recorded=['NO_ACTIVE_WORK'] rederived=['NO_ACTIVE_WORK']
+long_file_task         recorded=['INGRESS_TASK_MISMATCH', 'NO_ACTIVE_WORK'] rederived=['INGRESS_TASK_MISMATCH', 'NO_ACTIVE_WORK']
+
+conditions whose repeat set changed under the corrected identity: 2

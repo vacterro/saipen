@@ -1,0 +1,24 @@
+oracle  sha256 358814c7078e5028 (identical copy: True)
+subject e9bac9b997c63266 -> aa06f1a72ea14ea5 (file_route reverted to unquoted)
+test_a_path_no_quoted_argument_carries_gets_no_route (tools.test_operator_task_witness.TheFileRouteSurvivesEveryShellTests.test_a_path_no_quoted_argument_carries_gets_no_route) ... 
+  test_a_path_no_quoted_argument_carries_gets_no_route (tools.test_operator_task_witness.TheFileRouteSurvivesEveryShellTests.test_a_path_no_quoted_argument_carries_gets_no_route) (path='C:\\tasks\\$HOME\\task.txt') ... FAIL
+  test_a_path_no_quoted_argument_carries_gets_no_route (tools.test_operator_task_witness.TheFileRouteSurvivesEveryShellTests.test_a_path_no_quoted_argument_carries_gets_no_route) (path='C:\\tasks\\a"b.txt') ... FAIL
+  test_a_path_no_quoted_argument_carries_gets_no_route (tools.test_operator_task_witness.TheFileRouteSurvivesEveryShellTests.test_a_path_no_quoted_argument_carries_gets_no_route) (path='C:\\tasks\\') ... FAIL
+test_every_available_shell_types_it_to_started (tools.test_operator_task_witness.TheFileRouteSurvivesEveryShellTests.test_every_available_shell_types_it_to_started) ... 
+  test_every_available_shell_types_it_to_started (tools.test_operator_task_witness.TheFileRouteSurvivesEveryShellTests.test_every_available_shell_types_it_to_started) (shell='bash') ... FAIL
+  test_every_available_shell_types_it_to_started (tools.test_operator_task_witness.TheFileRouteSurvivesEveryShellTests.test_every_available_shell_types_it_to_started) (shell='powershell') ... FAIL
+  test_every_available_shell_types_it_to_started (tools.test_operator_task_witness.TheFileRouteSurvivesEveryShellTests.test_every_available_shell_types_it_to_started) (shell='pwsh') ... FAIL
+  test_every_available_shell_types_it_to_started (tools.test_operator_task_witness.TheFileRouteSurvivesEveryShellTests.test_every_available_shell_types_it_to_started) (shell='cmd') ... FAIL
+test_the_route_is_double_quoted (tools.test_operator_task_witness.TheFileRouteSurvivesEveryShellTests.test_the_route_is_double_quoted) ... FAIL
+FAIL: test_a_path_no_quoted_argument_carries_gets_no_route (tools.test_operator_task_witness.TheFileRouteSurvivesEveryShellTests.test_a_path_no_quoted_argument_carries_gets_no_route) (path='C:\\tasks\\$HOME\\task.txt')
+FAIL: test_a_path_no_quoted_argument_carries_gets_no_route (tools.test_operator_task_witness.TheFileRouteSurvivesEveryShellTests.test_a_path_no_quoted_argument_carries_gets_no_route) (path='C:\\tasks\\a"b.txt')
+FAIL: test_a_path_no_quoted_argument_carries_gets_no_route (tools.test_operator_task_witness.TheFileRouteSurvivesEveryShellTests.test_a_path_no_quoted_argument_carries_gets_no_route) (path='C:\\tasks\\')
+FAIL: test_every_available_shell_types_it_to_started (tools.test_operator_task_witness.TheFileRouteSurvivesEveryShellTests.test_every_available_shell_types_it_to_started) (shell='bash')
+FAIL: test_every_available_shell_types_it_to_started (tools.test_operator_task_witness.TheFileRouteSurvivesEveryShellTests.test_every_available_shell_types_it_to_started) (shell='powershell')
+FAIL: test_every_available_shell_types_it_to_started (tools.test_operator_task_witness.TheFileRouteSurvivesEveryShellTests.test_every_available_shell_types_it_to_started) (shell='pwsh')
+FAIL: test_every_available_shell_types_it_to_started (tools.test_operator_task_witness.TheFileRouteSurvivesEveryShellTests.test_every_available_shell_types_it_to_started) (shell='cmd')
+FAIL: test_the_route_is_double_quoted (tools.test_operator_task_witness.TheFileRouteSurvivesEveryShellTests.test_the_route_is_double_quoted)
+Ran 3 tests in 2.118s
+FAILED (failures=8)
+shells red against the pre-fix route: ['bash', 'cmd', 'powershell', 'pwsh']
+RED CONTROL OK: the unquoted route fails the quoting control and every shell run

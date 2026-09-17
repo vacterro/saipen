@@ -75,11 +75,62 @@ def _git_worktree(root: Path) -> Path:
     return root
 
 #: The EXACT shape the field incident carried: a Windows path in the task text.
+#: That path does not exist on this machine, so it is the NEGATIVE control
+#: (`windows_path_missing`): a session handed a missing authority must stop,
+#: and stopping is correct -- measured 17.09, the model refused to invent notes
+#: it could not read, which the matrix had been scoring as broken transport.
 FIELD_TASK = (
     r"add a docstring to the top of src/app.py explaining what it does; "
     r"the original notes are in V:\_TEMP_\fastprompter_drag\SAIPENVIEW_main.py"
 )
 SIMPLE_TASK = "add a one-line docstring to the top of src/app.py"
+
+#: The POSITIVE Windows-path case (SRC-055 section 6): a real file inside the
+#: fixture, named in the task by an absolute path that carries a drive colon,
+#: backslashes and spaces, holding one value a session can only get by reading
+#: it. Transport is proven when that value lands in the target.
+NOTES_DIR = "operator notes"
+NOTES_FILE = "notes with spaces.txt"
+NOTES_KEY = "MODULE_PURPOSE"
+
+
+def windows_notes_path(project: Path) -> Path:
+    return Path(project) / NOTES_DIR / NOTES_FILE
+
+
+def windows_path_task(project: Path) -> str:
+    """The positive task, naming this fixture's notes file by its absolute path."""
+    return (
+        "add a one-line docstring to the top of src/app.py whose text is exactly the "
+        f"{NOTES_KEY} value written in {windows_notes_path(project)}"
+    )
+
+
+def notes_value(project: Path) -> str | None:
+    """The value the positive fixture wrote, read back from the file itself."""
+    path = windows_notes_path(project)
+    if not path.is_file():
+        return None
+    for line in path.read_text(encoding="utf-8").splitlines():
+        key, sep, value = line.partition("=")
+        if sep and key.strip() == NOTES_KEY and value.strip():
+            return value.strip()
+    return None
+
+
+def _windows_notes_project(case) -> Path:
+    """A healthy project plus the readable notes file its task points at."""
+    import uuid
+
+    import test_t1363_zero_manual_entry as fixtures
+
+    root = fixtures.healthy(case)
+    notes = windows_notes_path(root)
+    notes.parent.mkdir(parents=True)
+    notes.write_text(
+        f"{NOTES_KEY}=launch ledger {uuid.uuid4().hex[:12]}\n", encoding="utf-8", newline="\n"
+    )
+    return root
 
 #: A request no shell carries: multi-line, several hundred bytes, the shape a
 #: user actually pastes. `guard_events.ingress_rewrite` answers
@@ -122,11 +173,26 @@ CONDITION_NAMES = (
     "long_file_task",
 )
 
-#: The task each condition hands the model. Absent means SIMPLE_TASK.
+#: The task each condition hands the model. Absent means SIMPLE_TASK; a task
+#: that has to name its own fixture is computed by `condition_task`.
 CONDITION_TASKS = {
-    "windows_path_task": FIELD_TASK,
     "long_file_task": LONG_TASK,
 }
+
+#: Controls runnable by name that are NOT part of the nine-condition matrix.
+#: Their correct outcome is a stop, so they are judged on their own terms and
+#: never folded into the positive conditions' verdicts.
+NEGATIVE_CONTROLS = ("windows_path_missing",)
+NEGATIVE_CONTROL_TASKS = {"windows_path_missing": FIELD_TASK}
+
+
+def condition_task(name: str, project: Path) -> str:
+    """The exact request condition `name` hands the model in `project`."""
+    if name == "windows_path_task":
+        return windows_path_task(project)
+    if name in NEGATIVE_CONTROL_TASKS:
+        return NEGATIVE_CONTROL_TASKS[name]
+    return CONDITION_TASKS.get(name, SIMPLE_TASK)
 
 #: Commands that are PROTOCOL, not product. A session that runs many of these
 #: before touching the work is the failure this ticket measures.
@@ -149,7 +215,7 @@ def condition_builders() -> dict:
         "captured_unprojected": _captured_unprojected,
         "already_done": lambda case: fixtures.completed_request_project(case, SIMPLE_TASK),
         "foreign_owner": fixtures.foreign_owner_project,
-        "windows_path_task": fixtures.healthy,
+        "windows_path_task": _windows_notes_project,
         "long_file_task": fixtures.healthy,
     }
     missing = [name for name in CONDITION_NAMES if name not in build]
@@ -161,16 +227,30 @@ def condition_builders() -> dict:
     return build
 
 
-def conditions() -> dict:
-    """The nine project conditions the field matrix names, built."""
+def negative_control_builders() -> dict:
+    import test_t1363_zero_manual_entry as fixtures
+
+    return {"windows_path_missing": fixtures.healthy}
+
+
+def conditions(names=None) -> dict:
+    """The requested conditions, built; the nine the matrix names by default.
+
+    Only what was asked for is built: a targeted re-run of three conditions
+    used to build nine git worktrees and drive three of them.
+    """
 
     class _Case:
         def addCleanup(self, _fn):  # fixtures keep themselves; we keep the tree
             return None
 
     holder = _Case()
-    build = condition_builders()
-    return {name: _git_worktree(build[name](holder)) for name in CONDITION_NAMES}
+    build = {**condition_builders(), **negative_control_builders()}
+    selected = list(names) if names else list(CONDITION_NAMES)
+    unknown = [name for name in selected if name not in build]
+    if unknown:
+        raise ValueError(f"unknown condition(s) {unknown}; known: {sorted(build)}")
+    return {name: _git_worktree(build[name](holder)) for name in selected}
 
 
 def _captured_unprojected(case) -> Path:
@@ -381,7 +461,10 @@ def _tool_events(events: list[dict]) -> list[dict]:
                 "tool": part.get("tool"),
                 "status": state.get("status"),
                 "input": state.get("input") or {},
-                "output": str(state.get("output") or "")[:2000],
+                # T-1380: a refusal message that fell outside this window made
+                # every VALIDATION_FAILED read as one empty-message identity,
+                # and three different problems scored as a loop.
+                "output": str(state.get("output") or "")[:6000],
                 "error": str(state.get("error") or "")[:1200],
             }
         )
@@ -416,10 +499,16 @@ def _task_env(project: Path, task: str) -> dict:
     matrix able to measure which of the two happened.
     """
     from saipen_engine import operator_task as carrier
-    from saipen_engine.pending_ingress import ingress_digest
 
     env = _host_env(project)
-    env[carrier.ENV_TASK_SHA256] = ingress_digest(task)
+    # T-1380: declare the task by FILE, not by digest. A digest is irreversible,
+    # so a session refused for paraphrasing had no way back -- measured: one
+    # dumped the variable and built a list of text variants to search for a
+    # match. The file is the operator's own bytes, and the refusal can name a
+    # command the session can actually run.
+    task_file = project / ".saipen-launched-task.txt"
+    task_file.write_text(task, encoding="utf-8", newline="\n")
+    env[carrier.ENV_TASK_FILE] = str(task_file)
     return env
 
 
@@ -442,12 +531,23 @@ def _shell_commands(tools: list[dict]) -> list[str]:
 _JSON_REFUSAL = re.compile(r'"ok"\s*:\s*false.{0,400}?"code"\s*:\s*"([A-Z_]+)"', re.DOTALL)
 
 #: The guard's own marker: it is emitted for ANY tool, so it counts whatever
-#: command the session ran.
+#: command the session ran -- but only where the host puts a before-tool
+#: refusal, the tool's ERROR text. Measured on the T-1380 re-run: one completed
+#: `grep` over this repository listed source lines carrying the marker, and
+#: `operator_decision` scored a repeated PROTOCOL_STATE_INVALID it never
+#: received. Every real guard refusal in all five sessions sat in `error` with
+#: status `error`.
 _GUARD_REFUSAL = re.compile(r"SAIPEN_(?:GUARD|FLEET)_REFUSAL: ([A-Z_]+):?([^\r\n]{0,160})")
 
-#: Human-mode `REFUSE [CODE] reason`, counted only when the tool that produced
-#: it actually ran `saipen`.
-_HUMAN_REFUSAL = re.compile(r"REFUSE \[([A-Z_]+)\]([^\r\n]{0,160})")
+#: Human-mode refusal, counted only when the tool that produced it actually ran
+#: `saipen`. The CLI prints `REFUSE [CODE]` and puts the sentence on the NEXT
+#: line under `reason:`, so matching only the rest of the first line captured an
+#: empty message for every one of them: `saipen ship` refusing over a missing
+#: VERSION and `ticket done` refusing over a surplus `--paths` then shared one
+#: identity and scored as the same refusal repeating with nothing changed.
+_HUMAN_REFUSAL = re.compile(
+    r"REFUSE \[([A-Z_]+)\][^\r\n]{0,160}(?:[\r\n]+reason:\s*([^\r\n]{0,200}))?"
+)
 
 
 def _refusal_texts(tools: list[dict]) -> list[tuple[str, str]]:
@@ -468,15 +568,15 @@ def _refusal_texts(tools: list[dict]) -> list[tuple[str, str]]:
         blob = item["output"] + " " + item["error"]
         command = item["input"].get("command")
         ran_saipen = isinstance(command, str) and _PROTOCOL.search(command) is not None
-        for match in _GUARD_REFUSAL.finditer(blob):
+        for match in _GUARD_REFUSAL.finditer(item["error"]):
             out.append((match.group(1), match.group(2).strip()))
         if not ran_saipen:
             continue
         for match in _HUMAN_REFUSAL.finditer(blob):
-            out.append((match.group(1), match.group(2).strip()))
+            out.append((match.group(1), (match.group(2) or "").strip()))
         for match in _JSON_REFUSAL.finditer(blob):
-            tail = blob[match.end() : match.end() + 400]
-            message = re.search(r'"(?:message|detail)":\s*"([^"]{0,160})', tail)
+            tail = blob[match.end() : match.end() + 600]
+            message = re.search(r'"(?:message|detail)":\s*"([^"]{0,200})', tail)
             out.append((match.group(1), (message.group(1) if message else "").strip()))
     return out
 
@@ -517,6 +617,35 @@ def productive_shell(command: str) -> bool:
 #: every transcript metric below is None rather than zero.
 MEASURED = "MEASURED"
 UNMEASURED = "UNMEASURED_NO_EVENT_STREAM"
+#: The provider or host failed before the session did anything. Measured twice
+#: on `long_file_task` (17.09): `Unexpected server error` and exit 1 before the
+#: first tool, recorded as MEASURED with `protocol_commands_before_productive:
+#: 0` -- the STRONG acceptance number, handed to a session that never ran. An
+#: empty session is not a SAIPEN result of any kind: not PASS, not FAIL.
+INFRASTRUCTURE_UNMEASURED = "INFRASTRUCTURE_UNMEASURED"
+#: How many times a condition is re-driven after an infrastructure failure.
+DEFAULT_INFRA_RETRIES = 2
+_ANSI = re.compile(r"\x1b\[[0-9;]*m")
+
+
+def infrastructure_failure(
+    returncode: int | None, tools: list[dict], events: list[dict], stderr: str
+) -> str | None:
+    """Why this session never reached the model's first action, or None.
+
+    Only a session with NO tool event qualifies: once anything ran, the
+    transcript is a measurement whatever the exit code says. Then either the
+    host exited non-zero or its own event stream reported an error.
+    """
+    if tools:
+        return None
+    error_events = [event for event in events if event.get("type") == "error"]
+    if not error_events and returncode in (0, None):
+        return None
+    text = _ANSI.sub("", stderr or "").strip()
+    if not text and error_events:
+        text = json.dumps(error_events[-1], ensure_ascii=False)
+    return (text or f"host exited {returncode} before any tool ran")[-600:]
 
 #: The shape returned when the host produced no readable events. Measured on
 #: `long_file_task`: the session ran the whole protocol chain and finished
@@ -621,6 +750,12 @@ def session(model: str, project: Path, task: str, timeout: int) -> dict:
             tools = _part_tool_events(stored_parts)
             source = SOURCE_HOST_STORE
     measured = source != SOURCE_NONE
+    infrastructure = infrastructure_failure(proc.returncode, tools, events, proc.stderr)
+    metrics = (
+        {"measurement": INFRASTRUCTURE_UNMEASURED, **_UNMEASURED_METRICS}
+        if infrastructure
+        else measure(tools, measured=measured)
+    )
     return {
         "model": model,
         "returncode": proc.returncode,
@@ -631,7 +766,7 @@ def session(model: str, project: Path, task: str, timeout: int) -> dict:
             "cwd": str(project),
             "PWD": env.get("PWD"),
             "SAIPEN_PROJECT_ROOT": env.get("SAIPEN_PROJECT_ROOT"),
-            "SAIPEN_TASK_SHA256": env.get("SAIPEN_TASK_SHA256"),
+            "SAIPEN_TASK_FILE": env.get("SAIPEN_TASK_FILE"),
             "OLDPWD": env.get("OLDPWD"),
             "INIT_CWD": env.get("INIT_CWD"),
             "resolved_project_root": str(project),
@@ -648,9 +783,37 @@ def session(model: str, project: Path, task: str, timeout: int) -> dict:
         "measurement_source": source,
         "host_store_parts": len(stored_parts),
         "session_id": session_id,
-        **measure(tools, measured=measured),
+        **metrics,
+        "infrastructure_error": infrastructure,
         "tool_names": [item["tool"] for item in tools] if measured else None,
     }
+
+
+def drive_with_retries(run_once, retries: int, unchanged) -> dict:
+    """Drive one condition, re-driving ONLY an infrastructure failure, boundedly.
+
+    `run_once()` returns a session record; `unchanged()` answers whether the
+    fixture is still byte-identical to what the first attempt was handed. A
+    retry happens only when both hold -- the provider failed before any tool,
+    and nothing moved -- so a retry can never re-drive a project a previous
+    attempt touched. Every attempt stays on the record.
+    """
+    attempts: list[dict] = []
+    record: dict = {}
+    for attempt in range(1 + max(0, retries)):
+        record = run_once()
+        attempts.append(
+            {
+                "attempt": attempt + 1,
+                "measurement": record.get("measurement"),
+                "returncode": record.get("returncode"),
+                "infrastructure_error": record.get("infrastructure_error"),
+            }
+        )
+        if record.get("measurement") != INFRASTRUCTURE_UNMEASURED or not unchanged():
+            break
+    record["attempts"] = attempts
+    return record
 
 
 #: Isolation outcomes. INCONCLUSIVE exists because "this repository's bytes
@@ -725,6 +888,12 @@ def main() -> int:
     parser.add_argument("--conditions", nargs="+", default=None)
     parser.add_argument("--timeout", type=int, default=1200)
     parser.add_argument("--out", default=None)
+    parser.add_argument(
+        "--infra-retries",
+        type=int,
+        default=DEFAULT_INFRA_RETRIES,
+        help="re-drive a condition whose provider failed before any tool, at most N times",
+    )
     args = parser.parse_args()
 
     force_utf8_console(sys.stdout, sys.stderr)
@@ -740,8 +909,8 @@ def main() -> int:
         capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=300,
     ).stdout
 
-    built = conditions()
-    selected = args.conditions or list(built)
+    built = conditions(args.conditions)
+    selected = list(built)
     report = {
         "installed_runtime": INSTALLED.exists(),
         "installed_generation": _installed_generation(),
@@ -751,7 +920,7 @@ def main() -> int:
     for model in args.models:
         for name in selected:
             project = built[name]
-            task = CONDITION_TASKS.get(name, SIMPLE_TASK)
+            task = condition_task(name, project)
             before = _canonical_hashes(project)
             # SRC-049:R011 -- the MAIN repository is measured too. "the model
             # edited the fixture's file" is not isolation; "this repository's
@@ -763,23 +932,33 @@ def main() -> int:
             # change". A model can drive the whole protocol chain, close the
             # ticket, and never touch the file it was asked about.
             target_before = _target_digest(project)
-            began_ms = int(time.time() * 1000)
-            try:
-                record = session(model, project, task, args.timeout)
-            except subprocess.TimeoutExpired:
-                # A killed session's stdout is lost, but the host wrote its
-                # parts down as it went: the work it DID do before the wall
-                # clock ran out is a measurement, not a blank. Only when that
-                # store is empty too does the session go UNMEASURED -- which
-                # must never read as a run that chose to do nothing.
-                stored = _host_store_parts(project, began_ms, None)
-                record = {
-                    "model": model,
-                    "timeout": True,
-                    "measurement_source": SOURCE_HOST_STORE if stored else SOURCE_NONE,
-                    "host_store_parts": len(stored),
-                    **measure(_part_tool_events(stored), measured=bool(stored)),
-                }
+
+            def run_once(project=project, task=task, model=model):
+                began_ms = int(time.time() * 1000)
+                try:
+                    return session(model, project, task, args.timeout)
+                except subprocess.TimeoutExpired:
+                    # A killed session's stdout is lost, but the host wrote its
+                    # parts down as it went: the work it DID do before the wall
+                    # clock ran out is a measurement, not a blank. Only when that
+                    # store is empty too does the session go UNMEASURED -- which
+                    # must never read as a run that chose to do nothing.
+                    stored = _host_store_parts(project, began_ms, None)
+                    return {
+                        "model": model,
+                        "timeout": True,
+                        "measurement_source": SOURCE_HOST_STORE if stored else SOURCE_NONE,
+                        "host_store_parts": len(stored),
+                        **measure(_part_tool_events(stored), measured=bool(stored)),
+                    }
+
+            def unchanged(project=project, before=before, target_before=target_before):
+                return (
+                    _canonical_hashes(project) == before
+                    and _target_digest(project) == target_before
+                )
+
+            record = drive_with_retries(run_once, args.infra_retries, unchanged)
             after = _canonical_hashes(project)
             repo_after = _canonical_hashes(REPO)
             owned_after = _owning_ledger(project)
@@ -824,6 +1003,23 @@ def main() -> int:
                 "after": target_after,
                 "changed": target_before != target_after,
             }
+            if name == "windows_path_task":
+                # SRC-055 section 6: transport is proven by the VALUE only the
+                # named file holds arriving in the target, not by any edit.
+                value = notes_value(project)
+                landed = (project / TARGET_FILE).read_text(encoding="utf-8", errors="replace")
+                record["authority"] = {
+                    "path": str(windows_notes_path(project)),
+                    "readable": value is not None,
+                    "value": value,
+                    "target_carries_value": bool(value) and value in landed,
+                }
+            elif name == "windows_path_missing":
+                missing = re.search(r"[A-Za-z]:\\\S+", task)
+                record["authority"] = {
+                    "path": missing.group(0) if missing else None,
+                    "exists": bool(missing) and Path(missing.group(0)).exists(),
+                }
             record["isolation"] = isolation_verdict(record, REPO)
             report["sessions"].append(record)
             # Write after EVERY session. Live model time is the expensive part
@@ -840,7 +1036,9 @@ def main() -> int:
                 f"refusals={record.get('refusal_sequence')} "
                 f"repeated={record.get('repeated_refusal')} "
                 f"isolation={record.get('isolation')} "
-                f"minted={record.get('fixture_minted')}"
+                f"minted={record.get('fixture_minted')} "
+                f"attempts={len(record.get('attempts') or [])} "
+                f"authority={record.get('authority')}"
             )
     if _write_report(args.out, report):
         print(f"wrote {Path(args.out) / 'polygon.json'}")

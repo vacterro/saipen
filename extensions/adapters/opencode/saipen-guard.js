@@ -731,10 +731,20 @@ const SaipenGuard = async (context) => {
           guardPayload && typeof guardPayload.canonical_next_command === "string"
             ? guardPayload.canonical_next_command.slice(0, MAX_EVENT_BYTES)
             : "";
+        // T-1380: a refusal that does not say WHAT it refused reads identically
+        // for every effect it stops, so two different commands blocked by one
+        // standing project state were measured as the same refusal repeating
+        // with nothing changed. The attempted command is a bounded machine fact
+        // the adapter already holds; naming it is what makes two refusals two.
+        const attempted =
+          args && typeof args.command === "string"
+            ? ` attempted: ${args.command.slice(0, 160)}`
+            : "";
         throw new Error(
           `SAIPEN_GUARD_REFUSAL: ${verdict.code}: the saipen guard refused tool '${toolName}'; ` +
             `the host tool did not execute` +
             (verdict.diagnostic ? ` (${verdict.diagnostic})` : "") +
+            attempted +
             (route ? ` next: ${route}` : ""),
         );
       }

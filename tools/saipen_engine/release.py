@@ -45,7 +45,7 @@ from pathlib import Path
 
 from . import codec
 from .board import strict_iso_utc, iso_utc_sort_key
-from .errors import CODES
+from .errors import CODES, EngineError
 from .journal import _drop_settled_staged
 from .operations import RELEASE_SCOPE_DIR, _plan_finish_ticket, release_scope_matches
 from .state import parse_state
@@ -71,12 +71,16 @@ class GitResult:
 class ReleaseRefusal(Exception):
     """A public release refusal with a stable code from errors.CODES."""
 
-    def __init__(self, code: str, detail: str) -> None:
+    def __init__(self, code: str, detail: str, next_command: str | None = None) -> None:
         if code not in CODES:
             raise ValueError(f"release refusal {code!r} is not in OPS.md's closed set")
         super().__init__(f"REFUSE [{code}] {detail}")
         self.code = code
         self.detail = detail
+        # T-1380: measured live -- a session ran `saipen ship` twice in a project
+        # that has no VERSION. The sentence named the right command; the machine
+        # field did not carry it, so nothing a host reads could act on it.
+        self.next_command = next_command
 
 
 # ---------------------------------------------------------------------------
@@ -3545,6 +3549,18 @@ def _git_object_count(root: Path) -> int:
     return count
 
 
+def _active_work(root: Path) -> str | None:
+    """The ticket the project is working on: STATE.task, held in ## DOING."""
+    try:
+        _text, state = _read_state(root)
+        _text, board = _read_board(root)
+    except (OSError, ValueError, EngineError, ReleaseRefusal):
+        return None
+    task = str(state.get("task") or "").strip()
+    ticket = board.get("tickets", {}).get(task)
+    return task if ticket and ticket.get("section") == "## DOING" else None
+
+
 def _installed_version(root: Path) -> str:
     version = root / "VERSION"
     if not version.is_file():
@@ -3553,11 +3569,18 @@ def _installed_version(root: Path) -> str:
         # again. `ship` publishes a versioned release of a repository that HAS a
         # VERSION; an ordinary project closes its Work instead, and the refusal
         # says which command that is.
+        # T-1380: the machine route names the ACTIVE ticket. `<T-###>` typed into
+        # PowerShell is a redirection error, and with no active Work there is
+        # nothing to close, so no route is printed at all.
+        ticket = _active_work(root)
         raise ReleaseRefusal(
             "VALIDATION_FAILED",
             "VERSION is missing from the repository root: `saipen ship` publishes a "
             "versioned release and does not apply to a project without one. To close "
             "finished Work run: saipen ticket done <T-###> --closure-mode own_patch",
+            next_command=(
+                f"saipen ticket done {ticket} --closure-mode own_patch" if ticket else None
+            ),
         )
     return version.read_text(encoding="utf-8-sig").strip().split("\n")[0]
 

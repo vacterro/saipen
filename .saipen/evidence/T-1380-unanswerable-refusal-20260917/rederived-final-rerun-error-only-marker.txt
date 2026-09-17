@@ -1,0 +1,13 @@
+== polygon.json
+   captured_unprojected   recorded repeated=[] re-derived repeated=[]
+   operator_decision      recorded repeated=['PROTOCOL_STATE_INVALID'] re-derived repeated=[]   <-- changed
+      recorded   refusals=['WAIT_BLOCKED', 'WAIT_BLOCKED', 'PROTOCOL_STATE_INVALID', 'PROTOCOL_STATE_INVALID', 'PROTECTED_CANONICAL_NAMESPACE', 'PROTECTED_CANONICAL_NAMESPACE', 'PROTOCOL_STATE_INVALID', 'NO_ACTIVE_WORK', 'PROTOCOL_STATE_INVALID', 'PLUGIN_RESTART_REQUIRED', 'FLEET_INSPECTION_UNTRUSTED', 'WAIT_BLOCKED', 'WAIT_OPERATOR']
+      re-derived refusals=['WAIT_BLOCKED', 'WAIT_BLOCKED', 'WAIT_BLOCKED', 'WAIT_OPERATOR']
+   long_file_task         recorded repeated=[] re-derived repeated=[]
+   windows_path_task      recorded repeated=[] re-derived repeated=[]
+   windows_path_missing   recorded repeated=[] re-derived repeated=[]
+== field-rerun-after-canonical-path.json
+   long_file_task         recorded repeated=[] re-derived repeated=[]
+   windows_path_task      recorded repeated=[] re-derived repeated=[]
+   captured_unprojected   recorded repeated=['ILLEGAL_PHASE', 'VALIDATION_FAILED'] re-derived repeated=['ILLEGAL_PHASE', 'VALIDATION_FAILED']
+sessions whose metrics changed under the current extractor: 1

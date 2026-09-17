@@ -77,6 +77,26 @@ def start(root: Path, text: str, **env_extra):
     return proc.returncode, payload, proc.stdout + proc.stderr
 
 
+def start_raw(root: Path, command: list[str], carrier: dict):
+    """The same CLI call, for a command whose arguments are not one task string."""
+    env = {**os.environ}
+    for key in ("SAIPEN_PROJECT_ROOT", "SAIPEN_PROJECT_LINEAGE", "SAIPEN_AGENT",
+                operator_task.ENV_TASK_SHA256, operator_task.ENV_TASK_FILE):
+        env.pop(key, None)
+    env.update(carrier)
+    proc = subprocess.run(
+        [PYTHON, str(REPO / "tools" / "saipen.py"), *command, "--json",
+         "--project-root", str(root), "--agent", "test-agent"],
+        capture_output=True, text=True, encoding="utf-8", errors="replace",
+        timeout=300, env=env,
+    )
+    try:
+        payload = json.loads(proc.stdout)
+    except ValueError:
+        payload = None
+    return proc.returncode, payload, proc.stdout + proc.stderr
+
+
 def provenance_of(root: Path) -> dict:
     receipt = receipts_of(root)[0]
     meta = root / ".saipen" / "intake" / "active" / f"{receipt}.meta.json"
@@ -145,8 +165,48 @@ class AnOperatorCarrierIsComparedTests(unittest.TestCase):
         self.assertEqual(
             payload["supplied_digest"], pending_ingress.ingress_digest(PARAPHRASE)
         )
-        self.assertEqual(payload["canonical_next_command"], "saipen start --file <path>")
         self.assertEqual(receipts_of(root), [], "a refused ingress captured a receipt")
+
+    def test_a_digest_only_mismatch_prints_no_route_it_cannot_run(self):
+        """T-1380, measured: a route the session cannot run becomes a guess.
+
+        `long_file_task` was refused, wrote its OWN paraphrase to a file, ran
+        `saipen start --file` on that (refused again), then dumped the carrier
+        variable and built a list of text variants to search for one hashing to
+        it. A digest is irreversible; the refusal says so instead of implying
+        the session can produce the bytes.
+        """
+        root = healthy(self)
+        digest = hashlib.sha256(TASK.encode()).hexdigest()
+        code, payload, text = start(
+            root, PARAPHRASE, **{operator_task.ENV_TASK_SHA256: digest}
+        )
+        self.assertNotEqual(code, 0, text)
+        self.assertIsNone(payload["canonical_next_command"])
+        self.assertFalse(payload["operator_text_reachable"])
+        self.assertIn("a digest is irreversible", payload["detail"])
+        self.assertIn("do not try to reconstruct", payload["detail"])
+
+    def test_a_file_carrier_mismatch_names_that_exact_file_and_it_works(self):
+        """With the bytes on disk the refusal is answerable, and answered."""
+        root = healthy(self)
+        task_file = root / "launched-task.txt"
+        task_file.write_text(TASK, encoding="utf-8")
+        code, payload, text = start(
+            root, PARAPHRASE, **{operator_task.ENV_TASK_FILE: str(task_file)}
+        )
+        self.assertNotEqual(code, 0, text)
+        self.assertEqual(payload["code"], operator_task.CODE_MISMATCH)
+        self.assertTrue(payload["operator_text_reachable"])
+        route = payload["canonical_next_command"]
+        self.assertEqual(route, f'saipen start --file "{task_file}"')
+
+        # Run exactly what it printed.
+        env_key = {operator_task.ENV_TASK_FILE: str(task_file)}
+        code, payload, text = start_raw(root, ["start", "--file", str(task_file)], env_key)
+        self.assertEqual(code, 0, text)
+        self.assertEqual(payload["code"], "STARTED", text)
+        self.assertEqual(provenance_of(root)["witness"], operator_task.WITNESS_CARRIER)
 
     def test_a_malformed_carrier_fails_closed(self):
         """An environment that meant to declare a task and failed is not silence."""
@@ -247,6 +307,116 @@ class WitnessIsDecidedFromBytesTests(unittest.TestCase):
         big.write_text("x" * (operator_task.MAX_TASK_FILE_BYTES + 1), encoding="utf-8")
         record = operator_task.declared({operator_task.ENV_TASK_FILE: str(big)})
         self.assertIn("larger than", record["error"])
+
+
+class TheFileRouteSurvivesEveryShellTests(unittest.TestCase):
+    """T-1380 REVIEW F1: a route is only a route in the shell that types it.
+
+    Measured in four real shells: the unquoted `saipen start --file V:\\...` was
+    intact in PowerShell 5, pwsh 7 and cmd, and Git Bash handed the CLI
+    `V:_TEMP_...` with every backslash consumed; a path with a space split in
+    all four. The live proof had passed only because OpenCode on that host runs
+    PowerShell and the fixture path had no space.
+
+    Each available shell here TYPES the printed route -- its arguments exactly
+    as the refusal printed them, after an explicit interpreter in place of the
+    `saipen` shim -- for a task file whose directories contain spaces, and the
+    CLI must reach STARTED holding the operator's own bytes.
+    """
+
+    GIT_BASH = Path(r"C:\Program Files\Git\usr\bin\bash.exe")
+
+    def shells(self) -> list[str]:
+        import shutil
+
+        found = ["bash"] if self.GIT_BASH.is_file() or shutil.which("bash") else []
+        found += [name for name in ("powershell", "pwsh", "cmd") if shutil.which(name)]
+        return found
+
+    def refused_route(self) -> tuple[Path, Path, str]:
+        import shutil
+        import tempfile
+
+        root = healthy(self)
+        holder = Path(tempfile.mkdtemp(prefix="t1380 route "))
+        self.addCleanup(lambda: shutil.rmtree(holder, ignore_errors=True))
+        task_file = holder / "operator notes" / "launched task.txt"
+        task_file.parent.mkdir()
+        task_file.write_text(TASK, encoding="utf-8")
+        code, payload, text = start(
+            root, PARAPHRASE, **{operator_task.ENV_TASK_FILE: str(task_file)}
+        )
+        self.assertNotEqual(code, 0, text)
+        self.assertEqual(payload["code"], operator_task.CODE_MISMATCH, payload)
+        route = payload["canonical_next_command"]
+        self.assertTrue(route and route.startswith("saipen start --file "), payload)
+        return root, task_file, route
+
+    def command(self, shell: str, route: str, root: Path):
+        import shutil
+        import tempfile
+
+        arguments = route[len("saipen ") :]
+        py, cli = PYTHON, str(REPO / "tools" / "saipen.py")
+        if shell == "bash":
+            bash = str(self.GIT_BASH) if self.GIT_BASH.is_file() else shutil.which("bash")
+            holder = Path(tempfile.mkdtemp(prefix="t1380-typed-"))
+            self.addCleanup(lambda: shutil.rmtree(holder, ignore_errors=True))
+            script = holder / "typed.sh"
+            posix = lambda value: str(value).replace("\\", "/")  # noqa: E731
+            script.write_text(
+                f'"{posix(py)}" "{posix(cli)}" {arguments} '
+                f'--json --project-root "{posix(root)}" --agent test-agent\n',
+                encoding="utf-8",
+                newline="\n",
+            )
+            return [bash, str(script)]
+        if shell == "cmd":
+            return (
+                f'cmd /d /c ""{py}" "{cli}" {arguments} '
+                f'--json --project-root "{root}" --agent test-agent"'
+            )
+        return [
+            shell,
+            "-NoProfile",
+            "-Command",
+            f"& '{py}' '{cli}' {arguments} --json --project-root '{root}' --agent test-agent",
+        ]
+
+    def test_the_route_is_double_quoted(self):
+        _root, task_file, route = self.refused_route()
+        self.assertEqual(route, f'saipen start --file "{task_file}"')
+
+    def test_every_available_shell_types_it_to_started(self):
+        shells = self.shells()
+        if not shells:
+            self.skipTest("no shell available to type the route into")
+        for shell in shells:
+            with self.subTest(shell=shell):
+                root, task_file, route = self.refused_route()
+                env = {**os.environ, operator_task.ENV_TASK_FILE: str(task_file)}
+                for key in ("SAIPEN_PROJECT_ROOT", "SAIPEN_PROJECT_LINEAGE", "SAIPEN_AGENT",
+                            operator_task.ENV_TASK_SHA256):
+                    env.pop(key, None)
+                proc = subprocess.run(
+                    self.command(shell, route, root),
+                    capture_output=True,
+                    text=True,
+                    encoding="utf-8",
+                    errors="replace",
+                    timeout=300,
+                    env=env,
+                )
+                out = proc.stdout
+                self.assertIn("{", out, f"{shell}: {out[-400:]} {proc.stderr[-400:]}")
+                payload, _end = json.JSONDecoder().raw_decode(out[out.index("{"):])
+                self.assertEqual(payload.get("code"), "STARTED", f"{shell}: {payload}")
+                self.assertEqual(provenance_of(root)["witness"], operator_task.WITNESS_CARRIER)
+
+    def test_a_path_no_quoted_argument_carries_gets_no_route(self):
+        for hostile in (r"C:\tasks\$HOME\task.txt", 'C:\\tasks\\a"b.txt', "C:\\tasks\\"):
+            with self.subTest(path=hostile):
+                self.assertIsNone(operator_task.file_route(hostile))
 
 
 if __name__ == "__main__":

@@ -1,0 +1,53 @@
+# T-1380 core-unit A/B by TEST IDENTITY
+
+recorded baseline (the inherited set): 34 red identities
+with this ticket: Ran 2695, 35 red identities
+
+The one extra identity was the install-freshness invariant doing its job:
+  test_opencode_host_smoke::test_fresh_process_loads_the_installed_generation_from_one_origin
+  -- it compares the INSTALLED copy's digest with the source's, and this ticket
+  changed the guard adapter after the last injection. Re-injected (6/6 fresh at
+  gen-sha256:609f4719...) and that module is Ran 10 OK.
+
+PATCH_OWNED = 0, UNKNOWN = 0 after the injection the invariant asked for.
+
+## Final A/B (after the Windows-path canonical fix)
+Ran 2700, 34 red identities -- the inherited set. PATCH_OWNED = 0, UNKNOWN = 0.
+
+## A/B after the third wave
+Ran 2702, 35 red identities -- one PATCH_OWNED, this ticket's own:
+  test_canonical_command_reachability::test_every_printed_command_classifies_as_canonical
+  -- the ILLEGAL_PHASE route was an f-string with an inline conditional, so the
+  literal left in the source was 'saipen transition {', which is not a command.
+  The gate is computed first now and the control is green. Same lesson as T-1377's
+  trailing comment, one level down: a printed command has to BE a command.
+
+## FINAL A/B (slices 5-6, python -m unittest discover -s tools -v, classified by core_unit_ab_identity.py)
+
+First final run: Ran 2719, 37 red identities -- PATCH_OWNED 3, all one cause, and not the patch:
+  test_debt_gate.DebtGateFixtureTests.test_delta_resolves_and_reports_release_blocked
+  test_t1304_r004_dry_run_purity.MaturePreviewPurityTests.test_pass_preview_emits_no_receipt
+  test_t1304_r004_transition.SuccessfulTransitionTests.test_real_transition_creates_one_checkpoint_bound_baseline
+  -- each runs the validator over the real protocol home, and tools/validate.py reported
+  'cross-doc drift [root-file-set] -- file(s) at the repository root that the closed set does
+  not name: [the]': an EMPTY untracked file 'the' (13:39:32) left by a malformed shell heredoc
+  in this session. Removed; the three pass in isolation; validator conformant.
+  That run was NOT used for the verdict: the whole family was re-run on the clean tree.
+
+Clean re-run:
+  inherited record : core-unit-ab-by-identity.txt (34 identities)
+  current run      : Ran 2719, FAILED (failures=33, errors=1, skipped=17)
+  red identities   : 34
+  PATCH_OWNED      : 0
+  UNKNOWN          : 0
+  FIXED (inherited, green now): 0
+
+Instrument control for the classifier (known-good / known-bad / crash inputs): exit 0 / 1 (PATCH_OWNED 1) / 1 (UNKNOWN 1).
+
+## FINAL A/B after slice 7 (the harness change is inside tools/, so the family ran again)
+  inherited record : core-unit-ab-by-identity.txt (34 identities)
+  current run      : Ran 2720, FAILED (failures=33, errors=1, skipped=17)
+  red identities   : 34
+  PATCH_OWNED      : 0
+  UNKNOWN          : 0
+  FIXED (inherited, green now): 0

@@ -86,6 +86,40 @@ def declared(env: dict | None = None) -> dict | None:
     return {"digest": ingress_digest(text), "source": ENV_TASK_FILE}
 
 
+def file_route(task_file: str | None) -> str | None:
+    """`saipen start --file` for a declared task file, typed so every shell carries it.
+
+    MEASURED in four real shells (T-1380 review): the unquoted route arrived
+    intact in PowerShell 5, pwsh 7 and cmd, but Git Bash handed the CLI
+    `V:_TEMP_t1363-abc.saipen-launched-task.txt` -- an unquoted backslash is an
+    escape there -- and a path with a space split into three arguments in all
+    four. The double-quoted form arrived intact in every one. A path no quoted
+    argument carries literally (a quote, `$`, a backtick, `%VAR%`, a trailing
+    backslash) gets no route rather than one that breaks when typed.
+    """
+    from .guard_events import ingress_payload_literal
+
+    path = (task_file or "").strip()
+    if not path or not ingress_payload_literal(path, '"'):
+        return None
+    return f'saipen start --file "{path}"'
+
+
+def _reachable_route(env: dict | None) -> str | None:
+    """The command a session can actually RUN to answer a mismatch, or None.
+
+    Measured 2026-09-17 on the final matrix: a refusal whose only instruction is
+    "carry the operator's own bytes" is unanswerable when the carrier declared a
+    DIGEST, because a digest is irreversible. `long_file_task` was refused, wrote
+    its own paraphrase to a file, was refused again, then dumped
+    SAIPEN_TASK_SHA256 and built a list of text variants to search for one that
+    hashes to it. A route the session cannot run is worse than no route: it
+    turns a correct refusal into a guessing loop.
+    """
+    env = os.environ if env is None else env
+    return file_route(env.get(ENV_TASK_FILE))
+
+
 def witness(text: str, *, obligation_met: bool = False, env: dict | None = None) -> dict:
     """How this request's fidelity was established, or why it is refused.
 
@@ -106,10 +140,22 @@ def witness(text: str, *, obligation_met: bool = False, env: dict | None = None)
                 "ingress is refused rather than recorded as unwitnessed. Fix the "
                 "carrier or unset it"
             ),
-            "canonical_next_command": "saipen start --file <path>",
+            "canonical_next_command": _reachable_route(env),
         }
     if record:
         if record["digest"] != supplied:
+            route = _reachable_route(env)
+            reach = (
+                "The operator's own bytes are on disk at the declared task file; run "
+                "the command in canonical_next_command, which needs no shell quoting."
+                if route
+                else (
+                    "This session cannot reach the operator's text: the carrier declared "
+                    "a DIGEST, and a digest is irreversible -- do not try to reconstruct "
+                    "the text from it. Ask the operator to restate the request, or have "
+                    "the launcher declare " + ENV_TASK_FILE + " so the bytes are readable."
+                )
+            )
             return {
                 "code": CODE_MISMATCH,
                 "detail": (
@@ -120,13 +166,13 @@ def witness(text: str, *, obligation_met: bool = False, env: dict | None = None)
                     + ") and the text supplied to the ingress has digest "
                     + supplied
                     + ". A receipt built from it would carry the session's words under "
-                    "the operator's authority. Carry the operator's own bytes -- "
-                    "`saipen start --file <path>` needs no shell quoting -- or have "
-                    "the operator restate the request"
+                    "the operator's authority. "
+                    + reach
                 ),
                 "declared_digest": record["digest"],
                 "supplied_digest": supplied,
-                "canonical_next_command": "saipen start --file <path>",
+                "canonical_next_command": route,
+                "operator_text_reachable": bool(route),
             }
         return {
             "witness": WITNESS_CARRIER,
@@ -184,11 +230,8 @@ def unstarted(root: Path | str, env: dict | None = None) -> dict | None:
         if isinstance(provenance, dict) and provenance.get("compared_digest") == record["digest"]:
             return None
     env = os.environ if env is None else env
-    task_file = (env.get(ENV_TASK_FILE) or "").strip()
-    command = (
-        f"saipen start --file {task_file}"
-        if task_file
-        else "saipen start '<the task you were given, one line>'"
+    command = file_route(env.get(ENV_TASK_FILE)) or (
+        "saipen start '<the task you were given, one line>'"
     )
     return {"digest": record["digest"], "source": record["source"], "command": command}
 
