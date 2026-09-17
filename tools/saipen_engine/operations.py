@@ -4722,13 +4722,21 @@ def user_request(
     # T-1372: the other ingress door. `start` and `user-request` are the two
     # verbs the guard refuses on transport, so closing only one of them would
     # leave the paraphrase a door with a different name on it.
-    from . import pending_ingress
+    from . import operator_task, pending_ingress
 
+    obligation = pending_ingress.pending(root)
     owed = pending_ingress.enforce(
         root, text.strip(), supersede=supersede_ingress, commit=not dry_run
     )
     if owed is not None:
         return _refuse(owed.pop("code"), owed.pop("detail"), **owed)
+    # T-1376: the same witness the other ingress door asks for.
+    provenance = operator_task.witness(
+        text.strip(),
+        obligation_met=bool(obligation) and not obligation.get("malformed"),
+    )
+    if "code" in provenance:
+        return _refuse(provenance.pop("code"), provenance.pop("detail"), **provenance)
     verify_text = (verify or "").strip() or USER_REQUEST_VERIFY
     if _is_placeholder_verify(verify_text):
         return _refuse(
@@ -4798,7 +4806,9 @@ def user_request(
             },
         )
 
-    captured = intake.capture(root, body, source_kind="user_instruction")
+    captured = intake.capture(
+        root, body, source_kind="user_instruction", request_provenance=provenance
+    )
     if not captured.get("ok"):
         return _refuse(
             captured.get("code", "SOURCE_UNRESOLVED"),
@@ -4816,7 +4826,13 @@ def user_request(
         # is not.
         return projected
     ticket_id = projected.data.get("ticket")
-    linked = intake.capture(root, body, source_kind="user_instruction", work=ticket_id)
+    linked = intake.capture(
+        root,
+        body,
+        source_kind="user_instruction",
+        work=ticket_id,
+        request_provenance=provenance,
+    )
     if not linked.get("ok"):
         return _refuse(
             linked.get("code", "ORPHAN_RECEIPT"),

@@ -70,12 +70,17 @@
       "INGRESS-AUTHORITY-01": {
         "owner": "saipen/SOURCES.md",
         "test": "tools/test_pending_ingress.py",
-        "subject": "a refused ingress owes its own bytes"
+        "subject": "a refused ingress owes its bytes"
       },
       "REQUEST-CLAUSE-01": {
         "owner": "saipen/SOURCES.md",
         "test": "tools/test_request_clause_closure.py",
-        "subject": "a request is one requirement, discharged by the Work's own proof"
+        "subject": "a request is one requirement"
+      },
+      "REQUEST-PROVENANCE-01": {
+        "owner": "saipen/SOURCES.md",
+        "test": "tools/test_operator_task_witness.py",
+        "subject": "a receipt records its witness"
       },
       "OPS-EFFECT-01": {
         "owner": "saipen/OPS.md",
@@ -138,6 +143,7 @@
     "SOURCE-AUTHORITY-01": "saipen/SOURCES.md",
     "INGRESS-AUTHORITY-01": "saipen/SOURCES.md",
     "REQUEST-CLAUSE-01": "saipen/SOURCES.md",
+    "REQUEST-PROVENANCE-01": "saipen/SOURCES.md",
     "OPS-EFFECT-01": "saipen/OPS.md",
     "GOAL-01": "saipen/MAINTENANCE.md",
     "EXEC-HUSH-01": "saipen/EXECUTION.md",
@@ -626,7 +632,7 @@
     "budgets": {
       "cold": 20480,
       "ordinary_continue": 35840,
-      "command_resolution": 30720,
+      "command_resolution": 32768,
       "ordinary_phase": 40960,
       "ship_improve": 56320,
       "single_doc": 51200
@@ -837,7 +843,9 @@
     "RETIRED",
     "RETIREMENT_EVIDENCE_BOUND",
     "INGRESS_PARAPHRASE_REFUSED",
-    "INGRESS_PENDING_UNREADABLE"
+    "INGRESS_PENDING_UNREADABLE",
+    "INGRESS_TASK_MISMATCH",
+    "INGRESS_TASK_CARRIER_INVALID"
   ],
   "continue_fallback": {
     "invariant": "continue may fall through to improve ONLY after recovery, blocked/retryable, queued and required-follow-up routing are exhausted; it resumes an existing active Improve cycle and never creates an unbounded improve carousel",

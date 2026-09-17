@@ -406,6 +406,23 @@ def _host_env(project: Path) -> dict:
     return env
 
 
+def _task_env(project: Path, task: str) -> dict:
+    """The child's environment, WITH the operator's task declared (T-1376).
+
+    The harness knows the exact request it is about to hand the model, which is
+    precisely what an operator knows and the protocol never did. Declaring its
+    digest is what turns "the session reworded the task and every gate agreed"
+    into either the operator's own bytes or a refusal -- and it makes the
+    matrix able to measure which of the two happened.
+    """
+    from saipen_engine import operator_task as carrier
+    from saipen_engine.pending_ingress import ingress_digest
+
+    env = _host_env(project)
+    env[carrier.ENV_TASK_SHA256] = ingress_digest(task)
+    return env
+
+
 def _shell_commands(tools: list[dict]) -> list[str]:
     commands = []
     for item in tools:
@@ -571,7 +588,7 @@ def measure(tools: list[dict], *, measured: bool = True) -> dict:
 def session(model: str, project: Path, task: str, timeout: int) -> dict:
     began = time.time()
     since_ms = int(began * 1000)
-    env = _host_env(project)
+    env = _task_env(project, task)
     proc = subprocess.run(
         [OPENCODE, "run", task, "--format", "json", "--auto", "--model", model],
         cwd=str(project),
@@ -614,6 +631,7 @@ def session(model: str, project: Path, task: str, timeout: int) -> dict:
             "cwd": str(project),
             "PWD": env.get("PWD"),
             "SAIPEN_PROJECT_ROOT": env.get("SAIPEN_PROJECT_ROOT"),
+            "SAIPEN_TASK_SHA256": env.get("SAIPEN_TASK_SHA256"),
             "OLDPWD": env.get("OLDPWD"),
             "INIT_CWD": env.get("INIT_CWD"),
             "resolved_project_root": str(project),

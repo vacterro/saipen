@@ -1,0 +1,6 @@
+# T-1376 core-unit A/B by TEST IDENTITY
+
+recorded baseline (T-1379's evidence, the inherited set): 34 red identities
+with this ticket: Ran 2681, 34 red identities -- the same ones
+PATCH_OWNED = 0, UNKNOWN = 0. The 14 added tests are tools/test_operator_task_witness.py (12)
+and the two polygon task-declaration controls.

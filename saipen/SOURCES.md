@@ -111,6 +111,39 @@ when release-affecting. Mechanical gates verify exact digest and structural
 coverage; agents own semantic clause extraction. Model memory is navigation,
 never authority.
 
+### A receipt says whose words it holds
+
+<!-- RULE-OWNER: REQUEST-PROVENANCE-01 -->
+
+The defect class this ends, measured live on 2026-09-17: a session handed a
+520-byte request ran the ingress with a 46-character substitute it wrote itself,
+and nothing in the receipt contradicted it. `source_authority: exact` is a true
+statement about BYTES -- the stored body is whole and unredacted -- and it was
+being read as a statement about WORDS. INGRESS-AUTHORITY-01 only arms when a
+transport refusal recorded something; a session that never attempted the literal
+ingress was never refused, so nothing compared anything.
+
+Every `user_instruction` receipt therefore records its WITNESS:
+
+| witness | who compared what |
+|---|---|
+| `operator_carrier` | something outside the session declared the task's digest and the arriving text matches it |
+| `transport_obligation` | a transport refusal recorded these exact bytes and they arrived |
+| `model_supplied` | nobody compared anything |
+
+`model_supplied` is honest, not degrading: most sessions have no carrier, and
+refusing them would make the protocol unusable while inventing a witness would
+be the fabrication this rule exists to stop. What IS refused is a contradiction:
+a declared task whose digest differs from the text that arrived
+(`INGRESS_TASK_MISMATCH`), and a carrier that declares a task it cannot prove
+(`INGRESS_TASK_CARRIER_INVALID`) -- an environment that meant to declare one and
+failed is not the same as an environment that never declared one.
+
+The carrier is `SAIPEN_TASK_SHA256`, or `SAIPEN_TASK_FILE` when a launcher can
+write the text but not a digest. Digests normalize line endings and outer
+whitespace exactly as INGRESS-AUTHORITY-01 does, so a launcher's file and a
+shell payload are the same request.
+
 ### A request is one requirement, and the Work's own proof discharges it
 
 <!-- RULE-OWNER: REQUEST-CLAUSE-01 -->

@@ -611,5 +611,44 @@ class RefusalCountingTests(unittest.TestCase):
         self.assertEqual(seen["repeated_refusal"], ["NO_ACTIVE_WORK"])
 
 
+class TheHarnessDeclaresTheOperatorTaskTests(unittest.TestCase):
+    """T-1376: the harness knows the request, so it says so to the protocol.
+
+    Measured 2026-09-17: `long_file_task` substituted 46 characters for a
+    520-byte request and every gate agreed, because nothing in the session knew
+    what the operator had actually asked. The harness DOES know -- it hands the
+    task to the host itself -- so it declares the digest and the matrix can
+    measure which of the two honest outcomes happened: the operator's own bytes
+    arrived, or the ingress was refused.
+    """
+
+    def test_the_child_environment_declares_the_task_digest(self):
+        from saipen_engine import operator_task
+        from saipen_engine.pending_ingress import ingress_digest
+
+        project = Path(tempfile.mkdtemp(prefix="t1376-fixture-"))
+        self.addCleanup(lambda: shutil.rmtree(project, ignore_errors=True))
+        env = polygon._task_env(project, polygon.LONG_TASK)
+        self.assertEqual(
+            env[operator_task.ENV_TASK_SHA256], ingress_digest(polygon.LONG_TASK)
+        )
+        self.assertEqual(env["PWD"], str(project))
+
+    def test_each_condition_declares_its_own_task(self):
+        """A digest copied from another condition would witness the wrong words."""
+        from saipen_engine import operator_task
+
+        project = Path(tempfile.mkdtemp(prefix="t1376-fixture-"))
+        self.addCleanup(lambda: shutil.rmtree(project, ignore_errors=True))
+        digests = {
+            name: polygon._task_env(
+                project, polygon.CONDITION_TASKS.get(name, polygon.SIMPLE_TASK)
+            )[operator_task.ENV_TASK_SHA256]
+            for name in polygon.CONDITION_NAMES
+        }
+        self.assertNotEqual(digests["long_file_task"], digests["healthy"])
+        self.assertNotEqual(digests["windows_path_task"], digests["healthy"])
+
+
 if __name__ == "__main__":  # pragma: no cover
     unittest.main()

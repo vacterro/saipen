@@ -33,7 +33,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from . import codec, intake, ownership, pending_ingress
+from . import codec, intake, operator_task, ownership, pending_ingress
 from .board import parse_board
 from .errors import EngineError
 from .journal import recovery_preflight, scan_pending
@@ -229,11 +229,22 @@ def start_work(
     # T-1372: a transport refusal names a command AND owes specific bytes. A
     # request that is not those bytes cannot enter here silently -- that is how
     # a model's paraphrase earned a receipt asserting the operator's own words.
+    obligation = pending_ingress.pending(root)
     owed = pending_ingress.enforce(
         root, text, supersede=supersede_ingress, commit=not dry_run
     )
     if owed is not None:
         return _refuse(owed.pop("code"), owed.pop("detail"), **owed)
+    # T-1376: the obligation above only exists when something REFUSED these
+    # bytes. A session that never attempted the literal ingress was never
+    # refused, so nothing compared its words with the operator's -- unless the
+    # launcher declared the task, which is what this asks.
+    provenance = operator_task.witness(
+        text,
+        obligation_met=bool(obligation) and not obligation.get("malformed"),
+    )
+    if "code" in provenance:
+        return _refuse(provenance.pop("code"), provenance.pop("detail"), **provenance)
     verify_text = (verify or "").strip() or USER_REQUEST_VERIFY
 
     def render(supersedes: str | None) -> str:
@@ -281,7 +292,9 @@ def start_work(
     # unfinished operation that writes intake is the one debt it must wait on.
     captured_receipt = None
     if not _pending_touches_intake(root):
-        captured = intake.capture(root, body, source_kind="user_instruction")
+        captured = intake.capture(
+            root, body, source_kind="user_instruction", request_provenance=provenance
+        )
         if not captured.get("ok"):
             return _refuse(
                 captured.get("code") or "SOURCE_UNRESOLVED",
@@ -314,7 +327,9 @@ def start_work(
             **identity,
         )
     if captured_receipt is None:
-        captured = intake.capture(root, body, source_kind="user_instruction")
+        captured = intake.capture(
+            root, body, source_kind="user_instruction", request_provenance=provenance
+        )
         if not captured.get("ok"):
             return _refuse(
                 captured.get("code") or "SOURCE_UNRESOLVED",

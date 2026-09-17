@@ -1070,6 +1070,7 @@ def capture(
     force: bool = False,
     transport_transform: str = "none",
     newline_normalization: str = "none",
+    request_provenance: dict | None = None,
 ) -> dict:
     """Capture an authoritative source VERBATIM before any interpretation.
 
@@ -1228,6 +1229,15 @@ def capture(
                     "newline_normalization": newline_normalization,
                     "transport_transform": transport_transform,
                 },
+                # T-1376: `source_authority: exact` is true about BYTES -- the
+                # stored body is the body we were handed. It was being read as a
+                # statement about WORDS, and a session that reworded its own
+                # task produced a receipt nothing contradicted. This records who
+                # compared the arriving text with what the operator wrote, and
+                # `model_supplied` means nobody did.
+                "request_provenance": dict(request_provenance)
+                if isinstance(request_provenance, dict)
+                else {"witness": "model_supplied"},
             }
             if amends:
                 meta["amends"] = amends

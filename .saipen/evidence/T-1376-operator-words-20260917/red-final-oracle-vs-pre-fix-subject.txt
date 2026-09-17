@@ -1,0 +1,69 @@
+oracle  sha256 d2e27cb7b5a7f59c (identical copy: True)
+subject 90f0d6a5d09eba74 -> 0505990f209c7350 (witness() reverted)
+--- pre-fix subject run ---
+l last):
+  File "V:\_TEMP_\t1376-red-8zowgstz\subject\tools\test_operator_task_witness.py", line 164, in test_an_unreadable_task_file_fails_closed
+    self.assertNotEqual(code, 0, text)
+AssertionError: 0 == 0 : {
+  "ok": true,
+  "code": "STARTED",
+  "project_root": "V:\\_TEMP_\\t1363-0j9rg_xm",
+  "actor": "test-agent",
+  "actor_source": "explicit",
+  "receipt": "SRC-001",
+  "ticket": "T-1",
+  "valve_reauthorized": false,
+  "preserved_decisions": [],
+  "resumed": false,
+  "phase": "SCOUT",
+  "action": "PHASE SCOUT T-1",
+  "next_action": "PHASE SCOUT T-1",
+  "event_id": "E-3",
+  "parked": null,
+  "load_path": "V:\\_TEMP_\\t1376-red-8zowgstz\\subject\\saipen\\phases\\scout.md",
+  "load": "saipen/phases/scout.md",
+  "execution_instruction": "The task is claimed Work. Read load_path, then execute action now under that phase; do not run status, continue, source or recover first."
+}
+
+
+======================================================================
+FAIL: test_matching_text_records_the_carrier (tools.test_operator_task_witness.AnOperatorCarrierIsComparedTests.test_matching_text_records_the_carrier)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\t1376-red-8zowgstz\subject\tools\test_operator_task_witness.py", line 120, in test_matching_text_records_the_carrier
+    self.assertEqual(witness["witness"], operator_task.WITNESS_CARRIER)
+AssertionError: 'model_supplied' != 'operator_carrier'
+- model_supplied
++ operator_carrier
+
+
+======================================================================
+FAIL: test_bytes_that_answered_an_obligation_are_witnessed_by_it (tools.test_operator_task_witness.TheTransportObligationIsAlsoAWitnessTests.test_bytes_that_answered_an_obligation_are_witnessed_by_it)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\t1376-red-8zowgstz\subject\tools\test_operator_task_witness.py", line 220, in test_bytes_that_answered_an_obligation_are_witnessed_by_it
+    self.assertEqual(
+AssertionError: 'model_supplied' != 'transport_obligation'
+- model_supplied
++ transport_obligation
+
+
+======================================================================
+FAIL: test_line_endings_do_not_change_the_answer (tools.test_operator_task_witness.WitnessIsDecidedFromBytesTests.test_line_endings_do_not_change_the_answer)
+A launcher's file and a shell payload are the same request.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\t1376-red-8zowgstz\subject\tools\test_operator_task_witness.py", line 242, in test_line_endings_do_not_change_the_answer
+    self.assertEqual(outcome["witness"], operator_task.WITNESS_CARRIER)
+AssertionError: 'model_supplied' != 'operator_carrier'
+- model_supplied
++ operator_carrier
+
+
+----------------------------------------------------------------------
+Ran 12 tests in 2.966s
+
+FAILED (failures=7, errors=1)
+
+classes red against the pre-fix subject: ['AnOperatorCarrierIsComparedTests', 'NobodyComparedItAndTheReceiptSaysSoTests', 'TheTransportObligationIsAlsoAWitnessTests', 'WitnessIsDecidedFromBytesTests']
+RED CONTROL OK: the witness controls fail when every receipt claims nothing
