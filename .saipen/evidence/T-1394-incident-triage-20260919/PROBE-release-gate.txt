@@ -1,0 +1,40 @@
+T-1394 live probe: V:\_TEMP_\saipen-mint-probe (disposable, outside SAIPEN repo)
+HEAD engine: V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN @ dc3b2f88
+
+1) MINT: saipen start --hex 323e2631  (utf-8 of "2>&1")
+   -> {"ok":true,"code":"STARTED","receipt":"SRC-001","ticket":"T-1",...}
+   BOARD DOING: "- [/] T-1 [P1] 2>&1 | ... | user_explicit: true | source_receipts: SRC-001"
+   contract SRC-001.json source_sha256=a791f19e974b0ea895fd8c0a168f66c1e60d585fd61e5c1abf6a87da21ef6061
+
+2) ingress extraction (pure function, HEAD tools/saipen_engine/guard_events.py):
+   ingress_payload('saipen start 2>&1') -> '2>&1'
+   ingress_rewrite('saipen start 2>&1') -> 'saipen start --hex 323e2631'
+   same for '> out.txt', '| cat', '2> err.txt', '2>/dev/null', user-request variant
+
+3) RELEASE DEADLOCK: T-2 fully finished (SCOUT..SHIP, checkpoint RUN '1 PASS conf: high',
+   ticket done FINISHED). T-1 parked (blocked_on T-2), then blocked via
+   `saipen ticket block T-1 "external owner unreachable probe"`.
+   intake._board_source_links -> {'T-1': ['SRC-001'], 'T-2': ['SRC-002']}
+   intake.release_gate(root, 'T-2') ->
+     {"ok": false, "code": "SOURCE_UNRESOLVED", "receipt": "SRC-001", "work": "T-1"}
+   release.py ship stage: _release_failure("SOURCE_COVERAGE", ...) with no canonical route.
+   => unrelated blocked ticket with active empty-coverage receipt freezes publication.
+
+4) classification probes (HEAD):
+   _saipen_cli_tokens('saipen status x1..x10')       12 tokens -> tokens (admitted)
+   _saipen_cli_tokens('saipen status x1..x11')       13 tokens -> None
+   _saipen_cli_tokens('saipen improve sweep <13-token documented grammar>') -> None
+   _saipen_cli_tokens('saipen source disp SRC-011 R001 VERIFIED --evidence "...")' -> None (quote)
+   _saipen_cli_tokens('saipen status "SRC-011" --json') -> None (quote)
+   is_shell_canonical_verb('permissions')=False, ('explain-next')=False, ('status')=True
+   provably_read_only_shell: whoami=False, hostname=False, Get-Location=False,
+     Get-Date=False; echo=True, 'git rev-parse'=True, Get-FileHash=True
+   _saipen_cli_tokens(r'saipen start --file V:\_TEMP_	ask.txt') -> tokens (backslash OK)
+
+5) guard artifact generations (2026-09-19):
+   HEAD extensions/adapters/opencode/saipen-guard.js  sha 8f3d90042a40e332 BUILD_ID T-1327-...
+   %LOCALAPPDATA% scheduled-source copy              sha 8f3d90042a40e332 (identical)
+   installed ~/.config/opencode/plugins/saipen-guard.js sha 8f3d90042a40e332 (identical)
+   legacy plugin/ copy absent. No live producer divergence measurable.
+
+6) saipen init on fresh git dir -> NOT_SAIPEN_PROJECT (greenfield birth still gate-only)
