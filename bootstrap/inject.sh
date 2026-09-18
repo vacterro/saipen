@@ -554,11 +554,16 @@ while IFS='|' read -r id name home skill instruction hook artifact bespoke legac
         [ -d "$HOME/.agents" ] && _agents_supported=1
         command -v freebuff >/dev/null 2>&1 && _agents_supported=1
         command -v codebuddy >/dev/null 2>&1 && _agents_supported=1
+        _agents_skill_dir="$HOME/.agents/skills/saipen"
+        _agents_skill_installed=0
         if [ -d "$HOME/.agents/skills" ]; then
-          report "~/.agents skills" copy_skill "$HOME/.agents/skills/saipen"
+          report "~/.agents skills" copy_skill "$_agents_skill_dir" && _agents_skill_installed=1
         elif [ "$_agents_supported" -eq 1 ]; then
-          report "~/.agents skills" copy_skill "$HOME/.agents/skills/saipen"
+          report "~/.agents skills" copy_skill "$_agents_skill_dir" && _agents_skill_installed=1
         else printf '%-28s %s\n' "~/.agents" "not installed - skip"; fi
+        if [ "$_agents_skill_installed" -eq 1 ]; then
+          report "~/.agents provenance" write_provenance "$_agents_skill_dir" "$id"
+        fi
 
         # FreeBuff always-on activation backstop
         _freebuff_detected=0

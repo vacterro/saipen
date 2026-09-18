@@ -531,12 +531,19 @@ foreach ($adapter in @($AdapterRegistry.adapters)) {
         # Copy, lowercase: these readers skip junctions and uppercase dirs.
         # Positive host detection (not directory-exists-only): create parent when a supported host is present.
         $agentsSupported = (Test-Path "$h\.config\opencode") -or (Test-Path "$h\.codex") -or (Test-Path "$h\.gemini") -or (Test-Path "$h\.codebuddy") -or (Test-Path "$h\.claude") -or (Test-Path "$h\.agents") -or (Get-Command freebuff -ErrorAction SilentlyContinue) -or (Get-Command codebuddy -ErrorAction SilentlyContinue)
+        $agentsSkillDir = "$h\.agents\skills\saipen"
+        $agentsSkillRes = $null
         if (Test-Path "$h\.agents\skills") {
-          [void]$report.Add(@("~/.agents skills", (Copy-Skill "$h\.agents\skills\saipen")))
+          $agentsSkillRes = (Copy-Skill $agentsSkillDir)
+          [void]$report.Add(@("~/.agents skills", $agentsSkillRes))
         } elseif ($agentsSupported) {
           # Host supports generic skill root but hasn't created the directory yet -- create it.
-          [void]$report.Add(@("~/.agents skills", (Copy-Skill "$h\.agents\skills\saipen")))
+          $agentsSkillRes = (Copy-Skill $agentsSkillDir)
+          [void]$report.Add(@("~/.agents skills", $agentsSkillRes))
         } else { [void]$report.Add(@("~/.agents", "not installed - skip")) }
+        if ($agentsSkillRes -and ($agentsSkillRes -match '^(copied|already)')) {
+          [void]$report.Add(@("~/.agents provenance", (Write-RuntimeProvenance $adapter $agentsSkillDir)))
+        }
 
         # --- FreeBuff always-on activation backstop ---
         # FreeBuff loads generic ~/.agents/skills on demand; weak models need a small always-on gate.
@@ -591,7 +598,12 @@ foreach ($adapter in @($AdapterRegistry.adapters)) {
           Get-ChildItem $plugRoot -Directory | ForEach-Object {
             $skillsDir = Join-Path $_.FullName "skills"
             if (Test-Path $skillsDir) {
-              [void]$report.Add(@("Antigravity [$($_.Name)]", (Copy-Skill (Join-Path $skillsDir "saipen"))))
+              $agDst = (Join-Path $skillsDir "saipen")
+              $agRes = (Copy-Skill $agDst)
+              [void]$report.Add(@("Antigravity [$($_.Name)]", $agRes))
+              if ($agRes -match '^(copied|already)') {
+                [void]$report.Add(@("Antigravity [$($_.Name)] provenance", (Write-RuntimeProvenance $adapter $agDst)))
+              }
             }
           }
         }

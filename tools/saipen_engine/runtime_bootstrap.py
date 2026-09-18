@@ -468,6 +468,12 @@ def resolve_authority(
         marked = record.get("adapter_id")
         host = adapter_id or (marked if isinstance(marked, str) and marked.strip() else None)
         return source, (host.strip() if isinstance(host, str) else None)
+    if (root / "MANIFEST.json").is_file() and not (root / "saipen" / "MANIFEST.json").is_file():
+        raise CanonicalSourceUnproven(
+            f"installed runtime projection at {root} has no provenance marker "
+            f"({PROVENANCE_FILENAME}); run the canonical injector once to "
+            "establish provenance"
+        )
     source = prove_canonical_root(root)
     named = adapter_id.strip() if isinstance(adapter_id, str) else ""
     return source, (named or None)
