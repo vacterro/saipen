@@ -108,3 +108,39 @@ The defect classes this run measured are tickets, not prose:
 * **T-1377** -- four sessions repeated an identical refusal with nothing changed.
 * **T-1378** -- four sessions entered with `status`/`continue` rather than
   `start`, and three never changed the requested target bytes.
+
+## The run that closed T-1367 (2026-09-19)
+
+Installed generation `gen-sha256:69e9a839…` at source head `fc04b968`
+(smoke + full matrix) and `gen-sha256:752850b0…` at `e97d1c58` (the
+foreign-owner re-measure), 6/6 homes current both times, no worktree
+override. Nine conditions, nine sessions, **9/9 MEASURED** (`long_file_task`
+from the host session store, the known stdout-blind case), isolation PASS on
+every one, `main_minted` empty on every one, this repository byte-identical
+throughout. `matrix9-20260919.json` + console; verdicts:
+
+| condition | verdict | why |
+|---|---|---|
+| healthy | PASS | `saipen start` first, 0 protocol commands before productive, target changed |
+| safety_valve | PASS | refused correctly, MAIN untouched |
+| captured_unprojected | PASS | START-first, target changed (FAIL on 2026-09-17) |
+| already_done | PASS | START-first, target changed (FAIL on 2026-09-17) |
+| foreign_owner | PASS (re-measure) | see below |
+| operator_decision | FAIL | opened with `saipen recover --help`, target unchanged |
+| repairable_debt | FAIL | `src/app.py` bytes never changed |
+| windows_path_task | FAIL | entered with `continue`, but the authority VALUE was read from the real drive/backslash/spaces file and landed in the target (`target_carries_value: true`) |
+| long_file_task | FAIL | `INGRESS_TASK_MISMATCH` refused the paraphrase ONCE and handed the exact `--file` route (T-1380 working in the field); the model never took it |
+
+The one protocol-owned defect this matrix measured became a ticket:
+
+* **T-1397** -- `foreign_owner` executed the refusal's `then:
+  saipen start --receipt SRC-001` verbatim and received a byte-identical
+  refusal with the identical `then:`. Compliance was a fixed point. Fixed in
+  `e97d1c58`: a receipt-form ingress now gets a terminal refusal (no
+  re-handed command). Re-measured on the fixed generation
+  (`foreign-rerun-20260919.json`): one `WAIT_FOREIGN_OWNER`, `repeated=[]`,
+  nothing minted, isolation PASS.
+
+The four remaining FAILs are weak-model compliance (entry choice, a handed
+route not taken), with the machinery armed and pinned by controls; no
+protocol-owned repeat or loop remains in the measured set.
