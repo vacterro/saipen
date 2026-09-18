@@ -175,3 +175,4 @@
 - 18.09.26 23:29 [E-7212] [parent: E-7211] [T-1398] [agent: glm-5.3-max] [op: transition-a5f61d6a379f441e85e1b3fdb54a7206] RUN: transition to REVIEW
 - 18.09.26 23:29 [E-7213] [parent: E-7212] [T-1398] [agent: glm-5.3-max] [op: checkpoint-b1cd0fcbcb4f4142a2928696422df9ca] RUN: REVIEW: red proven -- pre-fix run of the new suite failed 3+9 (ingress_payload returned '2>&1', verdict INGRESS_TRANSPORT_UNSAFE named --hex transport, quoted '2>&1' admitted, mint STARTED); post-fix all green; scope exact: guard_events.py entry.py operations.py REGISTRY.json + new test 1 gate PASS conf: high
 - 18.09.26 23:29 [E-7214] [parent: E-7213] [T-1398] [agent: glm-5.3-max] [op: transition-76cd840e726b4a59b4d5e749fb8475eb] RUN: transition to SHIP
+- 18.09.26 23:29 [E-7215] [parent: E-7214] [T-1398] [agent: glm-5.3-max] [op: finish-3dd86b8f0eec4d48a0929082a9be0198] DEC: ticket finished via SAIOPS -- completion (from SHIP)
