@@ -762,6 +762,43 @@ class TargetBNoDeadEndTests(unittest.TestCase):
         detail = resolve_detail(root, ticket["fields"]["detail_ref"])
         self.assertTrue(detail["metadata"]["lossless"])
 
+    def test_claiming_a_row_that_crosses_the_cap_externalizes_instead_of_refusing(self):
+        """The frozen-seat dead end: the CLAIM payload is what crosses the cap.
+
+        A TODO row can be legal before the claim and oversized only AFTER the
+        claim appends `owner`/`claim_time`, so asserting the cap on the proposed
+        row made the ticket unclaimable AND unreachable by `ticket compact`
+        (under the cap before the claim, `compact_board` reports it already
+        within). The claim path must route through the same externalizing
+        projector every other lifecycle writer uses.
+        """
+        pad = "z" * 1120
+        line = f"- [ ] T-1315 [P1] {pad} | verify: proof\n"
+        root, _ = _legacy_project_line(
+            line, section="## TODO", phase="DONE", task="none", next_action="saipen continue"
+        )
+        before = parse_board((root / ".saipen" / "BOARD.md").read_text(encoding="utf-8"))
+        self.assertLessEqual(len(before["tickets"]["T-1315"]["raw"]), MAX_LIVE_RECORD_CHARS)
+
+        # RED CONTROL: the canonical repair cannot reach this row -- it is not
+        # oversized YET, so `ticket compact` refuses it. Without the fix the
+        # claim refuses too, and the seat is frozen with no way forward.
+        unreachable = compact_board(root, "T-1315", "test-agent")
+        self.assertFalse(unreachable.ok)
+        self.assertIn("already within", unreachable.message)
+
+        result = apply_claim(root, "T-1315", "test-agent")
+        self.assertTrue(result.ok, result.to_dict())
+
+        ticket = _ticket(root)
+        self.assertEqual(ticket["section"], "## DOING")
+        self.assertLessEqual(len(ticket["raw"]), MAX_LIVE_RECORD_CHARS)
+        self.assertEqual(ticket["fields"]["owner"], "test-agent")
+        self.assertTrue(ticket["fields"].get("detail_ref"))
+        detail = resolve_detail(root, ticket["fields"]["detail_ref"])
+        self.assertTrue(detail["metadata"]["lossless"])
+        self.assertIn(pad, detail["original_record"].decode("utf-8"))
+
     def test_blocking_an_oversized_todo_row_externalizes_instead_of_refusing(self):
         line = _legacy_line(verify=("proof " * 200)).replace("- [/]", "- [ ]", 1)
         root, _ = _legacy_project_line(

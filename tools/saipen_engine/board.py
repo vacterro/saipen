@@ -357,6 +357,71 @@ def parse_board(text: str) -> dict:
     return {"tickets": tickets, "headings": headings, "errors": errors}
 
 
+def board_record_digest(raw: str) -> str:
+    """Content-bound identity for ONE physical BOARD record.
+
+    A line NUMBER is not an identity: every repair that inserts, removes or
+    moves a row changes it, so an operator decision that named a line could be
+    aimed by a later edit at a row nobody chose. What a decision must name is
+    the record's bytes, so this is their digest. It hashes the STRIPPED record,
+    byte for byte the same way `retirement.board_record_digest` does, so a
+    digest written into recovery evidence means one thing everywhere.
+    """
+    return hashlib.sha256(str(raw).strip().encode("utf-8")).hexdigest()
+
+
+def duplicate_records(text: str, ticket_id: str) -> list[dict]:
+    """EVERY physical record claiming ``ticket_id``, in file order.
+
+    `parse_board` keeps the FIRST record for an id and reports the rest as
+    errors -- right for a reader, useless for a repair. Two records claim one
+    identity, the history references the id and not the row, and the record the
+    parser dropped is exactly the one that has no other name: an operator
+    deciding which record keeps the identity could not even point at them.
+
+    Each entry carries the content-bound digest, the section and the parsed
+    description, so a decision is about RECORDS rather than lines. The walk
+    mirrors `parse_board` (same `TICKET_RE`, same heading rules, same
+    `PIPE_SENTINEL` unescape) so the two views of one board cannot drift.
+    """
+    wanted = str(ticket_id or "").strip()
+    if not wanted:
+        return []
+    found: list[dict] = []
+    section = None
+    for line_no, line in enumerate(text.splitlines(), 1):
+        if line.startswith("## "):
+            section = line.strip()
+            continue
+        if not line.strip() or not line.lstrip().startswith("- ["):
+            continue
+        match = TICKET_RE.match(line.strip().replace("\\|", PIPE_SENTINEL))
+        if not match:
+            continue
+        checkbox, tid, rest = match.groups()
+        if tid != wanted:
+            continue
+        parts = [unescape_ticket_part(p.strip()) for p in rest.split(" | ")]
+        entries: dict = {}
+        for part in parts[1:]:
+            fm = re.match(r"^([a-z_]+):\s*(.*)$", part)
+            if fm and fm.group(1) in KNOWN_FIELDS:
+                entries[fm.group(1)] = fm.group(2)
+        found.append(
+            {
+                "id": tid,
+                "digest": board_record_digest(line),
+                "line_no": line_no,
+                "section": section,
+                "checkbox": checkbox,
+                "description": parts[0] if parts else "",
+                "fields": entries,
+                "raw": line,
+            }
+        )
+    return found
+
+
 # Reserved structural BOARD fields (T-1316 handoff): a field marker for one of
 # these embedded inside ANOTHER field's value is a pseudo-link -- prose trying
 # to borrow the authority of a structured field. Real incident: a ticket written

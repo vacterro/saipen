@@ -1,0 +1,11 @@
+test_dry_run_classifies_the_known_migration_as_repairable (tools.test_reconcile_legacy_output_field.LegacyOutputFieldMigrationTests.test_dry_run_classifies_the_known_migration_as_repairable) ... ok
+test_migration_is_idempotent (tools.test_reconcile_legacy_output_field.LegacyOutputFieldMigrationTests.test_migration_is_idempotent) ... ok
+test_real_migration_removes_only_the_field_and_preserves_bytes (tools.test_reconcile_legacy_output_field.LegacyOutputFieldMigrationTests.test_real_migration_removes_only_the_field_and_preserves_bytes) ... ok
+test_strict_readers_keep_refusing_the_field (tools.test_reconcile_legacy_output_field.LegacyOutputFieldMigrationTests.test_strict_readers_keep_refusing_the_field)
+checkpoint/write paths validate strictly; no silent auto-strip. ... ok
+test_unknown_non_allowlisted_field_still_refuses (tools.test_reconcile_legacy_output_field.LegacyOutputFieldMigrationTests.test_unknown_non_allowlisted_field_still_refuses) ... ok
+
+----------------------------------------------------------------------
+Ran 5 tests in 0.222s
+
+OK

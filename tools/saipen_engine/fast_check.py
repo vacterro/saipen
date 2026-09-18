@@ -478,8 +478,9 @@ def defect_delta(before: list[str], after: list[str]) -> tuple[list[str], list[s
     keep the project out of CLEAN, but it is not a reason to refuse a repair
     that strictly improves the surface it owns. Measured on _SAITULS, 17.09.26:
     the STATE repair was refused for a duplicate BOARD id, two stale blockers
-    and three malformed LOG lines it had never proposed to touch, so the one
-    repair that could have made the next repair runnable never ran.
+    and FIVE malformed LOG lines (four events that had lost their leading `- `
+    and one free-text record) it had never proposed to touch, so the one repair
+    that could have made the next repair runnable never ran.
     """
     seen = {}
     for error in before:

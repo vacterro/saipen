@@ -1,0 +1,13 @@
+test_A_healthy_project_unknown_targetless_tool_is_refused (tools.test_unknown_tool_fail_closed.UnknownToolFailClosedAcceptance.test_A_healthy_project_unknown_targetless_tool_is_refused) ... ok
+test_B_healthy_project_namespaced_unknown_targetless_tool_is_refused (tools.test_unknown_tool_fail_closed.UnknownToolFailClosedAcceptance.test_B_healthy_project_namespaced_unknown_targetless_tool_is_refused) ... ok
+test_C_kiro_control_bash_process_is_never_an_admitted_targetless_unknown (tools.test_unknown_tool_fail_closed.UnknownToolFailClosedAcceptance.test_C_kiro_control_bash_process_is_never_an_admitted_targetless_unknown) ... ok
+test_D_unknown_tool_with_an_ordinary_path_gains_no_read_trust (tools.test_unknown_tool_fail_closed.UnknownToolFailClosedAcceptance.test_D_unknown_tool_with_an_ordinary_path_gains_no_read_trust) ... ok
+test_E_unknown_tool_cannot_touch_protected_canonical_state (tools.test_unknown_tool_fail_closed.UnknownToolFailClosedAcceptance.test_E_unknown_tool_cannot_touch_protected_canonical_state) ... ok
+test_F_non_saipen_project_remains_non_interfering (tools.test_unknown_tool_fail_closed.UnknownToolFailClosedAcceptance.test_F_non_saipen_project_remains_non_interfering) ... ok
+test_G_exact_canonical_recovery_stays_usable_under_debt (tools.test_unknown_tool_fail_closed.UnknownToolFailClosedAcceptance.test_G_exact_canonical_recovery_stays_usable_under_debt) ... ok
+test_H_diagnostic_reads_survive_broken_state (tools.test_unknown_tool_fail_closed.UnknownToolFailClosedAcceptance.test_H_diagnostic_reads_survive_broken_state) ... ok
+
+----------------------------------------------------------------------
+Ran 8 tests in 2.009s
+
+OK

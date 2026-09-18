@@ -1,0 +1,23 @@
+test_a_genuine_conflict_names_the_command_that_settles_it (tools.test_recovery_noop_targets.NoopTargetRecoveryTests.test_a_genuine_conflict_names_the_command_that_settles_it)
+TERMINATION ORACLE: never advertise a command that reproduces this. ... ok
+test_a_no_op_beside_a_third_state_does_not_shield_it (tools.test_recovery_noop_targets.NoopTargetRecoveryTests.test_a_no_op_beside_a_third_state_does_not_shield_it)
+The transparency must not swallow the refusal next to it. ... ok
+test_a_no_op_changes_neither_verdict_nor_writes (tools.test_recovery_noop_targets.NoopTargetRecoveryTests.test_a_no_op_changes_neither_verdict_nor_writes)
+Inserting one anywhere is invisible to the outcome. ... ok
+test_a_plan_of_nothing_but_no_ops_settles (tools.test_recovery_noop_targets.NoopTargetRecoveryTests.test_a_plan_of_nothing_but_no_ops_settles) ... ok
+test_a_real_out_of_order_materialization_still_refuses (tools.test_recovery_noop_targets.NoopTargetRecoveryTests.test_a_real_out_of_order_materialization_still_refuses)
+Deferral is not amnesty: a LATER effective write still refuses. ... ok
+test_a_second_recovery_is_stable_and_names_a_route (tools.test_recovery_noop_targets.NoopTargetRecoveryTests.test_a_second_recovery_is_stable_and_names_a_route)
+Settled is settled, and the gate that follows is not a dead end. ... ok
+test_a_third_state_still_refuses_and_names_its_target (tools.test_recovery_noop_targets.NoopTargetRecoveryTests.test_a_third_state_still_refuses_and_names_its_target) ... ok
+test_an_empty_frontier_is_not_reported_as_index_minus_one (tools.test_recovery_noop_targets.NoopTargetRecoveryTests.test_an_empty_frontier_is_not_reported_as_index_minus_one)
+A message a reader cannot act on is not a message. ... ok
+test_the_predicate_names_only_a_no_op (tools.test_recovery_noop_targets.NoopTargetRecoveryTests.test_the_predicate_names_only_a_no_op)
+Guard the fixture: an ordinary target is not transparent. ... ok
+test_the_verdict_does_not_move_with_the_no_ops_position (tools.test_recovery_noop_targets.NoopTargetRecoveryTests.test_the_verdict_does_not_move_with_the_no_ops_position)
+The whole defect in one assertion. ... ok
+
+----------------------------------------------------------------------
+Ran 10 tests in 0.439s
+
+OK

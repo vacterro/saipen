@@ -933,13 +933,13 @@ _RESIDUE_EVIDENCE = (
 #: survivor is a judgement about which piece of work is real. Naming the choice
 #: is the whole obligation -- recovery liveness allows one exact operator
 #: decision, never a dead end and never a guess dressed as a repair.
-_RESIDUE_DECISIONS = (
-    (
-        "duplicate ticket ID",
+_RESIDUE_DECISIONS = (    ("duplicate ticket ID",
         "two BOARD records claim the same ticket id. Decide which record keeps "
-        "the id and give the other one a free id, then re-run `saipen recover`; "
-        "no repair may choose for you, because the history references the id "
-        "and not the row",
+        "the id; no repair may choose for you, because the history references "
+        "the id and not the row. SAIPEN itself executes the repair once you "
+        "decide -- the exact `saipen recover --resolve-duplicate-id` command "
+        "for each choice is in `duplicate_id_decision.choices`, and no operator "
+        "is ever asked to edit BOARD.md",
     ),
 )
 
@@ -974,6 +974,118 @@ def _residue_decision(residue: list[str]) -> str | None:
         if any(marker in item for item in residue):
             return question
     return None
+
+
+def duplicate_id_findings(board_text: str) -> list[dict]:
+    """Every duplicated ticket id on this BOARD, with BOTH records named.
+
+    The engine is right not to guess between two records claiming one identity:
+    the history references the id, not the row, so which record is the real
+    work is a judgement only the operator can make. But the operator may not be
+    asked to edit `BOARD.md`, and the old answer did exactly that -- a prose
+    question plus "give the other one a free id", with the addressing left as
+    an exercise. This is the addressable half: each record's digest, section and
+    description, so the decision can be CARRIED by a canonical command and
+    executed by the engine.
+
+    Line numbers are reported for orientation and are never authority: the
+    digest is what a repair binds to, because lines move.
+    """
+    from .board import duplicate_records
+
+    ids: list[str] = []
+    errors: list[str] = []
+    for error in parse_board(board_text)["errors"]:
+        if "duplicate ticket ID" not in error:
+            continue
+        errors.append(error)
+        match = re.search(r"duplicate ticket ID (T-\d+)", error)
+        if match and match.group(1) not in ids:
+            ids.append(match.group(1))
+    findings: list[dict] = []
+    for tid in ids:
+        records = duplicate_records(board_text, tid)
+        findings.append(
+            {
+                "ticket": tid,
+                "records": [
+                    {
+                        "digest": record["digest"],
+                        "section": record["section"],
+                        "line": record["line_no"],
+                        "checkbox": record["checkbox"],
+                        "description": str(record["description"])[:200],
+                    }
+                    for record in records
+                ],
+                "errors": [e for e in errors if f" {tid}" in e],
+            }
+        )
+    return findings
+
+
+def duplicate_id_decision(finding: dict) -> dict:
+    """The ONE bounded choice a duplicated ticket id leaves an operator.
+
+    `choices` carries one EXACT command per candidate survivor, built from the
+    records' own digests. Neither is privileged: printing one of them as "the"
+    route would be the engine picking a survivor, which is the one thing this
+    repair may never do. The command an operator (or a session acting on those
+    words) runs IS the decision; nothing is written before it.
+
+    The new id is NOT one of the choices. Numbering is bookkeeping the
+    allocator owns -- `next_ticket_id` derives the next unused id from
+    structured BOARD and LOG records -- and asking a human for it is how a
+    recovery verb ends up with a hand-typed id that collides with live work.
+    """
+    ticket = finding["ticket"]
+    records = finding["records"]
+    choices = [
+        (
+            f"saipen recover --resolve-duplicate-id {ticket} "
+            f"--keep {record['digest']} --reassign {other['digest']}"
+        )
+        for record in records
+        for other in records
+        if record is not other
+    ]
+    return {
+        "ticket": ticket,
+        "records": records,
+        "choice_grammar": (
+            "saipen recover --resolve-duplicate-id <T-###> --keep <keep-digest> "
+            "--reassign <reassign-digest>"
+        ),
+        "choices": choices,
+        "allocator": (
+            "the operator decides WHICH record owns the historical identity; "
+            "SAIPEN assigns the non-surviving record the next unused ticket id"
+        ),
+        "question": (
+            f"two BOARD records claim {ticket}. Decide which record keeps the id: "
+            "the history references the id and not the row, so no repair may "
+            "choose for you. Run the exact `saipen recover "
+            "--resolve-duplicate-id` command for that choice"
+        ),
+    }
+
+
+def _duplicate_decision_fields(board_text: str) -> dict:
+    """The decision payload a recover surface must carry, or nothing.
+
+    `operator_decision` (prose) is not a carrier: a refusal that only describes
+    the choice leaves the operator to edit a protected file. Every surface that
+    refuses over a duplicate id -- the pre-approval check, the commit path and
+    the residual-defect report -- therefore adds the SAME structured decision,
+    built by the same function, so no path can show one shape and hide another.
+    """
+    findings = duplicate_id_findings(board_text)
+    if not findings:
+        return {}
+    return {
+        "duplicate_id_decision": duplicate_id_decision(findings[0]),
+        "duplicate_id_decisions": [duplicate_id_decision(f) for f in findings],
+    }
 
 
 def _residue_evidence(residue: list[str]) -> str:
@@ -1971,6 +2083,10 @@ def reconcile_protocol_state(
             if "duplicate ticket ID" in error
         ]
         if _unaddressable:
+            # The decision is CARRIED, not merely described (T-1382): the
+            # operator chooses a record by digest and the engine executes the
+            # repair, so `OPERATOR_DECISION_REQUIRED` never means "please edit
+            # BOARD.md".
             return {
                 "ok": False,
                 "code": "OPERATOR_DECISION_REQUIRED",
@@ -1983,6 +2099,7 @@ def reconcile_protocol_state(
                 "changed": {"board": board_drifts, "state": state_repairs},
                 "strict_state_error": strict_state_error or None,
                 "dry_run": dry_run,
+                **_duplicate_decision_fields(board_text),
                 **_blocked_recovery_fields(
                     terminal_disposition="OPERATOR_DECISION_REQUIRED",
                     evidence_reference=".saipen/BOARD.md",
@@ -2121,6 +2238,11 @@ def reconcile_protocol_state(
                     ),
                     "canonical_next_command": _residue_route(residue, board),
                     "operator_decision": _residue_decision(residue),
+                    # A duplicate id is the residual class whose decision must be
+                    # CARRIED even on this path: a board whose ONLY defect is a
+                    # duplicated identity has no drift to plan, so it lands here,
+                    # and a prose question here is the same dead end as before.
+                    **_duplicate_decision_fields(board_text),
                 },
                 project_root,
             )
@@ -2238,6 +2360,7 @@ def reconcile_protocol_state(
                 "changed": {"board": board_drifts, "state": state_repairs},
                 "strict_state_error": strict_state_error or None,
                 "dry_run": dry_run,
+                **_duplicate_decision_fields(board_text),
                 **_blocked_recovery_fields(
                     terminal_disposition="OPERATOR_DECISION_REQUIRED",
                     evidence_reference=".saipen/BOARD.md",
@@ -2430,6 +2553,381 @@ def reconcile_protocol_state(
             "event": f"E-{event}",
             "agent": agent,
             "strict_state_error": strict_state_error or None,
+            "dry_run": False,
+        },
+        project_root,
+    )
+
+
+#: Where a duplicate-id repair keeps the exact BOARD bytes the operator's
+#: decision was made against. Permanent, like every other recovery copy: the
+#: operator answered a question about THESE bytes, so losing them would leave
+#: the decision unauditable.
+DUPLICATE_ID_EVIDENCE_ROOT = ".saipen/recovery/board-duplicate-id"
+
+
+def resolve_duplicate_id(
+    root: Path | str,
+    agent: str,
+    ticket_id: str,
+    keep_digest: str,
+    reassign_digest: str,
+    *,
+    dry_run: bool = False,
+) -> dict:
+    """Execute an operator's duplicate-id decision, canonically and atomically.
+
+    T-1382. Two BOARD records claiming one ticket id are a genuine judgement
+    call: the history references the id and not the row, so no engine may pick
+    a survivor. Until now the engine said exactly that and stopped -- `recover`
+    returned `OPERATOR_DECISION_REQUIRED` with a prose question, and the only
+    way to answer it was to edit `.saipen/BOARD.md`, a protected file the guard
+    correctly refuses to let anyone write. The recovery contract is "one exact
+    operator decision unlocks a finite executable canonical repair path"; this
+    is that path, and `OPERATOR_DECISION_REQUIRED` must never again mean
+    "please edit BOARD.md".
+
+    The decision arrives as TWO content-bound digests, never as line numbers:
+
+      ``keep_digest``     the record that keeps the historical identity
+      ``reassign_digest`` the record that gives it up
+
+    Binding both is what makes a STALE decision refusable. Naming only a
+    survivor would leave "the other record" to be whatever the board happened
+    to hold when the repair ran -- the unaddressable-record problem one layer
+    up. A digest that does not match a record of this id means the operator
+    decided about bytes that are no longer those bytes: refuse, write nothing.
+
+    What the repair does, once the decision is real:
+
+      * renames the identity TOKEN of the non-surviving record and nothing
+        else. References to the duplicated id elsewhere in the file keep the
+        survivor: a canonical rule cannot attribute them to a row that never
+        owned the identity, and inventing that provenance is exactly the fraud
+        the audit contract exists to catch;
+      * takes the new id from `next_ticket_id` over structured BOARD records
+        and the COMPLETE LOG history, never from the operator -- numbering is
+        bookkeeping the allocator owns, and a hand-typed id is how a repair
+        collides with live work;
+      * writes one DEC naming who decided what, and preserves the exact BOARD
+        bytes it replaced as recovery evidence;
+      * commits LOG + BOARD + STATE + evidence as ONE journaled plan, so a
+        crash after PREPARE converges through the ordinary replay and replaying
+        this same decision cannot rename a second record.
+    """
+    project_root = Path(root)
+    ticket_id = str(ticket_id or "").strip()
+    keep_digest = str(keep_digest or "").strip().lower()
+    reassign_digest = str(reassign_digest or "").strip().lower()
+    if not re.fullmatch(r"T-\d+", ticket_id or ""):
+        return {
+            "ok": False,
+            "code": "VALIDATION_FAILED",
+            "detail": f"duplicate-id decision needs a board ticket id, got {ticket_id!r}",
+        }
+    if not re.fullmatch(r"[0-9a-f]{64}", keep_digest) or not re.fullmatch(
+        r"[0-9a-f]{64}", reassign_digest
+    ):
+        return {
+            "ok": False,
+            "code": "VALIDATION_FAILED",
+            "detail": (
+                "a duplicate-id decision is carried by the 64-hex record digests "
+                "printed by `saipen recover` (--keep and --reassign); a line "
+                "number is not a record identity and is refused"
+            ),
+        }
+    if keep_digest == reassign_digest:
+        return {
+            "ok": False,
+            "code": "VALIDATION_FAILED",
+            "detail": (
+                "--keep and --reassign name the same record, so the decision "
+                "does not say which record gives the id up"
+            ),
+        }
+
+    try:
+        from .board import board_record_digest, duplicate_records
+        from .fast_check import defect_delta, validate_texts
+        from .operations import (
+            REPAIR_OBSERVABLE,
+            _docs_preconditions,
+            _event_line,
+            _identity,
+            _log_targets,
+            _read,
+            _target,
+            next_ticket_id,
+            uuid4_hex,
+        )
+        from .plan import apply_plan, build_plan
+        from .state import patch_state
+    except ImportError as exc:  # pragma: no cover - import graph is static
+        return {"ok": False, "code": "VALIDATION_FAILED", "detail": str(exc)}
+
+    try:
+        docs, state, _board, log_tail = _read(project_root, observe=REPAIR_OBSERVABLE)
+    except Exception as exc:  # CheckpointError / HomeDeadError / OSError
+        return {
+            "ok": False,
+            "code": getattr(exc, "code", "VALIDATION_FAILED"),
+            "detail": str(exc),
+        }
+
+    board_text = docs["board"].text_norm
+    records = duplicate_records(board_text, ticket_id)
+    current = {record["digest"]: record for record in records}
+    stale = {
+        "ok": False,
+        "code": "STALE_DUPLICATE_ID_DECISION",
+        "detail": (
+            f"the decision does not name the current duplicate records of "
+            f"{ticket_id}: the BOARD no longer holds a record with "
+            + (
+                "the record to keep"
+                if keep_digest not in current
+                else "the record to reassign"
+            )
+            + ". Re-run `saipen recover` and answer the decision it prints now; "
+            "nothing was written"
+        ),
+        "ticket": ticket_id,
+        "current_records": [
+            {
+                "digest": record["digest"],
+                "section": record["section"],
+                "line": record["line_no"],
+                "description": str(record["description"])[:200],
+            }
+            for record in records
+        ],
+        "dry_run": dry_run,
+    }
+    if len(records) < 2:
+        return {
+            **stale,
+            "detail": (
+                f"{ticket_id} is not duplicated on this BOARD any more, so there "
+                "is nothing for this decision to resolve; nothing was written"
+            ),
+        }
+    if keep_digest not in current or reassign_digest not in current:
+        return stale
+
+    survivor = current[keep_digest]
+    loser = current[reassign_digest]
+
+    # The new id is derived, never supplied. `next_ticket_id` reads STRUCTURED
+    # BOARD ticket lines and the complete LOG history, so a prose mention of a
+    # number can neither poison the allocation nor be silently reused.
+    history = docs.get("_history")
+    new_id = "T-%d" % next_ticket_id(
+        board_text,
+        docs["log"].text_norm,
+        getattr(history, "max_ticket_id", None),
+    )
+    if new_id == ticket_id or new_id in {record["id"] for record in records}:
+        return {
+            "ok": False,
+            "code": "VALIDATION_FAILED",
+            "detail": (
+                f"the allocator produced {new_id}, which is already in use; "
+                "refusing to rename a record into an existing identity"
+            ),
+        }
+
+    # Bounded line surgery, addressed by DIGEST: the line is a locator, the
+    # digest is the authority. Recomputing it here is what makes a board that
+    # moved under the decision a refusal instead of a rename aimed elsewhere.
+    lines = board_text.splitlines(keepends=True)
+    index = loser["line_no"] - 1
+    if not (0 <= index < len(lines)) or board_record_digest(lines[index]) != loser["digest"]:
+        return {
+            **stale,
+            "detail": (
+                f"the record that must give up {ticket_id} is no longer at the "
+                "bytes the decision named; the BOARD moved after the decision was "
+                "issued, so it is refused rather than aimed at whatever now sits "
+                "there. Nothing was written"
+            ),
+        }
+    rewritten = re.sub(
+        r"^(\s*-\s*\[[ x/]\]\s*)" + re.escape(ticket_id) + r"\b",
+        lambda m: m.group(1) + new_id,
+        lines[index],
+        count=1,
+    )
+    if rewritten == lines[index]:
+        return {
+            "ok": False,
+            "code": "VALIDATION_FAILED",
+            "detail": (
+                f"could not address the identity token of {ticket_id} on the "
+                "record to rename; nothing was written"
+            ),
+        }
+    lines[index] = rewritten
+    new_board = "".join(lines)
+
+    now = dt.datetime.now(dt.timezone.utc)
+    stamp = now.strftime("%d.%m.%y %H:%M")
+    utc = now.replace(microsecond=0).isoformat().replace("+00:00", "Z")
+    op_id = "duplicate-id-" + uuid4_hex()
+    evidence = f"{DUPLICATE_ID_EVIDENCE_ROOT}/{op_id}/BOARD.md"
+
+    new_log_base = docs["log"].text_norm.rstrip("\n") + "\n"
+    tail, line = _event_line(
+        docs,
+        log_tail,
+        "DEC",
+        state.get("task") if str(state.get("task") or "").startswith("T-") else None,
+        agent,
+        (
+            f"duplicate BOARD ticket id {ticket_id} resolved by operator decision: "
+            f"record {keep_digest[:12]} ({survivor['section']}) keeps {ticket_id}; "
+            f"record {reassign_digest[:12]} ({loser['section']}) reassigned to "
+            f"{new_id}. Original BOARD bytes preserved at {evidence}"
+        ),
+        stamp,
+        op_id,
+        root=project_root,
+    )
+    new_log = new_log_base + line + "\n"
+    try:
+        new_state = patch_state(
+            docs["state"].text_norm,
+            {"last_event": tail, "updated": utc, "agent": agent},
+        )
+    except ValueError as exc:
+        return {"ok": False, "code": "VALIDATION_FAILED", "detail": str(exc)}
+
+    accepted = validate_texts(
+        new_state,
+        new_board,
+        new_log,
+        current_agent=agent,
+        sealed_events=history,
+    )
+    # VISIBILITY-EQUALIZED DELTA. `before` is measured on the SAME board the
+    # proposal writes, not on the loaded one, and that is deliberate. A record
+    # dropped for a duplicated key is invisible to every semantic check -- the
+    # parser keeps the first record and files the other as an error -- so the
+    # second record's own stale blocker, unresolvable `needs:` or bad checkbox
+    # could not be reported no matter what the repair did. Measuring the before
+    # side on the damaged key would therefore read "give this record a name" as
+    # "invented a stale blocker on it", while the bytes that carry the field are
+    # the very bytes that were already there (the repair changes one identity
+    # token and nothing else). Comparing two worlds whose only difference is
+    # what the repair is allowed to change is what keeps "inherited damage may
+    # survive a partial repair; newly introduced damage may not" exact -- and
+    # the newly visible findings are still reported, still inherited, and still
+    # keep the project out of CLEAN until their own owner repairs them.
+    before = validate_texts(
+        docs["state"].text_norm,
+        new_board,
+        docs["log"].text_norm,
+        current_agent=agent,
+        sealed_events=history,
+    )
+    introduced, inherited = defect_delta(before, accepted)
+    if introduced:
+        return {
+            "ok": False,
+            "code": "VALIDATION_FAILED",
+            "detail": (
+                "the duplicate-id repair would INTRODUCE defects the surface did "
+                "not have: " + "; ".join(introduced[:5])
+            ),
+            "introduced": introduced,
+            "inherited": inherited,
+            "dry_run": dry_run,
+        }
+
+    from .journal import hash_bytes, owned_target_path
+    from .plan import TargetPlan
+
+    original = (project_root / ".saipen" / "BOARD.md").read_bytes()
+    owned_target_path(project_root, evidence, kind="board recovery evidence")
+    targets = [
+        *_log_targets(docs, new_log),
+        _target(docs["board"], ".saipen/BOARD.md", "board", new_board),
+        _target(docs["state"], ".saipen/STATE.md", "state", new_state),
+        TargetPlan(evidence, "generic", original, "", hash_bytes(original)),
+    ]
+    preconditions = _docs_preconditions(docs, "state", "board", "log")
+    from . import fast_check as _fast_check
+
+    # What the post-write verifier MAY find afterwards without this write being
+    # blamed for it (T-1354's declared residue). Two names for one truth: the
+    # findings the live project already carried, plus the findings the delta
+    # just classified as inherited -- the latter are the ones the repair makes
+    # VISIBLE by giving the duplicate record a name. Declaring them is not a
+    # loophole here: the delta above has already established that the write
+    # introduces NOTHING (an introduced finding returns before this line), so
+    # the exempted set is exactly the damage that predates the repair and stays
+    # reported everywhere else.
+    inherited_findings = sorted(
+        {str(item) for item in (_fast_check.validate_project(project_root) or [])}
+        | {str(item) for item in inherited}
+    )
+    plan = build_plan(
+        "resolve_duplicate_id",
+        agent,
+        _identity(project_root),
+        {
+            "operation": "resolve_duplicate_id",
+            "ticket": ticket_id,
+            "kept": keep_digest,
+            "reassigned": reassign_digest,
+            "new_id": new_id,
+            "event": tail,
+            "preserved_board": evidence,
+        },
+        preconditions,
+        targets,
+        {"ok": True, "code": "DUPLICATE_ID_RESOLVED", "event_id": f"E-{tail}"},
+        op_id=op_id,
+        receipt_metadata=(
+            {"inherited_findings": inherited_findings} if inherited_findings else None
+        ),
+    )
+    if dry_run:
+        return {
+            "ok": True,
+            "code": "REPAIR_REQUIRED",
+            "ticket": ticket_id,
+            "kept": keep_digest,
+            "reassigned": reassign_digest,
+            "new_id": new_id,
+            "targets": [target.path for target in targets],
+            "planned_event": f"E-{tail}",
+            "detail": (
+                f"{ticket_id} keeps record {keep_digest[:12]}; record "
+                f"{reassign_digest[:12]} becomes {new_id}"
+            ),
+            "dry_run": True,
+        }
+    applied = apply_plan(project_root, plan)
+    if not applied.get("ok"):
+        return {
+            "ok": False,
+            "code": applied.get("code", "VALIDATION_FAILED"),
+            "detail": applied.get("message", ""),
+            "dry_run": False,
+        }
+    return _ensure_audit_contract(
+        {
+            "ok": True,
+            "code": "DUPLICATE_ID_RESOLVED",
+            "ticket": ticket_id,
+            "kept": keep_digest,
+            "reassigned": reassign_digest,
+            "new_id": new_id,
+            "targets": [target.path for target in targets],
+            "event": f"E-{tail}",
+            "agent": agent,
+            "evidence": evidence,
             "dry_run": False,
         },
         project_root,

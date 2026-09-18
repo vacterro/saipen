@@ -1,0 +1,21 @@
+test_dec_at_or_after_the_inversion_covers_it (tools.test_log_stamp_guard.AmnestyScopeTests.test_dec_at_or_after_the_inversion_covers_it) ... ok
+test_dec_does_not_cover_an_inversion_written_after_it (tools.test_log_stamp_guard.AmnestyScopeTests.test_dec_does_not_cover_an_inversion_written_after_it) ... ok
+test_run_line_quoting_the_phrase_grants_no_amnesty (tools.test_log_stamp_guard.AmnestyScopeTests.test_run_line_quoting_the_phrase_grants_no_amnesty) ... ok
+test_clock_slack_is_tolerated_in_both_directions (tools.test_log_stamp_guard.GuardTests.test_clock_slack_is_tolerated_in_both_directions)
+Two machines may disagree by minutes; that is skew, not a bad stamp. ... ok
+test_future_stamp_is_refused (tools.test_log_stamp_guard.GuardTests.test_future_stamp_is_refused) ... ok
+test_good_line_passes (tools.test_log_stamp_guard.GuardTests.test_good_line_passes) ... ok
+test_impossible_date_is_refused_with_the_field_order_hint (tools.test_log_stamp_guard.GuardTests.test_impossible_date_is_refused_with_the_field_order_hint) ... ok
+test_iso_order_stamp_is_refused_as_an_inversion (tools.test_log_stamp_guard.GuardTests.test_iso_order_stamp_is_refused_as_an_inversion)
+The real E-5171 shape: parses, but lands decades before the tail. ... ok
+test_later_line_in_the_same_call_is_checked_against_the_earlier_one (tools.test_log_stamp_guard.GuardTests.test_later_line_in_the_same_call_is_checked_against_the_earlier_one) ... ok
+test_non_event_lines_pass_through (tools.test_log_stamp_guard.GuardTests.test_non_event_lines_pass_through) ... ok
+test_impossible_date_reports_invalid (tools.test_log_stamp_guard.StampParsingTests.test_impossible_date_reports_invalid) ... ok
+test_iso_order_is_not_a_valid_day_first_stamp (tools.test_log_stamp_guard.StampParsingTests.test_iso_order_is_not_a_valid_day_first_stamp)
+`26.09.01` means day 26 of month 9; it is not 2026-09-01. ... ok
+test_non_event_line_is_not_a_stamp (tools.test_log_stamp_guard.StampParsingTests.test_non_event_line_is_not_a_stamp) ... ok
+
+----------------------------------------------------------------------
+Ran 13 tests in 0.001s
+
+OK

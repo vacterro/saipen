@@ -1,0 +1,46 @@
+test_forged_receipt_leaves_the_delta_unattributed_and_visible (tools.test_xpatch.ConvergenceAttribution.test_forged_receipt_leaves_the_delta_unattributed_and_visible) ... ok
+test_receipt_explained_delta_is_attributed (tools.test_xpatch.ConvergenceAttribution.test_receipt_explained_delta_is_attributed) ... ok
+test_target_repair_after_the_patch_stays_attributed (tools.test_xpatch.ConvergenceAttribution.test_target_repair_after_the_patch_stays_attributed) ... ok
+test_unexplained_delta_is_unattributed (tools.test_xpatch.ConvergenceAttribution.test_unexplained_delta_is_unattributed) ... ok
+test_applied_record_cannot_contradict_its_intent (tools.test_xpatch.CrashWindows.test_applied_record_cannot_contradict_its_intent) ... ok
+test_direct_intent_without_applied_still_explains_the_declared_bytes (tools.test_xpatch.CrashWindows.test_direct_intent_without_applied_still_explains_the_declared_bytes)
+The real crash window: a direct receipt is durable BEFORE the bytes ... ok
+test_disposition_without_apply_refuses (tools.test_xpatch.CrashWindows.test_disposition_without_apply_refuses) ... ok
+test_partial_disposition_refuses (tools.test_xpatch.CrashWindows.test_partial_disposition_refuses) ... ok
+test_payload_without_intent_is_ignored_not_claimed (tools.test_xpatch.CrashWindows.test_payload_without_intent_is_ignored_not_claimed) ... ok
+test_pending_proposal_claims_nothing (tools.test_xpatch.CrashWindows.test_pending_proposal_claims_nothing)
+Nobody wrote those bytes yet, so a proposal must not claim them -- ... ok
+test_creation_and_deletion_round_trip (tools.test_xpatch.CreationAndDeletion.test_creation_and_deletion_round_trip) ... ok
+test_creation_into_a_new_directory_works (tools.test_xpatch.CreationAndDeletion.test_creation_into_a_new_directory_works) ... ok
+test_deleting_a_missing_file_refuses (tools.test_xpatch.CreationAndDeletion.test_deleting_a_missing_file_refuses) ... ok
+test_no_op_mutation_refuses (tools.test_xpatch.CreationAndDeletion.test_no_op_mutation_refuses) ... ok
+test_direct_apply_refuses_and_names_the_gate (tools.test_xpatch.DirectModeStaysGated.test_direct_apply_refuses_and_names_the_gate) ... ok
+test_target_may_finish_a_stranded_direct_receipt (tools.test_xpatch.DirectModeStaysGated.test_target_may_finish_a_stranded_direct_receipt)
+Mode says who was SUPPOSED to write, not who MAY. A direct receipt ... ok
+test_double_apply_refuses (tools.test_xpatch.DriftAndCas.test_double_apply_refuses) ... ok
+test_partial_payload_writes_nothing (tools.test_xpatch.DriftAndCas.test_partial_payload_writes_nothing) ... ok
+test_revert_refuses_once_the_bytes_moved_on (tools.test_xpatch.DriftAndCas.test_revert_refuses_once_the_bytes_moved_on) ... ok
+test_revert_restores_only_its_own_bytes (tools.test_xpatch.DriftAndCas.test_revert_restores_only_its_own_bytes) ... ok
+test_target_modification_after_apply_reads_as_conflicting (tools.test_xpatch.DriftAndCas.test_target_modification_after_apply_reads_as_conflicting) ... ok
+test_target_moved_before_apply_yields_zero_writes (tools.test_xpatch.DriftAndCas.test_target_moved_before_apply_yields_zero_writes) ... ok
+test_foreign_target_lineage_does_not_bind (tools.test_xpatch.ForgedAndForeignReceipts.test_foreign_target_lineage_does_not_bind) ... ok
+test_forged_after_hash_is_caught_at_apply (tools.test_xpatch.ForgedAndForeignReceipts.test_forged_after_hash_is_caught_at_apply) ... ok
+test_receipt_id_must_match_its_directory (tools.test_xpatch.ForgedAndForeignReceipts.test_receipt_id_must_match_its_directory) ... ok
+test_stranger_directory_in_the_namespace_is_a_problem_not_a_claim (tools.test_xpatch.ForgedAndForeignReceipts.test_stranger_directory_in_the_namespace_is_a_problem_not_a_claim) ... ok
+test_unreadable_lineage_refuses_to_bind (tools.test_xpatch.ForgedAndForeignReceipts.test_unreadable_lineage_refuses_to_bind) ... ok
+test_verification_result_vocabulary_is_closed (tools.test_xpatch.ForgedAndForeignReceipts.test_verification_result_vocabulary_is_closed) ... ok
+test_apply_then_verify (tools.test_xpatch.HappyPath.test_apply_then_verify) ... ok
+test_repair_supersedes_the_foreign_after_state (tools.test_xpatch.HappyPath.test_repair_supersedes_the_foreign_after_state) ... ok
+test_ids_are_unique_and_sequential (tools.test_xpatch.IdAllocation.test_ids_are_unique_and_sequential) ... ok
+test_taken_id_is_never_reused (tools.test_xpatch.IdAllocation.test_taken_id_is_never_reused) ... ok
+test_backslash_paths_refuse (tools.test_xpatch.NamespaceBoundary.test_backslash_paths_refuse) ... ok
+test_path_escape_and_absolute_paths_refuse (tools.test_xpatch.NamespaceBoundary.test_path_escape_and_absolute_paths_refuse) ... ok
+test_target_protocol_state_is_never_writable (tools.test_xpatch.NamespaceBoundary.test_target_protocol_state_is_never_writable) ... ok
+test_intent_writes_zero_target_source_bytes (tools.test_xpatch.RecordingLeavesTargetSourceUntouched.test_intent_writes_zero_target_source_bytes) ... ok
+test_pending_proposal_claims_nothing_live (tools.test_xpatch.RecordingLeavesTargetSourceUntouched.test_pending_proposal_claims_nothing_live) ... ok
+test_a_receipt_never_claims_a_path_it_did_not_declare (tools.test_xpatch.UnrelatedDirtStaysUnattributed.test_a_receipt_never_claims_a_path_it_did_not_declare) ... ok
+
+----------------------------------------------------------------------
+Ran 38 tests in 0.790s
+
+OK

@@ -1,0 +1,38 @@
+test_control_a_exact_reported_incident (tools.test_project_root_session_binding.DetachedHandoffBindingTests.test_control_a_exact_reported_incident)
+CONTROL A: Detached staging directory + SAIPEN_PROJECT_ROOT. ... ok
+test_control_b_lineage_binding (tools.test_project_root_session_binding.DetachedHandoffBindingTests.test_control_b_lineage_binding)
+CONTROL B: Correct root + correct lineage PASS; ... ok
+test_control_c_stale_root (tools.test_project_root_session_binding.DetachedHandoffBindingTests.test_control_c_stale_root)
+CONTROL C: SAIPEN_PROJECT_ROOT points to deleted/moved dir -> fails closed. ... ok
+test_control_d_foreign_git_staging_cwd (tools.test_project_root_session_binding.DetachedHandoffBindingTests.test_control_d_foreign_git_staging_cwd)
+CONTROL D: Staging dir inside foreign Git adopts intended project or fails. ... ok
+test_control_e_ordinary_invocation_unchanged (tools.test_project_root_session_binding.DetachedHandoffBindingTests.test_control_e_ordinary_invocation_unchanged)
+CONTROL E: When no env binding present, standard Git resolution is identical. ... ok
+test_control_f_linked_worktree (tools.test_project_root_session_binding.DetachedHandoffBindingTests.test_control_f_linked_worktree)
+CONTROL F: Git worktree resolution works for Git repositories. ... ok
+test_control_g_non_git_project (tools.test_project_root_session_binding.DetachedHandoffBindingTests.test_control_g_non_git_project)
+CONTROL G: Non-git project resolves through nearest ancestor containing .saipen. ... ok
+test_control_h_portable_handoff (tools.test_project_root_session_binding.DetachedHandoffBindingTests.test_control_h_portable_handoff)
+CONTROL H: saipen brief contains project_lineage, no machine-local root. ... ok
+test_control_i_staging_path_payload (tools.test_project_root_session_binding.DetachedHandoffBindingTests.test_control_i_staging_path_payload)
+CONTROL I: Staging-path payload outside project_root doesn't become root. ... ok
+test_control_j_guard_integration (tools.test_project_root_session_binding.DetachedHandoffBindingTests.test_control_j_guard_integration)
+CONTROL J: Admission check resolves intended project's state from detached cwd. ... ok
+test_control_k_activation_contract (tools.test_project_root_session_binding.DetachedHandoffBindingTests.test_control_k_activation_contract)
+CONTROL K: the ONE activation template carries the handoff/session ... ok
+test_control_l_no_disk_scanning (tools.test_project_root_session_binding.DetachedHandoffBindingTests.test_control_l_no_disk_scanning)
+CONTROL L: Two unrelated projects exist; detached staging refuses cleanly. ... ok
+test_milestone2_identities_distinct (tools.test_project_root_session_binding.DetachedHandoffBindingTests.test_milestone2_identities_distinct)
+Milestone 2: saipen_home != project_root != project_lineage. ... ok
+test_explicit_scan_is_read_only_and_non_saipen_is_non_interfering (tools.test_project_root_session_binding.FleetRecoveryBindingTests.test_explicit_scan_is_read_only_and_non_saipen_is_non_interfering) ... ok
+test_healthy_repairable_and_ambiguous_are_distinct_and_read_only (tools.test_project_root_session_binding.FleetRecoveryBindingTests.test_healthy_repairable_and_ambiguous_are_distinct_and_read_only) ... ok
+test_public_fleet_scan_and_unbound_preflight_are_read_only (tools.test_project_root_session_binding.FleetRecoveryBindingTests.test_public_fleet_scan_and_unbound_preflight_are_read_only) ... ok
+test_recovery_keeps_product_work_and_requires_fresh_tool_payload (tools.test_project_root_session_binding.FleetRecoveryBindingTests.test_recovery_keeps_product_work_and_requires_fresh_tool_payload) ... ok
+test_representative_fleet_names_remain_isolated (tools.test_project_root_session_binding.FleetRecoveryBindingTests.test_representative_fleet_names_remain_isolated) ... ok
+test_unchanged_repair_condition_gets_one_attempt (tools.test_project_root_session_binding.FleetRecoveryBindingTests.test_unchanged_repair_condition_gets_one_attempt) ... ok
+test_wrong_lineage_and_foreign_cwd_never_select_other_project (tools.test_project_root_session_binding.FleetRecoveryBindingTests.test_wrong_lineage_and_foreign_cwd_never_select_other_project) ... ok
+
+----------------------------------------------------------------------
+Ran 20 tests in 1.856s
+
+OK

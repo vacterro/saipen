@@ -1879,6 +1879,14 @@ def _recover(project_root: Path, args: list[str], as_json: bool, dry_run: bool =
     approved_repair_id: str | None = None
     migrate_generation = False
     normalize_log_requested = False
+    # T-1382: the OPERATOR'S duplicate-id decision, carried as content-bound
+    # record digests. `--resolve-duplicate-id <T-###>` names the duplicated
+    # identity; `--keep` / `--reassign` name the two records by their digest.
+    # Line numbers are deliberately not an option: they move, and a decision
+    # that could be aimed at a different row is worse than no decision.
+    duplicate_id_ticket: str | None = None
+    keep_record_digest: str | None = None
+    reassign_record_digest: str | None = None
 
     def _refuse(detail: str) -> int:
         _emit({"ok": False, "code": "VALIDATION_FAILED", "detail": detail}, as_json)
@@ -1894,6 +1902,12 @@ def _recover(project_root: Path, args: list[str], as_json: bool, dry_run: bool =
     #   --adopt-legacy <T-###[,T-###...]>       Target E (legacy BOARD adoption)
     #   --attest-legacy-done <T-###[,T-###...]> legacy terminal completion
     #   resolve-blocker "<decision>"            Target C (operator-gated blocker)
+    #   --resolve-duplicate-id <T-###>
+    #       --keep <digest> --reassign <digest> T-1382 (duplicate identity)
+    #
+    # `--resolve-duplicate-id` carries the OPERATOR'S answer to a duplicated
+    # BOARD identity: which of the two records keeps the ticket id, named by the
+    # record's own digest. It is a targeted repair and combines with nothing.
     #
     # `--attest-legacy-done` is the operator's answer to a `legacy-done-review`
     # refusal: a `## DONE` record older than this project's closure contract,
@@ -1957,6 +1971,39 @@ def _recover(project_root: Path, args: list[str], as_json: bool, dry_run: bool =
             # supplied, so nobody can name a line the LOG does not carry.
             normalize_log_requested = True
             index += 1
+            continue
+        if token == "--resolve-duplicate-id":
+            if index + 1 >= len(args):
+                return _refuse(
+                    "usage: recover --resolve-duplicate-id <T-###> "
+                    "--keep <digest> --reassign <digest> (missing ticket id)"
+                )
+            candidate = args[index + 1].strip()
+            if re.fullmatch(r"T-\d+", candidate) is None:
+                return _refuse(
+                    "recover --resolve-duplicate-id requires the duplicated "
+                    "ticket id (T-###), exactly as `saipen recover` printed it"
+                )
+            duplicate_id_ticket = candidate
+            index += 2
+            continue
+        if token in ("--keep", "--reassign"):
+            if index + 1 >= len(args):
+                return _refuse(
+                    f"usage: recover {token} <64-hex record digest> (missing digest)"
+                )
+            candidate = args[index + 1].strip().lower()
+            if re.fullmatch(r"[0-9a-f]{64}", candidate) is None:
+                return _refuse(
+                    f"recover {token} takes the 64-hex record digest printed by "
+                    "`saipen recover`, not a line number -- a line number moves "
+                    "and cannot address a record"
+                )
+            if token == "--keep":
+                keep_record_digest = candidate
+            else:
+                reassign_record_digest = candidate
+            index += 2
             continue
         if token == "--apply-approved-repair":
             if index + 1 >= len(args):
@@ -2046,6 +2093,7 @@ def _recover(project_root: Path, args: list[str], as_json: bool, dry_run: bool =
             f"unknown recover argument(s) {args!r}; usage: recover "
             '[--adopt-legacy <T-###[,T-###...]>] '
             '[--attest-legacy-done <T-###[,T-###...]>] '
+            "[--resolve-duplicate-id <T-###> --keep <digest> --reassign <digest>] "
             "[--migrate-generation] "
             "[normalize-log] "
             "[resolve-blocker <decision>] "
@@ -2053,6 +2101,52 @@ def _recover(project_root: Path, args: list[str], as_json: bool, dry_run: bool =
             "[--apply-approved-repair <repair_id>] "
             "| recover inspect <op_id> | recover resolve <op_id> [--resolution <mode>]"
         )
+    if keep_record_digest or reassign_record_digest:
+        if duplicate_id_ticket is None:
+            return _refuse(
+                "--keep/--reassign carry a duplicate-id DECISION and mean nothing "
+                "without `--resolve-duplicate-id <T-###>`; the exact command for "
+                "each choice is printed as `duplicate_id_decision.choices`"
+            )
+    if duplicate_id_ticket is not None:
+        # T-1382: a targeted repair, not a journal replay, and it combines with
+        # nothing -- exactly like `normalize-log` and `--migrate-generation`.
+        # It runs BEFORE the plan machinery for the same reason: the operator's
+        # decision is about the bytes on disk now, and the plan machinery would
+        # need the very duplicate it resolves to be addressable first.
+        if (
+            keep_record_digest is None
+            or reassign_record_digest is None
+            or normalize_log_requested
+            or migrate_generation
+            or adopt_legacy
+            or attest_legacy_done
+            or resolve_blocker
+            or resolve_next_action
+            or approved_repair_id
+        ):
+            return _refuse(
+                "recover --resolve-duplicate-id takes exactly "
+                "`--keep <digest> --reassign <digest>` and combines with nothing "
+                "else; run the other decisions in their own pass"
+            )
+        if not dry_run and _negotiate_capability(project_root) == "read-only":
+            return _capability_refusal(as_json)
+        _ho = _ensure_handover(project_root, as_json, dry_run)
+        if _ho is not None:
+            return _ho
+        from saipen_engine.reconcile import resolve_duplicate_id
+
+        resolved = resolve_duplicate_id(
+            project_root,
+            _agent_for(project_root),
+            duplicate_id_ticket,
+            keep_record_digest,
+            reassign_record_digest,
+            dry_run=dry_run,
+        )
+        _emit(resolved, as_json)
+        return 0 if resolved.get("ok") else 1
     if normalize_log_requested:
         # T-1356: a targeted repair, not a journal replay. It runs before the
         # pending-operation machinery for the same reason `--migrate-generation`

@@ -1373,15 +1373,23 @@ class UnboundHistoryDeadlockTests(unittest.TestCase):
 # T-1382 specimen B: four damaged surfaces, each repair behind another's parse
 # ---------------------------------------------------------------------------
 
-#: _SAITULS, 17.09.26. STATE carries a retired output-only field; three LOG
-#: lines lost their leading `- ` and one is free text with no event tag at all;
-#: BOARD has a duplicate ticket id and two DONE rows still carrying `blocker:`.
+#: _SAITULS, 17.09.26. Counted from the fixture below, not from memory: STATE
+#: carries a retired output-only field; FIVE LOG lines are illegal -- FOUR
+#: events (E-1300, E-1301, E-1302, E-1303) lost their leading `- ` and one is
+#: free text with no event tag at all; BOARD has a duplicate ticket id and two
+#: DONE rows still carrying `blocker:`.
 #:
 #: Each repair needed another damaged surface to already parse: reconcile's
 #: proposal validation tripped over the LOG and BOARD damage it does not own,
 #: `normalize-log` needed a strict STATE it could not have, and the BOARD rows
 #: were unaddressable through a duplicated id. Individual repairs existed; no
 #: EXECUTABLE ORDERING did.
+#:
+#: T-1382 closes the last of those with a decision that is CARRIED rather than
+#: described: the operator names the record that keeps the id by its digest and
+#: one canonical verb executes the repair. No path in this file writes
+#: `BOARD.md` by hand -- if the GREEN route ever needs to, the fixture is
+#: telling the truth about the engine again.
 _SAITULS_STATE = (
     "---\n"
     "phase: BUILD\n"
@@ -1458,23 +1466,57 @@ class CyclicRepairDependencyTests(unittest.TestCase):
         except json.JSONDecodeError:
             return {"_raw": (run.stdout + run.stderr)[:400]}
 
-    def resolve_the_duplicate_id(self) -> None:
-        board = self.root / ".saipen" / "BOARD.md"
-        board.write_text(
-            board.read_text(encoding="utf-8").replace(
-                "- [x] T-176 [P1] the duplicate id", "- [x] T-901 [P1] the duplicate id"
-            ),
-            encoding="utf-8",
+    def board_path(self) -> Path:
+        return self.root / ".saipen" / "BOARD.md"
+
+    def decision(self) -> dict:
+        """The structured choice `recover` prints for the duplicated id."""
+        answer = self.cli("recover")
+        self.assertEqual(answer.get("code"), "OPERATOR_DECISION_REQUIRED", answer)
+        decision = answer.get("duplicate_id_decision") or {}
+        self.assertTrue(decision.get("records"), answer)
+        return decision
+
+    def decide(self, keep_section: str = "## DOING") -> str:
+        """The OPERATOR'S answer, as the exact canonical command carrying it.
+
+        This is the whole point of T-1382: the decision is expressed by running
+        one canonical verb, never by editing `BOARD.md`. Which record keeps the
+        id is the operator's to choose (here: the live `## DOING` one); the new
+        id is the allocator's, and is not part of the command.
+        """
+        decision = self.decision()
+        keep = next(r for r in decision["records"] if r["section"] == keep_section)
+        other = next(r for r in decision["records"] if r["digest"] != keep["digest"])
+        return (
+            f"saipen recover --resolve-duplicate-id {decision['ticket']} "
+            f"--keep {keep['digest']} --reassign {other['digest']}"
         )
 
-    def drive(self, limit: int = 8) -> list[str]:
-        """Follow the route the protocol names, and record what it named."""
+    def drive(self, decide: str | None = None, limit: int = 10) -> list[str]:
+        """Follow the route the protocol names, and record what it named.
+
+        An OPERATOR decision is answered by the exact canonical command that
+        carries it, once; without one, the trail stops at the decision instead
+        of inventing an answer for the operator.
+        """
         trail: list[str] = []
+        answered = False
         for _ in range(limit):
             answer = self.cli("recover")
             if answer.get("ok") and answer.get("code") == "CLEAN":
                 trail.append("CLEAN")
                 return trail
+            if answer.get("duplicate_id_decision"):
+                if decide is None or answered:
+                    trail.append(str(answer.get("code")))
+                    return trail
+                answered = True
+                applied = self.cli(*decide.split()[1:])
+                trail.append("DECISION:" + str(applied.get("code")))
+                if not applied.get("ok"):
+                    return trail
+                continue
             route = answer.get("canonical_next_command")
             if not route:
                 trail.append(str(answer.get("code")))
@@ -1497,18 +1539,118 @@ class CyclicRepairDependencyTests(unittest.TestCase):
         self.assertIn("not a legal event line", reported)
 
     def test_an_unaddressable_record_is_one_decision_not_a_dead_end(self):
+        """The refusal must carry the choice, not describe it and stop."""
         answer = self.cli("recover")
         self.assertEqual(answer.get("code"), "OPERATOR_DECISION_REQUIRED", answer)
         self.assertIn("duplicate ticket ID", answer.get("detail", ""))
-        decision = answer.get("operator_decision") or ""
-        self.assertIn("which record keeps the id", decision)
+        prose = answer.get("operator_decision") or ""
+        self.assertIn("which record keeps the id", prose)
+        # Prose is not a carrier. Both records are named, by CONTENT, with an
+        # exact bounded command for each way the operator can answer.
+        decision = answer["duplicate_id_decision"]
+        self.assertEqual(decision["ticket"], "T-176")
+        self.assertEqual(
+            sorted(r["section"] for r in decision["records"]), ["## DOING", "## DONE"]
+        )
+        digests = {r["digest"] for r in decision["records"]}
+        self.assertEqual(len(digests), 2, decision)
+        for choice in decision["choices"]:
+            self.assertTrue(
+                choice.startswith("saipen recover --resolve-duplicate-id T-176"), choice
+            )
+            self.assertEqual({word for word in choice.split() if len(word) == 64}, digests)
+        # The id the non-survivor will get is NOT one of the choices: numbering
+        # is the allocator's, and asking a human for it is how a recovery verb
+        # ends up with a hand-typed id.
+        self.assertIn("next unused ticket id", decision["allocator"])
+        self.assertNotIn("T-178", " ".join(decision["choices"]))
         # Asked once, and the same question every time until it is answered --
         # never a different one, and never silently repaired for the operator.
-        self.assertEqual(self.cli("recover").get("operator_decision"), decision)
+        self.assertEqual(self.cli("recover").get("operator_decision"), prose)
+        self.assertEqual(self.cli("recover").get("duplicate_id_decision"), decision)
+
+    def test_the_decision_is_reachable_from_the_verbs_a_session_reaches_for(self):
+        """A stranded session looks at `continue`; the choice must be there."""
+        own = self.decision()
+        carried = self.cli("continue")
+        self.assertEqual(carried.get("code"), "OPERATOR_DECISION_REQUIRED", carried)
+        self.assertEqual(carried.get("duplicate_id_decision"), own)
+
+    def test_no_ordinary_mutator_writes_through_the_duplicate(self):
+        """Observation is not authority, and a duplicate is not a back door.
+
+        The recovery surface may LOOK at this damaged board through its declared
+        observer; nothing may WRITE through it, and no verb may resolve the
+        ambiguous identity by quietly editing whichever record the parser
+        happened to keep -- that was the original unaddressable-record problem.
+        """
+        before = {
+            name: (self.root / ".saipen" / name).read_bytes()
+            for name in ("STATE.md", "BOARD.md", "LOG.md")
+        }
+        for verb in (
+            ["transition", "BUILD"],
+            ["claim", "T-176"],
+            ["checkpoint", "RUN", "T-176", "probe"],
+            ["start", "a new task"],
+        ):
+            with self.subTest(verb=verb[:2]):
+                answer = self.cli(*verb)
+                self.assertFalse(answer.get("ok"), answer)
+                self.assertNotEqual(answer.get("code"), "DUPLICATE_ID_RESOLVED")
+        for name, raw in before.items():
+            self.assertEqual((self.root / ".saipen" / name).read_bytes(), raw, name)
+
+    def test_nothing_is_written_before_the_operator_decides(self):
+        """Observation is not authority to mutate."""
+        before = {
+            name: (self.root / ".saipen" / name).read_bytes()
+            for name in ("STATE.md", "BOARD.md", "LOG.md")
+        }
+        decision = self.decide()
+        self.assertTrue(decision)
+        for _ in range(2):
+            self.assertEqual(self.cli("recover").get("code"), "OPERATOR_DECISION_REQUIRED")
+        for name, raw in before.items():
+            self.assertEqual((self.root / ".saipen" / name).read_bytes(), raw, name)
+
+    def test_a_wrong_or_stale_decision_is_refused_with_zero_writes(self):
+        decision = self.decision()
+        digests = [r["digest"] for r in decision["records"]]
+        before = self.board_path().read_bytes()
+        attempts = (
+            # a decision about bytes this board never held
+            ["--resolve-duplicate-id", "T-176", "--keep", "a" * 64, "--reassign", digests[1]],
+            # a decision that does not say who gives the id up
+            ["--resolve-duplicate-id", "T-176", "--keep", digests[0], "--reassign", digests[0]],
+            # a decision about a ticket that is not duplicated at all
+            ["--resolve-duplicate-id", "T-177", "--keep", digests[0], "--reassign", digests[1]],
+            # a LINE NUMBER is not a record identity
+            ["--resolve-duplicate-id", "T-176", "--keep", "5", "--reassign", digests[1]],
+        )
+        for argv in attempts:
+            with self.subTest(argv=argv[:2]):
+                answer = self.cli("recover", *argv)
+                self.assertFalse(answer.get("ok"), answer)
+                self.assertIn(
+                    answer.get("code"),
+                    ("STALE_DUPLICATE_ID_DECISION", "VALIDATION_FAILED"),
+                    answer,
+                )
+                self.assertEqual(self.board_path().read_bytes(), before)
 
     def test_one_decision_makes_the_whole_sequence_executable(self):
-        self.resolve_the_duplicate_id()
-        self.assertEqual(self.drive()[-1], "CLEAN", self.cli("recover"))
+        """GREEN from the FIELD damage: one decision, ZERO canonical-file edits.
+
+        The previous version of this test renamed the duplicate with
+        `Path.write_text`, so it proved "one operator decision plus one manual
+        edit of a protected file". This one drives the same damaged fixture
+        through canonical verbs only, which is what the contract claims.
+        """
+        command = self.decide()
+        trail = self.drive(decide=command)
+        self.assertEqual(trail[-1], "CLEAN", (trail, self.cli("recover")))
+        self.assertEqual(trail.count("DECISION:DUPLICATE_ID_RESOLVED"), 1, trail)
 
         self.assertEqual(self.cli("validate").get("code"), "VALID")
         self.assertTrue(self.cli("status").get("ok"))
@@ -1522,10 +1664,53 @@ class CyclicRepairDependencyTests(unittest.TestCase):
         self.assertNotIn("parked_work", state_text)
         board_text = (self.root / ".saipen" / "BOARD.md").read_text(encoding="utf-8")
         self.assertNotIn("blocker: STALE", board_text)
+        # Every event id in the ledger is unique: the repair's own DEC must not
+        # reissue an id that a bulletless line already claimed.
+        ids = [
+            line.split("[E-", 1)[1].split("]", 1)[0]
+            for line in log_text.splitlines()
+            if "[E-" in line
+        ]
+        self.assertEqual(len(ids), len(set(ids)), ids)
+
+    def test_the_decision_renames_one_record_and_touches_nothing_else(self):
+        """The historical id stays with the survivor; every other byte stays put.
+
+        The rename is bounded on purpose: an id this engine mints for a
+        non-survivor must not be written into references whose provenance the
+        history cannot attribute -- that would invent history, not repair it.
+        """
+        command = self.decide(keep_section="## DOING")
+        decided = self.cli(*command.split()[1:])
+        self.assertEqual(decided.get("code"), "DUPLICATE_ID_RESOLVED", decided)
+        new_id = decided["new_id"]
+        after = self.board_path().read_text(encoding="utf-8").splitlines()
+        original = _SAITULS_BOARD.splitlines()
+        # The survivor keeps its identity AND its bytes, verbatim.
+        self.assertIn(original[1], after)
+        # The record that gave the id up differs in its identity token only.
+        self.assertIn(original[4].replace("T-176", new_id, 1), after)
+        self.assertNotIn(original[4], after)
+        # The new id came from the allocator over structured records, not from
+        # the operator, and was unused before.
+        self.assertNotIn(new_id, _SAITULS_BOARD)
+        self.assertGreater(int(new_id.split("-")[1]), 177)
+        # ONE record still claims T-176, and it is the one that kept it.
+        claimants = [ln for ln in after if ln.startswith("- [") and " T-176 " in ln]
+        self.assertEqual(len(claimants), 1, after)
+        self.assertEqual(claimants[0], original[1])
+
+    def test_the_decision_cannot_be_replayed(self):
+        """A second rename would be a second identity invented from one choice."""
+        command = self.decide()
+        self.assertTrue(self.cli(*command.split()[1:]).get("ok"))
+        board_after = self.board_path().read_bytes()
+        replay = self.cli(*command.split()[1:])
+        self.assertEqual(replay.get("code"), "STALE_DUPLICATE_ID_DECISION", replay)
+        self.assertEqual(self.board_path().read_bytes(), board_after)
 
     def test_repair_is_idempotent_and_the_route_is_never_a_loop(self):
-        self.resolve_the_duplicate_id()
-        trail = self.drive()
+        trail = self.drive(decide=self.decide())
         self.assertEqual(trail[-1], "CLEAN", trail)
         # Nothing in the sequence was the same command twice in a row failing.
         self.assertNotIn("STALE_APPROVED_REPAIR", trail[:-1], trail)
@@ -1534,11 +1719,12 @@ class CyclicRepairDependencyTests(unittest.TestCase):
 
     def test_clean_is_a_claim_about_the_project_not_about_the_repair_set(self):
         """`recover` may not certify CLEAN over damage it does not own."""
-        self.resolve_the_duplicate_id()
         # Stop one repair short: apply the reconciliations, leave the LOG.
-        for _ in range(4):
+        for _ in range(5):
             answer = self.cli("recover")
             route = answer.get("canonical_next_command") or ""
+            if answer.get("duplicate_id_decision"):
+                route = self.decide()
             if "normalize-log" in route or not route:
                 break
             self.cli(*route.split()[1:])
@@ -1551,9 +1737,19 @@ class CyclicRepairDependencyTests(unittest.TestCase):
         )
 
     def test_the_original_bytes_of_every_repaired_surface_survive(self):
-        """Each repair preserves what IT replaced -- not a pristine snapshot."""
-        self.resolve_the_duplicate_id()
+        """Each repair preserves what IT replaced -- not a pristine snapshot.
+
+        The fixture's very first STATE bytes are deliberately NOT asserted here:
+        the operator's decision is itself a canonical write, so by the time the
+        STATE repair runs, "the bytes it replaced" are no longer the fixture's.
+        What must survive is what each repair actually replaced -- and for the
+        duplicate id that is the BOARD the decision was made against.
+        """
+        board_before = self.board_path().read_bytes()
+        command = self.decide()
+        self.assertTrue(self.cli(*command.split()[1:]).get("ok"))
         state_before = (self.root / ".saipen" / "STATE.md").read_bytes()
+        self.assertIn(b"parked_work", state_before)
         self.assertEqual(self.drive()[-1], "CLEAN")
         kept = [
             path.read_bytes()
@@ -1561,6 +1757,9 @@ class CyclicRepairDependencyTests(unittest.TestCase):
             if path.is_file()
         ]
         self.assertIn(state_before, kept, "the original STATE was not preserved")
+        # The duplicate-id decision was made about THESE bytes, so they are the
+        # ones the recovery evidence has to hold.
+        self.assertIn(board_before, kept, "the original BOARD was not preserved")
         # The damaged LOG lines are gone from the live ledger and recoverable
         # from the copy `normalize-log` took of the bytes it rewrote.
         damaged = b"\n17.09.26 00:01 [E-1300]"

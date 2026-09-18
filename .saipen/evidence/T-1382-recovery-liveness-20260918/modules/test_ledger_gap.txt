@@ -1,0 +1,27 @@
+test_a_dec_merely_discussing_one_does_not_grant_it (tools.test_ledger_gap.AmnestyConditions.test_a_dec_merely_discussing_one_does_not_grant_it)
+Anchoring: a sentence containing the marker is describing it. ... ok
+test_a_run_reporting_an_amnesty_does_not_grant_one (tools.test_ledger_gap.AmnestyConditions.test_a_run_reporting_an_amnesty_does_not_grant_one) ... ok
+test_an_amnesty_for_another_pair_covers_nothing (tools.test_ledger_gap.AmnestyConditions.test_an_amnesty_for_another_pair_covers_nothing) ... ok
+test_an_amnesty_granted_before_the_gap_covers_nothing (tools.test_ledger_gap.AmnestyConditions.test_an_amnesty_granted_before_the_gap_covers_nothing)
+Bounding: a decision cannot exempt a hole that did not exist yet. ... ok
+test_the_grant_map_carries_the_deciding_event_id (tools.test_ledger_gap.AmnestyConditions.test_the_grant_map_carries_the_deciding_event_id)
+A boolean cannot be bounded; that is how the class starts. ... ok
+test_a_named_gap_is_exempted_and_still_visible (tools.test_ledger_gap.AmnestyGrant.test_a_named_gap_is_exempted_and_still_visible)
+Unwedging is the point, and silence is not how it is done. ... ok
+test_an_exempted_project_can_still_be_mutated (tools.test_ledger_gap.AmnestyGrant.test_an_exempted_project_can_still_be_mutated)
+The wedge: with no escape, every SAIOPS mutation on that tree refused. ... ok
+test_one_amnesty_does_not_cover_a_second_gap (tools.test_ledger_gap.AmnestyGrant.test_one_amnesty_does_not_cover_a_second_gap) ... ok
+test_a_backwards_id_is_still_reported (tools.test_ledger_gap.GapDetection.test_a_backwards_id_is_still_reported) ... ok
+test_a_consecutive_chain_is_clean (tools.test_ledger_gap.GapDetection.test_a_consecutive_chain_is_clean) ... ok
+test_a_duplicate_is_still_reported (tools.test_ledger_gap.GapDetection.test_a_duplicate_is_still_reported) ... ok
+test_a_gap_is_reported (tools.test_ledger_gap.GapDetection.test_a_gap_is_reported)
+The measured regression: E-001 then E-005 returned no error at all. ... ok
+test_the_diagnostic_says_consecutive_not_monotonic (tools.test_ledger_gap.GapDetection.test_the_diagnostic_says_consecutive_not_monotonic)
+The old string claimed a contract the canonical validator owns. ... ok
+test_no_constant_answer_satisfies_this_class (tools.test_ledger_gap.RedControl.test_no_constant_answer_satisfies_this_class)
+Neither verdict can be hardcoded. ... ok
+
+----------------------------------------------------------------------
+Ran 14 tests in 0.003s
+
+OK

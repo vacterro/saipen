@@ -1,0 +1,23 @@
+test_a_checkpoint_quoting_the_marker_is_not (tools.test_narrative_authority.AnchoringTests.test_a_checkpoint_quoting_the_marker_is_not)
+The live shape: a SCOUT line discussing the marker while diagnosing it. ... ok
+test_a_free_note_mentioning_it_is_not (tools.test_narrative_authority.AnchoringTests.test_a_free_note_mentioning_it_is_not) ... ok
+test_the_canonical_record_is_authority (tools.test_narrative_authority.AnchoringTests.test_the_canonical_record_is_authority) ... ok
+test_this_docstring_would_not_activate_anything (tools.test_narrative_authority.AnchoringTests.test_this_docstring_would_not_activate_anything)
+The file explaining the rule must not be able to trigger the rule. ... ok
+test_a_grant_at_or_after_the_anomaly_does_cover_it (tools.test_narrative_authority.BoundingTests.test_a_grant_at_or_after_the_anomaly_does_cover_it) ... ok
+test_an_expired_grant_suppresses_nothing_later (tools.test_narrative_authority.BoundingTests.test_an_expired_grant_suppresses_nothing_later)
+The whole point: a July authorization must not cover September. ... ok
+test_authority_before_the_bound_is_excluded (tools.test_narrative_authority.BoundingTests.test_authority_before_the_bound_is_excluded) ... ok
+test_prose_mentions_outnumber_nothing_and_are_demoted (tools.test_narrative_authority.LiveJournalTests.test_prose_mentions_outnumber_nothing_and_are_demoted) ... ok
+test_an_empty_marker_grants_nothing (tools.test_narrative_authority.ScopeTests.test_an_empty_marker_grants_nothing) ... ok
+test_ids_are_returned_so_a_caller_can_bound_its_own_decision (tools.test_narrative_authority.ScopeTests.test_ids_are_returned_so_a_caller_can_bound_its_own_decision)
+A boolean cannot be scoped; that is how the class started. ... ok
+test_one_grant_does_not_cover_a_different_marker (tools.test_narrative_authority.ScopeTests.test_one_grant_does_not_cover_a_different_marker) ... ok
+test_a_run_does_not_grant_a_dec_authority (tools.test_narrative_authority.TaxonomyTests.test_a_run_does_not_grant_a_dec_authority) ... ok
+test_several_taxonomies_may_be_declared_explicitly (tools.test_narrative_authority.TaxonomyTests.test_several_taxonomies_may_be_declared_explicitly) ... ok
+test_the_declared_taxonomy_does (tools.test_narrative_authority.TaxonomyTests.test_the_declared_taxonomy_does) ... ok
+
+----------------------------------------------------------------------
+Ran 14 tests in 0.024s
+
+OK
