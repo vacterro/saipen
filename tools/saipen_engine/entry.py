@@ -264,7 +264,9 @@ def start_work(
         state, board, problem = _snapshot(root)
         preview = reconcile_protocol_state(root, actor, dry_run=True)
         seat = (
-            ownership.classify_active_ownership(state, board["tickets"], actor).status
+            ownership.classify_active_ownership(
+                state, board["tickets"], actor, root=root
+            ).status
             if state is not None and board is not None
             else None
         )
@@ -347,7 +349,9 @@ def start_work(
     # owner/STATE split this caller had just proposed to create.
     state, board, problem = _snapshot(root)
     if state is not None and board is not None:
-        seat = ownership.classify_active_ownership(state, board["tickets"], actor)
+        seat = ownership.classify_active_ownership(
+            state, board["tickets"], actor, root=root
+        )
         if seat.status == ownership.FOREIGN_LIVE:
             return {
                 "ok": False,
@@ -483,7 +487,7 @@ def start_work(
         )
 
     # 4. The seat.
-    seat = ownership.classify_active_ownership(state, tickets, actor)
+    seat = ownership.classify_active_ownership(state, tickets, actor, root=root)
     parked = None
     if seat.active_ticket == ticket and seat.status == ownership.SELF:
         phase = state.get("phase") if state.get("task") == ticket else "SCOUT"
