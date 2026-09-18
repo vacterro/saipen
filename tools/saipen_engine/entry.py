@@ -133,6 +133,41 @@ def _decision_wait(
 _MAX_SUPERSEDE_CHAIN = 64
 
 
+def _foreign_seat_route(
+    seat, *, receipt_form: bool, queue_id: str | None
+) -> tuple[str, str | None]:
+    """The route a live FOREIGN seat hands out must make progress (T-1397).
+
+    A plain-text ingress is told to resume by receipt -- real progress: the
+    request becomes durable and the resume form is exact. A receipt-form
+    ingress has ALREADY run that command; re-handing it makes compliance a
+    fixed point (the field measured a session execute the handed ``then:``
+    verbatim and receive a byte-identical refusal with the same ``then:``),
+    so that answer is terminal instead: the request is queued, the seat is
+    not taken over, and the caller stops rather than loops.
+    """
+    held = (
+        f"{seat.active_ticket} is live Work owned by {seat.board_owner!r} "
+        f"(claim_time {seat.claim_time}); it is not taken over."
+    )
+    if receipt_form:
+        return (
+            f"{held} The request is already queued as {queue_id}; running the same "
+            "resume again cannot advance it -- stop here and return after that "
+            "seat is free.",
+            None,
+        )
+    resume = (
+        f"saipen start --receipt {queue_id}"
+        if str(queue_id or "").startswith("SRC-")
+        else None
+    )
+    return (
+        f"{held} The request is durable as {queue_id} and starts when that seat is free.",
+        resume,
+    )
+
+
 def _terminal(root: Path, found: dict | None) -> bool:
     """Is this receipt's Work finished, so a new submission is a NEW action?"""
     if not found:
@@ -353,19 +388,20 @@ def start_work(
             state, board["tickets"], actor, root=root
         )
         if seat.status == ownership.FOREIGN_LIVE:
+            detail, resume = _foreign_seat_route(
+                seat, receipt_form=receipt is not None, queue_id=captured_receipt
+            )
             return {
                 "ok": False,
                 "code": WAIT_FOREIGN_OWNER,
-                "detail": f"{seat.active_ticket} is live Work owned by {seat.board_owner!r} "
-                f"(claim_time {seat.claim_time}); it is not taken over. The request is "
-                f"durable as {captured_receipt} and starts when that seat is free.",
+                "detail": detail,
                 **identity,
                 "receipt": captured_receipt,
                 "ticket": None,
                 "active_ticket": seat.active_ticket,
                 "owner": seat.board_owner,
                 "claim_time": seat.claim_time,
-                "resume_command": f"saipen start --receipt {captured_receipt}",
+                "resume_command": resume,
             }
 
     # Reconciliation, with the valve cleared by the new explicit task.
@@ -502,17 +538,18 @@ def start_work(
             "parked": None,
         }
     if seat.status == ownership.FOREIGN_LIVE:
+        detail, resume = _foreign_seat_route(
+            seat, receipt_form=receipt is not None, queue_id=captured_receipt or ticket
+        )
         return {
             "ok": False,
             "code": WAIT_FOREIGN_OWNER,
-            "detail": f"{seat.active_ticket} is live Work owned by {seat.board_owner!r} "
-            f"(claim_time {seat.claim_time}); it is not taken over. The request is "
-            f"queued as {ticket}.",
+            "detail": detail,
             **base,
             "active_ticket": seat.active_ticket,
             "owner": seat.board_owner,
             "claim_time": seat.claim_time,
-            "resume_command": f"saipen start --receipt {captured_receipt}",
+            "resume_command": resume,
         }
     if seat.status == ownership.INVALID:
         return wait_on_decision(
