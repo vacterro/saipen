@@ -33,7 +33,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from . import codec, intake, operator_task, ownership, pending_ingress
+from . import codec, guard_events, intake, operator_task, ownership, pending_ingress
 from .board import parse_board
 from .errors import EngineError
 from .journal import recovery_preflight, scan_pending
@@ -261,6 +261,20 @@ def start_work(
     if not isinstance(text, str) or not text.strip():
         return _refuse("VALIDATION_FAILED", USAGE, usage=USAGE)
     text = text.strip()
+    # T-1398: shell control operators are transport syntax, not user request
+    # content. A shell consumes an operator-only tail and passes no task at
+    # all, so those bytes cannot buy a receipt, a ticket or a resumed
+    # request, whatever carried them -- plain text, --hex, --file or a
+    # receipt body. Measured live: `saipen start --hex 323e2631` (utf-8 of
+    # "2>&1") minted a ticket titled `2>&1` with `user_explicit: true`.
+    if guard_events.shell_control_expression(text):
+        return _refuse(
+            "INGRESS_SHELL_CONTROL",
+            "the request text is shell control syntax, not a request: a shell "
+            "would consume it as transport and pass no task at all; name the "
+            "task in words",
+            canonical_next_command="saipen start '<the task, one line>'",
+        )
     # T-1372: a transport refusal names a command AND owes specific bytes. A
     # request that is not those bytes cannot enter here silently -- that is how
     # a model's paraphrase earned a receipt asserting the operator's own words.

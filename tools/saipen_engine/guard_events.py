@@ -951,6 +951,61 @@ def ingress_payload_literal(payload: str, quote: str = "'") -> bool:
     return payload.count("%") <= 1 and not payload.endswith("\\")
 
 
+#: Sequence/pipe operators. The word after one is a command name, never
+#: request content.
+_SHELL_SEQUENCE_OPS = frozenset({"|", "||", "&", "&&", ";"})
+#: `>`, `>>`, `2>`, `2>>` -- a redirection whose target is the NEXT token.
+_SHELL_REDIRECT_NEXT = re.compile(r"(?:\d+)?>{1,2}")
+#: `2>&1`, `>&2`, `1>&2` -- fd duplication, complete in one token.
+_SHELL_DUP_REDIRECT = re.compile(r"(?:\d+)?>{1,2}&\d+")
+#: A redirection with its target glued on: `>/dev/null`, `2>err.txt`, `&>all`.
+_SHELL_REDIRECT_GLUED = re.compile(r"(?:\d+|&)?>{1,2}&?\S+")
+#: Input redirection with the source glued on: `<file`, `0</dev/null`.
+_SHELL_INPUT_GLUED = re.compile(r"(?:\d+)?<{1,2}\S+")
+
+
+def shell_control_expression(payload: str) -> bool:
+    """Whether this text is ONLY shell control syntax, not a request.
+
+    T-1398. A shell never hands these bytes to the program: it consumes them
+    as transport and executes a bare command with no task argument. So a
+    payload made solely of redirect/pipe/sequence operators -- plus the words
+    those operators bind, a redirect target or a piped command name -- is not
+    user content under any spelling. Measured incident: `saipen start 2>&1`
+    extracted `2>&1` as the request, the refusal named
+    `saipen start --hex 323e2631`, and running that minted a real ticket
+    titled `2>&1` with `user_explicit: true`. Mixed content (`fix login |
+    cat`) keeps its operator bytes as ordinary characters inside a real
+    request; only an operator-ONLY payload is refused, because only that one
+    is pure transport.
+    """
+    tokens = str(payload or "").split()
+    if not tokens:
+        return False
+    expect: str | None = None  # "target" | "command" once an operator binds one
+    saw_operator = False
+    for tok in tokens:
+        if expect is not None:
+            expect = None  # the bound word completes the unit, whatever it is
+            continue
+        if tok in _SHELL_SEQUENCE_OPS:
+            saw_operator = True
+            expect = "command"
+            continue
+        if _SHELL_DUP_REDIRECT.fullmatch(tok):
+            saw_operator = True
+            continue
+        if tok == "<" or _SHELL_REDIRECT_NEXT.fullmatch(tok):
+            saw_operator = True
+            expect = "target"
+            continue
+        if _SHELL_REDIRECT_GLUED.fullmatch(tok) or _SHELL_INPUT_GLUED.fullmatch(tok):
+            saw_operator = True
+            continue
+        return False
+    return saw_operator
+
+
 def ingress_payload(command: str) -> str | None:
     """The request text an ingress line carries, exactly as typed.
 
@@ -971,6 +1026,12 @@ def ingress_payload(command: str) -> str | None:
         payload = payload[1:-1]
     payload = payload.strip()
     if not payload or len(payload) > MAX_INGRESS_REWRITE_CHARS or payload.startswith("-"):
+        return None
+    if shell_control_expression(payload):
+        # T-1398: the shell consumes an operator-only tail as transport and
+        # passes no task at all, so there is no request here to name, to
+        # refuse, or to carry -- and no transport obligation may be recorded
+        # over the operator's punctuation.
         return None
     return payload
 
@@ -1019,7 +1080,12 @@ def _ingress_payload_tokens(command: str) -> list[str] | None:
             if quoted or end < 0:
                 return None
             payload = text[index + 1 : end]
-            if not ingress_payload_literal(payload, char):
+            # T-1398: quoting operator-only bytes does not make them a
+            # request. The quoted form is the admitted grammar for real
+            # payloads; shell control syntax stays transport, quoted or not.
+            if not ingress_payload_literal(payload, char) or shell_control_expression(
+                payload
+            ):
                 return None
             if end + 1 < len(text) and text[end + 1] != " ":
                 return None

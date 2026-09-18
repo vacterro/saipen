@@ -4894,6 +4894,19 @@ def user_request(
         return _refuse("INCOMPLETE_TICKET", "user request text is required (semantic input)")
     if not re.fullmatch(r"P[0-9]", priority or ""):
         return _refuse("VALIDATION_FAILED", "priority " + repr(priority) + " is not P0-P9")
+    # T-1398: the same rule the start door carries. `user-request 2>&1` is a
+    # shell line the shell itself would consume as transport; the operator
+    # bytes are not a request under either ingress verb.
+    from . import guard_events as _guard_events
+
+    if _guard_events.shell_control_expression(text.strip()):
+        return _refuse(
+            "INGRESS_SHELL_CONTROL",
+            "the user request is shell control syntax, not a request: a shell "
+            "would consume it as transport and pass no task at all; name the "
+            "task in words",
+            canonical_next_command="saipen start '<the task, one line>'",
+        )
     needs = list(needs or [])
     # T-1372: the other ingress door. `start` and `user-request` are the two
     # verbs the guard refuses on transport, so closing only one of them would
