@@ -690,6 +690,20 @@ _BRAKE_ROUTES = {
 }
 
 
+#: T-1385. What a session refused PROTECTED_CANONICAL_NAMESPACE runs instead.
+#:
+#: The refusal knows one thing -- direct canonical mutation is forbidden -- and
+#: not which canonical operation the session meant, so any route that names an
+#: operation invents authority the guard does not have. The first route this
+#: ticket printed was `saipen checkpoint RUN T-### '<what happened>'`; typed
+#: verbatim, it appended a LOG event whose evidence was the placeholder. The
+#: router's own read has no such gap: it writes nothing, carries nothing to
+#: fill in, classifies as a canonical DIAGNOSTIC that needs no Fleet
+#: preparation, and answers from the state it runs in -- including the one
+#: where STATE.md cannot be parsed, which it diagnoses instead of writing over.
+CANONICAL_NAMESPACE_ROUTE = "saipen next --json"
+
+
 def protocol_snapshot(
     root: Path,
     actor: str | None = None,
@@ -1033,6 +1047,11 @@ def evaluate_admission(
     t0 = time.perf_counter()
 
     def result(**fields: object) -> dict:
+        if fields.get("code") == "PROTECTED_CANONICAL_NAMESPACE":
+            # T-1385: attached where the verdict is built, not at each site.
+            # Hand-placed per site, the hard-link refusal was missed and
+            # stayed routeless while its five siblings were routed.
+            fields.setdefault("canonical_next_command", CANONICAL_NAMESPACE_ROUTE)
         fields["duration_ms"] = round((time.perf_counter() - t0) * 1000.0, 3)
         return fields
 

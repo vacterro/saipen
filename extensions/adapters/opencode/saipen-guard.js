@@ -396,6 +396,40 @@ function parseGuardPayload(result) {
   }
 }
 
+// ONE shape for every guard refusal the model reads, whichever branch throws it.
+//
+// T-1385, measured from OpenCode's own session store: all eleven
+// PROTECTED_CANONICAL_NAMESPACE refusals the field recorded reached the model
+// as `the host tool did not execute` and nothing else. The terminal-code branch
+// threw its own shorter sentence before the branch that names the route and
+// the attempted command, so the route never arrived, and seven different
+// effects read as one refusal repeating.
+function guardRefusal(verdict, guardPayload, toolName, args) {
+  // T-1363: when the guard computed the exact command that carries this
+  // request, the refusal names it. A bounded machine fact, capped like
+  // every other one the adapter forwards -- never guard prose.
+  const route =
+    guardPayload && typeof guardPayload.canonical_next_command === "string"
+      ? guardPayload.canonical_next_command.slice(0, MAX_EVENT_BYTES)
+      : "";
+  // T-1380: a refusal that does not say WHAT it refused reads identically
+  // for every effect it stops, so two different commands blocked by one
+  // standing project state were measured as the same refusal repeating
+  // with nothing changed. The attempted command is a bounded machine fact
+  // the adapter already holds; naming it is what makes two refusals two.
+  const attempted =
+    args && typeof args.command === "string"
+      ? ` attempted: ${args.command.slice(0, 160)}`
+      : "";
+  return new Error(
+    `SAIPEN_GUARD_REFUSAL: ${verdict.code}: the saipen guard refused tool '${toolName}'; ` +
+      `the host tool did not execute` +
+      (verdict.diagnostic ? ` (${verdict.diagnostic})` : "") +
+      attempted +
+      (route ? ` next: ${route}` : ""),
+  );
+}
+
 // One bounded line of machine fact, or null. Control characters and newlines
 // are stripped so no carried value can smuggle a second system-ahead line, a
 // value over the bound is refused rather than truncated (an over-long root is
@@ -651,9 +685,7 @@ const SaipenGuard = async (context) => {
         "PROJECT_BINDING_INVALID", "PROJECT_LINEAGE_MISMATCH", "OWNERSHIP_CONFLICT",
       ]);
       if (verdict.block && terminalGuardCodes.has(verdict.code)) {
-        throw new Error(
-          `SAIPEN_GUARD_REFUSAL: ${verdict.code}: the host tool did not execute`,
-        );
+        throw guardRefusal(verdict, guardPayload, toolName, args);
       }
       // Fleet owns classification and the single canonical recovery attempt.
       // A repaired project NEVER receives this old tool payload: the hook
@@ -736,29 +768,7 @@ const SaipenGuard = async (context) => {
         }
       }
       if (verdict.block) {
-        // T-1363: when the guard computed the exact command that carries this
-        // request, the refusal names it. A bounded machine fact, capped like
-        // every other one the adapter forwards -- never guard prose.
-        const route =
-          guardPayload && typeof guardPayload.canonical_next_command === "string"
-            ? guardPayload.canonical_next_command.slice(0, MAX_EVENT_BYTES)
-            : "";
-        // T-1380: a refusal that does not say WHAT it refused reads identically
-        // for every effect it stops, so two different commands blocked by one
-        // standing project state were measured as the same refusal repeating
-        // with nothing changed. The attempted command is a bounded machine fact
-        // the adapter already holds; naming it is what makes two refusals two.
-        const attempted =
-          args && typeof args.command === "string"
-            ? ` attempted: ${args.command.slice(0, 160)}`
-            : "";
-        throw new Error(
-          `SAIPEN_GUARD_REFUSAL: ${verdict.code}: the saipen guard refused tool '${toolName}'; ` +
-            `the host tool did not execute` +
-            (verdict.diagnostic ? ` (${verdict.diagnostic})` : "") +
-            attempted +
-            (route ? ` next: ${route}` : ""),
-        );
+        throw guardRefusal(verdict, guardPayload, toolName, args);
       }
     },
   };
