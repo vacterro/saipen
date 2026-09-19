@@ -10,8 +10,10 @@ Closed mapping, three hard rules (SRC-028:R012 / T-1317 P0-1, P0-5, P0-8):
 1. Canonical-operation exemption is all-or-nothing. A shell command reads as
    ``saipen_op`` ONLY when the ENTIRE command line is one bounded SAIPEN
    invocation: closed verb vocabulary, bounded argument alphabet, and no shell
-   control syntax anywhere. ``saipen recover && rm -f .saipen/STATE.md`` is an
-   ordinary SHELL effect and is judged as one.
+   control syntax anywhere OUTSIDE quoted literal payload regions (T-1386) --
+   canonical command structure defines the effect, and payload bytes are
+   data, never shell syntax. ``saipen recover && rm -f .saipen/STATE.md`` is
+   an ordinary SHELL effect and is judged as one.
 2. Effect is decided from a target SET, never a first hit. Multi-file patches
    and both endpoints of a move/rename are carried explicitly for every
    consequential target.
@@ -1112,6 +1114,87 @@ def _ingress_payload_tokens(command: str) -> list[str] | None:
     return tokens
 
 
+def _quoted_payload_tokens(command: str) -> list[str] | None:
+    """Tokens of one canonical invocation carrying quoted payload regions (T-1386).
+
+    A canonical command's OWN grammar decides where its payload begins and what
+    those bytes ARE. ``saipen checkpoint RUN T-1 '<evidence>'`` is one bounded
+    SAIPEN invocation whose final argument is text; the quoted bytes are DATA,
+    so the generic shell preflight (``_PROTECTED_SHELL_SEGMENT``,
+    ``destructive_shell_effects``) never reads them. Before this owner a quoted
+    payload was admitted only for ``start``/``user-request``
+    (``_ingress_payload_tokens``), so a checkpoint whose evidence prose named
+    the protected namespace was judged an ordinary shell line and refused
+    PROTECTED_CANONICAL_NAMESPACE -- repeatedly, because nothing told the
+    session the prose itself was the trigger.
+
+    The exemption stays all-or-nothing and structural:
+
+    * every quoted region must survive ONE quoted host-shell argument
+      literally (``ingress_payload_literal``: no quote characters, no
+      expansion bytes in double quotes, no trailing backslash, no control
+      characters), because the HOST shell does the real parsing. More than one
+      region is admitted -- a session legitimately writes
+      ``... '<evidence>' --project-root "<path>"`` -- and each is checked
+      independently;
+    * every token OUTSIDE the quotes keeps the bounded canonical alphabet, so
+      ``;``, ``&&``, ``|``, ``>``, ``<``, ``$(`` or a second command line
+      cannot hide behind the quotes -- real shell syntax outside the payload
+      still disqualifies the whole line. The only exception is the closed
+      stderr redirect set (``2>&1`` and friends): the shell consumes those
+      before the program starts, so they transport nothing;
+    * at most ``_SAIPEN_MAX_TOKENS`` tokens and the verb must be shell
+      canonical;
+    * the quoted payload is opaque beyond literalness: unlike the ingress
+      grammar, operator-shaped text such as ``2>&1`` inside evidence is data,
+      not transport, so it is NOT refused for that reason;
+    * ingress verbs keep their own owner -- a quoted ``start``/``user-request``
+      payload that is operator-only stays transport (T-1398), never a request.
+    """
+    text = command.strip()
+    tokens: list[str] = []
+    quoted = False
+    index = 0
+    while index < len(text):
+        char = text[index]
+        if char == " ":
+            index += 1
+            continue
+        if char in "'\"":
+            end = text.find(char, index + 1)
+            if end < 0:
+                return None
+            payload = text[index + 1 : end]
+            if not ingress_payload_literal(payload, char):
+                return None
+            if end + 1 < len(text) and text[end + 1] != " ":
+                return None
+            tokens.append(payload)
+            quoted = True
+            index = end + 1
+            continue
+        end = index
+        while end < len(text) and text[end] != " ":
+            end += 1
+        word = text[index:end]
+        if word not in _PROBE_SAFE_REDIRECTIONS and not _SAIPEN_PATH_ARG_CHARS.issuperset(
+            word
+        ):
+            return None
+        tokens.append(word)
+        index = end
+    if (
+        not quoted
+        or len(tokens) < 3
+        or len(tokens) > _SAIPEN_MAX_TOKENS
+        or tokens[0] != "saipen"
+        or tokens[1] in command_effects.INGRESS_PAYLOAD_VERBS
+        or not command_effects.is_shell_canonical_verb(tokens[1])
+    ):
+        return None
+    return tokens
+
+
 def _windows_path_tokens(command: str) -> list[str] | None:
     """Tokens of a canonical line whose ONLY metacharacter is a literal `\`.
 
@@ -1151,15 +1234,26 @@ def _saipen_cli_tokens(command: str) -> list[str] | None:
     substitution, subshell, background job, quoting/escaping, glob or a second
     newline-separated command -- is an ordinary SHELL effect for the whole
     line, so `saipen recover && rm -f .saipen/STATE.md` can never inherit the
-    canonical recovery exemption. The one quoted form admitted is an INGRESS
-    request payload (`_ingress_payload_tokens`).
+    canonical recovery exemption. The quoted forms admitted are an INGRESS
+    request payload (`_ingress_payload_tokens`; operator-only text stays
+    transport, T-1398) and quoted literal payload regions of any other
+    shell-canonical verb (`_quoted_payload_tokens`, T-1386: `saipen checkpoint
+    RUN T-1 '<evidence>'` is judged by its own grammar, and its payload bytes
+    are data).
     """
     if not isinstance(command, str) or not command.strip():
         return None
     if any(char in _SHELL_SYNTAX_CHARS for char in command):
         tokens = _windows_path_tokens(command)
         if tokens is None:
-            return _ingress_payload_tokens(command)
+            ingress_tokens = _ingress_payload_tokens(command)
+            if ingress_tokens is not None:
+                return ingress_tokens
+            # T-1386: the canonical grammar decides where the payload begins;
+            # quoted payload bytes are data. Lines whose shell syntax sits
+            # OUTSIDE the quotes still fail this recognizer and stay ordinary
+            # shell effects.
+            return _quoted_payload_tokens(command)
     else:
         try:
             tokens = shlex.split(command)
