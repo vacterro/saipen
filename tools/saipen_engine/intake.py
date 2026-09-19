@@ -38,6 +38,7 @@ import os
 import re
 import shutil
 import stat
+from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -2131,8 +2132,139 @@ def _legacy_sensitive_source_gate(root: Path) -> dict:
 
 
 
+@dataclass(frozen=True)
+class _ReleaseScopeTrust:
+    """Trust verdict for one existing release-scope authority record."""
+
+    status: str
+    paths: frozenset[str] = frozenset()
+    code: str = ""
+    detail: str = ""
+
+
+@dataclass(frozen=True)
+class _ReleaseRelevance:
+    work: frozenset[str]
+    uncertain_work: str | None = None
+    scope: _ReleaseScopeTrust | None = None
+
+
+def _scope_trust(
+    status: str, code: str, detail: str, *, paths: set[str] | None = None
+) -> _ReleaseScopeTrust:
+    return _ReleaseScopeTrust(status, frozenset(paths or ()), code, detail)
+
+
+def _release_scope_trust(root: Path, work: str, source_identity: object) -> _ReleaseScopeTrust:
+    """Validate one scope through the writer's source/content identity contract.
+
+    Scope absence or corruption is uncertainty, never evidence of disjointness.
+    The status remains separate from paths so callers cannot collapse UNKNOWN
+    relevance into an empty set.
+    """
+    if not isinstance(work, str) or not re.fullmatch(r"T-\d+", work):
+        return _scope_trust(
+            "INVALID_SCOPE", "RECOVERY_CONFLICT", f"invalid release-scope Work id {work!r}"
+        )
+    from .release import ReleaseRefusal, _load_scope
+
+    live_head = getattr(source_identity, "source_head", None)
+    live_tree = getattr(source_identity, "source_tree_fingerprint", None)
+    try:
+        record = _load_scope(root, work, live_head, live_tree, continuation=False)
+    except ReleaseRefusal as exc:
+        status = {
+            "SOURCE_SCOPE_MISSING": "NO_SCOPE",
+            "STALE_PLAN": "STALE_SCOPE",
+            "PATH_ESCAPE": "FOREIGN_SCOPE",
+        }.get(exc.code, "INVALID_SCOPE")
+        return _scope_trust(status, exc.code, exc.detail)
+    except (OSError, ValueError, UnicodeError) as exc:
+        return _scope_trust(
+            "RECOVERY_CONFLICT",
+            f"cannot validate release scope for {work}: {exc}",
+        )
+    recorded_tree = record.get("source_tree_fingerprint")
+    if not isinstance(recorded_tree, str):
+        return _scope_trust(
+            "INVALID_SCOPE", "RECOVERY_CONFLICT", f"release scope for {work} lacks tree identity"
+        )
+    if recorded_tree != live_tree:
+        return _scope_trust(
+            "STALE_SCOPE",
+            "STALE_PLAN",
+            f"release scope tree identity for {work} differs from the live tree",
+        )
+    paths = set(record["paths"])
+    return _scope_trust(
+        "TRUSTED_SCOPE", "SOURCE_SCOPE_TRUSTED", f"release scope for {work} is current",
+        paths=paths,
+    )
+
+
+def _release_relevant_work(
+    root: Path, current_work: str | None, board_links: dict[str, set[str]]
+) -> _ReleaseRelevance:
+    """Work that may constrain publication of the CURRENT release artifact.
+
+    Closure is scoped to release-relevant Work: the current Work always, plus
+    any other Work whose recorded reviewed release scope overlaps the artifact
+    (transitively -- a contributing Work's own scope joins the artifact). With
+    no named release target the old repository-wide scope is preserved, which
+    keeps the fail-closed behaviour wherever a caller cannot name an artifact.
+    """
+    if not current_work:
+        return _ReleaseRelevance(frozenset(board_links))
+    try:
+        from freshness import compute_source_identity
+
+        source_identity = compute_source_identity(root)
+    except Exception as exc:
+        scope = _scope_trust(
+            "INVALID_SCOPE",
+            "VALIDATION_FAILED",
+            f"cannot compute source identity for release relevance: {exc}",
+        )
+        return _ReleaseRelevance(frozenset({current_work}), current_work, scope)
+
+    scopes: dict[str, _ReleaseScopeTrust] = {}
+    for work in sorted(set(board_links) | {current_work}):
+        if work != current_work and _work_is_done(root, work):
+            continue
+        scope = _release_scope_trust(root, work, source_identity)
+        if scope.status != "TRUSTED_SCOPE":
+            return _ReleaseRelevance(frozenset({current_work}), work, scope)
+        scopes[work] = scope
+
+    relevant = {current_work}
+    frontier = set(scopes[current_work].paths)
+    changed = True
+    while changed:
+        changed = False
+        for work, scope in sorted(scopes.items()):
+            if work in relevant:
+                continue
+            paths = set(scope.paths)
+            if paths and paths & frontier:
+                relevant.add(work)
+                frontier |= paths
+                changed = True
+    return _ReleaseRelevance(frozenset(relevant))
+
+
 def release_gate(root: Path | str, current_work: str | None = None) -> dict:
-    """Fail ship closed while authoritative active source scope is unresolved."""
+    """Fail ship closed while active source coverage that CAN affect this release
+    artifact is unresolved.
+
+    Two classes of gate are deliberately kept apart:
+
+    * REPOSITORY AUTHORITY / INTEGRITY -- credentials, receipt/index integrity
+      and unprojected authoritative receipts -- stays global: a corrupt or
+      unowned source must freeze every publication.
+    * WORK CLOSURE -- receipt coverage for a Work -- is scoped to Work whose
+      recorded release scope overlaps the artifact being released. An unrelated
+      parked Work no longer freezes an independent release.
+    """
     root = Path(root)
     credential_gate = _legacy_sensitive_source_gate(root)
     if not credential_gate["ok"]:
@@ -2141,8 +2273,21 @@ def release_gate(root: Path | str, current_work: str | None = None) -> dict:
         board_links = _board_source_links(root)
     except (OSError, ValueError) as exc:
         return {"ok": False, "code": "VALIDATION_FAILED", "detail": str(exc)}
+    try:
+        relevance = _release_relevant_work(root, current_work, board_links)
+    except (OSError, ValueError) as exc:
+        return {"ok": False, "code": "SOURCE_CORRUPTION", "detail": str(exc)}
+    if relevance.scope is not None:
+        return {
+            "ok": False,
+            "code": relevance.scope.code,
+            "detail": relevance.scope.detail,
+            "work": relevance.uncertain_work,
+            "scope_status": relevance.scope.status,
+        }
+    relevant = set(relevance.work)
     checked: set[str] = set()
-    for work in sorted(board_links):
+    for work in sorted(relevant):
         gate = work_closure_gate(root, work)
         if not gate.get("ok"):
             return gate
@@ -2161,27 +2306,35 @@ def release_gate(root: Path | str, current_work: str | None = None) -> dict:
         receipt_id = item["receipt"]
         if receipt_id in checked:
             continue
+        # Integrity is repository-global: a receipt whose body no longer matches
+        # its recorded digest fails closed for EVERY release, relevant or not.
         integrity = verify_integrity(root, receipt_id)
-        gate = (
-            integrity
-            if not integrity["ok"]
-            else {
-                "ok": coverage_complete(root, receipt_id),
-                "code": "SOURCE_COVERAGE_COMPLETE"
-                if coverage_complete(root, receipt_id)
-                else "SOURCE_UNRESOLVED",
-            }
-        )
-        if not gate.get("ok"):
-            return gate | {"receipt": receipt_id}
+        if not integrity["ok"]:
+            return integrity | {"receipt": receipt_id}
         linked = item.get("linked_work")
-        if linked and linked != current_work and not _work_is_done(root, linked):
+        if not linked:
+            # UNPROJECTED authoritative receipt: no Work owns its closure, so
+            # the repository answers for it -- fail closed.
+            if not coverage_complete(root, receipt_id):
+                return {"ok": False, "code": "SOURCE_UNRESOLVED", "receipt": receipt_id}
+            continue
+        if linked in relevant:
+            gate = work_closure_gate(root, linked)
+            if not gate.get("ok"):
+                return gate
+            checked.update(gate.get("receipts", []))
+            continue
+        if linked not in board_links:
+            # A projection naming no BOARD Work is untrustworthy: refuse
+            # regardless of release scope.
             return {
                 "ok": False,
                 "code": "SOURCE_WORK_ACTIVE",
                 "receipt": receipt_id,
                 "work": linked,
             }
+        # Projected to an unrelated Work: coverage is Work-scoped and does not
+        # gate this artifact. Integrity was proven above.
     return {
         "ok": True,
         "code": "SOURCE_RELEASE_COVERAGE_COMPLETE",

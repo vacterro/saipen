@@ -567,6 +567,272 @@ class SourceReceiptTests(unittest.TestCase):
         cold = context_cold(self.root).get("surface")
         self.assertNotIn("historical audit", cold)
 
+    # ------------------------------------------------------------------
+    # T-1399: release closure is scoped to release-relevant Work, while
+    # repository authority/integrity stays global.
+    # ------------------------------------------------------------------
+
+    def _release_board(self) -> None:
+        (self.root / ".saipen/BOARD.md").write_text(
+            "# Board\n"
+            "## DOING\n"
+            "- [/] T-001 DOING task\n"
+            "## TODO\n"
+            "## DONE\n"
+            "- [x] T-002 finished independent task | verify: independent\n"
+            "## BLOCKED\n"
+            "- [ ] T-003 parked unrelated task | verify: parked | "
+            "blocker: external owner | blocker_scope: ticket\n",
+            encoding="utf-8",
+        )
+
+    def _record_scope(self, ticket: str, paths: list[str]) -> None:
+        from freshness import compute_source_identity
+        from saipen_engine.operations import release_scope_hash
+        from saipen_engine.paths import project_identity, project_lineage_identity
+
+        identity = compute_source_identity(self.root)
+        hashes = {
+            path: release_scope_hash((self.root / path).read_bytes())
+            for path in paths
+        }
+
+        record = {
+            "schema_version": 2,
+            "ticket": ticket,
+            "project_identity": project_identity(self.root),
+            "project_lineage": project_lineage_identity(self.root),
+            "source_head": identity.source_head,
+            "source_tree_fingerprint": identity.source_tree_fingerprint,
+            "paths": hashes,
+            "recorded_at": "2026-09-19T00:00:00Z",
+            "op_id": "scope-fixture",
+        }
+        scope_dir = self.root / ".saipen/kitchen/release_scope"
+        scope_dir.mkdir(parents=True, exist_ok=True)
+        (scope_dir / f"{ticket}.json").write_text(
+            json.dumps(record, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+        )
+
+    def _scope_file(self, path: str, body: str = "reviewed bytes\n") -> None:
+        target = self.root / path
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_text(body, encoding="utf-8")
+
+    def _complete_work(self, body: str, work: str) -> str:
+        receipt = intake.capture(
+            self.root, body, source_kind="user_instruction", work=work
+        )["receipt"]
+        self.assertTrue(
+            intake.add_requirement(self.root, receipt, rid="R001", text="deliver")["ok"]
+        )
+        self.resolve(receipt)
+        return receipt
+
+    def _incomplete_work(self, body: str, work: str) -> str:
+        receipt = intake.capture(
+            self.root, body, source_kind="user_instruction", work=work
+        )["receipt"]
+        self.assertTrue(
+            intake.add_requirement(self.root, receipt, rid="R001", text="never done")["ok"]
+        )
+        return receipt
+
+    def test_t1399_primary_independent_work_releases_over_unrelated_parked_work(self) -> None:
+        self._release_board()
+        self._complete_work("independent verified source", "T-002")
+        parked = self._incomplete_work("unrelated parked source", "T-003")
+        self._scope_file("release.py")
+        self._scope_file("parked.py")
+        self._record_scope("T-002", ["release.py"])
+        self._record_scope("T-003", ["parked.py"])
+
+        gate = intake.release_gate(self.root, "T-002")
+
+        self.assertTrue(gate["ok"], gate)
+        self.assertEqual(gate["code"], "SOURCE_RELEASE_COVERAGE_COMPLETE", gate)
+        # The parked Work stays BLOCKED/unresolved and is never mutated.
+        self.assertEqual(
+            intake.coverage_summary(self.root, parked)["unresolved"], [f"{parked}:R001"]
+        )
+        self.assertIn("T-003", (self.root / ".saipen/BOARD.md").read_text(encoding="utf-8"))
+
+    def test_t1399_current_work_incomplete_still_blocks(self) -> None:
+        self._release_board()
+        self._incomplete_work("unfinished current source", "T-002")
+        self._scope_file("release.py")
+        self._record_scope("T-002", ["release.py"])
+
+        gate = intake.release_gate(self.root, "T-002")
+
+        self.assertFalse(gate["ok"], gate)
+        self.assertEqual(gate["code"], "SOURCE_UNRESOLVED", gate)
+
+    def test_t1399_relevant_overlapping_work_still_blocks(self) -> None:
+        self._release_board()
+        self._complete_work("independent verified source", "T-002")
+        self._incomplete_work("parked but relevant source", "T-003")
+        self._scope_file("shared.py")
+        self._record_scope("T-002", ["shared.py"])
+        self._record_scope("T-003", ["shared.py"])
+
+        gate = intake.release_gate(self.root, "T-002")
+
+        self.assertFalse(gate["ok"], gate)
+        self.assertEqual(gate["code"], "SOURCE_UNRESOLVED", gate)
+
+    def test_t1399_unprojected_authoritative_receipt_still_blocks(self) -> None:
+        self._release_board()
+        self._complete_work("independent verified source", "T-002")
+        orphan = self._incomplete_work("unprojected parked source", "T-003")
+        meta_path = self.root / f".saipen/intake/active/{orphan}.meta.json"
+        meta = json.loads(meta_path.read_text(encoding="utf-8"))
+        meta["linked_work"] = None
+        meta_path.write_text(json.dumps(meta, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+        index = intake._read_index(self.root)
+        index["active"][orphan]["linked_work"] = None
+        intake._write_index(self.root, index)
+        board = (self.root / ".saipen/BOARD.md").read_text(encoding="utf-8").replace(
+            f" | source_receipts: {orphan}", ""
+        )
+        (self.root / ".saipen/BOARD.md").write_text(board, encoding="utf-8")
+        self._scope_file("release.py")
+        self._record_scope("T-002", ["release.py"])
+
+        gate = intake.release_gate(self.root, "T-002")
+
+        self.assertFalse(gate["ok"], gate)
+        self.assertEqual(gate["code"], "SOURCE_UNRESOLVED", gate)
+
+    def test_t1399_corrupt_unrelated_receipt_still_blocks_globally(self) -> None:
+        self._release_board()
+        self._complete_work("independent verified source", "T-002")
+        parked = self._incomplete_work("unrelated parked source", "T-003")
+        self._scope_file("release.py")
+        self._scope_file("parked.py")
+        self._record_scope("T-002", ["release.py"])
+        self._record_scope("T-003", ["parked.py"])
+        (self.root / f".saipen/intake/active/{parked}.md").write_text(
+            "tampered", encoding="utf-8"
+        )
+
+        gate = intake.release_gate(self.root, "T-002")
+
+        self.assertFalse(gate["ok"], gate)
+        self.assertEqual(gate["code"], "SOURCE_CORRUPTION", gate)
+
+    def test_t1399_sensitive_unrelated_receipt_still_blocks_globally(self) -> None:
+        self._release_board()
+        self._complete_work("independent verified source", "T-002")
+        self._incomplete_work("api_key = sk-live-secret-value", "T-003")
+        self._scope_file("release.py")
+        self._scope_file("parked.py")
+        self._record_scope("T-002", ["release.py"])
+        self._record_scope("T-003", ["parked.py"])
+
+        gate = intake.release_gate(self.root, "T-002")
+
+        self.assertFalse(gate["ok"], gate)
+        self.assertEqual(gate["code"], "SOURCE_CREDENTIALS_UNSAFE", gate)
+
+    def test_t1399_scope_follows_repository_wide_when_no_target_is_named(self) -> None:
+        self._release_board()
+        self._complete_work("independent verified source", "T-002")
+        self._incomplete_work("unrelated parked source", "T-003")
+
+        gate = intake.release_gate(self.root)
+
+        self.assertFalse(gate["ok"], gate)
+        self.assertEqual(gate["code"], "SOURCE_UNRESOLVED", gate)
+
+    def test_t1405_missing_other_work_scope_fails_closed(self) -> None:
+        self._release_board()
+        self._complete_work("independent verified source", "T-002")
+        self._incomplete_work("unresolved source with unknown scope", "T-003")
+        self._scope_file("release.py")
+        self._record_scope("T-002", ["release.py"])
+
+        gate = intake.release_gate(self.root, "T-002")
+
+        self.assertFalse(gate["ok"], gate)
+        self.assertEqual(gate["code"], "SOURCE_SCOPE_MISSING", gate)
+        self.assertEqual(gate["work"], "T-003", gate)
+        self.assertEqual(gate["scope_status"], "NO_SCOPE", gate)
+
+    def test_t1405_stale_other_work_scope_fails_closed(self) -> None:
+        self._release_board()
+        self._complete_work("independent verified source", "T-002")
+        self._incomplete_work("unresolved source with stale scope", "T-003")
+        self._scope_file("release.py")
+        self._scope_file("parked.py")
+        self._scope_file("generation.txt", "before\n")
+        self._record_scope("T-003", ["parked.py"])
+        self._scope_file("generation.txt", "after\n")
+        self._record_scope("T-002", ["release.py"])
+
+        gate = intake.release_gate(self.root, "T-002")
+
+        self.assertFalse(gate["ok"], gate)
+        self.assertEqual(gate["code"], "STALE_PLAN", gate)
+        self.assertEqual(gate["work"], "T-003", gate)
+        self.assertEqual(gate["scope_status"], "STALE_SCOPE", gate)
+
+    def test_t1405_tampered_other_work_path_hash_fails_closed(self) -> None:
+        self._release_board()
+        self._complete_work("independent verified source", "T-002")
+        self._incomplete_work("unresolved source with tampered scope", "T-003")
+        self._scope_file("release.py")
+        scoped = ".saipen/kitchen/t1405-tampered.py"
+        self._scope_file(scoped, "reviewed\n")
+        self._record_scope("T-003", [scoped])
+        self._scope_file(scoped, "tampered\n")
+        self._record_scope("T-002", ["release.py"])
+
+        gate = intake.release_gate(self.root, "T-002")
+
+        self.assertFalse(gate["ok"], gate)
+        self.assertEqual(gate["code"], "STALE_PLAN", gate)
+        self.assertEqual(gate["work"], "T-003", gate)
+        self.assertEqual(gate["scope_status"], "STALE_SCOPE", gate)
+
+    def test_t1405_foreign_other_work_scope_fails_closed(self) -> None:
+        self._release_board()
+        self._complete_work("independent verified source", "T-002")
+        self._incomplete_work("unresolved source with foreign scope", "T-003")
+        self._scope_file("release.py")
+        self._scope_file("parked.py")
+        self._record_scope("T-002", ["release.py"])
+        self._record_scope("T-003", ["parked.py"])
+        path = self.root / ".saipen/kitchen/release_scope/T-003.json"
+        record = json.loads(path.read_text(encoding="utf-8"))
+        record["project_lineage"] = "lineage-foreign"
+        path.write_text(json.dumps(record, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+
+        gate = intake.release_gate(self.root, "T-002")
+
+        self.assertFalse(gate["ok"], gate)
+        self.assertEqual(gate["code"], "PATH_ESCAPE", gate)
+        self.assertEqual(gate["work"], "T-003", gate)
+        self.assertEqual(gate["scope_status"], "FOREIGN_SCOPE", gate)
+
+    def test_t1405_invalid_other_work_scope_fails_closed(self) -> None:
+        self._release_board()
+        self._complete_work("independent verified source", "T-002")
+        self._incomplete_work("unresolved source with invalid scope", "T-003")
+        self._scope_file("release.py")
+        self._scope_file("parked.py")
+        self._record_scope("T-002", ["release.py"])
+        self._record_scope("T-003", ["parked.py"])
+        path = self.root / ".saipen/kitchen/release_scope/T-003.json"
+        path.write_text("{not-json\n", encoding="utf-8")
+
+        gate = intake.release_gate(self.root, "T-002")
+
+        self.assertFalse(gate["ok"], gate)
+        self.assertEqual(gate["code"], "RECOVERY_CONFLICT", gate)
+        self.assertEqual(gate["work"], "T-003", gate)
+        self.assertEqual(gate["scope_status"], "INVALID_SCOPE", gate)
+
 
 if __name__ == "__main__":
     unittest.main()
