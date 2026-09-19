@@ -11,6 +11,14 @@ and every scheduled run since 18:31 had skipped with SKIP DIRTY_SOURCE.
 The guard that stalls distribution on a dirty source is correct. The defect was
 that one uncommitted edit could stall it indefinitely and only a log file knew.
 
+T-1371: that same log was then read as the CURRENT verdict -- `fresh` required
+`not blocked`, where `blocked` was the newest run's skip or rc -- so after a
+clean manual injection made every home current, one historical SKIP:
+DIRTY_SOURCE still held the report red until an unrelated actor ran again.
+The newest run is now `last_run` provenance; freshness comes from current bytes
+alone, and each direction is pinned below: old failure cannot poison current
+green, old success cannot hide current red.
+
 T-1342: a stamp and a head are provenance. Every fixture home here holds a real
 (miniature) shipped runtime, because `fresh` now means the bytes an agent would
 execute ARE the accepted generation -- a directory holding only a stamp is not
@@ -185,12 +193,12 @@ class StaleCountTests(DistributionFixture):
 
 
 # ---------------------------------------------------------------------------
-# AC-02 -- a blocked injection names the blocking condition
+# AC-02 -- the newest scheduler run is provenance, never the current verdict
 # ---------------------------------------------------------------------------
 
 
-class BlockedInjectionTests(DistributionFixture):
-    def test_a_skipped_run_names_its_reason_and_the_dirty_paths(self) -> None:
+class LastScheduledRunTests(DistributionFixture):
+    def test_a_skipped_run_keeps_its_reason_and_dirty_paths_as_history(self) -> None:
         self.log(
             f"2026-09-03 09:46:00 {RUN}",
             "2026-09-03 09:46:00 dirty:  M saipen/CORE.md",
@@ -199,26 +207,35 @@ class BlockedInjectionTests(DistributionFixture):
             "2026-09-03 09:46:00 === end rc=2 ===",
         )
         report = self.report([self.home(".claude", OLD)])
-        self.assertEqual(report["blocked"], "DIRTY_SOURCE")
-        self.assertEqual(report["blocking_paths"], ["M saipen/CORE.md", "M tools/saipen.py"])
-        self.assertIn("injection blocked: DIRTY_SOURCE", A.distribution_line(report))
-        self.assertIn("M saipen/CORE.md", A.distribution_line(report))
+        self.assertEqual(report["last_run"]["status"], "skipped")
+        self.assertEqual(report["last_run"]["skip"], "DIRTY_SOURCE")
+        self.assertEqual(report["last_run"]["rc"], 2)
+        self.assertEqual(
+            report["last_run"]["dirty"], ["M saipen/CORE.md", "M tools/saipen.py"]
+        )
+        line = A.distribution_line(report)
+        self.assertIn("last scheduled injection: skipped DIRTY_SOURCE", line)
+        self.assertNotIn("injection blocked", line)
 
-    def test_a_nonzero_run_with_no_skip_line_still_reports_blocked(self) -> None:
+    def test_a_nonzero_run_with_no_skip_line_is_history_not_a_verdict(self) -> None:
         self.log(f"2026-09-03 09:46:00 {RUN}", "2026-09-03 09:46:00 === end rc=9 ===")
-        self.assertEqual(self.report([self.home(".claude", OLD)])["blocked"], "rc=9")
+        report = self.report([self.home(".claude", OLD)])
+        self.assertEqual(report["last_run"]["status"], "failed")
+        self.assertEqual(report["last_run"]["rc"], 9)
+        self.assertEqual(report["stale"], 1)
 
-    def test_a_successful_run_is_not_blocked(self) -> None:
+    def test_a_successful_run_is_history_too(self) -> None:
         self.log(
             f"2026-09-03 12:46:00 {RUN}",
             f"2026-09-03 12:46:12 inject: head={HEAD} exit=0",
             "2026-09-03 12:46:12 === end rc=0 ===",
         )
         report = self.report([self.home(".claude", HEAD)])
-        self.assertIsNone(report["blocked"])
+        self.assertEqual(report["last_run"]["status"], "success")
         self.assertTrue(report["fresh"])
+        self.assertIn("last scheduled injection: success", A.distribution_line(report))
 
-    def test_only_the_newest_run_decides(self) -> None:
+    def test_only_the_newest_run_is_provenance(self) -> None:
         self.log(
             f"2026-09-03 09:00:00 {RUN}",
             "2026-09-03 09:00:00 SKIP: DIRTY_SOURCE",
@@ -226,33 +243,70 @@ class BlockedInjectionTests(DistributionFixture):
             f"2026-09-03 12:00:00 {RUN}",
             "2026-09-03 12:00:00 === end rc=0 ===",
         )
-        self.assertIsNone(self.report([self.home(".claude", HEAD)])["blocked"])
+        report = self.report([self.home(".claude", HEAD)])
+        self.assertEqual(report["last_run"]["status"], "success")
 
-    def test_a_run_still_in_flight_is_unknown_not_a_success(self) -> None:
+    def test_a_run_still_in_flight_is_provenance_and_never_a_success(self) -> None:
         self.log(f"2026-09-03 12:00:00 {RUN}", "2026-09-03 12:00:00 inject: working")
         run = A.last_inject_run()
         self.assertIsNotNone(run)
         self.assertIsNone(run["rc"])
+        report = self.report([self.home(".claude", HEAD)])
+        self.assertEqual(report["last_run"]["status"], "in_flight")
+        self.assertTrue(report["last_run"]["in_flight"])
+        self.assertNotIn("success", A.distribution_line(report))
+        self.assertTrue(report["fresh"])
 
     def test_no_scheduler_log_is_a_normal_answer(self) -> None:
         self.assertIsNone(A.scheduler_log())
         self.assertIsNone(A.last_inject_run())
         report = self.report([self.home(".claude", HEAD)])
-        self.assertIsNone(report["blocked"])
+        self.assertIsNone(report["last_run"])
         self.assertTrue(report["fresh"])
 
-    def test_a_blocked_run_makes_a_current_looking_set_not_fresh(self) -> None:
-        # Homes can read current while publication is stalled: the stall is
-        # about what happens NEXT, and reporting fresh would hide it.
+    def test_a_historical_skip_no_longer_poisons_current_homes(self) -> None:
+        # The T-1371 defect specimen, transformed (was: a blocked run makes a
+        # current-looking set not fresh). A scheduler log whose newest run
+        # skipped DIRTY_SOURCE, over homes that currently match the source
+        # generation, must read fresh -- while the skip stays visible as
+        # history. RED before the fix: fresh False with blocked=DIRTY_SOURCE.
         self.log(
             f"2026-09-03 09:46:00 {RUN}",
+            "2026-09-03 09:46:00 dirty:  M saipen/CORE.md",
             "2026-09-03 09:46:00 SKIP: DIRTY_SOURCE",
             "2026-09-03 09:46:00 === end rc=2 ===",
         )
         report = self.report([self.home(".claude", HEAD)])
         self.assertEqual(report["stale"], 0)
+        self.assertEqual(report["unknown"], 0)
+        self.assertEqual(report["surface_unknown"], 0)
+        self.assertTrue(report["fresh"])
+        self.assertEqual(report["last_run"]["skip"], "DIRTY_SOURCE")
+        self.assertEqual(report["last_run"]["dirty"], ["M saipen/CORE.md"])
+        line = A.distribution_line(report)
+        self.assertIn("current", line)
+        self.assertIn("last scheduled injection: skipped DIRTY_SOURCE", line)
+        self.assertNotIn("injection blocked", line)
+
+    def test_a_successful_history_cannot_hide_currently_stale_bytes(self) -> None:
+        # The symmetric direction: reassuring history must not mask current
+        # red any more than old failure may poison current green.
+        self.log(f"2026-09-03 12:46:00 {RUN}", "2026-09-03 12:46:12 === end rc=0 ===")
+        target = self.home(".opencode", HEAD)
+        (target / "tools" / "saipen_engine" / "board.py").write_text(
+            "# parser v0 -- an older generation\n", encoding="utf-8"
+        )
+        report = self.report([target])
+        self.assertEqual(report["last_run"]["status"], "success")
+        self.assertEqual(report["stale"], 1)
         self.assertFalse(report["fresh"])
-        self.assertIn("DIRTY_SOURCE", A.distribution_line(report))
+
+    def test_a_reassuring_history_cannot_make_an_unknown_surface_fresh(self) -> None:
+        self.log(f"2026-09-03 12:46:00 {RUN}", "2026-09-03 12:46:12 === end rc=0 ===")
+        report = self.report([self.home(".claude", None)])
+        self.assertEqual(report["last_run"]["status"], "success")
+        self.assertEqual(report["unknown"], 1)
+        self.assertFalse(report["fresh"])
 
 
 # ---------------------------------------------------------------------------

@@ -1396,6 +1396,9 @@ def _status(project_root: Path, as_json: bool) -> int:
 
         _dist = distribution_report()
         if _dist["installed"]:
+            _last_run = _dist.get("last_run")
+            if _last_run is not None:
+                _last_run = {**_last_run, "dirty": _last_run["dirty"][:5]}
             payload["distribution"] = {
                 "installed": _dist["installed"],
                 "stale": _dist["stale"],
@@ -1403,8 +1406,10 @@ def _status(project_root: Path, as_json: bool) -> int:
                 "fresh": _dist["fresh"],
                 "source_head": _dist["source_head"],
                 "newest_installed_head": _dist["newest_installed_head"],
-                "blocked": _dist["blocked"],
-                "blocking_paths": _dist["blocking_paths"][:5],
+                # T-1371: provenance, not the current verdict. The newest
+                # scheduled run may have skipped on a dirty surface; that is
+                # history, and `fresh` above is decided by current bytes only.
+                "last_run": _last_run,
                 "summary": distribution_line(_dist),
             }
     except Exception as exc:

@@ -358,6 +358,40 @@ def last_inject_run(log: Path | None = None) -> dict | None:
     return run
 
 
+def _last_run_provenance(run: dict | None) -> dict | None:
+    """The newest scheduler run as HISTORY, never as the current verdict.
+
+    T-1371: `fresh` used to require `not blocked`, where `blocked` was this
+    run's skip/rc -- so one stale log line held the whole distribution red
+    while every installed home already matched the current source. The
+    converse held too: a reassuring success would have hidden genuinely
+    stale bytes. The run keeps its exact evidence (skip, rc, dirty paths,
+    timestamp, head) under its own name; only current bytes decide
+    freshness. LAST FAILED ATTEMPT != CURRENT FAILED STATE.
+    """
+    if run is None:
+        return None
+    skip = run.get("skip")
+    rc = run.get("rc")
+    if skip:
+        status = "skipped"
+    elif rc == 0:
+        status = "success"
+    elif isinstance(rc, int):
+        status = "failed"
+    else:
+        status = "in_flight"
+    return {
+        "status": status,
+        "skip": skip,
+        "rc": rc,
+        "dirty": list(run.get("dirty") or []),
+        "at": run.get("at") or None,
+        "head": run.get("head"),
+        "in_flight": status == "in_flight",
+    }
+
+
 # ---------------------------------------------------------------------------
 # Surface freshness from the adapter registry (SRC-030 Part 12)
 # ---------------------------------------------------------------------------
@@ -643,6 +677,12 @@ def distribution_report(source_head: str | None = None) -> dict:
     instruction block's home and the guard hook's delegated engine included --
     proves the same generation. A current stamp over different bytes, or a
     matching head over a dirty tree, is never fresh.
+
+    T-1371: the newest scheduler run is published under `last_run` as
+    historical provenance, and the current verdict ignores it entirely. A
+    home whose bytes are current reads fresh even when the last scheduled
+    run skipped; a home holding stale bytes reads stale even when the last
+    scheduled run succeeded.
     """
     head = source_head or _source_head()
     homes: list[dict] = []
@@ -692,9 +732,6 @@ def distribution_report(source_head: str | None = None) -> dict:
         elif heads:
             newest = heads[0]
     run = last_inject_run()
-    blocked = None
-    if run is not None and (run.get("skip") or (run.get("rc") not in (0, None))):
-        blocked = run.get("skip") or f"rc={run.get('rc')}"
     stale = [item["home"] for item in homes if item["stale"]]
     surface_unknown = len(
         [item for item in homes if any(s == "unknown" for s in item["surfaces"].values())]
@@ -709,9 +746,12 @@ def distribution_report(source_head: str | None = None) -> dict:
         "surface_unknown": surface_unknown,
         "newest_installed_head": newest,
         "homes": homes,
-        "blocked": blocked,
-        "blocking_paths": (run or {}).get("dirty") or [],
-        "last_run_at": (run or {}).get("at") or None,
+        # T-1371: the last scheduled run is PROVENANCE. It answers "what did
+        # the scheduler do", never "are the installed bytes current now" --
+        # a historical SKIP is not today's blocked state, and a historical
+        # success cannot hide today's stale bytes. The current verdict below
+        # must never consult this again.
+        "last_run": _last_run_provenance(run),
         "scheduler_log": str(scheduler_log()) if scheduler_log() else None,
         # AC-04: a fully current set is a POSITIVE answer, not an empty
         # section. "Nothing printed" and "everything is current" have to be
@@ -723,19 +763,31 @@ def distribution_report(source_head: str | None = None) -> dict:
         "fresh": bool(homes)
         and expected is not None
         and not stale
-        and not blocked
         and surface_unknown == 0,
     }
+
+
+def _last_run_sentence(run: dict) -> str:
+    """One historical sentence about the scheduler. Never a current verdict."""
+    status = run["status"].replace("_", " ")
+    if run["status"] == "skipped" and run.get("skip"):
+        status += f" {run['skip']}"
+    elif run["status"] == "failed":
+        status += f" rc={run['rc']}"
+    at = f" at {run['at']}" if run.get("at") else ""
+    return f"last scheduled injection: {status}{at}"
 
 
 def distribution_line(report: dict) -> str:
     """One operator sentence from `distribution_report`. Never a verdict."""
     if not report["installed"]:
         return "distribution: no installed agent home on this machine"
+    run = report.get("last_run")
+    history = f" -- {_last_run_sentence(run)}" if run else ""
     if report["fresh"]:
         return (
             f"distribution: {report['installed']} home(s) current at "
-            f"{str(report['source_head'] or '?')[:12]}"
+            f"{str(report['source_head'] or '?')[:12]}{history}"
         )
     parts = [
         f"distribution: {report['stale']} of {report['installed']} home(s) stale",
@@ -744,13 +796,8 @@ def distribution_line(report: dict) -> str:
     ]
     if report["unknown"]:
         parts.append(f"{report['unknown']} home(s) carry no head")
-    if report["blocked"]:
-        detail = f"injection blocked: {report['blocked']}"
-        if report["blocking_paths"]:
-            shown = ", ".join(report["blocking_paths"][:3])
-            more = len(report["blocking_paths"]) - 3
-            detail += f" ({shown}{f', +{more} more' if more > 0 else ''})"
-        parts.append(detail)
+    if run:
+        parts.append(_last_run_sentence(run))
     return " -- ".join(parts)
 
 
