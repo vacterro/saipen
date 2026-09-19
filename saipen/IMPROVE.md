@@ -55,8 +55,12 @@ is the surface, not a second copy of the law.
   deterministic order. Semantic adjudication (reproduce/classify/dedupe/decide)
   is Core-owned; each decision is committed through `saipen improve sweep`.
 - `saipen improve sweep <cycle> <RUN-N/IMP-NNN> <DISPOSITION> [--ticket T-###]
-  [--report <ident>] [--reproduced y|n]` — the Core-only disposition write
-  through `write_sweep_entry`; section 7 owns its pre-write validation.
+  [--report <ident>] [--reproduced y|n] [--fixed-by <ref>]
+  [--verification <ref>]` — the Core-only disposition write
+  through `write_sweep_entry`; section 7 owns its pre-write validation, and
+  `--fixed-by`/`--verification` bind a resolution or successor evidence ref
+  (a historical `SUPERSEDED`/`NOT_REPRODUCED` disposition uses
+  `--verification` to name the current replacement finding it defers to).
 - `saipen improve verify <cycle>` — the bounded DELTA audit of section 9.
 - `saipen improve cycle-complete <cycle>` — runs the full cycle bar
   (section 2) and flips ACTIVE -> COMPLETE through `complete_cycle`. A partial
@@ -74,7 +78,12 @@ is the surface, not a second copy of the law.
   seat `availability: unavailable` through the journaled roster write; the
   never-completed report stays byte-identical at its path, every SWEEP
   disposition is untouched, and the cycle bar can then be met with the
-  remaining seats. It never touches a seat whose report IS complete.
+  remaining seats. It never touches a seat whose report IS complete. The one
+  COMPLETE route is `--reason STALE_COMPLETE --replacement <fresh-seat>`: it
+  is NOT ordinary retirement and returns `SEAT_SUPERSEDED` (not
+  `SEAT_RETIRED`), marking the seat `availability: superseded` bound to its
+  preserved report hash and its current same-scope replacement (section 7).
+  A COMPLETE report is never made generically retireable.
 - `saipen improve clean <cycle>` — archive/retention meta-operation
   (section 10). Never means phase CLEAN, never enters the CLEAN phase.
 
@@ -136,8 +145,10 @@ satisfies another's finding.
   cycle, and a new cycle may then be admitted without deleting history.
 - Every ACTIVE cycle has a finite canonical exit even after its sweep started:
   an un-audited DRAFT (zero committed RUNs) is re-bound on resume (section 4),
-  and a seat that can never complete is retired through `saipen improve retire`
-  (section 3). Retirement preserves every existing disposition and the
+  a seat that can never complete is retired through `saipen improve retire`
+  (section 3), and a stale COMPLETE seat is superseded to a current
+  same-scope replacement through `--reason STALE_COMPLETE --replacement`
+  (section 7). Retirement preserves every existing disposition and the
   never-completed report's bytes; `abort` stays forbidden once the sweep has
   dispositions, because aborting would discard them.
 
@@ -185,7 +196,16 @@ project_identity
 seat_id
 role
 report_path
-availability        (expected | unavailable)
+availability        (expected | unavailable | superseded)
+```
+
+Superseded seats add exactly these fields to the same block:
+
+```
+availability: superseded
+resolution: stale-complete
+replacement_seat: <seat_id>
+preserved_report_sha256: <64 lowercase hex>
 ```
 
 - `seat_id` is path-safe.
@@ -197,6 +217,16 @@ availability        (expected | unavailable)
   whose report never reached complete; it is refused for a completed report
   and refused when it would leave the roster with no expected seat, so a
   cycle is never completed into evidence-free history.
+- `availability: superseded` is written ONLY by stale-COMPLETE resolution
+  (section 7): the seat's COMPLETE report is stale against the current tree
+  and a distinct, current, same-role, same-`context_scope` replacement seat
+  carries its findings forward. The old report and the SWEEP ledger stay
+  byte-identical; `preserved_report_sha256` binds those exact bytes, and any
+  drift is a validation failure. The replacement chain must be acyclic and
+  terminate at an `expected` seat. `prepare` never overrides a roster
+  decision: preparing a superseded or unavailable seat returns
+  `SEAT_SUPERSEDED`/`SEAT_UNAVAILABLE` and names the replacement where one
+  exists.
 - Seat identity is NEVER inferred from `STATE.agent` (latest actor only) or
   from LOG agent tags (optional field).
 - Bare/`--new-seat` allocates the next `<agent>-NN` while holding SAIOPS's
@@ -283,6 +313,7 @@ moment the original report content is immutable (byte-stable).
 | complete | `report_status: complete`, no Core disposition yet |
 | swept | sweep ledger contains final disposition coverage for that report |
 | unavailable | roster explicitly records `availability: unavailable` |
+| superseded | roster records `availability: superseded` with its stale-complete resolution |
 
 MANIFEST never mirrors report status. SWEEP owns dispositions.
 
@@ -374,6 +405,42 @@ share disposition coverage.
 Disposition set (closed): `CONFIRMED | DUPLICATE | ALREADY_FIXED |
 SUPERSEDED | LATER_RULE | NOT_REPRODUCED | INVALID | NEEDS_EXTERNAL_EVIDENCE`.
 
+### Stale COMPLETE evidence and its finding accounting (T-1411)
+
+A strict active cycle's COMPLETE report whose captured source identity no
+longer matches the current tree is stale, and stale evidence never authorizes
+fresh canonical work (T-619): `CONFIRMED` on that report is refused. The
+finding still owes a truthful final Core disposition and the cycle owes a
+finite executable exit. The ONE route is:
+
+1. create and complete a distinct replacement seat (`saipen improve
+   --new-seat`, section 4) auditing the SAME `context_scope` against the
+   current tree;
+2. dispose every historical finding with a non-CONFIRMED disposition --
+   `SUPERSEDED` with `reproduced=y` when the replacement reproduced the
+   defect, `NOT_REPRODUCED` with `reproduced=n` when it no longer does --
+   bound to the successor with `--verification
+   <cycle>/<replacement-seat>/<report>#<RUN-N/IMP-NNN>`. Current ticket
+   authority flows ONLY through the replacement's own `CONFIRMED`
+   disposition on fresh evidence; the historical record carries no ticket;
+3. `saipen improve retire <cycle> <seat> --reason STALE_COMPLETE
+   --replacement <fresh-seat>`, which validates the replacement is distinct,
+   registered, `expected`, COMPLETE, current and same-role/same-scope, then
+   writes the `availability: superseded` binding. The machine result is
+   `SEAT_SUPERSEDED`, never `SEAT_RETIRED`.
+
+Existing SWEEP dispositions are never rewritten: the route appends only. A
+finding may never disappear because its report was superseded -- unswept
+findings refuse the supersession itself. Repeated resolution of the same
+relation returns `ALREADY_APPLIED` and writes nothing; that is a statement
+about the relation, never about cycle freshness -- if the replacement later
+goes stale, `saipen improve verify` reports it and names the next route. Every
+refusal that blocks a recoverable stale-COMPLETE state prints the executable
+route above. `saipen improve verify`, `saipen improve cycle-complete`,
+`saipen improve clean` and `tools/validate.py` share the same
+`validate_superseded_seat` evidence: a tampered preserved report, a
+dangling/cyclic replacement chain, or a swallowed finding fails them all.
+
 A report's own `confidence: proven` is evidence to inspect, never a ticket
 authorization. Canonical tickets carry: `source_reports, reproduced,
 invariant, defect, impact, exact_fix_scope, red_control, done_condition`.
@@ -383,6 +450,9 @@ invariant, defect, impact, exact_fix_scope, red_control, done_condition`.
 evidence only: it may resolve against legacy (run-less) sweep records in
 legacy cycles, and FAILs once the only matching records live in strict cycles
 -- a new ticket can never launder a strict finding through a bare IMP.
+Provenance resolves to a `CONFIRMED` disposition only: a historical
+`SUPERSEDED`/`NOT_REPRODUCED`/`INVALID` record never satisfies a ticket's
+`source_reports`, because only `CONFIRMED` authorizes canonical work.
 Substring search is never provenance.
 
 Chain of custody:

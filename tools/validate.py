@@ -3584,10 +3584,25 @@ if log_files:
                 # evidence: its source_head records the tree it audited, and
                 # the ever-moving HEAD does not invalidate it retroactively.
                 _cycle_active = True
+                _seat_id = _rep.parent.name
+                _seat_superseded = False
                 if _man.is_file():
                     _mst = _man.read_text(encoding="utf-8-sig")
                     if re.search(r"(?m)^cycle_status:\s*(?:complete|archived)", _mst):
                         _cycle_active = False
+                    _seat_block = _imp_mod._seat_block(_mst, _seat_id) or ""
+                    _seat_superseded = (
+                        _imp_mod._field(_seat_block, "availability") == "superseded"
+                    )
+                    if _seat_superseded:
+                        for _resolution_error in _imp_mod.validate_superseded_seat(
+                            _rep.parent.parent,
+                            _seat_id,
+                            roster_text=_mst,
+                            sweep_text=_imp_mod._read_maybe(_rep.parent.parent / "SWEEP.md"),
+                        ):
+                            _report_errors.append(f"{_rep}: {_resolution_error}")
+                _report_current = _cycle_active and not _seat_superseded
                 # T-992/§2 + T-638/§6: an ACTIVE strict report's provenance
                 # must match current installed truth via the ONE bound bar
                 # (validate_bound_report) -- agent vs the ROSTER seat (the
@@ -3596,8 +3611,7 @@ if log_files:
                 # saipen_version and protocol_fingerprint vs installed.
                 # Archived/complete history keeps its historical identity and
                 # is never compared to today's install.
-                if _strict_cycle and _cycle_active and _man.is_file():
-                    _seat_id = _rep.parent.name
+                if _strict_cycle and _report_current and _man.is_file():
                     for _bv in _imp_mod.validate_bound_report(
                         _rep.parent.parent,
                         _seat_id,
@@ -3616,7 +3630,7 @@ if log_files:
                 # historical evidence whose symbolic fingerprints stay valid.
                 # (_strict_cycle is derived above from the same manifest, so
                 # report validation and freshness checks agree on one truth.)
-                if _cycle_active and _src_head:
+                if _report_current and _src_head:
                     _cur_head = _git("rev-parse", "HEAD")[1].strip()
                     if _cur_head and _src_head not in (_cur_head, _cur_head[:7]):
                         _report_errors.append(
@@ -3628,7 +3642,7 @@ if log_files:
                         )
                 if (
                     _strict_cycle
-                    and _cycle_active
+                    and _report_current
                     and _src_tree
                     and not re.match(r"^(git-delta-v1|no-git-tree-v1):", _src_tree)
                 ):
@@ -3648,7 +3662,7 @@ if log_files:
                 # that is an explicit non-green, never a silent pass.
                 if (
                     _strict_cycle
-                    and _cycle_active
+                    and _report_current
                     and _src_head
                     and _src_tree
                     and _cur_head
@@ -3866,13 +3880,17 @@ if log_files:
                             and rec.report in _imp_mod._report_ledger_keys(_ros, _cseat, _creport)
                             and rec.run() == int(_crun)
                             and rec.imp() == f"IMP-{_cimp}"
+                            and rec.disposition == "CONFIRMED"
                             for cid, _cd, _ros, rec in _sweep_records
                         )
                         if not _matched:
                             _sweep_errors.append(
                                 f"{_tid} source_reports: {_ref} resolves to "
-                                "no EXACT composite SWEEP disposition "
-                                "(cycle + report + run + IMP); substring "
+                                "no EXACT composite CONFIRMED SWEEP disposition "
+                                "(cycle + report + run + IMP); only a CONFIRMED "
+                                "finding authorizes a ticket, so a historical "
+                                "SUPERSEDED/NOT_REPRODUCED/INVALID disposition "
+                                "never satisfies provenance; substring "
                                 "matching is never provenance"
                             )
                         continue
@@ -3886,7 +3904,10 @@ if log_files:
                         continue
                     if re.fullmatch(r"IMP-\d+", _ref):
                         _legacy = any(
-                            rec.legacy and rec.imp() == _ref and cid not in _strict_cycle_ids
+                            rec.legacy
+                            and rec.disposition == "CONFIRMED"
+                            and rec.imp() == _ref
+                            and cid not in _strict_cycle_ids
                             for cid, _cd, _ros, rec in _sweep_records
                         )
                         _strict_only = any(
@@ -3906,7 +3927,8 @@ if log_files:
                         else:
                             _sweep_errors.append(
                                 f"{_tid} source_reports: {_ref} resolves to "
-                                "no legacy SWEEP disposition (red control 20)"
+                                "no legacy CONFIRMED SWEEP disposition (red "
+                                "control 20)"
                             )
                         continue
                     _sweep_errors.append(

@@ -59,7 +59,7 @@ FINDING_CLASS = {
 CONFIDENCE = {"observed", "reproduced", "proven", "suspected"}
 ACTION = {"fix", "ticket", "note", "reject"}
 REPORT_STATUS = {"draft", "complete"}
-AVAILABILITY = {"expected", "unavailable"}
+AVAILABILITY = {"expected", "unavailable", "superseded"}
 ROLES = {"core", "critic"}
 DISPOSITION = {
     "CONFIRMED",
@@ -575,6 +575,8 @@ def derive_status(
     fully_swept = bool(expected) and not missing
     if availability == "unavailable":
         visible = "unavailable"
+    elif availability == "superseded":
+        visible = "superseded"
     elif not report_text:
         visible = "expected"
     elif status == "draft":
@@ -878,8 +880,12 @@ def write_sweep_entry(cycle_dir: Path, entry: dict) -> dict:
             raise ImproveError(
                 "write_sweep_entry refuses CONFIRMED on stale evidence: "
                 + "; ".join(fresh_errors)
-                + " -- re-audit against the current tree (a new RUN) or use "
-                "a non-CONFIRMED disposition"
+                + " -- re-audit against the current tree (a new RUN carrying current "
+                "authority) or dispose the finding historically without stale authority: "
+                "SUPERSEDED when a fresh same-scope replacement reproduced it, "
+                "NOT_REPRODUCED when it did not, binding the successor with "
+                "--verification <cycle>/<seat>/<report>#<RUN-N/IMP-NNN>; stale CONFIRMED "
+                "stays forbidden (T-619)"
             )
     run_raw = entry.get("run")
     imp_raw = str(entry.get("imp_id", ""))
@@ -1709,19 +1715,24 @@ def prepare_audit_seat(
             # blank slate, and every refusal below is decided READ-ONLY,
             # BEFORE any journal recovery or mutation -- zero bytes are
             # written, no pending op is rolled forward to mask the refusal.
-            # Unavailable is a roster decision prepare does not override,
-            # whatever the rest of the block says.
-            if availability == "unavailable":
+            # Unavailable/superseded are roster decisions prepare does not
+            # override, whatever the rest of the block says.  A superseded
+            # COMPLETE report is immutable history whose replacement is a
+            # different concrete seat.
+            if availability in {"unavailable", "superseded"}:
+                code = "SEAT_UNAVAILABLE" if availability == "unavailable" else "SEAT_SUPERSEDED"
+                replacement = _field(block, "replacement_seat")
                 return _rv(
                     {
                         "ok": False,
-                        "code": "SEAT_UNAVAILABLE",
+                        "code": code,
                         "cycle_id": active_cycle,
                         "seat_id": seat,
                         "role": selected_role,
                         "report_path": report.relative_to(root).as_posix(),
-                        "detail": f"session {seat} is unavailable on the "
-                        "roster; prepare does not override it",
+                        "replacement_seat": replacement,
+                        "detail": f"session {seat} is {availability} on the "
+                        "roster; prepare does not override that historical decision",
                     }
                 )
             if roster_role != selected_role:
@@ -2281,6 +2292,384 @@ def register_cycle(project_root: Path, cycle_id: str, roster_lines: str) -> Path
     return cdir
 
 
+def _historical_bound_report_errors(
+    cycle_dir: Path,
+    seat_id: str,
+    report_text: str,
+    roster_text: str,
+    *,
+    require_runs: bool,
+) -> list[str]:
+    """Validate sealed report evidence without rewriting history as current.
+
+    A superseded COMPLETE report still has to be structurally valid and bound
+    to its original roster/project identity.  Its captured install/source
+    identity is historical truth, however, so this bar deliberately does not
+    compare those values with today's install or tree.
+    """
+    strict = _schema_of(roster_text) == "strict"
+    errors = validate_report(report_text, require_runs=require_runs, strict=strict)
+    block = _seat_block(roster_text, seat_id)
+    if block is None:
+        errors.append(f"seat {seat_id} is not registered on the roster")
+        return errors
+    errors += validate_strict_provenance(
+        report_text,
+        roster=roster_text,
+        manifest_project_identity=_field(roster_text, "project_identity"),
+        seat_id=seat_id,
+    )
+    report_role = _field(report_text, "role")
+    roster_role = _field(block, "role")
+    if report_role != roster_role:
+        errors.append(f"report role {report_role!r} != roster role {roster_role!r}")
+    if strict:
+        tree = _field(report_text, "source_tree_fingerprint")
+        if not re.match(r"^(git-delta-v1|no-git-tree-v1):", tree):
+            errors.append(
+                f"source_tree_fingerprint {tree!r} is not a mechanical fingerprint"
+            )
+        protocol_fp = _field(report_text, "protocol_fingerprint")
+        if not re.fullmatch(r"sha256:[0-9a-f]{64}", protocol_fp):
+            errors.append(
+                f"protocol_fingerprint {protocol_fp!r} is not canonical sha256 evidence"
+            )
+    return errors
+
+
+def stale_complete_route_hint(
+    cycle_name: str,
+    seat_id: str,
+    report_path: str,
+    missing: list[str],
+    *,
+    replacement: str | None = None,
+    replacement_report: str | None = None,
+) -> str:
+    """The finite executable Core route for unswept stale-COMPLETE findings.
+
+    T-1411: a locally-correct refusal must never compose into a global dead
+    end. A stale report's historical findings are disposed with a non-CONFIRMED
+    disposition only (T-619): SUPERSEDED when the fresh replacement reproduced
+    the defect, NOT_REPRODUCED when it no longer does. Current ticket authority
+    always flows through the replacement's OWN CONFIRMED disposition on fresh
+    evidence; the historical record binds the successor with `verification=`.
+    """
+    report_ident = f"{seat_id}/{report_path}"
+    finding = missing[0]
+    successor = ""
+    if replacement and replacement_report:
+        successor = f" --verification {cycle_name}/{replacement}/{replacement_report}#{finding}"
+    remainder = "" if len(missing) == 1 else f" (repeat for {', '.join(missing[1:])})"
+    return (
+        f"stale COMPLETE {seat_id} has unswept finding(s) {', '.join(missing)}: "
+        f"run `saipen improve sweep-queue {cycle_name}`, then dispose each -- "
+        f"`saipen improve sweep {cycle_name} {finding} SUPERSEDED --report "
+        f"{report_ident} --reproduced y{successor}` when the current replacement "
+        "reproduced it, or `saipen improve sweep "
+        f"{cycle_name} {finding} NOT_REPRODUCED --report {report_ident} "
+        f"--reproduced n{successor}` when it did not{remainder}; then "
+        f"`saipen improve retire {cycle_name} {seat_id} --reason "
+        "STALE_COMPLETE --replacement <fresh-seat>`"
+    )
+
+
+def validate_superseded_seat(
+    cycle_dir: Path,
+    seat_id: str,
+    *,
+    roster_text: str | None = None,
+    sweep_text: str | None = None,
+) -> list[str]:
+    """Validate the ONE stale-COMPLETE resolution representation.
+
+    The manifest is only an index.  Authority remains the exact immutable old
+    report, its hash, the Core SWEEP ledger, and the named replacement seat.
+    This function is shared by resolution, verify/cycle-complete, status and
+    the repository validator so no consumer can implement a private "skip".
+    """
+    errors: list[str] = []
+    roster = roster_text if roster_text is not None else _read_maybe(cycle_dir / "MANIFEST.md")
+    sweep = sweep_text if sweep_text is not None else _read_maybe(cycle_dir / "SWEEP.md")
+    block = _seat_block(roster, seat_id)
+    if block is None:
+        return [f"seat {seat_id}: supersession owner is missing from the roster"]
+    if _field(block, "availability") != "superseded":
+        return [f"seat {seat_id}: availability is not superseded"]
+
+    report_path = _field(block, "report_path")
+    report = cycle_dir / seat_id / report_path
+    try:
+        report_bytes = report.read_bytes()
+        report_text = report_bytes.decode("utf-8-sig")
+    except (OSError, UnicodeError) as exc:
+        return [f"seat {seat_id}: preserved report cannot be read ({type(exc).__name__})"]
+    expected_hash = _field(block, "preserved_report_sha256")
+    actual_hash = hashlib.sha256(report_bytes).hexdigest()
+    if expected_hash != actual_hash:
+        errors.append(
+            f"seat {seat_id}: preserved report sha256 {actual_hash} != recorded "
+            f"{expected_hash}; superseded evidence was tampered"
+        )
+    if _field(report_text, "report_status") != "complete":
+        errors.append(f"seat {seat_id}: preserved report is not COMPLETE")
+    for error in _historical_bound_report_errors(
+        cycle_dir,
+        seat_id,
+        report_text,
+        roster,
+        require_runs=_schema_of(roster) == "strict",
+    ):
+        errors.append(f"seat {seat_id} preserved report: {error}")
+
+    sweep_errors = validate_sweep(sweep) if sweep else []
+    for error in sweep_errors:
+        errors.append(f"seat {seat_id}: malformed SWEEP evidence: {error}")
+    if not sweep_errors:
+        derived = derive_status(report_path, roster, report_text, sweep, seat_id=seat_id)
+        missing = derived.get("missing", [])
+        if missing:
+            replacement_seat = _field(block, "replacement_seat")
+            replacement_block = _seat_block(roster, replacement_seat) or ""
+            errors.append(
+                stale_complete_route_hint(
+                    cycle_dir.name,
+                    seat_id,
+                    report_path,
+                    missing,
+                    replacement=replacement_seat,
+                    replacement_report=_field(replacement_block, "report_path"),
+                )
+            )
+
+    replacement = _field(block, "replacement_seat")
+    replacement_block = _seat_block(roster, replacement)
+    if replacement_block is None:
+        errors.append(f"seat {seat_id}: replacement seat {replacement!r} is missing")
+        return errors
+    replacement_report_path = _field(replacement_block, "report_path")
+    replacement_report = cycle_dir / replacement / replacement_report_path
+    try:
+        replacement_text = _read_maybe(replacement_report)
+    except (OSError, UnicodeError) as exc:
+        errors.append(
+            f"seat {seat_id}: replacement report cannot be read ({type(exc).__name__})"
+        )
+        return errors
+    if not replacement_text:
+        errors.append(f"seat {seat_id}: replacement seat {replacement} has no report")
+        return errors
+    if _field(replacement_text, "report_status") != "complete":
+        errors.append(f"seat {seat_id}: replacement seat {replacement} is not COMPLETE")
+    if _field(block, "role") != _field(replacement_block, "role"):
+        errors.append(
+            f"seat {seat_id}: replacement seat {replacement} has a different role"
+        )
+    if _field(report_text, "context_scope") != _field(replacement_text, "context_scope"):
+        errors.append(
+            f"seat {seat_id}: replacement seat {replacement} has a different context_scope"
+        )
+    return errors
+
+
+def resolve_stale_complete_seat(
+    cycle_dir: Path, seat_id: str, replacement_seat: str
+) -> dict:
+    """Supersede one stale immutable COMPLETE report with a fresh seat.
+
+    The old report and SWEEP ledger are read-only evidence.  The sole write is
+    a journaled manifest decision binding their exact bytes to a distinct,
+    fresh, same-scope COMPLETE replacement.  Findings must already have Core
+    dispositions; no resolution can hide unswept evidence.
+    """
+    seat = _validate_safe_id(seat_id, "seat_id")
+    replacement = _validate_safe_id(replacement_seat, "replacement_seat")
+    if seat == replacement:
+        raise ImproveError("stale-COMPLETE supersession needs a distinct replacement seat")
+    snapshot = load_valid_manifest(cycle_dir, "stale-COMPLETE supersession", ("active",))
+    roster = snapshot.text
+    manifest = snapshot.path
+    block = _seat_block(roster, seat)
+    if block is None:
+        raise ImproveError(f"supersession refuses: seat {seat} is not registered on the roster")
+    availability = _field(block, "availability") or "expected"
+    if availability == "superseded":
+        existing = _field(block, "replacement_seat")
+        integrity_errors = validate_superseded_seat(
+            cycle_dir, seat, roster_text=roster, sweep_text=_read_maybe(cycle_dir / "SWEEP.md")
+        )
+        if integrity_errors:
+            raise ImproveError(
+                "supersession integrity failure: " + "; ".join(integrity_errors[:5])
+            )
+        if existing == replacement:
+            return {
+                "ok": True,
+                "code": "ALREADY_APPLIED",
+                "cycle_id": cycle_dir.name,
+                "seat_id": seat,
+                "replacement_seat": replacement,
+            }
+        raise ImproveError(
+            f"supersession refuses: seat {seat} already resolves to {existing}, not {replacement}"
+        )
+    if availability != "expected":
+        raise ImproveError(
+            f"supersession refuses: seat {seat} availability is {availability}, not expected"
+        )
+
+    report_path = _field(block, "report_path")
+    report = cycle_dir / seat / report_path
+    if not report.is_file():
+        raise ImproveError(f"supersession refuses: seat {seat} report is missing")
+    try:
+        report_bytes = report.read_bytes()
+        report_text = report_bytes.decode("utf-8-sig")
+    except (OSError, UnicodeError) as exc:
+        raise ImproveError(
+            f"supersession refuses: seat {seat} report cannot be read ({type(exc).__name__})"
+        ) from exc
+    if _field(report_text, "report_status") != "complete":
+        raise ImproveError(
+            f"supersession refuses: seat {seat} report is not COMPLETE; use the existing "
+            "draft re-bind or retire route"
+        )
+    historical_errors = _historical_bound_report_errors(
+        cycle_dir,
+        seat,
+        report_text,
+        roster,
+        require_runs=snapshot.strict,
+    )
+    if historical_errors:
+        raise ImproveError(
+            "supersession refuses malformed historical evidence: "
+            + "; ".join(historical_errors[:5])
+        )
+    current_errors = validate_bound_report(
+        cycle_dir,
+        seat,
+        report_text,
+        require_runs=snapshot.strict,
+        require_fresh=snapshot.strict,
+        cycle_active=True,
+    )
+    if not current_errors:
+        raise ImproveError(
+            f"supersession refuses: seat {seat} COMPLETE report is fresh, not stale; "
+            "normal sweep/cycle-complete semantics remain authoritative"
+        )
+
+    replacement_block = _seat_block(roster, replacement)
+    if replacement_block is None:
+        raise ImproveError(
+            f"supersession refuses: replacement seat {replacement} is not registered; "
+            f"create it with `saipen improve --new-seat --role {_field(block, 'role')}`"
+        )
+    if (_field(replacement_block, "availability") or "expected") != "expected":
+        raise ImproveError(
+            f"supersession refuses: replacement seat {replacement} is not expected/current"
+        )
+    replacement_path = _field(replacement_block, "report_path")
+    replacement_report = cycle_dir / replacement / replacement_path
+    replacement_text = _read_maybe(replacement_report)
+    if not replacement_text or _field(replacement_text, "report_status") != "complete":
+        raise ImproveError(
+            f"supersession refuses: replacement seat {replacement} must carry a COMPLETE report"
+        )
+    if _field(block, "role") != _field(replacement_block, "role"):
+        raise ImproveError(
+            f"supersession refuses: replacement seat {replacement} has a different role"
+        )
+    if _field(report_text, "context_scope") != _field(replacement_text, "context_scope"):
+        raise ImproveError(
+            f"supersession refuses: replacement seat {replacement} has a different "
+            "context_scope; re-audit the same bounded scope"
+        )
+
+    replacement_errors = validate_bound_report(
+        cycle_dir,
+        replacement,
+        replacement_text,
+        require_runs=snapshot.strict,
+        require_fresh=snapshot.strict,
+        cycle_active=True,
+    )
+    if replacement_errors:
+        raise ImproveError(
+            f"supersession refuses: replacement seat {replacement} is not current and "
+            "fully valid: " + "; ".join(replacement_errors[:5])
+        )
+
+    sweep = _read_maybe(cycle_dir / "SWEEP.md")
+    sweep_errors = validate_sweep(sweep) if sweep else []
+    if sweep_errors:
+        raise ImproveError(
+            "supersession refuses malformed SWEEP evidence: " + "; ".join(sweep_errors[:3])
+        )
+    missing = derive_status(report_path, roster, report_text, sweep, seat_id=seat).get(
+        "missing", []
+    )
+    if missing:
+        raise ImproveError(
+            "supersession refuses: "
+            + stale_complete_route_hint(
+                cycle_dir.name,
+                seat,
+                report_path,
+                missing,
+                replacement=replacement,
+                replacement_report=replacement_path,
+            )
+        )
+
+    preserved_hash = hashlib.sha256(report_bytes).hexdigest()
+    lines: list[str] = []
+    in_seat = False
+    replaced = False
+    for raw in roster.rstrip("\n").split("\n"):
+        if raw.startswith("seat_id:"):
+            in_seat = raw.split(":", 1)[1].strip() == seat
+        if in_seat and raw.startswith("availability:"):
+            lines.extend(
+                [
+                    "availability: superseded",
+                    "resolution: stale-complete",
+                    f"replacement_seat: {replacement}",
+                    f"preserved_report_sha256: {preserved_hash}",
+                ]
+            )
+            replaced = True
+            in_seat = False
+            continue
+        lines.append(raw)
+    if not replaced:
+        raise ImproveError(f"supersession refuses: seat {seat} carries no availability line")
+    proposed = "\n".join(lines) + "\n"
+    proposed_errors = validate_manifest(proposed, expected_cycle_id=cycle_dir.name)
+    if proposed_errors:
+        raise ImproveError(
+            "supersession refuses its own proposed manifest: "
+            + "; ".join(proposed_errors[:5])
+        )
+    result = _journaled_write(manifest, proposed, "seat", base_hash=_base_hash(manifest))
+    if not result.get("ok"):
+        raise ImproveError(
+            f"seat {seat} not superseded: {result.get('code')} {result.get('message', '')}"
+        )
+    return {
+        "ok": True,
+        "code": "SEAT_SUPERSEDED",
+        "cycle_id": cycle_dir.name,
+        "seat_id": seat,
+        "availability": "superseded",
+        "replacement_seat": replacement,
+        "preserved_report_sha256": preserved_hash,
+        "report_preserved": True,
+        "sweep_preserved": True,
+    }
+
+
 def verify_cycle(cycle_dir: Path) -> list[str]:
     """Validate the COMPLETE cycle output (DOGFOOD V, T-615/T-616/T-618).
 
@@ -2299,10 +2688,22 @@ def verify_cycle(cycle_dir: Path) -> list[str]:
     errors.extend(manifest_errors)
     strict = bool(re.search(r"(?m)^manifest_schema:\s*strict\s*$", text))
     sweep_text = _read_maybe(cycle_dir / "SWEEP.md")
+    cycle_active = _status_of(text) == "active"
     for seat in _seat_blocks(text):
-        if _field(seat, "availability") == "unavailable":
-            continue
+        availability = _field(seat, "availability") or "expected"
         seat_id = _field(seat, "seat_id") or "?"
+        if availability == "unavailable":
+            continue
+        if availability == "superseded":
+            errors.extend(
+                validate_superseded_seat(
+                    cycle_dir,
+                    seat_id,
+                    roster_text=text,
+                    sweep_text=sweep_text,
+                )
+            )
+            continue
         report_path = _field(seat, "report_path")
         if not report_path:
             errors.append(f"seat {seat_id}: missing report_path in roster")
@@ -2327,11 +2728,29 @@ def verify_cycle(cycle_dir: Path) -> list[str]:
             seat_id,
             report_text,
             require_runs=strict,
-            require_fresh=strict,
-            cycle_active=True,
+            require_fresh=strict and cycle_active,
+            cycle_active=cycle_active,
         )
         for err in report_errors:
             errors.append(f"seat {seat_id} report: {err}")
+        if cycle_active and report_errors and _field(report_text, "report_status") == "complete":
+            stale = _freshness_errors(
+                _project_root_of(cycle_dir), report_text, strict, cycle_active
+            )
+            if stale:
+                errors.append(
+                    f"seat {seat_id}: stale COMPLETE recovery route: create a current "
+                    f"replacement with `saipen improve --new-seat --role {roster_role}`, "
+                    "complete it against the current tree, then dispose every historical "
+                    "finding with a non-CONFIRMED disposition (`saipen improve sweep "
+                    f"{cycle_dir.name} <RUN-N/IMP-NNN> SUPERSEDED|NOT_REPRODUCED --report "
+                    f"{seat_id}/{report_path} --reproduced y|n --verification "
+                    "<replacement>/<report>#<RUN-N/IMP-NNN>`; SUPERSEDED when the "
+                    "replacement reproduced it, NOT_REPRODUCED when it did not, and "
+                    "stale CONFIRMED stays forbidden (T-619)), then "
+                    f"`saipen improve retire {cycle_dir.name} {seat_id} --reason "
+                    "STALE_COMPLETE --replacement <fresh-seat>`"
+                )
         derived = derive_status(report_path, text, report_text, sweep_text, seat_id=seat_id)
         for missing_ref in derived.get("missing", []):
             errors.append(
@@ -2453,7 +2872,9 @@ def retire_seat(cycle_dir: Path, seat_id: str, reason: str) -> dict:
             raise ImproveError(
                 f"retire refuses: seat {seat} report is complete -- a "
                 "completed report is resolved through sweep and "
-                "cycle-complete, never retired"
+                "cycle-complete, never retired; if it is stale, preserve it "
+                f"through `saipen improve retire {cycle_dir.name} {seat} "
+                "--reason STALE_COMPLETE --replacement <fresh-seat>`"
             )
     remaining_expected = [
         other
@@ -2764,8 +3185,11 @@ def register_seat(
     seat = _validate_safe_id(seat_id, "seat_id")
     selected_role = _validate_role(role)
     _validate_report_path(report_path, seat)
-    if availability not in AVAILABILITY:
-        raise ImproveError(f"availability {availability!r} outside expected|unavailable")
+    if availability not in {"expected", "unavailable"}:
+        raise ImproveError(
+            f"availability {availability!r} outside expected|unavailable; "
+            "superseded is emitted only by stale-COMPLETE resolution"
+        )
     manifest = _require_cycle_active(cycle_dir, "register_seat")
     text = _read_maybe(manifest)
     if not text.startswith("# IMPROVE CYCLE ROSTER"):
@@ -3165,7 +3589,75 @@ def validate_manifest(text: str, expected_cycle_id: str | None = None) -> list[s
         availability = _field(block, "availability")
         if availability and availability not in AVAILABILITY:
             errors.append(
-                f"seat {seat_id}: availability {availability!r} outside expected|unavailable"
+                f"seat {seat_id}: availability {availability!r} outside "
+                "expected|unavailable|superseded"
+            )
+        resolution_fields = (
+            "resolution",
+            "replacement_seat",
+            "preserved_report_sha256",
+        )
+        if availability == "superseded":
+            for key in resolution_fields:
+                count = len(re.findall(rf"(?m)^{key}:[ \t]*\S", block))
+                if count != 1:
+                    errors.append(
+                        f"seat {seat_id}: superseded field {key} must appear "
+                        f"exactly once, found {count}"
+                    )
+            if _field(block, "resolution") != "stale-complete":
+                errors.append(
+                    f"seat {seat_id}: superseded resolution must be stale-complete"
+                )
+            replacement = _field(block, "replacement_seat")
+            try:
+                _validate_safe_id(replacement, "replacement_seat")
+            except ImproveError as exc:
+                errors.append(f"seat {seat_id}: {exc}")
+            if replacement == seat_id:
+                errors.append(f"seat {seat_id}: replacement_seat must be distinct")
+            preserved_hash = _field(block, "preserved_report_sha256")
+            if not re.fullmatch(r"[0-9a-f]{64}", preserved_hash):
+                errors.append(
+                    f"seat {seat_id}: preserved_report_sha256 must be 64 lowercase hex"
+                )
+        else:
+            present = [key for key in resolution_fields if _field(block, key)]
+            if present:
+                errors.append(
+                    f"seat {seat_id}: resolution field(s) {', '.join(present)} require "
+                    "availability: superseded"
+                )
+
+    # The roster relation is a finite chain ending at one current expected
+    # seat.  A forged dangling/cyclic marker can never make evidence vanish.
+    blocks = {_field(block, "seat_id"): block for block in _seat_blocks(text)}
+    for seat_id, block in blocks.items():
+        if _field(block, "availability") != "superseded":
+            continue
+        replacement = _field(block, "replacement_seat")
+        replacement_block = blocks.get(replacement)
+        if replacement_block is None:
+            errors.append(
+                f"seat {seat_id}: replacement_seat {replacement!r} is not registered"
+            )
+            continue
+        if _field(block, "role") != _field(replacement_block, "role"):
+            errors.append(
+                f"seat {seat_id}: replacement_seat {replacement} has a different role"
+            )
+        seen_chain: set[str] = set()
+        cursor = seat_id
+        while cursor in blocks and _field(blocks[cursor], "availability") == "superseded":
+            if cursor in seen_chain:
+                errors.append(f"seat {seat_id}: supersession chain is cyclic at {cursor}")
+                break
+            seen_chain.add(cursor)
+            cursor = _field(blocks[cursor], "replacement_seat")
+        terminal = blocks.get(cursor)
+        if terminal is not None and (_field(terminal, "availability") or "expected") != "expected":
+            errors.append(
+                f"seat {seat_id}: supersession chain terminates at non-expected seat {cursor}"
             )
     return errors
 

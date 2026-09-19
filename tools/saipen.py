@@ -5689,9 +5689,23 @@ def _improve_dry_run_plan(project_root: Path, action: str, rest: list[str], as_j
             return 2
         cycle, seat = rest[0], rest[1]
         reason = ""
+        replacement = ""
         tail = rest[2:]
-        if tail[:1] == ["--reason"] and len(tail) > 1:
-            reason = tail[1]
+        while tail:
+            if tail[0] == "--reason" and len(tail) > 1 and not reason:
+                reason, tail = tail[1], tail[2:]
+            elif tail[0] == "--replacement" and len(tail) > 1 and not replacement:
+                replacement, tail = tail[1], tail[2:]
+            else:
+                _emit(
+                    {
+                        "ok": False,
+                        "code": "VALIDATION_FAILED",
+                        "detail": f"unsupported or duplicate improve retire option {tail[0]!r}",
+                    },
+                    as_json,
+                )
+                return 2
         if not reason:
             _emit(
                 {
@@ -5699,6 +5713,26 @@ def _improve_dry_run_plan(project_root: Path, action: str, rest: list[str], as_j
                     "code": "VALIDATION_FAILED",
                     "detail": "improve retire needs --reason <CODE> "
                     "(pattern [A-Z][A-Z0-9_-]{0,63})",
+                },
+                as_json,
+            )
+            return 2
+        if reason == "STALE_COMPLETE" and not replacement:
+            _emit(
+                {
+                    "ok": False,
+                    "code": "VALIDATION_FAILED",
+                    "detail": "stale-COMPLETE retire needs --replacement <fresh-seat>",
+                },
+                as_json,
+            )
+            return 2
+        if replacement and reason != "STALE_COMPLETE":
+            _emit(
+                {
+                    "ok": False,
+                    "code": "VALIDATION_FAILED",
+                    "detail": "--replacement is valid only with --reason STALE_COMPLETE",
                 },
                 as_json,
             )
@@ -5712,8 +5746,13 @@ def _improve_dry_run_plan(project_root: Path, action: str, rest: list[str], as_j
                 "cycle": cycle,
                 "seat": seat,
                 "reason": reason,
+                "replacement_seat": replacement,
                 "targets": [str(cycle_root / "MANIFEST.md"), ".saipen/LOG.md"],
-                "detail": "planned seat availability -> unavailable; no writes",
+                "detail": (
+                    "planned stale COMPLETE -> superseded binding; no writes"
+                    if replacement
+                    else "planned seat availability -> unavailable; no writes"
+                ),
             },
             as_json,
         )
@@ -5736,12 +5775,15 @@ def _improve(project_root: Path, args: list[str], as_json: bool, dry_run: bool) 
     mechanically, `complete` finishes a report through full validation,
     `sweep-queue` enumerates the exact unswept composite findings, `sweep
     <cycle> <RUN-N/IMP-NNN> <DISPOSITION>` commits a validated Core
-    disposition (the finding/run/report/ticket must exist BEFORE write),
+    disposition (the finding/run/report/ticket must exist BEFORE write;
+    `--fixed-by`/`--verification` bind a resolution/successor evidence ref),
     `verify <cycle>` validates the COMPLETE cycle output (delta-only, never a
     new cycle), `cycle-complete <cycle>` runs the full cycle bar and flips
     ACTIVE -> COMPLETE, `abort <cycle>` is the pre-sweep mechanical exit,
     `retire <cycle> <seat> --reason <CODE>` is the bounded exit for one seat
-    that can never complete, `clean <cycle>` is archive-with-provenance.
+    that can never complete; `--reason STALE_COMPLETE --replacement <seat>`
+    binds immutable stale COMPLETE evidence to a fresh same-scope replacement.
+    `clean <cycle>` is archive-with-provenance.
     """
     state_path = _state_path(project_root)
     if not state_path.is_file():
@@ -5770,8 +5812,10 @@ def _improve(project_root: Path, args: list[str], as_json: bool, dry_run: bool) 
         from improve import validate_report as _vr
         from improve import validate_sweep as _vs
         from improve import _report_fresh as _rf
+        from improve import _seat_block as _sb
         from improve import _cycle_schema as _cs
         from improve import _field as _imp_field
+        from improve import validate_superseded_seat as _validate_superseded
 
         for cycle in sorted(imp_root.iterdir()):
             manifest = cycle / "MANIFEST.md"
@@ -5844,6 +5888,31 @@ def _improve(project_root: Path, args: list[str], as_json: bool, dry_run: bool) 
                     continue
                 if not report_text:
                     seats.append({"seat": seat, "role": roster_role, "visible": "expected"})
+                    continue
+                seat_block = _sb(roster, seat) or ""
+                availability = _imp_field(seat_block, "availability") or "expected"
+                if availability == "superseded":
+                    resolution_errors = _validate_superseded(
+                        cycle,
+                        seat,
+                        roster_text=roster,
+                        sweep_text=sweep,
+                    )
+                    if resolution_errors:
+                        seats.append(
+                            {
+                                "seat": seat,
+                                "role": roster_role,
+                                "visible": "INVALID_REPORT",
+                                "report_status": _imp_field(report_text, "report_status"),
+                                "errors": resolution_errors[:3],
+                            }
+                        )
+                    else:
+                        derived = derive_status(
+                            report_path, roster, report_text, sweep, seat_id=seat
+                        )
+                        seats.append({"seat": seat, "role": roster_role, **derived})
                     continue
                 # DOGFOOD V (T-620): status applies the SAME report-validation
                 # depth the validator applies -- schema AND mechanical source
@@ -6157,7 +6226,7 @@ def _improve(project_root: Path, args: list[str], as_json: bool, dry_run: bool) 
         disposed = list(_sweep_records(sweep))
         queue = []
         for block in _seat_blocks(roster):
-            if _imp_field(block, "availability") == "unavailable":
+            if _imp_field(block, "availability") in {"unavailable", "superseded"}:
                 continue
             seat_id = _imp_field(block, "seat_id")
             report_ident = _imp_field(block, "report_path")
@@ -6264,8 +6333,11 @@ def _improve(project_root: Path, args: list[str], as_json: bool, dry_run: bool) 
                     "code": "VALIDATION_FAILED",
                     "detail": "improve sweep needs <cycle> <finding_ref> "
                     "<disposition> [--ticket T-###] [--report "
-                    "<ident>] [--reproduced y|n] where finding_ref "
-                    "is RUN-N/IMP-NNN (strict) or IMP-NNN (legacy)",
+                    "<ident>] [--reproduced y|n] [--fixed-by <ref>] "
+                    "[--verification <ref>] where finding_ref "
+                    "is RUN-N/IMP-NNN (strict) or IMP-NNN (legacy); "
+                    "--verification binds a historical SUPERSEDED/"
+                    "NOT_REPRODUCED disposition to its successor evidence",
                 },
                 as_json,
             )
@@ -6290,6 +6362,8 @@ def _improve(project_root: Path, args: list[str], as_json: bool, dry_run: bool) 
         ticket = "-"
         report = "-"
         reproduced = "-"
+        fixed_by = "-"
+        verification = "-"
         rest = args[4:]
         while rest:
             if rest[0] == "--ticket" and len(rest) > 1:
@@ -6298,6 +6372,10 @@ def _improve(project_root: Path, args: list[str], as_json: bool, dry_run: bool) 
                 report, rest = rest[1], rest[2:]
             elif rest[0] == "--reproduced" and len(rest) > 1:
                 reproduced, rest = rest[1], rest[2:]
+            elif rest[0] == "--fixed-by" and len(rest) > 1:
+                fixed_by, rest = rest[1], rest[2:]
+            elif rest[0] == "--verification" and len(rest) > 1:
+                verification, rest = rest[1], rest[2:]
             else:
                 rest = rest[1:]
         if dry_run:
@@ -6319,6 +6397,8 @@ def _improve(project_root: Path, args: list[str], as_json: bool, dry_run: bool) 
                 "ticket": ticket,
                 "report": report,
                 "reproduced": reproduced,
+                "fixed_by": fixed_by,
+                "verification": verification,
             }
             if run_raw is not None:
                 entry["run"] = f"RUN-{run_raw}"
@@ -6444,34 +6524,75 @@ def _improve(project_root: Path, args: list[str], as_json: bool, dry_run: bool) 
         # Marks that ONE roster seat unavailable (journaled) so the cycle bar
         # can be met; the never-completed report and every SWEEP disposition
         # stay byte-identical.
-        if len(args) < 4 or args[3] != "--reason" or len(args) < 5:
+        if len(args) < 5:
             _emit(
                 {
                     "ok": False,
                     "code": "VALIDATION_FAILED",
                     "detail": "improve retire needs <cycle_id> <seat_id> "
-                    "--reason <CODE> (pattern [A-Z][A-Z0-9_-]{0,63})",
+                    "--reason <CODE> [--replacement <fresh-seat>] "
+                    "(pattern [A-Z][A-Z0-9_-]{0,63})",
                 },
                 as_json,
             )
             return 2
-        if len(args) > 5:
+        reason = ""
+        replacement = ""
+        tail = args[3:]
+        while tail:
+            if tail[0] == "--reason" and len(tail) > 1 and not reason:
+                reason, tail = tail[1], tail[2:]
+            elif tail[0] == "--replacement" and len(tail) > 1 and not replacement:
+                replacement, tail = tail[1], tail[2:]
+            else:
+                _emit(
+                    {
+                        "ok": False,
+                        "code": "VALIDATION_FAILED",
+                        "detail": f"unsupported or duplicate improve retire option {tail[0]!r}",
+                    },
+                    as_json,
+                )
+                return 2
+        if not reason:
             _emit(
                 {
                     "ok": False,
                     "code": "VALIDATION_FAILED",
-                    "detail": f"improve retire takes <cycle_id> <seat_id> "
-                    f"--reason <CODE>; unsupported surplus argument "
-                    f"{args[5]!r}",
+                    "detail": "improve retire needs --reason <CODE>",
                 },
                 as_json,
             )
             return 2
+        if reason == "STALE_COMPLETE" and not replacement:
+            _emit(
+                {
+                    "ok": False,
+                    "code": "VALIDATION_FAILED",
+                    "detail": "stale-COMPLETE retire needs --replacement <fresh-seat>",
+                },
+                as_json,
+            )
+            return 2
+        if replacement and reason != "STALE_COMPLETE":
+            _emit(
+                {
+                    "ok": False,
+                    "code": "VALIDATION_FAILED",
+                    "detail": "--replacement is valid only with --reason STALE_COMPLETE",
+                },
+                as_json,
+            )
+            return 2
+        from improve import resolve_stale_complete_seat as _resolve_stale_complete_seat
         from improve import retire_seat as _retire_seat
 
         cycle = cycle_dir(project_root, args[1])
         try:
-            result = _retire_seat(cycle, args[2], args[4])
+            if reason == "STALE_COMPLETE":
+                result = _resolve_stale_complete_seat(cycle, args[2], replacement)
+            else:
+                result = _retire_seat(cycle, args[2], reason)
             _emit(result, as_json)
             return 0 if result.get("ok") else 1
         except ValueError as exc:
