@@ -76,6 +76,15 @@ SOURCE_KINDS = (
     "corrective_followup",
 )
 
+#: What capturing this Source produces (T-1414). `work` is the historical
+#: behaviour: callers may project the receipt as Work. `authority_only` marks
+#: bytes that exist to GRANT something (an operator retirement decision): they
+#: persist with full authority and NEVER project Work, a ticket, a goal or an
+#: Improve cycle. The policy is typed data on the receipt, not a title prefix.
+PROJECTION_POLICIES = ("work", "authority_only")
+PROJECTION_WORK = "work"
+PROJECTION_AUTHORITY_ONLY = "authority_only"
+
 INTENT_RE = re.compile(r"^(SRC-\d+)$")
 
 # Requirement clause classes (agent-normalized, recorded durably).
@@ -1150,6 +1159,7 @@ def find_by_body(root: Path | str, body: str) -> dict | None:
         "status": meta.get("status") or (CLOSED_STATUS if found.get("closed") else None),
         "orphan": bool(found.get("orphan")),
         "invalid": found.get("invalid"),
+        "projection_policy": meta.get("projection_policy") or PROJECTION_WORK,
     }
 
 
@@ -1184,6 +1194,7 @@ def capture(
     transport_transform: str = "none",
     newline_normalization: str = "none",
     request_provenance: dict | None = None,
+    projection_policy: str = PROJECTION_WORK,
 ) -> dict:
     """Capture an authoritative source VERBATIM before any interpretation.
 
@@ -1215,6 +1226,12 @@ def capture(
             "ok": False,
             "code": "VALIDATION_FAILED",
             "detail": f"unknown source kind {source_kind!r}",
+        }
+    if projection_policy not in PROJECTION_POLICIES:
+        return {
+            "ok": False,
+            "code": "VALIDATION_FAILED",
+            "detail": f"unknown projection policy {projection_policy!r}",
         }
     if work is not None and not re.fullmatch(r"T-\d+", work):
         return {"ok": False, "code": "INVALID_ID", "detail": f"work {work!r}"}
@@ -1355,6 +1372,11 @@ def capture(
                 if isinstance(request_provenance, dict)
                 else {"witness": "model_supplied"},
             }
+            if projection_policy != PROJECTION_WORK:
+                # Typed, explicit and additive: only a non-default policy is
+                # recorded, so every historical receipt keeps its exact shape
+                # while an authority-only receipt says what it is.
+                meta["projection_policy"] = projection_policy
             if amends:
                 meta["amends"] = amends
 

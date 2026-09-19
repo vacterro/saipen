@@ -7066,7 +7066,8 @@ def main(argv: list[str] | None = None) -> int:
             "<name> <public|private>|userperson show "
             "[--project|--global|--effective]|userperson add|remove <text> "
             "[--category NAME] [--project|--global]|userperson reset "
-            "[--project|--global] --confirm|sub|rebind-home "
+            "[--project|--global] --confirm|authority capture [--file PATH|--hex HEX]|"
+            "sub|rebind-home "
             "<candidate-home>|context cold|hot|audit|orient [--handoff JSON]|"
             "acceptance <T-###>|attempt open|attempt close <RESULT> "
             "<STOP>|brief|focus [text]|build <directive>|knowledge "
@@ -8095,6 +8096,95 @@ def main(argv: list[str] | None = None) -> int:
                 as_json,
             )
             return 1
+    if command == "authority":
+        # T-1414: persist ONE operator-authority Source and project NOTHING.
+        # The capsule grammar is retirement's own closed parser; this verb is
+        # only the byte-exact transport (--file / --hex, never a joined argv).
+        from saipen_engine.operations import authority_capture
+
+        rest = args[1:]
+        if not rest or rest[0] != "capture":
+            _emit(
+                {
+                    "ok": False,
+                    "code": "VALIDATION_FAILED",
+                    "detail": "authority needs an action: capture --file <UTF8_FILE> | "
+                    "capture --hex <UTF8_HEX>",
+                    "canonical_next_command": "saipen authority capture --file <UTF8_FILE>",
+                },
+                as_json,
+            )
+            return 2
+        file_path = None
+        hex_payload = None
+        opts = rest[1:]
+        index = 0
+        while index < len(opts):
+            token = opts[index]
+            if token not in ("--file", "--hex") or index + 1 >= len(opts):
+                detail = (
+                    f"{token} needs a value"
+                    if token in ("--file", "--hex")
+                    else f"unknown argument {token!r}"
+                )
+                _emit(
+                    {
+                        "ok": False,
+                        "code": "VALIDATION_FAILED",
+                        "detail": detail,
+                        "canonical_next_command": "saipen authority capture --file <UTF8_FILE>",
+                    },
+                    as_json,
+                )
+                return 2
+            value = opts[index + 1]
+            if file_path is not None or hex_payload is not None:
+                _emit(
+                    {
+                        "ok": False,
+                        "code": "VALIDATION_FAILED",
+                        "detail": "authority capture takes exactly one carrier: "
+                        "--file or --hex, not both",
+                    },
+                    as_json,
+                )
+                return 2
+            if token == "--file":
+                file_path = value
+            else:
+                hex_payload = value
+            index += 2
+        if file_path is None and hex_payload is None:
+            _emit(
+                {
+                    "ok": False,
+                    "code": "VALIDATION_FAILED",
+                    "detail": "authority capture needs --file <UTF8_FILE> or --hex <UTF8_HEX>",
+                    "canonical_next_command": "saipen authority capture --file <UTF8_FILE>",
+                },
+                as_json,
+            )
+            return 2
+        try:
+            if file_path is not None:
+                text = Path(file_path).read_bytes().decode("utf-8")
+            else:
+                text = bytes.fromhex(hex_payload).decode("utf-8")
+        except (OSError, ValueError, UnicodeDecodeError) as exc:
+            _emit(
+                {
+                    "ok": False,
+                    "code": "VALIDATION_FAILED",
+                    "detail": f"authority capture needs exact UTF-8 bytes: {exc}",
+                },
+                as_json,
+            )
+            return 1
+        if not dry_run and _negotiate_capability(project_root) == "read-only":
+            return _capability_refusal(as_json)
+        result = authority_capture(project_root, _agent_for(project_root), text, dry_run=dry_run)
+        _emit(result.to_dict(), as_json)
+        return 0 if result.ok else 1
     if command == "acceptance":
         return _acceptance(project_root, args[1:], as_json)
     if command == "brief":

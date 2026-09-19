@@ -77,6 +77,16 @@ def _request_from_receipt(root: Path, receipt: str) -> tuple[dict | None, str | 
     found = intake.read_body(root, receipt)
     if not found.get("ok"):
         return None, f"{receipt}: {found.get('code')} {found.get('detail') or ''}".strip()
+    meta = found.get("meta") or {}
+    if meta.get("projection_policy") == intake.PROJECTION_AUTHORITY_ONLY:
+        # T-1414: an authority-only Source is typed data, not a task. It
+        # exists to be cited by `saipen ticket retire --authority` and must
+        # never be re-projected into Work.
+        return None, (
+            f"{receipt} is captured operator authority (projection_policy "
+            "authority_only) and never projects Work; cite it with "
+            f"saipen ticket retire <T-###> --authority {receipt}"
+        )
     body = str(found.get("body") or "")
     head, sep, request = body.partition("\n" + _REQUEST_HEADER + "\n")
     if not sep or not head.startswith("# User request"):

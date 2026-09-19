@@ -87,6 +87,12 @@
         "purge": "EXECUTION"
       }
     },
+    "authority": {
+      "default": "DIAGNOSTIC",
+      "subcommands": {
+        "capture": "INGRESS"
+      }
+    },
     "audit": {
       "default": "DIAGNOSTIC",
       "subcommands": {

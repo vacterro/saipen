@@ -26,6 +26,7 @@ import json
 import os
 import re
 import datetime
+import hashlib
 import uuid
 from pathlib import Path
 
@@ -5068,6 +5069,87 @@ def user_request(
             "user_explicit": True,
             "next_action": projected.data.get("next_action"),
             "event_id": projected.data.get("event_id"),
+        },
+    )
+
+
+def authority_capture(
+    project_root: Path | str,
+    agent: str,
+    text: str,
+    *,
+    dry_run: bool = False,
+) -> Result:
+    """Persist ONE operator-authority capsule and project NOTHING (T-1414).
+
+    The retirement contract already demands `--authority SRC-###` whose stored
+    bytes carry an operator-authority capsule granting exactly the Work's
+    receipts -- and it must not be weakened to trust prose, event text, Work
+    titles or command lines. What was missing is the pure persistence half:
+    every existing ingress (`start`, `user-request`, `source capture`) either
+    also projected Work or accepted arbitrary bodies. This owner captures the
+    SAME closed capsule grammar the retirement parser owns, with an explicit
+    non-projecting policy, so the operator's decision becomes one Source and
+    zero Work/ticket/goal/Improve rows.
+    """
+    from . import intake as _intake
+    from . import retirement as _ret
+
+    root = Path(project_root)
+    if not isinstance(text, str) or not text.strip():
+        return _refuse(
+            "INVALID_AUTHORITY_CAPTURE",
+            "authority capture needs the exact UTF-8 capsule bytes from --file or --hex",
+        )
+    problem = _ret.capsule_problem(text)
+    if problem:
+        return _refuse("INVALID_AUTHORITY_CAPTURE", problem)
+    digest = hashlib.sha256(text.encode("utf-8")).hexdigest()
+    operation_id = "authority-capture-" + digest[:16]
+    if dry_run:
+        existing = _intake.find_by_body(root, text)
+        return Result(
+            True,
+            "PLAN",
+            message="operator-authority capsule would be captured as its own Source",
+            data={
+                "operation": "authority_capture",
+                "dry_run": True,
+                "receipt": (existing or {}).get("receipt"),
+                "source_sha256": digest,
+                "operation_id": operation_id,
+                "projection_policy": _intake.PROJECTION_AUTHORITY_ONLY,
+                "targets": [".saipen/intake/active (source receipt)"],
+            },
+        )
+    captured = _intake.capture(
+        root,
+        text,
+        source_kind="user_instruction",
+        projection_policy=_intake.PROJECTION_AUTHORITY_ONLY,
+    )
+    if not captured.get("ok"):
+        return _refuse(
+            captured.get("code", "SOURCE_UNRESOLVED"),
+            "operator-authority capsule could not be captured durably: "
+            + str(captured.get("detail") or captured),
+        )
+    duplicate = str(captured.get("code") or "").startswith("SOURCE_DUPLICATE")
+    return Result(
+        True,
+        "AUTHORITY_ALREADY_CAPTURED" if duplicate else "AUTHORITY_CAPTURED",
+        message="operator-authority capsule captured as "
+        + str(captured.get("receipt"))
+        + (" (already present)" if duplicate else "")
+        + "; it authorizes retirement and projects no Work",
+        data={
+            "receipt": captured.get("receipt"),
+            "source_sha256": captured.get("source_sha256") or digest,
+            "operation_id": operation_id,
+            "projection_policy": _intake.PROJECTION_AUTHORITY_ONLY,
+            "source_kind": "user_instruction",
+            "duplicate": duplicate,
+            "linked_work": None,
         },
     )
 

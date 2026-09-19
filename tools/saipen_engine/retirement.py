@@ -283,6 +283,29 @@ def grammar_hint() -> str:
     )
 
 
+def capsule_problem(text: str) -> str | None:
+    """Why these exact bytes are not a usable operator-authority capsule.
+
+    Syntax gate for `saipen authority capture` (T-1414): the SAME parser
+    retirement uses decides what grants. A body whose capsule is malformed,
+    conflicting, fenced (a quotation), never closed or absent stores nothing;
+    semantic checks against the live BOARD stay retirement's job.
+    """
+    if not isinstance(text, str):
+        return "operator-authority capsule bytes must be UTF-8 text"
+    parsed = authority_grants(text)
+    if parsed.problems:
+        return "; ".join(parsed.problems) + " -- " + grammar_hint()
+    if parsed.grants:
+        return None
+    if GRANT_HEADER in text:
+        return (
+            "the operator-authority capsule is fenced, unclosed or quoted as a "
+            "whole, so it grants nothing -- " + grammar_hint()
+        )
+    return "the body carries no operator-authority capsule -- " + grammar_hint()
+
+
 def authority_error(
     root: Path,
     authority_receipt: str,
