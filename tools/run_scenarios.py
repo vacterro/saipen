@@ -81,9 +81,11 @@ from improve import (
     register_cycle,
     register_seat,
     resolve_report_path,
+    retire_seat,
     validate_manifest,
     validate_report,
     validate_strict_provenance,
+    verify_cycle,
     write_sweep_entry,
 )
 from userperson import (
@@ -11392,10 +11394,13 @@ def run_improve_probes() -> tuple[list[str], int]:
     )
 
     # ---- PRE-v8 DOGFOOD VIII (A1-A6): hostile evidence-continuity closeout.
-    # A1: a DRAFT seat may resume only while its mechanical source identity
-    # still matches the CURRENT source identity. Tracked source mutation
-    # between prepare and retry must refuse -- never resume with the OLD
-    # report fingerprint bound to fresh work, never silently rebase.
+    # T-1406: a DRAFT with ZERO committed RUN sections is an assignment, not
+    # evidence -- when its mechanical identity header went stale (install
+    # update or tracked source change between admission and resume) it is
+    # re-bound IN PLACE through the journal: only installed version/fingerprint
+    # and the source identity fields are re-derived, assignment context and
+    # body bytes are never touched. A draft with ANY committed RUN is evidence
+    # and is never re-bound; the refusal names the canonical retire route.
     _stale_root = project_fixture("saipen-stale-draft-")
     (_stale_root / "src.txt").write_text("v1\n", encoding="utf-8")
     _stale_first = prepare_audit_seat(
@@ -11410,7 +11415,6 @@ def run_improve_probes() -> tuple[list[str], int]:
     _stale_report = _stale_root / _stale_first["report_path"]
     _stale_manifest = _stale_root / ".saipen" / "improve" / _stale_first["cycle_id"] / "MANIFEST.md"
     _stale_manifest_before = _stale_manifest.read_bytes()
-    _stale_report_before = _stale_report.read_bytes()
     _stale_recovery_before = _recovery_ops_snapshot(_stale_root)
     (_stale_root / "src.txt").write_text("v2 -- tracked source changed\n", encoding="utf-8")
     _stale_retry = prepare_audit_seat(
@@ -11422,31 +11426,188 @@ def run_improve_probes() -> tuple[list[str], int]:
         model_or_runtime="probe",
         context_scope="stale draft control",
     )
+    _stale_current = compute_source_identity(_stale_root)
+    _stale_text = _stale_report.read_text(encoding="utf-8-sig")
     expect(
-        "A1: stale DRAFT resume refuses STALE_REPORT with zero writes",
-        _stale_retry.get("code") == "STALE_REPORT"
-        and _stale_retry.get("resumed") is False
-        and _stale_retry.get("ok") is False
+        "T-1406: stale un-audited DRAFT resume re-binds the mechanical header "
+        "through the journal with zero manifest bytes",
+        _stale_retry.get("code") == "ALREADY_ASSIGNED"
+        and _stale_retry.get("resumed") is True
+        and _stale_retry.get("header_rebound") is True
+        and _stale_retry.get("previous_source_head") != ""
         and _stale_manifest.read_bytes() == _stale_manifest_before
-        and _stale_report.read_bytes() == _stale_report_before
-        and _recovery_ops_snapshot(_stale_root) == _stale_recovery_before,
+        and _recovery_ops_snapshot(_stale_root) == _stale_recovery_before
+        and f"source_tree_fingerprint: {_stale_current.source_tree_fingerprint}" in _stale_text
+        and len(re.findall(r"(?m)^## RUN \d+\s*$", _stale_text)) == 0,
         repr(_stale_retry),
     )
-    (_stale_root / "src.txt").write_text("v1\n", encoding="utf-8")
-    _stale_restored = prepare_audit_seat(
-        _stale_root,
+
+    # T-1406: the FreeBuff incident shape -- install-stale (not source-stale)
+    # un-audited draft resumes by re-binding the install identity fields.
+    _fp_root = project_fixture("saipen-stale-fingerprint-")
+    _fp_first = prepare_audit_seat(
+        _fp_root,
         agent_family="probe",
         role="critic",
-        session_id="critic-stale-01",
-        project_name="STALE",
+        session_id="critic-fp-01",
+        project_name="FP",
         model_or_runtime="probe",
-        context_scope="stale draft control",
+        context_scope="install fingerprint control",
+    )
+    _fp_report = _fp_root / _fp_first["report_path"]
+    _fp_stale = "sha256:" + "f" * 64
+    _fp_report.write_text(
+        re.sub(
+            r"(?m)^protocol_fingerprint:.*$",
+            f"protocol_fingerprint: {_fp_stale}",
+            _fp_report.read_text(encoding="utf-8-sig"),
+            count=1,
+        ),
+        encoding="utf-8",
+    )
+    _fp_retry = prepare_audit_seat(
+        _fp_root,
+        agent_family="probe",
+        role="critic",
+        session_id="critic-fp-01",
+        project_name="FP",
+        model_or_runtime="probe",
+        context_scope="install fingerprint control",
     )
     expect(
-        "A1: restoring the source restores the DRAFT resume",
-        _stale_restored.get("code") == "ALREADY_ASSIGNED"
-        and _stale_restored.get("resumed") is True,
-        repr(_stale_restored),
+        "T-1406: install-stale un-audited DRAFT re-binds and reports the old "
+        "fingerprint",
+        _fp_retry.get("code") == "ALREADY_ASSIGNED"
+        and _fp_retry.get("header_rebound") is True
+        and _fp_retry.get("previous_protocol_fingerprint") == _fp_stale,
+        repr(_fp_retry),
+    )
+
+    # A1: an audited DRAFT (any committed RUN) is evidence: the stale resume
+    # still refuses, byte-preserves the report, and names the retire route.
+    _stale2_root = project_fixture("saipen-stale-audited-")
+    (_stale2_root / "src.txt").write_text("v1\n", encoding="utf-8")
+    _stale2_first = prepare_audit_seat(
+        _stale2_root,
+        agent_family="probe",
+        role="critic",
+        session_id="critic-stale-02",
+        project_name="STAUD",
+        model_or_runtime="probe",
+        context_scope="audited stale control",
+    )
+    _stale2_report = _stale2_root / _stale2_first["report_path"]
+    append_run(_stale2_report, "NO_FINDINGS")
+    _stale2_report_before = _stale2_report.read_bytes()
+    (_stale2_root / "src.txt").write_text("v2 -- tracked source changed\n", encoding="utf-8")
+    _stale2_retry = prepare_audit_seat(
+        _stale2_root,
+        agent_family="probe",
+        role="critic",
+        session_id="critic-stale-02",
+        project_name="STAUD",
+        model_or_runtime="probe",
+        context_scope="audited stale control",
+    )
+    expect(
+        "T-1406: a draft with a committed RUN is never re-bound and the "
+        "refusal names the retire route",
+        _stale2_retry.get("code") in ("STALE_REPORT", "INVALID_REPORT")
+        and _stale2_retry.get("resumed") is False
+        and _stale2_report.read_bytes() == _stale2_report_before
+        and "improve retire" in str(_stale2_retry.get("detail", "")),
+        repr(_stale2_retry),
+    )
+
+    # T-1406 bounded exit: retire the one seat that can never complete while a
+    # second seat carries the evidence. Every SWEEP disposition survives, the
+    # never-completed report stays byte-identical, the retired seat is skipped
+    # by the cycle bar, and the cycle completes.
+    _ret_root = project_fixture("saipen-retire-seat-")
+    _ret_s1 = prepare_audit_seat(
+        _ret_root,
+        agent_family="probe",
+        role="critic",
+        session_id="critic-ret-01",
+        project_name="RET",
+        model_or_runtime="probe",
+        context_scope="retire control",
+    )
+    _ret_s2 = prepare_audit_seat(
+        _ret_root,
+        agent_family="probe",
+        role="critic",
+        session_id="critic-ret-02",
+        project_name="RET",
+        model_or_runtime="probe",
+        context_scope="retire control",
+    )
+    _ret_cycle = cycle_dir(_ret_root, _ret_s1["cycle_id"])
+    _ret_r1 = _ret_root / _ret_s1["report_path"]
+    _ret_r2 = _ret_root / _ret_s2["report_path"]
+    append_run(_ret_r1, "NO_FINDINGS")
+    _ret_r1.write_text(
+        re.sub(
+            r"(?m)^protocol_fingerprint:.*$",
+            "protocol_fingerprint: sha256:" + "f" * 64,
+            _ret_r1.read_text(encoding="utf-8-sig"),
+            count=1,
+        ),
+        encoding="utf-8",
+    )
+    append_run(
+        _ret_r2,
+        "IMP-001 [P2] [LOGIC_ERROR] [observed] [note]\n"
+        "expected: no synthetic finding\nactual: synthetic finding\n"
+        "evidence: retire control\n",
+    )
+    complete_report(_ret_r2)
+    write_sweep_entry(
+        _ret_cycle,
+        {
+            "run": "RUN-1",
+            "imp_id": "IMP-001",
+            "disposition": "NOT_REPRODUCED",
+            "ticket": "-",
+            "report": "critic-ret-02/saipen_improve_RET.md",
+            "reproduced": "n",
+        },
+    )
+    _ret_r1_before = _ret_r1.read_bytes()
+    _ret_r2_before = _ret_r2.read_bytes()
+    try:
+        abort_cycle(_ret_cycle)
+        _ret_abort_refused = False
+    except ImproveError as _ret_abort_exc:
+        _ret_abort_refused = "improve retire" in str(_ret_abort_exc)
+    _ret_done = retire_seat(_ret_cycle, "critic-ret-01", "STALE_INSTALL")
+    _ret_manifest = (_ret_cycle / "MANIFEST.md").read_text(encoding="utf-8-sig")
+    try:
+        retire_seat(_ret_cycle, "critic-ret-01", "AGAIN")
+        _ret_double_refused = False
+    except ImproveError as _ret_double_exc:
+        _ret_double_refused = "already unavailable" in str(_ret_double_exc)
+    try:
+        retire_seat(_ret_cycle, "critic-ret-02", "COMPLETE_SEAT")
+        _ret_complete_refused = False
+    except ImproveError as _ret_complete_exc:
+        _ret_complete_refused = "is complete" in str(_ret_complete_exc)
+    _ret_verify = verify_cycle(_ret_cycle)
+    _ret_completed = complete_cycle(_ret_cycle)
+    expect(
+        "T-1406: bounded exit -- abort refuses post-sweep, retire preserves "
+        "the dead report and every disposition, then the cycle completes",
+        _ret_abort_refused
+        and _ret_done.get("code") == "SEAT_RETIRED"
+        and _ret_done.get("availability") == "unavailable"
+        and "availability: unavailable" in _ret_manifest
+        and _ret_double_refused
+        and _ret_complete_refused
+        and _ret_verify == []
+        and _ret_completed.get("ok") is True
+        and _ret_r1.read_bytes() == _ret_r1_before
+        and _ret_r2.read_bytes() == _ret_r2_before,
+        repr((_ret_done, _ret_verify, _ret_completed)),
     )
 
     # A2: an invalid active MANIFEST is never consumed or mutated. validate
@@ -12448,6 +12609,86 @@ def run_improve_probes() -> tuple[list[str], int]:
         "IMPROVE.md documents same-path abort preservation, never .discarded",
         "AT THEIR SAME PATH" in _abort_doc and ".discarded" not in _abort_doc,
         "IMPROVE.md abort contract drifted from the writer",
+    )
+
+    # T-1406: the canonical CLI exit -- `improve retire` flips ONE expected
+    # seat to unavailable through the journaled roster write; the
+    # never-completed report and every other report byte are preserved.
+    _rt_root = project_fixture("saipen-retire-cli-")
+    _rt_s1 = prepare_audit_seat(
+        _rt_root,
+        agent_family="probe",
+        role="core",
+        session_id="probe-rt-1",
+        project_name="RTC",
+        model_or_runtime="probe",
+        context_scope="retire cli",
+    )
+    _rt_s2 = prepare_audit_seat(
+        _rt_root,
+        agent_family="probe",
+        role="core",
+        session_id="probe-rt-2",
+        project_name="RTC",
+        model_or_runtime="probe",
+        context_scope="retire cli",
+    )
+    _rt_cycle = cycle_dir(_rt_root, _rt_s1["cycle_id"])
+    _rt_rep1 = _rt_root / _rt_s1["report_path"]
+    _rt_rep2 = _rt_root / _rt_s2["report_path"]
+    append_run(_rt_rep2, "NO_FINDINGS")
+    complete_report(_rt_rep2)
+    _rt_bytes1 = _rt_rep1.read_bytes()
+    _rt_bytes2 = _rt_rep2.read_bytes()
+    _rt_proc = subprocess.run(
+        [
+            sys.executable,
+            str(HOME / "tools" / "saipen.py"),
+            "improve",
+            "retire",
+            _rt_s1["cycle_id"],
+            _rt_s1["seat_id"],
+            "--reason",
+            "STALE_INSTALL",
+            "--json",
+        ],
+        cwd=str(_rt_root),
+        capture_output=True,
+        text=True,
+        timeout=60,
+    )
+    _rt_data = json.loads(_rt_proc.stdout)
+    expect(
+        "retire: the CLI flips one expected seat to unavailable and preserves "
+        "both report bodies",
+        _rt_data.get("code") == "SEAT_RETIRED"
+        and _rt_data.get("availability") == "unavailable"
+        and "availability: unavailable" in (_rt_cycle / "MANIFEST.md").read_text(encoding="utf-8")
+        and _rt_rep1.read_bytes() == _rt_bytes1
+        and _rt_rep2.read_bytes() == _rt_bytes2,
+        repr(_rt_proc.stdout[:300]),
+    )
+    _rt_proc2 = subprocess.run(
+        [
+            sys.executable,
+            str(HOME / "tools" / "saipen.py"),
+            "improve",
+            "retire",
+            _rt_s1["cycle_id"],
+            _rt_s2["seat_id"],
+            "--reason",
+            "WHY",
+            "--json",
+        ],
+        cwd=str(_rt_root),
+        capture_output=True,
+        text=True,
+        timeout=60,
+    )
+    expect(
+        "retire: a completed seat's report is never retired",
+        "is complete" in _rt_proc2.stdout and "never retired" in _rt_proc2.stdout,
+        repr(_rt_proc2.stdout[:200]),
     )
 
     # ---- T-638 (P0): a known-INVALID base is never mutated. Every lifecycle
@@ -18855,6 +19096,7 @@ def _main_impl():
         "SAIPEN_T1012_STRICT_PROBES_ONLY": "t1012_strict",
         "SAIPEN_PERF_WAVE_PROBES_ONLY": "perf_wave",
         "SAIPEN_SOURCE_RECEIPT_PROBES_ONLY": "source_receipts",
+        "SAIPEN_IMPROVE_PROBES_ONLY": "improve",
     }
     _active = [k for k, v in _PROBE_SELECTORS.items() if os.environ.get(k) == "1"]
     if len(_active) > 1:
@@ -19397,6 +19639,7 @@ def _main_impl():
             "t1012_strict": [run_t1012_strict_grammar_probes],
             "perf_wave": [run_perf_wave_probes],
             "source_receipts": [run_source_receipt_probes],
+            "improve": [run_improve_probes],
         }
         if _selected_group not in _GROUPS:
             print(f"FAILED: no probe group for {_selected_group!r}")

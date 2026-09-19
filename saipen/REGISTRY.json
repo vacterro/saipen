@@ -392,6 +392,7 @@
       "verify",
       "cycle-complete",
       "abort",
+      "retire",
       "clean"
     ]
   },

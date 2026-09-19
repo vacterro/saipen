@@ -5468,8 +5468,8 @@ def _improve_dry_run_plan(project_root: Path, action: str, rest: list[str], as_j
     """CORE-002: semantic PLAN for an improve mutator under --dry-run.
 
     Validates the closed grammar of `submit` / `complete` / `cycle-complete` /
-    `abort` and returns concrete planned journal/LOG/state targets with zero
-    writes. The pre-improve state error surface (NOT_SAIPEN_PROJECT /
+    `abort` / `retire` and returns concrete planned journal/LOG/state targets
+    with zero writes. The pre-improve state error surface (NOT_SAIPEN_PROJECT /
     state-malformed) is shared between dry-run and the real mutator so an
     invalid session refuses consistently.
     """
@@ -5598,6 +5598,48 @@ def _improve_dry_run_plan(project_root: Path, action: str, rest: list[str], as_j
             as_json,
         )
         return 0
+    if action == "retire":
+        if len(rest) < 2:
+            _emit(
+                {
+                    "ok": False,
+                    "code": "VALIDATION_FAILED",
+                    "detail": "improve retire needs <cycle> <seat> --reason <CODE>",
+                },
+                as_json,
+            )
+            return 2
+        cycle, seat = rest[0], rest[1]
+        reason = ""
+        tail = rest[2:]
+        if tail[:1] == ["--reason"] and len(tail) > 1:
+            reason = tail[1]
+        if not reason:
+            _emit(
+                {
+                    "ok": False,
+                    "code": "VALIDATION_FAILED",
+                    "detail": "improve retire needs --reason <CODE> "
+                    "(pattern [A-Z][A-Z0-9_-]{0,63})",
+                },
+                as_json,
+            )
+            return 2
+        cycle_root = project_root / ".saipen" / "improve" / cycle
+        _emit(
+            {
+                "ok": True,
+                "code": "DRY_RUN_PLAN",
+                "action": "retire",
+                "cycle": cycle,
+                "seat": seat,
+                "reason": reason,
+                "targets": [str(cycle_root / "MANIFEST.md"), ".saipen/LOG.md"],
+                "detail": "planned seat availability -> unavailable; no writes",
+            },
+            as_json,
+        )
+        return 0
     _emit(
         {"ok": False, "code": "VALIDATION_FAILED", "detail": f"unknown improve action {action!r}"},
         as_json,
@@ -5619,7 +5661,9 @@ def _improve(project_root: Path, args: list[str], as_json: bool, dry_run: bool) 
     disposition (the finding/run/report/ticket must exist BEFORE write),
     `verify <cycle>` validates the COMPLETE cycle output (delta-only, never a
     new cycle), `cycle-complete <cycle>` runs the full cycle bar and flips
-    ACTIVE -> COMPLETE, `clean <cycle>` is archive-with-provenance.
+    ACTIVE -> COMPLETE, `abort <cycle>` is the pre-sweep mechanical exit,
+    `retire <cycle> <seat> --reason <CODE>` is the bounded exit for one seat
+    that can never complete, `clean <cycle>` is archive-with-provenance.
     """
     state_path = _state_path(project_root)
     if not state_path.is_file():
@@ -5766,7 +5810,7 @@ def _improve(project_root: Path, args: list[str], as_json: bool, dry_run: bool) 
     # same as non-dry; valid requests report concrete plan targets. The
     # previous `DRY_RUN_UNSUPPORTED` short-circuit hid the plan and made
     # dry-run observationally different from a real submission.
-    if dry_run and action in ("submit", "complete", "cycle-complete", "abort"):
+    if dry_run and action in ("submit", "complete", "cycle-complete", "abort", "retire"):
         return _improve_dry_run_plan(project_root, action, args[1:] if action else [], as_json)
     if action is None:
         # DOGFOOD V (T-617): bare `saipen improve` is the documented
@@ -6317,13 +6361,51 @@ def _improve(project_root: Path, args: list[str], as_json: bool, dry_run: bool) 
                 as_json,
             )
             return 1
+    if action == "retire":
+        # T-1406: canonical bounded exit for a seat that can never complete.
+        # Marks that ONE roster seat unavailable (journaled) so the cycle bar
+        # can be met; the never-completed report and every SWEEP disposition
+        # stay byte-identical.
+        if len(args) < 4 or args[3] != "--reason" or len(args) < 5:
+            _emit(
+                {
+                    "ok": False,
+                    "code": "VALIDATION_FAILED",
+                    "detail": "improve retire needs <cycle_id> <seat_id> "
+                    "--reason <CODE> (pattern [A-Z][A-Z0-9_-]{0,63})",
+                },
+                as_json,
+            )
+            return 2
+        if len(args) > 5:
+            _emit(
+                {
+                    "ok": False,
+                    "code": "VALIDATION_FAILED",
+                    "detail": f"improve retire takes <cycle_id> <seat_id> "
+                    f"--reason <CODE>; unsupported surplus argument "
+                    f"{args[5]!r}",
+                },
+                as_json,
+            )
+            return 2
+        from improve import retire_seat as _retire_seat
+
+        cycle = cycle_dir(project_root, args[1])
+        try:
+            result = _retire_seat(cycle, args[2], args[4])
+            _emit(result, as_json)
+            return 0 if result.get("ok") else 1
+        except ValueError as exc:
+            _emit({"ok": False, "code": "VALIDATION_FAILED", "detail": str(exc)}, as_json)
+            return 1
     _emit(
         {
             "ok": False,
             "code": "UNKNOWN_ACTION",
             "detail": f"unknown saipen improve action {action!r}; use "
             "status|submit|complete|sweep|sweep-queue|"
-            "verify|cycle-complete|abort|clean",
+            "verify|cycle-complete|abort|retire|clean",
         },
         as_json,
     )

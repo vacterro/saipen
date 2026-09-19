@@ -24,7 +24,7 @@ error this file exists to prevent.
 This lifecycle declaration must exactly mirror CORE's routing declaration;
 the validator compares both with the CLI executor set.
 
-`IMPROVE_ACTIONS = [bare, status, submit, complete, sweep, sweep-queue, verify, cycle-complete, abort, clean]`
+`IMPROVE_ACTIONS = [bare, status, submit, complete, sweep, sweep-queue, verify, cycle-complete, abort, retire, clean]`
 
 Each action's own validation rules live in the section that owns it; this list
 is the surface, not a second copy of the law.
@@ -69,6 +69,12 @@ is the surface, not a second copy of the law.
   rename, no move, no raw file deletion): the manifest's archived +
   cycle_aborted markers are the single source of truth that the cycle and
   its drafts are non-authoritative (T-632). The next cycle can be admitted.
+- `saipen improve retire <cycle> <seat> --reason <CODE>` — the bounded exit
+  for ONE expected seat that can never complete (section 3). It marks that
+  seat `availability: unavailable` through the journaled roster write; the
+  never-completed report stays byte-identical at its path, every SWEEP
+  disposition is untouched, and the cycle bar can then be met with the
+  remaining seats. It never touches a seat whose report IS complete.
 - `saipen improve clean <cycle>` — archive/retention meta-operation
   (section 10). Never means phase CLEAN, never enters the CLEAN phase.
 
@@ -128,6 +134,12 @@ satisfies another's finding.
 - After COMPLETE every ordinary mutator (register_seat, append_run,
   write_sweep_entry) refuses; only permitted archive metadata may change the
   cycle, and a new cycle may then be admitted without deleting history.
+- Every ACTIVE cycle has a finite canonical exit even after its sweep started:
+  an un-audited DRAFT (zero committed RUNs) is re-bound on resume (section 4),
+  and a seat that can never complete is retired through `saipen improve retire`
+  (section 3). Retirement preserves every existing disposition and the
+  never-completed report's bytes; `abort` stays forbidden once the sweep has
+  dispositions, because aborting would discard them.
 
 Cycle directory:
 
@@ -181,6 +193,10 @@ availability        (expected | unavailable)
 - Duplicate seat registration fails.
 - A seat cannot silently attach itself to another project's cycle.
 - Unavailable historical seats are explicitly `availability: unavailable`.
+  `saipen improve retire` is the canonical journaled transition for a seat
+  whose report never reached complete; it is refused for a completed report
+  and refused when it would leave the roster with no expected seat, so a
+  cycle is never completed into evidence-free history.
 - Seat identity is NEVER inferred from `STATE.agent` (latest actor only) or
   from LOG agent tags (optional field).
 - Bare/`--new-seat` allocates the next `<agent>-NN` while holding SAIOPS's
@@ -242,6 +258,17 @@ installation path (e.g. `V:\...\_SAIPEN`) must never be persisted as report
 identity: it is machine-local, non-portable, unnecessary for reproduction, and
 potentially user-specific filesystem leakage.
 
+A DRAFT with zero committed `## RUN` sections is an assignment, not evidence:
+when its mechanical identity header (installed `saipen_version`/
+`protocol_fingerprint`, `source_head`, `source_tree_fingerprint`,
+`discovery_model`) went stale between admission and resume -- an install
+update, a tracked source change -- the canonical resume re-derives ONLY those
+fields in place through the journal, and the assignment result carries
+`header_rebound: true` with the previous fingerprint/head. Assignment context
+fields (`agent`, `role`, `model_or_runtime`, `project`, `context_scope`,
+`context_available`) and every body byte are never touched. A draft with ANY
+committed RUN is evidence and is never re-bound.
+
 `report_status: draft | complete`. A seat marks a RUN complete; from that
 moment the original report content is immutable (byte-stable).
 
@@ -281,7 +308,9 @@ discovery_model, context_scope, context_available, report_status
 or a friendly label never passes as fresh audit evidence. For strict active
 cycles the report must also be fresh against the CURRENT source identity:
 same HEAD plus a changed/dirty tree is detected, and stale evidence cannot
-authorize fresh canonical work without current reproduction.
+authorize fresh canonical work without current reproduction. A zero-RUN draft
+is not evidence, so the section 4 re-bind rule is its one exception -- it
+rewrites no observation and frees no stale evidence into fresh work.
 
 No `saipen_home` absolute path. Every finding MUST carry an observable
 expected/actual/evidence triple — a finding without it is rejected, not

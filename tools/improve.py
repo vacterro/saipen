@@ -1024,9 +1024,13 @@ def _journaled_write(path: Path, content: str, kind: str, base_hash: str | None 
     # so the target-aware semantic verifier validates the ACTUAL changed file
     # with the correct grammar -- a malformed SWEEP can never hide behind a
     # manifest-only scan, and APPLY + Recovery use one verifier.
-    role = {"cycle": "manifest", "seat": "manifest", "sweep": "sweep", "run": "report"}.get(
-        kind, "generic"
-    )
+    role = {
+        "cycle": "manifest",
+        "seat": "manifest",
+        "sweep": "sweep",
+        "run": "report",
+        "rebind": "report",
+    }.get(kind, "generic")
     with project_writer_lock(root):
         return run_mutation(
             root,
@@ -1435,6 +1439,77 @@ def portable_project_key(project_root: Path) -> str:
     return safe.strip("-.").lower() or "project"
 
 
+#: Header fields a DRAFT re-bind may re-derive. Assignment context fields
+#: (agent, role, model_or_runtime, project, context_scope, context_available)
+#: are decisions and are never re-derived -- only mechanically known identity.
+_REBINDABLE_HEADER_KEYS = (
+    "saipen_version",
+    "protocol_fingerprint",
+    "source_head",
+    "source_tree_fingerprint",
+    "discovery_model",
+)
+
+
+def _run_section_count(text: str) -> int:
+    """The number of committed RUN sections in a report text."""
+    return len(re.findall(r"(?m)^## RUN \d+\s*$", text))
+
+
+def _un_audited_report(text: str) -> bool:
+    """True only for a report that has committed ZERO audit content.
+
+    A report with no `## RUN N` section is an assignment the engine minted,
+    not evidence: no observation exists that a re-bind could rewrite. Any
+    committed RUN makes the report audit evidence and forbids a re-bind.
+    """
+    return _run_section_count(text) == 0
+
+
+def _rebind_un_audited_header(
+    report_text: str,
+    *,
+    saipen_version: str,
+    protocol_fp: str,
+    source,
+) -> str | None:
+    """Re-derive the mechanical identity header of an un-audited DRAFT.
+
+    Returns the rewritten report text, or None when nothing changes (the
+    draft is already current) or when the header does not carry the full
+    mechanical field set (a hand-crafted skeleton is never guessed at).
+    Only lines that already exist are rewritten; body bytes and assignment
+    context fields are preserved exactly.
+    """
+    values = {
+        "saipen_version": saipen_version,
+        "protocol_fingerprint": protocol_fp,
+        "source_head": source.source_head,
+        "source_tree_fingerprint": source.source_tree_fingerprint,
+        "discovery_model": source.discovery_model,
+    }
+    lines: list[str] = []
+    seen: set[str] = set()
+    changed = False
+    for line in report_text.splitlines(keepends=True):
+        stripped = line.rstrip("\r\n")
+        ending = line[len(stripped) :]
+        key = stripped.split(":", 1)[0].strip() if ":" in stripped else ""
+        if key in values and not stripped.startswith("#"):
+            seen.add(key)
+            replacement = f"{key}: {values[key]}"
+            if stripped != replacement:
+                changed = True
+            lines.append(replacement + ending)
+        else:
+            lines.append(line)
+    if set(values) - seen:
+        return None
+    if not changed:
+        return None
+    return "".join(lines)
+
+
 def prepare_audit_seat(
     project_root: Path,
     *,
@@ -1796,6 +1871,87 @@ def prepare_audit_seat(
                     f"resume: {exc}; refuse to bind a DRAFT to "
                     "an unverifiable source",
                 }
+            # T-1406: a DRAFT with ZERO committed RUN sections is an
+            # assignment, not evidence. When its mechanical identity header
+            # went stale (an install update or a tracked source change between
+            # admission and resume) the canonical exit is an in-place,
+            # journaled re-bind of ONLY the mechanically known header fields;
+            # assignment context (agent/role/model/scope) is never touched and
+            # no RUN byte exists to rewrite. A draft with any committed RUN is
+            # evidence and is never re-bound -- it keeps the structured
+            # refusals below, and a seat that can never continue is retired
+            # through `saipen improve retire`.
+            _header_rebound = False
+            _previous_fp = ""
+            _previous_head = ""
+            if _un_audited_report(report_text):
+                try:
+                    _rebind_fp = installed_protocol_fingerprint(_protocol_root_for())
+                    _rebind_version = _saipen_install_version()
+                except ImproveError:
+                    _rebind_fp = _rebind_version = None
+                if _rebind_fp is not None and _rebind_version is not None:
+                    _rebound = _rebind_un_audited_header(
+                        report_text,
+                        saipen_version=_rebind_version,
+                        protocol_fp=_rebind_fp,
+                        source=_current_src,
+                    )
+                    if _rebound is not None:
+                        _previous_fp = _field(report_text, "protocol_fingerprint")
+                        _previous_head = _field(report_text, "source_head")
+                        if dry_run:
+                            return _rv(
+                                {
+                                    "ok": True,
+                                    "code": "DRY_RUN_PLAN",
+                                    "action": "rebind",
+                                    "cycle_id": active_cycle,
+                                    "seat_id": seat,
+                                    "role": selected_role,
+                                    "report_path": report.relative_to(root).as_posix(),
+                                    "resumed": False,
+                                    "targets": [report.relative_to(root).as_posix()],
+                                    "detail": "planned un-audited draft header "
+                                    "re-bind against the installed protocol "
+                                    "and current source; no writes",
+                                }
+                            )
+                        _rebind_rel = report.relative_to(root).as_posix()
+                        _rebind_result = run_mutation(
+                            root,
+                            "improve-rebind-" + uuid.uuid4().hex,
+                            "improve_rebind",
+                            seat,
+                            _identity(root),
+                            hash_bytes(f"{active_cycle}:{seat}:rebind".encode("utf-8")),
+                            [
+                                {
+                                    "path": _rebind_rel,
+                                    "role": "report",
+                                    "content": _rebound,
+                                }
+                            ],
+                            preconditions={_rebind_rel: _hash_file(report)},
+                            skip_preflight=True,
+                            verification_policy="improve_atomic_file",
+                        )
+                        if not _rebind_result.get("ok"):
+                            return {
+                                "ok": False,
+                                "code": "REBIND_FAILED",
+                                "cycle_id": active_cycle,
+                                "seat_id": seat,
+                                "role": selected_role,
+                                "report_path": report.relative_to(root).as_posix(),
+                                "resumed": False,
+                                "detail": "un-audited draft header re-bind did "
+                                "not commit: "
+                                f"{_rebind_result.get('code')} "
+                                f"{_rebind_result.get('message', '')}",
+                            }
+                        report_text = _rebound
+                        _header_rebound = True
             _r_model = _field(report_text, "discovery_model")
             _r_head = _field(report_text, "source_head")
             _r_tree = _field(report_text, "source_tree_fingerprint")
@@ -1818,7 +1974,13 @@ def prepare_audit_seat(
                     "under the old identity would bind stale "
                     "evidence to fresh work -- capture a new "
                     "seat/cycle against the current tree (or "
-                    "regenerate the draft) instead of resuming",
+                    "regenerate the draft) instead of resuming. "
+                    "An un-audited draft is re-bound automatically; "
+                    "this one already carries committed RUN evidence, "
+                    "which is never re-bound -- if this seat can never "
+                    "continue, retire it with `saipen improve retire "
+                    "<cycle> <seat> --reason <CODE>` and complete the "
+                    "cycle with the remaining seats",
                     "current_source_head": _current_src.source_head,
                     "current_discovery_model": _current_src.discovery_model,
                 }
@@ -1847,23 +2009,31 @@ def prepare_audit_seat(
                     "report_path": report.relative_to(root).as_posix(),
                     "resumed": False,
                     "detail": f"session {seat} report fails the bound "
-                    f"provenance bar: " + "; ".join(_bound_errors[:3]),
+                    f"provenance bar: " + "; ".join(_bound_errors[:3])
+                    + " -- a draft with committed RUN evidence is never "
+                    "re-bound; if this seat can never continue, retire it "
+                    "with `saipen improve retire <cycle> <seat> --reason "
+                    "<CODE>` and complete the cycle with the remaining "
+                    "seats",
                 }
-            return _rv(
-                {
-                    "ok": True,
-                    "code": "ALREADY_ASSIGNED",
-                    "cycle_id": active_cycle,
-                    "seat_id": seat,
-                    "role": selected_role,
-                    "report_path": report,
-                    "report_created": False,
-                    "resumed": True,
-                    "source_head": _field(report_text, "source_head"),
-                    "source_tree_fingerprint": _field(report_text, "source_tree_fingerprint"),
-                    "discovery_model": _field(report_text, "discovery_model"),
-                }
-            )
+            _assigned = {
+                "ok": True,
+                "code": "ALREADY_ASSIGNED",
+                "cycle_id": active_cycle,
+                "seat_id": seat,
+                "role": selected_role,
+                "report_path": report,
+                "report_created": False,
+                "resumed": True,
+                "source_head": _field(report_text, "source_head"),
+                "source_tree_fingerprint": _field(report_text, "source_tree_fingerprint"),
+                "discovery_model": _field(report_text, "discovery_model"),
+            }
+            if _header_rebound:
+                _assigned["header_rebound"] = True
+                _assigned["previous_protocol_fingerprint"] = _previous_fp
+                _assigned["previous_source_head"] = _previous_head
+            return _rv(_assigned)
         else:
             _refuse_duplicate_owner_over_bare_sweep(
                 manifest.parent, manifest_text, report_ident, seat
@@ -2204,8 +2374,11 @@ def abort_cycle(cycle_dir: Path) -> dict:
     if _sweep_records(sweep):
         raise ImproveError(
             "abort refuses: the sweep ledger already carries dispositions; a "
-            "cycle whose Core sweep started is not abortable -- finish or "
-            "dispose it properly"
+            "cycle whose Core sweep started is not abortable -- finish it. A "
+            "seat that can never complete is retired through `saipen improve "
+            "retire <cycle> <seat> --reason <CODE>`, and a seat whose draft "
+            "carries no committed RUN can resume and re-bind its header; "
+            "aborting would discard the dispositions the sweep already made"
         )
     # The manifest write is the ONLY filesystem effect, and it is the single
     # journaled transaction. A crash at any stage leaves either the active
@@ -2240,6 +2413,98 @@ def abort_cycle(cycle_dir: Path) -> dict:
             preserved.append(f"{seat_id}/{report_path}")
     result["preserved_reports"] = sorted(preserved)
     return result
+
+
+_RETIRE_REASON_RE = re.compile(r"^[A-Z][A-Z0-9_-]{0,63}$")
+
+
+def retire_seat(cycle_dir: Path, seat_id: str, reason: str) -> dict:
+    """Canonical bounded exit for a seat that can never complete (T-1406).
+
+    A cycle can be stuck after its Core sweep started: one expected seat's
+    report never reached `complete` (a stale install identity, an interrupted
+    audit) and no draft re-bind applies, so `verify_cycle` can never pass and
+    `abort` is (correctly) forbidden once dispositions exist. Retiring marks
+    that ONE seat `availability: unavailable` through the journaled roster
+    write: the never-completed report stays byte-identical at its path, every
+    existing SWEEP disposition is untouched, `verify_cycle` already skips
+    unavailable seats, and the next cycle can be admitted once this one
+    completes. Retirement is refused for a seat whose report IS complete (a
+    completed report is resolved through sweep/cycle-complete, never hidden)
+    and when it would leave the roster with no expected seat -- a cycle is
+    never completed into evidence-free history.
+    """
+    seat = _validate_safe_id(seat_id, "seat_id")
+    if not isinstance(reason, str) or not _RETIRE_REASON_RE.fullmatch(reason):
+        raise ImproveError("retire reason must match [A-Z][A-Z0-9_-]{0,63}")
+    snapshot = load_valid_manifest(cycle_dir, "retire", ("active",))
+    text = snapshot.text
+    manifest = snapshot.path
+    block = _seat_block(text, seat)
+    if block is None:
+        raise ImproveError(f"retire refuses: seat {seat} is not registered on the roster")
+    if (_field(block, "availability") or "expected") == "unavailable":
+        raise ImproveError(f"retire refuses: seat {seat} is already unavailable")
+    report_path = _field(block, "report_path")
+    report = cycle_dir / seat / report_path if report_path else None
+    if report is not None and report.is_file():
+        report_text = _read_maybe(report)
+        if _field(report_text, "report_status") == "complete":
+            raise ImproveError(
+                f"retire refuses: seat {seat} report is complete -- a "
+                "completed report is resolved through sweep and "
+                "cycle-complete, never retired"
+            )
+    remaining_expected = [
+        other
+        for other in _seat_blocks(text)
+        if (_field(other, "availability") or "expected") != "unavailable"
+        and _field(other, "seat_id") != seat
+    ]
+    if not remaining_expected:
+        raise ImproveError(
+            "retire refuses: no expected seat would remain on the roster -- "
+            "a cycle is never completed without audit evidence (retire a "
+            "stray seat only while another expected seat can still report)"
+        )
+    lines: list[str] = []
+    in_seat = False
+    replaced = False
+    for raw in text.rstrip("\n").split("\n"):
+        if raw.startswith("seat_id:"):
+            in_seat = raw.split(":", 1)[1].strip() == seat
+        if in_seat and raw.startswith("availability:"):
+            lines.append("availability: unavailable")
+            replaced = True
+            in_seat = False
+            continue
+        lines.append(raw)
+    if not replaced:
+        raise ImproveError(f"retire refuses: seat {seat} carries no availability line")
+    new_text = "\n".join(lines) + "\n"
+    _proposed_errors = validate_manifest(new_text, expected_cycle_id=cycle_dir.name)
+    if _proposed_errors:
+        raise ImproveError(
+            "retire refuses its own proposed manifest: "
+            + "; ".join(_proposed_errors[:3])
+            + " -- a known-INVALID proposed state is never written (T-638)"
+        )
+    result = _journaled_write(manifest, new_text, "seat", base_hash=_base_hash(manifest))
+    if not result.get("ok"):
+        raise ImproveError(
+            f"seat {seat} not retired: {result.get('code')} {result.get('message', '')}"
+        )
+    return {
+        "ok": True,
+        "code": "SEAT_RETIRED",
+        "cycle_id": cycle_dir.name,
+        "seat_id": seat,
+        "role": _field(block, "role"),
+        "availability": "unavailable",
+        "reason": reason,
+        "report_path": report_path,
+        "report_preserved": bool(report is not None and report.is_file()),
+    }
 
 
 def complete_cycle(cycle_dir: Path) -> dict:
