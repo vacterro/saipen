@@ -1527,6 +1527,9 @@ def _continue_improve_fallthrough(
     parked: list,
     pending: list,
     reconciliation: dict | None,
+    *,
+    chain_trace: list | None = None,
+    iterations: int = 0,
 ) -> int:
     """T-20260830_0842: one bounded fallthrough `continue` -> `improve`.
 
@@ -1539,7 +1542,22 @@ def _continue_improve_fallthrough(
         already-active cycle instead of preparing a duplicate;
       - read-only / dry-run sessions do not write: the fallback projects the
         prepare plan or refuses exactly as `improve` would.
+
+    T-1416: when the bounded executor drove a deterministic chain to this
+    terminal boundary, its trace and iteration count ride along on whichever
+    outcome is emitted, so the machine-readable answer covers the whole
+    invocation.
     """
+
+    def _emit_result(payload: dict) -> None:
+        if chain_trace:
+            payload = {
+                **payload,
+                "continue_trace": chain_trace,
+                "iterations": iterations,
+                "stop_reason": "idle",
+            }
+        _emit(payload, as_json)
     from saipen_engine.continue_fallback import (
         active_cycle_status,
         read_marker,
@@ -1555,7 +1573,7 @@ def _continue_improve_fallthrough(
             # was prepared by a prior `continue`). Resume is `improve`'s own
             # semantics; re-preparing here would duplicate. Emit the resume
             # point rather than a second discovery.
-            _emit(
+            _emit_result(
                 {
                     "ok": True,
                     "code": "CONTINUE_IMPROVE_IN_FLIGHT",
@@ -1568,8 +1586,7 @@ def _continue_improve_fallthrough(
                         f"{prior_cycle} is already active; resume it "
                         "(saipen improve) instead of preparing a duplicate"
                     ),
-                },
-                as_json,
+                }
             )
             return 0
 
@@ -1593,7 +1610,7 @@ def _continue_improve_fallthrough(
         # Replay the captured result unchanged -- the fallback outcome is the
         # improve outcome.
         if as_json and prepared:
-            _emit(prepared, as_json)
+            _emit_result(prepared)
         elif raw:
             print(raw, end="")
         return rc
@@ -1608,7 +1625,7 @@ def _continue_improve_fallthrough(
         "WRITER_BUSY",
     ):
         if as_json and prepared:
-            _emit(prepared, as_json)
+            _emit_result(prepared)
         elif raw:
             print(raw, end="")
         return 1
@@ -1620,69 +1637,72 @@ def _continue_improve_fallthrough(
     _imp_code = prepared.get("code") if prepared else ""
     if _imp_code == "NO_WORTHWHILE_IMPROVEMENT":
         if as_json:
-            _emit(
+            _emit_result(
                 {
                     "ok": True,
                     "code": "CONTINUE_IDLE",
                     "detail": "no worthwhile improvement discovered",
-                },
-                as_json,
+                }
             )
         else:
-            _emit({"ok": True, "code": "CONTINUE_IDLE"}, as_json)
+            _emit_result({"ok": True, "code": "CONTINUE_IDLE"})
         return 0
     # Non-recovery structured failure: propagate the improve refusal as-is
     # so ambiguity, validation, manifest, permission and corrupt-state
     # failures are surfaced, never masked as idle.
     if as_json and prepared:
-        _emit(prepared, as_json)
+        _emit_result(prepared)
     elif raw:
         print(raw, end="")
     return 1
 
 
-def _next_action(
-    project_root: Path,
-    as_json: bool,
-    *,
-    reconciliation: dict | None = None,
-    fallthrough_to_improve: bool = False,
-    dry_run: bool = False,
-) -> int:
+def _route_once(project_root: Path) -> dict:
+    """ONE read-only route computation, shared by `next` and the chain (T-1416).
+
+    Returns either a terminal `emitted` payload with its exit code, or the
+    live snapshot pieces the continuation executor drives from. This is the
+    same computation `_next_action` always performed; extracting it is what
+    lets the bounded executor re-route on CURRENT bytes after every committed
+    operation instead of trusting a stale multi-step plan.
+    """
+    from saipen_engine.state import parse_state_or_error
+
     state_path = _state_path(project_root)
     if not state_path.is_file():
-        _emit({"ok": False, "code": "NOT_SAIPEN_PROJECT"}, as_json)
-        return 3
+        return {"emitted": {"ok": False, "code": "NOT_SAIPEN_PROJECT"}, "rc": 3}
     # T-1014: ONE recovery-manifest traversal (pending + conflicts + corrupt).
     pending, conflicts, _corrupt = _scan_full(project_root)
     if _corrupt:
-        _emit(_corrupt_refusal(_corrupt), as_json)
-        return 1
+        return {"emitted": _corrupt_refusal(_corrupt), "rc": 1}
     try:
         snap = snapshot.ProjectSnapshot.capture(project_root, lean=True)
     except (OSError, ValueError) as exc:
-        _emit(
-            {"ok": False, "code": "VALIDATION_FAILED", "detail": f"history-ownership: {exc}"},
-            as_json,
-        )
-        return 1
+        return {
+            "emitted": {
+                "ok": False,
+                "code": "VALIDATION_FAILED",
+                "detail": f"history-ownership: {exc}",
+            },
+            "rc": 1,
+        }
     state_text = snap.state_text
     board_text = snap.board_text
-    from saipen_engine.state import parse_state_or_error
-
     state, state_error = parse_state_or_error(state_text)
     if state_error:
-        _emit(
-            {"ok": False, "code": "VALIDATION_FAILED", "detail": f"state-malformed: {state_error}"},
-            as_json,
-        )
-        return 1
+        return {
+            "emitted": {
+                "ok": False,
+                "code": "VALIDATION_FAILED",
+                "detail": f"state-malformed: {state_error}",
+            },
+            "rc": 1,
+        }
     subject = state.get("task")
     board = parse_board(board_text)
     parked = _parked_work(board["tickets"], state)
     from saipen_engine.router import (
         audit_inbox_projection,
-        load_for_action,
         route_next,
         routing_failure_code,
     )
@@ -1702,68 +1722,283 @@ def _next_action(
         snap=snap,
         audit_inbox=audit_inbox_projection(project_root),
     )
+    route = {
+        "emitted": None,
+        "rc": 0,
+        "subject": subject,
+        "state": state,
+        "state_text": state_text,
+        "board": board,
+        "board_text": board_text,
+        "parked": parked,
+        "pending": pending,
+        "conflicts": conflicts,
+        "routed": routed,
+    }
     if not routed.get("ok"):
         # The router owns the stable failure code: recovery conflicts/pending
         # are RECOVERY_*; malformed/binding failures are VALIDATION_FAILED
         # with recovery_pending strictly false (there is no journal to
         # recover -- T-1003 hostile findings).
-        _emit(
-            {
-                "ok": False,
-                "code": routing_failure_code(routed),
-                "action": routed.get("action"),
-                "reason": routed.get("reason"),
-                "detail": routed.get("detail", ""),
-                "recovery_pending": bool(pending),
-                "recovery_conflict": bool(conflicts),
-                "conflict_ops": conflicts,
-                "pending_ops": pending,
-                "parked_work": parked or None,
-            },
-            as_json,
-        )
-        return 1
+        route["emitted"] = {
+            "ok": False,
+            "code": routing_failure_code(routed),
+            "action": routed.get("action"),
+            "reason": routed.get("reason"),
+            "detail": routed.get("detail", ""),
+            "recovery_pending": bool(pending),
+            "recovery_conflict": bool(conflicts),
+            "conflict_ops": conflicts,
+            "pending_ops": pending,
+            "parked_work": parked or None,
+        }
+        route["rc"] = 1
+    return route
 
-    # T-20260830_0842: the `continue` fallthrough. ONLY `saipen continue`
-    # (and its aliases) may fall through to the improvement-discovery path.
-    # `saipen next` stays a pure projection and never triggers a mutation.
-    # A `--dry-run` is purely observational -- the spec forbids the
-    # fallthrough from generating work, and observers must see the
-    # same idle-maintain verdict the prior release carried.
-    if fallthrough_to_improve and not dry_run and _is_idle_maintain_route(routed, board):
-        return _continue_improve_fallthrough(
-            project_root, as_json, dry_run, routed, parked, pending, reconciliation
-        )
+
+def _route_payload(
+    project_root: Path,
+    route: dict,
+    *,
+    reconciliation: dict | None,
+    dry_run: bool,
+    kind: str | None = None,
+) -> dict:
+    """The public route projection for one computed route."""
+    from saipen_engine.router import load_for_action
+
+    routed = route["routed"]
+    state = route["state"]
+    state_text = route["state_text"]
+    subject = route["subject"]
     load = load_for_action(routed.get("action"))
     cold_route = _cold_route(project_root, state, state_text)
     protocol_dir = cold_route.get("protocol_dir")
     load_path = (
         str(Path(protocol_dir) / load.removeprefix("saipen/")) if protocol_dir and load else None
     )
+    payload = {
+        "ok": True,
+        "action": routed.get("action"),
+        "ticket": routed.get("ticket") or subject,
+        "reason": routed.get("reason"),
+        "load": load,
+        "load_path": load_path,
+        "cold_route": cold_route,
+        "execution_instruction": (
+            "Routing is not completion evidence. Read load_path when present, "
+            "then execute action under its owner in this turn; respect WAIT and "
+            "actual refusals. If --dry-run was requested, this is a preview only."
+        ),
+        "execution_intent": state.get("execution_intent") or "normal",
+        "converge_target": state.get("converge_target"),
+        "goal_waves": state.get("goal_waves"),
+        "goal_tickets": state.get("goal_tickets"),
+        "recovery_pending": bool(route["pending"]),
+        "recovery_conflict": False,
+        "pending_ops": route["pending"],
+        "parked_work": route["parked"] or None,
+        "reconciliation": reconciliation,
+    }
+    if dry_run and kind is not None:
+        from saipen_engine import continue_loop
+
+        if kind == continue_loop.FINISH_AT_SHIP:
+            ticket = str((routed.get("ticket") or subject) or "")
+            payload["projected_steps"] = [
+                {
+                    "step": 1,
+                    "action": f"saipen ticket done {ticket} --closure-mode own_patch",
+                    "condition": "the finish gate stays green on current bytes",
+                }
+            ]
+            payload["projection_ends_at"] = (
+                "after that closure, the next route depends on bytes the "
+                "execution would create; projection ends there"
+            )
+        elif kind == continue_loop.IDLE_MAINTAIN:
+            payload["projected_steps"] = [
+                {
+                    "step": 1,
+                    "action": "saipen improve",
+                    "condition": "the idle-maintain route is still the route",
+                }
+            ]
+            payload["projection_ends_at"] = (
+                "improvement discovery depends on bytes it would create; projection ends there"
+            )
+    return payload
+
+
+def _continue_chain(
+    project_root: Path,
+    as_json: bool,
+    first_route: dict,
+    *,
+    reconciliation: dict | None,
+) -> int:
+    """Drive deterministic canonical operations until a real boundary (T-1416).
+
+    Every iteration re-routes from CURRENT bytes after the previous operation
+    commits; nothing here trusts a stale plan. Only `continue_loop`'s closed
+    action vocabulary may execute, and executing anything at all is bounded by
+    a hard iteration budget plus a fixed-point witness. The loop holds no
+    authority of its own: each step is the same journaled canonical operation
+    the model would have run.
+    """
+    from saipen_engine import continue_loop
+    from saipen_engine.operations import finish_ticket
+
+    agent = _agent_for(project_root)
+    trace: list[dict] = []
+    iterations = 0
+    route = first_route
+    seen = {continue_loop.state_identity(route["state"], route["board_text"])}
+    while True:
+        routed = route["routed"]
+        state = route["state"]
+        board = route["board"]
+        kind = continue_loop.classify_route(routed, state, board)
+        if kind == continue_loop.FINISH_AT_SHIP:
+            doing = next(
+                t for t in board["tickets"].values() if t["section"] == "## DOING"
+            )
+            ticket = doing["id"]
+            before_event = state.get("last_event")
+            result = finish_ticket(project_root, ticket, agent)
+            after_route = _route_once(project_root) if result.ok else None
+            trace.append(
+                {
+                    "iteration": iterations + 1,
+                    "action": str(routed.get("action") or ""),
+                    "kind": kind,
+                    "operation": "ticket_done",
+                    "ticket": ticket,
+                    "result": result.code,
+                    "ok": bool(result.ok),
+                    "before_last_event": before_event,
+                    "after_last_event": (
+                        after_route["state"].get("last_event") if after_route is not None else None
+                    ),
+                }
+            )
+            if not result.ok:
+                payload = result.to_dict()
+                payload.update(
+                    {
+                        "recovery_pending": bool(route["pending"]),
+                        "parked_work": route["parked"] or None,
+                        "continue_trace": trace,
+                        "iterations": iterations,
+                        "stop_reason": "refusal",
+                    }
+                )
+                _emit(payload, as_json)
+                return 1
+            iterations += 1
+            if after_route is None:  # unreachable; keeps the bound explicit
+                break
+            if iterations >= continue_loop.max_iterations():
+                payload = {
+                    "ok": True,
+                    "code": continue_loop.CONTINUE_BUDGET_EXHAUSTED,
+                    "iterations": iterations,
+                    "last_operation": trace[-1]["operation"],
+                    "canonical_next_action": str(after_route["routed"].get("action") or ""),
+                    "continue_trace": trace,
+                    "stop_reason": "budget",
+                    "detail": (
+                        f"the deterministic chain reached the hard "
+                        f"{continue_loop.max_iterations()}-iteration bound; no silent "
+                        "success was claimed"
+                    ),
+                }
+                _emit(payload, as_json)
+                return 0
+            route = after_route
+            identity = continue_loop.state_identity(route["state"], route["board_text"])
+            if identity in seen:
+                payload = {
+                    "ok": True,
+                    "code": continue_loop.CONTINUE_FIXED_POINT,
+                    "iterations": iterations,
+                    "last_operation": trace[-1]["operation"],
+                    "canonical_next_action": str(route["routed"].get("action") or ""),
+                    "continue_trace": trace,
+                    "stop_reason": "fixed-point",
+                    "detail": (
+                        "an executed canonical operation left phase, task, last_event "
+                        "and BOARD byte-identical and the same action routed again; "
+                        "this is a deterministic fixed point / repeated-refusal defect, "
+                        "not progress"
+                    ),
+                }
+                _emit(payload, as_json)
+                return 0
+            seen.add(identity)
+            continue
+        if kind == continue_loop.IDLE_MAINTAIN:
+            # The single bounded Improve fallthrough keeps its existing owner
+            # and semantics; the hold from ROOT B gates it when it must, and
+            # the chain trace rides along on its outcome.
+            return _continue_improve_fallthrough(
+                project_root,
+                as_json,
+                False,
+                routed,
+                route["parked"],
+                route["pending"],
+                reconciliation,
+                chain_trace=trace,
+                iterations=iterations,
+            )
+        payload = _route_payload(
+            project_root, route, reconciliation=reconciliation, dry_run=False, kind=kind
+        )
+        payload["continue_trace"] = trace
+        payload["iterations"] = iterations
+        payload["stop_reason"] = "boundary"
+        _emit(payload, as_json)
+        return 0
+
+
+def _next_action(
+    project_root: Path,
+    as_json: bool,
+    *,
+    reconciliation: dict | None = None,
+    fallthrough_to_improve: bool = False,
+    dry_run: bool = False,
+) -> int:
+    route = _route_once(project_root)
+    if route["emitted"] is not None:
+        _emit(route["emitted"], as_json)
+        return route["rc"]
+    from saipen_engine import continue_loop
+
+    kind = continue_loop.classify_route(route["routed"], route["state"], route["board"])
+    # T-20260830_0842: the `continue` fallthrough. ONLY `saipen continue`
+    # (and its aliases) may fall through to the improvement-discovery path or
+    # drive the bounded chain. `saipen next` stays a pure projection and never
+    # triggers a mutation. A `--dry-run` is purely observational -- the spec
+    # forbids the fallthrough from generating work, and observers must see the
+    # same idle-maintain verdict the prior release carried.
+    if fallthrough_to_improve and not dry_run and kind == continue_loop.FINISH_AT_SHIP:
+        return _continue_chain(
+            project_root,
+            as_json,
+            route,
+            reconciliation=reconciliation,
+        )
+    if fallthrough_to_improve and not dry_run and kind == continue_loop.IDLE_MAINTAIN:
+        return _continue_improve_fallthrough(
+            project_root, as_json, dry_run, route["routed"], route["parked"], route["pending"],
+            reconciliation,
+        )
     _emit(
-        {
-            "ok": True,
-            "action": routed.get("action"),
-            "ticket": routed.get("ticket") or subject,
-            "reason": routed.get("reason"),
-            "load": load,
-            "load_path": load_path,
-            "cold_route": cold_route,
-            "execution_instruction": (
-                "Routing is not completion evidence. Read load_path when present, "
-                "then execute action under its owner in this turn; respect WAIT and "
-                "actual refusals. If --dry-run was requested, this is a preview only."
-            ),
-            "execution_intent": state.get("execution_intent") or "normal",
-            "converge_target": state.get("converge_target"),
-            "goal_waves": state.get("goal_waves"),
-            "goal_tickets": state.get("goal_tickets"),
-            "recovery_pending": bool(pending),
-            "recovery_conflict": False,
-            "pending_ops": pending,
-            "parked_work": parked or None,
-            "reconciliation": reconciliation,
-        },
+        _route_payload(
+            project_root, route, reconciliation=reconciliation, dry_run=dry_run, kind=kind
+        ),
         as_json,
     )
     return 0
