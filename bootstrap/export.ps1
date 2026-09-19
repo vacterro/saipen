@@ -81,7 +81,48 @@ Write-Host "saipen STATE-ONLY exporter (NO implementation files)"
 Write-Host "------------------------------------------------------------"
 Write-Host "Archiving: $saipenDir"
 try {
-    Compress-Archive -Path $saipenDir -DestinationPath $tmpPath -ErrorAction Stop
+    # Distribution authority is separate from source authority. Exact bodies
+    # below .saipen/quarantine stay local; their safe digest/status records
+    # under .saipen/intake/distribution remain in the archive.
+    Add-Type -AssemblyName System.IO.Compression
+    Add-Type -AssemblyName System.IO.Compression.FileSystem
+    $stream = [System.IO.File]::Open(
+        $tmpPath,
+        [System.IO.FileMode]::CreateNew,
+        [System.IO.FileAccess]::ReadWrite,
+        [System.IO.FileShare]::None
+    )
+    try {
+        $archive = [System.IO.Compression.ZipArchive]::new(
+            $stream,
+            [System.IO.Compression.ZipArchiveMode]::Create,
+            $false
+        )
+        try {
+            $rootPrefix = $ownerRoot.TrimEnd([System.IO.Path]::DirectorySeparatorChar) +
+                [System.IO.Path]::DirectorySeparatorChar
+            $quarantinePrefix = (Join-Path $saipenDir "quarantine").TrimEnd(
+                [System.IO.Path]::DirectorySeparatorChar
+            ) + [System.IO.Path]::DirectorySeparatorChar
+            foreach ($file in Get-ChildItem -LiteralPath $saipenDir -Recurse -File) {
+                if ($file.FullName.StartsWith(
+                    $quarantinePrefix,
+                    [System.StringComparison]::OrdinalIgnoreCase
+                )) { continue }
+                $entryName = $file.FullName.Substring($rootPrefix.Length).Replace('\', '/')
+                [System.IO.Compression.ZipFileExtensions]::CreateEntryFromFile(
+                    $archive,
+                    $file.FullName,
+                    $entryName,
+                    [System.IO.Compression.CompressionLevel]::Optimal
+                ) | Out-Null
+            }
+        } finally {
+            $archive.Dispose()
+        }
+    } finally {
+        $stream.Dispose()
+    }
 } catch {
     Write-Host "FAILED: $_" -ForegroundColor Red
     Remove-Item -LiteralPath $tmpPath -Force -ErrorAction SilentlyContinue

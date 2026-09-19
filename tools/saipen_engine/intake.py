@@ -43,6 +43,12 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from . import codec
+from .distribution import (
+    DISTRIBUTABLE,
+    QUARANTINED,
+    distribution_record_rel,
+    quarantine_body_rel,
+)
 from .journal import _atomic_write, owned_target_path
 from .lock import project_writer_lock
 from .paths import (
@@ -351,6 +357,95 @@ def _contract_dir(root: Path) -> Path:
     return root / ".saipen" / "intake" / "contracts"
 
 
+_DISTRIBUTION_SCHEMA_VERSION = 1
+_DISTRIBUTION_REASON_RE = re.compile(r"[A-Z][A-Z0-9_-]{0,63}")
+
+
+def _read_distribution_record(root: Path, receipt_id: str) -> dict | None:
+    """Read the canonical distribution overlay for one receipt.
+
+    Record absence preserves the pre-T-1400 state: the receipt body remains in
+    its ordinary active/archive location and is distributable.  Once a record
+    exists, quarantine is monotonic; no operation removes or downgrades it.
+    """
+    if not _valid_receipt_id(receipt_id):
+        raise ValueError(f"invalid source receipt id: {receipt_id!r}")
+    rel = distribution_record_rel(receipt_id)
+    try:
+        raw = _read_owned_file(
+            root, rel, kind="source distribution record", max_bytes=_META_MAX
+        )
+    except FileNotFoundError:
+        return None
+    try:
+        record = json.loads(raw.decode("utf-8-sig"))
+    except (UnicodeDecodeError, ValueError) as exc:
+        raise ValueError(f"malformed distribution record {receipt_id}: {exc}") from exc
+    expected_body = quarantine_body_rel(receipt_id)
+    if not isinstance(record, dict):
+        raise ValueError(f"malformed distribution record {receipt_id}: root is not an object")
+    if (
+        record.get("schema_version") != _DISTRIBUTION_SCHEMA_VERSION
+        or record.get("receipt_id") != receipt_id
+        or record.get("state") != QUARANTINED
+        or record.get("body_ref") != expected_body
+        or not isinstance(record.get("source_sha256"), str)
+        or not re.fullmatch(r"[0-9a-f]{64}", record["source_sha256"])
+        or not isinstance(record.get("quarantined_at"), str)
+        or not record["quarantined_at"]
+        or not isinstance(record.get("reason"), str)
+        or not _DISTRIBUTION_REASON_RE.fullmatch(record["reason"])
+    ):
+        raise ValueError(f"distribution record {receipt_id} identity/state drift")
+    return record
+
+
+def _write_distribution_record(root: Path, receipt_id: str, record: dict) -> None:
+    path = _safe_path(root, distribution_record_rel(receipt_id), expect_file=True)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    _atomic_write(path, _json_bytes(record), ownership_root=root)
+
+
+def _protected_body_exists(root: Path, receipt_id: str) -> bool:
+    try:
+        _read_owned_file(
+            root,
+            quarantine_body_rel(receipt_id),
+            kind="quarantined source body",
+            max_bytes=_BODY_MAX,
+        )
+    except FileNotFoundError:
+        return False
+    return True
+
+
+def _distribution_projection(root: Path, receipt_id: str, digest: str) -> dict:
+    """Return trusted distribution state bound to canonical content identity."""
+    record = _read_distribution_record(root, receipt_id)
+    if record is None:
+        if _protected_body_exists(root, receipt_id):
+            raise ValueError(
+                f"quarantined body {receipt_id} lacks its distribution record"
+            )
+        return {
+            "state": DISTRIBUTABLE,
+            "receipt_id": receipt_id,
+            "source_sha256": digest,
+        }
+    if record["source_sha256"] != digest:
+        raise ValueError(f"distribution record {receipt_id} digest drift")
+    return dict(record)
+
+
+def _canonical_body_rel(root: Path, receipt_id: str, digest: str, location: str) -> str:
+    distribution = _distribution_projection(root, receipt_id, digest)
+    if distribution["state"] == QUARANTINED:
+        return distribution["body_ref"]
+    if location == "active":
+        return f".saipen/intake/active/{receipt_id}.md"
+    return f".saipen/archive/source/{receipt_id}.md"
+
+
 def _read_index(root: Path) -> dict:
     try:
         raw = _read_owned_file(
@@ -475,6 +570,23 @@ def _read_meta(root: Path, receipt_id: str) -> dict | None:
 def _write_meta(root: Path, receipt_id: str, meta: dict) -> None:
     path = _safe_path(root, f".saipen/intake/active/{receipt_id}.meta.json", expect_file=True)
     _atomic_write(path, _json_bytes(meta), ownership_root=root)
+
+
+def _read_archived_meta(root: Path, receipt_id: str) -> dict | None:
+    rel = f".saipen/archive/source/{receipt_id}.meta.json"
+    try:
+        raw = _read_owned_file(
+            root, rel, kind="source archive metadata", max_bytes=_META_MAX
+        )
+    except FileNotFoundError:
+        return None
+    try:
+        value = json.loads(raw.decode("utf-8-sig"))
+    except (UnicodeDecodeError, ValueError) as exc:
+        raise ValueError(f"malformed archived metadata {receipt_id}: {exc}") from exc
+    if not isinstance(value, dict):
+        raise ValueError(f"malformed archived metadata {receipt_id}: root is not an object")
+    return value
 
 
 def _write_body(root: Path, receipt_id: str, body: str) -> None:
@@ -1188,6 +1300,9 @@ def capture(
                         "status": meta.get("status", ACTIVE_STATUS),
                         "linked_work": linked_work,
                         "coverage": coverage_summary(root, existing["receipt_id"]),
+                        "distribution": _distribution_projection(
+                            root, existing["receipt_id"], digest
+                        ),
                     }
 
             index = _read_index(root)
@@ -1330,10 +1445,163 @@ def capture(
                 "sensitive": meta["sensitive"],
                 "redaction": redaction,
                 "source_authority": authority,
+                "distribution": {
+                    "state": DISTRIBUTABLE,
+                    "receipt_id": receipt_id,
+                    "source_sha256": digest,
+                },
                 "detail": linkage.get("detail"),
             }
     except (OSError, PermissionError, ValueError) as exc:
         return {"ok": False, "code": "VALIDATION_FAILED", "detail": str(exc)}
+
+
+def quarantine_receipt(
+    root: Path | str, receipt_id: str, *, reason: str = "OPERATOR_MARKED"
+) -> dict:
+    """Make an active or archived receipt non-distributable without rewriting it.
+
+    The exact body is moved into the protected local-authority namespace first;
+    only then is the export-safe, digest-bound distribution record written.
+    Thus every interruption is fail-closed for export.  A retry repairs the
+    narrow body-moved/record-missing crash state.  No inverse operation exists:
+    quarantine is monotonic and cannot grant or remove source authority.
+    """
+    root = Path(root)
+    if not _valid_receipt_id(receipt_id):
+        return _invalid_receipt_id(receipt_id)
+    if not isinstance(reason, str) or not _DISTRIBUTION_REASON_RE.fullmatch(reason):
+        return {
+            "ok": False,
+            "code": "VALIDATION_FAILED",
+            "detail": "quarantine reason must match [A-Z][A-Z0-9_-]{0,63}",
+        }
+    try:
+        with project_writer_lock(root):
+            meta = _read_meta(root, receipt_id)
+            location = "active"
+            if meta is None:
+                meta = _read_archived_meta(root, receipt_id)
+                location = "archive"
+            if meta is None:
+                return {"ok": False, "code": "TICKET_NOT_FOUND", "detail": receipt_id}
+            digest = meta.get("source_sha256")
+            if not isinstance(digest, str) or not re.fullmatch(r"[0-9a-f]{64}", digest):
+                return {
+                    "ok": False,
+                    "code": "SOURCE_CORRUPTION",
+                    "detail": f"source {receipt_id} metadata has invalid digest",
+                }
+
+            standard_rel = (
+                f".saipen/intake/active/{receipt_id}.md"
+                if location == "active"
+                else f".saipen/archive/source/{receipt_id}.md"
+            )
+            protected_rel = quarantine_body_rel(receipt_id)
+            standard = _safe_path(root, standard_rel, expect_file=True)
+            protected = _safe_path(root, protected_rel, expect_file=True)
+
+            existing_record = _read_distribution_record(root, receipt_id)
+            if existing_record is not None and existing_record["source_sha256"] != digest:
+                return {
+                    "ok": False,
+                    "code": "SOURCE_CORRUPTION",
+                    "detail": f"distribution record {receipt_id} digest drift",
+                }
+
+            standard_raw = None
+            protected_raw = None
+            with contextlib.suppress(FileNotFoundError):
+                standard_raw = _read_owned_file(
+                    root, standard_rel, kind="source body", max_bytes=_BODY_MAX
+                )
+            with contextlib.suppress(FileNotFoundError):
+                protected_raw = _read_owned_file(
+                    root, protected_rel, kind="quarantined source body", max_bytes=_BODY_MAX
+                )
+            if standard_raw is None and protected_raw is None:
+                return {
+                    "ok": False,
+                    "code": "SOURCE_CORRUPTION",
+                    "detail": f"source body {receipt_id} is missing",
+                }
+            if standard_raw is not None and hashlib.sha256(standard_raw).hexdigest() != digest:
+                return {
+                    "ok": False,
+                    "code": "SOURCE_CORRUPTION",
+                    "detail": f"source body {receipt_id} digest mismatch",
+                }
+            if protected_raw is not None and hashlib.sha256(protected_raw).hexdigest() != digest:
+                return {
+                    "ok": False,
+                    "code": "SOURCE_CORRUPTION",
+                    "detail": f"quarantined source body {receipt_id} digest mismatch",
+                }
+            if standard_raw is not None and protected_raw is not None:
+                if standard_raw != protected_raw:
+                    return {
+                        "ok": False,
+                        "code": "SOURCE_CORRUPTION",
+                        "detail": f"source body {receipt_id} disagrees across locations",
+                    }
+                safe_unlink_owned(
+                    standard, kind="duplicate distributable source body", ownership_root=root
+                )
+            elif protected_raw is None:
+                prove_owned_regular(standard, kind="source body")
+                protected.parent.mkdir(parents=True, exist_ok=True)
+                prove_owned_dir_chain(
+                    protected.parent, kind="quarantine source body", ownership_root=root
+                )
+                os.replace(standard, protected)
+
+            record = existing_record or {
+                "schema_version": _DISTRIBUTION_SCHEMA_VERSION,
+                "receipt_id": receipt_id,
+                "source_sha256": digest,
+                "state": QUARANTINED,
+                "reason": reason,
+                "quarantined_at": _utc(),
+                "body_ref": protected_rel,
+                "authoritative_body_exported": False,
+            }
+            if existing_record is None:
+                _write_distribution_record(root, receipt_id, record)
+            return {
+                "ok": True,
+                "code": "SOURCE_QUARANTINED"
+                if existing_record is None
+                else "ALREADY_SATISFIED",
+                "receipt": receipt_id,
+                "source_sha256": digest,
+                "distribution": dict(record),
+                "source_authority": _source_authority(meta),
+            }
+    except (OSError, PermissionError, ValueError) as exc:
+        return {"ok": False, "code": "VALIDATION_FAILED", "detail": str(exc)}
+
+
+def distribution_status(root: Path | str, receipt_id: str) -> dict:
+    """Read-only distribution projection; never opens or exposes body bytes."""
+    root = Path(root)
+    if not _valid_receipt_id(receipt_id):
+        return _invalid_receipt_id(receipt_id)
+    try:
+        meta = _read_meta(root, receipt_id) or _read_archived_meta(root, receipt_id)
+        if meta is None:
+            tomb = _read_index(root).get("tombstones", {}).get(receipt_id)
+            if not isinstance(tomb, dict):
+                return {"ok": False, "code": "TICKET_NOT_FOUND", "detail": receipt_id}
+            digest = tomb.get("source_sha256")
+        else:
+            digest = meta.get("source_sha256")
+        if not isinstance(digest, str):
+            raise ValueError(f"source {receipt_id} has no valid content identity")
+        projection = _distribution_projection(root, receipt_id, digest)
+        return {"ok": True, "code": "SOURCE_DISTRIBUTION", **projection}
+    except (OSError, ValueError) as exc:
+        return {"ok": False, "code": "SOURCE_CORRUPTION", "detail": str(exc)}
 
 
 def add_requirement(
@@ -1818,7 +2086,12 @@ def verify_integrity(root: Path | str, receipt_id: str) -> dict:
     meta = _read_meta(root, receipt_id)
     if not meta:
         return {"ok": False, "code": "INVALID", "detail": "receipt metadata missing"}
-    rel = f".saipen/intake/active/{receipt_id}.md"
+    try:
+        rel = _canonical_body_rel(
+            root, receipt_id, str(meta.get("source_sha256") or ""), "active"
+        )
+    except (OSError, ValueError) as exc:
+        return {"ok": False, "code": "SOURCE_CORRUPTION", "detail": str(exc)}
     try:
         body = _read_owned_file(root, rel, kind="source body", max_bytes=_BODY_MAX)
     except FileNotFoundError:
@@ -2048,6 +2321,7 @@ def _legacy_sensitive_source_gate(root: Path) -> dict:
                     if INTENT_RE.fullmatch(path.name.split(".", 1)[0])
                 )
         lost_originals: list[str] = []
+        quarantined: list[str] = []
         for receipt_id in sorted(candidates):
             meta = _read_meta(root, receipt_id)
             location = "active"
@@ -2078,11 +2352,15 @@ def _legacy_sensitive_source_gate(root: Path) -> dict:
             legacy_metadata = "source_authority" not in meta
             redaction = meta.get("redaction")
             applied = isinstance(redaction, dict) and redaction.get("applied") is True
-            rel = (
-                f".saipen/intake/active/{receipt_id}.md"
-                if location == "active"
-                else f".saipen/archive/source/{receipt_id}.md"
-            )
+            digest = meta.get("source_sha256")
+            if not isinstance(digest, str):
+                return {
+                    "ok": False,
+                    "code": "SOURCE_CORRUPTION",
+                    "detail": f"{location} source {receipt_id} has no content digest",
+                }
+            distribution = _distribution_projection(root, receipt_id, digest)
+            rel = _canonical_body_rel(root, receipt_id, digest, location)
             try:
                 body = _read_owned_file(
                     root, rel, kind="source body", max_bytes=_BODY_MAX
@@ -2091,13 +2369,19 @@ def _legacy_sensitive_source_gate(root: Path) -> dict:
                 continue
             except (UnicodeDecodeError, OSError, ValueError) as exc:
                 return {"ok": False, "code": "SOURCE_CORRUPTION", "detail": str(exc)}
+            if hashlib.sha256(body.encode("utf-8")).hexdigest() != digest:
+                return {
+                    "ok": False,
+                    "code": "SOURCE_CORRUPTION",
+                    "detail": f"{location} source {receipt_id} digest mismatch",
+                }
             if legacy_metadata and meta.get("sensitive") is True and not applied:
                 return {
                     "ok": False,
                     "code": "SOURCE_CORRUPTION",
                     "detail": f"legacy sensitive unsanitized {location} source {receipt_id}",
                 }
-            if _redact_text(body) != body:
+            if _redact_text(body) != body and distribution["state"] != QUARANTINED:
                 return {
                     "ok": False,
                     "code": "SOURCE_CORRUPTION" if legacy_metadata else "SOURCE_CREDENTIALS_UNSAFE",
@@ -2110,6 +2394,8 @@ def _legacy_sensitive_source_gate(root: Path) -> dict:
                         )
                     ),
                 }
+            if distribution["state"] == QUARANTINED:
+                quarantined.append(receipt_id)
             if authority["mode"] == "redacted-derivative":
                 if location == "active":
                     return {
@@ -2127,6 +2413,7 @@ def _legacy_sensitive_source_gate(root: Path) -> dict:
         "ok": True,
         "code": "SOURCE_CREDENTIALS_SAFE",
         "lost_originals": tuple(lost_originals),
+        "quarantined": tuple(quarantined),
     }
 
 
@@ -2349,30 +2636,37 @@ def _is_archive_commit_pending(root: Path, receipt_id: str, index: dict) -> bool
     transaction must settle before it can be retried."""
     if not isinstance(index.get("active", {}).get(receipt_id), dict):
         return False
-    active_present = []
-    for active_rel, max_bytes in (
-        (f".saipen/intake/active/{receipt_id}.md", _BODY_MAX),
-        (f".saipen/intake/active/{receipt_id}.meta.json", _META_MAX),
-    ):
-        try:
-            _read_owned_file(root, active_rel, kind="source receipt probe", max_bytes=max_bytes)
-        except FileNotFoundError:
-            active_present.append(False)
-            continue
-        except (ValueError, OSError):
-            return False
-        active_present.append(True)
-    for archived_rel, max_bytes in (
-        (f".saipen/archive/source/{receipt_id}.md", _BODY_MAX),
-        (f".saipen/archive/source/{receipt_id}.meta.json", _META_MAX),
-    ):
-        try:
-            _read_owned_file(root, archived_rel, kind="source archive probe", max_bytes=max_bytes)
-        except FileNotFoundError:
-            return False
-        except (ValueError, OSError):
-            return False
-    return not all(active_present)
+    projection = index["active"][receipt_id]
+    digest = projection.get("source_sha256")
+    if not isinstance(digest, str):
+        return False
+    try:
+        _read_owned_file(
+            root,
+            f".saipen/archive/source/{receipt_id}.meta.json",
+            kind="source archive probe",
+            max_bytes=_META_MAX,
+        )
+        _read_owned_file(
+            root,
+            _canonical_body_rel(root, receipt_id, digest, "archive"),
+            kind="source archive probe",
+            max_bytes=_BODY_MAX,
+        )
+    except (FileNotFoundError, ValueError, OSError):
+        return False
+    try:
+        _read_owned_file(
+            root,
+            f".saipen/intake/active/{receipt_id}.meta.json",
+            kind="source receipt probe",
+            max_bytes=_META_MAX,
+        )
+        return False
+    except FileNotFoundError:
+        return True
+    except (ValueError, OSError):
+        return False
 
 
 def _closed_archive_bundle(
@@ -2393,7 +2687,11 @@ def _closed_archive_bundle(
     if not isinstance(meta, dict):
         raise ValueError("archive metadata is not an object")
     expected_digest = projection.get("source_sha256")
-    expected_ref = f".saipen/archive/source/{receipt_id}.md"
+    if not isinstance(expected_digest, str):
+        raise ValueError(f"archive projection {receipt_id} has no content digest")
+    expected_ref = _canonical_body_rel(
+        root, receipt_id, expected_digest, "archive"
+    )
     if (
         meta.get("receipt_id") != receipt_id
         or meta.get("source_sha256") != expected_digest
@@ -2536,7 +2834,7 @@ def _settle_archive_commit(root: Path, receipt_id: str, index: dict) -> dict | N
         "status": CLOSED_STATUS,
         "closed_at": archived_meta.get("closed_at"),
         "closure_event": archived_meta.get("closure_event"),
-        "archive_ref": f".saipen/archive/source/{receipt_id}.md",
+        "archive_ref": archived_meta.get("archive_ref"),
         "requirements": requirements,
         "actionable": actionable,
         "unresolved": len(summary["unresolved"]),
@@ -2672,7 +2970,13 @@ def _finish_archive_bundle_locked(root: Path, receipt_id: str) -> None:
 
 def _archive_closed_locked(root: Path, receipt_id: str, meta: dict) -> dict:
     archive = _archive_dir(root)
-    body = _safe_path(root, f".saipen/intake/active/{receipt_id}.md", expect_file=True)
+    digest = meta.get("source_sha256")
+    if not isinstance(digest, str):
+        raise ValueError(f"source {receipt_id} metadata has no content digest")
+    distribution = _distribution_projection(root, receipt_id, digest)
+    body_rel = _canonical_body_rel(root, receipt_id, digest, "active")
+    archive_ref = _canonical_body_rel(root, receipt_id, digest, "archive")
+    body = _safe_path(root, body_rel, expect_file=True)
     active_meta = _safe_path(
         root, f".saipen/intake/active/{receipt_id}.meta.json", expect_file=True
     )
@@ -2683,9 +2987,16 @@ def _archive_closed_locked(root: Path, receipt_id: str, meta: dict) -> dict:
     archive.mkdir(parents=True, exist_ok=True)
     meta = dict(meta)
     meta["storage_status"] = ARCHIVED_STATUS
-    meta["archive_ref"] = f".saipen/archive/source/{receipt_id}.md"
+    meta["archive_ref"] = archive_ref
     _atomic_write(archive_meta, _json_bytes(meta), ownership_root=root)
-    _move_archive_artifact(root, body, archive_body, label="source body", required=True)
+    if distribution["state"] == QUARANTINED:
+        raw = _read_owned_file(
+            root, body_rel, kind="quarantined source body", max_bytes=_BODY_MAX
+        )
+        if hashlib.sha256(raw).hexdigest() != digest:
+            raise ValueError(f"quarantined source body {receipt_id} digest mismatch")
+    else:
+        _move_archive_artifact(root, body, archive_body, label="source body", required=True)
     safe_unlink_owned(active_meta, kind="active source metadata", ownership_root=root)
     for label, path in (
         ("coverage", _coverage_path(root, receipt_id)),
@@ -2727,7 +3038,9 @@ def _settle_closed_residue_locked(root: Path, receipt_id: str, tomb: dict) -> di
     try:
         raw = _read_owned_file(
             root,
-            f".saipen/archive/source/{receipt_id}.md",
+            _canonical_body_rel(
+                root, receipt_id, str(tomb.get("source_sha256") or ""), "archive"
+            ),
             kind="source body",
             max_bytes=_BODY_MAX,
         )
@@ -2817,7 +3130,9 @@ def close_receipt(root: Path | str, receipt_id: str, *, closure_event: str | Non
                 "status": CLOSED_STATUS,
                 "closed_at": closed_at,
                 "closure_event": closure_event,
-                "archive_ref": f".saipen/archive/source/{receipt_id}.md",
+                "archive_ref": _canonical_body_rel(
+                    root, receipt_id, meta["source_sha256"], "archive"
+                ),
                 "requirements": summary["requirements"],
                 "actionable": summary["actionable"],
                 "unresolved": 0,
@@ -2855,7 +3170,9 @@ def archive_receipt(root: Path | str, receipt_id: str) -> dict:
             meta = _read_meta(root, receipt_id)
             if not meta:
                 tomb = _read_index(root).get("tombstones", {}).get(receipt_id)
-                if tomb and (_archive_dir(root) / f"{receipt_id}.md").is_file():
+                if tomb and (
+                    root / str(tomb.get("archive_ref") or "")
+                ).is_file():
                     return {
                         "ok": True,
                         "code": "ALREADY_SATISFIED",
@@ -2882,7 +3199,12 @@ def archive_receipt(root: Path | str, receipt_id: str) -> dict:
                     "status": CLOSED_STATUS,
                     "closed_at": meta.get("closed_at"),
                     "closure_event": meta.get("closure_event"),
-                    "archive_ref": f".saipen/archive/source/{receipt_id}.md",
+                    "archive_ref": _canonical_body_rel(
+                        root,
+                        receipt_id,
+                        str(meta.get("source_sha256") or ""),
+                        "archive",
+                    ),
                     "requirements": 0,
                     "actionable": 0,
                     "unresolved": 0,
@@ -2930,6 +3252,13 @@ def purge_receipt(root: Path | str, receipt_id: str) -> dict:
             path = _safe_path(root, rel, expect_file=True)
             if path.is_file() and not _is_link_or_reparse(path):
                 archive_targets.append(path)
+        distribution = _read_distribution_record(root, receipt_id)
+        if distribution is not None:
+            protected = _safe_path(
+                root, distribution["body_ref"], expect_file=True
+            )
+            if protected.is_file() and not _is_link_or_reparse(protected):
+                archive_targets.append(protected)
         revision_targets: list[Path] = []
         if archive_dir.is_dir() and not _is_link_or_reparse(archive_dir):
             for revision in sorted(archive_dir.glob(f"{receipt_id}.r*.json")):
@@ -3066,6 +3395,22 @@ def read_body(root: Path | str, receipt_id: str) -> dict:
             }
         return {"ok": False, "code": "TICKET_NOT_FOUND", "detail": receipt_id}
     try:
+        distribution = (
+            _distribution_projection(root, receipt_id, str(meta.get("source_sha256") or ""))
+            if location in {"active", "archive"}
+            else {
+                "state": DISTRIBUTABLE,
+                "receipt_id": receipt_id,
+                "source_sha256": meta.get("source_sha256"),
+            }
+        )
+        if location in {"active", "archive"}:
+            rel = _canonical_body_rel(
+                root, receipt_id, str(meta.get("source_sha256") or ""), location
+            )
+    except (OSError, ValueError) as exc:
+        return {"ok": False, "code": "SOURCE_CORRUPTION", "detail": str(exc)}
+    try:
         raw = _read_owned_file(root, rel, kind="source body", max_bytes=_BODY_MAX)
         body = raw.decode("utf-8")
     except UnicodeDecodeError:
@@ -3093,6 +3438,7 @@ def read_body(root: Path | str, receipt_id: str) -> dict:
         "body": body,
         "meta": meta,
         "source_authority": _source_authority(meta),
+        "distribution": distribution,
     }
 
 
@@ -3151,6 +3497,14 @@ def status(root: Path | str, receipt_id: str) -> dict:
                         )
                     except (FileNotFoundError, OSError, ValueError) as exc:
                         return {"ok": False, "code": "SOURCE_CORRUPTION", "detail": str(exc)}
+                try:
+                    distribution = _distribution_projection(
+                        root,
+                        receipt_id,
+                        str(tomb.get("source_sha256") or ""),
+                    )
+                except (OSError, ValueError) as exc:
+                    return {"ok": False, "code": "SOURCE_CORRUPTION", "detail": str(exc)}
                 return {
                     "ok": True,
                     "receipt": receipt_id,
@@ -3165,6 +3519,7 @@ def status(root: Path | str, receipt_id: str) -> dict:
                         "terminal": tomb.get("actionable", 0),
                         "unresolved": [],
                     },
+                    "distribution": distribution,
                 }
             return {"ok": False, "code": "TICKET_NOT_FOUND", "detail": receipt_id}
     if location == "archive":
@@ -3199,6 +3554,12 @@ def status(root: Path | str, receipt_id: str) -> dict:
             return {"ok": False, "code": "SOURCE_CORRUPTION", "detail": str(exc)}
     else:
         summary = coverage_summary(root, receipt_id)
+    try:
+        distribution = _distribution_projection(
+            root, receipt_id, str(meta.get("source_sha256") or "")
+        )
+    except (OSError, ValueError) as exc:
+        return {"ok": False, "code": "SOURCE_CORRUPTION", "detail": str(exc)}
     return {
         "ok": True,
         "receipt": receipt_id,
@@ -3210,6 +3571,7 @@ def status(root: Path | str, receipt_id: str) -> dict:
         "amends": meta.get("amends"),
         "closure_event": meta.get("closure_event"),
         "coverage": summary,
+        "distribution": distribution,
     }
 
 
@@ -3246,6 +3608,9 @@ def active_receipts(root: Path | str, *, work: str | None = None) -> list[dict]:
                 "requirements": summary["requirements"],
                 "terminal": summary["terminal"],
                 "unresolved": len(summary["unresolved"]),
+                "distribution": _distribution_projection(
+                    root, receipt_id, str(meta.get("source_sha256") or "")
+                ),
             }
         )
     return result
@@ -3490,9 +3855,19 @@ def validate_project(root: Path | str) -> list[str]:
             errors.extend(retirement_tombstone_errors(receipt_id, tomb))
         elif tomb.get("status") != CLOSED_STATUS or tomb.get("unresolved") != 0:
             errors.append(f"tombstone {receipt_id} lacks verified closed coverage")
-        expected_archive = f".saipen/archive/source/{receipt_id}.md"
-        if not retired and tomb.get("archive_ref") != expected_archive:
-            errors.append(f"tombstone {receipt_id} has invalid archive_ref")
+        if not retired:
+            try:
+                expected_archive = _canonical_body_rel(
+                    root,
+                    receipt_id,
+                    str(tomb.get("source_sha256") or ""),
+                    "archive",
+                )
+            except (OSError, ValueError) as exc:
+                expected_archive = None
+                errors.append(f"tombstone {receipt_id} distribution invalid: {exc}")
+            if expected_archive is not None and tomb.get("archive_ref") != expected_archive:
+                errors.append(f"tombstone {receipt_id} has invalid archive_ref")
         tomb_path = _tombstone_dir(root) / f"{receipt_id}.json"
         if not tomb_path.is_file() or _is_link_or_reparse(tomb_path):
             errors.append(f"tombstone {receipt_id} file missing or unsafe")

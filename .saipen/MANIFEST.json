@@ -3,7 +3,7 @@
   "note": "A consumer reading contract_version greater than it implements MUST report the snapshot as protocol-unknown rather than reinterpreting this document.",
   "unknown_contract_version": "refuse"
  },
- "contract_version": 1,
+ "contract_version": 2,
  "evidence": {
   "conditional": [
    {
@@ -64,6 +64,7 @@
   "non_exportable": [
    "locks/",
    "recovery/",
+   "quarantine/",
    "LOCAL_STATE.json"
   ],
   "optional": [
@@ -87,8 +88,8 @@
    }
   ]
  },
- "generated_at": "2026-09-16T20:41:17Z",
- "generator": "saipen-audit-manifest/1",
+ "generated_at": "2026-09-19T12:20:21Z",
+ "generator": "saipen-audit-manifest/2",
  "kind": "saipen_audit_manifest",
  "memory_root": ".saipen",
  "protocol_version": "8.0.1",

@@ -67,11 +67,13 @@ def version_metadata_paths(root: Path) -> list[Path]:
 
 
 def source_authority_paths(root: Path) -> list[Path]:
-    """Return the complete source-authority transition surface.
+    """Return the complete distributable source-authority transition surface.
 
     Source receipts are release authority, not runtime cache.  Enumerating the
     fixed owned trees here makes the release planner, stager and ship validator
-    agree on the exact bytes that must survive a fresh clone.
+    agree on the exact bytes that may survive a fresh clone. Quarantined exact
+    bodies live outside both owned trees; their digest-bound distribution
+    records remain below ``intake/`` and therefore stay on this surface.
     """
     root = Path(root)
     paths: set[Path] = set()

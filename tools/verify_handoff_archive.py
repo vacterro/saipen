@@ -26,6 +26,10 @@ import zipfile
 from collections import defaultdict
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+
+from saipen_engine.distribution import is_non_exportable_path
+
 # ---------- helpers -------------------------------------------------------
 
 _WINDOWS_RESERVED = frozenset(
@@ -84,7 +88,9 @@ def _delivery_inventory(project: Path) -> set[str]:
         print("FAIL: cannot enumerate untracked working-tree files for verification.")
         sys.exit(1)
     untracked = {entry for entry in u.stdout.split("\0") if entry.strip()}
-    return tracked | untracked
+    return {
+        rel for rel in tracked | untracked if not is_non_exportable_path(rel)
+    }
 
 
 def _deleted_tracked(project: Path) -> list[str]:

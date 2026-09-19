@@ -833,6 +833,227 @@ class SourceReceiptTests(unittest.TestCase):
         self.assertEqual(gate["work"], "T-003", gate)
         self.assertEqual(gate["scope_status"], "INVALID_SCOPE", gate)
 
+    def test_t1400_filename_credential_can_be_quarantined_without_body_mutation(self) -> None:
+        body = "attachment: customer-prod-credential-fragment-001.txt\n"
+        captured = self.capture(body)
+        receipt = captured["receipt"]
+        digest = captured["source_sha256"]
+        self.assertFalse(intake._looks_sensitive(body))
+        self.assertEqual(
+            intake._legacy_sensitive_source_gate(self.root)["code"],
+            "SOURCE_CREDENTIALS_SAFE",
+        )
+
+        result = intake.quarantine_receipt(
+            self.root, receipt, reason="CREDENTIAL_FILENAME"
+        )
+
+        self.assertTrue(result["ok"], result)
+        protected = self.root / f".saipen/quarantine/source/{receipt}.md"
+        self.assertEqual(protected.read_bytes(), body.encode("utf-8"))
+        self.assertEqual(hashlib.sha256(protected.read_bytes()).hexdigest(), digest)
+        self.assertFalse((self.root / f".saipen/intake/active/{receipt}.md").exists())
+        self.assertEqual(intake.read_body(self.root, receipt)["body"], body)
+        self.assertEqual(intake.verify_integrity(self.root, receipt)["code"], "SOURCE_INTEGRITY_OK")
+
+    def test_t1400_release_surface_exports_record_never_quarantined_body(self) -> None:
+        from saipen_engine.release_contract import source_authority_paths
+
+        body = "attachment: operator-marked-private-name-001.txt\n"
+        receipt = self.capture(body)["receipt"]
+        before = {path.as_posix() for path in source_authority_paths(self.root)}
+        self.assertIn(f".saipen/intake/active/{receipt}.md", before)
+
+        intake.quarantine_receipt(self.root, receipt, reason="OPERATOR_MARKED")
+        first = source_authority_paths(self.root)
+        second = source_authority_paths(self.root)
+        selected = {path.as_posix() for path in first}
+
+        self.assertEqual(first, second, "export retry must recompute the same live policy")
+        self.assertNotIn(f".saipen/intake/active/{receipt}.md", selected)
+        self.assertNotIn(f".saipen/quarantine/source/{receipt}.md", selected)
+        record_rel = f".saipen/intake/distribution/{receipt}.json"
+        self.assertIn(record_rel, selected)
+        record = json.loads((self.root / record_rel).read_text(encoding="utf-8"))
+        self.assertEqual(record["receipt_id"], receipt)
+        self.assertEqual(record["source_sha256"], hashlib.sha256(body.encode()).hexdigest())
+        self.assertEqual(record["state"], "QUARANTINED")
+        exported = b"\n".join(
+            (self.root / path).read_bytes() for path in first if (self.root / path).is_file()
+        )
+        self.assertNotIn(body.encode(), exported)
+
+    def test_t1400_normal_distributable_receipt_export_is_unchanged(self) -> None:
+        from saipen_engine.release_contract import source_authority_paths
+
+        receipt = self.capture("ordinary distributable source\n")["receipt"]
+        selected = {path.as_posix() for path in source_authority_paths(self.root)}
+
+        self.assertIn(f".saipen/intake/active/{receipt}.md", selected)
+        self.assertEqual(
+            intake.distribution_status(self.root, receipt)["state"], "DISTRIBUTABLE"
+        )
+
+    def test_t1400_quarantined_active_receipt_keeps_execution_and_coverage(self) -> None:
+        body = "operator-private attachment path\n"
+        captured = intake.capture(
+            self.root, body, source_kind="user_audit", work="T-001"
+        )
+        receipt = captured["receipt"]
+        self.assertTrue(intake.quarantine_receipt(self.root, receipt)["ok"])
+
+        self.normalized(receipt)
+        self.resolve(receipt)
+
+        self.assertEqual(intake.read_body(self.root, receipt)["body"], body)
+        self.assertEqual(intake.status(self.root, receipt)["linked_work"], "T-001")
+        self.assertTrue(intake.coverage_complete(self.root, receipt))
+        self.assertEqual(intake.validate_project(self.root), [])
+
+    def test_t1400_quarantined_archived_receipt_retains_exact_local_authority(self) -> None:
+        body = "archive-private operator source\n"
+        captured = self.capture(body)
+        receipt = captured["receipt"]
+        self.normalized(receipt)
+        self.resolve(receipt)
+        self.assertTrue(intake.quarantine_receipt(self.root, receipt)["ok"])
+
+        closed = intake.close_receipt(self.root, receipt, closure_event="E-TEST")
+
+        self.assertTrue(closed["ok"], closed)
+        self.assertEqual(
+            closed["archive_ref"], f".saipen/quarantine/source/{receipt}.md"
+        )
+        shown = intake.read_body(self.root, receipt)
+        self.assertTrue(shown["ok"], shown)
+        self.assertEqual(shown["body"], body)
+        self.assertEqual(shown["distribution"]["state"], "QUARANTINED")
+        self.assertEqual(intake.validate_project(self.root), [])
+
+    def test_t1400_quarantine_survives_dedupe_and_amendment(self) -> None:
+        body = "private dedupe source\n"
+        receipt = self.capture(body)["receipt"]
+        self.assertTrue(intake.quarantine_receipt(self.root, receipt)["ok"])
+
+        duplicate = self.capture(body)
+        amendment = intake.capture(
+            self.root,
+            "safe replacement source\n",
+            source_kind="user_audit",
+            amends=receipt,
+        )
+
+        self.assertEqual(duplicate["receipt"], receipt)
+        self.assertEqual(duplicate["distribution"]["state"], "QUARANTINED")
+        self.assertNotEqual(amendment["receipt"], receipt)
+        self.assertEqual(amendment["distribution"]["state"], "DISTRIBUTABLE")
+        self.assertEqual(intake.distribution_status(self.root, receipt)["state"], "QUARANTINED")
+
+    def test_t1400_matching_credential_is_publishable_only_after_quarantine(self) -> None:
+        receipt = self.capture("api_key = test-secret-material\n")["receipt"]
+        before = intake._legacy_sensitive_source_gate(self.root)
+        self.assertFalse(before["ok"], before)
+        self.assertEqual(before["code"], "SOURCE_CREDENTIALS_UNSAFE")
+
+        self.assertTrue(
+            intake.quarantine_receipt(self.root, receipt, reason="CREDENTIAL_PATTERN")["ok"]
+        )
+        after = intake._legacy_sensitive_source_gate(self.root)
+
+        self.assertTrue(after["ok"], after)
+        self.assertIn(receipt, after["quarantined"])
+
+    def test_t1400_release_gate_accepts_verified_quarantined_current_work(self) -> None:
+        self._release_board()
+        receipt = self._complete_work("api_key = test-secret-material\n", "T-002")
+        self.assertTrue(
+            intake.quarantine_receipt(
+                self.root, receipt, reason="CREDENTIAL_PATTERN"
+            )["ok"]
+        )
+        self._scope_file("release.py")
+        self._record_scope("T-002", ["release.py"])
+
+        gate = intake.release_gate(self.root, "T-002")
+
+        self.assertTrue(gate["ok"], gate)
+        self.assertEqual(gate["code"], "SOURCE_RELEASE_COVERAGE_COMPLETE")
+
+    def test_t1400_metadata_cannot_unset_canonical_quarantine(self) -> None:
+        receipt = self.capture("arbitrary operator-private source\n")["receipt"]
+        self.assertTrue(intake.quarantine_receipt(self.root, receipt)["ok"])
+        meta_path = self.root / f".saipen/intake/active/{receipt}.meta.json"
+        meta = json.loads(meta_path.read_text(encoding="utf-8"))
+        meta["distribution"] = {"state": "DISTRIBUTABLE"}
+        meta_path.write_text(json.dumps(meta, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+
+        status = intake.distribution_status(self.root, receipt)
+
+        self.assertTrue(status["ok"], status)
+        self.assertEqual(status["state"], "QUARANTINED")
+        self.assertEqual(
+            intake.read_body(self.root, receipt)["distribution"]["state"],
+            "QUARANTINED",
+        )
+
+    def test_t1400_tampered_distribution_digest_fails_closed(self) -> None:
+        receipt = self.capture("private source\n")["receipt"]
+        self.assertTrue(intake.quarantine_receipt(self.root, receipt)["ok"])
+        record_path = self.root / f".saipen/intake/distribution/{receipt}.json"
+        record = json.loads(record_path.read_text(encoding="utf-8"))
+        record["source_sha256"] = "0" * 64
+        record_path.write_text(
+            json.dumps(record, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+        )
+
+        self.assertEqual(
+            intake.distribution_status(self.root, receipt)["code"], "SOURCE_CORRUPTION"
+        )
+        self.assertEqual(intake.verify_integrity(self.root, receipt)["code"], "SOURCE_CORRUPTION")
+
+    def test_t1400_handoff_filter_excludes_only_protected_authority(self) -> None:
+        from build_handoff_archive import _is_delivery_source
+
+        self.assertFalse(
+            _is_delivery_source(
+                self.root, ".saipen/quarantine/source/SRC-001.md"
+            )
+        )
+        self.assertTrue(
+            _is_delivery_source(
+                self.root, ".saipen/intake/distribution/SRC-001.json"
+            )
+        )
+
+    def test_t1400_cli_quarantine_is_explicit_and_dry_run_is_pure(self) -> None:
+        receipt = self.capture("cli-private source\n")["receipt"]
+        active = self.root / f".saipen/intake/active/{receipt}.md"
+        original = active.read_bytes()
+        command = [
+            sys.executable,
+            str(CLI),
+            "source",
+            "quarantine",
+            receipt,
+            "--reason",
+            "OPERATOR_POLICY",
+            "--project-root",
+            str(self.root),
+            "--json",
+        ]
+
+        preview = subprocess.run(
+            [*command, "--dry-run"], capture_output=True, text=True, timeout=60
+        )
+        self.assertEqual(preview.returncode, 0, preview.stderr or preview.stdout)
+        self.assertEqual(json.loads(preview.stdout)["code"], "DRY_RUN_PLAN")
+        self.assertEqual(active.read_bytes(), original)
+
+        applied = subprocess.run(command, capture_output=True, text=True, timeout=60)
+        self.assertEqual(applied.returncode, 0, applied.stderr or applied.stdout)
+        self.assertEqual(json.loads(applied.stdout)["code"], "SOURCE_QUARANTINED")
+        self.assertFalse(active.exists())
+
 
 if __name__ == "__main__":
     unittest.main()

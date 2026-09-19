@@ -33,6 +33,8 @@ from pathlib import Path
 # import work regardless of the invocation working directory.
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
+from saipen_engine.distribution import is_non_exportable_path
+
 
 def _git(project: Path, *args: str) -> subprocess.CompletedProcess[str]:
     # T-1349: git writes path bytes as UTF-8. `text=True` alone decodes them
@@ -129,7 +131,7 @@ def _is_delivery_source(project: Path, rel: str) -> bool:
 
     Includes all tracked files that aren't transient garbage.
     """
-    return not _is_garbage(rel)
+    return not _is_garbage(rel) and not is_non_exportable_path(rel)
 
 
 # T-1016: explicit destructive-overwrite authorization. Default False.

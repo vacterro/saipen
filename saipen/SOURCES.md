@@ -28,11 +28,37 @@ Canonical project paths:
 - `.saipen/intake/coverage/SRC-NNN.json`: clause disposition and evidence;
 - `.saipen/intake/tombstones/SRC-NNN.json`: compact verified closure;
 - `.saipen/archive/source/`: cold forensic bodies and derived closure records.
+- `.saipen/intake/distribution/SRC-NNN.json`: export-safe quarantine record;
+- `.saipen/quarantine/source/SRC-NNN.md`: exact local, non-exportable authority.
 
 Archived source bodies are excluded from ordinary startup, status, context,
 validation and Work selection. Explicit forensic `source show` may read them.
-State-only exports already include `.saipen/`, therefore every active receipt,
-contract and coverage ledger required for cold resume remains in the bundle.
+State-only exports include distributable receipt authority and the metadata
+required to identify quarantined authority. They never include the protected
+quarantine namespace.
+
+## Distribution state
+<!-- RULE-OWNER: SOURCE-DISTRIBUTION-01 -->
+
+This contract eliminates source-authority/distribution conflation: exact bytes
+may remain valid local authority while publication of those same bytes is
+forbidden. Lifecycle status (`ACTIVE`, `CLOSED`, `INVALID`, `RETIRED`) never
+grants distribution permission and quarantine never changes lifecycle truth.
+
+A receipt with no quarantine record is `DISTRIBUTABLE`. This is the explicit
+compatible default for pre-contract receipts: they were already exportable,
+and pretending historical publication can be undone would add no safety. The
+operator may monotonically mark any active or archived receipt `QUARANTINED`.
+The engine moves its byte-identical body under `.saipen/quarantine/source/`
+and writes a digest-bound record under `.saipen/intake/distribution/`. No
+operation downgrades that record. Dedupe, amendments, Work linkage, coverage,
+reread and forensic `source show` continue to use the exact protected body.
+
+Every canonical release, whole-project handoff and state-only exporter excludes
+the protected namespace and retains the safe record (`receipt_id`,
+`source_sha256`, state, bounded reason and body-export flag). Credential
+detection may trigger a quarantine decision, but regex non-detection is never
+distribution authority: `source quarantine` is the independent operator route.
 
 ## Intake and identity
 
@@ -211,6 +237,7 @@ only when a real receipt was committed.
 - `saipen source status SRC-N` / `show SRC-N` / `recover`
 - `saipen source req SRC-N RNNN CLASS [--when-environment HOST] TEXT`
 - `saipen source disp SRC-N RNNN STATUS --evidence REF [--verification REF] [--environment HOST]`
+- `saipen source quarantine SRC-N [--reason CODE]`
 - `saipen source close SRC-N` / `archive SRC-N`
 - `saipen source purge SRC-N --confirm`
 

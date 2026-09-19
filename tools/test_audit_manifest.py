@@ -93,13 +93,14 @@ class TestContractShape(unittest.TestCase):
         banned = manifest["evidence"]["non_exportable"]
         self.assertIn("locks/", banned)
         self.assertIn("recovery/", banned)
+        self.assertIn("quarantine/", banned)
         self.assertIn("LOCAL_STATE.json", banned)
         every_declared = [
             item["path"]
             for tier in ("mandatory", "conditional", "optional")
             for item in manifest["evidence"][tier]
         ]
-        for forbidden in ("locks", "recovery", "LOCAL_STATE.json"):
+        for forbidden in ("locks", "recovery", "quarantine", "LOCAL_STATE.json"):
             self.assertNotIn(forbidden, every_declared)
 
     def test_every_evidence_dir_declares_a_finite_cap(self):

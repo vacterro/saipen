@@ -3905,6 +3905,8 @@ def _source(project_root: Path, args: list[str], as_json: bool, dry_run: bool) -
       req <SRC> <RID> <class> [--when-environment HOST] <text...>
       disp <SRC> <RID> <DISPOSITION> [--work T-x] [--evidence E-y]
            [--environment HOST]
+      quarantine <SRC> [--reason CODE]
+                        retain exact local authority; exclude body from export
       close <SRC>       close ONLY when coverage is terminal (mutating)
       archive <SRC>     move a CLOSED receipt to cold storage (mutating)
       purge <SRC>       hard purge, tombstone retained (mutating, explicit)
@@ -3919,7 +3921,7 @@ def _source(project_root: Path, args: list[str], as_json: bool, dry_run: bool) -
                 "ok": False,
                 "code": "VALIDATION_FAILED",
                 "detail": "source needs a subcommand: capture|status|show|req|"
-                "disp|close|archive|purge|recover",
+                "disp|quarantine|close|archive|purge|recover",
             },
             as_json,
         )
@@ -3932,11 +3934,13 @@ def _source(project_root: Path, args: list[str], as_json: bool, dry_run: bool) -
     # with concrete target paths, zero writes, and the canonical mutator is
     # NOT invoked. The old `SOURCE_DRY_RUN` early-return certified invalid
     # input as successful, which is removed here.
-    if action in ("capture", "close", "archive", "purge", "req", "disp"):
+    if action in ("capture", "close", "archive", "purge", "req", "disp", "quarantine"):
         if _negotiate_capability(project_root) == "read-only":
             return _capability_refusal(as_json)
 
-    if dry_run and action in ("capture", "close", "archive", "purge", "req", "disp"):
+    if dry_run and action in (
+        "capture", "close", "archive", "purge", "req", "disp", "quarantine"
+    ):
         return _source_dry_run_plan(project_root, action, rest, as_json)
 
     if action == "capture":
@@ -4212,6 +4216,26 @@ def _source(project_root: Path, args: list[str], as_json: bool, dry_run: bool) -
         _emit(result, as_json)
         return 0 if result.get("ok") else 1
 
+    if action == "quarantine":
+        reason = "OPERATOR_MARKED"
+        if len(rest) == 1:
+            receipt_id = rest[0]
+        elif len(rest) == 3 and rest[1] == "--reason":
+            receipt_id, reason = rest[0], rest[2]
+        else:
+            _emit(
+                {
+                    "ok": False,
+                    "code": "VALIDATION_FAILED",
+                    "detail": "source quarantine needs <SRC-ID> [--reason CODE]",
+                },
+                as_json,
+            )
+            return 2
+        result = intake.quarantine_receipt(project_root, receipt_id, reason=reason)
+        _emit(result, as_json)
+        return 0 if result.get("ok") else 1
+
     if action == "archive":
         if len(rest) != 1:
             _emit(
@@ -4468,6 +4492,55 @@ def _source_dry_run_plan(project_root: Path, action: str, rest: list[str], as_js
                     ".saipen/intake/index.json",
                 ],
                 "detail": "planned immutable source body + metadata + index; no writes",
+            },
+            as_json,
+        )
+        return 0
+    if action == "quarantine":
+        reason = "OPERATOR_MARKED"
+        if len(rest) == 1:
+            receipt_id = rest[0]
+        elif len(rest) == 3 and rest[1] == "--reason":
+            receipt_id, reason = rest[0], rest[2]
+        else:
+            _emit(
+                {
+                    "ok": False,
+                    "code": "VALIDATION_FAILED",
+                    "detail": "source quarantine needs <SRC-ID> [--reason CODE]",
+                },
+                as_json,
+            )
+            return 2
+        if not re.fullmatch(r"SRC-\d+", receipt_id):
+            _emit({"ok": False, "code": "INVALID_ID", "detail": receipt_id}, as_json)
+            return 1
+        if not re.fullmatch(r"[A-Z][A-Z0-9_-]{0,63}", reason):
+            _emit(
+                {
+                    "ok": False,
+                    "code": "VALIDATION_FAILED",
+                    "detail": "quarantine reason must match [A-Z][A-Z0-9_-]{0,63}",
+                },
+                as_json,
+            )
+            return 1
+        projection = intake.distribution_status(Path(project_root), receipt_id)
+        if not projection.get("ok"):
+            _emit(projection, as_json)
+            return 1
+        _emit(
+            {
+                "ok": True,
+                "code": "DRY_RUN_PLAN",
+                "action": "quarantine",
+                "receipt": receipt_id,
+                "reason": reason,
+                "targets": [
+                    f".saipen/quarantine/source/{receipt_id}.md",
+                    f".saipen/intake/distribution/{receipt_id}.json",
+                ],
+                "detail": "planned exact-body relocation + distribution record; no writes",
             },
             as_json,
         )

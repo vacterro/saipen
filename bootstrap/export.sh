@@ -90,7 +90,7 @@ rm -f "$TMP_PATH"
 echo "saipen STATE-ONLY exporter (NO implementation files)"
 echo "------------------------------------------------------------"
 echo "Archiving: $SAIPEN_DIR"
-if ! tar -czf "$TMP_PATH" -C "$PROJECT_ROOT" .saipen; then
+if ! tar -czf "$TMP_PATH" --exclude='.saipen/quarantine' -C "$PROJECT_ROOT" .saipen; then
     echo "FAILED: tar exited non-zero"
     rm -f "$TMP_PATH"
     exit 1

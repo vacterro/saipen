@@ -10,6 +10,9 @@ __pycache__/
 .freebuff/
 .saipen/recovery/
 .saipen/locks/
+# Exact quarantined receipt bodies are local source authority, never a Git or
+# archive distribution surface. Export-safe state stays under intake/distribution.
+.saipen/quarantine/
 # T-994: process-local runtime caches must never enter the tree.
 .saipen/cache/
 # bootstrap/export.* drops its archive in the project root by design

@@ -55,8 +55,10 @@ CLASSIFICATION
 
 `non_exportable`
     Never leaves the project: OS lock files carrying no canonical truth,
-    settled recovery records, and machine-local runtime state. A consumer
-    that copies these is leaking working state, not collecting evidence.
+    settled recovery records, machine-local runtime state, and exact receipt
+    bodies whose distribution record declares quarantine. A consumer that
+    copies these is leaking local state or protected authority, not collecting
+    distributable evidence.
 """
 
 from __future__ import annotations
@@ -81,7 +83,7 @@ from .paths import (
 #: Bumped only when the SHAPE of this contract changes. A consumer that
 #: understands version N must refuse a manifest declaring N+1 rather than
 #: reinterpreting unknown fields (see `compatibility` below).
-CONTRACT_VERSION = 1
+CONTRACT_VERSION = 2
 
 #: The manifest's own filename inside `.saipen/`. Deliberately MANIFEST.json:
 #: a consumer that already honours a project-owned `MANIFEST.json` "required"
@@ -140,6 +142,7 @@ OPTIONAL_DIRS = (
 NON_EXPORTABLE = (
     f"{LOCKS_DIR}/",
     "recovery/",
+    "quarantine/",
     "LOCAL_STATE.json",
 )
 
