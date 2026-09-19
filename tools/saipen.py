@@ -1782,6 +1782,8 @@ def _route_payload(
         "action": routed.get("action"),
         "ticket": routed.get("ticket") or subject,
         "reason": routed.get("reason"),
+        "detail": routed.get("detail") or None,
+        "executable_behavior": routed.get("executable_behavior"),
         "load": load,
         "load_path": load_path,
         "cold_route": cold_route,
