@@ -627,6 +627,72 @@ def audit_inbox_projection(project_root) -> dict | None:
         }
 
 
+def conformance_crew_gate(project_root, routed: dict) -> dict | None:
+    """CORE-004 / T-1412: ONE conformance gate for the crew convergence route.
+
+    Returns `routed` with the refusal merged in (`ok` False) when the mapping
+    is the crew convergence route and the receipt-derived decision is not
+    CURRENT_PASS; returns None when the route is not a crew route or
+    conformance is healthy.
+
+    ONE owner, two consumers: `route_next_result` (the Result wrapper) and the
+    CLI's `_route_once` continuation path both call THIS function, so a
+    `saipen crew` route can never be emitted by one surface while another
+    refuses it. NOT_RUN is not an exemption -- absence of validator evidence is
+    not health -- and the refusal names the executable remediation
+    (`saipen validate`), never a command that merely re-reports the problem.
+    """
+    if not (
+        routed.get("ok")
+        and routed.get("action") == "saipen crew"
+        and routed.get("reason") == "crew-converge"
+        and project_root is not None
+    ):
+        return None
+    try:
+        from .conformance import (
+            CONFORMANCE_REMEDIATION_COMMAND,
+            CONFORMANCE_UNHEALTHY,
+            conformance_decision,
+        )
+
+        decision = conformance_decision(project_root, gate="core")
+        if decision["healthy"]:
+            return None
+        return {
+            **routed,
+            "ok": False,
+            "code": CONFORMANCE_UNHEALTHY,
+            "action": CONFORMANCE_REMEDIATION_COMMAND,
+            "reason": "conformance-unhealthy",
+            "detail": (
+                "crew convergence requires a CURRENT_PASS canonical conformance "
+                f"receipt, got {decision['status']}: {decision['reason']} -- run "
+                f"'{CONFORMANCE_REMEDIATION_COMMAND}' before crew work"
+            ),
+            "conformance_status": decision["status"],
+            "canonical_next_command": CONFORMANCE_REMEDIATION_COMMAND,
+        }
+    except Exception as exc:
+        # W2-007: fail closed when conformance cannot be positively
+        # established. An import/read/decode or unexpected runtime failure at
+        # the gate disables the gate and masks its root cause if it falls
+        # through to ROUTED. Route toward validate/recover instead of crew
+        # execution.
+        return {
+            **routed,
+            "ok": False,
+            "code": "CONFORMANCE_UNKNOWN",
+            "action": "saipen validate",
+            "reason": "conformance-unknown",
+            "detail": (
+                f"crew convergence could not establish conformance evidence "
+                f"({type(exc).__name__}: {exc}); run 'saipen validate' before crew work"
+            ),
+            "canonical_next_command": "saipen validate",
+        }
+
+
 def route_next_result(
     project_root,
     state_text: str,
@@ -665,66 +731,19 @@ def route_next_result(
                         "detail": f"phase doc {load} is missing or empty",
                     },
                 )
-    # CORE-004: conformance health gate -- when routing to crew convergence,
-    # verify that the canonical conformance evidence is healthy. Structural
-    # corruption or failing conformance must route to VALIDATE/RECOVER
-    # instead of normal crew work.
-    #
-    # T-1412: the decision is read from the ONE conformance owner and admits
-    # ONLY CURRENT_PASS. NOT_RUN is not an exemption -- absence of validator
-    # evidence is not health -- and the route names the executable remediation
-    # (`saipen validate`), never a command that merely re-reports the problem.
-    if (
-        out.get("ok")
-        and out.get("action") == "saipen crew"
-        and out.get("reason") == "crew-converge"
-        and project_root is not None
-    ):
-        try:
-            from .conformance import (
-                CONFORMANCE_REMEDIATION_COMMAND,
-                CONFORMANCE_UNHEALTHY,
-                conformance_decision,
-            )
-
-            _decision = conformance_decision(project_root, gate="core")
-            if not _decision["healthy"]:
-                return Result(
-                    ok=False,
-                    code=CONFORMANCE_UNHEALTHY,
-                    data={
-                        "action": CONFORMANCE_REMEDIATION_COMMAND,
-                        "reason": "conformance-unhealthy",
-                        "detail": (
-                            "crew convergence requires a CURRENT_PASS canonical "
-                            f"conformance receipt, got {_decision['status']}: "
-                            f"{_decision['reason']} -- run "
-                            f"'{CONFORMANCE_REMEDIATION_COMMAND}' before crew work"
-                        ),
-                        "conformance_status": _decision["status"],
-                        "canonical_next_command": CONFORMANCE_REMEDIATION_COMMAND,
-                    },
-                )
-        except Exception as exc:
-            # W2-007: fail closed when conformance cannot be positively
-            # established. An import/read/decode or unexpected runtime
-            # failure at the gate disables the gate and masks its root cause
-            # if it falls through to ROUTED. Route toward validate/recover
-            # instead of crew execution.
-            return Result(
-                ok=False,
-                code="CONFORMANCE_UNKNOWN",
-                data={
-                    "action": "saipen validate",
-                    "reason": "conformance-unknown",
-                    "detail": (
-                        f"crew convergence could not establish conformance "
-                        f"evidence ({type(exc).__name__}: {exc}); "
-                        "run 'saipen validate' before crew work"
-                    ),
-                    "canonical_next_command": "saipen validate",
-                },
-            )
+    # CORE-004 / T-1412: the ONE crew-convergence conformance gate. It is
+    # applied HERE for every Result-shaped route consumer and by the CLI's
+    # `_route_once` continuation path through the SAME function, because the
+    # gate used to live only in this wrapper while the production route was
+    # emitted by the raw router -- a route one surface refused and another
+    # handed out (measured live in the T-1412 field acceptance).
+    gated = conformance_crew_gate(project_root, out)
+    if gated is not None:
+        return Result(
+            ok=False,
+            code=gated["code"],
+            data={key: value for key, value in gated.items() if key not in ("ok", "code")},
+        )
     return Result(
         ok=bool(out.get("ok")),
         code=("ROUTED" if out.get("ok") else routing_failure_code(out)),

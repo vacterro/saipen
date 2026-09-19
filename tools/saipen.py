@@ -1910,6 +1910,16 @@ def _route_once(project_root: Path) -> dict:
         snap=snap,
         audit_inbox=audit_inbox_projection(project_root),
     )
+    # T-1412: the crew-convergence conformance gate is applied to the route
+    # THIS continuation path emits, through the same ONE gate owner the Result
+    # wrapper uses. The gate used to exist only in `route_next_result`, which
+    # no production caller reached, so `continue` could hand out a crew route
+    # that `saipen validate`'s contract (and every other surface) refused.
+    from saipen_engine.router import conformance_crew_gate
+
+    _gated = conformance_crew_gate(project_root, routed)
+    if _gated is not None:
+        routed = _gated
     route = {
         "emitted": None,
         "rc": 0,
@@ -1927,10 +1937,12 @@ def _route_once(project_root: Path) -> dict:
         # The router owns the stable failure code: recovery conflicts/pending
         # are RECOVERY_*; malformed/binding failures are VALIDATION_FAILED
         # with recovery_pending strictly false (there is no journal to
-        # recover -- T-1003 hostile findings).
-        route["emitted"] = {
+        # recover -- T-1003 hostile findings). T-1412: a refusal the router
+        # itself classified (e.g. CONFORMANCE_UNHEALTHY) keeps ITS code and
+        # route instead of being re-derived here.
+        emitted = {
             "ok": False,
-            "code": routing_failure_code(routed),
+            "code": routed.get("code") or routing_failure_code(routed),
             "action": routed.get("action"),
             "reason": routed.get("reason"),
             "detail": routed.get("detail", ""),
@@ -1940,6 +1952,10 @@ def _route_once(project_root: Path) -> dict:
             "pending_ops": pending,
             "parked_work": parked or None,
         }
+        for key in ("conformance_status", "canonical_next_command", "remediation"):
+            if routed.get(key) is not None:
+                emitted[key] = routed[key]
+        route["emitted"] = emitted
         route["rc"] = 1
     return route
 

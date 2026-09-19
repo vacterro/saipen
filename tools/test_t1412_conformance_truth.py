@@ -168,10 +168,11 @@ class T1412Base(unittest.TestCase):
         legacy_pass_run: bool = False,
         commit_identity: bool = True,
         board: str = _BOARD,
+        state: str | None = None,
     ) -> Path:
         root = self.base / name
         (root / ".saipen").mkdir(parents=True)
-        (root / ".saipen" / "STATE.md").write_text(_STATE, encoding="utf-8")
+        (root / ".saipen" / "STATE.md").write_text(state or _STATE, encoding="utf-8")
         (root / ".saipen" / "BOARD.md").write_text(board, encoding="utf-8")
         log = "# LOG\n\n- 19.09.26 21:00 [E-001] DEC: fixture init\n"
         if legacy_pass_run:
@@ -493,6 +494,38 @@ class RouterConformanceGateTests(T1412Base):
         allowed = self.route(root)
         self.assertTrue(allowed.ok, allowed)
         self.assertEqual(allowed.data.get("action"), "saipen crew")
+
+    def test_continue_crew_route_is_refused_and_the_named_remediation_clears_it(self) -> None:
+        """The PRODUCTION continuation path, not just the Result wrapper.
+
+        Measured in the T-1412 installed field acceptance: `saipen continue`
+        emitted the crew route while conformance was NOT_RUN, because the only
+        conformance gate lived in `route_next_result`, which no production
+        caller reached. The gate now sits in ONE function both surfaces call.
+        """
+        root = self.make_project("router-continue", state=_ROUTER_STATE)
+        self.assert_fast_gate_clean(root)
+
+        rc, payload, text = self.run_cli(root, "continue")
+        self.assertNotEqual(rc, 0, text)
+        self.assertFalse(payload.get("ok"), payload)
+        self.assertEqual(payload.get("code"), "CONFORMANCE_UNHEALTHY", payload)
+        self.assertEqual(
+            payload.get("action"), C.CONFORMANCE_REMEDIATION_COMMAND, payload
+        )
+        self.assertEqual(
+            payload.get("canonical_next_command"), C.CONFORMANCE_REMEDIATION_COMMAND
+        )
+        self.assertEqual(payload.get("conformance_status"), "NOT_RUN", payload)
+
+        rc, payload, text = self.run_cli(root, "validate")
+        self.assertEqual(rc, 0, text)
+        self.assertEqual(payload.get("code"), "VALID", payload)
+
+        rc, payload, text = self.run_cli(root, "continue")
+        self.assertEqual(rc, 0, text)
+        self.assertTrue(payload.get("ok"), payload)
+        self.assertEqual(payload.get("action"), "saipen crew", payload)
 
 
 if __name__ == "__main__":
