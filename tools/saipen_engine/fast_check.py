@@ -183,7 +183,13 @@ class LogAnalysis:
         self.amnestied = tuple(amnestied)
 
 
-def block_parked_evidence_error(state: dict, board: dict, events) -> str | None:
+def block_parked_evidence_error(
+    state: dict,
+    board: dict,
+    events,
+    *,
+    planned_detail_events=frozenset(),
+) -> str | None:
     """Bind the narrow mid-flight ``phase -> DONE`` exception to its event.
 
     ``state_contract_errors`` can validate the transition shape, but the one
@@ -212,6 +218,23 @@ def block_parked_evidence_error(state: dict, board: dict, events) -> str | None:
             if isinstance(event.get("event"), int) and event["event"] <= last_event
         ]
 
+    from .log import ACTIVE_TICKET_BLOCK_MARKER, compact_detail_reference
+
+    def detail_authority_valid(event: dict) -> bool:
+        text = str(event.get("text") or "")
+        claims_detail = text.startswith(ACTIVE_TICKET_BLOCK_MARKER) and (
+            "detail_ref:" in text or "structural_event:" in text
+        )
+        if not claims_detail:
+            return True
+        compact = compact_detail_reference(text)
+        if compact is not None and compact[1] is None:
+            return False
+        return bool(
+            event.get("detail_integrity") == "valid"
+            or event.get("event") in planned_detail_events
+        )
+
     def is_active_block(event: dict) -> bool:
         ticket_id = event.get("ticket")
         ticket = board.get("tickets", {}).get(ticket_id) if ticket_id else None
@@ -220,7 +243,8 @@ def block_parked_evidence_error(state: dict, board: dict, events) -> str | None:
             and ticket.get("section") == "## BLOCKED"
             and event.get("taxonomy") == "DEC"
             and str(event.get("op_id") or "").startswith("ticket-")
-            and str(event.get("text") or "").startswith("ticket block via SAIOPS (active)")
+            and str(event.get("text") or "").startswith(ACTIVE_TICKET_BLOCK_MARKER)
+            and detail_authority_valid(event)
         )
 
     phase_events = [
@@ -229,10 +253,22 @@ def block_parked_evidence_error(state: dict, board: dict, events) -> str | None:
         if str(event.get("op_id") or "").startswith(
             ("claim-", "transition-", "finish-", "goal-entry-")
         )
-        or str(event.get("text") or "").startswith("ticket block via SAIOPS (active)")
+        or str(event.get("text") or "").startswith(ACTIVE_TICKET_BLOCK_MARKER)
     ]
     latest_phase_event = max(phase_events, key=lambda event: event["event"], default=None)
     if latest_phase_event is None or not is_active_block(latest_phase_event):
+        if (
+            latest_phase_event is not None
+            and str(latest_phase_event.get("text") or "").startswith(
+                ACTIVE_TICKET_BLOCK_MARKER
+            )
+            and not detail_authority_valid(latest_phase_event)
+        ):
+            return (
+                "structural/detail integrity failure: the canonical active-block "
+                f"event E-{latest_phase_event.get('event')} has a missing, malformed, "
+                "unbound, or non-atomic detail proof"
+            )
         return (
             f"invalid phase transition: {source} -> {destination} (RFC § 1.6). "
             "The block-parked shape requires the latest phase-changing event "
@@ -538,6 +574,7 @@ def validate_texts(
     log_text: str,
     current_agent: str | None = None,
     sealed_events=None,
+    planned_detail_events=frozenset(),
 ) -> list[str]:
     """Validate the proposed STATE/BOARD/LOG texts. Returns every error.
 
@@ -558,6 +595,10 @@ def validate_texts(
     from the proposed active LOG.md alone. This keeps the transactional
     write-path validator consistent with the canonical read-path validator
     once decisive evidence rotates into a sealed LOG segment.
+
+    `planned_detail_events` names only structural detail targets present in the
+    same immutable OperationPlan as this proposed LOG. Live validation never
+    supplies it; persisted detail must prove its own integrity from disk.
     """
     errors: list[str] = []
 
@@ -678,7 +719,12 @@ def validate_texts(
         active_events = tuple(
             prior + [ev for ev in active_events if ev.get("event") not in prior_ids]
         )
-    parked_error = block_parked_evidence_error(state, board, active_events)
+    parked_error = block_parked_evidence_error(
+        state,
+        board,
+        active_events,
+        planned_detail_events=planned_detail_events,
+    )
     if parked_error is not None:
         errors.append(f"STATE proposed {parked_error}")
 

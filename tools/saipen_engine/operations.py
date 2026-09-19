@@ -62,7 +62,12 @@ from .board_compaction import (
 )
 from .fast_check import block_parked_evidence_error, validate_texts
 from .journal import MISSING_FILE_DEPENDENCY, hash_bytes
-from .log import VALID_TAXONOMIES, prepare_bounded_event
+from .log import (
+    VALID_TAXONOMIES,
+    ActiveTicketBlockStructure,
+    active_ticket_block_structure,
+    prepare_bounded_event,
+)
 from .plan import OperationPlan, TargetPlan, apply_plan, build_plan
 from .result import Result
 from .state import (
@@ -623,6 +628,7 @@ def _event_line(
     now: str,
     op_id: str | None = None,
     root: Path | None = None,
+    structure: ActiveTicketBlockStructure | None = None,
 ) -> tuple[int, str]:
     # T-1361 CL-04: the WRITER asks the LOG grammar, which is the one owner of
     # what a LOG event may be. It used to consult the command surface's own
@@ -658,6 +664,7 @@ def _event_line(
         agent=agent,
         now=now,
         op_id=op_id,
+        structure=structure,
     )
     if targets:
         docs.setdefault("_log_detail_targets", []).extend(targets)
@@ -2614,6 +2621,11 @@ def _ticket_targets(
             ticket=ticket_id,
         )
     _safe_payload = redact_credentials(payload) if payload else ""
+    event_structure = None
+    if is_active_block:
+        event_structure = active_ticket_block_structure(
+            child_id if action == "block-for" else None
+        )
     event, line = _event_line(
         docs,
         log_tail,
@@ -2627,6 +2639,7 @@ def _ticket_targets(
         now,
         op_id,
         root=root,
+        structure=event_structure,
     )
     new_log = docs["log"].text_norm.rstrip("\n") + "\n" + line + "\n"
     # T-1101: redact credentials in the payload before it reaches BOARD
@@ -2738,8 +2751,16 @@ def _ticket_targets(
     else:
         new_state = _settle_stop_reason(new_state, new_board, agent)
 
+    planned_detail_events = (
+        {event} if is_active_block and docs.get("_log_detail_targets") else set()
+    )
     errors = validate_texts(
-        new_state, new_board, new_log, current_agent=agent, sealed_events=docs["_history"]
+        new_state,
+        new_board,
+        new_log,
+        current_agent=agent,
+        sealed_events=docs["_history"],
+        planned_detail_events=planned_detail_events,
     )
     if errors:
         return _refuse(

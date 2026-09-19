@@ -202,19 +202,97 @@ def _normalised_doc_text(raw: bytes) -> str:
     return text.replace("\r\n", "\n").replace("\r", "\n")
 
 
-#: The message a compacted event carries in place of its own text.
-_DETAIL_REF_MESSAGE = re.compile(r"^detail_ref:\s*(\S+)$")
+ACTIVE_TICKET_BLOCK_MARKER = "ticket block via SAIOPS (active)"
+STRUCTURAL_DETAIL_TAG = "structural_event: ticket-block-active"
+
+
+@dataclass(frozen=True)
+class ActiveTicketBlockStructure:
+    """Machine-owned identity for the narrow active-ticket block exception."""
+
+    dependency_ticket: str | None = None
+
+
+def active_ticket_block_structure(
+    dependency_ticket: str | None = None,
+) -> ActiveTicketBlockStructure:
+    """Build active-block structure without accepting caller prose."""
+    if dependency_ticket is not None and re.fullmatch(r"T-\d+", dependency_ticket) is None:
+        raise ValueError(
+            "active ticket block dependency must be a canonical T-### identity"
+        )
+    return ActiveTicketBlockStructure(dependency_ticket)
+
+
+def structural_event_prefix(structure: ActiveTicketBlockStructure) -> str:
+    """Render the canonical semantic marker preserved by compaction."""
+    structure = active_ticket_block_structure(structure.dependency_ticket)
+    prefix = ACTIVE_TICKET_BLOCK_MARKER
+    if structure.dependency_ticket is not None:
+        prefix += f" -- dependency {structure.dependency_ticket}"
+    return prefix
+
+
+def structural_event_record(structure: ActiveTicketBlockStructure) -> dict:
+    """Metadata binding for one machine-owned compact event structure."""
+    structure = active_ticket_block_structure(structure.dependency_ticket)
+    return {
+        "kind": "ticket_block",
+        "active": True,
+        "dependency_ticket": structure.dependency_ticket,
+    }
+
+
+def _structure_from_record(record) -> ActiveTicketBlockStructure | None:
+    if not isinstance(record, dict):
+        return None
+    if set(record) != {"kind", "active", "dependency_ticket"}:
+        return None
+    if record.get("kind") != "ticket_block" or record.get("active") is not True:
+        return None
+    try:
+        return active_ticket_block_structure(record.get("dependency_ticket"))
+    except ValueError:
+        return None
+
+
+_STRUCTURAL_DETAIL_MESSAGE = re.compile(
+    rf"^(?P<prefix>{re.escape(ACTIVE_TICKET_BLOCK_MARKER)}"
+    rf"(?: -- dependency (?P<dependency>T-\d+))?) -- "
+    rf"{re.escape(STRUCTURAL_DETAIL_TAG)} -- detail_ref:\s*(?P<reference>\S+)$"
+)
+_PLAIN_DETAIL_MESSAGE = re.compile(r"^detail_ref:\s*(?P<reference>\S+)$")
+
+
+def compact_detail_reference(
+    text: str,
+) -> tuple[str, ActiveTicketBlockStructure | None] | None:
+    """Parse only canonical compact-detail messages, never arbitrary prose."""
+    structural = _STRUCTURAL_DETAIL_MESSAGE.fullmatch((text or "").strip())
+    if structural is not None:
+        structure = active_ticket_block_structure(structural.group("dependency"))
+        if structural.group("prefix") != structural_event_prefix(structure):
+            return None
+        return structural.group("reference"), structure
+    plain = _PLAIN_DETAIL_MESSAGE.fullmatch((text or "").strip())
+    if plain is None:
+        return None
+    return plain.group("reference"), None
+
+
 #: Where `log_compaction` is allowed to have put those bytes, and nowhere else.
 _DETAIL_ROOT = ".saipen/recovery/log-detail/"
-#: Externalized detail is immutable by contract, so one read per path is enough.
+#: Last resolution telemetry kept for compatibility with existing diagnostics.
+#: Entries are never reused as authority: every validation pass re-reads bytes,
+#: so same-process tampering cannot hide behind a previously valid resolution.
 _DETAIL_CACHE: dict[str, str | None] = {}
 
 
-def _restored_detail_text(root: Path, parsed: dict) -> str | None:
-    """The original message of a compacted event, or None if it cannot be proved.
+def _restored_detail_text(root: Path, parsed: dict) -> tuple[str | None, str | None]:
+    """Return ``(reference, original message)`` for a proved compact event.
 
-    `log_compaction` replaces any event over `MAX_NEW_EVENT_BYTES` with the one
-    line `detail_ref: <metadata>` and calls that lossless -- which it is on
+    `log_compaction` replaces any event over `MAX_NEW_EVENT_BYTES` with one
+    bounded detail-reference line and calls that lossless -- which it is on
     disk, and was not for any reader. `verification_evidence`,
     `regression_evidence` and `structural_marker_events` all classify on event
     TEXT, so a verdict long enough to be compacted carried no PASS token, no
@@ -227,10 +305,10 @@ def _restored_detail_text(root: Path, parsed: dict) -> str | None:
     text standing, so a missing or tampered detail file can never invent a
     verdict -- it only fails the way it already failed.
     """
-    match = _DETAIL_REF_MESSAGE.match((parsed.get("text") or "").strip())
-    if match is None:
-        return None
-    reference = match.group(1)
+    compact = compact_detail_reference(str(parsed.get("text") or ""))
+    if compact is None:
+        return None, None
+    reference, structure = compact
     # The key is the RESOLVED root: two projects reached by the same spelling
     # -- `read_history_events(".")` from two working directories in one process
     # -- would otherwise share entries, and the digest is checked when the file
@@ -239,13 +317,11 @@ def _restored_detail_text(root: Path, parsed: dict) -> str | None:
     try:
         identity = root.resolve().as_posix()
     except OSError:
-        return None
+        return reference, None
     cache_key = f"{identity}|{reference}|{parsed.get('event')}"
-    if cache_key in _DETAIL_CACHE:
-        return _DETAIL_CACHE[cache_key]
-    restored = _read_detail_text(root, reference, parsed)
+    restored = _read_detail_text(root, reference, parsed, structure)
     _DETAIL_CACHE[cache_key] = restored
-    return restored
+    return reference, restored
 
 
 def _owned_detail_bytes(root: Path, reference: str) -> bytes | None:
@@ -270,7 +346,12 @@ def _owned_detail_bytes(root: Path, reference: str) -> bytes | None:
         return None
 
 
-def _read_detail_text(root: Path, reference: str, parsed: dict) -> str | None:
+def _read_detail_text(
+    root: Path,
+    reference: str,
+    parsed: dict,
+    structure: ActiveTicketBlockStructure | None,
+) -> str | None:
     metadata_raw = _owned_detail_bytes(root, reference)
     if metadata_raw is None:
         return None
@@ -278,14 +359,58 @@ def _read_detail_text(root: Path, reference: str, parsed: dict) -> str | None:
         metadata = json.loads(metadata_raw.decode("utf-8"))
     except (UnicodeDecodeError, ValueError):
         return None
+    if not isinstance(metadata, dict):
+        return None
+    from .paths import project_identity, project_lineage_identity
+
+    expected = {
+        "schema_version": 1,
+        "operation": "log_event_externalization",
+        "status": "COMMITTED",
+        "event_id": f"E-{parsed.get('event')}",
+        "ticket_id": parsed.get("ticket"),
+        "project_identity": project_identity(root),
+        "project_lineage": project_lineage_identity(root),
+        "source": ".saipen/LOG.md",
+        "metadata_path": reference,
+        "lossless": True,
+    }
+    if not set(expected).issubset(metadata) or any(
+        metadata.get(key) != value for key, value in expected.items()
+    ):
+        return None
+    externalization = metadata.get("externalization_event")
+    if not isinstance(externalization, dict) or externalization.get(
+        "operation_id"
+    ) != parsed.get("op_id"):
+        return None
+    if structure is None:
+        if "structural_event" in metadata:
+            return None
+    else:
+        recorded_structure = _structure_from_record(metadata.get("structural_event"))
+        if recorded_structure != structure:
+            return None
     raw = _owned_detail_bytes(root, str(metadata.get("original_event_path") or ""))
     if raw is None:
         return None
+    if metadata.get("original_event_bytes") != len(raw):
+        return None
     if hashlib.sha256(raw).hexdigest() != metadata.get("original_event_sha256"):
         return None
-    line = _normalised_doc_text(raw).splitlines()[0] if raw else ""
+    lines = _normalised_doc_text(raw).splitlines()
+    if len(lines) != 1:
+        return None
+    line = lines[0]
     full = parse_log_line(line)
-    if full is None or full.get("event") != parsed.get("event"):
+    if full is None:
+        return None
+    for key in ("date", "event", "parent", "ticket", "agent", "op_id", "taxonomy"):
+        if full.get(key) != parsed.get(key):
+            return None
+    if structure is not None and not str(full.get("text") or "").startswith(
+        structural_event_prefix(structure) + " -- "
+    ):
         return None
     return full.get("text")
 
@@ -346,7 +471,12 @@ def read_history_snapshot(
         for idx, line in enumerate(text.splitlines()):
             parsed = parse_log_line(line)
             if parsed is not None:
-                restored = _restored_detail_text(root, parsed)
+                reference, restored = _restored_detail_text(root, parsed)
+                if reference is not None:
+                    parsed["detail_ref"] = reference
+                    parsed["detail_integrity"] = (
+                        "valid" if restored is not None else "invalid"
+                    )
                 if restored is not None:
                     parsed["text"] = restored
                 events.append(parsed)
@@ -450,7 +580,12 @@ def read_history_snapshot_and_logs_digest(
         for idx, line in enumerate(text.splitlines()):
             parsed = parse_log_line(line)
             if parsed is not None:
-                restored = _restored_detail_text(root, parsed)
+                reference, restored = _restored_detail_text(root, parsed)
+                if reference is not None:
+                    parsed["detail_ref"] = reference
+                    parsed["detail_integrity"] = (
+                        "valid" if restored is not None else "invalid"
+                    )
                 if restored is not None:
                     parsed["text"] = restored
                 events.append(parsed)
@@ -689,6 +824,7 @@ def prepare_bounded_event(
     agent: str | None = None,
     now: str | None = None,
     op_id: str | None = None,
+    structure: ActiveTicketBlockStructure | None = None,
 ) -> tuple[int, str, tuple]:
     """The ONE bounded LOG producer every canonical writer uses.
 
@@ -714,6 +850,7 @@ def prepare_bounded_event(
         agent=agent,
         now=now,
         op_id=op_id,
+        structure=structure,
     )
     return prepared.event, prepared.line, prepared.targets
 
