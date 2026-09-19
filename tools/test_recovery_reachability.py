@@ -1278,6 +1278,20 @@ def _unbound_history_project() -> Path:
     return root
 
 
+def assert_structural_gate_restored(case, cli, label=""):
+    """T-1412: `saipen validate` is the canonical FULL-validator front door.
+
+    These synthetic fixtures are not full-validator-green projects and carry no
+    durable CURRENT_PASS receipt, so the property a repair can prove here is the
+    STRUCTURAL gate (STATE/BOARD/LOG) -- and that no surface returns VALID
+    without receipt-backed CURRENT_PASS. The refresh-to-CURRENT_PASS and
+    CURRENT_FAIL paths are pinned in tools/test_t1412_conformance_truth.py.
+    """
+    verdict = cli("validate")
+    case.assertEqual(verdict.get("structural_gate"), "pass", (label, verdict))
+    case.assertNotEqual(verdict.get("code"), "VALID", (label, verdict))
+
+
 class UnboundHistoryDeadlockTests(unittest.TestCase):
     """A repair that exists must be REACHABLE from the state that needs it."""
 
@@ -1337,7 +1351,7 @@ class UnboundHistoryDeadlockTests(unittest.TestCase):
         self.assertIn("\nphase: VERIFY\n", state)
         self.assertIn("\ntransition_from: BUILD\n", state)
 
-        self.assertEqual(self.cli("validate").get("code"), "VALID")
+        assert_structural_gate_restored(self, self.cli)
         self.assertEqual(self.cli("recover").get("code"), "CLEAN")
         self.assertTrue(self.cli("status").get("ok"))
         self.assertTrue(self.cli("continue").get("ok"))
@@ -1652,7 +1666,7 @@ class CyclicRepairDependencyTests(unittest.TestCase):
         self.assertEqual(trail[-1], "CLEAN", (trail, self.cli("recover")))
         self.assertEqual(trail.count("DECISION:DUPLICATE_ID_RESOLVED"), 1, trail)
 
-        self.assertEqual(self.cli("validate").get("code"), "VALID")
+        assert_structural_gate_restored(self, self.cli, "cyclic-repair")
         self.assertTrue(self.cli("status").get("ok"))
         continued = self.cli("continue")
         self.assertTrue(continued.get("ok"), continued)
@@ -1856,7 +1870,7 @@ class StrandedClaimTests(unittest.TestCase):
         self.assertEqual(self.cli("continue").get("canonical_next_command"), route)
 
         self.assertEqual(self.cli(*route.split()[1:]).get("code"), "CLAIMED")
-        self.assertEqual(self.cli("validate").get("code"), "VALID")
+        assert_structural_gate_restored(self, self.cli, "stranded-claim")
         self.assertEqual(self.cli("recover").get("code"), "CLEAN")
         self.assertTrue(self.cli("status").get("ok"))
         self.assertTrue(self.cli("continue").get("ok"))

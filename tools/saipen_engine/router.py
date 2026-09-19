@@ -669,6 +669,11 @@ def route_next_result(
     # verify that the canonical conformance evidence is healthy. Structural
     # corruption or failing conformance must route to VALIDATE/RECOVER
     # instead of normal crew work.
+    #
+    # T-1412: the decision is read from the ONE conformance owner and admits
+    # ONLY CURRENT_PASS. NOT_RUN is not an exemption -- absence of validator
+    # evidence is not health -- and the route names the executable remediation
+    # (`saipen validate`), never a command that merely re-reports the problem.
     if (
         out.get("ok")
         and out.get("action") == "saipen crew"
@@ -676,22 +681,28 @@ def route_next_result(
         and project_root is not None
     ):
         try:
-            from .conformance import conformance_status, STATUS_CURRENT_PASS
+            from .conformance import (
+                CONFORMANCE_REMEDIATION_COMMAND,
+                CONFORMANCE_UNHEALTHY,
+                conformance_decision,
+            )
 
-            _cs = conformance_status(project_root, gate="core")
-            if _cs.get("status") not in (STATUS_CURRENT_PASS, "NOT_RUN"):
+            _decision = conformance_decision(project_root, gate="core")
+            if not _decision["healthy"]:
                 return Result(
                     ok=False,
-                    code="CONFORMANCE_UNHEALTHY",
+                    code=CONFORMANCE_UNHEALTHY,
                     data={
-                        "action": "saipen status",
+                        "action": CONFORMANCE_REMEDIATION_COMMAND,
                         "reason": "conformance-unhealthy",
                         "detail": (
-                            f"crew convergence requires current conformance evidence, "
-                            f"got {_cs['status']}: {_cs.get('reason', '')} -- "
-                            "run 'saipen validate' before crew work"
+                            "crew convergence requires a CURRENT_PASS canonical "
+                            f"conformance receipt, got {_decision['status']}: "
+                            f"{_decision['reason']} -- run "
+                            f"'{CONFORMANCE_REMEDIATION_COMMAND}' before crew work"
                         ),
-                        "conformance_status": _cs["status"],
+                        "conformance_status": _decision["status"],
+                        "canonical_next_command": CONFORMANCE_REMEDIATION_COMMAND,
                     },
                 )
         except Exception as exc:
@@ -704,13 +715,14 @@ def route_next_result(
                 ok=False,
                 code="CONFORMANCE_UNKNOWN",
                 data={
-                    "action": "saipen status",
+                    "action": "saipen validate",
                     "reason": "conformance-unknown",
                     "detail": (
                         f"crew convergence could not establish conformance "
                         f"evidence ({type(exc).__name__}: {exc}); "
                         "run 'saipen validate' before crew work"
                     ),
+                    "canonical_next_command": "saipen validate",
                 },
             )
     return Result(

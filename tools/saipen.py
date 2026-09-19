@@ -557,22 +557,147 @@ def _hex_decode(text: str) -> str | None:
         return None
 
 
+#: T-1412: a canonical-validator run is bounded like every other internal
+#: capture (the debt engine's VALIDATOR_CAPTURE_TIMEOUT), and its output is
+#: summarized for the operator, never proxied whole into JSON.
+_CANONICAL_VALIDATOR_TIMEOUT_SECONDS = 1800
+_VALIDATOR_OUTPUT_TAIL_CHARS = 2000
+
+
+def _bounded_validator_output(completed) -> str:
+    """Tail-bounded validator output. NEVER a PASS/FAIL verdict source."""
+    text = completed.stdout or ""
+    if completed.stderr:
+        text = f"{text}\n{completed.stderr}" if text else completed.stderr
+    text = text.strip()
+    if len(text) <= _VALIDATOR_OUTPUT_TAIL_CHARS:
+        return text
+    return text[-_VALIDATOR_OUTPUT_TAIL_CHARS:]
+
+
+def _canonical_validator_path() -> Path:
+    """The canonical validator owned by the RUNNING SAIPEN runtime (T-1412).
+
+    Resolved through the install-ownership primitive
+    (`saipen_engine.paths.resolve_tool_path` -> `<install>/tools/validate.py`),
+    with the executing adapter's own directory as the source-layout
+    equivalent. Deliberately no PATH search and no cwd dependence: a stale
+    clone or a project-vendored copy must never answer for this runtime.
+    """
+    from saipen_engine.paths import resolve_tool_path
+
+    try:
+        return resolve_tool_path("validate.py")
+    except (FileNotFoundError, ValueError):
+        beside = Path(__file__).resolve().parent / "validate.py"
+        if beside.is_file():
+            return beside
+        raise FileNotFoundError(
+            "canonical tools/validate.py is missing from the running SAIPEN runtime"
+        ) from None
+
+
+class _ValidatorRun:
+    """One bounded canonical-validator execution result (T-1412)."""
+
+    __slots__ = ("error", "exit_code", "launched", "path", "summary")
+
+    def __init__(self, path, launched, exit_code=None, summary="", error=None):
+        self.path = path
+        self.launched = launched
+        self.exit_code = exit_code
+        self.summary = summary
+        self.error = error
+
+
+def _run_canonical_validator(project_root: Path) -> _ValidatorRun:
+    """Execute the canonical Core validator through an INTERNAL argv path.
+
+    No shell, no command string, no `shell=True`. The exit code and the receipt
+    the validator writes are the only inputs; free-form stdout is summarized
+    for the operator and never parsed for a PASS/FAIL verdict (T-1412).
+    """
+    import subprocess
+
+    try:
+        validator = _canonical_validator_path()
+    except Exception as exc:
+        return _ValidatorRun(None, False, error=f"{type(exc).__name__}: {exc}")
+    command = [
+        sys.executable,
+        str(validator),
+        "--project-root",
+        str(project_root),
+        "--gate",
+        "core",
+    ]
+    try:
+        completed = subprocess.run(
+            command,
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            timeout=_CANONICAL_VALIDATOR_TIMEOUT_SECONDS,
+        )
+    except Exception as exc:
+        return _ValidatorRun(validator, False, error=f"{type(exc).__name__}: {exc}")
+    return _ValidatorRun(
+        validator,
+        True,
+        exit_code=completed.returncode,
+        summary=_bounded_validator_output(completed),
+    )
+
+
+def _validator_run_block(run: _ValidatorRun) -> dict:
+    block = {
+        "path": str(run.path) if run.path else None,
+        "launched": run.launched,
+        "exit_code": run.exit_code,
+        "summary": run.summary,
+    }
+    if run.error:
+        block["error"] = run.error
+    return block
+
+
 def _validate(project_root: Path, as_json: bool) -> int:
-    """Why the canonical gate refuses this project, if it does. READ-ONLY.
+    """The canonical Core-conformance front door (T-1412). EVIDENCE-WRITE.
 
-    T-1357. The router already told operators to "run 'saipen validate' before
-    crew work", and no such verb existed; the real gate is an ordinary shell
-    command, which the guard correctly refuses once the protocol state is
-    invalid. So the one question a blocked operator needs answered -- WHAT is
-    wrong -- had no canonical answer, and the refusal that named the problem
-    could not be read from the session it was refusing.
+    T-1357 gave a blocked operator a read-only fast-gate report under this verb;
+    T-1412 makes it the REAL remediation the router already recommends. Two
+    ordered stages:
 
-    Like `search`, this is reachable in the state that broke: it reads the
-    three canonical documents through the codec, runs the same `validate_texts`
-    the mutation path runs, and writes nothing. It reports; it never repairs.
+    1. a cheap structural gate over canonical STATE/BOARD/LOG. A malformed
+       document returns the structural failure immediately -- running the whole
+       validator over proven corruption would only manufacture a receipt.
+    2. if the structural gate passes, the canonical validator of the SAME
+       running runtime runs as `validate.py --project-root <root> --gate core`
+       through an internal argv path (no shell) and emits its ordinary
+       conformance receipt.
+
+    The verdict is NOT the validator's exit code and NOT its stdout: after the
+    run `conformance_decision(project_root, gate="core")` is re-read, and ONLY
+    CURRENT_PASS returns VALID -- a validator process that exits 0 without a
+    durable CURRENT_PASS receipt for the final source is not proof. The receipt
+    is the command's ONLY write: product files, BOARD Work, STATE phase, source
+    intake and Improve cycles are untouched.
     """
     from saipen_engine import codec
+    from saipen_engine.conformance import (
+        CONFORMANCE_REMEDIATION_COMMAND,
+        CONFORMANCE_UNAVAILABLE,
+        CONFORMANCE_UNHEALTHY,
+        conformance_decision,
+    )
     from saipen_engine.fast_check import validate_texts
+
+    def _authoritative_block():
+        try:
+            return conformance_decision(project_root, gate="core")["status_block"]
+        except Exception:
+            return None
 
     saipen = project_root / ".saipen"
     missing = [
@@ -587,6 +712,7 @@ def _validate(project_root: Path, as_json: bool) -> int:
                 "code": "VALIDATION_FAILED",
                 "detail": "canonical document(s) missing: " + ", ".join(missing),
                 "errors": missing,
+                "conformance_status": _authoritative_block(),
             },
             as_json,
         )
@@ -610,21 +736,79 @@ def _validate(project_root: Path, as_json: bool) -> int:
             as_json,
         )
         return 1
-    _emit(
-        {
-            "ok": not errors,
-            "code": "VALID" if not errors else "VALIDATION_FAILED",
-            "error_count": len(errors),
-            "errors": errors,
-            "detail": (
-                "canonical STATE/BOARD/LOG pass the fast gate"
-                if not errors
-                else "; ".join(errors[:8])
-            ),
-        },
-        as_json,
-    )
-    return 0 if not errors else 1
+    if errors:
+        # Structural failure: refuse before the expensive validator so a
+        # malformed canonical document never manufactures a conformance receipt.
+        _emit(
+            {
+                "ok": False,
+                "code": "VALIDATION_FAILED",
+                "error_count": len(errors),
+                "errors": errors,
+                "detail": "; ".join(errors[:8]),
+                "conformance_status": _authoritative_block(),
+            },
+            as_json,
+        )
+        return 1
+
+    run = _run_canonical_validator(project_root)
+    try:
+        decision = conformance_decision(project_root, gate="core")
+    except Exception as exc:
+        _emit(
+            {
+                "ok": False,
+                "code": CONFORMANCE_UNAVAILABLE,
+                "detail": (
+                    "the canonical validator ran but conformance could not be "
+                    f"established afterwards ({type(exc).__name__}: {exc})"
+                ),
+                "validator": _validator_run_block(run),
+            },
+            as_json,
+        )
+        return 1
+
+    healthy = bool(decision["healthy"])
+    code = CONFORMANCE_UNHEALTHY
+    detail = f"conformance is {decision['status']}: {decision['reason']}".strip()
+    if run.error:
+        code = CONFORMANCE_UNAVAILABLE
+        detail = (
+            f"conformance could not be refreshed ({run.error}); the current "
+            f"authoritative status is {decision['status']}"
+        )
+    elif run.exit_code not in (0, None) and healthy:
+        # Fail closed: a failing live run and a still-current PASS receipt
+        # cannot both be true, and process output is not the authority.
+        healthy = False
+        code = CONFORMANCE_UNAVAILABLE
+        detail = (
+            f"the canonical validator exited {run.exit_code} while the stored "
+            "receipt still read CURRENT_PASS -- durable evidence and the live "
+            "run disagree, so no conformance verdict is claimable"
+        )
+
+    payload = {
+        "ok": healthy,
+        "code": "VALID" if healthy else code,
+        "structural_gate": "pass",
+        "validator": _validator_run_block(run),
+        "conformance_status": decision["status_block"],
+    }
+    if healthy:
+        payload["detail"] = (
+            "canonical STATE/BOARD/LOG pass the structural gate and the "
+            "canonical validator minted a CURRENT_PASS conformance receipt"
+        )
+    else:
+        payload["reason"] = decision["reason"]
+        payload["detail"] = detail
+        if code == CONFORMANCE_UNAVAILABLE:
+            payload["canonical_next_command"] = CONFORMANCE_REMEDIATION_COMMAND
+    _emit(payload, as_json)
+    return 0 if healthy else 1
 
 
 def _search(project_root: Path, args: list[str], as_json: bool) -> int:
@@ -1433,11 +1617,15 @@ def _status(project_root: Path, as_json: bool) -> int:
     # §8 Conformance Closure: the authoritative current-conformance status,
     # derived from the canonical validator receipt, not from prose in the LOG.
     # `conformance` (above) is the legacy history-derived hint; this is the
-    # load-bearing truth that gates terminal/crew closure.
+    # load-bearing truth that gates terminal/crew closure. T-1412: it is read
+    # through the shared decision owner, the SAME projection `saipen validate`
+    # and the router consume.
     try:
-        from saipen_engine.conformance import conformance_status
+        from saipen_engine.conformance import conformance_decision
 
-        payload["conformance_status"] = conformance_status(project_root, gate="core")
+        payload["conformance_status"] = conformance_decision(project_root, gate="core")[
+            "status_block"
+        ]
     except Exception as exc:
         # Conformance is load-bearing terminal truth.  A projection may never
         # report ok:true while silently omitting it because evidence decoding
@@ -5634,6 +5822,12 @@ def _human_refusal_lines(payload: dict) -> list[str]:
         if len(text) > _HUMAN_REASON_CHARS:
             text = text[: _HUMAN_REASON_CHARS - 3].rstrip() + "..."
         lines.append(f"reason: {text}")
+    # T-1412: a refusal that carries the authoritative conformance block must
+    # name the status it is actually refusing on -- the human form is where a
+    # model reads it first.
+    conformance = payload.get("conformance_status")
+    if isinstance(conformance, dict) and conformance.get("status"):
+        lines.append(f"conformance: {conformance['status']}")
     command = payload.get("canonical_next_command")
     if not command:
         decisions = [
@@ -5732,8 +5926,26 @@ def _emit(payload: dict, as_json: bool) -> None:
         print(f"Waiting on you: {'; '.join(payload['waiting_on_you'])}")
     if payload.get("claimed_but_unproven"):
         print(f"Claimed but unproven: {', '.join(payload['claimed_but_unproven'])}")
+    # T-1412: the receipt-derived `conformance_status` is the operator's PRIMARY
+    # conformance truth; the LOG-derived `conformance` projection is history and
+    # may never be rendered under the `Conformance:` label.
+    _conformance = payload.get("conformance_status")
+    if isinstance(_conformance, dict) and _conformance.get("status"):
+        from saipen_engine.conformance import STATUS_CURRENT_PASS
+
+        print(f"Conformance: {_conformance['status']}")
+        if _conformance["status"] != STATUS_CURRENT_PASS:
+            _reason = str(_conformance.get("reason") or "").strip()
+            if _reason:
+                print(f"Reason: {_reason}")
+            print("Remediation: saipen validate")
+    elif payload.get("conformance"):
+        print("Conformance: UNKNOWN (authoritative receipt status unavailable)")
     if payload.get("conformance"):
-        print(f"Conformance: {payload['conformance']}")
+        print(
+            f"Validator history hint: {payload['conformance']} "
+            "(historical; not current authority)"
+        )
     if payload.get("staleness"):
         print(f"Staleness: {payload['staleness']}")
     automation = payload.get("automation")

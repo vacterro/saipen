@@ -853,7 +853,10 @@
     "INGRESS_PENDING_UNREADABLE",
     "INGRESS_SHELL_CONTROL",
     "INGRESS_TASK_MISMATCH",
-    "INGRESS_TASK_CARRIER_INVALID"
+    "INGRESS_TASK_CARRIER_INVALID",
+    "CONFORMANCE_UNHEALTHY",
+    "CONFORMANCE_UNKNOWN",
+    "CONFORMANCE_UNAVAILABLE"
   ],
   "continue_fallback": {
     "invariant": "continue may fall through to improve ONLY after recovery, blocked/retryable, queued and required-follow-up routing are exhausted; it resumes an existing active Improve cycle and never creates an unbounded improve carousel",

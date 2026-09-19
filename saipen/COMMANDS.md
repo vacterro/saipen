@@ -40,7 +40,7 @@ global authority and deterministic priority rules.
 | `saipen goal <text>` | PLAN | CMD-ROUTING-01 |
 | `saipen clean` | CLEAN | CMD-ROUTING-01 |
 | `saipen translate` | TRANSLATE | CMD-ROUTING-01 |
-| `saipen validate` | VALIDATE | CMD-ROUTING-01 |
+| `saipen validate` | canonical Core-conformance front door: structural precheck on STATE/BOARD/LOG, then the canonical full validator (`tools/validate.py --gate core`) whose receipt decides; VALID only on CURRENT_PASS | CMD-ROUTING-01 |
 | `saipen prepare <producer>` | PREPARE | CMD-ROUTING-01 |
 | `saipen collect <producer>` | router | CMD-ROUTING-01 |
 | `saipen ship` | SHIP | CMD-ROUTING-01 |
@@ -52,7 +52,6 @@ global authority and deterministic priority rules.
 | `saipen acceptance <T-###>` | read-only | CMD-ROUTING-01 |
 | `saipen runtime` | read-only | CMD-ROUTING-01 |
 | `saipen search <pattern>` | read-only bounded search | CMD-ROUTING-01 |
-| `saipen validate` | read-only fast-gate verdict on the canonical documents | CMD-ROUTING-01 |
 | `saipen --agent <seat> launch opencode -- [args]` | optional explicit-actor host process | CMD-ROUTING-01 |
 | `saipen knowledge [status\|index\|retrieve]` | project knowledge | CMD-ROUTING-01 |
 | `saipen start '<task>' [--file PATH] [--hex HEX] [--receipt SRC-###]` | THE entry command for a new actionable task: capture, recover, seat, claim | CMD-ROUTING-01 |
@@ -64,6 +63,18 @@ global authority and deterministic priority rules.
 | `saipen audit [status\|inspect\|ingest]` | intake transport | CMD-CONTINUE-01 |
 | `saipen userperson` | meta | CMD-ROUTING-01 |
 | `saipen sub <verb> <name>` | sub | CMD-ROUTING-01 |
+
+`saipen validate` is the canonical Core-conformance front door. It first runs
+the cheap structural gate over `.saipen/STATE.md`, `BOARD.md` and `LOG.md`; a
+malformed document is refused there and no validator runs. When the structural
+gate passes it executes the canonical validator of the running SAIPEN runtime
+(`tools/validate.py --project-root <project> --gate core`) through an internal
+argv path -- no shell. That validator emits the ordinary conformance receipt,
+so the command is NOT zero-write: receipt generation is its only write, and it
+never mutates product files, BOARD Work state, STATE phase, source intake or
+Improve cycles. The verdict is then re-read from the authoritative
+`conformance_status` decision and `VALID` is returned ONLY on CURRENT_PASS -- a
+process exit of 0 with no durable CURRENT_PASS receipt is not conformance.
 
 This optional advanced `launch opencode` command requires its explicit global
 `--agent` seat. It exports that actor plus resolved project root and portable

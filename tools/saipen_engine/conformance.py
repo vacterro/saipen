@@ -1312,6 +1312,58 @@ def current_conformance_pass(
     )
 
 
+#: T-1412: the ONE executable remediation the conformance decision names. It is
+#: the command that runs the canonical validator and re-reads this decision, so
+#: a refusal can never hand the operator a route the remediation path itself
+#: refuses to walk.
+CONFORMANCE_REMEDIATION_COMMAND = "saipen validate"
+
+#: T-1412: the code a non-green decision carries on the command surfaces. One
+#: name for every non-CURRENT_PASS status -- the exact closed status travels in
+#: the decision itself -- so consumers never invent per-status strings.
+CONFORMANCE_UNHEALTHY = "CONFORMANCE_UNHEALTHY"
+
+#: T-1412: fail-closed code for "the decision could not be established" /
+#: "the canonical validator could not execute". Distinct from UNHEALTHY because
+#: the instrument, not the project, is the problem -- and both are non-green.
+CONFORMANCE_UNAVAILABLE = "CONFORMANCE_UNAVAILABLE"
+
+
+def conformance_decision(
+    project_root: Path | str,
+    gate: str = "core",
+    now: datetime.datetime | None = None,
+    # PERF-002: optional pre-computed SourceIdentity to avoid redundant
+    # filesystem/Git subprocess calls.
+    source_identity=None,
+) -> dict:
+    """T-1412: ONE structured health decision over `conformance_status`.
+
+    Every consumer -- `saipen status` (JSON and human render), `saipen
+    validate` and the router's crew gate -- reads THIS projection instead of
+    re-deriving "is conformance green" from the status string in its own
+    dialect, so the three surfaces cannot drift apart again.
+
+    `healthy` is exactly `status == CURRENT_PASS`. NOT_RUN, every stale status,
+    CURRENT_FAIL and the invalid/version-mismatched statuses are all non-green
+    for the same reason: none of them proves the CURRENT source conformant. The
+    decision carries the bounded reason and the one executable remediation, and
+    `status_block` is the untouched `conformance_status` payload so a caller
+    that needs the receipt or validator metadata still gets the full evidence.
+    """
+    status = conformance_status(project_root, gate=gate, now=now, source_identity=source_identity)
+    kind = status.get("status")
+    healthy = kind == STATUS_CURRENT_PASS
+    return {
+        "status": kind,
+        "gate": status.get("gate", gate),
+        "healthy": healthy,
+        "reason": status.get("reason", "") or "",
+        "remediation_command": None if healthy else CONFORMANCE_REMEDIATION_COMMAND,
+        "status_block": status,
+    }
+
+
 # --------------------------------------------------------------------------- §3
 def convergence_stage_satisfied(
     project_root: Path | str, stage: str, source_identity, now: datetime.datetime | None = None
