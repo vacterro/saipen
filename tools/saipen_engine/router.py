@@ -536,6 +536,33 @@ def route_next(
             ),
         }
 
+    # IMPROVE GATE (T-1415): the typed no-improve-before-gate hold. It sits
+    # AFTER every executable-work branch above -- active continuation, the
+    # audit inbox, the BOARD Pick Rule -- and BEFORE the idle-maintain verdict
+    # the Improve fallthrough consumes. The defect class it ends: deterministic
+    # work reaches DONE, a parked operator-only gate owns the next real
+    # decision, the operator said once "no more Improve before that gate", and
+    # the prose was not routing -- `continue` prepared Improve cycles the
+    # operator aborted by hand. A gate that has RESOLVED (DONE, or gone from
+    # BOARD) is inert here too: reconciliation removes the field, and routing
+    # degrades to ordinary maintenance even before that clear lands.
+    _gate = str(state.get("improve_gate") or "").strip()
+    if _gate:
+        _gate_ticket = board["tickets"].get(_gate)
+        if _gate_ticket is not None and _gate_ticket.get("section") != "## DONE":
+            return {
+                "ok": True,
+                "action": "saipen status",
+                "reason": "improve-gate",
+                "executable_behavior": "RESTATE_AND_STOP",
+                "ticket": _gate,
+                "detail": (
+                    f"automatic improvement discovery is held until {_gate} resolves "
+                    f"(STATE.improve_gate; {_gate} is {_gate_ticket.get('section')}); "
+                    f"resolve the gate or run `saipen improve unhold` to lift the hold"
+                ),
+            }
+
     # MAINTAIN: fall through to the persisted next_action only when it is a
     # legal non-ticket action (saipen continue / saipen <verb>), never a stale
     # PHASE echo and never a WAIT -- a WAIT reaching here already failed the

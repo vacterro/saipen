@@ -394,7 +394,9 @@
       "cycle-complete",
       "abort",
       "retire",
-      "clean"
+      "clean",
+      "hold",
+      "unhold"
     ]
   },
   "command_effects": {
@@ -439,7 +441,8 @@
       "paused_from_phase",
       "paused_from_na",
       "transition_from",
-      "stop_reason"
+      "stop_reason",
+      "improve_gate"
     ],
     "string_fields": [
       "task",
@@ -455,7 +458,8 @@
       "role_revision",
       "paused_from_phase",
       "paused_from_na",
-      "stop_reason"
+      "stop_reason",
+      "improve_gate"
     ],
     "integer_fields": {
       "saipen_version": null,

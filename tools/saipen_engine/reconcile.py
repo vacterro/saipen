@@ -225,6 +225,39 @@ def _state_output_field_repairs(state: dict) -> list[dict]:
     return repairs
 
 
+def _stale_improve_gate_repairs(state: dict, board: dict | None) -> list[dict]:
+    """Remove `STATE.improve_gate` the moment its named gate resolves (T-1415).
+
+    The hold is a temporary routing constraint, not history: once the gate
+    ticket is DONE or gone from BOARD, keeping the field would be the immortal
+    "never improve again" residue the hold exists to avoid. Both conditions are
+    read from the CURRENT BOARD, so a legitimate parked gate keeps its hold and
+    a resolved one clears deterministically on the next continuation.
+    """
+    gate = str(state.get("improve_gate") or "").strip()
+    if not gate:
+        return []
+    tickets = (board or {}).get("tickets") or {}
+    ticket = tickets.get(gate)
+    if ticket is not None and ticket.get("section") != "## DONE":
+        return []
+    resolved = "DONE" if ticket is not None else "absent from BOARD"
+    return [
+        {
+            "field": "improve_gate",
+            "from": gate,
+            "to": None,
+            "surface": "state",
+            "remove": True,
+            "reason": (
+                f"improve gate {gate} has resolved ({resolved}); the temporary "
+                "no-improve hold clears and ordinary improvement discovery "
+                "resumes"
+            ),
+        }
+    ]
+
+
 def _state_blocker_repairs(
     state: dict, board: dict | None, resolve_blocker: str | None = None
 ) -> list[dict]:
@@ -1921,6 +1954,7 @@ def reconcile_protocol_state(
     board_drifts = _checkbox_drifts(board_text)
     state_repairs = (
         _state_output_field_repairs(state)
+        + _stale_improve_gate_repairs(state, _board)
         + _state_marker_repairs(state, log_tail)
         + _state_counter_repairs(state, events)
         + _tripped_valve_repairs(state)

@@ -167,6 +167,10 @@
         "NO_WORK_AND_IMPROVE_DISABLED"
       ],
       "description": "Orchestration repair (T-1302): explicit stop reason. Present ONLY when the autonomous loop stopped; absence means the loop is still workable. GOAL_BLOCKED is legal only while no workable ticket exists -- tools/validate.py FAILs a false global block."
+    },
+    "improve_gate": {
+      "type": "string",
+      "description": "T-1415: the named parked gate that holds AUTOMATIC improvement discovery. Written only by `saipen improve hold <T-###>` and removed by `saipen improve unhold` or deterministically when the named ticket resolves (DONE or gone from BOARD). While it names an unresolved ticket, `continue` must route to that gate / WAIT instead of starting an Improve cycle. It never blocks an explicit operator `saipen improve` invocation."
     }
   },
   "required": [

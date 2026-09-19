@@ -6068,6 +6068,51 @@ def _improve(project_root: Path, args: list[str], as_json: bool, dry_run: bool) 
             as_json,
         )
         return 0
+    if action == "hold":
+        # T-1415: persist the typed no-improve-before-gate hold. This is the
+        # operator's temporary policy made canonical data -- the router reads
+        # it and never greps prose for "do not improve until ...".
+        from saipen_engine.operations import hold_improve
+
+        rest = args[1:]
+        if not rest or rest[0].startswith("-"):
+            _emit(
+                {
+                    "ok": False,
+                    "code": "VALIDATION_FAILED",
+                    "detail": "improve hold needs <T-###> [reason]",
+                    "canonical_next_command": "saipen improve hold <T-###>",
+                },
+                as_json,
+            )
+            return 2
+        result = hold_improve(
+            project_root,
+            _agent_for(project_root),
+            rest[0],
+            reason=" ".join(rest[1:]).strip(),
+            dry_run=dry_run,
+        )
+        _emit(result.to_dict(), as_json)
+        return 0 if result.ok else 1
+    if action == "unhold":
+        from saipen_engine.operations import release_improve
+
+        if len(args) > 1:
+            _emit(
+                {
+                    "ok": False,
+                    "code": "VALIDATION_FAILED",
+                    "detail": "improve unhold accepts no arguments; surplus: "
+                    + " ".join(args[1:]),
+                    "canonical_next_command": "saipen improve unhold",
+                },
+                as_json,
+            )
+            return 2
+        result = release_improve(project_root, _agent_for(project_root), dry_run=dry_run)
+        _emit(result.to_dict(), as_json)
+        return 0 if result.ok else 1
     if action == "submit":
         # DOGFOOD V (T-617): structured report submission -- the current agent
         # supplies the semantic RUN text in a JSON file, Python appends the
@@ -7056,7 +7101,7 @@ def main(argv: list[str] | None = None) -> int:
             "block-for <parent T-###> <blocker T-###> <reason> "
             "[--scope ticket|goal]|ticket "
             "unblock <T-###> <decision>|cohort status <C-###>|cohort ship "
-            "<C-###>|improve|improve "
+            "<C-###>|improve|improve hold <T-###> [reason]|improve unhold|improve "
             "status|improve sweep <cycle> <RUN-N/IMP-NNN> <DISPOSITION> "
             "|improve sweep-queue <cycle>|improve submit <cycle> <seat> "
             "<project> <findings.json>|improve complete <cycle> <seat> "

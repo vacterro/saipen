@@ -573,6 +573,11 @@ def state_contract_errors(
     target = fields.get("converge_target")
     if target is not None and (not isinstance(target, str) or target not in STATE_CONVERGE_TARGETS):
         errors.append(f"converge_target {target!r} not one of {'|'.join(STATE_CONVERGE_TARGETS)}")
+    gate = fields.get("improve_gate")
+    if gate is not None and (not isinstance(gate, str) or not re.fullmatch(r"T-\d+", gate)):
+        errors.append(
+            f"improve_gate {gate!r} is not a T-### id -- the hold names one gate ticket"
+        )
     for key, minimum in STATE_INTEGER_FIELDS.items():
         value = fields.get(key)
         if value is None:

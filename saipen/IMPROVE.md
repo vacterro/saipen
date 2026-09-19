@@ -24,7 +24,7 @@ error this file exists to prevent.
 This lifecycle declaration must exactly mirror CORE's routing declaration;
 the validator compares both with the CLI executor set.
 
-`IMPROVE_ACTIONS = [bare, status, submit, complete, sweep, sweep-queue, verify, cycle-complete, abort, retire, clean]`
+`IMPROVE_ACTIONS = [bare, status, submit, complete, sweep, sweep-queue, verify, cycle-complete, abort, retire, clean, hold, unhold]`
 
 Each action's own validation rules live in the section that owns it; this list
 is the surface, not a second copy of the law.
@@ -44,6 +44,15 @@ is the surface, not a second copy of the law.
 - `saipen improve status` — read-only derived status (section 5). Refuses to
   round malformed evidence up to a normal lifecycle state: invalid
   manifests/reports/sweeps are reported as INVALID_CYCLE / INVALID_REPORT.
+- `saipen improve hold <T-###> [reason]` — persist the typed operator policy
+  that automatic improvement discovery is held until the named gate ticket
+  resolves (STATE.improve_gate). While it names an unresolved ticket, `continue`
+  routes to that gate / WAIT and the automatic `continue -> improve`
+  fallthrough cannot fire; an explicit `saipen improve` invocation is never
+  blocked. Cleared by `saipen improve unhold` or deterministically by
+  reconciliation the moment the gate reaches DONE or leaves BOARD.
+- `saipen improve unhold` — clear the hold (idempotent; reports
+  IMPROVE_GATE_NONE when no hold is set).
 - `saipen improve submit <cycle> <seat> <project> <findings.json>` — the
   mechanical RUN submission path: Python appends the semantic RUN text through
   the journaled writer; the agent never edits the report file directly.

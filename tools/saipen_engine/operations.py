@@ -7301,6 +7301,164 @@ def record_scope(
     return apply_plan(root, plan)
 
 
+def _improve_gate_plan(
+    root: Path,
+    agent: str,
+    *,
+    gate: str | None,
+    reason: str,
+    dry_run: bool,
+) -> Result | OperationPlan:
+    """Shared PLAN body for hold (gate set) and unhold (gate None)."""
+    docs, state, board, log_tail = _read(root)
+    if board["errors"]:
+        return _refuse(
+            "VALIDATION_FAILED", "BOARD parse error(s): " + "; ".join(board["errors"][:3])
+        )
+    current = str(state.get("improve_gate") or "").strip()
+    if gate is not None and current == gate:
+        return Result(
+            True,
+            "IMPROVE_GATE_ALREADY_SET",
+            message=f"automatic improvement discovery is already held until {gate} resolves",
+            data={"improve_gate": gate},
+        )
+    if gate is None and not current:
+        return Result(
+            True,
+            "IMPROVE_GATE_NONE",
+            message="no improve hold is set; automatic improvement discovery is not constrained",
+        )
+    now, utc = _now(), _utc_iso()
+    op_id = ("improve-hold-" if gate is not None else "improve-unhold-") + uuid4_hex()
+    if gate is not None:
+        text = f"improve discovery held until {gate} resolves"
+        if reason:
+            text += f" -- {reason[:200]}"
+        code = "IMPROVE_GATE_SET"
+        owned = {"improve_gate": gate, "last_event": None, "updated": utc, "agent": agent}
+        ticket = gate
+    else:
+        text = f"improve hold cleared (was {current})"
+        code = "IMPROVE_GATE_CLEARED"
+        owned = {"last_event": None, "updated": utc, "agent": agent}
+        ticket = current
+    event, line = _event_line(docs, log_tail, "DEC", ticket, agent, text, now, op_id)
+    owned["last_event"] = event
+    new_log = docs["log"].text_norm.rstrip("\n") + "\n" + line + "\n"
+    if gate is not None:
+        new_state = patch_state(docs["state"].text_norm, owned)
+    else:
+        stripped = remove_state_fields(docs["state"].text_norm, ["improve_gate"])
+        new_state = patch_state(stripped, owned)
+    errors = validate_texts(
+        new_state,
+        docs["board"].text_norm,
+        new_log,
+        current_agent=agent,
+        sealed_events=docs["_history"],
+    )
+    if errors:
+        return _refuse(
+            "VALIDATION_FAILED",
+            "proposed improve-gate state fails fast validation: " + "; ".join(errors[:5]),
+        )
+    targets = [
+        *_log_targets(docs, new_log),
+        _target(docs["state"], ".saipen/STATE.md", "state", new_state),
+    ]
+    if dry_run:
+        return build_plan(
+            "improve_hold" if gate is not None else "improve_unhold",
+            agent,
+            _identity(root),
+            {"operation": "improve_hold", "gate": gate},
+            _docs_preconditions(docs, "state", "board", "log"),
+            [],
+            {
+                "ok": True,
+                "code": "PLAN",
+                "operation": "improve_hold",
+                "dry_run": True,
+                "improve_gate": gate or None,
+            },
+            op_id=op_id,
+        )
+    return build_plan(
+        "improve_hold" if gate is not None else "improve_unhold",
+        agent,
+        _identity(root),
+        {"operation": "improve_hold", "gate": gate, "reason": reason},
+        _docs_preconditions(docs, "state", "board", "log"),
+        targets,
+        {
+            "ok": True,
+            "code": code,
+            "improve_gate": gate or None,
+            "event_id": f"E-{event}",
+        },
+        op_id=op_id,
+    )
+
+
+@_state_guard
+def hold_improve(
+    project_root: Path | str,
+    agent: str,
+    gate_ticket: str,
+    *,
+    reason: str = "",
+    dry_run: bool = False,
+) -> Result:
+    """Persist the typed no-improve-before-gate constraint (T-1415).
+
+    The operator's temporary policy -- do not start another Improve cycle
+    before THIS gate resolves -- becomes `STATE.improve_gate` instead of prose
+    a later router greps for. While the field names an unresolved ticket, the
+    router surfaces that gate and the automatic `continue -> improve`
+    fallthrough cannot fire. Cleared by `release_improve`, or deterministically
+    by reconciliation the moment the named ticket resolves.
+    """
+    root = Path(project_root)
+    gate = str(gate_ticket or "").strip().upper()
+    if not re.fullmatch(r"T-\d+", gate):
+        return _refuse(
+            "VALIDATION_FAILED",
+            f"improve hold needs a T-### gate ticket, got {gate_ticket!r}",
+        )
+    _docs, _state, board, _tail = _read(root)
+    if not board["errors"]:
+        ticket = board["tickets"].get(gate)
+        if ticket is None:
+            return _refuse(
+                "TICKET_NOT_FOUND", f"improve gate {gate} is on no BOARD section", ticket=gate
+            )
+        if ticket["section"] == "## DONE":
+            return _refuse(
+                "TICKET_ALREADY_DONE",
+                f"improve gate {gate} is already DONE; there is no unresolved gate to hold",
+                ticket=gate,
+            )
+    plan = _improve_gate_plan(root, agent, gate=gate, reason=reason, dry_run=dry_run)
+    if isinstance(plan, Result):
+        return plan
+    if dry_run:
+        return _render_plan(plan)
+    return apply_plan(root, plan)
+
+
+@_state_guard
+def release_improve(project_root: Path | str, agent: str, dry_run: bool = False) -> Result:
+    """Clear the typed no-improve-before-gate constraint (T-1415)."""
+    root = Path(project_root)
+    plan = _improve_gate_plan(root, agent, gate=None, reason="", dry_run=dry_run)
+    if isinstance(plan, Result):
+        return plan
+    if dry_run:
+        return _render_plan(plan)
+    return apply_plan(root, plan)
+
+
 # ------------------------------------------- first-publish wait (T-994 / § 11)
 
 
