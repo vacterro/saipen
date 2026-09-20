@@ -122,15 +122,19 @@ BOARD is Work authority. It contains `## DOING`, `## TODO`, `## DONE`, and
 - BOARD is not append-only. CLEAN prunes closed prose after durable evidence
   exists in LOG/CHANGELOG. The validator warns when cold-start size exceeds its
   soft budget.
-- Work minted into the WRONG PROJECT is RETIRED, never finished. Retirement is
-  a third terminal verdict beside DONE and BLOCKED: the row leaves schedulable
-  Work, the request bytes move to forensic cold storage, and no completion,
-  coverage or disposition is ever fabricated to get there. `saipen ticket
-  retire` (OPS.md) is its only mechanical implementation and it requires a
-  registered reason, evidence that resolves to a canonical event or an owned
-  artifact, and an operator authority receipt whose own text GRANTS the Work --
-  a mention is not an authorization. It restores a parked parent to its own
-  seat; it never transfers Work to whoever ran it.
+- Work minted into the WRONG PROJECT is RETIRED, never finished -- the third
+  terminal verdict beside DONE and BLOCKED. The row leaves scheduling, its
+  request bytes move to forensic cold storage, and no completion, coverage or
+  disposition is fabricated. `saipen ticket retire` (OPS.md) is its only
+  writer and it requires a registered reason, resolving evidence and an
+  authority receipt whose own text GRANTS the Work -- a mention is never
+  authorization. It restores a parked parent to its own seat, never
+  transferring Work to whoever ran it.
+- Legitimate old Work implemented and verified through a later DONE Work
+  closes as `superseded_verified` (OPS.md): explicit DONE successor, exact
+  old-target PASS evidence and operator authority required; local terminal
+  only, never a retirement or publication claim. Publication still resolves
+  against committed release evidence downstream.
 
 #### LOG.md
 
@@ -234,27 +238,16 @@ escaped defect to the exact earlier PASS event without rewriting either event.
   Host session ids, UI slots, process ids, titles and ports never become actors.
   An explicit carrier is provenance, not authentication, and cannot override a
   foreign live owner or repair contradictory canonical ownership.
-- The explicit protected-namespace shell bypass is closed at the host-event
-  preflight: an ordinary shell command that visibly names a `.saipen` path,
-  including quoted, Windows/POSIX separator and simple traversal spellings,
-  is refused before execution. A standalone canonical `saipen <verb>` retains
-  its operation exemption. Ordinary source-development shell use remains
-  available. This is an accidental-mutation barrier over explicit command
-  text, not a sandbox: dynamically computed or deliberately obfuscated paths
-  in arbitrary code cannot be proven safe by this guard.
-- Command text is not the only evidence. The same preflight resolves a shell
-  command's destructive EFFECTS -- a bounded delete/move/rename verb set with
-  its documented flags, the explicit `bash -c` / `powershell -Command` /
-  `cmd /c` / `eval` wrappers, command substitution, and the working directory
-  as `cd`, `pushd` and `popd` move it -- and admission judges each resolved
-  effect exactly as the file-tool effect it is. Without this one effect had
-  two answers: `rm -rf .` named no `.saipen` path and was admitted, while the
-  native delete of the same directory was refused by containment, so an agent
-  changed the outcome by changing surface. An effect whose operands or working
-  directory cannot be proven -- a variable, a pipeline, an encoded command, a
-  directory stack deeper than the guard tracks -- is refused as unresolved,
-  never admitted as ordinary shell. What falls outside that bounded
-  resolution stays outside this guard's proof, exactly as above.
+- Host-event preflight closes the protected-namespace shell bypass: shell text
+  visibly naming a `.saipen` path is refused before execution, while a
+  standalone canonical `saipen <verb>` keeps its operation exemption and
+  ordinary source-development shell use remains available. The same preflight
+  resolves a shell command's destructive EFFECTS and judges each one exactly
+  as the file-tool effect it is; an operand or working directory it cannot
+  prove is refused as unresolved, never admitted. It is an accidental-mutation
+  barrier over explicit command text, not a sandbox: obfuscated or dynamically
+  computed paths stay outside its proof. Exact verb/wrapper vocabulary and
+  resolution bounds live in `OPS.md` (`OPS-EFFECT-01`).
 - The exact built-in OpenCode `task` call is consequential delegation, not an
   unnamed file mutation. It passes normal canonical state, actor and recovery
   admission; the delegated session's concrete tool calls receive their own

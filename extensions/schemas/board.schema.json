@@ -93,9 +93,25 @@
         "enum": [
           "own_patch",
           "inherited_verified",
-          "cohort"
+          "cohort",
+          "superseded_verified"
         ],
-        "description": "Orchestration repair (T-1302): closure provenance on DONE tickets. own_patch = attributable implementation diff; inherited_verified = no new implementation added, verification-only closeout against a durable publication authority; cohort = evidence complete but publication deferred to a C-### cohort. Absent reads as 'own_patch'."
+        "description": "Orchestration repair (T-1302): closure provenance on DONE tickets. own_patch = attributable implementation diff; inherited_verified = no new implementation added, verification-only closeout against a durable publication authority; cohort = evidence complete but publication deferred to a C-### cohort; superseded_verified (T-1418) = legitimate old Work implemented and verified through an explicit DONE successor, written only by `saipen ticket supersede`. It is LOCAL lifecycle terminality and asserts NO publication. Absent reads as 'own_patch'."
+      },
+      "superseded_by": {
+        "type": "string",
+        "pattern": "^T-\\d+$",
+        "description": "T-1418: the explicit DONE successor that terminally settles superseded_verified Work. Valid only with closure_mode superseded_verified."
+      },
+      "supersession_evidence": {
+        "type": "string",
+        "pattern": "^E-\\d+$",
+        "description": "T-1418: the canonical successor-owned PASS event explicitly targeted at the superseded Work ([target: T-OLD]). Valid only with closure_mode superseded_verified."
+      },
+      "supersession_authority": {
+        "type": "string",
+        "pattern": "^SRC-\\d+$",
+        "description": "T-1418: the ACTIVE operator-ingress Source receipt whose own text grants the exact OLD - NEW supersession pair. Valid only with closure_mode superseded_verified."
       },
       "closure_cohort": {
         "type": "string",
@@ -240,12 +256,25 @@
               "enum": [
                 "own_patch",
                 "inherited_verified",
-                "cohort"
+                "cohort",
+                "superseded_verified"
               ]
             },
             "closure_cohort": {
               "type": "string",
               "pattern": "^C-\\d+$"
+            },
+            "superseded_by": {
+              "type": "string",
+              "pattern": "^T-\\d+$"
+            },
+            "supersession_evidence": {
+              "type": "string",
+              "pattern": "^E-\\d+$"
+            },
+            "supersession_authority": {
+              "type": "string",
+              "pattern": "^SRC-\\d+$"
             },
             "implementation_delta": {
               "type": "string",
@@ -277,6 +306,21 @@
               {
                 "required": [
                   "closure_paths"
+                ]
+              },
+              {
+                "required": [
+                  "superseded_by"
+                ]
+              },
+              {
+                "required": [
+                  "supersession_evidence"
+                ]
+              },
+              {
+                "required": [
+                  "supersession_authority"
                 ]
               }
             ]

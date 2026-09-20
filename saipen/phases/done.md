@@ -16,6 +16,10 @@ Closure provenance is mandatory at DONE (orchestration repair, T-1302):
   `--paths <shared paths>` bind the member into the durable cohort
   registry. Publication is the cohort's obligation (`saipen cohort ship
   C-###`), never an imaginary per-ticket diff.
+- `superseded_verified` — legitimate old Work was implemented and verified
+  through explicit DONE successor Work. Only `saipen ticket supersede` writes
+  this mode with successor, old-target PASS evidence and operator authority.
+  It is terminal locally and asserts no publication.
 
 A DONE ticket may carry zero Git commits in `inherited_verified`/`cohort`
 modes; that is state evidence, not publication.

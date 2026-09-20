@@ -4,7 +4,7 @@
 
 Read-only commands: `saipen status`, `saipen next`. Mutating commands run
 PLAN/APPLY through the engine's lock + journal + recovery machinery:
-`claim`, `transition`, `checkpoint`, `ticket add/done/retire/block/unblock`.
+`claim`, `transition`, `checkpoint`, `ticket add/done/supersede/retire/block/unblock`.
 `saipen recover` lists and resolves pending operation journals; status and
 next derive `recovery_pending` from the real journal state, never a hardcoded
 false.
@@ -36,6 +36,7 @@ from saipen_engine.operations import (
     compact_board,
     finish_ticket,
     plan_claim,
+    supersede_ticket,
     ticket_add,
     ticket_move,
     ticket_verify,
@@ -4195,6 +4196,11 @@ _TICKET_RETIRE_OPTIONS = {
     "--discovery-event": "discovery_event",
     "--note": "note",
 }
+_TICKET_SUPERSEDE_OPTIONS = {
+    "--by": "successor",
+    "--evidence": "evidence",
+    "--authority": "authority",
+}
 
 
 def _parse_value_options(tokens: list[str], spec: dict[str, str]) -> tuple[dict, list[str], str]:
@@ -7562,7 +7568,9 @@ def main(argv: list[str] | None = None) -> int:
             "done <T-###> [--closure-mode own_patch|inherited_verified|cohort] "
             "[--closure-cohort C-###] [--implementation-source "
             "<release:<id>|T-###|SRC-###>] [--paths <p1,p2>]|"
-             "ticket compact <T-###>|ticket block <T-###> <reason> [--scope ticket|goal]|ticket "
+            "ticket supersede <T-OLD> --by <T-NEW> --evidence <E-###> "
+            "--authority <SRC-###>|ticket compact <T-###>|ticket block <T-###> "
+            "<reason> [--scope ticket|goal]|ticket "
             "block-for <parent T-###> <blocker T-###> <reason> "
             "[--scope ticket|goal]|ticket "
             "unblock <T-###> <decision>|cohort status <C-###>|cohort ship "
@@ -8127,7 +8135,7 @@ def main(argv: list[str] | None = None) -> int:
                     "ok": False,
                     "code": "VALIDATION_FAILED",
                 "detail": "ticket needs an action: "
-                "add|compact|verify|done|retire|block|block-for|unblock",
+                "add|compact|verify|done|supersede|retire|block|block-for|unblock",
                 },
                 as_json,
             )
@@ -8294,6 +8302,50 @@ def main(argv: list[str] | None = None) -> int:
                 " ".join(clean_rest[1:]),
                 needs_arg,
                 verify_arg,
+                dry_run=dry_run,
+            )
+            _emit(result.to_dict(), as_json)
+            return 0 if result.ok else 1
+        if action == "supersede":
+            _opts, _pos, _opt_err = _parse_value_options(
+                rest[1:], _TICKET_SUPERSEDE_OPTIONS
+            )
+            if not rest or not re.fullmatch(r"T-\d+", rest[0], re.IGNORECASE):
+                _emit(
+                    {
+                        "ok": False,
+                        "code": "VALIDATION_FAILED",
+                        "detail": "ticket supersede needs <T-OLD> --by <T-NEW> "
+                        "--evidence <E-###> --authority <SRC-###>",
+                    },
+                    as_json,
+                )
+                return 2
+            if _opt_err:
+                _emit({"ok": False, "code": "VALIDATION_FAILED", "detail": _opt_err}, as_json)
+                return 2
+            if _pos:
+                _emit(
+                    {
+                        "ok": False,
+                        "code": "VALIDATION_FAILED",
+                        "detail": f"ticket supersede takes <T-OLD>; surplus: {' '.join(_pos)}",
+                    },
+                    as_json,
+                )
+                return 2
+            if not dry_run and _negotiate_capability(project_root) == "read-only":
+                return _capability_refusal(as_json)
+            _ho = _ensure_handover(project_root, as_json, dry_run)
+            if _ho is not None:
+                return _ho
+            result = supersede_ticket(
+                project_root,
+                rest[0].upper(),
+                str(_opts.get("successor") or "").upper(),
+                _agent_for(project_root),
+                evidence=str(_opts.get("evidence") or "").upper(),
+                authority=str(_opts.get("authority") or "").upper(),
                 dry_run=dry_run,
             )
             _emit(result.to_dict(), as_json)

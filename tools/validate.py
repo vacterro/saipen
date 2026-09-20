@@ -2372,7 +2372,16 @@ if not any(f.startswith("BOARD.md") and "duplicate" in f for f in failures):
 # all-TODO graph is corrupt work state, not 'no workable ticket'.
 _graph_errors = board_graph_errors(tickets)
 _cycle_errors = [e for e in _graph_errors if e.startswith("cyclic needs:")]
-_dangling = [e for e in _graph_errors if e not in _cycle_errors]
+_supersession_graph_errors = [
+    e
+    for e in _graph_errors
+    if e.startswith("supersession ") or e.startswith("cyclic supersession:")
+]
+_dangling = [
+    e
+    for e in _graph_errors
+    if e not in _cycle_errors and e not in _supersession_graph_errors
+]
 if _dangling:
     fail(
         "BOARD.md dangling needs: reference(s): "
@@ -2390,6 +2399,10 @@ if _cycle_errors:
     fail("BOARD.md contains cyclic needs: dependencies involving: " + ", ".join(_cycle_nodes))
 else:
     ok("BOARD.md acyclic")
+if _supersession_graph_errors:
+    fail("BOARD.md invalid Work supersession: " + "; ".join(_supersession_graph_errors))
+else:
+    ok("BOARD.md Work supersession relations are terminal, existing and acyclic")
 
 # RFC § 1.11's Pick Rule, the satisfaction half. Dangling and cyclic references
 # were both checked from the start; whether a claimed ticket's dependencies are
@@ -2739,6 +2752,7 @@ from saipen_engine.closure import (  # noqa: E402
     read_registry as _read_cohort_registry,
     resolve_implementation_source as _resolve_impl_source,
 )
+from saipen_engine import supersession as _supersession  # noqa: E402
 
 _closure_problems: list[str] = []
 try:
@@ -2760,6 +2774,31 @@ for _tid, _t in sorted(tickets.items()):
             _verdict = _resolve_impl_source(PROJECT_ROOT, _named_source)
             if not _verdict.ok:
                 _closure_problems.append(f"{_tid}: {_verdict.detail}")
+    elif _mode == "superseded_verified":
+        _fields = _t.get("fields") or {}
+        _successor = str(_fields.get("superseded_by") or "")
+        _evidence = str(_fields.get("supersession_evidence") or "")
+        _authority = str(_fields.get("supersession_authority") or "")
+        _authority_problem, _ = _supersession.authority_error(
+            PROJECT_ROOT,
+            _authority,
+            old_ticket=_tid,
+            successor_ticket=_successor,
+        )
+        if _authority_problem:
+            _closure_problems.append(f"{_tid}: {_authority_problem}")
+        _evidence_problem, _ = _supersession.evidence_error(
+            (
+                _canonical_history_snapshot.events
+                if _canonical_history_snapshot is not None
+                else []
+            ),
+            _evidence,
+            old_ticket=_tid,
+            successor_ticket=_successor,
+        )
+        if _evidence_problem:
+            _closure_problems.append(f"{_tid}: {_evidence_problem}")
     elif _mode == "cohort":
         _cid = _closure_cohort(_t)
         _record = (_cohort_registry.get("cohorts") or {}).get(_cid or "")
@@ -2781,7 +2820,13 @@ if _closure_problems:
         "published when it was not (CORE-003)"
     )
 elif any(_t["section"] == "## DONE" for _t in tickets.values()):
-    ok("every DONE closure provenance resolves to durable publication authority")
+    # The success sentence names the CONTRACT each mode must satisfy, not one
+    # verdict for all of them. `inherited_verified` and a shipped `cohort` do
+    # resolve to durable publication; `superseded_verified` is local lifecycle
+    # terminality and asserts NO publication. Claiming every closure resolves
+    # to publication would be false for exactly the mode this gate added, and
+    # publication stays a separate, downstream question (CORE-003).
+    ok("every DONE closure provenance satisfies its declared closure contract")
 
 # CORE-001 (SRC-026:R001): the SAME active-execution-owner predicate the
 # transactional gate runs, imported rather than restated. The pair used to

@@ -10,12 +10,21 @@ CORE-003 / SRC-026:R003. Two facts the protocol kept confusing:
   legitimately share one unpublished implementation; inventing a fictional
   per-ticket blob for each is a lie the release machinery would then commit.
 
-So closure has exactly three modes -- ``own_patch`` (default, the ticket owns
-and publishes an isolatable delta), ``inherited_verified`` (no delta; a named
-DURABLE publication authority carries it) and ``cohort`` (evidence complete,
-publication owed by a C-### batch) -- and this module owns the two things that
-must never be decided twice: the STRICT implementation-source resolver and the
-durable cohort registry.
+So closure has exactly four lifecycle modes. Three of them resolve to a
+publication authority: ``own_patch`` (default, the ticket owns and publishes an
+isolatable delta), ``inherited_verified`` (no delta; a named DURABLE publication
+authority carries it) and ``cohort`` (evidence complete, publication owed by a
+C-### batch). The fourth, ``superseded_verified`` (T-1418), is local Work
+lifecycle terminality through a verified DONE successor and asserts NO
+publication at all: legitimate old Work was implemented and verified by a later
+Work, so it owns no executable delta, but the successor is not thereby published.
+This module owns the two things that must never be decided twice: the STRICT
+implementation-source resolver and the durable cohort registry.
+
+Publication stays a separate, downstream question for EVERY mode.
+`superseded_verified` is the mode that makes that separation explicit: its ticket
+is lifecycle-terminal while ``resolve_implementation_source`` may still return
+non-green, and both answers are correct at once.
 
 Nothing here trusts prose, and nothing here trusts a bare status. `DONE` alone
 is not publication: a DONE ticket may itself have closed `inherited_verified`
@@ -36,6 +45,7 @@ from .board import (
     closure_mode as _ticket_closure_mode,
     implementation_source as _ticket_source,
     parse_board,
+    superseded_by as _ticket_successor,
 )
 
 COHORT_REGISTRY_REL = ".saipen/kitchen/cohort_registry.json"
@@ -328,7 +338,12 @@ def resolve_implementation_source(
                       needs committed release evidence NAMING that Work; a DONE
                       ``cohort`` needs a SHIPPED cohort with an exact release
                       identity; a DONE ``inherited_verified`` resolves its own
-                      source recursively. `DONE` alone is never trusted.
+                      source recursively; a DONE ``superseded_verified`` follows
+                      ``superseded_by`` to its successor and resolves THAT Work.
+                      `DONE` alone is never trusted. Supersession does not
+                      manufacture publication: the follow is a PROVENANCE link,
+                      so a superseded ticket whose successor is unpublished
+                      returns non-green, exactly as it should.
     ``SRC-###``       a Source is PROVENANCE, not publication: it must be
                       terminal with a durable linked Work, and that Work is
                       then resolved recursively. An ACTIVE Source is invalid.
@@ -421,6 +436,34 @@ def _resolve_work(root: Path, ticket_id: str, chain: tuple[str, ...]) -> SourceV
             chain=chain,
         )
     mode = _ticket_closure_mode(ticket)
+    if mode == "superseded_verified":
+        successor = _ticket_successor(ticket)
+        if not successor:
+            return SourceVerdict(
+                False,
+                ticket_id,
+                "work",
+                f"{ticket_id} closed superseded_verified with no superseded_by Work",
+                chain=chain,
+            )
+        verdict = resolve_implementation_source(root, successor, _chain=chain)
+        if verdict.ok:
+            return SourceVerdict(
+                True,
+                ticket_id,
+                "work",
+                f"{ticket_id} was superseded by {successor}: {verdict.detail}",
+                chain=verdict.chain,
+                release=verdict.release,
+            )
+        return SourceVerdict(
+            False,
+            ticket_id,
+            "work",
+            f"{ticket_id} was superseded by {successor}, which has no proven "
+            f"publication: {verdict.detail}",
+            chain=verdict.chain,
+        )
     if mode == "inherited_verified":
         inner = _ticket_source(ticket)
         if not inner:

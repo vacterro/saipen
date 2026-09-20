@@ -2871,6 +2871,11 @@ def closure_request_error(
             f"closure_mode {closure_mode!r} is outside "
             f"{'|'.join(CLOSURE_MODES)}"
         )
+    if mode == "superseded_verified":
+        return (
+            "closure_mode superseded_verified is written only by `saipen ticket "
+            "supersede T-OLD --by T-NEW --evidence E-### --authority SRC-###`"
+        )
     if mode == "inherited_verified" and not (implementation_source or "").strip():
         return (
             "closure_mode inherited_verified requires --implementation-source "
@@ -3579,6 +3584,10 @@ def _move_ticket(
         raise ValueError(f"cannot locate section {target_section}")
     if action == "done":
         marked = ticket_line.replace("- [/] ", "- [x] ", 1)
+    elif action == "supersede":
+        # Terminal supersession closes schedulable TODO/BLOCKED Work in one
+        # transition; ordinary completion still starts from claimed DOING.
+        marked = re.sub(r"^- \[[/ ]\] ", "- [x] ", ticket_line, count=1)
     elif action == "block":
         marked = ticket_line.replace("- [/] ", "- [ ] ", 1)
         marked = set_ticket_field(
@@ -3608,6 +3617,298 @@ def _move_ticket(
         assert_live_record(marked.rstrip())
     out.insert(target_idx + 1, marked.rstrip() + "\n")
     return "".join(out)
+
+
+# -------------------------------------------------------- Work supersession
+
+
+def _plan_supersede_ticket(
+    root: Path,
+    old_ticket: str,
+    successor_ticket: str,
+    agent: str,
+    evidence: str,
+    authority: str,
+    now: str,
+    utc: str,
+) -> OperationPlan | Result:
+    """Plan one terminal local Work-supersession transaction."""
+    from . import supersession as _sup
+
+    old_ticket = str(old_ticket or "").strip().upper()
+    successor_ticket = str(successor_ticket or "").strip().upper()
+    evidence = str(evidence or "").strip().upper()
+    authority = str(authority or "").strip().upper()
+    if not re.fullmatch(r"T-\d+", old_ticket):
+        return _refuse("INVALID_ID", f"old ticket {old_ticket!r}")
+    if not re.fullmatch(r"T-\d+", successor_ticket):
+        return _refuse("INVALID_ID", f"successor ticket {successor_ticket!r}")
+    if old_ticket == successor_ticket:
+        return _refuse(
+            "SUPERSESSION_SELF_CYCLE",
+            f"{old_ticket} cannot be superseded by itself",
+            ticket=old_ticket,
+        )
+    if not evidence:
+        return _refuse(
+            "SUPERSESSION_EVIDENCE_REQUIRED",
+            "Work supersession requires --evidence E-### targeted at the OLD Work",
+            ticket=old_ticket,
+        )
+    if not authority:
+        return _refuse(
+            "SUPERSESSION_AUTHORITY_REQUIRED",
+            "Work supersession requires --authority SRC-### -- " + _sup.grammar_hint(),
+            ticket=old_ticket,
+        )
+
+    docs, state, board, log_tail = _read(root)
+    if board["errors"]:
+        return _refuse(
+            "VALIDATION_FAILED",
+            "BOARD parse error(s): " + "; ".join(board["errors"][:3]),
+            ticket=old_ticket,
+        )
+    tickets = board["tickets"]
+    old = tickets.get(old_ticket)
+    if old is None:
+        return _refuse("TICKET_NOT_FOUND", f"{old_ticket} not on the board", ticket=old_ticket)
+
+    fields = old.get("fields") or {}
+    if old.get("section") == "## DONE":
+        if (
+            str(fields.get("closure_mode") or "") == "superseded_verified"
+            and str(fields.get("superseded_by") or "") == successor_ticket
+            and str(fields.get("supersession_evidence") or "") == evidence
+            and str(fields.get("supersession_authority") or "") == authority
+        ):
+            return Result(
+                ok=True,
+                code="ALREADY_APPLIED",
+                message=f"{old_ticket} is already superseded by {successor_ticket}",
+                data={
+                    "ticket": old_ticket,
+                    "successor": successor_ticket,
+                    "evidence": evidence,
+                    "authority": authority,
+                },
+            )
+        return _refuse(
+            "TICKET_ALREADY_DONE",
+            f"{old_ticket} is already terminal with a different closure",
+            ticket=old_ticket,
+        )
+    if old.get("section") not in ("## TODO", "## BLOCKED"):
+        return _refuse(
+            "SUPERSESSION_OLD_NOT_SETTLEABLE",
+            f"{old_ticket} sits under {old.get('section')}; only schedulable TODO or "
+            "BLOCKED Work may be superseded",
+            ticket=old_ticket,
+        )
+    if old.get("section") == "## TODO" and not ticket_is_workable(old, tickets, agent):
+        return _refuse(
+            "SUPERSESSION_OLD_NOT_SETTLEABLE",
+            f"{old_ticket} is TODO but not schedulable",
+            ticket=old_ticket,
+        )
+
+    successor = tickets.get(successor_ticket)
+    if successor is None:
+        return _refuse(
+            "SUPERSESSION_SUCCESSOR_NOT_FOUND",
+            f"successor {successor_ticket} not on the board",
+            ticket=old_ticket,
+        )
+    if successor.get("section") != "## DONE":
+        return _refuse(
+            "SUPERSESSION_SUCCESSOR_NOT_DONE",
+            f"successor {successor_ticket} sits under {successor.get('section')}; "
+            "only DONE Work may settle another Work",
+            ticket=old_ticket,
+        )
+    cycle = _sup.cycle_error(tickets, old_ticket, successor_ticket)
+    if cycle:
+        return _refuse("SUPERSESSION_CYCLE", cycle, ticket=old_ticket)
+
+    if str(fields.get("source_receipts") or "").strip():
+        return _refuse(
+            "SUPERSESSION_SOURCE_MIGRATION_REQUIRED",
+            f"{old_ticket} carries Source receipts; this first supersession route "
+            "cannot prove their transfer or settlement",
+            ticket=old_ticket,
+        )
+
+    authority_problem, authority_binding = _sup.authority_error(
+        root,
+        authority,
+        old_ticket=old_ticket,
+        successor_ticket=successor_ticket,
+    )
+    if authority_problem:
+        return _refuse(
+            "SUPERSESSION_AUTHORITY_REQUIRED", authority_problem, ticket=old_ticket
+        )
+    evidence_problem, evidence_binding = _sup.evidence_error(
+        docs["_history"].events,
+        evidence,
+        old_ticket=old_ticket,
+        successor_ticket=successor_ticket,
+    )
+    if evidence_problem:
+        return _refuse(
+            "SUPERSESSION_EVIDENCE_INVALID", evidence_problem, ticket=old_ticket
+        )
+
+    try:
+        seat = _seat_agent(state, docs["board"].text_norm, agent)
+    except OwnershipSplitError as exc:
+        return _refuse(
+            "VALIDATION_FAILED",
+            f"Work supersession refuses a corrupt ownership snapshot: {exc}",
+            ticket=old_ticket,
+        )
+
+    op_id = "supersede-" + uuid4_hex()
+    message = _actor_provenance(
+        state,
+        agent,
+        f"SUPERSEDE {old_ticket} -> {successor_ticket} -- evidence {evidence}; "
+        f"authority {authority}; grant {authority_binding['authority_grant']}; "
+        f"successor completion {evidence_binding['successor_completion']}; "
+        "local lifecycle terminal, publication not asserted",
+    )
+    event, line = _producer_event(
+        docs,
+        log_tail,
+        "DEC",
+        message,
+        ticket=old_ticket,
+        agent=agent,
+        now=now,
+        op_id=op_id,
+    )
+    new_log = docs["log"].text_norm.rstrip("\n") + "\n" + line + "\n"
+
+    def _propose_superseded(board_text: str) -> str:
+        closed = _move_ticket(
+            board_text,
+            old_ticket,
+            "## DONE",
+            "[x]",
+            "supersede",
+            "",
+            enforce_cap=False,
+        )
+        return _ticket_fields_in_place(
+            closed,
+            old_ticket,
+            {
+                "closure_mode": "superseded_verified",
+                "implementation_delta": "none",
+                "superseded_by": successor_ticket,
+                "supersession_evidence": evidence,
+                "supersession_authority": authority,
+            },
+            remove=("blocker", "blocker_scope", "verify_attempts"),
+            enforce_cap=False,
+        )
+
+    try:
+        projected = _project_board_mutation(
+            root,
+            docs["board"].text_norm,
+            _propose_superseded,
+            [old_ticket],
+            op_id=op_id,
+            event_id=f"E-{event}",
+            reason="terminal Work supersession metadata requires canonical projection",
+        )
+    except ValueError as exc:
+        return _refuse("VALIDATION_FAILED", str(exc), ticket=old_ticket)
+    new_board = projected.board_text
+    new_state = patch_state(
+        docs["state"].text_norm,
+        {"last_event": event, "updated": utc, "agent": seat},
+    )
+    new_state = _settle_stop_reason(new_state, new_board, agent)
+    if str(parse_state(new_state).get("task") or "none") == "none":
+        from .router import route_next
+
+        routed = route_next(new_state, new_board, current_agent=agent)
+        if routed.get("ok"):
+            new_state = patch_state(new_state, {"next_action": routed["action"]})
+
+    errors = validate_texts(
+        new_state, new_board, new_log, current_agent=agent, sealed_events=docs["_history"]
+    )
+    if errors:
+        return _refuse(
+            "VALIDATION_FAILED",
+            "proposed Work supersession fails fast validation: " + "; ".join(errors[:5]),
+            ticket=old_ticket,
+        )
+
+    targets = [
+        *_log_targets(docs, new_log),
+        *projected.targets,
+        _target(docs["board"], ".saipen/BOARD.md", "board", new_board),
+        _target(docs["state"], ".saipen/STATE.md", "state", new_state),
+    ]
+    return build_plan(
+        "ticket_supersede",
+        agent,
+        _identity(root),
+        {
+            "operation": "ticket_supersede",
+            "ticket": old_ticket,
+            "successor": successor_ticket,
+            "evidence": evidence,
+            "authority": authority,
+        },
+        _docs_preconditions(docs, "state", "board", "log"),
+        targets,
+        {
+            "ok": True,
+            "code": "SUPERSEDED",
+            "ticket": old_ticket,
+            "successor": successor_ticket,
+            "evidence": evidence,
+            "authority": authority,
+            "event_id": f"E-{event}",
+        },
+        op_id=op_id,
+    )
+
+
+@_state_guard
+def supersede_ticket(
+    project_root: Path | str,
+    old_ticket: str,
+    successor_ticket: str,
+    agent: str,
+    *,
+    evidence: str,
+    authority: str,
+    dry_run: bool = False,
+) -> Result:
+    """Terminally settle OLD through verified DONE successor NEW."""
+    root = Path(project_root)
+    now, utc = _now(), _utc_iso()
+    plan = _plan_supersede_ticket(
+        root,
+        old_ticket,
+        successor_ticket,
+        agent,
+        evidence,
+        authority,
+        now,
+        utc,
+    )
+    if isinstance(plan, Result):
+        return plan
+    if dry_run:
+        return _render_plan(plan)
+    return apply_plan(root, plan)
 
 
 # ----------------------------------------------------------- retirement

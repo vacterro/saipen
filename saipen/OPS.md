@@ -287,6 +287,37 @@ tampered.
 Retirement never deletes repository files: residue found alongside it goes
 through CLEAN's own recovery gate.
 
+### Work supersession transaction
+
+`saipen ticket supersede T-OLD --by T-NEW --evidence E-### --authority
+SRC-###` terminally settles legitimate old Work through a later DONE Work. It
+writes `closure_mode: superseded_verified`, `superseded_by`,
+`supersession_evidence`, `supersession_authority` and
+`implementation_delta: none` on the preserved DONE row. It never writes a
+retirement record and never claims publication.
+
+PLAN fails closed unless OLD and NEW are distinct, OLD is schedulable TODO or
+BLOCKED Work, NEW exists under DONE, the exact PASS event is owned by NEW and
+contains `[target: T-OLD]`, NEW has a later canonical completion event, the
+relation is acyclic, and an ACTIVE operator-ingress receipt grants the exact
+pair through this dedicated closed capsule:
+
+    This message supplies operator authority for Work supersession:
+
+        T-OLD - T-NEW
+
+    only.
+
+Fenced, malformed, unclosed, prose-only or conflicting capsules grant nothing.
+The retirement capsule parser is not consulted. OLD carrying `source_receipts`
+refuses `SUPERSESSION_SOURCE_MIGRATION_REQUIRED`; this first route does not
+guess how Source authority migrates. A repeat of the identical settled tuple
+returns `ALREADY_APPLIED` with zero writes.
+
+Publication resolution may follow `T-OLD -> T-NEW` recursively, but success
+still requires the successor chain to reach committed release evidence. DONE
+and local Git commits remain insufficient publication authority.
+
 ## 5. Locks
 
 One project-local lock file, `.saipen/locks/core.lock`, using real OS file
@@ -401,6 +432,21 @@ no Git means status UNAVAILABLE, never a fabricated clean bill).
 guarantees `fs.write`; a shell/interpreter POSSIBLY exercises anything and is
 therefore never "read-only because the command looked harmless". Possible
 effects are capability metadata for humans and diagnostics -- never proof.
+
+**Shell preflight resolution bounds** (CORE § 1.4). Shell text visibly naming a
+`.saipen` path -- quoted, Windows/POSIX separator, or simple-traversal
+spellings -- is refused before execution; a standalone canonical `saipen
+<verb>` keeps its operation exemption, and ordinary source-development shell
+use remains available. Destructive EFFECTS are resolved from a bounded
+delete/move/rename verb set with its documented flags, the explicit `bash -c` /
+`powershell -Command` / `cmd /c` / `eval` wrappers, command substitution, and
+the working directory as `cd`, `pushd` and `popd` move it; each resolved
+effect is judged exactly as the file-tool effect it is. An effect whose
+operands or working directory cannot be proven -- a variable, a pipeline, an
+encoded command, a directory stack deeper than the guard tracks -- is refused
+as unresolved, never admitted as ordinary shell. This is an accidental-
+mutation barrier over explicit command text, not a sandbox: obfuscated or
+dynamically computed paths stay outside its proof.
 
 **Coverage evaluation** (`evaluate_coverage`) answers one question
 mechanically: WHAT AUTHORIZATION COVERS THIS OBSERVED EFFECT? DENY fails

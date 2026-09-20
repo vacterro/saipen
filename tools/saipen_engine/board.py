@@ -120,6 +120,12 @@ KNOWN_FIELDS = frozenset(
         "implementation_delta",
         "implementation_source",
         "closure_paths",
+        # Terminal local lifecycle supersession. These fields assert neither
+        # retirement nor publication; they bind OLD -> NEW, the old-target
+        # PASS event, and the operator authority that granted the pair.
+        "superseded_by",
+        "supersession_evidence",
+        "supersession_authority",
         # Active-parent dependency handoff. These fields exist only while the
         # parent is BLOCKED on one child Work item; finish_ticket consumes
         # them atomically when that child reaches DONE.
@@ -206,7 +212,7 @@ DEFAULT_BLOCKER_SCOPE = "ticket"
 
 #: Closed closure-mode vocabulary. Absent reads as `own_patch`: the ticket
 #: owns and publishes its implementation delta, which is the strict half.
-CLOSURE_MODES = ("own_patch", "inherited_verified", "cohort")
+CLOSURE_MODES = ("own_patch", "inherited_verified", "cohort", "superseded_verified")
 DEFAULT_CLOSURE_MODE = "own_patch"
 
 #: The ONLY value that arms explicit-user scheduling precedence. Anything else
@@ -613,7 +619,16 @@ def closure_metadata_errors(ticket: dict) -> list[str]:
                 "silently downgraded to ticket while the line claims otherwise"
             )
 
-    closure_fields = ("closure_mode", "closure_cohort", "implementation_delta", "closure_paths")
+    closure_fields = (
+        "closure_mode",
+        "closure_cohort",
+        "implementation_delta",
+        "implementation_source",
+        "closure_paths",
+        "superseded_by",
+        "supersession_evidence",
+        "supersession_authority",
+    )
     declared = [name for name in closure_fields if str(fields.get(name, "")).strip()]
     if declared and section != "## DONE":
         errors.append(
@@ -640,6 +655,49 @@ def closure_metadata_errors(ticket: dict) -> list[str]:
             f"{tid} names closure_cohort {cohort} but closes as "
             f"{mode or DEFAULT_CLOSURE_MODE} -- cohort membership is only "
             "valid with closure_mode cohort"
+        )
+    implementation_source_value = str(fields.get("implementation_source", "")).strip()
+    if mode.lower() == "inherited_verified" and not implementation_source_value:
+        errors.append(f"{tid} closes inherited_verified with no | implementation_source:")
+    if implementation_source_value and mode.lower() != "inherited_verified":
+        errors.append(
+            f"{tid} names implementation_source outside closure_mode inherited_verified"
+        )
+
+    supersession = {
+        "superseded_by": str(fields.get("superseded_by", "")).strip(),
+        "supersession_evidence": str(fields.get("supersession_evidence", "")).strip(),
+        "supersession_authority": str(fields.get("supersession_authority", "")).strip(),
+    }
+    present_supersession = [name for name, value in supersession.items() if value]
+    if mode.lower() == "superseded_verified":
+        missing = [name for name, value in supersession.items() if not value]
+        if missing:
+            errors.append(
+                f"{tid} closes superseded_verified with missing " + ", ".join(missing)
+            )
+        if supersession["superseded_by"] and not re.fullmatch(
+            r"T-\d+", supersession["superseded_by"]
+        ):
+            errors.append(f"{tid} superseded_by is not a T-### identity")
+        if supersession["superseded_by"] == tid:
+            errors.append(f"{tid} cannot supersede itself")
+        if supersession["supersession_evidence"] and not re.fullmatch(
+            r"E-\d+", supersession["supersession_evidence"]
+        ):
+            errors.append(f"{tid} supersession_evidence is not an E-### identity")
+        if supersession["supersession_authority"] and not re.fullmatch(
+            r"SRC-\d+", supersession["supersession_authority"]
+        ):
+            errors.append(f"{tid} supersession_authority is not an SRC-### identity")
+        if delta.lower() != "none":
+            errors.append(
+                f"{tid} closes superseded_verified without implementation_delta none"
+            )
+    elif present_supersession:
+        errors.append(
+            f"{tid} carries {', '.join(present_supersession)} outside "
+            "closure_mode superseded_verified"
         )
     explicit = str(fields.get("user_explicit", "")).strip()
     if explicit and explicit.lower() != USER_EXPLICIT_TRUE:
@@ -706,6 +764,29 @@ def board_graph_errors(tickets: dict) -> list[str]:
     """
     errors: list[str] = []
     ids = set(tickets.keys())
+    superseded: dict[str, str] = {}
+    for tid, ticket in tickets.items():
+        successor = str((ticket.get("fields") or {}).get("superseded_by") or "").strip()
+        if not successor:
+            continue
+        superseded[tid] = successor
+        if successor not in ids:
+            errors.append(f"supersession {tid} names nonexistent successor {successor}")
+        elif tickets[successor].get("section") != "## DONE":
+            errors.append(f"supersession {tid} names non-DONE successor {successor}")
+
+    for start in superseded:
+        chain: list[str] = []
+        positions: dict[str, int] = {}
+        current = start
+        while current in superseded:
+            if current in positions:
+                cycle = [*chain[positions[current] :], current]
+                errors.append("cyclic supersession: " + " -> ".join(cycle))
+                break
+            positions[current] = len(chain)
+            chain.append(current)
+            current = superseded[current]
     for tid, ticket in tickets.items():
         for need in ticket.get("needs", []):
             if need not in ids:
@@ -959,6 +1040,12 @@ def closure_cohort(ticket: dict) -> str | None:
 def implementation_source(ticket: dict) -> str | None:
     """The durable publication authority named by this closure, or None."""
     return _field(ticket, "implementation_source") or None
+
+
+def superseded_by(ticket: dict) -> str | None:
+    """The explicit successor of terminal superseded Work, or None."""
+    value = _field(ticket, "superseded_by")
+    return value if re.fullmatch(r"T-\d+", value) else None
 
 
 def closure_paths(ticket: dict) -> list[str]:
