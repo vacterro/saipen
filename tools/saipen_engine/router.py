@@ -693,6 +693,77 @@ def conformance_crew_gate(project_root, routed: dict) -> dict | None:
         }
 
 
+def closure_finish_gate(project_root, routed: dict) -> dict | None:
+    """T-1403: the router must not EMIT a finish route its own closure gate
+    already refuses.
+
+    Returns `routed` rewritten to the exact legal remediation when the route is
+    the finish corridor (`PHASE SHIP <ticket>`) and the current closure gate
+    proves it would refuse; returns None when the route is not a finish route or
+    the Work is genuinely ready to close.
+
+    ONE owner, two consumers -- `route_next_result` (the Result wrapper) and the
+    CLI's `_route_once` continuation path -- exactly like `conformance_crew_gate`.
+    The router core stays PURE (it never reads the filesystem); this gate reads
+    the project so it can consult the SAME closure-readiness decision the finish
+    operation reads. The remediation is chosen from current source-clause truth
+    (`closure_readiness.closure_readiness`), never a hardcoded
+    `SOURCE_UNRESOLVED -> block`, and it is always a finite executable route.
+    """
+    if not (
+        routed.get("ok")
+        and project_root is not None
+        and isinstance(routed.get("action"), str)
+        and routed["action"].startswith("PHASE SHIP ")
+    ):
+        return None
+    ticket = str(routed["action"]).split()[-1]
+    try:
+        from .closure_readiness import closure_readiness
+
+        decision = closure_readiness(project_root, ticket)
+    except Exception as exc:
+        # Fail toward a named route, not a silent PHASE the gate will refuse.
+        return {
+            **routed,
+            "ok": False,
+            "code": "CLOSURE_UNKNOWN",
+            "action": "saipen source status",
+            "reason": "closure-unknown",
+            "ticket": ticket,
+            "detail": (
+                "closure readiness could not be established "
+                f"({type(exc).__name__}: {exc}); inspect the Work's linked "
+                "sources before finishing"
+            ),
+            "canonical_next_command": "saipen source status",
+        }
+    if decision.get("ready"):
+        return None
+    route = decision.get("canonical_next_command")
+    return {
+        **routed,
+        "ok": False,
+        "code": "CLOSURE_NOT_READY",
+        "action": route,
+        "reason": "closure-not-ready",
+        "ticket": ticket,
+        "detail": (
+            f"closure is not ready for {ticket} ({decision.get('code')}"
+            + (
+                f"; unresolved {', '.join(decision.get('unresolved') or [])}"
+                if decision.get("unresolved")
+                else ""
+            )
+            + f") -- the finite route out is `{route}`, not a finish the gate "
+            "would refuse"
+        ),
+        "canonical_next_command": route,
+        "closure_code": decision.get("code"),
+        "receipt": decision.get("receipt"),
+    }
+
+
 def route_next_result(
     project_root,
     state_text: str,
@@ -743,6 +814,19 @@ def route_next_result(
             ok=False,
             code=gated["code"],
             data={key: value for key, value in gated.items() if key not in ("ok", "code")},
+        )
+    # T-1403: the SAME finish-readiness gate the CLI continuation path uses, so
+    # a `PHASE SHIP` route the closure gate would refuse is never emitted here.
+    finish_gated = closure_finish_gate(project_root, out)
+    if finish_gated is not None:
+        return Result(
+            ok=False,
+            code=finish_gated["code"],
+            data={
+                key: value
+                for key, value in finish_gated.items()
+                if key not in ("ok", "code")
+            },
         )
     return Result(
         ok=bool(out.get("ok")),

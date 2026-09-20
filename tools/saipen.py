@@ -1921,6 +1921,14 @@ def _route_once(project_root: Path) -> dict:
     _gated = conformance_crew_gate(project_root, routed)
     if _gated is not None:
         routed = _gated
+    # T-1403: the SAME not-ready-finish gate the Result wrapper applies, so the
+    # production continuation path can never emit a `PHASE SHIP` action the
+    # closure gate provably refuses. One owner, two consumers.
+    from saipen_engine.router import closure_finish_gate
+
+    _finish_gated = closure_finish_gate(project_root, routed)
+    if _finish_gated is not None:
+        routed = _finish_gated
     route = {
         "emitted": None,
         "rc": 0,

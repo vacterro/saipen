@@ -3027,11 +3027,24 @@ def _plan_finish_ticket(
                 canonical_next_command=_evidence_route(ticket_id, reason, state.get("phase")),
             )
     if not source_gate.get("ok"):
+        # T-1403: a repairable closure refusal must NAME a finite executable
+        # route, from current source-clause truth -- never prose and never a
+        # hardcoded code->block. The router consults the SAME decision owner
+        # (`closure_readiness`) before it emits a finish route, so this refusal
+        # and that gate can never disagree.
+        try:
+            from .closure_readiness import closure_readiness
+
+            _route = closure_readiness(root, ticket_id).get("canonical_next_command")
+        except Exception:
+            _route = None
         return _refuse(
             source_gate.get("code", "SOURCE_UNRESOLVED"),
             f"source coverage gate for {ticket_id}: {source_gate}",
+            ticket=ticket_id,
             receipt=source_gate.get("receipt"),
             unresolved=(source_gate.get("coverage") or {}).get("unresolved"),
+            canonical_next_command=_route,
         )
     # SELF-ownership gate (second-wave P0): finishing a ticket is THE active
     # mutation -- it closes the DOING claim and rewrites STATE.agent.
