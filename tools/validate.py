@@ -9505,6 +9505,19 @@ else:
                     "stops never opens the file (T-405)"
                 )
                 drift_ok = False
+            elif "EXECUTION.md" not in _fp_region:
+                # T-1419 (EXEC-RESPONSE-01): STYLE owns language/voice and
+                # EXECUTION owns response/narration structure, so the FIRST
+                # output must resolve BOTH. A BOOT that mandates only STYLE
+                # lets a session answer in the right tongue with no response
+                # contract -- the exact hole this rule closes.
+                warn("cross-doc-drift",
+                    "cross-doc drift [chat-voice] -- BOOT.md's numbered fast "
+                    "path names STYLE.md but not EXECUTION.md; the response "
+                    "contract (EXEC-RESPONSE-01) must load before the first "
+                    "output too (T-1419)"
+                )
+                drift_ok = False
             elif "beside this BOOT.md" not in _fp_region:
                 warn("cross-doc-drift",
                     "cross-doc drift [chat-voice] -- the fast-path STYLE.md "

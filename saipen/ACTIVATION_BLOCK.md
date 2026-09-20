@@ -15,16 +15,19 @@ expansion. `sc` is `saipen crew`, never "stop caveman". A shortcut inside a
 compound instruction (`saipen push + build ccc`) resolves identically as one
 ordered segment. Style commands (`stop caveman`/`normal mode`) stay legal, but
 a full-token shortcut match ALWAYS wins over style interpretation.
-FIRST-OUTPUT LANGUAGE GATE: when project root contains .saipen/ or a verified
+FIRST-OUTPUT GATE: when project root contains .saipen/ or a verified
 SAIPEN handoff/session binding is active, SAIPEN is active for the entire session
 including ordinary Q&A. BEFORE composing ANY assistant response
-(acknowledgement, explanation, or tool preamble), read STYLE.md and resolve its
-single reply_language: value. A pinned value (et, en, or ru) is the absolute
-chat language for EVERY response including the first, and incoming user language
-MUST NOT override it. Language detection precedence applies ONLY when
-reply_language is auto. Missing, duplicated, invalid, or unreadable STYLE
-language authority is a deterministic bootstrap/style failure -- never guess a
-language and emit substantive output.
+(acknowledgement, explanation, tool preamble, or final response), read
+STYLE.md and EXECUTION.md and resolve both. STYLE owns language/voice
+(single reply_language: value); EXECUTION owns response/narration structure
+(EXEC-RESPONSE-01 owns the response schema). A pinned
+language (et, en, or ru) is the absolute chat language for EVERY response
+including the first, and incoming user language MUST NOT override it.
+Language detection precedence applies ONLY when reply_language is auto.
+Missing, duplicated, invalid, or unreadable STYLE or EXECUTION authority is a
+deterministic bootstrap/style failure -- never guess and emit substantive
+output.
 On "saipen set" / "saipen ..." commands, when a verified SAIPEN handoff/session
 binding is active, or when project root contains .saipen/: read
 {{SAIPEN_HOME}}/BOOT.md (cold-start kernel) + {{SAIPEN_HOME}}/STYLE.md and follow them.

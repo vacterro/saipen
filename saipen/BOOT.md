@@ -29,8 +29,10 @@ Never reword the user's task to get past a refusal.
 
 ## Cold route
 
-1. **Load `STYLE.md` beside this BOOT.md before user-visible output.** Its
-   `reply_language:` value and style contract govern the first token. Invalid or unreadable style
+1. **Load `STYLE.md` beside this BOOT.md before user-visible output, and
+   `EXECUTION.md` with it.** STYLE's `reply_language:` and style contract govern
+   the first token; EXECUTION's `EXEC-RESPONSE-01` governs output structure
+   (control block first). No response token before both resolve; unreadable
    authority is a bootstrap failure, never permission to guess.
 
 2. **Bind the project and installation.** Explicit target wins; then a verified

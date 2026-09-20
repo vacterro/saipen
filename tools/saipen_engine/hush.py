@@ -48,6 +48,12 @@ DISCRETIONARY = frozenset(
         "plan",
         "tool_narration",
         "success_chatter",
+        # T-1419 EXEC-RESPONSE-01: the optional DETAILS block is renderable
+        # chatter, not control surface. HUSH may drop it and may NOT drop any
+        # mandatory field (STATUS/RESULT/BLOCKER/OPERATOR ACTION/NEXT EXACT
+        # ACTION/VALIDATION), so the control surface has one schema under both
+        # policies.
+        "details",
     }
 )
 

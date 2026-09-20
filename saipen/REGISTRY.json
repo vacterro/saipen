@@ -97,6 +97,11 @@
         "test": "tools/test_continue_improve_fallthrough.py",
         "subject": "HUSH precedence, silence and mandatory output"
       },
+      "EXEC-RESPONSE-01": {
+        "owner": "saipen/EXECUTION.md",
+        "test": "tools/test_response_surface_contract.py",
+        "subject": "default response surface: control block first, DETAILS last"
+      },
       "PHASE-DELTA-01": {
         "owner": "saipen/CORE.md",
         "test": "tools/test_protocol_registry.py",
@@ -147,6 +152,7 @@
     "OPS-EFFECT-01": "saipen/OPS.md",
     "GOAL-01": "saipen/MAINTENANCE.md",
     "EXEC-HUSH-01": "saipen/EXECUTION.md",
+    "EXEC-RESPONSE-01": "saipen/EXECUTION.md",
     "PHASE-DELTA-01": "saipen/CORE.md",
     "CONFORMANCE-CORPUS-01": "tests/conformance_cases.jsonl",
     "CONTEXT-BUDGET-01": "saipen/CORE.md",
@@ -636,7 +642,7 @@
       }
     },
     "budgets": {
-      "cold": 20480,
+      "cold": 25600,
       "ordinary_continue": 35840,
       "command_resolution": 32768,
       "ordinary_phase": 40960,
@@ -673,6 +679,7 @@
             "must": [
               "BOOT.md",
               "STYLE.md",
+              "EXECUTION.md",
               "INDEX.md"
             ],
             "conditional": [],
@@ -921,7 +928,8 @@
       "progress",
       "plan",
       "tool_narration",
-      "success_chatter"
+      "success_chatter",
+      "details"
     ],
     "mandatory": [
       "safety_refusal",

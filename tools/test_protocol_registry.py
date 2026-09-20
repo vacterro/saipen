@@ -185,7 +185,7 @@ class ProtocolRegistryTests(unittest.TestCase):
     def test_every_declared_load_budget_is_measured_from_registry(self):
         graph = self.registry["load_profiles"]
         self.assertEqual(set(graph["budgets"]), set(graph["profiles"]))
-        self.assertEqual(graph["budgets"]["cold"], 20 * 1024)
+        self.assertEqual(graph["budgets"]["cold"], 25 * 1024)
         measured = protocol_budget.load_profiles(PROTOCOL)
         for name, limit in graph["budgets"].items():
             self.assertIn(name, measured)
