@@ -56,13 +56,82 @@ def suppressed_line_ranges(tree: ast.AST) -> list[tuple[int, int]]:
     return spans
 
 
-def tight_numeric_timeouts(path: Path) -> list[tuple[int, float]]:
-    """`timeout=<number>` under the floor and not inside a suppress block."""
-    tree = ast.parse(path.read_text(encoding="utf-8-sig"), filename=str(path))
-    spans = suppressed_line_ranges(tree)
-    found = []
+def subprocess_timeout_calls(tree: ast.AST) -> set[ast.Call]:
+    """Resolve subprocess calls and syntactically bound Popen receivers."""
+    modules = set()
+    functions = {}
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Import):
+            modules.update(
+                alias.asname or alias.name
+                for alias in node.names
+                if alias.name == "subprocess"
+            )
+        elif isinstance(node, ast.ImportFrom) and node.module == "subprocess":
+            functions.update(
+                (alias.asname or alias.name, alias.name) for alias in node.names
+            )
+
+    def function_name(node):
+        if isinstance(node, ast.Name):
+            return functions.get(node.id)
+        if (
+            isinstance(node, ast.Attribute)
+            and isinstance(node.value, ast.Name)
+            and node.value.id in modules
+        ):
+            return node.attr
+        return None
+
+    def is_popen(node):
+        return isinstance(node, ast.Call) and function_name(node.func) == "Popen"
+
+    receivers = set()
+    for node in ast.walk(tree):
+        targets = []
+        if isinstance(node, ast.Assign) and is_popen(node.value):
+            targets = node.targets
+        elif isinstance(node, ast.AnnAssign) and is_popen(node.value):
+            targets = [node.target]
+        elif isinstance(node, (ast.With, ast.AsyncWith)):
+            targets = [
+                item.optional_vars
+                for item in node.items
+                if is_popen(item.context_expr) and item.optional_vars is not None
+            ]
+        receivers.update(ast.unparse(target) for target in targets)
+
+    calls = set()
     for node in ast.walk(tree):
         if not isinstance(node, ast.Call):
+            continue
+        if function_name(node.func) in {
+            "run",
+            "Popen",
+            "check_output",
+            "check_call",
+            "call",
+        }:
+            calls.add(node)
+        elif isinstance(node.func, ast.Attribute) and node.func.attr == "communicate":
+            receiver = node.func.value
+            if (
+                is_popen(receiver)
+                or function_name(receiver) == "Popen"
+                or ast.unparse(receiver) in receivers
+            ):
+                calls.add(node)
+    return calls
+
+
+def tight_numeric_timeouts(path: Path) -> list[tuple[int, float]]:
+    """Subprocess `timeout=<number>` under the floor, outside suppress blocks."""
+    tree = ast.parse(path.read_text(encoding="utf-8-sig"), filename=str(path))
+    spans = suppressed_line_ranges(tree)
+    subprocess_calls = subprocess_timeout_calls(tree)
+    found = []
+    for node in ast.walk(tree):
+        if not isinstance(node, ast.Call) or node not in subprocess_calls:
             continue
         for kw in node.keywords:
             if kw.arg != "timeout" or not isinstance(kw.value, ast.Constant):
@@ -107,6 +176,9 @@ class NoAbsoluteLatencyBudgets(unittest.TestCase):
                 "    subprocess.run(['x'], timeout=1.5)\n"
             ),
             "generous": "import subprocess\nsubprocess.run(['x'], timeout=900)\n",
+            "thread_join": "import threading\nthreading.Thread().join(timeout=5)\n",
+            "other_run": "worker.run(timeout=1)\n",
+            "other_communicate": "client.communicate(timeout=1)\n",
         }
         with tempfile.TemporaryDirectory() as tmp:
             for label, text in cases.items():
@@ -117,6 +189,36 @@ class NoAbsoluteLatencyBudgets(unittest.TestCase):
                     self.assertEqual([value for _, value in hits], [1.5], label)
                 else:
                     self.assertEqual(hits, [], label)
+
+    def test_subprocess_aliases_and_communicate_still_have_a_timeout_guard(self):
+        import tempfile
+
+        cases = {
+            "module_alias": "import subprocess as sp\nsp.run(['x'], timeout=1)\n",
+            "function_alias": "from subprocess import run as launch\nlaunch(['x'], timeout=1)\n",
+            "check_output": "import subprocess\nsubprocess.check_output(['x'], timeout=1)\n",
+            "check_call": "import subprocess\nsubprocess.check_call(['x'], timeout=1)\n",
+            "call": "import subprocess\nsubprocess.call(['x'], timeout=1)\n",
+            "communicate": (
+                "import subprocess\nproc = subprocess.Popen(['x'])\n"
+                "proc.communicate(timeout=1)\n"
+            ),
+            "context": (
+                "from subprocess import Popen as Process\n"
+                "with Process(['x']) as child:\n    child.communicate(timeout=1)\n"
+            ),
+            "direct": "import subprocess\nsubprocess.Popen(['x']).communicate(timeout=1)\n",
+            "attribute": (
+                "import subprocess\nself.proc = subprocess.Popen(['x'])\n"
+                "self.proc.communicate(timeout=1)\n"
+            ),
+        }
+        with tempfile.TemporaryDirectory() as tmp:
+            for label, text in cases.items():
+                with self.subTest(label=label):
+                    path = Path(tmp) / f"test_{label}.py"
+                    path.write_text(text, encoding="utf-8")
+                    self.assertEqual(tight_numeric_timeouts(path)[0][1], 1.0)
 
     def test_the_liveness_latency_control_prices_the_host_first(self):
         source = (TOOLS / "test_audit_2026_08_28_all3.py").read_text(encoding="utf-8-sig")
