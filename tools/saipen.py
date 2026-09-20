@@ -1344,6 +1344,7 @@ def _status(project_root: Path, as_json: bool) -> int:
         return 1
     from saipen_engine.router import (
         audit_inbox_projection,
+        queued_source_projection,
         route_next,
         routing_failure_code,
     )
@@ -1360,6 +1361,7 @@ def _status(project_root: Path, as_json: bool) -> int:
         current_agent=resolved_agent,
         snap=snap,
         audit_inbox=audit_inbox_projection(project_root),
+        queued_source=queued_source_projection(project_root),
     )
     # SRC-085 M3: `computed_next_action`, `computed_reason` and the automation
     # block must classify the SAME gated route every other surface executes --
@@ -1918,6 +1920,7 @@ def _route_once(project_root: Path) -> dict:
     parked = _parked_work(board["tickets"], state)
     from saipen_engine.router import (
         audit_inbox_projection,
+        queued_source_projection,
         route_next,
         routing_failure_code,
     )
@@ -1936,6 +1939,7 @@ def _route_once(project_root: Path) -> dict:
         current_agent=resolved_agent,
         snap=snap,
         audit_inbox=audit_inbox_projection(project_root),
+        queued_source=queued_source_projection(project_root),
     )
     # T-1412 + T-1403 + SRC-085 M3: the SAME ordered gate chain the Result
     # wrapper applies, so `continue` can never hand out a route another surface
@@ -2078,7 +2082,7 @@ def _continue_chain(
     the model would have run.
     """
     from saipen_engine import continue_loop
-    from saipen_engine.operations import finish_ticket
+    from saipen_engine.operations import apply_claim, finish_ticket
 
     agent = _agent_for(project_root)
     trace: list[dict] = []
@@ -2090,20 +2094,29 @@ def _continue_chain(
         state = route["state"]
         board = route["board"]
         kind = continue_loop.classify_route(routed, state, board)
-        if kind == continue_loop.FINISH_AT_SHIP:
+        if kind in (continue_loop.FINISH_AT_SHIP, continue_loop.ADOPT):
             doing = next(
                 t for t in board["tickets"].values() if t["section"] == "## DOING"
             )
             ticket = doing["id"]
             before_event = state.get("last_event")
-            result = finish_ticket(project_root, ticket, agent)
+            if kind == continue_loop.FINISH_AT_SHIP:
+                result = finish_ticket(project_root, ticket, agent)
+                operation_name = "ticket_done"
+            else:
+                # T-1436: the resumed parent is UNCLAIMED, so the router's own
+                # adoption action is the next mechanical step. It is the same
+                # canonical claim the model would run; the operation re-checks
+                # ownership and refuses a live foreign claim at apply time.
+                result = apply_claim(project_root, ticket, agent, explicit=True)
+                operation_name = "claim"
             after_route = _route_once(project_root) if result.ok else None
             trace.append(
                 {
                     "iteration": iterations + 1,
                     "action": str(routed.get("action") or ""),
                     "kind": kind,
-                    "operation": "ticket_done",
+                    "operation": operation_name,
                     "ticket": ticket,
                     "result": result.code,
                     "ok": bool(result.ok),
@@ -2280,6 +2293,7 @@ def _explain_next(project_root: Path, as_json: bool) -> int:
     from saipen_engine.router import (
         audit_inbox_projection,
         gate_route,
+        queued_source_projection,
         route_next,
         routing_failure_code,
     )
@@ -2296,6 +2310,7 @@ def _explain_next(project_root: Path, as_json: bool) -> int:
         current_agent=resolved_agent,
         snap=snap,
         audit_inbox=audit_inbox_projection(project_root),
+        queued_source=queued_source_projection(project_root),
     )
     # Explain the executable route, including the same conformance and closure
     # gates used by status/next/continue. A raw route can name a refused action.

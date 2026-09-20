@@ -130,8 +130,13 @@ A clean Git tree does not imply a completed BOARD. Recovery remains bounded
 by OPS; WAIT and actual refusals retain their existing meaning.
 
 `saipen continue` routes: recovery -> WAIT -> active phase-owned continuation
--> Audit Inbox -> ordinary BOARD Pick Rule -> maintenance -> bounded Improve
-fallback. The Audit Inbox stage checks the canonical `audit/` layers
+-> queued explicit user Source -> Audit Inbox -> ordinary BOARD Pick Rule ->
+maintenance -> bounded Improve fallback. A queued Source stage means the
+oldest unprojected `user_instruction` receipt (T-1436): a request captured
+while the seat was busy is started through `saipen start --receipt SRC-###` by
+the next canonical poll after the seat frees -- an operator never retypes the
+command, and the queued request outranks persisted converge intent and
+speculative backlog. The Audit Inbox stage checks the canonical `audit/` layers
 (`SOURCE-AUDIT-INBOX-01`, SOURCES.md): a workable unconsumed audit outranks
 SELECTION of unrelated queued TODO but never preempts active Work, and a
 project holding one is never idle. Layer identity is the file digest, so a

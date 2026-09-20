@@ -24,6 +24,14 @@ before it writes. Nothing is guessed, and a refusal is reported, never
 softened. Phase work (SCOUT..REVIEW) is NOT in the set: it needs judgement,
 so it is a STOP boundary returned to the model.
 
+`adopt`: T-1436 made dependency resume restore the parent WITHOUT a synthesized
+live claim, so the resumed seat may route to `saipen claim T-###` -- the
+router's own adoption action, emitted only when the active DOING is UNCLAIMED
+or FOREIGN_STALE (a live foreign claim is never adopted). It is the same
+mechanical claim the model would run, it re-checks every gate at apply time,
+and without it the parent resume T-1416 exists to automate would stop one step
+short of the boundary on every cc.
+
 `state_identity` is the fixed-point witness: an execution that succeeds but
 leaves phase, task, last_event and BOARD byte-identical did not progress, and
 re-running it would burn the whole budget on the same action.
@@ -58,6 +66,7 @@ CONTINUE_FIXED_POINT = "CONTINUE_FIXED_POINT"
 
 #: Closed classification vocabulary.
 FINISH_AT_SHIP = "finish-at-ship"
+ADOPT = "adopt"
 IDLE_MAINTAIN = "idle-maintain"
 REFUSAL = "refusal"
 STOP = "boundary"
@@ -75,6 +84,13 @@ def classify_route(routed: dict, state: dict, board: dict) -> str:
     action = str(routed.get("action") or "")
     reason = str(routed.get("reason") or "")
     doing = [t for t in (board.get("tickets") or {}).values() if t.get("section") == "## DOING"]
+    # ADOPT (T-1436): the router's own adoption action for an UNCLAIMED or
+    # FOREIGN_STALE active DOING -- never a live foreign claim (the router
+    # refuses that route and the claim operation re-checks at apply time).
+    if reason == "adopt" and len(doing) == 1:
+        ticket = str(doing[0].get("id") or "")
+        if ticket and action == f"saipen claim {ticket}":
+            return ADOPT
     if len(doing) == 1:
         ticket = str(doing[0].get("id") or "")
         if (

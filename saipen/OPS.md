@@ -191,6 +191,17 @@ Rule and `CONTINUATION_RESERVED` refuses every unrelated claim including
 one operation. A failed/blocked B leaves A parked. Ordinary journal recovery
 therefore cannot expose an intermediate second owner or two DOING tickets.
 
+DEPENDENCY COMPLETION IS NOT A CLAIM EVENT (T-1436, measured E-7715/E-7716).
+The resumed A carries a live claim only when the actor closing B presents the
+SAME host-session binding the reservation saved for A -- the one mechanically
+proven live session that legitimately holds the lease. Every other case (a
+different session, no saved binding, no provable binding) restores A UNCLAIMED:
+`owner`, `claim_time` and `claim_session` leave together (a half pair is
+INVALID), the resume event records the previous owner as historical
+attribution only, and the seat is adopted explicitly by whoever resumes the
+Work. A mechanical resume must never refresh liveness metadata as though the
+historical owner process reclaimed the seat.
+
 ### Retirement transaction
 
 `saipen ticket retire T-### --reason CODE --evidence REF --authority SRC-###

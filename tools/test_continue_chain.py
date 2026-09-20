@@ -204,9 +204,21 @@ class ContinueChainTests(unittest.TestCase):
         self.assertEqual(tickets[self.parent_id]["section"], "## DONE", tickets[self.parent_id])
         self.assertGreaterEqual(result.get("iterations", 0), 2, result)
         trace = result.get("continue_trace") or []
-        self.assertEqual([row["operation"] for row in trace], ["ticket_done", "ticket_done"], trace)
+        # T-1436: the dependency resume restores the parent WITHOUT a
+        # synthesized live claim, so the deterministic chain adds the router's
+        # own adoption step (`saipen claim`) before the parent can finish. The
+        # T-1416 contract -- one cc drives the chain to the boundary with no
+        # operator message -- is unchanged.
+        self.assertEqual(
+            [row["operation"] for row in trace],
+            ["ticket_done", "claim", "ticket_done"],
+            trace,
+        )
         self.assertEqual(trace[0]["ticket"], self.child_id, trace)
         self.assertEqual(trace[1]["ticket"], self.parent_id, trace)
+        self.assertEqual(trace[2]["ticket"], self.parent_id, trace)
+        self.assertEqual(trace[1]["kind"], "adopt", trace)
+        self.assertTrue(trace[1]["ok"], trace)
         self.assertNotEqual(trace[0]["before_last_event"], trace[0]["after_last_event"], trace)
         # The loop stopped at the real boundary: idle-maintain, whose single
         # existing fallthrough owns improvement discovery.

@@ -3207,6 +3207,31 @@ def _plan_finish_ticket(
     # seat between child completion and parent resumption.
     resume_parent = continuation_parent(tickets, ticket_id, require_done=False)
 
+    # T-1436: DEPENDENCY COMPLETION IS NOT A CLAIM EVENT. A parent resumed by
+    # its child's closure may retain a live claim ONLY when the actor closing
+    # the child NOW is mechanically proven to be the SAME host session the
+    # reservation names -- the saved claim_session binding equals this
+    # process's binding. Anything else (a different session, no saved binding,
+    # no provable binding) restores the Work WITHOUT any claim: the previous
+    # owner stays historical attribution in the resume LOG line, and the seat
+    # is adopted explicitly by whoever actually resumes the Work. The old
+    # behaviour wrote `owner` + a fresh `claim_time` with no session write,
+    # so a dead window's name carried a fresh 15-minute FOREIGN_LIVE window
+    # and every other agent got WAIT_FOREIGN_OWNER for a session that never
+    # reclaimed the seat (measured E-7715/E-7716).
+    resume_claim_mode = None
+    resume_previous_owner = None
+    finisher_binding = None
+    if resume_parent is not None:
+        _parent_fields = resume_parent.get("fields", {})
+        resume_previous_owner = str(_parent_fields.get("owner") or "").strip() or None
+        _saved_binding = str(_parent_fields.get("claim_session") or "").strip() or None
+        finisher_binding = host_session_binding(root)
+        if _saved_binding and finisher_binding and _saved_binding == finisher_binding:
+            resume_claim_mode = "refresh"
+        else:
+            resume_claim_mode = "clear"
+
     # One LOG completion event naming the ACTUAL closure phase -- the event
     # is the provenance that the gate chain actually ended at SHIP.
     if prefix_run:
@@ -3251,11 +3276,22 @@ def _plan_finish_ticket(
 
     if resume_parent is not None:
         parent_id = resume_parent["id"]
+        resume_detail = f"blocked parent resumed after dependency {ticket_id} reached DONE"
+        if resume_claim_mode == "clear":
+            resume_detail += (
+                "; dependency completion is not a claim event -- no live claim "
+                "restored"
+            )
+            if resume_previous_owner:
+                resume_detail += (
+                    f"; previous owner {resume_previous_owner} is historical "
+                    "attribution only and the seat must be claimed explicitly"
+                )
         event, resume_line = _producer_event(
             docs,
             event,
             "DEC",
-            f"blocked parent resumed after dependency {ticket_id} reached DONE",
+            resume_detail,
             ticket=parent_id,
             agent=agent,
             now=now,
@@ -3339,17 +3375,34 @@ def _plan_finish_ticket(
             closed = _move_ticket(
                 closed, parent_tid, "## DOING", "[/]", "resume", "", enforce_cap=False
             )
+            remove_fields = [
+                "blocker",
+                "blocker_scope",
+                "blocked_on",
+                "resume_phase",
+                "resume_transition_from",
+            ]
+            if resume_claim_mode == "refresh":
+                # The SAME mechanically-proven live session that the
+                # reservation names is closing the child now -- its lease is
+                # current, so the seat is retained and re-bound to it.
+                claim_fields = {
+                    "owner": agent,
+                    "claim_time": utc,
+                    "claim_session": finisher_binding,
+                }
+            else:
+                # No proven live claim: the parent returns UNCLAIMED. A
+                # half-pair (owner or claim_time alone) is INVALID, so all
+                # three claim fields leave together; the previous owner is
+                # preserved as historical attribution in the resume event.
+                claim_fields = {}
+                remove_fields += ["owner", "claim_time", "claim_session"]
             closed = _ticket_fields_in_place(
                 closed,
                 parent_tid,
-                {"owner": agent, "claim_time": utc},
-                remove=(
-                    "blocker",
-                    "blocker_scope",
-                    "blocked_on",
-                    "resume_phase",
-                    "resume_transition_from",
-                ),
+                claim_fields,
+                remove=tuple(remove_fields),
                 enforce_cap=False,
             )
         return closed

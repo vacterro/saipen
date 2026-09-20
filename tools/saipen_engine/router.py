@@ -47,6 +47,7 @@ def route_next(
     current_agent: str | None = None,
     snap=None,
     audit_inbox: dict | None = None,
+    queued_source: dict | None = None,
     # PERF-004: optional pre-parsed objects from the caller to avoid
     # redundant STATE/BOARD parsing. When provided, these take precedence
     # over parsing state_text/board_text.
@@ -408,6 +409,34 @@ def route_next(
             "detail": "partial MARKHUNT pass owns continuation until its manifest closes",
         }
 
+    # QUEUED EXPLICIT USER SOURCE (T-1436): a request the operator already
+    # submitted while the seat was busy is DURABLE QUEUE TRUTH, not a command
+    # to retype. Once no active continuation owns the seat, the OLDEST
+    # unprojected operator Source is STARTED through the canonical ingress
+    # BEFORE persisted converge intent and speculative backlog. It can never
+    # preempt a live ticket: every active/continuation branch above returned
+    # first.
+    if not active and queued_source:
+        if queued_source.get("invalid"):
+            return {
+                "ok": True,
+                "action": queued_source.get("action", "saipen source status"),
+                "reason": "queued-source-invalid",
+                "executable_behavior": "RESTATE_AND_STOP",
+                "detail": queued_source.get(
+                    "detail", "the queued Source projection is unreadable"
+                ),
+            }
+        return {
+            "ok": True,
+            "action": queued_source["action"],
+            "reason": "queued-source",
+            "receipt": queued_source.get("receipt"),
+            "detail": queued_source.get(
+                "detail", "queued explicit user Source owns continuation"
+            ),
+        }
+
     # Crew is an outer convergence target. Once local ticket execution has no
     # immediate continuation, ordinary `cc` returns to crew orchestration from
     # persisted semantics rather than relying on a lucky next_action string.
@@ -606,6 +635,52 @@ ROUTING_FAILURE_CODES = {
 def routing_failure_code(out: dict) -> str:
     """The stable failure code for one route_next result."""
     return ROUTING_FAILURE_CODES.get(out.get("reason"), "VALIDATION_FAILED")
+
+
+def queued_source_projection(project_root) -> dict | None:
+    """The OLDEST unprojected explicit user Source, or None (T-1436).
+
+    A durable queue behaves like a queue: an operator request captured while
+    the seat was occupied is STARTED by the next canonical poll after the seat
+    frees -- the operator never retypes `saipen start --receipt SRC-###`.
+    Read-only; opens the index and metadata, never a source body. Only
+    `user_instruction` Sources qualify: audit layers and authority captures
+    are not queued Work.
+    """
+    if project_root is None:
+        return None
+    try:
+        from . import intake
+
+        for item in intake.active_receipts(project_root):
+            if item.get("linked_work"):
+                continue
+            receipt = str(item.get("receipt") or "").strip()
+            if not receipt:
+                continue
+            meta = intake._read_meta(Path(project_root), receipt) or {}
+            if meta.get("source_kind") != "user_instruction":
+                continue
+            return {
+                "action": f"saipen start --receipt {receipt}",
+                "receipt": receipt,
+                "detail": (
+                    f"queued explicit user request {receipt} is durable and "
+                    "unprojected; this is the canonical ingress that projects "
+                    "and claims it"
+                ),
+            }
+    except Exception as exc:  # transport failure is a diagnostic, never idle
+        return {
+            "action": "saipen source status",
+            "invalid": True,
+            "detail": (
+                "the queued Source projection is unreadable "
+                f"({type(exc).__name__}: {exc}); inspect the intake surface "
+                "before treating the project as idle"
+            ),
+        }
+    return None
 
 
 def audit_inbox_projection(project_root) -> dict | None:
@@ -884,6 +959,7 @@ def route_next_result(
         conflict_ops_list,
         snap=snap,
         audit_inbox=audit_inbox_projection(project_root),
+        queued_source=queued_source_projection(project_root),
     )
     data = {k: v for k, v in out.items() if k != "ok"}
     # Capability surface (hostile-regression, P0#5): a PHASE action names the
