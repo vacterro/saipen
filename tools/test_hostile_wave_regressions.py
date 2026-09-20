@@ -29,6 +29,15 @@ if str(TOOLS) not in sys.path:
     sys.path.insert(0, str(TOOLS))
 
 from saipen_engine import commands as CM  # noqa: E402
+from test_hermetic_env import isolate_host_session  # noqa: E402
+
+
+def setUpModule() -> None:
+    # An OpenCode seat running this suite carries SAIPEN_PROJECT_ROOT/LINEAGE;
+    # without isolation the fixtures would bind the OPERATOR's live project
+    # (test_hermetic_env's module owns exactly this repair).
+    isolate_host_session()
+
 
 PROTOCOL_DIR = TOOLS.parent / "saipen"
 SAIPEN_PY = TOOLS / "saipen.py"

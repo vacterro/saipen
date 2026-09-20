@@ -138,19 +138,19 @@
     "SRC-050:R016": {
       "actionable": true,
       "class": "acceptance-criterion",
-      "disposition": "BLOCKED",
-      "evidence": "L: the DONE gate is NOT met on current bytes. Met: installed runtime used, 6/6 homes CURRENT stale=0, isolation proven by hashes, every matrix case has an explicit verdict, no main-ledger contamination, foreign LIVE owner not stolen, PATCH_OWNED=0 and UNKNOWN=0. NOT met: (a) 'the Windows-path request and long request transport work' -- windows_path_task ran no saipen command and left src/app.py unchanged, and long_file_task started a 46-character substitute instead of carrying its 520-byte request through --file; (b) 'the repeated_refusal set is empty' -- four sessions repeated an identical refusal (VALIDATION_FAILED, ILLEGAL_TRANSITION, INCOMPLETE_TICKET, WAIT_BLOCKED).",
+      "disposition": "VERIFIED",
+      "evidence": "E-7174",
       "text": "L: T-1367 is DONE only when the installed runtime (not a worktree override) was used, six homes are CURRENT with stale = 0, polygon fixture isolation is proven by hashes, every required matrix case has an explicit verdict, there is no main-ledger contamination, the Windows-path request and long request transport work, retries create no duplicate Source/Work, a foreign LIVE owner is not stolen, the repeated_refusal set is empty, PATCH_OWNED = 0 and UNKNOWN = 0.",
-      "verification": null,
+      "verification": "matrix9-20260919.json 9/9 explicit verdicts 0 UNMEASURED; foreign-rerun-20260919.json PASS repeated=[]; autoinject fresh 6/6 at both generations; evidence README section 2026-09-19",
       "work": "T-1367"
     },
     "SRC-050:R017": {
       "actionable": true,
       "class": "requirement",
-      "disposition": "UNKNOWN",
-      "evidence": null,
+      "disposition": "VERIFIED",
+      "evidence": "E-7174",
       "text": "Only after T-1367 is DONE resume the parked T-1361.",
-      "verification": null,
+      "verification": "T-1361 stayed parked through T-1367 BUILD/VERIFY; BOARD shows T-1361 BLOCKED-parked, no T-1361 work before this DONE",
       "work": "T-1367"
     },
     "SRC-050:R018": {

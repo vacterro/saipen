@@ -173,9 +173,10 @@ class HomeDeadError(ValueError):
 
     The bootloader cannot load the protocol the checkpoint was written against
     (CORE § 1.2), so an ORDINARY mutation must refuse with HOME_REQUIRED and
-    zero canonical writes. `saipen rebind-home` is the ONE operation allowed to
-    repair the dead pointer, and it does so only after proving an explicitly
-    named candidate (hostile-regression, P0#3).
+    zero canonical writes. `saipen rebind-home --auto` is the ONE operation
+    allowed to repair the dead pointer when a replacement is already proven;
+    the explicit form (`saipen rebind-home <candidate>`) does so only after
+    proving an explicitly named candidate (hostile-regression, P0#3).
     """
 
 
@@ -197,7 +198,9 @@ def _state_guard(fn):
             return fn(*args, **kwargs)
         except HomeDeadError as exc:
             return _refuse(
-                "HOME_REQUIRED", str(exc), next_action="saipen rebind-home <candidate-home-path>"
+                "HOME_REQUIRED",
+                str(exc),
+                next_action="saipen rebind-home --auto",
             )
         except (StateMalformedError, CheckpointError) as exc:
             return _refuse(getattr(exc, "code", "VALIDATION_FAILED"), str(exc))
@@ -318,8 +321,9 @@ def _read(
             raise HomeDeadError(
                 f"home-dead: {home_problem} -- the bootloader cannot load the "
                 f"protocol this checkpoint names, so ordinary mutation is "
-                f"refused; repair it with `saipen rebind-home "
-                f"<candidate-home-path>`"
+                f"refused; converge it with `saipen rebind-home --auto` "
+                f"(or name the replacement explicitly with `saipen "
+                f"rebind-home <candidate-home-path>`)"
             )
     # ONE strict complete-history snapshot before any planning
     # (hostile-regression, P0#2). The SAME pass supplies the immutable-ledger
@@ -2876,6 +2880,14 @@ def closure_request_error(
             "closure_mode superseded_verified is written only by `saipen ticket "
             "supersede T-OLD --by T-NEW --evidence E-### --authority SRC-###`"
         )
+    if mode == "external_implementation":
+        return (
+            "closure_mode external_implementation is written only by `saipen "
+            "ticket resolve-external <T-###> --authority lineage-<32hex> "
+            "--implementation T-###@<commit> --reason <CLASS> --run <command>`; "
+            "`ticket done` can never claim local implementation for externally "
+            "implemented work"
+        )
     if mode == "inherited_verified" and not (implementation_source or "").strip():
         return (
             "closure_mode inherited_verified requires --implementation-source "
@@ -3601,6 +3613,10 @@ def _move_ticket(
         # Terminal supersession closes schedulable TODO/BLOCKED Work in one
         # transition; ordinary completion still starts from claimed DOING.
         marked = re.sub(r"^- \[[/ ]\] ", "- [x] ", ticket_line, count=1)
+    elif action == "resolve":
+        # External implementation resolution closes BLOCKED Work; the ticket
+        # was never claimed DOING, so the open checkbox is the normal shape.
+        marked = re.sub(r"^- \[[/ ]\] ", "- [x] ", ticket_line, count=1)
     elif action == "block":
         marked = ticket_line.replace("- [/] ", "- [ ] ", 1)
         marked = set_ticket_field(
@@ -3916,6 +3932,624 @@ def supersede_ticket(
         authority,
         now,
         utc,
+    )
+    if isinstance(plan, Result):
+        return plan
+    if dry_run:
+        return _render_plan(plan)
+    return apply_plan(root, plan)
+
+
+# ------------------------------------- external implementation resolution
+
+
+def _plan_resolve_external_ticket(
+    root: Path,
+    work: str,
+    agent: str,
+    *,
+    authority: str,
+    implementation: str,
+    resolution_reason: str,
+    runs,
+    verification,
+    contract: str | None,
+    timeout: int,
+    now: str,
+    utc: str,
+) -> OperationPlan | Result:
+    """Plan ONE external-implementation resolution transaction (SRC-088 M2).
+
+    A local ticket represents a defect that was implemented in an EXTERNAL
+    authority and is observable in the installed implementation. The local
+    verification contract is EXECUTED here against the current tree; a PASS
+    writes the append-only EX receipt and terminalizes the BLOCKED Work, a
+    FAIL records its own receipt and changes no lifecycle byte. The immutable
+    receipt binds the installed engine GENERATION, so a later dependency
+    rollback makes the closure non-green instead of silently green.
+    """
+    from . import external as _external
+    from .debt import _run_verification_command, _verification_contract_digest
+
+    work = str(work or "").strip().upper()
+    authority = str(authority or "").strip()
+    implementation = str(implementation or "").strip()
+    resolution_reason = str(resolution_reason or "").strip()
+    runs = [str(item) for item in (runs or []) if str(item).strip()]
+    verification = list(verification or [])
+
+    if not re.fullmatch(r"T-\d+", work):
+        return _refuse("INVALID_ID", f"ticket {work!r}")
+    problem = _external.authority_error(authority)
+    if problem:
+        return _refuse("EXTERNAL_AUTHORITY_REQUIRED", problem, ticket=work)
+    problem = _external.implementation_error(implementation)
+    if problem:
+        return _refuse("EXTERNAL_IMPLEMENTATION_REQUIRED", problem, ticket=work)
+    problem = _external.reason_error(resolution_reason)
+    if problem:
+        return _refuse("EXTERNAL_REASON_INVALID", problem, ticket=work)
+    for entry in verification:
+        if entry.get("result") != "PASS":
+            return _refuse(
+                "EXTERNAL_VERIFICATION_REFUSED",
+                f"attested verification is not PASS: {entry.get('command')}",
+                ticket=work,
+            )
+    if not runs and not verification:
+        return _refuse(
+            "EXTERNAL_VERIFICATION_REQUIRED",
+            "external resolution requires at least one --run <command> so the "
+            "local verification is executed evidence, not an assertion",
+            ticket=work,
+        )
+
+    docs, state, board, log_tail = _read(root)
+    if board["errors"]:
+        return _refuse(
+            "VALIDATION_FAILED",
+            "BOARD parse error(s): " + "; ".join(board["errors"][:3]),
+            ticket=work,
+        )
+    tickets = board["tickets"]
+    ticket = tickets.get(work)
+    if ticket is None:
+        return _refuse("TICKET_NOT_FOUND", f"{work} not on the board", ticket=work)
+    fields = ticket.get("fields") or {}
+    already_done = False
+    if ticket.get("section") == "## DONE":
+        same = (
+            str(fields.get("closure_mode") or "") == _external.CLOSURE_MODE
+            and str(fields.get("external_authority") or "") == authority
+            and str(fields.get("external_implementation") or "") == implementation
+            and str(fields.get("resolution_reason") or "") == resolution_reason
+        )
+        if not same:
+            return _refuse(
+                "TICKET_ALREADY_DONE",
+                f"{work} is already terminal with a different closure; external "
+                "resolution never rewrites another closure mode",
+                ticket=work,
+            )
+        if not _external.resolution_problems(root, work, ticket):
+            return Result(
+                ok=True,
+                code="ALREADY_APPLIED",
+                message=f"{work} is already resolved externally with a current receipt",
+                data={
+                    "ticket": work,
+                    "receipt_id": str(fields.get("external_evidence") or ""),
+                    "authority": authority,
+                    "implementation": implementation,
+                },
+            )
+        # Same tuple, but the installed generation moved: this is the
+        # RE-RESOLUTION path. A new append-only receipt replaces the pointer;
+        # the DONE row and all history stay intact.
+        already_done = True
+    elif ticket.get("section") != "## BLOCKED":
+        return _refuse(
+            "EXTERNAL_RESOLUTION_REQUIRES_BLOCKED",
+            f"{work} sits under {ticket.get('section')}; only externally blocked "
+            "Work is resolved through an external implementation",
+            ticket=work,
+        )
+
+    verify_text = str(fields.get("verify") or "")
+    digest = _external.contract_digest(work, verify_text)
+    if contract and str(contract).strip() != digest:
+        return _refuse(
+            "EXTERNAL_CONTRACT_MISMATCH",
+            f"--contract {contract} does not match {work}'s own defect contract "
+            f"{digest}; a resolution may not answer a different defect",
+            ticket=work,
+        )
+
+    from .intake import work_closure_gate
+
+    gate = work_closure_gate(root, work)
+    if not gate.get("ok"):
+        return _refuse(
+            gate.get("code") or "SOURCE_UNRESOLVED",
+            "external resolution refuses while the Work's Source coverage is "
+            f"unresolved: {gate.get('detail')}",
+            ticket=work,
+        )
+
+    try:
+        seat = _seat_agent(state, docs["board"].text_norm, agent)
+    except OwnershipSplitError as exc:
+        return _refuse(
+            "VALIDATION_FAILED",
+            f"external resolution refuses a corrupt ownership snapshot: {exc}",
+            ticket=work,
+        )
+
+    executed = [_run_verification_command(root, command, timeout) for command in runs]
+    entries = verification + executed
+    verdict = "PASS" if all(entry.get("result") == "PASS" for entry in entries) else "FAIL"
+    contract_identity = _verification_contract_digest(entries, "external")
+    prior_blocker = str(fields.get("blocker") or "")
+    op_id = "resolve-external-" + uuid4_hex()
+    receipt_id = _external.next_receipt_id(root)
+    from .journal import LineageRefusal, ensure_project_lineage
+
+    try:
+        # The receipt must bind the DURABLE lineage, and a journaled commit
+        # mints the carrier on first mutation anyway; ensure it here so the
+        # receipt bytes and the live carrier can never be two different
+        # values (the T-1434 M2 fixture caught exactly that race).
+        lineage = ensure_project_lineage(root)
+    except LineageRefusal as exc:
+        return _refuse(
+            "VALIDATION_FAILED",
+            f"external resolution requires a durable project lineage: {exc}",
+            ticket=work,
+        )
+
+    record = _external.build_receipt(
+        root=root,
+        receipt_id=receipt_id,
+        work=work,
+        project_identity=_identity(root),
+        project_lineage=lineage,
+        agent=agent,
+        created_at=utc,
+        authority=authority,
+        implementation=implementation,
+        resolution_reason=resolution_reason,
+        defect_contract_digest=digest,
+        defect_contract_text=verify_text,
+        prior_blocker_sha256=(
+            hash_bytes(prior_blocker.encode("utf-8")) if prior_blocker else ""
+        ),
+        verification=entries,
+        verification_contract_digest=contract_identity,
+        verdict=verdict,
+        op_id=op_id,
+    )
+    content = json.dumps(record, indent=2, sort_keys=True).encode("utf-8")
+    rel = f"{_external.EXTERNAL_DIR}/{receipt_id}.json"
+    receipt_target = TargetPlan(
+        path=rel,
+        role="report",
+        content=content,
+        before_hash="",
+        after_hash=hash_bytes(content),
+    )
+    if verdict != "PASS":
+        # Honest FAIL evidence, zero lifecycle mutation: the BLOCKED Work stays
+        # BLOCKED and the receipt says exactly why the claimed fix was not
+        # verified locally.
+        return build_plan(
+            "external_resolve",
+            agent,
+            _identity(root),
+            {
+                "operation": "ticket_resolve_external",
+                "ticket": work,
+                "receipt": receipt_id,
+                "verdict": verdict,
+            },
+            {**_docs_preconditions(docs, "state", "board", "log"), rel: ""},
+            [receipt_target],
+            {
+                "ok": False,
+                "code": "EXTERNAL_VERIFICATION_FAILED",
+                "ticket": work,
+                "receipt_id": receipt_id,
+                "verdict": verdict,
+            },
+            op_id=op_id,
+        )
+
+    message = _actor_provenance(
+        state,
+        agent,
+        f"RESOLVE-EXTERNAL {work} -- authority {authority}; implementation "
+        f"{implementation}; reason {resolution_reason}; local verification PASS "
+        f"({len(entries)} check(s)); receipt {receipt_id}; prior blocker sha256 "
+        f"{(record['prior_blocker_sha256'] or 'none')[:20]}"
+        + ("; RE-RESOLVED after installed generation move" if already_done else ""),
+    )
+    event, line = _producer_event(
+        docs,
+        log_tail,
+        "DEC",
+        message,
+        ticket=work,
+        agent=agent,
+        now=now,
+        op_id=op_id,
+    )
+    new_log = docs["log"].text_norm.rstrip("\n") + "\n" + line + "\n"
+
+    def _propose_resolved(board_text: str) -> str:
+        if already_done:
+            mutated = board_text
+        else:
+            mutated = _move_ticket(
+                board_text,
+                work,
+                "## DONE",
+                "[x]",
+                "resolve",
+                "",
+                enforce_cap=False,
+            )
+        return _ticket_fields_in_place(
+            mutated,
+            work,
+            {
+                "closure_mode": _external.CLOSURE_MODE,
+                "implementation_delta": "none",
+                "external_authority": authority,
+                "external_implementation": implementation,
+                "external_evidence": receipt_id,
+                "resolution_reason": resolution_reason,
+            },
+            remove=("blocker", "blocker_scope", "verify_attempts"),
+            enforce_cap=False,
+        )
+
+    try:
+        projected = _project_board_mutation(
+            root,
+            docs["board"].text_norm,
+            _propose_resolved,
+            [work],
+            op_id=op_id,
+            event_id=f"E-{event}",
+            reason="external implementation resolution requires canonical projection",
+        )
+    except ValueError as exc:
+        return _refuse("VALIDATION_FAILED", str(exc), ticket=work)
+    new_board = projected.board_text
+    new_state = patch_state(
+        docs["state"].text_norm,
+        {"last_event": event, "updated": utc, "agent": seat},
+    )
+    new_state = _settle_stop_reason(new_state, new_board, agent)
+    if str(parse_state(new_state).get("task") or "none") == "none":
+        from .router import route_next
+
+        routed = route_next(new_state, new_board, current_agent=agent)
+        if routed.get("ok"):
+            new_state = patch_state(new_state, {"next_action": routed["action"]})
+
+    errors = validate_texts(
+        new_state, new_board, new_log, current_agent=agent, sealed_events=docs["_history"]
+    )
+    if errors:
+        return _refuse(
+            "VALIDATION_FAILED",
+            "proposed external resolution fails fast validation: "
+            + "; ".join(errors[:5]),
+            ticket=work,
+        )
+
+    targets = [
+        *_log_targets(docs, new_log),
+        *projected.targets,
+        _target(docs["board"], ".saipen/BOARD.md", "board", new_board),
+        _target(docs["state"], ".saipen/STATE.md", "state", new_state),
+        receipt_target,
+    ]
+    return build_plan(
+        "external_resolve",
+        agent,
+        _identity(root),
+        {
+            "operation": "ticket_resolve_external",
+            "ticket": work,
+            "receipt": receipt_id,
+            "authority": authority,
+            "implementation": implementation,
+            "verdict": verdict,
+        },
+        {**_docs_preconditions(docs, "state", "board", "log"), rel: ""},
+        targets,
+        {
+            "ok": True,
+            "code": "EXTERNAL_RESOLVED",
+            "ticket": work,
+            "receipt_id": receipt_id,
+            "verdict": verdict,
+            "authority": authority,
+            "implementation": implementation,
+            "event_id": f"E-{event}",
+        },
+        op_id=op_id,
+    )
+
+
+@_state_guard
+def resolve_external_ticket(
+    project_root: Path | str,
+    work: str,
+    agent: str,
+    *,
+    authority: str,
+    implementation: str,
+    resolution_reason: str,
+    runs=None,
+    verification=None,
+    contract: str | None = None,
+    timeout: int = 300,
+    dry_run: bool = False,
+) -> Result:
+    """Resolve locally reported Work through an externally implemented fix."""
+    root = Path(project_root)
+    now, utc = _now(), _utc_iso()
+    plan = _plan_resolve_external_ticket(
+        root,
+        work,
+        agent,
+        authority=authority,
+        implementation=implementation,
+        resolution_reason=resolution_reason,
+        runs=runs,
+        verification=verification,
+        contract=contract,
+        timeout=timeout,
+        now=now,
+        utc=utc,
+    )
+    if isinstance(plan, Result):
+        return plan
+    if dry_run:
+        return _render_plan(plan)
+    applied = apply_plan(root, plan)
+    if not isinstance(applied, Result):
+        return applied
+    expected = plan.expected if isinstance(plan.expected, dict) else {}
+    if expected.get("code") == "EXTERNAL_VERIFICATION_FAILED":
+        return Result(
+            ok=False,
+            code="EXTERNAL_VERIFICATION_FAILED",
+            message=(
+                f"local verification of the claimed external implementation did "
+                f"not pass; FAIL receipt recorded, {work} stays BLOCKED"
+            ),
+            data={
+                "ticket": work,
+                "receipt_id": expected.get("receipt_id"),
+                "verdict": "FAIL",
+                "applied": applied.code,
+            },
+        )
+    return applied
+
+
+def _plan_retire_source(
+    root: Path,
+    receipt_id: str,
+    agent: str,
+    *,
+    reason: str,
+    successor: str | None,
+    note: str | None,
+    now: str,
+    utc: str,
+) -> OperationPlan | Result:
+    """Plan ONE receipt-only source retirement (T-1434 M3 / SRC-088).
+
+    A stale, non-actionable Source is tombstoned out of CURRENT gating while
+    every byte it ever held is preserved: cold copy first, hot surface out, the
+    original tombstone shape recorded in the same journaled transaction as the
+    LOG and STATE. No unresolved actionable requirement may be discarded -- the
+    eligibility gate refuses first.
+    """
+    from . import intake
+    from . import retirement as _ret
+
+    receipt_id = str(receipt_id or "").strip().upper()
+    reason = str(reason or "").strip().upper()
+    successor = str(successor or "").strip().upper() or None
+    note = str(note or "").strip() or None
+    if not intake._valid_receipt_id(receipt_id):
+        return _refuse("INVALID_ID", f"source {receipt_id!r}", receipt=receipt_id)
+    if not _ret.valid_source_retirement_reason(reason):
+        return _refuse(
+            "RETIREMENT_REASON_UNKNOWN",
+            f"reason {reason!r} is outside {'|'.join(_ret.SOURCE_RETIREMENT_REASONS)}",
+            receipt=receipt_id,
+        )
+
+    docs, state, board, log_tail = _read(root)
+    if board["errors"]:
+        return _refuse(
+            "VALIDATION_FAILED",
+            "BOARD parse error(s): " + "; ".join(board["errors"][:3]),
+            receipt=receipt_id,
+        )
+    index = intake._read_index(root)
+    existing = (index.get("tombstones") or {}).get(receipt_id)
+    if existing is not None:
+        if _ret.is_retired_tombstone(existing):
+            retirement = existing.get("retirement") or {}
+            if (
+                retirement.get("reason") == reason
+                and str(retirement.get("successor") or "") == str(successor or "")
+            ):
+                return Result(
+                    ok=True,
+                    code="ALREADY_RETIRED",
+                    message=f"{receipt_id} is already retired for {reason}",
+                    data={"receipt": receipt_id, "reason": reason},
+                )
+        return _refuse(
+            "ALREADY_RETIRED",
+            f"{receipt_id} already carries a tombstone; retirement never rewrites it",
+            receipt=receipt_id,
+        )
+
+    problems = _ret.source_retirement_errors(
+        root, receipt_id, reason=reason, successor=successor, note=note
+    )
+    if problems:
+        first = problems[0]
+        route = None
+        marker = "requirement(s): "
+        if marker in first:
+            rid = first.split(marker, 1)[1].split(",", 1)[0].strip()
+            route = (
+                f"saipen source disp {receipt_id} {rid} <DISPOSITION> "
+                "[--evidence E-###]"
+            )
+        return _refuse(
+            "SOURCE_RETIREMENT_NOT_ELIGIBLE",
+            f"{receipt_id} is not retirable for {reason}: " + "; ".join(problems[:3]),
+            receipt=receipt_id,
+            canonical_next_command=route,
+        )
+
+    try:
+        seat = _seat_agent(state, docs["board"].text_norm, agent)
+    except OwnershipSplitError as exc:
+        return _refuse(
+            "VALIDATION_FAILED",
+            f"source retirement refuses a corrupt ownership snapshot: {exc}",
+            receipt=receipt_id,
+        )
+
+    op_id = "retire-source-" + uuid4_hex()
+    event, line = _producer_event(
+        docs,
+        log_tail,
+        "DEC",
+        _actor_provenance(
+            state,
+            agent,
+            f"RETIRE-SOURCE {receipt_id} -- reason {reason}; original bytes preserved "
+            f"to {_ret.retired_source_ref(receipt_id)}; successor "
+            f"{successor or 'none'}; the receipt leaves CURRENT gating and its "
+            "history stays readable",
+        ),
+        ticket=None,
+        agent=agent,
+        now=now,
+        op_id=op_id,
+    )
+    new_log = docs["log"].text_norm.rstrip("\n") + "\n" + line + "\n"
+    shared = {
+        "retired_at": utc,
+        "retired_by": agent,
+        "retirement_event": f"E-{event}",
+        "source_reason": reason,
+    }
+    try:
+        source_targets, tombstone = _ret.source_only_retirement_targets(
+            root,
+            receipt_id,
+            reason=reason,
+            successor=successor,
+            note=note,
+            shared=shared,
+        )
+        source_targets.append(_ret.index_target(root, {receipt_id: tombstone}))
+    except ValueError as exc:
+        return _refuse("VALIDATION_FAILED", str(exc), receipt=receipt_id)
+
+    new_state = patch_state(
+        docs["state"].text_norm,
+        {"last_event": event, "updated": utc, "agent": seat},
+    )
+    new_state = _settle_stop_reason(new_state, docs["board"].text_norm, agent)
+    if str(parse_state(new_state).get("task") or "none") == "none":
+        from .router import route_next
+
+        routed = route_next(new_state, docs["board"].text_norm, current_agent=agent)
+        if routed.get("ok"):
+            new_state = patch_state(new_state, {"next_action": routed["action"]})
+
+    errors = validate_texts(
+        new_state,
+        docs["board"].text_norm,
+        new_log,
+        current_agent=agent,
+        sealed_events=docs["_history"],
+    )
+    if errors:
+        return _refuse(
+            "VALIDATION_FAILED",
+            "proposed source retirement fails fast validation: " + "; ".join(errors[:5]),
+            receipt=receipt_id,
+        )
+
+    targets = [
+        *_log_targets(docs, new_log),
+        *source_targets,
+        _target(docs["state"], ".saipen/STATE.md", "state", new_state),
+    ]
+    return build_plan(
+        "source_retire",
+        agent,
+        _identity(root),
+        {
+            "operation": "source_retire",
+            "receipt": receipt_id,
+            "reason": reason,
+            "successor": successor or "",
+        },
+        _docs_preconditions(docs, "state", "log"),
+        targets,
+        {
+            "ok": True,
+            "code": "RETIRED",
+            "receipt": receipt_id,
+            "reason": reason,
+            "successor": successor or "",
+            "event_id": f"E-{event}",
+            "archive_ref": _ret.retired_source_ref(receipt_id),
+        },
+        op_id=op_id,
+    )
+
+
+@_state_guard
+def retire_source(
+    project_root: Path | str,
+    receipt_id: str,
+    agent: str,
+    *,
+    reason: str,
+    successor: str | None = None,
+    note: str | None = None,
+    dry_run: bool = False,
+) -> Result:
+    """Retire ONE stale, non-actionable Source receipt without deleting history."""
+    root = Path(project_root)
+    now, utc = _now(), _utc_iso()
+    plan = _plan_retire_source(
+        root,
+        receipt_id,
+        agent,
+        reason=reason,
+        successor=successor,
+        note=note,
+        now=now,
+        utc=utc,
     )
     if isinstance(plan, Result):
         return plan
@@ -5139,6 +5773,171 @@ USER_REQUEST_VERIFY = (
     "the requested change is present and demonstrated against the user own "
     "description of it"
 )
+
+
+def _improve_module():
+    """The improve.py owning the Core-sweep grammar, imported path-safely.
+
+    `saipen_engine` loads from any harness that put the engine package on
+    sys.path; improve.py is its SIBLING under the same tools/ root and may not
+    be importable in every such harness. The fallback adds only that one
+    directory -- the module's own home -- never an ambient path.
+    """
+    import importlib
+    import sys
+
+    try:
+        return importlib.import_module("improve")
+    except ImportError:
+        tools_dir = str(Path(__file__).resolve().parent.parent)
+        if tools_dir not in sys.path:
+            sys.path.insert(0, tools_dir)
+        return importlib.import_module("improve")
+
+
+def _sweep_linkage(root: Path, ticket_id: str) -> dict:
+    """The strict Core-sweep links naming `ticket_id` (T-1434 M4)."""
+    try:
+        improve = _improve_module()
+    except ImportError as exc:
+        return {"ok": False, "linked": False, "error": str(exc), "links": []}
+    return improve.sweep_ticket_linkage(root, ticket_id)
+
+
+def ticket_reasoning(
+    project_root: Path | str,
+    ticket_id: str,
+    agent: str,
+    recurrence: str,
+    weak_model: str,
+    dry_run: bool = False,
+) -> Result:
+    """Canonical writer for the Core-sweep reasoning-gate linkage (T-1434 M4).
+
+    `recurrence:` (META-IMPROVEMENT) and `weak_model:` (WEAK-MODEL PRECEDENT)
+    are required by the validator on a ticket produced by a STRICT Core sweep
+    CONFIRMED PROTOCOL_VIOLATION disposition, and until now no canonical
+    writer existed: the only way to satisfy the check was a raw BOARD edit.
+    This operation refuses unless that exact linkage resolves through the ONE
+    sweep grammar, so reasoning text can never be attached to an arbitrary
+    ticket; an identical repeat is idempotent and writes nothing.
+    """
+    root = Path(project_root)
+    for label, value in (("recurrence", recurrence), ("weak_model", weak_model)):
+        if not value or not value.strip():
+            return _refuse("VALIDATION_FAILED", f"{label} text is required", ticket=ticket_id)
+        try:
+            assert_single_record(value, label)
+        except ValueError as exc:
+            return _refuse("VALIDATION_FAILED", str(exc), ticket=ticket_id)
+    op_id = "ticket-reasoning-" + uuid4_hex()
+    now, utc = _now(), _utc_iso()
+    docs, state, board, log_tail = _read(root)
+    if board["errors"]:
+        return _refuse(
+            "VALIDATION_FAILED",
+            "BOARD parse error(s): " + "; ".join(board["errors"][:3]),
+            ticket=ticket_id,
+        )
+    if ticket_id not in board["tickets"]:
+        return _refuse("TICKET_NOT_FOUND", f"{ticket_id} not on the board", ticket=ticket_id)
+    linkage = _sweep_linkage(root, ticket_id)
+    if not linkage.get("linked"):
+        detail = (
+            "no strict Core sweep CONFIRMED PROTOCOL_VIOLATION disposition "
+            f"references {ticket_id}; the reasoning gates bind only to a real "
+            "sweep linkage -- a ticket that a strict sweep did not produce is "
+            "never given reasoning text"
+        )
+        if linkage.get("error"):
+            detail += f" (linkage scan unavailable: {linkage['error']})"
+        return _refuse("TICKET_REASONING_NOT_LINKED", detail, ticket=ticket_id)
+    recurrence = escape_ticket_description(redact_credentials(recurrence.strip()))
+    weak_model = escape_ticket_description(redact_credentials(weak_model.strip()))
+    fields = board["tickets"][ticket_id].get("fields", {})
+    if fields.get("recurrence") == recurrence and fields.get("weak_model") == weak_model:
+        return Result(
+            True,
+            "ALREADY_LINKED",
+            data={
+                "ticket": ticket_id,
+                "idempotent": True,
+                "links": [link["ref"] for link in linkage["links"]],
+            },
+            message="the exact reasoning linkage is already recorded",
+        )
+    event, line = _event_line(
+        docs,
+        log_tail,
+        "DEC",
+        ticket_id,
+        agent,
+        "ticket reasoning linkage written via SAIOPS "
+        f"({len(linkage['links'])} strict sweep ref(s))",
+        now,
+        op_id,
+    )
+    try:
+        projected = _project_board_mutation(
+            root,
+            docs["board"].text_norm,
+            lambda board: _ticket_fields_in_place(
+                board,
+                ticket_id,
+                {"recurrence": recurrence, "weak_model": weak_model},
+                enforce_cap=False,
+            ),
+            [ticket_id],
+            op_id=op_id,
+            event_id=f"E-{event}",
+            reason="existing/proposed oversized BOARD record requires canonical reasoning update",
+        )
+    except ValueError as exc:
+        return _refuse("VALIDATION_FAILED", str(exc), ticket=ticket_id)
+    new_board = projected.board_text
+    new_log = docs["log"].text_norm.rstrip("\n") + "\n" + line + "\n"
+    new_state = patch_state(
+        docs["state"].text_norm,
+        {
+            "last_event": event,
+            "updated": utc,
+            "agent": _seat_agent(state, docs["board"].text_norm, agent),
+        },
+    )
+    errors = validate_texts(
+        new_state, new_board, new_log, current_agent=agent, sealed_events=docs["_history"]
+    )
+    if errors:
+        return _refuse(
+            "VALIDATION_FAILED",
+            "proposed reasoning update fails fast validation: " + "; ".join(errors[:5]),
+            ticket=ticket_id,
+        )
+    targets = [
+        *_log_targets(docs, new_log),
+        *projected.targets,
+        _target(docs["board"], ".saipen/BOARD.md", "board", new_board),
+        _target(docs["state"], ".saipen/STATE.md", "state", new_state),
+    ]
+    plan = build_plan(
+        "ticket_reasoning",
+        agent,
+        _identity(root),
+        {"operation": "ticket_reasoning", "ticket": ticket_id},
+        _docs_preconditions(docs, "state", "board", "log"),
+        targets,
+        {
+            "ok": True,
+            "code": "TICKET_REASONING_WRITTEN",
+            "ticket": ticket_id,
+            "event_id": f"E-{event}",
+            "links": [link["ref"] for link in linkage["links"]],
+        },
+        op_id=op_id,
+    )
+    if dry_run:
+        return _render_plan(plan)
+    return apply_plan(root, plan)
 
 
 def _user_request_body(
@@ -6895,7 +7694,7 @@ def migrate_saipen_generation(
         return _refuse(
             "HOME_REQUIRED",
             "STATE.saipen_home is unset, so there is no proven generation to record",
-            next_action="saipen rebind-home <candidate-home-path>",
+            next_action="saipen rebind-home --auto",
         )
     errors, major = _home_layout_errors(home)
     if errors or not major:
@@ -6903,7 +7702,7 @@ def migrate_saipen_generation(
             "HOME_REQUIRED",
             "cannot read a generation from the bound home: "
             + ("; ".join(errors[:4]) if errors else f"VERSION in {home!r} is unreadable"),
-            next_action="saipen rebind-home <candidate-home-path>",
+            next_action="saipen rebind-home --auto",
         )
     declared = str(state.get("saipen_version") or 7)
     if major == declared:
@@ -6952,6 +7751,172 @@ def migrate_saipen_generation(
     return apply_plan(root, plan)
 
 
+def _commit_rebound_home(
+    root: Path,
+    agent: str,
+    resolved_home: str,
+    read_once: tuple[dict, dict, dict, dict],
+    *,
+    code: str,
+    detail: str,
+    extra: dict | None = None,
+    dry_run: bool = False,
+) -> Result:
+    """Journal ONE STATE-only home-pointer update (the rebind body).
+
+    Shared by the explicit `rebind_saipen_home` and the automatic
+    `rebind_home_auto`: both write exactly `saipen_home`, `last_event`,
+    `updated` and `agent`, both preserve phase/task/BOARD, and both carry the
+    same LOG evidence shape. Only the result code and detail differ, so a
+    consumer can tell an operator-directed rebind from an automatic
+    convergence without guessing.
+    """
+    _docs, state, _board, _tail = read_once
+    now, utc = _now(), _utc_iso()
+    task = state.get("task")
+
+    def mutate(text: str, event: int) -> str:
+        return patch_state(
+            text,
+            {
+                "saipen_home": resolved_home,
+                "last_event": event,
+                "updated": utc,
+                "agent": agent,
+            },
+        )
+
+    payload: dict = {"ok": True, "code": code, "saipen_home": resolved_home}
+    if extra:
+        payload.update(extra)
+    plan = _state_only_plan(
+        root,
+        "rebind_home",
+        agent,
+        mutate,
+        detail,
+        payload,
+        now,
+        utc,
+        {"saipen_home", "last_event", "updated", "agent"},
+        ticket_id=task if task not in (None, "", "none") else None,
+        allow_dead_home=True,
+        read_once=read_once,
+    )
+    if isinstance(plan, Result):
+        return plan
+    if dry_run:
+        return _render_plan(plan)
+    return apply_plan(root, plan)
+
+
+def rebind_home_auto(
+    project_root: Path | str,
+    agent: str,
+    dry_run: bool = False,
+    *,
+    engine_root: Path | str | None = None,
+) -> Result:
+    """Converge a DEAD persisted home onto an already-PROVEN canonical runtime.
+
+    The zero-manual repair for the contradiction this operation exists to end
+    (T-1425 REPAIR 1): bootstrap proves a canonical runtime (the executing
+    engine, a verified installed carrier, a verified canonical bridge), the
+    persisted `STATE.saipen_home` names a previous host/OS and does not resolve
+    here, and admission refuses `HOME_REQUIRED`. Operator-directed
+    `rebind-home <candidate>` already repaired that, but required the human to
+    type a path SAIPEN had already proven.
+
+    Semantics, one deterministic rule:
+
+        dead persisted home + no proven replacement  -> HOME_REQUIRED (refuse)
+        dead persisted home + proven replacement     -> journal the pointer
+                                                        (HOST_BINDING_CONVERGED)
+        live persisted home                          -> HOME_ALREADY_BOUND,
+                                                        zero writes (idempotent)
+
+    Candidates come only from `host_bootstrap.replacement_candidates` (SAIPEN-
+    controlled sources, never a disk scan), and each one is proved with the
+    SAME `_candidate_home_errors` the explicit rebind uses (readable VERSION,
+    compatible major, core BOOT layout, required protocol files). No candidate
+    is adopted on discovery alone. `engine_root` is a fixture-only override that
+    models a host whose executing engine is not a usable install.
+    """
+    from . import host_bootstrap
+    from .state import persisted_home_error
+
+    root = Path(project_root)
+    read_once = _read(root, allow_dead_home=True)
+    _docs, state, _board, _tail = read_once
+
+    current_home = str(state.get("saipen_home") or "").strip()
+    current_problem = persisted_home_error(state.get("saipen_home"))
+    if current_home and current_problem is None:
+        return Result(
+            ok=True,
+            code="HOME_ALREADY_BOUND",
+            data={
+                "saipen_home": current_home,
+                "changed": False,
+                "detail": (
+                    "STATE.saipen_home already resolves to a usable SAIPEN "
+                    "install on this host; no convergence was needed"
+                ),
+            },
+        )
+
+    tried: list[dict] = []
+    for candidate in host_bootstrap.replacement_candidates(
+        root, engine_root=engine_root
+    ):
+        raw = str(candidate.get("path") or "")
+        try:
+            resolved = Path(raw).expanduser().resolve().as_posix()
+        except Exception:  # pragma: no cover - defensive: unrepresentable path
+            resolved = raw
+        record = {"source": candidate.get("source"), "path": resolved, "ok": False}
+        if not raw or resolved == current_home:
+            record["why"] = "candidate is the dead persisted pointer itself"
+            tried.append(record)
+            continue
+        errors = _candidate_home_errors(root, state, resolved)
+        if errors:
+            record["why"] = "; ".join(errors[:2])
+            tried.append(record)
+            continue
+        record["ok"] = True
+        tried.append(record)
+        return _commit_rebound_home(
+            root,
+            agent,
+            resolved,
+            read_once,
+            code="HOST_BINDING_CONVERGED",
+            detail=(
+                f"saipen_home automatically converged to the proven canonical "
+                f"runtime {resolved} (source: {candidate.get('source')}); "
+                f"previous pointer: {current_home or 'unset'}"
+            ),
+            extra={
+                "auto": True,
+                "previous_home": current_home or None,
+                "runtime_source": candidate.get("source"),
+                "candidates": tried,
+            },
+            dry_run=dry_run,
+        )
+
+    return _refuse(
+        "HOME_REQUIRED",
+        "no proven canonical replacement is reachable for the dead "
+        f"STATE.saipen_home {current_home or '(unset)'!r}; attempted: "
+        + "; ".join(
+            f"{row.get('source')}={row.get('why')}" for row in tried
+        )[:400],
+        next_action="saipen rebind-home <candidate-home-path>",
+    )
+
+
 def rebind_saipen_home(
     project_root: Path | str, agent: str, candidate_home: str, dry_run: bool = False
 ) -> Result:
@@ -6970,12 +7935,12 @@ def rebind_saipen_home(
         resolved_home = Path(candidate_home).expanduser().resolve().as_posix()
     except Exception:
         resolved_home = candidate_home
-    now, utc = _now(), _utc_iso()
     # The ONE reader allowed to load a checkpoint whose persisted pointer is
     # already dead (P0#3): repairing exactly that pointer is this operation's
     # purpose, and the replacement is proved by `_candidate_home_errors` below.
     # ONE frozen snapshot for the whole rebind operation (second-wave P0).
-    _docs, state, _board, _tail = _read(root, allow_dead_home=True)
+    read_once = _read(root, allow_dead_home=True)
+    _docs, state, _board, _tail = read_once
     errors = _candidate_home_errors(root, state, resolved_home)
     if errors:
         return _refuse(
@@ -6988,38 +7953,15 @@ def rebind_saipen_home(
             "VALIDATION_FAILED",
             f"STATE.saipen_home already points at {resolved_home!r}; nothing to rebind",
         )
-    task = state.get("task")
-
-    def mutate(text: str, event: int) -> str:
-        return patch_state(
-            text,
-            {
-                "saipen_home": resolved_home,
-                "last_event": event,
-                "updated": utc,
-                "agent": agent,
-            },
-        )
-
-    plan = _state_only_plan(
+    return _commit_rebound_home(
         root,
-        "rebind_home",
         agent,
-        mutate,
-        f"saipen_home rebound to {resolved_home}",
-        {"ok": True, "code": "HOME_REBOUND", "saipen_home": resolved_home},
-        now,
-        utc,
-        {"saipen_home", "last_event", "updated", "agent"},
-        ticket_id=task if task not in (None, "", "none") else None,
-        allow_dead_home=True,
-        read_once=(_docs, state, _board, _tail),
+        resolved_home,
+        read_once,
+        code="HOME_REBOUND",
+        detail=f"saipen_home rebound to {resolved_home}",
+        dry_run=dry_run,
     )
-    if isinstance(plan, Result):
-        return plan
-    if dry_run:
-        return _render_plan(plan)
-    return apply_plan(root, plan)
 
 
 @_state_guard

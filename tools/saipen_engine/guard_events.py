@@ -198,8 +198,14 @@ _SAIPEN_ARG_CHARS = frozenset(
 #: already owns that distinction for ingress payloads.
 _SAIPEN_PATH_ARG_CHARS = _SAIPEN_ARG_CHARS | {"\\"}
 
-#: A canonical operation never needs an unbounded argument list.
-_SAIPEN_MAX_TOKENS = 12
+#: A canonical operation never needs an unbounded argument list. The bound is
+#: the documented grammar's own maximum plus headroom, not a guess: the full
+#: `saipen improve sweep` line with every documented optional flag and `--json`
+#: reaches 17 tokens, and the former 12-token bound made `_saipen_cli_tokens`
+#: return None, so a documented canonical line fell through to action=shell
+#: and was refused NO_ACTIVE_WORK in an idle DONE project (T-1401/T-1432). The
+#: argument alphabet above, not the token count, remains the real limit.
+_SAIPEN_MAX_TOKENS = 24
 
 # This is a bounded accidental-mutation preflight, not a shell parser. A
 # protected namespace segment is significant even inside quotes, a Python -c
@@ -1321,9 +1327,15 @@ _READ_ONLY_SHELL_VERBS = frozenset(
         "format-table",
         "ft",
         "get-filehash",
+        "get-date",
+        "get-location",
         "write-output",
         "echo",
         # POSIX
+        "whoami",
+        "hostname",
+        "which",
+        "where",
         "cat",
         "head",
         "tail",
@@ -1364,6 +1376,44 @@ def _read_only_git(args: list[str]) -> bool:
     )
 
 
+#: T-1432 / T-1402: bounded runtime/version probes a protocol-assigned
+#: verification gate runs (`node --version`, `python --version`). The authority
+#: is the CLOSED tool set plus a version-only argument grammar -- never a
+#: substring search for `--version`, which any consequential command could
+#: carry while doing something else.
+_RUNTIME_PROBE_TOOLS = frozenset(
+    {
+        "python",
+        "python3",
+        "py",
+        "node",
+        "npm",
+        "npx",
+        "pip",
+        "pip3",
+        "ruff",
+        "pwsh",
+        "powershell",
+        "cmd",
+    }
+)
+_VERSION_ONLY_FLAGS = frozenset({"--version", "-V", "-v"})
+#: `-v` means verbose for the Python family (`python -v` reads stdin as a REPL
+#: rather than answering a version question), so those admit only the explicit
+#: version flags.
+_VERBOSE_AMBIGUOUS_TOOLS = frozenset({"python", "python3", "py"})
+
+
+def _version_probe_args(verb: str, args: list[str]) -> bool:
+    """True when the arguments are exactly a bounded version query."""
+    if not args:
+        return False
+    allowed = _VERSION_ONLY_FLAGS - (
+        {"-v"} if verb in _VERBOSE_AMBIGUOUS_TOOLS else set()
+    )
+    return all(word in allowed for word in args)
+
+
 def provably_read_only_shell(command: str) -> bool:
     """True only when the whole line is a closed-set read-only probe."""
     if not isinstance(command, str) or not command.strip():
@@ -1384,10 +1434,18 @@ def provably_read_only_shell(command: str) -> bool:
         # and an executable suffix, and `./cat.ps1` or `C:\tmp\git.exe` is
         # whatever program sits at that path, not the read-only command.
         verb = words[0].lower()
-        if verb != _shell_verb(words[0]) or verb not in _READ_ONLY_SHELL_VERBS:
+        if verb != _shell_verb(words[0]) or (
+            verb not in _READ_ONLY_SHELL_VERBS and verb not in _RUNTIME_PROBE_TOOLS
+        ):
             return False
-        if verb == "git" and not _read_only_git(words[1:]):
-            return False
+        if verb == "git":
+            if not (
+                _read_only_git(words[1:]) or _version_probe_args("git", words[1:])
+            ):
+                return False
+        elif verb in _RUNTIME_PROBE_TOOLS:
+            if not _version_probe_args(verb, words[1:]):
+                return False
     return True
 
 

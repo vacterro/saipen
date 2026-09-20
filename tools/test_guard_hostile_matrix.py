@@ -735,15 +735,24 @@ class ProtectedShellNamespace(unittest.TestCase):
 
     def test_normal_development_shell_remains_usable(self):
         root = active_project()
-        for command in (
-            "python --version",
-            "python -m compileall src",
-            "rg TODO src/app.py",
+        # SRC-085 M1: `python --version` is now classified by the bounded
+        # runtime-probe owner, so it maps to the READ class instead of an
+        # ordinary shell effect. The property this control owns is that
+        # ordinary development lines stay usable and admitted, whichever
+        # read-only class they earn.
+        for command, expected_action in (
+            ("python --version", "read"),
+            ("python -m compileall src", "shell"),
+            ("rg TODO src/app.py", "shell"),
         ):
             code, data = GuardEventHarness.run(
                 GuardEventHarness.tool_event(root, "bash", {"command": command})
             )
-            self.assertEqual((code, data["code"], data["action"]), (0, "ADMITTED", "shell"))
+            self.assertEqual(
+                (code, data["code"], data["action"]),
+                (0, "ADMITTED", expected_action),
+                command,
+            )
 
     def test_explicit_protected_shell_paths_are_refused(self):
         root = fresh_project()

@@ -1,5 +1,23 @@
 # OUTBOX
 
+## PY-14: T-1347 subprocess timeout detector patch
+- **status:** ready
+- **summary:** One-file tested patch excludes thread.join and unrelated timeout methods while retaining subprocess calls and Popen.communicate.
+- **main_project_refs:** [tools/test_concurrency_independence.py]
+- **critical:** true
+- **severity:** P2
+- **producer:** saipython
+- **source_head:** b7f5b51280b8f49c5fedbf7a00aeb6d4f45743ba
+- **source_tree_fingerprint:** git-delta-v1:4c6fd9b3f13a1d7a0b203e00a759dae5eac1474eabb77cb3e39dad9da1953eb9
+- **role_revision:** sha256:3069120b1a83291867c000dd5d7edb141d5fedf7895e5dc8f07d06624d05d9ff
+- **base_head:** b7f5b512
+- **coverage:** T-1347 detector and its existing suite; alias and receiver controls; same-verifier original/patch comparison
+- **payload:** [kitchen/PY-14.patch]
+- **verified:** PASS -- pen suite 10 tests, 0 failures, 1 opt-in soak skip; original detector fails the new thread-join control; Ruff clean; git apply --check passes.
+- **patch:** kitchen/PY-14.patch
+- **instructions:** Core review kitchen/PY-14.md and PY-14.patch, integrate under existing T-1347, then rerun tools.test_concurrency_independence and Ruff. Do not duplicate or prematurely close T-1347.
+- **details:** Only pen bytes changed; bounded syntax analysis limitations and exact validation are recorded in PY-14.md. No full-suite or publication claim.
+
 ## PY-1: No failures to fix
 - **status:** stale
 - **superseded_by:** PY-2
@@ -201,7 +219,8 @@
 - **details:** TEST-9 is closed by the existing implementation and tests. This package deliberately contains no generated patch and no fabricated fix evidence.
 
 ## PY-13: current Python sweep at 005a8ac2 — no patch required
-- **status:** ready
+- **status:** stale
+- **superseded_by:** PY-14 -- source identity changed; old observations preserved.
 - **summary:** Current Python tooling passes all test suites and lint gates; no independent Python defect remains to fix
 - **main_project_refs:** []
 - **critical:** false

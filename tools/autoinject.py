@@ -533,6 +533,95 @@ def _names_a_real_home(home: str) -> bool:
         return False
 
 
+def _installed_block_status(
+    installed: str | None,
+    expected: str | None,
+    template_block: str | None,
+    skill_install_dir: Path,
+) -> str:
+    """current | stale for ONE installed instruction file's activation block."""
+    if installed is None:
+        return "stale"
+    if expected is not None and installed == expected.replace("\r\n", "\n").strip():
+        # The exact rendering names this skill copy; it is current only
+        # when that copy IS the accepted generation (T-1342), the same
+        # proof every other spelling of the home has to pass.
+        return "current" if _names_a_real_home(str(skill_install_dir)) else "stale"
+    if template_block is not None:
+        named = _activation_home(template_block.replace("\r\n", "\n").strip(), installed)
+        if named is not None and _names_a_real_home(named):
+            return "current"
+    return "stale"
+
+
+def instruction_contract_status(adapter: dict, skill_install_dir: Path) -> dict:
+    """Per-loader-contract activation freshness (T-1427).
+
+    A host loader reads the FIRST existing file of its own declared list, so
+    an adapter whose registry entry declares `instruction_loaders` is fresh
+    only when EVERY loader contract DELIVERS the current block. The
+    any-surface loop reported `current` from whichever declared surface
+    happened to be current first, while another loader delivered nothing:
+    with `~/.knowledge.md` current and `~/.AGENTS.md` absent, FreeBuff
+    Desktop (first existing of `~/.AGENTS.md`, `~/.CLAUDE.md`) reaches the
+    first-turn prompt with zero activation semantics -- the exact shape that
+    stayed invisible while the freshness surface read current.
+
+    Returns a structured decision: overall `status`, the per-loader
+    `deliveries`, and one bounded `detail` sentence naming the first loader
+    contract that is not current, with the surface it reads.
+    """
+    rendered = rendered_activation_block(skill_install_dir)
+    expected = _extract_block(rendered)
+    template_block = _extract_block(activation_template_path().read_text(encoding="utf-8"))
+    deliveries: list[dict] = []
+    detail: str | None = None
+    saw_any_surface = False
+    for contract in adapter.get("instruction_loaders") or []:
+        loader = str(contract.get("name") or "loader")
+        surfaces = [str(item) for item in (contract.get("surfaces") or [])]
+        state = "absent"
+        found: str | None = None
+        for surface in surfaces:
+            path = _expand_home(surface)
+            if not path.is_file():
+                continue
+            found = surface
+            saw_any_surface = True
+            try:
+                installed = _extract_block(
+                    _content_bytes(path).decode("utf-8", errors="replace")
+                )
+            except OSError:
+                state = "unknown"
+                break
+            state = _installed_block_status(
+                installed, expected, template_block, skill_install_dir
+            )
+            break
+        deliveries.append({"loader": loader, "surface": found, "status": state})
+        if state != "current" and detail is None:
+            if state == "absent":
+                detail = (
+                    f"{loader} delivers no SAIPEN activation block: none of "
+                    f"{', '.join(surfaces)} exists"
+                )
+            elif state == "unknown":
+                detail = f"{loader} surface {found} cannot be read"
+            else:
+                detail = f"{loader} delivers a stale activation block from {found}"
+    states = [entry["status"] for entry in deliveries]
+    if states and all(state == "current" for state in states):
+        overall = "current"
+    elif any(state == "unknown" for state in states):
+        overall = "unknown"
+    elif saw_any_surface:
+        overall = "stale"
+    else:
+        overall = "absent"
+    return {"status": overall, "deliveries": deliveries, "detail": detail}
+
+
 def instruction_status(adapter: dict, skill_install_dir: Path) -> str:
     """current | stale | absent for the always-on instruction block.
 
@@ -543,7 +632,13 @@ def instruction_status(adapter: dict, skill_install_dir: Path) -> str:
     always reads live documents. Reporting the second as stale forever taught
     the operator to ignore the freshness surface, which is how a genuine
     staleness gets ignored too.
+
+    T-1427: when the adapter declares `instruction_loaders`, EVERY declared
+    loader contract must DELIVER the current block; the any-surface fallback
+    below exists only for adapters whose entry declares no loader contract.
     """
+    if adapter.get("instruction_loaders"):
+        return instruction_contract_status(adapter, skill_install_dir)["status"]
     rendered = rendered_activation_block(skill_install_dir)
     expected = _extract_block(rendered)
     template_block = _extract_block(activation_template_path().read_text(encoding="utf-8"))
@@ -557,18 +652,7 @@ def instruction_status(adapter: dict, skill_install_dir: Path) -> str:
             return "unknown"
         if installed is None:
             return "stale"
-        if expected is not None and installed == expected.replace("\r\n", "\n").strip():
-            # The exact rendering names this skill copy; it is current only
-            # when that copy IS the accepted generation (T-1342), the same
-            # proof every other spelling of the home has to pass.
-            return "current" if _names_a_real_home(str(skill_install_dir)) else "stale"
-        if template_block is not None:
-            named = _activation_home(
-                template_block.replace("\r\n", "\n").strip(), installed
-            )
-            if named is not None and _names_a_real_home(named):
-                return "current"
-        return "stale"
+        return _installed_block_status(installed, expected, template_block, skill_install_dir)
     return "absent"
 
 
@@ -641,13 +725,27 @@ def home_surface_status(target: Path) -> dict:
     """Per-declared-surface freshness for one installed home."""
     adapter = _HOME_ADAPTERS.get(str(target.resolve()))
     if adapter is None:
-        return {"adapter": None, "surfaces": {}, "ok": True, "problems": [], "hook": None}
+        return {
+            "adapter": None,
+            "surfaces": {},
+            "ok": True,
+            "problems": [],
+            "hook": None,
+            "details": {},
+        }
     surfaces: dict[str, str] = {}
+    details: dict[str, str] = {}
     hook: dict | None = None
     # The skill copy's own generation is proven by `distribution_report`;
     # declared non-skill surfaces are checked here.
     if "instruction" in (adapter.get("freshness_surfaces") or []):
-        surfaces["instruction"] = instruction_status(adapter, target)
+        if adapter.get("instruction_loaders"):
+            decision = instruction_contract_status(adapter, target)
+            surfaces["instruction"] = decision["status"]
+            if decision.get("detail"):
+                details["instruction"] = decision["detail"]
+        else:
+            surfaces["instruction"] = instruction_status(adapter, target)
     if "hook" in (adapter.get("freshness_surfaces") or []):
         hook = _hook_state(adapter)
         surfaces["hook"] = hook["status"]
@@ -658,6 +756,7 @@ def home_surface_status(target: Path) -> dict:
         "ok": not problems,
         "problems": problems,
         "hook": hook,
+        "details": details,
     }
 
 
@@ -721,6 +820,7 @@ def distribution_report(source_head: str | None = None) -> dict:
                     "unknown": not carried,
                     "surfaces": surface["surfaces"],
                     "surface_problems": surface.get("problems", []),
+                    "surface_details": surface.get("details", {}),
                 }
             )
     heads = [h for h in (item["source_head"] for item in homes) if h]

@@ -61,6 +61,28 @@ ACTION = {"fix", "ticket", "note", "reject"}
 REPORT_STATUS = {"draft", "complete"}
 AVAILABILITY = {"expected", "unavailable", "superseded"}
 ROLES = {"core", "critic"}
+
+#: T-1434 M4: the closed cycle lifecycle. `active` is the only working state;
+#: `complete` finished with every expected seat reported; `superseded` was
+#: closed by reconciliation with seats canonically unavailable; `blocked_external`
+#: was closed with an externally blocked seat recorded by `retire_reason`;
+#: `archived` is the abort/retention state (cycle_aborted marks the abort).
+TERMINAL_CYCLE_STATUSES = ("complete", "archived", "superseded", "blocked_external")
+CYCLE_STATUS = ("active", *TERMINAL_CYCLE_STATUSES)
+
+#: T-1434 M4: the closed per-seat reconciliation classification. Every roster
+#: seat classifies into exactly one of these; each class is either terminal now
+#: or names the one canonical action that makes it terminal.
+SEAT_RECONCILE_CLASSES = (
+    "CURRENT_COMPLETE",
+    "SUPERSEDED",
+    "CANONICALLY_UNAVAILABLE",
+    "BLOCKED_EXTERNAL",
+    "EMPTY_DRAFT",
+    "STALE_COMPLETE",
+    "STILL_ACTIONABLE",
+)
+_RETIRE_REASON_RE = re.compile(r"^[A-Z][A-Z0-9_-]{0,63}$")
 DISPOSITION = {
     "CONFIRMED",
     "DUPLICATE",
@@ -169,7 +191,17 @@ class SweepRecord:
 
 
 class ImproveError(ValueError):
-    """A rejected Improve mutation; carries the refusal reason."""
+    """A rejected Improve mutation; carries the refusal reason.
+
+    A caller that needs a stable machine-readable refusal (SRC-085 M2: an
+    append_run body carrying its own RUN heading) may attach one; every other
+    refusal keeps the historical message-only shape and the CLI reports it as
+    VALIDATION_FAILED.
+    """
+
+    def __init__(self, message: str = "", *, code: str | None = None):
+        super().__init__(message)
+        self.code = code
 
 
 def _validate_safe_id(value: str, kind: str) -> str:
@@ -1069,7 +1101,7 @@ def _cycle_status(manifest: Path) -> str:
     """The lifecycle status of a cycle manifest, defaulting to active for
     legacy manifests that predate the explicit lifecycle field."""
     text = _read_maybe(manifest)
-    match = re.search(r"(?m)^cycle_status:\s*([A-Za-z]+)", text)
+    match = re.search(r"(?m)^cycle_status:\s*([A-Za-z_]+)", text)
     return match.group(1) if match else "active"
 
 
@@ -1120,7 +1152,7 @@ def load_valid_manifest(
 
 def _status_of(text: str) -> str:
     """Lifecycle status derived from an already-loaded manifest TEXT."""
-    match = re.search(r"(?m)^cycle_status:\s*([A-Za-z]+)", text)
+    match = re.search(r"(?m)^cycle_status:\s*([A-Za-z_]+)", text)
     return match.group(1) if match else "active"
 
 
@@ -1373,13 +1405,19 @@ def validate_bound_report(
         installed_fp = None
         installed_version = None
     if installed_fp is not None and installed_version is not None:
+        # T-1434 M7.3: installed truth binds ACTIVE evidence only. A sealed
+        # cycle (complete/archived/superseded/blocked_external) is historical
+        # evidence validated against its OWN captured identity -- the install
+        # moving after the cycle closed never retroactively invalidates it
+        # (the same rule the validator's sealed scan and
+        # _historical_bound_report_errors already apply).
         errors += validate_strict_provenance(
             report_text,
             roster=roster_text,
             manifest_project_identity=project_identity,
             seat_id=seat_id,
-            installed_saipen_version=installed_version,
-            installed_protocol_fp=installed_fp,
+            installed_saipen_version=installed_version if cycle_active else None,
+            installed_protocol_fp=installed_fp if cycle_active else None,
         )
         # role must match the roster binding, not just be closed.
         _r_role = _field(report_text, "role")
@@ -2804,7 +2842,7 @@ def abort_cycle(cycle_dir: Path) -> dict:
     # manifest unchanged (retry re-aborts idempotently) or an archived +
     # cycle_aborted manifest whose draft reports stay byte-identical -- there
     # is no intermediate state where a report moved but the manifest did not.
-    new_text = re.sub(r"(?m)^cycle_status:\s*[A-Za-z]+", "cycle_status: archived", text, count=1)
+    new_text = re.sub(r"(?m)^cycle_status:\s*[A-Za-z_]+", "cycle_status: archived", text, count=1)
     new_text = new_text.rstrip() + "\ncycle_aborted: draft-preserved\n"
     # T-638/§2: the PROPOSED manifest (archived + cycle_aborted) must validate
     # before it is written -- a known-invalid proposed state never enters
@@ -2832,9 +2870,6 @@ def abort_cycle(cycle_dir: Path) -> dict:
             preserved.append(f"{seat_id}/{report_path}")
     result["preserved_reports"] = sorted(preserved)
     return result
-
-
-_RETIRE_REASON_RE = re.compile(r"^[A-Z][A-Z0-9_-]{0,63}$")
 
 
 def retire_seat(cycle_dir: Path, seat_id: str, reason: str) -> dict:
@@ -2896,6 +2931,7 @@ def retire_seat(cycle_dir: Path, seat_id: str, reason: str) -> dict:
             in_seat = raw.split(":", 1)[1].strip() == seat
         if in_seat and raw.startswith("availability:"):
             lines.append("availability: unavailable")
+            lines.append(f"retire_reason: {reason}")
             replaced = True
             in_seat = False
             continue
@@ -2928,6 +2964,366 @@ def retire_seat(cycle_dir: Path, seat_id: str, reason: str) -> dict:
     }
 
 
+def _seat_report(cycle_dir: Path, block: str) -> tuple[str, str]:
+    """(report_path, report_text) for one roster block; empty text when absent."""
+    seat_id = _field(block, "seat_id") or "?"
+    report_path = _field(block, "report_path") or ""
+    if not report_path:
+        return "", ""
+    report = cycle_dir / seat_id / report_path
+    if not report.is_file():
+        return report_path, ""
+    return report_path, _read_maybe(report)
+
+
+def classify_cycle_seat(cycle_dir: Path, block: str, sweep_text: str, roster_text: str) -> dict:
+    """Classify ONE roster seat for strict-cycle reconciliation (T-1434 M4).
+
+    The classification is derived from the roster, the report bytes and the
+    Core SWEEP ledger only -- never from prose or from a caller's claim. It is
+    the single truth shared by `reconcile_cycle`, the `improve status`
+    projection and the reconciliation regression suite.
+    """
+    seat_id = _field(block, "seat_id") or "?"
+    role = _field(block, "role") or ""
+    report_path, report_text = _seat_report(cycle_dir, block)
+    availability = _field(block, "availability") or "expected"
+    record = {
+        "seat_id": seat_id,
+        "role": role,
+        "report_path": report_path,
+        "availability": availability,
+        "report_status": _field(report_text, "report_status"),
+        "class": "STILL_ACTIONABLE",
+        "terminal": False,
+        "retire_reason": _field(block, "retire_reason") or "",
+        "detail": "",
+        "routes": [],
+    }
+    if availability == "unavailable":
+        reason = record["retire_reason"]
+        record["class"] = (
+            "BLOCKED_EXTERNAL" if reason == "BLOCKED_EXTERNAL" else "CANONICALLY_UNAVAILABLE"
+        )
+        record["terminal"] = True
+        record["detail"] = f"seat retired unavailable ({reason or 'no reason recorded'})"
+        return record
+    if availability == "superseded":
+        errors = validate_superseded_seat(
+            cycle_dir, seat_id, roster_text=roster_text, sweep_text=sweep_text
+        )
+        if errors:
+            record["detail"] = "supersession integrity failure: " + "; ".join(errors[:3])
+            record["routes"] = [f"repair supersession of seat {seat_id}: " + "; ".join(errors[:1])]
+            return record
+        record["class"] = "SUPERSEDED"
+        record["terminal"] = True
+        record["detail"] = f"superseded by {_field(block, 'replacement_seat')!r}"
+        return record
+    if not report_text:
+        record["detail"] = "expected seat carries no readable report"
+        record["routes"] = [f"saipen improve --session {seat_id} (resume the assignment)"]
+        return record
+    status = record["report_status"]
+    if status != "complete":
+        if _un_audited_report(report_text):
+            record["class"] = "EMPTY_DRAFT"
+            record["detail"] = "zero committed RUNs; the assignment produced no evidence"
+            record["routes"] = [
+                f"saipen improve retire {cycle_dir.name} {seat_id} --reason EMPTY_DRAFT"
+            ]
+            return record
+        record["detail"] = f"report_status {status!r} with committed audit content"
+        record["routes"] = [
+            f"saipen improve submit {cycle_dir.name} {seat_id} <project> <findings.json>",
+            f"saipen improve complete {cycle_dir.name} {seat_id} <project>",
+        ]
+        return record
+    # COMPLETE: structural identity first, then current-tree/install staleness.
+    historical = _historical_bound_report_errors(
+        cycle_dir, seat_id, report_text, roster_text, require_runs=True
+    )
+    if historical:
+        record["detail"] = "malformed historical evidence: " + "; ".join(historical[:3])
+        record["routes"] = [f"repair seat {seat_id} report: " + "; ".join(historical[:1])]
+        return record
+    derived = derive_status(report_path, roster_text, report_text, sweep_text, seat_id=seat_id)
+    missing = derived.get("missing", [])
+    record["missing_findings"] = missing
+    bound_errors = validate_bound_report(
+        cycle_dir,
+        seat_id,
+        report_text,
+        require_runs=True,
+        require_fresh=True,
+        cycle_active=True,
+    )
+    if not bound_errors:
+        record["class"] = "CURRENT_COMPLETE"
+        record["terminal"] = True
+        return record
+    if missing:
+        record["detail"] = (
+            "complete but stale COMPLETE with unswept finding(s): " + ", ".join(missing)
+        )
+        record["routes"] = [
+            stale_complete_route_hint(cycle_dir.name, seat_id, report_path, missing)
+        ]
+        return record
+    record["class"] = "STALE_COMPLETE"
+    record["detail"] = "complete but not current: " + "; ".join(bound_errors[:3])
+    record["routes"] = [
+        f"saipen improve retire {cycle_dir.name} {seat_id} --reason STALE_COMPLETE "
+        "--replacement <fresh-seat>"
+    ]
+    return record
+
+
+def _replacement_for(cycle_dir: Path, records: list[dict], stale: dict) -> str | None:
+    """The first CURRENT_COMPLETE same-role same-scope replacement seat, or None.
+
+    A supersession may only bind to evidence that is current against TODAY's
+    install and tree, so a stale COMPLETE (or another stale seat) is never a
+    replacement.
+    """
+    source_path, source_text = "", ""
+    for record in records:
+        if record["seat_id"] == stale["seat_id"]:
+            source_path = record["report_path"]
+            break
+    if source_path:
+        source_text = _read_maybe(cycle_dir / stale["seat_id"] / source_path)
+    source_scope = _field(source_text, "context_scope")
+    for record in records:
+        if record["class"] != "CURRENT_COMPLETE":
+            continue
+        if record["seat_id"] == stale["seat_id"] or record["role"] != stale["role"]:
+            continue
+        candidate_text = _read_maybe(cycle_dir / record["seat_id"] / record["report_path"])
+        if _field(candidate_text, "context_scope") == source_scope:
+            return record["seat_id"]
+    return None
+
+
+def _outcome_for_status(status: str) -> str:
+    return {
+        "complete": "COMPLETE",
+        "archived": "ABORTED",
+        "superseded": "SUPERSEDED",
+        "blocked_external": "BLOCKED_EXTERNAL",
+    }.get(status, status.upper())
+
+
+def reconcile_cycle(cycle_dir: Path, *, dry_run: bool = False) -> dict:
+    """ONE canonical finite exit for a strict Improve cycle (T-1434 M4).
+
+    The operation inspects every roster seat, executes the deterministic
+    lossless transitions the current evidence already authorizes (retire an
+    un-started EMPTY_DRAFT, supersede a STALE_COMPLETE seat onto a current
+    same-scope replacement), refuses while genuine actionable work remains,
+    and terminalizes the cycle with the lifecycle class that records WHY it
+    ended (COMPLETE / SUPERSEDED / BLOCKED_EXTERNAL). It is idempotent: a
+    terminal cycle returns ALREADY_TERMINAL with zero writes.
+    """
+    snapshot = load_valid_manifest(cycle_dir, "reconcile", CYCLE_STATUS)
+    if not snapshot.strict:
+        raise ImproveError(
+            "reconcile refuses: reconciliation is a STRICT-cycle operation; "
+            f"cycle {cycle_dir.name} is legacy sealed history and stays "
+            "read-only (retire/abort are its only historical exits)"
+        )
+    roster = snapshot.text
+    manifest = snapshot.path
+    status = snapshot.status
+    sweep = _read_maybe(cycle_dir / "SWEEP.md")
+    records = [
+        classify_cycle_seat(cycle_dir, block, sweep, roster) for block in _seat_blocks(roster)
+    ]
+    base = {
+        "cycle_id": cycle_dir.name,
+        "seats": records,
+        "seat_classes": {record["seat_id"]: record["class"] for record in records},
+    }
+    if status in TERMINAL_CYCLE_STATUSES:
+        return {
+            "ok": True,
+            "code": "ALREADY_TERMINAL",
+            "outcome": _outcome_for_status(status),
+            **base,
+            "retired": [],
+            "superseded": [],
+        }
+    actionable = [record for record in records if record["class"] == "STILL_ACTIONABLE"]
+    if actionable:
+        raise ImproveError(
+            "reconcile refuses: genuine actionable work remains: "
+            + "; ".join(
+                f"seat {record['seat_id']} ({record['detail']})"
+                for record in actionable[:5]
+            )
+            + " -- resolve each named route first"
+        )
+    empty = [record for record in records if record["class"] == "EMPTY_DRAFT"]
+    stale = [record for record in records if record["class"] == "STALE_COMPLETE"]
+    replacements: dict[str, str] = {}
+    for record in stale:
+        replacement = _replacement_for(cycle_dir, records, record)
+        if replacement is None:
+            raise ImproveError(
+                "reconcile refuses: stale COMPLETE seat "
+                f"{record['seat_id']} has no current same-scope replacement seat; "
+                f"create one with `saipen improve --new-seat --role {record['role']}`, "
+                "complete its audit against the current tree, then run reconcile again"
+            )
+        replacements[record["seat_id"]] = replacement
+    if dry_run:
+        return {
+            "ok": True,
+            "code": "RECONCILE_PLAN",
+            **base,
+            "planned_retire": [
+                {"seat_id": record["seat_id"], "reason": "EMPTY_DRAFT"} for record in empty
+            ],
+            "planned_supersede": [
+                {
+                    "seat_id": record["seat_id"],
+                    "replacement_seat": replacements[record["seat_id"]],
+                }
+                for record in stale
+            ],
+            "planned_outcome": "COMPLETE" if not (empty or stale) else "RECONCILED",
+        }
+    retired: list[dict] = []
+    superseded: list[dict] = []
+    for record in empty:
+        result = retire_seat(cycle_dir, record["seat_id"], "EMPTY_DRAFT")
+        retired.append(
+            {"seat_id": record["seat_id"], "reason": "EMPTY_DRAFT", "result": result["code"]}
+        )
+    for record in stale:
+        result = resolve_stale_complete_seat(
+            cycle_dir, record["seat_id"], replacements[record["seat_id"]]
+        )
+        superseded.append(
+            {
+                "seat_id": record["seat_id"],
+                "replacement_seat": replacements[record["seat_id"]],
+                "result": result["code"],
+            }
+        )
+    # Re-derive from the bytes on disk: reconcile never trusts its own plan.
+    roster_now = _read_maybe(manifest)
+    refreshed = [
+        classify_cycle_seat(cycle_dir, block, sweep, roster_now)
+        for block in _seat_blocks(roster_now)
+    ]
+    still_open = [record for record in refreshed if not record["terminal"]]
+    if still_open:
+        raise ImproveError(
+            "reconcile refuses: after resolution these seats are still open: "
+            + ", ".join(f"{record['seat_id']} ({record['class']})" for record in still_open[:5])
+        )
+    errors = verify_cycle(cycle_dir)
+    if errors:
+        raise ImproveError(
+            "reconcile refuses: the cycle bar is unmet after resolution: "
+            + "; ".join(errors[:5])
+        )
+    banned = any(
+        record["class"] == "BLOCKED_EXTERNAL" for record in refreshed
+    )
+    has_unavailable = any(
+        record["class"] in ("CANONICALLY_UNAVAILABLE", "BLOCKED_EXTERNAL") for record in refreshed
+    )
+    if banned:
+        outcome = "BLOCKED_EXTERNAL"
+    elif has_unavailable:
+        outcome = "SUPERSEDED"
+    else:
+        outcome = "COMPLETE"
+    if outcome == "COMPLETE":
+        completed = complete_cycle(cycle_dir)
+        terminal_code = completed.get("code")
+    else:
+        new_status = "blocked_external" if outcome == "BLOCKED_EXTERNAL" else "superseded"
+        new_text = re.sub(
+            r"(?m)^cycle_status:\s*[A-Za-z_]+", f"cycle_status: {new_status}", roster_now, count=1
+        )
+        if new_text == roster_now:
+            raise ImproveError(
+                f"reconcile refuses: cycle {cycle_dir.name} carries no cycle_status line"
+            )
+        proposed_errors = validate_manifest(new_text, expected_cycle_id=cycle_dir.name)
+        if proposed_errors:
+            raise ImproveError(
+                "reconcile refuses its own proposed manifest: "
+                + "; ".join(proposed_errors[:3])
+            )
+        written = _journaled_write(manifest, new_text, "cycle", base_hash=_base_hash(manifest))
+        if not written.get("ok"):
+            raise ImproveError(
+                f"cycle {cycle_dir.name} not terminalized: {written.get('code')} "
+                f"{written.get('message', '')}"
+            )
+        terminal_code = "CYCLE_TERMINALIZED"
+    return {
+        "ok": True,
+        "code": "CYCLE_RECONCILED",
+        "outcome": outcome,
+        "terminal_code": terminal_code,
+        **base,
+        "retired": retired,
+        "superseded": superseded,
+    }
+
+
+def sweep_ticket_linkage(project_root: Path | str, ticket_id: str) -> dict:
+    """Strict-cycle CONFIRMED PROTOCOL_VIOLATION dispositions naming `ticket_id`.
+
+    T-1434 M4: the reasoning-gate fields (`recurrence:`, `weak_model:`) are
+    required on a ticket a strict Core sweep produced. The canonical writer for
+    those fields exists only where that link is real, so this resolver is the
+    ONE proof of the link: it walks every STRICT cycle's SWEEP ledger, resolves
+    each CONFIRMED disposition naming the ticket to its exact report finding,
+    and returns the composite references whose class is PROTOCOL_VIOLATION. A
+    ticket with no such reference is never given reasoning text.
+    """
+    matches: list[dict] = []
+    imp_root = Path(project_root) / _IMP_DIR
+    if imp_root.is_dir():
+        for sweep in sorted(imp_root.rglob("SWEEP.md")):
+            cycle = sweep.parent
+            roster = _read_maybe(cycle / "MANIFEST.md")
+            if _schema_of(roster) != "strict":
+                continue
+            for record in _sweep_records(_read_maybe(sweep)):
+                if record.disposition != "CONFIRMED" or record.ticket != ticket_id:
+                    continue
+                try:
+                    seat, report_name, _key = _resolve_report_owner(cycle, record.report)
+                except ImproveError:
+                    continue
+                report_text = _read_maybe(cycle / seat / report_name)
+                for finding in parse_report(report_text).findings:
+                    if finding.run != record.run() or finding.imp != record.imp():
+                        continue
+                    if finding.cls != "PROTOCOL_VIOLATION":
+                        continue
+                    matches.append(
+                        {
+                            "cycle_id": cycle.name,
+                            "seat_id": seat,
+                            "report": report_name,
+                            "run": finding.run,
+                            "imp": finding.imp,
+                            "ref": composite_finding_ref(
+                                cycle.name, seat, report_name, finding.run, finding.imp
+                            ),
+                        }
+                    )
+    return {"ok": True, "ticket": ticket_id, "links": matches, "linked": bool(matches)}
+
+
 def complete_cycle(cycle_dir: Path) -> dict:
     """Mark a cycle COMPLETE: no longer active, so the next cycle can start.
     The cycle's evidence stays in place (never deleted to admit the next
@@ -2949,7 +3345,7 @@ def complete_cycle(cycle_dir: Path) -> dict:
         raise ImproveError(
             "complete_cycle refused -- the cycle bar is unmet:\n- " + "\n- ".join(errors[:20])
         )
-    new_text = re.sub(r"(?m)^cycle_status:\s*[A-Za-z]+", "cycle_status: complete", text, count=1)
+    new_text = re.sub(r"(?m)^cycle_status:\s*[A-Za-z_]+", "cycle_status: complete", text, count=1)
     if new_text == text:
         new_text = text.rstrip() + "\ncycle_status: complete\n"
     # T-638/§2: the PROPOSED manifest must validate before it is written.
@@ -3136,12 +3532,16 @@ def archive_cycle(cycle_dir: Path) -> dict:
     `saipen improve clean` is archive-with-provenance and nothing else. It
     refuses while the cycle is not COMPLETE (an active cycle is still
     mutation-producing; a complete cycle with unswept findings cannot exist
-    because complete_cycle requires full sweep coverage). It preserves the
+    because complete_cycle requires full sweep coverage). T-1434 M4: a
+    reconciled terminal cycle (`superseded` / `blocked_external`) is sealed
+    evidence too and archives the same way. It preserves the
     original findings and the sweep ledger verbatim -- archived evidence keeps
     resolving through the [sweep-ticket-link] check. The mutation is the same
     journaled manifest write complete_cycle uses, changing only the lifecycle
     status to `archived`."""
-    snapshot = load_valid_manifest(cycle_dir, "archive", ("complete",))
+    snapshot = load_valid_manifest(
+        cycle_dir, "archive", ("complete", "superseded", "blocked_external")
+    )
     text = snapshot.text
     manifest = snapshot.path
     # T-638/§10: a corrupted COMPLETE cycle must not become accepted ARCHIVED
@@ -3154,7 +3554,7 @@ def archive_cycle(cycle_dir: Path) -> dict:
             + "\n- ".join(_sealed_errors[:20])
             + " -- corrupted history is never accepted as archived (T-638)"
         )
-    new_text = re.sub(r"(?m)^cycle_status:\s*[A-Za-z]+", "cycle_status: archived", text, count=1)
+    new_text = re.sub(r"(?m)^cycle_status:\s*[A-Za-z_]+", "cycle_status: archived", text, count=1)
     if new_text == text:
         new_text = text.rstrip() + "\ncycle_status: archived\n"
     # T-638/§2: the PROPOSED manifest must validate before it is written.
@@ -3231,6 +3631,19 @@ def append_run(report_path: Path, run_text: str) -> dict:
     the lifecycle gate. Returns the transaction result.
     """
     text = _read_maybe(report_path)
+    if _RUN_RE.search(run_text):
+        # SRC-085 M2 / AUDAPACK: append_run RECEIVES a RUN BODY and owns the
+        # `## RUN N` heading it writes. A body that smuggles its own heading
+        # commits two headings for one RUN, which the RUN-identity bar reads
+        # as duplicate evidence; the report's completion bar then refuses and
+        # its immutability makes `abort` the only exit. Refuse BEFORE any
+        # write -- never repair committed immutable bytes.
+        raise ImproveError(
+            "append_run receives a RUN BODY, not a complete RUN section: "
+            "run_text carries its own '## RUN N' heading, which append_run "
+            "owns; remove the heading and submit the body alone",
+            code="RUN_BODY_REQUIRED",
+        )
     if _field(text, "report_status") == "complete":
         raise ImproveError(
             "seat report is complete and immutable; no further RUN sections may be appended"
@@ -3272,6 +3685,18 @@ def append_run(report_path: Path, run_text: str) -> dict:
     run_count = len(re.findall(r"(?m)^## RUN \d+\s*$", text))
     run = f"## RUN {run_count + 1}\n\n{run_text.rstrip()}\n"
     proposed = text.rstrip() + "\n\n" + run
+    # SRC-085 M2: the PROPOSED report is constructed in memory and must pass
+    # the RUN-identity bar (unique / ascending / contiguous) before anything is
+    # written, for legacy and strict cycles alike -- an append is never allowed
+    # to compound an identity the completion bar will later refuse.
+    _proposed_identity = _run_identity_problems(list(parse_report(proposed).runs))
+    if _proposed_identity:
+        raise ImproveError(
+            "append_run refuses its own proposed report: "
+            + "; ".join(f"proposed report {problem}" for problem in _proposed_identity)
+            + " -- one RUN section per number",
+            code="RUN_IDENTITY_INVALID",
+        )
     # T-638/§2: the PROPOSED report (with the new RUN) must validate before
     # it is journaled.
     if strict:
@@ -3294,6 +3719,33 @@ def append_run(report_path: Path, run_text: str) -> dict:
     if not result.get("ok"):
         raise ImproveError(f"RUN not committed: {result.get('code')} {result.get('message', '')}")
     return result
+
+
+def _run_identity_problems(runs: "tuple[int, ...] | list[int]") -> list[str]:
+    """The RUN-identity bar (A4) as reusable problem strings, no prefixes.
+
+    One owner for "RUN identity is injective": numbers unique, ascending and
+    contiguous 1..N. `validate_report` applies it to a report that claims
+    completion; `append_run` applies it to the PROPOSED report before writing
+    (SRC-085 M2), because a report carrying two headings for one RUN is
+    uncompletable and immutable -- abort was the only escape.
+    """
+    problems: list[str] = []
+    if len(runs) != len(set(runs)):
+        dup = sorted({n for n in runs if runs.count(n) > 1})
+        problems.append(
+            "repeats RUN section number(s): " + ", ".join(f"RUN {n}" for n in dup)
+        )
+    if list(runs) != sorted(runs):
+        problems.append(
+            "RUN numbers are not ascending: " + ", ".join(f"RUN {n}" for n in runs)
+        )
+    if runs and sorted(runs) != list(range(1, max(runs) + 1)):
+        problems.append(
+            "RUN numbers are not contiguous 1..N: "
+            + ", ".join(f"RUN {n}" for n in sorted(runs))
+        )
+    return problems
 
 
 def validate_report(text: str, require_runs: bool = False, strict: bool = False) -> list[str]:
@@ -3364,22 +3816,8 @@ def validate_report(text: str, require_runs: bool = False, strict: bool = False)
             # descending renumber): every finding's composite <RUN>/<IMP>
             # identity must resolve to exactly one section.
             runs = list(parsed.runs)
-            if len(runs) != len(set(runs)):
-                dup = sorted({n for n in runs if runs.count(n) > 1})
-                errors.append(
-                    "strict report repeats RUN section number(s): "
-                    + ", ".join(f"RUN {n}" for n in dup)
-                )
-            if runs != sorted(runs):
-                errors.append(
-                    "strict report RUN numbers are not ascending: "
-                    + ", ".join(f"RUN {n}" for n in runs)
-                )
-            if runs and sorted(runs) != list(range(1, max(runs) + 1)):
-                errors.append(
-                    "strict report RUN numbers are not contiguous "
-                    "1..N: " + ", ".join(f"RUN {n}" for n in sorted(runs))
-                )
+            for problem in _run_identity_problems(runs):
+                errors.append(f"strict report {problem}")
             # A run with NO_FINDINGS must actually have zero findings.
             for run_number in sorted(parsed.no_findings_runs):
                 if any(f.run == run_number for f in parsed.findings):
@@ -3528,13 +3966,15 @@ def validate_manifest(text: str, expected_cycle_id: str | None = None) -> list[s
                 "portable evidence (DOGFOOD V, T-618)"
             )
         # Exactly one lifecycle status.
-        if len(re.findall(r"(?m)^cycle_status:\s*[A-Za-z]+\s*$", text)) != 1:
+        if len(re.findall(r"(?m)^cycle_status:\s*[A-Za-z_]+\s*$", text)) != 1:
             errors.append("strict manifest must carry exactly one cycle_status")
     if not text.startswith("# IMPROVE CYCLE ROSTER"):
         errors.append("manifest must open with '# IMPROVE CYCLE ROSTER'")
-    status = re.search(r"(?m)^cycle_status:\s*([A-Za-z]+)", text)
-    if status and status.group(1) not in ("active", "complete", "archived"):
-        errors.append(f"cycle_status {status.group(1)!r} outside active|complete|archived")
+    status = re.search(r"(?m)^cycle_status:\s*([A-Za-z_]+)", text)
+    if status and status.group(1) not in CYCLE_STATUS:
+        errors.append(
+            f"cycle_status {status.group(1)!r} outside {'|'.join(CYCLE_STATUS)}"
+        )
     # T-638/§7: `cycle_aborted` is ONE legal lifecycle meaning -- it marks an
     # ARCHIVED cycle whose drafts are non-authoritative. ACTIVE or COMPLETE
     # with the marker is a contradictory state; a duplicate or non-canonical
@@ -3591,6 +4031,27 @@ def validate_manifest(text: str, expected_cycle_id: str | None = None) -> list[s
             errors.append(
                 f"seat {seat_id}: availability {availability!r} outside "
                 "expected|unavailable|superseded"
+            )
+        # T-1434 M4: a retired seat records WHY it is unavailable. The field is
+        # optional for historical retirements written before this grammar and
+        # legal ONLY beside availability: unavailable -- an expected or
+        # superseded seat carrying it is corruption, not a second meaning.
+        retire_reasons = re.findall(r"(?m)^retire_reason:[ \t]*\S", block)
+        if availability == "unavailable":
+            if len(retire_reasons) > 1:
+                errors.append(
+                    f"seat {seat_id}: retire_reason must appear at most once, "
+                    f"found {len(retire_reasons)}"
+                )
+            reason_value = _field(block, "retire_reason")
+            if reason_value and not _RETIRE_REASON_RE.fullmatch(reason_value):
+                errors.append(
+                    f"seat {seat_id}: retire_reason {reason_value!r} is not "
+                    "[A-Z][A-Z0-9_-]{0,63}"
+                )
+        elif retire_reasons:
+            errors.append(
+                f"seat {seat_id}: retire_reason requires availability: unavailable"
             )
         resolution_fields = (
             "resolution",

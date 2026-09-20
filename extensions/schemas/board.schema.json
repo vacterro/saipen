@@ -94,9 +94,34 @@
           "own_patch",
           "inherited_verified",
           "cohort",
-          "superseded_verified"
+          "superseded_verified",
+          "external_implementation"
         ],
-        "description": "Orchestration repair (T-1302): closure provenance on DONE tickets. own_patch = attributable implementation diff; inherited_verified = no new implementation added, verification-only closeout against a durable publication authority; cohort = evidence complete but publication deferred to a C-### cohort; superseded_verified (T-1418) = legitimate old Work implemented and verified through an explicit DONE successor, written only by `saipen ticket supersede`. It is LOCAL lifecycle terminality and asserts NO publication. Absent reads as 'own_patch'."
+        "description": "Orchestration repair (T-1302): closure provenance on DONE tickets. own_patch = attributable implementation diff; inherited_verified = no new implementation added, verification-only closeout against a durable publication authority; cohort = evidence complete but publication deferred to a C-### cohort; superseded_verified (T-1418) = legitimate old Work implemented and verified through an explicit DONE successor, written only by `saipen ticket supersede`; external_implementation (T-1434 M2 / SRC-088) = the defect was implemented by an EXTERNAL authority and verified locally against the installed implementation, written only by `saipen ticket resolve-external`, carrying the EXTERNAL_IMPLEMENTATION_LOCAL_VERIFICATION provenance class. Both new modes assert LOCAL lifecycle terminality, not publication. Absent reads as 'own_patch'."
+      },
+      "external_authority": {
+        "type": "string",
+        "pattern": "^lineage-[0-9a-f]{32}$",
+        "description": "T-1434 M2: the portable lineage identity of the project that implemented the fix. Valid only with closure_mode external_implementation; a URL or prose name is not an authority."
+      },
+      "external_implementation": {
+        "type": "string",
+        "pattern": "^T-\\d+@[0-9a-f]{7,40}$",
+        "description": "T-1434 M2: the upstream Work and exact commit that carries the externally implemented fix. Valid only with closure_mode external_implementation."
+      },
+      "external_evidence": {
+        "type": "string",
+        "pattern": "^EX-\\d{6}$",
+        "description": "T-1434 M2: the append-only external-resolution receipt under .saipen/recovery/conformance/external/ that records the local verification contract, its executed result, and the installed engine generation it was verified against. Valid only with closure_mode external_implementation."
+      },
+      "resolution_reason": {
+        "type": "string",
+        "enum": [
+          "PROTOCOL_HOME_FIX_VERIFIED",
+          "DEPENDENCY_UPGRADE_VERIFIED",
+          "UPSTREAM_FIX_VERIFIED"
+        ],
+        "description": "T-1434 M2: the registered reason class for an external-implementation resolution. Valid only with closure_mode external_implementation."
       },
       "superseded_by": {
         "type": "string",

@@ -212,6 +212,14 @@ def _routing_disposition(routed: dict | None, action: str, reason: str) -> tuple
         # INVALID (R3 fail-closed).
         if reason in ("recovery-conflict", "recovery-pending"):
             return CONTINUE, reason
+        # SRC-085 M3: a red conformance gate that owns the route is a STOP for
+        # the transport. The routed action itself names the remediation, and
+        # the block carries it as remediation_command; CONTINUE is not
+        # advertised while an unaccepted red gate holds the route.
+        if reason in ("conformance-remediation", "conformance-unhealthy"):
+            return BLOCKED, "conformance-remediation"
+        if reason == "conformance-unknown":
+            return INVALID, "conformance-unknown"
         if reason in (
             "state-malformed",
             "board-malformed",
@@ -239,6 +247,14 @@ def _routing_disposition(routed: dict | None, action: str, reason: str) -> tuple
         "audit-inbox-invalid": (CONTINUE, "audit-inbox-invalid"),
         "audit-inbox": (CONTINUE, "audit-inbox"),
         "bootstrap": (CONTINUE, "bootstrap"),
+        # SRC-085 M3: a red conformance gate that owns the route is a STOP for
+        # the transport, never a synthetic `cc` -- the routed action itself
+        # names `saipen validate`, and the block carries it as
+        # remediation_command. CONTINUE is not advertised while an unaccepted
+        # red gate holds the route.
+        "conformance-remediation": (BLOCKED, "conformance-remediation"),
+        "conformance-unhealthy": (BLOCKED, "conformance-remediation"),
+        "conformance-unknown": (INVALID, "conformance-unknown"),
     }
     if reason in named:
         return named[reason]
@@ -481,6 +497,15 @@ def automation_block(
         quiescent = audit_quiescent(audit_status)
         epoch = audit_epoch(audit_status)
 
+        # SRC-085 M3: when the red gate owns the route, the machine surface
+        # names the ONE executable remediation instead of leaving a consumer to
+        # mine LOG prose for why CURRENT_FAIL and a stop coexist.
+        remediation_command: str | None = None
+        if reason_code in ("conformance-remediation", "conformance-unknown"):
+            remediation_command = str(
+                (routed or {}).get("canonical_next_command") or "saipen validate"
+            )
+
         reason_text = None
         if disposition == COMPLETE:
             reason_text = (
@@ -493,7 +518,7 @@ def automation_block(
         else:
             reason_text = f"route reason: {route_reason or 'none'}"
 
-        return {
+        block = {
             "schema_version": SCHEMA_VERSION,
             "disposition": disposition,
             "next_command": _NEXT_COMMAND.get(disposition),
@@ -506,6 +531,9 @@ def automation_block(
             "source_fingerprint": source_fingerprint,
             "completed_at": completed_at,
         }
+        if remediation_command is not None:
+            block["remediation_command"] = remediation_command
+        return block
     except Exception as exc:
         return failed_automation_block(RC_AUTOMATION_FAILURE, f"{type(exc).__name__}: {exc}")
 

@@ -722,7 +722,7 @@ def protocol_snapshot(
     """
     from .board import claim_session_digest, claim_status, parse_board
     from .journal import scan_pending
-    from .state import binding_brake, parse_state_or_error
+    from .state import binding_brake, parse_state_or_error, persisted_home_error
 
     snapshot: dict = {"block": None, "detail": ""}
 
@@ -738,6 +738,23 @@ def protocol_snapshot(
     if state is None:
         return refuse("PROTOCOL_STATE_INVALID", f"malformed STATE: {state_error}")
     snapshot["state"] = state
+
+    # T-1424: the canonical runtime BINDING is protocol state. A persisted
+    # `STATE.saipen_home` that is absolute but does not resolve to a usable
+    # SAIPEN install on this host (a dead pointer, a foreign OS, a removed
+    # clone) means the bootloader cannot load the protocol this checkpoint was
+    # written against. Consequential mutation is refused so a host that lost
+    # the canonical runtime can never silently degrade into an ordinary
+    # writable session; canonical operations remain the repair path.
+    #
+    # T-1425: the route is the AUTOMATIC convergence command, not a placeholder
+    # demanding a path. `rebind-home --auto` adopts the runtime host bootstrap
+    # already proved and refuses with the manual route when nothing is proven,
+    # so a refusal never asks the operator to retype what SAIPEN already knows.
+    home_problem = persisted_home_error(state.get("saipen_home"))
+    if home_problem is not None:
+        snapshot["route"] = "saipen rebind-home --auto"
+        return refuse("HOME_REQUIRED", home_problem)
 
     board_text = _read_text_bounded(root / ".saipen" / "BOARD.md", _BOARD_READ_LIMIT)
     if board_text is None:

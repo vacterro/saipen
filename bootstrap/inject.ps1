@@ -546,20 +546,31 @@ foreach ($adapter in @($AdapterRegistry.adapters)) {
         }
 
         # --- FreeBuff always-on activation backstop ---
-        # FreeBuff loads generic ~/.agents/skills on demand; weak models need a small always-on gate.
-        # Use supported user-level knowledge surface when FreeBuff is positively detected.
+        # T-1426 live RED: FreeBuff ships TWO loaders with DIFFERENT home
+        # knowledge contracts, so installing ONE surface leaves the other
+        # loader blind:
+        #   * the freebuff CLI reads the FIRST existing of ~/.knowledge.md,
+        #     ~/.AGENTS.md, ~/.claude.md;
+        #   * FreeBuff Desktop (orchestrator loadUserKnowledgeFiles) scans the
+        #     home for DOT-prefixed entries only and reads the FIRST of
+        #     .AGENTS.md, .CLAUDE.md -- ~/.knowledge.md is not a home surface
+        #     for it at all.
+        # The registry declares every surface (instruction_surfaces); the
+        # backstop installs ALL of them. An either/or choice here is exactly
+        # the defect class this backstop exists to remove.
         $freebuffDetected = (Test-Path "$h\.agents") -or (Get-Command freebuff -ErrorAction SilentlyContinue) -or (Test-Path "$h\.agents\skills")
         if ($freebuffDetected) {
-          # Prefer ~/.knowledge.md where supported, fallback to ~/.AGENTS.md -- both are documented FreeBuff user-knowledge surfaces.
-          $fbKnowledge = "$h\.knowledge.md"
-          $fbAgents = "$h\.AGENTS.md"
-          # Create at least one always-on surface if neither exists yet, preferring knowledge.md
-          if (-not (Test-Path $fbKnowledge) -and -not (Test-Path $fbAgents)) {
-            [void]$report.Add(@("FreeBuff knowledge", (Add-Block $fbKnowledge)))
-          } elseif (Test-Path $fbKnowledge) {
-            [void]$report.Add(@("FreeBuff knowledge", (Add-Block $fbKnowledge)))
-          } elseif (Test-Path $fbAgents) {
-            [void]$report.Add(@("FreeBuff AGENTS.md", (Add-Block $fbAgents)))
+          $fbSurfaces = @($adapter.instruction_surfaces | Where-Object { -not [string]::IsNullOrWhiteSpace([string]$_) })
+          if ($fbSurfaces.Count -eq 0) {
+            [void]$report.Add(@("FreeBuff", "FAILED: registry declares no instruction_surfaces"))
+          }
+          foreach ($fbSurface in $fbSurfaces) {
+            $fbResolved = Expand-Home ([string]$fbSurface)
+            if ([string]::IsNullOrWhiteSpace($fbResolved)) {
+              [void]$report.Add(@("FreeBuff", "FAILED: empty instruction surface '$fbSurface'"))
+              continue
+            }
+            [void]$report.Add(@("FreeBuff $fbSurface", (Add-Block $fbResolved)))
           }
         } else { [void]$report.Add(@("FreeBuff", "not installed - skip")) }
       }

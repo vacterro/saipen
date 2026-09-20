@@ -5,6 +5,7 @@
 ## TODO
 
 ## DONE
+- [x] PY-014 Prepare T-1347 timeout-detector patch in pen | verify: kitchen/PY-14.md; 10 tests, 0 failures, 1 opt-in skip; red control; Ruff; apply check
 - [x] PY-009 post-PY-8 Python hygiene sweep -- Ruff clean; no Python patch warranted
 - [x] PY-008 make improve admission drift check formatting-invariant | verify: PY-8 patch apply check, Ruff, and validator admission gate pass
 - [x] PY-001 lint + type hygiene -- deferred; no runtime impact

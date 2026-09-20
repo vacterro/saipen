@@ -25,8 +25,6 @@
     "user-request"
   ],
   "not_shell_canonical": [
-    "permissions",
-    "explain-next",
     "init",
     "clean",
     "translate",
@@ -48,6 +46,13 @@
     "guard": "DIAGNOSTIC",
     "test": "DIAGNOSTIC",
     "runtime": "DIAGNOSTIC",
+    "host": {
+      "default": "DIAGNOSTIC",
+      "subcommands": {
+        "bootstrap": "DIAGNOSTIC",
+        "activation": "DIAGNOSTIC"
+      }
+    },
     "fleet": {
       "default": "DIAGNOSTIC",
       "subcommands": {
@@ -73,18 +78,28 @@
         "retire": {
           "class": "RECOVERY",
           "operands": "one_ticket_id"
-        }
+        },
+        "resolve-external": "EXECUTION",
+        "reasoning": "EXECUTION"
+      }
+    },
+    "work": {
+      "default": "EXECUTION",
+      "subcommands": {
+        "reverify": "RECOVERY"
       }
     },
     "source": {
       "default": "DIAGNOSTIC",
       "subcommands": {
         "capture": "INGRESS",
+        "recover": "DIAGNOSTIC",
         "req": "EXECUTION",
         "disp": "EXECUTION",
         "close": "EXECUTION",
         "archive": "EXECUTION",
-        "purge": "EXECUTION"
+        "purge": "EXECUTION",
+        "retire": "EXECUTION"
       }
     },
     "authority": {
@@ -133,7 +148,8 @@
       "subcommands": {
         "status": "DIAGNOSTIC",
         "sweep-queue": "DIAGNOSTIC",
-        "verify": "DIAGNOSTIC"
+        "verify": "DIAGNOSTIC",
+        "reconcile": "EXECUTION"
       }
     },
     "cohort": {

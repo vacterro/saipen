@@ -603,6 +603,7 @@ def resolve_project_root(
     host_root: str | Path | None = None,
     host_lineage: str | None = None,
     honor_environment: bool = True,
+    authority: str = "mutation",
 ) -> ResolvedProjectRoot:
     """Resolve the one root whose checkpoint files this run may touch.
 
@@ -620,7 +621,27 @@ def resolve_project_root(
     Never scans arbitrary drives. Never infers a project by basename alone.
     On host carrier error/mismatch, fails closed immediately without falling
     back to ambient CWD or foreign repositories.
+
+    T-1434 M6: `authority` is the caller's declared USE of the resolved root,
+    a closed value:
+
+      * ``mutation`` (default) -- the run writes canonical state. An explicit
+        ``--project-root`` must agree with every ambient carrier lineage or the
+        binding REFUSES (PROJECT_LINEAGE_MISMATCH): silently mutating a foreign
+        project merely because the flag was supplied is exactly the incident
+        this protects.
+      * ``observe`` -- the run is an observational diagnostic (its effect class
+        is DIAGNOSTIC). An explicit target may be bound DELIBERATELY even when
+        the ambient session claims another project: observing project B from a
+        session bound to A is legitimate and does not inherit A's mutation
+        authority. Observation never grants write authority anywhere; every
+        mutating operation still resolves with ``mutation``.
+
+    The ambient carrier root/lineage still judge every non-explicit resolution
+    exactly as before, under both authorities.
     """
+    if authority not in ("mutation", "observe"):
+        raise ValueError(f"authority {authority!r} outside mutation|observe")
     start = Path(start).resolve() if start is not None else Path.cwd().resolve()
     expected_lineage = host_lineage
     if expected_lineage is None and honor_environment:
@@ -645,7 +666,11 @@ def resolve_project_root(
                 code="PROJECT_BINDING_INVALID",
             )
         lineage = project_lineage_identity(root)
-        if expected_lineage is not None and lineage != expected_lineage:
+        if (
+            authority == "mutation"
+            and expected_lineage is not None
+            and lineage != expected_lineage
+        ):
             return ResolvedProjectRoot(
                 None,
                 f"explicit project lineage {lineage!r} does not match "

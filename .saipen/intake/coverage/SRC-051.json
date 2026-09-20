@@ -1,4 +1,14 @@
 {
-  "requirements": {},
+  "requirements": {
+    "SRC-051:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-7174",
+      "text": "finish T-1370 then T-1367: complete the T-1370 acceptance consolidation and carry T-1367 to its installed-runtime field acceptance; do not reopen the completed retirement design review",
+      "verification": "T-1370 DONE (E-6808 era closure, superseded by reopened acceptance); T-1367 field acceptance executed to its R016 bar 2026-09-19 (E-7172..E-7179); retirement design review never reopened",
+      "work": "T-1367"
+    }
+  },
   "schema_version": 1
 }

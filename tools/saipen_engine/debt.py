@@ -1183,8 +1183,171 @@ def load_reverify_receipt(root, receipt_id):
     return record
 
 
-def reverify_work(root, work, agent, *, verification=None, dry_run=False):
-    """Official DONE-Work re-verification (T-158 Stage 2).
+def _last_ticket_event_id(root, work):
+    """Highest `[E-###]` in the ACTIVE LOG bearing this exact ticket slot.
+
+    The reverify receipt binds ORIGINAL implementation provenance: the receipt
+    says "this already-DONE Work was checked again", so it has to name what
+    closed it. The last ticket-bearing event is the bounded answer the active
+    LOG can give without replaying sealed history.
+    """
+    try:
+        text = (Path(root) / ".saipen/LOG.md").read_text(encoding="utf-8-sig")
+    except OSError:
+        return None
+    pattern = re.compile(r"\[(E-(\d+))\][^\n]*\[" + re.escape(work) + r"\]")
+    matches = [(int(match.group(2)), match.group(1)) for match in pattern.finditer(text)]
+    return max(matches)[1] if matches else None
+
+
+def _original_closure(ticket, root, work):
+    """The preserved implementation/closure provenance of the DONE record."""
+    fields = ticket.get("fields") or {}
+    closure = {
+        key: fields[key]
+        for key in (
+            "owner",
+            "claim_time",
+            "closure_mode",
+            "source_receipts",
+            "implementation_source",
+            "implementation_delta",
+            "superseded_by",
+        )
+        if fields.get(key)
+    }
+    event = _last_ticket_event_id(root, work)
+    if event:
+        closure["last_ticket_event"] = event
+    return closure
+
+
+def _run_verification_command(root, command, timeout):
+    """Execute ONE verification command against the CURRENT tree.
+
+    The receipt records an executed check with its real outcome and a digest
+    of its bounded output -- never the output bytes themselves (findings, and
+    therefore receipts, never carry captured content). A timeout or launch
+    failure is an honest FAIL, never an absent check.
+    """
+    started = datetime.now(timezone.utc)
+    if not str(command or "").strip():
+        return {
+            "command": str(command or ""),
+            "result": "FAIL",
+            "exit_code": None,
+            "executed": True,
+            "launch_error": "EMPTY_COMMAND",
+            "duration_ms": 0,
+            "output_digest": hash_bytes(b""),
+            "output_bytes": 0,
+        }
+    try:
+        completed = subprocess.run(
+            command,
+            shell=True,
+            cwd=str(root),
+            capture_output=True,
+            text=True,
+            timeout=timeout,
+        )
+        output = (completed.stdout or "") + (completed.stderr or "")
+        entry = {
+            "command": command,
+            "result": "PASS" if completed.returncode == 0 else "FAIL",
+            "exit_code": completed.returncode,
+            "executed": True,
+        }
+    except subprocess.TimeoutExpired:
+        output = ""
+        entry = {
+            "command": command,
+            "result": "FAIL",
+            "exit_code": None,
+            "executed": True,
+            "timed_out": True,
+        }
+    except OSError as exc:
+        output = str(exc)
+        entry = {
+            "command": command,
+            "result": "FAIL",
+            "exit_code": None,
+            "executed": True,
+            "launch_error": type(exc).__name__,
+        }
+    entry["duration_ms"] = int(
+        (datetime.now(timezone.utc) - started).total_seconds() * 1000
+    )
+    entry["output_digest"] = hash_bytes(output.encode("utf-8", "replace"))
+    entry["output_bytes"] = len(output)
+    return entry
+
+
+def _verification_contract_digest(entries, gate):
+    """Identity of the CHECKS, not of their outcome.
+
+    Same Work + same tree + same contract must be idempotent even though the
+    recorded result is part of the receipt; a later run under the same
+    contract on a different tree is a NEW receipt because the tree identity
+    moved, never because the outcome string did.
+    """
+    material = [
+        {
+            "command": str(entry.get("command") or ""),
+            "kind": "executed" if entry.get("executed") else "attested",
+        }
+        for entry in entries
+    ]
+    return hash_bytes(
+        json.dumps({"gate": gate, "checks": material}, sort_keys=True).encode("utf-8")
+    )
+
+
+#: T-1434 M5.3: the evidence classes a reverify contract can carry. The class
+#: is DERIVED from the entries, never accepted from a caller:
+#:   executed  -- every check was really run by the engine (real exit codes);
+#:   mixed     -- at least one check was executed, some are attested;
+#:   attested  -- nothing was executed; the receipt records the caller's word.
+#: Current-tree CLOSURE authority requires executable evidence: an attested-only
+#: contract is honest recorded evidence and can never cure a closure gap
+#: (`current_tree_reverify` refuses it), so typing PASS manufactures nothing.
+EVIDENCE_CLASSES = ("executed", "mixed", "attested")
+
+
+def evidence_class_of(record):
+    """The evidence class of a receipt (or its entries), fail-closed.
+
+    Receipts written before the field existed are DERIVED from their entries:
+    any executed entry means executable evidence; no entries at all reads as
+    attested because nothing proves an execution happened.
+    """
+    explicit = str(record.get("evidence_class") or "").strip()
+    if explicit in EVIDENCE_CLASSES:
+        return explicit
+    entries = record.get("verification")
+    if not isinstance(entries, list):
+        return "attested"
+    executed = sum(1 for entry in entries if isinstance(entry, dict) and entry.get("executed"))
+    if executed and executed == len(entries):
+        return "executed"
+    if executed:
+        return "mixed"
+    return "attested"
+
+
+def reverify_work(
+    root,
+    work,
+    agent,
+    *,
+    verification=None,
+    runs=None,
+    timeout=300,
+    derive_default=False,
+    dry_run=False,
+):
+    """Official DONE-Work re-verification (T-158 Stage 2, T-1434 M1).
 
     Accepts ONLY Work currently under ## DONE -- other states own their normal
     lifecycle paths. Runs the strict validator, derives the structured
@@ -1193,15 +1356,35 @@ def reverify_work(root, work, agent, *, verification=None, dry_run=False):
     + source checkpoint. DONE stays DONE before, during and after: no
     lifecycle edge, no synthetic VERIFY transition, no history rewrite.
 
-    Evidence trust: the caller must supply targeted verification entries and
-    every one must be result=PASS; the receipt records them plus the findings
-    digest so a later consumer can re-derive the same verdict. A FAIL verdict
-    is recorded honestly and never becomes accepted closure evidence.
+    Evidence trust: the caller supplies targeted verification entries (each
+    must be result=PASS) and/or ``runs`` -- commands the ENGINE executes
+    against the current tree, recording real exit codes. ``derive_default``
+    records the project's canonical strict gate itself as the executed
+    contract, so the validator's own remediation is one command with no
+    arguments. The receipt records the checks plus the findings digest so a
+    later consumer can re-derive the same verdict. A FAIL verdict is recorded
+    honestly and never becomes accepted closure evidence.
 
     Idempotency: a second identical invocation (same Work + same findings
-    digest + same ruleset) returns the existing receipt -- never a duplicate.
+    digest + same ruleset + same verification contract) returns the existing
+    PASS receipt -- never a duplicate. A newer FAIL is never hidden behind an
+    older PASS, and a new attempt after a FAIL writes a new receipt.
     """
     root = Path(root)
+    verification = list(verification or [])
+    runs = list(runs or [])
+    # T-1434 M5.3: attested entries are TYPED in the receipt the same way the
+    # CLI types them, whatever caller shape arrives -- a check is executable
+    # evidence only when the engine ran it.
+    for entry in verification:
+        if not isinstance(entry, dict):
+            return {
+                "ok": False,
+                "code": "VALIDATION_FAILED",
+                "detail": "verification entries must be objects",
+            }
+        entry.setdefault("executed", False)
+        entry.setdefault("kind", "executed" if entry.get("executed") else "attested")
     if not _WORK_RE.match(work or ""):
         return {"ok": False, "code": "VALIDATION_FAILED", "detail": f"invalid Work {work!r}"}
     try:
@@ -1224,14 +1407,14 @@ def reverify_work(root, work, agent, *, verification=None, dry_run=False):
             }
     except (OSError, ValueError) as exc:
         return {"ok": False, "code": "VALIDATION_FAILED", "detail": str(exc)}
-    for entry in verification or []:
+    for entry in verification:
         if entry.get("result") != "PASS":
             return {
                 "ok": False,
                 "code": "REVERIFY_REFUSED",
                 "detail": f"targeted verification not PASS: {entry.get('command')}",
             }
-    if not verification:
+    if not verification and not runs and not derive_default:
         return {
             "ok": False,
             "code": "REVERIFY_REFUSED",
@@ -1247,28 +1430,7 @@ def reverify_work(root, work, agent, *, verification=None, dry_run=False):
     warnings = capture.get("warnings", [])
     findings_digest = findings_mod.findings_digest(problems, warnings)
     identity = _source_identity(root)
-
-    # Idempotency: same Work + same findings digest + same ruleset -> reuse.
-    for path in _existing_reverify_receipts(root):
-        try:
-            existing = json.loads(path.read_text(encoding="utf-8"))
-        except (OSError, ValueError):
-            continue
-        if (
-            existing.get("work") == work
-            and existing.get("findings_digest") == findings_digest
-            and existing.get("ruleset_fingerprint") == findings_mod.ruleset_fingerprint()
-        ):
-            return {
-                "ok": True,
-                "code": "REVERIFY_REUSED",
-                "receipt_id": existing.get("receipt_id"),
-                "verdict": existing.get("verdict"),
-                "reuse": True,
-            }
-
-    receipt_id = _next_reverify_id(root)
-    now = _utc()
+    gate = capture.get("gate", "core")
     own_problems = [
         f for f in problems if f.get("subject_kind") == "work" and f.get("subject_id") == work
     ]
@@ -1284,12 +1446,72 @@ def reverify_work(root, work, agent, *, verification=None, dry_run=False):
         for f in own_problems
         if f.get("rule_id") != "work_closure_evidence"
     ]
-    if capture.get("exit_code") == 0:
+    executed = [_run_verification_command(root, command, timeout) for command in runs]
+    entries = verification + executed
+    verification_failed = any(entry.get("result") != "PASS" for entry in executed)
+    if verification_failed:
+        verdict = "FAIL"
+    elif capture.get("exit_code") == 0:
         verdict = "PASS"
     elif not cured_own:
         verdict = "PASS_WITH_CARRIED_DEBT"
     else:
         verdict = "FAIL"
+    if derive_default:
+        entries = [
+            *entries,
+            {
+                "command": f"strict_gate:{gate}",
+                "result": (
+                    verdict if verdict in ("PASS", "PASS_WITH_CARRIED_DEBT") else "FAIL"
+                ),
+                "executed": True,
+                "default_contract": True,
+            },
+        ]
+    evidence_class = evidence_class_of({"verification": entries})
+    contract_digest = _verification_contract_digest(entries, gate)
+
+    # Idempotency: newest matching receipt decides. The KEY is the current
+    # TREE + the verification CONTRACT + the ruleset, never the findings
+    # digest: the receipt itself is the cure for the Work's own
+    # closure-evidence gap, so a successful reverify necessarily CHANGES the
+    # next finding set -- keying on the digest would make a repaired tree look
+    # like a new tree and mint duplicates forever. A FAIL is never reused (a
+    # re-run after repair must mint new evidence), the CURRENT run's own
+    # failure is never hidden behind an older PASS, and an older PASS is never
+    # resurrected through a newer FAIL.
+    if not verification_failed and verdict in ("PASS", "PASS_WITH_CARRIED_DEBT"):
+        for path in reversed(_existing_reverify_receipts(root)):
+            try:
+                existing = json.loads(path.read_text(encoding="utf-8"))
+            except (OSError, ValueError):
+                continue
+            if existing.get("work") != work:
+                continue
+            if existing.get("ruleset_fingerprint") != findings_mod.ruleset_fingerprint():
+                continue
+            if existing.get("verification_contract_digest") != contract_digest:
+                continue
+            if (
+                existing.get("source_head") != identity["source_head"]
+                or existing.get("source_tree_fingerprint")
+                != identity["source_tree_fingerprint"]
+            ):
+                continue
+            if existing.get("verdict") in ("PASS", "PASS_WITH_CARRIED_DEBT"):
+                return {
+                    "ok": True,
+                    "code": "REVERIFY_REUSED",
+                    "receipt_id": existing.get("receipt_id"),
+                    "verdict": existing.get("verdict"),
+                    "evidence_class": evidence_class_of(existing),
+                    "reuse": True,
+                }
+            break
+
+    receipt_id = _next_reverify_id(root)
+    now = _utc()
     record = {
         "schema_version": REVERIFY_SCHEMA_VERSION,
         "receipt_id": receipt_id,
@@ -1302,13 +1524,22 @@ def reverify_work(root, work, agent, *, verification=None, dry_run=False):
         "source_tree_fingerprint": identity["source_tree_fingerprint"],
         "created_at": now,
         "agent": agent,
-        "verification": list(verification or []),
+        "verifier": agent,
+        "verification": entries,
+        "evidence_class": evidence_class,
+        "verification_contract_digest": contract_digest,
+        "verification_contract": {
+            "gate": gate,
+            "findings_digest": findings_digest,
+            "commands": [str(entry.get("command") or "") for entry in entries],
+        },
+        "original_closure": _original_closure(ticket, root, work),
         "problem_count": len(problems),
         "warning_count": len(warnings),
         "findings_digest": findings_digest,
         "own_problem_keys": sorted(f["finding_key"] for f in own_problems),
         "verdict": verdict,
-        "gate": capture.get("gate", "core"),
+        "gate": gate,
     }
     canonical = json.dumps(record, sort_keys=True, separators=(",", ":")).encode("utf-8")
     record["integrity_digest"] = hash_bytes(canonical)
@@ -1321,10 +1552,14 @@ def reverify_work(root, work, agent, *, verification=None, dry_run=False):
             "receipt_id": receipt_id,
             "work": work,
             "verdict": verdict,
+            "evidence_class": evidence_class,
+            "verification_contract_digest": contract_digest,
             "problem_count": len(problems),
             "warning_count": len(warnings),
         }
-    op_id = "reverify." + hash_bytes(f"{lineage}|{work}|{findings_digest}".encode("utf-8"))[:12]
+    op_id = "reverify." + hash_bytes(
+        f"{lineage}|{work}|{findings_digest}|{contract_digest}".encode("utf-8")
+    )[:12]
     record["journal_op_id"] = op_id
     content = json.dumps(record, indent=2, sort_keys=True).encode("utf-8")
     committed = run_mutation(
@@ -1335,7 +1570,12 @@ def reverify_work(root, work, agent, *, verification=None, dry_run=False):
         project_identity=record["project_identity"],
         semantic_payload_hash=hash_bytes(
             json.dumps(
-                {"receipt": receipt_id, "work": work, "digest": findings_digest},
+                {
+                    "receipt": receipt_id,
+                    "work": work,
+                    "digest": findings_digest,
+                    "contract": contract_digest,
+                },
                 sort_keys=True,
             ).encode()
         ),
@@ -1364,6 +1604,8 @@ def reverify_work(root, work, agent, *, verification=None, dry_run=False):
         "receipt_id": receipt_id,
         "work": work,
         "verdict": verdict,
+        "evidence_class": evidence_class,
+        "verification_contract_digest": contract_digest,
         "problem_count": len(problems),
         "warning_count": len(warnings),
     }
@@ -1406,11 +1648,20 @@ def current_tree_reverify(root: Path | str, work: str) -> dict | None:
     against THIS tree: project identity, lineage, ruleset and the current
     source fingerprint (HEAD + working-tree delta) must all match the live
     project. A receipt from an older checkpoint is stale evidence, never
-    closure proof. Returns the receipt dict on success, None otherwise.
+    closure proof.
+
+    T-1434 M5.3: the receipt must also carry EXECUTABLE evidence. An
+    attested-only contract (``--verification cmd:PASS`` and no ``--run``)
+    records the caller's word; it is honest evidence and stays visible in the
+    receipt, but it never cures a current-tree closure gap, so typing PASS
+    cannot manufacture conformance authority the evidence class does not
+    prove.
     """
     root = Path(root)
     receipt = latest_pass_reverify(root, work)
     if receipt is None:
+        return None
+    if evidence_class_of(receipt) == "attested":
         return None
     identity = _source_identity(root)
     if (

@@ -287,6 +287,34 @@ tampered.
 Retirement never deletes repository files: residue found alongside it goes
 through CLEAN's own recovery gate.
 
+### Work re-verification transaction
+
+`saipen work reverify <T-###> [--verification <command>:PASS]...
+[--run <command>]... [--timeout SECONDS]` re-checks already-DONE Work
+against the CURRENT tree and writes ONE immutable `RV-NNNNNN` receipt under
+`.saipen/recovery/conformance/reverify/`. It is not a lifecycle edge: DONE
+stays DONE, no VERIFY boundary is fabricated, and no historical LOG event or
+evidence blob is rewritten. The receipt is the ONE canonical cure for the
+validator's `work_closure_evidence` gap; a current-tree `PASS` (or
+`PASS_WITH_CARRIED_DEBT`) receipt bound to project identity, lineage,
+ruleset and source fingerprint counts as closure evidence, while a newer
+`FAIL` never hides behind an older `PASS`.
+
+Checks come from exactly two places. `--verification cmd:PASS` records a
+check the CALLER ran (a non-PASS attestation refuses with zero writes).
+`--run cmd` makes the ENGINE execute the command in the project root and
+record the real exit code (a timeout or non-zero exit is an honest FAIL).
+With neither, the operation derives its contract from the project's own
+strict gate and records that execution, so the validator's remediation is a
+single executable command with no arguments.
+
+The receipt binds `verification_contract_digest` (identity of the CHECKS,
+not of their outcome), `original_closure` (owner, claim time, closure mode,
+source receipts, last ticket-bearing event) and `verifier`. It is idempotent
+for the same Work + same findings digest + same ruleset + same contract +
+a successful receipt; after repair, a re-run writes a NEW receipt rather
+than resurrecting an old verdict.
+
 ### Work supersession transaction
 
 `saipen ticket supersede T-OLD --by T-NEW --evidence E-### --authority
@@ -363,10 +391,14 @@ INVALID_AUTHORITY_CAPTURE.
 The codes whose meaning is not self-evident from the name:
 
 - `HOME_REQUIRED` -- STATE.saipen_home is missing or unusable. The executable
-  next action is `saipen rebind-home <candidate>`: the ONE mechanical rebind
-  path, which proves the candidate install (readable `VERSION`, compatible
-  major, `BOOT` layout, required protocol files) and journals a single
-  narrowly-owned `STATE.saipen_home` pointer update.
+  next action is `saipen rebind-home --auto` when a canonical runtime is
+  already proven (the executing engine or a verified carrier): it converges the
+  dead pointer automatically (`HOST_BINDING_CONVERGED`, idempotent) rather than
+  demanding the operator retype a path SAIPEN already found. When nothing is
+  proven it refuses and names `saipen rebind-home <candidate>`: the explicit
+  mechanical rebind, which proves the candidate install (readable `VERSION`,
+  compatible major, `BOOT` layout, required protocol files) and journals a
+  single narrowly-owned `STATE.saipen_home` pointer update.
 - `CREW_BLOCKED` -- the EXPECTED crew result when the circuit has no executable
   semantic continuation: an unsatisfied stage needs inspection, not invention.
   The result carries the unsatisfied `stage`/`role`/`reason` and an
@@ -533,3 +565,79 @@ Legacy closure/provenance gaps are immutable historical debt. They remain
 readable and are reported as legacy/unknown or WARN according to the
 protocol-version boundary. The engine never invents filenames, commits,
 timestamps, test results, or other evidence to make old records pass.
+
+## 11. Validator remediation contract (T-1434 M5)
+
+Every actionable machine-readable remediation the validator emits resolves to
+exactly ONE of two kinds, and there is no third:
+
+    REGISTERED_CANONICAL_COMMAND   a REGISTRY.json verb/action, classified in
+                                   COMMAND_EFFECTS.json, parsed and dispatched
+                                   by tools/saipen.py;
+    TYPED_EXTERNAL_ACTION          a closed `external_kind` naming an actor
+                                   SAIPEN is not (operator GUI verification,
+                                   unavailable upstream credential, external
+                                   publication authority, external project
+                                   observation); never a command in disguise.
+
+The closed table lives in `tools/saipen_engine/remediation.py`;
+`tools/validate.py` extracts receipt remediation ONLY through that table, so a
+failure message can never smuggle an unregistered command, an internal Python
+function, a docs-only verb, a pseudocommand, or a generic `saipen validate`
+recursion into the conformance receipt while a specific repair exists. The
+conformance receipt carries the commands as `remediation_commands` and the
+typed external requirements as `external_actions` (possibly empty); a machine
+consumer distinguishes them by `kind`, never by prose.
+
+`tools/test_remediation_self_consistency.py` is the ONE executable gate: for
+every table entry it proves the registry identity, the effects classification,
+the parser/dispatch owner (a structured engine answer to a nonexistent
+target), the no-internal-function rule, and -- for the closure-evidence
+remediation -- the full round trip (emit -> parse -> registry -> effects ->
+dispatch -> execute -> validator green). A new emitted remediation without a
+table entry fails the gate, not a review.
+
+## 12. Foreign project authority and cross-repo provenance (T-1434 M6)
+
+Binding precedence is unchanged: explicit `--project-root` > verified
+host/session carrier (`SAIPEN_PROJECT_ROOT` + `SAIPEN_PROJECT_LINEAGE`) > Git
+worktree > Git common worktree > nearest ancestor `.saipen` > refusal.
+
+What the EXPLICIT root means depends on the caller's declared USE of it, a
+closed authority value derived mechanically from the command's effect class:
+
+    observe   DIAGNOSTIC effects. An explicit target may be bound
+              deliberately even when the ambient session names another
+              project: observing B from a session bound to A is legitimate,
+              write-free observation and inherits no mutation authority.
+              The validator itself resolves under `observe` -- its only write
+              is the conformance receipt for the tree it was pointed at.
+    mutation  every other effect. The explicit target must agree with every
+              ambient carrier lineage, or the binding REFUSES
+              (`PROJECT_LINEAGE_MISMATCH`): silently mutating a foreign
+              project merely because `--project-root` was supplied stays
+              impossible. A coherent carrier set (root + lineage naming the
+              target) authorizes the repair surface normally.
+
+Cross-repository provenance is one closed model (`fix == local patch` is no
+longer an assumption). Each semantic class has its durable representation:
+
+    local implementation                      closure_mode: own_patch
+    external implementation verified locally  closure_mode: external_implementation
+                                              + EX-NNNNNN receipt, resolution_reason
+                                              PROTOCOL_HOME_FIX_VERIFIED |
+                                              UPSTREAM_FIX_VERIFIED |
+                                              DEPENDENCY_UPGRADE_VERIFIED
+    dependency upgrade satisfying local Work  resolution_reason:
+                                              DEPENDENCY_UPGRADE_VERIFIED
+    protocol-home repair for a product defect resolution_reason:
+                                              PROTOCOL_HOME_FIX_VERIFIED
+    superseded local Work                     closure_mode: superseded_verified
+                                              + superseded_by
+
+External authority is a STABLE IDENTITY, never a URL: `--authority` must be a
+portable `lineage-<32hex>`, the implementation a `T-###@commit`, and the
+receipt binds the installed engine generation. Arbitrary URLs, ticket ids and
+free text are refused by the grammar; the receipt predicate is shared by the
+closure resolver and the validator
+(`tools/test_foreign_observation_authority.py`).

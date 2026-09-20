@@ -41,6 +41,7 @@ def main() -> None:
         "SECURITY.md",
         "CODE_OF_CONDUCT.md",
         "GUIDE.md",
+        "saipen/COMMANDS.md",
         "saipen/phases/translate.md",
     ]
     read_paths.extend(
@@ -55,7 +56,10 @@ def main() -> None:
         base_source_head=identity.source_head,
         base_source_tree_fingerprint=identity.source_tree_fingerprint,
         base_discovery_model=identity.discovery_model,
-        scope="force-fresh-all-real-docs-32-locales-no-ui-v7.249.0",
+        scope=(
+            "force-fresh-all-real-docs-32-locales-no-ui-current-tree: "
+            "35 surfaces re-verified against README.md digest 877128c3 and VERSION 8.0.1"
+        ),
         read_set=producer_api.read_set_from(ROOT, read_paths),
         write_set=producer_api.write_set_before(ROOT, write_paths),
         epoch=epoch,

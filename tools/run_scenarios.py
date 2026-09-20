@@ -19804,9 +19804,40 @@ def _main_impl():
     print("All executable scenarios and injector probes passed.")
 
 
+#: A HOST SESSION's project binding. Inheriting it into the disposable
+#: fixture projects this suite drives is wrong twice over: `paths.py` reads the
+#: ambient lineage as the expected one and refuses every explicit foreign root
+#: with PROJECT_LINEAGE_MISMATCH, and the adapter's own binding check then
+#: re-refuses the child. That is correct for a bound session and false for a
+#: hermetic fixture run -- CI has none of these variables. Measured 2026-09-17
+#: (T-1392 repair path: clearing them turns the same two tests green) and
+#: 2026-09-20 (T-1361 remeasurement: same claim, 41 PROJECT_LINEAGE_MISMATCH
+#: in one run, and an improve fixture that resolved the HOST project).
+_SESSION_CARRIER_VARS = (
+    "SAIPEN_PROJECT_ROOT",
+    "SAIPEN_PROJECT_LINEAGE",
+    "SAIPEN_AGENT",
+    "SAIPEN_HOST_SESSION",
+)
+
+
+@contextlib.contextmanager
+def session_carrier_isolation():
+    """Run nested code with this session's project carriers removed."""
+    saved = {
+        name: os.environ.pop(name)
+        for name in _SESSION_CARRIER_VARS
+        if name in os.environ
+    }
+    try:
+        yield
+    finally:
+        os.environ.update(saved)
+
+
 def main():
     """Run hermetically: developer USERPERSON must never influence CI."""
-    with tempfile.TemporaryDirectory(
+    with session_carrier_isolation(), tempfile.TemporaryDirectory(
         prefix="saipen-scenarios-user-config-"
     ) as config, mock.patch.dict(
         os.environ, {"SAIPEN_USER_CONFIG_HOME": config}, clear=False

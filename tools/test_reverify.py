@@ -188,7 +188,13 @@ class LatestPassTests(ReverifyFixture):
             "source_tree_fingerprint": "git-delta-v1:abc",
             "created_at": "2026-09-08T00:00:00Z",
             "agent": "probe",
-            "verification": V,
+            # T-1434 M5.3: these fixtures probe IDENTITY semantics, so they
+            # carry executable evidence; the attested-only downgrade has its
+            # own RED control in test_work_reverify_cli.py.
+            "verification": [
+                {**V[0], "executed": True, "kind": "executed"}
+            ],
+            "evidence_class": "executed",
             "problem_count": 0,
             "warning_count": 0,
             "findings_digest": "digest",
@@ -249,7 +255,7 @@ class WorkDeltaConsumesReverifyTests(ReverifyFixture):
         """The Work-delta gate consumes a valid current-tree PASS reverify
         receipt as closure evidence for a DONE blocker."""
         with patch.object(debt_mod, "capture_findings", return_value=self._canned([])):
-            rv = debt_mod.reverify_work(self.root, "T-001", "probe", verification=V)
+            rv = debt_mod.reverify_work(self.root, "T-001", "probe", runs=["exit 0"])
         self.assertTrue(rv["ok"])
         # work_closure_evidence view: current_tree_reverify must surface it
         found = debt_mod.current_tree_reverify(self.root, "T-001")

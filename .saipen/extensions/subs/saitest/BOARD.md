@@ -23,6 +23,7 @@
 
 ## DONE
 
+- [x] TEST-011 Bounded continuation and timing-classification scenarios | verify: kitchen/TEST-11.md; three clean scenarios, T-1347 reproduced
 - [x] TEST-006 independently reproduce HUNT-13 sole locale failure | verify: validator reports exactly one failing gate and 32 locale files
 - [x] TEST-005 independently reproduce HUNT-12 validator failures | verify: 4/4 scenarios REPRODUCED with exact command and output in kitchen/TEST-5.md
 - [x] TEST-004 independently reproduce HUNT-11 after T-1115 | verify: both scenarios REPRODUCED with exact commands in kitchen/TEST-4.md

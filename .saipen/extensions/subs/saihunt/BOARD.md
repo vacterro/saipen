@@ -23,4 +23,6 @@
 
 ## DONE
 
+- [x] HUNT-014 Bounded current closure/conformance/crew continuation sweep | verify: kitchen/HUNT-014.md; 47 tests, 4 known T-1346 failures, 6 closure tests PASS
+
 ## BLOCKED

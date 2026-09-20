@@ -33,6 +33,15 @@ from saipen_engine import guard_events
 from saipen_engine.board import claim_session_digest
 from saipen_engine.operations import HOST_SESSION_ENV
 from saipen_engine.paths import unbound_environment
+from test_hermetic_env import isolate_host_session
+
+
+def setUpModule() -> None:
+    # Every fixture here drives the CLI from a disposable project on purpose.
+    # An enclosing host session's carriers would bind the OPERATOR's live
+    # project instead (test_hermetic_env owns this repair); the suite sets the
+    # one carrier it is actually testing explicitly in each case.
+    isolate_host_session()
 
 SAIPEN = Path(__file__).resolve().parent / "saipen.py"
 OWNER = "ses_owner_window"

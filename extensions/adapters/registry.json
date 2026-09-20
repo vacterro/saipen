@@ -143,6 +143,23 @@
         "~/.knowledge.md",
         "~/.AGENTS.md"
       ],
+      "instruction_loaders": [
+        {
+          "name": "freebuff CLI",
+          "surfaces": [
+            "~/.knowledge.md",
+            "~/.AGENTS.md",
+            "~/.claude.md"
+          ]
+        },
+        {
+          "name": "FreeBuff Desktop",
+          "surfaces": [
+            "~/.AGENTS.md",
+            "~/.CLAUDE.md"
+          ]
+        }
+      ],
       "skill_surfaces": [
         "~/.agents/skills/saipen"
       ],
@@ -150,7 +167,8 @@
       "hook_install_surface": null,
       "hook_artifact": null,
       "freshness_surfaces": [
-        "skill"
+        "skill",
+        "instruction"
       ],
       "declared_strength": "ADVISORY",
       "artifact_version": null,

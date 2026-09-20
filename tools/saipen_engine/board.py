@@ -145,6 +145,17 @@ KNOWN_FIELDS = frozenset(
         # never the session id, so BOARD and every audit archive built from
         # it carry no reusable bearer value.
         "claim_session",
+        # External implementation resolution (SRC-088 / T-1434 M2): the LOCAL
+        # ticket was implemented by an EXTERNAL authority and verified locally.
+        # external_authority     the portable lineage identity of the
+        #                        implementing project;
+        # external_implementation the upstream T-###@<commit> identity;
+        # external_evidence      the append-only EX-###### receipt;
+        # resolution_reason      the registered reason class.
+        "external_authority",
+        "external_implementation",
+        "external_evidence",
+        "resolution_reason",
     }
 )
 
@@ -212,7 +223,13 @@ DEFAULT_BLOCKER_SCOPE = "ticket"
 
 #: Closed closure-mode vocabulary. Absent reads as `own_patch`: the ticket
 #: owns and publishes its implementation delta, which is the strict half.
-CLOSURE_MODES = ("own_patch", "inherited_verified", "cohort", "superseded_verified")
+CLOSURE_MODES = (
+    "own_patch",
+    "inherited_verified",
+    "cohort",
+    "superseded_verified",
+    "external_implementation",
+)
 DEFAULT_CLOSURE_MODE = "own_patch"
 
 #: The ONLY value that arms explicit-user scheduling precedence. Anything else
@@ -628,6 +645,10 @@ def closure_metadata_errors(ticket: dict) -> list[str]:
         "superseded_by",
         "supersession_evidence",
         "supersession_authority",
+        "external_authority",
+        "external_implementation",
+        "external_evidence",
+        "resolution_reason",
     )
     declared = [name for name in closure_fields if str(fields.get(name, "")).strip()]
     if declared and section != "## DONE":
@@ -698,6 +719,61 @@ def closure_metadata_errors(ticket: dict) -> list[str]:
         errors.append(
             f"{tid} carries {', '.join(present_supersession)} outside "
             "closure_mode superseded_verified"
+        )
+
+    # external_implementation (SRC-088 / T-1434 M2): the LOCAL_IMPLEMENTATION
+    # vs EXTERNAL_IMPLEMENTATION_LOCAL_VERIFICATION distinction. The mode is
+    # written only by `saipen ticket resolve-external`; its four provenance
+    # fields are a closed grammar over a portable lineage authority, a
+    # structured <T-###>@<commit> implementation identity, an append-only
+    # EX-###### receipt and a registered reason. A partial or mixed record is
+    # a declaration the machine would silently ignore, so it refuses here.
+    external = {
+        "external_authority": str(fields.get("external_authority", "")).strip(),
+        "external_implementation": str(fields.get("external_implementation", "")).strip(),
+        "external_evidence": str(fields.get("external_evidence", "")).strip(),
+        "resolution_reason": str(fields.get("resolution_reason", "")).strip(),
+    }
+    present_external = [name for name, value in external.items() if value]
+    if mode.lower() == "external_implementation":
+        missing = [name for name, value in external.items() if not value]
+        if missing:
+            errors.append(
+                f"{tid} closes external_implementation with missing " + ", ".join(missing)
+            )
+        if external["external_authority"] and not re.fullmatch(
+            r"lineage-[0-9a-f]{32}", external["external_authority"]
+        ):
+            errors.append(
+                f"{tid} external_authority is not a lineage-<32 hex> identity"
+            )
+        if external["external_implementation"] and not re.fullmatch(
+            r"T-\d+@[0-9a-f]{7,40}", external["external_implementation"]
+        ):
+            errors.append(
+                f"{tid} external_implementation is not a T-###@<commit> identity"
+            )
+        if external["external_evidence"] and not re.fullmatch(
+            r"EX-\d{6}", external["external_evidence"]
+        ):
+            errors.append(f"{tid} external_evidence is not an EX-###### identity")
+        if external["resolution_reason"] and external["resolution_reason"] not in (
+            "PROTOCOL_HOME_FIX_VERIFIED",
+            "DEPENDENCY_UPGRADE_VERIFIED",
+            "UPSTREAM_FIX_VERIFIED",
+        ):
+            errors.append(
+                f"{tid} resolution_reason {external['resolution_reason']!r} is "
+                "outside the registered reason set"
+            )
+        if delta.lower() != "none":
+            errors.append(
+                f"{tid} closes external_implementation without implementation_delta none"
+            )
+    elif present_external:
+        errors.append(
+            f"{tid} carries {', '.join(present_external)} outside "
+            "closure_mode external_implementation"
         )
     explicit = str(fields.get("user_explicit", "")).strip()
     if explicit and explicit.lower() != USER_EXPLICIT_TRUE:
@@ -1046,6 +1122,32 @@ def superseded_by(ticket: dict) -> str | None:
     """The explicit successor of terminal superseded Work, or None."""
     value = _field(ticket, "superseded_by")
     return value if re.fullmatch(r"T-\d+", value) else None
+
+
+def external_authority(ticket: dict) -> str | None:
+    """The portable lineage identity that implemented the fix, or None."""
+    value = _field(ticket, "external_authority")
+    return value if re.fullmatch(r"lineage-[0-9a-f]{32}", value) else None
+
+
+def external_implementation(ticket: dict) -> str | None:
+    """The upstream ``T-###@<commit>`` implementation identity, or None."""
+    value = _field(ticket, "external_implementation")
+    return value if re.fullmatch(r"T-\d+@[0-9a-f]{7,40}", value) else None
+
+
+def external_evidence(ticket: dict) -> str | None:
+    """The append-only EX-###### resolution receipt id, or None."""
+    value = _field(ticket, "external_evidence")
+    return value if re.fullmatch(r"EX-\d{6}", value) else None
+
+
+def resolution_reason(ticket: dict) -> str | None:
+    """The registered external-resolution reason, or None."""
+    from .external import RESOLUTION_REASONS
+
+    value = _field(ticket, "resolution_reason")
+    return value if value in RESOLUTION_REASONS else None
 
 
 def closure_paths(ticket: dict) -> list[str]:

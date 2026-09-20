@@ -43,6 +43,8 @@ from . import codec
 from .board import (
     closure_cohort as _ticket_cohort,
     closure_mode as _ticket_closure_mode,
+    external_evidence as _ticket_external_evidence,
+    external_implementation as _ticket_external_implementation,
     implementation_source as _ticket_source,
     parse_board,
     superseded_by as _ticket_successor,
@@ -436,6 +438,33 @@ def _resolve_work(root: Path, ticket_id: str, chain: tuple[str, ...]) -> SourceV
             chain=chain,
         )
     mode = _ticket_closure_mode(ticket)
+    if mode == "external_implementation":
+        # SRC-088 / T-1434 M2: the fix lives in an EXTERNAL authority and this
+        # project verified it locally. The receipt is append-only and binds the
+        # installed engine GENERATION it was verified against; the ONE shared
+        # predicate (external.resolution_problems) makes a moved/rolled-back
+        # dependency non-green here, in the validator, and in every consumer.
+        from . import external as _external
+
+        problems = _external.resolution_problems(root, ticket_id, ticket)
+        if problems:
+            return SourceVerdict(
+                False,
+                ticket_id,
+                "work",
+                f"{ticket_id} closed external_implementation but the resolution "
+                f"is not current: " + "; ".join(problems[:4]),
+                chain=chain,
+            )
+        return SourceVerdict(
+            True,
+            ticket_id,
+            "work",
+            f"{ticket_id} was implemented by "
+            f"{_ticket_external_implementation(ticket)} and verified locally "
+            f"against the installed generation ({_ticket_external_evidence(ticket)})",
+            chain=chain,
+        )
     if mode == "superseded_verified":
         successor = _ticket_successor(ticket)
         if not successor:

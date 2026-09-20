@@ -13,6 +13,14 @@ if str(TOOLS) not in sys.path:
 
 from saipen_engine import guard_events  # noqa: E402
 
+from test_hermetic_env import isolate_host_session  # noqa: E402
+
+
+def setUpModule() -> None:
+    # An outer host session (SAIPEN_PROJECT_ROOT/LINEAGE, SAIPEN_AGENT, ...)
+    # must never bind this module's disposable fixtures (test_hermetic_env).
+    isolate_host_session()
+
 
 def _event(**overrides) -> dict:
     base = {
@@ -615,6 +623,109 @@ class WindowsPathIsACanonicalArgumentTests(unittest.TestCase):
     def test_a_pipeline_after_a_path_is_still_shell(self):
         verb, _klass = self.verb(r"saipen status --json V:\x | Out-String")
         self.assertIsNone(verb)
+
+
+class IdleDoneReadOnlyAdmissionTests(unittest.TestCase):
+    """SRC-085 M1: idle DONE admits read-only observation, never mutation.
+
+    NO_ACTIVE_WORK may block consequential effects. It must not block the
+    bounded read-only observation a session needs to determine what the
+    project even is, and it must not turn a documented canonical line into an
+    unrelated shell refusal. The corridor stays semantic: canonical
+    diagnostics by the command-effect table, runtime version probes by a
+    closed tool set plus a version-only argument grammar.
+    """
+
+    def setUp(self) -> None:
+        self._tmp = tempfile.TemporaryDirectory(prefix="t1432-idle-")
+        self.addCleanup(self._tmp.cleanup)
+        self.root = Path(self._tmp.name).resolve()
+        saipen = self.root / ".saipen"
+        saipen.mkdir(parents=True, exist_ok=True)
+        (saipen / "STATE.md").write_text(
+            "---\n"
+            "phase: DONE\n"
+            "task: none\n"
+            'next_action: "saipen continue"\n'
+            'blocker: ""\n'
+            "transition_from: SHIP\n"
+            "saipen_version: 7\n"
+            "schema_version: 3\n"
+            "last_event: 1\n"
+            "mode: full\n"
+            "agent: test-agent\n"
+            'updated: "2026-09-20T00:00:00Z"\n'
+            "---\n",
+            encoding="utf-8",
+        )
+        (saipen / "BOARD.md").write_text(
+            "## DOING\n## TODO\n## DONE\n## BLOCKED\n", encoding="utf-8"
+        )
+        (saipen / "LOG.md").write_text("# LOG\n", encoding="utf-8")
+
+    def verdict(self, command: str) -> dict:
+        return guard_events.evaluate_event(
+            _event(
+                tool_name="bash",
+                cwd=str(self.root),
+                tool_input={"command": command},
+            )
+        )
+
+    def test_canonical_read_only_diagnostics_are_admitted_in_idle_done(self):
+        for command in (
+            "saipen status --json",
+            r"saipen status --json --project-root V:\_TEMP_\probe",
+            "saipen permissions --json",
+            "saipen explain-next --json",
+        ):
+            with self.subTest(command=command):
+                v = self.verdict(command)
+                self.assertTrue(v.get("admitted"), v)
+                self.assertEqual(v.get("code"), "ADMITTED")
+                self.assertEqual(v.get("action"), "saipen_op")
+
+    def test_assigned_runtime_version_probes_are_admitted(self):
+        for command in ("node --version", "python --version"):
+            with self.subTest(command=command):
+                mapped = guard_events.map_event(
+                    _event(
+                        tool_name="bash",
+                        cwd=str(self.root),
+                        tool_input={"command": command},
+                    )
+                )
+                self.assertEqual(mapped["action"], "read")
+                self.assertEqual(mapped["command_class"], "DIAGNOSTIC")
+                v = self.verdict(command)
+                self.assertTrue(v.get("admitted"), v)
+                self.assertEqual(v.get("action"), "read")
+
+    def test_a_documented_full_bound_canonical_line_is_admitted(self):
+        line = (
+            "saipen improve sweep imp-x IMP-001 FIXED --ticket T-1 --report r1 "
+            "--reproduced y --fixed-by c1 --verification v1 --json"
+        )
+        v = self.verdict(line)
+        self.assertTrue(v.get("admitted"), v)
+        self.assertEqual(v.get("action"), "saipen_op")
+
+    def test_consequential_effects_still_refuse_in_idle_done(self):
+        for command, code in (
+            ("npm install", "NO_ACTIVE_WORK"),
+            ("git checkout main", "NO_ACTIVE_WORK"),
+            ("rm -rf .saipen", "PROTECTED_CANONICAL_NAMESPACE"),
+        ):
+            with self.subTest(command=command):
+                v = self.verdict(command)
+                self.assertFalse(v.get("admitted"), v)
+                self.assertEqual(v.get("code"), code)
+
+    def test_the_token_bound_still_bounds(self):
+        over = "saipen status " + " ".join(f"--x{index}" for index in range(30))
+        v = self.verdict(over)
+        self.assertFalse(v.get("admitted"), v)
+        self.assertEqual(v.get("code"), "NO_ACTIVE_WORK")
 
 
 if __name__ == "__main__":

@@ -594,6 +594,12 @@ ROUTING_FAILURE_CODES = {
     "board-graph-invalid": "VALIDATION_FAILED",
     "checkpoint-invalid": "VALIDATION_FAILED",
     "capability-invalid": "VALIDATION_FAILED",
+    # SRC-085 M3: the conformance red gate's own outcomes. They are NOT
+    # malformed-input failures -- the state is perfectly readable and the
+    # remediation is executable -- so they keep their own stable codes.
+    "conformance-remediation": "CONFORMANCE_UNHEALTHY",
+    "conformance-unhealthy": "CONFORMANCE_UNHEALTHY",
+    "conformance-unknown": "CONFORMANCE_UNKNOWN",
 }
 
 
@@ -659,19 +665,23 @@ def conformance_crew_gate(project_root, routed: dict) -> dict | None:
         decision = conformance_decision(project_root, gate="core")
         if decision["healthy"]:
             return None
+        # T-1434 M1: lead with the command the failures themselves named when
+        # the receipt carries one (e.g. `saipen work reverify T-008`); the
+        # generic gate re-run remains the fallback, never the dead end.
+        command = decision.get("remediation_command") or CONFORMANCE_REMEDIATION_COMMAND
         return {
             **routed,
             "ok": False,
             "code": CONFORMANCE_UNHEALTHY,
-            "action": CONFORMANCE_REMEDIATION_COMMAND,
+            "action": command,
             "reason": "conformance-unhealthy",
             "detail": (
                 "crew convergence requires a CURRENT_PASS canonical conformance "
                 f"receipt, got {decision['status']}: {decision['reason']} -- run "
-                f"'{CONFORMANCE_REMEDIATION_COMMAND}' before crew work"
+                f"'{command}' before crew work"
             ),
             "conformance_status": decision["status"],
-            "canonical_next_command": CONFORMANCE_REMEDIATION_COMMAND,
+            "canonical_next_command": command,
         }
     except Exception as exc:
         # W2-007: fail closed when conformance cannot be positively
@@ -691,6 +701,100 @@ def conformance_crew_gate(project_root, routed: dict) -> dict | None:
             ),
             "canonical_next_command": "saipen validate",
         }
+
+
+def conformance_idle_gate(project_root, routed: dict) -> dict | None:
+    """SRC-085 M3: an unaccepted CURRENT_FAIL owns IDLE continuation.
+
+    The measured coexistence (AUDAPACK): the strict gate reported CURRENT_FAIL
+    while `status` advertised `next_action: saipen continue` and
+    `automation.disposition: CONTINUE`, with the accepted-debt rationale living
+    only in historical LOG prose -- two incompatible machine authorities.
+
+    This gate closes the contract for the exact measured case. The idle
+    terminal route (`reason: maintain` -- no pending recovery, no active
+    ticket, no workable TODO; the action is `saipen continue` or an idle
+    canonical command) is rewritten to the canonical remediation when the
+    authoritative decision says REMEDIATION_REQUIRED. UNPROVEN statuses
+    (NOT_RUN / stale) do NOT stop a fresh project: only a CURRENT_FAIL measured
+    on the CURRENT checkpoint does. No acceptance surface exists yet, so no
+    unaccepted red can buy itself a CONTINUE.
+
+    ONE owner, two consumers: `route_next_result` and the CLI continuation and
+    status paths reach it through `gate_route`.
+    """
+    if not (
+        routed.get("ok")
+        and routed.get("reason") == "maintain"
+        and project_root is not None
+    ):
+        return None
+    try:
+        from .conformance import (
+            CONFORMANCE_DISPOSITION_REMEDIATION_REQUIRED,
+            CONFORMANCE_REMEDIATION_COMMAND,
+            CONFORMANCE_UNHEALTHY,
+            conformance_decision,
+        )
+
+        current_action = str(routed.get("action") or "").strip()
+        if current_action.startswith(CONFORMANCE_REMEDIATION_COMMAND):
+            # The idle route already IS the remediation: never wrap it in its
+            # own refusal (a self-referential loop).
+            return None
+        decision = conformance_decision(project_root, gate="core")
+        if decision["disposition"] != CONFORMANCE_DISPOSITION_REMEDIATION_REQUIRED:
+            return None
+        # T-1434 M1: the receipt's own failure-named repair wins over the
+        # generic gate re-run, and naming THAT command must not wrap itself in
+        # its own refusal either.
+        command = decision.get("remediation_command") or CONFORMANCE_REMEDIATION_COMMAND
+        if current_action.startswith(command):
+            return None
+        return {
+            **routed,
+            "ok": False,
+            "code": CONFORMANCE_UNHEALTHY,
+            "action": command,
+            "reason": "conformance-remediation",
+            "detail": (
+                "idle continuation is owned by the unaccepted conformance red "
+                f"gate (CURRENT_FAIL: {decision['reason']}); run "
+                f"'{command}' before continuing"
+            ),
+            "conformance_status": decision["status"],
+            "conformance_disposition": decision["disposition"],
+            "canonical_next_command": command,
+        }
+    except Exception as exc:
+        # Fail closed: an unestablished decision never yields a green-looking
+        # idle continuation.
+        return {
+            **routed,
+            "ok": False,
+            "code": "CONFORMANCE_UNKNOWN",
+            "action": "saipen validate",
+            "reason": "conformance-unknown",
+            "detail": (
+                "idle continuation could not establish conformance evidence "
+                f"({type(exc).__name__}: {exc}); run 'saipen validate'"
+            ),
+            "canonical_next_command": "saipen validate",
+        }
+
+
+def gate_route(project_root, routed: dict) -> dict | None:
+    """The ONE ordered gate chain every production route surface applies.
+
+    Returns the first gate's rewrite, or None when the route stands. Consumers:
+    `route_next_result` and the CLI continuation, status and explain-next
+    paths must agree on the executable action.
+    """
+    for gate in (conformance_crew_gate, closure_finish_gate, conformance_idle_gate):
+        rewritten = gate(project_root, routed)
+        if rewritten is not None:
+            return rewritten
+    return None
 
 
 def closure_finish_gate(project_root, routed: dict) -> dict | None:
@@ -802,31 +906,19 @@ def route_next_result(
                         "detail": f"phase doc {load} is missing or empty",
                     },
                 )
-    # CORE-004 / T-1412: the ONE crew-convergence conformance gate. It is
-    # applied HERE for every Result-shaped route consumer and by the CLI's
-    # `_route_once` continuation path through the SAME function, because the
-    # gate used to live only in this wrapper while the production route was
-    # emitted by the raw router -- a route one surface refused and another
-    # handed out (measured live in the T-1412 field acceptance).
-    gated = conformance_crew_gate(project_root, out)
+    # CORE-004 / T-1412 + T-1403 + SRC-085 M3: the ONE gate chain every
+    # production route surface applies. It is applied HERE for every
+    # Result-shaped route consumer and by the CLI's `_route_once` continuation
+    # path and `_status` through the SAME `gate_route`, because a gate that
+    # lived only in this wrapper while the production route was emitted by the
+    # raw router was a route one surface refused and another handed out
+    # (measured live in the T-1412 field acceptance).
+    gated = gate_route(project_root, out)
     if gated is not None:
         return Result(
             ok=False,
             code=gated["code"],
             data={key: value for key, value in gated.items() if key not in ("ok", "code")},
-        )
-    # T-1403: the SAME finish-readiness gate the CLI continuation path uses, so
-    # a `PHASE SHIP` route the closure gate would refuse is never emitted here.
-    finish_gated = closure_finish_gate(project_root, out)
-    if finish_gated is not None:
-        return Result(
-            ok=False,
-            code=finish_gated["code"],
-            data={
-                key: value
-                for key, value in finish_gated.items()
-                if key not in ("ok", "code")
-            },
         )
     return Result(
         ok=bool(out.get("ok")),

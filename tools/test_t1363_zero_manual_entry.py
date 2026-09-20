@@ -845,6 +845,44 @@ class ReadOnlyProbeBoundaryTests(unittest.TestCase):
             with self.subTest(command=command):
                 self.assertFalse(self.probe(command), command)
 
+    def test_bounded_runtime_probes_are_reads(self):
+        """SRC-085 M1: version probes a gate assigns are observation.
+
+        The authority is the closed tool set plus a version-only argument
+        grammar -- not a substring match on `--version`. A known program given
+        any other argument stays an ordinary shell effect.
+        """
+        for command in (
+            "node --version",
+            "node -v",
+            "python --version",
+            "python3 --version",
+            "py -V",
+            "npm --version",
+            "ruff --version",
+            "git --version",
+            "whoami",
+            "hostname",
+            "Get-Location",
+            "Get-Date",
+        ):
+            with self.subTest(command=command):
+                self.assertTrue(self.probe(command), command)
+
+    def test_a_probe_tool_with_any_other_argument_is_not_a_read(self):
+        for command in (
+            "python script.py",
+            "python -m pytest",
+            "node server.js",
+            "npm run build",
+            "git add .",
+            "git checkout main",
+            "pip install requests",
+            "powershell -Command Remove-Item .saipen/STATE.md",
+        ):
+            with self.subTest(command=command):
+                self.assertFalse(self.probe(command), command)
+
     def test_the_read_class_reaches_the_mapped_event(self):
         from saipen_engine import guard_events
 

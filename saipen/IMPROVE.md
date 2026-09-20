@@ -24,7 +24,7 @@ error this file exists to prevent.
 This lifecycle declaration must exactly mirror CORE's routing declaration;
 the validator compares both with the CLI executor set.
 
-`IMPROVE_ACTIONS = [bare, status, submit, complete, sweep, sweep-queue, verify, cycle-complete, abort, retire, clean, hold, unhold]`
+`IMPROVE_ACTIONS = [bare, status, submit, complete, sweep, sweep-queue, verify, cycle-complete, reconcile, abort, retire, clean, hold, unhold]`
 
 Each action's own validation rules live in the section that owns it; this list
 is the surface, not a second copy of the law.
@@ -95,6 +95,19 @@ is the surface, not a second copy of the law.
   A COMPLETE report is never made generically retireable.
 - `saipen improve clean <cycle>` — archive/retention meta-operation
   (section 10). Never means phase CLEAN, never enters the CLEAN phase.
+- `saipen improve reconcile <cycle>` — ONE canonical finite exit for a strict
+  ACTIVE cycle (section 14): it classifies every roster seat, executes the
+  lossless transitions the evidence already authorizes (retire an un-started
+  `EMPTY_DRAFT`, supersede a `STALE_COMPLETE` seat onto a current same-scope
+  replacement), refuses while genuine actionable work remains, and terminalizes
+  the cycle with the lifecycle class that records WHY it ended (`complete` /
+  `superseded` / `blocked_external`). Idempotent on a terminal cycle
+  (`ALREADY_TERMINAL`, zero writes).
+- `saipen ticket reasoning <T-###> --recurrence <text> --weak-model <text>` —
+  the canonical writer for the strict-sweep reasoning gates (section 13). It
+  refuses unless a strict Core sweep `CONFIRMED` `PROTOCOL_VIOLATION`
+  disposition resolves to that exact ticket, so the fields can never be
+  attached to an arbitrary ticket and no raw BOARD field edit is ever needed.
 
 No repeated-letter shortcut is assigned; the shortcut key count stays
 byte-unchanged.
@@ -160,6 +173,15 @@ satisfies another's finding.
   (section 7). Retirement preserves every existing disposition and the
   never-completed report's bytes; `abort` stays forbidden once the sweep has
   dispositions, because aborting would discard them.
+- The CYCLE terminal classes (T-1434 M4) are `complete` (every expected seat
+  reported, current or superseded onto current replacements), `superseded`
+  (closed by reconciliation with seats canonically unavailable), and
+  `blocked_external` (closed with a seat explicitly recorded
+  `retire_reason: BLOCKED_EXTERNAL`). `archived` remains the abort/retention
+  state. Only `active` blocks a new cycle; every terminal class is sealed
+  historical evidence and frees admission of the next cycle. `saipen improve
+  reconcile` (section 14) is the ONE operation that decides which terminal
+  class is truthful -- never a generic DONE that erases why the cycle ended.
 
 Cycle directory:
 
@@ -225,7 +247,12 @@ preserved_report_sha256: <64 lowercase hex>
   `saipen improve retire` is the canonical journaled transition for a seat
   whose report never reached complete; it is refused for a completed report
   and refused when it would leave the roster with no expected seat, so a
-  cycle is never completed into evidence-free history.
+  cycle is never completed into evidence-free history. T-1434 M4: the retire
+  reason is PERSISTED as `retire_reason: <CODE>` beside the availability, so
+  a terminal cycle records WHY its seat was abandoned; a seat retired with
+  `retire_reason: BLOCKED_EXTERNAL` is the explicit externally blocked seat
+  class and terminalizes its cycle as `blocked_external` (section 14). The
+  field is legal ONLY with `availability: unavailable`.
 - `availability: superseded` is written ONLY by stale-COMPLETE resolution
   (section 7): the seat's COMPLETE report is stale against the current tree
   and a distinct, current, same-role, same-`context_scope` replacement seat
@@ -449,6 +476,10 @@ route above. `saipen improve verify`, `saipen improve cycle-complete`,
 `saipen improve clean` and `tools/validate.py` share the same
 `validate_superseded_seat` evidence: a tampered preserved report, a
 dangling/cyclic replacement chain, or a swallowed finding fails them all.
+`saipen improve reconcile` (section 14) executes this exact route, plus the
+empty-draft retirement, in ONE operation when the cycle is otherwise
+terminalizable; it never weakens the evidence bar, and it refuses when no
+current same-scope replacement exists.
 
 A report's own `confidence: proven` is evidence to inspect, never a ticket
 authorization. Canonical tickets carry: `source_reports, reproduced,
@@ -562,12 +593,60 @@ a canonical ticket) MUST record two checked artifacts on the ticket itself:
   transition rule, validator, red scenario, canonical example, prose last.
 
 The `[sweep-ticket-link]` check FAILs a `PROTOCOL_VIOLATION` finding that
-produced a ticket without both fields (red controls 15/16). A fix answered
+produced a ticket without both fields (red controls 15/16). The canonical
+writer is `saipen ticket reasoning <T-###> --recurrence <text> --weak-model
+<text>` (T-1434 M4): it resolves the strict-sweep link first and refuses a
+ticket no strict `CONFIRMED` `PROTOCOL_VIOLATION` disposition names, so the
+reasoning text can never be attached to an arbitrary ticket and the validator
+remediation is executable by construction. A fix answered
 only with prose where a state field or validator was available is flagged.
 `ACCIDENTAL_SUCCESS` is first-class: a finding whose result was correct but
 whose verification never ran is classified `ACCIDENTAL_SUCCESS`, never PASS
 -- a sweep disposition recording it as verified (`reproduced=y`) fails (red
 control 5).
+
+## 14. Strict-cycle reconciliation (T-1434 M4)
+
+An ACTIVE strict cycle whose seats are individually resolvable can still be
+globally stuck: drafts that never started, COMPLETE seats stale against a
+moved install, dispositions already in the sweep ledger (so `abort` refuses),
+and `cycle-complete` unmet. Every ACTIVE cycle therefore owes ONE canonical
+operation that decides the cycle's finite exit:
+
+    saipen improve reconcile <cycle>
+
+It classifies every roster seat into exactly one machine-readable class:
+
+```
+CURRENT_COMPLETE           terminal; complete and current on this tree/install
+SUPERSEDED                 terminal; availability: superseded with valid binding
+CANONICALLY_UNAVAILABLE    terminal; retired seat, reason persisted
+BLOCKED_EXTERNAL           terminal; retired seat with retire_reason: BLOCKED_EXTERNAL
+EMPTY_DRAFT                resolvable; zero committed RUNs, losslessly retired
+STALE_COMPLETE             resolvable; superseded onto a current replacement
+STILL_ACTIONABLE           refuse; committed evidence in flight or evidence broken
+```
+
+Rules:
+
+- a seat with committed audit content that is not COMPLETE is genuine work in
+  flight: reconcile REFUSES and names the submit/complete route;
+- an EMPTY_DRAFT has produced no evidence: retiring it discards nothing, and
+  its report stays byte-identical at its path;
+- a STALE_COMPLETE seat may only be superseded onto a CURRENT, COMPLETE,
+  same-role, same-`context_scope` replacement; with none registered reconcile
+  refuses and names the `--new-seat` route rather than weakening the bar;
+- reconcile re-derives every classification from the bytes on disk after the
+  transitions and requires the full cycle bar (`verify_cycle`) before it
+  terminalizes -- it never trusts its own plan;
+- the terminal class records WHY: `complete` when every expected seat is
+  reported, `superseded` when seats were canonically unavailable,
+  `blocked_external` when an external blockage was explicitly recorded;
+- reports, SWEEP bytes and preserved report hashes are never rewritten;
+- an already-terminal cycle returns `ALREADY_TERMINAL` with ZERO writes.
+
+Legacy (non-strict) cycles are sealed read-only history: reconcile refuses
+them and the historical exits (`retire`, `abort`) keep their meaning.
 
 A real IMPROVE phase may still be proposed only by first proving a failure the
 meta-control design cannot solve.

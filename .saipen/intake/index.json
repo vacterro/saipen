@@ -115,9 +115,125 @@
     "SRC-056": {
       "linked_work": "T-1381",
       "source_sha256": "512b48241dfe617124caca48275d542fde8b8923a8e0e5a80aac112e411088cf"
+    },
+    "SRC-057": {
+      "linked_work": "T-1367",
+      "source_sha256": "e2b6ed4d283cff29f47a1095284bd32f74eb35d4ec4113364e6c70c0d56d6f73"
+    },
+    "SRC-062": {
+      "linked_work": "T-1393",
+      "source_sha256": "4ae2bf500de30936bb6a11c0d409447e9d2996cff6d446c7d752b7f7f743faa0"
+    },
+    "SRC-063": {
+      "linked_work": null,
+      "source_sha256": "0efce4461e945e4f725699bc1c1d85ef7bd28cddecea1ddd945f273b40346f93"
+    },
+    "SRC-064": {
+      "linked_work": "T-1395",
+      "source_sha256": "60f9bfbca1633f213e61638702f2f694b0f711d140857653cbc4bcb1282663a6"
+    },
+    "SRC-065": {
+      "linked_work": null,
+      "source_sha256": "688642993f7a3ebc87054ddbb939bc04f4f645ce8e497dd605b870d70fb44192"
+    },
+    "SRC-066": {
+      "linked_work": "T-1396",
+      "source_sha256": "d6d7230877ddc41876f7d74899f21c25f47d5664e469faae15778aadbfc6b594"
+    },
+    "SRC-067": {
+      "linked_work": "T-1404",
+      "source_sha256": "f2f7676d5ab5b7bd5a84973e3160bdab6cd8db09937e5185d6c754d40f027e01"
+    },
+    "SRC-068": {
+      "linked_work": "T-1405",
+      "source_sha256": "e1f811d9c8d6e83e19b12026040f956639045daf3c56be10ae89f25af1aa67d7"
+    },
+    "SRC-069": {
+      "linked_work": "T-1406",
+      "source_sha256": "6878c413db666e46b6fa48d2236e009e81cd76db18fe650d4f829cee76abba37"
+    },
+    "SRC-070": {
+      "linked_work": "T-1408",
+      "source_sha256": "e26df5d0c0c4c5da5af800b7c608c3954b3723917852c3d0e8e1117a77c54354"
+    },
+    "SRC-071": {
+      "linked_work": "T-1409",
+      "source_sha256": "d4b3370c764f47433085ef0fd58153ab61e885ec671a57a6608a48fae11d7e90"
+    },
+    "SRC-072": {
+      "linked_work": "T-1410",
+      "source_sha256": "bdbfee4e2f65bbec1d2574363c2b9cf5476be9156128b8572c5922b3b1be2011"
+    },
+    "SRC-073": {
+      "linked_work": "T-1413",
+      "source_sha256": "b671aed624b72dadc50fde97b6cb60b04a1edfc0121e163f2dba71e1f37f9473"
+    },
+    "SRC-074": {
+      "linked_work": "T-1417",
+      "source_sha256": "69949b726c97e452a80d88e30b7ab0ab46d649b14f0d67e94581ad4811016a4a"
+    },
+    "SRC-075": {
+      "linked_work": null,
+      "source_sha256": "b5d302f550608152eecd967017a2f71074e10cdf8321c10f3df24f77d441d857"
+    },
+    "SRC-076": {
+      "linked_work": "T-1419",
+      "source_sha256": "57f9ba8112f8c655980cd322fe75577e98edb185bb4ed08ff8724942f1a28aa0"
+    },
+    "SRC-077": {
+      "linked_work": "T-1423",
+      "source_sha256": "c5eb2da8096f39d0bdc4de9073659c495d8cab8e969d4c1c3f38ccb3cc9e53d9"
+    },
+    "SRC-078": {
+      "linked_work": "T-1424",
+      "source_sha256": "bc4d2276feb87c5b0ed32eaaedc1e4a3aaeeab29d2a950b4ae50935f54ff2c8e"
+    },
+    "SRC-079": {
+      "linked_work": "T-1425",
+      "source_sha256": "f9b7b805f6719b0a5d43cd4d4a6172502a1bf7a52a07101e29ea2a4a8669d36a"
+    },
+    "SRC-080": {
+      "linked_work": "T-1425",
+      "source_sha256": "a8bf0f9e97ad8e33323a423233a5987cb26c372452f9c5242c6cc3668b0871fe"
+    },
+    "SRC-081": {
+      "linked_work": "T-1426",
+      "source_sha256": "0539801f9818a970730bda4c3ff9788c961917431f3d35cfe6f3077de1c6cdbc"
+    },
+    "SRC-082": {
+      "linked_work": null,
+      "source_sha256": "0f614fdcc8398e1b99e9f837b6af0da56e21ba5061750d09281532d1f0db7d11"
+    },
+    "SRC-083": {
+      "linked_work": "T-1428",
+      "source_sha256": "e639c5866e23270b5c1137c9a15a3c4347fa471746f54a5fa15f4aee022f1a0c"
+    },
+    "SRC-084": {
+      "linked_work": "T-1431",
+      "source_sha256": "9b7c6faa1d930cd3d274280bc3400a24ec090f6191f55a51a7f8a2ed6a2dc19b"
+    },
+    "SRC-085": {
+      "linked_work": "T-1432",
+      "source_sha256": "4635500feb7577f5f5f6914cf688ed8913c40b9df4a0e011f5575bb1e931d87d"
+    },
+    "SRC-086": {
+      "linked_work": "T-1432",
+      "source_sha256": "a9fdd2fbbc2ae15e701a314245a28813d2a3d34feadbf939af16ec35b6d9e461"
+    },
+    "SRC-087": {
+      "linked_work": "T-1433",
+      "source_sha256": "9c8a69ea42e715ac9e99a562f04d30b861ceb83116de33a33995a80df2cbed17"
+    },
+    "SRC-088": {
+      "linked_work": "T-1434",
+      "source_sha256": "e07b494ee85661b7179769c1d0684d468ed3ecdf4db8d0bb17cb6b9303185d96"
+    },
+    "SRC-089": {
+      "linked_work": null,
+      "source_sha256": "8ff4f85642370c6aaac6dbebdeae5532d51242d97d0c19e3d8f05c33d9a42c56"
     }
   },
-  "next_id": 57,
+  "next_id": 90,
   "schema_version": 1,
   "tombstones": {
     "SRC-001": {
@@ -492,6 +608,78 @@
       "source_sha256": "9a70e5fe7e0429d0a651567b8c5e95e8c19697c09da10fcb17304752b4cee8fa",
       "status": "INVALID",
       "ticket_ref": ".saipen/archive/retired/T-1369.json"
+    },
+    "SRC-058": {
+      "actionable": 7,
+      "archive_ref": ".saipen/archive/source/SRC-058.md",
+      "closed_at": "2026-09-18T21:03:33Z",
+      "closure_event": null,
+      "linked_work": "T-1385",
+      "receipt_id": "SRC-058",
+      "requirements": 7,
+      "schema_version": 1,
+      "source_sha256": "dc4d91943214122373df05a96109a26fa52eb8d9f0b02ce0fdf2e263dce1525b",
+      "status": "CLOSED",
+      "unresolved": 0
+    },
+    "SRC-059": {
+      "archive_ref": ".saipen/archive/retired/SRC-059.md",
+      "authority_grant": "T-1390 / SRC-059",
+      "authority_receipt": "SRC-065",
+      "authority_sha256": "688642993f7a3ebc87054ddbb939bc04f4f645ce8e497dd605b870d70fb44192",
+      "discovery_event": null,
+      "evidence": {
+        "kind": "event",
+        "ref": "E-7014"
+      },
+      "evidence_bound_event": "E-7074",
+      "evidence_note": "fixture contamination; proof dir T-1391-T-1390-fixture-contamination-20260917",
+      "linked_work": "T-1390",
+      "reason": "TEST_FIXTURE_CONTAMINATION",
+      "receipt_id": "SRC-059",
+      "retired_at": "2026-09-18T17:17:56Z",
+      "retired_by": "claude",
+      "retirement_event": "E-7074",
+      "schema_version": 2,
+      "source_sha256": "cb1d490e3e5db4157a79d25e8bd03670a36041e925e0b36ebfc02a5e18eb60d6",
+      "status": "INVALID",
+      "ticket_ref": ".saipen/archive/retired/T-1390.json"
+    },
+    "SRC-060": {
+      "archive_ref": ".saipen/archive/retired/SRC-060.md",
+      "authority_grant": "T-1391 / SRC-060",
+      "authority_receipt": "SRC-065",
+      "authority_sha256": "688642993f7a3ebc87054ddbb939bc04f4f645ce8e497dd605b870d70fb44192",
+      "discovery_event": null,
+      "evidence": {
+        "kind": "event",
+        "ref": "E-7017"
+      },
+      "evidence_bound_event": "E-7073",
+      "evidence_note": "fixture contamination; proof dir T-1391-T-1390-fixture-contamination-20260917",
+      "linked_work": "T-1391",
+      "reason": "TEST_FIXTURE_CONTAMINATION",
+      "receipt_id": "SRC-060",
+      "retired_at": "2026-09-18T17:17:51Z",
+      "retired_by": "claude",
+      "retirement_event": "E-7073",
+      "schema_version": 2,
+      "source_sha256": "7da1fa1015f5457bd93ed7a0624ff13050befd03a37e85ad511c0889cb58ab2e",
+      "status": "INVALID",
+      "ticket_ref": ".saipen/archive/retired/T-1391.json"
+    },
+    "SRC-061": {
+      "actionable": 5,
+      "archive_ref": ".saipen/archive/source/SRC-061.md",
+      "closed_at": "2026-09-18T21:03:33Z",
+      "closure_event": null,
+      "linked_work": "T-1385",
+      "receipt_id": "SRC-061",
+      "requirements": 5,
+      "schema_version": 1,
+      "source_sha256": "8e5a1078f8f19b56ea69e3b3492c76828ae1b67c87661e2c2d0972c4695cda89",
+      "status": "CLOSED",
+      "unresolved": 0
     }
   }
 }

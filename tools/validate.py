@@ -501,7 +501,14 @@ STRICT, _requested_root, GATE, GATE_PRODUCER, REQUIRE_RELEASE_INDEX, FINDINGS_JS
 #: The one parsed gate context every producer severity decision reads. Built
 #: once; the policy function is pure, so nothing can drift around it.
 GATE_CONTEXT = GateContext(GATE, GATE_PRODUCER)
-PROJECT_ROOT_RES = resolve_project_root(Path.cwd().resolve(), _requested_root)
+# T-1434 M6: the validator is an OBSERVER of the project it is pointed at.
+# `--project-root` is a deliberate target, and its only write is the
+# conformance receipt for THAT project's tree -- so it binds under the
+# observe authority and never inherits mutation authority from an ambient
+# session that names a different project.
+PROJECT_ROOT_RES = resolve_project_root(
+    Path.cwd().resolve(), _requested_root, authority="observe"
+)
 PROJECT_ROOT, PROJECT_ROOT_SOURCE = PROJECT_ROOT_RES.root, PROJECT_ROOT_RES.source
 if PROJECT_ROOT is None:
     fail_code = getattr(PROJECT_ROOT_RES, "code", None)
@@ -523,6 +530,17 @@ os.chdir(PROJECT_ROOT)
 # every run that does not pass the flag.
 _orig_sys_exit = sys.exit
 
+#: T-1434 M1/M5: the exact executable repairs this run's failures name. The
+#: extraction is owned by saipen_engine.remediation's CLOSED table, so only a
+#: registered command shape can ever enter the conformance receipt -- an
+#: unregistered or free-prose route cannot be smuggled through a failure
+#: message (M5 invariant).
+def _receipt_remediation_commands():
+    """Bounded executable commands extracted from THIS run's failures."""
+    from saipen_engine import remediation
+
+    return remediation.extract_commands(list(globals().get("failures") or []))
+
 
 def _saipen_exit(code=0):
     if not NO_RECEIPT:
@@ -539,6 +557,7 @@ def _saipen_exit(code=0):
                 gate=GATE,
                 exit_code=int(code or 0),
                 source_identity=_source_identity,
+                remediation_commands=_receipt_remediation_commands(),
             )
         except Exception:
             pass
@@ -2812,6 +2831,15 @@ for _tid, _t in sorted(tickets.items()):
             _closure_problems.append(
                 f"cohort {_cid} claims shipped without a release identity"
             )
+    elif _mode == "external_implementation":
+        # SRC-088 M2: the SAME predicate the closure resolver uses, so
+        # "resolves" and "validates" can never drift. The receipt is
+        # append-only and bound to the installed engine generation; a moved
+        # (rolled back or upgraded) dependency is a CURRENT problem, not a
+        # silent green.
+        from saipen_engine import external as _external_mod
+
+        _closure_problems.extend(_external_mod.resolution_problems(PROJECT_ROOT, _tid, _t))
 if _closure_problems:
     fail(
         "closure provenance does not resolve: "
@@ -3451,7 +3479,16 @@ if log_files:
             # current-cycle classifier cannot apply by construction, and a
             # superseded ticket with BAD authority/evidence still FAILs in
             # that gate -- so skipping it here exempts a mode, not a claim.
-            if _closure_mode(tickets.get(_done_id) or {}) == "superseded_verified":
+            # external_implementation (SRC-088 M2) is the same shape: the fix
+            # was never implemented in this repository, so its evidence contract
+            # is the append-only EX receipt -- validated by the
+            # closure-provenance gate above, which fails a stale/tampered/
+            # rolled-back receipt. Skipping the local-cycle classifier exempts
+            # the mode, never a claim.
+            if _closure_mode(tickets.get(_done_id) or {}) in (
+                "superseded_verified",
+                "external_implementation",
+            ):
                 continue
             _last_ev = _last_ticket_event.get(_done_id)
             if _ev_boundary is None:
@@ -3513,6 +3550,18 @@ if log_files:
                         _reverify_note = "{0} verdict={1}".format(
                             _receipt.get("receipt_id"), _receipt.get("verdict")
                         )
+                    else:
+                        # T-1434 M5.3: an attested-only PASS receipt is visible
+                        # evidence but NOT closure authority -- name why.
+                        _latest = _debt_mod.latest_pass_reverify(PROJECT_ROOT, _done_id)
+                        if _latest is not None and (
+                            _debt_mod.evidence_class_of(_latest) == "attested"
+                        ):
+                            _reverify_note = (
+                                f"{_latest.get('receipt_id')} is attested-only "
+                                "(no executed check); attested evidence is recorded "
+                                "but never current-tree closure proof"
+                            )
                 except Exception as _reverify_exc:
                     _reverify_note = (
                         f"re-verification receipt unavailable: "
@@ -3523,8 +3572,13 @@ if log_files:
                         f"closure-evidence -- ticket {_done_id} is ## DONE but "
                         "carries no current-cycle verification evidence "
                         f"(classifier: {_ev_reason}; reverify: {_reverify_note}); "
-                        "an unproven closure is never protocol-green -- re-verify "
-                        "with real evidence before DONE"
+                        "an unproven closure is never protocol-green -- run "
+                        f"saipen work reverify {_done_id} --run '<executable check "
+                        "for this Work>' to record ONE immutable current-tree "
+                        "re-verification receipt with EXECUTED evidence (an "
+                        "attested-only --verification contract is recorded evidence, "
+                        "never closure proof), or re-verify with real evidence "
+                        "before DONE"
                     )
 
     # [attempt-contract] (T-1148): Work vs Attempt separation. An Attempt is
@@ -3621,9 +3675,15 @@ if log_files:
                     _report_errors.append(f"{_rep}: {_e}")
                 # red control 22 (T-557): a seat report is evidence, never
                 # canonical BOARD state -- a report carrying board section
-                # headings is a report mistreated as a board.
+                # headings is a report mistreated as a board. T-1434 M4: the
+                # heading must be a LINE, not a backticked prose citation
+                # (`## DOING` inside an evidence sentence is a reference to the
+                # board, not a pasted board), so the check anchors to line start
+                # and allows trailing whitespace only.
                 _board_headings = [
-                    h for h in ("## DOING", "## TODO", "## DONE", "## BLOCKED") if h in _rt
+                    h
+                    for h in ("## DOING", "## TODO", "## DONE", "## BLOCKED")
+                    if re.search(rf"(?m)^{re.escape(h)}[ \t]*$", _rt)
                 ]
                 if _board_headings:
                     _report_errors.append(
@@ -3644,7 +3704,13 @@ if log_files:
                 _seat_superseded = False
                 if _man.is_file():
                     _mst = _man.read_text(encoding="utf-8-sig")
-                    if re.search(r"(?m)^cycle_status:\s*(?:complete|archived)", _mst):
+                    # T-1434 M4: superseded / blocked_external are terminal
+                    # reconciliation outcomes too -- their reports are sealed
+                    # historical evidence exactly like complete/archived.
+                    if re.search(
+                        r"(?m)^cycle_status:\s*(?:complete|archived|superseded|blocked_external)",
+                        _mst,
+                    ):
                         _cycle_active = False
                     _seat_block = _imp_mod._seat_block(_mst, _seat_id) or ""
                     _seat_superseded = (
@@ -3893,7 +3959,12 @@ if log_files:
                                     f"{_ref} produced ticket {_ticket} "
                                     "without recurrence: and weak_model: "
                                     "(META-IMPROVEMENT + WEAK-MODEL PRECEDENT "
-                                    "reasoning gates, red controls 15/16)"
+                                    f"reasoning gates, red controls 15/16); the "
+                                    "executable repair is `saipen ticket reasoning "
+                                    f"{_ticket} --recurrence <META-IMPROVEMENT "
+                                    "reasoning> --weak-model <WEAK-MODEL PRECEDENT "
+                                    "answer>`, which refuses unless this exact "
+                                    "strict-sweep linkage resolves"
                                 )
                             if _cls == "ACCIDENTAL_SUCCESS" and _repro == "y":
                                 _sweep_errors.append(

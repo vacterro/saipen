@@ -371,6 +371,55 @@ def stale_validator(project_root: Path | str, tool_validator_version: str | None
 
 
 # --------------------------------------------------------------------------- §2
+def _bounded_remediation_commands(commands) -> list[str]:
+    """The executable commands a FAIL receipt may advertise (T-1434 M1).
+
+    The validator's own failure messages name their remediation; carrying the
+    bounded machine-readable list INTO the receipt is what lets the router
+    lead with a real repair (`saipen work reverify T-008`) instead of the
+    generic `saipen validate` loop. Only `saipen ...` lines survive, each
+    bounded, deduplicated and capped -- a receipt is evidence, not a log.
+    """
+    out: list[str] = []
+    seen: set[str] = set()
+    for raw in commands or ():
+        command = str(raw or "").strip()
+        if not command.startswith("saipen ") or len(command) > 160:
+            continue
+        if command in seen:
+            continue
+        seen.add(command)
+        out.append(command)
+        if len(out) >= 10:
+            break
+    return out
+
+
+def _bounded_external_actions(actions) -> list[dict]:
+    """The TYPED external remediations a FAIL receipt may advertise (M5.2).
+
+    An external action is never a command: each record carries
+    ``kind: external`` plus a closed ``external_kind``, so a machine consumer
+    can distinguish "executable now" from "requires an actor SAIPEN is not"
+    without prose parsing.
+    """
+    from . import remediation
+
+    out: list[dict] = []
+    for raw in actions or ():
+        if remediation.is_external(raw):
+            out.append(
+                {
+                    "kind": "external",
+                    "external_kind": raw["external_kind"],
+                    "detail": str(raw.get("detail") or "")[:240],
+                }
+            )
+        if len(out) >= 10:
+            break
+    return out
+
+
 def generate_conformance_receipt(
     project_root: Path | str,
     *,
@@ -379,6 +428,8 @@ def generate_conformance_receipt(
     validator_version: str | None = None,
     now: datetime.datetime | None = None,
     source_identity=None,
+    remediation_commands=None,
+    external_actions=None,
 ) -> dict:
     """§2: mechanically produce ONE structured conformance receipt.
 
@@ -446,6 +497,8 @@ def generate_conformance_receipt(
     # W2-005: unique receipt id and microsecond-precision timestamp for
     # total ordering. Never overwrites an earlier receipt.
     rid = _receipt_id()
+    bounded_remediation = _bounded_remediation_commands(remediation_commands)
+    bounded_external = _bounded_external_actions(external_actions)
     receipt = {
         "schema_version": 2,
         "kind": "conformance_receipt",
@@ -461,6 +514,16 @@ def generate_conformance_receipt(
         "state_hash": state_hash,
         "board_hash": board_hash,
         "log_hash": log_hash,
+        # T-1434 M1: the executable repairs the failures themselves named,
+        # bounded and deduplicated. Empty on a PASS; on a FAIL the router may
+        # lead with the first one instead of re-running the whole gate.
+        "remediation_commands": bounded_remediation,
+        # T-1434 M5.2: typed external remediations, never disguised commands.
+        # Empty when no current rule needs an actor outside the project.
+        "external_actions": bounded_external,
+        "canonical_next_command": (
+            bounded_remediation[0] if bounded_remediation else CONFORMANCE_REMEDIATION_COMMAND
+        ),
     }
     # content_hash binds the EXACT written bytes, so compute it from the body
     # BEFORE serializing for real -- otherwise the on-disk receipt would omit it.
@@ -1328,6 +1391,40 @@ CONFORMANCE_UNHEALTHY = "CONFORMANCE_UNHEALTHY"
 #: the instrument, not the project, is the problem -- and both are non-green.
 CONFORMANCE_UNAVAILABLE = "CONFORMANCE_UNAVAILABLE"
 
+# SRC-085 M3: the machine-readable reconciliation between "the strict gate is
+# red" and "the router advertises continuation". A closed set so a consumer can
+# fail closed on an unknown value instead of interpreting it:
+#   HEALTHY              -- CURRENT_PASS; no red gate exists.
+#   REMEDIATION_REQUIRED -- CURRENT_FAIL measured on the CURRENT checkpoint; the
+#                           red gate is actionable and must outrank idle
+#                           continuation until the canonical remediation runs.
+#   UNPROVEN             -- no receipt / stale / not yet bound: not a red gate,
+#                           never assumed green (fresh projects keep working;
+#                           closure still refuses, which is the existing rule).
+#   INVALID              -- the receipt could not be trusted at all.
+CONFORMANCE_DISPOSITION_HEALTHY = "HEALTHY"
+CONFORMANCE_DISPOSITION_REMEDIATION_REQUIRED = "REMEDIATION_REQUIRED"
+CONFORMANCE_DISPOSITION_UNPROVEN = "UNPROVEN"
+CONFORMANCE_DISPOSITION_INVALID = "INVALID"
+
+
+def conformance_disposition(status: str | None) -> str:
+    """Map ONE authoritative conformance status onto the closed disposition.
+
+    This is the single owner for "what does this status MEAN for routing": the
+    status string travels beside it, so a consumer never re-derives a meaning
+    from prose. Only a CURRENT_FAIL is actionable red; absence of evidence
+    (NOT_RUN/stale) stays UNPROVEN and is not a stop -- the closure gates
+    already refuse it where closure is what is being asked.
+    """
+    if status == STATUS_CURRENT_PASS:
+        return CONFORMANCE_DISPOSITION_HEALTHY
+    if status == STATUS_CURRENT_FAIL:
+        return CONFORMANCE_DISPOSITION_REMEDIATION_REQUIRED
+    if status in (STATUS_INVALID, STATUS_VERSION_MISMATCH):
+        return CONFORMANCE_DISPOSITION_INVALID
+    return CONFORMANCE_DISPOSITION_UNPROVEN
+
 
 def conformance_decision(
     project_root: Path | str,
@@ -1354,12 +1451,31 @@ def conformance_decision(
     status = conformance_status(project_root, gate=gate, now=now, source_identity=source_identity)
     kind = status.get("status")
     healthy = kind == STATUS_CURRENT_PASS
+    # T-1434 M1: a FAIL receipt carries the bounded commands its own failures
+    # named. When the ONLY current defects are re-verifiable Work, that list is
+    # the real repair (`saipen work reverify T-###`), and the router must lead
+    # with it instead of dead-ending at the generic gate re-run. Absence of a
+    # machine-readable list (older receipt, non-command failure) falls back to
+    # the canonical validator re-run.
+    receipt = status.get("receipt") or {}
+    stated = receipt.get("remediation_commands")
+    bounded = [
+        str(command)
+        for command in (stated or [])
+        if isinstance(command, str) and command.startswith("saipen ") and len(command) <= 160
+    ][:10]
+    primary = bounded[0] if bounded else CONFORMANCE_REMEDIATION_COMMAND
     return {
         "status": kind,
         "gate": status.get("gate", gate),
         "healthy": healthy,
+        # SRC-085 M3: the routing meaning of this status, machine-readable, so
+        # "CURRENT_FAIL" next to "CONTINUE" is explained by a value rather than
+        # by historical LOG prose.
+        "disposition": conformance_disposition(kind),
         "reason": status.get("reason", "") or "",
-        "remediation_command": None if healthy else CONFORMANCE_REMEDIATION_COMMAND,
+        "remediation_command": None if healthy else primary,
+        "remediation_commands": [] if healthy else bounded,
         "status_block": status,
     }
 

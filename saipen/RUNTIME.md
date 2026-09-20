@@ -4,6 +4,66 @@ This document owns runtime identity/capability semantics. CORE still owns Work,
 state, commands, precedence, checkpointing, and completion. Runtime data is
 replaceable session telemetry; it cannot make project truth provider-specific.
 
+## Host bootstrap / runtime binding
+
+A host that opens a SAIPEN-managed project must reach a canonical runtime before
+it does ordinary work. One read-only operation answers that:
+
+    saipen host bootstrap [--host <registry-id>] [--project-root PATH] [--json]
+
+It resolves the binding in this order and never scans disks or guesses a path:
+
+1. project binding -- `.saipen/` present, or an asserted carrier verifies;
+2. a canonical `saipen` already resolves on PATH (reported, never trusted as
+   the binding);
+3. a SAIPEN-controlled pointer to the install -- the project's own
+   `STATE.saipen_home` or an exported `SAIPEN_SKILL_ROOT` carrier;
+4. the executing engine itself, which IS a canonical runtime.
+
+`HOST_BOOTSTRAP_BOUND` is the only green code. Otherwise the single stable
+diagnostic `SAIPEN_HOST_RUNTIME_UNAVAILABLE` names the exact unsupported
+boundary (`project_binding`, `activation_contract`, `canonical_runtime`,
+`direct_entrypoint`, `host_bridge`), the attempted candidates, and the
+remediation. A diagnostic carries a `fingerprint` so a host suppresses repeated
+output when nothing changed.
+
+Three verdicts are never merged. **Runtime discovered** is what the resolver
+proved from a candidate's own bytes; **host admitted** requires an explicit
+`--host` to be a registered adapter, otherwise the verdict is
+`HOST_UNSUPPORTED` with `ok: false` and the discovery kept as diagnostic data
+under `runtime_discovered`/`runtime_boundary`; **transport reachable** is a
+launcher discovery question, and only an executable launcher (POSIX `+x`, or a
+Windows `.cmd` shim) or a `saipen` on PATH counts as one. This resolver probes
+no cross-boundary transport: a file path inside another execution boundary is
+never claimed as a bridge (`bridge.cross_boundary` is always false).
+
+Fail-closed writes: a project whose absolute `STATE.saipen_home` does not
+resolve to a usable SAIPEN install on this host refuses consequential mutation
+(`HOME_REQUIRED`) at the same admission gate every other protocol brake uses.
+Canonical operations and diagnostic reads stay available, so recovery is never
+wedged.
+
+The refusal is never a dead end when SAIPEN already proved a replacement:
+`saipen rebind-home --auto` converges a DEAD persisted pointer onto the
+already-PROVEN canonical runtime (the executing engine, or a verified installed
+carrier -- never a scanned or guessed path), journaled as
+`HOST_BINDING_CONVERGED` with the previous pointer in LOG evidence. It is
+idempotent (`HOME_ALREADY_BOUND`, zero writes, on a live pointer) and refuses
+`HOME_REQUIRED` naming the explicit form only when NO replacement proves. Both
+`cc` and `start` run the same convergence before their ordinary work, so a
+fresh supported host reaches canonical continue with no operator-supplied
+runtime path. The explicit `saipen rebind-home <candidate>` remains the route
+when the operator names an install the resolver cannot prove by itself. A host
+with no before-tool hook surface (its `declared_strength` is ADVISORY) is
+reported as such -- the resolver never claims enforcement an install cannot
+provide.
+
+`saipen host activation --project-root PATH` answers the narrower question --
+does the MANAGED PROJECT's resolved runtime carry the canonical activation
+contract (`ACTIVATION_PRESENT`). The argument is the project root (the thing
+carrying `.saipen/`), never the install home: a flattened/installed runtime
+home has no `.saipen/` of its own and must still answer green.
+
 ## Wave 1 — identity and capabilities
 
 `agent != model`. `--agent <id>` selects the acting SAIPEN seat and participates

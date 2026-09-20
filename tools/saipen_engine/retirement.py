@@ -872,11 +872,116 @@ def legacy_ticket_record_errors(ticket_id: str, record: object) -> list[str]:
     return errors
 
 
+#: The closed field set of a receipt-only retirement tombstone (T-1434 M3).
+RECEIPT_ONLY_TOMBSTONE_FIELDS = frozenset(
+    {
+        "schema_version",
+        "receipt_id",
+        "source_sha256",
+        "measured_sha256",
+        "linked_work",
+        "status",
+        "archive_ref",
+        "retirement",
+        "retired_at",
+        "retired_by",
+        "retirement_event",
+        "source_reason",
+    }
+)
+
+#: The closed field set of a receipt-only retirement block inside the archived
+#: metadata (the exact same story the tombstone tells).
+RECEIPT_ONLY_RETIREMENT_FIELDS = frozenset(
+    {
+        "schema_version",
+        "receipt_only",
+        "reason",
+        "successor",
+        "note",
+        "recorded_sha256",
+        "measured_sha256",
+        "digest_mismatch",
+        "retired_at",
+        "retired_by",
+        "retirement_event",
+        "source_reason",
+    }
+)
+
+
+def _receipt_only_block_errors(label: str, block: object) -> list[str]:
+    if not isinstance(block, dict):
+        return [f"{label} has no retirement block"]
+    errors: list[str] = []
+    if block.get("schema_version") != RETIREMENT_SCHEMA_VERSION:
+        errors.append(f"{label} retirement block has invalid schema_version")
+    if set(block) != RECEIPT_ONLY_RETIREMENT_FIELDS:
+        errors.append(f"{label} retirement block field set drift")
+    if block.get("receipt_only") is not True:
+        errors.append(f"{label} is not marked receipt_only")
+    if not valid_source_retirement_reason(block.get("reason")):
+        errors.append(f"{label} carries an unregistered source reason")
+    successor = block.get("successor")
+    if successor not in (None, "") and not intake._valid_receipt_id(str(successor)):
+        errors.append(f"{label} successor is not a Source receipt id")
+    note = block.get("note")
+    if note is not None and (not isinstance(note, str) or "\n" in note):
+        errors.append(f"{label} note is neither null nor a single line")
+    for field in ("recorded_sha256", "measured_sha256"):
+        if not isinstance(block.get(field), str) or not _SHA256_RE.fullmatch(block[field]):
+            errors.append(f"{label} {field} is not a sha256")
+    if not isinstance(block.get("digest_mismatch"), bool):
+        errors.append(f"{label} digest_mismatch is not a boolean")
+    if not valid_stamp(block.get("retired_at")):
+        errors.append(f"{label} retired_at is not a UTC timestamp")
+    if not isinstance(block.get("retired_by"), str) or not block.get("retired_by", "").strip():
+        errors.append(f"{label} retired_by is empty")
+    if _event_number(block.get("retirement_event")) is None:
+        errors.append(f"{label} retirement_event is not an event id")
+    return errors
+
+
+def receipt_only_tombstone_errors(receipt_id: str, tomb: dict) -> list[str]:
+    """Structural validation for a receipt-only retirement tombstone."""
+    label = f"retired source tombstone {receipt_id}"
+    errors: list[str] = []
+    if tomb.get("schema_version") != RETIREMENT_SCHEMA_VERSION:
+        errors.append(f"{label} has invalid schema_version")
+    if set(tomb) != RECEIPT_ONLY_TOMBSTONE_FIELDS:
+        errors.append(
+            f"{label} field set drift: missing "
+            f"{sorted(RECEIPT_ONLY_TOMBSTONE_FIELDS - set(tomb))} unexpected "
+            f"{sorted(set(tomb) - RECEIPT_ONLY_TOMBSTONE_FIELDS)}"
+        )
+    if tomb.get("receipt_id") != receipt_id:
+        errors.append(f"{label} identity drift")
+    if tomb.get("status") != intake.INVALID_STATUS or not tomb.get("retired_at"):
+        errors.append(f"{label} is not a retired tombstone state")
+    if tomb.get("archive_ref") != retired_source_ref(receipt_id):
+        errors.append(f"{label} has invalid archive_ref")
+    linked = tomb.get("linked_work")
+    if linked is not None and not (isinstance(linked, str) and _TICKET_RE.fullmatch(linked)):
+        errors.append(f"{label} linked_work is neither null nor a ticket id")
+    for field in ("source_sha256", "measured_sha256"):
+        if not isinstance(tomb.get(field), str) or not _SHA256_RE.fullmatch(tomb[field]):
+            errors.append(f"{label} has invalid {field}")
+    errors.extend(_receipt_only_block_errors(label, tomb.get("retirement")))
+    for field in ("retired_at", "retired_by", "retirement_event"):
+        if tomb.get(field) != (tomb.get("retirement") or {}).get(field):
+            errors.append(f"{label} {field} disagrees with its retirement block")
+    if tomb.get("source_reason") != (tomb.get("retirement") or {}).get("source_reason"):
+        errors.append(f"{label} source_reason disagrees with its retirement block")
+    return errors
+
+
 def retirement_tombstone_errors(receipt_id: str, tomb: dict) -> list[str]:
     """Structural validation for one retired tombstone projection."""
     label = f"retired tombstone {receipt_id}"
     if tomb.get("schema_version") == LEGACY_SCHEMA_VERSION:
         return [_legacy_error(label)]
+    if isinstance(tomb.get("retirement"), dict) and tomb["retirement"].get("receipt_only"):
+        return receipt_only_tombstone_errors(receipt_id, tomb)
     errors: list[str] = []
     if tomb.get("schema_version") != RETIREMENT_SCHEMA_VERSION:
         errors.append(f"{label} has invalid schema_version")
@@ -910,6 +1015,16 @@ def meta_retirement_errors(receipt_id: str, meta: dict, tomb: dict) -> list[str]
         return [f"{label} has no retirement block"]
     if block.get("schema_version") == LEGACY_SCHEMA_VERSION:
         return [_legacy_error(label)]
+    if block.get("receipt_only"):
+        errors = _receipt_only_block_errors(label, block)
+        if meta.get("receipt_id") != receipt_id:
+            errors.append(f"{label} identity drift")
+        if meta.get("linked_work") != tomb.get("linked_work"):
+            errors.append(f"{label} names different Work than its tombstone")
+        for field in ("source_sha256", "measured_sha256"):
+            if meta.get(field) != tomb.get(field) and block.get(field) != tomb.get(field):
+                errors.append(f"{label} {field} disagrees with its tombstone")
+        return errors
     errors: list[str] = []
     if block.get("schema_version") != RETIREMENT_SCHEMA_VERSION:
         errors.append(f"{label} retirement block has invalid schema_version")
@@ -1212,6 +1327,8 @@ def retired_archive_errors(root: Path, receipt_id: str, tomb: dict) -> list[str]
     """The receipt half: exact body bytes, honest metadata, a resolvable link."""
     errors: list[str] = []
     digest = tomb.get("source_sha256")
+    block = tomb.get("retirement") if isinstance(tomb.get("retirement"), dict) else {}
+    receipt_only = bool(block.get("receipt_only"))
     try:
         body = intake._read_owned_file(
             root,
@@ -1221,7 +1338,16 @@ def retired_archive_errors(root: Path, receipt_id: str, tomb: dict) -> list[str]
         )
     except (FileNotFoundError, OSError, ValueError) as exc:
         return [f"retired receipt {receipt_id} body unreadable: {exc}"]
-    if hashlib.sha256(body).hexdigest() != digest:
+    # Receipt-only retirement preserves the ORIGINAL bytes even when the
+    # recorded digest no longer matches them (STALE_CREDENTIAL): the measured
+    # digest is what the archived copy must reproduce, so corruption stays
+    # visible instead of being "fixed" during cold storage.
+    expected = (
+        block.get("measured_sha256")
+        if receipt_only and block.get("digest_mismatch")
+        else digest
+    )
+    if hashlib.sha256(body).hexdigest() != expected:
         errors.append(f"retired receipt {receipt_id} archived body digest mismatch")
     try:
         meta_raw = intake._read_owned_file(
@@ -1241,7 +1367,10 @@ def retired_archive_errors(root: Path, receipt_id: str, tomb: dict) -> list[str]
         errors.append(f"retired receipt {receipt_id} archived metadata digest drift")
     if tomb.get("schema_version") != LEGACY_SCHEMA_VERSION:
         errors.extend(meta_retirement_errors(receipt_id, meta, tomb))
-        errors.extend(retired_link_errors(root, receipt_id, tomb))
+        # A receipt-only retirement has no ticket link to resolve; its identity
+        # is the tombstone itself plus the archived meta.
+        if not receipt_only:
+            errors.extend(retired_link_errors(root, receipt_id, tomb))
     if os.path.lexists(root / ".saipen" / "intake" / "active" / f"{receipt_id}.md"):
         errors.append(f"retired receipt {receipt_id} still holds an active body")
     return errors
@@ -1387,6 +1516,239 @@ def source_retirement_targets(
         if current is not None:
             targets.append(_delete_target(rel, current))
 
+    tomb_rel = f".saipen/intake/tombstones/{receipt_id}.json"
+    targets.append(
+        _write_target(tomb_rel, intake._json_bytes(tombstone), _existing(root, tomb_rel))
+    )
+    return targets, tombstone
+
+
+# ------------------------------------------------- receipt-only retirement
+
+
+#: Receipt-only retirement reasons (T-1434 M3 / SRC-088). These retire a SOURCE
+#: whose own state proves it cannot represent current actionable work. Each one
+#: is machine-checkable, which is the whole point: a reason that cannot be
+#: proven is a free-text excuse to delete a receipt.
+#:
+#:   EMPTY_STALE_SOURCE       zero requirements; nothing was ever owed.
+#:   STALE_CREDENTIAL         the body no longer matches its recorded digest
+#:                            identity (bytes are preserved, never rewritten).
+#:   SUPERSEDED_SOURCE        a named successor receipt exists; no unresolved
+#:                            requirement is discarded.
+#:   ORPHANED_RECEIPT         no live Work references it and its linked Work is
+#:                            absent from BOARD.
+#:   MISROUTED_PROJECT_BINDING the receipt was minted here by a wrong-root
+#:                            resolution; requires a --note naming the owner.
+SOURCE_RETIREMENT_REASONS = (
+    "EMPTY_STALE_SOURCE",
+    "STALE_CREDENTIAL",
+    "SUPERSEDED_SOURCE",
+    "ORPHANED_RECEIPT",
+    "MISROUTED_PROJECT_BINDING",
+)
+
+
+def valid_source_retirement_reason(reason: object) -> bool:
+    return isinstance(reason, str) and reason in SOURCE_RETIREMENT_REASONS
+
+
+def source_retirement_errors(
+    root: Path,
+    receipt_id: str,
+    *,
+    reason: str,
+    successor: str | None,
+    note: str | None,
+) -> list[str]:
+    """Why this receipt may NOT be retired for this reason, or [] when it may.
+
+    PLAN-time only, zero writes. Unresolved actionable requirements ALWAYS
+    refuse: retirement may remove a non-actionable receipt from CURRENT gating,
+    never discard an obligation. Each reason additionally proves its own class.
+    """
+    root = Path(root)
+    problems: list[str] = []
+    if not intake._valid_receipt_id(receipt_id):
+        return [f"{receipt_id!r} is not a Source receipt id"]
+    if not valid_source_retirement_reason(reason):
+        return [f"reason {reason!r} is outside {'|'.join(SOURCE_RETIREMENT_REASONS)}"]
+    meta = intake._read_meta(root, receipt_id)
+    if not meta:
+        return [f"{receipt_id} has no active metadata (already retired or never captured)"]
+    if str(meta.get("status") or "") != intake.ACTIVE_STATUS:
+        problems.append(f"{receipt_id} is {meta.get('status')!r}, not ACTIVE")
+    successor = str(successor or "").strip()
+    try:
+        summary = intake.coverage_summary(root, receipt_id)
+    except (OSError, ValueError) as exc:
+        return [f"{receipt_id} coverage is unreadable: {exc}"]
+    unresolved = list(summary.get("unresolved") or [])
+    if unresolved:
+        problems.append(
+            f"{receipt_id} still carries {len(unresolved)} unresolved actionable "
+            f"requirement(s): {', '.join(unresolved[:3])}"
+            + (" ..." if len(unresolved) > 3 else "")
+        )
+    if reason == "EMPTY_STALE_SOURCE" and summary.get("requirements"):
+        problems.append(
+            f"{receipt_id} is not empty: it carries {summary['requirements']} requirement(s)"
+        )
+    if reason == "SUPERSEDED_SOURCE":
+        if not successor:
+            problems.append("SUPERSEDED_SOURCE requires --successor SRC-###")
+        elif not intake._valid_receipt_id(successor):
+            problems.append(f"successor {successor!r} is not a Source receipt id")
+        elif successor == receipt_id:
+            problems.append(f"{receipt_id} cannot succeed itself")
+        else:
+            successor_meta = intake._read_meta(root, successor)
+            successor_tomb = intake._read_index(root).get("tombstones", {}).get(successor)
+            if not successor_meta and not successor_tomb:
+                problems.append(
+                    f"successor {successor} exists in neither ACTIVE nor tombstones"
+                )
+    if reason == "ORPHANED_RECEIPT":
+        from .board import parse_board
+
+        board_raw = _existing(root, ".saipen/BOARD.md")
+        tickets = (
+            parse_board(board_raw.decode("utf-8-sig")).get("tickets", {})
+            if board_raw is not None
+            else {}
+        )
+        linked = str(meta.get("linked_work") or "").strip()
+        if linked and linked in tickets:
+            problems.append(f"{receipt_id} is still linked to live Work {linked}")
+        if not linked:
+            referencing = [
+                tid
+                for tid, t in tickets.items()
+                if receipt_id in str((t.get("fields") or {}).get("source_receipts") or "")
+            ]
+            if referencing:
+                problems.append(
+                    f"{receipt_id} is claimed by BOARD Work {referencing[0]}"
+                )
+    # A broken body-digest identity has exactly ONE provable reason class: it
+    # may not be buried under EMPTY_STALE_SOURCE or ORPHANED_RECEIPT, because
+    # then the corruption disappears from the retirement record's meaning.
+    try:
+        identity_ok = bool(intake.verify_integrity(root, receipt_id).get("ok"))
+    except (OSError, ValueError) as exc:
+        problems.append(f"{receipt_id} body-digest identity is unreadable: {exc}")
+        identity_ok = False
+    if reason == "STALE_CREDENTIAL":
+        if identity_ok:
+            problems.append(
+                f"{receipt_id} still passes its own body-digest identity check; "
+                "STALE_CREDENTIAL requires a provably dead credential/digest identity"
+            )
+    elif not identity_ok:
+        problems.append(
+            f"{receipt_id} fails its own body-digest identity; the provable "
+            f"reason class is STALE_CREDENTIAL, not {reason}"
+        )
+    if reason == "MISROUTED_PROJECT_BINDING" and not str(note or "").strip():
+        problems.append("MISROUTED_PROJECT_BINDING requires --note naming the true project")
+    return problems
+
+
+def source_only_retirement_targets(
+    root: Path,
+    receipt_id: str,
+    *,
+    reason: str,
+    successor: str | None,
+    note: str | None,
+    shared: dict,
+) -> tuple[list[TargetPlan], dict]:
+    """Plan a receipt-only retirement: cold copy first, hot surface out.
+
+    The ORIGINAL body bytes are copied to cold storage EXACTLY as they stand
+    (corrupt digest included) and the measured digest is recorded beside the
+    recorded one, so nothing is silently rewritten and the mismatch stays
+    visible forever. Raises ValueError on anything the caller must refuse.
+    """
+    root = Path(root)
+    meta = intake._read_meta(root, receipt_id)
+    if not meta:
+        raise ValueError(f"receipt {receipt_id} has no active metadata")
+    recorded = meta.get("source_sha256")
+    body = _existing(root, f".saipen/intake/active/{receipt_id}.md")
+    if body is None:
+        raise ValueError(
+            f"receipt {receipt_id} body missing; original bytes cannot be preserved"
+        )
+    measured = hashlib.sha256(body).hexdigest()
+    retirement = {
+        "schema_version": RETIREMENT_SCHEMA_VERSION,
+        "receipt_only": True,
+        "reason": reason,
+        "successor": str(successor or ""),
+        "note": str(note or ""),
+        "recorded_sha256": recorded,
+        "measured_sha256": measured,
+        "digest_mismatch": measured != recorded,
+        **shared,
+    }
+    retired_meta = dict(meta)
+    retired_meta["status"] = intake.INVALID_STATUS
+    retired_meta["storage_status"] = intake.ARCHIVED_STATUS
+    retired_meta["archive_ref"] = retired_source_ref(receipt_id)
+    retired_meta["retirement"] = retirement
+    tombstone = {
+        "schema_version": RETIREMENT_SCHEMA_VERSION,
+        "receipt_id": receipt_id,
+        "source_sha256": recorded,
+        "measured_sha256": measured,
+        "linked_work": meta.get("linked_work"),
+        "status": intake.INVALID_STATUS,
+        "archive_ref": retired_source_ref(receipt_id),
+        "retirement": retirement,
+        **shared,
+    }
+
+    targets: list[TargetPlan] = []
+    body_rel = retired_source_ref(receipt_id)
+    targets.append(_write_target(body_rel, body, _existing(root, body_rel)))
+    meta_rel = retired_meta_ref(receipt_id)
+    targets.append(
+        _write_target(meta_rel, intake._json_bytes(retired_meta), _existing(root, meta_rel))
+    )
+    for label, active_rel in (
+        ("contract", f".saipen/intake/contracts/{receipt_id}.json"),
+        ("coverage", f".saipen/intake/coverage/{receipt_id}.json"),
+    ):
+        current = _existing(root, active_rel)
+        if current is None:
+            continue
+        cold_rel = f"{RETIRED_DIR}/{receipt_id}.{label}.json"
+        targets.append(_write_target(cold_rel, current, _existing(root, cold_rel)))
+    for revision in sorted((root / ".saipen/intake/contracts").glob(f"{receipt_id}.r*.json")):
+        if not revision.is_file():
+            continue
+        rel = f".saipen/intake/contracts/{revision.name}"
+        current = _existing(root, rel)
+        if current is None:
+            continue
+        targets.append(
+            _write_target(f"{RETIRED_DIR}/{revision.name}", current, _existing(root, rel))
+        )
+    for active_rel in (
+        f".saipen/intake/active/{receipt_id}.meta.json",
+        f".saipen/intake/active/{receipt_id}.md",
+        f".saipen/intake/contracts/{receipt_id}.json",
+        f".saipen/intake/coverage/{receipt_id}.json",
+    ):
+        current = _existing(root, active_rel)
+        if current is not None:
+            targets.append(_delete_target(active_rel, current))
+    for revision in sorted((root / ".saipen/intake/contracts").glob(f"{receipt_id}.r*.json")):
+        rel = f".saipen/intake/contracts/{revision.name}"
+        current = _existing(root, rel)
+        if current is not None:
+            targets.append(_delete_target(rel, current))
     tomb_rel = f".saipen/intake/tombstones/{receipt_id}.json"
     targets.append(
         _write_target(tomb_rel, intake._json_bytes(tombstone), _existing(root, tomb_rel))

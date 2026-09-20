@@ -158,6 +158,24 @@ for adapter in adapters:
 PY
 }
 
+adapter_surfaces() { # $1=adapter id; prints that adapter's declared instruction_surfaces, one per line
+  "$PYTHON_BIN" - "$REGISTRY" "$1" <<'PY'
+import json
+import sys
+
+registry_path, adapter_id = sys.argv[1], sys.argv[2]
+sys.stdout.reconfigure(newline="\n")
+with open(registry_path, encoding="utf-8") as handle:
+    registry = json.load(handle)
+for adapter in registry.get("adapters") or []:
+    if str(adapter.get("id", "")) == adapter_id:
+        for surface in adapter.get("instruction_surfaces") or []:
+            if isinstance(surface, str) and surface:
+                print(surface)
+        break
+PY
+}
+
 MANIFEST_ROWS=$(manifest_query all) \
   || { echo "FATAL: saipen/MANIFEST.json is invalid"; exit 1; }
 [ -n "$MANIFEST_ROWS" ] \
@@ -566,16 +584,29 @@ while IFS='|' read -r id name home skill instruction hook artifact bespoke legac
         fi
 
         # FreeBuff always-on activation backstop
+        # T-1426 live RED: FreeBuff ships TWO loaders with DIFFERENT home
+        # knowledge contracts, so installing ONE surface leaves the other
+        # loader blind:
+        #   * the freebuff CLI reads the FIRST existing of ~/.knowledge.md,
+        #     ~/.AGENTS.md, ~/.claude.md;
+        #   * FreeBuff Desktop (orchestrator loadUserKnowledgeFiles) scans the
+        #     home for DOT-prefixed entries only and reads the FIRST of
+        #     .AGENTS.md, .CLAUDE.md -- ~/.knowledge.md is not a home surface
+        #     for it at all.
+        # Install ALL registry-declared instruction_surfaces; an either/or
+        # choice here is exactly the defect class this backstop removes.
         _freebuff_detected=0
         [ -d "$HOME/.agents" ] && _freebuff_detected=1
         command -v freebuff >/dev/null 2>&1 && _freebuff_detected=1
         [ -d "$HOME/.agents/skills" ] && _freebuff_detected=1
         if [ "$_freebuff_detected" -eq 1 ]; then
-          if [ -f "$HOME/.knowledge.md" ] || [ ! -f "$HOME/.AGENTS.md" ]; then
-            report "FreeBuff knowledge" add_block "$HOME/.knowledge.md"
-          else
-            report "FreeBuff AGENTS.md" add_block "$HOME/.AGENTS.md"
+          _fb_surfaces="$(adapter_surfaces freebuff)"
+          if [ -z "$_fb_surfaces" ]; then
+            printf '%-28s %s\n' "FreeBuff" "FAILED: registry declares no instruction_surfaces"
           fi
+          for _surface in $_fb_surfaces; do
+            report "FreeBuff $_surface" add_block "$(expand_home "$_surface")"
+          done
         else printf '%-28s %s\n' "FreeBuff" "not installed - skip"; fi
         ;;
       aider-conf)

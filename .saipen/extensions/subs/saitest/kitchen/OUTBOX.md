@@ -1,5 +1,21 @@
 # OUTBOX
 
+## TEST-11: continuation is read-only; T-1347 false positive reproduced
+- **status:** ready
+- **summary:** Three bounded continuation/help scenarios are NOT_REPRODUCED; thread.join misclassification is REPRODUCED and already belongs to T-1347.
+- **main_project_refs:** [tools/saipen.py, tools/test_concurrency_independence.py, tools/test_opencode_bound_launch_smoke.py]
+- **critical:** true
+- **severity:** P2
+- **producer:** saitest
+- **source_head:** b7f5b51280b8f49c5fedbf7a00aeb6d4f45743ba
+- **source_tree_fingerprint:** git-delta-v1:4c6fd9b3f13a1d7a0b203e00a759dae5eac1474eabb77cb3e39dad9da1953eb9
+- **role_revision:** sha256:801fbfdc4be680d87b18cd21e6246d83fad5b474ebd7fe82efa83918cecf2f08
+- **coverage:** four bounded order/repetition/input/timing-classification scenarios in kitchen/TEST-11.md
+- **payload:** []
+- **verified:** PASS -- all four scenarios have evidence and a verdict; concurrency suite itself has 1 known failure and 1 opt-in skip among 9 tests, not full-green.
+- **instructions:** Core review kitchen/TEST-11.md; preserve T-1347 ownership. saipython may prepare the narrow detector fix in its pen.
+- **details:** No main source changed. Repeated diagnostic hashes agree. Exact commands and limitations are preserved in TEST-11.md.
+
 ## TEST-1: No findings to reproduce
 - **status:** stale
 - **superseded_by:** TEST-2
@@ -198,7 +214,8 @@
 - **details:** Scenario 1 NOT_REPRODUCED: deterministic drift repairs and continuation proceeds. Scenario 2 NOT_REPRODUCED: legacy metadata remains truthful and does not globally block current continuation; no evidence is synthesized. Scenario 3 REPRODUCED as the intended safety behavior: ambiguous active receipt refuses with `BLOCKED_AMBIGUOUS_SOURCE_RECEIPT`. Scenario 4 NOT_REPRODUCED: repair is idempotent. Scenario 5 NOT_REPRODUCED: canonical loaded SAIPEN root is used without a project-local probe. Scenario 6 NOT_REPRODUCED: recover CLEAN/REPAIRED is not followed by validation failure for a repairable condition.
 
 ## TEST-10: regression sweep at 005a8ac2 — no failure reproduced
-- **status:** ready
+- **status:** stale
+- **superseded_by:** TEST-11 -- source identity changed; old observations preserved.
 - **summary:** Independent regression sweep over the post-T1363 tree; all test suites green, no failure reproduced
 - **main_project_refs:** []
 - **critical:** false
