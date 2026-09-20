@@ -169,6 +169,36 @@ class GreenPathTests(SupersessionFixture):
         self.assertEqual(verdict.chain[:2], ("T-7", successor))
         self.assertIn("no committed release evidence", verdict.detail)
 
+    def test_closure_evidence_exemption_is_not_blindness(self):
+        """The superseded_verified skip exempts a MODE, never a claim (T-1418).
+
+        A superseded ticket never ran its own VERIFY cycle, so the generic
+        current-cycle classifier cannot apply and the closure-evidence gate
+        skips it. That skip must not swallow a bad closure: with the successor
+        demoted out of DONE the closure-provenance gate still FAILs the very
+        same ticket the evidence gate stepped over.
+        """
+        project, successor, evidence, authority = self.prepare()
+        self.assertTrue(self.supersede(project, successor, evidence, authority).ok)
+        board_path = project / ".saipen" / "BOARD.md"
+        board = board_path.read_text(encoding="utf-8")
+        raw = parse_board(board)["tickets"][successor]["raw"]
+        board_path.write_text(
+            board.replace(raw + "\n", "", 1).replace(
+                "## TODO\n", "## TODO\n" + raw.replace("- [x] ", "- [ ] ") + "\n", 1
+            ),
+            encoding="utf-8",
+        )
+        proc = subprocess.run(
+            [sys.executable, str(TOOLS / "validate.py"), "--project-root", str(project)],
+            cwd=ROOT,
+            text=True,
+            capture_output=True,
+            check=False,
+        )
+        output = proc.stdout + proc.stderr
+        self.assertIn("supersession T-7 names non-DONE successor", output)
+
     def test_public_cli_is_the_canonical_operation(self):
         project, successor, evidence, authority = self.prepare()
         proc = subprocess.run(

@@ -3442,6 +3442,17 @@ if log_files:
                 _last_ticket_event[_ctid] = _cev["event"]
         _done_ids = sorted(t["id"] for t in tickets.values() if t.get("section") == "## DONE")
         for _done_id in _done_ids:
+            # [closure-evidence] / superseded_verified (T-1418): a superseded
+            # ticket never ran its own VERIFY cycle -- it closed because a
+            # later DONE Work implemented and verified it. Its evidence
+            # contract is the successor-owned `[target: OLD]` PASS plus the
+            # successor's later canonical completion, and that exact contract
+            # is validated by the closure-provenance gate above. The generic
+            # current-cycle classifier cannot apply by construction, and a
+            # superseded ticket with BAD authority/evidence still FAILs in
+            # that gate -- so skipping it here exempts a mode, not a claim.
+            if _closure_mode(tickets.get(_done_id) or {}) == "superseded_verified":
+                continue
             _last_ev = _last_ticket_event.get(_done_id)
             if _ev_boundary is None:
                 # No strict VERIFY boundary exists in this project's
