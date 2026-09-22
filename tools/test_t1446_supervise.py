@@ -61,7 +61,9 @@ AGENT = r'''
 import json, os, sys, time
 from pathlib import Path
 
-root = Path(os.environ["SAIPEN_PROJECT_ROOT"])
+root = Path.cwd()
+assert os.environ.get("PWD") == str(root), "PWD must name the project"
+assert "SAIPEN_PROJECT_ROOT" not in os.environ, "no inherited binding carrier"
 control = Path(os.environ["FAKE_AGENT_CONTROL"])
 plan = json.loads((control / "plan.json").read_text(encoding="utf-8"))
 counter = control / "counter.txt"
@@ -310,6 +312,35 @@ class QualityOverTimeTests(SuperviseFixture):
             text = (self.project / ".saipen" / name).read_text(encoding="utf-8")
             self.assertNotIn("bad-model", text, name)
             self.assertNotIn("good-model", text, name)
+
+
+class FailureChannelTests(unittest.TestCase):
+    """Field soak 2026-09-22: a killed generation was stopped as AUTH_FAILED
+    because an auth word sat in the agent's own transcript."""
+
+    TRANSCRIPT = "\n".join(
+        [
+            json.dumps({"type": "tool_use", "part": {"state": {"output":
+                        "HTTP 401 Unauthorized is handled in auth.py; 429 rate limit docs"}}}),
+            json.dumps({"type": "text", "part": {"text": "the model is not found in cache"}}),
+        ]
+    )
+
+    def test_transcript_content_never_names_the_failure(self):
+        text = worker.failure_text(self.TRANSCRIPT, "")
+        self.assertEqual(text, "")
+        # A forced kill exits 1 with a silent error channel: a crash, not auth.
+        self.assertEqual(supervisor.classify_failure(1, text), supervisor.WORKER_CRASH)
+        self.assertEqual(supervisor.classify_failure(9, text), supervisor.WORKER_CRASH)
+
+    def test_error_events_and_stderr_still_classify(self):
+        event = json.dumps({"type": "error", "error": {"message": "429 Too Many Requests"}})
+        text = worker.failure_text(self.TRANSCRIPT + "\n" + event, "")
+        self.assertEqual(supervisor.classify_failure(1, text), supervisor.RATE_LIMITED)
+        text = worker.failure_text(self.TRANSCRIPT, "Error: 401 Unauthorized")
+        self.assertEqual(supervisor.classify_failure(1, text), supervisor.AUTH_FAILED)
+        plain = worker.failure_text("Error: model x not found", "")
+        self.assertEqual(supervisor.classify_failure(1, plain), supervisor.MODEL_UNAVAILABLE)
 
 
 class ProcessTreeTests(SuperviseFixture):

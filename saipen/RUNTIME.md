@@ -132,7 +132,9 @@ and HOST_RUNTIME_FAILURE replace the generation; RATE_LIMITED,
 PROVIDER_UNAVAILABLE and NETWORK_UNAVAILABLE back off and retry;
 QUOTA_EXHAUSTED and MODEL_UNAVAILABLE move to the next model ONLY from the
 operator's `--fallback-model` list, otherwise stop with an operator action;
-AUTH_FAILED always stops; UNKNOWN stops after a repeat. CAPABILITY_UNAVAILABLE
+AUTH_FAILED always stops; UNKNOWN stops after a repeat. A class is read only
+from error channels (stderr, non-JSON stdout, JSON error events), never from
+the agent's own transcript; a silent nonzero exit is WORKER_CRASH. CAPABILITY_UNAVAILABLE
 (an absent host, or a runtime without tools) is never read as reasoning
 failure: it moves only to an authorized runtime, else stops as a truthful
 blocker. Model identity lives in the runtime cache checkpoint, never in

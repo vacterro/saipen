@@ -380,12 +380,15 @@ class QualityFloorTests(unittest.TestCase):
         weak = self.recall("weak-model", previous=strong["agent_incarnation"])
         back = self.recall("strong-model", previous=weak["agent_incarnation"])
         keys = ("execution_epoch", "active_work", "phase", "canonical_next_action",
-                "last_durable_checkpoint", "claim_owner", "source_receipts")
+                "last_durable_checkpoint", "claim_owner", "source_receipts",
+                "acceptance", "objective")
         for key in keys:
             with self.subTest(key=key):
                 self.assertEqual(strong[key], weak[key])
                 self.assertEqual(weak[key], back[key])
         self.assertEqual(weak["phase"], "VERIFY")
+        self.assertEqual(weak["acceptance"], "verified by the focused suite")
+        self.assertNotIn("verified by the focused suite", cr.render_directive(weak))
         self.assertNotIn("SCOUT", weak["canonical_next_action"])
         self.assertIn("repair applied to x.py", weak["last_durable_checkpoint"])
         self.assertNotEqual(strong["agent_incarnation"], weak["agent_incarnation"])

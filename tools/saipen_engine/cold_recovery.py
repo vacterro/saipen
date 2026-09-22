@@ -805,6 +805,11 @@ def auto_recall(root, carrier: dict | None = None) -> dict:
         "execution_epoch": execution_epoch(task, owner, claim_event),
         "claim_event": claim_event,
         "active_work": task or None,
+        # QUALITY-TIME-01: the successor gets the SAME acceptance, verbatim
+        # from BOARD, whatever model it is. Data for the agent's own reads;
+        # never copied into the injected directive (P0-1).
+        "objective": _redact_prose(str((ticket or {}).get("description") or ""), 240) or None,
+        "acceptance": str(fields.get("verify") or "").strip() or None,
         "source_receipts": source_receipts,
         "phase": phase,
         "last_event": package.get("LAST_EVENT"),

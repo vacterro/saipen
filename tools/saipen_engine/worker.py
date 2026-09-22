@@ -31,6 +31,7 @@ from . import supervisor, watchdog
 from .paths import safe_atomic_write_bytes
 
 CHECKPOINT_REL = Path(".saipen") / "cache" / "autonomy-worker.json"
+LIVE_GENERATION_REL = Path(".saipen") / "cache" / "autonomy-live-generation.json"
 SCHEMA_VERSION = 1
 
 #: Exit codes. A worker's exit status is the only thing a supervisor that did
@@ -242,6 +243,43 @@ def _agent_argv(template: list[str], model: str | None) -> list[str]:
     return [part.replace(MODEL_PLACEHOLDER, model) for part in template]
 
 
+def _tail(handle) -> str:
+    handle.seek(0, 2)
+    size = handle.tell()
+    handle.seek(max(0, size - OUTPUT_TAIL_BYTES))
+    return handle.read().decode("utf-8", errors="replace")
+
+
+def failure_text(stdout: str, stderr: str = "") -> str:
+    """The ONLY text a failure class may be read from: the error channels.
+
+    Measured in the first field soak (2026-09-22): a generation killed on
+    purpose exited 1, and the classifier found an auth word somewhere in the
+    agent's own JSON transcript -- file contents it had read, tool output --
+    and stopped the whole run as AUTH_FAILED. The transcript is the agent's
+    work, not the host's verdict. So: all of stderr; from stdout only lines
+    that are not JSON events, plus JSON events that ARE errors.
+    """
+    kept = [stderr] if stderr else []
+    for line in str(stdout or "").splitlines():
+        text = line.strip()
+        if not text:
+            continue
+        if not text.startswith("{"):
+            kept.append(text)
+            continue
+        try:
+            event = json.loads(text)
+        except ValueError:
+            kept.append(text)
+            continue
+        if isinstance(event, dict) and (
+            str(event.get("type") or "").lower() == "error" or "error" in event
+        ):
+            kept.append(json.dumps(event.get("error", event))[:2000])
+    return "\n".join(kept)
+
+
 def _kill_tree(proc) -> None:
     """Stop a generation AND every process it started.
 
@@ -292,16 +330,22 @@ def _run_generation(
     import tempfile
     import time
 
-    child_env = {**os.environ, **(env or {})}
-    child_env.update(
-        {
-            "SAIPEN_PROJECT_ROOT": str(root),
-            "SAIPEN_AUTONOMY_RUN_ID": run_id,
-            "SAIPEN_AUTONOMY_WORKER": worker_id,
-            "SAIPEN_LEASE_GENERATION": str(generation),
-        }
+    from .paths import unbound_environment
+
+    # The generation binds to the project by its cwd, exactly like a cold
+    # session: every inherited binding carrier is dropped and PWD is pointed
+    # at the project. A launcher started from another repository otherwise
+    # hands the host that repository's PWD, and a measured field model ran
+    # `saipen start` against the wrong ledger (16.09/17.09 incidents).
+    child_env = unbound_environment(
+        {**os.environ, **(env or {})},
+        PWD=str(root),
+        SAIPEN_AGENT=None,
+        SAIPEN_AUTONOMY_RUN_ID=run_id,
+        SAIPEN_AUTONOMY_WORKER=worker_id,
+        SAIPEN_LEASE_GENERATION=str(generation),
     )
-    with tempfile.TemporaryFile() as sink:
+    with tempfile.TemporaryFile() as sink, tempfile.TemporaryFile() as errsink:
         try:
             proc = subprocess.Popen(
                 argv,
@@ -309,7 +353,7 @@ def _run_generation(
                 env=child_env,
                 stdin=subprocess.DEVNULL,
                 stdout=sink,
-                stderr=subprocess.STDOUT,
+                stderr=errsink,
                 start_new_session=os.name != "nt",
             )
         except OSError as exc:
@@ -321,6 +365,17 @@ def _run_generation(
                 "fenced": False,
                 "bounded": False,
             }
+        # Diagnostic only: which process serves which generation, so an
+        # operator (or a chaos harness) can target exactly the live generation.
+        with contextlib.suppress(OSError, ValueError):
+            safe_atomic_write_bytes(
+                Path(root).resolve() / LIVE_GENERATION_REL,
+                json.dumps(
+                    {"worker_id": worker_id, "lease_generation": generation, "pid": proc.pid}
+                ).encode("utf-8"),
+                kind="autonomy live generation",
+                ownership_root=Path(root).resolve(),
+            )
         # QUALITY > TIME (QUALITY-TIME-01): elapsed time never implies failure.
         # `slice_timeout` is the IDLE bound -- the time a generation may run
         # without durable canonical progress -- and every observed progress
@@ -355,13 +410,12 @@ def _run_generation(
                 break
             time.sleep(min(0.2, max(0.01, heartbeat_every / 4)))
         returncode = proc.wait()
-        sink.seek(0, 2)
-        size = sink.tell()
-        sink.seek(max(0, size - OUTPUT_TAIL_BYTES))
-        output = sink.read().decode("utf-8", errors="replace")
+        output = _tail(sink)
+        errors = _tail(errsink)
     return {
         "returncode": returncode,
         "output": output,
+        "errors": errors,
         "timed_out": timed_out,
         "launch_error": False,
         "fenced": fenced,
@@ -383,6 +437,8 @@ def supervise(
     expire_after: float = 120.0,
     backoff: tuple[float, ...] = FAILURE_BACKOFF_SECONDS,
     max_awaits: int = 3,
+    max_wall_seconds: float | None = None,
+    keep_output_tail: int = 0,
     max_unknown: int = 2,
     run_id: str | None = None,
     env: dict | None = None,
@@ -439,7 +495,7 @@ def supervise(
 
     def report(stop: str, reason: str, *, operator_action: str | None = None) -> dict:
         return {
-            "ok": stop in (supervisor.IDLE, "MAX_CYCLES"),
+            "ok": stop in (supervisor.IDLE, "MAX_CYCLES", "MAX_WALL"),
             "code": "SUPERVISE_STOPPED",
             "run_id": run_id,
             "stop": stop,
@@ -451,7 +507,10 @@ def supervise(
             "history": history,
         }
 
+    run_started = clock()
     for cycle in range(1, int(max_cycles) + 1):
+        if max_wall_seconds is not None and clock() - run_started >= max_wall_seconds:
+            return report("MAX_WALL", f"wall bound of {max_wall_seconds:.0f} s reached")
         counters["cycles"] = cycle
         worker_id = f"{run_id}-c{cycle}"
         before_lease = watchdog.observe(
@@ -519,7 +578,7 @@ def supervise(
         else:
             failure = supervisor.classify_failure(
                 outcome["returncode"],
-                outcome["output"],
+                failure_text(outcome["output"], outcome.get("errors", "")),
                 timed_out=outcome["timed_out"] or outcome["fenced"] or outcome["bounded"],
                 launch_error=outcome["launch_error"],
                 progressed=progressed,
@@ -571,6 +630,10 @@ def supervise(
                 "returncode": outcome["returncode"],
                 "failure": failure,
                 "progressed": progressed,
+                "bounded": outcome["bounded"],
+                "output_tail": outcome["output"][-int(keep_output_tail):]
+                if keep_output_tail
+                else None,
             }
         )
         if failure is None:
@@ -619,6 +682,7 @@ def _supervise_main(argv: list[str]) -> int:
     parser.add_argument("--model", default=None)
     parser.add_argument("--fallback-model", action="append", default=[])
     parser.add_argument("--max-cycles", type=int, default=10)
+    parser.add_argument("--max-wall-seconds", type=float, default=None)
     parser.add_argument("--slice-timeout", type=float, default=900.0)
     parser.add_argument("--max-slice-seconds", type=float, default=None)
     parser.add_argument("--heartbeat-every", type=float, default=5.0)
@@ -635,6 +699,7 @@ def _supervise_main(argv: list[str]) -> int:
         model=args.model,
         fallback_models=tuple(args.fallback_model),
         max_cycles=args.max_cycles,
+        max_wall_seconds=args.max_wall_seconds,
         slice_timeout=args.slice_timeout,
         max_slice_seconds=args.max_slice_seconds,
         heartbeat_every=args.heartbeat_every,
