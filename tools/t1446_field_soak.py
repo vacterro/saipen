@@ -73,6 +73,67 @@ def build_project() -> Path:
     return _git_worktree(root)
 
 
+def _open_tickets(root: Path) -> int:
+    board = parse_board((root / ".saipen" / "BOARD.md").read_text(encoding="utf-8"))
+    return sum(
+        1
+        for ticket in board.get("tickets", {}).values()
+        if ticket.get("section") in ("## TODO", "## DOING")
+    )
+
+
+def supplier(root: Path, minimum: int, stop: threading.Event, log: list[dict]) -> None:
+    """Keep bounded Work available for a long soak: one new small task
+    whenever fewer than `minimum` are open. Same shape, same acceptance style,
+    numbered so each is distinct Work (never a duplicate by construction)."""
+    number = 0
+    while not stop.wait(30.0):
+        try:
+            if _open_tickets(root) >= minimum:
+                continue
+            number += 1
+            added = ticket_add(
+                root, "test-agent", "P2",
+                f"create src/value_{number}.py defining value_{number}() that returns "
+                f"{number}, and tests/test_value_{number}.py asserting it",
+                [],
+                "python -m unittest discover -s tests -t . passes",
+            )
+            log.append({"at": time.time(), "ok": added.ok, "ticket": added.data.get("ticket")})
+        except (OSError, ValueError, RuntimeError) as exc:
+            log.append({"at": time.time(), "ok": False, "error": str(exc)[:200]})
+
+
+def interim(root: Path, out: Path, started: float, kills: list, supplied: list,
+            stop: threading.Event, every: float) -> None:
+    """Durable evidence while the soak runs: a driver death loses nothing."""
+    while not stop.wait(every):
+        try:
+            board = parse_board((root / ".saipen" / "BOARD.md").read_text(encoding="utf-8"))
+            sections: dict[str, int] = {}
+            titles: dict[str, int] = {}
+            for ticket in board.get("tickets", {}).values():
+                section = ticket.get("section", "?")
+                sections[section] = sections.get(section, 0) + 1
+                title = str(ticket.get("description") or "").strip().lower()
+                titles[title] = titles.get(title, 0) + 1
+            live = root / worker.LIVE_GENERATION_REL
+            snapshot = {
+                "elapsed_seconds": round(time.monotonic() - started, 1),
+                "sections": sections,
+                "duplicate_work_count": sum(c - 1 for c in titles.values() if c > 1),
+                "live_generation": json.loads(live.read_text(encoding="utf-8"))
+                if live.exists() else None,
+                "deliberate_kills": list(kills),
+                "supplied": len(supplied),
+            }
+            with (out / "interim.jsonl").open("a", encoding="utf-8") as handle:
+                handle.write(json.dumps(snapshot) + "\n")
+        except (OSError, ValueError) as exc:
+            with (out / "interim.jsonl").open("a", encoding="utf-8") as handle:
+                handle.write(json.dumps({"error": str(exc)[:200]}) + "\n")
+
+
 def killer(root: Path, kill_at: list[float], started: float, log: list[dict]) -> None:
     """Deliberate worker death: kill the LIVE generation's whole process tree."""
     for moment in sorted(kill_at):
@@ -169,6 +230,11 @@ def main() -> int:
     parser.add_argument("--slice-timeout", type=float, default=420.0)
     parser.add_argument("--max-slice-seconds", type=float, default=1200.0)
     parser.add_argument("--max-cycles", type=int, default=80)
+    parser.add_argument("--kill-every", type=float, default=0.0,
+                        help="also kill the live generation every N seconds")
+    parser.add_argument("--supply-min-open", type=int, default=0,
+                        help="keep at least N open tickets by adding small tasks")
+    parser.add_argument("--interim-every", type=float, default=1800.0)
     parser.add_argument("--out", required=True)
     args = parser.parse_args()
     if not OPENCODE:
@@ -177,13 +243,32 @@ def main() -> int:
     out = Path(args.out)
     out.mkdir(parents=True, exist_ok=True)
     root = build_project()
+    (out / "project.txt").write_text(str(root), encoding="utf-8")
     started_wall = time.time()
     started = time.monotonic()
     kills: list[dict] = []
-    thread = threading.Thread(
-        target=killer, args=(root, args.kill_at, started, kills), daemon=True
-    )
-    thread.start()
+    supplied: list[dict] = []
+    stop = threading.Event()
+    schedule = list(args.kill_at)
+    if args.kill_every > 0:
+        moment = args.kill_every
+        while moment < args.wall_seconds:
+            schedule.append(moment)
+            moment += args.kill_every
+    threads = [
+        threading.Thread(target=killer, args=(root, schedule, started, kills), daemon=True),
+        threading.Thread(
+            target=interim,
+            args=(root, out, started, kills, supplied, stop, args.interim_every),
+            daemon=True,
+        ),
+    ]
+    if args.supply_min_open > 0:
+        threads.append(threading.Thread(
+            target=supplier, args=(root, args.supply_min_open, stop, supplied), daemon=True
+        ))
+    for thread in threads:
+        thread.start()
     result = worker.supervise(
         root,
         [OPENCODE, "run", "cc", "--format", "json", "--auto", "--model", worker.MODEL_PLACEHOLDER],
@@ -196,8 +281,10 @@ def main() -> int:
         max_wall_seconds=args.wall_seconds,
         keep_output_tail=1500,
     )
+    stop.set()
     elapsed = time.monotonic() - started
     report = {
+        "supplied_tickets": supplied,
         "schema_version": 1,
         "project": str(root),
         "model": args.model,
