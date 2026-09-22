@@ -28,11 +28,14 @@ from unittest.mock import patch
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "tools"))
 
-from saipen_engine.operations import apply_claim, plan_claim  # noqa: E402
+from saipen_engine.operations import apply_claim, plan_claim, ticket_add  # noqa: E402
+from test_hermetic_env import isolate_host_session  # noqa: E402
 
 CLI = ROOT / "tools" / "saipen.py"
 SCENARIO = ROOT / "tests" / "scenarios" / "userperson-valid" / ".saipen"
+AGENT = "probe"
 
+#: The two allocated tickets' exact BOARD serialization, in pick order.
 TWO_TODO = (
     "# Board\n"
     "## DOING\n"
@@ -44,6 +47,11 @@ TWO_TODO = (
 )
 
 
+def setUpModule() -> None:
+    """An outer host session must never bind this module's fixtures."""
+    isolate_host_session()
+
+
 class ExplicitClaimFixture(unittest.TestCase):
     def setUp(self) -> None:
         self.tmp = tempfile.TemporaryDirectory(prefix="saipen-explicit-claim-")
@@ -52,6 +60,14 @@ class ExplicitClaimFixture(unittest.TestCase):
         shutil.copytree(SCENARIO, self.root / ".saipen")
         (self.root / ".saipen" / "USERPERSON.md").unlink(missing_ok=True)
         self.board = self.root / ".saipen" / "BOARD.md"
+        # CORE-003 / SRC-026:R003: ticket identity comes from a canonical
+        # allocation event, never from a record that merely looks like a
+        # ticket. Build T-1 and T-2 through the allocator, then restore the
+        # exact serialized pick order this module pins (ticket_add prepends,
+        # so the allocator alone leaves T-2 topmost).
+        for description in ("top probe", "lower probe"):
+            added = ticket_add(self.root, AGENT, "P1", description, [], "probe")
+            self.assertTrue(added.ok, added.to_dict())
         self.board.write_text(TWO_TODO, encoding="utf-8")
         self.config = Path(self.tmp.name) / "user-config"
         self.env = patch.dict(os.environ, {"SAIPEN_USER_CONFIG_HOME": str(self.config)})
@@ -176,6 +192,29 @@ class CliSurfaceTests(ExplicitClaimFixture):
     def test_the_flag_alone_is_not_a_ticket_id(self) -> None:
         out = self.run_cli("claim", "--explicit")
         self.assertIn("VALIDATION_FAILED", out.stdout, out.stdout + out.stderr)
+
+
+class AllocationIdentityControlTests(ExplicitClaimFixture):
+    """RED control: canonical allocation is the only source of ticket identity.
+
+    The fixture above builds T-1/T-2 through the allocator. A record that
+    merely LOOKS like a ticket must still block canonical writes, or the
+    rewrite would have replaced the protected invariant with a green
+    assertion.
+    """
+
+    def test_a_phantom_record_blocks_an_unrelated_claim(self) -> None:
+        self.board_with(
+            "# Board\n## DOING\n## TODO\n"
+            "- [ ] T-1 [P1] top probe | verify: probe\n"
+            "- [ ] T-99 [P1] phantom | verify: probe\n"
+            "## DONE\n## BLOCKED\n"
+        )
+        out = apply_claim(self.root, "T-1", "probe")
+        self.assertFalse(out.get("ok"), out)
+        self.assertEqual(out.get("code"), "VALIDATION_FAILED", out)
+        self.assertIn("T-99", out.get("message") or "", out)
+        self.assertIn("allocation event", out.get("message") or "", out)
 
 
 if __name__ == "__main__":

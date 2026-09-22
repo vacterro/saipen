@@ -524,5 +524,98 @@ class PlanIdentityTests(unittest.TestCase):
         self.assertEqual(section_of(root, "T-195"), "## TODO")
 
 
+class NoFrontierAttestationTests(unittest.TestCase):
+    """The remedy a `legacy-done-review` refusal names must clear that refusal.
+
+    Measured (T-1346) on a project that never observed the closure contract
+    (`_closure_contract_frontier` is None): the attestation DEC is itself a
+    mechanized `[op: ...]` event, so the very next pass re-classified the
+    record as `current` and answered with a phantom-DONE reopen approval. The
+    operator's classification of a record as legacy must not be read as
+    closure-generation evidence.
+    """
+
+    @staticmethod
+    def _frontier_none_project(*, op: str | None = None) -> Path:
+        board = (
+            "## DOING\n"
+            "## TODO\n"
+            "## DONE\n"
+            "- [x] T-001 legacy completion | verify: PASS -- fixture\n"
+            "## BLOCKED\n"
+        )
+        root = project(
+            board, event(1, "T-001", "DEC: ticket added", op=op), task="none", last_event=1
+        )
+        # A terminal project, not a BUILD-in-progress one: the legacy
+        # next_action refusal is a different operator decision and must not
+        # stand in for the one under test.
+        state = (
+            STATE_TEMPLATE.format(task="none", last_event=1)
+            .replace("phase: BUILD", "phase: DONE")
+            .replace('next_action: "PHASE BUILD none"', 'next_action: "saipen continue"')
+            .replace("transition_from: PLAN", "transition_from: SHIP")
+        )
+        (root / ".saipen" / "STATE.md").write_text(state, encoding="utf-8")
+        return root
+
+    def test_the_named_remedy_clears_the_refusal(self):
+        root = self._frontier_none_project()
+        plan = reconcile_protocol_state(root, "test-agent", dry_run=True)
+        legacy_refusals = [
+            r
+            for r in plan.get("refused", [])
+            if r.get("ticket") == "T-001" and r.get("kind") == "legacy-done-review"
+        ]
+        self.assertEqual(len(legacy_refusals), 1, plan)
+        self.assertEqual(
+            legacy_refusals[0]["canonical_next_command"],
+            "saipen recover --attest-legacy-done T-001",
+        )
+
+        with _unbound_host():
+            code = saipen_main(
+                [
+                    "recover",
+                    "--attest-legacy-done",
+                    "T-001",
+                    "--project-root",
+                    str(root),
+                    "--agent",
+                    "test-agent",
+                    "--json",
+                ]
+            )
+        self.assertEqual(code, 0)
+
+        # The refusal is gone: no atom remains and the router is not refused.
+        self.assertEqual(atoms(root, "T-001"), [])
+        self.assertNotEqual(
+            reconcile_protocol_state(root, "test-agent", dry_run=True).get("code"),
+            "RECONCILE_REAUTH_REQUIRED",
+        )
+        with _unbound_host():
+            code = saipen_main(
+                [
+                    "continue",
+                    "--dry-run",
+                    "--project-root",
+                    str(root),
+                    "--agent",
+                    "test-agent",
+                    "--json",
+                ]
+            )
+        self.assertEqual(code, 0)
+
+    def test_a_genuinely_mechanized_record_is_still_current(self):
+        # The exception is narrow: a record touched by a real canonical
+        # operation in the same frontier-None project stays `current`, so its
+        # missing closure evidence still needs the operator's reopen approval.
+        root = self._frontier_none_project(op="ticket-" + "d" * 32)
+        self.assertIn("section-move", kinds(root, "T-001"))
+        self.assertNotIn("legacy-done-review", kinds(root, "T-001"))
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

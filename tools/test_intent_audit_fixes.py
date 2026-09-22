@@ -36,8 +36,43 @@ from saipen_engine import capability as CAP  # noqa: E402
 from saipen_engine import crew as C  # noqa: E402
 from saipen_engine import state as S  # noqa: E402
 from saipen_engine.conformance import _validate_conformance_containment  # noqa: E402
+from saipen_engine.reconcile import reconcile_protocol_state  # noqa: E402
 from saipen_engine.subs import SUBS_REL  # noqa: E402
+from test_hermetic_env import isolate_host_session  # noqa: E402
 import saipen as CLI  # noqa: E402
+
+AGENT = "test"
+
+
+def setUpModule() -> None:
+    """An outer host session must never bind this module's fixtures."""
+    isolate_host_session()
+
+
+def _canonicalize_legacy_done(root: Path) -> None:
+    """Answer the legacy-closure decision the current gate asks for.
+
+    `done-wait-deadlock-goal-mode` is a legacy-generation fixture: T-001 was
+    closed before the closure contract existed, so the reconcile preflight
+    refuses with RECONCILE_REAUTH_REQUIRED and names the one sanctioned
+    operator decision, `saipen recover --attest-legacy-done T-001`. The fixture
+    takes that exact decision once through the same canonical writer, so the
+    intent-routing semantics under test are reachable; the legacy refusal keeps
+    its own coverage in `test_legacy_lifecycle_compat.py`.
+    """
+    plan = reconcile_protocol_state(
+        root, AGENT, dry_run=True, attest_legacy_done=["T-001"]
+    )
+    if plan.get("code") == "CLEAN":
+        return
+    repair_id = plan.get("repair_id")
+    if not repair_id:
+        raise AssertionError(f"legacy fixture is not reconcilable: {plan}")
+    applied = reconcile_protocol_state(
+        root, AGENT, attest_legacy_done=["T-001"], approved_repair_id=repair_id
+    )
+    if not applied.get("ok"):
+        raise AssertionError(f"legacy attestation failed: {applied}")
 
 
 def _hash_tree(root: Path) -> str:
@@ -81,6 +116,7 @@ class IntentAuditTests(unittest.TestCase):
         self.addCleanup(temporary.cleanup)
         root = Path(temporary.name) / "project"
         shutil.copytree(TOOLS.parent / "tests/scenarios/done-wait-deadlock-goal-mode", root)
+        _canonicalize_legacy_done(root)
         return root
 
     @staticmethod
@@ -430,6 +466,13 @@ class IntentAuditTests(unittest.TestCase):
             with self.subTest(target=target):
                 root = self._resume_fixture()
                 self._set_fixture_intent(root, "converge", target)
+                if target == "crew":
+                    # `crew` convergence refuses while conformance is UNKNOWN,
+                    # and absent is never assumed PASS: the fixture takes the
+                    # canonical receipt through the front door the refusal
+                    # names, after the intent makes its STATE legal.
+                    rc, result = self._invoke_cli(root, "validate")
+                    self.assertEqual(rc, 0, result)
                 before = _hash_tree(root)
                 rc, result = self._invoke_cli(root, "continue", "--dry-run")
                 self.assertEqual(_hash_tree(root), before)

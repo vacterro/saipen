@@ -1922,9 +1922,13 @@ class CoreArchiveSettlementTamperTests(ControlFixture):
             (root / ".saipen/intake/index.json").read_text(encoding="utf-8")
         ).get("tombstones", {})
         second = intake.close_receipt(root, rid)
-        # Retry after a settled close is a stable no-op: the receipt has left
-        # the active surface, so the retry must not resurrect or re-settle it.
-        self.assertEqual(second.get("code"), "TICKET_NOT_FOUND", second)
+        # Retry after a settled close is a stable no-op (T-1323): the receipt
+        # is ALREADY a tombstone, so closure is a done fact and the retry
+        # re-proves the archived body instead of resurrecting or re-settling
+        # anything. The tombstone set below is the proof it did not move.
+        self.assertEqual(second.get("code"), "SOURCE_CLOSED", second)
+        self.assertTrue(second.get("ok"), second)
+        self.assertFalse(second.get("residue_removed"), second)
         self.assertEqual(
             json.loads((root / ".saipen/intake/index.json").read_text(encoding="utf-8")).get(
                 "tombstones", {}
@@ -1939,6 +1943,19 @@ class CoreArchiveSettlementTamperTests(ControlFixture):
         self.assertEqual(tombstone.get("requirements"), 1)
         self.assertEqual(tombstone.get("actionable"), 1)
         self.assertEqual(tombstone.get("unresolved"), 0)
+
+    def test_a_settled_retry_is_not_a_rubber_stamp(self) -> None:
+        # Red control for the idempotent retry above: the retry re-proves the
+        # archived body against the tombstone digest, so a corrupted archive
+        # refuses SOURCE_CORRUPTION instead of reporting a clean closed fact.
+        root, rid = self._resolved()
+        self._interrupt(root, rid)
+        self.assertTrue(intake.close_receipt(root, rid)["ok"])
+        archived = root / f".saipen/archive/source/{rid}.md"
+        archived.write_bytes(b"tampered after settlement\n")
+        retry = intake.close_receipt(root, rid)
+        self.assertFalse(retry.get("ok"), retry)
+        self.assertEqual(retry.get("code"), "SOURCE_CORRUPTION", retry)
 
 
 class CrewPlanSourceAuthorityOnceTests(unittest.TestCase):

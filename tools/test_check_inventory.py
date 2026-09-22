@@ -23,12 +23,14 @@ from __future__ import annotations
 
 import ast
 import json
+import os
 import shutil
 import sys
 import tempfile
 import unittest
 from dataclasses import replace
 from pathlib import Path
+from unittest import mock
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "tools"))
@@ -470,6 +472,51 @@ class ProbeIsolationTests(unittest.TestCase):
             and node.value.value == 1
         ]
         self.assertEqual(early, [], f"main returns 1 early at line(s) {early}")
+
+
+class HermeticProbeChildrenTests(unittest.TestCase):
+    """T-1446 -- a probe child is addressed by its cwd, never by the operator session."""
+
+    def test_the_child_env_strips_every_host_session_carrier(self) -> None:
+        hostile = {
+            "SAIPEN_PROJECT_ROOT": str(ROOT),
+            "SAIPEN_PROJECT_LINEAGE": "lineage-" + "f" * 32,
+            "SAIPEN_AGENT": "foreign-seat",
+            "SAIPEN_HOST_SESSION": "ses_foreign",
+        }
+        with mock.patch.dict(os.environ, hostile, clear=False):
+            env = A.hermetic_child_env(SAIPEN_VALIDATE_ALL_WARNINGS="1")
+        for key in A.HOST_SESSION_VARIABLES:
+            self.assertNotIn(key, env)
+        self.assertEqual(env["SAIPEN_VALIDATE_ALL_WARNINGS"], "1")
+
+    def test_every_python_child_is_launched_with_that_env(self) -> None:
+        # Structural red control: a validator or corpus child launched WITHOUT
+        # the hermetic env is the leak itself (measured: phase-rename judged the
+        # live repository while its copy carried the rename), so no
+        # `[sys.executable, ...]` call site may omit it.
+        source = (ROOT / "tools" / "audit_checks.py").read_text(encoding="utf-8-sig")
+        missing: list[int] = []
+        for node in ast.walk(ast.parse(source)):
+            if not (
+                isinstance(node, ast.Call)
+                and isinstance(node.func, ast.Attribute)
+                and node.func.attr == "run"
+                and isinstance(node.func.value, ast.Name)
+                and node.func.value.id == "subprocess"
+            ):
+                continue
+            argv = node.args[0] if node.args else None
+            if not (
+                isinstance(argv, ast.List)
+                and argv.elts
+                and isinstance(argv.elts[0], ast.Attribute)
+                and argv.elts[0].attr == "executable"
+            ):
+                continue
+            if "env" not in {kw.arg for kw in node.keywords}:
+                missing.append(node.lineno)
+        self.assertEqual(missing, [], f"python children without a hermetic env at {missing}")
 
 
 if __name__ == "__main__":

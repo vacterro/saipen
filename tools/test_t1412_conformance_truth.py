@@ -302,7 +302,7 @@ class StatusSurfaceTests(T1412Base):
                 decision = C.conformance_decision(root, gate="core")
                 self.assertEqual(decision["status"], expected)
                 self.assertEqual(decision["healthy"], expected == "CURRENT_PASS")
-                if expected == "CURRENT_PASS":
+                if expected in ("CURRENT_PASS", "CURRENT_FAIL"):
                     self.assertIsNone(decision["remediation_command"])
                 else:
                     self.assertEqual(
@@ -467,10 +467,11 @@ class RouterConformanceGateTests(T1412Base):
                     continue
                 self.assertFalse(result.ok, result)
                 self.assertEqual(result.code, "CONFORMANCE_UNHEALTHY", result)
-                self.assertEqual(result.data.get("action"), C.CONFORMANCE_REMEDIATION_COMMAND)
+                command = None if expected == "CURRENT_FAIL" else C.CONFORMANCE_REMEDIATION_COMMAND
+                self.assertEqual(result.data.get("action"), command)
                 self.assertEqual(
                     result.data.get("canonical_next_command"),
-                    C.CONFORMANCE_REMEDIATION_COMMAND,
+                    command,
                 )
                 self.assertEqual(result.data.get("conformance_status"), expected)
 

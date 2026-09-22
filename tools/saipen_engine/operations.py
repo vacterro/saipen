@@ -43,11 +43,13 @@ from .board import (
     claim_status,
     continuation_parent,
     escape_ticket_description,
+    iso_utc_sort_key,
     parse_board,
     pick_next_work,
     remove_ticket_field,
     reserved_continuation_child,
     set_ticket_field,
+    strict_iso_utc,
     ticket_has_blocker,
     ticket_is_workable,
 )
@@ -1799,9 +1801,18 @@ def _plan_attempt(
     new_log = docs["log"].text_norm.rstrip("\n") + "\n" + line + "\n"
     cleaned = remove_state_fields(docs["state"].text_norm, ("attempt",))
     new_state = patch_state(cleaned, {"last_event": event, "updated": utc, "agent": agent})
+    new_board = docs["board"].text_norm
+    if _close_is_recovery and task and task in _tickets:
+        # Validate the complete proposed checkpoint, including release of the
+        # predecessor's claim. Recovery closes an episode, not a new claim.
+        tick_raw = _tickets[task]["raw"]
+        released = tick_raw
+        for field in ("owner", "claim_time", "claim_session"):
+            released = remove_ticket_field(released, field)
+        new_board = new_board.replace(tick_raw, released, 1)
     errors = validate_texts(
         new_state,
-        docs["board"].text_norm,
+        new_board,
         new_log,
         current_agent=agent,
         sealed_events=docs["_history"],
@@ -1813,22 +1824,10 @@ def _plan_attempt(
         )
     targets = [
         *_log_targets(docs, new_log),
-        _target(docs["state"], ".saipen/STATE.md", "state", new_state),
     ]
-    if _close_is_recovery and task and task in parse_board(docs["board"].text_norm)["tickets"]:
-        # W2-002: a successor recovering a stale predecessor attempt must end
-        # at a validator-GREEN checkpoint. STATE.agent moves to the successor,
-        # so the stale predecessor owner/claim_time on BOARD must be released
-        # in the SAME transaction -- otherwise STATE says agent a2 while BOARD
-        # still claims owner a1, which the validator rejects as a concurrency
-        # collision. Releasing the stale claim here routes the next step to
-        # the canonical claim/adoption, never PHASE work under a1's owner.
-        _board_text = docs["board"].text_norm
-        _tick_raw = parse_board(_board_text)["tickets"][task]["raw"]
-        _released = remove_ticket_field(_tick_raw, "owner")
-        _released = remove_ticket_field(_released, "claim_time")
-        _board_target = _board_text.replace(_tick_raw, _released, 1)
-        targets.append(_target(docs["board"], ".saipen/BOARD.md", "board", _board_target))
+    if new_board != docs["board"].text_norm:
+        targets.append(_target(docs["board"], ".saipen/BOARD.md", "board", new_board))
+    targets.append(_target(docs["state"], ".saipen/STATE.md", "state", new_state))
     return build_plan(
         "attempt-close",
         agent,
@@ -1840,7 +1839,7 @@ def _plan_attempt(
             "stop": stop,
             "agent": agent,
         },
-        _docs_preconditions(docs, "state", "log"),
+        _docs_preconditions(docs, "state", "board", "log"),
         targets,
         {
             "ok": True,
@@ -2496,8 +2495,46 @@ def _ticket_targets(
     utc: str,
     scope: str | None = None,
     blocked_on: str | None = None,
+    retry_not_before: str | None = None,
 ) -> OperationPlan | Result:
     op_id = "ticket-" + uuid4_hex()
+    # T-1429: one canonical machine due instant, written only by a block and
+    # always strict-UTC. A malformed or naive stamp is refused HERE (PLAN
+    # time, zero writes) -- it never degrades to host-local interpretation.
+    _rnb = str(retry_not_before or "").strip()
+    if _rnb and action not in ("block", "block-for"):
+        return _refuse(
+            "VALIDATION_FAILED",
+            "retry_not_before may be written only by a block (it is "
+            "ACTIVE blocked-state data)",
+            ticket=ticket_id,
+        )
+    if _rnb and iso_utc_sort_key(_rnb) is None:
+        return _refuse(
+            "VALIDATION_FAILED",
+            f"retry_not_before {_rnb!r} is not strict UTC "
+            "(YYYY-MM-DDTHH:MM:SS[.fff]Z); naive/local/malformed stamps "
+            "are refused, never reinterpreted as host time",
+            ticket=ticket_id,
+        )
+    if _rnb:
+        # T-1429: the public writer must not be able to author state the
+        # projection then refuses to honour. `block-for` always writes an
+        # ACTIVE_DEPENDENCY blocker, which is never operator-owned, so it
+        # is refused here too -- a dependency is not a person with a clock.
+        from .board import _DEFERRED_OPERATOR_BLOCKER_CLASSES, deferred_operator_class
+
+        _candidate = "ACTIVE_DEPENDENCY:" if action == "block-for" else str(payload or "")
+        if deferred_operator_class(_candidate) is None:
+            _head = _candidate.strip().split(" -- ", 1)[0].strip() or "(empty)"
+            return _refuse(
+                "VALIDATION_FAILED",
+                f"retry_not_before needs an operator-owned deferred blocker "
+                f"({'|'.join(sorted(_DEFERRED_OPERATOR_BLOCKER_CLASSES))}); "
+                f"blocker {_head!r} is not one, so the due instant would "
+                "never be reported operator-actionable",
+                ticket=ticket_id,
+            )
     # CORE-003: blocker SCOPE is the difference between "this task is stuck"
     # and "nothing can be done at all". The FastPrompter loop stopped because
     # the protocol had only the second meaning, so parking one ticket parked
@@ -2661,6 +2698,7 @@ def _ticket_targets(
             "block" if action == "block-for" else action,
             block_payload,
             blocker_scope=_scope if action in ("block", "block-for") else None,
+            retry_not_before=strict_iso_utc(_rnb) if _rnb else None,
             enforce_cap=False,
         )
         if action == "block-for":
@@ -3637,6 +3675,7 @@ def _move_ticket(
     action: str,
     payload: str,
     blocker_scope: str | None = None,
+    retry_not_before: str | None = None,
     *,
     enforce_cap: bool = True,
 ) -> str:
@@ -3684,6 +3723,15 @@ def _move_ticket(
             blocker_scope or DEFAULT_BLOCKER_SCOPE,
             enforce_cap=enforce_cap,
         )
+        # T-1429: one canonical machine due instant, canonicalized by the
+        # caller. Written only on a block; cleared by unblock below.
+        if str(retry_not_before or "").strip():
+            marked = set_ticket_field(
+                marked,
+                "retry_not_before",
+                str(retry_not_before).strip(),
+                enforce_cap=enforce_cap,
+            )
     elif action == "unblock":
         marked = ticket_line.replace("- [/] ", "- [ ] ", 1)
         marked = remove_ticket_field(marked, "blocker")
@@ -3691,6 +3739,9 @@ def _move_ticket(
         # would be stale advisory data the parser then refuses outside BLOCKED.
         marked = remove_ticket_field(marked, "blocker_scope")
         marked = remove_ticket_field(marked, "verify_attempts")
+        # T-1429: the due instant is ACTIVE blocked-state data too -- a resumed
+        # ticket must never carry stale timing metadata.
+        marked = remove_ticket_field(marked, "retry_not_before")
     elif action == "resume":
         marked = ticket_line.replace("- [ ] ", "- [/] ", 1)
     else:  # pragma: no cover
@@ -4394,6 +4445,360 @@ def resolve_external_ticket(
     return applied
 
 
+# ------------------------------------- legacy metadata migration (T-1435)
+
+
+def _plan_repair_metadata(
+    root: Path,
+    work: str,
+    agent: str,
+    *,
+    field: str,
+    to_target: str,
+    legacy_unbound: bool,
+    authority: str,
+    now: str,
+    utc: str,
+) -> OperationPlan | Result:
+    """Plan ONE legacy BOARD metadata migration on a historical DONE row.
+
+    The validator correctly refuses a malformed machine-interpreted field, and
+    before this operation no legal canonical move owned the repair: the Work is
+    historical DONE, manual BOARD editing is forbidden, and history is
+    immutable. Two closed classifications:
+
+      EXACT_CANONICAL_MIGRATION -- the malformed token's exact `SRC-###` exists
+      in this project AND that receipt's durable metadata links it to THIS Work.
+      The field is replaced with the proven identity; nothing is invented.
+
+      LEGACY_UNBOUND_REFERENCE -- no exact receipt proves the token. The
+      malformed prose leaves the machine-interpreted field; the exact original
+      bytes survive in the immutable MR receipt; authority is required because
+      dropping an unprovable historical reference is a protocol act.
+
+    Refuses non-DONE rows, unproven or foreign targets, a second conflicting
+    migration and an ambiguous request -- always zero writes, always through
+    the same journaled commit as the LOG/STATE/BOARD bytes.
+    """
+    from . import metadata_repair as _mr
+
+    work = str(work or "").strip().upper()
+    field = str(field or "").strip()
+    to_target = str(to_target or "").strip().upper()
+    authority = str(authority or "").strip()
+
+    if not re.fullmatch(r"T-\d+", work):
+        return _refuse("INVALID_ID", f"ticket {work!r}")
+    if field not in _mr.SUPPORTED_FIELDS:
+        return _refuse(
+            "METADATA_REPAIR_FIELD_UNSUPPORTED",
+            f"field {field!r} is outside {'|'.join(_mr.SUPPORTED_FIELDS)}",
+            ticket=work,
+        )
+    if bool(to_target) == bool(legacy_unbound):
+        return _refuse(
+            "VALIDATION_FAILED",
+            "metadata repair needs exactly one of --to <SRC-###> or "
+            "--legacy-unbound",
+            ticket=work,
+        )
+    problem = _mr.authority_problem(root, authority, required=legacy_unbound)
+    if problem:
+        return _refuse(
+            "METADATA_REPAIR_AUTHORITY_REQUIRED"
+            if not authority
+            else "METADATA_REPAIR_AUTHORITY_INVALID",
+            problem,
+            ticket=work,
+        )
+
+    docs, state, board, log_tail = _read(root)
+    if board["errors"]:
+        return _refuse(
+            "VALIDATION_FAILED",
+            "BOARD parse error(s): " + "; ".join(board["errors"][:3]),
+            ticket=work,
+        )
+    ticket = board["tickets"].get(work)
+    if ticket is None:
+        return _refuse("TICKET_NOT_FOUND", f"{work} not on the board", ticket=work)
+    if ticket.get("section") != "## DONE":
+        return _refuse(
+            "METADATA_REPAIR_REQUIRES_DONE",
+            f"{work} sits under {ticket.get('section')}; legacy metadata is only "
+            "migrated on historical DONE rows -- active Work is repaired by "
+            "editing its own canonical fields through their normal writers",
+            ticket=work,
+        )
+
+    fields = ticket.get("fields") or {}
+    original_value = str(fields.get(field) or "")
+    tokens = _mr.receipt_tokens(original_value)
+    desired: str | None = to_target or None
+
+    prior = _mr.latest_receipt_for(root, work, field)
+    if prior is not None:
+        prior_value = prior.get("repaired_value")
+        prior_desired = str(prior_value) if prior_value is not None else None
+        if prior_desired != desired:
+            return _refuse(
+                "METADATA_REPAIR_CONFLICT",
+                f"{work} field {field} was already migrated by "
+                f"{prior.get('repair_id')} to {prior_value!r}; a different "
+                "second migration is never a silent rewrite",
+                ticket=work,
+                prior_receipt=prior.get("repair_id"),
+            )
+
+    current_is_target = tokens == [to_target] if to_target else not tokens
+    if current_is_target:
+        if prior is None:
+            return _refuse(
+                "METADATA_REPAIR_NOT_NEEDED",
+                f"{work} field {field} already carries the requested canonical "
+                "state",
+                ticket=work,
+            )
+        return Result(
+            ok=True,
+            code="ALREADY_APPLIED",
+            message=f"{work} was already migrated by {prior.get('repair_id')}",
+            data={
+                "ticket": work,
+                "field": field,
+                "receipt_id": prior.get("repair_id"),
+                "classification": prior.get("classification"),
+            },
+        )
+
+    if to_target:
+        target_problem = _mr.target_problem(root, work, to_target)
+        if target_problem is not None:
+            return _refuse(target_problem[0], target_problem[1], ticket=work)
+        if tokens and all(
+            _mr.is_canonical_token(token) and _mr.receipt_exists(root, token)
+            for token in tokens
+        ):
+            return _refuse(
+                "METADATA_REPAIR_CONFLICT",
+                f"{work} field {field} already names live canonical receipts "
+                f"({','.join(tokens)}); an exact migration never rewrites live "
+                "authority",
+                ticket=work,
+            )
+        classification = "EXACT_CANONICAL_MIGRATION"
+        repaired_value: str | None = to_target
+        evidence = [
+            f"target-receipt:{to_target}",
+            f"linkage-work:{work}",
+            f"receipt-membership:{','.join(sorted(_mr.work_membership(root, to_target)))}",
+        ]
+    else:
+        live = [token for token in tokens if _mr.receipt_exists(root, token)]
+        if live:
+            return _refuse(
+                "METADATA_REPAIR_CONFLICT",
+                f"{work} field {field} names live canonical receipts "
+                f"({','.join(live)}); removing them would drop real authority -- "
+                "migrate to the proven receipt with --to instead",
+                ticket=work,
+            )
+        if not tokens:
+            return _refuse(
+                "METADATA_REPAIR_NOT_NEEDED",
+                f"{work} field {field} carries no value to remove",
+                ticket=work,
+            )
+        classification = "LEGACY_UNBOUND_REFERENCE"
+        repaired_value = None
+        evidence = [
+            f"original-token-sha256:{hash_bytes(original_value.encode('utf-8'))}",
+            "classification:no-exact-canonical-src-provable",
+        ]
+
+    receipt_id = _mr.next_receipt_id(root)
+    op_id = "metadata-repair-" + uuid4_hex()
+    from .journal import LineageRefusal, ensure_project_lineage
+
+    try:
+        lineage = ensure_project_lineage(root)
+    except LineageRefusal as exc:
+        return _refuse(
+            "VALIDATION_FAILED",
+            f"metadata repair requires a durable project lineage: {exc}",
+            ticket=work,
+        )
+    try:
+        seat = _seat_agent(state, docs["board"].text_norm, agent)
+    except OwnershipSplitError as exc:
+        return _refuse(
+            "VALIDATION_FAILED",
+            f"metadata repair refuses a corrupt ownership snapshot: {exc}",
+            ticket=work,
+        )
+
+    message = _actor_provenance(
+        state,
+        agent,
+        f"REPAIR-METADATA {work} -- field {field}; classification "
+        f"{classification}; receipt {receipt_id}; original field value "
+        f"{original_value!r} preserved by hash; "
+        + (f"replaced with {repaired_value}" if repaired_value else "malformed value removed"),
+    )
+    event, line = _producer_event(
+        docs,
+        log_tail,
+        "DEC",
+        message,
+        ticket=work,
+        agent=agent,
+        now=now,
+        op_id=op_id,
+    )
+    from .external import engine_identity as _engine_identity
+
+    record = _mr.build_receipt(
+        repair_id=receipt_id,
+        work=work,
+        field=field,
+        classification=classification,
+        original_board_record=str(ticket.get("raw") or ""),
+        original_value=original_value,
+        repaired_value=repaired_value,
+        evidence=evidence,
+        authority=authority,
+        authority_kind_value=_mr.authority_kind(authority) or "NONE",
+        engine_generation=_engine_identity(),
+        project_identity=_identity(root),
+        project_lineage=lineage,
+        agent=seat,
+        event_id=f"E-{event}",
+        created_at=utc,
+        op_id=op_id,
+    )
+    content = json.dumps(record, indent=2, sort_keys=True).encode("utf-8")
+    rel = f"{_mr.METADATA_REPAIR_DIR}/{receipt_id}.json"
+    receipt_target = TargetPlan(
+        path=rel,
+        role="report",
+        content=content,
+        before_hash="",
+        after_hash=hash_bytes(content),
+    )
+    new_log = docs["log"].text_norm.rstrip("\n") + "\n" + line + "\n"
+
+    def _propose_repaired(board_text: str) -> str:
+        if repaired_value is None:
+            return _ticket_fields_in_place(
+                board_text, work, {}, remove=(field,), enforce_cap=False
+            )
+        return _ticket_fields_in_place(
+            board_text, work, {field: repaired_value}, enforce_cap=False
+        )
+
+    try:
+        projected = _project_board_mutation(
+            root,
+            docs["board"].text_norm,
+            _propose_repaired,
+            [work],
+            op_id=op_id,
+            event_id=f"E-{event}",
+            reason="legacy metadata migration requires canonical projection",
+        )
+    except ValueError as exc:
+        return _refuse("VALIDATION_FAILED", str(exc), ticket=work)
+    new_board = projected.board_text
+    new_state = patch_state(
+        docs["state"].text_norm,
+        {"last_event": event, "updated": utc, "agent": seat},
+    )
+    new_state = _settle_stop_reason(new_state, new_board, agent)
+    if str(parse_state(new_state).get("task") or "none") == "none":
+        from .router import route_next
+
+        routed = route_next(new_state, new_board, current_agent=agent)
+        if routed.get("ok"):
+            new_state = patch_state(new_state, {"next_action": routed["action"]})
+
+    errors = validate_texts(
+        new_state, new_board, new_log, current_agent=agent, sealed_events=docs["_history"]
+    )
+    if errors:
+        return _refuse(
+            "VALIDATION_FAILED",
+            "proposed metadata repair fails fast validation: " + "; ".join(errors[:5]),
+            ticket=work,
+        )
+
+    targets = [
+        *_log_targets(docs, new_log),
+        *projected.targets,
+        _target(docs["board"], ".saipen/BOARD.md", "board", new_board),
+        _target(docs["state"], ".saipen/STATE.md", "state", new_state),
+        receipt_target,
+    ]
+    return build_plan(
+        "metadata_repair",
+        agent,
+        _identity(root),
+        {
+            "operation": "ticket_repair_metadata",
+            "ticket": work,
+            "field": field,
+            "classification": classification,
+            "receipt": receipt_id,
+        },
+        {**_docs_preconditions(docs, "state", "board", "log"), rel: ""},
+        targets,
+        {
+            "ok": True,
+            "code": "METADATA_REPAIRED",
+            "ticket": work,
+            "field": field,
+            "classification": classification,
+            "receipt_id": receipt_id,
+            "original_value": original_value,
+            "repaired_value": repaired_value,
+            "event_id": f"E-{event}",
+        },
+        op_id=op_id,
+    )
+
+
+@_state_guard
+def repair_metadata(
+    project_root: Path | str,
+    work: str,
+    agent: str,
+    *,
+    field: str,
+    to_target: str | None = None,
+    legacy_unbound: bool = False,
+    authority: str = "",
+    dry_run: bool = False,
+) -> Result:
+    """Migrate malformed legacy metadata on historical DONE Work (T-1435)."""
+    root = Path(project_root)
+    now, utc = _now(), _utc_iso()
+    plan = _plan_repair_metadata(
+        root,
+        work,
+        agent,
+        field=field,
+        to_target=str(to_target or ""),
+        legacy_unbound=bool(legacy_unbound),
+        authority=authority,
+        now=now,
+        utc=utc,
+    )
+    if isinstance(plan, Result):
+        return plan
+    if dry_run:
+        return _render_plan(plan)
+    return apply_plan(root, plan)
+
+
 def _plan_retire_source(
     root: Path,
     receipt_id: str,
@@ -4841,10 +5246,11 @@ def _retire_targets(
                 ticket=ticket_id,
             )
         meta = _intake._read_meta(root, receipt_id) or {}
-        if meta.get("linked_work") != ticket_id:
+        if not _intake.is_linked_to(meta, ticket_id):
             return _refuse(
                 "VALIDATION_FAILED",
-                f"receipt {receipt_id} is linked to {meta.get('linked_work')!r}, not "
+                f"receipt {receipt_id} is linked to "
+                f"{sorted(_intake.linked_works(meta))!r}, not "
                 f"{ticket_id}; retirement refuses a crossed ticket/receipt linkage",
                 ticket=ticket_id,
             )
@@ -6655,6 +7061,7 @@ def ticket_move(
     dry_run: bool = False,
     scope: str | None = None,
     blocked_on: str | None = None,
+    retry_not_before: str | None = None,
 ) -> Result:
     """Move a ticket between BOARD sections.
 
@@ -6663,6 +7070,10 @@ def ticket_move(
     (BOARD DONE[x] while STATE still names the ticket in a ticket-bearing
     phase) that the composition audit reproduced. `done` delegates to
     finish_ticket so one public operation, one lifecycle meaning.
+
+    `retry_not_before` (T-1429) is the ONE canonical machine-readable
+    deferred-operator due instant, written only on a `block`/`block-for` and
+    cleared by `unblock`.
     """
     if action == "done":
         return finish_ticket(project_root, ticket_id, agent, dry_run=dry_run)
@@ -6678,6 +7089,7 @@ def ticket_move(
         utc,
         scope=scope,
         blocked_on=blocked_on,
+        retry_not_before=retry_not_before,
     )
     if isinstance(plan, Result):
         return plan
@@ -6948,6 +7360,15 @@ def goal_entry(
 
     W2-004: a missing/whitespace/normalized-empty objective is refused with
     ZERO writes before any handover/LOG/counter/BOARD/journal touch.
+
+    T-1446 duplicate-goal idempotence: a semantic objective whose deterministic
+    ingress identity (project + normalized objective) already owns a nonterminal
+    goal with no new semantic scope is NOT planned again. The existing goal is
+    returned as GOAL_ALREADY_CAPTURED with zero LOG/BOARD/STATE writes, so a
+    repeated broad shorthand (`cc all`) can never mint a second goal, demote a
+    live mission, or consume another verification run. A materially changed
+    objective, a changed project, or a TERMINAL prior goal is a NEW scope and
+    plans normally.
     """
     # W2-004: validate the objective BEFORE touching any canonical file.
     safe_objective, goal_err = _validate_goal_objective(objective)
@@ -6965,6 +7386,32 @@ def goal_entry(
             "VALIDATION_FAILED",
             "BOARD parse error(s): " + "; ".join(board["errors"][:3]),
         )
+
+    # --- T-1446 duplicate-goal idempotence (deterministic, no LLM guessing) --
+    from .cold_recovery import goal_ingress_identity
+
+    ingress = goal_ingress_identity(safe_objective, _identity(root))
+    goal_waves = 0
+    if (
+        state.get("execution_intent") == "goal"
+        and str(state.get("goal_ingress") or "").strip()
+    ):
+        goal_waves = int(state.get("goal_waves") or 0)
+        if str(state.get("goal_ingress")) == ingress and goal_waves > 0:
+            return Result(
+                True,
+                "GOAL_ALREADY_CAPTURED",
+                message="duplicate goal ingress: this exact objective is already "
+                "the active goal; no second goal is planned and no work is "
+                "duplicated",
+                data={
+                    "goal_ingress": ingress,
+                    "objective": safe_objective,
+                    "goal_waves": goal_waves,
+                    "task": state.get("task"),
+                    "next_action": state.get("next_action"),
+                },
+            )
 
     active_ticket = None
     doing = [t for t in board["tickets"].values() if t["section"] == "## DOING"]
@@ -7093,6 +7540,7 @@ def goal_entry(
             "phase": new_phase,
             "task": first_id if first_id is not None else "none",
             "next_action": next_action,
+            "goal_ingress": ingress,
             # CORE-009: only set transition_from when the phase actually changes
             "transition_from": (
                 (state.get("phase") or "DONE")
@@ -7128,6 +7576,7 @@ def goal_entry(
         "plan_tickets": plan_ids,
         "goal_waves": 1,
         "goal_tickets": 0,
+        "goal_ingress": ingress,
     }
     plan = build_plan(
         "goal_entry",
@@ -7138,6 +7587,7 @@ def goal_entry(
             "objective": safe_objective,
             "agent": agent,
             "plan_tickets": plan_ids,
+            "goal_ingress": ingress,
         },
         _docs_preconditions(docs, "state", "board", "log"),
         targets,

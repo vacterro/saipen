@@ -165,6 +165,41 @@ def freshen_synthetic_outboxes(tree: Path) -> None:
         derived_translate.write_text("# OUTBOX\n", encoding="utf-8", newline="\n")
 
 
+#: T-1446: the operator's host-session carriers must never reach a probe child.
+#:
+#: Measured: with `SAIPEN_PROJECT_ROOT`/`SAIPEN_PROJECT_LINEAGE` present, a
+#: probe's `cwd=<copy>` was outranked by the ambient carrier (the resolver ranks
+#: the carrier above the working directory), so phase-rename, warn-ownership,
+#: release-ledger and validator-baseline judged the LIVE repository instead of
+#: the copy under test -- the copy's own renaming and mutations were never
+#: read, and the verdicts moved with the operator's session rather than with
+#: the tree. This is the class `tools/test_hermetic_env.py` closes one level
+#: down; the tool that JUDGES fixtures isolates its children the same way.
+HOST_SESSION_VARIABLES = (
+    "SAIPEN_PROJECT_ROOT",
+    "SAIPEN_PROJECT_LINEAGE",
+    "SAIPEN_AGENT",
+    "SAIPEN_CAPABILITY",
+    "SAIPEN_HOST_SESSION",
+    "SAIPEN_HOST_ENFORCEMENT",
+    "SAIPEN_RUNTIME_INFO",
+    "SAIPEN_SKILL_ROOT",
+)
+
+
+def hermetic_child_env(**overrides: str) -> dict[str, str]:
+    """A child-process environment with no host-session carrier.
+
+    Every probe child is addressed by its `cwd`, so no carrier is ever input;
+    `overrides` are applied last for probes that deliberately set a shim.
+    """
+    env = dict(os.environ)
+    for key in HOST_SESSION_VARIABLES:
+        env.pop(key, None)
+    env.update(overrides)
+    return env
+
+
 def root_device_ignore_probe(tmp: Path) -> str | None:
     """Prove a real `nul` entry cannot poison an audit snapshot.
 
@@ -340,6 +375,7 @@ def release_ledger_probe(source: Path, destination: Path) -> str | None:
         return subprocess.run(
             [sys.executable, str(tree / "tools" / "validate.py")],
             cwd=tree,
+            env=hermetic_child_env(),
             capture_output=True,
             text=True,
             errors="replace",
@@ -615,6 +651,7 @@ def warn_ownership_probe(source: Path, destination: Path) -> str | None:
         return subprocess.run(
             [sys.executable, str(tree / "tools" / "validate.py")],
             cwd=tree,
+            env=hermetic_child_env(),
             capture_output=True,
             text=True,
             errors="replace",
@@ -820,6 +857,7 @@ def phase_rename_probe(source: Path, destination: Path) -> str | None:
     generated = subprocess.run(
         [sys.executable, str(tree / "tools" / "conformance_corpus.py"), "--write"],
         cwd=tree,
+        env=hermetic_child_env(),
         capture_output=True,
         text=True,
         errors="replace",
@@ -832,6 +870,7 @@ def phase_rename_probe(source: Path, destination: Path) -> str | None:
     proc = subprocess.run(
         [sys.executable, str(tree / "tools" / "validate.py")],
         cwd=tree,
+        env=hermetic_child_env(),
         capture_output=True,
         text=True,
         errors="replace",
@@ -848,7 +887,7 @@ def phase_rename_probe(source: Path, destination: Path) -> str | None:
 
 def audit_tags_batch_probe(root: Path, destination: Path) -> str | None:
     """Execute process and protocol failures against the tag audit."""
-    missing_env = os.environ.copy()
+    missing_env = hermetic_child_env()
     missing_env.pop(AUDIT_TAGS_GIT_SHIM, None)
     missing_env.pop(AUDIT_TAGS_MODE, None)
     missing_env["PATH"] = ""
@@ -916,7 +955,7 @@ raise SystemExit(8)
         "surplus": "FAIL: git cat-file batch response has 5 unexpected trailing byte(s)",
     }
     for mode, message in expected.items():
-        env = os.environ.copy()
+        env = hermetic_child_env()
         env[AUDIT_TAGS_GIT_SHIM] = str(shim)
         env[AUDIT_TAGS_MODE] = mode
         result = subprocess.run(
@@ -942,7 +981,7 @@ def observed_tag_queries(root: Path) -> tuple[int, str | None]:
     handle, raw_path = tempfile.mkstemp(prefix="saipen-git-trace-", suffix=".json")
     os.close(handle)
     trace = Path(raw_path)
-    env = os.environ.copy()
+    env = hermetic_child_env()
     env["GIT_TRACE2_EVENT"] = str(trace)
     try:
         result = subprocess.run(
@@ -4316,8 +4355,7 @@ def validator_output(root: Path, gate: str | None = None) -> str:
     "at most one", "cyclic" and "dangling needs" all appear in the lines that
     say those very checks PASSED, so five cases scored as proving nothing when
     the harness was the thing at fault."""
-    env = os.environ.copy()
-    env["SAIPEN_VALIDATE_ALL_WARNINGS"] = "1"
+    env = hermetic_child_env(SAIPEN_VALIDATE_ALL_WARNINGS="1")
     r = subprocess.run(
         [sys.executable, str(root / "tools" / "validate.py"), *(["--gate", gate] if gate else [])],
         cwd=root,

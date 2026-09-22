@@ -10,9 +10,8 @@ acceptance surface exists yet, so an unaccepted CURRENT_FAIL can never buy a
 CONTINUE):
 
 * `conformance_decision` carries a closed machine `disposition`;
-* an idle route (`reason: maintain`) under REMEDIATION_REQUIRED is rewritten to
-  the ONE canonical remediation (`saipen validate`) through the same gate chain
-  every production surface applies;
+* an idle route (`reason: maintain`) under REMEDIATION_REQUIRED reaches the
+  shared repair or terminal engineering boundary (T-1439), never a validate loop;
 * clean conformance keeps ordinary continuation, and UNPROVEN (NOT_RUN / stale)
   does NOT stop a fresh project;
 * active Work routes are not owned by the idle gate;
@@ -72,9 +71,10 @@ class IdleGateTests(T1412Base):
         gated = router_mod.gate_route(root, _idle())
         self.assertIsNotNone(gated)
         self.assertFalse(gated["ok"])
-        self.assertEqual(gated["action"], "saipen validate")
+        self.assertIsNone(gated["action"])
         self.assertEqual(gated["reason"], "conformance-remediation")
-        self.assertEqual(gated["canonical_next_command"], "saipen validate")
+        self.assertIsNone(gated["canonical_next_command"])
+        self.assertEqual(gated["repair_status"], "ENGINEERING_REQUIRED")
         self.assertEqual(gated["code"], "CONFORMANCE_UNHEALTHY")
 
     def test_clean_conformance_keeps_ordinary_continuation(self) -> None:
@@ -96,10 +96,12 @@ class IdleGateTests(T1412Base):
         active = {"ok": True, "action": "PHASE SHIP T-1", "reason": "finish"}
         self.assertIsNone(router_mod.gate_route(root, active))
 
-    def test_the_idle_route_never_wraps_the_remediation_in_its_own_refusal(self) -> None:
+    def test_current_failure_does_not_recommend_another_idle_validation(self) -> None:
         root = self.make_project("fail-already-validate")
         write_receipt(root, "FAIL")
-        self.assertIsNone(router_mod.gate_route(root, _idle("saipen validate")))
+        gated = router_mod.gate_route(root, _idle("saipen validate"))
+        self.assertTrue(gated["terminal"])
+        self.assertIsNone(gated["canonical_next_command"])
 
     def test_crew_route_still_uses_the_crew_gate(self) -> None:
         root = self.make_project("fail-crew")
@@ -108,7 +110,7 @@ class IdleGateTests(T1412Base):
         gated = router_mod.gate_route(root, crew)
         self.assertIsNotNone(gated)
         self.assertFalse(gated["ok"])
-        self.assertEqual(gated["canonical_next_command"], "saipen validate")
+        self.assertIsNone(gated["canonical_next_command"])
 
 
 class StatusSurfaceTests(T1412Base):
@@ -123,13 +125,12 @@ class StatusSurfaceTests(T1412Base):
         rc, route, text = self.run_cli(root, "next")
         self.assertNotEqual(rc, 0, text)
 
-        self.assertEqual(explanation["selected_action"], "saipen validate")
+        self.assertIsNone(explanation["selected_action"])
         self.assertEqual(explanation["selected_action"], status["computed_next_action"])
         self.assertEqual(explanation["selected_action"], route["action"])
         self.assertEqual(explanation["carrier"]["code"], "CONFORMANCE_UNHEALTHY")
-        self.assertEqual(
-            explanation["carrier"]["canonical_next_command"], "saipen validate"
-        )
+        self.assertIsNone(explanation["carrier"].get("canonical_next_command"))
+        self.assertEqual(explanation["disposition"], "BLOCKED")
         self.assertFalse(explanation["human_required"])
         self.assertEqual(explanation["owner"], "agent")
 
@@ -151,13 +152,13 @@ class StatusSurfaceTests(T1412Base):
         conf = payload["conformance_status"]
         self.assertEqual(conf["status"], "CURRENT_FAIL")
         self.assertEqual(conf["disposition"], "REMEDIATION_REQUIRED")
-        self.assertEqual(conf["remediation_command"], "saipen validate")
+        self.assertIsNone(conf["remediation_command"])
         self.assertEqual(payload["computed_reason"], "conformance-remediation")
-        self.assertEqual(payload["computed_next_action"], "saipen validate")
+        self.assertIsNone(payload["computed_next_action"])
         automation = payload["automation"]
         self.assertEqual(automation["disposition"], "BLOCKED")
         self.assertEqual(automation["reason_code"], "conformance-remediation")
-        self.assertEqual(automation["remediation_command"], "saipen validate")
+        self.assertIsNone(automation["remediation_command"])
         self.assertIsNone(automation["next_command"])
 
         rc, _payload, text = self.run_cli(root, "status", json_output=False)

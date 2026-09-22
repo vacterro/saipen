@@ -101,6 +101,10 @@
       "minimum": 0,
       "description": "Safety-valve counter, RFC § 2.4. MUST be present when execution_intent is `goal`, MUST be absent otherwise."
     },
+    "goal_ingress": {
+      "type": "string",
+      "description": "T-1446 duplicate-goal idempotence: the deterministic ingress identity (goal-<16hex> over project identity + normalized objective) of the objective the current `goal` execution_intent was entered with. A repeated identical ingress resolves to GOAL_ALREADY_CAPTURED with zero canonical writes instead of minting a second goal. Written by goal_entry; absent otherwise."
+    },
     "last_event": {
       "type": "integer",
       "minimum": 1,

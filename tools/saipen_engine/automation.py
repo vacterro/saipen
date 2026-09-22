@@ -502,9 +502,7 @@ def automation_block(
         # mine LOG prose for why CURRENT_FAIL and a stop coexist.
         remediation_command: str | None = None
         if reason_code in ("conformance-remediation", "conformance-unknown"):
-            remediation_command = str(
-                (routed or {}).get("canonical_next_command") or "saipen validate"
-            )
+            remediation_command = (routed or {}).get("canonical_next_command")
 
         reason_text = None
         if disposition == COMPLETE:
@@ -531,8 +529,9 @@ def automation_block(
             "source_fingerprint": source_fingerprint,
             "completed_at": completed_at,
         }
-        if remediation_command is not None:
+        if reason_code in ("conformance-remediation", "conformance-unknown"):
             block["remediation_command"] = remediation_command
+            block["diagnostic"] = (routed or {}).get("diagnostic")
         return block
     except Exception as exc:
         return failed_automation_block(RC_AUTOMATION_FAILURE, f"{type(exc).__name__}: {exc}")

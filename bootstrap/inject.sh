@@ -253,7 +253,9 @@ add_block() { # $1=file
   backup_file "$1" || return 1
   mkdir -p "$(dirname "$1")" \
     || { echo "directory create FAILED ($1)"; return 1; }
-  printf '%s\n' "$BLOCK" >> "$1" \
+  # ACTIVATION_BLOCK.md begins at BEGIN. Own one separator explicitly so
+  # uninstall.sh removes our byte, never the user's final newline.
+  printf '\n%s\n' "$BLOCK" >> "$1" \
     || { echo "block write FAILED ($1)"; return 1; }
   echo "block added"
 }

@@ -101,6 +101,11 @@ FLEET_EXEMPT_CLASSES = frozenset(require_string_list(_TABLE, "fleet_exempt_class
 HELP_TOKENS = frozenset(require_string_list(_TABLE, "help_tokens"))
 INGRESS_PAYLOAD_VERBS = frozenset(require_string_list(_TABLE, "ingress_payload_verbs"))
 _VERBS: dict = dict(require_mapping(_TABLE, "verbs"))
+
+#: The execution-policy modifier (EXECUTION.md, `EXEC-HUSH-01`). It is not a
+#: verb and has no effect class of its own: it is stripped, and the task it
+#: modifies is classified. Imported from its owner so the token cannot drift.
+from .hush import MODIFIER as _MODIFIER  # noqa: E402
 #: The verbs a shell line may name and still be read as ONE canonical
 #: operation. The rest are classified (for the CLI's own mutation gate) but a
 #: shell spelling of them stays an ordinary shell effect, as it always was.
@@ -129,7 +134,20 @@ def _operands(tokens: Sequence[str]) -> list[str]:
 
 
 def _resolve_verb(verb: str, rest: list[str]) -> tuple[str, list[str]]:
-    """A shortcut classifies as the command it routes to, payload included."""
+    """A shortcut classifies as the command it routes to, payload included.
+
+    A LEADING `hush` is stripped first. EXECUTION.md is explicit that the
+    modifier is removed and the task reaches the normal resolver unchanged --
+    `hush cc` routes where `cc` routes -- but this classifier did not know the
+    word, so `hush` fell to `unknown_class` and every hushed invocation was
+    judged EXECUTION. `hush status` then required fleet preparation and was
+    refused in read-only capability as though it wrote something. Only the
+    leading token is the modifier, and a bare `hush` modifies nothing.
+    """
+    if verb == _MODIFIER and rest:
+        # Exactly ONE leading modifier. A second `hush` is the task, not a
+        # second modifier, and a task that is not a verb stays unknown.
+        return _resolve_verb(rest[0], rest[1:]) if rest[0] != _MODIFIER else (rest[0], rest[1:])
     if verb in _VERBS:
         return verb, rest
     key = resolve_shortcut(verb, table=load_shortcut_table())
@@ -153,6 +171,11 @@ def classify_invocation(verb: str | None, rest: Sequence[str] = ()) -> str:
     if "--" in words:
         words = words[: words.index("--")]
     if verb in HELP_TOKENS or any(word in HELP_TOKENS - {"help"} for word in words):
+        return DIAGNOSTIC
+    if verb == _MODIFIER and not words:
+        # A bare modifier modifies nothing and is REPORTED (EXECUTION.md). A
+        # report writes nothing, so judging it EXECUTION would demand fleet
+        # preparation and a write capability for a refusal message.
         return DIAGNOSTIC
     name, words = _resolve_verb(verb or "continue", words)
     entry = _VERBS.get(name)

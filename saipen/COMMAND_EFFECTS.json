@@ -80,7 +80,8 @@
           "operands": "one_ticket_id"
         },
         "resolve-external": "EXECUTION",
-        "reasoning": "EXECUTION"
+        "reasoning": "EXECUTION",
+        "repair-metadata": "RECOVERY"
       }
     },
     "work": {
@@ -99,7 +100,8 @@
         "close": "EXECUTION",
         "archive": "EXECUTION",
         "purge": "EXECUTION",
-        "retire": "EXECUTION"
+        "retire": "EXECUTION",
+        "quarantine": "EXECUTION"
       }
     },
     "authority": {
@@ -140,7 +142,8 @@
         "resume": "EXECUTION",
         "clean": "EXECUTION",
         "collect": "EXECUTION",
-        "dispose": "EXECUTION"
+        "dispose": "EXECUTION",
+        "reconcile": "RECOVERY"
       }
     },
     "improve": {
@@ -192,6 +195,7 @@
     "first-publish-confirm": "EXECUTION",
     "crew": "EXECUTION",
     "stop": "EXECUTION",
-    "launch": "EXECUTION"
+    "launch": "EXECUTION",
+    "autonomy": "DIAGNOSTIC"
   }
 }

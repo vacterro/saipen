@@ -33,7 +33,13 @@ class Result:
 
     def __post_init__(self) -> None:
         if not self.ok and self.code not in CODES:
-            raise ValueError(f"refusal code {self.code!r} is not in OPS.md's closed set")
+            # T-1437: an unregistered refusal code is a REGISTRY defect, not a
+            # traceback and not a silent generic failure. The refusal keeps its
+            # original code and is explicitly MARKED; the developer-facing
+            # completeness contract (tools/test_refusal_registry.py) is what
+            # fails loudly when the registry falls behind production.
+            self.data["unregistered_code"] = True
+            self.data.setdefault("detail", "refusal code missing from REGISTRY.json error_codes")
 
     def to_dict(self) -> dict[str, Any]:
         out: dict[str, Any] = {

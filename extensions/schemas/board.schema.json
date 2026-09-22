@@ -166,6 +166,11 @@
         "type": "string",
         "description": "Orchestration repair (T-1302 FINDING 4): comma-separated worktree paths this COHORT-mode member attributes to its C-### batch; publication belongs to the cohort authority, never to an imaginary per-ticket diff."
       },
+      "retry_not_before": {
+        "type": "string",
+        "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d+)?Z$",
+        "description": "T-1429: the ONE canonical machine-readable deferred-operator due instant for a ## BLOCKED ticket, strict UTC YYYY-MM-DDTHH:MM:SS[.fff]Z. Never naive, never local-time. Malformed timestamps fail closed at the parser. Timestamps in blocker/description/evidence PROSE never activate a gate; only this field plus an OPERATOR-OWNED deferred blocker class (WAIT_USER_CONFIRMATION, WAIT_USER_DECISION, BLOCKED_EXTERNAL) projects DEFERRED_OPERATOR (before the instant) or DUE_OPERATOR_ACTION (at or after it). Recognized-but-ineligible classes -- HELD, FUTURE_GATE, ACTIVE, PERMANENT_WARNING_OWNER, WAIT_ROLE:<role>, ACTIVE_DEPENDENCY:<T-###> -- are protocol or crew holds, not a human with a clock."
+      },
       "blocked_on": {
         "type": "string",
         "pattern": "^T-\\d+$",
@@ -241,6 +246,52 @@
             "required": [
               "blocker_scope"
             ]
+          }
+        }
+      },
+      {
+        "description": "T-1429: retry_not_before is ACTIVE blocked-state data -- it may appear only on a BLOCKED ticket",
+        "if": {
+          "properties": {
+            "status": {
+              "const": "BLOCKED"
+            }
+          },
+          "required": [
+            "status"
+          ]
+        },
+        "then": {
+          "properties": {
+            "retry_not_before": {
+              "type": "string",
+              "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d+)?Z$"
+            }
+          }
+        },
+        "else": {
+          "not": {
+            "required": [
+              "retry_not_before"
+            ]
+          }
+        }
+      },
+      {
+        "description": "T-1429: a machine operator due instant may exist ONLY on an operator-eligible BLOCKED ticket -- the blocker must open with WAIT_USER_CONFIRMATION, WAIT_USER_DECISION or BLOCKED_EXTERNAL. A due instant on HELD, FUTURE_GATE, ACTIVE, PERMANENT_WARNING_OWNER, WAIT_ROLE:<role> or ACTIVE_DEPENDENCY:<T-###> is dead metadata: no surface will ever report it operator-actionable.",
+        "if": {
+          "required": [
+            "retry_not_before"
+          ]
+        },
+        "then": {
+          "required": [
+            "blocker"
+          ],
+          "properties": {
+            "blocker": {
+              "pattern": "^(WAIT_USER_CONFIRMATION|WAIT_USER_DECISION|BLOCKED_EXTERNAL)\\s*($| -- )"
+            }
           }
         }
       },

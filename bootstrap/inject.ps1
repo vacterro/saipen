@@ -590,7 +590,7 @@ foreach ($adapter in @($AdapterRegistry.adapters)) {
               $addition = $Utf8NoBom.GetBytes("`n# saipen protocol auto-loaded`nread:`n  - $skillPath`n  - $stylePath`n")
               $combined = New-Object byte[] ($original.Length + $addition.Length)
               [System.Buffer]::BlockCopy($original, 0, $combined, 0, $original.Length)
-              [System.Buffer]::BlockCopy($addition, 0, $combined, $original.Length)
+              [System.Buffer]::BlockCopy($addition, 0, $combined, $original.Length, $addition.Length)
               [System.IO.File]::WriteAllBytes((Get-NativePath $aider), $combined)
               [void]$report.Add(@("Aider conf", "read: appended"))
             } else {

@@ -49,6 +49,7 @@ global authority and deterministic priority rules.
 | `saipen improve reconcile <cycle>` | BUILD/RECOVERY: strict-cycle finite exit; classify every seat, execute lossless transitions, refuse while actionable work remains, terminalize COMPLETE/SUPERSEDED/BLOCKED_EXTERNAL; idempotent | CMD-ROUTING-01 |
 | `saipen ticket reasoning <T-###> --recurrence <text> --weak-model <text>` | BUILD: canonical writer for the strict-sweep reasoning gates; refuses unless a strict CONFIRMED PROTOCOL_VIOLATION disposition names the ticket | CMD-ROUTING-01 |
 | `saipen status` | read-only | CMD-ROUTING-01 |
+| `saipen autonomy` | read-only: the supervisor's ONE verdict (RUN_WORK, ADOPT_WORKER, REPLACE_WORKER, AWAIT_WORKER, OPERATOR_ACTION_DUE, NO_PROGRESS_LOOP, AMBIGUOUS_AUTHORITY, IDLE) plus the observation that produced it -- lease generation and heartbeat age, executable Work, due/deferred operator gates, no-progress verdict. Writes nothing; ambiguous lease authority fails closed for mutation | CMD-ROUTING-01 |
 | `saipen context orient [--handoff JSON]` | bounded current-truth orientation | CONTEXT-BUDGET-01 |
 | `saipen brief` | generated handoff with identity/lineage/event provenance | CONTEXT-BUDGET-01 |
 | `saipen acceptance <T-###>` | read-only | CMD-ROUTING-01 |
@@ -65,15 +66,19 @@ global authority and deterministic priority rules.
 | `saipen ticket retire <T-###> --reason <CODE> --evidence <E-###\|.saipen/evidence/PATH> --authority <SRC-###> [--discovery-event E-###] [--note TEXT]` | canonical retirement of misrouted/invalid Work -- NOT done, NOT close; the authority must GRANT it (OPS.md) | CMD-ROUTING-01 |
 | `saipen work reverify <T-###> [--verification <command>:PASS]... [--run <command>]... [--timeout <SECONDS>]` | RECOVERY: re-verify already-DONE Work against the CURRENT tree; writes ONE immutable `RV-NNNNNN` receipt, keeps DONE, never rewrites history (OPS.md); only an EXECUTED contract is current-tree closure evidence, an attested-only contract is recorded but never closure proof | CMD-ROUTING-01 |
 | `saipen ticket resolve-external <T-###> --authority <lineage-32hex> --implementation <T-###@commit> --reason <CLASS> --run <command>...` | EXECUTION: close BLOCKED Work implemented by an external authority with an immutable `EX-NNNNNN` receipt bound to the installed engine generation (OPS.md) | CMD-ROUTING-01 |
+| `saipen ticket repair-metadata <T-###> --field source_receipts (--to <SRC-###> \| --legacy-unbound [--authority <SRC-###\|lineage-32hex>])` | RECOVERY: migrate malformed legacy metadata on historical DONE Work; `--to` needs an exact linked receipt, `--legacy-unbound` removes an unprovable token and preserves its bytes in an immutable `MR-NNNNNN` receipt; non-DONE rows and conflicting second migrations refuse with zero writes (T-1435) | CMD-ROUTING-01 |
 | `saipen ticket reasoning <T-###> --recurrence <text> --weak-model <text>` | EXECUTION: canonical writer for the strict-sweep reasoning gates; refuses unless a strict CONFIRMED PROTOCOL_VIOLATION disposition names the ticket | CMD-ROUTING-01 |
 | `saipen cohort [status\|ship] <C-###>` | batch publication authority | CMD-ROUTING-01 |
 | `saipen source` | intake | CMD-ROUTING-01 |
 | `saipen source retire <SRC-###> --reason <CLASS> [--successor SRC-###] [--note TEXT]` | EXECUTION: receipt-only source retirement; cold-copies the original bytes, refuses while any unresolved actionable requirement would be discarded (OPS.md) | CMD-ROUTING-01 |
+| `saipen source link <SRC-###> --work T-###` | EXECUTION: canonical multi-work membership (T-1437); adds ONE Work to a receipt's durable membership, never moves the historical primary `linked_work`, idempotent, refuses an unknown receipt / Work / integrity failure with zero writes | CMD-ROUTING-01 |
 | `saipen source recover` | DIAGNOSTIC: read-only orphan/crash diagnostic; never deletes or invents source intent | CMD-ROUTING-01 |
+| `saipen source quarantine <SRC-###> [--reason CODE]` | EXECUTION: preserve the exact active or archived body locally and exclude it from release/export; `--dry-run` previews without writing; does not close Work or waive coverage (SOURCES.md) | CMD-ROUTING-01 |
 | `saipen authority capture --file <UTF8_FILE>\|--hex <UTF8_HEX>` | persist ONE operator-authority Source from exact bytes; never projects Work | CMD-ROUTING-01 |
 | `saipen audit [status\|inspect\|ingest]` | intake transport | CMD-CONTINUE-01 |
 | `saipen userperson` | meta | CMD-ROUTING-01 |
 | `saipen sub <verb> <name>` | sub | CMD-ROUTING-01 |
+| `saipen sub reconcile <role> --authority <SRC-###>` | RECOVERY: producer-owned terminal reconciliation (T-1435); OUTCOME A clears stale task/residue on a DONE producer whose BOARD proves all work terminal, OUTCOME B restores a truthful nonterminal projection (SCOUT/PLAN/BLOCKED) without touching real open work; malformed STATE/BOARD and a foreign producer owner refuse with zero writes; the journaled `sub_lifecycle` verification is the write-time backstop | CMD-ROUTING-01 |
 
 `saipen validate` is the canonical Core-conformance front door. It first runs
 the cheap structural gate over `.saipen/STATE.md`, `BOARD.md` and `LOG.md`; a
@@ -86,6 +91,8 @@ never mutates product files, BOARD Work state, STATE phase, source intake or
 Improve cycles. The verdict is then re-read from the authoritative
 `conformance_status` decision and `VALID` is returned ONLY on CURRENT_PASS -- a
 process exit of 0 with no durable CURRENT_PASS receipt is not conformance.
+
+CURRENT_FAIL retains blocking findings; ENGINEERING_REQUIRED has no next command.
 
 This optional advanced `launch opencode` command requires its explicit global
 `--agent` seat. It exports that actor plus resolved project root and portable

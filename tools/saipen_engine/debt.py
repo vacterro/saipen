@@ -613,10 +613,12 @@ def _work_source_receipts(root: Path, work: str) -> set[str]:
         index = intake._read_index(root)
         for receipt_id, meta in index.get("active", {}).items():
             meta_obj = intake._read_meta(root, receipt_id)
-            if meta_obj and meta_obj.get("linked_work") == work:
+            if meta_obj and intake.is_linked_to(meta_obj, work):
                 receipts.add(receipt_id)
         for receipt_id, tomb in index.get("tombstones", {}).items():
-            if isinstance(tomb, dict) and tomb.get("linked_work") == work:
+            if isinstance(tomb, dict) and work in (
+                tomb.get("linked_works") or [tomb.get("linked_work")]
+            ):
                 receipts.add(receipt_id)
         return receipts
     except (OSError, ValueError):

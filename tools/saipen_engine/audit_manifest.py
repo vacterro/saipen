@@ -83,7 +83,7 @@ from .paths import (
 #: Bumped only when the SHAPE of this contract changes. A consumer that
 #: understands version N must refuse a manifest declaring N+1 rather than
 #: reinterpreting unknown fields (see `compatibility` below).
-CONTRACT_VERSION = 2
+CONTRACT_VERSION = 3
 
 #: The manifest's own filename inside `.saipen/`. Deliberately MANIFEST.json:
 #: a consumer that already honours a project-owned `MANIFEST.json` "required"
@@ -104,6 +104,13 @@ CONDITIONAL_DIRS = (
     ("KNOWLEDGE", True, 4000),
     ("audit", False, 500),
     ("evidence", True, 4000),
+    # T-1452: BOARD rows compacted by `saipen ticket compact` keep their full
+    # text HERE and cite it as `detail_ref: .saipen/recovery/board-compaction/
+    # T-###/...json`. `recovery/` is non-exportable as a whole, so an
+    # "authoritative" snapshot used to drop text BOARD itself points at and
+    # still report required_evidence_omitted=false. A positive durable
+    # declaration outranks the broad prefix -- see `EXPORT_PRECEDENCE`.
+    ("recovery/board-compaction", True, 8000),
 )
 
 #: Surfaces a closure record may cite by path (`<memory_root>/<surface>/...`).
@@ -146,6 +153,60 @@ NON_EXPORTABLE = (
     "LOCAL_STATE.json",
 )
 
+#: T-1452 / SRC-103 defect A. The prefix list above answers "is this path
+#: under a private ROOT" and nothing else, so a transient directory that
+#: appears BELOW an allowed optional root -- `saitranslate/.prepare-staging/
+#: <id>/.in-flight`, its payload tree, `.translation-cache` -- was exported by
+#: an artifact that then declared `authoritative_state=true` and
+#: `required_evidence_omitted=false`. Measured live on 2026-09-21 by
+#: SAIPENVIEW at HEAD 654916e35a4c, and the same class as T-850.
+#:
+#: These are STRUCTURAL classes matched on any path SEGMENT at ANY depth, so a
+#: new transient directory appearing under an otherwise durable root is
+#: excluded the day it appears, without excluding the durable family above it.
+TRANSIENT_SEGMENTS = (
+    ".prepare-staging",
+    ".collect-staging",
+    ".staging",
+    ".in-flight",
+    ".translation-cache",
+    ".cache",
+    "__pycache__",
+    SAIPEN_DIR,
+)
+
+#: Runtime coordination markers, matched on the FILE NAME at any depth. An
+#: epoch marker says which producer generation is live right now; it is a
+#: coordination value, never durable audit evidence.
+TRANSIENT_FILENAMES = (
+    "LOCAL_STATE.json",
+    "producer_epoch.json",
+    "crew_epoch.json",
+    ".in-flight",
+)
+
+#: Write-in-progress and lock artifacts, matched on the file-name SUFFIX at
+#: any depth. One constant for the classifier AND the published declaration:
+#: a consumer applies the declaration, so a second literal is a second answer.
+TRANSIENT_SUFFIXES = (".tmp", ".lock", ".partial")
+
+#: A nested instance's OWN live checkpoint (`extensions/subs/<role>/STATE.md`
+#: and friends). It is that instance's canonical truth, not this project's
+#: evidence, and exporting it puts two live protocol states in one snapshot.
+#: Matched structurally: a core protocol-memory filename anywhere BELOW the
+#: memory root rather than at it.
+NESTED_INSTANCE_FILES = (STATE_NAME, BOARD_NAME, LOG_NAME, IDENTITY_NAME)
+
+#: The ONE ordering a consumer applies. Declared in the manifest so a packager
+#: cannot invent its own and call the result authoritative.
+EXPORT_PRECEDENCE = (
+    "transient_segment_or_filename",
+    "nested_instance_state",
+    "declared_durable_path",
+    "non_exportable_prefix",
+    "directory_rule",
+)
+
 #: Result codes. One stable vocabulary for the CLI, the lifecycle hook and the
 #: regression matrix.
 CODE_WRITTEN = "AUDIT_MANIFEST_WRITTEN"
@@ -182,6 +243,75 @@ DECLARED_UNSUPPORTED = "UNSUPPORTED"  # a NEWER contract -> refuse
 #: authority. IDENTITY is mandatory evidence but a project may legitimately
 #: predate it (see `LAYOUT_LEGACY`).
 LAYOUT_CORE_FILES = (STATE_NAME, BOARD_NAME, LOG_NAME)
+
+
+def _segments(relative_path: str) -> list[str]:
+    raw = str(relative_path or "").replace("\\", "/")
+    return [part for part in raw.split("/") if part and part != "."]
+
+
+def is_transient(relative_path: str) -> bool:
+    """True when a path under the memory root is runtime coordination.
+
+    Structural and nesting-independent on purpose: the defect was a contract
+    that could only answer "which ROOTS are private", so anything transient
+    below a durable root shipped as evidence.
+    """
+    parts = _segments(relative_path)
+    if not parts:
+        return False
+    if any(part in TRANSIENT_SEGMENTS for part in parts):
+        return True
+    last = parts[-1]
+    return last in TRANSIENT_FILENAMES or last.endswith(TRANSIENT_SUFFIXES)
+
+
+def is_nested_instance_state(relative_path: str) -> bool:
+    """True for another live instance's own STATE/BOARD/LOG/IDENTITY."""
+    parts = _segments(relative_path)
+    return len(parts) > 1 and parts[-1] in NESTED_INSTANCE_FILES
+
+
+def _declared_durable(relative_path: str) -> bool:
+    parts = _segments(relative_path)
+    if not parts:
+        return False
+    if len(parts) == 1 and parts[0] in MANDATORY_FILES:
+        return True
+    joined = "/".join(parts)
+    for path, recursive, _cap in CONDITIONAL_DIRS:
+        if joined == path:
+            return True
+        if joined.startswith(path + "/"):
+            return recursive or "/" not in joined[len(path) + 1 :]
+    return False
+
+
+def is_exportable(relative_path: str) -> bool:
+    """May this path, relative to `<memory_root>`, enter an audit snapshot?
+
+    ONE owner for the question, applied in `EXPORT_PRECEDENCE` order, so the
+    generator, the consumer and the regression matrix cannot disagree about
+    what `authoritative_state=true` claims. Both failure directions are real
+    and both were measured: transient runtime state leaking OUT through a
+    broad optional root, and BOARD-cited `recovery/board-compaction` detail
+    disappearing IN through a broad private prefix.
+    """
+    parts = _segments(relative_path)
+    if not parts:
+        return False
+    joined = "/".join(parts)
+    if is_transient(joined) or is_nested_instance_state(joined):
+        return False
+    if _declared_durable(joined):
+        return True
+    for prefix in NON_EXPORTABLE:
+        if prefix.endswith("/"):
+            if joined == prefix.rstrip("/") or joined.startswith(prefix):
+                return False
+        elif joined == prefix:
+            return False
+    return True
 
 
 def _protocol_version(protocol_dir: Path | None) -> str:
@@ -237,6 +367,21 @@ def build(root: Path | str, *, protocol_dir: Path | str | None = None) -> dict[s
                 for p, r, cap in OPTIONAL_DIRS
             ],
             "non_exportable": list(NON_EXPORTABLE),
+            # T-1452: structural classes, matched on any path segment or file
+            # name at ANY depth. A consumer that applies only the prefix list
+            # above exports runtime coordination state and must not call the
+            # result authoritative.
+            "non_exportable_segments": list(TRANSIENT_SEGMENTS),
+            "non_exportable_filenames": list(TRANSIENT_FILENAMES),
+            "non_exportable_suffixes": list(TRANSIENT_SUFFIXES),
+            "nested_instance_files": list(NESTED_INSTANCE_FILES),
+            "precedence": list(EXPORT_PRECEDENCE),
+            "authority_note": (
+                "authoritative_state=true asserts this artifact satisfies THIS "
+                "contract -- every declared durable path present and every "
+                "transient class excluded -- not merely that the mandatory "
+                "files happened to exist."
+            ),
         },
         "references": {
             "surfaces": list(REFERENCE_SURFACES),

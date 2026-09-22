@@ -72,11 +72,32 @@ def _snapshot(root: Path) -> tuple[dict | None, dict | None, str | None]:
     return state, board, None
 
 
-def _request_from_receipt(root: Path, receipt: str) -> tuple[dict | None, str | None]:
-    """(priority, verify, text, linked_work) of a `user-request` receipt body."""
+#: Why `saipen start --receipt` refuses a receipt. The queued-Source router
+#: asks `request_from_receipt` too (T-1458), and needs to tell a receipt that
+#: is simply not a request (skip it) from one it cannot read (surface it).
+RECEIPT_UNREADABLE = "UNREADABLE"
+RECEIPT_AUTHORITY_ONLY = "AUTHORITY_ONLY"
+RECEIPT_NOT_A_REQUEST = "NOT_A_REQUEST"
+
+
+def request_from_receipt(
+    root: Path, receipt: str
+) -> tuple[dict | None, str | None, str | None]:
+    """(request, problem, problem_class) of a `user-request` receipt body.
+
+    THE admissibility owner for starting a receipt. The queued-Source router
+    used to decide on `source_kind` alone, so an operator authority capsule
+    captured as `user_instruction` was routed as `saipen start --receipt` and
+    this function then refused it -- measured live 2026-09-22 (T-1458): the
+    router answered the same refused start after every dependency park.
+    """
     found = intake.read_body(root, receipt)
     if not found.get("ok"):
-        return None, f"{receipt}: {found.get('code')} {found.get('detail') or ''}".strip()
+        return (
+            None,
+            f"{receipt}: {found.get('code')} {found.get('detail') or ''}".strip(),
+            RECEIPT_UNREADABLE,
+        )
     meta = found.get("meta") or {}
     if meta.get("projection_policy") == intake.PROJECTION_AUTHORITY_ONLY:
         # T-1414: an authority-only Source is typed data, not a task. It
@@ -86,11 +107,15 @@ def _request_from_receipt(root: Path, receipt: str) -> tuple[dict | None, str | 
             f"{receipt} is captured operator authority (projection_policy "
             "authority_only) and never projects Work; cite it with "
             f"saipen ticket retire <T-###> --authority {receipt}"
-        )
+        ), RECEIPT_AUTHORITY_ONLY
     body = str(found.get("body") or "")
     head, sep, request = body.partition("\n" + _REQUEST_HEADER + "\n")
     if not sep or not head.startswith("# User request"):
-        return None, f"{receipt} is not a user request receipt; start it with its own text"
+        return (
+            None,
+            f"{receipt} is not a user request receipt; start it with its own text",
+            RECEIPT_NOT_A_REQUEST,
+        )
     fields = {}
     for line in head.splitlines():
         key, colon, value = line.partition(": ")
@@ -103,7 +128,7 @@ def _request_from_receipt(root: Path, receipt: str) -> tuple[dict | None, str | 
         "supersedes": (fields.get("supersedes") or "").strip() or None,
         "text": request.strip("\n"),
         "linked_work": (found.get("meta") or {}).get("linked_work"),
-    }, None
+    }, None, None
 
 
 def _pending_touches_intake(root: Path) -> bool:
@@ -262,7 +287,7 @@ def start_work(
     linked_work = None
     explicit_supersedes = None
     if receipt:
-        request, problem = _request_from_receipt(root, receipt)
+        request, problem, _problem_class = request_from_receipt(root, receipt)
         if problem:
             return _refuse("VALIDATION_FAILED", problem, usage=USAGE)
         text, priority = request["text"], request["priority"]

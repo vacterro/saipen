@@ -619,6 +619,27 @@ class SourceReceiptTests(unittest.TestCase):
         target.parent.mkdir(parents=True, exist_ok=True)
         target.write_text(body, encoding="utf-8")
 
+    def _git(self, *args: str) -> subprocess.CompletedProcess[str]:
+        return subprocess.run(
+            ["git", "-C", str(self.root), *args],
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+
+    def _init_git(self) -> bool:
+        if self._git("init", "-q").returncode != 0:
+            return False
+        self._git("config", "user.email", "probe@example.invalid")
+        self._git("config", "user.name", "probe")
+        return True
+
+    def _commit_all(self, message: str) -> bool:
+        return (
+            self._git("add", "-A").returncode == 0
+            and self._git("commit", "-q", "-m", message).returncode == 0
+        )
+
     def _complete_work(self, body: str, work: str) -> str:
         receipt = intake.capture(
             self.root, body, source_kind="user_instruction", work=work
@@ -776,6 +797,50 @@ class SourceReceiptTests(unittest.TestCase):
         self.assertEqual(gate["code"], "STALE_PLAN", gate)
         self.assertEqual(gate["work"], "T-003", gate)
         self.assertEqual(gate["scope_status"], "STALE_SCOPE", gate)
+
+    def test_t1405_continuation_scope_stays_trusted_when_reviewed_head_is_an_ancestor(
+        self,
+    ) -> None:
+        """A scope reviewed before the release's own commits stays trusted.
+
+        RED on the pre-fix gate: it loaded the scope with continuation=False,
+        so ANY later HEAD movement -- the release content/closure commits, the
+        post-release retry, the fresh-clone continuation -- reported
+        STALE_SCOPE while the reviewed bytes were untouched. The gate now
+        accepts the writer's continuation contract (reviewed HEAD is an
+        ancestor of live HEAD + exact reviewed path hashes); the stale
+        fingerprint and tampered hash controls above still refuse, and the
+        tampered byte check below proves the continuation path is not a bypass.
+        """
+        if not self._init_git():
+            self.skipTest("git unavailable")
+        self._release_board()
+        self._complete_work("independent verified source", "T-002")
+        self._incomplete_work("unresolved source with reviewed scope", "T-003")
+        self._scope_file("release.py")
+        self._scope_file("parked.py")
+        self.assertTrue(self._commit_all("baseline"), "fixture baseline commit failed")
+        self._record_scope("T-003", ["parked.py"])
+        self._scope_file("later_metadata.txt", "not part of the reviewed scope\n")
+        self.assertTrue(self._commit_all("release content"), "fixture release commit failed")
+        self._record_scope("T-002", ["release.py"])
+
+        gate = intake.release_gate(self.root, "T-002")
+
+        self.assertTrue(gate["ok"], gate)
+        self.assertEqual(gate["code"], "SOURCE_RELEASE_COVERAGE_COMPLETE", gate)
+
+        # Negative control: the continuation binding still refuses when the
+        # reviewed bytes themselves moved after review. T-002's binding is
+        # refreshed first so the assert can only be answered by T-003's
+        # continuation load, never by T-002's fingerprint mismatch.
+        self._scope_file("parked.py", "tampered after review\n")
+        self._record_scope("T-002", ["release.py"])
+        stale = intake.release_gate(self.root, "T-002")
+        self.assertFalse(stale["ok"], stale)
+        self.assertEqual(stale["code"], "STALE_PLAN", stale)
+        self.assertEqual(stale["work"], "T-003", stale)
+        self.assertEqual(stale["scope_status"], "STALE_SCOPE", stale)
 
     def test_t1405_tampered_other_work_path_hash_fails_closed(self) -> None:
         self._release_board()

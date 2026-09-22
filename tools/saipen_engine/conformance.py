@@ -377,14 +377,16 @@ def _bounded_remediation_commands(commands) -> list[str]:
     The validator's own failure messages name their remediation; carrying the
     bounded machine-readable list INTO the receipt is what lets the router
     lead with a real repair (`saipen work reverify T-008`) instead of the
-    generic `saipen validate` loop. Only `saipen ...` lines survive, each
-    bounded, deduplicated and capped -- a receipt is evidence, not a log.
+    generic `saipen validate` loop. Only registered remediation shapes survive,
+    each bounded, deduplicated and capped -- a receipt is evidence, not a log.
     """
+    from .remediation import resolve_command
+
     out: list[str] = []
     seen: set[str] = set()
     for raw in commands or ():
         command = str(raw or "").strip()
-        if not command.startswith("saipen ") or len(command) > 160:
+        if len(command) > 160 or not resolve_command(command).get("ok"):
             continue
         if command in seen:
             continue
@@ -430,6 +432,7 @@ def generate_conformance_receipt(
     source_identity=None,
     remediation_commands=None,
     external_actions=None,
+    blocking_findings=None,
 ) -> dict:
     """§2: mechanically produce ONE structured conformance receipt.
 
@@ -521,8 +524,15 @@ def generate_conformance_receipt(
         # T-1434 M5.2: typed external remediations, never disguised commands.
         # Empty when no current rule needs an actor outside the project.
         "external_actions": bounded_external,
+        # T-1439: complete classified blocking records from THIS execution,
+        # bound by the same content/source/checkpoint hashes as the verdict.
+        # Retain the array: distinct unclassified findings may share a key.
+        "blocking_findings": blocking_findings if blocking_findings is not None else {
+            "status": "unavailable",
+            "reason": "validator did not provide complete classified blocking findings",
+        },
         "canonical_next_command": (
-            bounded_remediation[0] if bounded_remediation else CONFORMANCE_REMEDIATION_COMMAND
+            bounded_remediation[0] if verdict == "FAIL" and bounded_remediation else None
         ),
     }
     # content_hash binds the EXACT written bytes, so compute it from the body
@@ -1178,6 +1188,30 @@ def _strict_validate_receipt(receipt: dict, gate: str, project_root: Path) -> st
             f"recomputed={recomputed[:16]}.. (receipt body was tampered)"
         )
 
+    # Optional diagnostic extension; old receipts remain readable. A malformed
+    # complete set is unavailable evidence, never a current empty/green set.
+    blocking = receipt.get("blocking_findings")
+    if blocking is not None:
+        if not isinstance(blocking, dict) or blocking.get("status") not in (
+            "complete", "unavailable"
+        ):
+            return "receipt blocking_findings has invalid status/shape"
+        if blocking["status"] == "complete":
+            problems = blocking.get("problems")
+            count = blocking.get("problem_count")
+            warning_count = blocking.get("warning_count")
+            if (
+                not isinstance(problems, list)
+                or type(count) is not int or count != len(problems)
+                or type(warning_count) is not int or warning_count < 0
+                or not blocking.get("ruleset_version")
+                or not blocking.get("ruleset_fingerprint")
+                or any(not isinstance(item, dict) or item.get("severity") != "problem"
+                       for item in problems)
+                or (verdict == "PASS" and count != 0)
+            ):
+                return "receipt blocking_findings is not a complete consistent problem set"
+
     # 5. Real timestamp parsing
     ts = receipt.get("timestamp_utc", "")
     if not _strict_iso_utc(ts):
@@ -1444,27 +1478,41 @@ def conformance_decision(
     `healthy` is exactly `status == CURRENT_PASS`. NOT_RUN, every stale status,
     CURRENT_FAIL and the invalid/version-mismatched statuses are all non-green
     for the same reason: none of them proves the CURRENT source conformant. The
-    decision carries the bounded reason and the one executable remediation, and
+    decision carries a registered repair, a refresh, or a terminal diagnosis, and
     `status_block` is the untouched `conformance_status` payload so a caller
     that needs the receipt or validator metadata still gets the full evidence.
     """
     status = conformance_status(project_root, gate=gate, now=now, source_identity=source_identity)
     kind = status.get("status")
     healthy = kind == STATUS_CURRENT_PASS
-    # T-1434 M1: a FAIL receipt carries the bounded commands its own failures
-    # named. When the ONLY current defects are re-verifiable Work, that list is
-    # the real repair (`saipen work reverify T-###`), and the router must lead
-    # with it instead of dead-ending at the generic gate re-run. Absence of a
-    # machine-readable list (older receipt, non-command failure) falls back to
-    # the canonical validator re-run.
+    # Only current, valid evidence may supply executable repairs. An unchanged
+    # CURRENT_FAIL with no registered repair is an engineering boundary, not
+    # an instruction to run the same failing validator forever (T-1439).
     receipt = status.get("receipt") or {}
-    stated = receipt.get("remediation_commands")
-    bounded = [
-        str(command)
-        for command in (stated or [])
-        if isinstance(command, str) and command.startswith("saipen ") and len(command) <= 160
-    ][:10]
-    primary = bounded[0] if bounded else CONFORMANCE_REMEDIATION_COMMAND
+    bounded = (_bounded_remediation_commands(receipt.get("remediation_commands"))
+               if kind == STATUS_CURRENT_FAIL else [])
+    diagnostic = None
+    if healthy:
+        primary, repair_status = None, "HEALTHY"
+    elif kind != STATUS_CURRENT_FAIL:
+        primary, repair_status = CONFORMANCE_REMEDIATION_COMMAND, "REFRESH_REQUIRED"
+    elif bounded:
+        primary, repair_status = bounded[0], "REPAIR_AVAILABLE"
+    else:
+        primary, repair_status = None, "ENGINEERING_REQUIRED"
+        blocking = receipt.get("blocking_findings") or {}
+        diagnostic = {
+            "kind": "ENGINEERING_REQUIRED",
+            "owner": "SAIPEN conformance/remediation",
+            "receipt_id": receipt.get("receipt_id"),
+            "findings_status": blocking.get("status", "unavailable"),
+            "detail": (
+                "CURRENT_FAIL has no registered executable repair. Diagnose the "
+                "receipt-bound blocking findings under their owning Work and implement "
+                "or register the required repair; validate again after the input, "
+                "state or runtime changes. Missing findings require diagnostic repair."
+            ),
+        }
     return {
         "status": kind,
         "gate": status.get("gate", gate),
@@ -1474,8 +1522,10 @@ def conformance_decision(
         # by historical LOG prose.
         "disposition": conformance_disposition(kind),
         "reason": status.get("reason", "") or "",
-        "remediation_command": None if healthy else primary,
-        "remediation_commands": [] if healthy else bounded,
+        "remediation_command": primary,
+        "remediation_commands": bounded,
+        "repair_status": repair_status,
+        "diagnostic": diagnostic,
         "status_block": status,
     }
 

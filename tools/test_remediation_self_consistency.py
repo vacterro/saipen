@@ -59,18 +59,41 @@ class RemediationTableTests(unittest.TestCase):
         self.assertTrue(remediation.REMEDIATIONS)
         for spec in remediation.REMEDIATIONS:
             self.assertIn(spec.kind, remediation.REMEDIATION_KINDS)
+            self.assertIn(
+                spec.route_kind,
+                remediation.ROUTE_KINDS,
+                f"{spec.rule}: route kind outside the closed set",
+            )
             if spec.kind == "command":
                 self.assertIsNotNone(spec.pattern)
-                self.assertTrue(spec.template.startswith("saipen "))
-                self.assertTrue(spec.verb)
+                self.assertTrue(spec.template.startswith(("saipen ", "git ")))
+                if spec.route_kind == "OPERATOR_AUTHORIZED_COMMAND":
+                    self.assertFalse(spec.extract, "operator commands are never auto-extracted")
+                    self.assertTrue(spec.template.startswith("git "))
+                else:
+                    self.assertTrue(spec.verb)
                 self.assertTrue(spec.owner)
             else:
                 self.assertIn(spec.external_kind, remediation.EXTERNAL_ACTION_KINDS)
                 self.assertFalse(spec.template, "external remediation carries no command")
 
+    def test_01b_no_dead_end_route_shapes(self):
+        """M7: the forbidden terminal outputs never appear in the table."""
+        forbidden = ("manual edit board", "manual edit state", "fix it somehow", ".py")
+        for spec in remediation.REMEDIATIONS:
+            if spec.kind != "command":
+                continue
+            lowered = spec.template.lower()
+            with self.subTest(rule=spec.rule):
+                for phrase in forbidden:
+                    self.assertNotIn(phrase, lowered)
+                self.assertNotEqual(spec.template.strip(), "saipen validate")
+
     def test_02_command_specs_resolve_in_registry_and_effects(self):
         for spec in remediation.REMEDIATIONS:
             if spec.kind != "command":
+                continue
+            if spec.route_kind == "OPERATOR_AUTHORIZED_COMMAND":
                 continue
             with self.subTest(rule=spec.rule):
                 self.assertIn(
@@ -192,8 +215,10 @@ class RemediationTableTests(unittest.TestCase):
                     "y",
                 ),
                 ("improve", "reconcile", "imp-does-not-exist"),
+                ("sub", "reconcile", "saiwiki", "--authority", "SRC-999"),
                 ("source", "retire", "SRC-999", "--reason", "STALE_CREDENTIAL"),
                 ("source", "recover"),
+                ("source", "quarantine", "SRC-999", "--reason", "CREDENTIAL_PATTERN"),
             )
             for argv in cases:
                 with self.subTest(argv=argv):
@@ -250,7 +275,7 @@ class RemediationTableTests(unittest.TestCase):
         commands_md = (ROOT / "saipen" / "COMMANDS.md").read_text(encoding="utf-8-sig")
         self.assertTrue(help_text)
         for spec in remediation.REMEDIATIONS:
-            if spec.kind != "command":
+            if spec.kind != "command" or not spec.extract:
                 continue
             pair = f"{spec.verb} {spec.action}" if spec.action else spec.verb
             with self.subTest(rule=spec.rule):
@@ -275,19 +300,35 @@ class EmittedLiteralScanTests(unittest.TestCase):
 
     def test_every_table_pattern_is_exercised(self):
         samples = {
+            "source credentials": (
+                "credential gate: run saipen source quarantine SRC-033 --reason CREDENTIAL_PATTERN"
+            ),
             "closure-evidence": "run saipen work reverify T-008 to record ONE",
             "closure-provenance:external-generation": (
                 "re-resolve with saipen ticket resolve-external T-66 --authority x"
             ),
+            "legacy metadata:exact": (
+                "repair with saipen ticket repair-metadata T-901 --field "
+                "source_receipts --to SRC-001"
+            ),
+            "legacy metadata:unbound": (
+                "repair with saipen ticket repair-metadata T-901 --field "
+                "source_receipts --legacy-unbound --authority lineage-"
+                + "0" * 32
+            ),
             "core sweep:sweep-ticket-link": (
                 "the executable repair is `saipen ticket reasoning T-53 --recurrence"
+            ),
+            "producer lifecycle:terminal": (
+                "repair with the producer-owned reconciliation "
+                "saipen sub reconcile saiwiki --authority SRC-042"
             ),
             "improve report": "repair: saipen improve reconcile imp-x-1 --json",
             "source receipts": "retire with saipen source retire SRC-007 --reason",
             "source coverage": "route: saipen source recover",
         }
         for spec in remediation.REMEDIATIONS:
-            if spec.kind != "command":
+            if spec.kind != "command" or not spec.extract:
                 continue
             with self.subTest(rule=spec.rule):
                 sample = samples[spec.rule]
@@ -296,6 +337,25 @@ class EmittedLiteralScanTests(unittest.TestCase):
                 self.assertTrue(
                     remediation.resolve_command(found[0]).get("ok"), found[0]
                 )
+
+    def test_operator_authorized_command_is_resolvable_but_never_extracted(self):
+        """M7: the operator maintenance route is classified, not auto-dispatched."""
+        verdict = remediation.resolve_command("git rm -r --cached -- .saipen/locks/x")
+        self.assertTrue(verdict["ok"], verdict)
+        self.assertEqual(verdict["route_kind"], "OPERATOR_AUTHORIZED_COMMAND")
+        self.assertFalse(verdict["verb"])
+        self.assertEqual(
+            remediation.extract_commands(["maintenance: git rm -r --cached -- .saipen/locks/x"]),
+            [],
+            "an operator command must never become a canonical_next_command",
+        )
+
+    def test_every_route_kind_is_represented_or_declared(self):
+        seen = {spec.route_kind for spec in remediation.REMEDIATIONS}
+        self.assertIn("CANONICAL_COMMAND", seen)
+        self.assertIn("OPERATOR_AUTHORIZED_COMMAND", seen)
+        self.assertIn("PRODUCER_OWNED_COMMAND", seen)
+        self.assertIn("IMMUTABLE_CLASSIFIED", remediation.ROUTE_KINDS)
 
 
 if __name__ == "__main__":

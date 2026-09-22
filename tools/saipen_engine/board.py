@@ -132,6 +132,7 @@ KNOWN_FIELDS = frozenset(
         "blocked_on",
         "resume_phase",
         "resume_transition_from",
+        "retry_not_before",
         # T-1326: a compact execution-index pointer to losslessly externalized
         # historical detail.  The resolver is canonical; the pointer itself
         # carries no authority beyond naming that artifact.
@@ -636,6 +637,33 @@ def closure_metadata_errors(ticket: dict) -> list[str]:
                 "silently downgraded to ticket while the line claims otherwise"
             )
 
+    rnb = str(fields.get("retry_not_before", "")).strip()
+    if rnb:
+        if section != "## BLOCKED":
+            errors.append(
+                f"{tid} carries | retry_not_before: outside ## BLOCKED ({section}) "
+                "-- a deferred due instant is ACTIVE blocked-state data"
+            )
+        elif iso_utc_sort_key(rnb) is None:
+            errors.append(
+                f"{tid} retry_not_before {rnb!r} is not strict UTC "
+                "(YYYY-MM-DDTHH:MM:SS[.fff]Z); malformed or naive local "
+                "timestamps fail closed -- they never fall back to host time"
+            )
+        elif deferred_operator_class(str(fields.get("blocker", ""))) is None:
+            # T-1429: the invariant is "a machine operator due instant may
+            # exist ONLY on an operator-eligible BLOCKED ticket", not "any
+            # BLOCKED ticket may carry the field". The projection already
+            # fails closed; without this the board keeps claiming a human
+            # deadline that nothing will ever report.
+            errors.append(
+                f"{tid} carries | retry_not_before: with blocker "
+                f"{str(fields.get('blocker', '')).strip().split(' -- ', 1)[0]!r}, "
+                "which is not an operator-owned deferred class "
+                f"({'|'.join(sorted(_DEFERRED_OPERATOR_BLOCKER_CLASSES))}) "
+                "-- a due instant nobody can action is dead metadata"
+            )
+
     closure_fields = (
         "closure_mode",
         "closure_cohort",
@@ -1066,6 +1094,23 @@ _CLOSURE_EXEMPT_BLOCKER_CLASSES = frozenset(
         "WAIT_USER_DECISION",
     }
 )
+# T-1429: the deferred-operator vocabulary is NARROWER than the general
+# blocker vocabulary, and conflating them was the defect. A due instant
+# claims "a HUMAN must act at this moment"; only a blocker class whose
+# owner IS the operator may make that claim. HELD/FUTURE_GATE/ACTIVE are
+# protocol holds, PERMANENT_WARNING_OWNER can never be actioned at all, and
+# WAIT_ROLE:<role> is crew-owned Work -- none of them are a person with a
+# clock. BLOCKED_EXTERNAL earns its place on evidence: T-1426's documented
+# live acceptance gate is exactly that class and is explicitly operator-owned.
+# Expanding this set requires live repository evidence of an explicit
+# operator-owned contract for the added class, recorded with the change.
+_DEFERRED_OPERATOR_BLOCKER_CLASSES = frozenset(
+    {
+        "WAIT_USER_CONFIRMATION",
+        "WAIT_USER_DECISION",
+        "BLOCKED_EXTERNAL",
+    }
+)
 
 
 def _field(ticket: dict, name: str) -> str:
@@ -1154,6 +1199,80 @@ def closure_paths(ticket: dict) -> list[str]:
     """The shared worktree paths a cohort member attributes to its batch."""
     raw = _field(ticket, "closure_paths")
     return [part.strip() for part in raw.replace(",", " ").split() if part.strip()]
+
+
+def retry_not_before(ticket: dict) -> str | None:
+    """The canonical machine-readable deferred due instant, or None.
+
+    T-1429: one field only (``retry_not_before``), strict-UTC
+    ``YYYY-MM-DDTHH:MM:SS[.fff]Z``. Malformed, naive, or non-UTC prose
+    fails closed to None -- prose never drives timing.
+    """
+    value = _field(ticket, "retry_not_before")
+    if not value:
+        return None
+    return value if iso_utc_sort_key(value) is not None else None
+
+
+def deferred_state(ticket: dict, now=None) -> str | None:
+    """DEFERRED_OPERATOR | DUE_OPERATOR_ACTION | None for one ticket.
+
+    None when no valid machine due-time exists. A timestamp alone never
+    creates a gate: only a ## BLOCKED ticket whose blocker is an
+    OPERATOR-OWNED deferred class (`deferred_operator_class`) plus a valid
+    due instant projects. Before due -> DEFERRED_OPERATOR; at/after -> DUE.
+
+    A due instant sitting on a HELD, FUTURE_GATE, ACTIVE,
+    PERMANENT_WARNING_OWNER or WAIT_ROLE ticket -- however it got there,
+    including out-of-band historical bytes -- fails closed to None here.
+    """
+    if ticket.get("section") != "## BLOCKED":
+        return None
+    due = retry_not_before(ticket)
+    if due is None:
+        return None
+    blocker = str(((ticket or {}).get("fields") or {}).get("blocker") or "")
+    if deferred_operator_class(blocker) is None:
+        return None
+    stamp = iso_utc_sort_key(due)
+    if stamp is None:
+        return None
+    if now is None:
+        import datetime as _dt
+
+        now = _dt.datetime.now(_dt.timezone.utc)
+    elif now.tzinfo is None:
+        import datetime as _dt
+
+        now = now.replace(tzinfo=_dt.timezone.utc)
+    return "DUE_OPERATOR_ACTION" if now >= stamp else "DEFERRED_OPERATOR"
+
+
+def operator_gates(tickets: dict, now=None) -> list[dict]:
+    """Every ## BLOCKED ticket projecting a machine due-time gate.
+
+    T-1429: one entry per ticket with a valid ``retry_not_before`` AND an
+    operator-eligible blocker class (`deferred_operator_class`) --
+    ``{"ticket", "retry_not_before", "state"}``
+    where state is DEFERRED_OPERATOR (before the instant) or
+    DUE_OPERATOR_ACTION (at or after it). Prose timestamps are invisible
+    here: ``deferred_state`` returns None without the structured field.
+    """
+    gates: list[dict] = []
+    for ticket in tickets.values():
+        if ticket.get("section") != "## BLOCKED":
+            continue
+        state = deferred_state(ticket, now)
+        if state is None:
+            continue
+        gates.append(
+            {
+                "ticket": ticket["id"],
+                "retry_not_before": retry_not_before(ticket),
+                "state": state,
+            }
+        )
+    return gates
 
 
 def goal_blocked_tickets(tickets: dict) -> list[str]:
@@ -1279,6 +1398,24 @@ def blocker_class(blocker: str) -> str | None:
         r"^WAIT_ROLE:([A-Za-z0-9_-]+)$", blocker.strip().split(" -- ", 1)[0].strip()
     )
     return "WAIT_ROLE" if wait_role else None
+
+
+def deferred_operator_class(blocker: str) -> str | None:
+    """The operator-owned deferred class a blocker opens with, or None.
+
+    T-1429's single policy owner for "may this blocker carry a machine
+    operator due instant". It is deliberately NOT `blocker_class` filtered
+    at the call site: `blocker_class` answers "is this a recognized
+    blocker", which is a different and broader question, and every consumer
+    that re-derived the narrower answer locally drifted. Router, status,
+    the public writer, the board validator and the schema all ask HERE.
+
+    Recognized but ineligible (no human owns the clock): HELD, FUTURE_GATE,
+    ACTIVE, PERMANENT_WARNING_OWNER, WAIT_ROLE:<role>, and every unrecognized
+    blocker such as ACTIVE_DEPENDENCY:<T-###>.
+    """
+    head = blocker.strip().split(" -- ", 1)[0].strip().upper()
+    return head if head in _DEFERRED_OPERATOR_BLOCKER_CLASSES else None
 
 
 def wait_role_target(blocker: str) -> str | None:

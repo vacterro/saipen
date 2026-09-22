@@ -114,8 +114,26 @@ class TestContractShape(unittest.TestCase):
 
     def test_declared_paths_are_relative_and_cannot_escape(self):
         manifest = audit_manifest.build(self.root)
-        paths = [item["path"] for tier in manifest["evidence"] if tier != "non_exportable"
-                 for item in manifest["evidence"][tier]]
+        # Name the path-bearing tiers. The old "every tier except
+        # non_exportable" shape assumed each new evidence key would also be a
+        # list of {path: ...}, so the contract could not grow a structural
+        # declaration (T-1452's segment/filename classes) without this test
+        # dying on a TypeError instead of judging anything.
+        paths = [
+            item["path"]
+            for tier in ("mandatory", "conditional", "optional")
+            for item in manifest["evidence"][tier]
+        ]
+        for tier in (
+            "non_exportable",
+            "non_exportable_segments",
+            "non_exportable_filenames",
+            "non_exportable_suffixes",
+            "nested_instance_files",
+        ):
+            for token in manifest["evidence"].get(tier, ()):
+                self.assertIsInstance(token, str, tier)
+                paths.append(token)
         for path in paths:
             self.assertFalse(path.startswith("/"), path)
             self.assertNotIn("..", path.split("/"), path)

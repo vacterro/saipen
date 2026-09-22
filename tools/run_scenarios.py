@@ -2337,6 +2337,8 @@ exit 9
             no_schtasks_env = {
                 **shell_env,
                 "PATH": "/usr/bin:/bin",
+                # Isolate Task Scheduler, not the registry JSON reader.
+                "PYTHON_BIN": Path(sys.executable).as_posix(),
                 "MOCK_QUERY_FAIL": "",
             }
             shell_without_schtasks = subprocess.run(
@@ -5962,17 +5964,34 @@ def neutralize_sandbox_work_surface(saipen_dir: Path) -> set[str]:
     # in the copy. Only ids this function dropped are unlinked: a need that
     # names Work absent from the ORIGINAL board is untouched, still dangling,
     # and still fails, because that is the condition the check exists to catch.
+    #
+    # T-1361 release-freshness root: a `blocked_on:` continuation reservation
+    # is a reference exactly like a `needs:` edge, and the copy must stay a
+    # COHERENT board. Two defects lived here: the field rewrite dropped the
+    # separator space (`T-1428| blocked_on:`), so the parser lost the
+    # reservation fields, and a reservation naming a dropped ticket stayed
+    # behind as a dangling reference. Both manufactured validator failures the
+    # probe then reported against the live repository.
     if dropped:
         for index, line in enumerate(board_out):
-            match = re.search(r"(?m)\|\s*needs:\s*([^|\n]*)", line)
-            if not match:
-                continue
-            kept = [
-                need
-                for need in (part.strip() for part in match.group(1).split(","))
-                if need and need not in dropped
-            ]
-            board_out[index] = line[: match.start(1)] + ",".join(kept) + line[match.end(1) :]
+            match = re.search(r"(?m)\|\s*needs:\s*([^|\n]*?)\s*(?=\||$)", line)
+            if match:
+                kept = [
+                    need
+                    for need in (part.strip() for part in match.group(1).split(","))
+                    if need and need not in dropped
+                ]
+                board_out[index] = line[: match.start(1)] + ", ".join(kept) + line[match.end(1) :]
+            blocked = re.search(
+                r"\|\s*blocked_on:\s*(T-\d+)\s*(?=\|)", board_out[index]
+            )
+            if blocked and blocked.group(1) in dropped:
+                stripped = re.sub(r"\|\s*blocked_on:\s*T-\d+\s*", "", board_out[index])
+                stripped = re.sub(r"\|\s*resume_phase:\s*[A-Za-z_]+\s*", "", stripped)
+                stripped = re.sub(
+                    r"\|\s*resume_transition_from:\s*[A-Za-z_]+\s*", "", stripped
+                )
+                board_out[index] = stripped
     board_path.write_text("\n".join(board_out) + "\n", encoding="utf-8")
 
     intake_dir = saipen_dir / "intake"
@@ -6513,7 +6532,9 @@ def run_release_executor_probes() -> tuple[list[str], int]:
         )
         state_path.write_text(state_text, encoding="utf-8")
 
-    def build_fixture(tmp: Path, *, mode: str = "full", gitless: bool = False) -> tuple:
+    def build_fixture(
+        tmp: Path, *, mode: str = "full", gitless: bool = False, foreign: bool = False
+    ) -> tuple:
         """ONE valid SHIP-phase fixture builder (T-994 / § 21): the copied
         project's real STATE keeps every required field (blocker,
         saipen_version, mode, ...) and only the SHIP-relevant fields are
@@ -6642,10 +6663,6 @@ def run_release_executor_probes() -> tuple[list[str], int]:
             ),
             encoding="utf-8",
         )
-        r = cli("scope", "T-9000", "tools/saipen_engine/release_contract.py")
-        if r.returncode != 0:
-            raise RuntimeError("fixture scope failed: " + r.stdout + r.stderr)
-
         old_ver = (project / "VERSION").read_text(encoding="utf-8").strip()
         major, minor, patch = old_ver.split(".")
         new_ver = f"{major}.{minor}.{int(patch) + 1}"
@@ -6675,6 +6692,20 @@ def run_release_executor_probes() -> tuple[list[str], int]:
             for rm in kitchen.glob("*/README_*.md"):
                 t = rm.read_text(encoding="utf-8-sig")
                 rm.write_text(t.replace(f"**v{old_ver}**", f"**v{new_ver}**"), encoding="utf-8")
+        if foreign:
+            # The intended final source tree includes this foreign untracked
+            # file: the release must keep it out of its commits and preserve it
+            # in the worktree. It has to exist BEFORE the scope identity is
+            # recorded -- the fingerprint covers untracked non-.saipen bytes,
+            # so writing it afterwards makes the reviewed scope stale.
+            (project / "tools" / "foreign_file.py").write_text(
+                "FOREIGN = True\n", encoding="utf-8"
+            )
+        # Scope binds the complete reviewed tree, including release metadata.
+        # Recording it before the version bump creates a stale fixture.
+        r = cli("scope", "T-9000", "tools/saipen_engine/release_contract.py")
+        if r.returncode != 0:
+            raise RuntimeError("fixture scope failed: " + r.stdout + r.stderr)
         return project, origin, git, cli, new_ver
 
     def remote_branch_tip(origin: Path) -> str:
@@ -6975,12 +7006,11 @@ def run_release_executor_probes() -> tuple[list[str], int]:
     # 8. FULL SUCCESS: REAL source change ships into a fresh clone
     # ======================================================================
     with tempfile.TemporaryDirectory(prefix="saipen-rel-8-") as tmp:
-        built = build_fixture(Path(tmp))
+        built = build_fixture(Path(tmp), foreign=True)
         if built is None:
             return problems, checked
         project, origin, git, cli, new_ver = built
         foreign = project / "tools" / "foreign_file.py"
-        foreign.write_text("FOREIGN = True\n", encoding="utf-8")
 
         result = cli("ship", "--json")
         rd = j(result)
@@ -18637,8 +18667,8 @@ def run_hostile_state_probes() -> tuple[list[str], int]:
     root = Path(tempfile.mkdtemp(prefix="saipen-hr-state-"))
     (root / ".saipen").mkdir(parents=True)
     (root / ".saipen" / "BOARD.md").write_text(
-        "# BOARD\n\n## ACTIVE\n\n- none\n\n## DOING\n\n- none\n\n"
-        "## TODO\n\n- none\n\n## BLOCKED\n\n- none\n\n## DONE\n\n- none\n",
+        "# BOARD\n\n## ACTIVE\n\n- none\n\n## DOING\n\n"
+        "## TODO\n\n## BLOCKED\n\n## DONE\n",
         encoding="utf-8",
     )
     (root / ".saipen" / "LOG.md").write_text("# LOG\n", encoding="utf-8")

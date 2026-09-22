@@ -946,6 +946,28 @@ _FAIL_FIELD_RE = re.compile(r"\bFAILURES?\s*=\s*(?!0+\b)\d+", re.IGNORECASE)
 #: Their zero twins, which exempt a token instead of claiming one.
 _ZERO_FIELD_RE = re.compile(r"\bFAILURES?\s*=\s*0+\b", re.IGNORECASE)
 
+# T-1444: a count ATTRIBUTED to a foreign scope is not this ticket's claim.
+#
+# The classifier had no scope. Measured live on SAIMAIL T-99: verify
+# checkpoints honestly reported the SAIPEN core gate's INHERITED failures
+# ("SAIPEN core 4 FAIL / 22 WARN (inherited)") next to the ticket's own green
+# suite; the foreign count vetoed the ticket's PASS, VERIFY -> REVIEW refused,
+# and the session misread the echoed text as a requirement to reproduce the
+# previous experiment's evidence vocabulary -- a scope leak with no vocabulary
+# requirement anywhere in the engine. The claim belongs to the ACTIVE ticket's
+# own acceptance surface. The marker vocabulary is CLOSED and the attribution
+# must be adjacent to the count, so an unattributed `2 FAIL` still claims from
+# anywhere and a real failure cannot be talked past.
+_FOREIGN_SCOPE = r"(?:inherited|unrelated|pre-existing|carried|foreign)"
+_FOREIGN_FAIL_RE = re.compile(
+    r"\b" + _FOREIGN_SCOPE + r"\s+\d+\s+FAIL(?:S|ED|URE|URES)?\b"
+    r"|\b\d+\s+" + _FOREIGN_SCOPE + r"\s+FAIL(?:S|ED|URE|URES)?\b"
+    r"|\b\d+\s+FAIL(?:S|ED|URE|URES)?\b"
+    r"(?:\s*/?\s*\d*\s*WARN(?:ING|INGS)?\b)?\s*"
+    r"(?:\(\s*" + _FOREIGN_SCOPE + r"\s*\)|\b" + _FOREIGN_SCOPE + r"\b)",
+    re.IGNORECASE,
+)
+
 
 def _claims_failure(text: str) -> bool:
     """Does this event text CLAIM a failure? (T-1241, narrowed by T-1281)
@@ -983,14 +1005,22 @@ def _claims_failure(text: str) -> bool:
     of a line whose verdict says PASS. That is the trade the four
     reproductions above are worth, and a real failure still has three ways to
     say so.
+
+    T-1444 scopes the machine shapes: a count explicitly attributed to a
+    foreign scope (`inherited 4 FAIL`, `4 FAIL / 22 WARN (inherited)`,
+    `4 FAIL 22 WARN inherited`) reports ANOTHER acceptance surface and is
+    removed before the scan. An unattributed count is untouched.
     """
     if _NEGATION_RE.search(text):
         return True
     body = text or ""
+    # T-1444: counts explicitly attributed to a foreign/inherited scope are
+    # narrative about another acceptance surface, never this ticket's claim.
+    scoped = _FOREIGN_FAIL_RE.sub(" ", body)
     # Machine shapes: unambiguous wherever they appear.
-    if _FAIL_COUNTED_RE.search(body) or _FAIL_FIELD_RE.search(body):
+    if _FAIL_COUNTED_RE.search(scoped) or _FAIL_FIELD_RE.search(scoped):
         return True
-    verdict = body.split(_VERDICT_SEPARATOR, 1)[0]
+    verdict = scoped.split(_VERDICT_SEPARATOR, 1)[0]
     total = len(_FAIL_TOKEN_RE.findall(verdict))
     if not total:
         return False

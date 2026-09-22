@@ -1894,9 +1894,12 @@ def _preflight_plan(root: Path, plan: ReleasePlan) -> dict:
 
     source_gate = release_gate(root, plan.ticket_id)
     if not source_gate.get("ok"):
+        route = source_gate.get("canonical_next_command")
         return _release_failure(
             "SOURCE_COVERAGE",
-            f"active source receipt blocks ship: {source_gate}",
+            f"source receipt blocks ship: {source_gate}",
+            source_gate=source_gate,
+            **({"canonical_next_command": route} if route else {}),
         )
 
     if plan.targeted_ticket:

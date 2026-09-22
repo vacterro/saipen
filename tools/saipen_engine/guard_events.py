@@ -1029,10 +1029,13 @@ def ingress_payload(command: str) -> str | None:
         command_effects.INGRESS_PAYLOAD_VERBS
     ):
         return None
-    payload = head[2].strip()
-    if len(payload) >= 2 and payload[0] in "'\"" and payload[-1] == payload[0]:
-        payload = payload[1:-1]
-    payload = payload.strip()
+    # ONE owner for "where does the request end". A quoted request ends at its
+    # CLOSING quote; everything after it is transport, not words the operator
+    # wrote. Stripping quotes only when the whole remainder was quoted meant a
+    # single trailing `--json` made the recorded obligation undischargeable.
+    from .pending_ingress import request_bytes
+
+    payload = request_bytes(head[2])
     if not payload or len(payload) > MAX_INGRESS_REWRITE_CHARS or payload.startswith("-"):
         return None
     if shell_control_expression(payload):

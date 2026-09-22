@@ -87,6 +87,10 @@ COMPACTION_DISPOSITION = {
     "regression": "inline",
     "resume_phase": "inline",
     "resume_transition_from": "inline",
+    # T-1429: the deferred due instant is machine-routing truth -- a cold
+    # worker must see DEFERRED/DUE without opening the externalized detail.
+    # 20 characters, so inline costs the live line nothing.
+    "retry_not_before": "inline",
     "review_passes": "inline",
     "source_receipts": "tokenized",
     "source_reports": "tokenized",

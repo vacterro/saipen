@@ -1604,6 +1604,83 @@ def validate_sub_state(state: dict) -> list[str]:
     return errors
 
 
+#: T-1435 M4: the closed producer terminal-consistency verdicts. ONE
+#: side-effect-free predicate classifies a producer's STATE/BOARD pair; the
+#: validator, the producer-owned reconciliation and the terminal writers all
+#: consume the SAME facts, so "repairable" and "refused" can never disagree.
+TERMINAL_VERDICTS = (
+    "CLEAN",
+    "STALE_STATE",
+    "DONE_CLAIM_FALSE",
+    "MUST_RESUME",
+    "MUST_BLOCK",
+    "NONTERMINAL",
+    "MALFORMED_STATE",
+    "MALFORMED_BOARD",
+)
+
+
+def terminal_consistency(state: dict | None, board: dict | None) -> dict:
+    """ONE side-effect-free producer terminal-truth predicate (T-1435 M4).
+
+    Truth table (STATE phase DONE unless stated otherwise):
+
+      A  DONE + task/residue, BOARD terminal   -> STALE_STATE   (clear residue)
+      B  DONE + real TODO                      -> DONE_CLAIM_FALSE
+      C  DONE + DOING                          -> MUST_RESUME
+      D  DONE + active BLOCKED                 -> MUST_BLOCK
+      E  DONE + task none, BOARD terminal      -> CLEAN
+      F  malformed STATE                       -> MALFORMED_STATE (refuse)
+      G  malformed BOARD                       -> MALFORMED_BOARD (refuse)
+
+    Precedence inside a contradiction is conservative: a live DOING outranks
+    a BLOCKED, which outranks a TODO, because the stronger lifecycle truth is
+    the one the producer must resume. Nothing here writes or infers from
+    prose; archival rows are distinguishable because only the OPEN sections
+    are counted.
+    """
+    if state is None or not isinstance(state, dict):
+        return {"verdict": "MALFORMED_STATE", "detail": "STATE is absent or unparseable"}
+    if board is None or not isinstance(board, dict):
+        return {"verdict": "MALFORMED_BOARD", "detail": "BOARD is absent or unparseable"}
+    phase = str(state.get("phase") or "")
+    tickets = board.get("tickets", {}) or {}
+    doing = sorted(t["id"] for t in tickets.values() if t.get("section") == "## DOING")
+    todo = sorted(t["id"] for t in tickets.values() if t.get("section") == "## TODO")
+    blocked = sorted(t["id"] for t in tickets.values() if t.get("section") == "## BLOCKED")
+    facts = {
+        "phase": phase,
+        "task": state.get("task"),
+        "task_residue": False,
+        "state_residue": [],
+        "doing": doing,
+        "todo": todo,
+        "blocked": blocked,
+    }
+    if phase != "DONE":
+        return {**facts, "verdict": "NONTERMINAL", "detail": f"phase {phase!r} is not terminal"}
+    task = state.get("task")
+    ticket = None if task in (None, "", "none") else str(task).strip()
+    residue: list[str] = []
+    if ticket:
+        residue.append(f"task {task!r}")
+    if str(state.get("blocker") or "").strip():
+        residue.append("an active blocker")
+    facts["task_residue"] = bool(ticket)
+    facts["state_residue"] = residue
+    if doing:
+        verdict = "MUST_RESUME"
+    elif blocked:
+        verdict = "MUST_BLOCK"
+    elif todo:
+        verdict = "DONE_CLAIM_FALSE"
+    elif residue:
+        verdict = "STALE_STATE"
+    else:
+        verdict = "CLEAN"
+    return {**facts, "verdict": verdict, "detail": "; ".join(residue) or "terminal"}
+
+
 def validate_sub_lifecycle(state: dict, board: dict, role_name: str) -> list[str]:
     """Bind ONE sub STATE phase/task to its parsed BOARD as one coherent
     machine (T-1003 sweep, hostile finding 2). The shared validator every
@@ -1628,15 +1705,18 @@ def validate_sub_lifecycle(state: dict, board: dict, role_name: str) -> list[str
     doing = [t for t in tickets.values() if t["section"] == "## DOING"]
     prefix = ticket_prefix_for_role(role_name)
     if phase == "DONE":
-        if ticket:
+        # T-1435 M4: the DONE branch reads the ONE terminal predicate's facts
+        # (message strings unchanged, so a second truth cannot drift).
+        verdict = terminal_consistency(state, board)
+        if verdict["task_residue"]:
             errors.append(
                 f"phase DONE but task is {task!r} -- Core's "
                 "terminal invariant requires task none in a DONE "
                 "worker state"
             )
-        if doing:
+        if verdict["doing"]:
             errors.append("phase DONE but the board still carries a ## DOING ticket")
-        if counts.get("TODO") or counts.get("BLOCKED"):
+        if verdict["todo"] or verdict["blocked"] or counts.get("TODO") or counts.get("BLOCKED"):
             errors.append(
                 "phase DONE but the board still holds open work "
                 "(TODO/BLOCKED) -- a worker cannot say DONE while "
@@ -2943,6 +3023,332 @@ def sub_resume(
         op_id=op_id,
         changed_files=[t["path"] for t in targets],
         data={"name": name, "restored_phase": prior_phase, "restored_next_action": prior_na},
+    )
+
+
+def _bounded_wait(value: object) -> str:
+    """The producer's own WAIT, re-bounded to CORE § 1.2's shape (T-1435 M5).
+
+    A historical producer STATE can carry a WAIT whose category is legal but
+    whose body is several sentences (the measured saitranslate residue). The
+    strict parser refuses to READ that state, so without a bounded rewrite the
+    producer-owned reconciliation would be unreachable -- the exact deadlock
+    T-1435 exists to remove. This helper keeps the FIRST sentence (the human
+    action) and drops the rest; the producer's own journaled transaction is
+    the only writer. An unparseable shape returns "" and the caller refuses.
+    """
+    from .state import WAIT_CATEGORIES
+
+    text = str(value or "").strip()
+    if not text.startswith("WAIT:"):
+        return ""
+    body = text[len("WAIT:") :].strip()
+    head, sep, tail = body.partition(" -- ")
+    if sep:
+        category = head.strip().lower()
+        sentence = tail.strip()
+    else:
+        category = ""
+        sentence = body
+    if category not in WAIT_CATEGORIES:
+        category = "manual-verify"
+    sentence = re.split(r"\.\s+(?=[A-Z`])", sentence)[0].strip()
+    sentence = re.sub(r"\s+", " ", sentence).strip()
+    if not sentence:
+        sentence = "producer terminal residue recorded; session status belongs in the sub LOG"
+    if len(sentence) > 400:
+        cut = sentence[:400]
+        space = cut.rfind(" ")
+        sentence = (cut[:space] if space > 0 else cut).strip()
+    return f"WAIT: {category} -- {sentence}"
+
+
+def sub_reconcile(
+    project_root: Path | str,
+    name: str,
+    agent: str | None = None,
+    *,
+    authority: str = "",
+    dry_run: bool = False,
+) -> Result:
+    """Producer-owned terminal reconciliation (T-1435 M5).
+
+    A producer's STATE and BOARD can contradict each other (the measured
+    FastPrompter incident: saitranslate/saiwiki DONE with a live task, saiwiki
+    DONE with open BOARD work). Core may DETECT and ROUTE that contradiction
+    but must never patch another producer's canonical files, and it must never
+    clear unfinished work to make a ship gate green. This is the finite,
+    producer-owned repair: ONE side-effect-free predicate
+    (:func:`terminal_consistency`) decides the truth, and this transaction
+    writes the producer's OWN STATE plus a producer-attributed LOG event.
+
+    Outcomes:
+      OUTCOME A (STALE_STATE)      terminal BOARD proves the task/reference
+                                   residue stale -> clear it, stay DONE.
+      OUTCOME B (MUST_RESUME /     real open Work -> truthful nonterminal
+      DONE_CLAIM_FALSE /           projection; the open rows are untouched.
+      MUST_BLOCK)
+      CLEAN                        already coherent -> no-op, zero writes.
+      NONTERMINAL                  producer is not in DONE; nothing to do here.
+
+    Authority is MANDATORY: dropping a terminal claim is never anonymous. It
+    must be a receipt this project already owns, and it is named in the LOG
+    event. Any malformed STATE/BOARD, a foreign producer owner, or a proposed
+    state that fails the role grammar refuses with ZERO writes -- and the
+    journal's own `sub_lifecycle` verification is the write-time backstop.
+    """
+    root = Path(project_root)
+    name = str(name or "").strip()
+    authority = str(authority or "").strip().upper()
+    if not authority:
+        return _refuse(
+            "SUB_RECONCILE_AUTHORITY_REQUIRED",
+            "producer reconciliation requires --authority <SRC-###>: a receipt "
+            "this project owns that names the reconciliation decision",
+            name=name,
+        )
+    from . import metadata_repair
+
+    if not authority.startswith("SRC-") or not metadata_repair.receipt_exists(root, authority):
+        return _refuse(
+            "SUB_RECONCILE_AUTHORITY_INVALID",
+            f"authority receipt {authority!r} does not exist in this project's "
+            "intake history",
+            name=name,
+        )
+    if not dry_run:
+        from .journal import recovery_preflight
+
+        pre = recovery_preflight(root)
+        if not pre["ok"]:
+            return _refuse(pre.get("code", "RECOVERY_REQUIRED"), pre.get("detail", ""), name=name)
+    try:
+        _sub_dir(root, name)
+    except ValueError as exc:
+        return _refuse("INVALID_ID", str(exc), name=name)
+    manifest_raw, entry, manifest_errors = _registered_entry(root, name)
+    if manifest_errors:
+        return _refuse(
+            "INVALID_MANIFEST", "; ".join(manifest_errors[:5]), name=name, errors=manifest_errors
+        )
+    state_path = _entry_dir(root, entry) / "STATE.md"
+    if not state_path.is_file():
+        return _refuse("TICKET_NOT_FOUND", f"no subSaipen {name!r}", name=name)
+    doc = codec.read_document(state_path)
+    from .state import parse_state_or_error
+
+    st, state_error = parse_state_or_error(doc.text_norm)
+    malformed_wait = False
+    if state_error:
+        if "next_action is a malformed WAIT" in state_error:
+            # The ONE observed damage class with a finite producer-owned
+            # rewrite: the category is legal, the BODY is not bounded. Read
+            # leniently so the contradiction can be seen at all; the proposal
+            # below is still proved against the strict grammar before commit.
+            malformed_wait = True
+            from .state import parse_frontmatter
+
+            st, _lenient_error = parse_frontmatter(doc.text_norm)
+            if not st:
+                return _refuse(
+                    "VALIDATION_FAILED",
+                    f"subSaipen {name!r} STATE is malformed -- reconciliation "
+                    f"refuses with zero writes: {state_error}",
+                    name=name,
+                )
+        else:
+            return _refuse(
+                "VALIDATION_FAILED",
+                f"subSaipen {name!r} STATE is malformed -- reconciliation refuses "
+                f"with zero writes: {state_error}",
+                name=name,
+            )
+    board_path = state_path.parent / "BOARD.md"
+    board_text = board_path.read_text(encoding="utf-8-sig") if board_path.is_file() else ""
+    parsed_board = parse_sub_board(board_text, expected_role=name)
+    if parsed_board["errors"]:
+        return _refuse(
+            "VALIDATION_FAILED",
+            f"subSaipen {name!r} BOARD is malformed -- reconciliation refuses "
+            f"with zero writes: {'; '.join(parsed_board['errors'][:3])}",
+            name=name,
+        )
+    owner = str(st.get("agent") or "").strip()
+    if owner and owner != name:
+        return _refuse(
+            "SUB_RECONCILE_OWNERSHIP_CONFLICT",
+            f"subSaipen {name!r} STATE.agent is {owner!r}, not the producer "
+            "itself -- Core never takes over a foreign producer seat; the "
+            "recorded owner must reconcile or release it first",
+            name=name,
+        )
+    verdict = terminal_consistency(st, parsed_board)
+    surfaces = {
+        "doing": verdict["doing"],
+        "todo": verdict["todo"],
+        "blocked": verdict["blocked"],
+        "state_residue": verdict["state_residue"],
+    }
+    kind = verdict["verdict"]
+    if kind == "CLEAN":
+        return Result(
+            ok=True,
+            code="SUB_RECONCILE_CLEAN",
+            data={"name": name, "verdict": kind, "contradictory_surfaces": surfaces},
+        )
+    if kind == "NONTERMINAL":
+        return _refuse(
+            "SUB_RECONCILE_NOT_TERMINAL",
+            f"subSaipen {name!r} phase is {st.get('phase')!r}; terminal "
+            "reconciliation only repairs a DONE claim against its own BOARD",
+            name=name,
+        )
+    updates: dict[str, str] = {"updated": _utc_iso()}
+    if kind == "STALE_STATE":
+        updates.update({"task": "none", "blocker": ""})
+        if malformed_wait:
+            bounded = _bounded_wait(st.get("next_action"))
+            if not bounded:
+                return _refuse(
+                    "VALIDATION_FAILED",
+                    f"subSaipen {name!r} carries a malformed WAIT that cannot "
+                    "be bounded to one sentence; the producer must rewrite it",
+                    name=name,
+                )
+            updates["next_action"] = bounded
+        outcome = "OUTCOME_A_STALE_STATE_CLEARED"
+    elif kind == "MUST_RESUME":
+        # A sub ticket uses the role's own prefix, and the shared `PHASE ...`
+        # grammar only admits a T-### ref -- so the truthful projection is the
+        # non-ticket-bearing PLAN phase with the DOING ticket bound to `task`
+        # (exactly what validate_sub_lifecycle checks for that phase).
+        ticket = verdict["doing"][0]
+        updates.update(
+            {
+                "phase": "PLAN",
+                "task": ticket,
+                "blocker": "",
+                "next_action": "PHASE PLAN",
+            }
+        )
+        outcome = "OUTCOME_B_RESUMED_NONTERMINAL"
+    elif kind == "DONE_CLAIM_FALSE":
+        updates.update(
+            {
+                "phase": "PLAN",
+                "task": "none",
+                "blocker": "",
+                "next_action": "PHASE PLAN",
+            }
+        )
+        outcome = "OUTCOME_B_RESUMED_NONTERMINAL"
+    else:  # MUST_BLOCK
+        ticket = verdict["blocked"][0]
+        row = parsed_board["tickets"].get(ticket) or {}
+        description = str(row.get("description") or "").strip().split(" | ")[0].strip()
+        why = f"{ticket}: {description}" if description else f"{ticket} awaits external resolution"
+        updates.update(
+            {"phase": "BLOCKED", "task": "none", "blocker": why, "next_action": "PHASE BLOCKED"}
+        )
+        outcome = "OUTCOME_B_BLOCKED_NONTERMINAL"
+    new_text = patch_state(doc.text_norm, updates)
+    from .state import parse_state as _parse_state_text
+
+    proposed_state = _parse_state_text(new_text)
+    proposed_errors = validate_sub_state(proposed_state) + validate_sub_lifecycle(
+        proposed_state, parsed_board, name
+    )
+    if proposed_errors:
+        return _refuse(
+            "VALIDATION_FAILED",
+            "proposed reconciliation fails the producer lifecycle grammar: "
+            + "; ".join(proposed_errors[:3]),
+            name=name,
+        )
+    rel = f"{SUBS_REL}/{name}/STATE.md"
+    log_rel = f"{SUBS_REL}/{name}/LOG.md"
+    log_raw = _read_bytes_maybe(root / log_rel)
+    targets = [
+        {
+            "path": rel,
+            "role": "state",
+            "content": doc.encode(new_text),
+            "before_hash": doc.raw_hash,
+            "after_hash": hash_bytes(doc.encode(new_text)),
+        }
+    ]
+    # Producer attribution: the role itself is the event's agent; the Core
+    # dispatcher and the authority are named inside the message.
+    targets.extend(
+        _sub_trace_targets(
+            root,
+            name,
+            "reconcile",
+            f"terminal reconciliation {kind} -> {outcome}; dispatched by "
+            f"{agent or 'saipen-cli'}; authority {authority}"
+            + ("; malformed WAIT re-bounded to one sentence" if malformed_wait else ""),
+            log_raw,
+            agent=name,
+        )
+    )
+    lifecycle_reads = _lifecycle_read_preconditions(
+        root, name, manifest_raw, st.get("saipen_home") or ""
+    )
+    if dry_run:
+        return Result(
+            ok=True,
+            code="SUB_RECONCILE_PLAN",
+            data={
+                "name": name,
+                "verdict": kind,
+                "outcome": outcome,
+                "contradictory_surfaces": surfaces,
+                "authority": authority,
+                "normalized_wait": malformed_wait,
+                "dry_run": True,
+                "would_result": "SUB_RECONCILED",
+                "would_write": [t["path"] for t in targets],
+            },
+        )
+    op_id = "sub-reconcile-" + __import__("uuid").uuid4().hex[:8]
+    with project_writer_lock(root):
+        commit = run_mutation(
+            root,
+            op_id,
+            "sub_reconcile",
+            agent or "saipen-cli",
+            project_identity(root),
+            hash_bytes(("sub_reconcile:" + name + ":" + kind).encode("utf-8")),
+            targets,
+            preconditions={
+                rel: doc.raw_hash,
+                log_rel: _captured_hash(log_raw),
+            },
+            read_preconditions=lifecycle_reads,
+            verification_policy="sub_lifecycle",
+            receipt_metadata={
+                "producer": name,
+                "verdict": kind,
+                "outcome": outcome,
+                "authority": authority,
+                "dispatched_by": agent or "saipen-cli",
+            },
+        )
+    if not commit.get("ok"):
+        return _refuse(commit.get("code", "VALIDATION_FAILED"), commit.get("detail", ""), name=name)
+    return Result(
+        ok=True,
+        code="SUB_RECONCILED",
+        op_id=op_id,
+        changed_files=[t["path"] for t in targets],
+        data={
+            "name": name,
+            "verdict": kind,
+            "outcome": outcome,
+            "contradictory_surfaces": surfaces,
+            "authority": authority,
+            "normalized_wait": malformed_wait,
+        },
     )
 
 

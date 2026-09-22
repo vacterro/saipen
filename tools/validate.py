@@ -70,6 +70,7 @@ from saipen_engine.corpus import (
 import hashlib
 import io
 import json
+import contextlib
 import os
 import re
 import stat
@@ -558,6 +559,7 @@ def _saipen_exit(code=0):
                 exit_code=int(code or 0),
                 source_identity=_source_identity,
                 remediation_commands=_receipt_remediation_commands(),
+                blocking_findings=globals().get("_conformance_findings"),
             )
         except Exception:
             pass
@@ -575,6 +577,34 @@ def _git(*args):
     except (OSError, subprocess.SubprocessError):
         return 1, ""
     return r.returncode, r.stdout
+
+
+#: A live SAIPEN home's release metadata surface is >1000 paths (the intake and
+#: archive source trees join it), and Windows caps a process command line near
+#: 32K characters. One argv carrying every pathspec made subprocess.run raise
+#: `WinError 206`; `_git` swallowed it as rc 1, so the ship gate reported
+#: "cannot read staged release metadata" -- a fail-closed verdict with a cause
+#: that named neither the length nor the platform. Batch the pathspec
+#: deterministically: every query is set-valued, so the union of the batches is
+#: identical to one query.
+_PATHSPEC_BATCH = 100
+
+
+def _git_pathspec_sets(args: tuple[str, ...], paths: list[str], *, nul: bool = False):
+    """Union one Git query over bounded batches of *paths*.
+
+    Returns (returncode, values). The first failing batch returns its rc with
+    the values gathered so far; callers treat any nonzero rc as unreadable.
+    """
+    values: set[str] = set()
+    for start in range(0, len(paths), _PATHSPEC_BATCH):
+        rc, text = _git(*args, "--", *paths[start : start + _PATHSPEC_BATCH])
+        if rc != 0:
+            return rc, values
+        values.update(
+            part for part in text.split("\0" if nul else "\n") if part.strip()
+        )
+    return 0, values
 
 
 # Git object-ID lengths: 40 hex for SHA-1, 64 for SHA-256 (`git init
@@ -795,6 +825,35 @@ def warn(category, msg):
 # global USERPERSON or archived bodies during ordinary validation; only active
 # source authority, compact tombstones, contracts and coverage are structural
 # gate inputs.
+_SOURCE_METADATA_REPAIR_RE = re.compile(
+    r"\ABOARD Work (T-\d+) references missing source receipt (.+)\Z"
+)
+
+
+def _source_metadata_repair_hint(problem: str) -> str:
+    """The ONE executable migration for a malformed BOARD metadata token.
+
+    T-1435 M3: the validator correctly refuses a legacy human-readable
+    `source_receipts` value, and before this hint the message named no legal
+    move at all (the repair did not exist). The command text is assembled here
+    from the canonical migration authority and is extracted back out of this
+    same failure message by the closed remediation table, so the emitted route
+    is the implemented one by construction.
+    """
+    match = _SOURCE_METADATA_REPAIR_RE.match(str(problem or ""))
+    if not match:
+        return ""
+    work = match.group(1)
+    try:
+        from saipen_engine import metadata_repair
+    except ImportError:
+        return ""
+    try:
+        return metadata_repair.remediation_command_for_work(PROJECT_ROOT, work) or ""
+    except (OSError, ValueError):
+        return ""
+
+
 try:
     from saipen_engine.intake import validate_project as _validate_source_receipts
 
@@ -810,7 +869,11 @@ try:
                 f"source receipts -- {_source_problem}; continuation can regenerate the BOARD projection",
             )
         else:
-            fail(f"source receipts -- {_source_problem}")
+            _metadata_hint = _source_metadata_repair_hint(_source_problem)
+            fail(
+                f"source receipts -- {_source_problem}"
+                + (f"; repair with {_metadata_hint}" if _metadata_hint else "")
+            )
 except (OSError, ValueError) as _source_exc:
     fail(f"source receipts -- validation unavailable: {_source_exc}")
 
@@ -2226,7 +2289,9 @@ for _board_path in sorted(subs_root.glob("*/BOARD.md")):
             if _lifecycle:
                 fail(
                     f"{_st_file.as_posix()} state/board lifecycle is "
-                    f"incoherent: " + "; ".join(_lifecycle[:3]) + " (SAICREW H)"
+                    f"incoherent: " + "; ".join(_lifecycle[:3]) + " (SAICREW H); "
+                    "repair with the producer-owned reconciliation "
+                    f"saipen sub reconcile {_sub_name} --authority SRC-###"
                 )
             if _st_front.get("phase") == "DONE" and (
                 _parsed_board["counts"]["TODO"]
@@ -6021,19 +6086,11 @@ if IS_SAIPEN_HOME and kitchen.is_dir():
         # batched `git diff --name-only -- <all paths>` plus
         # `git ls-files -z -- <all paths>` produce identical semantics at
         # O(1) process count with respect to release-path count.
-        _unstaged_rc_batch, _unstaged_text_batch = _git(
-            "diff", "--name-only", "--", *_release_paths
+        _unstaged_rc_batch, _unstaged_set = _git_pathspec_sets(
+            ("diff", "--name-only"), _release_paths
         )
-        _unstaged_set = (
-            {line for line in _unstaged_text_batch.splitlines() if line.strip()}
-            if _unstaged_rc_batch == 0
-            else set()
-        )
-        _tracked_rc_batch, _tracked_text_batch = _git("ls-files", "-z", "--", *_release_paths)
-        _tracked_set = (
-            {line for line in _tracked_text_batch.split("\0") if line.strip()}
-            if _tracked_rc_batch == 0
-            else set()
+        _tracked_rc_batch, _tracked_set = _git_pathspec_sets(
+            ("ls-files", "-z"), _release_paths, nul=True
         )
         _need_staging = [
             p
@@ -6049,12 +6106,12 @@ if IS_SAIPEN_HOME and kitchen.is_dir():
             # slice even when `_need_staging` is empty (properly staged paths
             # match the index and are deliberately absent from that list).
             #
-            _staged_rc, _staged_text = _git(
-                "diff", "--cached", "--name-only", "--", *_release_paths
+            _staged_rc, _staged_set = _git_pathspec_sets(
+                ("diff", "--cached", "--name-only"), _release_paths
             )
             if _staged_rc != 0:
                 fail("binding ship gate cannot read staged release metadata")
-            elif not _staged_text.strip():
+            elif not _staged_set:
                 fail(
                     "binding ship gate requires every release metadata path "
                     "staged: release index is empty"
@@ -6081,13 +6138,15 @@ if IS_SAIPEN_HOME and kitchen.is_dir():
         # non-metadata dirt such as the release's own LOG/STATE closure
         # writes): a staged metadata path whose working bytes drifted must
         # be refused.
-        _unstaged_rc, _unstaged_text = _git("diff", "--name-only", "--", *_release_paths)
+        _unstaged_rc, _unstaged_paths = _git_pathspec_sets(
+            ("diff", "--name-only"), _release_paths
+        )
         if _unstaged_rc != 0:
             fail("ship gate cannot compare staged release metadata with working-tree bytes")
-        elif _unstaged_text.strip():
+        elif _unstaged_paths:
             fail(
                 "staged release metadata differs from working-tree bytes: "
-                + ", ".join(sorted(_unstaged_text.splitlines()))
+                + ", ".join(sorted(_unstaged_paths))
                 + " -- the binding ship gate must inspect the exact "
                 "release bytes selected for commit"
             )
@@ -7533,6 +7592,35 @@ else:
             "belongs in .gitignore, which this check honours"
         )
         drift_ok = False
+
+    # 1b8b. T-1435 M6: machine-local SAIPEN runtime artifacts (OS writer locks,
+    #       liveness caches, per-operation journal scratch, rebuildable
+    #       snapshot generations) must never enter a release cohort. The
+    #       ship gate asks Git directly, because `.gitignore` does NOT untrack
+    #       a file Git already follows -- the exact reason a project can add
+    #       every exclude line and still fail forever. Tracked runtime paths
+    #       get a finite OPERATOR_AUTHORIZED_COMMAND (`git rm -r --cached`,
+    #       which untracks without deleting the live runtime state) instead of
+    #       an instruction that cannot converge. The check reads the VALIDATED
+    #       project (PROJECT_ROOT), never the validator's own checkout, so a
+    #       consumer project is inspected where it actually lives. Durable
+    #       protocol/evidence history is never in this class (see
+    #       saipen_engine/runtime_namespace.py, the ONE policy owner), and a
+    #       gitless export reports UNPROVEN rather than a false failure.
+    if GATE == "ship":
+        from saipen_engine.runtime_namespace import release_problems as _runtime_release
+
+        _runtime = _runtime_release(PROJECT_ROOT)
+        if not _runtime.get("ok"):
+            fail(
+                "runtime namespace -- machine-local SAIPEN runtime artifact(s) "
+                f"are tracked by Git: {_runtime['paths']} "
+                f"[classification: OPERATOR_AUTHORIZED_COMMAND] -- `.gitignore` "
+                "cannot untrack a tracked file, so the finite maintenance is: "
+                f"{_runtime['remediation_command']} (removes them from tracking "
+                "without deleting live runtime state; the protocol recreates it)"
+            )
+            drift_ok = False
 
     # 1b9. SHIP's `no-publish` block fused a policy mode with an absence of
     #      git. It called the remote steps skippable because "no remote
@@ -10765,28 +10853,41 @@ if STRICT:
 # promotion of warnings into failures is included, and the real exit code is
 # never affected by this write (best-effort by design -- a missing artifact
 # keeps `capture_findings` FAILING rather than inventing an empty green set).
-if FINDINGS_JSON:
-    try:
-        from saipen_engine import findings as _findings_mod
+_doc = None
+try:
+    from saipen_engine import findings as _findings_mod
 
-        _problems = [_findings_mod.classify("problem", msg) for msg in failures]
-        _warnings = [
-            _findings_mod.classify("warning", msg, category=category)
-            for category, msgs in warnings.items()
-            for msg in msgs
-        ]
-        _doc = {
-            "schema_version": _findings_mod.RULESET_VERSION,
-            "ruleset_fingerprint": _findings_mod.ruleset_fingerprint(),
-            "gate": GATE,
-            "problems": _problems,
-            "warnings": _warnings,
-        }
+    _problems = [_findings_mod.classify("problem", msg) for msg in failures]
+    _warnings = [
+        _findings_mod.classify("warning", msg, category=category)
+        for category, msgs in warnings.items()
+        for msg in msgs
+    ]
+    _doc = {
+        "schema_version": _findings_mod.RULESET_VERSION,
+        "ruleset_fingerprint": _findings_mod.ruleset_fingerprint(),
+        "gate": GATE,
+        "problems": _problems,
+        "warnings": _warnings,
+    }
+    _conformance_findings = {
+        "status": "complete",
+        "ruleset_version": _doc["schema_version"],
+        "ruleset_fingerprint": _doc["ruleset_fingerprint"],
+        "problem_count": len(_problems),
+        "warning_count": len(_warnings),
+        "problems": _problems,
+    }
+except Exception as _classification_error:
+    _conformance_findings = {
+        "status": "unavailable",
+        "reason": "findings classification failed: " + type(_classification_error).__name__,
+    }
+if FINDINGS_JSON and _doc is not None:
+    with contextlib.suppress(Exception):
         Path(FINDINGS_JSON).write_text(
             json.dumps(_doc, indent=2, sort_keys=True), encoding="utf-8"
         )
-    except Exception:
-        pass
 
 if failures:
     print(

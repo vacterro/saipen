@@ -674,9 +674,25 @@ def _mechanized_ticket_ids(events) -> set[str]:
     layer. A record that never appears on one was never touched by the
     generation that owns closure_mode, so its grammar is the fallback
     compatibility marker when the BOARD carries no closure_mode at all.
+
+    ONE EXCEPTION, measured (T-1346): a `--attest-legacy-done` DEC is itself a
+    mechanized event, and its entire content is the operator's statement that
+    the record PREDATES the closure contract. Counting it here flipped the
+    record to `current` on the next pass, so the exact remedy the
+    `legacy-done-review` refusal names replaced that refusal with a
+    phantom-DONE reopen approval in a project that never observed the closure
+    contract -- the refusal's own cure did not clear the refusal. An
+    attestation is the operator's legacy classification, never closure-
+    generation evidence.
     """
+    from .log import LEGACY_DONE_ATTESTATION
+
     return {
-        ev.get("ticket") for ev in (events or ()) if ev.get("ticket") and ev.get("op_id")
+        ev.get("ticket")
+        for ev in (events or ())
+        if ev.get("ticket")
+        and ev.get("op_id")
+        and LEGACY_DONE_ATTESTATION not in (ev.get("text") or "")
     }
 
 

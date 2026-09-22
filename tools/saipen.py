@@ -36,6 +36,7 @@ from saipen_engine.operations import (
     compact_board,
     finish_ticket,
     plan_claim,
+    repair_metadata,
     resolve_external_ticket,
     supersede_ticket,
     ticket_add,
@@ -811,10 +812,11 @@ def _validate(project_root: Path, as_json: bool) -> int:
         if code == CONFORMANCE_UNAVAILABLE:
             payload["canonical_next_command"] = CONFORMANCE_REMEDIATION_COMMAND
         else:
-            # T-1434 M1: the receipt's own failure-named repair wins; the
-            # generic gate re-run is the fallback, never the dead end.
-            command = decision.get("remediation_command") or CONFORMANCE_REMEDIATION_COMMAND
+            command = decision["remediation_command"]
             payload["canonical_next_command"] = command
+            payload["repair_status"] = decision["repair_status"]
+            payload["diagnostic"] = decision["diagnostic"]
+            payload["terminal"] = command is None
             if decision.get("remediation_commands"):
                 payload["remediation_commands"] = decision["remediation_commands"]
     _emit(payload, as_json)
@@ -1393,8 +1395,13 @@ def _status(project_root: Path, as_json: bool) -> int:
         )
         return 1
 
-    from saipen_engine.board import blocker_class
+    # T-1429: operator due-time gates, visible as MACHINE side state on every
+    # status projection -- differing from `parked_work` (which lists BLOCKED
+    # tickets) by carrying the canonical due instant and the DEFERRED_OPERATOR
+    # / DUE_OPERATOR_ACTION classification computed against the live clock.
+    from saipen_engine.board import deferred_operator_class, operator_gates
 
+    _operator_gates = operator_gates(board["tickets"])
     waiting_on_you: list[str] = []
     next_act = state.get("next_action") or ""
     if next_act.startswith("WAIT:"):
@@ -1404,11 +1411,29 @@ def _status(project_root: Path, as_json: bool) -> int:
         # the ticket-record level -- `ticket["fields"]["blocker"]` is the
         # canonical home of `| blocker:` (T-1003 hostile findings).
         b_text = bt.get("fields", {}).get("blocker") or ""
-        b_cls = blocker_class(b_text)
-        if b_cls in ("WAIT_USER_CONFIRMATION", "WAIT_USER_DECISION") or b_text.startswith(
-            "WAIT_USER"
-        ):
+        # T-1429: ONE owner decides "does a human own this". The third local
+        # copy of the vocabulary lived here and listed only the two WAIT_USER
+        # classes, so a genuine BLOCKED_EXTERNAL operator gate never reached
+        # `Waiting on you` -- the same hole the recovery package had, pointing
+        # the other way: that one over-reported, this one hid real work.
+        if deferred_operator_class(b_text) is not None:
             waiting_on_you.append(f"{bt['id']}: {b_text}")
+
+    # A standing ingress obligation is operator-owned: only the human holds the
+    # original bytes, or the authority to say the request itself changed. It
+    # used to be visible ONLY inside the refusal that enforced it, so a session
+    # that hit it had nothing to read and nothing to tell the operator.
+    from saipen_engine.pending_ingress import obligation as _ingress_obligation
+
+    _owed = _ingress_obligation(project_root)
+    if _owed.get("owed"):
+        waiting_on_you.append(
+            f"{_owed['code']}: this project owes its last refused ingress"
+            + (f" ({_owed.get('bytes')} bytes, sha256 {_owed.get('digest')})"
+               if _owed.get("digest") else "")
+            + f" -- carry the ORIGINAL bytes with `{_owed['canonical_next_command']}`,"
+            + f" or supersede it with `{_owed['supersede_command']}`"
+        )
 
     # T-1014: the parsed events come from the SAME one-pass ProjectSnapshot
     # that supplied log_hash/log_tail/head -- status never reopens the complete
@@ -1615,6 +1640,10 @@ def _status(project_root: Path, as_json: bool) -> int:
                 # scheduled run may have skipped on a dirty surface; that is
                 # history, and `fresh` above is decided by current bytes only.
                 "last_run": _last_run,
+                # T-1454: the CURRENT blocking condition and the exact command
+                # that clears it. Without it a stale home reads as bad luck,
+                # and the repairs that cannot reach it read as missing.
+                "blocker": _dist.get("blocker"),
                 "summary": distribution_line(_dist),
             }
     except Exception as exc:
@@ -1626,8 +1655,15 @@ def _status(project_root: Path, as_json: bool) -> int:
     parked = _parked_work(board["tickets"], state)
     if parked:
         payload["parked_work"] = parked
+    if _operator_gates:
+        payload["operator_gates"] = _operator_gates
     if waiting_on_you:
         payload["waiting_on_you"] = waiting_on_you
+    if _owed.get("owed"):
+        # The machine-readable half: digest, byte count, preview, how long it
+        # still stands, and both discharge routes. Discoverable WITHOUT
+        # attempting the ingress it would refuse.
+        payload["pending_ingress"] = _owed
     if claimed_but_unproven:
         payload["claimed_but_unproven"] = claimed_but_unproven
     if conformance is not None:
@@ -1652,6 +1688,8 @@ def _status(project_root: Path, as_json: bool) -> int:
             **_conf_decision["status_block"],
             "disposition": _conf_decision["disposition"],
             "remediation_command": _conf_decision["remediation_command"],
+            "repair_status": _conf_decision["repair_status"],
+            "diagnostic": _conf_decision["diagnostic"],
         }
     except Exception as exc:
         # Conformance is load-bearing terminal truth.  A projection may never
@@ -1981,8 +2019,9 @@ def _route_once(project_root: Path) -> dict:
             "pending_ops": pending,
             "parked_work": parked or None,
         }
-        for key in ("conformance_status", "canonical_next_command", "remediation"):
-            if routed.get(key) is not None:
+        for key in ("conformance_status", "canonical_next_command", "remediation",
+                    "diagnostic", "repair_status", "terminal"):
+            if key in routed:
                 emitted[key] = routed[key]
         route["emitted"] = emitted
         route["rc"] = 1
@@ -2196,14 +2235,17 @@ def _continue_chain(
                 chain_trace=trace,
                 iterations=iterations,
             )
-        payload = _route_payload(
+        # A gate may refuse only AFTER preceding deterministic steps finish.
+        # Preserve that refusal exactly; the ordinary success projection would
+        # otherwise turn the final red boundary into ok:true and exit 0.
+        payload = dict(route["emitted"]) if route["emitted"] is not None else _route_payload(
             project_root, route, reconciliation=reconciliation, dry_run=False, kind=kind
         )
         payload["continue_trace"] = trace
         payload["iterations"] = iterations
-        payload["stop_reason"] = "boundary"
+        payload["stop_reason"] = "refusal" if route["emitted"] is not None else "boundary"
         _emit(payload, as_json)
-        return 0
+        return route["rc"]
 
 
 def _next_action(
@@ -2289,7 +2331,11 @@ def _explain_next(project_root: Path, as_json: bool) -> int:
             as_json,
         )
         return 1
-    parked = _parked_work(parse_board(board_text)["tickets"], state)
+    from saipen_engine.board import operator_gates, parse_board
+
+    _parsed_board = parse_board(board_text)
+    parked = _parked_work(_parsed_board["tickets"], state)
+    _gates = operator_gates(_parsed_board["tickets"])
     from saipen_engine.router import (
         audit_inbox_projection,
         gate_route,
@@ -2325,6 +2371,8 @@ def _explain_next(project_root: Path, as_json: bool) -> int:
             "next_action": routed.get("action"),
             "canonical_next_command": routed.get("canonical_next_command"),
             "recovery_pending": bool(pending),
+            "terminal": bool(routed.get("terminal")),
+            "diagnostic": routed.get("diagnostic"),
         }
     else:
         carrier = {
@@ -2354,6 +2402,7 @@ def _explain_next(project_root: Path, as_json: bool) -> int:
         "why": verdict["reason"],
         "selected_action": verdict["action"],
         "parked_work": parked or None,
+        "operator_gates": _gates or None,
         "note": (
             "internal sequencing alternatives never create a human decision; "
             "WAIT_USER requires human-owned information or authority"
@@ -2940,6 +2989,7 @@ def _sub(project_root: Path, args: list[str], as_json: bool, dry_run: bool) -> i
         sub_disposition,
         sub_list,
         sub_pause,
+        sub_reconcile,
         sub_resume,
         sub_spawn,
         sub_status,
@@ -2952,7 +3002,7 @@ def _sub(project_root: Path, args: list[str], as_json: bool, dry_run: bool) -> i
                 "ok": False,
                 "code": "VALIDATION_FAILED",
                 "detail": "sub needs an action: list|sync|status|spawn|adopt|"
-                "pause|resume|clean|collect|dispose",
+                "pause|resume|reconcile|clean|collect|dispose",
             },
             as_json,
         )
@@ -2967,6 +3017,7 @@ def _sub(project_root: Path, args: list[str], as_json: bool, dry_run: bool) -> i
         "adopt": (1, 1),
         "pause": (1, 1),
         "resume": (1, 1),
+        "reconcile": (1, 1),
         "clean": (1, 1),
         "collect": (0, 1),
         "dispose": (1, 2),
@@ -2977,12 +3028,47 @@ def _sub(project_root: Path, args: list[str], as_json: bool, dry_run: bool) -> i
                 "ok": False,
                 "code": "VALIDATION_FAILED",
                 "detail": f"unknown sub action {action!r}; use "
-                "list|sync|status|spawn|adopt|pause|resume|clean|"
+                "list|sync|status|spawn|adopt|pause|resume|reconcile|clean|"
                 "collect|dispose",
             },
             as_json,
         )
         return 2
+    if action == "reconcile":
+        # T-1435 M5: the ONE producer-owned terminal reconciliation route.
+        # The producer's OWN STATE/LOG are written in one journaled
+        # transaction; Core only detects, routes and dispatches -- it never
+        # patches a foreign producer's files by hand and never clears open
+        # work. The authorizing receipt is mandatory.
+        _opts, _pos, _opt_err = _parse_value_options(rest, {"--authority": "authority"})
+        if _opt_err:
+            _emit({"ok": False, "code": "VALIDATION_FAILED", "detail": _opt_err}, as_json)
+            return 2
+        if len(_pos) != 1 or not re.fullmatch(r"[A-Za-z0-9_-]+", _pos[0]):
+            _emit(
+                {
+                    "ok": False,
+                    "code": "VALIDATION_FAILED",
+                    "detail": "sub reconcile takes exactly <role> --authority "
+                    "SRC-###",
+                },
+                as_json,
+            )
+            return 2
+        if not dry_run and _negotiate_capability(project_root) == "read-only":
+            return _capability_refusal(as_json)
+        _ho = _ensure_handover(project_root, as_json, dry_run)
+        if _ho is not None:
+            return _ho
+        result = sub_reconcile(
+            project_root,
+            _pos[0],
+            _agent_for(project_root),
+            authority=str(_opts.get("authority") or ""),
+            dry_run=dry_run,
+        )
+        _emit(result.to_dict(), as_json)
+        return 0 if result.ok else 1
     minimum, maximum = grammar[action]
     if len(rest) < minimum or len(rest) > maximum:
         wanted = f"exactly {minimum}" if minimum == maximum else f"at most {maximum}"
@@ -4283,7 +4369,7 @@ _TICKET_DONE_OPTIONS = {
     "--implementation-source": "implementation_source",
     "--paths": "closure_paths",
 }
-_TICKET_BLOCK_OPTIONS = {"--scope": "scope"}
+_TICKET_BLOCK_OPTIONS = {"--scope": "scope", "--retry_not_before": "retry_not_before"}
 #: `ticket retire` grammar. The first three are MANDATORY and each one is a
 #: separate refusal: a reason outside the registered set, evidence that does
 #: not resolve to a canonical event or an owned artifact, and an authority
@@ -4476,8 +4562,8 @@ def _source(project_root: Path, args: list[str], as_json: bool, dry_run: bool) -
             {
                 "ok": False,
                 "code": "VALIDATION_FAILED",
-                "detail": "source needs a subcommand: capture|status|show|req|"
-                "disp|quarantine|close|archive|purge|retire|recover",
+                "detail":                 "source needs a subcommand: capture|status|show|req|"
+                "disp|quarantine|link|close|archive|purge|retire|recover",
             },
             as_json,
         )
@@ -4533,6 +4619,79 @@ def _source(project_root: Path, args: list[str], as_json: bool, dry_run: bool) -
         )
         _emit(result.to_dict(), as_json)
         return 0 if result.ok else 1
+    if action == "link":
+        # T-1437: canonical multi-work membership. ONE source receipt may
+        # legitimately produce several Work items; this adds ONE Work to the
+        # durable membership without moving the historical primary.
+        _opts, _pos, _opt_err = _parse_value_options(
+            rest[1:], {"--work": "work"}
+        )
+        _link_usage = (
+            "source link needs <SRC-###> --work T-### "
+            "(adds one Work to the receipt's durable membership)"
+        )
+        if not rest or not re.fullmatch(r"SRC-\d+", rest[0], re.IGNORECASE):
+            _emit({"ok": False, "code": "VALIDATION_FAILED", "detail": _link_usage}, as_json)
+            return 2
+        if _opt_err:
+            _emit({"ok": False, "code": "VALIDATION_FAILED", "detail": _opt_err}, as_json)
+            return 2
+        if _pos:
+            _emit(
+                {
+                    "ok": False,
+                    "code": "VALIDATION_FAILED",
+                    "detail": f"source link takes <SRC-###>; surplus: {' '.join(_pos)}",
+                },
+                as_json,
+            )
+            return 2
+        if not str(_opts.get("work") or "").strip():
+            _emit({"ok": False, "code": "VALIDATION_FAILED", "detail": _link_usage}, as_json)
+            return 2
+        if not dry_run and _negotiate_capability(project_root) == "read-only":
+            return _capability_refusal(as_json)
+        _ho = _ensure_handover(project_root, as_json, dry_run)
+        if _ho is not None:
+            return _ho
+        from saipen_engine import intake as _intake_mod
+
+        receipt_id = rest[0].upper()
+        work_id = str(_opts.get("work") or "").strip()
+        if dry_run:
+            meta = (
+                _intake_mod._read_meta(project_root, receipt_id)
+                if _intake_mod._valid_receipt_id(receipt_id)
+                else None
+            )
+            if meta is None:
+                _emit(
+                    {
+                        "ok": False,
+                        "code": "SOURCE_RECEIPT_MISSING",
+                        "detail": f"{receipt_id} is not on the active intake surface",
+                    },
+                    as_json,
+                )
+                return 1
+            members = sorted(_intake_mod.linked_works(meta))
+            _emit(
+                {
+                    "ok": True,
+                    "code": "DRY_RUN_PLAN",
+                    "receipt": receipt_id,
+                    "work": work_id,
+                    "linked_work": meta.get("linked_work"),
+                    "linked_works": members,
+                    "would_add": work_id not in members,
+                    "writes": 0,
+                },
+                as_json,
+            )
+            return 0
+        resolved = _intake_mod.link_work_to(project_root, receipt_id, work_id)
+        _emit(resolved, as_json)
+        return 0 if resolved.get("ok") else 1
     # CORE-002 (audit fdc73e06): dry-run is one semantic PLAN path, not a
     # short-circuit. Refusals at parsing/validation stage are returned for
     # invalid input the same way under dry-run; valid requests are PLANned
@@ -7862,7 +8021,9 @@ def main(argv: list[str] | None = None) -> int:
             "ticket supersede <T-OLD> --by <T-NEW> --evidence <E-###> "
             "--authority <SRC-###>|ticket resolve-external <T-###> --authority "
             "<lineage-32hex> --implementation <T-###@commit> --reason <CLASS> "
-            "--run <command>...|ticket reasoning <T-###> --recurrence <text> "
+            "--run <command>...|ticket repair-metadata <T-###> --field "
+            "source_receipts (--to SRC-### | --legacy-unbound "
+            "[--authority SRC-###|lineage-<32hex>])|ticket reasoning <T-###> --recurrence <text> "
             "--weak-model <text>|ticket compact <T-###>|ticket block <T-###> "
             "<reason> [--scope ticket|goal]|ticket "
             "block-for <parent T-###> <blocker T-###> <reason> "
@@ -7870,7 +8031,8 @@ def main(argv: list[str] | None = None) -> int:
             "unblock <T-###> <decision>|work reverify <T-###> "
             "[--verification <cmd>:PASS]... [--run <command>]... "
             "[--timeout SECONDS]|source retire <SRC-###> --reason <CLASS> "
-            "[--successor SRC-###]|source recover|cohort status <C-###>|cohort ship "
+            "[--successor SRC-###]|source quarantine <SRC-###> [--reason CODE]|"
+            "source recover|cohort status <C-###>|cohort ship "
             "<C-###>|improve|improve hold <T-###> [reason]|improve unhold|improve "
             "status|improve sweep <cycle> <RUN-N/IMP-NNN> <DISPOSITION> "
             "|improve sweep-queue <cycle>|improve submit <cycle> <seat> "
@@ -7882,7 +8044,7 @@ def main(argv: list[str] | None = None) -> int:
             "[--project|--global|--effective]|userperson add|remove <text> "
             "[--category NAME] [--project|--global]|userperson reset "
             "[--project|--global] --confirm|authority capture [--file PATH|--hex HEX]|"
-            "sub|rebind-home "
+            "sub reconcile <role> --authority <SRC-###>|sub|rebind-home "
             "<candidate-home>|context cold|hot|audit|orient [--handoff JSON]|"
             "acceptance <T-###>|attempt open|attempt close <RESULT> "
             "<STOP>|brief|focus [text]|build <directive>|knowledge "
@@ -8460,7 +8622,7 @@ def main(argv: list[str] | None = None) -> int:
                     "code": "VALIDATION_FAILED",
                 "detail": "ticket needs an action: "
                 "add|compact|verify|reasoning|done|supersede|retire|resolve-external|"
-                "block|block-for|unblock",
+                "repair-metadata|block|block-for|unblock",
                 },
                 as_json,
             )
@@ -8838,6 +9000,91 @@ def main(argv: list[str] | None = None) -> int:
             )
             _emit(result.to_dict(), as_json)
             return 0 if result.ok else 1
+        if action == "repair-metadata":
+            # T-1435 M3: the ONE canonical migration for malformed machine
+            # metadata on a historical DONE row. The implementation is the
+            # existing operation/journal/receipt machinery; this branch only
+            # parses the closed grammar.
+            _usage = (
+                "ticket repair-metadata <T-###> --field source_receipts "
+                "(--to SRC-### | --legacy-unbound [--authority "
+                "SRC-###|lineage-<32hex>])"
+            )
+            if not rest or not re.fullmatch(r"T-\d+", rest[0], re.IGNORECASE):
+                _emit(
+                    {"ok": False, "code": "VALIDATION_FAILED", "detail": _usage},
+                    as_json,
+                )
+                return 2
+            _work_id = rest[0].upper()
+            _field = ""
+            _to_target = ""
+            _legacy_unbound = False
+            _authority = ""
+            _err = ""
+            _i = 1
+            while _i < len(rest):
+                _tok = rest[_i]
+                if _tok == "--legacy-unbound":
+                    if _legacy_unbound:
+                        _err = "duplicate option --legacy-unbound"
+                        break
+                    _legacy_unbound = True
+                    _i += 1
+                    continue
+                if _tok in ("--field", "--to", "--authority"):
+                    if _i + 1 >= len(rest):
+                        _err = f"option {_tok} needs a value"
+                        break
+                    _value = rest[_i + 1]
+                    _i += 2
+                    if _tok == "--field":
+                        if _field:
+                            _err = "duplicate option --field"
+                            break
+                        _field = _value
+                    elif _tok == "--to":
+                        if _to_target:
+                            _err = "duplicate option --to"
+                            break
+                        _to_target = _value
+                    else:
+                        if _authority:
+                            _err = "duplicate option --authority"
+                            break
+                        _authority = _value
+                    continue
+                _err = f"unknown ticket repair-metadata argument: {_tok}"
+                break
+            if _err:
+                _emit(
+                    {"ok": False, "code": "VALIDATION_FAILED", "detail": _err},
+                    as_json,
+                )
+                return 2
+            if not _field or bool(_to_target) == bool(_legacy_unbound):
+                _emit(
+                    {"ok": False, "code": "VALIDATION_FAILED", "detail": _usage},
+                    as_json,
+                )
+                return 2
+            if not dry_run and _negotiate_capability(project_root) == "read-only":
+                return _capability_refusal(as_json)
+            _ho = _ensure_handover(project_root, as_json, dry_run)
+            if _ho is not None:
+                return _ho
+            result = repair_metadata(
+                project_root,
+                _work_id,
+                _agent_for(project_root),
+                field=_field,
+                to_target=_to_target or None,
+                legacy_unbound=_legacy_unbound,
+                authority=_authority,
+                dry_run=dry_run,
+            )
+            _emit(result.to_dict(), as_json)
+            return 0 if result.ok else 1
         if action == "retire":
             # CORE: retirement is NOT completion. It is the canonical verdict
             # for Work that was minted into the WRONG PROJECT, and it refuses
@@ -8963,12 +9210,15 @@ def main(argv: list[str] | None = None) -> int:
             if _opt_err:
                 _emit({"ok": False, "code": "VALIDATION_FAILED", "detail": _opt_err}, as_json)
                 return 2
-            if action == "unblock" and _opts.get("scope"):
+            if action == "unblock" and (_opts.get("scope") or _opts.get("retry_not_before")):
                 _emit(
                     {
                         "ok": False,
                         "code": "VALIDATION_FAILED",
-                        "detail": "--scope describes a BLOCK; unblock takes no scope",
+                        "detail": (
+                            "--scope and --retry_not_before describe a BLOCK; "
+                            "unblock takes neither"
+                        ),
                     },
                     as_json,
                 )
@@ -8987,6 +9237,7 @@ def main(argv: list[str] | None = None) -> int:
                 dry_run=dry_run,
                 scope=_opts.get("scope"),
                 blocked_on=rest[1] if action == "block-for" else None,
+                retry_not_before=_opts.get("retry_not_before"),
             )
             _emit(result.to_dict(), as_json)
             return 0 if result.ok else 1
@@ -9413,6 +9664,41 @@ def main(argv: list[str] | None = None) -> int:
         result = authority_capture(project_root, _agent_for(project_root), text, dry_run=dry_run)
         _emit(result.to_dict(), as_json)
         return 0 if result.ok else 1
+    if command == "autonomy":
+        # T-1446: the read-only autonomy picture a supervisor or a cold worker
+        # reads before deciding anything. Writes nothing; `decide` is included
+        # because the verdict and the observation that produced it must be one
+        # answer, not two reads a caller could take at different moments.
+        surplus = [a for a in args[1:] if a not in ("--json", "status")]
+        if surplus:
+            _emit(
+                {
+                    "ok": False,
+                    "code": "VALIDATION_FAILED",
+                    "detail": f"autonomy accepts no arguments; surplus: {' '.join(surplus)}",
+                    "canonical_next_command": "saipen autonomy --json",
+                },
+                as_json,
+            )
+            return 2
+        from saipen_engine import supervisor as _supervisor
+
+        _verdict = _supervisor.decide(project_root)
+        _emit(
+            {
+                "ok": True,
+                "code": "AUTONOMY_STATUS",
+                "verdict": _verdict["verdict"],
+                "reason": _verdict["reason"],
+                "may_mutate": _verdict["may_mutate"],
+                "requires_human": _verdict["requires_human"],
+                "stop_reason": _verdict["stop_reason"],
+                "canonical_next_command": _verdict["next_command"],
+                "observation": _verdict["observation"],
+            },
+            as_json,
+        )
+        return 0
     if command == "acceptance":
         return _acceptance(project_root, args[1:], as_json)
     if command == "brief":

@@ -852,6 +852,9 @@ def distribution_report(source_head: str | None = None) -> dict:
         # success cannot hide today's stale bytes. The current verdict below
         # must never consult this again.
         "last_run": _last_run_provenance(run),
+        # T-1454: the CURRENT blocking condition, not history. `last_run` says
+        # what the scheduler did; this says why the next run will do the same.
+        "blocker": injection_blockers(),
         "scheduler_log": str(scheduler_log()) if scheduler_log() else None,
         # AC-04: a fully current set is a POSITIVE answer, not an empty
         # section. "Nothing printed" and "everything is current" have to be
@@ -864,6 +867,125 @@ def distribution_report(source_head: str | None = None) -> dict:
         and expected is not None
         and not stale
         and surface_unknown == 0,
+    }
+
+
+#: Why the installed homes cannot be refreshed right now. T-1454: the report
+#: could say a home was stale and could say the last scheduled run SKIPPED,
+#: but nothing said WHICH files block it or WHAT clears it. Two downstream
+#: sessions (SRC-102 SAITULS, SRC-103 SAIPENVIEW) then reported protocol
+#: defects that were already repaired HERE -- in an uncommitted working tree
+#: no clone and no installed home could ever see. A repair that cannot be
+#: distributed has not shipped, and a blocked distributor that cannot name
+#: its blocker leaves every consumer guessing.
+BLOCK_NONE = "NONE"
+BLOCK_DIRTY_SOURCE = "DIRTY_SOURCE"
+BLOCK_NO_GIT = "SOURCE_NOT_A_GIT_WORKTREE"
+
+
+def injected_surface(root: Path | None = None) -> list[str]:
+    """The paths the injector copies, from the ONE owner of that list.
+
+    Mirrors `Get-InjectedSurface` in `bootstrap/schedule-run.ps1` by reading
+    the same `saipen/MANIFEST.json`. Reading the manifest is the point: a
+    second hand-written copy of the surface would drift, and a drifted copy
+    either blocks on something harmless or publishes an edited protocol file
+    the check no longer watches.
+    """
+    base = Path(root) if root is not None else HOME
+    try:
+        manifest = json.loads((base / "saipen" / "MANIFEST.json").read_text(encoding="utf-8"))
+    except (OSError, ValueError, UnicodeDecodeError):
+        return []
+    surface: list[str] = []
+    for entry in manifest.get("copy_trees") or ():
+        src = entry.get("src") if isinstance(entry, dict) else None
+        if isinstance(src, str) and src:
+            surface.append(src)
+    for entry in manifest.get("files") or ():
+        src = entry.get("src") if isinstance(entry, dict) else None
+        if isinstance(src, str) and src:
+            surface.append(src)
+    surface.append("saipen/MANIFEST.json")
+    return sorted(set(surface))
+
+
+def injection_blockers(root: Path | None = None, limit: int = 8) -> dict:
+    """What stops distribution right now, and the exact command that clears it.
+
+    Read-only and scoped to the injected surface, exactly like the scheduled
+    runner's own guard -- a dirty translation cache or a local note is not a
+    reason to freeze publication, and an edited `saipen/CORE.md` still is.
+    """
+    base = Path(root) if root is not None else HOME
+    surface = injected_surface(base)
+    if not surface:
+        return {
+            "condition": BLOCK_NONE,
+            "blocked": False,
+            "detail": "no injected surface declared by saipen/MANIFEST.json",
+            "paths": [],
+            "path_count": 0,
+            "canonical_next_command": "",
+        }
+    rc, out = _run(
+        [
+            "git",
+            "-C",
+            str(base),
+            "status",
+            "--porcelain=v1",
+            "--untracked-files=all",
+            "--",
+            *surface,
+        ]
+    )
+    if rc != 0:
+        return {
+            "condition": BLOCK_NO_GIT,
+            "blocked": True,
+            "detail": "git could not report the injected surface's status",
+            "paths": [],
+            "path_count": 0,
+            "canonical_next_command": "git -C <source> status --porcelain",
+        }
+    lines = [line for line in out.splitlines() if line.strip()]
+    if not lines:
+        return {
+            "condition": BLOCK_NONE,
+            "blocked": False,
+            "detail": f"injected surface matches HEAD ({len(surface)} path(s))",
+            "paths": [],
+            "path_count": 0,
+            "canonical_next_command": "",
+        }
+    # `_run` strips the captured output, so the first porcelain line has lost
+    # the leading space of a ` M` status and a fixed `line[3:]` slice ate the
+    # first character of its path. Parse the status field instead of counting
+    # columns, and follow a rename to the path that actually ships.
+    paths = []
+    for line in lines:
+        match = re.match(r"^\s*(\S{1,2})\s+(.*)$", line)
+        if not match:
+            continue
+        path = match.group(2).strip()
+        if " -> " in path:
+            path = path.split(" -> ", 1)[1].strip()
+        paths.append(path.strip('"'))
+    return {
+        "condition": BLOCK_DIRTY_SOURCE,
+        "blocked": True,
+        "detail": (
+            f"{len(paths)} injected-surface path(s) differ from HEAD; the "
+            "scheduled injector refuses to publish an edited protocol, so "
+            "every installed home stays on the last committed generation"
+        ),
+        "paths": paths[:limit],
+        "path_count": len(paths),
+        "canonical_next_command": (
+            "git add " + " ".join(paths[:limit]) + (" ..." if len(paths) > limit else "")
+            + " && git commit"
+        ),
     }
 
 
@@ -898,6 +1020,11 @@ def distribution_line(report: dict) -> str:
         parts.append(f"{report['unknown']} home(s) carry no head")
     if run:
         parts.append(_last_run_sentence(run))
+    blocker = report.get("blocker") or {}
+    if blocker.get("blocked"):
+        parts.append(f"BLOCKED {blocker['condition']}: {blocker['detail']}")
+        if blocker.get("canonical_next_command"):
+            parts.append(f"clears with: {blocker['canonical_next_command']}")
     return " -- ".join(parts)
 
 

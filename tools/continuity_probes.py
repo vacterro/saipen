@@ -544,8 +544,10 @@ def run_continuity_probes() -> tuple[list[str], int]:
     )
 
     # H12: unsupported future protocol fails closed.
+    from saipen_engine.state import running_protocol_major
+
     p = fresh_project()
-    set_state_field(p, "saipen_version", "8")
+    set_state_field(p, "saipen_version", str(running_protocol_major() + 1))
     r = cli(p, "a1", "claim", "T-001")
     expect(
         "H12: newer protocol state refuses mutation",

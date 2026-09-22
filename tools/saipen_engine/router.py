@@ -19,6 +19,8 @@ from .audit_route import audit_route_owns
 from .board import (
     board_graph_errors,
     goal_blocked_tickets,
+    is_user_explicit,
+    operator_gates,
     parse_board,
     pick_next_work,
 )
@@ -416,6 +418,15 @@ def route_next(
     # BEFORE persisted converge intent and speculative backlog. It can never
     # preempt a live ticket: every active/continuation branch above returned
     # first.
+    #
+    # T-1446 cc-all-recovery ordering refinement: the queue sits BELOW the
+    # shared Pick Rule's `user_explicit` tier, not above the whole BOARD. The
+    # incident proved the failure mode: a stale unprojected wave brief (days
+    # old, its Work already DONE) took the START seat from the live workable
+    # user_explicit mission and the project looked DONE-idle. A queued Source
+    # is still an operator request that outranks ordinary backlog -- the
+    # Pick Rule itself starts a fresh projection for it -- but the LIVE
+    # user_explicit Work on the BOARD outranks a stale unlinked brief.
     if not active and queued_source:
         if queued_source.get("invalid"):
             return {
@@ -427,15 +438,29 @@ def route_next(
                     "detail", "the queued Source projection is unreadable"
                 ),
             }
-        return {
-            "ok": True,
-            "action": queued_source["action"],
-            "reason": "queued-source",
-            "receipt": queued_source.get("receipt"),
-            "detail": queued_source.get(
-                "detail", "queued explicit user Source owns continuation"
-            ),
-        }
+        # T-1446: a workable user_explicit Work outranks the stale queue.
+        # T-1458: so does a dependency reservation. `ticket block-for` parks
+        # the live mission on its child and CONTINUATION_RESERVED refuses
+        # every unrelated claim, so routing the queue there emitted a start
+        # the reservation (or the receipt gate) refuses. The reserved child IS
+        # the parked mission's continuation, not backlog.
+        _top, _pick_reason = pick_next_work(board["tickets"], agent=session_agent, now=now)
+        _outranks_queue = _top is not None and (
+            _pick_reason == "dependency-continuation"
+            or is_user_explicit(board["tickets"].get(_top, {}))
+        )
+        if not _outranks_queue:
+            return {
+                "ok": True,
+                "action": queued_source["action"],
+                "reason": "queued-source",
+                "receipt": queued_source.get("receipt"),
+                "detail": queued_source.get(
+                    "detail", "queued explicit user Source owns continuation"
+                ),
+            }
+        # Fall through to the START branch below, which re-derives the same
+        # pick; the queued Source stays projected for when the mission closes.
 
     # Crew is an outer convergence target. Once local ticket execution has no
     # immediate continuation, ordinary `cc` returns to crew orchestration from
@@ -508,6 +533,50 @@ def route_next(
                 "reason": "board-graph-invalid",
                 "detail": "BOARD needs: graph invalid with no workable "
                 "ticket: " + "; ".join(_graph_errors[:3]),
+            }
+
+        # T-1429: an operator due-time GATE is a REAL human boundary, never a
+        # maintenance candidate and never a fabricated agent action. It fires
+        # here, after no Work remains workable: with unrelated agent-owned Work
+        # eligible the gates stay visible as SIDE STATE and that Work is
+        # selected (the pick above already won). When NOTHING agent-owned is
+        # executable and a gate is due, the truthful next action is the
+        # operator boundary itself -- NOT GOAL_BLOCKED (which means something
+        # different) and never an invented `continue`.
+        _gates = operator_gates(board["tickets"], now=now)
+        if _gates:
+            _due = [g for g in _gates if g["state"] == "DUE_OPERATOR_ACTION"]
+            if _due:
+                return {
+                    "ok": True,
+                    "action": "saipen status",
+                    "reason": "operator-gate-due",
+                    "stop_reason": "OPERATOR_ACTION_DUE",
+                    "executable_behavior": "RESTATE_AND_STOP",
+                    "requires_human": True,
+                    "operator_gates": _gates,
+                    "detail": (
+                        "no unrelated executable Work remains and the operator "
+                        "gate is due: " + ", ".join(g["ticket"] for g in _due)
+                        + " is operator-actionable now (DUE_OPERATOR_ACTION); "
+                        "this is a human boundary -- the operator gate is "
+                        "surfaced, not executed"
+                    ),
+                }
+            return {
+                "ok": True,
+                "action": "saipen status",
+                "reason": "operator-gate-deferred",
+                "executable_behavior": "RESTATE_AND_STOP",
+                "requires_human": True,
+                "operator_gates": _gates,
+                "detail": (
+                    "no unrelated executable Work remains; the operator gate "
+                    + ", ".join(g["ticket"] for g in _gates)
+                    + " is DEFERRED_OPERATOR until its retry_not_before "
+                    "instant -- the loop waits truthfully, it does not "
+                    "manufacture agent Work"
+                ),
             }
 
         # GOAL_BLOCKED (CORE-003): a clean stop, and ONLY when it is true --
@@ -643,14 +712,22 @@ def queued_source_projection(project_root) -> dict | None:
     A durable queue behaves like a queue: an operator request captured while
     the seat was occupied is STARTED by the next canonical poll after the seat
     frees -- the operator never retypes `saipen start --receipt SRC-###`.
-    Read-only; opens the index and metadata, never a source body. Only
-    `user_instruction` Sources qualify: audit layers and authority captures
-    are not queued Work.
+    Read-only. Only `user_instruction` Sources qualify: audit layers and
+    authority captures are not queued Work.
+
+    T-1458: `source_kind` alone is not admissibility. Operator authority
+    capsules are captured as `user_instruction` too, and `start --receipt`
+    refuses them, so this projection routed a start its own executor refused
+    -- after every dependency park, forever. The queue now asks the SAME owner
+    `start --receipt` asks (`entry.request_from_receipt`, which reads the
+    receipt's request header): a receipt that is not a request is skipped, a
+    receipt that cannot be read is surfaced, never skipped.
     """
     if project_root is None:
         return None
     try:
         from . import intake
+        from .entry import RECEIPT_UNREADABLE, request_from_receipt
 
         for item in intake.active_receipts(project_root):
             if item.get("linked_work"):
@@ -660,6 +737,21 @@ def queued_source_projection(project_root) -> dict | None:
                 continue
             meta = intake._read_meta(Path(project_root), receipt) or {}
             if meta.get("source_kind") != "user_instruction":
+                continue
+            _request, problem, problem_class = request_from_receipt(
+                Path(project_root), receipt
+            )
+            if problem_class == RECEIPT_UNREADABLE:
+                return {
+                    "action": "saipen source status",
+                    "invalid": True,
+                    "detail": (
+                        f"queued Source {receipt} cannot be read ({problem}); "
+                        "inspect the intake surface before treating the "
+                        "project as idle"
+                    ),
+                }
+            if problem is not None:
                 continue
             return {
                 "action": f"saipen start --receipt {receipt}",
@@ -720,8 +812,8 @@ def conformance_crew_gate(project_root, routed: dict) -> dict | None:
     CLI's `_route_once` continuation path both call THIS function, so a
     `saipen crew` route can never be emitted by one surface while another
     refuses it. NOT_RUN is not an exemption -- absence of validator evidence is
-    not health -- and the refusal names the executable remediation
-    (`saipen validate`), never a command that merely re-reports the problem.
+    not health. Missing/stale evidence names a validation refresh; current
+    failures name a registered repair or a terminal engineering diagnosis.
     """
     if not (
         routed.get("ok")
@@ -732,7 +824,6 @@ def conformance_crew_gate(project_root, routed: dict) -> dict | None:
         return None
     try:
         from .conformance import (
-            CONFORMANCE_REMEDIATION_COMMAND,
             CONFORMANCE_UNHEALTHY,
             conformance_decision,
         )
@@ -740,23 +831,23 @@ def conformance_crew_gate(project_root, routed: dict) -> dict | None:
         decision = conformance_decision(project_root, gate="core")
         if decision["healthy"]:
             return None
-        # T-1434 M1: lead with the command the failures themselves named when
-        # the receipt carries one (e.g. `saipen work reverify T-008`); the
-        # generic gate re-run remains the fallback, never the dead end.
-        command = decision.get("remediation_command") or CONFORMANCE_REMEDIATION_COMMAND
+        command = decision["remediation_command"]
         return {
             **routed,
             "ok": False,
             "code": CONFORMANCE_UNHEALTHY,
             "action": command,
             "reason": "conformance-unhealthy",
-            "detail": (
+            "detail": decision["diagnostic"]["detail"] if decision["diagnostic"] else (
                 "crew convergence requires a CURRENT_PASS canonical conformance "
                 f"receipt, got {decision['status']}: {decision['reason']} -- run "
                 f"'{command}' before crew work"
             ),
             "conformance_status": decision["status"],
             "canonical_next_command": command,
+            "diagnostic": decision["diagnostic"],
+            "repair_status": decision["repair_status"],
+            "terminal": command is None,
         }
     except Exception as exc:
         # W2-007: fail closed when conformance cannot be positively
@@ -807,24 +898,19 @@ def conformance_idle_gate(project_root, routed: dict) -> dict | None:
     try:
         from .conformance import (
             CONFORMANCE_DISPOSITION_REMEDIATION_REQUIRED,
-            CONFORMANCE_REMEDIATION_COMMAND,
             CONFORMANCE_UNHEALTHY,
             conformance_decision,
         )
 
         current_action = str(routed.get("action") or "").strip()
-        if current_action.startswith(CONFORMANCE_REMEDIATION_COMMAND):
-            # The idle route already IS the remediation: never wrap it in its
-            # own refusal (a self-referential loop).
-            return None
         decision = conformance_decision(project_root, gate="core")
         if decision["disposition"] != CONFORMANCE_DISPOSITION_REMEDIATION_REQUIRED:
             return None
         # T-1434 M1: the receipt's own failure-named repair wins over the
         # generic gate re-run, and naming THAT command must not wrap itself in
         # its own refusal either.
-        command = decision.get("remediation_command") or CONFORMANCE_REMEDIATION_COMMAND
-        if current_action.startswith(command):
+        command = decision["remediation_command"]
+        if command and current_action == command:
             return None
         return {
             **routed,
@@ -832,7 +918,7 @@ def conformance_idle_gate(project_root, routed: dict) -> dict | None:
             "code": CONFORMANCE_UNHEALTHY,
             "action": command,
             "reason": "conformance-remediation",
-            "detail": (
+            "detail": decision["diagnostic"]["detail"] if decision["diagnostic"] else (
                 "idle continuation is owned by the unaccepted conformance red "
                 f"gate (CURRENT_FAIL: {decision['reason']}); run "
                 f"'{command}' before continuing"
@@ -840,6 +926,9 @@ def conformance_idle_gate(project_root, routed: dict) -> dict | None:
             "conformance_status": decision["status"],
             "conformance_disposition": decision["disposition"],
             "canonical_next_command": command,
+            "diagnostic": decision["diagnostic"],
+            "repair_status": decision["repair_status"],
+            "terminal": command is None,
         }
     except Exception as exc:
         # Fail closed: an unestablished decision never yields a green-looking

@@ -455,6 +455,16 @@ def _canonical_body_rel(root: Path, receipt_id: str, digest: str, location: str)
     return f".saipen/archive/source/{receipt_id}.md"
 
 
+def _archive_ref_matches(reference: object, receipt_id: str, current_ref: str) -> bool:
+    """A later quarantine preserves the immutable reference recorded at closure.
+
+    The caller resolves current_ref through the digest-bound distribution
+    overlay first. Only that reference or the original archive location is
+    legal; the body itself is still read and verified at current_ref.
+    """
+    return reference in (current_ref, f".saipen/archive/source/{receipt_id}.md")
+
+
 def _read_index(root: Path) -> dict:
     try:
         raw = _read_owned_file(
@@ -874,21 +884,127 @@ def _commit_source_link(root: Path, work: str, receipt_id: str, *, op_id: str) -
     return {"ok": True, "code": "SOURCE_LINKED", "work": work, "linked_work": work}
 
 
+def linked_works(meta: dict | None) -> set[str]:
+    """Every Work a receipt's durable metadata names (T-1437).
+
+    ONE source receipt may legitimately produce several independent Work
+    items. `linked_work` stays the historical PRIMARY (single-work receipts
+    are byte-for-byte unchanged), and the optional `linked_works` list carries
+    the remaining membership. Linkage checks consume MEMBERSHIP; the primary
+    is display/back-compat only, so closing one child never rewrites the
+    ownership away from its siblings.
+    """
+    works: set[str] = set()
+    primary = str((meta or {}).get("linked_work") or "").strip()
+    if primary:
+        works.add(primary)
+    extra = (meta or {}).get("linked_works")
+    if isinstance(extra, list):
+        for item in extra:
+            value = str(item or "").strip()
+            if value:
+                works.add(value)
+    return works
+
+
+def is_linked_to(meta: dict | None, work: str) -> bool:
+    """Is `work` a canonical member of this receipt's Work membership?"""
+    return str(work or "").strip() in linked_works(meta)
+
+
 def _relink_authorities(root: Path, work: str, receipt_id: str) -> dict:
-    """Durably record the link in the metadata and the intake index."""
+    """Durably record the link in the metadata and the intake index.
+
+    T-1437: an EMPTY primary takes the Work (single-work receipts keep their
+    exact old shape); an existing DIFFERENT primary is never moved -- the Work
+    joins `linked_works` instead.
+    """
     try:
         meta = _read_meta(root, receipt_id)
-        meta["linked_work"] = work
+        primary = str(meta.get("linked_work") or "").strip()
+        if not primary:
+            meta["linked_work"] = work
+        elif primary != work:
+            extra = sorted(
+                {value for value in (meta.get("linked_works") or []) if str(value).strip()}
+                | {work}
+            )
+            meta["linked_works"] = extra
         _write_meta(root, receipt_id, meta)
         index = _read_index(root)
         entry = index.setdefault("active", {}).get(receipt_id)
         if entry is None:
             return {"ok": False, "detail": f"{receipt_id} is not in the active intake index"}
-        entry["linked_work"] = work
+        entry["linked_work"] = meta.get("linked_work")
+        if meta.get("linked_works"):
+            entry["linked_works"] = list(meta["linked_works"])
         _write_index(root, index)
     except (OSError, ValueError) as exc:
         return {"ok": False, "detail": str(exc)}
     return {"ok": True}
+
+
+def link_work_to(root: Path | str, receipt_id: str, work: str) -> dict:
+    """Canonically add ONE Work to a receipt's durable membership (T-1437).
+
+    Fail closed on an unknown receipt, a Work missing from BOARD, a byte
+    integrity failure, or an invalid identity. Idempotent: a Work already in
+    the membership returns ALREADY_LINKED with zero writes.
+    """
+    root = Path(root)
+    if not _valid_receipt_id(receipt_id):
+        return _invalid_receipt_id(receipt_id)
+    work = str(work or "").strip()
+    if not _WORK_ID_RE.match(work):
+        return {
+            "ok": False,
+            "code": "INVALID_ID",
+            "detail": f"source link needs a T-### Work id, got {work!r}",
+        }
+    index = _read_index(root)
+    if receipt_id not in index.get("active", {}):
+        return {
+            "ok": False,
+            "code": "SOURCE_RECEIPT_MISSING",
+            "detail": f"{receipt_id} is not on the active intake surface",
+        }
+    if not _board_has_work(root, work):
+        return {
+            "ok": False,
+            "code": "ORPHAN_RECEIPT",
+            "detail": f"linked Work {work} is missing from BOARD",
+        }
+    integrity = verify_integrity(root, receipt_id)
+    if not integrity.get("ok"):
+        return integrity
+    meta = _read_meta(root, receipt_id) or {}
+    if work in linked_works(meta):
+        return {
+            "ok": True,
+            "code": "ALREADY_LINKED",
+            "receipt": receipt_id,
+            "work": work,
+            "linked_work": meta.get("linked_work"),
+            "linked_works": sorted(linked_works(meta)),
+        }
+    committed = _commit_source_link(
+        root,
+        work,
+        receipt_id,
+        op_id="source-link-"
+        + hashlib.sha256(f"{receipt_id}:{work}".encode("utf-8")).hexdigest()[:16],
+    )
+    if not committed.get("ok"):
+        return committed
+    after = _read_meta(root, receipt_id) or {}
+    return {
+        "ok": True,
+        "code": "SOURCE_LINKED",
+        "receipt": receipt_id,
+        "work": work,
+        "linked_work": after.get("linked_work"),
+        "linked_works": sorted(linked_works(after)),
+    }
 
 
 def _board_source_links(root: Path) -> dict[str, set[str]]:
@@ -1449,6 +1565,15 @@ def capture(
                 linked_work = linkage.get("linked_work")
             else:
                 linkage = {"ok": True, "detail": None}
+            if not index.get("tombstones") and len(index.get("active") or {}) == 1:
+                # T-1435 M6: the FIRST durable capture in a project is its
+                # adoption boundary, so the canonical machine-local runtime
+                # ignore policy is established beside it. Best-effort
+                # project-file policy: its failure never loses a source
+                # transaction, and an existing policy is never duplicated.
+                from . import runtime_namespace
+
+                runtime_namespace.ensure_gitignore_policy(root)
             return {
                 "ok": bool(linkage.get("ok")),
                 "code": "ORPHAN_RECEIPT_RECOVERED"
@@ -1967,11 +2092,54 @@ def set_disposition(
 REQUEST_HEADER = "## Request"
 
 
+#: How much of a header-less body the fallback clause quotes. The clause is a
+#: POINTER to the authoritative receipt, never a second copy of it.
+REQUEST_FALLBACK_HEAD = 240
+
+#: Kinds whose body IS the operator's own request, so "what was asked" needs
+#: no interpretation to exist. An audit or an imported specification is NOT
+#: here on purpose: its clauses are its individual findings, and one catch-all
+#: clause would let a forty-finding audit close on a single disposition.
+REQUEST_KINDS = ("user_instruction", "corrective_followup")
+
+
 def request_clause_text(body: str) -> str:
     """The operator's own words inside a durable request document, or ""."""
     if REQUEST_HEADER not in body:
         return ""
     return body.split(REQUEST_HEADER, 1)[1].strip()
+
+
+def canonical_request_clause_text(receipt_id: str, body: str, digest: str = "") -> str:
+    """The ONE clause a captured user request always has: itself.
+
+    A body written by `saipen start` carries the `## Request` header and its
+    clause stays exactly the operator's words. A body that arrived through any
+    OTHER ingress -- `saipen source capture --file`, the transport every
+    operator handoff actually uses -- has no header, and the header-only
+    derivation returned "" for it. The receipt then sat at requirements 0,
+    `coverage_complete` needs `actionable > 0`, and `release_gate` fails closed
+    SOURCE_UNRESOLVED for an unprojected receipt: three ordinary handoffs
+    captured on 2026-09-22 (SRC-101/102/103) froze publication on arrival.
+
+    The fallback clause NAMES the receipt and its digest instead of restating
+    the request, because the authoritative bytes are the body and a truncated
+    paraphrase must never read as the contract.
+    """
+    header_text = request_clause_text(body)
+    if header_text:
+        return header_text
+    compact = " ".join(str(body or "").split())
+    if not compact:
+        return ""
+    head = compact[:REQUEST_FALLBACK_HEAD]
+    if len(compact) > REQUEST_FALLBACK_HEAD:
+        head = head.rstrip() + "…"
+    fingerprint = str(digest or "")[:12] or "unrecorded"
+    return (
+        f"Satisfy the captured request {receipt_id} in full; the authoritative "
+        f"text is the receipt body (sha256 {fingerprint}): {head}"
+    )
 
 
 def ensure_request_clause(root: Path | str, receipt_id: str) -> dict:
@@ -1991,7 +2159,7 @@ def ensure_request_clause(root: Path | str, receipt_id: str) -> dict:
     """
     root = Path(root)
     meta = _read_meta(root, receipt_id)
-    if not meta or meta.get("source_kind") != "user_instruction":
+    if not meta or meta.get("source_kind") not in REQUEST_KINDS:
         return {"ok": False, "code": "NOT_A_USER_REQUEST", "receipt": receipt_id}
     contract = _read_contract(root, receipt_id) or {}
     if contract.get("clauses"):
@@ -1999,7 +2167,9 @@ def ensure_request_clause(root: Path | str, receipt_id: str) -> dict:
     body = read_body(root, receipt_id)
     if not body.get("ok"):
         return body
-    text = request_clause_text(body.get("body") or "")
+    text = canonical_request_clause_text(
+        receipt_id, body.get("body") or "", str(meta.get("source_sha256") or "")
+    )
     if not text:
         return {"ok": False, "code": "VALIDATION_FAILED", "detail": "request body has no request"}
     return add_requirement(root, receipt_id, rid="R001", text=text, clause_class="requirement")
@@ -2007,14 +2177,18 @@ def ensure_request_clause(root: Path | str, receipt_id: str) -> dict:
 
 def is_request_clause(root: Path | str, receipt_id: str, rid: str) -> bool:
     """True when this clause IS the request, not something an agent derived."""
-    contract = _read_contract(Path(root), receipt_id) or {}
+    root = Path(root)
+    contract = _read_contract(root, receipt_id) or {}
     clause = (contract.get("clauses") or {}).get(rid)
     if not isinstance(clause, dict):
         return False
     body = read_body(root, receipt_id)
     if not body.get("ok"):
         return False
-    text = request_clause_text(body.get("body") or "")
+    meta = _read_meta(root, receipt_id) or {}
+    text = canonical_request_clause_text(
+        receipt_id, body.get("body") or "", str(meta.get("source_sha256") or "")
+    )
     return bool(text) and clause.get("text", "").strip() == text
 
 
@@ -2172,9 +2346,13 @@ def discharge_request_clauses(
         if not _valid_receipt_id(receipt_id):
             continue
         meta = _read_meta(root, receipt_id)
-        if not meta or meta.get("linked_work") != work:
+        if not meta or not is_linked_to(meta, work):
             continue
-        if meta.get("source_kind") != "user_instruction":
+        # ONE owner for "is this body the operator's own request". A second
+        # literal here read `!= "user_instruction"` and silently skipped every
+        # corrective_followup, so SRC-042 stayed unresolved after T-1326 was
+        # already DONE -- a receipt no closure path would ever settle again.
+        if meta.get("source_kind") not in REQUEST_KINDS:
             continue
         ensure_request_clause(root, receipt_id)
         try:
@@ -2198,6 +2376,108 @@ def discharge_request_clauses(
     return settled
 
 
+#: T-1452/SRC-103 M8. What a caller must do next for each coverage refusal.
+#: A bare `{"code": "SOURCE_UNRESOLVED", "receipt": "SRC-007"}` sent two field
+#: sessions digging through intake ledgers, and both surfaced with the same two
+#: invented escapes: declaring the project MISROUTED_PROJECT_BINDING, and
+#: hand-authoring an operator-authority capsule. Neither is a repair. A refusal
+#: that cannot name its own next action gets one invented for it.
+_COVERAGE_NEXT_COMMAND = {
+    "SOURCE_UNRESOLVED": (
+        "saipen source disp <SRC-###> <RID> <DISPOSITION> --work <T-###> "
+        "--evidence <E-###> --verification '<command> -> PASS'"
+    ),
+    "SOURCE_LINKAGE_MISSING": (
+        "saipen ticket repair-metadata <T-###> --field source_receipts --to <SRC-###>"
+    ),
+    "SOURCE_LINKAGE_DRIFT": "saipen source link <SRC-###> --work <T-###>",
+    "SOURCE_RECEIPT_MISSING": "saipen source recover",
+    "SOURCE_WORK_ACTIVE": "saipen continue --json",
+    "SOURCE_CORRUPTION": "saipen source recover",
+}
+
+
+def route_source_refusal(
+    root: Path | str,
+    refusal: dict,
+    *,
+    work: str | None = None,
+    release_scope: set | frozenset | None = None,
+) -> dict:
+    """Add the routing facts a coverage refusal has to carry to be actionable.
+
+    One owner, so every gate answers the same shape: which receipt, which Work
+    owns it, whether a contract was ever derived, which clauses are unresolved,
+    whether the receipt is inside the release scope being shipped, and the
+    exact canonical command that changes the answer. Best-effort by design --
+    a refusal must never become an exception while explaining itself.
+    """
+    if not isinstance(refusal, dict) or refusal.get("ok"):
+        return refusal
+    code = str(refusal.get("code") or "")
+    routed = dict(refusal)
+    routed.setdefault("work", work)
+    receipt_id = refusal.get("receipt")
+    if isinstance(receipt_id, str) and _valid_receipt_id(receipt_id):
+        try:
+            meta = _read_meta(Path(root), receipt_id) or {}
+        except (OSError, ValueError):
+            meta = {}
+        routed["source_status"] = meta.get("status")
+        routed["linked_work"] = meta.get("linked_work")
+        routed["linked_works"] = meta.get("linked_works") or (
+            [meta["linked_work"]] if meta.get("linked_work") else []
+        )
+        try:
+            contract = _read_contract(Path(root), receipt_id) or {}
+        except (OSError, ValueError):
+            contract = {}
+        routed["contract_derived"] = bool(contract.get("clauses"))
+        if "coverage" not in routed:
+            try:
+                routed["coverage"] = coverage_summary(root, receipt_id)
+            except (OSError, ValueError):
+                routed["coverage"] = None
+        summary = routed.get("coverage")
+        if isinstance(summary, dict):
+            routed["unresolved_clauses"] = list(summary.get("unresolved") or [])
+    # Release-scope membership is ALWAYS answered: True/False inside a release
+    # evaluation, None when no release is being evaluated. An absent field
+    # reads the same as "not in scope" to a caller that defaults it, and the
+    # release gate used to return a relevant Work's refusal without it.
+    if release_scope is None:
+        routed["in_release_scope"] = None
+    else:
+        owner = routed.get("linked_work")
+        routed["in_release_scope"] = bool(
+            (routed.get("work") in release_scope)
+            or (owner is not None and owner in release_scope)
+        )
+    if code == "SOURCE_UNRESOLVED" and routed.get("contract_derived") is False:
+        # Nothing to dispose yet: the receipt has no contract at all, so
+        # pointing at `source disp` would name a clause id that does not
+        # exist. Zero clauses and unresolved clauses are different repairs.
+        command = "saipen source req <SRC-###> R001 requirement '<what the receipt asks for>'"
+    else:
+        command = _COVERAGE_NEXT_COMMAND.get(code, "saipen status --json")
+    # Fill in what the refusal already knows. A template that makes the caller
+    # look up the receipt, the Work and the open clause is the archaeology
+    # this owner exists to end; the caller supplies only its own decisions.
+    if isinstance(receipt_id, str) and _valid_receipt_id(receipt_id):
+        command = command.replace("<SRC-###>", receipt_id)
+    work_id = routed.get("work") or routed.get("linked_work")
+    if isinstance(work_id, str) and work_id:
+        command = command.replace("<T-###>", work_id)
+    unresolved = routed.get("unresolved_clauses") or []
+    if unresolved and "<RID>" in command:
+        command = command.replace("<RID>", str(unresolved[0]).rsplit(":", 1)[-1])
+    routed["canonical_next_command"] = command
+    # Said out loud, because both invented escapes were attempts to reclassify
+    # a coverage fact as a binding fault.
+    routed["binding_fault"] = False
+    return routed
+
+
 def work_closure_gate(root: Path | str, work: str) -> dict:
     """Mechanical DONE/SHIP gate for every active receipt linked to Work."""
     root = Path(root)
@@ -2209,18 +2489,22 @@ def work_closure_gate(root: Path | str, work: str) -> dict:
     active_linked: set[str] = set()
     for receipt_id in index.get("active", {}):
         meta = _read_meta(root, receipt_id)
-        if not meta or meta.get("linked_work") != work:
+        if not meta or not is_linked_to(meta, work):
             continue
         active_linked.add(receipt_id)
     missing_projection = active_linked - board_links
     if missing_projection:
         receipt_id = min(missing_projection)
-        return {
-            "ok": False,
-            "code": "SOURCE_LINKAGE_MISSING",
-            "receipt": receipt_id,
-            "work": work,
-        }
+        return route_source_refusal(
+            root,
+            {
+                "ok": False,
+                "code": "SOURCE_LINKAGE_MISSING",
+                "receipt": receipt_id,
+                "work": work,
+            },
+            work=work,
+        )
     linked: list[str] = []
     for receipt_id in sorted(board_links):
         if not _valid_receipt_id(receipt_id):
@@ -2231,23 +2515,31 @@ def work_closure_gate(root: Path | str, work: str) -> dict:
             if (
                 isinstance(tomb, dict)
                 and tomb.get("status") == CLOSED_STATUS
-                and tomb.get("linked_work") == work
+                and work in (tomb.get("linked_works") or [tomb.get("linked_work")])
             ):
                 linked.append(receipt_id)
                 continue
-            return {
-                "ok": False,
-                "code": "SOURCE_RECEIPT_MISSING",
-                "receipt": receipt_id,
-                "work": work,
-            }
-        if meta.get("linked_work") != work:
-            return {
-                "ok": False,
-                "code": "SOURCE_LINKAGE_DRIFT",
-                "receipt": receipt_id,
-                "work": work,
-            }
+            return route_source_refusal(
+                root,
+                {
+                    "ok": False,
+                    "code": "SOURCE_RECEIPT_MISSING",
+                    "receipt": receipt_id,
+                    "work": work,
+                },
+                work=work,
+            )
+        if not is_linked_to(meta, work):
+            return route_source_refusal(
+                root,
+                {
+                    "ok": False,
+                    "code": "SOURCE_LINKAGE_DRIFT",
+                    "receipt": receipt_id,
+                    "work": work,
+                },
+                work=work,
+            )
         linked.append(receipt_id)
         integrity = verify_integrity(root, receipt_id)
         if not integrity["ok"]:
@@ -2257,13 +2549,17 @@ def work_closure_gate(root: Path | str, work: str) -> dict:
             return contract_gate | {"work": work}
         summary = coverage_summary(root, receipt_id)
         if not coverage_complete(root, receipt_id):
-            return {
-                "ok": False,
-                "code": "SOURCE_UNRESOLVED",
-                "receipt": receipt_id,
-                "work": work,
-                "coverage": summary,
-            }
+            return route_source_refusal(
+                root,
+                {
+                    "ok": False,
+                    "code": "SOURCE_UNRESOLVED",
+                    "receipt": receipt_id,
+                    "work": work,
+                    "coverage": summary,
+                },
+                work=work,
+            )
     return {"ok": True, "code": "SOURCE_COVERAGE_COMPLETE", "work": work, "receipts": linked}
 
 
@@ -2292,7 +2588,7 @@ def boundary_gate(root: Path | str, work: str, boundary: str) -> dict:
                 "receipt": receipt_id,
                 "boundary": boundary,
             }
-        if meta.get("linked_work") != work:
+        if not is_linked_to(meta, work):
             return {
                 "ok": False,
                 "code": "SOURCE_LINKAGE_DRIFT",
@@ -2404,6 +2700,9 @@ def _legacy_sensitive_source_gate(root: Path) -> dict:
                     "detail": f"legacy sensitive unsanitized {location} source {receipt_id}",
                 }
             if _redact_text(body) != body and distribution["state"] != QUARANTINED:
+                quarantine_command = (
+                    f"saipen source quarantine {receipt_id} --reason CREDENTIAL_PATTERN"
+                )
                 return {
                     "ok": False,
                     "code": "SOURCE_CORRUPTION" if legacy_metadata else "SOURCE_CREDENTIALS_UNSAFE",
@@ -2412,8 +2711,14 @@ def _legacy_sensitive_source_gate(root: Path) -> dict:
                         if legacy_metadata
                         else (
                             f"credential pattern in exact {location} source {receipt_id}; "
-                            "supply a user-authorized replacement or amendment before release"
+                            f"run {quarantine_command} to preserve local authority "
+                            "and exclude the body from release"
                         )
+                    ),
+                    **(
+                        {"receipt": receipt_id, "canonical_next_command": quarantine_command}
+                        if not legacy_metadata
+                        else {}
                     ),
                 }
             if distribution["state"] == QUARANTINED:
@@ -2464,12 +2769,32 @@ def _scope_trust(
     return _ReleaseScopeTrust(status, frozenset(paths or ()), code, detail)
 
 
+def _scope_refusal_trust(exc: Exception) -> _ReleaseScopeTrust:
+    """Map one writer-side scope refusal onto the gate's trust vocabulary."""
+    code = getattr(exc, "code", "")
+    status = {
+        "SOURCE_SCOPE_MISSING": "NO_SCOPE",
+        "STALE_PLAN": "STALE_SCOPE",
+        "PATH_ESCAPE": "FOREIGN_SCOPE",
+    }.get(code, "INVALID_SCOPE")
+    return _scope_trust(status, code, getattr(exc, "detail", str(exc)))
+
+
 def _release_scope_trust(root: Path, work: str, source_identity: object) -> _ReleaseScopeTrust:
     """Validate one scope through the writer's source/content identity contract.
 
     Scope absence or corruption is uncertainty, never evidence of disjointness.
     The status remains separate from paths so callers cannot collapse UNKNOWN
     relevance into an empty set.
+
+    Two legitimate bindings exist. A FRESH scope was reviewed at the live HEAD
+    and its tree fingerprint must still match exactly. A CONTINUATION scope was
+    reviewed before the release's own content/closure commits landed, so its
+    reviewed HEAD is an ancestor of the live HEAD and every reviewed path must
+    still hash to its live bytes (the writer's own continuation contract). The
+    defect this closes: loading only the fresh binding made every in-flight
+    release -- the post-release retry and the fresh-clone continuation above
+    all -- fail closed as STALE_SCOPE the moment its own commits moved HEAD.
     """
     if not isinstance(work, str) or not re.fullmatch(r"T-\d+", work):
         return _scope_trust(
@@ -2479,15 +2804,17 @@ def _release_scope_trust(root: Path, work: str, source_identity: object) -> _Rel
 
     live_head = getattr(source_identity, "source_head", None)
     live_tree = getattr(source_identity, "source_tree_fingerprint", None)
+    fresh = True
     try:
         record = _load_scope(root, work, live_head, live_tree, continuation=False)
     except ReleaseRefusal as exc:
-        status = {
-            "SOURCE_SCOPE_MISSING": "NO_SCOPE",
-            "STALE_PLAN": "STALE_SCOPE",
-            "PATH_ESCAPE": "FOREIGN_SCOPE",
-        }.get(exc.code, "INVALID_SCOPE")
-        return _scope_trust(status, exc.code, exc.detail)
+        if exc.code != "STALE_PLAN":
+            return _scope_refusal_trust(exc)
+        try:
+            record = _load_scope(root, work, live_head, live_tree, continuation=True)
+        except ReleaseRefusal as continuation_exc:
+            return _scope_refusal_trust(continuation_exc)
+        fresh = False
     except (OSError, ValueError, UnicodeError) as exc:
         return _scope_trust(
             "RECOVERY_CONFLICT",
@@ -2498,7 +2825,7 @@ def _release_scope_trust(root: Path, work: str, source_identity: object) -> _Rel
         return _scope_trust(
             "INVALID_SCOPE", "RECOVERY_CONFLICT", f"release scope for {work} lacks tree identity"
         )
-    if recorded_tree != live_tree:
+    if fresh and recorded_tree != live_tree:
         return _scope_trust(
             "STALE_SCOPE",
             "STALE_PLAN",
@@ -2561,6 +2888,19 @@ def _release_relevant_work(
     return _ReleaseRelevance(frozenset(relevant))
 
 
+def _route_release_refusal(root: Path, gate: dict, work: str, relevant) -> dict:
+    """A Work closure refusal, re-answered in the release being evaluated.
+
+    `work_closure_gate` knows nothing about a release, so its refusal carried
+    no release-scope membership when the release gate passed it on unchanged
+    (T-1455). Only coverage refusals are re-routed; a validation or integrity
+    answer keeps exactly the shape its own owner gave it.
+    """
+    if str(gate.get("code") or "").startswith("SOURCE_"):
+        return route_source_refusal(root, gate, work=work, release_scope=relevant)
+    return gate
+
+
 def release_gate(root: Path | str, current_work: str | None = None) -> dict:
     """Fail ship closed while active source coverage that CAN affect this release
     artifact is unresolved.
@@ -2599,14 +2939,15 @@ def release_gate(root: Path | str, current_work: str | None = None) -> dict:
     for work in sorted(relevant):
         gate = work_closure_gate(root, work)
         if not gate.get("ok"):
-            return gate
+            return _route_release_refusal(root, gate, work, relevant)
         checked.update(gate.get("receipts", []))
         if work != current_work and not _work_is_done(root, work):
-            return {
-                "ok": False,
-                "code": "SOURCE_WORK_ACTIVE",
-                "work": work,
-            }
+            return route_source_refusal(
+                root,
+                {"ok": False, "code": "SOURCE_WORK_ACTIVE", "work": work},
+                work=work,
+                release_scope=relevant,
+            )
     try:
         receipts = active_receipts(root)
     except (OSError, ValueError) as exc:
@@ -2625,23 +2966,41 @@ def release_gate(root: Path | str, current_work: str | None = None) -> dict:
             # UNPROJECTED authoritative receipt: no Work owns its closure, so
             # the repository answers for it -- fail closed.
             if not coverage_complete(root, receipt_id):
-                return {"ok": False, "code": "SOURCE_UNRESOLVED", "receipt": receipt_id}
+                return route_source_refusal(
+                    root,
+                    {
+                        "ok": False,
+                        "code": "SOURCE_UNRESOLVED",
+                        "receipt": receipt_id,
+                        "detail": (
+                            "an authoritative receipt no BOARD Work projects: the "
+                            "repository answers for its coverage, so link it to the "
+                            "Work that owns it or resolve its clauses"
+                        ),
+                    },
+                    release_scope=relevant,
+                )
             continue
         if linked in relevant:
             gate = work_closure_gate(root, linked)
             if not gate.get("ok"):
-                return gate
+                return _route_release_refusal(root, gate, linked, relevant)
             checked.update(gate.get("receipts", []))
             continue
         if linked not in board_links:
             # A projection naming no BOARD Work is untrustworthy: refuse
             # regardless of release scope.
-            return {
-                "ok": False,
-                "code": "SOURCE_WORK_ACTIVE",
-                "receipt": receipt_id,
-                "work": linked,
-            }
+            return route_source_refusal(
+                root,
+                {
+                    "ok": False,
+                    "code": "SOURCE_WORK_ACTIVE",
+                    "receipt": receipt_id,
+                    "work": linked,
+                },
+                work=linked,
+                release_scope=relevant,
+            )
         # Projected to an unrelated Work: coverage is Work-scoped and does not
         # gate this artifact. Integrity was proven above.
     return {
@@ -2655,13 +3014,43 @@ def _is_archive_commit_pending(root: Path, receipt_id: str, index: dict) -> bool
     """True when `receipt_id` sits in an interrupted close (CORE-003): still
     indexed as active, the active surface is cleared, and complete archived
     artifacts are present. This is the resumable crash state the close
-    transaction must settle before it can be retried."""
+    transaction must settle before it can be retried.
+
+    CLEARED IS PARTIAL (T-1346). The transaction moves the body, then unlinks
+    the active metadata, so a crash between those two steps leaves exactly ONE
+    active artifact behind. Requiring the metadata to be gone missed that real
+    window and answered a generic `INVALID receipt body missing` for a state
+    whose archive bundle is the proof the retry must consult -- measured on
+    the corrupt-partial fixture, which must refuse SOURCE_CORRUPTION, and on
+    the body-limit recovery fixture, which must classify as pending. The body
+    probe resolves through the digest-bound distribution overlay, so a
+    quarantined body (which the close never moves) is found at its quarantine
+    path.
+    """
     if not isinstance(index.get("active", {}).get(receipt_id), dict):
         return False
     projection = index["active"][receipt_id]
     digest = projection.get("source_sha256")
     if not isinstance(digest, str):
         return False
+    try:
+        active_body_rel = _canonical_body_rel(root, receipt_id, digest, "active")
+        archive_body_rel = _canonical_body_rel(root, receipt_id, digest, "archive")
+    except (OSError, ValueError):
+        return False
+    active_present: list[bool] = []
+    for active_rel, max_bytes in (
+        (active_body_rel, _BODY_MAX),
+        (f".saipen/intake/active/{receipt_id}.meta.json", _META_MAX),
+    ):
+        try:
+            _read_owned_file(root, active_rel, kind="source receipt probe", max_bytes=max_bytes)
+        except FileNotFoundError:
+            active_present.append(False)
+            continue
+        except (ValueError, OSError):
+            return False
+        active_present.append(True)
     try:
         _read_owned_file(
             root,
@@ -2671,24 +3060,13 @@ def _is_archive_commit_pending(root: Path, receipt_id: str, index: dict) -> bool
         )
         _read_owned_file(
             root,
-            _canonical_body_rel(root, receipt_id, digest, "archive"),
+            archive_body_rel,
             kind="source archive probe",
             max_bytes=_BODY_MAX,
         )
     except (FileNotFoundError, ValueError, OSError):
         return False
-    try:
-        _read_owned_file(
-            root,
-            f".saipen/intake/active/{receipt_id}.meta.json",
-            kind="source receipt probe",
-            max_bytes=_META_MAX,
-        )
-        return False
-    except FileNotFoundError:
-        return True
-    except (ValueError, OSError):
-        return False
+    return not all(active_present)
 
 
 def _closed_archive_bundle(
@@ -2719,7 +3097,7 @@ def _closed_archive_bundle(
         or meta.get("source_sha256") != expected_digest
         or meta.get("status") != CLOSED_STATUS
         or meta.get("storage_status") != ARCHIVED_STATUS
-        or meta.get("archive_ref") != expected_ref
+        or not _archive_ref_matches(meta.get("archive_ref"), receipt_id, expected_ref)
         or meta.get("linked_work") != projection.get("linked_work")
         or meta.get("source_kind") not in SOURCE_KINDS
         or meta.get("schema_version") != SCHEMA_VERSION
@@ -3133,11 +3511,16 @@ def close_receipt(root: Path | str, receipt_id: str, *, closure_event: str | Non
                     "detail": f"unresolved: {summary['unresolved']}",
                     "coverage": summary,
                 }
-            if not _work_is_done(root, meta.get("linked_work")):
+            open_members = sorted(
+                member
+                for member in linked_works(meta)
+                if _board_has_work(root, member) and not _work_is_done(root, member)
+            )
+            if open_members:
                 return {
                     "ok": False,
                     "code": "SOURCE_WORK_ACTIVE",
-                    "detail": f"linked Work {meta.get('linked_work')} is not DONE",
+                    "detail": f"linked Work {', '.join(open_members)} is not DONE",
                 }
             closed_at = _utc()
             meta["status"] = CLOSED_STATUS
@@ -3149,6 +3532,7 @@ def close_receipt(root: Path | str, receipt_id: str, *, closure_event: str | Non
                 "receipt_id": receipt_id,
                 "source_sha256": meta["source_sha256"],
                 "linked_work": meta.get("linked_work"),
+                "linked_works": sorted(linked_works(meta)),
                 "status": CLOSED_STATUS,
                 "closed_at": closed_at,
                 "closure_event": closure_event,
@@ -3192,14 +3576,15 @@ def archive_receipt(root: Path | str, receipt_id: str) -> dict:
             meta = _read_meta(root, receipt_id)
             if not meta:
                 tomb = _read_index(root).get("tombstones", {}).get(receipt_id)
-                if tomb and (
-                    root / str(tomb.get("archive_ref") or "")
-                ).is_file():
+                if tomb and not tomb.get("purged"):
+                    _closed_archive_bundle(root, receipt_id, tomb)
                     return {
                         "ok": True,
                         "code": "ALREADY_SATISFIED",
                         "receipt": receipt_id,
-                        "archive_ref": tomb.get("archive_ref"),
+                        "archive_ref": _canonical_body_rel(
+                            root, receipt_id, tomb["source_sha256"], "archive"
+                        ),
                     }
                 return {"ok": False, "code": "TICKET_NOT_FOUND", "detail": receipt_id}
             if meta.get("status") != CLOSED_STATUS:
@@ -3590,6 +3975,7 @@ def status(root: Path | str, receipt_id: str) -> dict:
         "source_kind": meta.get("source_kind"),
         "source_sha256": meta.get("source_sha256"),
         "linked_work": meta.get("linked_work"),
+        "linked_works": sorted(linked_works(meta)),
         "amends": meta.get("amends"),
         "closure_event": meta.get("closure_event"),
         "coverage": summary,
@@ -3619,7 +4005,7 @@ def active_receipts(root: Path | str, *, work: str | None = None) -> list[dict]:
             "source_sha256"
         ):
             raise ValueError(f"active receipt {receipt_id} index metadata drift")
-        if work is not None and meta.get("linked_work") != work:
+        if work is not None and not is_linked_to(meta, work):
             continue
         summary = coverage_summary(root, receipt_id)
         result.append(
@@ -3888,7 +4274,9 @@ def validate_project(root: Path | str) -> list[str]:
             except (OSError, ValueError) as exc:
                 expected_archive = None
                 errors.append(f"tombstone {receipt_id} distribution invalid: {exc}")
-            if expected_archive is not None and tomb.get("archive_ref") != expected_archive:
+            if expected_archive is not None and not _archive_ref_matches(
+                tomb.get("archive_ref"), receipt_id, expected_archive
+            ):
                 errors.append(f"tombstone {receipt_id} has invalid archive_ref")
         tomb_path = _tombstone_dir(root) / f"{receipt_id}.json"
         if not tomb_path.is_file() or _is_link_or_reparse(tomb_path):

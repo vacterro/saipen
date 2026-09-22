@@ -32,6 +32,17 @@ import re
 #: The closed remediation kinds. A third value is a protocol error.
 REMEDIATION_KINDS = ("command", "external")
 
+#: T-1435 M7: the closed ROUTE classification every repairable hard finding
+#: must resolve to. One owner, so "no dead end" is mechanically checkable
+#: instead of a promise: a finding that fits none of these classes must be
+#: classified explicitly immutable/unrepairable, never left with prose.
+ROUTE_KINDS = (
+    "CANONICAL_COMMAND",  # a registered saipen verb the operator/agent runs
+    "OPERATOR_AUTHORIZED_COMMAND",  # exact maintenance command outside saipen
+    "PRODUCER_OWNED_COMMAND",  # the producer's own writer reconciles it
+    "IMMUTABLE_CLASSIFIED",  # deliberately unrepairable; the class is recorded
+)
+
 #: The closed external-action vocabulary. An external action is a real,
 #: typed requirement on an actor outside the project -- never a command
 #: dressed up as one, and never inferred from free prose.
@@ -52,7 +63,18 @@ class RemediationSpec:
     ``verb``/``action`` name the registry identity the gate resolves.
     """
 
-    __slots__ = ("action", "external_kind", "kind", "owner", "pattern", "rule", "template", "verb")
+    __slots__ = (
+        "action",
+        "external_kind",
+        "extract",
+        "kind",
+        "owner",
+        "pattern",
+        "route_kind",
+        "rule",
+        "template",
+        "verb",
+    )
 
     def __init__(
         self,
@@ -65,17 +87,23 @@ class RemediationSpec:
         action: str | None = None,
         external_kind: str | None = None,
         owner: str = "",
+        route_kind: str = "CANONICAL_COMMAND",
+        extract: bool = True,
     ):
         if kind not in REMEDIATION_KINDS:
             raise ValueError(f"remediation kind {kind!r} outside {REMEDIATION_KINDS}")
+        if route_kind not in ROUTE_KINDS:
+            raise ValueError(f"remediation route {route_kind!r} outside {ROUTE_KINDS}")
         if kind == "external":
             if external_kind not in EXTERNAL_ACTION_KINDS:
                 raise ValueError(f"external kind {external_kind!r} outside {EXTERNAL_ACTION_KINDS}")
             if template or verb:
                 raise ValueError("an external remediation never carries a command shape")
         else:
-            if not pattern or not template or not verb:
-                raise ValueError("a command remediation needs pattern, template and verb")
+            if not pattern or not template:
+                raise ValueError("a command remediation needs pattern and template")
+            if not verb and route_kind != "OPERATOR_AUTHORIZED_COMMAND":
+                raise ValueError("a canonical/producer command remediation needs a verb")
         self.rule = rule
         self.kind = kind
         self.pattern = pattern
@@ -84,6 +112,8 @@ class RemediationSpec:
         self.action = action
         self.external_kind = external_kind
         self.owner = owner
+        self.route_kind = route_kind
+        self.extract = extract
 
     def to_dict(self) -> dict:
         return {
@@ -94,10 +124,21 @@ class RemediationSpec:
             "action": self.action,
             "external_kind": self.external_kind,
             "owner": self.owner,
+            "route_kind": self.route_kind,
         }
 
 
-def _cmd(rule: str, pattern: str, template: str, verb: str, action: str | None, owner: str):
+def _cmd(
+    rule: str,
+    pattern: str,
+    template: str,
+    verb: str,
+    action: str | None,
+    owner: str,
+    *,
+    route_kind: str = "CANONICAL_COMMAND",
+    extract: bool = True,
+):
     return RemediationSpec(
         rule,
         kind="command",
@@ -106,6 +147,8 @@ def _cmd(rule: str, pattern: str, template: str, verb: str, action: str | None, 
         verb=verb,
         action=action,
         owner=owner,
+        route_kind=route_kind,
+        extract=extract,
     )
 
 
@@ -113,6 +156,14 @@ def _cmd(rule: str, pattern: str, template: str, verb: str, action: str | None, 
 #: Every entry names the rule identity, the exact command shape, the registry
 #: verb/action it must resolve to, and the implementation owner.
 REMEDIATIONS = (
+    _cmd(
+        "source credentials",
+        r"saipen source quarantine SRC-\d+ --reason CREDENTIAL_PATTERN",
+        "saipen source quarantine <SRC-###> --reason CREDENTIAL_PATTERN",
+        "source",
+        "quarantine",
+        "tools/saipen_engine/intake.py",
+    ),
     _cmd(
         "closure-evidence",
         r"saipen work reverify T-\d+",
@@ -129,6 +180,43 @@ REMEDIATIONS = (
         "ticket",
         "resolve-external",
         "tools/saipen_engine/external.py",
+    ),
+    _cmd(
+        "legacy metadata:exact",
+        r"saipen ticket repair-metadata T-\d+ --field source_receipts --to SRC-\d+",
+        "saipen ticket repair-metadata <T-###> --field source_receipts --to <SRC-###>",
+        "ticket",
+        "repair-metadata",
+        "tools/saipen_engine/metadata_repair.py",
+    ),
+    _cmd(
+        "legacy metadata:unbound",
+        r"saipen ticket repair-metadata T-\d+ --field source_receipts "
+        r"--legacy-unbound --authority lineage-[0-9a-f]{32}",
+        "saipen ticket repair-metadata <T-###> --field source_receipts "
+        "--legacy-unbound --authority <lineage-32hex>",
+        "ticket",
+        "repair-metadata",
+        "tools/saipen_engine/metadata_repair.py",
+    ),
+    _cmd(
+        "runtime namespace:tracked",
+        r"git rm -r --cached -- .+",
+        "git rm -r --cached -- <paths>",
+        "",
+        None,
+        "tools/saipen_engine/runtime_namespace.py",
+        route_kind="OPERATOR_AUTHORIZED_COMMAND",
+        extract=False,
+    ),
+    _cmd(
+        "producer lifecycle:terminal",
+        r"saipen sub reconcile [A-Za-z0-9_-]+ --authority SRC-\d+",
+        "saipen sub reconcile <role> --authority <SRC-###>",
+        "sub",
+        "reconcile",
+        "tools/saipen_engine/subs.py",
+        route_kind="PRODUCER_OWNED_COMMAND",
     ),
     _cmd(
         "core sweep:sweep-ticket-link",
@@ -194,6 +282,8 @@ def extract_commands(failures) -> list[str]:
     for message in failures or ():
         text = str(message)
         for spec in REMEDIATIONS:
+            if not spec.extract:
+                continue
             for match in spec.pattern.finditer(text):
                 command = match.group(0).strip()
                 if command not in seen:
@@ -220,6 +310,7 @@ def resolve_command(command: str) -> dict:
                 "template": spec.template,
                 "verb": spec.verb,
                 "action": spec.action,
+                "route_kind": spec.route_kind,
             }
     return {
         "ok": False,

@@ -60,6 +60,20 @@ the protected namespace and retains the safe record (`receipt_id`,
 detection may trigger a quarantine decision, but regex non-detection is never
 distribution authority: `source quarantine` is the independent operator route.
 
+An exact active or archived credential-bearing receipt refuses publication
+with `SOURCE_CREDENTIALS_UNSAFE` and
+`canonical_next_command: saipen source quarantine <SRC-###> --reason CREDENTIAL_PATTERN`.
+The validator receipt and release preflight preserve this route. This closes
+the archived-credential dead end: quarantine is the distribution repair even
+when the receipt already has a tombstone. Retirement or amendment does not
+remove the archived bytes from distribution. Quarantine preserves lifecycle,
+digest and local authority; incomplete coverage and corrupt authority still
+refuse independently. Rebuild the release plan after changing distribution.
+Closure-time archive references remain immutable when quarantine happens
+later. Readers resolve the current body through the digest-bound distribution
+record and still verify its bytes; the historical reference is not a second
+distributable copy.
+
 ## Intake and identity
 
 Receipt IDs are monotonic collision-safe protocol identities. SHA-256 is

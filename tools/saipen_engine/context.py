@@ -1013,6 +1013,33 @@ def brief_projection(project_root: Path | str) -> Result:
     project_lineage = project_lineage_identity(root)
 
     handoff_provenance = generated_handoff_provenance(root, state)
+
+    # T-1446: the cold recovery carrier rides the brief so a zero-context
+    # worker gets Work, owner/liveness, lease health and the exact next command
+    # from ONE read-only surface. Watchdog observation is read-only by design.
+    from . import board as _board_mod
+    from . import watchdog as _watchdog_mod
+    from .cold_recovery import build_recovery_package
+
+    watchdog_status = _watchdog_mod.observe(root).as_dict()
+    claim_liveness = ""
+    if work_id and work_id in board["tickets"]:
+        claim_liveness = _board_mod.claim_status(
+            board["tickets"][work_id], agent=state.get("agent")
+        )
+    recovery = build_recovery_package(
+        inputs["state_text"],
+        inputs["board_text"],
+        inputs["log_text"],
+        runtime_state={
+            "canonical_root": str(root),
+            "project_identity": handoff_provenance["project_identity"],
+            "project_lineage": project_lineage,
+            "watchdog": watchdog_status,
+            "claim_liveness": claim_liveness,
+        },
+    )
+
     payload = {
         "project": root.name,
         "project_identity": handoff_provenance["project_identity"],
@@ -1038,6 +1065,7 @@ def brief_projection(project_root: Path | str) -> Result:
         "runtime_generation": handoff_provenance["runtime_generation"],
         "implementation_checkpoint": handoff_provenance["implementation_checkpoint"],
         "provenance": handoff_provenance,
+        "recovery": recovery,
     }
 
     def _or_none(value):
@@ -1098,6 +1126,22 @@ def brief_projection(project_root: Path | str) -> Result:
     lines.append("")
     lines.append("NEXT ACTION:")
     lines.append(str(payload["next_action"]))
+    lines.append("")
+    lines.append("RECOVERY (derived):")
+    lines.append(f"- ACTIVE_WORK: {recovery['ACTIVE_WORK'] or 'none'}")
+    lines.append(
+        f"- OWNER: {recovery['OWNER'] or 'unclaimed'}"
+        f" ({recovery['CLAIM_LIVENESS'] or 'unclassified'})"
+    )
+    lines.append(
+        f"- LEASE: {recovery['MUTATION_LEASE'].get('state', 'UNKNOWN')}"
+        f" gen={recovery['MUTATION_LEASE'].get('lease_generation', 'none')}"
+    )
+    lines.append(f"- NEXT_COMMAND: {recovery['NEXT_COMMAND']}")
+    if recovery["DEFERRED"]:
+        lines.append("- DEFERRED: " + ", ".join(d["id"] for d in recovery["DEFERRED"]))
+    if recovery["DO_NOT_REPEAT"]:
+        lines.append(f"- DO_NOT_REPEAT: {len(recovery['DO_NOT_REPEAT'])} recorded")
     surface = "\n".join(lines) + "\n"
     return Result(
         ok=True,
