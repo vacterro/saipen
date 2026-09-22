@@ -104,6 +104,42 @@ takes message identity from `chat.message`, and marks consumption in
 instruction text, which is not a recovery mechanism; that gap is an external
 host boundary, not a solved case.
 
+## Unattended execution owner (T-1446)
+
+`supervisor.decide` names ONE verdict; `worker.supervise` acts on it. From
+`<saipen_home>/tools`:
+
+    python -m saipen_engine.worker supervise --project-root P \
+        --agent-json '["opencode","run","--model","{model}","cc"]' \
+        --model M [--fallback-model M2 ...] [--max-cycles N] \
+        [--slice-timeout IDLE_S] [--max-slice-seconds HOST_S]
+
+Each cycle: decide; stop cleanly on IDLE, OPERATOR_ACTION_DUE,
+NO_PROGRESS_LOOP or AMBIGUOUS_AUTHORITY; await (never steal) a HEALTHY or
+SUSPECT foreign lease; otherwise take ONE lease generation, launch the agent
+host, heartbeat the lease for it while it lives, kill it on freeze or on an
+outside fence, then fence the finished generation so nothing it still does can
+mutate. QUALITY-TIME-01: `--slice-timeout` is the IDLE bound -- time without
+durable canonical progress (STATE last_event/phase/task/next_action/blocker)
+-- and every progress restarts it; `--max-slice-seconds` (default 4x) is the
+host bound, and a progressing generation that reaches it ends SLICE_BOUNDED,
+not failed: the next generation continues the same epoch. A fence takes
+effect when written: a fenced generation reads EXPIRED, fails
+`mutation_allowed` and cannot heartbeat itself back.
+
+Failures use one closed vocabulary (`supervisor.FAILURE_CLASSES`): WORKER_CRASH
+and HOST_RUNTIME_FAILURE replace the generation; RATE_LIMITED,
+PROVIDER_UNAVAILABLE and NETWORK_UNAVAILABLE back off and retry;
+QUOTA_EXHAUSTED and MODEL_UNAVAILABLE move to the next model ONLY from the
+operator's `--fallback-model` list, otherwise stop with an operator action;
+AUTH_FAILED always stops; UNKNOWN stops after a repeat. CAPABILITY_UNAVAILABLE
+(an absent host, or a runtime without tools) is never read as reasoning
+failure: it moves only to an authorized runtime, else stops as a truthful
+blocker. Model identity lives in the runtime cache checkpoint, never in
+STATE/BOARD/LOG. No failure writes
+canonical state: Work, Source, checkpoint and epoch survive every class, and
+only the agent incarnation changes.
+
 ## Wave 1 — identity and capabilities
 
 `agent != model`. `--agent <id>` selects the acting SAIPEN seat and participates

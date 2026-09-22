@@ -32,6 +32,14 @@ mechanics live in `OPS.md`. Prose is never a runtime database.
 - Disk is authoritative. If STATE names another agent or is newer than the
   actor's last write, all remembered project facts are stale and MUST be reread.
 
+#### Quality over time
+
+<!-- RULE-OWNER: QUALITY-TIME-01 -->
+
+- QUALITY > TIME. No model, tier, session or incarnation weakens acceptance
+  or enters Work truth: no cheaper DONE. Missing durable progress is failure;
+  elapsed time is not, within NO_PROGRESS/budget/host bounds (`RUNTIME.md`).
+
 #### Scope, security, and communication
 
 - Preserve user data and unrelated dirty changes. A destructive effect needs

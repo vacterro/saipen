@@ -75,6 +75,105 @@ NEXT_COMMAND = {
 }
 
 
+#: Provider/model/host failure vocabulary (SRC-105 section 23). Closed: a
+#: failure outside it is UNKNOWN, never a guess. Order is the match order --
+#: a quota 429 is QUOTA_EXHAUSTED, not RATE_LIMITED.
+QUOTA_EXHAUSTED = "QUOTA_EXHAUSTED"
+RATE_LIMITED = "RATE_LIMITED"
+AUTH_FAILED = "AUTH_FAILED"
+MODEL_UNAVAILABLE = "MODEL_UNAVAILABLE"
+PROVIDER_UNAVAILABLE = "PROVIDER_UNAVAILABLE"
+NETWORK_UNAVAILABLE = "NETWORK_UNAVAILABLE"
+CAPABILITY_UNAVAILABLE = "CAPABILITY_UNAVAILABLE"
+HOST_RUNTIME_FAILURE = "HOST_RUNTIME_FAILURE"
+WORKER_CRASH = "WORKER_CRASH"
+UNKNOWN_FAILURE = "UNKNOWN"
+FAILURE_CLASSES = (
+    QUOTA_EXHAUSTED,
+    RATE_LIMITED,
+    AUTH_FAILED,
+    MODEL_UNAVAILABLE,
+    PROVIDER_UNAVAILABLE,
+    NETWORK_UNAVAILABLE,
+    CAPABILITY_UNAVAILABLE,
+    HOST_RUNTIME_FAILURE,
+    WORKER_CRASH,
+    UNKNOWN_FAILURE,
+)
+
+_FAILURE_PATTERNS = (
+    (QUOTA_EXHAUSTED, r"insufficient_quota|quota (?:exceeded|exhausted)|out of credits|"
+     r"credit balance|usage limit (?:reached|exceeded)|billing"),
+    (RATE_LIMITED, r"\b429\b|rate[ _-]?limit|too many requests"),
+    (AUTH_FAILED, r"\b401\b|\b403\b|unauthori[sz]ed|invalid api[ _-]?key|"
+     r"authentication (?:failed|error)|forbidden"),
+    (CAPABILITY_UNAVAILABLE, r"does not support (?:tools|tool use|function calling)|"
+     r"(?:tool use|tools|function calling) (?:is |are )?not supported|"
+     r"unsupported capability|capability unavailable"),
+    (MODEL_UNAVAILABLE, r"model[^\n]{0,40}(?:not found|unavailable|does not exist|"
+     r"not supported)|unknown model|no such model"),
+    (PROVIDER_UNAVAILABLE, r"\b50[0234]\b|service unavailable|overloaded|bad gateway|"
+     r"provider (?:error|unavailable)"),
+    (NETWORK_UNAVAILABLE, r"econnrefused|econnreset|enotfound|etimedout|getaddrinfo|"
+     r"network (?:error|unreachable)|connection (?:refused|reset)"),
+)
+
+#: What each failure may do to the execution. Every class preserves Work,
+#: Source, checkpoint and epoch; only the incarnation may change, and a paid
+#: or different model only through an operator-authorized fallback list.
+FAILURE_POLICY = {
+    QUOTA_EXHAUSTED: "FALLBACK_OR_OPERATOR",
+    RATE_LIMITED: "BACKOFF_RETRY",
+    AUTH_FAILED: "OPERATOR",
+    MODEL_UNAVAILABLE: "FALLBACK_OR_OPERATOR",
+    PROVIDER_UNAVAILABLE: "BACKOFF_RETRY",
+    NETWORK_UNAVAILABLE: "BACKOFF_RETRY",
+    CAPABILITY_UNAVAILABLE: "FALLBACK_OR_OPERATOR",
+    HOST_RUNTIME_FAILURE: "REPLACE_GENERATION",
+    WORKER_CRASH: "REPLACE_GENERATION",
+    UNKNOWN_FAILURE: "STOP_AFTER_REPEAT",
+}
+
+
+def classify_failure(
+    returncode: int | None, output: str = "", *, timed_out: bool = False,
+    launch_error: bool = False, progressed: bool = True,
+) -> str | None:
+    """Name ONE failure class for a finished worker process, or None.
+
+    None means the slice ended cleanly (exit 0, no failure text). A frozen or
+    unlaunchable host is HOST_RUNTIME_FAILURE; a nonzero exit that says
+    nothing recognizable is a WORKER_CRASH; recognizable provider text wins
+    over the exit code because a host often exits 1 for every provider error,
+    and a clean exit that made no progress is checked for the same text.
+    """
+    import re as _re
+
+    if launch_error:
+        # The runtime to run the Work does not exist here. That is a missing
+        # capability, never evidence about any model's reasoning.
+        return CAPABILITY_UNAVAILABLE
+    if timed_out:
+        return HOST_RUNTIME_FAILURE
+    text = str(output or "").lower()
+    if returncode == 0 and progressed:
+        return None
+    for klass, pattern in _FAILURE_PATTERNS:
+        if _re.search(pattern, text):
+            return klass
+    if returncode == 0:
+        # A host that exits 0 after a provider error it swallowed shows up
+        # as no progress; without recognizable text it is not a failure.
+        return None
+    if returncode is None:
+        return UNKNOWN_FAILURE
+    if returncode < 0 or returncode in (9, 137, 139, 3221225477, 3221225786) or not text.strip():
+        return WORKER_CRASH
+    if "traceback (most recent call last)" in text:
+        return HOST_RUNTIME_FAILURE
+    return UNKNOWN_FAILURE
+
+
 def _now(now: _dt.datetime | None = None) -> _dt.datetime:
     if now is None:
         return _dt.datetime.now(_dt.timezone.utc)

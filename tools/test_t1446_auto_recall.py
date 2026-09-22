@@ -329,6 +329,93 @@ class TurnEntryOrderingTests(unittest.TestCase):
         self.assertIsNone(head["next_action"])
 
 
+class QualityFloorTests(unittest.TestCase):
+    """SRC-106 sections 10, 11, 23: a model swap moves no finish line.
+
+    Real canonical operations on a real project: incarnation A works up to
+    VERIFY; B -- stronger or weaker, no private memory -- receives only the
+    recall surface. B must land on the same execution and the same acceptance,
+    must not close from prose confidence, and may record a truthful blocker.
+    """
+
+    def setUp(self):
+        from test_dependency_resume_liveness import AGENT as FIXTURE_AGENT
+        from test_dependency_resume_liveness import ResumeFixture
+
+        from saipen_engine.operations import apply_claim, checkpoint, transition_phase
+
+        self.agent = FIXTURE_AGENT
+        self.transition_phase = transition_phase
+        self.checkpoint = checkpoint
+        fixture = ResumeFixture()
+        fixture.addCleanup = self.addCleanup
+        fixture.assertTrue = self.assertTrue
+        self.project = fixture.make_project()
+        self.ticket = fixture.add(self.project, "one bounded repair with exact acceptance")
+        self.assertTrue(apply_claim(self.project, self.ticket, self.agent, explicit=True).ok)
+        for destination, text in (
+            ("SCOUT", "SCOUT: files named, reproduction recorded"),
+            ("BUILD", "BUILD: bounded change"),
+        ):
+            moved = transition_phase(self.project, destination, self.agent, self.ticket, text)
+            self.assertTrue(moved.ok, moved.to_dict())
+        built = checkpoint(
+            self.project, self.agent, "RUN", self.ticket, "build -> repair applied to x.py"
+        )
+        self.assertTrue(built.ok, built.to_dict())
+        moved = transition_phase(
+            self.project, "VERIFY", self.agent, self.ticket, "VERIFY: run the focused family"
+        )
+        self.assertTrue(moved.ok, moved.to_dict())
+
+    def recall(self, model: str, previous: str | None = None) -> dict:
+        return cr.auto_recall(
+            self.project,
+            {"host": "opencode", "host_session": "s", "provider": "p", "model": model,
+             "previous_incarnation": previous or "", "cold": True, "ingress": HISTORICAL_CC},
+        )
+
+    def test_downgrade_and_upgrade_change_only_the_incarnation(self):
+        strong = self.recall("strong-model")
+        weak = self.recall("weak-model", previous=strong["agent_incarnation"])
+        back = self.recall("strong-model", previous=weak["agent_incarnation"])
+        keys = ("execution_epoch", "active_work", "phase", "canonical_next_action",
+                "last_durable_checkpoint", "claim_owner", "source_receipts")
+        for key in keys:
+            with self.subTest(key=key):
+                self.assertEqual(strong[key], weak[key])
+                self.assertEqual(weak[key], back[key])
+        self.assertEqual(weak["phase"], "VERIFY")
+        self.assertNotIn("SCOUT", weak["canonical_next_action"])
+        self.assertIn("repair applied to x.py", weak["last_durable_checkpoint"])
+        self.assertNotEqual(strong["agent_incarnation"], weak["agent_incarnation"])
+        self.assertEqual(weak["turn"]["decision"], cr.TURN_AUTO_KICK)
+        board = (self.project / ".saipen" / "BOARD.md").read_text(encoding="utf-8")
+        self.assertNotIn("weak-model", board)
+        self.assertNotIn("strong-model", board)
+
+    def test_the_successor_cannot_close_from_prose_confidence(self):
+        refused = self.transition_phase(
+            self.project, "REVIEW", self.agent, self.ticket,
+            "REVIEW: I am confident this is done",
+        )
+        self.assertFalse(refused.ok, refused.to_dict())
+        self.assertEqual(refused.code, "INCOMPLETE_TICKET", refused.to_dict())
+        self.assertEqual(self.recall("weak-model")["phase"], "VERIFY")
+
+    def test_the_successor_can_record_a_truthful_inability(self):
+        from saipen_engine.operations import ticket_move
+
+        blocked = ticket_move(
+            self.project, "block", self.ticket, self.agent,
+            "cannot reproduce the failure on current bytes; focused family output attached",
+        )
+        self.assertTrue(blocked.ok, blocked.to_dict())
+        after = self.recall("weak-model")
+        self.assertFalse(after["continuation_required"])
+        self.assertNotEqual(after["turn"]["decision"], cr.TURN_AUTO_KICK)
+
+
 class RecoveryPackagePhaseTests(unittest.TestCase):
     """The measured phase reset: a DOING seat in BUILD was told PHASE SCOUT."""
 

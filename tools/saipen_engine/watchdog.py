@@ -138,9 +138,18 @@ def heartbeat(
         raise RuntimeError("UNKNOWN_LEASE")
     if current["worker_id"] != worker_id or current["lease_generation"] != lease_generation:
         raise RuntimeError("FENCED_LEASE_GENERATION")
+    if _is_fenced(current):
+        # A fenced generation must not revive itself. Before T-1446 this
+        # rewrote status back to HEALTHY, so a returning fenced worker
+        # un-fenced its own lease with one heartbeat.
+        raise RuntimeError("FENCED_LEASE_GENERATION")
     payload = {**current, "heartbeat_at": _utc(now), "status": HEALTHY}
     _save(root, payload)
     return payload.copy()
+
+
+def _is_fenced(current: dict) -> bool:
+    return current.get("status") == EXPIRED and bool(current.get("fenced_at"))
 
 
 def observe(
@@ -159,6 +168,12 @@ def observe(
     age = max(0.0, (observed_at - heartbeat_at).total_seconds())
     if current.get("status") == TERMINAL:
         state, reason = TERMINAL, "worker_terminal"
+    elif _is_fenced(current):
+        # Fencing takes effect when it is written, not when the heartbeat
+        # ages out: a fenced generation read as HEALTHY for up to
+        # `expire_after`, still passed `mutation_allowed`, and blocked its own
+        # replacement with LIVE_LEASE_PRESENT (measured 2026-09-22).
+        state, reason = EXPIRED, "fenced"
     elif age >= expire_after:
         state, reason = EXPIRED, "heartbeat_timeout"
     elif age >= suspect_after:

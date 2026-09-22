@@ -132,6 +132,11 @@
         "test": "tools/test_evidence_hygiene.py",
         "subject": "bounded durable proof, run-owned ephemeral cleanup, conservative historical classification and retention manifests"
       },
+      "QUALITY-TIME-01": {
+        "owner": "saipen/CORE.md",
+        "test": "tools/test_t1446_supervise.py",
+        "subject": "model-independent acceptance; durable progress, not elapsed time, decides liveness"
+      },
       "SOURCE-APPEND-01": {
         "owner": "saipen/SOURCES.md",
         "test": "tools/test_t1461_source_append.py",
@@ -170,7 +175,8 @@
     "SOURCE-AUDIT-ENQUEUE-01": "saipen/SOURCES.md",
     "EVIDENCE-RETENTION-01": "saipen/CORE.md",
     "SOURCE-DISTRIBUTION-01": "saipen/SOURCES.md",
-    "SOURCE-APPEND-01": "saipen/SOURCES.md"
+    "SOURCE-APPEND-01": "saipen/SOURCES.md",
+    "QUALITY-TIME-01": "saipen/CORE.md"
   },
   "evidence_retention": {
     "max_artifact_bytes": 26214400,
