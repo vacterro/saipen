@@ -767,6 +767,14 @@ def queued_source_projection(project_root) -> dict | None:
     `start --receipt` asks (`entry.request_from_receipt`, which reads the
     receipt's request header): a receipt that is not a request is skipped, a
     receipt that cannot be read is surfaced, never skipped.
+
+    T-1460: "unprojected" means no Work in the receipt's durable MEMBERSHIP
+    (`intake.linked_works`, T-1437), not merely an empty primary. A request
+    that existing Work already executed is consumed ingress once that
+    consumption is bound with `saipen source link`; routing it again would
+    project duplicate Work for intent the operator gave once. Measured live
+    2026-09-22: SRC-082 and SRC-089 sat unbound after their Work ran, and this
+    stage routed `saipen start --receipt SRC-082`.
     """
     if project_root is None:
         return None
@@ -775,12 +783,12 @@ def queued_source_projection(project_root) -> dict | None:
         from .entry import RECEIPT_UNREADABLE, request_from_receipt
 
         for item in intake.active_receipts(project_root):
-            if item.get("linked_work"):
-                continue
             receipt = str(item.get("receipt") or "").strip()
             if not receipt:
                 continue
             meta = intake._read_meta(Path(project_root), receipt) or {}
+            if intake.linked_works(meta):
+                continue
             if meta.get("source_kind") != "user_instruction":
                 continue
             _request, problem, problem_class = request_from_receipt(
