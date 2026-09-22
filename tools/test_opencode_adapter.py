@@ -623,7 +623,12 @@ class OpenCodeAdapterIntegration(unittest.TestCase):
         record = self.by_id["fresh_staging_bootstrap"]
         self.assertEqual(record["outcome"], "allowed", record)
         self.assertIn("experimental.chat.system.transform", record["hooks"])
-        self.assertEqual(len(record["system"]), 1, record)
+        # T-1446: the binding is ALWAYS the first system entry. This fixture
+        # carries active DOING Work, so the per-request AUTO_RECALL directive
+        # follows it; nothing else may be injected.
+        self.assertEqual(len(record["system"]), 2, record)
+        self.assertTrue(record["system"][1].startswith("SAIPEN_AUTO_RECALL "), record)
+        self.assertIn('"decision": "AUTO_KICK"', record["system"][1])
         message = record["system"][0]
         payload = self._binding(message)
         # The staging/drag directory is the session location; the WORKTREE is

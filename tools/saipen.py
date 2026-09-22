@@ -5943,6 +5943,78 @@ def _acceptance(project_root: Path, args: list[str], as_json: bool) -> int:
     return 0
 
 
+def _autonomy_recall(project_root: Path, args: list[str], as_json: bool) -> int:
+    """saipen autonomy recall (T-1446): AUTO_RECALL + the turn-entry decision.
+
+    Read-only. The host passes what only the host knows -- host, session,
+    provider, model, the previous incarnation and the latest user message
+    identity -- as ONE JSON carrier (``--carrier-json`` or, for shells that
+    cannot carry it, ``--carrier-hex``). ``--directive`` adds the bounded text
+    a host puts in front of every model request.
+    """
+    from saipen_engine.cold_recovery import auto_recall, render_directive
+
+    carrier: dict = {}
+    directive = False
+    index = 0
+    while index < len(args):
+        token = args[index]
+        if token == "--json":
+            index += 1
+            continue
+        if token == "--directive":
+            directive = True
+            index += 1
+            continue
+        if token in ("--carrier-json", "--carrier-hex") and index + 1 < len(args):
+            raw = args[index + 1]
+            try:
+                text = bytes.fromhex(raw).decode("utf-8") if token == "--carrier-hex" else raw
+                parsed = json.loads(text)
+            except (ValueError, UnicodeDecodeError) as exc:
+                _emit(
+                    {
+                        "ok": False,
+                        "code": "VALIDATION_FAILED",
+                        "detail": f"{token} is not one JSON object: {exc}",
+                    },
+                    as_json,
+                )
+                return 2
+            if not isinstance(parsed, dict):
+                _emit(
+                    {
+                        "ok": False,
+                        "code": "VALIDATION_FAILED",
+                        "detail": f"{token} must be an object",
+                    },
+                    as_json,
+                )
+                return 2
+            carrier = parsed
+            index += 2
+            continue
+        _emit(
+            {
+                "ok": False,
+                "code": "VALIDATION_FAILED",
+                "detail": f"autonomy recall: unknown argument {token!r}",
+                "canonical_next_command": "saipen autonomy recall --json",
+            },
+            as_json,
+        )
+        return 2
+    recall = auto_recall(project_root, carrier)
+    payload = {"ok": True, "code": "AUTO_RECALL", **recall}
+    if directive:
+        payload["directive"] = render_directive(recall)
+    if as_json:
+        _emit(payload, as_json)
+    else:
+        print(render_directive(recall))
+    return 0
+
+
 def _brief(project_root: Path, as_json: bool) -> int:
     """saipen brief (T-1148): derived cold-handoff projection. Read-only."""
     from saipen_engine.context import brief_projection
@@ -9821,6 +9893,8 @@ def main(argv: list[str] | None = None) -> int:
         # reads before deciding anything. Writes nothing; `decide` is included
         # because the verdict and the observation that produced it must be one
         # answer, not two reads a caller could take at different moments.
+        if args[1:2] == ["recall"]:
+            return _autonomy_recall(project_root, args[2:], as_json)
         surplus = [a for a in args[1:] if a not in ("--json", "status")]
         if surplus:
             _emit(

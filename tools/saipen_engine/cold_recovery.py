@@ -384,6 +384,21 @@ def build_recovery_package(
     active_from_blocked = active is not None and any(
         entry is active for entry in blocked
     )
+    # The seat STATE names keeps its own phase. Answering `PHASE SCOUT` for a
+    # claimed DOING seat (measured live 2026-09-22: T-1446 in BUILD) told a
+    # cold successor to reset the phase it had to resume. STATE's next_action
+    # is kept when it is about the seat; otherwise the seat resumes at STATE's
+    # executing phase, and only a non-executing phase starts at SCOUT.
+    active_is_seat = active is not None and active["id"] == state_task
+    seat_next_action = None
+    if active_is_seat:
+        recorded = str(state.get("next_action", "")).strip()
+        named = re.findall(r"T-\d+", recorded)
+        seat_phase = str(state.get("phase", "")).strip().upper()
+        if recorded and (not named or active["id"] in named):
+            seat_next_action = recorded
+        elif seat_phase and seat_phase not in ("DONE", "IDLE", "INIT"):
+            seat_next_action = f"PHASE {seat_phase} {active['id']}"
     active_fields = active["fields"] if active else {}
 
     # DO_NOT_REPEAT: INCOMPLETE/NO_EVIDENCE checkpoint outcomes are the exact
@@ -443,7 +458,9 @@ def build_recovery_package(
         "UNRELATED_REDS": unrelated_reds,
         "DO_NOT_REPEAT": do_not_repeat,
         "NEXT_ACTION": (
-            str(state.get("next_action", ""))
+            seat_next_action
+            if seat_next_action and not active_from_blocked
+            else str(state.get("next_action", ""))
             if (active is None or active_from_blocked)
             else f"PHASE SCOUT {active['id']}"
         ),
@@ -459,3 +476,422 @@ def build_recovery_package(
             if not deps_ok[e["id"]]
         ],
     }
+
+
+# ---------------------------------------------------------------------------
+# T-1446 / SRC-105: execution epoch, agent incarnation, AUTO_RECALL, AUTO_KICK.
+#
+# The field failure this ends (SAIFREN, SRC-105 section 15): the operator typed
+# `cc`, SAIPEN continued, Work was claimed and SCOUT was running -- then the
+# host's model router replaced the model mid-work. The successor read the
+# historical `cc` in the conversation tail and asked the operator what it
+# meant. Nothing machine-computed stood between a cold model and free-form
+# interpretation of input that had already been consumed.
+#
+# Everything below is a READ-ONLY projection over STATE/BOARD/LOG. The host
+# carries what only the host can know (which model answers, which session,
+# whether the latest user message is new) in a ``carrier`` dict; SAIPEN
+# answers with the canonical execution and the one turn-entry decision.
+
+INGRESS_NONE = "NONE"
+INGRESS_HISTORICAL = "HISTORICAL"
+INGRESS_CONTINUATION = "CONTINUATION_COMMAND"
+INGRESS_NEW = "NEW_USER_INPUT"
+INGRESS_CLASSES = (INGRESS_NONE, INGRESS_HISTORICAL, INGRESS_CONTINUATION, INGRESS_NEW)
+
+TURN_AUTO_KICK = "AUTO_KICK"
+TURN_RUN_CONTINUE = "RUN_CONTINUE"
+TURN_RECOVER = "RECOVER"
+TURN_OPERATOR_WAIT = "OPERATOR_WAIT"
+TURN_USER_INPUT = "USER_INPUT"
+TURN_ORDINARY = "ORDINARY"
+TURN_DECISIONS = (
+    TURN_AUTO_KICK,
+    TURN_RUN_CONTINUE,
+    TURN_RECOVER,
+    TURN_OPERATOR_WAIT,
+    TURN_USER_INPUT,
+    TURN_ORDINARY,
+)
+#: Decisions that require the canonical continuation BEFORE any chat text.
+KICK_DECISIONS = frozenset({TURN_AUTO_KICK, TURN_RUN_CONTINUE, TURN_RECOVER})
+
+#: What a kicked turn must never do (SRC-105 section 19). Stated once so the
+#: directive and the regression read the same list.
+FORBIDDEN_WHEN_KICKED = (
+    "ASK_USER_MEANING",
+    "REQUEST_CLARIFICATION",
+    "IDLE_CHAT",
+    "REINTERPRET_CONSUMED_INGRESS",
+)
+
+RESUME_COMMAND = "saipen continue --json"
+
+#: Phases in which an active seat is not executable Work.
+_NON_EXECUTING_PHASES = frozenset({"", "DONE", "IDLE", "INIT", "CORRUPT"})
+
+#: Whole-message spellings of the continuation command besides the registry
+#: shortcuts (`cc`, `ccc` and their Cyrillic twins resolve mechanically).
+_CONTINUE_SPELLINGS = frozenset(
+    {"saipen", "saipen continue", "saipen continue --json", "saipen cc"}
+)
+
+
+def _digest16(prefix: str, *parts: str) -> str:
+    material = "\0".join(str(part or "").strip() for part in parts)
+    return prefix + hashlib.sha256(material.encode("utf-8")).hexdigest()[:16]
+
+
+def execution_epoch(work: str | None, owner: str | None, claim_event: str | None) -> str | None:
+    """Logical execution continuity, derived from the canonical claim EVENT.
+
+    An epoch begins at the LOG event that claimed the Work. A model, provider
+    or session change writes no claim event, so it cannot change the epoch.
+    BOARD `claim_time` is deliberately NOT the anchor: every checkpoint
+    refreshes it as a liveness lease (measured 2026-09-22, E-8173), so an
+    epoch keyed on it changed at each checkpoint. When the claim event has
+    been sealed out of the live LOG the epoch is anchored on (work, owner)
+    alone -- still stable, never a heartbeat.
+    """
+    if not (work and owner):
+        return None
+    return _digest16("ep-", work, owner, claim_event or "unanchored")
+
+
+def _claim_event(root, work: str, owner: str) -> str | None:
+    """The newest `claimed via SAIOPS` LOG event for this Work and owner."""
+    from pathlib import Path
+
+    if not (work and owner):
+        return None
+    pattern = re.compile(
+        r"\[(E-\d+)\].*\[" + re.escape(work) + r"\].*\[op: claim-[0-9a-f]+\] "
+        r"DEC: claimed via SAIOPS -- owner " + re.escape(owner) + r"\s*$"
+    )
+    base = Path(root) / ".saipen"
+    segments = [base / "LOG.md", *sorted((base / "logs").glob("LOG-*.md"), reverse=True)[:1]]
+    for segment in segments:
+        try:
+            lines = segment.read_text(encoding="utf-8", errors="replace").splitlines()
+        except OSError:
+            continue
+        for line in reversed(lines):
+            match = pattern.search(line)
+            if match:
+                return match.group(1)
+    return None
+
+
+def agent_incarnation(carrier: dict | None) -> str | None:
+    """The current physical actor: host, session, provider and model.
+
+    Disposable by design. Two incarnations of one epoch are the same execution
+    served by different minds; the identity exists so a replacement is
+    visible, never so it can be refused.
+    """
+    carrier = carrier or {}
+    parts = [
+        str(carrier.get(key) or "").strip()
+        for key in ("host", "host_session", "provider", "model")
+    ]
+    if not any(parts):
+        return None
+    return _digest16("inc-", *parts)
+
+
+def is_continuation_command(text: str | None) -> bool:
+    """True when the whole message IS the continuation command."""
+    compact = " ".join(str(text or "").split())
+    if not compact:
+        return False
+    if compact.lower() in _CONTINUE_SPELLINGS:
+        return True
+    if " " in compact:
+        return False
+    from .commands import resolve_shortcut
+
+    try:
+        key = resolve_shortcut(compact)
+    except (OSError, ValueError):
+        return False
+    return key in ("cc", "ccc")
+
+
+def classify_ingress(ingress: dict | None) -> dict:
+    """Classify the latest user message by host identity, never by prose.
+
+    The host names the message (``id``) and says whether a previous turn entry
+    already admitted it (``consumed``). A historical message is evidence of an
+    execution that already started, whatever it says. Only an unconsumed
+    message is user authority -- and a message SAIPEN cannot read is treated
+    as NEW, because suppressing real input is worse than one extra read.
+    """
+    if not isinstance(ingress, dict):
+        return {"class": INGRESS_NONE, "id": None, "digest": None, "continuation": False}
+    text = ingress.get("text")
+    message_id = str(ingress.get("id") or "").strip() or None
+    digest = None
+    if isinstance(text, str) and text.strip():
+        normalized = text.replace("\r\n", "\n").replace("\r", "\n").strip()
+        digest = hashlib.sha256(normalized.encode("utf-8")).hexdigest()
+    if message_id is None and digest is None:
+        return {"class": INGRESS_NONE, "id": None, "digest": None, "continuation": False}
+    continuation = is_continuation_command(text)
+    if ingress.get("consumed") is True:
+        klass = INGRESS_HISTORICAL
+    elif continuation:
+        klass = INGRESS_CONTINUATION
+    else:
+        klass = INGRESS_NEW
+    return {"class": klass, "id": message_id, "digest": digest, "continuation": continuation}
+
+
+def turn_entry(recall: dict, ingress_class: str, *, continuation: bool = False) -> dict:
+    """The ONE turn-entry decision (SRC-105 section 17 ordering).
+
+    bind -> inspect canonical execution -> classify ingress -> detect
+    replacement -> recover -> continue; ordinary interpretation comes last.
+    """
+    if not recall.get("readable", False) or recall.get("recovery_pending"):
+        decision = TURN_RECOVER
+        reason = "canonical state needs recovery before any other turn handling"
+    elif ingress_class == INGRESS_NEW:
+        decision = TURN_USER_INPUT
+        reason = "a genuinely new user message is user authority; handle it first"
+    elif recall.get("wait"):
+        decision = TURN_OPERATOR_WAIT
+        reason = "the canonical next action is an operator WAIT"
+    elif recall.get("continuation_required"):
+        decision = TURN_AUTO_KICK
+        reason = (
+            "active executable Work exists and no new user input, WAIT or "
+            "safety stop outranks it"
+        )
+    elif continuation or ingress_class == INGRESS_CONTINUATION:
+        # Old or new, `cc` asked for the canonical continuation, and that
+        # command is idempotent: re-running it after a replacement is the
+        # original request, never a new interpretation of it.
+        decision = TURN_RUN_CONTINUE
+        reason = "the latest user message is the continuation command itself"
+    else:
+        decision = TURN_ORDINARY
+        reason = "no active executable Work; ordinary handling applies"
+    kick = decision in KICK_DECISIONS
+    return {
+        "decision": decision,
+        "reason": reason,
+        "kick": kick,
+        "command": RESUME_COMMAND if kick else None,
+        "forbidden": list(FORBIDDEN_WHEN_KICKED) if kick else [],
+    }
+
+
+def _log_tail_text(root, max_bytes: int = 64 * 1024) -> str:
+    from pathlib import Path
+
+    path = Path(root) / ".saipen" / "LOG.md"
+    try:
+        with path.open("rb") as handle:
+            handle.seek(0, 2)
+            size = handle.tell()
+            handle.seek(max(0, size - max_bytes))
+            raw = handle.read()
+    except OSError:
+        return ""
+    text = raw.decode("utf-8", errors="replace")
+    if size > max_bytes and "\n" in text:
+        text = text.split("\n", 1)[1]
+    return text
+
+
+def auto_recall(root, carrier: dict | None = None) -> dict:
+    """AUTO_RECALL: the canonical execution a successor must adopt, read-only.
+
+    Projection only. It never claims, never writes, and never depends on the
+    predecessor's hidden reasoning: every field is recomputed from
+    STATE/BOARD/LOG plus the host carrier on each call.
+    """
+    from pathlib import Path
+
+    from . import watchdog as _watchdog
+    from .board import claim_session_digest, claim_status, parse_board
+    from .paths import project_lineage_identity
+    from .state import parse_state_or_error
+
+    root = Path(root)
+    carrier = dict(carrier or {})
+    ingress = classify_ingress(carrier.get("ingress"))
+    base = {
+        "schema_version": 1,
+        "carrier": "auto-recall",
+        "authority": "STATE/BOARD/LOG remain canonical; this recall is regenerable DATA",
+        "project_root": str(root),
+        "ingress": ingress,
+        "ingress_already_consumed": ingress["class"] == INGRESS_HISTORICAL,
+        "agent_incarnation": agent_incarnation(carrier),
+        "exact_resume_command": RESUME_COMMAND,
+    }
+    try:
+        state_text = (root / ".saipen" / "STATE.md").read_text(encoding="utf-8-sig")
+        board_text = (root / ".saipen" / "BOARD.md").read_text(encoding="utf-8-sig")
+    except OSError as exc:
+        recall = {**base, "readable": False, "problem": f"{type(exc).__name__}: {exc}"}
+        recall["turn"] = turn_entry(recall, ingress["class"], continuation=ingress["continuation"])
+        return recall
+    state, error = parse_state_or_error(state_text)
+    board = parse_board(board_text)
+    if state is None or board.get("errors"):
+        problem = error or "; ".join(board.get("errors", [])[:3])
+        recall = {**base, "readable": False, "problem": str(problem)}
+        recall["turn"] = turn_entry(recall, ingress["class"], continuation=ingress["continuation"])
+        return recall
+
+    task = str(state.get("task") or "").strip()
+    task = "" if task.lower() == "none" else task
+    ticket = board.get("tickets", {}).get(task) if task else None
+    fields = (ticket or {}).get("fields", {})
+    owner = str(fields.get("owner") or "").strip()
+    claim_event = _claim_event(root, task, owner) if ticket else None
+    claim_session = str(fields.get("claim_session") or "").strip()
+    lineage = project_lineage_identity(root)
+    session_digest = claim_session_digest(lineage, carrier.get("host_session"))
+    liveness = claim_status(ticket, agent=state.get("agent")) if ticket else ""
+    watch = _watchdog.observe(root).as_dict()
+    package = build_recovery_package(
+        state_text,
+        board_text,
+        _log_tail_text(root),
+        runtime_state={
+            "canonical_root": str(root),
+            "project_lineage": lineage,
+            "watchdog": watch,
+            "claim_liveness": liveness,
+        },
+    )
+    try:
+        from .journal import scan_pending
+
+        pending, conflicts = scan_pending(root)
+        recovery_pending = bool(pending or conflicts)
+    except (OSError, ValueError):
+        recovery_pending = True
+
+    phase = str(state.get("phase") or "").strip().upper()
+    next_action = str(state.get("next_action") or "").strip()
+    blocker = str(state.get("blocker") or "").strip()
+    wait = next_action.upper().startswith("WAIT")
+    section = (ticket or {}).get("section", "")
+    continuation_required = bool(
+        task
+        and ticket is not None
+        and section == "## DOING"
+        and phase not in _NON_EXECUTING_PHASES
+        and not wait
+        and not blocker
+    )
+    previous = str(carrier.get("previous_incarnation") or "").strip() or None
+    incarnation = base["agent_incarnation"]
+    session_changed = bool(claim_session and session_digest and session_digest != claim_session)
+    model_changed = bool(previous and incarnation and previous != incarnation)
+    cold = carrier.get("cold") is True
+    source_receipts = [
+        item.strip() for item in str(fields.get("source_receipts") or "").split(",") if item.strip()
+    ]
+    recall = {
+        **base,
+        "readable": True,
+        "saipen_home": str(state.get("saipen_home") or ""),
+        "project_lineage": lineage,
+        "execution_epoch": execution_epoch(task, owner, claim_event),
+        "claim_event": claim_event,
+        "active_work": task or None,
+        "source_receipts": source_receipts,
+        "phase": phase,
+        "last_event": package.get("LAST_EVENT"),
+        "last_durable_checkpoint": package.get("LAST_CHECKPOINT"),
+        "last_verified_slice": package.get("LAST_VERIFIED_SLICE"),
+        "claim_owner": owner or None,
+        "claim_liveness": liveness or None,
+        "mutation_lease_generation": watch.get("lease_generation"),
+        "mutation_lease_state": watch.get("state"),
+        "blocker": blocker or None,
+        "blocker_scope": package.get("BLOCKER_SCOPE") or None,
+        "operator_action_due": list(package.get("DUE") or []),
+        "execution_intent": str(state.get("execution_intent") or "") or None,
+        "canonical_next_action": next_action or None,
+        "wait": wait,
+        "recovery_pending": recovery_pending,
+        "continuation_required": continuation_required,
+        "replacement_detected": bool(session_changed or model_changed or cold),
+        "replacement_evidence": {
+            "session_changed": session_changed,
+            "model_changed": model_changed,
+            "cold_successor": cold,
+        },
+        "do_not_repeat": list(package.get("DO_NOT_REPEAT") or []),
+    }
+    recall["turn"] = turn_entry(recall, ingress["class"], continuation=ingress["continuation"])
+    return recall
+
+
+def render_directive(recall: dict) -> str:
+    """The bounded text a host puts in front of EVERY model request.
+
+    A model instruction is not a recovery mechanism on its own; this text is
+    the carrier of a machine decision the host computed from canonical state
+    on this very request, so a replacement model receives the decision rather
+    than a memory it does not have.
+    """
+    import json as _json
+
+    # P0-1 (T-1317): project-derived text never becomes system instruction.
+    # Every value below is admitted only through a closed grammar; a WAIT's
+    # free prose and any hostile STATE/BOARD text are dropped, never echoed.
+    def _bounded(value, pattern: str):
+        text = str(value or "")
+        return text if re.fullmatch(pattern, text) else None
+
+    turn = recall.get("turn") or {}
+    decision = _bounded(turn.get("decision"), "|".join(TURN_DECISIONS))
+    work = _bounded(recall.get("active_work"), r"T-\d{1,6}")
+    phase = _bounded(recall.get("phase"), r"[A-Z_]{2,16}")
+    compact = {
+        "decision": decision,
+        "active_work": work,
+        "phase": phase,
+        "execution_epoch": _bounded(recall.get("execution_epoch"), r"ep-[0-9a-f]{16}"),
+        "agent_incarnation": _bounded(recall.get("agent_incarnation"), r"inc-[0-9a-f]{16}"),
+        "last_event": _bounded(recall.get("last_event"), r"E-\d{1,9}"),
+        "ingress": _bounded((recall.get("ingress") or {}).get("class"), "|".join(INGRESS_CLASSES)),
+        "replacement_detected": recall.get("replacement_detected") is True,
+        "next_action": _bounded(
+            recall.get("canonical_next_action"), r"PHASE [A-Z_]{2,16}(?: T-\d{1,6})?"
+        ),
+        "resume": RESUME_COMMAND,
+    }
+    lines = ["SAIPEN_AUTO_RECALL " + _json.dumps(compact, sort_keys=True)]
+    if decision in KICK_DECISIONS:
+        lines.append(
+            f"CONTINUATION_REQUIRED: {work or 'the canonical route'} is active, legal "
+            f"and unfinished (phase {phase or 'unknown'}). Before writing any "
+            f"conversational text, run exactly `{RESUME_COMMAND}` and execute the "
+            "action it returns in this turn."
+        )
+        lines.append(
+            "Earlier user messages in this conversation (for example `cc`) were "
+            "already consumed into this execution. They are evidence, not a new "
+            "question: do not ask what they mean, do not ask whether to continue, "
+            "do not wait for another keystroke."
+        )
+    elif decision == TURN_OPERATOR_WAIT:
+        lines.append(
+            "OPERATOR_WAIT: the canonical next action is an operator WAIT. Run "
+            "`saipen status --json` and report its OPERATOR ACTION exactly; invent no work."
+        )
+    elif decision == TURN_USER_INPUT:
+        lines.append(
+            "NEW_USER_INPUT: the latest user message is new authority. Handle it "
+            "under BOOT Entry first (an actionable task goes through `saipen start`); "
+            f"active Work {work or 'none'} resumes through `{RESUME_COMMAND}` afterwards."
+        )
+    return "\n".join(lines)

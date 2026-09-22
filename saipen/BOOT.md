@@ -125,6 +125,8 @@ Never reword the user's task to get past a refusal.
    - With no new instruction, ask the deterministic router for the current
      action. If the engine is unavailable, apply the registry/CORE Pick and
      routing invariants (`PICK-01`). A persisted `WAIT:` is returned verbatim.
+   - `SAIPEN_AUTO_RECALL` kick decision: run `saipen continue --json` before
+     any chat; consumed earlier input (old `cc`) is evidence, never a question.
 
 7. **Load one owner, not the library.** Use `INDEX.md` to select the exact rule
    owner. For a command, load `COMMANDS.md`; for mechanics/recovery, `OPS.md`;

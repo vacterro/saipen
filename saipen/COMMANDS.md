@@ -50,6 +50,7 @@ global authority and deterministic priority rules.
 | `saipen ticket reasoning <T-###> --recurrence <text> --weak-model <text>` | BUILD: canonical writer for the strict-sweep reasoning gates; refuses unless a strict CONFIRMED PROTOCOL_VIOLATION disposition names the ticket | CMD-ROUTING-01 |
 | `saipen status` | read-only | CMD-ROUTING-01 |
 | `saipen autonomy` | read-only: the supervisor's ONE verdict (RUN_WORK, ADOPT_WORKER, REPLACE_WORKER, AWAIT_WORKER, OPERATOR_ACTION_DUE, NO_PROGRESS_LOOP, AMBIGUOUS_AUTHORITY, IDLE) plus the observation that produced it -- lease generation and heartbeat age, executable Work, due/deferred operator gates, no-progress verdict. Writes nothing; ambiguous lease authority fails closed for mutation | CMD-ROUTING-01 |
+| `saipen autonomy recall` | read-only AUTO_RECALL + turn-entry decision for a replaced/cold agent (RUNTIME.md) | CMD-ROUTING-01 |
 | `saipen context orient [--handoff JSON]` | bounded current-truth orientation | CONTEXT-BUDGET-01 |
 | `saipen brief` | generated handoff with identity/lineage/event provenance | CONTEXT-BUDGET-01 |
 | `saipen acceptance <T-###>` | read-only | CMD-ROUTING-01 |

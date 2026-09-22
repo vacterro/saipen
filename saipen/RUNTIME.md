@@ -64,6 +64,46 @@ contract (`ACTIVATION_PRESENT`). The argument is the project root (the thing
 carrying `.saipen/`), never the install home: a flattened/installed runtime
 home has no `.saipen/` of its own and must still answer green.
 
+## Turn entry — AUTO_RECALL / AUTO_KICK (T-1446)
+
+The agent is disposable; the execution is not. A host may replace the model,
+provider or session in the middle of Work (a routed model pool does this
+between two requests). The successor has no private memory, but it still sees
+the old conversation, including the `cc` that started the mission.
+
+    saipen autonomy recall [--carrier-json JSON | --carrier-hex HEX] [--directive] [--json]
+
+is a read-only projection over STATE/BOARD/LOG plus a host carrier
+(`host`, `host_session`, `provider`, `model`, `previous_incarnation`, `cold`,
+`ingress: {id, text, consumed}`). It answers:
+
+- `execution_epoch` -- anchored on the LOG event that claimed the Work, never
+  on `claim_time` (checkpoints refresh that lease). A model or session change
+  writes no claim event, so it cannot move the epoch;
+- `agent_incarnation` -- the physical actor; `replacement_detected` reports a
+  session change against `claim_session`, a model change against the previous
+  incarnation, or a cold successor;
+- the active Work, phase, last event and checkpoint, claim, lease, blocker,
+  due gates, canonical next action and `exact_resume_command`;
+- ONE turn-entry decision, in this order: `RECOVER` (unreadable state or
+  pending recovery) > `USER_INPUT` (a genuinely new, unconsumed message) >
+  `OPERATOR_WAIT` > `AUTO_KICK` (active executable DOING Work) >
+  `RUN_CONTINUE` (the message is `cc`, old or new) > `ORDINARY`.
+
+A kick decision means: run `saipen continue --json` before any conversational
+text. A message becomes HISTORICAL only when the host saw an admitted canonical
+`saipen` command after it; message identity comes from the host, never from
+prose similarity, and unreadable input stays NEW. The directive a host injects
+carries only closed-grammar fields, so project text never becomes system
+instruction (P0-1).
+
+Host seams. OpenCode: `saipen-guard.js` runs the recall in
+`experimental.chat.system.transform`, which fires before EVERY model request,
+takes message identity from `chat.message`, and marks consumption in
+`tool.execute.before`. Hosts without a per-request hook get the rule only as
+instruction text, which is not a recovery mechanism; that gap is an external
+host boundary, not a solved case.
+
 ## Wave 1 — identity and capabilities
 
 `agent != model`. `--agent <id>` selects the acting SAIPEN seat and participates

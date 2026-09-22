@@ -572,6 +572,124 @@ function startupProbe(
   }
 }
 
+// ---------------------------------------------------------------------------
+// T-1446 AUTO_RECALL / AUTO_KICK carrier. The plugin knows what only the host
+// knows (session, provider, model, which user message is new); the canonical
+// runtime answers with the execution a successor must adopt.
+
+const RECALL_TIMEOUT_MS = 10000;
+const MAX_RECALL_DIRECTIVE_BYTES = 4096;
+const MAX_INGRESS_TEXT_CHARS = 2048;
+const RECALL_UNAVAILABLE =
+  "SAIPEN_AUTO_RECALL_UNAVAILABLE: the canonical recall could not be computed for this " +
+  "request. Run `saipen continue --json` before interpreting any earlier user message.";
+// A canonical SAIPEN invocation in a host shell: the launcher, its .cmd twin
+// or the runtime script, followed by a verb.
+const SAIPEN_COMMAND_RE = /(?:^|[\s;&|("'])saipen(?:\.cmd|\.py)?["']?\s+[a-z]/i;
+
+const recallSessions = new Map();
+
+function sessionMemory(sessionID) {
+  const key = sessionID ? String(sessionID) : "";
+  let memory = recallSessions.get(key);
+  if (!memory) {
+    memory = { seen: false, lastIncarnation: null, pending: null, last: null };
+    recallSessions.set(key, memory);
+  }
+  return memory;
+}
+
+function consumeIngress(memory) {
+  if (memory && memory.pending) {
+    memory.last = memory.pending;
+    memory.pending = null;
+  }
+}
+
+function userMessageText(output) {
+  const parts = output && Array.isArray(output.parts) ? output.parts : [];
+  const text = parts
+    .filter((part) => part && part.type === "text" && !part.synthetic &&
+      typeof part.text === "string")
+    .map((part) => part.text)
+    .join("\n")
+    .trim();
+  return text.slice(0, MAX_INGRESS_TEXT_CHARS);
+}
+
+function recallCarrier(input, memory) {
+  const model = (input && input.model) || {};
+  const provider =
+    model.providerID || (model.provider && model.provider.id) || model.provider || "";
+  const ingress = memory.pending
+    ? { id: memory.pending.id, text: memory.pending.text, consumed: false }
+    : memory.last
+      ? { id: memory.last.id, text: memory.last.text, consumed: true }
+      : null;
+  return {
+    host: "opencode",
+    // Diagnostic incarnation identity only; never an actor (see SAIPEN_AGENT).
+    "host_session": (input && input.sessionID) ? String(input.sessionID) : "",
+    provider: typeof provider === "string" ? provider : "",
+    model: String(model.id || model.modelID || ""),
+    previous_incarnation: memory.lastIncarnation || "",
+    cold: !memory.seen,
+    ingress,
+  };
+}
+
+// One recall costs a Python start (~185 ms measured) and runs synchronously
+// before a model request, so an unchanged answer is reused: same carrier, same
+// canonical file identities, younger than the TTL. Any canonical write changes
+// STATE/BOARD/LOG identity and forces a fresh recall.
+const RECALL_CACHE_TTL_MS = 30000;
+let recallCache = null;
+
+function canonicalIdentity(projectRoot) {
+  return ["STATE.md", "BOARD.md", "LOG.md"].map((name) => {
+    try {
+      const stat = fs.statSync(path.join(projectRoot, ".saipen", name));
+      return `${name}:${stat.size}:${stat.mtimeMs}`;
+    } catch (_error) {
+      return `${name}:missing`;
+    }
+  }).join("|");
+}
+
+function runRecall(pythonBin, saipenPy, projectRoot, carrier) {
+  if (!pythonBin || !saipenPy || !projectRoot) return null;
+  const key = `${projectRoot}\n${JSON.stringify(carrier)}\n${canonicalIdentity(projectRoot)}`;
+  if (recallCache && recallCache.key === key &&
+      Date.now() - recallCache.at < RECALL_CACHE_TTL_MS) {
+    return recallCache.payload;
+  }
+  const payload = computeRecall(pythonBin, saipenPy, projectRoot, carrier);
+  recallCache = payload ? { key, at: Date.now(), payload } : null;
+  return payload;
+}
+
+function computeRecall(pythonBin, saipenPy, projectRoot, carrier) {
+  try {
+    const hex = Buffer.from(JSON.stringify(carrier), "utf8").toString("hex");
+    const proc = spawnSync(
+      pythonBin,
+      [saipenPy, "autonomy", "recall", "--json", "--directive", "--carrier-hex", hex],
+      {
+        encoding: "utf8", timeout: RECALL_TIMEOUT_MS, windowsHide: true,
+        maxBuffer: MAX_EVENT_BYTES, cwd: projectRoot,
+      },
+    );
+    const payload = JSON.parse(proc.stdout || "");
+    if (!payload || payload.ok !== true || typeof payload.directive !== "string") return null;
+    if (Buffer.byteLength(payload.directive, "utf8") > MAX_RECALL_DIRECTIVE_BYTES) return null;
+    return payload;
+  } catch (_error) {
+    // A recall that cannot be computed is reported to the model as exactly
+    // that; it never changes a tool verdict and never invents a decision.
+    return null;
+  }
+}
+
 const SaipenGuard = async (context) => {
   const skill = skillRoot();
   const saipenPy = path.join(skill, "tools", "saipen.py");
@@ -604,8 +722,45 @@ const SaipenGuard = async (context) => {
   let attemptedCondition = null;
 
   return {
-    "experimental.chat.system.transform": async (_input, output) => {
-      if (output && Array.isArray(output.system)) output.system.push(systemMessage);
+    "experimental.chat.system.transform": async (input, output) => {
+      if (!output || !Array.isArray(output.system)) return;
+      output.system.push(systemMessage);
+      // T-1446 AUTO_RECALL / AUTO_KICK. This hook runs before EVERY model
+      // request -- including the first request a replacement model serves
+      // after a router swaps providers mid-work (SAIFREN, SRC-105). The
+      // canonical execution is recomputed here from project state on each
+      // request, so the successor receives the decision instead of needing a
+      // memory it does not have.
+      if (bootstrapBinding.code !== "ADMITTED" || !bootstrapBinding.project_root) return;
+      const sessionID = input && input.sessionID;
+      const memory = sessionMemory(sessionID);
+      const recall = runRecall(
+        pythonBin, saipenPy, bootstrapBinding.project_root,
+        recallCarrier(input, memory),
+      );
+      memory.seen = true;
+      if (!recall) {
+        output.system.push(RECALL_UNAVAILABLE);
+        return;
+      }
+      if (typeof recall.agent_incarnation === "string") {
+        memory.lastIncarnation = recall.agent_incarnation;
+      }
+      const decision = recall.turn && recall.turn.decision;
+      if (decision && decision !== "ORDINARY") output.system.push(recall.directive);
+    },
+    "chat.message": async (input, output) => {
+      // A NEW user message is user authority until an admitted canonical
+      // SAIPEN command consumes it. Identity is the host's message id, never
+      // prose similarity.
+      const text = userMessageText(output);
+      const id =
+        (input && input.messageID) ||
+        (output && output.message && output.message.id) ||
+        null;
+      if (!text && !id) return;
+      const memory = sessionMemory(input && input.sessionID);
+      memory.pending = { id: id ? String(id) : null, text: text || "" };
     },
     "tool.execute.before": async (input, output) => {
       // Safe diagnostics must remain reachable after an installer replaces
@@ -770,6 +925,11 @@ const SaipenGuard = async (context) => {
       if (verdict.block) {
         throw guardRefusal(verdict, guardPayload, toolName, args);
       }
+      // T-1446 AUTO_KICK: an admitted canonical SAIPEN command is the moment
+      // the latest user message entered execution. From here on that message
+      // is HISTORICAL ingress: evidence of a started execution, never a new
+      // question for a replacement model to reinterpret.
+      if (SAIPEN_COMMAND_RE.test(command)) consumeIngress(sessionMemory(hostSession));
     },
   };
 };
