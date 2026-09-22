@@ -58,6 +58,81 @@ def _refuse(code: str, detail: str, **fields) -> dict:
     return {"ok": False, "code": code, "detail": detail, **fields}
 
 
+def _normalized_request(text: str) -> str:
+    return " ".join(str(text or "").split()).strip().lower()
+
+
+def existing_work_for_request(root: Path, tickets: dict, text: str) -> str | None:
+    """The BOARD Work that already carries this exact request, or None.
+
+    Measured in the T-1446 field soak (2026-09-22): one minute after a cold
+    successor finished T-2, it ran `saipen start` with T-2's exact text and
+    minted SRC-001 + T-4 over DONE Work. START deduplicated identical receipt
+    BODIES only, never an existing Work for the same request.
+
+    Two classes stay distinct. An operator repeating an operator request after
+    it is DONE is a NEW action (T-1363 RequestIdentityTests: a new receipt that
+    supersedes the old one) -- so DONE Work matched through its own request
+    receipt is not a duplicate. Echoing a Work item's DESCRIPTION back as a
+    request, with no operator request of that text behind the Work, is the
+    field defect: that is the same Work, open or DONE.
+    """
+    import re as _re
+
+    wanted = _normalized_request(text)
+    if not wanted:
+        return None
+    for work, ticket in tickets.items():
+        receipts = [
+            item.strip()
+            for item in str((ticket.get("fields") or {}).get("source_receipts") or "").split(",")
+            if item.strip()
+        ]
+        via_receipt = False
+        for receipt_id in receipts:
+            request, problem, _cls = request_from_receipt(root, receipt_id)
+            if problem is None and _normalized_request(request.get("text") or "") == wanted:
+                via_receipt = True
+                break
+        done = ticket.get("section") == "## DONE"
+        if via_receipt:
+            if done:
+                continue  # operator repeat after DONE: a new action (T-1363)
+            return work
+        description = _re.sub(r"^\[P\d\]\s*", "", str(ticket.get("description") or "").strip())
+        if _normalized_request(description) == wanted:
+            return work
+    return None
+
+
+def _bind_duplicate_ingress(root: Path, receipt_id: str, work: str, ticket: dict) -> dict:
+    """Bind a repeated request to the Work that already owns it (T-1446).
+
+    Open Work gains the receipt as membership. DONE Work gains it as CONSUMED
+    ingress: the request clause is VERIFIED by that Work's own closure, so the
+    receipt never re-queues and never leaves DONE Work with an unresolved
+    source.
+    """
+    if ticket.get("section") == "## DONE":
+        clause = intake.ensure_request_clause(root, receipt_id)
+        if not clause.get("ok"):
+            return clause
+        ledger = intake._read_coverage(root, receipt_id) or {}
+        for rid in sorted((ledger.get("requirements") or {}).keys()):
+            marked = intake.set_disposition(
+                root,
+                receipt_id,
+                rid,
+                "VERIFIED",
+                work=work,
+                evidence=f"duplicate ingress of DONE {work}: identical request text",
+                verification=f"{work} closed through its own VERIFY/REVIEW/SHIP chain",
+            )
+            if not marked.get("ok"):
+                return marked
+    return intake.link_work_to(root, receipt_id, work)
+
+
 def _snapshot(root: Path) -> tuple[dict | None, dict | None, str | None]:
     """STATE + parsed BOARD, or the reason they cannot be read."""
     try:
@@ -515,6 +590,18 @@ def start_work(
     # 3. Project the receipt as Work (idempotent on the receipt's bytes).
     tickets = (board or {}).get("tickets") or {}
     ticket = linked_work if linked_work in tickets else None
+    if ticket is None and captured_receipt:
+        existing = existing_work_for_request(root, tickets, text)
+        if existing is not None:
+            bound = _bind_duplicate_ingress(root, captured_receipt, existing, tickets[existing])
+            if not bound.get("ok"):
+                return wait_on_decision(
+                    f"the request repeats {existing} but could not be bound to it: "
+                    f"{bound.get('code')} {bound.get('detail') or ''}".strip(),
+                    existing,
+                    bound,
+                )
+            ticket = existing
     if ticket is None:
         projected = user_request(
             root,

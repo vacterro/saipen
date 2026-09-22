@@ -634,6 +634,11 @@ def supervise(
                 "output_tail": outcome["output"][-int(keep_output_tail):]
                 if keep_output_tail
                 else None,
+                "failure_text_tail": failure_text(
+                    outcome["output"], outcome.get("errors", "")
+                )[-int(keep_output_tail):]
+                if keep_output_tail
+                else None,
             }
         )
         if failure is None:
