@@ -101,7 +101,11 @@
         "archive": "EXECUTION",
         "purge": "EXECUTION",
         "retire": "EXECUTION",
-        "quarantine": "EXECUTION"
+        "quarantine": "EXECUTION",
+        "link": "EXECUTION",
+        "append": "INGRESS",
+        "apply-append": "EXECUTION",
+        "appends": "DIAGNOSTIC"
       }
     },
     "authority": {

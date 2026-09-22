@@ -132,6 +132,11 @@
         "test": "tools/test_evidence_hygiene.py",
         "subject": "bounded durable proof, run-owned ephemeral cleanup, conservative historical classification and retention manifests"
       },
+      "SOURCE-APPEND-01": {
+        "owner": "saipen/SOURCES.md",
+        "test": "tools/test_t1461_source_append.py",
+        "subject": "operational handoff appends are durable mission state: verbatim amending receipt, ordered ledger, deterministic clause derivation, supersession without deletion, minimum truthful rewind, unprojected append routed before continuation"
+      },
       "SOURCE-DISTRIBUTION-01": {
         "owner": "saipen/SOURCES.md",
         "test": "tools/test_source_receipts.py",
@@ -164,7 +169,8 @@
     "SOURCE-AUDIT-INBOX-01": "saipen/SOURCES.md",
     "SOURCE-AUDIT-ENQUEUE-01": "saipen/SOURCES.md",
     "EVIDENCE-RETENTION-01": "saipen/CORE.md",
-    "SOURCE-DISTRIBUTION-01": "saipen/SOURCES.md"
+    "SOURCE-DISTRIBUTION-01": "saipen/SOURCES.md",
+    "SOURCE-APPEND-01": "saipen/SOURCES.md"
   },
   "evidence_retention": {
     "max_artifact_bytes": 26214400,
@@ -1029,7 +1035,14 @@
     "RUNTIME_NAMESPACE_TRACKED",
     "AMBIGUOUS_AUTHORITY",
     "LIVE_LEASE_PRESENT",
-    "FENCED_LEASE_GENERATION"
+    "FENCED_LEASE_GENERATION",
+    "APPEND_CLASS_INVALID",
+    "APPEND_CONFLICT_UNNAMED",
+    "APPEND_DELTA_INVALID",
+    "APPEND_NEW_MISSION",
+    "APPEND_NOT_FOUND",
+    "APPEND_SUPERSEDES_UNKNOWN",
+    "APPEND_TARGET_UNKNOWN"
   ],
   "continue_fallback": {
     "invariant": "continue may fall through to improve ONLY after recovery, blocked/retryable, queued and required-follow-up routing are exhausted; it resumes an existing active Improve cycle and never creates an unbounded improve carousel",

@@ -207,6 +207,51 @@ the request's own exactly when its text equals the request body's own
 `## Request` section, so the distinction is read from bytes rather than
 declared.
 
+### An operational append is mission state, not prose
+
+<!-- RULE-OWNER: SOURCE-APPEND-01 -->
+
+The defect class this ends: the operator hands a RUNNING mission one more
+operational file -- a replacement handoff after `/new`, ten small bricks over an
+afternoon, or one line saying a recoverable binding failure must fall back to
+direct launch -- and the agent answers with a summary of it. The requirement
+reaches no receipt, no coverage and no routing, so it exists only in a chat
+transcript the next incarnation will not see, and the operator has to restate it
+by hand. Transport was never the variable: pasted text, an attached `.md`, a
+2,000-line mega handoff and a one-invariant brick are the same input form.
+
+An append is an immutable receipt captured VERBATIM with `amends: <SRC-###>`.
+The controlling source's bytes are never edited, and exact-digest dedupe makes
+the same file supplied twice ONE append. A per-source ordered ledger at
+`.saipen/intake/appends/SRC-###.json` carries each append's class, delta,
+supersession and processing state, so RECEIVED-but-unprojected is a machine
+fact: `saipen continue` routes `saipen source apply-append SRC-###` ahead of any
+phase continuation, and the mission cannot proceed as if the append had not
+arrived.
+
+Projection derives traceable clauses deterministically from the normative units
+of the body (`MUST` / `MUST NOT` / `never` / `do not`, and list or fenced units
+under an acceptance or test heading), binds them to the controlling mission's
+Work, and marks what the append supersedes SUPERSEDED -- never deleted, and
+terminal evidence survives. Identical texts collapse, so ten bricks and the one
+consolidated handoff assembled from them derive the SAME clause set: project
+behaviour does not depend on how the operator grouped the instructions. Every
+step is individually idempotent, so a crash mid-projection is completed by the
+next call, never duplicated, and repeated content never mints a second Work.
+
+Rewind is the minimum truthful one. Only an `implementation` delta returns a
+Work that already moved past BUILD; an evidence-, review- or packaging-only
+append leaves the Work where it stands, because its unresolved clause already
+gates closure. An append is never refused for arriving late, arriving during
+BUILD, being larger than the current ticket, or overlapping work already done --
+those are reconciliation, not operator blockers. A NEW_MISSION goes through
+normal intake instead: unrelated missions are never silently merged.
+
+Semantic judgement stays with the agent. The class, the delta and what an append
+supersedes are explicit inputs, because only a reader can tell an amendment from
+a different mission. Everything mechanical -- identity, ordering, derivation,
+supersession, rewind, routing -- is decided once, here.
+
 ## Closure and retention
 
 Closure requires: digest PASS, contract bound to that digest, every actionable
@@ -252,6 +297,10 @@ only when a real receipt was committed.
 - `saipen source req SRC-N RNNN CLASS [--when-environment HOST] TEXT`
 - `saipen source disp SRC-N RNNN STATUS --evidence REF [--verification REF] [--environment HOST]`
 - `saipen source quarantine SRC-N [--reason CODE]`
+- `saipen source append [--to SRC-N] [--class APPEND|SUPERSEDE|CLARIFICATION|CONFLICT]`
+  `[--delta implementation|evidence|review|packaging|context] [--supersedes ID,...]`
+  `[--label TEXT] (--file PATH | --hex HEX | -- TEXT)`
+- `saipen source apply-append SRC-N` / `appends`
 - `saipen source close SRC-N` / `archive SRC-N`
 - `saipen source purge SRC-N --confirm`
 

@@ -454,7 +454,7 @@ def context_cold(
     # Second-wave P0: claim truth is judged relative to the SESSION identity,
     # never to persisted STATE.agent.
     from .capability import negotiate_capability
-    from .router import queued_source_projection
+    from .router import pending_append_projection, queued_source_projection
 
     routed = (
         _routed
@@ -468,6 +468,7 @@ def context_cold(
             current_agent=current_agent,
             snap=inputs["snap"],
             queued_source=queued_source_projection(root),
+            pending_append=pending_append_projection(root),
         )
     )
     if not routed.get("ok") and routing_failure_code(routed) == "VALIDATION_FAILED":
@@ -615,7 +616,12 @@ def context_hot(
     doing = [t for t in board["tickets"].values() if t["section"] == "## DOING"]
     pending = inputs["pending"]
     conflicts = inputs["conflicts"]
-    from .router import queued_source_projection, route_next, routing_failure_code
+    from .router import (
+        pending_append_projection,
+        queued_source_projection,
+        route_next,
+        routing_failure_code,
+    )
 
     # P0#4: same current-session capability authority as the cold-start
     # projection above. Second-wave P0: same session-agent claim truth.
@@ -633,6 +639,7 @@ def context_hot(
             current_agent=current_agent,
             snap=inputs["snap"],
             queued_source=queued_source_projection(root),
+            pending_append=pending_append_projection(root),
         )
     )
     if not routed.get("ok") and routing_failure_code(routed) == "VALIDATION_FAILED":
@@ -764,7 +771,7 @@ def context_audit(project_root: Path | str) -> Result:
     # reuse it for both projections -- cold and hot previously each re-ran the
     # full router (validation + routing) over the same world.
     from .capability import negotiate_capability
-    from .router import queued_source_projection, route_next
+    from .router import pending_append_projection, queued_source_projection, route_next
 
     routed = route_next(
         inputs["state_text"],
@@ -775,6 +782,7 @@ def context_audit(project_root: Path | str) -> Result:
         current_agent=None,
         snap=inputs["snap"],
         queued_source=queued_source_projection(root),
+        pending_append=pending_append_projection(root),
     )
     cold = context_cold(root, _inputs=inputs, _routed=routed)
     if not cold.ok:

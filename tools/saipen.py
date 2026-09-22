@@ -1346,6 +1346,7 @@ def _status(project_root: Path, as_json: bool) -> int:
         return 1
     from saipen_engine.router import (
         audit_inbox_projection,
+        pending_append_projection,
         queued_source_projection,
         route_next,
         routing_failure_code,
@@ -1364,6 +1365,7 @@ def _status(project_root: Path, as_json: bool) -> int:
         snap=snap,
         audit_inbox=audit_inbox_projection(project_root),
         queued_source=queued_source_projection(project_root),
+        pending_append=pending_append_projection(project_root),
     )
     # SRC-085 M3: `computed_next_action`, `computed_reason` and the automation
     # block must classify the SAME gated route every other surface executes --
@@ -1664,6 +1666,20 @@ def _status(project_root: Path, as_json: bool) -> int:
         # still stands, and both discharge routes. Discoverable WITHOUT
         # attempting the ingress it would refuse.
         payload["pending_ingress"] = _owed
+    # SRC-104 / T-1461: an operational append is mission state, so status shows
+    # it -- latest append, active/superseded requirements, anything received
+    # but not yet projected, the Work it touched and the exact next action --
+    # instead of burying it in LOG. Read-only; a broken ledger is reported,
+    # never fatal to status.
+    try:
+        from saipen_engine.source_append import append_status as _append_status
+
+        _append_missions = _append_status(project_root).get("missions") or []
+    except Exception as _append_exc:  # status must survive metadata faults
+        payload["appends_error"] = f"{type(_append_exc).__name__}: {_append_exc}"
+    else:
+        if _append_missions:
+            payload["appends"] = _append_missions
     if claimed_but_unproven:
         payload["claimed_but_unproven"] = claimed_but_unproven
     if conformance is not None:
@@ -1958,6 +1974,7 @@ def _route_once(project_root: Path) -> dict:
     parked = _parked_work(board["tickets"], state)
     from saipen_engine.router import (
         audit_inbox_projection,
+        pending_append_projection,
         queued_source_projection,
         route_next,
         routing_failure_code,
@@ -1978,6 +1995,7 @@ def _route_once(project_root: Path) -> dict:
         snap=snap,
         audit_inbox=audit_inbox_projection(project_root),
         queued_source=queued_source_projection(project_root),
+        pending_append=pending_append_projection(project_root),
     )
     # T-1412 + T-1403 + SRC-085 M3: the SAME ordered gate chain the Result
     # wrapper applies, so `continue` can never hand out a route another surface
@@ -2133,23 +2151,36 @@ def _continue_chain(
         state = route["state"]
         board = route["board"]
         kind = continue_loop.classify_route(routed, state, board)
-        if kind in (continue_loop.FINISH_AT_SHIP, continue_loop.ADOPT):
-            doing = next(
-                t for t in board["tickets"].values() if t["section"] == "## DOING"
-            )
-            ticket = doing["id"]
+        if kind in (continue_loop.FINISH_AT_SHIP, continue_loop.ADOPT, continue_loop.APPLY_APPEND):
             before_event = state.get("last_event")
-            if kind == continue_loop.FINISH_AT_SHIP:
-                result = finish_ticket(project_root, ticket, agent)
-                operation_name = "ticket_done"
+            if kind == continue_loop.APPLY_APPEND:
+                from saipen_engine.source_append import apply_append
+
+                ticket = routed.get("ticket")
+                outcome = apply_append(project_root, str(routed.get("receipt")), actor=agent)
+                step_ok, step_code, failure_payload = (
+                    bool(outcome.get("ok")), str(outcome.get("code")), outcome
+                )
+                operation_name = "apply_append"
             else:
-                # T-1436: the resumed parent is UNCLAIMED, so the router's own
-                # adoption action is the next mechanical step. It is the same
-                # canonical claim the model would run; the operation re-checks
-                # ownership and refuses a live foreign claim at apply time.
-                result = apply_claim(project_root, ticket, agent, explicit=True)
-                operation_name = "claim"
-            after_route = _route_once(project_root) if result.ok else None
+                doing = next(
+                    t for t in board["tickets"].values() if t["section"] == "## DOING"
+                )
+                ticket = doing["id"]
+                if kind == continue_loop.FINISH_AT_SHIP:
+                    result = finish_ticket(project_root, ticket, agent)
+                    operation_name = "ticket_done"
+                else:
+                    # T-1436: the resumed parent is UNCLAIMED, so the router's own
+                    # adoption action is the next mechanical step. It is the same
+                    # canonical claim the model would run; the operation re-checks
+                    # ownership and refuses a live foreign claim at apply time.
+                    result = apply_claim(project_root, ticket, agent, explicit=True)
+                    operation_name = "claim"
+                step_ok, step_code, failure_payload = (
+                    bool(result.ok), result.code, result.to_dict()
+                )
+            after_route = _route_once(project_root) if step_ok else None
             trace.append(
                 {
                     "iteration": iterations + 1,
@@ -2157,16 +2188,16 @@ def _continue_chain(
                     "kind": kind,
                     "operation": operation_name,
                     "ticket": ticket,
-                    "result": result.code,
-                    "ok": bool(result.ok),
+                    "result": step_code,
+                    "ok": step_ok,
                     "before_last_event": before_event,
                     "after_last_event": (
                         after_route["state"].get("last_event") if after_route is not None else None
                     ),
                 }
             )
-            if not result.ok:
-                payload = result.to_dict()
+            if not step_ok:
+                payload = dict(failure_payload)
                 payload.update(
                     {
                         "recovery_pending": bool(route["pending"]),
@@ -2269,7 +2300,10 @@ def _next_action(
     # triggers a mutation. A `--dry-run` is purely observational -- the spec
     # forbids the fallthrough from generating work, and observers must see the
     # same idle-maintain verdict the prior release carried.
-    if fallthrough_to_improve and not dry_run and kind == continue_loop.FINISH_AT_SHIP:
+    if fallthrough_to_improve and not dry_run and kind in (
+        continue_loop.FINISH_AT_SHIP,
+        continue_loop.APPLY_APPEND,
+    ):
         return _continue_chain(
             project_root,
             as_json,
@@ -2339,6 +2373,7 @@ def _explain_next(project_root: Path, as_json: bool) -> int:
     from saipen_engine.router import (
         audit_inbox_projection,
         gate_route,
+        pending_append_projection,
         queued_source_projection,
         route_next,
         routing_failure_code,
@@ -2357,6 +2392,7 @@ def _explain_next(project_root: Path, as_json: bool) -> int:
         snap=snap,
         audit_inbox=audit_inbox_projection(project_root),
         queued_source=queued_source_projection(project_root),
+        pending_append=pending_append_projection(project_root),
     )
     # Explain the executable route, including the same conformance and closure
     # gates used by status/next/continue. A raw route can name a refused action.
@@ -4533,6 +4569,119 @@ def _cohort(project_root: Path, args: list[str], as_json: bool, dry_run: bool) -
     return 0 if result.ok else 1
 
 
+_SOURCE_APPEND_USAGE = (
+    "source append [--to SRC-###] [--class APPEND|SUPERSEDE|CLARIFICATION|CONFLICT] "
+    "[--delta implementation|evidence|review|packaging|context] "
+    "[--supersedes SRC-###:R###,SRC-###] [--label TEXT] (--file PATH | --hex HEX | -- TEXT) | "
+    "source apply-append <SRC-###> | source appends"
+)
+
+
+def _source_append_command(
+    project_root: Path, action: str, rest: list[str], as_json: bool, dry_run: bool
+) -> int:
+    """SRC-104 / T-1461: operational appends are mission input, not prose.
+
+    `append` makes the bytes durable against the controlling mission source,
+    `apply-append` projects them into requirements, Work and the minimum
+    truthful rewind, and `appends` is the read-only view status shares.
+    """
+    from saipen_engine import source_append
+
+    if action == "appends":
+        _emit(source_append.append_status(project_root), as_json)
+        return 0
+    if not dry_run and _negotiate_capability(project_root) == "read-only":
+        return _capability_refusal(as_json)
+    if action == "apply-append":
+        if len(rest) != 1 or not re.fullmatch(r"SRC-\d+", rest[0]):
+            _emit({"ok": False, "code": "VALIDATION_FAILED", "detail": _SOURCE_APPEND_USAGE},
+                  as_json)
+            return 2
+        if dry_run:
+            source, entry = source_append.find_append(project_root, rest[0])
+            _emit(
+                {
+                    "ok": entry is not None,
+                    "code": "PLAN" if entry is not None else "APPEND_NOT_FOUND",
+                    "dry_run": True,
+                    "receipt": rest[0],
+                    "source": source,
+                    "state": (entry or {}).get("state"),
+                },
+                as_json,
+            )
+            return 0 if entry is not None else 1
+        result = source_append.apply_append(project_root, rest[0], actor=_agent_for(project_root))
+        _emit(result, as_json)
+        return 0 if result.get("ok") else 1
+    opts = {"to": None, "class": source_append.APPEND, "delta": "implementation",
+            "supersedes": "", "label": "", "file": None, "hex": None}
+    body_tokens: list[str] = []
+    i = 0
+    while i < len(rest):
+        token = rest[i]
+        if token == "--":
+            body_tokens.extend(rest[i + 1:])
+            break
+        key = token[2:] if token.startswith("--") else None
+        if key in opts:
+            if i + 1 >= len(rest):
+                _emit(
+                    {"ok": False, "code": "VALIDATION_FAILED", "detail": f"{token} needs a value"},
+                    as_json,
+                )
+                return 2
+            opts[key] = rest[i + 1]
+            i += 2
+            continue
+        if token.startswith("--"):
+            _emit({"ok": False, "code": "VALIDATION_FAILED", "detail": f"unknown flag {token!r}",
+                   "usage": _SOURCE_APPEND_USAGE}, as_json)
+            return 2
+        body_tokens.append(token)
+        i += 1
+    carriers = [bool(opts["file"]), bool(opts["hex"]), bool(body_tokens)]
+    if sum(carriers) != 1:
+        _emit({"ok": False, "code": "VALIDATION_FAILED",
+               "detail": "source append takes exactly one of --file, --hex or -- TEXT",
+               "usage": _SOURCE_APPEND_USAGE}, as_json)
+        return 2
+    try:
+        if opts["file"]:
+            body = Path(opts["file"]).read_bytes().decode("utf-8")
+        elif opts["hex"]:
+            body = bytes.fromhex(opts["hex"]).decode("utf-8")
+        else:
+            body = " ".join(body_tokens)
+    except (OSError, ValueError) as exc:
+        _emit({"ok": False, "code": "VALIDATION_FAILED", "detail": f"cannot read append: {exc}"},
+              as_json)
+        return 1
+    supersedes = [part.strip() for part in str(opts["supersedes"]).split(",") if part.strip()]
+    if dry_run:
+        target = source_append.resolve_controlling_source(project_root, opts["to"])
+        _emit({"ok": bool(target.get("ok")),
+               "code": "PLAN" if target.get("ok") else target.get("code"),
+               "dry_run": True, "source": target.get("source"), "class": opts["class"],
+               "delta": opts["delta"], "supersedes": supersedes,
+               "derived_clauses": len(source_append.derive_normative_clauses(body)),
+               "detail": target.get("detail")}, as_json)
+        return 0 if target.get("ok") else 1
+    result = source_append.append(
+        project_root,
+        body,
+        to=opts["to"],
+        klass=str(opts["class"]).upper(),
+        delta=str(opts["delta"]).lower(),
+        supersedes=supersedes,
+        label=opts["label"],
+        actor=_agent_for(project_root),
+    )
+    _emit(result, as_json)
+    return 0 if result.get("ok") else 1
+
+
 def _source(project_root: Path, args: list[str], as_json: bool, dry_run: bool) -> int:
     """T-1162: lossless source receipts.
 
@@ -4563,13 +4712,16 @@ def _source(project_root: Path, args: list[str], as_json: bool, dry_run: bool) -
                 "ok": False,
                 "code": "VALIDATION_FAILED",
                 "detail":                 "source needs a subcommand: capture|status|show|req|"
-                "disp|quarantine|link|close|archive|purge|retire|recover",
+                "disp|quarantine|link|close|archive|purge|retire|recover|"
+                "append|apply-append|appends",
             },
             as_json,
         )
         return 2
     action = args[0]
     rest = args[1:]
+    if action in ("append", "apply-append", "appends"):
+        return _source_append_command(project_root, action, rest, as_json, dry_run)
     if action == "retire":
         # T-1434 M3 / SRC-088: receipt-only retirement. Eligibility proves the
         # reason class and that no unresolved actionable requirement is being

@@ -511,7 +511,12 @@ def _state_next_action_repairs(
         except ValueError as exc:
             return refuse(f"cannot stage routing over malformed STATE: {exc}")
 
-    from .router import audit_inbox_projection, queued_source_projection, route_next
+    from .router import (
+        audit_inbox_projection,
+        pending_append_projection,
+        queued_source_projection,
+        route_next,
+    )
 
     routed = route_next(
         provisional,
@@ -519,6 +524,7 @@ def _state_next_action_repairs(
         current_agent=agent,
         audit_inbox=audit_inbox_projection(Path(project_root)),
         queued_source=queued_source_projection(Path(project_root)),
+        pending_append=pending_append_projection(Path(project_root)),
     )
     canonical = f"PHASE {phase} {task}"
     if (

@@ -50,6 +50,7 @@ def route_next(
     snap=None,
     audit_inbox: dict | None = None,
     queued_source: dict | None = None,
+    pending_append: dict | None = None,
     # PERF-004: optional pre-parsed objects from the caller to avoid
     # redundant STATE/BOARD parsing. When provided, these take precedence
     # over parsing state_text/board_text.
@@ -269,6 +270,32 @@ def route_next(
             "executable_behavior": "RESTATE_AND_STOP",
             "detail": _detail,
         }
+
+    # OPERATIONAL APPEND (SRC-104 / T-1461). An append the operator made
+    # durable for this mission changes what the active phase has to do, so it
+    # is projected BEFORE any phase continuation -- continuing BUILD as if the
+    # new requirement had not arrived is the "read it, summarized it, carried
+    # on" failure in mechanical form. Only the seat holder projects (the
+    # projection may rewind the active Work); a foreign, invalid or adoptable
+    # seat falls through to the binding rules below. An unreadable ledger never
+    # blocks valid Work: it falls through too and `source appends` names it.
+    if pending_append and not pending_append.get("invalid"):
+        _append_seat_ok = True
+        if active:
+            _append_own = ownership.classify_active_ownership(
+                state, board, session_agent, now=now
+            )
+            _append_seat_ok = _append_own.status == "SELF" and not _append_own.misbound
+        if _append_seat_ok:
+            return {
+                "ok": True,
+                "action": pending_append["action"],
+                "reason": "unprojected-source-append",
+                "receipt": pending_append.get("receipt"),
+                "source_receipt": pending_append.get("source"),
+                "ticket": active,
+                "detail": pending_append.get("detail"),
+            }
 
     # BINDING (hostile-regression, P0): STATE.task binds BOARD.DOING only where
     # this agent actually OWNS or ADOPTS the active ticket. The ONE
@@ -706,6 +733,24 @@ def routing_failure_code(out: dict) -> str:
     return ROUTING_FAILURE_CODES.get(out.get("reason"), "VALIDATION_FAILED")
 
 
+def pending_append_projection(project_root) -> dict | None:
+    """The oldest received-but-unprojected operational append, or None.
+
+    Read-only seam for `route_next` (SRC-104 / T-1461); the owner is
+    `source_append`. A failure to read a ledger is reported as `invalid` and
+    never raised: routing must not die on append metadata.
+    """
+    if project_root is None:
+        return None
+    try:
+        from .source_append import pending_append_projection as _projection
+
+        return _projection(project_root)
+    except Exception as exc:  # metadata trouble never takes routing down
+        return {"invalid": True, "action": "saipen source appends",
+                "detail": f"append ledger unreadable ({type(exc).__name__}: {exc})"}
+
+
 def queued_source_projection(project_root) -> dict | None:
     """The OLDEST unprojected explicit user Source, or None (T-1436).
 
@@ -1049,6 +1094,7 @@ def route_next_result(
         snap=snap,
         audit_inbox=audit_inbox_projection(project_root),
         queued_source=queued_source_projection(project_root),
+        pending_append=pending_append_projection(project_root),
     )
     data = {k: v for k, v in out.items() if k != "ok"}
     # Capability surface (hostile-regression, P0#5): a PHASE action names the

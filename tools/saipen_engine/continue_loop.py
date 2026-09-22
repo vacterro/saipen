@@ -67,6 +67,10 @@ CONTINUE_FIXED_POINT = "CONTINUE_FIXED_POINT"
 #: Closed classification vocabulary.
 FINISH_AT_SHIP = "finish-at-ship"
 ADOPT = "adopt"
+#: SRC-104 / T-1461: projecting a durable operational append is mechanical --
+#: class, delta and supersession were recorded when the operator's bytes were
+#: captured -- so `cc` executes it instead of stopping to hand it back.
+APPLY_APPEND = "apply-append"
 IDLE_MAINTAIN = "idle-maintain"
 REFUSAL = "refusal"
 STOP = "boundary"
@@ -83,6 +87,12 @@ def classify_route(routed: dict, state: dict, board: dict) -> str:
         return REFUSAL
     action = str(routed.get("action") or "")
     reason = str(routed.get("reason") or "")
+    if (
+        reason == "unprojected-source-append"
+        and routed.get("receipt")
+        and action == f"saipen source apply-append {routed.get('receipt')}"
+    ):
+        return APPLY_APPEND
     doing = [t for t in (board.get("tickets") or {}).values() if t.get("section") == "## DOING"]
     # ADOPT (T-1436): the router's own adoption action for an UNCLAIMED or
     # FOREIGN_STALE active DOING -- never a live foreign claim (the router
