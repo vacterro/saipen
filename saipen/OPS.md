@@ -202,6 +202,16 @@ attribution only, and the seat is adopted explicitly by whoever resumes the
 Work. A mechanical resume must never refresh liveness metadata as though the
 historical owner process reclaimed the seat.
 
+HANDBACK (T-1473). `saipen start` parks the active Work behind a new request
+with this same edge. When the request's SCOUT finds its first bounded Work IS
+the Work it parked, `saipen ticket unblock <parked> <decision>` hands the seat
+back: PLAN requires the holder to be this seat's active DOING ticket, the
+reservation to be the actor's own (restore, never transfer) and every other
+need of the parked Work DONE; APPLY returns the holder to the top of TODO
+unclaimed and the parked Work to DOING at its saved phase tuple, pause edge
+dropped, in one journaled transaction. Unblocking parked Work in any other
+shape refuses with zero writes.
+
 ### Retirement transaction
 
 `saipen ticket retire T-### --reason CODE --evidence REF --authority SRC-###

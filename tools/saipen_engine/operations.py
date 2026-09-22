@@ -2485,6 +2485,218 @@ def _insert_todo(board_text: str, line: str) -> str:
     return "".join(lines)
 
 
+def _plan_handback(
+    root: Path,
+    docs: dict,
+    state: dict,
+    tickets: dict,
+    log_tail: int | None,
+    parked: dict,
+    agent: str,
+    decision: str,
+    now: str,
+    utc: str,
+    op_id: str,
+) -> OperationPlan | Result:
+    """PLAN the handback of the seat to Work parked on the ACTIVE ticket (T-1473).
+
+    `saipen start` parks the active Work behind a new request with the same
+    `block-for` edge a parent takes for its child. When the request's own SCOUT
+    finds that its first bounded Work IS the parked Work (a request to continue
+    it), nothing could return the seat: `unblock` left the reservation under
+    TODO, `block-for` needs a workable TODO blocker and an explicit claim
+    refuses a blocked ticket, so the request deadlocked the Work it named.
+
+    The handback is the inverse of that `block-for`, in ONE transaction: the
+    holder -- the active DOING ticket of this very seat -- returns to the top of
+    TODO unclaimed, and the parked Work returns to DOING at its saved phase
+    tuple with the pause edge dropped. The actor hands over only the seat it
+    holds now, so a reservation saved for another agent refuses (restore,
+    never transfer), as does every other precondition, with zero writes.
+    """
+    parked_id = parked["id"]
+    fields = parked.get("fields", {})
+    holder_id = str(fields.get("blocked_on", "")).strip()
+    head = str(fields.get("blocker", "")).split(" -- ", 1)[0].strip()
+    if head != f"ACTIVE_DEPENDENCY:{holder_id}" or holder_id not in parked.get("needs", []):
+        return _refuse(
+            "VALIDATION_FAILED",
+            f"{parked_id} is reserved on {holder_id} but its blocker/needs do not name "
+            "that dependency; the reservation is malformed",
+            ticket=parked_id,
+        )
+    holder = tickets.get(holder_id)
+    if (
+        holder is None
+        or holder.get("section") != "## DOING"
+        or state.get("task") != holder_id
+        or state.get("phase") not in phases.TICKET_BEARING_PHASES
+        or claim_status(holder, agent) != "SELF"
+    ):
+        return _refuse(
+            "CONTINUATION_RESERVED",
+            f"{parked_id} is parked on {holder_id} and resumes when {holder_id} closes; "
+            f"unblock hands the seat back only while {holder_id} is this seat's "
+            "active DOING ticket",
+            ticket=parked_id,
+        )
+    saved_owner = str(fields.get("owner") or "").strip()
+    if saved_owner and saved_owner != agent:
+        return _refuse(
+            "TICKET_NOT_WORKABLE",
+            f"{parked_id} is reserved for seat {saved_owner}; a handback returns only "
+            f"the seat {agent} holds (restore, never transfer)",
+            ticket=parked_id,
+        )
+    resume_phase = str(fields.get("resume_phase", "")).strip()
+    resume_from = str(fields.get("resume_transition_from", "")).strip()
+    if resume_phase not in phases.TICKET_BEARING_PHASES:
+        return _refuse(
+            "VALIDATION_FAILED",
+            f"{parked_id} is parked with resume_phase {resume_phase!r}; restoring it "
+            "would fabricate a phase",
+            ticket=parked_id,
+        )
+    other_needs = [need for need in parked.get("needs", []) if need != holder_id]
+    unmet = [
+        need for need in other_needs if tickets.get(need, {}).get("section") != "## DONE"
+    ]
+    if unmet:
+        return _refuse(
+            "TICKET_NOT_WORKABLE",
+            f"{parked_id} still needs {', '.join(unmet)}; the seat would go to Work its "
+            "own dependencies block",
+            ticket=parked_id,
+        )
+
+    event, holder_line = _event_line(
+        docs,
+        log_tail,
+        "DEC",
+        holder_id,
+        agent,
+        f"ticket checkpointed to TODO via SAIOPS -- handback: {holder_id} returns the seat "
+        f"to {parked_id}, which was parked on it",
+        now,
+        op_id,
+        root=root,
+    )
+    event, parked_line = _event_line(
+        docs,
+        event,
+        "DEC",
+        parked_id,
+        agent,
+        f"ticket unblock via SAIOPS (handback from {holder_id}) -- resumes at "
+        f"{resume_phase} -- {redact_credentials(decision)}",
+        now,
+        op_id,
+        root=root,
+    )
+    new_log = (
+        docs["log"].text_norm.rstrip("\n") + "\n" + holder_line + "\n" + parked_line + "\n"
+    )
+    binding = host_session_binding(root)
+
+    def _propose(board_text: str) -> str:
+        board_text = _move_ticket(
+            board_text, holder_id, "## TODO", "[ ]", "demote", "", enforce_cap=False
+        )
+        board_text = _ticket_fields_in_place(
+            board_text,
+            holder_id,
+            {},
+            remove=("owner", "claim_time", "claim_session"),
+            enforce_cap=False,
+        )
+        board_text = _move_ticket(
+            board_text, parked_id, "## DOING", "[/]", "resume", "", enforce_cap=False
+        )
+        claim = {"owner": agent, "claim_time": utc}
+        remove = [
+            "blocker",
+            "blocker_scope",
+            "blocked_on",
+            "resume_phase",
+            "resume_transition_from",
+            "retry_not_before",
+        ]
+        if binding:
+            claim["claim_session"] = binding
+        else:
+            remove.append("claim_session")
+        if other_needs:
+            claim["needs"] = ",".join(other_needs)
+        else:
+            remove.append("needs")
+        return _ticket_fields_in_place(
+            board_text, parked_id, claim, remove=tuple(remove), enforce_cap=False
+        )
+
+    try:
+        projected = _project_board_mutation(
+            root,
+            docs["board"].text_norm,
+            _propose,
+            [holder_id, parked_id],
+            op_id=op_id,
+            event_id=f"E-{event}",
+            reason="existing/proposed oversized BOARD record requires canonical handback update",
+        )
+    except ValueError as exc:
+        return _refuse("VALIDATION_FAILED", str(exc), ticket=parked_id)
+    new_board = projected.board_text
+    next_action = str(state.get("next_action") or "")
+    new_state = patch_state(
+        docs["state"].text_norm,
+        {
+            "phase": resume_phase,
+            "task": parked_id,
+            # A hard stop outranks the handback: a WAIT is kept verbatim.
+            "next_action": next_action
+            if next_action.startswith("WAIT:")
+            else f"PHASE {resume_phase} {parked_id}",
+            "transition_from": resume_from,
+            "last_event": event,
+            "updated": utc,
+            "agent": agent,
+        },
+    )
+    new_state = _settle_stop_reason(new_state, new_board, agent)
+    errors = validate_texts(
+        new_state, new_board, new_log, current_agent=agent, sealed_events=docs["_history"]
+    )
+    if errors:
+        return _refuse(
+            "VALIDATION_FAILED",
+            "proposed handback state fails fast validation: " + "; ".join(errors[:5]),
+            ticket=parked_id,
+        )
+    targets = [
+        *_log_targets(docs, new_log),
+        *projected.targets,
+        _target(docs["board"], ".saipen/BOARD.md", "board", new_board),
+        _target(docs["state"], ".saipen/STATE.md", "state", new_state),
+    ]
+    return build_plan(
+        "ticket_move",
+        agent,
+        _identity(root),
+        {"operation": "ticket_move", "action": "unblock", "ticket": parked_id, "holder": holder_id},
+        _docs_preconditions(docs, "state", "board", "log"),
+        targets,
+        {
+            "ok": True,
+            "code": "HANDBACK",
+            "ticket": parked_id,
+            "holder": holder_id,
+            "phase": resume_phase,
+            "event_id": f"E-{event}",
+        },
+        op_id=op_id,
+    )
+
+
 def _ticket_targets(
     root: Path,
     action: str,
@@ -2600,6 +2812,12 @@ def _ticket_targets(
                 "ILLEGAL_TICKET_LIFECYCLE",
                 f"unblock accepts only BLOCKED; {ticket_id} is under {ticket['section']}",
                 ticket=ticket_id,
+            )
+        if str(ticket.get("fields", {}).get("blocked_on", "")).strip():
+            # T-1473: parked Work carries a continuation reservation, which is
+            # only legal under BLOCKED; lifting it is the handback or nothing.
+            return _plan_handback(
+                root, docs, state, tickets, log_tail, ticket, agent, payload, now, utc, op_id
             )
         target_section, checkbox = "## TODO", "[ ]"
     else:
@@ -3744,6 +3962,10 @@ def _move_ticket(
         marked = remove_ticket_field(marked, "retry_not_before")
     elif action == "resume":
         marked = ticket_line.replace("- [ ] ", "- [/] ", 1)
+    elif action == "demote":
+        # T-1473: the handback holder leaves DOING as plain open Work; its
+        # claim fields are removed by the caller, nothing else changes.
+        marked = ticket_line.replace("- [/] ", "- [ ] ", 1)
     else:  # pragma: no cover
         marked = ticket_line.replace("- [/] ", "- [ ] ", 1)
     if enforce_cap:
