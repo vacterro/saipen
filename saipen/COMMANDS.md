@@ -154,6 +154,12 @@ SELECTION of unrelated queued TODO but never preempts active Work, and a
 project holding one is never idle. Layer identity is the file digest, so a
 changed audit at a path already worked is a NEW generation and is read again.
 
+Every `continue`/`cc`/`status` JSON answer carries `telegrams`: the acting
+seat's unread SAIMAIL telegram COUNTS when `SAIMAIL_WORKSPACE` is set and
+`saimail-local` is on PATH (else `NOT_CONFIGURED`/`UNAVAILABLE`). Report a
+nonzero count; reading is `read_command`, opening is an explicit decision. A
+telegram never routes, creates Work or skips a WAIT (T-1497).
+
 After the Pick Rule and before any idle verdict, two inbox diagnostics are
 restated rather than routed: `audit-inbox-invalid` (a layer that cannot be
 read) and `audit-inbox-residue` (every layer settled and deleted, but

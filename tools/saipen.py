@@ -105,6 +105,9 @@ _ROUTE_ECHO: str | None = None
 #: into an improvement audit. The table was right; the runtime's own answer to
 #: the question the model actually asked did not agree with it.
 _ENTRY_HINT_ROOT: Path | None = None
+#: T-1497: set for the turn-entry questions (`continue`/`cc`/`status`); every
+#: JSON answer they emit carries the seat's unread SAIMAIL telegram counts.
+_TELEGRAM_ROOT: Path | None = None
 
 
 def _agent_for(project_root: Path) -> str:
@@ -2045,6 +2048,16 @@ def _route_once(project_root: Path) -> dict:
         route["emitted"] = emitted
         route["rc"] = 1
     return route
+
+
+def _turn_entry_telegrams(project_root: Path, state: dict) -> dict:
+    """The turn-entry telegram read (T-1497); a failure is a state, never a raise."""
+    try:
+        from saipen_engine.telegrams import turn_entry
+
+        return turn_entry(project_root, state)
+    except Exception as exc:  # the read must never fail `continue`
+        return {"state": "ERROR", "detail": f"turn-entry telegram read failed: {exc}"[:300]}
 
 
 def _route_payload(
@@ -6661,6 +6674,15 @@ def _emit(payload: dict, as_json: bool) -> None:
                     "BOOT's entry table routes a new actionable task to `saipen start`"
                 ),
             }
+    if _TELEGRAM_ROOT is not None and as_json and "telegrams" not in payload:
+        # T-1497: counts only, and data only -- the answer above was computed
+        # before this line and nothing in it depends on the telegrams.
+        _state_file = _TELEGRAM_ROOT / ".saipen" / "STATE.md"
+        try:
+            _telegram_state = parse_state(_state_file.read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            _telegram_state = {}
+        payload = {**payload, "telegrams": _turn_entry_telegrams(_TELEGRAM_ROOT, _telegram_state)}
     if _ROUTE_ECHO is not None:
         # Route echo: the invocation resolved through the shared shortcut
         # resolver, so every emitted payload names its canonical route. This
@@ -8687,6 +8709,11 @@ def main(argv: list[str] | None = None) -> int:
         # know what to do. Their answer must agree with BOOT's entry table.
         global _ENTRY_HINT_ROOT  # noqa: PLW0603
         _ENTRY_HINT_ROOT = project_root
+    if command in ("status", "sss", "cc", "ccc", "continue"):
+        # T-1497: every turn-entry question, shortcut or long form, carries the
+        # same telegram counts -- `sss` is `status` (test_command_routing).
+        global _TELEGRAM_ROOT  # noqa: PLW0603
+        _TELEGRAM_ROOT = project_root
 
     if command == "status":
         if len(args) > 1:

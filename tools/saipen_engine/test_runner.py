@@ -203,6 +203,8 @@ def _run_family(root: Path, family: TestFamily, *, spool: Path | None = None) ->
     # or read as that session's claim, and the verdict does not follow whoever
     # holds the seat.
     env = unbound_environment(os.environ.copy(), SAIPEN_AGENT=None)
+    # T-1497: nor the operator's SAIMAIL mailbox -- a family run never reads it.
+    env.pop("SAIMAIL_WORKSPACE", None)
     env["PYTHONDONTWRITEBYTECODE"] = "1"
     env["SAIPEN_CANONICAL_TEST_CHILD"] = "1"
     creation = {"start_new_session": True} if os.name != "nt" else {
