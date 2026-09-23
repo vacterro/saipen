@@ -1768,29 +1768,71 @@ def add_requirement(
     before COMMIT leaves the on-disk state byte-identical to the pre-call
     generation; a successful commit advances the immutable revision
     monotonically. Seeded Contract/coverage drift refuses the request with
-    ZERO writes.
+    ZERO writes. The one-clause case of `add_requirements`.
+    """
+    result = add_requirements(
+        root,
+        receipt_id,
+        [
+            {
+                "rid": rid,
+                "text": text,
+                "class": clause_class,
+                "when_environment": when_environment,
+            }
+        ],
+    )
+    if not result.get("ok"):
+        return result
+    return {
+        "ok": True,
+        "code": "REQUIREMENT_ADDED",
+        "receipt": receipt_id,
+        "rid": result["rids"][0],
+        "revision": result["revision"],
+    }
+
+
+def add_requirements(root: Path | str, receipt_id: str, clauses: list[dict]) -> dict:
+    """Persist N new requirement clauses as ONE recoverable transaction (T-1462).
+
+    Each clause is `{"rid", "text", "class", "when_environment"}` and is
+    judged exactly as `add_requirement` judges one; any refusal refuses the
+    whole batch with ZERO writes. The batch is ONE contract revision and ONE
+    OperationPlan under the writer lock: measured 2026-09-22, projecting the
+    156 clauses of SRC-105 one plan per clause pushed `saipen continue` past
+    its 120-second interactive bound.
     """
     root = Path(root)
     if not INTENT_RE.fullmatch(receipt_id):
         return {"ok": False, "code": "INVALID_ID", "detail": receipt_id}
-    if re.fullmatch(r"R\d+", rid):
-        rid = f"{receipt_id}:{rid}"
-    if not re.fullmatch(rf"{re.escape(receipt_id)}:R\d+", rid):
-        return {"ok": False, "code": "INVALID_ID", "detail": rid}
-    if not text.strip():
-        return {"ok": False, "code": "VALIDATION_FAILED", "detail": "empty clause text"}
-    if clause_class not in CLAUSE_CLASSES:
-        return {
-            "ok": False,
-            "code": "VALIDATION_FAILED",
-            "detail": f"unknown clause class {clause_class!r}",
-        }
-    if when_environment is not None and not re.fullmatch(r"[a-z0-9_-]+", when_environment):
-        return {
-            "ok": False,
-            "code": "VALIDATION_FAILED",
-            "detail": f"invalid environment identity {when_environment!r}",
-        }
+    if not clauses:
+        return {"ok": False, "code": "VALIDATION_FAILED", "detail": "no clause to add"}
+    normalized: list[tuple[str, str, str, str | None]] = []
+    for item in clauses:
+        rid = str(item.get("rid") or "")
+        text = str(item.get("text") or "")
+        clause_class = str(item.get("class") or "requirement")
+        when_environment = item.get("when_environment")
+        if re.fullmatch(r"R\d+", rid):
+            rid = f"{receipt_id}:{rid}"
+        if not re.fullmatch(rf"{re.escape(receipt_id)}:R\d+", rid):
+            return {"ok": False, "code": "INVALID_ID", "detail": rid}
+        if not text.strip():
+            return {"ok": False, "code": "VALIDATION_FAILED", "detail": "empty clause text"}
+        if clause_class not in CLAUSE_CLASSES:
+            return {
+                "ok": False,
+                "code": "VALIDATION_FAILED",
+                "detail": f"unknown clause class {clause_class!r}",
+            }
+        if when_environment is not None and not re.fullmatch(r"[a-z0-9_-]+", when_environment):
+            return {
+                "ok": False,
+                "code": "VALIDATION_FAILED",
+                "detail": f"invalid environment identity {when_environment!r}",
+            }
+        normalized.append((rid, text, clause_class, when_environment))
     try:
         meta = _read_meta(root, receipt_id)
         if not meta:
@@ -1810,24 +1852,6 @@ def add_requirement(
         if not contract_gate["ok"]:
             return contract_gate
         ledger = _read_coverage(root, receipt_id)
-        if rid in ledger["requirements"]:
-            return {
-                "ok": False,
-                "code": "VALIDATION_FAILED",
-                "detail": f"requirement {rid} exists",
-            }
-        clause = {
-            "class": clause_class,
-            "text": text,
-            "actionable": clause_class in ACTIONABLE_CLASSES,
-            "disposition": "UNKNOWN",
-            "work": meta.get("linked_work"),
-            "evidence": None,
-            "verification": None,
-        }
-        if when_environment:
-            clause["when_environment"] = when_environment
-        ledger["requirements"][rid] = clause
         contract = _read_contract(root, receipt_id)
         if not contract or contract.get("source_sha256") != meta.get("source_sha256"):
             return {
@@ -1835,23 +1859,41 @@ def add_requirement(
                 "code": "CONTRACT_DRIFT",
                 "detail": "contract missing or source digest mismatch",
             }
+        for rid, text, clause_class, when_environment in normalized:
+            if rid in ledger["requirements"]:
+                return {
+                    "ok": False,
+                    "code": "VALIDATION_FAILED",
+                    "detail": f"requirement {rid} exists",
+                }
+            clause = {
+                "class": clause_class,
+                "text": text,
+                "actionable": clause_class in ACTIONABLE_CLASSES,
+                "disposition": "UNKNOWN",
+                "work": meta.get("linked_work"),
+                "evidence": None,
+                "verification": None,
+            }
+            contract_clause = {
+                "class": clause_class,
+                "text": text,
+                "actionable": clause_class in ACTIONABLE_CLASSES,
+            }
+            if when_environment:
+                clause["when_environment"] = when_environment
+                contract_clause["when_environment"] = when_environment
+            ledger["requirements"][rid] = clause
+            contract.setdefault("clauses", {})[rid] = contract_clause
         new_revision = int(contract.get("interpretation_revision", 0)) + 1
         contract["interpretation_revision"] = new_revision
         contract["derived_at"] = _utc()
-        contract_clause = {
-            "class": clause_class,
-            "text": text,
-            "actionable": clause_class in ACTIONABLE_CLASSES,
-        }
-        if when_environment:
-            contract_clause["when_environment"] = when_environment
-        contract.setdefault("clauses", {})[rid] = contract_clause
         # CORE-001: build the exact future bytes for all three targets so a
         # single OperationPlan binds them under one writer lock and one
         # journal. Direct sequential _write_* are never called here.
         from .journal import hash_bytes
         from .paths import project_identity as _project_identity
-        from .plan import TargetPlan, build_plan, apply_plan
+        from .plan import TargetPlan, apply_plan, build_plan
 
         contract_rel = f".saipen/intake/contracts/{receipt_id}.json"
         revision_rel = f".saipen/intake/contracts/{receipt_id}.r{new_revision:03d}.json"
@@ -1867,23 +1909,42 @@ def add_requirement(
                 "code": "VALIDATION_FAILED",
                 "detail": f"contract revision already exists: {receipt_id} r{new_revision}",
             }
+
         def _before(path: Path) -> str:
             try:
                 return hash_bytes(path.read_bytes())
             except FileNotFoundError:
                 return ""
 
-        plan = build_plan(
-            operation="source.requirement_add",
-            agent=_agent_for_intake(root),
-            project_identity=_project_identity(root),
-            semantic_request={
+        rids = [rid for rid, _text, _klass, _env in normalized]
+        if len(normalized) == 1:
+            rid, _text, clause_class, when_environment = normalized[0]
+            semantic_request = {
                 "receipt": receipt_id,
                 "rid": rid,
                 "class": clause_class,
                 "revision": new_revision,
                 "when_environment": when_environment,
-            },
+            }
+            expected = {"ok": True, "code": "REQUIREMENT_ADDED", "receipt": receipt_id, "rid": rid}
+        else:
+            semantic_request = {
+                "receipt": receipt_id,
+                "rids": rids,
+                "classes": [klass for _rid, _text, klass, _env in normalized],
+                "revision": new_revision,
+            }
+            expected = {
+                "ok": True,
+                "code": "REQUIREMENT_ADDED",
+                "receipt": receipt_id,
+                "rids": rids,
+            }
+        plan = build_plan(
+            operation="source.requirement_add",
+            agent=_agent_for_intake(root),
+            project_identity=_project_identity(root),
+            semantic_request=semantic_request,
             preconditions={
                 contract_rel: _before(contract_path),
                 revision_rel: "",
@@ -1912,12 +1973,7 @@ def add_requirement(
                     hash_bytes(coverage_bytes),
                 ),
             ],
-            expected={
-                "ok": True,
-                "code": "REQUIREMENT_ADDED",
-                "receipt": receipt_id,
-                "rid": rid,
-            },
+            expected=expected,
         )
         committed = apply_plan(root, plan)
         if not committed.get("ok"):
@@ -1925,7 +1981,8 @@ def add_requirement(
                 "ok": False,
                 "code": committed.get("code", "VALIDATION_FAILED"),
                 "receipt": receipt_id,
-                "rid": rid,
+                "rid": rids[0] if len(rids) == 1 else None,
+                "rids": rids,
                 "detail": committed.get("message")
                 or committed.get("detail", "plan apply failed"),
             }
@@ -1933,7 +1990,7 @@ def add_requirement(
             "ok": True,
             "code": "REQUIREMENT_ADDED",
             "receipt": receipt_id,
-            "rid": rid,
+            "rids": rids,
             "revision": new_revision,
         }
     except (OSError, PermissionError, ValueError) as exc:

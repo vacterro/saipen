@@ -570,15 +570,26 @@ def apply_append(root: Path | str, receipt: str, *, actor: str | None = None) ->
             return {**seeded, "receipt": receipt, "step": "derive"}
         contract = intake._read_contract(root, receipt) or {}
         clause_ids = sorted((contract.get("clauses") or {}).keys())
+    # T-1462: every new clause in ONE contract revision under ONE writer-lock
+    # transaction; one plan per clause made a 156-clause handoff outlast the
+    # interactive bound of the `continue` that projected it.
+    batch: list[dict] = []
     for klass, text in derived:
         if text.lower() in existing:
             continue
         rid = f"R{len(existing) + 1:03d}"
-        added = intake.add_requirement(root, receipt, rid=rid, text=text, clause_class=klass)
-        if not added.get("ok"):
-            return {**added, "receipt": receipt, "step": "derive", "clause": text[:80]}
+        batch.append({"rid": rid, "text": text, "class": klass})
         existing[text.lower()] = f"{receipt}:{rid}"
         clause_ids.append(f"{receipt}:{rid}")
+    if batch:
+        added = intake.add_requirements(root, receipt, batch)
+        if not added.get("ok"):
+            return {
+                **added,
+                "receipt": receipt,
+                "step": "derive",
+                "clause": str(batch[0]["text"])[:80],
+            }
     _mark_step(root, source, receipt, "derived")
 
     superseded = _apply_supersession(root, source, entry, receipt)

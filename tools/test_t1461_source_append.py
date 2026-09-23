@@ -321,27 +321,59 @@ class ContinuityTests(AppendFixture):
         self.assertEqual(routed["source_receipt"], received["source"])
 
     def test_16_a_crash_mid_projection_is_completed_not_duplicated(self):
+        # T-1462: the clauses are ONE transaction now, so "mid-projection" is
+        # either inside it (nothing of it lands) or right after it commits
+        # (every clause landed, the step was never marked). Both resume to the
+        # same four clauses, never eight.
+        real_mark = source_append._mark_step
+
+        def crash_after_derive(root, source, receipt, step):
+            if step == "derived":
+                raise OSError("simulated crash after the clause transaction")
+            return real_mark(root, source, receipt, step)
+
+        crashes = {
+            "inside": mock.patch.object(
+                intake, "add_requirements", side_effect=OSError("simulated crash in it")
+            ),
+            "after": mock.patch.object(source_append, "_mark_step", crash_after_derive),
+        }
+        for where, crash in crashes.items():
+            with self.subTest(crash=where):
+                project = self.make_project()
+                self.mission(project, "BUILD")
+                received = self.append(project, "\n\n".join(BRICKS[:4]))
+                with crash, self.assertRaises(OSError):
+                    source_append.apply_append(project, received["receipt"], actor=AGENT)
+                entry = source_append.read_ledger(project, received["source"])["appends"][0]
+                self.assertEqual(
+                    entry["state"], source_append.RECEIVED, "a crash never claims PROJECTED"
+                )
+                self.project_it(project, received["receipt"])
+                self.assertEqual(self.clause_texts(project, received["receipt"]), set(BRICKS[:4]))
+                again = source_append.apply_append(project, received["receipt"], actor=AGENT)
+                self.assertEqual(again["code"], "ALREADY_PROJECTED")
+
+    def test_16b_every_clause_lands_in_one_transaction(self):
+        """T-1462: N derived clauses are one contract revision, not N."""
         project = self.make_project()
         self.mission(project, "BUILD")
         received = self.append(project, "\n\n".join(BRICKS[:4]))
-        real = intake.add_requirement
-        calls = {"n": 0}
+        real = intake.add_requirements
+        calls = []
 
-        def crash_after_two(*args, **kwargs):
-            calls["n"] += 1
-            if calls["n"] == 3:
-                raise OSError("simulated crash mid-projection")
-            return real(*args, **kwargs)
+        def counting(root, receipt, clauses):
+            calls.append(len(clauses))
+            return real(root, receipt, clauses)
 
-        with mock.patch.object(intake, "add_requirement", crash_after_two), \
-                self.assertRaises(OSError):
-            source_append.apply_append(project, received["receipt"], actor=AGENT)
-        entry = source_append.read_ledger(project, received["source"])["appends"][0]
-        self.assertEqual(entry["state"], source_append.RECEIVED, "a crash never claims PROJECTED")
-        self.project_it(project, received["receipt"])
+        with mock.patch.object(intake, "add_requirements", counting), \
+                mock.patch.object(intake, "add_requirement", side_effect=AssertionError(
+                    "the per-clause transaction is not the projection path")):
+            self.project_it(project, received["receipt"])
+        self.assertEqual(calls, [4])
+        contract = intake._read_contract(project, received["receipt"])
+        self.assertEqual(contract["interpretation_revision"], 1)
         self.assertEqual(self.clause_texts(project, received["receipt"]), set(BRICKS[:4]))
-        again = source_append.apply_append(project, received["receipt"], actor=AGENT)
-        self.assertEqual(again["code"], "ALREADY_PROJECTED")
 
     def test_17_repeated_content_never_produces_duplicate_work(self):
         project = self.make_project()
