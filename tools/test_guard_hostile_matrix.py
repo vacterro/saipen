@@ -41,8 +41,6 @@ def setUpModule() -> None:
     isolate_host_session()
 
 
-CLAIM_NOW = datetime.now(timezone.utc)
-
 #: TemporaryDirectory handles are retained so the OS reclaims them at exit
 #: instead of the suite rmtree-ing fixtures other assertions may still read.
 #:
@@ -112,10 +110,14 @@ def project_with_doing_owner(owner: str, agent: str = "other-agent") -> Path:
     root = fresh_project(
         agent=agent, phase="BUILD", task="T-9001", next_action="PHASE BUILD T-9001"
     )
+    # T-1478: stamped when the fixture is BUILT. An import-time stamp is
+    # discovery time, and the declared family reaches this module past the
+    # 15-minute claim liveness window, so "live" read as stale.
+    claimed = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
     board = (
         "## DOING\n"
         f"- [/] T-9001 live work | verify: x | owner: {owner} | "
-        f"claim_time: {CLAIM_NOW.strftime('%Y-%m-%dT%H:%M:%SZ')}\n"
+        f"claim_time: {claimed}\n"
         "## TODO\n## DONE\n## BLOCKED\n"
     )
     (root / ".saipen" / "BOARD.md").write_text(board, encoding="utf-8")

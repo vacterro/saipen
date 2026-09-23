@@ -64,11 +64,14 @@ def setUpModule() -> None:
 # produces proves nothing about the gate under test.
 # ---------------------------------------------------------------------------
 
-_NOW = datetime.now(timezone.utc)
-
-
 def _stamp(delta_hours: int = 0) -> str:
-    return (_NOW + timedelta(hours=delta_hours)).strftime("%Y-%m-%dT%H:%M:%SZ")
+    # T-1478: the clock is read when the fixture is BUILT, never at import. A
+    # module-level "now" is discovery time, and the declared family reaches
+    # these fixtures tens of minutes later: a "live" claim was already past
+    # board.CLAIM_LIVENESS_WINDOW (15 min), so the verdict followed the
+    # machine's speed.
+    now = datetime.now(timezone.utc)
+    return (now + timedelta(hours=delta_hours)).strftime("%Y-%m-%dT%H:%M:%SZ")
 
 
 _LEGAL_LOG = (
