@@ -51,11 +51,25 @@ from saipen_engine.operations import (  # noqa: E402
     ticket_move,
     transition_phase,
 )
+from saipen_engine.paths import PROJECT_BINDING_ENV  # noqa: E402
 from saipen_engine.state import parse_state  # noqa: E402
+from test_hermetic_env import isolate_host_session  # noqa: E402
 
 SAIPEN_PY = TOOLS / "saipen.py"
 AGENT = "tester"
-ENV_KEYS = ("SAIPEN_PROJECT_ROOT", "SAIPEN_PROJECT_LINEAGE", "SAIPEN_AGENT")
+#: T-1442: the engine's one list of binding carriers plus the seat, not a
+#: remembered one -- SAIPEN_HOST_SESSION was missing, and inside a live host
+#: session a fixture's resumed parent read as claimed.
+ENV_KEYS = (
+    *(name for name in PROJECT_BINDING_ENV if name.startswith("SAIPEN_")),
+    "SAIPEN_AGENT",
+)
+
+
+def setUpModule() -> None:
+    # T-1442: the in-process operations read the host-session carrier too, so
+    # the whole module runs without the operator's session.
+    isolate_host_session()
 
 
 def _cli(project: Path, *args: str) -> tuple[int, dict]:

@@ -44,6 +44,12 @@ HOST_SESSION_VARIABLES = (
     "SAIPEN_RUNTIME_INFO",
     "SAIPEN_SKILL_ROOT",
     "SAIPEN_GUARD_STARTUP_PROBE",
+    # T-1442: the host adapter's session carrier. Inherited, it made a fixture's
+    # parent read as claimed in the operator's session: test_continue_chain and
+    # test_conformance_repair_boundary failed inside a live host session and
+    # passed outside one. `paths.PROJECT_BINDING_ENV` already names it; the
+    # tripwire below keeps this list a superset of that one.
+    "SAIPEN_HOST_SESSION",
     # SAIGPU: an operator's `SAIPEN_GPU=on` would start a real GPU lane beside
     # every fixture `supervise`; stripped, the fixture's own (absent) switch
     # decides, which is OFF.
@@ -216,6 +222,19 @@ class HermeticEnvironmentTests(unittest.TestCase):
         )
         self.assertNotIn("foreign", probe.stdout)
         self.assertNotIn("lineage-", probe.stdout)
+
+    def test_every_engine_binding_carrier_is_stripped(self) -> None:
+        """T-1442: one owner. The engine's own list of project-binding carriers
+        (`paths.PROJECT_BINDING_ENV`) is what production treats as a binding;
+        the harness must strip every SAIPEN_ name in it."""
+        tools = str(Path(__file__).resolve().parent)
+        if tools not in sys.path:
+            sys.path.insert(0, tools)
+        from saipen_engine.paths import PROJECT_BINDING_ENV
+
+        engine = {name for name in PROJECT_BINDING_ENV if name.startswith("SAIPEN_")}
+        self.assertIn("SAIPEN_HOST_SESSION", engine)
+        self.assertEqual(sorted(engine - set(HOST_SESSION_VARIABLES)), [])
 
 
 if __name__ == "__main__":

@@ -194,7 +194,15 @@ def _run_family(root: Path, family: TestFamily, *, spool: Path | None = None) ->
             "exit_code": None,
             "detail": "required platform shell is unavailable",
         }
-    env = os.environ.copy()
+    from .paths import unbound_environment
+
+    # T-1442: a family run is evidence about the tree, never about the session
+    # that launched it. The operator's project binding, host session and seat
+    # (the engine's one carrier list, plus SAIPEN_AGENT) are not inherited, so
+    # a module that forgot `isolate_host_session` cannot bind the live project
+    # or read as that session's claim, and the verdict does not follow whoever
+    # holds the seat.
+    env = unbound_environment(os.environ.copy(), SAIPEN_AGENT=None)
     env["PYTHONDONTWRITEBYTECODE"] = "1"
     env["SAIPEN_CANONICAL_TEST_CHILD"] = "1"
     creation = {"start_new_session": True} if os.name != "nt" else {
