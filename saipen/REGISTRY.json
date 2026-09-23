@@ -1052,7 +1052,8 @@
     "APPEND_NEW_MISSION",
     "APPEND_NOT_FOUND",
     "APPEND_SUPERSEDES_UNKNOWN",
-    "APPEND_TARGET_UNKNOWN"
+    "APPEND_TARGET_UNKNOWN",
+    "GPU_TRIAGE"
   ],
   "continue_fallback": {
     "invariant": "continue may fall through to improve ONLY after recovery, blocked/retryable, queued and required-follow-up routing are exhausted; it resumes an existing active Improve cycle and never creates an unbounded improve carousel",
