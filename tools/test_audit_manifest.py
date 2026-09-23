@@ -666,7 +666,11 @@ class TestEvidenceSurfaceIsCanonical(unittest.TestCase):
         closure records is protocol knowledge, so the contract names them.
         """
         references = audit_manifest.build(self.root)["references"]
-        self.assertEqual(references["surfaces"], ["evidence"])
+        # T-1374: the externalized-detail stores a detail_ref points into.
+        self.assertEqual(
+            references["surfaces"],
+            ["evidence", "recovery/log-detail", "recovery/board-compaction"],
+        )
         carriers = {item["path"]: item for item in references["carriers"]}
         for name in ("STATE.md", "BOARD.md", "LOG.md"):
             self.assertEqual(carriers[name]["kind"], "file", name)

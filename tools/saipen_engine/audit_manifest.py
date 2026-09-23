@@ -111,12 +111,22 @@ CONDITIONAL_DIRS = (
     # still report required_evidence_omitted=false. A positive durable
     # declaration outranks the broad prefix -- see `EXPORT_PRECEDENCE`.
     ("recovery/board-compaction", True, 8000),
+    # T-1374: the LOG twin. An event over the live cap keeps its full text
+    # HERE and LOG cites it as `detail_ref: .saipen/recovery/log-detail/
+    # E-###-<hash>.json` (63 in SAIPEN and 4 in ProTrail when first measured,
+    # 141 in SAIPEN on 2026-09-23), so an archive without it carried dangling
+    # pointers while reporting COMPLETE. The metadata embeds the machine-local
+    # project_identity, the same trade T-1452 made for board-compaction.
+    ("recovery/log-detail", True, 8000),
 )
 
 #: Surfaces a closure record may cite by path (`<memory_root>/<surface>/...`).
 #: Each one is also a CONDITIONAL_DIRS entry, so a cited file that exists is
 #: collected by its directory rule as well.
-REFERENCE_SURFACES = ("evidence",)
+#: T-1374: both externalized-detail stores are surfaces too -- a LOG or BOARD
+#: `detail_ref` is a citation, and a consumer that cannot resolve one must
+#: report the snapshot incomplete naming it, not COMPLETE.
+REFERENCE_SURFACES = ("evidence", "recovery/log-detail", "recovery/board-compaction")
 
 #: (relative path, kind, recursive, name suffix, max_files): the closure
 #: records whose citations a consumer must resolve. Files carry no cap; a
