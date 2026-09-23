@@ -317,9 +317,214 @@ def copy_tree_consistent(source: Path, sandbox: Path, ignore) -> None:
     )
 
 
-def run_family(root: Path | str, *, timeout: int | None = None) -> dict:
-    """Run the declared family in a disposable copy; parse the COMPLETE output."""
-    from .test_runner import _ignore_copy, _run_family
+#: T-1472. The family is ONE discovery; run as concurrent shards of it, each in
+#: its own copy of the same subject, it proves the same thing in a fraction of
+#: the wall time (2254 s sequential at af93fd56). One job is the declared
+#: command itself, unchanged.
+DEFAULT_JOBS = max(1, min(6, (os.cpu_count() or 2) // 2))
+#: The stdlib-only shard runner. Like this module it is the harness, not the
+#: subject: it runs from the engine, so any project declaring the family shards.
+SHARD_RUNNER = Path(__file__).resolve().with_name("core_unit_shard.py")
+#: Each module's measured time, kept to balance the next run's shards. A cache
+#: beside the red sections: it decides only which shard runs a module.
+DURATIONS_REL = ".saipen/cache/core-unit/durations.json"
+
+
+def shardable(command) -> tuple[str, str] | None:
+    """``(start, pattern)`` when ``command`` is exactly the declared discovery
+    shape the shard runner reproduces, else None (the family then runs whole)."""
+    tail = list(command)[1:]
+    if len(tail) != 9 or tail[:4] != ["-B", "-m", "unittest", "discover"]:
+        return None
+    if tail[4] != "-s" or tail[6] != "-p" or tail[8] != "-v":
+        return None
+    return tail[5], tail[7]
+
+
+def plan_shards(modules, weights: dict, jobs: int) -> list[list[str]]:
+    """Longest-first onto the least-loaded shard; deterministic for equal input.
+
+    A module with no measured weight is costed at the mean of the measured
+    ones, so a new module neither starves nor swamps a shard.
+    """
+    modules = sorted(set(modules))
+    known = [float(weights[name]) for name in modules if name in weights]
+    default = sum(known) / len(known) if known else 1.0
+    cost = {name: float(weights.get(name, default)) for name in modules}
+    shards: list[list[str]] = [[] for _ in range(max(1, int(jobs)))]
+    loads = [0.0] * len(shards)
+    for name in sorted(modules, key=lambda item: (-cost[item], item)):
+        index = min(range(len(shards)), key=lambda item: (loads[item], item))
+        shards[index].append(name)
+        loads[index] += cost[name]
+    return shards
+
+
+def load_durations(root: Path | str) -> dict:
+    try:
+        data = json.loads((Path(root) / DURATIONS_REL).read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return {}
+    modules = data.get("modules") if isinstance(data, dict) else None
+    if not isinstance(modules, dict):
+        return {}
+    return {
+        str(name): float(seconds)
+        for name, seconds in modules.items()
+        if isinstance(seconds, (int, float)) and seconds >= 0
+    }
+
+
+def keep_durations(root: Path | str, measured: dict) -> None:
+    """Merge a run's per-module times into the balancing cache."""
+    if not measured:
+        return
+    merged = {**load_durations(root), **measured}
+    path = Path(root) / DURATIONS_REL
+    path.parent.mkdir(parents=True, exist_ok=True)
+    payload = {"schema": 1, "modules": dict(sorted(merged.items()))}
+    path.write_text(json.dumps(payload, indent=1) + "\n", encoding="utf-8")
+
+
+def _modules(sandbox: Path, start: str, pattern: str) -> list[str]:
+    """The top-level test modules discovery will import, by file name. A module
+    this misses is still run: the catch-all shard takes every unnamed one."""
+    import fnmatch
+
+    return sorted(
+        path.stem
+        for path in (sandbox / start).iterdir()
+        if path.is_file()
+        and path.suffix == ".py"
+        and fnmatch.fnmatch(path.name, pattern)
+        and path.stem.isidentifier()
+    )
+
+
+def _run_whole(sandbox: Path, declared_family, spool: Path) -> dict:
+    from .test_runner import _run_family
+
+    report = _run_family(sandbox, declared_family, spool=spool)
+    # unittest's runner writes to stderr; stdout is the tests' own output.
+    text = (spool / "stderr").read_bytes().decode("utf-8", errors="replace")
+    return {
+        "status": report["status"],
+        "exit_code": report.get("exit_code"),
+        **parse_output(text),
+        "sections": red_sections(text),
+    }
+
+
+def _run_shard(sandbox: Path, declared_family, shape: tuple, spec: dict, work: Path) -> dict:
+    from .test_runner import TestFamily, _run_family
+
+    spool = work / "spool"
+    spool.mkdir()
+    spec_path = work / "spec.json"
+    spec_path.write_text(json.dumps(spec), encoding="utf-8")
+    manifest_path = work / "manifest.json"
+    command = (
+        declared_family.command[0],
+        "-B",
+        str(SHARD_RUNNER),
+        *shape,
+        str(spec_path),
+        str(manifest_path),
+    )
+    began = time.monotonic()
+    report = _run_family(
+        sandbox,
+        TestFamily(declared_family.name, command, declared_family.timeout),
+        spool=spool,
+    )
+    text = (spool / "stderr").read_bytes().decode("utf-8", errors="replace")
+    try:
+        manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        manifest = None
+    return {
+        "status": report["status"],
+        "exit_code": report.get("exit_code"),
+        **parse_output(text),
+        "sections": red_sections(text),
+        "manifest": manifest if isinstance(manifest, dict) else None,
+        "duration_s": round(time.monotonic() - began, 1),
+    }
+
+
+def merge_shards(shards: list[dict]) -> dict:
+    """One run from its shards: red is the union, counts are sums, and the
+    partition is proven by arithmetic -- every shard discovered the same
+    family, and together they kept every discovered test exactly once."""
+    statuses = [shard["status"] for shard in shards]
+    if "TIMEOUT" in statuses:
+        status = "TIMEOUT"
+    else:
+        status = "PASS" if all(item == "PASS" for item in statuses) else "FAIL"
+    exits = [shard.get("exit_code") for shard in shards]
+    if status == "TIMEOUT" or None in exits:
+        exit_code = None
+    else:
+        exit_code = next((code for code in exits if code != 0), 0)
+    rans = [shard.get("ran") for shard in shards]
+    tallies = [shard.get("tallied") for shard in shards]
+    manifests = [shard.get("manifest") or {} for shard in shards]
+    sections: dict = {}
+    durations: dict = {}
+    for shard, manifest in zip(shards, manifests):
+        sections.update(shard.get("sections") or {})
+        for name, seconds in (manifest.get("modules") or {}).items():
+            durations[name] = round(durations.get(name, 0.0) + float(seconds), 1)
+    discovered = {manifest.get("discovered") for manifest in manifests}
+    selected = [manifest.get("selected") for manifest in manifests]
+    partition_error = None
+    if None in discovered or None in selected:
+        silent = [index for index, item in enumerate(selected) if item is None]
+        partition_error = f"shard(s) {silent} never reported their discovery"
+    elif len(discovered) != 1:
+        partition_error = f"shards discovered different families: {sorted(discovered)}"
+    elif sum(selected) != min(discovered):
+        partition_error = f"shards kept {sum(selected)} of {min(discovered)} discovered tests"
+    return {
+        "status": status,
+        "exit_code": exit_code,
+        "ran": sum(rans) if None not in rans else None,
+        "red": sorted({test for shard in shards for test in shard.get("red") or []}),
+        "headers": sum(int(shard.get("headers") or 0) for shard in shards),
+        "unparsed": sum(int(shard.get("unparsed") or 0) for shard in shards),
+        "tallied": sum(tallies) if None not in tallies else None,
+        "sections": sections,
+        "discovered": next(iter(discovered)) if len(discovered) == 1 else None,
+        "partition_error": partition_error,
+        "shards": [
+            {
+                "status": shard["status"],
+                "exit_code": shard.get("exit_code"),
+                "ran": shard.get("ran"),
+                "selected": manifest.get("selected"),
+                "red": shard.get("red") or [],
+                "headers": shard.get("headers"),
+                "unparsed": shard.get("unparsed"),
+                "tallied": shard.get("tallied"),
+                "duration_s": shard.get("duration_s"),
+            }
+            for shard, manifest in zip(shards, manifests)
+        ],
+        "module_durations_s": dict(sorted(durations.items())),
+    }
+
+
+def run_family(root: Path | str, *, timeout: int | None = None, jobs: int = 1) -> dict:
+    """Run the declared family in a disposable copy; parse the COMPLETE output.
+
+    With ``jobs`` > 1 and a declared command of the discovery shape, the same
+    discovery runs as that many concurrent shards, each in its own copy of the
+    one consistent snapshot, and every copy must carry the tested fingerprint.
+    """
+    import contextlib
+    from concurrent.futures import ThreadPoolExecutor
+
+    from .test_runner import _ignore_copy
 
     source = Path(root).resolve()
     declared_family = family()
@@ -327,37 +532,57 @@ def run_family(root: Path | str, *, timeout: int | None = None) -> dict:
         declared_family = type(declared_family)(
             declared_family.name, declared_family.command, timeout
         )
+    shape = shardable(declared_family.command) if int(jobs) > 1 else None
+    count = int(jobs) if shape else 1
     started = time.monotonic()
-    with tempfile.TemporaryDirectory(prefix="saipen-core-unit-") as tmp:
-        sandbox = Path(tmp) / "project"
-        spool = Path(tmp) / "spool"
-        spool.mkdir()
-        copy_tree_consistent(source, sandbox, _ignore_copy)
+    with contextlib.ExitStack() as stack:
+        # Each shard lives where the sequential run lives -- its own
+        # `saipen-core-unit-*/project` -- so no test sees a longer path.
+        tmps = [
+            Path(stack.enter_context(tempfile.TemporaryDirectory(prefix="saipen-core-unit-")))
+            for _ in range(count)
+        ]
+        sandboxes = [tmp / "project" for tmp in tmps]
+        copy_tree_consistent(source, sandboxes[0], _ignore_copy)
         # The subject is what was copied, fingerprinted where it was tested:
         # a write to the real tree after this line changes nothing here.
-        tested = tree_fingerprint(sandbox)
-        report = _run_family(sandbox, declared_family, spool=spool)
-        # unittest's runner writes to stderr; stdout is the tests' own output.
-        text = (spool / "stderr").read_bytes().decode("utf-8", errors="replace")
-    parsed = parse_output(text)
+        tested = tree_fingerprint(sandboxes[0])
+        if count == 1:
+            spool = tmps[0] / "spool"
+            spool.mkdir()
+            run = _run_whole(sandboxes[0], declared_family, spool)
+        else:
+            with ThreadPoolExecutor(max_workers=count) as pool:
+                list(pool.map(lambda target: shutil.copytree(sandboxes[0], target, symlinks=True),
+                              sandboxes[1:]))
+                copies = list(pool.map(tree_fingerprint, sandboxes[1:]))
+            if any(item != tested for item in copies):
+                raise RuntimeError("CORE_UNIT_SHARD_COPY: a shard copy is not the tested subject")
+            plan = plan_shards(_modules(sandboxes[0], *shape), load_durations(source), count)
+            # Shard 0 is the catch-all: every module no other shard names.
+            named = sorted({name for shard in plan[1:] for name in shard})
+            specs = [{"exclude": named}, *({"include": shard} for shard in plan[1:])]
+            with ThreadPoolExecutor(max_workers=count) as pool:
+                shards = list(pool.map(
+                    lambda index: _run_shard(
+                        sandboxes[index], declared_family, shape, specs[index], tmps[index]
+                    ),
+                    range(count),
+                ))
+            run = merge_shards(shards)
     return {
-        "status": report["status"],
-        "exit_code": report.get("exit_code"),
-        **parsed,
-        "sections": red_sections(text),
+        **run,
         "fingerprint": tested,
+        "jobs": count,
         "duration_s": round(time.monotonic() - started, 1),
         "timeout_s": declared_family.timeout,
         "command": ["python", *declared_family.command[1:]],
     }
 
 
-def judge(run: dict, baseline_red) -> dict:
-    """The verdict of one run against the baseline; the arithmetic lives here only."""
-    red = set(run.get("red") or [])
-    inherited = set(baseline_red or [])
-    new_red = sorted(red - inherited)
-    fixed = sorted(inherited - red)
+def _consistency(run: dict) -> list[str]:
+    """What makes a run -- or one shard of it -- not a complete run."""
+    red = run.get("red") or []
     problems = []
     if run.get("status") == "TIMEOUT":
         problems.append(f"the family did not finish inside {run.get('timeout_s')} s")
@@ -373,6 +598,21 @@ def judge(run: dict, baseline_red) -> dict:
         problems.append(
             f"unittest tallied {run['tallied']} red but {run.get('headers')} header(s) were read"
         )
+    return problems
+
+
+def judge(run: dict, baseline_red) -> dict:
+    """The verdict of one run against the baseline; the arithmetic lives here only."""
+    red = set(run.get("red") or [])
+    inherited = set(baseline_red or [])
+    new_red = sorted(red - inherited)
+    fixed = sorted(inherited - red)
+    problems = _consistency(run)
+    for index, shard in enumerate(run.get("shards") or []):
+        shard_run = {**shard, "timeout_s": run.get("timeout_s")}
+        problems.extend(f"shard {index}: {problem}" for problem in _consistency(shard_run))
+    if run.get("partition_error"):
+        problems.append(str(run["partition_error"]))
     if new_red:
         problems.append(f"{len(new_red)} new red outside the baseline")
     return {
@@ -425,6 +665,13 @@ def write_record(root: Path | str, run: dict, fingerprint: str) -> dict:
         "unparsed": run.get("unparsed"),
         "tallied": run.get("tallied"),
         "red": run["red"],
+        # T-1472: how the one discovery was executed, and the proof that its
+        # shards covered it. Absent for a whole (single-process) run.
+        **{
+            key: run[key]
+            for key in ("jobs", "discovered", "partition_error", "shards", "module_durations_s")
+            if run.get(key) is not None
+        },
         **verdict,
     }
     directory = base / RECORD_DIR_REL
@@ -568,6 +815,12 @@ def main(argv: list[str] | None = None) -> int:
     evidence.add_argument("--agent")
     evidence.add_argument("--timeout", type=int)
     evidence.add_argument(
+        "--jobs",
+        type=int,
+        default=DEFAULT_JOBS,
+        help="concurrent shards of the one discovery (1 = the declared command, whole)",
+    )
+    evidence.add_argument(
         "--fresh", action="store_true", help="run even when a PASS record of this tree exists"
     )
     baseline = sub.add_parser("baseline", help="record the family's current red set")
@@ -579,6 +832,7 @@ def main(argv: list[str] | None = None) -> int:
         help="required when the new baseline adds red ids the old one lacks",
     )
     baseline.add_argument("--timeout", type=int)
+    baseline.add_argument("--jobs", type=int, default=DEFAULT_JOBS)
     args = parser.parse_args(argv)
     root = Path(args.project_root).resolve()
 
@@ -597,7 +851,8 @@ def _baseline(root: Path, args) -> int:
         record = json.loads((root / args.from_record).read_text(encoding="utf-8"))
         run = {key: record.get(key) for key in ("status", "exit_code", "ran", "red", "command")}
     else:
-        run = run_family(root, timeout=args.timeout)
+        run = run_family(root, timeout=args.timeout, jobs=args.jobs)
+        keep_durations(root, run.get("module_durations_s") or {})
     if run["status"] not in ("PASS", "FAIL") or not run["ran"]:
         return _emit({"ok": False, "detail": "the family did not complete", "run": run})
     old, _error = load_baseline(root)
@@ -631,7 +886,8 @@ def _evidence(root: Path, args) -> int:
     written = None if args.fresh else reusable_record(root, fingerprint)
     reused = written is not None
     if written is None:
-        run = run_family(root, timeout=args.timeout)
+        run = run_family(root, timeout=args.timeout, jobs=args.jobs)
+        keep_durations(root, run.get("module_durations_s") or {})
         # The record is the truth about the copy that ran, so it is kept either
         # way; a tree that drifted since the copy only loses the citation.
         written = write_record(root, run, run.get("fingerprint") or fingerprint)
