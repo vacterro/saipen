@@ -18,7 +18,16 @@ def _protocol_dir(protocol_dir: Path | None = None) -> Path:
 
 
 def _size(path: Path) -> int:
-    return path.stat().st_size if path.is_file() else 0
+    """Content bytes with LF line ends (T-1465).
+
+    `st_size` counted the checkout's line ends: with `text=auto` a file one
+    tool rewrote carries CRLF on Windows and LF everywhere else, so
+    REGISTRY.json measured 30496 bytes here and 29346 in a Linux clone, and a
+    budget's verdict followed the checkout rather than the protocol.
+    """
+    if not path.is_file():
+        return 0
+    return len(path.read_bytes().replace(b"\r\n", b"\n"))
 
 
 def _load_registry(protocol_dir: Path) -> dict[str, Any]:

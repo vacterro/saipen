@@ -196,8 +196,11 @@ class ProtocolRegistryTests(unittest.TestCase):
     def test_phase_metrics_measure_all_registry_phases_and_actual_bytes(self):
         phase_names = self.registry["phases"]["all"]
         measured = protocol_budget.load_profiles(PROTOCOL)
+        # T-1465: content bytes with LF line ends, whatever the checkout wrote.
         actual = {
-            name: (PROTOCOL / "phases" / f"{name.lower()}.md").stat().st_size
+            name: len(
+                (PROTOCOL / "phases" / f"{name.lower()}.md").read_bytes().replace(b"\r\n", b"\n")
+            )
             for name in phase_names
         }
         self.assertEqual(len(phase_names), 16)
