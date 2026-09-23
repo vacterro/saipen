@@ -1197,8 +1197,11 @@ def _quoted_payload_tokens(command: str) -> list[str] | None:
         or len(tokens) < 3
         or len(tokens) > _SAIPEN_MAX_TOKENS
         or tokens[0] != "saipen"
-        or tokens[1] in command_effects.INGRESS_PAYLOAD_VERBS
-        or not command_effects.is_shell_canonical_verb(tokens[1])
+        # The ingress verbs own a stricter payload grammar (T-1398); a shortcut
+        # or hush in front of one must not reach this generic one instead.
+        or command_effects.routed_verb(tokens[1], tokens[2:])
+        in command_effects.INGRESS_PAYLOAD_VERBS
+        or not command_effects.is_shell_canonical_verb(tokens[1], tokens[2:])
     ):
         return None
     return tokens
@@ -1277,7 +1280,7 @@ def _saipen_cli_tokens(command: str) -> list[str] | None:
     for token in tokens:
         if not token or not _SAIPEN_PATH_ARG_CHARS.issuperset(token):
             return None
-    if len(tokens) > 1 and not command_effects.is_shell_canonical_verb(tokens[1]):
+    if len(tokens) > 1 and not command_effects.is_shell_canonical_verb(tokens[1], tokens[2:]):
         return None
     return tokens
 

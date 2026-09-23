@@ -33,11 +33,14 @@ if str(TOOLS) not in sys.path:
 from saipen_engine import guard_events  # noqa: E402
 
 ENGINE = TOOLS / "saipen_engine"
-#: A quoted string literal that begins a `saipen ...` command line.
-_LITERAL = re.compile(r"""["'](saipen [^"'\n]{0,160})["']""")
+#: A quoted string literal that begins a `saipen ...` command line, with its
+#: string prefix: a RAW literal in the engine is a pattern that RECOGNISES a
+#: command (`r"saipen improve reconcile [A-Za-z0-9_-]+"`), never one printed.
+_LITERAL = re.compile(r"""(?<![A-Za-z0-9_])([rRbBfFuU]{0,2})["'](saipen [^"'\n]{0,160})["']""")
 #: `<placeholder>` and `{interpolation}` both stand for a value the operator or
-#: the engine supplies; neither is what gets typed.
-_PLACEHOLDER = re.compile(r"<[^<>]{1,40}>|\{[^{}]{0,60}\}")
+#: the engine supplies; neither is what gets typed. An interpolation whose own
+#: quote ended the literal (`{first['receipt']}`) is cut at that quote.
+_PLACEHOLDER = re.compile(r"<[^<>]{1,40}>|\{[^{}]{0,60}(?:\}|$)")
 #: What a substituted placeholder becomes: inside the canonical argument
 #: alphabet, so substitution itself never decides the verdict.
 _FILLER = "T-1"
@@ -50,7 +53,9 @@ def harvested() -> dict[str, set[str]]:
     found: dict[str, set[str]] = {}
     for path in sorted(ENGINE.glob("*.py")):
         for match in _LITERAL.finditer(path.read_text(encoding="utf-8")):
-            found.setdefault(match.group(1).strip(), set()).add(path.name)
+            if "r" in match.group(1).lower():
+                continue
+            found.setdefault(match.group(2).strip(), set()).add(path.name)
     return found
 
 
@@ -91,13 +96,50 @@ class CanonicalCommandReachabilityTests(unittest.TestCase):
                     f"{command!r} is not reachable as a canonical operation",
                 )
 
-    def test_quoting_still_disqualifies_the_line(self):
-        """The grammar did not move; the command was made to fit it."""
+    def test_shell_syntax_outside_a_payload_still_disqualifies_the_line(self):
+        """T-1386 moved ONE thing: a single quoted literal payload of a canonical
+        verb is data, judged by the verb's own grammar. Shell syntax outside the
+        payload still makes the whole line an ordinary shell effect."""
+        for command in (
+            "saipen recover && rm -rf .saipen",
+            "saipen status | tee out.txt",
+            "saipen recover resolve-blocker 'decision' && rm -rf .saipen",
+            "saipen status > out.txt",
+        ):
+            with self.subTest(command=command):
+                self.assertIsNone(guard_events._saipen_cli_verb(command), command)
+
+    def test_a_quoted_payload_is_data_under_its_verb(self):
         for command in (
             'saipen recover resolve-blocker "quoted decision"',
             "saipen recover resolve-blocker 'quoted decision'",
-            "saipen recover && rm -rf .saipen",
-            "saipen status | tee out.txt",
+            "saipen recover resolve-blocker 'a && b | c'",
+        ):
+            with self.subTest(command=command):
+                self.assertEqual(guard_events._saipen_cli_verb(command), "recover", command)
+
+    def test_a_shortcut_is_the_command_it_routes_to(self):
+        """The CLI resolves a registry shortcut before any dispatch, and so
+        must the guard: `saipen cc` is `saipen continue`."""
+        for command, verb in (
+            ("saipen cc", "cc"),
+            ("saipen sss", "sss"),
+            ("saipen hush status", "hush"),
+            ("saipen continue", "continue"),
+        ):
+            with self.subTest(command=command):
+                self.assertEqual(guard_events._saipen_cli_verb(command), verb, command)
+        for command in ("saipen hush", "saipen bogus", "saipen hush bogus"):
+            with self.subTest(command=command):
+                self.assertIsNone(guard_events._saipen_cli_verb(command), command)
+
+    def test_a_modifier_never_carries_an_ingress_payload_past_its_own_grammar(self):
+        """start/user-request payloads are judged by the ingress grammar only
+        (T-1398); `hush` in front must not route one through the generic
+        quoted-payload path instead."""
+        for command in (
+            "saipen hush start 'fix the page'",
+            "saipen hush user-request 'fix the page'",
         ):
             with self.subTest(command=command):
                 self.assertIsNone(guard_events._saipen_cli_verb(command), command)

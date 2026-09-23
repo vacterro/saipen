@@ -214,5 +214,24 @@ def fleet_preflight_required(command_class: str) -> bool:
     return command_class not in FLEET_EXEMPT_CLASSES
 
 
-def is_shell_canonical_verb(token: str) -> bool:
-    return token in SHELL_CANONICAL_VERBS or token in HELP_TOKENS
+def routed_verb(token: str, rest: Sequence[str] = ()) -> str:
+    """The verb the CLI dispatches `saipen <token> <rest...>` to.
+
+    The CLI resolves a registry shortcut and strips the hush modifier BEFORE
+    any dispatch, so `saipen cc` is `saipen continue` and `saipen hush status`
+    is `saipen status`.
+    """
+    return _resolve_verb(token, list(rest))[0]
+
+
+def is_shell_canonical_verb(token: str, rest: Sequence[str] = ()) -> bool:
+    """Whether `saipen <token> <rest...>` names a shell-canonical operation.
+
+    Judged on the verb the CLI dispatches to (`routed_verb`): judging the raw
+    token refused the engine's own printed `saipen cc` while the CLI ran it --
+    one question, two answers.
+    """
+    if token in SHELL_CANONICAL_VERBS or token in HELP_TOKENS:
+        return True
+    verb = routed_verb(token, rest)
+    return verb != token and verb in SHELL_CANONICAL_VERBS
