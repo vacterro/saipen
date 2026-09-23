@@ -190,13 +190,38 @@ class TestAdmissionAuthority(unittest.TestCase):
         self.assertTrue(result["admitted"], result)
         self.assertEqual(result["code"], "ADMITTED_EXTERNAL")
 
+    def _fastest_of_twenty(self) -> list[float]:
+        evaluate_admission(self.root, target_path="src/app.py")  # warmup
+        return [
+            evaluate_admission(self.root, target_path="src/app.py")["duration_ms"]
+            for _ in range(20)
+        ]
+
     def test_performance_budget(self):
-        # Warmup
-        evaluate_admission(self.root, target_path="src/app.py")
-        # Evaluation should meet budget (< 5ms)
-        for _ in range(20):
-            res = evaluate_admission(self.root, target_path="src/app.py")
-            self.assertLess(res["duration_ms"], 5.0)
+        # T-1496: the budget is judged on the FASTEST of 20 evaluations. Every
+        # call pays the code's own cost, so a real regression moves the
+        # minimum; a busy host only adds spikes on top of it. The old bound
+        # required all 20 calls under 5 ms and failed 6 of 60 runs on a loaded
+        # host (5.456-10.817 ms) while the code did not change.
+        durations = self._fastest_of_twenty()
+        self.assertLess(min(durations), 5.0, durations)
+
+    def test_performance_budget_still_sees_a_real_regression(self):
+        """Red control: a gate that cannot fail is not a gate. A cost every
+        evaluation pays (6 ms per call) must lift the minimum over the budget."""
+        import time
+
+        import saipen_engine.admission as admission
+
+        real = admission.canonicalize_target
+
+        def slow(*args, **kwargs):
+            time.sleep(0.006)
+            return real(*args, **kwargs)
+
+        with patch.object(admission, "canonicalize_target", slow):
+            durations = self._fastest_of_twenty()
+        self.assertGreaterEqual(min(durations), 5.0, durations)
 
     def test_detached_staging_cwd_with_env(self):
         staging = tempfile.TemporaryDirectory()
