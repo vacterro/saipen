@@ -40,6 +40,11 @@ FAMILY_NAME = "unit"
 DECLARATION_REL = "tools/saipen_engine/test_runner.py"
 BASELINE_REL = "tools/core_unit_baseline.json"
 RECORD_DIR_REL = ".saipen/evidence/core-unit"
+#: T-1481. The red sections of a fresh run, kept beside nothing that decides:
+#: a runtime cache for advisory triage (SAIGPU), never part of a record.
+RED_SECTIONS_REL = ".saipen/cache/core-unit"
+#: One red section is cut to this many characters; the tail holds the error.
+RED_SECTION_CHARS = 4000
 MARKER = "CORE-UNIT-EVIDENCE"
 SCHEMA_VERSION = 1
 #: The subject is everything the sandbox copy holds except canonical state.
@@ -118,6 +123,48 @@ def parse_output(text: str) -> dict:
         "unparsed": headers - parsed,
         "tallied": tallied,
     }
+
+
+def red_sections(text: str) -> dict:
+    """``{test id: its section of the unittest error list}`` (T-1481).
+
+    The same anchoring as ``parse_output``: a section starts at a separator
+    line directly above a red header and ends at the next separator or dash
+    rule that closes the error list. Long sections keep their tail, where the
+    exception is.
+    """
+    lines = (text or "").replace("\r\n", "\n").split("\n")
+    sections: dict = {}
+    for index, (above, line) in enumerate(zip(lines, lines[1:])):
+        if above != _SEPARATOR or not line.startswith(_HEADER_PREFIXES):
+            continue
+        match = _RED_RE.match(line)
+        if match is None:
+            continue
+        _kind, name, where = match.groups()
+        test_id = where if where.endswith("." + name) else f"{where}.{name}"
+        body = []
+        for follow in lines[index + 2 :]:
+            if follow == _SEPARATOR or (follow.startswith("-" * 70) and body and body[-1] == ""):
+                break
+            body.append(follow)
+        section = "\n".join([line, *body]).strip()
+        if len(section) > RED_SECTION_CHARS:
+            section = line + "\n...\n" + section[-RED_SECTION_CHARS:]
+        sections.setdefault(test_id, section)
+    return sections
+
+
+def keep_red_sections(root: Path | str, record_path: str, sections: dict) -> str | None:
+    """Cache a fresh run's red sections next to nothing canonical (T-1481)."""
+    if not sections:
+        return None
+    directory = Path(root) / RED_SECTIONS_REL
+    directory.mkdir(parents=True, exist_ok=True)
+    path = directory / (Path(record_path).stem + ".red.json")
+    payload = {"record": record_path, "sections": sections}
+    path.write_text(json.dumps(payload, indent=1, ensure_ascii=False), encoding="utf-8")
+    return path.relative_to(Path(root)).as_posix()
 
 
 def _sha256_file(path: Path) -> str:
@@ -297,6 +344,7 @@ def run_family(root: Path | str, *, timeout: int | None = None) -> dict:
         "status": report["status"],
         "exit_code": report.get("exit_code"),
         **parsed,
+        "sections": red_sections(text),
         "fingerprint": tested,
         "duration_s": round(time.monotonic() - started, 1),
         "timeout_s": declared_family.timeout,
@@ -587,6 +635,7 @@ def _evidence(root: Path, args) -> int:
         # The record is the truth about the copy that ran, so it is kept either
         # way; a tree that drifted since the copy only loses the citation.
         written = write_record(root, run, run.get("fingerprint") or fingerprint)
+        keep_red_sections(root, written["path"], run.get("sections") or {})
         if tree_fingerprint(root) != written["record"]["fingerprint"]:
             return _emit(
                 {

@@ -5944,7 +5944,7 @@ def _acceptance(project_root: Path, args: list[str], as_json: bool) -> int:
 
 
 _GPU_USAGE = (
-    "saipen gpu [status|on|off|index [--budget SECONDS]|recall <text> [--k N]] [--json]"
+    "saipen gpu [status|on|off|index [--budget SECONDS]|recall <text> [--k N]|triage] [--json]"
 )
 
 
@@ -6011,6 +6011,22 @@ def _gpu(project_root: Path, args: list[str], as_json: bool) -> int:
         result = _gpu_lane.refresh_index(project_root, budget_s=budget)
         _gpu_out({**result, "ok": True, "complete": result["ok"]}, as_json)
         return 0
+    if action == "triage" and not rest:
+        result = _gpu_lane.triage(project_root)
+        if result.get("stop") == _gpu_lane.DISABLED:
+            _emit(
+                {
+                    "ok": False,
+                    "code": "GPU_LANE_UNAVAILABLE",
+                    "reason": _gpu_lane.DISABLED,
+                    "detail": "the GPU lane is not usable now: DISABLED",
+                    "canonical_next_command": "saipen gpu on",
+                },
+                as_json,
+            )
+            return 1
+        _gpu_out({**result, "ok": True, "complete": result["ok"]}, as_json)
+        return 0
     if action == "recall":
         k = 5
         if "--k" in rest:
@@ -6070,7 +6086,17 @@ def _gpu_out(payload: dict, as_json: bool) -> None:
         )
         if payload.get("note"):
             print(f"note: {payload['note']}")
-    for key in ("stop", "embedded", "pending", "indexed", "seconds"):
+    for key in (
+        "stop",
+        "embedded",
+        "pending",
+        "indexed",
+        "seconds",
+        "file",
+        "groups",
+        "annotated",
+        "covered_ids",
+    ):
         if key in payload:
             print(f"{key}: {payload[key]}")
     for hit in payload.get("hits") or []:

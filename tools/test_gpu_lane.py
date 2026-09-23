@@ -17,7 +17,10 @@ Proven here:
 - nothing the lane does touches STATE, BOARD or LOG;
 - the side lane runs beside `supervise` only when ON and reports what it did;
 - the CLI verb is DIAGNOSTIC, refuses unknown actions, and `ticket add`
-  output and exit code are unchanged whether the advisory fires or not.
+  output and exit code are unchanged whether the advisory fires or not;
+- T-1481 triage: a REAL red unittest run is captured, its red ids grouped by
+  a mechanical signature that covers every id, each group annotated once,
+  OFF produces nothing, a busy card pauses it and the next pass resumes.
 """
 
 from __future__ import annotations
@@ -32,6 +35,7 @@ import os
 import re
 import sys
 import tempfile
+import time
 import unittest
 from pathlib import Path
 from unittest import mock
@@ -306,6 +310,126 @@ class SideLaneTests(LaneTestCase):
         with fake_lane, exploding, self.assertRaises(RuntimeError):
             worker.supervise(self.root, ["agent", "{model}"], max_cycles=1)
         self.assertEqual(stopped, [True])
+
+
+RED_TESTS = (
+    "import unittest\n\n\n"
+    "class R(unittest.TestCase):\n"
+    "    def test_one(self):\n        self.assertEqual(2, 1)\n\n"
+    "    def test_two(self):\n        self.assertEqual(7, 5)\n\n"
+    "    def test_three(self):\n        {}['missing']\n"
+)
+
+
+class TriageTests(LaneTestCase):
+    """T-1481: a red family run gets mechanical groups and one hypothesis each."""
+
+    def red_run(self) -> Path:
+        """A REAL unittest run of three red tests, captured like `_evidence` does."""
+        core_unit = importlib.import_module("saipen_engine.core_unit")
+        test_runner = importlib.import_module("saipen_engine.test_runner")
+        (self.root / "tools").mkdir(exist_ok=True)
+        (self.root / "tools" / "test_red.py").write_text(RED_TESTS, encoding="utf-8")
+        small = test_runner.TestFamily(
+            core_unit.FAMILY_NAME,
+            (sys.executable, "-B", "-m", "unittest", "discover", "-s", "tools", "-p", "test_*.py"),
+            120,
+        )
+        with mock.patch.object(core_unit, "family", return_value=small):
+            run = core_unit.run_family(self.root)
+        self.assertEqual(len(run["red"]), 3)
+        self.assertEqual(sorted(run["sections"]), run["red"])
+        kept = core_unit.keep_red_sections(
+            self.root, ".saipen/evidence/core-unit/abc-20260923T000000Z.json", run["sections"]
+        )
+        return self.root / kept
+
+    def hypothesis(self, _system, prompt):
+        self.prompts.append(prompt)
+        return "look at " + prompt.split("\n", 1)[0]
+
+    def setUp(self) -> None:
+        super().setUp()
+        self.prompts: list[str] = []
+        self.ready = lambda: {"ok": True, "reason": gpu.READY}
+
+    def test_every_red_id_is_covered_and_every_group_annotated(self):
+        red_file = self.red_run()
+        before = self.canonical()
+        result = gpu.triage(self.root, chat=self.hypothesis, gate_check=self.ready)
+        self.assertTrue(result["ok"], result)
+        written = json.loads((self.root / result["file"]).read_text(encoding="utf-8"))
+        ids = sorted(i for group in written["groups"] for i in group["ids"])
+        sections = json.loads(red_file.read_text(encoding="utf-8"))["sections"]
+        self.assertEqual(ids, sorted(sections))
+        # 2 != 1 and 7 != 5 are one root cause; the KeyError is another.
+        self.assertEqual(sorted(len(g["ids"]) for g in written["groups"]), [1, 2])
+        self.assertTrue(all(g["hypothesis"] for g in written["groups"]))
+        self.assertIn("ADVISORY", written["advisory"])
+        self.assertEqual(len(self.prompts), 2)
+        self.assertEqual(self.canonical(), before, "triage wrote canonical state")
+        self.assertIsNone(gpu.pending_triage(self.root))
+
+    def test_off_produces_nothing(self):
+        self.red_run()
+        gpu.set_enabled(self.root, False)
+        result = gpu.triage(self.root, chat=self.hypothesis, gate_check=self.ready)
+        self.assertEqual(result["stop"], gpu.DISABLED)
+        self.assertFalse((gpu.cache_dir(self.root) / gpu.TRIAGE_DIR).exists())
+        self.assertEqual(self.prompts, [])
+
+    def test_the_user_taking_the_card_pauses_and_the_next_pass_resumes(self):
+        self.red_run()
+        # The user's load stays: READY once, then busy past every patience retry.
+        answers = iter([gpu.READY] + [gpu.GPU_BUSY] * 20)
+        first = gpu.triage(
+            self.root,
+            chat=self.hypothesis,
+            gate_check=lambda: (lambda r: {"ok": r == gpu.READY, "reason": r})(next(answers)),
+            sleep=lambda _s: None,
+        )
+        self.assertEqual((first["stop"], first["annotated"]), (gpu.GPU_BUSY, 1))
+        self.assertIsNotNone(gpu.pending_triage(self.root))
+        second = gpu.triage(
+            self.root, chat=self.hypothesis, gate_check=self.ready, sleep=lambda _s: None
+        )
+        self.assertTrue(second["ok"])
+        self.assertEqual(len(self.prompts), 2, "an annotated group was asked twice")
+
+    def test_triage_never_yields_to_its_own_inference(self):
+        # Measured live: the first real run stopped GPU_BUSY after ONE group --
+        # the card was 99 % busy with the lane's own model. The card reads busy
+        # right after a call and idle once the lane has rested.
+        self.red_run()
+        state = {"hot": False}
+
+        def chat(system, prompt):
+            state["hot"] = True
+            return self.hypothesis(system, prompt)
+
+        def rest(_seconds):
+            state["hot"] = False
+
+        def card():
+            reason = gpu.GPU_BUSY if state["hot"] else gpu.READY
+            return {"ok": reason == gpu.READY, "reason": reason}
+
+        result = gpu.triage(self.root, chat=chat, gate_check=card, sleep=rest)
+        self.assertEqual((result["stop"], result["annotated"]), ("COMPLETE", 2))
+
+    def test_the_side_lane_triages_a_waiting_run(self):
+        self.red_run()
+        live = importlib.import_module("saipen_engine.gpu")
+        with mock.patch.object(
+            live, "chat_ollama", lambda _c, s, p: self.hypothesis(s, p)
+        ), mock.patch.object(live, "gate", lambda *_a, **_k: self.ready()):
+            lane = live.SideLane(self.root, every=3600).start()
+            deadline = time.monotonic() + 60
+            while lane.last_triage is None and time.monotonic() < deadline:
+                time.sleep(0.05)
+            summary = lane.stop(timeout=60)
+        self.assertEqual(summary["triage_annotated"], 2)
+        self.assertEqual(summary["last_triage_stop"], "COMPLETE")
 
 
 def _live_gpu():

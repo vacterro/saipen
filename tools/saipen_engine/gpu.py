@@ -11,7 +11,11 @@ read in milliseconds when an agent needs it:
   for a question, so a cold agent orients from pointers instead of re-reading
   the tree;
 * the echo advisory -- ``ticket add`` names existing Work that says nearly
-  the same thing, the near-duplicate case T-1469's exact-echo rule cannot see.
+  the same thing, the near-duplicate case T-1469's exact-echo rule cannot see;
+* red-test triage (T-1481) -- after a declared-family run with red tests, the
+  red sections are grouped by a mechanical signature (every id covered by
+  construction) and a local chat model writes one hypothesis per group,
+  ``saipen gpu triage`` or the side lane.
 
 The rules are the telemetry rules (SRC-108): the lane is OBSERVED, it never
 DEFINES truth.
@@ -82,6 +86,11 @@ DEFAULTS = {
     #: waits this many cooldowns x5 for it to pass before giving up the run.
     "patience": 3,
     "echo_threshold": 0.80,
+    #: T-1481 red-test triage: a local chat model, only while the card is idle
+    #: AND this much VRAM is free (a 14B Q4 model wants ~9-10 GiB).
+    "llm_model": "qwen3:14b",
+    "llm_min_free_mib": 8000,
+    "llm_timeout_s": 240,
 }
 
 #: Reason codes. One closed vocabulary; ``READY`` is the only one that works.
@@ -224,11 +233,18 @@ def gate(
     gpu_probe=None,
     backend_probe=None,
     need_enabled: bool = True,
+    llm: bool = False,
 ) -> dict:
-    """May the lane use the card RIGHT NOW? ``{"ok", "reason", ...}``."""
+    """May the lane use the card RIGHT NOW? ``{"ok", "reason", ...}``.
+
+    ``llm`` asks for the triage model instead of the embedding model: a
+    different model to find and a far larger VRAM footprint to leave room for.
+    """
     gpu_probe = gpu_probe or probe_gpu
     backend_probe = backend_probe or probe_backend
     config = load_config(root)
+    model = config["llm_model"] if llm else config["embed_model"]
+    need_mib = int(config["llm_min_free_mib"] if llm else config["min_free_mib"])
     enabled, source = switch(root)
     answer = {"ok": False, "enabled": enabled, "switch": source, "gpu": None, "backend": None}
     if need_enabled and not enabled:
@@ -241,12 +257,12 @@ def gate(
     answer["backend"] = backend
     if not backend["up"]:
         return {**answer, "reason": BACKEND_DOWN}
-    if not _model_present(config["embed_model"], backend["models"]):
+    if not _model_present(model, backend["models"]):
         return {**answer, "reason": MODEL_MISSING}
     if card["utilization_percent"] > int(config["max_busy_percent"]):
         return {**answer, "reason": GPU_BUSY}
-    loaded = config["embed_model"] in _loaded_models(config)
-    if card["memory_free_mib"] < int(config["min_free_mib"]) and not loaded:
+    loaded = model in _loaded_models(config)
+    if card["memory_free_mib"] < need_mib and not loaded:
         return {**answer, "reason": VRAM_LOW}
     return {**answer, "ok": True, "reason": READY}
 
@@ -421,16 +437,14 @@ def refresh_index(
         if clock() - started >= budget_s:
             stop = "BUDGET"
             break
-        if start:
-            sleep(float(config["cooldown_s"]))
-        verdict = gate_check()
-        waited = 0
-        while verdict.get("reason") == GPU_BUSY and waited < int(config["patience"]):
-            if clock() - started >= budget_s:
-                break
-            waited += 1
-            sleep(float(config["cooldown_s"]) * 5)
-            verdict = gate_check()
+        verdict = _idle_gate(
+            gate_check,
+            config,
+            rested=start == 0,
+            deadline=started + budget_s,
+            clock=clock,
+            sleep=sleep,
+        )
         if not verdict.get("ok"):
             stop = verdict.get("reason") or "GATE"
             break
@@ -465,6 +479,29 @@ def refresh_index(
         "indexed": len(stored),
         "seconds": round(clock() - started, 2),
     }
+
+
+def _idle_gate(gate_check, config: dict, *, rested: bool, deadline: float, clock, sleep) -> dict:
+    """Ask the gate after the lane's OWN load has drained, with patience.
+
+    nvidia-smi reports utilization over its last sample window, so a gate
+    asked right after a batch or a model call measures the lane itself and
+    yields to it -- measured twice: the index at 480 of 1304 items, and the
+    first triage run after ONE group (99 % busy, its own inference). The rest
+    before asking is also the lane's duty cycle; patience rides out a
+    desktop spike instead of abandoning the pass.
+    """
+    if not rested:
+        sleep(float(config["cooldown_s"]))
+    verdict = gate_check()
+    waited = 0
+    while verdict.get("reason") == GPU_BUSY and waited < int(config["patience"]):
+        if clock() >= deadline:
+            break
+        waited += 1
+        sleep(float(config["cooldown_s"]) * 5)
+        verdict = gate_check()
+    return verdict
 
 
 def _utc() -> str:
@@ -564,7 +601,193 @@ def status(root: Path | str, *, gpu_probe=None, backend_probe=None) -> dict:
             "by_kind": kinds,
             "updated_at": index.get("updated_at"),
         },
+        "llm_model": config["llm_model"],
+        "triage_pending": pending_triage(root) is not None,
         "advisory": ADVISORY,
+    }
+
+
+# ---------------------------------------------------------------------------
+# red-test triage (T-1481): mechanical groups, local-LLM hypotheses
+#
+# The GROUPING is arithmetic, so every red id is covered by construction and a
+# model can neither drop nor invent a test. The model only annotates a group
+# with a hypothesis -- the part a frontier agent would otherwise spend its
+# own context reading tracebacks to reach. The output is advisory like
+# everything else here: a pointer where to look first, never a verdict.
+
+RED_SECTIONS_REL = Path(".saipen") / "cache" / "core-unit"
+TRIAGE_DIR = "triage"
+TRIAGE_SYSTEM = (
+    "You triage failing unit tests of the SAIPEN repository. You see ONE group "
+    "of failures that share an exception signature. In at most two sentences, "
+    "name the most probable root cause and where to look first. Use only file "
+    "and function names that appear in the traceback. If the traceback is not "
+    "enough, say what is missing instead of guessing."
+)
+_EXCEPTION_RE = re.compile(
+    r"^(?P<type>(?:[A-Za-z_][\w]*\.)*[A-Za-z_]\w*(?:Error|Exception|Exit|Failure|Interrupt|Warning))"
+    r"\b:?\s?(?P<message>.*)$"
+)
+_FRAME_RE = re.compile(r'^\s*File "(?P<file>[^"]+)", line \d+, in (?P<func>\S+)')
+_STDLIB_MARKERS = ("\\lib\\", "/lib/python", "\\python3", "/unittest/", "\\unittest\\")
+
+
+def red_signature(section: str) -> str:
+    """The mechanical root-cause key of one red section.
+
+    Final exception type, its message with numbers, quoted values and paths
+    normalized, and the innermost frame outside the standard library.
+    """
+    exception, frame = "NO_EXCEPTION", "?"
+    for line in section.splitlines():
+        found = _FRAME_RE.match(line)
+        if found and not any(m in found["file"].lower() for m in _STDLIB_MARKERS):
+            name = Path(found["file"]).name
+            # A test method's own name is not a cause: two tests of one module
+            # failing the same way are one group. An engine frame is.
+            frame = name if name.startswith("test_") else f"{name}:{found['func']}"
+        raised = _EXCEPTION_RE.match(line.strip())
+        if raised:
+            message = raised["message"]
+            message = re.sub(r"'[^']*'|\"[^\"]*\"", "'…'", message)
+            message = re.sub(r"[A-Za-z]:[\\/][^\s,)]+|/[\w./-]+", "<path>", message)
+            message = re.sub(r"\d+", "N", message)
+            exception = f"{raised['type'].rsplit('.', 1)[-1]}: {message[:80]}".rstrip(": ")
+    return f"{exception} @ {frame}"
+
+
+def group_red(sections: dict) -> list[dict]:
+    """Red ids grouped by signature, largest group first; covers every id."""
+    groups: dict[str, list[str]] = {}
+    for test_id in sorted(sections):
+        groups.setdefault(red_signature(sections[test_id]), []).append(test_id)
+    ordered = sorted(groups.items(), key=lambda pair: (-len(pair[1]), pair[0]))
+    return [
+        {"signature": signature, "ids": ids, "excerpt": sections[ids[0]][-1500:]}
+        for signature, ids in ordered
+    ]
+
+
+def chat_ollama(config: dict, system: str, prompt: str) -> str:
+    reply = _http(
+        config["endpoint"],
+        "/api/chat",
+        {
+            "model": config["llm_model"],
+            "messages": [
+                {"role": "system", "content": system},
+                {"role": "user", "content": prompt},
+            ],
+            # qwen3 reasons out loud unless told not to; a hypothesis needs none.
+            "think": False,
+            "stream": False,
+            "keep_alive": config["keep_alive"],
+            "options": {"temperature": 0.2, "num_ctx": 8192},
+        },
+        float(config["llm_timeout_s"]),
+    )
+    text = str((reply.get("message") or {}).get("content") or "")
+    return re.sub(r"<think>.*?</think>", "", text, flags=re.DOTALL).strip()
+
+
+def pending_triage(root: Path | str) -> Path | None:
+    """The newest cached red-section file that has no complete triage yet."""
+    folder = Path(root) / RED_SECTIONS_REL
+    if not folder.is_dir():
+        return None
+    for path in sorted(folder.glob("*.red.json"), key=lambda p: p.name, reverse=True):
+        done = cache_dir(root) / TRIAGE_DIR / path.name.replace(".red.json", ".json")
+        with contextlib.suppress(OSError, ValueError):
+            if json.loads(done.read_text(encoding="utf-8")).get("complete"):
+                continue
+        return path
+    return None
+
+
+def triage(
+    root: Path | str,
+    *,
+    red_file: Path | None = None,
+    chat=None,
+    gate_check=None,
+    budget_s: float = 900.0,
+    clock=time.monotonic,
+    sleep=time.sleep,
+) -> dict:
+    """Annotate the newest untriaged red run, one group per model call.
+
+    Resumable: groups already annotated are kept, so a run the user
+    interrupted (GPU_BUSY) continues where it stopped on the next pass.
+    """
+    if not switch(root)[0]:
+        return {"ok": False, "code": "GPU_TRIAGE", "stop": DISABLED}
+    source = red_file or pending_triage(root)
+    if source is None:
+        return {"ok": True, "code": "GPU_TRIAGE", "stop": "NOTHING_PENDING"}
+    config = load_config(root)
+    chat = chat or (lambda system, prompt: chat_ollama(config, system, prompt))
+    gate_check = gate_check or (lambda: gate(root, llm=True))
+    started = clock()
+    payload = json.loads(Path(source).read_text(encoding="utf-8"))
+    sections = payload.get("sections") or {}
+    out = cache_dir(root) / TRIAGE_DIR / Path(source).name.replace(".red.json", ".json")
+    previous = {}
+    with contextlib.suppress(OSError, ValueError):
+        for group in json.loads(out.read_text(encoding="utf-8")).get("groups") or []:
+            if group.get("hypothesis"):
+                previous[group["signature"]] = group["hypothesis"]
+    groups = group_red(sections)
+    stop = "COMPLETE"
+    asked = 0
+    for group in groups:
+        if group["signature"] in previous:
+            group["hypothesis"] = previous[group["signature"]]
+            continue
+        if clock() - started >= budget_s:
+            stop = "BUDGET"
+            break
+        verdict = _idle_gate(
+            gate_check,
+            config,
+            rested=asked == 0,
+            deadline=started + budget_s,
+            clock=clock,
+            sleep=sleep,
+        )
+        if not verdict.get("ok"):
+            stop = verdict.get("reason") or "GATE"
+            break
+        prompt = (
+            f"Signature: {group['signature']}\n"
+            f"Failing tests ({len(group['ids'])}): {', '.join(group['ids'][:12])}\n"
+            f"Traceback of the first:\n{group['excerpt']}"
+        )
+        asked += 1
+        try:
+            group["hypothesis"] = chat(TRIAGE_SYSTEM, prompt)[:600]
+        except (OSError, ValueError, urllib.error.URLError) as exc:
+            stop = f"{BACKEND_DOWN}: {exc}"[:200]
+            break
+    annotated = sum(1 for group in groups if group.get("hypothesis"))
+    result = {
+        "record": payload.get("record"),
+        "advisory": ADVISORY,
+        "model": config["llm_model"],
+        "complete": annotated == len(groups),
+        "covered_ids": sum(len(group["ids"]) for group in groups),
+        "groups": [{k: v for k, v in group.items() if k != "excerpt"} for group in groups],
+        "updated_at": _utc(),
+    }
+    _write_json(out, result)
+    return {
+        "ok": result["complete"],
+        "code": "GPU_TRIAGE",
+        "stop": stop,
+        "file": out.relative_to(Path(root)).as_posix(),
+        "groups": len(groups),
+        "annotated": annotated,
+        "covered_ids": result["covered_ids"],
     }
 
 
@@ -580,17 +803,28 @@ class SideLane:
     """
 
     def __init__(
-        self, root: Path | str, *, every: float = 120.0, budget_s: float = 60.0, refresh=None
+        self,
+        root: Path | str,
+        *,
+        every: float = 120.0,
+        budget_s: float = 60.0,
+        refresh=None,
+        triage_job=None,
     ):
         self.root = Path(root)
         self.every = every
         self.budget_s = budget_s
         self._refresh = refresh or (lambda: refresh_index(self.root, budget_s=self.budget_s))
+        # T-1481: after the index, the heavier job -- one bounded triage pass
+        # over a red declared-family run, when one is waiting.
+        self._triage = triage_job or (lambda: triage(self.root, budget_s=self.budget_s * 5))
         self._stop = threading.Event()
         self._thread = threading.Thread(target=self._run, name="saipen-gpu-lane", daemon=True)
         self.runs = 0
         self.embedded = 0
+        self.annotated = 0
         self.last: dict | None = None
+        self.last_triage: dict | None = None
 
     def _run(self) -> None:
         while not self._stop.is_set():
@@ -600,6 +834,12 @@ class SideLane:
                 self.last = {"ok": False, "stop": f"ERROR: {type(exc).__name__}: {exc}"[:200]}
             self.runs += 1
             self.embedded += int((self.last or {}).get("embedded") or 0)
+            if not self._stop.is_set():
+                try:
+                    self.last_triage = self._triage()
+                except Exception as exc:
+                    self.last_triage = {"stop": f"ERROR: {type(exc).__name__}: {exc}"[:200]}
+                self.annotated += int((self.last_triage or {}).get("annotated") or 0)
             self._stop.wait(self.every)
 
     def start(self) -> "SideLane":
@@ -616,6 +856,8 @@ class SideLane:
             "runs": self.runs,
             "embedded": self.embedded,
             "last_stop": (self.last or {}).get("stop"),
+            "triage_annotated": self.annotated,
+            "last_triage_stop": (self.last_triage or {}).get("stop"),
         }
 
 
