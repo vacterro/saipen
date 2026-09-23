@@ -1478,6 +1478,18 @@ def evaluate_admission(
         root, actor=agent, proposed_targets=canonical_targets, session_id=session_id
     )
     if snapshot["block"] is not None and action_name != "saipen_op":
+        detail = snapshot["detail"]
+        if action_name == "shell" and snapshot["block"] == "NO_ACTIVE_WORK":
+            # T-1402: `date` was told "consequential mutation requires ... DOING
+            # Work" -- true of the classification, false as a description of
+            # the command. Say which rule classified it and what runs anyway.
+            detail = (
+                "this shell line is outside the closed read-only probe set, so it "
+                f"is judged a consequential mutation, and {detail}. Read-only "
+                "probes run without Work: git status/log/diff/show, ls, cat, "
+                "grep, whoami, hostname, date, uname, id, ps, Get-Date, "
+                "Get-Location, Get-Process, and <tool> --version"
+            )
         return result(
             ok=False,
             code=snapshot["block"],
@@ -1487,7 +1499,7 @@ def evaluate_admission(
             targets=canonical_targets,
             action=action_name,
             effect=effect,
-            detail=snapshot["detail"],
+            detail=detail,
             canonical_next_command=snapshot.get("route"),
         )
 

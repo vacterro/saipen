@@ -1375,11 +1375,22 @@ _READ_ONLY_SHELL_VERBS = frozenset(
         "get-filehash",
         "get-date",
         "get-location",
+        "get-process",
+        "gps",
+        "get-command",
+        "gcm",
         "write-output",
         "echo",
+        # cmd.exe
+        "ver",
+        "tasklist",
         # POSIX
         "whoami",
         "hostname",
+        "date",
+        "uname",
+        "id",
+        "ps",
         "which",
         "where",
         "cat",
@@ -1395,6 +1406,31 @@ _READ_ONLY_SHELL_VERBS = frozenset(
         "git",
     }
 )
+#: T-1402: reporters that also have a SETTING form, admitted only in the
+#: reporting one. `hostname NAME` and `hostname -F FILE` set the host name;
+#: `date -s ...`, `date --set=...` and `date MMDDhhmm` set the clock. Every
+#: word must be a reporting flag (or, for `date`, a `+FORMAT`).
+_REPORTING_ONLY_FLAGS = {
+    "hostname": frozenset(
+        {"-f", "--fqdn", "--long", "-s", "--short", "-d", "--domain", "-i",
+         "--ip-address", "-I", "--all-ip-addresses", "-A", "--all-fqdns"}
+    ),
+    "date": frozenset({"-u", "--utc", "--universal", "-R", "--rfc-email", "-I",
+                       "--iso-8601", "/t", "/T"}),
+}
+
+
+def _reporting_args(verb: str, args: list[str]) -> bool:
+    allowed = _REPORTING_ONLY_FLAGS.get(verb)
+    if allowed is None:
+        return True
+    return all(
+        word in allowed
+        or (verb == "date" and (word.startswith("+") or re.fullmatch(r"-I[a-z]+", word)))
+        for word in args
+    )
+
+
 #: git subcommands that only report. No `-c` override is accepted in front of
 #: them, and no option that writes a file or runs an external program.
 _READ_ONLY_GIT = frozenset(
@@ -1492,6 +1528,8 @@ def provably_read_only_shell(command: str) -> bool:
         elif verb in _RUNTIME_PROBE_TOOLS:
             if not _version_probe_args(verb, words[1:]):
                 return False
+        elif not _reporting_args(verb, words[1:]):
+            return False
     return True
 
 
