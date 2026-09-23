@@ -16,7 +16,7 @@ import shutil
 import subprocess
 import sys
 import tempfile
-from contextlib import suppress
+from contextlib import nullcontext, suppress
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -66,7 +66,9 @@ def _families() -> tuple[TestFamily, ...]:
                 "test_*.py",
                 "-v",
             ),
-            600,
+            # T-1344: measured 2254 s for 3475 tests on the operator host; the
+            # old 600 s bound made every run of the family a TIMEOUT verdict.
+            5400,
         ),
         TestFamily(
             "consumer-unit",
@@ -173,7 +175,13 @@ def _terminate_process_tree(process: subprocess.Popen) -> None:
             process.kill()
 
 
-def _run_family(root: Path, family: TestFamily) -> dict:
+def _run_family(root: Path, family: TestFamily, *, spool: Path | None = None) -> dict:
+    """Run one family; its report keeps only the bounded output tails.
+
+    ``spool`` names a caller-owned directory that receives the COMPLETE
+    ``stdout``/``stderr`` files, for a caller that must parse the whole run
+    (the core-unit evidence reads every failure header, not the tail).
+    """
     if not family.command:
         return {
             "name": family.name,
@@ -187,8 +195,13 @@ def _run_family(root: Path, family: TestFamily) -> dict:
     creation = {"start_new_session": True} if os.name != "nt" else {
         "creationflags": getattr(subprocess, "CREATE_NEW_PROCESS_GROUP", 0),
     }
-    with tempfile.TemporaryDirectory(prefix="saipen-family-") as spool:
-        spool_dir = Path(spool)
+    spool_context = (
+        nullcontext(str(spool))
+        if spool is not None
+        else tempfile.TemporaryDirectory(prefix="saipen-family-")
+    )
+    with spool_context as spool_name:
+        spool_dir = Path(spool_name)
         stdout_path = spool_dir / "stdout"
         stderr_path = spool_dir / "stderr"
         process: subprocess.Popen | None = None

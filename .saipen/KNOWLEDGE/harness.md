@@ -26,6 +26,37 @@ without Ruff MUST report the lint gate as missing evidence, never as green -- ru
 rest of the suite, LOG `lint: not run (ruff unavailable)`, and do not claim full-green
 for a pass that never linted.
 
+## The declared core-unit family is SHIP evidence (T-1344)
+
+```
+python tools/core_unit.py evidence T-###   # whole family, cited in LOG
+python tools/core_unit.py baseline         # re-record the inherited red set
+```
+
+`saipen_engine/test_runner.py` declares the core-unit family as
+`python -m unittest discover -s tools -p test_*.py`. A closure citing named
+modules (`python -m unittest tools.test_x`) is not a run of it: those import
+dotted, skip discovery order and never see the rest of the family, and waves
+closed green that way while the family carried dozens of red tests.
+
+So a transition into SHIP in this repository requires, in the ticket's current
+VERIFY cycle, an anchored `CORE-UNIT-EVIDENCE` line written by
+`core_unit.py evidence`. It cites a JSON record under
+`.saipen/evidence/core-unit/` by path and sha256; the gate refuses a record
+with any red id outside `tools/core_unit_baseline.json`, a run that did not
+reach its summary, a record judged against another baseline, or one whose
+content fingerprint is not the tree being shipped. The fingerprint covers
+everything the sandbox copies except `.saipen/` and `.git/` -- the family
+reads `tests/`, `bootstrap/`, `extensions/` and the root file set too -- and
+is taken from the copy that ran. Any edit outside `.saipen/` after the copy
+(a stray root file included) means a rerun, unless the tree returns to the
+tested bytes, in which case `evidence` reuses that PASS record.
+
+The baseline only shrinks freely: `baseline` refuses to add a red id without
+`--grow "<reason>"`, and the reason is stored in the file. A run that fixed an
+inherited red reports it under `fixed`; shrink the baseline in the same Work.
+Projects without `tools/saipen_engine/test_runner.py` are untouched.
+
 `tools/validate.py --gate <name>` narrows the gate (`core`, `ship`,
 `collect:<sub>`). `tests/validate.sh` / `tests/validate.ps1` are the portable
 floor — a deliberate SUBSET of `validate.py`, for hosts without Python.

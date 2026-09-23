@@ -1999,6 +1999,22 @@ def _plan_transition(
                 receipt=source_boundary.get("receipt"),
             )
 
+    if subject and destination == "SHIP":
+        from .core_unit import evidence_command, ship_gate
+
+        # T-1344: closures recorded green from narrower invocations while the
+        # declared core-unit family was red. A project that declares the family
+        # ships only on a current-cycle run of it with no red outside baseline.
+        core_unit_problem = ship_gate(root, subject, docs["_history"].events)
+        if core_unit_problem is not None:
+            return _refuse(
+                "INCOMPLETE_TICKET",
+                f"-> SHIP: {core_unit_problem}",
+                phase=destination,
+                ticket=subject,
+                canonical_next_command=evidence_command(subject),
+            )
+
     if destination == "REVIEW" and current == "VERIFY":
         from .log import verification_evidence
 
