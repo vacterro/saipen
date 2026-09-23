@@ -244,10 +244,27 @@ def _agent_argv(template: list[str], model: str | None) -> list[str]:
 
 
 def _tail(handle) -> str:
+    """The last whole lines within OUTPUT_TAIL_BYTES.
+
+    A cut that lands mid-line keeps the END of some line, and in a JSON
+    transcript that end is the inside of an event: 24H gate 2026-09-23 read
+    such fragments of the agent reading saipen/OPS.md and RUNTIME.md as
+    error-channel text and stopped the run as AUTH_FAILED (T-1485). So the
+    partial first line is dropped; a tail never starts inside a line.
+    """
     handle.seek(0, 2)
     size = handle.tell()
-    handle.seek(max(0, size - OUTPUT_TAIL_BYTES))
-    return handle.read().decode("utf-8", errors="replace")
+    start = max(0, size - OUTPUT_TAIL_BYTES)
+    at_line_start = start == 0
+    if not at_line_start:
+        handle.seek(start - 1)
+        at_line_start = handle.read(1) == b"\n"
+    handle.seek(start)
+    data = handle.read()
+    if not at_line_start:
+        newline = data.find(b"\n")
+        data = data[newline + 1:] if newline >= 0 else b""
+    return data.decode("utf-8", errors="replace")
 
 
 def failure_text(stdout: str, stderr: str = "") -> str:
@@ -258,7 +275,9 @@ def failure_text(stdout: str, stderr: str = "") -> str:
     agent's own JSON transcript -- file contents it had read, tool output --
     and stopped the whole run as AUTH_FAILED. The transcript is the agent's
     work, not the host's verdict. So: all of stderr; from stdout only lines
-    that are not JSON events, plus JSON events that ARE errors.
+    that are not JSON events, plus JSON events that ARE errors. A line that
+    opens like an event but does not parse is a torn event -- a generation
+    killed mid-write -- and is transcript too (T-1485).
     """
     kept = [stderr] if stderr else []
     for line in str(stdout or "").splitlines():
@@ -271,7 +290,6 @@ def failure_text(stdout: str, stderr: str = "") -> str:
         try:
             event = json.loads(text)
         except ValueError:
-            kept.append(text)
             continue
         if isinstance(event, dict) and (
             str(event.get("type") or "").lower() == "error" or "error" in event

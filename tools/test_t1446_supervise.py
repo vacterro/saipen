@@ -160,6 +160,19 @@ if mode == "no_tools":
     if model != "tool-model":
         done(1, "Error: this model does not support tools")
     bump(); done()
+if mode in ("big_transcript", "big_transcript_killed", "big_transcript_then_error"):
+    # The agent reads a long protocol document that quotes provider words.
+    # The event is larger than the classifier's tail, so the tail's cut lands
+    # inside it -- the 24H gate shape of 2026-09-23 (T-1485).
+    words = " 403 Forbidden; 429 Too Many Requests; 401 Unauthorized; billing "
+    print(json.dumps({"type": "tool_use", "part": {"state": {
+        "output": "x" * 70000 + words + "y" * 2000}}}), flush=True)
+    if mode == "big_transcript_killed":
+        sys.stdout.write('{"type": "tool_use", "part": {"state": {"output": "401 Unauthorized')
+        done(1)
+    if mode == "big_transcript_then_error":
+        done(1, "Error: 401 Unauthorized: invalid api key")
+    done(0, json.dumps({"type": "step_finish"}))
 done(0)
 '''
 
@@ -341,6 +354,58 @@ class FailureChannelTests(unittest.TestCase):
         self.assertEqual(supervisor.classify_failure(1, text), supervisor.AUTH_FAILED)
         plain = worker.failure_text("Error: model x not found", "")
         self.assertEqual(supervisor.classify_failure(1, plain), supervisor.MODEL_UNAVAILABLE)
+
+    def test_a_torn_event_is_transcript_not_error_text(self):
+        torn = self.TRANSCRIPT + '\n{"type": "tool_use", "part": {"output": "401 Unauthorized'
+        text = worker.failure_text(torn, "")
+        self.assertEqual(text, "")
+        self.assertEqual(supervisor.classify_failure(9, text), supervisor.WORKER_CRASH)
+
+
+class TailTests(unittest.TestCase):
+    """T-1485: the classifier's tail never starts inside a line."""
+
+    def tail_of(self, payload: bytes) -> str:
+        with tempfile.TemporaryFile() as handle:
+            handle.write(payload)
+            return worker._tail(handle)
+
+    def test_a_cut_inside_a_line_drops_the_fragment(self):
+        size = worker.OUTPUT_TAIL_BYTES
+        last = b'{"type": "step_finish"}\n'
+        payload = b'{"output": "' + b"x" * size + b' 403 Forbidden"}\n' + last
+        self.assertEqual(self.tail_of(payload), last.decode())
+
+    def test_a_cut_on_a_line_boundary_keeps_the_whole_line(self):
+        size = worker.OUTPUT_TAIL_BYTES
+        kept = b"k" * (size - 1) + b"\n"
+        self.assertEqual(self.tail_of(b"dropped\n" + kept), kept.decode())
+
+    def test_a_short_output_is_whole(self):
+        self.assertEqual(self.tail_of(b"Error: 401 Unauthorized\n"), "Error: 401 Unauthorized\n")
+
+    def test_one_line_longer_than_the_tail_leaves_nothing(self):
+        self.assertEqual(self.tail_of(b"y" * (worker.OUTPUT_TAIL_BYTES * 2)), "")
+
+
+class TruncatedTranscriptTests(SuperviseFixture):
+    """24H gate 2026-09-23 (T-1485): the run stopped as AUTH_FAILED at 11005 s
+    because the tail began inside the agent's reading of saipen/OPS.md."""
+
+    def test_a_long_read_never_stops_the_run_on_a_clean_exit(self):
+        result = self.run_plan(["big_transcript", "finish"])
+        self.assertEqual(result["stop"], supervisor.IDLE, result)
+        self.assertIsNone(result["history"][0]["failure"], result["history"][0])
+        self.assertEqual(result["counters"]["failures"], {}, result)
+
+    def test_a_killed_generation_after_a_long_read_is_a_crash(self):
+        result = self.run_plan(["big_transcript_killed", "finish"])
+        self.assertEqual(result["stop"], supervisor.IDLE, result)
+        self.assertEqual(result["history"][0]["failure"], supervisor.WORKER_CRASH)
+
+    def test_a_genuine_error_line_after_a_long_read_still_classifies(self):
+        result = self.run_plan(["big_transcript_then_error"])
+        self.assertEqual(result["stop"], supervisor.AUTH_FAILED, result)
 
 
 class ProcessTreeTests(SuperviseFixture):
