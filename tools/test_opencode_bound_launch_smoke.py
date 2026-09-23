@@ -162,6 +162,14 @@ class _ScriptedProvider:
         }
 
 
+#: T-1495: the bound on one real opencode child. 120 s followed host load: in
+#: a 6-shard family on a host shared with other agents one launch ran past it
+#: while the same tree passed alone (4 tests in 104 s). This is the bound the
+#: sibling host smokes already use for the same kind of child; a hang still
+#: fails, only a slow host no longer does.
+CHILD_TIMEOUT_S = 600
+
+
 @unittest.skipUnless(OPENCODE, "opencode runtime unavailable")
 @unittest.skipUnless(BASH, "working bash runtime unavailable")
 @unittest.skipUnless(PYTHON, "python runtime unavailable")
@@ -258,7 +266,7 @@ class BoundOpenCodeNativeSmoke(unittest.TestCase):
                 env=env,
                 capture_output=True,
                 text=True,
-                timeout=120,
+                timeout=CHILD_TIMEOUT_S,
             )
             return proc, probe, provider.requests
 
