@@ -3433,8 +3433,9 @@ if log_files:
                 _ev = _engine_log_parse(_line)
                 if _ev is None:
                     continue
-                _all_events.append((_lf, _line_no, _ev))
-        for _lf, _line_no, _ev in sorted(_all_events, key=lambda e: e[2]["event"]):
+                _all_events.append((_lf, _line_no, _line, _ev))
+        _provenance_missing_full = []
+        for _lf, _line_no, _line, _ev in sorted(_all_events, key=lambda e: e[3]["event"]):
             if _ev["op_id"] and _first_op_event is None:
                 _first_op_event = _ev["event"]
             if _first_op_event is None or _ev["event"] < _first_op_event:
@@ -3446,14 +3447,49 @@ if log_files:
                 _mk in _text for _mk in _provenance_markers
             ):
                 _provenance_missing.append(f"{_lf.as_posix()}:{_line_no} E-{_ev['event']}")
+                _provenance_missing_full.append(
+                    (f"E-{_ev['event']}", _lf.as_posix(), _line)
+                )
         if _provenance_missing:
-            fail(
-                "mechanical provenance [saio] -- structural SAIOPS-owned "
-                "events after the first provenanced event "
-                f"(E-{_first_op_event}) lack `[op: ...]`, so a manual "
-                "structural edit cannot be distinguished from a mechanized "
-                "one: " + "; ".join(_provenance_missing[:6]) + " (T-584)"
-            )
+            # ACCEPTED LEGACY DEBT (canonical, Decision B): an exact sealed
+            # historical missing-set registered through saipen_engine.
+            # accepted_debt downgrades THIS finding to a visible warning; a
+            # new event changes the exact set and never matches, an unrelated
+            # failure is untouched, and any corrupt/foreign/mismatched record
+            # fails closed to the ordinary FAIL below. The check itself, its
+            # message and its rule identity are unchanged.
+            _accepted_debt = None
+            try:
+                from saipen_engine.accepted_debt import evaluate_provenance
+
+                _accepted_debt = evaluate_provenance(PROJECT_ROOT, _provenance_missing_full)
+            except Exception:
+                _accepted_debt = None  # a crashed check never accepts
+            if _accepted_debt is not None and _accepted_debt.get("accepted"):
+                _accepted_shown = "; ".join(_provenance_missing[:6])
+                if len(_provenance_missing) > 6:
+                    _accepted_shown += (
+                        f" [+{len(_provenance_missing) - 6} more accepted events"
+                        f" of {len(_provenance_missing)} total]"
+                    )
+                warn(
+                    "accepted-legacy-debt",
+                    "mechanical provenance [saio] -- structural SAIOPS-owned "
+                    "events after the first provenanced event "
+                    f"(E-{_first_op_event}) lack `[op: ...]` but are registered "
+                    f"IMMUTABLE accepted legacy debt ({_accepted_debt['record_id']}, "
+                    "exact event/line evidence verified): "
+                    + _accepted_shown
+                    + " (T-584) -- a NEW unmarked structural event still FAILs",
+                )
+            else:
+                fail(
+                    "mechanical provenance [saio] -- structural SAIOPS-owned "
+                    "events after the first provenanced event "
+                    f"(E-{_first_op_event}) lack `[op: ...]`, so a manual "
+                    "structural edit cannot be distinguished from a mechanized "
+                    "one: " + "; ".join(_provenance_missing[:6]) + " (T-584)"
+                )
 
     # [gate-closure] (NITRO dogfood IV, T-602): a ticket's DONE state is
     # evidence of the phase chain that produced it, NEVER of a legal-looking
