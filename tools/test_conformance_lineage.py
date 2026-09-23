@@ -91,6 +91,52 @@ def _write_and_append(root: Path, rid: str, gate: str, ts: str) -> Path:
     return path
 
 
+def _population_member(index: int) -> tuple[str, str, str]:
+    """Receipt id, gate and timestamp of member ``index`` of a test population."""
+    return (
+        f"r{index:06d}",
+        "core" if index % 3 else "crew",
+        f"2026-01-01T00:{index // 60:02d}:{index % 60:02d}Z",
+    )
+
+
+def _append_population(root: Path, population: int) -> None:
+    """The population through the canonical append, one receipt at a time."""
+    for index in range(population):
+        _write_and_append(root, *_population_member(index))
+
+
+def _rebuild_population(root: Path, population: int) -> None:
+    """The same population written first and projected by ONE rebuild (T-1489).
+
+    Same lineage as `_append_population` (proven by
+    test_appended_and_rebuilt_preconditions_are_one_lineage) at a fraction of
+    the cost: 10000 canonical appends took ~220 s of the declared family.
+    """
+    for index in range(population):
+        _write_receipt(root, *_population_member(index))
+    result = CL.rebuild_lineage(root)
+    if not result.get("ok"):
+        raise AssertionError(f"rebuild_lineage failed: {result}")
+
+
+#: Head fields that record WHEN the receipt directory was last written, not
+#: what the lineage holds: its mtime token, and the root digest that covers it.
+_HEAD_TIME_FIELDS = ("receipt_dir_mtime_ns", "root")
+
+
+def _lineage_content(root: Path) -> dict:
+    """Every lineage index document, with the head's time fields left out."""
+    base = root / CL.INDEX_DIR_REL
+    documents = {}
+    for path in sorted(base.rglob("*.json")):
+        document = json.loads(path.read_text(encoding="utf-8"))
+        if path.name == Path(CL.HEAD_REL).name:
+            document = {k: v for k, v in document.items() if k not in _HEAD_TIME_FIELDS}
+        documents[path.relative_to(base).as_posix()] = document
+    return documents
+
+
 class ConformanceLineageTests(unittest.TestCase):
     def setUp(self) -> None:
         self.root = Path(tempfile.mkdtemp(prefix="r011_"))
@@ -123,19 +169,20 @@ class ConformanceLineageTests(unittest.TestCase):
 
     def test_canonical_append_never_enumerates_receipt_directory(self) -> None:
         """R011-A red control: the canonical append enumerates ZERO receipt
-        directory entries, whatever the population."""
-        for population in (100, 1000, 10000):
+        directory entries, whatever the population.
+
+        The 10000 precondition is rebuilt, not appended (T-1489): the measured
+        append below is the subject, and the rebuilt lineage is the appended
+        one (test_appended_and_rebuilt_preconditions_are_one_lineage)."""
+        for population, build in (
+            (100, _append_population),
+            (1000, _append_population),
+            (10000, _rebuild_population),
+        ):
             with self.subTest(population=population):
                 root = Path(tempfile.mkdtemp(prefix=f"r011a_{population}_"))
                 try:
-                    for index in range(population):
-                        gate = "core" if index % 3 else "crew"
-                        _write_and_append(
-                            root,
-                            f"r{index:06d}",
-                            gate,
-                            f"2026-01-01T00:{index // 60:02d}:{index % 60:02d}Z",
-                        )
+                    build(root, population)
                     enumerated = {"n": 0}
                     receipt_hashes = {"n": 0}
                     original_iterdir = Path.iterdir
@@ -169,6 +216,37 @@ class ConformanceLineageTests(unittest.TestCase):
                     self.assertLessEqual(receipt_hashes["n"], CL.GEN_BOUND)
                 finally:
                     shutil.rmtree(root, ignore_errors=True)
+
+    def test_appended_and_rebuilt_preconditions_are_one_lineage(self) -> None:
+        """T-1489: the rebuilt precondition IS the appended one, so the cheap
+        builder proves what the costly one proved. Two sealed generations and
+        an active tail of both gates; the comparison sees a one-receipt
+        difference, and the next canonical append treats both alike."""
+        population = 2 * CL.GEN_BOUND + 44
+        roots = {}
+        for name in ("appended", "rebuilt", "rebuilt_plus_one"):
+            roots[name] = Path(tempfile.mkdtemp(prefix=f"r011_{name}_"))
+            self.addCleanup(shutil.rmtree, roots[name], True)
+        _append_population(roots["appended"], population)
+        _rebuild_population(roots["rebuilt"], population)
+        _rebuild_population(roots["rebuilt_plus_one"], population + 1)
+
+        appended = _lineage_content(roots["appended"])
+        self.assertEqual(appended[Path(CL.HEAD_REL).name]["sealed_count"], 2)
+        self.assertEqual(appended[Path(CL.HEAD_REL).name]["receipt_count"], population)
+        self.assertEqual(_lineage_content(roots["rebuilt"]), appended)
+        # Control: the comparison is not blind -- one receipt more is a
+        # different lineage.
+        self.assertNotEqual(_lineage_content(roots["rebuilt_plus_one"]), appended)
+
+        for name in ("appended", "rebuilt"):
+            _write_and_append(roots[name], "r-final", "core", "2026-01-01T12:00:00Z")
+        self.assertEqual(
+            _lineage_content(roots["rebuilt"]), _lineage_content(roots["appended"])
+        )
+        for name in ("appended", "rebuilt"):
+            _handled, record = CL.latest_receipt_bounded(roots[name], "core")
+            self.assertEqual(record["receipt_id"], "r-final")
 
     def test_prior_token_mismatch_refuses_bounded_advance(self) -> None:
         """A pre-append token that disagrees with the head (crash between
