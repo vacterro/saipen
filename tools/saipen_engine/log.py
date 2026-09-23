@@ -923,7 +923,15 @@ MANUAL_RESULT_PREFIX = "MANUAL-VERIFY RESULT: "
 # negative-evidence-wins (a real failure can never be talked past) while
 # recognising that a count of zero in front of the token is the OPPOSITE of a
 # failure. Anything not provably zero stays a failure.
-_ZERO_FAIL_RE = re.compile(r"\b(?:0|no|zero)\s+FAIL(?:S|ED|URE|URES)?\b", re.IGNORECASE)
+#: T-1445: a token that is itself a field's KEY (`failed=0`, `failed: 3`) owns
+#: the number after it, never the one before it -- that one belongs to the
+#: previous field. Read as a count, `passed=0 failed=3` was a zero failure and
+#: a real failure was talked past, while `passed=52 failed=0` vetoed a green
+#: line. The field itself is read by `_FAIL_FIELD_RE`/`_ZERO_FIELD_RE`.
+_NOT_A_FIELD_KEY = r"(?!\s*[=:]\s*\d)"
+_ZERO_FAIL_RE = re.compile(
+    r"\b(?:0|no|zero)\s+FAIL(?:S|ED|URE|URES)?\b" + _NOT_A_FIELD_KEY, re.IGNORECASE
+)
 _FAIL_TOKEN_RE = re.compile(r"\bFAIL(?:S|ED|URE|URES)?\b", re.IGNORECASE)
 
 #: The VERDICT SEGMENT: an event's text up to its first ` -- `. Everything
@@ -938,13 +946,14 @@ _VERDICT_SEPARATOR = " -- "
 
 #: Unambiguous MACHINE shapes, honoured anywhere in the text because no prose
 #: produces them by accident: a nonzero count before the token (`2 FAIL`,
-#: `3 failures`) and a nonzero field (`failures=2`, the shape unittest prints).
+#: `3 failures`) and a nonzero field of the FAIL family (`failures=2`, the shape
+#: unittest prints; `failed=3` and `failed: 3`, the shapes other runners print).
 _FAIL_COUNTED_RE = re.compile(
-    r"\b(?!0+\b)\d+\s+FAIL(?:S|ED|URE|URES)?\b", re.IGNORECASE
+    r"\b(?!0+\b)\d+\s+FAIL(?:S|ED|URE|URES)?\b" + _NOT_A_FIELD_KEY, re.IGNORECASE
 )
-_FAIL_FIELD_RE = re.compile(r"\bFAILURES?\s*=\s*(?!0+\b)\d+", re.IGNORECASE)
+_FAIL_FIELD_RE = re.compile(r"\bFAIL(?:S|ED|URE|URES)?\s*[=:]\s*(?!0+\b)\d+", re.IGNORECASE)
 #: Their zero twins, which exempt a token instead of claiming one.
-_ZERO_FIELD_RE = re.compile(r"\bFAILURES?\s*=\s*0+\b", re.IGNORECASE)
+_ZERO_FIELD_RE = re.compile(r"\bFAIL(?:S|ED|URE|URES)?\s*[=:]\s*0+\b", re.IGNORECASE)
 
 # T-1444: a count ATTRIBUTED to a foreign scope is not this ticket's claim.
 #
