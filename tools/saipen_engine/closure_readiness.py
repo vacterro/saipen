@@ -155,7 +155,13 @@ def _remediation(root: Path, ticket_id: str, gate: dict, unresolved: list) -> st
     if code in ("SOURCE_LINKAGE_MISSING", "SOURCE_LINKAGE_DRIFT"):
         return f"saipen source status {receipt}"
     if code in ("SOURCE_RECEIPT_MISSING", "SOURCE_CORRUPTION", "INVALID"):
-        return "saipen source recover"
+        from .intake import recover_reports
+
+        # T-1476: the read-only diagnostic is a route only when it reports this
+        # receipt; otherwise it changes nothing and the route repeats forever.
+        if recover_reports(root, receipt):
+            return "saipen source recover"
+        return _block_route(ticket_id, code)
     if code == "SOURCE_UNRESOLVED" and receipt:
         # The request's own clause (or an empty contract) is discharged by the
         # Work's own verification evidence -- the same reconcile T-1379 landed.

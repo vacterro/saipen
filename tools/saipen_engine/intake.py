@@ -2471,6 +2471,15 @@ def route_source_refusal(
     unresolved = routed.get("unresolved_clauses") or []
     if unresolved and "<RID>" in command:
         command = command.replace("<RID>", str(unresolved[0]).rsplit(":", 1)[-1])
+    if (
+        command == "saipen source recover"
+        and isinstance(work_id, str)
+        and work_id
+        and not recover_reports(root, receipt_id)
+    ):
+        # T-1476: same rule as closure_readiness -- a read-only diagnostic
+        # that does not report this receipt is no route out.
+        command = f'saipen ticket block {work_id} "source closure not ready ({code})"'
     routed["canonical_next_command"] = command
     # Said out loud, because both invented escapes were attempts to reclassify
     # a coverage fact as a binding fault.
@@ -4094,6 +4103,21 @@ def recover_orphans(root: Path | str) -> dict:
                     }
                 )
     return {"ok": True, "code": "ORPHAN_RECEIPTS", "orphans": orphans}
+
+
+def recover_reports(root: Path | str, receipt_id: object) -> bool:
+    """Does `source recover` have anything to say about this receipt?
+
+    T-1476. `source recover` is read-only, so it is a route out of a stuck
+    closure only when it reports the stuck receipt. Anything else -- a receipt
+    retired under its live Work, a corrupt body -- gets `orphans: []`, the
+    state never changes, and every agent generation re-runs the same route.
+    """
+    try:
+        orphans = recover_orphans(root).get("orphans") or []
+    except (OSError, ValueError):
+        return False
+    return any(item.get("receipt") == receipt_id for item in orphans)
 
 
 def validate_project(root: Path | str) -> list[str]:

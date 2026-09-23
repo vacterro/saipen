@@ -1608,23 +1608,47 @@ def source_retirement_errors(
                 problems.append(
                     f"successor {successor} exists in neither ACTIVE nor tombstones"
                 )
-    if reason == "ORPHANED_RECEIPT":
-        from .board import parse_board
+    from .board import parse_board
 
-        board_raw = _existing(root, ".saipen/BOARD.md")
-        tickets = (
-            parse_board(board_raw.decode("utf-8-sig")).get("tickets", {})
-            if board_raw is not None
-            else {}
+    board_raw = _existing(root, ".saipen/BOARD.md")
+    tickets = (
+        parse_board(board_raw.decode("utf-8-sig")).get("tickets", {})
+        if board_raw is not None
+        else {}
+    )
+    # T-1476: a live Work's own request is an obligation even while its
+    # contract is still empty (the request clause is added at closure), so
+    # the unresolved-requirement check above cannot see it. Retiring the
+    # receipt under the Work strands its closure: the gate answers
+    # SOURCE_RECEIPT_MISSING and nothing can close or re-home the Work.
+    live = sorted(
+        tid
+        for tid, t in tickets.items()
+        if t.get("section") != "## DONE"
+        and (
+            tid in intake.linked_works(meta)
+            or receipt_id
+            in {
+                value.strip()
+                for value in str((t.get("fields") or {}).get("source_receipts") or "").split(",")
+            }
         )
+    )
+    if live:
+        problems.append(
+            f"{receipt_id} is the source of live Work {', '.join(live[:3])}; "
+            "close or retire that Work before its source"
+        )
+    if reason == "ORPHANED_RECEIPT":
         linked = str(meta.get("linked_work") or "").strip()
-        if linked and linked in tickets:
+        if linked and linked in tickets and linked not in live:
             problems.append(f"{receipt_id} is still linked to live Work {linked}")
         if not linked:
             referencing = [
                 tid
                 for tid, t in tickets.items()
                 if receipt_id in str((t.get("fields") or {}).get("source_receipts") or "")
+                and tid not in live
             ]
             if referencing:
                 problems.append(
