@@ -353,6 +353,7 @@ def start_work(
         _user_request_body,
         apply_claim,
         reauthorize_valve,
+        set_goal_intent,
         ticket_move,
         user_request,
     )
@@ -622,7 +623,27 @@ def start_work(
                 projected.to_dict(),
             )
         ticket = projected.data.get("ticket")
+        # T-1474, GOAL-01 Entry (MAINTENANCE 2.4): a request projected as NEW
+        # Work is a new objective, and its run starts with both counters at 0.
+        # Only a tripped valve was reset here, so SRC-107 (/goal) inherited
+        # 1 wave / 18 tickets and would have tripped after two VERIFY passes.
+        # An echo bound to existing Work never reaches this branch (T-1469).
         state, board, problem = _snapshot(root)
+        if state is not None and not (
+            state.get("execution_intent") == "goal"
+            and not state.get("goal_waves")
+            and not state.get("goal_tickets")
+        ):
+            objective = " ".join(str(text or "").split())[:200]
+            pivot = set_goal_intent(root, actor, f"{ticket} ({captured_receipt}): {objective}")
+            if not pivot.ok:
+                return wait_on_decision(
+                    f"{ticket} was projected but its goal Entry could not be recorded: "
+                    f"{pivot.code} {pivot.message or ''}".strip(),
+                    ticket,
+                    pivot.to_dict(),
+                )
+            state, board, problem = _snapshot(root)
         tickets = (board or {}).get("tickets") or {}
     if state is None or board is None:
         return wait_on_decision(
