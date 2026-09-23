@@ -298,13 +298,16 @@ class TheHostDeliversTheRouteTests(unittest.TestCase):
     """The shipped OpenCode plugin, in node, with the real spawned guard.
 
     A route in the verdict that the host error text drops is a route no model
-    ever reads. The two shell commands are the field pair from the T-1385
-    smoke's long_file_task (run a scratch script, then delete it), which the
-    polygon scored as one refusal repeating.
+    ever reads. The two shell commands are the shape of the field pair from the
+    T-1385 smoke's long_file_task (run a script, then delete it), which the
+    polygon scored as one refusal repeating. The field pair named
+    `.saipen/kitchen/`, which T-1387 made an ordinary project path judged like a
+    file-tool target; the same pair inside the protected namespace is still the
+    refusal whose route this class pins.
     """
 
-    RUN = "python .saipen/kitchen/review_check.py"
-    DELETE = "Remove-Item -LiteralPath .saipen/kitchen/review_check.py"
+    RUN = "python .saipen/recovery/review_check.py"
+    DELETE = "Remove-Item -LiteralPath .saipen/recovery/review_check.py"
 
     @classmethod
     def setUpClass(cls):

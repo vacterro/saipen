@@ -208,6 +208,21 @@ def contains_protected_canonical_path(rel_path: str | Path) -> bool:
     )
 
 
+def _ordinary_namespace_targets(root: Path, paths: "list[str] | None") -> bool:
+    """T-1387: every `.saipen` path a shell line names is an ordinary project
+    file -- canonicalized exactly as a file-tool target (`canonicalize_target`),
+    inside the root, outside the protected canonical namespace, and not a
+    directory that contains it. No paths means the mention was not a path the
+    guard could judge, and the whole-namespace refusal stands."""
+    if not paths:
+        return False
+    for path in paths:
+        classification, rel, _detail = canonicalize_target(root, path)
+        if classification != "inside" or contains_protected_canonical_path(rel):
+            return False
+    return True
+
+
 #: Directory-capable effects: the only ones whose single target can remove or
 #: relocate a whole subtree, and so the only ones that need containment checks
 #: outside the root.
@@ -1044,6 +1059,7 @@ def evaluate_admission(
     target_paths: "list[str] | tuple[str, ...] | None" = None,
     targets_unresolved: bool = False,
     shell_protected_namespace: bool = False,
+    shell_namespace_targets: "list[str] | None" = None,
     shell_effects: "list[dict] | None" = None,
     shell_effects_unresolved: str | None = None,
     session_id: str | None = None,
@@ -1109,7 +1125,11 @@ def evaluate_admission(
 
     root = Path(root_res.root).resolve()
 
-    if action_name == "shell" and shell_protected_namespace:
+    if (
+        action_name == "shell"
+        and shell_protected_namespace
+        and not _ordinary_namespace_targets(root, shell_namespace_targets)
+    ):
         return result(
             ok=False,
             code="PROTECTED_CANONICAL_NAMESPACE",

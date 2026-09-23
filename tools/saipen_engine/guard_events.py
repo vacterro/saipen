@@ -393,6 +393,53 @@ def _shell_words(segment: str) -> list[str] | None:
     return [word for word in words if word]
 
 
+#: T-1387. One path operand spelled with the characters a project path uses:
+#: an optional drive, then names and separators -- no glob, variable, quote,
+#: `~`, `=` or anything else whose meaning the guard would have to guess.
+_CLEAN_SHELL_PATH = re.compile(r"(?:[A-Za-z]:)?[A-Za-z0-9_.\-\\/]+")
+#: A redirection glued to its operand (`>.saipen/kitchen/out.txt`).
+_GLUED_REDIRECTION = re.compile(r"^\d?(?:>>?|<)")
+
+
+def shell_namespace_paths(command: str | None, cwd: str | None) -> list[str] | None:
+    """T-1387: every `.saipen` path a shell line names, spelled absolute so
+    admission judges each one exactly as it judges a file-tool target.
+
+    The write tool was admitted to create `.saipen/kitchen/<file>` while the
+    shell was refused for running or deleting that same file, because the
+    shell preflight refused the literal text `.saipen` and structured
+    protection covers only the canonical path list: one file, two answers.
+
+    None when one mention is not a path the guard can judge -- the namespace
+    itself, a glob, a variable, a substitution, a word that merely contains the
+    text -- and that keeps the whole-namespace refusal.
+    """
+    if not command or not cwd or not _PROTECTED_SHELL_SEGMENT.search(command):
+        return None
+    segments, nested = _shell_segments(command)
+    if any(_PROTECTED_SHELL_SEGMENT.search(text) for text in nested):
+        return None
+    paths: list[str] = []
+    for segment, _piped in segments:
+        if not _PROTECTED_SHELL_SEGMENT.search(segment):
+            continue
+        words = _shell_words(segment)
+        if words is None:
+            return None
+        for word in words:
+            if not _PROTECTED_SHELL_SEGMENT.search(word):
+                continue
+            operand = _GLUED_REDIRECTION.sub("", word)
+            if not _CLEAN_SHELL_PATH.fullmatch(operand):
+                return None
+            parts = [part.lower() for part in re.split(r"[\\/]", operand)]
+            if ".saipen" not in parts or parts.index(".saipen") == len(parts) - 1:
+                return None
+            raw = Path(operand)
+            paths.append(str(raw if raw.is_absolute() else Path(cwd) / raw))
+    return paths or None
+
+
 def _shell_verb(word: str) -> str:
     name = re.split(r"[\\/]", word)[-1].lower()
     for suffix in (".exe", ".cmd", ".bat", ".com", ".ps1"):
@@ -1559,6 +1606,7 @@ def map_event(event: dict) -> dict:
     ingress_route: str | None = None
     action: str
     shell_protected_namespace = False
+    shell_namespace_targets: list[str] | None = None
     shell_effects: list[dict] = []
     shell_effects_unresolved: str | None = None
 
@@ -1615,6 +1663,8 @@ def map_event(event: dict) -> dict:
                     # structured target protection remains its narrower canonical
                     # path list. Carry the finding separately: no fake file target.
                     shell_protected_namespace = True
+                    # T-1387: the paths named, for admission to canonicalize.
+                    shell_namespace_targets = shell_namespace_paths(command, event["cwd"])
                     detail = (
                         "shell command explicitly references the protected .saipen namespace"
                     )
@@ -1677,6 +1727,7 @@ def map_event(event: dict) -> dict:
         "target_paths": targets,
         "targets_unresolved": targets_unresolved,
         "shell_protected_namespace": shell_protected_namespace,
+        "shell_namespace_targets": shell_namespace_targets,
         "shell_effects": shell_effects,
         "shell_effects_unresolved": shell_effects_unresolved,
         "actor": actor,
@@ -1764,6 +1815,7 @@ def evaluate_event(event: dict, project_root: str | None = None) -> dict:
         target_paths=mapped["target_paths"],
         targets_unresolved=mapped["targets_unresolved"],
         shell_protected_namespace=mapped["shell_protected_namespace"],
+        shell_namespace_targets=mapped["shell_namespace_targets"],
         shell_effects=mapped["shell_effects"],
         shell_effects_unresolved=mapped["shell_effects_unresolved"],
         session_id=mapped["session_id"],
