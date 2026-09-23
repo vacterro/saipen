@@ -42,6 +42,11 @@ def log(*bodies: str) -> str:
     return "\n".join(lines) + "\n"
 
 
+def _engine_modules() -> dict:
+    """Every loaded saipen_engine module, by name."""
+    return {name: mod for name, mod in sys.modules.items() if name.startswith("saipen_engine")}
+
+
 class AcceptanceSectionTests(unittest.TestCase):
     def setUp(self) -> None:
         self.tmp = tempfile.TemporaryDirectory(prefix="saipen-metrics-acc-")
@@ -298,16 +303,26 @@ class ObservationalTests(unittest.TestCase):
                 "raise RuntimeError('engine is broken')", encoding="utf-8"
             )
             original = sys.path[:]
-            for name in [n for n in sys.modules if n.startswith("saipen_engine")]:
+            # T-1490: the engine modules are put BACK, the same objects, not
+            # merely deleted. Deleted, every later import built fresh ones
+            # while modules imported at discovery kept the old ones, so a
+            # later module's patch.object hit an object the engine no longer
+            # used (test_source_quarantine_route went red in one process).
+            saved = _engine_modules()
+            for name in saved:
                 del sys.modules[name]
             sys.path.insert(0, str(broken))
             try:
                 out = saipen_metrics.acceptance_signals(saipen)
             finally:
                 sys.path[:] = original
-                for name in [n for n in sys.modules if n.startswith("saipen_engine")]:
+                for name in _engine_modules():
                     del sys.modules[name]
+                sys.modules.update(saved)
             self.assertIn("RuntimeError", out["unavailable"])
+            self.assertEqual(_engine_modules(), saved)
+            for name, module in saved.items():
+                self.assertIs(sys.modules[name], module, name)
 
 
 class LiveProjectTests(unittest.TestCase):
