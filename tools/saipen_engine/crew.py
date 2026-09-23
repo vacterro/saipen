@@ -800,7 +800,9 @@ def crew_snapshot(
             health["instance_present"] = (root / role.outbox_path).is_file()
         roles[role.name] = health
     epoch = _crew_epoch(root, history, records)
-    run_receipts = _crew_run_receipts(root, epoch.op_id if epoch else None, records)
+    run_receipts = _crew_run_receipts(
+        root, epoch.op_id if epoch else None, records, history=history
+    )
     packages = {
         role.name: _current_packages_for(
             root, source_id, home, role, epoch.op_id if epoch else None, run_receipts
@@ -1418,14 +1420,29 @@ def _current_packages(snapshot: CrewSnapshot, role) -> list[dict]:
 
 
 def _crew_run_receipts(
-    root: Path, epoch_op_id: str | None, records: tuple[dict, ...] | None = None
+    root: Path,
+    epoch_op_id: str | None,
+    records: tuple[dict, ...] | None = None,
+    *,
+    history: "HistorySnapshot",  # noqa: F821
 ) -> tuple[dict, ...]:
     """Every COMMITTED crew_run receipt for the epoch (item 7): structured
     proof a role actually ran IN this epoch and bound its package identities
-    to epoch + role + source + role_revision."""
+    to epoch + role + source + role_revision.
+
+    T-1430: a receipt counts only when the journal wrote it -- the LOG event
+    its metadata names carries this receipt's own `[op: ...]` tag. A
+    hand-written operation.json has a decoder-valid shape and no such line,
+    and it satisfied SC-2 while no shipped command could produce a receipt.
+    """
     out = []
     if not epoch_op_id:
         return ()
+    logged = {
+        parsed.get("op_id"): parsed.get("event")
+        for parsed in history.events
+        if parsed.get("op_id")
+    }
     for record in _iter_operation_records(root, records):
         meta = record.get("receipt_metadata") or {}
         if record.get("operation") != "crew_run":
@@ -1436,8 +1453,89 @@ def _crew_run_receipts(
             continue
         if not _strict_created_at(record.get("created_at")):
             continue
+        event_id = str(meta.get("event_id") or "")
+        if not event_id.startswith("E-") or f"E-{logged.get(record.get('op_id'))}" != event_id:
+            continue
         out.append(record)
     return tuple(out)
+
+
+def crew_record_run(
+    project_root: Path | str,
+    agent: str,
+    role_name: str,
+    package_ids: list[str] | None = None,
+    dry_run: bool = False,
+) -> Result:
+    """T-1430: the ONE canonical producer of a crew_run receipt.
+
+    `operations.record_crew_run` had no caller, so a sensor stage (SC-2 for
+    saihunt) could be satisfied only by a hand-written receipt. This binds the
+    role's CURRENT packages -- ready/reviewed OUTBOX packages carrying the live
+    source triple and the current role revision -- to the ACTIVE crew epoch
+    through the journaled writer. The caller names only the role and,
+    optionally, which packages; epoch, source identity and role revision are
+    read, never supplied, and a named package that is not current is refused.
+    """
+    from .log import read_history_snapshot
+    from .operations import record_crew_run
+
+    root = Path(project_root)
+    role = next((item for item in CREW_ROLES if item.name == role_name), None)
+    if role is None:
+        return _refuse(
+            "INVALID_ROLE",
+            f"{role_name!r} is not a crew role",
+            roles=[item.name for item in CREW_ROLES],
+        )
+    state = parse_state(_read_maybe(root / ".saipen/STATE.md"))
+    home = state.get("saipen_home") or ""
+    history = read_history_snapshot(root)
+    records = _capture_operation_receipts(root).records
+    epoch = _crew_epoch(root, history, records)
+    if epoch is None:
+        return _refuse(
+            "CREW_NOT_READY",
+            "no active crew epoch: a crew run is recorded inside a running crew circuit",
+            canonical_next_command="saipen crew",
+        )
+    source_id, source_error = _source_identity(root)
+    if source_id is None:
+        return _refuse(
+            "SOURCE_IDENTITY_UNKNOWN",
+            f"the live source identity is unavailable: {source_error}",
+        )
+    current = _current_packages_for(root, source_id, home, role)
+    by_id = {package["package_id"]: package for package in current}
+    if package_ids:
+        stale = [package_id for package_id in package_ids if package_id not in by_id]
+        if stale:
+            return _refuse(
+                "STALE_PACKAGE",
+                f"{', '.join(stale)} is not a current {role.name} package: it must be "
+                "ready or reviewed and carry the live source triple and the current "
+                "role revision",
+                current=sorted(by_id),
+            )
+        chosen = [by_id[package_id] for package_id in package_ids]
+    else:
+        chosen = current
+    if not chosen:
+        return _refuse(
+            "NO_READY_PACKAGE",
+            f"{role.name} has no current package to bind to crew epoch {epoch.op_id}",
+        )
+    return record_crew_run(
+        root,
+        agent,
+        crew_epoch=epoch.op_id,
+        role=role.name,
+        source_head=source_id.source_head,
+        source_tree_fingerprint=source_id.source_tree_fingerprint,
+        role_revision=chosen[0]["role_revision"],
+        package_identities=[package["package_identity"] for package in chosen],
+        dry_run=dry_run,
+    )
 
 
 def _finalizer_receipt(

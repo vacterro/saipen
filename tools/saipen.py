@@ -3212,12 +3212,56 @@ def _crew(project_root: Path, args: list[str], as_json: bool, dry_run: bool) -> 
     the same target. The launcher scripts stay an OPTIONAL manual multi-window
     helper -- never `saipen crew` semantics.
     """
+    if args and args[0] == "record-run":
+        # T-1430: the one canonical producer of a crew_run receipt.
+        rest = args[1:]
+        packages: list[str] = []
+        role_name = None
+        index = 0
+        while index < len(rest):
+            token = rest[index]
+            if token == "--package" and index + 1 < len(rest):
+                packages.append(rest[index + 1])
+                index += 2
+                continue
+            if token.startswith("-") or role_name is not None:
+                _emit(
+                    {
+                        "ok": False,
+                        "code": "VALIDATION_FAILED",
+                        "detail": "crew record-run <ROLE> [--package <PACKAGE-ID>]...",
+                    },
+                    as_json,
+                )
+                return 2
+            role_name = token
+            index += 1
+        if role_name is None:
+            _emit(
+                {
+                    "ok": False,
+                    "code": "VALIDATION_FAILED",
+                    "detail": "crew record-run <ROLE> [--package <PACKAGE-ID>]...",
+                },
+                as_json,
+            )
+            return 2
+        if not dry_run and _negotiate_capability(project_root) == "read-only":
+            return _capability_refusal(as_json)
+        from saipen_engine.crew import crew_record_run
+
+        result = crew_record_run(
+            project_root, _agent_for(project_root), role_name, packages, dry_run=dry_run
+        )
+        _emit(result.to_dict(), as_json)
+        return 0 if result.ok else 1
     if args:
         _emit(
             {
                 "ok": False,
                 "code": "VALIDATION_FAILED",
-                "detail": "crew accepts no positional arguments; surplus: " + " ".join(args),
+                "detail": "crew accepts no positional arguments except record-run; surplus: "
+                + " ".join(args),
             },
             as_json,
         )

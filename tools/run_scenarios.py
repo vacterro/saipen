@@ -4867,23 +4867,17 @@ def run_saicrew_probes() -> tuple[list[str], int]:
         epoch_op = entered.op_id
 
         # Epoch-bound sensor certification: one crew_run receipt per sensor
-        # binding the reviewed package identity to THIS crew epoch.
+        # binding the reviewed package identity to THIS crew epoch, through
+        # the canonical producer (T-1430): a hand-written receipt has no
+        # journaled LOG line and no longer counts.
+        from saipen_engine.crew import crew_record_run
+
         for name in sensor_names:
-            identity = package_identity_of(sensor_reviewed[name], name)
-            fixture_op_receipt(
-                pre,
-                f"crew-run-{name}",
-                "crew_run",
-                "2026-08-13T00:00:03Z",
-                meta={
-                    "operation": "crew_run",
-                    "status": "COMMITTED",
-                    "role": name,
-                    "package_identities": [identity],
-                    "crew_epoch": epoch_op,
-                    "source_head": pre_source.source_head,
-                    "source_tree_fingerprint": pre_source.source_tree_fingerprint,
-                },
+            recorded = crew_record_run(pre, "probe", name)
+            expect(
+                f"positive fixture crew run recorded for {name}",
+                recorded.ok and recorded.data.get("crew_epoch") == epoch_op,
+                recorded.message or str(recorded.data),
             )
 
         def integration_receipt(root: Path, name: str, text: str, created_at: str) -> str:

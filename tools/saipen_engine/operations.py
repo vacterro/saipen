@@ -10183,12 +10183,14 @@ def _plan_crew_run(
     certify the new SC stage. CURRENT != FRESH FOR THIS CREW EPOCH."""
     op_id = "crew-run-" + uuid4_hex()
     docs, _state, _board, log_tail = _read(root)
+    # T-1430: the actor who records the run is the agent; the role is what
+    # ran, and it is named in the text and the receipt.
     event, line = _event_line(
         docs,
         log_tail,
         "DEC",
         None,
-        role,
+        agent,
         f"crew run -- epoch {crew_epoch} role {role} ({len(package_identities)} package(s))",
         now,
         op_id,
