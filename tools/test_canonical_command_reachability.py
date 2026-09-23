@@ -21,9 +21,11 @@ what has to classify is the command an operator actually types.
 
 from __future__ import annotations
 
+import ast
 import re
 import sys
 import unittest
+import warnings
 from pathlib import Path
 
 TOOLS = Path(__file__).resolve().parent
@@ -33,29 +35,75 @@ if str(TOOLS) not in sys.path:
 from saipen_engine import guard_events  # noqa: E402
 
 ENGINE = TOOLS / "saipen_engine"
-#: A quoted string literal that begins a `saipen ...` command line, with its
-#: string prefix: a RAW literal in the engine is a pattern that RECOGNISES a
-#: command (`r"saipen improve reconcile [A-Za-z0-9_-]+"`), never one printed.
-_LITERAL = re.compile(r"""(?<![A-Za-z0-9_])([rRbBfFuU]{0,2})["'](saipen [^"'\n]{0,160})["']""")
 #: `<placeholder>` and `{interpolation}` both stand for a value the operator or
-#: the engine supplies; neither is what gets typed. An interpolation whose own
-#: quote ended the literal (`{first['receipt']}`) is cut at that quote.
-_PLACEHOLDER = re.compile(r"<[^<>]{1,40}>|\{[^{}]{0,60}(?:\}|$)")
+#: the engine supplies; neither is what gets typed.
+_PLACEHOLDER = re.compile(r"<[^<>]{1,40}>|\{[^{}]{0,60}\}")
 #: What a substituted placeholder becomes: inside the canonical argument
 #: alphabet, so substitution itself never decides the verdict.
 _FILLER = "T-1"
 #: Literals that are prose or a bare prefix, not a command anyone runs.
 _NOT_COMMANDS = frozenset({"saipen", "saipen ...", "saipen push + build ccc"})
+#: The string prefix in front of a literal's first quote.
+_PREFIX = re.compile(rb"""([A-Za-z]{0,2})["']""")
+
+
+def _printed(node: ast.AST) -> str | None:
+    """The text a string literal prints, or None for anything else.
+
+    The parser has already joined implicit concatenation, so a command split
+    over two source lines is one literal, and a quote of the other kind inside
+    it is part of the command (T-1383: `'{text}'` payloads were cut off). Each
+    f-string interpolation reads `{expression}`.
+    """
+    if isinstance(node, ast.Constant) and isinstance(node.value, str):
+        return node.value
+    if isinstance(node, ast.JoinedStr):
+        parts = []
+        for value in node.values:
+            if isinstance(value, ast.Constant):
+                parts.append(str(value.value))
+            else:
+                expression = ast.unparse(value.value)
+                parts.append("{" + re.sub(r"[{}]", "", expression)[:60] + "}")
+        return "".join(parts)
+    return None
+
+
+def _is_raw(node: ast.AST, lines: list[bytes]) -> bool:
+    """A RAW literal is a pattern that RECOGNISES a command
+    (`r"saipen improve reconcile [A-Za-z0-9_-]+"`), never one printed."""
+    prefix = _PREFIX.match(lines[node.lineno - 1], node.col_offset)
+    return bool(prefix) and b"r" in prefix.group(1).lower()
 
 
 def harvested() -> dict[str, set[str]]:
     """Every `saipen ...` command literal in the engine, by source file."""
     found: dict[str, set[str]] = {}
     for path in sorted(ENGINE.glob("*.py")):
-        for match in _LITERAL.finditer(path.read_text(encoding="utf-8")):
-            if "r" in match.group(1).lower():
+        source = path.read_bytes()
+        # Compile-time warnings (an invalid escape) are the linter's finding,
+        # not this control's, and would land inside the family's own stream.
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            tree = ast.parse(source, filename=str(path))
+        # AST column offsets count UTF-8 bytes.
+        lines = source.splitlines()
+        # An f-string's own constant parts are nodes too; only whole literals.
+        parts = {
+            id(value)
+            for node in ast.walk(tree)
+            if isinstance(node, ast.JoinedStr)
+            for value in node.values
+        }
+        for node in ast.walk(tree):
+            if id(node) in parts:
                 continue
-            found.setdefault(match.group(2).strip(), set()).add(path.name)
+            text = _printed(node)
+            if text is None or not text.startswith("saipen ") or "\n" in text:
+                continue
+            if _is_raw(node, lines):
+                continue
+            found.setdefault(text.strip(), set()).add(path.name)
     return found
 
 
@@ -65,6 +113,23 @@ class CanonicalCommandReachabilityTests(unittest.TestCase):
         found = harvested()
         self.assertGreater(len(found), 10, found)
         self.assertIn("saipen recover resolve-blocker <decision>", found)
+
+    def test_a_literal_is_harvested_whole(self):
+        """T-1383: the harvest read a literal only up to its first quote of
+        either kind, so the `ticket add` route -- quoted payloads inside a
+        double-quoted f-string -- was judged as `saipen ticket add {priority}`
+        and its payloads never reached the guard. A command split over two
+        source lines by implicit concatenation is one literal too."""
+        found = harvested()
+        self.assertIn(
+            "saipen ticket add {priority} '{text}' --verify '<how DONE is proven>'", found
+        )
+        self.assertIn(
+            'saipen checkpoint RUN {ticket_id} "verify -> PASS [target: {ticket_id}] '
+            'conf: high -- <the command that ran and what it reported>"',
+            found,
+        )
+        self.assertNotIn("saipen ticket add {priority}", found)
 
     def test_every_printed_command_classifies_as_canonical(self):
         unreachable = []

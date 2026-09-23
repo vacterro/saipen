@@ -5109,9 +5109,11 @@ def _plan_retire_source(
         marker = "requirement(s): "
         if marker in first:
             rid = first.split(marker, 1)[1].split(",", 1)[0].strip()
+            # T-1383: a route is typed, not read -- `[...]` is shell glob syntax
+            # the guard refuses, and a terminal disposition needs its evidence.
             route = (
                 f"saipen source disp {receipt_id} {rid} <DISPOSITION> "
-                "[--evidence E-###]"
+                "--evidence <E-###>"
             )
         return _refuse(
             "SOURCE_RETIREMENT_NOT_ELIGIBLE",
@@ -6044,6 +6046,20 @@ def _is_placeholder_verify(verify: str) -> bool:
     )
 
 
+def _ticket_add_route(priority: str, description: str) -> str:
+    """The `ticket add` that creates the same ticket once its DONE proof is
+    written in (T-1383). What the caller supplied is carried over when it can
+    be typed back verbatim inside single quotes; anything else stays a
+    placeholder rather than a line that would parse differently."""
+    priority = str(priority or "").strip().upper()
+    if not re.fullmatch(r"P[0-9]", priority):
+        priority = "<PRIORITY>"
+    text = " ".join(str(description or "").split())
+    if not text or "'" in text or len(text) > 200:
+        text = "<the ticket, one line>"
+    return f"saipen ticket add {priority} '{text}' --verify '<how DONE is proven>'"
+
+
 @_state_guard
 def ticket_add(
     project_root: Path | str,
@@ -6056,12 +6072,34 @@ def ticket_add(
 ) -> Result:
     root = Path(project_root)
     if not description or not description.strip():
-        return _refuse("INCOMPLETE_TICKET", "ticket description is required (semantic input)")
-    if _is_placeholder_verify(verify):
         return _refuse(
             "INCOMPLETE_TICKET",
-            "verify is a placeholder; a ticket needs a real DONE proof (no TBD/TODO/empty)",
+            "ticket description is required (semantic input)",
+            canonical_next_command=_ticket_add_route(priority, ""),
+        )
+    # T-1383: the BOARD grammar is `[P<digit>]`, and cold recovery and entry
+    # read nothing else -- `ticket add fix the bug ...` made "fix" a priority
+    # and a ticket those readers could not see. Case is mechanics, not intent.
+    given = str(priority or "").strip()
+    priority = given.upper()
+    if not re.fullmatch(r"P[0-9]", priority):
+        # Most often the priority was left out and the description's first
+        # word took its place, so the route keeps that word in the text.
+        return _refuse(
+            "VALIDATION_FAILED",
+            f"priority {given!r} is not P0-P9; the priority comes first, "
+            "then the description",
+            canonical_next_command=_ticket_add_route("", f"{given} {description}"),
+        )
+    if _is_placeholder_verify(verify):
+        # T-1383: the refusal names the move, not only the rule -- the same
+        # ticket with the one option it lacked.
+        return _refuse(
+            "INCOMPLETE_TICKET",
+            "verify is required and cannot be a placeholder: pass --verify with "
+            "the DONE proof (no TBD/TODO/empty)",
             verify=verify,
+            canonical_next_command=_ticket_add_route(priority, description),
         )
     # CORE-003 / SRC-026:R003, ONE shared record-boundary predicate (not two
     # ad-hoc \\n/\\r tests): a scalar that carries ANY physical record

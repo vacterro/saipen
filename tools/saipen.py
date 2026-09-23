@@ -31,6 +31,7 @@ from saipen_engine.board import parse_board, ticket_is_workable
 from saipen_engine.commands import load_shortcut_table, resolve_shortcut
 from saipen_engine.journal import auto_recover_pending
 from saipen_engine.operations import (
+    _ticket_add_route,
     apply_claim,
     checkpoint,
     compact_board,
@@ -8420,7 +8421,8 @@ def main(argv: list[str] | None = None) -> int:
             "validate|recover|fleet preflight|scan|prepare|claim <T-###> [--explicit]|"
             "transition <PHASE> [T-###] [text]|checkpoint <TAXONOMY> "
             "[T-###] [text]|goal <text>|user-request <text> [--priority P#] "
-            "[--verify <text>] [--needs T-X,T-Y]|ticket add <PRIORITY> <text>|ticket "
+            "[--verify <text>] [--needs T-X,T-Y]|ticket add <PRIORITY> <text> --verify <proof> "
+            "[--needs T-X,T-Y]|ticket "
             "done <T-###> [--closure-mode own_patch|inherited_verified|cohort] "
             "[--closure-cohort C-###] [--implementation-source "
             "<release:<id>|T-###|SRC-###>] [--paths <p1,p2>]|"
@@ -9149,7 +9151,10 @@ def main(argv: list[str] | None = None) -> int:
                         "ok": False,
                         "code": "VALIDATION_FAILED",
                         "detail": "ticket add <PRIORITY> <description> "
-                        "[--verify <text>] [--needs T-X,T-Y]",
+                        "--verify <proof> [--needs T-X,T-Y]",
+                        "canonical_next_command": _ticket_add_route(
+                            rest[0] if rest else "", " ".join(rest[1:])
+                        ),
                     },
                     as_json,
                 )
@@ -9239,7 +9244,10 @@ def main(argv: list[str] | None = None) -> int:
                     {
                         "ok": False,
                         "code": "VALIDATION_FAILED",
-                        "detail": "ticket add needs <PRIORITY> <description>",
+                        "detail": "ticket add needs <PRIORITY> <description> --verify <proof>",
+                        "canonical_next_command": _ticket_add_route(
+                            clean_rest[0] if clean_rest else "", ""
+                        ),
                     },
                     as_json,
                 )
