@@ -455,6 +455,47 @@ def supervise(
     live in canonical state the loop never writes. A different model is used
     only when the operator listed it in `fallback_models`.
     """
+    args = dict(locals())
+    # SAIGPU: while the agent host thinks, an idle local GPU refreshes the
+    # recall index. None when the switch is OFF (the default). The lane holds
+    # no lock and writes only .saipen/cache/gpu/, so it cannot change a
+    # verdict. It stops with the loop on EVERY exit, an exception included
+    # (T-1482): a daemon lane outliving its loop kept a long-lived caller's
+    # GPU busy for nothing.
+    from . import gpu as _gpu
+
+    lane = _gpu.start_side_lane(root)
+    try:
+        return _supervise(**args, lane=lane)
+    finally:
+        if lane is not None:
+            lane.stop()
+
+
+def _supervise(
+    root: Path | str,
+    agent_argv: list[str],
+    *,
+    model: str | None = None,
+    fallback_models: tuple[str, ...] | list[str] = (),
+    max_cycles: int = 10,
+    slice_timeout: float = 900.0,
+    max_slice_seconds: float | None = None,
+    heartbeat_every: float = 5.0,
+    suspect_after: float = 30.0,
+    expire_after: float = 120.0,
+    backoff: tuple[float, ...] = FAILURE_BACKOFF_SECONDS,
+    max_awaits: int = 3,
+    max_wall_seconds: float | None = None,
+    keep_output_tail: int = 0,
+    max_unknown: int = 2,
+    run_id: str | None = None,
+    env: dict | None = None,
+    sleep=None,
+    clock=None,
+    lane=None,
+) -> dict:
+    """The loop behind `supervise`; `lane` is the side lane it reports."""
     import time
     import uuid
 
@@ -492,14 +533,6 @@ def supervise(
     history: list[dict] = []
     max_latency = 0.0
     failed_at: float | None = None
-
-    # SAIGPU: while the agent host thinks, an idle local GPU refreshes the
-    # recall index. None when the switch is OFF (the default). The lane holds
-    # no lock and writes only .saipen/cache/gpu/, so it cannot change a
-    # verdict; it stops with the loop.
-    from . import gpu as _gpu
-
-    lane = _gpu.start_side_lane(root)
 
     def report(stop: str, reason: str, *, operator_action: str | None = None) -> dict:
         lane_summary = lane.stop() if lane is not None else None

@@ -226,6 +226,16 @@ class IndexTests(LaneTestCase):
         result = gpu.refresh_index(self.root, gate_check=spiky, sleep=lambda _s: None)
         self.assertEqual(result["stop"], "COMPLETE")
 
+    def test_an_idle_pass_writes_nothing(self):
+        # T-1482: the side lane refreshes every two minutes; an unchanged
+        # corpus must not rewrite a megabyte-sized index each time.
+        gpu.refresh_index(self.root)
+        writes = []
+        real = gpu._write_json
+        with mock.patch.object(gpu, "_write_json", lambda *a: writes.append(a) or real(*a)):
+            self.assertEqual(gpu.refresh_index(self.root)["embedded"], 0)
+        self.assertEqual(writes, [])
+
 
 class RecallTests(LaneTestCase):
     def test_recall_ranks_the_projects_own_memory(self):
@@ -278,6 +288,25 @@ class SideLaneTests(LaneTestCase):
         summary = lane.stop(timeout=30)
         self.assertIn("driver reset", summary["last_stop"])
 
+    def test_supervise_stops_the_lane_even_when_it_raises(self):
+        # T-1482: the lane used to stop only through the loop's report().
+        live_gpu = importlib.import_module("saipen_engine.gpu")
+        worker = importlib.import_module("saipen_engine.worker")
+        stopped = []
+
+        class FakeLane:
+            def stop(self, timeout=5.0):
+                stopped.append(True)
+                return {"runs": 0, "embedded": 0, "last_stop": None}
+
+        fake_lane = mock.patch.object(live_gpu, "start_side_lane", lambda *_a, **_k: FakeLane())
+        exploding = mock.patch.object(
+            worker.supervisor, "decide", side_effect=RuntimeError("decider exploded")
+        )
+        with fake_lane, exploding, self.assertRaises(RuntimeError):
+            worker.supervise(self.root, ["agent", "{model}"], max_cycles=1)
+        self.assertEqual(stopped, [True])
+
 
 def _live_gpu():
     """The gpu module `saipen.py` will import NOW (see test_t1479's `_engine`):
@@ -314,6 +343,13 @@ class CliTests(unittest.TestCase):
             payload = json.loads(out.getvalue())
             self.assertFalse(payload["enabled"])
             self.assertEqual(payload["lane"], gpu.DISABLED)
+            # T-1482: OFF routes to the switch, not to an index that refuses too.
+            out = io.StringIO()
+            with contextlib.redirect_stdout(out):
+                self.assertEqual(saipen._gpu(root, ["recall", "anything"], True), 1)
+            refusal = json.loads(out.getvalue())
+            self.assertEqual(refusal["reason"], gpu.DISABLED)
+            self.assertEqual(refusal["canonical_next_command"], "saipen gpu on")
 
     def test_the_echo_advisory_goes_to_stderr_only(self):
         import saipen

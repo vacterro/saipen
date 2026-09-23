@@ -6029,7 +6029,12 @@ def _gpu(project_root: Path, args: list[str], as_json: bool) -> int:
                 {
                     **answer,
                     "detail": f"no recall: {answer['reason']}",
-                    "canonical_next_command": "saipen gpu index",
+                    # T-1482: the route out depends on why there is no answer.
+                    "canonical_next_command": {
+                        _gpu_lane.DISABLED: "saipen gpu on",
+                        "EMPTY_INDEX": "saipen gpu index",
+                        "INDEX_MODEL_MISMATCH": "saipen gpu index",
+                    }.get(answer["reason"], "saipen gpu status"),
                 },
                 as_json,
             )

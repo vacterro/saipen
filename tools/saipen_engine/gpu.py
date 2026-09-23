@@ -34,6 +34,9 @@ DEFINES truth.
   point answers with a reason code and never raises into a caller.
 
 The backend is Ollama's local HTTP API (``/api/embed``), standard library only.
+The endpoint RECEIVES PROJECT TEXT -- BOARD, LOG decisions, KNOWLEDGE -- so an
+``endpoint`` in ``config.json`` that is not on this machine sends that text
+off it (T-1482); the default is 127.0.0.1.
 """
 
 from __future__ import annotations
@@ -404,7 +407,8 @@ def refresh_index(
     wanted = corpus(root)
     index = load_index(root)
     stored = index["items"]
-    for key in [k for k in stored if k not in wanted]:
+    vanished = [k for k in stored if k not in wanted]
+    for key in vanished:
         del stored[key]
     todo = []
     for key, item in wanted.items():
@@ -447,7 +451,9 @@ def refresh_index(
         embedded += len(chunk)
         index.update({"model": model, "dims": dims, "updated_at": _utc()})
         _write_json(cache_dir(root) / INDEX_NAME, index)
-    if embedded == 0:
+    # T-1482: an idle pass (nothing embedded, nothing vanished, same model)
+    # writes nothing; the side lane runs every two minutes.
+    if embedded == 0 and (vanished or (index.get("model"), index.get("dims")) != (model, dims)):
         index.update({"model": model, "dims": dims})
         _write_json(cache_dir(root) / INDEX_NAME, index)
     return {
