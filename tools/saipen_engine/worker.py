@@ -493,8 +493,18 @@ def supervise(
     max_latency = 0.0
     failed_at: float | None = None
 
+    # SAIGPU: while the agent host thinks, an idle local GPU refreshes the
+    # recall index. None when the switch is OFF (the default). The lane holds
+    # no lock and writes only .saipen/cache/gpu/, so it cannot change a
+    # verdict; it stops with the loop.
+    from . import gpu as _gpu
+
+    lane = _gpu.start_side_lane(root)
+
     def report(stop: str, reason: str, *, operator_action: str | None = None) -> dict:
+        lane_summary = lane.stop() if lane is not None else None
         return {
+            "gpu_lane": lane_summary,
             "ok": stop in (supervisor.IDLE, "MAX_CYCLES", "MAX_WALL"),
             "code": "SUPERVISE_STOPPED",
             "run_id": run_id,

@@ -44,6 +44,10 @@ HOST_SESSION_VARIABLES = (
     "SAIPEN_RUNTIME_INFO",
     "SAIPEN_SKILL_ROOT",
     "SAIPEN_GUARD_STARTUP_PROBE",
+    # SAIGPU: an operator's `SAIPEN_GPU=on` would start a real GPU lane beside
+    # every fixture `supervise`; stripped, the fixture's own (absent) switch
+    # decides, which is OFF.
+    "SAIPEN_GPU",
 )
 
 #: T-1343. The interlock `saipen_engine.host_launch` checks before it creates a

@@ -200,6 +200,7 @@
     "crew": "EXECUTION",
     "stop": "EXECUTION",
     "launch": "EXECUTION",
-    "autonomy": "DIAGNOSTIC"
+    "autonomy": "DIAGNOSTIC",
+    "gpu": "DIAGNOSTIC"
   }
 }

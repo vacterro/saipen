@@ -5943,6 +5943,157 @@ def _acceptance(project_root: Path, args: list[str], as_json: bool) -> int:
     return 0
 
 
+_GPU_USAGE = (
+    "saipen gpu [status|on|off|index [--budget SECONDS]|recall <text> [--k N]] [--json]"
+)
+
+
+def _gpu(project_root: Path, args: list[str], as_json: bool) -> int:
+    """saipen gpu: the idle-GPU recall lane (SAIGPU). Default OFF; advisory only.
+
+    Every write is under .saipen/cache/gpu/ -- a git-ignored runtime cache, never
+    canonical state -- which is why the verb is DIAGNOSTIC.
+    """
+    from saipen_engine import gpu as _gpu_lane
+
+    args = [a for a in args if a != "--json"]
+    action = args[0] if args else "status"
+    rest = args[1:]
+
+    def refuse(detail: str) -> int:
+        _emit(
+            {
+                "ok": False,
+                "code": "VALIDATION_FAILED",
+                "detail": detail,
+                "canonical_next_command": _GPU_USAGE,
+            },
+            as_json,
+        )
+        return 2
+
+    if action == "status" and not rest:
+        _gpu_out(_gpu_lane.status(project_root), as_json)
+        return 0
+    if action in ("on", "off") and not rest:
+        config = _gpu_lane.set_enabled(project_root, action == "on")
+        payload = _gpu_lane.status(project_root)
+        payload.update({"code": "GPU_SWITCH", "config": config})
+        if action == "on" and payload["hardware"] != _gpu_lane.READY:
+            payload["note"] = (
+                f"switch is ON; the lane waits until the hardware answers READY "
+                f"(now {payload['hardware']})"
+            )
+        _gpu_out(payload, as_json)
+        return 0
+    if action == "index":
+        budget = 300.0
+        if rest[:1] == ["--budget"] and len(rest) == 2:
+            try:
+                budget = float(rest[1])
+            except ValueError:
+                return refuse(f"--budget needs seconds, got {rest[1]!r}")
+        elif rest:
+            return refuse(f"gpu index: unknown argument(s) {' '.join(rest)}")
+        verdict = _gpu_lane.gate(project_root)
+        if not verdict["ok"]:
+            _emit(
+                {
+                    "ok": False,
+                    "code": "GPU_LANE_UNAVAILABLE",
+                    "reason": verdict["reason"],
+                    "detail": f"the GPU lane is not usable now: {verdict['reason']}",
+                    "canonical_next_command": "saipen gpu status",
+                },
+                as_json,
+            )
+            return 1
+        result = _gpu_lane.refresh_index(project_root, budget_s=budget)
+        _gpu_out({**result, "ok": True, "complete": result["ok"]}, as_json)
+        return 0
+    if action == "recall":
+        k = 5
+        if "--k" in rest:
+            at = rest.index("--k")
+            try:
+                k = int(rest[at + 1])
+            except (IndexError, ValueError):
+                return refuse("--k needs a whole number")
+            rest = rest[:at] + rest[at + 2 :]
+        text = " ".join(rest).strip()
+        if not text:
+            return refuse("gpu recall needs <text>")
+        answer = _gpu_lane.recall(project_root, text, k=k)
+        if not answer["ok"]:
+            _emit(
+                {
+                    **answer,
+                    "detail": f"no recall: {answer['reason']}",
+                    "canonical_next_command": "saipen gpu index",
+                },
+                as_json,
+            )
+            return 1
+        _gpu_out(answer, as_json)
+        return 0
+    return refuse(f"gpu: unknown action {' '.join(args)!r}")
+
+
+def _gpu_out(payload: dict, as_json: bool) -> None:
+    """The gpu verb's own compact human rendering; --json is the full payload."""
+    if as_json:
+        _emit(payload, as_json)
+        return
+    print(f"code: {payload.get('code')}")
+    if "enabled" in payload:
+        print(f"switch: {'ON' if payload['enabled'] else 'OFF'} ({payload.get('switch')})")
+        print(f"lane: {payload.get('lane')}  hardware: {payload.get('hardware')}")
+        card = payload.get("gpu") or {}
+        if card:
+            print(
+                f"gpu: {card.get('name')}  busy {card.get('utilization_percent')}%  "
+                f"free {card.get('memory_free_mib')}/{card.get('memory_total_mib')} MiB"
+            )
+        backend = payload.get("backend") or {}
+        if backend:
+            state = "up" if backend.get("up") else "down"
+            print(f"backend: {state}  model: {payload.get('embed_model')}")
+        index = payload.get("index") or {}
+        print(
+            f"index: {index.get('items', 0)} items {index.get('by_kind') or {}}  "
+            f"updated {index.get('updated_at')}"
+        )
+        if payload.get("note"):
+            print(f"note: {payload['note']}")
+    for key in ("stop", "embedded", "pending", "indexed", "seconds"):
+        if key in payload:
+            print(f"{key}: {payload[key]}")
+    for hit in payload.get("hits") or []:
+        print(f"{hit['score']:.3f}  {hit['kind']:<11} {hit['ref']}  {hit['preview'][:100]}")
+    if payload.get("advisory"):
+        print(payload["advisory"])
+
+
+def _gpu_echo_advisory(project_root: Path, text: str, new_ticket: str) -> None:
+    """ADVISORY on stderr: existing Work that nearly echoes the new ticket.
+
+    Silent unless the GPU lane is ON and indexed; never changes the result,
+    the exit code or stdout.
+    """
+    try:
+        from saipen_engine import gpu as _gpu_lane
+
+        hits = _gpu_lane.echo_advisory(project_root, text, exclude=new_ticket or None)
+    except Exception:
+        return
+    for hit in hits:
+        print(
+            f"{_gpu_lane.ADVISORY}: {new_ticket or 'the new Work'} may echo "
+            f"{hit['ref']} (similarity {hit['score']}); if so, supersede one of them",
+            file=sys.stderr,
+        )
+
+
 def _autonomy_recall(project_root: Path, args: list[str], as_json: bool) -> int:
     """saipen autonomy recall (T-1446): AUTO_RECALL + the turn-entry decision.
 
@@ -9077,6 +9228,10 @@ def main(argv: list[str] | None = None) -> int:
                 dry_run=dry_run,
             )
             _emit(result.to_dict(), as_json)
+            if result.ok:
+                _gpu_echo_advisory(
+                    project_root, " ".join(clean_rest), str(result.data.get("ticket") or "")
+                )
             return 0 if result.ok else 1
         if action == "supersede":
             _opts, _pos, _opt_err = _parse_value_options(
@@ -9888,6 +10043,8 @@ def main(argv: list[str] | None = None) -> int:
         result = authority_capture(project_root, _agent_for(project_root), text, dry_run=dry_run)
         _emit(result.to_dict(), as_json)
         return 0 if result.ok else 1
+    if command == "gpu":
+        return _gpu(project_root, args[1:], as_json)
     if command == "autonomy":
         # T-1446: the read-only autonomy picture a supervisor or a cold worker
         # reads before deciding anything. Writes nothing; `decide` is included

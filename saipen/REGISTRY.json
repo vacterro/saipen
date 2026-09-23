@@ -424,7 +424,8 @@
       "user-request",
       "start",
       "cohort",
-      "autonomy"
+      "autonomy",
+      "gpu"
     ],
     "improve_actions": [
       "bare",
@@ -913,6 +914,9 @@
     "EXTERNAL_RESOLUTION_REQUIRES_BLOCKED",
     "EXTERNAL_RECEIPT_MISSING",
     "EXTERNAL_RECEIPT_CORRUPT",
+    "FALLBACK_NEEDS_MODEL_PLACEHOLDER",
+    "GPU_LANE_UNAVAILABLE",
+    "GPU_RECALL",
     "SOURCE_RETIREMENT_NOT_ELIGIBLE",
     "INVALID_AUTHORITY_CAPTURE",
     "INGRESS_PARAPHRASE_REFUSED",
