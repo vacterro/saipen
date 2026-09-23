@@ -223,7 +223,16 @@ class OneTemplateTests(unittest.TestCase):
     def test_template_exists_and_carries_the_semantics(self):
         text = TEMPLATE.read_text(encoding="utf-8")
         self.assertIn("SHORTCUT ACTIVATION GATE", text)
-        self.assertIn("FIRST-OUTPUT LANGUAGE GATE", text)
+        # T-1466: cf5102eb (EXEC-RESPONSE-01) renamed the gate FIRST-OUTPUT GATE
+        # when it came to own response structure beside language; the language
+        # pin it always carried is asserted by meaning, not by the old title.
+        self.assertIn("FIRST-OUTPUT GATE", text)
+        flat = " ".join(text.split())
+        self.assertIn(
+            "is the absolute chat language for EVERY response including the first, "
+            "and incoming user language MUST NOT override it",
+            flat,
+        )
         # T-1317 P1-3: a placeholder COUNT is not the contract -- the template
         # legitimately points at BOOT.md, STYLE.md and UI.md, so the contract is
         # that every placeholder renders to the installed home with none left
