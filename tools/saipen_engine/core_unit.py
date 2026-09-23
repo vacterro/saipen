@@ -176,6 +176,100 @@ def baseline_digest(root: Path | str) -> str:
     return _sha256_file(Path(root) / BASELINE_REL)
 
 
+#: The four files one checkpoint writes together. A copy that straddles a
+#: checkpoint holds a STATE ahead of its LOG (T-1479).
+CHECKPOINT_FILES = ("STATE.md", "LOG.md", "BOARD.md", "MANIFEST.json")
+#: Attempts to copy `.saipen` between two checkpoints before giving up.
+CONSISTENT_COPY_ATTEMPTS = 20
+
+
+def _checkpoint_stamp(saipen_dir: Path) -> tuple:
+    stamp = []
+    for name in CHECKPOINT_FILES:
+        try:
+            st = (saipen_dir / name).stat()
+        except FileNotFoundError:
+            stamp.append(None)
+            continue
+        stamp.append((st.st_size, st.st_mtime_ns))
+    return tuple(stamp)
+
+
+def _without_locks(ignore):
+    """Lock files are this process's runtime, not state: a held one cannot even
+    be read on Windows, and a sandbox creates its own on demand."""
+
+    def wrapped(directory: str, names: list[str]) -> set[str]:
+        ignored = set(ignore(directory, names))
+        if Path(directory).name == "locks":
+            ignored.update(name for name in names if name.endswith(".lock"))
+        return ignored
+
+    return wrapped
+
+
+def _copy_saipen_once(source: Path, target: Path, ignore, *, lock: bool) -> bool:
+    """Copy ``source/.saipen`` to ``target``; True when no checkpoint landed meanwhile.
+
+    The checkpoint files are compared before and after, so an optimistic copy
+    that straddled a checkpoint is detected. With ``lock`` the canonical writer
+    lock is also taken when it is free, so no writer can start a checkpoint
+    mid-copy. Copying `.saipen` takes tens of seconds and a held lock refuses
+    every canonical writer WRITER_BUSY meanwhile, so the lock is for a retry
+    only, never the first attempt.
+    """
+    from .lock import WriterLock
+
+    held = False
+    writer = WriterLock(source)
+    if lock:
+        try:
+            held = writer.acquire()
+        except PermissionError:
+            held = False
+    try:
+        before = _checkpoint_stamp(source / ".saipen")
+        shutil.copytree(source / ".saipen", target, symlinks=True, ignore=_without_locks(ignore))
+        return held or _checkpoint_stamp(source / ".saipen") == before
+    finally:
+        if held:
+            writer.release()
+
+
+def copy_tree_consistent(source: Path, sandbox: Path, ignore) -> None:
+    """``shutil.copytree`` whose ``.saipen`` part is ONE checkpoint (T-1479).
+
+    A checkpoint written while the tree is being copied left the sandbox with
+    STATE.last_event ahead of the LOG tail; every state-reading test in it then
+    answered VALIDATION_FAILED, and the evidence verdict described the copy
+    race, not the subject.
+    """
+
+    def ignore_top_saipen(directory: str, names: list[str]) -> set[str]:
+        ignored = set(ignore(directory, names))
+        if Path(directory) == source and ".saipen" in names:
+            ignored.add(".saipen")
+        return ignored
+
+    shutil.copytree(source, sandbox, symlinks=True, ignore=ignore_top_saipen)
+    if not (source / ".saipen").is_dir():
+        return
+    for attempt in range(CONSISTENT_COPY_ATTEMPTS):
+        # Each attempt gets a fresh directory BESIDE the sandbox, never inside
+        # it: a torn copy is abandoned, not deleted. `.saipen` holds read-only
+        # git objects (the saiwiki kitchen clone) that rmtree cannot remove on
+        # Windows, and a half-deleted copy made the next attempt fail with
+        # FileExistsError. The enclosing temporary directory reclaims them.
+        staging = sandbox.parent / f"saipen-copy-{attempt}"
+        if _copy_saipen_once(source, staging, ignore, lock=attempt > 0):
+            os.replace(staging, sandbox / ".saipen")
+            return
+        time.sleep(min(0.25 * (attempt + 1), 2.0))
+    raise RuntimeError(
+        f"CORE_UNIT_COPY_TORN: .saipen changed during each of {CONSISTENT_COPY_ATTEMPTS} copies"
+    )
+
+
 def run_family(root: Path | str, *, timeout: int | None = None) -> dict:
     """Run the declared family in a disposable copy; parse the COMPLETE output."""
     from .test_runner import _ignore_copy, _run_family
@@ -191,7 +285,7 @@ def run_family(root: Path | str, *, timeout: int | None = None) -> dict:
         sandbox = Path(tmp) / "project"
         spool = Path(tmp) / "spool"
         spool.mkdir()
-        shutil.copytree(source, sandbox, symlinks=True, ignore=_ignore_copy)
+        copy_tree_consistent(source, sandbox, _ignore_copy)
         # The subject is what was copied, fingerprinted where it was tested:
         # a write to the real tree after this line changes nothing here.
         tested = tree_fingerprint(sandbox)
