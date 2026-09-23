@@ -117,12 +117,17 @@ def canonical_test_plan(_project_root: Path | str) -> list[dict]:
     ]
 
 
+_SESSION_LOCAL = frozenset({".workbuddy-ai", ".pytest_cache", ".ruff_cache", ".mypy_cache"})
+
+
 def _ignore_copy(_directory: str, names: list[str]) -> set[str]:
     ignored = {name for name in names if name == "__pycache__" or name.endswith(".pyc")}
     # These are editor/session-local and have no bearing on the declared test
     # surface. Everything else, including .git and canonical .saipen state, is
     # copied so the sandbox sees the same current working-tree generation.
-    ignored.update(name for name in names if name in {".workbuddy-ai", ".pytest_cache"})
+    # Lint caches too (T-1483): REVIEW runs ruff after VERIFY's family run,
+    # and a cache inside the tested subject made that run cite nothing.
+    ignored.update(name for name in names if name in _SESSION_LOCAL)
     if os.name == "nt":
         reserved = {"CON", "PRN", "AUX", "NUL"}
         reserved.update(f"COM{index}" for index in range(1, 10))

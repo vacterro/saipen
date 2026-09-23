@@ -306,6 +306,16 @@ class ReuseTests(CoreUnitFixture):
         cache.write_bytes(b"\0")
         self.assertEqual(self.fingerprint(), before)
 
+    def test_a_lint_run_after_the_evidence_does_not_spend_it(self):
+        """T-1483: `ruff check` rewrites .ruff_cache; REVIEW lints after VERIFY ran."""
+        before = self.fingerprint()
+        for relative in (".ruff_cache/0.16.0/123", ".mypy_cache/3.11/x.json"):
+            with self.subTest(cache=relative):
+                cache = self.project / relative
+                cache.parent.mkdir(parents=True, exist_ok=True)
+                cache.write_bytes(b"lint")
+                self.assertEqual(self.fingerprint(), before)
+
     def test_a_tree_that_drifted_after_the_copy_keeps_the_record_but_cites_nothing(self):
         self.reach_review()
         copied = {**_run(INHERITED), "fingerprint": "0" * 64}
