@@ -1285,6 +1285,46 @@ def _saipen_cli_tokens(command: str) -> list[str] | None:
     return tokens
 
 
+def saipen_line_problem(command: str | None) -> tuple[str, str | None] | None:
+    """Why a line that starts with `saipen` is not a canonical operation, with
+    the corrected command when the verb is a near miss (T-1401); None for a
+    canonical line or one that does not start with `saipen`."""
+    if not isinstance(command, str) or _saipen_cli_tokens(command) is not None:
+        return None
+    words = command.strip().split()
+    if not words or words[0] != "saipen":
+        return None
+    if len(words) > 1 and not words[1].startswith(("-", "'", '"')):
+        verb = words[1]
+        if not command_effects.is_shell_canonical_verb(verb, words[2:]):
+            import difflib
+
+            close = difflib.get_close_matches(
+                verb, sorted(command_effects.SHELL_CANONICAL_VERBS), n=1, cutoff=0.75
+            )
+            reason = f"`saipen {verb}` is not a canonical SAIPEN operation: {verb!r} is not a verb"
+            if not close:
+                return reason + " (`saipen --help` prints the grammar)", "saipen --help"
+            corrected = " ".join(["saipen", close[0], *words[2:]])
+            # A route is run verbatim: the correction is offered only when it
+            # is itself ONE canonical operation. `saipen statuz && rm -rf x`
+            # must never come back as `saipen status && rm -rf x`.
+            if _saipen_cli_tokens(corrected) is None:
+                return (
+                    reason + f"; did you mean `saipen {close[0]}`? The rest of the line "
+                    "is not part of one canonical operation either; run the saipen "
+                    "command alone",
+                    None,
+                )
+            return reason + f"; did you mean `saipen {close[0]}`?", corrected
+    return (
+        "the line starts with `saipen` but is not ONE canonical operation -- shell "
+        "syntax outside a quoted payload, a path-routed launcher or its length took "
+        "it outside the grammar; run the saipen command alone",
+        None,
+    )
+
+
 def _saipen_cli_verb(command: str) -> str | None:
     tokens = _saipen_cli_tokens(command)
     if tokens is None:
@@ -1719,6 +1759,19 @@ def evaluate_event(event: dict, project_root: str | None = None) -> dict:
                     else ""
                 )
             )
+    if not verdict.get("admitted") and mapped["action"] == "shell":
+        # T-1401: a line that starts with `saipen` but is outside the canonical
+        # grammar was judged an ordinary shell effect, so a typo (`saipen
+        # statuz`) was told "consequential mutation requires ... DOING Work"
+        # -- a rule about something the line never tried. Say what the
+        # grammar refused, and the spelling it most likely meant.
+        tool_input = event.get("tool_input") if isinstance(event.get("tool_input"), dict) else {}
+        grammar = saipen_line_problem(tool_input.get("command"))
+        if grammar is not None:
+            reason, corrected = grammar
+            verdict["detail"] = f"{reason}; {verdict.get('detail') or ''}".rstrip("; ")
+            if corrected:
+                verdict["canonical_next_command"] = corrected
     verdict["event"] = {
         "event": mapped["event"],
         "host": mapped["host"],
