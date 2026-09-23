@@ -202,6 +202,24 @@ def assess(root: Path) -> dict:
     }
 
 
+def survey(root: Path) -> dict:
+    """`assess`, but a run's evidence never dies with its project (T-1484).
+
+    Measured 2026-09-23: the relaunched 24H gate's project vanished whole at a
+    generation boundary, `assess` raised FileNotFoundError on BOARD.md, and the
+    report -- supervise counters, history, gpu_lane -- was never written.
+    """
+    if not (root / ".saipen" / "BOARD.md").is_file():
+        left = None
+        if root.exists():
+            left = sorted(p.relative_to(root).as_posix() for p in root.rglob("*"))[:50]
+        return {"verdict": "PROJECT_VANISHED", "left_in_project": left}
+    try:
+        return assess(root)
+    except (OSError, ValueError, subprocess.SubprocessError) as exc:
+        return {"verdict": "ASSESS_FAILED", "error": f"{type(exc).__name__}: {exc}"[:300]}
+
+
 def efficiency(result: dict) -> dict:
     history = result.get("history") or []
     generations = [item for item in history if "generation" in item]
@@ -295,7 +313,7 @@ def main() -> int:
         "supervise": {key: value for key, value in result.items() if key != "history"},
         "history": result.get("history"),
         "deliberate_kills": kills,
-        "quality": assess(root),
+        "quality": survey(root),
         "efficiency": efficiency(result),
         "manual_continue_count": 0,
     }
