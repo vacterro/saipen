@@ -134,6 +134,10 @@
       "required": true
     },
     {
+      "src": "saipen/SAIPEN_ENTRY.json",
+      "required": true
+    },
+    {
       "src": "tools/validate.py",
       "required": true
     },

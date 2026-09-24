@@ -168,6 +168,11 @@ def classify_invocation(verb: str | None, rest: Sequence[str] = ()) -> str:
     judged -- or refused -- as the command it is asking about.
     """
     words = _operands(list(rest))
+    if verb == "host" and words[:1] == ["entry"] and "--" in words:
+        # The transport runner has the effect of the command it launches: a
+        # wrapped `ticket done` must never be judged DIAGNOSTIC (T-1501).
+        inner = words[words.index("--") + 1 :]
+        return classify_invocation(inner[0], inner[1:]) if inner else DIAGNOSTIC
     if "--" in words:
         words = words[: words.index("--")]
     if verb in HELP_TOKENS or any(word in HELP_TOKENS - {"help"} for word in words):

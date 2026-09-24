@@ -58,6 +58,7 @@ global authority and deterministic priority rules.
 | `saipen runtime` | read-only | CMD-ROUTING-01 |
 | `saipen host bootstrap [--host ID] [--project-root PATH]` | read-only host/runtime binding diagnostic; `HOST_UNSUPPORTED` for unregistered hosts | CMD-ROUTING-01 |
 | `saipen host activation --project-root PATH` | read-only; does the managed project's resolved runtime carry the activation contract | CMD-ROUTING-01 |
+| `saipen host entry [--host ID] [--project-root PATH] [-- <command>...]` | transport only: proven transport or `PROJECT_UNBOUND`/`RUNTIME_UNAVAILABLE`/`HOST_UNSUPPORTED`; with a command, rebinds a dead home, then runs it as argv, never via a shell; unregistered hosts: DIAGNOSTIC only | CMD-ROUTING-01 |
 | `saipen rebind-home --auto` | RECOVERY: converge a dead persisted home onto an already-proven runtime (`HOST_BINDING_CONVERGED`; refuses `HOME_REQUIRED` when nothing proves) | CMD-ROUTING-01 |
 | `saipen rebind-home <candidate-home-path>` | RECOVERY: explicit re-point of `STATE.saipen_home` onto a proven install | CMD-ROUTING-01 |
 | `saipen search <pattern>` | read-only bounded search | CMD-ROUTING-01 |

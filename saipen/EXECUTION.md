@@ -52,6 +52,10 @@ Prefer action and evidence over narrating each tool call; the control surface
 (or none) replaces per-step commentary. Report failures when they occur;
 continue autonomously when the repair is authorized and deterministic.
 
+A command is logical; its transport is resolved (`saipen host entry`, BOOT.md
+Entry). A failed `python -m saipen` or `where saipen` proves nothing, and
+inventing another invocation is not a recovery.
+
 ## HUSH
 
 `hush <task>` applies to that task and its authorized continuation chain.

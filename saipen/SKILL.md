@@ -40,7 +40,8 @@ include its exact evidence and take available safe recovery first.
 Thin entry for skill-reading platforms. The system lives elsewhere:
 
 0. **Resolve the cold route deterministically -- never by searching.** Run the
-   installed launcher (`saipen status --json`) and read its `cold_route`
+   installed launcher (`bin/saipen.cmd`/`bin/saipen status --json` beside this
+   file; BOOT.md Entry owns transport) and read its `cold_route`
    block. It names the bound `project_root`, `protocol_dir`, `boot`, `style`,
    `phase_module` and the `.saipen/` memory files, and states
    `search_required: false`. Open those exact paths. Do NOT use the host's

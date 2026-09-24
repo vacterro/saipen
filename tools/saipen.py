@@ -8131,6 +8131,10 @@ def _host_command(tokens: list[str], project_root_opt: str | None, as_json: bool
     sub = tokens[0]
     host: str | None = None
     root_opt = project_root_opt
+    command: list[str] = []
+    if sub == "entry" and "--" in tokens:
+        cut = tokens.index("--")
+        tokens, command = tokens[:cut], tokens[cut + 1 :]
     index = 1
     while index < len(tokens):
         token = tokens[index]
@@ -8160,6 +8164,8 @@ def _host_command(tokens: list[str], project_root_opt: str | None, as_json: bool
             )
             return 2
     start = None if root_opt else Path.cwd().resolve()
+    if sub == "entry":
+        return _host_entry(command, host, root_opt, start, as_json)
     try:
         if sub == "activation":
             resolved = host_bootstrap.resolve_bootstrap(root_opt, host=host, start=start)
@@ -8196,6 +8202,114 @@ def _host_command(tokens: list[str], project_root_opt: str | None, as_json: bool
         return 2
     _emit(payload, as_json)
     return 0 if payload.get("ok") else 2
+
+
+def _host_entry(
+    command: list[str],
+    host: str | None,
+    root_opt: str | None,
+    start: Path | None,
+    as_json: bool,
+) -> int:
+    """`saipen host entry [--host ID] [--project-root PATH] [-- <command>...]`.
+
+    Without a command: the read-only transport resolution (exit 0 only when a
+    proven transport is admitted). With one: the thin host runner -- resolve,
+    converge a dead `saipen_home` through `rebind-home --auto` when this host
+    may mutate, then run `exec_prefix + command` -- the launcher's proven
+    interpreter and engine, never a shell that would re-parse the command
+    text -- with inherited stdio, and return its exit code. It owns transport
+    only; the engine it launches owns every protocol decision, admission
+    included.
+    """
+    import subprocess
+
+    from saipen_engine import entry_resolver as er
+
+    if command[:2] == ["host", "entry"]:
+        _emit(
+            {
+                "ok": False,
+                "code": "VALIDATION_FAILED",
+                "detail": "host entry does not run itself; pass the logical command after --",
+            },
+            as_json,
+        )
+        return 2
+
+    def resolve() -> dict:
+        return er.resolve_entry(root_opt, host=host, command=command or None, start=start)
+
+    try:
+        resolved = resolve()
+    except (OSError, ValueError) as exc:  # pragma: no cover - defensive boundary
+        _emit(
+            {
+                "ok": False,
+                "code": er.RUNTIME_UNAVAILABLE,
+                "detail": f"{type(exc).__name__}: {exc}",
+                "next_action": "re-run from the managed project or pass --project-root",
+            },
+            as_json,
+        )
+        return 2
+    if not command:
+        _emit(resolved, as_json)
+        return 0 if resolved.get("ok") else 2
+    if not resolved.get("exec_prefix") or not resolved.get("command_allowed"):
+        if resolved.get("code") == er.HOST_UNSUPPORTED:
+            resolved["detail"] = (
+                f"{command[0]} is {resolved.get('command_effect')}; this host is not "
+                "admitted to mutate, only DIAGNOSTIC commands run here"
+            )
+        _emit(resolved, as_json)
+        return 2
+
+    rebound = None
+    if (
+        "stale_runtime_binding" in resolved.get("degraded", [])
+        and resolved["host_admission"].get("mutation_admitted")
+        and command[0] != "rebind-home"
+    ):
+        proc = subprocess.run(
+            [*resolved["exec_prefix"], "rebind-home", "--auto", "--json"],
+            cwd=resolved["project_root"],
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            timeout=300,
+        )
+        try:
+            rebound = json.loads(proc.stdout)
+        except ValueError:
+            rebound = {"ok": False, "code": "REBIND_OUTPUT_INVALID", "detail": proc.stdout[-400:]}
+        if rebound.get("ok"):
+            resolved = resolve()
+            resolved["code"] = er.RUNTIME_REBOUND
+            resolved["rebind"] = {k: rebound.get(k) for k in ("code", "event_id", "previous_home")}
+        elif rebound.get("code") == "HOME_REQUIRED":
+            resolved.update(
+                ok=False,
+                code=er.HUMAN_REQUIRED,
+                rebind={k: rebound.get(k) for k in ("code", "detail")},
+                operator_action="name the SAIPEN home: saipen rebind-home <candidate-home-path>",
+            )
+            _emit(resolved, as_json)
+            return 2
+        else:
+            # Fail open: the proven transport still runs; the refusal is reported.
+            resolved["degraded"].append(f"rebind_refused:{rebound.get('code')}")
+
+    summary = {
+        key: resolved.get(key)
+        for key in ("code", "transport", "argv_prefix", "project_root", "saipen_home", "degraded")
+    }
+    print("SAIPEN_ENTRY " + json.dumps(summary, ensure_ascii=False), file=sys.stderr, flush=True)
+    sys.stdout.flush()
+    return subprocess.run(
+        [*resolved["exec_prefix"], *command], cwd=resolved["project_root"]
+    ).returncode
 
 
 #: T-1327 TARGET D: the exact fields the OpenCode guard requires of EVERY Fleet
@@ -8572,9 +8686,12 @@ def main(argv: list[str] | None = None) -> int:
     # reachable, so it must dispatch before project-root resolution and must
     # never require the runtime it is diagnosing. `activation` is the narrower
     # question: is the canonical activation contract loadable for this project.
+    # T-1501: `host entry` is the transport half of the same question -- which
+    # proven invocation runs a logical command -- so it dispatches here too.
     if args and args[0] == "host" and len(args) >= 2 and args[1] in (
         "bootstrap",
         "activation",
+        "entry",
     ):
         return _host_command(args[1:], project_root_opt, as_json)
 
