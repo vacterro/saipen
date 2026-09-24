@@ -1,23 +1,16 @@
 # SAIPEN Improve — the meta-control that audits SAIPEN
 
-Improve is a META-CONTROL, not a project phase (T-552). It audits SAIPEN and
-the project under it; it does not run project execution. This file is the
-single canonical owner of the Improve lifecycle: cycle admission, the seat and
-report contract, the finding schema, sweep, verify, and archive semantics.
-CORE.md section 1.10 owns command routing only. STATE owns no Improve
-semantics. SubSaipen boundaries stay in `extensions/subs/PROTOCOL.md`. There is
-no improve phase document under the phases directory, and the phase count
-remains 16.
+Improve is SAIPEN's audit meta-control, not project execution or a phase
+(T-552). This file owns cycle admission, seats, reports, findings, sweep,
+verify and archive. CORE.md §1.10 owns routing; SubSaipen boundaries remain in
+`extensions/subs/PROTOCOL.md`. STATE owns no Improve semantics and the 16
+project phases have no Improve phase.
 
 ## 0. Why a meta-control
 
-Improve is invoked on top of whatever the project is doing. Several seats may
-audit independently and concurrently; reports are read-only evidence, never
-canonical state; invoking improve during BUILD or VERIFY must not orphan the
-DOING ticket; and one global `STATE.phase: IMPROVE` cannot represent several
-independent audit seats at once. Adding Improve routing fields to STATE turns
-retrospective evidence collection into project execution state — the category
-error this file exists to prevent.
+Improve audits independently of project execution. Concurrent seats produce
+read-only reports; they never orphan DOING Work or create a global
+`STATE.phase: IMPROVE`. Improve routing fields do not belong in STATE.
 
 ## 1. Command surface (routing lives in COMMANDS.md, CMD-ROUTING-01)
 
@@ -30,17 +23,14 @@ Each action's own validation rules live in the section that owns it; this list
 is the surface, not a second copy of the law.
 
 - `saipen improve` — the meta-control entry point: binds the current project,
-  finds or mechanically admits the one active cycle, registers this seat,
-  creates the DRAFT report mechanically with the real captured source
-  identity, and returns a bounded AUDIT ASSIGNMENT (cycle_id, seat_id, report
-  path, source identity, scope, proof levels, schema, write boundary, next
-  mechanical submission action). It is NEVER an alias for status, and section 11
-  owns its phase/task/next_action boundary.
-  Bare invocation admits a NEW independent `core` seat.
-  `--new-seat` states that choice explicitly;
+  admits or finds one active cycle, registers a seat, creates its DRAFT report
+  with captured source identity, and returns the bounded AUDIT ASSIGNMENT
+  (cycle/seat/report, source, scope, proof levels, schema, write boundary and
+  submit action). It is not status; section 11 owns its STATE boundary. Bare
+  invocation admits a NEW independent `core` seat. `--new-seat` is explicit;
   `--session <seat_id>` admits or resumes exactly one stable concrete session;
-  `--role core|critic` selects the closed role, with `core` as default. A
-  session retry returns the same assignment and never allocates another seat.
+  `--role core|critic` selects the closed role, default `core`. Retrying the
+  session reuses its assignment.
 - `saipen improve status` — read-only derived status (section 5). Refuses to
   round malformed evidence up to a normal lifecycle state: invalid
   manifests/reports/sweeps are reported as INVALID_CYCLE / INVALID_REPORT.
@@ -75,24 +65,17 @@ is the surface, not a second copy of the law.
   (section 2) and flips ACTIVE -> COMPLETE through `complete_cycle`. A partial
   sweep REFUSES it; complete-before-sweep is impossible.
 - `saipen improve abort <cycle>` — the sanctioned mechanical exit for a STUCK
-  DRAFT cycle whose report cannot complete (an interrupted audit, a committed
-  RUN missing a required field). Refuses once any disposition exists, flips
-  the manifest to archived with a journaled `cycle_aborted` marker, and
-  byte-preserves the never-completed draft reports AT THEIR SAME PATH (no
-  rename, no move, no raw file deletion): the manifest's archived +
-  cycle_aborted markers are the single source of truth that the cycle and
-  its drafts are non-authoritative (T-632). The next cycle can be admitted.
+  DRAFT cycle whose report cannot complete. It refuses after any disposition,
+  archives with a journaled `cycle_aborted` marker, and preserves drafts at
+  their original paths. Those manifest markers make the drafts non-authoritative;
+  a new cycle may then start (T-632).
 - `saipen improve retire <cycle> <seat> --reason <CODE>` — the bounded exit
-  for ONE expected seat that can never complete (section 3). It marks that
-  seat `availability: unavailable` through the journaled roster write; the
-  never-completed report stays byte-identical at its path, every SWEEP
-  disposition is untouched, and the cycle bar can then be met with the
-  remaining seats. It never touches a seat whose report IS complete. The one
-  COMPLETE route is `--reason STALE_COMPLETE --replacement <fresh-seat>`: it
-  is NOT ordinary retirement and returns `SEAT_SUPERSEDED` (not
-  `SEAT_RETIRED`), marking the seat `availability: superseded` bound to its
-  preserved report hash and its current same-scope replacement (section 7).
-  A COMPLETE report is never made generically retireable.
+  for one expected seat that cannot complete (section 3). A journaled roster
+  write marks `availability: unavailable`, preserving its report bytes at the original path and all SWEEP
+  dispositions; other seats can meet the cycle bar. A COMPLETE seat cannot be
+  retired ordinarily. `--reason STALE_COMPLETE --replacement <fresh-seat>`
+  instead returns `SEAT_SUPERSEDED`, marks `availability: superseded` and binds its preserved report hash to a
+  current same-scope replacement (section 7).
 - `saipen improve clean <cycle>` — archive/retention meta-operation
   (section 10). Never means phase CLEAN, never enters the CLEAN phase.
 - `saipen improve reconcile <cycle>` — ONE canonical finite exit for a strict
