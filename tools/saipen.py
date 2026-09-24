@@ -4784,7 +4784,7 @@ def _source(project_root: Path, args: list[str], as_json: bool, dry_run: bool) -
                 "ok": False,
                 "code": "VALIDATION_FAILED",
                 "detail":                 "source needs a subcommand: capture|status|show|req|"
-                "disp|quarantine|link|close|archive|purge|retire|recover|"
+                "disp|quarantine|link|close|archive|purge|retire|recover|reconcile|"
                 "append|apply-append|appends",
             },
             as_json,
@@ -5060,6 +5060,29 @@ def _source(project_root: Path, args: list[str], as_json: bool, dry_run: bool) -
             )
             return 2
         result = intake.status(project_root, rest[0])
+        _emit(result, as_json)
+        return 0 if result.get("ok") else 1
+
+    if action == "reconcile":
+        # T-1300 (AUDAPACK T-171): the read-only survey IS the contradiction
+        # report; only --confirm performs the one journaled convergence, and
+        # a dry-run always degrades to the survey (zero writes).
+        confirm = "--confirm" in rest
+        rest = [token for token in rest if token != "--confirm"]
+        if len(rest) != 1:
+            _emit(
+                {
+                    "ok": False,
+                    "code": "VALIDATION_FAILED",
+                    "detail": "source reconcile needs <SRC-ID> and accepts only [--confirm]",
+                },
+                as_json,
+            )
+            return 2
+        apply = bool(confirm and not dry_run)
+        if apply and _negotiate_capability(project_root) == "read-only":
+            return _capability_refusal(as_json)
+        result = intake.reconcile_receipt(project_root, rest[0], apply=apply)
         _emit(result, as_json)
         return 0 if result.get("ok") else 1
 
@@ -8675,7 +8698,8 @@ def main(argv: list[str] | None = None) -> int:
             "[--verification <cmd>:PASS]... [--run <command>]... "
             "[--timeout SECONDS]|source retire <SRC-###> --reason <CLASS> "
             "[--successor SRC-###]|source quarantine <SRC-###> [--reason CODE]|"
-            "source recover|cohort status <C-###>|cohort ship "
+            "source recover|source reconcile <SRC-###> [--confirm]|"
+            "cohort status <C-###>|cohort ship "
             "<C-###>|improve|improve hold <T-###> [reason]|improve unhold|improve "
             "status|improve sweep <cycle> <RUN-N/IMP-NNN> <DISPOSITION> "
             "|improve sweep-queue <cycle>|improve submit <cycle> <seat> "

@@ -32,6 +32,7 @@ Invariants:
 from __future__ import annotations
 
 import contextlib
+import base64
 import hashlib
 import json
 import os
@@ -4032,7 +4033,45 @@ def status(root: Path | str, receipt_id: str) -> dict:
                     "distribution": distribution,
                 }
             return {"ok": False, "code": "TICKET_NOT_FOUND", "detail": receipt_id}
-    if location == "archive":
+    recovery_meta = meta.get("recovery") if isinstance(meta, dict) else None
+    if (
+        location == "archive"
+        and isinstance(recovery_meta, dict)
+        and recovery_meta.get("method") in PRESERVING_RECOVERY_METHODS
+    ):
+        # T-1300: a tombstone-authoritative recovery preserves the legacy
+        # Contract/coverage verbatim instead of a valid engine ledger. Its one
+        # canonical reader is the attribution proof (T-1315); anything it
+        # cannot prove stays corruption.
+        proof = evaluate_terminal_recovered_source_attribution(root, receipt_id)
+        if not proof.get("attributable"):
+            return {
+                "ok": False,
+                "code": "SOURCE_CORRUPTION",
+                "receipt": receipt_id,
+                "surface": (
+                    f".saipen/archive/source/{receipt_id}.md"
+                    if str(proof.get("reason", "")).startswith("ARCHIVE_BODY_")
+                    else f".saipen/archive/source/{receipt_id}.*"
+                ),
+                "reason": proof.get("reason"),
+                "detail": f"recovered receipt {receipt_id} is not provable: {proof.get('reason')}",
+                "diagnosis": proof,
+            }
+        summary = {
+            "receipt": receipt_id,
+            "requirements": proof["requirements"],
+            "actionable": proof["requirements"],
+            "terminal": proof["terminal"],
+            "dispositions": {},
+            "unresolved": [],
+            "recovery": {
+                "method": proof["recovery_method"],
+                "record": proof["recovery_record"],
+                "linked_work": proof["linked_work"],
+            },
+        }
+    elif location == "archive":
         try:
             raw = _read_owned_file(
                 root,
@@ -4063,7 +4102,17 @@ def status(root: Path | str, receipt_id: str) -> dict:
         except (FileNotFoundError, OSError, ValueError) as exc:
             return {"ok": False, "code": "SOURCE_CORRUPTION", "detail": str(exc)}
     else:
-        summary = coverage_summary(root, receipt_id)
+        try:
+            summary = coverage_summary(root, receipt_id)
+        except (OSError, ValueError) as exc:
+            return {
+                "ok": False,
+                "code": "SOURCE_CORRUPTION",
+                "receipt": receipt_id,
+                "surface": f".saipen/intake/coverage/{receipt_id}.json",
+                "detail": str(exc),
+                "recovery_action": f"saipen source reconcile {receipt_id}",
+            }
     try:
         distribution = _distribution_projection(
             root, receipt_id, str(meta.get("source_sha256") or "")
@@ -4464,6 +4513,654 @@ def validate_project(root: Path | str) -> list[str]:
     for orphan in recover_orphans(root)["orphans"]:
         errors.append(f"ORPHAN_RECEIPT {orphan['receipt']}")
     return errors
+
+
+# ---------------------------------------------------------------------------
+# T-1300 (AUDAPACK T-171): canonical recovery of contradictory intake state.
+#
+# The AUDAPACK SRC-038 fixture carried an ACTIVE index entry, an ACTIVE body
+# + metadata, a never-developed (seeded-empty) Contract, a 16-requirement
+# agent-authored legacy coverage ledger that is terminal 16/16, and an
+# agent-authored legacy tombstone asserting the consumed source -- all at
+# once, with NO archive bundle. That state must never silently exist and it
+# must never be healed by deleting evidence. `reconcile_receipt` surveys every
+# authoritative surface, returns a structured contradiction report, and
+# converges to the canonical tombstone-authoritative terminal state ONLY when
+# every strong-proof gate agrees; any disagreement fails closed with zero
+# mutations. Restored 2026-09-24 from XP-000001, which was applied to this
+# tree on 2026-09-07 but never committed, and so was lost.
+# ---------------------------------------------------------------------------
+
+RECOVERY_METHOD = "TOMBSTONE_AUTHORITATIVE"
+_RECOVERED_CONTRACT_RESIDUE = "seeded-empty-invalid-residue"
+
+
+def _surface_json(
+    root: Path, rel: str, kind: str, max_bytes: int
+) -> tuple[str, object | None, str | None]:
+    """Read one authoritative JSON surface. Returns (state, value, detail).
+
+    state is one of OK | ABSENT | INVALID. Never raises for a bounded
+    read/decode problem: the survey must be able to CLASSIFY a broken
+    surface, not crash over it.
+    """
+    try:
+        raw = _read_owned_file(root, rel, kind=kind, max_bytes=max_bytes)
+    except FileNotFoundError:
+        return "ABSENT", None, None
+    except (ValueError, OSError) as exc:
+        return "INVALID", None, str(exc)
+    try:
+        return "OK", json.loads(raw.decode("utf-8-sig")), None
+    except (UnicodeDecodeError, ValueError) as exc:
+        return "INVALID", None, str(exc)
+
+
+def _board_work_section(root: Path, work: str | None) -> str | None:
+    """Canonical BOARD section of `work`, or None when it does not exist."""
+    if not work:
+        return None
+    try:
+        from .board import parse_board
+
+        raw = _read_owned_file(
+            root, ".saipen/BOARD.md", kind="source BOARD authority", max_bytes=_BOARD_MAX
+        )
+        board = parse_board(raw.decode("utf-8-sig"))
+    except (OSError, ValueError):
+        return None
+    ticket = board.get("tickets", {}).get(work)
+    return ticket.get("section") if isinstance(ticket, dict) else None
+
+
+def _audit_inbox_entry(root: Path, receipt_id: str) -> dict | None:
+    """The audit-inbox layer bound to `receipt_id`, when one exists."""
+    state, doc, _detail = _surface_json(
+        root, ".saipen/intake/audit_inbox.json", "audit inbox authority", _INDEX_MAX
+    )
+    if state != "OK" or not isinstance(doc, dict):
+        return None
+    layers = doc.get("layers")
+    if not isinstance(layers, dict):
+        return None
+    for _name, entry in sorted(layers.items()):
+        if isinstance(entry, dict) and entry.get("receipt_id") == receipt_id:
+            return entry
+    return None
+
+
+def _archive_surface_names(root: Path, receipt_id: str) -> list[str]:
+    archive_dir = _archive_dir(root)
+    if not archive_dir.is_dir() or _is_link_or_reparse(archive_dir):
+        return []
+    return sorted(
+        path.name
+        for path in archive_dir.glob(f"{receipt_id}.*")
+        if path.is_file() and not _is_link_or_reparse(path)
+    )
+
+
+def _active_contract_state(contract: object) -> str:
+    """Classify the ACTIVE Contract for recovery: residue or developed."""
+    if not isinstance(contract, dict):
+        return "INVALID"
+    if (
+        contract.get("interpretation_revision") == 0
+        and contract.get("clauses") == {}
+        and contract.get("derived_at") is None
+    ):
+        return _RECOVERED_CONTRACT_RESIDUE
+    return "DEVELOPED"
+
+
+def _reconcile_survey(root: Path, receipt_id: str) -> dict:
+    """Read-only survey of every authoritative surface for one receipt."""
+    findings: dict[str, object] = {}
+    contradictions: list[str] = []
+
+    index: dict | None = None
+    try:
+        index = _read_index(root)
+    except (OSError, ValueError) as exc:
+        contradictions.append(f"intake index unreadable: {exc}")
+    index_active = index.get("active", {}).get(receipt_id) if index else None
+    index_tomb = index.get("tombstones", {}).get(receipt_id) if index else None
+    if index_tomb is not None:
+        if index_active is not None:
+            return {
+                "ok": False,
+                "code": "SOURCE_CORRUPTION",
+                "receipt": receipt_id,
+                "terminal": False,
+                "recoverable": False,
+                "contradictions": ["intake index holds both active and tombstone projections"],
+                "findings": {"index_tombstone": "present", "index_active": "present"},
+            }
+        terminal_status = status(root, receipt_id)
+        if not terminal_status.get("ok"):
+            return {
+                "ok": False,
+                "code": "SOURCE_CORRUPTION",
+                "receipt": receipt_id,
+                "terminal": True,
+                "recoverable": False,
+                "contradictions": [terminal_status.get("detail", "terminal status is invalid")],
+                "findings": {"index_tombstone": "present", "status": terminal_status},
+            }
+        return {
+            "ok": True,
+            "code": "ALREADY_RECONCILED",
+            "receipt": receipt_id,
+            "terminal": True,
+            "recoverable": False,
+            "contradictions": [],
+            "findings": {"index_tombstone": "present"},
+        }
+    if index_active is None:
+        contradictions.append("intake index has no active projection for this receipt")
+
+    findings["index_active_digest"] = (
+        index_active.get("source_sha256") if isinstance(index_active, dict) else None
+    )
+
+    active_digest: str | None = None
+    try:
+        body_raw = _read_owned_file(
+            root,
+            f".saipen/intake/active/{receipt_id}.md",
+            kind="source body",
+            max_bytes=_BODY_MAX,
+        )
+        active_digest = hashlib.sha256(body_raw).hexdigest()
+        findings["active_body"] = "present"
+    except FileNotFoundError:
+        findings["active_body"] = "absent"
+        contradictions.append("active source body absent")
+    except (ValueError, OSError) as exc:
+        findings["active_body"] = "INVALID"
+        contradictions.append(f"active source body unreadable: {exc}")
+
+    meta_state, meta, meta_detail = _surface_json(
+        root,
+        f".saipen/intake/active/{receipt_id}.meta.json",
+        "source metadata",
+        _META_MAX,
+    )
+    findings["active_metadata"] = meta_state.lower()
+    meta_digest = meta.get("source_sha256") if isinstance(meta, dict) else None
+    findings["active_metadata_digest"] = meta_digest
+    if meta_state == "ABSENT":
+        contradictions.append("active source metadata absent")
+    elif meta_state == "INVALID":
+        contradictions.append(f"active source metadata invalid: {meta_detail}")
+    elif not isinstance(meta, dict) or meta.get("receipt_id") != receipt_id:
+        contradictions.append("active source metadata receipt id mismatch")
+    elif meta.get("status") != ACTIVE_STATUS:
+        contradictions.append(f"active source metadata status {meta.get('status')!r}")
+
+    contract_state, contract, contract_detail = _surface_json(
+        root,
+        f".saipen/intake/contracts/{receipt_id}.json",
+        "source Contract",
+        _LEDGER_MAX,
+    )
+    contract_class = _active_contract_state(contract) if contract_state == "OK" else contract_state
+    findings["active_contract"] = contract_class.lower()
+    if contract_state == "INVALID":
+        contradictions.append(f"active Contract invalid: {contract_detail}")
+    if contract_state == "OK" and _active_contract_state(contract) == "DEVELOPED":
+        contradictions.append(
+            "active Contract is developed (interpretation_revision >= 1): "
+            "use the official close path, not tombstone-authoritative recovery"
+        )
+
+    coverage_state, coverage, coverage_detail = _surface_json(
+        root,
+        f".saipen/intake/coverage/{receipt_id}.json",
+        "source coverage",
+        _LEDGER_MAX,
+    )
+    findings["active_coverage"] = coverage_state.lower()
+    requirements = coverage.get("requirements") if isinstance(coverage, dict) else None
+    terminal = 0
+    total = 0
+    if coverage_state == "ABSENT":
+        contradictions.append("active coverage absent")
+    elif coverage_state == "INVALID":
+        contradictions.append(f"active coverage invalid: {coverage_detail}")
+    elif not isinstance(requirements, dict) or not requirements:
+        contradictions.append("active coverage carries no requirements")
+    else:
+        total = len(requirements)
+        non_terminal = sorted(
+            rid
+            for rid, entry in requirements.items()
+            if not (isinstance(entry, dict) and entry.get("disposition") in TERMINAL_DISPOSITIONS)
+        )
+        terminal = total - len(non_terminal)
+        if non_terminal:
+            contradictions.append(
+                "coverage carries non-terminal requirements: " + ", ".join(non_terminal[:5])
+            )
+    findings["coverage_requirements"] = total
+    findings["coverage_terminal"] = terminal
+
+    tomb_state, tomb, tomb_detail = _surface_json(
+        root,
+        f".saipen/intake/tombstones/{receipt_id}.json",
+        "source tombstone",
+        _META_MAX,
+    )
+    findings["tombstone_file"] = tomb_state.lower()
+    legacy_digest: str | None = None
+    legacy_work: str | None = None
+    legacy_closed_at: str | None = None
+    legacy_closure_event: str | None = None
+    legacy_actionable: int | None = None
+    legacy_terminal: int | None = None
+    if tomb_state == "ABSENT":
+        contradictions.append("terminal tombstone file absent")
+    elif tomb_state == "INVALID":
+        contradictions.append(f"tombstone file invalid: {tomb_detail}")
+    elif not isinstance(tomb, dict):
+        contradictions.append("tombstone file is not an object")
+    elif tomb.get("archive_ref") is not None:
+        contradictions.append(
+            "tombstone file already carries the engine schema -- an interrupted "
+            "normal close; use the official settle/archive path"
+        )
+    else:
+        closure = tomb.get("closure")
+        consumption = tomb.get("consumption")
+        legacy_digest = tomb.get("source_sha256")
+        legacy_work = tomb.get("linked_work")
+        legacy_closed_at = tomb.get("closed_at")
+        if tomb.get("receipt_id") != receipt_id:
+            contradictions.append("tombstone receipt id mismatch")
+        if not isinstance(closure, dict):
+            contradictions.append("tombstone closure block missing")
+        else:
+            legacy_actionable = closure.get("actionable_clauses")
+            legacy_terminal = closure.get("terminal_clauses")
+            run = closure.get("run")
+            legacy_closure_event = run if isinstance(run, str) and run.strip() else None
+            if not isinstance(legacy_actionable, int) or isinstance(legacy_actionable, bool):
+                legacy_actionable = None
+                contradictions.append("tombstone actionable_clauses missing")
+            if not isinstance(legacy_terminal, int) or isinstance(legacy_terminal, bool):
+                legacy_terminal = None
+                contradictions.append("tombstone terminal_clauses missing")
+            if (
+                isinstance(legacy_actionable, int)
+                and isinstance(legacy_terminal, int)
+                and legacy_actionable != legacy_terminal
+            ):
+                contradictions.append(
+                    f"tombstone actionable_clauses {legacy_actionable} != terminal_clauses "
+                    f"{legacy_terminal}"
+                )
+        if not isinstance(consumption, dict) or consumption.get("deleted") is not True:
+            contradictions.append("tombstone does not record the source as consumed")
+        if tomb.get("schema_version") != SCHEMA_VERSION:
+            contradictions.append("tombstone schema_version mismatch")
+        if legacy_digest is not None and not re.fullmatch(r"[0-9a-f]{64}", str(legacy_digest)):
+            legacy_digest = None
+            contradictions.append("tombstone source_sha256 malformed")
+        if legacy_closed_at is not None and not isinstance(legacy_closed_at, str):
+            contradictions.append("tombstone closed_at malformed")
+    findings["tombstone_digest"] = legacy_digest
+    findings["tombstone_work"] = legacy_work
+    findings["tombstone_closure_event"] = legacy_closure_event
+
+    archive_names = _archive_surface_names(root, receipt_id)
+    findings["archive_bundle"] = "absent" if not archive_names else sorted(archive_names)
+    if archive_names:
+        contradictions.append(
+            "archive bundle already holds surfaces for this receipt: "
+            + ", ".join(archive_names)
+        )
+
+    inbox = _audit_inbox_entry(root, receipt_id)
+    findings["audit_inbox"] = (
+        {"state": inbox.get("state"), "linked_work": inbox.get("linked_work")}
+        if isinstance(inbox, dict)
+        else None
+    )
+    inbox_digest = inbox.get("receipt_sha256") or inbox.get("file_sha256") if isinstance(
+        inbox, dict
+    ) else None
+    if isinstance(inbox, dict):
+        if inbox.get("state") == "ACTIVE":
+            contradictions.append(
+                "audit inbox still claims this receipt as a live ACTIVE layer"
+            )
+        if (
+            isinstance(inbox_digest, str)
+            and active_digest is not None
+            and inbox_digest != active_digest
+        ):
+            contradictions.append("audit inbox layer digest disagrees with the active source")
+
+    digests = {
+        "index": findings["index_active_digest"],
+        "body": active_digest,
+        "metadata": meta_digest,
+        "tombstone": legacy_digest,
+        "audit_inbox": inbox_digest if isinstance(inbox_digest, str) else None,
+    }
+    present = {name: value for name, value in digests.items() if isinstance(value, str)}
+    if len(set(present.values())) > 1:
+        contradictions.append(
+            "source digest disagreement across surfaces: "
+            + ", ".join(f"{name}" for name, value in present.items() if value != active_digest)
+        )
+    findings["digest_agreement"] = len(set(present.values())) <= 1 and bool(present)
+
+    work_values = {
+        value
+        for value in (
+            meta.get("linked_work") if isinstance(meta, dict) else None,
+            legacy_work,
+            inbox.get("linked_work") if isinstance(inbox, dict) else None,
+        )
+        if isinstance(value, str) and value
+    }
+    if len(work_values) > 1:
+        contradictions.append(
+            "linked Work disagreement across surfaces: " + ", ".join(sorted(work_values))
+        )
+    work = next(iter(work_values), None)
+    findings["linked_work"] = work
+    if work:
+        section = _board_work_section(root, work)
+        findings["linked_work_section"] = section
+        if section is None:
+            contradictions.append(f"linked Work {work} missing from BOARD")
+        elif section != "## DONE":
+            contradictions.append(f"linked Work {work} is {section}, not ## DONE")
+
+    counts = {
+        value
+        for value in (legacy_actionable, legacy_terminal, total or None)
+        if value is not None
+    }
+    if len(counts) > 1:
+        contradictions.append(
+            "terminal coverage count disagreement across surfaces: "
+            + ", ".join(str(value) for value in sorted(counts))
+        )
+    elif not counts:
+        contradictions.append("no terminal coverage count agreed by any surface")
+
+    duplicate_generation = (
+        other
+        for other, projection in (index or {}).get("active", {}).items()
+        if other != receipt_id
+        and isinstance(projection, dict)
+        and projection.get("source_sha256")
+        and active_digest
+        and projection.get("source_sha256") == active_digest
+    )
+    for other in duplicate_generation:
+        contradictions.append(
+            f"conflicting later active generation {other} holds the same source digest"
+        )
+
+    recoverable = not contradictions and all(
+        value is not None
+        for value in (
+            active_digest,
+            meta_digest,
+            legacy_digest,
+            legacy_closed_at,
+        )
+    )
+    return {
+        "ok": True,
+        "code": "RECONCILE_REPORT",
+        "receipt": receipt_id,
+        "terminal": False,
+        "recoverable": recoverable,
+        "contradictions": contradictions,
+        "findings": findings,
+    }
+
+
+def _b64_surface(raw: bytes) -> dict:
+    """Preserve one original surface verbatim: base64 bytes + file sha256."""
+    return {
+        "sha256": hashlib.sha256(raw).hexdigest(),
+        "bytes": base64.b64encode(raw).decode("ascii"),
+    }
+
+
+def reconcile_receipt(root: Path | str, receipt_id: str, *, apply: bool = False) -> dict:
+    """Survey (and, with ``apply``, heal) one contradictory intake receipt.
+
+    Read-only by default: the survey is the structured contradiction report.
+    With ``apply`` the same gates re-run under the writer lock and a single
+    journaled convergence transaction moves the receipt to the canonical
+    tombstone-authoritative terminal state: the active surfaces are archived
+    (body + metadata), the invalid residue is preserved verbatim inside a
+    recovery record, the legacy tombstone is preserved verbatim inside the
+    same record, the engine tombstone becomes authoritative, and the index
+    settles active -> tombstone in one atomic commit. Any gate disagreement
+    fails closed with zero writes. Repeating a successful recovery is an
+    idempotent no-op.
+    """
+    root = Path(root)
+    if not _valid_receipt_id(receipt_id):
+        return _invalid_receipt_id(receipt_id)
+    if not apply:
+        try:
+            return _reconcile_survey(root, receipt_id)
+        except (OSError, ValueError) as exc:
+            return {"ok": False, "code": "SOURCE_CORRUPTION", "detail": str(exc)}
+    try:
+        with project_writer_lock(root):
+            survey = _reconcile_survey(root, receipt_id)
+            if not survey.get("ok"):
+                return survey
+            if survey.get("terminal"):
+                return {
+                    "ok": True,
+                    "code": "ALREADY_RECONCILED",
+                    "receipt": receipt_id,
+                    "terminal": True,
+                }
+            if not survey.get("recoverable"):
+                return {
+                    "ok": False,
+                    "code": "VALIDATION_FAILED",
+                    "receipt": receipt_id,
+                    "detail": "tombstone-authoritative recovery refused: strong proof "
+                    "does not agree",
+                    "contradictions": survey.get("contradictions", []),
+                    "findings": survey.get("findings", {}),
+                }
+            findings = survey["findings"]
+            index = _read_index(root)
+            meta_raw = _read_owned_file(
+                root,
+                f".saipen/intake/active/{receipt_id}.meta.json",
+                kind="source metadata",
+                max_bytes=_META_MAX,
+            )
+            meta = json.loads(meta_raw.decode("utf-8-sig"))
+            body_raw = _read_owned_file(
+                root,
+                f".saipen/intake/active/{receipt_id}.md",
+                kind="source body",
+                max_bytes=_BODY_MAX,
+            )
+            contract_rel = f".saipen/intake/contracts/{receipt_id}.json"
+            contract_raw = None
+            try:
+                contract_raw = _read_owned_file(
+                    root, contract_rel, kind="source Contract", max_bytes=_LEDGER_MAX
+                )
+            except FileNotFoundError:
+                contract_raw = None
+            coverage_rel = f".saipen/intake/coverage/{receipt_id}.json"
+            coverage_raw = _read_owned_file(
+                root, coverage_rel, kind="source coverage", max_bytes=_LEDGER_MAX
+            )
+            tomb_raw = _read_owned_file(
+                root,
+                f".saipen/intake/tombstones/{receipt_id}.json",
+                kind="source tombstone",
+                max_bytes=_META_MAX,
+            )
+            legacy_tomb = json.loads(tomb_raw.decode("utf-8-sig"))
+
+            archive_ref = f".saipen/archive/source/{receipt_id}.md"
+            record_rel = f".saipen/archive/source/{receipt_id}.recovery.json"
+            now = _utc()
+            archived_meta = dict(meta)
+            archived_meta["status"] = CLOSED_STATUS
+            archived_meta["storage_status"] = ARCHIVED_STATUS
+            archived_meta["archive_ref"] = archive_ref
+            # The archive bundle check requires the closed-archive timestamps;
+            # the closure instant is the legacy tombstone's, the re-read is now.
+            archived_meta["closed_at"] = legacy_tomb.get("closed_at")
+            archived_meta.setdefault("reread_at", now)
+            archived_meta["linked_work"] = findings["linked_work"]
+            archived_meta["recovery"] = {
+                "method": RECOVERY_METHOD,
+                "record": record_rel,
+            }
+            recovery_record = {
+                "schema_version": RECOVERY_SCHEMA_VERSION,
+                "receipt_id": receipt_id,
+                "method": RECOVERY_METHOD,
+                "recovered_at": now,
+                "source_sha256": findings["active_metadata_digest"],
+                "terminal_requirements": findings["coverage_requirements"],
+                "closure_proof": (
+                    "existing terminal tombstone + terminal coverage; the stale "
+                    "active Contract was never-developed invalid residue and is "
+                    "preserved verbatim below -- no clause text was fabricated"
+                ),
+                "active_contract_state": findings["active_contract"],
+                "original_tombstone": _b64_surface(tomb_raw),
+                "original_contract": _b64_surface(contract_raw) if contract_raw else None,
+                "original_coverage": _b64_surface(coverage_raw),
+            }
+            tombstone = {
+                "schema_version": SCHEMA_VERSION,
+                "receipt_id": receipt_id,
+                "source_sha256": findings["active_metadata_digest"],
+                "linked_work": findings["linked_work"],
+                "status": CLOSED_STATUS,
+                "closed_at": legacy_tomb.get("closed_at"),
+                "closure_event": findings.get("tombstone_closure_event"),
+                "archive_ref": archive_ref,
+                "requirements": findings["coverage_requirements"],
+                "actionable": findings["coverage_terminal"],
+                "unresolved": 0,
+                "recovery": {
+                    "method": RECOVERY_METHOD,
+                    "recovered_at": now,
+                    "record": record_rel,
+                },
+            }
+            index_out = dict(index)
+            index_out["active"] = {
+                key: value for key, value in index["active"].items() if key != receipt_id
+            }
+            index_out["tombstones"] = dict(index["tombstones"])
+            index_out["tombstones"][receipt_id] = tombstone
+
+            from .journal import hash_bytes, run_mutation
+            from .paths import project_identity as _project_identity
+            from .plan import semantic_payload_hash
+
+            def _target(path: Path, action: str, content: bytes | None) -> dict:
+                before = hash_bytes(path.read_bytes()) if path.is_file() else ""
+                return {
+                    "path": path.relative_to(root).as_posix(),
+                    "role": "generic",
+                    "action": action,
+                    "content": b"" if content is None else content,
+                    "before_hash": before,
+                    "after_hash": "" if content is None else hash_bytes(content),
+                }
+
+            archive_dir = _archive_dir(root)
+            targets = [
+                _target(archive_dir / f"{receipt_id}.md", "write", body_raw),
+                _target(
+                    archive_dir / f"{receipt_id}.meta.json",
+                    "write",
+                    _json_bytes(archived_meta),
+                ),
+                _target(
+                    archive_dir / f"{receipt_id}.recovery.json",
+                    "write",
+                    _json_bytes(recovery_record),
+                ),
+                _target(
+                    _tombstone_dir(root) / f"{receipt_id}.json",
+                    "write",
+                    _json_bytes(tombstone),
+                ),
+                _target(_index_path(root), "write", _json_bytes(index_out)),
+            ]
+            # The archived Contract/coverage ARE the preserved originals, byte
+            # for byte: the attribution proof (T-1315) and the archive-bundle
+            # check both read them, and nothing may be re-derived or fabricated.
+            if contract_raw:
+                targets.append(
+                    _target(archive_dir / f"{receipt_id}.contract.json", "write", contract_raw)
+                )
+            targets.append(
+                _target(archive_dir / f"{receipt_id}.coverage.json", "write", coverage_raw)
+            )
+            for rel in (
+                f".saipen/intake/active/{receipt_id}.md",
+                f".saipen/intake/active/{receipt_id}.meta.json",
+                contract_rel,
+                coverage_rel,
+            ):
+                path = root / rel
+                if path.is_file():
+                    targets.append(_target(path, "delete_file", None))
+            committed = run_mutation(
+                root,
+                op_id=f"source.reconcile-{hash_bytes(receipt_id.encode('utf-8'))[:12]}",
+                operation="source.reconcile",
+                agent=_agent_for_intake(root),
+                project_identity=_project_identity(root),
+                semantic_payload_hash=semantic_payload_hash(
+                    {
+                        "receipt": receipt_id,
+                        "method": RECOVERY_METHOD,
+                        "requirements": findings["coverage_requirements"],
+                    }
+                ),
+                targets=targets,
+                preconditions={t["path"]: t["before_hash"] for t in targets},
+                verification_policy="none",
+            )
+            if not committed.get("ok"):
+                return {
+                    "ok": False,
+                    "code": committed.get("code", "VALIDATION_FAILED"),
+                    "receipt": receipt_id,
+                    "detail": committed.get("detail", "plan apply failed"),
+                }
+            return {
+                "ok": True,
+                "code": "RECONCILED",
+                "receipt": receipt_id,
+                "status": CLOSED_STATUS,
+                "method": RECOVERY_METHOD,
+                "archive_ref": archive_ref,
+                "recovery_record": record_rel,
+                "terminal_requirements": findings["coverage_requirements"],
+            }
+    except (OSError, PermissionError, ValueError) as exc:
+        return {"ok": False, "code": "VALIDATION_FAILED", "detail": str(exc)}
 
 
 # ---------------------------------------------------------------------------

@@ -96,6 +96,7 @@
       "subcommands": {
         "capture": "INGRESS",
         "recover": "DIAGNOSTIC",
+        "reconcile": "RECOVERY",
         "req": "EXECUTION",
         "disp": "EXECUTION",
         "close": "EXECUTION",

@@ -1255,5 +1255,340 @@ class ContractSemanticEqualityTests(unittest.TestCase):
         self._settle_refused(receipt)
 
 
+def _preserved(record: dict, field: str) -> bytes:
+    """Decode one preserved original from a recovery record and prove it
+    against the digest recorded beside it."""
+    import base64
+
+    spec = record[field]
+    raw = base64.b64decode(spec["bytes"], validate=True)
+    assert hashlib.sha256(raw).hexdigest() == spec["sha256"], field
+    return raw
+
+
+class ReceiptReconcileTests(unittest.TestCase):
+    """T-1300 (AUDAPACK T-171): contradictory active+tombstone intake state
+    converges only under strong proof, preserves every byte of evidence,
+    is journaled and idempotent, and refuses fail-closed otherwise.
+
+    Borrows the source-receipt fixture's setUp/tearDown only: subclassing
+    SourceReceiptTests would run every one of its tests a second time.
+    """
+
+    setUp = SourceReceiptTests.setUp
+    tearDown = SourceReceiptTests.tearDown
+
+    LEGACY_COUNT = 16
+
+    def _finish_board_done(self) -> None:
+        board = self.root / ".saipen/BOARD.md"
+        text = board.read_text(encoding="utf-8")
+        text = text.replace("## DOING\n- [/] T-001 DOING task", "## DOING")
+        text = text.replace("## DONE\n", "## DONE\n- [x] T-001 DOING task\n")
+        board.write_text(text, encoding="utf-8")
+
+    def _build_fixture(self) -> str:
+        self._finish_board_done()
+        body = "external audit layer: actionable clauses\n" + "\n".join(
+            f"R{n:03d}: requirement clause {n}" for n in range(1, self.LEGACY_COUNT + 1)
+        )
+        result = intake.capture(self.root, body, source_kind="external_audit", work="T-001")
+        self.assertTrue(result["ok"], result)
+        receipt = result["receipt"]
+        digest = result["source_sha256"]
+        now = "2026-09-06T18:00:00Z"
+        coverage = {
+            "schema_version": 1,
+            "requirements": {
+                f"{receipt}:R{n:03d}": {
+                    "disposition": "IMPLEMENTED",
+                    "evidence": f".saipen/kitchen/BUILD.md clause CORE-{n:03d}",
+                    "linked_work": "T-001",
+                    "source_ticket": f"CORE-{n:03d}",
+                    "verification": "unittest discover: OK",
+                }
+                for n in range(1, self.LEGACY_COUNT + 1)
+            },
+        }
+        (self.root / ".saipen/intake/coverage" / f"{receipt}.json").write_text(
+            json.dumps(coverage), encoding="utf-8"
+        )
+        tomb = {
+            "schema_version": 1,
+            "receipt_id": receipt,
+            "kind": "external_audit",
+            "transport": "audit_inbox",
+            "layer": "audit/7.md",
+            "captured_at": "2026-09-05T13:54:24Z",
+            "closed_at": now,
+            "source_sha256": digest,
+            "linked_work": "T-001",
+            "closure": {
+                "actionable_clauses": self.LEGACY_COUNT,
+                "terminal_clauses": self.LEGACY_COUNT,
+                "digest_pass": True,
+                "contract_bound": True,
+                "coverage": f".saipen/intake/coverage/{receipt}.json",
+                "run": "acb-run-1 (quick3, 3 waves)",
+                "work_done": "T-001",
+            },
+            "consumption": {
+                "deleted": True,
+                "deleted_at": now,
+                "file": "audit/7.md",
+                "file_sha256": digest,
+                "generation": 1,
+                "size_bytes": len(body),
+            },
+        }
+        tombstones_dir = self.root / ".saipen/intake/tombstones"
+        tombstones_dir.mkdir(parents=True, exist_ok=True)
+        (tombstones_dir / f"{receipt}.json").write_text(
+            json.dumps(tomb), encoding="utf-8"
+        )
+        return receipt
+
+    def _tree_hashes(self) -> dict:
+        intake_dir = self.root / ".saipen/intake"
+        return {
+            str(path.relative_to(self.root)): hashlib.sha256(path.read_bytes()).hexdigest()
+            for path in sorted(intake_dir.rglob("*"))
+            if path.is_file()
+        }
+
+    def test_survey_reports_recoverable_fixture(self) -> None:
+        receipt = self._build_fixture()
+        survey = intake.reconcile_receipt(self.root, receipt)
+        self.assertTrue(survey["ok"], survey)
+        self.assertTrue(survey["recoverable"], survey)
+        self.assertEqual(survey["contradictions"], [])
+        self.assertEqual(survey["findings"]["coverage_requirements"], self.LEGACY_COUNT)
+        self.assertEqual(survey["findings"]["coverage_terminal"], self.LEGACY_COUNT)
+        self.assertTrue(survey["findings"]["digest_agreement"])
+
+    def test_legacy_status_names_the_surface_and_read_only_recovery(self) -> None:
+        receipt = self._build_fixture()
+        coverage_path = self.root / f".saipen/intake/coverage/{receipt}.json"
+        original = coverage_path.read_bytes()
+        coverage = json.loads(original)
+        first = coverage["requirements"][f"{receipt}:R001"]
+        self.assertEqual(
+            sorted(first),
+            ["disposition", "evidence", "linked_work", "source_ticket", "verification"],
+        )
+        result = intake.status(self.root, receipt)
+        self.assertFalse(result["ok"])
+        self.assertEqual(result["code"], "SOURCE_CORRUPTION")
+        self.assertEqual(result["surface"], f".saipen/intake/coverage/{receipt}.json")
+        self.assertIn(f"{receipt}:R001 has invalid clause structure", result["detail"])
+        self.assertEqual(result["recovery_action"], f"saipen source reconcile {receipt}")
+        cli = subprocess.run(
+            [sys.executable, str(CLI), "--project-root", str(self.root),
+             "source", "status", receipt, "--json"],
+            capture_output=True, text=True, timeout=60,
+        )
+        self.assertEqual(cli.returncode, 1, cli.stderr)
+        self.assertEqual(json.loads(cli.stdout)["surface"], result["surface"])
+        self.assertNotIn("Traceback", cli.stderr)
+        self.assertEqual(coverage_path.read_bytes(), original)
+        self.assertTrue(intake.reconcile_receipt(self.root, receipt)["recoverable"])
+
+    def test_corrupt_terminal_is_not_reported_as_already_reconciled(self) -> None:
+        receipt = self._build_fixture()
+        self.assertTrue(intake.reconcile_receipt(self.root, receipt, apply=True)["ok"])
+        body_path = self.root / f".saipen/archive/source/{receipt}.md"
+        body_path.write_bytes(body_path.read_bytes() + b"changed")
+        before = self._tree_hashes()
+        for apply in (False, True):
+            result = intake.reconcile_receipt(self.root, receipt, apply=apply)
+            self.assertFalse(result["ok"], result)
+            self.assertEqual(result["code"], "SOURCE_CORRUPTION")
+            self.assertTrue(result["terminal"])
+            self.assertEqual(result["findings"]["status"]["reason"], "ARCHIVE_BODY_SHA_MISMATCH")
+            self.assertEqual(result["findings"]["status"]["surface"],
+                             f".saipen/archive/source/{receipt}.md")
+        self.assertEqual(self._tree_hashes(), before)
+
+    def test_reconcile_converges_and_is_idempotent(self) -> None:
+        receipt = self._build_fixture()
+        result = intake.reconcile_receipt(self.root, receipt, apply=True)
+        self.assertTrue(result["ok"], result)
+        self.assertEqual(result["code"], "RECONCILED")
+        index = intake._read_index(self.root)
+        self.assertNotIn(receipt, index["active"])
+        self.assertIn(receipt, index["tombstones"])
+        tomb = index["tombstones"][receipt]
+        self.assertEqual(tomb["status"], "CLOSED")
+        self.assertEqual(tomb["requirements"], self.LEGACY_COUNT)
+        self.assertEqual(tomb["actionable"], self.LEGACY_COUNT)
+        self.assertEqual(tomb["unresolved"], 0)
+        self.assertEqual(tomb["recovery"]["method"], intake.RECOVERY_METHOD)
+        self.assertFalse((self.root / f".saipen/intake/active/{receipt}.md").exists())
+        self.assertFalse((self.root / f".saipen/intake/active/{receipt}.meta.json").exists())
+        record = self.root / f".saipen/archive/source/{receipt}.recovery.json"
+        self.assertTrue(record.is_file())
+        # evidence preserved verbatim
+        doc = json.loads(record.read_text(encoding="utf-8-sig"))
+        original_tomb = json.loads(
+            _preserved(doc, "original_tombstone").decode("utf-8")
+        )
+        self.assertEqual(original_tomb["closure"]["terminal_clauses"], self.LEGACY_COUNT)
+        original_coverage = json.loads(
+            _preserved(doc, "original_coverage").decode("utf-8")
+        )
+        self.assertEqual(len(original_coverage["requirements"]), self.LEGACY_COUNT)
+        # the seeded-empty active Contract is invalid residue, preserved verbatim
+        self.assertIsNotNone(doc["original_contract"])
+        seeded = json.loads(
+            _preserved(doc, "original_contract").decode("utf-8")
+        )
+        self.assertEqual(seeded["interpretation_revision"], 0)
+        self.assertEqual(seeded["clauses"], {})
+        self.assertEqual(doc["active_contract_state"], intake._RECOVERED_CONTRACT_RESIDUE)
+        # engine tombstone replaced the legacy file and the validator agrees
+        tomb_file = json.loads(
+            (self.root / f".saipen/intake/tombstones/{receipt}.json").read_text(encoding="utf-8")
+        )
+        self.assertEqual(tomb_file, tomb)
+        errors = [
+            line
+            for line in intake.validate_project(self.root)
+            if receipt in line
+        ]
+        # Strict Core keeps reporting the preserved never-developed Contract as
+        # residue: it is immutable evidence and no clause may be fabricated to
+        # make it valid. The T-1315 attribution proves that residue belongs to
+        # the one terminal linked Work, so it never blocks unrelated Work.
+        self.assertEqual(
+            errors,
+            [
+                f"closed receipt {receipt} archive bundle invalid: source {receipt} "
+                "Contract/coverage clause identities differ"
+            ],
+        )
+        proof = intake.evaluate_terminal_recovered_source_attribution(self.root, receipt)
+        self.assertTrue(proof["attributable"], proof)
+        self.assertEqual(proof["linked_work"], "T-001")
+        status = intake.status(self.root, receipt)
+        self.assertTrue(status["ok"], status)
+        self.assertEqual(status["coverage"]["terminal"], self.LEGACY_COUNT)
+        # idempotent second application
+        before = self._tree_hashes()
+        again = intake.reconcile_receipt(self.root, receipt, apply=True)
+        self.assertTrue(again["ok"], again)
+        self.assertEqual(again["code"], "ALREADY_RECONCILED")
+        self.assertEqual(self._tree_hashes(), before)
+
+    def test_reconcile_refuses_digest_mismatch_without_mutation(self) -> None:
+        receipt = self._build_fixture()
+        body_path = self.root / f".saipen/intake/active/{receipt}.md"
+        body_path.write_text(
+            body_path.read_text(encoding="utf-8") + "\nstray byte\n", encoding="utf-8"
+        )
+        before = self._tree_hashes()
+        survey = intake.reconcile_receipt(self.root, receipt)
+        self.assertFalse(survey["recoverable"], survey)
+        result = intake.reconcile_receipt(self.root, receipt, apply=True)
+        self.assertFalse(result["ok"], result)
+        self.assertIn("digest", "; ".join(result["contradictions"]))
+        self.assertEqual(self._tree_hashes(), before)
+
+    def test_reconcile_refuses_metadata_receipt_mismatch(self) -> None:
+        receipt = self._build_fixture()
+        meta_path = self.root / f".saipen/intake/active/{receipt}.meta.json"
+        meta = json.loads(meta_path.read_text(encoding="utf-8-sig"))
+        meta["receipt_id"] = "SRC-999"
+        meta_path.write_text(json.dumps(meta), encoding="utf-8")
+        before = self._tree_hashes()
+        result = intake.reconcile_receipt(self.root, receipt, apply=True)
+        self.assertFalse(result["ok"], result)
+        self.assertTrue(any("receipt id mismatch" in c for c in result["contradictions"]))
+        self.assertEqual(self._tree_hashes(), before)
+
+    def test_reconcile_refuses_work_mismatch(self) -> None:
+        receipt = self._build_fixture()
+        tomb_path = self.root / f".saipen/intake/tombstones/{receipt}.json"
+        tomb = json.loads(tomb_path.read_text(encoding="utf-8"))
+        tomb["linked_work"] = "T-002"
+        tomb["closure"]["work_done"] = "T-002"
+        tomb_path.write_text(json.dumps(tomb), encoding="utf-8")
+        before = self._tree_hashes()
+        result = intake.reconcile_receipt(self.root, receipt, apply=True)
+        self.assertFalse(result["ok"], result)
+        self.assertTrue(any("Work" in c for c in result["contradictions"]))
+        self.assertEqual(self._tree_hashes(), before)
+
+    def test_reconcile_refuses_terminal_count_mismatch(self) -> None:
+        receipt = self._build_fixture()
+        tomb_path = self.root / f".saipen/intake/tombstones/{receipt}.json"
+        tomb = json.loads(tomb_path.read_text(encoding="utf-8"))
+        tomb["closure"]["actionable_clauses"] = self.LEGACY_COUNT - 1
+        tomb_path.write_text(json.dumps(tomb), encoding="utf-8")
+        before = self._tree_hashes()
+        result = intake.reconcile_receipt(self.root, receipt, apply=True)
+        self.assertFalse(result["ok"], result)
+        self.assertTrue(
+            any(
+                "terminal_clauses" in c or "count disagreement" in c
+                for c in result["contradictions"]
+            )
+        )
+        self.assertEqual(self._tree_hashes(), before)
+
+    def test_reconcile_refuses_non_terminal_requirement(self) -> None:
+        receipt = self._build_fixture()
+        coverage_path = self.root / f".saipen/intake/coverage/{receipt}.json"
+        coverage = json.loads(coverage_path.read_text(encoding="utf-8"))
+        first = min(coverage["requirements"])
+        coverage["requirements"][first]["disposition"] = "BLOCKED"
+        coverage_path.write_text(json.dumps(coverage), encoding="utf-8")
+        before = self._tree_hashes()
+        result = intake.reconcile_receipt(self.root, receipt, apply=True)
+        self.assertFalse(result["ok"], result)
+        self.assertTrue(any("non-terminal" in c for c in result["contradictions"]))
+        self.assertEqual(self._tree_hashes(), before)
+
+    def test_reconcile_refuses_conflicting_later_generation(self) -> None:
+        receipt = self._build_fixture()
+        digest = json.loads(
+            (self.root / f".saipen/intake/active/{receipt}.meta.json").read_text(
+                encoding="utf-8-sig"
+            )
+        )["source_sha256"]
+        index_path = self.root / ".saipen/intake/index.json"
+        index = json.loads(index_path.read_text(encoding="utf-8-sig"))
+        index["active"]["SRC-002"] = {"source_sha256": digest, "linked_work": "T-001"}
+        index["next_id"] = max(index.get("next_id", 1), 3)
+        index_path.write_text(json.dumps(index), encoding="utf-8")
+        before = self._tree_hashes()
+        result = intake.reconcile_receipt(self.root, receipt, apply=True)
+        self.assertFalse(result["ok"], result)
+        self.assertTrue(any("SRC-002" in c for c in result["contradictions"]))
+        self.assertEqual(self._tree_hashes(), before)
+
+    def test_reconcile_refuses_invalid_tombstone(self) -> None:
+        receipt = self._build_fixture()
+        tomb_path = self.root / f".saipen/intake/tombstones/{receipt}.json"
+        tomb = json.loads(tomb_path.read_text(encoding="utf-8"))
+        del tomb["closure"]
+        tomb_path.write_text(json.dumps(tomb), encoding="utf-8")
+        before = self._tree_hashes()
+        result = intake.reconcile_receipt(self.root, receipt, apply=True)
+        self.assertFalse(result["ok"], result)
+        self.assertTrue(any("closure" in c for c in result["contradictions"]))
+        self.assertEqual(self._tree_hashes(), before)
+
+    def test_reconcile_refuses_unordered_archive_state(self) -> None:
+        receipt = self._build_fixture()
+        archive_dir = self.root / ".saipen/archive/source"
+        archive_dir.mkdir(parents=True, exist_ok=True)
+        (archive_dir / f"{receipt}.md").write_text("already archived", encoding="utf-8")
+        before = self._tree_hashes()
+        result = intake.reconcile_receipt(self.root, receipt, apply=True)
+        self.assertFalse(result["ok"], result)
+        self.assertTrue(any("archive bundle" in c for c in result["contradictions"]))
+        self.assertEqual(self._tree_hashes(), before)
+
+
 if __name__ == "__main__":
     unittest.main()
