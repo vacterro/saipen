@@ -1064,6 +1064,40 @@ def _amends_resolvable(root: Path, amends: str) -> bool:
     return amends in index.get("tombstones", {})
 
 
+# T-1299 (AUDAPACK T-170, SRC-034): the semantic identity of a Contract is
+# exactly these fields. `derived_at` is NON-SEMANTIC derivation metadata --
+# a settled close refuses on it only as unknown-field noise, never as
+# content. Every other canonical field is semantic; a field outside both
+# sets is a schema violation and fails closed rather than being silently
+# ignored (a nested semantic field must never become invisible because a
+# name looks timestamp-like).
+_CONTRACT_SEMANTIC_FIELDS = (
+    "schema_version",
+    "derived_from",
+    "source_sha256",
+    "interpretation_revision",
+    "clauses",
+)
+_CONTRACT_NON_SEMANTIC_FIELDS = ("derived_at",)
+_CONTRACT_KNOWN_FIELDS = frozenset(_CONTRACT_SEMANTIC_FIELDS + _CONTRACT_NON_SEMANTIC_FIELDS)
+
+
+def _contract_semantics_equal(current: object, revision: object) -> bool:
+    """One canonical semantic Contract comparator (T-1299).
+
+    True only when both documents are Contract objects carrying exactly the
+    known field set and every semantic field agrees byte-for-byte. Unknown
+    extra fields refuse (schema violation), and ONLY `derived_at` may differ.
+    """
+    if not isinstance(current, dict) or not isinstance(revision, dict):
+        return False
+    if set(current) - _CONTRACT_KNOWN_FIELDS or set(revision) - _CONTRACT_KNOWN_FIELDS:
+        return False
+    return all(
+        current.get(field) == revision.get(field) for field in _CONTRACT_SEMANTIC_FIELDS
+    )
+
+
 def _contract_revision_integrity(root: Path, receipt_id: str, contract: dict) -> None:
     """Validate the owned contiguous contract revision chain (W2-004).
 
@@ -1130,7 +1164,10 @@ def _contract_revision_integrity(root: Path, receipt_id: str, contract: dict) ->
             or historical.get("interpretation_revision") != number
         ):
             raise ValueError(f"source {receipt_id} revision r{number:03d} identity drift")
-        if number == revision and historical != contract:
+        # T-1299: semantic equality, not document equality. derived_at is
+        # derivation provenance and may differ between the live Contract and
+        # its final revision; any semantic field may not.
+        if number == revision and not _contract_semantics_equal(contract, historical):
             raise ValueError(
                 f"source {receipt_id} current Contract differs from revision r{number:03d}"
             )

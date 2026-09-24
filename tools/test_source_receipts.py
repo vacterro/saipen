@@ -1120,5 +1120,140 @@ class SourceReceiptTests(unittest.TestCase):
         self.assertFalse(active.exists())
 
 
+class ContractSemanticEqualityTests(unittest.TestCase):
+    """T-1299 (AUDAPACK T-170): settle compares semantic Contract content,
+    never derived metadata; any semantic difference still refuses.
+
+    Borrows the source-receipt fixture and its three helpers only:
+    subclassing SourceReceiptTests would run every one of its tests again.
+    """
+
+    setUp = SourceReceiptTests.setUp
+    tearDown = SourceReceiptTests.tearDown
+    capture = SourceReceiptTests.capture
+    normalized = SourceReceiptTests.normalized
+    resolve = SourceReceiptTests.resolve
+
+    def _developed(self, clauses: int = 1) -> str:
+        receipt = self.capture("contract body")["receipt"]
+        self.normalized(receipt, clauses)
+        self.resolve(receipt, clauses)
+        return receipt
+
+    def _settle_refused(self, receipt: str) -> dict:
+        result = intake.close_receipt(self.root, receipt)
+        self.assertFalse(result["ok"], result)
+        return result
+
+    def test_comparator_ignores_only_derived_at(self) -> None:
+        current = {
+            "schema_version": 1,
+            "derived_from": "SRC-001",
+            "source_sha256": "a" * 64,
+            "derived_at": "2026-09-04T20:09:23Z",
+            "interpretation_revision": 17,
+            "clauses": {"SRC-001:R001": {"class": "requirement", "text": "t", "actionable": True}},
+        }
+        later = json.loads(json.dumps(current))
+        later["derived_at"] = "2026-09-04T20:09:40Z"
+        self.assertTrue(intake._contract_semantics_equal(current, later))
+        for field in ("schema_version", "derived_from", "source_sha256", "interpretation_revision"):
+            drifted = json.loads(json.dumps(later))
+            drifted[field] = "x" if field != "interpretation_revision" else 18
+            self.assertFalse(intake._contract_semantics_equal(current, drifted))
+        drifted = json.loads(json.dumps(later))
+        drifted["clauses"]["SRC-001:R001"]["text"] = "changed"
+        self.assertFalse(intake._contract_semantics_equal(current, drifted))
+        extra = json.loads(json.dumps(later))
+        extra["transport"] = "unknown"
+        self.assertFalse(intake._contract_semantics_equal(current, extra))
+        nested_time = json.loads(json.dumps(later))
+        nested_time["clauses"]["SRC-001:R001"]["updated_at"] = 1
+        self.assertFalse(intake._contract_semantics_equal(current, nested_time))
+
+    def test_derived_at_only_difference_settles(self) -> None:
+        receipt = self._developed()
+        contract_path = self.root / f".saipen/intake/contracts/{receipt}.json"
+        contract = json.loads(contract_path.read_text(encoding="utf-8-sig"))
+        contract["derived_at"] = "2000-01-01T00:00:00Z"
+        contract_path.write_text(json.dumps(contract, indent=2), encoding="utf-8")
+        result = intake.close_receipt(self.root, receipt)
+        self.assertTrue(result["ok"], result)
+        self.assertEqual(result["code"], "SOURCE_CLOSED")
+
+    def test_source_sha256_difference_refuses(self) -> None:
+        receipt = self._developed()
+        revision = self.root / f".saipen/intake/contracts/{receipt}.r001.json"
+        doc = json.loads(revision.read_text(encoding="utf-8-sig"))
+        doc["source_sha256"] = "b" * 64
+        revision.write_text(json.dumps(doc, indent=2), encoding="utf-8")
+        self._settle_refused(receipt)
+
+    def test_interpretation_revision_difference_refuses(self) -> None:
+        receipt = self._developed()
+        revision = self.root / f".saipen/intake/contracts/{receipt}.r001.json"
+        doc = json.loads(revision.read_text(encoding="utf-8-sig"))
+        doc["interpretation_revision"] = 2
+        revision.write_text(json.dumps(doc, indent=2), encoding="utf-8")
+        self._settle_refused(receipt)
+
+    def test_schema_version_difference_refuses(self) -> None:
+        receipt = self._developed()
+        revision = self.root / f".saipen/intake/contracts/{receipt}.r001.json"
+        doc = json.loads(revision.read_text(encoding="utf-8-sig"))
+        doc["schema_version"] = 2
+        revision.write_text(json.dumps(doc, indent=2), encoding="utf-8")
+        self._settle_refused(receipt)
+
+    def test_derived_from_difference_refuses(self) -> None:
+        receipt = self._developed()
+        revision = self.root / f".saipen/intake/contracts/{receipt}.r001.json"
+        doc = json.loads(revision.read_text(encoding="utf-8-sig"))
+        doc["derived_from"] = "SRC-999"
+        revision.write_text(json.dumps(doc, indent=2), encoding="utf-8")
+        self._settle_refused(receipt)
+
+    def test_clause_id_set_difference_refuses(self) -> None:
+        receipt = self._developed()
+        contract_path = self.root / f".saipen/intake/contracts/{receipt}.json"
+        contract = json.loads(contract_path.read_text(encoding="utf-8-sig"))
+        contract["clauses"][f"{receipt}:R999"] = contract["clauses"][f"{receipt}:R001"]
+        contract_path.write_text(json.dumps(contract, indent=2), encoding="utf-8")
+        self._settle_refused(receipt)
+
+    def test_clause_text_difference_refuses(self) -> None:
+        receipt = self._developed()
+        contract_path = self.root / f".saipen/intake/contracts/{receipt}.json"
+        contract = json.loads(contract_path.read_text(encoding="utf-8-sig"))
+        contract["clauses"][f"{receipt}:R001"]["text"] = "changed text"
+        contract_path.write_text(json.dumps(contract, indent=2), encoding="utf-8")
+        self._settle_refused(receipt)
+
+    def test_clause_requirement_semantics_difference_refuses(self) -> None:
+        receipt = self._developed()
+        contract_path = self.root / f".saipen/intake/contracts/{receipt}.json"
+        contract = json.loads(contract_path.read_text(encoding="utf-8-sig"))
+        contract["clauses"][f"{receipt}:R001"]["actionable"] = False
+        contract_path.write_text(json.dumps(contract, indent=2), encoding="utf-8")
+        self._settle_refused(receipt)
+
+    def test_missing_final_revision_refuses(self) -> None:
+        receipt = self._developed()
+        (self.root / f".saipen/intake/contracts/{receipt}.r001.json").unlink()
+        self._settle_refused(receipt)
+
+    def test_malformed_current_contract_refuses(self) -> None:
+        receipt = self._developed()
+        contract_path = self.root / f".saipen/intake/contracts/{receipt}.json"
+        contract_path.write_text("{not json", encoding="utf-8")
+        self._settle_refused(receipt)
+
+    def test_malformed_final_revision_refuses(self) -> None:
+        receipt = self._developed()
+        revision = self.root / f".saipen/intake/contracts/{receipt}.r001.json"
+        revision.write_text("[broken", encoding="utf-8")
+        self._settle_refused(receipt)
+
+
 if __name__ == "__main__":
     unittest.main()
