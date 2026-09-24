@@ -52,6 +52,7 @@ import hashlib
 import json
 import os
 import re
+import subprocess
 from dataclasses import dataclass, field
 from pathlib import Path
 
@@ -554,6 +555,100 @@ def summary(root: Path | str) -> dict:
             f"{verified} verified, {conflicting} conflicting"
         ),
     }
+
+
+def commit_survival(root: Path | str) -> dict:
+    """Find applied XPATCH bytes that never entered reachable Git history.
+
+    This is a read-only historical check. A later target disposition can
+    supersede individual paths; unchanged paths still need their own commit.
+    The Git checkout must be the requested project root, so an extracted audit
+    archive cannot borrow an ancestor repository's history as proof.
+    """
+    root = Path(root).resolve()
+    receipts, problems = load_receipts(root)
+    candidates: list[tuple[Receipt, str, str | None]] = []
+    for receipt in receipts:
+        if not receipt.applied_at:
+            continue
+        for rel, spec in receipt.paths.items():
+            after = spec["after_sha256"]
+            if (
+                receipt.disposition in {"REPAIRED", "SUPERSEDED", "REVERTED"}
+                and receipt.disposition_paths.get(rel) != after
+            ):
+                continue
+            candidates.append((receipt, rel, after))
+    if not candidates:
+        return {"available": True, "uncommitted": [], "problems": problems}
+
+    def git(*args: str, input_bytes: bytes | None = None) -> subprocess.CompletedProcess:
+        return subprocess.run(
+            ["git", "-C", str(root), *args],
+            input=input_bytes,
+            capture_output=True,
+            timeout=60,
+            check=False,
+        )
+
+    try:
+        top = git("rev-parse", "--show-toplevel")
+        if top.returncode or Path(os.fsdecode(top.stdout.strip())).resolve() != root:
+            return {
+                "available": False,
+                "uncommitted": [],
+                "problems": [*problems, "XPATCH commit survival needs this project's Git checkout"],
+            }
+        by_patch: dict[str, list[str]] = {}
+        blob_cache: dict[str, str | None] = {}
+        for receipt, rel, expected in candidates:
+            history = git(
+                "log", "--all", "-m", f"--since={receipt.applied_at}",
+                "--raw", "--no-renames", "--no-abbrev", "--format=", "--", rel,
+            )
+            if history.returncode:
+                problems.append(
+                    f"{receipt.patch_id} {rel}: Git history unreadable: "
+                    + os.fsdecode(history.stderr).strip()[:240]
+                )
+                continue
+            committed = False
+            for line in history.stdout.splitlines():
+                if not line.startswith(b":"):
+                    continue
+                fields = line.split(b"\t", 1)[0].split()
+                if len(fields) != 5:
+                    continue
+                oid = fields[3].decode("ascii", "replace")
+                if expected is None:
+                    if fields[4] == b"D" and set(oid) == {"0"}:
+                        committed = True
+                        break
+                    continue
+                if set(oid) == {"0"}:
+                    continue
+                if oid not in blob_cache:
+                    blob = git("cat-file", "blob", oid)
+                    blob_cache[oid] = sha256_hex(blob.stdout) if blob.returncode == 0 else None
+                if blob_cache[oid] == expected:
+                    committed = True
+                    break
+            if not committed:
+                by_patch.setdefault(receipt.patch_id, []).append(rel)
+        return {
+            "available": True,
+            "uncommitted": [
+                {"patch_id": patch_id, "paths": sorted(paths)}
+                for patch_id, paths in sorted(by_patch.items())
+            ],
+            "problems": problems,
+        }
+    except (OSError, subprocess.TimeoutExpired, ValueError) as exc:
+        return {
+            "available": False,
+            "uncommitted": [],
+            "problems": [*problems, f"XPATCH Git history unavailable: {exc}"],
+        }
 
 
 # -- producing a receipt -----------------------------------------------

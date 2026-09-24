@@ -10852,6 +10852,29 @@ for _milestone_error in _milestone_errors:
     fail(f"Restore Milestone: {_milestone_error}")
 
 
+# T-1506: a VERIFIED receipt can outlive the uncommitted bytes it vouched for.
+# Keep historical receipts immutable and surface the missing commit by patch
+# id and path; strict validation promotes this warning like every other debt.
+try:
+    from saipen_engine.xpatch import commit_survival as _xpatch_commit_survival
+
+    _xpatch_survival = _xpatch_commit_survival(PROJECT_ROOT)
+    for _missing in _xpatch_survival["uncommitted"]:
+        warn(
+            "xpatch-survival",
+            f"{_missing['patch_id']} applied bytes never reached a commit: "
+            + ", ".join(_missing["paths"]),
+        )
+    for _problem in _xpatch_survival["problems"]:
+        warn("xpatch-survival", _problem)
+except Exception as _xpatch_survival_exc:
+    warn(
+        "xpatch-survival",
+        f"XPATCH commit survival check failed: "
+        f"{type(_xpatch_survival_exc).__name__}: {_xpatch_survival_exc}",
+    )
+
+
 # ------------------------------------------------------------------- summary
 
 warn_total = sum(len(msgs) for msgs in warnings.values())
