@@ -8501,6 +8501,25 @@ def _fleet_command_inner(
     return 0 if result.get("ok") else 1
 
 
+def unconsumed_quote_span(tokens: list[str]) -> tuple[int, int] | None:
+    """``(first, last)`` argv indexes of one quoted text no shell consumed.
+
+    T-1513. A working shell removes the quotes that group a text and hands
+    the program ONE argument. When an extra layer does not honour them --
+    measured: Git Bash `cmd //c` with backslash-escaped quotes -- the program
+    receives words instead: one opening with an unpaired `"`, a later one
+    closing with it. No shell that delivered the text whole produces that
+    pair, so it is transport damage, never content.
+    """
+    for first, token in enumerate(tokens):
+        if not token.startswith('"') or token.count('"') % 2 == 0:
+            continue
+        for last in range(first + 1, len(tokens)):
+            if tokens[last].endswith('"') and tokens[last].count('"') % 2 == 1:
+                return first, last
+    return None
+
+
 def main(argv: list[str] | None = None) -> int:
     global _ROUTE_ECHO  # noqa: PLW0603
     # ``main`` is normally one process/one invocation, but tests and embedded
@@ -8508,6 +8527,28 @@ def main(argv: list[str] | None = None) -> int:
     # command only; never let a previous shortcut label a later direct verb.
     _ROUTE_ECHO = None
     raw_args = list(argv if argv is not None else sys.argv[1:])
+    # T-1513: judged on the raw words, before anything reads them -- a damaged
+    # text can carry a split `--` that would end option parsing below.
+    damaged = unconsumed_quote_span(raw_args)
+    if damaged is not None:
+        first, last = damaged
+        _emit(
+            {
+                "ok": False,
+                "code": "ARGV_QUOTES_UNCONSUMED",
+                "detail": (
+                    f"arguments {first + 1}..{last + 1} ({raw_args[first]!r} .. "
+                    f"{raw_args[last]!r}) still carry the double quotes a shell should "
+                    "have consumed: an extra shell layer split one quoted text into "
+                    "words. Nothing was written. Run the launcher directly from the "
+                    "host shell -- bin/saipen (POSIX shells, Git Bash) or "
+                    "bin\\saipen.cmd (cmd.exe, PowerShell); `saipen host entry --json` "
+                    "names the proven transport."
+                ),
+            },
+            "--json" in raw_args,
+        )
+        return 2
     if "--" in raw_args:
         dd_idx = raw_args.index("--")
         before_dashdash = raw_args[:dd_idx]
