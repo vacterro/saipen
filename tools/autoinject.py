@@ -77,7 +77,15 @@ def load_adapter_registry() -> dict:
 
 
 def _expand_home(surface: str) -> Path:
-    return Path(surface).expanduser()
+    # `~` is the user's home; `$NAME` names a host whose HOME is not the
+    # user's (ZAICODE isolates its own). An unset variable stays unexpanded
+    # and names nothing on this machine (see `_configured`).
+    return Path(os.path.expandvars(os.path.expanduser(surface)))
+
+
+def _configured(surface: str) -> bool:
+    """Whether a registry surface names a path on this machine at all."""
+    return not os.path.expandvars(surface).startswith("$")
 
 
 def registry_home_adapters() -> dict[str, dict]:
@@ -85,7 +93,8 @@ def registry_home_adapters() -> dict[str, dict]:
     mapping: dict[str, dict] = {}
     for adapter in load_adapter_registry()["adapters"]:
         for surface in adapter.get("skill_surfaces") or []:
-            mapping[str(_expand_home(surface).resolve())] = adapter
+            if _configured(surface):
+                mapping[str(_expand_home(surface).resolve())] = adapter
     return mapping
 
 
@@ -94,6 +103,8 @@ def registry_targets() -> list[Path]:
     seen: dict[str, Path] = {}
     for adapter in load_adapter_registry()["adapters"]:
         for surface in adapter.get("skill_surfaces") or []:
+            if not _configured(surface):
+                continue
             path = _expand_home(surface)
             seen.setdefault(str(path.resolve()), path)
     return list(seen.values())

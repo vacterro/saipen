@@ -60,6 +60,9 @@ HOST_SESSION_VARIABLES = (
     # T-1497: the operator's SAIMAIL mailbox; set, every fixture `continue`
     # would read a real inbox at turn entry.
     "SAIMAIL_WORKSPACE",
+    # T-1504: the operator's ZAICODE HOME; set, an injector fixture that only
+    # redirects USERPROFILE would install into the real ZAICODE profile.
+    "ZAICODE_HOME",
 )
 
 #: T-1343. The interlock `saipen_engine.host_launch` checks before it creates a

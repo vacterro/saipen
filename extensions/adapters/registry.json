@@ -88,6 +88,32 @@
       }
     },
     {
+      "id": "zaicode",
+      "name": "ZAICODE",
+      "home_variable": "ZAICODE_HOME",
+      "home_note": "ZAICODE runs with an isolated HOME (<workspace>/.zaicode/home) and never shares ~/.zcode with a production ZCode; ZAICODE_HOME names that HOME, and an unset variable means ZAICODE is not configured on this machine.",
+      "instruction_surfaces": [
+        "$ZAICODE_HOME/.zcode/AGENTS.md"
+      ],
+      "skill_surfaces": [
+        "$ZAICODE_HOME/.zcode/skills/saipen"
+      ],
+      "blocking_capability": false,
+      "hook_install_surface": null,
+      "hook_artifact": null,
+      "freshness_surfaces": [
+        "skill",
+        "instruction"
+      ],
+      "declared_strength": "ADVISORY",
+      "artifact_version": null,
+      "install": {
+        "home": "$ZAICODE_HOME/.zcode",
+        "skill": "$ZAICODE_HOME/.zcode/skills/saipen",
+        "instruction": "$ZAICODE_HOME/.zcode/AGENTS.md"
+      }
+    },
+    {
       "id": "gemini",
       "name": "Gemini CLI / Antigravity",
       "instruction_surfaces": [

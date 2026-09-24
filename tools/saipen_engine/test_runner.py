@@ -205,6 +205,8 @@ def _run_family(root: Path, family: TestFamily, *, spool: Path | None = None) ->
     env = unbound_environment(os.environ.copy(), SAIPEN_AGENT=None)
     # T-1497: nor the operator's SAIMAIL mailbox -- a family run never reads it.
     env.pop("SAIMAIL_WORKSPACE", None)
+    # T-1504: nor the operator's ZAICODE profile -- no fixture installs into it.
+    env.pop("ZAICODE_HOME", None)
     env["PYTHONDONTWRITEBYTECODE"] = "1"
     env["SAIPEN_CANONICAL_TEST_CHILD"] = "1"
     creation = {"start_new_session": True} if os.name != "nt" else {

@@ -340,6 +340,14 @@ function Copy-Skill([string]$dst) {
 
 function Expand-Home([string]$path) {
   if ([string]::IsNullOrWhiteSpace($path)) { return $null }
+  # `$NAME/...`: a host whose HOME is not the user profile (ZAICODE isolates
+  # its own) is named by an environment variable. Unset means the host is not
+  # configured on this machine, so the caller skips it.
+  if ($path -match '^\$\{?([A-Za-z_][A-Za-z0-9_]*)\}?(.*)$') {
+    $value = [Environment]::GetEnvironmentVariable($Matches[1])
+    if ([string]::IsNullOrWhiteSpace($value)) { return $null }
+    return Get-NativePath ($value + $Matches[2])
+  }
   return Get-NativePath ($path.Replace('~', $env:USERPROFILE))
 }
 

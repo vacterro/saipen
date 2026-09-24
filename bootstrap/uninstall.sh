@@ -259,6 +259,11 @@ report "OpenCode AGENTS.md" strip_block "$HOME/.config/opencode/AGENTS.md"
 report "guard hooks" remove_hooks
 report "Codex skill" rm_skill "$HOME/.codex/skills/saipen"
 report "Codex AGENTS.md" strip_block "$HOME/.codex/AGENTS.md"
+# ZAICODE keeps its own isolated HOME, named by ZAICODE_HOME (registry).
+if [ -n "${ZAICODE_HOME:-}" ]; then
+  report "ZAICODE skill" rm_skill "$ZAICODE_HOME/.zcode/skills/saipen"
+  report "ZAICODE AGENTS.md" strip_block "$ZAICODE_HOME/.zcode/AGENTS.md"
+fi
 report "Gemini GEMINI.md" strip_block "$HOME/.gemini/GEMINI.md"
 report "~/.agents skills" rm_skill "$HOME/.agents/skills/saipen"
 PLUG_ROOT="$HOME/.gemini/config/plugins"

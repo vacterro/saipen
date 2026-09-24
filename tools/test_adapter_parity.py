@@ -27,6 +27,13 @@ if str(TOOLS) not in sys.path:
 
 import autoinject  # noqa: E402
 from saipen_engine.admission import ADAPTER_REGISTRY  # noqa: E402
+from test_hermetic_env import isolate_host_session  # noqa: E402
+
+
+def setUpModule():
+    # The injector runs below redirect only USERPROFILE/HOME; an operator's
+    # ZAICODE_HOME would otherwise receive a real install (T-1504).
+    isolate_host_session()
 
 REGISTRY_PATH = REPO / "extensions" / "adapters" / "registry.json"
 PS1 = REPO / "bootstrap" / "inject.ps1"
@@ -74,7 +81,7 @@ POWERSHELL = _find_powershell()
 
 #: Dotted host-home tokens the installers and uninstallers may name.
 _HOST_HOME_PATTERN = re.compile(
-    r"\.(?:claude|codex|gemini|codebuddy|agents|config[/\\]opencode"
+    r"\.(?:claude|codex|gemini|codebuddy|agents|zcode|config[/\\]opencode"
     r"|knowledge\.md|AGENTS\.md|aider\.conf\.yml)"
 )
 
@@ -92,7 +99,7 @@ def registry_home_tokens() -> set[str]:
         for surface in surfaces:
             parts = Path(surface).parts  # ('~', '.claude', 'skills', ...)
             for index, part in enumerate(parts):
-                if part.startswith("~"):
+                if part.startswith(("~", "$")):
                     continue
                 if part.startswith("."):
                     rest = "/".join(parts[index : index + 2])
@@ -105,6 +112,9 @@ def registry_home_tokens() -> set[str]:
     for home in install_homes:
         if isinstance(home, str) and home.startswith("~/"):
             tokens.add(home[2:].rstrip("/"))
+        elif isinstance(home, str) and home.startswith("$") and "/" in home:
+            # `$ZAICODE_HOME/.zcode`: a host HOME named by a variable.
+            tokens.add(home.split("/", 1)[1].rstrip("/"))
     return tokens
 
 
@@ -121,11 +131,13 @@ class RegistryParityTests(unittest.TestCase):
         )
 
     def test_autoinject_targets_are_registry_skill_surfaces(self):
+        # A `$NAME` surface is a target only where NAME is set (ZAICODE).
         expected = sorted(
             {
-                str(Path(surface).expanduser().resolve())
+                str(Path(os.path.expandvars(os.path.expanduser(surface))).resolve())
                 for adapter in registry()["adapters"]
                 for surface in (adapter.get("skill_surfaces") or [])
+                if not os.path.expandvars(surface).startswith("$")
             }
         )
         self.assertEqual(sorted(str(Path(t).resolve()) for t in autoinject.TARGETS), expected)

@@ -218,6 +218,11 @@ Report "OpenCode AGENTS.md" (Remove-Block "$h\.config\opencode\AGENTS.md")
 Report "guard hooks" (Remove-Hooks)
 Report "Codex skill" (Remove-Skill "$h\.codex\skills\saipen")
 Report "Codex AGENTS.md" (Remove-Block "$h\.codex\AGENTS.md")
+# ZAICODE keeps its own isolated HOME, named by ZAICODE_HOME (registry).
+if (-not [string]::IsNullOrWhiteSpace($env:ZAICODE_HOME)) {
+  Report "ZAICODE skill" (Remove-Skill "$env:ZAICODE_HOME\.zcode\skills\saipen")
+  Report "ZAICODE AGENTS.md" (Remove-Block "$env:ZAICODE_HOME\.zcode\AGENTS.md")
+}
 Report "Gemini GEMINI.md" (Remove-Block "$h\.gemini\GEMINI.md")
 Report "~/.agents skills" (Remove-Skill "$h\.agents\skills\saipen")
 $plugRoot = "$h\.gemini\config\plugins"

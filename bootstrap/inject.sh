@@ -466,8 +466,25 @@ remove_legacy_hook() { # $1=registry-declared legacy surface
   echo "legacy hook removed"
 }
 
-expand_home() { # $1=registry path starting with ~
-  printf '%s\n' "${1/#\~/$HOME}"
+expand_home() { # $1=registry path starting with ~ or $NAME
+  # `$NAME/...`: a host whose HOME is not the user's (ZAICODE isolates its
+  # own) is named by an environment variable. Unset prints an empty line,
+  # which the caller reads as "not configured on this machine".
+  case "$1" in
+    '$'*)
+      local _name="${1#\$}"
+      _name="${_name#\{}"
+      _name="${_name%%[!A-Za-z0-9_]*}"
+      if [ -z "$_name" ]; then printf '\n'; return; fi
+      local _rest="${1#\$}"
+      _rest="${_rest#\{}"
+      _rest="${_rest#"$_name"}"
+      _rest="${_rest#\}}"
+      local _value="${!_name:-}"
+      if [ -n "$_value" ]; then printf '%s%s\n' "$_value" "$_rest"; else printf '\n'; fi
+      ;;
+    *) printf '%s\n' "${1/#\~/$HOME}" ;;
+  esac
 }
 
 # --- T-1319 TARGET 2: install-time runtime provenance (mirrors inject.ps1) --
