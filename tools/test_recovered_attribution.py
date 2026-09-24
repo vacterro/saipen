@@ -22,6 +22,7 @@ attributes to T-160, and every integrity/provenance negative stays GLOBAL.
 from __future__ import annotations
 
 import base64
+import contextlib
 import copy
 import hashlib
 import json
@@ -219,6 +220,7 @@ class RecoveredSourceFixture(unittest.TestCase):
         # binds to it, and a test that wants a mismatch declares it.
         real_sha = hashlib.sha256(body.encode("utf-8")).hexdigest()
         bound_sha = real_sha if body_sha is None else body_sha
+        self.bound_sha = bound_sha
 
         def _rebind(doc: dict) -> dict:
             return json.loads(json.dumps(doc).replace(SOURCE_SHA, bound_sha))
@@ -250,12 +252,14 @@ class RecoveredSourceFixture(unittest.TestCase):
             return record
 
         self.tombstone = _rebind(CURRENT_TOMBSTONE if tombstone is None else tombstone)
-        self.contract = copy.deepcopy(_zero_clause_contract() if contract is None else contract)
+        self.contract = (
+            _rebind(_zero_clause_contract()) if contract is None else copy.deepcopy(contract)
+        )
         self.coverage = copy.deepcopy(_coverage() if coverage is None else coverage)
         if record is None:
             record = _recovery_record(
                 contract=_rebind(_zero_clause_contract()),
-                coverage=self.coverage,
+                coverage=_coverage(),
                 tombstone=_rebind(ORIGINAL_TOMBSTONE),
             )
             record["source_sha256"] = bound_sha
@@ -263,6 +267,13 @@ class RecoveredSourceFixture(unittest.TestCase):
             if record.get("source_sha256") == SOURCE_SHA:
                 record["source_sha256"] = bound_sha
             record = _rebind_embedded(record)
+            # A test that shapes the preserved original coverage means the
+            # archived coverage to be that same document; only a test that
+            # passes `coverage` itself asks for the two to differ.
+            block = record.get("original_coverage")
+            if coverage is None and isinstance(block, dict) and isinstance(block.get("bytes"), str):
+                with contextlib.suppress(ValueError, TypeError):
+                    self.coverage = json.loads(base64.b64decode(block["bytes"]))
         self.record = record
         default_meta = {
             "archive_ref": f".saipen/archive/source/{RECEIPT}.md",
@@ -283,25 +294,30 @@ class RecoveredSourceFixture(unittest.TestCase):
             "storage_status": "ARCHIVED",
         }
         self.meta = default_meta if meta is None else meta
-        (archive / f"{RECEIPT}.meta.json").write_text(
-            json.dumps(self.meta, indent=2), encoding="utf-8"
+        (archive / f"{RECEIPT}.meta.json").write_bytes(
+            json.dumps(self.meta, indent=2).encode("utf-8")
         )
+        # setUp already built the default fixture: a test that omits this
+        # artifact must not inherit the earlier build's copy.
+        (archive / f"{RECEIPT}.contract.json").unlink(missing_ok=True)
         if write_contract:
-            (archive / f"{RECEIPT}.contract.json").write_text(
-                json.dumps(self.contract, indent=2), encoding="utf-8"
+            (archive / f"{RECEIPT}.contract.json").write_bytes(
+                json.dumps(self.contract, indent=2).encode("utf-8")
             )
+        (archive / f"{RECEIPT}.coverage.json").unlink(missing_ok=True)
         if write_coverage:
-            (archive / f"{RECEIPT}.coverage.json").write_text(
-                json.dumps(self.coverage, indent=2), encoding="utf-8"
+            (archive / f"{RECEIPT}.coverage.json").write_bytes(
+                json.dumps(self.coverage, indent=2).encode("utf-8")
             )
+        (archive / f"{RECEIPT}.recovery.json").unlink(missing_ok=True)
         if write_record:
-            (archive / f"{RECEIPT}.recovery.json").write_text(
-                json.dumps(self.record, indent=2), encoding="utf-8"
+            (archive / f"{RECEIPT}.recovery.json").write_bytes(
+                json.dumps(self.record, indent=2).encode("utf-8")
             )
         tombs = self.root / ".saipen" / "intake" / "tombstones"
         tombs.mkdir(parents=True, exist_ok=True)
-        (tombs / f"{RECEIPT}.json").write_text(
-            json.dumps(self.tombstone, indent=2), encoding="utf-8"
+        (tombs / f"{RECEIPT}.json").write_bytes(
+            json.dumps(self.tombstone, indent=2).encode("utf-8")
         )
         index_path = self.root / ".saipen" / "intake" / "index.json"
         index = json.loads(index_path.read_text(encoding="utf-8")) if index_path.exists() else {}
@@ -372,7 +388,7 @@ class AttributionPositiveTests(RecoveredSourceFixture):
         self.assertEqual(result["recovery_method"], "TOMBSTONE_AUTHORITATIVE")
         self.assertEqual(result["requirements"], 16)
         self.assertEqual(result["terminal"], 16)
-        self.assertEqual(result["source_sha256"], SOURCE_SHA)
+        self.assertEqual(result["source_sha256"], self.bound_sha)
 
     def test_current_tombstone_is_not_byte_identical_to_original(self) -> None:
         """C3: the additive recovery block is expected, never corruption."""
@@ -467,6 +483,12 @@ class AttributionNegativeTests(RecoveredSourceFixture):
             report["blocking"],
         )
 
+    def _refused_corrupt_index(self) -> None:
+        """A corrupt intake index stops the Work delta gate outright."""
+        report = self.legacy()
+        self.assertEqual(report["code"], "VALIDATION_FAILED", report)
+        self.assertIn("index corrupt", report.get("detail", ""), report)
+
     # -- 14..17 record / method / sha / receipt -------------------------
 
     def test_missing_recovery_record_refuses(self) -> None:
@@ -507,8 +529,10 @@ class AttributionNegativeTests(RecoveredSourceFixture):
         tombstone = copy.deepcopy(CURRENT_TOMBSTONE)
         tombstone["status"] = "ACTIVE"
         self.build(tombstone=tombstone)
-        self._refuse(self.proof(), "TOMBSTONE_NOT_CLOSED")
-        self._blocked_global()
+        # The index decoder refuses a non-CLOSED tombstone before attribution
+        # can read it, and the Work delta gate refuses the corrupt index.
+        self._refuse(self.proof(), "INDEX_UNREADABLE")
+        self._refused_corrupt_index()
 
     # -- 18..22 embedded digest / preserved originals --------------------
 
@@ -562,14 +586,18 @@ class AttributionNegativeTests(RecoveredSourceFixture):
         tombstone = copy.deepcopy(CURRENT_TOMBSTONE)
         tombstone["linked_work"] = "T-161"
         self.build(tombstone=tombstone)
-        self._refuse(self.proof(), "TOMBSTONE_CLOSURE_IDENTITY_CHANGED")
+        # The archive metadata still names T-160: the archive gate refuses
+        # before closure identity is compared.
+        self._refuse(self.proof(), "ARCHIVE_WORK_MISMATCH")
         self._blocked_global()
 
     def test_tombstone_source_sha_change_refuses(self) -> None:
         tombstone = copy.deepcopy(CURRENT_TOMBSTONE)
         tombstone["source_sha256"] = "5" * 64
         self.build(tombstone=tombstone)
-        self._refuse(self.proof(), "TOMBSTONE_CLOSURE_IDENTITY_CHANGED")
+        # No archived body hashes to this digest: the archive gate refuses
+        # before closure identity is compared.
+        self._refuse(self.proof(), "ARCHIVE_SHA_MISMATCH")
         self._blocked_global()
 
     def test_tombstone_closure_counts_change_refuses(self) -> None:
@@ -577,7 +605,8 @@ class AttributionNegativeTests(RecoveredSourceFixture):
         tombstone["requirements"] = 15
         tombstone["actionable"] = 15
         self.build(tombstone=tombstone)
-        self._refuse(self.proof(), "COVERAGE_COUNT_MISMATCH")
+        # The counts are closure identity, compared before coverage truth.
+        self._refuse(self.proof(), "TOMBSTONE_CLOSURE_IDENTITY_CHANGED")
         self._blocked_global()
 
     def test_tombstone_closed_at_change_refuses(self) -> None:
@@ -662,7 +691,7 @@ class AttributionNegativeTests(RecoveredSourceFixture):
         index["active"][RECEIPT] = {"source_sha256": self.tombstone["source_sha256"]}
         index_path.write_text(json.dumps(index, indent=2), encoding="utf-8")
         self._refuse(self.proof(), "INDEX_UNREADABLE")
-        self._blocked_global()
+        self._refused_corrupt_index()
 
     def test_active_artifact_present_refuses(self) -> None:
         active = self.root / ".saipen" / "intake" / "active"
@@ -679,7 +708,10 @@ class AttributionNegativeTests(RecoveredSourceFixture):
             "amends": RECEIPT,
             "status": "CLOSED",
             "linked_work": WORK,
+            "source_sha256": "7" * 64,
         }
+        # A well-formed index: the allocator has moved past the newer id.
+        index["next_id"] = max(int(index.get("next_id") or 0), 40)
         index_path.write_text(json.dumps(index, indent=2), encoding="utf-8")
         self._refuse(self.proof(), "NEWER_GENERATION_EXISTS")
         self._blocked_global()

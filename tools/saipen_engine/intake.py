@@ -4466,6 +4466,26 @@ RICH_TOMBSTONE_ONLY_FIELDS = frozenset({"closure", "consumption", "kind", "layer
 # closure identity, so their presence is never corruption.
 RECOVERY_ADDITIVE_TOMBSTONE_FIELDS = frozenset({"recovery"})
 
+# The canonical compact CLOSED tombstone the close path writes. A recovery
+# that normalized a legacy rich tombstone may introduce exactly these keys;
+# any other key that appears is undocumented and refused (T-1315).
+CLOSED_TOMBSTONE_FIELDS = frozenset(
+    {
+        "schema_version",
+        "receipt_id",
+        "source_sha256",
+        "linked_work",
+        "linked_works",
+        "status",
+        "closed_at",
+        "closure_event",
+        "archive_ref",
+        "requirements",
+        "actionable",
+        "unresolved",
+    }
+)
+
 RECOVERY_INTEGRITY_REQUIRED = (
     "schema_version",
     "receipt_id",
@@ -4644,7 +4664,16 @@ def _closure_identity(original: dict, current: dict) -> str | None:
     if original_is_rich and current_is_compact:
         # Documented recovery normalization: the legacy rich tombstone was
         # rewritten into the canonical compact form. Only the closure identity
-        # (compared below) and the shared raw fields are authoritative.
+        # (compared below) and the shared raw fields are authoritative. The
+        # compact form may introduce only its own canonical keys.
+        extra = (
+            set(current)
+            - set(original)
+            - RECOVERY_ADDITIVE_TOMBSTONE_FIELDS
+            - CLOSED_TOMBSTONE_FIELDS
+        )
+        if extra:
+            return f"tombstone gained undocumented fields: {','.join(sorted(extra))}"
         shared = set(original) & set(current) - RECOVERY_ADDITIVE_TOMBSTONE_FIELDS
         for field in sorted(shared):
             if current[field] != original[field]:
