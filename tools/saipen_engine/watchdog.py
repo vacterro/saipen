@@ -10,6 +10,8 @@ from __future__ import annotations
 
 import datetime as _dt
 import json
+import os
+import functools
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -23,6 +25,151 @@ EXPIRED = "EXPIRED"
 TERMINAL = "TERMINAL"
 UNKNOWN = "UNKNOWN"
 HEALTH_STATES = (HEALTHY, SUSPECT, EXPIRED, TERMINAL, UNKNOWN)
+CLAIM_WITNESSES = ("claim_run", "claim_generation")
+AUTONOMY_ENV = ("SAIPEN_AUTONOMY_RUN_ID", "SAIPEN_AUTONOMY_WORKER", "SAIPEN_LEASE_GENERATION")
+
+
+def _serialized(fn):
+    """Fence changes and canonical APPLY share the same project mutex."""
+
+    @functools.wraps(fn)
+    def wrapped(root, *args, **kwargs):
+        import time
+        from .lock import WriterLock
+
+        lock = WriterLock(root)
+        deadline = time.monotonic() + 5
+        while True:
+            try:
+                lock.acquire()
+                break
+            except PermissionError as exc:
+                if "WRITER_BUSY" not in str(exc):
+                    raise
+                if time.monotonic() >= deadline:
+                    raise RuntimeError("WRITER_BUSY") from exc
+                time.sleep(0.02)
+        try:
+            return fn(root, *args, **kwargs)
+        finally:
+            lock.release()
+
+    return wrapped
+
+
+def _binding(root: Path | str, run_id: str) -> dict:
+    from .board import claim_session_digest
+    from .paths import project_lineage_identity
+
+    lineage = project_lineage_identity(root)
+    return {
+        "project_root": str(Path(root).resolve()),
+        "project_lineage": lineage,
+        "run_binding": claim_session_digest(lineage, run_id) if lineage else None,
+    }
+
+
+def carrier_present() -> bool:
+    return any(name in os.environ for name in AUTONOMY_ENV)
+
+
+def current_carrier(root: Path | str) -> dict | None:
+    """Prove all presented runtime witnesses against the current healthy lease.
+
+    Environment values are witnesses, never authentication. Missing, partial,
+    cross-project and stale carriers cannot authorize a canonical mutation.
+    """
+    run_id, worker_id, raw_generation = (os.environ.get(key, "") for key in AUTONOMY_ENV)
+    if not run_id or not worker_id or not raw_generation.isdecimal():
+        return None
+    generation = int(raw_generation)
+    expected = _binding(root, run_id)
+    if not expected["run_binding"]:
+        return None
+    for key, value in (
+        ("SAIPEN_PROJECT_ROOT", expected["project_root"]),
+        ("SAIPEN_PROJECT_LINEAGE", expected["project_lineage"]),
+    ):
+        presented = os.environ.get(key)
+        if presented is not None:
+            if key == "SAIPEN_PROJECT_ROOT":
+                try:
+                    if Path(presented).resolve() != Path(value):
+                        return None
+                except (OSError, ValueError):
+                    return None
+            elif presented != value:
+                return None
+    current = _load(root)
+    if (
+        not current
+        or any(current.get(k) != v for k, v in expected.items())
+        or not mutation_allowed(root, worker_id, generation)
+    ):
+        return None
+    return current
+
+
+def claim_witnesses(root: Path | str) -> dict[str, str]:
+    current = current_carrier(root)
+    if current is None:
+        return {}
+    return {
+        "claim_run": current["run_binding"],
+        "claim_generation": str(current["lease_generation"]),
+    }
+
+
+def can_continue_claim(root: Path | str, ticket: dict, session_id: str | None = None) -> bool:
+    """One continuation predicate: healthy successor -> fenced predecessor -> claim."""
+    from .board import host_session_binding, claim_session_digest, claim_status
+    from .paths import project_lineage_identity
+    from .state import parse_state_or_error, binding_brake
+
+    current = current_carrier(root)
+    fields = ticket.get("fields") or {}
+    session = (
+        claim_session_digest(project_lineage_identity(root), session_id)
+        if session_id is not None
+        else host_session_binding(root)
+    )
+    old_session = fields.get("claim_session")
+    if (
+        not current
+        or ticket.get("section") != "## DOING"
+        or claim_status(ticket) not in ("FOREIGN_LIVE", "FOREIGN_STALE")
+        or not old_session
+        or not session
+        or session == old_session
+        or fields.get("claim_run") != current["run_binding"]
+    ):
+        return False
+    try:
+        state, error = parse_state_or_error(
+            (Path(root) / ".saipen/STATE.md").read_text(encoding="utf-8-sig")
+        )
+    except (OSError, UnicodeError):
+        return False
+    if (
+        error
+        or state.get("task") != ticket.get("id")
+        or state.get("phase") not in ("SCOUT", "BUILD", "VERIFY", "REVIEW", "SHIP")
+        or state.get("mode") == "read-only"
+        or binding_brake(state) is not None
+    ):
+        return False
+    old = str(fields.get("claim_generation", ""))
+    if not old.isdecimal() or not 0 < int(old) < current["lease_generation"]:
+        return False
+    return any(
+        record.get("lease_generation") == int(old)
+        and record.get("run_binding") == fields["claim_run"]
+        and record.get("project_root") == current["project_root"]
+        and record.get("project_lineage") == current["project_lineage"]
+        and _instant(record.get("fenced_at")) is not None
+        for record in current.get("fenced_generations", [])
+        if isinstance(record, dict)
+    )
 
 
 def _instant(value: str) -> _dt.datetime | None:
@@ -41,10 +188,7 @@ def _instant(value: str) -> _dt.datetime | None:
 def _utc(value: _dt.datetime | None = None) -> str:
     value = value or _dt.datetime.now(_dt.timezone.utc)
     return (
-        value.astimezone(_dt.timezone.utc)
-        .replace(microsecond=0)
-        .isoformat()
-        .replace("+00:00", "Z")
+        value.astimezone(_dt.timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
     )
 
 
@@ -68,6 +212,24 @@ class WatchdogStatus:
         }
 
 
+def _contended(action, attempts: int = 50):
+    """Retry a lease-file access that lost a Windows sharing race.
+
+    Workers read the lease while the supervisor replaces it; Windows reports
+    either side of that race as PermissionError. It is contention, never a
+    missing or fenced lease, so it is retried briefly before it is believed.
+    """
+    import time
+
+    for attempt in range(attempts):
+        try:
+            return action()
+        except PermissionError:
+            if attempt == attempts - 1:
+                raise
+            time.sleep(0.01)
+
+
 def _path(root: Path | str) -> Path:
     return Path(root).resolve() / CACHE_REL
 
@@ -75,7 +237,7 @@ def _path(root: Path | str) -> Path:
 def _load(root: Path | str) -> dict | None:
     path = _path(root)
     try:
-        payload = json.loads(path.read_text(encoding="utf-8"))
+        payload = json.loads(_contended(lambda: path.read_text(encoding="utf-8")))
     except (OSError, UnicodeError, json.JSONDecodeError):
         return None
     if not isinstance(payload, dict) or payload.get("schema_version") != SCHEMA_VERSION:
@@ -86,21 +248,29 @@ def _load(root: Path | str) -> dict | None:
         return None
     if _instant(payload.get("heartbeat_at")) is None:
         return None
+    records = payload.get("fenced_generations", [])
+    if not isinstance(records, list) or any(not isinstance(r, dict) for r in records):
+        return None
     return payload
 
 
 def _save(root: Path | str, payload: dict) -> None:
     root = Path(root).resolve()
     body = (json.dumps(payload, indent=2, sort_keys=True) + "\n").encode("utf-8")
-    safe_atomic_write_bytes(
-        _path(root),
-        body,
-        kind="autonomy watchdog runtime state",
-        ownership_root=root,
+    _contended(
+        lambda: safe_atomic_write_bytes(
+            _path(root),
+            body,
+            kind="autonomy watchdog runtime state",
+            ownership_root=root,
+        )
     )
 
 
-def acquire_lease(root: Path | str, worker_id: str, *, now: _dt.datetime | None = None) -> dict:
+@_serialized
+def acquire_lease(
+    root: Path | str, worker_id: str, *, now: _dt.datetime | None = None, run_id: str = ""
+) -> dict:
     """Create generation 1 or advance the fenced generation.
 
     A live, healthy lease is never silently stolen.  Callers must observe and
@@ -120,11 +290,16 @@ def acquire_lease(root: Path | str, worker_id: str, *, now: _dt.datetime | None 
         "lease_generation": generation,
         "heartbeat_at": _utc(now),
         "status": HEALTHY,
+        **(_binding(root, run_id) if run_id else {}),
+        "fenced_generations": list((current or {}).get("fenced_generations", [])),
     }
     _save(root, payload)
     return payload.copy()
 
 
+# No project mutex here: a worker's canonical APPLY fails fast on
+# WRITER_BUSY, so a beat holding it would kill the generation it serves.
+# The supervisor that beats is the same thread that fences.
 def heartbeat(
     root: Path | str,
     worker_id: str,
@@ -190,6 +365,7 @@ def observe(
     )
 
 
+@_serialized
 def fence(
     root: Path | str, worker_id: str, lease_generation: int, *, now: _dt.datetime | None = None
 ) -> dict:
@@ -199,7 +375,23 @@ def fence(
         raise RuntimeError("UNKNOWN_LEASE")
     if current["worker_id"] != worker_id or current["lease_generation"] != lease_generation:
         raise RuntimeError("FENCED_LEASE_GENERATION")
-    payload = {**current, "status": EXPIRED, "fenced_at": _utc(now)}
+    records = list(current.get("fenced_generations", []))
+    fenced_at = current.get("fenced_at") or _utc(now)
+    if not any(r.get("lease_generation") == lease_generation for r in records):
+        records.append(
+            {
+                key: current.get(key)
+                for key in (
+                    "worker_id",
+                    "lease_generation",
+                    "run_binding",
+                    "project_root",
+                    "project_lineage",
+                )
+            }
+            | {"fenced_at": fenced_at}
+        )
+    payload = {**current, "status": EXPIRED, "fenced_at": fenced_at, "fenced_generations": records}
     _save(root, payload)
     return payload.copy()
 

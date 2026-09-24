@@ -146,6 +146,8 @@ KNOWN_FIELDS = frozenset(
         # never the session id, so BOARD and every audit archive built from
         # it carry no reusable bearer value.
         "claim_session",
+        "claim_run",
+        "claim_generation",
         # External implementation resolution (SRC-088 / T-1434 M2): the LOCAL
         # ticket was implemented by an EXTERNAL authority and verified locally.
         # external_authority     the portable lineage identity of the

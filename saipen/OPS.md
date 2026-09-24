@@ -182,6 +182,21 @@ mechanical path was unavailable.
 
 ### Dependency continuation transaction
 
+Crashed-generation claim continuity (T-1500) eliminates the lockout where a
+replacement worker reads its dead predecessor as a live foreign host window.
+Managed claims carry `claim_run` (lineage-salted run digest) and
+`claim_generation`, stamped only from the current healthy watchdog lease.
+The watchdog retains fenced-generation witnesses through replacement.
+`saipen claim` may rebind that exact active Work only when the same project,
+lineage and run connect a healthy successor to the fenced predecessor claim.
+`continue` routes to that claim; START uses the same operation. Neither treats
+the successor as seated before the journal commits. Missing witnesses, a new
+supervisor run, a live foreign window or a fenced caller cannot authorize the
+transfer. A lapsed claim keeps the ordinary stale takeover whichever run
+stamped it. Fencing and canonical APPLY share the project mutex; the heartbeat
+never takes it, because APPLY fails fast on WRITER_BUSY. Replay retains the
+existing journal's idempotency. Runtime witnesses are not credentials.
+
 `saipen ticket block-for A B REASON` is the sole active-parent handoff. PLAN
 requires A to be the owned DOING ticket and B to be a workable TODO ticket.
 APPLY journals and commits A→BLOCKED, `A needs B`, `blocked_on: B`, and A's

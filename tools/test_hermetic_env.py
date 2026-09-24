@@ -36,6 +36,9 @@ from pathlib import Path
 #: Every variable through which a HOST SESSION declares something the engine
 #: or a host adapter acts on. None of them is test input unless a test sets it.
 HOST_SESSION_VARIABLES = (
+    "SAIPEN_AUTONOMY_RUN_ID",
+    "SAIPEN_AUTONOMY_WORKER",
+    "SAIPEN_LEASE_GENERATION",
     "SAIPEN_PROJECT_ROOT",
     "SAIPEN_PROJECT_LINEAGE",
     "SAIPEN_AGENT",

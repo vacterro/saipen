@@ -3747,6 +3747,20 @@ def _continue(
 
     from saipen_engine.reconcile import reconcile_protocol_state
 
+    # A replacement generation must first commit the exact predecessor claim.
+    # Return that operation before reconciliation can refresh any ownership.
+    from saipen_engine import watchdog
+    from saipen_engine.entry import _snapshot
+
+    claim_state, claim_board, _claim_problem = _snapshot(project_root)
+    if claim_state is not None and claim_board is not None:
+        active = claim_board["tickets"].get(claim_state.get("task"), {})
+        if watchdog.can_continue_claim(project_root, active):
+            _emit({"ok": True, "action": f"saipen claim {active['id']}",
+                   "ticket": active["id"], "reason": "fenced-generation-continuation",
+                   "load": "saipen/OPS.md", "dry_run": dry_run}, as_json)
+            return 0
+
     reconciliation = reconcile_protocol_state(
         project_root, _agent_for(project_root), dry_run=dry_run
     )

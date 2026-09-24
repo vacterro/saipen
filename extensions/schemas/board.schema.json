@@ -46,6 +46,16 @@
         "type": "string",
         "format": "date-time"
       },
+      "claim_run": {
+        "type": "string",
+        "pattern": "^[0-9a-f]{32}$",
+        "description": "Lineage-salted supervisor-run witness stamped from a healthy lease at claim time; OPS.md owns fenced-predecessor continuation. Runtime witness, not a credential."
+      },
+      "claim_generation": {
+        "type": "string",
+        "pattern": "^[1-9][0-9]*$",
+        "description": "Lease generation that acquired this claim, paired with claim_run and claim_session. A successor must prove its predecessor was fenced."
+      },
       "claim_session": {
         "type": "string",
         "pattern": "^[0-9a-f]{32}$",

@@ -140,6 +140,36 @@ def apply_plan(project_root: Path | str, plan: OperationPlan) -> Result:
     root = Path(project_root)
     try:
         with project_writer_lock(root):
+            from . import watchdog
+
+            if watchdog.carrier_present() and watchdog.current_carrier(root) is None:
+                return Result(ok=False, code="FENCED_LEASE_GENERATION",
+                              message="current healthy same-project lease required")
+            if watchdog.carrier_present():
+                from .board import parse_board, session_locked_out
+
+                board = parse_board((root / ".saipen/BOARD.md").read_text(encoding="utf-8-sig"))
+                for active in board["tickets"].values():
+                    # Only a LIVE foreign binding blocks; a lapsed one is the
+                    # ordinary takeover the claim operation itself performs.
+                    if (active["section"] == "## DOING"
+                            and session_locked_out(active, root)
+                            and not plan.semantic_request.get("continued_generation")):
+                        return Result(
+                            ok=False, code="UNSEATED_MUTATION",
+                            message=f"canonical claim of {active['id']} must precede mutation"
+                        )
+            if plan.semantic_request.get("continued_generation"):
+                from .board import parse_board
+                from .journal import Journal, decode_operation_record
+
+                decoded = decode_operation_record(root, Journal(root, plan.op_id).dir)
+                committed = decoded.get("ok") and decoded["record"].get("status") == "COMMITTED"
+                board = parse_board((root / ".saipen/BOARD.md").read_text(encoding="utf-8-sig"))
+                ticket = board["tickets"].get(plan.semantic_request["ticket"], {})
+                if not committed and not watchdog.can_continue_claim(root, ticket):
+                    return Result(ok=False, code="TICKET_NOT_WORKABLE",
+                                  message="predecessor continuation proof changed before APPLY")
             written = {t.path for t in plan.targets}
             # WRITE CAS only for targets (their own before_hash also covers
             # them); everything else the plan READ is a READ-ONLY dependency

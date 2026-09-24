@@ -71,6 +71,8 @@ COMPACTION_DISPOSITION = {
     # answer would silently become "unbound". It is 32 hex characters, so it
     # costs the live line nothing worth reclaiming.
     "claim_session": "inline",
+    "claim_run": "inline",
+    "claim_generation": "inline",
     "closure_cohort": "inline",
     "closure_mode": "inline",
     "closure_paths": "tokenized",

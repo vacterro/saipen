@@ -746,6 +746,11 @@ def protocol_snapshot(
         snapshot["detail"] = detail
         return snapshot
 
+    from . import watchdog
+
+    if watchdog.carrier_present() and watchdog.current_carrier(root) is None:
+        return refuse("FENCED_LEASE_GENERATION", "current healthy same-project lease required")
+
     state_text = _read_text_bounded(root / ".saipen" / "STATE.md", _STATE_READ_LIMIT)
     if state_text is None:
         return refuse("PROTOCOL_STATE_INVALID", "STATE.md missing or beyond read bound")
@@ -918,6 +923,8 @@ def protocol_snapshot(
                     else "this host session is not the one that claimed it"
                 )
                 snapshot["route"] = ENTRY_COMMAND
+                if watchdog.can_continue_claim(root, ticket, session_id):
+                    snapshot["route"] = f"saipen claim {ticket['id']}"
                 return refuse(
                     "UNSEATED_MUTATION",
                     f"live Work {ticket['id']} is claimed by {owner!r} in another "

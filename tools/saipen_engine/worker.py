@@ -79,6 +79,7 @@ def take_authority(
     now: _dt.datetime | None = None,
     suspect_after: float = 30.0,
     expire_after: float = 120.0,
+    run_id: str = "",
 ) -> dict:
     """Acquire, adopt or replace -- whichever the supervisor's verdict allows.
 
@@ -102,7 +103,7 @@ def take_authority(
         }
     if name == supervisor.RUN_WORK:
         try:
-            lease = watchdog.acquire_lease(root, worker_id, now=now)
+            lease = watchdog.acquire_lease(root, worker_id, now=now, run_id=run_id)
         except RuntimeError as exc:
             return {"ok": False, "code": str(exc), "verdict": name}
         return {
@@ -118,6 +119,7 @@ def take_authority(
             now=now,
             suspect_after=suspect_after,
             expire_after=expire_after,
+            run_id=run_id,
         )
         if not replaced["ok"]:
             return {**replaced, "verdict": name}
@@ -412,8 +414,19 @@ def _run_generation(
                     fenced = True
                     _kill_tree(proc)
                     break
-                watchdog.heartbeat(root, worker_id, generation)
-                last_beat = now
+                try:
+                    watchdog.heartbeat(root, worker_id, generation)
+                except RuntimeError:
+                    fenced = True
+                    _kill_tree(proc)
+                    break
+                except OSError:
+                    # The lease file stayed contended past the watchdog's own
+                    # retry. A missed beat never grants a lease; beat again on
+                    # the next poll.
+                    pass
+                else:
+                    last_beat = now
                 current = _progress_marker(root)
                 if current != marker:
                     marker = current
@@ -602,7 +615,8 @@ def _supervise(
             sleep(heartbeat_every)
             continue
         authority = take_authority(
-            root, worker_id, suspect_after=suspect_after, expire_after=expire_after
+            root, worker_id, suspect_after=suspect_after, expire_after=expire_after,
+            run_id=run_id,
         )
         if not authority["ok"]:
             return report(str(authority.get("code")), str(authority.get("reason") or ""))

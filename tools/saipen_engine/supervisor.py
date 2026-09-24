@@ -398,6 +398,7 @@ def replace_worker(
     now: _dt.datetime | None = None,
     suspect_after: float = 30.0,
     expire_after: float = 120.0,
+    run_id: str = "",
 ) -> dict:
     """Fence the expired generation, then acquire its successor. Never steals.
 
@@ -429,7 +430,7 @@ def replace_worker(
     except RuntimeError as exc:
         return {"ok": False, "code": str(exc), "lease": status.as_dict()}
     try:
-        payload = watchdog.acquire_lease(root, new_worker_id, now=moment)
+        payload = watchdog.acquire_lease(root, new_worker_id, now=moment, run_id=run_id)
     except RuntimeError as exc:
         return {"ok": False, "code": str(exc), "lease": status.as_dict()}
     return {

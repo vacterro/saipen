@@ -830,6 +830,7 @@ def _claim_fields_in_place(
     *,
     enforce_cap: bool = True,
     session_binding: str | None = None,
+    run_witnesses: dict[str, str] | None = None,
 ) -> str:
     """Surgically set/overwrite owner/claim_time on the EXISTING DOING ticket
     line in place -- no second ticket, no duplicated fields (P0#2 adoption).
@@ -852,10 +853,19 @@ def _claim_fields_in_place(
         raise ValueError(f"{ticket_id} is not a ## DOING ticket")
     raw = ticket["raw"]
     new = raw
+    if run_witnesses is None and session_binding != ticket["fields"].get("claim_session"):
+        run_witnesses = {}
     if session_binding:
         new = set_ticket_field(new, "claim_session", session_binding, enforce_cap=enforce_cap)
     else:
         new = remove_ticket_field(new, "claim_session")
+    if run_witnesses is not None:
+        from .watchdog import CLAIM_WITNESSES
+
+        for key in CLAIM_WITNESSES:
+            new = remove_ticket_field(new, key)
+        for key, value in run_witnesses.items():
+            new = set_ticket_field(new, key, value, enforce_cap=enforce_cap)
     for key, value in fields.items():
         new = set_ticket_field(new, key, value, enforce_cap=enforce_cap)
     if enforce_cap:
@@ -1062,6 +1072,12 @@ def _plan_claim(
     if ticket_id not in tickets:
         return _refuse("TICKET_NOT_FOUND", f"{ticket_id} not on the board", ticket=ticket_id)
     ticket = tickets[ticket_id]
+    from . import watchdog
+
+    if watchdog.carrier_present() and watchdog.current_carrier(root) is None:
+        return _refuse("FENCED_LEASE_GENERATION", "current healthy same-project lease required")
+    witnesses = watchdog.claim_witnesses(root)
+    continued = watchdog.can_continue_claim(root, ticket)
     # T-1326: readable legacy rows may be oversized.  Compact the historical
     # projection before any normal claim mutation; the detail targets join the
     # same OperationPlan below, so no orphan reference can be accepted.
@@ -1104,6 +1120,19 @@ def _plan_claim(
     )
 
     if section == "## DOING":
+        # Only this journaled claim operation may transfer a predecessor's
+        # LIVE binding. The shared seat/admission checks remain strict until
+        # the successor's claim has actually committed. A lapsed claim keeps
+        # the ordinary takeover route, whichever run or window stamped it.
+        from .board import session_locked_out
+
+        if (watchdog.carrier_present() and not continued
+                and session_locked_out(ticket, root, instant)):
+            return _refuse(
+                "TICKET_NOT_WORKABLE", "no proven same-run fenced predecessor", ticket=ticket_id
+            )
+        if continued:
+            cs = "FOREIGN_STALE"
         # In-place adoption / lease refresh -- never a second ticket or
         # duplicated fields (P0#2 / CORE § 1.4 stale/unclaimed adoption).
         if cs == ownership.FOREIGN_LIVE:
@@ -1128,6 +1157,7 @@ def _plan_claim(
             new_board = _claim_fields_in_place(
                 board_text, ticket_id, {"claim_time": utc},
                 session_binding=host_session_binding(root),
+                run_witnesses=witnesses,
             )
             errors = validate_texts(
                 docs["state"].text_norm,
@@ -1187,7 +1217,12 @@ def _plan_claim(
                 "crashed predecessor) before claiming",
                 ticket=ticket_id,
             )
-        if cs == "FOREIGN_STALE":
+        if continued:
+            _msg = (f"claimed via SAIOPS -- continued fenced generation "
+                    f"{ticket['fields']['claim_generation']} -> "
+                    f"{witnesses['claim_generation']} in run {witnesses['claim_run']}; "
+                    f"owner {agent}")
+        elif cs == "FOREIGN_STALE":
             _old_owner = (ticket["fields"].get("owner") or "").strip()
             _prior_claim = (ticket["fields"].get("claim_time") or "").strip()
             _msg = (
@@ -1203,6 +1238,7 @@ def _plan_claim(
         new_board = _claim_fields_in_place(
             board_text, ticket_id, {"owner": agent, "claim_time": utc},
             session_binding=host_session_binding(root),
+            run_witnesses=witnesses,
         )
         resume_in_place = (
             state.get("task") == ticket_id and state.get("phase") in phases.TICKET_BEARING_PHASES
@@ -1246,6 +1282,7 @@ def _plan_claim(
                 "agent": agent,
                 "explicit": explicit,
                 "adopt": True,
+                "continued_generation": continued,
             },
             _docs_preconditions(docs, "state", "board", "log"),
             targets,
@@ -1259,6 +1296,7 @@ def _plan_claim(
                     state.get("next_action") if resume_in_place else f"PHASE SCOUT {ticket_id}"
                 ),
                 "adopted": True,
+                "continued_generation": continued,
                 "resumed_in_place": resume_in_place,
             },
             op_id=op_id,
@@ -1358,6 +1396,7 @@ def _plan_claim(
                 agent,
                 utc,
                 session_binding=host_session_binding(root),
+                run_witnesses=witnesses,
                 enforce_cap=False,
             ),
             [ticket_id],
@@ -1421,6 +1460,7 @@ def _claim_move(
     session_binding: str | None = None,
     *,
     enforce_cap: bool = True,
+    run_witnesses: dict[str, str] | None = None,
 ) -> str:
     """Surgical claim move: target ticket TODO -> DOING with [/] owner.
 
@@ -1456,6 +1496,12 @@ def _claim_move(
         marked = set_ticket_field(marked, "claim_session", session_binding, enforce_cap=enforce_cap)
     else:
         marked = remove_ticket_field(marked, "claim_session")
+    from .watchdog import CLAIM_WITNESSES
+
+    for key in CLAIM_WITNESSES:
+        marked = remove_ticket_field(marked, key)
+    for key, value in (run_witnesses or {}).items():
+        marked = set_ticket_field(marked, key, value, enforce_cap=enforce_cap)
     out.insert(doing_idx + 1, marked + "\n")
     return "".join(out)
 
@@ -1807,7 +1853,7 @@ def _plan_attempt(
         # predecessor's claim. Recovery closes an episode, not a new claim.
         tick_raw = _tickets[task]["raw"]
         released = tick_raw
-        for field in ("owner", "claim_time", "claim_session"):
+        for field in ("owner", "claim_time", "claim_session", "claim_run", "claim_generation"):
             released = remove_ticket_field(released, field)
         new_board = new_board.replace(tick_raw, released, 1)
     errors = validate_texts(
@@ -2622,14 +2668,18 @@ def _plan_handback(
             board_text,
             holder_id,
             {},
-            remove=("owner", "claim_time", "claim_session"),
+            remove=("owner", "claim_time", "claim_session", "claim_run", "claim_generation"),
             enforce_cap=False,
         )
         board_text = _move_ticket(
             board_text, parked_id, "## DOING", "[/]", "resume", "", enforce_cap=False
         )
         claim = {"owner": agent, "claim_time": utc}
+        from .watchdog import claim_witnesses, CLAIM_WITNESSES
+
+        claim.update(claim_witnesses(root) if binding else {})
         remove = [
+            *CLAIM_WITNESSES,
             "blocker",
             "blocker_scope",
             "blocked_on",
@@ -3669,7 +3719,9 @@ def _plan_finish_ticket(
                 # three claim fields leave together; the previous owner is
                 # preserved as historical attribution in the resume event.
                 claim_fields = {}
-                remove_fields += ["owner", "claim_time", "claim_session"]
+                remove_fields += [
+                    "owner", "claim_time", "claim_session", "claim_run", "claim_generation"
+                ]
             closed = _ticket_fields_in_place(
                 closed,
                 parent_tid,

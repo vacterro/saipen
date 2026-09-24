@@ -357,8 +357,12 @@ def start_work(
         ticket_move,
         user_request,
     )
+    from . import watchdog
 
     root = Path(project_root)
+    if watchdog.carrier_present() and watchdog.current_carrier(root) is None:
+        return _refuse("FENCED_LEASE_GENERATION", "current healthy same-project lease required")
+
     needs: list[str] = []
     linked_work = None
     explicit_supersedes = None
@@ -509,6 +513,15 @@ def start_work(
     # owner/STATE split this caller had just proposed to create.
     state, board, problem = _snapshot(root)
     if state is not None and board is not None:
+        from . import watchdog
+        from .operations import apply_claim
+
+        active = board["tickets"].get(state.get("task"), {})
+        if watchdog.can_continue_claim(root, active):
+            adopted = apply_claim(root, active["id"], actor)
+            if not adopted.ok:
+                return _refuse(adopted.code, adopted.message, **identity)
+            state, board, problem = _snapshot(root)
         seat = ownership.classify_active_ownership(
             state, board["tickets"], actor, root=root
         )
