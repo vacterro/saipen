@@ -400,6 +400,7 @@
    "search",
    "validate",
    "claim",
+   "handoff",
    "transition",
    "checkpoint",
    "source",
@@ -843,6 +844,7 @@
   }
  },
  "error_codes": [
+  "HANDOFF_AUTHORITY_REQUIRED",
   "STALE_STATE",
   "TICKET_NOT_FOUND",
   "TICKET_NOT_WORKABLE",

@@ -1006,12 +1006,24 @@ def _runtime(
         )
         return 1
 
-    payload = {"ok": True, "code": "RUNTIME", **projection, "strategy": strategy}
+    _actor, actor_source = _start_actor(project_root)
+    payload = {
+        "ok": True,
+        "code": "RUNTIME",
+        **projection,
+        "actor_source": actor_source,
+        "strategy": strategy,
+    }
     if as_json:
         _emit(payload, True)
         return 0
     print("SAIPEN runtime (read-only)")
-    print(f"agent seat : {projection['agent']}")
+    seat_note = (
+        " (inherited from STATE.agent; SAIPEN_AGENT unset)"
+        if actor_source == "inherited"
+        else f" ({actor_source})"
+    )
+    print(f"agent seat : {projection['agent']}{seat_note}")
     print(f"metadata   : {projection['runtime_info_source']}")
     for field in ("harness", "provider", "model", "variant"):
         print(f"{field:<10} : {projection[field] or 'UNKNOWN'}")
@@ -3388,7 +3400,7 @@ def _start_actor(project_root: Path) -> tuple[str, str]:
         return _AGENT_OVERRIDE, "explicit"
     carrier = (os.environ.get("SAIPEN_AGENT") or "").strip()
     if carrier:
-        return carrier, "launcher"
+        return carrier, "explicit"
     inherited = _agent_for(project_root)
     return inherited, ("inherited" if inherited != AGENT else "default")
 
@@ -6760,6 +6772,11 @@ def _emit(payload: dict, as_json: bool) -> None:
         value = payload.get(key)
         if value is not None and value != []:
             print(f"{key}: {value}")
+    if payload.get("actor_source") == "inherited" and payload.get("actor"):
+        print(
+            f"actor: {payload['actor']} (inherited from STATE.agent; set SAIPEN_AGENT "
+            "or pass --agent to name the agent actually working)"
+        )
     milestone = payload.get("milestone")
     if isinstance(milestone, dict) and milestone.get("current"):
         print(f"CHECKPOINT: {milestone['current']}  {milestone.get('label') or ''}".rstrip())
@@ -8677,6 +8694,7 @@ def main(argv: list[str] | None = None) -> int:
             "continue|status|next|runtime [--prelaunch [--adapter ID] "
             "[--no-resync]|--bootstrap|--check-freshness]|search [--hex HEX]|"
             "validate|recover|fleet preflight|scan|prepare|claim <T-###> [--explicit]|"
+            "handoff <T-###> --to <agent> [--authority SRC-###]|"
             "transition <PHASE> [T-###] [text]|checkpoint <TAXONOMY> "
             "[T-###] [text]|goal <text>|user-request <text> [--priority P#] "
             "[--verify <text>] [--needs T-X,T-Y]|ticket add <PRIORITY> <text> --verify <proof> "
@@ -9240,6 +9258,35 @@ def main(argv: list[str] | None = None) -> int:
             else apply_claim(
                 project_root, claim_rest[0], _agent_for(project_root), explicit=claim_explicit
             )
+        )
+        _emit(result.to_dict(), as_json)
+        return 0 if result.ok else 1
+    if command == "handoff":
+        from saipen_engine.operations import handoff_claim
+
+        opts, positional, option_error = _parse_value_options(
+            args[1:], {"--to": "to", "--authority": "authority"}
+        )
+        if option_error or len(positional) != 1 or not opts.get("to"):
+            _emit(
+                {
+                    "ok": False,
+                    "code": "VALIDATION_FAILED",
+                    "detail": option_error
+                    or "handoff takes <T-###> --to <agent> [--authority SRC-###]",
+                    "canonical_next_command": "saipen handoff <T-###> --to <agent>",
+                },
+                as_json,
+            )
+            return 2
+        if not dry_run and _negotiate_capability(project_root) == "read-only":
+            return _capability_refusal(as_json)
+        actor, actor_source = _start_actor(project_root)
+        result = handoff_claim(
+            project_root, actor, positional[0], opts["to"],
+            actor_source=actor_source,
+            authority=opts.get("authority"),
+            dry_run=dry_run,
         )
         _emit(result.to_dict(), as_json)
         return 0 if result.ok else 1

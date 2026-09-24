@@ -1140,8 +1140,12 @@ def _plan_claim(
                 "TICKET_NOT_WORKABLE",
                 f"{ticket_id} is actively claimed by another agent "
                 f"({ticket['fields'].get('owner', '')}); a live "
-                f"foreign claim cannot be taken over",
+                f"foreign claim cannot be taken over. An operator-ordered "
+                f"switch is a handoff the owner or an operator receipt grants",
                 ticket=ticket_id,
+                canonical_next_command=(
+                    f"saipen handoff {ticket_id} --to {agent} --authority <SRC-###>"
+                ),
             )
         if cs == "INVALID":
             return _refuse(
@@ -7002,6 +7006,16 @@ def authority_capture(
             "authority capture needs the exact UTF-8 capsule bytes from --file or --hex",
         )
     problem = _ret.capsule_problem(text)
+    if problem and not _ret.authority_grants(text).problems:
+        from . import handoff as _handoff
+
+        handed = _handoff.handoff_grants(text)
+        if handed.problems:
+            problem = "; ".join(handed.problems) + " -- " + _handoff.grammar_hint()
+        elif handed.grants:
+            problem = None
+        else:
+            problem += "; or a claim handoff: " + _handoff.grammar_hint()
     if problem:
         return _refuse("INVALID_AUTHORITY_CAPTURE", problem)
     digest = hashlib.sha256(text.encode("utf-8")).hexdigest()
@@ -7022,10 +7036,16 @@ def authority_capture(
                 "targets": [".saipen/intake/active (source receipt)"],
             },
         )
+    from . import operator_task
+
+    provenance = operator_task.witness(text)
+    if "code" in provenance:
+        return _refuse(provenance["code"], provenance["detail"])
     captured = _intake.capture(
         root,
         text,
         source_kind="user_instruction",
+        request_provenance=provenance,
         projection_policy=_intake.PROJECTION_AUTHORITY_ONLY,
     )
     if not captured.get("ok"):
@@ -8803,6 +8823,7 @@ def handover_agent(
     allow_dead_home: bool = False,
     explicit: bool = False,
     now: datetime.datetime | None = None,
+    reason: str | None = None,
 ) -> Result:
     """The ONE explicit agent-handover operation (T-1006).
 
@@ -8907,6 +8928,8 @@ def handover_agent(
     pivot_msg = f"agent handover {old_label} -> {new_agent}"
     if claim_transferred:
         pivot_msg += f" (active {claim_transferred} claim transferred)"
+    if reason:
+        pivot_msg += f" -- {reason}"
     pivot_event, pivot_line = _event_line(
         docs, log_tail, "DEC", claim_transferred, new_agent, pivot_msg, now, op_id
     )
@@ -8967,6 +8990,101 @@ def handover_agent(
     if dry_run:
         return _render_plan(plan)
     return apply_plan(root, plan)
+
+
+_SEAT_ID_RE = re.compile(r"[A-Za-z0-9][A-Za-z0-9._:-]{0,63}")
+
+
+def handoff_claim(
+    project_root: Path | str,
+    actor: str,
+    ticket_id: str,
+    to_agent: str,
+    *,
+    actor_source: str = "explicit",
+    authority: str | None = None,
+    dry_run: bool = False,
+) -> Result:
+    """`saipen handoff T-### --to AGENT`: move a LIVE claim on purpose (T-1487).
+
+    A plain `claim` never takes a live foreign claim, and that stays. This is
+    the deliberate case the lease wait cannot tell apart from a vanished
+    owner: the owner hands its own Work on, or the operator switches agents.
+    Authority is the owner itself -- under a DECLARED identity (`--agent` or
+    the launcher's `SAIPEN_AGENT`), never one inherited from STATE.agent,
+    which is exactly how SAIMAIL T-108 was mislabelled -- or an ACTIVE
+    operator receipt granting this exact ticket to this exact agent. The
+    move itself is `handover_agent(explicit=True)`: same ticket, same phase,
+    one LOG->BOARD->STATE transaction whose DEC names the authority.
+    """
+    from . import handoff as _handoff
+
+    root = Path(project_root)
+    ticket_id = str(ticket_id or "").strip().upper()
+    to_agent = str(to_agent or "").strip()
+    route = f"saipen handoff {ticket_id or '<T-###>'} --to {to_agent or '<agent>'}"
+    if not re.fullmatch(r"T-\d+", ticket_id):
+        return _refuse(
+            "VALIDATION_FAILED",
+            f"handoff needs the active ticket as T-###, got {ticket_id!r}",
+            canonical_next_command="saipen handoff <T-###> --to <agent>",
+        )
+    if not _SEAT_ID_RE.fullmatch(to_agent):
+        return _refuse(
+            "VALIDATION_FAILED",
+            "handoff needs --to <agent>: the receiving seat id",
+            canonical_next_command=f"saipen handoff {ticket_id} --to <agent>",
+        )
+    _docs, state, board, _log_tail = _read(root)
+    ticket = board["tickets"].get(ticket_id)
+    if ticket is None:
+        return _refuse("TICKET_NOT_FOUND", f"{ticket_id} is not on the board", ticket=ticket_id)
+    if ticket.get("section") != "## DOING" or state.get("task") != ticket_id:
+        return _refuse(
+            "TICKET_NOT_WORKABLE",
+            f"{ticket_id} is not the active DOING Work; a handoff moves the live claim "
+            "of the active ticket only",
+            ticket=ticket_id,
+        )
+    owner = str(ticket["fields"].get("owner") or "").strip()
+    if owner == to_agent:
+        return _refuse(
+            "VALIDATION_FAILED",
+            f"{ticket_id} is already claimed by {to_agent!r}; nothing to hand off",
+            ticket=ticket_id,
+        )
+    declared = actor_source in ("explicit", "launcher")
+    if authority:
+        authority = authority.strip().upper()
+        problem = _handoff.authority_error(root, authority, ticket=ticket_id, agent=to_agent)
+        if problem:
+            return _refuse(
+                "HANDOFF_AUTHORITY_REQUIRED",
+                problem,
+                ticket=ticket_id,
+                canonical_next_command=f"{route} --authority <SRC-###>",
+            )
+        basis = f"operator authority {authority}"
+    elif owner and actor == owner and declared:
+        basis = f"voluntary, by its owner {owner}"
+    else:
+        who = f"{actor!r} (inherited from STATE.agent)" if not declared else repr(actor)
+        return _refuse(
+            "HANDOFF_AUTHORITY_REQUIRED",
+            f"{ticket_id} is claimed by {owner or 'nobody'!r}; the caller is {who}. Only "
+            f"the owner under a declared identity, or an ACTIVE operator receipt that "
+            f"grants `{ticket_id} -> {to_agent}`, can hand it on -- "
+            + _handoff.grammar_hint(),
+            ticket=ticket_id,
+            canonical_next_command=f"{route} --authority <SRC-###>",
+        )
+    return handover_agent(
+        root,
+        to_agent,
+        dry_run=dry_run,
+        explicit=True,
+        reason=f"handoff of {ticket_id}, {basis}",
+    )
 
 
 GOAL_WAVE_CAP = 3

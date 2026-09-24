@@ -203,6 +203,7 @@
     "stop": "EXECUTION",
     "launch": "EXECUTION",
     "autonomy": "DIAGNOSTIC",
-    "gpu": "DIAGNOSTIC"
+    "gpu": "DIAGNOSTIC",
+    "handoff": "EXECUTION"
   }
 }
