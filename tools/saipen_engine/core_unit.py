@@ -24,12 +24,14 @@ This module is that tie, in three parts:
 
 from __future__ import annotations
 
+import contextlib
 import datetime
 import hashlib
 import json
 import os
 import re
 import shutil
+import stat
 import subprocess
 import tempfile
 import time
@@ -514,6 +516,152 @@ def merge_shards(shards: list[dict]) -> dict:
     }
 
 
+#: T-1505. A run's sandboxes are stamped with their owner, reclaimed in its own
+#: `finally`, and swept by a later run when the owner died first. Measured
+#: 2026-09-24: 24 `saipen-core-unit-*` directories (4 runs x 6 shards, about
+#: 40 MB each, every one a full copy of `.saipen`) had accumulated in %TEMP%;
+#: what survived in each was the read-only object store of the copied saiwiki
+#: kitchen clone, which a plain `shutil.rmtree` cannot remove on Windows.
+SANDBOX_PREFIX = "saipen-core-unit-"
+SANDBOX_OWNER = "owner.json"
+#: A sandbox without an owner stamp predates T-1505; reclaim it only this old.
+LEGACY_SANDBOX_AGE_S = 12 * 3600
+#: A just-exited shard can hold a handle for a moment on Windows.
+RECLAIM_ATTEMPTS = 5
+
+
+def pid_alive(pid: int) -> bool:
+    """Whether a process with this id is running (never raises)."""
+    if not isinstance(pid, int) or pid <= 0:
+        return False
+    if os.name == "nt":
+        import ctypes
+
+        kernel32 = ctypes.windll.kernel32
+        handle = kernel32.OpenProcess(0x1000, False, pid)  # QUERY_LIMITED_INFORMATION
+        if not handle:
+            return kernel32.GetLastError() == 5  # ACCESS_DENIED: exists, not ours
+        try:
+            code = ctypes.c_ulong()
+            if not kernel32.GetExitCodeProcess(handle, ctypes.byref(code)):
+                return True
+            return code.value == 259  # STILL_ACTIVE
+        finally:
+            kernel32.CloseHandle(handle)
+    try:
+        os.kill(pid, 0)
+    except ProcessLookupError:
+        return False
+    except PermissionError:
+        return True
+    return True
+
+
+def _unlink_writable(target: Path) -> None:
+    try:
+        os.unlink(target)
+    except PermissionError:
+        os.chmod(target, stat.S_IWRITE | stat.S_IREAD)
+        os.unlink(target)
+
+
+def reclaim(path: Path) -> bool:
+    """Remove one sandbox tree, read-only files included; True when it is gone.
+
+    `shutil.rmtree` stops at the first read-only file on Windows (WinError 5),
+    which is exactly what a copied git object store contains, and a handle a
+    lingering process holds (WinError 32) cannot be removed at all until that
+    process exits. Read-only entries are made writable and retried; a held
+    tree gets a few short retries and is then reported. The owner stamp goes
+    last and is put back if the directory itself cannot be removed, so a
+    later `sweep_stale_sandboxes` still recognises the tree as a sandbox.
+    """
+    path = Path(path)
+    stamp = path / SANDBOX_OWNER
+
+    def writable_retry(func, target, _exc):
+        try:
+            os.chmod(target, stat.S_IWRITE | stat.S_IREAD)
+            func(target)
+        except FileNotFoundError:
+            pass
+
+    for attempt in range(RECLAIM_ATTEMPTS):
+        if not path.exists():
+            return True
+        try:
+            saved = stamp.read_bytes() if stamp.is_file() else None
+        except OSError:
+            saved = None
+        with contextlib.suppress(OSError):
+            for child in list(path.iterdir()):
+                if child.name == SANDBOX_OWNER:
+                    continue
+                if child.is_dir() and not child.is_symlink():
+                    shutil.rmtree(child, onerror=writable_retry)
+                else:
+                    _unlink_writable(child)
+            if saved is not None:
+                _unlink_writable(stamp)
+            try:
+                path.rmdir()
+            except OSError:
+                if saved is not None and not stamp.exists():
+                    stamp.write_bytes(saved)
+                raise
+        if not path.exists():
+            return True
+        time.sleep(0.2 * (attempt + 1))
+    return not path.exists()
+
+
+def new_sandbox_root() -> Path:
+    """One owner-stamped `saipen-core-unit-*` directory under the temp root."""
+    root = Path(tempfile.mkdtemp(prefix=SANDBOX_PREFIX))
+    (root / SANDBOX_OWNER).write_text(
+        json.dumps({"pid": os.getpid(), "created": time.time()}), encoding="utf-8"
+    )
+    return root
+
+
+def sweep_stale_sandboxes(temp_root: Path | None = None, now: float | None = None) -> list[str]:
+    """Reclaim sandboxes whose owning run is gone; returns the names reclaimed.
+
+    Only direct children of the temp root named `saipen-core-unit-*` are
+    considered. A stamped one is stale when its owner pid is not running; an
+    unstamped one (pre-T-1505) only when it holds a `project/` sandbox and is
+    older than LEGACY_SANDBOX_AGE_S. Nothing outside those trees is touched.
+    """
+    base = Path(temp_root) if temp_root is not None else Path(tempfile.gettempdir())
+    now = time.time() if now is None else now
+    reclaimed: list[str] = []
+    try:
+        candidates = sorted(base.glob(SANDBOX_PREFIX + "*"))
+    except OSError:
+        return reclaimed
+    for candidate in candidates:
+        if not candidate.is_dir() or candidate.is_symlink():
+            continue
+        stale = False
+        try:
+            owner = json.loads((candidate / SANDBOX_OWNER).read_text(encoding="utf-8"))
+        except FileNotFoundError:
+            owner = None
+        except (OSError, ValueError):
+            continue
+        if isinstance(owner, dict):
+            stale = not pid_alive(owner.get("pid"))
+        elif owner is None:
+            try:
+                age = now - candidate.stat().st_mtime
+            except OSError:
+                continue
+            stale = (candidate / "project").is_dir() and age > LEGACY_SANDBOX_AGE_S
+        if stale and reclaim(candidate):
+            reclaimed.append(candidate.name)
+    return reclaimed
+
+
 def run_family(root: Path | str, *, timeout: int | None = None, jobs: int = 1) -> dict:
     """Run the declared family in a disposable copy; parse the COMPLETE output.
 
@@ -521,7 +669,6 @@ def run_family(root: Path | str, *, timeout: int | None = None, jobs: int = 1) -
     discovery runs as that many concurrent shards, each in its own copy of the
     one consistent snapshot, and every copy must carry the tested fingerprint.
     """
-    import contextlib
     from concurrent.futures import ThreadPoolExecutor
 
     from .test_runner import _ignore_copy
@@ -535,13 +682,12 @@ def run_family(root: Path | str, *, timeout: int | None = None, jobs: int = 1) -
     shape = shardable(declared_family.command) if int(jobs) > 1 else None
     count = int(jobs) if shape else 1
     started = time.monotonic()
-    with contextlib.ExitStack() as stack:
+    swept = sweep_stale_sandboxes()
+    tmps: list[Path] = []
+    try:
         # Each shard lives where the sequential run lives -- its own
         # `saipen-core-unit-*/project` -- so no test sees a longer path.
-        tmps = [
-            Path(stack.enter_context(tempfile.TemporaryDirectory(prefix="saipen-core-unit-")))
-            for _ in range(count)
-        ]
+        tmps = [new_sandbox_root() for _ in range(count)]
         sandboxes = [tmp / "project" for tmp in tmps]
         copy_tree_consistent(source, sandboxes[0], _ignore_copy)
         # The subject is what was copied, fingerprinted where it was tested:
@@ -570,8 +716,12 @@ def run_family(root: Path | str, *, timeout: int | None = None, jobs: int = 1) -
                     range(count),
                 ))
             run = merge_shards(shards)
+    finally:
+        leaked = [str(tmp) for tmp in tmps if not reclaim(tmp)]
     return {
         **run,
+        "sandboxes_swept": swept,
+        "sandboxes_leaked": leaked,
         "fingerprint": tested,
         "jobs": count,
         "duration_s": round(time.monotonic() - started, 1),
@@ -885,8 +1035,10 @@ def _evidence(root: Path, args) -> int:
     fingerprint = tree_fingerprint(root)
     written = None if args.fresh else reusable_record(root, fingerprint)
     reused = written is not None
+    leaked: list[str] = []
     if written is None:
         run = run_family(root, timeout=args.timeout, jobs=args.jobs)
+        leaked = run.get("sandboxes_leaked") or []
         keep_durations(root, run.get("module_durations_s") or {})
         # The record is the truth about the copy that ran, so it is kept either
         # way; a tree that drifted since the copy only loses the citation.
@@ -923,5 +1075,7 @@ def _evidence(root: Path, args) -> int:
             "reused": reused,
             "checkpoint": result.code,
             "checkpoint_detail": result.message or None,
+            # T-1505: a sandbox a process still held; a later run sweeps it.
+            "sandboxes_leaked": leaked,
         }
     )
