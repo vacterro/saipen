@@ -14,11 +14,18 @@ the per-request AUTO_RECALL seam. Nothing here types a second `cc`.
 
 Quality and efficiency are reported separately (SRC-106 section 13); nothing
 is folded into a score, and a result is evidence, never routing truth.
+
+The fixture's `saipen_home` is this checkout, so every generation imports the
+engine from its working tree as it is at that moment. The report therefore
+binds the source it tested (`source`, T-1511): the Git identity at launch, at
+every interim sample and at the end, and `integrity` STABLE / DRIFTED /
+UNMEASURED. An edit made and reverted between two samples is not observable.
 """
 
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import os
 import re
@@ -34,6 +41,7 @@ if str(TOOLS) not in sys.path:
     sys.path.insert(0, str(TOOLS))
 
 import test_t1363_zero_manual_entry as fixtures  # noqa: E402
+from freshness import FreshnessError, compute_source_identity  # noqa: E402
 from t1363_field_polygon import _git_worktree  # noqa: E402
 
 from saipen_engine import worker  # noqa: E402
@@ -41,6 +49,9 @@ from saipen_engine.board import parse_board  # noqa: E402
 from saipen_engine.operations import ticket_add  # noqa: E402
 
 OPENCODE = shutil.which("opencode")
+#: The checkout every generation imports the engine from (T-1511).
+SOURCE_ROOT = TOOLS.parent
+_SAIPEN_MEMORY = ".saipen/"
 
 #: Small bounded Work with executable acceptance. The same shapes and the
 #: same acceptance serve every model the soak is pointed at.
@@ -82,6 +93,96 @@ def _open_tickets(root: Path) -> int:
     )
 
 
+def _git_paths(root: Path, *args: str) -> list[str]:
+    done = subprocess.run(["git", "-C", os.fspath(root), *args], capture_output=True, check=True)
+    return [
+        path
+        for path in done.stdout.decode("utf-8", "surrogateescape").split("\0")
+        if path and not path.startswith(_SAIPEN_MEMORY)
+    ]
+
+
+def _delta_digests(root: Path) -> dict[str, str]:
+    """Working-tree delta from HEAD outside project memory: path -> sha256 of
+    the bytes a generation would import now, or "deleted"."""
+    paths = _git_paths(root, "diff", "--name-only", "-z", "--no-renames", "HEAD", "--")
+    paths += _git_paths(root, "ls-files", "-z", "--others", "--exclude-standard", "--")
+    digests: dict[str, str] = {}
+    for rel in sorted(set(paths)):
+        try:
+            digests[rel] = hashlib.sha256((root / rel).read_bytes()).hexdigest()
+        except FileNotFoundError:
+            digests[rel] = "deleted"
+    return digests
+
+
+def source_identity(root: Path) -> dict:
+    """The source a generation imports at this moment, or why it has no name.
+
+    `dirty` maps each changed path to its bytes' digest under the Git model;
+    the no-Git model fingerprints the whole tree and cannot name paths."""
+    try:
+        identity = compute_source_identity(root)
+        dirty = _delta_digests(root) if identity.discovery_model == "git-delta-v1" else None
+    except (FreshnessError, OSError, subprocess.SubprocessError) as exc:
+        return {"measured": False, "error": f"{type(exc).__name__}: {exc}"[:300]}
+    return {
+        "measured": True,
+        "source_head": identity.source_head,
+        "source_tree_fingerprint": identity.source_tree_fingerprint,
+        "dirty": dirty,
+    }
+
+
+def source_drift(root: Path, launch: dict, now: dict) -> dict:
+    """Compare two identities. `changed_paths` is None when drift is certain
+    but the paths cannot be named."""
+    if not (launch.get("measured") and now.get("measured")):
+        return {"integrity": "UNMEASURED", "changed_paths": []}
+    key = ("source_head", "source_tree_fingerprint")
+    if all(launch[name] == now[name] for name in key):
+        return {"integrity": "STABLE", "changed_paths": []}
+    before, after = launch.get("dirty"), now.get("dirty")
+    if before is None or after is None:
+        return {"integrity": "DRIFTED", "changed_paths": None}
+    changed = {path for path in before.keys() | after.keys() if before.get(path) != after.get(path)}
+    if launch["source_head"] != now["source_head"]:
+        try:
+            changed.update(_git_paths(
+                root, "diff", "--name-only", "-z", "--no-renames",
+                launch["source_head"], now["source_head"], "--",
+            ))
+        except (OSError, subprocess.SubprocessError):
+            return {"integrity": "DRIFTED", "changed_paths": None}
+    return {"integrity": "DRIFTED", "changed_paths": sorted(changed) or None}
+
+
+def source_report(root: Path, launch: dict, end: dict, samples: list[dict],
+                  elapsed: float) -> dict:
+    """STABLE only when the end matches the launch and no sample saw drift;
+    a drift seen by any sample stays DRIFTED even if the tree later returned."""
+    final = source_drift(root, launch, end)
+    drifted = [sample for sample in samples if sample["integrity"] == "DRIFTED"]
+    if final["integrity"] == "DRIFTED":
+        drifted.append({**final, "elapsed_seconds": round(elapsed, 1)})
+    changed: set[str] | None = set()
+    for sample in drifted:
+        if sample["changed_paths"] is None:
+            changed = None
+        elif changed is not None:
+            changed.update(sample["changed_paths"])
+    return {
+        "root": str(root),
+        "at_launch": launch,
+        "at_end": end,
+        "integrity": "DRIFTED" if drifted else final["integrity"],
+        "changed_paths": sorted(changed) if changed is not None else None,
+        "first_drift_elapsed_seconds": drifted[0]["elapsed_seconds"] if drifted else None,
+        "samples": len(samples),
+        "unmeasured_samples": sum(1 for s in samples if s["integrity"] == "UNMEASURED"),
+    }
+
+
 def supplier(root: Path, minimum: int, stop: threading.Event, log: list[dict]) -> None:
     """Keep bounded Work available for a long soak: one new small task
     whenever fewer than `minimum` are open. Same shape, same acceptance style,
@@ -105,9 +206,17 @@ def supplier(root: Path, minimum: int, stop: threading.Event, log: list[dict]) -
 
 
 def interim(root: Path, out: Path, started: float, kills: list, supplied: list,
-            stop: threading.Event, every: float) -> None:
+            stop: threading.Event, every: float, source_launch: dict | None = None,
+            source_samples: list | None = None) -> None:
     """Durable evidence while the soak runs: a driver death loses nothing."""
     while not stop.wait(every):
+        source = None
+        if source_launch is not None:
+            sample = source_drift(SOURCE_ROOT, source_launch, source_identity(SOURCE_ROOT))
+            sample["elapsed_seconds"] = round(time.monotonic() - started, 1)
+            if source_samples is not None:
+                source_samples.append(sample)
+            source = {"integrity": sample["integrity"], "changed_paths": sample["changed_paths"]}
         try:
             board = parse_board((root / ".saipen" / "BOARD.md").read_text(encoding="utf-8"))
             sections: dict[str, int] = {}
@@ -126,12 +235,13 @@ def interim(root: Path, out: Path, started: float, kills: list, supplied: list,
                 if live.exists() else None,
                 "deliberate_kills": list(kills),
                 "supplied": len(supplied),
+                "source": source,
             }
             with (out / "interim.jsonl").open("a", encoding="utf-8") as handle:
                 handle.write(json.dumps(snapshot) + "\n")
         except (OSError, ValueError) as exc:
             with (out / "interim.jsonl").open("a", encoding="utf-8") as handle:
-                handle.write(json.dumps({"error": str(exc)[:200]}) + "\n")
+                handle.write(json.dumps({"error": str(exc)[:200], "source": source}) + "\n")
 
 
 def killer(root: Path, kill_at: list[float], started: float, log: list[dict]) -> None:
@@ -260,6 +370,12 @@ def main() -> int:
         return 2
     out = Path(args.out)
     out.mkdir(parents=True, exist_ok=True)
+    source_launch = source_identity(SOURCE_ROOT)
+    source_samples: list[dict] = []
+    (out / "source.json").write_text(
+        json.dumps({"root": str(SOURCE_ROOT), "at_launch": source_launch}, indent=2),
+        encoding="utf-8",
+    )
     root = build_project()
     (out / "project.txt").write_text(str(root), encoding="utf-8")
     started_wall = time.time()
@@ -273,13 +389,15 @@ def main() -> int:
         while moment < args.wall_seconds:
             schedule.append(moment)
             moment += args.kill_every
+    sampler = threading.Thread(
+        target=interim,
+        args=(root, out, started, kills, supplied, stop, args.interim_every,
+              source_launch, source_samples),
+        daemon=True,
+    )
     threads = [
         threading.Thread(target=killer, args=(root, schedule, started, kills), daemon=True),
-        threading.Thread(
-            target=interim,
-            args=(root, out, started, kills, supplied, stop, args.interim_every),
-            daemon=True,
-        ),
+        sampler,
     ]
     if args.supply_min_open > 0:
         threads.append(threading.Thread(
@@ -300,7 +418,11 @@ def main() -> int:
         keep_output_tail=1500,
     )
     stop.set()
+    sampler.join(timeout=120.0)
     elapsed = time.monotonic() - started
+    source = source_report(
+        SOURCE_ROOT, source_launch, source_identity(SOURCE_ROOT), list(source_samples), elapsed
+    )
     report = {
         "supplied_tickets": supplied,
         "schema_version": 1,
@@ -316,10 +438,12 @@ def main() -> int:
         "quality": survey(root),
         "efficiency": efficiency(result),
         "manual_continue_count": 0,
+        "source": source,
     }
     (out / "report.json").write_text(json.dumps(report, indent=2), encoding="utf-8")
-    print(json.dumps({k: report[k] for k in ("elapsed_seconds", "quality", "efficiency")},
-                     indent=2))
+    summary = {k: report[k] for k in ("elapsed_seconds", "quality", "efficiency")}
+    summary["source_integrity"] = source["integrity"]
+    print(json.dumps(summary, indent=2))
     return 0
 
 
