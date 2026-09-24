@@ -40,6 +40,10 @@ The goal is not nostalgia as a costume. The goal is clarity that happens to look
 ## Iron laws
 
 1. **Verdana, non-antialiased, everywhere, `!important`.** No subpixel smoothing. Sizes only 10/11/12/14/16px.
+   AA is always OFF, a hard invariant: every glyph pixel is text or background
+   colour (no grey or ClearType fringe, no half-pixel edge), whatever ClearType,
+   font smoothing or driver/browser/toolkit defaults say. Override them for
+   our own text only; never change the system setting.
 2. **Zero rounded corners, zero shadow, zero gradients, zero blur, zero transparency, zero animation, zero transition.**
 3. **Depth is 2px bevel only.** Raised and sunken states are the only depth language allowed.
 4. **Compact by default.** Fit **640x540 CSS pixels** without horizontal
@@ -262,6 +266,25 @@ a, a:link, a:visited {
 - Use weight sparingly. The interface should read through spacing, borders, and layout first, not font tricks.
 - Keep line length short. Dense blocks of text are harder to scan than dense blocks of controls.
 
+### Non-antialiased text
+
+A font name or CSS hint is not compliance: set the renderer's AA control
+before any UI, early dialogs included.
+- Qt: `QFont.StyleStrategy.NoAntialias` on the app font.
+- WinForms/GDI: `NONANTIALIASED_QUALITY`, `SingleBitPerPixelGridFit`; never
+  `SystemDefault`, ClearType or `AntiAlias`.
+- Web: CSS cannot guarantee it on Windows; pixel-grid webfont at native size,
+  or report the limit.
+- Other: the renderer's AA control, or report there is none.
+
+No re-blur: DPI-aware, no bitmap stretch, whole-number scale and geometry,
+pixel assets `image-rendering: pixelated`.
+
+Proof is rendered pixels, not flags: real screen, real engine, system
+smoothing ON, no shades beyond the tokens (smoothing adds hundreds). The
+regression renders and fails without the AA control; a flag check is
+secondary.
+
 ## Layout rules
 
 - Padding is usually 1-2px inside controls, 4px in groups, 8px between sections, and 12-16px at outer margins.
@@ -388,7 +411,9 @@ Before a screen is considered finished:
 
 - No rounded corners.
 - No animation frame.
-- Verdana renders non-antialiased.
+- Text passes the *Non-antialiased text* proof.
+- No platform default leaks: scrollbar tracks, focus rectangles, dither and
+  stock colours (pure yellow, red, white) are token-painted or gone.
 - The interface fits 640x540 CSS pixels with no horizontal scroll on the
   page. Checked by narrowing the viewport to 640 and looking for a bottom
   scrollbar -- not by trusting `overflow`, which can only hide one.
