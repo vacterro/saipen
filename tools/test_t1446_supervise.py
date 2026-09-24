@@ -503,6 +503,28 @@ class ProviderFailureTests(SuperviseFixture):
         )
         self.assertEqual(set(supervisor.FAILURE_POLICY), set(supervisor.FAILURE_CLASSES))
 
+    def test_a_retryable_host_outage_is_retried_not_unknown(self):
+        # T-1520: generations 42-43 of the T-1446 field run, verbatim. The
+        # refused local provider stopped the run on UNKNOWN twice.
+        field = (
+            '{"name": "APIError", "data": {"message": "Cannot connect to API: Unable to '
+            'connect. Is the computer able to access the url?", "isRetryable": true, '
+            '"metadata": {"url": "http://localhost:20128/v1/chat/completions"}}}'
+        )
+        policy = supervisor.FAILURE_POLICY
+        self.assertEqual(supervisor.classify_failure(1, field), supervisor.NETWORK_UNAVAILABLE)
+        self.assertEqual(policy[supervisor.NETWORK_UNAVAILABLE], "BACKOFF_RETRY")
+        retryable = '{"name": "APIError", "data": {"message": "odd", "isRetryable": true}}'
+        self.assertEqual(supervisor.classify_failure(1, retryable), supervisor.PROVIDER_UNAVAILABLE)
+        self.assertEqual(policy[supervisor.PROVIDER_UNAVAILABLE], "BACKOFF_RETRY")
+        final = '{"name": "APIError", "data": {"message": "odd", "isRetryable": false}}'
+        self.assertEqual(supervisor.classify_failure(1, final), supervisor.UNKNOWN_FAILURE)
+        # A named class still wins over the host's retryable flag.
+        quota = '{"data": {"message": "insufficient_quota", "isRetryable": true}}'
+        self.assertEqual(supervisor.classify_failure(1, quota), supervisor.QUOTA_EXHAUSTED)
+        auth = '{"data": {"message": "401 Unauthorized", "isRetryable": true}}'
+        self.assertEqual(supervisor.classify_failure(1, auth), supervisor.AUTH_FAILED)
+
 
 class AuthorityTests(SuperviseFixture):
     def test_a_healthy_foreign_worker_is_awaited_never_stolen(self):

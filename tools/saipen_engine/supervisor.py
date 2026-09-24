@@ -115,7 +115,12 @@ _FAILURE_PATTERNS = (
     (PROVIDER_UNAVAILABLE, r"\b50[0234]\b|service unavailable|overloaded|bad gateway|"
      r"provider (?:error|unavailable)"),
     (NETWORK_UNAVAILABLE, r"econnrefused|econnreset|enotfound|etimedout|getaddrinfo|"
-     r"network (?:error|unreachable)|connection (?:refused|reset)"),
+     r"network (?:error|unreachable)|connection (?:refused|reset)|"
+     # OpenCode's wording for a refused provider endpoint (T-1520).
+     r"(?:unable to|cannot|could not|failed to) connect"),
+    # A provider error the host itself marks retryable and that no class above
+    # names is still transient: backing off beats stopping on UNKNOWN (T-1520).
+    (PROVIDER_UNAVAILABLE, r'"isretryable"\s*:\s*true'),
 )
 
 #: What each failure may do to the execution. Every class preserves Work,
