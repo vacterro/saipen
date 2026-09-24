@@ -631,7 +631,9 @@ def _settle_journal(journal: "Journal") -> None:
         with contextlib.suppress(OSError, ValueError, TypeError):
             if prior_index is not None:
                 _extend_settled_index(journal.project_root, prior_index)
-            elif not (journal.project_root / SETTLED_INDEX_REL).exists():
+            else:
+                # T-1519: a present-but-stale index is rebuilt too; rebuilding
+                # only an absent one left a dead index dead forever.
                 _bootstrap_settled_index(journal.project_root)
     except (OSError, InvalidIdError):
         pass
@@ -1452,6 +1454,9 @@ class Journal:
         # ids (../../x, absolute, drive-qualified) must never escape (T-1003
         # operational integrity).
         self.op_id = validate_op_id(op_id)
+        # T-1519: the staged-payload cleanup result of mark("COMMITTED"),
+        # which now runs before the receipt settles.
+        self.staged_cleanup: list[str] | None = None
 
         # Prevent symlink/junction escape
         ops_op_dir = safe_op_dir(self.project_root, self.op_id, OPS_DIR)
@@ -1612,6 +1617,12 @@ class Journal:
 
         if status in SETTLED:
             self.fold_progress()
+            if status == "COMMITTED":
+                # T-1519: drop the staged payloads BEFORE the receipt moves.
+                # Deleting them from the settled directory changed its mtime
+                # after the settled index had recorded it, so the index died at
+                # the first settlement and every read paid the strict scan.
+                self.staged_cleanup = _drop_staged_payloads(self)
             _settle_journal(self)
 
     def reconcile_progress(self, status: str, progress_index: int, applied_frontier: int) -> None:
@@ -1916,7 +1927,20 @@ class Journal:
         return f.read_bytes()
 
 
-def _drop_settled_staged(journal: "Journal") -> None:
+def _drop_settled_staged(journal: "Journal") -> list[str]:
+    """The staged-payload cleanup result for a COMMITTED operation.
+
+    T-1519: Journal.mark("COMMITTED") already dropped the payloads before the
+    receipt settled; this returns that result so every caller keeps reporting
+    `cleanup_pending` truthfully without touching the settled directory again.
+    A journal that settled some other way still gets the drop here.
+    """
+    if journal.staged_cleanup is not None:
+        return journal.staged_cleanup
+    return _drop_staged_payloads(journal)
+
+
+def _drop_staged_payloads(journal: "Journal") -> list[str]:
     """Best-effort delete an op's `.staged` payloads after terminal COMMITTED.
 
     COMMITTED ops never participate in recovery -- idempotent retry only
