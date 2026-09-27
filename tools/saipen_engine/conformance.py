@@ -1251,6 +1251,93 @@ def _checkpoint_hash_mismatch(receipt: dict, root: Path) -> str | None:
     return None
 
 
+#: T-1334: a reverify receipt only supersedes a FAIL receipt when it is a real,
+#: executed, PASS-shaped cure for Work this very receipt blocks, bound to the
+#: same tree, and newer than the receipt. Anything less is ignored, so an
+#: unrelated or hand-written PASS cannot buy a red gate its way to green.
+_REVERIFY_VERDICTS = ("PASS", "PASS_WITH_CARRIED_DEBT")
+_REVERIFY_ID_RE = re.compile(r"\ARV-\d{6}\Z")
+_WORK_RE = re.compile(r"\AT-\d+\Z")
+
+
+def _parse_utc(value: object) -> datetime.datetime | None:
+    """Strict UTC parse of a receipt timestamp; None when unusable."""
+    if not isinstance(value, str) or not value.strip():
+        return None
+    try:
+        stamp = datetime.datetime.fromisoformat(value.strip().replace("Z", "+00:00"))
+    except ValueError:
+        return None
+    if stamp.tzinfo is None:
+        return stamp.replace(tzinfo=datetime.timezone.utc)
+    return stamp.astimezone(datetime.timezone.utc)
+
+
+def _remediation_evidence_after(receipt: dict, root: Path) -> dict | None:
+    """T-1334: newest executed reverify receipt that this FAIL cannot have seen.
+
+    Returns ``{"receipt_id", "work", "created_at"}`` for the newest qualifying
+    reverify receipt, or None. The check is deliberately narrow, because it
+    demotes a CURRENT_FAIL (a red gate) to STALE_FAIL (unproven, not a stop):
+    the cure must be an executed, non-FAIL receipt whose subject is Work this
+    receipt itself blocks, bound to the same source identity, written later.
+    A PASS receipt is never demoted by this path -- extra evidence never
+    invalidates a green verdict -- and the next canonical validator run writes
+    a receipt newer than any of this, so the demotion cannot loop.
+    """
+    receipt_at = _parse_utc(receipt.get("timestamp_utc"))
+    if receipt_at is None:
+        return None
+    blocked = {
+        str(p.get("subject_id"))
+        for p in ((receipt.get("blocking_findings") or {}).get("problems") or [])
+        if p.get("subject_id")
+    }
+    if not blocked:
+        return None
+    reverify_dir = root / ".saipen" / "recovery" / "conformance" / "reverify"
+    try:
+        paths = sorted(reverify_dir.glob("RV-*.json"))
+    except OSError:
+        return None
+    best: dict | None = None
+    best_at: datetime.datetime | None = None
+    for path in paths:
+        if not _REVERIFY_ID_RE.match(path.stem):
+            continue
+        try:
+            data = json.loads(path.read_text(encoding="utf-8-sig"))
+        except (OSError, ValueError):
+            continue
+        if not isinstance(data, dict):
+            continue
+        if data.get("schema_version") != 1:
+            continue
+        if data.get("evidence_class") != "executed":
+            continue          # an attested-only contract is never closure proof
+        if data.get("verdict") not in _REVERIFY_VERDICTS:
+            continue          # a FAIL cure is no cure
+        work = str(data.get("work") or "")
+        if not _WORK_RE.match(work) or work not in blocked:
+            continue          # must cure Work THIS receipt blocks
+        if (
+            data.get("source_head") != receipt.get("source_head")
+            or data.get("source_tree_fingerprint") != receipt.get("source_tree_fingerprint")
+        ):
+            continue          # a cure for another tree proves nothing here
+        created = _parse_utc(data.get("created_at"))
+        if created is None or created <= receipt_at:
+            continue          # the receipt already saw this evidence
+        if best_at is None or created > best_at:
+            best_at = created
+            best = {
+                "receipt_id": str(data.get("receipt_id") or path.stem),
+                "work": work,
+                "created_at": str(data.get("created_at")),
+            }
+    return best
+
+
 # --------------------------------------------------------------------------- §8
 def conformance_status(
     project_root: Path | str,
@@ -1380,8 +1467,28 @@ def conformance_status(
                 status = STATUS_CURRENT_PASS
                 reason = ""
         else:
-            status = STATUS_CURRENT_FAIL
-            reason = "canonical validator reports FAIL for the current checkpoint"
+            # T-1334: a FAIL receipt is a projection of the evidence set that
+            # existed when it was written. Remediation evidence written AFTER
+            # it -- a reverify receipt is the canonical cure (OPS.md, "Work
+            # re-verification transaction") -- is exactly the input that can
+            # flip the verdict, and the receipt cannot have seen it. Reading
+            # such a receipt as CURRENT_FAIL names an already-cured ticket as
+            # a blocker indefinitely, because none of the other currency
+            # checks (source identity, freshness window, checkpoint hashes)
+            # can see evidence that changed no source file.
+            advanced = _remediation_evidence_after(receipt, root)
+            if advanced:
+                status = STATUS_STALE_FAIL
+                reason = (
+                    f"remediation evidence {advanced['receipt_id']} for "
+                    f"{advanced['work']} was executed after this receipt "
+                    f"({advanced['created_at']} > {receipt.get('timestamp_utc')}), "
+                    "so the recorded FAIL no longer describes the current "
+                    f"evidence set -- re-run '{CONFORMANCE_REMEDIATION_COMMAND}'"
+                )
+            else:
+                status = STATUS_CURRENT_FAIL
+                reason = "canonical validator reports FAIL for the current checkpoint"
     return {
         "status": status,
         "gate": gate,
