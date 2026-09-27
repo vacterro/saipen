@@ -306,7 +306,15 @@ def _is_published(record: dict) -> bool:
         return record.get("release_stage") == "COMMITTED"
     # A closure artifact proves publication when it names the identity a clone
     # could check out: a commit, or an explicitly no-publish COMMITTED release.
-    if record.get("commit"):
+    #
+    # T-1238: `release_commit` is the field the project's OWN receipt writer
+    # emits (tools/release_provenance.py writes `release_commit` and verifies
+    # against it; it never writes a bare `commit`). Checking only `commit` made
+    # every genuine receipt invisible as publication evidence, so a release
+    # that really shipped -- EXE built, packaged probe green -- still read as
+    # "no COMMITTED release receipt names <version>" and blocked the closure
+    # of the work it shipped. Both spellings name the same identity.
+    if record.get("commit") or record.get("release_commit"):
         return True
     return record.get("mode") == "no-publish" and bool(record.get("op_id"))
 
@@ -317,6 +325,8 @@ def _release_matches(record: dict, wanted: str) -> bool:
         str(record.get("version") or ""),
         str(record.get("tag") or ""),
         str(record.get("commit") or ""),
+        # T-1238: same identity, the spelling the receipt writer actually uses.
+        str(record.get("release_commit") or ""),
     }
     candidates.discard("")
     if wanted in candidates:
