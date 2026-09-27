@@ -78,7 +78,13 @@ import subprocess
 import sys
 from pathlib import Path
 
-from freshness import FreshnessError, compute_role_revision, compute_source_identity
+from freshness import (
+    FreshnessError,
+    compute_role_revision,
+    compute_source_identity,
+    digest_marker_matches,
+    source_content_digest,
+)
 from userperson import validate_profile as _validate_userperson_profile
 from improve import validate_report as _validate_improve_report
 
@@ -1533,6 +1539,20 @@ else:
         ".saipen/IDENTITY.md absent -- project not yet lineage-migrated "
         "(the first mutation mints it journaled)"
     )
+
+# T-1278: a published closure commit may not name a ticket DONE that its own
+# BOARD bytes leave open. Recorded historical divergences are excepted by
+# release.KNOWN_CLOSURE_DIVERGENCES; history itself is never rewritten.
+if _git("rev-parse", "--is-inside-work-tree")[0] == 0:
+    from saipen_engine.release import closure_history_contradictions
+
+    for _closure in closure_history_contradictions(PROJECT_ROOT):
+        fail(
+            f"closure history [closure-contradiction] -- commit {_closure['commit'][:12]} "
+            f"names {_closure['ticket']} DONE but {_closure['problem']}. Published "
+            "history is not rewritten: record the commit in "
+            "release.KNOWN_CLOSURE_DIVERGENCES with its reason (T-1278)"
+        )
 
 # The voice marker, gated exactly the way `last_event` is: REQUIRED once the
 # state is at the current revision, exempt while it is readable legacy, and
@@ -3491,6 +3511,72 @@ if log_files:
                     "one: " + "; ".join(_provenance_missing[:6]) + " (T-584)"
                 )
 
+    # T-1282: the `[op: ...]` tag above proves only that a BRACKET is present,
+    # never that the id names a REAL journaled operation. An agent closing a
+    # ticket outside a SAIOPS run has no mechanized way to obtain an op id, so
+    # it hand-mints one and the presence check passes -- the tag is forgeable
+    # by exactly the path it exists to detect. Resolve each tagged event
+    # against the journaled operation records (ops dir, settled dir, and the
+    # durable settled-index projection that survives compaction) and report an
+    # id that names no record.
+    #
+    # Boundary, self-establishing and derived, never configured, in two layers:
+    #  * Sealed segments (.saipen/logs/LOG-NNN.md) are immutable append-only
+    #    history whose ops were legitimately settled and then COMPACTED before
+    #    the durable index existed. They are exempt wholesale -- demanding a
+    #    live record for them would red every historical hole, and history is
+    #    handled by exemption, never by rewriting (AC-04).
+    #  * Inside the ACTIVE log the enforced window is every tagged event NEWER
+    #    than the newest RESOLVABLE one. A legitimate new op is resolvable the
+    #    instant it settles, so under normal operation the newest active event
+    #    resolves and the floor sits at the head; a forgery is a brand-new
+    #    hand-typed id, so it lands ABOVE that floor (append-only puts every new
+    #    event at the head) and is caught even when it is the single newest
+    #    line. Pre-fix hand-minted ids already sitting deeper in the active log
+    #    (the very disclosure this ticket names) fall BELOW the floor and are
+    #    exempt as history, exactly like a sealed segment.
+    #
+    # When NO ledger exists on the checkout (a fresh clone, a consumer
+    # checkout -- the recovery tree is gitignored machine-local evidence) the
+    # check is UNAVAILABLE, not red: there is nothing on this disk to resolve
+    # against, and demanding a record that cannot exist here would fail every
+    # clean checkout.
+    if log_ok:
+        from saipen_engine.journal import resolvable_op_ids as _resolvable_op_ids
+
+        _op_ledger = _resolvable_op_ids(PROJECT_ROOT)
+        if _op_ledger:
+            _active_tagged = sorted(
+                (
+                    (_ev["event"], _ev["op_id"], _lf.as_posix(), _line_no)
+                    for _lf, _line_no, _line, _ev in _all_events
+                    if _ev.get("op_id") and _lf.name == "LOG.md"
+                ),
+                key=lambda item: item[0],
+            )
+            _resolved_floor = max(
+                (eid for eid, oid, _rel, _ln in _active_tagged if oid in _op_ledger),
+                default=None,
+            )
+            if _resolved_floor is not None:
+                _forged = [
+                    (eid, oid, rel, ln)
+                    for eid, oid, rel, ln in _active_tagged
+                    if eid > _resolved_floor and oid not in _op_ledger
+                ]
+                if _forged:
+                    _shown = "; ".join(
+                        f"{rel}:{ln} E-{eid} [op: {oid}]"
+                        for eid, oid, rel, ln in _forged[:6]
+                    )
+                    fail(
+                        "mechanical provenance [saio] -- active-log structural "
+                        "events name an `[op: ...]` id that resolves to NO "
+                        "operation record in the journal, so the tag proves only "
+                        "that a bracket was typed, never that an operation ran: "
+                        f"{_shown} (T-1282)"
+                    )
+
     # [gate-closure] (NITRO dogfood IV, T-602): a ticket's DONE state is
     # evidence of the phase chain that produced it, NEVER of a legal-looking
     # final STATE. finish_ticket now REFUSEs every non-SHIP closure (the
@@ -3629,7 +3715,7 @@ if log_files:
                 # a legitimate current VERIFY boundary OR a valid current-tree
                 # PASS re-verification receipt. The receipt is machine-owned
                 # (debt.reverify_work / `saipen work reverify`) and bound to
-                # project identity, lineage, ruleset and the current source
+                # project lineage (T-1516), ruleset and the current source
                 # checkpoint; DONE still stays DONE -- no lifecycle edge is
                 # created here. A missing, FAIL, stale, foreign-project,
                 # foreign-lineage or foreign-ruleset receipt is not evidence.
@@ -3914,12 +4000,27 @@ if log_files:
                                 "T-618)"
                             )
             if _report_errors:
+                # T-1333: a blocking finding must NAME the executable route or
+                # it is a red gate with no door. The closed remediation table
+                # already registers `saipen improve reconcile <cycle>` (IMPROVE
+                # section 14 is the one finite exit for a strict ACTIVE cycle,
+                # and it losslessly retires an EMPTY_DRAFT), but extraction is
+                # from the failure text, so an error that only described the
+                # report produced a receipt whose remediation named unrelated
+                # tickets. The cycle is the report's grandparent directory.
+                _cycles = sorted(
+                    {r.parent.parent.name for r in _reports if r.parent.parent.name}
+                )
+                _routes = ", ".join(
+                    f"saipen improve reconcile {c}" for c in _cycles[:4]
+                )
                 fail(
                     "improve report [improve-report] -- "
                     + "; ".join(_report_errors[:6])
                     + "; a finding is rejected, not softened; "
                     "report_status: complete requires the completion bar; "
                     "a partial scope can never claim full context (T-555)"
+                    + (f"; run {_routes}" if _routes else "")
                 )
             else:
                 ok(f"improve seat report schema valid ({len(_reports)} report(s) scanned)")
@@ -7617,6 +7718,12 @@ else:
         _root_files = {n for n in _root_files if not _gitignored_root(n)}
     _stray = sorted(_root_files - ROOT_ALLOWED)
     if _stray:
+        # T-1475: empty strays named after protocol text (`BLOCKED`, `M``)
+        # were written by a host hook that runs its payload as commands; name
+        # that writer when the host settings show one.
+        from saipen_engine.host_hooks import stray_hint
+
+        _hint = stray_hint(_tools_parent)
         fail(
             "cross-doc drift [root-file-set] -- file(s) at the repository "
             f"root that the closed set does not name: {_stray}. Both orphans "
@@ -7626,6 +7733,7 @@ else:
             "could ever see them. A deliberate new root file is a one-line "
             "addition to ROOT_ALLOWED in tools/validate.py; a scratch file "
             "belongs in .gitignore, which this check honours"
+            + (f". {_hint}" if _hint else "")
         )
         drift_ok = False
 
@@ -7728,11 +7836,7 @@ else:
     _tr_dir = _tools_parent / ".saipen" / "saitranslate" / "kitchen"
     _en_src = _tools_parent / "README.md"
     if _tr_dir.is_dir() and _en_src.is_file():
-        _want = hashlib.sha256(
-            re.sub(r"\d+\.\d+\.\d+", "VERSION", _en_src.read_text(encoding="utf-8-sig")).encode(
-                "utf-8"
-            )
-        ).hexdigest()
+        _want = source_content_digest(_en_src.read_text(encoding="utf-8-sig"))
         _stale, _unstamped = [], []
         for _loc in locale_readme_paths(_tr_dir):
             if not _loc.is_file():
@@ -7743,7 +7847,7 @@ else:
             )
             if _m is None:
                 _unstamped.append(_loc.parent.name)
-            elif _m.group(1) != _want:
+            elif not digest_marker_matches(_m.group(1), _want):
                 _stale.append(_loc.parent.name)
         if _stale:
             warn(

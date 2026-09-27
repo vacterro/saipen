@@ -1025,7 +1025,7 @@ def _runtime(
     )
     print(f"agent seat : {projection['agent']}{seat_note}")
     print(f"metadata   : {projection['runtime_info_source']}")
-    for field in ("harness", "provider", "model", "variant"):
+    for field in ("harness", "provider", "model", "variant", "effort"):
         print(f"{field:<10} : {projection[field] or 'UNKNOWN'}")
     print("capabilities:")
     for name, value in projection["capabilities"].items():
@@ -5362,41 +5362,48 @@ def _source_dry_run_plan(project_root: Path, action: str, rest: list[str], as_js
             when_environment = text_tokens[1]
             text_tokens = text_tokens[2:]
         text = " ".join(text_tokens)
-        if not re.fullmatch(r"SRC-\d+", receipt_id):
-            _emit({"ok": False, "code": "INVALID_ID", "detail": receipt_id}, as_json)
-            return 1
-        if not text.strip():
-            _emit(
-                {"ok": False, "code": "VALIDATION_FAILED", "detail": "empty clause text"},
-                as_json,
-            )
-            return 1
-        if when_environment is not None and not re.fullmatch(r"[a-z0-9_-]+", when_environment):
-            _emit(
+        # T-1277: the dry-run planner MUST consume the same grammar authority
+        # the apply path (intake.add_requirements) consumes, or a dry-run says
+        # yes where apply says no -- the exact defect this fixes (an invalid
+        # rid like R-001 certified DRY_RUN_PLAN while apply REFUSEd INVALID_ID).
+        normalized, refusal = intake.validate_requirement_clauses(
+            receipt_id,
+            [
                 {
-                    "ok": False,
-                    "code": "VALIDATION_FAILED",
-                    "detail": f"invalid environment identity {when_environment!r}",
-                },
-                as_json,
-            )
+                    "rid": rid,
+                    "text": text,
+                    "class": clause_class,
+                    "when_environment": when_environment,
+                }
+            ],
+        )
+        if refusal is not None:
+            _emit(refusal, as_json)
             return 1
-        from saipen_engine.intake import CLAUSE_CLASSES
-
-        if clause_class not in CLAUSE_CLASSES:
-            _emit(
-                {
-                    "ok": False,
-                    "code": "VALIDATION_FAILED",
-                    "detail": f"unknown clause class {clause_class!r}",
-                },
-                as_json,
-            )
-            return 1
+        assert normalized is not None
+        plan_rid = normalized[0][0]
         contract = intake._read_contract(Path(project_root), receipt_id)
         if not contract:
             _emit(
                 {"ok": False, "code": "TICKET_NOT_FOUND", "detail": receipt_id},
+                as_json,
+            )
+            return 1
+        # T-1531: mirror the apply path's read-only STATE check. add_requirements
+        # refuses an already-present rid (intake.py 'requirement {rid} exists');
+        # the coverage ledger is read here anyway, so the dry-run refuses it too
+        # rather than planning green where apply says no.
+        try:
+            ledger = intake._read_coverage(Path(project_root), receipt_id)
+        except (OSError, ValueError):
+            ledger = {"requirements": {}}
+        if plan_rid in (ledger.get("requirements") or {}):
+            _emit(
+                {
+                    "ok": False,
+                    "code": "VALIDATION_FAILED",
+                    "detail": f"requirement {plan_rid} exists",
+                },
                 as_json,
             )
             return 1
@@ -5407,7 +5414,7 @@ def _source_dry_run_plan(project_root: Path, action: str, rest: list[str], as_js
                 "code": "DRY_RUN_PLAN",
                 "action": "req",
                 "receipt": receipt_id,
-                "rid": f"{receipt_id}:{rid}" if re.fullmatch(r"R\d+", rid) else rid,
+                "rid": plan_rid,
                 "revision": new_revision,
                 "when_environment": when_environment,
                 "targets": [
@@ -5466,22 +5473,35 @@ def _source_dry_run_plan(project_root: Path, action: str, rest: list[str], as_js
                 as_json,
             )
             return 2
-        from saipen_engine.intake import ALL_DISPOSITIONS
-
-        if disposition not in ALL_DISPOSITIONS:
+        # T-1277: same grammar authority as set_disposition (receipt id +
+        # disposition), so dry-run cannot certify a disp the apply path refuses.
+        normalized_rid, refusal = intake.validate_disposition_request(
+            receipt_id, rid, disposition
+        )
+        if refusal is not None:
+            _emit(refusal, as_json)
+            return 1
+        assert normalized_rid is not None
+        # T-1531: mirror the apply path's read-only STATE check. set_disposition
+        # refuses a rid absent from coverage ('unknown requirement {rid}'); the
+        # ledger is read here anyway to plan, so the dry-run refuses it too.
+        try:
+            _disp_ledger = intake._read_coverage(Path(project_root), receipt_id)
+        except (OSError, ValueError):
+            _disp_ledger = {"requirements": {}}
+        if normalized_rid not in (_disp_ledger.get("requirements") or {}):
             _emit(
                 {
                     "ok": False,
                     "code": "VALIDATION_FAILED",
-                    "detail": f"disposition {disposition!r}",
+                    "detail": f"unknown requirement {normalized_rid}",
                 },
                 as_json,
             )
             return 1
         if disposition == "UNAVAILABLE_ENVIRONMENT":
             contract = intake._read_contract(Path(project_root), receipt_id) or {}
-            full_rid = f"{receipt_id}:{rid}" if re.fullmatch(r"R\d+", rid) else rid
-            clause = (contract.get("clauses") or {}).get(full_rid) or {}
+            clause = (contract.get("clauses") or {}).get(normalized_rid) or {}
             if not environment or clause.get("when_environment") != environment:
                 _emit(
                     {
@@ -5505,7 +5525,7 @@ def _source_dry_run_plan(project_root: Path, action: str, rest: list[str], as_js
                 "code": "DRY_RUN_PLAN",
                 "action": "disp",
                 "receipt": receipt_id,
-                "rid": rid,
+                "rid": normalized_rid,
                 "disposition": disposition,
                 "work": work,
                 "evidence": evidence,
@@ -6721,6 +6741,22 @@ def _human_refusal_lines(payload: dict) -> list[str]:
     return lines
 
 
+
+def _reverify_default_timeout() -> int:
+    """T-1332: ONE owner for the default verification-command budget.
+
+    The engine spends VALIDATOR_CAPTURE_TIMEOUT on the strict gate it captures
+    before running an operator's own check, so a smaller default for that check
+    truncated gates the operation had already budgeted for. Read from the engine
+    rather than restated, so the two cannot drift apart again.
+    """
+    try:
+        from saipen_engine.debt import VALIDATOR_CAPTURE_TIMEOUT
+
+        return int(VALIDATOR_CAPTURE_TIMEOUT)
+    except Exception:
+        return 1800
+
 def _emit(payload: dict, as_json: bool) -> None:
     # ONE public refusal shape. CLI-side refusals have always carried
     # `detail`; engine `Result` refusals carry `message`, so the same public
@@ -7364,6 +7400,7 @@ def _improve(project_root: Path, args: list[str], as_json: bool, dry_run: bool) 
                 protocol_fingerprint=fingerprint,
                 context_scope=f"SAIPEN audit, phase {state.get('phase') or '?'}",
                 context_available="partial",
+                allow_new_seat=explicit_new,
                 dry_run=dry_run,
             )
         except ImproveError as exc:
@@ -7395,8 +7432,13 @@ def _improve(project_root: Path, args: list[str], as_json: bool, dry_run: bool) 
                 "scope": {"phase": state.get("phase") or "?", "task": state.get("task") or ""},
                 "proof_levels": proof_levels,
                 "schema": "cycle + seat/report + RUN-N/IMP-NNN composite finding "
-                "ref; dispositions go to SWEEP.md via saipen improve "
-                "sweep; report completion via saipen improve complete",
+                "ref; a submitted RUN body carries NO '## RUN N' heading of its "
+                "own and must contain either at least one IMP-<n> finding line "
+                "or a line beginning NO_FINDINGS -- an audit that honestly found "
+                "nothing is submitted as 'NO_FINDINGS -- <what was audited and "
+                "why it was empty>', never as prose; dispositions go to SWEEP.md "
+                "via saipen improve sweep; report completion via saipen improve "
+                "complete",
                 "write_boundary": "RUNs append via saipen improve submit; report "
                 "completion via saipen improve complete; no raw "
                 "report/MANIFEST/SWEEP editing",
@@ -8723,7 +8765,7 @@ def main(argv: list[str] | None = None) -> int:
             "transition <PHASE> [T-###] [text]|checkpoint <TAXONOMY> "
             "[T-###] [text]|goal <text>|user-request <text> [--priority P#] "
             "[--verify <text>] [--needs T-X,T-Y]|ticket add <PRIORITY> <text> --verify <proof> "
-            "[--needs T-X,T-Y]|ticket "
+            "[--needs T-X,T-Y] [--regression required]|ticket "
             "done <T-###> [--closure-mode own_patch|inherited_verified|cohort] "
             "[--closure-cohort C-###] [--implementation-source "
             "<release:<id>|T-###|SRC-###>] [--paths <p1,p2>]|"
@@ -9490,7 +9532,8 @@ def main(argv: list[str] | None = None) -> int:
                         "ok": False,
                         "code": "VALIDATION_FAILED",
                         "detail": "ticket add <PRIORITY> <description> "
-                        "--verify <proof> [--needs T-X,T-Y]",
+                        "--verify <proof> [--needs T-X,T-Y] "
+                        "[--regression required]",
                         "canonical_next_command": _ticket_add_route(
                             rest[0] if rest else "", " ".join(rest[1:])
                         ),
@@ -9500,8 +9543,10 @@ def main(argv: list[str] | None = None) -> int:
                 return 2
             verify_arg = ""
             needs_arg = []
+            regression_arg = ""
             has_verify = False
             has_needs = False
+            has_regression = False
 
             if "--" in rest:
                 dd_idx = rest.index("--")
@@ -9562,6 +9607,30 @@ def main(argv: list[str] | None = None) -> int:
                     needs_arg = [n.strip() for n in pre_dd[idx + 1].split(",") if n.strip()]
                     has_needs = True
                     idx += 2
+                elif pre_dd[idx] == "--regression":
+                    if has_regression:
+                        _emit(
+                            {
+                                "ok": False,
+                                "code": "VALIDATION_FAILED",
+                                "detail": "duplicate --regression option",
+                            },
+                            as_json,
+                        )
+                        return 2
+                    if idx + 1 >= len(pre_dd) or pre_dd[idx + 1].startswith("--"):
+                        _emit(
+                            {
+                                "ok": False,
+                                "code": "VALIDATION_FAILED",
+                                "detail": "dangling --regression option",
+                            },
+                            as_json,
+                        )
+                        return 2
+                    regression_arg = pre_dd[idx + 1]
+                    has_regression = True
+                    idx += 2
                 elif pre_dd[idx].startswith("--"):
                     _emit(
                         {
@@ -9585,7 +9654,7 @@ def main(argv: list[str] | None = None) -> int:
                         "code": "VALIDATION_FAILED",
                         "detail": "ticket add needs <PRIORITY> <description> --verify <proof>",
                         "canonical_next_command": _ticket_add_route(
-                            clean_rest[0] if clean_rest else "", ""
+                            clean_rest[0] if clean_rest else "", "", regression_arg
                         ),
                     },
                     as_json,
@@ -9604,6 +9673,7 @@ def main(argv: list[str] | None = None) -> int:
                 needs_arg,
                 verify_arg,
                 dry_run=dry_run,
+                regression=regression_arg,
             )
             _emit(result.to_dict(), as_json)
             if result.ok:
@@ -9682,7 +9752,7 @@ def main(argv: list[str] | None = None) -> int:
             _implementation = ""
             _reason = ""
             _contract = ""
-            _timeout = 300
+            _timeout = _reverify_default_timeout()
             _runs: list[str] = []
             _verification: list[dict] = []
             _err = ""
@@ -10031,7 +10101,11 @@ def main(argv: list[str] | None = None) -> int:
         work_id = ""
         verification: list[dict] = []
         runs: list[str] = []
-        timeout = 300
+        # T-1332: the CLI default is the engine's own capture budget, not a
+        # 300 s guess. A project whose strict gate runs longer than the
+        # default made the prescribed single-command remediation record an
+        # honest timed_out FAIL that no text ever explained.
+        timeout = _reverify_default_timeout()
         i = 0
         while i < len(rest):
             tok = rest[i]

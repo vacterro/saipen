@@ -44,8 +44,8 @@ from pathlib import Path
 
 from . import findings as findings_mod
 from .journal import hash_bytes, run_mutation
+from .paths import history_bound_here, project_lineage_identity
 from .paths import project_identity as _project_identity
-from .paths import project_lineage_identity
 
 DEBT_SCHEMA_VERSION = 1
 DEBT_DIR = ".saipen/recovery/conformance/debt"
@@ -537,18 +537,18 @@ def load_snapshot(root: Path | str, ref: str) -> dict:
         raise DebtRefusal("DEBT_SNAPSHOT_CORRUPT", f"{ref} has an unsupported schema")
     if record.get("snapshot_id") != ref:
         raise DebtRefusal("DEBT_SNAPSHOT_CORRUPT", f"{ref} names a different snapshot id")
-    live_identity = _project_identity(root)
-    if record.get("project_identity") != live_identity:
-        raise DebtRefusal(
-            "DEBT_SNAPSHOT_FOREIGN_PROJECT",
-            f"{ref} was captured for {record.get('project_identity')!r}, not this project",
-        )
     live_lineage = project_lineage_identity(root)
     if record.get("project_lineage") != live_lineage:
         raise DebtRefusal(
             "DEBT_SNAPSHOT_FOREIGN_LINEAGE",
-            f"{ref} binds lineage {record.get('project_lineage')!r}; a copied .saipen "
-            "directory never makes a baseline portable",
+            f"{ref} binds lineage {record.get('project_lineage')!r}; a baseline never "
+            "crosses project lineages",
+        )
+    # T-1516: the lineage owns the baseline; the path binds a lineage-less project only.
+    if not history_bound_here(record.get("project_identity"), record.get("project_lineage"), root):
+        raise DebtRefusal(
+            "DEBT_SNAPSHOT_FOREIGN_PROJECT",
+            f"{ref} was captured for {record.get('project_identity')!r}, not this project",
         )
     if record.get("ruleset_version") != findings_mod.RULESET_VERSION or record.get(
         "ruleset_fingerprint"
@@ -1162,27 +1162,38 @@ def load_reverify_receipt(root, receipt_id):
         raise DebtRefusal("REVERIFY_RECEIPT_CORRUPT", f"{receipt_id} has an unsupported schema")
     if record.get("receipt_id") != receipt_id:
         raise DebtRefusal("REVERIFY_RECEIPT_CORRUPT", f"{receipt_id} names a different receipt id")
-    if record.get("project_identity") != _project_identity(root):
-        raise DebtRefusal(
-            "REVERIFY_RECEIPT_FOREIGN_PROJECT",
-            f"{receipt_id} was captured for {record.get('project_identity')!r}, not this project",
-        )
     if record.get("project_lineage") != project_lineage_identity(root):
         raise DebtRefusal(
             "REVERIFY_RECEIPT_FOREIGN_LINEAGE",
-            f"{receipt_id} binds a foreign lineage; a copied .saipen directory never "
-            "makes a receipt portable",
+            f"{receipt_id} binds a foreign lineage; a receipt never crosses project lineages",
+        )
+    # T-1516: the lineage owns the receipt; the path binds a lineage-less project only.
+    if not history_bound_here(record.get("project_identity"), record.get("project_lineage"), root):
+        raise DebtRefusal(
+            "REVERIFY_RECEIPT_FOREIGN_PROJECT",
+            f"{receipt_id} was captured for {record.get('project_identity')!r}, not this project",
         )
     if record.get("ruleset_fingerprint") != findings_mod.ruleset_fingerprint():
         raise DebtRefusal(
             "BASELINE_RULESET_CHANGED",
             f"{receipt_id} was captured under a different ruleset; stale",
         )
-    body = {k: v for k, v in record.items() if k != "integrity_digest"}
-    canonical = json.dumps(body, sort_keys=True, separators=(",", ":")).encode("utf-8")
-    if hash_bytes(canonical) != record.get("integrity_digest"):
+    if not _reverify_intact(record):
         raise DebtRefusal("REVERIFY_RECEIPT_CORRUPT", f"{receipt_id} integrity digest mismatch")
     return record
+
+
+# reverify_work digests the body BEFORE the journal assigns journal_op_id, so
+# the op id is outside the digest (T-1517: 444 of 444 receipts found on this
+# machine verify this way, 0 with the op id inside).
+_REVERIFY_UNDIGESTED = frozenset({"integrity_digest", "journal_op_id"})
+
+
+def _reverify_intact(record: dict) -> bool:
+    """Do a receipt's bytes still match the digest its writer recorded?"""
+    body = {k: v for k, v in record.items() if k not in _REVERIFY_UNDIGESTED}
+    canonical = json.dumps(body, sort_keys=True, separators=(",", ":")).encode("utf-8")
+    return hash_bytes(canonical) == record.get("integrity_digest")
 
 
 def _last_ticket_event_id(root, work):
@@ -1268,6 +1279,10 @@ def _run_verification_command(root, command, timeout):
             "exit_code": None,
             "executed": True,
             "timed_out": True,
+            # T-1332: a truncated check that does not announce the truncation
+            # reads as a failing gate, and the operator re-runs the identical
+            # command forever. The budget belongs in the receipt.
+            "timeout_seconds": timeout,
         }
     except OSError as exc:
         output = str(exc)
@@ -1345,7 +1360,15 @@ def reverify_work(
     *,
     verification=None,
     runs=None,
-    timeout=300,
+    # T-1332: the default budget for an operator's verification command is the
+    # SAME budget this operation already spends on the strict gate it captures
+    # first (VALIDATOR_CAPTURE_TIMEOUT). A 300 s default made the prescribed
+    # single-command remediation unusable for any project whose own strict gate
+    # runs longer -- FastPrompter's takes 604 s -- so the command recorded an
+    # honest `timed_out` FAIL while the identical command with an explicit
+    # --timeout recorded exit_code 0. The truncation was invisible in the
+    # refusal and in the gate's remediation string.
+    timeout=VALIDATOR_CAPTURE_TIMEOUT,
     derive_default=False,
     dry_run=False,
 ):
@@ -1491,6 +1514,12 @@ def reverify_work(
                 continue
             if existing.get("work") != work:
                 continue
+            # T-1517: a receipt that can never be evidence is never reused, or
+            # re-running reverify could not mint the cure.
+            if not _reverify_intact(existing) or not history_bound_here(
+                existing.get("project_identity"), existing.get("project_lineage"), root
+            ):
+                continue
             if existing.get("ruleset_fingerprint") != findings_mod.ruleset_fingerprint():
                 continue
             if existing.get("verification_contract_digest") != contract_digest:
@@ -1560,7 +1589,7 @@ def reverify_work(
             "warning_count": len(warnings),
         }
     op_id = "reverify." + hash_bytes(
-        f"{lineage}|{work}|{findings_digest}|{contract_digest}".encode("utf-8")
+        f"{lineage}|{work}|{findings_digest}|{contract_digest}|{receipt_id}".encode("utf-8")
     )[:12]
     record["journal_op_id"] = op_id
     content = json.dumps(record, indent=2, sort_keys=True).encode("utf-8")
@@ -1620,7 +1649,9 @@ def latest_pass_reverify(root, work):
     PASS_WITH_CARRIED_DEBT verdict whose project/lineage/ruleset bindings all
     match the live project wins. A newer FAIL for the same tree is NOT hidden
     behind an older PASS: the newest receipt is inspected first and a FAIL
-    simply returns None (the caller treats the Work as unverified).
+    simply returns None (the caller treats the Work as unverified). A newest
+    receipt whose bytes fail its digest returns None the same way (T-1517):
+    an edited verdict is no verdict, and it never lets an older PASS through.
     """
     root = Path(root)
     for path in reversed(_existing_reverify_receipts(root)):
@@ -1628,11 +1659,13 @@ def latest_pass_reverify(root, work):
             record = json.loads(path.read_text(encoding="utf-8"))
         except (OSError, ValueError):
             continue
+        if not _reverify_intact(record):
+            return None
         if record.get("work") != work:
             continue
-        if record.get("project_identity") != _project_identity(root):
-            continue
-        if record.get("project_lineage") != project_lineage_identity(root):
+        if not history_bound_here(
+            record.get("project_identity"), record.get("project_lineage"), root
+        ):
             continue
         if record.get("ruleset_fingerprint") != findings_mod.ruleset_fingerprint():
             continue
@@ -1647,10 +1680,10 @@ def current_tree_reverify(root: Path | str, work: str) -> dict | None:
     checkpoint check (T-158 Stage 2, D3).
 
     A PASS receipt counts as closure evidence ONLY when it was captured
-    against THIS tree: project identity, lineage, ruleset and the current
-    source fingerprint (HEAD + working-tree delta) must all match the live
-    project. A receipt from an older checkpoint is stale evidence, never
-    closure proof.
+    against THIS tree: project lineage (never the checkout path, T-1516),
+    ruleset and the current source fingerprint (HEAD + working-tree delta)
+    must all match the live project. A receipt from an older checkpoint is
+    stale evidence, never closure proof.
 
     T-1434 M5.3: the receipt must also carry EXECUTABLE evidence. An
     attested-only contract (``--verification cmd:PASS`` and no ``--run``)
