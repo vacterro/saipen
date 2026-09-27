@@ -9144,12 +9144,42 @@ def main(argv: list[str] | None = None) -> int:
         _emit(result.to_dict(), as_json)
         return 0 if result.ok else 1
     if command in ("build", "vv"):
-        if len(args) < 2 or not " ".join(args[1:]).strip():
+        # T-1287: this verb used to join its arguments verbatim, so an
+        # option-shaped invocation was silently INGESTED as the directive
+        # itself. `saipen build --file <payload>` became a P0 build whose text
+        # was the option string, and that phantom outranked real work until an
+        # operator neutralised it. A free-text verb must never swallow an
+        # option. `build` therefore takes free text ONLY and names the verbs
+        # that own the carriers: `start --file` ingests a request (T-1363) and
+        # `saipen checkpoint` records evidence. One owner per behaviour beats a
+        # second door that silently does the wrong thing.
+        _b_tokens = args[1:]
+        _b_option = next((t for t in _b_tokens if t.startswith("--")), None)
+        _b_usage = "saipen build <directive>"
+        if _b_option is not None:
             _emit(
                 {
                     "ok": False,
                     "code": "VALIDATION_FAILED",
-                    "detail": "Use: vv <build directive>",
+                    "detail": (
+                        f"{_b_option} is not a build directive -- a build "
+                        "directive is free text, never an option. To send a "
+                        "request from a file use 'saipen start --file "
+                        "<UTF8_FILE>'; to record evidence use 'saipen checkpoint'."
+                    ),
+                    "usage": _b_usage,
+                },
+                as_json,
+            )
+            return 2
+        _b_text = " ".join(_b_tokens).strip()
+        if not _b_text:
+            _emit(
+                {
+                    "ok": False,
+                    "code": "VALIDATION_FAILED",
+                    "detail": "build needs a free-text directive",
+                    "usage": _b_usage,
                 },
                 as_json,
             )
@@ -9161,12 +9191,13 @@ def main(argv: list[str] | None = None) -> int:
         result = directive_entry(
             project_root,
             _agent_for(project_root),
-            " ".join(args[1:]),
+            _b_text,
             kind="build",
             dry_run=dry_run,
         )
         _emit(result.to_dict(), as_json)
         return 0 if result.ok else 1
+
     if command in ("cut", "xx"):
         from saipen_engine.controls import confirm_cut, cut_preview, decode_agent_plan
 
