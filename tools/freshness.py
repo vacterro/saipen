@@ -18,6 +18,7 @@ link target text, and an input that cannot be classified or read is fatal.
 from __future__ import annotations
 
 import hashlib
+import json
 import os
 import stat
 import struct
@@ -657,6 +658,7 @@ def _git_identity(root: Path) -> SourceIdentity:
     if head_before != head_after or not (listing_before == listing_middle == listing_after):
         raise FreshnessError("source tree or HEAD changed while fingerprint inputs were being read")
     model = "git-delta-v1"
+    binding_before = _nested_binding(root)
     digest, observe = _digest_capture(model)
     confirmed = _parse_git_delta_evidence(
         root, *listing_after, path_map=_path_map, record_observer=observe
@@ -672,10 +674,132 @@ def _git_identity(root: Path) -> SourceIdentity:
         fingerprint = _digest(model, records)
     else:
         fingerprint = f"{model}:{digest.hexdigest()}"
+    if binding_before != _nested_binding(root):
+        raise FreshnessError(
+            "declared nested source changed while fingerprint inputs were being read"
+        )
+    fingerprint = _bind_nested(fingerprint, binding_before)
     token = _RevalidationToken(
         os.fspath(root.resolve()), model, head_before, listing_after, tuple(confirmed)
     )
     return SourceIdentity(head_before, fingerprint, model, token)
+
+
+#: A project that keeps a repository INSIDE another one declares it here. The
+#: outer `git diff` cannot see it: the path is either gitignored (ZAICODE's
+#: ``/zcode/``) or tracked as a submodule, and in both cases an edit inside
+#: the nested tree left the outer fingerprint byte-identical -- measured, not
+#: assumed, on 27.09.26 against _zaicode. Every freshness and staleness
+#: decision in the outer project was therefore blind to the code that ships.
+#:
+#: Declaration, not discovery: a tree walk for ``.git`` on every identity call
+#: would cost more than the capture it protects, and would silently bind
+#: repositories the project never meant to. A project says which ones count.
+NESTED_REPOS_CONFIG_REL = Path(".saipen") / "source-nested-repos.json"
+
+
+def _nested_binding(root: Path) -> bytes:
+    """Canonical bytes binding every DECLARED nested repository's identity.
+
+    Empty when the project declares none, which keeps every existing project's
+    identity byte-identical to what it was before this rule existed. A declared
+    repository that is missing, unreadable or not a Git work tree FAILS the
+    capture rather than dropping out of it: a freshness guarantee that quietly
+    stops covering its source is worse than no guarantee, because it is believed.
+    """
+    config = root / NESTED_REPOS_CONFIG_REL
+    try:
+        raw = config.read_bytes()
+    except OSError:
+        return b""
+    try:
+        data = json.loads(raw.decode("utf-8-sig"))
+    except (UnicodeDecodeError, ValueError) as exc:
+        raise FreshnessError(f"nested-repo binding is unreadable: {exc}") from exc
+    if not isinstance(data, dict):
+        raise FreshnessError("nested-repo binding must be a JSON object")
+    declared = data.get("nested_repos")
+    if declared is None:
+        return b""
+    if not isinstance(declared, list) or not all(isinstance(x, str) for x in declared):
+        raise FreshnessError("nested-repo binding 'nested_repos' must be a list of paths")
+    if not declared:
+        return b""
+    # Canonical, not raw: the binding names WHICH repositories count, so
+    # reordering the list or repeating an entry is not a change in what is
+    # bound and must not move the identity. Only adding or removing one does.
+    canon = json.dumps(
+        {"schema_version": data.get("schema_version", 1), "nested_repos": sorted(set(declared))},
+        sort_keys=True,
+        separators=(",", ":"),
+    ).encode("utf-8")
+    parts: list[bytes] = [b"git-delta-v1-nested\x00", canon]
+    for rel in sorted(set(declared)):
+        nested = (root / rel).resolve()
+        try:
+            nested.relative_to(root.resolve())
+        except ValueError as exc:
+            raise FreshnessError(
+                f"declared nested repository escapes the project root: {rel!r}"
+            ) from exc
+        if not nested.is_dir():
+            raise FreshnessError(f"declared nested repository is missing: {rel!r}")
+        if _is_reparse_point(root / rel):
+            raise FreshnessError(
+                f"declared nested repository is a reparse point: {rel!r}"
+            )
+        # `--is-inside-work-tree` is the wrong test here: a plain directory
+        # inside the outer repository answers true and would then be bound to
+        # the OUTER head and delta, silently covering the wrong bytes. The
+        # nested path must be the TOP LEVEL of its own work tree -- the same
+        # rule compute_source_identity applies to a checkpoint root nested
+        # inside somebody else's repository.
+        probe = subprocess.run(
+            ["git", "-C", os.fspath(nested), "rev-parse", "--show-toplevel"],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            check=False,
+        )
+        if probe.returncode != 0:
+            raise FreshnessError(
+                f"declared nested repository is not a Git work tree: {rel!r}"
+            )
+        try:
+            toplevel = Path(os.fsdecode(probe.stdout.strip())).resolve()
+        except (OSError, ValueError) as exc:
+            raise FreshnessError(
+                f"declared nested repository has an unreadable work tree: {rel!r}"
+            ) from exc
+        if toplevel != nested:
+            raise FreshnessError(
+                f"declared nested repository is not its own work tree root: {rel!r} "
+                f"(git reports {os.fspath(toplevel)!r}); a directory inside the "
+                f"outer repository would be bound to the outer head and delta"
+            )
+        head = _run_git(nested, "rev-parse", "--verify", "HEAD").decode("ascii").strip()
+        raw_delta, untracked = _git_delta_listing(nested)
+        parts.append(
+            b"\x00"
+            + rel.encode("utf-8")
+            + b"\x00"
+            + head.encode("ascii")
+            + b"\x00"
+            + hashlib.sha256(raw_delta + b"\x00" + untracked).digest()
+        )
+    return b"".join(parts)
+
+
+def _bind_nested(fingerprint: str, binding: bytes) -> str:
+    """Mix the nested binding into ``model:hex`` without changing its shape."""
+    if not binding:
+        return fingerprint
+    model, _, hexdigest = fingerprint.partition(":")
+    mixed = hashlib.sha256()
+    mixed.update(fingerprint.encode("ascii"))
+    mixed.update(b"\x00")
+    mixed.update(struct.pack(">Q", len(binding)))
+    mixed.update(binding)
+    return f"{model}:{mixed.hexdigest()}"
 
 
 def _walk_no_git(root: Path) -> list[_Record]:
