@@ -1058,7 +1058,10 @@
   "APPEND_TARGET_UNKNOWN",
   "GPU_TRIAGE",
   "ACCEPTED_DEBT_EXISTS",
-  "REBIND_OUTPUT_INVALID"
+  "REBIND_OUTPUT_INVALID",
+  "ACCEPTED_DEBT_CORRUPT",
+  "ACCEPTED_DEBT_REBIND_NOOP",
+  "STALE_PRECONDITION"
  ],
  "continue_fallback": {
   "invariant": "continue may fall through to improve ONLY after recovery, blocked/retryable, queued and required-follow-up routing are exhausted; it resumes an existing active Improve cycle and never creates an unbounded improve carousel",
