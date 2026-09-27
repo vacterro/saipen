@@ -177,6 +177,15 @@ STATE_KNOWN_FIELDS = frozenset(require_string_list(_STATE_REGISTRY, "known_field
 # that pasted it in (SAITULS, 13.09.26) -- it is defined by no STATE schema.
 STATE_OUTPUT_ONLY_FIELDS = frozenset({"parked_work"})
 
+#: T-1173: optional routing-intent fields whose EMPTY value carries no
+#: meaning the schema can accept. A key present with an empty/whitespace
+#: value is not a corrupted enum member, it is an unset field written as
+#: `field: ""`; removing the key restores the documented default intent and
+#: is the only repair that cannot invent operator intent. A NON-empty
+#: invalid value is real corruption and is deliberately NOT in this set --
+#: it still refuses and still needs an operator.
+STATE_EMPTY_NORMALIZABLE_FIELDS = frozenset({"execution_intent", "converge_target"})
+
 STATE_PHASE_ENUM = require_string_list(require_mapping(_REGISTRY, "phases"), "all")
 
 STATE_MODE_ENUM = require_string_list(_STATE_REGISTRY, "mode_enum")

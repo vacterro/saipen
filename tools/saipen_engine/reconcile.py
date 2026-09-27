@@ -202,10 +202,48 @@ def _state_output_field_repairs(state: dict) -> list[dict]:
     produces no repair, so the strict-state error survives and reconciliation
     refuses (RECOVERY_BLOCKED). This function can therefore never widen into a
     generic unknown-field stripper.
+
+    T-1173 adds the same exact-key discipline for a second closed set: an
+    optional routing-intent field PRESENT with an empty value. Measured
+    31.08.26 (improve cycle imp-vacterro-fastprompter-20260901-1, agents-01,
+    IMP-001): `execution_intent: ""` and `converge_target: ""` are written by
+    hand as "unset", the strict reader rejects both as out-of-enum, and with
+    no marker/counter repair in the set recovery returned VALIDATION_FAILED
+    proposing ZERO changes -- a STATE the operator cannot clear with any
+    command. Removing the key restores the documented default intent and is
+    the only repair that cannot invent one. A NON-empty invalid value stays
+    untouched and keeps refusing: that is real corruption and still needs an
+    operator.
     """
-    from .state import STATE_KNOWN_FIELDS, STATE_OUTPUT_ONLY_FIELDS
+    from .state import (
+        STATE_EMPTY_NORMALIZABLE_FIELDS,
+        STATE_KNOWN_FIELDS,
+        STATE_OUTPUT_ONLY_FIELDS,
+    )
 
     repairs: list[dict] = []
+    for field in sorted(STATE_EMPTY_NORMALIZABLE_FIELDS):
+        if field not in state:
+            continue
+        value = state.get(field)
+        if not isinstance(value, str) or value.strip():
+            continue
+        repairs.append(
+            {
+                "field": field,
+                "from": value,
+                "to": None,
+                "surface": "state",
+                "remove": True,
+                "reason": (
+                    field + " is present with an empty value, which is not a "
+                    "member of its enum but an unset optional field written "
+                    "as an empty string; the key is removed by exact name so "
+                    "the documented default intent is restored (T-1173). A "
+                    "non-empty invalid value is never normalized here"
+                ),
+            }
+        )
     for field in sorted(STATE_OUTPUT_ONLY_FIELDS):
         if field in state and field not in STATE_KNOWN_FIELDS:
             repairs.append(
