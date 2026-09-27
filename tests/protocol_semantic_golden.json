@@ -264,7 +264,9 @@
     "new_cycle_per_invocation": 1,
     "recursive_carousel": false,
     "ambiguous_improve": "refusal_not_idle",
-    "no_worthwhile_improvement": "CONTINUE_IDLE"
+    "no_worthwhile_improvement": "CONTINUE_IDLE",
+    "unchanged_source": "CONTINUE_IDLE_SOURCE_UNCHANGED",
+    "explicit_invoke_always_admits": true
   },
   "cyrillic_twins": {
     "аа": "aa",

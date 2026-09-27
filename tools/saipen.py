@@ -1846,6 +1846,7 @@ def _continue_improve_fallthrough(
     from saipen_engine.continue_fallback import (
         active_cycle_status,
         read_marker,
+        source_unchanged,
         write_marker,
     )
 
@@ -1876,6 +1877,30 @@ def _continue_improve_fallthrough(
                 }
             )
             return 0
+
+    # The source gate (T-76). A terminal cycle frees a fresh discovery only
+    # when the source actually moved: a `git-delta-v1` discovery against an
+    # unchanged tree re-derives a verdict already held, and every admitted
+    # cycle becomes immutable evidence. An explicit `saipen improve` is never
+    # blocked by this -- only the automatic fallthrough is.
+    _unchanged, _identity_detail = source_unchanged(project_root, marker)
+    if _unchanged:
+        _emit_result(
+            {
+                "ok": True,
+                "code": "CONTINUE_IDLE_SOURCE_UNCHANGED",
+                "action": "saipen status",
+                "reason": "improve-source-unchanged",
+                "dry_run": bool(dry_run),
+                "cycle_id": prior_cycle,
+                "detail": (
+                    "no automatic improvement discovery: "
+                    f"{_identity_detail}. Run `saipen improve` explicitly to "
+                    "audit anyway"
+                ),
+            }
+        )
+        return 0
 
     import contextlib as _ctxlib
     import io as _io

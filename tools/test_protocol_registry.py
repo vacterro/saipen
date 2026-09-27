@@ -172,6 +172,11 @@ class ProtocolRegistryTests(unittest.TestCase):
         self.assertFalse(fb["recursive_carousel"])
         self.assertEqual(fb["ambiguous_improve"], "refusal_not_idle")
         self.assertEqual(fb["no_worthwhile_improvement"], "CONTINUE_IDLE")
+        # T-76: a terminal cycle frees a fresh discovery only when the source
+        # moved. The gate belongs to the AUTOMATIC fallthrough; an explicit
+        # `saipen improve` is never blocked by it.
+        self.assertEqual(fb["unchanged_source"], "CONTINUE_IDLE_SOURCE_UNCHANGED")
+        self.assertTrue(fb["explicit_invoke_always_admits"])
 
     def test_semantic_facts_name_owner_and_test(self):
         facts = self.registry["semantic_baseline"]["facts"]
