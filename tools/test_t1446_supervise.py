@@ -27,6 +27,7 @@ from pathlib import Path
 TOOLS = Path(__file__).resolve().parent
 if str(TOOLS) not in sys.path:
     sys.path.insert(0, str(TOOLS))
+from test_fixture_support import CURRENT_STYLE_CONTRACT  # noqa: E402
 
 from saipen_engine import supervisor, watchdog, worker  # noqa: E402
 
@@ -40,7 +41,7 @@ STATE = (
     "saipen_version: 7\n"
     "schema_version: 3\n"
     "last_event: 7\n"
-    "style_contract: ded-4ae736e4\n"
+    'style_contract: ' + CURRENT_STYLE_CONTRACT + '\n'
     "agent: tester\n"
     "mode: full\n"
     "---\n"
@@ -145,9 +146,15 @@ if mode == "hang_tree":
         out.write(json.dumps(trace) + "\n")
     time.sleep(60)
 if mode == "slow_work":
-    for _ in range(6):
+    # QUALITY-TIME-01 is about the SEMANTIC (a slow generation that keeps
+    # progressing is not a failure), so the wall-clock run stays long while the
+    # gap between durable progress markers stays far below the idle bound. At
+    # 0.5 s per bump against a 1.0 s bound the margin was smaller than the
+    # scheduler's jitter, and the test turned red under a loaded machine --
+    # the fixture proving the host's luck instead of the supervisor's rule.
+    for _ in range(60):
         bump()
-        time.sleep(0.5)
+        time.sleep(0.05)
     done()
 if mode == "slow_forever":
     trace["end"] = None
@@ -155,7 +162,9 @@ if mode == "slow_forever":
         out.write(json.dumps(trace) + "\n")
     while True:
         bump()
-        time.sleep(0.4)
+        # Same reasoning as `slow_work`: the marker cadence has to be well
+        # inside the idle bound, so the host bound is what ends this slice.
+        time.sleep(0.05)
 if mode == "no_tools":
     if model != "tool-model":
         done(1, "Error: this model does not support tools")
