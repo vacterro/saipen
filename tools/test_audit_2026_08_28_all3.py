@@ -21,6 +21,7 @@ from unittest import mock
 TOOLS = Path(__file__).resolve().parent
 if str(TOOLS) not in sys.path:
     sys.path.insert(0, str(TOOLS))
+from test_fixture_support import CURRENT_STYLE_CONTRACT  # noqa: E402
 
 from test_control_primitives import ControlFixture  # noqa: E402
 
@@ -53,6 +54,7 @@ from saipen_engine import release as release_engine  # noqa: E402
 from saipen_engine.release import _stage_release_content  # noqa: E402
 from saipen_engine.release_contract import release_metadata_paths  # noqa: E402
 from saipen_engine.snapshot import canonical_identity  # noqa: E402
+from saipen_engine import audit_inbox, retirement  # noqa: E402
 
 
 def _file_snapshot(paths: list[Path]) -> dict[str, bytes | None]:
@@ -767,13 +769,41 @@ class PerformanceAuditTests(ControlFixture):
             for path in paths:
                 self.assertEqual(calls.get(str(path), 0), 1, (lean, path, calls))
 
+    def _pinned_distribution_env(self):
+        # T-1552: the routing output embeds autoinject.distribution_report(),
+        # which reads HOST state -- the scheduler log under LOCALAPPDATA, the
+        # installed agent homes, this checkout's git head. A parity control
+        # that compares two reads of host-mutable bytes compares luck, not
+        # capture modes (E-10616 FAIL / E-10618 PASS on one fingerprint). The
+        # control therefore runs against a pinned projection: a synthetic log
+        # holding an UNTERMINATED run block -- the most hostile in-flight
+        # shape, the exact one the live 15-minute injector wrote mid-test --
+        # plus no installed homes and the fixture project as the source root.
+        import autoinject
+
+        base = Path(tempfile.mkdtemp(prefix="saipen-t1552-appdata-"))
+        self.addCleanup(shutil.rmtree, base, True)
+        (base / "saipen").mkdir()
+        (base / "saipen" / "inject.log").write_text(
+            "2026-09-03 12:46:00 === saipen scheduled inject run=deadbeef ==="
+            "2026-09-03 12:46:00 dirty:  M saipen/CORE.md"
+            "2026-09-03 12:46:00 dirty:  M tools/saipen.py",
+            encoding="utf-8",
+        )
+        return mock.patch.dict(os.environ, {"LOCALAPPDATA": str(base)}), mock.patch.object(
+            autoinject, "TARGETS", ()
+        )
+
     def _routing_output_with_capture_mode(self, root: Path, command: str, lean: bool) -> str:
         import saipen as cli
         from saipen_engine.snapshot import ProjectSnapshot
 
         original_capture = ProjectSnapshot.capture
         output = io.StringIO()
-        with mock.patch.object(ProjectSnapshot, "capture") as capture:
+        env_pin, targets_pin = self._pinned_distribution_env()
+        with env_pin, targets_pin, mock.patch.object(
+            ProjectSnapshot, "capture"
+        ) as capture:
             capture.side_effect = lambda path, *args, **kwargs: original_capture(
                 path, lean=lean
             )
@@ -789,6 +819,62 @@ class PerformanceAuditTests(ControlFixture):
                 full = self._routing_output_with_capture_mode(root, command, False)
                 lean = self._routing_output_with_capture_mode(root, command, True)
                 self.assertEqual(full, lean)
+
+    def test_parity_control_detects_a_capture_mode_dependent_projection(self) -> None:
+        # The control's own red half (T-1552): a distribution projection that
+        # really does differ between the two captures MUST break the parity
+        # comparison -- otherwise the green above proved nothing.
+        import autoinject
+
+        root = self.make_project()
+        calls = []
+
+        def drifting_report(*args, **kwargs):
+            calls.append(1)
+            return {
+                "installed": 1,
+                "stale": calls and len(calls) % 2,
+                "unknown": 0,
+                "fresh": 0,
+                "source_head": None,
+                "newest_installed_head": "deadbeef" if calls else None,
+                "last_run": None,
+                "dirty": [],
+            }
+
+        with mock.patch.object(autoinject, "distribution_report", drifting_report):
+            full = self._routing_output_with_capture_mode(root, "status", False)
+            lean = self._routing_output_with_capture_mode(root, "status", True)
+        self.assertNotEqual(full, lean, "a drifting projection slipped through parity")
+
+    def test_family_host_reads_are_pinned(self) -> None:
+        # T-1552: no declared-family test may call the host-reading
+        # distribution APIs without pinning the environment it reads.
+        import re
+
+        reader = re.compile(r"scheduler_log\(|last_inject_run\(|distribution_report\(")
+        # A real pin, not the WORD "patch": an env-level LOCALAPPDATA patch, or
+        # the host-reading attributes of the injector module itself. The
+        # previous test exempted any file whose text merely mentioned patching,
+        # so a test that read the live scheduler log and wrote "we will patch
+        # nothing" in a comment passed the control that exists to catch exactly
+        # that (proved with tools/test_zzz_t1552_probe.py before this fix).
+        pinned = re.compile(
+            r"patch\.dict\(\s*os\.environ[^)]*LOCALAPPDATA"
+            r"|patch\.object\(\s*(?:autoinject|\w*\.)?\s*autoinject\s*,\s*[\"']HOME"
+            r"|patch\.object\(\s*\w+\s*,\s*[\"']HOME"
+            r"|patch\.object\(\s*autoinject\s*,\s*[\"']TARGETS"
+        )
+        tools = Path(__file__).resolve().parent
+        offenders = [
+            path.name
+            for path in tools.glob("test_*.py")
+            if reader.search(path.read_text(encoding="utf-8", errors="replace"))
+            and not pinned.search(path.read_text(encoding="utf-8", errors="replace"))
+        ]
+        self.assertEqual(
+            offenders, [], "host-reading tests without a pinned env: " + ", ".join(offenders)
+        )
 
     def test_context_renderers_keep_full_history_capture(self) -> None:
         from saipen_engine.context import context_audit, context_cold, context_hot
@@ -2400,6 +2486,140 @@ class OrdinaryPlanSourceAuthorityOnceTests(unittest.TestCase):
             sum(calls), 1,
             f"ordinary PLAN must invoke source_authority_paths exactly once; calls={calls}",
         )
+
+
+
+class AuditTombstoneDeleteGateTests(unittest.TestCase):
+    """T-134: the delete gate must accept the tombstone its own docstring names.
+
+    ``delete_gate`` documents its condition as "receipt CLOSED with a
+    tombstone", and the only verb that mints a tombstone is retirement --
+    which writes ``INVALID`` into it, because INVALID is what retirement means
+    everywhere else in this engine. Reading only ``status`` therefore refused
+    every receipt the gate itself admits, and audit-layer consumption was
+    unreachable for all of them. ``location == "retired"`` is only ever
+    returned from the branch that already verified ``is_retired_tombstone``,
+    so it IS the "with a tombstone" half -- the same reading the sibling
+    ``receipt_for_digest`` already uses.
+    """
+
+    def _fixture(self) -> tuple[Path, str]:
+        root = Path(tempfile.mkdtemp(prefix="saipen-t134-"))
+        self.addCleanup(lambda: shutil.rmtree(root, ignore_errors=True))
+        (root / ".saipen").mkdir(parents=True)
+        (root / ".saipen" / "IDENTITY.md").write_text(
+            "---\nproject_lineage: lineage-b512942bac884a8691f6c98afcd6ddb9\n---\n",
+            encoding="utf-8",
+        )
+        (root / "VERSION").write_text("8.0.1\n", encoding="utf-8")
+        (root / ".saipen" / "BOARD.md").write_text(
+            "# Board\n## DOING\n## TODO\n## DONE\n- [x] T-001 [P1] done | verify: E-1\n## BLOCKED\n",
+            encoding="utf-8",
+        )
+        (root / ".saipen" / "LOG.md").write_text(
+            "- 25.09.26 00:00 [E-1] [T-001] DEC: base\n", encoding="utf-8"
+        )
+        (root / ".saipen" / "STATE.md").write_text(
+            "---\nphase: DONE\ntask: none\nnext_action: \"saipen continue\"\n"
+            "blocker: \"\"\ntransition_from: SHIP\n"
+            "saipen_version: 8\nschema_version: 3\nlast_event: 1\n"
+            'style_contract: ' + CURRENT_STYLE_CONTRACT + '\n'
+            "saipen_home: \"" + str(TOOLS.parent) + "\"\nagent: saipen-cli\n"
+            "mode: full\nupdated: 2026-09-25T00:00:00Z\n---\n",
+            encoding="utf-8",
+        )
+        body = b"# audit layer\n\nCLAUSE: verify the thing\n"
+        layer = root / "audit" / "1.md"
+        layer.parent.mkdir(parents=True)
+        layer.write_bytes(body)
+        captured = intake.capture(root, body.decode("utf-8"), source_kind="user_instruction")
+        self.assertTrue(captured.get("ok"), captured)
+        receipt_id = captured["receipt"]
+        intake.add_requirement(
+            root, receipt_id, rid="R001", text="CLAUSE: verify the thing",
+            clause_class="requirement",
+        )
+        disposition = intake.set_disposition(
+            root, receipt_id, "R001", "VERIFIED",
+            work="T-001", evidence="E-1", verification="E-1",
+        )
+        self.assertTrue(disposition.get("ok"), disposition)
+        self.assertTrue(intake.coverage_complete(root, receipt_id))
+        binding = audit_inbox.read_binding(root)
+        binding.setdefault("layers", {})["audit/1.md"] = {
+            "layer": 1,
+            "generation": 1,
+            "file_sha256": hashlib.sha256(body).hexdigest(),
+            "receipt_sha256": hashlib.sha256(body).hexdigest(),
+            "binding": "exact",
+            "size_bytes": len(body),
+            "receipt_id": receipt_id,
+            "linked_work": "T-001",
+            "state": audit_inbox.CLOSED_PENDING_DELETE,
+            "captured_at": "2026-09-20T00:00:00Z",
+            "closed_at": None,
+        }
+        (root / ".saipen" / "intake").mkdir(parents=True, exist_ok=True)
+        (root / ".saipen" / "intake" / "audit_inbox.json").write_text(
+            json.dumps(binding, indent=1), encoding="utf-8"
+        )
+        return root, receipt_id
+
+    def test_an_active_bound_receipt_is_still_refused(self) -> None:
+        root, _ = self._fixture()
+        self.assertEqual(
+            audit_inbox.delete_gate(root, "audit/1.md").get("code"),
+            "SOURCE_UNRESOLVED",
+        )
+
+    # The reason CLASS is incidental here: the gate only needs a verified
+    # tombstone. ORPHANED_RECEIPT is the one class that needs no successor.
+    def test_a_retired_bound_receipt_passes_the_gate(self) -> None:
+        root, receipt_id = self._fixture()
+        retired = operations.retire_source(
+            root, receipt_id, "saipen-cli", reason="ORPHANED_RECEIPT",
+        )
+        self.assertTrue(retired.ok, retired.to_dict())
+        tomb = (intake._read_index(root).get("tombstones") or {}).get(receipt_id)
+        self.assertTrue(
+            retirement.is_retired_tombstone(tomb),
+            "the receipt must be a verified tombstone for this test to mean anything",
+        )
+        # The tombstone says INVALID -- the exact value that used to make this
+        # gate refuse a receipt it had just admitted.
+        self.assertEqual(intake.status(root, receipt_id).get("status"), "INVALID")
+        gate = audit_inbox.delete_gate(root, "audit/1.md")
+        self.assertTrue(gate.get("ok"), gate)
+        self.assertEqual(gate.get("code"), "AUDIT_DELETE_READY")
+        self.assertEqual(gate.get("receipt"), receipt_id)
+
+    def test_a_retired_layer_is_closed_pending_delete_not_invalid(self) -> None:
+        """T-135: the same reading in the status projection.
+
+        `scan_layers` classified a bound receipt as BLOCKED unless it was
+        CLOSED or ACTIVE, so a retired receipt -- INVALID by retirement's own
+        convention -- made a finished inbox report "it is not idle" forever.
+        """
+        root, receipt_id = self._fixture()
+        operations.retire_source(
+            root, receipt_id, "saipen-cli", reason="ORPHANED_RECEIPT",
+        )
+        report = audit_inbox.status(root)
+        self.assertEqual(report.get("invalid"), [])
+        self.assertEqual(report.get("closed_pending_delete"), [1])
+        # Still not clean: the layer file is present and only consume removes it.
+        self.assertFalse(report.get("clean"))
+        self.assertTrue((root / "audit" / "1.md").is_file())
+
+    def test_opening_the_gate_does_not_delete_the_layer(self) -> None:
+        root, receipt_id = self._fixture()
+        operations.retire_source(
+            root, receipt_id, "saipen-cli", reason="ORPHANED_RECEIPT",
+        )
+        layer = root / "audit" / "1.md"
+        self.assertTrue(audit_inbox.delete_gate(root, "audit/1.md").get("ok"))
+        self.assertTrue(layer.is_file(), "the gate must not consume the layer")
+        self.assertEqual(layer.read_bytes(), b"# audit layer\n\nCLAUSE: verify the thing\n")
 
 
 if __name__ == "__main__":
