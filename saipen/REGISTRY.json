@@ -417,6 +417,7 @@
    "userperson",
    "rebind-home",
    "context",
+   "mail",
    "acceptance",
    "attempt",
    "brief",
@@ -685,7 +686,7 @@
   "budgets": {
    "cold": 25600,
    "ordinary_continue": 35840,
-   "command_resolution": 43008,
+   "command_resolution": 44032,
    "ordinary_phase": 40960,
    "ship_improve": 56320,
    "single_doc": 51200
@@ -977,6 +978,7 @@
   "NOT_A_USER_REQUEST",
   "NOT_SAIPEN_PROJECT",
   "NO_PACKAGE",
+  "OUTBOX_INVALID",
   "NO_READY_PACKAGE",
   "OPERATOR_DECISION_REQUIRED",
   "ORPHAN_RECEIPT",
@@ -1061,6 +1063,15 @@
   "REBIND_OUTPUT_INVALID",
   "ACCEPTED_DEBT_CORRUPT",
   "ACCEPTED_DEBT_REBIND_NOOP",
+  "CLOSURE_CONTRADICTION",
+  "ATTRIBUTES_POLICY_UNAVAILABLE",
+  "EXEC_RESPONSE_INVALID",
+  "INIT_REFUSED",
+  "NON_JSON_SEGMENT_OUTPUT",
+  "MAILBOX_ATTACH_SKIPPED",
+  "MAILBOX_NO_HOME",
+  "MAILBOX_TIMEOUT",
+  "MAILBOX_UNAVAILABLE",
   "STALE_PRECONDITION"
  ],
  "continue_fallback": {
