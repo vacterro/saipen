@@ -593,31 +593,7 @@ const RECALL_UNAVAILABLE =
 // A canonical SAIPEN invocation in a host shell: the launcher, its .cmd twin
 // or the runtime script, followed by a verb.
 const SAIPEN_COMMAND_RE = /(?:^|[\s;&|("'])saipen(?:\.cmd|\.py)?["']?\s+[a-z]/i;
-// An EXPLICIT operator request for one bounded canonical operation, whose
-// completion IS the answer to the turn that asked for it. `status` asks for a
-// status card; `init` asks for a project to be created. For these the response
-// contract still gates the final text in full -- only the AUTONOMY rule
-// (T-1416) is not stacked on top as a second refusal reason, because "keep
-// working, a canonical action is eligible" is the wrong reading of a turn whose
-// whole subject was one operation the operator named.
-const REQUEST_TERMINATING_COMMAND_RE =
-  /^\s*saipen(?:\.cmd|\.py)?\s+(?:status(?:\s+--(?:json|project-root\s+\S+))*|init(?:\s+\S+)*)\s*$/i;
-// T-1553: the one canonical command that must be reachable in a directory that
-// is not a SAIPEN project yet -- the command that MAKES it one. Demanding a
-// binding for it made the mid-session transition unreachable: the host that
-// started outside a project could never run the very init whose completion
-// EXEC-RESPONSE-01 then had to gate. The canonical guard already admits this
-// tool as non-interfering in a non-SAIPEN cwd; the adapter's own
-// `requireBinding` escalation was the second authority that contradicted it.
-//
-// The match is ANCHORED and WHOLE-COMMAND on purpose. An unanchored search for
-// `saipen init` anywhere in the line exempts every consequential command that
-// merely mentions it -- `saipen ticket add P1 "please saipen init this"` and
-// `saipen init && curl ...` were both admitted from an unbound cwd, which is
-// exactly the over-admission this exemption must never create. `[^;&|]*$` refuses
-// chaining outright; a `|` inside a quoted argument false-negatives into
-// requiring a binding, which is the safe direction.
-const PROJECT_CREATING_COMMAND_RE = /^\s*saipen(?:\.cmd|\.py)?\s+init(?:\s[^;&|]*)?\s*$/i;
+const STATUS_ONLY_COMMAND_RE = /^\s*saipen(?:\.cmd|\.py)?\s+status(?:\s+--(?:json|project-root\s+\S+))*\s*$/i;
 
 const recallSessions = new Map();
 
@@ -634,20 +610,14 @@ function sessionMemory(sessionID) {
   return memory;
 }
 
-function checkOperationalResponse(pythonBin, saipenPy, projectRoot, text, enforceAutonomy,
-                                 requestText) {
+function checkOperationalResponse(pythonBin, saipenPy, projectRoot, text, enforceAutonomy) {
   if (!pythonBin || !saipenPy || !projectRoot) {
     throw new Error("EXEC_RESPONSE_UNAVAILABLE: canonical response checker is unreachable");
   }
   const proc = spawnSync(
     pythonBin,
     [saipenPy, "response", "check", "--stdin", "--json", "--project-root", projectRoot,
-      ...(enforceAutonomy ? ["--auto-eligibility"] : []),
-      // T-1556: the HUMAN's ingress, transported. The canonical owner decides
-      // whether this turn authorized the detailed path; this adapter never
-      // classifies it and never restates a DETAILS rule. Without it the closed
-      // default stands and DETAILS is refused.
-      ...(requestText ? ["--request", requestText] : [])],
+      ...(enforceAutonomy ? ["--auto-eligibility"] : [])],
     {
       input: text, encoding: "utf8", timeout: GUARD_TIMEOUT_MS,
       windowsHide: true, maxBuffer: MAX_EVENT_BYTES, cwd: projectRoot,
@@ -778,81 +748,28 @@ const SaipenGuard = async (context) => {
     runtimeGeneration,
   );
 
+  const systemMessage = bindingSystemMessage(bootstrapBinding);
   // The resolved project is the admission cwd. When no binding resolved this
   // is the legacy worktree-first start, so refusal behaviour is unchanged.
-  let eventCwd = bootstrapBinding.resolved_from || contextStart(context);
-
-  // T-1553: a host session that STARTS outside a SAIPEN project can enter one
-  // without restarting this plugin factory -- `saipen init` writes `.saipen/`
-  // mid-session. The binding above is therefore a CACHE, never the last word:
-  // an unadmitted cache is re-asked through the SAME canonical resolver (never
-  // a second binding authority, never adapter-local filesystem guessing) at the
-  // moments that decide enforcement -- before a tool is admitted, before a
-  // model request, and before a final response is gated. Without this, a host
-  // that started in a non-SAIPEN directory kept `NOT_SAIPEN_PROJECT` for the
-  // whole session and every operational free-form response escaped the
-  // EXEC-RESPONSE-01 gate after `saipen init` completed.
-  //
-  // Upgrade-only and bounded: an admitted binding is final for the session
-  // (provenance stays stable and a bound project pays nothing), while an
-  // unadmitted session pays at most one extra resolver probe per tool event
-  // and per final response, plus the rate limit below on model requests. No
-  // probe storm, and no one-turn grace period after init.
-  const BINDING_RECHECK_MS = 2000;
-  let liveBinding = bootstrapBinding;
-  let bindingProbedAt = Date.now();
-  // T-1553: the turn that CREATED the project is an operational turn, and
-  // nothing else in this adapter would ever say so. `saipen init` materializes
-  // the canonical project with file effects, not with a `saipen ...` shell
-  // command, so the command-driven path below never fires for it -- and the
-  // regression this repair exists for is precisely the init turn's own final
-  // response escaping the gate. The canonical FACT that the turn executed
-  // canonical Work is the observable binding upgrade itself: this session
-  // started unbound and the live project is now bound. Turn context is the
-  // host's to decide, and it is decided here from that fact alone -- no prose
-  // similarity, no second binding authority, and no effect on any session that
-  // did not cross the boundary. `chat.message` clears it with the rest of the
-  // turn context when the next user message arrives, so this marks the init
-  // turn rather than the life of the session.
-  let initTurnObserved = false;
-  async function currentBinding({ rateLimitMs = 0, sessionId = null } = {}) {
-    if (liveBinding.code === "ADMITTED" && liveBinding.project_root) return liveBinding;
-    if (rateLimitMs && Date.now() - bindingProbedAt < rateLimitMs) return liveBinding;
-    bindingProbedAt = Date.now();
-    const refreshed = await resolveBootstrapBinding(
-      context, launchActor, pythonBin, saipenPy,
-    );
-    if (refreshed.project_root) {
-      liveBinding = refreshed;
-      eventCwd = refreshed.resolved_from || eventCwd;
-      if (!initTurnObserved) {
-        initTurnObserved = true;
-        const memory = sessionMemory(sessionId);
-        if (memory) memory.operational = true;
-      }
-    }
-    return liveBinding;
-  }
+  const eventCwd = bootstrapBinding.resolved_from || contextStart(context);
   let attemptedCondition = null;
+
 
   return {
     "experimental.chat.system.transform": async (input, output) => {
       if (!output || !Array.isArray(output.system)) return;
-      const binding = await currentBinding({
-        rateLimitMs: BINDING_RECHECK_MS, sessionId: input && input.sessionID,
-      });
-      output.system.push(bindingSystemMessage(binding));
+      output.system.push(systemMessage);
       // T-1446 AUTO_RECALL / AUTO_KICK. This hook runs before EVERY model
       // request -- including the first request a replacement model serves
       // after a router swaps providers mid-work (SAIFREN, SRC-105). The
       // canonical execution is recomputed here from project state on each
       // request, so the successor receives the decision instead of needing a
       // memory it does not have.
-      if (binding.code !== "ADMITTED" || !binding.project_root) return;
+      if (bootstrapBinding.code !== "ADMITTED" || !bootstrapBinding.project_root) return;
       const sessionID = input && input.sessionID;
       const memory = sessionMemory(sessionID);
       const recall = runRecall(
-        pythonBin, saipenPy, binding.project_root,
+        pythonBin, saipenPy, bootstrapBinding.project_root,
         recallCarrier(input, memory),
       );
       memory.seen = true;
@@ -889,19 +806,15 @@ const SaipenGuard = async (context) => {
       // T-1553: enforce against the CURRENT binding, so the final response of
       // the very turn that ran `saipen init` is already gated. Nothing about
       // this needs a host restart.
-      const binding = await currentBinding({ sessionId: input && input.sessionID });
-      if (binding.code !== "ADMITTED" || !binding.project_root) return;
+      if (bootstrapBinding.code !== "ADMITTED" || !bootstrapBinding.project_root) return;
       const memory = sessionMemory(input && input.sessionID);
       if (!memory.operational) return;
       if (!output || typeof output.text !== "string" || !output.text.trim()) {
         throw new Error("EXEC_RESPONSE_INVALID: empty operational response");
       }
-      const request = memory.pending || memory.last;
       checkOperationalResponse(
-        pythonBin, saipenPy, binding.project_root, output.text,
+        pythonBin, saipenPy, bootstrapBinding.project_root, output.text,
         memory.enforceAutonomy,
-        request && typeof request.text === "string"
-          ? request.text.slice(0, MAX_INGRESS_TEXT_CHARS) : "",
       );
     },
     "tool.execute.before": async (input, output) => {
@@ -962,10 +875,6 @@ const SaipenGuard = async (context) => {
       const hostSession = input && input.sessionID;
       if (hostSession) process.env.SAIPEN_HOST_SESSION = String(hostSession);
       else delete process.env.SAIPEN_HOST_SESSION;
-      // T-1553: a tool event is the cheapest canonical moment to notice that
-      // this project became a SAIPEN project (the guard round trip is spawned
-      // for the event anyway), and eventCwd follows the upgraded binding.
-      const binding = await currentBinding({ sessionId: hostSession });
       const payload = JSON.stringify(
         buildEvent(context, toolName, args, {
           actor: launchActor,
@@ -1015,8 +924,8 @@ const SaipenGuard = async (context) => {
         effect && typeof effect.fleet_preflight === "boolean" ? effect.fleet_preflight : true;
       if (fleetPreflight) {
         const fleetResult = await runFleetPrepare(
-          pythonBin, saipenPy, binding, eventCwd, attemptedCondition,
-          /^saipen(?:\s|$)/.test(command) && !PROJECT_CREATING_COMMAND_RE.test(command),
+          pythonBin, saipenPy, bootstrapBinding, eventCwd, attemptedCondition,
+          /^saipen(?:\s|$)/.test(command),
         );
         const fleet = parseGuardPayload(fleetResult);
         if (!fleet || typeof fleet.classification !== "string" ||
@@ -1079,8 +988,8 @@ const SaipenGuard = async (context) => {
         const memory = sessionMemory(hostSession);
         consumeIngress(memory);
         memory.operational = true;
-        // An explicit one-operation request is an authorized response boundary.
-        memory.enforceAutonomy = !REQUEST_TERMINATING_COMMAND_RE.test(command);
+        // An explicit status-only request is an authorized response boundary.
+        memory.enforceAutonomy = !STATUS_ONLY_COMMAND_RE.test(command);
       }
     },
   };
