@@ -114,6 +114,47 @@
       }
     },
     {
+      "id": "zcode-production",
+      "name": "ZCode (production ~/.zcode home)",
+      "home_note": "The production ZCode desktop app reads the REAL user home ~/.zcode (global AGENTS.md instructions) and the shared ~/.agents skills tree; it never sees $ZAICODE_HOME. Distinct from the isolated 'zaicode' dev entry, which names a variable-guarded HOME.",
+      "instruction_surfaces": [
+        "~/.zcode/AGENTS.md"
+      ],
+      "skill_surfaces": [
+        "~/.agents/skills/saipen"
+      ],
+      "blocking_capability": false,
+      "hook_install_surface": null,
+      "hook_artifact": null,
+      "freshness_surfaces": [
+        "skill",
+        "instruction"
+      ],
+      "declared_strength": "ADVISORY",
+      "response_enforcement": "ADVISORY",
+      "response_hook": null,
+      "response_enforcement_note": "No final-response hook surface exists for this host: the T-1583 incident (a STYLE-breaking reply escaping on the live production host) measured the limit, so ADVISORY states the enforced boundary, not an aspiration.",
+      "artifact_version": null,
+      "install": {
+        "home": "~/.zcode",
+        "skill": "~/.agents/skills/saipen",
+        "instruction": "~/.zcode/AGENTS.md"
+      },
+      "pre_output_interception": "NONE",
+      "stop_output_interception": "NONE",
+      "admission_enforcement": "ADVISORY",
+      "style_enforcement": "ADVISORY",
+      "admission_enforcement_note": "No final-response or delivery hook surface is installed for this host: protocol admission and chat style reach the model as instructions only.",
+      "execution_capabilities": {
+        "silent_tool_continuation": "ADVISORY",
+        "intermediate_text_suppression": "ADVISORY",
+        "structured_progress": "CANONICAL_RUNTIME_STATUS",
+        "host_thought_visibility_control": "UNAVAILABLE",
+        "final_response_gate": "ADVISORY"
+      },
+      "execution_capability_note": "EXECUTION.md instructs silent tool continuation. No supported pre-render intermediate-text interception is installed; final/Stop hooks cannot retract streamed text. Machine progress uses canonical status and runtime heartbeat. Native thought UI is host-owned. Higher-priority host narration requirements take precedence and prevent a silence guarantee."
+    },
+    {
       "id": "gemini",
       "name": "Gemini CLI / Antigravity",
       "instruction_surfaces": [
