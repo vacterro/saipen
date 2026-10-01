@@ -42,6 +42,11 @@ ticket must never BLOCK solely because its personal diff cannot be isolated
   the full reviewed-scope release path below unchanged: exact path
   attribution, explicit staging, foreign bytes preserved, ship gate,
   commit/tag/push when publishing is enabled.
+  A delta that lives in ANOTHER repository has no path channel: `--paths` is
+  refused outside `cohort`, and `saipen scope` refuses a path that resolves
+  outside this project root. Name the carrying commit in the ticket's
+  `verify:` text at closure so the board line still points at the bytes, and
+  say plainly that publication happened in the other repository.
 - `inherited_verified` — this ticket adds NO implementation delta; it
   independently verified implementation whose durable publication authority
   already exists elsewhere. Record `BUILD` no-delta evidence, `VERIFY` PASS,
