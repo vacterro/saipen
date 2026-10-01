@@ -146,6 +146,11 @@
     "owner": "saipen/SOURCES.md",
     "test": "tools/test_source_receipts.py",
     "subject": "local authority and publication permission are separate states: DISTRIBUTABLE default, monotonic QUARANTINED, protected body never exported"
+   },
+   "STORE-SAFETY-01": {
+    "owner": "saipen/STORAGE.md",
+    "test": "tools/test_storage_artifacts.py",
+    "subject": "explicit durable trust, disposable scratch, verified atomic artifact promotion and honest state-loss recovery"
    }
   }
  },
@@ -176,7 +181,8 @@
   "EVIDENCE-RETENTION-01": "saipen/CORE.md",
   "SOURCE-DISTRIBUTION-01": "saipen/SOURCES.md",
   "SOURCE-APPEND-01": "saipen/SOURCES.md",
-  "QUALITY-TIME-01": "saipen/CORE.md"
+  "QUALITY-TIME-01": "saipen/CORE.md",
+  "STORE-SAFETY-01": "saipen/STORAGE.md"
  },
  "evidence_retention": {
   "max_artifact_bytes": 26214400,
@@ -415,6 +421,7 @@
    "hunt",
    "crew",
    "userperson",
+   "storage",
    "rebind-home",
    "context",
    "mail",
@@ -434,6 +441,7 @@
    "status",
    "submit",
    "complete",
+   "rebind",
    "sweep",
    "sweep-queue",
    "verify",
@@ -684,9 +692,9 @@
    }
   },
   "budgets": {
-   "cold": 25600,
+   "cold": 26880,
    "ordinary_continue": 35840,
-   "command_resolution": 44032,
+   "command_resolution": 46080,
    "ordinary_phase": 40960,
    "ship_improve": 56320,
    "single_doc": 51200
@@ -845,6 +853,18 @@
   }
  },
  "error_codes": [
+  "STORAGE_POLICY_VIOLATION",
+  "STORAGE_POLICY_INVALID",
+  "STORAGE_POLICY_CHANGED",
+  "STORAGE_PATH_INVALID",
+  "STORAGE_REGISTRY_INVALID",
+  "STORAGE_REGISTRY_MISSING",
+  "STORAGE_OPERATION_FAILED",
+  "STORAGE_SOURCE_CHANGED",
+  "STORAGE_HASH_MISMATCH",
+  "STORAGE_ARTIFACT_MISSING",
+  "STORAGE_RECOVERY_UNPROVEN",
+  "UNKNOWN_REQUIRES_EXPLICIT_DECISION",
   "HANDOFF_AUTHORITY_REQUIRED",
   "STALE_STATE",
   "TICKET_NOT_FOUND",
@@ -1072,7 +1092,12 @@
   "MAILBOX_NO_HOME",
   "MAILBOX_TIMEOUT",
   "MAILBOX_UNAVAILABLE",
-  "STALE_PRECONDITION"
+  "STALE_PRECONDITION",
+  "PROTOCOL_ADMISSION_REQUIRED",
+  "PROTOCOL_ADMISSION_TRANSPORT_REQUIRED",
+  "CHAT_STYLE_DRIFT",
+  "INTERMEDIATE_TEXT_SUPPRESSED",
+  "TREE_UNDER_TEST"
  ],
  "continue_fallback": {
   "invariant": "continue may fall through to improve ONLY after recovery, blocked/retryable, queued and required-follow-up routing are exhausted; it resumes an existing active Improve cycle and never creates an unbounded improve carousel",
@@ -1166,5 +1191,53 @@
   "envelope_owner": "tools/saipen_engine/audit_envelope.py",
   "test": "tools/test_audit_enqueue.py",
   "envelope_test": "tools/test_audit_envelope.py"
+ },
+ "protocol_admission": {
+  "host_authority": {
+   "status": "UNAVAILABLE",
+   "reason": "T-1563: same-user Python can reproduce a local hook; project keys and importable signers do not prove host provenance",
+   "required_boundary": "host-owned authenticated broker outside the ordinary model child-process surface",
+   "local_minting": "UNAVAILABLE",
+   "legacy_project_key_provenance": "UNTRUSTED"
+  },
+  "rule_id": "PROTOCOL-ADMISSION-01",
+  "owner": "tools/saipen_engine/protocol_admission.py",
+  "test": "tools/test_protocol_admission.py",
+  "invariant": "no current protocol admission -> no normal user-visible assistant output; admission is machine-derived from delivered authority fingerprints, never from model prose, and is generational: any change to what it proved makes the old token fail",
+  "states": [
+   "UNBOUND",
+   "BINDING",
+   "ADMITTED",
+   "STALE",
+   "REFUSED"
+  ],
+  "layers": [
+   "binding",
+   "admission",
+   "exec_response",
+   "chat_style"
+  ],
+  "documents": [
+   "BOOT.md",
+   "STYLE.md",
+   "EXECUTION.md"
+  ],
+  "agents_absent": "refuse",
+  "agents_stale": "diagnose",
+  "skills": [
+   {
+    "name": "caveman",
+    "critical": false,
+    "aliases": [
+     "anthropic-skills:caveman"
+    ],
+    "locations": [
+     "~/.claude/skills/caveman",
+     "~/.claude/skills/synced/*/caveman",
+     "~/.agents/skills/caveman"
+    ],
+    "decision": "B for the observed failure, C for the protocol: the skill exists by identity under ~/.claude/skills/synced/*/ and ~/.agents/skills/, the identity anthropic-skills:caveman exists nowhere, and the voice is carried by delivered STYLE.md, so it is not admission-critical; unresolvable is a reported warning; set critical true to REFUSE."
+   }
+  ]
  }
 }

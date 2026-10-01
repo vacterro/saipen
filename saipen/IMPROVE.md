@@ -17,7 +17,7 @@ read-only reports; they never orphan DOING Work or create a global
 This lifecycle declaration must exactly mirror CORE's routing declaration;
 the validator compares both with the CLI executor set.
 
-`IMPROVE_ACTIONS = [bare, status, submit, complete, sweep, sweep-queue, verify, cycle-complete, reconcile, abort, retire, clean, hold, unhold]`
+`IMPROVE_ACTIONS = [bare, status, submit, complete, rebind, sweep, sweep-queue, verify, cycle-complete, reconcile, abort, retire, clean, hold, unhold]`
 
 Each action's own validation rules live in the section that owns it; this list
 is the surface, not a second copy of the law.
@@ -49,6 +49,17 @@ is the surface, not a second copy of the law.
 - `saipen improve complete <cycle> <seat> <project>` — mechanical report
   completion: full report validation, then draft -> complete, journaled and
   immutable.
+- `saipen improve rebind <cycle> <seat> <project>` — re-stamp a DRAFT report's
+  install-derived identity (installed protocol fingerprint and the bound source
+  identity) to the currently installed one. The protocol tree is writable while
+  a cycle is in flight, so an edit between cycle open and submit moves that
+  fingerprint and `submit` then correctly refuses the draft; before this
+  action the only recovery was abort-and-rediscover, which throws the audit
+  away. IDENTITY ONLY, and only on a draft: a complete, swept or archived
+  report is refused outright, the RUN body is never touched so no audit
+  content can be laundered, every OTHER bound error must already be clear so a
+  rebind cannot ride in on a report that was already malformed, and the cycle
+  must still be active as for every other mutator.
 - `saipen improve sweep-queue <cycle>` — read-only enumeration of the exact
   unswept composite finding queue (cycle + seat/report + RUN + IMP), in
   deterministic order. Semantic adjudication (reproduce/classify/dedupe/decide)
@@ -424,45 +435,47 @@ share disposition coverage.
 Disposition set (closed): `CONFIRMED | DUPLICATE | ALREADY_FIXED |
 SUPERSEDED | LATER_RULE | NOT_REPRODUCED | INVALID | NEEDS_EXTERNAL_EVIDENCE`.
 
+Reproduction labels measure the original defect predicate, never an exception
+or exit code: `REPRODUCED` = the unsafe/broken effect occurred;
+`NOT_REPRODUCED` = it was prevented and its absence checked; a broken harness
+or unknown predicate is `INVALID`. `saipen_engine.reproduction.run_reproduction`
+owns this probe contract (NITRO consumes it); an external probe states and
+measures its own predicate before it supplies a sweep disposition.
+
 ### Stale COMPLETE evidence and its finding accounting (T-1411)
 
 A strict active cycle's COMPLETE report whose captured source identity no
-longer matches the current tree is stale, and stale evidence never authorizes
-fresh canonical work (T-619): `CONFIRMED` on that report is refused. The
-finding still owes a truthful final Core disposition and the cycle owes a
-finite executable exit. The ONE route is:
+longer matches the current tree is stale; stale evidence never authorizes
+fresh canonical work (T-619), so `CONFIRMED` on it is refused. The finding
+still owes a truthful final disposition and the cycle a finite exit. The ONE
+executable route is `saipen improve reconcile <cycle>` (section 14). It needs:
 
-1. create and complete a distinct replacement seat (`saipen improve
-   --new-seat`, section 4) auditing the SAME `context_scope` against the
-   current tree;
-2. dispose every historical finding with a non-CONFIRMED disposition --
-   `SUPERSEDED` with `reproduced=y` when the replacement reproduced the
-   defect, `NOT_REPRODUCED` with `reproduced=n` when it no longer does --
-   bound to the successor with `--verification
-   <cycle>/<replacement-seat>/<report>#<RUN-N/IMP-NNN>`. Current ticket
-   authority flows ONLY through the replacement's own `CONFIRMED`
-   disposition on fresh evidence; the historical record carries no ticket;
-3. `saipen improve retire <cycle> <seat> --reason STALE_COMPLETE
-   --replacement <fresh-seat>`, which validates the replacement is distinct,
-   registered, `expected`, COMPLETE, current and same-role/same-scope, then
-   writes the `availability: superseded` binding. The machine result is
-   `SEAT_SUPERSEDED`, never `SEAT_RETIRED`.
+1. a distinct, completed replacement seat (`saipen improve --new-seat`,
+   section 4) auditing the SAME `context_scope` against the current tree;
+2. a non-CONFIRMED disposition for each UNSWEPT historical finding --
+   `SUPERSEDED` with `reproduced=y` when the replacement reproduced it,
+   `NOT_REPRODUCED` with `reproduced=n` when not -- bound with `--verification
+   <cycle>/<replacement-seat>/<report>#<RUN-N/IMP-NNN>`. Ticket authority flows
+   ONLY through the replacement's own `CONFIRMED` disposition; the historical
+   record carries no ticket. The SWEEP ledger is append-only: an already
+   disposed finding is never swept again.
 
-Existing SWEEP dispositions are never rewritten: the route appends only. A
-finding may never disappear because its report was superseded -- unswept
-findings refuse the supersession itself. Repeated resolution of the same
-relation returns `ALREADY_APPLIED` and writes nothing; that is a statement
-about the relation, never about cycle freshness -- if the replacement later
-goes stale, `saipen improve verify` reports it and names the next route. Every
-refusal that blocks a recoverable stale-COMPLETE state prints the executable
-route above. `saipen improve verify`, `saipen improve cycle-complete`,
-`saipen improve clean` and `tools/validate.py` share the same
-`validate_superseded_seat` evidence: a tampered preserved report, a
-dangling/cyclic replacement chain, or a swallowed finding fails them all.
-`saipen improve reconcile` (section 14) executes this exact route, plus the
-empty-draft retirement, in ONE operation when the cycle is otherwise
-terminalizable; it never weakens the evidence bar, and it refuses when no
-current same-scope replacement exists.
+Reconcile then writes the same binding as `saipen improve retire <cycle>
+<seat> --reason STALE_COMPLETE --replacement <fresh-seat>` (distinct,
+registered, `expected`, COMPLETE, current, same-role/same-scope replacement;
+`SEAT_SUPERSEDED`, never `SEAT_RETIRED`), preserving report hashes and ledger
+bytes, and terminalizes an otherwise complete cycle. `cycle-complete` names
+this route and never completes implicitly; every refusal blocking a
+recoverable stale-COMPLETE state prints it.
+
+A finding may never disappear because its report was superseded: unswept
+findings refuse the supersession itself. Repeated resolution returns
+`ALREADY_APPLIED` with no writes -- a statement about the relation, never
+cycle freshness; a replacement that later goes stale is reported by
+`saipen improve verify` with the next route. `verify`, `cycle-complete`,
+`clean` and `tools/validate.py` share `validate_superseded_seat`: a tampered
+preserved report, a dangling/cyclic replacement chain or a swallowed finding
+fails them all.
 
 A report's own `confidence: proven` is evidence to inspect, never a ticket
 authorization. Canonical tickets carry: `source_reports, reproduced,
@@ -536,6 +549,14 @@ Prefer immutable cycle directories plus a compact index/archive marker over
 renaming paths that tickets reference. Do not create link rot as a cleanup
 feature: canonical ticket provenance must still resolve through a stable
 cycle/report identity after archiving.
+
+COMPLETE is protocol convergence, not a Git commit. `cycle-complete`,
+`reconcile`, `clean` and `improve status` report read-only `bookkeeping`:
+PERSISTED, PENDING (changed and untracked history paths, ignored ones
+included) or UNAVAILABLE. The bounded remaining action is operator-scoped:
+stage only the approved paths, then `git commit --only -- <those paths>`, which
+leaves unrelated staged changes out. No lifecycle command commits; `ship`
+stays a release.
 
 ## 11. Meta-control proof
 

@@ -191,14 +191,14 @@ def _looks_sensitive(text: str) -> bool:
     """Conservative metadata signal; never redacts or echoes the source."""
     return bool(
         re.search(
-            r"(?im)\b(?:api[_-]?key|access[_-]?token|token|password|secret)\b\s*[:=]\s*(?!<redacted>|\*{3})\S+",
+            r"(?im)\b(?:api[_-]?key|access[_-]?token|token|password|secret)\b[ \t]*[:=][ \t]*(?!<redacted>|\*{3})\S+",
             text,
         )
     )
 
 
 _CREDENTIAL_ASSIGNMENT_RE = re.compile(
-    r"(?im)(\b(?:api[_-]?key|access[_-]?token|token|password|secret)\b\s*[:=]\s*)\S+"
+    r"(?im)(\b(?:api[_-]?key|access[_-]?token|token|password|secret)\b[ \t]*[:=][ \t]*)\S+"
 )
 
 
@@ -1612,6 +1612,15 @@ def capture(
                 from . import runtime_namespace
 
                 runtime_namespace.ensure_gitignore_policy(root)
+            # T-1508: every new body is byte-bound evidence, so the `-text`
+            # protection is re-established whenever it is missing -- not only
+            # at adoption, because a project adopted before the policy
+            # existed is exactly the one a `git stash -u` round-trip under
+            # core.autocrlf already converted. Best-effort, like the ignore
+            # policy: a project-file failure never loses a source.
+            from . import runtime_namespace
+
+            runtime_namespace.ensure_gitattributes_policy(root)
             return {
                 "ok": bool(linkage.get("ok")),
                 "code": "ORPHAN_RECEIPT_RECOVERED"
@@ -1789,6 +1798,74 @@ def distribution_status(root: Path | str, receipt_id: str) -> dict:
         return {"ok": False, "code": "SOURCE_CORRUPTION", "detail": str(exc)}
 
 
+def validate_requirement_clauses(
+    receipt_id: str, clauses: list[dict]
+) -> tuple[list[tuple[str, str, str, str | None]] | None, dict | None]:
+    """The ONE grammar authority for a `source req` request (T-1277).
+
+    Returns ``(normalized, None)`` on success or ``(None, refusal)`` on the
+    first refusal, with the exact code the caller emits. `add_requirements`
+    consumes this before any write, and the CLI `--dry-run` planner consumes
+    the SAME function -- so a dry-run can never certify input the apply path
+    would refuse. This is pure and stateless (no disk read): it decides only
+    what the grammar decides, which is what both paths must agree on. State
+    checks (receipt exists, clause already present) stay in the mutator.
+    """
+    if not INTENT_RE.fullmatch(receipt_id):
+        return None, {"ok": False, "code": "INVALID_ID", "detail": receipt_id}
+    if not clauses:
+        return None, {"ok": False, "code": "VALIDATION_FAILED", "detail": "no clause to add"}
+    normalized: list[tuple[str, str, str, str | None]] = []
+    for item in clauses:
+        rid = str(item.get("rid") or "")
+        text = str(item.get("text") or "")
+        clause_class = str(item.get("class") or "requirement")
+        when_environment = item.get("when_environment")
+        if re.fullmatch(r"R\d+", rid):
+            rid = f"{receipt_id}:{rid}"
+        if not re.fullmatch(rf"{re.escape(receipt_id)}:R\d+", rid):
+            return None, {"ok": False, "code": "INVALID_ID", "detail": rid}
+        if not text.strip():
+            return None, {"ok": False, "code": "VALIDATION_FAILED", "detail": "empty clause text"}
+        if clause_class not in CLAUSE_CLASSES:
+            return None, {
+                "ok": False,
+                "code": "VALIDATION_FAILED",
+                "detail": f"unknown clause class {clause_class!r}",
+            }
+        if when_environment is not None and not re.fullmatch(r"[a-z0-9_-]+", when_environment):
+            return None, {
+                "ok": False,
+                "code": "VALIDATION_FAILED",
+                "detail": f"invalid environment identity {when_environment!r}",
+            }
+        normalized.append((rid, text, clause_class, when_environment))
+    return normalized, None
+
+
+def validate_disposition_request(
+    receipt_id: str, rid: str, disposition: str
+) -> tuple[str | None, dict | None]:
+    """The ONE stateless grammar authority for a `source disp` request (T-1277).
+
+    Returns ``(normalized_rid, None)`` or ``(None, refusal)``. Shared by
+    `set_disposition` and the CLI `--dry-run` planner so the two never
+    disagree on a receipt id or disposition the grammar refuses. Clause
+    membership is a state question and stays in the mutator.
+    """
+    if not _valid_receipt_id(receipt_id):
+        return None, _invalid_receipt_id(receipt_id)
+    if disposition not in ALL_DISPOSITIONS:
+        return None, {
+            "ok": False,
+            "code": "VALIDATION_FAILED",
+            "detail": f"disposition {disposition!r}",
+        }
+    if re.fullmatch(r"R\d+", rid):
+        rid = f"{receipt_id}:{rid}"
+    return rid, None
+
+
 def add_requirement(
     root: Path | str,
     receipt_id: str,
@@ -1842,35 +1919,10 @@ def add_requirements(root: Path | str, receipt_id: str, clauses: list[dict]) -> 
     its 120-second interactive bound.
     """
     root = Path(root)
-    if not INTENT_RE.fullmatch(receipt_id):
-        return {"ok": False, "code": "INVALID_ID", "detail": receipt_id}
-    if not clauses:
-        return {"ok": False, "code": "VALIDATION_FAILED", "detail": "no clause to add"}
-    normalized: list[tuple[str, str, str, str | None]] = []
-    for item in clauses:
-        rid = str(item.get("rid") or "")
-        text = str(item.get("text") or "")
-        clause_class = str(item.get("class") or "requirement")
-        when_environment = item.get("when_environment")
-        if re.fullmatch(r"R\d+", rid):
-            rid = f"{receipt_id}:{rid}"
-        if not re.fullmatch(rf"{re.escape(receipt_id)}:R\d+", rid):
-            return {"ok": False, "code": "INVALID_ID", "detail": rid}
-        if not text.strip():
-            return {"ok": False, "code": "VALIDATION_FAILED", "detail": "empty clause text"}
-        if clause_class not in CLAUSE_CLASSES:
-            return {
-                "ok": False,
-                "code": "VALIDATION_FAILED",
-                "detail": f"unknown clause class {clause_class!r}",
-            }
-        if when_environment is not None and not re.fullmatch(r"[a-z0-9_-]+", when_environment):
-            return {
-                "ok": False,
-                "code": "VALIDATION_FAILED",
-                "detail": f"invalid environment identity {when_environment!r}",
-            }
-        normalized.append((rid, text, clause_class, when_environment))
+    normalized, refusal = validate_requirement_clauses(receipt_id, clauses)
+    if refusal is not None:
+        return refusal
+    assert normalized is not None
     try:
         meta = _read_meta(root, receipt_id)
         if not meta:
@@ -2105,12 +2157,11 @@ def set_disposition(
     environment: str | None = None,
 ) -> dict:
     root = Path(root)
-    if not _valid_receipt_id(receipt_id):
-        return _invalid_receipt_id(receipt_id)
-    if disposition not in ALL_DISPOSITIONS:
-        return {"ok": False, "code": "VALIDATION_FAILED", "detail": f"disposition {disposition!r}"}
-    if re.fullmatch(r"R\d+", rid):
-        rid = f"{receipt_id}:{rid}"
+    normalized_rid, refusal = validate_disposition_request(receipt_id, rid, disposition)
+    if refusal is not None:
+        return refusal
+    assert normalized_rid is not None
+    rid = normalized_rid
     try:
         with project_writer_lock(root):
             integrity = verify_integrity(root, receipt_id)
@@ -2391,13 +2442,50 @@ def verify_integrity(root: Path | str, receipt_id: str) -> dict:
         return {"ok": False, "code": "SOURCE_CORRUPTION", "detail": str(exc)}
     actual = hashlib.sha256(body).hexdigest()
     if actual != meta.get("source_sha256"):
-        return {
+        refused = {
             "ok": False,
             "code": "SOURCE_CORRUPTION",
             "recorded": meta.get("source_sha256"),
             "actual": actual,
         }
+        if line_ending_drift(body, meta.get("source_sha256")):
+            refused["drift"] = LINE_ENDING_DRIFT
+            refused["detail"] = line_ending_drift_detail(rel)
+        return refused
     return {"ok": True, "code": "SOURCE_INTEGRITY_OK", "receipt": receipt_id}
+
+
+#: T-1508. The one name for a byte-bound file whose digest fails ONLY because
+#: Git converted its line endings. The refusal stands -- the bytes on disk are
+#: not the recorded bytes -- but the cause and the lossless repair are known.
+LINE_ENDING_DRIFT = "LINE_ENDING_DRIFT"
+
+
+def line_ending_drift(raw: bytes, expected_digest: object) -> bool:
+    """True when `raw` fails its digest only because CRLF replaced LF (T-1508).
+
+    Replacing every CRLF with LF reproduces the recorded digest exactly, so
+    the source is intact and the repair is proven. This never makes the
+    drifted bytes acceptable; it only names the cause instead of a bare
+    mismatch.
+    """
+    return (
+        isinstance(expected_digest, str)
+        and b"\r\n" in raw
+        and hashlib.sha256(raw.replace(b"\r\n", b"\n")).hexdigest() == expected_digest
+    )
+
+
+def line_ending_drift_detail(rel: str) -> str:
+    """The exact diagnosis and remediation for one drifted byte-bound file."""
+    return (
+        f"line-ending drift: {rel} carries CRLF where its recorded digest is of "
+        "the LF bytes -- Git converted it (core.autocrlf with no -text rule: a "
+        "checkout or a `git stash -u` round-trip). The source is intact: mark "
+        "byte-bound .saipen paths -text in .gitattributes (the next source "
+        f"capture appends the missing rules), then rewrite {rel} with every "
+        "CRLF replaced by LF; the recorded digest proves the result"
+    )
 
 
 def _work_is_done(root: Path, work: str | None) -> bool:
@@ -2616,10 +2704,27 @@ def work_closure_gate(root: Path | str, work: str) -> dict:
         meta = _read_meta(root, receipt_id) if receipt_id in index.get("active", {}) else None
         if not meta:
             tomb = index.get("tombstones", {}).get(receipt_id)
+            # A RETIRED source is valid coverage for ANY Work that cites it,
+            # provided the retirement itself is complete. The old test also
+            # demanded `work in tomb["linked_work(s)"]` -- that the citing
+            # ticket be the very one that retired the source -- and that is a
+            # PROVENANCE-IDENTITY question, not the one this gate asks. The
+            # gate asks whether every source a ticket claims is real and
+            # SETTLED. A source retired under different Work is the ordinary
+            # case, not an edge: it is how a request closes once its own clause
+            # ticket is DONE, while later findings raised under it are still
+            # real Work. Requiring identity stranded those findings in
+            # BLOCKED forever -- every route then refuses for its own correct
+            # reason and the row can never be closed or superseded (T-354,
+            # measured on T-250 / SRC-007).
+            #
+            # Settlement is not weakened: retirement only ever writes
+            # `unresolved: 0`, and both that and CLOSED are still required
+            # here, so a tombstone with an open clause still refuses.
             if (
                 isinstance(tomb, dict)
                 and tomb.get("status") == CLOSED_STATUS
-                and work in (tomb.get("linked_works") or [tomb.get("linked_work")])
+                and int(tomb.get("unresolved") or 0) == 0
             ):
                 linked.append(receipt_id)
                 continue
@@ -3236,6 +3341,11 @@ def _closed_archive_bundle(
     )
     body_digest = hashlib.sha256(body).hexdigest()
     if body_digest != expected_digest:
+        if line_ending_drift(body, expected_digest):
+            raise ValueError(
+                f"archived body {receipt_id} digest mismatch: "
+                f"{line_ending_drift_detail(expected_ref)}"
+            )
         raise ValueError(f"archived body {receipt_id} digest mismatch")
     if isinstance(redaction, dict) and redaction.get("sanitized_sha256") != body_digest:
         raise ValueError(f"archived metadata {receipt_id} redaction digest drift")
@@ -5574,6 +5684,15 @@ def evaluate_terminal_recovered_source_attribution(root: Path | str, receipt_id:
             "detail": str(exc),
         }
     if hashlib.sha256(body).hexdigest() != digest:
+        if line_ending_drift(body, digest):
+            return {
+                "attributable": False,
+                "reason": "ARCHIVE_BODY_LINE_ENDING_DRIFT",
+                "receipt_id": receipt_id,
+                "detail": line_ending_drift_detail(
+                    f".saipen/archive/source/{receipt_id}.md"
+                ),
+            }
         return {
             "attributable": False,
             "reason": "ARCHIVE_BODY_SHA_MISMATCH",
@@ -5694,6 +5813,14 @@ def evaluate_terminal_recovered_source_attribution(root: Path | str, receipt_id:
         import base64
 
         if current_raw != base64.b64decode(record[field]["bytes"].encode("ascii")):
+            rel = f".saipen/archive/source/{receipt_id}.{suffix}.json"
+            if line_ending_drift(current_raw, record[field]["sha256"]):
+                return {
+                    "attributable": False,
+                    "reason": "ARCHIVE_ARTIFACT_LINE_ENDING_DRIFT",
+                    "receipt_id": receipt_id,
+                    "detail": line_ending_drift_detail(rel),
+                }
             return {
                 "attributable": False,
                 "reason": "PRESERVED_ORIGINAL_REPLACED",
