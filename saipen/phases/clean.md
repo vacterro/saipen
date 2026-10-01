@@ -33,6 +33,14 @@ recoverable move can still break all consumers of the old path.
 
    - Prune old DONE entries only after their permanent LOG evidence exists.
      A DONE ticket that any live ticket **still names in `needs:` MUST NOT be pruned**.
+   - LOG evidence is necessary but NOT sufficient. A DONE ticket that any
+     **active** source receipt still references MUST NOT be pruned either:
+     the BOARD line is that Work's existence record, and retiring it ahead of
+     the receipt fails the gate with `source receipts -- active receipt
+     SRC-NNN references missing Work T-NNN`, once per receipt. Pruning 61 of
+     82 well-evidenced DONE entries produced ten such failures at once
+     (imp-vacterro-zaicode-20261001-2 IMP-002). Retire the receipt first
+     (`saipen source retire SRC-NNN`), or keep the entry.
    - Prune TODO/BLOCKED only with cited evidence that it is superseded, already
      resolved or no longer applicable. Age alone proves nothing.
    - Re-evaluate blockers. Resolved -> TODO. A durable undecided item remains
