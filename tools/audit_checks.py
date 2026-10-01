@@ -39,6 +39,7 @@ from __future__ import annotations
 import ast
 import contextlib
 import datetime
+import errno
 import hashlib
 import io
 import json
@@ -55,7 +56,9 @@ from pathlib import Path
 
 import fail_site_inventory as inventory
 from freshness import compute_role_revision, compute_source_identity
+from saipen_engine.journal import SETTLED_DIR
 from saipen_engine.paths import project_lineage_identity
+from saipen_engine.subs import outbox_rel
 from saipen_engine.release_contract import locale_readme_paths
 
 if hasattr(sys.stdout, "reconfigure"):
@@ -238,7 +241,16 @@ def root_device_ignore_probe(tmp: Path) -> str | None:
 
 
 def symlink_restore_probe(tmp: Path) -> str | None:
-    """Prove mutation restoration removes the link, not its target bytes."""
+    """Prove mutation restoration removes the link, not its target bytes.
+
+    T-1561: a host without the symlink privilege (Windows without Developer
+    Mode or SeCreateSymbolicLinkPrivilege) cannot CONSTRUCT this red control,
+    and that lack is a property of the host, not of the restoration code --
+    so the narrow capability refusal raises `ProbeUnproven` (a loud UNPROVEN
+    verdict, named in the summary) instead of failing every audit run on such
+    a host. Any other construction error stays a FAIL, and once the link
+    exists the control itself has no skip path.
+    """
     probe = tmp / "symlink-restore-probe"
     probe.mkdir()
     path = probe / "IDENTITY.md"
@@ -251,6 +263,11 @@ def symlink_restore_probe(tmp: Path) -> str | None:
     try:
         os.symlink(external, path)
     except (OSError, NotImplementedError) as exc:
+        if _is_symlink_capability_refusal(exc):
+            raise ProbeUnproven(
+                "host cannot create a symlink, so the red control was never "
+                f"constructed: {exc}"
+            ) from exc
         return f"cannot construct symlink red control: {exc}"
     restore_case_files(saved)
     if path.is_symlink() or path.read_bytes() != original:
@@ -258,6 +275,23 @@ def symlink_restore_probe(tmp: Path) -> str | None:
     if external.read_bytes() != b"external authority\n":
         return "restoration overwrote the external symlink target"
     return None
+
+
+def _is_symlink_capability_refusal(exc: BaseException) -> bool:
+    """True only for the narrow "this host may not make symlinks" refusals.
+
+    WinError 1314 is ERROR_PRIVILEGE_NOT_HELD; the errno set is the POSIX
+    spelling of the same refusal. Anything else (a read-only temp dir, a
+    damaged path, a disk error) keeps the FAIL verdict: that is this probe's
+    own breakage, not a missing host capability, and must stay loud.
+    """
+    if isinstance(exc, NotImplementedError):
+        return True
+    if not isinstance(exc, OSError):
+        return False
+    if getattr(exc, "winerror", None) == 1314:
+        return True
+    return exc.errno in (errno.EPERM, errno.EACCES, errno.ENOSYS)
 
 
 def rebind_synthetic_milestones(tree: Path) -> None:
@@ -537,6 +571,16 @@ def journal_probe_allocation(tree: Path, ticket: str) -> str | None:
     else -- files a record the validator correctly refuses. The event is
     appended the way a checkpoint appends one: next id, parent the current
     tail (T-1359).
+
+    T-1561: the appended line is the NEWEST event of a copy that carries this
+    checkout's settled ledger, so it sits above every provenance floor and
+    must satisfy BOTH journal checks, not just carry a bracket: the op id is
+    on-grammar (`ticket-<32 hex>`, a registered writer class) and resolves to
+    a synthetic committed record filed under the copy's own settled dir, the
+    on-disk shape `resolvable_op_ids` enumerates. The old `alloc-<32 zeros>`
+    id named a class no writer emits and no record, so T-1577 and T-1282
+    failed the CONTROL leg on the fixture's own line before warn ownership
+    was ever measured.
     """
     log = tree / LOG
     if not log.is_file():
@@ -546,12 +590,34 @@ def journal_probe_allocation(tree: Path, ticket: str) -> str | None:
     if not events:
         return f"copied {LOG} carries no parsable event to continue from"
     stamp, last = events[-1]
+    op_id = "ticket-" + hashlib.sha256(
+        ("warn-probe-allocation:" + ticket).encode("utf-8")
+    ).hexdigest()[:32]
     entry = (
         f"- {stamp} [E-{int(last) + 1}] [parent: E-{last}] [{ticket}] "
-        f"[agent: {WARN_PROBE_AGENT}] [op: alloc-{'0' * 32}] "
+        f"[agent: {WARN_PROBE_AGENT}] [op: {op_id}] "
         f"DEC: allocated for the warn-ownership probe fixture\n"
     )
     log.write_text(text.rstrip("\n") + "\n" + entry, encoding="utf-8", newline="\n")
+    record = {
+        "op_id": op_id,
+        "status": "COMMITTED",
+        "operation": "ticket",
+        "semantic_payload_hash": hashlib.sha256(entry.encode("utf-8")).hexdigest(),
+        "created_at": datetime.datetime.now(datetime.timezone.utc).strftime(
+            "%Y-%m-%dT%H:%M:%SZ"
+        ),
+        "agent": WARN_PROBE_AGENT,
+        "verification_policy": "none",
+        "preconditions": {},
+        "progress_index": 0,
+        "targets": [],
+    }
+    op_dir = tree / SETTLED_DIR / op_id
+    op_dir.mkdir(parents=True, exist_ok=True)
+    (op_dir / "operation.json").write_text(
+        json.dumps(record, indent=2) + "\n", encoding="utf-8", newline="\n"
+    )
     return None
 
 
@@ -4546,6 +4612,18 @@ class ProbeContext:
         self.extra: list[str] = []
 
 
+class ProbeUnproven(Exception):
+    """A probe could not CONSTRUCT its control on this host (T-1561).
+
+    Reserved for a missing host capability -- never for a control that ran
+    and broke, which stays a FAIL, and never for a missing prerequisite,
+    which the protocol already reports as SKIP. `run_probes` turns it into a
+    loud UNPROVEN verdict that `main` names in the summary; the run's exit
+    code ignores it, because no repair to this repository can grant the host
+    a privilege its operator has withheld.
+    """
+
+
 @dataclass(frozen=True)
 class Probe:
     """One always-on check, isolated from every other one.
@@ -4568,8 +4646,11 @@ class Probe:
 def run_probes(probes, context: ProbeContext, out=print) -> dict[str, str]:
     """Give every probe a verdict in one invocation. Never stop at the first.
 
-    Returns {probe name: PASS|FAIL|SKIP}. The caller derives rc from it, once,
-    at the end -- there is no early exit anywhere in this layer.
+    Returns {probe name: PASS|FAIL|SKIP|UNPROVEN}. The caller derives rc from
+    it, once, at the end -- there is no early exit anywhere in this layer.
+    UNPROVEN is a construction-time host-capability lack (ProbeUnproven), not
+    a soft FAIL: it is printed as loudly as a failure and only `main` decides
+    it must not cost the exit code.
     """
     verdicts: dict[str, str] = {}
     for probe in probes:
@@ -4581,9 +4662,13 @@ def run_probes(probes, context: ProbeContext, out=print) -> dict[str, str]:
         sandbox = context.tmp / f"probe-{probe.name}"
         context.sandbox = sandbox
         context.extra = []
+        unproven: str | None = None
         try:
             sandbox.mkdir(parents=True, exist_ok=True)
             error = probe.run(context)
+        except ProbeUnproven as exc:
+            unproven = str(exc)
+            error = None
         except Exception as exc:  # a probe that explodes is a failed probe
             error = f"{type(exc).__name__}: {exc}"
         finally:
@@ -4591,7 +4676,10 @@ def run_probes(probes, context: ProbeContext, out=print) -> dict[str, str]:
             # failure cannot poison the fixture the next probe is handed.
             shutil.rmtree(sandbox, ignore_errors=True)
             context.sandbox = context.tmp
-        if error:
+        if unproven is not None:
+            verdicts[probe.name] = "UNPROVEN"
+            out(f"UNPROVEN: {probe.name} -- {unproven}")
+        elif error:
             verdicts[probe.name] = "FAIL"
             out(f"FAIL: {probe.name} -- {error}")
         else:
@@ -4994,11 +5082,13 @@ def main() -> int:
     # contains none.
     failed = sorted(name for name, verdict in verdicts.items() if verdict == "FAIL")
     skipped = sorted(name for name, verdict in verdicts.items() if verdict == "SKIP")
-    if failed or skipped:
+    unproven = sorted(name for name, verdict in verdicts.items() if verdict == "UNPROVEN")
+    if failed or skipped or unproven:
         print(
-            f"AUDIT: {len(verdicts) - len(failed) - len(skipped)} of {len(verdicts)} "
-            f"probes passed; failed: {', '.join(failed) or 'none'}; "
-            f"skipped: {', '.join(skipped) or 'none'}"
+            f"AUDIT: {len(verdicts) - len(failed) - len(skipped) - len(unproven)} of "
+            f"{len(verdicts)} probes passed; failed: {', '.join(failed) or 'none'}; "
+            f"skipped: {', '.join(skipped) or 'none'}; "
+            f"unproven (host capability): {', '.join(unproven) or 'none'}"
         )
     else:
         print(f"AUDIT: all {len(verdicts)} always-on probes passed")
