@@ -36,6 +36,46 @@ MARKER_RE = re.compile(r"ded-[0-9a-f]{8}")
 ALLOWED_IN_SCENARIOS = {LIVE_PLACEHOLDER, "ded-deadbeef"}
 #: A deliberately-wrong marker assertion must stay pinned to its reason.
 HOSTILE_STYLE_FIXTURES = {"hr-wrong-style_contract", "hr-missing-style_contract"}
+#: Infixes a before/after evidence capture inserts into its subject's file
+#: name: `audit_checks.py` is captured as `audit_checks.before.py`.
+CAPTURE_INFIXES = (".before", ".after", ".orig")
+
+
+def _subject_file_name(script_name: str) -> str:
+    """The shipped file an evidence script is a capture of, or itself."""
+    if not script_name.endswith(".py"):
+        return script_name
+    stem = script_name[: -len(".py")]
+    for infix in CAPTURE_INFIXES:
+        if stem.endswith(infix):
+            return stem[: -len(infix)] + ".py"
+    return script_name
+
+
+def _shipped_subject_markers(script_name: str) -> set[str] | None:
+    """Markers the shipped subject of an evidence script already carries.
+
+    An evidence script is not always hand-authored: a seat captures the bytes
+    of a production file as `audit_checks.before.py` / `run_scenarios.py` to
+    prove a before/after pair, and those bytes carry the subject's own marker.
+    Such a copy is a record of the subject, not a second place that has to be
+    edited when STYLE.md moves, so it inherits the subject's markers instead of
+    counting as a hardcoded one. A marker the subject does NOT have stays a
+    hardcoded marker and still fails -- the boundary is inheritance, not a
+    blanket exemption for anything parked under a candidate directory (T-1589).
+    """
+    subject = TOOLS / _subject_file_name(script_name)
+    if not subject.is_file():
+        return None
+    return set(MARKER_RE.findall(subject.read_text(encoding="utf-8-sig")))
+
+
+def _novel_markers(script_name: str, markers: set[str]) -> set[str]:
+    """Markers an evidence script hardcodes rather than inherits."""
+    inherited = _shipped_subject_markers(script_name)
+    if inherited is None:
+        return markers
+    return markers - inherited
 
 
 def setUpModule() -> None:
@@ -106,11 +146,47 @@ class StaticChokepointTests(unittest.TestCase):
         offenders = []
         evidence = ROOT / ".saipen" / "evidence"
         for script in evidence.rglob("*.py") if evidence.is_dir() else []:
-            for marker in MARKER_RE.findall(script.read_text(encoding="utf-8-sig")):
+            markers = set(MARKER_RE.findall(script.read_text(encoding="utf-8-sig")))
+            for marker in sorted(_novel_markers(script.name, markers)):
                 offenders.append(f"{script.relative_to(ROOT)}: {marker}")
         self.assertEqual(
             offenders, [], "hardcoded markers in evidence scripts: " + "; ".join(offenders)
         )
+
+    def test_a_captured_copy_inherits_its_subject_markers_only(self):
+        # The boundary is inheritance, so both directions are pinned: a
+        # capture of a shipped subject carries no novel marker, and the same
+        # capture carrying anything else -- or any script with no shipped
+        # subject at all -- is still a hardcoded marker.
+        self.assertEqual(
+            _novel_markers("audit_checks.before.py", {"ded-deadbeef"}), set()
+        )
+        self.assertEqual(
+            _novel_markers("audit_checks.py", {"ded-deadbeef"}), set()
+        )
+        self.assertEqual(
+            _novel_markers("run_scenarios.py", {"ded-00000000", "ded-deadbeef"}), set()
+        )
+        self.assertEqual(
+            _novel_markers("audit_checks.before.py", {"ded-00000000"}),
+            {"ded-00000000"},
+            "a marker the subject does not carry is still hardcoded",
+        )
+        self.assertEqual(
+            _novel_markers("hand_written_probe.py", {"ded-deadbeef"}),
+            {"ded-deadbeef"},
+            "a script with no shipped subject inherits nothing",
+        )
+
+    def test_a_hand_written_evidence_probe_still_fails(self):
+        # The red control for the exemption above: an evidence script that
+        # hardcodes a marker with no shipped subject behind it must still be
+        # reported, so the boundary cannot become a blanket candidate-dir skip.
+        with tempfile.TemporaryDirectory(prefix="saipen-evidence-probe-") as td:
+            probe = Path(td) / "evidence_probe.py"
+            probe.write_text("STYLE = 'ded-deadbeef'\n", encoding="utf-8")
+            markers = set(MARKER_RE.findall(probe.read_text(encoding="utf-8")))
+            self.assertEqual(_novel_markers(probe.name, markers), {"ded-deadbeef"})
 
 
 class BehavioralChokepointTests(unittest.TestCase):
