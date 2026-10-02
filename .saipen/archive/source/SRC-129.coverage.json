@@ -1,0 +1,14 @@
+{
+  "requirements": {
+    "SRC-129:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/T-1545-audit21-triage.md",
+      "text": "audit/21 execution: determine every actionable clause of the SRC-129 layer; if the layer body reports none, the receipt's own determination is the clause and it is terminal with that evidence.",
+      "verification": "audit/21 execution: every actionable clause of SRC-129 is terminal with evidence: verified: audit/21 layer execution -- PASS",
+      "work": "T-1545"
+    }
+  },
+  "schema_version": 1
+}

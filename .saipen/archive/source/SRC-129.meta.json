@@ -1,4 +1,7 @@
 {
+  "archive_ref": ".saipen/archive/source/SRC-129.md",
+  "closed_at": "2026-10-02T13:15:51Z",
+  "closure_event": null,
   "linked_work": "T-1545",
   "receipt_id": "SRC-129",
   "received_at": "2026-09-27T18:16:00Z",
@@ -11,6 +14,7 @@
   "request_provenance": {
     "witness": "model_supplied"
   },
+  "reread_at": "2026-10-02T13:15:51Z",
   "schema_version": 1,
   "sensitive": false,
   "source_authority": {
@@ -20,7 +24,8 @@
   },
   "source_kind": "external_audit",
   "source_sha256": "cc23e599db5a531fbace40a24319125b481b8b3d013c4e4f3befa6705758975d",
-  "status": "ACTIVE",
+  "status": "CLOSED",
+  "storage_status": "ARCHIVED",
   "transport": {
     "newline_normalization": "none",
     "source_encoding": "utf-8",
