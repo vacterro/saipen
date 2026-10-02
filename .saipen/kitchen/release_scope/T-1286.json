@@ -1,0 +1,15 @@
+{
+  "op_id": "scope-dc78857f13384fbc863f0cb2ce86b5ae",
+  "paths": {
+    "bootstrap/saipen_crew.sh": "3a0810c9260a3715e3760e8ef2bb45c8f1b0286839b8782c606cf560570d37ad",
+    "tools/run_scenarios.py": "d159ba253de7e7cb261fcc10276a772b94e7a62221988e30824e8540834fcd04",
+    "tools/test_t1286_crew_probe.py": "2e279a6ac905fcc964052788aa46e72f2629d939fd4b6cfe744a92187111f59d"
+  },
+  "project_identity": "v:\\___vac\\__k\\__code\\_ai_stuff_agentic\\_saipen",
+  "project_lineage": "lineage-b512942bac884a8691f6c98afcd6ddb9",
+  "recorded_at": "2026-09-25T06:56:36Z",
+  "schema_version": 2,
+  "source_head": "6c6e2a457125c3a526688cf86892cf660d2f7211",
+  "source_tree_fingerprint": "git-delta-v1:7fb9415027c336708835be64eda8459df8a1bb36b4f07c8a8caddd72ed7af5ee",
+  "ticket": "T-1286"
+}

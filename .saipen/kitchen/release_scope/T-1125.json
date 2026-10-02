@@ -1,0 +1,13 @@
+{
+  "op_id": "scope-42e85767ac8748b387372cb97fed3475",
+  "paths": {
+    "tools/validate.py": "5f2f98f6ef6bd4c7"
+  },
+  "project_identity": "v:\\___vac\\__k\\__code\\_ai_stuff_agentic\\_saipen",
+  "project_lineage": "lineage-b512942bac884a8691f6c98afcd6ddb9",
+  "recorded_at": "2026-08-20T22:53:37Z",
+  "schema_version": 1,
+  "source_head": "3a343e8d0e5a04e2cb43b671c9072996e810c65a",
+  "source_tree_fingerprint": "git-delta-v1:4ec002cc5f2d23a8858d6c959ec2704e25be28f555a0396e5502685a0a4f3eb6",
+  "ticket": "T-1125"
+}

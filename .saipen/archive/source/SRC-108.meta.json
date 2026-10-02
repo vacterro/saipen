@@ -1,5 +1,8 @@
 {
   "amends": "SRC-107",
+  "archive_ref": ".saipen/archive/source/SRC-108.md",
+  "closed_at": "2026-10-02T15:36:17Z",
+  "closure_event": null,
   "linked_work": "T-1471",
   "receipt_id": "SRC-108",
   "received_at": "2026-09-23T01:12:43Z",
@@ -12,6 +15,7 @@
   "request_provenance": {
     "witness": "model_supplied"
   },
+  "reread_at": "2026-10-02T15:36:17Z",
   "schema_version": 1,
   "sensitive": false,
   "source_authority": {
@@ -21,7 +25,8 @@
   },
   "source_kind": "corrective_followup",
   "source_sha256": "5c498338f8d92e8d546eb7c7aa33d6cc792c476c1040af4c758acde7f45bf59d",
-  "status": "ACTIVE",
+  "status": "CLOSED",
+  "storage_status": "ARCHIVED",
   "transport": {
     "newline_normalization": "none",
     "source_encoding": "utf-8",

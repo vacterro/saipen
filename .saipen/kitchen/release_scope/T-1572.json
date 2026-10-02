@@ -1,0 +1,15 @@
+{
+  "op_id": "scope-07487a4b35fd4efa95ec09e5949a78d1",
+  "paths": {
+    "tools/saipen_engine/board.py": "5777d374ca26e9b2e988a2e9ce816df646d90ade70ba04b20f0562541cf5824c",
+    "tools/saipen_engine/reconcile.py": "1e7dddf50d11e4e1d3458349bbf589cfe742d6a8a996299064b450487b1e895b",
+    "tools/test_t1572_ticket_scoped_recovery.py": "5b9427a75c53a1b663e17d87eb6f42c9b2efa4728eddaa21ea0f9a14658f85e3"
+  },
+  "project_identity": "v:\\___vac\\__k\\__code\\_ai_stuff_agentic\\_saipen",
+  "project_lineage": "lineage-b512942bac884a8691f6c98afcd6ddb9",
+  "recorded_at": "2026-10-02T08:26:36Z",
+  "schema_version": 2,
+  "source_head": "bd911bca37b73fe22e545b382431d7bc8ba8f773",
+  "source_tree_fingerprint": "git-delta-v1:9b7904dd51fe0264692cf18f42164a688b1248da161bb223f4298de5571459d4",
+  "ticket": "T-1572"
+}

@@ -1,0 +1,16 @@
+{
+  "op_id": "scope-b1ffb02864614f9eb82d637e739305ce",
+  "paths": {
+    "extensions/adapters/opencode/saipen-guard.js": "e0f0c0ac29d3c35bdde934c3e4ae482951c156cb5d6af120a09dd5d2281d09ec",
+    "extensions/adapters/registry.json": "51a3fdc0b3670ef21f99e42e953a51bb87a5f9bca9f0aa68747c32b4f31ab24b",
+    "tools/test_opencode_adapter.py": "da0e4f09a88ea3425c3c27794fd339f67542aa00cad58532b808d6d8b42a49d7",
+    "tools/test_t1568_opencode_chat_style.py": "99f9a64c0e3dd4312092fb43d8a23d432b396281ff65eb36a9a8468ec3dfa4ab"
+  },
+  "project_identity": "v:\\___vac\\__k\\__code\\_ai_stuff_agentic\\_saipen",
+  "project_lineage": "lineage-b512942bac884a8691f6c98afcd6ddb9",
+  "recorded_at": "2026-10-02T08:57:06Z",
+  "schema_version": 2,
+  "source_head": "8577a3a3e74cb71773c92e92cc5960ee5700d61b",
+  "source_tree_fingerprint": "git-delta-v1:ff6aa744f3ec1e0b3b499aa328c62c36bead0d8fa8be233233bbfe617711f919",
+  "ticket": "T-1568"
+}

@@ -1,0 +1,14 @@
+{
+  "op_id": "scope-47aa3e6551344f52aaf261b4b94a46d0",
+  "paths": {
+    ".gitignore": "90cb95cbf70d6e2f294fd9ca13902354f9d4617df013b4ce19ddc031949ce73f",
+    "tools/test_handoff_archive_cross_repo.py": "e01edde423509d839072ce9129b1985ce5c35665fc7073608c97b30e309dc237"
+  },
+  "project_identity": "v:\\___vac\\__k\\__code\\_ai_stuff_agentic\\_saipen",
+  "project_lineage": "lineage-b512942bac884a8691f6c98afcd6ddb9",
+  "recorded_at": "2026-09-15T18:32:06Z",
+  "schema_version": 2,
+  "source_head": "055efc39396e549bd863316f48694de3189ce82e",
+  "source_tree_fingerprint": "git-delta-v1:fc4d17e478d1ed9fd2e1950f1d12d7ff901dc736e89eae22647beacf1fae2dd9",
+  "ticket": "T-1350"
+}

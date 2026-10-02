@@ -4698,3 +4698,6 @@
 - 02.10.26 15:33 [E-11734] [parent: E-11733] [T-1471] [agent: saipen-cli] [op: checkpoint-43ed0b7d0cc541848dc87e81fff90c0f] RUN: detail_ref: .saipen/recovery/log-detail/E-11734-0b0fc0c093438a1f0288e0db.json
 - 02.10.26 15:33 [E-11735] [parent: E-11734] [T-1471] [agent: saipen-cli] [op: transition-6365a0c70178443f808b7e48ad3ea9e2] RUN: transition to REVIEW -- roll-up demonstration accepted; family PASS with red 0; fingerprint reuse is the operator's headline ask demonstrated on its own record
 - 02.10.26 15:33 [E-11736] [parent: E-11735] [agent: saipen-cli] [op: transition-6365a0c70178443f808b7e48ad3ea9e2] DEC: goal_tickets 16->17
+- 02.10.26 15:35 [E-11737] [parent: E-11736] [T-1471] [agent: saipen-cli] [op: scope-be74661a4ab4409cba735ae35f47d7f1] DEC: release scope recorded -- 1 path(s) bound to 0b6a5571a7b4
+- 02.10.26 15:35 [E-11738] [parent: E-11737] [T-1471] [agent: saipen-cli] [op: transition-3e299ebb9f0645ab936a217848447c99] RUN: transition to SHIP -- roll-up closed on its children's proofs; this ticket's own delta is the demonstration file
+- 02.10.26 15:35 [E-11739] [parent: E-11738] [T-1471] [agent: saipen-cli] [op: finish-a75f9e8a37fa4eae942299f5d78ad96e] DEC: ticket finished via SAIOPS -- completion (from SHIP)

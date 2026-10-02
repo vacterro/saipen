@@ -1,0 +1,13 @@
+{
+  "op_id": "scope-602245c3c9a6452dab35dc440d475b3e",
+  "paths": {
+    ".saipen/extensions/subs/saihunt/kitchen/OUTBOX.md": "b45b6896a0be27f1"
+  },
+  "project_identity": "v:\\___vac\\__k\\__code\\_ai_stuff_agentic\\_saipen",
+  "project_lineage": "lineage-b512942bac884a8691f6c98afcd6ddb9",
+  "recorded_at": "2026-08-22T09:09:39Z",
+  "schema_version": 1,
+  "source_head": "e045ad07d21aac78cce073caa732a5780652882b",
+  "source_tree_fingerprint": "git-delta-v1:ca4c738ba4c0c2b2ba0200b711bfd4e983a3884559a76e68b3d1dd869a3cb727",
+  "ticket": "T-1100"
+}

@@ -305,18 +305,6 @@
       "linked_work": "T-1446",
       "source_sha256": "3e74aaaefdadb6d3173ca8136a1df24227b30c4bfe39c15f262e2856fad4efa0"
     },
-    "SRC-107": {
-      "linked_work": "T-1471",
-      "source_sha256": "2080b5508d79299db1f92745f32c1edcb86fcd63c3afcd11945ee5a5a0da5c40"
-    },
-    "SRC-108": {
-      "linked_work": "T-1471",
-      "source_sha256": "5c498338f8d92e8d546eb7c7aa33d6cc792c476c1040af4c758acde7f45bf59d"
-    },
-    "SRC-109": {
-      "linked_work": "T-1471",
-      "source_sha256": "594d2290d76b8f4415cb3f11be893dbf82fc2f48e335f5740016ccc09c4f1e3b"
-    },
     "SRC-110": {
       "linked_work": "T-1480",
       "source_sha256": "b3426925962fa193d00dc4ad2dae0dd82f7beabde1a8e43f726d0d85421db921"
@@ -962,6 +950,54 @@
       "requirements": 5,
       "schema_version": 1,
       "source_sha256": "8e5a1078f8f19b56ea69e3b3492c76828ae1b67c87661e2c2d0972c4695cda89",
+      "status": "CLOSED",
+      "unresolved": 0
+    },
+    "SRC-107": {
+      "actionable": 1,
+      "archive_ref": ".saipen/archive/source/SRC-107.md",
+      "closed_at": "2026-10-02T15:36:17Z",
+      "closure_event": null,
+      "linked_work": "T-1471",
+      "linked_works": [
+        "T-1471"
+      ],
+      "receipt_id": "SRC-107",
+      "requirements": 1,
+      "schema_version": 1,
+      "source_sha256": "2080b5508d79299db1f92745f32c1edcb86fcd63c3afcd11945ee5a5a0da5c40",
+      "status": "CLOSED",
+      "unresolved": 0
+    },
+    "SRC-108": {
+      "actionable": 46,
+      "archive_ref": ".saipen/archive/source/SRC-108.md",
+      "closed_at": "2026-10-02T15:36:17Z",
+      "closure_event": null,
+      "linked_work": "T-1471",
+      "linked_works": [
+        "T-1471"
+      ],
+      "receipt_id": "SRC-108",
+      "requirements": 46,
+      "schema_version": 1,
+      "source_sha256": "5c498338f8d92e8d546eb7c7aa33d6cc792c476c1040af4c758acde7f45bf59d",
+      "status": "CLOSED",
+      "unresolved": 0
+    },
+    "SRC-109": {
+      "actionable": 1,
+      "archive_ref": ".saipen/archive/source/SRC-109.md",
+      "closed_at": "2026-10-02T15:36:17Z",
+      "closure_event": null,
+      "linked_work": "T-1471",
+      "linked_works": [
+        "T-1471"
+      ],
+      "receipt_id": "SRC-109",
+      "requirements": 1,
+      "schema_version": 1,
+      "source_sha256": "594d2290d76b8f4415cb3f11be893dbf82fc2f48e335f5740016ccc09c4f1e3b",
       "status": "CLOSED",
       "unresolved": 0
     },

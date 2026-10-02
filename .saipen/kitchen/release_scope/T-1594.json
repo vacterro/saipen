@@ -1,0 +1,15 @@
+{
+  "op_id": "scope-9b36a403aacd4c2cb12f38bef308308d",
+  "paths": {
+    "tools/build_handoff_archive.py": "14ab712d2f0a8856ac76d347e502e1f215c95467ce5f0c24c5715b04ccece0fe",
+    "tools/test_recovery_noop_targets.py": "ef92fde4d13fa1a39f5e75cb74b8591e7ccdf45e3e5846783f188376057d9e7f",
+    "tools/test_t1363_zero_manual_entry.py": "bdeca48c6fb2ddc6ff837edd188ca8175b5e455625494a3933c4f62faf72978c"
+  },
+  "project_identity": "v:\\___vac\\__k\\__code\\_ai_stuff_agentic\\_saipen",
+  "project_lineage": "lineage-b512942bac884a8691f6c98afcd6ddb9",
+  "recorded_at": "2026-10-02T08:19:38Z",
+  "schema_version": 2,
+  "source_head": "bd911bca37b73fe22e545b382431d7bc8ba8f773",
+  "source_tree_fingerprint": "git-delta-v1:9b7904dd51fe0264692cf18f42164a688b1248da161bb223f4298de5571459d4",
+  "ticket": "T-1594"
+}

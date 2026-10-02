@@ -1,0 +1,25 @@
+{
+  "op_id": "scope-3364406225b444318c0c2da1d4ac7b21",
+  "paths": {
+    "extensions/schemas/board.schema.json": "e20da20638ec56420065810e9f758aa6015c14eded90f598f1139fcccea76b20",
+    "saipen/CORE.md": "5c9daf61ccec45779f75452e303f536b286ff95d3f630bf5c811a41281a0e649",
+    "saipen/OPS.md": "a7730f278f340b851af8a784a535782771ba104e3af41ad387d6ecc7dafc4b90",
+    "saipen/REGISTRY.json": "549cc8eff29534555dbc01d241ba518067439022e2060a9d86383d983a3e9537",
+    "saipen/phases/done.md": "b3e46896ce69f8414b0504ffd05ac688db68b38fa23dda0d29b5e1f1382b98e5",
+    "tools/saipen.py": "2db887b2ebe7eb4888ad08a2951a848f9b7ac70d8a076c4bb590cc506e720ab1",
+    "tools/saipen_engine/board.py": "572a0cfb320c0591035afa805903140fd9ecdf3d98130ed5d4b18a3f24d90e43",
+    "tools/saipen_engine/board_compaction.py": "0de1d50e87a6c34bf1f8dc1eae261daddc2e179c8cc6ea73e1a2793b0b3fc29c",
+    "tools/saipen_engine/closure.py": "3e382d55f8a8da14a39adb77ae8e42283db7d0583ee9dd03ad520b8e81c1618c",
+    "tools/saipen_engine/operations.py": "8c868edaa2df589e9f07d11ed8ad002ad2928894695ec6e0207ea647badb9950",
+    "tools/saipen_engine/supersession.py": "3780c1d9fd722baec1fd7aa868a3c5b47b53e7d4025874b075b8ab444a46924a",
+    "tools/test_ticket_supersession.py": "43130f692d0ec6adcbd85490d5d2e515fc9aee80bad2335d8168e15bf0a4c9b5",
+    "tools/validate.py": "17e89caed1f333a0ed76d0a04dc2f66bc7e44e05e17c78ebed16b9ab36852461"
+  },
+  "project_identity": "v:\\___vac\\__k\\__code\\_ai_stuff_agentic\\_saipen",
+  "project_lineage": "lineage-b512942bac884a8691f6c98afcd6ddb9",
+  "recorded_at": "2026-09-20T01:01:34Z",
+  "schema_version": 2,
+  "source_head": "2fd83527ac99091c6aae7b52d5c6565a26d92b4e",
+  "source_tree_fingerprint": "git-delta-v1:56a3d783049544cdae57f1926c8898404ee52409fcc29bd5a02358c4bd3fd060",
+  "ticket": "T-1418"
+}

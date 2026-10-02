@@ -1,0 +1,23 @@
+{
+  "op_id": "scope-deaf208e15764569a7c4c023735c9ffa",
+  "paths": {
+    ".saipen/evidence/T-1544-audit20-triage.md": "63695e78e5ce4e3a0e5a0f3ccf6875e1437a8fa9ca7417535a36249375e91698",
+    "tools/autoinject.py": "cbbf95ab560bd905841ebb466c9445c004ff338dc47a7278ce98b9992e1bf348",
+    "tools/saipen.py": "e4cd7635caf94f7f3ac2b7f007990f4ec1b091c8989815e8c3806e009b8400fa",
+    "tools/saipen_engine/admission.py": "045fbe6134eb73b95db48cd090a52e91252424989f09c322b913a102d2da7469",
+    "tools/saipen_engine/audit_inbox.py": "aada9fb01baa4a6ee6b36af67d3c6cc4becd6e2712c3ca201b04a41408532d3f",
+    "tools/saipen_engine/intake.py": "d30c02061eb74705f6e05265ca4b245f73b2faee9205474551a27200ee2a615a",
+    "tools/saipen_engine/log.py": "173596942090002c8d1bb0508fa0a986e1fea3e7f769d8e841f3d7c7114287e1",
+    "tools/test_audit_2026_08_28_all3.py": "c11f71977caea7709cbe22076486323a466dc20e557146a4958072880c53f58e",
+    "tools/test_t1544_audit20.py": "52a252d80a787b2cfa1b3477679fd7944813a46c59a7877d82adc3e76f1e18fa",
+    "tools/test_t1544_audit20_intake.py": "c1c3973276c906e33bc39ccc0c3e21ac9967c2f89ecb88aa0651ec5c060eb6d9",
+    "tools/test_t1544_audit20_perf.py": "c75b9357272416e1dd15a4f2893e32665528b8e9fd3649391c02a02a44943db8"
+  },
+  "project_identity": "v:\\___vac\\__k\\__code\\_ai_stuff_agentic\\_saipen",
+  "project_lineage": "lineage-b512942bac884a8691f6c98afcd6ddb9",
+  "recorded_at": "2026-10-02T12:52:57Z",
+  "schema_version": 2,
+  "source_head": "02d5c10c14c49d7c4129eca5aff83b20c9cf5e51",
+  "source_tree_fingerprint": "git-delta-v1:fbb69ed3dcce0f1c4f04744a79b2a0ba50c2384ef9cd52e31b0ed1460c162b25",
+  "ticket": "T-1544"
+}

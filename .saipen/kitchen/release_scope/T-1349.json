@@ -1,0 +1,15 @@
+{
+  "op_id": "scope-8dd5a3b1edf74effa79ed4e47ab32510",
+  "paths": {
+    "tools/build_handoff_archive.py": "cd44e96cd4c0610d78a4948b8f979f4f03e25e4c14da7292b0eb640ca355d66f",
+    "tools/test_handoff_archive_cross_repo.py": "36490d80a9340156d4f3fed0ff335cb1ecc0d28027cd0940ea78592eb2adb29a",
+    "tools/verify_handoff_archive.py": "a8763443194b8d1f36e88fb923cca82bada2b4aa62ce01253f4ce5a537029d4b"
+  },
+  "project_identity": "v:\\___vac\\__k\\__code\\_ai_stuff_agentic\\_saipen",
+  "project_lineage": "lineage-b512942bac884a8691f6c98afcd6ddb9",
+  "recorded_at": "2026-09-15T17:38:25Z",
+  "schema_version": 2,
+  "source_head": "4751714170ab466b63082e25782576722b430968",
+  "source_tree_fingerprint": "git-delta-v1:82375455bb9468840ebba59afe10989b766b003964e24121fb9b022cfb2c69b5",
+  "ticket": "T-1349"
+}

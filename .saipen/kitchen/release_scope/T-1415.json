@@ -1,0 +1,21 @@
+{
+  "op_id": "scope-3a90edf3ab584ff6894c9aad10a02045",
+  "paths": {
+    "extensions/schemas/state.schema.json": "e5d8bc952fa69c6fa8f68373ed0ed4631f7b9201cb6a27183c86839e07b97cfe",
+    "saipen/IMPROVE.md": "30918382d15995a7d11ee2d8af674bef1a1a9b283e55f403558d67064cecac1c",
+    "saipen/REGISTRY.json": "dbd3865ff77e2f41fc5108dfd29484a40018c7011479db78c51a5eeb59895b71",
+    "tools/saipen.py": "e6b4590fa0dbd13cbf8010f042c446f599ae3ec34995a91936c2fa5b27ff024c",
+    "tools/saipen_engine/operations.py": "e4c1d09e1da611ea07422b99fd5faee9e244a545e92236a9d522a10c0d91d180",
+    "tools/saipen_engine/reconcile.py": "3f6e3140210f865f20c0433d9ed8a15b743252cc7b8b5d81e3c56f2a0806ebab",
+    "tools/saipen_engine/router.py": "0cb54c517e77a8892fad90bdfd6c1f090ebb1bac2d2eb384e328274109afe4c6",
+    "tools/saipen_engine/state.py": "301309cdcc0e77261fca91dba86a4f78ec6f4fb445d59561de0c6e2e513105b9",
+    "tools/test_improve_gate.py": "708f76084d2b7602f06da9c3621e3c3f51f765c8e81ffb5b9a962b02ee75d34e"
+  },
+  "project_identity": "v:\\___vac\\__k\\__code\\_ai_stuff_agentic\\_saipen",
+  "project_lineage": "lineage-b512942bac884a8691f6c98afcd6ddb9",
+  "recorded_at": "2026-09-19T20:36:16Z",
+  "schema_version": 2,
+  "source_head": "f40952af5a1bd634d58437941ccc493964414caf",
+  "source_tree_fingerprint": "git-delta-v1:4c6fd9b3f13a1d7a0b203e00a759dae5eac1474eabb77cb3e39dad9da1953eb9",
+  "ticket": "T-1415"
+}

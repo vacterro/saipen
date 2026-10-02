@@ -1,0 +1,13 @@
+{
+  "op_id": "scope-bab9a15585864d41a5645bc29fd08a8f",
+  "paths": {
+    ".saipen/evidence/T-1545-audit21-triage.md": "949be31d47883ab0088709a6f2b7e2ed85760e242c865d27b946cbd596a442d0"
+  },
+  "project_identity": "v:\\___vac\\__k\\__code\\_ai_stuff_agentic\\_saipen",
+  "project_lineage": "lineage-b512942bac884a8691f6c98afcd6ddb9",
+  "recorded_at": "2026-10-02T13:15:24Z",
+  "schema_version": 2,
+  "source_head": "9975126f6c9d2c806ac5ceb574384a7bf998f28a",
+  "source_tree_fingerprint": "git-delta-v1:ff6aa744f3ec1e0b3b499aa328c62c36bead0d8fa8be233233bbfe617711f919",
+  "ticket": "T-1545"
+}

@@ -1,0 +1,17 @@
+{
+  "op_id": "scope-a3fdf857b1f746a8867ea2cc758e4a82",
+  "paths": {
+    "tools/saipen.py": "1e52ae604c32a459a7deff94f97f4bbceaf004169e5d3352f4994729263308b3",
+    "tools/saipen_engine/closure_readiness.py": "0823f83ffd0219e899885a0d6213671d45f4f127300d60796c113ca77eed2258",
+    "tools/saipen_engine/operations.py": "d8306761a6c98c7f190cb336aee82c4c3546fa0d788028e74ae568eb9eb63e58",
+    "tools/saipen_engine/router.py": "54e77933b8d69bbd4fe58013be47ea7afab2b3bf7d3b329808974799aaee3b2e",
+    "tools/test_router_closure_readiness.py": "3f598fbbc1d4d9818322b3994cb0a69034f3ad917e12fb4e60e8789aa3f1e0ac"
+  },
+  "project_identity": "v:\\___vac\\__k\\__code\\_ai_stuff_agentic\\_saipen",
+  "project_lineage": "lineage-b512942bac884a8691f6c98afcd6ddb9",
+  "recorded_at": "2026-09-20T01:27:39Z",
+  "schema_version": 2,
+  "source_head": "cf5102eb46ff07da9e41b275f88f51dfd2e00205",
+  "source_tree_fingerprint": "git-delta-v1:cfb1dce3182897131a84026a19cdcea038930d76e3288fad5e627bba1513291e",
+  "ticket": "T-1403"
+}

@@ -1,0 +1,30 @@
+{
+  "op_id": "scope-5b9015fe5bc0427aa6de60e727b3db5f",
+  "paths": {
+    "extensions/adapters/opencode/saipen-guard.js": "252c69bdacf014853aec53083fdc04e24a9c6a5b8f10ef20590b403e1317bf7e",
+    "extensions/adapters/registry.json": "77aaf52d64dff8aa28f6fe15537c32fa2f51642abd37083fdd49c3f29f882d82",
+    "saipen/ACTIVATION_BLOCK.md": "60c1bbb55d6e4faa2cdedb73118bfcd1f46576919ed73b03cc6315a9240eda84",
+    "saipen/EXECUTION.md": "5efb8c920a2695cefa3a97638d04123ae765919fea618b20f1d0865d2aab80d5",
+    "saipen/IMPROVE.md": "040035d5559d04f2cdeaf8bfcfde3b890691d52ab3cac1072a8df9d4acf134d8",
+    "saipen/MAINTENANCE.md": "1ff3276ccd36421f6a37abb48cebce6c75fd0abf3d3e3b8673f542c0a99fa2c5",
+    "saipen/OPS.md": "8d20dfa7b7d19d3d1591511e86ec9eb5d697fefa66d05eff3f4090d11d07af87",
+    "saipen/REGISTRY.json": "db6e67d3641a7e8d8c9aeae4783fc06d5cc6df5f603aa14765aca399c85c8c3c",
+    "saipen/RUNTIME.md": "7215975b662cfe51377cd01866035668152ff5beaa7d67bc00d9d1341d60a68b",
+    "tools/improve.py": "a79c7c4f363d882caddf38a5e70da8ab03a2a6e32fa3273b0eaf5ed684e197b2",
+    "tools/nitro_integrity_repro.py": "54de1a21e953981b696d676d7063ee78db5fa14d8c5cc30a7ce46ade59ce0bb4",
+    "tools/saipen.py": "47d001eea42a12a1eab19845d3d71963d50ff68ee47a8e424372c488b3f4609c",
+    "tools/saipen_engine/hush.py": "336638f8863de7e919c5a392b8c024f944d31ab8c914d4f70d324e36b830e9d9",
+    "tools/saipen_engine/reconcile.py": "c3761dab3c6b596f5770ccd7b345d2376e2bb51de8db1aee8bec9cca1b6b6617",
+    "tools/saipen_engine/reproduction.py": "e3927fdcf0313506f75c74f7aa1e84c360548ffa11dfbc9e292a22836e553e18",
+    "tools/test_hush_runtime.py": "9a755bf10af25de1932f32ee63e18f31d442fe3527c0500d3b06981f141ef88c",
+    "tools/test_t1572_ticket_scoped_recovery.py": "5b9427a75c53a1b663e17d87eb6f42c9b2efa4728eddaa21ea0f9a14658f85e3",
+    "tools/test_t1574_followups.py": "21e96b8d4242f3089622919f3f855b6e49f4bf84a1b4542eb851731e5ba4274f"
+  },
+  "project_identity": "v:\\___vac\\__k\\__code\\_ai_stuff_agentic\\_saipen",
+  "project_lineage": "lineage-b512942bac884a8691f6c98afcd6ddb9",
+  "recorded_at": "2026-09-30T19:28:23Z",
+  "schema_version": 2,
+  "source_head": "bf70d2eb9b73df5e9a74333cb817446b1f91ed1a",
+  "source_tree_fingerprint": "git-delta-v1:2762a851d4ce6c9c6f76101b67e0069aab2c34cbec6ccc1c993ff090eccd321b",
+  "ticket": "T-1574"
+}

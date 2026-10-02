@@ -1,0 +1,13 @@
+{
+  "op_id": "scope-1863a68a9cea41709a70d33626344ec3",
+  "paths": {
+    "future_gate/ROADMAP_NEXT_20260920.md": "870aa70cbb57eafaa3d82e9d8069c42dcf21b4afffb1520e6d5d51ab39b3f7f9"
+  },
+  "project_identity": "v:\\___vac\\__k\\__code\\_ai_stuff_agentic\\_saipen",
+  "project_lineage": "lineage-b512942bac884a8691f6c98afcd6ddb9",
+  "recorded_at": "2026-09-20T13:19:35Z",
+  "schema_version": 2,
+  "source_head": "b7f5b51280b8f49c5fedbf7a00aeb6d4f45743ba",
+  "source_tree_fingerprint": "git-delta-v1:d01765813f28649a21484d28d47d4336d1d6be994098853f4e3dde2113cbe671",
+  "ticket": "T-1423"
+}

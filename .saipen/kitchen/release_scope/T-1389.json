@@ -1,0 +1,16 @@
+{
+  "op_id": "scope-8d5430be6b014b918df7c24390996e5f",
+  "paths": {
+    "bootstrap/inject.ps1": "64017889dd556767e416e965b6c4cda0841b68e0449d8e7c0b878abaf2c7a9db",
+    "bootstrap/inject.sh": "00b33cb2881e66ca6aae7711b70be3a38f1a27b1c34925db44e104704e6a2941",
+    "tools/saipen_engine/runtime_bootstrap.py": "f6aad9261b801d54c6dbe67662bfba656f02b02eb8da8e668c0d8fbbfdb9b749",
+    "tools/test_t1389_foreign_delta_adoption.py": "383bd40f35cc5693c114e9805f925746c114e28d3be9eefb2028b20f2564de04"
+  },
+  "project_identity": "v:\\___vac\\__k\\__code\\_ai_stuff_agentic\\_saipen",
+  "project_lineage": "lineage-b512942bac884a8691f6c98afcd6ddb9",
+  "recorded_at": "2026-09-18T20:26:23Z",
+  "schema_version": 2,
+  "source_head": "90395ddb69fa1503b5bcec6f0967b58fed7b928c",
+  "source_tree_fingerprint": "git-delta-v1:52f1f23b80046a656c7eccff9cbccebceb000bf148d0d9b4f2385f6d4187234a",
+  "ticket": "T-1389"
+}

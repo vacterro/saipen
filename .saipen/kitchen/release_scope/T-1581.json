@@ -1,0 +1,14 @@
+{
+  "op_id": "scope-06ea7458780948968a51d559c5668bfe",
+  "paths": {
+    "tools/audit_checks.py": "994ca5631702bf2a39a9c24609e623f615f2bf55f768547247f44748f44fb769",
+    "tools/test_t1581_phase_rename_knowledge.py": "8b14abf00bf826b7734d402fa085d4288142a338ca4e99c4d7a613456816e162"
+  },
+  "project_identity": "v:\\___vac\\__k\\__code\\_ai_stuff_agentic\\_saipen",
+  "project_lineage": "lineage-b512942bac884a8691f6c98afcd6ddb9",
+  "recorded_at": "2026-10-01T13:49:44Z",
+  "schema_version": 2,
+  "source_head": "3bbebfc6e4c324b0c32c8e858da91da141eee521",
+  "source_tree_fingerprint": "git-delta-v1:1a383ca8dfda3ec76f59c8b8b28c4c242c0b871556ab3e8bf8ef4c8bb32e4f84",
+  "ticket": "T-1581"
+}

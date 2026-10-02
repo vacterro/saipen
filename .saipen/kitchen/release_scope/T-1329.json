@@ -1,0 +1,14 @@
+{
+  "op_id": "scope-99511a1d96fa4c2591dcb45fa33705be",
+  "paths": {
+    ".saipen/evidence/T-1329-guard_surface_matrix.py": "4e4085103aba25dbb880a09d8ccc3890557100def96db887f55965504cfbcf38",
+    ".saipen/evidence/T-1329-package_verdict.py": "b0d13855fa42dcae188dc6b3df6969e3ec9683c0b8768599eb9a0cc145ecc317"
+  },
+  "project_identity": "v:\\___vac\\__k\\__code\\_ai_stuff_agentic\\_saipen",
+  "project_lineage": "lineage-b512942bac884a8691f6c98afcd6ddb9",
+  "recorded_at": "2026-09-15T18:06:25Z",
+  "schema_version": 2,
+  "source_head": "f5aeb00cc437a6babb757256ee2c91060fa34215",
+  "source_tree_fingerprint": "git-delta-v1:fc4d17e478d1ed9fd2e1950f1d12d7ff901dc736e89eae22647beacf1fae2dd9",
+  "ticket": "T-1329"
+}

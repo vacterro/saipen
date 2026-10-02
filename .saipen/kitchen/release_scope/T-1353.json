@@ -1,0 +1,15 @@
+{
+  "op_id": "scope-b1da96dac213477b9b062a3c7b0dfd85",
+  "paths": {
+    "tools/test_guard_hostile_matrix.py": "c9d6d87ba0c600b97a39c4f1b3fbc482ce485eecd6637f3394efdac8b0089dae",
+    "tools/test_hermetic_env.py": "2b0f3d96bbfef8945380d9cbc991e236fbc8475f2a3e14ed3534ff888fc2b2d1",
+    "tools/test_module_duplication_guard.py": "341cd1e1fb7efa6d1a0a921c5466a49a0d0ef17ac21a5159eabff9d03ad6fcf7"
+  },
+  "project_identity": "v:\\___vac\\__k\\__code\\_ai_stuff_agentic\\_saipen",
+  "project_lineage": "lineage-b512942bac884a8691f6c98afcd6ddb9",
+  "recorded_at": "2026-09-15T19:09:23Z",
+  "schema_version": 2,
+  "source_head": "055efc39396e549bd863316f48694de3189ce82e",
+  "source_tree_fingerprint": "git-delta-v1:63f739abfddf0cdb0f77ec5a931b5889a05c3fce981ce57a383092736f65fb9d",
+  "ticket": "T-1353"
+}

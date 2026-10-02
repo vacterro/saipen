@@ -1,0 +1,13 @@
+{
+  "op_id": "scope-b0769a6921ec44778a6388135565952b",
+  "paths": {
+    "tools/test_concurrency_independence.py": "e35780f65004392f343947eb8538af0d7fbd71e079707e7844eb8e16677c17e3"
+  },
+  "project_identity": "v:\\___vac\\__k\\__code\\_ai_stuff_agentic\\_saipen",
+  "project_lineage": "lineage-b512942bac884a8691f6c98afcd6ddb9",
+  "recorded_at": "2026-09-20T14:10:26Z",
+  "schema_version": 2,
+  "source_head": "b7f5b51280b8f49c5fedbf7a00aeb6d4f45743ba",
+  "source_tree_fingerprint": "git-delta-v1:51efe3bce349e852fcae2d1c48e0592298485685c1abf2a260762e21f6b52a9f",
+  "ticket": "T-1347"
+}
