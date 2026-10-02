@@ -503,7 +503,11 @@ function bindingInstruction(binding) {
       "admission. Use project_root directly; do not run generic shell root discovery and " +
       "do not ask the user for a root. Before output, read BOOT, STYLE and EXECUTION and " +
       "the bound project's .saipen state. EXECUTION/EXEC-RESPONSE-01 owns operational " +
-      "response structure and outranks STYLE. For an operational handback, assemble the " +
+      "response structure and outranks STYLE. During runnable work its default is silent " +
+      "tool-to-tool continuation, with one final boundary and immediate real blockers. " +
+      "An explicit user progress request permits bounded commentary; higher-priority " +
+      "host instructions retain precedence. Native Thought UI is host-owned. " +
+      "For an operational handback, assemble the " +
       "structured fields with `saipen response render --stdin`, then check the exact text " +
       "with `saipen response check --stdin --project-root <root>`; use " +
       "`--auto-eligibility` for work handbacks. An explicit status-only request may return " +
@@ -660,6 +664,56 @@ function checkOperationalResponse(pythonBin, saipenPy, projectRoot, text, enforc
     ? answer.errors.slice(0, 3).join("; ")
     : (answer && answer.code) || (proc.error && proc.error.code) || "checker failed";
   throw new Error(`EXEC_RESPONSE_INVALID: ${reason}`);
+}
+
+// T-1568: the ORDINARY_CHAT half of the contract had no mechanical check on
+// this host. `experimental.text.complete` returned before the checker whenever
+// the turn never consumed a canonical saipen command, so an essay where a
+// compressed answer belongs, a polite assistant register or the wrong language
+// passed unmeasured -- while the registry called this host's response gate
+// MECHANICAL. Same authority, same refusal shape as every other host: this
+// adapter transports the verdict and never restates a STYLE rule.
+function checkOrdinaryChat(pythonBin, saipenPy, projectRoot, text, requestText) {
+  if (!pythonBin || !saipenPy || !projectRoot) {
+    throw new Error("EXEC_RESPONSE_UNAVAILABLE: canonical response checker is unreachable");
+  }
+  const proc = spawnSync(
+    pythonBin,
+    [saipenPy, "response", "check", "--stdin", "--json", "--classify",
+      "--project-root", projectRoot,
+      ...(requestText ? ["--request", requestText] : [])],
+    {
+      input: text, encoding: "utf8", timeout: GUARD_TIMEOUT_MS,
+      windowsHide: true, maxBuffer: MAX_EVENT_BYTES, cwd: projectRoot,
+    },
+  );
+  let answer;
+  try { answer = JSON.parse(proc.stdout || ""); } catch (_error) { answer = null; }
+  // An unreachable or unreadable authority is not a verdict: the same rule the
+  // Claude and Codex hooks already apply, and the reason style enforcement is
+  // never the same claim as hard admission.
+  if (!answer || typeof answer.ok !== "boolean") return;
+  if (answer.ok === true) return;
+  const klass = answer.class;
+  if (typeof klass !== "string" || !klass) return;
+  const errors = Array.isArray(answer.errors)
+    ? answer.errors.slice(0, 3).join("; ")
+    : (answer.code || "checker failed");
+  if (klass !== "CHAT_STYLE_DRIFT") {
+    // Not the chat half. An ordinary turn that the authority governs for
+    // another reason keeps the operational gate's wording; never silence a
+    // class this adapter does not own.
+    throw new Error(`EXEC_RESPONSE_INVALID: ${klass}: ${errors}`);
+  }
+  throw new Error(
+    "SAIPEN chat-style gate (CHAT_STYLE_DRIFT): this ordinary reply breaks the " +
+    `measurable chat contract of STYLE.md (${errors}). Rewrite it as one short ` +
+    "message in the pinned reply language, within the chat line budget, without " +
+    "a banned opener, closer or apology, and reply with only that message. Read " +
+    "the contract with `saipen response style --json`; verify the exact text " +
+    "with `saipen response check --stdin --classify --project-root " +
+    `${projectRoot}"`,
+  );
 }
 
 function consumeIngress(memory) {
@@ -892,17 +946,25 @@ const SaipenGuard = async (context) => {
       const binding = await currentBinding({ sessionId: input && input.sessionID });
       if (binding.code !== "ADMITTED" || !binding.project_root) return;
       const memory = sessionMemory(input && input.sessionID);
-      if (!memory.operational) return;
-      if (!output || typeof output.text !== "string" || !output.text.trim()) {
-        throw new Error("EXEC_RESPONSE_INVALID: empty operational response");
-      }
       const request = memory.pending || memory.last;
-      checkOperationalResponse(
-        pythonBin, saipenPy, binding.project_root, output.text,
-        memory.enforceAutonomy,
+      const ingress =
         request && typeof request.text === "string"
-          ? request.text.slice(0, MAX_INGRESS_TEXT_CHARS) : "",
-      );
+          ? request.text.slice(0, MAX_INGRESS_TEXT_CHARS) : "";
+      // T-1568: a non-operational turn is still MEASURED, never unchecked.
+      // An empty reply stays the operational gate's error so that wording is
+      // untouched; any other text goes to the branch that owns its turn.
+      if (memory.operational) {
+        if (!output || typeof output.text !== "string" || !output.text.trim()) {
+          throw new Error("EXEC_RESPONSE_INVALID: empty operational response");
+        }
+        checkOperationalResponse(
+          pythonBin, saipenPy, binding.project_root, output.text,
+          memory.enforceAutonomy, ingress,
+        );
+        return;
+      }
+      if (!output || typeof output.text !== "string" || !output.text.trim()) return;
+      checkOrdinaryChat(pythonBin, saipenPy, binding.project_root, output.text, ingress);
     },
     "tool.execute.before": async (input, output) => {
       // Safe diagnostics must remain reachable after an installer replaces

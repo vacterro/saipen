@@ -96,12 +96,28 @@ for (const item of request.cases) {
       await systemHook({ sessionID: item.input && item.input.sessionID }, systemOutput);
       record.system = systemOutput.system;
     }
-    const hook = plugin ? plugin["tool.execute.before"] : undefined;
-    if (typeof hook !== "function") {
-      record.outcome = "no_hook";
-      record.message = "tool.execute.before is not callable";
+    // T-1568: `text_complete` drives the FINAL-RESPONSE hook instead of the
+    // tool gate, on the same real module and the same fixtures. Absent, the
+    // case keeps its original tool-gate meaning.
+    if (typeof item.text_complete === "string") {
+      const textHook = plugin ? plugin["experimental.text.complete"] : undefined;
+      if (typeof textHook !== "function") {
+        record.outcome = "no_hook";
+        record.message = "experimental.text.complete is not callable";
+      } else {
+        await textHook(
+          { sessionID: item.session_id || (item.input && item.input.sessionID) },
+          { text: item.text_complete },
+        );
+      }
     } else {
-      await hook(item.input, item.output);
+      const hook = plugin ? plugin["tool.execute.before"] : undefined;
+      if (typeof hook !== "function") {
+        record.outcome = "no_hook";
+        record.message = "tool.execute.before is not callable";
+      } else {
+        await hook(item.input, item.output);
+      }
     }
     if (record.outcome === "allowed" && item.simulate_effect) {
       fs.writeFileSync(item.simulate_effect.path, item.simulate_effect.contents);
