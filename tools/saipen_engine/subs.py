@@ -4608,10 +4608,14 @@ def sub_disposition(
 
     INTAKE != REVIEW: sub_collect only queues the hypothesis; this operation
     writes the reviewed claim, and only when:
-      - the package is current (source triple + role revision),
+      - the package carries the CURRENT role revision,
       - a durable collect receipt links its immutable identity to a Core
         review ticket,
       - that ticket is terminal (DONE or BLOCKED) on the Core board.
+    The source triple is deliberately NOT part of that selection: collect
+    writes a receipt into the very tree whose fingerprint the package recorded,
+    so a collected package is stale by construction and no dispose could ever
+    select the package it exists to retire.
     Health derivation turns the role CURRENT only after this receipt exists;
     until then the role is REVIEW_PENDING.
     """
@@ -4664,10 +4668,13 @@ def sub_disposition(
             continue
         if package_id is not None and package.package_id != package_id:
             continue
-        if package.fields.get("source_head") != current.source_head:
-            continue
-        if package.fields.get("source_tree_fingerprint") != current.source_tree_fingerprint:
-            continue
+        # Dispose is the terminal transition of a package that has ALREADY been
+        # collected, and collecting it is what moves the source head. Gating this
+        # selection on source freshness therefore made it unsatisfiable by
+        # construction: the package a writer was supposed to retire was excluded by
+        # the very integration that retired its payload, and every dispose refused
+        # PACKAGE_INCOMPLETE. The role revision still guards the package's shape,
+        # which is the freshness that still means something here.
         if package.fields.get("role_revision") != current_role:
             continue
         candidates.append(package)
