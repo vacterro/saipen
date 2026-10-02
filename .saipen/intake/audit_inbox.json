@@ -65,6 +65,69 @@
       "size_bytes": 72313,
       "state": "ACTIVE"
     },
+    "audit/17.md": {
+      "binding": "exact",
+      "captured_at": "2026-09-27T14:51:54Z",
+      "closed_at": "2026-10-02T09:57:15Z",
+      "file_sha256": "6d1ee46d9e8557da38b4ae294fb2cb296864014f01b732f4efb9585c83d015f1",
+      "generation": 1,
+      "layer": 17,
+      "linked_work": "T-1537",
+      "receipt_id": "SRC-123",
+      "receipt_sha256": "6d1ee46d9e8557da38b4ae294fb2cb296864014f01b732f4efb9585c83d015f1",
+      "size_bytes": 63421,
+      "state": "DELETED"
+    },
+    "audit/18.md": {
+      "binding": "exact",
+      "captured_at": "2026-09-27T18:09:32Z",
+      "closed_at": null,
+      "file_sha256": "1b24b8f049528928d6f7275bc024e1e23fc1dee9e24840d1b0387e3bd4023e46",
+      "generation": 1,
+      "layer": 18,
+      "linked_work": "T-1542",
+      "provenance": {
+        "claims": {
+          "confidence": "reproduced",
+          "producer": "opencode-01",
+          "severity": "P1"
+        },
+        "envelope": "valid",
+        "maintainer_verdict": "PENDING"
+      },
+      "receipt_id": "SRC-126",
+      "receipt_sha256": "1b24b8f049528928d6f7275bc024e1e23fc1dee9e24840d1b0387e3bd4023e46",
+      "size_bytes": 7776,
+      "state": "ACTIVE"
+    },
+    "audit/19.md": {
+      "binding": "exact",
+      "captured_at": "2026-09-27T18:13:54Z",
+      "closed_at": null,
+      "file_sha256": "3dab14dd575b38f6d2afb7d21f10600b78bd43d30f9844a9bb6e3f3cc021ff53",
+      "generation": 1,
+      "layer": 19,
+      "linked_work": "T-1543",
+      "provenance": {
+        "claims": {
+          "audit_schema": "1",
+          "confidence": "reproduced",
+          "created_at": "2026-09-17",
+          "observed_project": "SAIPAL",
+          "producer": "saipal-opencode-01",
+          "producer_item_id": "SAIPAL-DEADLOCK-RECONFIRM-20260917",
+          "producer_version": "1.0.0",
+          "related_audit": "18",
+          "severity": "high"
+        },
+        "envelope": "valid",
+        "maintainer_verdict": "PENDING"
+      },
+      "receipt_id": "SRC-127",
+      "receipt_sha256": "3dab14dd575b38f6d2afb7d21f10600b78bd43d30f9844a9bb6e3f3cc021ff53",
+      "size_bytes": 13690,
+      "state": "ACTIVE"
+    },
     "audit/2.md": {
       "binding": "exact",
       "captured_at": "2026-08-31T07:31:09Z",
@@ -77,6 +140,45 @@
       "receipt_sha256": "4264b5489fbbe4f40338cdb868f915b97ed4eac483bf4a16b68084f060a1eeb2",
       "size_bytes": 15784,
       "state": "DELETED"
+    },
+    "audit/20.md": {
+      "binding": "exact",
+      "captured_at": "2026-09-27T18:15:15Z",
+      "closed_at": null,
+      "file_sha256": "a567d89ad4b12a9de07b8abaf4a7241e2271e8e64d36f03af792a73072570cd1",
+      "generation": 1,
+      "layer": 20,
+      "linked_work": "T-1544",
+      "receipt_id": "SRC-128",
+      "receipt_sha256": "a567d89ad4b12a9de07b8abaf4a7241e2271e8e64d36f03af792a73072570cd1",
+      "size_bytes": 54230,
+      "state": "ACTIVE"
+    },
+    "audit/21.md": {
+      "binding": "exact",
+      "captured_at": "2026-09-27T18:16:04Z",
+      "closed_at": null,
+      "file_sha256": "cc23e599db5a531fbace40a24319125b481b8b3d013c4e4f3befa6705758975d",
+      "generation": 1,
+      "layer": 21,
+      "linked_work": "T-1545",
+      "receipt_id": "SRC-129",
+      "receipt_sha256": "cc23e599db5a531fbace40a24319125b481b8b3d013c4e4f3befa6705758975d",
+      "size_bytes": 1428,
+      "state": "ACTIVE"
+    },
+    "audit/22.md": {
+      "binding": "exact",
+      "captured_at": "2026-10-02T09:57:15Z",
+      "closed_at": null,
+      "file_sha256": "cc23e599db5a531fbace40a24319125b481b8b3d013c4e4f3befa6705758975d",
+      "generation": 1,
+      "layer": 22,
+      "linked_work": "T-1545",
+      "receipt_id": "SRC-129",
+      "receipt_sha256": "cc23e599db5a531fbace40a24319125b481b8b3d013c4e4f3befa6705758975d",
+      "size_bytes": 1428,
+      "state": "ACTIVE"
     },
     "audit/3.md": {
       "binding": "exact",
