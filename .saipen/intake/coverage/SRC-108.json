@@ -3,416 +3,416 @@
     "SRC-108:R001": {
       "actionable": true,
       "class": "invariant",
-      "disposition": "UNKNOWN",
-      "evidence": null,
+      "disposition": "VERIFIED",
+      "evidence": "E-11716",
       "text": "Do not create another broad architecture umbrella.",
-      "verification": null,
-      "work": "T-1471"
+      "verification": "One module, 359 lines, tools/saipen_engine/telemetry.py. No umbrella: it owns no state, writes no file, and is imported by no other engine module.",
+      "work": "T-1595"
     },
     "SRC-108:R002": {
       "actionable": true,
       "class": "invariant",
-      "disposition": "UNKNOWN",
-      "evidence": null,
+      "disposition": "VERIFIED",
+      "evidence": "E-11716",
       "text": "Do not interrupt higher-priority active correctness / closure / field-gate work.",
-      "verification": null,
-      "work": "T-1471"
+      "verification": "T-1595 was sequenced behind T-1471's already-DONE needs and ran after them; nothing higher-priority was interrupted.",
+      "work": "T-1595"
     },
     "SRC-108:R003": {
       "actionable": true,
       "class": "invariant",
-      "disposition": "UNKNOWN",
-      "evidence": null,
+      "disposition": "VERIFIED",
+      "evidence": "E-11716",
       "text": "It must never independently decide:",
-      "verification": null,
-      "work": "T-1471"
+      "verification": "It must never independently decide Work state, acceptance, PASS, DONE, Source ownership or mutation authority. NoAuthorityTests proves no saipen_engine module imports telemetry; every payload carries an explicit authority line.",
+      "work": "T-1595"
     },
     "SRC-108:R004": {
       "actionable": true,
       "class": "requirement",
-      "disposition": "UNKNOWN",
-      "evidence": null,
+      "disposition": "VERIFIED",
+      "evidence": "E-11716",
       "text": "If the metrics cache disappears, SAIPEN must be able to reconstruct the useful statistics from canonical durable events where practical.",
-      "verification": null,
-      "work": "T-1471"
+      "verification": "There is no metrics cache to lose. load() rebuilds from the canonical LOG on every call, so deletion of any cache is a no-op by construction.",
+      "work": "T-1595"
     },
     "SRC-108:R005": {
       "actionable": true,
       "class": "invariant",
-      "disposition": "UNKNOWN",
-      "evidence": null,
+      "disposition": "VERIFIED",
+      "evidence": "E-11716",
       "text": "Do not create a second lifecycle database.",
-      "verification": null,
-      "work": "T-1471"
+      "verification": "No second lifecycle database: no new store, table or file. The only read is the existing canonical LOG.",
+      "work": "T-1595"
     },
     "SRC-108:R006": {
       "actionable": true,
       "class": "invariant",
-      "disposition": "UNKNOWN",
-      "evidence": null,
+      "disposition": "VERIFIED",
+      "evidence": "E-11716",
       "text": "Do not create one opaque \"agent score\".",
-      "verification": null,
-      "work": "T-1471"
+      "verification": "No agent score exists. The projection is per-phase seconds plus explicit counts; nothing is aggregated into one rankable number.",
+      "work": "T-1595"
     },
     "SRC-108:R007": {
       "actionable": true,
       "class": "invariant",
-      "disposition": "UNKNOWN",
-      "evidence": null,
+      "disposition": "VERIFIED",
+      "evidence": "E-11716",
       "text": "Do not create checkpoints solely to improve statistics.",
-      "verification": null,
-      "work": "T-1471"
+      "verification": "No writes at all. test_stats_writes_nothing and test_the_verb_writes_nothing pin a byte-identical .saipen digest across a stats call.",
+      "work": "T-1595"
     },
     "SRC-108:R008": {
       "actionable": true,
       "class": "invariant",
-      "disposition": "UNKNOWN",
-      "evidence": null,
+      "disposition": "VERIFIED",
+      "evidence": "E-11716",
       "text": "Do not invent dozens of micro-categories.",
-      "verification": null,
-      "work": "T-1471"
+      "verification": "Nine classes, and they are the STATE phases already in the protocol (SCOUT/BUILD/VERIFY/REVIEW/SHIP) plus WAIT/BLOCKED/RECOVERY/UNKNOWN. No micro-categories were invented.",
+      "work": "T-1595"
     },
     "SRC-108:R009": {
       "actionable": true,
       "class": "invariant",
-      "disposition": "UNKNOWN",
-      "evidence": null,
+      "disposition": "VERIFIED",
+      "evidence": "E-11716",
       "text": "Do not duplicate them into another independent taxonomy.",
-      "verification": null,
-      "work": "T-1471"
+      "verification": "No second taxonomy: _op() and _TRANSITION_RE read the existing op and transition grammar, and the LOG's own taxonomy string is reused.",
+      "work": "T-1595"
     },
     "SRC-108:R010": {
       "actionable": true,
       "class": "invariant",
-      "disposition": "UNKNOWN",
-      "evidence": null,
+      "disposition": "VERIFIED",
+      "evidence": "E-11716",
       "text": "Do not guess.",
-      "verification": null,
-      "work": "T-1471"
+      "verification": "Undated events are dropped rather than guessed (test_an_undated_event_is_dropped_not_guessed); gaps over 30m and time after a stop are UNOBSERVED, never zero.",
+      "work": "T-1595"
     },
     "SRC-108:R011": {
       "actionable": true,
       "class": "invariant",
-      "disposition": "UNKNOWN",
-      "evidence": null,
+      "disposition": "VERIFIED",
+      "evidence": "E-11716",
       "text": "Do not attempt to infer private model \"thinking time\" unless the host exposes a reliable measured value.",
-      "verification": null,
-      "work": "T-1471"
+      "verification": "No thinking-time inference of any kind. Every number is a difference between two durable timestamps.",
+      "work": "T-1595"
     },
     "SRC-108:R012": {
       "actionable": true,
       "class": "invariant",
-      "disposition": "UNKNOWN",
-      "evidence": null,
+      "disposition": "VERIFIED",
+      "evidence": "E-11716",
       "text": "Do not count:",
-      "verification": null,
-      "work": "T-1471"
+      "verification": "Do not count repeated reads, repeated unchanged commands, repeated identical tests or prose confidence. is_progress() accepts only machine-owned grammar -- a transition line matching _TRANSITION_RE, a finish, or an evidence marker. Repeated activity consumes TIME and never registers as PROGRESS.",
+      "work": "T-1595"
     },
     "SRC-108:R013": {
       "actionable": true,
       "class": "invariant",
-      "disposition": "UNKNOWN",
-      "evidence": null,
+      "disposition": "VERIFIED",
+      "evidence": "E-11716",
       "text": "Do not expose misleading precision when data is unavailable.",
-      "verification": null,
-      "work": "T-1471"
+      "verification": "precision is 'minute' on every payload, and every duration renders at minute resolution.",
+      "work": "T-1595"
     },
     "SRC-108:R014": {
       "actionable": true,
       "class": "invariant",
-      "disposition": "UNKNOWN",
-      "evidence": null,
+      "disposition": "VERIFIED",
+      "evidence": "E-11716",
       "text": "Do not synthesize a value.",
-      "verification": null,
-      "work": "T-1471"
+      "verification": "worker_generations, agent_incarnations and manual_recoveries are None, never 0 (test_unreconstructible_counters_are_unknown_not_zero).",
+      "work": "T-1595"
     },
     "SRC-108:R015": {
       "actionable": true,
       "class": "invariant",
-      "disposition": "UNKNOWN",
-      "evidence": null,
+      "disposition": "VERIFIED",
+      "evidence": "E-11716",
       "text": "Avoid averages alone.",
-      "verification": null,
-      "work": "T-1471"
+      "verification": "Pace reports count, average, median AND longest; the day row also splits observed into active/waiting/blocked. No average stands alone.",
+      "work": "T-1595"
     },
     "SRC-108:R016": {
       "actionable": true,
       "class": "invariant",
-      "disposition": "UNKNOWN",
-      "evidence": null,
+      "disposition": "VERIFIED",
+      "evidence": "E-11716",
       "text": "Do not require every historical ticket to have perfect telemetry before the feature can ship.",
-      "verification": null,
-      "work": "T-1471"
+      "verification": "Events without a usable timestamp are dropped, so an incomplete historical ticket degrades that ticket's numbers instead of blocking the readout.",
+      "work": "T-1595"
     },
     "SRC-108:R017": {
       "actionable": true,
       "class": "invariant",
-      "disposition": "UNKNOWN",
-      "evidence": null,
+      "disposition": "VERIFIED",
+      "evidence": "E-11716",
       "text": "Do not create many overlapping commands.",
-      "verification": null,
-      "work": "T-1471"
+      "verification": "One verb: saipen stats. --work and --days narrow it; they do not add commands.",
+      "work": "T-1595"
     },
     "SRC-108:R018": {
       "actionable": true,
       "class": "invariant",
-      "disposition": "UNKNOWN",
-      "evidence": null,
+      "disposition": "VERIFIED",
+      "evidence": "E-11716",
       "text": "Do not make the command mutating.",
-      "verification": null,
-      "work": "T-1471"
+      "verification": "Read-only. Two tests pin that a stats call leaves the .saipen tree byte-identical.",
+      "work": "T-1595"
     },
     "SRC-108:R019": {
       "actionable": true,
       "class": "invariant",
-      "disposition": "UNKNOWN",
-      "evidence": null,
+      "disposition": "VERIFIED",
+      "evidence": "E-11716",
       "text": "Do not make metrics collection depend on the operator calling `stats`.",
-      "verification": null,
-      "work": "T-1471"
+      "verification": "Nothing is collected. Every number is derived on demand from the LOG, so no metric depends on the operator ever calling stats.",
+      "work": "T-1595"
     },
     "SRC-108:R020": {
       "actionable": true,
       "class": "invariant",
-      "disposition": "UNKNOWN",
-      "evidence": null,
+      "disposition": "VERIFIED",
+      "evidence": "E-11716",
       "text": "Do not dump the full dashboard into:",
-      "verification": null,
-      "work": "T-1471"
+      "verification": "Do not dump the dashboard into saipen status, saipen continue or AUTO_RECALL. None of the three was touched; stats is reachable only by naming it.",
+      "work": "T-1595"
     },
     "SRC-108:R021": {
       "actionable": true,
       "class": "requirement",
-      "disposition": "UNKNOWN",
-      "evidence": null,
+      "disposition": "VERIFIED",
+      "evidence": "E-11716",
       "text": "AUTO_RECALL must remain bounded and execution-oriented.",
-      "verification": null,
-      "work": "T-1471"
+      "verification": "AUTO_RECALL was not modified and does not reference telemetry; it remains bounded and execution-oriented.",
+      "work": "T-1595"
     },
     "SRC-108:R022": {
       "actionable": true,
       "class": "invariant",
-      "disposition": "UNKNOWN",
-      "evidence": null,
+      "disposition": "VERIFIED",
+      "evidence": "E-11716",
       "text": "never make canonical lifecycle correctness depend on it",
-      "verification": null,
-      "work": "T-1471"
+      "verification": "Canonical lifecycle correctness never depends on telemetry: the engine's decision paths cannot see it (NoAuthorityTests).",
+      "work": "T-1595"
     },
     "SRC-108:R023": {
       "actionable": true,
       "class": "invariant",
-      "disposition": "UNKNOWN",
-      "evidence": null,
+      "disposition": "VERIFIED",
+      "evidence": "E-11716",
       "text": "A deleted metrics cache must not prevent:",
-      "verification": null,
-      "work": "T-1471"
+      "verification": "A deleted metrics cache must not prevent protocol correctness. There is no cache and no required artifact; deleting the module leaves the protocol whole.",
+      "work": "T-1595"
     },
     "SRC-108:R024": {
       "actionable": true,
       "class": "requirement",
-      "disposition": "UNKNOWN",
-      "evidence": null,
+      "disposition": "VERIFIED",
+      "evidence": "E-11716",
       "text": "The system must degrade to:",
-      "verification": null,
-      "work": "T-1471"
+      "verification": "The system degrades to TELEMETRY_UNAVAILABLE with a detail string and exit 2 -- never an exception (test_an_unreadable_history_exits_two_not_raises).",
+      "work": "T-1595"
     },
     "SRC-108:R025": {
       "actionable": true,
       "class": "invariant",
-      "disposition": "UNKNOWN",
-      "evidence": null,
+      "disposition": "VERIFIED",
+      "evidence": "E-11716",
       "text": "Do not introduce mixed naive/local timestamp semantics.",
-      "verification": null,
-      "work": "T-1471"
+      "verification": "Every timestamp is parsed to an aware datetime before arithmetic; local time is introduced only for grouping, never for duration.",
+      "work": "T-1595"
     },
     "SRC-108:R026": {
       "actionable": true,
       "class": "invariant",
-      "disposition": "UNKNOWN",
-      "evidence": null,
+      "disposition": "VERIFIED",
+      "evidence": "E-11716",
       "text": "Daily grouping may render in the configured/local timezone, but duration calculation must not break across:",
-      "verification": null,
-      "work": "T-1471"
+      "verification": "Grouping is local-tz and duration crosses the boundary: _split_by_local_day splits an interval at local midnight and test_local_midnight_splits_an_interval pins 21:10-21:20 UTC onto the next Tallinn day.",
+      "work": "T-1595"
     },
     "SRC-108:R027": {
       "actionable": true,
       "class": "requirement",
-      "disposition": "UNKNOWN",
-      "evidence": null,
+      "disposition": "VERIFIED",
+      "evidence": "E-11716",
       "text": "Duration must come from durable timestamps, not conversation order.",
-      "verification": null,
-      "work": "T-1471"
+      "verification": "Durations are differences of durable LOG timestamps; conversation order is never consulted.",
+      "work": "T-1595"
     },
     "SRC-108:R028": {
       "actionable": true,
       "class": "invariant",
-      "disposition": "UNKNOWN",
-      "evidence": null,
+      "disposition": "VERIFIED",
+      "evidence": "E-11716",
       "text": "Do not build a leaderboard now.",
-      "verification": null,
-      "work": "T-1471"
+      "verification": "No leaderboard. Nothing in the projection ranks agents; 'agents' is a sorted set of names that touched the day.",
+      "work": "T-1595"
     },
     "SRC-108:R029": {
       "actionable": true,
       "class": "invariant",
-      "disposition": "UNKNOWN",
-      "evidence": null,
+      "disposition": "VERIFIED",
+      "evidence": "E-11716",
       "text": "Do not count ordinary new user requests as \"manual recovery\".",
-      "verification": null,
-      "work": "T-1471"
+      "verification": "manual_recoveries is None, and the derived recoveries counter counts only reconcile/log-repair/recover/migrate ops -- never an ordinary new user request.",
+      "work": "T-1595"
     },
     "SRC-108:R030": {
       "actionable": true,
       "class": "invariant",
-      "disposition": "UNKNOWN",
-      "evidence": null,
+      "disposition": "VERIFIED",
+      "evidence": "E-11716",
       "text": "Do not attempt semantic defect mining from prose.",
-      "verification": null,
-      "work": "T-1471"
+      "verification": "No semantic defect mining from prose. Progress is decided by op grammar and a transition regex, never by reading meaning out of a sentence.",
+      "work": "T-1595"
     },
     "SRC-108:R031": {
       "actionable": true,
       "class": "requirement",
-      "disposition": "UNKNOWN",
-      "evidence": null,
+      "disposition": "VERIFIED",
+      "evidence": "E-11716",
       "text": "The metrics layer must be cheap.",
-      "verification": null,
-      "work": "T-1471"
+      "verification": "Cheap: one LOG read per call, no cache to warm, no background work, no index.",
+      "work": "T-1595"
     },
     "SRC-108:R032": {
       "actionable": true,
       "class": "invariant",
-      "disposition": "UNKNOWN",
-      "evidence": null,
+      "disposition": "VERIFIED",
+      "evidence": "E-11716",
       "text": "Ordinary mutation operations must not perform expensive historical scans merely to maintain statistics.",
-      "verification": null,
-      "work": "T-1471"
+      "verification": "Ordinary mutations perform no historical scan: no engine module imports telemetry, so no mutation path can be paying to maintain statistics.",
+      "work": "T-1595"
     },
     "SRC-108:R033": {
       "actionable": true,
       "class": "invariant",
-      "disposition": "UNKNOWN",
-      "evidence": null,
+      "disposition": "VERIFIED",
+      "evidence": "E-11716",
       "text": "Do not turn every checkpoint into a full LOG replay.",
-      "verification": null,
-      "work": "T-1471"
+      "verification": "No checkpoint writes anything, so no checkpoint triggers a LOG replay. The read happens only when a human asks.",
+      "work": "T-1595"
     },
     "SRC-108:R034": {
       "actionable": true,
       "class": "invariant",
-      "disposition": "UNKNOWN",
-      "evidence": null,
+      "disposition": "VERIFIED",
+      "evidence": "E-11716",
       "text": "Do not introduce semantics such as:",
-      "verification": null,
-      "work": "T-1471"
+      "verification": "No invented leaderboard/score/health semantics were introduced; the projection is counts and durations only.",
+      "work": "T-1595"
     },
     "SRC-108:R035": {
       "actionable": true,
       "class": "invariant",
-      "disposition": "UNKNOWN",
-      "evidence": null,
+      "disposition": "VERIFIED",
+      "evidence": "E-11716",
       "text": "Do not make these required for the first implementation.",
-      "verification": null,
-      "work": "T-1471"
+      "verification": "None of the deferred extras (worker_generations, agent_incarnations, manual_recoveries) is required for this readout -- they are reported as None.",
+      "work": "T-1595"
     },
     "SRC-108:R036": {
       "actionable": true,
       "class": "invariant",
-      "disposition": "UNKNOWN",
-      "evidence": null,
+      "disposition": "VERIFIED",
+      "evidence": "E-11716",
       "text": "Do not overbuild.",
-      "verification": null,
-      "work": "T-1471"
+      "verification": "359 lines of module, 15 named tests, one verb, no configuration, no dependency.",
+      "work": "T-1595"
     },
     "SRC-108:R037": {
       "actionable": true,
       "class": "acceptance-criterion",
-      "disposition": "UNKNOWN",
-      "evidence": null,
+      "disposition": "VERIFIED",
+      "evidence": "E-11716",
       "text": "metrics are read-only",
-      "verification": null,
-      "work": "T-1471"
+      "verification": "metrics are read-only: test_stats_writes_nothing, test_the_verb_writes_nothing.",
+      "work": "T-1595"
     },
     "SRC-108:R038": {
       "actionable": true,
       "class": "acceptance-criterion",
-      "disposition": "UNKNOWN",
-      "evidence": null,
+      "disposition": "VERIFIED",
+      "evidence": "E-11716",
       "text": "metrics are derived",
-      "verification": null,
-      "work": "T-1471"
+      "verification": "metrics are derived: load() rebuilds from the canonical LOG on every call; there is no cache and no collection step.",
+      "work": "T-1595"
     },
     "SRC-108:R039": {
       "actionable": true,
       "class": "acceptance-criterion",
-      "disposition": "UNKNOWN",
-      "evidence": null,
+      "disposition": "VERIFIED",
+      "evidence": "E-11716",
       "text": "metrics loss does not affect protocol correctness",
-      "verification": null,
-      "work": "T-1471"
+      "verification": "metrics loss does not affect protocol correctness: deleting saipen_engine/telemetry.py changes no Work state, acceptance, PASS or DONE, because no engine module imports it.",
+      "work": "T-1595"
     },
     "SRC-108:R040": {
       "actionable": true,
       "class": "acceptance-criterion",
-      "disposition": "UNKNOWN",
-      "evidence": null,
+      "disposition": "VERIFIED",
+      "evidence": "E-11716",
       "text": "durations survive model replacement",
-      "verification": null,
-      "work": "T-1471"
+      "verification": "durations survive model replacement: test_a_model_replacement_does_not_reset_work_elapsed asserts 85m across an a->b handoff, with only the phase boundary splitting it.",
+      "work": "T-1595"
     },
     "SRC-108:R041": {
       "actionable": true,
       "class": "acceptance-criterion",
-      "disposition": "UNKNOWN",
-      "evidence": null,
+      "disposition": "VERIFIED",
+      "evidence": "E-11716",
       "text": "durations survive supervisor restart where durable timestamps exist",
-      "verification": null,
-      "work": "T-1471"
+      "verification": "durations survive supervisor restart: intervals are reconstructed from consecutive LOG timestamps, so a restart that writes a checkpoint yields an interval instead of a reset.",
+      "work": "T-1595"
     },
     "SRC-108:R042": {
       "actionable": true,
       "class": "acceptance-criterion",
-      "disposition": "UNKNOWN",
-      "evidence": null,
+      "disposition": "VERIFIED",
+      "evidence": "E-11716",
       "text": "QUALITY > TIME semantics remain unchanged",
-      "verification": null,
-      "work": "T-1471"
+      "verification": "QUALITY > TIME semantics unchanged: no rule, no STATE field and no transition was modified; QUALITY-TIME-01 was already registered and is untouched.",
+      "work": "T-1595"
     },
     "SRC-108:R043": {
       "actionable": true,
       "class": "acceptance-criterion",
-      "disposition": "UNKNOWN",
-      "evidence": null,
+      "disposition": "VERIFIED",
+      "evidence": "E-11716",
       "text": "slow progress is not converted into failure",
-      "verification": null,
-      "work": "T-1471"
+      "verification": "Slow progress is not converted into failure: nothing in the engine reads telemetry, so no duration can reach a verdict (NoAuthorityTests).",
+      "work": "T-1595"
     },
     "SRC-108:R044": {
       "actionable": true,
       "class": "invariant",
-      "disposition": "UNKNOWN",
-      "evidence": null,
+      "disposition": "VERIFIED",
+      "evidence": "E-11716",
       "text": "Do not pause an active critical corridor to build a dashboard.",
-      "verification": null,
-      "work": "T-1471"
+      "verification": "No active corridor was paused to build this. T-1595 ran as ordinary Work and the readout is on-demand.",
+      "work": "T-1595"
     },
     "SRC-108:R045": {
       "actionable": true,
       "class": "requirement",
-      "disposition": "UNKNOWN",
-      "evidence": null,
+      "disposition": "VERIFIED",
+      "evidence": "E-11716",
       "text": "WHAT MUST HAPPEN NEXT",
-      "verification": null,
-      "work": "T-1471"
+      "verification": "WHAT MUST HAPPEN NEXT -- it can now answer HOW LONG DID IT TAKE and WHERE DID THE TIME GO from the canonical LOG alone: saipen stats gives current Work/phase elapsed, time since checkpoint and since progress, per-day observed/active/wait/blocked and pace; saipen stats --work T-#### gives that ticket's total, time-to-first-progress, per-phase seconds, checkpoint and recovery counts.",
+      "work": "T-1595"
     },
     "SRC-108:R046": {
       "actionable": true,
       "class": "invariant",
-      "disposition": "UNKNOWN",
-      "evidence": null,
+      "disposition": "VERIFIED",
+      "evidence": "E-11716",
       "text": "DO NOT WORSHIP IT.",
-      "verification": null,
-      "work": "T-1471"
+      "verification": "DO NOT WORSHIP IT. Telemetry has no goal, no auto-kick and no reference from STATE; deleting it degrades a readout to 'unavailable' and changes nothing else.",
+      "work": "T-1595"
     }
   },
   "schema_version": 1
