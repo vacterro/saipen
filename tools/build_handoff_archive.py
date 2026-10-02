@@ -34,6 +34,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from saipen_engine.distribution import is_non_exportable_path
+from saipen_engine.journal import RESOLUTION_CLASSES
 
 
 def _git(project: Path, *args: str) -> subprocess.CompletedProcess[str]:
@@ -241,7 +242,12 @@ def build_archive(output: Path, project: Path) -> None:
         for op_id, status in unresolved:
             print(f"  - {op_id} ({status})")
         print("Cannot build handoff archive while recovery is pending.")
-        print("Resolve with: saipen recover resolve <op_id> --resolution <accept_live|replan>")
+        # The class list is the engine's, never a copy of it: T-1398 added
+        # `reconcile` and this message kept offering the old two.
+        print(
+            "Resolve with: saipen recover resolve <op_id> "
+            f"--resolution <{'|'.join(RESOLUTION_CLASSES)}>"
+        )
         sys.exit(1)
 
     # --- Collect inventory + source snapshot ---

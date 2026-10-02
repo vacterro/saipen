@@ -174,7 +174,7 @@ class NoopTargetRecoveryTests(unittest.TestCase):
         refusal -- the loop the field report was stuck in. The route named must
         be one whose execution CHANGES the state.
         """
-        from saipen_engine.journal import recovery_preflight
+        from saipen_engine.journal import RESOLUTION_CLASSES, recovery_preflight
 
         targets = self.plan(None)
         root, op_id = self.fixture(targets, label="oracle")
@@ -182,9 +182,15 @@ class NoopTargetRecoveryTests(unittest.TestCase):
         conflict = recover(root, op_id)
         self.assertEqual(conflict.get("code"), "RECOVERY_CONFLICT", conflict)
         named = conflict.get("canonical_next_command")
+        # The closed vocabulary is the ENGINE's, read from its one owner: this
+        # oracle is about naming the settling route, not about pinning the
+        # spelling of a class list that legitimately grows (T-1398 added
+        # `reconcile` and left this literal behind, which is how two family
+        # checks went red on a commit that changed no behaviour here).
         self.assertEqual(
             named,
-            f"saipen recover resolve {op_id} --resolution <accept_live|replan>",
+            f"saipen recover resolve {op_id} --resolution "
+            f"<{'|'.join(RESOLUTION_CLASSES)}>",
             conflict,
         )
         preflight = recovery_preflight(root)

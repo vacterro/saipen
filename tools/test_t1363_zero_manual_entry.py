@@ -1701,7 +1701,17 @@ class LiveTranscriptConvergenceTests(unittest.TestCase):
                 named = (
                     command.replace("<decision>", "cleared")
                     .replace("<next-action>", "saipen continue")
-                    .replace("<accept_live|replan>", "replan")
+                )
+                # Every remaining `<a|b|c>` is a CLOSED CLASS VOCABULARY the
+                # refusal prints so the reader picks a member; fill it with its
+                # first member instead of matching one spelling of the list.
+                # The property under test is that the named route SETTLES the
+                # refusal, so a literal list here only re-breaks the oracle when
+                # the vocabulary legitimately grows (T-1398 added `reconcile`).
+                named = re.sub(
+                    r"<([^<>|]+(?:\|[^<>|]+)*)>",
+                    lambda match: match.group(1).split("|")[0],
+                    named,
                 )
                 cli(root, *named.split(" ")[1:], "--json")
                 _rc, second, text = cli(root, "start", self.TASK, "--json")
