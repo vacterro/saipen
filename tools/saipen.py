@@ -8214,10 +8214,13 @@ def _improve(project_root: Path, args: list[str], as_json: bool, dry_run: bool) 
                     "detail": "improve sweep needs <cycle> <finding_ref> "
                     "<disposition> [--ticket T-###] [--report "
                     "<ident>] [--reproduced y|n] [--fixed-by <ref>] "
-                    "[--verification <ref>] where finding_ref "
+                    "[--verification <ref>] [--amend] where finding_ref "
                     "is RUN-N/IMP-NNN (strict) or IMP-NNN (legacy); "
                     "--verification binds a historical SUPERSEDED/"
-                    "NOT_REPRODUCED disposition to its successor evidence",
+                    "NOT_REPRODUCED disposition to its successor evidence; "
+                    "--amend corrects the live line's reproduced/fixed_by/"
+                    "verification in place instead of appending a second "
+                    "disposition for a finding_ref already in the ledger",
                 },
                 as_json,
             )
@@ -8244,6 +8247,7 @@ def _improve(project_root: Path, args: list[str], as_json: bool, dry_run: bool) 
         reproduced = "-"
         fixed_by = "-"
         verification = "-"
+        amend = False
         rest = args[4:]
         while rest:
             if rest[0] == "--ticket" and len(rest) > 1:
@@ -8256,6 +8260,8 @@ def _improve(project_root: Path, args: list[str], as_json: bool, dry_run: bool) 
                 fixed_by, rest = rest[1], rest[2:]
             elif rest[0] == "--verification" and len(rest) > 1:
                 verification, rest = rest[1], rest[2:]
+            elif rest[0] == "--amend":
+                amend, rest = True, rest[1:]
             else:
                 rest = rest[1:]
         if dry_run:
@@ -8266,6 +8272,7 @@ def _improve(project_root: Path, args: list[str], as_json: bool, dry_run: bool) 
                     "cycle": args[1],
                     "finding_ref": finding_ref,
                     "disposition": disposition,
+                    "amend": amend,
                 },
                 as_json,
             )
@@ -8279,6 +8286,7 @@ def _improve(project_root: Path, args: list[str], as_json: bool, dry_run: bool) 
                 "reproduced": reproduced,
                 "fixed_by": fixed_by,
                 "verification": verification,
+                "amend": amend,
             }
             if run_raw is not None:
                 entry["run"] = f"RUN-{run_raw}"

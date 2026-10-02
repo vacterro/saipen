@@ -893,6 +893,16 @@ def write_sweep_entry(cycle_dir: Path, entry: dict) -> dict:
     relation is legal, and a CONFIRMED disposition names a canonical ticket
     that actually exists. Fictional findings can never COMMIT.
 
+    `entry["amend"]` selects the correction path (T-1401). Without it a
+    finding_ref already in the ledger is refused outright, so a value that was
+    wrong when written -- a `reproduced=n` that has since been reproduced --
+    could never be put right and the ledger stayed permanently unfixable. With
+    it, the live line is corrected in place instead of appended, under every
+    precondition above unchanged and through the same journaled write, so the
+    superseded bytes stay in the operation journal as before/after evidence.
+    An amendment corrects the evidence (`reproduced`, `fixed_by`,
+    `verification`), never the authority (`disposition`, `ticket`, `report`).
+
     Returns the transaction result; the caller MUST inspect it. An invalid
     disposition writes zero bytes.
     """
@@ -901,6 +911,9 @@ def write_sweep_entry(cycle_dir: Path, entry: dict) -> dict:
         raise ImproveError(
             f"disposition {disposition!r} outside the closed set {sorted(DISPOSITION)}"
         )
+    amend = bool(entry.get("amend"))
+    if amend:
+        return _amend_sweep_entry(cycle_dir, entry, disposition)
     report_ident = str(entry.get("report", ""))
     if not report_ident or report_ident in ("-", ""):
         raise ImproveError(
@@ -930,6 +943,12 @@ def write_sweep_entry(cycle_dir: Path, entry: dict) -> dict:
                 "NOT_REPRODUCED when it did not, binding the successor with "
                 "--verification <cycle>/<seat>/<report>#<RUN-N/IMP-NNN>; stale CONFIRMED "
                 "stays forbidden (T-619)"
+                + (
+                    "; --amend additionally requires --verification <ref> naming the "
+                    "CURRENT reproduction that justifies the correction"
+                    if amend
+                    else ""
+                )
             )
     run_raw = entry.get("run")
     imp_raw = str(entry.get("imp_id", ""))
@@ -999,7 +1018,8 @@ def write_sweep_entry(cycle_dir: Path, entry: dict) -> dict:
         raise ImproveError(
             "write_sweep_entry refuses to extend a malformed SWEEP ledger: "
             + "; ".join(_base_sweep_errors[:3])
-            + " -- a known-INVALID base is never mutated (T-638)"
+            + " -- a known-INVALID base is never mutated (T-638); correcting a "
+            "line that was wrong when written is 'saipen improve sweep --amend'"
         )
     if any(
         r.finding_ref == finding_ref and r.report in equivalent_report_keys
@@ -1019,6 +1039,7 @@ def write_sweep_entry(cycle_dir: Path, entry: dict) -> dict:
         fixed_by=str(entry.get("fixed_by", "-") or "-"),
         verification=str(entry.get("verification", "-") or "-"),
     )
+    proposed = text.rstrip() + "\n" + record.render() + "\n"
     proposed = text.rstrip() + "\n" + record.render() + "\n"
     # T-638/§2+§3: the PROPOSED sweep ledger must validate before journal.
     _proposed_sweep_errors = validate_sweep(proposed)
@@ -1181,6 +1202,171 @@ def _require_cycle_active(cycle_dir: Path, mutator: str) -> Path:
     ZERO writes on a base whose grammar/semantics are broken."""
     snapshot = load_valid_manifest(cycle_dir, mutator, ("active",))
     return snapshot.path
+
+
+def _require_cycle_amendable(cycle_dir: Path) -> Path:
+    """T-1401: the amendment gate, distinct from `_require_cycle_active`.
+
+    A completed cycle's ledger is immutable under every normal writer, and
+    that invariant is right: a seat must never add a disposition to a body of
+    work that has already been adjudicated. But it also froze the one thing
+    an amendment exists to do. The core validator checks CONFIRMED/
+    reproduced on EVERY cycle's SWEEP.md with no status exemption, so a
+    mistranscribed line in a completed cycle was simultaneously forbidden to
+    be corrected and counted as a standing problem -- an invariant that could
+    not be satisfied by any route.
+
+    So the exemption is scoped to the narrowest thing that resolves it: a
+    terminal cycle is amendable, an ACTIVE cycle is amendable, and what may
+    change under an amendment is the evidence (`reproduced`, `fixed_by`,
+    `verification`) and never the authority (`disposition`, `ticket`,
+    `report`). No finding is added, none is removed, and no canonical ticket
+    is created or re-pointed; the amendment cannot move a cycle's work, only
+    stop the ledger from misdescribing work that already happened.
+    """
+    snapshot = load_valid_manifest(
+        cycle_dir, "write_sweep_entry --amend", ("active", *TERMINAL_CYCLE_STATUSES)
+    )
+    return snapshot.path
+
+
+def _amend_sweep_entry(cycle_dir: Path, entry: dict, disposition: str) -> dict:
+    """T-1401: correct the evidence on a disposition that is ALREADY committed.
+
+    Split out of `write_sweep_entry` because an amendment is a different act
+    and must be gated by a different set of invariants. Every precondition in
+    the append path exists to certify a FINDING -- the report is bound to its
+    protocol version and its source identity, the round and IMP must exist in
+    that exact report, the ticket must exist on the board, the report must be
+    fresh. An amendment certifies no finding: the line it edits is itself the
+    proof that the finding was adjudicated, and its authority is compared
+    field-by-field against the live record rather than re-derived. Re-running
+    the finding gauntlet would not add a check -- it would add four
+    independent ways to refuse a correction, which is exactly the state this
+    ticket was filed from.
+
+    What replaces them is a narrower and stricter discipline:
+
+    - `--verification` is MANDATORY. A correction to committed evidence must
+      name the evidence that justifies it. This is the ledger's existing
+      successor-binding vocabulary, reused rather than invented.
+    - the disposition, ticket and report MUST equal the live record's. An
+      amendment corrects what was measured, never what was claimed.
+    - the PROPOSED ledger must validate (T-638/§3, unchanged). The base may
+      be invalid -- that is the reason to be here -- but the result may not be.
+    - the write goes through the same journaled ATOMIC_FILE transaction, so
+      the superseded bytes survive as before/after evidence.
+
+    ponytail: the amendment replaces the line in place because the ledger's
+    own duplicate-identity rule makes a second live line for one finding
+    illegal. If a project ever needs full history rather than the journal's,
+    add an explicit `amended_from=` field and a history view -- do NOT relax
+    the one-disposition rule to get it.
+    """
+    ledger = cycle_dir / "SWEEP.md"
+    _prove_inside(_project_root_of(ledger), ledger)
+    _require_cycle_amendable(cycle_dir)
+
+    verification = str(entry.get("verification", "-") or "-")
+    if verification == "-":
+        raise ImproveError(
+            "--amend refuses: --verification is required -- a correction to a "
+            "committed disposition must name the evidence that justifies it "
+            "(the reproduction, re-run receipt or verdict it rests on)"
+        )
+    reproduced = str(entry.get("reproduced", "-"))
+    if reproduced not in {"y", "n"}:
+        raise ImproveError(
+            f"--amend refuses: reproduced {reproduced!r} outside the closed set y|n"
+        )
+    imp_raw = str(entry.get("imp_id", ""))
+    if re.fullmatch(r"\d+", imp_raw):
+        imp_num = imp_raw
+    elif re.fullmatch(r"IMP-(\d+)", imp_raw):
+        imp_num = re.match(r"IMP-(\d+)", imp_raw).group(1)
+    else:
+        raise ImproveError(f"--amend refuses: imp_id {imp_raw!r} is not IMP-###")
+    run_m = re.fullmatch(r"(?:RUN-)?(\d+)", str(entry.get("run", "")).strip())
+    if not run_m:
+        raise ImproveError(
+            f"--amend refuses: run {entry.get('run')!r} is not RUN-<N>"
+        )
+    finding_ref = f"RUN-{run_m.group(1)}/IMP-{imp_num}"
+
+    text = _read_maybe(ledger)
+    # Spelled out as a line index rather than a rendered-record match: an
+    # amendment targets the bytes on disk, not a re-rendering of them.
+    at: int | None = None
+    target: SweepRecord | None = None
+    for i, line in enumerate(text.splitlines()):
+        for rec in _sweep_records(line):
+            if rec.finding_ref == finding_ref:
+                at, target = i, rec
+                break
+        if at is not None:
+            break
+    if target is None:
+        raise ImproveError(
+            f"--amend refuses: the ledger has no line for {finding_ref}; an "
+            "amendment corrects a disposition that exists, it never creates "
+            "one -- drop --amend to record a new disposition"
+        )
+
+    ticket = str(entry.get("ticket", "-") or "-")
+    if target.disposition != disposition or target.ticket != ticket:
+        raise ImproveError(
+            f"--amend refuses: {finding_ref} is recorded as [{target.disposition}] "
+            f"{target.ticket}; amending it to [{disposition}] {ticket} changes "
+            "what the ledger authorizes, not how it was evidenced -- supersede "
+            "it with a new RUN (SUPERSEDED/NOT_REPRODUCED, --verification "
+            "<successor>) instead"
+        )
+    # Unnamed annotations inherit, so correcting `reproduced` cannot silently
+    # drop a fixed_by= or verification= that is still true. `verification` is
+    # never inherited: it was just required to be named.
+    fixed_by = str(entry.get("fixed_by", "-") or "-")
+    if fixed_by == "-":
+        fixed_by = target.fixed_by
+    record = SweepRecord(
+        finding_ref=finding_ref,
+        disposition=target.disposition,
+        ticket=target.ticket,
+        # Several spellings resolve to one report; keep the bytes the ledger
+        # already carries so an amendment cannot re-key the line.
+        report=target.report,
+        reproduced=reproduced,
+        fixed_by=fixed_by,
+        verification=verification,
+    )
+    if record == target:
+        raise ImproveError(
+            f"--amend refuses: {finding_ref} already reads "
+            f"reproduced={target.reproduced} -- an amendment that changes "
+            "nothing is journal noise, not evidence"
+        )
+    lines = text.splitlines()
+    lines[at] = record.render()
+    proposed = "\n".join(lines) + "\n"
+    proposed_errors = validate_sweep(proposed)
+    if proposed_errors:
+        raise ImproveError(
+            "--amend refuses its own proposed SWEEP ledger: "
+            + "; ".join(proposed_errors[:3])
+            + " -- a known-INVALID proposed state is never written (T-638)"
+        )
+    result = _journaled_write(ledger, proposed, "sweep", base_hash=_base_hash(ledger))
+    if not result.get("ok"):
+        raise ImproveError(
+            f"amendment of {finding_ref} not committed: "
+            f"{result.get('code')} {result.get('message', '')}"
+        )
+    result["amended"] = {
+        "finding_ref": finding_ref,
+        "was": target.render(),
+        "now": record.render(),
+        "verification": verification,
+    }
+    return result
 
 
 def installed_protocol_fingerprint(protocol_root: Path) -> str:
@@ -4403,6 +4589,20 @@ def validate_sweep(text: str) -> list[str]:
             errors.append(f"SWEEP.md line {index}: missing reproduced value")
         if finding_ref.count("/") > 1:
             errors.append(f"SWEEP.md line {index}: malformed finding reference {finding_ref!r}")
+        # T-1401: the WRITE-time gate and the CORE validator must not disagree
+        # on the same bytes. validate.py has always rejected a CONFIRMED
+        # finding that carries a ticket but reproduced != y -- an unverified
+        # finding cannot authorize canonical work -- while this gate, which
+        # write_sweep_entry calls on its own PROPOSED ledger, accepted it.
+        # Two shipped gates reading one line differently is the defect; the
+        # rule is not new, only its absence here. Wording matches validate.py
+        # so both gates report the same violation identically.
+        if disposition == "CONFIRMED" and reproduced != "y":
+            errors.append(
+                f"SWEEP.md line {index}: CONFIRMED {finding_ref} produced ticket "
+                f"{ticket} with reproduced={reproduced}; an unverified finding "
+                "cannot authorize a ticket"
+            )
     # A4 ledger side: one composite identity, one disposition. A duplicated
     # ledger line for the same <finding_ref, report> pair is ambiguous
     # evidence -- a set/map consumer would silently deduplicate it, so the
