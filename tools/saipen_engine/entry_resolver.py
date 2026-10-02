@@ -76,6 +76,40 @@ def _same_path(left: str | Path, right: str | Path) -> bool:
         return False
 
 
+_POSIX_SHELLS = frozenset({"sh", "bash", "zsh", "dash", "ksh"})
+
+
+def posix_shell_host(env: dict) -> bool:
+    """Does a POSIX shell (MSYS2/Git Bash, Cygwin) run the host's commands?
+
+    T-1515. Such a shell does not escape for cmd.exe, and a `.cmd` launcher
+    hands its arguments to cmd.exe, which parses them again: measured from
+    Git Bash, one argument `x"y > f` created the file `f`.
+    """
+    if env.get("MSYSTEM"):
+        return True
+    shell = str(env.get("SHELL") or "").replace("\\", "/").rsplit("/", 1)[-1].lower()
+    return shell.removesuffix(".exe") in _POSIX_SHELLS
+
+
+def posix_command_form(argv: list[str], execute: list[str], engine: str | Path,
+                       note) -> str | None:
+    """What a POSIX shell on Windows types: never a cmd.exe launcher.
+
+    `argv_prefix` stays what a PROGRAM spawns (a sh script is not a Win32
+    executable); only the host-facing form changes. The proven POSIX launcher
+    beside the `.cmd` is preferred, the engine prefix is the fallback.
+    """
+    first = Path(argv[0])
+    if first.suffix.lower() not in (".cmd", ".bat"):
+        return None
+    sibling = first.with_suffix("")
+    if sibling.is_file() and prove_launcher(sibling, engine)["ok"]:
+        return f'"{sibling.as_posix()}"'
+    note("posix_launcher_unavailable", f"{sibling}: no proven POSIX launcher beside {first.name}")
+    return " ".join(f'"{Path(part).as_posix()}"' for part in execute)
+
+
 def prove_launcher(path: str | Path, engine: str | Path) -> dict:
     """Is ``path`` a launcher for the canonical ``engine``, proven from its bytes?
 
@@ -272,6 +306,13 @@ def resolve_entry(
     # runner that passed command text through it let `"` plus `&` in one
     # token run an arbitrary command. `argv_prefix` stays the host-facing form.
     result["exec_prefix"] = execute
+    posix_host = os.name != "nt" or posix_shell_host(source_env)
+    result["host_shell"] = "posix" if posix_host else "windows"
+    if os.name == "nt" and posix_host:
+        # T-1515: the form a Git Bash host types must not reach cmd.exe.
+        result["command_form"] = (
+            posix_command_form(argv, execute, engine, note) or result["command_form"]
+        )
     if result["command_form"] is None:
         result["command_form"] = " ".join(f'"{part}"' for part in argv)
     if transport != PATH_LAUNCHER:

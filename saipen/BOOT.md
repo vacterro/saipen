@@ -11,10 +11,11 @@ human ownership map lives in `INDEX.md`.
     STATUS REQUEST / DIAGNOSTIC NEED  ->  saipen status --json
 
 **Transport is resolved, never guessed.** `saipen <command>` is LOGICAL: run
-it as `bin/saipen.cmd` (Windows) / `bin/saipen` from this home's root, per
-`SAIPEN_ENTRY.json` beside this file; `<launcher> host entry --json` proves
-the transport or names the failure. `python -m saipen`, `where`/`which saipen`
-and a hand-built interpreter path are never transports.
+it as `bin/saipen` (any POSIX shell, Git Bash too) / `bin/saipen.cmd` (cmd,
+PowerShell) from this home's root, per `SAIPEN_ENTRY.json` beside this file;
+`<launcher> host entry --json` proves the transport or names the failure.
+`python -m saipen`, `where`/`which saipen` and a hand-built interpreter path
+are never transports.
 
 **NEW TASK -> START FIRST.** For a new task, do NOT run `status`, `continue`,
 `source`, `recover` or any seat/role/auth negotiation first. START performs
