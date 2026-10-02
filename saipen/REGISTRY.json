@@ -693,7 +693,7 @@
    }
   },
   "budgets": {
-   "cold": 26880,
+   "cold": 27648,
    "ordinary_continue": 35840,
    "command_resolution": 47104,
    "ordinary_phase": 40960,

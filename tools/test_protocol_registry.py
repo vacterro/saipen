@@ -193,7 +193,12 @@ class ProtocolRegistryTests(unittest.TestCase):
         # T-1563 re-derivation (T-1465 evidence path): EXECUTION.md gained the
         # PROTOCOL-ADMISSION-01 and chat-style-gate rule families, so cold was
         # re-derived from the measured post-compression surface (26795).
-        self.assertEqual(graph["budgets"]["cold"], 26880)
+        # T-1596 re-derivation: the EXECUTION.md surface that adds the response
+        # compaction budgets, DETAILS authorization, response enforcement and
+        # the T-1575 parallel-lane rule measures 26901, so cold was re-derived
+        # again to the next whole KiB. No rule or document was dropped to pay
+        # for it -- .saipen/evidence/T-1596-budget-rederivation.md
+        self.assertEqual(graph["budgets"]["cold"], 27648)
         measured = protocol_budget.load_profiles(PROTOCOL)
         for name, limit in graph["budgets"].items():
             self.assertIn(name, measured)
