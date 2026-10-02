@@ -1,0 +1,77 @@
+{
+  "saipen/BOOT.md": {
+    "bytes_before": 4972,
+    "bytes_after": 5213,
+    "line_delta": 3,
+    "estimated_token_delta": 60.25
+  },
+  "saipen/INDEX.md": {
+    "bytes_before": 2350,
+    "bytes_after": 2350,
+    "line_delta": 0,
+    "estimated_token_delta": 0.0
+  },
+  "saipen/CORE.md": {
+    "bytes_before": 24461,
+    "bytes_after": 25068,
+    "line_delta": 8,
+    "estimated_token_delta": 151.75
+  },
+  "saipen/phases/scout.md": {
+    "bytes_before": 748,
+    "bytes_after": 1028,
+    "line_delta": 3,
+    "estimated_token_delta": 70.0
+  },
+  "saipen/phases/review.md": {
+    "bytes_before": 1916,
+    "bytes_after": 2249,
+    "line_delta": 6,
+    "estimated_token_delta": 83.25
+  },
+  "saipen/phases/clean.md": {
+    "bytes_before": 3801,
+    "bytes_after": 4032,
+    "line_delta": 3,
+    "estimated_token_delta": 57.75
+  },
+  "cold_before": {
+    "bytes": 3809,
+    "tokens": 979,
+    "knowledge": null,
+    "elapsed_ms": 292.98
+  },
+  "cold_after": {
+    "bytes": 3809,
+    "tokens": 979,
+    "knowledge": {
+      "index": "fresh",
+      "retrieved": 0,
+      "loaded_paths": [],
+      "metadata_scanned": 3
+    },
+    "elapsed_ms": 320.34
+  },
+  "build_index": {
+    "elapsed_ms": 48.37,
+    "bytes": 4882
+  },
+  "retrieve": {
+    "elapsed_ms": 49.41,
+    "result": {
+      "index": "fresh",
+      "retrieved": [],
+      "loaded_paths": [],
+      "metadata_scanned": 3
+    }
+  },
+  "validate_knowledge": {
+    "elapsed_ms": 51.92,
+    "result": {
+      "errors": [],
+      "cards": 3,
+      "active": 3,
+      "index": "fresh"
+    }
+  }
+}

@@ -1,0 +1,226 @@
+test_current_blocker_requires_exact_code (test_response_fact_binding.CanonicalResponseFacts.test_current_blocker_requires_exact_code) ... 
+  test_current_blocker_requires_exact_code (test_response_fact_binding.CanonicalResponseFacts.test_current_blocker_requires_exact_code) (invalid='BLOCKED_EXTERNAL_FAKE -- host unavailable') ... FAIL
+  test_current_blocker_requires_exact_code (test_response_fact_binding.CanonicalResponseFacts.test_current_blocker_requires_exact_code) (invalid='BLOCKED_EXTERNAL2 -- host unavailable') ... FAIL
+test_phase_and_task_are_exact_without_contradictory_phase_claims (test_response_fact_binding.CanonicalResponseFacts.test_phase_and_task_are_exact_without_contradictory_phase_claims) ... 
+  test_phase_and_task_are_exact_without_contradictory_phase_claims (test_response_fact_binding.CanonicalResponseFacts.test_phase_and_task_are_exact_without_contradictory_phase_claims) (invalid='DONE (VERIFY T-1567)') ... FAIL
+  test_phase_and_task_are_exact_without_contradictory_phase_claims (test_response_fact_binding.CanonicalResponseFacts.test_phase_and_task_are_exact_without_contradictory_phase_claims) (invalid='VERIFY DONE T-1567') ... FAIL
+  test_phase_and_task_are_exact_without_contradictory_phase_claims (test_response_fact_binding.CanonicalResponseFacts.test_phase_and_task_are_exact_without_contradictory_phase_claims) (invalid='PREVERIFY T-1567') ... FAIL
+  test_phase_and_task_are_exact_without_contradictory_phase_claims (test_response_fact_binding.CanonicalResponseFacts.test_phase_and_task_are_exact_without_contradictory_phase_claims) (invalid='VERIFY T-15670') ... FAIL
+  test_phase_and_task_are_exact_without_contradictory_phase_claims (test_response_fact_binding.CanonicalResponseFacts.test_phase_and_task_are_exact_without_contradictory_phase_claims) (invalid='VERIFY T-1567_FAKE') ... FAIL
+  test_phase_and_task_are_exact_without_contradictory_phase_claims (test_response_fact_binding.CanonicalResponseFacts.test_phase_and_task_are_exact_without_contradictory_phase_claims) (invalid='VERIFY_NOT_DONE T-1567') ... FAIL
+  test_phase_and_task_are_exact_without_contradictory_phase_claims (test_response_fact_binding.CanonicalResponseFacts.test_phase_and_task_are_exact_without_contradictory_phase_claims) (invalid='done (VERIFY T-1567)') ... FAIL
+  test_phase_and_task_are_exact_without_contradictory_phase_claims (test_response_fact_binding.CanonicalResponseFacts.test_phase_and_task_are_exact_without_contradictory_phase_claims) (invalid='FINISHED (VERIFY T-1567)') ... FAIL
+  test_phase_and_task_are_exact_without_contradictory_phase_claims (test_response_fact_binding.CanonicalResponseFacts.test_phase_and_task_are_exact_without_contradictory_phase_claims) (invalid='COMPLETE VERIFY T-1567') ... FAIL
+test_phase_and_task_are_exact_without_contradictory_phase_claims (test_response_fact_binding.CanonicalResponseFacts.test_phase_and_task_are_exact_without_contradictory_phase_claims) ... FAIL
+test_public_checker_binds_completed_project_phase (test_response_fact_binding.CanonicalResponseFacts.test_public_checker_binds_completed_project_phase) ... 
+  test_public_checker_binds_completed_project_phase (test_response_fact_binding.CanonicalResponseFacts.test_public_checker_binds_completed_project_phase) (status='VERIFY') ... FAIL
+test_public_checker_rejects_terminal_and_task_prefix_forgeries (test_response_fact_binding.CanonicalResponseFacts.test_public_checker_rejects_terminal_and_task_prefix_forgeries) ... 
+  test_public_checker_rejects_terminal_and_task_prefix_forgeries (test_response_fact_binding.CanonicalResponseFacts.test_public_checker_rejects_terminal_and_task_prefix_forgeries) (status='DONE (BUILD T-9001)') ... FAIL
+  test_public_checker_rejects_terminal_and_task_prefix_forgeries (test_response_fact_binding.CanonicalResponseFacts.test_public_checker_rejects_terminal_and_task_prefix_forgeries) (status='FINISHED (BUILD T-9001)') ... FAIL
+  test_public_checker_rejects_terminal_and_task_prefix_forgeries (test_response_fact_binding.CanonicalResponseFacts.test_public_checker_rejects_terminal_and_task_prefix_forgeries) (status='BUILD T-90010') ... FAIL
+test_public_checker_requires_current_blocker_identity (test_response_fact_binding.CanonicalResponseFacts.test_public_checker_requires_current_blocker_identity) ... 
+  test_public_checker_requires_current_blocker_identity (test_response_fact_binding.CanonicalResponseFacts.test_public_checker_requires_current_blocker_identity) (blocker='BLOCKED_EXTERNAL_FAKE -- host unavailable') ... FAIL
+test_public_wait_uses_canonical_human_obligation_with_a_binding_blocker (test_response_fact_binding.CanonicalResponseFacts.test_public_wait_uses_canonical_human_obligation_with_a_binding_blocker) ... FAIL
+test_terminal_phases_are_bound_too (test_response_fact_binding.CanonicalResponseFacts.test_terminal_phases_are_bound_too) ... 
+  test_terminal_phases_are_bound_too (test_response_fact_binding.CanonicalResponseFacts.test_terminal_phases_are_bound_too) (phase='DONE') ... FAIL
+  test_terminal_phases_are_bound_too (test_response_fact_binding.CanonicalResponseFacts.test_terminal_phases_are_bound_too) (phase='BLOCKED') ... FAIL
+
+======================================================================
+FAIL: test_current_blocker_requires_exact_code (test_response_fact_binding.CanonicalResponseFacts.test_current_blocker_requires_exact_code) (invalid='BLOCKED_EXTERNAL_FAKE -- host unavailable')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\.saipen\kitchen\t1569-response-facts-20260930\tools\test_response_fact_binding.py", line 76, in test_current_blocker_requires_exact_code
+    self.assertTrue(RS.response_errors(surface("BLOCKED T-1563", blocker),
+AssertionError: [] is not true
+
+======================================================================
+FAIL: test_current_blocker_requires_exact_code (test_response_fact_binding.CanonicalResponseFacts.test_current_blocker_requires_exact_code) (invalid='BLOCKED_EXTERNAL2 -- host unavailable')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\.saipen\kitchen\t1569-response-facts-20260930\tools\test_response_fact_binding.py", line 76, in test_current_blocker_requires_exact_code
+    self.assertTrue(RS.response_errors(surface("BLOCKED T-1563", blocker),
+AssertionError: [] is not true
+
+======================================================================
+FAIL: test_phase_and_task_are_exact_without_contradictory_phase_claims (test_response_fact_binding.CanonicalResponseFacts.test_phase_and_task_are_exact_without_contradictory_phase_claims) (invalid='DONE (VERIFY T-1567)')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\.saipen\kitchen\t1569-response-facts-20260930\tools\test_response_fact_binding.py", line 34, in test_phase_and_task_are_exact_without_contradictory_phase_claims
+    self.assertTrue(RS.response_errors(surface(status), **context))
+AssertionError: [] is not true
+
+======================================================================
+FAIL: test_phase_and_task_are_exact_without_contradictory_phase_claims (test_response_fact_binding.CanonicalResponseFacts.test_phase_and_task_are_exact_without_contradictory_phase_claims) (invalid='VERIFY DONE T-1567')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\.saipen\kitchen\t1569-response-facts-20260930\tools\test_response_fact_binding.py", line 34, in test_phase_and_task_are_exact_without_contradictory_phase_claims
+    self.assertTrue(RS.response_errors(surface(status), **context))
+AssertionError: [] is not true
+
+======================================================================
+FAIL: test_phase_and_task_are_exact_without_contradictory_phase_claims (test_response_fact_binding.CanonicalResponseFacts.test_phase_and_task_are_exact_without_contradictory_phase_claims) (invalid='PREVERIFY T-1567')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\.saipen\kitchen\t1569-response-facts-20260930\tools\test_response_fact_binding.py", line 34, in test_phase_and_task_are_exact_without_contradictory_phase_claims
+    self.assertTrue(RS.response_errors(surface(status), **context))
+AssertionError: [] is not true
+
+======================================================================
+FAIL: test_phase_and_task_are_exact_without_contradictory_phase_claims (test_response_fact_binding.CanonicalResponseFacts.test_phase_and_task_are_exact_without_contradictory_phase_claims) (invalid='VERIFY T-15670')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\.saipen\kitchen\t1569-response-facts-20260930\tools\test_response_fact_binding.py", line 34, in test_phase_and_task_are_exact_without_contradictory_phase_claims
+    self.assertTrue(RS.response_errors(surface(status), **context))
+AssertionError: [] is not true
+
+======================================================================
+FAIL: test_phase_and_task_are_exact_without_contradictory_phase_claims (test_response_fact_binding.CanonicalResponseFacts.test_phase_and_task_are_exact_without_contradictory_phase_claims) (invalid='VERIFY T-1567_FAKE')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\.saipen\kitchen\t1569-response-facts-20260930\tools\test_response_fact_binding.py", line 34, in test_phase_and_task_are_exact_without_contradictory_phase_claims
+    self.assertTrue(RS.response_errors(surface(status), **context))
+AssertionError: [] is not true
+
+======================================================================
+FAIL: test_phase_and_task_are_exact_without_contradictory_phase_claims (test_response_fact_binding.CanonicalResponseFacts.test_phase_and_task_are_exact_without_contradictory_phase_claims) (invalid='VERIFY_NOT_DONE T-1567')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\.saipen\kitchen\t1569-response-facts-20260930\tools\test_response_fact_binding.py", line 34, in test_phase_and_task_are_exact_without_contradictory_phase_claims
+    self.assertTrue(RS.response_errors(surface(status), **context))
+AssertionError: [] is not true
+
+======================================================================
+FAIL: test_phase_and_task_are_exact_without_contradictory_phase_claims (test_response_fact_binding.CanonicalResponseFacts.test_phase_and_task_are_exact_without_contradictory_phase_claims) (invalid='done (VERIFY T-1567)')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\.saipen\kitchen\t1569-response-facts-20260930\tools\test_response_fact_binding.py", line 34, in test_phase_and_task_are_exact_without_contradictory_phase_claims
+    self.assertTrue(RS.response_errors(surface(status), **context))
+AssertionError: [] is not true
+
+======================================================================
+FAIL: test_phase_and_task_are_exact_without_contradictory_phase_claims (test_response_fact_binding.CanonicalResponseFacts.test_phase_and_task_are_exact_without_contradictory_phase_claims) (invalid='FINISHED (VERIFY T-1567)')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\.saipen\kitchen\t1569-response-facts-20260930\tools\test_response_fact_binding.py", line 34, in test_phase_and_task_are_exact_without_contradictory_phase_claims
+    self.assertTrue(RS.response_errors(surface(status), **context))
+AssertionError: [] is not true
+
+======================================================================
+FAIL: test_phase_and_task_are_exact_without_contradictory_phase_claims (test_response_fact_binding.CanonicalResponseFacts.test_phase_and_task_are_exact_without_contradictory_phase_claims) (invalid='COMPLETE VERIFY T-1567')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\.saipen\kitchen\t1569-response-facts-20260930\tools\test_response_fact_binding.py", line 34, in test_phase_and_task_are_exact_without_contradictory_phase_claims
+    self.assertTrue(RS.response_errors(surface(status), **context))
+AssertionError: [] is not true
+
+======================================================================
+FAIL: test_phase_and_task_are_exact_without_contradictory_phase_claims (test_response_fact_binding.CanonicalResponseFacts.test_phase_and_task_are_exact_without_contradictory_phase_claims)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\.saipen\kitchen\t1569-response-facts-20260930\tools\test_response_fact_binding.py", line 35, in test_phase_and_task_are_exact_without_contradictory_phase_claims
+    self.assertTrue(RS.response_errors(
+AssertionError: [] is not true
+
+======================================================================
+FAIL: test_public_checker_binds_completed_project_phase (test_response_fact_binding.CanonicalResponseFacts.test_public_checker_binds_completed_project_phase) (status='VERIFY')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\.saipen\kitchen\t1569-response-facts-20260930\tools\test_response_fact_binding.py", line 106, in test_public_checker_binds_completed_project_phase
+    self.assertEqual(proc.returncode, expected, proc.stdout + proc.stderr)
+AssertionError: 0 != 1 : {
+  "ok": true,
+  "code": "RESPONSE_VALID",
+  "errors": [],
+  "detail_mode": "NONE",
+  "detail": null
+}
+
+
+======================================================================
+FAIL: test_public_checker_rejects_terminal_and_task_prefix_forgeries (test_response_fact_binding.CanonicalResponseFacts.test_public_checker_rejects_terminal_and_task_prefix_forgeries) (status='DONE (BUILD T-9001)')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\.saipen\kitchen\t1569-response-facts-20260930\tools\test_response_fact_binding.py", line 92, in test_public_checker_rejects_terminal_and_task_prefix_forgeries
+    self.assertEqual(proc.returncode, expected, proc.stdout + proc.stderr)
+AssertionError: 0 != 1 : {
+  "ok": true,
+  "code": "RESPONSE_VALID",
+  "errors": [],
+  "detail_mode": "NONE",
+  "detail": null
+}
+
+
+======================================================================
+FAIL: test_public_checker_rejects_terminal_and_task_prefix_forgeries (test_response_fact_binding.CanonicalResponseFacts.test_public_checker_rejects_terminal_and_task_prefix_forgeries) (status='FINISHED (BUILD T-9001)')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\.saipen\kitchen\t1569-response-facts-20260930\tools\test_response_fact_binding.py", line 92, in test_public_checker_rejects_terminal_and_task_prefix_forgeries
+    self.assertEqual(proc.returncode, expected, proc.stdout + proc.stderr)
+AssertionError: 0 != 1 : {
+  "ok": true,
+  "code": "RESPONSE_VALID",
+  "errors": [],
+  "detail_mode": "NONE",
+  "detail": null
+}
+
+
+======================================================================
+FAIL: test_public_checker_rejects_terminal_and_task_prefix_forgeries (test_response_fact_binding.CanonicalResponseFacts.test_public_checker_rejects_terminal_and_task_prefix_forgeries) (status='BUILD T-90010')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\.saipen\kitchen\t1569-response-facts-20260930\tools\test_response_fact_binding.py", line 92, in test_public_checker_rejects_terminal_and_task_prefix_forgeries
+    self.assertEqual(proc.returncode, expected, proc.stdout + proc.stderr)
+AssertionError: 0 != 1 : {
+  "ok": true,
+  "code": "RESPONSE_VALID",
+  "errors": [],
+  "detail_mode": "NONE",
+  "detail": null
+}
+
+
+======================================================================
+FAIL: test_public_checker_requires_current_blocker_identity (test_response_fact_binding.CanonicalResponseFacts.test_public_checker_requires_current_blocker_identity) (blocker='BLOCKED_EXTERNAL_FAKE -- host unavailable')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\.saipen\kitchen\t1569-response-facts-20260930\tools\test_response_fact_binding.py", line 120, in test_public_checker_requires_current_blocker_identity
+    self.assertEqual(proc.returncode, expected, proc.stdout + proc.stderr)
+AssertionError: 0 != 1 : {
+  "ok": true,
+  "code": "RESPONSE_VALID",
+  "errors": [],
+  "detail_mode": "NONE",
+  "detail": null
+}
+
+
+======================================================================
+FAIL: test_public_wait_uses_canonical_human_obligation_with_a_binding_blocker (test_response_fact_binding.CanonicalResponseFacts.test_public_wait_uses_canonical_human_obligation_with_a_binding_blocker)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\.saipen\kitchen\t1569-response-facts-20260930\tools\test_response_fact_binding.py", line 135, in test_public_wait_uses_canonical_human_obligation_with_a_binding_blocker
+    self.assertEqual(facts["automation"]["operator_action_due"], expected_due)
+AssertionError: False != True
+
+======================================================================
+FAIL: test_terminal_phases_are_bound_too (test_response_fact_binding.CanonicalResponseFacts.test_terminal_phases_are_bound_too) (phase='DONE')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\.saipen\kitchen\t1569-response-facts-20260930\tools\test_response_fact_binding.py", line 63, in test_terminal_phases_are_bound_too
+    self.assertTrue(RS.response_errors(surface(bad), current_phase=phase))
+AssertionError: [] is not true
+
+======================================================================
+FAIL: test_terminal_phases_are_bound_too (test_response_fact_binding.CanonicalResponseFacts.test_terminal_phases_are_bound_too) (phase='BLOCKED')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\.saipen\kitchen\t1569-response-facts-20260930\tools\test_response_fact_binding.py", line 63, in test_terminal_phases_are_bound_too
+    self.assertTrue(RS.response_errors(surface(bad), current_phase=phase))
+AssertionError: [] is not true
+
+----------------------------------------------------------------------
+Ran 7 tests in 12.319s
+
+FAILED (failures=20)

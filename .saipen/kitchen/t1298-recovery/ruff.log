@@ -1,0 +1,47 @@
+E501 Line too long (104 > 100)
+    --> tools\saipen_engine\debt.py:1014:101
+     |
+1012 |         record = json.loads(raw.decode("utf-8-sig"))
+1013 |     except (UnicodeDecodeError, ValueError) as exc:
+1014 |         raise DebtRefusal("REVERIFY_RECEIPT_CORRUPT", f"{receipt_id} is not valid JSON: {exc}") from exc
+     |                                                                                                     ^^^^
+1015 |     if not isinstance(record, dict) or record.get("schema_version") != REVERIFY_SCHEMA_VERSION:
+1016 |         raise DebtRefusal("REVERIFY_RECEIPT_CORRUPT", f"{receipt_id} has an unsupported schema")
+     |
+
+E501 Line too long (101 > 100)
+    --> tools\saipen_engine\debt.py:1069:101
+     |
+1067 |         ticket = board.get("tickets", {}).get(work)
+1068 |         if ticket is None:
+1069 |             return {"ok": False, "code": "TICKET_NOT_FOUND", "detail": f"{work} is not on the board"}
+     |                                                                                                     ^
+1070 |         if ticket.get("section") != "## DONE":
+1071 |             return {
+     |
+
+E501 Line too long (113 > 100)
+    --> tools\saipen_engine\debt.py:1177:101
+     |
+1175 |         project_identity=record["project_identity"],
+1176 |         semantic_payload_hash=hash_bytes(
+1177 |             json.dumps({"receipt": receipt_id, "work": work, "digest": findings_digest}, sort_keys=True).encode()
+     |                                                                                                     ^^^^^^^^^^^^^
+1178 |         ),
+1179 |         targets=[
+     |
+
+F841 Local variable `completed` is assigned to but never used
+   --> tools\test_debt_gate.py:622:9
+    |
+620 |         intake.capture(self.root, "audit body", source_kind="user_audit", work="T-001")
+621 |         out = self.root.parent / "findings.json"
+622 |         completed = subprocess.run(
+    |         ^^^^^^^^^
+623 |             [
+624 |                 sys.executable,
+    |
+help: Remove assignment to unused variable `completed`
+
+Found 4 errors.
+No fixes available (1 hidden fix can be enabled with the `--unsafe-fixes` option).

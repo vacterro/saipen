@@ -1,0 +1,12 @@
+[
+  {
+    "path": "tools/autoinject.py",
+    "line": 222,
+    "call": "subprocess.run(cmd, cwd=cwd, **kwargs)"
+  },
+  {
+    "path": "tools/saipen_engine/runtime_bootstrap.py",
+    "line": 332,
+    "call": "subprocess.run(cmd, **kwargs)"
+  }
+]

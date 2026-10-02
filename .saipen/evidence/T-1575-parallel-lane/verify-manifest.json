@@ -1,0 +1,26 @@
+{
+  "verifier": "c01de31dd4ce3b3a",
+  "command": "python -B -m unittest -v test_t1575_parallel_lane",
+  "oracle": [
+    "tools/test_t1575_parallel_lane.py",
+    "tools/saipen_engine/inflight.py",
+    "tools/test_guard_hostile_matrix.py",
+    "tools/test_hermetic_env.py"
+  ],
+  "runs": [
+    {
+      "label": "red",
+      "subject": "d1e520b1b959404f",
+      "returncode": 1,
+      "verdict": "FAILED (failures=4)",
+      "errors": 0
+    },
+    {
+      "label": "green",
+      "subject": "2bb45388438fffe5",
+      "returncode": 0,
+      "verdict": "OK",
+      "errors": 0
+    }
+  ]
+}

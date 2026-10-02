@@ -1,0 +1,40 @@
+test_completion_reports_unpersisted_history_without_touching_git (test_t1574_followups.ImproveFollowupTests.test_completion_reports_unpersisted_history_without_touching_git) ... ERROR
+test_disposed_stale_seats_get_an_executable_lossless_route (test_t1574_followups.ImproveFollowupTests.test_disposed_stale_seats_get_an_executable_lossless_route) ... ok
+test_01_all_current_complete_terminalizes_and_repeats_clean (test_improve_reconcile.ReconcileTests.test_01_all_current_complete_terminalizes_and_repeats_clean) ... ok
+test_02_empty_draft_is_retired_losslessly_and_cycle_superseded (test_improve_reconcile.ReconcileTests.test_02_empty_draft_is_retired_losslessly_and_cycle_superseded) ... ok
+test_03_stale_complete_supersedes_onto_fresh_replacement (test_improve_reconcile.ReconcileTests.test_03_stale_complete_supersedes_onto_fresh_replacement) ... ok
+test_04_stale_complete_without_replacement_refuses_without_writes (test_improve_reconcile.ReconcileTests.test_04_stale_complete_without_replacement_refuses_without_writes) ... ok
+test_05_still_actionable_draft_prevents_terminalization (test_improve_reconcile.ReconcileTests.test_05_still_actionable_draft_prevents_terminalization) ... ok
+test_06_early_abort_still_legal_before_dispositions (test_improve_reconcile.ReconcileTests.test_06_early_abort_still_legal_before_dispositions) ... ok
+test_07_post_disposition_state_requires_reconciliation_not_abort (test_improve_reconcile.ReconcileTests.test_07_post_disposition_state_requires_reconciliation_not_abort) ... ok
+test_08_blocked_external_seat_terminalizes_cycle (test_improve_reconcile.ReconcileTests.test_08_blocked_external_seat_terminalizes_cycle) ... ok
+test_09_legacy_cycle_is_refused_read_only (test_improve_reconcile.ReconcileTests.test_09_legacy_cycle_is_refused_read_only) ... ok
+test_10_ticket_reasoning_writer_requires_and_records_strict_linkage (test_improve_reconcile.ReconcileTests.test_10_ticket_reasoning_writer_requires_and_records_strict_linkage) ... ok
+test_11_red_control_22_ignores_backticked_prose_citation (test_improve_reconcile.ReconcileTests.test_11_red_control_22_ignores_backticked_prose_citation) ... ok
+test_12_sealed_cycle_is_not_compared_to_a_moved_install (test_improve_reconcile.ReconcileTests.test_12_sealed_cycle_is_not_compared_to_a_moved_install) ... ok
+test_harness_error_and_non_boolean_predicate_are_invalid (test_t1574_followups.ReproductionTests.test_harness_error_and_non_boolean_predicate_are_invalid) ... ok
+test_protective_rejection_is_not_reproduced (test_t1574_followups.ReproductionTests.test_protective_rejection_is_not_reproduced) ... ok
+test_unsafe_effect_is_reproduced (test_t1574_followups.ReproductionTests.test_unsafe_effect_is_reproduced) ... ok
+test_a_b_f_h_runnable_narration_is_suppressed (test_t1574_followups.SilentExecutionTests.test_a_b_f_h_runnable_narration_is_suppressed) ... ok
+test_c_d_g_i_machine_data_blockers_and_final_reports_survive (test_t1574_followups.SilentExecutionTests.test_c_d_g_i_machine_data_blockers_and_final_reports_survive) ... ok
+test_e_progress_is_explicit_bounded_and_turn_local (test_t1574_followups.SilentExecutionTests.test_e_progress_is_explicit_bounded_and_turn_local) ... ok
+test_j_details_and_final_gates_keep_their_owner (test_t1574_followups.SilentExecutionTests.test_j_details_and_final_gates_keep_their_owner) ... ok
+test_k_adapter_capabilities_are_explicit_and_do_not_claim_stream_control (test_t1574_followups.SilentExecutionTests.test_k_adapter_capabilities_are_explicit_and_do_not_claim_stream_control) ... ok
+
+======================================================================
+ERROR: test_completion_reports_unpersisted_history_without_touching_git (test_t1574_followups.ImproveFollowupTests.test_completion_reports_unpersisted_history_without_touching_git)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1574_followups.py", line 63, in test_completion_reports_unpersisted_history_without_touching_git
+    result = improve.complete_cycle(cycle)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\improve.py", line 3427, in complete_cycle
+    raise ImproveError(
+improve.ImproveError: complete_cycle refused -- the cycle bar is unmet:
+- seat current report: source_tree_fingerprint git-delta-v1:c66baf69a83... != current tree git-delta-v1:1570a30c2c4... at the same HEAD; the audited tree differs from the live one
+- seat current: stale COMPLETE recovery route: `saipen improve reconcile imp-t1434-20260920-01`; it requires a current same-role/same-scope COMPLETE replacement and final dispositions for unswept findings only. Existing sweep entries and report bytes are immutable; never re-sweep an already disposed finding.
+
+----------------------------------------------------------------------
+Ran 22 tests in 38.174s
+
+FAILED (errors=1)

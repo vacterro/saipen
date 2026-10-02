@@ -1,0 +1,10 @@
+test_host_operational_context_requires_surface_and_preserves_autonomy (test_opencode_chat_gate.HostTurnContext.test_host_operational_context_requires_surface_and_preserves_autonomy) ... ok
+test_host_ordinary_context_keeps_active_project_chat_measured (test_opencode_chat_gate.HostTurnContext.test_host_ordinary_context_keeps_active_project_chat_measured) ... ok
+test_invalid_host_context_fails_without_touching_canonical_bytes (test_opencode_chat_gate.HostTurnContext.test_invalid_host_context_fails_without_touching_canonical_bytes) ... ok
+test_real_hook_rejects_essay_and_accepts_compact_chat (test_opencode_chat_gate.OpenCodeChatHook.test_real_hook_rejects_essay_and_accepts_compact_chat) ... ok
+test_split_parts_share_message_budget_without_double_counting_reentry (test_opencode_chat_gate.OpenCodeChatHook.test_split_parts_share_message_budget_without_double_counting_reentry) ... ok
+
+----------------------------------------------------------------------
+Ran 5 tests in 27.029s
+
+OK

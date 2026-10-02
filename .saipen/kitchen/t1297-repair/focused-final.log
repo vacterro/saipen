@@ -1,0 +1,86 @@
+test_all_seven_twins_resolve_to_canonical_latin_rows (tools.test_command_routing.CliShortcutRoutingTests.test_all_seven_twins_resolve_to_canonical_latin_rows) ... ok
+test_ccc_resolves_to_ccc_never_sss (tools.test_command_routing.CliShortcutRoutingTests.test_ccc_resolves_to_ccc_never_sss) ... ok
+test_cli_and_resolver_cannot_disagree (tools.test_command_routing.CliShortcutRoutingTests.test_cli_and_resolver_cannot_disagree)
+Agreement property: whatever the resolver declares, the CLI routes ... ok
+test_cli_cc_dispatches_as_continue_dry_run (tools.test_command_routing.CliShortcutRoutingTests.test_cli_cc_dispatches_as_continue_dry_run) ... ok
+test_cli_ccc_refuses_closed_and_never_becomes_status_or_stop (tools.test_command_routing.CliShortcutRoutingTests.test_cli_ccc_refuses_closed_and_never_becomes_status_or_stop) ... ok
+test_cli_declared_shortcut_never_answers_unknown_command (tools.test_command_routing.CliShortcutRoutingTests.test_cli_declared_shortcut_never_answers_unknown_command) ... ok
+test_cli_holds_no_private_confusable_map_or_twin_table (tools.test_command_routing.CliShortcutRoutingTests.test_cli_holds_no_private_confusable_map_or_twin_table) ... ok
+test_cli_ss_refuses_naming_stop_and_differs_from_cc (tools.test_command_routing.CliShortcutRoutingTests.test_cli_ss_refuses_naming_stop_and_differs_from_cc) ... ok
+test_cli_sss_is_real_status_surface (tools.test_command_routing.CliShortcutRoutingTests.test_cli_sss_is_real_status_surface) ... ok
+test_cli_st_is_stop_and_matches_saipen_stop (tools.test_command_routing.CliShortcutRoutingTests.test_cli_st_is_stop_and_matches_saipen_stop) ... ok
+test_cli_twin_pairs_enter_identical_code_paths (tools.test_command_routing.CliShortcutRoutingTests.test_cli_twin_pairs_enter_identical_code_paths)
+Every Cyrillic twin dispatches byte-identically to its Latin row. ... ok
+test_derived_twins_match_declared_twins (tools.test_command_routing.CliShortcutRoutingTests.test_derived_twins_match_declared_twins) ... ok
+test_helper_cc_is_continue_never_stop (tools.test_command_routing.CliShortcutRoutingTests.test_helper_cc_is_continue_never_stop) ... ok
+test_no_cyrillic_input_can_ever_fold_to_ss_or_sss (tools.test_command_routing.CliShortcutRoutingTests.test_no_cyrillic_input_can_ever_fold_to_ss_or_sss) ... ok
+test_route_echo_is_scoped_to_one_in_process_invocation (tools.test_command_routing.CliShortcutRoutingTests.test_route_echo_is_scoped_to_one_in_process_invocation) ... ok
+test_twin_inside_compound_command_resolves (tools.test_command_routing.CliShortcutRoutingTests.test_twin_inside_compound_command_resolves) ... ok
+test_undeclared_lookalikes_fail_closed_in_resolver (tools.test_command_routing.CliShortcutRoutingTests.test_undeclared_lookalikes_fail_closed_in_resolver) ... ok
+test_already_satisfied_terminology (tools.test_command_routing.CommandRoutingTests.test_already_satisfied_terminology) ... ok
+test_bare_sc_shortcut_resolves (tools.test_command_routing.CommandRoutingTests.test_bare_sc_shortcut_resolves) ... ok
+test_bare_shortcuts_from_live_table (tools.test_command_routing.CommandRoutingTests.test_bare_shortcuts_from_live_table) ... ok
+test_boot_declares_compound_first (tools.test_command_routing.CommandRoutingTests.test_boot_declares_compound_first) ... ok
+test_chain_continue_when_independent (tools.test_command_routing.CommandRoutingTests.test_chain_continue_when_independent) ... ok
+test_chain_not_run_after_blocked (tools.test_command_routing.CommandRoutingTests.test_chain_not_run_after_blocked) ... ok
+test_chain_stop_on_failure_default (tools.test_command_routing.CommandRoutingTests.test_chain_stop_on_failure_default) ... ok
+test_compound_newline_separated (tools.test_command_routing.CommandRoutingTests.test_compound_newline_separated) ... ok
+test_compound_shortcut_inside (tools.test_command_routing.CommandRoutingTests.test_compound_shortcut_inside) ... ok
+test_compound_two_segments (tools.test_command_routing.CommandRoutingTests.test_compound_two_segments) ... ok
+test_control_shortcut_payload_is_opaque_inside_compound (tools.test_command_routing.CommandRoutingTests.test_control_shortcut_payload_is_opaque_inside_compound) ... ok
+test_control_shortcuts_require_whole_first_token (tools.test_command_routing.CommandRoutingTests.test_control_shortcuts_require_whole_first_token) ... ok
+test_cut_confirmation_blocks_later_mutator_by_chain_policy (tools.test_command_routing.CommandRoutingTests.test_cut_confirmation_blocks_later_mutator_by_chain_policy) ... ok
+test_cyrillic_twin_shortcut (tools.test_command_routing.CommandRoutingTests.test_cyrillic_twin_shortcut) ... ok
+test_injectors_declare_shortcut_gate (tools.test_command_routing.CommandRoutingTests.test_injectors_declare_shortcut_gate) ... ok
+test_leading_shortcut_payload_routing (tools.test_command_routing.CommandRoutingTests.test_leading_shortcut_payload_routing) ... ok
+test_multiple_shortcuts (tools.test_command_routing.CommandRoutingTests.test_multiple_shortcuts) ... ok
+test_normal_mode_not_shortcut (tools.test_command_routing.CommandRoutingTests.test_normal_mode_not_shortcut) ... ok
+test_registry_owns_compound_and_truthfulness (tools.test_command_routing.CommandRoutingTests.test_registry_owns_compound_and_truthfulness) ... ok
+test_sc_not_stop_caveman (tools.test_command_routing.CommandRoutingTests.test_sc_not_stop_caveman) ... ok
+test_shortcut_nested_in_compound (tools.test_command_routing.CommandRoutingTests.test_shortcut_nested_in_compound) ... ok
+test_unknown_token_in_compound (tools.test_command_routing.CommandRoutingTests.test_unknown_token_in_compound) ... ok
+test_unknown_token_not_shortcut (tools.test_command_routing.CommandRoutingTests.test_unknown_token_not_shortcut) ... ok
+test_bare_continue_cc_are_identical_canonical_path (tools.test_command_routing.CommandSemanticsTests.test_bare_continue_cc_are_identical_canonical_path)
+The three forms hit the SAME deterministic continue handler and the ... ok
+test_bare_continue_cc_identical_on_tripped_goal_valve (tools.test_command_routing.CommandSemanticsTests.test_bare_continue_cc_identical_on_tripped_goal_valve)
+Even under a tripped goal valve the three forms route to the same ... ok
+test_cc_never_creates_or_pivots_a_goal (tools.test_command_routing.CommandSemanticsTests.test_cc_never_creates_or_pivots_a_goal) ... ok
+test_cc_resumes_crew_target_not_normal_convergence (tools.test_command_routing.CommandSemanticsTests.test_cc_resumes_crew_target_not_normal_convergence) ... ok
+test_cc_resumes_existing_goal_preserving_objective (tools.test_command_routing.CommandSemanticsTests.test_cc_resumes_existing_goal_preserving_objective) ... ok
+test_empty_board_bare_and_cc_behave_identically (tools.test_command_routing.CommandSemanticsTests.test_empty_board_bare_and_cc_behave_identically) ... ok
+test_gg_bare_is_usage_line_never_resume (tools.test_command_routing.CommandSemanticsTests.test_gg_bare_is_usage_line_never_resume) ... ok
+test_gg_new_goal_is_create_pivot_not_resume (tools.test_command_routing.CommandSemanticsTests.test_gg_new_goal_is_create_pivot_not_resume) ... ok
+test_normal_cc_enters_converge_never_implicit_add (tools.test_command_routing.CommandSemanticsTests.test_normal_cc_enters_converge_never_implicit_add) ... ok
+test_sc_is_crew_workflow_distinct_from_cc (tools.test_command_routing.CommandSemanticsTests.test_sc_is_crew_workflow_distinct_from_cc) ... ok
+test_tripped_goal_valve_cc_reauthorizes_keeps_objective (tools.test_command_routing.CommandSemanticsTests.test_tripped_goal_valve_cc_reauthorizes_keeps_objective) ... ok
+test_cyrillic_cc_stays_continue_never_stop_or_retired (tools.test_command_routing.RetiredShortcutMigrationTests.test_cyrillic_cc_stays_continue_never_stop_or_retired) ... ok
+test_instrumented_red_control_ss_to_stop_fails_the_instrument (tools.test_command_routing.RetiredShortcutMigrationTests.test_instrumented_red_control_ss_to_stop_fails_the_instrument) ... ok
+test_instrumented_ss_reaches_neither_stop_nor_status_implementation (tools.test_command_routing.RetiredShortcutMigrationTests.test_instrumented_ss_reaches_neither_stop_nor_status_implementation) ... ok
+test_mutation_difference_sss_ss_zero_st_checkpoints (tools.test_command_routing.RetiredShortcutMigrationTests.test_mutation_difference_sss_ss_zero_st_checkpoints) ... ok
+test_red_control_reintroduced_ss_or_sss_to_stop_fails (tools.test_command_routing.RetiredShortcutMigrationTests.test_red_control_reintroduced_ss_or_sss_to_stop_fails) ... ok
+test_registry_holds_st_not_ss (tools.test_command_routing.RetiredShortcutMigrationTests.test_registry_holds_st_not_ss) ... ok
+test_retired_ss_is_zero_mutation_refusal (tools.test_command_routing.RetiredShortcutMigrationTests.test_retired_ss_is_zero_mutation_refusal) ... ok
+test_sss_surplus_retains_refusal (tools.test_command_routing.RetiredShortcutMigrationTests.test_sss_surplus_retains_refusal) ... ok
+test_st_surplus_is_refused_like_stop_surplus (tools.test_command_routing.RetiredShortcutMigrationTests.test_st_surplus_is_refused_like_stop_surplus) ... ok
+test_stop_and_status_shortcuts_are_not_repeated_letter_siblings (tools.test_command_routing.RetiredShortcutMigrationTests.test_stop_and_status_shortcuts_are_not_repeated_letter_siblings) ... ok
+test_ccc_atomically_records_head_refreshes_claim_and_clears_goal_counters (tools.test_audit_2026_08_27_core.CccAuditTests.test_ccc_atomically_records_head_refreshes_claim_and_clears_goal_counters) ... warning: in the working copy of '.saipen/IDENTITY.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.saipen/recovery/settled/.receipt-index.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.saipen/recovery/settled/op-migrate-lineage/operation.json', LF will be replaced by CRLF the next time Git touches it
+ok
+test_ccc_refuses_foreign_live_claim_without_marker_or_state_change (tools.test_audit_2026_08_27_core.CccAuditTests.test_ccc_refuses_foreign_live_claim_without_marker_or_state_change) ... warning: in the working copy of '.saipen/IDENTITY.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.saipen/recovery/settled/.receipt-index.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.saipen/recovery/settled/op-migrate-lineage/operation.json', LF will be replaced by CRLF the next time Git touches it
+ok
+test_cli_stop_uses_canonical_owned_transaction (tools.test_audit_2026_08_27_core.StopAuditTests.test_cli_stop_uses_canonical_owned_transaction) ... ok
+test_normal_stop_checkpoints_log_board_state_and_digest (tools.test_audit_2026_08_27_core.StopAuditTests.test_normal_stop_checkpoints_log_board_state_and_digest) ... ok
+test_read_only_stop_emits_real_digest_projection_and_writes_nothing (tools.test_audit_2026_08_27_core.StopAuditTests.test_read_only_stop_emits_real_digest_projection_and_writes_nothing) ... ok
+test_stop_goal_caps_emit_canonical_wait_without_reset (tools.test_audit_2026_08_27_core.StopAuditTests.test_stop_goal_caps_emit_canonical_wait_without_reset) ... ok
+test_stop_refuses_foreign_live_claim_with_zero_writes (tools.test_audit_2026_08_27_core.StopAuditTests.test_stop_refuses_foreign_live_claim_with_zero_writes) ... ok
+test_ci_fast_unit_uses_the_same_orchestrator (tools.test_audit_2026_08_27_core.TestCommandAuditTests.test_ci_fast_unit_uses_the_same_orchestrator) ... ok
+test_injected_failing_family_is_reported_as_overall_failure (tools.test_audit_2026_08_27_core.TestCommandAuditTests.test_injected_failing_family_is_reported_as_overall_failure) ... ok
+test_tt_dry_run_is_a_zero_write_non_recursive_plan (tools.test_audit_2026_08_27_core.TestCommandAuditTests.test_tt_dry_run_is_a_zero_write_non_recursive_plan) ... ok
+
+----------------------------------------------------------------------
+Ran 71 tests in 19.145s
+
+OK

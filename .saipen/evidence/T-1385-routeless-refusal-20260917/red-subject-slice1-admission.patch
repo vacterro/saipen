@@ -1,0 +1,98 @@
+diff --git a/tools/saipen_engine/admission.py b/tools/saipen_engine/admission.py
+--- a/tools/saipen_engine/admission.py
++++ b/tools/saipen_engine/admission.py
+@@ -64,12 +64,14 @@ from __future__ import annotations
+ 
+ import json
+ import os
++import re
+ import socket
+ import stat
+ import time
+ from pathlib import Path, PurePosixPath, PureWindowsPath
+ 
+ from .command_effects import SHELL_CANONICAL_VERBS
++from . import phases
+ from .phases import ENTRY_COMMAND
+ from .paths import project_lineage_identity, resolve_project_root
+ 
+@@ -690,6 +692,39 @@ _BRAKE_ROUTES = {
+ }
+ 
+ 
++def canonical_write_route(root: Path) -> str:
++    """The one command to run INSTEAD of writing canonical state by hand.
++
++    T-1385. `PROTECTED_CANONICAL_NAMESPACE` used to state the rule -- direct
++    mutation is forbidden, use canonical commands -- and name none of them.
++    Measured live: that refusal is the one the field repeats, three times in a
++    single session against the same target with nothing changed between
++    attempts, because "use canonical commands" is advice and a blocked session
++    needs a move.
++
++    The guard cannot know WHICH canonical write the session meant, so it names
++    the one the project's own state makes next: with an active ticket in a
++    ticket-bearing phase, the checkpoint that records what just happened; with
++    no such ticket, the status read that says where the project actually is.
++    `<what happened>` stays a placeholder on purpose -- it is the one part the
++    receiver already knows and the guard never can.
++    """
++    from .state import parse_state_or_error
++
++    state, error = parse_state_or_error(
++        _read_text_bounded(root / ".saipen" / "STATE.md", _STATE_READ_LIMIT)
++    )
++    if error or not isinstance(state, dict):
++        # An unreadable checkpoint is exactly when a session must not be sent
++        # to write one. Diagnose first.
++        return "saipen status --json"
++    task = str(state.get("task") or "").strip()
++    phase = str(state.get("phase") or "").strip()
++    if re.fullmatch(r"T-\d+", task) and phase in phases.TICKET_BEARING_PHASES:
++        return f"saipen checkpoint RUN {task} '<what happened>'"
++    return "saipen status --json"
++
++
+ def protocol_snapshot(
+     root: Path,
+     actor: str | None = None,
+@@ -1077,6 +1112,7 @@ def evaluate_admission(
+         return result(
+             ok=False,
+             code="PROTECTED_CANONICAL_NAMESPACE",
++            canonical_next_command=canonical_write_route(root),
+             admitted=False,
+             project_root=str(root),
+             target=".saipen",
+@@ -1165,6 +1201,7 @@ def evaluate_admission(
+             return result(
+                 ok=False,
+                 code="PROTECTED_CANONICAL_NAMESPACE",
++                canonical_next_command=canonical_write_route(root),
+                 admitted=False,
+                 project_root=str(root),
+                 target=canonical,
+@@ -1190,6 +1227,7 @@ def evaluate_admission(
+             return result(
+                 ok=False,
+                 code="PROTECTED_CANONICAL_NAMESPACE",
++                canonical_next_command=canonical_write_route(root),
+                 admitted=False,
+                 project_root=str(root),
+                 target=canonical,
+@@ -1209,6 +1247,7 @@ def evaluate_admission(
+                 return result(
+                     ok=False,
+                     code="PROTECTED_CANONICAL_NAMESPACE",
++                canonical_next_command=canonical_write_route(root),
+                     admitted=False,
+                     project_root=str(root),
+                     target=canonical,
+@@ -1244,6 +1283,7 @@ def evaluate_admission(
+                 return result(
+                     ok=False,
+                     code="PROTECTED_CANONICAL_NAMESPACE",
++                canonical_next_command=canonical_write_route(root),
+                     admitted=False,
+                     project_root=str(root),
+                     target=canonical,

@@ -3,8 +3,9 @@
   "note": "A consumer reading contract_version greater than it implements MUST report the snapshot as protocol-unknown rather than reinterpreting this document.",
   "unknown_contract_version": "refuse"
  },
- "contract_version": 2,
+ "contract_version": 3,
  "evidence": {
+  "authority_note": "authoritative_state=true asserts this artifact satisfies THIS contract -- every declared durable path present and every transient class excluded -- not merely that the mandatory files happened to exist.",
   "conditional": [
    {
     "kind": "dir",
@@ -41,6 +42,18 @@
     "max_files": 4000,
     "path": "evidence",
     "recursive": true
+   },
+   {
+    "kind": "dir",
+    "max_files": 8000,
+    "path": "recovery/board-compaction",
+    "recursive": true
+   },
+   {
+    "kind": "dir",
+    "max_files": 8000,
+    "path": "recovery/log-detail",
+    "recursive": true
    }
   ],
   "mandatory": [
@@ -61,11 +74,38 @@
     "path": "IDENTITY.md"
    }
   ],
+  "nested_instance_files": [
+   "STATE.md",
+   "BOARD.md",
+   "LOG.md",
+   "IDENTITY.md"
+  ],
   "non_exportable": [
    "locks/",
    "recovery/",
    "quarantine/",
    "LOCAL_STATE.json"
+  ],
+  "non_exportable_filenames": [
+   "LOCAL_STATE.json",
+   "producer_epoch.json",
+   "crew_epoch.json",
+   ".in-flight"
+  ],
+  "non_exportable_segments": [
+   ".prepare-staging",
+   ".collect-staging",
+   ".staging",
+   ".in-flight",
+   ".translation-cache",
+   ".cache",
+   "__pycache__",
+   ".saipen"
+  ],
+  "non_exportable_suffixes": [
+   ".tmp",
+   ".lock",
+   ".partial"
   ],
   "optional": [
    {
@@ -86,13 +126,20 @@
     "path": "saitranslate",
     "recursive": true
    }
+  ],
+  "precedence": [
+   "transient_segment_or_filename",
+   "nested_instance_state",
+   "declared_durable_path",
+   "non_exportable_prefix",
+   "directory_rule"
   ]
  },
- "generated_at": "2026-09-19T12:20:21Z",
- "generator": "saipen-audit-manifest/2",
+ "generated_at": "2026-10-02T19:09:09Z",
+ "generator": "saipen-audit-manifest/3",
  "kind": "saipen_audit_manifest",
  "memory_root": ".saipen",
- "protocol_version": "8.0.1",
+ "protocol_version": "8.0.2",
  "references": {
   "carriers": [
    {
@@ -133,7 +180,9 @@
   "max_references": 20000,
   "max_total_bytes": 67108864,
   "surfaces": [
-   "evidence"
+   "evidence",
+   "recovery/log-detail",
+   "recovery/board-compaction"
   ]
  },
  "required": [

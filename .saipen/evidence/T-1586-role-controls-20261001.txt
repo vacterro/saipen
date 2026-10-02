@@ -1,0 +1,33 @@
+PASS: role/source freshness -- matching derived charter+package passes
+PASS: role/source freshness -- charter behavior change without revision edit makes package stale
+PASS: role/source freshness -- role revision is stable across LF and CRLF checkouts
+PASS: role/source freshness -- instance on old derived revision is detected
+PASS: role/source freshness -- tracked dirty source changes fingerprint
+PASS: role/source freshness -- untracked non-ignored source changes fingerprint
+PASS: role/source freshness -- framing separates trees that collide under raw concatenation
+SKIP: role freshness -- this host cannot represent a tracked executable-bit transition in the HEAD-vs-working-tree delta
+SKIP: role freshness -- symlink probes need a host that can create symlinks (Developer Mode or SeCreateSymbolicLinkPrivilege on Windows)
+PASS: role/source freshness -- filename with spaces is fingerprinted
+PASS: role/source freshness -- Unicode filename is fingerprinted
+SKIP: role freshness -- host filesystem cannot hold two case-distinct filenames simultaneously
+PASS: role/source freshness -- nested project inside another git repository uses the no-Git discovery model
+PASS: role/source freshness -- ignored runtime mutation does not change fingerprint
+PASS: role/source freshness -- HEAD movement during computation fails
+PASS: role/source freshness -- tracked .saipen bookkeeping mutation does not change fingerprint
+PASS: role/source freshness -- content race after second sample fails
+PASS: role/source freshness -- tracked source deletion changes fingerprint
+PASS: role/source freshness -- source rename changes fingerprint
+PASS: role/source freshness -- unreadable required input fails computation
+PASS: role/source freshness -- package bound to current source passes
+PASS: role/source freshness -- generic role binds to its governing PROTOCOL digest
+PASS: role/source freshness -- generic role contract change makes package stale
+PASS: role/source freshness -- package produced before final source mutation is stale
+PASS: role/source freshness -- producer noise after package creation stays fresh
+PASS: role/source freshness -- package with old source_head is stale even when delta matches
+PASS: role/source freshness -- Git discovery failure cannot degrade to no-Git
+PASS: role/source freshness -- no-Git runtime names exclude directories, not files
+PASS: role/source freshness -- no-Git fallback uses its explicit runtime exclusions
+SKIP: role freshness -- FIFO probe needs a POSIX host (os.mkfifo unavailable)
+SKIP: role freshness -- host cannot express an executable bit in the no-Git discovery model
+PASS: role/source freshness -- no-Git walk hashes a junction as link identity and never recurses outside the root
+{"problems": [], "checked": 27, "skipped": 7}

@@ -1,0 +1,277 @@
+Index: tools\saipen.py
+===================================================================
+--- tools\saipen.py	before
++++ tools\saipen.py	after
+@@ -5031,9 +5031,13 @@
+         usage_msg = (
+             "usage: saipen (continue|status|next|runtime|recover|claim <T-###> [--explicit]|"
+             "transition <PHASE> [T-###] [text]|checkpoint <TAXONOMY> "
+-            "[T-###] [text]|goal <text>|ticket add <PRIORITY> <text>|ticket "
+-            "done <T-###>|ticket block <T-###> <reason>|ticket "
+-            "unblock <T-###> <decision>|improve|improve "
++            "[T-###] [text]|goal <text>|user-request <text> [--priority P#]|"
++            "ticket add <PRIORITY> <text>|ticket "
++            "done <T-###> [--closure-mode own_patch|inherited_verified|cohort] "
++            "[--closure-cohort C-###] [--implementation-source AUTH] "
++            "[--paths p1,p2,...]|ticket block <T-###> <reason> "
++            "[--scope ticket|goal]|ticket "
++            "unblock <T-###> <decision>|cohort ship <C-###>|improve|improve "
+             "status|improve sweep <cycle> <RUN-N/IMP-NNN> <DISPOSITION> "
+             "|improve sweep-queue <cycle>|improve submit <cycle> <seat> "
+             "<project> <findings.json>|improve complete <cycle> <seat> "
+@@ -5632,34 +5636,41 @@
+                     as_json,
+                 )
+                 return 2
+-            if len(rest) > 1:
+-                _emit(
+-                    {
+-                        "ok": False,
+-                        "code": "VALIDATION_FAILED",
+-                        "detail": f"ticket done takes <T-###> [--closure-mode <mode>] "
+-                        f"[--closure-cohort <C-###>]; surplus: {' '.join(rest[1:])}",
+-                    },
+-                    as_json,
+-                )
+-                return 2
+-            # Orchestration repair (T-1302): closure provenance on `done`.
++            # Orchestration repair (T-1302 FINDING 1): the option parser runs
++            # BEFORE any surplus refusal so `--closure-mode` / `--closure-cohort`
++            # / `--implementation-source` / `--paths` are actually reachable.
++            # Closed grammar, no silent reinterpretation:
++            #   ticket done <T-###>
++            #       [--closure-mode own_patch|inherited_verified|cohort]
++            #       [--closure-cohort C-###]
++            #       [--implementation-source <T-###|SRC-###|release:<id>>]
++            #       [--paths <p1,p2,...>]
+             done_mode = "own_patch"
+             done_cohort = None
++            done_source = None
++            done_paths: list[str] = []
++            _seen = set()
+             _idx = 1
+             while _idx < len(rest):
+-                if rest[_idx] == "--closure-mode" and _idx + 1 < len(rest):
+-                    done_mode = rest[_idx + 1]
+-                    _idx += 2
+-                elif rest[_idx] == "--closure-cohort" and _idx + 1 < len(rest):
+-                    done_cohort = rest[_idx + 1]
+-                    _idx += 2
+-                elif rest[_idx].startswith("--"):
++                _opt = rest[_idx]
++                if _opt == "--closure-mode":
++                    _kind = "closure-mode"
++                elif _opt == "--closure-cohort":
++                    _kind = "closure-cohort"
++                elif _opt == "--implementation-source":
++                    _kind = "implementation-source"
++                elif _opt == "--paths":
++                    _kind = "paths"
++                elif _opt.startswith("--"):
+                     _emit(
+                         {
+                             "ok": False,
+                             "code": "VALIDATION_FAILED",
+-                            "detail": f"unknown option {rest[_idx]}",
++                            "detail": f"unknown option {_opt}; ticket done takes "
++                            f"<T-###> [--closure-mode <mode>] "
++                            f"[--closure-cohort <C-###>] "
++                            f"[--implementation-source <authority>] "
++                            f"[--paths <p1,p2,...>]",
+                         },
+                         as_json,
+                     )
+@@ -5669,11 +5680,52 @@
+                         {
+                             "ok": False,
+                             "code": "VALIDATION_FAILED",
+-                            "detail": f"ticket done takes <T-###>; surplus: {rest[_idx]}",
++                            "detail": f"ticket done takes <T-###>; surplus: {_opt}",
+                         },
+                         as_json,
+                     )
+                     return 2
++                if _kind in _seen:
++                    _emit(
++                        {
++                            "ok": False,
++                            "code": "VALIDATION_FAILED",
++                            "detail": f"duplicate option --{_kind}",
++                        },
++                        as_json,
++                    )
++                    return 2
++                if _idx + 1 >= len(rest):
++                    _emit(
++                        {
++                            "ok": False,
++                            "code": "VALIDATION_FAILED",
++                            "detail": f"option --{_kind} needs a value",
++                        },
++                        as_json,
++                    )
++                    return 2
++                _val = rest[_idx + 1]
++                if _val.startswith("--"):
++                    _emit(
++                        {
++                            "ok": False,
++                            "code": "VALIDATION_FAILED",
++                            "detail": f"option --{_kind} needs a value (got {_val!r})",
++                        },
++                        as_json,
++                    )
++                    return 2
++                _seen.add(_kind)
++                if _kind == "closure-mode":
++                    done_mode = _val
++                elif _kind == "closure-cohort":
++                    done_cohort = _val
++                elif _kind == "implementation-source":
++                    done_source = _val
++                else:
++                    done_paths = [p.strip() for p in _val.split(",") if p.strip()]
++                _idx += 2
+             if not dry_run and _negotiate_capability(project_root) == "read-only":
+                 return _capability_refusal(as_json)
+             _ho = _ensure_handover(project_root, as_json, dry_run)
+@@ -5686,6 +5738,8 @@
+                 dry_run=dry_run,
+                 closure_mode=done_mode,
+                 closure_cohort=done_cohort,
++                implementation_source=done_source,
++                closure_paths=tuple(done_paths),
+             )
+             _emit(result.to_dict(), as_json)
+             return 0 if result.ok else 1
+@@ -6242,6 +6296,130 @@
+         result = execute_release(project_root, plan)
+         _emit(result, as_json)
+         return 0 if result.get("ok") else 1
++    if command == "cohort":
++        # Orchestration repair (T-1302 FINDING 4): `saipen cohort ship C-###`
++        # is the ONE public cohort publication operation. It freezes the
++        # union of the members' attributable paths, publishes through the
++        # EXISTING exact release-integrity machinery (no second engine), and
++        # flips the durable registry record to shipped with the release
++        # identity. No member may isolate a personal diff; publication
++        # belongs to the cohort authority.
++        if len(args) < 2 or args[1] not in ("ship", "status"):
++            _emit(
++                {
++                    "ok": False,
++                    "code": "VALIDATION_FAILED",
++                    "detail": "cohort accepts `ship <C-###>` | `status <C-###>`",
++                },
++                as_json,
++            )
++            return 2
++        if len(args) != 3:
++            _emit(
++                {
++                    "ok": False,
++                    "code": "VALIDATION_FAILED",
++                    "detail": f"cohort {args[1]} takes exactly <C-###>; surplus: "
++                    f"{' '.join(args[3:])}",
++                },
++                as_json,
++            )
++            return 2
++        cid = args[2]
++        if not re.fullmatch(r"C-\d+", cid):
++            _emit(
++                {
++                    "ok": False,
++                    "code": "VALIDATION_FAILED",
++                    "detail": f"cohort id must match C-### (got {cid!r})",
++                },
++                as_json,
++            )
++            return 2
++        from saipen_engine.operations import (
++            cohort_ready_error,
++            read_cohort_registry,
++        )
++        from saipen_engine.release import ReleaseRefusal, execute_release, plan_release
++
++        if args[1] == "status":
++            try:
++                registry = read_cohort_registry(project_root)
++                cohort = (registry.get("cohorts") or {}).get(cid)
++            except (OSError, ValueError) as exc:
++                _emit(
++                    {"ok": False, "code": "VALIDATION_FAILED", "detail": str(exc)},
++                    as_json,
++                )
++                return 1
++            if cohort is None:
++                _emit(
++                    {
++                        "ok": False,
++                        "code": "VALIDATION_FAILED",
++                        "detail": f"cohort {cid} has no durable registry record",
++                    },
++                    as_json,
++                )
++                return 1
++            _emit({"ok": True, "cohort": cohort}, as_json)
++            return 0
++        if not dry_run and _negotiate_capability(project_root) == "read-only":
++            return _capability_refusal(as_json)
++        _ho = _ensure_handover(project_root, as_json, dry_run)
++        if _ho is not None:
++            return _ho
++        from saipen_engine.board import parse_board
++
++        try:
++            board = parse_board(
++                (Path(project_root) / ".saipen" / "BOARD.md").read_text(encoding="utf-8")
++            )
++            registry = read_cohort_registry(project_root)
++            ready = cohort_ready_error(project_root, board, registry, cid)
++            if ready is not None:
++                _emit(
++                    {"ok": False, "code": "VALIDATION_FAILED", "detail": ready},
++                    as_json,
++                )
++                return 1
++            cohort = registry["cohorts"][cid]
++            scope: dict[str, str] = {}
++            for member_id, record in sorted((cohort.get("members") or {}).items()):
++                for rel, expected in sorted((record.get("paths") or {}).items()):
++                    scope[rel] = expected
++            if not scope:
++                _emit(
++                    {
++                        "ok": False,
++                        "code": "VALIDATION_FAILED",
++                        "detail": f"cohort {cid} has no attributable scope to publish",
++                    },
++                    as_json,
++                )
++                return 1
++            plan = plan_release(
++                project_root,
++                "ship",
++                dry_run=dry_run,
++                crew_carrier={
++                    "crew_epoch": f"cohort:{cid}",
++                    "ticket_id": cid,
++                    "scope": scope,
++                    "cohort_id": cid,
++                },
++                current_capability=_negotiate_capability(project_root),
++                current_agent=_agent_for(project_root),
++            )
++        except ReleaseRefusal as exc:
++            _emit({"ok": False, "code": exc.code, "detail": exc.detail}, as_json)
++            return 1
++        except (OSError, ValueError) as exc:
++            _emit({"ok": False, "code": "VALIDATION_FAILED", "detail": str(exc)}, as_json)
++            return 1
++        result = execute_release(project_root, plan)
++        _emit(result, as_json)
++        return 0 if result.get("ok") else 1
+     # в”Ђв”Ђ Autonomous command closure (SAIPEN intent handlers) в”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђв”Ђ
+     # qq/ee/qqq/eee are protocol semantic operations, not CLI aliases.
+ 

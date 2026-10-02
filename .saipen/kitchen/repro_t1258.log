@@ -1,0 +1,5 @@
+trial 1: rc=1 parity_rc=2 fails=0 errors=0 summary=None
+trial 2: rc=1 parity_rc=2 fails=0 errors=0 summary=None
+trial 3: rc=1 parity_rc=2 fails=0 errors=0 summary=None
+
+TRIALS=3  red=0

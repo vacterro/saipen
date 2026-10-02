@@ -1,0 +1,18 @@
+test_a_constructed_dead_control_is_not_softened_by_host_absence (test_t1582_sweep_skip_reason.ActualSweepCapabilityTests.test_a_constructed_dead_control_is_not_softened_by_host_absence) ... ok
+test_a_real_missing_anchor_still_fails_alongside_host_absence (test_t1582_sweep_skip_reason.ActualSweepCapabilityTests.test_a_real_missing_anchor_still_fails_alongside_host_absence) ... ok
+test_capability_reason_reaches_skip_and_unproven_runner (test_t1582_sweep_skip_reason.ActualSweepCapabilityTests.test_capability_reason_reaches_skip_and_unproven_runner) ... ok
+test_constructed_control_still_requires_the_validator_finding (test_t1582_sweep_skip_reason.ActualSweepCapabilityTests.test_constructed_control_still_requires_the_validator_finding) ... ok
+test_other_controls_continue_but_missing_capability_is_never_pass (test_t1582_sweep_skip_reason.ActualSweepCapabilityTests.test_other_controls_continue_but_missing_capability_is_never_pass) ... ok
+test_real_missing_anchor_alone_still_uses_generic_skip_and_fail (test_t1582_sweep_skip_reason.ActualSweepCapabilityTests.test_real_missing_anchor_alone_still_uses_generic_skip_and_fail) ... ok
+test_capability_refusal_returns_a_reason (test_t1582_sweep_skip_reason.ApplyCaseReasonTests.test_capability_refusal_returns_a_reason) ... ok
+test_missing_target_stays_a_bare_false (test_t1582_sweep_skip_reason.ApplyCaseReasonTests.test_missing_target_stays_a_bare_false) ... ok
+test_no_op_mutation_still_returns_false (test_t1582_sweep_skip_reason.ApplyCaseReasonTests.test_no_op_mutation_still_returns_false) ... ok
+test_real_symlink_still_applies (test_t1582_sweep_skip_reason.ApplyCaseReasonTests.test_real_symlink_still_applies) ... skipped 'host cannot create symlinks'
+test_reason_reuses_the_canonical_capability_test (test_t1582_sweep_skip_reason.ApplyCaseReasonTests.test_reason_reuses_the_canonical_capability_test) ... ok
+test_capability_refusal_is_named (test_t1582_sweep_skip_reason.SkipLineWordingTests.test_capability_refusal_is_named) ... ok
+test_moved_anchor_keeps_the_missing_file_wording (test_t1582_sweep_skip_reason.SkipLineWordingTests.test_moved_anchor_keeps_the_missing_file_wording) ... ok
+
+----------------------------------------------------------------------
+Ran 13 tests in 0.042s
+
+OK (skipped=1)

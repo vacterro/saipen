@@ -1,0 +1,35 @@
+{
+  "command": "focused.py run_injector_probes run_scheduler_probes run_hostile_state_probes run_continuity_probes",
+  "head": "d97abdc097db432bafe2316b1e3577e44cd9cc4c",
+  "harness_sha256": "85251f7b86a7133c06efe6178ea27df27c17983447f362bc6cfb593e68f24d52",
+  "results": [
+    {
+      "function": "run_injector_probes",
+      "elapsed": 37.875,
+      "checked": 6,
+      "skipped": 0,
+      "failures": []
+    },
+    {
+      "function": "run_scheduler_probes",
+      "elapsed": 14.90700000000652,
+      "checked": 60,
+      "skipped": 0,
+      "failures": []
+    },
+    {
+      "function": "run_hostile_state_probes",
+      "elapsed": 0.015000000013969839,
+      "checked": 17,
+      "skipped": 0,
+      "failures": []
+    },
+    {
+      "function": "run_continuity_probes",
+      "elapsed": 29.45299999997951,
+      "checked": 1,
+      "skipped": 0,
+      "failures": []
+    }
+  ]
+}

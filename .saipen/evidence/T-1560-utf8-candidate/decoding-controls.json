@@ -1,0 +1,1584 @@
+[
+  {
+    "path": "tools/audit_checks.py",
+    "line": 944,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/audit_checks.py",
+    "line": 957,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/audit_checks.py",
+    "line": 981,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/audit_checks.py",
+    "line": 4558,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/audit_checks.py",
+    "line": 352,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/audit_checks.py",
+    "line": 416,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/audit_checks.py",
+    "line": 668,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/audit_checks.py",
+    "line": 724,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/audit_checks.py",
+    "line": 1048,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/audit_checks.py",
+    "line": 1074,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/audit_floor.py",
+    "line": 229,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/audit_floor.py",
+    "line": 299,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/audit_floor.py",
+    "line": 253,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/audit_parity.py",
+    "line": 154,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/audit_parity.py",
+    "line": 246,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/audit_parity.py",
+    "line": 172,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/audit_parity.py",
+    "line": 191,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/audit_tags.py",
+    "line": 100,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/autoinject.py",
+    "line": 222,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/build_handoff_archive.py",
+    "line": 414,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/ci_status.py",
+    "line": 66,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/continuity_probes.py",
+    "line": 51,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/continuity_probes.py",
+    "line": 77,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/continuity_probes.py",
+    "line": 97,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/host_guard.py",
+    "line": 68,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/perf_wave_regressions.py",
+    "line": 710,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/perf_wave_regressions.py",
+    "line": 185,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/regression_second_wave.py",
+    "line": 8,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/regression_second_wave.py",
+    "line": 24,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/release_provenance.py",
+    "line": 65,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/run_scenarios.py",
+    "line": 909,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/run_scenarios.py",
+    "line": 9383,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/run_scenarios.py",
+    "line": 10619,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/run_scenarios.py",
+    "line": 10637,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/run_scenarios.py",
+    "line": 10656,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/run_scenarios.py",
+    "line": 10684,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/run_scenarios.py",
+    "line": 10710,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/run_scenarios.py",
+    "line": 10893,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/run_scenarios.py",
+    "line": 11362,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/run_scenarios.py",
+    "line": 12073,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/run_scenarios.py",
+    "line": 12096,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/run_scenarios.py",
+    "line": 12161,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/run_scenarios.py",
+    "line": 12202,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/run_scenarios.py",
+    "line": 12263,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/run_scenarios.py",
+    "line": 12545,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/run_scenarios.py",
+    "line": 12592,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/run_scenarios.py",
+    "line": 12643,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/run_scenarios.py",
+    "line": 12791,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/run_scenarios.py",
+    "line": 12819,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/run_scenarios.py",
+    "line": 13310,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/run_scenarios.py",
+    "line": 13311,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/run_scenarios.py",
+    "line": 13312,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/run_scenarios.py",
+    "line": 13371,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/run_scenarios.py",
+    "line": 13382,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/run_scenarios.py",
+    "line": 14245,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/run_scenarios.py",
+    "line": 14259,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/run_scenarios.py",
+    "line": 15081,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/run_scenarios.py",
+    "line": 15106,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/run_scenarios.py",
+    "line": 15125,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/run_scenarios.py",
+    "line": 15144,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/run_scenarios.py",
+    "line": 15164,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/run_scenarios.py",
+    "line": 15753,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/run_scenarios.py",
+    "line": 15843,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/run_scenarios.py",
+    "line": 15865,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/run_scenarios.py",
+    "line": 15892,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/run_scenarios.py",
+    "line": 16161,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/run_scenarios.py",
+    "line": 16200,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/run_scenarios.py",
+    "line": 16212,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/run_scenarios.py",
+    "line": 16224,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/run_scenarios.py",
+    "line": 16236,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/run_scenarios.py",
+    "line": 16264,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/run_scenarios.py",
+    "line": 16271,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/run_scenarios.py",
+    "line": 16290,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/run_scenarios.py",
+    "line": 16297,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/run_scenarios.py",
+    "line": 16312,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/run_scenarios.py",
+    "line": 16322,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/run_scenarios.py",
+    "line": 16353,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/run_scenarios.py",
+    "line": 16563,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/run_scenarios.py",
+    "line": 16612,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/run_scenarios.py",
+    "line": 16626,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/run_scenarios.py",
+    "line": 284,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/run_scenarios.py",
+    "line": 498,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/run_scenarios.py",
+    "line": 520,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/run_scenarios.py",
+    "line": 539,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/run_scenarios.py",
+    "line": 576,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/run_scenarios.py",
+    "line": 615,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/run_scenarios.py",
+    "line": 667,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/run_scenarios.py",
+    "line": 919,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/run_scenarios.py",
+    "line": 958,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/run_scenarios.py",
+    "line": 1028,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/run_scenarios.py",
+    "line": 2160,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/run_scenarios.py",
+    "line": 2200,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/run_scenarios.py",
+    "line": 2669,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/run_scenarios.py",
+    "line": 2672,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/run_scenarios.py",
+    "line": 2817,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/run_scenarios.py",
+    "line": 2824,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/run_scenarios.py",
+    "line": 3071,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/run_scenarios.py",
+    "line": 5556,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/run_scenarios.py",
+    "line": 5699,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/run_scenarios.py",
+    "line": 6747,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/run_scenarios.py",
+    "line": 6754,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/run_scenarios.py",
+    "line": 7101,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/run_scenarios.py",
+    "line": 7247,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/run_scenarios.py",
+    "line": 7263,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/run_scenarios.py",
+    "line": 7348,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/run_scenarios.py",
+    "line": 7422,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/run_scenarios.py",
+    "line": 7445,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/run_scenarios.py",
+    "line": 7534,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/run_scenarios.py",
+    "line": 7567,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/run_scenarios.py",
+    "line": 7624,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/run_scenarios.py",
+    "line": 7847,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/run_scenarios.py",
+    "line": 8022,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/run_scenarios.py",
+    "line": 8184,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/run_scenarios.py",
+    "line": 8851,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/run_scenarios.py",
+    "line": 9736,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/run_scenarios.py",
+    "line": 10980,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/run_scenarios.py",
+    "line": 11059,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/run_scenarios.py",
+    "line": 12007,
+    "callee": "Popen",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/run_scenarios.py",
+    "line": 12187,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/run_scenarios.py",
+    "line": 13235,
+    "callee": "Popen",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/run_scenarios.py",
+    "line": 15781,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/run_scenarios.py",
+    "line": 16252,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/run_scenarios.py",
+    "line": 16419,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/run_scenarios.py",
+    "line": 16954,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/run_scenarios.py",
+    "line": 17482,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/run_scenarios.py",
+    "line": 18241,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/run_scenarios.py",
+    "line": 18990,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/run_scenarios.py",
+    "line": 19024,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/run_scenarios.py",
+    "line": 438,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/run_scenarios.py",
+    "line": 730,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/run_scenarios.py",
+    "line": 748,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/run_scenarios.py",
+    "line": 1102,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/run_scenarios.py",
+    "line": 1125,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/run_scenarios.py",
+    "line": 1153,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/run_scenarios.py",
+    "line": 1174,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/run_scenarios.py",
+    "line": 1197,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/run_scenarios.py",
+    "line": 1283,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/run_scenarios.py",
+    "line": 1311,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/run_scenarios.py",
+    "line": 1650,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/run_scenarios.py",
+    "line": 1672,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/run_scenarios.py",
+    "line": 1884,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/run_scenarios.py",
+    "line": 2283,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/run_scenarios.py",
+    "line": 2316,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/run_scenarios.py",
+    "line": 2345,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/run_scenarios.py",
+    "line": 2433,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/run_scenarios.py",
+    "line": 2457,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/run_scenarios.py",
+    "line": 3225,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/run_scenarios.py",
+    "line": 5484,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/run_scenarios.py",
+    "line": 5495,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/run_scenarios.py",
+    "line": 5734,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/run_scenarios.py",
+    "line": 5845,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/run_scenarios.py",
+    "line": 5856,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/run_scenarios.py",
+    "line": 6093,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/run_scenarios.py",
+    "line": 6104,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/run_scenarios.py",
+    "line": 6592,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/run_scenarios.py",
+    "line": 6601,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/run_scenarios.py",
+    "line": 6891,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/run_scenarios.py",
+    "line": 7191,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/run_scenarios.py",
+    "line": 7357,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/run_scenarios.py",
+    "line": 7454,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/run_scenarios.py",
+    "line": 7577,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/run_scenarios.py",
+    "line": 8081,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/run_scenarios.py",
+    "line": 8295,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/run_scenarios.py",
+    "line": 8787,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/run_scenarios.py",
+    "line": 9112,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/run_scenarios.py",
+    "line": 10338,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/run_scenarios.py",
+    "line": 13452,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/run_scenarios.py",
+    "line": 18887,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/run_scenarios.py",
+    "line": 19148,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/run_scenarios.py",
+    "line": 19309,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/run_scenarios.py",
+    "line": 19341,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/run_scenarios.py",
+    "line": 19357,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/run_scenarios.py",
+    "line": 741,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/run_scenarios.py",
+    "line": 756,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/run_scenarios.py",
+    "line": 2258,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/run_scenarios.py",
+    "line": 2980,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/run_scenarios.py",
+    "line": 3105,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/run_scenarios.py",
+    "line": 3196,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/run_scenarios.py",
+    "line": 7270,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/run_scenarios.py",
+    "line": 7699,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/run_scenarios.py",
+    "line": 7890,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/run_scenarios.py",
+    "line": 8522,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/run_scenarios.py",
+    "line": 10581,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/run_scenarios.py",
+    "line": 19403,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/run_scenarios.py",
+    "line": 19408,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/run_scenarios.py",
+    "line": 19519,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/run_scenarios.py",
+    "line": 19628,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/run_scenarios.py",
+    "line": 6915,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/run_scenarios.py",
+    "line": 7900,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/run_scenarios.py",
+    "line": 10596,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/saipen_engine/cold_truth.py",
+    "line": 153,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/saipen_engine/controls.py",
+    "line": 128,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/saipen_engine/core_unit.py",
+    "line": 785,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/saipen_engine/debt.py",
+    "line": 120,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/saipen_engine/debt.py",
+    "line": 1259,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/saipen_engine/fleet.py",
+    "line": 744,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/saipen_engine/gpu.py",
+    "line": 171,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/saipen_engine/intent.py",
+    "line": 1700,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/saipen_engine/paths.py",
+    "line": 397,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/saipen_engine/release.py",
+    "line": 2821,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/saipen_engine/runtime_bootstrap.py",
+    "line": 332,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/saipen_engine/snapshot.py",
+    "line": 47,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/saipen_metrics.py",
+    "line": 142,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/second_wave_regressions.py",
+    "line": 8,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/t1318_current_generation_probe.py",
+    "line": 68,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/t1320_fleet_native_smoke.py",
+    "line": 65,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/t1320_fleet_native_smoke.py",
+    "line": 202,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/t1446_field_soak.py",
+    "line": 295,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/t1446_field_soak.py",
+    "line": 291,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/t1446_field_soak.py",
+    "line": 261,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/validate.py",
+    "line": 498,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/validate.py",
+    "line": 583,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/validate.py",
+    "line": 6785,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/validate.py",
+    "line": 8960,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/validate.py",
+    "line": 9169,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/validate.py",
+    "line": 9265,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/validate.py",
+    "line": 9191,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/validate.py",
+    "line": 9217,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/validate.py",
+    "line": 9272,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/validate.py",
+    "line": 9240,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/validate.py",
+    "line": 9298,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/validate.py",
+    "line": 9314,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/verify_handoff_archive.py",
+    "line": 462,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/verify_handoff_archive.py",
+    "line": 488,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/verify_handoff_archive.py",
+    "line": 545,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  },
+  {
+    "path": "tools/verify_handoff_archive.py",
+    "line": 513,
+    "callee": "run",
+    "old_preserves_utf8": false,
+    "candidate_preserves_utf8": true
+  }
+]

@@ -1,0 +1,16 @@
+{
+  "verifier_sha256": "3d48c2f03df0487b58c35541cf25baf8ed85c6c831881f76531ea4401f119ab1",
+  "same_verifier_and_command": true,
+  "command": [
+    "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+    "-B",
+    "-m",
+    "unittest",
+    "-v",
+    "tools.test_conformance_repair_boundary"
+  ],
+  "target": "V:\\_TEMP_\\saipen-t1439-control-2mltr6yw",
+  "green_exit": 0,
+  "red_exit": 1,
+  "restoration": "four initially clean files from HEAD; only T-1439 CLI hunks reversed"
+}

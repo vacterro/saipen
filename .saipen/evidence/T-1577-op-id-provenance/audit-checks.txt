@@ -1,0 +1,24 @@
+PASS: a real root `nul` entry is excluded from audit snapshots
+FAIL: symlink-restore -- cannot construct symlink red control: [WinError 1314] A required privilege is not held by the client: 'V:\\_TEMP_\\audit_checks_2bbdsdwl\\probe-symlink-restore\\symlink-restore-probe\\external.md' -> 'V:\\_TEMP_\\audit_checks_2bbdsdwl\\probe-symlink-restore\\symlink-restore-probe\\IDENTITY.md'
+PASS: audit-tags missing-Git skip plus enumeration, nonzero, malformed, truncated, and surplus fail-closed controls behave
+PASS: every producer-OUTBOX control runs at a gate where its finding is hard
+PASS: a known-good copy of this repository is built for the mutation controls
+PASS: release-ledger clean/new-tag/new-changelog/stale-baseline controls behave distinctly
+PASS: tools/validate.py declares exactly the adjudicated fail sites, and added, removed and same-count SWAPPED sites are each named
+NOTE: 337 fail site(s) recorded by identity in tools/validator_fail_sites.json
+NOTE: known limitation -- identity binds WHICH fail sites tools/validate.py declares, so an added, removed or same-count swapped site is named -- but a BASELINE record is inherited surface that was never individually adjudicated, which is recorded per site and is NOT detected here as missing coverage
+FAIL: warn-slug-ownership -- control copy with calibrated warn_slugs is not clean: s.py
+WARN [xpatch-survival]: XP-000002 applied bytes never reached a commit: saipen/COMMANDS.md, tools/saipen.py, tools/saipen_engine/debt.py, tools/saipen_engine/findings.py, tools/saipen_engine/operations.py, tools/test_debt_gate.py, tools/validate.py
+Validation FAILED: 1 problem(s), 27 warning(s)
+FAIL: phase-rename -- consistent SCOUT->SCOUTX rename was rejected: FAIL: KNOWLEDGE/ structured card/index: INDEX.md is stale; run `saipen knowledge index`
+PASS: release-ledger tag query is observed once; duplicate-query and invalid-validator controls both go red
+PASS: the unmodified copy validates clean, so every expectation below is absent before its mutation
+PASS: callable no-op mutations are rejected before validation
+PASS: every canonical mutation has its target, so the denominator holds still
+FAIL: mutation-sweep -- 3 of 244 mutation control(s) no longer prove anything
+FAIL: 'SKILL drops the reply-language precedence' expects 'reply-language', which the UNMODIFIED repository already prints -- the case proves nothing
+FAIL: 'STYLE drops persistent caveman voice' expects 'chat-voice', which the UNMODIFIED repository already prints -- the case proves nothing
+SKIP: portable project identity becomes an external symlink -- the mutation changed nothing: the file is missing, or its anchor text is (a LOG anchor sealed into .saipen/logs/ is the usual cause)
+
+3 of 244 case(s) are not evidence any more.
+AUDIT: 10 of 14 probes passed; failed: mutation-sweep, phase-rename, symlink-restore, warn-slug-ownership; skipped: none

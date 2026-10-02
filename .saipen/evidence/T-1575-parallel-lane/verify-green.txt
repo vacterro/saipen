@@ -1,0 +1,13 @@
+test_a_foreign_bound_agent_cannot_edit_a_tree_under_test (test_t1575_parallel_lane.GuardTests.test_a_foreign_bound_agent_cannot_edit_a_tree_under_test)
+Measured 30.09.26: another project's agent edited this repo mid-run. ... ok
+test_in_root_edits_outside_saipen_are_refused_while_live (test_t1575_parallel_lane.GuardTests.test_in_root_edits_outside_saipen_are_refused_while_live) ... ok
+test_a_stale_marker_never_freezes_the_tree (test_t1575_parallel_lane.MarkerTests.test_a_stale_marker_never_freezes_the_tree) ... ok
+test_only_the_writer_removes_its_marker (test_t1575_parallel_lane.MarkerTests.test_only_the_writer_removes_its_marker) ... ok
+test_the_marker_lives_exactly_as_long_as_the_gate (test_t1575_parallel_lane.MarkerTests.test_the_marker_lives_exactly_as_long_as_the_gate) ... ok
+test_the_evidence_run_holds_the_marker_and_always_releases_it (test_t1575_parallel_lane.RunnerWiringTests.test_the_evidence_run_holds_the_marker_and_always_releases_it) ... ok
+test_continue_names_the_gate_and_the_parallel_lane (test_t1575_parallel_lane.TurnEntryTests.test_continue_names_the_gate_and_the_parallel_lane) ... ok
+
+----------------------------------------------------------------------
+Ran 7 tests in 4.370s
+
+OK

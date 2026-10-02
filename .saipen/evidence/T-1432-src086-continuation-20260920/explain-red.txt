@@ -1,0 +1,16 @@
+F.
+======================================================================
+FAIL: test_explain_next_agrees_with_status_and_next_on_a_red_gate (tools.test_src085_conformance_disposition.StatusSurfaceTests.test_explain_next_agrees_with_status_and_next_on_a_red_gate)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_src085_conformance_disposition.py", line 126, in test_explain_next_agrees_with_status_and_next_on_a_red_gate
+    self.assertEqual(explanation["selected_action"], "saipen validate")
+AssertionError: 'saipen continue' != 'saipen validate'
+- saipen continue
++ saipen validate
+
+
+----------------------------------------------------------------------
+Ran 2 tests in 2.952s
+
+FAILED (failures=1)

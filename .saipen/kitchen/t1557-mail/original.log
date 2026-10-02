@@ -1,0 +1,126 @@
+test_continue_reports_telegrams_and_routes_exactly_as_without_them (test_t1497_candidate.ContinueTests.test_continue_reports_telegrams_and_routes_exactly_as_without_them) ... ok
+test_continue_preserves_explicit_environment_and_inherited_actor (test_t1497_candidate.TelegramActorTests.test_continue_preserves_explicit_environment_and_inherited_actor) ... 
+  test_continue_preserves_explicit_environment_and_inherited_actor (test_t1497_candidate.TelegramActorTests.test_continue_preserves_explicit_environment_and_inherited_actor) (explicit='explicit-worker', environment='environment-worker') ... FAIL
+  test_continue_preserves_explicit_environment_and_inherited_actor (test_t1497_candidate.TelegramActorTests.test_continue_preserves_explicit_environment_and_inherited_actor) (explicit='explicit-worker', environment='') ... FAIL
+  test_continue_preserves_explicit_environment_and_inherited_actor (test_t1497_candidate.TelegramActorTests.test_continue_preserves_explicit_environment_and_inherited_actor) (explicit=None, environment='environment-worker') ... FAIL
+  test_continue_preserves_explicit_environment_and_inherited_actor (test_t1497_candidate.TelegramActorTests.test_continue_preserves_explicit_environment_and_inherited_actor) (explicit=None, environment='') ... FAIL
+test_emit_preserves_explicit_environment_and_inherited_actor (test_t1497_candidate.TelegramActorTests.test_emit_preserves_explicit_environment_and_inherited_actor) ... 
+  test_emit_preserves_explicit_environment_and_inherited_actor (test_t1497_candidate.TelegramActorTests.test_emit_preserves_explicit_environment_and_inherited_actor) (explicit='explicit-worker', environment='environment-worker') ... FAIL
+  test_emit_preserves_explicit_environment_and_inherited_actor (test_t1497_candidate.TelegramActorTests.test_emit_preserves_explicit_environment_and_inherited_actor) (explicit='explicit-worker', environment='') ... FAIL
+  test_emit_preserves_explicit_environment_and_inherited_actor (test_t1497_candidate.TelegramActorTests.test_emit_preserves_explicit_environment_and_inherited_actor) (explicit=None, environment='environment-worker') ... FAIL
+  test_emit_preserves_explicit_environment_and_inherited_actor (test_t1497_candidate.TelegramActorTests.test_emit_preserves_explicit_environment_and_inherited_actor) (explicit=None, environment='') ... FAIL
+test_a_broken_or_slow_saimail_is_a_state (test_t1497_candidate.TurnEntryReadTests.test_a_broken_or_slow_saimail_is_a_state) ... ok
+test_a_missing_saimail_is_unavailable (test_t1497_candidate.TurnEntryReadTests.test_a_missing_saimail_is_unavailable) ... ok
+test_a_scan_window_that_left_rows_unread_is_not_complete (test_t1497_candidate.TurnEntryReadTests.test_a_scan_window_that_left_rows_unread_is_not_complete) ... ok
+test_counts_are_reported_and_nothing_a_sender_wrote (test_t1497_candidate.TurnEntryReadTests.test_counts_are_reported_and_nothing_a_sender_wrote) ... ok
+test_read_command_preserves_paths_with_spaces_in_a_real_shell (test_t1497_candidate.TurnEntryReadTests.test_read_command_preserves_paths_with_spaces_in_a_real_shell) ... ok
+test_unconfigured_starts_no_process (test_t1497_candidate.TurnEntryReadTests.test_unconfigured_starts_no_process) ... ok
+
+======================================================================
+FAIL: test_continue_preserves_explicit_environment_and_inherited_actor (test_t1497_candidate.TelegramActorTests.test_continue_preserves_explicit_environment_and_inherited_actor) (explicit='explicit-worker', environment='environment-worker')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\.saipen\kitchen\t1557-mail\candidate\tools\test_t1497_turn_entry_telegrams.py", line 265, in test_continue_preserves_explicit_environment_and_inherited_actor
+    self._assert_read_actor(json.loads(output.getvalue()), expected, fake)
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\.saipen\kitchen\t1557-mail\candidate\tools\test_t1497_turn_entry_telegrams.py", line 213, in _assert_read_actor
+    self.assertEqual(payload["telegrams"]["state"], telegrams.STATE_OK, payload)
+AssertionError: 'ERROR' != 'OK'
+- ERROR
++ OK
+ : {'ok': True, 'code': 'IMPROVE_AUDIT_ASSIGNMENT', 'op_id': 'improve-admit-21868c3c8286484fb3b0f289a84bca44', 'cycle_id': 'imp-t1363-qbr04vdn-20260928-1', 'seat_id': 'test-agent-01', 'role': 'core', 'report_path': '.saipen/improve/imp-t1363-qbr04vdn-20260928-1/test-agent-01/saipen_improve_SAIPEN.md', 'report_created': True, 'resumed': False, 'dry_run': False, 'source': {'source_head': 'no-git', 'source_tree_fingerprint': 'no-git-tree-v1:fb16cabc6962fa48e2b2e3293e17bab860126925020c8914ce158c4da7146709', 'discovery_model': 'no-git-tree-v1'}, 'scope': {'phase': 'DONE', 'task': 'none'}, 'proof_levels': ['UNIT', 'COMPOSITION', 'CANONICAL', 'GATE', 'PROVENANCE'], 'schema': "cycle + seat/report + RUN-N/IMP-NNN composite finding ref; a submitted RUN body carries NO '## RUN N' heading of its own and must contain either at least one IMP-<n> finding line or a line beginning NO_FINDINGS -- an audit that honestly found nothing is submitted as 'NO_FINDINGS -- <what was audited and why it was empty>', never as prose; dispositions go to SWEEP.md via saipen improve sweep; report completion via saipen improve complete", 'write_boundary': 'RUNs append via saipen improve submit; report completion via saipen improve complete; no raw report/MANIFEST/SWEEP editing', 'next': 'perform the semantic audit, then: saipen improve submit imp-t1363-qbr04vdn-20260928-1 test-agent-01 SAIPEN <findings.json>', 'telegrams': {'state': 'ERROR', 'detail': "turn-entry telegram read failed: turn_entry() got an unexpected keyword argument 'seat'"}}
+
+======================================================================
+FAIL: test_continue_preserves_explicit_environment_and_inherited_actor (test_t1497_candidate.TelegramActorTests.test_continue_preserves_explicit_environment_and_inherited_actor) (explicit='explicit-worker', environment='')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\.saipen\kitchen\t1557-mail\candidate\tools\test_t1497_turn_entry_telegrams.py", line 265, in test_continue_preserves_explicit_environment_and_inherited_actor
+    self._assert_read_actor(json.loads(output.getvalue()), expected, fake)
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\.saipen\kitchen\t1557-mail\candidate\tools\test_t1497_turn_entry_telegrams.py", line 213, in _assert_read_actor
+    self.assertEqual(payload["telegrams"]["state"], telegrams.STATE_OK, payload)
+AssertionError: 'ERROR' != 'OK'
+- ERROR
++ OK
+ : {'ok': True, 'code': 'IMPROVE_AUDIT_ASSIGNMENT', 'op_id': 'improve-admit-e40b12497aa04647914889ff2cd68f80', 'cycle_id': 'imp-t1363-ysi5y6gy-20260928-1', 'seat_id': 'test-agent-01', 'role': 'core', 'report_path': '.saipen/improve/imp-t1363-ysi5y6gy-20260928-1/test-agent-01/saipen_improve_SAIPEN.md', 'report_created': True, 'resumed': False, 'dry_run': False, 'source': {'source_head': 'no-git', 'source_tree_fingerprint': 'no-git-tree-v1:fb16cabc6962fa48e2b2e3293e17bab860126925020c8914ce158c4da7146709', 'discovery_model': 'no-git-tree-v1'}, 'scope': {'phase': 'DONE', 'task': 'none'}, 'proof_levels': ['UNIT', 'COMPOSITION', 'CANONICAL', 'GATE', 'PROVENANCE'], 'schema': "cycle + seat/report + RUN-N/IMP-NNN composite finding ref; a submitted RUN body carries NO '## RUN N' heading of its own and must contain either at least one IMP-<n> finding line or a line beginning NO_FINDINGS -- an audit that honestly found nothing is submitted as 'NO_FINDINGS -- <what was audited and why it was empty>', never as prose; dispositions go to SWEEP.md via saipen improve sweep; report completion via saipen improve complete", 'write_boundary': 'RUNs append via saipen improve submit; report completion via saipen improve complete; no raw report/MANIFEST/SWEEP editing', 'next': 'perform the semantic audit, then: saipen improve submit imp-t1363-ysi5y6gy-20260928-1 test-agent-01 SAIPEN <findings.json>', 'telegrams': {'state': 'ERROR', 'detail': "turn-entry telegram read failed: turn_entry() got an unexpected keyword argument 'seat'"}}
+
+======================================================================
+FAIL: test_continue_preserves_explicit_environment_and_inherited_actor (test_t1497_candidate.TelegramActorTests.test_continue_preserves_explicit_environment_and_inherited_actor) (explicit=None, environment='environment-worker')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\.saipen\kitchen\t1557-mail\candidate\tools\test_t1497_turn_entry_telegrams.py", line 265, in test_continue_preserves_explicit_environment_and_inherited_actor
+    self._assert_read_actor(json.loads(output.getvalue()), expected, fake)
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\.saipen\kitchen\t1557-mail\candidate\tools\test_t1497_turn_entry_telegrams.py", line 213, in _assert_read_actor
+    self.assertEqual(payload["telegrams"]["state"], telegrams.STATE_OK, payload)
+AssertionError: 'ERROR' != 'OK'
+- ERROR
++ OK
+ : {'ok': True, 'code': 'IMPROVE_AUDIT_ASSIGNMENT', 'op_id': 'improve-admit-065d4963b94d4e0997b6ac6ba2dd613f', 'cycle_id': 'imp-t1363-y0qpy6vw-20260928-1', 'seat_id': 'test-agent-01', 'role': 'core', 'report_path': '.saipen/improve/imp-t1363-y0qpy6vw-20260928-1/test-agent-01/saipen_improve_SAIPEN.md', 'report_created': True, 'resumed': False, 'dry_run': False, 'source': {'source_head': 'no-git', 'source_tree_fingerprint': 'no-git-tree-v1:fb16cabc6962fa48e2b2e3293e17bab860126925020c8914ce158c4da7146709', 'discovery_model': 'no-git-tree-v1'}, 'scope': {'phase': 'DONE', 'task': 'none'}, 'proof_levels': ['UNIT', 'COMPOSITION', 'CANONICAL', 'GATE', 'PROVENANCE'], 'schema': "cycle + seat/report + RUN-N/IMP-NNN composite finding ref; a submitted RUN body carries NO '## RUN N' heading of its own and must contain either at least one IMP-<n> finding line or a line beginning NO_FINDINGS -- an audit that honestly found nothing is submitted as 'NO_FINDINGS -- <what was audited and why it was empty>', never as prose; dispositions go to SWEEP.md via saipen improve sweep; report completion via saipen improve complete", 'write_boundary': 'RUNs append via saipen improve submit; report completion via saipen improve complete; no raw report/MANIFEST/SWEEP editing', 'next': 'perform the semantic audit, then: saipen improve submit imp-t1363-y0qpy6vw-20260928-1 test-agent-01 SAIPEN <findings.json>', 'telegrams': {'state': 'ERROR', 'detail': "turn-entry telegram read failed: turn_entry() got an unexpected keyword argument 'seat'"}}
+
+======================================================================
+FAIL: test_continue_preserves_explicit_environment_and_inherited_actor (test_t1497_candidate.TelegramActorTests.test_continue_preserves_explicit_environment_and_inherited_actor) (explicit=None, environment='')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\.saipen\kitchen\t1557-mail\candidate\tools\test_t1497_turn_entry_telegrams.py", line 265, in test_continue_preserves_explicit_environment_and_inherited_actor
+    self._assert_read_actor(json.loads(output.getvalue()), expected, fake)
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\.saipen\kitchen\t1557-mail\candidate\tools\test_t1497_turn_entry_telegrams.py", line 213, in _assert_read_actor
+    self.assertEqual(payload["telegrams"]["state"], telegrams.STATE_OK, payload)
+AssertionError: 'ERROR' != 'OK'
+- ERROR
++ OK
+ : {'ok': True, 'code': 'IMPROVE_AUDIT_ASSIGNMENT', 'op_id': 'improve-admit-0bba43244d8143d69b8d4f909f98066b', 'cycle_id': 'imp-t1363-p2lkswpy-20260928-1', 'seat_id': 'test-agent-01', 'role': 'core', 'report_path': '.saipen/improve/imp-t1363-p2lkswpy-20260928-1/test-agent-01/saipen_improve_SAIPEN.md', 'report_created': True, 'resumed': False, 'dry_run': False, 'source': {'source_head': 'no-git', 'source_tree_fingerprint': 'no-git-tree-v1:fb16cabc6962fa48e2b2e3293e17bab860126925020c8914ce158c4da7146709', 'discovery_model': 'no-git-tree-v1'}, 'scope': {'phase': 'DONE', 'task': 'none'}, 'proof_levels': ['UNIT', 'COMPOSITION', 'CANONICAL', 'GATE', 'PROVENANCE'], 'schema': "cycle + seat/report + RUN-N/IMP-NNN composite finding ref; a submitted RUN body carries NO '## RUN N' heading of its own and must contain either at least one IMP-<n> finding line or a line beginning NO_FINDINGS -- an audit that honestly found nothing is submitted as 'NO_FINDINGS -- <what was audited and why it was empty>', never as prose; dispositions go to SWEEP.md via saipen improve sweep; report completion via saipen improve complete", 'write_boundary': 'RUNs append via saipen improve submit; report completion via saipen improve complete; no raw report/MANIFEST/SWEEP editing', 'next': 'perform the semantic audit, then: saipen improve submit imp-t1363-p2lkswpy-20260928-1 test-agent-01 SAIPEN <findings.json>', 'telegrams': {'state': 'ERROR', 'detail': "turn-entry telegram read failed: turn_entry() got an unexpected keyword argument 'seat'"}}
+
+======================================================================
+FAIL: test_emit_preserves_explicit_environment_and_inherited_actor (test_t1497_candidate.TelegramActorTests.test_emit_preserves_explicit_environment_and_inherited_actor) (explicit='explicit-worker', environment='environment-worker')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\.saipen\kitchen\t1557-mail\candidate\tools\test_t1497_turn_entry_telegrams.py", line 240, in test_emit_preserves_explicit_environment_and_inherited_actor
+    self._assert_read_actor(json.loads(output.getvalue()), expected, fake)
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\.saipen\kitchen\t1557-mail\candidate\tools\test_t1497_turn_entry_telegrams.py", line 213, in _assert_read_actor
+    self.assertEqual(payload["telegrams"]["state"], telegrams.STATE_OK, payload)
+AssertionError: 'ERROR' != 'OK'
+- ERROR
++ OK
+ : {'ok': True, 'telegrams': {'state': 'ERROR', 'detail': "turn-entry telegram read failed: turn_entry() got an unexpected keyword argument 'seat'"}}
+
+======================================================================
+FAIL: test_emit_preserves_explicit_environment_and_inherited_actor (test_t1497_candidate.TelegramActorTests.test_emit_preserves_explicit_environment_and_inherited_actor) (explicit='explicit-worker', environment='')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\.saipen\kitchen\t1557-mail\candidate\tools\test_t1497_turn_entry_telegrams.py", line 240, in test_emit_preserves_explicit_environment_and_inherited_actor
+    self._assert_read_actor(json.loads(output.getvalue()), expected, fake)
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\.saipen\kitchen\t1557-mail\candidate\tools\test_t1497_turn_entry_telegrams.py", line 213, in _assert_read_actor
+    self.assertEqual(payload["telegrams"]["state"], telegrams.STATE_OK, payload)
+AssertionError: 'ERROR' != 'OK'
+- ERROR
++ OK
+ : {'ok': True, 'telegrams': {'state': 'ERROR', 'detail': "turn-entry telegram read failed: turn_entry() got an unexpected keyword argument 'seat'"}}
+
+======================================================================
+FAIL: test_emit_preserves_explicit_environment_and_inherited_actor (test_t1497_candidate.TelegramActorTests.test_emit_preserves_explicit_environment_and_inherited_actor) (explicit=None, environment='environment-worker')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\.saipen\kitchen\t1557-mail\candidate\tools\test_t1497_turn_entry_telegrams.py", line 240, in test_emit_preserves_explicit_environment_and_inherited_actor
+    self._assert_read_actor(json.loads(output.getvalue()), expected, fake)
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\.saipen\kitchen\t1557-mail\candidate\tools\test_t1497_turn_entry_telegrams.py", line 213, in _assert_read_actor
+    self.assertEqual(payload["telegrams"]["state"], telegrams.STATE_OK, payload)
+AssertionError: 'ERROR' != 'OK'
+- ERROR
++ OK
+ : {'ok': True, 'telegrams': {'state': 'ERROR', 'detail': "turn-entry telegram read failed: turn_entry() got an unexpected keyword argument 'seat'"}}
+
+======================================================================
+FAIL: test_emit_preserves_explicit_environment_and_inherited_actor (test_t1497_candidate.TelegramActorTests.test_emit_preserves_explicit_environment_and_inherited_actor) (explicit=None, environment='')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\.saipen\kitchen\t1557-mail\candidate\tools\test_t1497_turn_entry_telegrams.py", line 240, in test_emit_preserves_explicit_environment_and_inherited_actor
+    self._assert_read_actor(json.loads(output.getvalue()), expected, fake)
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\.saipen\kitchen\t1557-mail\candidate\tools\test_t1497_turn_entry_telegrams.py", line 213, in _assert_read_actor
+    self.assertEqual(payload["telegrams"]["state"], telegrams.STATE_OK, payload)
+AssertionError: 'ERROR' != 'OK'
+- ERROR
++ OK
+ : {'ok': True, 'telegrams': {'state': 'ERROR', 'detail': "turn-entry telegram read failed: turn_entry() got an unexpected keyword argument 'seat'"}}
+
+----------------------------------------------------------------------
+Ran 9 tests in 7.275s
+
+FAILED (failures=8)

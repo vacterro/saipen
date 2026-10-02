@@ -1,0 +1,130 @@
+........................................warning: in the working copy of '.saipen/IDENTITY.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.saipen/recovery/settled/.receipt-index.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.saipen/recovery/settled/op-migrate-lineage/operation.json', LF will be replaced by CRLF the next time Git touches it
+.warning: in the working copy of '.saipen/IDENTITY.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.saipen/recovery/settled/.receipt-index.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.saipen/recovery/settled/op-migrate-lineage/operation.json', LF will be replaced by CRLF the next time Git touches it
+...........................................warning: in the working copy of '.saipen/IDENTITY.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.saipen/recovery/settled/.receipt-index.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.saipen/recovery/settled/op-migrate-lineage/operation.json', LF will be replaced by CRLF the next time Git touches it
+.warning: in the working copy of '.saipen/IDENTITY.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.saipen/recovery/settled/.receipt-index.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.saipen/recovery/settled/op-migrate-lineage/operation.json', LF will be replaced by CRLF the next time Git touches it
+............................................................................................................................................................................................................................................................................................................................................................................................................................................s.....E......................................................................warning: in the working copy of '.saipen/IDENTITY.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.saipen/recovery/settled/.receipt-index.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.saipen/recovery/settled/op-migrate-lineage/operation.json', LF will be replaced by CRLF the next time Git touches it
+....warning: in the working copy of '.saipen/IDENTITY.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.saipen/recovery/settled/.receipt-index.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.saipen/recovery/settled/op-migrate-lineage/operation.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.saipen/IDENTITY.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.saipen/recovery/settled/.receipt-index.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.saipen/recovery/settled/op-migrate-lineage/operation.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.saipen/milestones/CP-001/manifest.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.saipen/milestones/current.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.saipen/recovery/settled/milestone-08d4eb14d3750db9/operation.json', LF will be replaced by CRLF the next time Git touches it
+...warning: in the working copy of '.saipen/IDENTITY.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.saipen/recovery/settled/.receipt-index.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.saipen/recovery/settled/op-migrate-lineage/operation.json', LF will be replaced by CRLF the next time Git touches it
+.............................................................................FFFFFFFF.............EF............................................................................................................................................................................................................................................................................................................................................................................s............................................................................................................................................................................................................................................................
+======================================================================
+ERROR: test_the_cost_helper_returns_a_positive_floor (test_concurrency_independence.NoAbsoluteLatencyBudgets.test_the_cost_helper_returns_a_positive_floor)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_concurrency_independence.py", line 128, in test_the_cost_helper_returns_a_positive_floor
+    from tools.test_audit_2026_08_28_all3 import PerformanceAuditTests
+ModuleNotFoundError: No module named 'tools'
+
+======================================================================
+ERROR: test_findings_json_side_artifact_matches_standard_counts (test_debt_gate.StrictGateInvariantTests.test_findings_json_side_artifact_matches_standard_counts)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_debt_gate.py", line 635, in test_findings_json_side_artifact_matches_standard_counts
+    doc = json.loads(out.read_text(encoding="utf-8"))
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\vac34\AppData\Local\Programs\Python\Python311\Lib\pathlib.py", line 1058, in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors) as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\vac34\AppData\Local\Programs\Python\Python311\Lib\pathlib.py", line 1044, in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: 'V:\\_TEMP_\\saipen-debt-strict-hf3cvvhe\\findings.json'
+
+======================================================================
+FAIL: test_corrupted_snapshot_fails_closed (test_debt_gate.DebtGateFixtureTests.test_corrupted_snapshot_fails_closed)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_debt_gate.py", line 154, in test_corrupted_snapshot_fails_closed
+    self.assertTrue(created["ok"], created)
+AssertionError: False is not true : {'ok': False, 'code': 'FINDINGS_CAPTURE_FAILED', 'exit_code': 2, 'detail': 'FAIL: unknown argument: --findings-json\n'}
+
+======================================================================
+FAIL: test_deleted_snapshot_cannot_create_pass (test_debt_gate.DebtGateFixtureTests.test_deleted_snapshot_cannot_create_pass)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_debt_gate.py", line 192, in test_deleted_snapshot_cannot_create_pass
+    self.assertTrue(created["ok"], created)
+AssertionError: False is not true : {'ok': False, 'code': 'FINDINGS_CAPTURE_FAILED', 'exit_code': 2, 'detail': 'FAIL: unknown argument: --findings-json\n'}
+
+======================================================================
+FAIL: test_delta_requires_verification_evidence (test_debt_gate.DebtGateFixtureTests.test_delta_requires_verification_evidence)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_debt_gate.py", line 277, in test_delta_requires_verification_evidence
+    self.assertTrue(baseline["ok"], baseline)
+AssertionError: False is not true : {'ok': False, 'code': 'FINDINGS_CAPTURE_FAILED', 'exit_code': 2, 'detail': 'FAIL: unknown argument: --findings-json\n'}
+
+======================================================================
+FAIL: test_delta_resolves_and_reports_release_blocked (test_debt_gate.DebtGateFixtureTests.test_delta_resolves_and_reports_release_blocked)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_debt_gate.py", line 202, in test_delta_resolves_and_reports_release_blocked
+    self.assertTrue(baseline["ok"], baseline)
+AssertionError: False is not true : {'ok': False, 'code': 'FINDINGS_CAPTURE_FAILED', 'exit_code': 2, 'detail': 'FAIL: unknown argument: --findings-json\n'}
+
+======================================================================
+FAIL: test_delta_without_any_baseline_refuses (test_debt_gate.DebtGateFixtureTests.test_delta_without_any_baseline_refuses)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_debt_gate.py", line 296, in test_delta_without_any_baseline_refuses
+    self.assertEqual(result["code"], "DEBT_BASELINE_MISSING")
+AssertionError: 'FINDINGS_CAPTURE_FAILED' != 'DEBT_BASELINE_MISSING'
+- FINDINGS_CAPTURE_FAILED
++ DEBT_BASELINE_MISSING
+
+
+======================================================================
+FAIL: test_ruleset_change_refuses_comparison (test_debt_gate.DebtGateFixtureTests.test_ruleset_change_refuses_comparison)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_debt_gate.py", line 183, in test_ruleset_change_refuses_comparison
+    self.assertTrue(created["ok"], created)
+AssertionError: False is not true : {'ok': False, 'code': 'FINDINGS_CAPTURE_FAILED', 'exit_code': 2, 'detail': 'FAIL: unknown argument: --findings-json\n'}
+
+======================================================================
+FAIL: test_snapshot_from_another_project_refuses (test_debt_gate.DebtGateFixtureTests.test_snapshot_from_another_project_refuses)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_debt_gate.py", line 171, in test_snapshot_from_another_project_refuses
+    self.assertTrue(created["ok"], created)
+AssertionError: False is not true : {'ok': False, 'code': 'FINDINGS_CAPTURE_FAILED', 'exit_code': 2, 'detail': 'FAIL: unknown argument: --findings-json\n'}
+
+======================================================================
+FAIL: test_snapshot_is_immutable_project_bound_and_reused (test_debt_gate.DebtGateFixtureTests.test_snapshot_is_immutable_project_bound_and_reused)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_debt_gate.py", line 135, in test_snapshot_is_immutable_project_bound_and_reused
+    self.assertTrue(first["ok"], first)
+AssertionError: False is not true : {'ok': False, 'code': 'FINDINGS_CAPTURE_FAILED', 'exit_code': 2, 'detail': 'FAIL: unknown argument: --findings-json\n'}
+
+======================================================================
+FAIL: test_strict_core_stays_red_with_carried_debt (test_debt_gate.StrictGateInvariantTests.test_strict_core_stays_red_with_carried_debt)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_debt_gate.py", line 601, in test_strict_core_stays_red_with_carried_debt
+    self.assertTrue(capture["ok"], capture)
+AssertionError: False is not true : {'ok': False, 'code': 'FINDINGS_CAPTURE_FAILED', 'exit_code': 2, 'detail': 'FAIL: unknown argument: --findings-json\n'}
+
+----------------------------------------------------------------------
+Ran 1314 tests in 517.662s
+
+FAILED (failures=9, errors=2, skipped=2)

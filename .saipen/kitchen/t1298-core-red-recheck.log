@@ -1,0 +1,511 @@
+VERIFIERS {"tools/test_crew_applicability.py": "0668f2979f7a7053df3f6bdc4b6b5697f74aa43c05cb002089509c9d09d12cc1", "tools/test_hostile_wave_regressions.py": "c24fb8d97eb2698f49d641cabd24a12742dc882582496983c6443f48a70895e5"}
+PRE_FIX_SUBJECTS {"applicability": "fc1bf42bc055ce9dfffd671a628795f2ffbda7a5e659237b9d3a2bd23b37bab4", "operations": "3e19829894af41bac5734476db8a4813f6ea2590cbc65729f65791300d290ee5", "crew": "17ab5fdb2920ee34d5f88ec39ea747ec46be47ee7886e30bb636efcd45a15436", "release": "c7feb689b65974f9b33b0f12ff9e984970f0c6b991b3a654bfd019bba6cfcdb9"}
+RED_CONTROL R003 tests 5 failures 1 errors 0 skipped 1
+..F.s
+======================================================================
+FAIL: test_included_child_error_is_uncertainty_even_without_gui (test_crew_applicability.EnumerationFailureTests.test_included_child_error_is_uncertainty_even_without_gui)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_crew_applicability.py", line 228, in test_included_child_error_is_uncertainty_even_without_gui
+    self.assertFalse(facts.readable)
+AssertionError: True is not false
+
+----------------------------------------------------------------------
+Ran 5 tests in 0.007s
+
+FAILED (failures=1, skipped=1)
+FFFFFF.FFFFF
+======================================================================
+FAIL: test_constant_dynamic_gui_imports (test_crew_applicability.DynamicImportTests.test_constant_dynamic_gui_imports) (source='__import__("tkinter")')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_crew_applicability.py", line 550, in check_sources
+    self.assertEqual(A._probe_gui_imports(path)[0], expected)
+AssertionError: 'clean' != 'gui'
+- clean
++ gui
+
+
+======================================================================
+FAIL: test_constant_dynamic_gui_imports (test_crew_applicability.DynamicImportTests.test_constant_dynamic_gui_imports) (source='loader = __import__\nloader("tkinter")')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_crew_applicability.py", line 550, in check_sources
+    self.assertEqual(A._probe_gui_imports(path)[0], expected)
+AssertionError: 'clean' != 'gui'
+- clean
++ gui
+
+
+======================================================================
+FAIL: test_constant_dynamic_gui_imports (test_crew_applicability.DynamicImportTests.test_constant_dynamic_gui_imports) (source='import importlib\nimportlib.import_module("PySide6.QtWidgets")')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_crew_applicability.py", line 550, in check_sources
+    self.assertEqual(A._probe_gui_imports(path)[0], expected)
+AssertionError: 'clean' != 'gui'
+- clean
++ gui
+
+
+======================================================================
+FAIL: test_constant_dynamic_gui_imports (test_crew_applicability.DynamicImportTests.test_constant_dynamic_gui_imports) (source='import importlib as il\nil.import_module("PyQt6")')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_crew_applicability.py", line 550, in check_sources
+    self.assertEqual(A._probe_gui_imports(path)[0], expected)
+AssertionError: 'clean' != 'gui'
+- clean
++ gui
+
+
+======================================================================
+FAIL: test_constant_dynamic_gui_imports (test_crew_applicability.DynamicImportTests.test_constant_dynamic_gui_imports) (source='from importlib import import_module\nimport_module("tkinter")')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_crew_applicability.py", line 550, in check_sources
+    self.assertEqual(A._probe_gui_imports(path)[0], expected)
+AssertionError: 'clean' != 'gui'
+- clean
++ gui
+
+
+======================================================================
+FAIL: test_constant_dynamic_gui_imports (test_crew_applicability.DynamicImportTests.test_constant_dynamic_gui_imports) (source='from importlib import import_module as im\nim("PySide6.QtWidgets")')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_crew_applicability.py", line 550, in check_sources
+    self.assertEqual(A._probe_gui_imports(path)[0], expected)
+AssertionError: 'clean' != 'gui'
+- clean
++ gui
+
+
+======================================================================
+FAIL: test_nonconstant_recognized_imports_are_indeterminate (test_crew_applicability.DynamicImportTests.test_nonconstant_recognized_imports_are_indeterminate) (source='__import__(name)')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_crew_applicability.py", line 550, in check_sources
+    self.assertEqual(A._probe_gui_imports(path)[0], expected)
+AssertionError: 'clean' != 'indeterminate'
+- clean
++ indeterminate
+
+
+======================================================================
+FAIL: test_nonconstant_recognized_imports_are_indeterminate (test_crew_applicability.DynamicImportTests.test_nonconstant_recognized_imports_are_indeterminate) (source='import importlib\nimportlib.import_module(name)')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_crew_applicability.py", line 550, in check_sources
+    self.assertEqual(A._probe_gui_imports(path)[0], expected)
+AssertionError: 'clean' != 'indeterminate'
+- clean
++ indeterminate
+
+
+======================================================================
+FAIL: test_nonconstant_recognized_imports_are_indeterminate (test_crew_applicability.DynamicImportTests.test_nonconstant_recognized_imports_are_indeterminate) (source='loader = __import__\nloader(name)')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_crew_applicability.py", line 550, in check_sources
+    self.assertEqual(A._probe_gui_imports(path)[0], expected)
+AssertionError: 'clean' != 'indeterminate'
+- clean
++ indeterminate
+
+
+======================================================================
+FAIL: test_nonconstant_recognized_imports_are_indeterminate (test_crew_applicability.DynamicImportTests.test_nonconstant_recognized_imports_are_indeterminate) (source='from importlib import import_module as im\nim(name)')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_crew_applicability.py", line 550, in check_sources
+    self.assertEqual(A._probe_gui_imports(path)[0], expected)
+AssertionError: 'clean' != 'indeterminate'
+- clean
++ indeterminate
+
+
+======================================================================
+FAIL: test_nonconstant_recognized_imports_are_indeterminate (test_crew_applicability.DynamicImportTests.test_nonconstant_recognized_imports_are_indeterminate) (source='import importlib as il\nil.import_module(name)')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_crew_applicability.py", line 550, in check_sources
+    self.assertEqual(A._probe_gui_imports(path)[0], expected)
+AssertionError: 'clean' != 'indeterminate'
+- clean
++ indeterminate
+
+
+----------------------------------------------------------------------
+Ran 3 tests in 0.012s
+
+FAILED (failures=11)
+RED_CONTROL R004 tests 3 failures 11 errors 0 skipped 0
+.EEFFEEFFFFFFFFFFFFFFF.
+======================================================================
+ERROR: test_malformed_evidence_top_level_refuses (test_crew_applicability.StrictReleaseAuthorityTests.test_malformed_evidence_top_level_refuses) (evidence=None)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_crew_applicability.py", line 876, in test_malformed_evidence_top_level_refuses
+    self.assertTrue(C._missing_pre_ship_evidence(
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "tools/saipen_engine/crew.py@HEAD", line 1278, in _missing_pre_ship_evidence
+    return (), (
+                ^
+  File "tools/saipen_engine/crew.py@HEAD", line 1263, in _certified_role_names
+    state = record.get("verdict")
+         ^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: 'NoneType' object is not iterable
+
+======================================================================
+ERROR: test_malformed_evidence_top_level_refuses (test_crew_applicability.StrictReleaseAuthorityTests.test_malformed_evidence_top_level_refuses) (evidence=7)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_crew_applicability.py", line 876, in test_malformed_evidence_top_level_refuses
+    self.assertTrue(C._missing_pre_ship_evidence(
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "tools/saipen_engine/crew.py@HEAD", line 1278, in _missing_pre_ship_evidence
+    return (), (
+                ^
+  File "tools/saipen_engine/crew.py@HEAD", line 1263, in _certified_role_names
+    state = record.get("verdict")
+         ^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: 'int' object is not iterable
+
+======================================================================
+ERROR: test_malformed_present_manifest_never_becomes_legacy (test_crew_applicability.StrictReleaseAuthorityTests.test_malformed_present_manifest_never_becomes_legacy) (manifest='bad')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_crew_applicability.py", line 839, in test_malformed_present_manifest_never_becomes_legacy
+    projected = _receipt_evidence({
+                ^^^^^^^^^^^^^^^^^^^
+  File "tools/saipen_engine/release.py@HEAD", line 4366, in _receipt_evidence
+    def _is_admissible_terminal_receipt(record: dict) -> bool:
+                                      ^^^^^^^^^^^^^^^^^^^^^^^^^
+ValueError: dictionary update sequence element #0 has length 1; 2 is required
+
+======================================================================
+ERROR: test_malformed_present_manifest_never_becomes_legacy (test_crew_applicability.StrictReleaseAuthorityTests.test_malformed_present_manifest_never_becomes_legacy) (manifest=7)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_crew_applicability.py", line 839, in test_malformed_present_manifest_never_becomes_legacy
+    projected = _receipt_evidence({
+                ^^^^^^^^^^^^^^^^^^^
+  File "tools/saipen_engine/release.py@HEAD", line 4366, in _receipt_evidence
+    def _is_admissible_terminal_receipt(record: dict) -> bool:
+                                      ^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: 'int' object is not iterable
+
+======================================================================
+FAIL: test_malformed_present_manifest_never_becomes_legacy (test_crew_applicability.StrictReleaseAuthorityTests.test_malformed_present_manifest_never_becomes_legacy) (manifest=None)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_crew_applicability.py", line 850, in test_malformed_present_manifest_never_becomes_legacy
+    self.assertTrue(C._missing_pre_ship_evidence(receipt))
+AssertionError: '' is not true
+
+======================================================================
+FAIL: test_malformed_present_manifest_never_becomes_legacy (test_crew_applicability.StrictReleaseAuthorityTests.test_malformed_present_manifest_never_becomes_legacy) (manifest=[])
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_crew_applicability.py", line 850, in test_malformed_present_manifest_never_becomes_legacy
+    self.assertTrue(C._missing_pre_ship_evidence(receipt))
+AssertionError: '' is not true
+
+======================================================================
+FAIL: test_malformed_present_manifest_never_becomes_legacy (test_crew_applicability.StrictReleaseAuthorityTests.test_malformed_present_manifest_never_becomes_legacy) (manifest={})
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_crew_applicability.py", line 850, in test_malformed_present_manifest_never_becomes_legacy
+    self.assertTrue(C._missing_pre_ship_evidence(receipt))
+AssertionError: '' is not true
+
+======================================================================
+FAIL: test_manifest_semantic_damage_refuses (test_crew_applicability.StrictReleaseAuthorityTests.test_manifest_semantic_damage_refuses) (field='probe', value='visual-surface')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_crew_applicability.py", line 833, in test_manifest_semantic_damage_refuses
+    self.assertTrue(C._missing_pre_ship_evidence(receipt))
+AssertionError: '' is not true
+
+======================================================================
+FAIL: test_manifest_semantic_damage_refuses (test_crew_applicability.StrictReleaseAuthorityTests.test_manifest_semantic_damage_refuses) (field='probe', value=None)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_crew_applicability.py", line 833, in test_manifest_semantic_damage_refuses
+    self.assertTrue(C._missing_pre_ship_evidence(receipt))
+AssertionError: '' is not true
+
+======================================================================
+FAIL: test_manifest_semantic_damage_refuses (test_crew_applicability.StrictReleaseAuthorityTests.test_manifest_semantic_damage_refuses) (field='probe', value='unknown')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_crew_applicability.py", line 833, in test_manifest_semantic_damage_refuses
+    self.assertTrue(C._missing_pre_ship_evidence(receipt))
+AssertionError: '' is not true
+
+======================================================================
+FAIL: test_manifest_semantic_damage_refuses (test_crew_applicability.StrictReleaseAuthorityTests.test_manifest_semantic_damage_refuses) (field='verdict', value='NOT_APPLICABLE')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_crew_applicability.py", line 833, in test_manifest_semantic_damage_refuses
+    self.assertTrue(C._missing_pre_ship_evidence(receipt))
+AssertionError: '' is not true
+
+======================================================================
+FAIL: test_manifest_semantic_damage_refuses (test_crew_applicability.StrictReleaseAuthorityTests.test_manifest_semantic_damage_refuses) (field='reason', value='  ')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_crew_applicability.py", line 833, in test_manifest_semantic_damage_refuses
+    self.assertTrue(C._missing_pre_ship_evidence(receipt))
+AssertionError: '' is not true
+
+======================================================================
+FAIL: test_manifest_semantic_damage_refuses (test_crew_applicability.StrictReleaseAuthorityTests.test_manifest_semantic_damage_refuses) (field='reason', value=42)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_crew_applicability.py", line 833, in test_manifest_semantic_damage_refuses
+    self.assertTrue(C._missing_pre_ship_evidence(receipt))
+AssertionError: '' is not true
+
+======================================================================
+FAIL: test_missing_unknown_or_malformed_role (test_crew_applicability.StrictReleaseAuthorityTests.test_missing_unknown_or_malformed_role) (damage='extra')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_crew_applicability.py", line 864, in test_missing_unknown_or_malformed_role
+    self.assertTrue(C._missing_pre_ship_evidence(receipt))
+AssertionError: '' is not true
+
+======================================================================
+FAIL: test_unusable_package_collection_refuses (test_crew_applicability.StrictReleaseAuthorityTests.test_unusable_package_collection_refuses) (packages=[])
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_crew_applicability.py", line 871, in test_unusable_package_collection_refuses
+    self.assertTrue(C._missing_pre_ship_evidence(receipt))
+AssertionError: '' is not true
+
+======================================================================
+FAIL: test_unusable_package_collection_refuses (test_crew_applicability.StrictReleaseAuthorityTests.test_unusable_package_collection_refuses) (packages=None)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_crew_applicability.py", line 871, in test_unusable_package_collection_refuses
+    self.assertTrue(C._missing_pre_ship_evidence(receipt))
+AssertionError: '' is not true
+
+======================================================================
+FAIL: test_unusable_package_collection_refuses (test_crew_applicability.StrictReleaseAuthorityTests.test_unusable_package_collection_refuses) (packages={})
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_crew_applicability.py", line 871, in test_unusable_package_collection_refuses
+    self.assertTrue(C._missing_pre_ship_evidence(receipt))
+AssertionError: '' is not true
+
+======================================================================
+FAIL: test_unusable_package_collection_refuses (test_crew_applicability.StrictReleaseAuthorityTests.test_unusable_package_collection_refuses) (packages='package')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_crew_applicability.py", line 871, in test_unusable_package_collection_refuses
+    self.assertTrue(C._missing_pre_ship_evidence(receipt))
+AssertionError: '' is not true
+
+======================================================================
+FAIL: test_unusable_package_collection_refuses (test_crew_applicability.StrictReleaseAuthorityTests.test_unusable_package_collection_refuses) (packages=[None])
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_crew_applicability.py", line 871, in test_unusable_package_collection_refuses
+    self.assertTrue(C._missing_pre_ship_evidence(receipt))
+AssertionError: '' is not true
+
+======================================================================
+FAIL: test_unusable_package_collection_refuses (test_crew_applicability.StrictReleaseAuthorityTests.test_unusable_package_collection_refuses) (packages=[{}])
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_crew_applicability.py", line 871, in test_unusable_package_collection_refuses
+    self.assertTrue(C._missing_pre_ship_evidence(receipt))
+AssertionError: '' is not true
+
+======================================================================
+FAIL: test_unusable_package_collection_refuses (test_crew_applicability.StrictReleaseAuthorityTests.test_unusable_package_collection_refuses) (packages=[{'package_identity': 'p'}])
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_crew_applicability.py", line 871, in test_unusable_package_collection_refuses
+    self.assertTrue(C._missing_pre_ship_evidence(receipt))
+AssertionError: '' is not true
+
+----------------------------------------------------------------------
+Ran 7 tests in 0.009s
+
+FAILED (failures=17, errors=4)
+RED_CONTROL R002 tests 7 failures 17 errors 4 skipped 0
+FF.FFFFFFF.FFFFFE
+======================================================================
+ERROR: test_v2_full_sha256_and_v1_explicit_compatibility (test_hostile_wave_regressions.ScopeIdentityTests.test_v2_full_sha256_and_v1_explicit_compatibility) (version=2)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_hostile_wave_regressions.py", line 432, in test_v2_full_sha256_and_v1_explicit_compatibility
+    self.assertEqual(R._load_scope(root, "T-1", "head", None, False), record)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "tools/saipen_engine/release.py@HEAD", line 1682, in _load_scope
+    or data.get("schema_version") not in (1, 2)):
+saipen_engine.release.ReleaseRefusal: REFUSE [RECOVERY_CONFLICT] release scope record V:\_TEMP_\tmpa74ipptq\.saipen\kitchen\release_scope\T-1.json has unknown schema_version 2
+
+======================================================================
+FAIL: test_crew_owned_substitution_refuses (test_hostile_wave_regressions.OwnedManifestTests.test_crew_owned_substitution_refuses)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_hostile_wave_regressions.py", line 313, in test_crew_owned_substitution_refuses
+    self.assert_refused(self.run_stage(self.substitute("crew.txt")))
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_hostile_wave_regressions.py", line 274, in assert_refused
+    self.assertFalse(result["ok"], result)
+AssertionError: True is not false : {'ok': True, 'commit': '34847a2f87636523a5eb895ea682da51bddbd230', 'tree': '0ec40a07cf35fe6f1648d3f81c9bb1ed6bcd7aa2'}
+
+======================================================================
+FAIL: test_exact_manifest_persisted_before_gate_and_matches_tree (test_hostile_wave_regressions.OwnedManifestTests.test_exact_manifest_persisted_before_gate_and_matches_tree)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_hostile_wave_regressions.py", line 353, in test_exact_manifest_persisted_before_gate_and_matches_tree
+    result = self.run_stage(gate)
+             ^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_hostile_wave_regressions.py", line 264, in run_stage
+    return R._stage_and_commit(self.root, self.plan, self.journal)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "tools/saipen_engine/release.py@HEAD", line 2876, in _stage_and_commit
+    return path not in unstaged and path not in staged and path in tracked
+              ^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\vac34\AppData\Local\Programs\Python\Python311\Lib\unittest\mock.py", line 1124, in __call__
+    return self._mock_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\vac34\AppData\Local\Programs\Python\Python311\Lib\unittest\mock.py", line 1128, in _mock_call
+    return self._execute_mock_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\vac34\AppData\Local\Programs\Python\Python311\Lib\unittest\mock.py", line 1189, in _execute_mock_call
+    result = effect(*args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_hostile_wave_regressions.py", line 348, in gate
+    self.assertIsNotNone(frozen)
+AssertionError: unexpectedly None
+
+======================================================================
+FAIL: test_foreign_staged_entry_preserved_on_owned_refusal (test_hostile_wave_regressions.OwnedManifestTests.test_foreign_staged_entry_preserved_on_owned_refusal)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_hostile_wave_regressions.py", line 322, in test_foreign_staged_entry_preserved_on_owned_refusal
+    self.assert_refused(self.run_stage(self.substitute("crew.txt")))
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_hostile_wave_regressions.py", line 274, in assert_refused
+    self.assertFalse(result["ok"], result)
+AssertionError: True is not false : {'ok': True, 'commit': '04e78d050e8682016f26e0ba9c0b56a57dcf2f72', 'tree': '0ec40a07cf35fe6f1648d3f81c9bb1ed6bcd7aa2'}
+
+======================================================================
+FAIL: test_foreign_staged_substitution_refuses (test_hostile_wave_regressions.OwnedManifestTests.test_foreign_staged_substitution_refuses)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_hostile_wave_regressions.py", line 326, in test_foreign_staged_substitution_refuses
+    self.assert_refused(self.run_stage(self.substitute("foreign.txt")))
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_hostile_wave_regressions.py", line 274, in assert_refused
+    self.assertFalse(result["ok"], result)
+AssertionError: True is not false : {'ok': True, 'commit': '403e3574d31bca25d35bda392a6f41fe8dd547eb', 'tree': 'a29786e116276edb7096cde5d7a590a1359b64af'}
+
+======================================================================
+FAIL: test_metadata_substitution_refuses (test_hostile_wave_regressions.OwnedManifestTests.test_metadata_substitution_refuses)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_hostile_wave_regressions.py", line 307, in test_metadata_substitution_refuses
+    self.assert_refused(self.run_stage(self.substitute("metadata.json")))
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_hostile_wave_regressions.py", line 274, in assert_refused
+    self.assertFalse(result["ok"], result)
+AssertionError: True is not false : {'ok': True, 'commit': 'e442aad25b1fbb1cd55b84584d1b31fca3c98b52', 'tree': '06bf83babfbcd39f0d9e27cf7be531cae18fd227'}
+
+======================================================================
+FAIL: test_owned_addition_substitution_refuses (test_hostile_wave_regressions.OwnedManifestTests.test_owned_addition_substitution_refuses)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_hostile_wave_regressions.py", line 298, in test_owned_addition_substitution_refuses
+    self.assert_refused(self.run_stage(self.substitute("added.txt")))
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_hostile_wave_regressions.py", line 274, in assert_refused
+    self.assertFalse(result["ok"], result)
+AssertionError: True is not false : {'ok': True, 'commit': '45682e72578c5f74ed818fdab397b966b9277fcf', 'tree': 'd186367b5d50de8d4dd2367dc20f3d202899271d'}
+
+======================================================================
+FAIL: test_owned_mode_substitution_refuses (test_hostile_wave_regressions.OwnedManifestTests.test_owned_mode_substitution_refuses)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_hostile_wave_regressions.py", line 319, in test_owned_mode_substitution_refuses
+    self.assert_refused(self.run_stage(gate))
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_hostile_wave_regressions.py", line 274, in assert_refused
+    self.assertFalse(result["ok"], result)
+AssertionError: True is not false : {'ok': True, 'commit': 'e73234d7dc81611f848ac8782b0cc4c300e9c501', 'tree': '8d9b8d96322678c2b17034652fe522c9a0f2fd01'}
+
+======================================================================
+FAIL: test_owned_modification_substitution_refuses (test_hostile_wave_regressions.OwnedManifestTests.test_owned_modification_substitution_refuses)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_hostile_wave_regressions.py", line 301, in test_owned_modification_substitution_refuses
+    self.assert_refused(self.run_stage(self.substitute("modified.txt")))
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_hostile_wave_regressions.py", line 274, in assert_refused
+    self.assertFalse(result["ok"], result)
+AssertionError: True is not false : {'ok': True, 'commit': '58f05a638c7eba83798d8d472cb831b3945e5d63', 'tree': '3768ab5137bb73804e89faebca342f8f6bcb6185'}
+
+======================================================================
+FAIL: test_reviewed_deletion_resurrection_refuses (test_hostile_wave_regressions.OwnedManifestTests.test_reviewed_deletion_resurrection_refuses)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_hostile_wave_regressions.py", line 304, in test_reviewed_deletion_resurrection_refuses
+    self.assert_refused(self.run_stage(self.substitute("deleted.txt")))
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_hostile_wave_regressions.py", line 274, in assert_refused
+    self.assertFalse(result["ok"], result)
+AssertionError: True is not false : {'ok': True, 'commit': '49f6666507a2fade1f14f78bac6177b73da5e87b', 'tree': '0d5834a316c26449fb3631971d533c171fb7c3b6'}
+
+======================================================================
+FAIL: test_same_owned_path_different_bytes_refuse_before_write_tree (test_hostile_wave_regressions.OwnedManifestTests.test_same_owned_path_different_bytes_refuse_before_write_tree)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_hostile_wave_regressions.py", line 294, in test_same_owned_path_different_bytes_refuse_before_write_tree
+    self.assert_refused(self.run_stage(gate))
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_hostile_wave_regressions.py", line 274, in assert_refused
+    self.assertFalse(result["ok"], result)
+AssertionError: True is not false : {'ok': True, 'commit': '8eb66fd46ec621703179fc680ffc82afef5c68e9', 'tree': '3768ab5137bb73804e89faebca342f8f6bcb6185'}
+
+======================================================================
+FAIL: test_scope_carrier_substitution_refuses (test_hostile_wave_regressions.OwnedManifestTests.test_scope_carrier_substitution_refuses)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_hostile_wave_regressions.py", line 310, in test_scope_carrier_substitution_refuses
+    self.assert_refused(self.run_stage(self.substitute("scope.json")))
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_hostile_wave_regressions.py", line 274, in assert_refused
+    self.assertFalse(result["ok"], result)
+AssertionError: True is not false : {'ok': True, 'commit': 'bc02f59d7c05c2f95fc8c8f2b6774df6875e3e83', 'tree': '3451569f7da459f4c958493fe7c2d523c823d3d1'}
+
+======================================================================
+FAIL: test_wrong_immutable_tree_refuses_before_commit (test_hostile_wave_regressions.OwnedManifestTests.test_wrong_immutable_tree_refuses_before_commit)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_hostile_wave_regressions.py", line 340, in test_wrong_immutable_tree_refuses_before_commit
+    self.assert_refused(self.run_stage())
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_hostile_wave_regressions.py", line 275, in assert_refused
+    self.assertEqual(self.git("rev-parse", "HEAD").stdout, self.head)
+AssertionError: '98e4a9c6cf557d2f82444a56b7e16c755afeca6f' != 'e59cc0ccc3f2357d3d5ca3f86ce89625036d0b67'
+- 98e4a9c6cf557d2f82444a56b7e16c755afeca6f
++ e59cc0ccc3f2357d3d5ca3f86ce89625036d0b67
+
+
+======================================================================
+FAIL: test_final_preflight_runs_under_writer_lock_before_apply (test_hostile_wave_regressions.ScopeIdentityTests.test_final_preflight_runs_under_writer_lock_before_apply)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_hostile_wave_regressions.py", line 383, in test_final_preflight_runs_under_writer_lock_before_apply
+    self.assertFalse(R._apply_release(Path("."), object())["ok"])
+AssertionError: <MagicMock name='_apply_release_locked().__getitem__()' id='1567150745552'> is not false
+
+======================================================================
+FAIL: test_new_scope_writer_records_full_identity_without_changing_journal_hash (test_hostile_wave_regressions.ScopeIdentityTests.test_new_scope_writer_records_full_identity_without_changing_journal_hash)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_hostile_wave_regressions.py", line 412, in test_new_scope_writer_records_full_identity_without_changing_journal_hash
+    self.assertEqual(record["schema_version"], 2)
+AssertionError: 1 != 2
+
+----------------------------------------------------------------------
+Ran 17 tests in 12.627s
+
+FAILED (failures=14, errors=1)
+RED_CONTROL R001 tests 17 failures 14 errors 1 skipped 0

@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "ticket": "T-1570",
+  "oracle": "tools/test_no_publish_source_scope.py",
+  "red_subject": "current tree with release._plan_publishes forced True, matching the pre-fix release_gate default",
+  "green_subject": "current tree",
+  "red_result": "8 tests, 4 failed as expected",
+  "green_result": "8 tests, 0 failed",
+  "scope": "preflight, active-scope and source refusals, unrelated integrity, public and batch refusals, no-publish closure, interrupted closure recovery",
+  "local_gate_note": "The throwaway fixture replaces only the core validator subprocess; the full current-tree core gate runs separately.",
+  "live_refusal": "E-10911..E-10913",
+  "sha256": {
+    "tools/test_no_publish_source_scope.py": "1759b809de0d5cbfccca8cecb7bfd4ade2bf561fd55600892b9657b672bb7ee9",
+    "tools/saipen_engine/release.py": "8f4b1431ee3c472089bea09a7604fe1894a22736fb8c885e8b9addbb179c21dd",
+    "tools/saipen_engine/intake.py": "2833ac57c311c32f6ca1c5e811bbfee7a878b4db1cd2a7533a261d29a7bee114",
+    ".saipen/evidence/T-1570-no-publish-scope/run_red.py": "57a12cf213353075199a68ffd301da3c773eb4b84a45ebc2381a41f379f86964",
+    ".saipen/evidence/T-1570-no-publish-scope/verify-red.txt": "7dd077e5db8be83b43007e8d79564dd0862f7e6837c56e01b5ef7d4d935d4a70",
+    ".saipen/evidence/T-1570-no-publish-scope/verify-green.txt": "375d512ad508723f91cc77d8d248b8d4d4398482ff78aef5d98f5de1cfbcd174"
+  }
+}

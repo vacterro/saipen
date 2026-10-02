@@ -1,0 +1,9 @@
+{
+  "oracle_sha256": "8f1400dc3789f42a5e3f9eaaa1f0fadabb060b37e530498eeb09fd35fc7762ff",
+  "subject_sha256": "4cff6d68742349b1579392267c5697246856002fe9aa54d2ca613ec572ac3061",
+  "tests": 4,
+  "failures": 0,
+  "errors": 0,
+  "status": "PASS",
+  "output": "....\n----------------------------------------------------------------------\nRan 4 tests in 0.261s\n\nOK\n"
+}

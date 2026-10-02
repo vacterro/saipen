@@ -1,0 +1,21 @@
+RED CONTROL T-1556 -- the identical hostile table through the PRE-FIX owner
+subject: .saipen/kitchen/t1556-prefix/response_surface_prefix.py
+        (the tree the review verified: this ticket's blocks deleted, nothing re-implemented)
+
+review finding / hostile shape           PRE-FIX    POST-FIX
+1 ordinary reply + DETAILS               ACCEPTED   refused
+                                           -> DETAILS is not authorized on an ordinary response -- the detailed path is an explicit repo
+2 RESULT 12,000 chars, ONE line          ACCEPTED   refused
+                                           -> RESULT exceeds 720 character(s) (12000) -- a line count is not a compactness contract
+2 eight enormous DETAILS lines           ACCEPTED   refused
+                                           -> DETAILS exceeds 2400 character(s) (4007) -- a line count is not a compactness contract
+2 BLOCKER one enormous line              ACCEPTED   refused
+                                           -> BLOCKER exceeds 300 character(s) (14012) -- a line count is not a compactness contract
+3 saipen validate && saipen continue     ACCEPTED   refused
+                                           -> NEXT EXACT ACTION must be exactly one action -- a chain (`&&`, `||`, `;`), a sequence (`th
+3 saipen validate; saipen continue       ACCEPTED   refused
+                                           -> NEXT EXACT ACTION must be exactly one action -- a chain (`&&`, `||`, `;`), a sequence (`th
+3 run tests then ship                    ACCEPTED   refused
+                                           -> NEXT EXACT ACTION must be exactly one action -- a chain (`&&`, `||`, `;`), a sequence (`th
+
+valid normal compact response            passes     passes

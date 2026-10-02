@@ -1,0 +1,61 @@
+{
+ "what": "T-1472 red control: declared family on a copy with one deliberate red, sharded",
+ "real_tree_fingerprint": "6bd02562455126e0c8150002f39ebee7a14c1d3d83c20ddf8e4791aadab32440",
+ "copy_fingerprint": "57452024af089ce762706b8907ef55cabdffc67be3057babb3a5336a9b506f54",
+ "jobs": 6,
+ "duration_s": 701.1,
+ "ran": 3581,
+ "discovered": 3581,
+ "partition_error": null,
+ "shards": [
+  {
+   "status": "PASS",
+   "ran": 20,
+   "selected": 20,
+   "duration_s": 626.5
+  },
+  {
+   "status": "FAIL",
+   "ran": 672,
+   "selected": 672,
+   "duration_s": 514.0
+  },
+  {
+   "status": "PASS",
+   "ran": 727,
+   "selected": 727,
+   "duration_s": 551.2
+  },
+  {
+   "status": "FAIL",
+   "ran": 661,
+   "selected": 661,
+   "duration_s": 534.5
+  },
+  {
+   "status": "FAIL",
+   "ran": 836,
+   "selected": 836,
+   "duration_s": 558.3
+  },
+  {
+   "status": "FAIL",
+   "ran": 665,
+   "selected": 665,
+   "duration_s": 549.6
+  }
+ ],
+ "red": 31,
+ "deliberate_red_id": "test_t1472_deliberate_red.DeliberateRed.test_deliberate_red",
+ "deliberate_red_in_red": true,
+ "verdict": "FAIL",
+ "new_red": [
+  "test_t1472_deliberate_red.DeliberateRed.test_deliberate_red"
+ ],
+ "problems": [
+  "1 new red outside the baseline"
+ ],
+ "citation_checkpoint": "CHECKPOINTED",
+ "ship_gate_refusal": "cited core-unit run is not admissible: 1 new red outside the baseline",
+ "wall_s": 717.0
+}

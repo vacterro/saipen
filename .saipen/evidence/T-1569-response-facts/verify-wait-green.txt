@@ -1,0 +1,12 @@
+test_current_blocker_requires_exact_code (test_response_fact_binding.CanonicalResponseFacts.test_current_blocker_requires_exact_code) ... ok
+test_phase_and_task_are_exact_without_contradictory_phase_claims (test_response_fact_binding.CanonicalResponseFacts.test_phase_and_task_are_exact_without_contradictory_phase_claims) ... ok
+test_public_checker_binds_completed_project_phase (test_response_fact_binding.CanonicalResponseFacts.test_public_checker_binds_completed_project_phase) ... ok
+test_public_checker_rejects_terminal_and_task_prefix_forgeries (test_response_fact_binding.CanonicalResponseFacts.test_public_checker_rejects_terminal_and_task_prefix_forgeries) ... ok
+test_public_checker_requires_current_blocker_identity (test_response_fact_binding.CanonicalResponseFacts.test_public_checker_requires_current_blocker_identity) ... ok
+test_public_wait_uses_canonical_human_obligation_with_a_binding_blocker (test_response_fact_binding.CanonicalResponseFacts.test_public_wait_uses_canonical_human_obligation_with_a_binding_blocker) ... ok
+test_terminal_phases_are_bound_too (test_response_fact_binding.CanonicalResponseFacts.test_terminal_phases_are_bound_too) ... ok
+
+----------------------------------------------------------------------
+Ran 7 tests in 15.972s
+
+OK

@@ -1,0 +1,14 @@
+test_continue_reports_telegrams_and_routes_exactly_as_without_them (tools.test_t1497_turn_entry_telegrams.ContinueTests.test_continue_reports_telegrams_and_routes_exactly_as_without_them) ... ok
+test_continue_preserves_explicit_environment_and_inherited_actor (tools.test_t1497_turn_entry_telegrams.TelegramActorTests.test_continue_preserves_explicit_environment_and_inherited_actor) ... ok
+test_emit_preserves_explicit_environment_and_inherited_actor (tools.test_t1497_turn_entry_telegrams.TelegramActorTests.test_emit_preserves_explicit_environment_and_inherited_actor) ... ok
+test_a_broken_or_slow_saimail_is_a_state (tools.test_t1497_turn_entry_telegrams.TurnEntryReadTests.test_a_broken_or_slow_saimail_is_a_state) ... ok
+test_a_missing_saimail_is_unavailable (tools.test_t1497_turn_entry_telegrams.TurnEntryReadTests.test_a_missing_saimail_is_unavailable) ... ok
+test_a_scan_window_that_left_rows_unread_is_not_complete (tools.test_t1497_turn_entry_telegrams.TurnEntryReadTests.test_a_scan_window_that_left_rows_unread_is_not_complete) ... ok
+test_counts_are_reported_and_nothing_a_sender_wrote (tools.test_t1497_turn_entry_telegrams.TurnEntryReadTests.test_counts_are_reported_and_nothing_a_sender_wrote) ... ok
+test_read_command_preserves_paths_with_spaces_in_a_real_shell (tools.test_t1497_turn_entry_telegrams.TurnEntryReadTests.test_read_command_preserves_paths_with_spaces_in_a_real_shell) ... ok
+test_unconfigured_starts_no_process (tools.test_t1497_turn_entry_telegrams.TurnEntryReadTests.test_unconfigured_starts_no_process) ... ok
+
+----------------------------------------------------------------------
+Ran 9 tests in 7.535s
+
+OK

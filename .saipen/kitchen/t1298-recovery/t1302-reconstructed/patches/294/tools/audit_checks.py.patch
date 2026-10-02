@@ -1,0 +1,107 @@
+Index: tools\audit_checks.py
+===================================================================
+--- tools\audit_checks.py	before
++++ tools\audit_checks.py	after
+@@ -92,7 +92,7 @@
+ #: ledger is intact did not move when a check arrived with no control (T-1292).
+ #: Raise this in the same change that adds the control, or that records why the
+ #: new check has none.
+-VALIDATOR_FAIL_SITES = 326
++VALIDATOR_FAIL_SITES = 329
+ 
+ #: The honest half. Counting fail sites binds VOLUME, not identity: it cannot
+ #: say WHICH check is uncovered, and a change that adds one check while
+@@ -1327,6 +1327,68 @@
+     return text
+ 
+ 
++def add_inherited_closure_no_source(text: str) -> str:
++    """T-1302 FINDING 3: stamp the first ## DONE ticket as an
++    INHERITED_VERIFIED closeout WITHOUT naming the durable implementation
++    authority. The verify evidence stays (so the earlier evidence check does
++    not shadow this site); only the mandatory source is missing."""
++    lines = text.splitlines()
++    section = ""
++    for index, line in enumerate(lines):
++        if line.startswith("## "):
++            section = line
++            continue
++        if section == "## DONE" and line.startswith("- [x] T-") and " | verify:" in line:
++            if "closure_mode:" in line:
++                continue
++            lines[index] = line + " | closure_mode: inherited_verified"
++            return "\n".join(lines) + "\n"
++    return text
++
++
++def add_inherited_closure_bad_source(text: str) -> str:
++    """T-1302 FINDING 3: INHERITED_VERIFIED closeout whose implementation
++    source is free prose instead of the closed authority grammar. Verify stays,
++    so only the malformed-authority site can fire."""
++    lines = text.splitlines()
++    section = ""
++    for index, line in enumerate(lines):
++        if line.startswith("## "):
++            section = line
++            continue
++        if section == "## DONE" and line.startswith("- [x] T-") and " | verify:" in line:
++            if "closure_mode:" in line:
++                continue
++            lines[index] = (
++                line
++                + " | closure_mode: inherited_verified"
++                + " | implementation_source: shared main.py blob"
++            )
++            return "\n".join(lines) + "\n"
++    return text
++
++
++def add_cohort_done_without_registry(text: str) -> str:
++    """T-1302 FINDING 4: a DONE ticket claiming closure_mode=cohort with NO
++    membership record in the durable cohort registry -- a cohort STRING on the
++    board pretending to be publication authority."""
++    lines = text.splitlines()
++    section = ""
++    for index, line in enumerate(lines):
++        if line.startswith("## "):
++            section = line
++            continue
++        if section == "## DONE" and line.startswith("- [x] T-") and " | verify:" in line:
++            if "closure_mode:" in line:
++                continue
++            lines[index] = (
++                line
++                + " | closure_mode: cohort | closure_cohort: C-999"
++            )
++            return "\n".join(lines) + "\n"
++    return text
++
++
+ def inject_unclaimed_doing(text: str) -> str:
+     """T-573: put an unclaimed ticket in ## DOING whatever the live board holds.
+ 
+@@ -2058,6 +2120,24 @@
+         strip_verify_add_inherited_closure,
+         "INHERITED_VERIFIED closure(s) carry no | verify: evidence",
+     ),
++    (
++        "INHERITED_VERIFIED closure without implementation_source",
++        BOARD,
++        add_inherited_closure_no_source,
++        "carry no implementation_source",
++    ),
++    (
++        "INHERITED_VERIFIED closure with malformed implementation_source",
++        BOARD,
++        add_inherited_closure_bad_source,
++        "malformed implementation_source",
++    ),
++    (
++        "COHORT closure without durable registry membership",
++        BOARD,
++        add_cohort_done_without_registry,
++        "no durable registry membership",
++    ),
+     # The category bounds what KIND of stop a WAIT is; nothing bounded what
+     # followed it, so `next_action` became a scratchpad and the next agent
+     # read the notes as a queue -- live on this repository, where a `user

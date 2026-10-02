@@ -1,0 +1,23 @@
+{
+  "oracle_change_reason": "Ruff E501 formatting only; repeat both halves with final same verifier",
+  "controls": [
+    {
+      "variant": "before",
+      "ran": 13,
+      "failures": 4,
+      "errors": 0,
+      "passed": false,
+      "subject_sha256": "581cf41f8960dc233783c53c1b235c079eb8bf0c6117849cba40fa460ae4de71",
+      "verifier_sha256": "008d76ca40ad1792f81a5d8ff1db0d4e62a29175a1d8614d2564bd30be65e6b5"
+    },
+    {
+      "variant": "live",
+      "ran": 13,
+      "failures": 0,
+      "errors": 0,
+      "passed": true,
+      "subject_sha256": "d25e83735980e23f5050a6df351b52869a64a0f68a1577cf07c064d1db6c0a17",
+      "verifier_sha256": "008d76ca40ad1792f81a5d8ff1db0d4e62a29175a1d8614d2564bd30be65e6b5"
+    }
+  ]
+}

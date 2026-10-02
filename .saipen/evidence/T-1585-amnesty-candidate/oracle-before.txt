@@ -1,0 +1,76 @@
+test_active_log_change_selects_the_control (t1585_final_oracle.AmnestyControlTests.test_active_log_change_selects_the_control) ... FAIL
+test_actual_sweep_restores_all_sources_after_seeing_the_unsuppressed_condition (t1585_final_oracle.AmnestyControlTests.test_actual_sweep_restores_all_sources_after_seeing_the_unsuppressed_condition) ... FAIL
+test_all_actual_grants_are_demoted_across_complete_history (t1585_final_oracle.AmnestyControlTests.test_all_actual_grants_are_demoted_across_complete_history) ... FAIL
+test_future_sealed_log_changes_select_the_control_without_disk_guessing (t1585_final_oracle.AmnestyControlTests.test_future_sealed_log_changes_select_the_control_without_disk_guessing) ... FAIL
+test_no_actual_grant_is_a_no_op_instead_of_fake_evidence (t1585_final_oracle.AmnestyControlTests.test_no_actual_grant_is_a_no_op_instead_of_fake_evidence) ... ok
+test_save_restore_declares_every_touched_file_and_preserves_raw_bytes (t1585_final_oracle.AmnestyControlTests.test_save_restore_declares_every_touched_file_and_preserves_raw_bytes) ... FAIL
+
+======================================================================
+FAIL: test_active_log_change_selects_the_control (t1585_final_oracle.AmnestyControlTests.test_active_log_change_selects_the_control)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\.saipen\evidence\T-1585-amnesty-candidate\test_t1585_amnesty_control.py", line 93, in test_active_log_change_selects_the_control
+    self.assertEqual([c[0] for c in A.select_cases([self.case], frozenset({".saipen/LOG.md"}))],
+AssertionError: Lists differ: [] != ['an amnesty demoted to prose stops suppressing']
+
+Second list contains 1 additional elements.
+First extra element 0:
+'an amnesty demoted to prose stops suppressing'
+
+- []
++ ['an amnesty demoted to prose stops suppressing']
+
+======================================================================
+FAIL: test_actual_sweep_restores_all_sources_after_seeing_the_unsuppressed_condition (t1585_final_oracle.AmnestyControlTests.test_actual_sweep_restores_all_sources_after_seeing_the_unsuppressed_condition)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\.saipen\evidence\T-1585-amnesty-candidate\test_t1585_amnesty_control.py", line 88, in test_actual_sweep_restores_all_sources_after_seeing_the_unsuppressed_condition
+    self.assertIsNone(error, "\n".join(context.extra))
+AssertionError: '1 of 1 mutation control(s) no longer prove anything' is not None : FAIL: an amnesty demoted to prose stops suppressing -- the validator did not report 'timestamp moves backwards by'. That check no longer goes red on its own condition -- its anchor is no longer in the file
+
+1 of 1 case(s) are not evidence any more.
+
+======================================================================
+FAIL: test_all_actual_grants_are_demoted_across_complete_history (t1585_final_oracle.AmnestyControlTests.test_all_actual_grants_are_demoted_across_complete_history)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\.saipen\evidence\T-1585-amnesty-candidate\test_t1585_amnesty_control.py", line 59, in test_all_actual_grants_are_demoted_across_complete_history
+    self.assertEqual(self.grants(self.root), [])
+AssertionError: Lists differ: [5, 6] != []
+
+First list contains 2 additional elements.
+First extra element 0:
+5
+
+- [5, 6]
++ []
+
+======================================================================
+FAIL: test_future_sealed_log_changes_select_the_control_without_disk_guessing (t1585_final_oracle.AmnestyControlTests.test_future_sealed_log_changes_select_the_control_without_disk_guessing)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\.saipen\evidence\T-1585-amnesty-candidate\test_t1585_amnesty_control.py", line 98, in test_future_sealed_log_changes_select_the_control_without_disk_guessing
+    self.assertEqual([c[0] for c in A.select_cases([self.case], frozenset({path}))],
+AssertionError: Lists differ: [] != ['an amnesty demoted to prose stops suppressing']
+
+Second list contains 1 additional elements.
+First extra element 0:
+'an amnesty demoted to prose stops suppressing'
+
+- []
++ ['an amnesty demoted to prose stops suppressing']
+
+======================================================================
+FAIL: test_save_restore_declares_every_touched_file_and_preserves_raw_bytes (t1585_final_oracle.AmnestyControlTests.test_save_restore_declares_every_touched_file_and_preserves_raw_bytes)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\.saipen\evidence\T-1585-amnesty-candidate\test_t1585_amnesty_control.py", line 68, in test_save_restore_declares_every_touched_file_and_preserves_raw_bytes
+    self.assertEqual(set(paths), set(history_paths(self.root)))
+AssertionError: Items in the second set but not the first:
+WindowsPath('V:/_TEMP_/saipen-amnesty-control-s9_srqj7/source/.saipen/LOG.md')
+WindowsPath('V:/_TEMP_/saipen-amnesty-control-s9_srqj7/source/.saipen/logs/LOG-018.md')
+
+----------------------------------------------------------------------
+Ran 6 tests in 0.017s
+
+FAILED (failures=5)

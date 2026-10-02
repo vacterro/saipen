@@ -1,0 +1,89 @@
+{
+  "recorded_utc": "2026-10-01T09:10:15.295896+00:00",
+  "ticket": "T-1579",
+  "status": "BUILD_EVIDENCE_ONLY",
+  "closure_claimed": false,
+  "files": {
+    "saipen/REGISTRY.json": "4379bb47281c138f63e6bd25c6ecd55ec5bf5b8ad1185a9272721c53036cb3ff",
+    "saipen/INDEX.md": "23fe63a199527df93b82271cc678694c7b8de5bd897569e8c7d3fc970bb3424c",
+    "saipen/COMMANDS.md": "fc44ef8449f3b9dd9d651dd070604493765ccebfaa147d93a3d12120e4ef93a9",
+    "saipen/STORAGE.md": "a6360a07378de3c997a6404ba2f503b49c8a32d80a46586341711410e2e63f31",
+    "tools/saipen_engine/storage.py": "5801295c9a319e31fec2f0cd30be938c393b3e41a850f4e02ffead42a3e68824",
+    "tools/saipen_engine/storage_artifacts.py": "74b843a372a7fa0ae6d8e81fa2d8ee5a0d339dd9d17c90c0112461a52d5c5175",
+    "tools/test_storage_policy.py": "137447ea2e637cd1b2c1d42416bfe625ee53abd0abb691b2fe241db909e83064",
+    "tools/test_storage_artifacts.py": "68bd5985da8b1cc71af37a45df339198a6e870cc0d85811a54ccf57074700513"
+  },
+  "load_budgets": {
+    "cold": {
+      "measured": 26876,
+      "limit": 26880
+    },
+    "ordinary_continue": {
+      "measured": 34423,
+      "limit": 35840
+    },
+    "command_resolution": {
+      "measured": 46061,
+      "limit": 46080
+    },
+    "ordinary_phase": {
+      "measured": 40506,
+      "limit": 40960
+    },
+    "ship_improve": {
+      "measured": 46007,
+      "limit": 56320
+    },
+    "single_doc": {
+      "measured": 37699,
+      "limit": 51200
+    }
+  },
+  "human_markdown_total": 306504,
+  "focused": {
+    "command": "python -B -m unittest tools.test_storage_policy tools.test_storage_artifacts tools.test_protocol_registry tools.test_source_quarantine_route tools.test_style_contract_chokepoint.StaticChokepointTests",
+    "ran": 51,
+    "status": "PASS",
+    "skipped": 1,
+    "skip_reason": "symlink capability unavailable"
+  },
+  "lint": {
+    "command": "python -B -m ruff check tools/ tests/ --output-format concise",
+    "status": "PASS"
+  },
+  "scoped_whitespace": {
+    "command": "git diff --check -- saipen/REGISTRY.json saipen/INDEX.md saipen/COMMANDS.md tools/test_storage_policy.py tools/test_storage_artifacts.py",
+    "status": "PASS"
+  },
+  "earlier_family": [
+    ".saipen/evidence/core-unit/7621521d20d8a7c5-20261001T083313Z.json",
+    ".saipen/evidence/core-unit/0b86bdb31c8f8159-20261001T090336Z.json"
+  ],
+  "family_rerun": "in flight; no PASS claimed before canonical completion record",
+  "seat": {
+    "phase": "SCOUT",
+    "task": "T-1580",
+    "T-1579": "parked behind T-1580",
+    "ownership_question": "pending; no canonical seat change performed"
+  },
+  "audit": {
+    "record": ".saipen/evidence/T-1579-storage-safety/storage-audit.json",
+    "projects": 11,
+    "runtime_homes": 9,
+    "known_ephemeral_durable_violations": 0,
+    "limitation": "bounded known roots; UNKNOWN roots are not blessed as durable"
+  },
+  "recovery": {
+    "selected_home": "V:/___VAC/__K/__STATE/SAILEARN_HOME",
+    "reconstruction": "PENDING_SOURCE_EVIDENCE",
+    "regenerated_artifacts": [],
+    "SAIBUD_8": "untouched"
+  },
+  "saipal": {
+    "candidates_submitted": 5,
+    "candidate_verdicts": "NO_DRIFT / PROVISIONAL",
+    "scope": "bounded synthetic OpenCode smoke carriers; no production compliance claim",
+    "report": ".saipen/evidence/T-1579-storage-safety/saipal-report.json",
+    "sha256": "68cc03a6a6921785c7304c976dd971bbdd132522a46a4751a348279f832bb3bc"
+  }
+}

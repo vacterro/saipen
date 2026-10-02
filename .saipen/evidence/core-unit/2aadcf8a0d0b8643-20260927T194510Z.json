@@ -1,0 +1,58 @@
+{
+  "schema": 1,
+  "family": "unit",
+  "command": [
+    "python",
+    "-B",
+    "-m",
+    "unittest",
+    "discover",
+    "-s",
+    "tools",
+    "-p",
+    "test_*.py",
+    "-v"
+  ],
+  "fingerprint": "2aadcf8a0d0b864379b6a533b708e1f19d1db17567c6e69459431e51f2bdcf33",
+  "fingerprint_excludes": [
+    ".git",
+    ".saipen"
+  ],
+  "baseline_sha256": "c771e5fadeb2b293e2f867f1af3caf6d7ff6773c29a83121af33fe19bfd44cc5",
+  "head": "6903807f321a078875ada7664b179fc1f70d4f6e",
+  "finished_utc": "2026-09-27T19:45:10Z",
+  "status": "FAIL",
+  "exit_code": 1,
+  "ran": 3972,
+  "duration_s": 1875.3,
+  "timeout_s": 5400,
+  "headers": 9,
+  "unparsed": 0,
+  "tallied": 9,
+  "red": [
+    "test_check_inventory.InventoryGateTests.test_regeneration_keeps_an_adjudicated_verdict",
+    "test_check_inventory.InventoryGateTests.test_regeneration_never_mints_a_baseline",
+    "test_check_inventory.InventoryGateTests.test_the_live_repository_agrees_with_its_ledger",
+    "test_check_inventory.InventoryGateTests.test_the_probe_passes_on_the_real_repository",
+    "test_check_inventory.InventoryGateTests.test_unrelated_line_insertion_is_accepted",
+    "test_inject_digest.SurfaceDigest.test_the_two_transports_agree",
+    "test_install_drift.DriftReportTests.test_line_endings_alone_are_not_drift",
+    "test_t1304_r004_transition.BaselineFailureTests.test_internal_debt_code_in_a_refusal_exception_is_normalized",
+    "test_t1304_r004_transition.BaselineFailureTests.test_internal_debt_code_is_normalized_not_a_crash"
+  ],
+  "jobs": 1,
+  "verdict": "FAIL",
+  "new_red": [
+    "test_check_inventory.InventoryGateTests.test_regeneration_keeps_an_adjudicated_verdict",
+    "test_check_inventory.InventoryGateTests.test_regeneration_never_mints_a_baseline",
+    "test_check_inventory.InventoryGateTests.test_the_live_repository_agrees_with_its_ledger",
+    "test_check_inventory.InventoryGateTests.test_the_probe_passes_on_the_real_repository",
+    "test_check_inventory.InventoryGateTests.test_unrelated_line_insertion_is_accepted"
+  ],
+  "fixed": [
+    "test_public_closure_cli.PublicClosureCliTests.test_control_c_d_cohort_cli_and_publication"
+  ],
+  "problems": [
+    "5 new red outside the baseline"
+  ]
+}

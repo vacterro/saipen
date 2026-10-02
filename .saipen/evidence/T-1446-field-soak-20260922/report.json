@@ -1,0 +1,158 @@
+{
+  "schema_version": 1,
+  "project": "V:\\_TEMP_\\t1363-o_7153e_",
+  "model": "sairoute/SAIFREN",
+  "fallback_models": [],
+  "started_at_unix": 1790102632.013662,
+  "elapsed_seconds": 4244.6,
+  "wall_bound_seconds": 3600.0,
+  "supervise": {
+    "ok": true,
+    "code": "SUPERVISE_STOPPED",
+    "run_id": "run-c5806703f136",
+    "stop": "MAX_WALL",
+    "reason": "wall bound of 3600 s reached",
+    "operator_action": null,
+    "counters": {
+      "cycles": 7,
+      "worker_generation_count": 7,
+      "crash_recovery_count": 4,
+      "model_replacement_recovery_count": 0,
+      "backoff_count": 0,
+      "await_count": 0,
+      "stolen_lease_count": 0,
+      "progress_slices": 4,
+      "slow_progress_slices": 0,
+      "manual_continue_count": 0,
+      "unknown_terminal_failure_count": 0,
+      "failures": {
+        "UNKNOWN": 1,
+        "HOST_RUNTIME_FAILURE": 3,
+        "WORKER_CRASH": 1
+      }
+    },
+    "maximum_recovery_latency_seconds": 0.015,
+    "model": "sairoute/SAIFREN"
+  },
+  "history": [
+    {
+      "cycle": 1,
+      "verdict": "RUN_WORK",
+      "generation": 1,
+      "model": "sairoute/SAIFREN",
+      "returncode": 1,
+      "failure": "UNKNOWN",
+      "progressed": true,
+      "bounded": false,
+      "output_tail": "-s tests -t .\\\" --json\",\"workdir\":\"V:\\\\_TEMP_\\\\t1363-o_7153e_\"},\"output\":\"{\\r\\n  \\\"ok\\\": true,\\r\\n  \\\"code\\\": \\\"CHECKPOINTED\\\",\\r\\n  \\\"op_id\\\": \\\"checkpoint-191a61f1983640b881794cb89ae4ef95\\\",\\r\\n  \\\"changed_files\\\": [\\r\\n    \\\".saipen/LOG.md\\\",\\r\\n    \\\".saipen/STATE.md\\\"\\r\\n  ],\\r\\n  \\\"recovery_required\\\": false,\\r\\n  \\\"event_id\\\": \\\"E-17\\\"\\r\\n}\\r\\n\",\"metadata\":{\"output\":\"{\\r\\n  \\\"ok\\\": true,\\r\\n  \\\"code\\\": \\\"CHECKPOINTED\\\",\\r\\n  \\\"op_id\\\": \\\"checkpoint-191a61f1983640b881794cb89ae4ef95\\\",\\r\\n  \\\"changed_files\\\": [\\r\\n    \\\".saipen/LOG.md\\\",\\r\\n    \\\".saipen/STATE.md\\\"\\r\\n  ],\\r\\n  \\\"recovery_required\\\": false,\\r\\n  \\\"event_id\\\": \\\"E-17\\\"\\r\\n}\\r\\n\",\"exit\":0,\"truncated\":false},\"title\":\"saipen checkpoint RUN T-2 \\\"SCOUT -- src/ has app.py only; no tests/ dir; will add mathx.py (add) + unittest under tests/; harness: python -m unittest discover -s tests -t .\\\" --json\",\"time\":{\"start\":1790103529437,\"end\":1790103530521}},\"id\":\"prt_0ca7c1fba001NP6YbUjuaurK3h\",\"sessionID\":\"ses_f35918218ffeMxRBJR8MiGUJw5\",\"messageID\":\"msg_0ca7bb422001XuIXxxjW95hZBe\"}}\r\n{\"type\":\"step_finish\",\"timestamp\":1790103530898,\"sessionID\":\"ses_f35918218ffeMxRBJR8MiGUJw5\",\"part\":{\"id\":\"prt_0ca7c2d87001HUJe81vcxj7b29\",\"reason\":\"tool-calls\",\"snapshot\":\"de4fec367000cad389e0b650e81edc22d72bc43a\",\"messageID\":\"msg_0ca7bb422001XuIXxxjW95hZBe\",\"sessionID\":\"ses_f35918218ffeMxRBJR8MiGUJw5\",\"type\":\"step-finish\",\"tokens\":{\"total\":67168,\"input\":64995,\"output\":123,\"reasoning\":258,\"cache\":{\"write\":0,\"read\":1792}},\"cost\":0}}\r\n"
+    },
+    {
+      "cycle": 2,
+      "verdict": "REPLACE_WORKER",
+      "generation": 2,
+      "model": "sairoute/SAIFREN",
+      "returncode": 1,
+      "failure": "HOST_RUNTIME_FAILURE",
+      "progressed": true,
+      "bounded": false,
+      "output_tail": "ost_guard.py:82:        verdict = json.loads(proc.\\r\\nstdout)\\r\\nV:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\tools\\\\host_guard.py:94:def main() -> int:\\r\\nV:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\tools\\\\host_guard.py:101:        print(json.dumps({\\\"decisi\\r\\non\\\": \\\"allow\\\" if allowed else \\\"deny\\\", \\\"reason\\\": code}))\\r\\n\\r\\n\\r\\n\",\"exit\":0,\"truncated\":false},\"title\":\"Select-String -Path \\\"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\tools\\\\host_guard.py\\\" -Pattern \\\"session_id|SESSION|argv|def main|stdin|json\\\" | Select-Object -First 40\",\"time\":{\"start\":1790104374705,\"end\":1790104375127}},\"id\":\"prt_0ca89013c001D6jmDPE4M1XFkQ\",\"sessionID\":\"ses_f3583c22cffeECrEbtpAb44ceW\",\"messageID\":\"msg_0ca88d682001cQSAHzZToG45Fm\"}}\r\n{\"type\":\"step_finish\",\"timestamp\":1790104375435,\"sessionID\":\"ses_f3583c22cffeECrEbtpAb44ceW\",\"part\":{\"id\":\"prt_0ca891080001SDZzJ25PAB2gTg\",\"reason\":\"tool-calls\",\"snapshot\":\"ab2e166bb8fb73b691ee0e413f803007fc9ff302\",\"messageID\":\"msg_0ca88d682001cQSAHzZToG45Fm\",\"sessionID\":\"ses_f3583c22cffeECrEbtpAb44ceW\",\"type\":\"step-finish\",\"tokens\":{\"total\":51158,\"input\":4430,\"output\":132,\"reasoning\":260,\"cache\":{\"write\":0,\"read\":46336}},\"cost\":0}}\r\n{\"type\":\"step_start\",\"timestamp\":1790104381862,\"sessionID\":\"ses_f3583c22cffeECrEbtpAb44ceW\",\"part\":{\"id\":\"prt_0ca89299e001Y2K8DwDwv2TG5p\",\"messageID\":\"msg_0ca891132001T2071olqsIAh5c\",\"sessionID\":\"ses_f3583c22cffeECrEbtpAb44ceW\",\"snapshot\":\"ab2e166bb8fb73b691ee0e413f803007fc9ff302\",\"type\":\"step-start\"}}\r\n"
+    },
+    {
+      "cycle": 3,
+      "verdict": "REPLACE_WORKER",
+      "generation": 3,
+      "model": "sairoute/SAIFREN",
+      "returncode": 0,
+      "failure": null,
+      "progressed": false,
+      "bounded": false,
+      "output_tail": "dd(2,3)==5`). Verify ei jooksnud: guard keeldus `UNSEATED_MUTATION` \u2014 T-2 `claim_session` kuulub teisele host-sessioonile. `saipen start` \u2192 `WAIT_FOREIGN_OWNER`.\\n\\n## BLOCKER\\n`WAIT_FOREIGN_OWNER`: T-2 live Work owner `test-agent`, claim_time `2026-09-22T19:06:09Z`, claim_session `6e36ea2978201c0d885cd85e07adea39`. See sessioon ei esita sama identiteeti \u2192 mutatsioon keelatud (read-only OK). Disainitud isolatsioon, mitte viga.\\n\\n## OPERATOR ACTION\\nVabasta T-2 claim v\u00f5i j\u00e4tka t\u00f6\u00f6d sessioonist, mis selle claimis. Kui eelmine sessioon on surnud: oota liveness-akna m\u00f6\u00f6dumist (siis FOREIGN_STALE \u2192 takeover lubatud).\\n\\n## NEXT EXACT ACTION\\n`saipen start --receipt SRC-001` (SRC-001 parkis p\u00e4ringu; k\u00e4ivitub kui koht vabaneb)\\n\\n## VALIDATION\\n- `read src/mathx.py` \u2192 `def add(a,b): return a+b`\\n- `read tests/test_mathx.py` \u2192 unittest `assertEqual(add(2,3),5)`\\n- `python -m unittest discover -s tests -t .` \u2192 REFUSE UNSEATED_MUTATION\\n- `saipen start \\\"create src/mathx.py\u2026\\\"` \u2192 REFUSE WAIT_FOREIGN_OWNER\",\"time\":{\"start\":1790104638215,\"end\":1790104640325}}}\r\n{\"type\":\"step_finish\",\"timestamp\":1790104640492,\"sessionID\":\"ses_f35769fe3ffeASoDt3fomYjoLb\",\"part\":{\"id\":\"prt_0ca8d1bde001tJq0N3XGmkU6Hx\",\"reason\":\"stop\",\"snapshot\":\"b139ea776a96e6378c9b1cd02ceb6a373c5effba\",\"messageID\":\"msg_0ca8cf4b3001wDS2FpDkZsFJ9j\",\"sessionID\":\"ses_f35769fe3ffeASoDt3fomYjoLb\",\"type\":\"step-finish\",\"tokens\":{\"total\":46903,\"input\":5238,\"output\":423,\"reasoning\":1050,\"cache\":{\"write\":0,\"read\":40192}},\"cost\":0}}\r\n"
+    },
+    {
+      "cycle": 4,
+      "verdict": "REPLACE_WORKER",
+      "generation": 4,
+      "model": "sairoute/SAIFREN",
+      "returncode": 1,
+      "failure": "WORKER_CRASH",
+      "progressed": false,
+      "bounded": false,
+      "output_tail": "790104729935}},\"id\":\"prt_0ca8e76790019UBUypnxcSOevH\",\"sessionID\":\"ses_f3572d89fffe8W4zwPvcsZORv7\",\"messageID\":\"msg_0ca8e69eb001WOwy6ZQrrFBtet\"}}\r\n{\"type\":\"tool_use\",\"timestamp\":1790104730028,\"sessionID\":\"ses_f3572d89fffe8W4zwPvcsZORv7\",\"part\":{\"type\":\"tool\",\"tool\":\"bash\",\"callID\":\"call_01_hPfSThJOxwCULredNQpu3237\",\"state\":{\"status\":\"error\",\"input\":{\"command\":\"saipen --help 2>&1\"},\"error\":\"SAIPEN_GUARD_REFUSAL: UNSEATED_MUTATION: the saipen guard refused tool 'bash'; the host tool did not execute attempted: saipen --help 2>&1 next: saipen start '<the task, one line>'\",\"time\":{\"start\":1790104729465,\"end\":1790104730018}},\"id\":\"prt_0ca8e772f001a6hAROT9WrR82V\",\"sessionID\":\"ses_f3572d89fffe8W4zwPvcsZORv7\",\"messageID\":\"msg_0ca8e69eb001WOwy6ZQrrFBtet\"}}\r\n{\"type\":\"step_finish\",\"timestamp\":1790104730198,\"sessionID\":\"ses_f3572d89fffe8W4zwPvcsZORv7\",\"part\":{\"id\":\"prt_0ca8e7a4a001JtTO8eXWJtKglP\",\"reason\":\"tool-calls\",\"snapshot\":\"5fa3896763bcbe7689fe7a02786913d6ad9cf6d0\",\"messageID\":\"msg_0ca8e69eb001WOwy6ZQrrFBtet\",\"sessionID\":\"ses_f3572d89fffe8W4zwPvcsZORv7\",\"type\":\"step-finish\",\"tokens\":{\"total\":31897,\"input\":5311,\"output\":112,\"reasoning\":234,\"cache\":{\"write\":0,\"read\":26240}},\"cost\":0}}\r\n{\"type\":\"step_start\",\"timestamp\":1790104731873,\"sessionID\":\"ses_f3572d89fffe8W4zwPvcsZORv7\",\"part\":{\"id\":\"prt_0ca8e80df001NH2zevggRajlOQ\",\"messageID\":\"msg_0ca8e7af3001k4LFzN1ifqWTQM\",\"sessionID\":\"ses_f3572d89fffe8W4zwPvcsZORv7\",\"snapshot\":\"5fa3896763bcbe7689fe7a02786913d6ad9cf6d0\",\"type\":\"step-start\"}}\r\n"
+    },
+    {
+      "cycle": 5,
+      "verdict": "REPLACE_WORKER",
+      "generation": 5,
+      "model": "sairoute/SAIFREN",
+      "returncode": 1,
+      "failure": "HOST_RUNTIME_FAILURE",
+      "progressed": false,
+      "bounded": false,
+      "output_tail": "77196e4dc7bd26ff4ce018dec3\\\\operation.json\\nV:\\\\_TEMP_\\\\t1363-o_7153e_\\\\.saipen\\\\recovery\\\\conformance\\\\2026-09-22T19_02_10.391692Z_receipt-6b1f1af15ede_core_PASS.json\\nV:\\\\_TEMP_\\\\t1363-o_7153e_\\\\.saipen\\\\recovery\\\\conformance\\\\2026-09-22T18_51_51.099459Z_receipt-6eb3eb33b104_core_PASS.json\\nV:\\\\_TEMP_\\\\t1363-o_7153e_\\\\.saipen\\\\recovery\\\\settled\\\\checkpoint-28676a5f059d4c398d2d84da2a21a97b\\\\operation.json\\nV:\\\\_TEMP_\\\\t1363-o_7153e_\\\\.saipen\\\\recovery\\\\conformance\\\\debt\\\\DEBT-000002.json\\nV:\\\\_TEMP_\\\\t1363-o_7153e_\\\\.saipen\\\\recovery\\\\conformance\\\\debt\\\\DEBT-000001.json\\nV:\\\\_TEMP_\\\\t1363-o_7153e_\\\\.saipen\\\\recovery\\\\conformance\\\\index\\\\lineage-head.json\\nV:\\\\_TEMP_\\\\t1363-o_7153e_\\\\.saipen\\\\recovery\\\\conformance\\\\index\\\\core.json\\nV:\\\\_TEMP_\\\\t1363-o_7153e_\\\\.saipen\\\\recovery\\\\conformance\\\\index\\\\active-gen.json\",\"metadata\":{\"count\":57,\"truncated\":false},\"title\":\"\",\"time\":{\"start\":1790105146626,\"end\":1790105148301}},\"id\":\"prt_0ca94d3de001xYGyTNUDsoXRjL\",\"sessionID\":\"ses_f35717441ffef0eq5Jsqjm4VwK\",\"messageID\":\"msg_0ca946836001ZLzJTc70tj8bDL\"}}\r\n{\"type\":\"step_finish\",\"timestamp\":1790105148489,\"sessionID\":\"ses_f35717441ffef0eq5Jsqjm4VwK\",\"part\":{\"id\":\"prt_0ca94dc3e001f1rWi76at4q2Ps\",\"reason\":\"tool-calls\",\"snapshot\":\"5fa3896763bcbe7689fe7a02786913d6ad9cf6d0\",\"messageID\":\"msg_0ca946836001ZLzJTc70tj8bDL\",\"sessionID\":\"ses_f35717441ffef0eq5Jsqjm4VwK\",\"type\":\"step-finish\",\"tokens\":{\"total\":92846,\"input\":90795,\"output\":129,\"reasoning\":98,\"cache\":{\"write\":0,\"read\":1824}},\"cost\":0}}\r\n"
+    },
+    {
+      "cycle": 6,
+      "verdict": "REPLACE_WORKER",
+      "generation": 6,
+      "model": "sairoute/SAIFREN",
+      "returncode": 1,
+      "failure": "HOST_RUNTIME_FAILURE",
+      "progressed": true,
+      "bounded": false,
+      "output_tail": "ption\\r\\n \\r\\n\",\"metadata\":{\"output\":\"rg : The term 'rg' is not recognized as the name of a cmdlet, function, script file, or operable program\\r\\n. Check the spelling of the name, or if a path was included, verify that the path is correct and try aga\\r\\nin.\\r\\nAt line:1 char:1\\r\\n+ rg -n \\\"no-publish|first-publish|converge_target|converge\\\" \\\"V:\\\\___VAC\\\\ ...\\r\\n+ ~~\\r\\n    + CategoryInfo          : ObjectNotFound: (rg:String) [], CommandNotFoundException\\r\\n    + FullyQualifiedErrorId : CommandNotFoundException\\r\\n \\r\\n\",\"exit\":1,\"truncated\":false},\"title\":\"rg -n \\\"no-publish|first-publish|converge_target|converge\\\" \\\"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\saipen\\\\MAINTENANCE.md\\\" \\\"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\saipen\\\\CORE.md\\\" \\\"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\saipen\\\\INDEX.md\\\" | Select-Object -First 80\",\"time\":{\"start\":1790106060141,\"end\":1790106060956}},\"id\":\"prt_0caa2ac0e001BqOy4ohkJW03ua\",\"sessionID\":\"ses_f356b0a66ffeKzbuSZfcc60uJv\",\"messageID\":\"msg_0caa2041e001kVgdDaHy5ugB2U\"}}\r\n{\"type\":\"step_finish\",\"timestamp\":1790106061110,\"sessionID\":\"ses_f356b0a66ffeKzbuSZfcc60uJv\",\"part\":{\"id\":\"prt_0caa2c92b0010vLoPNvGvqXpE5\",\"reason\":\"tool-calls\",\"snapshot\":\"98e0db22dcc8fe558d62b572cc72d4b10bc2be86\",\"messageID\":\"msg_0caa2041e001kVgdDaHy5ugB2U\",\"sessionID\":\"ses_f356b0a66ffeKzbuSZfcc60uJv\",\"type\":\"step-finish\",\"tokens\":{\"total\":71528,\"input\":67791,\"output\":200,\"reasoning\":849,\"cache\":{\"write\":0,\"read\":2688}},\"cost\":0}}\r\n"
+    },
+    {
+      "cycle": 7,
+      "verdict": "REPLACE_WORKER",
+      "generation": 7,
+      "model": "sairoute/SAIFREN",
+      "returncode": 0,
+      "failure": null,
+      "progressed": true,
+      "bounded": false,
+      "output_tail": "ffe9L1NlGQbAsIEAo\",\"snapshot\":\"76d9193baa3ba8e50f1449f45011c3ff6bdc4265\",\"type\":\"step-start\"}}\r\n{\"type\":\"text\",\"timestamp\":1790106875948,\"sessionID\":\"ses_f355c2262ffe9L1NlGQbAsIEAo\",\"part\":{\"id\":\"prt_0caaeeb25001enGT42dbz40ajV\",\"messageID\":\"msg_0caaeb2b30016Y2fAdW0t3mL4s\",\"sessionID\":\"ses_f355c2262ffe9L1NlGQbAsIEAo\",\"type\":\"text\",\"text\":\"STAATUS: T-1..T-4 DONE \u00b7 faas DONE \u00b7 converge/done saavutatud\\nTULEMUS: T-4 (SRC-001 \u2014 mathx `add` + unittest) suletud, kood oli juba T-2-st olemas. T-1 \u2014 \u00fcherealine moodulidokumentatsioon `src/app.py`-s lisatud. Board t\u00fchi (TODO/DOING t\u00fchjad).\\nTAKISTUS: NONE\\nOPERAATORI TEGU: NONE\\nJ\u00c4RGMINE T\u00c4PNE TEGU: NONE\\nKONTROLL: `python -m unittest discover -s tests -t .` -> OK (1 test); `ast.get_docstring(src/app.py)` -> `'Application module.'`; punane kontroll (add==6) kukkus ootusp\u00e4raselt; `saipen ticket done` -> FINISHED, STATE last_event 48.\\n\\nM\u00e4rkus: `saipen ship` ei k\u00e4ivitu \u2014 juurest puudub `VERSION` (see projekt pole versioonitud release). Suletud `own_patch`-iga.\",\"time\":{\"start\":1790106856229,\"end\":1790106875945}}}\r\n{\"type\":\"step_finish\",\"timestamp\":1790106876115,\"sessionID\":\"ses_f355c2262ffe9L1NlGQbAsIEAo\",\"part\":{\"id\":\"prt_0caaf38c90015p8RM9EM7jX96L\",\"reason\":\"stop\",\"snapshot\":\"76d9193baa3ba8e50f1449f45011c3ff6bdc4265\",\"messageID\":\"msg_0caaeb2b30016Y2fAdW0t3mL4s\",\"sessionID\":\"ses_f355c2262ffe9L1NlGQbAsIEAo\",\"type\":\"step-finish\",\"tokens\":{\"total\":70068,\"input\":64813,\"output\":264,\"reasoning\":255,\"cache\":{\"write\":0,\"read\":4736}},\"cost\":0}}\r\n"
+    }
+  ],
+  "deliberate_kills": [
+    {
+      "at": 900.0,
+      "killed": 19276,
+      "generation": 1,
+      "ok": true
+    },
+    {
+      "at": 2100.0,
+      "killed": 29436,
+      "generation": 4,
+      "ok": true
+    }
+  ],
+  "quality": {
+    "tickets_by_section": {
+      "## DONE": [
+        "T-1",
+        "T-2",
+        "T-3",
+        "T-4"
+      ]
+    },
+    "duplicate_work_count": 1,
+    "source_receipts": [
+      "SRC-001.md"
+    ],
+    "acceptance": {
+      "T-1_docstring": true,
+      "T-2_tests_pass": true,
+      "T-3_readme_one_sentence": true
+    },
+    "validator": "Validation complete. Agent is conformant. (16 warning(s))",
+    "validator_exit": 0
+  },
+  "efficiency": {
+    "generations": 7,
+    "progress_generations": 4,
+    "slow_bounded_generations": 0,
+    "asked_user_heuristic_count": 0
+  },
+  "manual_continue_count": 0
+}

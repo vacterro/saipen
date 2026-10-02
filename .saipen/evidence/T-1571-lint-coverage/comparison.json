@@ -1,0 +1,46 @@
+{
+  "pre_t1569": [
+    [
+      "E501",
+      "Line too long (102 > 100)"
+    ],
+    [
+      "E501",
+      "Line too long (102 > 100)"
+    ],
+    [
+      "E501",
+      "Line too long (104 > 100)"
+    ],
+    [
+      "E501",
+      "Line too long (114 > 100)"
+    ],
+    [
+      "E501",
+      "Line too long (119 > 100)"
+    ]
+  ],
+  "current": [
+    [
+      "E501",
+      "Line too long (102 > 100)"
+    ],
+    [
+      "E501",
+      "Line too long (102 > 100)"
+    ],
+    [
+      "E501",
+      "Line too long (104 > 100)"
+    ],
+    [
+      "E501",
+      "Line too long (114 > 100)"
+    ],
+    [
+      "E501",
+      "Line too long (119 > 100)"
+    ]
+  ]
+}

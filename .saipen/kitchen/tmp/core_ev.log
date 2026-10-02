@@ -1,0 +1,26 @@
+{
+  "ok": false,
+  "verdict": "FAIL",
+  "ran": 3928,
+  "red": 11,
+  "new_red": [
+    "test_t1293_valve_resume_audit_route.ValveResumeFollowsTheAuditRoute.test_a_live_doing_ticket_resumes_by_name_under_an_active_audit",
+    "test_t1293_valve_resume_audit_route.ValveResumeFollowsTheAuditRoute.test_no_live_ticket_resumes_the_routed_audit_action",
+    "test_t1527_runtime_provenance.RuntimeProvenanceTests.test_absent_or_invalid_host_context_is_explicitly_incomplete",
+    "test_t1527_runtime_provenance.RuntimeProvenanceTests.test_host_values_bind_separately_and_survive_checkpoint_and_restart",
+    "test_t1527_runtime_provenance.RuntimeProvenanceTests.test_missing_host_context_is_explicitly_unavailable",
+    "test_t1527_runtime_provenance.RuntimeProvenanceTests.test_partial_host_metadata_is_not_benchmark_complete",
+    "test_t1527_runtime_provenance.RuntimeProvenanceTests.test_provenance_digest_rejects_tampered_attempt_history"
+  ],
+  "fixed": [
+    "test_public_closure_cli.PublicClosureCliTests.test_control_c_d_cohort_cli_and_publication"
+  ],
+  "problems": [
+    "7 new red outside the baseline"
+  ],
+  "record": ".saipen/evidence/core-unit/c6e2a6eded5ad459-20260927T090036Z.json",
+  "reused": false,
+  "checkpoint": "CHECKPOINTED",
+  "checkpoint_detail": null,
+  "sandboxes_leaked": []
+}

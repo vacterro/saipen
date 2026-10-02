@@ -1,0 +1,12 @@
+======================================================================
+FAIL: test_performance_budget (tools.test_guard_admission.TestAdmissionAuthority.test_performance_budget)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_guard_admission.py", line 119, in test_performance_budget
+    self.assertLess(res["duration_ms"], 5.0)
+AssertionError: 5.121 not less than 5.0
+
+----------------------------------------------------------------------
+Ran 73 tests in 29.474s
+
+FAILED (failures=1)

@@ -1,0 +1,91 @@
+PASS: append-target-mid-line -- failed on 'end mid-line', as declared
+PASS: blocked-ticket -- expected pass, got pass
+PASS: checkpoint-missing-required-field -- failed on 'missing required field: blocker', as declared
+PASS: dangling-needs-reference -- failed on 'dangling needs: reference', as declared
+PASS: dependency-cycle -- failed on 'cyclic needs: dependencies', as declared
+PASS: done-wait-deadlock -- failed on 'auto-transition HUNT', as declared
+PASS: done-wait-deadlock-goal-mode -- failed on 'auto-transition HUNT', as declared
+PASS: goal-counter-recovery -- expected pass, got pass
+PASS: goal-counter-untraced -- passed and warned on 'goal-counter-untraced', as declared
+PASS: goal-reauthorization-trace -- expected pass, got pass
+PASS: goal-reauthorization-untraced -- failed on 'newest goal marker rebuilds', as declared
+PASS: invalid-mode-phase-combination -- expected pass, got pass
+PASS: multi-agent-claim-conflict -- expected pass, got pass
+PASS: next-action-not-executable -- failed on 'STATE.md next_action does not start with', as declared
+PASS: proposal-mode-halt -- expected pass, got pass
+PASS: read-only-restriction -- failed on 'read-only MUST NOT enter BUILD', as declared
+PASS: resume-after-crash -- expected pass, got pass
+PASS: saiui-adoption -- expected pass, got pass
+PASS: ship-preflight-build-return -- expected pass, got pass
+PASS: stale-state-reconciliation -- expected pass, got pass
+PASS: tripped-valve-without-wait -- failed on 'tripped safety valve', as declared
+PASS: two-doing-tickets -- failed on 'tickets in ## DOING', as declared
+PASS: bootstrap/inject.sh -- executable install replaced stale dirs, landed VERSION + validators, ran validate.py, and uninstalled byte-exact
+PASS: bootstrap/inject.sh grep failure -- exits nonzero without completion text
+PASS: bootstrap/inject.sh grep failure -- exits nonzero without Done
+PASS: bootstrap/inject.sh write failure -- exits nonzero without completion text
+PASS: bootstrap/uninstall.sh transform failure -- exits nonzero without completion text
+PASS: bootstrap/uninstall.sh grep failure -- exits nonzero without completion text
+PASS: bootstrap/uninstall.sh grep failure -- exits nonzero without Done
+PASS: bootstrap/uninstall.sh regular-file skill -- removed
+PASS: bootstrap/inject.ps1 -- executable install replaced stale dirs, landed VERSION + validators, ran validate.py, and uninstalled byte-exact
+PASS: bootstrap/inject.ps1 copy failure -- exits nonzero without completion text
+PASS: bootstrap/uninstall.ps1 read failure -- exits nonzero without completion text
+PASS: injector probe red-control -- deleted tests/ goes red
+PASS: injector probe red-control -- installed bytecode goes red
+PASS: project root -- correct root
+PASS: project root -- nested cwd
+PASS: project root -- wrong cwd rejected
+PASS: project root -- explicit root overrides cwd
+PASS: project root -- non-Git nested cwd
+PASS: project root -- linked worktree uses main owner
+PASS: project root -- linked worktree with its own .saipen/ is validated as itself
+PASS: export.sh -- nested cwd
+PASS: export.sh -- foreign cwd rejected
+PASS: export.sh -- explicit root overrides cwd
+PASS: export.sh -- empty explicit root rejected
+PASS: export.sh -- linked worktree uses main owner
+PASS: export.sh -- external git-dir parent rejected
+PASS: export.ps1 -- nested cwd
+PASS: export.ps1 -- foreign cwd rejected
+PASS: export.ps1 -- explicit root overrides cwd
+PASS: export.ps1 -- empty explicit root rejected
+PASS: export.ps1 -- linked worktree uses main owner
+PASS: export.ps1 -- external git-dir parent rejected
+PASS: bootstrap/saipen_crew.sh broken launcher -- exits nonzero without Done
+PASS: bootstrap/saipen_crew.sh working launcher -- three accepted calls
+PASS: bootstrap/saipen_crew.bat failed start 1 -- exits nonzero without success
+PASS: bootstrap/saipen_crew.bat failed start 2 -- exits nonzero without success
+PASS: bootstrap/saipen_crew.bat failed start 3 -- exits nonzero without success
+PASS: bootstrap/saipen_crew.bat working start -- three accepted calls
+PASS: last_event -- legacy absence warns but remains readable
+PASS: last_event -- current schema missing marker fails
+PASS: last_event -- current schema missing style marker fails
+PASS: last_event -- exact recovered tail passes
+PASS: last_event -- advanced LOG makes old marker stale
+PASS: last_event -- recovered exact tail passes
+PASS: last_event -- marker above LOG fails as corrupt
+PASS: hunt mark -- a mark no commit backs fails
+PASS: hunt mark -- the exact HEAD mark passes
+PASS: hunt mark -- a local-only commit fails (never reached a remote)
+PASS: hunt mark -- a remote-backed mark still passes after the stray
+PASS: converge routing -- converge clean-HUNT naming ADD fails
+PASS: converge routing -- converge clean-HUNT routing to CLEAN passes
+PASS: converge routing -- normal intent may still name ADD
+PASS: converge routing -- converge valve pause naming saipen goal fails
+PASS: converge routing -- converge valve pause naming cc passes
+PASS: role/source freshness -- matching derived charter+package passes
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\run_scenarios.py", line 2369, in <module>
+    rolefresh_failures, rolefresh_checked = run_role_freshness_probes()
+                                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\run_scenarios.py", line 1666, in run_role_freshness_probes
+    charter.read_text(encoding="utf-8").replace(
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\vac34\AppData\Local\Programs\Python\Python311\Lib\pathlib.py", line 1058, in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors) as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\vac34\AppData\Local\Programs\Python\Python311\Lib\pathlib.py", line 1044, in open
+    return io.open(self, mode, buffering, encoding, errors, newline)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: 'V:\\_TEMP_\\saipen-rolefresh-nwve_9i5\\project\\extensions\\subs\\saiwiki.md'

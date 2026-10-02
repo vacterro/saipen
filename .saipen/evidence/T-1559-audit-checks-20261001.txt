@@ -1,0 +1,21 @@
+PASS: a real root `nul` entry is excluded from audit snapshots
+UNPROVEN: symlink-restore -- host cannot create a symlink, so the red control was never constructed: [WinError 1314] A required privilege is not held by the client: 'V:\\_TEMP_\\audit_checks_op4lz4qa\\probe-symlink-restore\\symlink-restore-probe\\external.md' -> 'V:\\_TEMP_\\audit_checks_op4lz4qa\\probe-symlink-restore\\symlink-restore-probe\\IDENTITY.md'
+PASS: audit-tags missing-Git skip plus enumeration, nonzero, malformed, truncated, and surplus fail-closed controls behave
+PASS: every producer-OUTBOX control runs at a gate where its finding is hard
+PASS: a known-good copy of this repository is built for the mutation controls
+PASS: release-ledger clean/new-tag/new-changelog/stale-baseline controls behave distinctly
+PASS: tools/validate.py declares exactly the adjudicated fail sites, and added, removed and same-count SWAPPED sites are each named
+NOTE: 341 fail site(s) recorded by identity in tools/validator_fail_sites.json
+NOTE: known limitation -- identity binds WHICH fail sites tools/validate.py declares, so an added, removed or same-count swapped site is named -- but a BASELINE record is inherited surface that was never individually adjudicated, which is recorded per site and is NOT detected here as missing coverage
+PASS: aged unowned WARN slug fails; identical aged slug with a live naming ticket passes; baseline data, never validator wording
+FAIL: phase-rename -- consistent SCOUT->SCOUTX rename was rejected: FAIL: source receipts -- retired ticket record T-1580 evidence artifact .saipen/evidence/T-1580-project-binding-20261001.md no longer hashes to the sha256 its retirement bound
+PASS: release-ledger tag query is observed once; duplicate-query and invalid-validator controls both go red
+PASS: the unmodified copy validates clean, so every expectation below is absent before its mutation
+PASS: callable no-op mutations are rejected before validation
+PASS: every canonical mutation has its target, so the denominator holds still
+FAIL: mutation-sweep -- 2 of 247 mutation control(s) no longer prove anything
+FAIL: an amnesty demoted to prose stops suppressing -- the validator did not report 'timestamp moves backwards by'. That check no longer goes red on its own condition -- its anchor is no longer in the file
+FAIL: portable project identity becomes an external symlink -- the validator did not report 'IDENTITY.md is a symlink, reparse point, or non-regular file'. That check no longer goes red on its own condition
+
+2 of 247 case(s) are not evidence any more.
+AUDIT: 11 of 14 probes passed; failed: mutation-sweep, phase-rename; skipped: none; unproven (host capability): symlink-restore

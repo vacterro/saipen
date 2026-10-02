@@ -1,0 +1,16 @@
+test_public_recovery_same_damage_preserves_bytes_and_resumes (__main__.QuarantineLogTailTests.test_public_recovery_same_damage_preserves_bytes_and_resumes)
+Same oracle reaches the old runtime, not an absent-API import. ... FAIL
+
+======================================================================
+FAIL: test_public_recovery_same_damage_preserves_bytes_and_resumes (__main__.QuarantineLogTailTests.test_public_recovery_same_damage_preserves_bytes_and_resumes)
+Same oracle reaches the old runtime, not an absent-API import.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\.saipen\kitchen\t1565-goalresume-prefix-20260930\tools\test_log_tail_quarantine.py", line 137, in test_public_recovery_same_damage_preserves_bytes_and_resumes
+    self.assertEqual(route, "saipen recover quarantine-log-tail", recovery)
+AssertionError: None != 'saipen recover quarantine-log-tail' : {'ok': False, 'code': 'HISTORY_LEDGER_CORRUPT', 'detail': 'history-void: complete LOG history fails the immutable-ledger contract -- duplicate E-ID(s) in complete history: E-1301, E-1302; E-1301 is not greater than preceding E-1302 (out of order)', 'needs_local_mutation': False, 'safe_auto_repair_available': False, 'operator_decision_available': False, 'canonical_next_command': None, 'read_only': True, 'terminal_disposition': 'FORENSICALLY_UNRECOVERABLE', 'blocking_surface': 'log', 'blocking_field': None, 'evidence_reference': '.saipen/LOG.md', 'diagnosis': 'READ_ONLY_DIAGNOSIS_ONLY', 'read_only_diagnosis_only': True, 'instruction': 'READ_ONLY_DIAGNOSIS_ONLY -- do not probe mutating verbs; no local mutation can reconstruct the missing truth', 'forbidden_probes': ['saipen stop', 'saipen transition', 'saipen goal', 'saipen ticket', 'Bash', 'Edit', 'Write'], 'reason_code': 'HISTORY_LEDGER_CORRUPT'}
+
+----------------------------------------------------------------------
+Ran 1 test in 0.784s
+
+FAILED (failures=1)

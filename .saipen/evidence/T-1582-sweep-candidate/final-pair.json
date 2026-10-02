@@ -1,0 +1,25 @@
+{
+  "oracle_change_reason": "Ruff E501 and py38 floor: format the same mock context without changing setup or assertions",
+  "controls": [
+    {
+      "variant": "before",
+      "ran": 13,
+      "failures": 3,
+      "errors": 0,
+      "skipped": 1,
+      "passed": false,
+      "subject_sha256": "2572f2125203533ab3e0d8e5d979009d7a6a44c790c24420f2ad0cedee073c02",
+      "verifier_sha256": "780aca37dc30d80f57966367144485cbc1ec6f59f4d1a569e5c63fc86f74a7fc"
+    },
+    {
+      "variant": "live",
+      "ran": 13,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 1,
+      "passed": true,
+      "subject_sha256": "581cf41f8960dc233783c53c1b235c079eb8bf0c6117849cba40fa460ae4de71",
+      "verifier_sha256": "780aca37dc30d80f57966367144485cbc1ec6f59f4d1a569e5c63fc86f74a7fc"
+    }
+  ]
+}

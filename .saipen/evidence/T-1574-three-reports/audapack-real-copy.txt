@@ -1,0 +1,19 @@
+T-1574 real-bytes demonstration: scratch copy of V:\___VAC\__K\__CODE\_PY\_AUDAPACK\.saipen (STATE sha256 012a0697..., BOARD 5656a8f8..., LOG fe86ea42...), git-init snapshot; the real project was not touched.
+
+RECOVER code=RECONCILE_REAUTH_REQUIRED next=saipen recover --apply-approved-repair ddff307eabeb021d612f65265e1300ff867d5c791336e4381517719ca1059cb7
+DETAIL CURRENT_DONE_JOURNAL_GAP: restore T-261 to its own proven SCOUT lifecycle; preserve original bytes; drop from the live row, kept in the evidence copy: closure_mode, evidence
+APPLY code=REPAIRED ok=True detail=
+---
+phase: SCOUT
+task: T-261
+next_action: "PHASE SCOUT T-261"
+blocker: none
+- [/] T-261 [P1] Fix A3 split-brain: split send acceptance from Core user-turn adoption, Bridge AUDITING only after adoption | verify: the requested change is present and demonstrated against the user own description of it | user_explicit: true | source_receipts: SRC-108 | owner: buffy | claim_time: 2026-09-29T19:58:54Z
+VALIDATE code=CONFORMANCE_UNHEALTHY structural=pass errors=
+RECOVER2 code=CLEAN
+CONTINUE ok=True action=PHASE SCOUT T-261 code=
+REPLAY code=STALE_APPROVED_REPAIR
+EVIDENCE reconcile-20260930184131218035.BOARD.md 125314
+EVIDENCE reconcile-20260930184131218035.LOG.md 64102
+EVIDENCE reconcile-20260930184131218035.STATE.md 584
+

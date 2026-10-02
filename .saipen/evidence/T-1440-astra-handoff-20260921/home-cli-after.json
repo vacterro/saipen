@@ -1,0 +1,137 @@
+{
+  "ok": false,
+  "code": "CONFORMANCE_UNHEALTHY",
+  "structural_gate": "pass",
+  "validator": {
+    "path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\validate.py",
+    "launched": true,
+    "exit_code": 1,
+    "summary": "/extensions/subs/saihunt/kitchen/OUTBOX.md [HUNT-014] carries source_head 'b7f5b51280b8f49c5fedbf7a00aeb6d4f45743ba' but current source_head is 'd97abdc097db432bafe2316b1e3577e44cd9cc4c' -- package is stale and MUST NOT be collected -- reported under `--gate core`, where this producer is not being consumed; it FAILs under `--gate collect:saihunt` and blocks nothing else\nWARN [producer-package-stale]: .saipen/extensions/subs/saihunt/kitchen/OUTBOX.md [HUNT-014] carries source_tree_fingerprint 'git-delta-v1:4c6fd9b3f13a1d7a0b203e00a759dae5eac1474eabb77cb3e39dad9da1953eb9' but the current tree computes 'git-delta-v1:a3f3db07a9c1a932a309b1f0f1074b91d284f8509727d31f76a04755715aa093' -- the tree changed since the package was produced (same HEAD or not), so it is stale and MUST NOT be collected (PROTOCOL.md § 6, T-543) -- reported under `--gate core`, where this producer is not being consumed; it FAILs under `--gate collect:saihunt` and blocks nothing else\nWARN [producer-package-stale]: ... and 8 more like the above\nWARN [subsaipen-uncollected]: 4 subSaipen OUTBOX entr(y/ies) sit at `status: ready` -- that is a finding waiting on `saipen sub collect`, visible only when someone runs it (extensions/subs/PROTOCOL.md § 4)\nWARN [cross-doc-drift]: cross-doc drift [ahead-stamp-repair] -- CORE.md must say a future-stamped LOG line is restamped to a defensible bound with a DEC naming the original, the replacement, and that the minute is inherited rather than measured. Without it the only sanctioned response is waiting, which keeps a false record and reds every gate until the clock catches up\nWARN [cross-doc-drift]: cross-doc drift [shortcut-memory-ban] -- BOOT.md step 7 must order § 1.10's table read before acting on a shortcut and explicitly state that memory is never a source for it. An agent that believes it knows what a key means answers from recall rather than reading the file\nWARN [cross-doc-drift]: ... and 13 more like the above\nValidation FAILED: 6 problem(s), 29 warning(s)"
+  },
+  "conformance_status": {
+    "status": "CURRENT_FAIL",
+    "gate": "core",
+    "reason": "canonical validator reports FAIL for the current checkpoint",
+    "receipt": {
+      "blocking_findings": {
+        "problem_count": 6,
+        "problems": [
+          {
+            "category": null,
+            "credential": false,
+            "detail": "runtime manifest names a file git does not track: tools/test_conformance_repair_boundary.py -- it exists here and in no clone, so this home ships complete and every checkout of it does not. Commit the",
+            "detail_hash": "3a2be56be1f18a74",
+            "finding_key": "76b48f23558dce11",
+            "rule_id": "unclassified",
+            "severity": "problem",
+            "subject_id": null,
+            "subject_kind": "global",
+            "subject_ref": null
+          },
+          {
+            "category": null,
+            "credential": false,
+            "detail": "runtime manifest names a file git does not track: tools/test_refusal_registry.py -- it exists here and in no clone, so this home ships complete and every checkout of it does not. Commit the file or dr",
+            "detail_hash": "e6c03ae295ff8f63",
+            "finding_key": "76b48f23558dce11",
+            "rule_id": "unclassified",
+            "severity": "problem",
+            "subject_id": null,
+            "subject_kind": "global",
+            "subject_ref": null
+          },
+          {
+            "category": null,
+            "credential": false,
+            "detail": "runtime manifest names a file git does not track: tools/test_source_multiwork.py -- it exists here and in no clone, so this home ships complete and every checkout of it does not. Commit the file or dr",
+            "detail_hash": "815091cda040c15f",
+            "finding_key": "76b48f23558dce11",
+            "rule_id": "unclassified",
+            "severity": "problem",
+            "subject_id": null,
+            "subject_kind": "global",
+            "subject_ref": null
+          },
+          {
+            "category": null,
+            "credential": false,
+            "detail": "runtime manifest names a file git does not track: tools/test_source_quarantine_route.py -- it exists here and in no clone, so this home ships complete and every checkout of it does not. Commit the fil",
+            "detail_hash": "3b49d203d2af006f",
+            "finding_key": "76b48f23558dce11",
+            "rule_id": "unclassified",
+            "severity": "problem",
+            "subject_id": null,
+            "subject_kind": "global",
+            "subject_ref": null
+          },
+          {
+            "category": null,
+            "credential": false,
+            "detail": "cross-doc drift [root-file-set] -- file(s) at the repository root that the closed set does not name: ['SAIPEN — SAIHANDOFF — conformance-validation-deadlock_20260920.md', 'SAIPEN — SAIHANDOFF — conformance-validation-deadlock_20260921.md', 'SAIPEN — SAIHANDOFF — credential-gate-src033_20260921_0140.md']. Both orphans removed alongside this check arrived that way, on a `git add -A` in a commit about something else, and neither was referenced by any document or tool -- so no other check here could ever see them. A deliberate new root file is a one-line addition to ROOT_ALLOWED in tools/validate.py; a scratch file belongs in .gitignore, which this check honours",
+            "detail_hash": "1a278b6fe58a1eb0",
+            "finding_key": "4141c15153e33942",
+            "rule_id": "cross_doc_drift",
+            "severity": "problem",
+            "subject_id": null,
+            "subject_kind": "global",
+            "subject_ref": null
+          },
+          {
+            "category": null,
+            "credential": false,
+            "detail": "coverage gap -- 3 shipped document(s) are read by no check and declared exempt by none: SAIPEN — SAIHANDOFF — conformance-validation-deadlock_20260920.md, SAIPEN — SAIHANDOFF — conformance-validation-",
+            "detail_hash": "cdafa3c7f5db9358",
+            "finding_key": "76b48f23558dce11",
+            "rule_id": "unclassified",
+            "severity": "problem",
+            "subject_id": null,
+            "subject_kind": "global",
+            "subject_ref": null
+          }
+        ],
+        "ruleset_fingerprint": "82e5e183ae8f0fd909be3fa3627f00489cacaab813d942186c832db02a05a1c1",
+        "ruleset_version": 1,
+        "status": "complete",
+        "warning_count": 29
+      },
+      "board_hash": "ce988547927e4603",
+      "canonical_next_command": null,
+      "content_hash": "dcd1a6717b15a373",
+      "exit_code": 1,
+      "external_actions": [],
+      "gate": "core",
+      "kind": "conformance_receipt",
+      "log_hash": "76e36e5a26837d4f",
+      "project_identity": "v:\\___vac\\__k\\__code\\_ai_stuff_agentic\\_saipen",
+      "receipt_id": "receipt-d9cd7a0aef40",
+      "remediation_commands": [],
+      "schema_version": 2,
+      "source_head": "d97abdc097db432bafe2316b1e3577e44cd9cc4c",
+      "source_tree_fingerprint": "git-delta-v1:a3f3db07a9c1a932a309b1f0f1074b91d284f8509727d31f76a04755715aa093",
+      "state_hash": "e1234af7f20635f7",
+      "timestamp_utc": "2026-09-20T23:50:19.018134Z",
+      "validator_protocol_version": "1",
+      "verdict": "FAIL"
+    },
+    "validator": {
+      "validator_path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\validate.py",
+      "validator_protocol_version": "1",
+      "project_protocol_version": "8",
+      "gate": "core",
+      "source_head": "d97abdc097db432bafe2316b1e3577e44cd9cc4c",
+      "source_tree_fingerprint": "git-delta-v1:a3f3db07a9c1a932a309b1f0f1074b91d284f8509727d31f76a04755715aa093"
+    }
+  },
+  "reason": "canonical validator reports FAIL for the current checkpoint",
+  "detail": "conformance is CURRENT_FAIL: canonical validator reports FAIL for the current checkpoint",
+  "canonical_next_command": null,
+  "repair_status": "ENGINEERING_REQUIRED",
+  "diagnostic": {
+    "kind": "ENGINEERING_REQUIRED",
+    "owner": "SAIPEN conformance/remediation",
+    "receipt_id": "receipt-d9cd7a0aef40",
+    "findings_status": "complete",
+    "detail": "CURRENT_FAIL has no registered executable repair. Diagnose the receipt-bound blocking findings under their owning Work and implement or register the required repair; validate again after the input, state or runtime changes. Missing findings require diagnostic repair."
+  },
+  "terminal": true
+}

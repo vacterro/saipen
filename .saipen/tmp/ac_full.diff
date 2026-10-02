@@ -1,0 +1,505 @@
+diff --git a/tools/audit_checks.py b/tools/audit_checks.py
+index 77b0f58d..872c88da 100644
+--- a/tools/audit_checks.py
++++ b/tools/audit_checks.py
+@@ -39,6 +39,7 @@ from __future__ import annotations
+ import ast
+ import contextlib
+ import datetime
++import errno
+ import hashlib
+ import io
+ import json
+@@ -55,7 +56,9 @@ from pathlib import Path
+ 
+ import fail_site_inventory as inventory
+ from freshness import compute_role_revision, compute_source_identity
++from saipen_engine.journal import SETTLED_DIR
+ from saipen_engine.paths import project_lineage_identity
++from saipen_engine.subs import outbox_rel
+ from saipen_engine.release_contract import locale_readme_paths
+ 
+ if hasattr(sys.stdout, "reconfigure"):
+@@ -76,10 +79,13 @@ SUB = ".saipen/extensions/subs/saiwiki/STATE.md"
+ CHANGELOG = "CHANGELOG.md"
+ CORE = "saipen/CORE.md"
+ IMPROVE = "saipen/IMPROVE.md"
++REGISTRY = "saipen/REGISTRY.json"
+ INDEX = "saipen/INDEX.md"
+ ACTIVATION = "saipen/ACTIVATION_BLOCK.md"
+ CONVERGE = "saipen/CONVERGE.md"
+ COMMANDS = "saipen/COMMANDS.md"
++STORAGE = "saipen/STORAGE.md"
++STORAGE_REGISTRY = ".saipen/STORAGE_REGISTRY.json"
+ RUNTIME_SURFACE = "tools/saipen_engine/runtime_surface.py"
+ AUTOINJECT = "tools/autoinject.py"
+ CREW_BACKLOG = ".saipen/KNOWLEDGE/crew-v8-backlog.md"
+@@ -140,7 +146,10 @@ def freshen_synthetic_outboxes(tree: Path) -> None:
+         text = upsert_bold(text, "role_revision", compute_role_revision(wiki_charter))
+         wiki.write_text(text, encoding="utf-8", newline="\n")
+ 
+-    translate = tree / ".saipen/saitranslate/kitchen/OUTBOX.md"
++    # Same resolver the validator uses: canonical when the project has it,
++    # legacy only when it does not. A control package that stamps the
++    # SUPERSEDED copy proves nothing about the file actually shipped (T-313).
++    translate = tree / outbox_rel(tree, "saitranslate")
+     translate_charter = tree / "extensions/subs/saitranslate.md"
+     if translate.is_file() and translate_charter.is_file():
+         text = translate.read_text(encoding="utf-8-sig")
+@@ -238,7 +247,16 @@ def root_device_ignore_probe(tmp: Path) -> str | None:
+ 
+ 
+ def symlink_restore_probe(tmp: Path) -> str | None:
+-    """Prove mutation restoration removes the link, not its target bytes."""
++    """Prove mutation restoration removes the link, not its target bytes.
++
++    T-1561: a host without the symlink privilege (Windows without Developer
++    Mode or SeCreateSymbolicLinkPrivilege) cannot CONSTRUCT this red control,
++    and that lack is a property of the host, not of the restoration code --
++    so the narrow capability refusal raises `ProbeUnproven` (a loud UNPROVEN
++    verdict, named in the summary) instead of failing every audit run on such
++    a host. Any other construction error stays a FAIL, and once the link
++    exists the control itself has no skip path.
++    """
+     probe = tmp / "symlink-restore-probe"
+     probe.mkdir()
+     path = probe / "IDENTITY.md"
+@@ -251,6 +269,11 @@ def symlink_restore_probe(tmp: Path) -> str | None:
+     try:
+         os.symlink(external, path)
+     except (OSError, NotImplementedError) as exc:
++        if _is_symlink_capability_refusal(exc):
++            raise ProbeUnproven(
++                "host cannot create a symlink, so the red control was never "
++                f"constructed: {exc}"
++            ) from exc
+         return f"cannot construct symlink red control: {exc}"
+     restore_case_files(saved)
+     if path.is_symlink() or path.read_bytes() != original:
+@@ -260,6 +283,23 @@ def symlink_restore_probe(tmp: Path) -> str | None:
+     return None
+ 
+ 
++def _is_symlink_capability_refusal(exc: BaseException) -> bool:
++    """True only for the narrow "this host may not make symlinks" refusals.
++
++    WinError 1314 is ERROR_PRIVILEGE_NOT_HELD; the errno set is the POSIX
++    spelling of the same refusal. Anything else (a read-only temp dir, a
++    damaged path, a disk error) keeps the FAIL verdict: that is this probe's
++    own breakage, not a missing host capability, and must stay loud.
++    """
++    if isinstance(exc, NotImplementedError):
++        return True
++    if not isinstance(exc, OSError):
++        return False
++    if getattr(exc, "winerror", None) == 1314:
++        return True
++    return exc.errno in (errno.EPERM, errno.EACCES, errno.ENOSYS)
++
++
+ def rebind_synthetic_milestones(tree: Path) -> None:
+     """Upgrade an in-flight legacy runtime binding in copied test evidence."""
+     for manifest_path in tree.glob(".saipen/milestones/CP-*/manifest.json"):
+@@ -537,6 +577,16 @@ def journal_probe_allocation(tree: Path, ticket: str) -> str | None:
+     else -- files a record the validator correctly refuses. The event is
+     appended the way a checkpoint appends one: next id, parent the current
+     tail (T-1359).
++
++    T-1561: the appended line is the NEWEST event of a copy that carries this
++    checkout's settled ledger, so it sits above every provenance floor and
++    must satisfy BOTH journal checks, not just carry a bracket: the op id is
++    on-grammar (`ticket-<32 hex>`, a registered writer class) and resolves to
++    a synthetic committed record filed under the copy's own settled dir, the
++    on-disk shape `resolvable_op_ids` enumerates. The old `alloc-<32 zeros>`
++    id named a class no writer emits and no record, so T-1577 and T-1282
++    failed the CONTROL leg on the fixture's own line before warn ownership
++    was ever measured.
+     """
+     log = tree / LOG
+     if not log.is_file():
+@@ -546,12 +596,34 @@ def journal_probe_allocation(tree: Path, ticket: str) -> str | None:
+     if not events:
+         return f"copied {LOG} carries no parsable event to continue from"
+     stamp, last = events[-1]
++    op_id = "ticket-" + hashlib.sha256(
++        ("warn-probe-allocation:" + ticket).encode("utf-8")
++    ).hexdigest()[:32]
+     entry = (
+         f"- {stamp} [E-{int(last) + 1}] [parent: E-{last}] [{ticket}] "
+-        f"[agent: {WARN_PROBE_AGENT}] [op: alloc-{'0' * 32}] "
++        f"[agent: {WARN_PROBE_AGENT}] [op: {op_id}] "
+         f"DEC: allocated for the warn-ownership probe fixture\n"
+     )
+     log.write_text(text.rstrip("\n") + "\n" + entry, encoding="utf-8", newline="\n")
++    record = {
++        "op_id": op_id,
++        "status": "COMMITTED",
++        "operation": "ticket",
++        "semantic_payload_hash": hashlib.sha256(entry.encode("utf-8")).hexdigest(),
++        "created_at": datetime.datetime.now(datetime.timezone.utc).strftime(
++            "%Y-%m-%dT%H:%M:%SZ"
++        ),
++        "agent": WARN_PROBE_AGENT,
++        "verification_policy": "none",
++        "preconditions": {},
++        "progress_index": 0,
++        "targets": [],
++    }
++    op_dir = tree / SETTLED_DIR / op_id
++    op_dir.mkdir(parents=True, exist_ok=True)
++    (op_dir / "operation.json").write_text(
++        json.dumps(record, indent=2) + "\n", encoding="utf-8", newline="\n"
++    )
+     return None
+ 
+ 
+@@ -793,6 +865,7 @@ def phase_rename_probe(source: Path, destination: Path) -> str | None:
+     immutable_source_roots = (
+         tree / ".saipen" / "intake",
+         tree / ".saipen" / "archive" / "source",
++        tree / ".saipen" / "archive" / "retired",
+     )
+     changed = 0
+     for path in tree.rglob("*"):
+@@ -800,7 +873,10 @@ def phase_rename_probe(source: Path, destination: Path) -> str | None:
+             continue
+         # Restore evidence is historical, content-addressed exact bytes.  A
+         # semantic rename of the live protocol must not rewrite its archived
+-        # payloads or their immutable manifests.
++        # payloads or their immutable manifests.  Retired records (T-1391) bind
++        # a verbatim BOARD row under board_record_sha256; rewriting a SCOUT
++        # token inside that frozen text breaks the digest the retirement gate
++        # verifies, so the retired archive is off-limits to the rename too.
+         if path.is_relative_to(milestone_root) or any(
+             path.is_relative_to(authority_root) for authority_root in immutable_source_roots
+         ):
+@@ -2067,21 +2143,31 @@ CASES: list[tuple[str, str, object, str]] = [
+     ),
+     (
+         "nested success decoy launders a declared action",
+-        CORE,
++        REGISTRY,
+         (
+             "MULTI",
+             [
+-                (CORE, lambda t: t.replace("abort, clean]", "abort, extra, clean]")),
+-                (IMPROVE, lambda t: t.replace("abort, clean]", "abort, extra, clean]")),
++                (
++                    REGISTRY,
++                    lambda t: t.replace(
++                        '"retire",\n   "clean",', '"retire",\n   "extra",\n   "clean",'
++                    ),
++                ),
++                (
++                    IMPROVE,
++                    lambda t: t.replace(
++                        "abort, retire, clean,", "abort, retire, extra, clean,"
++                    ),
++                ),
+                 (
+                     "tools/saipen.py",
+                     lambda t: t.replace(
+-                        '    if action == "clean":',
++                        '    if action == "clean":\n        if len(args) < 2:',
+                         '    if action == "extra":\n'
+                         "        def decoy():\n"
+                         "            return 0\n"
+                         "        return 2\n"
+-                        '    if action == "clean":',
++                        '    if action == "clean":\n        if len(args) < 2:',
+                     ),
+                 ),
+             ],
+@@ -2090,21 +2176,31 @@ CASES: list[tuple[str, str, object, str]] = [
+     ),
+     (
+         "constant-false success decoy launders a declared action",
+-        CORE,
++        REGISTRY,
+         (
+             "MULTI",
+             [
+-                (CORE, lambda t: t.replace("abort, clean]", "abort, extra, clean]")),
+-                (IMPROVE, lambda t: t.replace("abort, clean]", "abort, extra, clean]")),
++                (
++                    REGISTRY,
++                    lambda t: t.replace(
++                        '"retire",\n   "clean",', '"retire",\n   "extra",\n   "clean",'
++                    ),
++                ),
++                (
++                    IMPROVE,
++                    lambda t: t.replace(
++                        "abort, retire, clean,", "abort, retire, extra, clean,"
++                    ),
++                ),
+                 (
+                     "tools/saipen.py",
+                     lambda t: t.replace(
+-                        '    if action == "clean":',
++                        '    if action == "clean":\n        if len(args) < 2:',
+                         '    if action == "extra":\n'
+                         "        if False:\n"
+                         "            return 0\n"
+                         "        return 2\n"
+-                        '    if action == "clean":',
++                        '    if action == "clean":\n        if len(args) < 2:',
+                     ),
+                 ),
+             ],
+@@ -2249,8 +2345,8 @@ CASES: list[tuple[str, str, object, str]] = [
+         "SAICRITIC drops PROVENANCE",
+         "saipen/SAICRITIC.md",
+         lambda t: t.replace(
+-            "| PROVENANCE | does the evidence bind the exact source, session, "
+-            "run, finding and result it claims? |\n",
++            "| PROVENANCE | Does evidence bind the exact source, session, "
++            "run, finding and result? |\n",
+             "",
+         ),
+         "saicritic",
+@@ -2259,12 +2355,12 @@ CASES: list[tuple[str, str, object, str]] = [
+         "SAICRITIC swaps GATE and PROVENANCE",
+         "saipen/SAICRITIC.md",
+         lambda t: t.replace(
+-            "| GATE | did the REQUIRED semantic/protocol gates actually occur? |\n"
+-            "| PROVENANCE | does the evidence bind the exact source, session, "
+-            "run, finding and result it claims? |",
+-            "| PROVENANCE | does the evidence bind the exact source, session, "
+-            "run, finding and result it claims? |\n"
+-            "| GATE | did the REQUIRED semantic/protocol gates actually occur? |",
++            "| GATE | Did required semantic and protocol gates actually run? |\n"
++            "| PROVENANCE | Does evidence bind the exact source, session, "
++            "run, finding and result? |",
++            "| PROVENANCE | Does evidence bind the exact source, session, "
++            "run, finding and result? |\n"
++            "| GATE | Did required semantic and protocol gates actually run? |",
+         ),
+         "saicritic",
+     ),
+@@ -2272,9 +2368,9 @@ CASES: list[tuple[str, str, object, str]] = [
+         "SAICRITIC duplicates UNIT",
+         "saipen/SAICRITIC.md",
+         lambda t: t.replace(
+-            "| UNIT | is the operation locally correct? |",
+-            "| UNIT | is the operation locally correct? |\n"
+-            "| UNIT | is the operation locally correct? |",
++            "| UNIT | Is the operation locally correct? |",
++            "| UNIT | Is the operation locally correct? |\n"
++            "| UNIT | Is the operation locally correct? |",
+         ),
+         "saicritic",
+     ),
+@@ -2520,7 +2616,7 @@ CASES: list[tuple[str, str, object, str]] = [
+     # inversions report again. If this stops going red, the anchoring is gone.
+     (
+         "an amnesty demoted to prose stops suppressing",
+-        LOG,
++        ".saipen/logs/LOG-017.md",
+         replace(
+             "DEC: observed historical timestamp inversions",
+             "DEC: a note about observed historical timestamp inversions",
+@@ -3431,6 +3527,45 @@ CASES: list[tuple[str, str, object, str]] = [
+         lambda t: t + "- 01.01.20 00:00 [E-999998] RUN: inversion probe\n",
+         "timestamp moves backwards by",
+     ),
++    # T-1282. The `[op: ...]` tag is forgeable: an agent closing outside a
++    # SAIOPS run hand-mints an id and the presence check passes. Appending a
++    # NEW active-log structural event carrying a fabricated op id (no journaled
++    # operation record names it) must be caught -- it lands at the active head,
++    # above the newest resolvable event, exactly where a real forgery lands.
++    # The high event id keeps LOG ids monotonic so only the resolution rung
++    # fires. This is the control that proves the check goes red on a hand-typed
++    # id (the other half, green on a minted one, is the live tree passing).
++    (
++        "active-log op id names no operation record",
++        LOG,
++        lambda t: t
++        + "- 25.09.26 23:59 [E-999997] [agent: probe] "
++        "[op: transition-forgedforgedforgedforgedforged00] "
++        "RUN: transition to BUILD -- forged provenance probe\n",
++        "resolves to NO operation record",
++    ),
++    # T-1577. The control above proves an id that RESOLVES to nothing is
++    # caught; this one proves the other half -- an id no writer in this
++    # repository can emit is caught by SHAPE, on a line that never touches the
++    # journal. 31 hex: the writers emit 8, 12, 16, 20 or 32 (measured over
++    # every operation record on this checkout), so this tag is a typed bracket
++    # standing in for a transition that never ran. Appended at the head, so it
++    # lands above the resolved floor; the high event id keeps LOG monotonic so
++    # only the new rung fires.
++    (
++        "active-log op id matches no writer grammar",
++        LOG,
++        lambda t: t
++        + "- 25.09.26 23:59 [E-999996] [agent: probe] "
++        # 32 hex: a writer's width under a class no writer mints (T-1577).
++        "[op: verify-a0b1c2d3e4f5061728394a5b6c7d8e9f] "
++        "RUN: transition to BUILD -- off-grammar provenance probe\n",
++        # Deliberately NOT "hand-authored": that word is already in the
++        # UNMODIFIED tree's exempt-history WARN, and a control whose expected
++        # string is already printed proves nothing. This phrase is on the FAIL
++        # path alone.
++        "standing in for a transition that never ran",
++    ),
+     # --- kitchen ---------------------------------------------------------
+     (
+         "digest is not three lines",
+@@ -4276,6 +4411,46 @@ CASES.extend(
+     ]
+ )
+ 
++# STORE-SAFETY-01: the validator's new storage gates have independent controls.
++CASES.extend(
++    [
++        (
++            "storage contract deleted",
++            STORAGE,
++            DELETE,
++            "storage -- saipen/STORAGE.md contract missing",
++        ),
++        (
++            "storage contract loses deletion invariant",
++            STORAGE,
++            replace("safe to delete at any instant", "safe for this run"),
++            "storage -- STORAGE.md missing 'safe to delete at any instant'",
++        ),
++        (
++            "canonical storage registry names no durable store",
++            STORAGE_REGISTRY,
++            write_new(
++                json.dumps(
++                    {
++                        "schema_version": 1,
++                        "artifacts": {
++                            "OrphanModel": {
++                                "store": "UNDECLARED",
++                                "path": "missing-artifact",
++                                "sha256": "0" * 64,
++                                "size": 1,
++                                "recovery": "PARTIAL",
++                                "provenance": {},
++                            }
++                        },
++                    }
++                ) + "\n"
++            ),
++            "canonical artifact has no DURABLE store",
++        ),
++    ]
++)
++
+ 
+ def apply_case(root: Path, rel: str, mutation) -> bool:
+     """Returns False when the case cannot be set up (skip it loudly)."""
+@@ -4504,6 +4679,12 @@ def sweep_report(changed, selected: int, live: int, skipped: int, broken: int) -
+         tail = f" ({skipped} skipped)" if skipped else ""
+         return [f"PASS: {live} of {selected} {FULL_SWEEP_PHRASE}{tail}"]
+     unrun = FULL_CASE_COUNT - selected
++    if not selected:
++        return [
++            "SCOPED: no control declares any changed path as its target, so none "
++            f"ran. This proves nothing about the {unrun} control(s) that were not "
++            "run, and is not audit_checks evidence for a checkpoint or a release."
++        ]
+     if broken:
+         return [
+             f"\nSCOPED: {broken} of the {selected} selected case(s) are not "
+@@ -4546,6 +4727,18 @@ class ProbeContext:
+         self.extra: list[str] = []
+ 
+ 
++class ProbeUnproven(Exception):
++    """A probe could not CONSTRUCT its control on this host (T-1561).
++
++    Reserved for a missing host capability -- never for a control that ran
++    and broke, which stays a FAIL, and never for a missing prerequisite,
++    which the protocol already reports as SKIP. `run_probes` turns it into a
++    loud UNPROVEN verdict that `main` names in the summary; the run's exit
++    code ignores it, because no repair to this repository can grant the host
++    a privilege its operator has withheld.
++    """
++
++
+ @dataclass(frozen=True)
+ class Probe:
+     """One always-on check, isolated from every other one.
+@@ -4568,8 +4761,11 @@ class Probe:
+ def run_probes(probes, context: ProbeContext, out=print) -> dict[str, str]:
+     """Give every probe a verdict in one invocation. Never stop at the first.
+ 
+-    Returns {probe name: PASS|FAIL|SKIP}. The caller derives rc from it, once,
+-    at the end -- there is no early exit anywhere in this layer.
++    Returns {probe name: PASS|FAIL|SKIP|UNPROVEN}. The caller derives rc from
++    it, once, at the end -- there is no early exit anywhere in this layer.
++    UNPROVEN is a construction-time host-capability lack (ProbeUnproven), not
++    a soft FAIL: it is printed as loudly as a failure and only `main` decides
++    it must not cost the exit code.
+     """
+     verdicts: dict[str, str] = {}
+     for probe in probes:
+@@ -4581,9 +4777,13 @@ def run_probes(probes, context: ProbeContext, out=print) -> dict[str, str]:
+         sandbox = context.tmp / f"probe-{probe.name}"
+         context.sandbox = sandbox
+         context.extra = []
++        unproven: str | None = None
+         try:
+             sandbox.mkdir(parents=True, exist_ok=True)
+             error = probe.run(context)
++        except ProbeUnproven as exc:
++            unproven = str(exc)
++            error = None
+         except Exception as exc:  # a probe that explodes is a failed probe
+             error = f"{type(exc).__name__}: {exc}"
+         finally:
+@@ -4591,7 +4791,10 @@ def run_probes(probes, context: ProbeContext, out=print) -> dict[str, str]:
+             # failure cannot poison the fixture the next probe is handed.
+             shutil.rmtree(sandbox, ignore_errors=True)
+             context.sandbox = context.tmp
+-        if error:
++        if unproven is not None:
++            verdicts[probe.name] = "UNPROVEN"
++            out(f"UNPROVEN: {probe.name} -- {unproven}")
++        elif error:
+             verdicts[probe.name] = "FAIL"
+             out(f"FAIL: {probe.name} -- {error}")
+         else:
+@@ -4775,7 +4978,9 @@ def mutation_sweep_probe(context: ProbeContext) -> str | None:
+             continue
+         runnable.append((label, rel, mutation, expected, gate))
+ 
+-    worker_count = min(8, max(1, os.cpu_count() or 1), max(1, len(runnable)))
++    # Zero runnable controls is an answer, not a pool of one (T-1287): a worker
++    # would copy the whole tree and run the validator twice to test nothing.
++    worker_count = min(8, max(1, os.cpu_count() or 1), len(runnable))
+     chunks = [runnable[index::worker_count] for index in range(worker_count)]
+ 
+     # One copy per worker, not one per case. Every case touches exactly one
+@@ -4816,7 +5021,8 @@ def mutation_sweep_probe(context: ProbeContext) -> str | None:
+             shutil.rmtree(worker_root, ignore_errors=True)
+ 
+     worker_errors = []
+-    with ThreadPoolExecutor(max_workers=worker_count) as executor:
++    # No chunk means no submit, and a pool starts its threads only on submit.
++    with ThreadPoolExecutor(max_workers=max(1, worker_count)) as executor:
+         futures = {
+             executor.submit(run_chunk, index, chunk): index
+             for index, chunk in enumerate(chunks)
+@@ -4994,11 +5200,13 @@ def main() -> int:
+     # contains none.
+     failed = sorted(name for name, verdict in verdicts.items() if verdict == "FAIL")
+     skipped = sorted(name for name, verdict in verdicts.items() if verdict == "SKIP")
+-    if failed or skipped:
++    unproven = sorted(name for name, verdict in verdicts.items() if verdict == "UNPROVEN")
++    if failed or skipped or unproven:
+         print(
+-            f"AUDIT: {len(verdicts) - len(failed) - len(skipped)} of {len(verdicts)} "
+-            f"probes passed; failed: {', '.join(failed) or 'none'}; "
+-            f"skipped: {', '.join(skipped) or 'none'}"
++            f"AUDIT: {len(verdicts) - len(failed) - len(skipped) - len(unproven)} of "
++            f"{len(verdicts)} probes passed; failed: {', '.join(failed) or 'none'}; "
++            f"skipped: {', '.join(skipped) or 'none'}; "
++            f"unproven (host capability): {', '.join(unproven) or 'none'}"
+         )
+     else:
+         print(f"AUDIT: all {len(verdicts)} always-on probes passed")

@@ -1,0 +1,127 @@
+{
+ "passed_methods": [
+  1,
+  2,
+  4,
+  5
+ ],
+ "install_rc": 0,
+ "generation": {
+  "build_id": "T-1327-zero-manual-recovery-20260914.1",
+  "source_artifact_path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\extensions\\adapters\\opencode\\saipen-guard.js",
+  "source_sha256": "8f3d90042a40e332bfeae9ed83f392c630b9d33e37fe2c1bec455124f87d0426",
+  "installed_artifact_path": "V:\\_TEMP_\\saipen-evidence-opencode-native-smoke-_j7u38yx\\home\\.config\\opencode\\plugins\\saipen-guard.js",
+  "installed_sha256": "8f3d90042a40e332bfeae9ed83f392c630b9d33e37fe2c1bec455124f87d0426",
+  "loaded_module_path": "V:\\_TEMP_\\saipen-evidence-opencode-native-smoke-_j7u38yx\\home\\.config\\opencode\\plugins\\saipen-guard.js",
+  "loaded_module_sha256": "8f3d90042a40e332bfeae9ed83f392c630b9d33e37fe2c1bec455124f87d0426",
+  "sha_triplet_equal": true,
+  "factory_count": 1,
+  "opencode_pid": 17164,
+  "factory_started_ms": 1790021959628,
+  "install_completed_ms": 1790021947088,
+  "context_directory": "V:\\_TEMP_\\tmpxzzpv18a",
+  "context_worktree": "/",
+  "resolved_project_root": "V:\\_TEMP_\\tmpxzzpv18a",
+  "resolved_project_lineage": "lineage-999edc289ced489e8493959af80df50d",
+  "resolution_provenance": "ancestor",
+  "binding_code": "ADMITTED",
+  "fresh_process_after_install": true
+ },
+ "case_outcomes": [
+  {
+   "id": "read",
+   "outcome": "allowed",
+   "message": ""
+  },
+  {
+   "id": "admitted_write",
+   "outcome": "allowed",
+   "message": ""
+  },
+  {
+   "id": "question",
+   "outcome": "allowed",
+   "message": ""
+  },
+  {
+   "id": "ordinary_shell",
+   "outcome": "allowed",
+   "message": ""
+  },
+  {
+   "id": "source_shell",
+   "outcome": "allowed",
+   "message": ""
+  },
+  {
+   "id": "protected_shell_state",
+   "outcome": "blocked",
+   "message": "SAIPEN_GUARD_REFUSAL: PROTECTED_CANONICAL_NAMESPACE: the saipen guard refused tool 'bash'; the host tool did not execute attempted: python -c \"from pathlib import Path; Path('.saip"
+  },
+  {
+   "id": "protected_shell_board",
+   "outcome": "blocked",
+   "message": "SAIPEN_GUARD_REFUSAL: PROTECTED_CANONICAL_NAMESPACE: the saipen guard refused tool 'bash'; the host tool did not execute attempted: rm -f .saipen/BOARD.md next: saipen next --json"
+  },
+  {
+   "id": "protected_shell_windows",
+   "outcome": "blocked",
+   "message": "SAIPEN_GUARD_REFUSAL: PROTECTED_CANONICAL_NAMESPACE: the saipen guard refused tool 'bash'; the host tool did not execute attempted: del .saipen\\STATE.md next: saipen next --json"
+  },
+  {
+   "id": "protected_shell_traversal",
+   "outcome": "blocked",
+   "message": "SAIPEN_GUARD_REFUSAL: PROTECTED_CANONICAL_NAMESPACE: the saipen guard refused tool 'bash'; the host tool did not execute attempted: rm -f src/../.saipen/STATE.md next: saipen next "
+  },
+  {
+   "id": "protected_write",
+   "outcome": "blocked",
+   "message": "SAIPEN_GUARD_REFUSAL: PROTECTED_CANONICAL_NAMESPACE: the saipen guard refused tool 'write'; the host tool did not execute next: saipen next --json"
+  },
+  {
+   "id": "unknown_tool",
+   "outcome": "blocked",
+   "message": "SAIPEN_GUARD_REFUSAL: TARGET_UNRESOLVED: the saipen guard refused tool 'mystery_tool'; the host tool did not execute"
+  },
+  {
+   "id": "board_patch",
+   "outcome": "blocked",
+   "message": "SAIPEN_GUARD_REFUSAL: PROTECTED_CANONICAL_NAMESPACE: the saipen guard refused tool 'apply_patch'; the host tool did not execute next: saipen next --json"
+  },
+  {
+   "id": "compound_recover",
+   "outcome": "blocked",
+   "message": "SAIPEN_GUARD_REFUSAL: PROTECTED_CANONICAL_NAMESPACE: the saipen guard refused tool 'bash'; the host tool did not execute attempted: saipen recover && rm -f .saipen/STATE.md next: s"
+  },
+  {
+   "id": "exact_recover",
+   "outcome": "allowed",
+   "message": ""
+  },
+  {
+   "id": "bare_canonical_actor",
+   "outcome": "allowed",
+   "message": ""
+  },
+  {
+   "id": "wrong_actor",
+   "outcome": "allowed",
+   "message": ""
+  },
+  {
+   "id": "explicit_owner",
+   "outcome": "allowed",
+   "message": ""
+  },
+  {
+   "id": "fleet_old",
+   "outcome": "blocked",
+   "message": "SAIPEN_FLEET_REFUSAL: RECOVERED_REISSUE_REQUIRED: the host tool did not execute. Reread current canonical STATE/BOARD/LOG, reroute once, then issue a fresh consequential action aga"
+  },
+  {
+   "id": "fleet_fresh",
+   "outcome": "allowed",
+   "message": ""
+  }
+ ]
+}

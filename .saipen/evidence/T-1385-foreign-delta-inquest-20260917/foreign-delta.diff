@@ -1,0 +1,79 @@
+diff --git a/bootstrap/inject.ps1 b/bootstrap/inject.ps1
+index edfb5db1..7fdcdaca 100644
+--- a/bootstrap/inject.ps1
++++ b/bootstrap/inject.ps1
+@@ -531,12 +531,19 @@ foreach ($adapter in @($AdapterRegistry.adapters)) {
+         # Copy, lowercase: these readers skip junctions and uppercase dirs.
+         # Positive host detection (not directory-exists-only): create parent when a supported host is present.
+         $agentsSupported = (Test-Path "$h\.config\opencode") -or (Test-Path "$h\.codex") -or (Test-Path "$h\.gemini") -or (Test-Path "$h\.codebuddy") -or (Test-Path "$h\.claude") -or (Test-Path "$h\.agents") -or (Get-Command freebuff -ErrorAction SilentlyContinue) -or (Get-Command codebuddy -ErrorAction SilentlyContinue)
++        $agentsSkillDir = "$h\.agents\skills\saipen"
++        $agentsSkillRes = $null
+         if (Test-Path "$h\.agents\skills") {
+-          [void]$report.Add(@("~/.agents skills", (Copy-Skill "$h\.agents\skills\saipen")))
++          $agentsSkillRes = (Copy-Skill $agentsSkillDir)
++          [void]$report.Add(@("~/.agents skills", $agentsSkillRes))
+         } elseif ($agentsSupported) {
+           # Host supports generic skill root but hasn't created the directory yet -- create it.
+-          [void]$report.Add(@("~/.agents skills", (Copy-Skill "$h\.agents\skills\saipen")))
++          $agentsSkillRes = (Copy-Skill $agentsSkillDir)
++          [void]$report.Add(@("~/.agents skills", $agentsSkillRes))
+         } else { [void]$report.Add(@("~/.agents", "not installed - skip")) }
++        if ($agentsSkillRes -and ($agentsSkillRes -match '^(copied|already)')) {
++          [void]$report.Add(@("~/.agents provenance", (Write-RuntimeProvenance $adapter $agentsSkillDir)))
++        }
+ 
+         # --- FreeBuff always-on activation backstop ---
+         # FreeBuff loads generic ~/.agents/skills on demand; weak models need a small always-on gate.
+@@ -591,7 +598,12 @@ foreach ($adapter in @($AdapterRegistry.adapters)) {
+           Get-ChildItem $plugRoot -Directory | ForEach-Object {
+             $skillsDir = Join-Path $_.FullName "skills"
+             if (Test-Path $skillsDir) {
+-              [void]$report.Add(@("Antigravity [$($_.Name)]", (Copy-Skill (Join-Path $skillsDir "saipen"))))
++              $agDst = (Join-Path $skillsDir "saipen")
++              $agRes = (Copy-Skill $agDst)
++              [void]$report.Add(@("Antigravity [$($_.Name)]", $agRes))
++              if ($agRes -match '^(copied|already)') {
++                [void]$report.Add(@("Antigravity [$($_.Name)] provenance", (Write-RuntimeProvenance $adapter $agDst)))
++              }
+             }
+           }
+         }
+diff --git a/bootstrap/inject.sh b/bootstrap/inject.sh
+index a291ad1d..36c2882e 100644
+--- a/bootstrap/inject.sh
++++ b/bootstrap/inject.sh
+@@ -554,11 +554,16 @@ while IFS='|' read -r id name home skill instruction hook artifact bespoke legac
+         [ -d "$HOME/.agents" ] && _agents_supported=1
+         command -v freebuff >/dev/null 2>&1 && _agents_supported=1
+         command -v codebuddy >/dev/null 2>&1 && _agents_supported=1
++        _agents_skill_dir="$HOME/.agents/skills/saipen"
++        _agents_skill_installed=0
+         if [ -d "$HOME/.agents/skills" ]; then
+-          report "~/.agents skills" copy_skill "$HOME/.agents/skills/saipen"
++          report "~/.agents skills" copy_skill "$_agents_skill_dir" && _agents_skill_installed=1
+         elif [ "$_agents_supported" -eq 1 ]; then
+-          report "~/.agents skills" copy_skill "$HOME/.agents/skills/saipen"
++          report "~/.agents skills" copy_skill "$_agents_skill_dir" && _agents_skill_installed=1
+         else printf '%-28s %s\n' "~/.agents" "not installed - skip"; fi
++        if [ "$_agents_skill_installed" -eq 1 ]; then
++          report "~/.agents provenance" write_provenance "$_agents_skill_dir" "$id"
++        fi
+ 
+         # FreeBuff always-on activation backstop
+         _freebuff_detected=0
+diff --git a/tools/saipen_engine/runtime_bootstrap.py b/tools/saipen_engine/runtime_bootstrap.py
+index 2d583719..f2942135 100644
+--- a/tools/saipen_engine/runtime_bootstrap.py
++++ b/tools/saipen_engine/runtime_bootstrap.py
+@@ -468,6 +468,11 @@ def resolve_authority(
+         marked = record.get("adapter_id")
+         host = adapter_id or (marked if isinstance(marked, str) and marked.strip() else None)
+         return source, (host.strip() if isinstance(host, str) else None)
++    if (root / "MANIFEST.json").is_file() and not (root / "saipen" / "MANIFEST.json").is_file():
++        raise CanonicalSourceUnproven(
++            f"installed runtime projection at {root} has no provenance marker ({PROVENANCE_FILENAME}); "
++            "run the canonical injector once to establish provenance"
++        )
+     source = prove_canonical_root(root)
+     named = adapter_id.strip() if isinstance(adapter_id, str) else ""
+     return source, (named or None)

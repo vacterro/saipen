@@ -2,29 +2,23 @@
 
 Applies to every interface: web, app, panel, dialog, HTML report, TUI, desktop tool, or embedded utility.
 
-**Golden Default is the default palette.** Its values are copied exactly from
-Wintage's shipped `themes/goldendefault.json`, not reconstructed from a generic
-"dark golden" description. It is not one preset among several: it is what a
-saipen interface looks like unless the user explicitly asks for another theme.
-There is no second palette in this document to choose from.
+**Golden Default is the default palette.** It is copied exactly from Vintage's
+shipped `themes/goldendefault.json`, not reconstructed from a generic "dark
+golden" description. It is not one preset among several: it is what a saipen
+interface looks like unless the user explicitly asks for another theme, and
+there is no second palette here to choose from.
 
 **Vintage Golden names the design language; Golden Default names its palette.**
 The design language supplies compact Win95 geometry, instant states and bevel
-rules. The 21 values below supply colour. If a generic vintage-theme skill,
-remembered prompt, screenshot estimate or old implementation gives
-different colour values, this file wins. A model that follows those different
-values has not followed the saipen UI contract.
+rules; the 21 values below supply colour. If a generic vintage-theme skill,
+remembered prompt, screenshot estimate or old implementation gives different
+values, this file wins.
 
 ## Intent
 
-This UI is meant to feel:
-- direct, legible, and calm
-- compact without becoming cramped
-- vintage without becoming decorative noise
-- easy to scan on screenshots
-- easy to maintain in code
-
-The goal is not nostalgia as a costume. The goal is clarity that happens to look old-school.
+Direct, legible, calm; compact without becoming cramped; vintage without
+decorative noise; easy to scan in a screenshot; easy to maintain in code. Not
+nostalgia as a costume -- clarity that happens to look old-school.
 
 ## Core principles
 
@@ -59,14 +53,11 @@ The goal is not nostalgia as a costume. The goal is clarity that happens to look
 
 ## Predictability -- the interface has no right to surprise the user
 
-The rules above stop the UI from *looking* alive. These stop it from *acting*
-alive. A computer is a tool. A hammer does not decide. Press the button, get
-the result -- the same result, every time, and nothing else.
-
-The failure this section prevents is not ugliness, it is **the user losing
-their model of what the machine will do.** Once that is gone they stop
-trusting the tool and start probing it, and every later design decision is
-built on that distrust.
+The rules above stop the UI from *looking* alive; these stop it from *acting*
+alive. A computer is a tool: press the button, get the result, the same one
+every time. The failure prevented here is not ugliness but **the user losing
+their model of what the machine will do** -- once that is gone they probe the
+tool, and every later design decision is built on that distrust.
 
 1. **Nothing happens unless the user asked for it.** No background refresh
    that changes what is on screen, no autosave that silently rewrites state,
@@ -76,8 +67,7 @@ built on that distrust.
 2. **The layout never moves after it is drawn.** Late-arriving content must
    not reflow the page, push a button under a cursor already travelling
    toward it, or resize a panel because text got longer. Reserve the space
-   up front. This is the single most common real-world surprise, and it costs
-   a misclick every time -- which is not cosmetic if the button was `Delete`.
+   up front.
 3. **Same input, same outcome.** A control does not change meaning with
    context, usage history, or how recently it was clicked. No adaptive menus
    that reorder by frequency, no button that becomes something else once a
@@ -107,17 +97,14 @@ built on that distrust.
 ## Tokens + base CSS -- Golden Default
 
 Paste this into every saipen UI implementation. These 21 values ARE Golden
-Default. Naming the palette means these exact numbers, and an interface that
-has drifted from them is wrong rather than merely different.
-
-Canonical upstream evidence: Wintage `themes/goldendefault.json`. This copy is
-self-contained so an injected agent does not need the Wintage repository, but
-the values remain byte-for-byte identical to that shipped theme.
+Default: an interface that has drifted from them is wrong, not merely
+different. Canonical upstream evidence is Wintage `themes/goldendefault.json`;
+this copy is self-contained but byte-for-byte identical to it.
 
 **Closed colour set.** An implementation MUST NOT alter these values or add a
 second colour system. Domain-specific token names may alias one of these 21
 values. A genuinely new colour requires the user's explicit theme request;
-"the model thought it looked better" is never authorization.
+thinking it looked better is never authorization.
 
 ```css
 :root {
@@ -172,12 +159,10 @@ html, body {
   line-height: 1.2;
 }
 
-/* Iron law 4 forbids horizontal scroll; `overflow-x: hidden` did not enforce
-   that, it hid the evidence. A too-wide element stopped producing a scrollbar
-   and started producing unreachable content instead -- a column, a button or
-   an error message clipped off the right edge with nothing on screen saying
-   so, and a QA gate that could never fail. Overflow is prevented by layout,
-   or it is scrolled inside the one element that is genuinely wide. */
+/* Iron law 4 forbids horizontal scroll. `overflow-x: hidden` did not enforce
+   that, it hid the evidence: unreachable clipped content with no on-screen
+   sign, and a QA gate that could never fail. Prevent overflow by layout, or
+   scroll it inside the one element that is genuinely wide. */
 body {
   overflow-x: auto;
 }
@@ -209,11 +194,9 @@ button {
   cursor: pointer;
 }
 
-/* The accessibility floor asks for 24px on primary targets and the compact
-   default above is 20px. Both numbers are right and they are about different
-   controls; leaving that unsaid meant every implementation picked one and
-   silently broke the other. 20px is the dense default for secondary controls,
-   24px is mandatory for the primary action on a screen. */
+/* 20px is the dense default for secondary controls; the accessibility floor's
+   24px is mandatory for the primary action on a screen. Both numbers are right
+   and they are about different controls. */
 button.primary {
   min-height: 24px;
 }
@@ -337,13 +320,11 @@ secondary.
 ### Tables and lists
 - Rows: 16-18px.
 - Headers: raised.
-- Selected row: sunken bevel **first**, `--selection` second. The bevel is what
-  carries the selection; the colour only reinforces it. `--selection` and
-  `--surfaceRaised` are declared to the same value in the palette above, so a
-  selected row drawn on a raised surface with colour alone is invisible -- the
-  user sees nothing selected and acts on the wrong row. Fix it in the rule,
-  never in the palette: the 21 values are closed, and inventing a 22nd colour
-  to resolve this is the exact drift the closed-set rule exists to stop.
+- Selected row: sunken bevel **first**, `--selection` second. The bevel carries
+  the selection; the colour only reinforces it. `--selection` and
+  `--surfaceRaised` share one value, so colour alone is invisible here. Fix it
+  in the rule, never in the palette: the 21 values are closed, and inventing a
+  22nd colour is the exact drift the closed-set rule exists to stop.
 - Keep column counts low.
 - Use numeric alignment for numbers and dates.
 - Avoid icons in every cell. Repetition creates noise and fatigue.
@@ -438,13 +419,11 @@ Log line:
 
 ## Revision notes
 
-This version tightens the original spec in four ways:
-- less ambiguity in typography and layout
-- more explicit accessibility and state rules
-- stronger maintenance guidance for future edits
-- fewer places where a designer or code generator can invent extra noise
+This version tightens the original spec: less ambiguity in typography and
+layout, more explicit accessibility and state rules, stronger maintenance
+guidance, fewer places to invent extra noise.
 
-And one rule that generates the rest: **a rule this document's own base CSS
+And the rule that generates the rest: **a rule this document's own base CSS
 violates is not a rule, it is a preference.** Four such contradictions were
 found and closed at their own sites (T-1262); check for a fifth before adding
 anything here.

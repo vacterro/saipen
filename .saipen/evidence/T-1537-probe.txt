@@ -1,0 +1,44 @@
+=== coverage SRC-123 ===
+{
+ "requirements": {
+  "SRC-123:R001": {
+   "actionable": true,
+   "class": "requirement",
+   "disposition": "UNKNOWN",
+   "evidence": null,
+   "text": "audit/17 CORE-001: current BOARD scalar writers and parser must prevent every Python splitlines separator from creating or detaching ticket records; verify current bytes and tests, then link existing Work or disposition only from live evidence.",
+   "verification": null,
+   "work": "T-1537"
+  },
+  "SRC-123:R002": {
+   "actionable": true,
+   "class": "requirement",
+   "disposition": "UNKNOWN",
+   "evidence": null,
+   "text": "audit/17 CORE-002: non-transfer operations must preserve STATE.agent and reject active ownership splits; verify current bytes and tests, then link existing Work or disposition only from live evidence.",
+   "verification": null,
+   "work": "T-1537"
+  },
+  "SRC-123:R003": {
+   "actionable": true,
+   "class": "requirement",
+   "disposition": "UNKNOWN",
+   "evidence": null,
+   "text": "audit/17 W2-001: dry-run snapshot and reverify paths must write zero durable bytes and BUILD baseline establishment must fail closed; verify current bytes and tests before disposition.",
+   "verification": null,
+   "work": "T-1537"
+ 
+=== prior layer coverage shape (SRC-024) ===
+{
+ "requirements": {
+  "SRC-024:R001": {
+   "actionable": true,
+   "class": "requirement",
+   "disposition": "VERIFIED",
+   "evidence": ".saipen/kitchen/t1297-repair/focused-final.log: 71 tests PASS; inspection.log: STOP branch body and _status AST identical to b71590b5; REGISTRY st=stop and sss=status verified",
+   "text": "Shortcut migration contract: st routes EXACTLY to saipen stop (same implementation path, no second STOP implementation); sss remains EXACTLY saipen status; saipen stop and saipen status long-form semantics unchanged --verification REGISTRY.json shortcuts row ss->stop becomes st->stop; dispatch tuple stop/ss becomes stop/st; COMMANDS.md/SKILL.md updated",
+   "verification": "CliShortcutRoutingTests.test_cli_st_is_stop_and_matches_saipen_stop; test_cli_sss_is_real_status_surface; StopAuditTests 5 tests",
+   "work": "T-1297"
+  },
+  "SRC-024:R002": {
+   "actionable": tru

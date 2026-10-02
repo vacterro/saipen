@@ -1,0 +1,252 @@
+diff --git a/saipen/HABITS.md b/saipen/HABITS.md
+index d9f67677..a7acda01 100644
+--- a/saipen/HABITS.md
++++ b/saipen/HABITS.md
+@@ -1,43 +1,13 @@
+ # Statistical Habits of Modern LLMs
+ 
+-SAIPEN is built on the premise that an agent's default behaviour is driven by statistical habits that optimize for conversational compliance rather than engineering correctness. Every rule in SAIPEN that survives is one that pushes back on a specific default behaviour.
+-
+-This document enumerates these habits and maps them to the mechanisms that counter them.
+-
+-## The Habits
+-
+-1. **Drifting to polite consultant prose**
+-   Producing filler, apologies, and hedging instead of terse, actionable output.
+-   *Counter-mechanism*: saipen/STYLE.md and the style_contract field in STATE.md, which pins the active voice (e.g., ded) and forbids consultant prose.
+-
+-2. **Agreeing with whoever spoke last**
+-   Abandoning canonical state or rules if the user's prompt implies otherwise.
+-   *Counter-mechanism*: CORE.md § 1.10 (memory ban) and tools/validate.py cross-doc drift checks which ensure authoritative documents overrule memory or recent chat.
+-
+-3. **Hedging instead of deciding**
+-   Proposing multiple options instead of picking one and executing it, or guessing instead of stopping.
+-   *Counter-mechanism*: CORE.md § 1.11 (Insufficient information is a stop, not a guess) and CORE.md § 1.6 Phase Transitions that force a single deterministic next action.
+-
+-4. **Claiming a read or a verification that never happened**
+-   Hallucinating tool output or test success.
+-   *Counter-mechanism*: CORE.md § 1.11 (A session MUST leave a trace) and tools/audit_checks.py, which require an agent to actually run the checks and parse the logged proof.
+-
+-5. **Inventing plausible detail**
+-   Making up paths, versions, line numbers, or shortcut keys that look correct statistically but do not exist.
+-   *Counter-mechanism*: CORE.md § 1.10 (strict shortcut table enforcement) and tools/validate.py strictly enforcing CONFORMANCE.md row IDs and explicit path validations.
+-
+-6. **Copying an example instead of applying the rule**
+-   Treating a documented example as a template and ignoring the normative rule text.
+-   *Counter-mechanism*: tools/validate.py checks that ensure examples in the docs strictly conform to the normative rules (implemented via T-435).
+-
+-7. **Declaring success at the first green**
+-   Stopping verification after one passing test while ignoring edge cases or other platforms.
+-   *Counter-mechanism*: the SHIP phase gates which enforce that all validation passes before closing (audit_parity.py only verifies shell portability).
+-
+-8. **Summarising work instead of doing it**
+-   Describing what should be done instead of invoking the tools to modify the files.
+-   *Counter-mechanism*: two, both older than the ticket that was filed to invent one. This habit has two shapes and each has its own. **Produced nothing and talked about it**: § 1.11's session-trace rule -- a session that did anything ends having produced a LOG line, a BOARD change, a STATE change or a change to the project's own files, and one that produced none of those MUST say exactly that "rather than summarising activity in chat". **Produced a trace that is itself a plan**: § 1.2's LOG rule -- an entry records what already happened, never what is about to, and its first clause MUST NOT be written as an intention. That second one is mechanically enforced in tools/validate.py, which rejects `will`, `going to`, `about to`, `plans to` and their relatives in that position. That gate has its own standing red control in tools/audit_checks.py, which is what keeps this citation honest -- a counter-mechanism named in prose is only as real as the control behind the check it names. The gap this line used to claim did not exist, and claiming one is its own defect: it sends the next agent to build a duplicate of a rule that is already enforced.
+-
+-9. **Truncating context and assuming the end**
+-   Reading only the first N lines of a file, queue, or command output, and acting as if the unread remainder is empty.
+-   *Counter-mechanism*: CORE.md § 1.11 (Read to the end, never truncate), which forbids declaring a list or queue empty without reading to End-Of-File.
++This retrieval map links common agent errors to existing countermeasures. It creates no new rule.
++
++1. **Consultant drift:** filler replaces an actionable answer. Counter: `STYLE.md` and the STATE style contract.
++2. **Following the last speaker instead of authority:** recent chat displaces canonical state. Counter: `CORE.md` authority and disk-first rules.
++3. **Hedging or guessing:** the agent offers options without choosing, or invents missing facts. Counter: `CORE.md` selection and insufficient-information rules.
++4. **Claiming an unperformed read or test:** a plausible PASS replaces evidence. Counter: `CORE.md` session trace and `tools/audit_checks.py` controls.
++5. **Inventing plausible details:** paths, versions or shortcuts are fabricated. Counter: the closed command registry and `tools/validate.py` path checks.
++6. **Copying an example instead of applying its rule:** example and law diverge. Counter: conformance checks in `tools/validate.py`.
++7. **Stopping at the first green:** narrow tests hide relevant failures. Counter: SHIP gates and the declared test family.
++8. **Describing work instead of doing it:** an empty session must say so under `CORE.md`'s trace rule. A LOG entry that promises future work violates its event rule; `tools/validate.py` rejects future-tense first clauses, with a red control in `tools/audit_checks.py`. Check these existing counters before claiming a new gap.
++9. **Assuming unread material is empty:** a truncated file or queue is treated as complete. Counter: `CORE.md`'s read-to-end rule.
+diff --git a/saipen/IMPROVE.md b/saipen/IMPROVE.md
+index 3ee23a06..aac9fb37 100644
+--- a/saipen/IMPROVE.md
++++ b/saipen/IMPROVE.md
+@@ -1,23 +1,16 @@
+ # SAIPEN Improve — the meta-control that audits SAIPEN
+ 
+-Improve is a META-CONTROL, not a project phase (T-552). It audits SAIPEN and
+-the project under it; it does not run project execution. This file is the
+-single canonical owner of the Improve lifecycle: cycle admission, the seat and
+-report contract, the finding schema, sweep, verify, and archive semantics.
+-CORE.md section 1.10 owns command routing only. STATE owns no Improve
+-semantics. SubSaipen boundaries stay in `extensions/subs/PROTOCOL.md`. There is
+-no improve phase document under the phases directory, and the phase count
+-remains 16.
++Improve is SAIPEN's audit meta-control, not project execution or a phase
++(T-552). This file owns cycle admission, seats, reports, findings, sweep,
++verify and archive. CORE.md §1.10 owns routing; SubSaipen boundaries remain in
++`extensions/subs/PROTOCOL.md`. STATE owns no Improve semantics and the 16
++project phases have no Improve phase.
+ 
+ ## 0. Why a meta-control
+ 
+-Improve is invoked on top of whatever the project is doing. Several seats may
+-audit independently and concurrently; reports are read-only evidence, never
+-canonical state; invoking improve during BUILD or VERIFY must not orphan the
+-DOING ticket; and one global `STATE.phase: IMPROVE` cannot represent several
+-independent audit seats at once. Adding Improve routing fields to STATE turns
+-retrospective evidence collection into project execution state — the category
+-error this file exists to prevent.
++Improve audits independently of project execution. Concurrent seats produce
++read-only reports; they never orphan DOING Work or create a global
++`STATE.phase: IMPROVE`. Improve routing fields do not belong in STATE.
+ 
+ ## 1. Command surface (routing lives in COMMANDS.md, CMD-ROUTING-01)
+ 
+@@ -30,17 +23,14 @@ Each action's own validation rules live in the section that owns it; this list
+ is the surface, not a second copy of the law.
+ 
+ - `saipen improve` — the meta-control entry point: binds the current project,
+-  finds or mechanically admits the one active cycle, registers this seat,
+-  creates the DRAFT report mechanically with the real captured source
+-  identity, and returns a bounded AUDIT ASSIGNMENT (cycle_id, seat_id, report
+-  path, source identity, scope, proof levels, schema, write boundary, next
+-  mechanical submission action). It is NEVER an alias for status, and section 11
+-  owns its phase/task/next_action boundary.
+-  Bare invocation admits a NEW independent `core` seat.
+-  `--new-seat` states that choice explicitly;
++  admits or finds one active cycle, registers a seat, creates its DRAFT report
++  with captured source identity, and returns the bounded AUDIT ASSIGNMENT
++  (cycle/seat/report, source, scope, proof levels, schema, write boundary and
++  submit action). It is not status; section 11 owns its STATE boundary. Bare
++  invocation admits a NEW independent `core` seat. `--new-seat` is explicit;
+   `--session <seat_id>` admits or resumes exactly one stable concrete session;
+-  `--role core|critic` selects the closed role, with `core` as default. A
+-  session retry returns the same assignment and never allocates another seat.
++  `--role core|critic` selects the closed role, default `core`. Retrying the
++  session reuses its assignment.
+ - `saipen improve status` — read-only derived status (section 5). Refuses to
+   round malformed evidence up to a normal lifecycle state: invalid
+   manifests/reports/sweeps are reported as INVALID_CYCLE / INVALID_REPORT.
+@@ -75,24 +65,17 @@ is the surface, not a second copy of the law.
+   (section 2) and flips ACTIVE -> COMPLETE through `complete_cycle`. A partial
+   sweep REFUSES it; complete-before-sweep is impossible.
+ - `saipen improve abort <cycle>` — the sanctioned mechanical exit for a STUCK
+-  DRAFT cycle whose report cannot complete (an interrupted audit, a committed
+-  RUN missing a required field). Refuses once any disposition exists, flips
+-  the manifest to archived with a journaled `cycle_aborted` marker, and
+-  byte-preserves the never-completed draft reports AT THEIR SAME PATH (no
+-  rename, no move, no raw file deletion): the manifest's archived +
+-  cycle_aborted markers are the single source of truth that the cycle and
+-  its drafts are non-authoritative (T-632). The next cycle can be admitted.
++  DRAFT cycle whose report cannot complete. It refuses after any disposition,
++  archives with a journaled `cycle_aborted` marker, and preserves drafts at
++  their original paths. Those manifest markers make the drafts non-authoritative;
++  a new cycle may then start (T-632).
+ - `saipen improve retire <cycle> <seat> --reason <CODE>` — the bounded exit
+-  for ONE expected seat that can never complete (section 3). It marks that
+-  seat `availability: unavailable` through the journaled roster write; the
+-  never-completed report stays byte-identical at its path, every SWEEP
+-  disposition is untouched, and the cycle bar can then be met with the
+-  remaining seats. It never touches a seat whose report IS complete. The one
+-  COMPLETE route is `--reason STALE_COMPLETE --replacement <fresh-seat>`: it
+-  is NOT ordinary retirement and returns `SEAT_SUPERSEDED` (not
+-  `SEAT_RETIRED`), marking the seat `availability: superseded` bound to its
+-  preserved report hash and its current same-scope replacement (section 7).
+-  A COMPLETE report is never made generically retireable.
++  for one expected seat that cannot complete (section 3). A journaled roster
++  write marks `availability: unavailable`, preserving its report bytes at the original path and all SWEEP
++  dispositions; other seats can meet the cycle bar. A COMPLETE seat cannot be
++  retired ordinarily. `--reason STALE_COMPLETE --replacement <fresh-seat>`
++  instead returns `SEAT_SUPERSEDED`, marks `availability: superseded` and binds its preserved report hash to a
++  current same-scope replacement (section 7).
+ - `saipen improve clean <cycle>` — archive/retention meta-operation
+   (section 10). Never means phase CLEAN, never enters the CLEAN phase.
+ - `saipen improve reconcile <cycle>` — ONE canonical finite exit for a strict
+diff --git a/saipen/SAICRITIC.md b/saipen/SAICRITIC.md
+index 273ae526..d691b792 100644
+--- a/saipen/SAICRITIC.md
++++ b/saipen/SAICRITIC.md
+@@ -1,69 +1,39 @@
+-# SAICRITIC -- the self-critique process (T-603)
++# SAICRITIC -- self-critique (T-603)
+ 
+-SAICRITIC is the periodic full self-critique of SAIPEN against the five proof
+-levels. It is not a separate phase -- it is a real Improve cycle whose seat
+-role is `critic` and whose subject is the protocol's own mechanical layer.
++SAICRITIC periodically audits all SAIPEN mechanical claims through a `critic` Improve seat; it is not a phase.
+ 
+ ## What it does
+ 
+-For every claim a wave made (its tickets' `verify:` clauses and the checks
+-that implement them), classify the proof as:
++Classify each Work claim and its checks at five ordered levels:
+ 
+ | Level | Question |
+ |---|---|
+-| UNIT | is the operation locally correct? |
+-| COMPOSITION | does the predecessor/successor chain work? |
+-| CANONICAL | do the repository invariants validate? |
+-| GATE | did the REQUIRED semantic/protocol gates actually occur? |
+-| PROVENANCE | does the evidence bind the exact source, session, run, finding and result it claims? |
++| UNIT | Is the operation locally correct? |
++| COMPOSITION | Does the predecessor/successor chain work? |
++| CANONICAL | Do repository invariants validate? |
++| GATE | Did required semantic and protocol gates actually run? |
++| PROVENANCE | Does evidence bind the exact source, session, run, finding and result? |
+ 
+-A claim with a missing layer is NOT PROVEN -- record it as such, never PASS.
+-The permanent invariant: VALID END STATE != PROOF OF REQUIRED PROCESS.
+-The provenance invariant: VALID RESULT + VALID PROCESS != VALID EVIDENCE LINK.
++Missing proof is NOT PROVEN, never PASS.
++VALID END STATE != PROOF OF REQUIRED PROCESS.
++VALID RESULT + VALID PROCESS != VALID EVIDENCE LINK.
+ 
+ ## How it runs
+ 
+-1. Run `saipen improve --role critic --new-seat` to register a real Improve
+-   cycle (`cycle_status: active`) with a `critic` seat; the report is written
+-   like any seat report under
+-   `.saipen/improve/<cycle>/<seat>/`.
+-2. The audit targets the wave's mechanical layer: the finish gate, the
+-   sweep-ticket linkage, the report schema, the reasoning gates, the
+-   target-aware verifier, the context projection, the command surface.
+-3. Every finding carries the five-level classification in its `expected/
+-   actual/evidence` block; a `PROTOCOL_VIOLATION` finding records the
+-   cross-project recurrence reasoning and the weak-model answer on its
+-   canonical ticket (IMP-003 spec, T-558).
+-4. Findings are swept with the normal Core sweep; root-cause dedup produces
+-   one canonical ticket per root cause.
+-5. A finding whose subject was ACCIDENTAL_SUCCESS (a wave claim met by luck,
+-   not by verification) is recorded honestly: either reclassify the gap as a
+-   real defect (LOGIC_ERROR) or dispose it as unverified -- never flip it to
+-   PASS in the sweep.
+-6. The cycle completes (full sweep coverage) and is archived with provenance.
++1. `saipen improve --role critic --new-seat` registers a real cycle and critic seat, with a report under `.saipen/improve/<cycle>/<seat>/`.
++2. Audit the wave's mechanical layer: finish gate, sweep linkage, report schema, reasoning gates, verifier, context projection and command surface.
++3. Give each finding the five-level classification in `expected/actual/evidence`. A `PROTOCOL_VIOLATION` records cross-project recurrence reasoning and the weak-model answer on its canonical ticket.
++4. Core sweeps findings and deduplicates by root cause, yielding one ticket per cause.
++5. ACCIDENTAL_SUCCESS is reclassified as LOGIC_ERROR or disposed as unverified; it is never promoted to PASS.
++6. Complete the cycle only with full sweep coverage, then archive it with provenance.
+ 
+ ## Permanent lenses
+ 
+-The proof levels are also applied to recurring boundary failures. These names
+-are audit lenses, not a demand for one new enum per phrase:
++Lenses, not new enums:
+ 
+-- `COMMAND_SURFACE_SPLIT`: declared and executable action sets differ.
+-- `ROLE_LAUNDERING`: evidence is called critic evidence while its roster or
+-  report role says otherwise.
++- `COMMAND_SURFACE_SPLIT`: declared and executable actions differ.
++- `ROLE_LAUNDERING`: critic evidence lacks a critic roster/report role.
+ - `SESSION_COLLAPSE`: independent workers share one logical seat or report.
+-- `PROVENANCE_FABRICATION`: runtime or protocol identity comes from a constant
+-  instead of captured evidence.
+-- `ERROR_NORMALIZATION_GAP`: expected contention is a stable Result in one
+-  public domain but escapes as a traceback in another.
+-- `EVIDENCE_ADVERSARY`: can this currently-green proof stay green after its
+-  witness is made false while the claimed end-state is left superficially
+-  valid? Adversarially mutate only the proof linkage of a recent green claim
+-  -- a stale fingerprint, a wrong seat, a duplicate identity, a missing gate
+-  receipt, a wrong source, a malformed-but-parseable ledger -- and a gate that
+-  stays green is a normal finding, never a PASS. A green proof is useful only
+-  if falsifying its witness makes it red.
+-
+-The first SAICRITIC run (T-603) found the register-without-executor defect:
+-`saipen improve` was registered in the command surface but the CLI had no
+-executor (IMP-001/IMP-003 -> T-606), and the SubSaipen write boundary was
+-admission-only, not continuously checked (IMP-002 -> T-607).
++- `PROVENANCE_FABRICATION`: runtime or protocol identity is asserted, not captured.
++- `ERROR_NORMALIZATION_GAP`: expected contention is structured in one domain but escapes as a traceback in another.
++- `EVIDENCE_ADVERSARY`: falsify only a recent green claim's proof linkage while leaving its end state apparently valid. A gate that stays green after a stale fingerprint, wrong seat/source, duplicate identity, missing gate receipt or malformed-but-parseable ledger is a finding, never PASS.

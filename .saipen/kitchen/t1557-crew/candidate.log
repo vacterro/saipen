@@ -1,0 +1,14 @@
+test_adoption_does_not_hide_unrelated_invalid_state (test_sub_style_contract.WorkerStyleContractTests.test_adoption_does_not_hide_unrelated_invalid_state) ... ok
+test_adoption_repairs_stale_style_without_changing_work (test_sub_style_contract.WorkerStyleContractTests.test_adoption_repairs_stale_style_without_changing_work) ... ok
+test_fresh_builtin_and_generic_workers_are_readable_and_current (test_sub_style_contract.WorkerStyleContractTests.test_fresh_builtin_and_generic_workers_are_readable_and_current) ... ok
+test_missing_style_authority_refuses_adoption_without_writes (test_sub_style_contract.WorkerStyleContractTests.test_missing_style_authority_refuses_adoption_without_writes) ... ok
+test_missing_style_authority_refuses_spawn_without_writes (test_sub_style_contract.WorkerStyleContractTests.test_missing_style_authority_refuses_spawn_without_writes) ... ok
+test_a_missing_applicable_instance_is_still_demanded (test_crew_applicability.RosterStageTests.test_a_missing_applicable_instance_is_still_demanded) ... ok
+test_a_missing_non_applicable_instance_is_not_demanded (test_crew_applicability.RosterStageTests.test_a_missing_non_applicable_instance_is_not_demanded) ... ok
+test_the_same_missing_instance_IS_demanded_once_a_ui_exists (test_crew_applicability.RosterStageTests.test_the_same_missing_instance_IS_demanded_once_a_ui_exists)
+Positive control for SC-1: the roster skip is conditional, not gone. ... ok
+
+----------------------------------------------------------------------
+Ran 8 tests in 4.342s
+
+OK

@@ -1,0 +1,1 @@
+["Explicit tradeoffs.", "Core protocol state is plain files with no runtime dependency. Canonical validation and CLI tooling require Python, but use only its standard library and need no install.", "Architecture", "SAIPEN", "file paths", "command names"]

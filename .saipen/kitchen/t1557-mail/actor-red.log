@@ -1,0 +1,51 @@
+test_continue_preserves_explicit_environment_and_inherited_actor (test_t1497_turn_entry_telegrams.TelegramActorTests.test_continue_preserves_explicit_environment_and_inherited_actor) ... 
+  test_continue_preserves_explicit_environment_and_inherited_actor (test_t1497_turn_entry_telegrams.TelegramActorTests.test_continue_preserves_explicit_environment_and_inherited_actor) (explicit='explicit-worker', environment='environment-worker') ... FAIL
+  test_continue_preserves_explicit_environment_and_inherited_actor (test_t1497_turn_entry_telegrams.TelegramActorTests.test_continue_preserves_explicit_environment_and_inherited_actor) (explicit='explicit-worker', environment='') ... FAIL
+test_emit_preserves_explicit_environment_and_inherited_actor (test_t1497_turn_entry_telegrams.TelegramActorTests.test_emit_preserves_explicit_environment_and_inherited_actor) ... 
+  test_emit_preserves_explicit_environment_and_inherited_actor (test_t1497_turn_entry_telegrams.TelegramActorTests.test_emit_preserves_explicit_environment_and_inherited_actor) (explicit='explicit-worker', environment='environment-worker') ... FAIL
+  test_emit_preserves_explicit_environment_and_inherited_actor (test_t1497_turn_entry_telegrams.TelegramActorTests.test_emit_preserves_explicit_environment_and_inherited_actor) (explicit='explicit-worker', environment='') ... FAIL
+
+======================================================================
+FAIL: test_continue_preserves_explicit_environment_and_inherited_actor (test_t1497_turn_entry_telegrams.TelegramActorTests.test_continue_preserves_explicit_environment_and_inherited_actor) (explicit='explicit-worker', environment='environment-worker')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1497_turn_entry_telegrams.py", line 265, in test_continue_preserves_explicit_environment_and_inherited_actor
+    self._assert_read_actor(json.loads(output.getvalue()), expected, fake)
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1497_turn_entry_telegrams.py", line 214, in _assert_read_actor
+    self.assertTrue(payload["telegrams"]["read_command"].endswith(f"--seat {expected}"))
+AssertionError: False is not true
+
+======================================================================
+FAIL: test_continue_preserves_explicit_environment_and_inherited_actor (test_t1497_turn_entry_telegrams.TelegramActorTests.test_continue_preserves_explicit_environment_and_inherited_actor) (explicit='explicit-worker', environment='')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1497_turn_entry_telegrams.py", line 265, in test_continue_preserves_explicit_environment_and_inherited_actor
+    self._assert_read_actor(json.loads(output.getvalue()), expected, fake)
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1497_turn_entry_telegrams.py", line 214, in _assert_read_actor
+    self.assertTrue(payload["telegrams"]["read_command"].endswith(f"--seat {expected}"))
+AssertionError: False is not true
+
+======================================================================
+FAIL: test_emit_preserves_explicit_environment_and_inherited_actor (test_t1497_turn_entry_telegrams.TelegramActorTests.test_emit_preserves_explicit_environment_and_inherited_actor) (explicit='explicit-worker', environment='environment-worker')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1497_turn_entry_telegrams.py", line 240, in test_emit_preserves_explicit_environment_and_inherited_actor
+    self._assert_read_actor(json.loads(output.getvalue()), expected, fake)
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1497_turn_entry_telegrams.py", line 214, in _assert_read_actor
+    self.assertTrue(payload["telegrams"]["read_command"].endswith(f"--seat {expected}"))
+AssertionError: False is not true
+
+======================================================================
+FAIL: test_emit_preserves_explicit_environment_and_inherited_actor (test_t1497_turn_entry_telegrams.TelegramActorTests.test_emit_preserves_explicit_environment_and_inherited_actor) (explicit='explicit-worker', environment='')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1497_turn_entry_telegrams.py", line 240, in test_emit_preserves_explicit_environment_and_inherited_actor
+    self._assert_read_actor(json.loads(output.getvalue()), expected, fake)
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_t1497_turn_entry_telegrams.py", line 214, in _assert_read_actor
+    self.assertTrue(payload["telegrams"]["read_command"].endswith(f"--seat {expected}"))
+AssertionError: False is not true
+
+----------------------------------------------------------------------
+Ran 2 tests in 1.282s
+
+FAILED (failures=4)

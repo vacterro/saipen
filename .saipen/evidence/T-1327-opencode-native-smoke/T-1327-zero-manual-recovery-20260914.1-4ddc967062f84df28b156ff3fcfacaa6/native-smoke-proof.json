@@ -1,0 +1,128 @@
+{
+ "passed_methods": [
+  1,
+  2,
+  3,
+  4,
+  5
+ ],
+ "install_rc": 0,
+ "generation": {
+  "build_id": "T-1327-zero-manual-recovery-20260914.1",
+  "source_artifact_path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\extensions\\adapters\\opencode\\saipen-guard.js",
+  "source_sha256": "34ffb4fe9c66477d3b9767a36c1397f8c997590d003821ac4cb41dd1e1a1714f",
+  "installed_artifact_path": "V:\\_TEMP_\\saipen-evidence-opencode-native-smoke-k9ho__48\\home\\.config\\opencode\\plugins\\saipen-guard.js",
+  "installed_sha256": "34ffb4fe9c66477d3b9767a36c1397f8c997590d003821ac4cb41dd1e1a1714f",
+  "loaded_module_path": "V:\\_TEMP_\\saipen-evidence-opencode-native-smoke-k9ho__48\\home\\.config\\opencode\\plugins\\saipen-guard.js",
+  "loaded_module_sha256": "34ffb4fe9c66477d3b9767a36c1397f8c997590d003821ac4cb41dd1e1a1714f",
+  "sha_triplet_equal": true,
+  "factory_count": 1,
+  "opencode_pid": 2772,
+  "factory_started_ms": 1789656476371,
+  "install_completed_ms": 1789656469250,
+  "context_directory": "V:\\_TEMP_\\tmpsechcm5h",
+  "context_worktree": "/",
+  "resolved_project_root": "V:\\_TEMP_\\tmpsechcm5h",
+  "resolved_project_lineage": "lineage-3dc77fba063a4347b35daaf165ca56e0",
+  "resolution_provenance": "ancestor",
+  "binding_code": "ADMITTED",
+  "fresh_process_after_install": true
+ },
+ "case_outcomes": [
+  {
+   "id": "read",
+   "outcome": "allowed",
+   "message": ""
+  },
+  {
+   "id": "admitted_write",
+   "outcome": "allowed",
+   "message": ""
+  },
+  {
+   "id": "question",
+   "outcome": "allowed",
+   "message": ""
+  },
+  {
+   "id": "ordinary_shell",
+   "outcome": "allowed",
+   "message": ""
+  },
+  {
+   "id": "source_shell",
+   "outcome": "allowed",
+   "message": ""
+  },
+  {
+   "id": "protected_shell_state",
+   "outcome": "blocked",
+   "message": "SAIPEN_GUARD_REFUSAL: PROTECTED_CANONICAL_NAMESPACE: the host tool did not execute"
+  },
+  {
+   "id": "protected_shell_board",
+   "outcome": "blocked",
+   "message": "SAIPEN_GUARD_REFUSAL: PROTECTED_CANONICAL_NAMESPACE: the host tool did not execute"
+  },
+  {
+   "id": "protected_shell_windows",
+   "outcome": "blocked",
+   "message": "SAIPEN_GUARD_REFUSAL: PROTECTED_CANONICAL_NAMESPACE: the host tool did not execute"
+  },
+  {
+   "id": "protected_shell_traversal",
+   "outcome": "blocked",
+   "message": "SAIPEN_GUARD_REFUSAL: PROTECTED_CANONICAL_NAMESPACE: the host tool did not execute"
+  },
+  {
+   "id": "protected_write",
+   "outcome": "blocked",
+   "message": "SAIPEN_GUARD_REFUSAL: PROTECTED_CANONICAL_NAMESPACE: the host tool did not execute"
+  },
+  {
+   "id": "unknown_tool",
+   "outcome": "blocked",
+   "message": "SAIPEN_GUARD_REFUSAL: TARGET_UNRESOLVED: the host tool did not execute"
+  },
+  {
+   "id": "board_patch",
+   "outcome": "blocked",
+   "message": "SAIPEN_GUARD_REFUSAL: PROTECTED_CANONICAL_NAMESPACE: the host tool did not execute"
+  },
+  {
+   "id": "compound_recover",
+   "outcome": "blocked",
+   "message": "SAIPEN_GUARD_REFUSAL: PROTECTED_CANONICAL_NAMESPACE: the host tool did not execute"
+  },
+  {
+   "id": "exact_recover",
+   "outcome": "allowed",
+   "message": ""
+  },
+  {
+   "id": "bare_canonical_actor",
+   "outcome": "allowed",
+   "message": ""
+  },
+  {
+   "id": "wrong_actor",
+   "outcome": "blocked",
+   "message": "SAIPEN_GUARD_REFUSAL: OWNERSHIP_CONFLICT: the host tool did not execute"
+  },
+  {
+   "id": "explicit_owner",
+   "outcome": "allowed",
+   "message": ""
+  },
+  {
+   "id": "fleet_old",
+   "outcome": "blocked",
+   "message": "SAIPEN_FLEET_REFUSAL: RECOVERED_REISSUE_REQUIRED: the host tool did not execute. Reread current canonical STATE/BOARD/LOG, reroute once, then issue a fresh consequential action aga"
+  },
+  {
+   "id": "fleet_fresh",
+   "outcome": "allowed",
+   "message": ""
+  }
+ ]
+}

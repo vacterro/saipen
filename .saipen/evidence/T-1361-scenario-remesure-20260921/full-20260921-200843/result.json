@@ -1,0 +1,10 @@
+{
+  "command": "python tools/run_scenarios.py",
+  "head": "d97abdc097db432bafe2316b1e3577e44cd9cc4c",
+  "harness_sha256": "70957fdecc49d9c34bce5bb85183160e25602be0589a59ecc7c1a37bcfbad3d3",
+  "dirty_paths": 701,
+  "status_sha256": "a37f2003d1eb1d88decbc4297223bd7408c4e94ef1542d477d28e2075e298622",
+  "exit_code": 0,
+  "started_utc": "2026-09-21T17:08:43Z",
+  "elapsed_seconds": 1228.7474105358124
+}

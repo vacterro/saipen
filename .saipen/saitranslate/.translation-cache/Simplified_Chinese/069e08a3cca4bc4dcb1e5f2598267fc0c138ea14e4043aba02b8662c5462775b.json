@@ -1,0 +1,1 @@
+["项目", "与 SAIPEN 的关系", "SAIPENVIEW", "本地 Windows 控制中心，用于 SAIPEN 项目 —— 可自动发现", "工作区，可视化实时状态和符合性判断，管理工单，并启动 AI CLI。它是辅助工具，而非权威。", "SAIWORK", "下游 CodeNomad 分支，集成了 SAIPEN：注入", "到 OpenCode 启动中，暴露 SAIPEN 快捷方式和项目状态视图，并添加了一个持久的提示队列。", "FastPrompter", "可移植的 Windows 草稿纸和代码片段管理器，可自动检测", "文件夹，并添加只读的 STATE/BOARD/LOG 查看器。", "文档"]

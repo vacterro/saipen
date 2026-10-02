@@ -1,0 +1,9 @@
+{
+  "oracle_sha256": "7f52a73476f367d8669aa88ecfea6427fafb3a1ab0c052978f1ed577ed734935",
+  "scope": "all inventoried text-mode subprocess calls, including local dict-built kwargs; unknown settings refuse",
+  "status": "FAIL",
+  "tests": 6,
+  "failures": 1,
+  "errors": 0,
+  "output": "...F..\n======================================================================\nFAIL: test_no_production_text_call_uses_the_implicit_locale (utf8_candidate.SubprocessUtf8Contract.test_no_production_text_call_uses_the_implicit_locale)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\test_subprocess_utf8.py\", line 167, in test_no_production_text_call_uses_the_implicit_locale\nAssertionError: Lists differ: ['tools\\\\audit_checks.py:944: run', 'tools[8485 chars]run'] != []\n\nFirst list contains 226 additional elements.\nFirst extra element 0:\n'tools\\\\audit_checks.py:944: run'\n\nDiff is 9215 characters long. Set self.maxDiff to None to see it. : explicit child-output encoding is required\n\n----------------------------------------------------------------------\nRan 6 tests in 28.885s\n\nFAILED (failures=1)\n"
+}

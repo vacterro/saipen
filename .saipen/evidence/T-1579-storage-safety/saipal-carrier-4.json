@@ -1,0 +1,883 @@
+{
+  "analysis_carrier": {
+    "applicable_law": {
+      "current_protocol_protection": "UNKNOWN",
+      "drift_class": "FALSE_DONE",
+      "expected_behavior": "done requires verified root cause, not absence of error",
+      "owner_documents": [
+        "saipal/CORE.md",
+        "saipal/FINDINGS.md"
+      ],
+      "reason": "protocol binding unknown; no historical violation may be claimed",
+      "rule_ids": [
+        "PAL-ROOTCAUSE-01",
+        "PAL-EVIDENCE-01",
+        "PAL-FINDING-02"
+      ],
+      "status": "RESOLVED",
+      "violation_claimable": false
+    },
+    "calibration": [],
+    "carrier": "analyze-episodes",
+    "defence_surface": [
+      {
+        "code": "SESSION_STILL_HOT",
+        "description": "the session is HOT, so the episode may simply be incomplete",
+        "seq": null
+      }
+    ],
+    "episode": {
+      "end_seq": 24,
+      "event_count": 24,
+      "events_truncated": false,
+      "finality": "PROVISIONAL",
+      "index": 0,
+      "kind": "terminal_task",
+      "start_seq": 1,
+      "trigger_seq": null
+    },
+    "events": [
+      {
+        "digest": "046e1822f2fbf5b9f408648d0b32c3741059df29e5ec99a7c8b0fc0afcb836f3",
+        "evidence_ref": {
+          "role": "user",
+          "source_digest": "2f365753eb5d0cb5e3cb103cdec73177fe40ed55650f382771f84c48ca3b93fe",
+          "source_kind": "opencode",
+          "source_message_id": "msg_0f48746b4001HOhMRIN0x5661m",
+          "source_part_id": "prt_0f48746d1001dFUj6GWLV9x6X0",
+          "source_session_id": "ses_f0b78ba1dffexFox9oe0ZFLjMu"
+        },
+        "facts": {
+          "digest": "046e1822f2fbf5b9f408648d0b32c3741059df29e5ec99a7c8b0fc0afcb836f3",
+          "excerpt": "\"Run the deterministic native binding smoke.\"",
+          "opencode_type": "text",
+          "role": "user"
+        },
+        "loc": null,
+        "seq": 1,
+        "ts": null,
+        "type": "USER_MESSAGE"
+      },
+      {
+        "digest": null,
+        "evidence_ref": {
+          "role": "assistant",
+          "source_digest": "aa266b3209315cdfb3f6436a97b3a0c2c0376012322d669e672ea07d8a9304ae",
+          "source_kind": "opencode",
+          "source_message_id": "msg_0f4874906001fP7Bh07uo06yJZ",
+          "source_part_id": "prt_0f4874d83001o5AE0EfPEgFBRt",
+          "source_session_id": "ses_f0b78ba1dffexFox9oe0ZFLjMu"
+        },
+        "facts": {
+          "kind": "step",
+          "phase": "step-start"
+        },
+        "loc": null,
+        "seq": 2,
+        "ts": null,
+        "type": "SESSION_BOUNDARY"
+      },
+      {
+        "digest": "ec9e5a71b963dbb095d49eb00e0df97c29b4d01fb409dfdd5ef4af6433392ca1",
+        "evidence_ref": {
+          "role": "tool",
+          "source_digest": "bb7bf953e4ec8d8f3892c819cc09f5596c3db2dc3f1283116f7049b554e534a5",
+          "source_kind": "opencode",
+          "source_message_id": "msg_0f4874906001fP7Bh07uo06yJZ",
+          "source_part_id": "prt_0f4874d970017SYerGcLSXB4Eq",
+          "source_session_id": "ses_f0b78ba1dffexFox9oe0ZFLjMu"
+        },
+        "facts": {
+          "call_id": "call_bound_0",
+          "digest": "ec9e5a71b963dbb095d49eb00e0df97c29b4d01fb409dfdd5ef4af6433392ca1",
+          "excerpt": "{'name': 'saipen'}",
+          "status": "completed",
+          "tool": "skill"
+        },
+        "loc": null,
+        "seq": 3,
+        "ts": null,
+        "type": "TOOL_CALL"
+      },
+      {
+        "digest": "6166f96f9e82ed4bf253a10160a4e5ae044625dc44356e48ba19e08feb265f98",
+        "evidence_ref": {
+          "role": "tool",
+          "source_digest": "bb7bf953e4ec8d8f3892c819cc09f5596c3db2dc3f1283116f7049b554e534a5",
+          "source_kind": "opencode",
+          "source_message_id": "msg_0f4874906001fP7Bh07uo06yJZ",
+          "source_part_id": "prt_0f4874d970017SYerGcLSXB4Eq",
+          "source_session_id": "ses_f0b78ba1dffexFox9oe0ZFLjMu"
+        },
+        "facts": {
+          "digest": "6166f96f9e82ed4bf253a10160a4e5ae044625dc44356e48ba19e08feb265f98",
+          "excerpt": "<skill_content name=\"saipen\">\n# Skill: saipen\n\n# saipen -- skill adapter\r\n\r\n**`saipen continue`, bare `saipen`, `cc` and `сс` mean EXECUTE the current\r\nwork. Loading this skill only returns instructions; it does not run Git,\r\ninspect the project, or complete a command.** After loading it, follow BOOT,\r\nrun `saipen continue --json`, read the returned `load_path` and project memory,\r\nand perform the returned action in this turn. Do not ask what `continue`\r\nmeans, repeat this skill call, or stop at \"state not checked\": read that state.\r\nOnly an observed refusal or a canonical WAIT can justify a blocked report;\r\ninclude its exact evidence and take available safe recovery first.\r\n\r\nThin entry for skill-reading platforms. The system lives elsewhere:\r\n\r\n0. **Resolve the cold route deterministically -- never by searching.** Run the\r\n   installed launcher (`bin/saipen.cmd`/`bin/saipen status --json` beside this\r\n   file; BOOT.md Entry owns transport) and read its `cold_route`\r\n   block. It names the bound `project_root`, `protocol_dir`, `boot`, `style`,\r\n   `phase_module` and the `.saipen/` memory files, and states\r\n   `search_required: false`. Open those exact paths. Do NOT use the host's\r\n   grep/glob/search tool to locate protocol files, and never conclude that\r\n   protocol startup failed because a host search tool errored: a ripgrep or\r\n   search fault is a HOST fault, unrelated to SAIPEN. If the launcher itself\r\n   is unavailable, read `BOOT.md` and the documents beside this SKILL.md by\r\n   their known paths -- still without searching.\r\n\r\n   When a search IS genuinely needed and the host's own search tool returns a\r\n   transport error (never for zero matches -- that is a normal empty result),\r\n   use the canonical read-only fallback `saipen search --hex\r\n   <hex-encoded-utf8>`. It needs no generic shell admission, so it still works\r\n   while the protocol state is invalid. Do not fall back to `grep`/`bash`.\r\n\r\n1. **Read `BOOT.md`** (the file in the same folder as this SK",
+          "status": "completed",
+          "tool": "skill"
+        },
+        "loc": null,
+        "seq": 4,
+        "ts": null,
+        "type": "TOOL_RESULT"
+      },
+      {
+        "digest": null,
+        "evidence_ref": {
+          "role": "assistant",
+          "source_digest": "0c2c49a99820e9e02e5c493bd464231fbbfe8f1aa09089d512acb4be812394db",
+          "source_kind": "opencode",
+          "source_message_id": "msg_0f4874906001fP7Bh07uo06yJZ",
+          "source_part_id": "prt_0f4874efe0010TD3eoPPNUuqfp",
+          "source_session_id": "ses_f0b78ba1dffexFox9oe0ZFLjMu"
+        },
+        "facts": {
+          "kind": "step",
+          "phase": "step-finish",
+          "reason": "tool-calls"
+        },
+        "loc": null,
+        "seq": 5,
+        "ts": null,
+        "type": "SESSION_BOUNDARY"
+      },
+      {
+        "digest": null,
+        "evidence_ref": {
+          "role": "assistant",
+          "source_digest": "aa266b3209315cdfb3f6436a97b3a0c2c0376012322d669e672ea07d8a9304ae",
+          "source_kind": "opencode",
+          "source_message_id": "msg_0f4874f1d001dkdU8I1rG2Lwtb",
+          "source_part_id": "prt_0f4874f5f001a4RP182ohH6gmn",
+          "source_session_id": "ses_f0b78ba1dffexFox9oe0ZFLjMu"
+        },
+        "facts": {
+          "kind": "step",
+          "phase": "step-start"
+        },
+        "loc": null,
+        "seq": 6,
+        "ts": null,
+        "type": "SESSION_BOUNDARY"
+      },
+      {
+        "digest": "28707ec8514641ae2ff74e278108936261e358731f345681822cd78bda4622f3",
+        "evidence_ref": {
+          "role": "tool",
+          "source_digest": "25fbf86fd809f0c60d6bfb691bc66a6315c73946658b92088c3b94411704fe31",
+          "source_kind": "opencode",
+          "source_message_id": "msg_0f4874f1d001dkdU8I1rG2Lwtb",
+          "source_part_id": "prt_0f4874f64001q8MCeYW13GpEuZ",
+          "source_session_id": "ses_f0b78ba1dffexFox9oe0ZFLjMu"
+        },
+        "facts": {
+          "call_id": "call_bound_1",
+          "digest": "28707ec8514641ae2ff74e278108936261e358731f345681822cd78bda4622f3",
+          "excerpt": "{'filePath': 'src/app.py'}",
+          "status": "completed",
+          "tool": "read"
+        },
+        "loc": null,
+        "seq": 7,
+        "ts": null,
+        "type": "TOOL_CALL"
+      },
+      {
+        "digest": "2a0ad4e60b2e9c56d89d575156a2f72ad2fc17dda6ae2d9d1483e36cc1911eb8",
+        "evidence_ref": {
+          "role": "tool",
+          "source_digest": "25fbf86fd809f0c60d6bfb691bc66a6315c73946658b92088c3b94411704fe31",
+          "source_kind": "opencode",
+          "source_message_id": "msg_0f4874f1d001dkdU8I1rG2Lwtb",
+          "source_part_id": "prt_0f4874f64001q8MCeYW13GpEuZ",
+          "source_session_id": "ses_f0b78ba1dffexFox9oe0ZFLjMu"
+        },
+        "facts": {
+          "digest": "2a0ad4e60b2e9c56d89d575156a2f72ad2fc17dda6ae2d9d1483e36cc1911eb8",
+          "excerpt": "<path>V:\\_TEMP_\\tmpcg1dwhb6\\src\\app.py</path>\n<type>file</type>\n<content>\n1: code\n\n(End of file - total 1 lines)\n</content>",
+          "status": "completed",
+          "tool": "read"
+        },
+        "loc": null,
+        "seq": 8,
+        "ts": null,
+        "type": "TOOL_RESULT"
+      },
+      {
+        "digest": null,
+        "evidence_ref": {
+          "role": "assistant",
+          "source_digest": "0c2c49a99820e9e02e5c493bd464231fbbfe8f1aa09089d512acb4be812394db",
+          "source_kind": "opencode",
+          "source_message_id": "msg_0f4874f1d001dkdU8I1rG2Lwtb",
+          "source_part_id": "prt_0f4874f8d001pmIqzEwpZFpF5d",
+          "source_session_id": "ses_f0b78ba1dffexFox9oe0ZFLjMu"
+        },
+        "facts": {
+          "kind": "step",
+          "phase": "step-finish",
+          "reason": "tool-calls"
+        },
+        "loc": null,
+        "seq": 9,
+        "ts": null,
+        "type": "SESSION_BOUNDARY"
+      },
+      {
+        "digest": null,
+        "evidence_ref": {
+          "role": "assistant",
+          "source_digest": "aa266b3209315cdfb3f6436a97b3a0c2c0376012322d669e672ea07d8a9304ae",
+          "source_kind": "opencode",
+          "source_message_id": "msg_0f4874fa3001q3JZCkKG5SagBs",
+          "source_part_id": "prt_0f4874fd1001YtHuLWULAmklO6",
+          "source_session_id": "ses_f0b78ba1dffexFox9oe0ZFLjMu"
+        },
+        "facts": {
+          "kind": "step",
+          "phase": "step-start"
+        },
+        "loc": null,
+        "seq": 10,
+        "ts": null,
+        "type": "SESSION_BOUNDARY"
+      },
+      {
+        "digest": "f2b30a0e5d82b3f983a9866d99117d853049729f31201e6ba8afcab9e520b2e7",
+        "evidence_ref": {
+          "role": "tool",
+          "source_digest": "a2905219c822d103c3f2d11555b70abb8e52dd809e77a9aa51dd1329565a08b2",
+          "source_kind": "opencode",
+          "source_message_id": "msg_0f4874fa3001q3JZCkKG5SagBs",
+          "source_part_id": "prt_0f4874fd7001yOsh5LgfBQCUjR",
+          "source_session_id": "ses_f0b78ba1dffexFox9oe0ZFLjMu"
+        },
+        "facts": {
+          "digest": "f2b30a0e5d82b3f983a9866d99117d853049729f31201e6ba8afcab9e520b2e7",
+          "excerpt": "python --version",
+          "opencode_type": "tool",
+          "shell": true,
+          "status": "completed",
+          "tool": "bash"
+        },
+        "loc": null,
+        "seq": 11,
+        "ts": null,
+        "type": "TOOL_CALL"
+      },
+      {
+        "digest": null,
+        "evidence_ref": {
+          "role": "assistant",
+          "source_digest": "0c2c49a99820e9e02e5c493bd464231fbbfe8f1aa09089d512acb4be812394db",
+          "source_kind": "opencode",
+          "source_message_id": "msg_0f4874fa3001q3JZCkKG5SagBs",
+          "source_part_id": "prt_0f48751e3001ct84tc2WE628fn",
+          "source_session_id": "ses_f0b78ba1dffexFox9oe0ZFLjMu"
+        },
+        "facts": {
+          "kind": "step",
+          "phase": "step-finish",
+          "reason": "tool-calls"
+        },
+        "loc": null,
+        "seq": 12,
+        "ts": null,
+        "type": "SESSION_BOUNDARY"
+      },
+      {
+        "digest": null,
+        "evidence_ref": {
+          "role": "assistant",
+          "source_digest": "aa266b3209315cdfb3f6436a97b3a0c2c0376012322d669e672ea07d8a9304ae",
+          "source_kind": "opencode",
+          "source_message_id": "msg_0f48751ff0018armi54DbqAfEi",
+          "source_part_id": "prt_0f4875241001m7M3h2Cb94ZgAO",
+          "source_session_id": "ses_f0b78ba1dffexFox9oe0ZFLjMu"
+        },
+        "facts": {
+          "kind": "step",
+          "phase": "step-start"
+        },
+        "loc": null,
+        "seq": 13,
+        "ts": null,
+        "type": "SESSION_BOUNDARY"
+      },
+      {
+        "digest": "83c80618705e7c034a8c3a142106abfb9c0ae8cb55194b3c044aaae2d6174b59",
+        "evidence_ref": {
+          "role": "tool",
+          "source_digest": "25d17fa1a7e58b182121c6a19d94fce063089dfa240823a79cf1dc367f0da494",
+          "source_kind": "opencode",
+          "source_message_id": "msg_0f48751ff0018armi54DbqAfEi",
+          "source_part_id": "prt_0f4875247001vW71WYDlk6PdUI",
+          "source_session_id": "ses_f0b78ba1dffexFox9oe0ZFLjMu"
+        },
+        "facts": {
+          "call_id": "call_bound_3",
+          "digest": "83c80618705e7c034a8c3a142106abfb9c0ae8cb55194b3c044aaae2d6174b59",
+          "excerpt": "{'filePath': 'src/global-installed-write.py', 'content': 'ok\\n'}",
+          "status": "completed",
+          "tool": "write"
+        },
+        "loc": null,
+        "seq": 14,
+        "ts": null,
+        "type": "TOOL_CALL"
+      },
+      {
+        "digest": "e3e06ec0f8c958669ed3682941ab88218ff9ee42a7ab9b48fd78126336aa968c",
+        "evidence_ref": {
+          "role": "tool",
+          "source_digest": "25d17fa1a7e58b182121c6a19d94fce063089dfa240823a79cf1dc367f0da494",
+          "source_kind": "opencode",
+          "source_message_id": "msg_0f48751ff0018armi54DbqAfEi",
+          "source_part_id": "prt_0f4875247001vW71WYDlk6PdUI",
+          "source_session_id": "ses_f0b78ba1dffexFox9oe0ZFLjMu"
+        },
+        "facts": {
+          "digest": "e3e06ec0f8c958669ed3682941ab88218ff9ee42a7ab9b48fd78126336aa968c",
+          "excerpt": "Wrote file successfully.",
+          "status": "completed",
+          "tool": "write"
+        },
+        "loc": null,
+        "seq": 15,
+        "ts": null,
+        "type": "TOOL_RESULT"
+      },
+      {
+        "digest": null,
+        "evidence_ref": {
+          "role": "assistant",
+          "source_digest": "0c2c49a99820e9e02e5c493bd464231fbbfe8f1aa09089d512acb4be812394db",
+          "source_kind": "opencode",
+          "source_message_id": "msg_0f48751ff0018armi54DbqAfEi",
+          "source_part_id": "prt_0f48754a5001Nqelb3VgkdZLF4",
+          "source_session_id": "ses_f0b78ba1dffexFox9oe0ZFLjMu"
+        },
+        "facts": {
+          "kind": "step",
+          "phase": "step-finish",
+          "reason": "tool-calls"
+        },
+        "loc": null,
+        "seq": 16,
+        "ts": null,
+        "type": "SESSION_BOUNDARY"
+      },
+      {
+        "digest": null,
+        "evidence_ref": {
+          "role": "assistant",
+          "source_digest": "aa266b3209315cdfb3f6436a97b3a0c2c0376012322d669e672ea07d8a9304ae",
+          "source_kind": "opencode",
+          "source_message_id": "msg_0f48754b5001M2avDKCTtCEgFT",
+          "source_part_id": "prt_0f48754e10016tci0FK3A9mDUH",
+          "source_session_id": "ses_f0b78ba1dffexFox9oe0ZFLjMu"
+        },
+        "facts": {
+          "kind": "step",
+          "phase": "step-start"
+        },
+        "loc": null,
+        "seq": 17,
+        "ts": null,
+        "type": "SESSION_BOUNDARY"
+      },
+      {
+        "digest": "f819773a88cbf4e7049702dc8eb98284bfa7fe8c300a99e054b8b7b5ab5d20b5",
+        "evidence_ref": {
+          "role": "tool",
+          "source_digest": "3ac8341da7c8c087dc40db6382597cf8b907f8299c02b6aa262169145179f847",
+          "source_kind": "opencode",
+          "source_message_id": "msg_0f48754b5001M2avDKCTtCEgFT",
+          "source_part_id": "prt_0f48754f500190y79eDujZIrio",
+          "source_session_id": "ses_f0b78ba1dffexFox9oe0ZFLjMu"
+        },
+        "facts": {
+          "call_id": "call_bound_4",
+          "digest": "f819773a88cbf4e7049702dc8eb98284bfa7fe8c300a99e054b8b7b5ab5d20b5",
+          "excerpt": "{'filePath': '.saipen/STATE.md', 'content': 'blocked\\n'}",
+          "status": "error",
+          "tool": "write"
+        },
+        "loc": null,
+        "seq": 18,
+        "ts": null,
+        "type": "TOOL_CALL"
+      },
+      {
+        "digest": null,
+        "evidence_ref": {
+          "role": "assistant",
+          "source_digest": "0c2c49a99820e9e02e5c493bd464231fbbfe8f1aa09089d512acb4be812394db",
+          "source_kind": "opencode",
+          "source_message_id": "msg_0f48754b5001M2avDKCTtCEgFT",
+          "source_part_id": "prt_0f4875623001JpIxB7R1E7iTRF",
+          "source_session_id": "ses_f0b78ba1dffexFox9oe0ZFLjMu"
+        },
+        "facts": {
+          "kind": "step",
+          "phase": "step-finish",
+          "reason": "tool-calls"
+        },
+        "loc": null,
+        "seq": 19,
+        "ts": null,
+        "type": "SESSION_BOUNDARY"
+      },
+      {
+        "digest": null,
+        "evidence_ref": {
+          "role": "assistant",
+          "source_digest": "aa266b3209315cdfb3f6436a97b3a0c2c0376012322d669e672ea07d8a9304ae",
+          "source_kind": "opencode",
+          "source_message_id": "msg_0f487563a001Cbpg1FbpJhDsQN",
+          "source_part_id": "prt_0f487566f001gUcfFmLGLaI1HM",
+          "source_session_id": "ses_f0b78ba1dffexFox9oe0ZFLjMu"
+        },
+        "facts": {
+          "kind": "step",
+          "phase": "step-start"
+        },
+        "loc": null,
+        "seq": 20,
+        "ts": null,
+        "type": "SESSION_BOUNDARY"
+      },
+      {
+        "digest": "8c450d3342c2b7d8709e499384a92c5e753bf02b60bad06390a6cae206622891",
+        "evidence_ref": {
+          "role": "tool",
+          "source_digest": "7ecbc68bc4ff3c9bb506a6f479733bdc5706d7d26395c6f5bd7d29f2b948d9c5",
+          "source_kind": "opencode",
+          "source_message_id": "msg_0f487563a001Cbpg1FbpJhDsQN",
+          "source_part_id": "prt_0f487567c001uRI1qJOvT6Td5m",
+          "source_session_id": "ses_f0b78ba1dffexFox9oe0ZFLjMu"
+        },
+        "facts": {
+          "call_id": "call_bound_5",
+          "digest": "8c450d3342c2b7d8709e499384a92c5e753bf02b60bad06390a6cae206622891",
+          "excerpt": "{'tool': 'mystery_tool', 'error': \"Model tried to call unavailable tool 'mystery_tool'. Available tools: bash, edit, glob, grep, invalid, read, skill, task, todowrite, webfetch, websearch, write.\"}",
+          "status": "error",
+          "tool": "invalid"
+        },
+        "loc": null,
+        "seq": 21,
+        "ts": null,
+        "type": "TOOL_CALL"
+      },
+      {
+        "digest": null,
+        "evidence_ref": {
+          "role": "assistant",
+          "source_digest": "0c2c49a99820e9e02e5c493bd464231fbbfe8f1aa09089d512acb4be812394db",
+          "source_kind": "opencode",
+          "source_message_id": "msg_0f487563a001Cbpg1FbpJhDsQN",
+          "source_part_id": "prt_0f48757f8001XIWnFYfb3AuJyV",
+          "source_session_id": "ses_f0b78ba1dffexFox9oe0ZFLjMu"
+        },
+        "facts": {
+          "kind": "step",
+          "phase": "step-finish",
+          "reason": "tool-calls"
+        },
+        "loc": null,
+        "seq": 22,
+        "ts": null,
+        "type": "SESSION_BOUNDARY"
+      },
+      {
+        "digest": null,
+        "evidence_ref": {
+          "role": "assistant",
+          "source_digest": "aa266b3209315cdfb3f6436a97b3a0c2c0376012322d669e672ea07d8a9304ae",
+          "source_kind": "opencode",
+          "source_message_id": "msg_0f4875802001kHqZULsHU4tGsl",
+          "source_part_id": "prt_0f487583f001zSdBsZtDnMpla7",
+          "source_session_id": "ses_f0b78ba1dffexFox9oe0ZFLjMu"
+        },
+        "facts": {
+          "kind": "step",
+          "phase": "step-start"
+        },
+        "loc": null,
+        "seq": 23,
+        "ts": null,
+        "type": "SESSION_BOUNDARY"
+      },
+      {
+        "digest": "20881c86002656aee998c94e0c68aacd9140354c0c2debb3c1f489212de3abc8",
+        "evidence_ref": {
+          "role": "assistant",
+          "source_digest": "86958a4ee836a613811df79352f6fa4200ef2ca30e54468eb86c947977c2e0a7",
+          "source_kind": "opencode",
+          "source_message_id": "msg_0f4875802001kHqZULsHU4tGsl",
+          "source_part_id": "prt_0f4875844001RCkuH9mRxpl9MJ",
+          "source_session_id": "ses_f0b78ba1dffexFox9oe0ZFLjMu"
+        },
+        "facts": {
+          "digest": "20881c86002656aee998c94e0c68aacd9140354c0c2debb3c1f489212de3abc8",
+          "excerpt": "Smoke complete.",
+          "opencode_type": "text",
+          "role": "assistant"
+        },
+        "loc": null,
+        "seq": 24,
+        "ts": null,
+        "type": "ASSISTANT_MESSAGE"
+      }
+    ],
+    "evidence_command": "saipal --json evidence ses_f0b78ba1dffexFox9oe0ZFLjMu <event_seq>",
+    "evidence_refs": [
+      {
+        "evidence_ref": {
+          "role": "user",
+          "source_digest": "2f365753eb5d0cb5e3cb103cdec73177fe40ed55650f382771f84c48ca3b93fe",
+          "source_kind": "opencode",
+          "source_message_id": "msg_0f48746b4001HOhMRIN0x5661m",
+          "source_part_id": "prt_0f48746d1001dFUj6GWLV9x6X0",
+          "source_session_id": "ses_f0b78ba1dffexFox9oe0ZFLjMu"
+        },
+        "seq": 1
+      },
+      {
+        "evidence_ref": {
+          "role": "assistant",
+          "source_digest": "aa266b3209315cdfb3f6436a97b3a0c2c0376012322d669e672ea07d8a9304ae",
+          "source_kind": "opencode",
+          "source_message_id": "msg_0f4874906001fP7Bh07uo06yJZ",
+          "source_part_id": "prt_0f4874d83001o5AE0EfPEgFBRt",
+          "source_session_id": "ses_f0b78ba1dffexFox9oe0ZFLjMu"
+        },
+        "seq": 2
+      },
+      {
+        "evidence_ref": {
+          "role": "tool",
+          "source_digest": "bb7bf953e4ec8d8f3892c819cc09f5596c3db2dc3f1283116f7049b554e534a5",
+          "source_kind": "opencode",
+          "source_message_id": "msg_0f4874906001fP7Bh07uo06yJZ",
+          "source_part_id": "prt_0f4874d970017SYerGcLSXB4Eq",
+          "source_session_id": "ses_f0b78ba1dffexFox9oe0ZFLjMu"
+        },
+        "seq": 3
+      },
+      {
+        "evidence_ref": {
+          "role": "tool",
+          "source_digest": "bb7bf953e4ec8d8f3892c819cc09f5596c3db2dc3f1283116f7049b554e534a5",
+          "source_kind": "opencode",
+          "source_message_id": "msg_0f4874906001fP7Bh07uo06yJZ",
+          "source_part_id": "prt_0f4874d970017SYerGcLSXB4Eq",
+          "source_session_id": "ses_f0b78ba1dffexFox9oe0ZFLjMu"
+        },
+        "seq": 4
+      },
+      {
+        "evidence_ref": {
+          "role": "assistant",
+          "source_digest": "0c2c49a99820e9e02e5c493bd464231fbbfe8f1aa09089d512acb4be812394db",
+          "source_kind": "opencode",
+          "source_message_id": "msg_0f4874906001fP7Bh07uo06yJZ",
+          "source_part_id": "prt_0f4874efe0010TD3eoPPNUuqfp",
+          "source_session_id": "ses_f0b78ba1dffexFox9oe0ZFLjMu"
+        },
+        "seq": 5
+      },
+      {
+        "evidence_ref": {
+          "role": "assistant",
+          "source_digest": "aa266b3209315cdfb3f6436a97b3a0c2c0376012322d669e672ea07d8a9304ae",
+          "source_kind": "opencode",
+          "source_message_id": "msg_0f4874f1d001dkdU8I1rG2Lwtb",
+          "source_part_id": "prt_0f4874f5f001a4RP182ohH6gmn",
+          "source_session_id": "ses_f0b78ba1dffexFox9oe0ZFLjMu"
+        },
+        "seq": 6
+      },
+      {
+        "evidence_ref": {
+          "role": "tool",
+          "source_digest": "25fbf86fd809f0c60d6bfb691bc66a6315c73946658b92088c3b94411704fe31",
+          "source_kind": "opencode",
+          "source_message_id": "msg_0f4874f1d001dkdU8I1rG2Lwtb",
+          "source_part_id": "prt_0f4874f64001q8MCeYW13GpEuZ",
+          "source_session_id": "ses_f0b78ba1dffexFox9oe0ZFLjMu"
+        },
+        "seq": 7
+      },
+      {
+        "evidence_ref": {
+          "role": "tool",
+          "source_digest": "25fbf86fd809f0c60d6bfb691bc66a6315c73946658b92088c3b94411704fe31",
+          "source_kind": "opencode",
+          "source_message_id": "msg_0f4874f1d001dkdU8I1rG2Lwtb",
+          "source_part_id": "prt_0f4874f64001q8MCeYW13GpEuZ",
+          "source_session_id": "ses_f0b78ba1dffexFox9oe0ZFLjMu"
+        },
+        "seq": 8
+      },
+      {
+        "evidence_ref": {
+          "role": "assistant",
+          "source_digest": "0c2c49a99820e9e02e5c493bd464231fbbfe8f1aa09089d512acb4be812394db",
+          "source_kind": "opencode",
+          "source_message_id": "msg_0f4874f1d001dkdU8I1rG2Lwtb",
+          "source_part_id": "prt_0f4874f8d001pmIqzEwpZFpF5d",
+          "source_session_id": "ses_f0b78ba1dffexFox9oe0ZFLjMu"
+        },
+        "seq": 9
+      },
+      {
+        "evidence_ref": {
+          "role": "assistant",
+          "source_digest": "aa266b3209315cdfb3f6436a97b3a0c2c0376012322d669e672ea07d8a9304ae",
+          "source_kind": "opencode",
+          "source_message_id": "msg_0f4874fa3001q3JZCkKG5SagBs",
+          "source_part_id": "prt_0f4874fd1001YtHuLWULAmklO6",
+          "source_session_id": "ses_f0b78ba1dffexFox9oe0ZFLjMu"
+        },
+        "seq": 10
+      },
+      {
+        "evidence_ref": {
+          "role": "tool",
+          "source_digest": "a2905219c822d103c3f2d11555b70abb8e52dd809e77a9aa51dd1329565a08b2",
+          "source_kind": "opencode",
+          "source_message_id": "msg_0f4874fa3001q3JZCkKG5SagBs",
+          "source_part_id": "prt_0f4874fd7001yOsh5LgfBQCUjR",
+          "source_session_id": "ses_f0b78ba1dffexFox9oe0ZFLjMu"
+        },
+        "seq": 11
+      },
+      {
+        "evidence_ref": {
+          "role": "assistant",
+          "source_digest": "0c2c49a99820e9e02e5c493bd464231fbbfe8f1aa09089d512acb4be812394db",
+          "source_kind": "opencode",
+          "source_message_id": "msg_0f4874fa3001q3JZCkKG5SagBs",
+          "source_part_id": "prt_0f48751e3001ct84tc2WE628fn",
+          "source_session_id": "ses_f0b78ba1dffexFox9oe0ZFLjMu"
+        },
+        "seq": 12
+      },
+      {
+        "evidence_ref": {
+          "role": "assistant",
+          "source_digest": "aa266b3209315cdfb3f6436a97b3a0c2c0376012322d669e672ea07d8a9304ae",
+          "source_kind": "opencode",
+          "source_message_id": "msg_0f48751ff0018armi54DbqAfEi",
+          "source_part_id": "prt_0f4875241001m7M3h2Cb94ZgAO",
+          "source_session_id": "ses_f0b78ba1dffexFox9oe0ZFLjMu"
+        },
+        "seq": 13
+      },
+      {
+        "evidence_ref": {
+          "role": "tool",
+          "source_digest": "25d17fa1a7e58b182121c6a19d94fce063089dfa240823a79cf1dc367f0da494",
+          "source_kind": "opencode",
+          "source_message_id": "msg_0f48751ff0018armi54DbqAfEi",
+          "source_part_id": "prt_0f4875247001vW71WYDlk6PdUI",
+          "source_session_id": "ses_f0b78ba1dffexFox9oe0ZFLjMu"
+        },
+        "seq": 14
+      },
+      {
+        "evidence_ref": {
+          "role": "tool",
+          "source_digest": "25d17fa1a7e58b182121c6a19d94fce063089dfa240823a79cf1dc367f0da494",
+          "source_kind": "opencode",
+          "source_message_id": "msg_0f48751ff0018armi54DbqAfEi",
+          "source_part_id": "prt_0f4875247001vW71WYDlk6PdUI",
+          "source_session_id": "ses_f0b78ba1dffexFox9oe0ZFLjMu"
+        },
+        "seq": 15
+      },
+      {
+        "evidence_ref": {
+          "role": "assistant",
+          "source_digest": "0c2c49a99820e9e02e5c493bd464231fbbfe8f1aa09089d512acb4be812394db",
+          "source_kind": "opencode",
+          "source_message_id": "msg_0f48751ff0018armi54DbqAfEi",
+          "source_part_id": "prt_0f48754a5001Nqelb3VgkdZLF4",
+          "source_session_id": "ses_f0b78ba1dffexFox9oe0ZFLjMu"
+        },
+        "seq": 16
+      },
+      {
+        "evidence_ref": {
+          "role": "assistant",
+          "source_digest": "aa266b3209315cdfb3f6436a97b3a0c2c0376012322d669e672ea07d8a9304ae",
+          "source_kind": "opencode",
+          "source_message_id": "msg_0f48754b5001M2avDKCTtCEgFT",
+          "source_part_id": "prt_0f48754e10016tci0FK3A9mDUH",
+          "source_session_id": "ses_f0b78ba1dffexFox9oe0ZFLjMu"
+        },
+        "seq": 17
+      },
+      {
+        "evidence_ref": {
+          "role": "tool",
+          "source_digest": "3ac8341da7c8c087dc40db6382597cf8b907f8299c02b6aa262169145179f847",
+          "source_kind": "opencode",
+          "source_message_id": "msg_0f48754b5001M2avDKCTtCEgFT",
+          "source_part_id": "prt_0f48754f500190y79eDujZIrio",
+          "source_session_id": "ses_f0b78ba1dffexFox9oe0ZFLjMu"
+        },
+        "seq": 18
+      },
+      {
+        "evidence_ref": {
+          "role": "assistant",
+          "source_digest": "0c2c49a99820e9e02e5c493bd464231fbbfe8f1aa09089d512acb4be812394db",
+          "source_kind": "opencode",
+          "source_message_id": "msg_0f48754b5001M2avDKCTtCEgFT",
+          "source_part_id": "prt_0f4875623001JpIxB7R1E7iTRF",
+          "source_session_id": "ses_f0b78ba1dffexFox9oe0ZFLjMu"
+        },
+        "seq": 19
+      },
+      {
+        "evidence_ref": {
+          "role": "assistant",
+          "source_digest": "aa266b3209315cdfb3f6436a97b3a0c2c0376012322d669e672ea07d8a9304ae",
+          "source_kind": "opencode",
+          "source_message_id": "msg_0f487563a001Cbpg1FbpJhDsQN",
+          "source_part_id": "prt_0f487566f001gUcfFmLGLaI1HM",
+          "source_session_id": "ses_f0b78ba1dffexFox9oe0ZFLjMu"
+        },
+        "seq": 20
+      },
+      {
+        "evidence_ref": {
+          "role": "tool",
+          "source_digest": "7ecbc68bc4ff3c9bb506a6f479733bdc5706d7d26395c6f5bd7d29f2b948d9c5",
+          "source_kind": "opencode",
+          "source_message_id": "msg_0f487563a001Cbpg1FbpJhDsQN",
+          "source_part_id": "prt_0f487567c001uRI1qJOvT6Td5m",
+          "source_session_id": "ses_f0b78ba1dffexFox9oe0ZFLjMu"
+        },
+        "seq": 21
+      },
+      {
+        "evidence_ref": {
+          "role": "assistant",
+          "source_digest": "0c2c49a99820e9e02e5c493bd464231fbbfe8f1aa09089d512acb4be812394db",
+          "source_kind": "opencode",
+          "source_message_id": "msg_0f487563a001Cbpg1FbpJhDsQN",
+          "source_part_id": "prt_0f48757f8001XIWnFYfb3AuJyV",
+          "source_session_id": "ses_f0b78ba1dffexFox9oe0ZFLjMu"
+        },
+        "seq": 22
+      },
+      {
+        "evidence_ref": {
+          "role": "assistant",
+          "source_digest": "aa266b3209315cdfb3f6436a97b3a0c2c0376012322d669e672ea07d8a9304ae",
+          "source_kind": "opencode",
+          "source_message_id": "msg_0f4875802001kHqZULsHU4tGsl",
+          "source_part_id": "prt_0f487583f001zSdBsZtDnMpla7",
+          "source_session_id": "ses_f0b78ba1dffexFox9oe0ZFLjMu"
+        },
+        "seq": 23
+      },
+      {
+        "evidence_ref": {
+          "role": "assistant",
+          "source_digest": "86958a4ee836a613811df79352f6fa4200ef2ca30e54468eb86c947977c2e0a7",
+          "source_kind": "opencode",
+          "source_message_id": "msg_0f4875802001kHqZULsHU4tGsl",
+          "source_part_id": "prt_0f4875844001RCkuH9mRxpl9MJ",
+          "source_session_id": "ses_f0b78ba1dffexFox9oe0ZFLjMu"
+        },
+        "seq": 24
+      }
+    ],
+    "historical_rule_surface": {
+      "attempts": [],
+      "identity": null,
+      "registry_sha256": null,
+      "rules": [],
+      "source": "UNKNOWN",
+      "status": "UNAVAILABLE"
+    },
+    "next_action": "saipal continue",
+    "open_candidates": [],
+    "protocol": {
+      "binding_status": "UNKNOWN",
+      "git_head": null,
+      "proof_level": "UNKNOWN",
+      "reason": "protocol binding unknown; no historical violation may be claimed",
+      "registry_sha256": null,
+      "tree_fingerprint": null,
+      "version": null,
+      "violation_claimable": false
+    },
+    "recurrence": {
+      "by_model": [],
+      "by_project": [],
+      "known_findings": 0,
+      "recurrence_status": "VALID",
+      "spread": {
+        "classification": "UNKNOWN",
+        "clean_models": [],
+        "contradicted_by_a_clean_model": false,
+        "drift_class": "FALSE_DONE",
+        "drifting_models": [],
+        "drifting_projects": [],
+        "guidance": "no drift occurrences recorded for this class",
+        "isolated_to_one_model": false,
+        "occurrences": 0
+      }
+    },
+    "schema_version": 1,
+    "session": {
+      "adapter": "opencode",
+      "event_count": 24,
+      "generation": 1,
+      "last_analyzed_seq": 24,
+      "project": {
+        "name": "Smoke complete.",
+        "path": "V:/_TEMP_/tmpcg1dwhb6"
+      },
+      "runtime": {
+        "agent": "build",
+        "model": "smoke",
+        "opencode_version": "1.18.32",
+        "provider": "opencode",
+        "reasoning_mode": "unknown"
+      },
+      "session_id": "ses_f0b78ba1dffexFox9oe0ZFLjMu",
+      "source_ref": "session_inbox/opencode-ses_f0b78ba1dffexFox9oe0ZFLjMu-75407de6692a.json",
+      "status": "IMPORTED",
+      "temperature": "HOT"
+    },
+    "signals": [],
+    "slice": {
+      "count": 1,
+      "end_seq": 24,
+      "final_slice": true,
+      "index": 0,
+      "offset": 0,
+      "span_event_count": 24,
+      "start_seq": 1
+    },
+    "unit_digest": "cef8966b886ea5236adfc637a1260483e98fc6d7ceb01ebe912270ccd17d64b6"
+  },
+  "carrier": "analyze-episodes",
+  "command": "next",
+  "home": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPAL\\.saipal",
+  "next_action": "saipal continue",
+  "note": "episode 0 of session ses_f0b78ba1dffexFox9oe0ZFLjMu is the next analysis unit; 11 session(s) also await conflict resolution by the operator",
+  "ok": true,
+  "phase": "IDLE",
+  "sessions": 699,
+  "sessions_conflict": 11,
+  "sessions_conflict_current": 11,
+  "sessions_conflict_indexed": 12,
+  "sessions_conflict_superseded": 1,
+  "sources": 0
+}

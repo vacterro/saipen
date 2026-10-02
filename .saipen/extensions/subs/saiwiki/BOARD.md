@@ -5,6 +5,7 @@
 ## TODO
 
 ## DONE
+- [x] W-049 FORCE-FRESH current-tree truth -- 5 pages corrected (Home, Getting-Started, Phases, SubSaipen, Use-Cases), 4 byte-identical; transport/telegrams/autonomy/QUALITY>TIME/supersession truth mirrored; inventory re-measured (224 modules / 3793 methods / FULL_CASE_COUNT 242); Scenarios 1-257 mirror sha256:43ab86d596572a90 unchanged | verify: strict READY sha256:9a4c65e5 at epoch 10; collect:saiwiki gate PASS; refresh script idempotent; no integration or push
 # LEGACY HISTORY (read-only, pre-W- era): tickets below are committed history under older prefixes and can never become actionable
 - [x] WIKI-001 saitranslate locale freshness audit -- baseline v7.55, current v7.64, drift confirmed minimal
 - [x] WIKI-002 maintenance mechanism delivered: `tools/validate.py` translation badge drift check + `githooks/pre-commit` hook templates (bash + ps1) | verify: python tools/validate.py now FAILs on stale translation badges -- confirms detection works (32/32 locales stale, all detected)

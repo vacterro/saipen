@@ -1,0 +1,40 @@
+[
+  {
+    "variant": "before",
+    "ran": 7,
+    "failures": 4,
+    "errors": 0,
+    "passed": false,
+    "subject_sha256": "f58c1f6ac38dabd2a992b579de5ac468b2b0c9e99606624e3f90be4f277ded1f",
+    "subjects": [
+      {
+        "path": "tools/run_scenarios.py",
+        "sha256": "ad32dab18f70382dec8dcf65e280f96bb81e9a83d202a93a4e6cf455c29820e4"
+      },
+      {
+        "path": "tools/perf_wave_regressions.py",
+        "sha256": "adaa37b41c67b66f5ef98ca714d2ac2f23b7d28ef011294b42d839a0a7ea140a"
+      }
+    ],
+    "verifier_sha256": "15389b88442cd01571c8dd112627bf050ecd74dcf3a052c3f6fbbec31072ef2a"
+  },
+  {
+    "variant": "live",
+    "ran": 7,
+    "failures": 0,
+    "errors": 0,
+    "passed": true,
+    "subject_sha256": "8a2dd8483f0fb28214d54f3117c88c2ceac51ca1d7451006660157c75b0edaf5",
+    "subjects": [
+      {
+        "path": "tools/run_scenarios.py",
+        "sha256": "45f2d1842cc4fb4ec4eb3457209f47566ce5d166cce84918c94efe4c9256788d"
+      },
+      {
+        "path": "tools/perf_wave_regressions.py",
+        "sha256": "ad5759cd6ac28fa8c67b3cf1c63fbd5140fa7e87932661abee80088f5f984d20"
+      }
+    ],
+    "verifier_sha256": "15389b88442cd01571c8dd112627bf050ecd74dcf3a052c3f6fbbec31072ef2a"
+  }
+]

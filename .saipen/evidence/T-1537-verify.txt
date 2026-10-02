@@ -1,0 +1,47 @@
+=== R003 dry-run hoist ===
+313:    if dry_run:
+1530:    with nullcontext() if dry_run else project_writer_lock(root):
+1531:        return _reverify_body(
+1536:def _reverify_body(
+1549:    if dry_run:
+1606:    if dry_run:
+=== R006 fingerprints in reuse ===
+218:    return {"board_sha256": board, "state_sha256": state, "log_fingerprint": log_digest}
+=== R007 writer lock ===
+307:    id. ``project_writer_lock`` is NOT reentrant, so the locked body is
+308:    :func:`_create_snapshot_apply`; callers that already hold the writer lock
+354:    from .lock import project_writer_lock
+356:    with project_writer_lock(root):
+357:        return _create_snapshot_apply(root, agent, reason, bound_work)
+360:def _create_snapshot_apply(root: Path, agent: str, reason: str, bound_work: str | None) -> dict:
+363:    Unlocked on purpose: ``project_writer_lock`` is not reentrant, so a caller
+485:    from .lock import project_writer_lock
+=== R010 single pass ===
+689:def _claim_boundary(boundary_event: str, history: list[dict]) -> dict:
+714:def _first_ticket_events(history: list[dict]) -> dict[str, int]:
+950:            first_event_by_ticket = _first_ticket_events(history)
+1006:            current_problem_keys = {f["finding_key"] for f in current_problems}
+1008:                if key not in current_problem_keys:
+=== R004 journal ===
+    verifier = _verifier_for(policy)
+    if verifier is None:
+        return []
+    try:
+        return verifier(root, targets, receipt_metadata) or []
+    except Exception as exc:
+        # A verifier that RAISES is not a verifier that had nothing to say:
+        # `[]` is read by every caller as "the postcondition holds", so an
+        # exception returned as `[]` would be a silent PASS. It also must not
+        # escape -- the operation is already APPLYING on disk, and a raw raise
+        # strands it there. A raised verifier becomes a refusal like any other
+        # non-empty list, so the operation lands on the caller's terminal state.
+        return [f"semantic verifier {policy} raised {type(exc).__name__}: {exc}"]
+
+
+def verify_improve(root, targets, receipt_metadata=None) -> list[str]:
+=== R007 journal half2 ===
+                    "dispatch a destructive fallback",
+                }
+        except (OSError, ValueError) as exc:
+            # W2-005: the safe-atomic ownership race (paths.py raises
+            # ValueError when the final node or the temporary is swapped under

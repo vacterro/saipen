@@ -1,0 +1,49 @@
+{
+  "schema": 1,
+  "family": "unit",
+  "command": [
+    "python",
+    "-B",
+    "-m",
+    "unittest",
+    "discover",
+    "-s",
+    "tools",
+    "-p",
+    "test_*.py",
+    "-v"
+  ],
+  "fingerprint": "7cf0cd5a579f9803529eb7dc3515a5ea171c17d3eeb31da5838f8b0982396a78",
+  "fingerprint_excludes": [
+    ".git",
+    ".saipen"
+  ],
+  "baseline_sha256": "c771e5fadeb2b293e2f867f1af3caf6d7ff6773c29a83121af33fe19bfd44cc5",
+  "head": "6c6e2a457125c3a526688cf86892cf660d2f7211",
+  "finished_utc": "2026-09-25T03:00:04Z",
+  "status": "FAIL",
+  "exit_code": 1,
+  "ran": 3773,
+  "duration_s": 1891.9,
+  "timeout_s": 5400,
+  "headers": 6,
+  "unparsed": 0,
+  "tallied": 6,
+  "red": [
+    "test_inject_digest.SurfaceDigest.test_the_two_transports_agree",
+    "test_install_drift.DriftReportTests.test_line_endings_alone_are_not_drift",
+    "test_opencode_host_smoke.OpenCodeHostSmoke.test_1_the_injector_installs_one_hook_on_the_loaded_surface",
+    "test_public_closure_cli.PublicClosureCliTests.test_control_c_d_cohort_cli_and_publication",
+    "test_t1304_r004_transition.BaselineFailureTests.test_internal_debt_code_in_a_refusal_exception_is_normalized",
+    "test_t1304_r004_transition.BaselineFailureTests.test_internal_debt_code_is_normalized_not_a_crash"
+  ],
+  "jobs": 1,
+  "verdict": "FAIL",
+  "new_red": [
+    "test_opencode_host_smoke.OpenCodeHostSmoke.test_1_the_injector_installs_one_hook_on_the_loaded_surface"
+  ],
+  "fixed": [],
+  "problems": [
+    "1 new red outside the baseline"
+  ]
+}

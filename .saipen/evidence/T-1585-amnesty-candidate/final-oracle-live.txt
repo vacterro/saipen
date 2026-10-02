@@ -1,0 +1,11 @@
+test_active_log_change_selects_the_control (test_t1585_amnesty_control.AmnestyControlTests.test_active_log_change_selects_the_control) ... ok
+test_actual_sweep_restores_all_sources_after_seeing_the_unsuppressed_condition (test_t1585_amnesty_control.AmnestyControlTests.test_actual_sweep_restores_all_sources_after_seeing_the_unsuppressed_condition) ... ok
+test_all_actual_grants_are_demoted_across_complete_history (test_t1585_amnesty_control.AmnestyControlTests.test_all_actual_grants_are_demoted_across_complete_history) ... ok
+test_future_sealed_log_changes_select_the_control_without_disk_guessing (test_t1585_amnesty_control.AmnestyControlTests.test_future_sealed_log_changes_select_the_control_without_disk_guessing) ... ok
+test_no_actual_grant_is_a_no_op_instead_of_fake_evidence (test_t1585_amnesty_control.AmnestyControlTests.test_no_actual_grant_is_a_no_op_instead_of_fake_evidence) ... ok
+test_save_restore_declares_every_touched_file_and_preserves_raw_bytes (test_t1585_amnesty_control.AmnestyControlTests.test_save_restore_declares_every_touched_file_and_preserves_raw_bytes) ... ok
+
+----------------------------------------------------------------------
+Ran 6 tests in 0.022s
+
+OK

@@ -1,0 +1,27 @@
+{
+  "ok": false,
+  "code": "HISTORY_LEDGER_CORRUPT",
+  "detail": "history-void: complete LOG history fails the immutable-ledger contract -- duplicate E-ID(s) in complete history: E-2602, E-2603, E-2604; E-2602 is not greater than preceding E-10842 (out of order)",
+  "needs_local_mutation": false,
+  "safe_auto_repair_available": false,
+  "operator_decision_available": false,
+  "canonical_next_command": null,
+  "read_only": true,
+  "terminal_disposition": "FORENSICALLY_UNRECOVERABLE",
+  "blocking_surface": "log",
+  "blocking_field": null,
+  "evidence_reference": ".saipen/LOG.md",
+  "diagnosis": "READ_ONLY_DIAGNOSIS_ONLY",
+  "read_only_diagnosis_only": true,
+  "instruction": "READ_ONLY_DIAGNOSIS_ONLY -- do not probe mutating verbs; no local mutation can reconstruct the missing truth",
+  "forbidden_probes": [
+    "saipen stop",
+    "saipen transition",
+    "saipen goal",
+    "saipen ticket",
+    "Bash",
+    "Edit",
+    "Write"
+  ],
+  "reason_code": "HISTORY_LEDGER_CORRUPT"
+}

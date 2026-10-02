@@ -1,0 +1,3005 @@
+diff --git a/saipen/REGISTRY.json b/saipen/REGISTRY.json
+index cc40b91a..a739e446 100644
+--- a/saipen/REGISTRY.json
++++ b/saipen/REGISTRY.json
+@@ -843,6 +843,7 @@
+   }
+  },
+  "error_codes": [
++  "CLOSURE_CONTRADICTION",
+   "STALE_STATE",
+   "TICKET_NOT_FOUND",
+   "TICKET_NOT_WORKABLE",
+diff --git a/tools/saipen_engine/release.py b/tools/saipen_engine/release.py
+index 8257844d..72661fa9 100644
+--- a/tools/saipen_engine/release.py
++++ b/tools/saipen_engine/release.py
+@@ -3210,6 +3210,95 @@ def _mark_target(journal, index: int) -> None:
+     _try_journal(journal, "mark", "APPLYING", target_index=index)
+ 
+ 
++# ---------------------------------------------------------------------------
++# T-1278: a closure commit may never assert a terminal state its own bytes
++# contradict. Observed live: 058ab732 "closure v7.250.0: ticket T-1276 DONE"
++# and, found by the history scan, 794085e9 "closure v7.251.0: ticket T-1280
++# DONE" both carry a BOARD on which the named ticket is still in ## DOING.
++# The commit path now refuses to create such a commit, and the history scan
++# reports any published one. Published history is never rewritten: the two
++# known divergences are recorded here with their reason instead.
++# ---------------------------------------------------------------------------
++
++KNOWN_CLOSURE_DIVERGENCES = {
++    "058ab732": "v7.250.0 names T-1276 DONE over a DOING board; observed while "
++    "shipping v7.250.0 and filed as T-1278",
++    "794085e9": "v7.251.0 names T-1280 DONE over a DOING board; found by the "
++    "T-1278 history scan on 2026-09-24",
++}
++_CLOSURE_SUBJECT_RE = re.compile(r"\Aclosure v\S+: ticket (T-\d+) DONE\Z")
++
++
++def closure_board_contradiction(board_text: str, ticket_id: str) -> str | None:
++    """Why ``board_text`` does not close ``ticket_id``, or None when it does."""
++    from .board import parse_board
++
++    try:
++        board = parse_board(board_text)
++    except (ValueError, KeyError, TypeError) as exc:
++        return f"its BOARD does not parse ({exc})"
++    ticket = (board.get("tickets") or {}).get(ticket_id)
++    if ticket is None:
++        return f"{ticket_id} is not on its BOARD"
++    section = ticket.get("section")
++    if section != "## DONE":
++        return f"{ticket_id} is in {section or 'no section'} on its BOARD, not ## DONE"
++    return None
++
++
++def closure_history_contradictions(root: Path | str) -> list[dict]:
++    """Every published closure commit whose own BOARD contradicts its subject.
++
++    Read-only. One `git log` plus one `git cat-file --batch` for all BOARD
++    blobs, so the cost stays flat as the history grows. A repository without
++    Git, or one Git cannot read, reports nothing: absence of history is not a
++    contradiction. Recorded divergences (KNOWN_CLOSURE_DIVERGENCES) are
++    excluded by commit prefix.
++    """
++    root = Path(root)
++    log = _git(root, "log", "--format=%H%x1f%s", "--grep=^closure v")
++    if not log.ok:
++        return []
++    commits: list[tuple[str, str]] = []
++    for line in log.stdout.splitlines():
++        sha, _sep, subject = line.partition("\x1f")
++        match = _CLOSURE_SUBJECT_RE.match(subject.strip())
++        if not match or any(sha.startswith(known) for known in KNOWN_CLOSURE_DIVERGENCES):
++            continue
++        commits.append((sha, match.group(1)))
++    if not commits:
++        return []
++    request = "".join(f"{sha}:.saipen/BOARD.md\n" for sha, _ticket in commits).encode("utf-8")
++    try:
++        proc = subprocess.run(
++            ["git", "-C", str(root), "cat-file", "--batch"],
++            input=request,
++            capture_output=True,
++            timeout=120,
++        )
++    except (OSError, subprocess.SubprocessError):
++        return []
++    if proc.returncode != 0:
++        return []
++    out = proc.stdout
++    found: list[dict] = []
++    offset = 0
++    for sha, ticket in commits:
++        newline = out.index(b"\n", offset)
++        header = out[offset:newline].decode("utf-8", "replace").split()
++        offset = newline + 1
++        if len(header) == 3 and header[1] == "blob":
++            size = int(header[2])
++            text = out[offset : offset + size].decode("utf-8", "replace")
++            offset += size + 1
++            problem = closure_board_contradiction(text, ticket)
++        else:
++            problem = "the commit carries no .saipen/BOARD.md"
++        if problem:
++            found.append({"commit": sha, "ticket": ticket, "problem": problem})
++    return found
++
++
+ def _commit_closure(root: Path, plan: ReleasePlan, journal) -> tuple[str, str]:
+     """Stage ONLY the canonical closure files (+ sealed LOG segments),
+     write-tree, commit B.
+@@ -3222,6 +3311,20 @@ def _commit_closure(root: Path, plan: ReleasePlan, journal) -> tuple[str, str]:
+         raise ReleaseRefusal(
+             "RELEASE_FAILED", f"closure staging failed: {add.stderr or add.stdout}"
+         )
++    # T-1278: the commit about to say "ticket T DONE" must carry a BOARD that
++    # closes T. Otherwise no commit is created at all.
++    staged = _git(root, "show", ":.saipen/BOARD.md")
++    problem = (
++        closure_board_contradiction(staged.stdout, plan.ticket_id)
++        if staged.ok
++        else "the closure stage carries no .saipen/BOARD.md"
++    )
++    if problem:
++        raise ReleaseRefusal(
++            "CLOSURE_CONTRADICTION",
++            f"closure commit would name {plan.ticket_id} DONE but {problem}; "
++            "no commit was created",
++        )
+     tree = _git(root, "write-tree")
+     if not tree.ok:
+         raise ReleaseRefusal("RELEASE_FAILED", f"closure write-tree failed: {tree.stderr}")
+diff --git a/tools/test_t1278_closure_contradiction.py b/tools/test_t1278_closure_contradiction.py
+new file mode 100644
+index 00000000..7f4b4c2d
+--- /dev/null
++++ b/tools/test_t1278_closure_contradiction.py
+@@ -0,0 +1,148 @@
++"""T-1278: a closure commit never asserts a terminal state its bytes contradict.
++
++Observed live: 058ab732 "closure v7.250.0: ticket T-1276 DONE" carries a BOARD
++on which T-1276 is still ## DOING, and the history scan found the same at
++794085e9 (T-1280). These controls hold:
++
++* AC-01/02: the commit path refuses, and creates no commit, when the staged
++  BOARD does not close the ticket its subject names;
++* AC-03: the history scan goes red on a hand-built commit carrying a DONE
++  subject over a DOING board, and stays green on a consistent one;
++* AC-04: recorded divergences are excepted by commit, never rewritten.
++"""
++
++from __future__ import annotations
++
++import os
++import shutil
++import subprocess
++import sys
++import tempfile
++import unittest
++from pathlib import Path
++from unittest import mock
++
++TOOLS = Path(__file__).resolve().parent
++if str(TOOLS) not in sys.path:
++    sys.path.insert(0, str(TOOLS))
++
++from saipen_engine import release  # noqa: E402
++
++
++def board(section: str, ticket: str = "T-1") -> str:
++    line = f"- [{'x' if section == 'DONE' else '/'}] {ticket} fixture work | verify: proof\n"
++    parts = {"DOING": "", "TODO": "", "BLOCKED": "", "DONE": ""}
++    parts[section] = line
++    return "# BOARD\n\n" + "".join(f"## {name}\n{body}\n" for name, body in parts.items())
++
++
++class Repo:
++    def __init__(self, case: unittest.TestCase):
++        self.root = Path(tempfile.mkdtemp(prefix="t1278-"))
++        case.addCleanup(shutil.rmtree, self.root, ignore_errors=True)
++        env = {k: v for k, v in os.environ.items() if not k.startswith("GIT_")}
++        self.env = env
++        self.git("init", "-q")
++        (self.root / ".saipen").mkdir()
++
++    def git(self, *args: str) -> str:
++        proc = subprocess.run(
++            ["git", "-c", "user.name=fixture", "-c", "user.email=fixture@example.invalid",
++             "-c", "core.autocrlf=false", *args],
++            cwd=self.root, env=self.env, capture_output=True, text=True, check=True,
++        )
++        return proc.stdout.strip()
++
++    def commit_board(self, text: str, subject: str) -> str:
++        (self.root / ".saipen" / "kitchen").mkdir(exist_ok=True)
++        for name, body in (
++            ("BOARD.md", text),
++            ("LOG.md", "- log\n"),
++            ("STATE.md", "---\n---\n"),
++            ("kitchen/digest.md", "digest\n"),
++        ):
++            (self.root / ".saipen" / name).write_bytes(body.encode("utf-8"))
++        self.git("add", "-A")
++        self.git("commit", "-q", "-m", subject)
++        return self.git("rev-parse", "HEAD")
++
++
++class BoardContradictionTests(unittest.TestCase):
++    def test_a_done_ticket_is_consistent(self):
++        self.assertIsNone(release.closure_board_contradiction(board("DONE"), "T-1"))
++
++    def test_a_doing_ticket_contradicts(self):
++        problem = release.closure_board_contradiction(board("DOING"), "T-1")
++        self.assertIn("## DOING", problem)
++
++    def test_a_missing_ticket_contradicts(self):
++        problem = release.closure_board_contradiction(board("DONE", "T-2"), "T-1")
++        self.assertIn("not on its BOARD", problem)
++
++
++class HistoryScanTests(unittest.TestCase):
++    def test_a_done_subject_over_a_doing_board_is_reported(self):
++        repo = Repo(self)
++        repo.commit_board(board("DONE", "T-1"), "closure v1.0.0: ticket T-1 DONE")
++        bad = repo.commit_board(board("DOING", "T-2"), "closure v1.0.1: ticket T-2 DONE")
++        found = release.closure_history_contradictions(repo.root)
++        self.assertEqual([(item["commit"], item["ticket"]) for item in found], [(bad, "T-2")])
++
++    def test_a_recorded_divergence_is_excepted_not_rewritten(self):
++        repo = Repo(self)
++        bad = repo.commit_board(board("DOING"), "closure v1.0.0: ticket T-1 DONE")
++        with mock.patch.dict(release.KNOWN_CLOSURE_DIVERGENCES, {bad[:8]: "fixture"}):
++            self.assertEqual(release.closure_history_contradictions(repo.root), [])
++        self.assertEqual(repo.git("rev-parse", "HEAD"), bad)
++
++    def test_other_subjects_are_ignored(self):
++        repo = Repo(self)
++        repo.commit_board(board("DOING"), "ship v1.0.0")
++        self.assertEqual(release.closure_history_contradictions(repo.root), [])
++
++    def test_no_repository_reports_nothing(self):
++        plain = Path(tempfile.mkdtemp(prefix="t1278-plain-"))
++        self.addCleanup(shutil.rmtree, plain, ignore_errors=True)
++        self.assertEqual(release.closure_history_contradictions(plain), [])
++
++    def test_the_live_history_carries_only_recorded_divergences(self):
++        self.assertEqual(release.closure_history_contradictions(TOOLS.parent), [])
++
++
++class _Journal:
++    manifest = "fixture-journal"
++
++    def update(self, **_fields):
++        return None
++
++
++class _Plan:
++    version = "1.0.0"
++    ticket_id = "T-1"
++
++
++class CommitGuardTests(unittest.TestCase):
++    def stage(self, text: str) -> Repo:
++        repo = Repo(self)
++        repo.commit_board(board("DOING"), "base")
++        (repo.root / ".saipen" / "BOARD.md").write_bytes(text.encode("utf-8"))
++        return repo
++
++    def test_no_closure_commit_over_a_board_that_leaves_the_ticket_open(self):
++        repo = self.stage(board("DOING"))
++        before = repo.git("rev-parse", "HEAD")
++        with self.assertRaises(release.ReleaseRefusal) as caught:
++            release._commit_closure(repo.root, _Plan(), _Journal())
++        self.assertEqual(caught.exception.code, "CLOSURE_CONTRADICTION")
++        self.assertEqual(repo.git("rev-parse", "HEAD"), before)
++
++    def test_a_consistent_closure_is_committed(self):
++        repo = self.stage(board("DONE"))
++        before = repo.git("rev-parse", "HEAD")
++        release._commit_closure(repo.root, _Plan(), _Journal())
++        self.assertNotEqual(repo.git("rev-parse", "HEAD"), before)
++        self.assertEqual(repo.git("log", "-1", "--format=%s"), "closure v1.0.0: ticket T-1 DONE")
++
++
++if __name__ == "__main__":
++    unittest.main()
+diff --git a/tools/validate.py b/tools/validate.py
+index 59300606..1a0eda5e 100644
+--- a/tools/validate.py
++++ b/tools/validate.py
+@@ -1534,6 +1534,20 @@ else:
+         "(the first mutation mints it journaled)"
+     )
+ 
++# T-1278: a published closure commit may not name a ticket DONE that its own
++# BOARD bytes leave open. Recorded historical divergences are excepted by
++# release.KNOWN_CLOSURE_DIVERGENCES; history itself is never rewritten.
++if _git("rev-parse", "--is-inside-work-tree")[0] == 0:
++    from saipen_engine.release import closure_history_contradictions
++
++    for _closure in closure_history_contradictions(PROJECT_ROOT):
++        fail(
++            f"closure history [closure-contradiction] -- commit {_closure['commit'][:12]} "
++            f"names {_closure['ticket']} DONE but {_closure['problem']}. Published "
++            "history is not rewritten: record the commit in "
++            "release.KNOWN_CLOSURE_DIVERGENCES with its reason (T-1278)"
++        )
++
+ # The voice marker, gated exactly the way `last_event` is: REQUIRED once the
+ # state is at the current revision, exempt while it is readable legacy, and
+ # always enforced when present. A missing STYLE.md fails loud instead of
+diff --git a/tools/validator_fail_sites.json b/tools/validator_fail_sites.json
+index 3b0c441d..76305eb8 100644
+--- a/tools/validator_fail_sites.json
++++ b/tools/validator_fail_sites.json
+@@ -2,13 +2,13 @@
+   "schema_version": 1,
+   "subject": "tools/validate.py",
+   "owner": "tools/fail_site_inventory.py",
+-  "count": 334,
++  "count": 335,
+   "sites": [
+     {
+       "site_id": "00e269421b42401a",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 9376,
++      "line": 9426,
+       "message": "locale coverage --  translated locale(s) have no guide: ",
+       "disposition": "BASELINE"
+     },
+@@ -16,7 +16,7 @@
+       "site_id": "015d440beb69ede4",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 2068,
++      "line": 2082,
+       "message": " mode is , MUST be read-only (extensions/subs/PROTOCOL.md § 1)",
+       "disposition": "BASELINE"
+     },
+@@ -32,7 +32,7 @@
+       "site_id": "027cd8cce74cedbf",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 10788,
++      "line": 10838,
+       "message": "cross-doc drift [adapters] --  file(s) STYLE.md as a rule-question escalation ('loads alongside it'); STYLE.md is a boot-read, applied before any output",
+       "disposition": "BASELINE"
+     },
+@@ -48,7 +48,7 @@
+       "site_id": "0339d8998867d564",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 10205,
++      "line": 10255,
+       "message": "cross-doc drift [cli-resolver-authority] -- tools/saipen.py declares its own translation table; the confusable map lives only in saipen_engine/commands.py",
+       "disposition": "BASELINE"
+     },
+@@ -56,7 +56,7 @@
+       "site_id": "037f189aa0c63b65",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 2098,
++      "line": 2112,
+       "message": " carries a concrete saipen_home () -- this file ships to every user and is copied by `saipen sub spawn`; a machine-specific path here leaks the author's layout ",
+       "disposition": "BASELINE"
+     },
+@@ -64,7 +64,7 @@
+       "site_id": "043245a106ed5663",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 9382,
++      "line": 9432,
+       "message": "locale coverage --  guide(s) have no translated locale: . English is the source and is exempt by name",
+       "disposition": "BASELINE"
+     },
+@@ -72,7 +72,7 @@
+       "site_id": "0442b5425c1d6123",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 7142,
++      "line": 7192,
+       "message": "cross-doc drift [crew-stages] -- crew.md stage ids/names/owner/condition , machine registry ",
+       "disposition": "BASELINE"
+     },
+@@ -80,7 +80,7 @@
+       "site_id": "044d98af7ef2ba97",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 7393,
++      "line": 7443,
+       "message": "cross-doc drift [prepare-record] -- phases/prepare.md step 6 must fix the completion and failure records as `RUN: prepare <producer> -> done|FAILED`, with `unqu",
+       "disposition": "BASELINE"
+     },
+@@ -88,7 +88,7 @@
+       "site_id": "04f0ea7e966c6261",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 5425,
++      "line": 5475,
+       "message": " has an odd number of fenced code markers",
+       "disposition": "BASELINE"
+     },
+@@ -96,7 +96,7 @@
+       "site_id": "054ad25b6d23319a",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 3243,
++      "line": 3257,
+       "message": " E- reused (first at ) -- Event IDs MUST be unique (RFC § 1.2)",
+       "disposition": "BASELINE"
+     },
+@@ -104,7 +104,7 @@
+       "site_id": "05687d6f953ed309",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 4773,
++      "line": 4823,
+       "message": "saiui charter lost the Golden Default mandate -- Vintage Golden is the design language, while UI.md's Wintage-derived Golden Default token set is the only palet",
+       "disposition": "BASELINE"
+     },
+@@ -112,7 +112,7 @@
+       "site_id": "088c937a07ada5a6",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 9749,
++      "line": 9799,
+       "message": " cursor is  -- markhunt.md defines exactly `partial` and `done`",
+       "disposition": "BASELINE"
+     },
+@@ -120,7 +120,7 @@
+       "site_id": "0937eaccba845600",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 5183,
++      "line": 5233,
+       "message": "SAIUI SAISENT mission claims the target was audited from this repository -- the mission must label findings as hypotheses to verify",
+       "disposition": "BASELINE"
+     },
+@@ -128,7 +128,7 @@
+       "site_id": "0a7dff07c7b1e549",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 7164,
++      "line": 7214,
+       "message": "cross-doc drift [hunt-no-mutation] -- phases/hunt.md must state it deletes, moves and renames nothing (detect/classify/ticket/report only), so the HUNT/CLEAN sc",
+       "disposition": "BASELINE"
+     },
+@@ -136,7 +136,7 @@
+       "site_id": "0aa503b75ec672a6",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 1677,
++      "line": 1691,
+       "message": "STATE.md next_action is vague, not executable:  (RFC § 1.2)",
+       "disposition": "BASELINE"
+     },
+@@ -144,7 +144,7 @@
+       "site_id": "0af07b82a8afa0f5",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 2355,
++      "line": 2369,
+       "message": "BOARD.md: ticket  claim_time  is not ISO-8601 UTC (Z or +00:00) -- § 1.4 decides a live claim from a 15-minute window, and a stamp with no zone is not comparabl",
+       "disposition": "BASELINE"
+     },
+@@ -152,7 +152,7 @@
+       "site_id": "0b1a2b79301cd7be",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 2128,
++      "line": 2142,
+       "message": " still carries TEMPLATE's placeholder :  -- `saipen sub spawn` replaces it at spawn (PROTOCOL.md § 6). A live subSaipen named  defeats RFC § 1.4's concurrency c",
+       "disposition": "BASELINE"
+     },
+@@ -160,7 +160,7 @@
+       "site_id": "0b3f14fa4247311c",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 5932,
++      "line": 5982,
+       "message": "runtime manifest names a file git does not track:  -- it exists here and in no clone, so this home ships complete and every checkout of it does not. Commit the ",
+       "disposition": "BASELINE"
+     },
+@@ -168,7 +168,7 @@
+       "site_id": "0bbc01d2df2a5aaf",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 10556,
++      "line": 10606,
+       "message": "cross-doc drift [root-device-ignore] -- root `nul` is not excluded by .gitignore; a real Windows device-name entry can pollute status and be staged by broad add",
+       "disposition": "BASELINE"
+     },
+@@ -176,7 +176,7 @@
+       "site_id": "0cfe420d71959e6d",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 3084,
++      "line": 3098,
+       "message": "ccc prepared EE/QQ before SHIP -- converge_target: ship MUST run A-I, SHIP, then J-M so packages bind to the shipped HEAD",
+       "disposition": "BASELINE"
+     },
+@@ -184,7 +184,7 @@
+       "site_id": "0e055439055ba2e9",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 2446,
++      "line": 2460,
+       "message": "BOARD.md has duplicate section heading  ( times) -- duplicate status buckets split the work surface (RFC § 1.2)",
+       "disposition": "BASELINE"
+     },
+@@ -200,7 +200,7 @@
+       "site_id": "0ea3f3e611b029df",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 8187,
++      "line": 8237,
+       "message": "cross-doc drift [phase-ticket-ref] --  writes , attaching a ticket ref to a phase RFC § 1.2 says omits one. The ref belongs to  alone; every other phase names i",
+       "disposition": "BASELINE"
+     },
+@@ -208,7 +208,7 @@
+       "site_id": "112d06a4120b4737",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 5074,
++      "line": 5124,
+       "message": "hardening wave barrier breached -- an improve-wave ticket is DOING while T-549 remains unresolved",
+       "disposition": "BASELINE"
+     },
+@@ -216,7 +216,7 @@
+       "site_id": "1212b79e006d43c1",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 5611,
++      "line": 5661,
+       "message": "cross-doc drift [improve-state-purity] -- STATE.md carries improve routing field(s) ; improve status is DERIVED from the cycle manifest + reports + sweep ledger",
+       "disposition": "BASELINE"
+     },
+@@ -224,7 +224,7 @@
+       "site_id": "125317601c4cc128",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 2972,
++      "line": 2986,
+       "message": "STATE.md audit route not followed --  (SOURCE-AUDIT-INBOX-01)",
+       "disposition": "BASELINE"
+     },
+@@ -232,7 +232,7 @@
+       "site_id": "129aa14284433e81",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 9121,
++      "line": 9171,
+       "message": "warn ownership [release history] -- WARN slug `` has survived  consecutive releases but no live BOARD ticket names it; create an owning ticket or fix the warnin",
+       "disposition": "BASELINE"
+     },
+@@ -240,7 +240,7 @@
+       "site_id": "12efba121fcdcc20",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 10710,
++      "line": 10760,
+       "message": "HABITS.md cites non-existent RFC section ",
+       "disposition": "BASELINE"
+     },
+@@ -248,7 +248,7 @@
+       "site_id": "13a621490f15b7e8",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 2512,
++      "line": 2526,
+       "message": "BOARD.md claims work whose dependencies are not done:  -- RFC § 1.11's Pick Rule makes a ticket workable only when all its needs: are DONE, so this claim was no",
+       "disposition": "BASELINE"
+     },
+@@ -256,7 +256,7 @@
+       "site_id": "13dc330d51bf443a",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 9952,
++      "line": 10002,
+       "message": "cross-doc drift [plan-forms] --  does not say that `saipen plan <text>` puts the user's own items at the front of `## TODO`. Board order is priority (§ 1.6), so",
+       "disposition": "BASELINE"
+     },
+@@ -264,7 +264,7 @@
+       "site_id": "13f13d321d8a58f5",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 8275,
++      "line": 8325,
+       "message": "cross-doc drift [schemas] -- board.schema.json does not describe , which RFC § 1.2 recognises as ticket fields and this validator already parses",
+       "disposition": "BASELINE"
+     },
+@@ -272,7 +272,7 @@
+       "site_id": "143466816da33b8e",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 9304,
++      "line": 9354,
+       "message": "cross-doc drift [sub-ban] -- PROTOCOL.md § 1 no longer distinguishes a subSaipen's SCOPE lock from Core's capability lock; without that sentence the two phase b",
+       "disposition": "BASELINE"
+     },
+@@ -280,7 +280,7 @@
+       "site_id": "145a2286aac40b4f",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 8204,
++      "line": 8254,
+       "message": "cross-doc drift [wait-categories] -- shipped doc prescribes a `WAIT:` with no § 1.2 category token: ",
+       "disposition": "BASELINE"
+     },
+@@ -288,7 +288,7 @@
+       "site_id": "14625451cab45bc0",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 6904,
++      "line": 6954,
+       "message": "lint parity [T-628] -- harness.md lints  but CI lints ; one canonical surface required",
+       "disposition": "BASELINE"
+     },
+@@ -296,7 +296,7 @@
+       "site_id": "14ec3d5cc972611d",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 1939,
++      "line": 1953,
+       "message": "tripped safety valve MUST NOT set phase: BLOCKED -- that is a § 2.4 Exit condition, so it clears the goal intent and makes bare `cc` (the documented way to cont",
+       "disposition": "BASELINE"
+     },
+@@ -304,7 +304,7 @@
+       "site_id": "15418af9a2b36539",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 2740,
++      "line": 2754,
+       "message": "BOARD.md has  tickets in ## DOING () -- RFC § 1.11 allows at most one per agent. Finish, block, or demote one to ## TODO with a LOG line before claiming another",
+       "disposition": "BASELINE"
+     },
+@@ -312,7 +312,7 @@
+       "site_id": "17c1825e57d0436e",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 2487,
++      "line": 2501,
+       "message": "BOARD.md invalid Work supersession: ",
+       "disposition": "INTENTIONALLY_NO_MUTATION_CASE",
+       "reason": "T-1418 supersession validator site landed without a CASE; owned by the T-1345 fail-site inventory debt wave"
+@@ -321,7 +321,7 @@
+       "site_id": "1ac4bced5ff0ed99",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 10179,
++      "line": 10229,
+       "message": "cross-doc drift [cli-resolver-authority] -- tools/saipen.py is missing from the home; shortcut dispatch cannot be checked",
+       "disposition": "BASELINE"
+     },
+@@ -329,7 +329,7 @@
+       "site_id": "1b13c2a800e18ec3",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 6334,
++      "line": 6384,
+       "message": "cross-doc drift [shortcut-callouts] -- expected 33 locale guides, found ",
+       "disposition": "BASELINE"
+     },
+@@ -337,7 +337,7 @@
+       "site_id": "1ca85c47fe6b4b5a",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 5548,
++      "line": 5598,
+       "message": "cross-doc drift [improve-meta-control] -- the phase enum contains IMPROVE; Improve is a meta-control and the phase count must stay 16 (T-552)",
+       "disposition": "BASELINE"
+     },
+@@ -353,7 +353,7 @@
+       "site_id": "1ced7afaf9564a67",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 8832,
++      "line": 8882,
+       "message": "release ledger baseline is stale for: . The recorded divergence no longer exists; remove its exception so the baseline cannot become a permanent blind spot",
+       "disposition": "BASELINE"
+     },
+@@ -361,7 +361,7 @@
+       "site_id": "1d39d61eee881cd6",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 3035,
++      "line": 3049,
+       "message": "converge clean-HUNT marker present but next_action names ADD -- under execution_intent: converge a clean HUNT MUST NOT enter ADD (CONVERGE.md stages F/I route i",
+       "disposition": "BASELINE"
+     },
+@@ -369,7 +369,7 @@
+       "site_id": "1d4847826e01d9e1",
+       "qualname": "_shortcut_callout",
+       "ordinal": 0,
+-      "line": 6287,
++      "line": 6337,
+       "message": "cross-doc drift [shortcut-callouts] --  does not link to ",
+       "disposition": "BASELINE"
+     },
+@@ -377,7 +377,7 @@
+       "site_id": "1dbf3642a04a1db8",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 9202,
++      "line": 9252,
+       "message": "UI.md Golden Default token drift [ui-palette] -- no :root single-owner token block found (count=)",
+       "disposition": "BASELINE"
+     },
+@@ -385,7 +385,7 @@
+       "site_id": "1e93fe466d2496cb",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 10163,
++      "line": 10213,
+       "message": "cross-doc drift [commands-vs-registry] -- saipen/COMMANDS.md shortcut table disagrees with saipen/REGISTRY.json (the machine authority). SRC-009:R0007: ",
+       "disposition": "COVERED",
+       "case": "COMMANDS.md shortcut row leaves the registry behind"
+@@ -394,7 +394,7 @@
+       "site_id": "1fdad6527c78e495",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 3881,
++      "line": 3931,
+       "message": "improve report [improve-report] -- ; a finding is rejected, not softened; report_status: complete requires the completion bar; a partial scope can never claim f",
+       "disposition": "BASELINE"
+     },
+@@ -410,7 +410,7 @@
+       "site_id": "24d3c7e7b505821f",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 4843,
++      "line": 4893,
+       "message": " lacks explicit - prefix in PROTOCOL.md ticket table -- the documented namespace must match the executable registry (SAICREW M parity)",
+       "disposition": "BASELINE"
+     },
+@@ -434,7 +434,7 @@
+       "site_id": "25776ff948e0f30b",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 4790,
++      "line": 4840,
+       "message": "saiui charter declares a second palette -- Vintage Golden is the single canonical palette",
+       "disposition": "BASELINE"
+     },
+@@ -450,7 +450,7 @@
+       "site_id": "260e1173c8564ca0",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 9244,
++      "line": 9294,
+       "message": "UI.md Golden Default token drift [ui-palette] -- 21-token map no longer matches Wintage themes/goldendefault.json; got sha256:",
+       "disposition": "BASELINE"
+     },
+@@ -458,7 +458,7 @@
+       "site_id": "2693a5c199b2290b",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 1784,
++      "line": 1798,
+       "message": "mode: read-only MUST NOT enter  -- that phase's work product is a file write (RFC § 1.3)",
+       "disposition": "BASELINE"
+     },
+@@ -466,7 +466,7 @@
+       "site_id": "277c5863e0032473",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 8794,
++      "line": 8844,
+       "message": "cross-doc drift [phantom-version] --  version(s) cited that are inside the release ledger's range but absent from it (no tag, no CHANGELOG entry): . Below VERSI",
+       "disposition": "BASELINE"
+     },
+@@ -474,7 +474,7 @@
+       "site_id": "28a00999d9e9937c",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 4141,
++      "line": 4191,
+       "message": "core sweep [sweep-ticket-link] -- scan failed: ",
+       "disposition": "BASELINE"
+     },
+@@ -490,7 +490,7 @@
+       "site_id": "29f585344859704b",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 2483,
++      "line": 2497,
+       "message": "BOARD.md contains cyclic needs: dependencies involving: ",
+       "disposition": "BASELINE"
+     },
+@@ -498,7 +498,7 @@
+       "site_id": "2a14ada9a949519b",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 10816,
++      "line": 10866,
+       "message": "Restore Milestone: ",
+       "disposition": "BASELINE"
+     },
+@@ -506,7 +506,7 @@
+       "site_id": "2a4b56f363e3c34b",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 1545,
++      "line": 1559,
+       "message": "STYLE.md not found under  -- the chat-voice contract has no source of truth on this install, so STATE.md's style_contract marker cannot be checked at all (RFC §",
+       "disposition": "BASELINE"
+     },
+@@ -514,7 +514,7 @@
+       "site_id": "2da0c9e14b905230",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 9835,
++      "line": 9885,
+       "message": "cross-doc drift [controls] -- CONTROLS.md is missing authority marker(s): ",
+       "disposition": "BASELINE"
+     },
+@@ -522,7 +522,7 @@
+       "site_id": "2e48dd7c728263c0",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 4806,
++      "line": 4856,
+       "message": "saiui charter removed fixer pen or OUTBOX requirement -- the charter must bind to PROTOCOL.md § 9 fixer contract",
+       "disposition": "BASELINE"
+     },
+@@ -538,7 +538,7 @@
+       "site_id": "30886d7e2c8aac1a",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 7972,
++      "line": 8022,
+       "message": "cross-doc drift [converge-target-converge] -- CONVERGE.md declares  `converge_targets:` sets; exactly one mechanically identifiable declaration is required (T-1",
+       "disposition": "BASELINE"
+     },
+@@ -546,7 +546,7 @@
+       "site_id": "3207cf6e255e91eb",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 5204,
++      "line": 5254,
+       "message": "KNOWLEDGE/ leak: : contains event journal syntax -- histories live in LOG.md only",
+       "disposition": "BASELINE"
+     },
+@@ -554,7 +554,7 @@
+       "site_id": "32881200d9b39d23",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 1726,
++      "line": 1740,
+       "message": "STATE.md next_action asks a question outside WAIT::  (RFC § 1.2)",
+       "disposition": "BASELINE"
+     },
+@@ -562,7 +562,7 @@
+       "site_id": "32bd4437cdc10276",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 3249,
++      "line": 3263,
+       "message": " E- after E- -- IDs MUST increase monotonically across segments (RFC § 1.2)",
+       "disposition": "BASELINE"
+     },
+@@ -570,7 +570,7 @@
+       "site_id": "32cfb5a898e65cc1",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 2312,
++      "line": 2326,
+       "message": "BOARD.md missing",
+       "disposition": "BASELINE"
+     },
+@@ -586,7 +586,7 @@
+       "site_id": "35c6e7cac0ad7fdc",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 5967,
++      "line": 6017,
+       "message": "extensions/adapters/ references  () which does not exist -- stale cross-reference (v7.22.3 bug class)",
+       "disposition": "BASELINE"
+     },
+@@ -594,7 +594,7 @@
+       "site_id": "3684d3d40e64c17b",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 3270,
++      "line": 3284,
+       "message": " states its event in the future tense () -- a LOG line records what happened, and an intention written as an event is counted as evidence the act occurred by ev",
+       "disposition": "BASELINE"
+     },
+@@ -602,7 +602,7 @@
+       "site_id": "3921805fcb779b05",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 7294,
++      "line": 7344,
+       "message": "cross-doc drift [clean-scrub-guard] -- phases/clean.md's board scrub must state that a `## DONE` ticket some live ticket still names in `needs:` is never pruned",
+       "disposition": "BASELINE"
+     },
+@@ -610,7 +610,7 @@
+       "site_id": "3946ee828add9fa5",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 3240,
++      "line": 3254,
+       "message": " has unparseable LOG timestamp",
+       "disposition": "BASELINE"
+     },
+@@ -618,7 +618,7 @@
+       "site_id": "3b08d1faaad8f186",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 5322,
++      "line": 5372,
+       "message": "conformance corpus invalid -- ",
+       "disposition": "BASELINE"
+     },
+@@ -626,7 +626,7 @@
+       "site_id": "3bfe417dbc47866b",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 2732,
++      "line": 2746,
+       "message": "BOARD.md:  has no [T-###] allocation event in the complete history (CORE-003 / SRC-026:R003)",
+       "disposition": "COVERED",
+       "case": "BOARD record with no allocation event"
+@@ -635,7 +635,7 @@
+       "site_id": "3cc8be9a727686ec",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 1752,
++      "line": 1766,
+       "message": "STATE.md next_action ",
+       "disposition": "BASELINE"
+     },
+@@ -643,7 +643,7 @@
+       "site_id": "3d9854cb8e2710f5",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 4832,
++      "line": 4882,
+       "message": "saiui lacks explicit UI- prefix in PROTOCOL.md ticket table -- built-in roles require a documented namespace",
+       "disposition": "BASELINE"
+     },
+@@ -651,7 +651,7 @@
+       "site_id": "3e9c18f6db0e7797",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 8002,
++      "line": 8052,
+       "message": "cross-doc drift [converge-target-converge] -- CONVERGE.md `converge_targets:` token  fails identifier grammar  (T-1012 strict grammar)",
+       "disposition": "BASELINE"
+     },
+@@ -659,7 +659,7 @@
+       "site_id": "3f173a52ff937692",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 7735,
++      "line": 7785,
+       "message": "cross-doc drift [translation-digest] -- phases/translate.md must tell the translator to recompute and write the `source-digest` marker for the locales it actual",
+       "disposition": "BASELINE"
+     },
+@@ -667,7 +667,7 @@
+       "site_id": "3f3266cfdffe58f9",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 6893,
++      "line": 6943,
+       "message": "lint parity [T-628] -- could not find the canonical ruff surface + pin in harness.md and validate.yml",
+       "disposition": "BASELINE"
+     },
+@@ -675,7 +675,7 @@
+       "site_id": "3f3c445fd6814d95",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 9157,
++      "line": 9207,
+       "message": "UI.md no longer names its design language  -- palette and design language are distinct contracts",
+       "disposition": "BASELINE"
+     },
+@@ -683,7 +683,7 @@
+       "site_id": "3f49b3e172ec13a0",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 2587,
++      "line": 2601,
+       "message": "STATE.md phase: BLOCKED while  workable ## TODO ticket(s) exist (topmost ) -- session-level BLOCKED is reserved for when no ticket anywhere on the board is work",
+       "disposition": "BASELINE"
+     },
+@@ -691,7 +691,7 @@
+       "site_id": "426911f649bbcc6c",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 4766,
++      "line": 4816,
+       "message": "saiui charter lost canonical saipen/UI.md reference -- the charter must load the one authoritative file by reference",
+       "disposition": "BASELINE"
+     },
+@@ -699,7 +699,7 @@
+       "site_id": "42dbc704657ec8f7",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 3129,
++      "line": 3143,
+       "message": "ccc SHIP did not change source revision -- post-SHIP packages would bind to the same pre-SHIP source_head ( and  are the same commit )",
+       "disposition": "BASELINE"
+     },
+@@ -707,7 +707,7 @@
+       "site_id": "43fa8de10fec2dce",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 1555,
++      "line": 1569,
+       "message": " declares  boot markers, expected exactly one line reading `style_contract: ` -- zero leaves every checkpoint with nothing to copy, two leaves it a choice (RFC ",
+       "disposition": "BASELINE"
+     },
+@@ -715,7 +715,7 @@
+       "site_id": "44791f418a5ae579",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 6325,
++      "line": 6375,
+       "message": "cross-doc drift [shortcut-callouts] --  differs from locale source ",
+       "disposition": "BASELINE"
+     },
+@@ -723,7 +723,7 @@
+       "site_id": "46598584ab38e56d",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 2770,
++      "line": 2784,
+       "message": "STATE.md task  is not the claimed ## DOING ticket () in ticket-bearing phase  -- a TODO/DONE/BLOCKED ticket cannot be the active task; Recovery reconstructs the",
+       "disposition": "BASELINE"
+     },
+@@ -740,7 +740,7 @@
+       "site_id": "4808607b0ddcd436",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 5724,
++      "line": 5774,
+       "message": "cross-doc drift [improve-admission-contract] -- role/session admission must keep closed core|critic roles, explicit new-seat/resume routing, one project lock + ",
+       "disposition": "BASELINE"
+     },
+@@ -748,7 +748,7 @@
+       "site_id": "481465c323c378f6",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 3703,
++      "line": 3753,
+       "message": "attempt-admission -- ",
+       "disposition": "BASELINE"
+     },
+@@ -756,7 +756,7 @@
+       "site_id": "487a82b80f1d5968",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 8013,
++      "line": 8063,
+       "message": "cross-doc drift [converge-target-converge] -- CONVERGE.md `converge_targets:` duplicate token  (T-1012 strict grammar: each target must appear exactly once)",
+       "disposition": "BASELINE"
+     },
+@@ -764,7 +764,7 @@
+       "site_id": "488bfa8bcafd9565",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 5306,
++      "line": 5356,
+       "message": "README.md badge doesn't match VERSION () exactly once -- this has drifted before",
+       "disposition": "BASELINE"
+     },
+@@ -772,7 +772,7 @@
+       "site_id": "4ab556d427ad4ff3",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 7334,
++      "line": 7384,
+       "message": "cross-doc drift [bootstrap-identity] -- extensions/templates/STATE.md must ship `agent:` as a value tools/validate.py rejects ( is the shipped one), so a copied",
+       "disposition": "BASELINE"
+     },
+@@ -780,7 +780,7 @@
+       "site_id": "4bc3aecbc7973f56",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 3257,
++      "line": 3271,
+       "message": " parent E- doesn't exist earlier in the sequence -- dangling parent breaks the graph Recovery depends on (RFC § 1.2)",
+       "disposition": "BASELINE"
+     },
+@@ -788,7 +788,7 @@
+       "site_id": "4eb0dfc9471f8996",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 3685,
++      "line": 3735,
+       "message": "attempt-contract -- ",
+       "disposition": "BASELINE"
+     },
+@@ -796,7 +796,7 @@
+       "site_id": "52363786ba3bb432",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 5803,
++      "line": 5853,
+       "message": "cross-doc drift [saicritic] -- saipen/SAICRITIC.md must define the canonical ordered proof levels exactly as  (observed ) and retain both invariants",
+       "disposition": "BASELINE"
+     },
+@@ -804,7 +804,7 @@
+       "site_id": "5250de7c0bb2cb90",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 9092,
++      "line": 9142,
+       "message": "release ledger baseline warn_slugs entry  needs first_seen, last_seen and rationale",
+       "disposition": "BASELINE"
+     },
+@@ -812,7 +812,7 @@
+       "site_id": "53afe53e03dbd7ba",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 3122,
++      "line": 3136,
+       "message": "ccc SHIP evidence names commit(s) this repository cannot resolve:  -- the I -> SHIP -> J proof compares commit identities, and a reference that resolves to noth",
+       "disposition": "BASELINE"
+     },
+@@ -820,7 +820,7 @@
+       "site_id": "5511b0272407560c",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 10197,
++      "line": 10247,
+       "message": "cross-doc drift [cli-resolver-authority] -- tools/saipen.py calls resolve_shortcut() after its first dispatch branch; shortcut normalization must precede ALL di",
+       "disposition": "BASELINE"
+     },
+@@ -828,7 +828,7 @@
+       "site_id": "55992140639367a5",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 3146,
++      "line": 3160,
+       "message": "ccc SHIP evidence does not match current source_head -- LOG says  (), current HEAD is ",
+       "disposition": "BASELINE"
+     },
+@@ -836,7 +836,7 @@
+       "site_id": "559b8616be3bf6f1",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 10716,
++      "line": 10766,
+       "message": "HABITS.md cites non-existent tool ",
+       "disposition": "BASELINE"
+     },
+@@ -844,7 +844,7 @@
+       "site_id": "55cec38e105005fa",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 8298,
++      "line": 8348,
+       "message": "cross-doc drift [outbox-status] -- PROTOCOL.md table , outbox.schema.json enum , validate.py . The table is normative for the extension (RFC § 1.9); the other t",
+       "disposition": "BASELINE"
+     },
+@@ -860,7 +860,7 @@
+       "site_id": "58309278acaf65d8",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 2385,
++      "line": 2399,
+       "message": "BOARD.md: ticket  verify_attempts  is not a number (RFC § 1.2)",
+       "disposition": "BASELINE"
+     },
+@@ -868,7 +868,7 @@
+       "site_id": "59c07f935fcfb013",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 7362,
++      "line": 7412,
+       "message": "cross-doc drift [clean-delete-proof] -- phases/clean.md must carry the deletion gate that HUNT previously held: delete only what it can prove recoverable (track",
+       "disposition": "BASELINE"
+     },
+@@ -876,7 +876,7 @@
+       "site_id": "59f2d1e572f15881",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 2470,
++      "line": 2484,
+       "message": "BOARD.md dangling needs: reference(s):  -- leaves the Pick Rule permanently unsatisfiable with zero signal",
+       "disposition": "BASELINE"
+     },
+@@ -892,7 +892,7 @@
+       "site_id": "5ccf3296762414b8",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 7584,
++      "line": 7634,
+       "message": "cross-doc drift [root-file-set] -- file(s) at the repository root that the closed set does not name: . Both orphans removed alongside this check arrived that wa",
+       "disposition": "BASELINE"
+     },
+@@ -900,7 +900,7 @@
+       "site_id": "5df040a86788785f",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 1876,
++      "line": 1890,
+       "message": "STATE.md agent is , which carries the model token  -- RFC 1.4 makes the seat the agent home the protocol was loaded from (`.claude` -> `claude`), not the model ",
+       "disposition": "BASELINE"
+     },
+@@ -908,7 +908,7 @@
+       "site_id": "5f2a16769cd86fba",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 5125,
++      "line": 5175,
+       "message": "[converge-contract] CONVERGE.md states its stages out of order:  -- preparing the producer packages before the cleanup and hunts that invalidate them is the exa",
+       "disposition": "BASELINE"
+     },
+@@ -916,7 +916,7 @@
+       "site_id": "5f4ae62bd7b94f0a",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 8513,
++      "line": 8563,
+       "message": "cross-doc drift [citations] -- could not read RFC's section headings or the phases/ directory, so citation checking would silently pass over everything",
+       "disposition": "BASELINE"
+     },
+@@ -924,7 +924,7 @@
+       "site_id": "60b053ad4abd970f",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 6536,
++      "line": 6586,
+       "message": "STATE.md next_action claims a push () but  commit(s) are not on the upstream branch. A claim the repository itself contradicts is worse than no claim: the next ",
+       "disposition": "BASELINE"
+     },
+@@ -932,7 +932,7 @@
+       "site_id": "630aac76a5802fbe",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 5523,
++      "line": 5573,
+       "message": "INDEX.md phase list does not match the files under phases/ -- INDEX names , disk has . Missing: ; phantom: ",
+       "disposition": "BASELINE"
+     },
+@@ -940,7 +940,7 @@
+       "site_id": "637543cf52dfeee3",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 2439,
++      "line": 2453,
+       "message": "BOARD.md missing required section heading: ",
+       "disposition": "BASELINE"
+     },
+@@ -948,7 +948,7 @@
+       "site_id": "63b16c8cd1b6df0a",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 7374,
++      "line": 7424,
+       "message": "cross-doc drift [hunt-clean-key] -- phases/hunt.md must require a clean worktree before reusing a `hunt -> clean` result. `HEAD` names a commit, not a tree, so ",
+       "disposition": "BASELINE"
+     },
+@@ -956,7 +956,7 @@
+       "site_id": "66ba327468292cba",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 8713,
++      "line": 8763,
+       "message": "release ledger baseline must contain exactly tag_only, changelog_only and warn_slugs maps",
+       "disposition": "BASELINE"
+     },
+@@ -964,7 +964,7 @@
+       "site_id": "66be91246be712ea",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 5418,
++      "line": 5468,
+       "message": " carries a cp1251-mangled  -- valid UTF-8, so the U+FFFD check above cannot catch it",
+       "disposition": "BASELINE"
+     },
+@@ -972,7 +972,7 @@
+       "site_id": "66c1ec34bf91d1a9",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 4798,
++      "line": 4848,
+       "message": "saiui charter softened or removed the main-tree write ban -- the charter must forbid main-project writes",
+       "disposition": "BASELINE"
+     },
+@@ -980,7 +980,7 @@
+       "site_id": "67a252e087de0a38",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 5118,
++      "line": 5168,
+       "message": "[converge-contract] CONVERGE.md is missing stage(s):  -- the contract is the whole order, and a run that cannot read a stage skips it",
+       "disposition": "BASELINE"
+     },
+@@ -988,7 +988,7 @@
+       "site_id": "67b18b19b202cf33",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 10574,
++      "line": 10624,
+       "message": "gitlink(s) committed inside .saipen/:  -- a nested repository recorded as a bare commit pointer nobody can fetch, with none of its content. Add the path to .git",
+       "disposition": "BASELINE"
+     },
+@@ -996,7 +996,7 @@
+       "site_id": "6803d11fc6c81592",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 1868,
++      "line": 1882,
+       "message": "STATE.md agent is  -- a placeholder, not a seat name. RFC § 1.4 compares this field against itself to decide whether another agent is live, and a placeholder ma",
+       "disposition": "BASELINE"
+     },
+@@ -1004,7 +1004,7 @@
+       "site_id": "6adbeb5dfb7c0f73",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 5587,
++      "line": 5637,
+       "message": "cross-doc drift [improve-meta-control] -- saipen/IMPROVE.md is the single canonical Improve owner and is missing (T-552)",
+       "disposition": "BASELINE"
+     },
+@@ -1012,7 +1012,7 @@
+       "site_id": "6b0fa9e956a5f80e",
+       "qualname": "_shortcut_callout",
+       "ordinal": 0,
+-      "line": 6259,
++      "line": 6309,
+       "message": "cross-doc drift [shortcut-callouts] --  has  shortcut callouts; expected exactly one",
+       "disposition": "BASELINE"
+     },
+@@ -1020,7 +1020,7 @@
+       "site_id": "6c2d9b0e71c7d018",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 5134,
++      "line": 5184,
+       "message": "[converge-contract] CONVERGE.md carries no closure bar -- the stage order says what to do and the bar is what says a run may stop, which is the half a converge ",
+       "disposition": "BASELINE"
+     },
+@@ -1036,7 +1036,7 @@
+       "site_id": "6c56bad55ab795c6",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 2781,
++      "line": 2795,
+       "message": "STATE.md next_action names  while task is  in ticket-bearing phase  -- the pick must agree with the active task (RFC § 1.2, T-573)",
+       "disposition": "BASELINE"
+     },
+@@ -1044,7 +1044,7 @@
+       "site_id": "6cb8f825de9a814f",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 3891,
++      "line": 3941,
+       "message": "improve report [improve-report] -- scan failed: ",
+       "disposition": "BASELINE"
+     },
+@@ -1052,7 +1052,7 @@
+       "site_id": "6f8eea39827d0de9",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 9267,
++      "line": 9317,
+       "message": "cross-doc drift [palette-name] --  document(s) still name the superseded palette instead of : ",
+       "disposition": "BASELINE"
+     },
+@@ -1060,7 +1060,7 @@
+       "site_id": "6ffb5f2be58b15a1",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 5540,
++      "line": 5590,
+       "message": "cross-doc drift [improve-meta-control] -- saipen/phases/improve.md exists; Improve is a meta-control and must never become an unofficial seventeenth phase (saip",
+       "disposition": "BASELINE"
+     },
+@@ -1068,7 +1068,7 @@
+       "site_id": "70b231c5181484df",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 2367,
++      "line": 2381,
+       "message": "BOARD.md: ticket  review_passes  is not a number (RFC § 1.2)",
+       "disposition": "BASELINE"
+     },
+@@ -1076,7 +1076,7 @@
+       "site_id": "70e1590ca9fd6c77",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 5043,
++      "line": 5093,
+       "message": "freshness hardening contract drift -- missing ",
+       "disposition": "BASELINE"
+     },
+@@ -1084,7 +1084,7 @@
+       "site_id": "70f3f961681263dd",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 9575,
++      "line": 9625,
+       "message": "guide opening drift --  starts with mechanics instead of prose. STYLE.md's guide contract puts the why-this-exists hook first, before any command, path or fence",
+       "disposition": "BASELINE"
+     },
+@@ -1092,7 +1092,7 @@
+       "site_id": "70fc42c1058e181c",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 5089,
++      "line": 5139,
+       "message": "[converge-contract] saipen/CONVERGE.md is missing -- INDEX.md and the phase docs point at it as the owner of the cc stage order",
+       "disposition": "BASELINE"
+     },
+@@ -1108,7 +1108,7 @@
+       "site_id": "73449202a579f55e",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 2062,
++      "line": 2076,
+       "message": " frontmatter: ",
+       "disposition": "BASELINE"
+     },
+@@ -1116,7 +1116,7 @@
+       "site_id": "7475582f3876c5e9",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 1716,
++      "line": 1730,
+       "message": "STATE.md next_action is a WAIT whose body starts a second sentence at offset  -- RFC § 1.2 bounds it to one. Session status belongs in .saipen/kitchen/digest.md",
+       "disposition": "BASELINE"
+     },
+@@ -1140,7 +1140,7 @@
+       "site_id": "769245ba097023b5",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 7792,
++      "line": 7842,
+       "message": "cross-doc drift [zero-prompt-exceptions] -- RFC § 2.1's ZERO-PROMPT rule must declare its exception list complete and name the `mode: read-only` carve-out: read",
+       "disposition": "BASELINE"
+     },
+@@ -1148,7 +1148,7 @@
+       "site_id": "776b50a725525714",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 9297,
++      "line": 9347,
+       "message": "cross-doc drift [sub-ban] -- PROTOCOL.md § 1 bans  but validate.py enforces ",
+       "disposition": "BASELINE"
+     },
+@@ -1156,7 +1156,7 @@
+       "site_id": "7862749c4a168836",
+       "qualname": "_shortcut_callout",
+       "ordinal": 0,
+-      "line": 6282,
++      "line": 6332,
+       "message": "cross-doc drift [shortcut-callouts] --  no longer orders continue, status, then stop like the canonical entry",
+       "disposition": "BASELINE"
+     },
+@@ -1164,7 +1164,7 @@
+       "site_id": "7982324fcfbe1b93",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 2145,
++      "line": 2159,
+       "message": " next_action is vague, not executable:  (RFC § 1.2)",
+       "disposition": "BASELINE"
+     },
+@@ -1172,7 +1172,7 @@
+       "site_id": "7b1eeba11f414fa3",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 2566,
++      "line": 2580,
+       "message": "STATE.md next_action names , claimed by  while this state's agent is  -- executing another agent's claim is the concurrency collision § 1.4 exists to prevent",
+       "disposition": "BASELINE"
+     },
+@@ -1180,7 +1180,7 @@
+       "site_id": "7b26583e1d3975a0",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 3194,
++      "line": 3208,
+       "message": " contains U+FFFD replacement character -- repair the corrupted text explicitly and LOG the repair",
+       "disposition": "BASELINE"
+     },
+@@ -1188,7 +1188,7 @@
+       "site_id": "7b7ddd6056953846",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 4429,
++      "line": 4479,
+       "message": "LOG has entries but not one parseable timestamp -- the inversion and future-timestamp checks below would both pass by iterating over nothing",
+       "disposition": "BASELINE"
+     },
+@@ -1196,7 +1196,7 @@
+       "site_id": "7d561369ba01c4f8",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 6611,
++      "line": 6661,
+       "message": "RFC.md not found at  -- SAIPEN home clone incomplete",
+       "disposition": "BASELINE"
+     },
+@@ -1204,7 +1204,7 @@
+       "site_id": "7d5dcbd7c033a324",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 2933,
++      "line": 2947,
+       "message": "",
+       "disposition": "BASELINE"
+     },
+@@ -1212,7 +1212,7 @@
+       "site_id": "7e114cf9e8ba7177",
+       "qualname": "_shortcut_callout",
+       "ordinal": 0,
+-      "line": 6289,
++      "line": 6339,
+       "message": "cross-doc drift [shortcut-callouts] --  hides its shortcut entry at line , outside the opening",
+       "disposition": "BASELINE"
+     },
+@@ -1220,7 +1220,7 @@
+       "site_id": "7ef11e801050d161",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 10213,
++      "line": 10263,
+       "message": "cross-doc drift [cli-resolver-authority] -- tools/saipen.py contains a Cyrillic literal; the adapter must hold no per-token Cyrillic special case",
+       "disposition": "BASELINE"
+     },
+@@ -1228,7 +1228,7 @@
+       "site_id": "7f2eb5d2d90e1f18",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 10190,
++      "line": 10240,
+       "message": "cross-doc drift [cli-resolver-authority] -- tools/saipen.py never calls resolve_shortcut(); CLI dispatch has bypassed the shared normalizer",
+       "disposition": "BASELINE"
+     },
+@@ -1236,7 +1236,7 @@
+       "site_id": "7f3870c582ff2324",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 2073,
++      "line": 2087,
+       "message": " phase  is unreachable for a subSaipen -- its work product lands outside the subSaipen's own folder (extensions/subs/PROTOCOL.md § 1)",
+       "disposition": "BASELINE"
+     },
+@@ -1244,7 +1244,7 @@
+       "site_id": "815f4a32c5be1d1e",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 10685,
++      "line": 10735,
+       "message": "RFC § 1.7 -- .saipen/ carries , which belong to saipen_home. `saipen set` writes a bootloader that POINTS at the home; a copy goes stale the moment the home mov",
+       "disposition": "BASELINE"
+     },
+@@ -1252,7 +1252,7 @@
+       "site_id": "822ea2f6c6ca32cd",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 10774,
++      "line": 10824,
+       "message": "cross-doc drift [adapters] --  adapter(s) never name BOOT.md and point a cold agent straight at the constitution: ",
+       "disposition": "BASELINE"
+     },
+@@ -1260,7 +1260,7 @@
+       "site_id": "84e2345ebe1206c5",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 5258,
++      "line": 5308,
+       "message": "improve report : ",
+       "disposition": "BASELINE"
+     },
+@@ -1285,7 +1285,7 @@
+       "site_id": "88cfe3b495241332",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 4850,
++      "line": 4900,
+       "message": "PROTOCOL.md spawn/sync does not mention sai*.md built-in charters -- first bootstrap would omit role charters",
+       "disposition": "BASELINE"
+     },
+@@ -1293,7 +1293,7 @@
+       "site_id": "88d1baeb5cd7ad99",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 5655,
++      "line": 5705,
+       "message": "cross-doc drift [improve-command-parity] -- REGISTRY declared , IMPROVE declared , CLI implements ; declared and executable Improve action sets must be exactly ",
+       "disposition": "BASELINE"
+     },
+@@ -1301,7 +1301,7 @@
+       "site_id": "89bc8ffece754832",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 9224,
++      "line": 9274,
+       "message": "UI.md Golden Default token drift [ui-palette] -- colour custom-property declaration or raw hex exists outside the single canonical :root block, or uses a non-#R",
+       "disposition": "BASELINE"
+     },
+@@ -1309,7 +1309,7 @@
+       "site_id": "8ac116e2aa18852d",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 2147,
++      "line": 2161,
+       "message": " next_action does not start with WAIT:/saipen /PHASE /RUN:/RESUME::  (RFC § 1.2)",
+       "disposition": "BASELINE"
+     },
+@@ -1317,7 +1317,7 @@
+       "site_id": "8bd6e19754efbb9d",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 3215,
++      "line": 3229,
+       "message": " has no DATE -- RFC § 1.2 makes it mandatory, and without it this line contributes nothing to the timestamp checks below",
+       "disposition": "BASELINE"
+     },
+@@ -1334,15 +1334,24 @@
+       "site_id": "8c37aa12d73d07fb",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 6308,
++      "line": 6358,
+       "message": "cross-doc drift [shortcut-callouts] -- expected 32 locale README sources, found ",
+       "disposition": "BASELINE"
+     },
++    {
++      "site_id": "8c8a68fe0315d0e2",
++      "qualname": "<module>",
++      "ordinal": 0,
++      "line": 1544,
++      "message": "closure history [closure-contradiction] -- commit  names  DONE but . Published history is not rewritten: record the commit in release.KNOWN_CLOSURE_DIVERGENCES ",
++      "disposition": "INTENTIONALLY_NO_MUTATION_CASE",
++      "reason": "the condition is a published git commit whose own BOARD contradicts its subject; a file mutation of the working tree cannot express it. Proved by tools/test_t1278_closure_contradiction.py (hand-built DONE subject over a DOING board goes red; recorded divergences are excepted)"
++    },
+     {
+       "site_id": "8cebee6c8d83330b",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 2178,
++      "line": 2192,
+       "message": " next_action ",
+       "disposition": "BASELINE"
+     },
+@@ -1358,7 +1367,7 @@
+       "site_id": "8d7bf9a3f289fa13",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 5564,
++      "line": 5614,
+       "message": "cross-doc drift [ops-owner] -- saipen/OPS.md does not state the mechanical boundary",
+       "disposition": "BASELINE"
+     },
+@@ -1366,7 +1375,7 @@
+       "site_id": "8e8ef7ef9272e800",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 2290,
++      "line": 2304,
+       "message": " state/board lifecycle is incoherent:  (SAICREW H); repair with the producer-owned reconciliation saipen sub reconcile  --authority SRC-###",
+       "disposition": "INTENTIONALLY_NO_MUTATION_CASE",
+       "reason": "covered by tools/test_producer_terminal_consistency.py, whose end-to-end case drives this validator FAIL and proves it disappears after the producer-owned `saipen sub reconcile` executes"
+@@ -1375,7 +1384,7 @@
+       "site_id": "8eaf9f565d3fabf6",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 9801,
++      "line": 9851,
+       "message": "cross-doc drift [commands] -- RFC § 1.10 not found; the command surface cannot be compared, and a missing anchor is a failure rather than a skip",
+       "disposition": "BASELINE"
+     },
+@@ -1383,7 +1392,7 @@
+       "site_id": "9045b35eb0744e6f",
+       "qualname": "_shortcut_callout",
+       "ordinal": 0,
+-      "line": 6277,
++      "line": 6327,
+       "message": "cross-doc drift [shortcut-callouts] --  callout does not carry each canonical key exactly once: ",
+       "disposition": "BASELINE"
+     },
+@@ -1391,7 +1400,7 @@
+       "site_id": "90953535208c448c",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 9078,
++      "line": 9128,
+       "message": "release ledger baseline warn_slugs must be a map of slug -> first/last seen + rationale",
+       "disposition": "BASELINE"
+     },
+@@ -1399,7 +1408,7 @@
+       "site_id": "90a734ec175e2787",
+       "qualname": "producer_problem",
+       "ordinal": 0,
+-      "line": 4605,
++      "line": 4655,
+       "message": "",
+       "disposition": "BASELINE"
+     },
+@@ -1407,7 +1416,7 @@
+       "site_id": "913f13a95a585274",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 6115,
++      "line": 6165,
+       "message": "binding ship gate requires every release metadata path staged: release index is empty",
+       "disposition": "BASELINE"
+     },
+@@ -1431,7 +1440,7 @@
+       "site_id": "933b285f25911b49",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 1741,
++      "line": 1755,
+       "message": "STATE.md next_action invokes 'saipen ', which RFC § 1.10 does not define -- a cold agent MUST decline an unrecognized command and stop, so this state fails TEST",
+       "disposition": "BASELINE"
+     },
+@@ -1447,7 +1456,7 @@
+       "site_id": "9388dc04ee2869c6",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 10656,
++      "line": 10706,
+       "message": "CONFORMANCE enforcement gone --  row(s) claim something that no longer exists: . Restore it or retire the row; a rule enforced by nothing is a decoration",
+       "disposition": "BASELINE"
+     },
+@@ -1455,7 +1464,7 @@
+       "site_id": "94586e09bef5cbd5",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 8264,
++      "line": 8314,
+       "message": "cross-doc drift [schemas] -- log.schema.json caps `content` at  characters; RFC § 1.2 sets no length limit and STYLE.md's commentary voice routinely exceeds it",
+       "disposition": "BASELINE"
+     },
+@@ -1463,7 +1472,7 @@
+       "site_id": "946803dbcbe81e4e",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 4748,
++      "line": 4798,
+       "message": "--gate crew -- ",
+       "disposition": "BASELINE"
+     },
+@@ -1471,7 +1480,7 @@
+       "site_id": "96229b843a73cbd1",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 1650,
++      "line": 1664,
+       "message": "STATE.md invalid phase transition:  ->  (RFC § 1.6). The block-parked shape is legal only with a matching active-block LOG event proving the ticket block (cross",
+       "disposition": "BASELINE"
+     },
+@@ -1479,7 +1488,7 @@
+       "site_id": "96bbcc34aec1ab30",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 8257,
++      "line": 8307,
+       "message": "cross-doc drift [schemas] -- log.schema.json does not require `event_id`, but RFC § 1.2 makes [E-###] a MUST on every line",
+       "disposition": "BASELINE"
+     },
+@@ -1487,7 +1496,7 @@
+       "site_id": "970328e9ae06e439",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 6145,
++      "line": 6195,
+       "message": "ship gate cannot compare staged release metadata with working-tree bytes",
+       "disposition": "BASELINE"
+     },
+@@ -1495,7 +1504,7 @@
+       "site_id": "97900f47f0af56c2",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 7615,
++      "line": 7665,
+       "message": "runtime namespace -- machine-local SAIPEN runtime artifact(s) are tracked by Git:  [classification: OPERATOR_AUTHORIZED_COMMAND] -- `.gitignore` cannot untrack ",
+       "disposition": "INTENTIONALLY_NO_MUTATION_CASE",
+       "reason": "covered by tools/test_runtime_namespace.py (tracked lock/cache/ops/snapshot red control, ignore-present-but-tracked control, remediation convergence); the check is ship-gate-only"
+@@ -1504,7 +1513,7 @@
+       "site_id": "9965552a31fc2c56",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 8630,
++      "line": 8680,
+       "message": "cross-doc drift [future-version] --  version(s) cited above VERSION (): . A citation to a release that has not happened is a promise the repo cannot keep",
+       "disposition": "BASELINE"
+     },
+@@ -1512,7 +1521,7 @@
+       "site_id": "99793890f547c237",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 4531,
++      "line": 4581,
+       "message": "source freshness computation BLOCKED -- ; no package may become ready or be collected with unknown input",
+       "disposition": "BASELINE"
+     },
+@@ -1520,7 +1529,7 @@
+       "site_id": "9bb7af9e27c54156",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 9770,
++      "line": 9820,
+       "message": " says cursor: done but vectors lists only  -- markhunt.md: a missing vector means the surface is NOT exhausted, keep going rather than round up (categories )",
+       "disposition": "BASELINE"
+     },
+@@ -1528,7 +1537,7 @@
+       "site_id": "9bd9dc372d410d02",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 6049,
++      "line": 6099,
+       "message": "RFC-stub-trap:  assigns normative authority to the RFC.md compatibility stub. The constitution was split into CORE.md/MAINTENANCE.md in v7.190.0; adapters and i",
+       "disposition": "BASELINE"
+     },
+@@ -1536,7 +1545,7 @@
+       "site_id": "9c69b1b41040c654",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 1926,
++      "line": 1940,
+       "message": "tripped goal safety valve must name the canonical resume key -- the § 1.2 safety-valve form under execution_intent: goal ends `-- run 'cc' to continue`; `saipen",
+       "disposition": "BASELINE"
+     },
+@@ -1544,7 +1553,7 @@
+       "site_id": "9cab6fb29990890d",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 7316,
++      "line": 7366,
+       "message": "cross-doc drift [bootstrap-identity] -- phases/init.md must refuse `agent: none` at INIT and must keep saying, in the same breath, that refusing it does NOT def",
+       "disposition": "BASELINE"
+     },
+@@ -1561,7 +1570,7 @@
+       "site_id": "9d3cebafba797d67",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 7445,
++      "line": 7495,
+       "message": "cross-doc drift [markhunt-pass-id] -- phases/markhunt.md must require the completion line to list the tickets the pass wrote and must name the line's own E-### ",
+       "disposition": "BASELINE"
+     },
+@@ -1569,7 +1578,7 @@
+       "site_id": "9d47089f9d5ab328",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 5252,
++      "line": 5302,
+       "message": "improve report  carries a machine-local saipen_home path in its header -- report identity uses saipen_version + protocol_fingerprint (T-555)",
+       "disposition": "BASELINE"
+     },
+@@ -1577,7 +1586,7 @@
+       "site_id": "9e2e80402404a8bc",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 3307,
++      "line": 3321,
+       "message": " records a MARKHUNT pass with no `tickets=` list -- phases/markhunt.md requires the completion line to name every [MARKHUNT] ticket the pass wrote (or `tickets=",
+       "disposition": "BASELINE"
+     },
+@@ -1585,7 +1594,7 @@
+       "site_id": "9ecc7e7a0574c6c0",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 8725,
++      "line": 8775,
+       "message": "release ledger baseline  must be a map",
+       "disposition": "BASELINE"
+     },
+@@ -1593,7 +1602,7 @@
+       "site_id": "9f3f2d44c6f32e3a",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 7639,
++      "line": 7689,
+       "message": "cross-doc drift [no-publish-split] -- phases/ship.md must say `no-publish` is a permission and not an absence of git, must record the real reason in the skipped",
+       "disposition": "BASELINE"
+     },
+@@ -1610,7 +1619,7 @@
+       "site_id": "a0330d22fa4e877d",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 5785,
++      "line": 5835,
+       "message": "cross-doc drift [saicritic-reachability] -- INDEX.md must route to SAICRITIC.md and MANIFEST.json must install it as a required runtime file",
+       "disposition": "BASELINE"
+     },
+@@ -1626,7 +1635,7 @@
+       "site_id": "a07c8790ff954e5e",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 5429,
++      "line": 5479,
+       "message": " contains split text artifact for ",
+       "disposition": "BASELINE"
+     },
+@@ -1634,7 +1643,7 @@
+       "site_id": "a0d07d3dda4c4672",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 6147,
++      "line": 6197,
+       "message": "staged release metadata differs from working-tree bytes:  -- the binding ship gate must inspect the exact release bytes selected for commit",
+       "disposition": "INTENTIONALLY_NO_MUTATION_CASE",
+       "reason": "The condition is a git INDEX-vs-worktree byte comparison over the reviewed release surface, so no file-content mutation can express it: staging state is not file content, and a mutation that changed a metadata file would have to also stage it to stay green. This identity replaced b74b14b021ad44e3 in the same count when the refusal gained sorted() over the drifted paths (same message, same check, same behavior). Proven instead end to end by the real ship-gate scenario in tools/run_scenarios.py (the probe that stages release metadata, edits the working bytes and requires 'staged release metadata differs from working-tree bytes' to refuse), which T-1361 measured green 44/44 groups."
+@@ -1643,7 +1652,7 @@
+       "site_id": "a1be82d061f840b4",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 4466,
++      "line": 4516,
+       "message": " timestamp for E- is m ahead of real UTC (slack is m) -- LOG timestamps MUST be real UTC time, and an event stamped at a minute that has not happened yet reorde",
+       "disposition": "BASELINE"
+     },
+@@ -1651,7 +1660,7 @@
+       "site_id": "a1e92ebe0324d37f",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 4728,
++      "line": 4778,
+       "message": "--gate converge but the closure's required producer package(s) are missing or not ready:  -- CONVERGE.md stages K/L/M require fresh EE and QQ bound to the curre",
+       "disposition": "BASELINE"
+     },
+@@ -1659,7 +1668,7 @@
+       "site_id": "a3301b99efeb255e",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 5165,
++      "line": 5215,
+       "message": "[converge-contract] ccc lost its persisted I -> SHIP -> J boundary -- plain cc would prepare EE/QQ before the ship that changes their source_head",
+       "disposition": "BASELINE"
+     },
+@@ -1667,7 +1676,7 @@
+       "site_id": "a385fdd3af88f070",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 2197,
++      "line": 2211,
+       "message": " transition_from  is not one of the 16 phase enum values (RFC § 1.6)",
+       "disposition": "BASELINE"
+     },
+@@ -1675,7 +1684,7 @@
+       "site_id": "a3eb8dd7d4c79111",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 2274,
++      "line": 2288,
+       "message": " is an invalid sub board:  (SAICREW H)",
+       "disposition": "BASELINE"
+     },
+@@ -1683,7 +1692,7 @@
+       "site_id": "a43e765bf7e4229a",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 2788,
++      "line": 2802,
+       "message": "STATE.md task is none but ## DOING carries  claimed by this agent or unclaimed -- STATE is behind BOARD; Recovery adopts the BOARD claim (RFC § 1.5, T-573)",
+       "disposition": "BASELINE"
+     },
+@@ -1691,7 +1700,7 @@
+       "site_id": "a4d1f972d5bca9e0",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 6353,
++      "line": 6403,
+       "message": "cross-doc drift [shortcut-callouts] --  differs from locale source ",
+       "disposition": "BASELINE"
+     },
+@@ -1699,7 +1708,7 @@
+       "site_id": "a5d695cd7705e736",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 1899,
++      "line": 1913,
+       "message": "execution_intent: goal but  counter missing -- safety valve can't survive a restart without it (RFC § 2.4)",
+       "disposition": "BASELINE"
+     },
+@@ -1707,7 +1716,7 @@
+       "site_id": "a5eb6635bbaf01b8",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 2399,
++      "line": 2413,
+       "message": "BOARD.md: ticket  has verify_attempts  against phases/verify.md's cap of  failed fix cycles, but carries no | blocker: -- at the cap the ticket moves to ## BLOC",
+       "disposition": "BASELINE"
+     },
+@@ -1723,7 +1732,7 @@
+       "site_id": "a7bd2acf1f3c301d",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 5623,
++      "line": 5673,
+       "message": "cross-doc drift [improve-state-purity] -- STATE.md carries finding text (an expected/actual/evidence triple or an IMP-### marker); findings live in seat reports",
+       "disposition": "BASELINE"
+     },
+@@ -1731,7 +1740,7 @@
+       "site_id": "a93afb96341dc3f5",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 5880,
++      "line": 5930,
+       "message": "saipen/MANIFEST.json is present but unparseable — the canonical manifest is corrupt",
+       "disposition": "BASELINE"
+     },
+@@ -1739,7 +1748,7 @@
+       "site_id": "a9fd7ab10cbcb86c",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 6113,
++      "line": 6163,
+       "message": "binding ship gate cannot read staged release metadata",
+       "disposition": "BASELINE"
+     },
+@@ -1747,7 +1756,7 @@
+       "site_id": "aa424c2b013d086e",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 2542,
++      "line": 2556,
+       "message": "STATE.md next_action names , which sits under  -- finished and blocked tickets are not executable, and § 1.11's Pick Rule selects from ## TODO (## BLOCKED is ex",
+       "disposition": "BASELINE"
+     },
+@@ -1755,7 +1764,7 @@
+       "site_id": "aa79f1808ad47131",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 9760,
++      "line": 9810,
+       "message": " has head_start= and head_end= -- markhunt.md permits `no-git` in BOTH fields, never one. A mixed pair skips the head-equality closure test on half a reason",
+       "disposition": "BASELINE"
+     },
+@@ -1763,7 +1772,7 @@
+       "site_id": "ab01272eba43322e",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 5140,
++      "line": 5190,
+       "message": "[converge-contract] CONVERGE.md lost the ordering rule that no main-source mutation may follow the producer preparation -- without it the factories can be fresh",
+       "disposition": "BASELINE"
+     },
+@@ -1779,7 +1788,7 @@
+       "site_id": "ac2874b82dd4b40b",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 8097,
++      "line": 8147,
+       "message": "cross-doc drift [scenario-read-only-bans] -- scenario README(s) re-list RFC § 1.3's Core read-only ban incorrectly: ",
+       "disposition": "BASELINE"
+     },
+@@ -1787,7 +1796,7 @@
+       "site_id": "ac327fb317b920a9",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 4705,
++      "line": 4755,
+       "message": "--gate collect: but no OUTBOX entry from that producer is `status: ready` -- there is nothing to collect. Run the producer's forced-fresh preparation first (COR",
+       "disposition": "BASELINE"
+     },
+@@ -1795,7 +1804,7 @@
+       "site_id": "ac8c4a6a3f0637a9",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 7945,
++      "line": 7995,
+       "message": "cross-doc drift [converge-target-schema] -- CORE.md declares  but state.schema.json enumerates . CORE.md is normative (§ 1.1); bring the schema to it, or change",
+       "disposition": "BASELINE"
+     },
+@@ -1803,7 +1812,7 @@
+       "site_id": "ae2c23eb24be2f45",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 9231,
++      "line": 9281,
+       "message": "UI.md Golden Default token drift [ui-palette] -- expected the closed 21-token Wintage order, got  entries: ",
+       "disposition": "BASELINE"
+     },
+@@ -1811,7 +1820,7 @@
+       "site_id": "afb269be0bb974b4",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 9777,
++      "line": 9827,
+       "message": " says cursor: partial while STATE.phase is  -- markhunt.md says an unfinished pass leaves phase: MARKHUNT with next_action: `saipen markhunt`. Moving on closed ",
+       "disposition": "BASELINE"
+     },
+@@ -1819,7 +1828,7 @@
+       "site_id": "b0a2b0781814fe36",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 2802,
++      "line": 2816,
+       "message": "## DOING  carries an INVALID claim (half owner/claim_time pair or non-UTC stamp) -- repair before validating",
+       "disposition": "BASELINE"
+     },
+@@ -1827,7 +1836,7 @@
+       "site_id": "b0c1a167f8c65a80",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 2154,
++      "line": 2168,
+       "message": " next_action is WAIT with no category token -- must be one of ; got ",
+       "disposition": "BASELINE"
+     },
+@@ -1835,7 +1844,7 @@
+       "site_id": "b0dd2914bb71c6f3",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 5755,
++      "line": 5805,
+       "message": "cross-doc drift [improve-boundary] -- saipen/IMPROVE.md must state the writer boundary and recursion stop (missing: ); an auditing seat writes only inside its o",
+       "disposition": "BASELINE"
+     },
+@@ -1843,7 +1852,7 @@
+       "site_id": "b1d345ce8e9d368a",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 6175,
++      "line": 6225,
+       "message": "translation README badge drift:  locale(s) still show an old version -- ",
+       "disposition": "BASELINE"
+     },
+@@ -1859,7 +1868,7 @@
+       "site_id": "b2b5e0db38189f5a",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 2225,
++      "line": 2239,
+       "message": " execution_intent: goal but  is missing -- PROTOCOL.md documents a goal run for an unattended sub, so § 2.4's valve applies here too and cannot survive a restar",
+       "disposition": "BASELINE"
+     },
+@@ -1867,7 +1876,7 @@
+       "site_id": "b33a8b789f0f6ac6",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 5156,
++      "line": 5206,
+       "message": "[converge-contract] closure evidence drift -- missing ",
+       "disposition": "BASELINE"
+     },
+@@ -1875,7 +1884,7 @@
+       "site_id": "b3dbd917228d9ace",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 4132,
++      "line": 4182,
+       "message": "core sweep [sweep-ticket-link] -- ",
+       "disposition": "BASELINE"
+     },
+@@ -1883,7 +1892,7 @@
+       "site_id": "b4503430f7a17189",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 2614,
++      "line": 2628,
+       "message": "STATE.md next_action picks , but the shared Pick Rule selects  () -- explicit user intent first, then board order (RFC § 1.11). A ticket filed above the named o",
+       "disposition": "COVERED",
+       "case": "next_action picks a ticket the shared Pick Rule does not select"
+@@ -1892,7 +1901,7 @@
+       "site_id": "b56390b34273b858",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 5398,
++      "line": 5448,
+       "message": " contains U+FFFD replacement character",
+       "disposition": "BASELINE"
+     },
+@@ -1900,7 +1909,7 @@
+       "site_id": "b7c389297ddbbf35",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 5556,
++      "line": 5606,
+       "message": "cross-doc drift [ops-owner] -- saipen/OPS.md is the mechanical execution layer contract and is missing",
+       "disposition": "BASELINE"
+     },
+@@ -1908,7 +1917,7 @@
+       "site_id": "b84588ed2281d119",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 6488,
++      "line": 6538,
+       "message": " protocol append target(s) end mid-line, so the next append extends the last line instead of adding one: ",
+       "disposition": "BASELINE"
+     },
+@@ -1916,7 +1925,7 @@
+       "site_id": "b9111296a8f17219",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 5213,
++      "line": 5263,
+       "message": "KNOWLEDGE/ structured card/index: ",
+       "disposition": "BASELINE"
+     },
+@@ -1924,7 +1933,7 @@
+       "site_id": "b97f8533e6854566",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 5490,
++      "line": 5540,
+       "message": "REGISTRY phase enum names  but saipen/phases/.md does not exist",
+       "disposition": "BASELINE"
+     },
+@@ -1932,7 +1941,7 @@
+       "site_id": "ba8b1834b2ba20e6",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 9102,
++      "line": 9152,
+       "message": "release ledger baseline warn_slugs entry  has non-semver first_seen/last_seen",
+       "disposition": "BASELINE"
+     },
+@@ -1940,7 +1949,7 @@
+       "site_id": "bb4c10f517825d11",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 1627,
++      "line": 1641,
+       "message": "LOG history is not canonical owned evidence: ",
+       "disposition": "BASELINE"
+     },
+@@ -1948,7 +1957,7 @@
+       "site_id": "bbaabddeb251cc8c",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 5578,
++      "line": 5628,
+       "message": "cross-doc drift [ops-owner] -- saipen/INDEX.md does not route to saipen/OPS.md; a mechanical-operation question has no way to reach the OPS contract",
+       "disposition": "BASELINE"
+     },
+@@ -1956,7 +1965,7 @@
+       "site_id": "bbd1ed1de9dc9f81",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 2650,
++      "line": 2664,
+       "message": "phase: DONE, empty ## TODO, but next_action= -- RFC § 2.1 says bare command + empty board MUST auto-transition HUNT->ADD. The legal WAITs here are the § 2.4 saf",
+       "disposition": "BASELINE"
+     },
+@@ -1964,7 +1973,7 @@
+       "site_id": "bbdc03128c001235",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 4815,
++      "line": 4865,
+       "message": "saiui built-in role charter extensions/subs/saiui.md is missing -- a shipped built-in role must carry its canonical charter",
+       "disposition": "BASELINE"
+     },
+@@ -1972,7 +1981,7 @@
+       "site_id": "bc5019e82bd6534f",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 6621,
++      "line": 6671,
+       "message": "cross-doc drift [required-set] -- REGISTRY requires unknown schema fields: ",
+       "disposition": "BASELINE"
+     },
+@@ -1980,7 +1989,7 @@
+       "site_id": "bd9b08808c554b24",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 5292,
++      "line": 5342,
+       "message": "saipen/RFC.md missing even though this looks like the SAIPEN home repo (saipen/ + VERSION + README.md all present) -- a real incident: a stray `git clone` of th",
+       "disposition": "BASELINE"
+     },
+@@ -1988,7 +1997,7 @@
+       "site_id": "be265b925be2cd43",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 8475,
++      "line": 8525,
+       "message": "coverage gap --  shipped document(s) are read by no check and declared exempt by none: . Put each under a check or add it to EXEMPT with a reason",
+       "disposition": "BASELINE"
+     },
+@@ -1996,7 +2005,7 @@
+       "site_id": "bfca3804b591954d",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 4189,
++      "line": 4239,
+       "message": "subsaipen [sub-write-boundary] -- ; a SubSaipen writes only inside its own home (T-607)",
+       "disposition": "BASELINE"
+     },
+@@ -2004,7 +2013,7 @@
+       "site_id": "c141cf5f66e70daf",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 2535,
++      "line": 2549,
+       "message": "STATE.md next_action names , which is on no board section -- the pre-computed pick points at nothing, so the cold agent BOOT.md sends here has no ticket to exec",
+       "disposition": "BASELINE"
+     },
+@@ -2012,7 +2021,7 @@
+       "site_id": "c17dc550b127b357",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 2216,
++      "line": 2230,
+       "message": " updated must be ISO-8601 UTC (Z or +00:00), got  -- Recovery miscompares staleness across timezones otherwise (RFC § 1.2)",
+       "disposition": "BASELINE"
+     },
+@@ -2020,7 +2029,7 @@
+       "site_id": "c2413e3b724f791c",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 5331,
++      "line": 5381,
+       "message": "conformance generated view drift -- ",
+       "disposition": "BASELINE"
+     },
+@@ -2028,7 +2037,7 @@
+       "site_id": "c299b922092d1c56",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 8034,
++      "line": 8084,
+       "message": "cross-doc drift [converge-target-converge] -- CONVERGE.md `converge_targets:` set differs from CORE.md by  (T-1012 exact SET equality; an extra target or a miss",
+       "disposition": "COVERED",
+       "case": "CONVERGE.md gains a target CORE.md does not declare"
+@@ -2037,7 +2046,7 @@
+       "site_id": "c3f0816560f3cfb1",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 5810,
++      "line": 5860,
+       "message": "cross-doc drift [saicritic-assignment] -- bare Improve must load _canonical_proof_levels() exactly once before any cycle/seat/report write and emit that exact v",
+       "disposition": "BASELINE"
+     },
+@@ -2045,7 +2054,7 @@
+       "site_id": "c4326374f85507f5",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 8065,
++      "line": 8115,
+       "message": "cross-doc drift [required-set] --  states a COUNT of required fields (). RFC § 1.2 is the only place the set is written down, and a count drifts the same way an",
+       "disposition": "BASELINE"
+     },
+@@ -2053,7 +2062,7 @@
+       "site_id": "c4b16235020dfae1",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 7836,
++      "line": 7886,
+       "message": "cross-doc drift [stale-schema-version] --  names a superseded schema version while the current one is . An agent obeying it writes state this validator WARNs as",
+       "disposition": "BASELINE"
+     },
+@@ -2061,7 +2070,7 @@
+       "site_id": "c54b02b456355250",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 2337,
++      "line": 2351,
+       "message": "",
+       "disposition": "BASELINE"
+     },
+@@ -2069,7 +2078,7 @@
+       "site_id": "c605c5cbf7bba3c4",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 1687,
++      "line": 1701,
+       "message": "STATE.md next_action does not start with WAIT:/saipen /PHASE /RUN:/RESUME::  -- not executable, so a cold agent cannot boot from it (RFC § 1.2, CONFORMANCE TEST",
+       "disposition": "BASELINE"
+     },
+@@ -2077,7 +2086,7 @@
+       "site_id": "c649a75441fd1f83",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 9741,
++      "line": 9791,
+       "message": " is missing  -- phases/markhunt.md requires a manifest, not a note: this file IS the closure check, and a partial one cannot close anything",
+       "disposition": "BASELINE"
+     },
+@@ -2085,7 +2094,7 @@
+       "site_id": "c68bbb4f76b64ed9",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 2997,
++      "line": 3011,
+       "message": "LOG.md missing -- RFC § 1.2 requires it, and § 1.5 Recovery has nothing to rebuild from without it (an empty LOG.md is legal, as phases/init.md writes on a fres",
+       "disposition": "BASELINE"
+     },
+@@ -2101,7 +2110,7 @@
+       "site_id": "c8c9bebfc1215bab",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 7964,
++      "line": 8014,
+       "message": "cross-doc drift [converge-target-converge] -- CONVERGE.md declares no `converge_targets:` set; CORE.md is the single definition and CONVERGE.md must restate it ",
+       "disposition": "BASELINE"
+     },
+@@ -2109,7 +2118,7 @@
+       "site_id": "c92d5968d562dedb",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 8197,
++      "line": 8247,
+       "message": "cross-doc drift [prescribed-next-action] -- shipped doc prescribes a `next_action` with none of § 1.2's five legal prefixes, so an agent obeying it writes a sta",
+       "disposition": "BASELINE"
+     },
+@@ -2117,7 +2126,7 @@
+       "site_id": "cb9678a9d80a8358",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 9702,
++      "line": 9752,
+       "message": " must be exactly three lines -- done:/remaining:/awaiting: in that order (phases/ship.md, RFC § 1.10); got  line(s)",
+       "disposition": "BASELINE"
+     },
+@@ -2125,7 +2134,7 @@
+       "site_id": "cc19dac46e616ed3",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 5917,
++      "line": 5967,
+       "message": "runtime manifest file missing from the home: ",
+       "disposition": "BASELINE"
+     },
+@@ -2141,7 +2150,7 @@
+       "site_id": "cdd53c258f593fec",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 2557,
++      "line": 2571,
+       "message": "STATE.md next_action names , whose needs:  are not DONE -- § 1.11 makes a ticket workable only when every dependency is finished, so this pick was never the rul",
+       "disposition": "BASELINE"
+     },
+@@ -2149,7 +2158,7 @@
+       "site_id": "cdfc93e0f478bc6b",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 6911,
++      "line": 6961,
+       "message": "lint parity [T-628] -- harness.md pins ruff  but CI installs ruff==; one pinned version required",
+       "disposition": "BASELINE"
+     },
+@@ -2157,7 +2166,7 @@
+       "site_id": "ce08bf709b83982d",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 2598,
++      "line": 2612,
+       "message": "STATE.md carries phase: BLOCKED with execution_intent: goal -- RFC 2.4's Exit list names BLOCKED as an exit, so the goal intent MUST be cleared there. Left set,",
+       "disposition": "BASELINE"
+     },
+@@ -2165,7 +2174,7 @@
+       "site_id": "d0bcef4953fcb024",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 2816,
++      "line": 2830,
+       "message": "STATE.md records stop_reason: GOAL_BLOCKED while the board still holds active or workable Work -- a goal block is only legal with no workable remainder, and a s",
+       "disposition": "COVERED",
+       "case": "GOAL_BLOCKED persisted while the board still has workable Work"
+@@ -2182,7 +2191,7 @@
+       "site_id": "d27c277d507f205c",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 9171,
++      "line": 9221,
+       "message": "UI.md lost the Golden Default default mandate -- merely mentioning the palette does not make it the mandatory default",
+       "disposition": "BASELINE"
+     },
+@@ -2190,7 +2199,7 @@
+       "site_id": "d3f53f6093268d76",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 2390,
++      "line": 2404,
+       "message": "cross-doc drift [verify-cap] -- phases/verify.md's 'Cap: N dead hypotheses OR M failed fix cycles' sentence moved, so verify_attempts has no cap to check agains",
+       "disposition": "BASELINE"
+     },
+@@ -2198,7 +2207,7 @@
+       "site_id": "d4155e2d6b608ae1",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 3201,
++      "line": 3215,
+       "message": " violates the Event Graph skeleton (RFC § 1.2): ",
+       "disposition": "BASELINE"
+     },
+@@ -2206,7 +2215,7 @@
+       "site_id": "d51f4e6533d1cd40",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 2371,
++      "line": 2385,
+       "message": "BOARD.md: ticket  has review_passes  -- phases/review.md caps re-litigating one finding at two passes, and this field exists so that cap is mechanical rather th",
+       "disposition": "BASELINE"
+     },
+@@ -2214,7 +2223,7 @@
+       "site_id": "d612b62e14f60bea",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 3053,
++      "line": 3067,
+       "message": "STATE.md converge_target: ship has no ccc entry marker -- a crash cannot recover the I -> SHIP -> J route without its LOG evidence",
+       "disposition": "BASELINE"
+     },
+@@ -2222,7 +2231,7 @@
+       "site_id": "d61c02a0fd869f75",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 5463,
++      "line": 5513,
+       "message": " contains control character U+ at offset  -- invisible in every reader, valid UTF-8 and valid Python, and it silently changes what the code does (two red contro",
+       "disposition": "BASELINE"
+     },
+@@ -2230,7 +2239,7 @@
+       "site_id": "d61d2f0ecf5b33f4",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 3492,
++      "line": 3542,
+       "message": "gate-closure -- ticket  closed by a finish event naming actual phase  at/after the gate-fix boundary (first SHIP-finish E-); a ticket must pass REVIEW -> SHIP b",
+       "disposition": "BASELINE"
+     },
+@@ -2238,7 +2247,7 @@
+       "site_id": "d672d4b1329eb721",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 4856,
++      "line": 4906,
+       "message": "PROTOCOL.md bare-subname adoption lost charter-loading language -- a subSaipen whose charter exists must load it on adoption",
+       "disposition": "BASELINE"
+     },
+@@ -2246,7 +2255,7 @@
+       "site_id": "d6cb3553922af8a7",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 8127,
++      "line": 8177,
+       "message": "cross-doc drift [required-set] --  enumerates the STATE required fields again (...). RFC § 1.2 is the only place that list may exist; refer to it instead (this ",
+       "disposition": "BASELINE"
+     },
+@@ -2254,7 +2263,7 @@
+       "site_id": "d72c6f241af1cdb6",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 8736,
++      "line": 8786,
+       "message": "release ledger baseline  entry  lacks semver/commit/reason evidence",
+       "disposition": "BASELINE"
+     },
+@@ -2262,7 +2271,7 @@
+       "site_id": "d73510564be7858a",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 3328,
++      "line": 3342,
+       "message": " records a prepare with no producer -- RFC 1.2's fixed-form rule and phases/prepare.md step 6 require `RUN: prepare <producer> -> done|FAILED`, where <producer>",
+       "disposition": "BASELINE"
+     },
+@@ -2270,7 +2279,7 @@
+       "site_id": "d835f1dd9e0343ce",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 2249,
++      "line": 2263,
+       "message": " is malformed under the strict manifest grammar:  (SAICREW B)",
+       "disposition": "BASELINE"
+     },
+@@ -2278,7 +2287,7 @@
+       "site_id": "d846f7cdd5da64b2",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 2301,
++      "line": 2315,
+       "message": " is phase DONE but its board still holds open work (TODO/DOING/BLOCKED) -- a worker cannot say DONE while its board says unresolved work (SAICREW H)",
+       "disposition": "BASELINE"
+     },
+@@ -2286,7 +2295,7 @@
+       "site_id": "d8df6fba864c3835",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 1562,
++      "line": 1576,
+       "message": " declares style_contract  but its text hashes to  -- the contract changed and its marker did not, so every state carrying the old value would validate against a",
+       "disposition": "BASELINE"
+     },
+@@ -2294,7 +2303,7 @@
+       "site_id": "d93c9e1f00064f54",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 2192,
++      "line": 2206,
+       "message": " missing transition_from -- RFC § 1.2's ninth required field, absent only for a fresh INIT",
+       "disposition": "BASELINE"
+     },
+@@ -2310,7 +2319,7 @@
+       "site_id": "da9f7575b956229a",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 1961,
++      "line": 1975,
+       "message": "safety-valve pause names the goal-create key -- the pause MUST read `-- run 'cc' to continue`, never `run 'saipen goal'`, which is the create/pivot command and ",
+       "disposition": "BASELINE"
+     },
+@@ -2318,7 +2327,7 @@
+       "site_id": "daba9bddf394dd6b",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 7898,
++      "line": 7948,
+       "message": "cross-doc drift [phase-exit] -- . A phase doc may only name edges that phase's DFA row allows; the phase doc is a copy, the DFA is enforced",
+       "disposition": "BASELINE"
+     },
+@@ -2326,7 +2335,7 @@
+       "site_id": "dac9da55a6f57b04",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 2430,
++      "line": 2444,
+       "message": "BOARD.md: ticket  carries a placeholder verify () -- a ticket needs a real DONE proof, not TBD/TODO/empty (NITRO dogfood II, T-590)",
+       "disposition": "BASELINE"
+     },
+@@ -2334,7 +2343,7 @@
+       "site_id": "db80d90bd4894eaf",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 4258,
++      "line": 4308,
+       "message": "LOG.md records a clean hunt against commit(s) this repository does not have:  -- `phases/hunt.md` skips a sweep only on an exact match with HEAD, so a mark no c",
+       "disposition": "BASELINE"
+     },
+@@ -2350,7 +2359,7 @@
+       "site_id": "dd6769cef8f61183",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 2170,
++      "line": 2184,
+       "message": " next_action invokes 'saipen ', which RFC § 1.10 does not define -- its cold agent MUST decline an unrecognized command and stop",
+       "disposition": "BASELINE"
+     },
+@@ -2358,7 +2367,7 @@
+       "site_id": "deed137307b11cd8",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 3636,
++      "line": 3686,
+       "message": "closure-evidence -- ticket  is ## DONE but carries no current-cycle verification evidence (classifier: ; reverify: ); an unproven closure is never protocol-gree",
+       "disposition": "COVERED",
+       "case": "a ## DONE ticket carries no verify evidence"
+@@ -2367,7 +2376,7 @@
+       "site_id": "dfc257c930182400",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 5514,
++      "line": 5564,
+       "message": "INDEX.md phase list does not match the canonical phase enum -- INDEX names  phases, enum has . Missing: ; phantom: ",
+       "disposition": "BASELINE"
+     },
+@@ -2375,7 +2384,7 @@
+       "site_id": "dfc9246e64b098e3",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 2691,
++      "line": 2705,
+       "message": "BOARD.md: ticket   (RFC § 1.2)",
+       "disposition": "BASELINE"
+     },
+@@ -2383,7 +2392,7 @@
+       "site_id": "e08fbd1f487f4e91",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 2206,
++      "line": 2220,
+       "message": "  ->  is not in the transition table ( allows ) (RFC § 1.6)",
+       "disposition": "BASELINE"
+     },
+@@ -2391,7 +2400,7 @@
+       "site_id": "e2dcb0d541b54e25",
+       "qualname": "_shortcut_callout",
+       "ordinal": 0,
+-      "line": 6271,
++      "line": 6321,
+       "message": "cross-doc drift [shortcut-callouts] --  does not name the complete -key map",
+       "disposition": "BASELINE"
+     },
+@@ -2399,7 +2408,7 @@
+       "site_id": "e46eb8527e55cfd4",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 1969,
++      "line": 1983,
+       "message": "safety-valve pause carries no resume key -- the § 1.2 form ends `-- run 'cc' to continue`",
+       "disposition": "BASELINE"
+     },
+@@ -2407,7 +2416,7 @@
+       "site_id": "e47adbd1ffbf9dff",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 4782,
++      "line": 4832,
+       "message": "saiui charter contains a copied palette/token block -- colors must trace to saipen/UI.md, never be re-declared",
+       "disposition": "BASELINE"
+     },
+@@ -2415,7 +2424,7 @@
+       "site_id": "e4e12983b38322c8",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 6132,
++      "line": 6182,
+       "message": "binding ship gate requires every release metadata path staged: ",
+       "disposition": "BASELINE"
+     },
+@@ -2423,7 +2432,7 @@
+       "site_id": "e511313f52926117",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 7992,
++      "line": 8042,
+       "message": "cross-doc drift [converge-target-converge] -- CONVERGE.md `converge_targets:` contains an empty token (T-1012 strict grammar: empty token after split on `|`)",
+       "disposition": "BASELINE"
+     },
+@@ -2431,7 +2440,7 @@
+       "site_id": "e69d3d771c7714f8",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 1917,
++      "line": 1931,
+       "message": "execution_intent: goal with goal_waves=/goal_tickets= is the tripped safety valve (caps /), but next_action= -- RFC § 2.4 requires next_action: WAIT: safety val",
+       "disposition": "BASELINE"
+     },
+@@ -2439,7 +2448,7 @@
+       "site_id": "e6b562cf9385ac0f",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 5066,
++      "line": 5116,
+       "message": "hardening wave barrier missing -- unresolved T-549 must make T-551 unworkable via `needs: T-549`; BOARD order cannot block the Pick Rule from entering T-551..T-",
+       "disposition": "BASELINE"
+     },
+@@ -2447,7 +2456,7 @@
+       "site_id": "e7644ce516f2c4a7",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 3450,
++      "line": 3500,
+       "message": "mechanical provenance [saio] -- structural SAIOPS-owned events after the first provenanced event (E-) lack `[op: ...]`, so a manual structural edit cannot be di",
+       "disposition": "BASELINE"
+     },
+@@ -2455,7 +2464,7 @@
+       "site_id": "e77d9c016b85265b",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 1580,
++      "line": 1594,
+       "message": " carries STYLE.md's marker value ; it MUST appear in STYLE.md alone, or the checkpoint can copy it without ever reading the contract it stands for (RFC § 1.2)",
+       "disposition": "BASELINE"
+     },
+@@ -2463,7 +2472,7 @@
+       "site_id": "e7a1331914921a0f",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 9987,
++      "line": 10037,
+       "message": "cross-doc drift [proposal-halt] -- phases/plan.md step 4 must name the one legal Proposal-Mode halt, a `WAIT: user brake` naming the choice, and must not forbid",
+       "disposition": "BASELINE"
+     },
+@@ -2471,7 +2480,7 @@
+       "site_id": "e7d90e0957eabe6e",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 5791,
++      "line": 5841,
+       "message": "cross-doc drift [saicritic] -- canonical saipen/SAICRITIC.md is missing",
+       "disposition": "BASELINE"
+     },
+@@ -2479,7 +2488,7 @@
+       "site_id": "e81beab3ca233351",
+       "qualname": "_compare",
+       "ordinal": 0,
+-      "line": 6591,
++      "line": 6641,
+       "message": "cross-doc drift [] -- . RFC.md is normative (§ 1.1); bring  to it, or change RFC deliberately and update both",
+       "disposition": "BASELINE"
+     },
+@@ -2487,7 +2496,7 @@
+       "site_id": "e8bd5532d844bc03",
+       "qualname": "_shortcut_callout",
+       "ordinal": 0,
+-      "line": 6294,
++      "line": 6344,
+       "message": "cross-doc drift [shortcut-callouts] --  still describes `cc` as the Goal Mode key, but § 1.10 routes it to `saipen continue`; `gg` is the sole short route for a",
+       "disposition": "BASELINE"
+     },
+@@ -2495,7 +2504,7 @@
+       "site_id": "e9005924e14a44b4",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 3138,
++      "line": 3152,
+       "message": "ccc cannot verify shipped source_head: ",
+       "disposition": "BASELINE"
+     },
+@@ -2503,7 +2512,7 @@
+       "site_id": "ea5bd857de46f3d1",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 5234,
++      "line": 5284,
+       "message": ".saipen/USERPERSON.md  -- the optional USERPERSON profile is active but malformed (T-574)",
+       "disposition": "BASELINE"
+     },
+@@ -2511,7 +2520,7 @@
+       "site_id": "eb21efece33f4852",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 1599,
++      "line": 1613,
+       "message": "STATE.md ",
+       "disposition": "BASELINE"
+     },
+@@ -2519,7 +2528,7 @@
+       "site_id": "ed629818a1899e15",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 2909,
++      "line": 2923,
+       "message": "closure provenance does not resolve:  -- a DONE line may record HOW it closed, never that something was published when it was not (CORE-003)",
+       "disposition": "BASELINE"
+     },
+@@ -2527,7 +2536,7 @@
+       "site_id": "ee222d7416718d03",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 8707,
++      "line": 8757,
+       "message": "release ledger baseline unreadable at : ",
+       "disposition": "BASELINE"
+     },
+@@ -2535,7 +2544,7 @@
+       "site_id": "ef5f456b91d5f370",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 8593,
++      "line": 8643,
+       "message": "cross-doc drift [citations] --  dangling reference(s): ",
+       "disposition": "BASELINE"
+     },
+@@ -2543,7 +2552,7 @@
+       "site_id": "f06aee337b9fe59b",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 4267,
++      "line": 4317,
+       "message": "LOG.md records a clean hunt against commit(s) that sit on no remote branch:  -- a hunt mark is durable, so the commit it names must be durable too: a commit tha",
+       "disposition": "BASELINE"
+     },
+@@ -2551,7 +2560,7 @@
+       "site_id": "f116ad5d6d7690f1",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 7785,
++      "line": 7835,
+       "message": "cross-doc check 'zero-prompt-exceptions' cannot find RFC § 2.1 -- update tools/validate.py deliberately; a drift check that silently stops checking still prints",
+       "disposition": "BASELINE"
+     },
+@@ -2559,7 +2568,7 @@
+       "site_id": "f149b59463c6e441",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 10010,
++      "line": 10060,
+       "message": "cross-doc drift [shortcuts] -- COMMANDS.md shortcut(s) do not resolve to a command REGISTRY.json defines: ",
+       "disposition": "BASELINE"
+     },
+@@ -2567,7 +2576,7 @@
+       "site_id": "f5760123bf130344",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 5263,
++      "line": 5313,
+       "message": "improve cycle manifest  carries  status -- the roster owns routing only; report status is owned by the report and dispositions by the sweep ledger (T-570)",
+       "disposition": "BASELINE"
+     },
+@@ -2575,7 +2584,7 @@
+       "site_id": "f5b4e6475e171a6b",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 9048,
++      "line": 9098,
+       "message": "orphaned release tag(s) -- the remote carries  but their commit(s) are on no remote branch: a tag push succeeded while the branch push it was supposed to ride d",
+       "disposition": "BASELINE"
+     },
+@@ -2583,7 +2592,7 @@
+       "site_id": "f6403b916acb72a3",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 5596,
++      "line": 5646,
+       "message": "cross-doc drift [improve-meta-control] -- saipen/IMPROVE.md does not state that Improve is a meta-control, not a phase",
+       "disposition": "BASELINE"
+     },
+@@ -2591,7 +2600,7 @@
+       "site_id": "f6dd6b1af888c8ba",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 7176,
++      "line": 7226,
+       "message": "cross-doc drift [move-reference-sweep] -- phases/clean.md must carry the pre-move reference sweep (cite it before it prunes or relocates anything). CLEAN is the",
+       "disposition": "BASELINE"
+     },
+@@ -2607,7 +2616,7 @@
+       "site_id": "f7ff65b32a5bf36a",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 7466,
++      "line": 7516,
+       "message": "cross-doc drift [markhunt-no-git] -- phases/markhunt.md must say `no-git` means git cannot be READ (so `mode: no-publish`, which blocks only publishing, still u",
+       "disposition": "BASELINE"
+     },
+@@ -2615,7 +2624,7 @@
+       "site_id": "f8c4d8a7666b8e9b",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 10754,
++      "line": 10804,
+       "message": "rule coverage --  RFC section(s) state a MUST that no CONFORMANCE row cites: . Every MUST is either enforced or has a row saying why it cannot be",
+       "disposition": "BASELINE"
+     },
+@@ -2623,7 +2632,7 @@
+       "site_id": "f9f12a172d9dabbf",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 2160,
++      "line": 2174,
+       "message": " next_action asks a question outside WAIT::  (RFC § 1.2)",
+       "disposition": "BASELINE"
+     },
+@@ -2631,7 +2640,7 @@
+       "site_id": "fa5114ea228f61a0",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 9287,
++      "line": 9337,
+       "message": "cross-doc drift [sub-ban] -- PROTOCOL.md no longer states the subSaipen phase ban in the form the drift check parses ('A subSaipen MUST NOT transition to ...').",
+       "disposition": "BASELINE"
+     },
+@@ -2639,7 +2648,7 @@
+       "site_id": "fb22685fc68f0b1c",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 9164,
++      "line": 9214,
+       "message": "UI.md no longer names its palette  -- the palette name is normative and every other document references it",
+       "disposition": "BASELINE"
+     },
+@@ -2647,7 +2656,7 @@
+       "site_id": "fb58a13e47891709",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 4862,
++      "line": 4912,
+       "message": "PROTOCOL.md sync lost the live-folder guard -- sync must never touch any <name>/ folder",
+       "disposition": "BASELINE"
+     },
+@@ -2655,7 +2664,7 @@
+       "site_id": "fc34fb65959fe3f4",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 2549,
++      "line": 2563,
+       "message": "STATE.md next_action names , which carries | blocker: outside ## BLOCKED -- malformed status cannot become executable, even before the board-status failure is r",
+       "disposition": "BASELINE"
+     },
+@@ -2663,7 +2672,7 @@
+       "site_id": "fc9c43266231ea5e",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 4974,
++      "line": 5024,
+       "message": "charter-metadata:  -- every shipped sai*.md must declare all eight metadata keys with role_kind/collect_policy from the closed sets (T-541)",
+       "disposition": "BASELINE"
+     },
+@@ -2671,7 +2680,7 @@
+       "site_id": "fdb80bcdda1d0dd6",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 2713,
++      "line": 2727,
+       "message": "BOARD.md:  is a [MARKHUNT] finding whose | blocker: cites no evidence -- phases/markhunt.md requires a real file:line or command output per finding ('no cite, n",
+       "disposition": "BASELINE"
+     },
+@@ -2679,7 +2688,7 @@
+       "site_id": "fde982bd0ce57f3b",
+       "qualname": "_shortcut_callout",
+       "ordinal": 0,
+-      "line": 6250,
++      "line": 6300,
+       "message": "cross-doc drift [shortcut-callouts] -- missing ",
+       "disposition": "BASELINE"
+     },
+@@ -2687,7 +2696,7 @@
+       "site_id": "ff16d889e9c07b59",
+       "qualname": "<module>",
+       "ordinal": 0,
+-      "line": 5866,
++      "line": 5916,
+       "message": "runtime manifest copy tree broken: ",
+       "disposition": "BASELINE"
+     }

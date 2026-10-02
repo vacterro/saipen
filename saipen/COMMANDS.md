@@ -38,9 +38,9 @@ global authority and deterministic priority rules.
 | `saipen init` | INIT | CMD-ROUTING-01 |
 | `saipen continue` | router | CMD-CONTINUE-01 |
 | `saipen goal <text>` | PLAN | CMD-ROUTING-01 |
-| `saipen clean` | CLEAN | CMD-ROUTING-01 |
+| `saipen clean` | Enter CLEAN; completion waits for the phase's exit obligations | CMD-ROUTING-01 |
 | `saipen translate` | TRANSLATE | CMD-ROUTING-01 |
-| `saipen validate` | canonical Core-conformance front door: structural precheck on STATE/BOARD/LOG, then the canonical full validator (`tools/validate.py --gate core`) whose receipt decides; VALID only on CURRENT_PASS | CMD-ROUTING-01 |
+| `saipen validate` | Core conformance; VALID requires durable CURRENT_PASS | CMD-ROUTING-01 |
 | `saipen prepare <producer>` | PREPARE | CMD-ROUTING-01 |
 | `saipen collect <producer>` | router | CMD-ROUTING-01 |
 | `saipen ship` | SHIP | CMD-ROUTING-01 |
@@ -49,11 +49,16 @@ global authority and deterministic priority rules.
 | `saipen improve reconcile <cycle>` | BUILD/RECOVERY: strict-cycle finite exit; classify every seat, execute lossless transitions, refuse while actionable work remains, terminalize COMPLETE/SUPERSEDED/BLOCKED_EXTERNAL; idempotent | CMD-ROUTING-01 |
 | `saipen ticket reasoning <T-###> --recurrence <text> --weak-model <text>` | BUILD: canonical writer for the strict-sweep reasoning gates; refuses unless a strict CONFIRMED PROTOCOL_VIOLATION disposition names the ticket | CMD-ROUTING-01 |
 | `saipen status` | read-only | CMD-ROUTING-01 |
+| `saipen storage <operation>` | Durable/scratch policy, stores and promotion; STORAGE.md lists forms | STORE-SAFETY-01 |
+| `saipen response render\|check --stdin`, `saipen response style [--json]` | response gate; `style` prints the chat contract generated from STYLE.md | EXEC-RESPONSE-01 |
+| `saipen admission status\|check\|matrix --session S --host H` | read-only: admission state (UNBOUND, BINDING, ADMITTED, STALE, REFUSED) / per-host enforcement boundaries | PROTOCOL-ADMISSION-01 |
+| `saipen admission establish\|invalidate --session S --host H` | host-hook transport only, gated inside the write boundary by a keyed capability; refuses from a shell or a direct import | PROTOCOL-ADMISSION-01 |
 | `saipen autonomy` | read-only: the supervisor's ONE verdict (RUN_WORK, ADOPT_WORKER, REPLACE_WORKER, AWAIT_WORKER, OPERATOR_ACTION_DUE, NO_PROGRESS_LOOP, AMBIGUOUS_AUTHORITY, IDLE) plus the observation that produced it -- lease generation and heartbeat age, executable Work, due/deferred operator gates, no-progress verdict. Writes nothing; ambiguous lease authority fails closed for mutation | CMD-ROUTING-01 |
 | `saipen autonomy recall` | read-only AUTO_RECALL + turn-entry decision for a replaced/cold agent (RUNTIME.md) | CMD-ROUTING-01 |
 | `saipen gpu [status\|on\|off\|index\|recall <text>\|triage]` | DIAGNOSTIC: idle-GPU lane, default OFF (`SAIPEN_GPU=off` wins); a local embedding model indexes Work/decisions/knowledge, a local chat model annotates red declared-family runs (mechanical groups, one hypothesis each), both while the card is idle and beside `supervise`; ADVISORY only, writes only `.saipen/cache/` (gpu.py) | CMD-ROUTING-01 |
 | `saipen context orient [--handoff JSON]` | bounded current-truth orientation | CONTEXT-BUDGET-01 |
 | `saipen brief` | generated handoff with identity/lineage/event provenance | CONTEXT-BUDGET-01 |
+| `saipen mail [init [--workspace PATH]]` | per-user SAIMAIL mailbox binding (SRC-136), DIAGNOSTIC status; `init` provisions the internal default idempotently via `saimail-local saipen init`; internal letters only | CMD-ROUTING-01 |
 | `saipen acceptance <T-###>` | read-only | CMD-ROUTING-01 |
 | `saipen runtime` | read-only | CMD-ROUTING-01 |
 | `saipen host bootstrap [--host ID] [--project-root PATH]` | read-only host/runtime binding diagnostic; `HOST_UNSUPPORTED` for unregistered hosts | CMD-ROUTING-01 |
@@ -86,29 +91,24 @@ global authority and deterministic priority rules.
 | `saipen audit [status\|inspect\|ingest]` | intake transport | CMD-CONTINUE-01 |
 | `saipen userperson` | meta | CMD-ROUTING-01 |
 | `saipen sub <verb> <name>` | sub | CMD-ROUTING-01 |
-| `saipen sub reconcile <role> --authority <SRC-###>` | RECOVERY: producer-owned terminal reconciliation (T-1435); OUTCOME A clears stale task/residue on a DONE producer whose BOARD proves all work terminal, OUTCOME B restores a truthful nonterminal projection (SCOUT/PLAN/BLOCKED) without touching real open work; malformed STATE/BOARD and a foreign producer owner refuse with zero writes; the journaled `sub_lifecycle` verification is the write-time backstop | CMD-ROUTING-01 |
+| `saipen sub reconcile <role> --authority <SRC-###>` | RECOVERY: producer-owned terminal reconciliation (T-1435); A clears stale task/residue on a DONE producer whose BOARD proves all work terminal, B restores a truthful nonterminal projection (SCOUT/PLAN/BLOCKED) without touching real open work; malformed STATE/BOARD and a foreign owner refuse with zero writes (`sub_lifecycle` backstop) | CMD-ROUTING-01 |
 
-`saipen validate` is the canonical Core-conformance front door. It first runs
-the cheap structural gate over `.saipen/STATE.md`, `BOARD.md` and `LOG.md`; a
-malformed document is refused there and no validator runs. When the structural
-gate passes it executes the canonical validator of the running SAIPEN runtime
-(`tools/validate.py --project-root <project> --gate core`) through an internal
-argv path -- no shell. That validator emits the ordinary conformance receipt,
-so the command is NOT zero-write: receipt generation is its only write, and it
-never mutates product files, BOARD Work state, STATE phase, source intake or
-Improve cycles. The verdict is then re-read from the authoritative
-`conformance_status` decision and `VALID` is returned ONLY on CURRENT_PASS -- a
-process exit of 0 with no durable CURRENT_PASS receipt is not conformance.
+`clean_execution`: CLEAN = `PENDING`; DONE with `RUN: clean -> done @HASH` =
+`COMPLETED`; else `UNPROVEN`.
+
+`saipen validate` first checks `.saipen/STATE.md`, `BOARD.md` and `LOG.md`;
+malformed input refuses before execution. It then runs this runtime's
+`tools/validate.py --project-root <project> --gate core` as argv, without a
+shell. Its sole write is a receipt; product files, Work/phase, intake and
+Improve stay untouched. Only durable CURRENT_PASS yields VALID; exit 0 alone
+proves nothing.
 
 CURRENT_FAIL retains blocking findings; ENGINEERING_REQUIRED has no next command.
 
-This optional advanced `launch opencode` command requires its explicit global
-`--agent` seat. It exports that actor plus resolved project root and portable
-lineage before starting the host; host arguments follow `--`. Missing actor on
-this explicit-envelope command fails `ACTOR_UNBOUND`. Routine generic OpenCode
-launches do not route through it and need no manual seat: Core inherits the
-project's canonical `STATE.agent`. Neither path treats a host session id as an
-actor.
+`launch opencode` requires global `--agent` (`ACTOR_UNBOUND` otherwise).
+It exports actor, resolved root and portable lineage before the host; arguments
+follow `--`. Generic launches inherit `STATE.agent`; no manual seat.
+A host session id is never an actor.
 
 ## Compound parsing
 
@@ -119,6 +119,8 @@ actor.
 - STOP_ON_FAILURE by default: a later segment after an earlier REFUSED/FAILED
   becomes NOT_RUN unless provably independent.
 - `saipen push + build ccc` executes both segments in order.
+- Launchers pass decoded argv intact: bare `+` splits, `\+` is literal,
+  `--` ends splitting (`.cmd` removes `"+"` quote marks).
 - `hush <task>` applies execution policy `EXEC-HUSH-01`; `hush` is syntax,
   never a lifecycle or style owner.
 
@@ -158,10 +160,21 @@ project holding one is never idle. Layer identity is the file digest, so a
 changed audit at a path already worked is a NEW generation and is read again.
 
 Every `continue`/`cc`/`status` JSON answer carries `telegrams`: the acting
-seat's unread SAIMAIL telegram COUNTS when `SAIMAIL_WORKSPACE` is set and
+seat's unread SAIMAIL telegram COUNTS when a mailbox is bound and
 `saimail-local` is on PATH (else `NOT_CONFIGURED`/`UNAVAILABLE`). Report a
 nonzero count; reading is `read_command`, opening is an explicit decision. A
 telegram never routes, creates Work or skips a WAIT (T-1497).
+
+A mailbox is bound through exactly one resolution order (SRC-136, T-1557):
+an explicit `SAIMAIL_WORKSPACE` always wins, else the per-user default root
+(`%LOCALAPPDATA%/saipen/saimail` on Windows, `~/.local/state/saipen/saimail`
+elsewhere) when SAIMAIL has already initialized it. `saipen mail init` is the
+one canonical provisioning verb: it runs `saimail-local saipen init` against
+the default root for the acting seat, idempotently, and writes nothing inside
+any project. `saipen init` attaches the same default mailbox for a genuinely
+new user when SAIMAIL is installed and nothing is bound yet -- an attachment
+reported as data, never a dependency of INIT. SAIMAIL carries internal
+letters only; electronic mail is not part of this binding.
 
 After the Pick Rule and before any idle verdict, two inbox diagnostics are
 restated rather than routed: `audit-inbox-invalid` (a layer that cannot be

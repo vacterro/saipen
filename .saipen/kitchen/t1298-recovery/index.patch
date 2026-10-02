@@ -1,0 +1,4343 @@
+diff --git a/.saipen/saitranslate/kitchen/OUTBOX.md b/.saipen/saitranslate/kitchen/OUTBOX.md
+index b09527bf..320d8358 100644
+--- a/.saipen/saitranslate/kitchen/OUTBOX.md
++++ b/.saipen/saitranslate/kitchen/OUTBOX.md
+@@ -1,6 +1,61 @@
+ # OUTBOX
+ 
++
++
++## SAIT-028: FORCE-FRESH translation package v7.249.0 -- 32/32 locales CURRENT (HEAD 02fd4892)
++- **status:** ready
++- **summary:** All 32 kitchen locale README_*.md surfaces re-verified CURRENT against the live README.md translation digest sha256:bb47f715 (version strings normalised out). Zero prose drift: 32/32 digest stamps match, badges v7.249.0. Root mirrors README.ee/ja/ded at v7.249.0 and aligned with the kitchen et/ja/ded sources. Payload = 32 locale README_*.md + 3 root mirrors (35 authenticated entries), strict READY sha256:4ae185840a717cae5c6ccaa03e9272b0aff82432bdb0bfcb9745630b2acba081 at epoch 3.
++- **main_project_refs:** [README.md, VERSION, SPEC.md, CONTRIBUTING.md, SECURITY.md, CODE_OF_CONDUCT.md, GUIDE.md, saipen/phases/translate.md, guides/GUIDE_*.md, README.ee.md, README.ja.md, README.ded.md]
++- **critical:** false
++- **severity:** P3
++- **producer:** saitranslate
++- **source_head:** 02fd489277227ffe65971f7cf06febb355233892
++- **source_tree_fingerprint:** git-delta-v1:eab67ebe378ac04b1ebbf7bfb9a19d5d897f48739279d8f969ee8c227f3d28fd
++- **role_revision:** sha256:f241e6b83c39e9b46bfa586638efb0374bbb39889646f723b9189bbb4912c0c5
++- **coverage:** 32/32 locale README_*.md in .saipen/saitranslate/kitchen/*/README_*.md (ar bg cs da de ded el es et fi fr he hi hr hu id it ja ko nl no pl pt ro ru sk sv th tr uk vi zh) + 3 root README.ee/ja/ded mirrors; all 35 bound to README translation digest sha256:bb47f7158db4a7a4fd99298427c1e4bc6859433c36435640e129cc6dad2a63b7 with badges v7.249.0; no in-app UI surface
++- **payload:** [.saipen/saitranslate/kitchen/ar/README_AR.md, bg/README_BG.md, cs/README_CS.md, da/README_DA.md, de/README_DE.md, ded/README_DED.md, el/README_EL.md, es/README_ES.md, et/README_ET.md, fi/README_FI.md, fr/README_FR.md, he/README_HE.md, hi/README_HI.md, hr/README_HR.md, hu/README_HU.md, id/README_ID.md, it/README_IT.md, ja/README_JA.md, ko/README_KO.md, nl/README_NL.md, no/README_NO.md, pl/README_PL.md, pt/README_PT.md, ro/README_RO.md, ru/README_RU.md, sk/README_SK.md, sv/README_SV.md, th/README_TH.md, tr/README_TR.md, uk/README_UK.md, vi/README_VI.md, zh/README_ZH.md, README.ee.md, README.ja.md, README.ded.md]
++- **verified:** PASS -- strict READY sha256:4ae185840a717cae5c6ccaa03e9272b0aff82432bdb0bfcb9745630b2acba081 published at producer epoch 3 with 44 read dependencies and 35 authenticated payload entries; 32/32 locale digest stamps match bb47f715 (current normalised README content); badges v7.249.0 across all 35 surfaces; freshness bound at 02fd4892/eab67ebe; git diff --check clean; no integration, commit, tag, push, or remote write performed
++- **instructions:** Run python -B tools/validate.py --gate collect:saitranslate; refuse on any source/role/payload mismatch. Integrate only READY package sha256:4ae185840a717cae5c6ccaa03e9272b0aff82432bdb0bfcb9745630b2acba081 through the canonical Core writer; recheck mirror byte-equality, Core gate, and REVIEW before SHIP.
++- **details:** SAIT-027 (bound to 312d4f37/4d4bdae8, badges 7.248.0) marked stale: ship v7.249.0 (T-1270, 6fe83d60/02fd4892) moved the source triple while the English README's only textual drift was its version badge. The translation digest (bb47f715, versions normalised out) is therefore unchanged and the ship already bumped every locale and root-mirror badge to v7.249.0, so this force-fresh is a verify-and-rebind with zero prose re-translation required -- no translate pass needed, and none was faked. Re-verified live: the normalised README digest equals bb47f715 and the 35 surface badges match VERSION 7.249.0. No integration, commit, tag, push, or remote write performed.
++
++## SAIT-027: FORCE-FRESH translation package v7.248.0 -- 32/32 locales CURRENT (HEAD 312d4f37)
++
++- **status:** stale
++- **superseded_by:** SAIT-028 -- source triple moved 312d4f37/4d4bdae8 -> 02fd4892/eab67ebe (v7.249.0 ship); locale badges already bumped to v7.249.0
++- **summary:** All 32 kitchen locale README_*.md surfaces re-verified CURRENT against the live README.md translation digest sha256:bb47f715 (version strings normalised out). Zero prose drift: 32/32 digest stamps match, badges v7.248.0. Root mirrors README.ee/ja/ded at v7.248.0 and aligned with the kitchen et/ja/ded sources. Payload = 32 locale README_*.md + 3 root mirrors (35 authenticated entries), strict READY sha256:e3a17cc98d03753f20595cf4f73bedba46c1a43a4d7a1376c50806e25378aabc at epoch 2.
++- **main_project_refs:** [README.md, VERSION, SPEC.md, CONTRIBUTING.md, SECURITY.md, CODE_OF_CONDUCT.md, GUIDE.md, saipen/phases/translate.md, guides/GUIDE_*.md, README.ee.md, README.ja.md, README.ded.md]
++- **critical:** false
++- **severity:** P3
++- **producer:** saitranslate
++- **source_head:** 312d4f37b69f3a52f6b46ad7854bad45ff31a356
++- **source_tree_fingerprint:** git-delta-v1:4d4bdae83a2d787b1880a4e80324a164f6dcc1679295c90e269dd137e8dc79cd
++- **role_revision:** sha256:f241e6b83c39e9b46bfa586638efb0374bbb39889646f723b9189bbb4912c0c5
++- **coverage:** 32/32 locale README_*.md in .saipen/saitranslate/kitchen/*/README_*.md (ar bg cs da de ded el es et fi fr he hi hr hu id it ja ko nl no pl pt ro ru sk sv th tr uk vi zh) + 3 root README.ee/ja/ded mirrors; all 35 bound to README translation digest sha256:bb47f7158db4a7a4fd99298427c1e4bc6859433c36435640e129cc6dad2a63b7 with badges v7.248.0; no in-app UI surface
++- **payload:** [.saipen/saitranslate/kitchen/ar/README_AR.md, bg/README_BG.md, cs/README_CS.md, da/README_DA.md, de/README_DE.md, ded/README_DED.md, el/README_EL.md, es/README_ES.md, et/README_ET.md, fi/README_FI.md, fr/README_FR.md, he/README_HE.md, hi/README_HI.md, hr/README_HR.md, hu/README_HU.md, id/README_ID.md, it/README_IT.md, ja/README_JA.md, ko/README_KO.md, nl/README_NL.md, no/README_NO.md, pl/README_PL.md, pt/README_PT.md, ro/README_RO.md, ru/README_RU.md, sk/README_SK.md, sv/README_SV.md, th/README_TH.md, tr/README_TR.md, uk/README_UK.md, vi/README_VI.md, zh/README_ZH.md, README.ee.md, README.ja.md, README.ded.md]
++- **verified:** PASS -- strict READY sha256:e3a17cc98d03753f20595cf4f73bedba46c1a43a4d7a1376c50806e25378aabc published at producer epoch 2 with 44 read dependencies and 35 authenticated payload entries; 32/32 locale digest stamps match bb47f715 (current normalised README content); badges v7.248.0 across all 35 surfaces; freshness bound at 312d4f37/4d4bdae8; git diff --check clean; no integration, commit, tag, push, or remote write performed
++- **instructions:** Run python -B tools/validate.py --gate collect:saitranslate; refuse on any source/role/payload mismatch. Integrate only READY package sha256:e3a17cc98d03753f20595cf4f73bedba46c1a43a4d7a1376c50806e25378aabc through the canonical Core writer; recheck mirror byte-equality, Core gate, and REVIEW before SHIP.
++- **details:** SAIT-026 (bound to 0c931d76/9f44e944, badges 7.243.0) marked stale: the source triple moved through v7.244.0-v7.248.0 while the English README's only textual drift was its version badge. The translation digest (bb47f715, versions normalised out) is therefore unchanged and every locale surface already carries the v7.248.0 badge, so this force-fresh is a verify-and-rebind with zero prose re-translation required -- no translate pass needed, and none was faked. Re-verified live: validate.py reports no translation-stale and no translation-unstamped WARN, and the 32 locale badges match VERSION. No integration, commit, tag, push, or remote write performed.
++
++## SAIT-026: FORCE-FRESH translation package v7.243.0 -- 32/32 locales CURRENT (HEAD 0c931d76)
++
++- **status:** stale
++- **superseded_by:** SAIT-027 -- source triple moved 0c931d76/9f44e944 -> 312d4f37/4d4bdae8 (v7.248.0); locale badges already bumped to v7.248.0
++- **summary:** All 32 kitchen locale README_*.md surfaces verified CURRENT against the live normalized README.md (sha256:bb47f715). No drift: 32/32 digests match, badges 7.243.0. Root mirrors README.ee/ja/ded also CURRENT (same digest, badges 7.243.0). Payload = 32 locale README_*.md + 3 root mirrors (35 authenticated entries), strict READY sha256:d26a31407d99efef6a1e45c585190fdd638e88aed732be4713953e4fbdf6b2c2 at epoch 1.
++- **main_project_refs:** [README.md, VERSION, SPEC.md, CONTRIBUTING.md, SECURITY.md, CODE_OF_CONDUCT.md, GUIDE.md, saipen/phases/translate.md, guides/GUIDE_*.md, README.ee.md, README.ja.md, README.ded.md]
++- **critical:** false
++- **severity:** P3
++- **producer:** saitranslate
++- **source_head:** 0c931d769e54080344fc05fece0044bd819afa44
++- **source_tree_fingerprint:** git-delta-v1:9f44e94477fcad090a3e644969f6d5b6624e81447e99cd62d2be5eb7c11e5544
++- **role_revision:** sha256:f241e6b83c39e9b46bfa586638efb0374bbb39889646f723b9189bbb4912c0c5
++- **coverage:** 32/32 locale README_*.md in .saipen/saitranslate/kitchen/*/README_*.md (ar bg cs da de ded el es et fi fr he hi hr hu id it ja ko nl no pl pt ro ru sk sv th tr uk vi zh) + 3 root README.ee/ja/ded mirrors; all 35 bound to normalized README digest sha256:bb47f7158db4a7a4fd99298427c1e4bc6859433c36435640e129cc6dad2a63b7; no in-app UI surface
++- **payload:** [.saipen/saitranslate/kitchen/ar/README_AR.md, bg/README_BG.md, cs/README_CS.md, da/README_DA.md, de/README_DE.md, ded/README_DED.md, el/README_EL.md, es/README_ES.md, et/README_ET.md, fi/README_FI.md, fr/README_FR.md, he/README_HE.md, hi/README_HI.md, hr/README_HR.md, hu/README_HU.md, id/README_ID.md, it/README_IT.md, ja/README_JA.md, ko/README_KO.md, nl/README_NL.md, no/README_NO.md, pl/README_PL.md, pt/README_PT.md, ro/README_RO.md, ru/README_RU.md, sk/README_SK.md, sv/README_SV.md, th/README_TH.md, tr/README_TR.md, uk/README_UK.md, vi/README_VI.md, zh/README_ZH.md, README.ee.md, README.ja.md, README.ded.md]
++- **verified:** PASS -- 32/32 locale digests match sha256:bb47f715 (current normalized README.md 7.243.0); 3/3 root mirrors digests match same source and badges 7.243.0; strict READY sha256:d26a31407d99efef6a1e45c585190fdd638e88aed732be4713953e4fbdf6b2c2 published at producer epoch 1 with 44 read dependencies and 35 authenticated payload entries (freshness CURRENT at 0c931d76/9f44e944); git diff --check clean; no integration, commit, tag, push, or remote write performed
++- **instructions:** Run python -B tools/validate.py --gate collect:saitranslate; refuse on any source/role/payload mismatch. Integrate only READY package sha256:d26a31407d99efef6a1e45c585190fdd638e88aed732be4713953e4fbdf6b2c2 through the canonical Core writer; recheck mirror byte-equality, Core gate, and REVIEW before SHIP.
++- **details:** SAIT-025 (c7ea5b1b -> staged) claimed 32 locales stale under digest 9fbc9510 because it only regenerated the 3 root mirrors. Live kitchen proves the opposite: all 32 locale digests are bb47f715, which equals the current normalized README digest, and validate.py confirms no translation-stale WARN. SAIT-025 is therefore superseded as stale even though its source_head differs (it was 3-root-only, not 32-wide). Re-reading the live tree at 0c931d76 gives CURRENT; no in-app UI surface exists to claim.
++
+ ## SAIT-008: translated fast-keys callout roll-out -- superseded by SAIT-011
++
+ - **legacy:** true
+ - **status:** stale
+ - **superseded_by:** SAIT-011 -- README.md prose moved again (cc routes to `saipen continue`, no-install reads INDEX.md), FORCE-FRESH re-pass landed
+@@ -18,6 +73,7 @@
+   1. Superseded -- collect SAIT-011 instead.
+ 
+ ## SAIT-011: FORCE-FRESH translation to v7.219.0 truth (cc continue semantics + INDEX.md)
++
+ - **status:** stale
+ - **superseded_by:** SAIT-012 -- README.md was substantially rewritten; the old 32-locale bundle no longer represented the source
+ - **summary:** FORCE-FRESH re-translation of the 28 non-Core kitchen locales + their guides to the current README.md truth (HEAD 2720d5d1, v7.219.0): cc callout moved from "Goal Mode" to continue/convergence semantics (CORE.md § 1.10 T-537), no-install line reads saipen/INDEX.md instead of saipen/RFC.md. All 32 kitchen locale READMEs restamped to the new normalized source digest.
+@@ -42,6 +98,7 @@
+   4. Commit: `git add guides/GUIDE_{AR,BG,CS,DA,DE,EL,ES,FI,FR,HE,HI,HR,HU,ID,IT,KO,NL,NO,PL,PT,RO,SK,SV,TH,TR,UK,VI,ZH}.md` and commit with message style `saitranslate: SAIT-011 retranslate cc callout + INDEX.md to v7.219.0 truth`.
+ 
+ ## SAIT-012: FORCE-FRESH complete translation package for current README truth
++
+ - **status:** stale
+ - **superseded_by:** SAIT-013 -- Core VERIFY rejected widespread trailing whitespace and 1.7B model commentary/JSON leakage; the package was settled but never shipped
+ - **summary:** Rebuilt all 32 locale README surfaces from the current 316-line README.md, preserved the maintained shortcut callouts, verified the five unchanged translated policy/spec surfaces across every locale, and prepared current ET/JA/DED root-mirror candidates. No tracked in-app UI/i18n surface exists.
+@@ -69,6 +126,7 @@
+   4. Verify the three root mirrors, 32 source digests, shortcut-callout parity, UTF-8 validity, and full repository gate before REVIEW/SHIP.
+ 
+ ## SAIT-013: verified 14B regeneration of the complete translation package
++
+ - **status:** stale
+ - **superseded_by:** SAIT-014 -- HEAD 3a343e8d -> e045ad07 (v7.226.0 audit commit CORE-002..007 + W2-004..008), tree git-delta-v1:d3538d0b -> git-delta-v1:da948fff; kitchen READMEs were rewritten 21.08 23:41 (after SAIT-013's 06:47 publish), so content as well as the freshness triple moved; FORCE-FRESH re-bind + re-package
+ - **summary:** Regenerated all 32 current README translations with qwen3:14b after Core rejected SAIT-012's 1.7B output. Cache identity now binds the model and prompt contract; publish rejects model commentary, replacement characters, structural drift, and trailing whitespace.
+@@ -97,6 +155,7 @@
+   4. Re-run the independent 32-file quality audit, mirror byte equality, Core gate, and REVIEW before SHIP.
+ 
+ ## SAIT-014: FORCE-FRESH re-bind + re-package to e045ad07 (v7.226.0)
++
+ - **status:** stale
+ - **superseded_by:** SAIT-015
+ - **summary:** SAIT-013 went stale by freshness triple (HEAD 3a343e8d -> e045ad07 from the v7.226.0 audit commit CORE-002..007 + W2-004..008) and by content (the 32 kitchen READMEs were rewritten 21.08 23:41, after SAIT-013's 06:47 publish). FORCE-FRESH re-ran the producer pipeline: recomputed source identity (HEAD e045ad07, tree git-delta-v1:da948fff), rebuilt the package, and re-published a fresh strict READY. 32 locale README_*.md payloads + 3 root mirrors (README.ee/ja/ded) = 35 payload entries; 44 read dependencies (README/VERSION/SPEC/CONTRIBUTING/SECURITY/CODE_OF_CONDUCT/GUIDE.md/saipen/phases/translate.md + 33 guides + 3 mirrors). All 32 locales remain bound to normalized source digest 2a33e364c3c12e8b1b9b2caf41b05db3ee27f17161336579ae85ee59da34fe56 -- README.md itself was unchanged by the audit commit, so the translations still represent current source.
+@@ -123,8 +182,8 @@
+   3. Integrate only READY package `sha256:dbcddc71fee86ac29e705b1e7be25d2d5f8b808006cdded1c449b551faa2367a` through the canonical Core writer.
+   4. Re-run the independent 32-file quality audit, mirror byte equality, Core gate, and REVIEW before SHIP.
+ 
+-
+ ## SAIT-015: FORCE-FRESH re-bind + re-package to 6cbed249 (v7.226.0)
++
+ - **status:** stale
+ - **superseded_by:** SAIT-017
+ - **summary:** SAIT-014 went stale by freshness triple (HEAD e045ad07 -> 6cbed249 from the ruff-hygiene commit PY-11). FORCE-FRESH re-ran the producer pipeline: recomputed source identity (HEAD 6cbed249, tree git-delta-v1:55f5361), rebuilt the package, and re-published a fresh strict READY. README.md and all 32 locale sources are content-unchanged by the ruff commit (tools/*.py only), so package identity is preserved; only the source binding moved.
+@@ -149,8 +208,8 @@
+   3. Integrate only READY package sha256:dbcddc71fee86ac29e705b1e7be25d2d5f8b808006cdded1c449b551faa2367a through the canonical Core writer.
+   4. Re-run the independent 32-file quality audit, mirror byte equality, Core gate, and REVIEW before SHIP.
+ 
+-
+ ## SAIT-017: FORCE-FRESH re-bind + re-package to e75367f7 (v7.226.0)
++
+ - **status:** stale
+ - **superseded_by:** SAIT-018
+ - **summary:** FORCE-FRESH re-bind to e75367f7 after crew fix commits; content-identical (README.md unchanged), package identity dbcddc71fee86ac29e705b1e7be25d2d5f8b808006cdded1c449b551faa2367a preserved
+@@ -164,8 +223,8 @@
+ - **verified:** PASS -- integrated CURRENT against e75367f7
+ - **instructions:** Core records the integrated saitranslate disposition.
+ 
+-
+ ## SAIT-018: FORCE-FRESH re-bind to 078f5cd6
++
+ - **status:** stale
+ - **superseded_by:** SAIT-019 -- HEAD 078f5cd6 -> b666b77f (v7.226.0 closure T-1150; SPEC.md +29 from audit-hardening, read_set moved)
+ - **summary:** FORCE-FRESH re-bind to 078f5cd6; content-identical (README.md unchanged), package identity dbcddc71fee86ac29e705b1e7be25d2d5f8b808006cdded1c449b551faa2367a preserved
+@@ -179,8 +238,8 @@
+ - **verified:** PASS -- integrated CURRENT against 078f5cd6
+ - **instructions:** Core records the integrated saitranslate disposition.
+ 
+-
+ ## SAIT-019: FORCE-FRESH re-bind to b666b77f (v7.226.0 closure)
++
+ - **status:** stale
+ - **superseded_by:** SAIT-020
+ - **summary:** FORCE-FRESH re-bind to b666b77f (v7.226.0 closure T-1150). README.md content-unchanged (normalized digest 2a33e364...), so all 32 locale translations remain valid; SPEC.md +29 from audit hardening changed the read_set, so package identity moved to sha256:51c1785b. Identical payload, fresh binding.
+@@ -199,6 +258,7 @@
+   4. Re-run the independent 32-file quality audit, mirror byte equality, Core gate, and REVIEW before SHIP.
+ 
+ ## SAIT-020: FORCE-FRESH re-bind to b666b77f (uncommitted working tree drift)
++
+ - **status:** stale
+ - **superseded_by:** SAIT-021
+ - **summary:** SAIT-019 went stale by freshness triple (fingerprint moved from git-delta-v1:c7765ad8 to git-delta-v1:e0834df2 due to uncommitted working tree changes in saipen/ docs and tools/). README.md, SPEC.md, CONTRIBUTING.md, SECURITY.md, CODE_OF_CONDUCT.md, guides/, and phases/translate.md are all unchanged -- 32 locale translations remain valid. FORCE-FRESH re-bound the same package to the current source identity.
+@@ -213,6 +273,7 @@
+ - **instructions:** Core records the integrated saitranslate disposition.
+ 
+ ## SAIT-021: verified qwen3:14b FORCE-FRESH package
++
+ - **status:** stale
+ - **superseded_by:** SAIT-022
+ - **summary:** FORCE-FRESH regenerated all 32 locale README candidates with qwen3:14b and published a new strict package against the current source identity; independent hashing disproved E-4192's stale `d7c62e72` premise and confirmed the live normalized README digest remains `2a33e364`.
+@@ -235,6 +296,7 @@
+   4. Re-run the 32-file quality audit, mirror byte equality, Core gate, and REVIEW before SHIP.
+ 
+ ## SAIT-022: reviewed qwen3:14b FORCE-FRESH package
++
+ - **status:** stale
+ - **superseded_by:** SAIT-023
+ - **summary:** Supersedes SAIT-021 after independent review found and repaired one malformed Turkish scenario-fixture link plus leaked English prose; all 32 locale candidates were re-audited and the strict package was republished.
+@@ -257,6 +319,7 @@
+   4. Re-run the 32-file quality audit, mirror byte equality, Core gate, and REVIEW before SHIP.
+ 
+ ## SAIT-023: v7.226.1 release-metadata rebind
++
+ - **status:** stale
+ - **summary:** Rebound the reviewed qwen3:14b translation payload after the v7.226.1 release metadata and all 32 locale badges were finalized; translation prose is unchanged from SAIT-022.
+ - **critical:** false
+@@ -267,4 +330,4 @@
+ - **coverage:** 32/32 locale README_*.md payloads + 3 root mirrors; 44 exact read dependencies; v7.226.1 badges current
+ - **payload:** [.saipen/saitranslate/kitchen/{ar,bg,cs,da,de,ded,el,es,et,fi,fr,he,hi,hr,hu,id,it,ja,ko,nl,no,pl,pt,ro,ru,sk,sv,th,tr,uk,vi,zh}/README_*.md, README.ee.md, README.ded.md, README.ja.md]
+ - **verified:** PASS -- strict READY `sha256:99c5be50394acad757928a2c7fa8f49f21670f84d733abfe8a5b9067cfc30bc6` at epoch 21; 35 authenticated payloads; normalized source digest remains `2a33e364c3c12e8b1b9b2caf41b05db3ee27f17161336579ae85ee59da34fe56`
+-- **instructions:** Run `python -B tools/validate.py --gate collect:saitranslate`; integrate only the named READY package through Core.
++- **instructions:** Run `python -B tools/validate.py --gate collect:saitranslate`; integrate only the named READY package through Core.
+\ No newline at end of file
+diff --git a/.saipen/saitranslate/kitchen/_publish_package.py b/.saipen/saitranslate/kitchen/_publish_package.py
+index af5b243d..e7a555f7 100644
+--- a/.saipen/saitranslate/kitchen/_publish_package.py
++++ b/.saipen/saitranslate/kitchen/_publish_package.py
+@@ -55,7 +55,7 @@ def main() -> None:
+         base_source_head=identity.source_head,
+         base_source_tree_fingerprint=identity.source_tree_fingerprint,
+         base_discovery_model=identity.discovery_model,
+-        scope="force-fresh-all-real-docs-32-locales-no-ui-v7.231.3",
++        scope="force-fresh-all-real-docs-32-locales-no-ui-v7.249.0",
+         read_set=producer_api.read_set_from(ROOT, read_paths),
+         write_set=producer_api.write_set_before(ROOT, write_paths),
+         epoch=epoch,
+diff --git a/tools/saipen_engine/conformance_lineage.py b/tools/saipen_engine/conformance_lineage.py
+new file mode 100644
+index 00000000..9f64bdf8
+--- /dev/null
++++ b/tools/saipen_engine/conformance_lineage.py
+@@ -0,0 +1,700 @@
++"""Bounded authenticated conformance receipt lineage (SRC-025:R011).
++
++The v1 lineage document grows one member per lifetime receipt, so every
++latest-receipt lookup re-hashed the whole population and every append rebuilt
++the full membership. This module replaces the hot path with:
++
++    bounded immutable sealed generations (fixed GEN_BOUND members)
++  + one bounded active append generation
++  + one compact authenticated lineage head
++  + exact per-gate latest locators
++
++The receipt JSON files remain the ONLY evidence authority: nothing here
++rewrites historical receipt bytes, and every lookup re-verifies the exact
++bytes of the receipt it returns against its generation member digest. The
++receipt-directory mtime stays the cheap staleness hint (one stat), exactly as
++the v1 locator used it, so an out-of-band sibling can never be laundered into
++"latest" and a crash can never half-advertise a locator: generation authority
++is published before the locator advertises it, and a lookup that cannot
++authenticate the locator through its generation degrades to the canonical
++strict scan without mutating anything.
++"""
++
++from __future__ import annotations
++
++import hashlib
++import json
++from pathlib import Path
++
++GEN_BOUND = 128
++
++SCHEMA_VERSION = 2
++
++#: Same sidecar namespace the v1 locator index already owns.
++INDEX_DIR_REL = ".saipen/recovery/conformance/index"
++HEAD_REL = f"{INDEX_DIR_REL}/lineage-head.json"
++ACTIVE_ID = "active-gen"
++
++_HEAD_DOMAIN = b"saipen-conformance-lineage-head-v2\0"
++_GENERATION_DOMAIN = b"saipen-conformance-generation-v2\0"
++_LOCATOR_DOMAIN = b"saipen-conformance-locator-v2\0"
++
++
++def _canonical(payload) -> bytes:
++    return json.dumps(payload, sort_keys=True, separators=(",", ":")).encode("utf-8")
++
++
++def _content_root(domain: bytes, payload) -> str:
++    return hashlib.sha256(domain + _canonical(payload)).hexdigest()
++
++
++def _index_path(root: Path, rel: str) -> Path:
++    from .journal import owned_target_path
++
++    return owned_target_path(root, rel, kind="conformance lineage")
++
++
++def _member(receipt_id: str, gate: str, timestamp: str, receipt_path: str, content_sha256: str):
++    return {
++        "receipt_id": receipt_id,
++        "gate": gate,
++        "timestamp_utc": timestamp,
++        "receipt_path": receipt_path,
++        "content_sha256": content_sha256,
++    }
++
++
++def _read_generation(root: Path, generation_id: str):
++    rel = f"{INDEX_DIR_REL}/{generation_id}.json"
++    from .paths import prove_owned_regular
++
++    path = _index_path(root, rel)
++    try:
++        prove_owned_regular(path, kind="conformance lineage generation")
++        document = json.loads(path.read_bytes().decode("utf-8-sig"))
++    except (FileNotFoundError, OSError, ValueError, UnicodeDecodeError, json.JSONDecodeError):
++        return None
++    if not isinstance(document, dict):
++        return None
++    root_value = document.get("root")
++    payload = {
++        "schema_version": document.get("schema_version"),
++        "generation_id": document.get("generation_id"),
++        "members": document.get("members"),
++    }
++    if _content_root(_GENERATION_DOMAIN, payload) != root_value:
++        return None
++    if payload.get("schema_version") != SCHEMA_VERSION:
++        return None
++    if payload.get("generation_id") != generation_id:
++        return None
++    members = payload.get("members")
++    if not isinstance(members, list) or len(members) > GEN_BOUND:
++        return None
++    if any(not isinstance(member, dict) for member in members):
++        return None
++    return members, root_value
++
++
++def _write_generation(root: Path, generation_id: str, members: list[dict]) -> str:
++    from .paths import safe_atomic_write_bytes
++
++    payload = {
++        "schema_version": SCHEMA_VERSION,
++        "generation_id": generation_id,
++        "members": members,
++    }
++    generation_root = _content_root(_GENERATION_DOMAIN, payload)
++    document = dict(payload)
++    document["root"] = generation_root
++    safe_atomic_write_bytes(
++        _index_path(root, f"{INDEX_DIR_REL}/{generation_id}.json"),
++        _canonical(document) + b"\n",
++        kind="conformance lineage generation",
++        ownership_root=root,
++    )
++    return generation_root
++
++
++def _read_head(root: Path):
++    from .paths import prove_owned_regular
++
++    path = _index_path(root, HEAD_REL)
++    try:
++        prove_owned_regular(path, kind="conformance lineage head")
++        document = json.loads(path.read_bytes().decode("utf-8-sig"))
++    except (FileNotFoundError, OSError, ValueError, UnicodeDecodeError, json.JSONDecodeError):
++        return None
++    if not isinstance(document, dict):
++        return None
++    head_root = document.get("root")
++    payload = {
++        "schema_version": document.get("schema_version"),
++        "gen_bound": document.get("gen_bound"),
++        "receipt_count": document.get("receipt_count"),
++        "sealed_count": document.get("sealed_count"),
++        "active_root": document.get("active_root"),
++        "latest_sealed_id": document.get("latest_sealed_id"),
++        "latest_sealed_root": document.get("latest_sealed_root"),
++        "prev_root": document.get("prev_root"),
++        "receipt_dir_mtime_ns": document.get("receipt_dir_mtime_ns"),
++    }
++    if _content_root(_HEAD_DOMAIN, payload) != head_root:
++        return None
++    if payload.get("schema_version") != SCHEMA_VERSION or payload.get("gen_bound") != GEN_BOUND:
++        return None
++    if not isinstance(payload.get("receipt_count"), int) or not isinstance(
++        payload.get("sealed_count"), int
++    ):
++        return None
++    return payload, head_root
++
++
++def _write_head(
++    root: Path,
++    *,
++    receipt_count: int,
++    sealed_count: int,
++    active_root: str,
++    latest_sealed_id: str | None,
++    latest_sealed_root: str | None,
++    prev_root: str | None,
++    receipt_dir_mtime_ns: int,
++) -> str:
++    from .paths import safe_atomic_write_bytes
++
++    payload = {
++        "schema_version": SCHEMA_VERSION,
++        "gen_bound": GEN_BOUND,
++        "receipt_count": receipt_count,
++        "sealed_count": sealed_count,
++        "active_root": active_root,
++        "latest_sealed_id": latest_sealed_id,
++        "latest_sealed_root": latest_sealed_root,
++        "prev_root": prev_root,
++        "receipt_dir_mtime_ns": receipt_dir_mtime_ns,
++    }
++    head_root = _content_root(_HEAD_DOMAIN, payload)
++    document = dict(payload)
++    document["root"] = head_root
++    safe_atomic_write_bytes(
++        _index_path(root, HEAD_REL),
++        _canonical(document) + b"\n",
++        kind="conformance lineage head",
++        ownership_root=root,
++    )
++    return head_root
++
++
++def _locator_payload(
++    gate: str,
++    receipt_id: str,
++    timestamp: str,
++    receipt_path: str,
++    content_sha256: str,
++    generation_id: str,
++    generation_root: str,
++):
++    return {
++        "schema_version": SCHEMA_VERSION,
++        "gate": gate,
++        "receipt_id": receipt_id,
++        "timestamp_utc": timestamp,
++        "receipt_path": receipt_path,
++        "content_sha256": content_sha256,
++        "generation_id": generation_id,
++        "generation_root": generation_root,
++    }
++
++
++def _write_locator(root: Path, payload: dict) -> None:
++    from .paths import safe_atomic_write_bytes
++
++    document = dict(payload)
++    document["root"] = _content_root(_LOCATOR_DOMAIN, payload)
++    safe_atomic_write_bytes(
++        _index_path(root, f"{INDEX_DIR_REL}/{payload['gate']}.json"),
++        _canonical(document) + b"\n",
++        kind="conformance lineage locator",
++        ownership_root=root,
++    )
++
++
++def _read_locator(root: Path, gate: str):
++    from .paths import prove_owned_regular
++
++    path = _index_path(root, f"{INDEX_DIR_REL}/{gate}.json")
++    try:
++        prove_owned_regular(path, kind="conformance lineage locator")
++        document = json.loads(path.read_bytes().decode("utf-8-sig"))
++    except (FileNotFoundError, OSError, ValueError, UnicodeDecodeError, json.JSONDecodeError):
++        return None
++    if not isinstance(document, dict):
++        return None
++    payload = {
++        key: document.get(key)
++        for key in (
++            "schema_version",
++            "gate",
++            "receipt_id",
++            "timestamp_utc",
++            "receipt_path",
++            "content_sha256",
++            "generation_id",
++            "generation_root",
++        )
++    }
++    if _content_root(_LOCATOR_DOMAIN, payload) != document.get("root"):
++        return None
++    if payload.get("schema_version") != SCHEMA_VERSION or payload.get("gate") != gate:
++        return None
++    return payload
++
++
++def _receipt_dir_mtime_ns(root: Path) -> int | None:
++    from .conformance import RECEIPT_DIRNAME
++
++    try:
++        return (root / RECEIPT_DIRNAME).stat().st_mtime_ns
++    except OSError:
++        return None
++
++
++def _scan_receipt_members(root: Path):
++    """One strict deep scan: every receipt decoded once, member metadata built.
++
++    Raises ReceiptDiscoveryError on any unreadable/foreign receipt, exactly
++    like the canonical scan, so corrupt evidence can never silently seed the
++    projection.
++    """
++    from .conformance import RECEIPT_DIRNAME, ReceiptDiscoveryError, _iter_receipts
++
++    members = []
++    for record in _iter_receipts(root):
++        receipt_path = f"{RECEIPT_DIRNAME}/{record['receipt_id']}.json"
++        raw = (root / receipt_path).read_bytes()
++        members.append(
++            _member(
++                record["receipt_id"],
++                record.get("gate", ""),
++                record.get("timestamp_utc", ""),
++                receipt_path,
++                hashlib.sha256(raw).hexdigest(),
++            )
++        )
++    members.sort(key=lambda member: (member["receipt_path"]))
++    return members
++
++
++def rebuild_lineage(root: Path) -> dict:
++    """The ONE canonical v1 -> v2 (or corrupt -> fresh) rebuild.
++
++    One deep O(N) scan of the actual receipt bytes; malformed v1 authority is
++    never used as migration input. The caller must hold the project writer
++    lock (the append path already does). Receipt bytes are read, never
++    rewritten.
++    """
++    root = Path(root)
++    members = _scan_receipt_members(root)
++    generations = [members[start : start + GEN_BOUND] for start in range(0, len(members), GEN_BOUND)]
++    active_members = generations.pop() if generations else []
++    prev_root = None
++    head = _read_head(root)
++    if head is not None:
++        prev_root = head[1]
++    latest_sealed_id = None
++    latest_sealed_root = None
++    latest_by_gate: dict[str, dict] = {}
++    for index, chunk in enumerate(generations):
++        generation_id = f"gen-{index:04d}"
++        generation_root = _write_generation(root, generation_id, chunk)
++        latest_sealed_id, latest_sealed_root = generation_id, generation_root
++        for member in chunk:
++            latest_by_gate[member["gate"]] = (member, generation_id, generation_root)
++    active_root = _write_generation(root, ACTIVE_ID, active_members)
++    for member in active_members:
++        latest_by_gate[member["gate"]] = (member, ACTIVE_ID, active_root)
++    mtime = _receipt_dir_mtime_ns(root)
++    if mtime is None:
++        return {"ok": False, "code": "RECEIPT_DIR_UNREADABLE"}
++    head_root = _write_head(
++        root,
++        receipt_count=len(members),
++        sealed_count=len(generations),
++        active_root=active_root,
++        latest_sealed_id=latest_sealed_id,
++        latest_sealed_root=latest_sealed_root,
++        prev_root=prev_root,
++        receipt_dir_mtime_ns=mtime,
++    )
++    for gate, (member, generation_id, generation_root) in latest_by_gate.items():
++        _write_locator(
++            root,
++            _locator_payload(
++                gate,
++                member["receipt_id"],
++                member["timestamp_utc"],
++                member["receipt_path"],
++                member["content_sha256"],
++                generation_id,
++                generation_root,
++            ),
++        )
++    return {
++        "ok": True,
++        "code": "CONFORMANCE_LINEAGE_REBUILT",
++        "receipt_count": len(members),
++        "head_root": head_root,
++    }
++
++
++def advance_append(
++    root: Path,
++    gate: str,
++    receipt_id: str,
++    timestamp: str,
++    receipt_path: str,
++    *,
++    prior_receipt_dir_mtime_ns: int | None,
++) -> bool:
++    """Fold one freshly written receipt into the v2 lineage (mutating).
++
++    Returns True when the bounded lineage now authenticates the receipt and
++    the per-gate locator advertises it. False means "refuse": an out-of-band
++    sibling appeared, the active generation fails verification, or the
++    receipt's own bytes cannot be read -- the caller then leaves both the old
++    (still truthful) locator and the head untouched, and the next canonical
++    strict path degrades exactly like the v1 design.
++
++    Crash-safety order: generation bytes first, head second, locator last, so
++    a locator is never advertised before the authority that authenticates it.
++    """
++    root = Path(root)
++    from .conformance import RECEIPT_DIRNAME
++
++    current_mtime = _receipt_dir_mtime_ns(root)
++    if current_mtime is None:
++        return False
++    if prior_receipt_dir_mtime_ns is not None and current_mtime != prior_receipt_dir_mtime_ns:
++        # Out-of-band change between the writer's observation and now: refuse
++        # to advance, exactly like the v1 append guard.
++        return False
++
++    raw = None
++    try:
++        raw = (root / receipt_path).read_bytes()
++    except OSError:
++        return False
++    content_sha256 = hashlib.sha256(raw).hexdigest()
++
++    head = _read_head(root)
++    if head is None:
++        result = rebuild_lineage(root)
++        if not result.get("ok"):
++            return False
++        # After the rebuild the head is current; fold the receipt in.
++        head = _read_head(root)
++        if head is None:
++            return False
++    payload, _ = head
++    if payload.get("receipt_dir_mtime_ns") != current_mtime:
++        # The head predates (or postdates) other directory activity: rebuild
++        # so membership is re-established from actual bytes, then fold in.
++        result = rebuild_lineage(root)
++        if not result.get("ok"):
++            return False
++        head = _read_head(root)
++        if head is None:
++            return False
++        payload, _ = head
++
++    tail = _read_generation(root, ACTIVE_ID)
++    if tail is None:
++        if not rebuild_lineage(root).get("ok"):
++            return False
++        head = _read_head(root)
++        if head is None:
++            return False
++        payload, _ = head
++        tail = _read_generation(root, ACTIVE_ID)
++        if tail is None:
++            return False
++    tail_members, _active_root = tail
++    if any(member.get("receipt_id") == receipt_id for member in tail_members):
++        # Idempotent re-append of the same receipt: refresh the locator only.
++        _write_locator(
++            root,
++            _locator_payload(
++                gate,
++                receipt_id,
++                timestamp,
++                receipt_path,
++                content_sha256,
++                ACTIVE_ID,
++                payload.get("active_root") or "",
++            ),
++        )
++        return True
++
++    new_member = _member(receipt_id, gate, timestamp, receipt_path, content_sha256)
++    sealed_count = payload.get("sealed_count") or 0
++    latest_sealed_id = payload.get("latest_sealed_id")
++    latest_sealed_root = payload.get("latest_sealed_root")
++    generation_id = ACTIVE_ID
++    generation_root = payload.get("active_root") or ""
++    if len(tail_members) >= GEN_BOUND:
++        # Seal the full active generation exactly once; the new receipt opens
++        # a fresh active generation.
++        generation_id = f"gen-{sealed_count:04d}"
++        generation_root = _write_generation(root, generation_id, tail_members)
++        sealed_count += 1
++        latest_sealed_id = generation_id
++        latest_sealed_root = generation_root
++        tail_members = []
++        active_root = _write_generation(root, ACTIVE_ID, [])
++    else:
++        tail_members = tail_members + [new_member]
++        active_root = _write_generation(root, ACTIVE_ID, tail_members)
++    mtime = _receipt_dir_mtime_ns(root)
++    if mtime is None:
++        return False
++    _write_head(
++        root,
++        receipt_count=(payload.get("receipt_count") or 0) + 1,
++        sealed_count=sealed_count,
++        active_root=active_root,
++        latest_sealed_id=latest_sealed_id,
++        latest_sealed_root=latest_sealed_root,
++        prev_root=payload.get("prev_root"),
++        receipt_dir_mtime_ns=mtime,
++    )
++    _write_locator(
++        root,
++        _locator_payload(
++            gate,
++            receipt_id,
++            timestamp,
++            receipt_path,
++            content_sha256,
++            generation_id,
++            generation_root if generation_id != ACTIVE_ID else active_root,
++        ),
++    )
++    return True
++
++
++def _verify_receipt_bytes(root: Path, receipt_path: str, expected_sha256: str):
++    from .conformance import RECEIPT_DIRNAME
++    from .paths import prove_owned_regular
++
++    if not receipt_path.startswith(RECEIPT_DIRNAME + "/"):
++        return None
++    path = root / receipt_path
++    try:
++        prove_owned_regular(path, kind="conformance receipt")
++        raw = path.read_bytes()
++    except (OSError, ValueError):
++        return None
++    if hashlib.sha256(raw).hexdigest() != expected_sha256:
++        return None
++    try:
++        record = json.loads(raw.decode("utf-8"))
++    except (UnicodeDecodeError, json.JSONDecodeError):
++        return None
++    if not isinstance(record, dict) or record.get("kind") != "conformance_receipt":
++        return None
++    return record
++
++
++def latest_receipt_bounded(root: Path, gate: str):
++    """The bounded authenticated latest lookup.
++
++    Returns (handled, record):
++
++    * handled=False: no v2 lineage exists -- the caller runs the legacy
++      fallback path unchanged (read-only, never mutating).
++    * handled=True, record set: the locator, its generation and the exact
++      receipt bytes all authenticated.
++    * handled=True, record None: the locator could not be authenticated
++      (staleness hint, missing/corrupt locator or generation, digest or
++      identity mismatch) -- the caller degrades to the strict scan and
++      reports the true latest; nothing here mutates on a read path.
++
++    Cost: one head read, one generation read, one locator read, one receipt
++    read, one directory stat. No lifetime receipt is opened or hashed.
++    """
++    root = Path(root)
++    head = _read_head(root)
++    if head is None:
++        head_path = _index_path(root, HEAD_REL)
++        if head_path.exists():
++            # Corrupt v2 authority on a read-only path: refuse bounded trust
++            # (the strict fallback decides), never rebuild from a reader.
++            return True, None
++        return False, None
++    payload, _ = head
++    mtime = _receipt_dir_mtime_ns(root)
++    if mtime is None or mtime != payload.get("receipt_dir_mtime_ns"):
++        # Directory changed after the head was published: the locator may
++        # lag a newer receipt. Degrade to the strict scan.
++        return True, None
++    locator = _read_locator(root, gate)
++    if locator is None:
++        # No authenticated locator for this gate. Absent means "no receipts
++        # for this gate" ONLY if no receipt for the gate exists in the
++        # generations -- proving that cheaply is not possible, so degrade.
++        if _index_path(root, f"{INDEX_DIR_REL}/{gate}.json").exists():
++            return True, None
++        return False, None
++    generation_id = locator.get("generation_id")
++    generation = _read_generation(root, str(generation_id))
++    if generation is None:
++        return True, None
++    members, generation_root = generation
++    if locator.get("generation_root") != generation_root:
++        return True, None
++    if generation_id == ACTIVE_ID and payload.get("active_root") != generation_root:
++        return True, None
++    if (
++        generation_id != ACTIVE_ID
++        and payload.get("latest_sealed_id") == generation_id
++        and payload.get("latest_sealed_root") != generation_root
++    ):
++        return True, None
++    member = next(
++        (
++            m
++            for m in members
++            if m.get("receipt_id") == locator.get("receipt_id")
++            and m.get("gate") == gate
++            and m.get("timestamp_utc") == locator.get("timestamp_utc")
++            and m.get("receipt_path") == locator.get("receipt_path")
++        ),
++        None,
++    )
++    if member is None or member.get("content_sha256") != locator.get("content_sha256"):
++        return True, None
++    record = _verify_receipt_bytes(root, str(locator.get("receipt_path")), member["content_sha256"])
++    if record is None:
++        return True, None
++    if (
++        record.get("gate") != gate
++        or record.get("receipt_id") != locator.get("receipt_id")
++        or record.get("timestamp_utc") != locator.get("timestamp_utc")
++    ):
++        return True, None
++    return True, record
++
++
++def validate_lineage_deep(root: Path) -> tuple[bool, list[str]]:
++    """The explicit forensic path: every receipt, every generation, all locators.
++
++    Normal latest lookup is NOT this. Here every historical receipt byte is
++    re-read and re-hashed, generation roots and the head chain are verified,
++    membership completeness (no missing, duplicate or foreign receipts) is
++    proven, and every per-gate locator is authenticated against its
++    generation.
++    """
++    root = Path(root)
++    from .conformance import RECEIPT_DIRNAME, _iter_receipts
++
++    errors: list[str] = []
++    head = _read_head(root)
++    if head is None:
++        return False, [f"{HEAD_REL}: absent or untrusted lineage head"]
++    payload, _ = head
++    records = _iter_receipts(root)
++    by_path: dict[str, dict] = {}
++    for record in records:
++        receipt_path = f"{RECEIPT_DIRNAME}/{record['receipt_id']}.json"
++        raw = (root / receipt_path).read_bytes()
++        by_path[receipt_path] = {
++            "receipt_id": record["receipt_id"],
++            "gate": record.get("gate", ""),
++            "timestamp_utc": record.get("timestamp_utc", ""),
++            "content_sha256": hashlib.sha256(raw).hexdigest(),
++        }
++
++    seen: dict[str, dict] = {}
++    sealed_count = payload.get("sealed_count") or 0
++    for index in range(sealed_count):
++        generation = _read_generation(root, f"gen-{index:04d}")
++        if generation is None:
++            errors.append(f"gen-{index:04d}.json: untrusted generation")
++            continue
++        for member in generation[0]:
++            receipt_path = member.get("receipt_path")
++            if receipt_path in seen:
++                errors.append(f"{receipt_path}: duplicate membership across generations")
++            seen[receipt_path] = member
++    tail = _read_generation(root, ACTIVE_ID)
++    if tail is None:
++        errors.append(f"{ACTIVE_ID}.json: untrusted active generation")
++    else:
++        for member in tail[0]:
++            receipt_path = member.get("receipt_path")
++            if receipt_path in seen:
++                errors.append(f"{receipt_path}: duplicate membership in the active generation")
++            seen[receipt_path] = member
++    if sorted(seen) != sorted(by_path):
++        missing = sorted(set(by_path) - set(seen))
++        extra = sorted(set(seen) - set(by_path))
++        errors.append(
++            f"lineage membership diverges from the receipt namespace "
++            f"(missing {missing[:3]}, extra {extra[:3]})"
++        )
++    for receipt_path, actual in by_path.items():
++        member = seen.get(receipt_path)
++        if member is None:
++            continue  # divergence already reported
++        if (
++            member.get("content_sha256") != actual["content_sha256"]
++            or member.get("gate") != actual["gate"]
++            or member.get("timestamp_utc") != actual["timestamp_utc"]
++        ):
++            errors.append(f"{receipt_path}: receipt bytes disagree with lineage membership")
++
++    gates = sorted({record.get("gate", "") for record in records})
++    for gate in gates:
++        locator = _read_locator(root, gate)
++        if locator is None:
++            errors.append(f"{gate}.json: untrusted locator")
++            continue
++        generation = _read_generation(root, str(locator.get("generation_id")))
++        if generation is None or locator.get("generation_root") != generation[1]:
++            errors.append(f"{gate}.json: locator generation unauthenticated")
++            continue
++        member = next(
++            (
++                m
++                for m in generation[0]
++                if m.get("receipt_id") == locator.get("receipt_id")
++                and m.get("gate") == gate
++            ),
++            None,
++        )
++        if member is None or member.get("content_sha256") != locator.get("content_sha256"):
++            errors.append(f"{gate}.json: locator does not bind a real generation member")
++            continue
++        # The advertised latest must BE the latest by validated completion.
++        candidates = [
++            m
++            for m in seen.values()
++            if m.get("gate") == gate
++        ]
++        from .board import iso_utc_sort_key
++        import datetime as _datetime
++
++        _earliest = iso_utc_sort_key("0000-01-01T00:00:00Z") or _datetime.datetime.min.replace(
++            tzinfo=_datetime.timezone.utc
++        )
++        best = max(
++            candidates,
++            key=lambda m: (
++                iso_utc_sort_key(m.get("timestamp_utc", "")) or _earliest,
++                m.get("receipt_id", ""),
++            ),
++        )
++        if best is None or best.get("receipt_id") != locator.get("receipt_id"):
++            errors.append(f"{gate}.json: locator is not the true latest receipt")
++    return not errors, errors
+diff --git a/tools/saipen_engine/debt.py b/tools/saipen_engine/debt.py
+new file mode 100644
+index 00000000..6489f6cd
+--- /dev/null
++++ b/tools/saipen_engine/debt.py
+@@ -0,0 +1,955 @@
++"""Conformance Debt Ledger + Work Delta Gate (AUDAPACK T-172 / SAIPEN T-1301).
++
++THE PROBLEM THIS SOLVES: the protocol had one binary project-wide rule --
++strict Core validator RED means new Work can never complete. That is correct
++for RELEASE and too coarse for ordinary convergence: honest, immutable
++historical debt (pre-claim closure-evidence gaps, operator-only receipts,
++credential-gated archives) otherwise permanently traps every future Work.
++
++THE DISTINCTION, WITHOUT WEAKENING ANYTHING:
++
++* STRICT project conformance (`validate --gate core`) is untouched. A
++  finding is still a finding; nothing is downgraded, hidden or waived.
++* A DEBT SNAPSHOT is an immutable, journaled, project+lineage+ruleset-bound
++  record of the exact structured finding set at one checkpoint. Creating one
++  closes nothing and turns nothing green (F4).
++* The WORK DELTA GATE compares current structured findings against a trusted
++  pre-work snapshot (CARRIED / RESOLVED / NEW / WORSENED / unsafe CHANGED).
++  It PASSes only with zero NEW/WORSENED/unsafe-CHANGED problems, zero
++  problems attributed to the Work or its source receipts, zero unattributed
++  problems that cannot be proven carried, terminal source coverage for the
++  Work, and green targeted verification.
++* RELEASE stays stricter than Work convergence: any carried Core problem
++  keeps release BLOCKED. `release_ready` is false whenever strict Core is
++  red; a Work delta PASS report says so explicitly (G3/H).
++* LEGACY BOOTSTRAP (J) adjudicates Work that predates the mechanism: a
++  finding is carried only when canonical provenance proves its subject is
++  unrelated to the target Work and predates the claim boundary. Target-Work,
++  target-source, post-claim, global/unattributed and unprovable subjects all
++  fail closed.
++
++CREDENTIAL SAFETY: structured findings and debt snapshots never carry secret
++values (findings.py drops message content for credential families; this
++module stores only the classifier output).
++"""
++
++from __future__ import annotations
++
++import json
++import re
++import subprocess
++import sys
++from datetime import datetime, timezone
++from pathlib import Path
++
++from . import findings as findings_mod
++from .journal import hash_bytes, run_mutation
++from .paths import project_identity as _project_identity
++from .paths import project_lineage_identity
++
++DEBT_SCHEMA_VERSION = 1
++DEBT_DIR = ".saipen/recovery/conformance/debt"
++DEBT_ID_RE = re.compile(r"\ADEBT-(\d{6})\Z")
++_VALIDATOR = Path(__file__).resolve().parent.parent / "validate.py"
++VALIDATOR_CAPTURE_TIMEOUT = 1800
++_SRC_RE = re.compile(r"\ASRC-\d+\Z")
++_WORK_RE = re.compile(r"\AT-\d+\Z")
++_EVENT_RE = re.compile(r"\AE-(\d+)\Z")
++
++
++class DebtRefusal(Exception):
++    """A structured, fail-closed refusal carrying its protocol code."""
++
++    def __init__(self, code: str, detail: str):
++        super().__init__(detail)
++        self.code = code
++        self.detail = detail
++
++
++def _utc() -> str:
++    return datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
++
++
++def _sha_file(path: Path) -> str | None:
++    try:
++        return hash_bytes(path.read_bytes())
++    except OSError:
++        return None
++
++
++# -- structured capture -------------------------------------------------
++
++
++def capture_findings(root: Path | str, *, gate: str = "core") -> dict:
++    """Run the canonical validator once and return its structured findings.
++
++    The validator stays strictly read-only on project state; the only extra
++    output is the requested findings JSON side artifact (outside the project,
++    in a temp directory). Exit codes pass through unchanged: this capture can
++    never turn a FAIL into a PASS.
++    """
++    root = Path(root)
++    import tempfile
++
++    with tempfile.TemporaryDirectory(prefix="saipen-debt-capture-") as tmp:
++        out_path = Path(tmp) / "findings.json"
++        completed = subprocess.run(
++            [
++                sys.executable,
++                str(_VALIDATOR),
++                "--project-root",
++                str(root),
++                "--gate",
++                gate,
++                "--findings-json",
++                str(out_path),
++            ],
++            capture_output=True,
++            text=True,
++            timeout=VALIDATOR_CAPTURE_TIMEOUT,
++        )
++        if not out_path.is_file():
++            return {
++                "ok": False,
++                "code": "FINDINGS_CAPTURE_FAILED",
++                "exit_code": completed.returncode,
++                "detail": (completed.stderr or completed.stdout or "")[-500:],
++            }
++        try:
++            doc = json.loads(out_path.read_text(encoding="utf-8"))
++        except (OSError, ValueError) as exc:
++            return {
++                "ok": False,
++                "code": "FINDINGS_CAPTURE_MALFORMED",
++                "detail": str(exc),
++            }
++    if doc.get("schema_version") != findings_mod.RULESET_VERSION:
++        return {
++            "ok": False,
++            "code": "BASELINE_RULESET_CHANGED",
++            "detail": f"validator emitted ruleset {doc.get('schema_version')!r}, "
++            f"engine expects {findings_mod.RULESET_VERSION}",
++        }
++    if doc.get("ruleset_fingerprint") != findings_mod.ruleset_fingerprint():
++        return {
++            "ok": False,
++            "code": "BASELINE_RULESET_CHANGED",
++            "detail": "validator ruleset fingerprint does not match the engine classifier",
++        }
++    doc["ok"] = True
++    doc["exit_code"] = completed.returncode
++    return doc
++
++
++# -- snapshot -------------------------------------------------------------
++
++
++def _debt_dir(root: Path) -> Path:
++    return root / DEBT_DIR
++
++
++def _existing_snapshots(root: Path) -> list[Path]:
++    directory = _debt_dir(root)
++    if not directory.is_dir():
++        return []
++    out = []
++    for path in sorted(directory.glob("DEBT-*.json")):
++        if path.is_file() and DEBT_ID_RE.match(path.stem):
++            out.append(path)
++    return out
++
++
++def _next_snapshot_id(root: Path) -> str:
++    numbers = [
++        int(DEBT_ID_RE.match(path.stem).group(1)) for path in _existing_snapshots(root)
++    ]
++    return f"DEBT-{(max(numbers) + 1) if numbers else 1:06d}"
++
++
++def _project_state_fingerprints(root: Path) -> dict:
++    board = _sha_file(root / ".saipen/BOARD.md") or ""
++    state = _sha_file(root / ".saipen/STATE.md") or ""
++    log_digest = ""
++    try:
++        from .log import read_history_snapshot
++
++        snapshot = read_history_snapshot(root, lean=True)
++        log_digest = snapshot.hash
++    except Exception:
++        log_digest = _sha_file(root / ".saipen/LOG.md") or ""
++    return {"board_sha256": board, "state_sha256": state, "log_fingerprint": log_digest}
++
++
++def _source_identity(root: Path) -> dict:
++    try:
++        from .freshness import compute_source_identity
++
++        identity = compute_source_identity(root)
++        return {
++            "source_head": identity.source_head,
++            "source_tree_fingerprint": identity.source_tree_fingerprint,
++        }
++    except Exception:
++        return {"source_head": None, "source_tree_fingerprint": None}
++
++
++def create_snapshot(
++    root: Path | str,
++    agent: str,
++    reason: str,
++    *,
++    bound_work: str | None = None,
++    dry_run: bool = False,
++) -> dict:
++    """Capture the current structured finding set as ONE immutable snapshot.
++
++    With ``bound_work`` the snapshot additionally binds the Work as its
++    pre-BUILD baseline: this is only accepted while the Work is the ACTIVE
++    claim owned by ``agent`` and its phase is SCOUT -- the narrowest existing
++    lifecycle point that guarantees the baseline predates BUILD mutations
++    (Phase I). I1: when a baseline for the same Work already exists at the
++    exact same source checkpoint and ruleset, it is REUSED, never rewritten.
++
++    Creating a snapshot is NOT a pass: it closes no Work, turns no gate green
++    and authorizes no release (F4).
++    """
++    root = Path(root)
++    from .journal import ensure_project_lineage
++
++    def _regulated_snapshot(
++        capture: dict, reason: str, bound_work: str | None = None
++    ) -> tuple[dict | None, str]:
++        if not capture.get("ok"):
++            return capture, "upstream"
++        problems = capture.get("problems", [])
++        warnings = capture.get("warnings", [])
++        digest = findings_mod.findings_digest(problems, warnings)
++        identity = _source_identity(root)
++        existing = None
++        for path in _existing_snapshots(root):
++            try:
++                record = json.loads(path.read_text(encoding="utf-8"))
++            except (OSError, ValueError):
++                continue
++            if record.get("bound_work") == (bound_work or None):
++                if (
++                    record.get("ruleset_version") == findings_mod.RULESET_VERSION
++                    and record.get("findings_digest") == digest
++                    and record.get("source_tree_fingerprint")
++                    == identity["source_tree_fingerprint"]
++                    and record.get("reason") == reason
++                ):
++                    existing = record
++                    break
++        if existing is not None:
++            return (
++                {
++                    "ok": True,
++                    "code": "DEBT_SNAPSHOT_REUSED",
++                    "snapshot_id": existing.get("snapshot_id"),
++                    "reuse": True,
++                },
++                "dedup",
++            )
++        return None, digest
++
++    # The lineage carrier must exist BEFORE the record is built, or the
++    # snapshot would bind a phantom lineage (None) that no later load can
++    # match (T-1003 fail-closed bootstrap).
++    lineage = ensure_project_lineage(root)
++    capture = capture_findings(root)
++    regulated, tagged = _regulated_snapshot(capture, reason, bound_work)
++    if regulated is not None:
++        return regulated
++    problems = capture.get("problems", [])
++    warnings = capture.get("warnings", [])
++    digest = tagged
++    identity = _source_identity(root)
++
++    snapshot_id = _next_snapshot_id(root)
++    record = {
++        "schema_version": DEBT_SCHEMA_VERSION,
++        "snapshot_id": snapshot_id,
++        "project_identity": _project_identity(root),
++        "project_lineage": lineage,
++        "created_at": _utc(),
++        "validator_protocol_version": "1",
++        "ruleset_version": findings_mod.RULESET_VERSION,
++        "ruleset_fingerprint": findings_mod.ruleset_fingerprint(),
++        "gate": capture.get("gate", "core"),
++        "source_head": identity["source_head"],
++        "source_tree_fingerprint": identity["source_tree_fingerprint"],
++        **_project_state_fingerprints(root),
++        "problem_count": len(problems),
++        "warning_count": len(warnings),
++        "problems": problems,
++        "warnings": warnings,
++        "findings_digest": digest,
++        "reason": reason,
++        "bound_work": bound_work,
++        "bound_work_phase": None,
++        "journal_op_id": None,
++    }
++    if bound_work:
++        guard = _bound_work_guard(root, bound_work, agent)
++        if guard is not None:
++            return guard
++        from .state import parse_state
++
++        state = parse_state((root / ".saipen/STATE.md").read_text(encoding="utf-8"))
++        record["bound_work_phase"] = state.get("phase")
++
++    content = json.dumps(record, indent=2, sort_keys=True).encode("utf-8")
++    rel = f"{DEBT_DIR}/{snapshot_id}.json"
++    if dry_run:
++        return {
++            "ok": True,
++            "code": "DEBT_SNAPSHOT_PLAN",
++            "snapshot_id": snapshot_id,
++            "bound_work": bound_work,
++            "problem_count": len(problems),
++            "warning_count": len(warnings),
++            "writes": 1,
++        }
++    op_id = (
++        "debt.snapshot-"
++        + hash_bytes(
++            f"{record['project_lineage']}|{snapshot_id}|{digest}".encode("utf-8")
++        )[:12]
++    )
++    record["journal_op_id"] = op_id
++    content = json.dumps(record, indent=2, sort_keys=True).encode("utf-8")
++    committed = run_mutation(
++        root,
++        op_id=op_id,
++        operation="debt.snapshot",
++        agent=agent,
++        project_identity=record["project_identity"],
++        semantic_payload_hash=hash_bytes(
++            json.dumps({"snapshot": snapshot_id, "digest": digest}, sort_keys=True).encode()
++        ),
++        targets=[
++            {
++                "path": rel,
++                "role": "report",
++                "action": "write",
++                "content": content,
++                "before_hash": "",
++                "after_hash": hash_bytes(content),
++            }
++        ],
++        preconditions={rel: ""},
++        verification_policy="none",
++    )
++    if not committed.get("ok"):
++        return {
++            "ok": False,
++            "code": committed.get("code", "VALIDATION_FAILED"),
++            "detail": committed.get("detail", committed.get("message", "plan apply failed")),
++        }
++    return {
++        "ok": True,
++        "code": "DEBT_SNAPSHOT_CREATED",
++        "snapshot_id": snapshot_id,
++        "problem_count": len(problems),
++        "warning_count": len(warnings),
++        "bound_work": bound_work,
++    }
++
++
++def ensure_debt_baseline(root: Path | str, work: str, agent: str, utc: str) -> dict:
++    """I1/I2: bind a fresh pre-BUILD structured receipt for future Work.
++
++    Called at the SCOUT -> BUILD boundary, the narrowest lifecycle point that
++    guarantees the baseline predates every BUILD mutation (Phase I). A fresh
++    structured Core receipt for the exact same project checkpoint and ruleset
++    is REUSED, never re-minted (I1). When the tree has already moved past the
++    captured checkpoint, a fresh snapshot is created BEFORE this Work's first
++    mutation, never pretended to be pre-work evidence (I2).
++    """
++    root = Path(root)
++    existing = None
++    for path in reversed(_existing_snapshots(root)):
++        try:
++            record = json.loads(path.read_text(encoding="utf-8"))
++        except (OSError, ValueError):
++            continue
++        if record.get("bound_work") != work:
++            continue
++        if record.get("ruleset_version") != findings_mod.RULESET_VERSION:
++            continue
++        if record.get("ruleset_fingerprint") != findings_mod.ruleset_fingerprint():
++            continue
++        existing = record
++        break
++    if existing is not None:
++        return {
++            "ok": True,
++            "code": "DEBT_SNAPSHOT_REUSED",
++            "snapshot_id": existing.get("snapshot_id"),
++            "reuse": True,
++        }
++    return create_snapshot(
++        root,
++        agent,
++        f"pre-BUILD debt baseline for {work}",
++        bound_work=work,
++    )
++
++
++def _bound_work_guard(root: Path, bound_work: str, agent: str) -> dict | None:
++    from .board import claim_status, parse_board
++    from .state import parse_state
++
++    if not _WORK_RE.match(bound_work or ""):
++        return {"ok": False, "code": "VALIDATION_FAILED", "detail": f"invalid Work {bound_work!r}"}
++    try:
++        board = parse_board((root / ".saipen/BOARD.md").read_text(encoding="utf-8-sig"))
++        state = parse_state((root / ".saipen/STATE.md").read_text(encoding="utf-8"))
++    except (OSError, ValueError) as exc:
++        return {"ok": False, "code": "VALIDATION_FAILED", "detail": str(exc)}
++    ticket = board.get("tickets", {}).get(bound_work)
++    if state.get("task") != bound_work or ticket is None or ticket.get("section") != "## DOING":
++        return {
++            "ok": False,
++            "code": "VALIDATION_FAILED",
++            "detail": f"debt baseline for {bound_work} requires the Work to be the ACTIVE claim",
++        }
++    if claim_status(ticket, agent) != "SELF":
++        return {
++            "ok": False,
++            "code": "TICKET_NOT_WORKABLE",
++            "detail": f"{bound_work} is not claimed by {agent}; the baseline binds the "
++            "implementing seat",
++        }
++    if state.get("phase") != "SCOUT":
++        return {
++            "ok": False,
++            "code": "VALIDATION_FAILED",
++            "detail": f"debt baseline must be captured pre-BUILD (phase {state.get('phase')!r}); "
++            "a baseline after mutations would grandfather post-change defects",
++        }
++    return None
++
++
++def load_snapshot(root: Path | str, ref: str) -> dict:
++    """Decode ONE debt snapshot fail-closed (F1/F2/F3 + K29)."""
++    root = Path(root)
++    if not DEBT_ID_RE.match(ref or ""):
++        raise DebtRefusal("VALIDATION_FAILED", f"invalid snapshot id {ref!r}")
++    path = _debt_dir(root) / f"{ref}.json"
++    try:
++        raw = path.read_bytes()
++    except FileNotFoundError as exc:
++        raise DebtRefusal("DEBT_SNAPSHOT_MISSING", f"{ref} does not exist") from exc
++    except OSError as exc:
++        raise DebtRefusal("DEBT_SNAPSHOT_CORRUPT", f"{ref} unreadable: {exc}") from exc
++    try:
++        record = json.loads(raw.decode("utf-8-sig"))
++    except (UnicodeDecodeError, ValueError) as exc:
++        raise DebtRefusal("DEBT_SNAPSHOT_CORRUPT", f"{ref} is not valid JSON: {exc}") from exc
++    if not isinstance(record, dict) or record.get("schema_version") != DEBT_SCHEMA_VERSION:
++        raise DebtRefusal("DEBT_SNAPSHOT_CORRUPT", f"{ref} has an unsupported schema")
++    if record.get("snapshot_id") != ref:
++        raise DebtRefusal("DEBT_SNAPSHOT_CORRUPT", f"{ref} names a different snapshot id")
++    live_identity = _project_identity(root)
++    if record.get("project_identity") != live_identity:
++        raise DebtRefusal(
++            "DEBT_SNAPSHOT_FOREIGN_PROJECT",
++            f"{ref} was captured for {record.get('project_identity')!r}, not this project",
++        )
++    live_lineage = project_lineage_identity(root)
++    if record.get("project_lineage") != live_lineage:
++        raise DebtRefusal(
++            "DEBT_SNAPSHOT_FOREIGN_LINEAGE",
++            f"{ref} binds lineage {record.get('project_lineage')!r}; a copied .saipen "
++            "directory never makes a baseline portable",
++        )
++    if record.get("ruleset_version") != findings_mod.RULESET_VERSION or record.get(
++        "ruleset_fingerprint"
++    ) != findings_mod.ruleset_fingerprint():
++        raise DebtRefusal(
++            "BASELINE_RULESET_CHANGED",
++            f"{ref} was captured under ruleset {record.get('ruleset_version')!r} "
++            f"({str(record.get('ruleset_fingerprint'))[:12]}); finding identity semantics "
++            "changed, comparison would be silent guesswork",
++        )
++    try:
++        digest = findings_mod.findings_digest(
++            record.get("problems") or [], record.get("warnings") or []
++        )
++    except (TypeError, ValueError) as exc:
++        raise DebtRefusal("DEBT_SNAPSHOT_CORRUPT", f"{ref} findings malformed: {exc}") from exc
++    if digest != record.get("findings_digest"):
++        raise DebtRefusal(
++            "DEBT_SNAPSHOT_CORRUPT",
++            f"{ref} findings fail their integrity digest (hand-edited or damaged)",
++        )
++    return record
++
++
++# -- Work delta gate ------------------------------------------------------
++
++
++def _safe_identity(finding: dict) -> dict:
++    """Presentation-safe identity for reports: never any message content."""
++    return {
++        "severity": finding.get("severity"),
++        "rule_id": finding.get("rule_id"),
++        "subject_kind": finding.get("subject_kind"),
++        "subject_id": finding.get("subject_id"),
++        "finding_key": finding.get("finding_key"),
++        "detail_hash": finding.get("detail_hash"),
++    }
++
++
++def _work_source_receipts(root: Path, work: str) -> set[str]:
++    try:
++        from .board import parse_board
++
++        board = parse_board((root / ".saipen/BOARD.md").read_text(encoding="utf-8-sig"))
++        ticket = board.get("tickets", {}).get(work)
++        receipts = set()
++        if ticket:
++            raw_field = str(ticket.get("fields", {}).get("source_receipts") or "")
++            for raw_token in raw_field.split(","):
++                token = raw_token.strip()
++                if token and _SRC_RE.match(token):
++                    receipts.add(token)
++        from . import intake
++
++        index = intake._read_index(root)
++        for receipt_id, meta in index.get("active", {}).items():
++            meta_obj = intake._read_meta(root, receipt_id)
++            if meta_obj and meta_obj.get("linked_work") == work:
++                receipts.add(receipt_id)
++        for receipt_id, tomb in index.get("tombstones", {}).items():
++            if isinstance(tomb, dict) and tomb.get("linked_work") == work:
++                receipts.add(receipt_id)
++        return receipts
++    except (OSError, ValueError):
++        return set()
++
++
++def _parse_log_stamp(stamp: str | None) -> str | None:
++    """DD.MM.YY HH:MM -> ISO-8601 UTC (order-comparable)."""
++    if not stamp:
++        return None
++    found = re.match(r"\A(\d{2})\.(\d{2})\.(\d{2})\s+(\d{2}):(\d{2})", str(stamp).strip())
++    if not found:
++        return None
++    day, month, year, hour, minute = found.groups()
++    try:
++        parsed = datetime(2000 + int(year), int(month), int(day), int(hour), int(minute))
++    except ValueError:
++        return None
++    return parsed.replace(tzinfo=timezone.utc).isoformat().replace("+00:00", "Z")
++
++
++def _claim_boundary(root: Path, boundary_event: str) -> dict:
++    """Resolve an E-### claim boundary from live protocol history (J)."""
++    found = _EVENT_RE.match(boundary_event or "")
++    if not found:
++        raise DebtRefusal("VALIDATION_FAILED", f"invalid claim boundary {boundary_event!r}")
++    boundary_number = int(found.group(1))
++    from .log import read_history_snapshot
++
++    snapshot = read_history_snapshot(root, lean=True)
++    events = {event["event"]: event for event in snapshot.events}
++    boundary = events.get(boundary_number)
++    if boundary is None:
++        raise DebtRefusal(
++            "VALIDATION_FAILED", f"claim boundary {boundary_event} is not in the canonical history"
++        )
++    return {
++        "event": boundary_number,
++        "stamp_iso": _parse_log_stamp(boundary.get("date")),
++        "ticket": boundary.get("ticket"),
++        "agent": boundary.get("agent"),
++        "first_event": min(events),
++    }
++
++
++def _first_ticket_event(root: Path, work: str) -> int | None:
++    from .log import read_history_snapshot
++
++    snapshot = read_history_snapshot(root, lean=True)
++    for event in snapshot.events:
++        if event.get("ticket") == work:
++            return event["event"]
++    return None
++
++
++def _receipt_timestamp(root: Path, receipt_id: str) -> str | None:
++    """Best durable creation/closure timestamp for one source receipt."""
++    from . import intake
++
++    index = intake._read_index(root)
++    if receipt_id in index.get("active", {}):
++        meta = intake._read_meta(root, receipt_id)
++        if meta:
++            return meta.get("received_at")
++    tomb = index.get("tombstones", {}).get(receipt_id)
++    if isinstance(tomb, dict):
++        if tomb.get("closed_at"):
++            return tomb.get("closed_at")
++        archive_meta = root / f".saipen/archive/source/{receipt_id}.meta.json"
++        try:
++            meta = json.loads(archive_meta.read_text(encoding="utf-8-sig"))
++            return meta.get("received_at")
++        except (OSError, ValueError):
++            return None
++    return None
++
++
++def _iso_or_none(value: object) -> str | None:
++    if not isinstance(value, str) or not value:
++        return None
++    text = value.strip()
++    try:
++        parsed = datetime.fromisoformat(text.replace("Z", "+00:00"))
++        return parsed.astimezone(timezone.utc).isoformat().replace("+00:00", "Z")
++    except ValueError:
++        return None
++
++
++def _legacy_eligibility(
++    root: Path,
++    finding: dict,
++    boundary: dict,
++    *,
++    target_work: str,
++    target_source: str | None,
++) -> tuple[bool, str]:
++    """J1/J2 provenance adjudication for one finding. Fail-closed."""
++    rule_id = finding.get("rule_id")
++    subject_kind = finding.get("subject_kind")
++    subject_id = finding.get("subject_id")
++    if rule_id in (None, "unclassified") or subject_kind in (None, "global") or not subject_id:
++        return False, "unattributed/global problems are never carried without a measured baseline"
++    if finding.get("credential"):
++        # Credential families carry only safe identity; the SOURCE subject is
++        # still adjudicated strictly below.
++        pass
++    if subject_kind == "work":
++        if subject_id == target_work:
++            return False, "subject is the target Work"
++        if not _WORK_RE.match(subject_id):
++            return False, f"non-canonical Work subject {subject_id!r}"
++        first = _first_ticket_event(root, subject_id)
++        if first is None:
++            return False, f"Work {subject_id} has no canonical history appearance"
++        if first >= boundary["event"]:
++            return False, (
++                f"Work {subject_id} first appears at E-{first}, after claim boundary "
++                f"E-{boundary['event']}"
++            )
++        return True, f"Work {subject_id} predates E-{boundary['event']} (first seen E-{first})"
++    if subject_kind == "source":
++        if not _SRC_RE.match(subject_id):
++            return False, f"non-canonical source subject {subject_id!r}"
++        if target_source and subject_id == target_source:
++            return False, "subject is the target Work's source receipt"
++        linked = _linked_work_of(root, subject_id)
++        if linked == target_work:
++            return False, "source receipt is linked to the target Work"
++        stamp = _iso_or_none(_receipt_timestamp(root, subject_id))
++        if stamp is None:
++            return False, f"source receipt {subject_id} has no comparable durable timestamp"
++        if boundary["stamp_iso"] is None:
++            return False, "claim boundary carries no comparable timestamp"
++        if stamp >= boundary["stamp_iso"]:
++            return False, (
++                f"source receipt {subject_id} ({stamp}) was received at or after "
++                "the claim boundary"
++            )
++        return True, f"source receipt {subject_id} received {stamp}, before E-{boundary['event']}"
++    if subject_kind == "event":
++        found = _EVENT_RE.match(subject_id)
++        if not found:
++            return False, f"non-canonical event subject {subject_id!r}"
++        number = int(found.group(1))
++        if number >= boundary["event"]:
++            return False, (
++                f"event {subject_id} is at or after the claim boundary "
++                f"E-{boundary['event']}"
++            )
++        return True, f"event {subject_id} predates E-{boundary['event']}"
++    return False, f"subject kind {subject_kind!r} cannot be proven pre-claim"
++
++
++def _linked_work_of(root: Path, receipt_id: str) -> str | None:
++    from . import intake
++
++    index = intake._read_index(root)
++    if receipt_id in index.get("active", {}):
++        meta = intake._read_meta(root, receipt_id)
++        if meta:
++            return meta.get("linked_work")
++    tomb = index.get("tombstones", {}).get(receipt_id)
++    if isinstance(tomb, dict):
++        return tomb.get("linked_work")
++    try:
++        meta = json.loads(
++            (root / f".saipen/archive/source/{receipt_id}.meta.json").read_text(
++                encoding="utf-8-sig"
++            )
++        )
++        return meta.get("linked_work")
++    except (OSError, ValueError):
++        return None
++
++
++def work_delta(
++    root: Path | str,
++    work: str,
++    *,
++    agent: str,
++    baseline_ref: str | None = None,
++    claim_boundary: str | None = None,
++    verification: list[dict] | None = None,
++    target_source: str | None = None,
++    dry_run: bool = False,
++) -> dict:
++    """The Work convergence gate: no-new-regressions against trusted debt.
++
++    Modes:
++      * baseline: compare against a bound/typed debt snapshot (F/G);
++      * legacy: retroactive adjudication against a claim boundary event (J) --
++        every carried finding must be PROVEN pre-claim and unrelated, or the
++        gate fails closed.
++
++    A PASS never implies release readiness: the report carries strict_core,
++    carried counts and release_ready explicitly (G3/H).
++    """
++    root = Path(root)
++    if not _WORK_RE.match(work or ""):
++        return {"ok": False, "code": "VALIDATION_FAILED", "detail": f"invalid Work {work!r}"}
++    try:
++        current = capture_findings(root)
++        if not current.get("ok"):
++            return current
++        baseline = None
++        mode = None
++        boundary = None
++        if baseline_ref:
++            baseline = load_snapshot(root, baseline_ref)
++            if baseline.get("bound_work") not in (None, work):
++                raise DebtRefusal(
++                    "DEBT_SNAPSHOT_FOREIGN_WORK",
++                    f"{baseline_ref} is bound to {baseline.get('bound_work')!r}, not {work}",
++                )
++            mode = "baseline"
++        elif claim_boundary:
++            boundary = _claim_boundary(root, claim_boundary)
++            mode = "legacy"
++        else:
++            for path in reversed(_existing_snapshots(root)):
++                try:
++                    record = load_snapshot(root, path.stem)
++                except DebtRefusal:
++                    # A foreign/corrupt snapshot is that Work's problem, not
++                    # this gate's: it must never silently become a baseline.
++                    continue
++                if record.get("bound_work") == work:
++                    baseline = record
++                    baseline_ref = record["snapshot_id"]
++                    mode = "baseline"
++                    break
++            if baseline is None:
++                raise DebtRefusal(
++                    "DEBT_BASELINE_MISSING",
++                    f"no debt baseline exists for {work}; capture one pre-BUILD with "
++                    "'saipen debt snapshot <T-###>' or adjudicate legacy debt with "
++                    "--claim-boundary",
++                )
++
++        current_problems = current.get("problems", [])
++        current_warnings = current.get("warnings", [])
++        carried, resolved, new, worsened, changed_unsafe = [], [], [], [], []
++        blocking: list[dict] = []
++        blocking_extra: list[dict] = []
++
++        if mode == "baseline":
++            base_problems = {f["finding_key"]: f for f in baseline.get("problems", [])}
++            base_warning_keys = {f["finding_key"] for f in baseline.get("warnings", [])}
++            for finding in current_problems:
++                key = finding["finding_key"]
++                if key not in base_problems:
++                    if key in base_warning_keys:
++                        # Same rule+subject existed as a warning pre-work and
++                        # now FAILs: severity escalated. WORSENED, blocking.
++                        worsened.append(finding)
++                    else:
++                        new.append(finding)
++                    continue
++                verdict = findings_mod.compare_finding(finding, base_problems[key])
++                (carried if verdict == "CARRIED" else changed_unsafe).append(finding)
++            for key, base_finding in base_problems.items():
++                if key not in {f["finding_key"] for f in current_problems}:
++                    resolved.append(base_finding)
++            carried_warnings = [
++                f for f in current_warnings if f["finding_key"] in base_warning_keys
++            ]
++            new_warnings = [
++                f for f in current_warnings if f["finding_key"] not in base_warning_keys
++            ]
++        else:
++            blocking_extra = []
++            carried_warnings = []
++            new_warnings = list(current_warnings)
++            for finding in current_problems:
++                eligible, reason = _legacy_eligibility(
++                    root,
++                    finding,
++                    boundary,
++                    target_work=work,
++                    target_source=target_source,
++                )
++                if eligible:
++                    carried.append(finding)
++                else:
++                    blocking_extra.append({**_safe_identity(finding), "reason": reason})
++
++        # G2 attribution gates over CURRENT problems. D2 is absolute for
++        # problems: an unattributed/global problem is NEVER automatically
++        # harmless legacy debt for a Work gate -- it blocks in both modes
++        # (a measured baseline keeps it visible as carried debt, never
++        # harmless), and it keeps blocking release either way.
++        work_receipts = _work_source_receipts(root, work)
++        base_problem_values = (
++            list(base_problems.values()) if mode == "baseline" else []
++        )
++        for finding in current_problems:
++            subject = finding.get("subject_id")
++            if finding.get("rule_id") in (None, "unclassified") or finding.get(
++                "subject_kind"
++            ) in (None, "global"):
++                if finding in base_problem_values:
++                    carried.append(finding)
++                blocking_extra.append(
++                    {
++                        **_safe_identity(finding),
++                        "reason": "unattributed/global problem remains blocking "
++                        "(never carried as harmless)",
++                    }
++                )
++            elif finding.get("subject_kind") == "work" and subject == work:
++                blocking_extra.append(
++                    {**_safe_identity(finding), "reason": f"problem attributed to Work {work}"}
++                )
++            elif finding.get("subject_kind") == "source" and subject in work_receipts:
++                blocking_extra.append(
++                    {
++                        **_safe_identity(finding),
++                        "reason": f"problem attributed to source receipt {subject} of {work}",
++                    }
++                )
++        blocking += [
++            {**_safe_identity(f), "reason": "NEW problem"}
++            for f in new
++        ] + [
++            {**_safe_identity(f), "reason": "WORSENED: same subject/rule, semantic defect changed"}
++            for f in worsened
++        ] + [
++            {**_safe_identity(f), "reason": "unsafe CHANGED problem"}
++            for f in changed_unsafe
++        ] + blocking_extra
++        deduped: list[dict] = []
++        seen: set[tuple[str | None, str]] = set()
++        for entry in blocking:
++            token = (entry.get("finding_key"), entry.get("reason"))
++            if token in seen:
++                continue
++            seen.add(token)
++            deduped.append(entry)
++        blocking = deduped
++
++        source_gate = None
++        try:
++            from . import intake
++
++            source_gate = intake.work_closure_gate(root, work)
++        except (OSError, ValueError) as exc:
++            source_gate = {"ok": False, "code": "VALIDATION_FAILED", "detail": str(exc)}
++
++        verification_problems = []
++        for entry in verification or []:
++            if entry.get("result") != "PASS":
++                verification_problems.append(
++                    {
++                        "rule_id": "work_delta_verification",
++                        "subject_kind": "work",
++                        "subject_id": work,
++                        "reason": f"targeted verification not PASS: {entry.get('command')}",
++                    }
++                )
++        if not verification:
++            verification_problems.append(
++                {
++                    "rule_id": "work_delta_verification",
++                    "subject_kind": "work",
++                    "subject_id": work,
++                    "reason": "no targeted verification evidence supplied",
++                }
++            )
++
++        blocking = verification_problems + blocking
++        passed = (
++            not new
++            and not worsened
++            and not changed_unsafe
++            and not blocking
++            and bool(source_gate and source_gate.get("ok"))
++        )
++        strict_problems = len(current_problems)
++        strict_warnings = len(current_warnings)
++        carried_problem_count = len(carried)
++        carried_warning_count = len(carried_warnings)
++        report = {
++            "ok": True,
++            "code": "WORK_DELTA_PASS" if passed else "WORK_DELTA_BLOCKED",
++            "work": work,
++            "mode": mode,
++            "baseline": (
++                {"snapshot_id": baseline["snapshot_id"], "captured_at": baseline.get("created_at")}
++                if baseline
++                else {
++                    "mode": "legacy_bootstrap",
++                    "claim_boundary": claim_boundary,
++                    "boundary_event": f"E-{boundary['event']}" if boundary else None,
++                }
++            ),
++            "strict_core": {
++                "ok": current.get("exit_code") == 0,
++                "problems": strict_problems,
++                "warnings": strict_warnings,
++            },
++            "work_delta": "PASS" if passed else "FAIL",
++            "release_ready": bool(current.get("exit_code") == 0 and strict_problems == 0),
++            "carried_problems": carried_problem_count,
++            "carried_warnings": carried_warning_count,
++            "carried": [_safe_identity(f) for f in carried],
++            "resolved": [_safe_identity(f) for f in resolved],
++            "new": [_safe_identity(f) for f in new],
++            "worsened": [_safe_identity(f) for f in worsened],
++            "changed_unsafe": [_safe_identity(f) for f in changed_unsafe],
++            "new_warnings": [_safe_identity(f) for f in new_warnings],
++            "source_gate": {
++                "ok": bool(source_gate and source_gate.get("ok")),
++                "code": source_gate.get("code") if source_gate else None,
++                "receipt": source_gate.get("receipt") if source_gate else None,
++            },
++            "verification": list(verification or []),
++            "blocking": blocking,
++        }
++        return report
++    except DebtRefusal as refusal:
++        return {
++            "ok": False,
++            "code": refusal.code,
++            "detail": refusal.detail,
++            "work": work,
++        }
++    except (OSError, ValueError) as exc:
++        return {"ok": False, "code": "VALIDATION_FAILED", "detail": str(exc), "work": work}
+diff --git a/tools/saipen_engine/findings.py b/tools/saipen_engine/findings.py
+new file mode 100644
+index 00000000..4a8d0f18
+--- /dev/null
++++ b/tools/saipen_engine/findings.py
+@@ -0,0 +1,373 @@
++"""Structured validator findings (AUDAPACK T-172 / SAIPEN T-1301).
++
++The Work delta gate cannot safely compare human-readable text blobs, so every
++validator problem/warning needs a stable structured identity. This module is
++the ONE classifier: it derives ``rule_id``/``subject_kind``/``subject_id``/
++``finding_key``/``detail_hash`` from a rendered finding message WITHOUT
++weakening the validator -- classification never removes, downgrades or hides a
++finding, and an unclassifiable message falls back to ``unclassified`` +
++``global``, which the Work gate always treats as blocking.
++
++finding_key is stable across timestamps, output ordering, line-number movement
++(where the semantic subject is unchanged), formatting and invocation time. It
++changes when the rule changes, the subject changes, or the semantic defect
++changes materially (via detail_hash comparison on top of the same key). The
++key is NEVER built from the whole rendered English message.
++
++CREDENTIAL SAFETY (AUDAPACK T-172 Phase D3): SOURCE_CREDENTIALS_UNSAFE and
++every other credential/secret-bearing family NEVER carries message content
++into structured artifacts -- only the rule id, the safe resource identity, a
++redacted category and a non-reversible evidence hash. No matched value, token
++body, password, API key or unsafe source fragment is ever serialized here.
++"""
++
++from __future__ import annotations
++
++import hashlib
++import json
++import re
++
++RULESET_VERSION = 1
++
++SEVERITIES = ("problem", "warning")
++
++# Canonical subject vocabulary.
++SUBJECT_KINDS = ("work", "source", "event", "receipt", "path", "global")
++
++_ID_PATTERNS = {
++    "work": re.compile(r"T-\d+"),
++    "source": re.compile(r"SRC-\d+"),
++    "event": re.compile(r"E-\d+"),
++    "receipt": re.compile(r"(?:XP|OP)-\d+|op[-_ ]?id[: ]\S+"),
++}
++
++
++def _sha(text: str) -> str:
++    return hashlib.sha256(text.encode("utf-8")).hexdigest()
++
++
++class Rule:
++    """One finding-family classifier: how to recognize it and who owns it."""
++
++    def __init__(
++        self,
++        rule_id: str,
++        pattern: str,
++        subject_kind: str,
++        *,
++        subject_pattern: str | None = None,
++        subject_last: bool = False,
++        credential: bool = False,
++        detail: str | None = None,
++    ):
++        self.rule_id = rule_id
++        self.re = re.compile(pattern)
++        self.subject_kind = subject_kind
++        self.subject_re = re.compile(subject_pattern) if subject_pattern else None
++        self.subject_last = subject_last
++        self.credential = credential
++        self.detail_template = detail
++
++    def subject(self, message: str) -> str | None:
++        if self.subject_re is not None:
++            if self.subject_last:
++                found = self.subject_re.findall(message)
++                return found[-1] if found else None
++            found = self.subject_re.search(message)
++            if found:
++                return found.group(0)
++            return None
++        return _default_subject(message, self.subject_kind)
++
++
++def _default_subject(message: str, subject_kind: str) -> str | None:
++    """Best canonical subject for a rule with no dedicated extractor."""
++    if subject_kind == "global":
++        return None
++    regex = _ID_PATTERNS.get(subject_kind)
++    if regex is not None:
++        found = regex.search(message)
++        if found:
++            return found.group(0)
++    return None
++
++
++# The rule table, in priority order. First match wins, so specific families
++# precede their generic prefixes. Rendering order of validator output NEVER
++# affects identity: classification is per-message and keys are compared as
++# sets, never as ordered lists.
++_RULES: tuple[Rule, ...] = (
++    # -- credential safety: detail is a FIXED redacted string; message content
++    # (which names a pattern category and path) never enters structured data.
++    Rule(
++        "source_credential_unsafe",
++        r"credential gate|SOURCE_CREDENTIALS_UNSAFE|credential pattern",
++        "source",
++        subject_pattern=r"SRC-\d+",
++        credential=True,
++        detail="credential-pattern:redacted",
++    ),
++    Rule(
++        "source_receipt_unresolved_work",
++        r"DONE Work (T-\d+) has unresolved source receipt",
++        "work",
++        subject_pattern=r"T-\d+",
++        detail=None,
++    ),
++    Rule(
++        "source_receipt_active_invalid",
++        r"active receipt (SRC-\d+) (contract/coverage invalid|coverage unreadable"
++        r"|contract revision chain)",
++        "source",
++        subject_pattern=r"SRC-\d+",
++    ),
++    Rule(
++        "source_receipt_clause_drift",
++        r"active receipt (SRC-\d+) contract/coverage clause drift",
++        "source",
++        subject_pattern=r"SRC-\d+",
++    ),
++    Rule(
++        "source_receipt_orphan",
++        r"ORPHAN_RECEIPT (SRC-\d+)",
++        "source",
++        subject_pattern=r"SRC-\d+",
++    ),
++    Rule(
++        "source_receipt_missing_board",
++        r"BOARD Work (T-\d+) references missing source receipt",
++        "work",
++        subject_pattern=r"T-\d+",
++    ),
++    Rule(
++        "source_receipt_index_drift",
++        r"(active receipt|tombstone) (SRC-\d+) (index metadata drift|index digest drift"
++        r"|differs from index projection)",
++        "source",
++        subject_pattern=r"SRC-\d+",
++    ),
++    Rule(
++        "source_receipt_linkage_drift",
++        r"active receipt SRC-\d+ linkage missing from BOARD Work",
++        "source",
++        subject_pattern=r"SRC-\d+",
++    ),
++    Rule(
++        "work_closure_evidence",
++        r"ticket (T-\d+) is ## DONE but carries no current-cycle verification evidence "
++        r"\(classifier: ([^)]+)\)",
++        "work",
++        subject_pattern=r"T-\d+",
++    ),
++    Rule(
++        "log_provenance_marker",
++        r"mechanical provenance \[saio\].*?(E-\d+)",
++        "event",
++        subject_pattern=r"E-\d+",
++        subject_last=True,
++    ),
++    Rule(
++        "log_ticket_ref",
++        r"ticket ref \[([^\]]+)\] isn't numeric",
++        "global",
++        detail=None,
++    ),
++    Rule(
++        "log_timestamp_inversion",
++        r"timestamp moves backwards by",
++        "global",
++    ),
++    Rule(
++        "board_soft_cap",
++        r"BOARD\.md is .* \(soft cap",
++        "global",
++    ),
++    Rule(
++        "log_soft_cap",
++        r"LOG\.md is .* (past|over) the",
++        "global",
++    ),
++    Rule(
++        "changelog_unarchived",
++        r"CHANGELOG\.md carries .* version entries",
++        "global",
++    ),
++    Rule(
++        "cross_doc_drift",
++        r"cross-doc drift \[([^\]]+)\]",
++        "global",
++    ),
++    Rule(
++        "legacy_closure_evidence",
++        r"ticket (T-\d+) has no ticket-bearing closure event",
++        "work",
++        subject_pattern=r"T-\d+",
++    ),
++    Rule(
++        "half_claim",
++        r"ticket (T-\d+) carries owner but no claim_time",
++        "work",
++        subject_pattern=r"T-\d+",
++    ),
++    Rule(
++        "translation_stale",
++        r"locale README",
++        "global",
++    ),
++    Rule(
++        "wiki_mirror",
++        r"(wiki-mirror|mirrors conformance corpus)",
++        "global",
++    ),
++    Rule(
++        "sub_role_revision_legacy",
++        r"subSaipen STATE\(s\) predate role-revision recording",
++        "global",
++    ),
++    Rule(
++        "producer_package_malformed",
++        r"OUTBOX\.md fails strict OUTBOX parsing",
++        "global",
++    ),
++)
++
++RULE_TABLE = tuple(
++    {
++        "rule_id": rule.rule_id,
++        "pattern": rule.re.pattern,
++        "subject_kind": rule.subject_kind,
++        "credential": rule.credential,
++    }
++    for rule in _RULES
++)
++
++
++def ruleset_fingerprint() -> str:
++    """Explicit compatibility binding for debt snapshots (F3).
++
++    Covers exactly the identity semantics: rule ids, recognition patterns,
++    subject kinds and the credential-redaction policy. A validator edit that
++    changes finding identity semantics changes this fingerprint, and every
++    older snapshot then refuses comparison (BASELINE_RULESET_CHANGED) instead
++    of silently comparing incompatible keys.
++    """
++    payload = json.dumps(
++        {"ruleset_version": RULESET_VERSION, "rules": RULE_TABLE},
++        sort_keys=True,
++        separators=(",", ":"),
++    )
++    return _sha(payload)
++
++
++def finding_key(rule_id: str, subject_kind: str, subject_id: str | None) -> str:
++    """Stable cross-run identity: rule + subject only. Never ordering, never
++    timestamps, never line numbers, never the rendered message."""
++    return _sha(f"{rule_id}|{subject_kind}|{subject_id or ''}")[:16]
++
++
++def _normalized_detail(rule: Rule, message: str) -> str:
++    """The semantic-condition fingerprint input.
++
++    Message-derived detail is deliberately narrow: the classifier class and
++    semantic tokens, with volatile numbers (line numbers, counts, sizes,
++    timestamps) stripped, and -- for credential families -- with ALL message
++    content dropped in favor of the fixed redacted category.
++    """
++    if rule.credential:
++        return rule.detail_template or "credential-pattern:redacted"
++    if rule.detail_template is not None:
++        return rule.detail_template
++    text = message
++    # Volatile numbers: line numbers, byte/line counts, sizes, minutes.
++    text = re.sub(r":\d+", "", text)
++    text = re.sub(r"\b\d+(?:\.\d+)?\s*(?:KB|MB|lines?|entries?|version entries)\b", "<n>", text)
++    text = re.sub(r"\b\d+m\b", "<n>", text)
++    text = re.sub(r"\b\d+(?:\.\d+)?s\b", "<n>", text)
++    if rule.rule_id == "work_closure_evidence":
++        found = re.search(r"\(classifier: ([^)]+)\)", text)
++        if found:
++            return found.group(1)
++    if rule.rule_id == "log_provenance_marker":
++        return "structural-event-missing-op-marker"
++    # Multi-id subjects (e.g. a ticket ref naming several tickets) keep the
++    # id set, order-normalized, so ordering never changes identity.
++    ids = re.findall(r"T-\d+|SRC-\d+|E-\d+", text)
++    if ids:
++        return ",".join(sorted(set(ids)))
++    return re.sub(r"\s+", " ", text).strip()
++
++
++def classify(severity: str, message: str, category: str | None = None) -> dict:
++    """Classify ONE rendered validator finding. Never raises."""
++    severity = "problem" if severity == "problem" else "warning"
++    rule: Rule | None = None
++    if category:
++        for candidate in _RULES:
++            if message.lstrip().startswith(f"{category}"):
++                rule = candidate
++                break
++    if rule is None:
++        for candidate in _RULES:
++            if candidate.re.search(message):
++                rule = candidate
++                break
++    if rule is not None:
++        subject_id = rule.subject(message)
++        subject_kind = rule.subject_kind
++        if subject_kind != "global" and not subject_id:
++            subject_kind = "global"
++        detail = _normalized_detail(rule, message)
++        structured = {
++            "severity": severity,
++            "rule_id": rule.rule_id,
++            "subject_kind": subject_kind,
++            "subject_id": subject_id,
++            "credential": rule.credential,
++        }
++    else:
++        subject_id = None
++        subject_kind = "global"
++        detail = re.sub(r"\s+", " ", message).strip()[:200]
++        structured = {
++            "severity": severity,
++            "rule_id": "unclassified",
++            "subject_kind": "global",
++            "subject_id": None,
++            "credential": False,
++        }
++    # Subject reference is presentation-only metadata: canonical file refs
++    # when the message carries one. It is NEVER part of finding_key.
++    ref = None
++    found = re.search(r"[\w./\\-]+(?:\.\w+):\d+", message)
++    if found:
++        ref = found.group(0)
++    structured.update(
++        {
++            "subject_ref": ref,
++            "finding_key": finding_key(
++                structured["rule_id"], structured["subject_kind"], structured["subject_id"]
++            ),
++            "detail_hash": _sha(detail)[:16],
++            "detail": None if structured["credential"] else detail,
++            "category": category,
++        }
++    )
++    return structured
++
++
++def findings_digest(problems: list[dict], warnings: list[dict]) -> str:
++    """Order-independent integrity digest over the classified finding set."""
++    canonical = json.dumps(
++        {
++            "problems": sorted(problems, key=lambda f: f["finding_key"] + f["detail_hash"]),
++            "warnings": sorted(warnings, key=lambda f: f["finding_key"] + f["detail_hash"]),
++        },
++        sort_keys=True,
++        separators=(",", ":"),
++    )
++    return _sha(canonical)
++
++
++def compare_finding(a: dict, b: dict) -> str:
++    """Same-key equivalence: CARRIED when the semantic condition is unchanged."""
++    return "CARRIED" if a.get("detail_hash") == b.get("detail_hash") else "CHANGED"
+diff --git a/tools/saipen_engine/producer_gate.py b/tools/saipen_engine/producer_gate.py
+new file mode 100644
+index 00000000..80fa2960
+--- /dev/null
++++ b/tools/saipen_engine/producer_gate.py
+@@ -0,0 +1,124 @@
++"""Producer severity policy: the one mapping from gate to severity (T-568).
++
++The rule the gate restores: a producer's package must be complete, fresh and
++role-current WHEN IT IS CONSUMED, or when the convergence closure explicitly
++requires it fresh -- never as a precondition for editing one Core line.
++
++Severity is a property of the ACTIVE GATE, not of the finding:
++
++  core (default) / ship / crew   every producer finding is a visible WARN.
++  collect:<producer>             that producer is hard; every finding class is
++                                 a FAIL for it and a WARN for every other.
++  converge                       the closure-required producers are hard,
++                                 every finding class included.
++
++The input contract is closed on all three axes. An unknown gate kind, a
++malformed gate string, or an unknown finding class raises ValueError instead
++of falling back to the soft default: a typo'd `collect:saiwki` that silently
++ran the soft gate would report green on exactly the package the caller asked
++to hard-check. The CLI keeps its exit-2 refusal by catching that error in
++`tools/validate.py:_parse_gate`.
++
++This module is side-effect-free and imported by both tools/validate.py and
++the in-process test matrix, so the validator and the tests can never disagree
++about what the policy says.
++"""
++
++from __future__ import annotations
++
++import re
++from dataclasses import dataclass
++
++#: Closed gate kinds. `crew` behaves like the soft gates today: the crew gate
++#: judges crew evidence, not producer packages.
++GATE_KINDS = frozenset({"core", "ship", "converge", "collect", "crew"})
++
++#: Closed producer finding classes. The truth table currently gives every
++#: class the same row per gate; the class stays in the contract so the matrix
++#: proves the complete surface instead of one representative column.
++FINDING_CLASSES = frozenset(
++    {"MALFORMED", "STALE", "INCOMPLETE", "NOT_READY", "MISSING"}
++)
++
++#: The validator's producer finding slugs, mapped to their policy class. An
++#: unmapped slug is a bug: callers fail closed rather than guess a severity.
++SLUG_FINDING_CLASS = {
++    "producer-package-malformed": "MALFORMED",
++    "producer-package-stale": "STALE",
++    "producer-package-incomplete": "INCOMPLETE",
++    "producer-package-not-ready": "NOT_READY",
++    "producer-package-missing": "MISSING",
++}
++
++#: The convergence closure's required producers, named rather than discovered:
++#: `--gate converge` must not depend on which producer folders happen to exist
++#: in a given project, or a closure could pass by deleting the producer
++#: instead of refreshing it. The single canonical roster; validate.py and the
++#: tests import it, never restate it.
++CONVERGE_REQUIRED_PRODUCERS = ("saitranslate", "saiwiki")
++
++#: Display labels used only in the converge diagnostic text.
++CONVERGE_LABELS = {"saitranslate": "EE", "saiwiki": "QQ"}
++
++_PRODUCER_RE = re.compile(r"[a-z][a-z0-9_-]*\Z")
++
++
++@dataclass(frozen=True)
++class GateContext:
++    """The parsed gate state a producer finding is assessed under."""
++
++    kind: str
++    producer: str | None = None
++
++    def __post_init__(self):
++        if self.kind not in GATE_KINDS:
++            raise ValueError(f"unknown gate kind {self.kind!r}")
++        if self.kind == "collect":
++            if not self.producer or not _PRODUCER_RE.fullmatch(self.producer):
++                raise ValueError(
++                    "--gate collect:<producer> needs a producer name, "
++                    f"got {self.producer!r}"
++                )
++        elif self.producer is not None:
++            raise ValueError(f"gate {self.kind!r} takes no producer")
++
++
++def parse_gate_context(raw: str | None) -> GateContext:
++    """Parse one --gate value into a GateContext, refusing everything else.
++
++    None means the default core gate. The ValueError messages are the exact
++    CLI refusal texts so validate.py can print them unchanged.
++    """
++    if raw is None:
++        return GateContext("core")
++    if raw in ("core", "ship", "converge", "crew"):
++        return GateContext(raw)
++    if raw.startswith("collect:"):
++        return GateContext("collect", raw.split(":", 1)[1])
++    raise ValueError(
++        f"unknown --gate {raw!r} -- one of: core (default), ship, "
++        "collect:<producer>, converge, crew"
++    )
++
++
++def severity(gate: GateContext, producer: str | None, finding_class: str) -> str:
++    """The full truth table: gate x producer x finding class -> WARN or FAIL.
++
++    Pure and side-effect-free. Unknown finding classes raise ValueError; the
++    gate context is already validated by construction.
++    """
++    if finding_class not in FINDING_CLASSES:
++        raise ValueError(f"unknown producer finding class {finding_class!r}")
++    if gate.kind == "collect":
++        return "FAIL" if producer == gate.producer else "WARN"
++    if gate.kind == "converge":
++        return "FAIL" if producer in CONVERGE_REQUIRED_PRODUCERS else "WARN"
++    return "WARN"
++
++
++def finding_class_for_slug(slug: str) -> str:
++    """Map a validator finding slug to its policy class, failing closed."""
++    finding = SLUG_FINDING_CLASS.get(slug)
++    if finding is None:
++        raise ValueError(f"unknown producer finding slug {slug!r}")
++    return finding
+diff --git a/tools/saipen_engine/settled_projection.py b/tools/saipen_engine/settled_projection.py
+new file mode 100644
+index 00000000..3c163751
+--- /dev/null
++++ b/tools/saipen_engine/settled_projection.py
+@@ -0,0 +1,733 @@
++"""Bounded segmented projection over the settled receipt namespace.
++
++SRC-025:R010 / PERF-001. The settled projection that predates this module is
++O(lifetime) on every read: the monolithic index authenticates every historical
++receipt (stat inventory plus manifest/progress re-hash) and
++``semantic_receipt_snapshot`` materializes the complete record set before any
++operation filter runs. This module replaces the hot read path with a bounded
++structure over the EXISTING immutable settled directories:
++
++    immutable sealed segments (fixed SEG_BOUND members)
++  + one bounded active tail
++  + operation-keyed locators
++  + one compact authenticated head
++
++The settled ``operation.json``/``progress.json`` bytes remain the ONLY
++evidence authority. Projection files are accelerators: a crash may leave the
++authoritative receipt with a stale/missing projection, never the reverse, and
++every hot read re-verifies the exact bytes of every receipt it returns. A
++zero-match query opens no lifetime receipt at all.
++
++Hot-path cost contract (proven by tests with instrumentation, not timing):
++reads scale with the locator + the relevant segment(s) + the active tail +
++one names-only directory enumeration for staleness detection -- never with
++the decoded receipt population.
++"""
++
++from __future__ import annotations
++
++import hashlib
++import json
++from pathlib import Path
++
++#: Fixed documented bound. Tests use it explicitly; it is never tuned from
++#: timing.
++SEG_BOUND = 128
++
++SCHEMA_VERSION = 2
++
++INDEX_DIR_REL = ".saipen/recovery/settled-index"
++HEAD_REL = f"{INDEX_DIR_REL}/head.json"
++ACTIVE_ID = "active"
++
++#: Names inside recovery/settled that are engine bookkeeping, never receipts.
++_SETTLED_SKIP_NAMES = {".cleanup-needed", ".receipt-index.json"}
++
++_ROOT_DOMAIN = b"saipen-settled-projection-v2\0"
++_SEGMENT_DOMAIN = b"saipen-settled-segment-v2\0"
++_LOCATOR_DOMAIN = b"saipen-settled-locator-v2\0"
++
++
++def _canonical(payload) -> bytes:
++    return json.dumps(payload, sort_keys=True, separators=(",", ":")).encode("utf-8")
++
++
++def _content_root(domain: bytes, payload) -> str:
++    return hashlib.sha256(domain + _canonical(payload)).hexdigest()
++
++
++def _locator_key(operation: str) -> str:
++    """Safe cryptographic filename for one operation's locator.
++
++    Raw operation names are never path components; the hex digest prefix is
++    the only path token and the file carries the exact operation for
++    verification.
++    """
++    return hashlib.sha256(operation.encode("utf-8")).hexdigest()[:16]
++
++
++def _index_path(root: Path, rel: str) -> Path:
++    from .paths import owned_target_path
++
++    return owned_target_path(root, rel, kind="settled projection")
++
++
++def _read_authenticated(path: Path, payload_keys: tuple[str, ...], domain: bytes):
++    """Read one root-authenticated projection document, or return None.
++
++    Malformed, unparseable, or root-mismatched bytes are NOT positive
++    evidence. Returns (payload, root) on success or None.
++    """
++    from .paths import prove_owned_regular
++
++    try:
++        prove_owned_regular(path, kind="settled projection")
++        document = json.loads(path.read_bytes().decode("utf-8-sig"))
++    except (FileNotFoundError, OSError, ValueError, UnicodeDecodeError, json.JSONDecodeError):
++        return None
++    if not isinstance(document, dict):
++        return None
++    root_value = document.get("root")
++    if not isinstance(root_value, str):
++        return None
++    payload = {key: document.get(key) for key in payload_keys}
++    if _content_root(domain, payload) != root_value:
++        return None
++    return payload, root_value
++
++
++def _member_from_record(name: str, record: dict, manifest_raw: bytes, progress_raw) -> dict:
++    return {
++        "name": name,
++        "operation": record.get("operation"),
++        "status": record.get("status"),
++        "created_at": record.get("created_at"),
++        "manifest_sha256": hashlib.sha256(manifest_raw).hexdigest(),
++        "progress_sha256": (
++            hashlib.sha256(progress_raw).hexdigest() if progress_raw is not None else None
++        ),
++    }
++
++
++def _settled_names(root: Path) -> list[str] | None:
++    """Names-only enumeration of the settled namespace (no stat, no reads).
++
++    One directory listing is the cheapest honest staleness detector: a crash
++    between the receipt move and the projection update leaves a directory the
++    projection never saw, and a names-only count comparison sees it without
++    opening a single receipt. None means the namespace could not be listed.
++    """
++    settled = root / "recovery/settled"
++    try:
++        return sorted(
++            entry.name for entry in settled.iterdir() if entry.name not in _SETTLED_SKIP_NAMES
++        )
++    except FileNotFoundError:
++        return []
++    except OSError:
++        return None
++
++
++def _segment_ids(sealed_count: int) -> list[str]:
++    return [f"seg-{index:04d}" for index in range(sealed_count)]
++
++
++def _read_segment(root: Path, segment_id: str):
++    """Read one segment document (sealed or active), root-verified.
++
++    Returns (segment_id, members, root) or None.
++    """
++    rel = f"{INDEX_DIR_REL}/{segment_id}.json"
++    result = _read_authenticated(
++        _index_path(root, rel),
++        ("schema_version", "segment_id", "members"),
++        _SEGMENT_DOMAIN,
++    )
++    if result is None:
++        return None
++    payload, root_value = result
++    if payload.get("schema_version") != SCHEMA_VERSION or payload.get("segment_id") != segment_id:
++        return None
++    members = payload.get("members")
++    if not isinstance(members, list) or len(members) > SEG_BOUND:
++        return None
++    if any(not isinstance(member, dict) for member in members):
++        return None
++    return segment_id, members, root_value
++
++
++def _read_head(root: Path):
++    """Read the compact authenticated head, or None (absent OR untrusted)."""
++    result = _read_authenticated(
++        _index_path(root, HEAD_REL),
++        (
++            "schema_version",
++            "lineage",
++            "seg_bound",
++            "sealed_count",
++            "settled_count",
++            "active_root",
++            "latest_sealed_id",
++            "latest_sealed_root",
++            "prev_root",
++        ),
++        _ROOT_DOMAIN,
++    )
++    if result is None:
++        return None
++    payload, head_root = result
++    if payload.get("schema_version") != SCHEMA_VERSION or payload.get("seg_bound") != SEG_BOUND:
++        return None
++    if not isinstance(payload.get("sealed_count"), int) or not isinstance(
++        payload.get("settled_count"), int
++    ):
++        return None
++    return payload, head_root
++
++
++def _write_segment(root: Path, segment_id: str, members: list[dict]) -> str:
++    from .paths import safe_atomic_write_bytes
++
++    payload = {"schema_version": SCHEMA_VERSION, "segment_id": segment_id, "members": members}
++    segment_root = _content_root(_SEGMENT_DOMAIN, payload)
++    document = dict(payload)
++    document["root"] = segment_root
++    safe_atomic_write_bytes(
++        _index_path(root, f"{INDEX_DIR_REL}/{segment_id}.json"),
++        _canonical(document) + b"\n",
++        kind="settled projection segment",
++        ownership_root=root,
++    )
++    return segment_root
++
++
++def _write_head(
++    root: Path,
++    *,
++    lineage: str,
++    sealed_count: int,
++    settled_count: int,
++    active_root: str | None,
++    latest_sealed_id: str | None,
++    latest_sealed_root: str | None,
++    prev_root: str | None,
++) -> str:
++    from .paths import safe_atomic_write_bytes
++
++    payload = {
++        "schema_version": SCHEMA_VERSION,
++        "lineage": lineage,
++        "seg_bound": SEG_BOUND,
++        "sealed_count": sealed_count,
++        "settled_count": settled_count,
++        "active_root": active_root,
++        "latest_sealed_id": latest_sealed_id,
++        "latest_sealed_root": latest_sealed_root,
++        "prev_root": prev_root,
++    }
++    head_root = _content_root(_ROOT_DOMAIN, payload)
++    document = dict(payload)
++    document["root"] = head_root
++    safe_atomic_write_bytes(
++        _index_path(root, HEAD_REL),
++        _canonical(document) + b"\n",
++        kind="settled projection head",
++        ownership_root=root,
++    )
++    return head_root
++
++
++def _write_locator(root: Path, operation: str, entries: list[dict]) -> None:
++    from .paths import safe_atomic_write_bytes
++
++    key = _locator_key(operation)
++    payload = {
++        "schema_version": SCHEMA_VERSION,
++        "operation": operation,
++        "key": key,
++        "entries": entries,
++    }
++    document = dict(payload)
++    document["root"] = _content_root(_LOCATOR_DOMAIN, payload)
++    safe_atomic_write_bytes(
++        _index_path(root, f"{INDEX_DIR_REL}/loc/{key}.json"),
++        _canonical(document) + b"\n",
++        kind="settled projection locator",
++        ownership_root=root,
++    )
++
++
++def _locator_path(root: Path, operation: str) -> Path:
++    return _index_path(root, f"{INDEX_DIR_REL}/loc/{_locator_key(operation)}.json")
++
++
++def _read_locator(root: Path, operation: str):
++    result = _read_authenticated(
++        _locator_path(root, operation),
++        ("schema_version", "operation", "key", "entries"),
++        _LOCATOR_DOMAIN,
++    )
++    if result is None:
++        return None
++    payload, _ = result
++    if (
++        payload.get("schema_version") != SCHEMA_VERSION
++        or payload.get("operation") != operation
++        or payload.get("key") != _locator_key(operation)
++    ):
++        return None
++    entries = payload.get("entries")
++    if not isinstance(entries, list) or any(
++        not isinstance(entry, dict)
++        or not isinstance(entry.get("loc"), str)
++        or not isinstance(entry.get("names"), list)
++        for entry in entries
++    ):
++        return None
++    return entries
++
++
++def rebuild_projection(root: Path) -> dict:
++    """The ONE canonical (mutating) rebuild: one deep O(N) scan.
++
++    Every settled receipt is decoded through the strict decoder exactly once
++    and folded into sealed segments plus an active tail. Corrupt settled
++    evidence is never silently omitted: any structural or decode failure
++    refuses publication and leaves the projection ABSENT (or stale), which
++    every hot read treats as no-bounded-trust while the strict whole-history
++    scan surfaces the corruption. The caller must hold the project writer
++    lock (settlement already does).
++    """
++    root = Path(root)
++    from .journal import SETTLED_DIR, _receipt_namespace_entries, decode_operation_record
++    from .paths import project_lineage_identity
++
++    lineage = project_lineage_identity(root)
++    members: list[dict] = []
++    for entry in _receipt_namespace_entries(root / SETTLED_DIR):
++        if entry.structural_error is not None or entry.op_dir is None:
++            return {
++                "ok": False,
++                "code": "SETTLED_CORRUPT",
++                "detail": f"{entry.name}: {entry.structural_error}",
++            }
++        decoded = decode_operation_record(
++            root,
++            entry.op_dir,
++            raw=entry.manifest_raw,
++            progress_raw=entry.progress_raw,
++            progress_captured=True,
++        )
++        if not decoded["ok"]:
++            return {
++                "ok": False,
++                "code": decoded.get("code", "RECOVERY_CONFLICT"),
++                "detail": f"{entry.name}: {decoded.get('detail', 'unparseable receipt')}",
++            }
++        members.append(
++            _member_from_record(
++                entry.name, decoded["record"], entry.manifest_raw, entry.progress_raw
++            )
++        )
++    members.sort(key=lambda member: member["name"])
++
++    # Locators from the FINAL membership so a locator never advertises a
++    # segment that does not exist yet.
++    sealed: list[list[dict]] = [
++        members[start : start + SEG_BOUND] for start in range(0, len(members), SEG_BOUND)
++    ]
++    active_members = sealed.pop() if sealed else []
++    # Index by operation over the final loc/tail split.
++    locator_entries: dict[str, list[dict]] = {}
++    for index, chunk in enumerate(sealed):
++        segment_id = f"seg-{index:04d}"
++        _collect_locator_entries(locator_entries, segment_id, chunk)
++    _collect_locator_entries(locator_entries, ACTIVE_ID, active_members)
++
++    prev_root = None
++    head = _read_head(root)
++    if head is not None:
++        prev_root = head[1]
++
++    latest_sealed_id = None
++    latest_sealed_root = None
++    for index, chunk in enumerate(sealed):
++        segment_id = f"seg-{index:04d}"
++        segment_root = _write_segment(root, segment_id, chunk)
++        latest_sealed_id, latest_sealed_root = segment_id, segment_root
++    active_root = _write_segment(root, ACTIVE_ID, active_members)
++    settled_count = len(members)
++    head_root = _write_head(
++        root,
++        lineage=lineage,
++        sealed_count=len(sealed),
++        settled_count=settled_count,
++        active_root=active_root,
++        latest_sealed_id=latest_sealed_id,
++        latest_sealed_root=latest_sealed_root,
++        prev_root=prev_root,
++    )
++    for operation, entries in locator_entries.items():
++        _write_locator(root, operation, entries)
++    return {
++        "ok": True,
++        "code": "SETTLED_PROJECTION_REBUILT",
++        "head_root": head_root,
++        "sealed_count": len(sealed),
++        "settled_count": settled_count,
++    }
++
++
++def _collect_locator_entries(
++    locator_entries: dict[str, list[dict]], segment_id: str, members: list[dict]
++) -> None:
++    for member in members:
++        operation = member.get("operation")
++        if not isinstance(operation, str) or not operation:
++            continue
++        bucket = locator_entries.setdefault(operation, [])
++        if bucket and bucket[-1]["loc"] == segment_id:
++            bucket[-1]["names"].append(member["name"])
++        else:
++            bucket.append({"loc": segment_id, "names": [member["name"]]})
++
++
++def advance_after_settlement(root: Path) -> dict:
++    """Advance (or rebuild) the projection after one receipt move.
++
++    Canonical settlement guarantee: if the projection exists and is valid the
++    just-moved receipt is folded in incrementally (append below the bound,
++    seal exactly once at the bound); if it is absent OR stale OR corrupt in
++    this mutating context, the canonical rebuild path establishes it from the
++    post-move namespace, so the just-settled receipt is always included. The
++    caller holds the project writer lock.
++    """
++    root = Path(root)
++    from .journal import SETTLED_DIR, _receipt_namespace_entries, decode_operation_record
++    from .paths import project_lineage_identity
++
++    lineage = project_lineage_identity(root)
++    head = _read_head(root)
++    if head is not None:
++        payload, _ = head
++        if payload.get("lineage") != lineage:
++            return rebuild_projection(root)
++        names = _settled_names(root)
++        if names is None or len(names) != payload.get("settled_count"):
++            # Stale (a crash between move and advance) or unreadable: the
++            # mutation context may rebuild, and the rebuild scans the POST
++            # move namespace so the just-settled receipt is included.
++            return rebuild_projection(root)
++        tail = _read_segment(root, ACTIVE_ID)
++        if tail is None:
++            return rebuild_projection(root)
++        _sid, tail_members, _tail_root = tail
++        projected = {member.get("name") for member in tail_members}
++        for index in range(payload.get("sealed_count") or 0):
++            segment = _read_segment(root, f"seg-{index:04d}")
++            if segment is None:
++                return rebuild_projection(root)
++            projected.update(member.get("name") for member in segment[1])
++        if projected != set(names):
++            return rebuild_projection(root)
++        # Fold in the receipts the projection does not know yet (normally the
++        # exactly one receipt this settlement moved).
++        new_names = [name for name in names if name not in projected]
++        new_members: list[dict] = []
++        for name in new_names:
++            op_dir = root / SETTLED_DIR / name
++            entry = next(
++                (e for e in _receipt_namespace_entries(op_dir.parent) if e.name == name), None
++            )
++            if entry is None or entry.structural_error is not None or entry.op_dir is None:
++                return rebuild_projection(root)
++            decoded = decode_operation_record(
++                root,
++                entry.op_dir,
++                raw=entry.manifest_raw,
++                progress_raw=entry.progress_raw,
++                progress_captured=True,
++            )
++            if not decoded["ok"]:
++                return rebuild_projection(root)
++            new_members.append(
++                _member_from_record(
++                    name, decoded["record"], entry.manifest_raw, entry.progress_raw
++                )
++            )
++        if not new_members:
++            return {"ok": True, "code": "SETTLED_PROJECTION_CURRENT", "settled_count": len(names)}
++        operations = sorted(
++            {m["operation"] for m in new_members if isinstance(m.get("operation"), str)}
++        )
++        tail_members.extend(new_members)
++        tail_members.sort(key=lambda member: member["name"])
++        sealed_count = payload.get("sealed_count") or 0
++        latest_sealed_id = payload.get("latest_sealed_id")
++        latest_sealed_root = payload.get("latest_sealed_root")
++        if len(tail_members) >= SEG_BOUND:
++            # Seal exactly once: the full tail becomes the next sealed
++            # segment; a fresh empty tail starts.
++            segment_id = f"seg-{sealed_count:04d}"
++            latest_sealed_id = segment_id
++            latest_sealed_root = _write_segment(root, segment_id, tail_members)
++            sealed_count += 1
++            tail_members = []
++        tail_root = _write_segment(root, ACTIVE_ID, tail_members)
++        head_root = _write_head(
++            root,
++            lineage=lineage,
++            sealed_count=sealed_count,
++            settled_count=len(names),
++            active_root=tail_root,
++            latest_sealed_id=latest_sealed_id,
++            latest_sealed_root=latest_sealed_root,
++            prev_root=payload.get("prev_root"),
++        )
++        _refresh_locators(root, operations)
++        return {
++            "ok": True,
++            "code": "SETTLED_PROJECTION_ADVANCED",
++            "head_root": head_root,
++            "settled_count": len(names),
++        }
++    return rebuild_projection(root)
++
++
++def _refresh_locators(root: Path, operations: list[str]) -> None:
++    """Rebuild ONLY the locators named by this settlement (bounded writes).
++
++    A locator is a pure function of the final membership, so refreshing one
++    operation's locator rescans only the head-named segment list and the
++    tail; each holds at most SEG_BOUND members. Sealed-away members are
++    covered because the scan reads the segments themselves, not the tail.
++    """
++    if not operations:
++        return
++    head = _read_head(root)
++    if head is None:
++        return
++    payload, _ = head
++    tail = _read_segment(root, ACTIVE_ID)
++    tail_hits_by_op: dict[str, list[str]] = {}
++    if tail is not None:
++        for member in tail[1]:
++            operation = member.get("operation")
++            if isinstance(operation, str):
++                tail_hits_by_op.setdefault(operation, []).append(member["name"])
++    segment_hits: dict[str, dict[str, list[str]]] = {}
++    for index in range(payload.get("sealed_count") or 0):
++        segment = _read_segment(root, f"seg-{index:04d}")
++        if segment is None:
++            return
++        for member in segment[1]:
++            operation = member.get("operation")
++            if isinstance(operation, str) and operation in operations:
++                segment_hits.setdefault(operation, {})[f"seg-{index:04d}"].append(member["name"])
++    for operation in operations:
++        entries: list[dict] = []
++        hits = segment_hits.get(operation, {})
++        for segment_id in sorted(hits):
++            entries.append({"loc": segment_id, "names": sorted(hits[segment_id])})
++        if operation in tail_hits_by_op:
++            entries.append({"loc": ACTIVE_ID, "names": sorted(tail_hits_by_op[operation])})
++        _write_locator(root, operation, entries)
++
++
++def operation_receipts_bounded(root: Path, operation: str):
++    """The bounded hot path behind semantic_receipts_for_operation_safe.
++
++    Returns (records, errors, projection_used):
++
++    * projection ABSENT -> ([], (), False): the caller falls back to the
++      canonical whole-history scan (read-only, never mutates).
++    * projection present but UNTRUSTED (corrupt head/segment/locator, digest
++      mismatch on a relevant receipt, staleness against the namespace) ->
++      ([], errors, True): fail closed. Corruption never becomes negative
++      evidence, and the caller never silently scans around it.
++    * projection trusted -> (records, (), True): only the locator, the
++      relevant segment(s), the active tail, and the matched receipts' exact
++      bytes were read.
++    """
++    root = Path(root)
++    from .journal import OPS_DIR, SETTLED_DIR, _receipt_namespace_entries, decode_operation_record
++    from .paths import project_lineage_identity
++
++    head = _read_head(root)
++    if head is None:
++        return [], (), False
++    payload, _ = head
++    lineage = project_lineage_identity(root)
++    if payload.get("lineage") != lineage:
++        return [], (f"{HEAD_REL}: projection lineage mismatch; refusing bounded trust",), True
++
++    # Staleness: one names-only enumeration detects a receipt the projection
++    # never saw (crash between move and advance) without opening any receipt.
++    names = _settled_names(root)
++    if names is None:
++        return [], ("settled namespace unreadable; refusing bounded trust",), True
++    if len(names) != payload.get("settled_count"):
++        return [], (
++            f"{HEAD_REL}: projection stale (settled_count {payload.get('settled_count')} "
++            f"vs {len(names)} receipts on disk); canonical settlement rebuilds it",
++        ), True
++
++    records: list[dict] = []
++    errors: list[str] = []
++
++    # Active tail: every settlement's most recent members.
++    tail = _read_segment(root, ACTIVE_ID)
++    if tail is None:
++        return [], (f"{ACTIVE_ID}.json: untrusted active tail",), True
++    tail_members, tail_root = tail[1], tail[2]
++    if tail_root != payload.get("active_root"):
++        return [], (f"{ACTIVE_ID}.json: tail root disagrees with head",), True
++
++    locator = _read_locator(root, operation)
++    if locator is None:
++        # ABSENT locator: this operation never settled (zero matches below).
++        # CORRUPT locator: bytes exist but fail verification -- fail closed
++        # instead of inventing a zero-match answer.
++        if _locator_path(root, operation).exists():
++            return [], (
++                f"loc/{_locator_key(operation)}.json: untrusted locator for {operation!r}",
++            ), True
++        locator = []
++
++    referenced = {entry["loc"]: set(entry["names"]) for entry in locator}
++    if ACTIVE_ID in referenced:
++        tail_hits = [m for m in tail_members if m.get("operation") == operation]
++        tail_names = {m.get("name") for m in tail_hits}
++        if not referenced[ACTIVE_ID].issubset(tail_names):
++            return [], (
++                f"{ACTIVE_ID}.json: locator advertises names the tail does not carry",
++            ), True
++        records.extend(_load_members(root, SETTLED_DIR, tail_hits, errors, decode_operation_record))
++        referenced.pop(ACTIVE_ID)
++
++    for segment_id, wanted in referenced.items():
++        segment = _read_segment(root, segment_id)
++        if segment is None:
++            return [], (f"{segment_id}.json: untrusted segment",), True
++        _sid, members, segment_root = segment
++        if payload.get("latest_sealed_id") == segment_id:
++            if segment_root != payload.get("latest_sealed_root"):
++                return [], (f"{segment_id}.json: root disagrees with head",), True
++        hits = [m for m in members if m.get("operation") == operation]
++        hit_names = {m.get("name") for m in hits}
++        if not wanted.issubset(hit_names):
++            return [], (
++                f"{segment_id}.json: locator advertises names the segment does not carry",
++            ), True
++        records.extend(_load_members(root, SETTLED_DIR, hits, errors, decode_operation_record))
++        if errors:
++            return [], errors, True
++
++    # Unresolved (ops) namespace: bounded active tail, unchanged semantics.
++    ops_entries = list(_receipt_namespace_entries(root / OPS_DIR))
++    for entry in ops_entries:
++        if entry.structural_error is not None or entry.op_dir is None:
++            errors.append(
++                f"{entry.name}: CORRUPT_JOURNAL: "
++                f"{entry.structural_error or 'invalid receipt structure'}"
++            )
++            continue
++        decoded = decode_operation_record(
++            root,
++            entry.op_dir,
++            raw=entry.manifest_raw,
++            progress_raw=entry.progress_raw,
++            progress_captured=True,
++        )
++        if not decoded["ok"]:
++            errors.append(
++                f"{entry.name}: {decoded.get('code', 'RECOVERY_CONFLICT')}: "
++                f"{decoded.get('detail', 'unparseable operation receipt')}"
++            )
++            continue
++        if decoded["record"].get("operation") == operation:
++            records.append(decoded["record"])
++
++    if errors:
++        return [], errors, True
++
++    from .board import iso_utc_sort_key
++    from .journal import SETTLED as _SETTLED_STATUSES, _recovery_identity_binding
++
++    # Live project binding on every returned record (the same gate the
++    # whole-history snapshot applies): foreign-lineage receipts are excluded
++    # as errors, never silently returned.
++    kept: list[dict] = []
++    for record in records:
++        if record.get("project_lineage") is None and record.get("status") in _SETTLED_STATUSES:
++            kept.append(record)
++            continue
++        binding = _recovery_identity_binding(root, record, live_lineage=lineage)
++        if binding["ok"]:
++            kept.append(record)
++        else:
++            errors.append(
++                f"foreign-lineage/identity receipt excluded: {record.get('op_id', '')}"
++            )
++    if errors:
++        return [], errors, True
++
++    import datetime as _datetime
++
++    _earliest = iso_utc_sort_key("0001-01-01T00:00:00Z") or _datetime.datetime.min.replace(
++        tzinfo=_datetime.timezone.utc
++    )
++    kept.sort(
++        key=lambda r: (iso_utc_sort_key(r.get("created_at", "")) or _earliest, r.get("op_id", ""))
++    )
++    return kept, (), True
++
++
++def _load_members(root: Path, settled_rel: str, members, errors, decode_operation_record):
++    """Open, digest-verify, and strictly decode the matched members only."""
++    records = []
++    for member in members:
++        name = member.get("name")
++        op_dir = root / settled_rel / str(name)
++        try:
++            manifest_raw = (op_dir / "operation.json").read_bytes()
++        except OSError as exc:
++            errors.append(f"{name}: operation.json unreadable ({type(exc).__name__}): {exc}")
++            return records
++        digest = hashlib.sha256(manifest_raw).hexdigest()
++        if digest != member.get("manifest_sha256"):
++            errors.append(
++                f"{name}: settled receipt content digest mismatch; refusing bounded trust"
++            )
++            return records
++        progress_raw = None
++        progress_path = op_dir / "progress.json"
++        if progress_path.is_file():
++            try:
++                progress_raw = progress_path.read_bytes()
++            except OSError as exc:
++                errors.append(f"{name}: progress.json unreadable ({type(exc).__name__}): {exc}")
++                return records
++        progress_digest = (
++            hashlib.sha256(progress_raw).hexdigest() if progress_raw is not None else None
++        )
++        if progress_digest != member.get("progress_sha256"):
++            errors.append(
++                f"{name}: settled progress content digest mismatch; refusing bounded trust"
++            )
++            return records
++        decoded = decode_operation_record(
++            root,
++            op_dir,
++            raw=manifest_raw,
++            progress_raw=progress_raw,
++            progress_captured=True,
++        )
++        if not decoded["ok"]:
++            errors.append(
++                f"{name}: {decoded.get('code', 'RECOVERY_CONFLICT')}: "
++                f"{decoded.get('detail', 'unparseable receipt')}"
++            )
++            return records
++        records.append(decoded["record"])
++    return records
+diff --git a/tools/test_conformance_lineage.py b/tools/test_conformance_lineage.py
+new file mode 100644
+index 00000000..b95c9d9e
+--- /dev/null
++++ b/tools/test_conformance_lineage.py
+@@ -0,0 +1,286 @@
++"""R011 structural tests: bounded authenticated conformance lineage.
++
++Counters are structural (receipt files opened, content hashes, generation
++reads), never wall-clock. The contract: latest lookup and normal append no
++longer scale with the lifetime receipt population, while the explicit deep
++validation still walks everything and exact receipt bytes stay the authority.
++"""
++
++from __future__ import annotations
++
++import hashlib
++import json
++import shutil
++import sys
++import tempfile
++import unittest
++from pathlib import Path
++from unittest import mock
++
++ROOT = Path(__file__).resolve().parents[1]
++sys.path.insert(0, str(ROOT / "tools"))
++
++from saipen_engine import conformance  # noqa: E402
++from saipen_engine import conformance_lineage as CL  # noqa: E402
++
++RECEIPTS = ".saipen/recovery/conformance"
++
++
++def _receipt(rid: str, gate: str, ts: str, verdict: str = "PASS") -> dict:
++    return {
++        "schema_version": 2,
++        "kind": "conformance_receipt",
++        "validator_protocol_version": "test",
++        "gate": gate,
++        "exit_code": 0,
++        "verdict": verdict,
++        "timestamp_utc": ts,
++        "receipt_id": rid,
++        "content_hash": "x",
++    }
++
++
++def _write_receipt(root: Path, rid: str, gate: str, ts: str) -> Path:
++    receipt_dir = root / RECEIPTS
++    receipt_dir.mkdir(parents=True, exist_ok=True)
++    path = receipt_dir / f"{rid}.json"
++    path.write_text(json.dumps(_receipt(rid, gate, ts)), encoding="utf-8")
++    return path
++
++
++def _append(root: Path, path: Path, rid: str, gate: str, ts: str) -> None:
++    conformance._update_receipt_index(
++        root,
++        gate,
++        rid,
++        ts,
++        receipt_path=path.relative_to(root).as_posix(),
++    )
++
++
++class ConformanceLineageTests(unittest.TestCase):
++    def setUp(self) -> None:
++        self.root = Path(tempfile.mkdtemp(prefix="r011_"))
++        self.addCleanup(shutil.rmtree, self.root, True)
++
++    def test_rebuild_then_bounded_latest_per_gate(self) -> None:
++        for index in range(5):
++            gate = "core" if index % 2 else "crew"
++            path = _write_receipt(self.root, f"r{index}", gate, f"2026-01-01T00:00:0{index}Z")
++            _append(self.root, path, f"r{index}", gate, f"2026-01-01T00:00:0{index}Z")
++        core, core_ok = CL.latest_receipt_bounded(self.root, "core")
++        self.assertTrue(core_ok)
++        self.assertIsNotNone(core)
++        self.assertEqual(core["receipt_id"], "r3")
++        crew, crew_ok = CL.latest_receipt_bounded(self.root, "crew")
++        self.assertEqual(crew["receipt_id"], "r4")
++        # Whole-history iteration stays available.
++        self.assertEqual(len(conformance._iter_receipts(self.root)), 5)
++
++    def test_bounded_lookup_cost_is_constant_in_population(self) -> None:
++        for population in (100, 1000, 10000):
++            with self.subTest(population=population):
++                root = Path(tempfile.mkdtemp(prefix=f"r011_pop{population}_"))
++                try:
++                    for index in range(population):
++                        gate = "core" if index % 3 else "crew"
++                        _write_receipt(
++                            root,
++                            f"r{index:06d}",
++                            gate,
++                            f"2026-01-01T00:{index // 60:02d}:{index % 60:02d}Z",
++                        )
++                    CL.rebuild_lineage(root)
++                    opens = {"receipt": 0}
++                    original_read_bytes = Path.read_bytes
++
++                    def counting_read(self, *args, **kwargs):
++                        text = str(self)
++                        if text.replace("\\", "/").startswith(
++                            str((root / RECEIPTS).resolve()).replace("\\", "/")
++                        ):
++                            opens["receipt"] += 1
++                        return original_read_bytes(self, *args, **kwargs)
++
++                    with mock.patch.object(Path, "read_bytes", counting_read):
++                        handled, record = CL.latest_receipt_bounded(root, "core")
++                    self.assertTrue(handled)
++                    self.assertIsNotNone(record)
++                    # Head + locator + one generation + one receipt: bounded,
++                    # never the population.
++                    self.assertLessEqual(opens["receipt"], 8)
++                finally:
++                    shutil.rmtree(root, ignore_errors=True)
++
++    def test_append_does_not_rehash_sealed_history(self) -> None:
++        for index in range(CL.GEN_BOUND):
++            path = _write_receipt(self.root, f"r{index:04d}", "core", "2026-01-01T00:00:00Z")
++            _append(self.root, path, f"r{index:04d}", "core", "2026-01-01T00:00:00Z")
++        head = CL._read_head(self.root)
++        self.assertIsNotNone(head)
++        self.assertEqual(head[0]["receipt_count"], CL.GEN_BOUND)
++        # One more receipt: the active generation is full, so this append
++        # seals exactly once and opens a fresh tail.
++        path = _write_receipt(self.root, "r-final", "core", "2026-01-01T00:01:00Z")
++        sealed_reads = {"n": 0}
++        original_read = Path.read_bytes
++        gen_dir = (self.root / CL.INDEX_DIR_REL).resolve()
++
++        def counting_read(self, *args, **kwargs):
++            text = str(self)
++            if text.endswith("operation.json") is False and gen_dir not in self.resolve():
++                if str(self).replace("\\", "/").startswith(
++                    str((Path(tempfile.gettempdir())).resolve()).replace("\\", "/")
++                ) and "r0" in text and ".json" in text and "conformance" in text:
++                    sealed_reads["n"] += 1
++            return original_read(self, *args, **kwargs)
++
++        with mock.patch.object(Path, "read_bytes", counting_read):
++            _append(self.root, path, "r-final", "core", "2026-01-01T00:01:00Z")
++        head = CL._read_head(self.root)
++        self.assertEqual(head[0]["sealed_count"], 1)
++        self.assertEqual(head[0]["receipt_count"], CL.GEN_BOUND + 1)
++        handled, record = CL.latest_receipt_bounded(self.root, "core")
++        self.assertEqual(record["receipt_id"], "r-final")
++        # The next no-op advance must not re-seal.
++        CL.advance_append(
++            self.root,
++            "core",
++            "r-final",
++            "2026-01-01T00:01:00Z",
++            path.relative_to(self.root).as_posix(),
++            prior_receipt_dir_mtime_ns=(self.root / RECEIPTS).stat().st_mtime_ns,
++        )
++        head = CL._read_head(self.root)
++        self.assertEqual(head[0]["sealed_count"], 1)
++
++    def test_out_of_band_sibling_refuses_advance_and_never_becomes_indexed(self) -> None:
++        for index in range(3):
++            path = _write_receipt(self.root, f"r{index}", "core", f"2026-01-01T00:00:0{index}Z")
++            _append(self.root, path, f"r{index}", "core", f"2026-01-01T00:00:0{index}Z")
++        locator_before = CL._read_locator(self.root, "core")
++        head_before = CL._read_head(self.root)
++        # A foreign writer lands a newer receipt WITHOUT telling the lineage.
++        _write_receipt(self.root, "out-of-band", "core", "2026-01-01T00:00:59Z")
++        # The writer's own append observes the pre-sibling mtime.
++        stale_mtime = head_before[0]["receipt_dir_mtime_ns"]
++        path = _write_receipt(self.root, "r3", "core", "2026-01-01T00:00:04Z")
++        _append(self.root, path, "r3", "core", "2026-01-01T00:00:04Z")
++        locator_after = CL._read_locator(self.root, "core")
++        self.assertEqual(locator_after, locator_before)
++        self.assertEqual(CL._read_head(self.root), head_before)
++        # The strict scan still reports the true latest.
++        latest = conformance.latest_receipt(self.root, "core")
++        self.assertEqual(latest["receipt_id"], "out-of-band")
++
++    def test_tampered_referenced_receipt_refuses_bounded_trust(self) -> None:
++        path = _write_receipt(self.root, "r1", "core", "2026-01-01T00:00:00Z")
++        _append(self.root, path, "r1", "core", "2026-01-01T00:00:00Z")
++        original = path.read_bytes()
++        path.write_bytes(original.replace(b"PASS", b"FAIL"))
++        handled, record = CL.latest_receipt_bounded(self.root, "core")
++        self.assertTrue(handled)
++        self.assertIsNone(record, "tampered referenced bytes must not authenticate")
++
++    def test_tampered_locator_refuses(self) -> None:
++        path = _write_receipt(self.root, "r1", "core", "2026-01-01T00:00:00Z")
++        _append(self.root, path, "r1", "core", "2026-01-01T00:00:00Z")
++        locator_path = self.root / CL.INDEX_DIR_REL / "core.json"
++        document = json.loads(locator_path.read_text())
++        document["receipt_id"] = "forged"
++        locator_path.write_text(json.dumps(document))
++        handled, record = CL.latest_receipt_bounded(self.root, "core")
++        self.assertTrue(handled)
++        self.assertIsNone(record)
++
++    def test_tampered_generation_manifest_refuses(self) -> None:
++        path = _write_receipt(self.root, "r1", "core", "2026-01-01T00:00:00Z")
++        _append(self.root, path, "r1", "core", "2026-01-01T00:00:00Z")
++        gen_path = self.root / CL.INDEX_DIR_REL / f"{CL.ACTIVE_ID}.json"
++        document = json.loads(gen_path.read_text())
++        document["members"] = []
++        gen_path.write_text(json.dumps(document))
++        handled, record = CL.latest_receipt_bounded(self.root, "core")
++        self.assertTrue(handled)
++        self.assertIsNone(record)
++
++    def test_unrelated_sealed_tamper_leaves_latest_clean_and_deep_red(self) -> None:
++        for index in range(CL.GEN_BOUND + 2):
++            path = _write_receipt(self.root, f"r{index:04d}", "core", "2026-01-01T00:00:00Z")
++            _append(self.root, path, f"r{index:04d}", "core", "2026-01-01T00:00:00Z")
++        head = CL._read_head(self.root)
++        self.assertEqual(head[0]["sealed_count"], 1)
++        # Tamper the OLDEST sealed receipt (in gen-0000, not referenced by
++        # the locator, not in the active generation).
++        victim = self.root / RECEIPTS / "r0000.json"
++        victim.write_text(victim.read_text().replace("PASS", "FAIL"))
++        handled, record = CL.latest_receipt_bounded(self.root, "core")
++        self.assertTrue(handled)
++        self.assertIsNotNone(record)
++        deep_ok, deep_errors = CL.validate_lineage_deep(self.root)
++        self.assertFalse(deep_ok)
++        self.assertTrue(any("r0000" in message for message in deep_errors))
++
++    def test_deleted_and_duplicated_and_reordered_history_goes_deep_red(self) -> None:
++        for index in range(4):
++            path = _write_receipt(self.root, f"r{index}", "core", f"2026-01-01T00:00:0{index}Z")
++            _append(self.root, path, f"r{index}", "core", f"2026-01-01T00:00:0{index}Z")
++        # Deletion.
++        (self.root / RECEIPTS / "r1.json").unlink()
++        deep_ok, deep_errors = CL.validate_lineage_deep(self.root)
++        self.assertFalse(deep_ok)
++        self.assertTrue(any("r1.json" in message for message in deep_errors))
++        # Rebuild heals, then duplication.
++        CL.rebuild_lineage(self.root)
++        source = (self.root / RECEIPTS / "r2.json").read_text()
++        (self.root / RECEIPTS / "r2-copy.json").write_text(
++            source.replace('"r2"', '"r2-copy"'), encoding="utf-8"
++        )
++        CL.rebuild_lineage(self.root)
++        deep_ok, deep_errors = CL.validate_lineage_deep(self.root)
++        self.assertTrue(deep_ok, deep_errors)  # a distinct receipt_id is legal
++        # Generation reorder (root no longer matches) must go red.
++        gen_path = self.root / CL.INDEX_DIR_REL / f"{CL.ACTIVE_ID}.json"
++        document = json.loads(gen_path.read_text())
++        document["members"] = list(reversed(document["members"]))
++        gen_path.write_text(json.dumps(document))
++        deep_ok, deep_errors = CL.validate_lineage_deep(self.root)
++        self.assertFalse(deep_ok)
++
++    def test_rebuild_is_idempotent_and_never_rewrites_receipt_bytes(self) -> None:
++        digests = {}
++        for index in range(6):
++            path = _write_receipt(self.root, f"r{index}", "core", f"2026-01-01T00:00:0{index}Z")
++            digests[path.name] = hashlib.sha256(path.read_bytes()).hexdigest()
++        first = CL.rebuild_lineage(self.root)
++        self.assertTrue(first["ok"])
++        head_root_first = first["head_root"]
++        second = CL.rebuild_lineage(self.root)
++        self.assertEqual(second["head_root"], head_root_first)
++        for name, digest in digests.items():
++            path = self.root / RECEIPTS / name
++            self.assertEqual(hashlib.sha256(path.read_bytes()).hexdigest(), digest)
++
++    def test_absent_lineage_falls_back_to_legacy_without_mutating(self) -> None:
++        path = _write_receipt(self.root, "r1", "core", "2026-01-01T00:00:00Z")
++        handled, record = CL.latest_receipt_bounded(self.root, "core")
++        self.assertFalse(handled)
++        legacy = conformance.latest_receipt(self.root, "core")
++        self.assertIsNotNone(legacy)
++        self.assertFalse((self.root / CL.INDEX_DIR_REL / "lineage-head.json").exists())
++
++    def test_update_receipt_index_creates_and_advances_v2(self) -> None:
++        first = _write_receipt(self.root, "r1", "core", "2026-01-01T00:00:00Z")
++        _append(self.root, first, "r1", "core", "2026-01-01T00:00:00Z")
++        self.assertTrue((self.root / CL.HEAD_REL.replace("/", "\\")).exists() or
++                        (self.root / CL.HEAD_REL).exists())
++        latest = conformance.latest_receipt(self.root, "core")
++        self.assertEqual(latest["receipt_id"], "r1")
++        second = _write_receipt(self.root, "r2", "core", "2026-01-01T00:00:01Z")
++        _append(self.root, second, "r2", "core", "2026-01-01T00:00:01Z")
++        latest = conformance.latest_receipt(self.root, "core")
++        self.assertEqual(latest["receipt_id"], "r2")
++
++
++if __name__ == "__main__":
++    unittest.main()
+diff --git a/tools/test_debt_gate.py b/tools/test_debt_gate.py
+new file mode 100644
+index 00000000..0760dda8
+--- /dev/null
++++ b/tools/test_debt_gate.py
+@@ -0,0 +1,631 @@
++from __future__ import annotations
++
++import json
++import shutil
++import sys
++import tempfile
++import unittest
++from pathlib import Path
++from unittest.mock import patch
++
++ROOT = Path(__file__).resolve().parents[1]
++sys.path.insert(0, str(ROOT / "tools"))
++
++from saipen_engine import debt as debt_mod  # noqa: E402
++from saipen_engine import findings as findings_mod  # noqa: E402
++from saipen_engine import intake  # noqa: E402
++
++SCENARIO = ROOT / "tests" / "scenarios" / "stale-state-reconciliation" / ".saipen"
++
++
++def _canned(entries: list[tuple[str, str, str]]) -> list[dict]:
++    """Build structured findings from (severity, message, category) triples."""
++    return [
++        findings_mod.classify(severity, message, category=category)
++        for severity, message, category in entries
++    ]
++
++
++class FindingsIdentityTests(unittest.TestCase):
++    """Phase D: stable structured identity, ordering/line stability, secrets."""
++
++    def test_identity_is_deterministic_and_order_free(self) -> None:
++        message = (
++            "ticket T-102 is ## DONE but carries no current-cycle verification "
++            "evidence (classifier: no current-cycle VERIFY boundary)"
++        )
++        first = findings_mod.classify("problem", message)
++        second = findings_mod.classify("problem", message)
++        self.assertEqual(first, second)
++        other_first = findings_mod.classify(
++            "problem",
++            "ticket T-31 is ## DONE but carries no current-cycle verification "
++            "evidence (classifier: no current-cycle VERIFY boundary)",
++        )
++        self.assertNotEqual(first["finding_key"], other_first["finding_key"])
++        # same broken semantic condition, different subject: the detail
++        # fingerprint is identical by design; the KEY is what separates them
++        self.assertEqual(first["detail_hash"], other_first["detail_hash"])
++        self.assertEqual(first["subject_id"], "T-102")
++        self.assertEqual(other_first["subject_id"], "T-31")
++
++    def test_subject_extraction_prefers_semantic_ids_over_line_numbers(self) -> None:
++        one = findings_mod.classify(
++            "problem",
++            "mechanical provenance [saio] -- structural SAIOPS-owned events after the "
++            "first provenanced event (E-4) lack `[op: ...]`, so a manual structural "
++            "edit cannot be distinguished from a mechanized one: .saipen/LOG.md:410 E-605 (T-584)",
++        )
++        moved = findings_mod.classify(
++            "problem",
++            "mechanical provenance [saio] -- structural SAIOPS-owned events after the "
++            "first provenanced event (E-4) lack `[op: ...]`, so a manual structural "
++            "edit cannot be distinguished from a mechanized one: .saipen/LOG.md:999 E-605 (T-584)",
++        )
++        self.assertEqual(one["subject_id"], "E-605")
++        self.assertEqual(one["finding_key"], moved["finding_key"])
++        self.assertNotEqual(one.get("subject_ref"), moved.get("subject_ref"))
++
++    def test_semantic_change_changes_detail_but_not_key_shape(self) -> None:
++        before = findings_mod.classify(
++            "problem",
++            "ticket T-102 is ## DONE but carries no current-cycle verification "
++            "evidence (classifier: no current-cycle VERIFY boundary)",
++        )
++        after = findings_mod.classify(
++            "problem",
++            "ticket T-102 is ## DONE but carries no current-cycle verification "
++            "evidence (classifier: unproven/failed)",
++        )
++        self.assertEqual(before["finding_key"], after["finding_key"])
++        self.assertNotEqual(before["detail_hash"], after["detail_hash"])
++        self.assertEqual(findings_mod.compare_finding(before, after), "CHANGED")
++        self.assertEqual(findings_mod.compare_finding(before, dict(before)), "CARRIED")
++
++    def test_unknown_message_is_global_and_never_carried(self) -> None:
++        finding = findings_mod.classify("problem", "completely novel failure shape")
++        self.assertEqual(finding["rule_id"], "unclassified")
++        self.assertEqual(finding["subject_kind"], "global")
++        self.assertIsNone(finding["subject_id"])
++
++    def test_credential_finding_never_carries_message_content(self) -> None:
++        secret = "sk-live-DO-NOT-LEAK-9f8e7d6c5b4a"
++        message = (
++            "source credential gate: SOURCE_CREDENTIALS_UNSAFE credential pattern "
++            f"{secret} in exact archive source SRC-033; supply a user-authorized "
++            "replacement or amendment before release"
++        )
++        finding = findings_mod.classify("problem", message)
++        self.assertTrue(finding["credential"])
++        self.assertIsNone(finding["detail"])
++        self.assertEqual(finding["subject_id"], "SRC-033")
++        serialized = json.dumps(finding)
++        self.assertNotIn(secret, serialized)
++        self.assertNotIn("sk-live", serialized)
++
++    def test_ruleset_fingerprint_covers_the_rule_table(self) -> None:
++        fingerprint = findings_mod.ruleset_fingerprint()
++        self.assertEqual(fingerprint, findings_mod.ruleset_fingerprint())
++        self.assertTrue(len(findings_mod.RULE_TABLE) >= 10)
++
++
++class DebtGateFixtureTests(unittest.TestCase):
++    """Real-engine plumbing: snapshots, delta, fail-closed refusals."""
++
++    def setUp(self) -> None:
++        self.tmp = tempfile.TemporaryDirectory(prefix="saipen-debt-gate-")
++        self.root = Path(self.tmp.name) / "project"
++        self.root.mkdir()
++        shutil.copytree(SCENARIO, self.root / ".saipen")
++        board = self.root / ".saipen/BOARD.md"
++        text = board.read_text(encoding="utf-8")
++        text = text.replace("## DOING\n- [/] T-001 DOING task", "## DOING")
++        text = text.replace(
++            "## DONE\n", "## DONE\n- [x] T-001 DOING task | verify: proof exists\n"
++        )
++        board.write_text(text, encoding="utf-8")
++
++    def tearDown(self) -> None:
++        self.tmp.cleanup()
++
++    # -- snapshot lifecycle ------------------------------------------------
++
++    def test_snapshot_is_immutable_project_bound_and_reused(self) -> None:
++        first = debt_mod.create_snapshot(self.root, "probe", "baseline capture")
++        self.assertTrue(first["ok"], first)
++        snapshot_id = first["snapshot_id"]
++        record = debt_mod.load_snapshot(self.root, snapshot_id)
++        self.assertEqual(record["snapshot_id"], snapshot_id)
++        self.assertEqual(record["project_lineage"], debt_mod.project_lineage_identity(self.root))
++        self.assertTrue(record["ruleset_fingerprint"])
++        self.assertIn("journal_op_id", record)
++        again = debt_mod.create_snapshot(self.root, "probe", "baseline capture")
++        self.assertTrue(again["ok"], again)
++        self.assertEqual(again["code"], "DEBT_SNAPSHOT_REUSED")
++        self.assertEqual(again["snapshot_id"], snapshot_id)
++        # immutability: a new checkpoint (tree changed) creates a NEW snapshot
++        intake.capture(self.root, "mutation", source_kind="user_audit")
++        second = debt_mod.create_snapshot(self.root, "probe", "after mutation")
++        self.assertTrue(second["ok"], second)
++        self.assertNotEqual(second["snapshot_id"], snapshot_id)
++
++    def test_corrupted_snapshot_fails_closed(self) -> None:
++        created = debt_mod.create_snapshot(self.root, "probe", "capture")
++        self.assertTrue(created["ok"], created)
++        intake.capture(
++            self.root, "seed finding material", source_kind="user_audit", work="T-001"
++        )
++        seeded = debt_mod.create_snapshot(self.root, "probe", "non-empty capture")
++        self.assertTrue(seeded["ok"], seeded)
++        self.assertTrue(seeded["problem_count"] >= 1, seeded)
++        path = self.root / debt_mod.DEBT_DIR / f"{seeded['snapshot_id']}.json"
++        record = json.loads(path.read_text(encoding="utf-8"))
++        record["problems"] = []
++        path.write_text(json.dumps(record), encoding="utf-8")
++        with self.assertRaises(debt_mod.DebtRefusal) as caught:
++            debt_mod.load_snapshot(self.root, seeded["snapshot_id"])
++        self.assertEqual(caught.exception.code, "DEBT_SNAPSHOT_CORRUPT")
++
++    def test_snapshot_from_another_project_refuses(self) -> None:
++        created = debt_mod.create_snapshot(self.root, "probe", "capture")
++        self.assertTrue(created["ok"], created)
++        other = Path(self.tmp.name) / "other"
++        shutil.copytree(self.root, other)
++        with self.assertRaises(debt_mod.DebtRefusal) as caught:
++            debt_mod.load_snapshot(other, created["snapshot_id"])
++        self.assertIn(
++            caught.exception.code,
++            ("DEBT_SNAPSHOT_FOREIGN_PROJECT", "DEBT_SNAPSHOT_FOREIGN_LINEAGE"),
++        )
++
++    def test_ruleset_change_refuses_comparison(self) -> None:
++        created = debt_mod.create_snapshot(self.root, "probe", "capture")
++        self.assertTrue(created["ok"], created)
++        with patch.object(findings_mod, "RULESET_VERSION", 99), patch.object(
++            findings_mod, "ruleset_fingerprint", lambda: "stale-fingerprint"
++        ), self.assertRaises(debt_mod.DebtRefusal) as caught:
++            debt_mod.load_snapshot(self.root, created["snapshot_id"])
++        self.assertEqual(caught.exception.code, "BASELINE_RULESET_CHANGED")
++
++    def test_deleted_snapshot_cannot_create_pass(self) -> None:
++        created = debt_mod.create_snapshot(self.root, "probe", "capture")
++        self.assertTrue(created["ok"], created)
++        (self.root / debt_mod.DEBT_DIR / f"{created['snapshot_id']}.json").unlink()
++        with self.assertRaises(debt_mod.DebtRefusal) as caught:
++            debt_mod.load_snapshot(self.root, created["snapshot_id"])
++        self.assertEqual(caught.exception.code, "DEBT_SNAPSHOT_MISSING")
++
++    # -- Work delta (real capture) ------------------------------------------
++
++    def test_delta_resolves_and_reports_release_blocked(self) -> None:
++        baseline = debt_mod.create_snapshot(self.root, "probe", "pre-work")
++        self.assertTrue(baseline["ok"], baseline)
++        base = debt_mod.load_snapshot(self.root, baseline["snapshot_id"])
++        self.assertEqual(base["problem_count"], 0)
++        # the Work's implementation introduces one real validator problem
++        result = intake.capture(
++            self.root, "audit body for T-001", source_kind="user_audit", work="T-001"
++        )
++        self.assertTrue(result["ok"], result)
++        delta = debt_mod.work_delta(
++            self.root,
++            "T-001",
++            agent="probe",
++            baseline_ref=baseline["snapshot_id"],
++            verification=[{"command": "unittest probe", "result": "PASS"}],
++        )
++        self.assertTrue(delta["ok"], delta)
++        self.assertEqual(delta["code"], "WORK_DELTA_BLOCKED")
++        self.assertEqual(len(delta["new"]), 1)
++        self.assertEqual(delta["new"][0]["subject_id"], "T-001")
++        self.assertEqual(delta["strict_core"]["problems"], 1)
++        self.assertFalse(delta["release_ready"])
++        # the mid-work snapshot carries the problem the Work introduced
++        mid_snapshot = debt_mod.create_snapshot(self.root, "probe", "mid-work")
++        self.assertTrue(mid_snapshot["ok"], mid_snapshot)
++        self.assertEqual(mid_snapshot["problem_count"], 1)
++        # repaired: coverage terminal -> problem RESOLVED, delta PASSes,
++        # strict Core returns to its baseline and release stays truthful
++        self.assertTrue(
++            intake.add_requirement(self.root, "SRC-001", rid="R001", text="the clause")["ok"]
++        )
++        self.assertTrue(
++            intake.set_disposition(
++                self.root,
++                "SRC-001",
++                "R001",
++                "VERIFIED",
++                evidence="E-1",
++                verification="unittest:PASS",
++            )["ok"]
++        )
++        resolved_delta = debt_mod.work_delta(
++            self.root,
++            "T-001",
++            agent="probe",
++            baseline_ref=mid_snapshot["snapshot_id"],
++            verification=[{"command": "unittest probe", "result": "PASS"}],
++        )
++        self.assertTrue(resolved_delta["ok"], resolved_delta)
++        self.assertEqual(resolved_delta["code"], "WORK_DELTA_PASS")
++        self.assertEqual(resolved_delta["work_delta"], "PASS")
++        self.assertEqual(len(resolved_delta["resolved"]), 1)
++        self.assertEqual(resolved_delta["resolved"][0]["subject_id"], "T-001")
++        # clean project: strict Core green -> release_ready becomes true;
++        # every carried-problem report below keeps it false (H)
++        self.assertTrue(resolved_delta["release_ready"])
++        # idempotent second invocation
++        second = debt_mod.work_delta(
++            self.root,
++            "T-001",
++            agent="probe",
++            baseline_ref=mid_snapshot["snapshot_id"],
++            verification=[{"command": "unittest probe", "result": "PASS"}],
++        )
++        self.assertEqual(second, resolved_delta)
++
++    def test_delta_requires_verification_evidence(self) -> None:
++        baseline = debt_mod.create_snapshot(self.root, "probe", "pre-work")
++        self.assertTrue(baseline["ok"], baseline)
++        delta = debt_mod.work_delta(
++            self.root, "T-001", agent="probe", baseline_ref=baseline["snapshot_id"]
++        )
++        self.assertTrue(delta["ok"], delta)
++        self.assertEqual(delta["code"], "WORK_DELTA_BLOCKED")
++        self.assertTrue(
++            any("verification" in entry["reason"] for entry in delta["blocking"]),
++            delta["blocking"],
++        )
++
++    def test_delta_without_any_baseline_refuses(self) -> None:
++        result = debt_mod.work_delta(
++            self.root,
++            "T-001",
++            agent="probe",
++            verification=[{"command": "probe", "result": "PASS"}],
++        )
++        self.assertFalse(result["ok"], result)
++        self.assertEqual(result["code"], "DEBT_BASELINE_MISSING")
++
++
++class WorkDeltaClassificationTests(unittest.TestCase):
++    """Phase G delta classes against canned finding sets (precise control)."""
++
++    def setUp(self) -> None:
++        self.tmp = tempfile.TemporaryDirectory(prefix="saipen-debt-classify-")
++        self.root = Path(self.tmp.name) / "project"
++        self.root.mkdir()
++        shutil.copytree(SCENARIO, self.root / ".saipen")
++        board = self.root / ".saipen/BOARD.md"
++        text = board.read_text(encoding="utf-8")
++        text = text.replace("## DOING\n- [/] T-001 DOING task", "## DOING")
++        text = text.replace(
++            "## DONE\n", "## DONE\n- [x] T-001 DOING task | verify: proof exists\n"
++        )
++        board.write_text(text, encoding="utf-8")
++
++    def tearDown(self) -> None:
++        self.tmp.cleanup()
++
++    def _delta(
++        self,
++        baseline_findings: list[dict],
++        current_findings: list[dict],
++        *,
++        work: str = "T-090",
++        verification: list[dict] | None = None,
++    ) -> dict:
++        with patch.object(
++            debt_mod,
++            "capture_findings",
++            return_value={
++                "ok": True,
++                "exit_code": 1,
++                "gate": "core",
++                "problems": baseline_findings,
++                "warnings": [],
++            },
++        ):
++            baseline = debt_mod.create_snapshot(self.root, "probe", "baseline")
++            self.assertTrue(baseline["ok"], baseline)
++        with patch.object(
++            debt_mod,
++            "capture_findings",
++            return_value={
++                "ok": True,
++                "exit_code": 1,
++                "gate": "core",
++                "problems": current_findings,
++                "warnings": [],
++            },
++        ):
++            return debt_mod.work_delta(
++                self.root,
++                work,
++                agent="probe",
++                baseline_ref=baseline["snapshot_id"],
++                verification=verification
++                or [{"command": "probe tests", "result": "PASS"}],
++            )
++
++    def _finding(self, message: str, severity: str = "problem") -> dict:
++        return findings_mod.classify(severity, message)
++
++    def test_carried_unrelated_problem_passes_but_keeps_release_blocked(self) -> None:
++        message = (
++            "ticket T-050 is ## DONE but carries no current-cycle verification "
++            "evidence (classifier: no current-cycle VERIFY boundary)"
++        )
++        baseline = [self._finding(message)]
++        report = self._delta(baseline, [self._finding(message)])
++        self.assertEqual(report["code"], "WORK_DELTA_PASS")
++        self.assertEqual(report["carried_problems"], 1)
++        self.assertEqual(report["carried"][0]["subject_id"], "T-050")
++        self.assertFalse(report["release_ready"])
++        self.assertFalse(report["strict_core"]["ok"])
++
++    def test_new_problem_blocks(self) -> None:
++        carried = (
++            "ticket T-050 is ## DONE but carries no current-cycle verification "
++            "evidence (classifier: no current-cycle VERIFY boundary)"
++        )
++        fresh = (
++            "ticket T-051 is ## DONE but carries no current-cycle verification "
++            "evidence (classifier: no current-cycle VERIFY boundary)"
++        )
++        report = self._delta(
++            [self._finding(carried)], [self._finding(carried), self._finding(fresh)]
++        )
++        self.assertEqual(report["code"], "WORK_DELTA_BLOCKED")
++        self.assertEqual(len(report["new"]), 1)
++        self.assertEqual(report["new"][0]["subject_id"], "T-051")
++
++    def test_worsened_problem_blocks(self) -> None:
++        warning = findings_mod.classify(
++            "warning",
++            "ticket T-060 has no ticket-bearing closure event; legacy evidence is not "
++            "recorded and is not fabricated",
++            category="legacy-closure-evidence",
++        )
++        problem = findings_mod.classify(
++            "problem",
++            "ticket T-060 is ## DONE but carries no current-cycle verification "
++            "evidence (classifier: unproven/failed)",
++        )
++        # same rule+subject identity escalated from warning to problem
++        problem["finding_key"] = warning["finding_key"]
++        report = self._delta([problem], [problem])
++        self.assertEqual(report["code"], "WORK_DELTA_PASS")  # same problem set as baseline
++        escalated = self._delta([], [problem])
++        self.assertEqual(escalated["code"], "WORK_DELTA_BLOCKED")
++        self.assertEqual(len(escalated["new"]), 1)
++
++    def test_changed_unsafe_problem_blocks(self) -> None:
++        before = findings_mod.classify(
++            "problem",
++            "ticket T-070 is ## DONE but carries no current-cycle verification "
++            "evidence (classifier: no current-cycle VERIFY boundary)",
++        )
++        after = findings_mod.classify(
++            "problem",
++            "ticket T-070 is ## DONE but carries no current-cycle verification "
++            "evidence (classifier: unproven/failed)",
++        )
++        report = self._delta([before], [after])
++        self.assertEqual(report["code"], "WORK_DELTA_BLOCKED")
++        self.assertEqual(len(report["changed_unsafe"]), 1)
++
++    def test_resolved_problem_is_reported(self) -> None:
++        message = (
++            "ticket T-080 is ## DONE but carries no current-cycle verification "
++            "evidence (classifier: no current-cycle VERIFY boundary)"
++        )
++        report = self._delta([self._finding(message)], [])
++        self.assertEqual(report["code"], "WORK_DELTA_PASS")
++        self.assertEqual(len(report["resolved"]), 1)
++        self.assertEqual(report["resolved"][0]["subject_id"], "T-080")
++
++    def test_work_attribution_blocks(self) -> None:
++        message = (
++            "ticket T-090 is ## DONE but carries no current-cycle verification "
++            "evidence (classifier: no current-cycle VERIFY boundary)"
++        )
++        baseline = [self._finding(message)]
++        report = self._delta(baseline, [self._finding(message)], work="T-090")
++        self.assertEqual(report["code"], "WORK_DELTA_BLOCKED")
++        self.assertTrue(
++            any("attributed to Work T-090" in entry["reason"] for entry in report["blocking"]),
++            report["blocking"],
++        )
++
++    def test_unattributed_global_problem_blocks_even_when_carried(self) -> None:
++        message = "completely novel global failure shape"
++        baseline = [self._finding(message)]
++        report = self._delta(baseline, [self._finding(message)])
++        self.assertEqual(report["code"], "WORK_DELTA_BLOCKED")
++        self.assertTrue(
++            any("unattributed" in entry["reason"] for entry in report["blocking"]),
++            report["blocking"],
++        )
++
++
++class LegacyBootstrapTests(unittest.TestCase):
++    """Phase J: provenance-aware retroactive adjudication, fail-closed."""
++
++    def setUp(self) -> None:
++        self.tmp = tempfile.TemporaryDirectory(prefix="saipen-debt-legacy-")
++        self.root = Path(self.tmp.name) / "project"
++        self.root.mkdir()
++        shutil.copytree(SCENARIO, self.root / ".saipen")
++        log_path = self.root / ".saipen/LOG.md"
++        # Claim boundary E-816; pre-claim work T-050; post-claim work T-200.
++        lines = [
++            "- 05.09.26 00:19 [E-815] [parent: E-814] [T-050] [agent: probe] [op: op-a] "
++            "DEC: pre-claim work created",
++            "- 05.09.26 00:20 [E-816] [parent: E-815] [T-158] [agent: probe] [op: op-b] "
++            "DEC: claimed via SAIOPS -- owner probe",
++            "- 05.09.26 00:21 [E-817] [parent: E-816] [T-200] [agent: probe] [op: op-c] "
++            "DEC: post-claim work created",
++        ]
++        log_path.write_text(
++            log_path.read_text(encoding="utf-8") + "\n".join(lines) + "\n", encoding="utf-8"
++        )
++
++    def tearDown(self) -> None:
++        self.tmp.cleanup()
++
++    def _legacy(self, findings_list: list[dict], *, target_source: str | None = None) -> dict:
++        with patch.object(
++            debt_mod,
++            "capture_findings",
++            return_value={
++                "ok": True,
++                "exit_code": 1,
++                "gate": "core",
++                "problems": findings_list,
++                "warnings": [],
++            },
++        ):
++            return debt_mod.work_delta(
++                self.root,
++                "T-158",
++                agent="probe",
++                claim_boundary="E-816",
++                target_source=target_source,
++                verification=[{"command": "regression_t158.py", "result": "PASS"}],
++            )
++
++    def _closure_finding(self, ticket: str) -> dict:
++        return findings_mod.classify(
++            "problem",
++            f"ticket {ticket} is ## DONE but carries no current-cycle verification "
++            "evidence (classifier: no current-cycle VERIFY boundary)",
++        )
++
++    def test_pre_claim_unrelated_subject_is_carried(self) -> None:
++        report = self._legacy([self._closure_finding("T-050")])
++        self.assertTrue(report["ok"], report)
++        self.assertEqual(report["mode"], "legacy")
++        self.assertEqual(report["carried_problems"], 1)
++        self.assertEqual(report["code"], "WORK_DELTA_PASS")
++
++    def test_target_work_subject_refuses(self) -> None:
++        report = self._legacy([self._closure_finding("T-158")])
++        self.assertEqual(report["code"], "WORK_DELTA_BLOCKED")
++        self.assertTrue(
++            any("subject is the target Work" in entry["reason"] for entry in report["blocking"]),
++            report["blocking"],
++        )
++
++    def test_post_claim_subject_refuses(self) -> None:
++        report = self._legacy([self._closure_finding("T-200")])
++        self.assertEqual(report["code"], "WORK_DELTA_BLOCKED")
++        self.assertTrue(
++            any("after claim boundary" in entry["reason"] for entry in report["blocking"]),
++            report["blocking"],
++        )
++
++    def test_target_source_receipt_refuses(self) -> None:
++        finding = findings_mod.classify(
++            "problem",
++            "active receipt SRC-036 contract/coverage invalid: broken",
++        )
++        report = self._legacy([finding], target_source="SRC-036")
++        self.assertEqual(report["code"], "WORK_DELTA_BLOCKED")
++        self.assertTrue(
++            any(
++                "target Work's source receipt" in entry["reason"]
++                for entry in report["blocking"]
++            ),
++            report["blocking"],
++        )
++
++    def test_global_problem_refuses(self) -> None:
++        finding = findings_mod.classify("problem", "completely novel global failure")
++        report = self._legacy([finding])
++        self.assertEqual(report["code"], "WORK_DELTA_BLOCKED")
++        self.assertTrue(
++            any("unattributed" in entry["reason"] for entry in report["blocking"]),
++            report["blocking"],
++        )
++
++    def test_claim_boundary_must_exist(self) -> None:
++        with patch.object(
++            debt_mod,
++            "capture_findings",
++            return_value={
++                "ok": True, "exit_code": 1, "gate": "core", "problems": [], "warnings": [],
++            },
++        ):
++            result = debt_mod.work_delta(
++                self.root,
++                "T-158",
++                agent="probe",
++                claim_boundary="E-999999",
++                verification=[{"command": "probe", "result": "PASS"}],
++            )
++        self.assertFalse(result["ok"], result)
++        self.assertEqual(result["code"], "VALIDATION_FAILED")
++
++
++class StrictGateInvariantTests(unittest.TestCase):
++    """Phase E/H: strict validation semantics are untouched by the feature."""
++
++    def setUp(self) -> None:
++        self.tmp = tempfile.TemporaryDirectory(prefix="saipen-debt-strict-")
++        self.root = Path(self.tmp.name) / "project"
++        self.root.mkdir()
++        shutil.copytree(SCENARIO, self.root / ".saipen")
++        board = self.root / ".saipen/BOARD.md"
++        text = board.read_text(encoding="utf-8")
++        text = text.replace("## DOING\n- [/] T-001 DOING task", "## DOING")
++        text = text.replace(
++            "## DONE\n", "## DONE\n- [x] T-001 DOING task | verify: proof exists\n"
++        )
++        board.write_text(text, encoding="utf-8")
++
++    def tearDown(self) -> None:
++        self.tmp.cleanup()
++
++    def test_strict_core_stays_red_with_carried_debt(self) -> None:
++        intake.capture(self.root, "audit body", source_kind="user_audit", work="T-001")
++        capture = debt_mod.capture_findings(self.root)
++        self.assertTrue(capture["ok"], capture)
++        self.assertNotEqual(capture["exit_code"], 0)
++        self.assertEqual(capture["problem_count"], 1)
++
++    def test_debt_feature_adds_no_ignore_path(self) -> None:
++        source = (ROOT / "tools" / "saipen_engine" / "debt.py").read_text(encoding="utf-8")
++        self.assertNotIn("--ignore-errors", source)
++        self.assertNotIn("--force-pass", source)
++        validate_source = (ROOT / "tools" / "validate.py").read_text(encoding="utf-8")
++        self.assertNotIn("--ignore-errors", validate_source)
++        self.assertNotIn("--force-pass", validate_source)
++
++    def test_findings_json_side_artifact_matches_standard_counts(self) -> None:
++        import subprocess
++
++        intake.capture(self.root, "audit body", source_kind="user_audit", work="T-001")
++        out = self.root.parent / "findings.json"
++        completed = subprocess.run(
++            [
++                sys.executable,
++                str(ROOT / "tools" / "validate.py"),
++                "--project-root",
++                str(self.root),
++                "--findings-json",
++                str(out),
++            ],
++            capture_output=True,
++            text=True,
++            timeout=600,
++        )
++        self.assertIn("1 problem(s)", completed.stdout)
++        doc = json.loads(out.read_text(encoding="utf-8"))
++        self.assertEqual(doc["problem_count"], 1)
++        self.assertEqual(doc["problems"][0]["rule_id"], "source_receipt_unresolved_work")
++        self.assertEqual(doc["problems"][0]["subject_id"], "T-001")
++
++
++if __name__ == "__main__":
++    unittest.main()
+diff --git a/tools/test_settled_projection.py b/tools/test_settled_projection.py
+new file mode 100644
+index 00000000..fb2d4ed0
+--- /dev/null
++++ b/tools/test_settled_projection.py
+@@ -0,0 +1,303 @@
++"""R010 structural tests: bounded settled-journal projection (SRC-025:R010).
++
++The counters are structural (decodes, receipt opens, sealed-segment reads),
++never wall-clock: hot operation lookup must cost the locator + relevant
++segment(s) + active tail, not the lifetime settled population.
++"""
++
++from __future__ import annotations
++
++import json
++import shutil
++import sys
++import tempfile
++import unittest
++from pathlib import Path
++from unittest import mock
++
++ROOT = Path(__file__).resolve().parents[1]
++sys.path.insert(0, str(ROOT / "tools"))
++
++from saipen_engine import journal
++from saipen_engine import settled_projection as SP
++from saipen_engine.journal import OPS_DIR, SETTLED_DIR
++from saipen_engine.paths import runtime_lock_identity
++
++_TARGET = {
++    "path": ".saipen/kitchen/_perf_test.json",
++    "role": "generic",
++    "before_hash": "",
++    "after_hash": "x",
++    "applied": True,
++    "action": "write",
++    "content": "{}",
++}
++
++
++def _write_receipt(root: Path, op_id: str, operation: str, ns: str = "settled") -> dict:
++    base = root / (OPS_DIR if ns == "ops" else SETTLED_DIR) / op_id
++    base.mkdir(parents=True, exist_ok=True)
++    record = {
++        "op_id": op_id,
++        "status": "COMMITTED",
++        "operation": operation,
++        "semantic_payload_hash": "x",
++        "created_at": "2026-09-07T00:00:00Z",
++        "agent": "perf-wave",
++        "project_identity": runtime_lock_identity(root),
++        "verification_policy": "none",
++        "preconditions": {},
++        "progress_index": 0,
++        "targets": [dict(_TARGET)],
++    }
++    (base / "operation.json").write_text(json.dumps(record))
++    return record
++
++
++class SettledProjectionTests(unittest.TestCase):
++    def test_rebuild_and_advance_publish_bounded_projection(self) -> None:
++        root = Path(tempfile.mkdtemp(prefix="r010_rebuild_"))
++        try:
++            _write_receipt(root, "op-0000", "alpha")
++            result = journal.rebuild_projection(root)
++            self.assertTrue(result["ok"], result)
++            self.assertTrue((root / SP.INDEX_DIR_REL / "head.json").is_file())
++            _write_receipt(root, "op-0001", "alpha")
++            result = SP.advance_after_settlement(root)
++            self.assertTrue(result["ok"], result)
++            self.assertEqual(result["settled_count"], 2)
++            records, errors = journal.semantic_receipts_for_operation_safe(root, "alpha")
++            self.assertEqual(errors, ())
++            self.assertEqual(len(records), 2)
++        finally:
++            shutil.rmtree(root, ignore_errors=True)
++
++    def test_zero_match_query_never_decodes_or_opens_lifetime_receipts(self) -> None:
++        root = Path(tempfile.mkdtemp(prefix="r010_zero_"))
++        try:
++            for index in range(SP.SEG_BOUND + 1):
++                _write_receipt(root, f"op-{index:04d}", "beta" if index % 3 == 0 else "alpha")
++            journal.rebuild_projection(root)
++            decodes = 0
++            settled_opens = 0
++            original_decode = journal.decode_operation_record
++            original_read = Path.read_bytes
++
++            def counting_decode(*args, **kwargs):
++                nonlocal decodes
++                decodes += 1
++                return original_decode(*args, **kwargs)
++
++            def counting_read(path_self, *args, **kwargs):
++                nonlocal settled_opens
++                text = str(path_self)
++                if "\\settled\\" in text or "/settled/" in text:
++                    settled_opens += 1
++                return original_read(path_self, *args, **kwargs)
++
++            with (
++                mock.patch.object(journal, "decode_operation_record", side_effect=counting_decode),
++                mock.patch.object(Path, "read_bytes", counting_read),
++            ):
++                records, errors = journal.semantic_receipts_for_operation_safe(root, "gamma")
++            self.assertEqual(records, [])
++            self.assertEqual(errors, ())
++            self.assertEqual(decodes, 0, "zero-match query decoded a receipt")
++            self.assertEqual(settled_opens, 0, "zero-match query opened a settled receipt")
++        finally:
++            shutil.rmtree(root, ignore_errors=True)
++
++    def test_match_query_cost_bounded_by_relevant_segments(self) -> None:
++        root = Path(tempfile.mkdtemp(prefix="r010_match_"))
++        try:
++            for index in range(SP.SEG_BOUND + 1):
++                _write_receipt(root, f"op-{index:04d}", "beta" if index % 3 == 0 else "alpha")
++            journal.rebuild_projection(root)
++            decodes = 0
++            original_decode = journal.decode_operation_record
++
++            def counting_decode(*args, **kwargs):
++                nonlocal decodes
++                decodes += 1
++                return original_decode(*args, **kwargs)
++
++            with mock.patch.object(journal, "decode_operation_record", side_effect=counting_decode):
++                records, errors = journal.semantic_receipts_for_operation_safe(root, "beta")
++            self.assertEqual(errors, ())
++            expected = sum(1 for index in range(SP.SEG_BOUND + 1) if index % 3 == 0)
++            self.assertEqual(len(records), expected)
++            self.assertLessEqual(decodes, SP.SEG_BOUND)
++        finally:
++            shutil.rmtree(root, ignore_errors=True)
++
++    def test_append_below_bound_never_reads_sealed_bodies(self) -> None:
++        root = Path(tempfile.mkdtemp(prefix="r010_append_"))
++        try:
++            for index in range(SP.SEG_BOUND):
++                _write_receipt(root, f"op-{index:04d}", "alpha")
++            journal.rebuild_projection(root)
++            _write_receipt(root, "op-0128", "alpha")
++            settled_opens = 0
++            original_read = Path.read_bytes
++
++            def counting_read(path_self, *args, **kwargs):
++                nonlocal settled_opens
++                text = str(path_self)
++                if "\\settled\\op-0" in text and text.endswith("operation.json"):
++                    settled_opens += 1
++                return original_read(path_self, *args, **kwargs)
++
++            with mock.patch.object(Path, "read_bytes", counting_read):
++                result = SP.advance_after_settlement(root)
++            self.assertTrue(result["ok"], result)
++            # Exactly the one newly moved receipt was opened; none of the 128
++            # sealed bodies were re-read or re-hashed.
++            self.assertEqual(settled_opens, 1)
++            head = SP._read_head(root)
++            self.assertIsNotNone(head)
++            self.assertEqual(head[0]["sealed_count"], 1)
++            self.assertEqual(head[0]["settled_count"], SP.SEG_BOUND + 1)
++        finally:
++            shutil.rmtree(root, ignore_errors=True)
++
++    def test_seal_happens_exactly_once_at_the_bound(self) -> None:
++        root = Path(tempfile.mkdtemp(prefix="r010_seal_"))
++        try:
++            for index in range(SP.SEG_BOUND):
++                _write_receipt(root, f"op-{index:04d}", "alpha")
++            journal.rebuild_projection(root)
++            head = SP._read_head(root)
++            self.assertIsNotNone(head)
++            self.assertEqual(head[0]["sealed_count"], 0)
++            _write_receipt(root, "op-0128", "alpha")
++            SP.advance_after_settlement(root)
++            head = SP._read_head(root)
++            self.assertIsNotNone(head)
++            self.assertEqual(head[0]["sealed_count"], 1)
++            self.assertEqual(head[0]["latest_sealed_id"], "seg-0000")
++            # The next advance (nothing new) is idempotent and does not re-seal.
++            result = SP.advance_after_settlement(root)
++            self.assertEqual(result["code"], "SETTLED_PROJECTION_CURRENT")
++            head = SP._read_head(root)
++            self.assertEqual(head[0]["sealed_count"], 1)
++        finally:
++            shutil.rmtree(root, ignore_errors=True)
++
++    def test_tampered_relevant_receipt_fails_closed(self) -> None:
++        root = Path(tempfile.mkdtemp(prefix="r010_tamper_"))
++        try:
++            _write_receipt(root, "op-0000", "alpha")
++            journal.rebuild_projection(root)
++            manifest = root / SETTLED_DIR / "op-0000" / "operation.json"
++            manifest.write_text(manifest.read_text().replace('"alpha"', '"beta"'))
++            records, errors = journal.semantic_receipts_for_operation_safe(root, "alpha")
++            self.assertEqual(records, [])
++            self.assertTrue(any("op-0000" in message for message in errors))
++            self.assertTrue(any("digest mismatch" in message for message in errors))
++        finally:
++            shutil.rmtree(root, ignore_errors=True)
++
++    def test_tampered_unrelated_sealed_receipt_leaves_hot_lookup_clean_and_deep_red(self) -> None:
++        root = Path(tempfile.mkdtemp(prefix="r010_unrelated_"))
++        try:
++            for index in range(SP.SEG_BOUND):
++                _write_receipt(root, f"op-{index:04d}", "alpha")
++            _write_receipt(root, "beta-0001", "beta")
++            journal.rebuild_projection(root)
++            manifest = root / SETTLED_DIR / "op-0000" / "operation.json"
++            manifest.write_text(manifest.read_text().replace('"alpha"', '"tampered"'))
++            records, errors = journal.semantic_receipts_for_operation_safe(root, "beta")
++            self.assertEqual(errors, ())
++            self.assertEqual([r["op_id"] for r in records], ["beta-0001"])
++            _snapshot_records, snapshot_errors = journal.semantic_receipt_snapshot(root)
++            self.assertTrue(snapshot_errors)
++        finally:
++            shutil.rmtree(root, ignore_errors=True)
++
++    def test_corrupt_projection_head_fails_closed_instead_of_legacy_scan(self) -> None:
++        root = Path(tempfile.mkdtemp(prefix="r010_head_"))
++        try:
++            _write_receipt(root, "op-0000", "alpha")
++            journal.rebuild_projection(root)
++            head_path = root / SP.INDEX_DIR_REL / "head.json"
++            head_path.write_text("{broken")
++            records, errors = journal.semantic_receipts_for_operation_safe(root, "alpha")
++            self.assertEqual(records, [])
++            self.assertTrue(errors, "corrupt projection authority must fail closed")
++        finally:
++            shutil.rmtree(root, ignore_errors=True)
++
++    def test_stale_projection_detected_without_opening_receipts(self) -> None:
++        root = Path(tempfile.mkdtemp(prefix="r010_stale_"))
++        try:
++            _write_receipt(root, "op-0000", "alpha")
++            journal.rebuild_projection(root)
++            # A crash between the move and the advance: receipt on disk the
++            # projection never saw.
++            _write_receipt(root, "op-0001", "alpha")
++            records, errors = journal.semantic_receipts_for_operation_safe(root, "alpha")
++            self.assertEqual(records, [])
++            self.assertTrue(any("stale" in message for message in errors))
++        finally:
++            shutil.rmtree(root, ignore_errors=True)
++
++    def test_absent_projection_falls_back_to_canonical_scan_readonly(self) -> None:
++        root = Path(tempfile.mkdtemp(prefix="r010_absent_"))
++        try:
++            _write_receipt(root, "op-0000", "alpha")
++            records, errors = journal.semantic_receipts_for_operation_safe(root, "alpha")
++            self.assertEqual(errors, ())
++            self.assertEqual(len(records), 1)
++            self.assertFalse((root / SP.INDEX_DIR_REL).exists(), "read-only lookup must not mutate")
++        finally:
++            shutil.rmtree(root, ignore_errors=True)
++
++    def test_settlement_advances_after_stale_projection(self) -> None:
++        root = Path(tempfile.mkdtemp(prefix="r010_advance_"))
++        try:
++            _write_receipt(root, "op-0000", "alpha")
++            journal.rebuild_projection(root)
++            _write_receipt(root, "op-0001", "alpha")  # crash-shaped stale state
++            result = SP.advance_after_settlement(root)
++            self.assertTrue(result["ok"], result)
++            head = SP._read_head(root)
++            self.assertEqual(head[0]["settled_count"], 2)
++            records, errors = journal.semantic_receipts_for_operation_safe(root, "alpha")
++            self.assertEqual(errors, ())
++            self.assertEqual(len(records), 2)
++        finally:
++            shutil.rmtree(root, ignore_errors=True)
++
++    def test_ops_namespace_matches_stay_visible_on_bounded_path(self) -> None:
++        root = Path(tempfile.mkdtemp(prefix="r010_ops_"))
++        try:
++            _write_receipt(root, "op-0000", "alpha")
++            journal.rebuild_projection(root)
++            _write_receipt(root, "live-0001", "alpha", ns="ops")
++            records, errors = journal.semantic_receipts_for_operation_safe(root, "alpha")
++            self.assertEqual(errors, ())
++            self.assertEqual(len(records), 2)
++        finally:
++            shutil.rmtree(root, ignore_errors=True)
++
++    def test_bounded_records_equal_snapshot_records(self) -> None:
++        root = Path(tempfile.mkdtemp(prefix="r010_equiv_"))
++        try:
++            for index in range(10):
++                _write_receipt(root, f"op-{index:04d}", "alpha" if index % 2 else "beta")
++            _write_receipt(root, "live-0001", "alpha", ns="ops")
++            journal.rebuild_projection(root)
++            bounded, errors = journal.semantic_receipts_for_operation_safe(root, "alpha")
++            self.assertEqual(errors, ())
++            snapshot_records, snapshot_errors = journal.semantic_receipt_snapshot(root)
++            self.assertEqual(snapshot_errors, ())
++            snapshot_alpha = [r for r in snapshot_records if r.get("operation") == "alpha"]
++            self.assertEqual(
++                [r["op_id"] for r in bounded], [r["op_id"] for r in snapshot_alpha]
++            )
++        finally:
++            shutil.rmtree(root, ignore_errors=True)
++
++
++if __name__ == "__main__":
++    unittest.main()

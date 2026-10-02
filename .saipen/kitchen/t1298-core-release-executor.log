@@ -1,0 +1,97 @@
+PASS: release executor -- 1. ship and push dry-run plans are structurally identical
+PASS: release executor -- 2a. dry-run reports writes=none
+PASS: release executor -- 2b. dry-run does not change index/staged set
+PASS: release executor -- 2c. dry-run creates no new commits
+PASS: release executor -- 2d. dry-run creates no tags
+PASS: release executor -- 2e. dry-run creates no git objects
+PASS: release executor -- 2f. dry-run does not change refs
+PASS: release executor -- 3a. first publish refuses with FIRST_PUBLISH_WAIT
+PASS: release executor -- 3a-code
+PASS: release executor -- 3b. first-publish does not create commits
+PASS: release executor -- 3c. first-publish does not create tags
+PASS: release executor -- 3d. canonical WAIT persisted in STATE
+PASS: release executor -- 3e. phase stays SHIP during the WAIT
+PASS: release executor -- 3f. confirmation is canonical evidence
+PASS: release executor -- 3g. confirmation recorded in STATE
+PASS: release executor -- 3h. confirmed first publish proceeds to RELEASED
+PASS: release executor -- 3i. tag published after confirmation
+PASS: release executor -- 4a. no-publish returns a truthful success
+PASS: release executor -- 4b. no-publish does not create a local commit
+PASS: release executor -- 4c. no-publish does not stage anything
+PASS: release executor -- 4d. no-publish creates no tags
+PASS: release executor -- 4e. no-publish remote refs unchanged
+PASS: release executor -- 4f. canonical STATE becomes DONE
+PASS: release executor -- 4g. ticket becomes DONE
+PASS: release executor -- 4h. truthful skipped-publish LOG event
+PASS: release executor -- 4i. digest updated
+PASS: release executor -- 4j. git-less no-publish succeeds
+PASS: release executor -- 4k. git-less no-publish records the true reason
+PASS: release executor -- 4l. git-less no-publish closes SHIP -> DONE
+PASS: release executor -- 5a. foreign pre-existing staging is refused
+PASS: release executor -- 5b. foreign staging is preserved after refusal
+PASS: release executor -- 6. release from an unproven DONE state is refused
+PASS: release executor -- 6-code. refusal names the phase/evidence problem
+PASS: release executor -- 7a. commit rejection is a closed refusal
+PASS: release executor -- 7b. failure detail is non-empty (stderr captured)
+PASS: release executor -- 7c. no push happened on commit failure
+PASS: release executor -- 8a. full release returns RELEASED
+PASS: release executor -- 8b. closure B is a separate non-empty commit after A
+PASS: release executor -- 8c. remote branch tip == closure commit (non-empty)
+PASS: release executor -- 8d. remote tag^{commit} == closure commit (non-empty)
+PASS: release executor -- 8e. local tag^{commit} == closure commit (non-empty)
+PASS: release executor -- 8f. tag is created AFTER the closure is published
+PASS: release executor -- 8g. B.parent == A
+PASS: release executor -- 8h. fresh clone succeeded
+PASS: release executor -- 8i. fresh clone carries the exact reviewed source change
+PASS: release executor -- 8j. fresh clone sees STATE DONE / task none
+PASS: release executor -- 8k. fresh clone sees ticket DONE
+PASS: release executor -- 8l. fresh clone LOG carries truthful release evidence
+PASS: release executor -- 8m. scope record reaches the fresh clone
+PASS: release executor -- 8n. foreign file did not enter the release commits
+PASS: release executor -- 8n. foreign file did not enter the release commits
+PASS: release executor -- 8o. foreign file still in the worktree
+PASS: release executor -- 8p. no owned work remains dirty (only the foreign untracked)
+PASS: release executor -- 8q. scope record is committed (no tracked dirt)
+PASS: release executor -- 8r. retry recognizes ALREADY_APPLIED from full evidence
+PASS: release executor -- 8s. retry writes nothing
+PASS: release executor -- 9. A after content push: crash injected at the edge
+PASS: release executor -- 9. A after content push: recovery settles
+PASS: release executor -- 9. A after content push: remote branch reaches closure
+PASS: release executor -- 9. A after content push: no duplicate commits on recovery
+PASS: release executor -- 9. A after content push: pending ops cleared
+PASS: release executor -- 9. B after closure push: crash injected at the edge
+PASS: release executor -- 9. B after closure push: recovery settles
+PASS: release executor -- 9. B after closure push: remote branch reaches closure
+PASS: release executor -- 9. B after closure push: no duplicate commits on recovery
+PASS: release executor -- 9. B after closure push: pending ops cleared
+PASS: release executor -- 9. C after tag push: crash injected at the edge
+PASS: release executor -- 9. C after tag push: recovery settles
+PASS: release executor -- 9. C after tag push: remote branch reaches closure
+PASS: release executor -- 9. C after tag push: no duplicate commits on recovery
+PASS: release executor -- 9. C after tag push: pending ops cleared
+PASS: release executor -- 9b. crash injected after closure publish
+PASS: release executor -- 9b. closure B pushed, tag absent
+PASS: release executor -- 9b. fresh clone succeeded
+PASS: release executor -- 9b. fresh-clone continuation publishes only the missing tag
+PASS: release executor -- 9b. tag now matches the closure tip (non-empty)
+PASS: release executor -- 10a. journal write failure is a public closed refusal
+PASS: release executor -- 10b. no remote stage ran after the receipt failure
+PASS: release executor -- 10c. no tag pushed after the receipt failure
+PASS: release executor -- 11a. index snapshot records the staged deletion
+PASS: release executor -- 11b. staged deletion is restored exactly
+PASS: release executor -- 11c. scope accepts a tracked deletion path
+PASS: release executor -- 11c. deletion-scope release succeeds
+PASS: release executor -- 11c. fresh clone lacks the reviewed deletion
+PASS: release executor -- 11c. fresh clone still carries the reviewed source change
+PASS: release executor -- 12. loose object creation changes the detector
+PASS: release executor -- 13. errors.CODES is non-empty and closed
+PASS: release executor -- 14. scope records a brand-new untracked file
+PASS: release executor -- 14. trap precondition: HEAD == remote tip (clean surface)
+PASS: release executor -- 14. untracked-only release returns RELEASED
+PASS: release executor -- 14. a content commit A was created (not skipped)
+PASS: release executor -- 14. closure B is a child of the content commit
+PASS: release executor -- 14. fresh clone carries the untracked scope file
+PASS: release executor -- 15. seal-with-release succeeds
+PASS: release executor -- 15. fresh clone carries the sealed segment
+PASS: release executor -- 15. fresh clone LOG graph validates (no dangling E-###)
+FINAL_RELEASE_EXECUTOR ([], 96)

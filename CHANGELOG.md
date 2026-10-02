@@ -1,6 +1,16 @@
 # Changelog
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 8.0.2 -- 2026-10-02 -- A tree that actually runs (T-1582, T-1593)
+
+The committed tree at the previous tag could not execute: 33 modules failed to import, so every command that touched them was dead on arrival. This release ships the accumulated `tools/` delta as four commits and restores the run.
+
+- Fix the release-executor scenario fixture: its four journal events carried hand-authored operation ids, so `op_id_provenance` classified them as untrusted and the finish gate ignored the VERIFY boundary the harness had just written. The release-executor group goes from 106 PASS / 34 red to 140 PASS / 0 red, and the full scenario suite from 1197 PASS / 34 failures to 1231 PASS, exit 0.
+- Give the sweep's `SYMLINK_EXTERNAL` control a reason that distinguishes a construction-time host-capability refusal (`WinError 1314`, the Windows symlink privilege) from a genuinely missing file or a moved anchor, reusing the same capability test the probe itself uses, so an honest `ProbeUnproven` cannot be misread as a missing artifact.
+- Restore four modules the validator and its tests import at module level but which were never committed.
+- Restamp the T-1589 style-contract subject with the fixture it imports.
+- Verification: core-unit 4,623 checks, 0 red; scenario suite 1,231 PASS; ruff clean on the tracked surface.
+
 ## 8.0.1 -- 2026-09-08 -- Audit release integrity and bounded receipt lookups (T-1298, SRC-025)
 
 - Preserve exact reviewed release identities, crew semantic applicability, and fail-closed audit transport authority.

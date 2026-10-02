@@ -1,0 +1,174 @@
+SAIPEN
+
+CURRENT VERIFY DEADLOCK — DO NOT RERUN THE FULL CORE UNTIL THE WORK GRAPH IS RECONCILED.
+
+CURRENT FACTS
+
+T-1565 is in VERIFY.
+
+Its focused repair is substantially green:
+
+    test_log_tail_quarantine + test_log_stamp_guard
+    post-fix: 22 PASS
+
+The latest full core is:
+
+    ran: 4352
+    red: 75
+    new_red: 73
+
+The 73 new reds are overwhelmingly admission/Claude tests belonging to the
+unfinished T-1563 implementation.
+
+T-1563 is currently blocked on T-1565 and is supposed to resume at BUILD.
+
+Therefore the current graph contains a practical verification cycle:
+
+    T-1563 unfinished bytes
+        -> make full core red
+        -> T-1565 cannot satisfy new_red=0
+        -> T-1563 cannot resume until T-1565 closes
+
+Do not rerun-gamble this state.
+
+============================================================
+1. RECONCILE THE CONTINUATION CLASSIFICATION
+============================================================
+
+SRC-143 contains only:
+
+    "Хорошо, продолжи пожалуйста дальше улучшать логику протокола
+     и закрывать мерзкие дыры до конца, Опус :)"
+
+This introduced no distinct implementation target.
+
+It was semantically a continuation of the already active stabilization goal.
+
+Investigate why it was projected as a new explicit P1 ticket T-1565 that
+preempted T-1563.
+
+Add a protocol regression for:
+
+    active ticket exists
+    + active execution_intent=goal
+    + user says "continue / keep improving / go further"
+    + no new concrete independent target
+    ->
+    CONTINUE CURRENT WORK
+
+not:
+
+    CREATE NEW USER_EXPLICIT TICKET
+    BLOCK CURRENT TICKET
+
+Do not generalize so aggressively that genuinely new explicit requests are lost.
+
+============================================================
+2. BREAK THE T-1563 <-> T-1565 VERIFY CYCLE CANONICALLY
+============================================================
+
+Do not baseline the 73 admission reds.
+
+Do not call them T-1565 regressions.
+
+Do not close T-1565 by ignoring the full-family requirement.
+
+Determine the canonical recovery route for a ticket that was created as a
+continuation but interrupted another ticket whose incomplete bytes contaminate
+its verification family.
+
+Preferred outcome:
+
+- retain T-1565's useful foreign-tail repair and evidence;
+- reclassify/reconcile SRC-143 as continuation rather than an independent
+  preempting task;
+- restore one executable owner for the stabilization chain;
+- resume T-1563 BUILD;
+- finish or honestly terminally disposition the admission work;
+- then rerun the family from a coherent tree;
+- close the foreign-tail repair from current evidence without circular
+  dependency.
+
+Do not discard the T-1565 repair merely because the ticket projection was wrong.
+
+============================================================
+3. PRESERVE THE T-1565 REPAIR
+============================================================
+
+The following work is useful and must survive reconciliation:
+
+- raw `_log_append.py` retired to zero-write behavior;
+- foreign suffix proof is based on checkpointed STATE.last_event;
+- a suffix containing an event above last_event is never cut;
+- prefix must satisfy the complete immutable-ledger contract;
+- original LOG bytes are preserved as evidence;
+- quarantine repair records its own canonical event;
+- recovery exposes `saipen recover quarantine-log-tail`;
+- evidence roots are durable and byte-bound.
+
+Do not weaken these properties while repairing the scheduler graph.
+
+============================================================
+4. IMPROVE THE RED CONTROL QUALITY
+============================================================
+
+The current pre-fix evidence for `test_log_tail_quarantine.py` stops during
+collection because the pre-fix subject lacks the new API.
+
+That is evidence of absence, but it is weaker than a same-oracle behavioral RED.
+
+Where practical, retain a pre-fix carrier that reaches the old runtime and
+demonstrates the measured behavior:
+
+    foreign suffix
+    -> HISTORY_LEDGER_CORRUPT
+    -> recover returns FORENSICALLY_UNRECOVERABLE
+    -> no canonical repair command
+
+and post-fix:
+
+    same damage
+    -> recover names quarantine-log-tail
+    -> repair preserves prefix/original bytes
+    -> validate resumes
+
+Do not require the new function to exist in the pre-fix subject merely to make
+the control collect.
+
+============================================================
+5. T-1563 MUST REMAIN HONEST
+============================================================
+
+Preserve the current security conclusion.
+
+The repaired T-1563 containment has correctly established that:
+
+- ordinary Python cannot mint the old host capability;
+- local forgeable signer paths were removed;
+- same-user child and hook execution do not provide genuine host provenance;
+- no production host-only authority provider currently exists.
+
+Therefore do not restore a local signer merely to make old positive tests green.
+
+The remaining positive admission clauses must be solved by a real separated
+authority boundary or remain explicitly BLOCKED/CAPABILITY_UNAVAILABLE.
+
+No fake HARD claim.
+
+============================================================
+6. REQUIRED NEXT STATE
+============================================================
+
+After graph reconciliation there must be:
+
+- exactly one active executable ticket;
+- no ticket blocked by another ticket whose unfinished bytes are required to
+  make its own VERIFY green;
+- no rebaseline of the 73 reds;
+- T-1565 repair preserved;
+- T-1563 security containment preserved;
+- continuation language no longer creates unnecessary preempting tickets;
+- current conformance restored;
+- final full core eventually returns new_red=0 from a coherent tree.
+
+Do not enter another full-core loop until the dependency cycle is removed.

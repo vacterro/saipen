@@ -1,0 +1,67 @@
+saipen conformance validation starting (tools/validate.py)...
+Project root: V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN (git-worktree)
+Project lineage: lineage-b512942bac884a8691f6c98afcd6ddb9
+PASS: state.schema.json and the engine STATE contract constants agree
+PASS: state.schema.json states nothing the validator ignores (4 keywords enforced natively, 5 delegated, 4 types interpreted)
+PASS: STATE.md schema valid (checked against state.schema.json)
+PASS: .saipen/IDENTITY.md is a canonical portable lineage carrier (lineage-b512942bac884a8691f6c98afcd6ddb9)
+PASS: subSaipen STATE.md shape valid (7 checked, live + shipped library)
+PASS: .saipen/extensions/subs/MANIFEST.md parses strictly (5 entries)
+PASS: extensions/subs/MANIFEST.md parses strictly (4 entries)
+PASS: BOARD.md has all required section headings
+PASS: BOARD.md no duplicate tickets
+PASS: BOARD.md no dangling needs: references
+PASS: BOARD.md acyclic
+PASS: BOARD.md Work supersession relations are terminal, existing and acyclic
+PASS: BOARD.md claimed tickets have their needs: satisfied
+PASS: BOARD.md at most one ## DOING ticket (1 claimed)
+PASS: every DONE closure provenance satisfies its declared closure contract
+PASS: converge clean-HUNT marker present, next_action avoids ADD
+PASS: LOG.md format valid (skeleton, E-### unique + monotonic, parents resolve; 18 segment(s))
+FAIL: improve report [improve-report] -- .saipen\improve\imp-vacterro-saipen-20260919-2\glm-5-3-max-01\saipen_improve_SAIPEN.md: report protocol_fingerprint 'sha256:22391dd1a09265826de311aee843635c0511d6994e1b1d0ab0993217afb8c414' != installed protocol fingerprint 'sha256:bfdb93c355c5a4d19cf45040809c35abe42d9e8c14f1e611c747bff553cd9550'; .saipen\improve\imp-vacterro-saipen-20260919-2\glm-5-3-max-01\saipen_improve_SAIPEN.md: source_head b7f5b51280b8f49c5fedbf7a00aeb6d4f45743ba != current HEAD ec53042; the audit did not reload the current tree -- reload-before-audit and previous-conclusions-not-trusted (red controls 1/2); .saipen\improve\imp-vacterro-saipen-20260919-2\glm-5-3-max-02\saipen_improve_SAIPEN.md: report protocol_fingerprint 'sha256:b9beaec310a147e1b902b95a5669cbda230b0607d7bc5625747426b1bba1de1f' != installed protocol fingerprint 'sha256:bfdb93c355c5a4d19cf45040809c35abe42d9e8c14f1e611c747bff553cd9550'; .saipen\improve\imp-vacterro-saipen-20260919-2\glm-5-3-max-02\saipen_improve_SAIPEN.md: source_tree_fingerprint git-delta-v1:5a2a39fc4f6... != current tree git-delta-v1:fb6c1525bb9... at the same HEAD -- the audited tree differs from the live one; stale audit evidence cannot authorize fresh canonical work without current reproduction (DOGFOOD V, T-618); .saipen\improve\imp-vacterro-saipen-20260919-2\glm-5-3-max-03\saipen_improve_SAIPEN.md: source_tree_fingerprint git-delta-v1:6e6eca11880... != current tree git-delta-v1:fb6c1525bb9... at the same HEAD -- the audited tree differs from the live one; stale audit evidence cannot authorize fresh canonical work without current reproduction (DOGFOOD V, T-618); a finding is rejected, not softened; report_status: complete requires the completion bar; a partial scope can never claim full context (T-555)
+PASS: core sweep linkage valid: every disposition resolves to a real finding/ticket, no unverified or INVALID/ALREADY_FIXED finding produced a ticket, source_reports resolve exactly
+PASS: subsaipen write boundary continuous: no sub artifact targets a main-project canonical file (red control 7)
+PASS: hunt skip marks resolve to real commits on the remote (24 checked)
+PASS: saiui charter integrity verified (references UI.md, no second palette, write ban enforced, fixer contract present, UI- prefix documented, bootstrap includes charters)
+PASS: 6 shipped sai*.md charter(s) declare the full metadata block (8 keys, closed enums)
+PASS: freshness hardening command/cleanup/worker contracts intact
+PASS: T-549 hard barrier blocks the T-551..T-561 improve wave
+PASS: convergence contract intact (13 stages in order, closure bar and post-K ordering rule present)
+PASS: SAIUI SAISENT mission labels findings as hypotheses to verify
+PASS: KNOWLEDGE/ clean
+PASS: KNOWLEDGE/ structured surface valid (4 card(s), 4 active, index fresh)
+PASS: .saipen/USERPERSON.md is a well-formed optional USERPERSON profile
+PASS: README.md badge matches VERSION
+PASS: conformance corpus schema + IDs valid (257 rows, exactly 1..257)
+PASS: CONFORMANCE.md matches the generated corpus index
+PASS: no stray control characters in shipped text (287 files swept)
+PASS: core docs text lint clean (no U+FFFD/split keywords/fence drift)
+PASS: phase enum <-> phases/ docs in sync (16 phases)
+PASS: INDEX.md phase list matches enum + files (16 phases)
+PASS: CORE / IMPROVE / CLI Improve action sets match exactly
+FAIL: runtime manifest names a file git does not track: tools/saipen_engine/host_bootstrap.py -- it exists here and in no clone, so this home ships complete and every checkout of it does not. Commit the file or drop the manifest entry
+FAIL: runtime manifest names a file git does not track: tools/test_host_bootstrap.py -- it exists here and in no clone, so this home ships complete and every checkout of it does not. Commit the file or drop the manifest entry
+FAIL: runtime manifest names a file git does not track: tools/test_instruction_loader_contracts.py -- it exists here and in no clone, so this home ships complete and every checkout of it does not. Commit the file or drop the manifest entry
+FAIL: runtime manifest names a file git does not track: tools/test_src085_conformance_disposition.py -- it exists here and in no clone, so this home ships complete and every checkout of it does not. Commit the file or drop the manifest entry
+FAIL: runtime manifest names a file git does not track: tools/test_src085_improve_run_body.py -- it exists here and in no clone, so this home ships complete and every checkout of it does not. Commit the file or drop the manifest entry
+PASS: adapter cross-references valid (checking saipen/ paths in all 10 adapters)
+PASS: no adapter or injector treats RFC.md as normative (13 checked, RFC stub is redirect-only)
+PASS: 32 locale README badge(s) match VERSION (8.0.1)
+PASS: shortcut callouts aligned across 32 locale sources, 3 mirrors, 33 locale guides, and both root entry docs
+PASS: append targets end on a line boundary (39 checked)
+PASS: lint parity [T-628] -- harness.md and validate.yml agree on `python -m ruff check tools/ tests/` with ruff==0.16.0
+PASS: doc coverage accounted for (424 shipped documents, 24 checked patterns, 34 exempt)
+PASS: release ledger has no unexpected divergence (9 historical exception(s) verified)
+PASS: warn slug ownership verified for 4 tracked slug(s)
+PASS: Golden Default palette integrity verified (21 Wintage tokens, sha256:271ba26cd75948e8)
+WARN [board-soft-cap]: BOARD.md is 82 KB (soft cap ~16 KB), of which 34 KB is closed-ticket text -- that content already lives in LOG.md/CHANGELOG.md, so scrub ## DONE at the next CLEAN (RFC § 1.2, phases/clean.md step 1)
+WARN [log-missing-date]: 125 sealed LOG entr(y/ies) predate the mandatory DATE (earliest .saipen/logs/LOG-001.md:3). Immutable by append-only; new entries are FAILed instead
+WARN [log-soft-cap]: .saipen/LOG.md is 630 lines / 224 KB, past the ~300 line / ~64 KB soft cap -- seal it into .saipen/logs/LOG-<NNN>.md at the next checkpoint (RFC § 1.2, phases/clean.md)
+WARN [producer-package-stale]: .saipen/extensions/subs/saihunt/kitchen/OUTBOX.md [HUNT-014] carries source_head 'b7f5b51280b8f49c5fedbf7a00aeb6d4f45743ba' but current source_head is 'ec53042a9262bc5bd22f2d39f2d08bef103cca3e' -- package is stale and MUST NOT be collected -- reported under `--gate core`, where this producer is not being consumed; it FAILs under `--gate collect:saihunt` and blocks nothing else
+WARN [producer-package-stale]: .saipen/extensions/subs/saihunt/kitchen/OUTBOX.md [HUNT-014] carries source_tree_fingerprint 'git-delta-v1:4c6fd9b3f13a1d7a0b203e00a759dae5eac1474eabb77cb3e39dad9da1953eb9' but the current tree computes 'git-delta-v1:fb6c1525bb91fc7d9d023e0aba5546343a832c60cd40c7e3e5f1d0fc057f46b3' -- the tree changed since the package was produced (same HEAD or not), so it is stale and MUST NOT be collected (PROTOCOL.md § 6, T-543) -- reported under `--gate core`, where this producer is not being consumed; it FAILs under `--gate collect:saihunt` and blocks nothing else
+WARN [producer-package-stale]: ... and 8 more like the above
+WARN [subsaipen-uncollected]: 4 subSaipen OUTBOX entr(y/ies) sit at `status: ready` -- that is a finding waiting on `saipen sub collect`, visible only when someone runs it (extensions/subs/PROTOCOL.md § 4)
+WARN [cross-doc-drift]: cross-doc drift [ahead-stamp-repair] -- CORE.md must say a future-stamped LOG line is restamped to a defensible bound with a DEC naming the original, the replacement, and that the minute is inherited rather than measured. Without it the only sanctioned response is waiting, which keeps a false record and reds every gate until the clock catches up
+WARN [cross-doc-drift]: cross-doc drift [shortcut-memory-ban] -- BOOT.md step 7 must order § 1.10's table read before acting on a shortcut and explicitly state that memory is never a source for it. An agent that believes it knows what a key means answers from recall rather than reading the file
+WARN [cross-doc-drift]: ... and 13 more like the above
+Validation FAILED: 6 problem(s), 29 warning(s)

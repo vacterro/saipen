@@ -1,0 +1,23 @@
+Index: extensions\schemas\state.schema.json
+===================================================================
+--- extensions\schemas\state.schema.json	before
++++ extensions\schemas\state.schema.json	after
+@@ -155,6 +155,18 @@
+         "PREPARE"
+       ],
+       "description": "The phase this state transitioned FROM. REQUIRED on every state except a fresh INIT -- part of RFC В§ 1.2's required set, which is the normative list; this file is its machine-readable mirror, never a second opinion about it. Deliberately NOT in `required`: that array cannot express 'except fresh INIT', and listing it there would hard-fail exactly the bootstrap state RFC В§ 1.2 exempts -- the same reason schema_version is kept out. The conditional is enforced in tools/validate.py instead (FAIL when phase is not INIT, WARN when it is), so absence from `required` here means 'checked elsewhere', never 'optional'. Combined with `phase` to validate transitions against RFC В§ 1.6. A fresh INIT bootstrap may set transition_from: INIT (self-referential, logically 'came from nothing')."
++    },
++    "stop_reason": {
++      "type": "string",
++      "enum": [
++        "EXPLICIT_USER_STOP",
++        "VALVE_REACHED",
++        "GOAL_DONE",
++        "GOAL_BLOCKED",
++        "FATAL_PROTOCOL_INVALID",
++        "NO_WORK_AND_IMPROVE_DISABLED"
++      ],
++      "description": "Orchestration repair (T-1302): explicit stop reason. Present ONLY when the autonomous loop stopped; absence means the loop is still workable. GOAL_BLOCKED is legal only while no workable ticket exists -- tools/validate.py FAILs a false global block."
+     }
+   },
+   "required": [

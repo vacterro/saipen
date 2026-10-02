@@ -1,0 +1,85 @@
+Index: tools\audit_checks.py
+===================================================================
+--- tools\audit_checks.py	before
++++ tools\audit_checks.py	after
+@@ -92,7 +92,7 @@
+ #: ledger is intact did not move when a check arrived with no control (T-1292).
+ #: Raise this in the same change that adds the control, or that records why the
+ #: new check has none.
+-VALIDATOR_FAIL_SITES = 324
++VALIDATOR_FAIL_SITES = 326
+ 
+ #: The honest half. Counting fail sites binds VOLUME, not identity: it cannot
+ #: say WHICH check is uncovered, and a change that adds one check while
+@@ -1298,6 +1298,35 @@
+     return text
+ 
+ 
++def force_stop_reason_goal_blocked(text: str) -> str:
++    """T-1302: stamp `stop_reason: GOAL_BLOCKED` onto STATE whatever the live
++    state holds. A sub_line would go dead the moment the field is absent (it
++    is new), so this inserts the line before the closing frontmatter `---`
++    and replaces it when already present."""
++    if re.search(r"^stop_reason:\s*GOAL_BLOCKED$", text, re.MULTILINE):
++        return text
++    if re.search(r"^stop_reason:", text, re.MULTILINE):
++        return re.sub(r"^stop_reason:.*$", "stop_reason: GOAL_BLOCKED", text, flags=re.MULTILINE)
++    return text.replace("\n---", "\nstop_reason: GOAL_BLOCKED\n---", 1)
++
++
++def strip_verify_add_inherited_closure(text: str) -> str:
++    """T-1302: turn the first DONE ticket into an evidence-less
++    INHERITED_VERIFIED closeout -- drop its | verify: evidence and stamp the
++    verification-only closure mode that requires it."""
++    lines = text.splitlines()
++    section = ""
++    for index, line in enumerate(lines):
++        if line.startswith("## "):
++            section = line
++            continue
++        if section == "## DONE" and line.startswith("- [x] T-") and " | verify:" in line:
++            stripped = re.sub(r" \| verify:[^|]*", "", line)
++            lines[index] = stripped + " | closure_mode: inherited_verified"
++            return "\n".join(lines) + "\n"
++    return text
++
++
+ def inject_unclaimed_doing(text: str) -> str:
+     """T-573: put an unclaimed ticket in ## DOING whatever the live board holds.
+ 
+@@ -2012,13 +2041,23 @@
+         "tools/run_scenarios.py",
+         lambda t: t.replace("\n# ", "\n# \x01", 1),
+         "contains control character U+0001",
+-    ),
+-    (
+-        "next_action has no prefix",
++    ),    ("next_action has no prefix",
+         STATE,
+         sub_line("next_action", '"finish the thing"'),
+         "does not start with",
+     ),
++    (
++        "stop_reason GOAL_BLOCKED while a workable ticket exists",
++        STATE,
++        force_stop_reason_goal_blocked,
++        "stop_reason: GOAL_BLOCKED while",
++    ),
++    (
++        "INHERITED_VERIFIED closure without verification evidence",
++        BOARD,
++        strip_verify_add_inherited_closure,
++        "INHERITED_VERIFIED closure(s) carry no | verify: evidence",
++    ),
+     # The category bounds what KIND of stop a WAIT is; nothing bounded what
+     # followed it, so `next_action` became a scratchpad and the next agent
+     # read the notes as a queue -- live on this repository, where a `user
+@@ -2934,7 +2973,7 @@
+     (
+         "SKILL metadata drops a shortcut trigger",
+         "saipen/SKILL.md",
+-        replace("cc, ccc, st, sss, dd", "cc, ccc, st, dd"),
++        replace("cc, ccc, st, sss, dd", "cc, ccc, st, dd"),
+         "metadata misses registry shortcut trigger",
+     ),
+     (

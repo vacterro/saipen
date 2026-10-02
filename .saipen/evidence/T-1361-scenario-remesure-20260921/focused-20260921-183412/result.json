@@ -1,0 +1,32 @@
+{
+  "command": "focused.py run_release_executor_probes",
+  "head": "d97abdc097db432bafe2316b1e3577e44cd9cc4c",
+  "harness_sha256": "85251f7b86a7133c06efe6178ea27df27c17983447f362bc6cfb593e68f24d52",
+  "results": [
+    {
+      "function": "run_release_executor_probes",
+      "elapsed": 569.045999999973,
+      "checked": 96,
+      "skipped": 0,
+      "failures": [
+        "release executor 8a. full release returns RELEASED: ok=False code=RELEASE_FAILED detail=source receipt blocks ship: {'ok': False, 'code': 'STALE_PLAN', 'detail': 'release scope tree identity for T-9000 differs from the live tree', 'work': 'T-9000', 'scope_status': 'STALE_SCOPE'}",
+        "release executor 8b. closure B is a separate non-empty commit after A: A= B=",
+        "release executor 8c. remote branch tip == closure commit (non-empty): remote=0d6c6f71c2bb closure=",
+        "release executor 8d. remote tag^{commit} == closure commit (non-empty): remote tag=(none)",
+        "release executor 8e. local tag^{commit} == closure commit (non-empty): local tag=v8.0.2^{comm closure=",
+        "release executor 8f. tag is created AFTER the closure is published: stages=[]",
+        "release executor 8g. B.parent == A: B^=^ A=",
+        "release executor 8i. fresh clone carries the exact reviewed source change: source change missing in fresh clone",
+        "release executor 8j. fresh clone sees STATE DONE / task none: ",
+        "release executor 8k. fresh clone sees ticket DONE: ",
+        "release executor 8l. fresh clone LOG carries truthful release evidence: release evidence missing in cloned LOG",
+        "release executor 8m. scope record reaches the fresh clone: scope record missing in clone",
+        "release executor 8p. no owned work remains dirty (only the foreign untracked): status=' M .saipen/LOG.md\\n M .saipen/STATE.md\\n M .saipen/saitranslate/kitchen/ar/README_AR.md\\n M .saipen/saitranslate/kitchen/bg/README_BG.md\\n M .saipen/saitranslate/kitchen/cs/README_CS.md\\n M .saipen/saitranslate/kitchen/da/README_DA.md\\n M .saipen/saitranslate/kitchen/de/README_DE.md\\n M .saipen/saitranslate/kitchen/ded/README_DED.md\\n M .saipen/saitranslate/kitchen/el/README_EL.md\\n M .saipen/saitranslate/kitchen/es/README_ES.md\\n M .saipen/saitranslate/kitchen/et/README_ET.md\\n M .saipen/saitranslate/kitchen/fi/README_FI.md\\n M .saipen/saitranslate/kitchen/fr/README_FR.md\\n M .saipen/saitranslate/kitchen/he/README_HE.md\\n M .saipen/saitranslate/kitchen/hi/README_HI.md\\n M .saipen/saitranslate/kitchen/hr/README_HR.md\\n M .saipen/saitranslate/kitchen/hu/README_HU.md\\n M .saipen/saitranslate/kitchen/id/README_ID.md\\n M .saipen/saitranslate/kitchen/it/README_IT.md\\n M .saipen/saitranslate/kitchen/ja/README_JA.md\\n M .saipen/saitranslate/kitchen/ko/README_KO.md\\n M .saipen/saitranslate/kitchen/nl/README_NL.md\\n M .saipen/saitranslate/kitchen/no/README_NO.md\\n M .saipen/saitranslate/kitchen/pl/README_PL.md\\n M .saipen/saitranslate/kitchen/pt/README_PT.md\\n M .saipen/saitranslate/kitchen/ro/README_RO.md\\n M .saipen/saitranslate/kitchen/ru/README_RU.md\\n M .saipen/saitranslate/kitchen/sk/README_SK.md\\n M .saipen/saitranslate/kitchen/sv/README_SV.md\\n M .saipen/saitranslate/kitchen/th/README_TH.md\\n M .saipen/saitranslate/kitchen/tr/README_TR.md\\n M .saipen/saitranslate/kitchen/uk/README_UK.md\\n M .saipen/saitranslate/kitchen/vi/README_VI.md\\n M .saipen/saitranslate/kitchen/zh/README_ZH.md\\n M CHANGELOG.md\\n M README.ded.md\\n M README.ee.md\\n M README.ja.md\\n M README.md\\n M VERSION\\n M tools/saipen_engine/release_contract.py\\n?? .saipen/kitchen/release_scope/T-9000.json\\n?? tools/foreign_file.py\\n'",
+        "release executor 8q. scope record is committed (no tracked dirt): scope record untracked",
+        "release executor 8r. retry recognizes ALREADY_APPLIED from full evidence: code=RELEASE_FAILED already_applied=None",
+        "release executor 9b. fresh-clone continuation publishes only the missing tag: code=RELEASE_FAILED detail=source receipt blocks ship: {'ok': False, 'code': 'STALE_PLAN', 'detail': 'reviewed source_head 1119624c94aa != current HEAD e64fba63ab18; the reviewed scope is stale, re-record it', 'work': 'T-9000', 'scope_status': 'STALE_SCOPE'}",
+        "release executor 9b. tag now matches the closure tip (non-empty): tag=(none) tip=e64fba63ab18"
+      ]
+    }
+  ]
+}

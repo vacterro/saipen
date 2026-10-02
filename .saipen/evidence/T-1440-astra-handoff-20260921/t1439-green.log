@@ -1,0 +1,33 @@
+test_classifier_failure_is_unavailable_not_an_empty_complete_set (tools.test_conformance_repair_boundary.RealValidatorBoundaryTests.test_classifier_failure_is_unavailable_not_an_empty_complete_set) ... ok
+test_real_source_and_flat_cli_preserve_findings_and_stop_the_loop (tools.test_conformance_repair_boundary.RealValidatorBoundaryTests.test_real_source_and_flat_cli_preserve_findings_and_stop_the_loop) ... 
+  test_real_source_and_flat_cli_preserve_findings_and_stop_the_loop (tools.test_conformance_repair_boundary.RealValidatorBoundaryTests.test_real_source_and_flat_cli_preserve_findings_and_stop_the_loop) (flatten=False) ... FAIL
+  test_real_source_and_flat_cli_preserve_findings_and_stop_the_loop (tools.test_conformance_repair_boundary.RealValidatorBoundaryTests.test_real_source_and_flat_cli_preserve_findings_and_stop_the_loop) (flatten=True) ... FAIL
+test_classified_credentials_are_redacted_in_receipt (tools.test_conformance_repair_boundary.RepairBoundaryTests.test_classified_credentials_are_redacted_in_receipt) ... ok
+test_current_fail_without_registered_repair_has_terminal_diagnosis (tools.test_conformance_repair_boundary.RepairBoundaryTests.test_current_fail_without_registered_repair_has_terminal_diagnosis) ... ok
+test_every_blocking_record_survives_duplicate_family_keys (tools.test_conformance_repair_boundary.RepairBoundaryTests.test_every_blocking_record_survives_duplicate_family_keys) ... ok
+test_registered_repair_remains_executable_but_validate_is_not_a_repair (tools.test_conformance_repair_boundary.RepairBoundaryTests.test_registered_repair_remains_executable_but_validate_is_not_a_repair) ... ok
+test_stale_fail_refreshes_instead_of_executing_its_old_repair (tools.test_conformance_repair_boundary.RepairBoundaryTests.test_stale_fail_refreshes_instead_of_executing_its_old_repair) ... ok
+test_tampered_blocking_findings_cannot_be_current_evidence (tools.test_conformance_repair_boundary.RepairBoundaryTests.test_tampered_blocking_findings_cannot_be_current_evidence) ... ok
+
+======================================================================
+FAIL: test_real_source_and_flat_cli_preserve_findings_and_stop_the_loop (tools.test_conformance_repair_boundary.RealValidatorBoundaryTests.test_real_source_and_flat_cli_preserve_findings_and_stop_the_loop) (flatten=False)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_conformance_repair_boundary.py", line 164, in test_real_source_and_flat_cli_preserve_findings_and_stop_the_loop
+    self.assertEqual(before, {name: (root / ".saipen" / name).read_bytes()
+AssertionError: {'STA[169 chars]ent: 2\r\nstyle_contract: ded-4ae736e4\r\nsaip[368 chars]r\n'} != {'STA[169 chars]ent: 3\r\nstyle_contract: ded-4ae736e4\r\nsaip[573 chars]r\n'}
+Diff is 1839 characters long. Set self.maxDiff to None to see it.
+
+======================================================================
+FAIL: test_real_source_and_flat_cli_preserve_findings_and_stop_the_loop (tools.test_conformance_repair_boundary.RealValidatorBoundaryTests.test_real_source_and_flat_cli_preserve_findings_and_stop_the_loop) (flatten=True)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_conformance_repair_boundary.py", line 164, in test_real_source_and_flat_cli_preserve_findings_and_stop_the_loop
+    self.assertEqual(before, {name: (root / ".saipen" / name).read_bytes()
+AssertionError: {'STA[169 chars]ent: 2\r\nstyle_contract: ded-4ae736e4\r\nsaip[366 chars]r\n'} != {'STA[169 chars]ent: 3\r\nstyle_contract: ded-4ae736e4\r\nsaip[571 chars]r\n'}
+Diff is 1827 characters long. Set self.maxDiff to None to see it.
+
+----------------------------------------------------------------------
+Ran 8 tests in 13.659s
+
+FAILED (failures=2)

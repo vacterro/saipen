@@ -1,0 +1,22 @@
+{
+  "subject": "tools/audit_checks.py",
+  "oracle": "tools/test_t1585_amnesty_control.py",
+  "before_sha256": "d25e83735980e23f5050a6df351b52869a64a0f68a1577cf07c064d1db6c0a17",
+  "after_sha256": "86d1287288fde97c29fd5157b96d2ca1cedfe536c44cffe7806ffd53fecf2649",
+  "oracle_before_sha256": null,
+  "oracle_sha256": "5656a05f2e490948ec39164f201c1396eb4e63a1dc5146ab2d5bb156a0575139",
+  "runs": {
+    "before": {
+      "ran": 6,
+      "failures": 5,
+      "errors": 0,
+      "ok": false
+    },
+    "candidate": {
+      "ran": 6,
+      "failures": 0,
+      "errors": 0,
+      "ok": true
+    }
+  }
+}

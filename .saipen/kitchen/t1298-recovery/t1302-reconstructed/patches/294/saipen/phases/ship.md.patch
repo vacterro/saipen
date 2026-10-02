@@ -1,0 +1,49 @@
+Index: saipen\phases\ship.md
+===================================================================
+--- saipen\phases\ship.md	before
++++ saipen\phases\ship.md	after
+@@ -30,10 +30,43 @@
+ but publishing is disabled, or `no git` only when git cannot answer. This is
+ not a failure. Write the digest, then finish into DONE.
+ 
++## Closure intent: determine BEFORE demanding a Git scope
++
++Ticket closure (`saipen ticket done --closure-mode ...`) is NOT the same
++operation as Git publication. The exact per-ticket diff requirement applies
++only to `own_patch`. Decide the mode first; a verification-only or cohort
++ticket must never BLOCK solely because its personal diff cannot be isolated
++(orchestration repair, T-1302 / FastPrompter regression):
++
++- `own_patch` вЂ” this ticket owns an attributable implementation delta. Run
++  the full reviewed-scope release path below unchanged: exact path
++  attribution, explicit staging, foreign bytes preserved, ship gate,
++  commit/tag/push when publishing is enabled.
++- `inherited_verified` вЂ” this ticket adds NO implementation delta; it
++  independently verified implementation whose durable publication authority
++  already exists elsewhere. Record `BUILD` no-delta evidence, `VERIFY` PASS,
++  `REVIEW` PASS, then close with
++  `saipen ticket done <T-###> --closure-mode inherited_verified
++  --implementation-source <T-###|SRC-###|release:<id>>`. Do NOT demand a
++  synthetic per-ticket Git diff, do NOT stage unrelated inherited files, do
++  NOT create an empty release commit. Evidence closure, not a fake patch.
++- `cohort` вЂ” this ticket owns part of a shared verified batch (overlapping
++  files such as one accumulated `main.py`). Members never isolate fictional
++  per-ticket blobs; each closes with
++  `saipen ticket done <T-###> --closure-mode cohort --closure-cohort C-###
++  --paths <shared paths>`, which binds the live bytes into the durable
++  cohort registry. Publication belongs to the cohort authority:
++  `saipen cohort ship C-###` freezes ONE batch scope (each shared path
++  once), publishes through the exact release-integrity machinery, and flips
++  the registry record to shipped with the release identity. While a cohort
++  is pending, a member is evidence-complete but NOT published.
++
+ ## Procedure
+ 
+ 0. Confirm every shipped work unit has a ticket and the active ticket remains
+-   in `## DOING`; CORE.md В§1.2 owns board freshness and attribution.
++   in `## DOING`; CORE.md В§1.2 owns board freshness and attribution. For a
++   cohort/crew terminal publication the local Core phase is DONE / task none
++   and the batch authority (cohort registry) is the active surface.
+ 1. Update README release-facing material and choose the semantic version bump.
+ 2. Make the release identity consistent before push:
+    - `VERSION` is canonical;

@@ -1,0 +1,13 @@
+F
+======================================================================
+FAIL: test_first_direct_caller_without_token_never_creates_lineage (tools.test_conformance_lineage.ConformanceLineageTests.test_first_direct_caller_without_token_never_creates_lineage)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_conformance_lineage.py", line 107, in test_first_direct_caller_without_token_never_creates_lineage
+    self.assertFalse(advanced)
+AssertionError: True is not false
+
+----------------------------------------------------------------------
+Ran 1 test in 0.029s
+
+FAILED (failures=1)

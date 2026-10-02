@@ -1,0 +1,82 @@
+{
+  "fixture": "V:\\_TEMP_\\t1317-opencode-native-4bb75b46",
+  "exit": 0,
+  "requests": [
+    {
+      "path": "/v1/chat/completions",
+      "tools": [],
+      "prior_tools": []
+    },
+    {
+      "path": "/v1/chat/completions",
+      "tools": [
+        "bash",
+        "edit",
+        "glob",
+        "grep",
+        "read",
+        "skill",
+        "task",
+        "todowrite",
+        "webfetch",
+        "websearch",
+        "write"
+      ],
+      "prior_tools": []
+    },
+    {
+      "path": "/v1/chat/completions",
+      "tools": [
+        "bash",
+        "edit",
+        "glob",
+        "grep",
+        "read",
+        "skill",
+        "task",
+        "todowrite",
+        "webfetch",
+        "websearch",
+        "write"
+      ],
+      "prior_tools": [
+        {
+          "role": "tool",
+          "tool_call_id": "call_smoke_0",
+          "content": "Wrote file successfully."
+        }
+      ]
+    },
+    {
+      "path": "/v1/chat/completions",
+      "tools": [
+        "bash",
+        "edit",
+        "glob",
+        "grep",
+        "read",
+        "skill",
+        "task",
+        "todowrite",
+        "webfetch",
+        "websearch",
+        "write"
+      ],
+      "prior_tools": [
+        {
+          "role": "tool",
+          "tool_call_id": "call_smoke_0",
+          "content": "Wrote file successfully."
+        },
+        {
+          "role": "tool",
+          "tool_call_id": "call_smoke_1",
+          "content": "SAIPEN_GUARD_REFUSAL: PROTECTED_CANONICAL_NAMESPACE: the saipen guard refused tool 'write'; the host tool did not execute"
+        }
+      ]
+    }
+  ],
+  "factory_probe": true,
+  "allowed_effect": true,
+  "protected_bytes_unchanged": true
+}

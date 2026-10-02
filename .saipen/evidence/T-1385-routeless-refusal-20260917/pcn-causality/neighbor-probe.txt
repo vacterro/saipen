@@ -1,0 +1,5 @@
+write admitted=True  code=ADMITTED action=write route=None :: write V:\_TEMP_\t1363-rlg6a62_\.saipen\kitchen\review_check.py
+bash  admitted=False code=PROTECTED_CANONICAL_NAMESPACE action=shell route=saipen next --json :: python "V:\_TEMP_\t1363-rlg6a62_\.saipen\kitchen\review_check.py"
+bash  admitted=False code=PROTECTED_CANONICAL_NAMESPACE action=shell route=saipen next --json :: Remove-Item -LiteralPath "V:\_TEMP_\t1363-rlg6a62_\.saipen\kitchen\review_check.py"
+bash  admitted=False code=PROTECTED_CANONICAL_NAMESPACE action=shell route=saipen next --json :: saipen checkpoint RUN T-1 'src/app.py and .saipen memory'
+bash  admitted=True  code=ADMITTED action=shell route=None :: saipen checkpoint RUN T-1 'diff limited to src/app.py'

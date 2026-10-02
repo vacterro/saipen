@@ -1,0 +1,74 @@
+test_classified_credentials_are_redacted_in_receipt (tools.test_conformance_repair_boundary.RepairBoundaryTests.test_classified_credentials_are_redacted_in_receipt) ... ERROR
+test_current_fail_without_registered_repair_has_terminal_diagnosis (tools.test_conformance_repair_boundary.RepairBoundaryTests.test_current_fail_without_registered_repair_has_terminal_diagnosis) ... FAIL
+test_every_blocking_record_survives_duplicate_family_keys (tools.test_conformance_repair_boundary.RepairBoundaryTests.test_every_blocking_record_survives_duplicate_family_keys) ... ERROR
+test_registered_repair_remains_executable_but_validate_is_not_a_repair (tools.test_conformance_repair_boundary.RepairBoundaryTests.test_registered_repair_remains_executable_but_validate_is_not_a_repair) ... 
+  test_registered_repair_remains_executable_but_validate_is_not_a_repair (tools.test_conformance_repair_boundary.RepairBoundaryTests.test_registered_repair_remains_executable_but_validate_is_not_a_repair) (commands=['saipen validate']) ... FAIL
+  test_registered_repair_remains_executable_but_validate_is_not_a_repair (tools.test_conformance_repair_boundary.RepairBoundaryTests.test_registered_repair_remains_executable_but_validate_is_not_a_repair) (commands=['saipen invented-repair']) ... FAIL
+test_stale_fail_refreshes_instead_of_executing_its_old_repair (tools.test_conformance_repair_boundary.RepairBoundaryTests.test_stale_fail_refreshes_instead_of_executing_its_old_repair) ... FAIL
+test_tampered_blocking_findings_cannot_be_current_evidence (tools.test_conformance_repair_boundary.RepairBoundaryTests.test_tampered_blocking_findings_cannot_be_current_evidence) ... ERROR
+
+======================================================================
+ERROR: test_classified_credentials_are_redacted_in_receipt (tools.test_conformance_repair_boundary.RepairBoundaryTests.test_classified_credentials_are_redacted_in_receipt)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_conformance_repair_boundary.py", line 113, in test_classified_credentials_are_redacted_in_receipt
+    receipt = C.generate_conformance_receipt(root, gate="core", exit_code=1,
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: generate_conformance_receipt() got an unexpected keyword argument 'blocking_findings'
+
+======================================================================
+ERROR: test_every_blocking_record_survives_duplicate_family_keys (tools.test_conformance_repair_boundary.RepairBoundaryTests.test_every_blocking_record_survives_duplicate_family_keys)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_conformance_repair_boundary.py", line 64, in test_every_blocking_record_survives_duplicate_family_keys
+    receipt = C.generate_conformance_receipt(
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: generate_conformance_receipt() got an unexpected keyword argument 'blocking_findings'
+
+======================================================================
+ERROR: test_tampered_blocking_findings_cannot_be_current_evidence (tools.test_conformance_repair_boundary.RepairBoundaryTests.test_tampered_blocking_findings_cannot_be_current_evidence)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_conformance_repair_boundary.py", line 100, in test_tampered_blocking_findings_cannot_be_current_evidence
+    C.generate_conformance_receipt(root, gate="core", exit_code=1,
+TypeError: generate_conformance_receipt() got an unexpected keyword argument 'blocking_findings'
+
+======================================================================
+FAIL: test_current_fail_without_registered_repair_has_terminal_diagnosis (tools.test_conformance_repair_boundary.RepairBoundaryTests.test_current_fail_without_registered_repair_has_terminal_diagnosis)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_conformance_repair_boundary.py", line 44, in test_current_fail_without_registered_repair_has_terminal_diagnosis
+    self.assertIsNone(decision["remediation_command"])
+AssertionError: 'saipen validate' is not None
+
+======================================================================
+FAIL: test_registered_repair_remains_executable_but_validate_is_not_a_repair (tools.test_conformance_repair_boundary.RepairBoundaryTests.test_registered_repair_remains_executable_but_validate_is_not_a_repair) (commands=['saipen validate'])
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_conformance_repair_boundary.py", line 96, in test_registered_repair_remains_executable_but_validate_is_not_a_repair
+    self.assertEqual(C.conformance_decision(root)["remediation_command"], expected)
+AssertionError: 'saipen validate' != None
+
+======================================================================
+FAIL: test_registered_repair_remains_executable_but_validate_is_not_a_repair (tools.test_conformance_repair_boundary.RepairBoundaryTests.test_registered_repair_remains_executable_but_validate_is_not_a_repair) (commands=['saipen invented-repair'])
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_conformance_repair_boundary.py", line 96, in test_registered_repair_remains_executable_but_validate_is_not_a_repair
+    self.assertEqual(C.conformance_decision(root)["remediation_command"], expected)
+AssertionError: 'saipen invented-repair' != None
+
+======================================================================
+FAIL: test_stale_fail_refreshes_instead_of_executing_its_old_repair (tools.test_conformance_repair_boundary.RepairBoundaryTests.test_stale_fail_refreshes_instead_of_executing_its_old_repair)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_conformance_repair_boundary.py", line 82, in test_stale_fail_refreshes_instead_of_executing_its_old_repair
+    self.assertEqual(decision["remediation_command"], "saipen validate")
+AssertionError: 'saipen work reverify T-123' != 'saipen validate'
+- saipen work reverify T-123
++ saipen validate
+
+
+----------------------------------------------------------------------
+Ran 6 tests in 2.527s
+
+FAILED (failures=4, errors=3)

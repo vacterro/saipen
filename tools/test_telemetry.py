@@ -218,6 +218,68 @@ class HonestyTests(TelemetryFixture):
         self.assertEqual(payload["code"], "TELEMETRY_UNAVAILABLE")
 
 
+class CliVerbTests(TelemetryFixture):
+    """`saipen stats` is the only public surface of the module, so the verb is
+    pinned here rather than trusted: a bad argument refuses with a route, and
+    asking the question still writes nothing."""
+
+    def _run(self, *args):
+        import contextlib
+        import io
+
+        import saipen as cli
+
+        out = io.StringIO()
+        with contextlib.redirect_stdout(out):
+            rc = cli._stats(self.root, list(args), True)
+        return rc, out.getvalue()
+
+    def test_the_verb_is_registered_as_a_read_only_diagnostic(self):
+        protocol = TOOLS.parent / "saipen"
+        registry = json.loads((protocol / "REGISTRY.json").read_text(encoding="utf-8"))
+        effects = json.loads((protocol / "COMMAND_EFFECTS.json").read_text(encoding="utf-8"))
+        self.assertIn("stats", registry["commands"]["saipen"])
+        self.assertEqual(effects["verbs"]["stats"], "DIAGNOSTIC")
+
+    def test_json_carries_the_current_work_and_the_authority_line(self):
+        rc, raw = self._run()
+        payload = json.loads(raw)
+        self.assertEqual(rc, 0)
+        self.assertEqual((payload["code"], payload["current"]["task"]), ("STATS", "T-8"))
+        self.assertIn("never decides", payload["authority"])
+
+    def test_work_narrows_the_readout_to_one_ticket(self):
+        payload = json.loads(self._run("--work", "T-7")[1])
+        self.assertEqual(payload["work"]["ticket"], "T-7")
+        self.assertNotIn("days", payload)
+
+    def test_a_surplus_argument_refuses_with_a_route(self):
+        rc, raw = self._run("--fast")
+        payload = json.loads(raw)
+        self.assertEqual(rc, 2)
+        self.assertEqual(payload["code"], "VALIDATION_FAILED")
+        # CORE-002: a refusal that names no executable move explains nothing.
+        self.assertEqual(payload["canonical_next_command"], "saipen stats")
+
+    def test_bad_argument_values_refuse_rather_than_default(self):
+        for args in (("--days",), ("--days", "x"), ("--days", "0"), ("--days", "999"), ("--work",)):
+            rc, raw = self._run(*args)
+            self.assertEqual(rc, 2, args)
+            self.assertEqual(json.loads(raw)["code"], "VALIDATION_FAILED", args)
+
+    def test_the_verb_writes_nothing(self):
+        before = self.digest()
+        self._run()
+        self._run("--work", "T-7", "--days", "2")
+        self.assertEqual(self.digest(), before)
+
+    def test_an_unreadable_history_exits_two_not_raises(self):
+        (self.root / ".saipen" / "LOG.md").unlink()
+        rc, raw = self._run()
+        self.assertEqual(rc, 2)
+        self.assertEqual(json.loads(raw)["code"], "TELEMETRY_UNAVAILABLE")
+
+
 class NoAuthorityTests(unittest.TestCase):
     def test_no_engine_module_decides_anything_from_telemetry(self):
         """Time observes: nothing in the engine imports it to decide."""

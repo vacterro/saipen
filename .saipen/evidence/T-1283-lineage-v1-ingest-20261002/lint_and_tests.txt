@@ -1,0 +1,28 @@
+All checks passed!
+RUFF_EXIT=0
+AC-03 by COUNT, never by timing: growing the population must not grow ... ok
+test_bounded_lookup_equals_the_strict_scan (tools.test_t1283_lineage_legacy_ingest.TestBoundedLookup.test_bounded_lookup_equals_the_strict_scan) ... ok
+test_exact_bytes_stay_authoritative (tools.test_t1283_lineage_legacy_ingest.TestBoundedLookup.test_exact_bytes_stay_authoritative)
+AC-05: a receipt whose BYTES no longer match its member digest is ... ok
+test_foreign_object_is_refused_fail_closed (tools.test_t1283_lineage_legacy_ingest.TestBoundedLookup.test_foreign_object_is_refused_fail_closed)
+AC-06 red control: the lineage must not seed from a population it ... ok
+test_out_of_band_sibling_is_degraded_never_laundered (tools.test_t1283_lineage_legacy_ingest.TestBoundedLookup.test_out_of_band_sibling_is_degraded_never_laundered)
+AC-06 red control: an out-of-band file moves the directory mtime, so ... ok
+test_tampered_referenced_generation_degrades (tools.test_t1283_lineage_legacy_ingest.TestBoundedLookup.test_tampered_referenced_generation_degrades)
+AC-06 red control: the generation the locator actually references is ... ok
+test_append_over_a_v1_population_does_not_raise (tools.test_t1283_lineage_legacy_ingest.TestLegacyIngest.test_append_over_a_v1_population_does_not_raise)
+RED against pre-fix code: the KeyError escaped generate_conformance_receipt ... ok
+test_deep_audit_ingests_a_v1_receipt (tools.test_t1283_lineage_legacy_ingest.TestLegacyIngest.test_deep_audit_ingests_a_v1_receipt)
+RED against pre-fix code: validate_lineage_deep raised KeyError too. ... ok
+test_deep_rebuild_ingests_a_v1_receipt (tools.test_t1283_lineage_legacy_ingest.TestLegacyIngest.test_deep_rebuild_ingests_a_v1_receipt)
+RED against pre-fix code: raised KeyError: 'receipt_id'. ... ok
+test_legacy_identity_is_content_addressed_and_stable (tools.test_t1283_lineage_legacy_ingest.TestLegacyIngest.test_legacy_identity_is_content_addressed_and_stable)
+The derived id must be deterministic, and must not collide with an ... ok
+test_v1_receipt_is_accepted_by_the_canonical_scan (tools.test_t1283_lineage_legacy_ingest.TestLegacyIngest.test_v1_receipt_is_accepted_by_the_canonical_scan)
+The premise. If this fails the engine no longer admits v1 receipts and ... ok
+
+----------------------------------------------------------------------
+Ran 12 tests in 1.220s
+
+OK
+TEST_EXIT=0

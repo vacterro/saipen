@@ -1,0 +1,6 @@
+test_every_declared_load_budget_is_measured_from_registry (tools.test_protocol_registry.ProtocolRegistryTests.test_every_declared_load_budget_is_measured_from_registry) ... ok
+
+----------------------------------------------------------------------
+Ran 1 test in 0.006s
+
+OK

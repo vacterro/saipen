@@ -1,0 +1,5 @@
+PASS: a real root `nul` entry is excluded from audit snapshots
+PASS: release-ledger clean/new-tag/new-changelog/stale-baseline controls behave distinctly
+FAIL: warn-slug ownership probe -- control copy with calibrated warn_slugs is not clean: out, so a badge bump can never cause this
+WARN [release-ledger]: git tag list unavailable or empty -- the release ledger has only its CHANGELOG half, so the phantom-version check is skipped rather than run against incomplete data (git tag -l exited 128)
+Validation FAILED: 3 problem(s), 14 warning(s)

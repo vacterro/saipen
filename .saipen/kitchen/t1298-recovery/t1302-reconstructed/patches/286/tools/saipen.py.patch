@@ -1,0 +1,261 @@
+Index: tools\saipen.py
+===================================================================
+--- tools\saipen.py	before
++++ tools\saipen.py	after
+@@ -5466,7 +5466,8 @@
+                         "ok": False,
+                         "code": "VALIDATION_FAILED",
+                         "detail": "ticket add <PRIORITY> <description> "
+-                        "[--verify <text>] [--needs T-X,T-Y]",
++                        "[--verify <text>] [--needs T-X,T-Y] "
++                        "[--user] [--receipt <SRC-###>]",
+                     },
+                     as_json,
+                 )
+@@ -5475,6 +5476,8 @@
+             needs_arg = []
+             has_verify = False
+             has_needs = False
++            user_explicit = False
++            receipt_arg = None
+ 
+             if "--" in rest:
+                 dd_idx = rest.index("--")
+@@ -5535,6 +5538,45 @@
+                     needs_arg = [n.strip() for n in pre_dd[idx + 1].split(",") if n.strip()]
+                     has_needs = True
+                     idx += 2
++                elif pre_dd[idx] == "--user":
++                    # Orchestration repair (T-1302): `--user` marks a ticket
++                    # created from an explicit user request, arming the
++                    # scheduler's user-explicit precedence signal.
++                    if user_explicit:
++                        _emit(
++                            {
++                                "ok": False,
++                                "code": "VALIDATION_FAILED",
++                                "detail": "duplicate --user option",
++                            },
++                            as_json,
++                        )
++                        return 2
++                    user_explicit = True
++                    idx += 1
++                elif pre_dd[idx] == "--receipt":
++                    if receipt_arg is not None:
++                        _emit(
++                            {
++                                "ok": False,
++                                "code": "VALIDATION_FAILED",
++                                "detail": "duplicate --receipt option",
++                            },
++                            as_json,
++                        )
++                        return 2
++                    if idx + 1 >= len(pre_dd):
++                        _emit(
++                            {
++                                "ok": False,
++                                "code": "VALIDATION_FAILED",
++                                "detail": "dangling --receipt option",
++                            },
++                            as_json,
++                        )
++                        return 2
++                    receipt_arg = pre_dd[idx + 1]
++                    idx += 2
+                 elif pre_dd[idx].startswith("--"):
+                     _emit(
+                         {
+@@ -5574,6 +5616,8 @@
+                 needs_arg,
+                 verify_arg,
+                 dry_run=dry_run,
++                user_explicit=user_explicit,
++                receipt_id=receipt_arg,
+             )
+             _emit(result.to_dict(), as_json)
+             return 0 if result.ok else 1
+@@ -5593,17 +5637,56 @@
+                     {
+                         "ok": False,
+                         "code": "VALIDATION_FAILED",
+-                        "detail": f"ticket done takes <T-###>; surplus: {' '.join(rest[1:])}",
++                        "detail": f"ticket done takes <T-###> [--closure-mode <mode>] "
++                        f"[--closure-cohort <C-###>]; surplus: {' '.join(rest[1:])}",
+                     },
+                     as_json,
+                 )
+                 return 2
++            # Orchestration repair (T-1302): closure provenance on `done`.
++            done_mode = "own_patch"
++            done_cohort = None
++            _idx = 1
++            while _idx < len(rest):
++                if rest[_idx] == "--closure-mode" and _idx + 1 < len(rest):
++                    done_mode = rest[_idx + 1]
++                    _idx += 2
++                elif rest[_idx] == "--closure-cohort" and _idx + 1 < len(rest):
++                    done_cohort = rest[_idx + 1]
++                    _idx += 2
++                elif rest[_idx].startswith("--"):
++                    _emit(
++                        {
++                            "ok": False,
++                            "code": "VALIDATION_FAILED",
++                            "detail": f"unknown option {rest[_idx]}",
++                        },
++                        as_json,
++                    )
++                    return 2
++                else:
++                    _emit(
++                        {
++                            "ok": False,
++                            "code": "VALIDATION_FAILED",
++                            "detail": f"ticket done takes <T-###>; surplus: {rest[_idx]}",
++                        },
++                        as_json,
++                    )
++                    return 2
+             if not dry_run and _negotiate_capability(project_root) == "read-only":
+                 return _capability_refusal(as_json)
+             _ho = _ensure_handover(project_root, as_json, dry_run)
+             if _ho is not None:
+                 return _ho
+-            result = finish_ticket(project_root, rest[0], _agent_for(project_root), dry_run=dry_run)
++            result = finish_ticket(
++                project_root,
++                rest[0],
++                _agent_for(project_root),
++                dry_run=dry_run,
++                closure_mode=done_mode,
++                closure_cohort=done_cohort,
++            )
+             _emit(result.to_dict(), as_json)
+             return 0 if result.ok else 1
+         if action in ("block", "unblock"):
+@@ -5612,11 +5695,33 @@
+                     {
+                         "ok": False,
+                         "code": "VALIDATION_FAILED",
+-                        "detail": f"ticket {action} needs <T-###> [reason/decision]",
++                        "detail": f"ticket {action} needs <T-###> [reason/decision] "
++                        f"[--scope ticket|goal]",
+                     },
+                     as_json,
+                 )
+                 return 2
++            # Orchestration repair (T-1302): blocker scope on `block`.
++            block_scope = "ticket"
++            block_text = []
++            _idx = 1
++            while _idx < len(rest):
++                if rest[_idx] == "--scope" and _idx + 1 < len(rest):
++                    block_scope = rest[_idx + 1]
++                    _idx += 2
++                elif rest[_idx].startswith("--"):
++                    _emit(
++                        {
++                            "ok": False,
++                            "code": "VALIDATION_FAILED",
++                            "detail": f"unknown option {rest[_idx]}",
++                        },
++                        as_json,
++                    )
++                    return 2
++                else:
++                    block_text.append(rest[_idx])
++                    _idx += 1
+             if not dry_run and _negotiate_capability(project_root) == "read-only":
+                 return _capability_refusal(as_json)
+             _ho = _ensure_handover(project_root, as_json, dry_run)
+@@ -5627,8 +5732,9 @@
+                 action,
+                 rest[0],
+                 _agent_for(project_root),
+-                " ".join(rest[1:]),
++                " ".join(block_text),
+                 dry_run=dry_run,
++                scope=block_scope,
+             )
+             _emit(result.to_dict(), as_json)
+             return 0 if result.ok else 1
+@@ -5669,6 +5775,77 @@
+         )
+         _emit(result.to_dict(), as_json)
+         return 0 if result.ok else 1
++    if command == "user-request":
++        # Orchestration repair (T-1302): the canonical USER_INTERRUPT command.
++        # A new explicit user request is persisted (intake receipt + BOARD
++        # ticket, marked user_explicit) BEFORE any active-ticket completion
++        # work continues, so a later block cannot lose it.
++        if len(args) < 2 or not args[1].strip():
++            _emit(
++                {
++                    "ok": False,
++                    "code": "VALIDATION_FAILED",
++                    "detail": "user-request needs <request text> [--priority P2] [--verify <text>]",
++                },
++                as_json,
++            )
++            return 2
++        req_priority = "P2"
++        req_verify = ""
++        req_needs = None
++        req_body = []
++        _idx = 1
++        while _idx < len(args):
++            if args[_idx] == "--priority" and _idx + 1 < len(args):
++                req_priority = args[_idx + 1]
++                _idx += 2
++            elif args[_idx] == "--verify" and _idx + 1 < len(args):
++                req_verify = args[_idx + 1]
++                _idx += 2
++            elif args[_idx] == "--needs" and _idx + 1 < len(args):
++                req_needs = [n.strip() for n in args[_idx + 1].split(",") if n.strip()]
++                _idx += 2
++            elif args[_idx].startswith("--"):
++                _emit(
++                    {
++                        "ok": False,
++                        "code": "VALIDATION_FAILED",
++                        "detail": f"unknown option {args[_idx]}",
++                    },
++                    as_json,
++                )
++                return 2
++            else:
++                req_body.append(args[_idx])
++                _idx += 1
++        if not req_body:
++            _emit(
++                {
++                    "ok": False,
++                    "code": "VALIDATION_FAILED",
++                    "detail": "user-request needs <request text>",
++                },
++                as_json,
++            )
++            return 2
++        if not dry_run and _negotiate_capability(project_root) == "read-only":
++            return _capability_refusal(as_json)
++        _ho = _ensure_handover(project_root, as_json, dry_run)
++        if _ho is not None:
++            return _ho
++        from saipen_engine.operations import user_request
++
++        result = user_request(
++            project_root,
++            _agent_for(project_root),
++            " ".join(req_body),
++            priority=req_priority,
++            verify=req_verify,
++            needs=req_needs,
++            dry_run=dry_run,
++        )
++        _emit(result.to_dict(), as_json)
++        return 0 if result.ok else 1
+     if command == "userperson":
+         return _userperson(project_root, args[1:], as_json, dry_run)
+     if command == "sub":

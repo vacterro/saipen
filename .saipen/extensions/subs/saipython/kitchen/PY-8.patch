@@ -1,0 +1,20 @@
+diff --git a/tools/validate.py b/tools/validate.py
+--- a/tools/validate.py
++++ b/tools/validate.py
+@@ -4972,6 +4972,7 @@
+         _improve_core_t = (
+             _improve_core_p.read_text(encoding="utf-8-sig") if _improve_core_p.is_file() else ""
+         )
++        _improve_core_contract_t = " ".join(_improve_core_t.split())
+         _admission_markers = (
+             (
+                 "CORE",
+@@ -5005,7 +5006,7 @@
+             ),
+             (
+                 "mechanical core",
+-                _improve_core_t,
++                _improve_core_contract_t,
+                 (
+                     'ROLES = {"core", "critic"}',
+                     "with project_writer_lock(root):",

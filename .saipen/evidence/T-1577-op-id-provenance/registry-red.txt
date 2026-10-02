@@ -1,0 +1,249 @@
+test_a_canonical_anchor_still_closes (test_t1577_op_id_provenance.ClosureEvidence.test_a_canonical_anchor_still_closes) ... ok
+test_a_hand_authored_anchor_is_not_closure_evidence (test_t1577_op_id_provenance.ClosureEvidence.test_a_hand_authored_anchor_is_not_closure_evidence) ... FAIL
+test_a_missing_tag_is_absent_not_hand_authored (test_t1577_op_id_provenance.GrammarOwner.test_a_missing_tag_is_absent_not_hand_authored)
+An untagged event is a different question (T-110), not this one. ... ok
+test_a_registered_class_at_a_width_its_writer_never_emits (test_t1577_op_id_provenance.GrammarOwner.test_a_registered_class_at_a_width_its_writer_never_emits) ... FAIL
+test_an_unregistered_class_is_hand_authored_at_every_writer_width (test_t1577_op_id_provenance.GrammarOwner.test_an_unregistered_class_is_hand_authored_at_every_writer_width)
+The review's reproduction: the class is the claim, not the width. ... FAIL
+test_other_typos_stay_hand_authored (test_t1577_op_id_provenance.GrammarOwner.test_other_typos_stay_hand_authored) ... FAIL
+test_real_writer_shapes_stay_canonical (test_t1577_op_id_provenance.GrammarOwner.test_real_writer_shapes_stay_canonical) ... FAIL
+test_the_carrier_ids_really_carry_thirty_one_hex (test_t1577_op_id_provenance.GrammarOwner.test_the_carrier_ids_really_carry_thirty_one_hex) ... ok
+test_the_three_hand_written_ids_are_hand_authored (test_t1577_op_id_provenance.GrammarOwner.test_the_three_hand_written_ids_are_hand_authored) ... FAIL
+test_a_hand_authored_boundary_opens_no_cycle (test_t1577_op_id_provenance.PhaseEvidence.test_a_hand_authored_boundary_opens_no_cycle)
+The boundary is itself evidence of the transition (CORE-001). ... FAIL
+test_a_hand_authored_fail_is_not_a_veto_either (test_t1577_op_id_provenance.PhaseEvidence.test_a_hand_authored_fail_is_not_a_veto_either)
+Filtered means IGNORED, not merely distrusted. ... ok
+test_a_hand_authored_pass_is_not_phase_evidence (test_t1577_op_id_provenance.PhaseEvidence.test_a_hand_authored_pass_is_not_phase_evidence) ... FAIL
+test_an_unregistered_class_pass_is_not_phase_evidence (test_t1577_op_id_provenance.PhaseEvidence.test_an_unregistered_class_pass_is_not_phase_evidence) ... FAIL
+test_canonical_evidence_still_verifies (test_t1577_op_id_provenance.PhaseEvidence.test_canonical_evidence_still_verifies) ... ok
+test_the_bulk_classifier_agrees_byte_for_byte (test_t1577_op_id_provenance.PhaseEvidence.test_the_bulk_classifier_agrees_byte_for_byte) ... ok
+test_every_literal_writer_class_is_registered (test_t1577_op_id_provenance.RegistryCoversEveryWriter.test_every_literal_writer_class_is_registered) ... FAIL
+test_every_named_writer_class_is_registered (test_t1577_op_id_provenance.RegistryCoversEveryWriter.test_every_named_writer_class_is_registered) ... FAIL
+test_every_registered_class_has_a_live_writer (test_t1577_op_id_provenance.RegistryCoversEveryWriter.test_every_registered_class_has_a_live_writer)
+The converse: registering `verify-` would launder every typed id. ... FAIL
+test_no_registered_class_is_an_unregistered_one_in_disguise (test_t1577_op_id_provenance.RegistryCoversEveryWriter.test_no_registered_class_is_an_unregistered_one_in_disguise) ... FAIL
+test_a_hand_authored_id_above_the_floor_is_named_and_fails (test_t1577_op_id_provenance.ValidatorGate.test_a_hand_authored_id_above_the_floor_is_named_and_fails) ... FAIL
+test_a_hand_authored_id_below_the_floor_only_warns (test_t1577_op_id_provenance.ValidatorGate.test_a_hand_authored_id_below_the_floor_only_warns)
+History stays readable: the record that follows sets the floor. ... ok
+test_a_hand_authored_id_that_resolves_is_not_claimed (test_t1577_op_id_provenance.ValidatorGate.test_a_hand_authored_id_that_resolves_is_not_claimed)
+A real operation record outranks the shape: no false accusation. ... ok
+test_a_typed_closure_above_the_floor_still_fails (test_t1577_op_id_provenance.ValidatorGate.test_a_typed_closure_above_the_floor_still_fails) ... FAIL
+test_a_typed_closure_below_the_floor_is_named_not_failed (test_t1577_op_id_provenance.ValidatorGate.test_a_typed_closure_below_the_floor_is_named_not_failed) ... FAIL
+test_an_unregistered_class_above_the_floor_is_named_and_fails (test_t1577_op_id_provenance.ValidatorGate.test_an_unregistered_class_above_the_floor_is_named_and_fails)
+The review's reproduction, end to end through the validator. ... FAIL
+test_no_ledger_means_unavailable_not_red (test_t1577_op_id_provenance.ValidatorGate.test_no_ledger_means_unavailable_not_red) ... ok
+
+======================================================================
+FAIL: test_a_hand_authored_anchor_is_not_closure_evidence (test_t1577_op_id_provenance.ClosureEvidence.test_a_hand_authored_anchor_is_not_closure_evidence)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1577-oracle-pkb5gwa3\tools\test_t1577_op_id_provenance.py", line 447, in test_a_hand_authored_anchor_is_not_closure_evidence
+    self.assertFalse(ok, reason)
+AssertionError: True is not false : ADMISSIBLE: the same verifier failed against the pre-fix subject and passed against the post-fix subject, so the implementation is what changed
+
+======================================================================
+FAIL: test_a_registered_class_at_a_width_its_writer_never_emits (test_t1577_op_id_provenance.GrammarOwner.test_a_registered_class_at_a_width_its_writer_never_emits)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1577-oracle-pkb5gwa3\tools\test_t1577_op_id_provenance.py", line 181, in test_a_registered_class_at_a_width_its_writer_never_emits
+    self.assertEqual(provenance(op_id), "hand_authored", op_id)
+AssertionError: 'absent' != 'hand_authored'
+- absent
++ hand_authored
+ : checkpoint-a1b2c3d4e5f6
+
+======================================================================
+FAIL: test_an_unregistered_class_is_hand_authored_at_every_writer_width (test_t1577_op_id_provenance.GrammarOwner.test_an_unregistered_class_is_hand_authored_at_every_writer_width)
+The review's reproduction: the class is the claim, not the width.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1577-oracle-pkb5gwa3\tools\test_t1577_op_id_provenance.py", line 164, in test_an_unregistered_class_is_hand_authored_at_every_writer_width
+    self.assertEqual(provenance(UNREGISTERED_VERIFY), "hand_authored")
+AssertionError: 'absent' != 'hand_authored'
+- absent
++ hand_authored
+
+
+======================================================================
+FAIL: test_other_typos_stay_hand_authored (test_t1577_op_id_provenance.GrammarOwner.test_other_typos_stay_hand_authored)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1577-oracle-pkb5gwa3\tools\test_t1577_op_id_provenance.py", line 202, in test_other_typos_stay_hand_authored
+    self.assertEqual(provenance(op_id), "hand_authored", op_id)
+AssertionError: 'absent' != 'hand_authored'
+- absent
++ hand_authored
+ : 0f1e2d3c4b5a69788796a5b4c3d2e1f0
+
+======================================================================
+FAIL: test_real_writer_shapes_stay_canonical (test_t1577_op_id_provenance.GrammarOwner.test_real_writer_shapes_stay_canonical)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1577-oracle-pkb5gwa3\tools\test_t1577_op_id_provenance.py", line 160, in test_real_writer_shapes_stay_canonical
+    self.assertEqual(provenance(op_id), "canonical", op_id)
+AssertionError: 'absent' != 'canonical'
+- absent
++ canonical
+ : checkpoint-0f1e2d3c4b5a69788796a5b4c3d2e1f0
+
+======================================================================
+FAIL: test_the_three_hand_written_ids_are_hand_authored (test_t1577_op_id_provenance.GrammarOwner.test_the_three_hand_written_ids_are_hand_authored)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1577-oracle-pkb5gwa3\tools\test_t1577_op_id_provenance.py", line 145, in test_the_three_hand_written_ids_are_hand_authored
+    self.assertEqual(provenance(op_id), "hand_authored", op_id)
+AssertionError: 'absent' != 'hand_authored'
+- absent
++ hand_authored
+ : scout-7a1b2c3d4e5f60718293a4b5c6d7e8f
+
+======================================================================
+FAIL: test_a_hand_authored_boundary_opens_no_cycle (test_t1577_op_id_provenance.PhaseEvidence.test_a_hand_authored_boundary_opens_no_cycle)
+The boundary is itself evidence of the transition (CORE-001).
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1577-oracle-pkb5gwa3\tools\test_t1577_op_id_provenance.py", line 385, in test_a_hand_authored_boundary_opens_no_cycle
+    self.assertFalse(ok, reason)
+AssertionError: True is not false : PASS conf: high -- core gate 0 FAIL with 34 warnings; ruff clean
+
+======================================================================
+FAIL: test_a_hand_authored_pass_is_not_phase_evidence (test_t1577_op_id_provenance.PhaseEvidence.test_a_hand_authored_pass_is_not_phase_evidence)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1577-oracle-pkb5gwa3\tools\test_t1577_op_id_provenance.py", line 376, in test_a_hand_authored_pass_is_not_phase_evidence
+    self.assertFalse(ok, reason)
+AssertionError: True is not false : PASS conf: high -- core gate 0 FAIL with 34 warnings; ruff clean
+
+======================================================================
+FAIL: test_an_unregistered_class_pass_is_not_phase_evidence (test_t1577_op_id_provenance.PhaseEvidence.test_an_unregistered_class_pass_is_not_phase_evidence)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1577-oracle-pkb5gwa3\tools\test_t1577_op_id_provenance.py", line 367, in test_an_unregistered_class_pass_is_not_phase_evidence
+    self.assertFalse(ok, reason)
+AssertionError: True is not false : PASS conf: high -- core gate 0 FAIL with 34 warnings; ruff clean
+
+======================================================================
+FAIL: test_every_literal_writer_class_is_registered (test_t1577_op_id_provenance.RegistryCoversEveryWriter.test_every_literal_writer_class_is_registered)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1577-oracle-pkb5gwa3\tools\test_t1577_op_id_provenance.py", line 330, in test_every_literal_writer_class_is_registered
+    self.assert_registered(minted)
+  File "V:\_TEMP_\saipen-t1577-oracle-pkb5gwa3\tools\test_t1577_op_id_provenance.py", line 323, in assert_registered
+    self.assertEqual(missing, {}, "writer mints an unregistered op class")
+AssertionError: {'improve-rebind-': 'tools\\improve.py:201[3511 chars]711'} != {}
+Diff is 3749 characters long. Set self.maxDiff to None to see it. : writer mints an unregistered op class
+
+======================================================================
+FAIL: test_every_named_writer_class_is_registered (test_t1577_op_id_provenance.RegistryCoversEveryWriter.test_every_named_writer_class_is_registered)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1577-oracle-pkb5gwa3\tools\test_t1577_op_id_provenance.py", line 336, in test_every_named_writer_class_is_registered
+    self.assert_registered(minted)
+  File "V:\_TEMP_\saipen-t1577-oracle-pkb5gwa3\tools\test_t1577_op_id_provenance.py", line 323, in assert_registered
+    self.assertEqual(missing, {}, "writer mints an unregistered op class")
+AssertionError: {'sweep-': 'tools\\improve.py:1031', 'cycl[890 chars].py'} != {}
+Diff is 996 characters long. Set self.maxDiff to None to see it. : writer mints an unregistered op class
+
+======================================================================
+FAIL: test_every_registered_class_has_a_live_writer (test_t1577_op_id_provenance.RegistryCoversEveryWriter.test_every_registered_class_has_a_live_writer)
+The converse: registering `verify-` would launder every typed id.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1577-oracle-pkb5gwa3\tools\test_t1577_op_id_provenance.py", line 346, in test_every_registered_class_has_a_live_writer
+    self.assertTrue(registry)
+AssertionError: {} is not true
+
+======================================================================
+FAIL: test_no_registered_class_is_an_unregistered_one_in_disguise (test_t1577_op_id_provenance.RegistryCoversEveryWriter.test_no_registered_class_is_an_unregistered_one_in_disguise)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1577-oracle-pkb5gwa3\tools\test_t1577_op_id_provenance.py", line 352, in test_no_registered_class_is_an_unregistered_one_in_disguise
+    self.assertTrue(registry)
+AssertionError: {} is not true
+
+======================================================================
+FAIL: test_a_hand_authored_id_above_the_floor_is_named_and_fails (test_t1577_op_id_provenance.ValidatorGate.test_a_hand_authored_id_above_the_floor_is_named_and_fails)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1577-oracle-pkb5gwa3\tools\test_t1577_op_id_provenance.py", line 505, in test_a_hand_authored_id_above_the_floor_is_named_and_fails
+    self.assertIn("hand-authored", out)
+AssertionError: 'hand-authored' not found in "saipen conformance validation starting (tools/validate.py)...\nProject root: V:\\_TEMP_\\saipen-t1577-val-zf0t3hza\\AUDAPACK (explicit)\nPASS: state.schema.json and the engine STATE contract constants agree\nPASS: state.schema.json states nothing the validator ignores (4 keywords enforced natively, 5 delegated, 4 types interpreted)\nPASS: STATE.md schema valid (checked against state.schema.json)\nPASS: .saipen/IDENTITY.md absent -- project not yet lineage-migrated (the first mutation mints it journaled)\nPASS: BOARD.md has all required section headings\nPASS: BOARD.md no duplicate tickets\nPASS: BOARD.md no dangling needs: references\nPASS: BOARD.md acyclic\nPASS: BOARD.md Work supersession relations are terminal, existing and acyclic\nPASS: BOARD.md claimed tickets have their needs: satisfied\nPASS: BOARD.md at most one ## DOING ticket (0 claimed)\nPASS: LOG.md format valid (skeleton, E-### unique + monotonic, parents resolve; 1 segment(s))\nFAIL: mechanical provenance [saio] -- active-log structural events name an `[op: ...]` id that resolves to NO operation record in the journal, so the tag proves only that a bracket was typed, never that an operation ran: .saipen/LOG.md:3 E-3 [op: verify-a0b1c2d3e4f5061728394a5b6c7d8e9] (T-1282)\nPASS: .saipen/USERPERSON.md is a well-formed optional USERPERSON profile\nPASS: append targets end on a line boundary (3 checked)\nPASS: Golden Default palette integrity verified (21 Wintage tokens, sha256:271ba26cd75948e8)\nWARN [repairable-protocol-drift]: STATE.md last_event is E-1 but the LOG tail is E-3 -- lower than the log means this STATE predates its own history: a checkpoint wrote LOG lines and did not finish updating STATE (RFC § 1.2, § 1.5)\nWARN [no-conformance-record]: no LOG line records a conformance run in § 1.2's fixed form (`RUN: validate.py -> PASS` or `-> FAIL`), so § 1.10's `saipen status` has nothing to report under Conformance and a cold agent must either guess from prose or say none exists\nWARN [cross-doc-drift]: cross-doc drift [ahead-stamp-repair] -- CORE.md must say a future-stamped LOG line is restamped to a defensible bound with a DEC naming the original, the replacement, and that the minute is inherited rather than measured. Without it the only sanctioned response is waiting, which keeps a false record and reds every gate until the clock catches up\nWARN [cross-doc-drift]: cross-doc drift [shortcut-memory-ban] -- BOOT.md step 7 must order § 1.10's table read before acting on a shortcut and explicitly state that memory is never a source for it. An agent that believes it knows what a key means answers from recall rather than reading the file\nWARN [cross-doc-drift]: ... and 15 more like the above\nValidation FAILED: 1 problem(s), 19 warning(s)\n"
+
+======================================================================
+FAIL: test_a_typed_closure_above_the_floor_still_fails (test_t1577_op_id_provenance.ValidatorGate.test_a_typed_closure_above_the_floor_still_fails)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1577-oracle-pkb5gwa3\tools\test_t1577_op_id_provenance.py", line 583, in test_a_typed_closure_above_the_floor_still_fails
+    self.assertTrue(self._closure_failed(out), out)
+AssertionError: [] is not true : saipen conformance validation starting (tools/validate.py)...
+Project root: V:\_TEMP_\saipen-t1577-val-6ud_do5n\AUDAPACK (explicit)
+PASS: state.schema.json and the engine STATE contract constants agree
+PASS: state.schema.json states nothing the validator ignores (4 keywords enforced natively, 5 delegated, 4 types interpreted)
+PASS: STATE.md schema valid (checked against state.schema.json)
+PASS: .saipen/IDENTITY.md absent -- project not yet lineage-migrated (the first mutation mints it journaled)
+PASS: BOARD.md has all required section headings
+PASS: BOARD.md no duplicate tickets
+PASS: BOARD.md no dangling needs: references
+PASS: BOARD.md acyclic
+PASS: BOARD.md Work supersession relations are terminal, existing and acyclic
+PASS: BOARD.md claimed tickets have their needs: satisfied
+PASS: BOARD.md at most one ## DOING ticket (0 claimed)
+PASS: every DONE closure provenance satisfies its declared closure contract
+PASS: LOG.md format valid (skeleton, E-### unique + monotonic, parents resolve; 1 segment(s))
+FAIL: mechanical provenance [saio] -- active-log structural events name an `[op: ...]` id that resolves to NO operation record in the journal, so the tag proves only that a bracket was typed, never that an operation ran: .saipen/LOG.md:3 E-3 [op: verify-a0b1c2d3e4f5061728394a5b6c7d8e9f]; .saipen/LOG.md:4 E-4 [op: verify-a0b1c2d3e4f5061728394a5b6c7d8e9f] (T-1282)
+PASS: .saipen/USERPERSON.md is a well-formed optional USERPERSON profile
+PASS: append targets end on a line boundary (3 checked)
+PASS: Golden Default palette integrity verified (21 Wintage tokens, sha256:271ba26cd75948e8)
+WARN [repairable-protocol-drift]: STATE.md last_event is E-1 but the LOG tail is E-4 -- lower than the log means this STATE predates its own history: a checkpoint wrote LOG lines and did not finish updating STATE (RFC § 1.2, § 1.5)
+WARN [no-conformance-record]: no LOG line records a conformance run in § 1.2's fixed form (`RUN: validate.py -> PASS` or `-> FAIL`), so § 1.10's `saipen status` has nothing to report under Conformance and a cold agent must either guess from prose or say none exists
+WARN [cross-doc-drift]: cross-doc drift [ahead-stamp-repair] -- CORE.md must say a future-stamped LOG line is restamped to a defensible bound with a DEC naming the original, the replacement, and that the minute is inherited rather than measured. Without it the only sanctioned response is waiting, which keeps a false record and reds every gate until the clock catches up
+WARN [cross-doc-drift]: cross-doc drift [shortcut-memory-ban] -- BOOT.md step 7 must order § 1.10's table read before acting on a shortcut and explicitly state that memory is never a source for it. An agent that believes it knows what a key means answers from recall rather than reading the file
+WARN [cross-doc-drift]: ... and 15 more like the above
+Validation FAILED: 1 problem(s), 19 warning(s)
+
+
+======================================================================
+FAIL: test_a_typed_closure_below_the_floor_is_named_not_failed (test_t1577_op_id_provenance.ValidatorGate.test_a_typed_closure_below_the_floor_is_named_not_failed)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1577-oracle-pkb5gwa3\tools\test_t1577_op_id_provenance.py", line 578, in test_a_typed_closure_below_the_floor_is_named_not_failed
+    self.assertTrue(warned, out)
+AssertionError: [] is not true : saipen conformance validation starting (tools/validate.py)...
+Project root: V:\_TEMP_\saipen-t1577-val-la0xx1h7\AUDAPACK (explicit)
+PASS: state.schema.json and the engine STATE contract constants agree
+PASS: state.schema.json states nothing the validator ignores (4 keywords enforced natively, 5 delegated, 4 types interpreted)
+PASS: STATE.md schema valid (checked against state.schema.json)
+PASS: .saipen/IDENTITY.md absent -- project not yet lineage-migrated (the first mutation mints it journaled)
+PASS: BOARD.md has all required section headings
+PASS: BOARD.md no duplicate tickets
+PASS: BOARD.md no dangling needs: references
+PASS: BOARD.md acyclic
+PASS: BOARD.md Work supersession relations are terminal, existing and acyclic
+PASS: BOARD.md claimed tickets have their needs: satisfied
+PASS: BOARD.md at most one ## DOING ticket (0 claimed)
+PASS: every DONE closure provenance satisfies its declared closure contract
+PASS: LOG.md format valid (skeleton, E-### unique + monotonic, parents resolve; 1 segment(s))
+PASS: .saipen/USERPERSON.md is a well-formed optional USERPERSON profile
+PASS: append targets end on a line boundary (3 checked)
+PASS: Golden Default palette integrity verified (21 Wintage tokens, sha256:271ba26cd75948e8)
+WARN [repairable-protocol-drift]: STATE.md last_event is E-1 but the LOG tail is E-5 -- lower than the log means this STATE predates its own history: a checkpoint wrote LOG lines and did not finish updating STATE (RFC § 1.2, § 1.5)
+WARN [no-conformance-record]: no LOG line records a conformance run in § 1.2's fixed form (`RUN: validate.py -> PASS` or `-> FAIL`), so § 1.10's `saipen status` has nothing to report under Conformance and a cold agent must either guess from prose or say none exists
+WARN [cross-doc-drift]: cross-doc drift [ahead-stamp-repair] -- CORE.md must say a future-stamped LOG line is restamped to a defensible bound with a DEC naming the original, the replacement, and that the minute is inherited rather than measured. Without it the only sanctioned response is waiting, which keeps a false record and reds every gate until the clock catches up
+WARN [cross-doc-drift]: cross-doc drift [shortcut-memory-ban] -- BOOT.md step 7 must order § 1.10's table read before acting on a shortcut and explicitly state that memory is never a source for it. An agent that believes it knows what a key means answers from recall rather than reading the file
+WARN [cross-doc-drift]: ... and 15 more like the above
+Validation complete. Agent is conformant. (19 warning(s))
+
+
+======================================================================
+FAIL: test_an_unregistered_class_above_the_floor_is_named_and_fails (test_t1577_op_id_provenance.ValidatorGate.test_an_unregistered_class_above_the_floor_is_named_and_fails)
+The review's reproduction, end to end through the validator.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1577-oracle-pkb5gwa3\tools\test_t1577_op_id_provenance.py", line 513, in test_an_unregistered_class_above_the_floor_is_named_and_fails
+    self.assertIn("unregistered class", out)
+AssertionError: 'unregistered class' not found in "saipen conformance validation starting (tools/validate.py)...\nProject root: V:\\_TEMP_\\saipen-t1577-val-twmi8_e3\\AUDAPACK (explicit)\nPASS: state.schema.json and the engine STATE contract constants agree\nPASS: state.schema.json states nothing the validator ignores (4 keywords enforced natively, 5 delegated, 4 types interpreted)\nPASS: STATE.md schema valid (checked against state.schema.json)\nPASS: .saipen/IDENTITY.md absent -- project not yet lineage-migrated (the first mutation mints it journaled)\nPASS: BOARD.md has all required section headings\nPASS: BOARD.md no duplicate tickets\nPASS: BOARD.md no dangling needs: references\nPASS: BOARD.md acyclic\nPASS: BOARD.md Work supersession relations are terminal, existing and acyclic\nPASS: BOARD.md claimed tickets have their needs: satisfied\nPASS: BOARD.md at most one ## DOING ticket (0 claimed)\nPASS: LOG.md format valid (skeleton, E-### unique + monotonic, parents resolve; 1 segment(s))\nFAIL: mechanical provenance [saio] -- active-log structural events name an `[op: ...]` id that resolves to NO operation record in the journal, so the tag proves only that a bracket was typed, never that an operation ran: .saipen/LOG.md:3 E-3 [op: verify-a0b1c2d3e4f5061728394a5b6c7d8e9f] (T-1282)\nPASS: .saipen/USERPERSON.md is a well-formed optional USERPERSON profile\nPASS: append targets end on a line boundary (3 checked)\nPASS: Golden Default palette integrity verified (21 Wintage tokens, sha256:271ba26cd75948e8)\nWARN [repairable-protocol-drift]: STATE.md last_event is E-1 but the LOG tail is E-3 -- lower than the log means this STATE predates its own history: a checkpoint wrote LOG lines and did not finish updating STATE (RFC § 1.2, § 1.5)\nWARN [no-conformance-record]: no LOG line records a conformance run in § 1.2's fixed form (`RUN: validate.py -> PASS` or `-> FAIL`), so § 1.10's `saipen status` has nothing to report under Conformance and a cold agent must either guess from prose or say none exists\nWARN [cross-doc-drift]: cross-doc drift [ahead-stamp-repair] -- CORE.md must say a future-stamped LOG line is restamped to a defensible bound with a DEC naming the original, the replacement, and that the minute is inherited rather than measured. Without it the only sanctioned response is waiting, which keeps a false record and reds every gate until the clock catches up\nWARN [cross-doc-drift]: cross-doc drift [shortcut-memory-ban] -- BOOT.md step 7 must order § 1.10's table read before acting on a shortcut and explicitly state that memory is never a source for it. An agent that believes it knows what a key means answers from recall rather than reading the file\nWARN [cross-doc-drift]: ... and 15 more like the above\nValidation FAILED: 1 problem(s), 19 warning(s)\n"
+
+----------------------------------------------------------------------
+Ran 26 tests in 4.559s
+
+FAILED (failures=17)

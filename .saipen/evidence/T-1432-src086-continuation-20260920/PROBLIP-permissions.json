@@ -1,0 +1,81 @@
+{
+  "ok": true,
+  "code": "PERMISSIONS",
+  "capability": "full",
+  "policy_source": "derived-from-capability",
+  "policy_overrides": [],
+  "policy": {
+    "fs.read": "ALLOW",
+    "repo.read": "ALLOW",
+    "process.execute": "ALLOW",
+    "network.read": "ALLOW",
+    "external.mutate": "ALLOW",
+    "fs.delete": "ALLOW",
+    "fs.write": "ALLOW",
+    "network.write": "ALLOW",
+    "repo.mutate": "ALLOW"
+  },
+  "host_enforcement": {
+    "declared": "unavailable",
+    "strength": "UNAVAILABLE",
+    "note": "no recognizable host enforcement declaration"
+  },
+  "strict_effects": [],
+  "enforcement_gap": false,
+  "enforcement_verdict": "ENFORCED_OR_UNRESTRICTED",
+  "tool_contracts": {
+    "guaranteed": {
+      "edit": [
+        "fs.write"
+      ],
+      "write": [
+        "fs.write"
+      ],
+      "read": [
+        "fs.read"
+      ]
+    },
+    "possible": {
+      "shell": [
+        "process.execute",
+        "fs.read",
+        "fs.write",
+        "fs.delete",
+        "network.read",
+        "network.write"
+      ],
+      "python": [
+        "process.execute",
+        "fs.read",
+        "fs.write",
+        "fs.delete",
+        "network.read",
+        "network.write"
+      ],
+      "powershell": [
+        "process.execute",
+        "fs.read",
+        "fs.write",
+        "fs.delete",
+        "network.read",
+        "network.write"
+      ]
+    },
+    "note": "possible effects are capability, not observation"
+  },
+  "worktree_delta": {
+    "status": "KNOWN",
+    "paths": [
+      ".codebase-memory/",
+      "Problip.cs",
+      "tests/smoke2_liveaudio.ps1",
+      "tests/test_ownership.ps1",
+      "tests/test_preferences.ps1",
+      "tests/test_problip_repaint.ps1",
+      "tests/test_runstate.ps1",
+      "tests/test_settings.ps1",
+      "tests/test_stats.ps1",
+      "tests/test_wav.ps1"
+    ]
+  }
+}

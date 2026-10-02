@@ -1,0 +1,485 @@
+Index: tools\saipen_engine\operations.py
+===================================================================
+--- tools\saipen_engine\operations.py	before
++++ tools\saipen_engine\operations.py	after
+@@ -760,12 +760,12 @@
+     # to name the ticket it stepped over (T-1275). CORE.md PICK-01 already
+     # allows the override and bounds it -- "explicit override cannot bypass
+     # eligibility or authorization" -- which is why every gate above this point
+-    # runs first and refuses with the flag present.
+-    top_workable = None
+-    for t in tickets.values():
+-        if ticket_is_workable(t, tickets, agent=agent):
+-            top_workable = t["id"]
+-            break
++    # runs first and refuses with the flag present. The ONE shared router pick
++    # decides (user-explicit pass first, then topmost workable), so the claim
++    # refusal can never disagree with what `saipen next`/the block path route.
++    from .router import _top_workable as _router_top_workable
++
++    top_workable = _router_top_workable(board, agent=agent)
+     if not explicit:
+         if top_workable is None or top_workable != ticket_id:
+             return _refuse(
+@@ -1708,7 +1708,14 @@
+ 
+ 
+ def _ticket_targets(
+-    root: Path, action: str, ticket_id: str, agent: str, payload: str, now: str, utc: str
++    root: Path,
++    action: str,
++    ticket_id: str,
++    agent: str,
++    payload: str,
++    now: str,
++    utc: str,
++    scope: str = "ticket",
+ ) -> OperationPlan | Result:
+     op_id = "ticket-" + uuid4_hex()
+     docs, state, board, log_tail = _read(root)
+@@ -1746,6 +1753,22 @@
+                 "block requires the facts/dead ends that justify the block",
+                 ticket=ticket_id,
+             )
++        # Orchestration repair: blocker SCOPE separates "this ticket cannot
++        # progress" (ticket, the default) from "no independent work toward the
++        # goal can progress" (goal). Only a goal-scope block may legitimately
++        # stop the autonomous loop, and only when nothing workable remains.
++        # NOTE: the parsed board above shadows the `board` module import, so
++        # the closed vocabulary must be read from the module explicitly.
++        from . import board as _board_mod
++
++        scope = (scope or "ticket").strip().lower()
++        if scope not in _board_mod.BLOCKER_SCOPES:
++            return _refuse(
++                "VALIDATION_FAILED",
++                f"block scope {scope!r} outside the closed vocabulary "
++                f"{'/'.join(board.BLOCKER_SCOPES)}",
++                ticket=ticket_id,
++            )
+         if ticket["section"] not in ("## DOING", "## TODO"):
+             return _refuse(
+                 "ILLEGAL_TICKET_LIFECYCLE",
+@@ -1807,14 +1830,31 @@
+         agent,
+         f"ticket {action} via SAIOPS"
+         + (" (active)" if is_active_block else "")
++        + (
++            f" (scope {scope})"
++            if action == "block" and scope in _board_mod.BLOCKER_SCOPES and scope != "ticket"
++            else ""
++        )
+         + (f" -- {_safe_payload}" if _safe_payload else ""),
+         now,
+         op_id,
+     )
+     new_log = docs["log"].text_norm.rstrip("\n") + "\n" + line + "\n"
+-    # T-1101: redact credentials in the payload before it reaches BOARD
++    # T-1101: redact credentials in the payload before it reaches BOARD.
++    # Orchestration repair: a block carries its blocker_scope field so the
++    # scheduler/validator can distinguish ticket-scope from goal-scope without
++    # reading prose; unblock removes it (with the blocker) in `_move_ticket`.
++    extra_fields = (
++        {"blocker_scope": scope} if (action == "block" and scope in _board_mod.BLOCKER_SCOPES) else None
++    )
+     new_board = _move_ticket(
+-        docs["board"].text_norm, ticket_id, target_section, checkbox, action, _safe_payload
++        docs["board"].text_norm,
++        ticket_id,
++        target_section,
++        checkbox,
++        action,
++        _safe_payload,
++        extra_fields=extra_fields,
+     )
+     owned = {
+         "last_event": event,
+@@ -1866,6 +1906,15 @@
+             routed = route_next(new_state, new_board, current_agent=agent)
+             if routed.get("ok"):
+                 new_state = patch_state(new_state, {"next_action": routed["action"]})
++                # Orchestration repair: persist the stop_reason when the
++                # recompute lands on GOAL_BLOCKED (no workable ticket remains
++                # and blockers block the goal), and clear a stale stop_reason
++                # the moment workability returns (a re-pick or unblock).
++                _stop_reason = routed.get("stop_reason")
++                if _stop_reason:
++                    new_state = patch_state(new_state, {"stop_reason": _stop_reason})
++                elif state.get("stop_reason"):
++                    new_state = remove_state_fields(new_state, ("stop_reason",))
+ 
+     errors = validate_texts(
+         new_state, new_board, new_log, current_agent=agent, sealed_events=docs["_history"]
+@@ -1902,6 +1951,8 @@
+     digest_done: str | None = None,
+     digest_awaiting: str | None = None,
+     prefix_run: str | None = None,
++    closure_mode: str = "own_patch",
++    closure_cohort: str | None = None,
+ ) -> OperationPlan | Result:
+     """PLAN the ONE atomic ticket-closure operation (NITRO dogfood III).
+ 
+@@ -1933,6 +1984,32 @@
+     ticket, ticket identity matches. No split-state window exists.
+     """
+     op_id = "finish-" + uuid4_hex()
++    # Orchestration repair: closure provenance. The closed vocabulary is
++    # own_patch | inherited_verified | cohort. A ticket may reach DONE without
++    # a per-ticket Git commit when closure_mode is inherited_verified (the
++    # implementation already exists in the worktree; this ticket verified it)
++    # or cohort (it ships inside a C-### batch). This gate is the evidence
++    # proof: every mode still requires the ticket's own verification evidence
++    # below -- no mode ever closes a ticket that was not verified.
++    from . import board as _board_mod
++
++    closure_mode = (closure_mode or "own_patch").strip().lower()
++    if closure_mode not in _board_mod.CLOSURE_MODES:
++        return _refuse(
++            "VALIDATION_FAILED",
++            f"closure_mode {closure_mode!r} outside the closed vocabulary "
++            f"{'/'.join(_board_mod.CLOSURE_MODES)}",
++            ticket=ticket_id,
++        )
++    if closure_mode == "cohort":
++        if not closure_cohort or not re.fullmatch(r"C-\d+", str(closure_cohort).strip()):
++            return _refuse(
++                "VALIDATION_FAILED",
++                f"closure_mode cohort requires a closure_cohort id of the "
++                f"form C-### (got {closure_cohort!r})",
++                ticket=ticket_id,
++            )
++        closure_cohort = closure_cohort.strip()
+     docs, state, board, log_tail = _read(root)
+     # T-1162: a short BOARD title cannot close Work whose authoritative
+     # source still has missing, corrupt, or uncovered clauses. This gate
+@@ -2083,7 +2160,14 @@
+         )
+ 
+     # One LOG completion event naming the ACTUAL closure phase -- the event
+-    # is the provenance that the gate chain actually ended at SHIP.
++    # is the provenance that the gate chain actually ended at SHIP -- plus the
++    # closure mode (orchestration repair), so the ledger alone proves whether
++    # this ticket closed on an attributable patch, an inherited-verified
++    # implementation, or a cohort.
++    _closure_text = (
++        f"ticket finished via SAIOPS -- completion (from {prev_phase}) "
++        f"closure {closure_mode}"
++    )
+     if prefix_run:
+         # ONE truthful RUN event emitted immediately before the completion
+         # event, both through the canonical LOG builder (T-994 / В§ 15). The
+@@ -2096,7 +2180,7 @@
+         event, line = build_event(
+             run_event,
+             "DEC",
+-            f"ticket finished via SAIOPS -- completion (from {prev_phase})",
++            _closure_text,
+             ticket=ticket_id,
+             agent=agent,
+             now=now,
+@@ -2110,14 +2194,32 @@
+             "DEC",
+             ticket_id,
+             agent,
+-            f"ticket finished via SAIOPS -- completion (from {prev_phase})",
++            _closure_text,
+             now,
+             op_id,
+         )
+         new_log = docs["log"].text_norm.rstrip("\n") + "\n" + line + "\n"
+ 
+-    # BOARD: DOING -> DONE, [/] -> [x], preserve all other fields.
+-    new_board = _move_ticket(docs["board"].text_norm, ticket_id, "## DONE", "[x]", "done", "")
++    # BOARD: DOING -> DONE, [/] -> [x], preserve all other fields. The closure
++    # mode (and cohort id / no-delta evidence) is recorded on the DONE line so
++    # the human-readable board keeps the provenance next to the ticket.
++    _closure_fields = {"closure_mode": closure_mode}
++    if closure_cohort:
++        _closure_fields["closure_cohort"] = closure_cohort
++    if closure_mode == "inherited_verified":
++        # The implementation was already present; BUILD produced no
++        # attributable diff for THIS ticket (orchestration repair, "no new
++        # code" case). Closure must not manufacture one.
++        _closure_fields["implementation_delta"] = "none"
++    new_board = _move_ticket(
++        docs["board"].text_norm,
++        ticket_id,
++        "## DONE",
++        "[x]",
++        "done",
++        "",
++        extra_fields=_closure_fields,
++    )
+ 
+     # STATE: phase -> DONE, task -> none, transition_from -> the ACTUAL
+     # previous phase (SHIP), and the next_action computed from the RESULTING
+@@ -2176,14 +2278,22 @@
+         "task": "none",
+         "next_action": routed.get("action"),
+         "transition_from": closure_from,
++        "closure_mode": closure_mode,
+     }
++    if closure_cohort:
++        expected["closure_cohort"] = closure_cohort
+     if digest_text is not None:
+         expected["digest"] = str(root / ".saipen" / "kitchen" / "digest.md")
+     return build_plan(
+         "finish",
+         agent,
+         _identity(root),
+-        {"operation": "finish", "ticket": ticket_id},
++        {
++            "operation": "finish",
++            "ticket": ticket_id,
++            "closure_mode": closure_mode,
++            "closure_cohort": closure_cohort,
++        },
+         _docs_preconditions(docs, "state", "board", "log"),
+         targets,
+         expected,
+@@ -2201,6 +2311,8 @@
+     digest_done: str | None = None,
+     digest_awaiting: str | None = None,
+     prefix_run: str | None = None,
++    closure_mode: str = "own_patch",
++    closure_cohort: str | None = None,
+ ) -> Result:
+     """Atomically finish a ticket: LOG + BOARD + STATE in ONE journaled plan.
+     The public `ticket done` semantics become this operation.
+@@ -2210,6 +2322,15 @@
+     `prefix_run` to emit its ONE truthful release RUN event through the same
+     canonical LOG builder (В§ 15). The `digest_done` / `digest_awaiting` hints
+     are reserved for the no-publish digest shape.
++
++    `closure_mode` (own_patch | inherited_verified | cohort, default
++    own_patch) records HOW the ticket satisfied its intent (orchestration
++    repair): own_patch closes on an attributable implementation diff,
++    inherited_verified closes a verification-only ticket whose implementation
++    already existed in the worktree (no new code, no fake commit), and cohort
++    closes a ticket that ships inside a C-### batch with its peers. Every mode
++    still requires this ticket's own verification evidence -- evidence closure
++    is separate from repository publication.
+     """
+     root = Path(project_root)
+     now, utc = _now(), _utc_iso()
+@@ -2223,6 +2344,8 @@
+         digest_done=digest_done,
+         digest_awaiting=digest_awaiting,
+         prefix_run=prefix_run,
++        closure_mode=closure_mode,
++        closure_cohort=closure_cohort,
+     )
+     if isinstance(plan, Result):
+         return plan
+@@ -2232,7 +2355,13 @@
+ 
+ 
+ def _move_ticket(
+-    board_text: str, ticket_id: str, target_section: str, checkbox: str, action: str, payload: str
++    board_text: str,
++    ticket_id: str,
++    target_section: str,
++    checkbox: str,
++    action: str,
++    payload: str,
++    extra_fields: dict[str, str] | None = None,
+ ) -> str:
+     lines = board_text.splitlines(keepends=True)
+     out = []
+@@ -2264,9 +2393,12 @@
+     elif action == "unblock":
+         marked = ticket_line.replace("- [/] ", "- [ ] ", 1)
+         marked = remove_ticket_field(marked, "blocker")
++        marked = remove_ticket_field(marked, "blocker_scope")
+         marked = remove_ticket_field(marked, "verify_attempts")
+     else:  # pragma: no cover
+         marked = ticket_line.replace("- [/] ", "- [ ] ", 1)
++    for field, value in (extra_fields or {}).items():
++        marked = set_ticket_field(marked, field, value)
+     out.insert(target_idx + 1, marked.rstrip() + "\n")
+     return "".join(out)
+ 
+@@ -2297,6 +2429,8 @@
+     needs: list[str],
+     verify: str,
+     dry_run: bool = False,
++    user_explicit: bool = False,
++    receipt_id: str | None = None,
+ ) -> Result:
+     root = Path(project_root)
+     if not description or not description.strip():
+@@ -2315,6 +2449,22 @@
+         )
+     if "\n" in verify or "\r" in verify:
+         return _refuse("VALIDATION_FAILED", "verify text may not contain line breaks")
++    # USER_INTERRUPT (orchestration repair): an explicit user request must be
++    # durably persisted BEFORE unrelated completion work continues. The
++    # receipt must already exist and be indexed when `receipt_id` is named --
++    # the receipt is the durable source of truth the BOARD line only projects.
++    if receipt_id is not None:
++        from . import intake
++
++        _receipt_status = intake.status(root, receipt_id)
++        if not _receipt_status.get("ok"):
++            return _refuse(
++                "RECEIPT_NOT_FOUND",
++                f"source receipt {receipt_id} is not an indexed active receipt: "
++                f"{_receipt_status.get('detail', 'unknown')}",
++                ticket=None,
++                receipt=receipt_id,
++            )
+     op_id = "ticket-" + uuid4_hex()
+     now, utc = _now(), _utc_iso()
+     docs, _state, board, log_tail = _read(root)
+@@ -2340,6 +2490,8 @@
+     desc = (
+         f"- [ ] T-{tid} [{priority}] {description}"
+         + (f" | needs: {', '.join(needs)}" if needs else "")
++        + (" | user_explicit: true" if user_explicit else "")
++        + (f" | source_receipts: {receipt_id}" if receipt_id else "")
+         + f" | verify: {verify}"
+     )
+     new_board = _insert_todo(docs["board"].text_norm, desc)
+@@ -2383,10 +2535,19 @@
+             "priority": priority,
+             "description": description,
+             "needs": needs,
++            "user_explicit": user_explicit,
++            "receipt": receipt_id,
+         },
+         _docs_preconditions(docs, "state", "board", "log"),
+         targets,
+-        {"ok": True, "code": "TICKET_ADDED", "ticket": f"T-{tid}", "event_id": f"E-{event}"},
++        {
++            "ok": True,
++            "code": "TICKET_ADDED",
++            "ticket": f"T-{tid}",
++            "event_id": f"E-{event}",
++            "user_explicit": user_explicit,
++            "receipt": receipt_id,
++        },
+         op_id=op_id,
+     )
+     if dry_run:
+@@ -2395,6 +2556,94 @@
+ 
+ 
+ @_state_guard
++def user_request(
++    project_root: Path | str,
++    agent: str,
++    body: str,
++    priority: str = "P2",
++    verify: str = "",
++    needs: list[str] | None = None,
++    dry_run: bool = False,
++) -> Result:
++    """The canonical USER_INTERRUPT operation (orchestration repair).
++
++    Ordering is the CORE contract for explicit user intent:
++
++      1. CAPTURE the raw request as a durable intake receipt (verbatim,
++         idempotent -- an identical request returns the existing receipt);
++      2. PROJECT it onto the board as a `user_explicit: true` ticket linked
++         to that receipt;
++      3. leave the active ticket's execution state UNTOUCHED -- persist
++         immediately, execute when safe (the router ranks the new ticket
++         ahead of planned work at the next START decision, and `saipen
++         continue` re-picks after any block).
++
++    A crash between (1) and (2) leaves an ORPHAN_USER_INTENT (receipt without
++    board projection), which the audit finding detects and `saipen source
++    recover` reconciles -- the request itself is never lost to agent memory.
++    """
++    root = Path(project_root)
++    if not body or not body.strip():
++        return _refuse("INVALID_SOURCE", "user request body is required")
++    # Dry-run projects zero bytes: no receipt is captured (capture is a
++    # durable write), so the plan renders against a hypothetical explicit
++    # ticket without a receipt link.
++    if dry_run:
++        description = body.strip().splitlines()[0].strip() or "user request"
++        if len(description) > 160:
++            description = description[:157].rstrip() + "..."
++        return ticket_add(
++            root,
++            agent,
++            priority,
++            description,
++            list(needs or []),
++            verify or "verify the requested behavior end-to-end",
++            dry_run=True,
++            user_explicit=True,
++        )
++    from . import intake
++
++    captured = intake.capture(
++        root,
++        body,
++        source_kind="user_instruction",
++    )
++    if not captured.get("ok"):
++        return _refuse(
++            captured.get("code", "SOURCE_CAPTURE_FAILED"),
++            f"user request could not be captured durably: {captured.get('detail', '')}",
++        )
++    receipt_id = captured.get("receipt")
++    # Persist the receipt BEFORE any board work; the ticket projection is a
++    # separate journaled transaction so a failure to project never loses the
++    # user's request (crash window A, orchestration repair).
++    description = body.strip()
++    # A multi-line request is projected as its first line with the full body
++    # staying authoritative in the receipt (one ticket_add renders exactly one
++    # board line).
++    description = description.splitlines()[0].strip() or "user request"
++    if len(description) > 160:
++        description = description[:157].rstrip() + "..."
++    result = ticket_add(
++        root,
++        agent,
++        priority,
++        description,
++        list(needs or []),
++        verify or "verify the requested behavior end-to-end",
++        dry_run=False,
++        user_explicit=True,
++        receipt_id=receipt_id,
++    )
++    if isinstance(result, Result) and not result.ok:
++        merged = dict(result.data or {})
++        merged["receipt"] = receipt_id
++        return Result(ok=False, code=result.code, data=merged, message=result.message)
++    return result
++
++
++@_state_guard
+ def ticket_move(
+     project_root: Path | str,
+     action: str,
+@@ -2402,6 +2651,7 @@
+     agent: str,
+     payload: str = "",
+     dry_run: bool = False,
++    scope: str = "ticket",
+ ) -> Result:
+     """Move a ticket between BOARD sections.
+ 
+@@ -2410,12 +2660,17 @@
+     (BOARD DONE[x] while STATE still names the ticket in a ticket-bearing
+     phase) that the composition audit reproduced. `done` delegates to
+     finish_ticket so one public operation, one lifecycle meaning.
++
++    `block` accepts an optional blocker `scope` (ticket | goal, default
++    ticket): a goal-scope block declares that no independent work toward the
++    current goal can progress, which is the ONLY blocker form allowed to stop
++    the autonomous loop (orchestration repair).
+     """
+     if action == "done":
+         return finish_ticket(project_root, ticket_id, agent, dry_run=dry_run)
+     root = Path(project_root)
+     now, utc = _now(), _utc_iso()
+-    plan = _ticket_targets(root, action, ticket_id, agent, payload, now, utc)
++    plan = _ticket_targets(root, action, ticket_id, agent, payload, now, utc, scope=scope)
+     if isinstance(plan, Result):
+         return plan
+     if dry_run:

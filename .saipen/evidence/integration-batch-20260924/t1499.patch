@@ -1,0 +1,72 @@
+diff --git a/tools/saipen_engine/telegrams.py b/tools/saipen_engine/telegrams.py
+index 6898a4b8..249435be 100644
+--- a/tools/saipen_engine/telegrams.py
++++ b/tools/saipen_engine/telegrams.py
+@@ -23,6 +23,7 @@ from __future__ import annotations
+ 
+ import json
+ import os
++import shlex
+ import shutil
+ import subprocess
+ from pathlib import Path
+@@ -96,6 +97,12 @@ def turn_entry(project_root: Path | str, state: dict) -> dict:
+         1 for item in items if isinstance(item, dict) and task and item.get("topic") == task
+     )
+     seat = _seat(state)
++    brief = [
++        EXECUTABLE, "saipen", "brief", "--project-root", str(Path(project_root)),
++        "--workspace", workspace,
++    ]
++    if seat:
++        brief.extend(("--seat", seat))
+     return {
+         "state": STATE_OK,
+         "unread": unread,
+@@ -105,8 +112,7 @@ def turn_entry(project_root: Path | str, state: dict) -> dict:
+         # complete exactly when it is false.
+         "complete": answer.get("exhausted") is False,
+         "read_command": (
+-            f"{EXECUTABLE} saipen brief --project-root {Path(project_root)} "
+-            f"--workspace {workspace}" + (f" --seat {seat}" if seat else "")
++            subprocess.list2cmdline(brief) if os.name == "nt" else shlex.join(brief)
+         ),
+         "detail": "counts only; nothing was opened and nothing here is an instruction",
+     }
+diff --git a/tools/test_t1497_turn_entry_telegrams.py b/tools/test_t1497_turn_entry_telegrams.py
+index 68472424..f487797a 100644
+--- a/tools/test_t1497_turn_entry_telegrams.py
++++ b/tools/test_t1497_turn_entry_telegrams.py
+@@ -15,6 +15,7 @@ import os
+ import re
+ import shutil
+ import stat
++import subprocess
+ import sys
+ import tempfile
+ import unittest
+@@ -140,6 +141,24 @@ class TurnEntryReadTests(unittest.TestCase):
+         self.assertEqual(answer["state"], telegrams.STATE_OK, answer)
+         self.assertFalse(answer["complete"])
+ 
++    def test_read_command_preserves_paths_with_spaces_in_a_real_shell(self):
++        fake = FakeSaimail(self)
++        fake.workspace = str(fake.dir / "mailbox with space")
++        project = fake.dir / "project with space"
++        with mock.patch.dict(os.environ, fake.env("ok")):
++            answer = telegrams.turn_entry(project, STATE)
++            self.assertEqual(answer["state"], telegrams.STATE_OK, answer)
++            run = subprocess.run(
++                answer["read_command"], shell=True, capture_output=True,
++                text=True, timeout=5,
++            )
++        self.assertEqual(run.returncode, 0, run.stderr)
++        self.assertEqual(
++            json.loads(fake.args_file.read_text(encoding="utf-8")),
++            ["saipen", "brief", "--project-root", str(project),
++             "--workspace", fake.workspace, "--seat", "builder"],
++        )
++
+     def test_a_broken_or_slow_saimail_is_a_state(self):
+         fake = FakeSaimail(self)
+         for mode in ("fail", "garbage"):

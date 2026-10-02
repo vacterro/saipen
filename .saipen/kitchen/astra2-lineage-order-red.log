@@ -1,0 +1,16 @@
+F
+======================================================================
+FAIL: test_rebuild_latest_uses_completion_order_across_generations (tools.test_conformance_lineage.ConformanceLineageTests.test_rebuild_latest_uses_completion_order_across_generations)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_conformance_lineage.py", line 108, in test_rebuild_latest_uses_completion_order_across_generations
+    self.assertEqual(record["receipt_id"], "a-latest")
+AssertionError: 'z0128' != 'a-latest'
+- z0128
++ a-latest
+
+
+----------------------------------------------------------------------
+Ran 1 test in 0.144s
+
+FAILED (failures=1)

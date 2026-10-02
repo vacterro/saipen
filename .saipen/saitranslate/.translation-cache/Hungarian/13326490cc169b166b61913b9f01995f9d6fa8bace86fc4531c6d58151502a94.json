@@ -1,0 +1,1 @@
+[") olvasja a lelátott állapotmodell, ", "\n  [STATE schema](", ") és ellenőrzi a fázis átmenetek, jegyzetfüggészek, esemény-egyedi kapcsolatok, átirányuló dokumentumok invariánsait, képességeket és visszatérési állapotot. \n- **Hibaszámítás.** [CONFORMANCE.md](", ") a követelményeket [scenario fixtures](", "); a [scenario runner]("]

@@ -1,6 +1,6 @@
 <!-- SAIPEN KNOWLEDGE INDEX v1; generated projection; not authority -->
-source-digest: sha256:8ef147691f257a61a756403a8443ea17d999559cdd96315e71e6bed960694652
-cards: 4
+source-digest: sha256:9182ca21c162e6465f3616cf6d81f5880e456ca7d16a2e8a6e5484dd2035ea79
+cards: 10
 legacy: 39
 
 # Knowledge index
@@ -8,9 +8,15 @@ legacy: 39
 Active cards are retrieval candidates. Superseded cards remain forensic history.
 
 - cards/automation-block-is-the-only-machine-truth.md | convention | scope: saipen status --json, automation block, external drivers, Run to Closure | trigger: deciding whether an external driver may continue, stop, or trust a completion signal | active
+- cards/copied-trees-inherit-the-provenance-ledger.md | trap | scope: audit fixtures, copytree, journal provenance, op ids, gitignored recovery ledger, validate.py | trigger: a fixture or probe appends a synthetic [T-###] LOG event to a copied tree and must survive validate.py | active
+- cards/downstream-shape-is-a-hypothesis-about-bytes.md | trap | scope: recovery repairs, downstream project reports, reconcile, regression fixtures | trigger: fixing a recovery or reconcile defect from a report that describes a stranded downstream project | active
+- cards/git-eol-conversion-breaks-byte-bound-evidence.md | trap | scope: .gitattributes, core.autocrlf, git stash, byte-bound evidence, managed projects, Windows | trigger: a digest-verified SAIPEN file (source body, archive, log detail, board compaction) fails its sha256 in a project on Windows | active
 - cards/narrative-authority-leakage.md | trap | scope: validators, authority, free-form prose, structural markers | trigger: adding a validator or gate that derives authority from human prose | active
+- cards/receipt-integrity-before-filter.md | trap | scope: reverify receipts, integrity digests, receipt selectors, closure evidence | trigger: a digest-verified record reader filters receipts by mutable body fields before validating their integrity digest | active
 - cards/red-control-before-green.md | convention | scope: tests, gates, red controls, regression oracle | trigger: adding a check or claiming a defect is fixed | active
+- cards/tests-mask-the-host-locale.md | trap | scope: subprocess, stdin, text mode, encoding, Windows, tests, hooks, validator | trigger: passing text to or reading text from a child process, or writing a test that spawns one | active
 - cards/unattributed-tree-edit.md | trap | scope: working tree, shipped surface, release scope, attribution | trigger: finding a modified shipped file no active Work authorized | active
+- cards/windows-replace-read-sharing-race.md | trap | scope: runtime state files, atomic replace, cross-process readers, Windows | trigger: one process atomically replaces a file that another process reads without a shared lock | active
 
 Legacy KNOWLEDGE documents (path and title only; no structured metadata):
 

@@ -1,0 +1,588 @@
+[
+ {
+  "label": "T-1367 smoke-probe gen-sha256:420e04e7 long_file_task",
+  "fixture": "V:/_TEMP_/t1363-ym10x47r",
+  "fixture_log_events": [
+   "- 14.09.26 00:00 [E-0001] [agent: test-agent] [op: transition-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa] RUN: transition to SCOUT",
+   "- 17.09.26 15:08 [E-2] [parent: E-1] [T-1] [agent: test-agent] [op: userreq-d571a15081134ff69d368999a3cff0fc] DEC: user request SRC-001 projected as T-1 (user_explicit)",
+   "- 17.09.26 15:08 [E-3] [parent: E-2] [T-1] [agent: test-agent] [op: claim-6157d55720f0487ea56e61b09f9ed827] DEC: claimed via SAIOPS -- owner test-agent",
+   "- 17.09.26 15:09 [E-4] [parent: E-3] [T-1] [agent: test-agent] [op: transition-1d5893b50870464dbe1f6e21483bf98f] RUN: transition to BUILD -- scout: src/app.py single line 'code'; no KNOWLEDGE dir; git repo, commit b6aa212",
+   "- 17.09.26 15:09 [E-5] [parent: E-4] [T-1] [agent: test-agent] [op: transition-d3ddf55267a4457b85fa0fedeac1ef46] RUN: transition to VERIFY -- build: docstring added to src/app.py line 1",
+   "- 17.09.26 15:10 [E-6] [parent: E-5] [T-1] [agent: test-agent] [op: checkpoint-f33e12908f9b4981886c260a7b8f618a] RUN: VERIFY: py_compile OK; ast.get_docstring=Application entry point.; one-paragraph/bullets/marketing checks True; red control ast.get_docstring('code')=None; conf high",
+   "- 17.09.26 15:10 [E-7] [parent: E-6] [T-1] [agent: test-agent] [op: checkpoint-e3d79cabdd19405ebe7f758706a7bb8e] RUN: verify -> PASS [target: T-1] conf: high -- python -m py_compile src/app.py OK; ast.get_docstring(app.py)='Application entry point.'; one-paragraph/no-bullets/no-marketing True; red control ast.get_docstring('code')=None",
+   "- 17.09.26 15:10 [E-8] [parent: E-7] [T-1] [agent: test-agent] [op: transition-9dfb4b1ea333426ebe41b074c2e1c21f] RUN: transition to REVIEW -- verify: PASS evidence logged E-6/E-7",
+   "- 17.09.26 15:10 [E-9] [parent: E-8] [T-1] [agent: test-agent] [op: checkpoint-a7f91b356a014e6485633f944460cea8] RUN: REVIEW: independent re-run ast.get_docstring='Application entry point.' line1_is_docstring True; diff shows only added line 1; no test/fixture touched; DEC: SHIP",
+   "- 17.09.26 15:10 [E-10] [parent: E-9] [T-1] [agent: test-agent] [op: transition-cfc5f24e461f431e82bacd79a6ede982] RUN: transition to SHIP -- review: DEC SHIP",
+   "- 17.09.26 15:11 [E-11] [parent: E-10] [T-1] [agent: test-agent] [op: converge_intent-b93edeb2b907413ea21b043ef950e00e] DEC: execution intent -> converge/done",
+   "- 17.09.26 15:11 [E-12] [parent: E-11] [T-1] [agent: test-agent] [op: finish-b5bdbe61b1a84f9a8868c5c5574421c4] DEC: ticket finished via SAIOPS -- completion (from SHIP)"
+  ],
+  "tool_calls": 80,
+  "occurrences": [
+   {
+    "tool_index": 9,
+    "session_id": "ses_f5016f4c6ffe1NOZyPZ7KhoW6l",
+    "message_id": "msg_0afe9637f001cQVqIXCyTUTWSk",
+    "call_id": "call_00_sLJCmPLMGftOcJgpgtog6009",
+    "tool": "bash",
+    "effect_fingerprint": "8f1c6135c2c48ab5",
+    "operation": "git -C \"V:\\_TEMP_\\t1363-ym10x47r\" status --short; echo \"---LOG---\"; git -C \"V:\\_TEMP_\\t1363-ym10x47r\" log --oneline -10; echo \"---FILES---\"; Get-ChildItem -Recurse -Force -File \"V:\\_TEMP_\\t1363-ym10x47r\" -Exclude \".git\" | Where-Object { $_.FullName -notmatch '\\\\\\.git\\\\' -and $_.FullName -notmatch '\\\\\\.saipen\\\\' } | Select-Object FullName, Length",
+    "attempted": "git -C \"V:\\_TEMP_\\t1363-ym10x47r\" status --short; echo \"---LOG---\"; git -C \"V:\\_TEMP_\\t1363-ym10x47r\" log --oneline -10; echo \"---FILES---\"; Get-ChildItem -Recurse -Force -File \"V:\\_TEMP_\\t1363-ym10x47r\" -Exclude \".git\" | Where-Object { $_.",
+    "call_start_ms": 1789657705950,
+    "refusal_end_ms": 1789657706117,
+    "assistant_step_created_ms": 1789657703295,
+    "assistant_step_completed_ms": 1789657706319,
+    "parent_message_id": "msg_0afe90b7c001Buas7fKLeTowzo",
+    "canonical_successes_before": 1,
+    "host_error_text": "SAIPEN_GUARD_REFUSAL: PROTECTED_CANONICAL_NAMESPACE: the host tool did not execute",
+    "route_delivered": false
+   },
+   {
+    "tool_index": 24,
+    "session_id": "ses_f5016f4c6ffe1NOZyPZ7KhoW6l",
+    "message_id": "msg_0afea00f1001LQ3CBEea1zQqwf",
+    "call_id": "call_00_qdG9C1nXaT65BqcpK3UA8764",
+    "tool": "bash",
+    "effect_fingerprint": "d5938e1ff513500b",
+    "operation": "$root=\"V:\\_TEMP_\\t1363-ym10x47r\"; foreach($f in @(\"$root\\.saipen-launched-task.txt\",\"$root\\.saipen\\intake\\active\\SRC-001.meta.json\",\"$root\\.saipen\\intake\\contracts\\SRC-001.json\",\"$root\\.saipen\\intake\\coverage\\SRC-001.json\",\"$root\\.saipen\\MANIFEST.json\",\"$root\\.saipen\\IDENTITY.md\")){ \"===== $f =====\"; Get-Content -LiteralPath $f -Raw }",
+    "attempted": "$root=\"V:\\_TEMP_\\t1363-ym10x47r\"; foreach($f in @(\"$root\\.saipen-launched-task.txt\",\"$root\\.saipen\\intake\\active\\SRC-001.meta.json\",\"$root\\.saipen\\intake\\contracts\\SRC-001.json\",\"$root\\.saipen\\intake\\coverage\\SRC-001.json\",\"$root\\.saipen\\MA",
+    "call_start_ms": 1789657751396,
+    "refusal_end_ms": 1789657751551,
+    "assistant_step_created_ms": 1789657743601,
+    "assistant_step_completed_ms": 1789657751743,
+    "parent_message_id": "msg_0afe90b7c001Buas7fKLeTowzo",
+    "canonical_successes_before": 2,
+    "host_error_text": "SAIPEN_GUARD_REFUSAL: PROTECTED_CANONICAL_NAMESPACE: the host tool did not execute",
+    "route_delivered": false
+   },
+   {
+    "tool_index": 33,
+    "session_id": "ses_f5016f4c6ffe1NOZyPZ7KhoW6l",
+    "message_id": "msg_0afea5065001xmsMK9OB5ofjiX",
+    "call_id": "call_01_0JSJQgG1yaA2j0KoIWBx3336",
+    "tool": "bash",
+    "effect_fingerprint": "d98aceaa3a34378c",
+    "operation": "Get-ChildItem -Force \"V:\\_TEMP_\\t1363-ym10x47r\" | Select-Object Mode,Name; \"---KNOWLEDGE---\"; Test-Path \"V:\\_TEMP_\\t1363-ym10x47r\\.saipen\\KNOWLEDGE\"",
+    "attempted": "Get-ChildItem -Force \"V:\\_TEMP_\\t1363-ym10x47r\" | Select-Object Mode,Name; \"---KNOWLEDGE---\"; Test-Path \"V:\\_TEMP_\\t1363-ym10x47r\\.saipen\\KNOWLEDGE\"",
+    "call_start_ms": 1789657768155,
+    "refusal_end_ms": 1789657768324,
+    "assistant_step_created_ms": 1789657763941,
+    "assistant_step_completed_ms": 1789657768571,
+    "parent_message_id": "msg_0afe90b7c001Buas7fKLeTowzo",
+    "canonical_successes_before": 2,
+    "host_error_text": "SAIPEN_GUARD_REFUSAL: PROTECTED_CANONICAL_NAMESPACE: the host tool did not execute",
+    "route_delivered": false
+   },
+   {
+    "tool_index": 51,
+    "session_id": "ses_f5016f4c6ffe1NOZyPZ7KhoW6l",
+    "message_id": "msg_0afeb42db001HgN6Hznw4jQWKK",
+    "call_id": "call_00_Ji5UUSDo59xmQGkSrt7d1747",
+    "tool": "bash",
+    "effect_fingerprint": "11e9597122bbe3a4",
+    "operation": "Get-Content -LiteralPath \"V:\\_TEMP_\\t1363-ym10x47r\\.saipen\\LOG.md\" -Tail 3; \"---STATE---\"; Get-Content -LiteralPath \"V:\\_TEMP_\\t1363-ym10x47r\\.saipen\\STATE.md\" -Raw",
+    "attempted": "Get-Content -LiteralPath \"V:\\_TEMP_\\t1363-ym10x47r\\.saipen\\LOG.md\" -Tail 3; \"---STATE---\"; Get-Content -LiteralPath \"V:\\_TEMP_\\t1363-ym10x47r\\.saipen\\STATE.md\" -Raw",
+    "call_start_ms": 1789657827740,
+    "refusal_end_ms": 1789657827899,
+    "assistant_step_created_ms": 1789657826011,
+    "assistant_step_completed_ms": 1789657828089,
+    "parent_message_id": "msg_0afe90b7c001Buas7fKLeTowzo",
+    "canonical_successes_before": 5,
+    "host_error_text": "SAIPEN_GUARD_REFUSAL: PROTECTED_CANONICAL_NAMESPACE: the host tool did not execute",
+    "route_delivered": false
+   }
+  ],
+  "pairs": [
+   {
+    "first_call": "call_00_sLJCmPLMGftOcJgpgtog6009",
+    "second_call": "call_00_qdG9C1nXaT65BqcpK3UA8764",
+    "same_assistant_step": false,
+    "second_started_after_first_refusal_ms": 45279,
+    "effect_equivalent": false,
+    "operation_equivalent": false,
+    "canonical_changed_between": true,
+    "calls_between": [
+     {
+      "tool": "glob",
+      "status": "completed",
+      "effect": "glob None"
+     },
+     {
+      "tool": "bash",
+      "status": "completed",
+      "effect": "$p=\"V:\\_TEMP_\\t1363-ym10x47r\\src\\app.py\"; $b=[System.IO.File]::ReadAllBytes($p); \"len=$($b.Length)\"; ($b | ForEach-Objec"
+     },
+     {
+      "tool": "read",
+      "status": "completed",
+      "effect": "read V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen"
+     },
+     {
+      "tool": "read",
+      "status": "completed",
+      "effect": "read V:\\_TEMP_\\t1363-ym10x47r\\.saipen\\LOG.md"
+     },
+     {
+      "tool": "read",
+      "status": "completed",
+      "effect": "read V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\phases"
+     },
+     {
+      "tool": "bash",
+      "status": "completed",
+      "effect": "Get-ChildItem \"V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\runtime\" | Select-Object Name; echo \"---\"; Get-Comm"
+     },
+     {
+      "tool": "bash",
+      "status": "completed",
+      "effect": "Select-String -Path \"V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\COMMANDS.md\" -Pattern \"^#|checkpoint|LOG:|sai"
+     },
+     {
+      "tool": "read",
+      "status": "completed",
+      "effect": "read V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\phases\\build.md"
+     },
+     {
+      "tool": "read",
+      "status": "completed",
+      "effect": "read V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\COMMANDS.md"
+     },
+     {
+      "tool": "bash",
+      "status": "completed",
+      "effect": "Select-String -Path \"V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\*.md\" -Pattern \"canonical checkpoint\" | Selec"
+     },
+     {
+      "tool": "bash",
+      "status": "completed",
+      "effect": "Select-String -Path \"V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\REGISTRY.json\",\"V:\\___VAC\\__K\\__CODE\\_AI_STUF"
+     },
+     {
+      "tool": "bash",
+      "status": "completed",
+      "effect": "Get-ChildItem \"C:\\Users\\vac34\\.config\\opencode\\skills\\saipen\\bin\" -Recurse -File | Select-Object FullName"
+     },
+     {
+      "tool": "bash",
+      "status": "completed",
+      "effect": "saipen --help 2>&1 | Select-Object -First 80"
+     },
+     {
+      "tool": "bash",
+      "status": "completed",
+      "effect": "Select-String -Path \"V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\CORE.md\" -Pattern \"CHECKPOINT-01|checkpoint|t"
+     }
+    ],
+    "shape": "SEQUENTIAL_DISTINCT_EFFECT"
+   },
+   {
+    "first_call": "call_00_qdG9C1nXaT65BqcpK3UA8764",
+    "second_call": "call_01_0JSJQgG1yaA2j0KoIWBx3336",
+    "same_assistant_step": false,
+    "second_started_after_first_refusal_ms": 16604,
+    "effect_equivalent": false,
+    "operation_equivalent": false,
+    "canonical_changed_between": false,
+    "calls_between": [
+     {
+      "tool": "read",
+      "status": "completed",
+      "effect": "read V:\\_TEMP_\\t1363-ym10x47r\\.saipen-launched-task.txt"
+     },
+     {
+      "tool": "read",
+      "status": "completed",
+      "effect": "read V:\\_TEMP_\\t1363-ym10x47r\\.saipen\\intake\\active\\SRC-001.meta.json"
+     },
+     {
+      "tool": "read",
+      "status": "completed",
+      "effect": "read V:\\_TEMP_\\t1363-ym10x47r\\.saipen\\intake\\contracts\\SRC-001.json"
+     },
+     {
+      "tool": "read",
+      "status": "completed",
+      "effect": "read V:\\_TEMP_\\t1363-ym10x47r\\.saipen\\intake\\coverage\\SRC-001.json"
+     },
+     {
+      "tool": "read",
+      "status": "completed",
+      "effect": "read V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\CORE.md"
+     },
+     {
+      "tool": "read",
+      "status": "completed",
+      "effect": "read V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\phases\\verify.md"
+     },
+     {
+      "tool": "read",
+      "status": "completed",
+      "effect": "read V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\phases\\done.md"
+     },
+     {
+      "tool": "bash",
+      "status": "completed",
+      "effect": "git -C \"V:\\_TEMP_\\t1363-ym10x47r\" status --short 2>&1; \"---LOG---\"; git -C \"V:\\_TEMP_\\t1363-ym10x47r\" log --oneline -10 "
+     }
+    ],
+    "shape": "SEQUENTIAL_DISTINCT_EFFECT"
+   },
+   {
+    "first_call": "call_01_0JSJQgG1yaA2j0KoIWBx3336",
+    "second_call": "call_00_Ji5UUSDo59xmQGkSrt7d1747",
+    "same_assistant_step": false,
+    "second_started_after_first_refusal_ms": 59416,
+    "effect_equivalent": false,
+    "operation_equivalent": false,
+    "canonical_changed_between": true,
+    "calls_between": [
+     {
+      "tool": "bash",
+      "status": "completed",
+      "effect": "saipen transition BUILD T-1 \"scout: src/app.py single line 'code'; no KNOWLEDGE dir; git repo, commit b6aa212\" 2>&1"
+     },
+     {
+      "tool": "read",
+      "status": "completed",
+      "effect": "read V:\\_TEMP_\\t1363-ym10x47r\\src\\app.py"
+     },
+     {
+      "tool": "edit",
+      "status": "completed",
+      "effect": "edit V:\\_TEMP_\\t1363-ym10x47r\\src\\app.py"
+     },
+     {
+      "tool": "read",
+      "status": "completed",
+      "effect": "read V:\\_TEMP_\\t1363-ym10x47r\\src\\app.py"
+     },
+     {
+      "tool": "bash",
+      "status": "completed",
+      "effect": "python --version 2>&1; py --version 2>&1"
+     },
+     {
+      "tool": "bash",
+      "status": "completed",
+      "effect": "saipen transition VERIFY T-1 \"build: docstring added to src/app.py line 1\" 2>&1"
+     },
+     {
+      "tool": "bash",
+      "status": "completed",
+      "effect": "python -m py_compile \"V:\\_TEMP_\\t1363-ym10x47r\\src\\app.py\"; if ($?) { \"py_compile: OK\" }"
+     },
+     {
+      "tool": "bash",
+      "status": "completed",
+      "effect": "python -c \"import ast,io,sys; p=r'V:\\_TEMP_\\t1363-ym10x47r\\src\\app.py'; s=open(p,encoding='utf-8').read(); t=ast.parse(s"
+     },
+     {
+      "tool": "bash",
+      "status": "error",
+      "effect": "$bad = \"V:\\_TEMP_\\opencode\\t1363-red-control.py\"; Set-Content -LiteralPath $bad -Value \"code`n\" -NoNewline; python -c \"i"
+     },
+     {
+      "tool": "bash",
+      "status": "completed",
+      "effect": "python -c \"import ast; print('red control (no docstring module):', repr(ast.get_docstring(ast.parse('code\\n'))))\""
+     },
+     {
+      "tool": "bash",
+      "status": "completed",
+      "effect": "Get-Content -LiteralPath \"V:\\_TEMP_\\t1363-ym10x47r\\.saipen\\LOG.md\" -Raw"
+     },
+     {
+      "tool": "bash",
+      "status": "completed",
+      "effect": "Select-String -Path \"V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\EXECUTION.md\",\"V:\\___VAC\\__K\\__CODE\\_AI_STUFF"
+     },
+     {
+      "tool": "bash",
+      "status": "completed",
+      "effect": "Select-String -Path \"V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\REGISTRY.json\" -Pattern \"taxonom|RUN|DEC|TAXO"
+     },
+     {
+      "tool": "read",
+      "status": "completed",
+      "effect": "read V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\REGISTRY.json"
+     },
+     {
+      "tool": "bash",
+      "status": "completed",
+      "effect": "Select-String -Path \"V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\*.md\" -Pattern \"checkpoint <|saipen checkpoin"
+     },
+     {
+      "tool": "read",
+      "status": "completed",
+      "effect": "read V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\CORE.md"
+     },
+     {
+      "tool": "bash",
+      "status": "completed",
+      "effect": "saipen checkpoint RUN T-1 \"VERIFY: py_compile OK; ast.get_docstring=Application entry point.; one-paragraph/bullets/mark"
+     }
+    ],
+    "shape": "SEQUENTIAL_DISTINCT_EFFECT"
+   }
+  ]
+ },
+ {
+  "label": "T-1380 field-rerun-E6962 gen-sha256:b374ef1f captured_unprojected",
+  "fixture": "V:/_TEMP_/t1363-15gdqkgd",
+  "fixture_log_events": [
+   "- 14.09.26 00:00 [E-0001] [agent: test-agent] [op: transition-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa] RUN: transition to SCOUT",
+   "- 17.09.26 13:23 [E-2] [parent: E-1] [T-1] [agent: test-agent] [op: userreq-9526f39ecf0448d69106e3f3efffdc9d] DEC: user request SRC-001 projected as T-1 (user_explicit)",
+   "- 17.09.26 13:23 [E-3] [parent: E-2] [T-1] [agent: test-agent] [op: claim-c3cbcb8085cf4a60bfb7c64b140e6f5c] DEC: claimed via SAIOPS -- owner test-agent",
+   "- 17.09.26 13:23 [E-4] [parent: E-3] [T-1] [agent: test-agent] [op: checkpoint-c8c887d4b670488991cd4a553b7f8e7a] RUN: SCOUT -- src/app.py single line 'code'; no manifests/tests/neighbors; trivial docstring add",
+   "- 17.09.26 13:23 [E-5] [parent: E-4] [T-1] [agent: test-agent] [op: transition-1ee4587d55374709a0cd041f902e3c04] RUN: transition to BUILD -- src/app.py docstring",
+   "- 17.09.26 13:24 [E-6] [parent: E-5] [T-1] [agent: test-agent] [op: checkpoint-e833b2723ba94e368f438cfd7366fe9c] RUN: build -> added one-line module docstring to src/app.py",
+   "- 17.09.26 13:24 [E-7] [parent: E-6] [T-1] [agent: test-agent] [op: transition-78d3c8d3c18f4fefa83d4e6381ced0c2] RUN: transition to VERIFY -- docstring present",
+   "- 17.09.26 13:24 [E-8] [parent: E-7] [T-1] [agent: test-agent] [op: checkpoint-82ecdcbadeea432b838ba3709afac7c7] RUN: verify -> python ast.parse OK; docstring present at src/app.py:1; conf: high (parse rung green)",
+   "- 17.09.26 13:24 [E-9] [parent: E-8] [T-1] [agent: test-agent] [op: checkpoint-3fabbb2047b845bb9e88d0f19fe5005f] RUN: verify -> PASS [target: T-1] conf: high -- python -c ast.parse app.py report PARSE OK; docstring line 1",
+   "- 17.09.26 13:24 [E-10] [parent: E-9] [T-1] [agent: test-agent] [op: transition-179def3be6824ee0a16e3f4099c67ebb] RUN: transition to REVIEW -- docstring verified",
+   "- 17.09.26 13:24 [E-11] [parent: E-10] [T-1] [agent: test-agent] [op: checkpoint-ec4a6be2d6d74a2f936b1e2d408517e8] RUN: review -> DEC: SHIP; re-ran python ast.parse PARSE OK; diff only src/app.py +2 (docstring+blank); no test/fixture moved; no memory card",
+   "- 17.09.26 13:24 [E-12] [parent: E-11] [T-1] [agent: test-agent] [op: transition-43a710d63c7b444793053695fa31f092] RUN: transition to SHIP -- ship docstring",
+   "- 17.09.26 13:25 [E-13] [parent: E-12] [T-1] [agent: test-agent] [op: finish-7eb443bc46954d608405cce46d0781a4] DEC: ticket finished via SAIOPS -- completion (from SHIP)"
+  ],
+  "tool_calls": 47,
+  "occurrences": [
+   {
+    "tool_index": 44,
+    "session_id": "ses_f5076c641ffeLV1NnwFbGjrI7b",
+    "message_id": "msg_0af8ae59d001BOh2GMDWLKkj07",
+    "call_id": "call_00_axx69ntTja5Oh0lHHo427620",
+    "tool": "bash",
+    "effect_fingerprint": "90157fbaf9938ca3",
+    "operation": "cd \"V:\\_TEMP_\\t1363-15gdqkgd\"; Test-Path .saipen/kitchen; Get-Content .saipen/STATE.md",
+    "attempted": "cd \"V:\\_TEMP_\\t1363-15gdqkgd\"; Test-Path .saipen/kitchen; Get-Content .saipen/STATE.md",
+    "call_start_ms": 1789651512856,
+    "refusal_end_ms": 1789651513008,
+    "assistant_step_created_ms": 1789651510685,
+    "assistant_step_completed_ms": 1789651513192,
+    "parent_message_id": "msg_0af8939fd001cQJF7u62Gj6bNE",
+    "canonical_successes_before": 11,
+    "host_error_text": "SAIPEN_GUARD_REFUSAL: PROTECTED_CANONICAL_NAMESPACE: the host tool did not execute",
+    "route_delivered": false
+   },
+   {
+    "tool_index": 46,
+    "session_id": "ses_f5076c641ffeLV1NnwFbGjrI7b",
+    "message_id": "msg_0af8aef6c001F4lw6OkDmgHuFU",
+    "call_id": "call_01_DF7Z4SP1bBWpnRz8HV4C1749",
+    "tool": "bash",
+    "effect_fingerprint": "ea72a9273abf1e75",
+    "operation": "cd \"V:\\_TEMP_\\t1363-15gdqkgd\"; if (Test-Path kitchen) {\"kitchen exists\"}; if (Test-Path \".saipen\\kitchen\") {\"saipen kitchen exists\"}",
+    "attempted": "cd \"V:\\_TEMP_\\t1363-15gdqkgd\"; if (Test-Path kitchen) {\"kitchen exists\"}; if (Test-Path \".saipen\\kitchen\") {\"saipen kitchen exists\"}",
+    "call_start_ms": 1789651515985,
+    "refusal_end_ms": 1789651516140,
+    "assistant_step_created_ms": 1789651513196,
+    "assistant_step_completed_ms": 1789651516323,
+    "parent_message_id": "msg_0af8939fd001cQJF7u62Gj6bNE",
+    "canonical_successes_before": 11,
+    "host_error_text": "SAIPEN_GUARD_REFUSAL: PROTECTED_CANONICAL_NAMESPACE: the host tool did not execute",
+    "route_delivered": false
+   }
+  ],
+  "pairs": [
+   {
+    "first_call": "call_00_axx69ntTja5Oh0lHHo427620",
+    "second_call": "call_01_DF7Z4SP1bBWpnRz8HV4C1749",
+    "same_assistant_step": false,
+    "second_started_after_first_refusal_ms": 2977,
+    "effect_equivalent": false,
+    "operation_equivalent": false,
+    "canonical_changed_between": false,
+    "calls_between": [
+     {
+      "tool": "read",
+      "status": "completed",
+      "effect": "read V:\\_TEMP_\\t1363-15gdqkgd\\.saipen\\STATE.md"
+     }
+    ],
+    "shape": "SEQUENTIAL_DISTINCT_EFFECT"
+   }
+  ]
+ },
+ {
+  "label": "T-1380 field-rerun-E6962 gen-sha256:b374ef1f windows_path_task",
+  "fixture": "V:/_TEMP_/t1363-q_02iu_z",
+  "fixture_log_events": [
+   "- 14.09.26 00:00 [E-0001] [agent: test-agent] [op: transition-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa] RUN: transition to SCOUT",
+   "- 17.09.26 13:26 [E-2] [parent: E-1] [T-1] [agent: test-agent] [op: userreq-02eccb6404a249a7bd69d433f5a3b041] DEC: user request SRC-001 projected as T-1 (user_explicit)",
+   "- 17.09.26 13:26 [E-3] [parent: E-2] [T-1] [agent: test-agent] [op: claim-154d86a680884d60a059007ac26a9b4a] DEC: claimed via SAIOPS -- owner test-agent",
+   "- 17.09.26 13:26 [E-4] [parent: E-3] [agent: test-agent] [op: checkpoint-821d03138c50452a954592e5bb53c3c3] RUN: SCOUT -- T-1: src/app.py is 1-line placeholder `code`; notes file has MODULE_PURPOSE=launch ledger 5b0e334229a3; no build/test manifest in repo",
+   "- 17.09.26 13:26 [E-5] [parent: E-4] [T-1] [agent: test-agent] [op: transition-36861031335d447f9bb3b49ebf6faa80] RUN: transition to BUILD",
+   "- 17.09.26 13:26 [E-6] [parent: E-5] [agent: test-agent] [op: checkpoint-28d00e5bee414e1eab7e5314ce29e18b] RUN: build -> src/app.py: prepended module docstring \"launch ledger 5b0e334229a3\" (exact MODULE_PURPOSE value from operator notes/notes with spaces.txt)",
+   "- 17.09.26 13:27 [E-7] [parent: E-6] [T-1] [agent: test-agent] [op: transition-9bd7fa9c72ff49d5a5e11eb5fb98a624] RUN: transition to VERIFY",
+   "- 17.09.26 13:27 [E-8] [parent: E-7] [agent: test-agent] [op: checkpoint-4ebad6c48b464f658fb683e71108741f] RUN: verify -> PASS conf:high: first line ceq \"launch ledger 5b0e334229a3\", ast.parse OK, ast.get_docstring raw == MODULE_PURPOSE; red control: wrong-value literal does not match",
+   "- 17.09.26 13:27 [E-9] [parent: E-8] [T-1] [agent: test-agent] [op: checkpoint-3dbe7ac6c7a740c88afd91ecec4826af] RUN: verify -> PASS [target: T-1] conf: high -- python ast.parse OK; first line ceq \"launch ledger 5b0e334229a3\"; ast.get_docstring raw == MODULE_PURPOSE; red control: mismatched literal fails",
+   "- 17.09.26 13:27 [E-10] [parent: E-9] [T-1] [agent: test-agent] [op: transition-dec52f42e6d24868890582de7159c1e2] RUN: transition to REVIEW",
+   "- 17.09.26 13:27 [E-11] [parent: E-10] [T-1] [agent: test-agent] [op: checkpoint-02734b0a5dbb499f91a707582b2b8fa6] RUN: review pass: independent re-run green, no blocking findings",
+   "- 17.09.26 13:27 [E-12] [parent: E-11] [T-1] [agent: test-agent] [op: transition-e9b7d69cfd704c689563706cac775700] RUN: transition to SHIP",
+   "- 17.09.26 13:27 [E-13] [parent: E-12] [T-1] [agent: test-agent] [op: finish-e478da3165714decb69b362f0e38f54e] DEC: ticket finished via SAIOPS -- completion (from SHIP)"
+  ],
+  "tool_calls": 36,
+  "occurrences": [
+   {
+    "tool_index": 29,
+    "session_id": "ses_f50740ca9ffeJuU5anJUITaotw",
+    "message_id": "msg_0af8d00a7001ZpctUfzSIu6eQL",
+    "call_id": "call_00_OpBdZxNvtYGzE3dvODoc1576",
+    "tool": "bash",
+    "effect_fingerprint": "5d4b2c9f6bb63b83",
+    "operation": "saipen checkpoint RUN T-1",
+    "attempted": "saipen checkpoint RUN T-1 'review -> independent re-run PASS conf: high -- ast docstring == launch ledger 5b0e334229a3; diff limited to src/app.py + .saipen memory; no P0/P1. DEC: SHIP' --project-root \"V:\\_TEMP_\\t1363-q_02iu_z\" 2>&1",
+    "call_start_ms": 1789651650881,
+    "refusal_end_ms": 1789651651037,
+    "assistant_step_created_ms": 1789651648679,
+    "assistant_step_completed_ms": 1789651651218,
+    "parent_message_id": "msg_0af8bf393001rATjGF7WuKxdwx",
+    "canonical_successes_before": 9,
+    "host_error_text": "SAIPEN_GUARD_REFUSAL: PROTECTED_CANONICAL_NAMESPACE: the host tool did not execute",
+    "route_delivered": false
+   },
+   {
+    "tool_index": 30,
+    "session_id": "ses_f50740ca9ffeJuU5anJUITaotw",
+    "message_id": "msg_0af8d0a96001idFjzLFj79HjEW",
+    "call_id": "call_00_VXeHWzbZFxQHprJ8taiR6273",
+    "tool": "bash",
+    "effect_fingerprint": "366c58d0049bd6d3",
+    "operation": "saipen checkpoint RUN T-1",
+    "attempted": "saipen checkpoint RUN T-1 'review -> independent re-run PASS conf: high -- ast docstring == launch ledger 5b0e334229a3; diff limited to src/app.py and .saipen memory; no P0/P1 findings' --project-root \"V:\\_TEMP_\\t1363-q_02iu_z\" 2>&1",
+    "call_start_ms": 1789651655113,
+    "refusal_end_ms": 1789651655273,
+    "assistant_step_created_ms": 1789651651222,
+    "assistant_step_completed_ms": 1789651655457,
+    "parent_message_id": "msg_0af8bf393001rATjGF7WuKxdwx",
+    "canonical_successes_before": 9,
+    "host_error_text": "SAIPEN_GUARD_REFUSAL: PROTECTED_CANONICAL_NAMESPACE: the host tool did not execute",
+    "route_delivered": false
+   },
+   {
+    "tool_index": 31,
+    "session_id": "ses_f50740ca9ffeJuU5anJUITaotw",
+    "message_id": "msg_0af8d1b26001r7kAtxS5QyYSM5",
+    "call_id": "call_00_UABcqkFZwlfJFHz6eRMx6584",
+    "tool": "bash",
+    "effect_fingerprint": "0606aecdb3473a02",
+    "operation": "saipen checkpoint RUN T-1",
+    "attempted": "saipen checkpoint RUN T-1 'review -> independent re-run passed conf: high -- ast.get_docstring(app.py) equals MODULE_PURPOSE value; diff confined to src/app.py and .saipen memory; no P0/P1 findings' --project-root \"V:\\_TEMP_\\t1363-q_02iu_z\"",
+    "call_start_ms": 1789651657886,
+    "refusal_end_ms": 1789651658048,
+    "assistant_step_created_ms": 1789651655462,
+    "assistant_step_completed_ms": 1789651658241,
+    "parent_message_id": "msg_0af8bf393001rATjGF7WuKxdwx",
+    "canonical_successes_before": 9,
+    "host_error_text": "SAIPEN_GUARD_REFUSAL: PROTECTED_CANONICAL_NAMESPACE: the host tool did not execute",
+    "route_delivered": false
+   }
+  ],
+  "pairs": [
+   {
+    "first_call": "call_00_OpBdZxNvtYGzE3dvODoc1576",
+    "second_call": "call_00_VXeHWzbZFxQHprJ8taiR6273",
+    "same_assistant_step": false,
+    "second_started_after_first_refusal_ms": 4076,
+    "effect_equivalent": false,
+    "operation_equivalent": true,
+    "canonical_changed_between": false,
+    "calls_between": [],
+    "shape": "SEQUENTIAL_REWORDED_RETRY"
+   },
+   {
+    "first_call": "call_00_VXeHWzbZFxQHprJ8taiR6273",
+    "second_call": "call_00_UABcqkFZwlfJFHz6eRMx6584",
+    "same_assistant_step": false,
+    "second_started_after_first_refusal_ms": 2613,
+    "effect_equivalent": false,
+    "operation_equivalent": true,
+    "canonical_changed_between": false,
+    "calls_between": [],
+    "shape": "SEQUENTIAL_REWORDED_RETRY"
+   }
+  ]
+ },
+ {
+  "label": "T-1385 smoke gen-sha256:a8290234 long_file_task",
+  "fixture": "V:/_TEMP_/t1363-gtj4k4e3",
+  "fixture_log_events": [
+   "- 14.09.26 00:00 [E-0001] [agent: test-agent] [op: transition-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa] RUN: transition to SCOUT",
+   "- 17.09.26 15:31 [E-2] [parent: E-1] [T-1] [agent: test-agent] [op: userreq-ef41935b3eb547a0aa1fe0638802c5b8] DEC: user request SRC-001 projected as T-1 (user_explicit)",
+   "- 17.09.26 15:31 [E-3] [parent: E-2] [T-1] [agent: test-agent] [op: claim-ac6a94510b8f4512b13ba377d080c110] DEC: claimed via SAIOPS -- owner test-agent",
+   "- 17.09.26 15:32 [E-4] [parent: E-3] [agent: test-agent] [op: checkpoint-cfb8320f73124ca3a7bf75b7c84467c9] RUN: SCOUT -- src/app.py is 1 line 'code'; task: module docstring, plain, one paragraph, no marketing, no bullet list; say line number",
+   "- 17.09.26 15:32 [E-5] [parent: E-4] [T-1] [agent: test-agent] [op: transition-81b155c016f6448b83b9c4ca0c6dda6b] RUN: transition to BUILD",
+   "- 17.09.26 15:32 [E-6] [parent: E-5] [T-1] [agent: test-agent] [op: checkpoint-225daa5865884a15a1e5b9de2ba0c869] RUN: added one-paragraph module docstring at src/app.py:1",
+   "- 17.09.26 15:32 [E-7] [parent: E-6] [T-1] [agent: test-agent] [op: transition-26cdd66cf662450fac52340474cb3f0e] RUN: transition to VERIFY",
+   "- 17.09.26 15:32 [E-8] [parent: E-7] [T-1] [agent: test-agent] [op: checkpoint-a3a71ba8dcbc4eb9be97b287438e39af] RUN: VERIFY: ast.parse PARSE OK; docstring at src/app.py:1, one paragraph, plain, no list, no 'provides'; conf:med (smoke only, no test harness)",
+   "- 17.09.26 15:32 [E-9] [parent: E-8] [T-1] [agent: test-agent] [op: checkpoint-1cdfa10a154d423abccd9f89ef8a6264] RUN: verify -> PASS [target: T-1] conf: med -- python ast.parse PARSE OK; line1 is module docstring, one paragraph, plain, no 'provides', no list; matches user description",
+   "- 17.09.26 15:32 [E-10] [parent: E-9] [T-1] [agent: test-agent] [op: checkpoint-eda8f7c7cfdf4848b9d61abd4185700a] RUN: verify -> PASS [target: T-1] conf: high -- python ast.parse src/app.py -> PARSE OK; strongest available rung (no test harness in repo); src/app.py:1 = one-paragraph module docstring, no list, no 'provides'",
+   "- 17.09.26 15:32 [E-11] [parent: E-10] [T-1] [agent: test-agent] [op: transition-59c4f88c96524b75886991f01c54e8d0] RUN: transition to REVIEW",
+   "- 17.09.26 15:33 [E-12] [parent: E-11] [T-1] [agent: test-agent] [op: checkpoint-28f0b61ddaf948bab57eba15f6c8e4fd] DEC: REVIEW verdict: SHIP -- independent re-run (ast module docstring, line 1, single paragraph, no 'provides'); no P0/P1; no follow-ups warranted",
+   "- 17.09.26 15:33 [E-13] [parent: E-12] [T-1] [agent: test-agent] [op: transition-74c7451cf1af4df5962e6c2c815741b3] RUN: transition to SHIP",
+   "- 17.09.26 15:33 [E-14] [parent: E-13] [T-1] [agent: test-agent] [op: finish-7eed39a2eac744f5a6f49884dcc062a0] DEC: ticket finished via SAIOPS -- completion (from SHIP)"
+  ],
+  "tool_calls": 54,
+  "occurrences": [
+   {
+    "tool_index": 36,
+    "session_id": "ses_f500173eaffe77ECIDxoJjYWhL",
+    "message_id": "msg_0affff483001BaSWG7V3J61K5T",
+    "call_id": "call_00_ET_MXRVw5yBfdWiIzZlzPQW1971",
+    "tool": "bash",
+    "effect_fingerprint": "605243dd7e72b048",
+    "operation": "python \"V:\\_TEMP_\\t1363-gtj4k4e3\\.saipen\\kitchen\\review_check.py\"",
+    "attempted": "python \"V:\\_TEMP_\\t1363-gtj4k4e3\\.saipen\\kitchen\\review_check.py\"",
+    "call_start_ms": 1789659183918,
+    "refusal_end_ms": 1789659184076,
+    "assistant_step_created_ms": 1789659182211,
+    "assistant_step_completed_ms": 1789659184254,
+    "parent_message_id": "msg_0affe8c50001lt4L3spW9q2dOq",
+    "canonical_successes_before": 10,
+    "host_error_text": "SAIPEN_GUARD_REFUSAL: PROTECTED_CANONICAL_NAMESPACE: the host tool did not execute",
+    "route_delivered": false
+   },
+   {
+    "tool_index": 39,
+    "session_id": "ses_f500173eaffe77ECIDxoJjYWhL",
+    "message_id": "msg_0b00012d4001LBQ9vALmNltfrr",
+    "call_id": "call_00_M0J85lW8hPxpqyWfwKGI5745",
+    "tool": "bash",
+    "effect_fingerprint": "d9e9691236d53dd1",
+    "operation": "Remove-Item -LiteralPath \"V:\\_TEMP_\\t1363-gtj4k4e3\\.saipen\\kitchen\\review_check.py\" -ErrorAction SilentlyContinue; Test-Path \"V:\\_TEMP_\\t1363-gtj4k4e3\\.saipen\\kitchen\\review_check.py\"",
+    "attempted": "Remove-Item -LiteralPath \"V:\\_TEMP_\\t1363-gtj4k4e3\\.saipen\\kitchen\\review_check.py\" -ErrorAction SilentlyContinue; Test-Path \"V:\\_TEMP_\\t1363-gtj4k4e3\\.saipen\\kitchen\\review_check.py\"",
+    "call_start_ms": 1789659192725,
+    "refusal_end_ms": 1789659192880,
+    "assistant_step_created_ms": 1789659189972,
+    "assistant_step_completed_ms": 1789659193069,
+    "parent_message_id": "msg_0affe8c50001lt4L3spW9q2dOq",
+    "canonical_successes_before": 10,
+    "host_error_text": "SAIPEN_GUARD_REFUSAL: PROTECTED_CANONICAL_NAMESPACE: the host tool did not execute",
+    "route_delivered": false
+   }
+  ],
+  "pairs": [
+   {
+    "first_call": "call_00_ET_MXRVw5yBfdWiIzZlzPQW1971",
+    "second_call": "call_00_M0J85lW8hPxpqyWfwKGI5745",
+    "same_assistant_step": false,
+    "second_started_after_first_refusal_ms": 8649,
+    "effect_equivalent": false,
+    "operation_equivalent": false,
+    "canonical_changed_between": false,
+    "calls_between": [
+     {
+      "tool": "write",
+      "status": "completed",
+      "effect": "write V:\\_TEMP_\\opencode\\saipen_review_check.py"
+     },
+     {
+      "tool": "bash",
+      "status": "completed",
+      "effect": "python \"V:\\_TEMP_\\opencode\\saipen_review_check.py\""
+     }
+    ],
+    "shape": "SEQUENTIAL_DISTINCT_EFFECT"
+   }
+  ]
+ }
+]

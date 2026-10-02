@@ -1,0 +1,195 @@
+.EEFFEEFFFFFFFFFFFFFFF.
+======================================================================
+ERROR: test_malformed_evidence_top_level_refuses (tools.test_crew_applicability.StrictReleaseAuthorityTests.test_malformed_evidence_top_level_refuses) (evidence=None)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_crew_applicability.py", line 872, in test_malformed_evidence_top_level_refuses
+    self.assertTrue(C._missing_pre_ship_evidence(replace(self.receipt(), pre_ship_evidence=evidence)))
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\crew.py", line 1278, in _missing_pre_ship_evidence
+    required, problem = _certified_role_names(release)
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\crew.py", line 1263, in _certified_role_names
+    forged = [
+             ^
+TypeError: 'NoneType' object is not iterable
+
+======================================================================
+ERROR: test_malformed_evidence_top_level_refuses (tools.test_crew_applicability.StrictReleaseAuthorityTests.test_malformed_evidence_top_level_refuses) (evidence=7)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_crew_applicability.py", line 872, in test_malformed_evidence_top_level_refuses
+    self.assertTrue(C._missing_pre_ship_evidence(replace(self.receipt(), pre_ship_evidence=evidence)))
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\crew.py", line 1278, in _missing_pre_ship_evidence
+    required, problem = _certified_role_names(release)
+                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\crew.py", line 1263, in _certified_role_names
+    forged = [
+             ^
+TypeError: 'int' object is not iterable
+
+======================================================================
+ERROR: test_malformed_present_manifest_never_becomes_legacy (tools.test_crew_applicability.StrictReleaseAuthorityTests.test_malformed_present_manifest_never_becomes_legacy) (manifest='bad')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_crew_applicability.py", line 837, in test_malformed_present_manifest_never_becomes_legacy
+    projected = _receipt_evidence({
+                ^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\release.py", line 4366, in _receipt_evidence
+    "pre_ship_applicability": dict(record.get("crew_pre_ship_applicability") or {}),
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ValueError: dictionary update sequence element #0 has length 1; 2 is required
+
+======================================================================
+ERROR: test_malformed_present_manifest_never_becomes_legacy (tools.test_crew_applicability.StrictReleaseAuthorityTests.test_malformed_present_manifest_never_becomes_legacy) (manifest=7)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_crew_applicability.py", line 837, in test_malformed_present_manifest_never_becomes_legacy
+    projected = _receipt_evidence({
+                ^^^^^^^^^^^^^^^^^^^
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\saipen_engine\release.py", line 4366, in _receipt_evidence
+    "pre_ship_applicability": dict(record.get("crew_pre_ship_applicability") or {}),
+                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: 'int' object is not iterable
+
+======================================================================
+FAIL: test_malformed_present_manifest_never_becomes_legacy (tools.test_crew_applicability.StrictReleaseAuthorityTests.test_malformed_present_manifest_never_becomes_legacy) (manifest=None)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_crew_applicability.py", line 848, in test_malformed_present_manifest_never_becomes_legacy
+    self.assertTrue(C._missing_pre_ship_evidence(receipt))
+AssertionError: '' is not true
+
+======================================================================
+FAIL: test_malformed_present_manifest_never_becomes_legacy (tools.test_crew_applicability.StrictReleaseAuthorityTests.test_malformed_present_manifest_never_becomes_legacy) (manifest=[])
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_crew_applicability.py", line 848, in test_malformed_present_manifest_never_becomes_legacy
+    self.assertTrue(C._missing_pre_ship_evidence(receipt))
+AssertionError: '' is not true
+
+======================================================================
+FAIL: test_malformed_present_manifest_never_becomes_legacy (tools.test_crew_applicability.StrictReleaseAuthorityTests.test_malformed_present_manifest_never_becomes_legacy) (manifest={})
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_crew_applicability.py", line 848, in test_malformed_present_manifest_never_becomes_legacy
+    self.assertTrue(C._missing_pre_ship_evidence(receipt))
+AssertionError: '' is not true
+
+======================================================================
+FAIL: test_manifest_semantic_damage_refuses (tools.test_crew_applicability.StrictReleaseAuthorityTests.test_manifest_semantic_damage_refuses) (field='probe', value='visual-surface')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_crew_applicability.py", line 831, in test_manifest_semantic_damage_refuses
+    self.assertTrue(C._missing_pre_ship_evidence(receipt))
+AssertionError: '' is not true
+
+======================================================================
+FAIL: test_manifest_semantic_damage_refuses (tools.test_crew_applicability.StrictReleaseAuthorityTests.test_manifest_semantic_damage_refuses) (field='probe', value=None)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_crew_applicability.py", line 831, in test_manifest_semantic_damage_refuses
+    self.assertTrue(C._missing_pre_ship_evidence(receipt))
+AssertionError: '' is not true
+
+======================================================================
+FAIL: test_manifest_semantic_damage_refuses (tools.test_crew_applicability.StrictReleaseAuthorityTests.test_manifest_semantic_damage_refuses) (field='probe', value='unknown')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_crew_applicability.py", line 831, in test_manifest_semantic_damage_refuses
+    self.assertTrue(C._missing_pre_ship_evidence(receipt))
+AssertionError: '' is not true
+
+======================================================================
+FAIL: test_manifest_semantic_damage_refuses (tools.test_crew_applicability.StrictReleaseAuthorityTests.test_manifest_semantic_damage_refuses) (field='verdict', value='NOT_APPLICABLE')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_crew_applicability.py", line 831, in test_manifest_semantic_damage_refuses
+    self.assertTrue(C._missing_pre_ship_evidence(receipt))
+AssertionError: '' is not true
+
+======================================================================
+FAIL: test_manifest_semantic_damage_refuses (tools.test_crew_applicability.StrictReleaseAuthorityTests.test_manifest_semantic_damage_refuses) (field='reason', value='  ')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_crew_applicability.py", line 831, in test_manifest_semantic_damage_refuses
+    self.assertTrue(C._missing_pre_ship_evidence(receipt))
+AssertionError: '' is not true
+
+======================================================================
+FAIL: test_manifest_semantic_damage_refuses (tools.test_crew_applicability.StrictReleaseAuthorityTests.test_manifest_semantic_damage_refuses) (field='reason', value=42)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_crew_applicability.py", line 831, in test_manifest_semantic_damage_refuses
+    self.assertTrue(C._missing_pre_ship_evidence(receipt))
+AssertionError: '' is not true
+
+======================================================================
+FAIL: test_missing_unknown_or_malformed_role (tools.test_crew_applicability.StrictReleaseAuthorityTests.test_missing_unknown_or_malformed_role) (damage='extra')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_crew_applicability.py", line 860, in test_missing_unknown_or_malformed_role
+    self.assertTrue(C._missing_pre_ship_evidence(receipt))
+AssertionError: '' is not true
+
+======================================================================
+FAIL: test_unusable_package_collection_refuses (tools.test_crew_applicability.StrictReleaseAuthorityTests.test_unusable_package_collection_refuses) (packages=[])
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_crew_applicability.py", line 867, in test_unusable_package_collection_refuses
+    self.assertTrue(C._missing_pre_ship_evidence(receipt))
+AssertionError: '' is not true
+
+======================================================================
+FAIL: test_unusable_package_collection_refuses (tools.test_crew_applicability.StrictReleaseAuthorityTests.test_unusable_package_collection_refuses) (packages=None)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_crew_applicability.py", line 867, in test_unusable_package_collection_refuses
+    self.assertTrue(C._missing_pre_ship_evidence(receipt))
+AssertionError: '' is not true
+
+======================================================================
+FAIL: test_unusable_package_collection_refuses (tools.test_crew_applicability.StrictReleaseAuthorityTests.test_unusable_package_collection_refuses) (packages={})
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_crew_applicability.py", line 867, in test_unusable_package_collection_refuses
+    self.assertTrue(C._missing_pre_ship_evidence(receipt))
+AssertionError: '' is not true
+
+======================================================================
+FAIL: test_unusable_package_collection_refuses (tools.test_crew_applicability.StrictReleaseAuthorityTests.test_unusable_package_collection_refuses) (packages='package')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_crew_applicability.py", line 867, in test_unusable_package_collection_refuses
+    self.assertTrue(C._missing_pre_ship_evidence(receipt))
+AssertionError: '' is not true
+
+======================================================================
+FAIL: test_unusable_package_collection_refuses (tools.test_crew_applicability.StrictReleaseAuthorityTests.test_unusable_package_collection_refuses) (packages=[None])
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_crew_applicability.py", line 867, in test_unusable_package_collection_refuses
+    self.assertTrue(C._missing_pre_ship_evidence(receipt))
+AssertionError: '' is not true
+
+======================================================================
+FAIL: test_unusable_package_collection_refuses (tools.test_crew_applicability.StrictReleaseAuthorityTests.test_unusable_package_collection_refuses) (packages=[{}])
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_crew_applicability.py", line 867, in test_unusable_package_collection_refuses
+    self.assertTrue(C._missing_pre_ship_evidence(receipt))
+AssertionError: '' is not true
+
+======================================================================
+FAIL: test_unusable_package_collection_refuses (tools.test_crew_applicability.StrictReleaseAuthorityTests.test_unusable_package_collection_refuses) (packages=[{'package_identity': 'p'}])
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_crew_applicability.py", line 867, in test_unusable_package_collection_refuses
+    self.assertTrue(C._missing_pre_ship_evidence(receipt))
+AssertionError: '' is not true
+
+----------------------------------------------------------------------
+Ran 7 tests in 0.013s
+
+FAILED (failures=17, errors=4)

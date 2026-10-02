@@ -1,0 +1,2418 @@
+{
+  "supplied_tickets": [
+    {
+      "at": 1790222018.6953444,
+      "ok": true,
+      "ticket": "T-4"
+    },
+    {
+      "at": 1790222078.7586915,
+      "ok": true,
+      "ticket": "T-5"
+    },
+    {
+      "at": 1790222168.8165262,
+      "ok": true,
+      "ticket": "T-6"
+    },
+    {
+      "at": 1790222228.8764458,
+      "ok": true,
+      "ticket": "T-7"
+    },
+    {
+      "at": 1790222318.9405644,
+      "ok": true,
+      "ticket": "T-8"
+    },
+    {
+      "at": 1790222379.0096893,
+      "ok": true,
+      "ticket": "T-9"
+    },
+    {
+      "at": 1790222469.098869,
+      "ok": true,
+      "ticket": "T-10"
+    },
+    {
+      "at": 1790222559.1701338,
+      "ok": true,
+      "ticket": "T-11"
+    },
+    {
+      "at": 1790222649.2425435,
+      "ok": true,
+      "ticket": "T-12"
+    },
+    {
+      "at": 1790222739.3633926,
+      "ok": true,
+      "ticket": "T-13"
+    },
+    {
+      "at": 1790222829.4807723,
+      "ok": true,
+      "ticket": "T-14"
+    },
+    {
+      "at": 1790222919.6082163,
+      "ok": true,
+      "ticket": "T-15"
+    },
+    {
+      "at": 1790223129.7465208,
+      "ok": true,
+      "ticket": "T-16"
+    },
+    {
+      "at": 1790223219.880554,
+      "ok": true,
+      "ticket": "T-17"
+    },
+    {
+      "at": 1790223340.01053,
+      "ok": true,
+      "ticket": "T-18"
+    },
+    {
+      "at": 1790223430.0956807,
+      "ok": true,
+      "ticket": "T-19"
+    },
+    {
+      "at": 1790223550.1916056,
+      "ok": true,
+      "ticket": "T-20"
+    },
+    {
+      "at": 1790223670.3673887,
+      "ok": true,
+      "ticket": "T-21"
+    },
+    {
+      "at": 1790223820.5317903,
+      "ok": true,
+      "ticket": "T-22"
+    },
+    {
+      "at": 1790223940.7200625,
+      "ok": true,
+      "ticket": "T-23"
+    },
+    {
+      "at": 1790224120.9087772,
+      "ok": true,
+      "ticket": "T-24"
+    },
+    {
+      "at": 1790224331.0956788,
+      "ok": true,
+      "ticket": "T-25"
+    },
+    {
+      "at": 1790224391.2931209,
+      "ok": true,
+      "ticket": "T-26"
+    },
+    {
+      "at": 1790224481.503084,
+      "ok": true,
+      "ticket": "T-27"
+    },
+    {
+      "at": 1790224601.6977441,
+      "ok": true,
+      "ticket": "T-28"
+    },
+    {
+      "at": 1790224691.9349613,
+      "ok": true,
+      "ticket": "T-29"
+    },
+    {
+      "at": 1790224752.0291576,
+      "ok": true,
+      "ticket": "T-30"
+    },
+    {
+      "at": 1790224872.1804664,
+      "ok": true,
+      "ticket": "T-31"
+    },
+    {
+      "at": 1790224932.3788316,
+      "ok": true,
+      "ticket": "T-32"
+    },
+    {
+      "at": 1790224992.590512,
+      "ok": true,
+      "ticket": "T-33"
+    },
+    {
+      "at": 1790225082.7512228,
+      "ok": true,
+      "ticket": "T-34"
+    },
+    {
+      "at": 1790225142.8616602,
+      "ok": true,
+      "ticket": "T-35"
+    },
+    {
+      "at": 1790225203.0526564,
+      "ok": true,
+      "ticket": "T-36"
+    },
+    {
+      "at": 1790225293.2507517,
+      "ok": true,
+      "ticket": "T-37"
+    },
+    {
+      "at": 1790225473.4654105,
+      "ok": true,
+      "ticket": "T-38"
+    },
+    {
+      "at": 1790225593.6753674,
+      "ok": true,
+      "ticket": "T-39"
+    },
+    {
+      "at": 1790225683.8504798,
+      "ok": true,
+      "ticket": "T-40"
+    },
+    {
+      "at": 1790225834.0586374,
+      "ok": true,
+      "ticket": "T-41"
+    },
+    {
+      "at": 1790225924.254954,
+      "ok": true,
+      "ticket": "T-42"
+    },
+    {
+      "at": 1790226044.4239225,
+      "ok": true,
+      "ticket": "T-43"
+    },
+    {
+      "at": 1790226134.6567204,
+      "ok": true,
+      "ticket": "T-44"
+    },
+    {
+      "at": 1790226224.8845687,
+      "ok": true,
+      "ticket": "T-45"
+    },
+    {
+      "at": 1790226345.096816,
+      "ok": true,
+      "ticket": "T-46"
+    },
+    {
+      "at": 1790226435.3223448,
+      "ok": true,
+      "ticket": "T-47"
+    },
+    {
+      "at": 1790226675.5603466,
+      "ok": true,
+      "ticket": "T-48"
+    },
+    {
+      "at": 1790226795.7072744,
+      "ok": true,
+      "ticket": "T-49"
+    },
+    {
+      "at": 1790226885.8545816,
+      "ok": true,
+      "ticket": "T-50"
+    },
+    {
+      "at": 1790226976.0719411,
+      "ok": true,
+      "ticket": "T-51"
+    },
+    {
+      "at": 1790227066.2202213,
+      "ok": true,
+      "ticket": "T-52"
+    },
+    {
+      "at": 1790227156.3494568,
+      "ok": true,
+      "ticket": "T-53"
+    },
+    {
+      "at": 1790227246.3765619,
+      "ok": false,
+      "ticket": null
+    },
+    {
+      "at": 1790227276.504698,
+      "ok": true,
+      "ticket": "T-54"
+    },
+    {
+      "at": 1790227336.654593,
+      "ok": true,
+      "ticket": "T-55"
+    },
+    {
+      "at": 1790227456.8430789,
+      "ok": true,
+      "ticket": "T-56"
+    },
+    {
+      "at": 1790227546.9841685,
+      "ok": true,
+      "ticket": "T-57"
+    },
+    {
+      "at": 1790227637.124787,
+      "ok": true,
+      "ticket": "T-58"
+    },
+    {
+      "at": 1790227907.3152487,
+      "ok": true,
+      "ticket": "T-59"
+    },
+    {
+      "at": 1790228057.4883451,
+      "ok": true,
+      "ticket": "T-60"
+    },
+    {
+      "at": 1790228147.6871927,
+      "ok": true,
+      "ticket": "T-61"
+    },
+    {
+      "at": 1790228237.8511372,
+      "ok": true,
+      "ticket": "T-62"
+    },
+    {
+      "at": 1790228327.9929836,
+      "ok": true,
+      "ticket": "T-63"
+    },
+    {
+      "at": 1790228418.2388873,
+      "ok": true,
+      "ticket": "T-64"
+    },
+    {
+      "at": 1790228538.3978765,
+      "ok": true,
+      "ticket": "T-65"
+    },
+    {
+      "at": 1790228658.670514,
+      "ok": true,
+      "ticket": "T-66"
+    },
+    {
+      "at": 1790228778.9967215,
+      "ok": true,
+      "ticket": "T-67"
+    },
+    {
+      "at": 1790228899.2006054,
+      "ok": true,
+      "ticket": "T-68"
+    },
+    {
+      "at": 1790229139.373599,
+      "ok": true,
+      "ticket": "T-69"
+    },
+    {
+      "at": 1790229259.589713,
+      "ok": true,
+      "ticket": "T-70"
+    },
+    {
+      "at": 1790229379.7917972,
+      "ok": true,
+      "ticket": "T-71"
+    },
+    {
+      "at": 1790229469.9612017,
+      "ok": true,
+      "ticket": "T-72"
+    },
+    {
+      "at": 1790229590.2429247,
+      "ok": true,
+      "ticket": "T-73"
+    },
+    {
+      "at": 1790229680.4076166,
+      "ok": true,
+      "ticket": "T-74"
+    },
+    {
+      "at": 1790229770.5791216,
+      "ok": true,
+      "ticket": "T-75"
+    },
+    {
+      "at": 1790229860.8117516,
+      "ok": true,
+      "ticket": "T-76"
+    },
+    {
+      "at": 1790229981.1219194,
+      "ok": true,
+      "ticket": "T-77"
+    },
+    {
+      "at": 1790230101.4357877,
+      "ok": true,
+      "ticket": "T-78"
+    },
+    {
+      "at": 1790230311.7248988,
+      "ok": true,
+      "ticket": "T-79"
+    },
+    {
+      "at": 1790230431.769669,
+      "ok": false,
+      "ticket": null
+    },
+    {
+      "at": 1790230462.0300596,
+      "ok": true,
+      "ticket": "T-80"
+    },
+    {
+      "at": 1790230492.2748554,
+      "ok": true,
+      "ticket": "T-81"
+    },
+    {
+      "at": 1790230582.5228484,
+      "ok": true,
+      "ticket": "T-82"
+    },
+    {
+      "at": 1790230702.7863147,
+      "ok": true,
+      "ticket": "T-83"
+    },
+    {
+      "at": 1790230793.1240106,
+      "ok": true,
+      "ticket": "T-84"
+    },
+    {
+      "at": 1790230883.3517056,
+      "ok": true,
+      "ticket": "T-85"
+    },
+    {
+      "at": 1790230973.537166,
+      "ok": true,
+      "ticket": "T-86"
+    },
+    {
+      "at": 1790231063.748511,
+      "ok": true,
+      "ticket": "T-87"
+    },
+    {
+      "at": 1790231153.9502566,
+      "ok": true,
+      "ticket": "T-88"
+    },
+    {
+      "at": 1790231244.1403136,
+      "ok": true,
+      "ticket": "T-89"
+    },
+    {
+      "at": 1790231334.3477657,
+      "ok": true,
+      "ticket": "T-90"
+    },
+    {
+      "at": 1790231514.6021836,
+      "ok": true,
+      "ticket": "T-91"
+    },
+    {
+      "at": 1790231634.8066545,
+      "ok": true,
+      "ticket": "T-92"
+    },
+    {
+      "at": 1790231755.0864248,
+      "ok": true,
+      "ticket": "T-93"
+    },
+    {
+      "at": 1790231875.3175657,
+      "ok": true,
+      "ticket": "T-94"
+    },
+    {
+      "at": 1790231995.5312915,
+      "ok": true,
+      "ticket": "T-95"
+    },
+    {
+      "at": 1790232115.7784386,
+      "ok": true,
+      "ticket": "T-96"
+    },
+    {
+      "at": 1790232296.2189615,
+      "ok": true,
+      "ticket": "T-97"
+    },
+    {
+      "at": 1790232476.6340504,
+      "ok": true,
+      "ticket": "T-98"
+    },
+    {
+      "at": 1790232716.9905763,
+      "ok": true,
+      "ticket": "T-99"
+    },
+    {
+      "at": 1790232837.2751534,
+      "ok": true,
+      "ticket": "T-100"
+    },
+    {
+      "at": 1790232927.7119184,
+      "ok": true,
+      "ticket": "T-101"
+    },
+    {
+      "at": 1790233048.008044,
+      "ok": true,
+      "ticket": "T-102"
+    },
+    {
+      "at": 1790233138.3489487,
+      "ok": true,
+      "ticket": "T-103"
+    },
+    {
+      "at": 1790233198.6374705,
+      "ok": true,
+      "ticket": "T-104"
+    },
+    {
+      "at": 1790233289.0294118,
+      "ok": true,
+      "ticket": "T-105"
+    },
+    {
+      "at": 1790233439.3177767,
+      "ok": true,
+      "ticket": "T-106"
+    },
+    {
+      "at": 1790233529.548647,
+      "ok": true,
+      "ticket": "T-107"
+    },
+    {
+      "at": 1790233620.0104783,
+      "ok": true,
+      "ticket": "T-108"
+    },
+    {
+      "at": 1790233710.2933674,
+      "ok": true,
+      "ticket": "T-109"
+    },
+    {
+      "at": 1790233920.6579218,
+      "ok": true,
+      "ticket": "T-110"
+    },
+    {
+      "at": 1790234011.0207038,
+      "ok": true,
+      "ticket": "T-111"
+    },
+    {
+      "at": 1790234131.4147854,
+      "ok": true,
+      "ticket": "T-112"
+    },
+    {
+      "at": 1790234221.9060223,
+      "ok": true,
+      "ticket": "T-113"
+    },
+    {
+      "at": 1790234372.2922533,
+      "ok": true,
+      "ticket": "T-114"
+    },
+    {
+      "at": 1790234492.686816,
+      "ok": true,
+      "ticket": "T-115"
+    },
+    {
+      "at": 1790234583.0308595,
+      "ok": true,
+      "ticket": "T-116"
+    },
+    {
+      "at": 1790234673.405953,
+      "ok": true,
+      "ticket": "T-117"
+    },
+    {
+      "at": 1790234763.7272491,
+      "ok": true,
+      "ticket": "T-118"
+    },
+    {
+      "at": 1790234854.0922987,
+      "ok": true,
+      "ticket": "T-119"
+    },
+    {
+      "at": 1790235094.5260923,
+      "ok": true,
+      "ticket": "T-120"
+    },
+    {
+      "at": 1790235214.7921011,
+      "ok": true,
+      "ticket": "T-121"
+    },
+    {
+      "at": 1790235305.0303507,
+      "ok": true,
+      "ticket": "T-122"
+    },
+    {
+      "at": 1790235395.270158,
+      "ok": true,
+      "ticket": "T-123"
+    },
+    {
+      "at": 1790235755.5581086,
+      "ok": true,
+      "ticket": "T-124"
+    },
+    {
+      "at": 1790235875.8714118,
+      "ok": true,
+      "ticket": "T-125"
+    },
+    {
+      "at": 1790235966.1898658,
+      "ok": true,
+      "ticket": "T-126"
+    },
+    {
+      "at": 1790236086.4723365,
+      "ok": true,
+      "ticket": "T-127"
+    },
+    {
+      "at": 1790236416.9070385,
+      "ok": true,
+      "ticket": "T-128"
+    },
+    {
+      "at": 1790236567.3137212,
+      "ok": true,
+      "ticket": "T-129"
+    },
+    {
+      "at": 1790236657.7131922,
+      "ok": true,
+      "ticket": "T-130"
+    },
+    {
+      "at": 1790236808.0318432,
+      "ok": true,
+      "ticket": "T-131"
+    },
+    {
+      "at": 1790236898.4225152,
+      "ok": true,
+      "ticket": "T-132"
+    },
+    {
+      "at": 1790237288.8709166,
+      "ok": true,
+      "ticket": "T-133"
+    },
+    {
+      "at": 1790237439.1406183,
+      "ok": true,
+      "ticket": "T-134"
+    },
+    {
+      "at": 1790237589.4079924,
+      "ok": true,
+      "ticket": "T-135"
+    },
+    {
+      "at": 1790237709.6934175,
+      "ok": true,
+      "ticket": "T-136"
+    },
+    {
+      "at": 1790237859.95697,
+      "ok": true,
+      "ticket": "T-137"
+    },
+    {
+      "at": 1790238040.2230005,
+      "ok": true,
+      "ticket": "T-138"
+    },
+    {
+      "at": 1790238280.5176604,
+      "ok": true,
+      "ticket": "T-139"
+    },
+    {
+      "at": 1790238400.7869503,
+      "ok": true,
+      "ticket": "T-140"
+    },
+    {
+      "at": 1790238491.070089,
+      "ok": true,
+      "ticket": "T-141"
+    },
+    {
+      "at": 1790238611.361326,
+      "ok": true,
+      "ticket": "T-142"
+    },
+    {
+      "at": 1790238731.6324122,
+      "ok": true,
+      "ticket": "T-143"
+    },
+    {
+      "at": 1790238851.9510431,
+      "ok": true,
+      "ticket": "T-144"
+    },
+    {
+      "at": 1790238942.242879,
+      "ok": true,
+      "ticket": "T-145"
+    },
+    {
+      "at": 1790239032.5497031,
+      "ok": true,
+      "ticket": "T-146"
+    },
+    {
+      "at": 1790239152.8695135,
+      "ok": true,
+      "ticket": "T-147"
+    },
+    {
+      "at": 1790239243.1931062,
+      "ok": true,
+      "ticket": "T-148"
+    },
+    {
+      "at": 1790239453.5152578,
+      "ok": true,
+      "ticket": "T-149"
+    },
+    {
+      "at": 1790239633.8276849,
+      "ok": true,
+      "ticket": "T-150"
+    },
+    {
+      "at": 1790239874.1637032,
+      "ok": true,
+      "ticket": "T-151"
+    },
+    {
+      "at": 1790239994.4309306,
+      "ok": true,
+      "ticket": "T-152"
+    },
+    {
+      "at": 1790240114.7614822,
+      "ok": true,
+      "ticket": "T-153"
+    },
+    {
+      "at": 1790240235.061534,
+      "ok": true,
+      "ticket": "T-154"
+    },
+    {
+      "at": 1790240325.3549206,
+      "ok": true,
+      "ticket": "T-155"
+    },
+    {
+      "at": 1790240445.6559842,
+      "ok": true,
+      "ticket": "T-156"
+    },
+    {
+      "at": 1790240595.9757812,
+      "ok": true,
+      "ticket": "T-157"
+    },
+    {
+      "at": 1790240716.2688286,
+      "ok": true,
+      "ticket": "T-158"
+    },
+    {
+      "at": 1790240866.6271904,
+      "ok": true,
+      "ticket": "T-159"
+    },
+    {
+      "at": 1790241076.9292934,
+      "ok": true,
+      "ticket": "T-160"
+    },
+    {
+      "at": 1790241197.2203455,
+      "ok": true,
+      "ticket": "T-161"
+    },
+    {
+      "at": 1790241287.5729623,
+      "ok": true,
+      "ticket": "T-162"
+    },
+    {
+      "at": 1790241377.8955703,
+      "ok": true,
+      "ticket": "T-163"
+    },
+    {
+      "at": 1790241498.1859927,
+      "ok": true,
+      "ticket": "T-164"
+    },
+    {
+      "at": 1790241588.481855,
+      "ok": true,
+      "ticket": "T-165"
+    },
+    {
+      "at": 1790241678.8031662,
+      "ok": true,
+      "ticket": "T-166"
+    },
+    {
+      "at": 1790241769.138969,
+      "ok": true,
+      "ticket": "T-167"
+    },
+    {
+      "at": 1790241859.4560513,
+      "ok": true,
+      "ticket": "T-168"
+    },
+    {
+      "at": 1790241949.7734995,
+      "ok": true,
+      "ticket": "T-169"
+    },
+    {
+      "at": 1790242040.1038716,
+      "ok": true,
+      "ticket": "T-170"
+    },
+    {
+      "at": 1790242130.394908,
+      "ok": true,
+      "ticket": "T-171"
+    },
+    {
+      "at": 1790242340.8211365,
+      "ok": true,
+      "ticket": "T-172"
+    },
+    {
+      "at": 1790242431.154197,
+      "ok": true,
+      "ticket": "T-173"
+    },
+    {
+      "at": 1790242551.5569122,
+      "ok": true,
+      "ticket": "T-174"
+    },
+    {
+      "at": 1790242672.4364207,
+      "ok": true,
+      "ticket": "T-175"
+    },
+    {
+      "at": 1790242792.8806813,
+      "ok": true,
+      "ticket": "T-176"
+    },
+    {
+      "at": 1790242943.3447802,
+      "ok": true,
+      "ticket": "T-177"
+    },
+    {
+      "at": 1790243033.8322065,
+      "ok": true,
+      "ticket": "T-178"
+    },
+    {
+      "at": 1790243154.2748246,
+      "ok": true,
+      "ticket": "T-179"
+    },
+    {
+      "at": 1790243274.7856627,
+      "ok": true,
+      "ticket": "T-180"
+    },
+    {
+      "at": 1790243635.246134,
+      "ok": true,
+      "ticket": "T-181"
+    },
+    {
+      "at": 1790243785.7617657,
+      "ok": true,
+      "ticket": "T-182"
+    },
+    {
+      "at": 1790243906.2512598,
+      "ok": true,
+      "ticket": "T-183"
+    },
+    {
+      "at": 1790244146.7694206,
+      "ok": true,
+      "ticket": "T-184"
+    },
+    {
+      "at": 1790244237.1325085,
+      "ok": true,
+      "ticket": "T-185"
+    },
+    {
+      "at": 1790244357.4488459,
+      "ok": true,
+      "ticket": "T-186"
+    },
+    {
+      "at": 1790244477.7926412,
+      "ok": true,
+      "ticket": "T-187"
+    },
+    {
+      "at": 1790244568.124688,
+      "ok": true,
+      "ticket": "T-188"
+    },
+    {
+      "at": 1790244658.203832,
+      "ok": false,
+      "ticket": null
+    },
+    {
+      "at": 1790244688.5379944,
+      "ok": true,
+      "ticket": "T-189"
+    },
+    {
+      "at": 1790244808.8991644,
+      "ok": true,
+      "ticket": "T-190"
+    },
+    {
+      "at": 1790244929.2502418,
+      "ok": true,
+      "ticket": "T-191"
+    },
+    {
+      "at": 1790245049.577327,
+      "ok": true,
+      "ticket": "T-192"
+    },
+    {
+      "at": 1790245319.931519,
+      "ok": true,
+      "ticket": "T-193"
+    },
+    {
+      "at": 1790245470.3179955,
+      "ok": true,
+      "ticket": "T-194"
+    },
+    {
+      "at": 1790245620.6657367,
+      "ok": true,
+      "ticket": "T-195"
+    },
+    {
+      "at": 1790245771.031106,
+      "ok": true,
+      "ticket": "T-196"
+    },
+    {
+      "at": 1790245951.4141848,
+      "ok": true,
+      "ticket": "T-197"
+    },
+    {
+      "at": 1790246071.8304188,
+      "ok": true,
+      "ticket": "T-198"
+    },
+    {
+      "at": 1790246222.1906636,
+      "ok": true,
+      "ticket": "T-199"
+    },
+    {
+      "at": 1790246462.5784068,
+      "ok": true,
+      "ticket": "T-200"
+    },
+    {
+      "at": 1790246582.9858332,
+      "ok": true,
+      "ticket": "T-201"
+    },
+    {
+      "at": 1790246703.5000267,
+      "ok": true,
+      "ticket": "T-202"
+    },
+    {
+      "at": 1790246853.8798695,
+      "ok": true,
+      "ticket": "T-203"
+    },
+    {
+      "at": 1790247034.273929,
+      "ok": true,
+      "ticket": "T-204"
+    },
+    {
+      "at": 1790247154.6874251,
+      "ok": true,
+      "ticket": "T-205"
+    },
+    {
+      "at": 1790247215.1020446,
+      "ok": true,
+      "ticket": "T-206"
+    },
+    {
+      "at": 1790247335.4930735,
+      "ok": true,
+      "ticket": "T-207"
+    },
+    {
+      "at": 1790247456.0171084,
+      "ok": true,
+      "ticket": "T-208"
+    },
+    {
+      "at": 1790247576.399481,
+      "ok": true,
+      "ticket": "T-209"
+    },
+    {
+      "at": 1790247666.7437797,
+      "ok": true,
+      "ticket": "T-210"
+    },
+    {
+      "at": 1790247787.1254508,
+      "ok": true,
+      "ticket": "T-211"
+    },
+    {
+      "at": 1790247877.508395,
+      "ok": true,
+      "ticket": "T-212"
+    },
+    {
+      "at": 1790247997.899868,
+      "ok": true,
+      "ticket": "T-213"
+    },
+    {
+      "at": 1790248118.2850459,
+      "ok": true,
+      "ticket": "T-214"
+    },
+    {
+      "at": 1790248388.3949015,
+      "ok": false,
+      "ticket": null
+    },
+    {
+      "at": 1790248418.9444919,
+      "ok": true,
+      "ticket": "T-215"
+    },
+    {
+      "at": 1790248509.4145164,
+      "ok": true,
+      "ticket": "T-216"
+    },
+    {
+      "at": 1790248629.80612,
+      "ok": true,
+      "ticket": "T-217"
+    },
+    {
+      "at": 1790248750.2316928,
+      "ok": true,
+      "ticket": "T-218"
+    },
+    {
+      "at": 1790248870.6662452,
+      "ok": true,
+      "ticket": "T-219"
+    },
+    {
+      "at": 1790249020.766431,
+      "ok": false,
+      "ticket": null
+    },
+    {
+      "at": 1790249051.2994113,
+      "ok": true,
+      "ticket": "T-220"
+    },
+    {
+      "at": 1790249141.8124676,
+      "ok": true,
+      "ticket": "T-221"
+    },
+    {
+      "at": 1790249292.2787104,
+      "ok": true,
+      "ticket": "T-222"
+    },
+    {
+      "at": 1790249562.7086163,
+      "ok": true,
+      "ticket": "T-223"
+    },
+    {
+      "at": 1790249863.1578648,
+      "ok": true,
+      "ticket": "T-224"
+    },
+    {
+      "at": 1790250013.565442,
+      "ok": true,
+      "ticket": "T-225"
+    },
+    {
+      "at": 1790250133.997607,
+      "ok": true,
+      "ticket": "T-226"
+    },
+    {
+      "at": 1790250284.418786,
+      "ok": true,
+      "ticket": "T-227"
+    },
+    {
+      "at": 1790250404.824058,
+      "ok": true,
+      "ticket": "T-228"
+    },
+    {
+      "at": 1790250585.3165207,
+      "ok": true,
+      "ticket": "T-229"
+    },
+    {
+      "at": 1790250795.7268553,
+      "ok": true,
+      "ticket": "T-230"
+    },
+    {
+      "at": 1790250916.24894,
+      "ok": true,
+      "ticket": "T-231"
+    },
+    {
+      "at": 1790251546.8834088,
+      "ok": true,
+      "ticket": "T-232"
+    },
+    {
+      "at": 1790251817.584694,
+      "ok": true,
+      "ticket": "T-233"
+    },
+    {
+      "at": 1790252148.7618206,
+      "ok": true,
+      "ticket": "T-234"
+    },
+    {
+      "at": 1790252359.4960186,
+      "ok": true,
+      "ticket": "T-235"
+    },
+    {
+      "at": 1790252660.269119,
+      "ok": true,
+      "ticket": "T-236"
+    },
+    {
+      "at": 1790252781.9694498,
+      "ok": true,
+      "ticket": "T-237"
+    },
+    {
+      "at": 1790252932.6805587,
+      "ok": true,
+      "ticket": "T-238"
+    },
+    {
+      "at": 1790253023.6926336,
+      "ok": true,
+      "ticket": "T-239"
+    },
+    {
+      "at": 1790253144.2521474,
+      "ok": true,
+      "ticket": "T-240"
+    },
+    {
+      "at": 1790253264.6817791,
+      "ok": true,
+      "ticket": "T-241"
+    },
+    {
+      "at": 1790253355.209392,
+      "ok": true,
+      "ticket": "T-242"
+    },
+    {
+      "at": 1790253445.8188245,
+      "ok": true,
+      "ticket": "T-243"
+    },
+    {
+      "at": 1790253536.2869954,
+      "ok": true,
+      "ticket": "T-244"
+    },
+    {
+      "at": 1790253746.7956595,
+      "ok": true,
+      "ticket": "T-245"
+    },
+    {
+      "at": 1790253897.2981644,
+      "ok": true,
+      "ticket": "T-246"
+    },
+    {
+      "at": 1790254017.732662,
+      "ok": true,
+      "ticket": "T-247"
+    },
+    {
+      "at": 1790254138.2164364,
+      "ok": true,
+      "ticket": "T-248"
+    },
+    {
+      "at": 1790254438.715541,
+      "ok": true,
+      "ticket": "T-249"
+    },
+    {
+      "at": 1790254589.1508923,
+      "ok": true,
+      "ticket": "T-250"
+    },
+    {
+      "at": 1790254739.594922,
+      "ok": true,
+      "ticket": "T-251"
+    },
+    {
+      "at": 1790254890.0806398,
+      "ok": true,
+      "ticket": "T-252"
+    },
+    {
+      "at": 1790255010.531245,
+      "ok": true,
+      "ticket": "T-253"
+    },
+    {
+      "at": 1790255101.0501628,
+      "ok": true,
+      "ticket": "T-254"
+    },
+    {
+      "at": 1790255221.5347261,
+      "ok": true,
+      "ticket": "T-255"
+    },
+    {
+      "at": 1790255311.9838047,
+      "ok": true,
+      "ticket": "T-256"
+    },
+    {
+      "at": 1790255612.592078,
+      "ok": true,
+      "ticket": "T-257"
+    },
+    {
+      "at": 1790255733.1045544,
+      "ok": true,
+      "ticket": "T-258"
+    },
+    {
+      "at": 1790255883.199473,
+      "ok": false,
+      "ticket": null
+    },
+    {
+      "at": 1790255913.6481411,
+      "ok": true,
+      "ticket": "T-259"
+    },
+    {
+      "at": 1790256004.1323996,
+      "ok": true,
+      "ticket": "T-260"
+    },
+    {
+      "at": 1790256124.5977025,
+      "ok": true,
+      "ticket": "T-261"
+    },
+    {
+      "at": 1790256275.043818,
+      "ok": true,
+      "ticket": "T-262"
+    },
+    {
+      "at": 1790256395.5028903,
+      "ok": true,
+      "ticket": "T-263"
+    },
+    {
+      "at": 1790256666.0009456,
+      "ok": true,
+      "ticket": "T-264"
+    },
+    {
+      "at": 1790256936.5013936,
+      "ok": true,
+      "ticket": "T-265"
+    },
+    {
+      "at": 1790257056.949398,
+      "ok": true,
+      "ticket": "T-266"
+    },
+    {
+      "at": 1790257177.4115298,
+      "ok": true,
+      "ticket": "T-267"
+    },
+    {
+      "at": 1790257327.9337292,
+      "ok": true,
+      "ticket": "T-268"
+    },
+    {
+      "at": 1790257448.419155,
+      "ok": true,
+      "ticket": "T-269"
+    },
+    {
+      "at": 1790257599.0390131,
+      "ok": true,
+      "ticket": "T-270"
+    },
+    {
+      "at": 1790257959.5463161,
+      "ok": true,
+      "ticket": "T-271"
+    },
+    {
+      "at": 1790258079.9908178,
+      "ok": true,
+      "ticket": "T-272"
+    },
+    {
+      "at": 1790258230.48155,
+      "ok": true,
+      "ticket": "T-273"
+    },
+    {
+      "at": 1790258320.9647713,
+      "ok": true,
+      "ticket": "T-274"
+    },
+    {
+      "at": 1790258471.4302535,
+      "ok": true,
+      "ticket": "T-275"
+    },
+    {
+      "at": 1790258591.985381,
+      "ok": true,
+      "ticket": "T-276"
+    },
+    {
+      "at": 1790258712.5074432,
+      "ok": true,
+      "ticket": "T-277"
+    },
+    {
+      "at": 1790258863.0909586,
+      "ok": true,
+      "ticket": "T-278"
+    },
+    {
+      "at": 1790259103.6414258,
+      "ok": true,
+      "ticket": "T-279"
+    },
+    {
+      "at": 1790259404.8535376,
+      "ok": true,
+      "ticket": "T-280"
+    },
+    {
+      "at": 1790259735.935761,
+      "ok": true,
+      "ticket": "T-281"
+    },
+    {
+      "at": 1790260067.2908065,
+      "ok": true,
+      "ticket": "T-282"
+    },
+    {
+      "at": 1790260879.0088837,
+      "ok": true,
+      "ticket": "T-283"
+    },
+    {
+      "at": 1790262410.9274325,
+      "ok": true,
+      "ticket": "T-284"
+    },
+    {
+      "at": 1790262742.0094962,
+      "ok": true,
+      "ticket": "T-285"
+    },
+    {
+      "at": 1790262922.1942797,
+      "ok": false,
+      "ticket": null
+    },
+    {
+      "at": 1790262953.088509,
+      "ok": true,
+      "ticket": "T-286"
+    },
+    {
+      "at": 1790263133.8829572,
+      "ok": true,
+      "ticket": "T-287"
+    },
+    {
+      "at": 1790263314.7873032,
+      "ok": true,
+      "ticket": "T-288"
+    },
+    {
+      "at": 1790263495.753695,
+      "ok": true,
+      "ticket": "T-289"
+    }
+  ],
+  "schema_version": 1,
+  "project": "V:\\_SAIPEN_SOAK_\\tmp\\t1363-8_l89v_z",
+  "model": "sairoute/SAIFREN",
+  "fallback_models": [],
+  "started_at_unix": 1790221718.634451,
+  "elapsed_seconds": 42789.2,
+  "wall_bound_seconds": 86400.0,
+  "supervise": {
+    "gpu_lane": {
+      "runs": 346,
+      "embedded": 1799,
+      "last_stop": "VRAM_LOW",
+      "triage_annotated": 0,
+      "last_triage_stop": "NOTHING_PENDING"
+    },
+    "ok": false,
+    "code": "SUPERVISE_STOPPED",
+    "run_id": "run-74b32f025d76",
+    "stop": "UNKNOWN",
+    "reason": "UNKNOWN (STOP_AFTER_REPEAT) after generation 43; Work, Source, checkpoint and epoch are preserved in canonical state",
+    "operator_action": "resolve the provider/model account condition or authorize a fallback model, then restart the supervisor",
+    "counters": {
+      "cycles": 43,
+      "worker_generation_count": 43,
+      "crash_recovery_count": 12,
+      "model_replacement_recovery_count": 0,
+      "backoff_count": 0,
+      "await_count": 0,
+      "stolen_lease_count": 0,
+      "progress_slices": 42,
+      "slow_progress_slices": 23,
+      "manual_continue_count": 0,
+      "unknown_terminal_failure_count": 1,
+      "failures": {
+        "WORKER_CRASH": 11,
+        "HOST_RUNTIME_FAILURE": 1,
+        "UNKNOWN": 2
+      }
+    },
+    "maximum_recovery_latency_seconds": 0.047,
+    "model": "sairoute/SAIFREN"
+  },
+  "history": [
+    {
+      "cycle": 1,
+      "verdict": "RUN_WORK",
+      "generation": 1,
+      "model": "sairoute/SAIFREN",
+      "returncode": 1,
+      "failure": null,
+      "progressed": true,
+      "bounded": true,
+      "output_tail": "G.md\\\",\\r\\n    \\\".saipen/BOARD.md\\\",\\r\\n    \\\".saipen/STATE.md\\\"\\r\\n  ],\\r\\n  \\\"recovery_required\\\": false,\\r\\n  \\\"ticket\\\": \\\"T-14\\\",\\r\\n  \\\"event_id\\\": \\\"E-161\\\",\\r\\n  \\\"phase\\\": \\\"DONE\\\",\\r\\n  \\\"task\\\": \\\"none\\\",\\r\\n  \\\"next_action\\\": \\\"PHASE SCOUT T-8\\\",\\r\\n  \\\"transition_from\\\": \\\"SHIP\\\"\\r\\n}\\r\\n\",\"metadata\":{\"output\":\"{\\r\\n  \\\"ok\\\": true,\\r\\n  \\\"code\\\": \\\"FINISHED\\\",\\r\\n  \\\"op_id\\\": \\\"finish-6ac3c068944a4e5cbdc21e3a0d202c99\\\",\\r\\n  \\\"changed_files\\\": [\\r\\n    \\\".saipen/LOG.md\\\",\\r\\n    \\\".saipen/BOARD.md\\\",\\r\\n    \\\".saipen/STATE.md\\\"\\r\\n  ],\\r\\n  \\\"recovery_required\\\": false,\\r\\n  \\\"ticket\\\": \\\"T-14\\\",\\r\\n  \\\"event_id\\\": \\\"E-161\\\",\\r\\n  \\\"phase\\\": \\\"DONE\\\",\\r\\n  \\\"task\\\": \\\"none\\\",\\r\\n  \\\"next_action\\\": \\\"PHASE SCOUT T-8\\\",\\r\\n  \\\"transition_from\\\": \\\"SHIP\\\"\\r\\n}\\r\\n\",\"exit\":0,\"truncated\":false},\"title\":\"saipen ticket done T-14 --closure-mode own_patch --json\",\"time\":{\"start\":1790222916923,\"end\":1790222918136}},\"id\":\"prt_0d199dc3b001p9jP5J58vQ3tFa\",\"sessionID\":\"ses_f2e78621cffe9dq2FioU4qJccU\",\"messageID\":\"msg_0d199d299001Lld1uUqiEZXn8r\"}}\r\n{\"type\":\"step_finish\",\"timestamp\":1790222918479,\"sessionID\":\"ses_f2e78621cffe9dq2FioU4qJccU\",\"part\":{\"id\":\"prt_0d199e343001hp0BPaDKPE1WXB\",\"reason\":\"tool-calls\",\"snapshot\":\"f340e42fbd6c65c10ebbbd49a5f6fb6f10c3e7df\",\"messageID\":\"msg_0d199d299001Lld1uUqiEZXn8r\",\"sessionID\":\"ses_f2e78621cffe9dq2FioU4qJccU\",\"type\":\"step-finish\",\"tokens\":{\"total\":235966,\"input\":2115,\"output\":79,\"reasoning\":0,\"cache\":{\"write\":0,\"read\":233772}},\"cost\":0}}\r\n",
+      "failure_text_tail": ""
+    },
+    {
+      "cycle": 2,
+      "verdict": "REPLACE_WORKER",
+      "generation": 2,
+      "model": "sairoute/SAIFREN",
+      "returncode": 1,
+      "failure": null,
+      "progressed": true,
+      "bounded": true,
+      "output_tail": "essionID\":\"ses_f2e6611e4ffe9j8HpgqOpPsTW9\",\"part\":{\"type\":\"tool\",\"tool\":\"glob\",\"callID\":\"b9ab288c-99e9-456c-b732-1e9c44b8305b\",\"state\":{\"status\":\"completed\",\"input\":{\"pattern\":\"src/value_19.py\",\"path\":\"V:\\\\_SAIPEN_SOAK_\\\\tmp\\\\t1363-8_l89v_z\"},\"output\":\"No files found\",\"metadata\":{\"count\":0,\"truncated\":false},\"title\":\"\",\"time\":{\"start\":1790224116172,\"end\":1790224118379}},\"id\":\"prt_0d1ac29c40015RB2MQGxV9urBA\",\"sessionID\":\"ses_f2e6611e4ffe9j8HpgqOpPsTW9\",\"messageID\":\"msg_0d1ac10d7001cQo9qV3x4zzUxM\"}}\r\n{\"type\":\"tool_use\",\"timestamp\":1790224118391,\"sessionID\":\"ses_f2e6611e4ffe9j8HpgqOpPsTW9\",\"part\":{\"type\":\"tool\",\"tool\":\"glob\",\"callID\":\"b29225dc-eccc-4e7c-a304-f57019fec9b0\",\"state\":{\"status\":\"completed\",\"input\":{\"pattern\":\"tests/test_value_19.py\",\"path\":\"V:\\\\_SAIPEN_SOAK_\\\\tmp\\\\t1363-8_l89v_z\"},\"output\":\"No files found\",\"metadata\":{\"count\":0,\"truncated\":false},\"title\":\"\",\"time\":{\"start\":1790224116232,\"end\":1790224118387}},\"id\":\"prt_0d1ac29ce001mqW4VsMZa52TjR\",\"sessionID\":\"ses_f2e6611e4ffe9j8HpgqOpPsTW9\",\"messageID\":\"msg_0d1ac10d7001cQo9qV3x4zzUxM\"}}\r\n{\"type\":\"step_finish\",\"timestamp\":1790224118905,\"sessionID\":\"ses_f2e6611e4ffe9j8HpgqOpPsTW9\",\"part\":{\"id\":\"prt_0d1ac346a001RNhipWI5syOm3w\",\"reason\":\"tool-calls\",\"snapshot\":\"ec00e82fdb08d819c25e26aa1e1fb2ee03b2ec0d\",\"messageID\":\"msg_0d1ac10d7001cQo9qV3x4zzUxM\",\"sessionID\":\"ses_f2e6611e4ffe9j8HpgqOpPsTW9\",\"type\":\"step-finish\",\"tokens\":{\"total\":202549,\"input\":3790,\"output\":276,\"reasoning\":0,\"cache\":{\"write\":0,\"read\":198483}},\"cost\":0}}\r\n",
+      "failure_text_tail": ""
+    },
+    {
+      "cycle": 3,
+      "verdict": "REPLACE_WORKER",
+      "generation": 3,
+      "model": "sairoute/SAIFREN",
+      "returncode": 1,
+      "failure": "WORKER_CRASH",
+      "progressed": true,
+      "bounded": false,
+      "output_tail": "s\":\"completed\",\"input\":{\"command\":\"saipen checkpoint RUN T-36 \\\"verify -> PASS [target: T-36] conf: high -- py_compile PASS; import assert PASS; unittest 34 tests OK; wrong-value control expected exit 1\\\"; if ($?) { saipen transition REVIEW T-36 \\\"verification complete\\\" }\",\"timeout\":120000,\"workdir\":\"V:\\\\_SAIPEN_SOAK_\\\\tmp\\\\t1363-8_l89v_z\"},\"output\":\"code: CHECKPOINTED\\r\\nticket: T-36\\r\\nphase: REVIEW\\r\\nnext_action: PHASE REVIEW T-36\\r\\ncode: TRANSITIONED\\r\\n\",\"metadata\":{\"output\":\"code: CHECKPOINTED\\r\\nticket: T-36\\r\\nphase: REVIEW\\r\\nnext_action: PHASE REVIEW T-36\\r\\ncode: TRANSITIONED\\r\\n\",\"exit\":0,\"truncated\":false},\"title\":\"saipen checkpoint RUN T-36 \\\"verify -> PASS [target: T-36] conf: high -- py_compile PASS; import assert PASS; unittest 34 tests OK; wrong-value control expected exit 1\\\"; if ($?) { saipen transition REVIEW T-36 \\\"verification complete\\\" }\",\"time\":{\"start\":1790225314353,\"end\":1790225316629}},\"id\":\"prt_0d1be7191001en74qWWU0iI9Vw\",\"sessionID\":\"ses_f2e53bcf0ffeIgV7SxYsIP6aWf\",\"messageID\":\"msg_0d1be659f001q2NJbCaDLWphPT\"}}\r\n{\"type\":\"step_finish\",\"timestamp\":1790225317392,\"sessionID\":\"ses_f2e53bcf0ffeIgV7SxYsIP6aWf\",\"part\":{\"id\":\"prt_0d1be7e01001HLV61wAQPzBhaJ\",\"reason\":\"tool-calls\",\"snapshot\":\"ece5e803d0ddbcb2989dd0b7385fd5d0c6d6da23\",\"messageID\":\"msg_0d1be659f001q2NJbCaDLWphPT\",\"sessionID\":\"ses_f2e53bcf0ffeIgV7SxYsIP6aWf\",\"type\":\"step-finish\",\"tokens\":{\"total\":167956,\"input\":2085,\"output\":130,\"reasoning\":0,\"cache\":{\"write\":0,\"read\":165741}},\"cost\":0}}\r\n",
+      "failure_text_tail": ""
+    },
+    {
+      "cycle": 4,
+      "verdict": "REPLACE_WORKER",
+      "generation": 4,
+      "model": "sairoute/SAIFREN",
+      "returncode": 1,
+      "failure": null,
+      "progressed": true,
+      "bounded": true,
+      "output_tail": "AT6OzIe\",\"part\":{\"id\":\"prt_0d1d0bf35001a4v5jwX3kctUlb\",\"messageID\":\"msg_0d1d0b2d9001aF3jDWqM5IY67c\",\"sessionID\":\"ses_f2e416161ffejLh5SMFAT6OzIe\",\"snapshot\":\"a8d6ac9122bbdd58a296b2bb88a1c84ee468ebe5\",\"type\":\"step-start\"}}\r\n{\"type\":\"tool_use\",\"timestamp\":1790226515376,\"sessionID\":\"ses_f2e416161ffejLh5SMFAT6OzIe\",\"part\":{\"type\":\"tool\",\"tool\":\"bash\",\"callID\":\"0070993c-6829-4714-bc60-f780f5d89352\",\"state\":{\"status\":\"completed\",\"input\":{\"command\":\"saipen transition REVIEW T-47 \\\"verification complete\\\"\",\"timeout\":120000,\"workdir\":\"V:\\\\_SAIPEN_SOAK_\\\\tmp\\\\t1363-8_l89v_z\"},\"output\":\"ticket: T-47\\r\\nphase: REVIEW\\r\\nnext_action: PHASE REVIEW T-47\\r\\ncode: TRANSITIONED\\r\\n\",\"metadata\":{\"output\":\"ticket: T-47\\r\\nphase: REVIEW\\r\\nnext_action: PHASE REVIEW T-47\\r\\ncode: TRANSITIONED\\r\\n\",\"exit\":0,\"truncated\":false},\"title\":\"saipen transition REVIEW T-47 \\\"verification complete\\\"\",\"time\":{\"start\":1790226513965,\"end\":1790226515373}},\"id\":\"prt_0d1d0bf38001OMPWYrVU4H8cHn\",\"sessionID\":\"ses_f2e416161ffejLh5SMFAT6OzIe\",\"messageID\":\"msg_0d1d0b2d9001aF3jDWqM5IY67c\"}}\r\n{\"type\":\"step_finish\",\"timestamp\":1790226515918,\"sessionID\":\"ses_f2e416161ffejLh5SMFAT6OzIe\",\"part\":{\"id\":\"prt_0d1d0c7be001l5CXMcc0IolJ1z\",\"reason\":\"tool-calls\",\"snapshot\":\"a33142548c60718b004c671ee9a45740041854d1\",\"messageID\":\"msg_0d1d0b2d9001aF3jDWqM5IY67c\",\"sessionID\":\"ses_f2e416161ffejLh5SMFAT6OzIe\",\"type\":\"step-finish\",\"tokens\":{\"total\":165231,\"input\":2716,\"output\":76,\"reasoning\":0,\"cache\":{\"write\":0,\"read\":162439}},\"cost\":0}}\r\n",
+      "failure_text_tail": ""
+    },
+    {
+      "cycle": 5,
+      "verdict": "REPLACE_WORKER",
+      "generation": 5,
+      "model": "sairoute/SAIFREN",
+      "returncode": 1,
+      "failure": null,
+      "progressed": true,
+      "bounded": true,
+      "output_tail": "_l89v_z\"},\"output\":\"{\\r\\n  \\\"ok\\\": true,\\r\\n  \\\"code\\\": \\\"CHECKPOINTED\\\",\\r\\n  \\\"op_id\\\": \\\"checkpoint-f3ffb23a8969422c913ffbd9104b02e3\\\",\\r\\n  \\\"changed_files\\\": [\\r\\n    \\\".saipen/LOG.md\\\",\\r\\n    \\\".saipen/BOARD.md\\\",\\r\\n    \\\".saipen/STATE.md\\\"\\r\\n  ],\\r\\n  \\\"recovery_required\\\": false,\\r\\n  \\\"event_id\\\": \\\"E-687\\\"\\r\\n}\\r\\n\",\"metadata\":{\"output\":\"{\\r\\n  \\\"ok\\\": true,\\r\\n  \\\"code\\\": \\\"CHECKPOINTED\\\",\\r\\n  \\\"op_id\\\": \\\"checkpoint-f3ffb23a8969422c913ffbd9104b02e3\\\",\\r\\n  \\\"changed_files\\\": [\\r\\n    \\\".saipen/LOG.md\\\",\\r\\n    \\\".saipen/BOARD.md\\\",\\r\\n    \\\".saipen/STATE.md\\\"\\r\\n  ],\\r\\n  \\\"recovery_required\\\": false,\\r\\n  \\\"event_id\\\": \\\"E-687\\\"\\r\\n}\\r\\n\",\"exit\":0,\"truncated\":false},\"title\":\"saipen checkpoint RUN T-58 \\\"verify -> PASS [target: T-58] conf: high -- py_compile PASS; import assert PASS; unittest 55 tests OK; wrong-value control expected exit 1\\\" --json\",\"time\":{\"start\":1790227715170,\"end\":1790227716465}},\"id\":\"prt_0d1e3138f001VFtI6bosJiRT8i\",\"sessionID\":\"ses_f2e2f1e71ffeLzgW6btwFJMPmV\",\"messageID\":\"msg_0d1e30b18001wVOKlrjblvlOfw\"}}\r\n{\"type\":\"step_finish\",\"timestamp\":1790227716883,\"sessionID\":\"ses_f2e2f1e71ffeLzgW6btwFJMPmV\",\"part\":{\"id\":\"prt_0d1e31aff001txThiSgAz5li3i\",\"reason\":\"tool-calls\",\"snapshot\":\"6c86ec351bbd4a3b42cde5d465e9fd5f6215fecd\",\"messageID\":\"msg_0d1e30b18001wVOKlrjblvlOfw\",\"sessionID\":\"ses_f2e2f1e71ffeLzgW6btwFJMPmV\",\"type\":\"step-finish\",\"tokens\":{\"total\":200798,\"input\":2063,\"output\":119,\"reasoning\":0,\"cache\":{\"write\":0,\"read\":198616}},\"cost\":0}}\r\n",
+      "failure_text_tail": ""
+    },
+    {
+      "cycle": 6,
+      "verdict": "REPLACE_WORKER",
+      "generation": 6,
+      "model": "sairoute/SAIFREN",
+      "returncode": 1,
+      "failure": "WORKER_CRASH",
+      "progressed": true,
+      "bounded": false,
+      "output_tail": "\\n  \\\"ok\\\": true,\\r\\n  \\\"code\\\": \\\"CLAIMED\\\",\\r\\n  \\\"op_id\\\": \\\"claim-2aa5824f727d4249bd13c636fec82463\\\",\\r\\n  \\\"changed_files\\\": [\\r\\n    \\\".saipen/LOG.md\\\",\\r\\n    \\\".saipen/BOARD.md\\\",\\r\\n    \\\".saipen/STATE.md\\\"\\r\\n  ],\\r\\n  \\\"recovery_required\\\": false,\\r\\n  \\\"ticket\\\": \\\"T-68\\\",\\r\\n  \\\"event_id\\\": \\\"E-794\\\",\\r\\n  \\\"phase\\\": \\\"SCOUT\\\",\\r\\n  \\\"next_action\\\": \\\"PHASE SCOUT T-68\\\"\\r\\n}\\r\\n\",\"metadata\":{\"output\":\"{\\r\\n  \\\"ok\\\": true,\\r\\n  \\\"code\\\": \\\"CLAIMED\\\",\\r\\n  \\\"op_id\\\": \\\"claim-2aa5824f727d4249bd13c636fec82463\\\",\\r\\n  \\\"changed_files\\\": [\\r\\n    \\\".saipen/LOG.md\\\",\\r\\n    \\\".saipen/BOARD.md\\\",\\r\\n    \\\".saipen/STATE.md\\\"\\r\\n  ],\\r\\n  \\\"recovery_required\\\": false,\\r\\n  \\\"ticket\\\": \\\"T-68\\\",\\r\\n  \\\"event_id\\\": \\\"E-794\\\",\\r\\n  \\\"phase\\\": \\\"SCOUT\\\",\\r\\n  \\\"next_action\\\": \\\"PHASE SCOUT T-68\\\"\\r\\n}\\r\\n\",\"exit\":0,\"truncated\":false},\"title\":\"saipen claim T-68 --json\",\"time\":{\"start\":1790228915576,\"end\":1790228916785}},\"id\":\"prt_0d1f5656e001HLmVultdNx6JQl\",\"sessionID\":\"ses_f2e1ccdfdffejAAHtU2GpnAbGR\",\"messageID\":\"msg_0d1f55b3a001Dhb133PUrxQNMo\"}}\r\n{\"type\":\"step_finish\",\"timestamp\":1790228917179,\"sessionID\":\"ses_f2e1ccdfdffejAAHtU2GpnAbGR\",\"part\":{\"id\":\"prt_0d1f56baf0016zWQ7ruH74HTWk\",\"reason\":\"tool-calls\",\"snapshot\":\"fe47a42111deddc2f009f7aa701e3ab64428f774\",\"messageID\":\"msg_0d1f55b3a001Dhb133PUrxQNMo\",\"sessionID\":\"ses_f2e1ccdfdffejAAHtU2GpnAbGR\",\"type\":\"step-finish\",\"tokens\":{\"total\":183422,\"input\":3119,\"output\":73,\"reasoning\":0,\"cache\":{\"write\":0,\"read\":180230}},\"cost\":0}}\r\n",
+      "failure_text_tail": ""
+    },
+    {
+      "cycle": 7,
+      "verdict": "REPLACE_WORKER",
+      "generation": 7,
+      "model": "sairoute/SAIFREN",
+      "returncode": 1,
+      "failure": null,
+      "progressed": true,
+      "bounded": true,
+      "output_tail": "f2e0a81d2ffenmCeUrnt3X8i9J\",\"part\":{\"id\":\"prt_0d207abcf001KKYZFfXS7U2YLs\",\"messageID\":\"msg_0d207a338001MeN2ds5vCoKPZS\",\"sessionID\":\"ses_f2e0a81d2ffenmCeUrnt3X8i9J\",\"snapshot\":\"db3158c83460ae2a23c11f88088e200d4112e136\",\"type\":\"step-start\"}}\r\n{\"type\":\"tool_use\",\"timestamp\":1790230115946,\"sessionID\":\"ses_f2e0a81d2ffenmCeUrnt3X8i9J\",\"part\":{\"type\":\"tool\",\"tool\":\"bash\",\"callID\":\"bbf7dee0-7656-4955-9288-3bede04896d0\",\"state\":{\"status\":\"completed\",\"input\":{\"command\":\"saipen transition BUILD T-77 \\\"SCOUT complete\\\"\",\"timeout\":120000,\"workdir\":\"V:\\\\_SAIPEN_SOAK_\\\\tmp\\\\t1363-8_l89v_z\"},\"output\":\"ticket: T-77\\r\\nphase: BUILD\\r\\nnext_action: PHASE BUILD T-77\\r\\ncode: TRANSITIONED\\r\\n\",\"metadata\":{\"output\":\"ticket: T-77\\r\\nphase: BUILD\\r\\nnext_action: PHASE BUILD T-77\\r\\ncode: TRANSITIONED\\r\\n\",\"exit\":0,\"truncated\":false},\"title\":\"saipen transition BUILD T-77 \\\"SCOUT complete\\\"\",\"time\":{\"start\":1790230114434,\"end\":1790230115934}},\"id\":\"prt_0d207aeb5001OMNdHsibxaAXve\",\"sessionID\":\"ses_f2e0a81d2ffenmCeUrnt3X8i9J\",\"messageID\":\"msg_0d207a338001MeN2ds5vCoKPZS\"}}\r\n{\"type\":\"step_finish\",\"timestamp\":1790230116410,\"sessionID\":\"ses_f2e0a81d2ffenmCeUrnt3X8i9J\",\"part\":{\"id\":\"prt_0d207b82d001z3KU724tEHEhDh\",\"reason\":\"tool-calls\",\"snapshot\":\"b0dce3567f9c46001cb59b4496c53d1873da86e0\",\"messageID\":\"msg_0d207a338001MeN2ds5vCoKPZS\",\"sessionID\":\"ses_f2e0a81d2ffenmCeUrnt3X8i9J\",\"type\":\"step-finish\",\"tokens\":{\"total\":156727,\"input\":4988,\"output\":173,\"reasoning\":0,\"cache\":{\"write\":0,\"read\":151566}},\"cost\":0}}\r\n",
+      "failure_text_tail": ""
+    },
+    {
+      "cycle": 8,
+      "verdict": "REPLACE_WORKER",
+      "generation": 8,
+      "model": "sairoute/SAIFREN",
+      "returncode": 1,
+      "failure": null,
+      "progressed": true,
+      "bounded": true,
+      "output_tail": "g is not completion evidence. Read load_path when present, then execute action under its owner in this turn; respect WAIT and actual refusals. If --dry-run was requested, this is a preview only.\\\",\\r\\n  \\\"execution_intent\\\": \\\"converge\\\",\\r\\n  \\\"converge_target\\\": \\\"done\\\",\\r\\n  \\\"goal_waves\\\": null,\\r\\n  \\\"goal_tickets\\\": null,\\r\\n  \\\"recovery_pending\\\": false,\\r\\n  \\\"recovery_conflict\\\": false,\\r\\n  \\\"pending_ops\\\": [],\\r\\n  \\\"parked_work\\\": null,\\r\\n  \\\"reconciliation\\\": {\\r\\n    \\\"ok\\\": true,\\r\\n    \\\"code\\\": \\\"CLEAN\\\",\\r\\n    \\\"changed\\\": [],\\r\\n    \\\"strict_state_error\\\": null,\\r\\n    \\\"dry_run\\\": false\\r\\n  },\\r\\n  \\\"telegrams\\\": {\\r\\n    \\\"state\\\": \\\"NOT_CONFIGURED\\\",\\r\\n    \\\"detail\\\": \\\"set SAIMAIL_WORKSPACE to this seat's SAIMAIL workspace to see unread telegrams at turn entry\\\"\\r\\n  }\\r\\n}\\r\\n\",\"exit\":0,\"truncated\":false},\"title\":\"saipen continue --json\",\"time\":{\"start\":1790231315880,\"end\":1790231316899}},\"id\":\"prt_0d21a05a3001CXbrBFA6J4WwYv\",\"sessionID\":\"ses_f2df83226ffeSzWu27NdBl59yp\",\"messageID\":\"msg_0d219f612001d4so4NPCNCTkzb\"}}\r\n{\"type\":\"step_finish\",\"timestamp\":1790231317217,\"sessionID\":\"ses_f2df83226ffeSzWu27NdBl59yp\",\"part\":{\"id\":\"prt_0d21a0ad4001qqqlBJ1WSYEOFk\",\"reason\":\"tool-calls\",\"snapshot\":\"e19e6d22a6438ac7e39058dc682b39da4600024d\",\"messageID\":\"msg_0d219f612001d4so4NPCNCTkzb\",\"sessionID\":\"ses_f2df83226ffeSzWu27NdBl59yp\",\"type\":\"step-finish\",\"tokens\":{\"total\":153071,\"input\":142268,\"output\":77,\"reasoning\":0,\"cache\":{\"write\":0,\"read\":10726}},\"cost\":0}}\r\n",
+      "failure_text_tail": ""
+    },
+    {
+      "cycle": 9,
+      "verdict": "REPLACE_WORKER",
+      "generation": 9,
+      "model": "sairoute/SAIFREN",
+      "returncode": 1,
+      "failure": "WORKER_CRASH",
+      "progressed": true,
+      "bounded": false,
+      "output_tail": "V:\\\\_SAIPEN_SOAK_\\\\tmp\\\\t1363-8_l89v_z\"},\"output\":\"...............................................................................................\\r\\n----------------------------------------------------------------------\\r\\nRan 95 tests in 0.004s\\r\\n\\r\\nOK\\r\\n\",\"metadata\":{\"output\":\"...............................................................................................\\r\\n----------------------------------------------------------------------\\r\\nRan 95 tests in 0.004s\\r\\n\\r\\nOK\\r\\n\",\"exit\":0,\"truncated\":false},\"title\":\"python -m unittest discover -s tests -t .\",\"time\":{\"start\":1790232512427,\"end\":1790232513383}},\"id\":\"prt_0d22c47a5001fB32bBCAogrEAC\",\"sessionID\":\"ses_f2de5e274ffeQOMctHUP3h7RLt\",\"messageID\":\"msg_0d22c3f38001rs1MxCVnHOxiNl\"}}\r\n{\"type\":\"step_finish\",\"timestamp\":1790232513795,\"sessionID\":\"ses_f2de5e274ffeQOMctHUP3h7RLt\",\"part\":{\"id\":\"prt_0d22c4cf2001RiQtHlCR4eooob\",\"reason\":\"tool-calls\",\"snapshot\":\"dea5803ec7cea93df0fb3f7139be41a43625a0ae\",\"messageID\":\"msg_0d22c3f38001rs1MxCVnHOxiNl\",\"sessionID\":\"ses_f2de5e274ffeQOMctHUP3h7RLt\",\"type\":\"step-finish\",\"tokens\":{\"total\":211445,\"input\":2032,\"output\":78,\"reasoning\":0,\"cache\":{\"write\":0,\"read\":209335}},\"cost\":0}}\r\n{\"type\":\"step_start\",\"timestamp\":1790232517757,\"sessionID\":\"ses_f2de5e274ffeQOMctHUP3h7RLt\",\"part\":{\"id\":\"prt_0d22c5c68001RnDSZj8zZRROxQ\",\"messageID\":\"msg_0d22c4e9b001eOvuRmw9d2IaDu\",\"sessionID\":\"ses_f2de5e274ffeQOMctHUP3h7RLt\",\"snapshot\":\"0f7dd0aca6bc043d929045f1de8ef2f66d048aeb\",\"type\":\"step-start\"}}\r\n",
+      "failure_text_tail": ""
+    },
+    {
+      "cycle": 10,
+      "verdict": "REPLACE_WORKER",
+      "generation": 10,
+      "model": "sairoute/SAIFREN",
+      "returncode": 1,
+      "failure": null,
+      "progressed": true,
+      "bounded": true,
+      "output_tail": "se},\"title\":\"\",\"time\":{\"start\":1790233709723,\"end\":1790233711467}},\"id\":\"prt_0d23e8c98001qzjj1JLmg8Kyur\",\"sessionID\":\"ses_f2dd3955bffekvazaLJ3sLznaC\",\"messageID\":\"msg_0d23e81e8001OdsiiXPNr4euNH\"}}\r\n{\"type\":\"tool_use\",\"timestamp\":1790233711800,\"sessionID\":\"ses_f2dd3955bffekvazaLJ3sLznaC\",\"part\":{\"type\":\"tool\",\"tool\":\"glob\",\"callID\":\"f512c7f9-3ee8-4c09-8d16-7c81c11b07f1\",\"state\":{\"status\":\"completed\",\"input\":{\"pattern\":\"tests/test_value_107.py\",\"path\":\"V:\\\\_SAIPEN_SOAK_\\\\tmp\\\\t1363-8_l89v_z\"},\"output\":\"No files found\",\"metadata\":{\"count\":0,\"truncated\":false},\"title\":\"\",\"time\":{\"start\":1790233709968,\"end\":1790233711797}},\"id\":\"prt_0d23e8c9d0018LpvK5UsYz5nS2\",\"sessionID\":\"ses_f2dd3955bffekvazaLJ3sLznaC\",\"messageID\":\"msg_0d23e81e8001OdsiiXPNr4euNH\"}}\r\n{\"type\":\"step_finish\",\"timestamp\":1790233712445,\"sessionID\":\"ses_f2dd3955bffekvazaLJ3sLznaC\",\"part\":{\"id\":\"prt_0d23e972a001g2HmRHmkNCgngY\",\"reason\":\"tool-calls\",\"snapshot\":\"627cc6ae2faea4380f23508e0ba564fd60580ffc\",\"messageID\":\"msg_0d23e81e8001OdsiiXPNr4euNH\",\"sessionID\":\"ses_f2dd3955bffekvazaLJ3sLznaC\",\"type\":\"step-finish\",\"tokens\":{\"total\":162010,\"input\":4491,\"output\":254,\"reasoning\":0,\"cache\":{\"write\":0,\"read\":157265}},\"cost\":0}}\r\n{\"type\":\"step_start\",\"timestamp\":1790233716560,\"sessionID\":\"ses_f2dd3955bffekvazaLJ3sLznaC\",\"part\":{\"id\":\"prt_0d23ea749001apRQ2YRCFehadU\",\"messageID\":\"msg_0d23e989b001G404gaWqXPpw4J\",\"sessionID\":\"ses_f2dd3955bffekvazaLJ3sLznaC\",\"snapshot\":\"627cc6ae2faea4380f23508e0ba564fd60580ffc\",\"type\":\"step-start\"}}\r\n",
+      "failure_text_tail": ""
+    },
+    {
+      "cycle": 11,
+      "verdict": "REPLACE_WORKER",
+      "generation": 11,
+      "model": "sairoute/SAIFREN",
+      "returncode": 1,
+      "failure": null,
+      "progressed": true,
+      "bounded": true,
+      "output_tail": "d does not apply to a project without one. To close finished Work run: saipen ticket done <T-###> --closure-mode own_patch\\r\\nnext: saipen ticket done T-118 --closure-mode own_patch\\r\\n\",\"metadata\":{\"output\":\"REFUSE [VALIDATION_FAILED]\\r\\nreason: VERSION is missing from the repository root: `saipen ship` publishes a versioned release and does not apply to a project without one. To close finished Work run: saipen ticket done <T-###> --closure-mode own_patch\\r\\nnext: saipen ticket done T-118 --closure-mode own_patch\\r\\n\",\"exit\":1,\"truncated\":false},\"title\":\"saipen ship\",\"time\":{\"start\":1790234914273,\"end\":1790234915030}},\"id\":\"prt_0d250eddc001h9AqfKw4UCrzXf\",\"sessionID\":\"ses_f2dc14201ffeurX9gAXdZIiOik\",\"messageID\":\"msg_0d250e380001ZaPc6lVgX8nIZS\"}}\r\n{\"type\":\"step_finish\",\"timestamp\":1790234915356,\"sessionID\":\"ses_f2dc14201ffeurX9gAXdZIiOik\",\"part\":{\"id\":\"prt_0d250f212001Yy3rIdufvoYuIF\",\"reason\":\"tool-calls\",\"snapshot\":\"df0dcc8575e09fd447f50b096057557b98318e65\",\"messageID\":\"msg_0d250e380001ZaPc6lVgX8nIZS\",\"sessionID\":\"ses_f2dc14201ffeurX9gAXdZIiOik\",\"type\":\"step-finish\",\"tokens\":{\"total\":147905,\"input\":2791,\"output\":72,\"reasoning\":0,\"cache\":{\"write\":0,\"read\":145042}},\"cost\":0}}\r\n{\"type\":\"step_start\",\"timestamp\":1790234918954,\"sessionID\":\"ses_f2dc14201ffeurX9gAXdZIiOik\",\"part\":{\"id\":\"prt_0d2510027001Mo4kUzcd677giQ\",\"messageID\":\"msg_0d250f2e7001uVHvVEeu3L9fqO\",\"sessionID\":\"ses_f2dc14201ffeurX9gAXdZIiOik\",\"snapshot\":\"df0dcc8575e09fd447f50b096057557b98318e65\",\"type\":\"step-start\"}}\r\n",
+      "failure_text_tail": ""
+    },
+    {
+      "cycle": 12,
+      "verdict": "REPLACE_WORKER",
+      "generation": 12,
+      "model": "sairoute/SAIFREN",
+      "returncode": 0,
+      "failure": null,
+      "progressed": true,
+      "bounded": false,
+      "output_tail": "496ffe9kAuwowKmO6l8y\",\"type\":\"step-finish\",\"tokens\":{\"total\":158621,\"input\":2122,\"output\":164,\"reasoning\":0,\"cache\":{\"write\":0,\"read\":156335}},\"cost\":0}}\r\n{\"type\":\"step_start\",\"timestamp\":1790235493931,\"sessionID\":\"ses_f2daef496ffe9kAuwowKmO6l8y\",\"part\":{\"id\":\"prt_0d259c628001PDB81raXw0nNDV\",\"messageID\":\"msg_0d259b982001AFDuuYemwF3PZE\",\"sessionID\":\"ses_f2daef496ffe9kAuwowKmO6l8y\",\"snapshot\":\"d9100d478f121baf9b9465dae16f56261e54543a\",\"type\":\"step-start\"}}\r\n{\"type\":\"text\",\"timestamp\":1790235497478,\"sessionID\":\"ses_f2daef496ffe9kAuwowKmO6l8y\",\"part\":{\"id\":\"prt_0d259d306001Czb6BdoQWgISgv\",\"messageID\":\"msg_0d259b982001AFDuuYemwF3PZE\",\"sessionID\":\"ses_f2daef496ffe9kAuwowKmO6l8y\",\"type\":\"text\",\"text\":\"STATUS: DONE \u2014 T-123 j\u00e4rjekorras.  \\nRESULT: T-118\u2013T-121 suletud; lisatud 3 module/test paari. Commit/push ei tehtud: `VERSION` ja `origin` puuduvad.  \\nBLOCKER: NONE  \\nOPERATOR ACTION: NONE  \\nNEXT EXACT ACTION: `cc`  \\nVALIDATION: 119 testi OK; vale-kontrollid punased; `saipen validate` \u2192 `CURRENT_PASS`.\",\"time\":{\"start\":1790235497222,\"end\":1790235497476}}}\r\n{\"type\":\"step_finish\",\"timestamp\":1790235497793,\"sessionID\":\"ses_f2daef496ffe9kAuwowKmO6l8y\",\"part\":{\"id\":\"prt_0d259d5370010u7WTmb9ZUBOrs\",\"reason\":\"stop\",\"snapshot\":\"304a33836fc3a7e8098e489c55356beef794da53\",\"messageID\":\"msg_0d259b982001AFDuuYemwF3PZE\",\"sessionID\":\"ses_f2daef496ffe9kAuwowKmO6l8y\",\"type\":\"step-finish\",\"tokens\":{\"total\":159043,\"input\":5764,\"output\":513,\"reasoning\":0,\"cache\":{\"write\":0,\"read\":152766}},\"cost\":0}}\r\n",
+      "failure_text_tail": ""
+    },
+    {
+      "cycle": 13,
+      "verdict": "REPLACE_WORKER",
+      "generation": 13,
+      "model": "sairoute/SAIFREN",
+      "returncode": 1,
+      "failure": "WORKER_CRASH",
+      "progressed": true,
+      "bounded": false,
+      "output_tail": "ttest\\n\\nfrom src.value_125 import value_125\\n\\n\\nclass TestValue125(unittest.TestCase):\\n    def test_value_125(self):\\n        self.assertEqual(value_125(), 125)\",\"truncated\":false,\"loaded\":[],\"display\":{\"type\":\"file\",\"path\":\"V:\\\\_SAIPEN_SOAK_\\\\tmp\\\\t1363-8_l89v_z\\\\tests\\\\test_value_125.py\",\"text\":\"import unittest\\n\\nfrom src.value_125 import value_125\\n\\n\\nclass TestValue125(unittest.TestCase):\\n    def test_value_125(self):\\n        self.assertEqual(value_125(), 125)\",\"lineStart\":1,\"lineEnd\":8,\"totalLines\":8,\"truncated\":false}},\"title\":\"tests\\\\test_value_125.py\",\"time\":{\"start\":1790236113354,\"end\":1790236113360}},\"id\":\"prt_0d26339c60011BiaGj9POp4oxs\",\"sessionID\":\"ses_f2da6203dffeh1xd8IiMz01tV1\",\"messageID\":\"msg_0d2632549001N6iSZHf0K0wJD2\"}}\r\n{\"type\":\"step_finish\",\"timestamp\":1790236113785,\"sessionID\":\"ses_f2da6203dffeh1xd8IiMz01tV1\",\"part\":{\"id\":\"prt_0d2633b67001VzFCXbGgqVXqeJ\",\"reason\":\"tool-calls\",\"snapshot\":\"2a46caa2aecdd7cc36efa85d8e7456a04b0040ad\",\"messageID\":\"msg_0d2632549001N6iSZHf0K0wJD2\",\"sessionID\":\"ses_f2da6203dffeh1xd8IiMz01tV1\",\"type\":\"step-finish\",\"tokens\":{\"total\":164054,\"input\":153056,\"output\":289,\"reasoning\":0,\"cache\":{\"write\":0,\"read\":10709}},\"cost\":0}}\r\n{\"type\":\"step_start\",\"timestamp\":1790236116374,\"sessionID\":\"ses_f2da6203dffeh1xd8IiMz01tV1\",\"part\":{\"id\":\"prt_0d26345910015qoP1r0rwbU9cv\",\"messageID\":\"msg_0d2633c9f001q6rLtxObHlAfPT\",\"sessionID\":\"ses_f2da6203dffeh1xd8IiMz01tV1\",\"snapshot\":\"2a46caa2aecdd7cc36efa85d8e7456a04b0040ad\",\"type\":\"step-start\"}}\r\n",
+      "failure_text_tail": ""
+    },
+    {
+      "cycle": 14,
+      "verdict": "REPLACE_WORKER",
+      "generation": 14,
+      "model": "sairoute/SAIFREN",
+      "returncode": 0,
+      "failure": null,
+      "progressed": true,
+      "bounded": false,
+      "output_tail": "ep-finish\",\"tokens\":{\"total\":192110,\"input\":2026,\"output\":86,\"reasoning\":0,\"cache\":{\"write\":0,\"read\":189998}},\"cost\":0}}\r\n{\"type\":\"step_start\",\"timestamp\":1790236934411,\"sessionID\":\"ses_f2d9ca564ffeUgsqW9z9iN47z3\",\"part\":{\"id\":\"prt_0d26fc107001TOwM15hAds1int\",\"messageID\":\"msg_0d26fb6ef001Ayt9CBl4N57yHZ\",\"sessionID\":\"ses_f2d9ca564ffeUgsqW9z9iN47z3\",\"snapshot\":\"be41704c67afc05c7f83017b2f1d959c53704a85\",\"type\":\"step-start\"}}\r\n{\"type\":\"text\",\"timestamp\":1790236952793,\"sessionID\":\"ses_f2d9ca564ffeUgsqW9z9iN47z3\",\"part\":{\"id\":\"prt_0d270066f001jZ1CheLtuaW1Fx\",\"messageID\":\"msg_0d26fb6ef001Ayt9CBl4N57yHZ\",\"sessionID\":\"ses_f2d9ca564ffeUgsqW9z9iN47z3\",\"type\":\"text\",\"text\":\"STATUS: `AWAIT_WORKER` \u2014 `DONE`, j\u00e4rgmine `T-132`  \\nRESULT: T-127, T-128, T-125, T-130, T-129 l\u00f5petatud; 128 testi PASS. Commit/push ei tehtud.  \\nBLOCKER: Terve generation 14 lease; t\u00f6\u00f6leerija ei v\u00f5eta \u00fcle.  \\nOPERATOR ACTION: `NONE`  \\nNEXT EXACT ACTION: `NONE`  \\nVALIDATION: `python -m unittest discover -s tests -t .` \u2192 `128 tests OK`\",\"time\":{\"start\":1790236952175,\"end\":1790236952785}}}\r\n{\"type\":\"step_finish\",\"timestamp\":1790236953298,\"sessionID\":\"ses_f2d9ca564ffeUgsqW9z9iN47z3\",\"part\":{\"id\":\"prt_0d2700ab8001ZhfAVZSe0ikGHh\",\"reason\":\"stop\",\"snapshot\":\"26ce90cc4370eb453d734d6702b960fc8c6920b1\",\"messageID\":\"msg_0d26fb6ef001Ayt9CBl4N57yHZ\",\"sessionID\":\"ses_f2d9ca564ffeUgsqW9z9iN47z3\",\"type\":\"step-finish\",\"tokens\":{\"total\":194320,\"input\":8643,\"output\":1800,\"reasoning\":0,\"cache\":{\"write\":0,\"read\":183877}},\"cost\":0}}\r\n",
+      "failure_text_tail": ""
+    },
+    {
+      "cycle": 15,
+      "verdict": "REPLACE_WORKER",
+      "generation": 15,
+      "model": "sairoute/SAIFREN",
+      "returncode": 1,
+      "failure": null,
+      "progressed": true,
+      "bounded": true,
+      "output_tail": "\\\": \\\"transition-d25a37087b0641d99d2cedb55eaad759\\\",\\r\\n  \\\"changed_files\\\": [\\r\\n    \\\".saipen/LOG.md\\\",\\r\\n    \\\".saipen/BOARD.md\\\",\\r\\n    \\\".saipen/STATE.md\\\"\\r\\n  ],\\r\\n  \\\"recovery_required\\\": false,\\r\\n  \\\"phase\\\": \\\"REVIEW\\\",\\r\\n  \\\"next_action\\\": \\\"PHASE REVIEW T-138\\\",\\r\\n  \\\"event_id\\\": \\\"E-1633\\\",\\r\\n  \\\"ticket\\\": \\\"T-138\\\"\\r\\n}\\r\\n\",\"metadata\":{\"output\":\"{\\r\\n  \\\"ok\\\": true,\\r\\n  \\\"code\\\": \\\"TRANSITIONED\\\",\\r\\n  \\\"op_id\\\": \\\"transition-d25a37087b0641d99d2cedb55eaad759\\\",\\r\\n  \\\"changed_files\\\": [\\r\\n    \\\".saipen/LOG.md\\\",\\r\\n    \\\".saipen/BOARD.md\\\",\\r\\n    \\\".saipen/STATE.md\\\"\\r\\n  ],\\r\\n  \\\"recovery_required\\\": false,\\r\\n  \\\"phase\\\": \\\"REVIEW\\\",\\r\\n  \\\"next_action\\\": \\\"PHASE REVIEW T-138\\\",\\r\\n  \\\"event_id\\\": \\\"E-1633\\\",\\r\\n  \\\"ticket\\\": \\\"T-138\\\"\\r\\n}\\r\\n\",\"exit\":0,\"truncated\":false},\"title\":\"saipen transition REVIEW T-138 \\\"VERIFY complete\\\" --json\",\"time\":{\"start\":1790238149881,\"end\":1790238150920}},\"id\":\"prt_0d2824bf6001ZUSR9KkHrbm00R\",\"sessionID\":\"ses_f2d8fe483ffe6DK3pf677u53Wx\",\"messageID\":\"msg_0d282432f001X5EVuXIdWOQa06\"}}\r\n{\"type\":\"step_finish\",\"timestamp\":1790238151262,\"sessionID\":\"ses_f2d8fe483ffe6DK3pf677u53Wx\",\"part\":{\"id\":\"prt_0d2825252001JLMZl6zxUUdVzc\",\"reason\":\"tool-calls\",\"snapshot\":\"b4e1d114dd94e027e7ae69cee03863fe030c02cf\",\"messageID\":\"msg_0d282432f001X5EVuXIdWOQa06\",\"sessionID\":\"ses_f2d8fe483ffe6DK3pf677u53Wx\",\"type\":\"step-finish\",\"tokens\":{\"total\":320874,\"input\":3036,\"output\":78,\"reasoning\":0,\"cache\":{\"write\":0,\"read\":317760}},\"cost\":0}}\r\n",
+      "failure_text_tail": ""
+    },
+    {
+      "cycle": 16,
+      "verdict": "REPLACE_WORKER",
+      "generation": 16,
+      "model": "sairoute/SAIFREN",
+      "returncode": 1,
+      "failure": null,
+      "progressed": true,
+      "bounded": true,
+      "output_tail": "ommand\":\"& \\\"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\bin\\\\saipen.cmd\\\" transition SHIP T-148 \\\"REVIEW complete; SHIP\\\"\",\"timeout\":120000,\"workdir\":\"V:\\\\_SAIPEN_SOAK_\\\\tmp\\\\t1363-8_l89v_z\"},\"output\":\"ticket: T-148\\r\\nphase: SHIP\\r\\nnext_action: PHASE SHIP T-148\\r\\ncode: TRANSITIONED\\r\\n\",\"metadata\":{\"output\":\"ticket: T-148\\r\\nphase: SHIP\\r\\nnext_action: PHASE SHIP T-148\\r\\ncode: TRANSITIONED\\r\\n\",\"exit\":0,\"truncated\":false},\"title\":\"& \\\"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\bin\\\\saipen.cmd\\\" transition SHIP T-148 \\\"REVIEW complete; SHIP\\\"\",\"time\":{\"start\":1790239344905,\"end\":1790239346572}},\"id\":\"prt_0d2948519001x1AAiAqjf44nZn\",\"sessionID\":\"ses_f2d7d99efffemm24UZAtQ60U0r\",\"messageID\":\"msg_0d29473f3001FMHXzm6V77Fmnh\"}}\r\n{\"type\":\"step_finish\",\"timestamp\":1790239347026,\"sessionID\":\"ses_f2d7d99efffemm24UZAtQ60U0r\",\"part\":{\"id\":\"prt_0d2949147001LiZgbTUB4SFBkp\",\"reason\":\"tool-calls\",\"snapshot\":\"1873a5c6be82d135aba85a1991bdf81087f5a720\",\"messageID\":\"msg_0d29473f3001FMHXzm6V77Fmnh\",\"sessionID\":\"ses_f2d7d99efffemm24UZAtQ60U0r\",\"type\":\"step-finish\",\"tokens\":{\"total\":200544,\"input\":189724,\"output\":108,\"reasoning\":0,\"cache\":{\"write\":0,\"read\":10712}},\"cost\":0}}\r\n{\"type\":\"step_start\",\"timestamp\":1790239354026,\"sessionID\":\"ses_f2d7d99efffemm24UZAtQ60U0r\",\"part\":{\"id\":\"prt_0d294aca6001DXcovq0bWanO5k\",\"messageID\":\"msg_0d2949255001Egytw1bn2zZJ1C\",\"sessionID\":\"ses_f2d7d99efffemm24UZAtQ60U0r\",\"snapshot\":\"1873a5c6be82d135aba85a1991bdf81087f5a720\",\"type\":\"step-start\"}}\r\n",
+      "failure_text_tail": ""
+    },
+    {
+      "cycle": 17,
+      "verdict": "REPLACE_WORKER",
+      "generation": 17,
+      "model": "sairoute/SAIFREN",
+      "returncode": 1,
+      "failure": "WORKER_CRASH",
+      "progressed": true,
+      "bounded": false,
+      "output_tail": "137Q14xRW3dWDDd\",\"messageID\":\"msg_0d29a25c8001JBkez2g2hCZTQE\",\"sessionID\":\"ses_f2d6b4659ffevegjss6oMKbUo9\",\"snapshot\":\"713cb7592a5918c594d2a2260a0f9f94d2a43525\",\"type\":\"step-start\"}}\r\n{\"type\":\"tool_use\",\"timestamp\":1790239716527,\"sessionID\":\"ses_f2d6b4659ffevegjss6oMKbUo9\",\"part\":{\"type\":\"tool\",\"tool\":\"bash\",\"callID\":\"39cbf2ef-f9a4-4287-97ae-59d9e3e72f32\",\"state\":{\"status\":\"completed\",\"input\":{\"command\":\"saipen transition SHIP T-147 \\\"transition to SHIP -- REVIEW complete; SHIP\\\"\",\"timeout\":120000,\"workdir\":\"V:\\\\_SAIPEN_SOAK_\\\\tmp\\\\t1363-8_l89v_z\"},\"output\":\"ticket: T-147\\r\\nphase: SHIP\\r\\nnext_action: PHASE SHIP T-147\\r\\ncode: TRANSITIONED\\r\\n\",\"metadata\":{\"output\":\"ticket: T-147\\r\\nphase: SHIP\\r\\nnext_action: PHASE SHIP T-147\\r\\ncode: TRANSITIONED\\r\\n\",\"exit\":0,\"truncated\":false},\"title\":\"saipen transition SHIP T-147 \\\"transition to SHIP -- REVIEW complete; SHIP\\\"\",\"time\":{\"start\":1790239715496,\"end\":1790239716524}},\"id\":\"prt_0d29a2f850017aBkOB5QSOfB6T\",\"sessionID\":\"ses_f2d6b4659ffevegjss6oMKbUo9\",\"messageID\":\"msg_0d29a25c8001JBkez2g2hCZTQE\"}}\r\n{\"type\":\"step_finish\",\"timestamp\":1790239716848,\"sessionID\":\"ses_f2d6b4659ffevegjss6oMKbUo9\",\"part\":{\"id\":\"prt_0d29a35e6001KA48OwH0VHfESr\",\"reason\":\"tool-calls\",\"snapshot\":\"a8ee879e8e0afb5cea1adbaa4f29c60e1ba8ae3a\",\"messageID\":\"msg_0d29a25c8001JBkez2g2hCZTQE\",\"sessionID\":\"ses_f2d6b4659ffevegjss6oMKbUo9\",\"type\":\"step-finish\",\"tokens\":{\"total\":105821,\"input\":4743,\"output\":85,\"reasoning\":0,\"cache\":{\"write\":0,\"read\":100993}},\"cost\":0}}\r\n",
+      "failure_text_tail": ""
+    },
+    {
+      "cycle": 18,
+      "verdict": "REPLACE_WORKER",
+      "generation": 18,
+      "model": "sairoute/SAIFREN",
+      "returncode": 1,
+      "failure": null,
+      "progressed": true,
+      "bounded": true,
+      "output_tail": "-------------------------------------------------------------\\r\\nRan 155 tests in 0.003s\\r\\n\\r\\nOK\\r\\n\",\"metadata\":{\"output\":\"...........................................................................................................................................................\\r\\n----------------------------------------------------------------------\\r\\nRan 155 tests in 0.003s\\r\\n\\r\\nOK\\r\\n\",\"exit\":0,\"truncated\":false},\"title\":\"python -B -c \\\"from src.value_153 import value_153; assert value_153() == 153\\\"; if ($?) { python -B -m unittest discover -s tests -t . }\",\"time\":{\"start\":1790240915217,\"end\":1790240916056}},\"id\":\"prt_0d2ac7be8001v37hu1VbvMVzQu\",\"sessionID\":\"ses_f2d65ba38ffeAsI1dEcNO2D4Wh\",\"messageID\":\"msg_0d2ac72a7001nxztrR8kPyOxha\"}}\r\n{\"type\":\"step_finish\",\"timestamp\":1790240916365,\"sessionID\":\"ses_f2d65ba38ffeAsI1dEcNO2D4Wh\",\"part\":{\"id\":\"prt_0d2ac8385001nd6mLt473ArCs7\",\"reason\":\"tool-calls\",\"snapshot\":\"377a3bd2f4d3f1ac44c07bcae067b836dfc062db\",\"messageID\":\"msg_0d2ac72a7001nxztrR8kPyOxha\",\"sessionID\":\"ses_f2d65ba38ffeAsI1dEcNO2D4Wh\",\"type\":\"step-finish\",\"tokens\":{\"total\":192764,\"input\":4155,\"output\":190,\"reasoning\":0,\"cache\":{\"write\":0,\"read\":188419}},\"cost\":0}}\r\n{\"type\":\"step_start\",\"timestamp\":1790240918444,\"sessionID\":\"ses_f2d65ba38ffeAsI1dEcNO2D4Wh\",\"part\":{\"id\":\"prt_0d2ac8ba900104emWcvDeuxxTt\",\"messageID\":\"msg_0d2ac8469001I3XO6bsaI9OIKy\",\"sessionID\":\"ses_f2d65ba38ffeAsI1dEcNO2D4Wh\",\"snapshot\":\"377a3bd2f4d3f1ac44c07bcae067b836dfc062db\",\"type\":\"step-start\"}}\r\n",
+      "failure_text_tail": ""
+    },
+    {
+      "cycle": 19,
+      "verdict": "REPLACE_WORKER",
+      "generation": 19,
+      "model": "sairoute/SAIFREN",
+      "returncode": 1,
+      "failure": null,
+      "progressed": true,
+      "bounded": true,
+      "output_tail": "o\",\"part\":{\"id\":\"prt_0d2bed4a10019R5msagH7NQDF9\",\"messageID\":\"msg_0d2bec7b5001dJpzuV79HsWyIS\",\"sessionID\":\"ses_f2d536966ffe9vfd2k2SWM6Jwo\",\"snapshot\":\"c12b87f32e5f2cfb9134fc48345f96b7031fb06b\",\"type\":\"step-start\"}}\r\n{\"type\":\"tool_use\",\"timestamp\":1790242118356,\"sessionID\":\"ses_f2d536966ffe9vfd2k2SWM6Jwo\",\"part\":{\"type\":\"tool\",\"tool\":\"bash\",\"callID\":\"7af9c4a3-8977-4ea6-b683-123f1ddb5e5c\",\"state\":{\"status\":\"completed\",\"input\":{\"command\":\"saipen ticket done T-169 --closure-mode own_patch\",\"timeout\":120000,\"workdir\":\"V:\\\\_SAIPEN_SOAK_\\\\tmp\\\\t1363-8_l89v_z\"},\"output\":\"ticket: T-169\\r\\nphase: DONE\\r\\ntask: none\\r\\nnext_action: PHASE SCOUT T-170\\r\\ncode: FINISHED\\r\\n\",\"metadata\":{\"output\":\"ticket: T-169\\r\\nphase: DONE\\r\\ntask: none\\r\\nnext_action: PHASE SCOUT T-170\\r\\ncode: FINISHED\\r\\n\",\"exit\":0,\"truncated\":false},\"title\":\"saipen ticket done T-169 --closure-mode own_patch\",\"time\":{\"start\":1790242117017,\"end\":1790242118354}},\"id\":\"prt_0d2bed4a3001GYoGyDA4ijSYKv\",\"sessionID\":\"ses_f2d536966ffe9vfd2k2SWM6Jwo\",\"messageID\":\"msg_0d2bec7b5001dJpzuV79HsWyIS\"}}\r\n{\"type\":\"step_finish\",\"timestamp\":1790242118750,\"sessionID\":\"ses_f2d536966ffe9vfd2k2SWM6Jwo\",\"part\":{\"id\":\"prt_0d2bedc53001EeZlkYsKZlC75I\",\"reason\":\"tool-calls\",\"snapshot\":\"dfdf731836d772b853283c05caf50ae75fe6ab93\",\"messageID\":\"msg_0d2bec7b5001dJpzuV79HsWyIS\",\"sessionID\":\"ses_f2d536966ffe9vfd2k2SWM6Jwo\",\"type\":\"step-finish\",\"tokens\":{\"total\":155463,\"input\":2094,\"output\":77,\"reasoning\":0,\"cache\":{\"write\":0,\"read\":153292}},\"cost\":0}}\r\n",
+      "failure_text_tail": ""
+    },
+    {
+      "cycle": 20,
+      "verdict": "REPLACE_WORKER",
+      "generation": 20,
+      "model": "sairoute/SAIFREN",
+      "returncode": 1,
+      "failure": "WORKER_CRASH",
+      "progressed": true,
+      "bounded": false,
+      "output_tail": ".............................................................\\r\\n----------------------------------------------------------------------\\r\\nRan 176 tests in 0.004s\\r\\n\\r\\nOK\\r\\n\",\"metadata\":{\"output\":\"................................................................................................................................................................................\\r\\n----------------------------------------------------------------------\\r\\nRan 176 tests in 0.004s\\r\\n\\r\\nOK\\r\\n\",\"exit\":0,\"truncated\":false},\"title\":\"python -m unittest discover -s tests -t .\",\"time\":{\"start\":1790243314218,\"end\":1790243315317}},\"id\":\"prt_0d2d11916001ugVaiwMYfvh2wf\",\"sessionID\":\"ses_f2d4117d4ffe2cc4fSHlVP5EB1\",\"messageID\":\"msg_0d2d107340011hV1ySeTaz1fFR\"}}\r\n{\"type\":\"step_finish\",\"timestamp\":1790243315802,\"sessionID\":\"ses_f2d4117d4ffe2cc4fSHlVP5EB1\",\"part\":{\"id\":\"prt_0d2d1204d0015WFAESP5eZtXlM\",\"reason\":\"tool-calls\",\"snapshot\":\"986d06f6aa1c8c9f004aad5deaeac9eb803db8b2\",\"messageID\":\"msg_0d2d107340011hV1ySeTaz1fFR\",\"sessionID\":\"ses_f2d4117d4ffe2cc4fSHlVP5EB1\",\"type\":\"step-finish\",\"tokens\":{\"total\":189227,\"input\":178165,\"output\":353,\"reasoning\":0,\"cache\":{\"write\":0,\"read\":10709}},\"cost\":0}}\r\n{\"type\":\"step_start\",\"timestamp\":1790243318438,\"sessionID\":\"ses_f2d4117d4ffe2cc4fSHlVP5EB1\",\"part\":{\"id\":\"prt_0d2d12aa0001OR7Kx9aIgEPG3U\",\"messageID\":\"msg_0d2d12161001BIzHvD6362scaA\",\"sessionID\":\"ses_f2d4117d4ffe2cc4fSHlVP5EB1\",\"snapshot\":\"986d06f6aa1c8c9f004aad5deaeac9eb803db8b2\",\"type\":\"step-start\"}}\r\n",
+      "failure_text_tail": ""
+    },
+    {
+      "cycle": 21,
+      "verdict": "REPLACE_WORKER",
+      "generation": 21,
+      "model": "sairoute/SAIFREN",
+      "returncode": 0,
+      "failure": null,
+      "progressed": true,
+      "bounded": false,
+      "output_tail": "output\":90,\"reasoning\":0,\"cache\":{\"write\":0,\"read\":10721}},\"cost\":0}}\r\n{\"type\":\"step_start\",\"timestamp\":1790243886966,\"sessionID\":\"ses_f2d2ec970ffeahwEshMg8le4cl\",\"part\":{\"id\":\"prt_0d2d9d773001g4J3rfKyTYTrVz\",\"messageID\":\"msg_0d2d9cf3b0019U78rJQqn5vn8M\",\"sessionID\":\"ses_f2d2ec970ffeahwEshMg8le4cl\",\"snapshot\":\"1d352976e3b1641d867f8a389cdd4a9fded1589a\",\"type\":\"step-start\"}}\r\n{\"type\":\"text\",\"timestamp\":1790243895874,\"sessionID\":\"ses_f2d2ec970ffeahwEshMg8le4cl\",\"part\":{\"id\":\"prt_0d2d9f710001KkOYok8pNrB0ow\",\"messageID\":\"msg_0d2d9cf3b0019U78rJQqn5vn8M\",\"sessionID\":\"ses_f2d2ec970ffeahwEshMg8le4cl\",\"type\":\"text\",\"text\":\"STATUS: BLOCKED \u2014 T-179, T-180, T-181\\nRESULT: 3 tickets implemented; VERIFY + REVIEW passed.\\nBLOCKER: FIRST_PUBLISH_WAIT \u2014 puudub `origin`; 16 v\u00f5\u00f5rad staged faili s\u00e4ilitatud.\\nOPERATOR ACTION: Anna repo nimi, `public|private` ning staged failide k\u00e4sitlus.\\nNEXT EXACT ACTION: NONE\\nVALIDATION: `python -m unittest discover -s tests -t .` \u2192 178 tests OK; wrong-value control \u2192 expected FAIL.\",\"time\":{\"start\":1790243895056,\"end\":1790243895871}}}\r\n{\"type\":\"step_finish\",\"timestamp\":1790243896227,\"sessionID\":\"ses_f2d2ec970ffeahwEshMg8le4cl\",\"part\":{\"id\":\"prt_0d2d9fb9800112tWx6ibaiOMsw\",\"reason\":\"stop\",\"snapshot\":\"73a5c54c78d32ef4a7d76119b17596016eeb14fd\",\"messageID\":\"msg_0d2d9cf3b0019U78rJQqn5vn8M\",\"sessionID\":\"ses_f2d2ec970ffeahwEshMg8le4cl\",\"type\":\"step-finish\",\"tokens\":{\"total\":168051,\"input\":3215,\"output\":948,\"reasoning\":0,\"cache\":{\"write\":0,\"read\":163888}},\"cost\":0}}\r\n",
+      "failure_text_tail": ""
+    },
+    {
+      "cycle": 22,
+      "verdict": "REPLACE_WORKER",
+      "generation": 22,
+      "model": "sairoute/SAIFREN",
+      "returncode": 1,
+      "failure": null,
+      "progressed": true,
+      "bounded": true,
+      "output_tail": "heckpoint-066b526b80c94a048f2adbfefa228f5e\\\",\\r\\n  \\\"changed_files\\\": [\\r\\n    \\\".saipen/LOG.md\\\",\\r\\n    \\\".saipen/BOARD.md\\\",\\r\\n    \\\".saipen/STATE.md\\\"\\r\\n  ],\\r\\n  \\\"recovery_required\\\": false,\\r\\n  \\\"event_id\\\": \\\"E-2262\\\"\\r\\n}\\r\\n\",\"metadata\":{\"output\":\"{\\r\\n  \\\"ok\\\": true,\\r\\n  \\\"code\\\": \\\"CHECKPOINTED\\\",\\r\\n  \\\"op_id\\\": \\\"checkpoint-066b526b80c94a048f2adbfefa228f5e\\\",\\r\\n  \\\"changed_files\\\": [\\r\\n    \\\".saipen/LOG.md\\\",\\r\\n    \\\".saipen/BOARD.md\\\",\\r\\n    \\\".saipen/STATE.md\\\"\\r\\n  ],\\r\\n  \\\"recovery_required\\\": false,\\r\\n  \\\"event_id\\\": \\\"E-2262\\\"\\r\\n}\\r\\n\",\"exit\":0,\"truncated\":false},\"title\":\"saipen checkpoint RUN T-191 \\\"verify -> PASS [target: T-191] conf: high -- python -m py_compile src/value_191.py tests/test_value_191.py; import assert; python -m unittest discover -s tests -t . -> 187 tests OK; known-bad value_191 control -> expected exit 1\\\" --json\",\"time\":{\"start\":1790245095373,\"end\":1790245096439}},\"id\":\"prt_0d2ec465b0018YcBu8HXo4qjtv\",\"sessionID\":\"ses_f2d25f87bffeowyB5czpXUkFGg\",\"messageID\":\"msg_0d2ec3afd001N1bNUdALjOkbMG\"}}\r\n{\"type\":\"step_finish\",\"timestamp\":1790245096818,\"sessionID\":\"ses_f2d25f87bffeowyB5czpXUkFGg\",\"part\":{\"id\":\"prt_0d2ec4d66001ijP6FIovA072A0\",\"reason\":\"tool-calls\",\"snapshot\":\"b8513d13136d99ccd6e9e72fc3d36e44d46f197a\",\"messageID\":\"msg_0d2ec3afd001N1bNUdALjOkbMG\",\"sessionID\":\"ses_f2d25f87bffeowyB5czpXUkFGg\",\"type\":\"step-finish\",\"tokens\":{\"total\":182550,\"input\":2055,\"output\":147,\"reasoning\":0,\"cache\":{\"write\":0,\"read\":180348}},\"cost\":0}}\r\n",
+      "failure_text_tail": ""
+    },
+    {
+      "cycle": 23,
+      "verdict": "REPLACE_WORKER",
+      "generation": 23,
+      "model": "sairoute/SAIFREN",
+      "returncode": 1,
+      "failure": null,
+      "progressed": true,
+      "bounded": true,
+      "output_tail": "bounded kitchen area and say\\n  plainly that the tree still carries partial changes.\\n\\nThese steps are reversible failed-attempt recovery; generic authorization and\\ncheckpoint mechanics remain in CORE/OPS.\\n\\n## Exit and evidence\\n\\nPASS requires the ticket check, applicable harness, regression coverage, both\\ninstrument controls where required, LOGged command/results, and confidence.\\nTransition to REVIEW; there is no next-ticket branch after a PASS.\\n\\nUnder `execution_intent: goal`, VERIFY's unique accounting point increments\\n`goal_tickets` once per pass and writes `DEC: goal_tickets N->M` before the\\ncheckpoint. MAINTENANCE \u00a72.4 owns persistence, the 20-ticket cap, stop shape,\\nand reauthorization.\",\"lineStart\":1,\"lineEnd\":148,\"totalLines\":148,\"truncated\":false}},\"title\":\"..\\\\..\\\\..\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\saipen\\\\phases\\\\verify.md\",\"time\":{\"start\":1790246296489,\"end\":1790246296493}},\"id\":\"prt_0d2fe9adc001OxpuKS6rXQzfJp\",\"sessionID\":\"ses_f2d13a8a1ffepB0EcNEjbsL5Br\",\"messageID\":\"msg_0d2fe8a52001IQ8CelSmuHemIU\"}}\r\n{\"type\":\"step_finish\",\"timestamp\":1790246296859,\"sessionID\":\"ses_f2d13a8a1ffepB0EcNEjbsL5Br\",\"part\":{\"id\":\"prt_0d2fe9d12001Dcu4S0rlp6Psxl\",\"reason\":\"tool-calls\",\"snapshot\":\"86d386f92374cc80e774f5f45af297b603d9902b\",\"messageID\":\"msg_0d2fe8a52001IQ8CelSmuHemIU\",\"sessionID\":\"ses_f2d13a8a1ffepB0EcNEjbsL5Br\",\"type\":\"step-finish\",\"tokens\":{\"total\":183145,\"input\":172317,\"output\":116,\"reasoning\":0,\"cache\":{\"write\":0,\"read\":10712}},\"cost\":0}}\r\n",
+      "failure_text_tail": ""
+    },
+    {
+      "cycle": 24,
+      "verdict": "REPLACE_WORKER",
+      "generation": 24,
+      "model": "sairoute/SAIFREN",
+      "returncode": 1,
+      "failure": "WORKER_CRASH",
+      "progressed": true,
+      "bounded": false,
+      "output_tail": "\",\"part\":{\"type\":\"tool\",\"tool\":\"bash\",\"callID\":\"4e7bf556-29d2-48fa-8217-25c63bc28264\",\"state\":{\"status\":\"completed\",\"input\":{\"command\":\"saipen transition REVIEW T-197 \\\"verification complete\\\"\",\"timeout\":120000,\"workdir\":\"V:\\\\_SAIPEN_SOAK_\\\\tmp\\\\t1363-8_l89v_z\"},\"output\":\"ticket: T-197\\r\\nphase: REVIEW\\r\\nnext_action: PHASE REVIEW T-197\\r\\ncode: TRANSITIONED\\r\\n\",\"metadata\":{\"output\":\"ticket: T-197\\r\\nphase: REVIEW\\r\\nnext_action: PHASE REVIEW T-197\\r\\ncode: TRANSITIONED\\r\\n\",\"exit\":0,\"truncated\":false},\"title\":\"saipen transition REVIEW T-197 \\\"verification complete\\\"\",\"time\":{\"start\":1790246914173,\"end\":1790246915266}},\"id\":\"prt_0d3080875001rMMWo6VMuahb8S\",\"sessionID\":\"ses_f2d015976ffe6DjGpIgXkBoXBP\",\"messageID\":\"msg_0d307fce4001tGQXbIsB1uVDNS\"}}\r\n{\"type\":\"step_finish\",\"timestamp\":1790246915607,\"sessionID\":\"ses_f2d015976ffe6DjGpIgXkBoXBP\",\"part\":{\"id\":\"prt_0d3080e0e001EqCZiCFWuEmoDy\",\"reason\":\"tool-calls\",\"snapshot\":\"7b53bbc7712928e64a229e4d9f8a1b1dc2ab11d4\",\"messageID\":\"msg_0d307fce4001tGQXbIsB1uVDNS\",\"sessionID\":\"ses_f2d015976ffe6DjGpIgXkBoXBP\",\"type\":\"step-finish\",\"tokens\":{\"total\":101452,\"input\":3217,\"output\":76,\"reasoning\":0,\"cache\":{\"write\":0,\"read\":98159}},\"cost\":0}}\r\n{\"type\":\"step_start\",\"timestamp\":1790246918397,\"sessionID\":\"ses_f2d015976ffe6DjGpIgXkBoXBP\",\"part\":{\"id\":\"prt_0d30818f900119x2xm5XO2YHSS\",\"messageID\":\"msg_0d3080f050013WO2o1WqKh71dY\",\"sessionID\":\"ses_f2d015976ffe6DjGpIgXkBoXBP\",\"snapshot\":\"7b53bbc7712928e64a229e4d9f8a1b1dc2ab11d4\",\"type\":\"step-start\"}}\r\n",
+      "failure_text_tail": ""
+    },
+    {
+      "cycle": 25,
+      "verdict": "REPLACE_WORKER",
+      "generation": 25,
+      "model": "sairoute/SAIFREN",
+      "returncode": 1,
+      "failure": null,
+      "progressed": true,
+      "bounded": true,
+      "output_tail": ":{\"type\":\"file\",\"path\":\"V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\saipen\\\\phases\\\\scout.md\",\"text\":\"# Phase: SCOUT\\n\\nClaiming is CORE/OPS work; confirm T-### is the claimed top workable ticket.\\n\\n1. Read relevant KNOWLEDGE first: use its compact INDEX when fresh, match the\\n   objective against scope/trigger/path, and load only the smallest relevant\\n   active set. Missing/stale INDEX falls back to targeted search, never a\\n   whole-tree read. Then read the ticket's files and one similar neighbor.\\n2. Record naming, errors, imports, reuse points, architecture, and build/test\\n   commands. Never invent a parallel architecture.\\n3. On first discovery, store canonical harness/build commands in KNOWLEDGE\\n   from repository-owned manifests/CI; they are **cited afterwards rather than**\\n   re-derived. Ambiguous command -> `WAIT: blocked` naming what is missing.\\n4. Put only promotion-gate-qualified durable findings in KNOWLEDGE; search\\n   first, and never turn progress/history/protocol into a card.\\n5. LOG one `RUN: SCOUT -- <scope/findings>` Event Graph line, then use the\\n   canonical checkpoint.\\n\\nAfter SCOUT: STATE -> BUILD.\",\"lineStart\":1,\"lineEnd\":19,\"totalLines\":19,\"truncated\":false}},\"title\":\"..\\\\..\\\\..\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\saipen\\\\phases\\\\scout.md\",\"time\":{\"start\":1790248118507,\"end\":1790248118537}},\"id\":\"prt_0d31a67e1001zp89RcPLdjzOUM\",\"sessionID\":\"ses_f2cf7dc90ffegiqJJXufy6QV1i\",\"messageID\":\"msg_0d31a554e001xMmL8hbZj0Mzf8\"}}\r\n",
+      "failure_text_tail": ""
+    },
+    {
+      "cycle": 26,
+      "verdict": "REPLACE_WORKER",
+      "generation": 26,
+      "model": "sairoute/SAIFREN",
+      "returncode": 1,
+      "failure": null,
+      "progressed": true,
+      "bounded": true,
+      "output_tail": "ittest\\n\\nfrom src.value_223 import value_223\\n\\n\\nclass TestValue223(unittest.TestCase):\\n    def test_value_223(self):\\n        self.assertEqual(value_223(), 223)\",\"truncated\":false,\"loaded\":[],\"display\":{\"type\":\"file\",\"path\":\"V:\\\\_SAIPEN_SOAK_\\\\tmp\\\\t1363-8_l89v_z\\\\tests\\\\test_value_223.py\",\"text\":\"import unittest\\n\\nfrom src.value_223 import value_223\\n\\n\\nclass TestValue223(unittest.TestCase):\\n    def test_value_223(self):\\n        self.assertEqual(value_223(), 223)\",\"lineStart\":1,\"lineEnd\":8,\"totalLines\":8,\"truncated\":false}},\"title\":\"tests\\\\test_value_223.py\",\"time\":{\"start\":1790249315605,\"end\":1790249315609}},\"id\":\"prt_0d32cac5b001uo4B0FHRQZNVtF\",\"sessionID\":\"ses_f2ce58bfdffeQ1Bb6FWXfFxC2D\",\"messageID\":\"msg_0d32c9d920010ISyM6rDg6tn5i\"}}\r\n{\"type\":\"step_finish\",\"timestamp\":1790249315969,\"sessionID\":\"ses_f2ce58bfdffeQ1Bb6FWXfFxC2D\",\"part\":{\"id\":\"prt_0d32cae75001KWdHAo0axCm7EC\",\"reason\":\"tool-calls\",\"snapshot\":\"9e412c0ab49607303282b85f57dd64a5028833fe\",\"messageID\":\"msg_0d32c9d920010ISyM6rDg6tn5i\",\"sessionID\":\"ses_f2ce58bfdffeQ1Bb6FWXfFxC2D\",\"type\":\"step-finish\",\"tokens\":{\"total\":187019,\"input\":2901,\"output\":280,\"reasoning\":0,\"cache\":{\"write\":0,\"read\":183838}},\"cost\":0}}\r\n{\"type\":\"step_start\",\"timestamp\":1790249318958,\"sessionID\":\"ses_f2ce58bfdffeQ1Bb6FWXfFxC2D\",\"part\":{\"id\":\"prt_0d32cba2b001Gp91hp5YZ0XLP1\",\"messageID\":\"msg_0d32caf9b001DFUsvrGxE2J9WB\",\"sessionID\":\"ses_f2ce58bfdffeQ1Bb6FWXfFxC2D\",\"snapshot\":\"9e412c0ab49607303282b85f57dd64a5028833fe\",\"type\":\"step-start\"}}\r\n",
+      "failure_text_tail": ""
+    },
+    {
+      "cycle": 27,
+      "verdict": "REPLACE_WORKER",
+      "generation": 27,
+      "model": "sairoute/SAIFREN",
+      "returncode": 0,
+      "failure": null,
+      "progressed": true,
+      "bounded": false,
+      "output_tail": "he\":{\"write\":0,\"read\":10756}},\"cost\":0}}\r\n{\"type\":\"step_start\",\"timestamp\":1790249578556,\"sessionID\":\"ses_f2cd33b95ffeI1rui7IwCE3YQ2\",\"part\":{\"id\":\"prt_0d330b0370016k4G55vVll9Ohp\",\"messageID\":\"msg_0d330a4ad001zmMljkI61CaHXk\",\"sessionID\":\"ses_f2cd33b95ffeI1rui7IwCE3YQ2\",\"snapshot\":\"8d2a4d7d217f9e666d16a3e2b74583023037af6c\",\"type\":\"step-start\"}}\r\n{\"type\":\"text\",\"timestamp\":1790249587529,\"sessionID\":\"ses_f2cd33b95ffeI1rui7IwCE3YQ2\",\"part\":{\"id\":\"prt_0d330d1360010tPxruR8xlAElh\",\"messageID\":\"msg_0d330a4ad001zmMljkI61CaHXk\",\"sessionID\":\"ses_f2cd33b95ffeI1rui7IwCE3YQ2\",\"type\":\"text\",\"text\":\"STATUS: T-222 BLOCKED\\nRESULT: `value_224()` + test loodud. 217 testi l\u00e4bisid. Commit/push puuduvad.\\nBLOCKER: `WAIT_USER_DECISION` \u2014 origin puudub; 16 v\u00f5\u00f5rad staged faili ootavad otsust.\\nOPERATOR ACTION: Anna repo nimi, `public/private` ning staged-failide k\u00e4sitlemine.\\nNEXT EXACT ACTION: Otsuse j\u00e4rel k\u00e4ivita `cc`.\\nVALIDATION: `python -m unittest discover -s tests -t .` \u2192 217 OK; `saipen validate --json` \u2192 `VALID`.\",\"time\":{\"start\":1790249586998,\"end\":1790249587526}}}\r\n{\"type\":\"step_finish\",\"timestamp\":1790249587862,\"sessionID\":\"ses_f2cd33b95ffeI1rui7IwCE3YQ2\",\"part\":{\"id\":\"prt_0d330d48b001CQj416ScqXyL62\",\"reason\":\"stop\",\"snapshot\":\"3fdc05a7ab6517d2ab2062ba2d08e7a014ecd356\",\"messageID\":\"msg_0d330a4ad001zmMljkI61CaHXk\",\"sessionID\":\"ses_f2cd33b95ffeI1rui7IwCE3YQ2\",\"type\":\"step-finish\",\"tokens\":{\"total\":115281,\"input\":7802,\"output\":949,\"reasoning\":0,\"cache\":{\"write\":0,\"read\":106530}},\"cost\":0}}\r\n",
+      "failure_text_tail": ""
+    },
+    {
+      "cycle": 28,
+      "verdict": "REPLACE_WORKER",
+      "generation": 28,
+      "model": "sairoute/SAIFREN",
+      "returncode": 1,
+      "failure": "WORKER_CRASH",
+      "progressed": true,
+      "bounded": false,
+      "output_tail": "_z\"},\"output\":\"{\\r\\n  \\\"ok\\\": false,\\r\\n  \\\"code\\\": \\\"VALIDATION_FAILED\\\",\\r\\n  \\\"detail\\\": \\\"VERSION is missing from the repository root: `saipen ship` publishes a versioned release and does not apply to a project without one. To close finished Work run: saipen ticket done <T-###> --closure-mode own_patch\\\",\\r\\n  \\\"canonical_next_command\\\": \\\"saipen ticket done T-227 --closure-mode own_patch\\\"\\r\\n}\\r\\n\",\"metadata\":{\"output\":\"{\\r\\n  \\\"ok\\\": false,\\r\\n  \\\"code\\\": \\\"VALIDATION_FAILED\\\",\\r\\n  \\\"detail\\\": \\\"VERSION is missing from the repository root: `saipen ship` publishes a versioned release and does not apply to a project without one. To close finished Work run: saipen ticket done <T-###> --closure-mode own_patch\\\",\\r\\n  \\\"canonical_next_command\\\": \\\"saipen ticket done T-227 --closure-mode own_patch\\\"\\r\\n}\\r\\n\",\"exit\":1,\"truncated\":false},\"title\":\"saipen ship --json\",\"time\":{\"start\":1790250513037,\"end\":1790250514060}},\"id\":\"prt_0d33ef1f3001apcAiy441ew6B0\",\"sessionID\":\"ses_f2ccf20b5ffeF2kgIFACoxcapw\",\"messageID\":\"msg_0d33ee8f30014gPWNytyt93hJG\"}}\r\n{\"type\":\"step_finish\",\"timestamp\":1790250514477,\"sessionID\":\"ses_f2ccf20b5ffeF2kgIFACoxcapw\",\"part\":{\"id\":\"prt_0d33ef8210012uGWOU0Q2Ow4iW\",\"reason\":\"tool-calls\",\"snapshot\":\"09123f4bedbbd5cf2cfcd90545c06fd41635ba3f\",\"messageID\":\"msg_0d33ee8f30014gPWNytyt93hJG\",\"sessionID\":\"ses_f2ccf20b5ffeF2kgIFACoxcapw\",\"type\":\"step-finish\",\"tokens\":{\"total\":201733,\"input\":3264,\"output\":88,\"reasoning\":0,\"cache\":{\"write\":0,\"read\":198381}},\"cost\":0}}\r\n",
+      "failure_text_tail": ""
+    },
+    {
+      "cycle": 29,
+      "verdict": "REPLACE_WORKER",
+      "generation": 29,
+      "model": "sairoute/SAIFREN",
+      "returncode": 0,
+      "failure": null,
+      "progressed": true,
+      "bounded": false,
+      "output_tail": "p-finish\",\"tokens\":{\"total\":190450,\"input\":3454,\"output\":308,\"reasoning\":0,\"cache\":{\"write\":0,\"read\":186688}},\"cost\":0}}\r\n{\"type\":\"step_start\",\"timestamp\":1790251181262,\"sessionID\":\"ses_f2cc0ee54ffeVjKDQunccLFQUn\",\"part\":{\"id\":\"prt_0d34924cb001JeUPpA9iKVNG3v\",\"messageID\":\"msg_0d3491c47001UO0LqgDwFstXfa\",\"sessionID\":\"ses_f2cc0ee54ffeVjKDQunccLFQUn\",\"snapshot\":\"93529dceeac64c3e57cc3d615c5aa36b6080e6c6\",\"type\":\"step-start\"}}\r\n{\"type\":\"text\",\"timestamp\":1790251191644,\"sessionID\":\"ses_f2cc0ee54ffeVjKDQunccLFQUn\",\"part\":{\"id\":\"prt_0d3494bd1001t1RlVKy6KmtP5U\",\"messageID\":\"msg_0d3491c47001UO0LqgDwFstXfa\",\"sessionID\":\"ses_f2cc0ee54ffeVjKDQunccLFQUn\",\"type\":\"text\",\"text\":\"STATUS: T-230 / SCOUT / AWAIT_WORKER  \\nRESULT: T-227\u2013T-229 l\u00f5petatud; T-230 claimitud. Duplicate mutation stopped.  \\nBLOCKER: `WRITER_BUSY` \u2014 healthy generation 29 owns lock; stealing forbidden.  \\nOPERATOR ACTION: NONE  \\nNEXT EXACT ACTION: `saipen autonomy --json`  \\nVALIDATION: 225 tests OK; recovery pending false; heartbeat current.\",\"time\":{\"start\":1790251191249,\"end\":1790251191642}}}\r\n{\"type\":\"step_finish\",\"timestamp\":1790251192029,\"sessionID\":\"ses_f2cc0ee54ffeVjKDQunccLFQUn\",\"part\":{\"id\":\"prt_0d3494ed3001Pqo4r92TD0bW2e\",\"reason\":\"stop\",\"snapshot\":\"292b90ca21573b426732910bf530dc4c340907c8\",\"messageID\":\"msg_0d3491c47001UO0LqgDwFstXfa\",\"sessionID\":\"ses_f2cc0ee54ffeVjKDQunccLFQUn\",\"type\":\"step-finish\",\"tokens\":{\"total\":191693,\"input\":2073,\"output\":1172,\"reasoning\":0,\"cache\":{\"write\":0,\"read\":188448}},\"cost\":0}}\r\n",
+      "failure_text_tail": ""
+    },
+    {
+      "cycle": 30,
+      "verdict": "REPLACE_WORKER",
+      "generation": 30,
+      "model": "sairoute/SAIFREN",
+      "returncode": 1,
+      "failure": null,
+      "progressed": true,
+      "bounded": true,
+      "output_tail": ":{\"command\":\"saipen checkpoint RUN T-231 \\\"SCOUT -- src/value_233.py and tests/test_value_233.py absent; reuse value_232 stdlib unittest pattern; harness: python -m unittest discover -s tests -t .\\\"\",\"timeout\":120000,\"workdir\":\"V:\\\\_SAIPEN_SOAK_\\\\tmp\\\\t1363-8_l89v_z\"},\"output\":\"code: CHECKPOINTED\\r\\n\",\"metadata\":{\"output\":\"code: CHECKPOINTED\\r\\n\",\"exit\":0,\"truncated\":false},\"title\":\"saipen checkpoint RUN T-231 \\\"SCOUT -- src/value_233.py and tests/test_value_233.py absent; reuse value_232 stdlib unittest pattern; harness: python -m unittest discover -s tests -t .\\\"\",\"time\":{\"start\":1790252366068,\"end\":1790252367686}},\"id\":\"prt_0d35b38ec001GFdMfnh5A9Fv0l\",\"sessionID\":\"ses_f2cb6a631ffeVxUqjZn52XXh4J\",\"messageID\":\"msg_0d35b1b40001Y5sN0wN5w01IEy\"}}\r\n{\"type\":\"step_finish\",\"timestamp\":1790252368247,\"sessionID\":\"ses_f2cb6a631ffeVxUqjZn52XXh4J\",\"part\":{\"id\":\"prt_0d35b416800113HbgH3UkHHspy\",\"reason\":\"tool-calls\",\"snapshot\":\"d34aceee9627181fdf22021d1c8d5898314c6916\",\"messageID\":\"msg_0d35b1b40001Y5sN0wN5w01IEy\",\"sessionID\":\"ses_f2cb6a631ffeVxUqjZn52XXh4J\",\"type\":\"step-finish\",\"tokens\":{\"total\":185964,\"input\":175054,\"output\":118,\"reasoning\":0,\"cache\":{\"write\":0,\"read\":10792}},\"cost\":0}}\r\n{\"type\":\"step_start\",\"timestamp\":1790252372639,\"sessionID\":\"ses_f2cb6a631ffeVxUqjZn52XXh4J\",\"part\":{\"id\":\"prt_0d35b528c00180aUOhi3xDhVUH\",\"messageID\":\"msg_0d35b42af001kLS7HPTIduD7Pi\",\"sessionID\":\"ses_f2cb6a631ffeVxUqjZn52XXh4J\",\"snapshot\":\"d34aceee9627181fdf22021d1c8d5898314c6916\",\"type\":\"step-start\"}}\r\n",
+      "failure_text_tail": ""
+    },
+    {
+      "cycle": 31,
+      "verdict": "REPLACE_WORKER",
+      "generation": 31,
+      "model": "sairoute/SAIFREN",
+      "returncode": 1,
+      "failure": null,
+      "progressed": true,
+      "bounded": true,
+      "output_tail": "00,\"workdir\":\"V:\\\\_SAIPEN_SOAK_\\\\tmp\\\\t1363-8_l89v_z\"},\"output\":\"...............................................................................................................................................................................................................................................\\r\\n----------------------------------------------------------------------\\r\\nRan 239 tests in 0.005s\\r\\n\\r\\nOK\\r\\n\",\"metadata\":{\"output\":\"...............................................................................................................................................................................................................................................\\r\\n----------------------------------------------------------------------\\r\\nRan 239 tests in 0.005s\\r\\n\\r\\nOK\\r\\n\",\"exit\":0,\"truncated\":false},\"title\":\"python -m unittest discover -s tests -t .\",\"time\":{\"start\":1790253591125,\"end\":1790253591969}},\"id\":\"prt_0d36dea4f001IG0GLf7ZEJpgEV\",\"sessionID\":\"ses_f2ca44a17ffeV13Rb9IZQTLoeB\",\"messageID\":\"msg_0d36dd3530018qZ9YFrYE18OjK\"}}\r\n{\"type\":\"step_finish\",\"timestamp\":1790253592333,\"sessionID\":\"ses_f2ca44a17ffeV13Rb9IZQTLoeB\",\"part\":{\"id\":\"prt_0d36def010010E6WGiZHsAyVKE\",\"reason\":\"tool-calls\",\"snapshot\":\"e15ec17f424687fb2085658557fca3aafe63ae72\",\"messageID\":\"msg_0d36dd3530018qZ9YFrYE18OjK\",\"sessionID\":\"ses_f2ca44a17ffeV13Rb9IZQTLoeB\",\"type\":\"step-finish\",\"tokens\":{\"total\":143812,\"input\":133022,\"output\":78,\"reasoning\":0,\"cache\":{\"write\":0,\"read\":10712}},\"cost\":0}}\r\n",
+      "failure_text_tail": ""
+    },
+    {
+      "cycle": 32,
+      "verdict": "REPLACE_WORKER",
+      "generation": 32,
+      "model": "sairoute/SAIFREN",
+      "returncode": 1,
+      "failure": "WORKER_CRASH",
+      "progressed": true,
+      "bounded": false,
+      "output_tail": "6dg\",\"part\":{\"id\":\"prt_0d375e92d0011wtDtGJTpJkFOP\",\"reason\":\"tool-calls\",\"snapshot\":\"667d57735f2d8f52f98f14e1611ea8c573da5aa4\",\"messageID\":\"msg_0d375ce990019dtLYoNxyKt8wD\",\"sessionID\":\"ses_f2c9205f5ffe7MzF9g8i66Z6dg\",\"type\":\"step-finish\",\"tokens\":{\"total\":82833,\"input\":72054,\"output\":70,\"reasoning\":0,\"cache\":{\"write\":0,\"read\":10709}},\"cost\":0}}\r\n{\"type\":\"step_start\",\"timestamp\":1790254116970,\"sessionID\":\"ses_f2c9205f5ffe7MzF9g8i66Z6dg\",\"part\":{\"id\":\"prt_0d375f065001FkE7RDBcHweUj4\",\"messageID\":\"msg_0d375ea57001RXp3T8NEGH3VKz\",\"sessionID\":\"ses_f2c9205f5ffe7MzF9g8i66Z6dg\",\"snapshot\":\"667d57735f2d8f52f98f14e1611ea8c573da5aa4\",\"type\":\"step-start\"}}\r\n{\"type\":\"tool_use\",\"timestamp\":1790254118496,\"sessionID\":\"ses_f2c9205f5ffe7MzF9g8i66Z6dg\",\"part\":{\"type\":\"tool\",\"tool\":\"bash\",\"callID\":\"df019cc9-7ade-4f49-a808-13784d150ca8\",\"state\":{\"status\":\"completed\",\"input\":{\"command\":\"saipen ticket done T-247 --closure-mode own_patch\",\"timeout\":120000,\"workdir\":\"V:\\\\_SAIPEN_SOAK_\\\\tmp\\\\t1363-8_l89v_z\"},\"output\":\"ticket: T-247\\r\\nphase: DONE\\r\\ntask: none\\r\\nnext_action: PHASE SCOUT T-244\\r\\ncode: FINISHED\\r\\n\",\"metadata\":{\"output\":\"ticket: T-247\\r\\nphase: DONE\\r\\ntask: none\\r\\nnext_action: PHASE SCOUT T-244\\r\\ncode: FINISHED\\r\\n\",\"exit\":0,\"truncated\":false},\"title\":\"saipen ticket done T-247 --closure-mode own_patch\",\"time\":{\"start\":1790254117190,\"end\":1790254118493}},\"id\":\"prt_0d375f068001BD2M1jDMy2hQGQ\",\"sessionID\":\"ses_f2c9205f5ffe7MzF9g8i66Z6dg\",\"messageID\":\"msg_0d375ea57001RXp3T8NEGH3VKz\"}}\r\n",
+      "failure_text_tail": ""
+    },
+    {
+      "cycle": 33,
+      "verdict": "REPLACE_WORKER",
+      "generation": 33,
+      "model": "sairoute/SAIFREN",
+      "returncode": 1,
+      "failure": null,
+      "progressed": true,
+      "bounded": true,
+      "output_tail": "stepped over\\\",\\r\\n  \\\"ticket\\\": \\\"T-253\\\",\\r\\n  \\\"top_workable\\\": \\\"T-256\\\",\\r\\n  \\\"detail\\\": \\\"topmost workable ticket is T-256, requested T-253; re-run with --explicit to override the Pick Rule and record which ticket was stepped over\\\"\\r\\n}\\r\\n\",\"metadata\":{\"output\":\"{\\r\\n  \\\"ok\\\": false,\\r\\n  \\\"code\\\": \\\"NOT_TOP_WORKABLE\\\",\\r\\n  \\\"op_id\\\": null,\\r\\n  \\\"changed_files\\\": [],\\r\\n  \\\"recovery_required\\\": false,\\r\\n  \\\"message\\\": \\\"topmost workable ticket is T-256, requested T-253; re-run with --explicit to override the Pick Rule and record which ticket was stepped over\\\",\\r\\n  \\\"ticket\\\": \\\"T-253\\\",\\r\\n  \\\"top_workable\\\": \\\"T-256\\\",\\r\\n  \\\"detail\\\": \\\"topmost workable ticket is T-256, requested T-253; re-run with --explicit to override the Pick Rule and record which ticket was stepped over\\\"\\r\\n}\\r\\n\",\"exit\":1,\"truncated\":false},\"title\":\"saipen claim T-253 --json\",\"time\":{\"start\":1790255315948,\"end\":1790255316927}},\"id\":\"prt_0d3883b05001nDm6uKwXo14wg3\",\"sessionID\":\"ses_f2c8a002dffeLb63NAX6obevMk\",\"messageID\":\"msg_0d3881de9001cS23cBShvFLfqa\"}}\r\n{\"type\":\"step_finish\",\"timestamp\":1790255317435,\"sessionID\":\"ses_f2c8a002dffeLb63NAX6obevMk\",\"part\":{\"id\":\"prt_0d38841b0001N95bGAQWjiY41c\",\"reason\":\"tool-calls\",\"snapshot\":\"b56892a0a9559d1c1fdbe4c3f2909b75e384a0ad\",\"messageID\":\"msg_0d3881de9001cS23cBShvFLfqa\",\"sessionID\":\"ses_f2c8a002dffeLb63NAX6obevMk\",\"type\":\"step-finish\",\"tokens\":{\"total\":196877,\"input\":186042,\"output\":129,\"reasoning\":0,\"cache\":{\"write\":0,\"read\":10706}},\"cost\":0}}\r\n",
+      "failure_text_tail": ""
+    },
+    {
+      "cycle": 34,
+      "verdict": "REPLACE_WORKER",
+      "generation": 34,
+      "model": "sairoute/SAIFREN",
+      "returncode": 1,
+      "failure": null,
+      "progressed": true,
+      "bounded": true,
+      "output_tail": "b8ffeZer9Ec7SPMA8Zb\",\"snapshot\":\"f3e1b87335058fca91d9a3837fb106243bc03dbf\",\"type\":\"step-start\"}}\r\n{\"type\":\"tool_use\",\"timestamp\":1790256516323,\"sessionID\":\"ses_f2c77afb8ffeZer9Ec7SPMA8Zb\",\"part\":{\"type\":\"tool\",\"tool\":\"bash\",\"callID\":\"76d12e7f-ca02-4e27-8bb2-163cc7d339b9\",\"state\":{\"status\":\"completed\",\"input\":{\"command\":\"saipen transition SHIP T-263 \\\"REVIEW complete -- independent verification agrees; no P0/P1 findings; proceed to SHIP\\\"\",\"timeout\":120000,\"workdir\":\"V:\\\\_SAIPEN_SOAK_\\\\tmp\\\\t1363-8_l89v_z\"},\"output\":\"ticket: T-263\\r\\nphase: SHIP\\r\\nnext_action: PHASE SHIP T-263\\r\\ncode: TRANSITIONED\\r\\n\",\"metadata\":{\"output\":\"ticket: T-263\\r\\nphase: SHIP\\r\\nnext_action: PHASE SHIP T-263\\r\\ncode: TRANSITIONED\\r\\n\",\"exit\":0,\"truncated\":false},\"title\":\"saipen transition SHIP T-263 \\\"REVIEW complete -- independent verification agrees; no P0/P1 findings; proceed to SHIP\\\"\",\"time\":{\"start\":1790256515094,\"end\":1790256516314}},\"id\":\"prt_0d39a8716001oDzORIZNpua9xB\",\"sessionID\":\"ses_f2c77afb8ffeZer9Ec7SPMA8Zb\",\"messageID\":\"msg_0d39a7f8a001abf61LQdvnKEo7\"}}\r\n{\"type\":\"step_finish\",\"timestamp\":1790256516706,\"sessionID\":\"ses_f2c77afb8ffeZer9Ec7SPMA8Zb\",\"part\":{\"id\":\"prt_0d39a8e56001xamia8B2YzlwRs\",\"reason\":\"tool-calls\",\"snapshot\":\"b2a543f33d6698601e14bc2edaa0146bc9c77a5c\",\"messageID\":\"msg_0d39a7f8a001abf61LQdvnKEo7\",\"sessionID\":\"ses_f2c77afb8ffeZer9Ec7SPMA8Zb\",\"type\":\"step-finish\",\"tokens\":{\"total\":172931,\"input\":2587,\"output\":94,\"reasoning\":0,\"cache\":{\"write\":0,\"read\":170250}},\"cost\":0}}\r\n",
+      "failure_text_tail": ""
+    },
+    {
+      "cycle": 35,
+      "verdict": "REPLACE_WORKER",
+      "generation": 35,
+      "model": "sairoute/SAIFREN",
+      "returncode": 0,
+      "failure": null,
+      "progressed": true,
+      "bounded": false,
+      "output_tail": "ype\":\"step-finish\",\"tokens\":{\"total\":110950,\"input\":4872,\"output\":952,\"reasoning\":0,\"cache\":{\"write\":0,\"read\":105126}},\"cost\":0}}\r\n{\"type\":\"step_start\",\"timestamp\":1790256686381,\"sessionID\":\"ses_f2c655ea4ffevlXySpxklTAGr0\",\"part\":{\"id\":\"prt_0d39d252a001bG92hxwytFBwJw\",\"messageID\":\"msg_0d39d10230012p4jBSJiytvEdl\",\"sessionID\":\"ses_f2c655ea4ffevlXySpxklTAGr0\",\"snapshot\":\"2c885538611edd94e1e22640dc486a93b4298da9\",\"type\":\"step-start\"}}\r\n{\"type\":\"text\",\"timestamp\":1790256698521,\"sessionID\":\"ses_f2c655ea4ffevlXySpxklTAGr0\",\"part\":{\"id\":\"prt_0d39d5452001La48E3b7jL7CbP\",\"messageID\":\"msg_0d39d10230012p4jBSJiytvEdl\",\"sessionID\":\"ses_f2c655ea4ffevlXySpxklTAGr0\",\"type\":\"text\",\"text\":\"STATUS: T-263 BLOCKED | RESULT: claim + ship preflight complete  \\nBLOCKER: `WAIT_USER_DECISION` \u2014 `origin` puudub; 18 ticketiv\u00e4list staged faili s\u00e4ilitatud | OPERATOR ACTION: anna repo nimi, `public`/`private` ja staged-failide otsus  \\nNEXT EXACT ACTION: `NONE` | VALIDATION: E-3099/E-3100 committed; STATE/BOARD/LOG kontrollitud\",\"time\":{\"start\":1790256698450,\"end\":1790256698519}}}\r\n{\"type\":\"step_finish\",\"timestamp\":1790256698749,\"sessionID\":\"ses_f2c655ea4ffevlXySpxklTAGr0\",\"part\":{\"id\":\"prt_0d39d55700019iSYSkV57EHyCH\",\"reason\":\"stop\",\"snapshot\":\"2c885538611edd94e1e22640dc486a93b4298da9\",\"messageID\":\"msg_0d39d10230012p4jBSJiytvEdl\",\"sessionID\":\"ses_f2c655ea4ffevlXySpxklTAGr0\",\"type\":\"step-finish\",\"tokens\":{\"total\":115574,\"input\":5309,\"output\":1317,\"reasoning\":0,\"cache\":{\"write\":0,\"read\":108948}},\"cost\":0}}\r\n",
+      "failure_text_tail": ""
+    },
+    {
+      "cycle": 36,
+      "verdict": "REPLACE_WORKER",
+      "generation": 36,
+      "model": "sairoute/SAIFREN",
+      "returncode": 1,
+      "failure": "WORKER_CRASH",
+      "progressed": true,
+      "bounded": false,
+      "output_tail": "3acb0cb001hZcovmBkG1akNT\"}}\r\n{\"type\":\"tool_use\",\"timestamp\":1790257714946,\"sessionID\":\"ses_f2c62a079ffecH1nEodngj7C8y\",\"part\":{\"type\":\"tool\",\"tool\":\"bash\",\"callID\":\"bf77eab4-bb88-4b3e-8ef9-e3c181df5195\",\"state\":{\"status\":\"completed\",\"input\":{\"command\":\"python -c \\\"from src.value_273 import value_273; assert value_273() == 273\\\"\",\"timeout\":120000,\"workdir\":\"V:\\\\_SAIPEN_SOAK_\\\\tmp\\\\t1363-8_l89v_z\"},\"output\":\"(no output)\",\"metadata\":{\"output\":\"(no output)\",\"exit\":0,\"truncated\":false},\"title\":\"python -c \\\"from src.value_273 import value_273; assert value_273() == 273\\\"\",\"time\":{\"start\":1790257714075,\"end\":1790257714943}},\"id\":\"prt_0d3acd2990017Zp2ew6NIS9zsv\",\"sessionID\":\"ses_f2c62a079ffecH1nEodngj7C8y\",\"messageID\":\"msg_0d3acb0cb001hZcovmBkG1akNT\"}}\r\n{\"type\":\"step_finish\",\"timestamp\":1790257715207,\"sessionID\":\"ses_f2c62a079ffecH1nEodngj7C8y\",\"part\":{\"id\":\"prt_0d3acd7f9001tXgd5fW3LfM2Ih\",\"reason\":\"tool-calls\",\"snapshot\":\"0f1ec20827672a8fc1db24ea8d83eda9d1fec36d\",\"messageID\":\"msg_0d3acb0cb001hZcovmBkG1akNT\",\"sessionID\":\"ses_f2c62a079ffecH1nEodngj7C8y\",\"type\":\"step-finish\",\"tokens\":{\"total\":188822,\"input\":177745,\"output\":368,\"reasoning\":0,\"cache\":{\"write\":0,\"read\":10709}},\"cost\":0}}\r\n{\"type\":\"step_start\",\"timestamp\":1790257717953,\"sessionID\":\"ses_f2c62a079ffecH1nEodngj7C8y\",\"part\":{\"id\":\"prt_0d3ace2bf001a3mStsxjDA1ube\",\"messageID\":\"msg_0d3acd908001ynmX5S19INQHHe\",\"sessionID\":\"ses_f2c62a079ffecH1nEodngj7C8y\",\"snapshot\":\"0f1ec20827672a8fc1db24ea8d83eda9d1fec36d\",\"type\":\"step-start\"}}\r\n",
+      "failure_text_tail": ""
+    },
+    {
+      "cycle": 37,
+      "verdict": "REPLACE_WORKER",
+      "generation": 37,
+      "model": "sairoute/SAIFREN",
+      "returncode": 1,
+      "failure": null,
+      "progressed": true,
+      "bounded": true,
+      "output_tail": "fP\",\"sessionID\":\"ses_f2c5310d9ffe51b1PlSOTHUYjy\",\"snapshot\":\"2fd50e2ef8acd77254c4253833fc9d6971d67d7b\",\"type\":\"step-start\"}}\r\n{\"type\":\"tool_use\",\"timestamp\":1790258914116,\"sessionID\":\"ses_f2c5310d9ffe51b1PlSOTHUYjy\",\"part\":{\"type\":\"tool\",\"tool\":\"bash\",\"callID\":\"f46e165c-9fcd-4a33-bd38-5f6fa7cf9ab5\",\"state\":{\"status\":\"completed\",\"input\":{\"command\":\"saipen transition VERIFY T-276 \\\"BUILD complete -- implementation and test added; proceed to VERIFY\\\"\",\"timeout\":120000,\"workdir\":\"V:\\\\_SAIPEN_SOAK_\\\\tmp\\\\t1363-8_l89v_z\"},\"output\":\"ticket: T-276\\r\\nphase: VERIFY\\r\\nnext_action: PHASE VERIFY T-276\\r\\ncode: TRANSITIONED\\r\\n\",\"metadata\":{\"output\":\"ticket: T-276\\r\\nphase: VERIFY\\r\\nnext_action: PHASE VERIFY T-276\\r\\ncode: TRANSITIONED\\r\\n\",\"exit\":0,\"truncated\":false},\"title\":\"saipen transition VERIFY T-276 \\\"BUILD complete -- implementation and test added; proceed to VERIFY\\\"\",\"time\":{\"start\":1790258912686,\"end\":1790258914114}},\"id\":\"prt_0d3bf1cb5001k7A0RAhj45bNJP\",\"sessionID\":\"ses_f2c5310d9ffe51b1PlSOTHUYjy\",\"messageID\":\"msg_0d3bf1575001y0wN3SIYxIQ8fP\"}}\r\n{\"type\":\"step_finish\",\"timestamp\":1790258914627,\"sessionID\":\"ses_f2c5310d9ffe51b1PlSOTHUYjy\",\"part\":{\"id\":\"prt_0d3bf253600142wg1tH7DEIcVF\",\"reason\":\"tool-calls\",\"snapshot\":\"da5eb9008878d9ff43be454d383036a004ada5ef\",\"messageID\":\"msg_0d3bf1575001y0wN3SIYxIQ8fP\",\"sessionID\":\"ses_f2c5310d9ffe51b1PlSOTHUYjy\",\"type\":\"step-finish\",\"tokens\":{\"total\":177857,\"input\":2527,\"output\":87,\"reasoning\":0,\"cache\":{\"write\":0,\"read\":175243}},\"cost\":0}}\r\n",
+      "failure_text_tail": ""
+    },
+    {
+      "cycle": 38,
+      "verdict": "REPLACE_WORKER",
+      "generation": 38,
+      "model": "sairoute/SAIFREN",
+      "returncode": 1,
+      "failure": null,
+      "progressed": true,
+      "bounded": true,
+      "output_tail": "ype\":\"step-start\"}}\r\n{\"type\":\"tool_use\",\"timestamp\":1790260114526,\"sessionID\":\"ses_f2c40be09ffeuRusmnmYMEliAQ\",\"part\":{\"type\":\"tool\",\"tool\":\"bash\",\"callID\":\"2e7d3a5b-f813-423f-bd0a-eb59066279c2\",\"state\":{\"status\":\"completed\",\"input\":{\"command\":\"saipen checkpoint RUN T-282 \\\"SCOUT -- src/value_285.py and tests/test_value_285.py absent; reuse value_284 unittest pattern; flat modules, no imports, manifests, or CI; harness: python -m unittest discover -s tests -t .\\\"\",\"timeout\":120000,\"workdir\":\"V:\\\\_SAIPEN_SOAK_\\\\tmp\\\\t1363-8_l89v_z\"},\"output\":\"code: CHECKPOINTED\\r\\n\",\"metadata\":{\"output\":\"code: CHECKPOINTED\\r\\n\",\"exit\":0,\"truncated\":false},\"title\":\"saipen checkpoint RUN T-282 \\\"SCOUT -- src/value_285.py and tests/test_value_285.py absent; reuse value_284 unittest pattern; flat modules, no imports, manifests, or CI; harness: python -m unittest discover -s tests -t .\\\"\",\"time\":{\"start\":1790260111311,\"end\":1790260114522}},\"id\":\"prt_0d3d1677e001jTTIm74HOSnOWF\",\"sessionID\":\"ses_f2c40be09ffeuRusmnmYMEliAQ\",\"messageID\":\"msg_0d3d1308b00120jXGUMHpmFT7W\"}}\r\n{\"type\":\"step_finish\",\"timestamp\":1790260115684,\"sessionID\":\"ses_f2c40be09ffeuRusmnmYMEliAQ\",\"part\":{\"id\":\"prt_0d3d178a60010Yn37n42H04Y6o\",\"reason\":\"tool-calls\",\"snapshot\":\"1284459c2eeae6198dd03d7a8481eec1f909899d\",\"messageID\":\"msg_0d3d1308b00120jXGUMHpmFT7W\",\"sessionID\":\"ses_f2c40be09ffeuRusmnmYMEliAQ\",\"type\":\"step-finish\",\"tokens\":{\"total\":138711,\"input\":4886,\"output\":122,\"reasoning\":0,\"cache\":{\"write\":0,\"read\":133703}},\"cost\":0}}\r\n",
+      "failure_text_tail": ""
+    },
+    {
+      "cycle": 39,
+      "verdict": "REPLACE_WORKER",
+      "generation": 39,
+      "model": "sairoute/SAIFREN",
+      "returncode": 1,
+      "failure": "WORKER_CRASH",
+      "progressed": true,
+      "bounded": false,
+      "output_tail": "etadata\":{\"output\":\"======================================================================\\r\\nFAIL: test_value_286 (tests.test_value_286.TestValue286.test_value_286)\\r\\n----------------------------------------------------------------------\\r\\nTraceback (most recent call last):\\r\\n  File \\\"V:\\\\_SAIPEN_SOAK_\\\\tmp\\\\t1363-8_l89v_z\\\\tests\\\\test_value_286.py\\\", line 8, in test_value_286\\r\\n    self.assertEqual(value_286(), 286)\\r\\nAssertionError: 285 != 286\\r\\n\\r\\n----------------------------------------------------------------------\\r\\nRan 1 test in 0.001s\\r\\n\\r\\nFAILED (failures=1)\\r\\n\",\"exit\":0,\"truncated\":false},\"title\":\"python -c \\\"import unittest; import tests.test_value_286 as t; t.value_286 = lambda: 285; result = unittest.TextTestRunner(verbosity=0).run(unittest.defaultTestLoader.loadTestsFromModule(t)); raise SystemExit(0 if not result.wasSuccessful() else 1)\\\"\",\"time\":{\"start\":1790261301620,\"end\":1790261304124}},\"id\":\"prt_0d3e39162001ywQywK6WBTpxrk\",\"sessionID\":\"ses_f2c2e5b20ffet3eYaz2zaEpeBA\",\"messageID\":\"msg_0d3e2d9d2001YcyF5Gg9bfODvk\"}}\r\n{\"type\":\"step_finish\",\"timestamp\":1790261305007,\"sessionID\":\"ses_f2c2e5b20ffet3eYaz2zaEpeBA\",\"part\":{\"id\":\"prt_0d3e39e9f0013P0bxKmKNC3NEF\",\"reason\":\"tool-calls\",\"snapshot\":\"cbdcaccd2f3a7130effdcb2f3ef302d891891e54\",\"messageID\":\"msg_0d3e2d9d2001YcyF5Gg9bfODvk\",\"sessionID\":\"ses_f2c2e5b20ffet3eYaz2zaEpeBA\",\"type\":\"step-finish\",\"tokens\":{\"total\":120537,\"input\":2041,\"output\":129,\"reasoning\":0,\"cache\":{\"write\":0,\"read\":118367}},\"cost\":0}}\r\n",
+      "failure_text_tail": ""
+    },
+    {
+      "cycle": 40,
+      "verdict": "REPLACE_WORKER",
+      "generation": 40,
+      "model": "sairoute/SAIFREN",
+      "returncode": 1,
+      "failure": "HOST_RUNTIME_FAILURE",
+      "progressed": true,
+      "bounded": false,
+      "output_tail": "en/STATE.md\\n\",\"exit\":0,\"truncated\":false},\"title\":\"git ls-files -- src/value_286.py tests/test_value_286.py src/value_285.py tests/test_value_285.py .saipen/STATE.md .saipen/BOARD.md .saipen/LOG.md\",\"time\":{\"start\":1790261968747,\"end\":1790261971250}},\"id\":\"prt_0d3edbf4d001U5qBDw0eU2worh\",\"sessionID\":\"ses_f2c1c0c15ffeyhRJdJsJ5Tq9hj\",\"messageID\":\"msg_0d3ed6244001k8WkA31zSVYF9i\"}}\r\n{\"type\":\"tool_use\",\"timestamp\":1790261972055,\"sessionID\":\"ses_f2c1c0c15ffeyhRJdJsJ5Tq9hj\",\"part\":{\"type\":\"tool\",\"tool\":\"bash\",\"callID\":\"3f613082-8604-4889-be02-430d7af5d202\",\"state\":{\"status\":\"completed\",\"input\":{\"command\":\"git diff -- src/value_286.py tests/test_value_286.py\",\"timeout\":120000,\"workdir\":\"V:\\\\_SAIPEN_SOAK_\\\\tmp\\\\t1363-8_l89v_z\"},\"output\":\"(no output)\",\"metadata\":{\"output\":\"(no output)\",\"exit\":0,\"truncated\":false},\"title\":\"git diff -- src/value_286.py tests/test_value_286.py\",\"time\":{\"start\":1790261968862,\"end\":1790261972051}},\"id\":\"prt_0d3edbf6e0010AvmZUkbjZRx8a\",\"sessionID\":\"ses_f2c1c0c15ffeyhRJdJsJ5Tq9hj\",\"messageID\":\"msg_0d3ed6244001k8WkA31zSVYF9i\"}}\r\n{\"type\":\"step_finish\",\"timestamp\":1790261973791,\"sessionID\":\"ses_f2c1c0c15ffeyhRJdJsJ5Tq9hj\",\"part\":{\"id\":\"prt_0d3edd2c4001PZYMVqCnhMPRxn\",\"reason\":\"tool-calls\",\"snapshot\":\"e156dcbd4dbe9c301b9e206271930637c2a58735\",\"messageID\":\"msg_0d3ed6244001k8WkA31zSVYF9i\",\"sessionID\":\"ses_f2c1c0c15ffeyhRJdJsJ5Tq9hj\",\"type\":\"step-finish\",\"tokens\":{\"total\":142894,\"input\":2115,\"output\":431,\"reasoning\":0,\"cache\":{\"write\":0,\"read\":140348}},\"cost\":0}}\r\n",
+      "failure_text_tail": ""
+    },
+    {
+      "cycle": 41,
+      "verdict": "REPLACE_WORKER",
+      "generation": 41,
+      "model": "sairoute/SAIFREN",
+      "returncode": 1,
+      "failure": null,
+      "progressed": true,
+      "bounded": true,
+      "output_tail": "sh repository name/visibility and disposition of 18 foreign staged paths\\\",\\r\\n    \\\"T-263 blocked: WAIT_USER_DECISION -- confirm first-publish repository name/visibility and disposition of 18 foreign staged paths\\\",\\r\\n    \\\"T-222 blocked: WAIT_USER_DECISION -- confirm first-publish repository name/visibility and disposition of 16 foreign staged paths\\\",\\r\\n    \\\"T-184 blocked: RELEASE_CLOSURE_PENDING -- inherited T-185 has no committed release evidence\\\",\\r\\n    \\\"T-180 blocked: WAIT_USER_DECISION -- confirm first-publish repository name/visibility and disposition of 16 foreign staged paths\\\",\\r\\n    \\\"T-181 blocked: WAIT_USER_DECISION -- confirm first-publish repository name/visibility and disposition of 16 foreign staged paths\\\",\\r\\n    \\\"T-179 blocked: WAIT_USER_DECISION -- confirm first-publish repository name/visibility and disposition of 16 foreign staged paths\\\"\\r\\n  ],\\r\\n  \\\"reconciliation\\\": {\\r\\n    \\\"ok\\\": true,\\r\\n    \\\"code\\\": \\\"CLEAN\\\",\\r\\n    \\\"changed\\\": [],\\r\\n    \\\"strict_state_error\\\": null,\\r\\n    \\\"dry_run\\\": false\\r\\n  },\\r\\n  \\\"telegrams\\\": {\\r\\n    \\\"state\\\": \\\"NOT_CONFIGURED\\\",\\r\\n    \\\"detail\\\": \\\"set SAIMAIL_WORKSPACE to this seat's SAIMAIL workspace to see unread telegrams at turn entry\\\"\\r\\n  }\\r\\n}\\r\\n\",\"exit\":0,\"truncated\":false},\"title\":\"saipen continue --json\",\"time\":{\"start\":1790263497641,\"end\":1790263499026}},\"id\":\"prt_0d40513a0001ESCUoZucsrS6dT\",\"sessionID\":\"ses_f2c0d291dffeLtezxBgU71zlfM\",\"messageID\":\"msg_0d405024a001S0Bl4VshEI1l8w\"}}\r\n",
+      "failure_text_tail": ""
+    },
+    {
+      "cycle": 42,
+      "verdict": "REPLACE_WORKER",
+      "generation": 42,
+      "model": "sairoute/SAIFREN",
+      "returncode": 1,
+      "failure": "UNKNOWN",
+      "progressed": true,
+      "bounded": false,
+      "output_tail": "  \\\"ok\\\": true,\\r\\n  \\\"code\\\": \\\"CHECKPOINTED\\\",\\r\\n  \\\"op_id\\\": \\\"checkpoint-afbb015a55a94d938a2846459921d7c2\\\",\\r\\n  \\\"changed_files\\\": [\\r\\n    \\\".saipen/LOG.md\\\",\\r\\n    \\\".saipen/BOARD.md\\\",\\r\\n    \\\".saipen/STATE.md\\\"\\r\\n  ],\\r\\n  \\\"recovery_required\\\": false,\\r\\n  \\\"event_id\\\": \\\"E-3429\\\"\\r\\n}\\r\\n\",\"exit\":0,\"truncated\":false},\"title\":\"saipen checkpoint RUN T-289 \\\"SCOUT -- src/value_293.py and tests/test_value_293.py absent; reuse value_292 unittest pattern; flat modules, no imports, manifests, or CI; harness: python -m unittest discover -s tests -t .\\\" --json\",\"time\":{\"start\":1790264315165,\"end\":1790264343441}},\"id\":\"prt_0d4118cd6001O6ay6svVi1V0Pi\",\"sessionID\":\"ses_f2bfadaaaffePkFNh34uDNpKoP\",\"messageID\":\"msg_0d4111b0e001JkimONs0mVgigX\"}}\r\n{\"type\":\"step_finish\",\"timestamp\":1790264344131,\"sessionID\":\"ses_f2bfadaaaffePkFNh34uDNpKoP\",\"part\":{\"id\":\"prt_0d411fe23001BndgLtMU1fiWQC\",\"reason\":\"tool-calls\",\"snapshot\":\"e9c0e31e8cbfddbbebd247d18488e83f90c3f390\",\"messageID\":\"msg_0d4111b0e001JkimONs0mVgigX\",\"sessionID\":\"ses_f2bfadaaaffePkFNh34uDNpKoP\",\"type\":\"step-finish\",\"tokens\":{\"total\":158629,\"input\":147772,\"output\":140,\"reasoning\":0,\"cache\":{\"write\":0,\"read\":10717}},\"cost\":0}}\r\n{\"type\":\"error\",\"timestamp\":1790264413528,\"sessionID\":\"ses_f2bfadaaaffePkFNh34uDNpKoP\",\"error\":{\"name\":\"APIError\",\"data\":{\"message\":\"Cannot connect to API: Unable to connect. Is the computer able to access the url?\",\"isRetryable\":true,\"metadata\":{\"url\":\"http://localhost:20128/v1/chat/completions\"}}}}\r\n",
+      "failure_text_tail": "{\"name\": \"APIError\", \"data\": {\"message\": \"Cannot connect to API: Unable to connect. Is the computer able to access the url?\", \"isRetryable\": true, \"metadata\": {\"url\": \"http://localhost:20128/v1/chat/completions\"}}}"
+    },
+    {
+      "cycle": 43,
+      "verdict": "REPLACE_WORKER",
+      "generation": 43,
+      "model": "sairoute/SAIFREN",
+      "returncode": 1,
+      "failure": "UNKNOWN",
+      "progressed": false,
+      "bounded": false,
+      "output_tail": "{\"type\":\"error\",\"timestamp\":1790264507287,\"sessionID\":\"ses_f2bec95bbffep95iBTvNY28LEA\",\"error\":{\"name\":\"APIError\",\"data\":{\"message\":\"Cannot connect to API: Unable to connect. Is the computer able to access the url?\",\"isRetryable\":true,\"metadata\":{\"url\":\"http://localhost:20128/v1/chat/completions\"}}}}\r\n",
+      "failure_text_tail": "{\"name\": \"APIError\", \"data\": {\"message\": \"Cannot connect to API: Unable to connect. Is the computer able to access the url?\", \"isRetryable\": true, \"metadata\": {\"url\": \"http://localhost:20128/v1/chat/completions\"}}}"
+    }
+  ],
+  "deliberate_kills": [
+    {
+      "at": 3600.0,
+      "killed": 44340,
+      "generation": 3,
+      "ok": true
+    },
+    {
+      "at": 7200.0,
+      "killed": 31756,
+      "generation": 6,
+      "ok": true
+    },
+    {
+      "at": 10800.0,
+      "killed": 10684,
+      "generation": 9,
+      "ok": true
+    },
+    {
+      "at": 14400.0,
+      "killed": 15384,
+      "generation": 13,
+      "ok": true
+    },
+    {
+      "at": 18000.0,
+      "killed": 33892,
+      "generation": 17,
+      "ok": true
+    },
+    {
+      "at": 21600.0,
+      "killed": 35208,
+      "generation": 20,
+      "ok": true
+    },
+    {
+      "at": 25200.0,
+      "killed": 48076,
+      "generation": 24,
+      "ok": true
+    },
+    {
+      "at": 28800.0,
+      "killed": 2212,
+      "generation": 28,
+      "ok": true
+    },
+    {
+      "at": 32400.0,
+      "killed": 45372,
+      "generation": 32,
+      "ok": false
+    },
+    {
+      "at": 36000.0,
+      "killed": 16496,
+      "generation": 36,
+      "ok": true
+    },
+    {
+      "at": 39600.0,
+      "killed": 23312,
+      "generation": 39,
+      "ok": true
+    }
+  ],
+  "quality": {
+    "tickets_by_section": {
+      "## DOING": [
+        "T-289"
+      ],
+      "## TODO": [
+        "T-286"
+      ],
+      "## DONE": [
+        "T-1",
+        "T-10",
+        "T-100",
+        "T-101",
+        "T-102",
+        "T-103",
+        "T-104",
+        "T-105",
+        "T-106",
+        "T-107",
+        "T-108",
+        "T-109",
+        "T-11",
+        "T-110",
+        "T-111",
+        "T-112",
+        "T-113",
+        "T-114",
+        "T-115",
+        "T-116",
+        "T-117",
+        "T-118",
+        "T-119",
+        "T-12",
+        "T-120",
+        "T-121",
+        "T-122",
+        "T-123",
+        "T-124",
+        "T-125",
+        "T-126",
+        "T-127",
+        "T-128",
+        "T-129",
+        "T-13",
+        "T-130",
+        "T-131",
+        "T-132",
+        "T-133",
+        "T-134",
+        "T-135",
+        "T-136",
+        "T-137",
+        "T-138",
+        "T-139",
+        "T-14",
+        "T-140",
+        "T-141",
+        "T-142",
+        "T-143",
+        "T-144",
+        "T-145",
+        "T-146",
+        "T-147",
+        "T-148",
+        "T-149",
+        "T-15",
+        "T-150",
+        "T-151",
+        "T-152",
+        "T-153",
+        "T-154",
+        "T-155",
+        "T-156",
+        "T-157",
+        "T-158",
+        "T-159",
+        "T-16",
+        "T-160",
+        "T-161",
+        "T-162",
+        "T-163",
+        "T-164",
+        "T-165",
+        "T-166",
+        "T-167",
+        "T-168",
+        "T-169",
+        "T-17",
+        "T-170",
+        "T-171",
+        "T-172",
+        "T-173",
+        "T-174",
+        "T-175",
+        "T-176",
+        "T-177",
+        "T-178",
+        "T-18",
+        "T-182",
+        "T-183",
+        "T-185",
+        "T-186",
+        "T-187",
+        "T-188",
+        "T-189",
+        "T-19",
+        "T-190",
+        "T-191",
+        "T-192",
+        "T-193",
+        "T-194",
+        "T-195",
+        "T-196",
+        "T-197",
+        "T-198",
+        "T-199",
+        "T-2",
+        "T-20",
+        "T-200",
+        "T-201",
+        "T-202",
+        "T-203",
+        "T-204",
+        "T-205",
+        "T-206",
+        "T-207",
+        "T-208",
+        "T-209",
+        "T-21",
+        "T-210",
+        "T-211",
+        "T-212",
+        "T-213",
+        "T-214",
+        "T-215",
+        "T-216",
+        "T-217",
+        "T-218",
+        "T-219",
+        "T-22",
+        "T-220",
+        "T-221",
+        "T-223",
+        "T-224",
+        "T-225",
+        "T-226",
+        "T-227",
+        "T-228",
+        "T-229",
+        "T-23",
+        "T-230",
+        "T-231",
+        "T-232",
+        "T-233",
+        "T-234",
+        "T-235",
+        "T-236",
+        "T-237",
+        "T-238",
+        "T-239",
+        "T-24",
+        "T-240",
+        "T-241",
+        "T-242",
+        "T-243",
+        "T-244",
+        "T-245",
+        "T-246",
+        "T-247",
+        "T-248",
+        "T-249",
+        "T-25",
+        "T-250",
+        "T-251",
+        "T-252",
+        "T-253",
+        "T-254",
+        "T-255",
+        "T-256",
+        "T-257",
+        "T-258",
+        "T-259",
+        "T-26",
+        "T-260",
+        "T-261",
+        "T-268",
+        "T-27",
+        "T-270",
+        "T-271",
+        "T-272",
+        "T-273",
+        "T-274",
+        "T-275",
+        "T-276",
+        "T-277",
+        "T-278",
+        "T-279",
+        "T-28",
+        "T-280",
+        "T-281",
+        "T-282",
+        "T-283",
+        "T-284",
+        "T-285",
+        "T-287",
+        "T-288",
+        "T-29",
+        "T-290",
+        "T-3",
+        "T-30",
+        "T-31",
+        "T-32",
+        "T-33",
+        "T-34",
+        "T-35",
+        "T-36",
+        "T-37",
+        "T-38",
+        "T-39",
+        "T-4",
+        "T-40",
+        "T-41",
+        "T-42",
+        "T-43",
+        "T-44",
+        "T-45",
+        "T-46",
+        "T-47",
+        "T-48",
+        "T-49",
+        "T-5",
+        "T-50",
+        "T-51",
+        "T-52",
+        "T-53",
+        "T-54",
+        "T-55",
+        "T-56",
+        "T-57",
+        "T-58",
+        "T-59",
+        "T-6",
+        "T-60",
+        "T-61",
+        "T-62",
+        "T-63",
+        "T-64",
+        "T-65",
+        "T-66",
+        "T-67",
+        "T-68",
+        "T-69",
+        "T-7",
+        "T-70",
+        "T-71",
+        "T-72",
+        "T-73",
+        "T-74",
+        "T-75",
+        "T-76",
+        "T-77",
+        "T-78",
+        "T-79",
+        "T-8",
+        "T-80",
+        "T-81",
+        "T-82",
+        "T-83",
+        "T-84",
+        "T-85",
+        "T-86",
+        "T-87",
+        "T-88",
+        "T-89",
+        "T-9",
+        "T-90",
+        "T-91",
+        "T-92",
+        "T-93",
+        "T-94",
+        "T-95",
+        "T-96",
+        "T-97",
+        "T-98",
+        "T-99"
+      ],
+      "## BLOCKED": [
+        "T-179",
+        "T-180",
+        "T-181",
+        "T-184",
+        "T-222",
+        "T-262",
+        "T-263",
+        "T-264",
+        "T-265",
+        "T-266",
+        "T-267",
+        "T-269"
+      ]
+    },
+    "duplicate_work_count": 0,
+    "source_receipts": [
+      "SRC-001.md",
+      "SRC-002.md"
+    ],
+    "acceptance": {
+      "T-1_docstring": true,
+      "T-2_tests_pass": true,
+      "T-3_readme_one_sentence": true
+    },
+    "validator": "Validation complete. Agent is conformant. (18 warning(s))",
+    "validator_exit": 0
+  },
+  "efficiency": {
+    "generations": 43,
+    "progress_generations": 42,
+    "slow_bounded_generations": 23,
+    "asked_user_heuristic_count": 0
+  },
+  "manual_continue_count": 0
+}

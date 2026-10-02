@@ -1,0 +1,90 @@
+{
+  "ok": true,
+  "code": "REPAIRED",
+  "changed": {
+    "board": [],
+    "state": [
+      {
+.....
+        "field": "phase",
+        "from": "BUILD",
+        "to": "SCOUT",
+        "surface": "state",
+        "reason": "phase 'BUILD' disagrees with the newest provable phase-changing event E-100, which names SCOUT (T-1318)"
+      }
+    ]
+  },
+  "adopted": [],
+  "lifecycle": [
+    {
+      "field": "board",
+      "kind": "claim-clear",
+      "ticket": "T-9001",
+      "surface": "board",
+      "section": "## DOING",
+      "fields": [
+        "owner",
+        "claim_time"
+      ],
+      "_class": "incomplete-claim-pair",
+      "reason": "T-9001 carries a half claim pair (owner='test-agent', claim_time='') on claimable Work; CORE's both-or-neither rule makes the LEASE INVALID, so the deterministic repair removes BOTH halves and fabricates no owner or time (SRC-043)"
+    },
+    {
+      "field": "board",
+      "kind": "section-move",
+      "ticket": "T-9001",
+      "surface": "board",
+----------------------------------------------------------------------
+Ran 5 tests in 0.166s
+
+OK
+      "from_section": "## DOING",
+      "to_section": "## TODO",
+      "reason": "T-9001 sits under ## DOING with no owner/claim_time pair; an unclaimed DOING Work was never started, so it returns to ## TODO (SRC-043)"
+    },
+    {
+      "field": "board",
+      "kind": "section-move",
+      "ticket": "T-9002",
+      "surface": "board",
+      "from_section": "## DOING",
+      "to_section": "## TODO",
+      "reason": "T-9002 sits under ## DOING with no owner/claim_time pair; an unclaimed DOING Work was never started, so it returns to ## TODO (SRC-043)"
+    },
+    {
+      "field": "board",
+      "kind": "section-move",
+      "ticket": "T-9003",
+      "surface": "board",
+      "from_section": "## DONE",
+      "to_section": "## TODO",
+      "requires_approval": true,
+      "generation": "current",
+      "reason": "T-9003 sits under ## DONE with no closure_mode, no owner, no claim_time and no verification evidence in history, and was allocated AFTER this project's closure contract became observable; the completion was never established by a canonical operation, so reopening it into ## TODO requires ONE operator approval of the repair plan (SRC-043)"
+    }
+  ],
+  "repair_id": "0172dedd6ca7cb177a3f5736175830e828bb961133a868e49c46be638c450aba",
+  "targets": [
+    ".saipen/LOG.md",
+    ".saipen/BOARD.md",
+    ".saipen/STATE.md",
+    ".saipen/recovery/state-phase/reconcile-20260930172649628349.STATE.md"
+  ],
+  "event": "E-101",
+  "agent": "test-agent",
+  "strict_state_error": "invalid phase transition: DONE -> BUILD (RFC § 1.6). Allowed from DONE: SCOUT, PLAN, HUNT, BLOCKED",
+  "dry_run": false,
+  "audit_manifest": {
+    "ok": true,
+    "code": "AUDIT_MANIFEST_WRITTEN",
+    "path": "V:/_TEMP_/saipen-sdefect-seeg_af3/.saipen/MANIFEST.json",
+    "contract_version": 3,
+    "changed": true,
+    "layout": "CURRENT",
+    "dry_run": false,
+    "declared": "ABSENT",
+    "manifest_present": true,
+    "manifest_current": true,
+    "detail": ""
+  }
+}

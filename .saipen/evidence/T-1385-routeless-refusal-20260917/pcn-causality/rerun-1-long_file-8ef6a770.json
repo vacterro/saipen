@@ -1,0 +1,14 @@
+[
+ {
+  "label": "T-1385 slice 2 rerun 1 gen-sha256:8ef6a770 long_file_task",
+  "fixture": "V:/_TEMP_/t1363-0qv1tf08",
+  "fixture_log_events": [
+   "- 14.09.26 00:00 [E-0001] [agent: test-agent] [op: transition-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa] RUN: transition to SCOUT",
+   "- 17.09.26 16:07 [E-2] [parent: E-1] [T-1] [agent: test-agent] [op: userreq-5c21bb60dc6d4617ae0e5956dd3c2f3b] DEC: user request SRC-001 projected as T-1 (user_explicit)",
+   "- 17.09.26 16:07 [E-3] [parent: E-2] [T-1] [agent: test-agent] [op: claim-fac0881e8c554db2a0502906c78becc3] DEC: claimed via SAIOPS -- owner test-agent"
+  ],
+  "tool_calls": 19,
+  "occurrences": [],
+  "pairs": []
+ }
+]

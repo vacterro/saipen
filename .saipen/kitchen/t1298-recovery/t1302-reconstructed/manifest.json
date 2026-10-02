@@ -1,0 +1,216 @@
+[
+  {
+    "seq": 286,
+    "path": "CHANGELOG.md",
+    "base": "HEAD:CHANGELOG.md",
+    "sha256": "65e264fb11601e1713bbe5bd54c849471e9a2fe09ed2a5a3a6e9babf4171d6d2"
+  },
+  {
+    "seq": 286,
+    "path": "saipen/COMMANDS.md",
+    "unresolved": [
+      ".saipen\\kitchen\\t1298-recovery\\worktree\\saipen\\COMMANDS.md: hunk 55 has 0 exact matches",
+      "HEAD:saipen/COMMANDS.md: hunk 55 has 0 exact matches"
+    ]
+  },
+  {
+    "seq": 286,
+    "path": "SPEC.md",
+    "base": "HEAD:SPEC.md",
+    "sha256": "2782ffbe120e00122b8dddd90c71ca503907e30e4bf372c4bb4ccaa5d66cb873"
+  },
+  {
+    "seq": 286,
+    "path": "tools/audit_checks.py",
+    "unresolved": [
+      ".saipen\\kitchen\\t1298-recovery\\worktree\\tools\\audit_checks.py: hunk 92 has 0 exact matches",
+      "HEAD:tools/audit_checks.py: hunk 92 has 0 exact matches"
+    ]
+  },
+  {
+    "seq": 286,
+    "path": "tools/saipen_engine/automation.py",
+    "base": ".saipen\\kitchen\\t1298-recovery\\worktree\\tools\\saipen_engine\\automation.py",
+    "sha256": "9b67c8b98e7348bcf1664308994d58de0c6070c63883cd225e41c24332990335"
+  },
+  {
+    "seq": 286,
+    "path": "tools/saipen_engine/board.py",
+    "unresolved": [
+      ".saipen\\kitchen\\t1298-recovery\\worktree\\tools\\saipen_engine\\board.py: hunk 93 has 0 exact matches",
+      "HEAD:tools/saipen_engine/board.py: hunk 93 has 0 exact matches"
+    ]
+  },
+  {
+    "seq": 286,
+    "path": "tools/saipen_engine/operations.py",
+    "unresolved": [
+      ".saipen\\kitchen\\t1298-recovery\\worktree\\tools\\saipen_engine\\operations.py: hunk 760 has 0 exact matches",
+      ".saipen\\kitchen\\t1298-review-foreign-backup\\operations.py.foreign: hunk 760 has 0 exact matches",
+      "HEAD:tools/saipen_engine/operations.py: hunk 760 has 0 exact matches"
+    ]
+  },
+  {
+    "seq": 286,
+    "path": "tools/saipen_engine/router.py",
+    "unresolved": [
+      ".saipen\\kitchen\\t1298-recovery\\worktree\\tools\\saipen_engine\\router.py: hunk 21 has 0 exact matches",
+      "HEAD:tools/saipen_engine/router.py: hunk 21 has 0 exact matches"
+    ]
+  },
+  {
+    "seq": 286,
+    "path": "tools/saipen.py",
+    "base": ".saipen\\kitchen\\t1298-recovery\\worktree\\tools\\saipen.py",
+    "sha256": "bad1fb418cc5af8528c46aca4ba67d93c261b207dfa9f37cae604176833fd3d7"
+  },
+  {
+    "seq": 286,
+    "path": "tools/test_orchestration_repair.py",
+    "base": ".saipen\\kitchen\\t1298-recovery\\worktree\\tools\\test_orchestration_repair.py",
+    "sha256": "325049fd5b3ce570e6f79c31f116198df82b8b5a35afc19d148673ce793eb88a"
+  },
+  {
+    "seq": 286,
+    "path": "tools/validate.py",
+    "unresolved": [
+      ".saipen\\kitchen\\t1298-recovery\\worktree\\tools\\validate.py: hunk 2389 has 0 exact matches",
+      ".saipen\\kitchen\\t1298-review-foreign-backup\\validate.py.foreign: hunk 2389 has 0 exact matches",
+      "HEAD:tools/validate.py: hunk 2389 has 0 exact matches"
+    ]
+  },
+  {
+    "seq": 286,
+    "path": "VERSION",
+    "base": "HEAD:VERSION",
+    "sha256": "14e6eb17bfb2bed74871b7ae972ad0ef1a6fdf08966bf35ec7ef279ad87dff57"
+  },
+  {
+    "seq": 294,
+    "path": "CHANGELOG.md",
+    "base": ".saipen\\kitchen\\t1298-recovery\\t1302-reconstructed\\files\\CHANGELOG.md",
+    "sha256": "9f8a57602a2af556967921cc9a8e8824714250a35f512439bc5df77fb3741bf9"
+  },
+  {
+    "seq": 294,
+    "path": "extensions/schemas/board.schema.json",
+    "base": "HEAD:extensions/schemas/board.schema.json",
+    "sha256": "a54c0e4130ec71a027243a42b6ab5d823765042b512bfc727c1959b255eb29e8"
+  },
+  {
+    "seq": 294,
+    "path": "extensions/schemas/state.schema.json",
+    "unresolved": [
+      ".saipen\\kitchen\\t1298-recovery\\worktree\\extensions\\schemas\\state.schema.json: hunk 155 has 0 exact matches",
+      "HEAD:extensions/schemas/state.schema.json: hunk 155 has 0 exact matches"
+    ]
+  },
+  {
+    "seq": 294,
+    "path": "README.md",
+    "unresolved": [
+      ".saipen\\kitchen\\t1298-recovery\\worktree\\README.md: hunk 26 has 0 exact matches",
+      "HEAD:README.md: hunk 26 has 0 exact matches"
+    ]
+  },
+  {
+    "seq": 294,
+    "path": "saipen/COMMANDS.md",
+    "unresolved": [
+      ".saipen\\kitchen\\t1298-recovery\\worktree\\saipen\\COMMANDS.md: hunk 38 has 0 exact matches",
+      "HEAD:saipen/COMMANDS.md: hunk 38 has 0 exact matches"
+    ]
+  },
+  {
+    "seq": 294,
+    "path": "saipen/CORE.md",
+    "unresolved": [
+      ".saipen\\kitchen\\t1298-recovery\\worktree\\saipen\\CORE.md: hunk 142 has 0 exact matches",
+      "HEAD:saipen/CORE.md: hunk 142 has 0 exact matches"
+    ]
+  },
+  {
+    "seq": 294,
+    "path": "saipen/phases/done.md",
+    "base": "HEAD:saipen/phases/done.md",
+    "sha256": "2cd54e9109385994de37ee23580ce28c1bb8f337be5819ef60394b3c3268042f"
+  },
+  {
+    "seq": 294,
+    "path": "saipen/phases/ship.md",
+    "unresolved": [
+      ".saipen\\kitchen\\t1298-recovery\\worktree\\saipen\\phases\\ship.md: hunk 30 has 0 exact matches",
+      "HEAD:saipen/phases/ship.md: hunk 30 has 0 exact matches"
+    ]
+  },
+  {
+    "seq": 294,
+    "path": "tools/audit_checks.py",
+    "unresolved": [
+      ".saipen\\kitchen\\t1298-recovery\\worktree\\tools\\audit_checks.py: hunk 92 has 0 exact matches",
+      "HEAD:tools/audit_checks.py: hunk 92 has 0 exact matches"
+    ]
+  },
+  {
+    "seq": 294,
+    "path": "tools/saipen_engine/board.py",
+    "unresolved": [
+      ".saipen\\kitchen\\t1298-recovery\\worktree\\tools\\saipen_engine\\board.py: hunk 117 has 0 exact matches",
+      "HEAD:tools/saipen_engine/board.py: hunk 117 has 0 exact matches"
+    ]
+  },
+  {
+    "seq": 294,
+    "path": "tools/saipen_engine/operations.py",
+    "unresolved": [
+      ".saipen\\kitchen\\t1298-recovery\\worktree\\tools\\saipen_engine\\operations.py: hunk 36 has 0 exact matches",
+      ".saipen\\kitchen\\t1298-review-foreign-backup\\operations.py.foreign: hunk 36 has 0 exact matches",
+      "HEAD:tools/saipen_engine/operations.py: hunk 36 has 0 exact matches"
+    ]
+  },
+  {
+    "seq": 294,
+    "path": "tools/saipen_engine/release.py",
+    "unresolved": [
+      ".saipen\\kitchen\\t1298-recovery\\worktree\\tools\\saipen_engine\\release.py: hunk 47 has 0 exact matches",
+      "HEAD:tools/saipen_engine/release.py: hunk 47 has 0 exact matches"
+    ]
+  },
+  {
+    "seq": 294,
+    "path": "tools/saipen.py",
+    "unresolved": [
+      ".saipen\\kitchen\\t1298-recovery\\t1302-reconstructed\\files\\tools\\saipen.py: hunk 6242 has 0 exact matches",
+      ".saipen\\kitchen\\t1298-recovery\\worktree\\tools\\saipen.py: hunk 5632 has 0 exact matches",
+      ".saipen\\kitchen\\t1298-review-foreign-backup\\saipen.py.foreign: hunk 5632 has 0 exact matches",
+      "HEAD:tools/saipen.py: hunk 5632 has 0 exact matches"
+    ]
+  },
+  {
+    "seq": 294,
+    "path": "tools/test_orchestration_repair.py",
+    "base": ".saipen\\kitchen\\t1298-recovery\\t1302-reconstructed\\files\\tools\\test_orchestration_repair.py",
+    "sha256": "3d1e66a4bda1768a6d08e22d5f81ff656bed63fa4fe06a1a30a0a1a28e229027"
+  },
+  {
+    "seq": 294,
+    "path": "tools/test_public_closure_cli.py",
+    "base": ".saipen\\kitchen\\t1298-recovery\\worktree\\tools\\test_public_closure_cli.py",
+    "sha256": "d4d2b79cfb40c8fa398c959b8329a9ad63415a597372a2be21311b60319a0847"
+  },
+  {
+    "seq": 294,
+    "path": "tools/validate.py",
+    "unresolved": [
+      ".saipen\\kitchen\\t1298-recovery\\worktree\\tools\\validate.py: hunk 2478 has 0 exact matches",
+      ".saipen\\kitchen\\t1298-review-foreign-backup\\validate.py.foreign: hunk 2478 has 0 exact matches",
+      "HEAD:tools/validate.py: hunk 2478 has 0 exact matches"
+    ]
+  },
+  {
+    "seq": 294,
+    "path": "VERSION",
+    "base": ".saipen\\kitchen\\t1298-recovery\\t1302-reconstructed\\files\\VERSION",
+    "sha256": "319095c4c2691f083478e17bfee6df58022bc5f23aca4e08b5dcb06dc24ce6c6"
+  }
+]

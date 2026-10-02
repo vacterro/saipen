@@ -1,0 +1,39 @@
+test_a_canonical_anchor_still_closes (test_t1577_op_id_provenance.ClosureEvidence.test_a_canonical_anchor_still_closes) ... ok
+test_a_hand_authored_anchor_is_not_closure_evidence (test_t1577_op_id_provenance.ClosureEvidence.test_a_hand_authored_anchor_is_not_closure_evidence) ... ok
+test_a_missing_tag_is_absent_not_hand_authored (test_t1577_op_id_provenance.GrammarOwner.test_a_missing_tag_is_absent_not_hand_authored)
+An untagged event is a different question (T-110), not this one. ... ok
+test_a_registered_class_at_a_width_its_writer_never_emits (test_t1577_op_id_provenance.GrammarOwner.test_a_registered_class_at_a_width_its_writer_never_emits) ... ok
+test_an_unregistered_class_is_hand_authored_at_every_writer_width (test_t1577_op_id_provenance.GrammarOwner.test_an_unregistered_class_is_hand_authored_at_every_writer_width)
+The review's reproduction: the class is the claim, not the width. ... ok
+test_other_typos_stay_hand_authored (test_t1577_op_id_provenance.GrammarOwner.test_other_typos_stay_hand_authored) ... ok
+test_real_writer_shapes_stay_canonical (test_t1577_op_id_provenance.GrammarOwner.test_real_writer_shapes_stay_canonical) ... ok
+test_the_carrier_ids_really_carry_thirty_one_hex (test_t1577_op_id_provenance.GrammarOwner.test_the_carrier_ids_really_carry_thirty_one_hex) ... ok
+test_the_three_hand_written_ids_are_hand_authored (test_t1577_op_id_provenance.GrammarOwner.test_the_three_hand_written_ids_are_hand_authored) ... ok
+test_a_hand_authored_boundary_opens_no_cycle (test_t1577_op_id_provenance.PhaseEvidence.test_a_hand_authored_boundary_opens_no_cycle)
+The boundary is itself evidence of the transition (CORE-001). ... ok
+test_a_hand_authored_fail_is_not_a_veto_either (test_t1577_op_id_provenance.PhaseEvidence.test_a_hand_authored_fail_is_not_a_veto_either)
+Filtered means IGNORED, not merely distrusted. ... ok
+test_a_hand_authored_pass_is_not_phase_evidence (test_t1577_op_id_provenance.PhaseEvidence.test_a_hand_authored_pass_is_not_phase_evidence) ... ok
+test_an_unregistered_class_pass_is_not_phase_evidence (test_t1577_op_id_provenance.PhaseEvidence.test_an_unregistered_class_pass_is_not_phase_evidence) ... ok
+test_canonical_evidence_still_verifies (test_t1577_op_id_provenance.PhaseEvidence.test_canonical_evidence_still_verifies) ... ok
+test_the_bulk_classifier_agrees_byte_for_byte (test_t1577_op_id_provenance.PhaseEvidence.test_the_bulk_classifier_agrees_byte_for_byte) ... ok
+test_every_literal_writer_class_is_registered (test_t1577_op_id_provenance.RegistryCoversEveryWriter.test_every_literal_writer_class_is_registered) ... ok
+test_every_named_writer_class_is_registered (test_t1577_op_id_provenance.RegistryCoversEveryWriter.test_every_named_writer_class_is_registered) ... ok
+test_every_registered_class_has_a_live_writer (test_t1577_op_id_provenance.RegistryCoversEveryWriter.test_every_registered_class_has_a_live_writer)
+The converse: registering `verify-` would launder every typed id. ... ok
+test_no_registered_class_is_an_unregistered_one_in_disguise (test_t1577_op_id_provenance.RegistryCoversEveryWriter.test_no_registered_class_is_an_unregistered_one_in_disguise) ... ok
+test_a_hand_authored_id_above_the_floor_is_named_and_fails (test_t1577_op_id_provenance.ValidatorGate.test_a_hand_authored_id_above_the_floor_is_named_and_fails) ... ok
+test_a_hand_authored_id_below_the_floor_only_warns (test_t1577_op_id_provenance.ValidatorGate.test_a_hand_authored_id_below_the_floor_only_warns)
+History stays readable: the record that follows sets the floor. ... ok
+test_a_hand_authored_id_that_resolves_is_not_claimed (test_t1577_op_id_provenance.ValidatorGate.test_a_hand_authored_id_that_resolves_is_not_claimed)
+A real operation record outranks the shape: no false accusation. ... ok
+test_a_typed_closure_above_the_floor_still_fails (test_t1577_op_id_provenance.ValidatorGate.test_a_typed_closure_above_the_floor_still_fails) ... ok
+test_a_typed_closure_below_the_floor_is_named_not_failed (test_t1577_op_id_provenance.ValidatorGate.test_a_typed_closure_below_the_floor_is_named_not_failed) ... ok
+test_an_unregistered_class_above_the_floor_is_named_and_fails (test_t1577_op_id_provenance.ValidatorGate.test_an_unregistered_class_above_the_floor_is_named_and_fails)
+The review's reproduction, end to end through the validator. ... ok
+test_no_ledger_means_unavailable_not_red (test_t1577_op_id_provenance.ValidatorGate.test_no_ledger_means_unavailable_not_red) ... ok
+
+----------------------------------------------------------------------
+Ran 26 tests in 6.501s
+
+OK

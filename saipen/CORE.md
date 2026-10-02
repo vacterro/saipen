@@ -46,6 +46,8 @@ mechanics live in `OPS.md`. Prose is never a runtime database.
   explicit user confirmation unless active Work pre-authorizes that exact,
   reversible effect. Force-push, history rewrite, branch/schema/database drop,
   mass deletion, user-data deletion, and irreversible migration are destructive.
+- Prevent the sole-copy ephemeral-state loss defect: durable project state and
+  canonical artifact references obey `STORAGE.md` (`STORE-SAFETY-01`).
 - Never persist credentials in BOARD, LOG, STATE, source summaries, or chat.
   Preserve an authoritative source body exactly under `SOURCES.md`; if it is
   sensitive, use that contract's protection and warn the user to rotate it.

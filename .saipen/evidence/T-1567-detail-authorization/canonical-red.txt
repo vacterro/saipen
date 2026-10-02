@@ -1,0 +1,397 @@
+test_explicit_requests_still_grant_their_own_mode (test_detail_authorization.DetailAuthorizationRegression.test_explicit_requests_still_grant_their_own_mode) ... ok
+test_incidental_negated_and_quoted_requests_never_grant (test_detail_authorization.DetailAuthorizationRegression.test_incidental_negated_and_quoted_requests_never_grant) ... 
+  test_incidental_negated_and_quoted_requests_never_grant (test_detail_authorization.DetailAuthorizationRegression.test_incidental_negated_and_quoted_requests_never_grant) (request='Fix audit logging') ... FAIL
+  test_incidental_negated_and_quoted_requests_never_grant (test_detail_authorization.DetailAuthorizationRegression.test_incidental_negated_and_quoted_requests_never_grant) (request='Repair the handoff parser') ... FAIL
+  test_incidental_negated_and_quoted_requests_never_grant (test_detail_authorization.DetailAuthorizationRegression.test_incidental_negated_and_quoted_requests_never_grant) (request='Do not write a detailed report; fix the bug') ... FAIL
+  test_incidental_negated_and_quoted_requests_never_grant (test_detail_authorization.DetailAuthorizationRegression.test_incidental_negated_and_quoted_requests_never_grant) (request="Don't audit the change; fix the failing test") ... FAIL
+  test_incidental_negated_and_quoted_requests_never_grant (test_detail_authorization.DetailAuthorizationRegression.test_incidental_negated_and_quoted_requests_never_grant) (request='Never prepare a handoff; continue') ... FAIL
+  test_incidental_negated_and_quoted_requests_never_grant (test_detail_authorization.DetailAuthorizationRegression.test_incidental_negated_and_quoted_requests_never_grant) (request='The audit log is broken') ... FAIL
+  test_incidental_negated_and_quoted_requests_never_grant (test_detail_authorization.DetailAuthorizationRegression.test_incidental_negated_and_quoted_requests_never_grant) (request='Audit logging is broken; fix it') ... FAIL
+  test_incidental_negated_and_quoted_requests_never_grant (test_detail_authorization.DetailAuthorizationRegression.test_incidental_negated_and_quoted_requests_never_grant) (request='The phrase write a detailed report is an example') ... FAIL
+  test_incidental_negated_and_quoted_requests_never_grant (test_detail_authorization.DetailAuthorizationRegression.test_incidental_negated_and_quoted_requests_never_grant) (request='The user previously said "write a detailed report"; now continue') ... FAIL
+  test_incidental_negated_and_quoted_requests_never_grant (test_detail_authorization.DetailAuthorizationRegression.test_incidental_negated_and_quoted_requests_never_grant) (request='"write a detailed report"') ... FAIL
+  test_incidental_negated_and_quoted_requests_never_grant (test_detail_authorization.DetailAuthorizationRegression.test_incidental_negated_and_quoted_requests_never_grant) (request='```\nwrite a detailed report\n```') ... FAIL
+  test_incidental_negated_and_quoted_requests_never_grant (test_detail_authorization.DetailAuthorizationRegression.test_incidental_negated_and_quoted_requests_never_grant) (request='> write a detailed report') ... FAIL
+test_public_cli_cannot_spend_incidental_or_negated_words (test_detail_authorization.DetailAuthorizationRegression.test_public_cli_cannot_spend_incidental_or_negated_words) ... 
+  test_public_cli_cannot_spend_incidental_or_negated_words (test_detail_authorization.DetailAuthorizationRegression.test_public_cli_cannot_spend_incidental_or_negated_words) (request='Fix audit logging') ... FAIL
+  test_public_cli_cannot_spend_incidental_or_negated_words (test_detail_authorization.DetailAuthorizationRegression.test_public_cli_cannot_spend_incidental_or_negated_words) (request='Repair the handoff parser') ... FAIL
+  test_public_cli_cannot_spend_incidental_or_negated_words (test_detail_authorization.DetailAuthorizationRegression.test_public_cli_cannot_spend_incidental_or_negated_words) (request='Do not write a detailed report; fix the bug') ... FAIL
+  test_public_cli_cannot_spend_incidental_or_negated_words (test_detail_authorization.DetailAuthorizationRegression.test_public_cli_cannot_spend_incidental_or_negated_words) (request="Don't audit the change; fix the failing test") ... FAIL
+  test_public_cli_cannot_spend_incidental_or_negated_words (test_detail_authorization.DetailAuthorizationRegression.test_public_cli_cannot_spend_incidental_or_negated_words) (request='Never prepare a handoff; continue') ... FAIL
+test_unauthorized_requests_preserve_both_response_budgets (test_detail_authorization.DetailAuthorizationRegression.test_unauthorized_requests_preserve_both_response_budgets) ... 
+  test_unauthorized_requests_preserve_both_response_budgets (test_detail_authorization.DetailAuthorizationRegression.test_unauthorized_requests_preserve_both_response_budgets) (request='Fix audit logging') ... FAIL
+  test_unauthorized_requests_preserve_both_response_budgets (test_detail_authorization.DetailAuthorizationRegression.test_unauthorized_requests_preserve_both_response_budgets) (request='Repair the handoff parser') ... FAIL
+  test_unauthorized_requests_preserve_both_response_budgets (test_detail_authorization.DetailAuthorizationRegression.test_unauthorized_requests_preserve_both_response_budgets) (request='Do not write a detailed report; fix the bug') ... FAIL
+  test_unauthorized_requests_preserve_both_response_budgets (test_detail_authorization.DetailAuthorizationRegression.test_unauthorized_requests_preserve_both_response_budgets) (request="Don't audit the change; fix the failing test") ... FAIL
+  test_unauthorized_requests_preserve_both_response_budgets (test_detail_authorization.DetailAuthorizationRegression.test_unauthorized_requests_preserve_both_response_budgets) (request='Never prepare a handoff; continue') ... FAIL
+  test_unauthorized_requests_preserve_both_response_budgets (test_detail_authorization.DetailAuthorizationRegression.test_unauthorized_requests_preserve_both_response_budgets) (request='The audit log is broken') ... FAIL
+  test_unauthorized_requests_preserve_both_response_budgets (test_detail_authorization.DetailAuthorizationRegression.test_unauthorized_requests_preserve_both_response_budgets) (request='Audit logging is broken; fix it') ... FAIL
+  test_unauthorized_requests_preserve_both_response_budgets (test_detail_authorization.DetailAuthorizationRegression.test_unauthorized_requests_preserve_both_response_budgets) (request='The phrase write a detailed report is an example') ... FAIL
+  test_unauthorized_requests_preserve_both_response_budgets (test_detail_authorization.DetailAuthorizationRegression.test_unauthorized_requests_preserve_both_response_budgets) (request='The user previously said "write a detailed report"; now continue') ... FAIL
+  test_unauthorized_requests_preserve_both_response_budgets (test_detail_authorization.DetailAuthorizationRegression.test_unauthorized_requests_preserve_both_response_budgets) (request='"write a detailed report"') ... FAIL
+  test_unauthorized_requests_preserve_both_response_budgets (test_detail_authorization.DetailAuthorizationRegression.test_unauthorized_requests_preserve_both_response_budgets) (request='```\nwrite a detailed report\n```') ... FAIL
+  test_unauthorized_requests_preserve_both_response_budgets (test_detail_authorization.DetailAuthorizationRegression.test_unauthorized_requests_preserve_both_response_budgets) (request='> write a detailed report') ... FAIL
+test_unknown_context_cannot_authorize_chat_or_details (test_detail_authorization.DetailAuthorizationRegression.test_unknown_context_cannot_authorize_chat_or_details) ... 
+  test_unknown_context_cannot_authorize_chat_or_details (test_detail_authorization.DetailAuthorizationRegression.test_unknown_context_cannot_authorize_chat_or_details) (mode=None) ... FAIL
+  test_unknown_context_cannot_authorize_chat_or_details (test_detail_authorization.DetailAuthorizationRegression.test_unknown_context_cannot_authorize_chat_or_details) (mode='') ... FAIL
+  test_unknown_context_cannot_authorize_chat_or_details (test_detail_authorization.DetailAuthorizationRegression.test_unknown_context_cannot_authorize_chat_or_details) (mode='INVALID') ... FAIL
+  test_unknown_context_cannot_authorize_chat_or_details (test_detail_authorization.DetailAuthorizationRegression.test_unknown_context_cannot_authorize_chat_or_details) (mode=0) ... FAIL
+  test_unknown_context_cannot_authorize_chat_or_details (test_detail_authorization.DetailAuthorizationRegression.test_unknown_context_cannot_authorize_chat_or_details) (mode=[]) ... FAIL
+  test_unknown_context_cannot_authorize_chat_or_details (test_detail_authorization.DetailAuthorizationRegression.test_unknown_context_cannot_authorize_chat_or_details) (mode={}) ... FAIL
+
+======================================================================
+FAIL: test_incidental_negated_and_quoted_requests_never_grant (test_detail_authorization.DetailAuthorizationRegression.test_incidental_negated_and_quoted_requests_never_grant) (request='Fix audit logging')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\.saipen\kitchen\t1567-response-candidate-20260930\tools\test_detail_authorization.py", line 40, in test_incidental_negated_and_quoted_requests_never_grant
+    self.assertEqual(RS.detail_mode_for_request(request), RS.DETAIL_MODE_NONE)
+AssertionError: 'AUDIT' != 'NONE'
+- AUDIT
++ NONE
+
+
+======================================================================
+FAIL: test_incidental_negated_and_quoted_requests_never_grant (test_detail_authorization.DetailAuthorizationRegression.test_incidental_negated_and_quoted_requests_never_grant) (request='Repair the handoff parser')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\.saipen\kitchen\t1567-response-candidate-20260930\tools\test_detail_authorization.py", line 40, in test_incidental_negated_and_quoted_requests_never_grant
+    self.assertEqual(RS.detail_mode_for_request(request), RS.DETAIL_MODE_NONE)
+AssertionError: 'HANDOFF' != 'NONE'
+- HANDOFF
++ NONE
+
+
+======================================================================
+FAIL: test_incidental_negated_and_quoted_requests_never_grant (test_detail_authorization.DetailAuthorizationRegression.test_incidental_negated_and_quoted_requests_never_grant) (request='Do not write a detailed report; fix the bug')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\.saipen\kitchen\t1567-response-candidate-20260930\tools\test_detail_authorization.py", line 40, in test_incidental_negated_and_quoted_requests_never_grant
+    self.assertEqual(RS.detail_mode_for_request(request), RS.DETAIL_MODE_NONE)
+AssertionError: 'EXPLICIT_REPORT' != 'NONE'
+- EXPLICIT_REPORT
++ NONE
+
+
+======================================================================
+FAIL: test_incidental_negated_and_quoted_requests_never_grant (test_detail_authorization.DetailAuthorizationRegression.test_incidental_negated_and_quoted_requests_never_grant) (request="Don't audit the change; fix the failing test")
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\.saipen\kitchen\t1567-response-candidate-20260930\tools\test_detail_authorization.py", line 40, in test_incidental_negated_and_quoted_requests_never_grant
+    self.assertEqual(RS.detail_mode_for_request(request), RS.DETAIL_MODE_NONE)
+AssertionError: 'AUDIT' != 'NONE'
+- AUDIT
++ NONE
+
+
+======================================================================
+FAIL: test_incidental_negated_and_quoted_requests_never_grant (test_detail_authorization.DetailAuthorizationRegression.test_incidental_negated_and_quoted_requests_never_grant) (request='Never prepare a handoff; continue')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\.saipen\kitchen\t1567-response-candidate-20260930\tools\test_detail_authorization.py", line 40, in test_incidental_negated_and_quoted_requests_never_grant
+    self.assertEqual(RS.detail_mode_for_request(request), RS.DETAIL_MODE_NONE)
+AssertionError: 'HANDOFF' != 'NONE'
+- HANDOFF
++ NONE
+
+
+======================================================================
+FAIL: test_incidental_negated_and_quoted_requests_never_grant (test_detail_authorization.DetailAuthorizationRegression.test_incidental_negated_and_quoted_requests_never_grant) (request='The audit log is broken')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\.saipen\kitchen\t1567-response-candidate-20260930\tools\test_detail_authorization.py", line 40, in test_incidental_negated_and_quoted_requests_never_grant
+    self.assertEqual(RS.detail_mode_for_request(request), RS.DETAIL_MODE_NONE)
+AssertionError: 'AUDIT' != 'NONE'
+- AUDIT
++ NONE
+
+
+======================================================================
+FAIL: test_incidental_negated_and_quoted_requests_never_grant (test_detail_authorization.DetailAuthorizationRegression.test_incidental_negated_and_quoted_requests_never_grant) (request='Audit logging is broken; fix it')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\.saipen\kitchen\t1567-response-candidate-20260930\tools\test_detail_authorization.py", line 40, in test_incidental_negated_and_quoted_requests_never_grant
+    self.assertEqual(RS.detail_mode_for_request(request), RS.DETAIL_MODE_NONE)
+AssertionError: 'AUDIT' != 'NONE'
+- AUDIT
++ NONE
+
+
+======================================================================
+FAIL: test_incidental_negated_and_quoted_requests_never_grant (test_detail_authorization.DetailAuthorizationRegression.test_incidental_negated_and_quoted_requests_never_grant) (request='The phrase write a detailed report is an example')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\.saipen\kitchen\t1567-response-candidate-20260930\tools\test_detail_authorization.py", line 40, in test_incidental_negated_and_quoted_requests_never_grant
+    self.assertEqual(RS.detail_mode_for_request(request), RS.DETAIL_MODE_NONE)
+AssertionError: 'EXPLICIT_REPORT' != 'NONE'
+- EXPLICIT_REPORT
++ NONE
+
+
+======================================================================
+FAIL: test_incidental_negated_and_quoted_requests_never_grant (test_detail_authorization.DetailAuthorizationRegression.test_incidental_negated_and_quoted_requests_never_grant) (request='The user previously said "write a detailed report"; now continue')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\.saipen\kitchen\t1567-response-candidate-20260930\tools\test_detail_authorization.py", line 40, in test_incidental_negated_and_quoted_requests_never_grant
+    self.assertEqual(RS.detail_mode_for_request(request), RS.DETAIL_MODE_NONE)
+AssertionError: 'EXPLICIT_REPORT' != 'NONE'
+- EXPLICIT_REPORT
++ NONE
+
+
+======================================================================
+FAIL: test_incidental_negated_and_quoted_requests_never_grant (test_detail_authorization.DetailAuthorizationRegression.test_incidental_negated_and_quoted_requests_never_grant) (request='"write a detailed report"')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\.saipen\kitchen\t1567-response-candidate-20260930\tools\test_detail_authorization.py", line 40, in test_incidental_negated_and_quoted_requests_never_grant
+    self.assertEqual(RS.detail_mode_for_request(request), RS.DETAIL_MODE_NONE)
+AssertionError: 'EXPLICIT_REPORT' != 'NONE'
+- EXPLICIT_REPORT
++ NONE
+
+
+======================================================================
+FAIL: test_incidental_negated_and_quoted_requests_never_grant (test_detail_authorization.DetailAuthorizationRegression.test_incidental_negated_and_quoted_requests_never_grant) (request='```\nwrite a detailed report\n```')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\.saipen\kitchen\t1567-response-candidate-20260930\tools\test_detail_authorization.py", line 40, in test_incidental_negated_and_quoted_requests_never_grant
+    self.assertEqual(RS.detail_mode_for_request(request), RS.DETAIL_MODE_NONE)
+AssertionError: 'EXPLICIT_REPORT' != 'NONE'
+- EXPLICIT_REPORT
++ NONE
+
+
+======================================================================
+FAIL: test_incidental_negated_and_quoted_requests_never_grant (test_detail_authorization.DetailAuthorizationRegression.test_incidental_negated_and_quoted_requests_never_grant) (request='> write a detailed report')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\.saipen\kitchen\t1567-response-candidate-20260930\tools\test_detail_authorization.py", line 40, in test_incidental_negated_and_quoted_requests_never_grant
+    self.assertEqual(RS.detail_mode_for_request(request), RS.DETAIL_MODE_NONE)
+AssertionError: 'EXPLICIT_REPORT' != 'NONE'
+- EXPLICIT_REPORT
++ NONE
+
+
+======================================================================
+FAIL: test_public_cli_cannot_spend_incidental_or_negated_words (test_detail_authorization.DetailAuthorizationRegression.test_public_cli_cannot_spend_incidental_or_negated_words) (request='Fix audit logging')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\.saipen\kitchen\t1567-response-candidate-20260930\tools\test_detail_authorization.py", line 91, in test_public_cli_cannot_spend_incidental_or_negated_words
+    self.assertFalse(payload["ok"], payload)
+AssertionError: True is not false : {'ok': True, 'code': 'NON_OPERATIONAL', 'class': 'ORDINARY_CHAT', 'layer': 'NONE', 'layers': {'admission': 'NOT_CONSULTED', 'exec_response': 'NOT_APPLICABLE', 'chat_style': 'PASS'}, 'errors': [], 'detail_mode': 'AUDIT', 'turn_decision': 'ORDINARY', 'detail': None, 'diagnostic': None, 'contract': None}
+
+======================================================================
+FAIL: test_public_cli_cannot_spend_incidental_or_negated_words (test_detail_authorization.DetailAuthorizationRegression.test_public_cli_cannot_spend_incidental_or_negated_words) (request='Repair the handoff parser')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\.saipen\kitchen\t1567-response-candidate-20260930\tools\test_detail_authorization.py", line 91, in test_public_cli_cannot_spend_incidental_or_negated_words
+    self.assertFalse(payload["ok"], payload)
+AssertionError: True is not false : {'ok': True, 'code': 'NON_OPERATIONAL', 'class': 'ORDINARY_CHAT', 'layer': 'NONE', 'layers': {'admission': 'NOT_CONSULTED', 'exec_response': 'NOT_APPLICABLE', 'chat_style': 'PASS'}, 'errors': [], 'detail_mode': 'HANDOFF', 'turn_decision': 'ORDINARY', 'detail': None, 'diagnostic': None, 'contract': None}
+
+======================================================================
+FAIL: test_public_cli_cannot_spend_incidental_or_negated_words (test_detail_authorization.DetailAuthorizationRegression.test_public_cli_cannot_spend_incidental_or_negated_words) (request='Do not write a detailed report; fix the bug')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\.saipen\kitchen\t1567-response-candidate-20260930\tools\test_detail_authorization.py", line 91, in test_public_cli_cannot_spend_incidental_or_negated_words
+    self.assertFalse(payload["ok"], payload)
+AssertionError: True is not false : {'ok': True, 'code': 'NON_OPERATIONAL', 'class': 'ORDINARY_CHAT', 'layer': 'NONE', 'layers': {'admission': 'NOT_CONSULTED', 'exec_response': 'NOT_APPLICABLE', 'chat_style': 'PASS'}, 'errors': [], 'detail_mode': 'EXPLICIT_REPORT', 'turn_decision': 'ORDINARY', 'detail': None, 'diagnostic': None, 'contract': None}
+
+======================================================================
+FAIL: test_public_cli_cannot_spend_incidental_or_negated_words (test_detail_authorization.DetailAuthorizationRegression.test_public_cli_cannot_spend_incidental_or_negated_words) (request="Don't audit the change; fix the failing test")
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\.saipen\kitchen\t1567-response-candidate-20260930\tools\test_detail_authorization.py", line 91, in test_public_cli_cannot_spend_incidental_or_negated_words
+    self.assertFalse(payload["ok"], payload)
+AssertionError: True is not false : {'ok': True, 'code': 'NON_OPERATIONAL', 'class': 'ORDINARY_CHAT', 'layer': 'NONE', 'layers': {'admission': 'NOT_CONSULTED', 'exec_response': 'NOT_APPLICABLE', 'chat_style': 'PASS'}, 'errors': [], 'detail_mode': 'AUDIT', 'turn_decision': 'ORDINARY', 'detail': None, 'diagnostic': None, 'contract': None}
+
+======================================================================
+FAIL: test_public_cli_cannot_spend_incidental_or_negated_words (test_detail_authorization.DetailAuthorizationRegression.test_public_cli_cannot_spend_incidental_or_negated_words) (request='Never prepare a handoff; continue')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\.saipen\kitchen\t1567-response-candidate-20260930\tools\test_detail_authorization.py", line 91, in test_public_cli_cannot_spend_incidental_or_negated_words
+    self.assertFalse(payload["ok"], payload)
+AssertionError: True is not false : {'ok': True, 'code': 'NON_OPERATIONAL', 'class': 'ORDINARY_CHAT', 'layer': 'NONE', 'layers': {'admission': 'NOT_CONSULTED', 'exec_response': 'NOT_APPLICABLE', 'chat_style': 'PASS'}, 'errors': [], 'detail_mode': 'HANDOFF', 'turn_decision': 'ORDINARY', 'detail': None, 'diagnostic': None, 'contract': None}
+
+======================================================================
+FAIL: test_unauthorized_requests_preserve_both_response_budgets (test_detail_authorization.DetailAuthorizationRegression.test_unauthorized_requests_preserve_both_response_budgets) (request='Fix audit logging')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\.saipen\kitchen\t1567-response-candidate-20260930\tools\test_detail_authorization.py", line 49, in test_unauthorized_requests_preserve_both_response_budgets
+    self.assertEqual(klass, RS.CLASS_CHAT_STYLE_DRIFT, errors)
+AssertionError: 'ORDINARY_CHAT' != 'CHAT_STYLE_DRIFT'
+- ORDINARY_CHAT
++ CHAT_STYLE_DRIFT
+ : []
+
+======================================================================
+FAIL: test_unauthorized_requests_preserve_both_response_budgets (test_detail_authorization.DetailAuthorizationRegression.test_unauthorized_requests_preserve_both_response_budgets) (request='Repair the handoff parser')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\.saipen\kitchen\t1567-response-candidate-20260930\tools\test_detail_authorization.py", line 49, in test_unauthorized_requests_preserve_both_response_budgets
+    self.assertEqual(klass, RS.CLASS_CHAT_STYLE_DRIFT, errors)
+AssertionError: 'ORDINARY_CHAT' != 'CHAT_STYLE_DRIFT'
+- ORDINARY_CHAT
++ CHAT_STYLE_DRIFT
+ : []
+
+======================================================================
+FAIL: test_unauthorized_requests_preserve_both_response_budgets (test_detail_authorization.DetailAuthorizationRegression.test_unauthorized_requests_preserve_both_response_budgets) (request='Do not write a detailed report; fix the bug')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\.saipen\kitchen\t1567-response-candidate-20260930\tools\test_detail_authorization.py", line 49, in test_unauthorized_requests_preserve_both_response_budgets
+    self.assertEqual(klass, RS.CLASS_CHAT_STYLE_DRIFT, errors)
+AssertionError: 'ORDINARY_CHAT' != 'CHAT_STYLE_DRIFT'
+- ORDINARY_CHAT
++ CHAT_STYLE_DRIFT
+ : []
+
+======================================================================
+FAIL: test_unauthorized_requests_preserve_both_response_budgets (test_detail_authorization.DetailAuthorizationRegression.test_unauthorized_requests_preserve_both_response_budgets) (request="Don't audit the change; fix the failing test")
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\.saipen\kitchen\t1567-response-candidate-20260930\tools\test_detail_authorization.py", line 49, in test_unauthorized_requests_preserve_both_response_budgets
+    self.assertEqual(klass, RS.CLASS_CHAT_STYLE_DRIFT, errors)
+AssertionError: 'ORDINARY_CHAT' != 'CHAT_STYLE_DRIFT'
+- ORDINARY_CHAT
++ CHAT_STYLE_DRIFT
+ : []
+
+======================================================================
+FAIL: test_unauthorized_requests_preserve_both_response_budgets (test_detail_authorization.DetailAuthorizationRegression.test_unauthorized_requests_preserve_both_response_budgets) (request='Never prepare a handoff; continue')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\.saipen\kitchen\t1567-response-candidate-20260930\tools\test_detail_authorization.py", line 49, in test_unauthorized_requests_preserve_both_response_budgets
+    self.assertEqual(klass, RS.CLASS_CHAT_STYLE_DRIFT, errors)
+AssertionError: 'ORDINARY_CHAT' != 'CHAT_STYLE_DRIFT'
+- ORDINARY_CHAT
++ CHAT_STYLE_DRIFT
+ : []
+
+======================================================================
+FAIL: test_unauthorized_requests_preserve_both_response_budgets (test_detail_authorization.DetailAuthorizationRegression.test_unauthorized_requests_preserve_both_response_budgets) (request='The audit log is broken')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\.saipen\kitchen\t1567-response-candidate-20260930\tools\test_detail_authorization.py", line 49, in test_unauthorized_requests_preserve_both_response_budgets
+    self.assertEqual(klass, RS.CLASS_CHAT_STYLE_DRIFT, errors)
+AssertionError: 'ORDINARY_CHAT' != 'CHAT_STYLE_DRIFT'
+- ORDINARY_CHAT
++ CHAT_STYLE_DRIFT
+ : []
+
+======================================================================
+FAIL: test_unauthorized_requests_preserve_both_response_budgets (test_detail_authorization.DetailAuthorizationRegression.test_unauthorized_requests_preserve_both_response_budgets) (request='Audit logging is broken; fix it')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\.saipen\kitchen\t1567-response-candidate-20260930\tools\test_detail_authorization.py", line 49, in test_unauthorized_requests_preserve_both_response_budgets
+    self.assertEqual(klass, RS.CLASS_CHAT_STYLE_DRIFT, errors)
+AssertionError: 'ORDINARY_CHAT' != 'CHAT_STYLE_DRIFT'
+- ORDINARY_CHAT
++ CHAT_STYLE_DRIFT
+ : []
+
+======================================================================
+FAIL: test_unauthorized_requests_preserve_both_response_budgets (test_detail_authorization.DetailAuthorizationRegression.test_unauthorized_requests_preserve_both_response_budgets) (request='The phrase write a detailed report is an example')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\.saipen\kitchen\t1567-response-candidate-20260930\tools\test_detail_authorization.py", line 49, in test_unauthorized_requests_preserve_both_response_budgets
+    self.assertEqual(klass, RS.CLASS_CHAT_STYLE_DRIFT, errors)
+AssertionError: 'ORDINARY_CHAT' != 'CHAT_STYLE_DRIFT'
+- ORDINARY_CHAT
++ CHAT_STYLE_DRIFT
+ : []
+
+======================================================================
+FAIL: test_unauthorized_requests_preserve_both_response_budgets (test_detail_authorization.DetailAuthorizationRegression.test_unauthorized_requests_preserve_both_response_budgets) (request='The user previously said "write a detailed report"; now continue')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\.saipen\kitchen\t1567-response-candidate-20260930\tools\test_detail_authorization.py", line 49, in test_unauthorized_requests_preserve_both_response_budgets
+    self.assertEqual(klass, RS.CLASS_CHAT_STYLE_DRIFT, errors)
+AssertionError: 'ORDINARY_CHAT' != 'CHAT_STYLE_DRIFT'
+- ORDINARY_CHAT
++ CHAT_STYLE_DRIFT
+ : []
+
+======================================================================
+FAIL: test_unauthorized_requests_preserve_both_response_budgets (test_detail_authorization.DetailAuthorizationRegression.test_unauthorized_requests_preserve_both_response_budgets) (request='"write a detailed report"')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\.saipen\kitchen\t1567-response-candidate-20260930\tools\test_detail_authorization.py", line 49, in test_unauthorized_requests_preserve_both_response_budgets
+    self.assertEqual(klass, RS.CLASS_CHAT_STYLE_DRIFT, errors)
+AssertionError: 'ORDINARY_CHAT' != 'CHAT_STYLE_DRIFT'
+- ORDINARY_CHAT
++ CHAT_STYLE_DRIFT
+ : []
+
+======================================================================
+FAIL: test_unauthorized_requests_preserve_both_response_budgets (test_detail_authorization.DetailAuthorizationRegression.test_unauthorized_requests_preserve_both_response_budgets) (request='```\nwrite a detailed report\n```')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\.saipen\kitchen\t1567-response-candidate-20260930\tools\test_detail_authorization.py", line 49, in test_unauthorized_requests_preserve_both_response_budgets
+    self.assertEqual(klass, RS.CLASS_CHAT_STYLE_DRIFT, errors)
+AssertionError: 'ORDINARY_CHAT' != 'CHAT_STYLE_DRIFT'
+- ORDINARY_CHAT
++ CHAT_STYLE_DRIFT
+ : []
+
+======================================================================
+FAIL: test_unauthorized_requests_preserve_both_response_budgets (test_detail_authorization.DetailAuthorizationRegression.test_unauthorized_requests_preserve_both_response_budgets) (request='> write a detailed report')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\.saipen\kitchen\t1567-response-candidate-20260930\tools\test_detail_authorization.py", line 49, in test_unauthorized_requests_preserve_both_response_budgets
+    self.assertEqual(klass, RS.CLASS_CHAT_STYLE_DRIFT, errors)
+AssertionError: 'ORDINARY_CHAT' != 'CHAT_STYLE_DRIFT'
+- ORDINARY_CHAT
++ CHAT_STYLE_DRIFT
+ : []
+
+======================================================================
+FAIL: test_unknown_context_cannot_authorize_chat_or_details (test_detail_authorization.DetailAuthorizationRegression.test_unknown_context_cannot_authorize_chat_or_details) (mode=None)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\.saipen\kitchen\t1567-response-candidate-20260930\tools\test_detail_authorization.py", line 73, in test_unknown_context_cannot_authorize_chat_or_details
+    self.assertTrue(RS.response_errors(SURFACE, detail_mode=mode))
+AssertionError: [] is not true
+
+======================================================================
+FAIL: test_unknown_context_cannot_authorize_chat_or_details (test_detail_authorization.DetailAuthorizationRegression.test_unknown_context_cannot_authorize_chat_or_details) (mode='')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\.saipen\kitchen\t1567-response-candidate-20260930\tools\test_detail_authorization.py", line 73, in test_unknown_context_cannot_authorize_chat_or_details
+    self.assertTrue(RS.response_errors(SURFACE, detail_mode=mode))
+AssertionError: [] is not true
+
+======================================================================
+FAIL: test_unknown_context_cannot_authorize_chat_or_details (test_detail_authorization.DetailAuthorizationRegression.test_unknown_context_cannot_authorize_chat_or_details) (mode='INVALID')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\.saipen\kitchen\t1567-response-candidate-20260930\tools\test_detail_authorization.py", line 73, in test_unknown_context_cannot_authorize_chat_or_details
+    self.assertTrue(RS.response_errors(SURFACE, detail_mode=mode))
+AssertionError: [] is not true
+
+======================================================================
+FAIL: test_unknown_context_cannot_authorize_chat_or_details (test_detail_authorization.DetailAuthorizationRegression.test_unknown_context_cannot_authorize_chat_or_details) (mode=0)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\.saipen\kitchen\t1567-response-candidate-20260930\tools\test_detail_authorization.py", line 73, in test_unknown_context_cannot_authorize_chat_or_details
+    self.assertTrue(RS.response_errors(SURFACE, detail_mode=mode))
+AssertionError: [] is not true
+
+======================================================================
+FAIL: test_unknown_context_cannot_authorize_chat_or_details (test_detail_authorization.DetailAuthorizationRegression.test_unknown_context_cannot_authorize_chat_or_details) (mode=[])
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\.saipen\kitchen\t1567-response-candidate-20260930\tools\test_detail_authorization.py", line 73, in test_unknown_context_cannot_authorize_chat_or_details
+    self.assertTrue(RS.response_errors(SURFACE, detail_mode=mode))
+AssertionError: [] is not true
+
+======================================================================
+FAIL: test_unknown_context_cannot_authorize_chat_or_details (test_detail_authorization.DetailAuthorizationRegression.test_unknown_context_cannot_authorize_chat_or_details) (mode={})
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\.saipen\kitchen\t1567-response-candidate-20260930\tools\test_detail_authorization.py", line 73, in test_unknown_context_cannot_authorize_chat_or_details
+    self.assertTrue(RS.response_errors(SURFACE, detail_mode=mode))
+AssertionError: [] is not true
+
+----------------------------------------------------------------------
+Ran 5 tests in 1.107s
+
+FAILED (failures=35)

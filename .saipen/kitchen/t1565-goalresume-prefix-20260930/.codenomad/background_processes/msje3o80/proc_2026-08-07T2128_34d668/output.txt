@@ -1,0 +1,6 @@
+PASS: a real root `nul` entry is excluded from audit snapshots
+PASS: release-ledger clean/new-tag/new-changelog/stale-baseline controls behave distinctly
+PASS: aged unowned WARN slug fails; identical aged slug with a live naming ticket passes; baseline data, never validator wording
+FAIL: phase-rename probe -- consistent SCOUT->SCOUTX rename was rejected: , zh) -- the English prose moved and the translation did not follow. Version strings are normalised out, so a badge bump can never cause this
+WARN [release-ledger]: git tag list unavailable or empty -- the release ledger has only its CHANGELOG half, so the phantom-version check is skipped rather than run against incomplete data (git tag -l exited 128)
+Validation FAILED: 1 problem(s), 13 warning(s)

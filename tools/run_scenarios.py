@@ -6537,7 +6537,7 @@ def run_release_executor_probes() -> tuple[list[str], int]:
             ticket="T-9000",
             agent="probe",
             now=now,
-            op_id="transition-release-fixture-verify",
+            op_id=f"transition-{tail + 1:08x}",
         )
         verdict, verdict_line = build_event(
             boundary,
@@ -6546,7 +6546,7 @@ def run_release_executor_probes() -> tuple[list[str], int]:
             ticket="T-9000",
             agent="probe",
             now=now,
-            op_id="checkpoint-release-fixture-verify",
+            op_id=f"checkpoint-{tail + 2:08x}",
         )
         review, review_line = build_event(
             verdict,
@@ -6555,7 +6555,7 @@ def run_release_executor_probes() -> tuple[list[str], int]:
             ticket="T-9000",
             agent="probe",
             now=now,
-            op_id="transition-release-fixture-review",
+            op_id=f"transition-{tail + 3:08x}",
         )
         ship, ship_line = build_event(
             review,
@@ -6564,7 +6564,7 @@ def run_release_executor_probes() -> tuple[list[str], int]:
             ticket="T-9000",
             agent="probe",
             now=now,
-            op_id="transition-release-fixture-ship",
+            op_id=f"transition-{tail + 4:08x}",
         )
         log_path.write_text(
             log_text.rstrip("\n")

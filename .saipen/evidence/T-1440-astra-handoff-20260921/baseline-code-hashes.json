@@ -1,0 +1,62 @@
+[
+  {
+    "path": "saipen/COMMANDS.md",
+    "sha256": "51f11e8f27855f20098729cf0d332c14e65e2cd72cc794696f11639507789409"
+  },
+  {
+    "path": "saipen/COMMAND_EFFECTS.json",
+    "sha256": "7e47dcf36f45346e06dfdb73912fdd9026beadb677d83b2d9d2b4caa1a75a6f7"
+  },
+  {
+    "path": "saipen/REGISTRY.json",
+    "sha256": "b47ee01c89e20e4f6bb1f8b22ec5bbeb2732032f60afe68f15a5516f642fa8d4"
+  },
+  {
+    "path": "saipen/SOURCES.md",
+    "sha256": "5b201aa3ec0f62c1ac1cebc6ef8b030638e725557d8ac78f53b89f86ee53301e"
+  },
+  {
+    "path": "tools/saipen.py",
+    "sha256": "17001bc9931483c54bdfde22d8efa93cca4cec54bd8f21d83468e17918fc6971"
+  },
+  {
+    "path": "tools/saipen_engine/debt.py",
+    "sha256": "003c5d399809ab6c5617671238acb6733f7c469c28720e3ee5fb75ec13bd74e0"
+  },
+  {
+    "path": "tools/saipen_engine/intake.py",
+    "sha256": "5e121c8bb1ddd8714252b2f2069013d8479aa915a8dc9cb210f2df3536c3008e"
+  },
+  {
+    "path": "tools/saipen_engine/operations.py",
+    "sha256": "4140a0e5d741d12fb5343c4b5fddfc7bc47810b9b6949723131f9ed2c793fb6d"
+  },
+  {
+    "path": "tools/saipen_engine/release.py",
+    "sha256": "794f9f32f299679335eabcf21fdd258482f3a69d1cf92d5a99e362725ab27b6b"
+  },
+  {
+    "path": "tools/saipen_engine/remediation.py",
+    "sha256": "be921d2114b3b5d121f272fbd23a064215a28c84072163d20d69afb380dfbd4f"
+  },
+  {
+    "path": "tools/saipen_engine/result.py",
+    "sha256": "4f6570531b2a1911a2be3c7c8eec10979ebcb3997cc39fe6c652ea4465a500c2"
+  },
+  {
+    "path": "tools/test_remediation_self_consistency.py",
+    "sha256": "5e3f276e3d671821503e1e7e71b36d15a97ec6218fe92e6297e4b7c1ac6f8eab"
+  },
+  {
+    "path": "tools/test_refusal_registry.py",
+    "sha256": "9e81d4a0276db40ff1a760ecb498da2c853bb24bd2b121e7de038bae004aadfe"
+  },
+  {
+    "path": "tools/test_source_multiwork.py",
+    "sha256": "a6cb9524c3d10628f7ba9096927aa18da337e0601d60c846f6adae235e51d069"
+  },
+  {
+    "path": "tools/test_source_quarantine_route.py",
+    "sha256": "53070f198e1ffe6715ea04c5202cd448f915bab5b45c76073170ccfa3f97a734"
+  }
+]

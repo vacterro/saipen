@@ -68,175 +68,119 @@ feature; once triggered this is a discipline requirement, not optional.
 ### 2.4 Goal-Driven Execution (Default)
 <!-- RULE-OWNER: GOAL-01 -->
 
-Goal-driven execution is the DEFAULT behavior for any actionable user objective
-(CORE.md § 1.12). `saipen goal <text>` (and `/goal`) is an explicit alias that
-sets a new high-level objective, supersedes whatever was queued, and runs it to
-completion with minimal interruption through the Maintenance layer, not just
-the current ticket wave. It is run-scoped, not session-scoped: the persisted
-counters carry a run across a crash or a fresh session, and only this section's
-Exit conditions end it.
+Goal-driven execution is the DEFAULT for any actionable user objective
+(CORE.md § 1.12). `saipen goal <text>` (and `/goal`) explicitly sets a new
+objective, supersedes the queue and runs it to completion through the
+Maintenance layer, not just the current ticket wave. It is run-scoped: the
+persisted counters carry a run across a crash or a fresh session, and only
+this section's Exit ends it.
 
-**Entry (the pivot).** An actionable natural-language request, or explicit
-`saipen goal <text>`, sets a new objective. A `DOING` ticket in flight is
-checkpointed cleanly and left `TODO` with a `DEC` line naming the pivot, never
-abandoned mid-edit. Existing `TODO` tickets are demoted below the new
-objective's tickets, never deleted (board order = priority = law, CORE.md
-§ 1.6). `PLAN` runs for the new objective and inserts its tickets at the top.
-Set `execution_intent: goal`, `goal_waves: 0`, `goal_tickets: 0`, then enter
-`SCOUT` for the first new ticket without pausing.
+**Entry (the pivot).** An actionable request or `saipen goal <text>` sets a new
+objective. A `DOING` ticket in flight is checkpointed and left `TODO` with a
+`DEC` naming the pivot, never abandoned mid-edit. Existing `TODO` tickets are
+demoted below the new objective's, never deleted (board order = priority =
+law, CORE.md § 1.6). `PLAN` inserts the new tickets at the top. Set
+`execution_intent: goal`, `goal_waves: 0`, `goal_tickets: 0`, then enter
+`SCOUT` without pausing. **The Entry `PLAN` is wave 1, not wave 0**: on its
+completion write `DEC: goal_waves 0->1` and checkpoint before `SCOUT`.
 
-**The Entry `PLAN` is wave 1, not wave 0.** It is a `PLAN` for a genuinely new
-wave, which is what the counter counts: on its completion write
-`DEC: goal_waves 0->1` and checkpoint before entering `SCOUT`. Reading the `0`
-initialization as the first wave's final value spends a third of the wave
-budget invisibly and counts three waves as two.
+**Target-free continuation is not Entry (SRC-143).** Defect class: a
+continuation minted as an independent preempting ticket whose VERIFY depends on
+the unfinished bytes of the Work it parked. With active Work and
+`execution_intent: goal`, "continue / keep improving / go further" without a
+concrete independent target continues that Work at its current phase and
+budget; create no `user_explicit` Work or pause dependency for it. A new
+concrete target remains explicit intake even when prefixed by "continue". If
+already misprojected, use OPS HANDBACK to restore the parked phase without
+closing either Work, preserve implementation and evidence, queue its
+coherent-tree verification and record the corrected interpretation. No
+admission failure becomes baseline debt or proof of the unrelated repair.
 
-**Entry versus resume.** Bare `cc` / `saipen continue` / "continue" resuming a
-paused run proceeds immediately to the next workable ticket via `SCOUT`,
-without re-planning or demoting anything. **A bare invocation standing in the
-same message immediately after a plan command is not that case**: CORE.md
-§ 1.10's pair carve-out makes it an Entry, with `execution_intent: goal` and
-both counters at `0`, because the plan just written IS the stated objective.
-That `PLAN` is the run's wave 1 and carries the same `DEC: goal_waves 0->1`
-line -- counted once, at the plan, never again at the goal command.
+**Entry versus resume.** Bare `cc` / `saipen continue` resuming a paused run
+proceeds to the next workable ticket via `SCOUT`, without re-planning or
+demoting. A bare invocation in the same message right after a plan command is
+an Entry (CORE.md § 1.10 pair carve-out): `execution_intent: goal`, both
+counters `0`, and that `PLAN` is wave 1 with one `DEC: goal_waves 0->1`.
 
-**Whether a resume also resets the counters depends on the valve, not on the
-command.** The resume command resets `goal_waves: 0`, `goal_tickets: 0` only
-when they are at or over this section's caps -- the tripped condition the
-resume exists to clear. With the valve untripped there is nothing to
-re-authorize: the counters carry over exactly as `saipen continue` would leave
-them and no re-authorization line is written. **A reset that does happen MUST
-leave its own countable line** -- this exact text after the taxonomy, with the
-real pre-reset counts substituted:
-`DEC: goal reauthorized -- goal_waves N->0, goal_tickets M->0`.
-Without it the drop is invisible: the bumps it cancels remain in LOG, so
-CORE.md § 1.5's rebuild counts a budget the human already
-re-authorized away and re-trips the valve, while this section forbids tidying
-the counters back down.
+**A resume resets the counters only when the valve tripped** (at or over the
+caps). Untripped counters carry over and no re-authorization line is written.
+A reset MUST leave exactly
+`DEC: goal reauthorized -- goal_waves N->0, goal_tickets M->0`
+with the real pre-reset counts; otherwise CORE.md § 1.5's rebuild re-counts
+the cancelled bumps and re-trips the valve.
 
-**A resume landing on no workable ticket** is not a dead end and asks the user
-nothing: fall through to § 2.1 under the still-set goal intent -- `HUNT`, then
-`ADD` if clean. It is the same situation as a wave finishing on an empty board.
+**A resume landing on no workable ticket** asks nothing: it falls through to
+§ 2.1 under the still-set goal intent (`HUNT`, then `ADD` if clean).
 
 **Continuation.** While `execution_intent: goal`, advance
-`SCOUT → BUILD → VERIFY → REVIEW → SHIP → DONE` across successive tickets
-without stopping between them, subject to the caps below. `DONE` MUST
-transition to `SCOUT` for the next ticket, or re-run `PLAN` automatically for
-the next wave if the board defines one.
+`SCOUT → BUILD → VERIFY → REVIEW → SHIP → DONE` across tickets without
+stopping, subject to the caps. `DONE` MUST transition to `SCOUT` for the next
+ticket, or re-run `PLAN` for the next wave the board defines.
 
-**Board-empty is not exit.** When `BOARD.md` empties, the agent MUST NOT stop
-or wait for a human -- it falls straight through into § 2.1 exactly as under
-bare `saipen`: `HUNT`, then `ADD` if clean, then `HUNT` again, indefinitely.
-The goal intent remains set across the whole loop; a clean `HUNT` or one
-completed `ADD` ticket is a *waypoint*, never a stopping point.
+**Board-empty is not exit.** An empty `BOARD.md` MUST NOT stop the run or wait
+for a human: fall through to § 2.1 (`HUNT`, then `ADD` if clean, then `HUNT`,
+indefinitely). A clean `HUNT` or a completed `ADD` ticket is a waypoint.
 
-**SHIP exception.** The `saipen ship` gate is satisfied by an active
-`execution_intent: goal` for subsequent ships to an existing `origin`; the
-agent MUST auto-push without re-confirming per ship. **First publish of a
-brand-new repository still MUST confirm name and public/private with the
-user** -- a new public artifact is a one-way door goal-driven execution does
-not waive. Brand-new means no `origin` yet, OR an `origin` that exists but has
-never actually received a commit or tag (`phases/ship.md` § 7).
+**SHIP exception.** An active `execution_intent: goal` satisfies the `saipen
+ship` gate for later ships to an existing `origin`; the agent MUST auto-push
+without per-ship confirmation. **First publish of a brand-new repository still
+MUST confirm name and public/private with the user.** Brand-new means no
+`origin`, or an `origin` that never received a commit or tag
+(`phases/ship.md` § 7).
 
-**Counters MUST persist, not just live in context** -- a long run spans
-crashes, restarts and other agents, so an in-context count is lost on exactly
-the runs the valve protects. `STATE.md` MUST carry:
+**Counters MUST persist in `STATE.md`**, never only in context:
 
-- `goal_waves` -- +1 each time `PLAN` runs for a genuinely new wave, and +1
-  each time a `HUNT`→`ADD` cycle completes. "Completes" is the moment ADD's own
-  § 2.2 evaluation reaches a `RETURN`, whether that tickets-and-claims a
-  `BUILD`, tickets a `PLAN_or_SCOUT`, or concludes `DONE` outright -- counted
-  there, never deferred until the ticket ADD just created finishes its own
-  `BUILD → VERIFY → REVIEW → SHIP` run, which `goal_tickets` tracks separately.
-  A `PLAN` entered directly from ADD's `RETURN PLAN` is NOT a new wave: that
-  cycle was already counted at ADD's RETURN, so `phases/plan.md` skips the
-  increment in exactly that case. Without the carve-out one `HUNT`→`ADD`→`PLAN`
-  chain counts one wave twice and trips the valve early.
+- `goal_waves` -- +1 per `PLAN` for a genuinely new wave and +1 per completed
+  `HUNT`→`ADD` cycle, counted when ADD's § 2.2 evaluation reaches a `RETURN`,
+  never deferred to the created ticket's run (`goal_tickets` tracks that). A
+  `PLAN` entered from ADD's `RETURN PLAN` is not a new wave (`phases/plan.md`
+  skips it), so one `HUNT`→`ADD`→`PLAN` chain counts once.
 - `goal_tickets` -- +1 each time a ticket passes `VERIFY`.
 
-Both are bumped and checkpointed (CORE.md § 1.5) at the moment they change, so
-a resuming agent reads the true count from `STATE.md` rather than re-deriving
-it from `LOG.md` scrollback. **Each bump MUST also leave an identifiable LOG
-line** -- `DEC: goal_waves N->M` or `DEC: goal_tickets N->M`, this exact text
-after the taxonomy -- because CORE.md § 1.5's Recovery rebuilds these counters
-by counting wave/ticket-completion events since the pivot line, which is only
-executable if those events are distinguishable rather than inferred from prose.
+Each bump is checkpointed (CORE.md § 1.5) when it happens and leaves the exact
+LOG line `DEC: goal_waves N->M` or `DEC: goal_tickets N->M`; Recovery rebuilds
+the counters from those lines, never from prose.
 
 **Safety valve.** One `saipen goal` invocation MUST NOT process more than
-3 waves (`goal_waves`, planned tickets and HUNT/ADD cycles counted together) or
-20 tickets (`goal_tickets` counts VERIFY-passes, so a ticket that bounces
-`REVIEW` -> `BUILD` -> `VERIFY` and re-passes consumes budget more than once --
-deliberate and conservative: the valve trips slightly early, never late),
-whichever comes first. On hitting the ceiling the agent MUST stop, write a full
-BOARD/STATE checkpoint, and report progress; the user re-invokes `cc` to
-re-authorize and continue.
+3 waves or 20 tickets, whichever comes first (`goal_tickets` counts
+VERIFY-passes, so a re-passing ticket counts again: the valve trips early,
+never late). At the ceiling the agent MUST stop, write a full BOARD/STATE
+checkpoint and report progress; the user re-invokes `cc` to re-authorize. A
+tripped valve is a pause, NOT an exit: the goal intent stays set, because
+CORE.md § 1.10 recognizes the resume only while `execution_intent: goal`.
 
-**A tripped valve is a pause awaiting re-authorization, NOT an exit, and the
-goal intent stays set through it** (see Exit below, which deliberately does not
-list the valve). The alternative deadlocks: CORE.md § 1.10 recognizes the goal
-resume ONLY while `execution_intent: goal`, so clearing the intent here would
-make the very command this line tells the user to run illegal in exactly the
-state it just created, leaving only `saipen goal <text>` -- a substitution, not
-a continuation.
+**The tripped state has one exact shape:**
 
-**The tripped state has one exact shape, and every field of it is
-load-bearing.** On tripping, checkpoint (CORE.md § 1.5) with:
-
-- `execution_intent: goal` -- unchanged; the valve is a pause, not an exit.
-- `goal_waves` / `goal_tickets` -- unchanged, left at or over the cap. These
-  ARE the tripped condition; "tidying" them lets a restart walk straight past
-  the valve.
-- `next_action` -- the CORE.md § 1.2 safety-valve wording, verbatim, with the
-  real counts substituted:
+- `execution_intent: goal` -- unchanged.
+- `goal_waves` / `goal_tickets` -- unchanged, at or over the cap; they ARE the
+  tripped condition.
+- `next_action` -- CORE.md § 1.2's wording with the real counts:
   `WAIT: safety valve reached (N waves / M tickets) -- run 'cc' to continue`.
-  **The resume key is uniform**: `cc` reauthorizes a
-  tripped valve and resumes the run for BOTH `execution_intent: goal` and
-  `execution_intent: converge`. `saipen goal` is never a resume key -- it is
-  the create/pivot command, so a pause naming it would substitute the objective
-  instead of continuing it.
-- `phase` -- **left exactly as it is. Do NOT set `phase: BLOCKED`.** This is
-  the one field an agent is most tempted to "fix" here, and setting it is a
-  self-inflicted deadlock: § 2.4's Exit list makes `STATE.phase: BLOCKED` an
-  exit condition, so writing it clears the goal intent and makes the resume the
-  `WAIT:` line prescribes illegal under CORE.md § 1.10 -- the valve destroying
-  its own continuation path.
-- `blocker` -- the tripped valve is not a session-level block, so
-  `blocker: none` stays correct. A budget pause and a blocked project are
-  different states and `saipen status` reports them differently.
+  `cc` is the uniform resume key for `execution_intent: goal` and `converge`;
+  `saipen goal` is never a resume key (it would substitute the objective).
+- `phase` -- **left exactly as it is. Do NOT set `phase: BLOCKED`**: that is an
+  Exit condition and makes the prescribed resume illegal.
+- `blocker: none` -- a budget pause is not a session-level block.
 
-**The counters are what stops a restart, not the phase.**
-`execution_intent: goal` with `goal_waves >= 3` or `goal_tickets >= 20` *is*
-the tripped condition -- no new field. An agent resuming into that state MUST
-NOT continue the run: it re-states the stop with `next_action` in CORE.md
-§ 1.2's safety-valve `WAIT:` form, and waits. `cc` is the human's
-re-authorization: it resets both counters to `0` (via `reauthorize_valve`, only
-when the valve has tripped), which clears the tripped condition and grants the
-next budget. Counters at or over the cap are load-bearing, not historical --
-never "tidy them up" without an actual re-authorization.
+An agent resuming with `goal_waves >= 3` or `goal_tickets >= 20` MUST NOT
+continue: it restates the `WAIT:` and waits. `cc` resets both counters to `0`
+(`reauthorize_valve`, only when tripped). Never tidy the counters without an
+actual re-authorization.
 
-**Unchanged under Goal-Driven Execution.** All existing caps still apply
-verbatim (3 dead hypotheses / 2 fix cycles per ticket in VERIFY; 2 review
-passes per finding in REVIEW). Goal-driven execution MUST NOT skip `VERIFY` or
-`REVIEW` -- autonomy applies to *continuation between steps*, never to the
-correctness gates themselves. Destructive ops outside the ship/publish path
-still require explicit confirmation unless the ticket itself pre-authorizes
-them.
+**Unchanged under Goal-Driven Execution.** All caps still apply (3 dead
+hypotheses / 2 fix cycles per ticket in VERIFY; 2 review passes per finding in
+REVIEW). Goal execution MUST NOT skip `VERIFY` or `REVIEW`: autonomy covers
+continuation between steps, never the correctness gates. Destructive ops
+outside the ship/publish path still require explicit confirmation unless the
+ticket pre-authorizes them.
 
-**Exit.** The goal intent MUST be cleared in `STATE.md` (back to
-`execution_intent: normal`) ONLY when `ADD` itself gracefully concludes because
-the product is mature and logically complete (`phases/add.md`), or the agent
-reaches `STATE.phase: BLOCKED` (not just a single ticket moving to
-`## BLOCKED`). **A tripped safety valve is NOT on this list** -- it is a budget
-pause, the same shape as `saipen stop`, which is likewise not on this list; the
-two real exits are the objective ending, which a valve trip is not. What stops
-a restart from silently continuing is the counters, not the flag. A momentarily
-empty `BOARD.md` is never, by itself, an exit condition. On exit,
-`goal_waves`/`goal_tickets` MUST be cleared -- they describe the run that just
-ended, not a running lifetime total.
+**Exit.** Clear the goal intent (`execution_intent: normal`) ONLY when `ADD`
+concludes the product is mature and logically complete (`phases/add.md`), or
+`STATE.phase: BLOCKED` is reached (not a single ticket in `## BLOCKED`). A
+tripped valve and `saipen stop` are budget pauses, not exits; an empty
+`BOARD.md` is never an exit by itself. On exit, clear
+`goal_waves`/`goal_tickets`.
 
-**Final report.** Tickets done/verified/shipped, any blocked, next action --
-distinguishing tickets that came from the user's original ask from ones picked
-up along the way (pre-existing backlog demoted below it, or `HUNT`/`ADD`
-findings), so the user can tell what actually happened without re-deriving it
-from `LOG.md`. Board order at Entry already carries that distinction; no new
-persisted field is needed, it only has to reach the report.
+**Final report.** Tickets done/verified/shipped, blocked ones and the next
+action, separating the user's original ask from work picked up along the way
+(demoted backlog, `HUNT`/`ADD` findings); board order at Entry carries that.

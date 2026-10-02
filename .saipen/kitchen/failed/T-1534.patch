@@ -1,0 +1,170 @@
+diff --git a/tools/saipen_engine/operations.py b/tools/saipen_engine/operations.py
+index 95d6819b..ed7a4524 100644
+--- a/tools/saipen_engine/operations.py
++++ b/tools/saipen_engine/operations.py
+@@ -1672,6 +1672,29 @@ def _plan_attempt(
+         text = f"attempt {new_id} open"
+         if latest is not None:
+             text += f"; supersedes {latest['id']}"
++        # T-1527: an attempt is the unit a benchmark scores, so the executor
++        # seat and the host-attested provider/model/effort must be captured
++        # WHEN the episode opens, sealed into the LOG event (the same token
++        # attempt.parse re-reads) and returned to the caller. A missing or
++        # invalid host context is not an error: it is recorded as explicitly
++        # unavailable with its reason code, never silently absent.
++        from .runtime.provenance import (
++            RuntimeProvenanceError,
++            capture_runtime_provenance,
++            parse_runtime_provenance,
++            seal_runtime_provenance,
++        )
++
++        try:
++            captured = capture_runtime_provenance(agent)
++            provenance_token = seal_runtime_provenance(captured)
++            # Answer with the ROUND-TRIPPED record, not the captured one: the
++            # digest is attached at parse time, so the replayed LOG record and
++            # this result must be the same dict rather than two shapes of it.
++            provenance = parse_runtime_provenance(provenance_token)
++        except RuntimeProvenanceError as exc:
++            return _refuse("VALIDATION_FAILED", f"runtime provenance: {exc}")
++        text += f"; provenance {provenance_token}"
+         event, line = _event_line(docs, log_tail, "DEC", task, agent, text, now, op_id)
+         new_log = docs["log"].text_norm.rstrip("\n") + "\n" + line + "\n"
+         owned = {"attempt": new_id, "last_event": event, "updated": utc, "agent": agent}
+@@ -1711,6 +1734,7 @@ def _plan_attempt(
+                 "ticket": task,
+                 "supersedes": latest["id"] if latest is not None else None,
+                 "event_id": f"E-{event}",
++                "runtime_provenance": provenance,
+             },
+             op_id=op_id,
+         )
+@@ -2592,7 +2616,15 @@ def _plan_handback(
+             ticket=parked_id,
+         )
+     holder = tickets.get(holder_id)
+-    if (
++    # T-1533: a holder that reached a TERMINAL section can never again be this
++    # seat's active DOING ticket, so the original precondition made the
++    # reservation permanently un-releasable: the parked Work was stranded under
++    # ## BLOCKED with no lawful command able to lift it (unblock refused here,
++    # claim refused the blocker, block refuses a BLOCKED ticket). A terminal
++    # holder is therefore a RELEASE condition, not a refusal. The live-DOING arm
++    # is unchanged, and the actor still only ever hands over the seat it holds.
++    holder_terminal = holder is not None and holder.get("section") in ("## DONE", "## BLOCKED")
++    if not holder_terminal and (
+         holder is None
+         or holder.get("section") != "## DOING"
+         or state.get("task") != holder_id
+@@ -2602,8 +2634,8 @@ def _plan_handback(
+         return _refuse(
+             "CONTINUATION_RESERVED",
+             f"{parked_id} is parked on {holder_id} and resumes when {holder_id} closes; "
+-            f"unblock hands the seat back only while {holder_id} is this seat's "
+-            "active DOING ticket",
++            f"unblock hands the seat back while {holder_id} holds this seat, or once "
++            f"{holder_id} is terminal (## DONE or ## BLOCKED)",
+             ticket=parked_id,
+         )
+     saved_owner = str(fields.get("owner") or "").strip()
+@@ -2635,14 +2667,22 @@ def _plan_handback(
+             ticket=parked_id,
+         )
+ 
++    holder_section = str((holder or {}).get("section") or "")
+     event, holder_line = _event_line(
+         docs,
+         log_tail,
+         "DEC",
+         holder_id,
+         agent,
+-        f"ticket checkpointed to TODO via SAIOPS -- handback: {holder_id} returns the seat "
+-        f"to {parked_id}, which was parked on it",
++        (
++            f"ticket checkpointed to TODO via SAIOPS -- handback: {holder_id} returns the seat "
++            f"to {parked_id}, which was parked on it"
++        )
++        if not holder_terminal
++        else (
++            f"handback: {holder_id} is {holder_section} (terminal) and no longer holds the "
++            f"seat; the seat returns to {parked_id}, which was parked on it"
++        ),
+         now,
+         op_id,
+         root=root,
+@@ -2665,16 +2705,17 @@ def _plan_handback(
+     binding = host_session_binding(root)
+ 
+     def _propose(board_text: str) -> str:
+-        board_text = _move_ticket(
+-            board_text, holder_id, "## TODO", "[ ]", "demote", "", enforce_cap=False
+-        )
+-        board_text = _ticket_fields_in_place(
+-            board_text,
+-            holder_id,
+-            {},
+-            remove=("owner", "claim_time", "claim_session", "claim_run", "claim_generation"),
+-            enforce_cap=False,
+-        )
++        if not holder_terminal:
++            board_text = _move_ticket(
++                board_text, holder_id, "## TODO", "[ ]", "demote", "", enforce_cap=False
++            )
++            board_text = _ticket_fields_in_place(
++                board_text,
++                holder_id,
++                {},
++                remove=("owner", "claim_time", "claim_session", "claim_run", "claim_generation"),
++                enforce_cap=False,
++            )
+         board_text = _move_ticket(
+             board_text, parked_id, "## DOING", "[/]", "resume", "", enforce_cap=False
+         )
+@@ -9111,21 +9152,41 @@ def reauthorize_valve(project_root: Path | str, agent: str, dry_run: bool = Fals
+         )
+ 
+     def mutate(text: str, event: int) -> str:
+-        return patch_state(
++        # The persisted safety-valve WAIT describes the pre-reset
++        # authorization state. Keeping it after reauthorization would make
++        # route_next bind the stale brake and deadlock the command that just
++        # cleared the valve -- but replacing it with a LITERAL "saipen
++        # continue" discards a valid pick just as surely (CORE-003): a live
++        # DOING ticket and an active audit layer each own the next action, and
++        # writing a generic carrier made the audit-route check red, so a legal
++        # cc left the repository red. The shared router owns this answer.
++        cleared = patch_state(
+             text,
+             {
+                 "goal_waves": 0,
+                 "goal_tickets": 0,
+-                # The persisted safety-valve WAIT describes the pre-reset
+-                # authorization state. Keeping it after reauthorization
+-                # would make route_next bind the stale brake and deadlock the
+-                # command that just cleared the valve.
+                 "next_action": "saipen continue",
+                 "last_event": event,
+                 "updated": utc,
+                 "agent": agent,
+             },
+         )
++        from .router import audit_inbox_projection as _audit_projection
++        from .router import route_next as _route_next
++
++        # The audit projection is the caller's job (route_next stays pure and
++        # never touches the filesystem); SOURCE-AUDIT-INBOX-01 ranks a fresh
++        # audit AFTER active continuation and BEFORE the ordinary board pick,
++        # which is exactly the ordering the valve resume has to preserve.
++        _routed = _route_next(
++            cleared,
++            _docs["board"].text_norm,
++            current_agent=agent,
++            audit_inbox=_audit_projection(root),
++        )
++        if _routed.get("ok") and _routed.get("action"):
++            cleared = patch_state(cleared, {"next_action": _routed["action"]})
++        return cleared
+ 
+     plan = _state_only_plan(
+         root,

@@ -1,0 +1,35 @@
+test_every_crash_prefix_is_deterministically_recoverable (test_t1572_ticket_scoped_recovery.GapCrashPrefixTests.test_every_crash_prefix_is_deterministically_recoverable) ... ok
+test_approval_refuses_changed_board_bytes_before_writing (test_t1572_ticket_scoped_recovery.GapRecoveryRouteTests.test_approval_refuses_changed_board_bytes_before_writing) ... ok
+test_matrix_CKL_the_route_converges_and_replay_is_refused (test_t1572_ticket_scoped_recovery.GapRecoveryRouteTests.test_matrix_CKL_the_route_converges_and_replay_is_refused) ... ok
+test_matrix_C_recover_names_one_approval_route_from_every_verb (test_t1572_ticket_scoped_recovery.GapRecoveryRouteTests.test_matrix_C_recover_names_one_approval_route_from_every_verb) ... ok
+test_matrix_J_resolve_next_action_cannot_mask_the_gap (test_t1572_ticket_scoped_recovery.GapRecoveryRouteTests.test_matrix_J_resolve_next_action_cannot_mask_the_gap)
+A legacy next_action must not become the advertised exit. ... ok
+test_no_history_is_fabricated_by_the_recovery (test_t1572_ticket_scoped_recovery.GapRecoveryRouteTests.test_no_history_is_fabricated_by_the_recovery)
+Acceptance 4: the LOG gains the DEC, nothing else. ... ok
+test_the_original_state_and_board_bytes_survive_as_evidence (test_t1572_ticket_scoped_recovery.GapRecoveryRouteTests.test_the_original_state_and_board_bytes_survive_as_evidence)
+Acceptance 6: the replaced bytes are preserved, both surfaces. ... ok
+test_a_finish_event_for_the_ticket_closes_the_gap_class (test_t1572_ticket_scoped_recovery.TicketScopeBindingTests.test_a_finish_event_for_the_ticket_closes_the_gap_class)
+A ticket whose finish event EXISTS is not a journal gap. ... ok
+test_a_ticket_bound_state_with_no_tagged_history_refuses (test_t1572_ticket_scoped_recovery.TicketScopeBindingTests.test_a_ticket_bound_state_with_no_tagged_history_refuses)
+No fabrication: a task whose own events prove nothing blocks. ... ok
+test_foreign_predecessor_cannot_supply_source_phase (test_t1572_ticket_scoped_recovery.TicketScopeBindingTests.test_foreign_predecessor_cannot_supply_source_phase) ... ok
+test_matrix_A_unrelated_ticket_never_supplies_phase_evidence (test_t1572_ticket_scoped_recovery.TicketScopeBindingTests.test_matrix_A_unrelated_ticket_never_supplies_phase_evidence)
+THE hostile carrier (report S10): pre-fix this is RED. ... ok
+test_matrix_G_a_legal_ship_done_pair_is_never_touched (test_t1572_ticket_scoped_recovery.TicketScopeBindingTests.test_matrix_G_a_legal_ship_done_pair_is_never_touched)
+T-260's own terminal state is not this defect class. ... ok
+test_matrix_H_the_unscoped_t1318_repair_still_works (test_t1572_ticket_scoped_recovery.TicketScopeBindingTests.test_matrix_H_the_unscoped_t1318_repair_still_works)
+A taskless STATE keeps the T-1318 global-chain derivation. ... ok
+test_reclaim_does_not_reuse_the_previous_lifecycle (test_t1572_ticket_scoped_recovery.TicketScopeBindingTests.test_reclaim_does_not_reuse_the_previous_lifecycle) ... ok
+test_the_binding_is_exactly_the_tagged_events (test_t1572_ticket_scoped_recovery.TicketScopeBindingTests.test_the_binding_is_exactly_the_tagged_events)
+Matrix B / report S1: one definition, tested as its own contract. ... ok
+test_the_gap_owns_next_action_with_the_canonical_projection (test_t1572_ticket_scoped_recovery.TicketScopeBindingTests.test_the_gap_owns_next_action_with_the_canonical_projection) ... ok
+test_completion_reports_unpersisted_history_without_touching_git (test_t1574_followups.ImproveFollowupTests.test_completion_reports_unpersisted_history_without_touching_git) ... ok
+test_disposed_stale_seats_get_an_executable_lossless_route (test_t1574_followups.ImproveFollowupTests.test_disposed_stale_seats_get_an_executable_lossless_route) ... ok
+test_real_producer_rejects_exit_status_as_defect_predicate (test_t1574_followups.ReproductionTests.test_real_producer_rejects_exit_status_as_defect_predicate) ... ok
+test_real_path_probe_distinguishes_guard_and_broken_harness (test_t1574_followups.ReproductionTests.test_real_path_probe_distinguishes_guard_and_broken_harness) ... ok
+test_existing_policy_consumer_defaults_to_silent (test_t1574_followups.SilentExecutionTests.test_existing_policy_consumer_defaults_to_silent) ... ok
+
+----------------------------------------------------------------------
+Ran 21 tests in 42.124s
+
+OK

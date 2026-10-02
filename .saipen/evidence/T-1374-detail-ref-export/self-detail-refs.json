@@ -1,0 +1,12 @@
+{
+ "detail_ref_pointers": 192,
+ "exportable": 192,
+ "exist": 192,
+ "dangling": [],
+ "log_detail_declared": true,
+ "surfaces": [
+  "evidence",
+  "recovery/log-detail",
+  "recovery/board-compaction"
+ ]
+}

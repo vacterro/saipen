@@ -1,0 +1,22 @@
+Index: CHANGELOG.md
+===================================================================
+--- CHANGELOG.md	before
++++ CHANGELOG.md	after
+@@ -1,6 +1,17 @@
+ # Changelog
+ > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
+ 
++## 8.1.0 -- 2026-09-08 -- Workable Scheduling and Evidence-Based Closure (T-1302)
++
++A real production failure exposed a core orchestration flaw: a ticket at REVIEW/SHIP whose implementation already existed in a shared dirty worktree could not isolate an exact per-ticket diff, the ticket blocked, the scheduler then selected an unworkable release whose gates were blocked, and the loop stopped -- while a fresh explicit user request sat unpersisted. The dirty-tree safety rules are unchanged; the orchestration model around them changed.
++
++- Explicit user intents persist before active-ticket completion: new `saipen user-request` command (and `ticket add --user`) writes the intake receipt + a `user_explicit: true` BOARD ticket immediately, and the scheduler routes new explicit workable requests ahead of planned/improve work.
++- Blocked tickets no longer halt independent work: `## BLOCKED` tickets carry `blocker_scope: ticket|goal`; only goal scope stops the loop. The router re-picks after every block/unblock/finish and emits `stop_reason: GOAL_BLOCKED` only when no workable ticket remains (persisted in STATE).
++- `next_action` is dependency/workability aware: a release ticket whose required tickets are blocked is never selected while an independent workable ticket exists; the validator fails unworkable picks, blocked phases with workable tickets, and GOAL_BLOCKED stop reasons that are false.
++- Verification-only / inherited / cohort closure: `ticket done --closure-mode inherited_verified|cohort [--closure-cohort C-###]` closes a ticket without an artificial per-ticket commit when BUILD produced no diff (`implementation_delta: none`), and COHORT closure defers publication to a C-### cohort of overlapping files. Ticket SHIP is separated from Git/release publication.
++- Validator + audit surface: two new hard fail sites (false global block, inherited closure without verification evidence) with red controls (324 -> 326), a cohort-dangling WARN slug, and board.schema.json accepts the new optional fields while old projects load unchanged.
++- Verification: focused orchestration-repair suite + existing core suites green, validator 0 FAIL on the live repository, ruff clean.
++
+ ## 8.0.0 -- 2026-09-06 -- Distinct STOP Shortcut (T-1297, SRC-024)
+ 
+ STOP shortcut changes from `ss` to `st` because repeated-letter `ss`/`sss` caused STOP/STATUS ambiguity for agents. `sss` remains STATUS; old `ss` is retired fail-closed and performs no action. Long-form commands are unchanged.

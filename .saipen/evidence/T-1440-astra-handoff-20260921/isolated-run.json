@@ -1,0 +1,23 @@
+{
+  "source_root": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+  "materialized_root": "V:\\_TEMP_\\saipen-t1439-verified-fro6kgh0",
+  "command": [
+    "C:\\Users\\vac34\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+    "-B",
+    "-m",
+    "unittest",
+    "-v",
+    "tools.test_conformance_repair_boundary",
+    "tools.test_t1412_conformance_truth",
+    "tools.test_src085_conformance_disposition",
+    "tools.test_validator_findings",
+    "tools.test_remediation_self_consistency",
+    "tools.test_continue_chain",
+    "tools.test_source_quarantine_route",
+    "tools.test_source_multiwork",
+    "tools.test_debt_gate",
+    "tools.test_protocol_registry"
+  ],
+  "materialization": "current runtime manifest plus repository test resources; git fixture; no source substitutions",
+  "removed_environment_names": []
+}

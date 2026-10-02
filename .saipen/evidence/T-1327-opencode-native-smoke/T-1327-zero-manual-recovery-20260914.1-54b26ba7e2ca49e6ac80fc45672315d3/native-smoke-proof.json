@@ -1,0 +1,94 @@
+{
+ "passed_methods": [
+  1
+ ],
+ "install_rc": 0,
+ "generation": null,
+ "case_outcomes": [
+  {
+   "id": "read",
+   "outcome": "allowed",
+   "message": ""
+  },
+  {
+   "id": "admitted_write",
+   "outcome": "blocked",
+   "message": "SAIPEN_FLEET_REFUSAL: GUARD_OUTPUT_INVALID: the host tool did not execute (FLEET_INTERNAL_ERROR: RegistryError: cannot load V:\\_TEMP_\\saipen-evidence-opencode-native-smoke-7lzzadgl"
+  },
+  {
+   "id": "question",
+   "outcome": "allowed",
+   "message": ""
+  },
+  {
+   "id": "ordinary_shell",
+   "outcome": "blocked",
+   "message": "SAIPEN_FLEET_REFUSAL: GUARD_OUTPUT_INVALID: the host tool did not execute (FLEET_INTERNAL_ERROR: RegistryError: cannot load V:\\_TEMP_\\saipen-evidence-opencode-native-smoke-7lzzadgl"
+  },
+  {
+   "id": "source_shell",
+   "outcome": "blocked",
+   "message": "SAIPEN_FLEET_REFUSAL: GUARD_OUTPUT_INVALID: the host tool did not execute (FLEET_INTERNAL_ERROR: RegistryError: cannot load V:\\_TEMP_\\saipen-evidence-opencode-native-smoke-7lzzadgl"
+  },
+  {
+   "id": "protected_shell_state",
+   "outcome": "blocked",
+   "message": "SAIPEN_FLEET_REFUSAL: GUARD_OUTPUT_INVALID: the host tool did not execute (FLEET_INTERNAL_ERROR: RegistryError: cannot load V:\\_TEMP_\\saipen-evidence-opencode-native-smoke-7lzzadgl"
+  },
+  {
+   "id": "protected_shell_board",
+   "outcome": "blocked",
+   "message": "SAIPEN_FLEET_REFUSAL: GUARD_OUTPUT_INVALID: the host tool did not execute (FLEET_INTERNAL_ERROR: RegistryError: cannot load V:\\_TEMP_\\saipen-evidence-opencode-native-smoke-7lzzadgl"
+  },
+  {
+   "id": "protected_shell_windows",
+   "outcome": "blocked",
+   "message": "SAIPEN_FLEET_REFUSAL: GUARD_OUTPUT_INVALID: the host tool did not execute (FLEET_INTERNAL_ERROR: RegistryError: cannot load V:\\_TEMP_\\saipen-evidence-opencode-native-smoke-7lzzadgl"
+  },
+  {
+   "id": "protected_shell_traversal",
+   "outcome": "blocked",
+   "message": "SAIPEN_FLEET_REFUSAL: GUARD_OUTPUT_INVALID: the host tool did not execute (FLEET_INTERNAL_ERROR: RegistryError: cannot load V:\\_TEMP_\\saipen-evidence-opencode-native-smoke-7lzzadgl"
+  },
+  {
+   "id": "protected_write",
+   "outcome": "blocked",
+   "message": "SAIPEN_FLEET_REFUSAL: GUARD_OUTPUT_INVALID: the host tool did not execute (FLEET_INTERNAL_ERROR: RegistryError: cannot load V:\\_TEMP_\\saipen-evidence-opencode-native-smoke-7lzzadgl"
+  },
+  {
+   "id": "unknown_tool",
+   "outcome": "blocked",
+   "message": "SAIPEN_FLEET_REFUSAL: GUARD_OUTPUT_INVALID: the host tool did not execute (FLEET_INTERNAL_ERROR: RegistryError: cannot load V:\\_TEMP_\\saipen-evidence-opencode-native-smoke-7lzzadgl"
+  },
+  {
+   "id": "board_patch",
+   "outcome": "blocked",
+   "message": "SAIPEN_FLEET_REFUSAL: GUARD_OUTPUT_INVALID: the host tool did not execute (FLEET_INTERNAL_ERROR: RegistryError: cannot load V:\\_TEMP_\\saipen-evidence-opencode-native-smoke-7lzzadgl"
+  },
+  {
+   "id": "compound_recover",
+   "outcome": "blocked",
+   "message": "SAIPEN_FLEET_REFUSAL: GUARD_OUTPUT_INVALID: the host tool did not execute (FLEET_INTERNAL_ERROR: RegistryError: cannot load V:\\_TEMP_\\saipen-evidence-opencode-native-smoke-7lzzadgl"
+  },
+  {
+   "id": "exact_recover",
+   "outcome": "blocked",
+   "message": "SAIPEN_FLEET_REFUSAL: GUARD_OUTPUT_INVALID: the host tool did not execute (FLEET_INTERNAL_ERROR: RegistryError: cannot load V:\\_TEMP_\\saipen-evidence-opencode-native-smoke-7lzzadgl"
+  },
+  {
+   "id": "bare_canonical_actor",
+   "outcome": "blocked",
+   "message": "SAIPEN_FLEET_REFUSAL: GUARD_OUTPUT_INVALID: the host tool did not execute (FLEET_INTERNAL_ERROR: RegistryError: cannot load V:\\_TEMP_\\saipen-evidence-opencode-native-smoke-7lzzadgl"
+  },
+  {
+   "id": "wrong_actor",
+   "outcome": "blocked",
+   "message": "SAIPEN_FLEET_REFUSAL: GUARD_OUTPUT_INVALID: the host tool did not execute (FLEET_INTERNAL_ERROR: RegistryError: cannot load V:\\_TEMP_\\saipen-evidence-opencode-native-smoke-7lzzadgl"
+  },
+  {
+   "id": "explicit_owner",
+   "outcome": "blocked",
+   "message": "SAIPEN_FLEET_REFUSAL: GUARD_OUTPUT_INVALID: the host tool did not execute (FLEET_INTERNAL_ERROR: RegistryError: cannot load V:\\_TEMP_\\saipen-evidence-opencode-native-smoke-7lzzadgl"
+  }
+ ]
+}

@@ -1,0 +1,28 @@
+test_absent_lineage_falls_back_to_legacy_without_mutating (tools.test_conformance_lineage.ConformanceLineageTests.test_absent_lineage_falls_back_to_legacy_without_mutating) ... ok
+test_append_below_bound_hashes_no_sealed_receipt_bodies (tools.test_conformance_lineage.ConformanceLineageTests.test_append_below_bound_hashes_no_sealed_receipt_bodies)
+An append below the bound never re-hashes sealed receipt bodies: ... ok
+test_append_does_not_rehash_sealed_history (tools.test_conformance_lineage.ConformanceLineageTests.test_append_does_not_rehash_sealed_history) ... ok
+test_deep_validation_proves_complete_generation_authority (tools.test_conformance_lineage.ConformanceLineageTests.test_deep_validation_proves_complete_generation_authority)
+The deep path proves the COMPLETE sealed-generation authority: ... ok
+test_deleted_and_duplicated_and_reordered_history_goes_deep_red (tools.test_conformance_lineage.ConformanceLineageTests.test_deleted_and_duplicated_and_reordered_history_goes_deep_red) ... ok
+test_direct_caller_without_token_refuses_bounded_advance (tools.test_conformance_lineage.ConformanceLineageTests.test_direct_caller_without_token_refuses_bounded_advance)
+A direct caller lacking a trustworthy pre-append token never ... ok
+test_first_direct_caller_without_token_never_creates_lineage (tools.test_conformance_lineage.ConformanceLineageTests.test_first_direct_caller_without_token_never_creates_lineage) ... ok
+test_old_gate_latest_in_old_sealed_generation_is_authenticated_by_current_head (tools.test_conformance_lineage.ConformanceLineageTests.test_old_gate_latest_in_old_sealed_generation_is_authenticated_by_current_head)
+R011-B red control: gen-0000 + gen-0001 + active. The latest ... ok
+test_out_of_band_sibling_refuses_advance_and_never_becomes_indexed (tools.test_conformance_lineage.ConformanceLineageTests.test_out_of_band_sibling_refuses_advance_and_never_becomes_indexed) ... ok
+test_prior_token_mismatch_refuses_bounded_advance (tools.test_conformance_lineage.ConformanceLineageTests.test_prior_token_mismatch_refuses_bounded_advance)
+A pre-append token that disagrees with the head (crash between ... ok
+test_rebuild_is_idempotent_and_never_rewrites_receipt_bytes (tools.test_conformance_lineage.ConformanceLineageTests.test_rebuild_is_idempotent_and_never_rewrites_receipt_bytes) ... ok
+test_rebuild_latest_uses_completion_order_across_generations (tools.test_conformance_lineage.ConformanceLineageTests.test_rebuild_latest_uses_completion_order_across_generations) ... ok
+test_rebuild_then_bounded_latest_per_gate (tools.test_conformance_lineage.ConformanceLineageTests.test_rebuild_then_bounded_latest_per_gate) ... ok
+test_tampered_generation_manifest_refuses (tools.test_conformance_lineage.ConformanceLineageTests.test_tampered_generation_manifest_refuses) ... ok
+test_tampered_locator_refuses (tools.test_conformance_lineage.ConformanceLineageTests.test_tampered_locator_refuses) ... ok
+test_tampered_referenced_receipt_refuses_bounded_trust (tools.test_conformance_lineage.ConformanceLineageTests.test_tampered_referenced_receipt_refuses_bounded_trust) ... ok
+test_unrelated_sealed_tamper_leaves_latest_clean_and_deep_red (tools.test_conformance_lineage.ConformanceLineageTests.test_unrelated_sealed_tamper_leaves_latest_clean_and_deep_red) ... ok
+test_update_receipt_index_creates_and_advances_v2 (tools.test_conformance_lineage.ConformanceLineageTests.test_update_receipt_index_creates_and_advances_v2) ... ok
+
+----------------------------------------------------------------------
+Ran 18 tests in 32.068s
+
+OK

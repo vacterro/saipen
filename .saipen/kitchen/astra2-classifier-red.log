@@ -1,0 +1,13 @@
+F
+======================================================================
+FAIL: test_classifier_failure_never_publishes_partial_findings (tools.test_debt_gate.StrictGateInvariantTests.test_classifier_failure_never_publishes_partial_findings)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_debt_gate.py", line 639, in test_classifier_failure_never_publishes_partial_findings
+    self.assertFalse(out.exists(), "Incomplete findings must never become debt authority")
+AssertionError: True is not false : Incomplete findings must never become debt authority
+
+----------------------------------------------------------------------
+Ran 1 test in 0.574s
+
+FAILED (failures=1)

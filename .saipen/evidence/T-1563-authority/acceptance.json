@@ -1,0 +1,151 @@
+{
+  "ticket": "T-1563",
+  "phase": "BUILD",
+  "verify_entered": false,
+  "rows": [
+    {
+      "number": 1,
+      "clause": "SRC-140:R001",
+      "corrective_clause": "SRC-142:R015",
+      "text": "Corrective authority SRC-142:R015: Ordinary direct Python import cannot mint host transport authority.",
+      "status": "VERIFIED",
+      "reason": "direct negative/paired control or current canonical source/validator proof",
+      "evidence": "security tests, pre-fix.json, post-fix.json, focused-results.json; canonical source ledgers",
+      "qualification": ""
+    },
+    {
+      "number": 2,
+      "clause": "SRC-140:R002",
+      "corrective_clause": "SRC-142:R016",
+      "text": "Corrective authority SRC-142:R016: The exact current bypass: bootstrap_transport_key -> _transport_mac -> establish is RED on the repaired implementation.",
+      "status": "VERIFIED",
+      "reason": "direct negative/paired control or current canonical source/validator proof",
+      "evidence": "security tests, pre-fix.json, post-fix.json, focused-results.json; canonical source ledgers",
+      "qualification": ""
+    },
+    {
+      "number": 3,
+      "clause": "SRC-140:R003",
+      "corrective_clause": "SRC-142:R017",
+      "text": "Corrective authority SRC-142:R017: Pre-fix/current vulnerable subject proves that same carrier previously reached ADMITTED.",
+      "status": "VERIFIED",
+      "reason": "direct negative/paired control or current canonical source/validator proof",
+      "evidence": "security tests, pre-fix.json, post-fix.json, focused-results.json; canonical source ledgers",
+      "qualification": ""
+    },
+    {
+      "number": 4,
+      "clause": "SRC-140:R004",
+      "corrective_clause": "SRC-142:R018",
+      "text": "Corrective authority SRC-142:R018: Direct establish without authority remains refused.",
+      "status": "VERIFIED",
+      "reason": "direct negative/paired control or current canonical source/validator proof",
+      "evidence": "security tests, pre-fix.json, post-fix.json, focused-results.json; canonical source ledgers",
+      "qualification": ""
+    },
+    {
+      "number": 5,
+      "clause": "SRC-140:R005",
+      "corrective_clause": "SRC-142:R019",
+      "text": "Corrective authority SRC-142:R019: Direct invalidate without authority remains refused.",
+      "status": "VERIFIED",
+      "reason": "direct negative/paired control or current canonical source/validator proof",
+      "evidence": "security tests, pre-fix.json, post-fix.json, focused-results.json; canonical source ledgers",
+      "qualification": ""
+    },
+    {
+      "number": 6,
+      "clause": "SRC-140:R006",
+      "corrective_clause": "SRC-142:R020",
+      "text": "Corrective authority SRC-142:R020: Forged ordinary SHA256 ledger remains non-authoritative.",
+      "status": "VERIFIED",
+      "reason": "direct negative/paired control or current canonical source/validator proof",
+      "evidence": "security tests, pre-fix.json, post-fix.json, focused-results.json; canonical source ledgers",
+      "qualification": ""
+    },
+    {
+      "number": 7,
+      "clause": "SRC-140:R007",
+      "corrective_clause": "SRC-142:R021",
+      "text": "Corrective authority SRC-142:R021: Keyed provenance remains required.",
+      "status": "BLOCKED",
+      "reason": "Keyed provenance stays mandatory but there is no trustworthy verifier; positive keyed record acceptance is unavailable.",
+      "evidence": "security tests, pre-fix.json, post-fix.json, focused-results.json; canonical source ledgers",
+      "qualification": ""
+    },
+    {
+      "number": 8,
+      "clause": "SRC-140:R008",
+      "corrective_clause": "SRC-142:R022",
+      "text": "Corrective authority SRC-142:R022: No ordinary project/file mutation route can alter protected admission state.",
+      "status": "BLOCKED",
+      "reason": "Path guards retain protection, but they are not an OS filesystem boundary against indirect same-user Python writes.",
+      "evidence": "security tests, pre-fix.json, post-fix.json, focused-results.json; canonical source ledgers",
+      "qualification": ""
+    },
+    {
+      "number": 9,
+      "clause": "SRC-140:R009",
+      "corrective_clause": "SRC-142:R023",
+      "text": "Corrective authority SRC-142:R023: Host adapter can still legitimately establish admission.",
+      "status": "BLOCKED",
+      "reason": "No separated host authority exists; the legitimate Claude adapter now fails closed rather than minting local authority.",
+      "evidence": "security tests, pre-fix.json, post-fix.json, focused-results.json; canonical source ledgers",
+      "qualification": ""
+    },
+    {
+      "number": 10,
+      "clause": "SRC-140:R010",
+      "corrective_clause": "SRC-142:R024",
+      "text": "Corrective authority SRC-142:R024: Same-session init remains functional.",
+      "status": "BLOCKED",
+      "reason": "Real init binds and remains usable in the same session, but same-turn admission cannot succeed without host authority.",
+      "evidence": "security tests, pre-fix.json, post-fix.json, focused-results.json; canonical source ledgers",
+      "qualification": ""
+    },
+    {
+      "number": 11,
+      "clause": "SRC-140:R011",
+      "corrective_clause": "SRC-142:R025",
+      "text": "Corrective authority SRC-142:R025: Detailed T-1563 acceptance exists in canonical source clauses/coverage.",
+      "status": "VERIFIED",
+      "reason": "direct negative/paired control or current canonical source/validator proof",
+      "evidence": "security tests, pre-fix.json, post-fix.json, focused-results.json; canonical source ledgers",
+      "qualification": ""
+    },
+    {
+      "number": 12,
+      "clause": "SRC-140:R012",
+      "corrective_clause": "SRC-142:R026",
+      "text": "Corrective authority SRC-142:R026: Focused admission/guard/Claude tests pass.",
+      "status": "BLOCKED",
+      "reason": "Focused guard and hostile controls pass; original admission and Claude positives are red. They are not waived or mocked.",
+      "evidence": "security tests, pre-fix.json, post-fix.json, focused-results.json; canonical source ledgers",
+      "qualification": ""
+    },
+    {
+      "number": 13,
+      "clause": "SRC-140:R013",
+      "corrective_clause": "SRC-142:R027",
+      "text": "Corrective authority SRC-142:R027: Canonical validate is CURRENT_PASS.",
+      "status": "BLOCKED",
+      "reason": "The earlier CURRENT_PASS predates the foreign LOG suffix and subsequent source edits. CONTINUE, RECOVER and the core checkpoint now refuse HISTORY_LEDGER_CORRUPT.",
+      "evidence": "security tests, pre-fix.json, post-fix.json, focused-results.json; canonical source ledgers",
+      "qualification": "CURRENT_PASS is checkpoint-specific and must be refreshed after the final checkpoint",
+      "canonical_coverage_note": "SRC-140/SRC-142 retain the historical VERIFIED result; structural corruption prevents a canonical coverage refresh. This diagnostic is not replacement source authority."
+    },
+    {
+      "number": 14,
+      "clause": "SRC-140:R014",
+      "corrective_clause": "SRC-142:R028",
+      "text": "Corrective authority SRC-142:R028: Full required core family has new_red=0.",
+      "status": "BLOCKED",
+      "reason": "Last complete core run: 4343 tests, 76 new red outside the baseline, 0 sandboxes leaked. Later lint and three budget controls pass; no current full-family PASS is claimed.",
+      "evidence": "security tests, pre-fix.json, post-fix.json, focused-results.json; canonical source ledgers",
+      "qualification": "",
+      "record": ".saipen/evidence/core-unit/39cb84441cec8e61-20260929T210208Z.json"
+    }
+  ],
+  "current_verified": 7,
+  "current_blocked": 7
+}

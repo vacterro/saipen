@@ -1,0 +1,464 @@
+PASS: bootstrap/inject.sh grep failure -- exits nonzero without completion text
+PASS: bootstrap/inject.sh grep failure -- exits nonzero without Done
+PASS: bootstrap/inject.sh write failure -- exits nonzero without completion text
+PASS: bootstrap/uninstall.sh transform failure -- exits nonzero without completion text
+PASS: bootstrap/uninstall.sh grep failure -- exits nonzero without completion text
+PASS: bootstrap/uninstall.sh grep failure -- exits nonzero without Done
+PASS: bootstrap/uninstall.sh regular-file skill -- removed
+PASS: bootstrap/inject.sh late missing source -- old install preserved, no staging debris
+PASS: bootstrap/inject.sh manifest traversal -- old install preserved, no staging debris
+PASS: bootstrap/inject.ps1 copy failure -- exits nonzero without completion text
+PASS: bootstrap/uninstall.ps1 read failure -- exits nonzero without completion text
+PASS: bootstrap/inject.ps1 late missing source -- old install preserved, no staging debris
+PASS: bootstrap/inject.ps1 manifest traversal -- old install preserved, no staging debris
+PASS: injector probe red-control -- deleted tests/ goes red
+PASS: injector probe red-control -- installed bytecode goes red
+PASS: scheduler -- one manager and no generated repository wrapper
+PASS: scheduler -- wrapper publication is atomic and outside the repository
+PASS: scheduler -- external-wrapper contract red control
+PASS: scheduler -- all removers own current task, legacy task, and runtime wrapper
+PASS: scheduler -- background runner never updates the development clone
+PASS: scheduler -- background Git disables optional index mutation
+PASS: scheduler -- status distinguishes NOT_INSTALLED
+PASS: scheduler -- unknown command is nonzero with concise usage
+PASS: scheduler -- install migrates legacy task and publishes external wrapper
+PASS: scheduler -- atomic install leaves no temporary wrapper
+PASS: scheduler -- wrapper preserves a Unicode runner path
+PASS: scheduler -- status distinguishes HEALTHY
+PASS: scheduler -- wrong scheduled action is DEGRADED
+PASS: scheduler -- quoted wrapper path is HEALTHY (host quoting is not a contract)
+PASS: scheduler -- an extra argument after the wrapper is DEGRADED
+PASS: scheduler -- wrong task principal is DEGRADED
+PASS: scheduler -- disabled scheduled task is DEGRADED
+PASS: scheduler -- wrong task trigger type is DEGRADED
+PASS: scheduler -- finite repetition duration is DEGRADED
+PASS: scheduler -- wrong task trigger or runtime policy is DEGRADED
+PASS: scheduler -- run-now triggers only a healthy installation
+PASS: scheduler -- wrapper with canonical path hidden in dead text is DEGRADED
+PASS: scheduler -- run-now refuses a noncanonical wrapper body
+PASS: scheduler -- generated wrapper waits and returns runner status
+PASS: scheduler -- duplicate current and legacy tasks are DEGRADED
+PASS: scheduler -- run-now refuses a DEGRADED duplicate installation
+PASS: scheduler -- missing VBS wrapper is DEGRADED
+PASS: scheduler -- run-now refuses a task with missing wrapper
+PASS: scheduler -- wrapper referencing a missing runner is DEGRADED
+PASS: scheduler -- remove cleans both task names and scheduler runtime
+PASS: scheduler -- remove sweeps killed-run temp files but keeps the canonical log
+PASS: scheduler -- install and remove leave repository status unchanged
+PASS: scheduler -- failed reinstall restores previous task and wrapper
+PASS: scheduler -- fresh settings failure removes new task and wrapper
+PASS: scheduler -- query failure is nonzero and preserves task and wrapper
+PASS: scheduler -- delete failure is nonzero and preserves runnable wrapper
+PASS: scheduler -- PowerShell global uninstall removes both tasks and wrapper
+PASS: scheduler -- PowerShell uninstall sweeps killed-run temp files but keeps the canonical log
+PASS: scheduler -- PowerShell global uninstall fails closed on query error
+PASS: scheduler -- PowerShell uninstall falls back when ScheduledTasks cmdlets are absent
+PASS: scheduler -- PowerShell fallback uninstall sweeps temp files, keeps canonical log
+PASS: scheduler -- PowerShell schtasks fallback fails closed on query error
+PASS: scheduler -- shell global uninstall removes both tasks and wrapper
+PASS: scheduler -- shell uninstall sweeps killed-run temp files but keeps the canonical log
+PASS: scheduler -- shell global uninstall fails closed on query error
+PASS: scheduler -- shell uninstall without schtasks sweeps temp files, keeps canonical log
+PASS: scheduler -- clean committed source injects exact HEAD without network access
+PASS: scheduler -- successful injection keeps its advertised source path alive
+PASS: scheduler -- background run never changes HEAD or working-tree bytes
+PASS: scheduler -- a successful inject writes the freshness stamp through its one owner
+PASS: scheduler -- dirty tracked source skips and preserves installed snapshot
+PASS: scheduler -- untracked file outside the injected surface does not block the refresh
+PASS: scheduler -- untracked file inside the injected surface still skips
+PASS: scheduler -- a source with no manifest refuses instead of guessing its surface
+PASS: scheduler -- source operation failure never falls through into injection
+PASS: scheduler -- source change during preflight refuses mixed-source injection
+PASS: scheduler -- every refusal preserves previous installed snapshot and HEAD
+PASS: scheduler -- stale snapshot backup from a killed run is refused
+PASS: scheduler -- failed injector restores previous persistent source snapshot
+PASS: release freshness -- post-metadata binding gate rejects stale locale badges
+PASS: release freshness -- failed post-metadata gate creates no commit or tag
+PASS: release freshness -- rollback removes only staging introduced by this ship
+PASS: release freshness -- duplicate locale badge fails the ship gate
+PASS: release freshness -- missing locale badge fails the ship gate
+PASS: release freshness -- final binding scope and cached diff are exact
+PASS: release freshness -- version-only mirror update leaves source digests unchanged
+PASS: improve -- report path lives under project .saipen/improve, never saipen_home
+PASS: improve -- two distinct seats resolve to different report paths
+PASS: improve -- same seat in a different cycle resolves to a different path
+PASS: improve -- requested basename is preserved exactly
+PASS: improve -- a well-formed report validates
+PASS: improve -- a finding without evidence is rejected
+PASS: improve -- a class outside the closed set is rejected
+PASS: improve -- context_available complete over an empty scope is refused
+PASS: improve -- derived status: roster-only is expected
+PASS: improve -- derived status: report draft is draft
+PASS: improve -- derived status: complete without sweep is complete
+PASS: improve -- derived status: partial disposition coverage is never swept
+PASS: improve -- derived status: swept after FULL disposition coverage
+PASS: improve -- derived status: unavailable roster wins
+PASS: improve -- derived status: per-seat availability, not the first field
+PASS: improve -- same IMP-001 in two reports stays independent
+PASS: improve -- SWEEP ledger write never mutates the seat report
+PASS: improve -- SWEEP ledger exists with the disposition
+PASS: improve -- a second cycle with the same id is refused, not duplicated
+PASS: improve -- cycle creation writes the roster atomically
+PASS: improve -- duplicate seat registration fails
+PASS: improve -- a roster availability outside the closed set is rejected
+PASS: improve -- a second run appends an immutable RUN section, never overwriting
+PASS: improve -- multiple RUNs accumulate without overwriting earlier ones
+PASS: improve -- a complete report refuses further RUN sections
+PASS: improve -- register_cycle crash after PREPARE leaves no admitted cycle
+PASS: improve -- recovery after the PREPARE crash leaves no roster-less cycle
+PASS: improve -- a fresh cycle can be admitted after clean recovery
+PASS: improve -- stale Improve plan refuses STALE_STATE (base-hash binding)
+PASS: improve -- retry after stale refusal keeps both seats (A + B)
+PASS: improve -- a second ACTIVE cycle is refused while one is active
+PASS: improve -- complete_report refuses a report with no RUN evidence (DOGFOOD V)
+PASS: improve -- a completed cycle allows the next cycle (no evidence deleted)
+PASS: improve -- historical cycle evidence is not deleted to admit the next
+PASS: improve -- complete_cycle refuses a draft report (completion means something)
+PASS: improve -- register_seat refuses a completed cycle (immutable)
+PASS: improve -- append_run refuses a completed cycle (immutable)
+PASS: improve -- write_sweep_entry refuses a completed cycle (immutable)
+PASS: improve -- sweep writer emits exactly one IMP-001 (never IMP-IMP-001)
+PASS: improve -- writer->parser->derive_status: A swept, B not (same local IMP-001)
+PASS: improve -- cycle-id allocator is deterministic and collision-safe
+PASS: improve -- lifecycle: partial sweep REFUSEs complete_cycle (unswept IMP-002)
+PASS: improve -- lifecycle: full sweep coverage permits complete_cycle
+PASS: improve -- lifecycle: register_seat REFUSEs a completed cycle (immutable)
+PASS: improve -- lifecycle: write_sweep_entry REFUSEs a completed cycle (immutable)
+PASS: improve -- lifecycle: the next cycle is admitted after completion
+PASS: improve -- verifier: malformed SWEEP FAILs the semantic verifier
+PASS: improve -- verifier: the writer's own SWEEP output passes (same grammar)
+PASS: improve -- recovery runs the same target-aware verifier: malformed SWEEP CONFLICTs on recovery, never COMMITTED
+PASS: improve -- improve routing: manifest+sweep edits flip the derived status (complete->swept) with zero STATE writes
+PASS: improve -- improve report: NO_FINDINGS with a stated scope validates
+PASS: improve -- improve report: report_status complete over an unmet completion bar is rejected
+PASS: improve -- improve report: a partial scope cannot claim complete context
+PASS: improve -- sweep: three reports' root cause deduplicates into ONE ticket (red control 11, validator green)
+PASS: improve -- sweep: an unverified finding cannot produce a ticket (red control 10, validator red)
+PASS: improve -- sweep: an INVALID finding must never produce a ticket (red control 12, validator red)
+PASS: improve -- sweep: an unresolvable source_reports ref fails (red control 20, validator red)
+PASS: improve -- sweep: an edited-away original finding loses its disposition (red control 19, validator red)
+PASS: improve -- sweep: a report treated as canonical BOARD state is rejected (red control 22, validator red)
+PASS: improve -- sweep: a PROTOCOL_VIOLATION ticket without recurrence/weak_model fails (red controls 15/16, validator red)
+PASS: improve -- sweep: a PROTOCOL_VIOLATION ticket with both reasoning gates passes
+PASS: improve -- sweep: an ACCIDENTAL_SUCCESS result recorded as PASS fails (red control 5, validator red)
+PASS: improve -- sweep: deleting SWEEP.md breaks archived-report ticket provenance (red control 24, validator red)
+PASS: improve -- sweep: partial/timed-out evidence cannot mark an IMP fixed (red control 25, validator red)
+PASS: improve -- improve roster: same basename in distinct seat homes is valid
+PASS: improve -- sweep: confidence: proven does not override Core's verification requirement (red control 14, validator red)
+PASS: improve -- sweep: a report auditing a stale head fails (reload-before-audit, red controls 1/2, validator red)
+PASS: improve -- sweep: a report audited against the current head passes the reload check (no false positive)
+PASS: improve -- saipen improve status executes and derives per-seat status
+PASS: improve -- saipen improve status is read-only (zero STATE writes)
+PASS: improve -- saipen improve clean refuses an ACTIVE cycle (archive needs complete)
+PASS: improve -- saipen improve sweep writes a disposition through the journal
+PASS: improve -- saipen improve verify executes the delta-only verifier on a fully-swept cycle
+PASS: improve -- bare saipen improve prepares the audit assignment (not status)
+PASS: improve -- bare Improve assignment emits SAICRITIC's exact ordered proof set
+PASS: improve -- CLI-prepared report derives its protocol fingerprint from owned protocol evidence
+PASS: improve -- CLI-prepared report never carries a guessed model constant
+PASS: improve -- CLI-prepared report begins context as partial, not complete
+PASS: improve -- editing a protocol document changes the derived fingerprint
+PASS: improve -- strict provenance refuses fabricated protocol fingerprint
+PASS: improve -- strict provenance refuses blank required scalar
+PASS: improve -- strict provenance refuses agent != seat
+PASS: improve -- strict provenance refuses unknown header field
+PASS: improve -- strict provenance refuses control injection in runtime
+PASS: improve -- foreign project VERSION can never become saipen_version
+PASS: improve -- installed flattened layout exposes canonical SAICRITIC proof set
+PASS: improve -- missing installed SAICRITIC proof owner refuses before assignment
+PASS: improve -- explicit improve prepare is not a hidden public action
+PASS: improve -- bare saipen improve never changes phase/task (audit prep is read-only for STATE)
+PASS: improve -- Improve admission journals roster and report as one operation
+PASS: improve -- admission crash between roster/report rolls forward both targets
+PASS: improve -- bare/new-seat allocates an independent seat in the active cycle
+PASS: improve -- explicit session retry resumes idempotently without rewriting
+PASS: improve -- explicit session retry refuses role drift
+PASS: improve -- Improve role vocabulary is closed to core and critic
+PASS: improve -- status derives independent same-basename seats by seat identity
+PASS: improve -- status rejects roster/report role mismatch
+PASS: improve -- missing report under a registered seat REFUSEs SEAT_EVIDENCE_MISSING
+PASS: improve -- missing report causes zero writes and no new provenance
+PASS: improve -- COMPLETE report cannot resume (SEAT_COMPLETE, resumed false)
+PASS: improve -- COMPLETE report yields an executable stable instruction
+PASS: improve -- unavailable roster seat cannot revive (SEAT_UNAVAILABLE, zero writes)
+PASS: improve -- malformed registered report refuses INVALID_REPORT, never replaced by prepare
+PASS: improve -- an unexpected report_status (bogus) refuses INVALID_REPORT -- only an exact draft resumes
+PASS: improve -- a draft missing required provenance refuses INVALID_REPORT (validate_report gates the resume)
+PASS: improve -- an undecodable report refuses INVALID_REPORT without a traceback
+PASS: improve -- a runless complete skeleton refuses INVALID_REPORT, never SEAT_COMPLETE
+PASS: improve -- a report repeating a required header field refuses INVALID_REPORT
+PASS: improve -- a prose line mentioning report_status does not false-reject a draft resume (header-anchored count)
+PASS: improve -- same-basename disposition is isolated by exact seat/report key
+PASS: improve -- status derivation refuses ambiguous basename without seat_id
+PASS: improve -- ambiguous legacy report basename refuses disposition
+PASS: improve -- sweep queue keeps unswept same-basename seat addressable
+PASS: improve -- late duplicate-basename admission preserves legacy provenance
+PASS: improve -- T-1406: stale un-audited DRAFT resume re-binds the mechanical header through the journal with zero manifest bytes
+PASS: improve -- T-1406: install-stale un-audited DRAFT re-binds and reports the old fingerprint
+PASS: improve -- T-1406: a draft with a committed RUN is never re-bound and the refusal names the retire route
+PASS: improve -- T-1406: bounded exit -- abort refuses post-sweep, retire preserves the dead report and every disposition, then the cycle completes
+PASS: improve -- A2: admission on an invalid active manifest refuses INVALID_MANIFEST with zero new mutation
+PASS: improve -- A2: register_seat refuses an invalid active manifest
+PASS: improve -- A3: a duplicated strict seat role field refuses INVALID_MANIFEST (exactly-once, no first/last-value ambiguity)
+PASS: improve -- A3: availability bogus can never resume as ALREADY_ASSIGNED
+PASS: improve -- A4: a strict report with unique contiguous RUNs validates
+PASS: improve -- A4: duplicate RUN 1 rejects (repeated section number)
+PASS: improve -- A4: RUN 1 then RUN 3 rejects (not contiguous 1..N)
+PASS: improve -- A4: RUN 2 as the first run rejects (not contiguous 1..N)
+PASS: improve -- A4: swapped/decreasing RUN numbers reject (not ascending)
+PASS: improve -- A4: duplicate IMP-001 inside one RUN rejects before any dedup
+PASS: improve -- A4: malformed IMP width (IMP-1) rejects canonical IMP-NNN
+PASS: improve -- A4: the same IMP-001 in two DIFFERENT RUNs stays distinct
+PASS: improve -- A4 + T-638/§2: a duplicate composite identity is refused at append with ZERO writes (never enters a report that could be swept)
+PASS: improve -- A5: a strict report missing discovery_model refuses INVALID_REPORT (writer/spec/validator field parity)
+PASS: improve -- A5: a legacy (non-strict) report may omit discovery_model (deliberate legacy boundary only where history needs it)
+PASS: improve -- A5: a duplicated discovery_model in a strict report rejects
+PASS: improve -- A4: a SWEEP ledger repeating one composite identity rejects (one disposition per composite finding identity)
+PASS: improve -- A2: create_report refuses an invalid active manifest (no first-value roster interpretation)
+PASS: improve -- simultaneous admissions lose no seat and allocate no duplicate
+PASS: improve -- live Improve contention returns structured WRITER_BUSY
+PASS: improve -- public Improve boundary never normalizes programming errors
+PASS: improve -- saipen improve verify validates the complete cycle output and does not recurse into a new cycle
+PASS: improve -- improve verify rejects a report containing only report_status: complete (false PASS closed)
+PASS: improve -- submit with a valid string run_text appends a RUN
+PASS: improve -- submit refuses a array findings payload without traceback
+PASS: improve -- submit refuses a scalar findings payload without traceback
+PASS: improve -- submit refuses a null findings payload without traceback
+PASS: improve -- submit refuses a string findings payload without traceback
+PASS: improve -- submit refuses a run_text non-string findings payload without traceback
+PASS: improve -- submit refuses a empty run_text findings payload without traceback
+PASS: improve -- submit refuses a whitespace run_text findings payload without traceback
+PASS: improve -- submit refuses a missing run_text findings payload without traceback
+PASS: improve -- submit rejects an unsupported surplus argument
+PASS: improve -- RUN-1/IMP-001 disposition never covers RUN-2/IMP-001 (composite identity)
+PASS: improve -- high-level sweep enumerates the exact unswept composite finding
+PASS: improve -- strict manifest carries cycle_id/created_at/project_identity exactly once and round-trips the validator
+PASS: improve -- a fabricated friendly fingerprint fails the strict-cycle validator (DOGFOOD V)
+PASS: improve -- sweep authorization: nonexistent run refuses
+PASS: improve -- sweep authorization: nonexistent finding refuses
+PASS: improve -- sweep authorization: CONFIRMED nonexistent ticket cannot COMMIT
+PASS: improve -- sweep authorization: INVALID never authorizes a ticket
+PASS: improve -- source_reports resolves an EXACT composite ref (validator green)
+PASS: improve -- an unrelated cycle's IMP-001 cannot satisfy ticket provenance (validator red)
+PASS: improve -- a bare IMP ref can never launder a strict-cycle finding (validator red)
+PASS: improve -- SweepRecord writer/parser round-trip preserves exact identity
+PASS: improve -- append after completion refuses via the PARSER, not substring (an evidence mention of the phrase does not freeze a draft)
+PASS: improve -- an empty strict run without NO_FINDINGS cannot complete
+PASS: improve -- an explicit NO_FINDINGS run completes as intentional evidence
+PASS: improve -- NO_FINDINGS report passes strict report validation
+PASS: improve -- source freshness: verify refuses a fully-swept but STALE strict cycle (SAICRITIC #4)
+PASS: improve -- source freshness: write_sweep_entry refuses CONFIRMED on stale evidence (SAICRITIC #4)
+PASS: improve -- status depth: a fabricated fingerprint is INVALID_REPORT, never swept (SAICRITIC #4)
+PASS: improve -- abort: an incomplete report is genuinely stuck (cannot complete)
+PASS: improve -- abort: the stuck cycle aborts mechanically, reports byte-preserved at the same path, no .discarded split state
+PASS: improve -- abort: a new cycle is admitted after the abort
+PASS: improve -- IMPROVE.md documents same-path abort preservation, never .discarded
+PASS: improve -- retire: the CLI flips one expected seat to unavailable and preserves both report bodies
+PASS: improve -- retire: a completed seat's report is never retired
+PASS: improve -- invalid-manifest abort refuses with ZERO writes
+PASS: improve -- invalid-manifest complete refuses with ZERO writes
+PASS: improve -- invalid-manifest archive refuses with ZERO writes
+PASS: improve -- append_run on a malformed strict report refuses with ZERO writes
+PASS: improve -- restored valid manifest + report still validate
+PASS: improve -- create_cycle invalid created_at refuses with ZERO writes (no manifest, no directory)
+PASS: improve -- create_cycle non-portable project_identity refuses with ZERO writes
+PASS: improve -- write_sweep_entry on a malformed SWEEP ledger refuses with ZERO writes
+PASS: improve -- write_sweep_entry on a malformed COMPLETE report refuses with ZERO writes
+PASS: improve -- archive of a corrupted COMPLETE cycle refuses with ZERO writes
+PASS: improve -- abort failure before first target: no split state -- manifest still active, report byte-identical, no .discarded
+PASS: improve -- abort crash after manifest write leaves one pending op
+PASS: improve -- abort crash recovery rolls forward: manifest archived, report byte-identical at same path, no split state
+PASS: improve -- abort retry after recovery refuses (cycle no longer active) with evidence untouched
+PASS: improve -- abort recovery over an external conflicting manifest edit refuses CONFLICT and never touches report bytes
+PASS: improve -- resolver race: exactly one process settles the conflict, the loser refuses (WRITER_BUSY or settled-journal refusal)
+PASS: nitro-integrity -- every shipped saipen_engine module imports in isolation
+PASS: nitro-integrity -- checkpoint preserves phase (no SCOUT rewrite)
+PASS: nitro-integrity -- checkpoint preserves task
+PASS: nitro-integrity -- checkpoint preserves next_action
+PASS: nitro-integrity -- ticket_add preserves execution phase
+PASS: nitro-integrity -- plan_claim dry-run writes zero canonical bytes
+PASS: nitro-integrity -- checkpoint dry-run writes zero bytes
+PASS: nitro-integrity -- normal claim of a non-top workable ticket refuses (NOT_TOP_WORKABLE)
+PASS: nitro-integrity -- claim of the topmost workable ticket succeeds
+PASS: nitro-integrity -- normal claim refuses a TODO ticket carrying blocker
+PASS: nitro-integrity -- explicit claim cannot override blocker authorization
+PASS: nitro-integrity -- refused normal and explicit blocker claims write zero bytes
+PASS: nitro-integrity -- router skips malformed TODO+blocker and never emits SCOUT for it
+PASS: nitro-integrity -- public status refuses structurally invalid TODO+blocker state
+PASS: nitro-integrity -- public next refuses structurally invalid TODO+blocker state
+PASS: nitro-integrity -- satisfied prerequisites never activate a human-decision blocker
+PASS: nitro-integrity -- mutation ignoring blocker makes Pick Rule route forbidden ticket
+PASS: nitro-integrity -- transition with a nonexistent ticket refuses
+PASS: nitro-integrity -- transition with a non-active ticket refuses (ACTIVE_TICKET_MISMATCH)
+PASS: nitro-integrity -- transition binds the exact active DOING ticket
+PASS: nitro-integrity -- block of an active DOING ticket succeeds
+PASS: nitro-integrity -- block of the active ticket never parks the session in a session-level BLOCKED state
+PASS: nitro-integrity -- block routes the next_action to the remaining workable TODO
+PASS: nitro-integrity -- unblock without the lifting decision/evidence refuses
+PASS: nitro-integrity -- unblock atomically creates TODO without active blocker/history
+PASS: nitro-integrity -- claim refuses a board the parser cannot read whole
+PASS: nitro-integrity -- router routes malformed board to inspection, never a ticket
+PASS: nitro-integrity -- ticket add escapes description pipes instead of injecting fields
+PASS: nitro-integrity -- verify text with pipe delimiters cannot inject claim fields
+PASS: nitro-integrity -- blocker payload with pipe delimiters cannot inject a verify field
+PASS: nitro-integrity -- WRITER_BUSY is a structured refusal
+PASS: nitro-integrity -- plan op_id == journal op_id (apply consumed the plan)
+PASS: nitro-integrity -- applied journal is COMMITTED
+PASS: nitro-integrity -- recovery on an externally modified pending target CONFLICTs
+PASS: nitro-integrity -- recovery refuses corrupt staged bytes (CONFLICT, not COMMIT)
+PASS: nitro-integrity -- status derives recovery_pending from real journals
+PASS: nitro-integrity -- recovery preflight recovers the single pending op first
+PASS: nitro-integrity -- a new mutation over no pending op succeeds
+PASS: nitro-integrity -- UTF-8 LF representation preserved
+PASS: nitro-integrity -- UTF-8 CRLF representation preserved by a real operation
+PASS: nitro-integrity -- UTF-8 BOM board refused before any write (zero canonical writes)
+PASS: nitro-integrity -- improve cycle_id traversal is refused
+PASS: nitro-integrity -- only one active Improve cycle is admitted
+PASS: nitro-integrity -- SWEEP disposition enum is enforced at the writer
+PASS: nitro-integrity -- checkpoint event carries [parent: E-<prev>]
+PASS: nitro-integrity -- checkpoint preserves unrelated fields (intent/counters/mode)
+PASS: nitro-integrity -- goal intent from DONE/none does not create SCOUT/none
+PASS: nitro-integrity -- checkpoint after a seal continues from the newest sealed event (E-903, not the oldest segment's E-901)
+PASS: nitro-integrity -- stale apply returns failure, never semantic success
+PASS: nitro-integrity -- every journal target carries before_hash and after_hash
+PASS: nitro-integrity -- proposed-state invalidity refuses before any journal PREPARED
+PASS: nitro-integrity -- UTF-16LE BOM board refused before any write (zero canonical writes)
+PASS: nitro-integrity -- one-file journal uses generic truthful stage, never LOG_WRITTEN
+PASS: nitro-integrity -- seat_id newline injection is refused
+PASS: nitro-integrity -- report_path traversal is refused
+PASS: nitro-integrity -- append_run returns a committed transaction result
+PASS: nitro-integrity -- Improve writer refuses a complete report and propagates
+PASS: nitro-integrity -- SAIOPS structural event carries [op: ...] provenance
+PASS: nitro-integrity -- manual structural event lacks provenance (detectable)
+PASS: nitro-integrity -- a committed op retried returns ALREADY_APPLIED, no second write
+PASS: nitro-integrity -- saipen recover --json returns structured JSON
+PASS: nitro-integrity -- saipen userperson add writes through the journal (COMMITTED)
+PASS: nitro-integrity -- userperson add keeps distinct preferences sharing a leading phrase
+PASS: nitro-integrity -- userperson reset without confirmation REFUSEs
+PASS: nitro-integrity -- project userperson reset deletes only the project profile
+PASS: nitro-integrity -- sub spawn creates a journaled instance (SPAWNED)
+PASS: nitro-integrity -- spawned sub has its own agent + real updated timestamp
+PASS: nitro-integrity -- sub spawn refuses an existing instance, never overwrites
+PASS: nitro-integrity -- sub list reports the spawned instance
+PASS: nitro-integrity -- sub pause is a journaled owned-field BLOCKED patch
+PASS: nitro-integrity -- sub pause leaves a trace in the sub LOG
+PASS: nitro-integrity -- sub resume restores the prior phase and next_action
+PASS: nitro-integrity -- sub resume leaves a trace in the sub LOG
+PASS: nitro-integrity -- resume of a non-paused sub refuses (no fake success)
+PASS: nitro-integrity -- sub clean preflight refuses a fresh instance with evidence
+PASS: nitro-integrity -- sub clean preflight refuses a nonexistent instance
+PASS: nitro-integrity -- sub clean preflight never mutates the instance
+PASS: nitro-integrity -- sub collect reports an empty eligible OUTBOX without writes
+PASS: nitro-integrity -- sub name '..' is refused (no path escape)
+PASS: nitro-integrity -- sub name '.' is refused (no path escape)
+PASS: nitro-integrity -- sub name '../x' is refused (no path escape)
+PASS: nitro-integrity -- sub name 'x/../y' is refused (no path escape)
+PASS: nitro-integrity -- sub name '..\\x' is refused (no path escape)
+PASS: nitro-integrity -- sub name 'V:\\abs' is refused (no path escape)
+PASS: nitro-integrity -- sub name 'a\nb' is refused (no path escape)
+PASS: nitro-integrity -- sub name 'a\x00b' is refused (no path escape)
+PASS: nitro-integrity -- path-escape attempts write zero bytes outside the owner root
+PASS: nitro-integrity -- first spawn installs PROTOCOL.md
+PASS: nitro-integrity -- first spawn installs TEMPLATE/
+PASS: nitro-integrity -- first spawn installs built-in sai*.md charters
+PASS: nitro-integrity -- first spawn does NOT bootstrap on a second instance
+PASS: nitro-integrity -- complete ready OUTBOX package with a verifiable role passes collect
+PASS: nitro-integrity -- ready OUTBOX missing source_head refuses (MALFORMED_PACKAGE)
+PASS: nitro-integrity -- ready OUTBOX missing source_tree_fingerprint refuses (MALFORMED_PACKAGE)
+PASS: nitro-integrity -- ready OUTBOX missing role_revision refuses (MALFORMED_PACKAGE)
+PASS: nitro-integrity -- ready OUTBOX with a superseded role revision refuses (MALFORMED_PACKAGE, STALE)
+PASS: nitro-integrity -- ready OUTBOX with an unverifiable role revision refuses (PACKAGE_INCOMPLETE)
+PASS: nitro-integrity -- malformed nonempty OUTBOX refuses (MALFORMED_PACKAGE)
+PASS: nitro-integrity -- sub collect with no name aggregates all active subs
+PASS: nitro-integrity -- context cold is read-only (zero bytes written)
+PASS: nitro-integrity -- context hot is read-only and names the claimed ticket
+PASS: nitro-integrity -- context audit accounts bytes/tokens per source
+PASS: nitro-integrity -- cold surface bytes are measured as real UTF-8 bytes
+PASS: nitro-integrity -- cold surface token count is modest (token optimization target)
+PASS: nitro-integrity -- context: with a small budget the exact routed ticket (the top workable below the orientation limit) survives in full (description + verify intact)
+PASS: nitro-integrity -- context: routed action + phase doc + recovery state survive a small budget
+PASS: nitro-integrity -- context: the board map is present and truthfully capped
+PASS: nitro-integrity -- context: _board_map omits exactly the right count (+9 more from 12 TODO tickets with cap 2 + protected full T-4)
+PASS: nitro-integrity -- context: bytes == len(surface.encode('utf-8')) and characters == len(surface) exactly (Cyrillic + Japanese)
+PASS: nitro-integrity -- context: multibyte content makes real bytes > characters
+PASS: nitro-integrity -- crash control A: changed unfinished write target CONFLICTs
+PASS: nitro-integrity -- unresolved CONFLICT is listed by pending_ops
+PASS: nitro-integrity -- unresolved CONFLICT is listed by pending_conflicts
+PASS: nitro-integrity -- new mutation over unresolved CONFLICT refuses (RECOVERY_CONFLICT)
+PASS: nitro-integrity -- recovery preflight over a conflict refuses RECOVERY_CONFLICT
+PASS: nitro-integrity -- crash control B: changed read-only dependency CONFLICTs
+PASS: nitro-integrity -- recovered state never COMMITTED over a drifted read dependency
+PASS: nitro-integrity -- new mutation refuses after read-dependency conflict
+PASS: nitro-integrity -- recovered invalid state cannot become COMMITTED (CONFLICT)
+PASS: nitro-integrity -- saipen recover --json refuses a conflict and names the op
+PASS: nitro-integrity -- subprocess crash after LOG leaves an unresolved op
+PASS: nitro-integrity -- crash-then-drifted-read-dep recover CONFLICTs in a real op
+PASS: nitro-integrity -- new mutation refuses after the subprocess-crash conflict
+PASS: nitro-integrity -- route_next on DONE + workable TODO routes to the ticket
+PASS: nitro-integrity -- route_next puts recovery ahead of normal work
+PASS: nitro-integrity -- route_next puts unresolved conflict ahead of everything
+PASS: nitro-integrity -- ticket add with TBD verify REFUSEs INCOMPLETE_TICKET
+PASS: nitro-integrity -- ticket add with a real verify succeeds and never emits TBD
+PASS: nitro-integrity -- userperson add with distilled category projects to saiui
+PASS: nitro-integrity -- cold context names the exact next ticket via the router
+PASS: nitro-integrity -- VERIFY->REVIEW under goal mechanically bumps goal_tickets
+PASS: nitro-integrity -- goal_tickets bump emits the DEC line mechanically
+PASS: nitro-integrity -- HUNT->ADD under goal mechanically bumps goal_waves
+PASS: nitro-integrity -- goal_waves bump emits the DEC line mechanically
+PASS: nitro-integrity -- a committed claim carries no staged bytes (auto-dropped at COMMIT)
+PASS: nitro-integrity -- compaction leaves committed ops staged-free (idempotent)
+PASS: nitro-integrity -- compacted op retried still returns ALREADY_APPLIED
+PASS: nitro-integrity -- a conflict journal is never compacted
+PASS: nitro-integrity -- compaction compacts a RESOLVED journal (settled maintenance op)
+PASS: nitro-integrity -- compaction keeps the full tombstone for a resolved op
+PASS: nitro-integrity -- a PREPARED journal is never compacted (evidence still required)
+PASS: nitro-integrity -- validator FAILs a new TODO ticket with placeholder verify
+PASS: nitro-integrity -- cold context includes the exact next ticket below the 8-ticket truncation boundary
+PASS: nitro-integrity -- public `saipen next` routes DONE+workable to the ticket
+PASS: nitro-integrity -- public `saipen status` exposes computed_next_action
+PASS: nitro-integrity -- public `saipen context hot` includes the computed next
+PASS: nitro-integrity -- public `saipen sub spawn` works through the adapter
+PASS: nitro-integrity -- public sub pause/resume work through the adapter
+PASS: nitro-integrity -- public closure: claim->BUILD->ticket done REFUSEs ILLEGAL_PHASE
+PASS: nitro-integrity -- public closure: the refused done writes zero bytes (ticket stays DOING, phase stays BUILD)
+PASS: nitro-integrity -- public closure: the state stays validator-green after the refusal
+PASS: nitro-integrity -- public `saipen next` pairs action with the routed phase doc
+PASS: nitro-integrity -- closure control A: SHIP->FINISH ends DONE/task none
+PASS: nitro-integrity -- closure control B: no DOING + ticket DONE[x] after finish
+PASS: nitro-integrity -- closure control C: crash during finish leaves an unresolved op
+PASS: nitro-integrity -- closure control C: recovery finishes exactly one ticket
+PASS: nitro-integrity -- closure control E: repeat finish returns ALREADY_APPLIED
+PASS: nitro-integrity -- closure control E: no second completion event
+PASS: nitro-integrity -- closure control F: raw done split is refused (no REVIEW/T-X + BOARD DONE)
+PASS: nitro-integrity -- gate control: finish from SCOUT REFUSEs ILLEGAL_PHASE
+PASS: nitro-integrity -- gate control: finish from SCOUT writes zero canonical bytes
+PASS: nitro-integrity -- gate control: finish from SCOUT leaves phase/task untouched
+PASS: nitro-integrity -- gate control: finish from BUILD REFUSEs ILLEGAL_PHASE
+PASS: nitro-integrity -- gate control: finish from BUILD writes zero canonical bytes
+PASS: nitro-integrity -- gate control: finish from BUILD leaves phase/task untouched
+PASS: nitro-integrity -- gate control: finish from VERIFY REFUSEs ILLEGAL_PHASE
+PASS: nitro-integrity -- gate control: finish from VERIFY writes zero canonical bytes
+PASS: nitro-integrity -- gate control: finish from VERIFY leaves phase/task untouched
+PASS: nitro-integrity -- gate control: finish from REVIEW REFUSEs ILLEGAL_PHASE
+PASS: nitro-integrity -- gate control: finish from REVIEW writes zero canonical bytes
+PASS: nitro-integrity -- gate control: finish from REVIEW leaves phase/task untouched
+PASS: nitro-integrity -- gate control D: full chain SHIP->finish ends FINISHED
+PASS: nitro-integrity -- gate control D: full chain ends validator-green
+PASS: nitro-integrity -- gate-closure red control: pre-boundary history passes, post-boundary non-SHIP finish FAILs the validator
+PASS: nitro-integrity -- mutation red-control: removing the SHIP gate makes the BUILD closure succeed (the refuse controls are NOT vacuous)
+PASS: nitro-integrity -- gate control E: VERIFY->REVIEW bumps goal_tickets (0->1), never at finish
+PASS: nitro-integrity -- valve control: VERIFY->REVIEW trips at the 20-ticket cap
+PASS: nitro-integrity -- valve control: next_action is the exact safety-valve WAIT
+PASS: nitro-integrity -- valve control: the ticket stays DOING behind the valve
+PASS: nitro-integrity -- valve control: finish behind the valve REFUSEs ILLEGAL_PHASE
+PASS: nitro-integrity -- valve control: explicit reauthorization resets the counters
+PASS: nitro-integrity -- valve control: after reauthorization REVIEW->SHIP->FINISH completes
+PASS: nitro-integrity -- router: user brake outranks START (RESTATE_AND_STOP)
+PASS: nitro-integrity -- router: a persisted WAIT alone is still classified `wait`, not board work
+PASS: nitro-integrity -- conflict inspect reports the conflicting location read-only
+PASS: nitro-integrity -- resolution refuses when another unrelated op is unresolved
+PASS: nitro-integrity -- accept_live settles the conflict (RESOLVED)
+PASS: nitro-integrity -- pending_ops clears after resolution
+PASS: nitro-integrity -- a new mutation succeeds after the conflict is resolved
+PASS: nitro-integrity -- replan retires the conflict op (RESOLVED)
+PASS: nitro-integrity -- replan does not touch live canonical bytes

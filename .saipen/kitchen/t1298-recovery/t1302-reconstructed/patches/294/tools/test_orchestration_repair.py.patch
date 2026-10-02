@@ -1,0 +1,183 @@
+Index: tools\test_orchestration_repair.py
+===================================================================
+--- tools\test_orchestration_repair.py	before
++++ tools\test_orchestration_repair.py	after
+@@ -11,7 +11,6 @@
+ from __future__ import annotations
+ 
+ import datetime as dt
+-import json
+ import shutil
+ import sys
+ import tempfile
+@@ -134,10 +133,8 @@
+             steps = steps[3:]
+         elif current == "REVIEW":
+             steps = steps[2:]
+-        elif current == "VERIFY":
++        elif current in ("VERIFY", "BUILD"):
+             steps = steps[1:]
+-        elif current == "BUILD":
+-            steps = steps[1:]
+         for destination, evidence in steps:
+             result = transition_phase(project, destination, "tester", ticket, evidence)
+             self.assertTrue(result.ok, result.to_dict())
+@@ -165,7 +162,8 @@
+         """Spec 19: only blocked tickets remain -> GOAL_BLOCKED, clean stop."""
+         project = self.make_project()
+         gate = self.add(project, "release visual gate")
+-        self.assertTrue(ticket_move(project, "block", gate, "tester", "needs operator HW", scope="goal").ok)
++        result = ticket_move(project, "block", gate, "tester", "needs operator HW", scope="goal")
++        self.assertTrue(result.ok, result.to_dict())
+ 
+         routed = self.route(project)
+         self.assertTrue(routed["ok"], routed)
+@@ -261,16 +259,40 @@
+ 
+ 
+ class ClosureProvenanceTests(OrchestrationFixture):
++    def _with_published_release(self, project: Path) -> str:
++        """Durable publication evidence: the implementation the verification-only
++        ticket inherits was already released. This is scenario setup (the
++        authority FINDING 3 resolves against), not a closure shortcut."""
++        import json
++
++        (project / ".saipen" / "kitchen").mkdir(parents=True, exist_ok=True)
++        (project / ".saipen" / "kitchen" / "release_receipt.json").write_text(
++            json.dumps(
++                {
++                    "schema_version": 2,
++                    "op_id": "release-abc123",
++                    "version": "0.4.2",
++                    "tag": "v0.4.2",
++                    "commit": "c0ffee",
++                }
++            ),
++            encoding="utf-8",
++        )
++        return "release:v0.4.2"
++
+     def test_inherited_verified_closure_without_patch(self):
+-        """Spec 10/15/32: verification-only closeout records provenance and never
+-        needs an isolated patch or a Git commit."""
++        """Spec 10/15/32 + FINDING 3: verification-only closeout records durable
++        implementation provenance and never needs an isolated patch or a Git
++        commit."""
+         project = self.make_project(active=True)
++        source = self._with_published_release(project)
+         self.to_ship(project, "T-7")
+         result = finish_ticket(
+             project,
+             "T-7",
+             "tester",
+             closure_mode="inherited_verified",
++            implementation_source=source,
+         )
+         self.assertTrue(result.ok, result.to_dict())
+ 
+@@ -280,6 +302,7 @@
+         fields = done["fields"]
+         self.assertEqual(fields.get("closure_mode"), "inherited_verified")
+         self.assertEqual(fields.get("implementation_delta"), "none")
++        self.assertEqual(fields.get("implementation_source"), source)
+         self.assertTrue(str(fields.get("verify", "")).strip())
+         # No commit exists; the closure is state evidence, not publication.
+         self.assertFalse((project / ".git").exists())
+@@ -287,6 +310,33 @@
+         state = self.state(project)
+         self.assertEqual(state["next_action"], "saipen continue")
+ 
++    def test_inherited_verified_refuses_without_source(self):
++        """FINDING 3: an unsupported "implementation already existed" assertion
++        must not close -- the durable authority is mandatory."""
++        project = self.make_project(active=True)
++        self.to_ship(project, "T-7")
++        result = finish_ticket(project, "T-7", "tester", closure_mode="inherited_verified")
++        self.assertFalse(result.ok)
++        self.assertEqual(result.code, "VALIDATION_FAILED")
++        self.assertIn("--implementation-source", result.message)
++        board = self.board(project)
++        self.assertEqual(board["tickets"]["T-7"]["section"], "## DOING")
++
++    def test_inherited_verified_refuses_unresolvable_source(self):
++        """FINDING 3: the named authority must resolve to durable evidence."""
++        project = self.make_project(active=True)
++        self.to_ship(project, "T-7")
++        result = finish_ticket(
++            project,
++            "T-7",
++            "tester",
++            closure_mode="inherited_verified",
++            implementation_source="release:v9.9.9",
++        )
++        self.assertFalse(result.ok)
++        self.assertEqual(result.code, "VALIDATION_FAILED")
++        self.assertIn("cannot be resolved", result.message)
++
+     def test_own_patch_is_default_and_explicit(self):
+         project = self.make_project(active=True)
+         self.to_ship(project, "T-7")
+@@ -298,16 +348,33 @@
+ 
+     def test_cohort_closure_records_membership(self):
+         project = self.make_project(active=True)
++        import json
++
++        # The shared accumulated bytes both members attribute (FastPrompter's
++        # main.py). The cohort binds the LIVE hash -- no per-ticket split.
++        (project / "main.py").write_text("shared = True\n", encoding="utf-8")
+         second = self.add(project, "overlapping work")
+         # Close the active ticket into the cohort first (one open claim), then
+         # claim and close the second member the same way.
+         self.to_ship(project, "T-7")
+-        r1 = finish_ticket(project, "T-7", "tester", closure_mode="cohort", closure_cohort="C-001")
++        r1 = finish_ticket(
++            project,
++            "T-7",
++            "tester",
++            closure_mode="cohort",
++            closure_cohort="C-001",
++            closure_paths=("main.py",),
++        )
+         claim = apply_claim(project, second, "tester", explicit=True)
+         self.assertTrue(claim.ok, claim.to_dict())
+         self.to_ship(project, second)
+         r2 = finish_ticket(
+-            project, second, "tester", closure_mode="cohort", closure_cohort="C-001"
++            project,
++            second,
++            "tester",
++            closure_mode="cohort",
++            closure_cohort="C-001",
++            closure_paths=("main.py",),
+         )
+         self.assertTrue(r1.ok, r1.to_dict())
+         self.assertTrue(r2.ok, r2.to_dict())
+@@ -316,7 +383,27 @@
+             fields = board["tickets"][tid]["fields"]
+             self.assertEqual(fields.get("closure_mode"), "cohort")
+             self.assertEqual(fields.get("closure_cohort"), "C-001")
++        # FINDING 4: durable cohort authority, not BOARD prose -- membership
++        # binds each ticket to the exact shared-bytes identity.
++        registry = json.loads(
++            (project / ".saipen" / "kitchen" / "cohort_registry.json").read_text(
++                encoding="utf-8"
++            )
++        )
++        cohort = registry["cohorts"]["C-001"]
++        self.assertEqual(cohort["publication_status"], "pending")
++        self.assertEqual(
++            set(cohort["members"]), {"T-7", second}, cohort["members"]
++        )
++        for member, record in cohort["members"].items():
++            # Hash of the LIVE bytes on disk (write_text may newline-translate).
++            from saipen_engine.operations import hash_bytes
+ 
++            self.assertEqual(
++                record["paths"]["main.py"],
++                hash_bytes((project / "main.py").read_bytes()),
++            )
++
+     def test_cohort_closure_requires_cohort_id(self):
+         project = self.make_project(active=True)
+         self.to_ship(project, "T-7")

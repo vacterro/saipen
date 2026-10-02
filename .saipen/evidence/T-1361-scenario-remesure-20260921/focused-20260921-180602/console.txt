@@ -1,0 +1,16 @@
+PASS: bootstrap/inject.sh grep failure -- exits nonzero without completion text
+PASS: bootstrap/inject.sh grep failure -- exits nonzero without Done
+PASS: bootstrap/inject.sh write failure -- exits nonzero without completion text
+PASS: bootstrap/uninstall.sh transform failure -- exits nonzero without completion text
+PASS: bootstrap/uninstall.sh grep failure -- exits nonzero without completion text
+PASS: bootstrap/uninstall.sh grep failure -- exits nonzero without Done
+PASS: bootstrap/uninstall.sh regular-file skill -- removed
+PASS: bootstrap/inject.sh late missing source -- old install preserved, no staging debris
+PASS: bootstrap/inject.sh manifest traversal -- old install preserved, no staging debris
+PASS: bootstrap/inject.ps1 -- manifest-complete install replaced stale dirs, ran validate.py, and uninstalled config + Aider byte-exact
+PASS: bootstrap/inject.ps1 copy failure -- exits nonzero without completion text
+PASS: bootstrap/uninstall.ps1 read failure -- exits nonzero without completion text
+PASS: bootstrap/inject.ps1 late missing source -- old install preserved, no staging debris
+PASS: bootstrap/inject.ps1 manifest traversal -- old install preserved, no staging debris
+PASS: injector probe red-control -- deleted tests/ goes red
+PASS: injector probe red-control -- installed bytecode goes red

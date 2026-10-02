@@ -1,0 +1,27 @@
+Index: saipen\COMMANDS.md
+===================================================================
+--- saipen\COMMANDS.md	before
++++ saipen\COMMANDS.md	after
+@@ -55,6 +55,7 @@
+ | `saipen audit [status\|inspect\|ingest]` | intake transport | CMD-CONTINUE-01 |
+ | `saipen userperson` | meta | CMD-ROUTING-01 |
+ | `saipen sub <verb> <name>` | sub | CMD-ROUTING-01 |
++| `saipen user-request <text>` | intake / USER_INTERRUPT (T-1302) | CMD-ROUTING-01 |
+ 
+ ## Compound parsing
+ 
+@@ -71,10 +72,10 @@
+ ## Unicode twin normalization
+ 
+ Cyrillic shortcuts are the same as Latin. Codepoint substitution:
+-`Р°в†’a Рµв†’e Рѕв†’o СЂв†’p СЃв†’c Сѓв†’y С…в†’x`. Latin `st`/`sss` have no Cyrillic twin.
+-Cyrillic `СЃСЃ` в†’ Latin `cc` (continue), never `st` (stop) or retired `ss`.
+-Retired `ss` returns `SHORTCUT_RETIRED` with non-success and zero mutation;
+-use `st` to checkpoint and stop, or `sss` for read-only status.
++`Р°в†’a Рµв†’e Рѕв†’o СЂв†’p СЃв†’c Сѓв†’y С…в†’x`. Latin `st`/`sss` have no Cyrillic twin.
++Cyrillic `СЃСЃ` в†’ Latin `cc` (continue), never `st` (stop) or retired `ss`.
++Retired `ss` returns `SHORTCUT_RETIRED` with non-success and zero mutation;
++use `st` to checkpoint and stop, or `sss` for read-only status.
+ 
+ ## Continueв†’improve fallthrough
+ 

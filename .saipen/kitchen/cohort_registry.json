@@ -1,0 +1,46 @@
+{
+  "cohorts": {
+    "C-001": {
+      "cohort_id": "C-001",
+      "commit": "",
+      "members": {
+        "T-1320": {
+          "closed_at": "2026-09-13T18:40:33Z",
+          "closed_by": "codex",
+          "paths": {
+            "extensions/adapters/opencode/saipen-guard.js": "941c650a9301f384",
+            "tools/saipen.py": "89e1c4899a221599",
+            "tools/saipen_engine/admission.py": "ea20a616c888008c",
+            "tools/saipen_engine/fleet.py": "0453d3e1ae50c7cb",
+            "tools/saipen_engine/paths.py": "1889eb788261bfbd",
+            "tools/t1320_fleet_native_smoke.py": "52e43d44fb807ecf",
+            "tools/test_guard_hostile_matrix.py": "1f1c69a07a8caba4",
+            "tools/test_opencode_adapter.py": "1a21ddbd038e8bf4",
+            "tools/test_opencode_host_smoke.py": "9e03d1b3563feb82",
+            "tools/test_project_root_session_binding.py": "34566355d7204941"
+          },
+          "ticket_id": "T-1320",
+          "verification": "AC-01..AC-12 proven by deterministic fixtures, representative fleet matrix, fresh OpenCode proof, no-rg proof, focused suite and broader gate; zero new PATCH_OWNED failures"
+        }
+      },
+      "publication_status": "pending",
+      "release_op_id": "",
+      "schema_version": 1,
+      "scope": [
+        "extensions/adapters/opencode/saipen-guard.js",
+        "tools/saipen.py",
+        "tools/saipen_engine/admission.py",
+        "tools/saipen_engine/fleet.py",
+        "tools/saipen_engine/paths.py",
+        "tools/t1320_fleet_native_smoke.py",
+        "tools/test_guard_hostile_matrix.py",
+        "tools/test_opencode_adapter.py",
+        "tools/test_opencode_host_smoke.py",
+        "tools/test_project_root_session_binding.py"
+      ],
+      "tag": "",
+      "version": ""
+    }
+  },
+  "schema_version": 1
+}

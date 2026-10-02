@@ -1,0 +1,2 @@
+sairoute/SAIFREN :: foreign_owner          measurement=MEASURED first='saipen start "add a one-line docstring to the top of src/app.py"' protocol_before=1 productive=None target_changed=False refusals=['WAIT_FOREIGN_OWNER'] repeated=[] isolation=PASS minted={'tickets': [], 'receipts': ['SRC-001']} attempts=1 authority=None
+wrote V:\_TEMP_\t1367-run-20260919\foreign-rerun\polygon.json

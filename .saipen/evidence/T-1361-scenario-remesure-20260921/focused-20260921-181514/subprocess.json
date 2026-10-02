@@ -1,0 +1,226 @@
+[
+  {
+    "argv": "['C:\\\\Program Files\\\\PowerShell\\\\7\\\\pwsh.EXE', '-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', 'V:\\\\_TEMP_\\\\saipen-scheduler-zndau_4c\\\\scheduler-harness.ps1', 'V:\\\\_TEMP_\\\\saipen-scheduler-zndau_4c\\\\unicode-\u043f\u0443\u0442\u044c-\u03a9\\\\bootstrap\\\\schedule.ps1', 'status']",
+    "cwd": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+    "exit": 1,
+    "stdout": "STATUS: NOT_INSTALLED\nInstall: powershell -ExecutionPolicy Bypass -File V:\\_TEMP_\\saipen-scheduler-zndau_4c\\unicode-\u0420\u0457\u0421\u0453\u0421\u201a\u0421\u040a-\u041e\u00a9\\bootstrap\\schedule.ps1 install\n",
+    "stderr": ""
+  },
+  {
+    "argv": "['C:\\\\Program Files\\\\PowerShell\\\\7\\\\pwsh.EXE', '-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', 'V:\\\\_TEMP_\\\\saipen-scheduler-zndau_4c\\\\scheduler-harness.ps1', 'V:\\\\_TEMP_\\\\saipen-scheduler-zndau_4c\\\\unicode-\u043f\u0443\u0442\u044c-\u03a9\\\\bootstrap\\\\schedule.ps1', 'typo-command']",
+    "cwd": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+    "exit": 1,
+    "stdout": "usage: schedule.ps1 [install|remove|status|run-now] (default: install)\n",
+    "stderr": ""
+  },
+  {
+    "argv": "['C:\\\\Program Files\\\\PowerShell\\\\7\\\\pwsh.EXE', '-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', 'V:\\\\_TEMP_\\\\saipen-scheduler-zndau_4c\\\\scheduler-harness.ps1', 'V:\\\\_TEMP_\\\\saipen-scheduler-zndau_4c\\\\unicode-\u043f\u0443\u0442\u044c-\u03a9\\\\bootstrap\\\\schedule.ps1', 'status']",
+    "cwd": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+    "exit": 2,
+    "stdout": "STATUS: DEGRADED\nREASON: task action does not execute the canonical VBS wrapper\n",
+    "stderr": ""
+  },
+  {
+    "argv": "['C:\\\\Program Files\\\\PowerShell\\\\7\\\\pwsh.EXE', '-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', 'V:\\\\_TEMP_\\\\saipen-scheduler-zndau_4c\\\\scheduler-harness.ps1', 'V:\\\\_TEMP_\\\\saipen-scheduler-zndau_4c\\\\unicode-\u043f\u0443\u0442\u044c-\u03a9\\\\bootstrap\\\\schedule.ps1', 'status']",
+    "cwd": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+    "exit": 2,
+    "stdout": "STATUS: DEGRADED\nREASON: task action does not execute the canonical VBS wrapper\n",
+    "stderr": ""
+  },
+  {
+    "argv": "['C:\\\\Program Files\\\\PowerShell\\\\7\\\\pwsh.EXE', '-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', 'V:\\\\_TEMP_\\\\saipen-scheduler-zndau_4c\\\\scheduler-harness.ps1', 'V:\\\\_TEMP_\\\\saipen-scheduler-zndau_4c\\\\unicode-\u043f\u0443\u0442\u044c-\u03a9\\\\bootstrap\\\\schedule.ps1', 'status']",
+    "cwd": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+    "exit": 2,
+    "stdout": "STATUS: DEGRADED\nREASON: task principal is not the current interactive user\n",
+    "stderr": ""
+  },
+  {
+    "argv": "['C:\\\\Program Files\\\\PowerShell\\\\7\\\\pwsh.EXE', '-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', 'V:\\\\_TEMP_\\\\saipen-scheduler-zndau_4c\\\\scheduler-harness.ps1', 'V:\\\\_TEMP_\\\\saipen-scheduler-zndau_4c\\\\unicode-\u043f\u0443\u0442\u044c-\u03a9\\\\bootstrap\\\\schedule.ps1', 'status']",
+    "cwd": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+    "exit": 2,
+    "stdout": "STATUS: DEGRADED\nREASON: canonical task is disabled: saipen-inject\n",
+    "stderr": ""
+  },
+  {
+    "argv": "['C:\\\\Program Files\\\\PowerShell\\\\7\\\\pwsh.EXE', '-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', 'V:\\\\_TEMP_\\\\saipen-scheduler-zndau_4c\\\\scheduler-harness.ps1', 'V:\\\\_TEMP_\\\\saipen-scheduler-zndau_4c\\\\unicode-\u043f\u0443\u0442\u044c-\u03a9\\\\bootstrap\\\\schedule.ps1', 'status']",
+    "cwd": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+    "exit": 2,
+    "stdout": "STATUS: DEGRADED\nREASON: task trigger is not the canonical 15-minute interval\n",
+    "stderr": ""
+  },
+  {
+    "argv": "['C:\\\\Program Files\\\\PowerShell\\\\7\\\\pwsh.EXE', '-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', 'V:\\\\_TEMP_\\\\saipen-scheduler-zndau_4c\\\\scheduler-harness.ps1', 'V:\\\\_TEMP_\\\\saipen-scheduler-zndau_4c\\\\unicode-\u043f\u0443\u0442\u044c-\u03a9\\\\bootstrap\\\\schedule.ps1', 'status']",
+    "cwd": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+    "exit": 2,
+    "stdout": "STATUS: DEGRADED\nREASON: task trigger is not the canonical 15-minute interval\n",
+    "stderr": ""
+  },
+  {
+    "argv": "['C:\\\\Program Files\\\\PowerShell\\\\7\\\\pwsh.EXE', '-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', 'V:\\\\_TEMP_\\\\saipen-scheduler-zndau_4c\\\\scheduler-harness.ps1', 'V:\\\\_TEMP_\\\\saipen-scheduler-zndau_4c\\\\unicode-\u043f\u0443\u0442\u044c-\u03a9\\\\bootstrap\\\\schedule.ps1', 'status']",
+    "cwd": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+    "exit": 2,
+    "stdout": "STATUS: DEGRADED\nREASON: task trigger is not the canonical 15-minute interval\nREASON: task settings differ from the canonical runtime policy\n",
+    "stderr": ""
+  },
+  {
+    "argv": "['C:\\\\Program Files\\\\PowerShell\\\\7\\\\pwsh.EXE', '-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', 'V:\\\\_TEMP_\\\\saipen-scheduler-zndau_4c\\\\scheduler-harness.ps1', 'V:\\\\_TEMP_\\\\saipen-scheduler-zndau_4c\\\\unicode-\u043f\u0443\u0442\u044c-\u03a9\\\\bootstrap\\\\schedule.ps1', 'status']",
+    "cwd": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+    "exit": 2,
+    "stdout": "STATUS: DEGRADED\nREASON: VBS wrapper differs from the canonical command body\n",
+    "stderr": ""
+  },
+  {
+    "argv": "['C:\\\\Program Files\\\\PowerShell\\\\7\\\\pwsh.EXE', '-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', 'V:\\\\_TEMP_\\\\saipen-scheduler-zndau_4c\\\\scheduler-harness.ps1', 'V:\\\\_TEMP_\\\\saipen-scheduler-zndau_4c\\\\unicode-\u043f\u0443\u0442\u044c-\u03a9\\\\bootstrap\\\\schedule.ps1', 'run-now']",
+    "cwd": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+    "exit": 2,
+    "stdout": "REFUSED: scheduler status is DEGRADED\nREASON: VBS wrapper differs from the canonical command body\n",
+    "stderr": ""
+  },
+  {
+    "argv": "['C:\\\\Windows\\\\system32\\\\wscript.exe', 'V:\\\\_TEMP_\\\\saipen-scheduler-zndau_4c\\\\local-app-data\\\\saipen\\\\schedule-run-hidden.vbs']",
+    "cwd": "",
+    "exit": 37,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "argv": "['C:\\\\Program Files\\\\PowerShell\\\\7\\\\pwsh.EXE', '-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', 'V:\\\\_TEMP_\\\\saipen-scheduler-zndau_4c\\\\scheduler-harness.ps1', 'V:\\\\_TEMP_\\\\saipen-scheduler-zndau_4c\\\\unicode-\u043f\u0443\u0442\u044c-\u03a9\\\\bootstrap\\\\schedule.ps1', 'status']",
+    "cwd": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+    "exit": 2,
+    "stdout": "STATUS: DEGRADED\nREASON: duplicate legacy task present: saipen-autoinject\n",
+    "stderr": ""
+  },
+  {
+    "argv": "['C:\\\\Program Files\\\\PowerShell\\\\7\\\\pwsh.EXE', '-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', 'V:\\\\_TEMP_\\\\saipen-scheduler-zndau_4c\\\\scheduler-harness.ps1', 'V:\\\\_TEMP_\\\\saipen-scheduler-zndau_4c\\\\unicode-\u043f\u0443\u0442\u044c-\u03a9\\\\bootstrap\\\\schedule.ps1', 'run-now']",
+    "cwd": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+    "exit": 2,
+    "stdout": "REFUSED: scheduler status is DEGRADED\nREASON: duplicate legacy task present: saipen-autoinject\n",
+    "stderr": ""
+  },
+  {
+    "argv": "['C:\\\\Program Files\\\\PowerShell\\\\7\\\\pwsh.EXE', '-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', 'V:\\\\_TEMP_\\\\saipen-scheduler-zndau_4c\\\\scheduler-harness.ps1', 'V:\\\\_TEMP_\\\\saipen-scheduler-zndau_4c\\\\unicode-\u043f\u0443\u0442\u044c-\u03a9\\\\bootstrap\\\\schedule.ps1', 'status']",
+    "cwd": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+    "exit": 2,
+    "stdout": "STATUS: DEGRADED\nREASON: VBS wrapper missing: V:\\_TEMP_\\saipen-scheduler-zndau_4c\\local-app-data\\saipen\\schedule-run-hidden.vbs\n",
+    "stderr": ""
+  },
+  {
+    "argv": "['C:\\\\Program Files\\\\PowerShell\\\\7\\\\pwsh.EXE', '-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', 'V:\\\\_TEMP_\\\\saipen-scheduler-zndau_4c\\\\scheduler-harness.ps1', 'V:\\\\_TEMP_\\\\saipen-scheduler-zndau_4c\\\\unicode-\u043f\u0443\u0442\u044c-\u03a9\\\\bootstrap\\\\schedule.ps1', 'run-now']",
+    "cwd": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+    "exit": 2,
+    "stdout": "REFUSED: scheduler status is DEGRADED\nREASON: VBS wrapper missing: V:\\_TEMP_\\saipen-scheduler-zndau_4c\\local-app-data\\saipen\\schedule-run-hidden.vbs\n",
+    "stderr": ""
+  },
+  {
+    "argv": "['C:\\\\Program Files\\\\PowerShell\\\\7\\\\pwsh.EXE', '-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', 'V:\\\\_TEMP_\\\\saipen-scheduler-zndau_4c\\\\scheduler-harness.ps1', 'V:\\\\_TEMP_\\\\saipen-scheduler-zndau_4c\\\\unicode-\u043f\u0443\u0442\u044c-\u03a9\\\\bootstrap\\\\schedule.ps1', 'status']",
+    "cwd": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+    "exit": 2,
+    "stdout": "STATUS: DEGRADED\nREASON: referenced runner missing: V:\\_TEMP_\\saipen-scheduler-zndau_4c\\unicode-\u0420\u0457\u0421\u0453\u0421\u201a\u0421\u040a-\u041e\u00a9\\bootstrap\\schedule-run.ps1\n",
+    "stderr": ""
+  },
+  {
+    "argv": "['C:\\\\Program Files\\\\PowerShell\\\\7\\\\pwsh.EXE', '-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', 'V:\\\\_TEMP_\\\\saipen-scheduler-zndau_4c\\\\scheduler-harness.ps1', 'V:\\\\_TEMP_\\\\saipen-scheduler-zndau_4c\\\\unicode-\u043f\u0443\u0442\u044c-\u03a9\\\\bootstrap\\\\schedule.ps1', 'install']",
+    "cwd": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+    "exit": 1,
+    "stdout": "FATAL: scheduler install rolled back: Exception calling \"Replace\" with \"3\" argument(s): \"The path is empty. (Parameter 'path')\"\n",
+    "stderr": ""
+  },
+  {
+    "argv": "['C:\\\\Program Files\\\\PowerShell\\\\7\\\\pwsh.EXE', '-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', 'V:\\\\_TEMP_\\\\saipen-scheduler-zndau_4c\\\\scheduler-harness.ps1', 'V:\\\\_TEMP_\\\\saipen-scheduler-zndau_4c\\\\unicode-\u043f\u0443\u0442\u044c-\u03a9\\\\bootstrap\\\\schedule.ps1', 'install']",
+    "cwd": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+    "exit": 1,
+    "stdout": "created saipen-inject\ndeleted saipen-inject\nRemoved: saipen-inject\nFATAL: scheduler install rolled back: mock settings failure\n",
+    "stderr": ""
+  },
+  {
+    "argv": "['C:\\\\Program Files\\\\PowerShell\\\\7\\\\pwsh.EXE', '-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', 'V:\\\\_TEMP_\\\\saipen-scheduler-zndau_4c\\\\scheduler-harness.ps1', 'V:\\\\_TEMP_\\\\saipen-scheduler-zndau_4c\\\\unicode-\u043f\u0443\u0442\u044c-\u03a9\\\\bootstrap\\\\schedule.ps1', 'remove']",
+    "cwd": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+    "exit": 1,
+    "stdout": "FATAL: could not query saipen-inject: mock query failure\nNot present: saipen-autoinject\nFATAL: scheduler cleanup incomplete; wrapper preserved for any remaining task\n",
+    "stderr": ""
+  },
+  {
+    "argv": "['C:\\\\Program Files\\\\PowerShell\\\\7\\\\pwsh.EXE', '-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', 'V:\\\\_TEMP_\\\\saipen-scheduler-zndau_4c\\\\scheduler-harness.ps1', 'V:\\\\_TEMP_\\\\saipen-scheduler-zndau_4c\\\\unicode-\u043f\u0443\u0442\u044c-\u03a9\\\\bootstrap\\\\schedule.ps1', 'remove']",
+    "cwd": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+    "exit": 1,
+    "stdout": "access denied\nFATAL: could not remove saipen-inject (schtasks rc 5)\nNot present: saipen-autoinject\nFATAL: scheduler cleanup incomplete; wrapper preserved for any remaining task\n",
+    "stderr": ""
+  },
+  {
+    "argv": "['C:\\\\Program Files\\\\PowerShell\\\\7\\\\pwsh.EXE', '-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', 'V:\\\\_TEMP_\\\\saipen-scheduler-zndau_4c\\\\scheduler-harness.ps1', 'V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\bootstrap\\\\uninstall.ps1', '']",
+    "cwd": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+    "exit": 1,
+    "stdout": "saipen uninstaller\n------------------------------------------------------------\nClaude Code skill            clean\nClaude Code CLAUDE.md        clean\nOpenCode skill               clean\nOpenCode AGENTS.md           clean\nguard hooks                  clean\nCodex skill                  clean\nCodex AGENTS.md              clean\nGemini GEMINI.md             clean\n~/.agents skills             clean\nAider conf                   clean\nscheduled inject task        task remove FAILED (could not query saipen-inject: mock query failure); wrapper preserved\n------------------------------------------------------------\nFAILED. Fix reported errors and re-run.\n",
+    "stderr": ""
+  },
+  {
+    "argv": "['C:\\\\Program Files\\\\PowerShell\\\\7\\\\pwsh.EXE', '-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', 'V:\\\\_TEMP_\\\\saipen-scheduler-zndau_4c\\\\scheduler-fallback-harness.ps1', 'V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\bootstrap\\\\uninstall.ps1']",
+    "cwd": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+    "exit": 1,
+    "stdout": "saipen uninstaller\n------------------------------------------------------------\nClaude Code skill            clean\nClaude Code CLAUDE.md        clean\nOpenCode skill               clean\nOpenCode AGENTS.md           clean\nguard hooks                  clean\nCodex skill                  clean\nCodex AGENTS.md              clean\nGemini GEMINI.md             clean\n~/.agents skills             clean\nAider conf                   clean\nscheduled inject task        task remove FAILED (could not query saipen-inject (schtasks rc 5; all-task query rc 5), could not query saipen-autoinject (schtasks rc 5; all-task query rc 5)); wrapper preserved\n------------------------------------------------------------\nFAILED. Fix reported errors and re-run.\n",
+    "stderr": ""
+  },
+  {
+    "argv": "['C:\\\\Program Files\\\\Git\\\\usr\\\\bin\\\\bash.exe', 'V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN\\\\bootstrap\\\\uninstall.sh']",
+    "cwd": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN",
+    "exit": 1,
+    "stdout": "saipen uninstaller\n------------------------------------------------------------\nClaude Code skill            clean\nClaude Code CLAUDE.md        clean\nOpenCode skill               clean\nOpenCode AGENTS.md           clean\nguard hooks                  clean\nCodex skill                  clean\nCodex AGENTS.md              clean\nGemini GEMINI.md             clean\n~/.agents skills             clean\nAider conf                   clean\nscheduled inject task        saipen-inject query FAILED\nsaipen-autoinject query FAILED\n------------------------------------------------------------\nFAILED. Fix reported errors and re-run.\n",
+    "stderr": ""
+  },
+  {
+    "argv": "['C:\\\\Program Files\\\\PowerShell\\\\7\\\\pwsh.EXE', '-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', 'V:\\\\_TEMP_\\\\saipen-scheduler-zndau_4c\\\\scheduled-source\\\\bootstrap\\\\schedule-run.ps1', '-CloneRoot', 'V:\\\\_TEMP_\\\\saipen-scheduler-zndau_4c\\\\scheduled-source']",
+    "cwd": "V:\\_TEMP_\\saipen-scheduler-zndau_4c\\scheduled-source",
+    "exit": 2,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "argv": "['C:\\\\Program Files\\\\PowerShell\\\\7\\\\pwsh.EXE', '-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', 'V:\\\\_TEMP_\\\\saipen-scheduler-zndau_4c\\\\scheduled-source\\\\bootstrap\\\\schedule-run.ps1', '-CloneRoot', 'V:\\\\_TEMP_\\\\saipen-scheduler-zndau_4c\\\\scheduled-source']",
+    "cwd": "V:\\_TEMP_\\saipen-scheduler-zndau_4c\\scheduled-source",
+    "exit": 2,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "argv": "['C:\\\\Program Files\\\\PowerShell\\\\7\\\\pwsh.EXE', '-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', 'V:\\\\_TEMP_\\\\saipen-scheduler-zndau_4c\\\\scheduled-source\\\\bootstrap\\\\schedule-run.ps1', '-CloneRoot', 'V:\\\\_TEMP_\\\\saipen-scheduler-zndau_4c\\\\scheduled-source']",
+    "cwd": "V:\\_TEMP_\\saipen-scheduler-zndau_4c\\scheduled-source",
+    "exit": 1,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "argv": "['git', 'commit', '-q', '-m', 'probe: restore manifest']",
+    "cwd": "V:\\_TEMP_\\saipen-scheduler-zndau_4c\\scheduled-source",
+    "exit": 1,
+    "stdout": "On branch master\nnothing to commit, working tree clean\n",
+    "stderr": ""
+  },
+  {
+    "argv": "['C:\\\\Program Files\\\\PowerShell\\\\7\\\\pwsh.EXE', '-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', 'V:\\\\_TEMP_\\\\saipen-scheduler-zndau_4c\\\\scheduled-source\\\\bootstrap\\\\schedule-run.ps1', '-CloneRoot', 'V:\\\\_TEMP_\\\\saipen-scheduler-zndau_4c\\\\scheduled-source']",
+    "cwd": "V:\\_TEMP_\\saipen-scheduler-zndau_4c\\scheduled-source",
+    "exit": 1,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "argv": "['C:\\\\Program Files\\\\PowerShell\\\\7\\\\pwsh.EXE', '-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', 'V:\\\\_TEMP_\\\\saipen-scheduler-zndau_4c\\\\schedule-run-race.ps1', '-CloneRoot', 'V:\\\\_TEMP_\\\\saipen-scheduler-zndau_4c\\\\scheduled-source']",
+    "cwd": "V:\\_TEMP_\\saipen-scheduler-zndau_4c\\scheduled-source",
+    "exit": 2,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "argv": "['C:\\\\Program Files\\\\PowerShell\\\\7\\\\pwsh.EXE', '-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', 'V:\\\\_TEMP_\\\\saipen-scheduler-zndau_4c\\\\scheduled-source\\\\bootstrap\\\\schedule-run.ps1', '-CloneRoot', 'V:\\\\_TEMP_\\\\saipen-scheduler-zndau_4c\\\\scheduled-source']",
+    "cwd": "V:\\_TEMP_\\saipen-scheduler-zndau_4c\\scheduled-source",
+    "exit": 1,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "argv": "['C:\\\\Program Files\\\\PowerShell\\\\7\\\\pwsh.EXE', '-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', 'V:\\\\_TEMP_\\\\saipen-scheduler-zndau_4c\\\\scheduled-source\\\\bootstrap\\\\schedule-run.ps1', '-CloneRoot', 'V:\\\\_TEMP_\\\\saipen-scheduler-zndau_4c\\\\scheduled-source']",
+    "cwd": "V:\\_TEMP_\\saipen-scheduler-zndau_4c\\scheduled-source",
+    "exit": 9,
+    "stdout": "",
+    "stderr": ""
+  }
+]

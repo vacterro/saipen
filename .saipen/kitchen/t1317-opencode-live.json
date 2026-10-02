@@ -1,0 +1,9 @@
+{
+  "host": "opencode",
+  "fixture": "V:\\_TEMP_\\t1317-opencode-z8b1ryg7",
+  "exit": "TIMEOUT",
+  "allowed_effect": false,
+  "protected_bytes_unchanged": true,
+  "factory_probe": true,
+  "verdict": "UNPROVEN: inspect native tool events; unchanged bytes alone are not proof"
+}

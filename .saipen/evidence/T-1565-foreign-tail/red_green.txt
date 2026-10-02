@@ -1,0 +1,13 @@
+== PRE-FIX subject (build_prefix.py), same test files
+ERROR test_log_tail_quarantine.py
+!!!!!!!!!!!!!!!!!!! Interrupted: 1 error during collection !!!!!!!!!!!!!!!!!!!!
+1 error in 0.51s
+=========================== short test summary info ===========================
+FAILED test_log_stamp_guard.py::RetiredAppenderTests::test_a_well_formed_next_line_is_still_refused
+FAILED test_log_stamp_guard.py::RetiredAppenderTests::test_help_prints_the_notice_and_writes_nothing
+FAILED test_log_stamp_guard.py::RetiredAppenderTests::test_no_code_path_opens_the_ledger_for_writing
+FAILED test_log_stamp_guard.py::RetiredAppenderTests::test_the_measured_foreign_sequence_writes_nothing
+4 failed, 3 passed in 0.25s
+== POST-FIX subject
+......................                                                   [100%]
+22 passed in 2.85s

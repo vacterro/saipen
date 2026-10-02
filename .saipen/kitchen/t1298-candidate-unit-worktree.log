@@ -1,0 +1,76 @@
+﻿python : ........................................warning: in the working copy of '.saipen/IDENTITY.md', 
+LF will be replaced by CRLF the next time Git touches it
+At line:1 char:147
++ ... ktree.log"; python -m unittest discover -s tools -p "test_*.py" 2>&1  ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (.................. Git touches it:String) [], RemoteExcept 
+   ion
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+warning: in the working copy of '.saipen/recovery/settled/.receipt-index.json', LF will be replaced by C
+RLF the next time Git touches it
+warning: in the working copy of '.saipen/recovery/settled/op-migrate-lineage/operation.json', LF will be
+ replaced by CRLF the next time Git touches it
+.warning: in the working copy of '.saipen/IDENTITY.md', LF will be replaced by CRLF the next time Git to
+uches it
+warning: in the working copy of '.saipen/recovery/settled/.receipt-index.json', LF will be replaced by C
+RLF the next time Git touches it
+warning: in the working copy of '.saipen/recovery/settled/op-migrate-lineage/operation.json', LF will be
+ replaced by CRLF the next time Git touches it
+...........................................warning: in the working copy of '.saipen/IDENTITY.md', LF wil
+l be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.saipen/recovery/settled/.receipt-index.json', LF will be replaced by C
+RLF the next time Git touches it
+warning: in the working copy of '.saipen/recovery/settled/op-migrate-lineage/operation.json', LF will be
+ replaced by CRLF the next time Git touches it
+.warning: in the working copy of '.saipen/IDENTITY.md', LF will be replaced by CRLF the next time Git to
+uches it
+warning: in the working copy of '.saipen/recovery/settled/.receipt-index.json', LF will be replaced by C
+RLF the next time Git touches it
+warning: in the working copy of '.saipen/recovery/settled/op-migrate-lineage/operation.json', LF will be
+ replaced by CRLF the next time Git touches it
+........................................................................................................
+........................................................................................................
+........................................................................................................
+........................................................................................................
+............s............................................................................warning: in the
+ working copy of '.saipen/IDENTITY.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of '.saipen/recovery/settled/.receipt-index.json', LF will be replaced by C
+RLF the next time Git touches it
+warning: in the working copy of '.saipen/recovery/settled/op-migrate-lineage/operation.json', LF will be
+ replaced by CRLF the next time Git touches it
+....warning: in the working copy of '.saipen/IDENTITY.md', LF will be replaced by CRLF the next time Git
+ touches it
+warning: in the working copy of '.saipen/recovery/settled/.receipt-index.json', LF will be replaced by C
+RLF the next time Git touches it
+warning: in the working copy of '.saipen/recovery/settled/op-migrate-lineage/operation.json', LF will be
+ replaced by CRLF the next time Git touches it
+warning: in the working copy of '.saipen/IDENTITY.md', LF will be replaced by CRLF the next time Git tou
+ches it
+warning: in the working copy of '.saipen/recovery/settled/.receipt-index.json', LF will be replaced by C
+RLF the next time Git touches it
+warning: in the working copy of '.saipen/recovery/settled/op-migrate-lineage/operation.json', LF will be
+ replaced by CRLF the next time Git touches it
+warning: in the working copy of '.saipen/milestones/CP-001/manifest.json', LF will be replaced by CRLF t
+he next time Git touches it
+warning: in the working copy of '.saipen/milestones/current.json', LF will be replaced by CRLF the next 
+time Git touches it
+warning: in the working copy of '.saipen/recovery/settled/milestone-b478746c726c8f11/operation.json', LF
+ will be replaced by CRLF the next time Git touches it
+...warning: in the working copy of '.saipen/IDENTITY.md', LF will be replaced by CRLF the next time Git 
+touches it
+warning: in the working copy of '.saipen/recovery/settled/.receipt-index.json', LF will be replaced by C
+RLF the next time Git touches it
+warning: in the working copy of '.saipen/recovery/settled/op-migrate-lineage/operation.json', LF will be
+ replaced by CRLF the next time Git touches it
+........................................................................................................
+........................................................................................................
+........................................................................................................
+........................................................................................................
+.s......................................................................................................
+........................................................................................................
+...............................................
+----------------------------------------------------------------------
+Ran 1268 tests in 724.288s
+
+OK (skipped=2)

@@ -1,0 +1,29 @@
+{
+  "subject": {
+    "path": "tools/saipen_engine/storage_artifacts.py",
+    "before_sha256": "74b843a372a7fa0ae6d8e81fa2d8ee5a0d339dd9d17c90c0112461a52d5c5175",
+    "after_sha256": "4d12e69b1cbf509e3f1410aac74d5f6f17b2d0e673e8938e3a527692446bd88c"
+  },
+  "oracle": {
+    "path": "tools/test_storage_lost_registry.py",
+    "after_sha256": "c2f00dec19c600bdfa79ce48a1b44319169c2d6d77534dbb7add531b477bd1f5"
+  },
+  "controls": [
+    {
+      "variant": "before",
+      "passed": false,
+      "ran": 3,
+      "failures": 3,
+      "errors": 0,
+      "oracle_sha256": "c2f00dec19c600bdfa79ce48a1b44319169c2d6d77534dbb7add531b477bd1f5"
+    },
+    {
+      "variant": "candidate",
+      "passed": true,
+      "ran": 3,
+      "failures": 0,
+      "errors": 0,
+      "oracle_sha256": "c2f00dec19c600bdfa79ce48a1b44319169c2d6d77534dbb7add531b477bd1f5"
+    }
+  ]
+}

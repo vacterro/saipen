@@ -1,0 +1,59 @@
+{
+  "elapsed_seconds": 11005.0,
+  "quality": {
+    "tickets_by_section": {
+      "## DOING": [
+        "T-23"
+      ],
+      "## TODO": [
+        "T-21"
+      ],
+      "## DONE": [
+        "T-1",
+        "T-10",
+        "T-11",
+        "T-12",
+        "T-13",
+        "T-14",
+        "T-15",
+        "T-16",
+        "T-17",
+        "T-18",
+        "T-19",
+        "T-2",
+        "T-20",
+        "T-22",
+        "T-3",
+        "T-4",
+        "T-5",
+        "T-6",
+        "T-7",
+        "T-8",
+        "T-9"
+      ]
+    },
+    "duplicate_work_count": 0,
+    "source_receipts": [
+      "SRC-001.md",
+      "SRC-002.md",
+      "SRC-003.md",
+      "SRC-004.md",
+      "SRC-005.md",
+      "SRC-006.md",
+      "SRC-007.md"
+    ],
+    "acceptance": {
+      "T-1_docstring": true,
+      "T-2_tests_pass": true,
+      "T-3_readme_one_sentence": true
+    },
+    "validator": "Validation complete. Agent is conformant. (16 warning(s))",
+    "validator_exit": 0
+  },
+  "efficiency": {
+    "generations": 28,
+    "progress_generations": 5,
+    "slow_bounded_generations": 2,
+    "asked_user_heuristic_count": 0
+  }
+}

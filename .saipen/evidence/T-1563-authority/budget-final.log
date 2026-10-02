@@ -1,0 +1,8 @@
+test_every_declared_load_budget_is_measured_from_registry (test_protocol_registry.ProtocolRegistryTests.test_every_declared_load_budget_is_measured_from_registry) ... ok
+test_context_budget_remains_green_with_execution_in_cold (test_response_surface_contract.BudgetTests.test_context_budget_remains_green_with_execution_in_cold) ... ok
+test_every_budget_holds (test_t1465_budget_line_ends.LineEndTests.test_every_budget_holds) ... ok
+
+----------------------------------------------------------------------
+Ran 3 tests in 0.038s
+
+OK

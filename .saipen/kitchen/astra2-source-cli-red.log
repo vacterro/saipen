@@ -1,0 +1,21 @@
+FF
+======================================================================
+FAIL: test_source_recovery_commands_refuse_structurally_when_unavailable (tools.test_source_receipts.SourceReceiptTests.test_source_recovery_commands_refuse_structurally_when_unavailable) (arguments=('reconcile', 'SRC-001'))
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_source_receipts.py", line 34, in test_source_recovery_commands_refuse_structurally_when_unavailable
+    self.assertNotIn("Traceback", result.stderr)
+AssertionError: 'Traceback' unexpectedly found in 'Traceback (most recent call last):\n  File "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen.py", line 6256, in <module>\n    sys.exit(main())\n             ^^^^^^\n  File "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen.py", line 5773, in main\n    return _source(project_root, args[1:], as_json, dry_run)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen.py", line 2727, in _source\n    result = intake.reconcile_receipt(\n             ^^^^^^^^^^^^^^^^^^^^^^^^\nAttributeError: module \'saipen_engine.intake\' has no attribute \'reconcile_receipt\'\n'
+
+======================================================================
+FAIL: test_source_recovery_commands_refuse_structurally_when_unavailable (tools.test_source_receipts.SourceReceiptTests.test_source_recovery_commands_refuse_structurally_when_unavailable) (arguments=('normalize',))
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_source_receipts.py", line 34, in test_source_recovery_commands_refuse_structurally_when_unavailable
+    self.assertNotIn("Traceback", result.stderr)
+AssertionError: 'Traceback' unexpectedly found in 'Traceback (most recent call last):\n  File "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen.py", line 6256, in <module>\n    sys.exit(main())\n             ^^^^^^\n  File "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen.py", line 5773, in main\n    return _source(project_root, args[1:], as_json, dry_run)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\tools\\saipen.py", line 2747, in _source\n    result = intake.normalize_receipt_ranges(project_root, dry_run=dry_run)\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAttributeError: module \'saipen_engine.intake\' has no attribute \'normalize_receipt_ranges\'\n'
+
+----------------------------------------------------------------------
+Ran 1 test in 0.277s
+
+FAILED (failures=2)

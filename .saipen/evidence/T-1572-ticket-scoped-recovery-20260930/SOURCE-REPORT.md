@@ -1,0 +1,501 @@
+# T-1572 source: full operator P1 recovery-defect report (2026-09-30)
+
+Provenance: the operator's chat message of 2026-09-30 that produced Work T-1572
+through `saipen start` (receipt SRC-145, linked_work T-1572). The start command
+carried only a one-line summary into the receipt; the report itself (§11)
+forbids losing this source into a one-line generic ticket, so the full text is
+preserved here verbatim. Copied byte-faithfully from the chat message by the
+working agent (witness: session transcript, not an operator file transfer).
+
+---
+
+SAIPEN
+
+P1 RECOVERY DEFECT — CURRENT-GENERATION DONE / JOURNAL SPLIT CAN STRAND A
+COMPLETED PROJECT AND CROSS-CONTAMINATE PHASE REPAIR FROM ANOTHER TICKET.
+
+Do not treat this as an AUDAPACK implementation failure.
+
+A real downstream SAIPEN project reached this state after its implementation
+and verification work had completed:
+
+    STATE:
+        phase: DONE
+        task: T-261
+        transition_from: VERIFY
+
+    BOARD:
+        T-261 is already under ## DONE
+        ## TODO empty
+        ## DOING empty
+
+    LOG:
+        T-261 has claim/scout/build/verify evidence
+        but no journaled transition to SHIP and no canonical finish event
+
+The project's implementation gates were independently re-run green.
+
+The current recovery path cannot converge.
+
+============================================================
+VERIFIED PROTOCOL ROOT CAUSE
+============================================================
+
+Current `tools/saipen_engine/reconcile.py`:
+
+    _transition_chain(events, budget)
+
+collects phase-transition events globally.
+
+It does NOT bind those events to:
+
+    STATE.task
+    the active ticket
+    a ticket lifecycle generation / claim epoch
+
+Then `_state_phase_repairs()` does:
+
+    chain = _transition_chain(events, budget)
+    number, target = chain[-1]
+    source = chain[-2][1] ...
+
+Therefore an illegal state pair belonging to T-261 can be repaired from the
+latest transition belonging to an unrelated earlier ticket such as T-260.
+
+In the observed downstream project this leads to a proposed:
+
+    phase: SHIP
+    transition_from: REVIEW
+
+derived from old journal history.
+
+The proposed state then correctly fails the structural validator because:
+
+    SHIP is ticket-bearing
+    BOARD has no ## DOING ticket
+
+So recovery proposes a mutation that its own validator rejects.
+
+This is a protocol defect.
+
+============================================================
+SECOND ROOT CAUSE
+============================================================
+
+The existing special-case around illegal:
+
+    <ticket phase> -> DONE
+
+only owns the canonical active-ticket BLOCK/PARK shape.
+
+It does not own this different terminal split:
+
+    BOARD says current ticket DONE
+    STATE says DONE
+    STATE.transition_from is illegal
+    current ticket journal stopped before SHIP/finish
+
+The current-generation terminal closure gap therefore has no canonical recovery
+owner.
+
+`--attest-legacy-done` is deliberately the wrong mechanism because this ticket
+belongs to the current closure-contract generation.
+
+`resolve-next-action` is also not sufficient: next_action can be operator-
+authorized, but the complete repair plan still contains an invalid phase repair
+derived from unrelated history.
+
+============================================================
+DO NOT "FIX" THIS WITH MANUAL STATE EDITS
+============================================================
+
+Do not prescribe:
+
+    edit STATE.transition_from VERIFY -> SHIP
+    edit STATE.task T-261 -> none
+
+as the canonical solution.
+
+That would assert SHIP -> DONE without journal authority and teach operators to
+modify the exact protected surface SAIPEN exists to own.
+
+Do not solve it by manually appending fake historical SHIP / finish events
+either.
+
+Historical events must not be fabricated.
+
+============================================================
+1. MAKE PHASE RECOVERY TICKET-SCOPED
+============================================================
+
+Repair `_transition_chain` / `_state_phase_repairs` so phase evidence used for a
+ticket-bound STATE cannot come from an unrelated ticket.
+
+For a state whose task is T-N:
+
+    phase repair evidence must belong to T-N's lifecycle
+
+or to an explicitly defined project-level event type that is legally allowed to
+move project phase independent of a ticket.
+
+Do not simply filter every event with `event.ticket == task` without checking
+the real event grammar: claims, transitions, finish, goal entry and recovery
+events may have different binding rules.
+
+Define the binding once and test it.
+
+Required hostile carrier:
+
+    T-260:
+        REVIEW -> SHIP -> DONE
+
+    T-261:
+        claim
+        SCOUT
+        BUILD
+        VERIFY
+        no SHIP
+        no finish
+
+    STATE:
+        phase DONE
+        task T-261
+        transition_from VERIFY
+        last_event after T-261 VERIFY
+
+    BOARD:
+        T-260 DONE
+        T-261 DONE
+        no DOING
+
+PRE-FIX:
+    recovery incorrectly derives phase from T-260.
+
+POST-FIX:
+    NO T-260 event may become T-261 phase evidence.
+
+============================================================
+2. DEFINE CURRENT-GENERATION TERMINAL SPLIT
+============================================================
+
+Introduce one explicit classification for:
+
+    current-generation ticket
+    + BOARD terminal DONE
+    + STATE terminal-ish DONE
+    + journal cannot prove canonical terminal lifecycle
+    + no active DOING Work
+
+Use the existing naming conventions; do not create duplicate taxonomy if one
+already fits.
+
+Conceptually:
+
+    CURRENT_DONE_JOURNAL_GAP
+
+This is different from:
+
+    legacy DONE attestation
+    active-ticket block park
+    malformed phase enum
+    ordinary crash in BUILD/VERIFY
+    forged DONE with no evidence
+
+============================================================
+3. RECOVERY MUST NEVER INVENT COMPLETION
+============================================================
+
+The protocol cannot infer:
+
+    "ticket really shipped"
+
+merely because BOARD says DONE.
+
+Likewise it cannot infer:
+
+    "ticket was not done"
+
+merely because one journal event is missing.
+
+Therefore terminal reconciliation must preserve the ambiguity honestly.
+
+A current-generation DONE/journal split needs a canonical semantic recovery
+route.
+
+Do not make the operator choose YAML fields.
+
+============================================================
+4. PROVIDE A CANONICAL RECOVERY ROUTE
+============================================================
+
+Design one bounded recovery flow.
+
+Preferred conservative behavior:
+
+A. Detect the exact ticket-scoped last proven lifecycle phase.
+
+For the observed shape that is:
+
+    T-261 -> VERIFY
+
+B. Preserve the original STATE / BOARD / LOG bytes as recovery evidence.
+
+C. Restore the ticket to an executable canonical lifecycle state using one
+content-addressed approved recovery plan.
+
+For example, if completion itself cannot be proven:
+
+    BOARD T-261:
+        DONE -> DOING
+
+    STATE:
+        phase: VERIFY
+        task: T-261
+        transition_from: BUILD
+        next_action: PHASE VERIFY T-261
+
+Then let normal:
+
+    REVIEW -> SHIP -> ticket done
+
+re-establish completion with fresh current evidence.
+
+This path does not fabricate historical SHIP.
+
+If the protocol instead introduces an operator-attested current-generation DONE
+route, it must:
+
+- be explicitly operator-authorized;
+- append a NOW-dated recovery/attestation event;
+- never pretend the missing historical events existed;
+- carry a distinct recovery provenance;
+- produce a fully valid terminal STATE;
+- be idempotent;
+- preserve the original bytes.
+
+Do not silently reuse `--attest-legacy-done`; its semantics are different.
+
+============================================================
+5. REPAIR PLANS MUST BE SELF-CONSISTENT
+============================================================
+
+A canonical recovery command must not advertise a repair that cannot pass the
+post-mutation structural validator.
+
+Add a general invariant:
+
+    every advertised mutation-capable canonical_next_command
+    for a deterministic recovery plan
+    must be executable against the same unchanged fixture
+    and either:
+        - converge to a structurally readable state, or
+        - refuse before writing with a precise changed-condition reason.
+
+The observed failure must become a regression:
+
+    recover names route
+    -> run exact named route
+    -> route converges
+
+Never:
+
+    recover names route
+    -> route writes/proposes SHIP
+    -> validator says no DOING ticket
+    -> project remains stranded
+
+============================================================
+6. RESOLVE-NEXT-ACTION MUST NOT MASK A STRONGER DEFECT
+============================================================
+
+In the observed project:
+
+    recover resolve-next-action <operator value>
+
+accepts the supplied executable grammar, but the transaction still fails because
+the phase repair is incoherent.
+
+When another recovery atom prevents the supplied next_action repair from ever
+committing, do not present `resolve-next-action` as the effective exit.
+
+The complete repair planner owns the answer.
+
+Either:
+
+- return the higher-priority phase/lifecycle recovery route; or
+- construct one atomic approved repair plan that makes all affected fields
+  mutually valid.
+
+No operator-command dead ends.
+
+============================================================
+7. CURRENT DONE BOARD EVIDENCE
+============================================================
+
+Inspect the current-generation DONE contract carefully.
+
+A DONE ticket may contain:
+
+    closure_mode
+    owner / historical attribution
+    verification evidence
+    source coverage
+    other modern closure fields
+
+Do not treat those fields as sufficient proof of a missing journal transition
+unless the contract explicitly says so.
+
+Conversely, do not throw them away.
+
+Use them to classify the recovery case and decide whether:
+
+    conservative reopen
+
+or:
+
+    explicit operator terminal attestation
+
+is the correct route.
+
+Document the authority boundary in code/tests, not prose alone.
+
+============================================================
+8. CRASH WINDOWS
+============================================================
+
+Investigate how a modern canonical operation could create:
+
+    BOARD DONE
+    STATE DONE
+    no finish journal
+
+If canonical finish is intended to be atomic, identify which crash/write order,
+old implementation generation, external mutation, or partial operation can
+produce the observed shape.
+
+Add crash-window tests around the relevant write plan.
+
+Required property:
+
+    every partial prefix of a terminal operation is either:
+        already valid
+        or deterministically recoverable
+
+No prefix may require manual STATE editing.
+
+============================================================
+9. REGRESSION MATRIX
+============================================================
+
+At minimum cover:
+
+A.
+T-260 terminal events + broken T-261
+-> T-260 phase evidence cannot repair T-261.
+
+B.
+Current ticket last proven VERIFY, BOARD DONE, STATE DONE/from VERIFY
+-> classified explicitly; no unrelated transition used.
+
+C.
+Same fixture + conservative recovery approval
+-> ticket/state restored to T-261's own last proven lifecycle
+-> normal lifecycle can continue.
+
+D.
+Same fixture + operator terminal-attestation path, if such a path is supported
+-> NOW-dated recovery evidence
+-> valid DONE/task:none state
+-> no fabricated historical event.
+
+E.
+Legacy DONE
+-> existing legacy attestation semantics unchanged.
+
+F.
+Canonical block-park DONE
+-> existing block-park carve-out unchanged.
+
+G.
+Normal legal SHIP -> DONE
+-> untouched.
+
+H.
+Malformed out-of-enum phase with valid ticket-local history
+-> existing T-1318 recovery still works.
+
+I.
+Two tickets with interleaved transition events
+-> repair binds to the correct lifecycle identity.
+
+J.
+`resolve-next-action` plus stronger phase defect
+-> no misleading unusable route.
+
+K.
+Advertised recovery command
+-> executing it on unchanged fixture converges.
+
+L.
+Second execution
+-> idempotent / stale-plan refusal, never duplicate mutation.
+
+============================================================
+10. DOWNSTREAM AUDAPACK ACCEPTANCE FIXTURE
+============================================================
+
+Add a fixture modeled on the real observed downstream shape:
+
+    project: AUDAPACK-like
+    T-261 under DONE
+    no TODO
+    no DOING
+    state DONE / task T-261 / transition_from VERIFY
+    T-261 journal through VERIFY
+    previous T-260 has later/usable SHIP lifecycle evidence
+
+Prove the old implementation selects T-260-derived history.
+
+Then prove the repaired implementation never does.
+
+This should be the main RED -> GREEN control.
+
+============================================================
+11. DO NOT PREEMPT CURRENT SAIPEN WORK INCORRECTLY
+============================================================
+
+Current SAIPEN may already have an active stabilization ticket.
+
+Treat this report as a new P1 recovery defect / appended stabilization target,
+but do not reproduce the earlier bug where generic continuation text created an
+unnecessary preempting ticket in the middle of another BUILD/VERIFY.
+
+Use canonical scheduling:
+
+- preserve current owned work;
+- checkpoint/yield only if protocol permits;
+- enqueue this defect with its complete acceptance;
+- execute it when it becomes the canonical next P1.
+
+Do not lose this detailed source into a one-line generic ticket.
+
+============================================================
+ACCEPTANCE
+============================================================
+
+DONE only when:
+
+1. Phase recovery is ticket/lifecycle scoped.
+2. An unrelated ticket can never supply phase evidence for another ticket.
+3. Current-generation DONE/journal split has an explicit classification.
+4. Recovery never fabricates missing historical lifecycle.
+5. No manual STATE edit is required.
+6. The canonical recovery route preserves original bytes.
+7. The route converges on the unchanged real-shaped fixture.
+8. resolve-next-action cannot advertise a dead-end mutation.
+9. Existing legacy-DONE and block-park behavior remain green.
+10. Crash-prefix tests show every terminal partial write is valid or recoverable.
+11. Focused recovery tests are green.
+12. Pre-fix same-oracle carrier is red.
+13. Current canonical validate is CURRENT_PASS.
+14. Required full core returns new_red=0.

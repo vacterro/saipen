@@ -1,0 +1,21 @@
+{
+  "command": ".saipen/evidence/T-1361-scenario-remesure-20260921/focused.py run_scheduler_probes run_hostile_state_probes",
+  "head": "d97abdc097db432bafe2316b1e3577e44cd9cc4c",
+  "harness_sha256": "df733ec77df7c355e63a85b7851b0879fa39a1325ac9e547d5c5850d13175fd3",
+  "results": [
+    {
+      "function": "run_scheduler_probes",
+      "elapsed": 14.64100000000326,
+      "checked": 60,
+      "skipped": 0,
+      "failures": []
+    },
+    {
+      "function": "run_hostile_state_probes",
+      "elapsed": 0.01600000000325963,
+      "checked": 17,
+      "skipped": 0,
+      "failures": []
+    }
+  ]
+}

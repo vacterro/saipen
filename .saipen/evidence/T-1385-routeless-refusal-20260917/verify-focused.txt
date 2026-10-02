@@ -1,0 +1,8 @@
+T-1385 VERIFY focused families (2026-09-17T16:14:56Z)
+python -m unittest tools.test_canonical_write_route tools.test_guard_execution_reachability tools.test_canonical_command_reachability tools.test_guard_admission tools.test_guard_hostile_matrix tools.test_guard_surface_parity tools.test_opencode_adapter tools.test_adapter_parity tools.test_refusal_routes tools.test_field_fixture_isolation tools.test_t1363_zero_manual_entry tools.test_native_host_guard tools.test_unknown_tool_fail_closed tools.test_pending_ingress tools.test_actor_binding_lifecycle tools.test_session_binding tools.test_guard_events
+
+..................................................................................................................................................................................................................................................................................................................................................................................................................
+----------------------------------------------------------------------
+Ran 402 tests in 115.051s
+
+OK

@@ -1,0 +1,9 @@
+{
+  "oracle_sha256": "7f52a73476f367d8669aa88ecfea6427fafb3a1ab0c052978f1ed577ed734935",
+  "scope": "all inventoried text-mode subprocess calls, including local dict-built kwargs; unknown settings refuse",
+  "status": "PASS",
+  "tests": 6,
+  "failures": 0,
+  "errors": 0,
+  "output": "......\n----------------------------------------------------------------------\nRan 6 tests in 17.069s\n\nOK\n"
+}

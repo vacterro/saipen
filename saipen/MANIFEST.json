@@ -66,6 +66,10 @@
       "required": true
     },
     {
+      "src": "saipen/STORAGE.md",
+      "required": true
+    },
+    {
       "src": "saipen/EXECUTION.md",
       "required": true
     },

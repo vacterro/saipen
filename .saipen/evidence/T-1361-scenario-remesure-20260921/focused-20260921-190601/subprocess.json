@@ -1,0 +1,107 @@
+[
+  {
+    "argv": "['C:\\\\Users\\\\vac34\\\\AppData\\\\Local\\\\Programs\\\\Python\\\\Python311\\\\python.exe', 'V:\\\\_TEMP_\\\\saipen-rel-3-chmgqs3e\\\\home\\\\tools\\\\saipen.py', 'ship', '--json']",
+    "cwd": "V:\\_TEMP_\\saipen-rel-3-chmgqs3e\\home",
+    "exit": 1,
+    "stdout": "{\n  \"ok\": false,\n  \"code\": \"FIRST_PUBLISH_WAIT\",\n  \"stage\": \"FIRST_PUBLISH_WAIT\",\n  \"stages_reached\": [\n    \"FIRST_PUBLISH_WAIT\"\n  ],\n  \"next_action\": \"WAIT: first-publish -- confirm repo name 'file://V:/_TEMP_/saipen-rel-3-chmgqs3e/origin_empty.git' and public/private before I push\",\n  \"event_id\": \"E-7044\",\n  \"op_id\": \"wait-571955cf20b0481d9ada98e4b62d3421\",\n  \"detail\": \"first publish requires confirmation; canonical WAIT persisted, zero commit/tag/push performed\"\n}\n",
+    "stderr": ""
+  },
+  {
+    "argv": "['C:\\\\Users\\\\vac34\\\\AppData\\\\Local\\\\Programs\\\\Python\\\\Python311\\\\python.exe', 'V:\\\\_TEMP_\\\\saipen-rel-5-l3jgx0xh\\\\home\\\\tools\\\\saipen.py', 'ship', '--dry-run', '--json']",
+    "cwd": "V:\\_TEMP_\\saipen-rel-5-l3jgx0xh\\home",
+    "exit": 1,
+    "stdout": "{\n  \"ok\": false,\n  \"code\": \"VALIDATION_FAILED\",\n  \"detail\": \"foreign pre-existing staged path(s) would enter this release: foreign_untracked.txt -- stage the release scope explicitly or leave it untouched\",\n  \"canonical_next_command\": null\n}\n",
+    "stderr": ""
+  },
+  {
+    "argv": "['C:\\\\Users\\\\vac34\\\\AppData\\\\Local\\\\Programs\\\\Python\\\\Python311\\\\python.exe', 'V:\\\\_TEMP_\\\\saipen-rel-6-zawu8d4h\\\\home\\\\tools\\\\saipen.py', 'ship', '--dry-run', '--json']",
+    "cwd": "V:\\_TEMP_\\saipen-rel-6-zawu8d4h\\home",
+    "exit": 1,
+    "stdout": "{\n  \"ok\": false,\n  \"code\": \"RELEASE_FAILED\",\n  \"detail\": \"phase DONE but no committed release RUN event names this version; cannot continue an unproven release\",\n  \"canonical_next_command\": null\n}\n",
+    "stderr": ""
+  },
+  {
+    "argv": "['C:\\\\Users\\\\vac34\\\\AppData\\\\Local\\\\Programs\\\\Python\\\\Python311\\\\python.exe', 'V:\\\\_TEMP_\\\\saipen-rel-7-dvyglooo\\\\home\\\\tools\\\\saipen.py', 'ship', '--json']",
+    "cwd": "V:\\_TEMP_\\saipen-rel-7-dvyglooo\\home",
+    "exit": 1,
+    "stdout": "{\n  \"ok\": false,\n  \"code\": \"RELEASE_FAILED\",\n  \"stage\": \"INDEX_RESTORE\",\n  \"detail\": \"HOOK REJECTION -- live index does not match the owned post-stage index (and is not the pre-release index); foreign staged changes would be destroyed by rollback -- preserve the live index and resolve explicitly (CONFLICT/RECOVERY_REQUIRED)\"\n}\n",
+    "stderr": ""
+  },
+  {
+    "argv": "['git', '-C', 'V:\\\\_TEMP_\\\\saipen-rel-8-ajoxjg_3\\\\home', 'cat-file', '-e', '18d14b789e58f6897415663e9d4c426b281cdd67:tools/foreign_file.py']",
+    "cwd": "",
+    "exit": 128,
+    "stdout": "",
+    "stderr": "fatal: path 'tools/foreign_file.py' exists on disk, but not in '18d14b789e58f6897415663e9d4c426b281cdd67'\n"
+  },
+  {
+    "argv": "['git', '-C', 'V:\\\\_TEMP_\\\\saipen-rel-8-ajoxjg_3\\\\home', 'cat-file', '-e', '5f5ce425a7fb2f19c51ad9fec9e5b16f219e2f5f:tools/foreign_file.py']",
+    "cwd": "",
+    "exit": 128,
+    "stdout": "",
+    "stderr": "fatal: path 'tools/foreign_file.py' exists on disk, but not in '5f5ce425a7fb2f19c51ad9fec9e5b16f219e2f5f'\n"
+  },
+  {
+    "argv": "['C:\\\\Users\\\\vac34\\\\AppData\\\\Local\\\\Programs\\\\Python\\\\Python311\\\\python.exe', 'V:\\\\_TEMP_\\\\saipen-rel-8-ajoxjg_3\\\\home\\\\tools\\\\saipen.py', 'ship', '--json']",
+    "cwd": "V:\\_TEMP_\\saipen-rel-8-ajoxjg_3\\home",
+    "exit": 1,
+    "stdout": "{\n  \"ok\": false,\n  \"code\": \"RELEASE_FAILED\",\n  \"stage\": \"SOURCE_COVERAGE\",\n  \"detail\": \"source receipt blocks ship: {'ok': False, 'code': 'STALE_PLAN', 'detail': 'reviewed source_head d843d884b525 != current HEAD 5f5ce425a7fb; the reviewed scope is stale, re-record it', 'work': 'T-9000', 'scope_status': 'STALE_SCOPE'}\",\n  \"source_gate\": {\n    \"ok\": false,\n    \"code\": \"STALE_PLAN\",\n    \"detail\": \"reviewed source_head d843d884b525 != current HEAD 5f5ce425a7fb; the reviewed scope is stale, re-record it\",\n    \"work\": \"T-9000\",\n    \"scope_status\": \"STALE_SCOPE\"\n  }\n}\n",
+    "stderr": ""
+  },
+  {
+    "argv": "['C:\\\\Users\\\\vac34\\\\AppData\\\\Local\\\\Programs\\\\Python\\\\Python311\\\\python.exe', 'V:\\\\_TEMP_\\\\saipen-rel-9-c6cl__ms\\\\home\\\\tools\\\\saipen.py', 'ship', '--json']",
+    "cwd": "V:\\_TEMP_\\saipen-rel-9-c6cl__ms\\home",
+    "exit": 86,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "argv": "['C:\\\\Users\\\\vac34\\\\AppData\\\\Local\\\\Programs\\\\Python\\\\Python311\\\\python.exe', 'V:\\\\_TEMP_\\\\saipen-rel-9-a5wbv34v\\\\home\\\\tools\\\\saipen.py', 'ship', '--json']",
+    "cwd": "V:\\_TEMP_\\saipen-rel-9-a5wbv34v\\home",
+    "exit": 86,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "argv": "['C:\\\\Users\\\\vac34\\\\AppData\\\\Local\\\\Programs\\\\Python\\\\Python311\\\\python.exe', 'V:\\\\_TEMP_\\\\saipen-rel-9-75baok0x\\\\home\\\\tools\\\\saipen.py', 'ship', '--json']",
+    "cwd": "V:\\_TEMP_\\saipen-rel-9-75baok0x\\home",
+    "exit": 86,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "argv": "['C:\\\\Users\\\\vac34\\\\AppData\\\\Local\\\\Programs\\\\Python\\\\Python311\\\\python.exe', 'V:\\\\_TEMP_\\\\saipen-rel-9b-qordjfbf\\\\home\\\\tools\\\\saipen.py', 'ship', '--json']",
+    "cwd": "V:\\_TEMP_\\saipen-rel-9b-qordjfbf\\home",
+    "exit": 86,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "argv": "['C:\\\\Users\\\\vac34\\\\AppData\\\\Local\\\\Programs\\\\Python\\\\Python311\\\\python.exe', 'V:\\\\_TEMP_\\\\saipen-rel-9b-qordjfbf\\\\clone\\\\tools\\\\saipen.py', 'ship', '--json']",
+    "cwd": "V:\\_TEMP_\\saipen-rel-9b-qordjfbf\\clone",
+    "exit": 1,
+    "stdout": "{\n  \"ok\": false,\n  \"code\": \"RELEASE_FAILED\",\n  \"stage\": \"SOURCE_COVERAGE\",\n  \"detail\": \"source receipt blocks ship: {'ok': False, 'code': 'STALE_PLAN', 'detail': 'reviewed source_head cced9c101f4c != current HEAD e30c15c33b5c; the reviewed scope is stale, re-record it', 'work': 'T-9000', 'scope_status': 'STALE_SCOPE'}\",\n  \"source_gate\": {\n    \"ok\": false,\n    \"code\": \"STALE_PLAN\",\n    \"detail\": \"reviewed source_head cced9c101f4c != current HEAD e30c15c33b5c; the reviewed scope is stale, re-record it\",\n    \"work\": \"T-9000\",\n    \"scope_status\": \"STALE_SCOPE\"\n  }\n}\n",
+    "stderr": ""
+  },
+  {
+    "argv": "['git', '-C', 'V:\\\\_TEMP_\\\\saipen-rel-10-s6v5ihgm\\\\home', 'rev-parse', '--verify', '--quiet', 'v8.0.2']",
+    "cwd": "",
+    "exit": 1,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "argv": "['git', '-C', 'V:\\\\_TEMP_\\\\saipen-rel-10-s6v5ihgm\\\\home', 'rev-parse', '--verify', '--quiet', 'v8.0.2']",
+    "cwd": "",
+    "exit": 1,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "argv": "['C:\\\\Users\\\\vac34\\\\AppData\\\\Local\\\\Programs\\\\Python\\\\Python311\\\\python.exe', 'V:\\\\_TEMP_\\\\saipen-rel-15-pohzpv1h\\\\clone15\\\\tools\\\\validate.py']",
+    "cwd": "V:\\_TEMP_\\saipen-rel-15-pohzpv1h\\clone15",
+    "exit": 1,
+    "stdout": "saipen conformance validation starting (tools/validate.py)...\nProject root: V:\\_TEMP_\\saipen-rel-15-pohzpv1h\\clone15 (git-worktree)\nProject lineage: lineage-b512942bac884a8691f6c98afcd6ddb9\nPASS: state.schema.json and the engine STATE contract constants agree\nPASS: state.schema.json states nothing the validator ignores (4 keywords enforced natively, 5 delegated, 4 types interpreted)\nPASS: STATE.md schema valid (checked against state.schema.json)\nPASS: .saipen/IDENTITY.md is a canonical portable lineage carrier (lineage-b512942bac884a8691f6c98afcd6ddb9)\nPASS: subSaipen STATE.md shape valid (7 checked, live + shipped library)\nPASS: .saipen/extensions/subs/MANIFEST.md parses strictly (5 entries)\nPASS: extensions/subs/MANIFEST.md parses strictly (4 entries)\nPASS: BOARD.md has all required section headings\nPASS: BOARD.md no duplicate tickets\nPASS: BOARD.md no dangling needs: references\nPASS: BOARD.md acyclic\nPASS: BOARD.md Work supersession relations are terminal, existing and acyclic\nPASS: BOARD.md claimed tickets have their needs: satisfied\nPASS: BOARD.md at most one ## DOING ticket (0 claimed)\nPASS: every DONE closure provenance satisfies its declared closure contract\nPASS: LOG.md format valid (skeleton, E-### unique + monotonic, parents resolve; 19 segment(s))\nPASS: improve seat report schema valid (12 report(s) scanned)\nPASS: core sweep linkage valid: every disposition resolves to a real finding/ticket, no unverified or INVALID/ALREADY_FIXED finding produced a ticket, source_reports resolve exactly\nPASS: subsaipen write boundary continuous: no sub artifact targets a main-project canonical file (red control 7)\nPASS: saiui charter integrity verified (references UI.md, no second palette, write ban enforced, fixer contract present, UI- prefix documented, bootstrap includes charters)\nPASS: 6 shipped sai*.md charter(s) declare the full metadata block (8 keys, closed enums)\nPASS: freshness hardening command/cleanup/worker contracts intact\nPASS: T-549 hard barrier blocks the T-551..T-561 improve wave\nPASS: convergence contract intact (13 stages in order, closure bar and post-K ordering rule present)\nPASS: SAIUI SAISENT mission labels findings as hypotheses to verify\nPASS: KNOWLEDGE/ clean\nFAIL: KNOWLEDGE/ structured card/index: INDEX.md is stale; run `saipen knowledge index`\nPASS: .saipen/USERPERSON.md is a well-formed optional USERPERSON profile\nPASS: README.md badge matches VERSION\nPASS: conformance corpus schema + IDs valid (257 rows, exactly 1..257)\nPASS: CONFORMANCE.md matches the generated corpus index\nPASS: no stray control characters in shipped text (305 files swept)\nPASS: core docs text lint clean (no U+FFFD/split keywords/fence drift)\nPASS: phase enum <-> phases/ docs in sync (16 phases)\nPASS: INDEX.md phase list matches enum + files (16 phases)\nPASS: CORE / IMPROVE / CLI Improve action sets match exactly\nPASS: runtime manifest complete (434 files, all tracked)\nPASS: adapter cross-references valid (checking saipen/ paths in all 10 adapters)\nPASS: no adapter or injector treats RFC.md as normative (13 checked, RFC stub is redirect-only)\nPASS: 32 locale README badge(s) match VERSION (8.0.2)\nPASS: shortcut callouts aligned across 32 locale sources, 3 mirrors, 33 locale guides, and both root entry docs\nPASS: append targets end on a line boundary (40 checked)\nPASS: lint parity [T-628] -- harness.md and validate.yml agree on `python -m ruff check tools/ tests/` with ruff==0.16.0\nPASS: doc coverage accounted for (419 shipped documents, 24 checked patterns, 34 exempt)\nFAIL: release ledger baseline is stale for: v7.84.0, v7.85.0, v7.85.1, v7.86.0, v7.87.0, v7.88.0, v7.89.0, v7.90.0, and 1 more. The recorded divergence no longer exists; remove its exception so the baseline cannot become a permanent blind spot\nPASS: warn slug ownership verified for 4 tracked slug(s)\nPASS: Golden Default palette integrity verified (21 Wintage tokens, sha256:271ba26cd75948e8)\nWARN [no-conformance-record]: no LOG line records a conformance run in \u0412\u00a7 1.2's fixed form (`RUN: validate.py -> PASS` or `-> FAIL`), so \u0412\u00a7 1.10's `saipen status` has nothing to report under Conformance and a cold agent must either guess from prose or say none exists\nWARN [hunt-mark-unresolvable]: 24 sealed hunt mark(s) name commits this repository does not have or that never reached the remote (earliest .saipen/logs/LOG-001.md:114 @ab71e87). Immutable by append-only; new marks are FAILed instead\nWARN [log-missing-date]: 125 sealed LOG entr(y/ies) predate the mandatory DATE (earliest .saipen/logs/LOG-001.md:3). Immutable by append-only; new entries are FAILed instead\nWARN [producer-package-stale]: .saipen/extensions/subs/saihunt/kitchen/OUTBOX.md [HUNT-014] carries source_head 'b7f5b51280b8f49c5fedbf7a00aeb6d4f45743ba' but current source_head is 'e4b1195c12937b9309b01df192aff25245c28383' -- package is stale and MUST NOT be collected -- reported under `--gate core`, where this producer is not being consumed; it FAILs under `--gate collect:saihunt` and blocks nothing else\nWARN [producer-package-stale]: .saipen/extensions/subs/saihunt/kitchen/OUTBOX.md [HUNT-014] carries source_tree_fingerprint 'git-delta-v1:4c6fd9b3f13a1d7a0b203e00a759dae5eac1474eabb77cb3e39dad9da1953eb9' but the current tree computes 'git-delta-v1:c66baf69a8306f3b95dfc7badb5f72b088f8de8408e933efadc4d149721a1195' -- the tree changed since the package was produced (same HEAD or not), so it is stale and MUST NOT be collected (PROTOCOL.md \u0412\u00a7 6, T-543) -- reported under `--gate core`, where this producer is not being consumed; it FAILs under `--gate collect:saihunt` and blocks nothing else\nWARN [producer-package-stale]: ... and 8 more like the above\nWARN [subsaipen-uncollected]: 4 subSaipen OUTBOX entr(y/ies) sit at `status: ready` -- that is a finding waiting on `saipen sub collect`, visible only when someone runs it (extensions/subs/PROTOCOL.md \u0412\u00a7 4)\nWARN [cross-doc-drift]: cross-doc drift [ahead-stamp-repair] -- CORE.md must say a future-stamped LOG line is restamped to a defensible bound with a DEC naming the original, the replacement, and that the minute is inherited rather than measured. Without it the only sanctioned response is waiting, which keeps a false record and reds every gate until the clock catches up\nWARN [cross-doc-drift]: cross-doc drift [shortcut-memory-ban] -- BOOT.md step 7 must order \u0412\u00a7 1.10's table read before acting on a shortcut and explicitly state that memory is never a source for it. An agent that believes it knows what a key means answers from recall rather than reading the file\nWARN [cross-doc-drift]: ... and 13 more like the above\nValidation FAILED: 2 problem(s), 29 warning(s)\n",
+    "stderr": ""
+  }
+]

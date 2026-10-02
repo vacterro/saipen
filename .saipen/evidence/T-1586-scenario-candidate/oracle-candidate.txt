@@ -1,0 +1,12 @@
+test_actual_copy_callbacks_skip_held_locks_but_preserve_durable_and_foreign_names (t1586_fixed_oracle.ScenarioInputTests.test_actual_copy_callbacks_skip_held_locks_but_preserve_durable_and_foreign_names) ... ok
+test_actual_goal_fixture_admits_claim_and_build_with_current_style (t1586_fixed_oracle.ScenarioInputTests.test_actual_goal_fixture_admits_claim_and_build_with_current_style) ... ok
+test_generic_known_bad_revision_still_fails_a_stuck_current_instrument (t1586_fixed_oracle.ScenarioInputTests.test_generic_known_bad_revision_still_fails_a_stuck_current_instrument) ... ok
+test_generic_probe_uses_its_actual_freshness_authority (t1586_fixed_oracle.ScenarioInputTests.test_generic_probe_uses_its_actual_freshness_authority) ... ok
+test_missing_style_control_still_refuses_the_same_canonical_writer (t1586_fixed_oracle.ScenarioInputTests.test_missing_style_control_still_refuses_the_same_canonical_writer) ... ok
+test_purity_snapshot_excludes_runtime_but_retains_durable_nested_names (t1586_fixed_oracle.ScenarioInputTests.test_purity_snapshot_excludes_runtime_but_retains_durable_nested_names) ... ok
+test_purity_snapshot_still_refuses_unreadable_durable_evidence (t1586_fixed_oracle.ScenarioInputTests.test_purity_snapshot_still_refuses_unreadable_durable_evidence) ... ok
+
+----------------------------------------------------------------------
+Ran 7 tests in 1.794s
+
+OK

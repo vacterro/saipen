@@ -1,0 +1,26 @@
+{
+  "verifier": "ea035e106ce20faf",
+  "command": "python -B -m unittest -v test_t1572_ticket_scoped_recovery test_t1574_followups.ImproveFollowupTests test_t1574_followups.ReproductionTests.test_real_producer_rejects_exit_status_as_defect_predicate test_t1574_followups.ReproductionTests.test_real_path_probe_distinguishes_guard_and_broken_harness test_t1574_followups.SilentExecutionTests.test_existing_policy_consumer_defaults_to_silent",
+  "oracle": [
+    "tools/test_t1572_ticket_scoped_recovery.py",
+    "tools/test_t1574_followups.py",
+    "tools/test_fixture_support.py",
+    "tools/test_hermetic_env.py",
+    "tools/test_improve_reconcile.py",
+    "tools/saipen_engine/reproduction.py"
+  ],
+  "runs": [
+    {
+      "label": "red",
+      "subject": "8fd7e9e47958d358",
+      "returncode": 1,
+      "verdict": "FAILED (failures=21)"
+    },
+    {
+      "label": "green",
+      "subject": "7222c91dcf11d2e0",
+      "returncode": 0,
+      "verdict": "OK"
+    }
+  ]
+}

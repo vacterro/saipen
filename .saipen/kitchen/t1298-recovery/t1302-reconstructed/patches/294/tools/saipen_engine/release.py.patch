@@ -1,0 +1,432 @@
+Index: tools\saipen_engine\release.py
+===================================================================
+--- tools\saipen_engine\release.py	before
++++ tools\saipen_engine\release.py	after
+@@ -47,7 +47,7 @@
+ from .board import strict_iso_utc, iso_utc_sort_key
+ from .errors import CODES
+ from .journal import _drop_settled_staged
+-from .operations import RELEASE_SCOPE_DIR, _plan_finish_ticket, release_scope_matches
++from .operations import RELEASE_SCOPE_DIR, _plan_finish_ticket, release_scope_matches
+ from .state import parse_state
+ 
+ # ---------------------------------------------------------------------------
+@@ -531,6 +531,14 @@
+     crew_epoch: str = ""
+     crew_closure: bool = False
+     crew_scope: tuple[str, str] = ()  # (path, expected_hash) pairs
++    # Cohort terminal publication (T-1302 FINDING 4): one durable batch
++    # authority. A cohort ship publishes the FROZEN union of its members'
++    # attributed paths through the SAME executor; the closure flips the
++    # registry record to shipped with the exact release identity. The carrier
++    # fills the crew identity slots (crew_epoch="cohort:C-###",
++    # ticket_id=C-###) so the existing phase-DONE/scope-drift machinery
++    # applies unchanged; `cohort_id` selects the cohort closure plan.
++    cohort_id: str = ""
+     # A targeted producer shortcut owns one reviewed Core ticket. Persisted
+     # crew intent must not replace that route between PLAN and APPLY.
+     targeted_ticket: bool = False
+@@ -595,6 +603,7 @@
+             self.crew_epoch,
+             self.crew_closure,
+             self.crew_scope,
++            self.cohort_id,
+             self.targeted_ticket,
+             self.targeted_integration_op,
+         )
+@@ -1062,7 +1071,7 @@
+             first_publish_wait=classification["first_publish_wait"],
+             confirmation=confirmation,
+             pre_plan_index=index,
+-            source_manifest=_source_authority_manifest(root, _source_paths),
++            source_manifest=_source_authority_manifest(root, _source_paths),
+             targeted_ticket=targeted_ticket,
+ 
+         targeted_integration_op=targeted_integration_op,
+@@ -1117,6 +1126,7 @@
+     crew_epoch = crew_carrier.get("crew_epoch") or ""
+     scope = crew_carrier.get("scope") or {}
+     ticket_id = crew_carrier.get("ticket_id") or ""
++    cohort_id = crew_carrier.get("cohort_id") or ""
+     if not crew_epoch or not ticket_id or not scope:
+         raise ReleaseRefusal(
+             "VALIDATION_FAILED", "crew terminal carrier is missing crew_epoch/ticket_id/scope"
+@@ -1196,6 +1206,7 @@
+             crew_epoch=crew_epoch,
+             crew_closure=True,
+             crew_scope=tuple(sorted(scope.items())),
++            cohort_id=cohort_id,
+             source_manifest=_source_authority_manifest(root, source_paths),
+             current_agent=release_actor,
+         )
+@@ -1312,6 +1323,7 @@
+         crew_epoch=crew_epoch,
+         crew_closure=True,
+         crew_scope=tuple(sorted(scope.items())),
++        cohort_id=cohort_id,
+         current_agent=release_actor,
+     )
+ 
+@@ -1678,12 +1690,12 @@
+         data = json.loads(codec.read_doc(path))
+     except (OSError, json.JSONDecodeError) as exc:
+         raise ReleaseRefusal("RECOVERY_CONFLICT", f"release scope record {path} is corrupt: {exc}")
+-    if (not isinstance(data, dict) or type(data.get("schema_version")) is not int
+-            or data.get("schema_version") not in (1, 2)):
++    if (not isinstance(data, dict) or type(data.get("schema_version")) is not int
++            or data.get("schema_version") not in (1, 2)):
+         raise ReleaseRefusal(
+             "RECOVERY_CONFLICT",
+             f"release scope record {path} has unknown schema_version "
+-            f"{data.get('schema_version') if isinstance(data, dict) else None!r}",
++            f"{data.get('schema_version') if isinstance(data, dict) else None!r}",
+         )
+     if data.get("ticket") != ticket_id:
+         raise ReleaseRefusal(
+@@ -1786,8 +1798,8 @@
+                     "the deletion",
+                 )
+             continue
+-        width = 64 if data["schema_version"] == 2 else 16
+-        if not isinstance(expected, str) or not re.fullmatch(rf"[0-9a-f]{{{width}}}", expected):
++        width = 64 if data["schema_version"] == 2 else 16
++        if not isinstance(expected, str) or not re.fullmatch(rf"[0-9a-f]{{{width}}}", expected):
+             raise ReleaseRefusal(
+                 "RECOVERY_CONFLICT",
+                 f"release scope path {rel!r} carries a malformed hash",
+@@ -1796,7 +1808,7 @@
+             raise ReleaseRefusal(
+                 "SOURCE_SCOPE_MISSING", f"scope path {rel} is missing from the worktree"
+             )
+-        live = hashlib.sha256(fp.read_bytes()).hexdigest()[:width]
++        live = hashlib.sha256(fp.read_bytes()).hexdigest()[:width]
+         if live != expected:
+             raise ReleaseRefusal(
+                 "STALE_PLAN",
+@@ -1915,7 +1927,7 @@
+                 continue
+             if not fp.is_file():
+                 return _release_failure("PREFLIGHT", f"crew scope path {rel} missing")
+-            if not release_scope_matches(fp.read_bytes(), expected):
++            if not release_scope_matches(fp.read_bytes(), expected):
+                 return _release_failure("PREFLIGHT", f"crew scope path {rel} changed since defer")
+         return {"ok": True}
+ 
+@@ -2045,7 +2057,7 @@
+                 continue
+             if not fp.is_file():
+                 return _release_failure("PREFLIGHT", f"crew scope path {rel} missing")
+-            if not release_scope_matches(fp.read_bytes(), expected):
++            if not release_scope_matches(fp.read_bytes(), expected):
+                 return _release_failure("PREFLIGHT", f"crew scope path {rel} changed since defer")
+     else:
+         try:
+@@ -2352,7 +2364,7 @@
+     # crew_release_context evaluates SC-0..SC-10 and would refuse its own
+     # pending sibling.
+     crew_context = None
+-    if plan.crew_epoch:
++    if plan.crew_epoch and not plan.cohort_id:
+         try:
+             from .crew import crew_release_context
+ 
+@@ -2466,11 +2478,11 @@
+     from .lock import project_writer_lock
+ 
+     try:
+-        with project_writer_lock(root):
+-            preflight = _preflight_plan(root, plan)
+-            if not preflight["ok"]:
+-                return preflight
+-            return _apply_release_locked(root, plan)
++        with project_writer_lock(root):
++            preflight = _preflight_plan(root, plan)
++            if not preflight["ok"]:
++                return preflight
++            return _apply_release_locked(root, plan)
+     except PermissionError:
+         return _release_failure("WRITER_BUSY", "another live writer holds the project lock")
+ 
+@@ -2786,61 +2798,61 @@
+     return {"ok": True}
+ 
+ 
+-def _owned_entries(root: Path, paths, tree: str | None = None) -> dict:
+-    """Read exact Git entries; missing owned paths are explicit deletions.
+-
+-    Neither route reads mutable worktree bytes or creates a tree object.
+-    """
+-    paths = sorted(set(paths))
+-    if not paths:
+-        return {}
+-    args = ("ls-tree", "-r", "-z", tree) if tree is not None else ("ls-files", "-s", "-z")
+-    result = _git(root, *args, "--", *paths, literal=True)
+-    if not result.ok:
+-        raise ValueError("cannot read owned Git entries: " + result.stderr)
+-    entries = {path: {"deleted": True} for path in paths}
+-    seen = set()
+-    for item in result.stdout.split("\0"):
+-        if not item:
+-            continue
+-        header, separator, path = item.partition("\t")
+-        fields = header.split()
+-        if not separator or len(fields) != 3 or path not in entries or path in seen:
+-            raise ValueError("noncanonical owned Git entry")
+-        mode, kind, blob = fields if tree is not None else (fields[0], fields[2], fields[1])
+-        if kind not in (("blob", "commit") if tree is not None else ("0",)):
+-            raise ValueError(f"unmerged or unsupported owned Git entry: {path}")
+-        if mode not in ("100644", "100755", "120000", "160000") or not re.fullmatch(
+-            r"[0-9a-f]{40}|[0-9a-f]{64}", blob
+-        ):
+-            raise ValueError(f"invalid owned Git identity: {path}")
+-        entries[path] = {"mode": mode, "blob": blob}
+-        seen.add(path)
+-    return entries
+-
+-
+-def _verify_owned_entries(root: Path, paths, manifest, tree: str | None = None) -> dict:
+-    stage = "TREE_MISMATCH" if tree is not None else "INDEX_DRIFT"
+-    if not isinstance(manifest, dict) or set(manifest) != set(paths):
+-        return {"ok": False, "stage": stage,
+-                "detail": "owned index manifest missing or scope differs"}
+-    try:
+-        actual = _owned_entries(root, paths, tree)
+-    except ValueError as exc:
+-        return {"ok": False, "stage": stage, "detail": str(exc)}
+-    if actual != manifest:
+-        changed = sorted(p for p in actual if actual[p] != manifest[p])
+-        return {"ok": False, "stage": stage,
+-                "detail": "owned Git identity changed: " + ", ".join(changed)}
+-    return {"ok": True}
+-
+-
+-def _verify_index_after_gate(root: Path, plan: ReleasePlan, manifest=None) -> dict:
++def _owned_entries(root: Path, paths, tree: str | None = None) -> dict:
++    """Read exact Git entries; missing owned paths are explicit deletions.
++
++    Neither route reads mutable worktree bytes or creates a tree object.
++    """
++    paths = sorted(set(paths))
++    if not paths:
++        return {}
++    args = ("ls-tree", "-r", "-z", tree) if tree is not None else ("ls-files", "-s", "-z")
++    result = _git(root, *args, "--", *paths, literal=True)
++    if not result.ok:
++        raise ValueError("cannot read owned Git entries: " + result.stderr)
++    entries = {path: {"deleted": True} for path in paths}
++    seen = set()
++    for item in result.stdout.split("\0"):
++        if not item:
++            continue
++        header, separator, path = item.partition("\t")
++        fields = header.split()
++        if not separator or len(fields) != 3 or path not in entries or path in seen:
++            raise ValueError("noncanonical owned Git entry")
++        mode, kind, blob = fields if tree is not None else (fields[0], fields[2], fields[1])
++        if kind not in (("blob", "commit") if tree is not None else ("0",)):
++            raise ValueError(f"unmerged or unsupported owned Git entry: {path}")
++        if mode not in ("100644", "100755", "120000", "160000") or not re.fullmatch(
++            r"[0-9a-f]{40}|[0-9a-f]{64}", blob
++        ):
++            raise ValueError(f"invalid owned Git identity: {path}")
++        entries[path] = {"mode": mode, "blob": blob}
++        seen.add(path)
++    return entries
++
++
++def _verify_owned_entries(root: Path, paths, manifest, tree: str | None = None) -> dict:
++    stage = "TREE_MISMATCH" if tree is not None else "INDEX_DRIFT"
++    if not isinstance(manifest, dict) or set(manifest) != set(paths):
++        return {"ok": False, "stage": stage,
++                "detail": "owned index manifest missing or scope differs"}
++    try:
++        actual = _owned_entries(root, paths, tree)
++    except ValueError as exc:
++        return {"ok": False, "stage": stage, "detail": str(exc)}
++    if actual != manifest:
++        changed = sorted(p for p in actual if actual[p] != manifest[p])
++        return {"ok": False, "stage": stage,
++                "detail": "owned Git identity changed: " + ", ".join(changed)}
++    return {"ok": True}
++
++
++def _verify_index_after_gate(root: Path, plan: ReleasePlan, manifest=None) -> dict:
+     """The index must hold EXACTLY the pre-plan index plus the release scope:
+     the gate must not have pulled in any path this release does not own."""
+-    exact = _verify_owned_entries(root, plan.release_paths, manifest)
+-    if not exact["ok"]:
+-        return exact
++    exact = _verify_owned_entries(root, plan.release_paths, manifest)
++    if not exact["ok"]:
++        return exact
+ 
+     pre_plan = set(plan.pre_plan_index.paths)
+     release = set(plan.release_paths)
+@@ -2882,10 +2894,10 @@
+     # identical bytes) is owned work, not drift: it never needs to stay in
+     # the staged diff (T-1003).
+     expected = (pre_plan - release) | {p for p in release if not _clean_tracked(p)}
+-    changed = _git(root, "diff", "--cached", "--name-only", "--no-renames", "-z")
+-    if not changed.ok:
+-        return {"ok": False, "stage": "INDEX_DRIFT", "detail": "cannot read staged path set"}
+-    actual = {p for p in changed.stdout.split("\0") if p}
++    changed = _git(root, "diff", "--cached", "--name-only", "--no-renames", "-z")
++    if not changed.ok:
++        return {"ok": False, "stage": "INDEX_DRIFT", "detail": "cannot read staged path set"}
++    actual = {p for p in changed.stdout.split("\0") if p}
+     if actual != expected:
+         extra = sorted(actual - expected)
+         missing = sorted(expected - actual)
+@@ -2898,11 +2910,11 @@
+                 + (f" -- missing: {', '.join(missing)}" if missing else "")
+             ),
+         }
+-    foreign = {
+-        p: {"deleted": True} if mode == "D" else {"mode": mode, "blob": blob}
+-        for p, mode, blob in plan.pre_plan_index.entries if p not in release
+-    }
+-    return _verify_owned_entries(root, foreign, foreign)
++    foreign = {
++        p: {"deleted": True} if mode == "D" else {"mode": mode, "blob": blob}
++        for p, mode, blob in plan.pre_plan_index.entries if p not in release
++    }
++    return _verify_owned_entries(root, foreign, foreign)
+ 
+ 
+ def _stage_and_commit(root: Path, plan: ReleasePlan, journal) -> dict:
+@@ -2918,13 +2930,13 @@
+     git process that changes the selected tree is a refusal with zero
+     publication, never "the reviewed release".
+     """
+-    stage_result = _stage_release_content(root, plan)
+-    if not stage_result["ok"]:
+-        return stage_result
+-    try:
+-        owned_manifest = _owned_entries(root, plan.release_paths)
+-    except ValueError as exc:
+-        return {"ok": False, "stage": "INDEX_SNAPSHOT", "detail": str(exc)}
++    stage_result = _stage_release_content(root, plan)
++    if not stage_result["ok"]:
++        return stage_result
++    try:
++        owned_manifest = _owned_entries(root, plan.release_paths)
++    except ValueError as exc:
++        return {"ok": False, "stage": "INDEX_SNAPSHOT", "detail": str(exc)}
+     # Capture the EXACT OWNED post-stage index SHA and journal it BEFORE the
+     # CONTENT_STAGED crash point (hostile-regression): rollback can then
+     # prove the live index is exactly the index THIS release staged -- and
+@@ -2934,8 +2946,8 @@
+         owned_post_stage_sha, _ = _exact_index_bytes(root)
+     except ValueError as exc:
+         return {"ok": False, "stage": "INDEX_SNAPSHOT", "detail": str(exc)}
+-    _try_journal(journal, "update", owned_post_stage_index_sha256=owned_post_stage_sha,
+-                 owned_index_manifest=owned_manifest)
++    _try_journal(journal, "update", owned_post_stage_index_sha256=owned_post_stage_sha,
++                 owned_index_manifest=owned_manifest)
+     # Kill right after the release's own `git add` but before the content
+     # commit: recovery must restore the EXACT pre-plan index snapshot from
+     # journal evidence, never leave release staging behind (T-1003 exact
+@@ -2944,24 +2956,24 @@
+     gate_result = _run_gate(root, "ship")
+     if not gate_result["ok"]:
+         return {"ok": False, "stage": "SHIP_GATE", "detail": gate_result["detail"]}
+-    idx_result = _verify_index_after_gate(root, plan, owned_manifest)
++    idx_result = _verify_index_after_gate(root, plan, owned_manifest)
+     if not idx_result["ok"]:
+         return idx_result
+     diff = _git(root, "diff", "--cached", "--check")
+     if not diff.ok:
+         return {"ok": False, "stage": "DIFF_CHECK", "detail": diff.stdout or diff.stderr}
+     intended_tree = _git(root, "write-tree")
+-    if not intended_tree.ok:
++    if not intended_tree.ok:
+         return {
+             "ok": False,
+             "stage": "COMMIT",
+             "detail": f"write-tree failed: {intended_tree.stderr}",
+-        }
+-    tree_result = _verify_owned_entries(
+-        root, plan.release_paths, owned_manifest, intended_tree.stdout
+-    )
+-    if not tree_result["ok"]:
+-        return tree_result
++        }
++    tree_result = _verify_owned_entries(
++        root, plan.release_paths, owned_manifest, intended_tree.stdout
++    )
++    if not tree_result["ok"]:
++        return tree_result
+     # Persist the intended tree BEFORE the commit so a kill right after the
+     # commit can never leave recovery unable to name what was just created.
+     _try_journal(journal, "update", intended_content_tree=intended_tree.stdout)
+@@ -3036,14 +3048,36 @@
+     STATE + digest, all through the canonical SAIOPS planner. The journal
+     carries a SINGLE LOG target whose after-bytes recovery can verify. A
+     terminal CREW release (no ## DOING ticket) closes through
+-    _plan_crew_closure instead of the ordinary ticket closure."""
++    _plan_crew_closure instead of the ordinary ticket closure; a terminal
++    COHORT publication (T-1302 FINDING 4) closes through _plan_cohort_closure
++    which flips the durable registry record with the exact release identity."""
+     import datetime
+ 
+     now = datetime.datetime.now(datetime.timezone.utc).strftime("%d.%m.%y %H:%M")
+     utc = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+-    from .operations import _plan_crew_closure
++    from .operations import _plan_cohort_closure, _plan_crew_closure
+ 
+-    if crew:
++    if plan.cohort_id:
++        closure_commit = ""
++        if plan.mode != "no-publish":
++            try:
++                closure_commit = _git(root, "rev-parse", "HEAD").stdout
++            except Exception:
++                closure_commit = ""
++        finish = _plan_cohort_closure(
++            root,
++            plan.current_agent or "saipen-cli",
++            now,
++            utc,
++            plan.cohort_id,
++            digest_text=digest,
++            prefix_run=run_msg,
++            release_op_id=plan.op_id,
++            version=plan.version,
++            tag=plan.tag,
++            commit=closure_commit,
++        )
++    elif crew:
+         finish = _plan_crew_closure(
+             root,
+             plan.current_agent or "saipen-cli",
+@@ -3134,6 +3168,7 @@
+                 "source_tree_fingerprint": plan.source_tree_fingerprint,
+                 "mode": plan.mode,
+                 "crew_epoch": plan.crew_epoch,
++                "cohort_id": plan.cohort_id,
+                 "project_lineage": project_lineage_identity(root),
+                 "recorded_at": now,
+             },
+@@ -4429,15 +4464,15 @@
+         "op_id": record.get("op_id", ""),
+         "ticket_id": record.get("ticket_id", ""),
+         "tag": record.get("tag", ""),
+-        "version": record.get("version", ""),
+-        "source_head": record.get("source_head", ""),
+-        "source_tree_fingerprint": record.get("source_tree_fingerprint", ""),
+-        "closure_commit": record.get("closure_commit", ""),
++        "version": record.get("version", ""),
++        "source_head": record.get("source_head", ""),
++        "source_tree_fingerprint": record.get("source_tree_fingerprint", ""),
++        "closure_commit": record.get("closure_commit", ""),
+         "created_at": record.get("created_at", ""),
+         "stages": tuple(record.get("stages") or ()),
+-        "pre_ship_evidence": record.get("crew_pre_ship_evidence", {}),
+-        **({"pre_ship_applicability": record["crew_pre_ship_applicability"]}
+-           if "crew_pre_ship_applicability" in record else {}),
++        "pre_ship_evidence": record.get("crew_pre_ship_evidence", {}),
++        **({"pre_ship_applicability": record["crew_pre_ship_applicability"]}
++           if "crew_pre_ship_applicability" in record else {}),
+         "mode": record.get("mode") or "full",
+     }
+ 

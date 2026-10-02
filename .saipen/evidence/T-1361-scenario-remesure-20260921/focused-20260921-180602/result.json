@@ -1,0 +1,16 @@
+{
+  "command": ".saipen/evidence/T-1361-scenario-remesure-20260921/focused.py run_injector_probes",
+  "head": "d97abdc097db432bafe2316b1e3577e44cd9cc4c",
+  "harness_sha256": "f15edd84483f38b0ae43e751b0f3b66c370a3adb28e75b6cf5f02f60e6771c9c",
+  "results": [
+    {
+      "function": "run_injector_probes",
+      "elapsed": 38.73399999999674,
+      "checked": 6,
+      "skipped": 0,
+      "failures": [
+        "bootstrap/inject.sh: install/uninstall changed surrounding user bytes | no failure line"
+      ]
+    }
+  ]
+}

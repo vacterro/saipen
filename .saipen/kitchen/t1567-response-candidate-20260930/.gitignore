@@ -1,0 +1,56 @@
+*.bak
+.DS_Store
+Thumbs.db
+desktop.ini
+# A Windows agent can leave a real NTFS device-name entry behind when a
+# redirect meant for another shell is interpreted literally. It is never
+# project content, and Git must not offer it to `git add -A`.
+/nul
+__pycache__/
+*.py[cod]
+.freebuff/
+.saipen/recovery/
+.saipen/locks/
+# Exact quarantined receipt bodies are local source authority, never a Git or
+# archive distribution surface. Export-safe state stays under intake/distribution.
+.saipen/quarantine/
+# T-994: process-local runtime caches must never enter the tree.
+.saipen/cache/
+# bootstrap/export.* drops its archive in the project root by design
+saipen_export_*.tar.gz
+saipen_export_*.zip
+
+thoughts/
+
+# Project scratch directory for ad-hoc debugging artifacts. It is not shipped
+# documentation or source; the validator's coverage stage and the audit checks
+# must never classify a file under it as a released Markdown document.
+/_tmp_dbg/
+
+# A subSaipen's kitchen is a sandbox, and saiwiki's holds a CLONE of the
+# GitHub wiki -- a nested git repository. `git add -A` turns that into a
+# gitlink: a 160000 entry pointing at a commit no clone of this repo can
+# fetch, with none of the content. It landed in v7.122.0 exactly that way.
+.saipen/extensions/subs/*/kitchen/wiki/
+
+# T-1350: the same rule, one directory over. saipython's `pen/` is the other
+# kitchen sandbox -- its own tracked marker says "Clones of target files land
+# here (read from the main tree, edited only as copies). Never the originals.
+# Scratch" -- and it was missed when the wiki case was ruled on. It had grown
+# two nested git repositories and 1534 untracked scratch files, including whole
+# copies of this repository's tools/saipen.py and tools/saipen_engine/, all of
+# which the whole-project delivery inventory was collecting as real content.
+# The marker itself stays tracked, so the directory keeps saying what it is.
+.saipen/extensions/subs/*/kitchen/pen/*
+!.saipen/extensions/subs/*/kitchen/pen/_gitkeep
+
+# Per-machine agent permissions. Untracked and unshared on purpose: it is
+# local trust, not project content, and `git add -A` would otherwise publish
+# one machine's allowlist as everyone's.
+.claude/settings.local.json
+.saipen/extensions/subs/*/kitchen/_gen_*.py
+saipen-delivery.zip
+
+# Wave 15 handoff artifact: large roadmap file, not shipped runtime. Keep out of
+# root-file-set and coverage checks; validator honours .gitignore.
+impl1.md

@@ -1,0 +1,49 @@
+test_a_foreign_bound_agent_cannot_edit_a_tree_under_test (test_t1575_parallel_lane.GuardTests.test_a_foreign_bound_agent_cannot_edit_a_tree_under_test)
+Measured 30.09.26: another project's agent edited this repo mid-run. ... FAIL
+test_in_root_edits_outside_saipen_are_refused_while_live (test_t1575_parallel_lane.GuardTests.test_in_root_edits_outside_saipen_are_refused_while_live) ... FAIL
+test_a_stale_marker_never_freezes_the_tree (test_t1575_parallel_lane.MarkerTests.test_a_stale_marker_never_freezes_the_tree) ... ok
+test_only_the_writer_removes_its_marker (test_t1575_parallel_lane.MarkerTests.test_only_the_writer_removes_its_marker) ... ok
+test_the_marker_lives_exactly_as_long_as_the_gate (test_t1575_parallel_lane.MarkerTests.test_the_marker_lives_exactly_as_long_as_the_gate) ... ok
+test_the_evidence_run_holds_the_marker_and_always_releases_it (test_t1575_parallel_lane.RunnerWiringTests.test_the_evidence_run_holds_the_marker_and_always_releases_it) ... FAIL
+test_continue_names_the_gate_and_the_parallel_lane (test_t1575_parallel_lane.TurnEntryTests.test_continue_names_the_gate_and_the_parallel_lane) ... FAIL
+
+======================================================================
+FAIL: test_a_foreign_bound_agent_cannot_edit_a_tree_under_test (test_t1575_parallel_lane.GuardTests.test_a_foreign_bound_agent_cannot_edit_a_tree_under_test)
+Measured 30.09.26: another project's agent edited this repo mid-run.
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1575-oracle-c0q2lhli\tools\test_t1575_parallel_lane.py", line 103, in test_a_foreign_bound_agent_cannot_edit_a_tree_under_test
+    self.assertEqual(refused["code"], "TREE_UNDER_TEST", refused)
+AssertionError: 'ADMITTED_EXTERNAL' != 'TREE_UNDER_TEST'
+- ADMITTED_EXTERNAL
++ TREE_UNDER_TEST
+ : {'ok': True, 'code': 'ADMITTED_EXTERNAL', 'admitted': True, 'applicable': True, 'project_root': 'V:\\_TEMP_\\tmp1_67l5ya', 'target': 'V:/_TEMP_/tmpzztfvkm7/tools/improve.py', 'targets': ['V:/_TEMP_/tmpzztfvkm7/tools/improve.py'], 'action': 'write', 'effect': 'mutating', 'outside_root': True, 'provenance': 'ancestor', 'project_lineage': 'lineage-3ae759fb7f1d4a82971e8c9ac0dab85c', 'detail': 'mutation outside the project root; protocol jurisdiction ends at the root', 'duration_ms': 1.141}
+
+======================================================================
+FAIL: test_in_root_edits_outside_saipen_are_refused_while_live (test_t1575_parallel_lane.GuardTests.test_in_root_edits_outside_saipen_are_refused_while_live)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1575-oracle-c0q2lhli\tools\test_t1575_parallel_lane.py", line 82, in test_in_root_edits_outside_saipen_are_refused_while_live
+    self.assertFalse(refused["admitted"], refused)
+AssertionError: True is not false : {'ok': True, 'code': 'ADMITTED', 'admitted': True, 'applicable': True, 'project_root': 'V:\\_TEMP_\\tmp8caa38ie', 'target': 'src/app.py', 'targets': ['src/app.py'], 'action': 'write', 'effect': 'mutating', 'provenance': 'ancestor', 'detail': 'protocol state sound', 'duration_ms': 3.133}
+
+======================================================================
+FAIL: test_the_evidence_run_holds_the_marker_and_always_releases_it (test_t1575_parallel_lane.RunnerWiringTests.test_the_evidence_run_holds_the_marker_and_always_releases_it)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1575-oracle-c0q2lhli\tools\test_t1575_parallel_lane.py", line 152, in test_the_evidence_run_holds_the_marker_and_always_releases_it
+    self.assertIsNotNone(seen["live"])
+AssertionError: unexpectedly None
+
+======================================================================
+FAIL: test_continue_names_the_gate_and_the_parallel_lane (test_t1575_parallel_lane.TurnEntryTests.test_continue_names_the_gate_and_the_parallel_lane)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\saipen-t1575-oracle-c0q2lhli\tools\test_t1575_parallel_lane.py", line 127, in test_continue_names_the_gate_and_the_parallel_lane
+    self.assertIsNotNone(lane, verb)
+AssertionError: unexpectedly None : continue
+
+----------------------------------------------------------------------
+Ran 7 tests in 2.099s
+
+FAILED (failures=4)

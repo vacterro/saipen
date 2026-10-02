@@ -1,0 +1,30 @@
+{
+  "ok": true,
+  "code": "EXPLAIN_NEXT",
+  "state": {
+    "phase": "DONE",
+    "task": "none",
+    "execution_intent": "converge",
+    "converge_target": "done"
+  },
+  "carrier": {
+    "ok": true,
+    "code": "ROUTED",
+    "action": "saipen status",
+    "reason": "goal-blocked",
+    "next_action": "saipen status",
+    "terminal": false,
+    "requires_human": false,
+    "execute_in_current_agent": true
+  },
+  "disposition": "EXECUTE_SELF",
+  "owner": "agent",
+  "human_required": false,
+  "why": "executable next action; internal alternatives do not create a human decision",
+  "selected_action": "saipen status",
+  "parked_work": [
+    "T-24 blocked: pre-existing protocol-tree defect: sweep-ticket-link requires T-22 (created from USER_REQUEST SRC-005) to carry recurrence and weak_model reasoning-gate fields, but no canonical SAIPEN verb writes arbitrary ticket fields and the board is a protected canonical namespace; the fix belongs to the external SAIPEN protocol tree, not this project (same class as T-22 BLOCKED_EXTERNAL)",
+    "T-22 blocked: BLOCKED_EXTERNAL"
+  ],
+  "note": "internal sequencing alternatives never create a human decision; WAIT_USER requires human-owned information or authority"
+}

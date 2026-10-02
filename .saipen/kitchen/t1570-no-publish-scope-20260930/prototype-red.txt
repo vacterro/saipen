@@ -1,0 +1,29 @@
+test_batch_terminal_closure_keeps_its_publication_gate (test_no_publish_source_scope.LocalSourceClosure.test_batch_terminal_closure_keeps_its_publication_gate) ... ok
+test_local_closure_still_refuses_current_scope_loss (test_no_publish_source_scope.LocalSourceClosure.test_local_closure_still_refuses_current_scope_loss) ... ok
+test_local_closure_still_refuses_unresolved_current_source (test_no_publish_source_scope.LocalSourceClosure.test_local_closure_still_refuses_unresolved_current_source) ... FAIL
+test_local_preflight_accepts_current_work_without_historical_scope (test_no_publish_source_scope.LocalSourceClosure.test_local_preflight_accepts_current_work_without_historical_scope) ... FAIL
+test_publication_still_refuses_unknown_historical_scope (test_no_publish_source_scope.LocalSourceClosure.test_publication_still_refuses_unknown_historical_scope) ... ok
+
+======================================================================
+FAIL: test_local_closure_still_refuses_unresolved_current_source (test_no_publish_source_scope.LocalSourceClosure.test_local_closure_still_refuses_unresolved_current_source)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\.saipen\kitchen\t1570-no-publish-scope-20260930\tools\test_no_publish_source_scope.py", line 87, in test_local_closure_still_refuses_unresolved_current_source
+    self.assertEqual(result["source_gate"]["code"], "SOURCE_UNRESOLVED", result)
+AssertionError: 'SOURCE_SCOPE_MISSING' != 'SOURCE_UNRESOLVED'
+- SOURCE_SCOPE_MISSING
++ SOURCE_UNRESOLVED
+ : {'ok': False, 'code': 'RELEASE_FAILED', 'stage': 'SOURCE_COVERAGE', 'detail': "source receipt blocks ship: {'ok': False, 'code': 'SOURCE_SCOPE_MISSING', 'detail': 'no release scope recorded for T-003 -- record the exact reviewed files (`saipen scope T-003 <path...>`) before shipping', 'work': 'T-003', 'scope_status': 'NO_SCOPE'}", 'source_gate': {'ok': False, 'code': 'SOURCE_SCOPE_MISSING', 'detail': 'no release scope recorded for T-003 -- record the exact reviewed files (`saipen scope T-003 <path...>`) before shipping', 'work': 'T-003', 'scope_status': 'NO_SCOPE'}}
+
+======================================================================
+FAIL: test_local_preflight_accepts_current_work_without_historical_scope (test_no_publish_source_scope.LocalSourceClosure.test_local_preflight_accepts_current_work_without_historical_scope)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\.saipen\kitchen\t1570-no-publish-scope-20260930\tools\test_no_publish_source_scope.py", line 63, in test_local_preflight_accepts_current_work_without_historical_scope
+    self.assertTrue(result["ok"], result)
+AssertionError: False is not true : {'ok': False, 'code': 'RELEASE_FAILED', 'stage': 'SOURCE_COVERAGE', 'detail': "source receipt blocks ship: {'ok': False, 'code': 'SOURCE_SCOPE_MISSING', 'detail': 'no release scope recorded for T-003 -- record the exact reviewed files (`saipen scope T-003 <path...>`) before shipping', 'work': 'T-003', 'scope_status': 'NO_SCOPE'}", 'source_gate': {'ok': False, 'code': 'SOURCE_SCOPE_MISSING', 'detail': 'no release scope recorded for T-003 -- record the exact reviewed files (`saipen scope T-003 <path...>`) before shipping', 'work': 'T-003', 'scope_status': 'NO_SCOPE'}}
+
+----------------------------------------------------------------------
+Ran 5 tests in 3.719s
+
+FAILED (failures=2)

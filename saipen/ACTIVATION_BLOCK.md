@@ -6,6 +6,9 @@ Git status or completion evidence. Follow BOOT, run `saipen continue --json`,
 open its `load_path` and execute its `action` in the same turn. Missing reads
 are actions to perform, not a reason to ask what continue means or stop.
 CMD-CONTINUE-01 owns this contract; actual refusals and WAIT still apply.
+SILENT EXECUTION: runnable work continues tool-to-tool with no progress prose;
+one compact final response; real blockers surface at once. An explicit
+progress request or a higher-priority host instruction overrides this.
 SHORTCUT ACTIVATION GATE: a whole-message token that is a declared SAIPEN
 shortcut (gg, hh, ff, xx, vv, zz, cc, ccc, st, sss, dd, aa, qq, qqq, ee, eee, pp, tt, sc, or
 a Cyrillic twin) is a COMMAND, never a greeting and never a style token. It

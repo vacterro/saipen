@@ -1,0 +1,62 @@
+{
+  "README.md": {
+    "before_sha256": "c0f2cb172c4d9eae794c1f6ced36bdac212ca240b805cb56d246bc3651f7c159",
+    "candidate_sha256": "a6d6cb9f02aa16f881f6110254ba6630ae159c7c08c2a81212a06feaa6dd66e6"
+  },
+  "SPEC.md": {
+    "before_sha256": "2782ffbe120e00122b8dddd90c71ca503907e30e4bf372c4bb4ccaa5d66cb873",
+    "candidate_sha256": "b17ac53f5f1b1ccfb6ac6b665dcf86afc41d29bbfffa49bfbee503b54134c313"
+  },
+  "VERSION": {
+    "before_sha256": "354aaddb8bec6cca2c73b714d3b08b94b055da001d2a0b3cae8141ab2d318e50",
+    "candidate_sha256": "64906a57372f3a7c4b5a906870dc3e11226c5969db650fe0c6f5028d380b444b"
+  },
+  "CHANGELOG.md": {
+    "before_sha256": "9f8a57602a2af556967921cc9a8e8824714250a35f512439bc5df77fb3741bf9",
+    "candidate_sha256": "92f270bcbbf5c17e8d80f813220df5cd793fea484bef4315e1ef7c84a24071f2"
+  },
+  "saipen/CORE.md": {
+    "before_sha256": "5234cb38e63bd4ed8e5fc8c0f1b4b28695f89e7beafaf8ecb7d0c4b7274cf976",
+    "candidate_sha256": "98b9b953ebc9dcd83d9626af269b27985a1544c65099daeecba9aaef457782fd"
+  },
+  "saipen/REGISTRY.json": {
+    "before_sha256": "98da74cd355b7bbf2c216fb63a535cc8e2c6bbc5d6d8a3997c05837759ed9619",
+    "candidate_sha256": "ee5b7ec6f50085ff223c081ac3faa5acc3d2e81b9274eb20b8860a461476939c"
+  },
+  "saipen/COMMANDS.md": {
+    "before_sha256": "d0c94dd0b9d63194f65af4269050b1a3bc4ec9b7ab0ccd3d2180725798e3a470",
+    "candidate_sha256": "c1821e703ba98c66810c1f9e2bf3aa2d6eda64dab6f8ba1984bb1a09e040b416"
+  },
+  "saipen/phases/done.md": {
+    "before_sha256": "877a0a12bb8e6b8b57ac38a746175d5d3eadad18c7d7f7704df5e3d56ce33594",
+    "candidate_sha256": "4681c21c636ae68e75dee064b1c52b3df99c41ca03f763ff0b3c0ee7259d7524"
+  },
+  "saipen/phases/ship.md": {
+    "before_sha256": "de992c01fb82af0c9036b64ee6b6ae6a85843455ff3b79bc07004bb786b3b84c",
+    "candidate_sha256": "9155a0a7c7f3e1953bf29e9137b9e9d901beefd3415c27a75cf0b75475695df2"
+  },
+  "extensions/schemas/board.schema.json": {
+    "before_sha256": "a54c0e4130ec71a027243a42b6ab5d823765042b512bfc727c1959b255eb29e8",
+    "candidate_sha256": "b4853345f19117cb621344c793ac6b31359ac3545ea7420b46323ffabcc2d5e4"
+  },
+  "extensions/schemas/state.schema.json": {
+    "before_sha256": "0428d98d85513a2914cbf4813d2350ea881190e1e82bca0c3f9e8101afe772ed",
+    "candidate_sha256": "453ce3cd9441d7217c15fc88e2374983e83b6ec94c0057c98b92706aefb6495a"
+  },
+  "tools/test_orchestration_repair.py": {
+    "before_sha256": "0d88912314af67dbbbb2a1d9f062ec8d0e4c8ecc8073f35cb5205207c788fcdb",
+    "candidate_sha256": null
+  },
+  "tools/test_public_closure_cli.py": {
+    "before_sha256": "fd87cd8f37a02e7ab5c8efd11ee3d40268a6c54427b673e48191615fbd6deed7",
+    "candidate_sha256": null
+  },
+  "tools/test_reverify.py": {
+    "before_sha256": "ede9edcdf9961f4213d39e11880aab1b00b4ce958132fa54a397beba5cac2461",
+    "candidate_sha256": null
+  },
+  "test_debt_gate.py": {
+    "before_sha256": "4c6b3d7b9045c293d1a09284be5924f5d7a46bcdeb57860566f9ea29472341a0",
+    "candidate_sha256": null
+  }
+}

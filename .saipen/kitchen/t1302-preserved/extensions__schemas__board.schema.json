@@ -1,0 +1,247 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "SAIPEN BOARD Schema",
+  "type": "array",
+  "items": {
+    "type": "object",
+    "properties": {
+      "status": {
+        "type": "string",
+        "enum": [
+          "TODO",
+          "DOING",
+          "DONE",
+          "BLOCKED"
+        ],
+        "description": "BLOCKED = ticket-level block (RFC § 1.2/VERIFY debug cap), distinct from session-level STATE.phase: BLOCKED"
+      },
+      "id": {
+        "type": "string"
+      },
+      "description": {
+        "type": "string"
+      },
+      "verify": {
+        "type": "string"
+      },
+      "blocker": {
+        "type": "string",
+        "description": "Active facts + dead ends. Present and non-empty exactly when status is BLOCKED; absent for every other status."
+      },
+      "needs": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      },
+      "owner": {
+        "type": "string",
+        "description": "Agent ID claiming this ticket"
+      },
+      "claim_time": {
+        "type": "string",
+        "format": "date-time"
+      },
+      "review_passes": {
+        "type": "integer",
+        "description": "RFC 1.2 recognized optional ticket field; phases/review.md uses it to enforce its two-pass cap mechanically rather than from memory. Absent from this schema until v7.101.0."
+      },
+      "verify_attempts": {
+        "type": "integer",
+        "minimum": 0,
+        "description": "RFC 1.2 recognized optional ticket field; absent reads as zero. Counts the current failed-fix-cycle budget phases/verify.md spends on this ticket. Canonical unblock clears the current budget while journaled events retain history. The cap number itself lives in phases/verify.md and is read from there, never copied."
+      },
+      "source_reports": {
+        "type": "string",
+        "description": "RFC 1.2 recognized optional ticket field (T-556): sweep provenance, the composite IMP-### identities a canonical ticket was generated from. Resolved by the [sweep-ticket-link] validator check against SWEEP.md; a reference that resolves to no disposition, or a ticket produced by an unverified or INVALID/ALREADY_FIXED finding, FAILs."
+      },
+      "source_receipts": {
+        "type": "string",
+        "description": "Comma-separated immutable SRC-NNN authority links. Full source bodies stay under .saipen/intake and are never copied onto BOARD."
+      },
+      "recurrence": {
+        "type": "string",
+        "description": "RFC 1.2 recognized optional ticket field (T-558): the META-IMPROVEMENT reasoning a protocol-level improve ticket MUST record -- the cross-project recurrence analysis (a protocol-level fix records whether the defect recurs across projects; a local bug stays local). Required by the [sweep-ticket-link] check for a PROTOCOL_VIOLATION finding that produced a ticket."
+      },
+      "weak_model": {
+        "type": "string",
+        "description": "RFC 1.2 recognized optional ticket field (T-558): the WEAK-MODEL PRECEDENT answer -- could a weak but compliant model still choose wrong while honestly believing it followed SAIPEN? Required by the [sweep-ticket-link] check for a PROTOCOL_VIOLATION finding that produced a ticket."
+      },
+      "regression": {
+        "type": "string",
+        "description": "CORE-001: `required` declares that this ticket owes a regression PAIR -- a FAIL against the pre-fix subject and a PASS against the post-fix one under the SAME verifier -- and arms the extra gate in VERIFY -> REVIEW and finish. A machine-owned field, never inferred from prose."
+      },
+      "blocker_scope": {
+        "type": "string",
+        "enum": [
+          "ticket",
+          "goal"
+        ],
+        "description": "Orchestration repair: scope of a BLOCKED ticket. 'ticket' = this task cannot progress but independent work may continue; 'goal' = no safe useful work remains without an external/operator dependency."
+      },
+      "closure_mode": {
+        "type": "string",
+        "enum": [
+          "own_patch",
+          "inherited_verified",
+          "cohort"
+        ],
+        "description": "Orchestration repair: closure provenance on DONE tickets. own_patch = attributable implementation diff; inherited_verified = no new implementation added, verification-only closeout; cohort = evidence complete but publication deferred to a C-### cohort."
+      },
+      "closure_cohort": {
+        "type": "string",
+        "pattern": "^C-\\d+$",
+        "description": "Orchestration repair: C-### cohort id for closure_mode=cohort (or a member note on inherited/own_patch closure)."
+      },
+      "user_explicit": {
+        "type": "string",
+        "enum": [
+          "true"
+        ],
+        "description": "Orchestration repair: marks a ticket created from an explicit user request (USER_INTERRUPT). Only 'true' arms the scheduler signal."
+      },
+      "implementation_delta": {
+        "type": "string",
+        "enum": [
+          "none",
+          "patch"
+        ],
+        "description": "Orchestration repair: records whether BUILD produced a code delta. 'none' = implementation already existed/verified, no new source touched."
+      },
+    "implementation_source": {
+      "type": "string",
+      "description": "Orchestration repair: names the receipt/event the inherited implementation came from when known (e.g. inherited:<event/ticket>). Never invented; unknown stays absent."
+    },
+    "closure_paths": {
+      "type": "string",
+      "description": "Orchestration repair (T-1302 FINDING 4): comma-separated worktree paths this COHORT-mode member attributes to its C-### batch; publication belongs to the cohort authority, never to an imaginary per-ticket diff."
+    }
+    },
+    "allOf": [
+      {
+        "description": "blocker is active blocked-state data: present and non-empty exactly under BLOCKED (T-631)",
+        "if": {
+          "properties": {
+            "status": {
+              "const": "BLOCKED"
+            }
+          },
+          "required": [
+            "status"
+          ]
+        },
+        "then": {
+          "required": [
+            "blocker"
+          ],
+          "properties": {
+            "blocker": {
+              "minLength": 1,
+              "pattern": "\\S"
+            }
+          }
+        },
+        "else": {
+          "not": {
+            "required": [
+              "blocker"
+            ]
+          }
+        }
+      },
+      {
+        "description": "orchestration repair (T-1302): when blocker_scope is present it must live on BLOCKED and take a closed value",
+        "if": {
+          "properties": {
+            "status": {
+              "const": "BLOCKED"
+            }
+          },
+          "required": [
+            "status"
+          ]
+        },
+        "then": {
+          "properties": {
+            "blocker_scope": {
+              "type": "string",
+              "enum": [
+                "ticket",
+                "goal"
+              ]
+            }
+          }
+        },
+        "else": {
+          "not": {
+            "required": [
+              "blocker_scope"
+            ]
+          }
+        }
+      },
+      {
+        "description": "orchestration repair (T-1302): closure fields only on DONE tickets",
+        "if": {
+          "properties": {
+            "status": {
+              "const": "DONE"
+            }
+          },
+          "required": [
+            "status"
+          ]
+        },
+        "then": {
+          "properties": {
+            "closure_mode": {
+              "type": "string",
+              "enum": [
+                "own_patch",
+                "inherited_verified",
+                "cohort"
+              ]
+            },
+            "closure_cohort": {
+              "type": "string",
+              "pattern": "^C-\\d+$"
+            },
+            "implementation_delta": {
+              "type": "string",
+              "enum": [
+                "none",
+                "patch"
+              ]
+            }
+          }
+        },
+        "else": {
+          "not": {
+            "anyOf": [
+              {
+                "required": [
+                  "closure_mode"
+                ]
+              },
+              {
+                "required": [
+                  "closure_cohort"
+                ]
+              },
+              {
+                "required": [
+                  "implementation_delta"
+                ]
+              }
+            ]
+          }
+        }
+      }
+    ],
+    "required": [
+      "status",
+      "id",
+      "description"
+    ]
+  }
+}

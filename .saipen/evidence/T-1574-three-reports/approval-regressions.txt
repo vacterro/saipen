@@ -1,0 +1,54 @@
+EEFEF
+======================================================================
+ERROR: test_a_wrong_or_stale_repair_id_is_refused (test_recover_approved_repair.PlanCollectionTests.test_a_wrong_or_stale_repair_id_is_refused)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_recover_approved_repair.py", line 147, in test_a_wrong_or_stale_repair_id_is_refused
+    self.assertNotEqual(plan["repair_id"], stale)
+                        ~~~~^^^^^^^^^^^^^
+KeyError: 'repair_id'
+
+======================================================================
+ERROR: test_approved_plan_applies_every_repair_atomically (test_recover_approved_repair.PlanCollectionTests.test_approved_plan_applies_every_repair_atomically)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_recover_approved_repair.py", line 158, in test_approved_plan_applies_every_repair_atomically
+    root, "test-agent", approved_repair_id=plan["repair_id"]
+                                           ~~~~^^^^^^^^^^^^^
+KeyError: 'repair_id'
+
+======================================================================
+ERROR: test_cli_approved_repair_round_trip (test_recover_approved_repair.PlanCollectionTests.test_cli_approved_repair_round_trip)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_recover_approved_repair.py", line 190, in test_cli_approved_repair_round_trip
+    plan["repair_id"],
+    ~~~~^^^^^^^^^^^^^
+KeyError: 'repair_id'
+
+======================================================================
+FAIL: test_bare_recover_does_not_reopen_a_phantom_done (test_recover_approved_repair.PlanCollectionTests.test_bare_recover_does_not_reopen_a_phantom_done)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_recover_approved_repair.py", line 139, in test_bare_recover_does_not_reopen_a_phantom_done
+    self.assertEqual(result["code"], "RECONCILE_REAUTH_REQUIRED")
+AssertionError: 'VALIDATION_FAILED' != 'RECONCILE_REAUTH_REQUIRED'
+- VALIDATION_FAILED
++ RECONCILE_REAUTH_REQUIRED
+
+
+======================================================================
+FAIL: test_one_dry_run_collects_the_complete_bounded_repair_set (test_recover_approved_repair.PlanCollectionTests.test_one_dry_run_collects_the_complete_bounded_repair_set)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_recover_approved_repair.py", line 121, in test_one_dry_run_collects_the_complete_bounded_repair_set
+    self.assertEqual(plan["code"], "RECONCILE_REAUTH_REQUIRED")
+AssertionError: 'VALIDATION_FAILED' != 'RECONCILE_REAUTH_REQUIRED'
+- VALIDATION_FAILED
++ RECONCILE_REAUTH_REQUIRED
+
+
+----------------------------------------------------------------------
+Ran 5 tests in 0.022s
+
+FAILED (failures=2, errors=3)
