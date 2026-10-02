@@ -1565,6 +1565,32 @@ def pending_conflicts(project_root: Path | str) -> list[dict]:
     return scan_pending(project_root)[1]
 
 
+def _conflict_diverges(root: Path, op_id: str) -> bool:
+    """True when a bare `saipen recover` would REFUSE this op rather than settle it.
+
+    CONFLICT carries at least three shapes that need different routes (T-1394):
+    a partial apply whose live bytes still match the plan, which bare recover
+    settles unattended; a third party having rewritten an applied target, which
+    recovery must refuse rather than overwrite; and non-prefix materialization,
+    which no automatic route settles. Predicting the difference by re-reading
+    the plan here would be a SECOND copy of the settle path's judgement, and the
+    two would drift.
+
+    So ask the one read-only surface that already performs that judgement --
+    `inspect_op` -- and take its conflicting locations. It is the same probe
+    the operator is told to run, so the advice and the diagnostic cannot
+    disagree. Evidence that will not inspect fails closed (True): unreadable
+    recovery evidence is an explicit human action, never an automatic attempt.
+    """
+    try:
+        inspected = inspect_op(root, op_id)
+    except Exception:
+        return True
+    if not inspected.get("ok"):
+        return True
+    return bool(inspected.get("conflicting_locations"))
+
+
 def recovery_preflight(project_root: Path | str, exclude_op_id: str | None = None) -> dict:
     """Mandatory scan before any new mutation.
 
@@ -1622,24 +1648,51 @@ def recovery_preflight(project_root: Path | str, exclude_op_id: str | None = Non
         # a literal the source cannot be read through is a literal no reachability
         # check can measure (T-1357's harvest).
         conflict_id = conflicts[0]["op_id"]
+        # T-1355 removed bare `saipen recover` from this answer, on the measured
+        # ground that it "returns this same refusal". That premise held for the
+        # one shape T-1355 sampled -- a conflict whose live bytes DIVERGE, where
+        # bare recover refuses by design -- and it does not hold for the other
+        # shape, which carries the identical CONFLICT status: a partial apply
+        # whose bytes still match the plan, which bare recover settles
+        # unattended. Measured both ways (T-1394): RECOVERED on the clean
+        # partial apply, RECOVERY_CONFLICT "refuse to guess" on the divergent
+        # one.
+        #
+        # Naming the classes alone is not the safe default either: on the clean
+        # partial apply BOTH answer NEEDS_REPAIR ("resolving to current live
+        # leaves an invalid repository"), so the operator was routed into a
+        # branch that cannot settle the state they are in. So the route is
+        # chosen by the shape, and the shape is read from `inspect_op` rather
+        # than re-derived here -- see _conflict_diverges.
+        divergent = _conflict_diverges(root, conflict_id)
+        if divergent:
+            next_command = (
+                f"saipen recover resolve {conflict_id} --resolution <accept_live|replan>"
+            )
+            route_note = (
+                "a target's live bytes match neither its before nor its after "
+                "hash, so recovery refuses rather than overwrite what a third "
+                "party wrote; resolve it explicitly, or by hand"
+            )
+        else:
+            next_command = "saipen recover"
+            route_note = (
+                "every unfinished target's live bytes still match the plan, so "
+                "`saipen recover` re-derives them from live bytes and settles "
+                "this without a human"
+            )
         return {
             "ok": False,
             "code": "RECOVERY_CONFLICT",
             "op_ids": [op["op_id"] for op in conflicts],
             "recovery_required": True,
-            # T-1355 termination oracle: this used to advertise bare `saipen
-            # recover`, and bare `saipen recover` on an unresolved conflict
-            # returns this same refusal -- measured byte-identical twice in a
-            # row. A surface that names a command reproducing its own state is
-            # the loop, not the exit. Name the two commands that settle it.
-            "canonical_next_command": (
-                f"saipen recover resolve {conflict_id} --resolution <accept_live|replan>"
-            ),
+            "conflict_diverged": divergent,
+            "canonical_next_command": next_command,
             "inspect_command": f"saipen recover inspect {conflict_id}",
-            "detail": f"unresolved conflict {conflict_id} blocks new mutation; look "
-            f"with `saipen recover inspect {conflict_id}` and settle it with "
-            f"`saipen recover resolve {conflict_id} --resolution "
-            "<accept_live|replan>` before any further canonical write",
+            "detail": f"unresolved conflict {conflict_id} blocks new mutation; "
+            f"{route_note}. Look first with `saipen recover inspect "
+            f"{conflict_id}`. No further canonical write is admitted until it "
+            "is settled",
         }
     pending = [op for op in pending if op["op_id"] != exclude_op_id]
     if not pending:
