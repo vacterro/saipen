@@ -2994,13 +2994,16 @@ def _recover(project_root: Path, args: list[str], as_json: bool, dry_run: bool =
         result = inspect_op(project_root, args[1])
         _emit(result, as_json)
         return 0 if result.get("ok") else 1
-    # `saipen recover resolve <op_id> [--resolution accept_live|replan]` --
+    # `saipen recover resolve <op_id> [--resolution accept_live|replan|reconcile]` --
     # the explicit conflict-resolution lifecycle (NITRO dogfood III, T-594).
     # Closed grammar (hostile-regression, P0#1): exactly `<op_id>` OR
-    # `<op_id> --resolution <accept_live|replan>`. Unknown/surplus tokens and a
+    # `<op_id> --resolution <accept_live|replan|reconcile>`. Unknown/surplus
+    # tokens and a
     # missing/unknown --resolution value are refused here; resolve_conflict is
     # NEVER called with a defaulted accept_live from malformed input.
     if args and args[0] == "resolve":
+        from saipen_engine.journal import RESOLUTION_CLASSES
+
         rest = args[1:]
         if len(rest) == 0:
             _emit(
@@ -3023,17 +3026,18 @@ def _recover(project_root: Path, args: list[str], as_json: bool, dry_run: bool =
                             "ok": False,
                             "code": "VALIDATION_FAILED",
                             "detail": "usage: recover resolve <op_id> "
-                            "--resolution <accept_live|replan>",
+                            "--resolution <" + "|".join(RESOLUTION_CLASSES) + ">",
                         },
                         as_json,
                     )
                     return 2
-                if extra[1] not in ("accept_live", "replan"):
+                if extra[1] not in RESOLUTION_CLASSES:
                     _emit(
                         {
                             "ok": False,
                             "code": "VALIDATION_FAILED",
-                            "detail": f"unknown resolution {extra[1]!r}; use accept_live|replan",
+                            "detail": "unknown resolution " + repr(extra[1]) + "; use "
+                            + "|".join(RESOLUTION_CLASSES),
                         },
                         as_json,
                     )
@@ -3046,7 +3050,7 @@ def _recover(project_root: Path, args: list[str], as_json: bool, dry_run: bool =
                         "code": "VALIDATION_FAILED",
                         "detail": f"unexpected token {extra[0]!r}; usage: "
                         "recover resolve <op_id> "
-                        "[--resolution <accept_live|replan>]",
+                        "[--resolution <" + "|".join(RESOLUTION_CLASSES) + ">]",
                     },
                     as_json,
                 )
@@ -3082,7 +3086,7 @@ def _recover(project_root: Path, args: list[str], as_json: bool, dry_run: bool =
                 "code": "VALIDATION_FAILED",
                 "detail": "recover takes no arguments (bare recover), or "
                 "`inspect <op_id>` / `resolve <op_id> [--resolution "
-                "accept_live|replan]`; unexpected: " + " ".join(args),
+                "|".join(RESOLUTION_CLASSES) + "]`; unexpected: " + " ".join(args),
             },
             as_json,
         )

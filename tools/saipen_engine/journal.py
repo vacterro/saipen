@@ -653,6 +653,25 @@ TARGET_ALREADY_APPLIED = "ALREADY_APPLIED"
 TARGET_PENDING = "PENDING"
 TARGET_CONFLICT = "CONFLICT"
 
+# Closed conflict-resolution vocabulary (T-1398). One constant, because the
+# class list is advertised by inspect, validated by the resolver, echoed in
+# three refusal messages and gated by the CLI: five hand-maintained copies of
+# the same list is how a new class ends up half-wired.
+#
+#   accept_live  keep every live byte, abandon the whole unapplied plan
+#   replan       retire the operation; a fresh plan is required
+#   reconcile    roll forward UNTOUCHED targets from their staged bytes,
+#                accept live for every DIVERGED target, then re-derive the
+#                STATE checkpoint cursor from the LOG tail (T-1398)
+#
+# reconcile is a third VALUE on the existing verb, not a new verb: same
+# signature, same writer lock, same preflight, same stability guard, and the
+# verifier still runs before any journal write.
+RESOLUTION_ACCEPT_LIVE = "accept_live"
+RESOLUTION_REPLAN = "replan"
+RESOLUTION_RECONCILE = "reconcile"
+RESOLUTION_CLASSES = (RESOLUTION_ACCEPT_LIVE, RESOLUTION_REPLAN, RESOLUTION_RECONCILE)
+
 
 def classify_target(current_hash: str, before_hash: str, after_hash: str) -> str:
     """The ONE canonical three-way target recovery classifier (T-1316).
@@ -1667,7 +1686,7 @@ def recovery_preflight(project_root: Path | str, exclude_op_id: str | None = Non
         divergent = _conflict_diverges(root, conflict_id)
         if divergent:
             next_command = (
-                f"saipen recover resolve {conflict_id} --resolution <accept_live|replan>"
+                f"saipen recover resolve {conflict_id} --resolution <accept_live|replan|reconcile>"
             )
             route_note = (
                 "a target's live bytes match neither its before nor its after "
@@ -3452,7 +3471,7 @@ def _recover_locked(root: Path, op_id: str) -> dict:
                 "actual_hash": _target_live_hash(root, target),
                 "applied_frontier": prefix_len - 1,
                 "canonical_next_command": (
-                    f"saipen recover resolve {op_id} --resolution <accept_live|replan>"
+                    f"saipen recover resolve {op_id} --resolution <accept_live|replan|reconcile>"
                 ),
                 "inspect_command": f"saipen recover inspect {op_id}",
                 "detail": f"target {target['path']} materialized out of order ("
@@ -3466,7 +3485,7 @@ def _recover_locked(root: Path, op_id: str) -> dict:
                 )
                 + "); non-prefix materialization is not a legal crash shape for "
                 "ordered mutation plans; refuse to guess. Settle it with "
-                f"`saipen recover resolve {op_id} --resolution <accept_live|replan>`",
+                f"`saipen recover resolve {op_id} --resolution <accept_live|replan|reconcile>`",
             }
 
     # Phase 4 guard: PREPARED with zero materialized targets aborts safely.
@@ -4234,9 +4253,215 @@ def inspect_op(project_root: Path | str, op_id: str) -> dict:
         "conflicting_locations": conflicts,
         "staged_identity": record.get("semantic_payload_hash"),
         "safe_resolution_classes": (
-            ["accept_live", "replan"] if record.get("status") == "CONFLICT" else []
+            list(RESOLUTION_CLASSES) if record.get("status") == "CONFLICT" else []
         ),
         "code": "CONFLICT_INSPECT" if record.get("status") == "CONFLICT" else "OP_INSPECT",
+    }
+
+
+def _reconcile_and_verify(root: Path, journal, record: dict, live_snapshot: dict) -> dict:
+    """T-1398: the `reconcile` resolution body -- roll forward, re-derive the
+    STATE cursor, verify, and undo everything if verification refuses.
+
+    ACCEPT_LIVE and REPLAN both leave the live tree exactly as they found it,
+    so their verifier judges an UNTOUCHED repository. A half-applied operation
+    has already left one behind, and the complaint the verifier then draws is a
+    description of that half-apply rather than an independent fault. Measured
+    (build/t1398_intersection, DEADLOCK_NO_ROUTE_SETTLES): both classes answer
+    NEEDS_REPAIR with "STATE proposed last_event 3 != LOG tail 5", while
+    accept_live is by definition the class that abandons the one target whose
+    staged bytes would have completed it. Neither class can settle the state
+    it is offered.
+
+    reconcile repairs the tree FIRST and verifies SECOND. That does NOT weaken
+    the verifier-before-settle guard: the verifier still runs before
+    _atomic_json(journal.manifest, ...) and before journal.mark("RESOLVED"), so
+    a journal is never marked RESOLVED over a repository the verifier has just
+    called invalid. What changes is WHICH repository the verifier is asked
+    about -- not whether it gets the last word. It always does.
+
+    Three rules bound it, and each is the thing that could have made this a
+    hole:
+      * the engine still never writes planned bytes over DIVERGED live bytes.
+        A target is rolled forward only while its live hash equals its
+        before_hash -- that is, only while nobody else has written there --
+        judged by the canonical classify_target, not a second classifier.
+      * a refusal writes ZERO NET BYTES. Every write is snapshotted first and
+        restored on refusal, so `reconcile` that cannot repair leaves the same
+        evidence the next attempt needs.
+      * the cursor is re-derived, never invented: the value written is always
+        an event id parsed out of the live LOG, and only ever FORWARD. A LOG
+        whose tail is below STATE.last_event is different damage (a truncated
+        log) and is refused rather than papered over.
+    """
+    targets = record.get("targets", [])
+    policy = record.get("verification_policy", "none")
+    undo: list[tuple[str, bytes | None]] = []
+
+    def _restore() -> None:
+        for rel, prior in reversed(undo):
+            path = root / rel
+            if prior is None:
+                with contextlib.suppress(OSError):
+                    path.unlink()
+            else:
+                _atomic_write(path, prior, ownership_root=root)
+
+    rolled_forward: list[str] = []
+    try:
+        for index, target in enumerate(targets):
+            rel = target["path"]
+            if (
+                classify_target(
+                    live_snapshot.get(rel),
+                    target.get("before_hash", ""),
+                    target.get("after_hash", ""),
+                )
+                != TARGET_PENDING
+            ):
+                # already-applied and DIVERGED targets are both left exactly as
+                # found: the first is already in its planned state, the second
+                # belongs to whoever wrote there.
+                continue
+            staged = journal.staged_content(index, record)
+            staged_hash = hash_bytes(staged)
+            if staged_hash != target["after_hash"]:
+                _restore()
+                return {
+                    "ok": False,
+                    "code": "NEEDS_REPAIR",
+                    "resolution_committed": False,
+                    "detail": f"staged bytes for {rel} hash to {staged_hash!r}, "
+                    f"not the planned {target['after_hash']!r}; journal evidence "
+                    "is corrupt -- reconcile refuses to roll forward on bytes it "
+                    "cannot prove are the plan's",
+                    "repair_evidence": [f"staged hash mismatch on {rel}"],
+                }
+            path = root / rel
+            prior = path.read_bytes() if path.is_file() else None
+            undo.append((rel, prior))
+            _atomic_write(path, staged, ownership_root=root)
+            rolled_forward.append(rel)
+
+        # OPS.md "Recovery semantics" step 3: byte-verify every target this
+        # call wrote, in the contract's own order -- apply, byte-verify, then
+        # the semantic verifier. It runs BEFORE the cursor repair, which
+        # legitimately rewrites STATE.last_event and so changes STATE.md's
+        # hash away from after_hash on purpose. Checking it here is what keeps
+        # "the write did not land" from being inferred from a later validator
+        # run instead of being measured.
+        for target in targets:
+            if target["path"] not in rolled_forward:
+                continue
+            live_after = _target_live_hash(root, target)
+            if live_after != target["after_hash"]:
+                _restore()
+                return {
+                    "ok": False,
+                    "code": "NEEDS_REPAIR",
+                    "resolution_committed": False,
+                    "detail": f"rolled-forward target {target['path']} reads "
+                    f"{live_after!r} after the write, not the planned "
+                    f"{target['after_hash']!r}; the write did not land",
+                    "repair_evidence": [f"byte verification failed on {target['path']}"],
+                }
+
+        cursor = _rederive_state_cursor(root)
+        if cursor.get("refused"):
+            _restore()
+            return {
+                "ok": False,
+                "code": "NEEDS_REPAIR",
+                "resolution_committed": False,
+                "detail": "reconcile refused to re-derive the STATE cursor: "
+                + cursor["refused"],
+                "repair_evidence": [cursor["refused"]],
+            }
+        if cursor.get("wrote"):
+            undo.append((cursor["path"], cursor["prior"]))
+    except OSError as exc:
+        _restore()
+        return {
+            "ok": False,
+            "code": "NEEDS_REPAIR",
+            "resolution_committed": False,
+            "detail": f"reconcile roll-forward failed on disk: {exc}",
+            "repair_evidence": [str(exc)],
+        }
+
+    errors = _run_verifier(root, targets, policy, record.get("receipt_metadata"))
+    if errors:
+        _restore()
+        return {
+            "ok": False,
+            "code": "NEEDS_REPAIR",
+            "resolution_committed": False,
+            "detail": "reconciling leaves an invalid repository: "
+            + "; ".join(errors[:5]),
+            "conflict_op_id": record.get("op_id"),
+            "rolled_forward_undone": [rel for rel, _ in undo],
+            "repair_evidence": errors,
+        }
+
+    repair = {"rolled_forward": rolled_forward, "cursor": cursor.get("detail", "unchanged")}
+    return {"ok": True, "repair": repair}
+
+
+def _rederive_state_cursor(root: Path) -> dict:
+    """Move STATE's checkpoint cursor onto the live LOG tail, forward only.
+
+    T-1398. The LOG is append-only and is the authority for what happened; a
+    partial apply that landed its LOG write but not its STATE write leaves the
+    cursor BEHIND the log by exactly the events that landed. Re-deriving the
+    cursor from the log is not a semantic judgement -- it is the invariant the
+    core validator already states ("current-schema STATE requires last_event
+    matching the LOG tail"), applied in the direction the log says is true.
+
+    Composed from the primitives the protocol already writes STATE with
+    (log.log_tail_event + state.patch_state, exactly as controls.py:366 does),
+    so this introduces no second STATE write path and no new schema knowledge.
+
+    Returns {"wrote": bool, "path", "prior", "detail"} on success, or
+    {"refused": reason} when the cursor may not move forward.
+    """
+    from .log import log_tail_event
+    from .state import parse_state, patch_state
+
+    state_rel = ".saipen/STATE.md"
+    log_rel = ".saipen/LOG.md"
+    state_path = root / state_rel
+    log_path = root / log_rel
+    if not state_path.is_file() or not log_path.is_file():
+        return {"wrote": False, "detail": "no STATE/LOG pair in this project"}
+
+    log_text = log_path.read_text(encoding="utf-8-sig")
+    tail = log_tail_event(log_text)
+    if tail is None:
+        return {"refused": f"LOG tail carries no parsable event id, so the STATE "
+        f"cursor cannot be re-derived from {log_rel}"}
+
+    text = state_path.read_text(encoding="utf-8-sig")
+    current = parse_state(text).get("last_event")
+    if not isinstance(current, int) or isinstance(current, bool):
+        return {"refused": f"STATE.last_event is {current!r}, not an int, so a "
+        f"forward cursor re-derivation has no base to compare against"}
+    if tail == current:
+        return {"wrote": False, "detail": f"cursor already at E-{tail}"}
+    if tail < current:
+        # A tail BELOW the checkpointed event is a truncated or rewound log --
+        # different damage, and moving the cursor would move the checkpoint
+        # boundary the log-cut repair depends on. Refuse rather than guess.
+        return {"refused": f"LOG tail E-{tail} is BELOW STATE.last_event E-{current}; "
+        "that is a truncated or rewound log, not a lagging cursor -- reconcile "
+        "will not move a checkpoint boundary backwards"}
+
+    patched = patch_state(text, {"last_event": tail})
+    _atomic_write(state_path, patched.encode("utf-8"), ownership_root=root)
+    return {
+        "wrote": True,
+        "path": state_rel,
+        "prior": text.encode("utf-8"),
+        "detail": f"E-{current} -> E-{tail}",
     }
 
 
@@ -4255,7 +4480,19 @@ def resolve_conflict(
     REPLAN: retire this operation (conflict evidence preserved), requiring a
     fresh semantic OperationPlan built from the current canonical state.
 
-    Both produce a RESOLVED journal with applied/skipped targets, the resolver
+    RECONCILE (T-1398): partial roll-forward. Targets whose live bytes still
+    equal their before_hash are completed from their hash-verified staged
+    bytes; targets a third party has written (live matching NEITHER before nor
+    after) are accepted live exactly as accept_live accepts them -- planned
+    bytes are never written over divergent live bytes here either. STATE's
+    checkpoint cursor is then re-derived forward from the LOG tail, and the
+    repository is re-verified BEFORE the settle. If verification refuses,
+    every write is rolled back and the conflict stays resolvable. This is a
+    third value on this verb, not a new verb: same lock, same preflight, same
+    stability guard, same verifier-before-settle ordering. See
+    _reconcile_and_verify for why the ordering is not weakened.
+
+    All produce a RESOLVED journal with applied/skipped targets, the resolver
     event and validation evidence. Resolution bypasses ONLY this op from the
     preflight gate: it refuses when another unrelated unresolved operation or
     conflict exists, and it re-verifies the live repository afterwards.
@@ -4320,11 +4557,11 @@ def _resolve_conflict_locked(root: Path, op_id: str, resolution: str, agent: str
             "CONFLICT; only an unresolved conflict is "
             "resolvable",
         }
-    if resolution not in ("accept_live", "replan"):
+    if resolution not in RESOLUTION_CLASSES:
         return {
             "ok": False,
             "code": "VALIDATION_FAILED",
-            "detail": f"resolution {resolution!r} outside accept_live|replan",
+            "detail": f"resolution {resolution!r} outside " + "|".join(RESOLUTION_CLASSES),
         }
 
     # Only the selected conflict may be settled: any OTHER unresolved op or
@@ -4373,19 +4610,32 @@ def _resolve_conflict_locked(root: Path, op_id: str, resolution: str, agent: str
                 "detail": f"target {path} changed during resolution; evidence moved, re-inspect",
             }
 
-    # ACCEPT_LIVE: the current live bytes are the new truth. Verify the
-    # resulting canonical repository before settling.
-    policy = record.get("verification_policy", "none")
-    errors = _run_verifier(root, record.get("targets", []), policy, record.get("receipt_metadata"))
-    if errors:
-        return {
-            "ok": False,
-            "code": "NEEDS_REPAIR",
-            "detail": "resolving to current live leaves an invalid "
-            "repository: " + "; ".join(errors[:5]),
-            "conflict_op_id": op_id,
-            "repair_evidence": errors,
-        }
+    # ACCEPT_LIVE / REPLAN: the current live bytes are the new truth. Neither
+    # class writes anything, so their verifier judges an untouched repository.
+    # RECONCILE repairs first and verifies second (T-1398). It still verifies
+    # BEFORE the settle below, so it cannot reach a RESOLVED journal over a
+    # repository this call found invalid -- the guard is unchanged, only the
+    # repository it is asked about is a repaired one.
+    repair: dict | None = None
+    if resolution == RESOLUTION_RECONCILE:
+        reconciled = _reconcile_and_verify(root, journal, record, live_snapshot)
+        if not reconciled.get("ok"):
+            return reconciled
+        repair = reconciled["repair"]
+    else:
+        policy = record.get("verification_policy", "none")
+        errors = _run_verifier(
+            root, record.get("targets", []), policy, record.get("receipt_metadata")
+        )
+        if errors:
+            return {
+                "ok": False,
+                "code": "NEEDS_REPAIR",
+                "detail": "resolving to current live leaves an invalid "
+                "repository: " + "; ".join(errors[:5]),
+                "conflict_op_id": op_id,
+                "repair_evidence": errors,
+            }
 
     # Settle: mark RESOLVED with the resolution record. Never touch the live
     # canonical files -- the resolution IS the decision to keep them.
@@ -4398,9 +4648,23 @@ def _resolve_conflict_locked(root: Path, op_id: str, resolution: str, agent: str
     record["resolver_agent"] = agent
     record["resolution_applied_targets"] = applied
     record["resolution_skipped_targets"] = skipped
-    record["resolution_evidence"] = (
-        "live accepted" if resolution == "accept_live" else "operation retired; fresh plan required"
-    )
+    if repair is not None:
+        # After a roll-forward the reconciled targets' planned effects really
+        # ARE live, so they belong in applied rather than in skipped. Recording
+        # them as skipped would be a receipt that describes the state before
+        # its own repair.
+        _rolled = [p for p in (repair.get("rolled_forward") or []) if p not in applied]
+        applied = applied + _rolled
+        skipped = [p for p in skipped if p not in _rolled]
+        record["resolution_rolled_forward"] = _rolled
+        record["resolution_cursor"] = repair.get("cursor")
+    record["resolution_evidence"] = {
+        RESOLUTION_ACCEPT_LIVE: "live accepted",
+        RESOLUTION_REPLAN: "operation retired; fresh plan required",
+        RESOLUTION_RECONCILE: "untouched targets rolled forward from hash-verified "
+        "staged bytes, diverged targets accepted live, STATE checkpoint cursor "
+        "re-derived forward from the LOG tail; repository re-verified before settle",
+    }[resolution]
     # W2-003 (CORE-005): ownership handover is an explicit part of the
     # resolution lifecycle, validated and performed BEFORE the irreversible
     # terminal write -- never a post-settlement best effort that can silently
@@ -4460,9 +4724,17 @@ def _resolve_conflict_locked(root: Path, op_id: str, resolution: str, agent: str
         "resolution": resolution,
         "applied_targets": applied,
         "skipped_targets": skipped,
-        "detail": "conflict settled; live bytes accepted as truth, "
-        "unapplied plan effects abandoned",
+        "detail": (
+            "conflict settled; untouched targets rolled forward, diverged targets "
+            "accepted live, STATE cursor re-derived from the LOG tail"
+            if repair is not None
+            else "conflict settled; live bytes accepted as truth, "
+            "unapplied plan effects abandoned"
+        ),
     }
+    if repair is not None:
+        result["rolled_forward_targets"] = record.get("resolution_rolled_forward", [])
+        result["cursor_rederived"] = record.get("resolution_cursor")
     if cleanup_pending:
         result["cleanup_pending"] = cleanup_pending
     return result
