@@ -64,6 +64,31 @@ def _member(receipt_id: str, gate: str, timestamp: str, receipt_path: str, conte
     }
 
 
+def _member_receipt_id(record: dict, content_sha256: str) -> str:
+    """The member identity for a receipt, total over BOTH receipt schemas.
+
+    ``_RECEIPT_REQUIRED_FIELDS_V1`` deliberately omits ``receipt_id`` and
+    ``_iter_receipts`` accepts a v1 receipt, so a real population can hold
+    receipts that carry no id of their own. Reading ``record["receipt_id"]``
+    unconditionally made the lineage STRICTLY less permissive than the
+    canonical scan it is supposed to accelerate: the first append into such a
+    population raised KeyError out of ``generate_conformance_receipt`` after
+    the receipt bytes were already durable, so no index was ever updated and
+    every later lookup full-scanned.
+
+    A v1 member therefore takes a content-addressed identity derived from the
+    exact bytes the member already binds. It is deterministic (same bytes ->
+    same id), collision-free against a real W2-005 id (the ``legacy-`` prefix
+    is outside the issued-id namespace), and it keeps the member's authority
+    unchanged: ``content_sha256`` is still the exact written bytes, which is
+    what every lookup re-verifies.
+    """
+    receipt_id = record.get("receipt_id")
+    if isinstance(receipt_id, str) and receipt_id:
+        return receipt_id
+    return f"legacy-{content_sha256[:32]}"
+
+
 def _member_sort_key(member: dict):
     """Validated-completion order: timestamp, then receipt id."""
     from .board import iso_utc_sort_key
@@ -333,13 +358,14 @@ def _scan_receipt_members(root: Path):
     members = []
     for receipt_path, record in _iter_receipt_records_with_paths(root):
         raw = (root / receipt_path).read_bytes()
+        content_sha256 = hashlib.sha256(raw).hexdigest()
         members.append(
             _member(
-                record["receipt_id"],
+                _member_receipt_id(record, content_sha256),
                 record.get("gate", ""),
                 record.get("timestamp_utc", ""),
                 receipt_path,
-                hashlib.sha256(raw).hexdigest(),
+                content_sha256,
             )
         )
     members.sort(key=lambda member: member["receipt_path"])
@@ -790,11 +816,12 @@ def validate_lineage_deep(root: Path) -> tuple[bool, list[str]]:
     by_path: dict[str, dict] = {}
     for receipt_path, record in _iter_receipt_records_with_paths(root):
         raw = (root / receipt_path).read_bytes()
+        content_sha256 = hashlib.sha256(raw).hexdigest()
         by_path[receipt_path] = {
-            "receipt_id": record["receipt_id"],
+            "receipt_id": _member_receipt_id(record, content_sha256),
             "gate": record.get("gate", ""),
             "timestamp_utc": record.get("timestamp_utc", ""),
-            "content_sha256": hashlib.sha256(raw).hexdigest(),
+            "content_sha256": content_sha256,
         }
 
     seen: dict[str, dict] = {}
