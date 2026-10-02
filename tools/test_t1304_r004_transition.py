@@ -423,5 +423,92 @@ class MidpointRecoveryTests(ScoutTransitionFixture):
         self.assertEqual(log_after.count("transition to BUILD"), 1)
 
 
+# ------------------------------------------------- W2-004 reuse matrix
+
+
+class BaselineReuseFingerprintTests(ScoutTransitionFixture):
+    """W2-004: reuse is keyed on the TREE the baseline was captured from.
+
+    `ensure_debt_baseline` decided reuse from the Work id + ruleset alone,
+    while every record carries the three project-state fingerprints it was
+    taken under. A baseline was therefore handed back after the canonical
+    BOARD/STATE/LOG had moved -- a receipt claiming to be pre-BUILD evidence
+    for a tree it never saw.
+    """
+
+    def _mint(self, project: Path) -> str:
+        result = _live_debt().ensure_debt_baseline(
+            project, "T-1", "tester", "2026-09-10T00:05:00Z"
+        )
+        self.assertTrue(result["ok"], result)
+        self.assertEqual(result["code"], "DEBT_SNAPSHOT_CREATED")
+        return result["snapshot_id"]
+
+    def _drift(self, project: Path, axis: str) -> None:
+        """One canonical, semantically unrelated edit to a recorded file."""
+        if axis == "BOARD.md":
+            path = project / ".saipen/BOARD.md"
+            path.write_text(
+                path.read_text(encoding="utf-8").replace(
+                    "## TODO\n", "## TODO\n- [ ] T-9 [P3] unrelated work | verify: nothing\n"
+                ),
+                encoding="utf-8",
+            )
+        elif axis == "STATE.md":
+            path = project / ".saipen/STATE.md"
+            path.write_text(
+                path.read_text(encoding="utf-8").replace(
+                    'next_action: "PHASE SCOUT T-1"', 'next_action: "PHASE SCOUT T-1 (revised)"'
+                ),
+                encoding="utf-8",
+            )
+        elif axis == "LOG.md":
+            path = project / ".saipen/LOG.md"
+            path.write_text(
+                path.read_text(encoding="utf-8")
+                + "- 09.09.26 12:30 [E-003] [parent: E-002] [T-1] [agent: tester]"
+                " DEC: unrelated history move\n",
+                encoding="utf-8",
+            )
+        else:  # unreachable
+            raise AssertionError(axis)
+
+    def test_every_record_carries_the_three_state_fingerprints(self) -> None:
+        project = self.make_scout_project()
+        snapshot_id = self._mint(project)
+        record = _live_debt().load_snapshot(project, snapshot_id)
+        live = _live_debt()._project_state_fingerprints(project)
+        self.assertEqual(
+            sorted(live),
+            ["board_sha256", "log_fingerprint", "state_sha256"],
+        )
+        for key, value in live.items():
+            self.assertEqual(record[key], value, key)
+
+    def test_reuse_matrix_over_the_three_recorded_fingerprints(self) -> None:
+        cases = (
+            ("no drift", None, True),
+            ("BOARD.md drift", "BOARD.md", False),
+            ("STATE.md drift", "STATE.md", False),
+            ("LOG.md drift", "LOG.md", False),
+        )
+        for label, axis, expect_reuse in cases:
+            with self.subTest(case=label):
+                project = self.make_scout_project()
+                first = self._mint(project)
+                if axis is not None:
+                    self._drift(project, axis)
+                again = _live_debt().ensure_debt_baseline(
+                    project, "T-1", "tester", "2026-09-10T00:06:00Z"
+                )
+                self.assertTrue(again["ok"], again)
+                if expect_reuse:
+                    self.assertEqual(again["code"], "DEBT_SNAPSHOT_REUSED", again)
+                    self.assertEqual(again["snapshot_id"], first)
+                else:
+                    self.assertEqual(again["code"], "DEBT_SNAPSHOT_CREATED", again)
+                    self.assertNotEqual(again["snapshot_id"], first)
+
+
 if __name__ == "__main__":
     unittest.main()

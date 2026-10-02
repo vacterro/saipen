@@ -43,6 +43,7 @@ from test_fixture_support import CURRENT_STYLE_CONTRACT  # noqa: E402
 from saipen_engine import debt as debt_mod  # noqa: E402
 from saipen_engine import intake  # noqa: E402
 from saipen_engine import journal as journal_mod  # noqa: E402
+from saipen_engine.lock import project_writer_lock  # noqa: E402
 
 SCENARIO = ROOT / "tests" / "scenarios" / "stale-state-reconciliation" / ".saipen"
 
@@ -160,6 +161,59 @@ class DryRunPurityFixture(unittest.TestCase):
         )
         self.assertTrue(captured["ok"], captured)
         return project
+
+    def make_bootstrap_done_project(self) -> Path:
+        """PRISTINE project (no lineage, no recovery state) with a DONE Work.
+
+        This is the shape the audit reproduced against: a project whose
+        identity carrier does not exist yet, so a mutating capture would have
+        to MIGRATE one.
+        """
+        project = self.make_bootstrap_project()
+        (project / ".saipen" / "BOARD.md").write_text(
+            "## DOING\n"
+            "## TODO\n"
+            "## DONE\n"
+            "- [x] T-1 [P2] seeded work | verify: proof it works\n"
+            "## BLOCKED\n",
+            encoding="utf-8",
+        )
+        return project
+
+    def make_migrated_done_project(self) -> Path:
+        """ALREADY-MIGRATED project with a DONE Work.
+
+        ``ensure_project_lineage`` has already committed, so the carrier, the
+        migration receipt and the settled receipt index all exist: the dry run
+        must leave every one of them byte-identical.
+        """
+        project = self.make_mature_project()
+        board = project / ".saipen/BOARD.md"
+        board.write_text(
+            board.read_text(encoding="utf-8").replace(
+                "## DOING\n- [/] T-001 DOING task", "## DOING"
+            ).replace(
+                "## DONE\n", "## DONE\n- [x] T-001 DOING task | verify: proof exists\n"
+            ),
+            encoding="utf-8",
+        )
+        with project_writer_lock(project):
+            journal_mod.ensure_project_lineage(project)
+        self.assertTrue((project / ".saipen/IDENTITY.md").is_file())
+        return project
+
+
+#: Durable artifacts a mutating reverify/capture would create. A dry run must
+#: never bring any of them into existence on a pristine project.
+LINEAGE_ARTIFACTS = (
+    ".saipen/IDENTITY.md",
+    ".saipen/recovery/settled/.receipt-index.json",
+    ".saipen/recovery/ops/op-migrate-lineage/operation.json",
+    ".saipen/recovery/settled/op-migrate-lineage/operation.json",
+    ".saipen/locks/core.lock",
+)
+
+REVERIFY_VERIFICATION = [{"command": "unittest probe", "result": "PASS"}]
 
 
 # ---------------------------------------------------------------- A + D
@@ -396,6 +450,116 @@ class FailClosedCaptureTests(DryRunPurityFixture):
         # never treated as zero findings, never fell through into APPLY
         self.assertNotIn("snapshot_id", result)
         self.assertFalse((project / debt_mod.DEBT_DIR).exists())
+
+
+# ------------------------------------------- reverify dry-run (W2-001/R003)
+
+
+class ReverifyDryRunPurityTests(DryRunPurityFixture):
+    """W2-001: `reverify_work(..., dry_run=True)` writes ZERO project bytes.
+
+    The defect was ordering, not intent: the lineage carrier and the ordinary
+    receipt-emitting capture ran BEFORE the `if dry_run:` return, so a preview
+    migrated an unmigrated project and minted conformance/recovery artifacts
+    while reporting REVERIFY_PLAN.
+    """
+
+    def _plan(self, project: Path, work: str) -> tuple[dict, dict, list[str]]:
+        before = _tree_state(project)
+        result = debt_mod.reverify_work(
+            project,
+            work,
+            "probe",
+            verification=[dict(REVERIFY_VERIFICATION[0])],
+            dry_run=True,
+        )
+        after = _tree_state(project)
+        self.assertTrue(result["ok"], result)
+        self.assertEqual(result["code"], "REVERIFY_PLAN")
+        self.assertTrue(result["receipt_id"].startswith("RV-"))
+        created = sorted(set(after[1]) - set(before[1]))
+        return result, before, created
+
+    def test_pristine_project_dry_run_creates_no_durable_artifact(self) -> None:
+        project = self.make_bootstrap_done_project()
+        receipts_before = _receipt_names(project)
+        _result, before, created = self._plan(project, "T-1")
+
+        self.assertEqual(before, _tree_state(project), "dry-run wrote project bytes")
+        self.assertEqual(created, [], "dry-run created durable paths")
+        for rel in LINEAGE_ARTIFACTS:
+            self.assertFalse((project / rel).exists(), f"dry-run created {rel}")
+        self.assertEqual(_receipt_names(project), receipts_before)
+
+    def test_already_migrated_project_dry_run_touches_nothing(self) -> None:
+        project = self.make_migrated_done_project()
+        receipts_before = _receipt_names(project)
+        _result, before, created = self._plan(project, "T-001")
+
+        # the carrier, the migration receipt and the settled receipt index this
+        # project already owns must all survive byte-identical
+        self.assertTrue((project / ".saipen/IDENTITY.md").is_file())
+        self.assertTrue((project / ".saipen/recovery/settled/.receipt-index.json").is_file())
+        self.assertEqual(before, _tree_state(project), "dry-run changed existing bytes")
+        self.assertEqual(created, [], "dry-run created durable paths")
+        self.assertEqual(_receipt_names(project), receipts_before)
+
+    def test_dry_run_never_calls_the_mutating_capture_or_lineage(self) -> None:
+        project = self.make_bootstrap_done_project()
+        with patch.object(
+            journal_mod,
+            "ensure_project_lineage",
+            side_effect=AssertionError("reverify dry-run migrated project lineage"),
+        ), patch.object(
+            debt_mod,
+            "capture_findings",
+            side_effect=AssertionError(
+                "reverify dry-run used the receipt-emitting capture_findings"
+            ),
+        ), patch.object(
+            debt_mod,
+            "run_mutation",
+            side_effect=AssertionError("reverify dry-run ran a mutation"),
+        ), patch.object(
+            debt_mod,
+            "_capture_findings_read_only",
+            wraps=debt_mod._capture_findings_read_only,
+        ) as read_only_spy:
+            result = debt_mod.reverify_work(
+                project,
+                "T-1",
+                "probe",
+                verification=[dict(REVERIFY_VERIFICATION[0])],
+                dry_run=True,
+            )
+        self.assertTrue(result["ok"], result)
+        self.assertEqual(result["code"], "REVERIFY_PLAN")
+        self.assertEqual(read_only_spy.call_count, 1)
+        self.assertFalse((project / ".saipen/IDENTITY.md").exists())
+
+    def test_read_only_capture_failure_fails_closed_without_bytes(self) -> None:
+        project = self.make_bootstrap_done_project()
+        before = _tree_state(project)
+        with patch.object(
+            debt_mod,
+            "_capture_findings_read_only",
+            return_value={
+                "ok": False,
+                "code": "FINDINGS_CAPTURE_FAILED",
+                "exit_code": 1,
+                "detail": "validator exploded",
+            },
+        ):
+            result = debt_mod.reverify_work(
+                project,
+                "T-1",
+                "probe",
+                verification=[dict(REVERIFY_VERIFICATION[0])],
+                dry_run=True,
+            )
+        self.assertFalse(result["ok"], result)
+        self.assertEqual(result["code"], "FINDINGS_CAPTURE_FAILED")
+        self.assertEqual(before, _tree_state(project), "refusal wrote bytes")
 
 
 if __name__ == "__main__":

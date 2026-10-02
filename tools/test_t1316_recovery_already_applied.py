@@ -1121,5 +1121,70 @@ class PublicRecoveryEntryPointTests(RecoveryFixture):
         self.assertEqual(codes, {"RECOVERY_CONFLICT"}, codes)
 
 
+class RaisingVerifierTests(RecoveryFixture):
+    """W2-002/R004: a verifier that RAISES is a refusal, not an escape.
+
+    ``_run_verifier`` used to call the policy verifier bare, so any raise
+    unwound through APPLY with the operation already APPLYING on disk: a
+    recoverable outcome became an unrecoverable crash. It must also never
+    answer ``[]`` -- that list is read as "the postcondition holds", so an
+    exception returned as ``[]`` would be a silent PASS.
+    """
+
+    @staticmethod
+    def _raising_verifier(_root, _targets, receipt_metadata=None):
+        raise RuntimeError(f"verifier exploded (metadata={receipt_metadata!r})")
+
+    def test_a_raising_verifier_never_answers_the_empty_pass_list(self):
+        with mock.patch.object(
+            journal_mod, "_verifier_for", return_value=self._raising_verifier
+        ):
+            errors = journal_mod._run_verifier(self.root, [], "core_fast", {"k": "v"})
+        self.assertTrue(errors, "an exception must never read as a pass")
+        self.assertEqual(len(errors), 1, errors)
+        self.assertIn("core_fast", errors[0])
+        self.assertIn("RuntimeError", errors[0])
+        self.assertIn("verifier exploded", errors[0])
+
+    def test_apply_settles_on_a_conflict_instead_of_raising(self):
+        with project_writer_lock(self.root), mock.patch.object(
+            journal_mod, "_verifier_for", return_value=self._raising_verifier
+        ):
+            result = journal_mod.run_mutation(
+                self.root,
+                self.op_id,
+                "generic",
+                "tester",
+                self.identity,
+                "t1316-payload",
+                self.targets(),
+                preconditions=self.preconditions(),
+                verification_policy="core_fast",
+                _ensure_lineage=False,
+            )
+        self.assertFalse(result["ok"], result)
+        self.assertEqual(result["code"], "CONFLICT", result)
+        self.assertIn("RuntimeError", result["detail"])
+        # terminal authority, never left mid-flight in APPLYING
+        self.assertEqual(self.sidecar()["status"], "CONFLICT")
+
+    def test_recovery_settles_instead_of_raising(self):
+        self.run_apply(crash_role="gamma")
+        self.rebuild_stale_prepared_manifest()
+        record = self.manifest()
+        record["verification_policy"] = "core_fast"
+        record["targets"] = [dict(target, applied=False) for target in record["targets"]]
+        self.active_manifest_path().write_text(json.dumps(record, indent=2), encoding="utf-8")
+        # `recover` is itself the writer-lock entry point; never nest the lock.
+        with mock.patch.object(
+            journal_mod, "_verifier_for", return_value=self._raising_verifier
+        ):
+            result = self.recover()
+        self.assertFalse(result["ok"], result)
+        self.assertEqual(result["code"], "CONFLICT", result)
+        self.assertNotEqual(self.sidecar()["status"], "APPLYING")
+        self.assertEqual(self.sidecar()["status"], "CONFLICT")
+
+
 if __name__ == "__main__":
     unittest.main()

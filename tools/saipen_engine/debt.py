@@ -231,6 +231,49 @@ def _source_identity(root: Path) -> dict:
         return {"source_head": None, "source_tree_fingerprint": None}
 
 
+def _regulated_snapshot(
+    root: Path, capture: dict, reason: str, bound_work: str | None = None
+) -> tuple[dict | None, str]:
+    """The dedup verdict for ONE regulated capture.
+
+    A capture whose finding set, source checkpoint, reason and Work already
+    exist is the SAME snapshot (I1): REUSED, never re-minted.
+    """
+    if not capture.get("ok"):
+        return capture, "upstream"
+    problems = capture.get("problems", [])
+    warnings = capture.get("warnings", [])
+    digest = findings_mod.findings_digest(problems, warnings)
+    identity = _source_identity(root)
+    existing = None
+    for path in _existing_snapshots(root):
+        try:
+            record = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            continue
+        if record.get("bound_work") == (bound_work or None):
+            if (
+                record.get("ruleset_version") == findings_mod.RULESET_VERSION
+                and record.get("findings_digest") == digest
+                and record.get("source_tree_fingerprint")
+                == identity["source_tree_fingerprint"]
+                and record.get("reason") == reason
+            ):
+                existing = record
+                break
+    if existing is not None:
+        return (
+            {
+                "ok": True,
+                "code": "DEBT_SNAPSHOT_REUSED",
+                "snapshot_id": existing.get("snapshot_id"),
+                "reuse": True,
+            },
+            "dedup",
+        )
+    return None, digest
+
+
 def create_snapshot(
     root: Path | str,
     agent: str,
@@ -257,45 +300,15 @@ def create_snapshot(
     lock. It reports the REAL structured finding set through the explicit
     internal ``--no-receipt`` validator capture, and fails closed (structured
     refusal) when that capture cannot determine the finding set.
+
+    WRITER BOUNDARY (W2-005): the mutating half runs under the canonical
+    project writer lock, so the snapshot-id allocation and the journaled write
+    are ONE critical section and two concurrent snapshots cannot collide on an
+    id. ``project_writer_lock`` is NOT reentrant, so the locked body is
+    :func:`_create_snapshot_apply`; callers that already hold the writer lock
+    (the baseline primitive) call it directly and never re-acquire.
     """
     root = Path(root)
-
-    def _regulated_snapshot(
-        capture: dict, reason: str, bound_work: str | None = None
-    ) -> tuple[dict | None, str]:
-        if not capture.get("ok"):
-            return capture, "upstream"
-        problems = capture.get("problems", [])
-        warnings = capture.get("warnings", [])
-        digest = findings_mod.findings_digest(problems, warnings)
-        identity = _source_identity(root)
-        existing = None
-        for path in _existing_snapshots(root):
-            try:
-                record = json.loads(path.read_text(encoding="utf-8"))
-            except (OSError, ValueError):
-                continue
-            if record.get("bound_work") == (bound_work or None):
-                if (
-                    record.get("ruleset_version") == findings_mod.RULESET_VERSION
-                    and record.get("findings_digest") == digest
-                    and record.get("source_tree_fingerprint")
-                    == identity["source_tree_fingerprint"]
-                    and record.get("reason") == reason
-                ):
-                    existing = record
-                    break
-        if existing is not None:
-            return (
-                {
-                    "ok": True,
-                    "code": "DEBT_SNAPSHOT_REUSED",
-                    "snapshot_id": existing.get("snapshot_id"),
-                    "reuse": True,
-                },
-                "dedup",
-            )
-        return None, digest
 
     if dry_run:
         # =================================================================
@@ -310,7 +323,7 @@ def create_snapshot(
         # capture (never zero findings, never a fall-through into APPLY).
         # =================================================================
         capture = _capture_findings_read_only(root)
-        regulated, tagged = _regulated_snapshot(capture, reason, bound_work)
+        regulated, tagged = _regulated_snapshot(root, capture, reason, bound_work)
         if regulated is not None:
             preview = dict(regulated)
             preview.setdefault("writes", 0)
@@ -338,6 +351,19 @@ def create_snapshot(
             "writes": 1,
         }
 
+    from .lock import project_writer_lock
+
+    with project_writer_lock(root):
+        return _create_snapshot_apply(root, agent, reason, bound_work)
+
+
+def _create_snapshot_apply(root: Path, agent: str, reason: str, bound_work: str | None) -> dict:
+    """The writer-serialized half of :func:`create_snapshot`.
+
+    Unlocked on purpose: ``project_writer_lock`` is not reentrant, so a caller
+    that already holds the writer lock (the baseline primitive) reaches the
+    same apply without deadlocking on itself.
+    """
     # =====================================================================
     # MUTATING APPLY (SRC-026:R004): the ordinary journaled snapshot path.
     # Lineage stays authoritative, structured findings stay real, the
@@ -351,7 +377,7 @@ def create_snapshot(
     # match (T-1003 fail-closed bootstrap).
     lineage = ensure_project_lineage(root)
     capture = capture_findings(root)
-    regulated, tagged = _regulated_snapshot(capture, reason, bound_work)
+    regulated, tagged = _regulated_snapshot(root, capture, reason, bound_work)
     if regulated is not None:
         return regulated
     problems = capture.get("problems", [])
@@ -448,38 +474,58 @@ def ensure_debt_baseline(root: Path | str, work: str, agent: str, utc: str) -> d
     Called at the SCOUT -> BUILD boundary, the narrowest lifecycle point that
     guarantees the baseline predates every BUILD mutation (Phase I). A fresh
     structured Core receipt for the exact same project checkpoint and ruleset
-    is REUSED, never re-minted (I1). When the tree has already moved past the
-    captured checkpoint, a fresh snapshot is created BEFORE this Work's first
-    mutation, never pretended to be pre-work evidence (I2).
+    is REUSED, never re-minted (I1). Reuse additionally requires the canonical
+    BOARD/STATE/LOG to still read exactly as they did at capture time: those
+    three fingerprints are recorded in every snapshot and a baseline whose
+    tree has moved is no longer pre-BUILD evidence. When the tree has already
+    moved past the captured checkpoint, a fresh snapshot is created BEFORE this
+    Work's first mutation, never pretended to be pre-work evidence (I2).
     """
     root = Path(root)
-    existing = None
-    for path in reversed(_existing_snapshots(root)):
-        try:
-            record = json.loads(path.read_text(encoding="utf-8"))
-        except (OSError, ValueError):
-            continue
-        if record.get("bound_work") != work:
-            continue
-        if record.get("ruleset_version") != findings_mod.RULESET_VERSION:
-            continue
-        if record.get("ruleset_fingerprint") != findings_mod.ruleset_fingerprint():
-            continue
-        existing = record
-        break
-    if existing is not None:
-        return {
-            "ok": True,
-            "code": "DEBT_SNAPSHOT_REUSED",
-            "snapshot_id": existing.get("snapshot_id"),
-            "reuse": True,
-        }
-    return create_snapshot(
-        root,
-        agent,
-        f"pre-BUILD debt baseline for {work}",
-        bound_work=work,
-    )
+    from .lock import project_writer_lock
+
+    # W2-005: the reuse scan and the fallback mint are ONE critical section, so
+    # two concurrent baseline establishments cannot both conclude "none
+    # exists" and race on the same snapshot id. The lock is not reentrant, so
+    # the mint goes through the unlocked apply helper rather than
+    # `create_snapshot`.
+    with project_writer_lock(root):
+        existing = None
+        for path in reversed(_existing_snapshots(root)):
+            try:
+                record = json.loads(path.read_text(encoding="utf-8"))
+            except (OSError, ValueError):
+                continue
+            if record.get("bound_work") != work:
+                continue
+            if record.get("ruleset_version") != findings_mod.RULESET_VERSION:
+                continue
+            if record.get("ruleset_fingerprint") != findings_mod.ruleset_fingerprint():
+                continue
+            # W2-004: a baseline is evidence ABOUT a tree. Every record carries
+            # the three project-state fingerprints it was captured from
+            # (`_project_state_fingerprints`), so reuse is only honest while the
+            # canonical BOARD/STATE/LOG still read the same. Without this the
+            # Work + ruleset identity alone would happily hand back a baseline
+            # whose "pre-BUILD checkpoint" the project has long since left.
+            live = _project_state_fingerprints(root)
+            if any(record.get(key) != value for key, value in live.items()):
+                continue
+            existing = record
+            break
+        if existing is not None:
+            return {
+                "ok": True,
+                "code": "DEBT_SNAPSHOT_REUSED",
+                "snapshot_id": existing.get("snapshot_id"),
+                "reuse": True,
+            }
+        return _create_snapshot_apply(
+            root,
+            agent,
+            f"pre-BUILD debt baseline for {work}",
+            work,
+        )
 
 
 def _bound_work_guard(root: Path, bound_work: str, agent: str) -> dict | None:
@@ -640,16 +686,17 @@ def _parse_log_stamp(stamp: str | None) -> str | None:
     return parsed.replace(tzinfo=timezone.utc).isoformat().replace("+00:00", "Z")
 
 
-def _claim_boundary(root: Path, boundary_event: str) -> dict:
-    """Resolve an E-### claim boundary from live protocol history (J)."""
+def _claim_boundary(boundary_event: str, history: list[dict]) -> dict:
+    """Resolve an E-### claim boundary from live protocol history (J).
+
+    PERF-003: the canonical history is read once per `work_delta` invocation
+    by the caller and handed in here; this never reads it for itself.
+    """
     found = _EVENT_RE.match(boundary_event or "")
     if not found:
         raise DebtRefusal("VALIDATION_FAILED", f"invalid claim boundary {boundary_event!r}")
     boundary_number = int(found.group(1))
-    from .log import read_history_snapshot
-
-    snapshot = read_history_snapshot(root, lean=True)
-    events = {event["event"]: event for event in snapshot.events}
+    events = {event["event"]: event for event in history}
     boundary = events.get(boundary_number)
     if boundary is None:
         raise DebtRefusal(
@@ -664,14 +711,19 @@ def _claim_boundary(root: Path, boundary_event: str) -> dict:
     }
 
 
-def _first_ticket_event(root: Path, work: str) -> int | None:
-    from .log import read_history_snapshot
+def _first_ticket_events(history: list[dict]) -> dict[str, int]:
+    """First appearance event per ticket, in ONE pass over canonical history.
 
-    snapshot = read_history_snapshot(root, lean=True)
-    for event in snapshot.events:
-        if event.get("ticket") == work:
-            return event["event"]
-    return None
+    PERF-003: replaces the per-Work-finding full history read that
+    `_first_ticket_event(root, ...)` used to perform. Order-preserving, so
+    the value for a ticket is byte-identical to that function's return.
+    """
+    first: dict[str, int] = {}
+    for event in history:
+        ticket = event.get("ticket")
+        if ticket is not None and ticket not in first:
+            first[ticket] = event["event"]
+    return first
 
 
 def _receipt_timestamp(root: Path, receipt_id: str) -> str | None:
@@ -714,8 +766,14 @@ def _legacy_eligibility(
     *,
     target_work: str,
     target_source: str | None,
+    first_event_by_ticket: dict[str, int],
 ) -> tuple[bool, str]:
-    """J1/J2 provenance adjudication for one finding. Fail-closed."""
+    """J1/J2 provenance adjudication for one finding. Fail-closed.
+
+    `first_event_by_ticket` is the invocation-local, read-only view of the
+    canonical history the caller already read (PERF-003); this function
+    never reads history for itself.
+    """
     rule_id = finding.get("rule_id")
     subject_kind = finding.get("subject_kind")
     subject_id = finding.get("subject_id")
@@ -730,7 +788,7 @@ def _legacy_eligibility(
             return False, "subject is the target Work"
         if not _WORK_RE.match(subject_id):
             return False, f"non-canonical Work subject {subject_id!r}"
-        first = _first_ticket_event(root, subject_id)
+        first = first_event_by_ticket.get(subject_id)
         if first is None:
             return False, f"Work {subject_id} has no canonical history appearance"
         if first >= boundary["event"]:
@@ -871,6 +929,7 @@ def work_delta(
         baseline = None
         mode = None
         boundary = None
+        first_event_by_ticket: dict[str, int] = {}
         if baseline_ref:
             baseline = load_snapshot(root, baseline_ref)
             if baseline.get("bound_work") not in (None, work):
@@ -880,7 +939,16 @@ def work_delta(
                 )
             mode = "baseline"
         elif claim_boundary:
-            boundary = _claim_boundary(root, claim_boundary)
+            from .log import read_history_snapshot
+
+            # PERF-003: ONE canonical history read per invocation feeds both
+            # the claim boundary and every Work-subject first-appearance
+            # lookup. Strictly invocation-local -- nothing is memoized across
+            # calls, so a second `work_delta` still re-reads and sees current
+            # state.
+            history = read_history_snapshot(root, lean=True).events
+            first_event_by_ticket = _first_ticket_events(history)
+            boundary = _claim_boundary(claim_boundary, history)
             mode = "legacy"
         else:
             for path in reversed(_existing_snapshots(root)):
@@ -932,8 +1000,12 @@ def work_delta(
                     continue
                 verdict = findings_mod.compare_finding(finding, base_problems[key])
                 (carried if verdict == "CARRIED" else changed_unsafe).append(finding)
+            # PERF-003: hoisted out of the loop. `current_problems` is not
+            # reassigned or mutated below, so membership results are
+            # identical to the old per-iteration rebuild.
+            current_problem_keys = {f["finding_key"] for f in current_problems}
             for key, base_finding in base_problems.items():
-                if key not in {f["finding_key"] for f in current_problems}:
+                if key not in current_problem_keys:
                     resolved.append(base_finding)
             carried_warnings = [
                 f for f in current_warnings if f["finding_key"] in base_warning_keys
@@ -952,6 +1024,7 @@ def work_delta(
                     boundary,
                     target_work=work,
                     target_source=target_source,
+                    first_event_by_ticket=first_event_by_ticket,
                 )
                 if eligible:
                     carried.append(finding)
@@ -1445,10 +1518,41 @@ def reverify_work(
             "code": "REVERIFY_REFUSED",
             "detail": "no targeted verification evidence supplied",
         }
-    from .journal import ensure_project_lineage
+    # W2-005: every mutating step below -- lineage, the receipt-emitting
+    # capture, the receipt-id allocation and the journaled write -- must run
+    # inside ONE writer critical section, or two concurrent reverifies race for
+    # the same RV-NNNNNN. A dry run is byte-pure, so it never acquires the lock
+    # (acquiring it creates .saipen/locks/core.lock).
+    from contextlib import nullcontext
 
-    lineage = ensure_project_lineage(root)
-    capture = capture_findings(root)
+    from .lock import project_writer_lock
+
+    with nullcontext() if dry_run else project_writer_lock(root):
+        return _reverify_body(
+            root, work, agent, ticket, verification, runs, timeout, derive_default, dry_run
+        )
+
+
+def _reverify_body(
+    root, work, agent, ticket, verification, runs, timeout, derive_default, dry_run
+):
+    """The writer-serialized body of :func:`reverify_work`.
+
+    Split out so the caller owns the writer boundary and a dry run reaches the
+    same code without ever acquiring the lock.
+    """
+    # READ-ONLY PREVIEW (W2-001): a dry run writes ZERO project bytes -- no
+    # lineage, no IDENTITY.md, no conformance receipt, no conformance index, no
+    # settled receipt. Its finding set is the REAL one, read through the
+    # explicit --no-receipt capture, never a fabricated empty one.
+    lineage = None
+    if dry_run:
+        capture = _capture_findings_read_only(root)
+    else:
+        from .journal import ensure_project_lineage
+
+        lineage = ensure_project_lineage(root)
+        capture = capture_findings(root)
     if not capture.get("ok"):
         return capture
     problems = capture.get("problems", [])
@@ -1496,6 +1600,21 @@ def reverify_work(
         ]
     evidence_class = evidence_class_of({"verification": entries})
     contract_digest = _verification_contract_digest(entries, gate)
+
+    # The preview returns here, before the idempotency scan, the receipt record
+    # and the journaled write: everything below this line is a mutation.
+    if dry_run:
+        return {
+            "ok": True,
+            "code": "REVERIFY_PLAN",
+            "receipt_id": _next_reverify_id(root),
+            "work": work,
+            "verdict": verdict,
+            "evidence_class": evidence_class,
+            "verification_contract_digest": contract_digest,
+            "problem_count": len(problems),
+            "warning_count": len(warnings),
+        }
 
     # Idempotency: newest matching receipt decides. The KEY is the current
     # TREE + the verification CONTRACT + the ruleset, never the findings
@@ -1576,18 +1695,6 @@ def reverify_work(
     record["integrity_digest"] = hash_bytes(canonical)
     content = json.dumps(record, indent=2, sort_keys=True).encode("utf-8")
     rel = f"{REVERIFY_DIR}/{receipt_id}.json"
-    if dry_run:
-        return {
-            "ok": True,
-            "code": "REVERIFY_PLAN",
-            "receipt_id": receipt_id,
-            "work": work,
-            "verdict": verdict,
-            "evidence_class": evidence_class,
-            "verification_contract_digest": contract_digest,
-            "problem_count": len(problems),
-            "warning_count": len(warnings),
-        }
     op_id = "reverify." + hash_bytes(
         f"{lineage}|{work}|{findings_digest}|{contract_digest}|{receipt_id}".encode("utf-8")
     )[:12]

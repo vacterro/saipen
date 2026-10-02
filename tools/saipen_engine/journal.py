@@ -3123,7 +3123,11 @@ def run_mutation(
                     f"unknown action {action!r}; refusing to "
                     "dispatch a destructive fallback",
                 }
-        except OSError as exc:
+        except (OSError, ValueError) as exc:
+            # W2-005: the safe-atomic ownership race (paths.py raises
+            # ValueError when the final node or the temporary is swapped under
+            # the write) is the same third-state event as a failing action, not
+            # an escaping crash: it becomes a CONFLICT the operator can settle.
             journal.mark("CONFLICT")
             return {
                 "ok": False,
@@ -3801,7 +3805,16 @@ def _run_verifier(root, targets, policy: str, receipt_metadata=None) -> list[str
     verifier = _verifier_for(policy)
     if verifier is None:
         return []
-    return verifier(root, targets, receipt_metadata) or []
+    try:
+        return verifier(root, targets, receipt_metadata) or []
+    except Exception as exc:
+        # A verifier that RAISES is not a verifier that had nothing to say:
+        # `[]` is read by every caller as "the postcondition holds", so an
+        # exception returned as `[]` would be a silent PASS. It also must not
+        # escape -- the operation is already APPLYING on disk, and a raw raise
+        # strands it there. A raised verifier becomes a refusal like any other
+        # non-empty list, so the operation lands on the caller's terminal state.
+        return [f"semantic verifier {policy} raised {type(exc).__name__}: {exc}"]
 
 
 def verify_improve(root, targets, receipt_metadata=None) -> list[str]:

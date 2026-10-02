@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import contextlib
 import json
 import shutil
 import sys
@@ -14,6 +15,9 @@ sys.path.insert(0, str(ROOT / "tools"))
 from saipen_engine import debt as debt_mod  # noqa: E402
 from saipen_engine import findings as findings_mod  # noqa: E402
 from saipen_engine import intake  # noqa: E402
+from saipen_engine import journal as journal_mod  # noqa: E402
+from saipen_engine import lock as lock_mod  # noqa: E402
+from saipen_engine.lock import project_writer_lock  # noqa: E402
 
 SCENARIO = ROOT / "tests" / "scenarios" / "stale-state-reconciliation" / ".saipen"
 
@@ -202,6 +206,72 @@ class DebtGateFixtureTests(unittest.TestCase):
         with self.assertRaises(debt_mod.DebtRefusal) as caught:
             debt_mod.load_snapshot(self.root, created["snapshot_id"])
         self.assertEqual(caught.exception.code, "DEBT_SNAPSHOT_MISSING")
+
+    # -- W2-005 writer serialization + injected race -----------------------
+
+    def test_snapshot_id_allocation_runs_inside_the_writer_boundary(self) -> None:
+        """The defect was ORDER, not intent: `_next_snapshot_id` allocated
+        before the writer boundary, so two concurrent snapshots could both
+        read the same maximum and mint the same id."""
+        events: list[str] = []
+
+        @contextlib.contextmanager
+        def spy_lock(_root):
+            events.append("lock")
+            try:
+                yield None
+            finally:
+                events.append("unlock")
+
+        real_next_id = debt_mod._next_snapshot_id
+
+        def spy_next_id(root):
+            events.append("id")
+            return real_next_id(root)
+
+        with patch.object(lock_mod, "project_writer_lock", spy_lock), patch.object(
+            debt_mod, "_next_snapshot_id", side_effect=spy_next_id
+        ), patch.object(
+            debt_mod, "run_mutation", wraps=debt_mod.run_mutation
+        ) as mutation_spy:
+            result = debt_mod.create_snapshot(self.root, "probe", "boundary probe")
+        self.assertTrue(result["ok"], result)
+        self.assertEqual(mutation_spy.call_count, 1, "exactly one snapshot mutation")
+        self.assertEqual(events, ["lock", "id", "unlock"])
+        self.assertTrue(result["snapshot_id"].endswith("000001"), result)
+
+    def test_a_second_concurrent_snapshot_refuses_instead_of_racing(self) -> None:
+        """A live writer already owns the project: the snapshot apply must
+        refuse WRITER_BUSY and write nothing, never slip a second writer past
+        the boundary."""
+        with project_writer_lock(self.root), self.assertRaises(PermissionError) as caught:
+            debt_mod.create_snapshot(self.root, "probe", "concurrent probe")
+        self.assertEqual(str(caught.exception), "WRITER_BUSY")
+        self.assertFalse((self.root / debt_mod.DEBT_DIR).exists())
+
+    def test_the_safe_atomic_ownership_race_is_a_conflict_not_an_escape(self) -> None:
+        """`paths.safe_atomic_replace_owned` raises ValueError when the final
+        node is swapped under the write. That is the same third-state event as
+        a failing action: it must land on CONFLICT, not unwind out of
+        `run_mutation` with the operation stranded in APPLYING."""
+        real_write = journal_mod._atomic_write
+
+        def racing_write(path, content, *, ownership_root):
+            # Windows normalises the journal-relative separators to backslashes.
+            if debt_mod.DEBT_DIR in str(path).replace("\\", "/"):
+                raise ValueError(
+                    f"generic_path {path} changed before atomic replacement"
+                )
+            return real_write(path, content, ownership_root=ownership_root)
+
+        with patch.object(
+            journal_mod, "_atomic_write", side_effect=racing_write
+        ):
+            result = debt_mod.create_snapshot(self.root, "probe", "race probe")
+        self.assertFalse(result["ok"], result)
+        self.assertEqual(result["code"], "CONFLICT", result)
+        self.assertIn("changed before atomic replacement", result["detail"])
+        self.assertFalse((self.root / debt_mod.DEBT_DIR).exists())
 
     # -- Work delta (real capture) ------------------------------------------
 
@@ -582,6 +652,167 @@ class LegacyBootstrapTests(unittest.TestCase):
             )
         self.assertFalse(result["ok"], result)
         self.assertEqual(result["code"], "VALIDATION_FAILED")
+
+
+class _CountingProblems(list):
+    """A `problems` list that counts how many times it is fully iterated.
+
+    Each iteration of `current_problems` inside `work_delta` is one full pass
+    over the current finding set, so the counter pins how many times the
+    per-baseline-key comprehension over that set can have been rebuilt.
+    """
+
+    def __init__(self, items: list[dict]) -> None:
+        super().__init__(items)
+        self.passes = 0
+
+    def __iter__(self):
+        self.passes += 1
+        return super().__iter__()
+
+
+class Perf003SinglePassTests(unittest.TestCase):
+    """T-1537 PERF-003: the debt gate derives each of these exactly ONCE.
+
+    Both counters, never a clock: the assertions are about how many times the
+    work happened, so they are deterministic on any machine. The computed
+    report is unchanged by the hoists -- only the read count is.
+    """
+
+    def setUp(self) -> None:
+        self.tmp = tempfile.TemporaryDirectory(prefix="saipen-debt-perf003-")
+        self.root = Path(self.tmp.name) / "project"
+        self.root.mkdir()
+        shutil.copytree(SCENARIO, self.root / ".saipen")
+        log_path = self.root / ".saipen/LOG.md"
+        lines = [
+            "- 05.09.26 00:19 [E-815] [parent: E-814] [T-050] [agent: probe] [op: op-a] "
+            "DEC: pre-claim work created",
+            "- 05.09.26 00:20 [E-816] [parent: E-815] [T-158] [agent: probe] [op: op-b] "
+            "DEC: claimed via SAIOPS -- owner probe",
+            "- 05.09.26 00:21 [E-817] [parent: E-816] [T-200] [agent: probe] [op: op-c] "
+            "DEC: post-claim work created",
+        ]
+        log_path.write_text(
+            log_path.read_text(encoding="utf-8") + "\n".join(lines) + "\n", encoding="utf-8"
+        )
+
+    def tearDown(self) -> None:
+        self.tmp.cleanup()
+
+    def _closure_finding(self, ticket: str) -> dict:
+        return findings_mod.classify(
+            "problem",
+            f"ticket {ticket} is ## DONE but carries no current-cycle verification "
+            "evidence (classifier: no current-cycle VERIFY boundary)",
+        )
+
+    def _capture(self, problems: list[dict]) -> dict:
+        return {
+            "ok": True,
+            "exit_code": 1,
+            "gate": "core",
+            "problems": problems,
+            "warnings": [],
+        }
+
+    def test_current_problem_keys_is_built_once_per_work_delta(self) -> None:
+        """`current_problem_keys` is built ONCE per call, not once per
+        baseline key (PERF-003 nested set rebuild)."""
+        passes_at_size: list[int] = []
+        for size in (1, 5):
+            tickets = tuple(f"T-{60 + n}" for n in range(size))
+            baseline = [self._closure_finding(t) for t in tickets]
+            with patch.object(
+                debt_mod, "capture_findings", return_value=self._capture(baseline)
+            ):
+                snapshot = debt_mod.create_snapshot(self.root, "probe", "baseline")
+            self.assertTrue(snapshot["ok"], snapshot)
+            # Only the FIRST baseline finding survives: size-1 are resolved,
+            # so the resolved pass really does walk every baseline key.
+            current = _CountingProblems([self._closure_finding(tickets[0])])
+            with patch.object(
+                debt_mod, "capture_findings", return_value=self._capture(current)
+            ):
+                report = debt_mod.work_delta(
+                    self.root,
+                    "T-090",
+                    agent="probe",
+                    baseline_ref=snapshot["snapshot_id"],
+                    verification=[{"command": "probe tests", "result": "PASS"}],
+                )
+            self.assertTrue(report["ok"], report)
+            self.assertEqual(len(report["resolved"]), size - 1)
+            passes_at_size.append(current.passes)
+        # A per-baseline-key rebuild scales with the baseline; a single hoist
+        # does not. Same count at both sizes == built once, not once per key.
+        self.assertEqual(
+            passes_at_size[0],
+            passes_at_size[1],
+            f"current-key set rebuild scales with baseline size: {passes_at_size}",
+        )
+
+    def test_work_delta_reads_canonical_history_once(self) -> None:
+        """`read_history_snapshot` is called exactly ONCE per `work_delta`
+        call, whatever the number of Work findings (PERF-003)."""
+        from saipen_engine import log as log_mod
+
+        calls: list[int] = []
+        original = log_mod.read_history_snapshot
+
+        def counting(project_root, **kwargs):
+            calls.append(1)
+            return original(project_root, **kwargs)
+
+        # Four Work findings across every adjudication branch: pre-claim
+        # (carried), post-claim (blocking), and never-seen (no history).
+        problems = [
+            self._closure_finding(t) for t in ("T-050", "T-200", "T-201", "T-202")
+        ]
+        with patch.object(
+            log_mod, "read_history_snapshot", counting
+        ), patch.object(
+            debt_mod, "capture_findings", return_value=self._capture(problems)
+        ):
+            report = debt_mod.work_delta(
+                self.root,
+                "T-158",
+                agent="probe",
+                claim_boundary="E-816",
+                verification=[{"command": "regression_t158.py", "result": "PASS"}],
+            )
+        self.assertEqual(len(calls), 1, "canonical history must be read once per call")
+        self.assertEqual(report["mode"], "legacy")
+        self.assertEqual(report["carried_problems"], 1)
+
+    def test_history_read_is_invocation_local_not_cached(self) -> None:
+        """The single read is not a memo: a second call in the same process
+        re-reads, so `current_tree_reverify` semantics stay intact."""
+        from saipen_engine import log as log_mod
+
+        calls: list[int] = []
+        original = log_mod.read_history_snapshot
+
+        def counting(project_root, **kwargs):
+            calls.append(1)
+            return original(project_root, **kwargs)
+
+        problems = [self._closure_finding("T-050")]
+        for _ in range(2):
+            with patch.object(
+                log_mod, "read_history_snapshot", counting
+            ), patch.object(
+                debt_mod, "capture_findings", return_value=self._capture(problems)
+            ):
+                report = debt_mod.work_delta(
+                    self.root,
+                    "T-158",
+                    agent="probe",
+                    claim_boundary="E-816",
+                    verification=[{"command": "regression_t158.py", "result": "PASS"}],
+                )
+            self.assertTrue(report["ok"], report)
+        self.assertEqual(len(calls), 2, "no cross-mutation cache: 1 read per call, 2 calls")
 
 
 class StrictGateInvariantTests(unittest.TestCase):
