@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-159:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Forensic response-enforcement investigation: why the long Estonian reply escaped the STYLE detail/chat ceilings on the live host"
+    }
+  },
+  "derived_at": "2026-10-01T12:38:00Z",
+  "derived_from": "SRC-159",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "d3bfc6d96f430561e781d6c5c6451ab455ccd6cac63953a1cea7ef7e3b0ca873"
+}

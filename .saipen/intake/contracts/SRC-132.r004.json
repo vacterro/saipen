@@ -1,0 +1,29 @@
+{
+  "clauses": {
+    "SRC-132:R0001": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "The documented Windows operator command is preserved correctly through the actual launcher path."
+    },
+    "SRC-132:R0002": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "`saipen clean + push` is parsed as two ordered canonical commands rather than one malformed command string."
+    },
+    "SRC-132:R0003": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "Compound behavior is generic, not special-cased for `clean` or `push`."
+    },
+    "SRC-132:R0004": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "CLEAN entry and CLEAN completion are semantically unambiguous in runtime state and user-facing reporting."
+    }
+  },
+  "derived_at": "2026-09-28T07:16:09Z",
+  "derived_from": "SRC-132",
+  "interpretation_revision": 4,
+  "schema_version": 1,
+  "source_sha256": "4cd6ed67e2a287260b7584a42b3bb5f3da05ad987f9bbafdb8dce8e21db6e593"
+}

@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-115:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "\u0414\u0430, \u044d\u0442\u043e \u044f \u043f\u043e\u043f\u0440\u043e\u0441\u0438\u043b \u0443\u0441\u0438\u043b\u0438\u0442\u044c \u044d\u0442\u043e.\n\n(Operator reply, 2026-09-24, identifying the uncommitted saipen/UI.md antialiasing strengthening as their own request. Operator decision on the follow-up question \"UI.md tugevdus (+4921 B, veel commitimata) l\u00fckkab protokolli markdowni kogumahu 311002 > 307200 (300 KiB piir, test_protocol_registry) ... Kuidas lahendan?\": \"Tihendan, piir j\u00e4\u00e4b (Soovitatud)\" -- take the UI.md strengthening into its own ticket, rewrite the new passage compactly keeping every rule (antialiasing always OFF, the system ClearType setting does not apply, the proof is a pixel check), fit under the 300 KiB human_markdown_total budget, and commit it before T-1501.)"
+    }
+  },
+  "derived_at": "2026-09-24T01:46:12Z",
+  "derived_from": "SRC-115",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "38216fc1c69d30a54084a29d59c8c062df61ae7a950e95336abdeba86c96508e"
+}

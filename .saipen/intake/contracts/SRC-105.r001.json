@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-105:R001": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not rewind to older snapshots."
+    }
+  },
+  "derived_at": "2026-09-22T16:31:35Z",
+  "derived_from": "SRC-105",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "06411bf03ce69cde2ff150b011e1a939ff98581342e049c0df7122ca5aabd87c"
+}

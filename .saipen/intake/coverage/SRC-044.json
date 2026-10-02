@@ -1,0 +1,14 @@
+{
+  "requirements": {
+    "SRC-044:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-6768",
+      "text": "Zero-manual task entry: an actionable user task must bind, persist intent, inherit a legal seat, claim and START with zero protocol coaching",
+      "verification": "tools.test_t1363_zero_manual_entry PASS",
+      "work": "T-1363"
+    }
+  },
+  "schema_version": 1
+}

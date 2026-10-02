@@ -1,0 +1,60 @@
+{
+  "appends": [
+    {
+      "class": "APPEND",
+      "created_work": null,
+      "delta": "implementation",
+      "derived_clauses": [
+        "SRC-142:R001",
+        "SRC-142:R002",
+        "SRC-142:R003",
+        "SRC-142:R004",
+        "SRC-142:R005",
+        "SRC-142:R006",
+        "SRC-142:R007",
+        "SRC-142:R008",
+        "SRC-142:R009",
+        "SRC-142:R010",
+        "SRC-142:R011",
+        "SRC-142:R012",
+        "SRC-142:R013",
+        "SRC-142:R014",
+        "SRC-142:R015",
+        "SRC-142:R016",
+        "SRC-142:R017",
+        "SRC-142:R018",
+        "SRC-142:R019",
+        "SRC-142:R020",
+        "SRC-142:R021",
+        "SRC-142:R022",
+        "SRC-142:R023",
+        "SRC-142:R024",
+        "SRC-142:R025",
+        "SRC-142:R026",
+        "SRC-142:R027",
+        "SRC-142:R028",
+        "SRC-142:R029"
+      ],
+      "label": "",
+      "projected_at": "2026-09-29T20:33:47Z",
+      "receipt": "SRC-142",
+      "received_at": "2026-09-29T20:32:56Z",
+      "rewind": null,
+      "seq": 1,
+      "source_sha256": "2c8619a315e7b663ca4a8978a47e562a242e684de71ca4240c7b74b05c741238",
+      "state": "PROJECTED",
+      "steps": [
+        "linked",
+        "derived",
+        "superseded"
+      ],
+      "superseded": [],
+      "supersedes": [],
+      "work": [
+        "T-1563"
+      ]
+    }
+  ],
+  "schema_version": 1,
+  "source": "SRC-140"
+}

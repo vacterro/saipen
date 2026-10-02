@@ -1,0 +1,419 @@
+{
+  "requirements": {
+    "SRC-108:R001": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Do not create another broad architecture umbrella.",
+      "verification": null,
+      "work": "T-1471"
+    },
+    "SRC-108:R002": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Do not interrupt higher-priority active correctness / closure / field-gate work.",
+      "verification": null,
+      "work": "T-1471"
+    },
+    "SRC-108:R003": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "It must never independently decide:",
+      "verification": null,
+      "work": "T-1471"
+    },
+    "SRC-108:R004": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "If the metrics cache disappears, SAIPEN must be able to reconstruct the useful statistics from canonical durable events where practical.",
+      "verification": null,
+      "work": "T-1471"
+    },
+    "SRC-108:R005": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Do not create a second lifecycle database.",
+      "verification": null,
+      "work": "T-1471"
+    },
+    "SRC-108:R006": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Do not create one opaque \"agent score\".",
+      "verification": null,
+      "work": "T-1471"
+    },
+    "SRC-108:R007": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Do not create checkpoints solely to improve statistics.",
+      "verification": null,
+      "work": "T-1471"
+    },
+    "SRC-108:R008": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Do not invent dozens of micro-categories.",
+      "verification": null,
+      "work": "T-1471"
+    },
+    "SRC-108:R009": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Do not duplicate them into another independent taxonomy.",
+      "verification": null,
+      "work": "T-1471"
+    },
+    "SRC-108:R010": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Do not guess.",
+      "verification": null,
+      "work": "T-1471"
+    },
+    "SRC-108:R011": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Do not attempt to infer private model \"thinking time\" unless the host exposes a reliable measured value.",
+      "verification": null,
+      "work": "T-1471"
+    },
+    "SRC-108:R012": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Do not count:",
+      "verification": null,
+      "work": "T-1471"
+    },
+    "SRC-108:R013": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Do not expose misleading precision when data is unavailable.",
+      "verification": null,
+      "work": "T-1471"
+    },
+    "SRC-108:R014": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Do not synthesize a value.",
+      "verification": null,
+      "work": "T-1471"
+    },
+    "SRC-108:R015": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Avoid averages alone.",
+      "verification": null,
+      "work": "T-1471"
+    },
+    "SRC-108:R016": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Do not require every historical ticket to have perfect telemetry before the feature can ship.",
+      "verification": null,
+      "work": "T-1471"
+    },
+    "SRC-108:R017": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Do not create many overlapping commands.",
+      "verification": null,
+      "work": "T-1471"
+    },
+    "SRC-108:R018": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Do not make the command mutating.",
+      "verification": null,
+      "work": "T-1471"
+    },
+    "SRC-108:R019": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Do not make metrics collection depend on the operator calling `stats`.",
+      "verification": null,
+      "work": "T-1471"
+    },
+    "SRC-108:R020": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Do not dump the full dashboard into:",
+      "verification": null,
+      "work": "T-1471"
+    },
+    "SRC-108:R021": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "AUTO_RECALL must remain bounded and execution-oriented.",
+      "verification": null,
+      "work": "T-1471"
+    },
+    "SRC-108:R022": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "never make canonical lifecycle correctness depend on it",
+      "verification": null,
+      "work": "T-1471"
+    },
+    "SRC-108:R023": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "A deleted metrics cache must not prevent:",
+      "verification": null,
+      "work": "T-1471"
+    },
+    "SRC-108:R024": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "The system must degrade to:",
+      "verification": null,
+      "work": "T-1471"
+    },
+    "SRC-108:R025": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Do not introduce mixed naive/local timestamp semantics.",
+      "verification": null,
+      "work": "T-1471"
+    },
+    "SRC-108:R026": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Daily grouping may render in the configured/local timezone, but duration calculation must not break across:",
+      "verification": null,
+      "work": "T-1471"
+    },
+    "SRC-108:R027": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Duration must come from durable timestamps, not conversation order.",
+      "verification": null,
+      "work": "T-1471"
+    },
+    "SRC-108:R028": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Do not build a leaderboard now.",
+      "verification": null,
+      "work": "T-1471"
+    },
+    "SRC-108:R029": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Do not count ordinary new user requests as \"manual recovery\".",
+      "verification": null,
+      "work": "T-1471"
+    },
+    "SRC-108:R030": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Do not attempt semantic defect mining from prose.",
+      "verification": null,
+      "work": "T-1471"
+    },
+    "SRC-108:R031": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "The metrics layer must be cheap.",
+      "verification": null,
+      "work": "T-1471"
+    },
+    "SRC-108:R032": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Ordinary mutation operations must not perform expensive historical scans merely to maintain statistics.",
+      "verification": null,
+      "work": "T-1471"
+    },
+    "SRC-108:R033": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Do not turn every checkpoint into a full LOG replay.",
+      "verification": null,
+      "work": "T-1471"
+    },
+    "SRC-108:R034": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Do not introduce semantics such as:",
+      "verification": null,
+      "work": "T-1471"
+    },
+    "SRC-108:R035": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Do not make these required for the first implementation.",
+      "verification": null,
+      "work": "T-1471"
+    },
+    "SRC-108:R036": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Do not overbuild.",
+      "verification": null,
+      "work": "T-1471"
+    },
+    "SRC-108:R037": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "metrics are read-only",
+      "verification": null,
+      "work": "T-1471"
+    },
+    "SRC-108:R038": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "metrics are derived",
+      "verification": null,
+      "work": "T-1471"
+    },
+    "SRC-108:R039": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "metrics loss does not affect protocol correctness",
+      "verification": null,
+      "work": "T-1471"
+    },
+    "SRC-108:R040": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "durations survive model replacement",
+      "verification": null,
+      "work": "T-1471"
+    },
+    "SRC-108:R041": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "durations survive supervisor restart where durable timestamps exist",
+      "verification": null,
+      "work": "T-1471"
+    },
+    "SRC-108:R042": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "QUALITY > TIME semantics remain unchanged",
+      "verification": null,
+      "work": "T-1471"
+    },
+    "SRC-108:R043": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "slow progress is not converted into failure",
+      "verification": null,
+      "work": "T-1471"
+    },
+    "SRC-108:R044": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Do not pause an active critical corridor to build a dashboard.",
+      "verification": null,
+      "work": "T-1471"
+    },
+    "SRC-108:R045": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "WHAT MUST HAPPEN NEXT",
+      "verification": null,
+      "work": "T-1471"
+    },
+    "SRC-108:R046": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "DO NOT WORSHIP IT.",
+      "verification": null,
+      "work": "T-1471"
+    }
+  },
+  "schema_version": 1
+}

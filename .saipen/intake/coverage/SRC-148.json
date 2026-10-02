@@ -1,0 +1,32 @@
+{
+  "requirements": {
+    "SRC-148:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-10973",
+      "text": "Reproduce and repair stale complete-seat recovery guidance with an executable append-only ledger path; preserve report hashes and existing dispositions; do not modify SAILEARN application code.",
+      "verification": "tools/test_t1574_followups.py::ImproveFollowupTests.test_disposed_stale_seats_get_an_executable_lossless_route",
+      "work": "T-1574"
+    },
+    "SRC-148:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-10973",
+      "text": "Classify actual defect predicates: unsafe behavior REPRODUCED, protective rejection NOT_REPRODUCED, harness failure INVALID or BLOCKED; preserve diagnostic evidence and controlled regressions.",
+      "verification": "tools/test_t1574_followups.py::ReproductionTests",
+      "work": "T-1574"
+    },
+    "SRC-148:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-10973",
+      "text": "Make post-cycle Git persistence and exact bounded bookkeeping action unambiguous; ship remains a release; never silently commit unrelated changes; report root causes files regressions targeted and full totals with red-green controls.",
+      "verification": "tools/test_t1574_followups.py::ImproveFollowupTests.test_completion_reports_unpersisted_history_without_touching_git",
+      "work": "T-1574"
+    }
+  },
+  "schema_version": 1
+}

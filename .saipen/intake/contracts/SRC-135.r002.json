@@ -1,0 +1,19 @@
+{
+  "clauses": {
+    "SRC-135:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Start with the most severe reproducible protocol defects; implement and verify a bounded repair wave that reduces unnecessary interruptions."
+    },
+    "SRC-135:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Enforce the operational response contract through existing canonical runtime checks, with regression proof for any repaired bypass."
+    }
+  },
+  "derived_at": "2026-09-28T17:03:05Z",
+  "derived_from": "SRC-135",
+  "interpretation_revision": 2,
+  "schema_version": 1,
+  "source_sha256": "cd38daeb95a27b54f3ae8f0c8c57f09d93e494756b2180d8b86864362ea34a13"
+}

@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-097:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "J\u00e4tka ka paranduste teostamist"
+    }
+  },
+  "derived_at": "2026-09-21T00:57:31Z",
+  "derived_from": "SRC-097",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "79c234fa57ea77caaacf50dca764b9ae409a422bf9ab27ecf4887525dfa02e38"
+}

@@ -1,0 +1,229 @@
+{
+  "clauses": {
+    "SRC-108:R001": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not create another broad architecture umbrella."
+    },
+    "SRC-108:R002": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not interrupt higher-priority active correctness / closure / field-gate work."
+    },
+    "SRC-108:R003": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "It must never independently decide:"
+    },
+    "SRC-108:R004": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "If the metrics cache disappears, SAIPEN must be able to reconstruct the useful statistics from canonical durable events where practical."
+    },
+    "SRC-108:R005": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not create a second lifecycle database."
+    },
+    "SRC-108:R006": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not create one opaque \"agent score\"."
+    },
+    "SRC-108:R007": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not create checkpoints solely to improve statistics."
+    },
+    "SRC-108:R008": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not invent dozens of micro-categories."
+    },
+    "SRC-108:R009": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not duplicate them into another independent taxonomy."
+    },
+    "SRC-108:R010": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not guess."
+    },
+    "SRC-108:R011": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not attempt to infer private model \"thinking time\" unless the host exposes a reliable measured value."
+    },
+    "SRC-108:R012": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not count:"
+    },
+    "SRC-108:R013": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not expose misleading precision when data is unavailable."
+    },
+    "SRC-108:R014": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not synthesize a value."
+    },
+    "SRC-108:R015": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Avoid averages alone."
+    },
+    "SRC-108:R016": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not require every historical ticket to have perfect telemetry before the feature can ship."
+    },
+    "SRC-108:R017": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not create many overlapping commands."
+    },
+    "SRC-108:R018": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not make the command mutating."
+    },
+    "SRC-108:R019": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not make metrics collection depend on the operator calling `stats`."
+    },
+    "SRC-108:R020": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not dump the full dashboard into:"
+    },
+    "SRC-108:R021": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "AUTO_RECALL must remain bounded and execution-oriented."
+    },
+    "SRC-108:R022": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "never make canonical lifecycle correctness depend on it"
+    },
+    "SRC-108:R023": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "A deleted metrics cache must not prevent:"
+    },
+    "SRC-108:R024": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "The system must degrade to:"
+    },
+    "SRC-108:R025": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not introduce mixed naive/local timestamp semantics."
+    },
+    "SRC-108:R026": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Daily grouping may render in the configured/local timezone, but duration calculation must not break across:"
+    },
+    "SRC-108:R027": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Duration must come from durable timestamps, not conversation order."
+    },
+    "SRC-108:R028": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not build a leaderboard now."
+    },
+    "SRC-108:R029": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not count ordinary new user requests as \"manual recovery\"."
+    },
+    "SRC-108:R030": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not attempt semantic defect mining from prose."
+    },
+    "SRC-108:R031": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "The metrics layer must be cheap."
+    },
+    "SRC-108:R032": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Ordinary mutation operations must not perform expensive historical scans merely to maintain statistics."
+    },
+    "SRC-108:R033": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not turn every checkpoint into a full LOG replay."
+    },
+    "SRC-108:R034": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not introduce semantics such as:"
+    },
+    "SRC-108:R035": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not make these required for the first implementation."
+    },
+    "SRC-108:R036": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not overbuild."
+    },
+    "SRC-108:R037": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "metrics are read-only"
+    },
+    "SRC-108:R038": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "metrics are derived"
+    },
+    "SRC-108:R039": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "metrics loss does not affect protocol correctness"
+    },
+    "SRC-108:R040": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "durations survive model replacement"
+    },
+    "SRC-108:R041": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "durations survive supervisor restart where durable timestamps exist"
+    },
+    "SRC-108:R042": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "QUALITY > TIME semantics remain unchanged"
+    },
+    "SRC-108:R043": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "slow progress is not converted into failure"
+    },
+    "SRC-108:R044": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not pause an active critical corridor to build a dashboard."
+    }
+  },
+  "derived_at": "2026-09-23T01:13:29Z",
+  "derived_from": "SRC-108",
+  "interpretation_revision": 44,
+  "schema_version": 1,
+  "source_sha256": "5c498338f8d92e8d546eb7c7aa33d6cc792c476c1040af4c758acde7f45bf59d"
+}

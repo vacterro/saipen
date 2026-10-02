@@ -1,0 +1,14 @@
+{
+  "requirements": {
+    "SRC-055:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-7174",
+      "text": "finish T-1380 then close the remaining T-1367 field gaps",
+      "verification": "T-1380 DONE (BOARD [x]); T-1367 field gaps closed: matrix9-20260919 all measured, foreign_owner re-measured PASS after T-1397",
+      "work": "T-1367"
+    }
+  },
+  "schema_version": 1
+}

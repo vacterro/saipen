@@ -1,0 +1,14 @@
+{
+  "requirements": {
+    "SRC-093:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "T-1437 closed with verification evidence in LOG: verify -> PASS [target: T-1437] conf: high -- SAITULS seat released by the canonical user-wait block E-1349 with the exact user action retained; source link SRC-015 -> T-162/T-163/T-164/T-165 proven; clauses R001/R002 VERIFIED with re-run harness evidence; T-164/T-165/T-171/T-182 terminal at E-1359/E-1366/E-1374/E-1382; consumer validator end state recorded with zero attributable findings and the ",
+      "text": "SAITULS protocol repair: refusal-code registry completeness (SOURCE_LINKAGE_DRIFT crash), canonical multi-work source linkage model plus SRC-015 migration, user-wait seat release semantics (T-168 AWAITING_USER_LIVE_ACCEPTANCE), evidence-complete closure reconciliation (T-164, T-165, T-171, T-182) with focused regressions, then validate SAITULS end state",
+      "verification": "the Work this request created reached its own verification gate; see the T-1437 VERIFY cycle in .saipen/LOG.md",
+      "work": "T-1437"
+    }
+  },
+  "schema_version": 1
+}

@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-070:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "operator decision on T-1406: proceed with local commit only -- isolate the T-1406 hunks in tools/saipen.py, commit the five reviewed files locally, skip push/tag/public release per the SRC-039 pause, preserve T-1400 working-tree hunks, then finish T-1406 own_patch"
+    }
+  },
+  "derived_at": "2026-09-19T13:16:20Z",
+  "derived_from": "SRC-070",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "e26df5d0c0c4c5da5af800b7c608c3954b3723917852c3d0e8e1117a77c54354"
+}

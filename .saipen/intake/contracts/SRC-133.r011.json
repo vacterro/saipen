@@ -1,0 +1,64 @@
+{
+  "clauses": {
+    "SRC-133:R0001": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "EXEC-RESPONSE-01 is enforced by active runtime/bootstrap architecture, not only prose documentation."
+    },
+    "SRC-133:R0002": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "Every operational boundary exposes the mandatory fields in canonical order."
+    },
+    "SRC-133:R0003": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "No free prose appears before the control surface."
+    },
+    "SRC-133:R0004": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "BLOCKER is always explicit."
+    },
+    "SRC-133:R0005": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "OPERATOR ACTION is always explicit."
+    },
+    "SRC-133:R0006": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "NEXT EXACT ACTION is always exact."
+    },
+    "SRC-133:R0007": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "VALIDATION reflects current authority."
+    },
+    "SRC-133:R0008": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "DETAILS is optional and always last."
+    },
+    "SRC-133:R0009": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "STYLE cannot structurally override EXECUTION."
+    },
+    "SRC-133:R0010": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "Future sessions automatically inherit the contract."
+    },
+    "SRC-133:R0011": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "Cold recovery automatically inherits the contract."
+    }
+  },
+  "derived_at": "2026-09-28T07:17:22Z",
+  "derived_from": "SRC-133",
+  "interpretation_revision": 11,
+  "schema_version": 1,
+  "source_sha256": "3665ddad1668b57dd3944e019aff81436f4e9419da8a32218aef0b6f870610be"
+}

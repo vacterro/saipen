@@ -1,0 +1,58 @@
+{
+  "appends": [
+    {
+      "class": "CLARIFICATION",
+      "created_work": null,
+      "delta": "context",
+      "derived_clauses": [
+        "SRC-154:R001"
+      ],
+      "label": "V:/___VAC/__K/__STATE/SAILEARN_HOME confirmed durable and outside cleanup",
+      "projected_at": "2026-10-01T06:25:11Z",
+      "receipt": "SRC-154",
+      "received_at": "2026-10-01T06:24:36Z",
+      "rewind": null,
+      "seq": 1,
+      "source_sha256": "5ad9e29954837656c5d2acb0b19f912d70cb2d59d94d0094ba4727acf9376086",
+      "state": "PROJECTED",
+      "steps": [
+        "linked",
+        "derived",
+        "superseded"
+      ],
+      "superseded": [],
+      "supersedes": [],
+      "work": [
+        "T-1579"
+      ]
+    },
+    {
+      "class": "CLARIFICATION",
+      "created_work": null,
+      "delta": "context",
+      "derived_clauses": [
+        "SRC-155:R001"
+      ],
+      "label": "SAILEARN repository not available yet; watch for it",
+      "projected_at": "2026-10-01T06:25:24Z",
+      "receipt": "SRC-155",
+      "received_at": "2026-10-01T06:24:52Z",
+      "rewind": null,
+      "seq": 2,
+      "source_sha256": "634ba2a9edebf1c761e5e2e313a8f08d212d472b23147b4c415a6f054cf21bf5",
+      "state": "PROJECTED",
+      "steps": [
+        "linked",
+        "derived",
+        "superseded"
+      ],
+      "superseded": [],
+      "supersedes": [],
+      "work": [
+        "T-1579"
+      ]
+    }
+  ],
+  "schema_version": 1,
+  "source": "SRC-153"
+}

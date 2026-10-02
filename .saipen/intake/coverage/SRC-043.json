@@ -1,4 +1,14 @@
 {
-  "requirements": {},
+  "requirements": {
+    "SRC-043:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "T-1318 closed with verification evidence in LOG: PASS -- AC-01 public recover restores invalid phase; AC-02 journaled idempotent repair preserves original bytes; AC-03 legal/corrupt/incomplete cases refuse with zero writes; AC-04 unchanged red controls remain red; AC-05 current guard .7 live proof PASS at .saipen/evidence/T-1318-current-generation-live-20260913/MANIFEST.json; 75/75 focused, ruff PASS; conf: high",
+      "text": "Satisfy the captured request SRC-043 in full; the authoritative text is the receipt body (sha256 c352fc7a51fc): SAIPENDEFECT \u2014 RECOVERY REQUIRES OPERATOR TO MANUALLY MUTATE PROTECTED CANONICAL FILES Observed workflow: 1. saipen recover correctly detects malformed canonical STATE/BOARD records. 2. It produces an exact deterministic repair. 3. The acti\u2026",
+      "verification": "the Work this request created reached its own verification gate; see the T-1318 VERIFY cycle in .saipen/LOG.md",
+      "work": "T-1318"
+    }
+  },
   "schema_version": 1
 }

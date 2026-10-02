@@ -1,0 +1,14 @@
+{
+  "requirements": {
+    "SRC-067:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "T-1404 closed with verification evidence in LOG: verify -> PASS [target: T-1404] conf: high -- live demonstration on this tree: 31 board-linked Works sit parked with no reviewed release scope (T-1304 first), and T-1582 still closed through 'saipen ticket done T-1582 --closure-mode own_patch' returning FINISHED while every one of those 31 stayed parked; intake.release_gate(root, 'T-1582', publish=False) answers ok, the T-1570 no-publish local clo",
+      "text": "T-1399 release-scope liveness: release gate must not block an independently releasable Work on unrelated unresolved Work",
+      "verification": "the Work this request created reached its own verification gate; see the T-1404 VERIFY cycle in .saipen/LOG.md",
+      "work": "T-1404"
+    }
+  },
+  "schema_version": 1
+}

@@ -1,0 +1,24 @@
+{
+  "archive_ref": ".saipen/archive/retired/SRC-158.md",
+  "authority_grant": "T-1580 / SRC-157,SRC-158",
+  "authority_receipt": "SRC-160",
+  "authority_sha256": "342829b269423a226dbfd23e5c6dcdf65c18ec10df475bc9997a752b218e5751",
+  "discovery_event": null,
+  "evidence": {
+    "kind": "artifact",
+    "ref": ".saipen/evidence/T-1580-project-binding-20261001.md",
+    "sha256": "7475459e4b9b07ef8e257946aa312a70b646eb9d87bc61d4163fedee2d8eda25"
+  },
+  "evidence_bound_event": "E-11175",
+  "evidence_note": null,
+  "linked_work": "T-1580",
+  "reason": "MISROUTED_PROJECT_BINDING",
+  "receipt_id": "SRC-158",
+  "retired_at": "2026-10-01T14:12:00Z",
+  "retired_by": "saipen-cli",
+  "retirement_event": "E-11175",
+  "schema_version": 2,
+  "source_sha256": "dd6e7e3f7517f9ee728ac9bd467e4e59dd788afd779cf960fb57b7cc753d29e5",
+  "status": "INVALID",
+  "ticket_ref": ".saipen/archive/retired/T-1580.json"
+}

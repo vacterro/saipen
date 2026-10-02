@@ -1,0 +1,154 @@
+{
+  "clauses": {
+    "SRC-142:R001": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "DO NOT ENTER VERIFY."
+    },
+    "SRC-142:R002": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not describe `bootstrap_transport_key()` as host-only while any ordinary Python process that imports the module can call it."
+    },
+    "SRC-142:R003": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "ordinary agent-accessible Python/shell code MUST NOT be able to mint the authority that proves host transport."
+    },
+    "SRC-142:R004": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not claim cryptographic host provenance while the secret is retrievable through an importable function in the same ordinary execution surface."
+    },
+    "SRC-142:R005": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "must demonstrate ADMITTED"
+    },
+    "SRC-142:R006": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "must be impossible to obtain a valid capability or admission."
+    },
+    "SRC-142:R007": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not replace this test with:"
+    },
+    "SRC-142:R008": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "It must not expose an ordinary runtime route that CREATES the host authority whose evidence it later verifies."
+    },
+    "SRC-142:R009": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "If a host adapter needs signing authority, the authority must originate from a surface that ordinary model-executed child processes cannot reproduce."
+    },
+    "SRC-142:R010": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not store a reusable signing secret in ordinary project state and then rely only on path classification to call it inaccessible."
+    },
+    "SRC-142:R011": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not leave a callable combination where ordinary Python can assemble the authority from individually \"internal\" helpers."
+    },
+    "SRC-142:R012": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not allow T-1563 to close under the generic:"
+    },
+    "SRC-142:R013": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not lose the detailed acceptance just because `saipen start` was called with a one-line title."
+    },
+    "SRC-142:R014": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "Must all be true:"
+    },
+    "SRC-142:R015": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "Ordinary direct Python import cannot mint host transport authority."
+    },
+    "SRC-142:R016": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "The exact current bypass: bootstrap_transport_key -> _transport_mac -> establish is RED on the repaired implementation."
+    },
+    "SRC-142:R017": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "Pre-fix/current vulnerable subject proves that same carrier previously reached ADMITTED."
+    },
+    "SRC-142:R018": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "Direct establish without authority remains refused."
+    },
+    "SRC-142:R019": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "Direct invalidate without authority remains refused."
+    },
+    "SRC-142:R020": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "Forged ordinary SHA256 ledger remains non-authoritative."
+    },
+    "SRC-142:R021": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "Keyed provenance remains required."
+    },
+    "SRC-142:R022": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "No ordinary project/file mutation route can alter protected admission state."
+    },
+    "SRC-142:R023": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "Host adapter can still legitimately establish admission."
+    },
+    "SRC-142:R024": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "Same-session init remains functional."
+    },
+    "SRC-142:R025": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "Detailed T-1563 acceptance exists in canonical source clauses/coverage."
+    },
+    "SRC-142:R026": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "Focused admission/guard/Claude tests pass."
+    },
+    "SRC-142:R027": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "Canonical validate is CURRENT_PASS."
+    },
+    "SRC-142:R028": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "Full required core family has new_red=0."
+    },
+    "SRC-142:R029": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not claim HARD protocol admission while authority minting remains available to ordinary model-executed Python."
+    }
+  },
+  "derived_at": "2026-09-29T20:33:42Z",
+  "derived_from": "SRC-142",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "2c8619a315e7b663ca4a8978a47e562a242e684de71ca4240c7b74b05c741238"
+}

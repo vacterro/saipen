@@ -1,0 +1,311 @@
+{
+  "requirements": {
+    "SRC-138:R001": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Do not substitute post-generation style checking for session admission.",
+      "verification": null,
+      "work": "T-1558"
+    },
+    "SRC-138:R002": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Do not discard those repairs.",
+      "verification": null,
+      "work": "T-1558"
+    },
+    "SRC-138:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "There must be one canonical runtime owner for session protocol admission.",
+      "verification": null,
+      "work": "T-1558"
+    },
+    "SRC-138:R004": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Do not place the admission truth separately in:",
+      "verification": null,
+      "work": "T-1558"
+    },
+    "SRC-138:R005": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Do not create duplicate authorities.",
+      "verification": null,
+      "work": "T-1558"
+    },
+    "SRC-138:R006": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Admission must prove current generations/fingerprints for at least:",
+      "verification": null,
+      "work": "T-1558"
+    },
+    "SRC-138:R007": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Model prose is NEVER evidence.",
+      "verification": null,
+      "work": "T-1558"
+    },
+    "SRC-138:R008": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Do not merely remove the requirement or pretend invocation succeeded.",
+      "verification": null,
+      "work": "T-1558"
+    },
+    "SRC-138:R009": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "A. the skill is admission-critical and must be installed/resolved; B. the skill identity/path changed and canonical resolution is stale; C. the skill is decorative and should never have been admission-critical.",
+      "verification": null,
+      "work": "T-1558"
+    },
+    "SRC-138:R010": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "admission must not silently become ADMITTED.",
+      "verification": null,
+      "work": "T-1558"
+    },
+    "SRC-138:R011": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Do NOT let the model print:",
+      "verification": null,
+      "work": "T-1558"
+    },
+    "SRC-138:R012": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "The model whose admission failed must not author that diagnostic.",
+      "verification": null,
+      "work": "T-1558"
+    },
+    "SRC-138:R013": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "The old admission token must fail after invalidation.",
+      "verification": null,
+      "work": "T-1558"
+    },
+    "SRC-138:R014": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Do not collapse these into one heuristic classifier.",
+      "verification": null,
+      "work": "T-1558"
+    },
+    "SRC-138:R015": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "A green later layer must never compensate for a failed earlier layer.",
+      "verification": null,
+      "work": "T-1558"
+    },
+    "SRC-138:R016": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Codex, OpenCode, ZAICODE, generic, and other hosts must be classified from their actual mechanics.",
+      "verification": null,
+      "work": "T-1558"
+    },
+    "SRC-138:R017": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "CHAT_STYLE MUST NOT BECOME A SECOND PROTOCOL",
+      "verification": null,
+      "work": "T-1558"
+    },
+    "SRC-138:R018": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "It must not independently invent:",
+      "verification": null,
+      "work": "T-1558"
+    },
+    "SRC-138:R019": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "The checker may compile them into a runtime form, but must preserve one owner.",
+      "verification": null,
+      "work": "T-1558"
+    },
+    "SRC-138:R020": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Do not use locale-dependent default decoding.",
+      "verification": null,
+      "work": "T-1558"
+    },
+    "SRC-138:R021": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "The fix must not make Windows cp1251 legacy input silently corrupt elsewhere.",
+      "verification": null,
+      "work": "T-1558"
+    },
+    "SRC-138:R022": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "The repaired implementation must reject the same carriers through the same oracle.",
+      "verification": null,
+      "work": "T-1558"
+    },
+    "SRC-138:R023": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Do not accept tests that only verify newly written code in isolation.",
+      "verification": null,
+      "work": "T-1558"
+    },
+    "SRC-138:R024": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Admission acceptance must use admission-specific RED/GREEN controls and host interception evidence.",
+      "verification": null,
+      "work": "T-1558"
+    },
+    "SRC-138:R025": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Do not let roadmap creation interrupt the active hard-admission repair.",
+      "verification": null,
+      "work": "T-1558"
+    },
+    "SRC-138:R026": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "separate MUST / SHOULD / FUTURE",
+      "verification": null,
+      "work": "T-1558"
+    },
+    "SRC-138:R027": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "do not turn the roadmap into execution authority",
+      "verification": null,
+      "work": "T-1558"
+    },
+    "SRC-138:R028": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "do not automatically enqueue the entire future roadmap as Work.",
+      "verification": null,
+      "work": "T-1558"
+    },
+    "SRC-138:R029": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Do not leave temporary repair machinery in production surfaces accidentally.",
+      "verification": null,
+      "work": "T-1558"
+    },
+    "SRC-138:R030": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Do not delete unknown foreign WIP.",
+      "verification": null,
+      "work": "T-1558"
+    },
+    "SRC-138:R031": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Do not close from BUILD or from isolated green tests.",
+      "verification": null,
+      "work": "T-1558"
+    },
+    "SRC-138:R032": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Healthy user experience must be boring:",
+      "verification": null,
+      "work": "T-1558"
+    },
+    "SRC-138:R033": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "The user must not need to read another explanation of why the model forgot the protocol.",
+      "verification": null,
+      "work": "T-1558"
+    },
+    "SRC-138:R034": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Failure must become:",
+      "verification": null,
+      "work": "T-1558"
+    }
+  },
+  "schema_version": 1
+}

@@ -1,0 +1,113 @@
+{
+  "requirements": {
+    "SRC-124:R001": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-10468",
+      "text": "Historical evidence and deliberate stale/wrong-style negative controls must remain historically accurate and must NOT be mass rewritten.",
+      "verification": "python -B -m unittest -v tools.test_fixture_style_authority -> PASS 6/6; historical fixture digest unchanged; pre/post pair E-10467/E-10468",
+      "work": "T-1536"
+    },
+    "SRC-124:R002": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-10463",
+      "text": "Do not globally replace the old token.",
+      "verification": "rg marker scan and fixture audit -> PASS: current fixtures use CURRENT_STYLE_CONTRACT; only deliberate negative/probe and digest-pinned historical literals remain; no token sweep.",
+      "work": "T-1536"
+    },
+    "SRC-124:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "IMPLEMENTED",
+      "evidence": "E-10468",
+      "text": "CURRENT_STYLE_FIXTURE The fixture means \"a valid project under the currently installed STYLE contract\". This class must derive its token from one canonical helper rather than hard-code a historical value.",
+      "verification": "python -B -m unittest -v tools.test_fixture_style_authority -> PASS 6/6; current-style fixtures derive the installed token through one shared helper, and isolated STYLE change tracks its new token.",
+      "work": "T-1536"
+    },
+    "SRC-124:R004": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-10468",
+      "text": "Do not change historical evidence merely to make the current suite green.",
+      "verification": "python -B -m unittest -v tools.test_fixture_style_authority -> PASS 6/6; historical INCIDENT_STATE digest remains 5885d5cd07e36f8e2fbe53bdd33a3e211ac60793023890022ad34f0a3914b976; no historical fixture rewrite.",
+      "work": "T-1536"
+    },
+    "SRC-124:R005": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-10468",
+      "text": "Current-valid fixtures must follow the installed STYLE contract mechanically.",
+      "verification": "python -B -m unittest -v tools.test_fixture_style_authority -> PASS 6/6; current-valid fixture follows installed marker and isolated changed STYLE derives its new marker.",
+      "work": "T-1536"
+    },
+    "SRC-124:R006": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-10468",
+      "text": "an intentionally stale marker must still fail",
+      "verification": "python -B -m unittest -v tools.test_fixture_style_authority -> PASS 6/6; intentionally stale marker still fails exact style_contract equality.",
+      "work": "T-1536"
+    },
+    "SRC-124:R007": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-10468",
+      "text": "a malformed/missing style_contract must still fail where schema-v3 requires it",
+      "verification": "python -B -m unittest -v tools.test_fixture_style_authority -> PASS 6/6; schema-v3 missing marker and unequal marker both remain rejected.",
+      "work": "T-1536"
+    },
+    "SRC-124:R008": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-10468",
+      "text": "Do not sweep `.saipen/evidence`, archived transcripts, kitchen forensic copies, or historical artifacts unless a current executable test actually reads them as live fixtures and the protocol explicitly says they should follow current STYLE.",
+      "verification": "python -B -m unittest -v tools.test_fixture_style_authority -> PASS 6/6; historical fixture is read and digest-pinned; no evidence, archive, transcript or kitchen files were swept by this Work.",
+      "work": "T-1536"
+    },
+    "SRC-124:R009": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-10461",
+      "text": "do not accept the 500+ reds into baseline",
+      "verification": "python -B tools/core_unit.py evidence T-1538 --jobs 1 --fresh -> PASS, 3985 ran, new_red=0; no baseline command or red-set acceptance was issued.",
+      "work": "T-1536"
+    },
+    "SRC-124:R010": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-10463",
+      "text": "do not classify them individually as independent ticket defects unless one still reproduces after the shared fixture repair.",
+      "verification": "former 24 jobs=6 new-red tests rerun individually -> PASS 24/24; none reproduced, so none classified as independent defects; results V:\\_TEMP_\\saipen-t1538-rescout\\former-24-individual-results.json.",
+      "work": "T-1536"
+    },
+    "SRC-124:R011": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-10465",
+      "text": "do not start the 24h T-1446 rerun until these canonical pre-soak changes are integrated and the full family is green.",
+      "verification": "T-1446 remains parked; no 24-hour soak rerun was started; current jobs=1/jobs=6 unit evidence is bounded and new_red=0.",
+      "work": "T-1536"
+    },
+    "SRC-124:R012": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-10465",
+      "text": "Do not continue creating additional SHIP_GATE_RED_OUTSIDE_SCOPE blocked tickets for the same mass fixture defect once the shared root cause is established.",
+      "verification": "T-1538 rescout and build created no SHIP_GATE_RED_OUTSIDE_SCOPE tickets; existing T-1535/T-1536 remain parked only until current full-family evidence is admissible.",
+      "work": "T-1536"
+    }
+  },
+  "schema_version": 1
+}

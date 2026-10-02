@@ -1,0 +1,32 @@
+{
+  "appends": [
+    {
+      "class": "CLARIFICATION",
+      "created_work": null,
+      "delta": "implementation",
+      "derived_clauses": [
+        "SRC-158:R001"
+      ],
+      "label": "",
+      "projected_at": "2026-10-01T08:11:18Z",
+      "receipt": "SRC-158",
+      "received_at": "2026-10-01T08:11:04Z",
+      "rewind": null,
+      "seq": 1,
+      "source_sha256": "dd6e7e3f7517f9ee728ac9bd467e4e59dd788afd779cf960fb57b7cc753d29e5",
+      "state": "PROJECTED",
+      "steps": [
+        "linked",
+        "derived",
+        "superseded"
+      ],
+      "superseded": [],
+      "supersedes": [],
+      "work": [
+        "T-1580"
+      ]
+    }
+  ],
+  "schema_version": 1,
+  "source": "SRC-157"
+}

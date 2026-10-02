@@ -1,0 +1,694 @@
+{
+  "clauses": {
+    "SRC-105:R001": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not rewind to older snapshots."
+    },
+    "SRC-105:R002": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not create another autonomy umbrella."
+    },
+    "SRC-105:R003": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not create another generic continuation ticket."
+    },
+    "SRC-105:R004": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not create another Source for SRC-100."
+    },
+    "SRC-105:R005": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not use `cc all` as a generic continuation mechanism."
+    },
+    "SRC-105:R006": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not raw-edit STATE.md, BOARD.md, LOG.md, Source records or coverage records."
+    },
+    "SRC-105:R007": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not use `git add -A`."
+    },
+    "SRC-105:R008": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not discard, stash, reset, clean or overwrite foreign dirty work."
+    },
+    "SRC-105:R009": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not push, tag, publish a release, consume unapproved paid quota, or perform irreversible publication."
+    },
+    "SRC-105:R010": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not reopen them without a newly reproduced regression."
+    },
+    "SRC-105:R011": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not restore the simpler \"first matching quote wins\" behavior."
+    },
+    "SRC-105:R012": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not call them FAIL."
+    },
+    "SRC-105:R013": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not call them PASS."
+    },
+    "SRC-105:R014": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not rerun that exact broad shape merely to obtain a prettier number."
+    },
+    "SRC-105:R015": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not create a SAIPEN ticket for it unless the file also exists in the live source worktree independently of AUDAPACK."
+    },
+    "SRC-105:R016": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "The three closure-evidence reds remain inherited and must stay visible, but do not merge them into T-1454 unless the canonical SHIP gate actually makes them a direct dependency."
+    },
+    "SRC-105:R017": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not assume E-8118 is still current if the live project advanced after this archive."
+    },
+    "SRC-105:R018": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not jump directly to T-1446 AUTO_RECALL work."
+    },
+    "SRC-105:R019": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "The live repository must reach one of two truthful states for every path:"
+    },
+    "SRC-105:R020": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not choose B merely to make the validator green."
+    },
+    "SRC-105:R021": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not infer ownership from filename alone."
+    },
+    "SRC-105:R022": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "At minimum the integration cohort must preserve the already-reviewed work for:"
+    },
+    "SRC-105:R023": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "do not silently stage it"
+    },
+    "SRC-105:R024": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "leave it out and explain why the manifest must not carry it"
+    },
+    "SRC-105:R025": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not invent another ticket merely because provenance requires reading LOG."
+    },
+    "SRC-105:R026": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "The staged cohort must be understandable as one integration boundary."
+    },
+    "SRC-105:R027": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not reset its working copy."
+    },
+    "SRC-105:R028": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not rewrite this owner merely because distribution is still blocked."
+    },
+    "SRC-105:R029": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not blindly rerun the full repository unit universe."
+    },
+    "SRC-105:R030": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not treat the two bounded audit timeouts as current reds."
+    },
+    "SRC-105:R031": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "injected runtime untracked count = 0"
+    },
+    "SRC-105:R032": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "DIRTY_SOURCE is absent for the reviewed committed injected surface"
+    },
+    "SRC-105:R033": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "dirty-source red control still refuses unreviewed edits"
+    },
+    "SRC-105:R034": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "manifest still has one owner"
+    },
+    "SRC-105:R035": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "no test was dropped merely to make the gate green"
+    },
+    "SRC-105:R036": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Therefore local source identity must advance through the canonical reviewed SHIP mechanism."
+    },
+    "SRC-105:R037": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not bypass current release-scope requirements."
+    },
+    "SRC-105:R038": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not weaken the scope gate."
+    },
+    "SRC-105:R039": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "T-1451 already documents a stale fixture around this contract and must remain a separate ticket."
+    },
+    "SRC-105:R040": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not merely rewrite freshness stamps."
+    },
+    "SRC-105:R041": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not overwrite foreign installed modifications."
+    },
+    "SRC-105:R042": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "one distribution owner exact blocker/remediation when blocked no runtime-manifest file absent from committed source dirty source still fails closed committed repaired protocol can actually reach installed homes"
+    },
+    "SRC-105:R043": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "do not hand-claim T-1446 by assumption"
+    },
+    "SRC-105:R044": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not restore stale ownership merely because BOARD records historical owner."
+    },
+    "SRC-105:R045": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "An unattended runner must not resurrect old user ingress after a dependency reservation disappears."
+    },
+    "SRC-105:R046": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not suppress these receipts by changing their bodies."
+    },
+    "SRC-105:R047": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not rewrite history."
+    },
+    "SRC-105:R048": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "each already-consumed receipt is canonically bound to the Work that executed it"
+    },
+    "SRC-105:R049": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "a genuine new unlinked request still queues"
+    },
+    "SRC-105:R050": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "a consumed request does not"
+    },
+    "SRC-105:R051": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "Source history remains intact"
+    },
+    "SRC-105:R052": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not replace these with a second autonomy framework."
+    },
+    "SRC-105:R053": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "AGENT IS DISPOSABLE. STATE IS NOT."
+    },
+    "SRC-105:R054": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "A replacement model must not ask the human to start it again."
+    },
+    "SRC-105:R055": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not misclassify the SAIFREN failure as:"
+    },
+    "SRC-105:R056": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not classify it only as:"
+    },
+    "SRC-105:R057": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "REPLACEMENT AGENT ADMISSION IS NOT MACHINE-GATED BY ACTIVE EXECUTION."
+    },
+    "SRC-105:R058": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "That ordering must become impossible."
+    },
+    "SRC-105:R059": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "ACTIVE EXECUTION OUTRANKS REINTERPRETATION OF CONSUMED HISTORICAL INGRESS."
+    },
+    "SRC-105:R060": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "recover T-181 recover SCOUT recover durable progress continue the bounded SCOUT slice"
+    },
+    "SRC-105:R061": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not implement this by blindly ignoring chat."
+    },
+    "SRC-105:R062": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not rely only on:"
+    },
+    "SRC-105:R063": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "A historical `cc` replay must be mechanically distinguishable from a new user interrupt."
+    },
+    "SRC-105:R064": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "The exact schema must follow existing runtime ownership."
+    },
+    "SRC-105:R065": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not create a second canonical state database."
+    },
+    "SRC-105:R066": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "saipen/BOOT.md saipen/COMMANDS.md saipen/EXECUTION.md saipen/RUNTIME.md"
+    },
+    "SRC-105:R067": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "It must machine-classify:"
+    },
+    "SRC-105:R068": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not add an unnecessary new command if current owners can express it."
+    },
+    "SRC-105:R069": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "AUTO_KICK must stop at:"
+    },
+    "SRC-105:R070": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "It must not bypass real human gates."
+    },
+    "SRC-105:R071": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not claim the real SAIFREN replacement problem is solved merely because a generic unit test passes."
+    },
+    "SRC-105:R072": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not invent an adapter API."
+    },
+    "SRC-105:R073": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not claim BLOCKING enforcement from an ADVISORY surface."
+    },
+    "SRC-105:R074": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Therefore the machine router must determine whether the apparent input is new before ordinary semantic reinterpretation."
+    },
+    "SRC-105:R075": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "The regression must remain caught even if the replacement model begins with zero memory and imperfect instruction-following."
+    },
+    "SRC-105:R076": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not create synonyms for fields that already exist."
+    },
+    "SRC-105:R077": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "B must NOT:"
+    },
+    "SRC-105:R078": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "manual_rekick_count = 0"
+    },
+    "SRC-105:R079": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "historical_ingress_reinterpretation_count = 0"
+    },
+    "SRC-105:R080": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "duplicate_source_after_replacement_count = 0"
+    },
+    "SRC-105:R081": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "duplicate_work_after_replacement_count = 0"
+    },
+    "SRC-105:R082": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "lost_claim_after_replacement_count = 0"
+    },
+    "SRC-105:R083": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "phase_reset_after_replacement_count = 0"
+    },
+    "SRC-105:R084": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Canonical outcome must not depend on model identity."
+    },
+    "SRC-105:R085": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "That behavior must be mechanically illegal when:"
+    },
+    "SRC-105:R086": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "This regression must be visible in tests before another downstream user loses eleven minutes of agent work to:"
+    },
+    "SRC-105:R087": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not confuse replacement recovery with the other open T-1446 architecture gap."
+    },
+    "SRC-105:R088": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "The final architecture must cover BOTH:"
+    },
+    "SRC-105:R089": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Both must preserve Work."
+    },
+    "SRC-105:R090": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not close T-1446 with only one half."
+    },
+    "SRC-105:R091": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "observe canonical state"
+    },
+    "SRC-105:R092": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "inspect lease"
+    },
+    "SRC-105:R093": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "classify worker liveness"
+    },
+    "SRC-105:R094": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "select legal Work"
+    },
+    "SRC-105:R095": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "launch/adopt exactly one bounded worker generation"
+    },
+    "SRC-105:R096": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "monitor progress"
+    },
+    "SRC-105:R097": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "checkpoint"
+    },
+    "SRC-105:R098": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "if healthy: do not steal"
+    },
+    "SRC-105:R099": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "if suspect: wait according to policy"
+    },
+    "SRC-105:R100": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "if expired/dead: fence exact generation create replacement generation recover canonical state continue"
+    },
+    "SRC-105:R101": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "if model incarnation is replaced: AUTO_RECALL AUTO_KICK preserve logical execution epoch"
+    },
+    "SRC-105:R102": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "if due human gate: park affected Work continue unrelated eligible Work when legal"
+    },
+    "SRC-105:R103": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "if no semantic progress: classify NO_PROGRESS stop wasteful repeats"
+    },
+    "SRC-105:R104": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "if no eligible Work: stop cleanly"
+    },
+    "SRC-105:R105": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "A provider failure must preserve:"
+    },
+    "SRC-105:R106": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "It must not create:"
+    },
+    "SRC-105:R107": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "stolen_lease_count simultaneous_mutator_count lost_work_count lost_source_count duplicate_source_count duplicate_work_count fabricated_pass_count false_global_stop_count historical_ingress_reinterpretation_count manual_rekick_count unknown_terminal_failure_count"
+    },
+    "SRC-105:R108": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "manual_continue_count manual_rekick_count duplicate_semantic_mutation_count duplicate_source_count duplicate_work_count stolen_lease_count false_global_stop_count fabricated_pass_count historical_ingress_reinterpretation_count unknown_terminal_failure_count"
+    },
+    "SRC-105:R109": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not fake elapsed time."
+    },
+    "SRC-105:R110": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not hold the only mutation seat merely waiting for a clock."
+    },
+    "SRC-105:R111": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "manual continuation manual re-kick duplicate mutation stolen lease fabricated PASS historical ingress reinterpretation unknown terminal failure false project-wide stop"
+    },
+    "SRC-105:R112": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not close it falsely."
+    },
+    "SRC-105:R113": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not reimplement its due-time machinery."
+    },
+    "SRC-105:R114": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not weaken release-scope safety to close it."
+    },
+    "SRC-105:R115": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Never rerun an identical expensive shape because the previous run lacked a cosmetic terminal summary."
+    },
+    "SRC-105:R116": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not ask the user for `cc` because context is running out."
+    },
+    "SRC-105:R117": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "The successor must be able to continue without predecessor hidden reasoning."
+    },
+    "SRC-105:R118": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do NOT globally stop for:"
+    },
+    "SRC-105:R119": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not ask:"
+    },
+    "SRC-105:R120": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "T-1446 must NOT close merely because:"
+    },
+    "SRC-105:R121": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "supervisor.py exists"
+    },
+    "SRC-105:R122": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "worker.py exists"
+    },
+    "SRC-105:R123": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "watchdog tests pass"
+    },
+    "SRC-105:R124": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "subprocess turnover works"
+    },
+    "SRC-105:R125": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "cold_recovery prints useful state"
+    },
+    "SRC-105:R126": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "BOOT tells models to continue"
+    },
+    "SRC-105:R127": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "generic model replacement fixture passes"
+    },
+    "SRC-105:R128": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "duplicate ingress idempotence"
+    },
+    "SRC-105:R129": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "consumed-ingress terminalization"
+    },
+    "SRC-105:R130": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "workability scheduling"
+    },
+    "SRC-105:R131": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "due/deferred gates"
+    },
+    "SRC-105:R132": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "watchdog liveness"
+    },
+    "SRC-105:R133": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "stale-generation fencing"
+    },
+    "SRC-105:R134": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "cold recovery"
+    },
+    "SRC-105:R135": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "cold worker continuation"
+    },
+    "SRC-105:R136": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "supervisor execution ownership"
+    },
+    "SRC-105:R137": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "process replacement"
+    }
+  },
+  "derived_at": "2026-09-22T16:33:27Z",
+  "derived_from": "SRC-105",
+  "interpretation_revision": 137,
+  "schema_version": 1,
+  "source_sha256": "06411bf03ce69cde2ff150b011e1a939ff98581342e049c0df7122ca5aabd87c"
+}

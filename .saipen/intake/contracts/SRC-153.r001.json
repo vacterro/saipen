@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-153:R001": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "A first-class durable versus ephemeral contract defines sole-copy safety and explicit ownership, lifetime and recovery."
+    }
+  },
+  "derived_at": "2026-10-01T08:15:03Z",
+  "derived_from": "SRC-153",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "7e668068dc1577673ed70824bb24c44023f82ea618a21342a792d052b100aee9"
+}

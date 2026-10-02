@@ -1,0 +1,1409 @@
+{
+  "requirements": {
+    "SRC-105:R001": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Do not rewind to older snapshots.",
+      "verification": null,
+      "work": "T-1446"
+    },
+    "SRC-105:R002": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Do not create another autonomy umbrella.",
+      "verification": null,
+      "work": "T-1446"
+    },
+    "SRC-105:R003": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Do not create another generic continuation ticket.",
+      "verification": null,
+      "work": "T-1446"
+    },
+    "SRC-105:R004": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Do not create another Source for SRC-100.",
+      "verification": null,
+      "work": "T-1446"
+    },
+    "SRC-105:R005": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Do not use `cc all` as a generic continuation mechanism.",
+      "verification": null,
+      "work": "T-1446"
+    },
+    "SRC-105:R006": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Do not raw-edit STATE.md, BOARD.md, LOG.md, Source records or coverage records.",
+      "verification": null,
+      "work": "T-1446"
+    },
+    "SRC-105:R007": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Do not use `git add -A`.",
+      "verification": null,
+      "work": "T-1446"
+    },
+    "SRC-105:R008": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Do not discard, stash, reset, clean or overwrite foreign dirty work.",
+      "verification": null,
+      "work": "T-1446"
+    },
+    "SRC-105:R009": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Do not push, tag, publish a release, consume unapproved paid quota, or perform irreversible publication.",
+      "verification": null,
+      "work": "T-1446"
+    },
+    "SRC-105:R010": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Do not reopen them without a newly reproduced regression.",
+      "verification": null,
+      "work": "T-1446"
+    },
+    "SRC-105:R011": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Do not restore the simpler \"first matching quote wins\" behavior.",
+      "verification": null,
+      "work": "T-1446"
+    },
+    "SRC-105:R012": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Do not call them FAIL.",
+      "verification": null,
+      "work": "T-1446"
+    },
+    "SRC-105:R013": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Do not call them PASS.",
+      "verification": null,
+      "work": "T-1446"
+    },
+    "SRC-105:R014": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Do not rerun that exact broad shape merely to obtain a prettier number.",
+      "verification": null,
+      "work": "T-1446"
+    },
+    "SRC-105:R015": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Do not create a SAIPEN ticket for it unless the file also exists in the live source worktree independently of AUDAPACK.",
+      "verification": null,
+      "work": "T-1446"
+    },
+    "SRC-105:R016": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "The three closure-evidence reds remain inherited and must stay visible, but do not merge them into T-1454 unless the canonical SHIP gate actually makes them a direct dependency.",
+      "verification": null,
+      "work": "T-1446"
+    },
+    "SRC-105:R017": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Do not assume E-8118 is still current if the live project advanced after this archive.",
+      "verification": null,
+      "work": "T-1446"
+    },
+    "SRC-105:R018": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Do not jump directly to T-1446 AUTO_RECALL work.",
+      "verification": null,
+      "work": "T-1446"
+    },
+    "SRC-105:R019": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "The live repository must reach one of two truthful states for every path:",
+      "verification": null,
+      "work": "T-1446"
+    },
+    "SRC-105:R020": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Do not choose B merely to make the validator green.",
+      "verification": null,
+      "work": "T-1446"
+    },
+    "SRC-105:R021": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Do not infer ownership from filename alone.",
+      "verification": null,
+      "work": "T-1446"
+    },
+    "SRC-105:R022": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "At minimum the integration cohort must preserve the already-reviewed work for:",
+      "verification": null,
+      "work": "T-1446"
+    },
+    "SRC-105:R023": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "do not silently stage it",
+      "verification": null,
+      "work": "T-1446"
+    },
+    "SRC-105:R024": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "leave it out and explain why the manifest must not carry it",
+      "verification": null,
+      "work": "T-1446"
+    },
+    "SRC-105:R025": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Do not invent another ticket merely because provenance requires reading LOG.",
+      "verification": null,
+      "work": "T-1446"
+    },
+    "SRC-105:R026": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "The staged cohort must be understandable as one integration boundary.",
+      "verification": null,
+      "work": "T-1446"
+    },
+    "SRC-105:R027": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Do not reset its working copy.",
+      "verification": null,
+      "work": "T-1446"
+    },
+    "SRC-105:R028": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Do not rewrite this owner merely because distribution is still blocked.",
+      "verification": null,
+      "work": "T-1446"
+    },
+    "SRC-105:R029": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Do not blindly rerun the full repository unit universe.",
+      "verification": null,
+      "work": "T-1446"
+    },
+    "SRC-105:R030": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Do not treat the two bounded audit timeouts as current reds.",
+      "verification": null,
+      "work": "T-1446"
+    },
+    "SRC-105:R031": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "injected runtime untracked count = 0",
+      "verification": null,
+      "work": "T-1446"
+    },
+    "SRC-105:R032": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "DIRTY_SOURCE is absent for the reviewed committed injected surface",
+      "verification": null,
+      "work": "T-1446"
+    },
+    "SRC-105:R033": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "dirty-source red control still refuses unreviewed edits",
+      "verification": null,
+      "work": "T-1446"
+    },
+    "SRC-105:R034": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "manifest still has one owner",
+      "verification": null,
+      "work": "T-1446"
+    },
+    "SRC-105:R035": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "no test was dropped merely to make the gate green",
+      "verification": null,
+      "work": "T-1446"
+    },
+    "SRC-105:R036": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Therefore local source identity must advance through the canonical reviewed SHIP mechanism.",
+      "verification": null,
+      "work": "T-1446"
+    },
+    "SRC-105:R037": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Do not bypass current release-scope requirements.",
+      "verification": null,
+      "work": "T-1446"
+    },
+    "SRC-105:R038": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Do not weaken the scope gate.",
+      "verification": null,
+      "work": "T-1446"
+    },
+    "SRC-105:R039": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "T-1451 already documents a stale fixture around this contract and must remain a separate ticket.",
+      "verification": null,
+      "work": "T-1446"
+    },
+    "SRC-105:R040": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Do not merely rewrite freshness stamps.",
+      "verification": null,
+      "work": "T-1446"
+    },
+    "SRC-105:R041": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Do not overwrite foreign installed modifications.",
+      "verification": null,
+      "work": "T-1446"
+    },
+    "SRC-105:R042": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "one distribution owner exact blocker/remediation when blocked no runtime-manifest file absent from committed source dirty source still fails closed committed repaired protocol can actually reach installed homes",
+      "verification": null,
+      "work": "T-1446"
+    },
+    "SRC-105:R043": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "do not hand-claim T-1446 by assumption",
+      "verification": null,
+      "work": "T-1446"
+    },
+    "SRC-105:R044": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Do not restore stale ownership merely because BOARD records historical owner.",
+      "verification": null,
+      "work": "T-1446"
+    },
+    "SRC-105:R045": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "An unattended runner must not resurrect old user ingress after a dependency reservation disappears.",
+      "verification": null,
+      "work": "T-1446"
+    },
+    "SRC-105:R046": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Do not suppress these receipts by changing their bodies.",
+      "verification": null,
+      "work": "T-1446"
+    },
+    "SRC-105:R047": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Do not rewrite history.",
+      "verification": null,
+      "work": "T-1446"
+    },
+    "SRC-105:R048": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "each already-consumed receipt is canonically bound to the Work that executed it",
+      "verification": null,
+      "work": "T-1446"
+    },
+    "SRC-105:R049": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "a genuine new unlinked request still queues",
+      "verification": null,
+      "work": "T-1446"
+    },
+    "SRC-105:R050": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "a consumed request does not",
+      "verification": null,
+      "work": "T-1446"
+    },
+    "SRC-105:R051": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Source history remains intact",
+      "verification": null,
+      "work": "T-1446"
+    },
+    "SRC-105:R052": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Do not replace these with a second autonomy framework.",
+      "verification": null,
+      "work": "T-1446"
+    },
+    "SRC-105:R053": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "AGENT IS DISPOSABLE. STATE IS NOT.",
+      "verification": null,
+      "work": "T-1446"
+    },
+    "SRC-105:R054": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "A replacement model must not ask the human to start it again.",
+      "verification": null,
+      "work": "T-1446"
+    },
+    "SRC-105:R055": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Do not misclassify the SAIFREN failure as:",
+      "verification": null,
+      "work": "T-1446"
+    },
+    "SRC-105:R056": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Do not classify it only as:",
+      "verification": null,
+      "work": "T-1446"
+    },
+    "SRC-105:R057": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "REPLACEMENT AGENT ADMISSION IS NOT MACHINE-GATED BY ACTIVE EXECUTION.",
+      "verification": null,
+      "work": "T-1446"
+    },
+    "SRC-105:R058": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "That ordering must become impossible.",
+      "verification": null,
+      "work": "T-1446"
+    },
+    "SRC-105:R059": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "ACTIVE EXECUTION OUTRANKS REINTERPRETATION OF CONSUMED HISTORICAL INGRESS.",
+      "verification": null,
+      "work": "T-1446"
+    },
+    "SRC-105:R060": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "recover T-181 recover SCOUT recover durable progress continue the bounded SCOUT slice",
+      "verification": null,
+      "work": "T-1446"
+    },
+    "SRC-105:R061": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Do not implement this by blindly ignoring chat.",
+      "verification": null,
+      "work": "T-1446"
+    },
+    "SRC-105:R062": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Do not rely only on:",
+      "verification": null,
+      "work": "T-1446"
+    },
+    "SRC-105:R063": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "A historical `cc` replay must be mechanically distinguishable from a new user interrupt.",
+      "verification": null,
+      "work": "T-1446"
+    },
+    "SRC-105:R064": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "The exact schema must follow existing runtime ownership.",
+      "verification": null,
+      "work": "T-1446"
+    },
+    "SRC-105:R065": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Do not create a second canonical state database.",
+      "verification": null,
+      "work": "T-1446"
+    },
+    "SRC-105:R066": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "saipen/BOOT.md saipen/COMMANDS.md saipen/EXECUTION.md saipen/RUNTIME.md",
+      "verification": null,
+      "work": "T-1446"
+    },
+    "SRC-105:R067": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "It must machine-classify:",
+      "verification": null,
+      "work": "T-1446"
+    },
+    "SRC-105:R068": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Do not add an unnecessary new command if current owners can express it.",
+      "verification": null,
+      "work": "T-1446"
+    },
+    "SRC-105:R069": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "AUTO_KICK must stop at:",
+      "verification": null,
+      "work": "T-1446"
+    },
+    "SRC-105:R070": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "It must not bypass real human gates.",
+      "verification": null,
+      "work": "T-1446"
+    },
+    "SRC-105:R071": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Do not claim the real SAIFREN replacement problem is solved merely because a generic unit test passes.",
+      "verification": null,
+      "work": "T-1446"
+    },
+    "SRC-105:R072": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Do not invent an adapter API.",
+      "verification": null,
+      "work": "T-1446"
+    },
+    "SRC-105:R073": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Do not claim BLOCKING enforcement from an ADVISORY surface.",
+      "verification": null,
+      "work": "T-1446"
+    },
+    "SRC-105:R074": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Therefore the machine router must determine whether the apparent input is new before ordinary semantic reinterpretation.",
+      "verification": null,
+      "work": "T-1446"
+    },
+    "SRC-105:R075": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "The regression must remain caught even if the replacement model begins with zero memory and imperfect instruction-following.",
+      "verification": null,
+      "work": "T-1446"
+    },
+    "SRC-105:R076": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Do not create synonyms for fields that already exist.",
+      "verification": null,
+      "work": "T-1446"
+    },
+    "SRC-105:R077": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "B must NOT:",
+      "verification": null,
+      "work": "T-1446"
+    },
+    "SRC-105:R078": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "manual_rekick_count = 0",
+      "verification": null,
+      "work": "T-1446"
+    },
+    "SRC-105:R079": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "historical_ingress_reinterpretation_count = 0",
+      "verification": null,
+      "work": "T-1446"
+    },
+    "SRC-105:R080": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "duplicate_source_after_replacement_count = 0",
+      "verification": null,
+      "work": "T-1446"
+    },
+    "SRC-105:R081": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "duplicate_work_after_replacement_count = 0",
+      "verification": null,
+      "work": "T-1446"
+    },
+    "SRC-105:R082": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "lost_claim_after_replacement_count = 0",
+      "verification": null,
+      "work": "T-1446"
+    },
+    "SRC-105:R083": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "phase_reset_after_replacement_count = 0",
+      "verification": null,
+      "work": "T-1446"
+    },
+    "SRC-105:R084": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Canonical outcome must not depend on model identity.",
+      "verification": null,
+      "work": "T-1446"
+    },
+    "SRC-105:R085": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "That behavior must be mechanically illegal when:",
+      "verification": null,
+      "work": "T-1446"
+    },
+    "SRC-105:R086": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "This regression must be visible in tests before another downstream user loses eleven minutes of agent work to:",
+      "verification": null,
+      "work": "T-1446"
+    },
+    "SRC-105:R087": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Do not confuse replacement recovery with the other open T-1446 architecture gap.",
+      "verification": null,
+      "work": "T-1446"
+    },
+    "SRC-105:R088": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "The final architecture must cover BOTH:",
+      "verification": null,
+      "work": "T-1446"
+    },
+    "SRC-105:R089": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Both must preserve Work.",
+      "verification": null,
+      "work": "T-1446"
+    },
+    "SRC-105:R090": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Do not close T-1446 with only one half.",
+      "verification": null,
+      "work": "T-1446"
+    },
+    "SRC-105:R091": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "observe canonical state",
+      "verification": null,
+      "work": "T-1446"
+    },
+    "SRC-105:R092": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "inspect lease",
+      "verification": null,
+      "work": "T-1446"
+    },
+    "SRC-105:R093": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "classify worker liveness",
+      "verification": null,
+      "work": "T-1446"
+    },
+    "SRC-105:R094": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "select legal Work",
+      "verification": null,
+      "work": "T-1446"
+    },
+    "SRC-105:R095": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "launch/adopt exactly one bounded worker generation",
+      "verification": null,
+      "work": "T-1446"
+    },
+    "SRC-105:R096": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "monitor progress",
+      "verification": null,
+      "work": "T-1446"
+    },
+    "SRC-105:R097": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "checkpoint",
+      "verification": null,
+      "work": "T-1446"
+    },
+    "SRC-105:R098": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "if healthy: do not steal",
+      "verification": null,
+      "work": "T-1446"
+    },
+    "SRC-105:R099": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "if suspect: wait according to policy",
+      "verification": null,
+      "work": "T-1446"
+    },
+    "SRC-105:R100": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "if expired/dead: fence exact generation create replacement generation recover canonical state continue",
+      "verification": null,
+      "work": "T-1446"
+    },
+    "SRC-105:R101": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "if model incarnation is replaced: AUTO_RECALL AUTO_KICK preserve logical execution epoch",
+      "verification": null,
+      "work": "T-1446"
+    },
+    "SRC-105:R102": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "if due human gate: park affected Work continue unrelated eligible Work when legal",
+      "verification": null,
+      "work": "T-1446"
+    },
+    "SRC-105:R103": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "if no semantic progress: classify NO_PROGRESS stop wasteful repeats",
+      "verification": null,
+      "work": "T-1446"
+    },
+    "SRC-105:R104": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "if no eligible Work: stop cleanly",
+      "verification": null,
+      "work": "T-1446"
+    },
+    "SRC-105:R105": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "A provider failure must preserve:",
+      "verification": null,
+      "work": "T-1446"
+    },
+    "SRC-105:R106": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "It must not create:",
+      "verification": null,
+      "work": "T-1446"
+    },
+    "SRC-105:R107": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "stolen_lease_count simultaneous_mutator_count lost_work_count lost_source_count duplicate_source_count duplicate_work_count fabricated_pass_count false_global_stop_count historical_ingress_reinterpretation_count manual_rekick_count unknown_terminal_failure_count",
+      "verification": null,
+      "work": "T-1446"
+    },
+    "SRC-105:R108": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "manual_continue_count manual_rekick_count duplicate_semantic_mutation_count duplicate_source_count duplicate_work_count stolen_lease_count false_global_stop_count fabricated_pass_count historical_ingress_reinterpretation_count unknown_terminal_failure_count",
+      "verification": null,
+      "work": "T-1446"
+    },
+    "SRC-105:R109": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Do not fake elapsed time.",
+      "verification": null,
+      "work": "T-1446"
+    },
+    "SRC-105:R110": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Do not hold the only mutation seat merely waiting for a clock.",
+      "verification": null,
+      "work": "T-1446"
+    },
+    "SRC-105:R111": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "manual continuation manual re-kick duplicate mutation stolen lease fabricated PASS historical ingress reinterpretation unknown terminal failure false project-wide stop",
+      "verification": null,
+      "work": "T-1446"
+    },
+    "SRC-105:R112": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Do not close it falsely.",
+      "verification": null,
+      "work": "T-1446"
+    },
+    "SRC-105:R113": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Do not reimplement its due-time machinery.",
+      "verification": null,
+      "work": "T-1446"
+    },
+    "SRC-105:R114": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Do not weaken release-scope safety to close it.",
+      "verification": null,
+      "work": "T-1446"
+    },
+    "SRC-105:R115": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Never rerun an identical expensive shape because the previous run lacked a cosmetic terminal summary.",
+      "verification": null,
+      "work": "T-1446"
+    },
+    "SRC-105:R116": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Do not ask the user for `cc` because context is running out.",
+      "verification": null,
+      "work": "T-1446"
+    },
+    "SRC-105:R117": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "The successor must be able to continue without predecessor hidden reasoning.",
+      "verification": null,
+      "work": "T-1446"
+    },
+    "SRC-105:R118": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Do NOT globally stop for:",
+      "verification": null,
+      "work": "T-1446"
+    },
+    "SRC-105:R119": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Do not ask:",
+      "verification": null,
+      "work": "T-1446"
+    },
+    "SRC-105:R120": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "T-1446 must NOT close merely because:",
+      "verification": null,
+      "work": "T-1446"
+    },
+    "SRC-105:R121": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "supervisor.py exists",
+      "verification": null,
+      "work": "T-1446"
+    },
+    "SRC-105:R122": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "worker.py exists",
+      "verification": null,
+      "work": "T-1446"
+    },
+    "SRC-105:R123": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "watchdog tests pass",
+      "verification": null,
+      "work": "T-1446"
+    },
+    "SRC-105:R124": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "subprocess turnover works",
+      "verification": null,
+      "work": "T-1446"
+    },
+    "SRC-105:R125": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "cold_recovery prints useful state",
+      "verification": null,
+      "work": "T-1446"
+    },
+    "SRC-105:R126": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "BOOT tells models to continue",
+      "verification": null,
+      "work": "T-1446"
+    },
+    "SRC-105:R127": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "generic model replacement fixture passes",
+      "verification": null,
+      "work": "T-1446"
+    },
+    "SRC-105:R128": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "duplicate ingress idempotence",
+      "verification": null,
+      "work": "T-1446"
+    },
+    "SRC-105:R129": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "consumed-ingress terminalization",
+      "verification": null,
+      "work": "T-1446"
+    },
+    "SRC-105:R130": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "workability scheduling",
+      "verification": null,
+      "work": "T-1446"
+    },
+    "SRC-105:R131": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "due/deferred gates",
+      "verification": null,
+      "work": "T-1446"
+    },
+    "SRC-105:R132": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "watchdog liveness",
+      "verification": null,
+      "work": "T-1446"
+    },
+    "SRC-105:R133": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "stale-generation fencing",
+      "verification": null,
+      "work": "T-1446"
+    },
+    "SRC-105:R134": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "cold recovery",
+      "verification": null,
+      "work": "T-1446"
+    },
+    "SRC-105:R135": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "cold worker continuation",
+      "verification": null,
+      "work": "T-1446"
+    },
+    "SRC-105:R136": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "supervisor execution ownership",
+      "verification": null,
+      "work": "T-1446"
+    },
+    "SRC-105:R137": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "process replacement",
+      "verification": null,
+      "work": "T-1446"
+    },
+    "SRC-105:R138": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "model/agent incarnation replacement",
+      "verification": null,
+      "work": "T-1446"
+    },
+    "SRC-105:R139": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "AUTO_RECALL",
+      "verification": null,
+      "work": "T-1446"
+    },
+    "SRC-105:R140": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "AUTO_KICK",
+      "verification": null,
+      "work": "T-1446"
+    },
+    "SRC-105:R141": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "active execution before historical-chat reinterpretation",
+      "verification": null,
+      "work": "T-1446"
+    },
+    "SRC-105:R142": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "no manual re-kick",
+      "verification": null,
+      "work": "T-1446"
+    },
+    "SRC-105:R143": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "provider/runtime failure classification",
+      "verification": null,
+      "work": "T-1446"
+    },
+    "SRC-105:R144": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "observability",
+      "verification": null,
+      "work": "T-1446"
+    },
+    "SRC-105:R145": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "accelerated chaos",
+      "verification": null,
+      "work": "T-1446"
+    },
+    "SRC-105:R146": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "credible one-hour field behavior",
+      "verification": null,
+      "work": "T-1446"
+    },
+    "SRC-105:R147": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "EXACT NEXT ACTION must be executable and machine-specific.",
+      "verification": null,
+      "work": "T-1446"
+    },
+    "SRC-105:R148": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Do not end with a question.",
+      "verification": null,
+      "work": "T-1446"
+    },
+    "SRC-105:R149": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Do not end with `cc all`.",
+      "verification": null,
+      "work": "T-1446"
+    },
+    "SRC-105:R150": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Do not claim T-1446 DONE while replacing the active model can still turn:",
+      "verification": null,
+      "work": "T-1446"
+    },
+    "SRC-105:R151": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "THE USER STARTS THE WORK ONCE.",
+      "verification": null,
+      "work": "T-1446"
+    },
+    "SRC-105:R152": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "WORK SURVIVES PROCESS DEATH.",
+      "verification": null,
+      "work": "T-1446"
+    },
+    "SRC-105:R153": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "WORK SURVIVES CONTEXT LOSS.",
+      "verification": null,
+      "work": "T-1446"
+    },
+    "SRC-105:R154": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "WORK SURVIVES MODEL REPLACEMENT.",
+      "verification": null,
+      "work": "T-1446"
+    },
+    "SRC-105:R155": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "HISTORICAL INPUT DOES NOT BECOME NEW INPUT.",
+      "verification": null,
+      "work": "T-1446"
+    },
+    "SRC-105:R156": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "A SUCCESSOR RECOVERS CANONICAL STATE AND CONTINUES WITHOUT ASKING THE USER TO KICK IT AGAIN.",
+      "verification": null,
+      "work": "T-1446"
+    }
+  },
+  "schema_version": 1
+}

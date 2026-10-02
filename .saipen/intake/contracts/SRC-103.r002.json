@@ -1,0 +1,19 @@
+{
+  "clauses": {
+    "SRC-103:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Audit manifest distinguishes durable audit surfaces from runtime/transient surfaces at any nesting depth, without excluding whole durable families"
+    },
+    "SRC-103:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Release SOURCE_COVERAGE is scoped to the release being shipped; an unrelated BLOCKED_EXTERNAL source cannot freeze an independent release while a related unresolved source still blocks"
+    }
+  },
+  "derived_at": "2026-09-22T13:00:29Z",
+  "derived_from": "SRC-103",
+  "interpretation_revision": 2,
+  "schema_version": 1,
+  "source_sha256": "54b0d043ee94f239e43f7bb26c3bbaa23b634a67fbd1bf955888e6693149a3a1"
+}

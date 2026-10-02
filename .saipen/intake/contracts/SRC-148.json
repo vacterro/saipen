@@ -1,0 +1,24 @@
+{
+  "clauses": {
+    "SRC-148:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Reproduce and repair stale complete-seat recovery guidance with an executable append-only ledger path; preserve report hashes and existing dispositions; do not modify SAILEARN application code."
+    },
+    "SRC-148:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Classify actual defect predicates: unsafe behavior REPRODUCED, protective rejection NOT_REPRODUCED, harness failure INVALID or BLOCKED; preserve diagnostic evidence and controlled regressions."
+    },
+    "SRC-148:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Make post-cycle Git persistence and exact bounded bookkeeping action unambiguous; ship remains a release; never silently commit unrelated changes; report root causes files regressions targeted and full totals with red-green controls."
+    }
+  },
+  "derived_at": "2026-09-30T17:15:22Z",
+  "derived_from": "SRC-148",
+  "interpretation_revision": 3,
+  "schema_version": 1,
+  "source_sha256": "394a65829aedc88a487db1186a22853a40e2fa89ae4fc4bc5c9c7f10a4b4b1ed"
+}

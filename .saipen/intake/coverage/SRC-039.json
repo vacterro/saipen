@@ -1,4 +1,14 @@
 {
-  "requirements": {},
+  "requirements": {
+    "SRC-039:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-6179 -- T-1324 finished via SAIOPS from SHIP",
+      "text": "Eliminate protocol self-deadlocks: every hard stop reaches SAFE_CANONICAL_REPAIR, OPERATOR_DECISION_REQUIRED or EXTERNAL_BLOCK -- satisfied by T-1324 DONE at E-6xxx with the full recovery-reachability wave",
+      "verification": "E-6178 REVIEW: PASS -- terminal recovery is read-only, exact decision routes survive, no repair loop; conf: high",
+      "work": "T-1324"
+    }
+  },
   "schema_version": 1
 }

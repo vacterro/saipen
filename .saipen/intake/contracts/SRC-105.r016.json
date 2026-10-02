@@ -1,0 +1,89 @@
+{
+  "clauses": {
+    "SRC-105:R001": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not rewind to older snapshots."
+    },
+    "SRC-105:R002": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not create another autonomy umbrella."
+    },
+    "SRC-105:R003": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not create another generic continuation ticket."
+    },
+    "SRC-105:R004": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not create another Source for SRC-100."
+    },
+    "SRC-105:R005": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not use `cc all` as a generic continuation mechanism."
+    },
+    "SRC-105:R006": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not raw-edit STATE.md, BOARD.md, LOG.md, Source records or coverage records."
+    },
+    "SRC-105:R007": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not use `git add -A`."
+    },
+    "SRC-105:R008": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not discard, stash, reset, clean or overwrite foreign dirty work."
+    },
+    "SRC-105:R009": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not push, tag, publish a release, consume unapproved paid quota, or perform irreversible publication."
+    },
+    "SRC-105:R010": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not reopen them without a newly reproduced regression."
+    },
+    "SRC-105:R011": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not restore the simpler \"first matching quote wins\" behavior."
+    },
+    "SRC-105:R012": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not call them FAIL."
+    },
+    "SRC-105:R013": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not call them PASS."
+    },
+    "SRC-105:R014": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not rerun that exact broad shape merely to obtain a prettier number."
+    },
+    "SRC-105:R015": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not create a SAIPEN ticket for it unless the file also exists in the live source worktree independently of AUDAPACK."
+    },
+    "SRC-105:R016": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "The three closure-evidence reds remain inherited and must stay visible, but do not merge them into T-1454 unless the canonical SHIP gate actually makes them a direct dependency."
+    }
+  },
+  "derived_at": "2026-09-22T16:31:46Z",
+  "derived_from": "SRC-105",
+  "interpretation_revision": 16,
+  "schema_version": 1,
+  "source_sha256": "06411bf03ce69cde2ff150b011e1a939ff98581342e049c0df7122ca5aabd87c"
+}

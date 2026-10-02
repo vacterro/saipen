@@ -1,0 +1,19 @@
+{
+  "clauses": {
+    "SRC-108:R001": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not create another broad architecture umbrella."
+    },
+    "SRC-108:R002": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not interrupt higher-priority active correctness / closure / field-gate work."
+    }
+  },
+  "derived_at": "2026-09-23T01:12:48Z",
+  "derived_from": "SRC-108",
+  "interpretation_revision": 2,
+  "schema_version": 1,
+  "source_sha256": "5c498338f8d92e8d546eb7c7aa33d6cc792c476c1040af4c758acde7f45bf59d"
+}

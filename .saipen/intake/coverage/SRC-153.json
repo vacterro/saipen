@@ -1,0 +1,113 @@
+{
+  "requirements": {
+    "SRC-153:R001": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-11371",
+      "text": "A first-class durable versus ephemeral contract defines sole-copy safety and explicit ownership, lifetime and recovery.",
+      "verification": "saipen/STORAGE.md and tools/saipen_engine/storage.py define DURABLE, EPHEMERAL, CACHE and EXTERNAL with sole-copy safety, ownership, lifetime and recovery; test_storage_policy runs 10 tests OK",
+      "work": "T-1579"
+    },
+    "SRC-153:R002": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-11371",
+      "text": "Machine policy supports arbitrary user-defined ephemeral roots and explicit durable roots through the existing user configuration mechanism.",
+      "verification": "saipen storage status --json reads C:/Users/vac34/AppData/Roaming/SAIPEN/STORAGE_POLICY.json and lists durable root V:/___VAC/__K/__STATE/SAILEARN_HOME plus user-defined ephemeral root V:/_TEMP_",
+      "work": "T-1579"
+    },
+    "SRC-153:R003": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-11371",
+      "text": "Known OS or custom ephemeral roots reject durable state before canonical publication; Windows case, slashes, relative paths and links cannot bypass classification; unknown paths do not gain trust.",
+      "verification": "saipen storage classify V:/_TEMP_/sailearn-home-m7 DURABLE refuses STORAGE_POLICY_VIOLATION naming path, matched root, required class and remedy; test_windows_case_and_slash_variants_do_not_bypass_cleanup_root and the nested/relative cases are OK",
+      "work": "T-1579"
+    },
+    "SRC-153:R004": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-11371",
+      "text": "RUN and SESSION scratch remain usable and disposable, including unavailable optional scratch; PROJECT, PERMANENT and REBOOT storage requires DURABLE.",
+      "verification": "the same path classified EPHEMERAL returns EPHEMERAL_ALLOWED; test_scratch_and_cache_are_disposable_but_unknown_durable_is_not is OK",
+      "work": "T-1579"
+    },
+    "SRC-153:R005": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-11371",
+      "text": "Canonical artifacts require allowed durable copies; registry referential integrity and existence are checked at validation and Work completion boundaries.",
+      "verification": "test_transient_checkpoint_promotes_before_registry_pointer and test_legacy_ephemeral_registry_reference_is_detected_and_migrated are OK",
+      "work": "T-1579"
+    },
+    "SRC-153:R006": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-11371",
+      "text": "Projects declare named stores with class, path, lifetime, owner and recovery; declaration and registry authority are durable when holding durable stores.",
+      "verification": "saipen storage store list --json returns ok; test_transient_project_may_declare_only_scratch_under_cleanup_root is OK",
+      "work": "T-1579"
+    },
+    "SRC-153:R007": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-11371",
+      "text": "Missing canonical state is explicitly detected, retained in the registry and classified RECONSTRUCTABLE, PARTIAL or UNRECOVERABLE with exact artifact paths and deterministic rebuild provenance where applicable.",
+      "verification": "test_missing_durable_artifact_reports_recovery_class, test_missing_registry_is_not_treated_as_fresh_installation and test_reconstructable_record_requires_and_reports_rebuild_command are OK",
+      "work": "T-1579"
+    },
+    "SRC-153:R008": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-11371",
+      "text": "Promotion and bounded legacy migration copy and hash-verify files or directory trees before atomic reference publication; source files, unrelated user data and old pointers survive failure.",
+      "verification": "test_registry_publication_failure_preserves_previous_pointer, test_source_disappears_mid_copy_without_registry_commit and test_policy_change_during_copy_prevents_canonical_publication are OK",
+      "work": "T-1579"
+    },
+    "SRC-153:R009": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-11371",
+      "text": "Regression controls cover ephemeral SAILEARN adapters/cards/manifests, transient checkpoint promotion, scratch disappearance, interrupted publication and concurrent policy changes.",
+      "verification": "27 tests green with 1 skipped across test_storage_policy, test_storage_artifacts and test_storage_lost_registry, including test_sailearn_model_home_under_cleanup_root_is_blocked_before_commit",
+      "work": "T-1579"
+    },
+    "SRC-153:R010": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-11371",
+      "text": "Existing valid temporary workflows remain operational; report focused and full-family results without hiding skips or inherited failures.",
+      "verification": "core-unit family fresh record 13e16cb43f531906-20261002T015427Z ran 4623 with red 0 and new_red empty; python tools/protocol_budget.py exits 0; validate --gate core reports conformant",
+      "work": "T-1579"
+    },
+    "SRC-153:R011": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-11371",
+      "text": "Audit the bounded known SAIPEN-controlled project/runtime surface for durable or sole-copy state under known ephemeral roots; record actual violations and audit coverage without treating legitimate scratch as durable.",
+      "verification": "saipen storage status and store list audited: no SAIPEN-controlled project declares durable state under V:/_TEMP_, and this repo own .saipen classifies UNKNOWN_REQUIRES_EXPLICIT_DECISION rather than assumed durable",
+      "work": "T-1579"
+    },
+    "SRC-153:R012": {
+      "actionable": false,
+      "class": "context",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Immediate SAILEARN recovery is conditioned by SRC-154/SRC-155: the operator confirmed the persistent HOME, but the source repository is not yet available; preserve SAIBUD-8, record pending recovery and never fabricate lost history.",
+      "verification": null,
+      "work": "T-1579"
+    }
+  },
+  "schema_version": 1
+}

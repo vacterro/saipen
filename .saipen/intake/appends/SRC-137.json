@@ -1,0 +1,69 @@
+{
+  "appends": [
+    {
+      "class": "APPEND",
+      "created_work": null,
+      "delta": "implementation",
+      "derived_clauses": [
+        "SRC-138:R001",
+        "SRC-138:R002",
+        "SRC-138:R003",
+        "SRC-138:R004",
+        "SRC-138:R005",
+        "SRC-138:R006",
+        "SRC-138:R007",
+        "SRC-138:R008",
+        "SRC-138:R009",
+        "SRC-138:R010",
+        "SRC-138:R011",
+        "SRC-138:R012",
+        "SRC-138:R013",
+        "SRC-138:R014",
+        "SRC-138:R015",
+        "SRC-138:R016",
+        "SRC-138:R017",
+        "SRC-138:R018",
+        "SRC-138:R019",
+        "SRC-138:R020",
+        "SRC-138:R021",
+        "SRC-138:R022",
+        "SRC-138:R023",
+        "SRC-138:R024",
+        "SRC-138:R025",
+        "SRC-138:R026",
+        "SRC-138:R027",
+        "SRC-138:R028",
+        "SRC-138:R029",
+        "SRC-138:R030",
+        "SRC-138:R031",
+        "SRC-138:R032",
+        "SRC-138:R033",
+        "SRC-138:R034"
+      ],
+      "label": "hard protocol admission corrective continuation",
+      "projected_at": "2026-09-29T11:54:39Z",
+      "receipt": "SRC-138",
+      "received_at": "2026-09-29T11:54:11Z",
+      "rewind": {
+        "from": "VERIFY",
+        "to": "BUILD",
+        "work": "T-1558"
+      },
+      "seq": 1,
+      "source_sha256": "e83f3adb052623840463e7361dbe9414ee4c9cac52b128c5831d0df40b4fe30d",
+      "state": "PROJECTED",
+      "steps": [
+        "linked",
+        "derived",
+        "superseded"
+      ],
+      "superseded": [],
+      "supersedes": [],
+      "work": [
+        "T-1558"
+      ]
+    }
+  ],
+  "schema_version": 1,
+  "source": "SRC-137"
+}

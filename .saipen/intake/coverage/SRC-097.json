@@ -1,0 +1,14 @@
+{
+  "requirements": {
+    "SRC-097:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "T-1440 closed with verification evidence in LOG: verify -> PASS [target: T-1440] conf: high -- integration artifacts present on current bytes: future_gate/ROADMAP_NEXT_20260920.md carries the T-1441 DONE E-7783 and T-1439 DONE E-7789 rows, the T-1442/T-1443 rows and the T-1437 -> T-1435 -> T-1361 chain; the T-1439/T-1440 evidence report is delivered; dirty-tree and no-publication limits preserved",
+      "text": "J\u00e4tka ka paranduste teostamist",
+      "verification": "the Work this request created reached its own verification gate; see the T-1440 VERIFY cycle in .saipen/LOG.md",
+      "work": "T-1440"
+    }
+  },
+  "schema_version": 1
+}

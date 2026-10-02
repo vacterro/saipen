@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-066:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Adopt the current extensions/subs/saitranslate.md charter/namespace update under one narrow canonical ticket. Preserve the current bytes if the inquest confirms they match the existing engine namespace semantics. Do not revert it merely because its original writer is no longer active. After the adoption is committed and verified, resume T-1367 from its existing BUILD blocker and continue the installed-runtime field acceptance. No push, no tag, no public release."
+    }
+  },
+  "derived_at": "2026-09-18T22:12:35Z",
+  "derived_from": "SRC-066",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "d6d7230877ddc41876f7d74899f21c25f47d5664e469faae15778aadbfc6b594"
+}

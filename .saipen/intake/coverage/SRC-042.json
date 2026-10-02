@@ -1,4 +1,14 @@
 {
-  "requirements": {},
+  "requirements": {
+    "SRC-042:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "T-1326 closed with verification evidence in LOG: transition to SHIP -- REVIEW verdict DEC: SHIP -- independent re-run of the T-1326 harness PASS conf: high",
+      "text": "Satisfy the captured request SRC-042 in full; the authoritative text is the receipt body (sha256 5fc82e2bf36e): SAIPEN Continue the independently verified BOARD-cap recovery defect from the current repository state. DO NOT restart discovery. DO NOT resume public release. DO NOT claim T-1315. DO NOT redesign Cold-Agent Truth. CURRENT VERIFIED STATE T-\u2026",
+      "verification": "the Work this request created reached its own verification gate; see the T-1326 VERIFY cycle in .saipen/LOG.md",
+      "work": "T-1326"
+    }
+  },
   "schema_version": 1
 }

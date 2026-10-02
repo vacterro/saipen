@@ -1,0 +1,19 @@
+{
+  "clauses": {
+    "SRC-102:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Every production refusal code emitted by engine paths is registered in REGISTRY.json error_codes and a known code never crashes an ordinary refusal path"
+    },
+    "SRC-102:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "One source receipt legitimately produces multiple Work items without SOURCE_LINKAGE_DRIFT for a covered child, while an uncovered claimant is still refused"
+    }
+  },
+  "derived_at": "2026-09-22T13:00:16Z",
+  "derived_from": "SRC-102",
+  "interpretation_revision": 2,
+  "schema_version": 1,
+  "source_sha256": "6906ed71bd6db0fe0a1f70531d96c0dd168def03a11fe70c1110d4bd5a825ff0"
+}

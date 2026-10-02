@@ -1,0 +1,14 @@
+{
+  "requirements": {
+    "SRC-057:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-7174",
+      "text": "T-1385 is not done: carry the T-1385 corridor to truthful completion",
+      "verification": "T-1385 carried to DONE E-7136 commit bf8b57f5; its verify clause re-run PASS E-7130",
+      "work": "T-1367"
+    }
+  },
+  "schema_version": 1
+}

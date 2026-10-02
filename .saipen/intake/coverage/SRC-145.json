@@ -1,0 +1,14 @@
+{
+  "requirements": {
+    "SRC-145:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "T-1572 closed with verification evidence in LOG: verify -> PASS [target: T-1572] conf: high -- python -m pytest tools/test_t1572_ticket_scoped_recovery.py tools/test_t1578_restore_owner.py tools/test_recovery_noop_targets.py tools/test_t1363_zero_manual_entry.py tools/test_cold_recovery.py -q: 137 passed; the wider family python -m pytest tools/ -k 'recovery or reconcile or ownership or journal': 460 passed, 11 skipped, 0 failed; the declared co",
+      "text": "P1 recovery defect: phase repair must be ticket-scoped (unrelated ticket evidence cross-contamination) + current-generation DONE/journal terminal split needs canonical recovery route (AUDAPACK T-261-shaped fixture, full acceptance matrix A-L)",
+      "verification": "the Work this request created reached its own verification gate; see the T-1572 VERIFY cycle in .saipen/LOG.md",
+      "work": "T-1572"
+    }
+  },
+  "schema_version": 1
+}

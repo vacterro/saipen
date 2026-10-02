@@ -1,0 +1,44 @@
+{
+  "clauses": {
+    "SRC-105:R001": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not rewind to older snapshots."
+    },
+    "SRC-105:R002": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not create another autonomy umbrella."
+    },
+    "SRC-105:R003": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not create another generic continuation ticket."
+    },
+    "SRC-105:R004": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not create another Source for SRC-100."
+    },
+    "SRC-105:R005": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not use `cc all` as a generic continuation mechanism."
+    },
+    "SRC-105:R006": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not raw-edit STATE.md, BOARD.md, LOG.md, Source records or coverage records."
+    },
+    "SRC-105:R007": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not use `git add -A`."
+    }
+  },
+  "derived_at": "2026-09-22T16:31:39Z",
+  "derived_from": "SRC-105",
+  "interpretation_revision": 7,
+  "schema_version": 1,
+  "source_sha256": "06411bf03ce69cde2ff150b011e1a939ff98581342e049c0df7122ca5aabd87c"
+}

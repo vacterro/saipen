@@ -1,0 +1,23 @@
+{
+  "requirements": {
+    "SRC-150:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-10973",
+      "text": "Silent execution is default for runnable work, phase changes and tool continuation; explicit request alone authorizes bounded progress; preserve immediate blockers human decisions safety capability boundaries and final response gates.",
+      "verification": "tools/test_t1574_followups.py::SilentExecutionTests",
+      "work": "T-1574"
+    },
+    "SRC-150:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-10973",
+      "text": "Separate model commentary from reasoning host-native thought and machine status; heartbeats use runtime logs not chat; adapters declare five actual silence capabilities; deterministic A-K red-green matrix canonical CURRENT_PASS and full core new_red=0.",
+      "verification": "tools/test_t1574_followups.py::SilentExecutionTests.test_k;core E-10971",
+      "work": "T-1574"
+    }
+  },
+  "schema_version": 1
+}

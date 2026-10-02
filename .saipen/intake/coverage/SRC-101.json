@@ -1,0 +1,41 @@
+{
+  "requirements": {
+    "SRC-101:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "IMPLEMENTED",
+      "evidence": "E-7950",
+      "text": "Deferred-operator due-gate eligibility gets one dedicated policy owner narrower than blocker_class; WAIT_USER_CONFIRMATION, WAIT_USER_DECISION and BLOCKED_EXTERNAL only",
+      "verification": "python -m unittest tools.test_t1429_deferred_due -> PASS 23",
+      "work": "T-1429"
+    },
+    "SRC-101:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "IMPLEMENTED",
+      "evidence": "E-7964",
+      "text": "Negative red controls prove ACTIVE, HELD, FUTURE_GATE, PERMANENT_WARNING_OWNER and WAIT_ROLE never project an operator gate at parser, writer, validator and router",
+      "verification": "4 duplicate classifier copies unified; unittest touched families PASS 209; red-checks 20+6+15 subtests fail pre-fix",
+      "work": "T-1429"
+    },
+    "SRC-101:R003": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "DEFERRED",
+      "evidence": "E-7950",
+      "text": "T-1426 carries the first live BLOCKED_EXTERNAL use of retry_not_before, entered through canonical lifecycle after its dependency chain releases it",
+      "verification": null,
+      "work": "T-1429"
+    },
+    "SRC-101:R004": {
+      "actionable": true,
+      "class": "non-goal",
+      "disposition": "NOT_APPLICABLE",
+      "evidence": "E-7966",
+      "text": "No FreeBuff quota consumed, no GUI acceptance executed automatically, no duplicate T-1429, no raw edit of STATE/BOARD/LOG",
+      "verification": null,
+      "work": "T-1429"
+    }
+  },
+  "schema_version": 1
+}

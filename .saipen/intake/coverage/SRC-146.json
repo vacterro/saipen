@@ -1,0 +1,14 @@
+{
+  "requirements": {
+    "SRC-146:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "T-1573 closed with verification evidence in LOG: verify -> PASS [target: T-1573] conf: high -- re-checked on the current tree: SRC-146's contract and coverage remain empty (clauses 0, requirements 0), so the requested change set is still empty and this vehicle still carries no code delta; the declared family ran 4623 checks with 0 red and its PASS record was reused unchanged on the same fingerprint",
+      "text": "test1",
+      "verification": "the Work this request created reached its own verification gate; see the T-1573 VERIFY cycle in .saipen/LOG.md",
+      "work": "T-1573"
+    }
+  },
+  "schema_version": 1
+}

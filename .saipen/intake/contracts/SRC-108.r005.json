@@ -1,0 +1,34 @@
+{
+  "clauses": {
+    "SRC-108:R001": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not create another broad architecture umbrella."
+    },
+    "SRC-108:R002": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not interrupt higher-priority active correctness / closure / field-gate work."
+    },
+    "SRC-108:R003": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "It must never independently decide:"
+    },
+    "SRC-108:R004": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "If the metrics cache disappears, SAIPEN must be able to reconstruct the useful statistics from canonical durable events where practical."
+    },
+    "SRC-108:R005": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not create a second lifecycle database."
+    }
+  },
+  "derived_at": "2026-09-23T01:12:51Z",
+  "derived_from": "SRC-108",
+  "interpretation_revision": 5,
+  "schema_version": 1,
+  "source_sha256": "5c498338f8d92e8d546eb7c7aa33d6cc792c476c1040af4c758acde7f45bf59d"
+}

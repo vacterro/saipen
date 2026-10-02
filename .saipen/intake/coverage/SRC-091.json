@@ -1,0 +1,14 @@
+{
+  "requirements": {
+    "SRC-091:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "T-1436 closed with verification evidence in LOG: transition to SHIP -- REVIEW PASS conf: high -- implementation reviewed as ONE bounded recovery patch: resume-without-synthetic-claim, queued-source wake, continue-loop adoption, docs, 7 focused controls and 238-suite green. own_patch closure, local commit only; no push/tag/release (SRC-039 no-publish pause)",
+      "text": "Recover synthetic foreign owner on T-1361: measure real Astra liveness, canonical stale-claim recovery if not live, repair dependency-resume liveness defect, then execute SRC-090 FastPrompter repair corridor",
+      "verification": "the Work this request created reached its own verification gate; see the T-1436 VERIFY cycle in .saipen/LOG.md",
+      "work": "T-1436"
+    }
+  },
+  "schema_version": 1
+}

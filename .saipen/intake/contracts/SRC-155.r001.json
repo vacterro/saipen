@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-155:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Satisfy the captured request SRC-155 in full; the authoritative text is the receipt body (sha256 634ba2a9edeb): \u0415\u0449\u0435 \u043f\u043e\u043a\u0430 \u0447\u0442\u043e \u043d\u0435\u0442 \u043d\u043e \u0441\u043b\u0435\u0434\u0438 \u0435\u0441\u043b\u0438 \u0447\u0442\u043e."
+    }
+  },
+  "derived_at": "2026-10-01T06:25:18Z",
+  "derived_from": "SRC-155",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "634ba2a9edebf1c761e5e2e313a8f08d212d472b23147b4c415a6f054cf21bf5"
+}

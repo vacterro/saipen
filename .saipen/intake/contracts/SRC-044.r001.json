@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-044:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Zero-manual task entry: an actionable user task must bind, persist intent, inherit a legal seat, claim and START with zero protocol coaching"
+    }
+  },
+  "derived_at": "2026-09-16T12:08:38Z",
+  "derived_from": "SRC-044",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "d971d83662016e6b973da609a273f08f850d3383c0c23f2fdaaf1f50f8a3920d"
+}

@@ -1,0 +1,49 @@
+{
+  "clauses": {
+    "SRC-153:R001": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "A first-class durable versus ephemeral contract defines sole-copy safety and explicit ownership, lifetime and recovery."
+    },
+    "SRC-153:R002": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "Machine policy supports arbitrary user-defined ephemeral roots and explicit durable roots through the existing user configuration mechanism."
+    },
+    "SRC-153:R003": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "Known OS or custom ephemeral roots reject durable state before canonical publication; Windows case, slashes, relative paths and links cannot bypass classification; unknown paths do not gain trust."
+    },
+    "SRC-153:R004": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "RUN and SESSION scratch remain usable and disposable, including unavailable optional scratch; PROJECT, PERMANENT and REBOOT storage requires DURABLE."
+    },
+    "SRC-153:R005": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "Canonical artifacts require allowed durable copies; registry referential integrity and existence are checked at validation and Work completion boundaries."
+    },
+    "SRC-153:R006": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "Projects declare named stores with class, path, lifetime, owner and recovery; declaration and registry authority are durable when holding durable stores."
+    },
+    "SRC-153:R007": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "Missing canonical state is explicitly detected, retained in the registry and classified RECONSTRUCTABLE, PARTIAL or UNRECOVERABLE with exact artifact paths and deterministic rebuild provenance where applicable."
+    },
+    "SRC-153:R008": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "Promotion and bounded legacy migration copy and hash-verify files or directory trees before atomic reference publication; source files, unrelated user data and old pointers survive failure."
+    }
+  },
+  "derived_at": "2026-10-01T08:15:40Z",
+  "derived_from": "SRC-153",
+  "interpretation_revision": 8,
+  "schema_version": 1,
+  "source_sha256": "7e668068dc1577673ed70824bb24c44023f82ea618a21342a792d052b100aee9"
+}

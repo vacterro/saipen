@@ -1,0 +1,14 @@
+{
+  "requirements": {
+    "SRC-064:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "T-1395 closed with verification evidence in LOG: verify -> PASS [target: T-1395] conf: high -- python -m unittest tools.test_ticket_retirement 55/55 OK; tools.test_field_fixture_isolation 46/46 OK; ruff clean; tools/validate.py conformant; retirements E-7073/E-7074 authority SRC-065",
+      "text": "T-1391 / SRC-060; T-1390 / SRC-059",
+      "verification": "the Work this request created reached its own verification gate; see the T-1395 VERIFY cycle in .saipen/LOG.md",
+      "work": "T-1395"
+    }
+  },
+  "schema_version": 1
+}

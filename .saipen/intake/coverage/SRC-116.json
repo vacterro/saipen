@@ -1,0 +1,14 @@
+{
+  "requirements": {
+    "SRC-116:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "T-1504 closed with verification evidence in LOG: verify -> PASS [target: T-1504] conf: high -- python -B -m unittest tools.test_t1504_zaicode_adapter on committed fcbfa403: OK; ZAICODE .zaicode/home/.zcode carries skills/saipen and the SAIPEN AGENTS.md block; declared family PASS ran 3681 red 26 new_red 0 (record d7c6b48c19fbb8ab); shipped fcbfa403",
+      "text": "\u0423\u0441\u0442\u0430\u043d\u043e\u0432\u0438 \u0432 \u0438\u043d\u0436\u0435\u043a\u0442\u043e\u0440 \u043f\u043e\u0434\u0434\u0435\u0440\u0436\u043a\u0443 ZAICODE \u0442\u043e\u0436\u0435 \u043f\u043e\u0436\u0430\u043b\u043e\u0443\u0439\u0441\u0442\u0430 v:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_ZAICODE",
+      "verification": "the Work this request created reached its own verification gate; see the T-1504 VERIFY cycle in .saipen/LOG.md",
+      "work": "T-1504"
+    }
+  },
+  "schema_version": 1
+}

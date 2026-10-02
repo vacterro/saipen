@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-068:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "CONTINUATION REPAIR T-1399 CLOSURE INTEGRITY, THEN ADVANCE T-1400"
+    }
+  },
+  "derived_at": "2026-09-19T11:50:40Z",
+  "derived_from": "SRC-068",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "e1f811d9c8d6e83e19b12026040f956639045daf3c56be10ae89f25af1aa67d7"
+}

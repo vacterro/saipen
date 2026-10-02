@@ -1,0 +1,29 @@
+{
+  "clauses": {
+    "SRC-101:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Deferred-operator due-gate eligibility gets one dedicated policy owner narrower than blocker_class; WAIT_USER_CONFIRMATION, WAIT_USER_DECISION and BLOCKED_EXTERNAL only"
+    },
+    "SRC-101:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Negative red controls prove ACTIVE, HELD, FUTURE_GATE, PERMANENT_WARNING_OWNER and WAIT_ROLE never project an operator gate at parser, writer, validator and router"
+    },
+    "SRC-101:R003": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "T-1426 carries the first live BLOCKED_EXTERNAL use of retry_not_before, entered through canonical lifecycle after its dependency chain releases it"
+    },
+    "SRC-101:R004": {
+      "actionable": true,
+      "class": "non-goal",
+      "text": "No FreeBuff quota consumed, no GUI acceptance executed automatically, no duplicate T-1429, no raw edit of STATE/BOARD/LOG"
+    }
+  },
+  "derived_at": "2026-09-22T13:00:06Z",
+  "derived_from": "SRC-101",
+  "interpretation_revision": 4,
+  "schema_version": 1,
+  "source_sha256": "cfe668de724a70b0505a441e0c686c5eb5a1577a29b8c4fd7e749ce410cf972c"
+}

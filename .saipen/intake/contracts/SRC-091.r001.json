@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-091:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Recover synthetic foreign owner on T-1361: measure real Astra liveness, canonical stale-claim recovery if not live, repair dependency-resume liveness defect, then execute SRC-090 FastPrompter repair corridor"
+    }
+  },
+  "derived_at": "2026-09-20T22:48:46Z",
+  "derived_from": "SRC-091",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "0b1e041e15e5c5f6c4dcdef5edb6956f796e4e48a011399c07600781b9d9692f"
+}

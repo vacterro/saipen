@@ -1,0 +1,50 @@
+{
+  "requirements": {
+    "SRC-102:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "IMPLEMENTED",
+      "evidence": "E-7956",
+      "text": "Every production refusal code emitted by engine paths is registered in REGISTRY.json error_codes and a known code never crashes an ordinary refusal path",
+      "verification": "python -m unittest tools.test_refusal_registry -> PASS; SOURCE_LINKAGE_DRIFT registered REGISTRY.json:977",
+      "work": "T-1454"
+    },
+    "SRC-102:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "IMPLEMENTED",
+      "evidence": "E-7956",
+      "text": "One source receipt legitimately produces multiple Work items without SOURCE_LINKAGE_DRIFT for a covered child, while an uncovered claimant is still refused",
+      "verification": "python -m unittest tools.test_source_multiwork -> PASS; saipen source link SRC-103 --work T-1452/T-1453/T-1454 -> SOURCE_LINKED live",
+      "work": "T-1454"
+    },
+    "SRC-102:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "IMPLEMENTED",
+      "evidence": "E-7956",
+      "text": "Work whose only remaining condition is external or user evidence releases the DOING seat, stays open, stays pick-ineligible and never becomes DONE",
+      "verification": "python -m unittest tools.test_user_wait_release -> PASS",
+      "work": "T-1454"
+    },
+    "SRC-102:R004": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "IMPLEMENTED",
+      "evidence": "E-8127",
+      "text": "The repaired engine reaches the SAITULS consumer home so T-164/T-165 can close there; a repair present only in an uncommitted protocol working tree has not shipped",
+      "verification": "autoinject.distribution_report -> 6 home(s) current at b1d7c22ffdd4 (opencode, claude, codex, gemini, codebuddy, freebuff) after scheduled injection 2026-09-22 18:46 success; the repair is committed and distributed, no longer working-tree-only",
+      "work": "T-1454"
+    },
+    "SRC-102:R005": {
+      "actionable": true,
+      "class": "non-goal",
+      "disposition": "NOT_APPLICABLE",
+      "evidence": "E-7966",
+      "text": "No SAITULS product workaround, no deleted source provenance, no T-168 marked DONE, no faked user acceptance",
+      "verification": null,
+      "work": "T-1454"
+    }
+  },
+  "schema_version": 1
+}

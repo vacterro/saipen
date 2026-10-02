@@ -1,0 +1,32 @@
+{
+  "requirements": {
+    "SRC-111:R001": {
+      "actionable": false,
+      "class": "context",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Future local-GPU roles (log/transcript summarization, SCOUT context preparation, incident clustering, diff triage, recovery-context compression, regression advisory, soak watcher, doc consistency, second review, eventually bounded Work execution) and the resource policy (yield to interactive GPU work, VRAM reserve, visible CPU offload, non-fatal failure, disposable cache), each an experiment adopted one at a time when measured value justifies it",
+      "verification": null,
+      "work": "T-1472"
+    },
+    "SRC-111:R002": {
+      "actionable": true,
+      "class": "non-goal",
+      "disposition": "VERIFIED",
+      "evidence": "E-8531",
+      "text": "Implementing the listed SAIGPU roles immediately, interrupting higher-priority correctness/closure/field-gate/autonomy/proof work to expand SAIGPU, or creating a broad GPU architecture umbrella without measured Work proving it necessary",
+      "verification": "no SAIGPU role, lane or GPU umbrella was added in response to SRC-111; the correctness corridor (T-1485, T-1472 and its batch) continued unchanged",
+      "work": "T-1472"
+    },
+    "SRC-111:R003": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/core-unit/6bd02562455126e0-20260923T125425Z.json",
+      "text": "SAIPEN owns truth, lifecycle, evidence and authority; local GPU output stays ADVISORY; GPU absence or failure never reduces protocol correctness; SAIGPU writes only a disposable cache",
+      "verification": "tools/test_gpu_lane.py green in the declared family run 6bd02562455126e0: switch default off and SAIPEN_GPU=off wins, the lane yields while the card is busy, writes only .saipen/cache/gpu, never evidence",
+      "work": "T-1472"
+    }
+  },
+  "schema_version": 1
+}

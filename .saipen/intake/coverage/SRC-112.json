@@ -1,0 +1,50 @@
+{
+  "requirements": {
+    "SRC-112:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "T-1493 is not closed in its current wording (an agent-run continue must leave the WAIT): that would degrade the autonomy an explicit operator /goal grants; T-1493 is re-scoped as separating persistent /goal authority from fresh cc authority",
+      "verification": null,
+      "work": "T-1493"
+    },
+    "SRC-112:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "machine truth distinguishes persistent operator authorization from fresh operator reauthorization, e.g. continuation_authority operator_persistent|operator_required, authority_source (the SRC or goal event that granted it), authority_until (goal_complete or a budget), safety_valve_mode checkpoint|hard_wait",
+      "verification": null,
+      "work": "T-1493"
+    },
+    "SRC-112:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "under an active persistent /goal (continue until goal complete) the 20-ticket valve is a checkpoint and budget boundary -- checkpoint and safety review, authority still valid, continue automatically -- not a mandatory human gate",
+      "verification": null,
+      "work": "T-1493"
+    },
+    "SRC-112:R004": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "without persistent authority (an ordinary bounded run) reaching the cap is a hard WAIT that requires the operator cc",
+      "verification": null,
+      "work": "T-1493"
+    },
+    "SRC-112:R005": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "saipen continue --json invoked on the BOOT route grants itself nothing: it checks the existing authority -- an active persistent /goal continues, otherwise it answers the WAIT for the operator cc",
+      "verification": null,
+      "work": "T-1493"
+    }
+  },
+  "schema_version": 1
+}

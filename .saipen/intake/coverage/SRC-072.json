@@ -1,0 +1,14 @@
+{
+  "requirements": {
+    "SRC-072:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "T-1410 closed with verification evidence in LOG: verify -> PASS [target: T-1410] conf: high -- python -B -m unittest tools.test_t1407_structural_log_compaction ran 9 tests and reported OK, covering test_long_active_block_is_lossless_in_log_and_board (a block reason over MAX_NEW_EVENT_BYTES keeps its detail in log and board), test_long_active_block_for_preserves_dependency_and_resume_tuple, test_unfit_compact_structure_names_size_and_cap (refusal",
+      "text": "T-1407 PRESERVE STRUCTURAL BLOCK EVIDENCE ACROSS BOUNDED LOG EXTERNALIZATION",
+      "verification": "the Work this request created reached its own verification gate; see the T-1410 VERIFY cycle in .saipen/LOG.md",
+      "work": "T-1410"
+    }
+  },
+  "schema_version": 1
+}
