@@ -1,0 +1,26 @@
+{
+  "authority_grant": "T-1390 / SRC-059",
+  "authority_receipt": "SRC-065",
+  "authority_sha256": "688642993f7a3ebc87054ddbb939bc04f4f645ce8e497dd605b870d70fb44192",
+  "board_record": "- [/] T-1390 [P1] add a docstring to src/app.py | verify: the requested change is present and demonstrated against the user own description of it | user_explicit: true | source_receipts: SRC-059 | owner: claude | claim_time: 2026-09-18T17:17:51Z",
+  "board_record_sha256": "2f0ba7aee472a7118db453230029f2aa65e46ce26ae694e94305116ca7b08ebb",
+  "discovery_event": null,
+  "evidence": {
+    "kind": "event",
+    "ref": "E-7014"
+  },
+  "evidence_bound_event": "E-7074",
+  "evidence_note": "fixture contamination; proof dir T-1391-T-1390-fixture-contamination-20260917",
+  "reason": "TEST_FIXTURE_CONTAMINATION",
+  "restored_parent": "T-1388",
+  "restored_parent_owner": "claude",
+  "retired_at": "2026-09-18T17:17:56Z",
+  "retired_by": "claude",
+  "retirement_event": "E-7074",
+  "schema_version": 2,
+  "section": "## DOING",
+  "source_receipts": [
+    "SRC-059"
+  ],
+  "ticket": "T-1390"
+}

@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-058:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "T-1385 implementation stays proven: focused canonical-route families green and the live route proof preserved; no redo unless bytes differ"
+    }
+  },
+  "derived_at": "2026-09-18T21:03:13Z",
+  "derived_from": "SRC-058",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "dc4d91943214122373df05a96109a26fa52eb8d9f0b02ce0fdf2e263dce1525b"
+}

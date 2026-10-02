@@ -1,0 +1,14 @@
+{
+  "requirements": {
+    "SRC-126:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "IMPLEMENTED",
+      "evidence": ".saipen/evidence/T-1542-audit18-triage.md: five findings, four terminal as already-fixed with the pinning test named (T-1401/T-1402 canonical-op exemption for IMP-001 and IMP-002, T-1434/T-1535 ticket reasoning writer for IMP-004, T-1320 search transport for IMP-005), one live (IMP-003) and built",
+      "text": "audit/18 execution: every finding in the audit/18.md layer must be terminal with live evidence -- an already-fixed finding is dispositioned against the test that pins it, a live finding is built and pinned by a new control",
+      "verification": "tools/test_t1412_conformance_truth.py test_no_second_route_to_a_conformance_verdict drives the two conformance sources as far apart as they go and asserts the payload offers exactly one keyable verdict; 38 tests green across three suites; core-unit 4644 red 0",
+      "work": "T-1542"
+    }
+  },
+  "schema_version": 1
+}

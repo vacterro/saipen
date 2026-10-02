@@ -1,0 +1,68 @@
+{
+  "requirements": {
+    "SRC-058:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-7006 live route proof; E-7130 verify -> PASS [target: T-1385] conf: high",
+      "text": "T-1385 implementation stays proven: focused canonical-route families green and the live route proof preserved; no redo unless bytes differ",
+      "verification": "focused canonical_write_route + guard/adapter/route/binding Ran 402 OK then; re-run Ran 91 OK on current bytes",
+      "work": "T-1385"
+    },
+    "SRC-058:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-6998; evidence/T-1385-routeless-refusal-20260917/pcn-causality/VERDICT.md",
+      "text": "Causality investigation of the repeated PCN refusals completes with per-pair classification from the host session store",
+      "verification": "PARALLEL_DUPLICATE 0, SEQUENTIAL_IDENTICAL_RETRY 0, REWORDED 2, DISTINCT_EFFECT 5; the smoke pair is DISTINCT",
+      "work": "T-1385"
+    },
+    "SRC-058:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-7102 through E-7113; commit 90395ddb",
+      "text": "The omitted T-1384 closure bytes in entry.py are allocated a narrow corrective ticket and committed under it, excluded from T-1385",
+      "verification": "detached 8cd798cc tools.test_session_binding failures=3; the corrective entry.py slice Ran 17 OK; T-1388 DONE",
+      "work": "T-1385"
+    },
+    "SRC-058:R004": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-7008; evidence/T-1385-foreign-delta-inquest-20260917/INQUEST.md",
+      "text": "The foreign injector/runtime provenance delta is investigated and classified from evidence before any use",
+      "verification": "LEGIT_FOREIGN_ABANDONED; writer buffy under AUDAPACK T-195; exact blobs recorded",
+      "work": "T-1385"
+    },
+    "SRC-058:R005": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "T-1389 DONE E-7129; commit 1d4d5e61",
+      "text": "The foreign delta is adopted under its own canonical ticket with bytes preserved and proven",
+      "verification": "tools.test_t1389_foreign_delta_adoption Ran 9 OK; injector blobs unchanged, runtime_bootstrap inquest blob plus one E501 wrap; PATCH_OWNED 0 UNKNOWN 0",
+      "work": "T-1385"
+    },
+    "SRC-058:R006": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-7130; evidence/T-1385-routeless-refusal-20260917/reverify-20260918.md",
+      "text": "T-1385 is re-verified on the current tree after ownership is clean: the five named families plus full core-unit attribution with PATCH_OWNED 0 UNKNOWN 0, validate and ruff green",
+      "verification": "focused Ran 91 OK; adjacent Ran 172 OK; A/B baseline 58 red vs with delta 38 red, PATCH_OWNED 0 UNKNOWN 0; validate conformant; ruff clean",
+      "work": "T-1385"
+    },
+    "SRC-058:R007": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "commit bf8b57f5; release_scope/T-1385.json",
+      "text": "T-1385 closes through REVIEW and SHIP with only its own paths in the commit, and T-1367 returns to BUILD",
+      "verification": "ship checkpoint E-7135; finish executes with only extensions/adapters/opencode/saipen-guard.js and tools/saipen_engine/admission.py staged, T-1367 resumed",
+      "work": "T-1385"
+    }
+  },
+  "schema_version": 1
+}

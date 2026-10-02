@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-126:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "audit/18 execution: every finding in the audit/18.md layer must be terminal with live evidence -- an already-fixed finding is dispositioned against the test that pins it, a live finding is built and pinned by a new control"
+    }
+  },
+  "derived_at": "2026-10-02T10:46:35Z",
+  "derived_from": "SRC-126",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "1b24b8f049528928d6f7275bc024e1e23fc1dee9e24840d1b0387e3bd4023e46"
+}
