@@ -1787,14 +1787,18 @@ def _status(project_root: Path, as_json: bool) -> int:
     if claimed_but_unproven:
         payload["claimed_but_unproven"] = claimed_but_unproven
     if conformance is not None:
-        payload["conformance"] = conformance
+        # audit/18.md IMP-003: this is history, not a verdict. Under the bare
+        # name `conformance` it read as a second, PASS-labelled authority next
+        # to `conformance_status`, and a consumer keying on the short name got
+        # the opposite answer. History is only addressable as history.
+        payload["conformance_history"] = conformance
     if staleness is not None:
         payload["staleness"] = staleness
 
     # §8 Conformance Closure: the authoritative current-conformance status,
     # derived from the canonical validator receipt, not from prose in the LOG.
-    # `conformance` (above) is the legacy history-derived hint; this is the
-    # load-bearing truth that gates terminal/crew closure. T-1412: it is read
+    # `conformance_history` (above) is the legacy history-derived hint; this is
+    # the load-bearing truth that gates terminal/crew closure. T-1412: it is read
     # through the shared decision owner, the SAME projection `saipen validate`
     # and the router consume.
     try:
@@ -7229,8 +7233,8 @@ def _emit(payload: dict, as_json: bool) -> None:
     if payload.get("claimed_but_unproven"):
         print(f"Claimed but unproven: {', '.join(payload['claimed_but_unproven'])}")
     # T-1412: the receipt-derived `conformance_status` is the operator's PRIMARY
-    # conformance truth; the LOG-derived `conformance` projection is history and
-    # may never be rendered under the `Conformance:` label.
+    # conformance truth; the LOG-derived `conformance_history` projection is
+    # history and may never be rendered under the `Conformance:` label.
     _conformance = payload.get("conformance_status")
     if isinstance(_conformance, dict) and _conformance.get("status"):
         from saipen_engine.conformance import STATUS_CURRENT_PASS
@@ -7244,12 +7248,11 @@ def _emit(payload: dict, as_json: bool) -> None:
             if _reason:
                 print(f"Reason: {_reason}")
             print("Remediation: saipen validate")
-    elif payload.get("conformance"):
+    elif payload.get("conformance_history"):
         print("Conformance: UNKNOWN (authoritative receipt status unavailable)")
-    if payload.get("conformance"):
-        print(
-            f"Validator history hint: {payload['conformance']} (historical; not current authority)"
-        )
+    if payload.get("conformance_history"):
+        _hist = payload["conformance_history"]
+        print(f"Validator history hint: {_hist} (historical; not current authority)")
     if payload.get("staleness"):
         print(f"Staleness: {payload['staleness']}")
     automation = payload.get("automation")

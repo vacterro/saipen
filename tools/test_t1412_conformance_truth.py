@@ -94,6 +94,14 @@ _ROUTER_STATE = _STATE.replace(
 )
 
 
+def _all_keys(node: object) -> set:
+    """Every mapping key anywhere in a decoded JSON payload."""
+    if isinstance(node, dict):
+        return {k for k, v in node.items()} | _all_keys(list(node.values()))
+    if isinstance(node, list):
+        return {k for item in node for k in _all_keys(item)}
+    return set()
+
 def _utc_now() -> str:
     return datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
 
@@ -269,9 +277,58 @@ class StatusSurfaceTests(T1412Base):
 
         rc, payload, _ = self.run_cli(root, "status")
         self.assertEqual(payload["conformance_status"]["status"], "STALE_FAIL")
-        # The legacy projection survives as JSON history -- and is NOT the
-        # authoritative field.
-        self.assertIn("PASS", str(payload.get("conformance", "")))
+        # audit/18.md IMP-003: the legacy projection survives as JSON, but only
+        # under a name that cannot be read as a verdict. Under the bare name
+        # `conformance` its PASS label sat one key away from the STALE_FAIL
+        # authority and answered the opposite question.
+        self.assertNotIn("conformance", payload)
+        self.assertIn("PASS", str(payload.get("conformance_history", "")))
+
+    def test_no_second_route_to_a_conformance_verdict(self) -> None:
+        """audit/18.md IMP-003: the payload offers exactly ONE keyable verdict.
+
+        Every fixture drives the two sources as far apart as they go -- a LOG
+        RUN that projects PASS beside a receipt the decision owner reads as
+        anything else -- so a surviving flat key would disagree here in every
+        row rather than only in the one that first measured it.
+        """
+        shapes = (
+            ("flat-current-pass", "PASS", {}),
+            ("flat-current-fail", "FAIL", {}),
+            ("flat-stale-pass", "PASS", {"source_head": "OLD_HEAD", "source_fp": "OLD_FP"}),
+            ("flat-stale-fail", "FAIL", {"source_head": "OLD_HEAD", "source_fp": "OLD_FP"}),
+            ("flat-mismatch", "PASS", {"validator_version": "0"}),
+            ("flat-tampered", "PASS", {"tamper": True}),
+            ("flat-no-receipt", None, {}),
+        )
+        for name, verdict, kwargs in shapes:
+            with self.subTest(shape=name):
+                root = self.make_project(name, legacy_pass_run=True)
+                self.assert_fast_gate_clean(root)
+                if verdict is not None:
+                    write_receipt(root, verdict, **kwargs)
+
+                rc, payload, text = self.run_cli(root, "status")
+                self.assertEqual(rc, 0, text)
+                authority = payload["conformance_status"]["status"]
+                self.assertTrue(authority, text)
+
+                # No bare `conformance` key anywhere in the tree -- a nested
+                # copy under a parent block would be the same defect renamed.
+                self.assertNotIn("conformance", _all_keys(payload))
+                # The only conformance-named structured block IS the authority.
+                self.assertEqual(
+                    [
+                        k
+                        for k, v in payload.items()
+                        if "conf" in k.lower() and isinstance(v, dict)
+                    ],
+                    ["conformance_status"],
+                )
+                # Any other conformance-named value is history by name.
+                for key, value in payload.items():
+                    if isinstance(value, str) and "conf" in key.lower():
+                        self.assertIn("history", key.lower(), key)
 
     def test_status_matrix_json_and_human_agree_with_authority(self) -> None:
         rows = (
