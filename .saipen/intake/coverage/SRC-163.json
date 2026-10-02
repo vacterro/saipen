@@ -1,4 +1,14 @@
 {
-  "requirements": {},
+  "requirements": {
+    "SRC-163:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "T-1596 closed with verification evidence in LOG: verify -> PASS [target: T-1596] conf: high -- python -B -m tools.core_unit evidence T-1596 --jobs 6 --timeout 5400 --fresh reported {\"verdict\":\"PASS\",\"ran\":4723,\"red\":0,\"new_red\":[],\"fixed\":[],\"problems\":[]}, record .saipen/evidence/core-unit/686f892d5de6e1ba-20261002T193708Z.json, sandboxes_leaked [], on the post-closure settled tree at 7e72d0cb; saipen validate reported code VALID with Conforman",
+      "text": "drain the BLOCKED backlog to fixpoint: re-evaluate every blocker from current evidence, repair canonically recoverable ones, execute newly runnable Work",
+      "verification": "the Work this request created reached its own verification gate; see the T-1596 VERIFY cycle in .saipen/LOG.md",
+      "work": "T-1596"
+    }
+  },
   "schema_version": 1
 }

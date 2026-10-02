@@ -2668,13 +2668,36 @@ if _na_pick:
                 "this pick was never the rule's to make"
             )
         _owner = _t["fields"].get("owner")
-        if _owner and state.get("agent") and _owner != state.get("agent"):
-            fail(
-                f"STATE.md next_action names {_named}, claimed by "
-                f"{_owner!r} while this state's agent is "
-                f"{state.get('agent')!r} -- executing another agent's claim "
-                f"is the concurrency collision § 1.4 exists to prevent"
-            )
+        _agent = state.get("agent")
+        if _owner and _agent:
+            # Liveness is the rule, not ownership by itself. board.claim_status
+            # is the single expiry authority CORE § 1.4 describes, and it is
+            # what separates an ADOPTABLE lapsed claim from an untakeable live
+            # one; a raw owner-string comparison cannot see the difference and
+            # therefore refuses picks § 1.4 explicitly hands to the next seat.
+            _cs = claim_status(_t, _agent)
+            if _cs == "FOREIGN_STALE":
+                warn(
+                    "adoptable-pick",
+                    f"STATE.md next_action names {_named}, whose claim by "
+                    f"{_owner!r} has lapsed past the § 1.4 liveness window "
+                    f"(FOREIGN_STALE) -- adoptable, but the adopting seat must "
+                    f"record the handover rather than start as if it were free",
+                )
+            elif _cs in ("FOREIGN_LIVE", "INVALID"):
+                fail(
+                    f"STATE.md next_action names {_named}, claimed by "
+                    f"{_owner!r} while this state's agent is "
+                    f"{_agent!r} -- executing another agent's claim "
+                    f"is the concurrency collision § 1.4 exists to prevent"
+                    + (
+                        ""
+                        if _cs == "FOREIGN_LIVE"
+                        else "; the claim pair itself is unreadable (owner "
+                        "and claim_time are both-or-neither), so CORE § 1.4 "
+                        "fails it closed rather than treats it as absent"
+                    )
+                )
 # Session-level BLOCKED is "no ticket anywhere on the board is workable", and
 # nothing checked the second half. A session halted with a full board looks
 # exactly like a legitimate stop: `phase: BLOCKED`, a `WAIT: blocked --`
