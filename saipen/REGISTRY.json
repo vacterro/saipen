@@ -398,6 +398,7 @@
    "next",
    "permissions",
    "explain-next",
+   "stats",
    "runtime",
    "host",
    "launch",

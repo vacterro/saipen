@@ -38,11 +38,25 @@
     "validate": "DIAGNOSTIC",
     "search": "DIAGNOSTIC",
     "context": "DIAGNOSTIC",
+    "mail": {
+      "default": "DIAGNOSTIC",
+      "subcommands": {
+        "init": "EXECUTION"
+      }
+    },
+    "admission": {
+      "default": "DIAGNOSTIC",
+      "subcommands": {
+        "establish": "EXECUTION",
+        "invalidate": "EXECUTION"
+      }
+    },
     "acceptance": "DIAGNOSTIC",
     "brief": "DIAGNOSTIC",
     "focus": "DIAGNOSTIC",
     "permissions": "DIAGNOSTIC",
     "explain-next": "DIAGNOSTIC",
+    "stats": "DIAGNOSTIC",
     "guard": "DIAGNOSTIC",
     "test": "DIAGNOSTIC",
     "runtime": "DIAGNOSTIC",
@@ -136,6 +150,20 @@
         "add": "EXECUTION",
         "remove": "EXECUTION",
         "reset": "EXECUTION"
+      }
+    },
+    "storage": {
+      "default": "DIAGNOSTIC",
+      "subcommands": {
+        "status": "DIAGNOSTIC",
+        "classify": "DIAGNOSTIC",
+        "durable": {"class": "EXECUTION", "actions": {"show": "DIAGNOSTIC"}},
+        "ephemeral": {"class": "EXECUTION", "actions": {"show": "DIAGNOSTIC"}},
+        "scratch": {"class": "EXECUTION", "actions": {"show": "DIAGNOSTIC"}},
+        "store": {"class": "EXECUTION", "actions": {"list": "DIAGNOSTIC"}},
+        "verify": "DIAGNOSTIC",
+        "promote": "EXECUTION",
+        "migrate": "RECOVERY"
       }
     },
     "sub": {

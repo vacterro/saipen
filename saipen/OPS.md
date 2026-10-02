@@ -153,6 +153,18 @@ READ-ONLY preconditions the original plan read but did not write. Recovery:
 
 "VERIFIED" on the recovery path means the verifier actually ran and passed.
 
+Ticket-scoped phase evidence: a task-bound STATE takes its phase only from that
+ticket's own `transition to` events since its latest fresh claim; the claim
+alone proves SCOUT, a hand-written `RUN:` line proves nothing, and a foreign
+ticket supplies neither phase. CURRENT_DONE_JOURNAL_GAP (BOARD and STATE DONE,
+no finish for that lifecycle) reopens the row to DOING at its last proven phase
+through one content-bound approved plan that first preserves the original
+STATE/BOARD/LOG bytes; closure, active-block and ungrammatical fields leave the
+live row and survive in that copy. Closure fields never prove a missing finish;
+no historical event is fabricated. `resolve-next-action` cannot override the
+plan, and the complete proposal is validated before approval is advertised.
+Legacy-DONE attestation and canonical block-park stay separate.
+
 ## 4. Idempotency
 
 Every mutating operation carries an op_id owned by its journal. A retry after
@@ -332,7 +344,7 @@ against the CURRENT tree and writes ONE immutable `RV-NNNNNN` receipt under
 stays DONE, no VERIFY boundary is fabricated, and no historical LOG event or
 evidence blob is rewritten. The receipt is the ONE canonical cure for the
 validator's `work_closure_evidence` gap; a current-tree `PASS` (or
-`PASS_WITH_CARRIED_DEBT`) receipt bound to project identity, lineage,
+`PASS_WITH_CARRIED_DEBT`) receipt bound to project lineage,
 ruleset and source fingerprint counts as closure evidence, while a newer
 `FAIL` never hides behind an older `PASS`.
 
@@ -571,6 +583,17 @@ FINDING_VALIDITY != EVIDENCE_FRESHNESS.
 next action as `next`/`cc` WITHOUT executing and reports the disposition,
 the owner (agent/user), the selected action, and why the human is or is not
 required. Decision-trace output for debugging autonomy; writes nothing.
+
+**Telemetry**: `saipen stats` (READ_ONLY, `--json`, `--work T-####`, `--days N`)
+derives execution time from the canonical LOG alone: how long the current Work
+and phase have run, since the last checkpoint and the last real progress, and
+per-day observed/active/waiting/blocked time. TIME IS OBSERVED. TIME DOES NOT
+DEFINE TRUTH -- nothing is written, cached or gated, so deleting
+`saipen_engine/telemetry` changes no Work state, no acceptance, no PASS and no
+DONE; telemetry degrades to `TELEMETRY_UNAVAILABLE`, never the protocol. Gaps
+longer than 30 minutes and any time after a stop are `UNOBSERVED`, never zero.
+Counters the supervisor holds outside the LOG (`worker_generations`,
+`agent_incarnations`, `manual_recoveries`) are `None`, never zero.
 
 **Meaningful automatic reconciliations** (state repaired against authority,
 stale evidence regenerated, traceability reconstructed) are recorded through

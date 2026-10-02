@@ -552,6 +552,66 @@ def _permissions(project_root: Path, as_json: bool) -> int:
     return 0
 
 
+def _stats(project_root: Path, args: list[str], as_json: bool) -> int:
+    """T-1595: execution-time telemetry (DIAGNOSTIC, READ_ONLY, P2).
+
+    QUALITY-TIME-01: TIME IS OBSERVED. TIME DOES NOT DEFINE TRUTH. Every number
+    here is derived from the canonical LOG, which records when a thing was
+    stamped, never how long it deserved. Nothing is written, cached or gated, so
+    deleting `saipen_engine.telemetry` changes no Work state, no acceptance, no
+    PASS and no DONE -- telemetry degrades to "unavailable", never the protocol.
+    That is why this is a readout and not a gate: a missing or unreadable LOG is
+    a reported TELEMETRY_UNAVAILABLE, not an error.
+
+    `--work T-####` scopes the readout to one ticket; `--days N` widens the day
+    rows (default 1). Neither argument can change what is measured.
+    """
+    from saipen_engine import telemetry
+
+    work_id: str | None = None
+    days = 1
+    refusal: str | None = None
+    cursor = 0
+    while cursor < len(args) and refusal is None:
+        flag = args[cursor]
+        if flag == "--work" and cursor + 1 < len(args):
+            work_id = args[cursor + 1]
+            cursor += 2
+        elif flag == "--days" and cursor + 1 < len(args):
+            raw = args[cursor + 1]
+            cursor += 2
+            try:
+                days = int(raw)
+            except ValueError:
+                refusal = f"stats --days needs an integer, not {raw!r}"
+            else:
+                if not 1 <= days <= 90:
+                    refusal = f"stats --days accepts 1..90, not {days}"
+        elif flag in ("--work", "--days"):
+            refusal = f"stats {flag} needs a value"
+        else:
+            refusal = f"stats accepts no argument {flag!r}"
+
+    if refusal is not None:
+        _emit(
+            {
+                "ok": False,
+                "code": "VALIDATION_FAILED",
+                "detail": refusal,
+                "canonical_next_command": "saipen stats",
+            },
+            as_json,
+        )
+        return 2
+
+    payload = telemetry.stats(project_root, work_id=work_id, days=days)
+    if as_json:
+        _emit(payload, True)
+        return 0 if payload.get("ok") else 2
+    print(telemetry.render(payload))
+    return 0 if payload.get("ok") else 2
+
+
 def _hex_decode(text: str) -> str | None:
     """Strict even-length hex token -> UTF-8 text, or None.
 
@@ -10479,6 +10539,12 @@ def main(argv: list[str] | None = None) -> int:
             )
             return 2
         return _permissions(project_root, as_json)
+    if command == "stats":
+        # QUALITY-TIME-01 (SRC-108): a readout of the canonical LOG, never a
+        # gate on it. Reach for it when the question is "how is the time going",
+        # never when the question is "is this Work finished" -- the latter is the
+        # LOG's stamped transitions and nothing else.
+        return _stats(project_root, args[1:], as_json)
     if command == "explain-next":
         if len(args) > 1:
             _emit(
