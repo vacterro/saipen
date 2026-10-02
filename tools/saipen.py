@@ -3325,12 +3325,19 @@ def _sub(project_root: Path, args: list[str], as_json: bool, dry_run: bool) -> i
     minimum, maximum = grammar[action]
     if len(rest) < minimum or len(rest) > maximum:
         wanted = f"exactly {minimum}" if minimum == maximum else f"at most {maximum}"
+        # A short invocation is missing arguments, not carrying surplus ones. Reporting it
+        # the other way round named the wrong direction and printed an empty tail --
+        # `surplus: ` with nothing after it -- so the reminder to pass the argument the
+        # command asked for never appeared.
+        if len(rest) < minimum:
+            how = f"missing {minimum - len(rest)}; got {len(rest)}"
+        else:
+            how = f"surplus: {' '.join(rest[maximum:])}"
         _emit(
             {
                 "ok": False,
                 "code": "VALIDATION_FAILED",
-                "detail": f"sub {action} takes {wanted} positional "
-                f"argument(s); surplus: {' '.join(rest[maximum:])}",
+                "detail": f"sub {action} takes {wanted} positional argument(s); {how}",
             },
             as_json,
         )
