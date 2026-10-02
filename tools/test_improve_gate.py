@@ -38,6 +38,7 @@ from pathlib import Path
 TOOLS = Path(__file__).resolve().parent
 if str(TOOLS) not in sys.path:
     sys.path.insert(0, str(TOOLS))
+from test_fixture_support import CURRENT_STYLE_CONTRACT  # noqa: E402
 
 from saipen_engine import reconcile  # noqa: E402
 from saipen_engine.router import route_next  # noqa: E402
@@ -104,7 +105,7 @@ def _state_text(*, phase: str = "DONE", improve_gate: str | None = None) -> str:
         "saipen_version: 8",
         "schema_version: 3",
         "last_event: 1",
-        "style_contract: ded-4ae736e4",
+        'style_contract: ' + CURRENT_STYLE_CONTRACT,
         "agent: tester",
         "requires:\n  - filesystem\n  - python",
         "mode: full",

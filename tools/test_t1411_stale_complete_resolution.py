@@ -19,6 +19,7 @@ from pathlib import Path
 TOOLS = Path(__file__).resolve().parent
 if str(TOOLS) not in sys.path:
     sys.path.insert(0, str(TOOLS))
+from test_fixture_support import CURRENT_STYLE_CONTRACT  # noqa: E402
 
 import improve  # noqa: E402
 from saipen_engine.paths import identity_file_content, new_project_lineage  # noqa: E402
@@ -64,7 +65,7 @@ class StaleCompleteResolutionTests(unittest.TestCase):
             '---\nphase: DONE\ntask: none\nnext_action: "saipen continue"\n'
             'blocker: ""\ntransition_from: SHIP\n'
             "saipen_version: 8\nschema_version: 3\n"
-            "last_event: 900\nstyle_contract: ded-4ae736e4\n"
+            'last_event: 900\nstyle_contract: ' + CURRENT_STYLE_CONTRACT + '\n'
             'saipen_home: "."\nagent: probe\nmode: full\n'
             "updated: 2026-09-19T00:00:00Z\n---\n",
             encoding="utf-8",
@@ -771,6 +772,108 @@ class StaleCompleteResolutionTests(unittest.TestCase):
         )
         rc, confirmed_out = self._validator(root)
         self.assertEqual(rc, 0, confirmed_out)
+
+
+
+class SeatResumeTests(unittest.TestCase):
+    """T-129: a bare `saipen improve` is a RESUME, not a fresh admission.
+
+    The router answers "resume it (saipen improve) instead of preparing a
+    duplicate", but every invocation allocated a NEW <family>-NN seat, so
+    following that instruction once per `continue` manufactured the empty-draft
+    pile the improve workflow then has to retire. An expected seat whose
+    report holds ZERO audit content is the resume target; `allow_new_seat`
+    (the CLI's `--new-seat`) is the explicit way to ask for another.
+    """
+
+    def setUp(self) -> None:
+        self._tmp = tempfile.TemporaryDirectory(prefix="t129-seat-")
+        self.addCleanup(self._tmp.cleanup)
+        self.root = Path(self._tmp.name).resolve() / "project"
+        saipen = self.root / ".saipen"
+        saipen.mkdir(parents=True)
+        (saipen / "LOG.md").write_text(
+            "- 25.09.26 00:00 [E-900] [T-none] DEC: base\n", encoding="utf-8"
+        )
+        (saipen / "BOARD.md").write_text(
+            "# Board\n## DOING\n## TODO\n## DONE\n## BLOCKED\n", encoding="utf-8"
+        )
+        (saipen / "STATE.md").write_text(
+            '---\nphase: DONE\ntask: none\nnext_action: "saipen continue"\n'
+            'blocker: ""\ntransition_from: SHIP\n'
+            "saipen_version: 8\nschema_version: 3\n"
+            'last_event: 900\nstyle_contract: ' + CURRENT_STYLE_CONTRACT + '\n'
+            'saipen_home: "."\nagent: probe\nmode: full\n'
+            "updated: 2026-09-25T00:00:00Z\n---\n",
+            encoding="utf-8",
+        )
+        (saipen / "IDENTITY.md").write_text(
+            identity_file_content(new_project_lineage()), encoding="utf-8"
+        )
+
+    def _admit(self, **kwargs):
+        return improve.prepare_audit_seat(
+            self.root,
+            agent_family="seat",
+            role="core",
+            session_id=None,
+            project_name="PROBE",
+            model_or_runtime="probe",
+            context_scope="same bounded audit scope",
+            **kwargs,
+        )
+
+    def _seat_count(self, cycle_name: str) -> int:
+        manifest = improve.cycle_dir(self.root, cycle_name) / "MANIFEST.md"
+        return len(improve._seat_blocks(manifest.read_text(encoding="utf-8")))
+
+    def test_a_second_bare_invocation_resumes_the_same_seat(self) -> None:
+        first = self._admit()
+        self.assertTrue(first["ok"], first)
+        second = self._admit()
+        self.assertTrue(second["ok"], second)
+        self.assertEqual(first["seat_id"], second["seat_id"])
+        self.assertEqual(first["cycle_id"], second["cycle_id"])
+        self.assertEqual(self._seat_count(first["cycle_id"]), 1)
+
+    def test_allow_new_seat_still_allocates_another(self) -> None:
+        first = self._admit()
+        second = self._admit(allow_new_seat=True)
+        self.assertTrue(second["ok"], second)
+        self.assertNotEqual(first["seat_id"], second["seat_id"])
+        self.assertEqual(self._seat_count(first["cycle_id"]), 2)
+
+    def test_an_audited_seat_is_not_a_resume_target(self) -> None:
+        first = self._admit()
+        improve.append_run(
+            improve.resolve_report_path(
+                self.root, first["cycle_id"], first["seat_id"], "PROBE"
+            ),
+            "NO_FINDINGS -- the bounded probe found nothing\n",
+        )
+        second = self._admit()
+        self.assertTrue(second["ok"], second)
+        self.assertNotEqual(first["seat_id"], second["seat_id"])
+
+    def test_an_unavailable_seat_is_not_a_resume_target(self) -> None:
+        first = self._admit()
+        second = self._admit(allow_new_seat=True)
+        improve.retire_seat(
+            improve.cycle_dir(self.root, first["cycle_id"]),
+            first["seat_id"],
+            reason="EMPTY_DRAFT",
+        )
+        third = self._admit()
+        self.assertTrue(third["ok"], third)
+        # The retired seat is the LOWEST-numbered match, so landing on the
+        # surviving one is the proof that availability filters the resume.
+        self.assertNotEqual(first["seat_id"], third["seat_id"])
+        self.assertEqual(second["seat_id"], third["seat_id"])
+
+    def test_the_cli_flag_reaches_the_mutator(self) -> None:
+        """`--new-seat` was parsed and discarded; it now has to be wired."""
+        source = (TOOLS / "saipen.py").read_text(encoding="utf-8")
+        self.assertIn("allow_new_seat=explicit_new", source)
 
 
 if __name__ == "__main__":

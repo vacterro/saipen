@@ -42,7 +42,7 @@ CAPABILITY_NAMES = (
     "programmatic_tool_calling",
 )
 
-_IDENTITY_FIELDS = ("harness", "provider", "model", "variant")
+_IDENTITY_FIELDS = ("harness", "provider", "model", "variant", "effort")
 _TOP_LEVEL_FIELDS = frozenset({"schema_version", *_IDENTITY_FIELDS, "capabilities"})
 _REPARSE_POINT = getattr(stat, "FILE_ATTRIBUTE_REPARSE_POINT", 0x400)
 
@@ -205,6 +205,7 @@ def runtime_projection(
         "provider": info["provider"],
         "model": info["model"],
         "variant": info["variant"],
+        "effort": info["effort"],
         "capabilities": info["capabilities"],
     }
 

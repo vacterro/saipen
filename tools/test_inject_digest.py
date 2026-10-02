@@ -194,6 +194,17 @@ class SurfaceDigest(unittest.TestCase):
                 if source.is_dir():
                     shutil.copytree(source, home / name, ignore=skip)
             (home / "VERSION").write_bytes((ROOT / "VERSION").read_bytes())
+        # Construct LF explicitly; a Windows checkout may itself already be
+        # CRLF, in which case copying it is not a distinct transport control.
+        for path in self.lf_home.rglob("*"):
+            if not path.is_file():
+                continue
+            raw = path.read_bytes()
+            try:
+                raw.decode("utf-8")
+            except UnicodeDecodeError:
+                continue
+            path.write_bytes(raw.replace(b"\r\n", b"\n"))
         # The snapshot side is what git hands the scheduled injector on this
         # platform: identical text, CRLF endings.
         for path in self.crlf_home.rglob("*"):

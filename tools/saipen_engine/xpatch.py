@@ -600,10 +600,15 @@ def commit_survival(root: Path | str) -> dict:
                 "problems": [*problems, "XPATCH commit survival needs this project's Git checkout"],
             }
         by_patch: dict[str, list[str]] = {}
-        blob_cache: dict[str, str | None] = {}
+        blob_cache: dict[tuple[str, str], set[str]] = {}
         for receipt, rel, expected in candidates:
             history = git(
-                "log", "--all", "-m", f"--since={receipt.applied_at}",
+                # --exclude=refs/stash keeps a stashed change from passing as
+                # committed: refs/stash is reachable from --all, and its bytes
+                # live only in the stash commit, so a path held solely in a
+                # stash would otherwise clear the finding it should raise.
+                "log", "--exclude=refs/stash", "--all", "-m",
+                f"--since={receipt.applied_at}",
                 "--raw", "--no-renames", "--no-abbrev", "--format=", "--", rel,
             )
             if history.returncode:
@@ -627,10 +632,27 @@ def commit_survival(root: Path | str) -> dict:
                     continue
                 if set(oid) == {"0"}:
                     continue
-                if oid not in blob_cache:
-                    blob = git("cat-file", "blob", oid)
-                    blob_cache[oid] = sha256_hex(blob.stdout) if blob.returncode == 0 else None
-                if blob_cache[oid] == expected:
+                # after_sha256 is the hash of the WORKING-TREE bytes the patch
+                # applied. The committed blob may be the CLEANED (eol-normalized)
+                # form -- `* text=auto` or core.autocrlf stores LF while the
+                # applied bytes were CRLF -- so the raw blob alone misses a
+                # correctly committed CRLF path. Accept a match on EITHER the
+                # raw blob (no eol filter, or bytes committed verbatim) OR the
+                # blob smudged back to working-tree form through this path's own
+                # gitattributes. Either equalling after_sha256 proves the exact
+                # applied bytes reached history; neither is sufficient alone,
+                # because the smudge direction depends on the repo/host config.
+                key = (oid, rel)
+                if key not in blob_cache:
+                    raw = git("cat-file", "blob", oid)
+                    smudged = git("cat-file", "--filters", f"--path={rel}", oid)
+                    hashes = set()
+                    if raw.returncode == 0:
+                        hashes.add(sha256_hex(raw.stdout))
+                    if smudged.returncode == 0:
+                        hashes.add(sha256_hex(smudged.stdout))
+                    blob_cache[key] = hashes
+                if expected in blob_cache[key]:
                     committed = True
                     break
             if not committed:

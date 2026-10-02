@@ -67,7 +67,7 @@ def run() -> dict:
             cwd=str(root),
             env=env,
             capture_output=True,
-            text=True,
+            text=True, encoding="utf-8",
             timeout=300,
         )
         installed = home / ".config" / "opencode" / "plugins" / "saipen-guard.js"
@@ -214,7 +214,7 @@ def run() -> dict:
                 cwd=str(root),
                 env=env,
                 capture_output=True,
-                text=True,
+                text=True, encoding="utf-8",
                 timeout=150,
             )
             exit_code = process.returncode

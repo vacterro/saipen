@@ -22,6 +22,7 @@ from pathlib import Path
 TOOLS = Path(__file__).resolve().parent
 if str(TOOLS) not in sys.path:
     sys.path.insert(0, str(TOOLS))
+from test_fixture_support import CURRENT_STYLE_CONTRACT  # noqa: E402
 
 import improve  # noqa: E402
 from saipen_engine.paths import identity_file_content, new_project_lineage  # noqa: E402
@@ -62,7 +63,7 @@ class ReconcileTests(unittest.TestCase):
             '---\nphase: DONE\ntask: none\nnext_action: "saipen continue"\n'
             'blocker: ""\ntransition_from: SHIP\n'
             "saipen_version: 8\nschema_version: 3\n"
-            "last_event: 900\nstyle_contract: ded-4ae736e4\n"
+            'last_event: 900\nstyle_contract: ' + CURRENT_STYLE_CONTRACT + '\n'
             "agent: probe\nmode: full\n"
             "updated: 2026-09-20T00:00:00Z\n---\n",
             encoding="utf-8",

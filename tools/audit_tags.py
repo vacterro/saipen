@@ -97,7 +97,8 @@ def _decode_version(raw: bytes) -> str:
 
 
 def git(*args: str) -> subprocess.CompletedProcess[str]:
-    return subprocess.run([*_git_command(), *args], capture_output=True, text=True, check=False)
+    return subprocess.run([*_git_command(), *args], capture_output=True, text=True,
+        encoding="utf-8", check=False)
 
 
 def _git_command() -> list[str]:

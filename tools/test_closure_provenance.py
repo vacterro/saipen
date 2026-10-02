@@ -21,6 +21,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import re
 import sys
 import unittest
 from pathlib import Path
@@ -31,6 +32,7 @@ if str(TOOLS) not in sys.path:
     sys.path.insert(0, str(TOOLS))
 
 from saipen_engine import closure, intake  # noqa: E402
+from saipen_engine.release_contract import _VERSION_BADGE_RE  # noqa: E402
 from saipen_engine.board import (  # noqa: E402
     goal_blocked_tickets,
     is_user_explicit,
@@ -542,6 +544,70 @@ class UnknownFieldTests(ProvenanceFixture):
             {"id": "T-1", "section": "## TODO", "fields": {"closure_mode": "own_patch"}}
         )
         self.assertTrue(any("under ## TODO" in p for p in problems), problems)
+
+
+
+class ReleaseVersionSurfaceTests(unittest.TestCase):
+    """T-131: the release version surface must read the versions we ship.
+
+    The parity gate compared ``**vX.Y.Z**`` and a ``## X.Y.Z`` CHANGELOG head
+    with patterns that stop at the third digit. This project ships a bare
+    pre-release suffix inside the bold -- ``**v0.0.2a3**`` -- so neither pattern
+    could ever match, and the release engine could not PLAN a release for any
+    version in this repository's history, published or no-publish. The patterns
+    now read the same version shape the rest of the protocol uses.
+    """
+
+    @staticmethod
+    def _badges(text: str) -> list[str]:
+        """`version_badges` over text, without a temp file on disk."""
+        return _VERSION_BADGE_RE.findall(text)
+
+    def test_badge_reads_a_bare_prerelease_suffix(self):
+        self.assertEqual(self._badges("# x\n\n**v0.0.2a3**\n"), ["**v0.0.2a3**"])
+
+    def test_badge_still_reads_a_plain_three_part_version(self):
+        self.assertEqual(self._badges("# x\n\n**v1.2.3**\n"), ["**v1.2.3**"])
+
+    def test_badge_reads_every_documented_suffix_shape(self):
+        for version in (
+            "0.0.2a3",
+            "0.0.2b1",
+            "1.2.3-rc.1",
+            "2.0.0+build.5",
+            "10.20.30",
+        ):
+            with self.subTest(version=version):
+                self.assertEqual(
+                    self._badges(f"# x\n\n**v{version}**\n"), [f"**v{version}**"]
+                )
+
+    def test_badge_does_not_match_a_bare_or_misspelled_version(self):
+        self.assertEqual(self._badges("# x\n\nv0.0.2a3\n"), [])
+        self.assertEqual(self._badges("# x\n\n**0.0.2a3**\n"), [])
+        self.assertEqual(self._badges("# x\n\n**v0.0.2a3 suffix**\n"), [])
+
+    def test_changelog_head_reads_the_same_shape(self):
+        from saipen_engine.release_contract import RELEASE_VERSION_CORE
+
+        heads = re.findall(
+            r"(?m)^## (" + RELEASE_VERSION_CORE + ")", "## 0.0.2a3\n\n- x\n"
+        )
+        self.assertEqual(heads[:1], ["0.0.2a3"])
+        plain = re.findall(
+            r"(?m)^## (" + RELEASE_VERSION_CORE + ")", "## 1.2.3\n\n- x\n"
+        )
+        self.assertEqual(plain[:1], ["1.2.3"])
+
+    def test_a_conformant_project_satisfies_the_badge_rule(self):
+        """The property the defect denied: exactly one badge, equal to VERSION."""
+        version = "0.0.2a3"
+        for body in (
+            f"**v{version}**",
+            f"**CURRENT CHECKOUT:** **v{version}** — includes the delta",
+        ):
+            with self.subTest(body=body):
+                self.assertEqual(self._badges(body + "\n"), [f"**v{version}**"])
 
 
 if __name__ == "__main__":

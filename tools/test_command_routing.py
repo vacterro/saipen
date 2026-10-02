@@ -1270,5 +1270,98 @@ class RetiredShortcutMigrationTests(unittest.TestCase):
         self.assertEqual(str(ctx.exception), "stop_checkpoint")
 
 
+class StorageArityRoutingTests(unittest.TestCase):
+    """A malformed storage command is a command error, not a project error.
+
+    `status`, `classify`, `durable`, `ephemeral` and `scratch` dispatch with
+    project_root=None on purpose, so they must never reach the project guard.
+    Only `classify` lacked an arity guard, and a missing or extra CLASS
+    argument was answered NOT_SAIPEN_PROJECT -- a false claim that sent the
+    operator hunting a project-binding defect instead of a typo (T-1579).
+    """
+
+    def setUp(self):
+        _sandbox_user_config(self)
+        self._tmp = tempfile.TemporaryDirectory(prefix="saipen-storage-arity-")
+        self.addCleanup(self._tmp.cleanup)
+        self.project = Path(self._tmp.name) / "proj"
+        (self.project / ".saipen").mkdir(parents=True)
+
+    def _invoke(self, *args: str):
+        return self._invoke_at(self.project, *args)
+
+    def _invoke_at(self, root: Path, *args: str):
+        import saipen as CLI
+
+        argv = [*args, "--project-root", str(root), "--json"]
+        output = io.StringIO()
+        with redirect_stdout(output):
+            rc = CLI.main(argv)
+        raw = output.getvalue().strip()
+        return rc, (json.loads(raw) if raw.startswith("{") else raw)
+
+    def test_missing_class_argument_is_a_command_error(self):
+        rc, payload = self._invoke("storage", "classify", "V:/_TEMP_/home")
+        self.assertEqual(rc, 2, payload)
+        self.assertEqual(payload["code"], "VALIDATION_FAILED")
+        self.assertNotEqual(payload["code"], "NOT_SAIPEN_PROJECT")
+        self.assertIn("DURABLE|EPHEMERAL|CACHE|EXTERNAL", payload["detail"])
+
+    def test_extra_argument_is_a_command_error(self):
+        rc, payload = self._invoke(
+            "storage", "classify", "V:/_TEMP_/home", "DURABLE", "EXTRA"
+        )
+        self.assertEqual(rc, 2, payload)
+        self.assertEqual(payload["code"], "VALIDATION_FAILED")
+        self.assertNotEqual(payload["code"], "NOT_SAIPEN_PROJECT")
+
+    def test_correct_arity_still_classifies(self):
+        rc, payload = self._invoke("storage", "classify", "V:/_TEMP_/home", "EPHEMERAL")
+        self.assertEqual(rc, 0, payload)
+        self.assertEqual(payload["code"], "EPHEMERAL_ALLOWED")
+
+    def test_project_less_verbs_still_work_outside_any_project(self):
+        # The control: these five verbs dispatch with project_root=None on
+        # purpose (tools/saipen.py:10104) so machine policy stays inspectable
+        # outside a project. The arity fix must not turn that into a refusal.
+        import saipen as CLI
+
+        bare = Path(self._tmp.name) / "not-a-project"
+        bare.mkdir()
+        for argv, expected in (
+            (["storage", "status"], "STORAGE_STATUS"),
+            (["storage", "classify", "V:/_TEMP_/home", "DURABLE"], "STORAGE_POLICY_VIOLATION"),
+            (["storage", "durable", "show"], "STORAGE_ROOTS"),
+            (["storage", "ephemeral", "show"], "STORAGE_ROOTS"),
+            (["storage", "scratch", "show"], "STORAGE_ROOTS"),
+        ):
+            with self.subTest(argv=argv):
+                with mock.patch("pathlib.Path.cwd", return_value=bare):
+                    output = io.StringIO()
+                    with redirect_stdout(output):
+                        rc = CLI.main([*argv, "--json"])
+                payload = json.loads(output.getvalue().strip())
+                self.assertEqual(payload["code"], expected, payload)
+                self.assertNotEqual(payload["code"], "NOT_SAIPEN_PROJECT")
+                self.assertIn(rc, (0, 1))
+
+    def test_a_project_bound_store_verb_still_resolves_its_project(self):
+        # The other half: the fix touches only the project-less verbs, so the
+        # project-bound surface must keep answering from a real binding.
+        rc, payload = self._invoke("storage", "store", "list")
+        self.assertEqual(rc, 0, payload)
+        self.assertEqual(payload["code"], "STORES")
+
+    def test_sibling_root_verbs_keep_their_arity_guard(self):
+        for argv in (
+            ["storage", "durable", "show", "extra"],
+            ["storage", "ephemeral", "show", "extra"],
+        ):
+            with self.subTest(argv=argv):
+                rc, payload = self._invoke(*argv)
+                self.assertEqual(rc, 2, payload)
+                self.assertEqual(payload["code"], "VALIDATION_FAILED")
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

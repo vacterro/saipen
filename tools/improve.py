@@ -98,6 +98,18 @@ _MISSING = object()
 
 _RUN_RE = re.compile(r"^## RUN (\d+)\s*$", re.MULTILINE)
 _NO_FINDINGS_RE = re.compile(r"^NO_FINDINGS\b", re.MULTILINE)
+#: The two forms a RUN body may legally take: at least one finding line, or
+#: an explicit NO_FINDINGS marker. A body with neither is an unfinished write,
+#: not an honest empty audit -- and because a committed report is immutable,
+#: accepting one at append time would leave `improve abort` as the only exit.
+_RUN_BODY_EVIDENCE_RE = re.compile(r"^(?:IMP-\d+\b|NO_FINDINGS\b)", re.MULTILINE)
+#: The FINDING half of that disjunction, alone. `_RUN_BODY_EVIDENCE_RE` answers
+#: "does this body carry evidence"; this one answers "does it carry a finding",
+#: on the same `^IMP-(\d+)` grammar the report parser's `_scan` counts findings
+#: with. Two ideas of what a finding is would let the append-time guard and the
+#: completion bar disagree about the same text, which is the class of defect
+#: this whole guard family exists to remove.
+_RUN_BODY_FINDING_RE = re.compile(r"^IMP-\d+", re.MULTILINE)
 # ONE finding reference grammar (DOGFOOD V, T-615): a composite finding is
 # RUN-<N>/IMP-<NNN>; a legacy (pre-boundary) record is a bare IMP-<NNN>. The
 # parser and the writer share exactly this pattern.
@@ -1565,6 +1577,7 @@ def prepare_audit_seat(
     context_scope: str,
     protocol_fingerprint: str | None = None,
     context_available: str = "complete",
+    allow_new_seat: bool = False,
     dry_run: bool = False,
 ) -> dict:
     """Atomically admit or resume one concrete Improve seat.
@@ -1572,7 +1585,9 @@ def prepare_audit_seat(
     Active-cycle selection, seat allocation, roster registration and report
     creation share the existing project writer lock and one journaled
     multi-target mutation. An explicit session id is idempotent; no session id
-    allocates a new independent <agent>-NN seat under the lock.
+    RESUMES an expected seat of the same family whose report holds zero audit
+    content, and only allocates a new independent <agent>-NN seat when none
+    exists or when `allow_new_seat` says so (T-129).
 
     A6: the public root is normalized ONCE at this entry (resolved absolute),
     so relative and absolute references to the same project behave identically
@@ -1735,13 +1750,37 @@ def prepare_audit_seat(
         if session_id is not None:
             seat = _validate_safe_id(session_id, "session_id")
         else:
-            highest = 0
-            for block in _seat_blocks(manifest_text):
-                candidate = _field(block, "seat_id")
-                match = re.fullmatch(re.escape(family) + r"-(\d+)", candidate)
-                if match:
-                    highest = max(highest, int(match.group(1)))
-            seat = f"{family}-{highest + 1:02d}"
+            # T-129: a bare `saipen improve` is a RESUME command -- the router
+            # answers "resume it (saipen improve) instead of preparing a
+            # duplicate". An expected seat of this family whose report holds
+            # ZERO audit content IS that resume target; allocating a fresh seat
+            # beside one is what turned one invocation per continue into a pile
+            # of empty drafts that then had to be retired. `--new-seat` is the
+            # explicit way to ask for another seat anyway.
+            seat = None
+            if not allow_new_seat:
+                for _block in _seat_blocks(manifest_text):
+                    _candidate = _field(_block, "seat_id")
+                    if not re.fullmatch(re.escape(family) + r"-\d+", _candidate or ""):
+                        continue
+                    if (_field(_block, "availability") or "expected") != "expected":
+                        continue
+                    _existing = resolve_report_path(
+                        root, active_cycle, _candidate, project_name
+                    )
+                    if _existing.is_file() and _un_audited_report(
+                        _read_maybe(_existing)
+                    ):
+                        seat = _candidate
+                        break
+            if seat is None:
+                highest = 0
+                for block in _seat_blocks(manifest_text):
+                    candidate = _field(block, "seat_id")
+                    match = re.fullmatch(re.escape(family) + r"-(\d+)", candidate)
+                    if match:
+                        highest = max(highest, int(match.group(1)))
+                seat = f"{family}-{highest + 1:02d}"
 
         block = _seat_block(manifest_text, seat)
         report = resolve_report_path(root, active_cycle, seat, project_name)
@@ -2776,18 +2815,18 @@ def verify_cycle(cycle_dir: Path) -> list[str]:
                 _project_root_of(cycle_dir), report_text, strict, cycle_active
             )
             if stale:
+                historical = derive_status(report_path, text, report_text, sweep_text,
+                                           seat_id=seat_id)
+                missing = historical.get("missing", [])
+                if missing:
+                    errors.append(stale_complete_route_hint(
+                        cycle_dir.name, seat_id, report_path, missing))
                 errors.append(
-                    f"seat {seat_id}: stale COMPLETE recovery route: create a current "
-                    f"replacement with `saipen improve --new-seat --role {roster_role}`, "
-                    "complete it against the current tree, then dispose every historical "
-                    "finding with a non-CONFIRMED disposition (`saipen improve sweep "
-                    f"{cycle_dir.name} <RUN-N/IMP-NNN> SUPERSEDED|NOT_REPRODUCED --report "
-                    f"{seat_id}/{report_path} --reproduced y|n --verification "
-                    "<replacement>/<report>#<RUN-N/IMP-NNN>`; SUPERSEDED when the "
-                    "replacement reproduced it, NOT_REPRODUCED when it did not, and "
-                    "stale CONFIRMED stays forbidden (T-619)), then "
-                    f"`saipen improve retire {cycle_dir.name} {seat_id} --reason "
-                    "STALE_COMPLETE --replacement <fresh-seat>`"
+                    f"seat {seat_id}: stale COMPLETE recovery route: "
+                    f"`saipen improve reconcile {cycle_dir.name}`; it requires a current "
+                    "same-role/same-scope COMPLETE replacement and final dispositions "
+                    "for unswept findings only. Existing sweep entries and report bytes "
+                    "are immutable; never re-sweep an already disposed finding."
                 )
         derived = derive_status(report_path, text, report_text, sweep_text, seat_id=seat_id)
         for missing_ref in derived.get("missing", []):
@@ -3152,6 +3191,7 @@ def reconcile_cycle(cycle_dir: Path, *, dry_run: bool = False) -> dict:
             **base,
             "retired": [],
             "superseded": [],
+            "bookkeeping": protocol_git_status(_project_root_of(cycle_dir), cycle_dir),
         }
     actionable = [record for record in records if record["class"] == "STILL_ACTIONABLE"]
     if actionable:
@@ -3274,6 +3314,7 @@ def reconcile_cycle(cycle_dir: Path, *, dry_run: bool = False) -> dict:
         **base,
         "retired": retired,
         "superseded": superseded,
+        "bookkeeping": protocol_git_status(_project_root_of(cycle_dir), cycle_dir),
     }
 
 
@@ -3324,6 +3365,54 @@ def sweep_ticket_linkage(project_root: Path | str, ticket_id: str) -> dict:
     return {"ok": True, "ticket": ticket_id, "links": matches, "linked": bool(matches)}
 
 
+def protocol_git_status(project_root: Path, history_dir: Path) -> dict:
+    """Read-only persistence projection; completion never commits user bytes."""
+    import subprocess
+
+    def git(*args):
+        return subprocess.run(["git", "-C", str(project_root), *args],
+                              capture_output=True, timeout=30)
+
+    try:
+        status = git("status", "--porcelain=v1", "-z", "--untracked-files=all", "--", ".saipen")
+        tracked = git("ls-files", "-z", "--", ".saipen")
+        if status.returncode or tracked.returncode:
+            return {"status": "UNAVAILABLE", "persisted": None,
+                    "detail": "Git persistence could not be measured; no commit was attempted"}
+        records = status.stdout.decode("utf-8", errors="replace").split("\0")
+        changed = []
+        i = 0
+        while i < len(records):
+            entry = records[i]
+            i += 1
+            if len(entry) < 4:
+                continue
+            changed.append({"status": entry[:2], "path": entry[3:]})
+            if "R" in entry[:2] or "C" in entry[:2]:
+                i += 1  # porcelain -z rename source; destination was recorded above
+        cached = set(tracked.stdout.decode("utf-8", errors="replace").split("\0"))
+        required = [project_root / ".saipen" / (name + ".md")
+                    for name in ("STATE", "BOARD", "LOG")]
+        required.extend(p for p in history_dir.rglob("*") if p.is_file())
+        relative = {p.relative_to(project_root).as_posix() for p in required if p.is_file()}
+        untracked = sorted(relative - cached)
+    except (OSError, ValueError, subprocess.TimeoutExpired) as exc:
+        return {"status": "UNAVAILABLE", "persisted": None, "detail": str(exc)}
+    pending = bool(changed or untracked)
+    return {
+        "status": "PENDING" if pending else "PERSISTED", "persisted": not pending,
+        "changed": changed, "untracked_history": untracked,
+        "next_action": (
+            "Review listed protocol files; explicitly stage approved paths (including ignored "
+            "history when appropriate), then git commit --only -- <those exact paths>. "
+            "Keep unrelated staged changes outside that commit; ship is a release operation."
+            if pending else "NONE"
+        ),
+        "review_command": "git status --short --untracked-files=all -- .saipen",
+        "automatic_commit": False,
+    }
+
+
 def complete_cycle(cycle_dir: Path) -> dict:
     """Mark a cycle COMPLETE: no longer active, so the next cycle can start.
     The cycle's evidence stays in place (never deleted to admit the next
@@ -3362,7 +3451,7 @@ def complete_cycle(cycle_dir: Path) -> dict:
             f"cycle {cycle_dir.name} not completed: {result.get('code')} "
             f"{result.get('message', '')}"
         )
-    return result
+    return {**result, "bookkeeping": protocol_git_status(_project_root_of(cycle_dir), cycle_dir)}
 
 
 def create_report(
@@ -3570,7 +3659,7 @@ def archive_cycle(cycle_dir: Path) -> dict:
         raise ImproveError(
             f"cycle {cycle_dir.name} not archived: {result.get('code')} {result.get('message', '')}"
         )
-    return result
+    return {**result, "bookkeeping": protocol_git_status(_project_root_of(cycle_dir), cycle_dir)}
 
 
 def register_seat(
@@ -3619,6 +3708,110 @@ def register_seat(
     return result
 
 
+def rebind_report_protocol(report_path: Path) -> dict:
+    """Re-stamp a DRAFT report's install-derived identity to the installed one.
+
+    T-6. The protocol tree is writable by any process with file access while a
+    cycle is in flight, so an edit between cycle open and submit moves
+    ``installed_protocol_fingerprint``. ``append_run`` then refuses the draft
+    as a known-INVALID base, which is correct -- and, before this, the only
+    recovery was abort-and-rediscover, which throws the audit away.
+
+    This rebinds IDENTITY ONLY, and only on a DRAFT:
+
+      - a COMPLETE, swept or archived report is immutable and refused outright;
+      - the RUN body is never touched, so no audit content can be laundered;
+      - the report must already be free of every OTHER bound error, so a
+        rebind cannot ride in on a report that was already malformed;
+      - the cycle must still be ACTIVE, as for every other mutator.
+    """
+    if not report_path.is_file():
+        raise ImproveError(f"rebind refuses: no report at {report_path}")
+    text = _read_maybe(report_path)
+    cycle_dir_of_report = report_path.parent.parent
+    _require_cycle_active(cycle_dir_of_report, "rebind_report_protocol")
+    seat = report_path.parent.name
+    status = _field(text, "report_status")
+    if status != "draft":
+        raise ImproveError(
+            "rebind refuses: only a DRAFT report may be rebound, report_status "
+            f"is {status!r} -- committed and swept evidence is immutable"
+        )
+    base_errors = validate_bound_report(
+        cycle_dir_of_report,
+        seat,
+        text,
+        require_runs=False,
+        require_fresh=False,
+        cycle_active=True,
+    )
+    # Exactly two scalars are derived from the install rather than from the
+    # audit, and those are the only ones a tree edit can move. Any other bound
+    # error means the report was already malformed, and rebinding must not
+    # become the way that launder it.
+    drift = ("protocol_fingerprint", "saipen_version")
+    other = [e for e in base_errors if not any(d in e for d in drift)]
+    if other:
+        raise ImproveError(
+            "rebind refuses: the report carries bound error(s) that are not "
+            "install-identity drift, so rebinding would launder them: "
+            + "; ".join(other[:3])
+        )
+    if not base_errors:
+        return {
+            "ok": False,
+            "code": "REBIND_NOT_NEEDED",
+            "detail": "report identity already matches the installed protocol",
+        }
+    installed_fp = installed_protocol_fingerprint(_protocol_root_for())
+    installed_version = _saipen_install_version()
+    proposed = re.sub(
+        r"(?m)^protocol_fingerprint:[ \t]*\S+",
+        f"protocol_fingerprint: {installed_fp}",
+        text,
+        count=1,
+    )
+    proposed = re.sub(
+        r"(?m)^saipen_version:[ \t]*\S+",
+        f"saipen_version: {installed_version}",
+        proposed,
+        count=1,
+    )
+    # The PROPOSED bytes must pass the SAME bound bar append_run will apply to
+    # them, or this rebind only moves the failure one step later.
+    proposed_errors = validate_bound_report(
+        cycle_dir_of_report,
+        seat,
+        proposed,
+        require_runs=False,
+        require_fresh=False,
+        cycle_active=True,
+    )
+    if proposed_errors:
+        raise ImproveError(
+            "rebind refuses: the rebound report does not satisfy the bound bar: "
+            + "; ".join(proposed_errors[:3])
+        )
+    if proposed == text:
+        raise ImproveError("rebind refuses: no install-identity scalar changed")
+    committed = _journaled_write(
+        report_path, proposed, "report", base_hash=_base_hash(report_path)
+    )
+    if not committed.get("ok"):
+        raise ImproveError(
+            f"rebind not committed: {committed.get('code')} "
+            f"{committed.get('message', '')}"
+        )
+    return {
+        "ok": True,
+        "code": "REBIND_COMMITTED",
+        "report": str(report_path),
+        "protocol_fingerprint": installed_fp,
+        "saipen_version": installed_version,
+        "detail": "draft report identity re-stamped to the installed protocol; RUN content untouched",
+    }
+
+
 def append_run(report_path: Path, run_text: str) -> dict:
     """Append an immutable RUN section to a seat report (T-551, migrated to
     the journal in NITRO M6; DOGFOOD V, T-616).
@@ -3647,6 +3840,41 @@ def append_run(report_path: Path, run_text: str) -> dict:
     if _field(text, "report_status") == "complete":
         raise ImproveError(
             "seat report is complete and immutable; no further RUN sections may be appended"
+        )
+    # T-130: the sibling of the heading guard above, for the OTHER way a body
+    # can commit evidence the completion bar will refuse forever. A run that
+    # carries neither an `IMP-<n>` finding nor a NO_FINDINGS marker is an
+    # unfinished write; once committed it is immutable, the bar refuses, and
+    # `improve abort` is the only exit -- so it is refused HERE, before any
+    # write, exactly as the heading case is.
+    if not _RUN_BODY_EVIDENCE_RE.search(run_text):
+        raise ImproveError(
+            "append_run refuses a RUN body that carries neither an IMP-<n> "
+            "finding line nor a NO_FINDINGS marker: the completion bar reads a "
+            "run with neither as an unfinished write rather than as an honest "
+            "empty audit, and a committed report is immutable, so accepting one "
+            "here would leave `improve abort` as the only exit. Submit the real "
+            "audit, or -- when it honestly found nothing -- the single line "
+            "'NO_FINDINGS -- <what was audited and why it was empty>'",
+            code="RUN_BODY_UNEVIDENCED",
+        )
+    # T-364 (Wintage): the sibling of both guards above, for the third way a
+    # body can commit evidence the completion bar will refuse forever. The two
+    # forms are mutually EXCLUSIVE by definition, but the evidence guard is a
+    # disjunction, so a body carrying BOTH satisfies it. The bar then refuses
+    # the seat with "RUN N declares NO_FINDINGS but carries findings" -- and by
+    # then the report is immutable, so the findings are destroyed and the only
+    # exit is `improve abort`. Refused HERE, at append time, from the same
+    # grammars the parser and the bar read.
+    if _NO_FINDINGS_RE.search(run_text) and _RUN_BODY_FINDING_RE.search(run_text):
+        raise ImproveError(
+            "append_run refuses a RUN body that carries BOTH an IMP-<n> finding "
+            "line and a NO_FINDINGS marker: a run is one or the other, and the "
+            "completion bar refuses the contradiction only AFTER the report is "
+            "immutable, where the findings are already lost. Keep the finding "
+            "and drop the marker, or -- when it honestly found nothing -- submit "
+            "only 'NO_FINDINGS -- <what was audited and why it was empty>'",
+            code="RUN_BODY_CONTRADICTORY",
         )
     # The report lives under .saipen/improve/<cycle>/<seat>/; the cycle must
     # still be ACTIVE for its report to be appended (completed-cycle

@@ -76,7 +76,7 @@ def run(host: str, skill_root: Path) -> tuple[bool, str]:
             ],
             input=json.dumps(event),
             capture_output=True,
-            text=True,
+            text=True, encoding="utf-8",
             timeout=20,
         )
         verdict = json.loads(proc.stdout)

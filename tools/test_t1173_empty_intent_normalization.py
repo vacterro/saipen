@@ -48,7 +48,7 @@ class EmptyIntentNormalizationTests(T1412Base):
 
     def test_dry_run_proposes_removing_exactly_those_keys(self) -> None:
         root = self._project("t1173-dry", _EMPTY_INTENT_STATE)
-        rc, payload, text = self.run_cli(root, "recover", "--dry-run")
+        _rc, _payload, text = self.run_cli(root, "recover", "--dry-run")
         proposed = json_text(text)
         self.assertIn("execution_intent", proposed)
         self.assertIn("converge_target", proposed)
@@ -58,11 +58,11 @@ class EmptyIntentNormalizationTests(T1412Base):
     def test_apply_commits_and_continue_routes(self) -> None:
         root = self._project("t1173-apply", _EMPTY_INTENT_STATE)
         # `recover` commits by default; --dry-run is the only preview.
-        rc, payload, text = self.run_cli(root, "recover")
+        _rc, _payload, _text = self.run_cli(root, "recover")
         state_after = (root / ".saipen" / "STATE.md").read_text(encoding="utf-8")
         self.assertNotIn("execution_intent: \"\"", state_after)
         self.assertNotIn("converge_target: \"\"", state_after)
-        rc2, payload2, text2 = self.run_cli(root, "continue", "--dry-run")
+        _rc2, payload2, text2 = self.run_cli(root, "continue", "--dry-run")
         self.assertNotEqual(
             payload2.get("code"), "VALIDATION_FAILED", text2[:1500]
         )
@@ -74,7 +74,7 @@ class EmptyIntentNormalizationTests(T1412Base):
             'next_action: "saipen continue"\nexecution_intent: "bogus"',
         )
         root = self._project("t1173-bogus", bad)
-        rc, payload, text = self.run_cli(root, "recover", "--dry-run")
+        _rc, _payload, text = self.run_cli(root, "recover", "--dry-run")
         self.assertIn("execution_intent", text)
         state_after = (root / ".saipen" / "STATE.md").read_text(encoding="utf-8")
         self.assertIn('execution_intent: "bogus"', state_after)

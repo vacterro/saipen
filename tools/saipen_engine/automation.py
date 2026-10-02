@@ -86,6 +86,17 @@ _HUMAN_WAIT_CATEGORIES = frozenset(
 # bootstrapping, not a human question) keeps ordinary cc legal.
 _PREAUTHORIZED_WAIT_CATEGORIES = frozenset({"safety valve", "init"})
 
+# T-1553: a pre-authorized WAIT keeps ROUTING legal, which is a different
+# question from whether a HUMAN must act before the agent may hand control
+# back. `cc` over a fresh INIT project is a legal re-authorization (R7), but
+# the WAIT it restates asks the operator for the first goal -- nothing is
+# executable until they answer. Without this the response gate reads
+# `CONTINUE`, concludes an eligible action remains, and refuses every
+# handback: the operator is never told the init finished, and the session
+# livelocks on `cc` over an empty board. One declared set, the same owner as
+# the two above, so the routing answer and the response answer cannot drift.
+_HUMAN_ACTION_WAIT_CATEGORIES = frozenset({"init"})
+
 # Stable reason codes for gate failures on the closure path.
 RC_CLOSURE_COMPLETE = "closure-complete"
 RC_AUTOMATION_FAILURE = "automation-projection-failed"
@@ -516,10 +527,30 @@ def automation_block(
         else:
             reason_text = f"route reason: {route_reason or 'none'}"
 
+        # A binding blocker can route as `unblock` before the WAIT route is
+        # reached. Its canonical human WAIT still requires operator action;
+        # never infer that obligation from the outgoing response.
+        blocked_human_wait = False
+        if reason_code == "unblock" and state:
+            from .state import parse_wait
+
+            blocked_human_wait = (
+                parse_wait(str(state.get("next_action") or "")) in _HUMAN_WAIT_CATEGORIES
+            )
+
         block = {
             "schema_version": SCHEMA_VERSION,
             "disposition": disposition,
             "next_command": _NEXT_COMMAND.get(disposition),
+            "operator_action_due": (
+                disposition == WAIT_USER
+                or blocked_human_wait
+                or (
+                    reason_code.startswith("wait-")
+                    and reason_code[len("wait-"):].replace("-", " ")
+                    in _HUMAN_ACTION_WAIT_CATEGORIES
+                )
+            ),
             "reason_code": reason_code,
             "reason": reason_text,
             "audit_quiescent": quiescent,

@@ -212,6 +212,32 @@ class CodexStopHookTests(unittest.TestCase):
         self.assertIn("saipen response render --stdin", reason)
         self.assertIn("saipen response check --stdin --classify", reason)
 
+    def test_chat_style_drift_is_intercepted_with_chat_guidance(self):
+        # T-1558: an ordinary reply over the STYLE.md chat budget is refused, and
+        # the correction prompt says how to fix a REPLY, not how to render an
+        # operational surface the reply never claimed to be.
+        project = fresh_project()
+        essay = "\n".join(f"Fact {n} is exact." for n in range(12))
+        rc, out, _ = stop_event(project, essay)
+        self.assertEqual(rc, 0, out)
+        self.assertIsNotNone(out)
+        self.assertEqual(out.get("decision"), "block")
+        reason = out.get("reason", "")
+        self.assertIn("CHAT_STYLE_DRIFT", reason)
+        self.assertIn("saipen response style --json", reason)
+        self.assertNotIn("Assemble the control surface", reason)
+
+    def test_a_reply_outside_the_host_locale_reaches_the_checker(self):
+        # T-1558: the hook piped the reply to the checker in text mode, which
+        # encodes with the LOCALE (cp1251 here). An Estonian diacritic is in no
+        # ANSI code page, so the encode raised, the checker was reported
+        # unreachable, and every Estonian reply passed as UNENFORCED.
+        project = fresh_project()
+        reply = "Õhtul äärmiselt ülemäärane öö."
+        rc, out, _ = stop_event(project, reply)
+        self.assertEqual(rc, 0)
+        self.assertIsNone(out, out)
+
     def test_autonomous_handback_is_intercepted(self):
         project = active_project()
         rc, out, _ = stop_event(project, card(project))
@@ -531,7 +557,7 @@ class NoSecondValidatorTests(unittest.TestCase):
         self.assertTrue(callable(RS.classify_final_response))
         self.assertTrue(callable(RS.response_errors))
         cli = (TOOLS / "saipen.py").read_text(encoding="utf-8")
-        self.assertIn("classify_final_response", cli)
+        self.assertIn("gate_final_response", cli)
         self.assertIn("from saipen_engine.response_surface import", cli)
         guard = (ROOT / "extensions" / "adapters" / "opencode" / "saipen-guard.js").read_text(
             encoding="utf-8"

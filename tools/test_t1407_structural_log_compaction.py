@@ -250,7 +250,10 @@ class StructuralLogCompactionTests(OrchestrationFixture):
         self.assertIn(redacted.encode("utf-8"), board_detail["original_record"])
 
     def test_structural_detail_tampering_fails_closed_with_true_diagnostic(self) -> None:
-        attacks = ("missing", "body", "project", "lineage", "compact-shape")
+        # No "project" attack (T-1514): the recorded checkout path is
+        # provenance, and a copy at another path is the same history; the
+        # "lineage" attack is what keeps a foreign project's detail out.
+        attacks = ("missing", "body", "lineage", "compact-shape")
         for attack in attacks:
             with self.subTest(attack=attack):
                 project, ticket = self.active_project()
@@ -265,11 +268,6 @@ class StructuralLogCompactionTests(OrchestrationFixture):
                     metadata_path.unlink()
                 elif attack == "body":
                     detail_path.write_bytes(detail_path.read_bytes() + b"tamper")
-                elif attack == "project":
-                    metadata["project_identity"] += "-wrong"
-                    metadata_path.write_text(
-                        json.dumps(metadata, sort_keys=True, indent=2) + "\n", encoding="utf-8"
-                    )
                 elif attack == "lineage":
                     metadata["project_lineage"] = "lineage-" + ("f" * 32)
                     metadata_path.write_text(

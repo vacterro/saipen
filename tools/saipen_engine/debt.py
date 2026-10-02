@@ -120,7 +120,7 @@ def _run_validator_capture(root: Path, gate: str, *, receipt: bool) -> dict:
         completed = subprocess.run(
             command,
             capture_output=True,
-            text=True,
+            text=True, encoding="utf-8",
             timeout=VALIDATOR_CAPTURE_TIMEOUT,
         )
         if not out_path.is_file():
@@ -1261,7 +1261,7 @@ def _run_verification_command(root, command, timeout):
             shell=True,
             cwd=str(root),
             capture_output=True,
-            text=True,
+            text=True, encoding="utf-8",
             timeout=timeout,
         )
         output = (completed.stdout or "") + (completed.stderr or "")

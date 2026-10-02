@@ -183,7 +183,8 @@ def run_t1019(base: Path) -> None:
         ["git", "commit", "-q", "-m", "current impl"], cwd=disp, env=git_env(), capture_output=True
     )
     committed_src = subprocess.run(
-        ["git", "-C", str(disp), "show", "HEAD:tools/freshness.py"], capture_output=True, text=True
+        ["git", "-C", str(disp), "show", "HEAD:tools/freshness.py"], capture_output=True, text=True,
+            encoding="utf-8"
     ).stdout
     expect(
         "T-1019 oracle durability: committed impl reproduces the live impl",
@@ -657,6 +658,17 @@ def run_t1021() -> None:
     )
 
 
+def probe_memory_snapshot(path: Path) -> dict[str, str]:
+    """Read-only purity fingerprint of durable memory, without host runtime."""
+    snapshot: dict[str, str] = {}
+    for item in sorted(path.rglob("*")):
+        rel = item.relative_to(path).as_posix()
+        if rel.startswith(("cache/", "locks/")) or not item.is_file():
+            continue
+        snapshot[rel] = hashlib.sha256(item.read_bytes()).hexdigest()
+    return snapshot
+
+
 def run_t1022() -> None:
     # ---- live HOME byte-identity + scoped runner: ONE canonical execution ----
     # PERF-006: the scoped runner is the single execution observed by BOTH the
@@ -672,19 +684,6 @@ def run_t1022() -> None:
     # process-local runtime cache: `.gitignore` line 14 keeps `.saipen/cache/`
     # out of the tree by design (T-994), every gate writes it, and a probe
     # writing there is not the leak this control guards.
-    transient = ("cache/",)
-
-    def tree_snapshot(path: Path) -> dict[str, str]:
-        snapshot: dict[str, str] = {}
-        for p in sorted(path.rglob("*")):
-            if not p.is_file():
-                continue
-            rel = p.relative_to(path).as_posix()
-            if rel.startswith(transient):
-                continue
-            snapshot[rel] = hashlib.sha256(p.read_bytes()).hexdigest()
-        return snapshot
-
     def snapshot_delta(before: dict[str, str], after: dict[str, str]) -> str:
         added = sorted(set(after) - set(before))
         removed = sorted(set(before) - set(after))
@@ -706,16 +705,16 @@ def run_t1022() -> None:
         if not (key.startswith("SAIPEN_") and key.endswith("_PROBES_ONLY"))
     }
     env["SAIPEN_THIRD_WAVE_PROBES_ONLY"] = "1"
-    before = tree_snapshot(HOME / ".saipen")
+    before = probe_memory_snapshot(HOME / ".saipen")
     proc = subprocess.run(
         [sys.executable, "tools/run_scenarios.py"],
         cwd=HOME,
         env=env,
         capture_output=True,
-        text=True,
+        text=True, encoding="utf-8",
         timeout=900,
     )
-    after = tree_snapshot(HOME / ".saipen")
+    after = probe_memory_snapshot(HOME / ".saipen")
     expect(
         "T-1022 nitro probes leave the live HOME tree byte-identical",
         before == after,

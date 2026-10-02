@@ -213,7 +213,7 @@ def _source_head() -> str | None:
 
 
 def _run(cmd: list[str], cwd: Path = HOME, env: dict | None = None) -> tuple[int, str]:
-    kwargs = dict(capture_output=True, text=True, errors="replace", timeout=300)
+    kwargs = dict(capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=300)
     if env is not None:
         kwargs["env"] = env
     if os.name == "nt":

@@ -32,6 +32,7 @@ ownership fact. A retry after the decision converges; it never re-asks.
 from __future__ import annotations
 
 from pathlib import Path
+import re
 
 from . import codec, guard_events, intake, operator_task, ownership, pending_ingress
 from .board import parse_board
@@ -60,6 +61,42 @@ def _refuse(code: str, detail: str, **fields) -> dict:
 
 def _normalized_request(text: str) -> str:
     return " ".join(str(text or "").split()).strip().lower()
+
+
+def continuation_work(
+    state: dict | None, tickets: dict, text: str, *,
+    verify: str | None = None, needs: list[str] | None = None, supersedes: str | None = None,
+) -> str | None:
+    """Recognize only complete target-free continuation forms, never a prefix.
+
+    Semantic classification remains agent-owned (OPS). This bounded convenience
+    grammar catches the measured SRC-143 form and generic resume language; any
+    concrete target or unrecognized remainder stays a new explicit request.
+    No current executable goal means there is nothing to resume.
+    """
+    if verify or needs or supersedes:
+        return None  # independent acceptance/dependency metadata is not target-free
+    if not state or state.get("execution_intent") != "goal":
+        return None
+    work = state.get("task")
+    if state.get("phase") not in _WORK_PHASES or tickets.get(work, {}).get("section") != "## DOING":
+        return None
+    normalized = _normalized_request(text)
+    english = (
+        r"(?:please[, ]+)?(?:continue|keep improving|go further)"
+        r"(?: (?:improving|working on|with))?"
+        r"(?: (?:the )?(?:current work|current goal|protocol|protocol logic))?"
+        r"(?: and (?:closing|close|fixing|fix) (?:the )?holes)?"
+        r"(?: to the end)?[.!]?"
+    )
+    russian = (
+        r"(?:хорошо[, ]+)?продолжи(?: пожалуйста)?(?: дальше)?"
+        r"(?: улучшать (?:логику протокола|протокол))?"
+        r"(?: и закрывать (?:мерзкие )?дыры)?(?: до конца)?"
+        r"(?:, опус)?(?: :\))?[.!]?"
+    )
+    matched = any(re.fullmatch(pattern, normalized) for pattern in (english, russian))
+    return work if matched else None
 
 
 def existing_work_for_request(root: Path, tickets: dict, text: str) -> str | None:
@@ -434,6 +471,11 @@ def start_work(
             if state is not None and board is not None
             else None
         )
+        continued = continuation_work(
+            state, (board or {}).get("tickets") or {}, text,
+            verify=verify_text if verify_text != USER_REQUEST_VERIFY else None,
+            needs=needs, supersedes=supersedes,
+        )
         return {
             "ok": True,
             "code": "PLAN",
@@ -445,13 +487,20 @@ def start_work(
             "remediation": preview.get("remediation"),
             "seat": seat,
             "snapshot_problem": problem,
-            "steps": [
+            "continuation": continued is not None,
+            "ticket": continued,
+            "steps": ([
+                "capture request receipt",
+                "recover journal / reconcile",
+                "bind continuation to current Work",
+                "resume current phase without a goal pivot",
+            ] if continued else [
                 "capture request receipt",
                 "recover journal / reconcile",
                 "project user_explicit Work",
                 "park own interrupted Work (ticket block-for)" if seat == ownership.SELF else None,
                 "claim Work into SCOUT",
-            ],
+            ]),
         }
 
     # 1. INGRESS before execution debt. The receipt is intake-only bytes; an
@@ -605,7 +654,13 @@ def start_work(
     tickets = (board or {}).get("tickets") or {}
     ticket = linked_work if linked_work in tickets else None
     if ticket is None and captured_receipt:
-        existing = existing_work_for_request(root, tickets, text)
+        existing = continuation_work(
+            state, tickets, text,
+            verify=verify_text if verify_text != USER_REQUEST_VERIFY else None,
+            needs=needs, supersedes=supersedes,
+        )
+        if existing is None:
+            existing = existing_work_for_request(root, tickets, text)
         if existing is not None:
             bound = _bind_duplicate_ingress(root, captured_receipt, existing, tickets[existing])
             if not bound.get("ok"):

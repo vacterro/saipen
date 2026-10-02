@@ -132,6 +132,11 @@ class RegistryParityTests(unittest.TestCase):
 
     def test_autoinject_targets_are_registry_skill_surfaces(self):
         # A `$NAME` surface is a target only where NAME is set (ZAICODE).
+        # Both sides derive in the SAME env moment: `autoinject.TARGETS` is an
+        # import-time snapshot, while setUpModule's hermetic isolation strips
+        # `ZAICODE_HOME` (T-1504) before the body runs -- comparing a frozen
+        # snapshot against a stripped-env derivation read as drift on any
+        # machine with ZAICODE configured.
         expected = sorted(
             {
                 str(Path(os.path.expandvars(os.path.expanduser(surface))).resolve())
@@ -140,7 +145,10 @@ class RegistryParityTests(unittest.TestCase):
                 if not os.path.expandvars(surface).startswith("$")
             }
         )
-        self.assertEqual(sorted(str(Path(t).resolve()) for t in autoinject.TARGETS), expected)
+        self.assertEqual(
+            sorted(str(Path(t).resolve()) for t in autoinject.registry_targets()),
+            expected,
+        )
 
     def test_installers_and_uninstallers_declare_no_undeclared_host_home(self):
         for path in (PS1, SH, UNINSTALL_PS1, UNINSTALL_SH):

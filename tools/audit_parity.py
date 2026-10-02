@@ -159,7 +159,7 @@ def main() -> int:
                 ],
                 cwd=root,
                 capture_output=True,
-                text=True,
+                text=True, encoding="utf-8",
                 errors="replace",
                 timeout=VALIDATOR_TIMEOUT,
             )
@@ -180,7 +180,7 @@ def main() -> int:
                     ],
                     cwd=root,
                     capture_output=True,
-                    text=True,
+                    text=True, encoding="utf-8",
                     errors="replace",
                     timeout=VALIDATOR_TIMEOUT,
                 )
@@ -193,7 +193,7 @@ def main() -> int:
                     cwd=root,
                     env=floor_env,
                     capture_output=True,
-                    text=True,
+                    text=True, encoding="utf-8",
                     errors="replace",
                     timeout=VALIDATOR_TIMEOUT,
                 )
@@ -247,7 +247,7 @@ def main() -> int:
                 [sys.executable, str(HOME / "tools" / "audit_checks.py")],
                 cwd=HOME,
                 capture_output=True,
-                text=True,
+                text=True, encoding="utf-8",
                 errors="replace",
                 timeout=900,
             )
@@ -300,7 +300,11 @@ def main() -> int:
                 file.unlink()
                 shutil.copy2(source, file)
             try:
-                if not ac.apply_case(root, rel, mutation):
+                # T-1582: `apply_case` returns a REASON STRING when the host
+                # refused to construct the case, and that string is truthy.
+                # Testing truthiness credited the floor with catching a
+                # mutation that was never applied. Only `True` is applied.
+                if ac.apply_case(root, rel, mutation) is not True:
                     local_skipped.append(label)
                     continue
                 floor_result = run_floor(root)

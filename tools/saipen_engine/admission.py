@@ -13,7 +13,9 @@ Layers (SRC-030 Parts 2-5):
 
 2. Protected canonical namespace -- `.saipen/STATE.md`, `.saipen/BOARD.md`,
    `.saipen/LOG.md`, `.saipen/IDENTITY.md`, `.saipen/logs/**`,
-   `.saipen/intake/**`, `.saipen/recovery/**`. The proposed target is
+   `.saipen/intake/**`, `.saipen/recovery/**`, and the exact
+   `.saipen/cache/admission/**` runtime-evidence namespace. Other
+   `.saipen/cache/` projections remain mutable. The proposed target is
    CANONICALLY resolved against the project root before classification, so
    `src/../.saipen/STATE.md`, `nested/a/../../.saipen/BOARD.md`, absolute
    spellings and symlink/reparse aliases all land on the same decision.
@@ -81,6 +83,9 @@ PROTECTED_CANONICAL_NAMESPACES = (
     ".saipen/logs",
     ".saipen/intake",
     ".saipen/recovery",
+    # Durable host admission evidence is protected exactly; disposable siblings
+    # under `.saipen/cache/` remain ordinary runtime caches.
+    ".saipen/cache/admission",
 )
 
 ENFORCEMENT_STRENGTH_BLOCKING = "BLOCKING"
@@ -1324,6 +1329,30 @@ def evaluate_admission(
                         "by its own root, never by this session's jurisdiction"
                     ),
                 )
+            # T-1575: another project's gate in flight freezes ITS tree for
+            # every session, not only its own (measured: a foreign-bound agent
+            # edited this repository mid-run and the family ran twice).
+            from .inflight import CODE_TREE_UNDER_TEST, frozen_owner
+
+            frozen_root = frozen_owner(canonical)
+            if frozen_root:
+                return result(
+                    ok=False,
+                    code=CODE_TREE_UNDER_TEST,
+                    admitted=False,
+                    project_root=str(root),
+                    target=canonical,
+                    targets=[canon for _cls, canon in resolved],
+                    action=action_name,
+                    effect=effect,
+                    outside_root=True,
+                    frozen_project=frozen_root,
+                    provenance=root_res.provenance,
+                    detail=(
+                        f"'{frozen_root}' is under a running core-unit gate; its tree "
+                        "is frozen until the gate finishes -- edit a scratch copy"
+                    ),
+                )
         if classification == "escape":
             if effect == "read":
                 continue
@@ -1467,6 +1496,31 @@ def evaluate_admission(
             project_lineage=root_res.lineage,
             detail="mutation outside the project root; protocol jurisdiction ends at the root",
         )
+
+    # T-1575: a fingerprint-bound gate in flight (the core-unit family)
+    # binds this tree; an in-root edit outside `.saipen/` makes its record
+    # uncitable and forces a full re-run. The agent works the parallel lane.
+    if effect == "mutating":
+        from .inflight import CODE_TREE_UNDER_TEST, frozen_targets
+
+        frozen = frozen_targets(root, [c for cls, c in resolved if cls == "inside"])
+        if frozen:
+            return result(
+                ok=False,
+                code=CODE_TREE_UNDER_TEST,
+                admitted=False,
+                project_root=str(root),
+                target=frozen[0],
+                targets=canonical_targets,
+                action=action_name,
+                effect=effect,
+                provenance=root_res.provenance,
+                detail=(
+                    "a core-unit gate is testing this tree; edit a scratch copy "
+                    "outside the project or .saipen/evidence/ until it finishes "
+                    "(`saipen continue --json` shows the parallel lane)"
+                ),
+            )
 
     # T-1317 Target A: an UNCLASSIFIED consequential effect (action `unknown`)
     # never reaches ADMITTED merely because the protocol state is healthy. A

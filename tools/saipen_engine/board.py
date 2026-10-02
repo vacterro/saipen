@@ -611,6 +611,26 @@ def board_semantic_errors(ticket: dict) -> list[str]:
     return errors
 
 
+#: The closure-contract fields: provenance that describes a COMPLETED ticket
+#: and is refused anywhere else (T-1302). ONE owner for the vocabulary -- the
+#: placement rule below and the reopen repairs that must strip exactly these
+#: keys (T-1572) read the same tuple.
+CLOSURE_METADATA_FIELDS = (
+    "closure_mode",
+    "closure_cohort",
+    "implementation_delta",
+    "implementation_source",
+    "closure_paths",
+    "superseded_by",
+    "supersession_evidence",
+    "supersession_authority",
+    "external_authority",
+    "external_implementation",
+    "external_evidence",
+    "resolution_reason",
+)
+
+
 def closure_metadata_errors(ticket: dict) -> list[str]:
     """Orchestration-metadata placement + vocabulary (T-1302 / CORE-003).
 
@@ -666,21 +686,7 @@ def closure_metadata_errors(ticket: dict) -> list[str]:
                 "-- a due instant nobody can action is dead metadata"
             )
 
-    closure_fields = (
-        "closure_mode",
-        "closure_cohort",
-        "implementation_delta",
-        "implementation_source",
-        "closure_paths",
-        "superseded_by",
-        "supersession_evidence",
-        "supersession_authority",
-        "external_authority",
-        "external_implementation",
-        "external_evidence",
-        "resolution_reason",
-    )
-    declared = [name for name in closure_fields if str(fields.get(name, "")).strip()]
+    declared = [name for name in CLOSURE_METADATA_FIELDS if str(fields.get(name, "")).strip()]
     if declared and section != "## DONE":
         errors.append(
             f"{tid} carries closure metadata ({', '.join(declared)}) under "

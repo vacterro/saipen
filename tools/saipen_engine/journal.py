@@ -86,6 +86,12 @@ CLEANUP_QUEUE_DIR = SETTLED_DIR + "/.cleanup-needed"
 # Closed verification-policy registry. Recovery must run the SAME semantic
 # postcondition class as the original APPLY; a policy names the verifier
 # WITHOUT serializing Python callables (NITRO dogfood II, T-587).
+# T-312: the closed set of operations allowed to write accepted-debt record
+# bytes. Kept beside VERIFICATION_POLICIES because both answer the same
+# question -- what may legally touch a domain-owned artifact.
+_ACCEPTED_DEBT_DIR_PREFIX = ".saipen/recovery/conformance/accepted_debt/"
+_ACCEPTED_DEBT_OPERATIONS = frozenset({"accepted_debt.register", "accepted_debt.rebind"})
+
 VERIFICATION_POLICIES = frozenset(
     {
         "core_fast",
@@ -96,6 +102,10 @@ VERIFICATION_POLICIES = frozenset(
         "sub_lifecycle",
         "sub_clean",
         "sub_sync",
+        # T-312: the closed semantic postcondition for an accepted-debt
+        # record write. Recovery reruns it, so a rebind that produced a record
+        # the engine itself refuses is rolled back instead of trusted.
+        "accepted_debt",
         "none",
     }
 )
@@ -400,6 +410,212 @@ def safe_op_dir(root: Path, op_id: str, base_dir: str = OPS_DIR) -> Path:
             raise InvalidIdError(f"op_dir {op_id!r} is a symlink or reparse point")
 
     return op_dir
+
+
+_HEX32 = frozenset({32})
+#: `operations.uuid4_hex()` returned `uuid4().hex[:8]` until e6682354
+#: (17.08.26); the classes that already existed then carry both widths in
+#: real history (SAIPEN LOG-011..014 hold ~2400 `transition-<8 hex>` alone).
+_HEX8_32 = frozenset({8, 32})
+
+#: The op-class registry (T-1577): every prefix a writer in this repository
+#: mints an op id from, with the body widths that writer has emitted. The
+#: body is lowercase hex of exactly one listed width (`reconcile-` stamps 20
+#: decimal digits, a subset of hex). `test_t1577_op_id_provenance` scans the
+#: writers and fails when one mints a prefix missing here, so a new class is
+#: registered in the same change that adds its writer.
+#:
+#: A shape check, never a forgery check: it names ids NO writer could have
+#: produced (`verify-<32 hex>`, `scout-<31 hex>`, `dec-...`) -- a well-formed
+#: forgery of a registered class is T-1282's question (does it resolve).
+OP_CLASSES: dict[str, frozenset[int]] = {
+    # operations.py, the eight-hex era classes (uuid4_hex, `_state_only_plan`
+    # `<operation>-` default: goal, valve, finalize_<converge target>).
+    **dict.fromkeys(
+        (
+            "checkpoint-",
+            "claim-",
+            "converge_intent-",
+            "crew-defer-",
+            "crew-run-",
+            "finalize_crew-",
+            "finalize_done-",
+            "finalize_ship-",
+            "finish-",
+            "fpc-",
+            "scope-",
+            "stop-",
+            "ticket-",
+            "transition-",
+            "valve-",
+            "wait-",
+        ),
+        _HEX8_32,
+    ),
+    # cold_recovery.py mints the goal ingress id from a 16-hex digest.
+    "goal-": frozenset({8, 16, 32}),
+    # operations.py, classes born after the switch to the full uuid4 hex.
+    **dict.fromkeys(
+        (
+            "attempt-close-",
+            "attempt-open-",
+            "board-compact-",
+            "ccc-entry-",
+            "clear-wait-role-",
+            "convergence-",
+            "crew-closure-",
+            "goal-entry-",
+            "handover-",
+            "improve-hold-",
+            "improve-unhold-",
+            "metadata-repair-",
+            "migrate_generation-",
+            "normalize-log-",
+            "producer-integration-",
+            "quarantine-log-tail-",
+            "rebind_home-",
+            "resolve-external-",
+            "retire-",
+            "retire-source-",
+            "supersede-",
+            "ticket-reasoning-",
+            "ticket-verify-",
+            "userreq-",
+            # reconcile.py, release.py, plan.py (`build_plan` default name)
+            "duplicate-id-",
+            "release-",
+            "source.requirement_add-",
+            # improve.py (`_journaled_write` kinds, admit, rebind), userperson.py
+            "cycle-",
+            "improve-admit-",
+            "improve-rebind-",
+            "report-",
+            "run-",
+            "seat-",
+            "sweep-",
+            "userperson-",
+            "userperson-reset-",
+        ),
+        _HEX32,
+    ),
+    # subs.py truncates to eight hex.
+    **dict.fromkeys(
+        (
+            "sub-adopt-",
+            "sub-clean-",
+            "sub-collect-",
+            "sub-disposition-",
+            "sub-pause-",
+            "sub-reconcile-",
+            "sub-resume-",
+            "sub-spawn-",
+            "sub-sync-",
+        ),
+        frozenset({8}),
+    ),
+    # Content-addressed ids: a sha256 prefix of a fixed width.
+    **dict.fromkeys(
+        (
+            "audit-consume-",
+            "authority-capture-",
+            "build-intake-",
+            "cut-intake-",
+            "milestone-",
+            "source-link-",
+            "undo-",
+            "undo-intake-",
+        ),
+        frozenset({16}),
+    ),
+    **dict.fromkeys(
+        (
+            "accepted_debt.rebind-",
+            "accepted_debt.register-",
+            "debt.snapshot-",
+            "receipt-",
+            "reverify.",
+            "source.purge-",
+            "source.reconcile-",
+        ),
+        frozenset({12}),
+    ),
+    "reconcile-": frozenset({20}),
+}
+
+#: One grammar owner for the `[op: ...]` LOG tag, compiled from the registry.
+#: `validate_op_id` above owns which ids may become an OPERATION DIRECTORY;
+#: this owns which ids may be believed when they appear on a LOG LINE.
+_OP_ID_GRAMMAR = re.compile(
+    "^(?:%s)$"
+    % "|".join(
+        re.escape(prefix) + "(?:%s)" % "|".join(r"[0-9a-f]{%d}" % width for width in sorted(widths))
+        for prefix, widths in sorted(OP_CLASSES.items())
+    )
+)
+
+
+def op_id_provenance(op_id: str | None) -> str:
+    """`canonical`, `hand_authored` or `absent` for one `[op: ...]` tag (T-1577).
+
+    T-1282 answers "does this id resolve to a record on THIS checkout", which
+    needs the gitignored recovery ledger and therefore speaks only about the
+    ids above the resolved floor. This answers the question that needs no disk
+    at all -- is the id a registered class (`OP_CLASSES`) over a body width
+    that class's writer emits -- so every consumer of a LOG tag can ask it:
+    the validator when it reports, and `log.verification_evidence` when it
+    decides whether an event counts.
+
+    `absent` is deliberately not `hand_authored`: an untagged event is T-110's
+    separate question and folding it in here would turn a missing tag into an
+    accusation.
+    """
+    if not op_id:
+        return "absent"
+    return "canonical" if _OP_ID_GRAMMAR.match(op_id) else "hand_authored"
+
+
+def resolvable_op_ids(root: Path | str) -> set[str]:
+    """Every op id that names a real operation record on THIS checkout (T-1282).
+
+    The `[op: ...]` LOG tag is forgeable prose until it is compared against
+    the journaled operation records this function enumerates: live op
+    directories, settled operation directories, and the durable settled-index
+    projection that survives compaction. The recovery tree is gitignored
+    machine-local evidence, so an empty result means "no ledger here" (a fresh
+    clone, a consumer checkout), never "every logged id is forged" -- callers
+    must treat that as check-unavailable, not a verdict.
+    """
+    root = Path(root)
+    names: set[str] = set()
+    for base in (OPS_DIR, SETTLED_DIR):
+        base_dir = root / base
+        try:
+            entries = os.listdir(base_dir)
+        except OSError:
+            continue
+        for name in entries:
+            if name == SETTLED_INDEX_NAME or name.startswith("."):
+                continue
+            names.add(name)
+    index_dir = root / Path(SETTLED_INDEX_REL).parent
+    try:
+        index_files = list(index_dir.glob("*.json"))
+    except OSError:
+        index_files = []
+    for path in index_files:
+        try:
+            document = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            continue
+        if not isinstance(document, dict):
+            continue
+        members = document.get("members")
+        if not isinstance(members, list):
+            continue
+        for member in members:
+            if isinstance(member, dict) and isinstance(member.get("name"), str):
+                names.add(member["name"])
+    return names
 
 
 def _target_action(target: dict) -> str:
@@ -2285,6 +2501,28 @@ def validate_mutation_request(
     if not isinstance(targets, list):
         return refuse("targets must be a list of target mappings")
 
+    # T-312: an accepted-debt record is domain-owned, not a journal-owned file.
+    # `run_mutation` takes an arbitrary `operation=` string, so without this the
+    # generic CAS can rewrite a record that claims immutable registration -- the
+    # exact hole AD-000002's history fell through. Only the closed accepted-debt
+    # writers may touch these paths; everything else is refused HERE, before any
+    # journal construction, so the refusal costs zero writes.
+    if operation not in _ACCEPTED_DEBT_OPERATIONS:
+        for target in targets:
+            if not isinstance(target, dict):
+                continue
+            owned = str(target.get("path", "")).replace("\\", "/")
+            # Strip a leading "./" PREFIX, never characters: `lstrip("./")` eats
+            # the dot of ".saipen" too and would let the whole guard miss.
+            while owned.startswith("./"):
+                owned = owned[2:]
+            if owned.startswith(_ACCEPTED_DEBT_DIR_PREFIX):
+                return refuse(
+                    f"{owned} is an accepted-debt record and may only be written by "
+                    f"{sorted(_ACCEPTED_DEBT_OPERATIONS)}; operation {operation!r} is not a "
+                    "closed accepted_debt domain writer"
+                )
+
     try:
         seen_target_paths: set[str] = set()
         canonical_targets = []
@@ -3415,7 +3653,68 @@ def _verifier_for(policy: str):
         return verify_sub_clean
     if policy == "sub_sync":
         return verify_sub_sync
+    if policy == "accepted_debt":
+        return verify_accepted_debt
     return None
+
+
+def verify_accepted_debt(root, targets, receipt_metadata=None) -> list[str]:
+    """T-312: the semantic postcondition of an accepted-debt record write.
+
+    Judges the ACTUAL written target, never a repository scan: for every
+    accepted-debt record this mutation wrote, the engine's own `load_record`
+    must accept it (schema, integrity digest, lineage, rule binding) AND every
+    evidence line must re-derive from the live history. A rebind that produced
+    a record the engine refuses, or one whose evidence still does not resolve,
+    is an error list -- so APPLY and Recovery reach the same verdict instead of
+    trusting the receipt that claims the repair worked.
+    """
+    errors: list[str] = []
+    from .accepted_debt import (
+        ACCEPTED_DEBT_DIR,
+        ACCEPTED_DEBT_ID_RE,
+        AcceptedDebtRefusal,
+        _iter_history,
+        _line_sha256,
+        load_record,
+    )
+
+    base = Path(root).resolve()
+    for target in targets or []:
+        path = str((target or {}).get("path", ""))
+        if not path.startswith(ACCEPTED_DEBT_DIR + "/"):
+            continue
+        name = Path(path).stem
+        if not ACCEPTED_DEBT_ID_RE.match(name):
+            errors.append(f"{path}: not an accepted-debt record id")
+            continue
+        try:
+            record = load_record(base, name)
+        except AcceptedDebtRefusal as refusal:
+            errors.append(f"{path}: engine refuses the written record: {refusal.detail}")
+            continue
+        except FileNotFoundError:
+            errors.append(f"{path}: the written record is absent")
+            continue
+        located = {
+            f"E-{parsed.get('event')}": (segment, line_no, raw)
+            for segment, line_no, raw, parsed in _iter_history(base)
+            if parsed.get("event") is not None
+        }
+        for item in record.get("evidence") or []:
+            event = item.get("event")
+            live = located.get(event)
+            if live is None:
+                errors.append(f"{path}: evidence {event} no longer resolves in history")
+                continue
+            if live[0] != item.get("file") or live[1] != item.get("line_number"):
+                errors.append(
+                    f"{path}: evidence {event} resolves at {live[0]}:{live[1]}, "
+                    f"record cites {item.get('file')}:{item.get('line_number')}"
+                )
+            elif _line_sha256(live[2]) != item.get("line_sha256"):
+                errors.append(f"{path}: evidence {event} line hash differs from the live line")
+    return errors
 
 
 def _run_verifier(root, targets, policy: str, receipt_metadata=None) -> list[str]:
@@ -4000,15 +4299,13 @@ def _resolve_conflict_locked(root: Path, op_id: str, resolution: str, agent: str
     for target in record.get("targets", []):
         live = _target_live_hash(root, target)
         live_snapshot[target["path"]] = live
-        if target.get("applied"):
-            if live != target.get("after_hash"):
-                return {
-                    "ok": False,
-                    "code": "CONFLICT",
-                    "detail": f"applied target {target['path']} changed "
-                    f"again during resolution; evidence moved, "
-                    "re-inspect",
-                }
+        # An applied target whose live bytes no longer equal after_hash was
+        # overwritten by a LATER successful operation, not by this resolution.
+        # Resolution does not roll such an operation forward (that is the
+        # recovery rule, and it is what made this conflict unsettleable under
+        # BOTH resolutions): its planned effect is abandoned exactly like an
+        # unapplied target's, and the live bytes stand. T-2.
+        if target.get("applied") and live == target.get("after_hash"):
             applied.append(target["path"])
         else:
             skipped.append(target["path"])

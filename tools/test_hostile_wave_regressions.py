@@ -27,6 +27,7 @@ from unittest import mock
 TOOLS = Path(__file__).resolve().parent
 if str(TOOLS) not in sys.path:
     sys.path.insert(0, str(TOOLS))
+from test_fixture_support import CURRENT_STYLE_CONTRACT  # noqa: E402
 
 from saipen_engine import commands as CM  # noqa: E402
 from test_hermetic_env import isolate_host_session  # noqa: E402
@@ -58,7 +59,7 @@ def _make_wait_fixture(tmp_root: Path, intent="normal", wait_text="WAIT: init --
         "---\n"
         f"phase: PLAN\ntask: none\nnext_action: \"{wait_text}\"\n"
         "blocker: \"\"\ntransition_from: INIT\nsaipen_version: 7\nschema_version: 3\n"
-        "last_event: 1\nstyle_contract: ded-4ae736e4\n"
+        'last_event: 1\nstyle_contract: ' + CURRENT_STYLE_CONTRACT + '\n'
         f"saipen_home: \"{saipen_home}\"\nagent: tester\n"
         "requires:\n  - filesystem\n  - git\n  - python\nmode: full\n"
         f"updated: \"{now}\"\nexecution_intent: {intent}\n---\n",
@@ -185,7 +186,7 @@ class Wave3CrewTests(unittest.TestCase):
         now = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
         saipen_home = str(TOOLS.parent).replace("\\", "/")
         (proj / ".saipen/STATE.md").write_text(
-            "---\nphase: DONE\ntask: none\nnext_action: \"saipen crew\"\nblocker: \"\"\ntransition_from: SHIP\nsaipen_version: 7\nschema_version: 3\nlast_event: 1\nstyle_contract: ded-4ae736e4\n"
+            '---\nphase: DONE\ntask: none\nnext_action: "saipen crew"\nblocker: ""\ntransition_from: SHIP\nsaipen_version: 7\nschema_version: 3\nlast_event: 1\nstyle_contract: ' + CURRENT_STYLE_CONTRACT + '\n'
             f"saipen_home: \"{saipen_home}\"\nagent: tester\nrequires:\n  - filesystem\n  - git\n  - python\nmode: full\nupdated: \"{now}\"\nexecution_intent: converge\nconverge_target: crew\n---\n",
             encoding="utf-8",
         )

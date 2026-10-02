@@ -361,7 +361,7 @@ def _read_detail_text(
         return None
     if not isinstance(metadata, dict):
         return None
-    from .paths import project_identity, project_lineage_identity
+    from .paths import history_bound_here
 
     expected = {
         "schema_version": 1,
@@ -369,14 +369,17 @@ def _read_detail_text(
         "status": "COMMITTED",
         "event_id": f"E-{parsed.get('event')}",
         "ticket_id": parsed.get("ticket"),
-        "project_identity": project_identity(root),
-        "project_lineage": project_lineage_identity(root),
         "source": ".saipen/LOG.md",
         "metadata_path": reference,
         "lossless": True,
     }
-    if not set(expected).issubset(metadata) or any(
+    if not {*expected, "project_identity", "project_lineage"}.issubset(metadata) or any(
         metadata.get(key) != value for key, value in expected.items()
+    ):
+        return None
+    # T-1514: the lineage binds history, never the checkout path.
+    if not history_bound_here(
+        metadata.get("project_identity"), metadata.get("project_lineage"), root
     ):
         return None
     externalization = metadata.get("externalization_event")
@@ -727,6 +730,167 @@ def read_history_snapshot_strict(project_root: Path | str) -> tuple[HistorySnaps
     return snapshot, snapshot_contract_errors(snapshot)
 
 
+_ACTIVE_ILLEGAL_RE = re.compile(r"^LOG\.md:(\d+):")
+
+
+@dataclass(frozen=True)
+class ForeignTail:
+    """The active-LOG lines after the checkpointed tail, and the ledger without them.
+
+    `snapshot` is the history exactly as it would read with the suffix removed:
+    the raw-byte `hash` still describes the bytes on disk, everything parsed
+    from the suffix is gone.
+    """
+
+    anchor_line: int
+    kept_text: str
+    suffix_lines: tuple[str, ...]
+    claimed_ids: tuple[int, ...]
+    non_event_lines: int
+    snapshot: HistorySnapshot
+
+
+def foreign_tail_cut(
+    snapshot: HistorySnapshot, active_text: str, last_event: int | None
+) -> tuple[ForeignTail | None, str | None]:
+    """Prove that the ledger damage is confined to lines STATE never bound.
+
+    Measured live on 29.09.26: an agent working in another project ran the
+    raw line appender from this project's root. `--help` became a LOG line and
+    three of its own events (E-2602..E-2604, ids this ledger spent months
+    earlier) followed it. Every verb then refused HISTORY_LEDGER_CORRUPT as
+    FORENSICALLY_UNRECOVERABLE, although nothing was missing: the ledger
+    through the checkpointed `last_event` was intact, and the damage was a
+    suffix no checkpoint had ever recorded.
+
+    The suffix is foreign -- and removing it reconstructs nothing -- only when
+    every one of these holds, and each refusal names the one that failed:
+
+    * `last_event` is a legal event line in the active LOG -- its first
+      occurrence is the boundary the checkpoint bound;
+    * the suffix holds something other than blanks and comments;
+    * no suffix line claims an id above `last_event`. Such a line could be a
+      genuine event whose checkpoint never landed, and that belongs to the
+      journal's recovery, never to a cut;
+    * the ledger WITHOUT the suffix passes the complete immutable-ledger
+      contract. Damage anywhere else is not a tail problem.
+    """
+    if last_event is None:
+        return None, "STATE.last_event is unset, so there is no checkpointed boundary to cut at"
+    lines = active_text.splitlines()
+    # The FIRST legal line carrying `last_event` is the one the checkpoint
+    # bound. The engine allocates tail + 1 at write time, so any earlier line
+    # claiming that id would have made it allocate higher; a later copy is
+    # itself suffix, and is cut like any other id at or below the tail.
+    anchor = next(
+        (
+            index
+            for index, line in enumerate(lines)
+            if (parsed := parse_log_line(line)) is not None and parsed["event"] == last_event
+        ),
+        None,
+    )
+    if anchor is None:
+        return None, (
+            f"STATE.last_event E-{last_event} is not a legal event line in the active "
+            "LOG.md, so the checkpointed boundary is not provable"
+        )
+    suffix = tuple(lines[anchor + 1 :])
+    foreign = [
+        line for line in suffix if line.strip() and not line.strip().startswith("#")
+    ]
+    if not foreign:
+        return None, (
+            f"nothing but blanks and comments follows the checkpointed E-{last_event}; "
+            "the ledger damage is not a tail"
+        )
+    claimed: list[int] = []
+    suffix_events = 0
+    for offset, line in enumerate(suffix, anchor + 2):
+        if not line.strip() or line.strip().startswith("#"):
+            # The snapshot reads neither, so neither claims an id.
+            continue
+        declared = declared_event_id(line)
+        if declared is None:
+            continue
+        if declared > last_event:
+            return None, (
+                f"LOG.md:{offset} claims E-{declared}, above the checkpointed E-{last_event}; "
+                "it may be a genuine event whose checkpoint never landed, so the tail is "
+                "not provably foreign"
+            )
+        claimed.append(declared)
+        if parse_log_line(line) is not None:
+            suffix_events += 1
+    events = snapshot.events
+    if suffix_events:
+        dropped = [ev["event"] for ev in events[-suffix_events:]]
+        expected = [parse_log_line(line)["event"] for line in suffix if parse_log_line(line)]
+        if dropped != expected:
+            return None, "the active LOG does not end the parsed history; refusing to cut"
+        events = events[:-suffix_events]
+    illegal = tuple(
+        problem
+        for problem in snapshot.illegal_lines
+        if not (
+            (match := _ACTIVE_ILLEGAL_RE.match(problem))
+            and int(match.group(1)) > anchor + 1
+        )
+    )
+    tail = None
+    for ev in events:
+        if tail is None or ev["event"] > tail:
+            tail = ev["event"]
+    for problem in illegal:
+        declared = declared_event_id(problem)
+        if declared is not None and (tail is None or declared > tail):
+            tail = declared
+    max_ticket_id = snapshot.max_ticket_id
+    if suffix_events:
+        max_ticket_id = 0
+        for ev in events:
+            for candidate in re.findall(r"T-(\d+)", f"[{ev.get('ticket') or ''}] {ev['text']}"):
+                max_ticket_id = max(max_ticket_id, int(candidate))
+    kept_text = "\n".join(lines[: anchor + 1]) + "\n"
+    text = snapshot.text
+    if text:
+        if not text.endswith(active_text):
+            return None, "the combined history does not end with the active LOG; refusing to cut"
+        text = text[: len(text) - len(active_text)] + kept_text
+    from dataclasses import replace
+
+    clean = replace(
+        snapshot,
+        text=text,
+        tail=tail,
+        events=events,
+        illegal_lines=illegal,
+        event_lines=(
+            snapshot.event_lines[:-suffix_events]
+            if suffix_events and snapshot.event_lines
+            else snapshot.event_lines
+        ),
+        max_ticket_id=max_ticket_id,
+    )
+    remaining = snapshot_contract_errors(clean)
+    if remaining:
+        return None, (
+            "the ledger is damaged before the checkpointed tail too, so a cut cannot "
+            "repair it: " + "; ".join(remaining[:3])
+        )
+    return (
+        ForeignTail(
+            anchor_line=anchor + 1,
+            kept_text=kept_text,
+            suffix_lines=suffix,
+            claimed_ids=tuple(claimed),
+            non_event_lines=len(foreign) - len(claimed),
+            snapshot=clean,
+        ),
+        None,
+    )
+
+
 def history_hash(project_root: Path | str) -> str:
     """Deterministic hash over all history files (sealed + active)."""
     return read_history_snapshot(project_root).hash
@@ -1063,6 +1227,23 @@ def _is_verify_boundary(ev: dict) -> bool:
     return txt == "transition to VERIFY" or txt.startswith(_VERIFY_BOUNDARY_PREFIX)
 
 
+def _hand_authored(event: dict) -> bool:
+    """True when this event's `[op: ...]` tag was typed, not emitted (T-1577).
+
+    The evidence classifiers decide on `text` and `taxonomy` and never read
+    `op_id`, so until now a hand-authored `transition to VERIFY` opened a
+    cycle and a hand-authored `PASS conf: high` closed one. Provenance is the
+    first question a tag answers, so it is asked here, once, before anything
+    reads the words. IGNORED is the rule, not refused: such a line may neither
+    pass a cycle nor block one. `absent` (no tag at all) is T-110's separate
+    question and is deliberately left alone -- a missing tag is not an
+    accusation.
+    """
+    from .journal import op_id_provenance
+
+    return op_id_provenance(event.get("op_id")) == "hand_authored"
+
+
 def regression_evidence(ticket_id: str, events: list[dict]) -> tuple[bool, str]:
     """`(admissible, reason)` for a ticket that owes a regression PAIR.
 
@@ -1086,6 +1267,7 @@ def regression_evidence(ticket_id: str, events: list[dict]) -> tuple[bool, str]:
         if (
             ev.get("ticket") == ticket_id
             and ev.get("taxonomy") == "RUN"
+            and not _hand_authored(ev)
             and _is_verify_boundary(ev)
         ):
             boundary = i
@@ -1096,6 +1278,8 @@ def regression_evidence(ticket_id: str, events: list[dict]) -> tuple[bool, str]:
     records = []
     for ev in events[boundary:]:
         if ev.get("ticket") != ticket_id or ev.get("taxonomy") != "RUN":
+            continue
+        if _hand_authored(ev):
             continue
         record = parse_evidence(ev.get("text", ""))
         if record is not None:
@@ -1188,7 +1372,7 @@ def verification_evidence(ticket_id: str, events: list[dict]) -> tuple[bool, str
     for i in range(len(events) - 1, -1, -1):
         ev = events[i]
         if ev.get("ticket") == ticket_id and ev.get("taxonomy") == "RUN":
-            if _is_verify_boundary(ev):
+            if not _hand_authored(ev) and _is_verify_boundary(ev):
                 verify_start_idx = i
                 break
     if verify_start_idx is None:
@@ -1197,6 +1381,8 @@ def verification_evidence(ticket_id: str, events: list[dict]) -> tuple[bool, str
     for i in range(len(events) - 1, verify_start_idx - 1, -1):
         ev = events[i]
         if ev.get("ticket") != ticket_id or ev.get("taxonomy") != "RUN":
+            continue
+        if _hand_authored(ev):
             continue
         txt = ev.get("text", "")
         if _is_regression_evidence(txt):
@@ -1260,6 +1446,8 @@ def bulk_verification_evidence(
             continue
         if tid in boundary_seen:
             continue  # older than the newest VERIFY boundary: out of cycle
+        if _hand_authored(ev):
+            continue  # T-1577: same IGNORED rule the single-ticket path applies
         txt = ev.get("text", "")
         if _is_regression_evidence(txt):
             continue

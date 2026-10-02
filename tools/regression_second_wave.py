@@ -5,7 +5,7 @@ from pathlib import Path
 
 
 def _run(cmd, cwd):
-    r = subprocess.run(cmd, cwd=str(cwd), capture_output=True, text=True)
+    r = subprocess.run(cmd, cwd=str(cwd), capture_output=True, text=True, encoding="utf-8")
     return r
 
 
@@ -33,7 +33,7 @@ def run_tests():
             ],
             cwd=str(project),
             capture_output=True,
-            text=True,
+            text=True, encoding="utf-8",
         )
         if "sk-***" not in r.stdout and "sk-***" not in r.stderr:
             if r.returncode == 0:

@@ -22,6 +22,7 @@ from pathlib import Path
 
 TOOLS = Path(__file__).resolve().parent
 sys.path.insert(0, str(TOOLS))
+from test_fixture_support import CURRENT_STYLE_CONTRACT  # noqa: E402
 
 
 # ---------------------------------------------------------------------------
@@ -50,7 +51,7 @@ class Core001CounterReconciliation(unittest.TestCase):
             "saipen_version: 7\n"
             "schema_version: 3\n"
             "last_event: 2\n"
-            "style_contract: ded-4ae736e4\n"
+            'style_contract: ' + CURRENT_STYLE_CONTRACT + '\n'
             "agent: tester\n"
             "requires:\n  - filesystem\n  - git\n  - python\n"
             "mode: full\n"

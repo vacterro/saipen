@@ -15,7 +15,9 @@ project-local stdout shim the engine receipt path never consulted. This module
 is the canonical, project-scoped, journaled replacement for that shim.
 
 NARROW BINDING (fail-closed on every condition):
-  * record is project- and lineage-bound -- a copied record never travels;
+  * record is lineage-bound -- it never crosses project lineages, and it
+    travels with the history it accepts when the project is copied or moved
+    (T-1516; the checkout path binds only a lineage-less project);
   * record binds ONE rule and the EXACT set of missing event ids -- an extra
     new event changes the set and the acceptance no longer matches;
   * record binds each event's source FILE and the SHA-256 of that event's
@@ -36,8 +38,8 @@ import re
 from datetime import datetime, timezone
 from pathlib import Path
 
+from .paths import history_bound_here, project_lineage_identity
 from .paths import project_identity as _project_identity
-from .paths import project_lineage_identity
 
 ACCEPTED_DEBT_DIR = ".saipen/recovery/conformance/accepted_debt"
 ACCEPTED_DEBT_ID_RE = re.compile(r"\AAD-(\d{6})\Z")
@@ -166,16 +168,16 @@ def load_record(root: Path | str, ref: str) -> dict:
         raise AcceptedDebtRefusal(
             "ACCEPTED_DEBT_CORRUPT", f"{ref} integrity digest mismatch (hand-edited or damaged)"
         )
-    if record.get("project_identity") != _project_identity(root):
-        raise AcceptedDebtRefusal(
-            "ACCEPTED_DEBT_FOREIGN_PROJECT",
-            f"{ref} was registered for {record.get('project_identity')!r}, not this project",
-        )
     if record.get("project_lineage") != project_lineage_identity(root):
         raise AcceptedDebtRefusal(
             "ACCEPTED_DEBT_FOREIGN_LINEAGE",
-            f"{ref} binds a foreign lineage; a copied .saipen directory never makes "
-            "an acceptance portable",
+            f"{ref} binds a foreign lineage; an acceptance never crosses project lineages",
+        )
+    # T-1516: the lineage owns the acceptance; the path binds a lineage-less project only.
+    if not history_bound_here(record.get("project_identity"), record.get("project_lineage"), root):
+        raise AcceptedDebtRefusal(
+            "ACCEPTED_DEBT_FOREIGN_PROJECT",
+            f"{ref} was registered for {record.get('project_identity')!r}, not this project",
         )
     if record.get("check_id") != RULE_ID or record.get("check_version") != CHECK_VERSION:
         raise AcceptedDebtRefusal(
@@ -511,4 +513,202 @@ def register(
         "events": record["accepted_missing_events"],
         "journal_op_id": op_id,
         "authority": authority,
+    }
+
+
+# T-312: the closed rebind writer.
+#
+# `register` is the only sanctioned way an accepted-debt record's bytes may
+# change, and it can only CREATE a record for a set no record covers yet. That
+# left a real hole: when a LOG shard is rotated, a live record's evidence
+# (`file`, `line_number`, `line_sha256`) stops resolving, and the generic
+# `run_mutation` CAS would happily rewrite the record anyway because it takes an
+# arbitrary `operation=` string. The result is exactly what AD-000002's history
+# shows: bytes moved under an operation name no module implements, with
+# `verification_policy: none`, and nothing in the journal able to tell a
+# legitimate repair from a forgery.
+#
+# `rebind` is the domain writer that closes it. It is deliberately NARROWER than
+# `register`, because a rebind is a repair, never a re-registration:
+#
+#   * the accepted EVENT SET is immutable. A rebind that changed what is
+#     accepted would be a new acceptance, and must be refused outright;
+#   * every new evidence line must resolve in the CURRENT history and its hash
+#     is recomputed from the live line -- a caller cannot assert a hash;
+#   * the live file must still hash to the caller's `expected_before`, so a
+#     concurrent write is refused rather than silently overwritten;
+#   * the write goes through `run_mutation` under the closed
+#     `accepted_debt` verification policy, so APPLY and Recovery both rerun the
+#     same semantic postcondition instead of trusting the receipt.
+def rebind(
+    root: Path | str,
+    ref: str,
+    *,
+    agent: str,
+    reason: str,
+    expected_before: str,
+) -> dict:
+    """Re-point ONE record's evidence at where its events live NOW.
+
+    Fails closed on: a missing/corrupt/foreign record, an empty reason, a stale
+    `expected_before`, an event that no longer parses as a LOG line, and any
+    attempt to change the accepted event set.
+    """
+    root = Path(root)
+    if not ACCEPTED_DEBT_ID_RE.match(ref or ""):
+        return {
+            "ok": False,
+            "code": "VALIDATION_FAILED",
+            "detail": f"invalid record id {ref!r} (expected AD-######)",
+        }
+    if not str(reason or "").strip():
+        return {"ok": False, "code": "VALIDATION_FAILED", "detail": "reason is required"}
+    if not str(expected_before or "").strip():
+        return {
+            "ok": False,
+            "code": "VALIDATION_FAILED",
+            "detail": "expected_before is required: a rebind without the live hash it "
+            "replaces cannot prove which bytes it is repairing",
+        }
+
+    # The engine's OWN loader: schema_version, record_id, kind, integrity digest,
+    # lineage and rule binding. A refusal here means the record is damaged or
+    # foreign, and repairing damaged bytes through a repair path is exactly the
+    # laundering this writer exists to prevent.
+    try:
+        record = load_record(root, ref)
+    except AcceptedDebtRefusal as refusal:
+        return {
+            "ok": False,
+            "code": refusal.code,
+            "detail": refusal.detail,
+        }
+
+    rel = f"{ACCEPTED_DEBT_DIR}/{ref}.json"
+    path = root / rel
+    from .journal import run_mutation
+
+    # The journal hashes a precondition target with its OWN 16-hex form, and
+    # compares it against exactly that. Binding the rebind to the same
+    # representation keeps "the bytes this repair replaces" and "the bytes the
+    # journal CASes on" the same fact; a caller may pass either the truncated
+    # form or a full digest, and both mean the same thing.
+    live_bytes = path.read_bytes()
+    live_hash = hashlib.sha256(live_bytes).hexdigest()[:16]
+    if live_hash != str(expected_before).strip()[:16]:
+        return {
+            "ok": False,
+            "code": "STALE_PRECONDITION",
+            "detail": (
+                f"{rel} is at {live_hash}, not the expected "
+                f"{str(expected_before).strip()[:16]}"
+            ),
+        }
+
+    # Resolve the SAME accepted set in the current history. The set is read from
+    # the record and never from the caller: that is what makes a rebind unable
+    # to silently widen or narrow an acceptance.
+    events = list(record.get("accepted_missing_events") or [])
+    if not events:
+        return {
+            "ok": False,
+            "code": "ACCEPTED_DEBT_CORRUPT",
+            "detail": f"{ref} accepts no events; there is nothing to rebind",
+        }
+    found: dict[str, tuple[str, int, str]] = {}
+    for segment_rel, line_no, raw_line, parsed in _iter_history(root):
+        event_id = EVENT_INPUT_RE.match(f"E-{parsed.get('event')}")
+        if event_id is None:
+            continue
+        canonical = f"E-{int(event_id.group(1))}"
+        found.setdefault(canonical, (segment_rel, line_no, raw_line))
+
+    unresolved = [event for event in events if event not in found]
+    if unresolved:
+        return {
+            "ok": False,
+            "code": "VALIDATION_FAILED",
+            "detail": "event(s) no longer parse as LOG lines and cannot be re-bound: "
+            + ", ".join(unresolved[:5]),
+        }
+
+    old_evidence = record.get("evidence") or []
+    new_evidence = [
+        {
+            "event": event,
+            "file": found[event][0],
+            "line_number": found[event][1],
+            "line_sha256": _line_sha256(found[event][2]),
+        }
+        for event in sorted(events, key=lambda e: int(EVENT_INPUT_RE.match(e).group(1)))
+    ]
+    if new_evidence == old_evidence:
+        return {
+            "ok": False,
+            "code": "ACCEPTED_DEBT_REBIND_NOOP",
+            "detail": f"{ref} evidence already resolves at its current location; "
+            "a rebind would change nothing",
+        }
+
+    rebound = dict(record)
+    rebound["evidence"] = new_evidence
+    rebound["rebind_reason"] = str(reason).strip()
+    rebound["rebind_from_evidence"] = old_evidence
+    op_id = (
+        "accepted_debt.rebind-"
+        + hashlib.sha256(
+            f"{ref}|{live_hash}|{json.dumps(new_evidence, sort_keys=True)}".encode("utf-8")
+        ).hexdigest()[:12]
+    )
+    rebound["journal_op_id"] = op_id
+    rebound["integrity_digest"] = _integrity_digest(
+        {k: v for k, v in rebound.items() if k != "integrity_digest"}
+    )
+    content = json.dumps(rebound, indent=2, sort_keys=True).encode("utf-8")
+
+    committed = run_mutation(
+        root,
+        op_id=op_id,
+        operation="accepted_debt.rebind",
+        agent=str(agent or "unknown"),
+        project_identity=record["project_identity"],
+        semantic_payload_hash=hashlib.sha256(
+            json.dumps(
+                {
+                    "record": ref,
+                    "events": events,
+                    "from": [item.get("file") for item in old_evidence],
+                    "to": sorted({item["file"] for item in new_evidence}),
+                    "reason": str(reason).strip(),
+                },
+                sort_keys=True,
+            ).encode("utf-8")
+        ).hexdigest(),
+        targets=[
+            {
+                "path": rel,
+                "role": "report",
+                "action": "write",
+                "content": content,
+                "before_hash": live_hash,
+                "after_hash": hashlib.sha256(content).hexdigest(),
+            }
+        ],
+        preconditions={rel: live_hash},
+        verification_policy="accepted_debt",
+    )
+    if not committed.get("ok"):
+        return {
+            "ok": False,
+            "code": committed.get("code", "VALIDATION_FAILED"),
+            "detail": committed.get("detail", committed.get("message", "journal apply failed")),
+        }
+    return {
+        "ok": True,
+        "code": "ACCEPTED_DEBT_REBOUND",
+        "record_id": ref,
+        "events": events,
+        "journal_op_id": op_id,
+        "evidence_from": sorted({item.get("file") for item in old_evidence if item.get("file")}),
+        "evidence_to": sorted({item["file"] for item in new_evidence}),
     }

@@ -43,6 +43,7 @@ ROOT = TOOLS.parent
 for _entry in (str(TOOLS), str(ROOT)):
     if _entry not in sys.path:
         sys.path.insert(0, _entry)
+from test_fixture_support import CURRENT_STYLE_CONTRACT  # noqa: E402
 
 SAIPEN_CLI = TOOLS / "saipen.py"
 
@@ -51,6 +52,15 @@ from saipen_engine import fast_check  # noqa: E402
 from saipen_engine import router as router_mod  # noqa: E402
 
 PROTOCOL_VERSION = C.CONFORMANCE_PROTOCOL_VERSION
+
+#: The install this test is running FROM, in the doubled-backslash form
+#: STATE.md carries. A fixture that names a hardcoded absolute path passes
+#: only in the checkout its author wrote it in: the declared core-unit family
+#: runs every test from a SANDBOX COPY, where the running install is the
+#: sandbox while STATE names the original checkout, so INSTALL_IDENTITY_MISMATCH
+#: refuses VALID -- and the three controls that assert `validate` succeeds red
+#: there and nowhere else (T-1588).
+_SAIPEN_HOME = str(ROOT).replace("\\", "\\\\")
 
 _STATE = (
     "---\n"
@@ -62,8 +72,8 @@ _STATE = (
     "saipen_version: 8\n"
     "schema_version: 3\n"
     "last_event: 2\n"
-    "style_contract: ded-4ae736e4\n"
-    'saipen_home: "V:\\\\___VAC\\\\__K\\\\__CODE\\\\_AI_STUFF_AGENTIC\\\\_SAIPEN"\n'
+    'style_contract: ' + CURRENT_STYLE_CONTRACT + '\n'
+    'saipen_home: "' + _SAIPEN_HOME + '"\n'
     "agent: tester\n"
     "mode: full\n"
     'updated: "2026-09-19T21:00:00Z"\n'

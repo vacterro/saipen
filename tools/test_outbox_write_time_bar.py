@@ -33,7 +33,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from saipen_engine.subs import (  # noqa: E402
+from saipen_engine.subs import (
     ROLE_REGISTRY,
     outbox_rel,
     validate_outbox_file,

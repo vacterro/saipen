@@ -190,7 +190,10 @@ class ProtocolRegistryTests(unittest.TestCase):
     def test_every_declared_load_budget_is_measured_from_registry(self):
         graph = self.registry["load_profiles"]
         self.assertEqual(set(graph["budgets"]), set(graph["profiles"]))
-        self.assertEqual(graph["budgets"]["cold"], 25 * 1024)
+        # T-1563 re-derivation (T-1465 evidence path): EXECUTION.md gained the
+        # PROTOCOL-ADMISSION-01 and chat-style-gate rule families, so cold was
+        # re-derived from the measured post-compression surface (26795).
+        self.assertEqual(graph["budgets"]["cold"], 26880)
         measured = protocol_budget.load_profiles(PROTOCOL)
         for name, limit in graph["budgets"].items():
             self.assertIn(name, measured)

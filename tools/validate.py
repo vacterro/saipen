@@ -134,6 +134,7 @@ from saipen_engine.subs import (
     CREW_ROLES,
     CREW_STAGES,
     current_local_role_revision,
+    outbox_paths as _sub_outbox_paths,
     parse_manifest as _parse_sub_manifest,
     parse_outbox as _parse_outbox,
     parse_sub_board as _parse_sub_board,
@@ -495,7 +496,7 @@ def _parse_cli(argv):
 def _git_from(cwd, *args):
     try:
         result = subprocess.run(
-            ["git", *args], cwd=cwd, capture_output=True, text=True, check=False
+            ["git", *args], cwd=cwd, capture_output=True, text=True, encoding="utf-8", check=False
         )
     except (OSError, subprocess.SubprocessError):
         return 1, ""
@@ -579,10 +580,67 @@ def _git(*args):
     """Run git, returning (returncode, stdout). Never raises: this file runs
     from a pre-commit hook and in projects that are not repositories at all."""
     try:
-        r = subprocess.run(["git", *args], capture_output=True, text=True, check=False)
+        r = subprocess.run(["git", *args], capture_output=True, text=True,
+            encoding="utf-8", check=False)
     except (OSError, subprocess.SubprocessError):
         return 1, ""
     return r.returncode, r.stdout
+
+
+def _uncommitted_symbols(rel: str) -> list[str]:
+    """Runtime symbols `rel` imports that HEAD does not carry.
+
+    T-1592.  Advising "commit the file" for an untracked runtime file is
+    unsafe when that file is a test whose SUBJECT is also uncommitted: the
+    commit turns a local manifest FAIL into a red suite in every clone.
+    Measured 2026-10-02 on this repo -- committing two untracked tools tests
+    made `--gate core` report zero manifest FAILs here while `git archive
+    HEAD`, extracted to a scratch tree, ran the same two modules as FAILED
+    (5 tests, 4 failures and one ImportError for a constant that exists only
+    in an uncommitted edit).
+
+    Read-only and cheap: one `git show` per distinct imported module, and it
+    is only ever called once a manifest file is already known to be untracked,
+    so the ordinary green gate pays nothing.  Names the missing symbols rather
+    than guessing; a file this cannot read returns no orphans and the existing
+    FAIL still stands.
+    """
+    try:
+        source = Path(rel).read_text(encoding="utf-8", errors="replace")
+    except OSError:
+        return []
+    cache: dict[str, str | None] = {}
+    orphans: set[str] = set()
+    for module, imported in re.findall(
+        r"^[ \t]*from[ \t]+([\w.]+)[ \t]+import[ \t]+(\(?[^\n#]+)", source, re.MULTILINE
+    ):
+        parts = module.split(".")
+        # Only a module that EXISTS IN THIS HOME can be one HEAD is missing. A
+        # stdlib or third-party name has no tools/ path at all and is present in
+        # every clone, so reporting it would fire on every ordinary file.
+        # ponytail: resolves repo modules under tools/ only; a manifest file
+        # outside that tree is not import-checked. Widen the root here if the
+        # manifest ever sweeps an importable tree.
+        candidates = [
+            f"tools/{(Path(*parts).with_suffix('.py')).as_posix()}",
+            f"tools/{(Path(*parts) / '__init__.py').as_posix()}",
+        ]
+        present = [k for k in candidates if Path(k).is_file()]
+        if not present:
+            continue
+        for key in present:
+            if key not in cache:
+                rc, out = _git("show", f"HEAD:{key}")
+                cache[key] = out if rc == 0 else None
+        bodies = [cache[k] for k in present]
+        if all(b is None for b in bodies):
+            orphans.add(f"module {module}")
+            continue
+        blob = "\n".join(b for b in bodies if b is not None)
+        for name in re.findall(r"[A-Za-z_]\w*", imported):
+            if not re.search(rf"\b{re.escape(name)}\b", blob):
+                orphans.add(f"{module}.{name}")
+    return sorted(orphans)
 
 
 #: A live SAIPEN home's release metadata surface is >1000 paths (the intake and
@@ -882,6 +940,34 @@ try:
             )
 except (OSError, ValueError) as _source_exc:
     fail(f"source receipts -- validation unavailable: {_source_exc}")
+
+# STORE-SAFETY-01: a declared canonical artifact may not vanish or point into
+# temporary storage while the Core/ship gate reports success.
+if (PROJECT_ROOT / ".saipen" / "STORES.json").exists() or (
+    PROJECT_ROOT / ".saipen" / "STORAGE_REGISTRY.json"
+).exists():
+    try:
+        from saipen_engine.storage_artifacts import validate_storage as _validate_storage
+
+        for _storage_finding in _validate_storage(PROJECT_ROOT):
+            fail(f"storage {_storage_finding['code']} -- {_storage_finding['detail']}")
+    except (OSError, ValueError) as _storage_exc:
+        fail(f"storage validation unavailable: {_storage_exc}")
+
+_storage_contract = home_doc("STORAGE.md")
+if _storage_contract is None:
+    fail("storage -- saipen/STORAGE.md contract missing")
+else:
+    _storage_text = _storage_contract.read_text(encoding="utf-8-sig")
+    for _marker in (
+        "STORE-SAFETY-01",
+        "safe to delete at any instant",
+        "unknown path never",
+        "saipen storage promote",
+        "STORAGE_REGISTRY.json",
+    ):
+        if _marker not in _storage_text:
+            fail(f"storage -- STORAGE.md missing {_marker!r}")
 
 _source_contract_path = home_doc("SOURCES.md")
 if _source_contract_path is None:
@@ -3577,6 +3663,75 @@ if log_files:
                         f"{_shown} (T-1282)"
                     )
 
+    # T-1577: T-1282 above proves an id resolves to a record. It cannot say
+    # whether a LOG line that DOES carry a plausible tag was emitted by a
+    # writer at all -- a hand-minted id that a later run happens to settle is
+    # indistinguishable from a real one, and a hand-typed id never has to. The
+    # writer grammar is decidable from the line alone (`journal.op_id_provenance`
+    # over the writer registry `journal.OP_CLASSES`), so this NAMES every id no
+    # writer emits and only FAILS the ones above the same resolved floor T-1282
+    # uses. Sealed segments, pre-floor history and off-grammar ids backed by a
+    # real record stay WARN: history is handled by exemption, never by
+    # rewriting (AC-04). With no ledger the gate is UNAVAILABLE, exactly as
+    # above. `_ha_floor` is kept for [closure-evidence] below, which draws the
+    # same history line for a closure that rests on typed evidence.
+    _ha_floor = None
+    if log_ok:
+        from saipen_engine.journal import (
+            op_id_provenance as _op_id_provenance,
+            resolvable_op_ids as _hand_authored_ledger,
+        )
+
+        _ha_ledger = _hand_authored_ledger(PROJECT_ROOT)
+        _ha_floor = max(
+            (
+                ev["event"]
+                for lf, _ln, _l, ev in _all_events
+                if lf.name == "LOG.md" and ev.get("op_id") and ev["op_id"] in _ha_ledger
+            ),
+            default=None,
+        )
+        _off_grammar = [
+            (ev["event"], ev["op_id"], lf.as_posix(), line_no, lf.name)
+            for lf, line_no, _line, ev in _all_events
+            if ev.get("op_id") and _op_id_provenance(ev["op_id"]) == "hand_authored"
+        ]
+        if _off_grammar:
+            _minted = [row for row in _off_grammar if row[1] not in _ha_ledger]
+            _forged = [
+                row
+                for row in _minted
+                if _ha_floor is not None and row[0] > _ha_floor and row[4] == "LOG.md"
+            ]
+            if _forged:
+                fail(
+                    "mechanical provenance [saio] -- active-log events name a "
+                    "hand-authored `[op: ...]` id that no writer in this "
+                    "repository emits (unregistered class or body width, "
+                    "journal.OP_CLASSES) "
+                    "and that resolves to no operation record, so the tag is a "
+                    "typed bracket standing in for a transition that never "
+                    "ran: "
+                    + "; ".join(f"{rel}:{ln} E-{eid} [op: {oid}]"
+                                for eid, oid, rel, ln, _n in _forged[:6])
+                    + " (T-1577)"
+                )
+            # Exempt = every named id the FAIL above did not take: the WARN
+            # must not call a forged line history, nor drop the ids a real
+            # operation record backs.
+            _exempt = [row for row in _off_grammar if row not in _forged]
+            if _exempt:
+                warn(
+                    "hand-authored-op-id",
+                    f"{len(_exempt)} event(s) carry an off-grammar "
+                    "`[op: ...]` id that no writer emits; exempt as history "
+                    "(sealed segment, at or below the resolved floor, or "
+                    "backed by a real operation record): "
+                    + "; ".join(f"{rel}:{ln} E-{eid} [op: {oid}]"
+                                for eid, oid, rel, ln, _n in _exempt[:3])
+                    + " (T-1577)",
+                )
+
     # [gate-closure] (NITRO dogfood IV, T-602): a ticket's DONE state is
     # evidence of the phase chain that produced it, NEVER of a legal-looking
     # final STATE. finish_ticket now REFUSEs every non-SHIP closure (the
@@ -3656,6 +3811,8 @@ if log_files:
             if _ctid:
                 _last_ticket_event[_ctid] = _cev["event"]
         _done_ids = sorted(t["id"] for t in tickets.values() if t.get("section") == "## DONE")
+        _closure_as_untagged = None
+        _typed_closures: list[str] = []
         for _done_id in _done_ids:
             # [closure-evidence] / superseded_verified (T-1418): a superseded
             # ticket never ran its own VERIFY cycle -- it closed because a
@@ -3754,6 +3911,26 @@ if log_files:
                         f"re-verification receipt unavailable: "
                         f"{type(_reverify_exc).__name__}"
                     )
+                if not _reverify_ok and (_ha_floor is None or _last_ev <= _ha_floor):
+                    # T-1577: the classifier IGNORES a hand-authored `[op: ...]`
+                    # line, so a closure whose evidence was typed reads as
+                    # unproven. Above the resolved floor that is the point and
+                    # FAILs below. At or below it -- or with no ledger to draw
+                    # the floor, where T-1577's own gate is UNAVAILABLE -- it
+                    # is history: read with those tags stripped (what the
+                    # classifier saw before), it closes, so it is NAMED and
+                    # never rewritten or failed (AC-04).
+                    if _closure_as_untagged is None:
+                        _closure_as_untagged = [
+                            dict(_cev, op_id=None)
+                            if _cev.get("op_id")
+                            and _op_id_provenance(_cev["op_id"]) == "hand_authored"
+                            else _cev
+                            for _cev in _closure_events
+                        ]
+                    if _closure_evidence(_done_id, _closure_as_untagged)[0]:
+                        _typed_closures.append(_done_id)
+                        continue
                 if not _reverify_ok:
                     fail(
                         f"closure-evidence -- ticket {_done_id} is ## DONE but "
@@ -3767,6 +3944,18 @@ if log_files:
                         "never closure proof), or re-verify with real evidence "
                         "before DONE"
                     )
+        if _typed_closures:
+            warn(
+                "hand-authored-closure-evidence",
+                f"{len(_typed_closures)} ## DONE ticket(s) closed on evidence "
+                "whose `[op: ...]` id no writer emits -- history at or below "
+                "the resolved floor, so named rather than failed; that "
+                "evidence is not closure proof, and `saipen work reverify` "
+                "records real proof: "
+                + ", ".join(_typed_closures[:8])
+                + (" ..." if len(_typed_closures) > 8 else "")
+                + " (T-1577)",
+            )
 
     # [attempt-contract] (T-1148): Work vs Attempt separation. An Attempt is
     # one bounded execution episode of one agent on one ticket; its failure
@@ -4671,10 +4860,14 @@ except FreshnessError as exc:
         + "; no package may become ready or be collected with unknown input"
     )
 
-_outbox_paths = set(Path(".").glob(".saipen/extensions/subs/*/kitchen/OUTBOX.md"))
-_translate_outbox = Path(".saipen/saitranslate/kitchen/OUTBOX.md")
-if _translate_outbox.is_file():
-    _outbox_paths.add(_translate_outbox)
+# ONE resolution for every role's package, canonical-when-present and
+# legacy-only-when-absent. The previous two-line form globbed the canonical
+# layout AND unconditionally added `.saipen/saitranslate/kitchen/OUTBOX.md`, so
+# a project that had migrated saitranslate to `extensions/subs/` was judged on
+# BOTH copies and the superseded one -- unparseable against the closed grammar
+# -- failed the collect gate for a package the gate was not even reading
+# (T-313). One role, one package, one answer.
+_outbox_paths = set(_sub_outbox_paths(Path(".")))
 
 # ------------------------------------------------------- PRODUCER GATE (T-568)
 #
@@ -6072,6 +6265,19 @@ if (
                 f"and every checkout of it does not. Commit the file or drop "
                 f"the manifest entry"
             )
+            # T-1592: the "Commit the file" branch above is unsafe when the
+            # file's runtime subject is itself uncommitted -- it trades this
+            # local FAIL for a red suite in every clone.  Say so here instead
+            # of letting the advice stand unqualified.
+            orphans = _uncommitted_symbols(f)
+            if orphans:
+                warn(
+                    "manifest-untracked-orphan",
+                    f"untracked manifest file {f} imports runtime that HEAD "
+                    f"does not carry: {', '.join(orphans)} -- do NOT commit it "
+                    f"alone; it will fail in every clone. Ship the runtime it "
+                    f"depends on first",
+                )
         if not manifest_missing and not manifest_untracked:
             ok(f"runtime manifest complete ({len(manifest)} files, all tracked)")
 
@@ -6647,7 +6853,8 @@ def _unpushed_count():
     """Commits on HEAD absent from the tracking remote, or None if unknowable."""
     try:
         r = subprocess.run(
-            ["git", "rev-list", "--count", "@{u}..HEAD"], capture_output=True, text=True, timeout=10
+            ["git", "rev-list", "--count", "@{u}..HEAD"], capture_output=True, text=True,
+                encoding="utf-8", timeout=10
         )
     except (OSError, subprocess.SubprocessError):
         return None  # no git on this host (RFC § 1.3 no-publish)
@@ -7676,12 +7883,22 @@ else:
         if _is_repo_clone and p.is_file() and p.name != ".git"
     }
     try:
+        # T-1558: explicit UTF-8 on both pipes. Text mode uses the LOCALE
+        # (cp1251 on the operator's Windows host), and a stray named by a
+        # host hook that ran its payload (T-1475) is exactly a name outside
+        # every ANSI code page: the encode raised out of the validator, no
+        # findings artifact was written, and the FAIL below -- the one that
+        # names the writing hook -- was unreachable. `replace` keeps an
+        # unrepresentable name a stray (git answers 'not ignored') rather
+        # than a crash.
         _ignored = subprocess.run(
             ["git", "check-ignore", "--stdin"],
             cwd=str(_tools_parent),
             input="\n".join(sorted(_root_files)),
             capture_output=True,
             text=True,
+            encoding="utf-8",
+            errors="replace",
         )
     except FileNotFoundError:
         # T-1322: `git` is ABSENT here, not "git present but not a clone". The
@@ -8481,6 +8698,10 @@ else:
             "mechanical-layer ownership doc (must state the semantic/mechanical boundary)",
         ),
         (
+            "saipen/STORAGE.md",
+            "durable/scratch rule markers and registered-artifact gate checked above",
+        ),
+        (
             "saipen/RUNTIME.md",
             "adaptive-runtime identity/capability contract enforced by tools/test_adaptive_runtime.py",
         ),
@@ -8808,7 +9029,8 @@ else:
         _tag_problem = None
         try:
             _r = subprocess.run(
-                ["git", "tag", "-l", "v*"], capture_output=True, text=True, check=False
+                ["git", "tag", "-l", "v*"], capture_output=True, text=True,
+                    encoding="utf-8", check=False
             )
             if _r.returncode == 0:
                 _tag_list = {
@@ -9019,7 +9241,7 @@ else:
                 _rb = subprocess.run(
                     ["git", "for-each-ref", "refs/remotes", "--format=%(refname)"],
                     capture_output=True,
-                    text=True,
+                    text=True, encoding="utf-8",
                     check=False,
                 )
                 if _rb.returncode == 0:
@@ -9047,7 +9269,7 @@ else:
                             "%(*objectname)%00%(objecttype)%00%(*objecttype)",
                         ],
                         capture_output=True,
-                        text=True,
+                        text=True, encoding="utf-8",
                         check=False,
                     )
                     if _tp.returncode == 0:
@@ -9067,7 +9289,7 @@ else:
                     _rl = subprocess.run(
                         ["git", "rev-list", "--remotes"],
                         capture_output=True,
-                        text=True,
+                        text=True, encoding="utf-8",
                         check=False,
                     )
                     if _rl.returncode == 0:
@@ -9090,7 +9312,7 @@ else:
                         _rc = subprocess.run(
                             ["git", "rev-parse", f"{_full}^{{commit}}"],
                             capture_output=True,
-                            text=True,
+                            text=True, encoding="utf-8",
                             check=False,
                         )
                         if _rc.returncode != 0:
@@ -9112,7 +9334,8 @@ else:
         if _orphan_candidates:
             _remote_names = []
             try:
-                _rn = subprocess.run(["git", "remote"], capture_output=True, text=True, check=False)
+                _rn = subprocess.run(["git", "remote"], capture_output=True, text=True,
+                    encoding="utf-8", check=False)
                 if _rn.returncode == 0:
                     _remote_names = [ln.strip() for ln in _rn.stdout.splitlines() if ln.strip()]
             except (OSError, subprocess.SubprocessError):
@@ -9122,7 +9345,7 @@ else:
                     _lr = subprocess.run(
                         ["git", "ls-remote", "--tags", _remote_names[0]],
                         capture_output=True,
-                        text=True,
+                        text=True, encoding="utf-8",
                         check=False,
                     )
                 except (OSError, subprocess.SubprocessError):
@@ -9148,7 +9371,7 @@ else:
                         _lh = subprocess.run(
                             ["git", "ls-remote", "--heads", _remote_names[0]],
                             capture_output=True,
-                            text=True,
+                            text=True, encoding="utf-8",
                             check=False,
                         )
                         if _lh.returncode == 0:
@@ -9164,7 +9387,7 @@ else:
                         _rc = subprocess.run(
                             ["git", "rev-parse", f"{_tag}^{{commit}}"],
                             capture_output=True,
-                            text=True,
+                            text=True, encoding="utf-8",
                             check=False,
                         )
                         if _rc.returncode != 0:

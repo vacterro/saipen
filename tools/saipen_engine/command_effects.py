@@ -91,6 +91,8 @@ def _entry_classes(entry: object) -> list[str]:
     found = [entry.get("default")]
     for sub in (entry.get("subcommands") or {}).values():
         found.append(sub if isinstance(sub, str) else (sub or {}).get("class"))
+        if isinstance(sub, dict):
+            found.extend((sub.get("actions") or {}).values())
     return [str(value) for value in found]
 
 
@@ -106,6 +108,7 @@ _VERBS: dict = dict(require_mapping(_TABLE, "verbs"))
 #: verb and has no effect class of its own: it is stripped, and the task it
 #: modifies is classified. Imported from its owner so the token cannot drift.
 from .hush import MODIFIER as _MODIFIER  # noqa: E402
+
 #: The verbs a shell line may name and still be read as ONE canonical
 #: operation. The rest are classified (for the CLI's own mutation gate) but a
 #: shell spelling of them stays an ordinary shell effect, as it always was.
@@ -195,6 +198,9 @@ def classify_invocation(verb: str | None, rest: Sequence[str] = ()) -> str:
         return default
     if isinstance(sub_entry, str):
         return sub_entry
+    nested = (sub_entry.get("actions") or {}).get(words[1]) if len(words) > 1 else None
+    if nested is not None:
+        return str(nested)
     if sub_entry.get("operands") == "one_ticket_id":
         # Exactly the named repair: one canonical ticket id, nothing else. A
         # placeholder or a second operand is not the registered repair.

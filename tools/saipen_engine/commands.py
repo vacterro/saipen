@@ -208,6 +208,33 @@ def parse_compound_command(message: str) -> list[str]:
     return segments
 
 
+def split_cli_compound_argv(argv: list[str]) -> list[list[str]]:
+    r"""Split shell-decoded CLI arguments without rebuilding a command line.
+
+    A standalone ``+`` is the operator separator. Quoted arguments containing
+    spaces or a plus remain one argv element and are passed through unchanged.
+    ``\+`` carries a literal standalone plus through Windows ``.cmd``, where
+    PowerShell removes quote marks before Python can see them. After ``--``,
+    arguments are opaque payload. Empty segments are invalid.
+    """
+    if not argv:
+        return [[]]
+    segments: list[list[str]] = [[]]
+    opaque = False
+    for arg in argv:
+        if arg == "--":
+            opaque = True
+        if arg == "+" and not opaque:
+            if not segments[-1]:
+                raise ValueError("compound command has an empty segment")
+            segments.append([])
+        else:
+            segments[-1].append("+" if arg == r"\+" and not opaque else arg)
+    if not segments[-1]:
+        raise ValueError("compound command has an empty segment")
+    return segments
+
+
 def resolve_compound_command(
     message: str,
     *,

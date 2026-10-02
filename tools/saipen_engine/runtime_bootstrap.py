@@ -319,7 +319,8 @@ def _invoke_installer(source: Path, adapter_id: str) -> subprocess.CompletedProc
         ]
     else:
         cmd = ["bash", str(source / "bootstrap" / "inject.sh"), "--adapter", adapter_id]
-    kwargs: dict = dict(capture_output=True, text=True, errors="replace", timeout=600)
+    kwargs: dict = dict(capture_output=True, text=True,
+        encoding="utf-8", errors="replace", timeout=600)
     # The installer renders the installed launcher with the SELECTED Python.
     # Pass the interpreter actually running this runtime so the installed
     # `bin/saipen` names a real interpreter instead of guessing from PATH.

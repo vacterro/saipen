@@ -63,7 +63,8 @@ def git(*args):
     """Run git, returning stdout stripped, or \"\" on failure. Never raises:
     this file runs from a pre-commit hook and in projects without git."""
     try:
-        r = subprocess.run(["git", *args], capture_output=True, text=True, check=False)
+        r = subprocess.run(["git", *args], capture_output=True, text=True,
+            encoding="utf-8", check=False)
     except (OSError, subprocess.SubprocessError):
         return ""
     return r.stdout.strip()

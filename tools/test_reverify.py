@@ -203,6 +203,9 @@ class LatestPassTests(ReverifyFixture):
             "gate": "core",
         }
         record.update(overrides)
+        # Sealed like reverify_work (T-1517): an unsealed receipt is never evidence.
+        canonical = json.dumps(record, sort_keys=True, separators=(",", ":")).encode("utf-8")
+        record["integrity_digest"] = debt_mod.hash_bytes(canonical)
         path = self._receipt_dir() / f"{receipt_id}.json"
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(json.dumps(record, indent=2), encoding="utf-8")

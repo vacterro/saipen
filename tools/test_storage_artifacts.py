@@ -5,8 +5,12 @@ from __future__ import annotations
 import hashlib
 import json
 import os
+import shutil
+import subprocess
+import sys
 import tempfile
 import unittest
+from contextlib import ExitStack
 from pathlib import Path
 from unittest.mock import patch
 
@@ -17,15 +21,28 @@ from saipen_engine.storage_artifacts import (
     promote_artifact,
     validate_storage,
 )
+from test_orchestration_repair import OrchestrationFixture
 
 ROOT = Path(__file__).resolve().parent.parent
 
 
-class StorageArtifactsTests(unittest.TestCase):
+class StorageArtifactsTests(OrchestrationFixture):
     def setUp(self) -> None:
-        self.temp = tempfile.TemporaryDirectory(prefix="storage-artifacts-", dir=ROOT)
+        # Core-unit sandboxes live under the OS temp root; model durable
+        # artifacts outside it while still cleaning this fixture on exit.
+        self.temp = tempfile.TemporaryDirectory(prefix="storage-artifacts-", dir=Path.home())
         self.addCleanup(self.temp.cleanup)
         self.base = Path(self.temp.name)
+        # The family runs in an OS-temp copy. Give this fixture its own real
+        # TEMP boundary so its explicit durable store is outside that boundary.
+        os_temp = self.base / "os-temporary"
+        os_temp.mkdir()
+        fixture_context = ExitStack()
+        self.addCleanup(fixture_context.close)
+        fixture_context.enter_context(patch.dict(os.environ, {
+            name: str(os_temp) for name in ("TEMP", "TMP", "TMPDIR")
+        }))
+        fixture_context.enter_context(patch.object(tempfile, "tempdir", str(os_temp)))
         self.project = self.base / "sailearn"
         (self.project / ".saipen").mkdir(parents=True)
         self.scratch = self.base / "cleanup" / "sailearn-home"
@@ -302,6 +319,66 @@ class StorageArtifactsTests(unittest.TestCase):
         (Path(result["record"]["path"]) / "adapter_model.safetensors").write_bytes(b"tampered")
         findings = validate_storage(self.project, policy=self.policy)
         self.assertEqual(findings[0]["code"], "STORAGE_HASH_MISMATCH")
+
+    def test_live_checker_and_finish_gate_refuse_lost_canonical_artifact(self) -> None:
+        from saipen_engine.fast_check import validate_project
+        from saipen_engine.operations import finish_ticket
+
+        fixture = self.make_project(active=True)
+        shutil.copytree(fixture / ".saipen", self.project / ".saipen", dirs_exist_ok=True)
+        with patch.dict(os.environ, {"SAIPEN_USER_CONFIG_HOME": str(self.base / "config")}):
+            configure_root("durable-set", self.base)
+            configure_root("ephemeral-add", self.base / "cleanup")
+            self.declare_durable()
+            source = self.scratch / "adapter.bin"
+            source.write_bytes(b"accepted adapter")
+            result = promote_artifact(self.project, "SAIBUD8", source, "SAILEARN_HOME")
+            self.to_ship(self.project, "T-7")
+            self.assertEqual(validate_project(self.project), [])
+            self.assertTrue(finish_ticket(self.project, "T-7", "tester", dry_run=True).ok)
+            paths = [self.project / ".saipen" / name for name in
+                     ("STATE.md", "BOARD.md", "LOG.md", "STORAGE_REGISTRY.json")]
+            before = [path.read_bytes() for path in paths]
+            Path(result["record"]["path"]).unlink()
+            errors = validate_project(self.project)
+            self.assertTrue(any("STORAGE_ARTIFACT_MISSING" in error for error in errors), errors)
+            refused = finish_ticket(self.project, "T-7", "tester")
+            self.assertFalse(refused.ok, refused.to_dict())
+            self.assertEqual(refused.code, "STORAGE_ARTIFACT_MISSING")
+            self.assertEqual([path.read_bytes() for path in paths], before)
+
+    def test_public_cli_blocks_temp_home_and_preserves_promoted_adapter_after_loss(self) -> None:
+        fixture = self.make_project(active=True)
+        shutil.copytree(fixture / ".saipen", self.project / ".saipen", dirs_exist_ok=True)
+        environment = {
+            **os.environ,
+            "SAIPEN_USER_CONFIG_HOME": str(self.base / "config"),
+            "SAIPEN_CAPABILITY": "full",
+            "PYTHONIOENCODING": "utf-8",
+        }
+
+        def cli(*args: str, expected: int = 0) -> dict:
+            run = subprocess.run(
+                [sys.executable, "-B", str(ROOT / "tools" / "saipen.py"),
+                 "--project-root", str(self.project), "--json", "storage", *args],
+                env=environment, capture_output=True, text=True, encoding="utf-8", timeout=30,
+            )
+            self.assertEqual(run.returncode, expected, run.stdout + run.stderr)
+            return json.loads(run.stdout)
+
+        cli("durable", "add", str(self.base))
+        cli("ephemeral", "add", str(self.base / "cleanup"))
+        refusal = cli("store", "declare", "SAILEARN_HOME", "DURABLE", str(self.scratch),
+                      "PROJECT", "SAILEARN", "PARTIAL", expected=1)
+        self.assertEqual(refusal["code"], "STORAGE_POLICY_VIOLATION")
+        cli("store", "declare", "SAILEARN_HOME", "DURABLE", str(self.durable),
+            "PROJECT", "SAILEARN", "PARTIAL")
+        source = self.scratch / "adapter.bin"
+        source.write_bytes(b"accepted adapter")
+        record = cli("promote", "SAIBUD8", str(source), "SAILEARN_HOME")["record"]
+        source.unlink()
+        self.assertEqual(cli("verify")["code"], "STORAGE_VALID")
+        self.assertEqual(Path(record["path"]).read_bytes(), b"accepted adapter")
 
 
 if __name__ == "__main__":

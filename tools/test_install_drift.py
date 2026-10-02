@@ -80,9 +80,11 @@ class DriftReportTests(unittest.TestCase):
     def test_line_endings_alone_are_not_drift(self):
         """The T-1253 boundary: the snapshot ships CRLF, the clone holds LF."""
         source = (autoinject.HOME / "saipen" / "BOOT.md").read_bytes()
-        crlf = source.replace(b"\r\n", b"\n").replace(b"\n", b"\r\n")
-        target = self._home({"BOOT.md": crlf})
-        self.assertNotEqual(crlf, source)
+        lf = source.replace(b"\r\n", b"\n")
+        crlf = lf.replace(b"\n", b"\r\n")
+        opposite = lf if source == crlf else crlf
+        target = self._home({"BOOT.md": opposite})
+        self.assertNotEqual(opposite, source)
         self.assertEqual(autoinject.surface_drift(target), [])
 
     def test_an_older_generation_is_named_with_both_byte_counts(self):

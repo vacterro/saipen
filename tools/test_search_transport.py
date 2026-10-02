@@ -37,6 +37,7 @@ from unittest import mock
 REPO = Path(__file__).resolve().parent
 if str(REPO) not in sys.path:
     sys.path.insert(0, str(REPO))
+from test_fixture_support import CURRENT_STYLE_CONTRACT  # noqa: E402
 
 from saipen_engine import search as search_engine  # noqa: E402
 from saipen_engine.guard_events import map_event  # noqa: E402
@@ -330,7 +331,7 @@ class ProjectShapeRegressionTests(unittest.TestCase):
             "saipen_version: 7\n"
             "schema_version: 3\n"
             "last_event: 2\n"
-            "style_contract: ded-4ae736e4\n"
+            'style_contract: ' + CURRENT_STYLE_CONTRACT + '\n'
             "agent: tester\n"
             "mode: full\n"
             "updated: 2026-09-13T00:00:00Z\n"

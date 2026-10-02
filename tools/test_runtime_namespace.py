@@ -35,6 +35,7 @@ TOOLS = Path(__file__).resolve().parent
 ROOT = TOOLS.parent
 if str(TOOLS) not in sys.path:
     sys.path.insert(0, str(TOOLS))
+from test_fixture_support import CURRENT_STYLE_CONTRACT  # noqa: E402
 
 from saipen_engine import runtime_namespace as rn_mod  # noqa: E402
 from saipen_engine.paths import unbound_environment  # noqa: E402
@@ -53,7 +54,7 @@ transition_from: DONE
 saipen_version: 8
 schema_version: 3
 last_event: 2
-style_contract: ded-4ae736e4
+style_contract: {CURRENT_STYLE_CONTRACT}
 saipen_home: "{ROOT}"
 agent: tester
 mode: full

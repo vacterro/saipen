@@ -123,6 +123,7 @@ class AdaptiveRuntimeTests(unittest.TestCase):
                 "provider": "openai",
                 "model": "model-x",
                 "variant": "high",
+                "effort": "xhigh",
                 "capabilities": {"shell": True, "browser": False},
             },
         )
@@ -130,6 +131,7 @@ class AdaptiveRuntimeTests(unittest.TestCase):
         self.assertEqual("seat-7", result["agent"])
         self.assertEqual("opencode", result["harness"])
         self.assertEqual("openai", result["provider"])
+        self.assertEqual("xhigh", result["effort"])
         self.assertTrue(result["capabilities"]["shell"])
         self.assertFalse(result["capabilities"]["browser"])
         self.assertIsNone(result["capabilities"]["mcp"])

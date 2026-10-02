@@ -45,7 +45,7 @@ class BuildDirectiveGrammarTests(T1412Base):
         """The exact invocation that created the phantom, twice: still refused."""
         before = self._board_hash()
         for _ in range(2):
-            rc, payload, text = self.run_cli(
+            _rc, payload, text = self.run_cli(
                 self.root, "build", "--file", str(self.payload), "--dry-run"
             )
             self.assertEqual(payload.get("code"), "VALIDATION_FAILED", text)
@@ -61,7 +61,7 @@ class BuildDirectiveGrammarTests(T1412Base):
         for option in ("--receipt", "--hex", "--priority", "--kind"):
             with self.subTest(option=option):
                 before = self._board_hash()
-                rc, payload, text = self.run_cli(
+                _rc, payload, text = self.run_cli(
                     self.root, "build", option, "SRC-001", "--dry-run"
                 )
                 self.assertEqual(payload.get("code"), "VALIDATION_FAILED", text)
@@ -70,26 +70,26 @@ class BuildDirectiveGrammarTests(T1412Base):
 
     def test_global_flags_are_consumed_globally_not_by_the_verb(self) -> None:
         """`--json` is the global transport flag, not a build option."""
-        rc, payload, text = self.run_cli(
+        _rc, payload, text = self.run_cli(
             self.root, "build", "--json", "the real directive"
         )
         self.assertEqual(payload.get("code"), "BUILD_WORK_STARTED", text)
         self.assertEqual(payload.get("directive"), "the real directive")
 
     def test_free_text_is_still_ingested_verbatim(self) -> None:
-        rc, payload, text = self.run_cli(self.root, "build", "fix the thing", "--dry-run")
+        _rc, payload, text = self.run_cli(self.root, "build", "fix the thing", "--dry-run")
         self.assertEqual(payload.get("code"), "BUILD_WORK_STARTED", text)
         self.assertEqual(payload.get("directive"), "fix the thing")
 
     def test_a_multi_word_directive_survives(self) -> None:
-        rc, payload, text = self.run_cli(
+        _rc, payload, text = self.run_cli(
             self.root, "build", "make", "the", "window", "close", "--dry-run"
         )
         self.assertEqual(payload.get("code"), "BUILD_WORK_STARTED", text)
         self.assertEqual(payload.get("directive"), "make the window close")
 
     def test_empty_build_needs_a_directive(self) -> None:
-        rc, payload, text = self.run_cli(self.root, "build", "--dry-run")
+        _rc, payload, text = self.run_cli(self.root, "build", "--dry-run")
         self.assertEqual(payload.get("code"), "VALIDATION_FAILED", text)
         self.assertIn("free-text directive", payload.get("detail", ""))
 

@@ -26,6 +26,7 @@ import subprocess
 import sys
 import tempfile
 import unittest
+from unittest import mock
 from pathlib import Path
 
 TOOLS = Path(__file__).resolve().parent
@@ -44,6 +45,9 @@ from test_hermetic_env import isolate_host_session  # noqa: E402
 
 HOOK = ROOT / "extensions" / "adapters" / "claude" / "saipen-guard.py"
 REAL_POLICY = PA.load_policy()
+HOST_POSITIVE_BLOCKED = (
+    "CAPABILITY_UNAVAILABLE: separated production host authority required; SRC-140:R009 BLOCKED"
+)
 
 VALID_REPLY = "Kontroll l\u00e4bitud."
 ESSAY = "\n".join(f"Fact {n} is exact." for n in range(12))
@@ -110,15 +114,14 @@ class World:
             "authority_root": self.authority,
             "home": self.home,
             "policy": self.policy,
+            "adapters": getattr(self, "adapters", None),
         }
         fields.update(overrides)
         return PA.Context(**fields)
 
     def transport(self, verb="establish", event="SessionStart", session_id="session-1") -> str:
-        """The host-owned capability: the test acts as the host channel, which
-        is the only role allowed to bootstrap the transport key."""
-        key = PA.bootstrap_transport_key(self.project)
-        return f"hook:{event}:{PA._transport_mac(key, verb, event, session_id)}"
+        """Synthetic token for isolated state-machine tests, NEVER host proof."""
+        return f"unit-only:{verb}:{event}:{session_id}"
 
     def establish(self, ctx: PA.Context | None = None, **overrides) -> dict:
         target = self.ctx(**overrides) if ctx is None else ctx
@@ -141,8 +144,53 @@ class WorldCase(unittest.TestCase):
         self.addCleanup(self._tmp.cleanup)
         self.world = World(Path(self._tmp.name))
 
+    def simulated_owner(self):
+        """Test-only dependency doubles exercise generation/delivery, not security.
 
-class OwnerStateTests(WorldCase):
+        No key, MAC, signing helper, environment flag or production provider is
+        installed. The independent AuthorityMintingTests run the real boundary.
+        """
+        records = {}
+        adapters = PA._adapters(self.world.ctx())
+        adapters["claude"] = {**adapters["claude"], "admission_enforcement": "MECHANICAL"}
+        self.world.adapters = adapters
+
+        def verify(root, verb, session, value):
+            parts = str(value or "").split(":")
+            if len(parts) == 4 and parts[:2] == ["unit-only", verb] and parts[3] == session:
+                return True, None, parts[2]
+            return False, PA.AUTHORITY_UNAVAILABLE, None
+
+        def write(root, session, record, transport_event):
+            record = {**record, "session": session, "transport": transport_event}
+            record["seal"] = PA._seal(record)
+            records[session] = record
+            path = PA._ledger_path(root, session)
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text(json.dumps(record), encoding="utf-8")
+
+        def read(root, session):
+            path = PA._ledger_path(root, session)
+            try:
+                record = json.loads(path.read_text(encoding="utf-8"))
+            except (OSError, ValueError):
+                return None
+            return record if record == records.get(session) else None
+
+        doubles = (("verify_transport", verify), ("_write_record", write), ("_read_record", read))
+        for name, double in doubles:
+            patch = mock.patch.object(PA, name, side_effect=double)
+            patch.start()
+            self.addCleanup(patch.stop)
+
+
+class SimulatedOwnerCase(WorldCase):
+    def setUp(self):
+        super().setUp()
+        self.simulated_owner()
+
+
+class OwnerStateTests(SimulatedOwnerCase):
     def test_a_project_with_no_delivered_authority_is_binding_and_not_permitted(self):
         verdict = PA.evaluate(self.world.ctx())
         self.assertEqual(verdict["state"], PA.STATE_BINDING)
@@ -196,7 +244,7 @@ class OwnerStateTests(WorldCase):
         self.assertTrue(any("cannot be compiled" in p["reason"] for p in verdict["problems"]))
 
 
-class SelfReportTests(WorldCase):
+class SelfReportTests(SimulatedOwnerCase):
     def test_prose_cannot_produce_a_ledger_record(self):
         # There is no API through which a claim can be passed: the only writers
         # are `establish` (runtime) and the seal check rejects everything else.
@@ -294,14 +342,17 @@ class TransportAuthorityTests(WorldCase):
         self.assertFalse(PA._ledger_path(self.world.project, "session-9").exists())
 
     def test_a_direct_import_cannot_invalidate(self):
-        self.world.establish()
+        path = PA._ledger_path(self.world.project, "session-1")
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_bytes(b"untrusted existing record")
+        before = path.read_bytes()
         payload = self._hostile_python(
             "out = pa.invalidate({p!r}, 'session-1', 'attack')\n"
             "print(json.dumps(out))".format(p=str(self.world.project))
         )
         self.assertFalse(payload["ok"])
         self.assertEqual(payload["code"], PA.CODE_TRANSPORT_REQUIRED)
-        self.assertTrue(PA._ledger_path(self.world.project, "session-1").exists())
+        self.assertEqual(path.read_bytes(), before)
 
     def test_a_forged_transport_env_is_not_a_capability(self):
         # Pre-fix subject: this exact CLI call with this exact env value was
@@ -338,8 +389,9 @@ class TransportAuthorityTests(WorldCase):
         self.assertEqual(proc.returncode, 1, out)
         self.assertEqual(out["code"], PA.CODE_TRANSPORT_REQUIRED)
         self.assertFalse(PA._ledger_path(self.world.project, "session-1").exists())
-        self.assertEqual(PA.evaluate(self.world.ctx())["state"], PA.STATE_BINDING)
+        self.assertFalse(PA.evaluate(self.world.ctx())["permitted"])
 
+    @unittest.skip(HOST_POSITIVE_BLOCKED)
     def test_the_cli_with_a_genuine_host_capability_establishes(self):
         env = {k: v for k, v in os.environ.items()}
         env[PA.TRANSPORT_ENV] = self.world.transport("establish", "UserPromptSubmit")
@@ -376,6 +428,7 @@ class TransportAuthorityTests(WorldCase):
         self.assertEqual(out["state"], PA.STATE_ADMITTED)
         self.assertEqual(PA.evaluate(self.world.ctx())["state"], PA.STATE_ADMITTED)
 
+    @unittest.skip(HOST_POSITIVE_BLOCKED)
     def test_the_host_hook_mints_capabilities_the_owner_accepts(self):
         import importlib.util
 
@@ -405,15 +458,21 @@ class TransportAuthorityTests(WorldCase):
             self.world.project, "establish", "session-1", "hook:UserPromptSubmit:" + "0" * 64
         )
         self.assertFalse(ok)
-        self.assertIn("no host transport key", detail)
+        self.assertEqual(detail, PA.AUTHORITY_UNAVAILABLE)
 
-    def test_bootstrap_never_replaces_an_existing_key(self):
-        first = PA.bootstrap_transport_key(self.world.project)
-        second = PA.bootstrap_transport_key(self.world.project)
-        self.assertEqual(first, second)
+    def test_local_bootstrap_is_unavailable_and_leaves_legacy_key_untouched(self):
+        path = self.world.project / PA.LEDGER_DIR / ".transport.key"
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_bytes(b"legacy key")
+        self.assertFalse(hasattr(PA, "bootstrap_transport_key"))
+        valid, _detail, _event = PA.verify_transport(
+            self.world.project, "establish", "session-1", "hook:e:0"
+        )
+        self.assertFalse(valid)
+        self.assertEqual(path.read_bytes(), b"legacy key")
 
 
-class ForgedLedgerTests(WorldCase):
+class ForgedLedgerTests(SimulatedOwnerCase):
     """The forged-record control: a syntactically valid, current-looking record
     whose ordinary SHA-256 seal was recomputed by hand is never admission
     evidence. The plain seal stays corruption detection; provenance is keyed."""
@@ -487,7 +546,7 @@ class ForgedLedgerTests(WorldCase):
         )
 
 
-class SkillTests(WorldCase):
+class SkillTests(SimulatedOwnerCase):
     """The observed carrier: `anthropic-skills:caveman` -> Unknown skill."""
 
     def _synced_only(self):
@@ -529,7 +588,7 @@ class SkillTests(WorldCase):
         self.assertIn(".agents/skills/caveman", joined)
 
 
-class InvalidationTests(WorldCase):
+class InvalidationTests(SimulatedOwnerCase):
     def _admit(self):
         self.assertEqual(self.world.establish()["state"], PA.STATE_ADMITTED)
         self.old_token = PA.evaluate(self.world.ctx())["token"]
@@ -654,7 +713,7 @@ def gate(world: World, text: str, *, state: str = "ADMITTED", **kw):
     )
 
 
-class LayeringTests(WorldCase):
+class LayeringTests(SimulatedOwnerCase):
     def test_no_admission_blocks_a_perfectly_formed_reply(self):
         result = gate(self.world, VALID_REPLY, state="UNESTABLISHED")
         self.assertFalse(result["ok"])
@@ -782,6 +841,7 @@ class PreFixOracleTests(WorldCase):
         verdict = self.world.establish(policy=policy)
         self.assertEqual(verdict["state"], PA.STATE_REFUSED)
 
+    @unittest.skip(HOST_POSITIVE_BLOCKED)
     def test_admitted_through_the_same_oracle_passes(self):
         self.world.establish()
         rc, now = cli_check(
@@ -829,6 +889,7 @@ class ClaudeHostTests(WorldCase):
             authority=self.world.authority,
         )
 
+    @unittest.skip(HOST_POSITIVE_BLOCKED)
     def test_the_first_prompt_delivers_authority_before_the_model_runs(self):
         out = self._prompt()
         context = out["hookSpecificOutput"]["additionalContext"]
@@ -837,6 +898,7 @@ class ClaudeHostTests(WorldCase):
             self.assertIn(f"=== {name} sha256:", context)
         self.assertNotIn("decision", out)
 
+    @unittest.skip(HOST_POSITIVE_BLOCKED)
     def test_the_second_prompt_is_not_charged_the_full_delivery(self):
         self._prompt()
         second = self._prompt()["hookSpecificOutput"]["additionalContext"]
@@ -850,12 +912,14 @@ class ClaudeHostTests(WorldCase):
         self.assertTrue(out["reason"].startswith("SAIPEN PROTOCOL ADMISSION REFUSED"))
         self.assertNotIn("hookSpecificOutput", out)
 
+    @unittest.skip(HOST_POSITIVE_BLOCKED)
     def test_a_changed_style_is_redelivered_on_the_next_prompt(self):
         self._prompt()
         self.world.edit_authority("STYLE.md", "\nNew rule.\n")
         out = self._prompt()
         self.assertIn("=== STYLE.md", out["hookSpecificOutput"]["additionalContext"])
 
+    @unittest.skip(HOST_POSITIVE_BLOCKED)
     def test_compaction_wipes_the_context_so_the_next_session_start_redelivers(self):
         self._prompt()
         out = guard(
@@ -875,7 +939,8 @@ class ClaudeHostTests(WorldCase):
             self.world.home,
             authority=self.world.authority,
         )
-        self.assertEqual(PA.evaluate(self.world.ctx())["state"], PA.STATE_BINDING)
+        self.assertFalse(PA.evaluate(self.world.ctx())["permitted"])
+        self.assertFalse((self.world.project / PA.LEDGER_DIR).exists())
 
     def test_bootstrap_tool_activity_is_never_gated_while_unadmitted(self):
         # Before admission the model must still be able to read, resolve and run.
@@ -892,7 +957,7 @@ class ClaudeHostTests(WorldCase):
                 guard(self.world.project, event, self.world.home, authority=self.world.authority),
                 event,
             )
-        self.assertEqual(PA.evaluate(self.world.ctx())["state"], PA.STATE_BINDING)
+        self.assertFalse(PA.evaluate(self.world.ctx())["permitted"])
 
     def test_the_stop_gate_blocks_an_unadmitted_perfect_reply_with_a_runtime_reason(self):
         out = guard(
@@ -908,6 +973,7 @@ class ClaudeHostTests(WorldCase):
         self.assertEqual(out["decision"], "block")
         self.assertIn("PROTOCOL ADMISSION", out["reason"])
 
+    @unittest.skip(HOST_POSITIVE_BLOCKED)
     def test_the_stop_gate_passes_an_admitted_compliant_reply(self):
         self._prompt()
         out = guard(
@@ -922,6 +988,7 @@ class ClaudeHostTests(WorldCase):
         )
         self.assertIsNone(out, out)
 
+    @unittest.skip(HOST_POSITIVE_BLOCKED)
     def test_the_stop_gate_still_rejects_a_style_invalid_reply_after_admission(self):
         self._prompt()
         out = guard(
@@ -994,9 +1061,9 @@ class SameTurnInitTests(unittest.TestCase):
                 world_home,
                 authority=authority,
             )
-            context = out["hookSpecificOutput"]["additionalContext"]
-            self.assertEqual(out["hookSpecificOutput"]["hookEventName"], "PostToolUse")
-            self.assertIn("=== STYLE.md", context)
+            self.assertIn("HOST_AUTHORITY_UNAVAILABLE", out["systemMessage"])
+            self.assertNotIn("hookSpecificOutput", out)
+            self.assertFalse((project / PA.LEDGER_DIR).exists())
             # Same turn, no restart, no grace turn: the final reply meets admission.
             reply = guard(
                 project,
@@ -1011,8 +1078,8 @@ class SameTurnInitTests(unittest.TestCase):
             # The fresh project routes as an operational WAIT (the human owes the
             # first goal): the EXEC-RESPONSE layer, not admission, speaks now.
             self.assertEqual(reply.get("decision"), "block", reply)
-            self.assertNotIn("PROTOCOL ADMISSION", reply["reason"])
-            self.assertIn("EXEC-RESPONSE-01", reply["reason"])
+            self.assertIn("PROTOCOL ADMISSION", reply["reason"])
+            self.assertNotIn("EXEC-RESPONSE-01 gate", reply["reason"])
 
 
 class CapabilityMatrixTests(unittest.TestCase):
@@ -1050,10 +1117,11 @@ class CapabilityMatrixTests(unittest.TestCase):
 
     def test_claude_is_mechanical_at_the_prompt_boundary_and_not_universal(self):
         claude = self.adapters["claude"]
-        self.assertEqual(claude["admission_enforcement"], "MECHANICAL")
+        self.assertEqual(claude["admission_enforcement"], "UNAVAILABLE")
+        self.assertTrue(claude["admission_required"])
         self.assertEqual(claude["pre_output_interception"], "PROMPT_LEVEL")
         self.assertEqual(claude["stop_output_interception"], "MECHANICAL")
-        self.assertIn("MessageDisplay", claude["admission_enforcement_note"])
+        self.assertIn("separated host authority", claude["admission_enforcement_note"])
 
     def test_no_other_host_claims_admission_without_an_evidence_channel(self):
         for name, entry in self.adapters.items():

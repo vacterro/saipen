@@ -45,6 +45,26 @@ PYTHON = shutil.which("python") or shutil.which("python3")
 INSTALL_RELATIVE = Path(".config") / "opencode" / "plugins" / "saipen-guard.js"
 
 
+def _provider_reports_tool_code(requests: list[dict], code: str) -> bool:
+    return any(
+        code in str(message.get("content") or "")
+        for request in requests
+        for message in request.get("prior", [])
+        if message.get("role") == "tool"
+    )
+
+
+class ProviderTranscriptOracleTests(unittest.TestCase):
+    def test_other_tool_refusals_do_not_satisfy_the_expected_code(self):
+        transcript = [{
+            "prior": [{
+                "role": "tool",
+                "content": "SAIPEN_GUARD_REFUSAL: PATH_ESCAPES_PROJECT",
+            }]
+        }]
+        self.assertFalse(_provider_reports_tool_code(transcript, "OWNERSHIP_CONFLICT"))
+
+
 class _ScriptedProvider:
     def __init__(self, actions: list[tuple[str, dict]],
                  child_actions: list[tuple[str, dict]] | None = None) -> None:
@@ -290,7 +310,8 @@ class BoundOpenCodeNativeSmoke(unittest.TestCase):
         ]
         proc, probe, requests = self._launch(root, None, actions)
         combined = proc.stdout + proc.stderr
-        self.assertEqual(proc.returncode, 0, combined)
+        self.assertEqual(proc.returncode, 1, combined)
+        self.assertIn("EXEC_RESPONSE_INVALID", combined)
         self.assertTrue(probe.is_file(), combined)
         self.assertIsNone(json.loads(probe.read_text(encoding="utf-8").splitlines()[0])["actor"])
         self.assertTrue((root / "src" / "allowed-one.py").is_file(), combined)
@@ -326,7 +347,8 @@ class BoundOpenCodeNativeSmoke(unittest.TestCase):
             root, None, parent_actions, child_actions=child_actions
         )
         combined = proc.stdout + proc.stderr
-        self.assertEqual(proc.returncode, 0, combined)
+        self.assertEqual(proc.returncode, 1, combined)
+        self.assertIn("EXEC_RESPONSE_INVALID", combined)
         self.assertTrue(probe.is_file(), combined)
         self.assertTrue(any(item["child"] for item in requests), requests)
         self.assertTrue(
@@ -356,7 +378,8 @@ class BoundOpenCodeNativeSmoke(unittest.TestCase):
         ]
         proc, probe, _requests = self._launch(root, None, actions, home=real_home)
         combined = proc.stdout + proc.stderr
-        self.assertEqual(proc.returncode, 0, combined)
+        self.assertEqual(proc.returncode, 1, combined)
+        self.assertIn("EXEC_RESPONSE_INVALID", combined)
         diagnostic = json.loads(probe.read_text(encoding="utf-8").splitlines()[0])
         self.assertIsNone(diagnostic["actor"])
         self.assertEqual(
@@ -373,12 +396,17 @@ class BoundOpenCodeNativeSmoke(unittest.TestCase):
     def test_optional_explicit_launch_is_checked_and_does_not_leak(self):
         foreign = project_with_doing_owner("other-seat")
         actions = [("write", {"filePath": "src/foreign.py", "content": "no\n"})]
-        proc, probe, _requests = self._launch(foreign, "launch-seat", actions)
+        proc, probe, requests = self._launch(foreign, "launch-seat", actions)
         combined = proc.stdout + proc.stderr
-        self.assertEqual(proc.returncode, 0, combined)
+        self.assertEqual(proc.returncode, 1, combined)
         self.assertEqual(json.loads(probe.read_text(encoding="utf-8").splitlines()[0])["actor"],
                          "launch-seat")
-        self.assertIn("OWNERSHIP_CONFLICT", combined)
+        # In CREATE_NO_WINDOW runs OpenCode may leave --format json stdout and
+        # stderr empty. Its next model request still carries the host tool's
+        # refusal as the tool result, which is the transcript this check owns.
+        self.assertTrue(
+            _provider_reports_tool_code(requests, "OWNERSHIP_CONFLICT"), requests
+        )
         self.assertFalse((foreign / "src" / "foreign.py").exists())
 
         # Separate bare control: generic launch has no explicit actor. This

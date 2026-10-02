@@ -24,7 +24,7 @@ from .board import (
     parse_board,
 )
 from .journal import hash_bytes, owned_target_path
-from .paths import project_identity, project_lineage_identity
+from .paths import history_bound_here, project_identity, project_lineage_identity
 from .plan import TargetPlan
 
 COMPACTION_ROOT = ".saipen/recovery/board-compaction"
@@ -835,6 +835,7 @@ def prepare_new(
     verify: str,
     op_id: str,
     event_id: str,
+    regression: str = "",
 ) -> CompactionResult:
     """Externalize a new record before it is projected onto BOARD.
 
@@ -852,11 +853,15 @@ def prepare_new(
     record_path, metadata_path = _artifact_paths(ticket_id, original_hash)
     owned_target_path(root, record_path, kind="BOARD compaction detail")
     owned_target_path(root, metadata_path, kind="BOARD compaction metadata")
+    fields = {"needs": ",".join(needs)}
+    if regression:
+        fields["regression"] = regression
+    fields["verify"] = verify
     ticket = {
         "id": ticket_id,
         "checkbox": " ",
         "description": f"[{priority}] {description}",
-        "fields": {"needs": ",".join(needs), "verify": verify},
+        "fields": fields,
     }
     metadata = _metadata(
         root=root,
@@ -1033,12 +1038,13 @@ def _verified_detail(
             f"({ticket_id}, expected {expected_ticket_id})"
         )
     _require(
-        metadata.get("project_identity") == project_identity(root),
-        "BOARD detail project identity mismatch",
-    )
-    _require(
         metadata.get("project_lineage") == project_lineage_identity(root),
         "BOARD detail project lineage mismatch",
+    )
+    # T-1514: the path identity binds only a lineage-less legacy project.
+    _require(
+        history_bound_here(metadata.get("project_identity"), metadata.get("project_lineage"), root),
+        "BOARD detail project identity mismatch",
     )
     record_ref = metadata.get("original_record_path")
     if not isinstance(record_ref, str) or not record_ref:
@@ -1106,8 +1112,10 @@ def _verified_checkpoint(root: Path, checkpoint_ref: str, ticket_id: str) -> dic
         f"({payload.get('ticket_id')!r}, expected {ticket_id})",
     )
     _require(
-        payload.get("project_identity") == project_identity(root)
-        and payload.get("project_lineage") == project_lineage_identity(root),
+        payload.get("project_lineage") == project_lineage_identity(root)
+        and history_bound_here(
+            payload.get("project_identity"), payload.get("project_lineage"), root
+        ),
         "BOARD detail lineage checkpoint project identity/lineage mismatch",
     )
     entries = payload.get("entries")

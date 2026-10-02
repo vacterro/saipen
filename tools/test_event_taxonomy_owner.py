@@ -31,6 +31,7 @@ from unittest import mock
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "tools"))
+from test_fixture_support import CURRENT_STYLE_CONTRACT  # noqa: E402
 
 from saipen_engine import operations as O  # noqa: E402
 from saipen_engine.log import VALID_TAXONOMIES  # noqa: E402
@@ -60,7 +61,7 @@ def make_project(tmp: Path) -> Path:
     (saipen / "STATE.md").write_text(
         '---\nphase: DONE\ntask: none\nnext_action: "saipen continue"\n'
         'blocker: ""\ntransition_from: SHIP\nsaipen_version: 8\n'
-        "schema_version: 3\nlast_event: 900\nstyle_contract: ded-4ae736e4\n"
+        'schema_version: 3\nlast_event: 900\nstyle_contract: ' + CURRENT_STYLE_CONTRACT + '\n'
         f'saipen_home: "{ROOT.as_posix()}"\nagent: probe\nrequires:\n  - filesystem\n'
         "  - git\n  - python\nmode: full\nupdated: 2026-08-09T00:00:00Z\n"
         "---\n",

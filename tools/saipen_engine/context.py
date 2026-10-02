@@ -962,6 +962,27 @@ def brief_projection(project_root: Path | str) -> Result:
         if rec is None:
             return None
         view = {"id": rec["id"], "result": rec["result"] or "active"}
+        view["executor_identity"] = rec.get("agent")
+        provenance = rec.get("runtime_provenance")
+        if provenance is None:
+            provenance = {
+                "schema_version": 1,
+                "executor_identity": rec.get("agent"),
+                "runtime_provider": None,
+                "runtime_model": None,
+                "runtime_effort": None,
+                "provenance_source": "unavailable",
+                "provenance_status": "unavailable",
+                "benchmark_evidence": "incomplete",
+                "reason_code": "legacy_attempt_without_provenance",
+                "missing_fields": [
+                    "runtime_provider",
+                    "runtime_model",
+                    "runtime_effort",
+                ],
+                "integrity_digest": None,
+            }
+        view["runtime_provenance"] = provenance
         if rec["close_event"] is not None:
             view["stop_reason"] = rec["stop"]
         else:

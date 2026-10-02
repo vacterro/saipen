@@ -63,6 +63,10 @@ class Fixture(unittest.TestCase):
         self.root = Path(self._tmp.name) / "project"
         self.root.mkdir()
         shutil.copytree(SCENARIO, self.root / ".saipen")
+        # T-1555: the fixture carries the placeholder; the copy claims THIS install.
+        from test_fixture_support import restamp_live_style
+
+        restamp_live_style(self.root / ".saipen")
         (self.root / ".saipen" / "LOG.md").write_text(LOG_SEED, encoding="utf-8")
         state_path = self.root / ".saipen" / "STATE.md"
         state = state_path.read_text(encoding="utf-8")
@@ -223,11 +227,13 @@ class FailClosedRecordTests(Fixture):
         self.assertNotEqual(done.returncode, 0, done.stdout)
         self.assertEqual(len(self.provenance_fail_lines(done.stdout)), 1, done.stdout)
 
-    def test_foreign_project_identity_fails_closed(self) -> None:
+    def test_foreign_project_lineage_fails_closed(self) -> None:
+        # T-1516: the lineage binds the record; the recorded checkout path is
+        # provenance, so a copy at another path keeps the acceptance.
         self.register_json(["E-003", "E-004"])
 
         def mutate(body: dict) -> None:
-            body["project_identity"] = "some-other-project"
+            body["project_lineage"] = "lineage-" + "0" * 32
 
         self.rewrite_record(mutate)
         done = self.run_validator()

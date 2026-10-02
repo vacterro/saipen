@@ -62,9 +62,9 @@ class Suppression(unittest.TestCase):
     def test_an_unknown_output_kind_prints_rather_than_disappearing(self) -> None:
         self.assertFalse(hush.HUSHED.suppresses("something-new"))
 
-    def test_the_default_policy_suppresses_nothing(self) -> None:
+    def test_the_default_policy_suppresses_intermediate_narration(self) -> None:
         for kind in hush.DISCRETIONARY | hush.MANDATORY:
-            self.assertFalse(hush.DEFAULT.suppresses(kind), kind)
+            self.assertEqual(hush.DEFAULT.suppresses(kind), kind in hush.INTERMEDIATE, kind)
 
     def test_the_two_output_sets_cannot_overlap(self) -> None:
         self.assertEqual(hush.DISCRETIONARY & hush.MANDATORY, frozenset())

@@ -293,13 +293,15 @@ def resolution_problems(root: Path | str, work: str, ticket: dict) -> list[str]:
         problems.append(
             f"{work} cites {receipt_id}, which resolves {record.get('work')!r}"
         )
-    from .paths import project_lineage_identity
-    from .debt import _project_identity
+    from .paths import history_bound_here, project_lineage_identity
 
-    if record.get("project_identity") != _project_identity(root):
-        problems.append(f"{receipt_id} was written for a different project identity")
+    # T-1516: the lineage owns the receipt; the path binds a lineage-less project only.
     if record.get("project_lineage") != project_lineage_identity(root):
         problems.append(f"{receipt_id} was written for a different project lineage")
+    elif not history_bound_here(
+        record.get("project_identity"), record.get("project_lineage"), root
+    ):
+        problems.append(f"{receipt_id} was written for a different project identity")
     if record.get("verdict") != "PASS":
         problems.append(
             f"{receipt_id} verdict is {record.get('verdict')!r}; only a PASS "

@@ -43,7 +43,9 @@ class AuthorityMintingTests(unittest.TestCase):
             hashlib.sha256((SUBJECT / "protocol_admission.py").read_bytes()).hexdigest(),
             identity["sha256"],
         )
-        common = dict(project=self.world.project, authority=self.world.authority, home=self.world.home)
+        common = dict(
+            project=self.world.project, authority=self.world.authority, home=self.world.home
+        )
         old = run(SUBJECT, **common)
         self.assertEqual((old["before"], old["result"], old["after"]),
                          ("BINDING", "ADMITTED", "ADMITTED"))
@@ -94,7 +96,8 @@ class AuthorityMintingTests(unittest.TestCase):
                 cap = f"hook:{event}:{hmac.new(key, domain, 'sha256').hexdigest()}"
                 self.assertFalse(PA.verify_transport(self.world.project, verb, "session-1", cap)[0])
                 self.assertFalse(PA.establish(self.world.ctx(), transport=cap)["permitted"])
-                self.assertFalse(PA.invalidate(self.world.project, "session-1", "attack", cap)["ok"])
+                result = PA.invalidate(self.world.project, "session-1", "attack", cap)
+                self.assertFalse(result["ok"])
         self.assertEqual(path.read_bytes(), key)
 
     def test_sha_seal_and_even_legacy_keyed_provenance_are_non_authoritative(self):
@@ -143,7 +146,8 @@ class AuthorityMintingTests(unittest.TestCase):
         project.mkdir()
         launcher = ROOT / "bin" / ("saipen.cmd" if os.name == "nt" else "saipen")
         process = subprocess.run(
-            [str(launcher), "init", "--project-root", str(project), "--agent", "test-agent", "--json"],
+            [str(launcher), "init", "--project-root", str(project),
+             "--agent", "test-agent", "--json"],
             capture_output=True, encoding="utf-8", check=False,
             env={k: v for k, v in os.environ.items() if not k.startswith("SAIPEN_")},
         )

@@ -25,25 +25,23 @@ recorded nowhere. A model cannot satisfy admission by talking: `establish` and
 `invalidate` are host-transport operations, gated HERE in the write boundary
 (not only in the CLI wrapper), and the ledger is protected runtime namespace.
 
-Transport authority (mechanical, inside this module): a mutating call must
-present a capability `hook:<event>:<mac>` where `<mac>` is HMAC-SHA256 over
-`saipen-admission-transport:<verb>:<event>:<session>` keyed by the per-project
-transport key (`.saipen/cache/admission/.transport.key`, created once by the
-HOST channel via `bootstrap_transport_key`, never by this module). An ordinary
-Python or shell route can set an environment variable or spell a record by
-hand; it cannot compute the MAC without the key, and the key sits in the
-guard-protected canonical namespace, so every model tool route that names it is
-refused before it runs. Honest scope limit: same-user code that has already
-exfiltrated the key bytes through a route the guard cannot see can forge a
-capability; that is the same-user limit every file on the machine shares, and
-it is recorded here instead of being papered over.
+Authority limit (T-1563): a Python hook and model-executed Python run as
+the same OS principal. Either can import the hook or read its project key.
+Neither an underscore, an environment variable, a protected path classifier,
+nor moving the signing helper into the adapter establishes host provenance.
+There is currently NO separated host authority in this installation. Local
+authority bootstrap, key reads, MAC minting and record signing are unavailable;
+mutations fail closed, including legacy hook:<event>:<mac> strings. A future
+host-owned service must authenticate the real host outside the model's child
+process surface and own both signing and authoritative ledger mutation. A
+same-user broker that accepts ordinary callers would reproduce this defect.
 
-Record provenance: the ledger record carries BOTH a plain SHA-256 `seal`
-(corruption detection only -- it never proves who wrote the record) and a keyed
-`provenance` HMAC over the sealed body (host-written provenance). A record
-whose plain seal is valid but whose provenance does not verify -- a forged
-current-looking record with a recomputed seal -- is ABSENT to `evaluate`:
-it is never ADMITTED evidence.
+Record provenance remains REQUIRED. A plain SHA-256 seal detects corruption
+only; legacy HMAC records made with the retrievable project key are not trusted.
+No record is accepted until provenance can be checked against a genuinely
+separated authority. Admission availability and the existing hook's ability to
+block a prompt are separate registry facts. UNAVAILABLE admission never grants
+a pass through the response layers.
 
 States (existing SAIPEN vocabulary; `ADMITTED` is already the tool-admission
 word):
@@ -75,12 +73,9 @@ from __future__ import annotations
 
 import glob
 import hashlib
-import hmac
 import json
 import os
 import re
-import secrets
-import tempfile
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -97,18 +92,17 @@ STATES = (STATE_UNBOUND, STATE_BINDING, STATE_ADMITTED, STATE_STALE, STATE_REFUS
 #: field says which; a second code per state would be a second vocabulary.
 CODE_REQUIRED = "PROTOCOL_ADMISSION_REQUIRED"
 #: `establish` and `invalidate` are runtime transport operations, gated inside
-#: the write boundary itself: a capability must name the host transport event
-#: and carry the keyed MAC a shell route cannot compute.
+#: the write boundary itself. No local MAC or caller-supplied hook name can
+#: satisfy it while separated host authority is unavailable.
 CODE_TRANSPORT_REQUIRED = "PROTOCOL_ADMISSION_TRANSPORT_REQUIRED"
 TRANSPORT_ENV = "SAIPEN_ADMISSION_TRANSPORT"
 TRANSPORT_PREFIX = "hook:"
 
 LEDGER_DIR = Path(".saipen") / "cache" / "admission"
-#: Per-project transport key. Lives inside the guard-protected admission
-#: namespace so every model tool route that names it is refused. Created only
-#: by the host channel (`bootstrap_transport_key`); this module never mints
-#: the authority it later requires.
-TRANSPORT_KEY_NAME = ".transport.key"
+AUTHORITY_UNAVAILABLE = (
+    "HOST_AUTHORITY_UNAVAILABLE: same-user Python hooks cannot authenticate host "
+    "transport; a separated host authority is required"
+)
 
 #: Authority documents whose delivered bytes admission proves.
 AUTHORITY_DOCUMENTS = ("BOOT.md", "STYLE.md", "EXECUTION.md")
@@ -204,13 +198,15 @@ def host_claims(ctx: Context) -> dict:
 
 
 def consulted(ctx: Context) -> bool:
-    """Is admission enforceable on this host? Only a MECHANICAL claim is consulted.
+    """Should the reply gate require admission for this host?
 
-    A host with no evidence channel cannot prove delivery; consulting admission
-    there would block every reply forever or pass on a declaration. Neither is
-    acceptable, so the gate reports the layer as not enforceable instead.
+    A required boundary remains closed when its authority is UNAVAILABLE.
+    Losing the MECHANICAL claim must not silently bypass the admission layer.
     """
-    return host_claims(ctx).get("admission_enforcement") == "MECHANICAL"
+    entry = _adapters(ctx).get(ctx.host) or {}
+    return entry.get("admission_required") is True or (
+        host_claims(ctx).get("admission_enforcement") == "MECHANICAL"
+    )
 
 
 def _authority_root(ctx: Context) -> Path | None:
@@ -312,7 +308,7 @@ def _agents_component(ctx: Context, policy: dict) -> tuple[str | None, str | Non
         status = instruction_status(entry, install)
     except Exception:
         status = "unknown"
-    if status not in ("current",):
+    if status != "current":
         message = f"host {ctx.host} activation block is {status}"
         if policy.get("agents_stale", "diagnose") == "refuse":
             return (_sha(block), message, None)
@@ -470,76 +466,16 @@ def _ledger_path(project_root: Path, session_id: str) -> Path:
     return Path(project_root) / LEDGER_DIR / (_sha(session_id)[:24] + ".json")
 
 
-def _transport_key_path(project_root: Path) -> Path:
-    return Path(project_root) / LEDGER_DIR / TRANSPORT_KEY_NAME
-
-
-def bootstrap_transport_key(project_root: Path | str) -> bytes:
-    """Create the per-project transport key ONCE, or return the existing bytes.
-
-    Host-channel bootstrap: the host hook calls this before its first mutating
-    admission call. Create-only (O_EXCL, 0600) -- an existing key is returned
-    untouched, and this module itself never calls this on its own behalf: the
-    write boundary must not mint the authority it verifies.
-    """
-    path = _transport_key_path(Path(project_root))
-    try:
-        data = path.read_bytes()
-        if data:
-            return data
-    except OSError:
-        pass
-    path.parent.mkdir(parents=True, exist_ok=True)
-    fresh = secrets.token_bytes(32)
-    try:
-        fd = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
-    except FileExistsError:
-        return path.read_bytes()
-    with os.fdopen(fd, "wb") as stream:
-        stream.write(fresh)
-    return fresh
-
-
-def _read_transport_key(project_root: Path | None) -> bytes | None:
-    if project_root is None:
-        return None
-    try:
-        data = _transport_key_path(Path(project_root)).read_bytes()
-    except OSError:
-        return None
-    return data or None
-
-
-def _transport_mac(key: bytes, verb: str, event: str, session_id: str) -> str:
-    domain = f"saipen-admission-transport:{verb}:{event}:{session_id}".encode("utf-8")
-    return hmac.new(key, domain, "sha256").hexdigest()
-
-
 def verify_transport(
     project_root: Path | str | None, verb: str, session_id: str, value: object
 ) -> tuple[bool, str | None, str | None]:
-    """Is `value` a genuine host-owned transport capability for this mutation?
+    """Read-only and fail closed until a separated host verifier exists.
 
-    The capability is `hook:<event>:<mac>`; the MAC is keyed by the per-project
-    transport key and binds the verb, the host event and the session, so a
-    captured or invented string does not transfer. An environment variable a
-    shell sets is not a capability: without the key bytes there is no MAC.
-    Returns (ok, detail, event).
+    Old project keys and capabilities are deliberately not read. Accepting them
+    would preserve the ordinary-import bypass. Caller-supplied keys, verifiers,
+    environment strings and hook names cannot install a trust authority.
     """
-    if not isinstance(value, str) or not value.startswith(TRANSPORT_PREFIX):
-        return False, "no host transport presented; a shell call is not a hook event", None
-    # rsplit: the EVENT may itself contain colons (SessionStart:compact); the
-    # MAC is the one component that never does.
-    parts = value[len(TRANSPORT_PREFIX) :].rsplit(":", 1)
-    if len(parts) != 2 or not parts[0] or not parts[1]:
-        return False, "transport capability is not hook:<event>:<mac>", None
-    event, mac = parts
-    key = _read_transport_key(Path(project_root) if project_root else None)
-    if key is None:
-        return False, "project has no host transport key", None
-    if not hmac.compare_digest(_transport_mac(key, verb, event, session_id), mac):
-        return False, "transport capability does not verify", None
-    return True, None, event
+    return False, AUTHORITY_UNAVAILABLE, None
 
 
 def _seal(record: dict) -> str:
@@ -547,57 +483,37 @@ def _seal(record: dict) -> str:
     return _sha(json.dumps(body, sort_keys=True))
 
 
-def _provenance(record: dict, key: bytes) -> str:
-    body = {k: v for k, v in record.items() if k != "provenance"}
-    return hmac.new(key, json.dumps(body, sort_keys=True).encode("utf-8"), "sha256").hexdigest()
+def _verify_record_provenance(record: dict) -> bool:
+    """SAFE_READ_ONLY: no trustworthy separated verifier is available yet.
+
+    Keyed provenance is mandatory; presence alone is insufficient. A supplied
+    record, key or valid corruption seal never creates a verification authority.
+    """
+    return False
 
 
 def _read_record(project_root: Path, session_id: str) -> dict | None:
-    """The ledger record, or None. Corrupt, unreadable or UNPROVEN is ABSENT:
-    an old token that cannot be proven is not reusable, and a forged record
-    whose plain seal was recomputed by hand proves nothing."""
+    """Read-only. Corrupt, transplanted, unsigned or unproven records are absent."""
     try:
         record = json.loads(_ledger_path(project_root, session_id).read_text(encoding="utf-8"))
     except (OSError, ValueError):
         return None
     if not isinstance(record, dict) or record.get("schema") != SCHEMA_VERSION:
         return None
-    # The record names its own session: a legitimate record transplanted to
-    # another session's ledger filename is not that session's evidence.
-    if record.get("session") != session_id:
+    if record.get("session") != session_id or record.get("seal") != _seal(record):
         return None
-    if record.get("seal") != _seal(record):
-        return None
-    key = _read_transport_key(project_root)
-    if key is None:
-        return None
-    if not hmac.compare_digest(record.get("provenance") or "", _provenance(record, key)):
+    if not record.get("provenance") or not _verify_record_provenance(record):
         return None
     return record
 
 
 def _write_record(project_root: Path, session_id: str, record: dict, transport_event: str) -> None:
-    """The canonical ledger writer. Callers are host transports that already
-    passed `verify_transport`; the writer itself needs the key, so an ordinary
-    caller cannot mint a proven record through it."""
-    key = _read_transport_key(project_root)
-    if key is None:
-        raise ValueError("no host transport key; the host channel must bootstrap first")
-    record = {k: v for k, v in record.items() if k not in ("seal", "provenance")}
-    record["session"] = session_id
-    record["transport"] = transport_event
-    record["seal"] = _seal(record)
-    record["provenance"] = _provenance(record, key)
-    path = _ledger_path(project_root, session_id)
-    path.parent.mkdir(parents=True, exist_ok=True)
-    fd, temp = tempfile.mkstemp(prefix=path.name + ".", dir=path.parent)
-    try:
-        with os.fdopen(fd, "w", encoding="utf-8") as stream:
-            json.dump(record, stream, sort_keys=True)
-        os.replace(temp, path)
-    finally:
-        if os.path.exists(temp):
-            os.unlink(temp)
+    """UNAVAILABLE: an ordinary engine caller cannot write authoritative state.
+
+    Do not reopen this writer with a caller-supplied key or verifier. The future
+    separated authority must own the write, as well as authenticate its caller.
+    """
+    raise PermissionError(AUTHORITY_UNAVAILABLE)
 
 
 def invalidate(
@@ -739,17 +655,10 @@ def _delivery(found: dict, gen: str) -> str:
 
 
 def establish(ctx: Context, transport: object = None) -> dict:
-    """Deliver the authority and record what was delivered. Host-transport only.
+    """Host mutation boundary; unavailable authority refuses before evaluation.
 
-    The transport gate lives HERE, in the write boundary, and it runs FIRST:
-    a direct Python call or a shell CLI call without a genuine host-owned
-    capability (`hook:<event>:<mac>` keyed by the per-project transport key) is
-    refused before any evaluation happens. A shell that merely sets the
-    transport environment variable does not hold the key and fails the same
-    gate.
-
-    Idempotent: a session whose record is already current gets no second copy
-    (`delivery` is empty), so a healthy session pays for delivery once per epoch.
+    The generation and delivery implementation remains for a separated host
+    integration. No local hook or ordinary imported helper can unlock it.
     """
     if transport is None:
         transport = os.environ.get(TRANSPORT_ENV, "")
@@ -834,14 +743,13 @@ def capability_matrix(adapters: dict | None = None) -> dict:
 
 
 __all__ = [
+    "AUTHORITY_UNAVAILABLE",
     "CODE_REQUIRED",
     "CODE_TRANSPORT_REQUIRED",
-    "Context",
     "STATES",
     "TRANSPORT_ENV",
-    "TRANSPORT_KEY_NAME",
     "TRANSPORT_PREFIX",
-    "bootstrap_transport_key",
+    "Context",
     "capability_matrix",
     "consulted",
     "diagnostic",

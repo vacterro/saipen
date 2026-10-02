@@ -1,90 +1,77 @@
-"""Cover the write-time stamp guard and the scope of the inversion amnesty.
+"""The retired raw appender, and the scope of the validator's inversion amnesty.
 
-Two things went wrong to produce T-1261, and each gets its own tests here.
+`tools/_log_append.py` took a caller-formed line and appended it. A stamp guard
+was bolted on after two ISO-order stamps (E-2068 `26.08.05`, E-5171
+`26.09.01`) became permanent, and on 29.09.26 it passed an agent from another
+project writing `--help` and three of its own events into this ledger. The
+defect was the caller forming ledger identity at all, so the appender is
+retired: it writes nothing, and `saipen checkpoint` forms every line.
 
-`tools/_log_append.py` appended whatever line it was handed. LOG.md is
-append-only, so a mistyped stamp is permanent: E-2068 (`26.08.05`) and E-5171
-(`26.09.01`) are both the ISO order written into a day-first field, landing 21
-and 25 years in the past. The guard has to refuse those before the write and
-write nothing at all when it does.
-
-`tools/validate.py` had a check that would have caught both and could not fire:
-its amnesty was one boolean over the whole corpus, so three sealed DECs from
-July 2026 covered every line written afterwards. The amnesty is now scoped to
-the event ids a DEC can actually have known about, and only a DEC grants it --
-a RUN line that merely quotes the phrase must not, which is exactly how the
-SCOUT checkpoint for this ticket silenced the check while diagnosing it.
+`tools/validate.py` had a check that would have caught both stamps and could
+not fire: its amnesty was one boolean over the whole corpus, so three sealed
+DECs from July 2026 covered every line written afterwards. The amnesty is now
+scoped to the event ids a DEC can actually have known about, and only a DEC
+grants it -- a RUN line that merely quotes the phrase must not.
 """
 
-import datetime
+import contextlib
+import io
+import os
+import tempfile
 import unittest
+from pathlib import Path
 
-import _log_append as guard
+import _log_append as appender
 
-NOW = datetime.datetime(2026, 9, 2, 12, 0, tzinfo=datetime.timezone.utc)
 EXISTING = "# Log\n- 02.09.26 11:00 [E-100] [agent: a] [op: t] RUN: previous\n"
 
 
-class StampParsingTests(unittest.TestCase):
-    def test_iso_order_is_not_a_valid_day_first_stamp(self):
-        """`26.09.01` means day 26 of month 9; it is not 2026-09-01."""
-        stamp, eid = guard.parse_stamp("- 26.09.01 13:20 [E-5171] RUN: x")
-        self.assertEqual(eid, 5171)
-        self.assertEqual(
-            stamp,
-            datetime.datetime(2001, 9, 26, 13, 20, tzinfo=datetime.timezone.utc),
+class RetiredAppenderTests(unittest.TestCase):
+    """Whatever it is handed, the appender leaves the ledger byte-identical."""
+
+    def setUp(self):
+        self._tmp = tempfile.TemporaryDirectory(prefix="retired-appender-")
+        self.addCleanup(self._tmp.cleanup)
+        self.log = Path(self._tmp.name) / ".saipen" / "LOG.md"
+        self.log.parent.mkdir()
+        self.log.write_bytes(EXISTING.encode("utf-8"))
+        cwd = os.getcwd()
+        os.chdir(self._tmp.name)
+        self.addCleanup(os.chdir, cwd)
+
+    def run_main(self, *args):
+        out, err = io.StringIO(), io.StringIO()
+        with contextlib.redirect_stdout(out), contextlib.redirect_stderr(err):
+            code = appender.main(["_log_append.py", *args])
+        return code, out.getvalue() + err.getvalue()
+
+    def test_help_prints_the_notice_and_writes_nothing(self):
+        """The measured first line: `--help` was appended to the ledger."""
+        for flag in ("--help", "-h"):
+            code, text = self.run_main(flag)
+            self.assertEqual(code, 0)
+            self.assertIn("saipen checkpoint", text)
+            self.assertEqual(self.log.read_bytes(), EXISTING.encode("utf-8"))
+
+    def test_a_well_formed_next_line_is_still_refused(self):
+        code, text = self.run_main("- 02.09.26 11:30 [E-101] [agent: a] [op: t] RUN: fine")
+        self.assertEqual(code, 2)
+        self.assertIn("REFUSED", text)
+        self.assertEqual(self.log.read_bytes(), EXISTING.encode("utf-8"))
+
+    def test_the_measured_foreign_sequence_writes_nothing(self):
+        code, _text = self.run_main(
+            "- 29.09.26 20:47 [E-2602] [parent: E-2601] [T-261] [agent: buffy] "
+            "[op: scout-4c1f9a2b] RUN: another project's line",
+            "--allow-inversion",
         )
+        self.assertEqual(code, 2)
+        self.assertEqual(self.log.read_bytes(), EXISTING.encode("utf-8"))
 
-    def test_impossible_date_reports_invalid(self):
-        stamp, _ = guard.parse_stamp("- 31.02.26 10:00 [E-9] RUN: x")
-        self.assertEqual(stamp, "INVALID")
-
-    def test_non_event_line_is_not_a_stamp(self):
-        self.assertIsNone(guard.parse_stamp("# Log"))
-        self.assertIsNone(guard.parse_stamp(""))
-
-
-class GuardTests(unittest.TestCase):
-    def test_good_line_passes(self):
-        line = "- 02.09.26 11:30 [E-101] [agent: a] [op: t] RUN: fine"
-        self.assertEqual(guard.check([line], EXISTING, NOW), [])
-
-    def test_iso_order_stamp_is_refused_as_an_inversion(self):
-        """The real E-5171 shape: parses, but lands decades before the tail."""
-        line = "- 26.09.01 13:20 [E-101] [agent: a] [op: t] RUN: x"
-        problems = guard.check([line], EXISTING, NOW)
-        self.assertEqual(len(problems), 1)
-        self.assertIn("BEHIND the last dated line", problems[0])
-
-    def test_impossible_date_is_refused_with_the_field_order_hint(self):
-        line = "- 31.02.26 13:20 [E-101] RUN: x"
-        problems = guard.check([line], EXISTING, NOW)
-        self.assertEqual(len(problems), 1)
-        self.assertIn("does not name a real date", problems[0])
-        self.assertIn("ISO order", problems[0])
-
-    def test_future_stamp_is_refused(self):
-        line = "- 02.09.26 23:00 [E-101] RUN: x"
-        problems = guard.check([line], EXISTING, NOW)
-        self.assertEqual(len(problems), 1)
-        self.assertIn("ahead of real UTC", problems[0])
-
-    def test_clock_slack_is_tolerated_in_both_directions(self):
-        """Two machines may disagree by minutes; that is skew, not a bad stamp."""
-        self.assertEqual(guard.check(["- 02.09.26 10:57 [E-101] RUN: x"], EXISTING, NOW), [])
-        self.assertEqual(guard.check(["- 02.09.26 12:04 [E-101] RUN: x"], EXISTING, NOW), [])
-
-    def test_non_event_lines_pass_through(self):
-        self.assertEqual(guard.check(["", "# Log", "not an event"], EXISTING, NOW), [])
-
-    def test_later_line_in_the_same_call_is_checked_against_the_earlier_one(self):
-        lines = [
-            "- 02.09.26 11:30 [E-101] RUN: first",
-            "- 26.09.01 11:31 [E-102] RUN: second",
-        ]
-        problems = guard.check(lines, EXISTING, NOW)
-        self.assertEqual(len(problems), 1)
-        self.assertIn("line 2", problems[0])
+    def test_no_code_path_opens_the_ledger_for_writing(self):
+        source = Path(appender.__file__).read_text(encoding="utf-8")
+        for writer in ("write_bytes", "write_text", "open("):
+            self.assertNotIn(writer, source)
 
 
 class AmnestyScopeTests(unittest.TestCase):

@@ -28,6 +28,7 @@ from pathlib import Path
 TOOLS = Path(__file__).resolve().parent
 if str(TOOLS) not in sys.path:
     sys.path.insert(0, str(TOOLS))
+from test_fixture_support import CURRENT_STYLE_CONTRACT  # noqa: E402
 
 from saipen_engine.operations import normalize_log  # noqa: E402
 from saipen_engine.paths import identity_file_content, new_project_lineage  # noqa: E402
@@ -40,22 +41,23 @@ def setUpModule() -> None:
     isolate_host_session()
 
 
-STATE = """---
-phase: BUILD
-task: T-1
-next_action: "PHASE BUILD T-1"
-blocker: ""
-transition_from: SCOUT
-saipen_version: 8
-schema_version: 3
-last_event: 1304
-style_contract: ded-4ae736e4
-saipen_home: "{home}"
-mode: full
-updated: 2026-09-16T00:00:00Z
-agent: test-agent
----
-"""
+STATE = (
+    '---\n'
+    'phase: BUILD\n'
+    'task: T-1\n'
+    'next_action: "PHASE BUILD T-1"\n'
+    'blocker: ""\n'
+    'transition_from: SCOUT\n'
+    'saipen_version: 8\n'
+    'schema_version: 3\n'
+    'last_event: 1304\n'
+    'style_contract: ' + CURRENT_STYLE_CONTRACT + '\n'
+    'saipen_home: "{home}"\n'
+    'mode: full\n'
+    'updated: 2026-09-16T00:00:00Z\n'
+    'agent: test-agent\n'
+    '---\n'
+)
 BOARD = (
     "## DOING\n- [/] T-1 [P1] normalize fixture | verify: the repair runs "
     "| owner: test-agent | claim_time: 2026-09-16T00:00:00Z\n"

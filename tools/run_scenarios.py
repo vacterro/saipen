@@ -54,6 +54,7 @@ import zipfile
 from pathlib import Path
 from unittest import mock
 
+from test_fixture_support import CURRENT_STYLE_CONTRACT
 import freshness
 from freshness import (
     FreshnessError,
@@ -283,7 +284,7 @@ def junctions_available() -> bool:
         result = subprocess.run(
             ["cmd", "/c", "mklink", "/J", os.fspath(link), os.fspath(real)],
             capture_output=True,
-            text=True,
+            text=True, encoding="utf-8",
             errors="replace",
         )
         if result.returncode != 0 or not link.exists():
@@ -294,9 +295,18 @@ def junctions_available() -> bool:
 
 EXPECT_RE = re.compile(r"^expect:\s*(pass|fail)\s*$", re.MULTILINE)
 
-_IGNORE_RUNTIME = shutil.ignore_patterns(
-    "__pycache__", "*.pyc", ".saipen/recovery", ".saipen/locks", ".saipen/cache"
-)
+def _without_probe_runtime(ignore):
+    """A fixture gets its own ephemeral locks/cache; durable evidence stays."""
+    def wrapped(directory, names):
+        ignored = set(ignore(directory, names))
+        if Path(directory).name == ".saipen":
+            ignored.update(name for name in names if name in ("locks", "cache"))
+        return ignored
+
+    return wrapped
+
+
+_IGNORE_RUNTIME = _without_probe_runtime(shutil.ignore_patterns("__pycache__", "*.pyc"))
 
 # A fixture that declares `expect: fail` and then fails for some OTHER reason
 # asserts nothing at all, and says PASS while doing it. Three did exactly that:
@@ -435,7 +445,8 @@ def run_ci_status_probes() -> tuple[list[str], int]:
             ["worktree", "add", "-q", "-b", "probe", str(root / "linked")],
         ):
             subprocess.run(
-                ["git", *args], cwd=main_repo, check=False, capture_output=True, text=True
+                ["git", *args], cwd=main_repo, check=False, capture_output=True, text=True,
+                    encoding="utf-8"
             )
         linked = root / "linked"
         if not linked.is_dir():
@@ -498,7 +509,7 @@ def run_hook_probes() -> tuple[list[str], int, int]:
             [sys.executable, str(fake_home / "tools" / "install_hook.py")],
             cwd=project,
             capture_output=True,
-            text=True,
+            text=True, encoding="utf-8",
             errors="replace",
         )
         if install.returncode:
@@ -521,7 +532,7 @@ def run_hook_probes() -> tuple[list[str], int, int]:
             cwd=project,
             env=env,
             capture_output=True,
-            text=True,
+            text=True, encoding="utf-8",
             errors="replace",
         )
         working_output = working.stdout + working.stderr
@@ -540,7 +551,7 @@ def run_hook_probes() -> tuple[list[str], int, int]:
             cwd=project,
             env=no_bash_env,
             capture_output=True,
-            text=True,
+            text=True, encoding="utf-8",
             errors="replace",
         )
         missing_output = missing.stdout + missing.stderr
@@ -577,7 +588,7 @@ def run_hook_probes() -> tuple[list[str], int, int]:
             cwd=project,
             env=ci_env,
             capture_output=True,
-            text=True,
+            text=True, encoding="utf-8",
             errors="replace",
         )
         no_tool_output = no_tool.stdout + no_tool.stderr
@@ -616,7 +627,7 @@ def run_hook_probes() -> tuple[list[str], int, int]:
             cwd=project,
             env=ci_env,
             capture_output=True,
-            text=True,
+            text=True, encoding="utf-8",
             errors="replace",
         )
         red_output = red.stdout + red.stderr
@@ -668,7 +679,7 @@ def run_hook_probes() -> tuple[list[str], int, int]:
             cwd=project,
             env=ci_env,
             capture_output=True,
-            text=True,
+            text=True, encoding="utf-8",
             errors="replace",
         )
         broken_output = broken.stdout + broken.stderr
@@ -730,7 +741,7 @@ def run_precommit_purity_probe() -> tuple[list[str], int, int]:
                 [sys.executable, str(fake_home / "tools" / "install_hook.py")],
                 cwd=project,
                 capture_output=True,
-                text=True,
+                text=True, encoding="utf-8",
                 errors="replace",
             )
             if install.returncode:
@@ -741,7 +752,7 @@ def run_precommit_purity_probe() -> tuple[list[str], int, int]:
                 ["git", "status", "--porcelain=v1", "-uall"],
                 cwd=project,
                 capture_output=True,
-                text=True,
+                text=True, encoding="utf-8",
                 errors="replace",
             ).stdout
             run = subprocess.run(
@@ -749,14 +760,14 @@ def run_precommit_purity_probe() -> tuple[list[str], int, int]:
                 cwd=project,
                 env=env,
                 capture_output=True,
-                text=True,
+                text=True, encoding="utf-8",
                 errors="replace",
             )
             after = subprocess.run(
                 ["git", "status", "--porcelain=v1", "-uall"],
                 cwd=project,
                 capture_output=True,
-                text=True,
+                text=True, encoding="utf-8",
                 errors="replace",
             ).stdout
             return (root, None, run, before, after)
@@ -906,7 +917,8 @@ def run_injector_probe(
     source_cache.write_bytes(b"not real bytecode; distribution sentinel\n")
     source_loose_bytecode.write_bytes(b"not real bytecode; loose distribution sentinel\n")
     result = subprocess.run(
-        command, cwd=home, env=env, capture_output=True, text=True, errors="replace"
+        command, cwd=home, env=env, capture_output=True, text=True,
+            encoding="utf-8", errors="replace"
     )
     problems = installed_layout_problems(destination)
     if result.returncode:
@@ -920,7 +932,7 @@ def run_injector_probe(
             cwd=home,
             env=env,
             capture_output=True,
-            text=True,
+            text=True, encoding="utf-8",
             errors="replace",
         )
         expected_root = f"Project root: {project.resolve()} (explicit)"
@@ -955,7 +967,8 @@ def run_injector_probe(
     if not problems:
         aider_config.write_bytes(aider_installed + AIDER_SUFFIX_BYTES)
         uninstall = subprocess.run(
-            uninstall_command, cwd=HOME, env=env, capture_output=True, text=True, errors="replace"
+            uninstall_command, cwd=HOME, env=env, capture_output=True, text=True,
+                encoding="utf-8", errors="replace"
         )
         uninstall_output = uninstall.stdout + uninstall.stderr
         if uninstall.returncode:
@@ -1025,7 +1038,8 @@ def run_atomic_copy_failure_probes(
             newline="\n",
         )
         result = subprocess.run(
-            command, cwd=source, env=env, capture_output=True, text=True, errors="replace"
+            command, cwd=source, env=env, capture_output=True, text=True,
+                encoding="utf-8", errors="replace"
         )
         leftovers = sorted(destination.parent.glob(".saipen.saipen-*"))
         output = result.stdout + result.stderr
@@ -1103,7 +1117,7 @@ def run_injector_probes() -> tuple[list[str], int, int]:
                 cwd=HOME,
                 env=grep_failure_env(home),
                 capture_output=True,
-                text=True,
+                text=True, encoding="utf-8",
                 errors="replace",
             )
             problem = failed_bootstrap_problem("bootstrap/inject.sh grep failure", result)
@@ -1126,7 +1140,7 @@ def run_injector_probes() -> tuple[list[str], int, int]:
                 cwd=HOME,
                 env=bash_env(bash, home),
                 capture_output=True,
-                text=True,
+                text=True, encoding="utf-8",
                 errors="replace",
             )
             problem = failed_bootstrap_problem("bootstrap/inject.sh write failure", result)
@@ -1154,7 +1168,7 @@ def run_injector_probes() -> tuple[list[str], int, int]:
                 cwd=HOME,
                 env=env,
                 capture_output=True,
-                text=True,
+                text=True, encoding="utf-8",
                 errors="replace",
             )
             problem = failed_bootstrap_problem("bootstrap/uninstall.sh transform failure", result)
@@ -1175,7 +1189,7 @@ def run_injector_probes() -> tuple[list[str], int, int]:
                 cwd=HOME,
                 env=grep_failure_env(home),
                 capture_output=True,
-                text=True,
+                text=True, encoding="utf-8",
                 errors="replace",
             )
             problem = failed_bootstrap_problem("bootstrap/uninstall.sh grep failure", result)
@@ -1198,7 +1212,7 @@ def run_injector_probes() -> tuple[list[str], int, int]:
                 cwd=HOME,
                 env=bash_env(bash, home),
                 capture_output=True,
-                text=True,
+                text=True, encoding="utf-8",
                 errors="replace",
             )
             output = result.stdout + result.stderr
@@ -1217,9 +1231,9 @@ def run_injector_probes() -> tuple[list[str], int, int]:
             shutil.copytree(
                 HOME,
                 source,
-                ignore=shutil.ignore_patterns(
+                ignore=_without_probe_runtime(shutil.ignore_patterns(
                     ".git", ".saipen", ".venv", "__pycache__", "node_modules", "nul"
-                ),
+                )),
             )
             atomic_failures, atomic_checked = run_atomic_copy_failure_probes(
                 "bootstrap/inject.sh",
@@ -1293,7 +1307,7 @@ def run_injector_probes() -> tuple[list[str], int, int]:
                 cwd=HOME,
                 env=env,
                 capture_output=True,
-                text=True,
+                text=True, encoding="utf-8",
                 errors="replace",
             )
             problem = failed_bootstrap_problem("bootstrap/inject.ps1 copy failure", result)
@@ -1319,7 +1333,7 @@ def run_injector_probes() -> tuple[list[str], int, int]:
                 cwd=HOME,
                 env=env,
                 capture_output=True,
-                text=True,
+                text=True, encoding="utf-8",
                 errors="replace",
             )
             problem = failed_bootstrap_problem("bootstrap/uninstall.ps1 read failure", result)
@@ -1333,9 +1347,9 @@ def run_injector_probes() -> tuple[list[str], int, int]:
             shutil.copytree(
                 HOME,
                 source,
-                ignore=shutil.ignore_patterns(
+                ignore=_without_probe_runtime(shutil.ignore_patterns(
                     ".git", ".saipen", ".venv", "__pycache__", "node_modules", "nul"
-                ),
+                )),
             )
             env = os.environ.copy()
             env["HOME"] = str(home)
@@ -1660,7 +1674,7 @@ exit 0
                 cwd=HOME,
                 env=env,
                 capture_output=True,
-                text=True,
+                text=True, encoding="utf-8",
                 errors="replace",
             )
 
@@ -1672,7 +1686,7 @@ exit 0
                 ["git", "status", "--short"],
                 cwd=HOME,
                 capture_output=True,
-                text=True,
+                text=True, encoding="utf-8",
                 errors="replace",
             )
             if result.returncode != 0:
@@ -1764,7 +1778,7 @@ exit 0
         current.write_text(canonical_task_xml, encoding="utf-8")
 
         smuggled = canonical_task_xml.replace(
-            "</Arguments>", " //E:vbscript C:\evil.vbs</Arguments>", 1
+            "</Arguments>", " //E:vbscript C:\\evil.vbs</Arguments>", 1
         )
         current.write_text(smuggled, encoding="utf-8")
         smuggled_action = invoke("status")
@@ -1884,7 +1898,7 @@ exit 0
                 [wscript, str(wrapper)],
                 env=base_env,
                 capture_output=True,
-                text=True,
+                text=True, encoding="utf-8",
                 errors="replace",
             )
             expect(
@@ -2169,7 +2183,7 @@ exit 0
             cwd=HOME,
             env=fallback_env,
             capture_output=True,
-            text=True,
+            text=True, encoding="utf-8",
             errors="replace",
         )
         expect(
@@ -2209,7 +2223,7 @@ exit 0
             cwd=HOME,
             env=fallback_env,
             capture_output=True,
-            text=True,
+            text=True, encoding="utf-8",
             errors="replace",
         )
         expect(
@@ -2257,7 +2271,7 @@ exit 9
                 path_result = subprocess.run(
                     [bash, "-lc", 'cygpath -u "$1"', "_", str(state)],
                     capture_output=True,
-                    text=True,
+                    text=True, encoding="utf-8",
                     errors="replace",
                 )
                 shell_state = path_result.stdout.strip()
@@ -2284,7 +2298,7 @@ exit 9
                 cwd=HOME,
                 env=shell_env,
                 capture_output=True,
-                text=True,
+                text=True, encoding="utf-8",
                 errors="replace",
             )
             expect(
@@ -2317,7 +2331,7 @@ exit 9
                 cwd=HOME,
                 env=shell_env,
                 capture_output=True,
-                text=True,
+                text=True, encoding="utf-8",
                 errors="replace",
             )
             expect(
@@ -2346,7 +2360,7 @@ exit 9
                 cwd=HOME,
                 env=no_schtasks_env,
                 capture_output=True,
-                text=True,
+                text=True, encoding="utf-8",
                 errors="replace",
             )
             expect(
@@ -2430,7 +2444,8 @@ exit 0
 
         def source_git(*args: str) -> subprocess.CompletedProcess[str]:
             return subprocess.run(
-                ["git", *args], cwd=source_repo, capture_output=True, text=True, errors="replace"
+                ["git", *args], cwd=source_repo, capture_output=True, text=True,
+                    encoding="utf-8", errors="replace"
             )
 
         source_git("init", "-q")
@@ -2467,7 +2482,7 @@ exit 0
                 cwd=source_repo,
                 env=runner_env,
                 capture_output=True,
-                text=True,
+                text=True, encoding="utf-8",
                 errors="replace",
                 timeout=60,
             )
@@ -2665,11 +2680,13 @@ def run_project_root_probes() -> tuple[list[str], int]:
         return ["project-root probes require git"], checked
 
     def git_run(cwd: Path, *args: str) -> subprocess.CompletedProcess[str]:
-        return subprocess.run([git, *args], cwd=cwd, capture_output=True, text=True)
+        return subprocess.run([git, *args], cwd=cwd, capture_output=True, text=True,
+            encoding="utf-8")
 
     def validate(cwd: Path, *args: str) -> subprocess.CompletedProcess[str]:
         return subprocess.run(
-            [sys.executable, str(VALIDATOR), *args], cwd=cwd, capture_output=True, text=True
+            [sys.executable, str(VALIDATOR), *args], cwd=cwd, capture_output=True, text=True,
+                encoding="utf-8"
         )
 
     def expect(
@@ -2814,7 +2831,8 @@ def run_export_probes() -> tuple[list[str], int, int]:
 
     def git_run(cwd: Path, *args: str) -> subprocess.CompletedProcess[str]:
         return subprocess.run(
-            [git, *args], cwd=cwd, capture_output=True, text=True, errors="replace"
+            [git, *args], cwd=cwd, capture_output=True, text=True,
+                encoding="utf-8", errors="replace"
         )
 
     def bash_path(path: Path) -> str:
@@ -2823,7 +2841,7 @@ def run_export_probes() -> tuple[list[str], int, int]:
         converted = subprocess.run(
             [bash, "-lc", 'cygpath -u "$1"', "saipen-export", str(path)],
             capture_output=True,
-            text=True,
+            text=True, encoding="utf-8",
             errors="replace",
         )
         return converted.stdout.strip() if converted.returncode == 0 else str(path)
@@ -2980,7 +2998,7 @@ def run_export_probes() -> tuple[list[str], int, int]:
                     command,
                     cwd=cwd,
                     capture_output=True,
-                    text=True,
+                    text=True, encoding="utf-8",
                     errors="replace",
                     env=shell_environment if tool_name.endswith(".sh") else None,
                 )
@@ -3039,6 +3057,118 @@ def run_export_probes() -> tuple[list[str], int, int]:
     return problems, checked, skipped
 
 
+#: T-1286: the launcher judges a shim the moment it exits, so a generous grace
+#: costs nothing unless a shim hangs. The old 0.05 s let a failing shim that was
+#: merely slow to start look like a live terminal (rc 0, "Done", 3 of 9 calls).
+CREW_SH_GRACE = "20"
+CREW_SH_TIMEOUT = 300
+
+
+def probe_crew_sh(
+    bash: str,
+    script: Path,
+    *,
+    grace: str = CREW_SH_GRACE,
+    shim_delay: float = 0.0,
+    timeout: float = CREW_SH_TIMEOUT,
+) -> tuple[list[str], list[str]]:
+    """Drive a POSIX crew launcher against three shimmed terminals.
+
+    Runs the broken case (every shim exits 9) and the working case (exit 0)
+    and returns (problems, passes). shim_delay makes each shim slow to start,
+    the field condition that made the fixed-grace launcher lie.
+    """
+    problems: list[str] = []
+    passes: list[str] = []
+    with tempfile.TemporaryDirectory(prefix="saipen-crew-") as raw:
+        sandbox = Path(raw)
+        shim_dir = sandbox / "bin"
+        shim_dir.mkdir()
+        probe_log = sandbox / "launcher.log"
+        converted = subprocess.run(
+            [
+                bash,
+                "-lc",
+                'cygpath -u "$1" 2>/dev/null || printf "%s" "$1"',
+                "saipen-crew",
+                str(probe_log),
+            ],
+            capture_output=True,
+            text=True, encoding="utf-8",
+            errors="replace",
+        )
+        log_path = converted.stdout.strip() if converted.returncode == 0 else str(probe_log)
+        launcher_source = (
+            "#!/usr/bin/env sh\n"
+            + (f"sleep {shim_delay}\n" if shim_delay else "")
+            + 'printf "%s\\n" "$*" >> "$SAIPEN_CREW_PROBE_LOG"\n'
+            'exit "$SAIPEN_CREW_PROBE_EXIT"\n'
+        )
+        for name in ("gnome-terminal", "konsole", "xterm"):
+            launcher = shim_dir / name
+            launcher.write_text(launcher_source, encoding="utf-8", newline="\n")
+            launcher.chmod(0o755)
+
+        env = bash_env(bash, sandbox)
+        env["PATH"] = str(shim_dir) + os.pathsep + env.get("PATH", "")
+        env["SAIPEN_CREW_LAUNCH_GRACE"] = grace
+        env["SAIPEN_CREW_PROBE_LOG"] = log_path
+
+        def run_case(exit_code: str, expected: int) -> tuple[int | None, str, int, str]:
+            """Return rc, output, calls and a precise observation."""
+            probe_log.unlink(missing_ok=True)
+            env["SAIPEN_CREW_PROBE_EXIT"] = exit_code
+            try:
+                done = subprocess.run(
+                    [bash, str(script)],
+                    cwd=HOME,
+                    env=env,
+                    capture_output=True,
+                    text=True, encoding="utf-8",
+                    errors="replace",
+                    timeout=timeout,
+                )
+                rc, output = done.returncode, done.stdout + done.stderr
+            except subprocess.TimeoutExpired:
+                rc, output = None, ""
+            calls = (
+                len(probe_log.read_text(encoding="utf-8").splitlines())
+                if probe_log.is_file()
+                else 0
+            )
+            if rc is None:
+                seen = (
+                    f"timed out after {timeout}s waiting for the launcher; "
+                    f"observed {calls} of {expected} calls"
+                )
+            else:
+                only = "only " if calls < expected else ""
+                seen = (
+                    f"observed {only}{calls} of {expected} calls after the launcher "
+                    f"exited (rc={rc})"
+                )
+            return rc, output, calls, seen
+
+        rc, output, calls, seen = run_case("9", 9)
+        if rc in (None, 0) or "Done." in output or "FAILED:" not in output or calls != 9:
+            problems.append(
+                "bootstrap/saipen_crew.sh broken launcher: expected nine failed "
+                f"fallback calls, focused nonzero, and no Done; {seen}"
+            )
+        else:
+            passes.append("bootstrap/saipen_crew.sh broken launcher -- exits nonzero without Done")
+
+        rc, output, calls, seen = run_case("0", 3)
+        if rc != 0 or "Done. Launched 3 crew windows." not in output or calls != 3:
+            problems.append(
+                "bootstrap/saipen_crew.sh working launcher: expected three "
+                f"accepted calls and truthful Done; {seen}"
+            )
+        else:
+            passes.append("bootstrap/saipen_crew.sh working launcher -- three accepted calls")
+    return problems, passes
+
+
 def run_crew_probes() -> tuple[list[str], int, int]:
     """Execute both crew launchers against controlled start processes."""
     bash = find_bash()
@@ -3049,87 +3179,11 @@ def run_crew_probes() -> tuple[list[str], int, int]:
         print("SKIP: bootstrap/saipen_crew.sh probes -- no usable bash")
         skipped += 2
     else:
-        with tempfile.TemporaryDirectory(prefix="saipen-crew-") as raw:
-            sandbox = Path(raw)
-            shim_dir = sandbox / "bin"
-            shim_dir.mkdir()
-            probe_log = sandbox / "launcher.log"
-            converted = subprocess.run(
-                [
-                    bash,
-                    "-lc",
-                    'cygpath -u "$1" 2>/dev/null || printf "%s" "$1"',
-                    "saipen-crew",
-                    str(probe_log),
-                ],
-                capture_output=True,
-                text=True,
-                errors="replace",
-            )
-            log_path = converted.stdout.strip() if converted.returncode == 0 else str(probe_log)
-            launcher_source = (
-                "#!/usr/bin/env sh\n"
-                'printf "%s\\n" "$*" >> "$SAIPEN_CREW_PROBE_LOG"\n'
-                'exit "$SAIPEN_CREW_PROBE_EXIT"\n'
-            )
-            for name in ("gnome-terminal", "konsole", "xterm"):
-                launcher = shim_dir / name
-                launcher.write_text(launcher_source, encoding="utf-8", newline="\n")
-                launcher.chmod(0o755)
-
-            env = bash_env(bash, sandbox)
-            env["PATH"] = str(shim_dir) + os.pathsep + env.get("PATH", "")
-            env["SAIPEN_CREW_LAUNCH_GRACE"] = "0.05"
-            env["SAIPEN_CREW_PROBE_LOG"] = log_path
-            command = [bash, str(HOME / "bootstrap" / "saipen_crew.sh")]
-
-            env["SAIPEN_CREW_PROBE_EXIT"] = "9"
-            failed = subprocess.run(
-                command, cwd=HOME, env=env, capture_output=True, text=True, errors="replace"
-            )
-            checked += 1
-            failed_output = failed.stdout + failed.stderr
-            failed_calls = (
-                probe_log.read_text(encoding="utf-8").splitlines() if probe_log.is_file() else []
-            )
-            if (
-                failed.returncode == 0
-                or "Done." in failed_output
-                or "FAILED:" not in failed_output
-                or len(failed_calls) != 9
-            ):
-                problems.append(
-                    "bootstrap/saipen_crew.sh broken launcher: expected nine "
-                    "failed fallback calls, focused nonzero, and no Done; got "
-                    f"{len(failed_calls)}"
-                )
-            else:
-                print(
-                    "PASS: bootstrap/saipen_crew.sh broken launcher -- exits nonzero without Done"
-                )
-
-            probe_log.unlink(missing_ok=True)
-            env["SAIPEN_CREW_PROBE_EXIT"] = "0"
-            succeeded = subprocess.run(
-                command, cwd=HOME, env=env, capture_output=True, text=True, errors="replace"
-            )
-            checked += 1
-            succeeded_output = succeeded.stdout + succeeded.stderr
-            calls = (
-                probe_log.read_text(encoding="utf-8").splitlines() if probe_log.is_file() else []
-            )
-            if (
-                succeeded.returncode != 0
-                or "Done. Launched 3 crew windows." not in succeeded_output
-                or len(calls) != 3
-            ):
-                problems.append(
-                    "bootstrap/saipen_crew.sh working launcher: expected three "
-                    "accepted calls and truthful Done, got "
-                    f"rc={succeeded.returncode} calls={len(calls)}"
-                )
-            else:
-                print("PASS: bootstrap/saipen_crew.sh working launcher -- three accepted calls")
+        sh_problems, sh_passes = probe_crew_sh(bash, HOME / "bootstrap" / "saipen_crew.sh")
+        checked += 2
+        problems.extend(sh_problems)
+        for line in sh_passes:
+            print(f"PASS: {line}")
 
     cmd = os.environ.get("COMSPEC") or shutil.which("cmd")
     if not cmd:
@@ -3157,7 +3211,8 @@ def run_crew_probes() -> tuple[list[str], int, int]:
                 probe_log.unlink(missing_ok=True)
                 env["SAIPEN_CREW_FAIL_AT"] = str(fail_at)
                 failed = subprocess.run(
-                    command, cwd=HOME, env=env, capture_output=True, text=True, errors="replace"
+                    command, cwd=HOME, env=env, capture_output=True, text=True,
+                        encoding="utf-8", errors="replace"
                 )
                 checked += 1
                 output = failed.stdout + failed.stderr
@@ -3186,7 +3241,8 @@ def run_crew_probes() -> tuple[list[str], int, int]:
             probe_log.unlink(missing_ok=True)
             env["SAIPEN_CREW_FAIL_AT"] = "0"
             succeeded = subprocess.run(
-                command, cwd=HOME, env=env, capture_output=True, text=True, errors="replace"
+                command, cwd=HOME, env=env, capture_output=True, text=True,
+                    encoding="utf-8", errors="replace"
             )
             checked += 1
             output = succeeded.stdout + succeeded.stderr
@@ -5431,9 +5487,9 @@ def run_manifest_tracking_probes() -> tuple[list[str], int]:
         shutil.copytree(
             HOME,
             home,
-            ignore=shutil.ignore_patterns(
+            ignore=_without_probe_runtime(shutil.ignore_patterns(
                 ".git", ".venv", "__pycache__", "node_modules", "nul", ".freebuff"
-            ),
+            )),
         )
         env = {
             **os.environ,
@@ -5445,7 +5501,8 @@ def run_manifest_tracking_probes() -> tuple[list[str], int]:
 
         def git(*args: str) -> subprocess.CompletedProcess[str]:
             return subprocess.run(
-                ["git", *args], cwd=home, env=env, capture_output=True, text=True, check=False
+                ["git", *args], cwd=home, env=env, capture_output=True, text=True,
+                    encoding="utf-8", check=False
             )
 
         if git("init", "-q").returncode != 0:
@@ -5459,7 +5516,7 @@ def run_manifest_tracking_probes() -> tuple[list[str], int]:
                 [sys.executable, str(home / "tools" / "validate.py"), "--project-root", str(home)],
                 cwd=home,
                 capture_output=True,
-                text=True,
+                text=True, encoding="utf-8",
                 errors="replace",
             )
             return r.stdout + r.stderr
@@ -5520,7 +5577,7 @@ def run_lint_parity_probes() -> tuple[list[str], int]:
             [sys.executable, str(home / "tools" / "validate.py"), "--project-root", str(home)],
             cwd=home,
             capture_output=True,
-            text=True,
+            text=True, encoding="utf-8",
             errors="replace",
             timeout=120,
         )
@@ -5534,9 +5591,9 @@ def run_lint_parity_probes() -> tuple[list[str], int]:
             shutil.copytree(
                 HOME,
                 home,
-                ignore=shutil.ignore_patterns(
+                ignore=_without_probe_runtime(shutil.ignore_patterns(
                     ".git", ".venv", "__pycache__", "node_modules", "nul", ".freebuff"
-                ),
+                )),
             )
             mutation(
                 home / ".saipen" / "KNOWLEDGE" / "harness.md",
@@ -5663,7 +5720,7 @@ def run_hunt_mark_probes() -> tuple[list[str], int]:
             [sys.executable, str(VALIDATOR), "--project-root", str(project)],
             cwd=project,
             capture_output=True,
-            text=True,
+            text=True, encoding="utf-8",
             errors="replace",
         )
         return r.stdout + r.stderr
@@ -5695,7 +5752,8 @@ def run_hunt_mark_probes() -> tuple[list[str], int]:
 
         def git(*args: str) -> subprocess.CompletedProcess[str]:
             return subprocess.run(
-                ["git", *args], cwd=project, env=env, capture_output=True, text=True, check=False
+                ["git", *args], cwd=project, env=env, capture_output=True, text=True,
+                    encoding="utf-8", check=False
             )
 
         if git("init", "-q").returncode != 0:
@@ -5799,14 +5857,15 @@ def run_ship_staging_probes() -> tuple[list[str], int]:
         shutil.copytree(
             home,
             home_copy,
-            ignore=shutil.ignore_patterns(
+            ignore=_without_probe_runtime(shutil.ignore_patterns(
                 ".git", ".venv", "__pycache__", ".freebuff", "node_modules", "nul"
-            ),
+            )),
         )
 
         def git(*args: str) -> subprocess.CompletedProcess[str]:
             return subprocess.run(
-                ["git", *args], cwd=home_copy, env=env, capture_output=True, text=True, check=False
+                ["git", *args], cwd=home_copy, env=env, capture_output=True, text=True,
+                    encoding="utf-8", check=False
             )
 
         if git("init", "-q").returncode != 0:
@@ -5827,7 +5886,7 @@ def run_ship_staging_probes() -> tuple[list[str], int]:
                 ],
                 cwd=home_copy,
                 capture_output=True,
-                text=True,
+                text=True, encoding="utf-8",
                 errors="replace",
             )
             return {
@@ -6048,9 +6107,9 @@ def run_release_freshness_probes() -> tuple[list[str], int]:
         shutil.copytree(
             home,
             project,
-            ignore=shutil.ignore_patterns(
+            ignore=_without_probe_runtime(shutil.ignore_patterns(
                 ".git", ".venv", "__pycache__", ".freebuff", "node_modules", "nul"
-            ),
+            )),
         )
         def git(*args: str) -> subprocess.CompletedProcess[str]:
             return subprocess.run(
@@ -6058,7 +6117,7 @@ def run_release_freshness_probes() -> tuple[list[str], int]:
                 cwd=project,
                 env=env,
                 capture_output=True,
-                text=True,
+                text=True, encoding="utf-8",
                 check=False,
                 errors="replace",
             )
@@ -6076,7 +6135,7 @@ def run_release_freshness_probes() -> tuple[list[str], int]:
                 ],
                 cwd=project,
                 capture_output=True,
-                text=True,
+                text=True, encoding="utf-8",
                 errors="replace",
             )
 
@@ -6538,21 +6597,25 @@ def run_release_executor_probes() -> tuple[list[str], int]:
         shutil.copytree(
             home,
             project,
-            ignore=shutil.ignore_patterns(
+            ignore=_without_probe_runtime(shutil.ignore_patterns(
                 ".git", ".venv", "__pycache__", ".freebuff", "node_modules", "nul"
-            ),
+            )),
         )
         # Release probes build their own synthetic BOARD/STATE/LOG and source
         # scope. Do not let an unrelated live receipt from the host project
         # become a hidden release precondition in every copied fixture.
         shutil.rmtree(project / ".saipen" / "intake", ignore_errors=True)
+        # Live improve cycles belong to the host checkout, not this synthetic
+        # release project. Copying them makes unrelated sweep tickets a
+        # hidden precondition for every release assertion.
+        shutil.rmtree(project / ".saipen" / "improve", ignore_errors=True)
 
         def git(*args: str) -> subprocess.CompletedProcess[str]:
             return subprocess.run(
                 ["git", "-C", str(project), *args],
                 env=env,
                 capture_output=True,
-                text=True,
+                text=True, encoding="utf-8",
                 check=False,
             )
 
@@ -6562,7 +6625,7 @@ def run_release_executor_probes() -> tuple[list[str], int]:
                 cwd=str(project),
                 env={**env, "SAIPEN_CAPABILITY": mode},
                 capture_output=True,
-                text=True,
+                text=True, encoding="utf-8",
                 errors="replace",
             )
 
@@ -6704,7 +6767,8 @@ def run_release_executor_probes() -> tuple[list[str], int]:
 
     def remote_branch_tip(origin: Path) -> str:
         r = subprocess.run(
-            ["git", "ls-remote", str(origin), "refs/heads/main"], capture_output=True, text=True
+            ["git", "ls-remote", str(origin), "refs/heads/main"], capture_output=True, text=True,
+                encoding="utf-8"
         )
         parts = r.stdout.strip().split()
         return parts[0] if parts else ""
@@ -6713,7 +6777,7 @@ def run_release_executor_probes() -> tuple[list[str], int]:
         r = subprocess.run(
             ["git", "ls-remote", str(origin), f"refs/tags/{tag}^{{}}"],
             capture_output=True,
-            text=True,
+            text=True, encoding="utf-8",
         )
         parts = r.stdout.strip().split()
         return parts[0] if parts else ""
@@ -6848,7 +6912,7 @@ def run_release_executor_probes() -> tuple[list[str], int]:
         pre_index = git("diff", "--cached", "--name-only").stdout
         pre_tags = git("tag", "--list").stdout
         pre_remote = subprocess.run(
-            ["git", "ls-remote", str(origin)], capture_output=True, text=True
+            ["git", "ls-remote", str(origin)], capture_output=True, text=True, encoding="utf-8"
         ).stdout
 
         result = cli("ship", "--json")
@@ -6871,7 +6935,8 @@ def run_release_executor_probes() -> tuple[list[str], int]:
         expect("4d. no-publish creates no tags", git("tag", "--list").stdout == pre_tags == "", "")
         expect(
             "4e. no-publish remote refs unchanged",
-            subprocess.run(["git", "ls-remote", str(origin)], capture_output=True, text=True).stdout
+            subprocess.run(["git", "ls-remote", str(origin)], capture_output=True, text=True,
+                encoding="utf-8").stdout
             == pre_remote,
             "remote changed under no-publish",
         )
@@ -7058,7 +7123,8 @@ def run_release_executor_probes() -> tuple[list[str], int]:
         # Fresh clone must carry the exact real source change + metadata
         clone = Path(tmp) / "fresh_clone"
         crc = subprocess.run(
-            ["git", "clone", "-q", f"file://{origin}", str(clone)], capture_output=True, text=True
+            ["git", "clone", "-q", f"file://{origin}", str(clone)], capture_output=True, text=True,
+                encoding="utf-8"
         )
         expect("8h. fresh clone succeeded", crc.returncode == 0, crc.stderr)
         if crc.returncode == 0:
@@ -7152,7 +7218,7 @@ def run_release_executor_probes() -> tuple[list[str], int]:
                 cwd=str(project),
                 env=env_crash,
                 capture_output=True,
-                text=True,
+                text=True, encoding="utf-8",
                 errors="replace",
             )
             expect(
@@ -7208,7 +7274,7 @@ def run_release_executor_probes() -> tuple[list[str], int]:
             cwd=str(project),
             env=env_crash,
             capture_output=True,
-            text=True,
+            text=True, encoding="utf-8",
             errors="replace",
         )
         expect("9b. crash injected after closure publish", r.returncode == 86, f"rc={r.returncode}")
@@ -7220,7 +7286,8 @@ def run_release_executor_probes() -> tuple[list[str], int]:
         shutil.rmtree(project, ignore_errors=True)
         clone = Path(tmp) / "clone"
         crc = subprocess.run(
-            ["git", "clone", "-q", f"file://{origin}", str(clone)], capture_output=True, text=True
+            ["git", "clone", "-q", f"file://{origin}", str(clone)], capture_output=True, text=True,
+                encoding="utf-8"
         )
         expect("9b. fresh clone succeeded", crc.returncode == 0, crc.stderr)
         if crc.returncode == 0:
@@ -7231,7 +7298,7 @@ def run_release_executor_probes() -> tuple[list[str], int]:
                     cwd=str(clone),
                     env=env,
                     capture_output=True,
-                    text=True,
+                    text=True, encoding="utf-8",
                     errors="replace",
                 )
 
@@ -7308,7 +7375,7 @@ def run_release_executor_probes() -> tuple[list[str], int]:
             ["git", "init", "-q", str(project)],
             env=env,
             capture_output=True,
-            text=True,
+            text=True, encoding="utf-8",
             check=False,
         )
 
@@ -7317,7 +7384,7 @@ def run_release_executor_probes() -> tuple[list[str], int]:
                 ["git", "-C", str(project), *args],
                 env=env,
                 capture_output=True,
-                text=True,
+                text=True, encoding="utf-8",
                 check=False,
             )
 
@@ -7379,7 +7446,8 @@ def run_release_executor_probes() -> tuple[list[str], int]:
         )
         clone = Path(tmp) / "clone11c"
         crc = subprocess.run(
-            ["git", "clone", "-q", f"file://{origin}", str(clone)], capture_output=True, text=True
+            ["git", "clone", "-q", f"file://{origin}", str(clone)], capture_output=True, text=True,
+                encoding="utf-8"
         )
         expect(
             "11c. fresh clone lacks the reviewed deletion",
@@ -7405,7 +7473,7 @@ def run_release_executor_probes() -> tuple[list[str], int]:
             ["git", "init", "-q", str(project)],
             env=env,
             capture_output=True,
-            text=True,
+            text=True, encoding="utf-8",
             check=False,
         )
 
@@ -7414,7 +7482,7 @@ def run_release_executor_probes() -> tuple[list[str], int]:
                 ["git", "-C", str(project), *args],
                 env=env,
                 capture_output=True,
-                text=True,
+                text=True, encoding="utf-8",
                 check=False,
                 input=input,
             )
@@ -7491,7 +7559,9 @@ def run_release_executor_probes() -> tuple[list[str], int]:
         )
         clone14 = Path(tmp) / "clone14"
         crc = subprocess.run(
-            ["git", "clone", "-q", f"file://{origin}", str(clone14)], capture_output=True, text=True
+            ["git", "clone", "-q", f"file://{origin}", str(clone14)], capture_output=True,
+                text=True,
+                encoding="utf-8"
         )
         expect(
             "14. fresh clone carries the untracked scope file",
@@ -7524,7 +7594,9 @@ def run_release_executor_probes() -> tuple[list[str], int]:
         )
         clone15 = Path(tmp) / "clone15"
         crc = subprocess.run(
-            ["git", "clone", "-q", f"file://{origin}", str(clone15)], capture_output=True, text=True
+            ["git", "clone", "-q", f"file://{origin}", str(clone15)], capture_output=True,
+                text=True,
+                encoding="utf-8"
         )
         seg_in_clone = (clone15 / ".saipen" / "logs" / "LOG-999.md").is_file()
         expect(
@@ -7537,7 +7609,7 @@ def run_release_executor_probes() -> tuple[list[str], int]:
                 [sys.executable, str(clone15 / "tools" / "validate.py")],
                 cwd=str(clone15),
                 capture_output=True,
-                text=True,
+                text=True, encoding="utf-8",
             )
             log_graph_fails = [
                 ln
@@ -7563,6 +7635,11 @@ def run_producer_gate_probes() -> tuple[list[str], int]:
     model blocked an unrelated one-line Core commit. What is under test is
     therefore the mapping from GATE to severity, which means each fixture is
     run at several gates and compared against itself.
+
+    T-1284: that mapping is saipen_engine.producer_gate, proven cell by cell
+    in-process by tools/test_producer_gate_policy.py. What stays here is one
+    validate.py run per gate that matters (seven, down from thirteen): the
+    proof that the validator wires the policy, not a second copy of the table.
     """
     problems: list[str] = []
     checked = 0
@@ -7579,7 +7656,7 @@ def run_producer_gate_probes() -> tuple[list[str], int]:
             [sys.executable, str(VALIDATOR), "--project-root", str(project), *gate],
             cwd=project,
             capture_output=True,
-            text=True,
+            text=True, encoding="utf-8",
             errors="replace",
         )
 
@@ -7651,7 +7728,8 @@ def run_producer_gate_probes() -> tuple[list[str], int]:
         shutil.copytree(SCENARIOS / "stale-state-reconciliation" / ".saipen", project / ".saipen")
         if (
             subprocess.run(
-                ["git", "init", "-q"], cwd=project, env=env, capture_output=True, text=True
+                ["git", "init", "-q"], cwd=project, env=env, capture_output=True, text=True,
+                    encoding="utf-8"
             ).returncode
             != 0
         ):
@@ -7661,6 +7739,12 @@ def run_producer_gate_probes() -> tuple[list[str], int]:
         wiki = project / ".saipen/extensions/subs/saiwiki/kitchen/OUTBOX.md"
         translate = project / ".saipen/saitranslate/kitchen/OUTBOX.md"
 
+        # Sentinels only (T-1284): the gate x producer x finding-class truth
+        # table is proven in-process by tools/test_producer_gate_policy.py
+        # against saipen_engine.producer_gate, the policy validate.py imports.
+        # Each run below proves that validate.py WIRES that policy, one run
+        # per gate, every assertion a run can carry read from the same output.
+        #
         # Control 1 + 2 + 3: ONE stale QQ package, read at three gates.
         write_outbox(
             wiki, ready_package("0000000", "git-delta-v1:" + "0" * 64, "sha256:" + "0" * 64)
@@ -7671,50 +7755,39 @@ def run_producer_gate_probes() -> tuple[list[str], int]:
             ["git", "commit", "-q", "-m", "probe"], cwd=project, env=env, capture_output=True
         )
 
+        default = validate(project)
         expect_severity(
-            "1. stale QQ does not fail the default gate", validate(project), stale_fail, hard=False
+            "1. stale QQ does not fail the default gate", default, stale_fail, hard=False
         )
-        expect_severity(
-            "1b. stale QQ does not fail the ship gate",
-            validate(project, "--gate", "ship"),
-            stale_fail,
-            hard=False,
-        )
-        expect("1c. the stale package is still visible as a WARN", validate(project), soft_note)
+        expect("1c. the stale package is still visible as a WARN", default, soft_note)
         expect_severity(
             "2. the same stale QQ FAILs collect:saiwiki",
             validate(project, "--gate", "collect:saiwiki"),
             stale_fail,
             hard=True,
         )
+        converge = validate(project, "--gate", "converge")
         expect_severity(
-            "3. the same stale QQ FAILs the converge gate",
-            validate(project, "--gate", "converge"),
-            stale_fail,
-            hard=True,
+            "3. the same stale QQ FAILs the converge gate", converge, stale_fail, hard=True
         )
-        # Collecting one producer says nothing about another: the whole point
-        # of the split is that severity follows the CONSUMED producer.
-        expect_severity(
-            "2b. collecting saitranslate leaves saiwiki soft",
-            validate(project, "--gate", "collect:saitranslate"),
-            stale_fail,
-            hard=False,
+        # The EE OUTBOX holds no package, so the same run proves that absence
+        # is a finding at the closure gate.
+        expect(
+            "8. converge names the missing closure package",
+            converge,
+            "required producer package(s) are missing or not ready: EE (saitranslate)",
         )
 
-        # Control 4 + 5: a malformed EE package.
+        # Control 4 + 5: a malformed EE package, consumed. Collecting one
+        # producer says nothing about another: the whole point of the split is
+        # that severity follows the CONSUMED producer, so the stale QQ stays soft.
         write_outbox(translate, "this is not an OUTBOX at all\n")
+        collect_ee = validate(project, "--gate", "collect:saitranslate")
         expect_severity(
-            "4. malformed EE does not block an ordinary Core ship",
-            validate(project, "--gate", "ship"),
-            malformed,
-            hard=False,
+            "5. the malformed EE FAILs collect:saitranslate", collect_ee, malformed, hard=True
         )
         expect_severity(
-            "5. the same malformed EE FAILs collect:saitranslate",
-            validate(project, "--gate", "collect:saitranslate"),
-            malformed,
-            hard=True,
+            "2b. collecting saitranslate leaves saiwiki soft", collect_ee, stale_fail, hard=False
         )
 
         # Control 6: fresh exact EE and QQ pass the converge gate. Both
@@ -7759,19 +7832,6 @@ def run_producer_gate_probes() -> tuple[list[str], int]:
             )
             expect_severity(
                 "6b. no producer finding survives on fresh packages", result, stale_fail, hard=False
-            )
-            # Absence is a finding at the consumer's gate: nothing to collect
-            # must refuse rather than report a silent green.
-            write_outbox(wiki, "# OUTBOX\n")
-            expect(
-                "7. a producer with no ready package cannot be collected",
-                validate(project, "--gate", "collect:saiwiki"),
-                "no OUTBOX entry from that producer is `status: ready`",
-            )
-            expect(
-                "8. converge names the missing closure package",
-                validate(project, "--gate", "converge"),
-                "required producer package(s) are missing or not ready: QQ (saiwiki)",
             )
 
         # An unknown gate must refuse rather than fall back to the soft
@@ -7820,7 +7880,7 @@ def run_ccc_identity_probes() -> tuple[list[str], int]:
             [sys.executable, str(VALIDATOR), "--project-root", str(project)],
             cwd=project,
             capture_output=True,
-            text=True,
+            text=True, encoding="utf-8",
             errors="replace",
         )
         return r.stdout + r.stderr
@@ -7860,7 +7920,8 @@ def run_ccc_identity_probes() -> tuple[list[str], int]:
             init += [f"--object-format={object_format}"]
         if (
             subprocess.run(
-                ["git", *init], cwd=project, env=env, capture_output=True, text=True
+                ["git", *init], cwd=project, env=env, capture_output=True, text=True,
+                    encoding="utf-8"
             ).returncode
             != 0
         ):
@@ -7870,7 +7931,8 @@ def run_ccc_identity_probes() -> tuple[list[str], int]:
 
     def git(project: Path, *args: str) -> str:
         return subprocess.run(
-            ["git", *args], cwd=project, env=env, capture_output=True, text=True, check=False
+            ["git", *args], cwd=project, env=env, capture_output=True, text=True,
+                encoding="utf-8", check=False
         ).stdout.strip()
 
     def commit(project: Path, message: str) -> str:
@@ -7995,7 +8057,7 @@ def run_converge_routing_probes() -> tuple[list[str], int]:
             [sys.executable, str(VALIDATOR), "--project-root", str(project)],
             cwd=project,
             capture_output=True,
-            text=True,
+            text=True, encoding="utf-8",
             errors="replace",
         )
         return r.stdout + r.stderr
@@ -8051,7 +8113,8 @@ def run_converge_routing_probes() -> tuple[list[str], int]:
 
         def git(*args: str) -> subprocess.CompletedProcess[str]:
             return subprocess.run(
-                ["git", *args], cwd=project, env=env, capture_output=True, text=True, check=False
+                ["git", *args], cwd=project, env=env, capture_output=True, text=True,
+                    encoding="utf-8", check=False
             )
 
         if git("init", "-q").returncode != 0:
@@ -8157,7 +8220,7 @@ def run_role_freshness_probes() -> tuple[list[str], int, int]:
             [sys.executable, str(VALIDATOR), "--project-root", str(project)],
             cwd=project,
             capture_output=True,
-            text=True,
+            text=True, encoding="utf-8",
             errors="replace",
         )
         return result.stdout + result.stderr
@@ -8265,7 +8328,8 @@ def run_role_freshness_probes() -> tuple[list[str], int, int]:
 
         def git(*args: str) -> subprocess.CompletedProcess[str]:
             return subprocess.run(
-                ["git", *args], cwd=project, env=env, capture_output=True, text=True, check=False
+                ["git", *args], cwd=project, env=env, capture_output=True, text=True,
+                    encoding="utf-8", check=False
             )
 
         if git("init", "-q").returncode != 0:
@@ -8492,7 +8556,8 @@ def run_role_freshness_probes() -> tuple[list[str], int, int]:
         (inner / "inner-source.txt").write_text("inner\n", encoding="utf-8")
         if (
             subprocess.run(
-                ["git", "init", "-q"], cwd=outer, env=env, capture_output=True, text=True
+                ["git", "init", "-q"], cwd=outer, env=env, capture_output=True, text=True,
+                    encoding="utf-8"
             ).returncode
             == 0
         ):
@@ -8633,14 +8698,21 @@ def run_role_freshness_probes() -> tuple[list[str], int, int]:
             encoding="utf-8",
             newline="\n",
         )
+        # Arbitrary generic names are outside the fixed Core OUTBOX registry.
+        # Exercise their shared freshness authority, used by sub operations;
+        # the registered-producer validator controls above remain unchanged.
+        from saipen_engine.subs import role_freshness
+
         expect(
             "generic role binds to its governing PROTOCOL digest",
-            validate(project),
-            absent=mismatch,
+            role_freshness(project, "saicustom", generic_revision),
+            contains="current",
         )
         generic_protocol.write_text("generic contract v2\n", encoding="utf-8")
         expect(
-            "generic role contract change makes package stale", validate(project), contains=mismatch
+            "generic role contract change makes package stale",
+            role_freshness(project, "saicustom", generic_revision),
+            contains="stale",
         )
         generic_outbox.unlink()
         generic_outbox.parent.rmdir()
@@ -8759,7 +8831,7 @@ def run_role_freshness_probes() -> tuple[list[str], int, int]:
             result = subprocess.run(
                 ["cmd", "/c", "mklink", "/J", os.fspath(junction), os.fspath(junction_outside)],
                 capture_output=True,
-                text=True,
+                text=True, encoding="utf-8",
                 errors="replace",
             )
             if result.returncode == 0 and junction.exists():
@@ -8824,7 +8896,7 @@ def run_sub_clean_probes() -> tuple[list[str], int, int]:
             [sys.executable, str(HOME / "tools" / "sub_clean.py"), "saiwiki"],
             cwd=raw,
             capture_output=True,
-            text=True,
+            text=True, encoding="utf-8",
             errors="replace",
         )
         expect(
@@ -9084,7 +9156,7 @@ def run_sub_clean_probes() -> tuple[list[str], int, int]:
             result = subprocess.run(
                 ["cmd", "/c", "mklink", "/J", os.fspath(junction), os.fspath(real_ev)],
                 capture_output=True,
-                text=True,
+                text=True, encoding="utf-8",
                 errors="replace",
             )
             if result.returncode == 0 and junction.exists():
@@ -9356,7 +9428,7 @@ def run_userperson_probes() -> tuple[list[str], int]:
         [sys.executable, "-m", "unittest", "tools.test_userperson_global"],
         cwd=str(HOME),
         capture_output=True,
-        text=True,
+        text=True, encoding="utf-8",
         timeout=120,
     )
     expect(
@@ -9535,7 +9607,7 @@ def run_improve_probes() -> tuple[list[str], int]:
             '---\nphase: DONE\ntask: none\nnext_action: "saipen continue"\n'
             'blocker: ""\ntransition_from: SHIP\n'
             "saipen_version: 7\nschema_version: 3\n"
-            "last_event: 900\nstyle_contract: ded-4ae736e4\n"
+            'last_event: 900\nstyle_contract: ' + CURRENT_STYLE_CONTRACT + '\n'
             'saipen_home: "."\nagent: probe\nmode: full\n'
             "updated: 2026-08-09T00:00:00Z\n---\n",
             encoding="utf-8",
@@ -9669,14 +9741,14 @@ def run_improve_probes() -> tuple[list[str], int]:
         model_or_runtime="probe",
         context_scope="scope",
     )
-    append_run(seat_report, "first run")
-    append_run(seat_report, "second run")
+    append_run(seat_report, "NO_FINDINGS -- first run audit had no findings")
+    append_run(seat_report, "NO_FINDINGS -- second run audit had no findings")
     after = seat_report.read_text(encoding="utf-8")
     expect(
         "a second run appends an immutable RUN section, never overwriting",
         "## RUN 1" in after and "## RUN 2" in after and "first" in after and "second run" in after,
     )
-    append_run(seat_report, "third run")
+    append_run(seat_report, "NO_FINDINGS -- third run audit had no findings")
     after2 = seat_report.read_text(encoding="utf-8")
     expect(
         "multiple RUNs accumulate without overwriting earlier ones",
@@ -9709,7 +9781,7 @@ def run_improve_probes() -> tuple[list[str], int]:
         [sys.executable, "-c", crash_code],
         cwd=str(proot),
         capture_output=True,
-        text=True,
+        text=True, encoding="utf-8",
         timeout=60,
     ).returncode
     owner = proot / ".saipen" / "improve"
@@ -10281,7 +10353,7 @@ def run_improve_probes() -> tuple[list[str], int]:
         (_root / ".saipen" / "STATE.md").write_text(
             '---\nphase: DONE\ntask: none\nnext_action: "saipen continue"\n'
             'blocker: ""\ntransition_from: SHIP\nsaipen_version: 7\n'
-            "schema_version: 3\nlast_event: 900\nstyle_contract: ded-4ae736e4\n"
+            'schema_version: 3\nlast_event: 900\nstyle_contract: ' + CURRENT_STYLE_CONTRACT + '\n'
             'saipen_home: "."\nagent: probe\nmode: full\n'
             "updated: 2026-08-09T00:00:00Z\n---\n",
             encoding="utf-8",
@@ -10311,7 +10383,7 @@ def run_improve_probes() -> tuple[list[str], int]:
             [sys.executable, str(VALIDATOR), "--project-root", str(_root)],
             cwd=str(_root),
             capture_output=True,
-            text=True,
+            text=True, encoding="utf-8",
             errors="replace",
             timeout=120,
         ).returncode
@@ -10551,7 +10623,8 @@ def run_improve_probes() -> tuple[list[str], int]:
         check=False,
     )
     _head2 = subprocess.run(
-        ["git", "rev-parse", "HEAD"], cwd=str(fresh_root), capture_output=True, text=True
+        ["git", "rev-parse", "HEAD"], cwd=str(fresh_root), capture_output=True, text=True,
+            encoding="utf-8"
     ).stdout.strip()
     _reps2 = list((fresh_root / ".saipen" / "improve").rglob("saipen_improve_*.md"))
     _rep2 = _reps2[0]
@@ -10569,7 +10642,7 @@ def run_improve_probes() -> tuple[list[str], int]:
             [sys.executable, str(VALIDATOR), "--project-root", str(fresh_root)],
             cwd=str(fresh_root),
             capture_output=True,
-            text=True,
+            text=True, encoding="utf-8",
             errors="replace",
             timeout=120,
         ).stdout[-800:],
@@ -10592,7 +10665,7 @@ def run_improve_probes() -> tuple[list[str], int]:
         [sys.executable, str(HOME / "tools" / "saipen.py"), "improve", "status", "--json"],
         cwd=str(cli_root),
         capture_output=True,
-        text=True,
+        text=True, encoding="utf-8",
         timeout=60,
     )
     expect(
@@ -10617,7 +10690,7 @@ def run_improve_probes() -> tuple[list[str], int]:
         ],
         cwd=str(cli_root),
         capture_output=True,
-        text=True,
+        text=True, encoding="utf-8",
         timeout=60,
     )
     expect(
@@ -10644,7 +10717,7 @@ def run_improve_probes() -> tuple[list[str], int]:
         ],
         cwd=str(cli_root),
         capture_output=True,
-        text=True,
+        text=True, encoding="utf-8",
         timeout=60,
     )
     expect(
@@ -10664,7 +10737,7 @@ def run_improve_probes() -> tuple[list[str], int]:
         ],
         cwd=str(cli_root),
         capture_output=True,
-        text=True,
+        text=True, encoding="utf-8",
         timeout=60,
     )
     expect(
@@ -10683,7 +10756,7 @@ def run_improve_probes() -> tuple[list[str], int]:
         [sys.executable, str(HOME / "tools" / "saipen.py"), "improve", "--json"],
         cwd=str(meta_root),
         capture_output=True,
-        text=True,
+        text=True, encoding="utf-8",
         timeout=60,
     )
     expect(
@@ -10710,7 +10783,7 @@ def run_improve_probes() -> tuple[list[str], int]:
     expect(
         "CLI-prepared report derives its protocol fingerprint from owned protocol evidence",
         f"protocol_fingerprint: {_derived_fp}" in _bare_header
-        and "ded-4ae736e4" not in _bare_header,
+        and CURRENT_STYLE_CONTRACT not in _bare_header,
         _bare_header,
     )
     expect(
@@ -10730,9 +10803,9 @@ def run_improve_probes() -> tuple[list[str], int]:
         shutil.copytree(
             HOME,
             _proto_home,
-            ignore=shutil.ignore_patterns(
+            ignore=_without_probe_runtime(shutil.ignore_patterns(
                 ".git", ".venv", "__pycache__", "node_modules", "nul", ".freebuff"
-            ),
+            )),
         )
         _fp_before = installed_protocol_fingerprint(_proto_home)
         _mutated_proto = _proto_home / "saipen" / "CORE.md"
@@ -10811,7 +10884,7 @@ def run_improve_probes() -> tuple[list[str], int]:
         (_fv_root / ".saipen" / "STATE.md").write_text(
             '---\nphase: DONE\ntask: none\nnext_action: "saipen continue"\n'
             'blocker: ""\ntransition_from: SHIP\nsaipen_version: 7\n'
-            "schema_version: 3\nlast_event: 900\nstyle_contract: ded-4ae736e4\n"
+            'schema_version: 3\nlast_event: 900\nstyle_contract: ' + CURRENT_STYLE_CONTRACT + '\n'
             'saipen_home: "."\nagent: probe\nmode: full\n'
             "updated: 2026-08-09T00:00:00Z\n---\n",
             encoding="utf-8",
@@ -10866,7 +10939,7 @@ def run_improve_probes() -> tuple[list[str], int]:
         [sys.executable, str(HOME / "tools" / "saipen.py"), "improve", "prepare", "--json"],
         cwd=str(meta_root),
         capture_output=True,
-        text=True,
+        text=True, encoding="utf-8",
         timeout=60,
     )
     expect(
@@ -10953,7 +11026,7 @@ def run_improve_probes() -> tuple[list[str], int]:
             [sys.executable, str(HOME / "tools" / "saipen.py"), "improve", *options, "--json"],
             cwd=str(meta_root),
             capture_output=True,
-            text=True,
+            text=True, encoding="utf-8",
             timeout=60,
         )
 
@@ -11032,7 +11105,7 @@ def run_improve_probes() -> tuple[list[str], int]:
             [sys.executable, str(HOME / "tools" / "saipen.py"), "improve", *options, "--json"],
             cwd=str(_seatc_root),
             capture_output=True,
-            text=True,
+            text=True, encoding="utf-8",
             timeout=60,
         )
 
@@ -11342,7 +11415,7 @@ def run_improve_probes() -> tuple[list[str], int]:
         ],
         cwd=str(_identity_root),
         capture_output=True,
-        text=True,
+        text=True, encoding="utf-8",
         timeout=60,
     )
     _identity_queue = json.loads(_identity_queue_proc.stdout).get("queue", [])
@@ -11521,7 +11594,10 @@ def run_improve_probes() -> tuple[list[str], int]:
         context_scope="audited stale control",
     )
     _stale2_report = _stale2_root / _stale2_first["report_path"]
-    append_run(_stale2_report, "NO_FINDINGS")
+    append_run(
+        _stale2_report,
+        "NO_FINDINGS -- audited stale-resume control; no findings expected",
+    )
     _stale2_report_before = _stale2_report.read_bytes()
     (_stale2_root / "src.txt").write_text("v2 -- tracked source changed\n", encoding="utf-8")
     _stale2_retry = prepare_audit_seat(
@@ -11569,7 +11645,10 @@ def run_improve_probes() -> tuple[list[str], int]:
     _ret_cycle = cycle_dir(_ret_root, _ret_s1["cycle_id"])
     _ret_r1 = _ret_root / _ret_s1["report_path"]
     _ret_r2 = _ret_root / _ret_s2["report_path"]
-    append_run(_ret_r1, "NO_FINDINGS")
+    append_run(
+        _ret_r1,
+        "NO_FINDINGS -- audited retirement control's stale seat; no findings expected",
+    )
     _ret_r1.write_text(
         re.sub(
             r"(?m)^protocol_fingerprint:.*$",
@@ -11975,7 +12054,7 @@ def run_improve_probes() -> tuple[list[str], int]:
             cwd=str(meta_root),
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
-            text=True,
+            text=True, encoding="utf-8",
         )
         for _ in range(2)
     ]
@@ -12040,7 +12119,7 @@ def run_improve_probes() -> tuple[list[str], int]:
         [sys.executable, str(HOME / "tools" / "saipen.py"), "improve", "verify", _mcycle, "--json"],
         cwd=str(meta_root),
         capture_output=True,
-        text=True,
+        text=True, encoding="utf-8",
         timeout=60,
     )
     expect(
@@ -12070,7 +12149,7 @@ def run_improve_probes() -> tuple[list[str], int]:
         ],
         cwd=str(false_root),
         capture_output=True,
-        text=True,
+        text=True, encoding="utf-8",
         timeout=60,
     )
     expect(
@@ -12128,7 +12207,7 @@ def run_improve_probes() -> tuple[list[str], int]:
         [*_submit_args, str(_submit_payload)],
         cwd=str(_submit_root),
         capture_output=True,
-        text=True,
+        text=True, encoding="utf-8",
         timeout=60,
     )
     expect(
@@ -12154,7 +12233,7 @@ def run_improve_probes() -> tuple[list[str], int]:
             [*_submit_args, str(_submit_payload)],
             cwd=str(_submit_root),
             capture_output=True,
-            text=True,
+            text=True, encoding="utf-8",
             timeout=60,
         )
         expect(
@@ -12169,7 +12248,7 @@ def run_improve_probes() -> tuple[list[str], int]:
         [*_submit_args, str(_submit_payload), "extra"],
         cwd=str(_submit_root),
         capture_output=True,
-        text=True,
+        text=True, encoding="utf-8",
         timeout=60,
     )
     expect(
@@ -12237,7 +12316,7 @@ def run_improve_probes() -> tuple[list[str], int]:
         ],
         cwd=str(dg_root),
         capture_output=True,
-        text=True,
+        text=True, encoding="utf-8",
         timeout=60,
     )
     expect(
@@ -12468,7 +12547,10 @@ def run_improve_probes() -> tuple[list[str], int]:
     except ValueError:
         _empty_ok = True
     expect("an empty strict run without NO_FINDINGS cannot complete", _empty_ok)
-    append_run(_nf_rep, "NO_FINDINGS\n")
+    append_run(
+        _nf_rep,
+        "NO_FINDINGS -- audited the fixture's declared scope; no findings were found\n",
+    )
     complete_report(_nf_rep)
     expect(
         "an explicit NO_FINDINGS run completes as intentional evidence",
@@ -12516,7 +12598,7 @@ def run_improve_probes() -> tuple[list[str], int]:
         ],
         cwd=str(fs_root),
         capture_output=True,
-        text=True,
+        text=True, encoding="utf-8",
         timeout=60,
     )
     expect(
@@ -12556,7 +12638,7 @@ def run_improve_probes() -> tuple[list[str], int]:
         [sys.executable, str(HOME / "tools" / "saipen.py"), "improve", "status", "--json"],
         cwd=str(fs_root),
         capture_output=True,
-        text=True,
+        text=True, encoding="utf-8",
         timeout=60,
     )
     _fss_data = json.loads(_fss.stdout)
@@ -12607,7 +12689,7 @@ def run_improve_probes() -> tuple[list[str], int]:
         [sys.executable, str(HOME / "tools" / "saipen.py"), "improve", "abort", "imp-ab", "--json"],
         cwd=str(ab_root),
         capture_output=True,
-        text=True,
+        text=True, encoding="utf-8",
         timeout=60,
     )
     _ab_data = json.loads(_abr.stdout)
@@ -12626,14 +12708,98 @@ def run_improve_probes() -> tuple[list[str], int]:
     _ab_cycle2 = create_cycle(ab_root, "imp-ab2")
     expect("abort: a new cycle is admitted after the abort", (_ab_cycle2 / "MANIFEST.md").is_file())
 
-    # T-992/§8: IMPROVE.md's abort contract must match the writer -- drafts
-    # preserved AT THE SAME PATH (never a .discarded rename).
+    # T-1528: judge the abort contract's meaning, not one exact phrase. The
+    # writer preserves draft bytes at their original paths; equivalent prose
+    # must pass, while a .discarded rename contract must fail.
     _abort_doc = (HOME / "saipen" / "IMPROVE.md").read_text(encoding="utf-8-sig")
+
+    def _abort_contract_preserves_draft_locations(contract: str) -> bool:
+        section = re.search(
+            r"(?ms)^- `saipen improve abort\b.*?(?=^- `saipen improve\b|\Z)",
+            contract,
+        )
+        if section is None:
+            return False
+        clause = section.group(0)
+        if ".discarded" in clause.casefold():
+            return False
+        verb = r"\b(?:preserv\w*|retain\w*|keep\w*|remain\w*|stay\w*)\b"
+        where = (
+            r"(?:\b(?:original|same|existing|current)\s+(?:paths?|locations?|files?)\b"
+            r"|\bwhere\s+(?:they|drafts?)\s+(?:were|are)\s+"
+            r"(?:written|created|saved|kept)\b)"
+        )
+        for sentence in re.split(r"(?<=[.;])\s+", re.sub(r"\s+", " ", clause)):
+            if (
+                re.search(r"\bdrafts?\b", sentence, re.IGNORECASE)
+                and re.search(verb, sentence, re.IGNORECASE)
+                and re.search(where, sentence, re.IGNORECASE)
+            ):
+                return True
+        return False
+
+    def _abort_contract_rewrite(replacement: str) -> str:
+        """Replace the draft-location claim without relying on its wording."""
+        section = re.search(
+            r"(?ms)^- \x60saipen improve abort\b.*?(?=^- \x60saipen improve\b|\Z)",
+            _abort_doc,
+        )
+        assert section is not None, "abort-contract red control found no abort section"
+        sentences = re.split(r"(?<=[.;])\s+", section.group(0))
+        target = next(
+            (
+                sentence
+                for sentence in sentences
+                if re.search(r"\bdrafts?\b", sentence, re.IGNORECASE)
+                and (
+                    re.search(
+                        r"\b(?:preserv\w*|retain\w*|keep\w*|remain\w*|stay\w*|rename\w*)\b",
+                        sentence,
+                        re.IGNORECASE,
+                    )
+                    or ".discarded" in sentence.casefold()
+                )
+            ),
+            None,
+        )
+        assert target is not None, "abort-contract red control found no draft-location claim"
+        replacement_text = replacement.rstrip()
+        if target.endswith((".", ";")) and not replacement_text.endswith((".", ";")):
+            replacement_text += target[-1]
+        rewritten, count = re.subn(
+            re.escape(target), replacement_text, _abort_doc, count=1
+        )
+        assert count == 1, f"abort-contract red control did not apply: {replacement!r}"
+        return rewritten
+
     expect(
-        "IMPROVE.md documents same-path abort preservation, never .discarded",
-        "AT THEIR SAME PATH" in _abort_doc and ".discarded" not in _abort_doc,
-        "IMPROVE.md abort contract drifted from the writer",
+        "IMPROVE.md documents abort preservation at the original draft locations",
+        _abort_contract_preserves_draft_locations(_abort_doc),
+        "IMPROVE.md abort contract does not preserve draft locations",
     )
+    expect(
+        "IMPROVE abort oracle accepts equivalent location wording",
+        _abort_contract_preserves_draft_locations(
+            _abort_contract_rewrite("keeps draft reports where they were written")
+        ),
+        "equivalent same-location wording was rejected",
+    )
+    # Every red control below must make the oracle go red. They cover the
+    # failure modes the word-matching version could not see: a rename, a
+    # claim with no preservation promise, a preservation promise with no
+    # location, and a location claim that never mentions drafts.
+    for _label, _rewrite in (
+        (".discarded rename", "renames drafts to `.discarded`"),
+        ("drafts discarded in place", "preserves drafts at `.discarded`"),
+        ("no preservation promise", "deletes drafts"),
+        ("no location claim", "preserves drafts"),
+        ("no draft mention", "preserves everything at their original paths"),
+    ):
+        expect(
+            f"IMPROVE abort oracle rejects a red control: {_label}",
+            not _abort_contract_preserves_draft_locations(_abort_contract_rewrite(_rewrite)),
+            f"a contract variant ({_label}) passed the abort oracle",
+        )
 
     # T-1406: the canonical CLI exit -- `improve retire` flips ONE expected
     # seat to unavailable through the journaled roster write; the
@@ -12660,7 +12826,10 @@ def run_improve_probes() -> tuple[list[str], int]:
     _rt_cycle = cycle_dir(_rt_root, _rt_s1["cycle_id"])
     _rt_rep1 = _rt_root / _rt_s1["report_path"]
     _rt_rep2 = _rt_root / _rt_s2["report_path"]
-    append_run(_rt_rep2, "NO_FINDINGS")
+    append_run(
+        _rt_rep2,
+        "NO_FINDINGS -- audited completed-seat retirement control; no findings expected",
+    )
     complete_report(_rt_rep2)
     _rt_bytes1 = _rt_rep1.read_bytes()
     _rt_bytes2 = _rt_rep2.read_bytes()
@@ -12678,7 +12847,7 @@ def run_improve_probes() -> tuple[list[str], int]:
         ],
         cwd=str(_rt_root),
         capture_output=True,
-        text=True,
+        text=True, encoding="utf-8",
         timeout=60,
     )
     _rt_data = json.loads(_rt_proc.stdout)
@@ -12706,7 +12875,7 @@ def run_improve_probes() -> tuple[list[str], int]:
         ],
         cwd=str(_rt_root),
         capture_output=True,
-        text=True,
+        text=True, encoding="utf-8",
         timeout=60,
     )
     expect(
@@ -12759,7 +12928,10 @@ def run_improve_probes() -> tuple[list[str], int]:
     _ib_rep.write_text(_ib_rep_bad, encoding="utf-8")
     _ib_rep_bytes = _ib_rep.read_bytes()
     try:
-        append_run(_ib_rep, "NO_FINDINGS\n")
+        append_run(
+            _ib_rep,
+            "NO_FINDINGS -- audited malformed-report append refusal control\n",
+        )
         _ib_append_refused = False
     except Exception:
         _ib_append_refused = True
@@ -13056,7 +13228,7 @@ def run_improve_probes() -> tuple[list[str], int]:
         '---\nphase: DONE\ntask: none\nnext_action: "saipen continue"\n'
         'blocker: ""\ntransition_from: SHIP\nsaipen_version: 7\n'
         'schema_version: 3\nlast_event: 900\n'
-        'style_contract: ded-4ae736e4\n'
+        'style_contract: ' + CURRENT_STYLE_CONTRACT + '\n'
         f'saipen_home: "{HOME.resolve().as_posix()}"\nagent: probe\nmode: full\n'
         "updated: 2026-08-09T00:00:00Z\n---\n",
         encoding="utf-8",
@@ -13110,7 +13282,7 @@ def run_improve_probes() -> tuple[list[str], int]:
             cwd=str(race_root),
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
-            text=True,
+            text=True, encoding="utf-8",
         )
         for _ in range(2)
     ]
@@ -13162,7 +13334,7 @@ def run_nitro_probes() -> tuple[list[str], int]:
     shutil.copytree(
         HOME,
         home,
-        ignore=shutil.ignore_patterns(
+        ignore=_without_probe_runtime(shutil.ignore_patterns(
             ".git",
             ".freebuff",
             ".claude",
@@ -13171,7 +13343,7 @@ def run_nitro_probes() -> tuple[list[str], int]:
             ".pytest_cache",
             ".ruff_cache",
             "nul",
-        ),
+        )),
     )
     env = {
         **os.environ,
@@ -13180,10 +13352,13 @@ def run_nitro_probes() -> tuple[list[str], int]:
         "GIT_COMMITTER_NAME": "probe",
         "GIT_COMMITTER_EMAIL": "probe@example.invalid",
     }
-    subprocess.run(["git", "init", "-q"], cwd=home, env=env, capture_output=True, text=True)
-    subprocess.run(["git", "add", "-A"], cwd=home, env=env, capture_output=True, text=True)
+    subprocess.run(["git", "init", "-q"], cwd=home, env=env, capture_output=True, text=True,
+        encoding="utf-8")
+    subprocess.run(["git", "add", "-A"], cwd=home, env=env, capture_output=True, text=True,
+        encoding="utf-8")
     subprocess.run(
-        ["git", "commit", "-q", "-m", "probe"], cwd=home, env=env, capture_output=True, text=True
+        ["git", "commit", "-q", "-m", "probe"], cwd=home, env=env, capture_output=True, text=True,
+            encoding="utf-8"
     )
 
     from saipen_engine.phases import ALL_PHASES
@@ -13245,7 +13420,7 @@ def run_nitro_probes() -> tuple[list[str], int]:
         [sys.executable, str(home / "tools" / "saipen.py"), "status"],
         cwd=home,
         capture_output=True,
-        text=True,
+        text=True, encoding="utf-8",
     )
     expect(
         "saipen status is read-only and reports the phase",
@@ -13256,7 +13431,7 @@ def run_nitro_probes() -> tuple[list[str], int]:
         [sys.executable, str(home / "tools" / "saipen.py"), "next", "--json"],
         cwd=home,
         capture_output=True,
-        text=True,
+        text=True, encoding="utf-8",
     )
     expect(
         "saipen next --json returns the action deterministically",
@@ -13327,7 +13502,7 @@ def run_nitro_m2_probes() -> tuple[list[str], int]:
             cwd=str(root),
             env=env,
             capture_output=True,
-            text=True,
+            text=True, encoding="utf-8",
             timeout=60,
         ).returncode
 
@@ -13557,7 +13732,8 @@ def run_nitro_m3_probes() -> tuple[list[str], int]:
         (s / "STATE.md").write_text(
             '---\nphase: DONE\ntask: none\nnext_action: "saipen continue"\n'
             'blocker: ""\ntransition_from: SHIP\nsaipen_version: 7\n'
-            f"schema_version: 3\nlast_event: {last_event}\nstyle_contract: ded-4ae736e4\n"
+            f"schema_version: 3\nlast_event: {last_event}\n"
+            f"style_contract: {CURRENT_STYLE_CONTRACT}\n"
             f'saipen_home: "{HOME.as_posix()}"\nagent: probe\nrequires:\n  - filesystem\n'
             "  - git\n  - python\nmode: full\nupdated: 2026-08-09T00:00:00Z\n"
             "---\n",
@@ -13578,7 +13754,7 @@ def run_nitro_m3_probes() -> tuple[list[str], int]:
     (saipen / "STATE.md").write_text(
         '---\nphase: DONE\ntask: none\nnext_action: "saipen continue"\n'
         'blocker: ""\ntransition_from: SHIP\nsaipen_version: 7\n'
-        f"schema_version: 3\nlast_event: {outer_last_event}\nstyle_contract: ded-4ae736e4\n"
+        f"schema_version: 3\nlast_event: {outer_last_event}\n"
         "agent: probe\nmode: full\nupdated: 2026-08-09T00:00:00Z\n---\n",
         encoding="utf-8",
     )
@@ -13971,7 +14147,7 @@ def run_nitro_integrity_probes() -> tuple[list[str], int]:
         (saipen / "STATE.md").write_text(
             '---\nphase: DONE\ntask: none\nnext_action: "saipen continue"\n'
             'blocker: ""\ntransition_from: SHIP\nsaipen_version: 7\n'
-            "schema_version: 3\nlast_event: 900\nstyle_contract: ded-4ae736e4\n"
+            'schema_version: 3\nlast_event: 900\nstyle_contract: ' + CURRENT_STYLE_CONTRACT + '\n'
             f'saipen_home: "{HOME.as_posix()}"\nagent: probe\nrequires:\n  - filesystem\n'
             "  - git\n  - python\nmode: full\nupdated: 2026-08-09T00:00:00Z\n"
             "---\n",
@@ -14119,7 +14295,7 @@ def run_nitro_integrity_probes() -> tuple[list[str], int]:
         [sys.executable, str(HOME / "tools" / "saipen.py"), "status", "--json"],
         cwd=str(blocker_root),
         capture_output=True,
-        text=True,
+        text=True, encoding="utf-8",
         timeout=60,
     )
     blocker_status_data = json.loads(blocker_status.stdout)
@@ -14133,7 +14309,7 @@ def run_nitro_integrity_probes() -> tuple[list[str], int]:
         [sys.executable, str(HOME / "tools" / "saipen.py"), "next", "--json"],
         cwd=str(blocker_root),
         capture_output=True,
-        text=True,
+        text=True, encoding="utf-8",
         timeout=60,
     )
     blocker_next_data = json.loads(blocker_next.stdout)
@@ -14836,7 +15012,9 @@ def run_nitro_integrity_probes() -> tuple[list[str], int]:
         model_or_runtime="probe",
         context_scope="scope",
     )
-    run_res = improve.append_run(rreport, "first run")
+    run_res = improve.append_run(
+        rreport, "NO_FINDINGS -- first run audit had no findings"
+    )
     expect(
         "append_run returns a committed transaction result",
         run_res.get("ok") and run_res.get("code") == "COMMITTED",
@@ -14953,7 +15131,7 @@ def run_nitro_integrity_probes() -> tuple[list[str], int]:
         [sys.executable, str(HOME / "tools" / "saipen.py"), "recover", "--json"],
         cwd=str(rec_root),
         capture_output=True,
-        text=True,
+        text=True, encoding="utf-8",
         timeout=60,
     )
     expect(
@@ -14985,7 +15163,7 @@ def run_nitro_integrity_probes() -> tuple[list[str], int]:
         ],
         cwd=str(up_root),
         capture_output=True,
-        text=True,
+        text=True, encoding="utf-8",
         timeout=60,
     )
     expect(
@@ -15003,7 +15181,7 @@ def run_nitro_integrity_probes() -> tuple[list[str], int]:
         ],
         cwd=str(up_root),
         capture_output=True,
-        text=True,
+        text=True, encoding="utf-8",
         timeout=60,
     )
     up_text = up_path.read_text(encoding="utf-8-sig")
@@ -15016,7 +15194,7 @@ def run_nitro_integrity_probes() -> tuple[list[str], int]:
         [sys.executable, str(HOME / "tools" / "saipen.py"), "userperson", "reset", "--json"],
         cwd=str(up_root),
         capture_output=True,
-        text=True,
+        text=True, encoding="utf-8",
         timeout=60,
     )
     expect(
@@ -15044,7 +15222,7 @@ def run_nitro_integrity_probes() -> tuple[list[str], int]:
         cwd=str(up_root),
         env=up_reset_env,
         capture_output=True,
-        text=True,
+        text=True, encoding="utf-8",
         timeout=60,
     )
     expect(
@@ -15576,7 +15754,7 @@ def run_nitro_integrity_probes() -> tuple[list[str], int]:
         b'next_action: "saipen continue"\n'
         b'blocker: ""\ntransition_from: SHIP\nsaipen_version: 7\n'
         b"schema_version: 3\nlast_event: 901\n"
-        b'style_contract: ded-4ae736e4\nsaipen_home: "."\n'
+        b'style_contract: ' + CURRENT_STYLE_CONTRACT.encode('ascii') + b'\nsaipen_home: "."\n'
         b"agent: probe\nmode: full\n"
         b"updated: 2026-08-09T00:00:00Z\n---\n"
     )
@@ -15625,7 +15803,7 @@ def run_nitro_integrity_probes() -> tuple[list[str], int]:
         [sys.executable, str(HOME / "tools" / "saipen.py"), "recover", "--json"],
         cwd=str(root_c),
         capture_output=True,
-        text=True,
+        text=True, encoding="utf-8",
         timeout=60,
     )
     expect(
@@ -15653,7 +15831,7 @@ def run_nitro_integrity_probes() -> tuple[list[str], int]:
         [sys.executable, "-c", crash_code],
         cwd=str(root_sp),
         capture_output=True,
-        text=True,
+        text=True, encoding="utf-8",
         timeout=60,
     ).returncode
     expect(
@@ -15725,7 +15903,7 @@ def run_nitro_integrity_probes() -> tuple[list[str], int]:
         ],
         cwd=str(tac_root),
         capture_output=True,
-        text=True,
+        text=True, encoding="utf-8",
         timeout=60,
     )
     expect(
@@ -15747,7 +15925,7 @@ def run_nitro_integrity_probes() -> tuple[list[str], int]:
         ],
         cwd=str(tac_root),
         capture_output=True,
-        text=True,
+        text=True, encoding="utf-8",
         timeout=60,
     )
     expect(
@@ -15773,7 +15951,7 @@ def run_nitro_integrity_probes() -> tuple[list[str], int]:
         ],
         cwd=str(up_ui_root),
         capture_output=True,
-        text=True,
+        text=True, encoding="utf-8",
         timeout=60,
     )
     from userperson import parse_profile, project_profile
@@ -16033,7 +16211,7 @@ def run_nitro_integrity_probes() -> tuple[list[str], int]:
         [sys.executable, str(VALIDATOR), "--project-root", str(vp_root)],
         cwd=str(vp_root),
         capture_output=True,
-        text=True,
+        text=True, encoding="utf-8",
         errors="replace",
         timeout=120,
     )
@@ -16072,7 +16250,7 @@ def run_nitro_integrity_probes() -> tuple[list[str], int]:
         [sys.executable, str(HOME / "tools" / "saipen.py"), "next", "--json"],
         cwd=str(pub_root),
         capture_output=True,
-        text=True,
+        text=True, encoding="utf-8",
         timeout=60,
     )
     expect(
@@ -16084,7 +16262,7 @@ def run_nitro_integrity_probes() -> tuple[list[str], int]:
         [sys.executable, str(HOME / "tools" / "saipen.py"), "status", "--json"],
         cwd=str(pub_root),
         capture_output=True,
-        text=True,
+        text=True, encoding="utf-8",
         timeout=60,
     )
     expect(
@@ -16096,7 +16274,7 @@ def run_nitro_integrity_probes() -> tuple[list[str], int]:
         [sys.executable, str(HOME / "tools" / "saipen.py"), "context", "hot"],
         cwd=str(pub_root),
         capture_output=True,
-        text=True,
+        text=True, encoding="utf-8",
         timeout=60,
     )
     expect(
@@ -16108,7 +16286,7 @@ def run_nitro_integrity_probes() -> tuple[list[str], int]:
         [sys.executable, str(HOME / "tools" / "saipen.py"), "sub", "spawn", "saipub", "--json"],
         cwd=str(pub_root),
         capture_output=True,
-        text=True,
+        text=True, encoding="utf-8",
         timeout=60,
     )
     if pub_sub.returncode != 0:
@@ -16124,7 +16302,7 @@ def run_nitro_integrity_probes() -> tuple[list[str], int]:
             [sys.executable, str(HOME / "tools" / "saipen.py"), "sub", "spawn", "saipub", "--json"],
             cwd=str(pub_root),
             capture_output=True,
-            text=True,
+            text=True, encoding="utf-8",
             timeout=60,
         )
     expect(
@@ -16136,14 +16314,14 @@ def run_nitro_integrity_probes() -> tuple[list[str], int]:
         [sys.executable, str(HOME / "tools" / "saipen.py"), "sub", "pause", "saipub", "--json"],
         cwd=str(pub_root),
         capture_output=True,
-        text=True,
+        text=True, encoding="utf-8",
         timeout=60,
     )
     pub_resume = subprocess.run(
         [sys.executable, str(HOME / "tools" / "saipen.py"), "sub", "resume", "saipub", "--json"],
         cwd=str(pub_root),
         capture_output=True,
-        text=True,
+        text=True, encoding="utf-8",
         timeout=60,
     )
     expect(
@@ -16162,7 +16340,7 @@ def run_nitro_integrity_probes() -> tuple[list[str], int]:
         [sys.executable, str(HOME / "tools" / "saipen.py"), "claim", "T-1", "--json"],
         cwd=str(pubc_root),
         capture_output=True,
-        text=True,
+        text=True, encoding="utf-8",
         timeout=60,
     )
     pubc_tr = subprocess.run(
@@ -16177,14 +16355,14 @@ def run_nitro_integrity_probes() -> tuple[list[str], int]:
         ],
         cwd=str(pubc_root),
         capture_output=True,
-        text=True,
+        text=True, encoding="utf-8",
         timeout=60,
     )
     pubc_done = subprocess.run(
         [sys.executable, str(HOME / "tools" / "saipen.py"), "ticket", "done", "T-1", "--json"],
         cwd=str(pubc_root),
         capture_output=True,
-        text=True,
+        text=True, encoding="utf-8",
         timeout=60,
     )
     pubc_st = parse_state(codec.read_doc(pubc_root / ".saipen" / "STATE.md"))
@@ -16194,7 +16372,7 @@ def run_nitro_integrity_probes() -> tuple[list[str], int]:
         [sys.executable, str(VALIDATOR), "--project-root", str(pubc_root)],
         cwd=str(pubc_root),
         capture_output=True,
-        text=True,
+        text=True, encoding="utf-8",
         errors="replace",
         timeout=120,
     )
@@ -16225,7 +16403,7 @@ def run_nitro_integrity_probes() -> tuple[list[str], int]:
         [sys.executable, str(HOME / "tools" / "saipen.py"), "next", "--json"],
         cwd=str(pubn_root),
         capture_output=True,
-        text=True,
+        text=True, encoding="utf-8",
         timeout=60,
     )
     import json as _json
@@ -16288,7 +16466,8 @@ def run_nitro_integrity_probes() -> tuple[list[str], int]:
         "finish_ticket(r'%s', 'T-1', 'probe')" % (str(HOME / "tools"), str(cC))
     )
     rc = subprocess.run(
-        [sys.executable, "-c", crash_code], cwd=str(cC), capture_output=True, text=True, timeout=60
+        [sys.executable, "-c", crash_code], cwd=str(cC), capture_output=True, text=True,
+            encoding="utf-8", timeout=60
     ).returncode
     _pending_cC = pending_ops(cC)
     expect(
@@ -16435,7 +16614,7 @@ def run_nitro_integrity_probes() -> tuple[list[str], int]:
         [sys.executable, str(VALIDATOR), "--project-root", str(gD)],
         cwd=str(gD),
         capture_output=True,
-        text=True,
+        text=True, encoding="utf-8",
         errors="replace",
         timeout=120,
     )
@@ -16484,7 +16663,7 @@ def run_nitro_integrity_probes() -> tuple[list[str], int]:
         [sys.executable, str(VALIDATOR), "--project-root", str(_g_ok)],
         cwd=str(_g_ok),
         capture_output=True,
-        text=True,
+        text=True, encoding="utf-8",
         errors="replace",
         timeout=120,
     )
@@ -16498,7 +16677,7 @@ def run_nitro_integrity_probes() -> tuple[list[str], int]:
         [sys.executable, str(VALIDATOR), "--project-root", str(_g_bad)],
         cwd=str(_g_bad),
         capture_output=True,
-        text=True,
+        text=True, encoding="utf-8",
         errors="replace",
         timeout=120,
     )
@@ -16628,7 +16807,7 @@ def run_nitro_integrity_probes() -> tuple[list[str], int]:
         'next_action: "WAIT: user brake -- user asked to stop"\n'
         'blocker: "user brake"\ntransition_from: SHIP\n'
         "saipen_version: 7\nschema_version: 3\nlast_event: 900\n"
-        'style_contract: ded-4ae736e4\nsaipen_home: "."\n'
+        'style_contract: ' + CURRENT_STYLE_CONTRACT + '\nsaipen_home: "."\n'
         "agent: probe\nmode: full\n"
         "updated: 2026-08-09T00:00:00Z\n---\n"
     )
@@ -16655,7 +16834,7 @@ def run_nitro_integrity_probes() -> tuple[list[str], int]:
         'next_action: "WAIT: user brake -- user asked to stop"\n'
         'blocker: ""\ntransition_from: SHIP\n'
         "saipen_version: 7\nschema_version: 3\nlast_event: 900\n"
-        'style_contract: ded-4ae736e4\nsaipen_home: "."\n'
+        'style_contract: ' + CURRENT_STYLE_CONTRACT + '\nsaipen_home: "."\n'
         "agent: probe\nmode: full\n"
         "updated: 2026-08-09T00:00:00Z\n---\n"
     )
@@ -16826,7 +17005,7 @@ def run_last_event_probes() -> tuple[list[str], int]:
             [sys.executable, str(VALIDATOR), "--project-root", str(project)],
             cwd=project,
             capture_output=True,
-            text=True,
+            text=True, encoding="utf-8",
             errors="replace",
         )
 
@@ -16990,7 +17169,7 @@ def run_log_tail_probes() -> tuple[list[str], int]:
     (saipen / "STATE.md").write_text(
         '---\nphase: DONE\ntask: none\nnext_action: "saipen continue"\n'
         'blocker: ""\ntransition_from: SHIP\nsaipen_version: 7\n'
-        "schema_version: 3\nlast_event: 100\nstyle_contract: ded-4ae736e4\n"
+        'schema_version: 3\nlast_event: 100\nstyle_contract: ' + CURRENT_STYLE_CONTRACT + '\n'
         'saipen_home: "."\nagent: probe\nmode: full\n'
         "updated: 2026-08-09T00:00:00Z\n---\n",
         encoding="utf-8",
@@ -17350,7 +17529,8 @@ def run_hostile_release_probes() -> tuple[list[str], int]:
         shutil.rmtree(path, onerror=lambda fn, p, e: None)
 
     def git(root, *args):
-        return subprocess.run(["git", *args], cwd=root, capture_output=True, text=True, check=False)
+        return subprocess.run(["git", *args], cwd=root, capture_output=True, text=True,
+            encoding="utf-8", check=False)
 
     def setup():
         root = Path(tempfile.mkdtemp(prefix="saipen-hr-release-"))
@@ -17683,7 +17863,7 @@ def run_hostile_authority_probes() -> tuple[list[str], int]:
     def style_token() -> str:
         from saipen_engine.state import running_style_token
 
-        return running_style_token() or "ded-4ae736e4"
+        return running_style_token() or CURRENT_STYLE_CONTRACT
 
     def mkproject(
         home: str | None = None, mode: str = "full", log_lines: str | None = None
@@ -18113,7 +18293,7 @@ def run_hostile_authority_probes() -> tuple[list[str], int]:
             [sys.executable, str(HOME / "tools" / "saipen.py"), command, "--json"],
             cwd=str(parent_file),
             capture_output=True,
-            text=True,
+            text=True, encoding="utf-8",
             timeout=90,
         )
         expect(
@@ -18759,7 +18939,7 @@ def run_t1012_strict_grammar_probes() -> tuple[list[str], int]:
                 [sys.executable, str(_val)],
                 cwd=str(_sandbox),
                 capture_output=True,
-                text=True,
+                text=True, encoding="utf-8",
                 timeout=400,
             )
             return pr.returncode, pr.stdout + pr.stderr
@@ -18862,7 +19042,7 @@ def run_perf_wave_probes() -> tuple[list[str], int]:
             [sys.executable, str(script)],
             cwd=HOME,
             capture_output=True,
-            text=True,
+            text=True, encoding="utf-8",
             errors="replace",
             timeout=1800,
         )
@@ -18896,7 +19076,7 @@ def run_continuity_probes() -> tuple[list[str], int]:
             [sys.executable, str(script)],
             cwd=HOME,
             capture_output=True,
-            text=True,
+            text=True, encoding="utf-8",
             errors="replace",
             timeout=1800,
         )
@@ -19006,11 +19186,21 @@ def run_scenario_fixture_probes(
         with tempfile.TemporaryDirectory(prefix="saipen-scenario-") as raw:
             disposable = Path(raw) / d.name
             shutil.copytree(d, disposable, symlinks=True, ignore=_IGNORE_RUNTIME)
+            # T-1555: fixture STATEs carry the placeholder (or a marker STYLE.md
+            # has since retired), never a claim about THIS install; the copy is
+            # restamped to the live marker so a STYLE.md edit cannot red the
+            # suite. A fixture whose own pinned failure IS the marker check
+            # (hr-wrong-style_contract, hr-missing-style_contract) must keep its
+            # wrongness verbatim, so it is skipped on its own pinned reason.
+            if not (declared == "fail" and reason and "style_contract" in reason):
+                from test_fixture_support import restamp_live_style
+
+                restamp_live_style(disposable / ".saipen", install_root=HOME)
             r = subprocess.run(
                 [sys.executable, str(VALIDATOR), "--project-root", str(disposable)],
                 cwd=disposable,
                 capture_output=True,
-                text=True,
+                text=True, encoding="utf-8",
             )
             actual = "pass" if r.returncode == 0 else "fail"
             checked += 1
@@ -19168,7 +19358,8 @@ def _main_impl():
 
         def git_run(cwd: Path, *args: str) -> subprocess.CompletedProcess[str]:
             return subprocess.run(
-                [git, *args], cwd=cwd, capture_output=True, text=True, errors="replace"
+                [git, *args], cwd=cwd, capture_output=True, text=True,
+                    encoding="utf-8", errors="replace"
             )
 
         with tempfile.TemporaryDirectory(prefix="saipen-digest-") as raw:
@@ -19203,7 +19394,7 @@ def _main_impl():
                 [sys.executable, str(VALIDATOR), "--project-root", str(project)],
                 cwd=project,
                 capture_output=True,
-                text=True,
+                text=True, encoding="utf-8",
             )
             if "[digest-stale]" in res1.stdout or "[digest-stale]" in res1.stderr:
                 problems.append(
@@ -19219,7 +19410,7 @@ def _main_impl():
                 [sys.executable, str(VALIDATOR), "--project-root", str(project)],
                 cwd=project,
                 capture_output=True,
-                text=True,
+                text=True, encoding="utf-8",
             )
             if "[digest-stale]" not in res2.stdout and "[digest-stale]" not in res2.stderr:
                 problems.append(
@@ -19248,9 +19439,9 @@ def _main_impl():
             shutil.copytree(
                 HOME,
                 home,
-                ignore=shutil.ignore_patterns(
+                ignore=_without_probe_runtime(shutil.ignore_patterns(
                     ".git", ".venv", "__pycache__", "node_modules", "nul", ".freebuff"
-                ),
+                )),
             )
             env = {
                 **os.environ,
@@ -19262,7 +19453,8 @@ def _main_impl():
 
             def git(*args: str) -> subprocess.CompletedProcess[str]:
                 return subprocess.run(
-                    ["git", *args], cwd=home, env=env, capture_output=True, text=True, check=False
+                    ["git", *args], cwd=home, env=env, capture_output=True, text=True,
+                        encoding="utf-8", check=False
                 )
 
             def validate() -> str:
@@ -19275,7 +19467,7 @@ def _main_impl():
                     ],
                     cwd=home,
                     capture_output=True,
-                    text=True,
+                    text=True, encoding="utf-8",
                     errors="replace",
                 )
                 return r.stdout + r.stderr
@@ -19358,9 +19550,9 @@ def _main_impl():
             shutil.copytree(
                 HOME,
                 home,
-                ignore=shutil.ignore_patterns(
+                ignore=_without_probe_runtime(shutil.ignore_patterns(
                     ".git", ".venv", "__pycache__", "node_modules", "nul", ".freebuff"
-                ),
+                )),
             )
 
             style_path = home / "saipen" / "STYLE.md"
@@ -19386,7 +19578,7 @@ def _main_impl():
                     ],
                     cwd=home,
                     capture_output=True,
-                    text=True,
+                    text=True, encoding="utf-8",
                     errors="replace",
                 )
                 return r.stdout + r.stderr
@@ -19490,7 +19682,7 @@ def _main_impl():
                     [sys.executable, str(VALIDATOR), "--project-root", str(project)],
                     cwd=project,
                     capture_output=True,
-                    text=True,
+                    text=True, encoding="utf-8",
                     errors="replace",
                 )
                 return r.stdout + r.stderr

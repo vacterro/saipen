@@ -19,6 +19,7 @@ from pathlib import Path
 TOOLS = Path(__file__).resolve().parent
 if str(TOOLS) not in sys.path:
     sys.path.insert(0, str(TOOLS))
+from test_fixture_support import CURRENT_STYLE_CONTRACT  # noqa: E402
 
 SAIPEN_CLI = TOOLS / "saipen.py"
 #: The fixture binds THIS repository as its protocol home, exactly as the
@@ -36,7 +37,7 @@ _SAITULS_STATE = (
     "saipen_version: 8\n"
     "schema_version: 3\n"
     "last_event: 1303\n"
-    "style_contract: ded-4ae736e4\n"
+    'style_contract: ' + CURRENT_STYLE_CONTRACT + '\n'
     'saipen_home: "{home}"\n'
     "agent: buffy\n"
     "parked_work: T-999\n"

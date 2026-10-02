@@ -227,7 +227,8 @@ def audit(runner, script, half):
                 fh.write(content)
         env = bash_env(runner[0]) if half == "sh" else None
         result = subprocess.run(
-            [*runner, script], cwd=str(control), env=env, capture_output=True, text=True
+            [*runner, script], cwd=str(control), env=env, capture_output=True, text=True,
+                encoding="utf-8"
         )
         if result.returncode:
             first = next(
@@ -251,7 +252,8 @@ def audit(runner, script, half):
                         fh.write(content)
             env = bash_env(runner[0]) if half == "sh" else None
             r = subprocess.run(
-                [*runner, script], cwd=str(work), env=env, capture_output=True, text=True
+                [*runner, script], cwd=str(work), env=env, capture_output=True, text=True,
+                    encoding="utf-8"
             )
             blob = (r.stdout or "") + (r.stderr or "")
             if expect not in blob:
@@ -301,7 +303,7 @@ def audit_sh_log_filter_failure(bash: str) -> str | None:
             cwd=work,
             env=env,
             capture_output=True,
-            text=True,
+            text=True, encoding="utf-8",
             errors="replace",
         )
         output = result.stdout + result.stderr

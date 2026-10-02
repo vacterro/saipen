@@ -31,6 +31,7 @@ from pathlib import Path
 TOOLS = Path(__file__).resolve().parent
 if str(TOOLS) not in sys.path:
     sys.path.insert(0, str(TOOLS))
+from test_fixture_support import CURRENT_STYLE_CONTRACT  # noqa: E402
 
 from saipen_engine.admission import evaluate_admission  # noqa: E402
 from saipen_engine.paths import identity_file_content, new_project_lineage  # noqa: E402
@@ -94,7 +95,7 @@ class NoPhantomBrakeTests(unittest.TestCase):
             "saipen_version: 8\n"
             "schema_version: 3\n"
             "last_event: 100\n"
-            "style_contract: ded-4ae736e4\n"
+            'style_contract: ' + CURRENT_STYLE_CONTRACT + '\n'
             "mode: full\n"
             "updated: 2026-09-12T00:00:00Z\n"
             "agent: test-agent\n"

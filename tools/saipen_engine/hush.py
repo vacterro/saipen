@@ -35,6 +35,7 @@ default policy, because there is nowhere for the old one to have been stored.
 from __future__ import annotations
 
 from dataclasses import dataclass
+import re
 
 RULE_ID = "EXEC-HUSH-01"
 MODIFIER = "hush"
@@ -73,6 +74,25 @@ MANDATORY = frozenset(
 )
 
 FINAL_REPORT_MAX_LINES = 20
+INTERMEDIATE = DISCRETIONARY - {"details"}
+#: An EFFICIENCY field or its rendered headline (T-1576) -- final boundary only.
+_KPI_LINE = re.compile(
+    r"(?im)^\s*EFFICIENCY\b|conditional_efficiency_kpi|"
+    r"^\s*(?:PRELIMINARY\s+)?~\d{1,3}%\s+(?:HIGH|MED|LOW)\s+\|"
+)
+
+
+def progress_requested(request: object) -> bool:
+    """Conservative affirmative ingress grammar; quoted/negated text cannot opt in."""
+    if not isinstance(request, str):
+        return False
+    return bool(re.fullmatch(
+        r"\s*(?:please\s+)?(?:keep me updated|show (?:me )?progress|"
+        r"tell me after every phase|explain what you(?: are|'re) doing|"
+        r"anna vahearuandeid|näita edenemist|hoia mind kursis|"
+        r"сообщай о ходе работы|держи меня в курсе|показывай прогресс)\s*[.!]?\s*",  # noqa: RUF001
+        request, re.IGNORECASE,
+    ))
 
 
 @dataclass(frozen=True)
@@ -80,25 +100,28 @@ class Policy:
     """One task-local execution policy. Immutable; created per resolution."""
 
     hushed: bool = False
+    progress_authorized: bool = False
 
     def suppresses(self, kind: str) -> bool:
         """May this output kind be dropped under the current policy?
 
-        Fails toward speech: not hushed, unknown kind, or a mandatory kind all
-        return False. Only a kind explicitly listed as discretionary is
-        droppable, and only while HUSH is active.
+        Mandatory and unknown kinds remain visible. Default execution drops
+        intermediate narration unless this ingress explicitly requested it.
+        HUSH additionally drops discretionary final detail.
         """
-        if not self.hushed:
-            return False
         if kind in MANDATORY:
             return False
-        return kind in DISCRETIONARY
+        if self.hushed:
+            return kind in DISCRETIONARY
+        return kind in INTERMEDIATE and not self.progress_authorized
 
     def describe(self) -> dict:
         return {
             "rule_id": RULE_ID,
             "execution_policy": "hush" if self.hushed else "default",
-            "suppressed": sorted(DISCRETIONARY) if self.hushed else [],
+            "silent_execution": not self.progress_authorized or self.hushed,
+            "progress_authorized": self.progress_authorized and not self.hushed,
+            "suppressed": sorted(k for k in DISCRETIONARY if self.suppresses(k)),
             "mandatory": sorted(MANDATORY),
             "final_report_max_lines": FINAL_REPORT_MAX_LINES if self.hushed else None,
         }
@@ -106,6 +129,35 @@ class Policy:
 
 DEFAULT = Policy(hushed=False)
 HUSHED = Policy(hushed=True)
+
+
+def for_request(request: object) -> Policy:
+    """One turn's policy; no preference leaks to the next human ingress."""
+    return Policy(progress_authorized=progress_requested(request))
+
+
+def intermediate_verdict(text: str, *, request: str = "", kind: str = "progress") -> dict:
+    """Host boundary for model commentary; runtime/heartbeat data stay separate."""
+    policy = for_request(request)
+    if policy.suppresses(kind) and text.strip():
+        return {"ok": False, "code": "INTERMEDIATE_TEXT_SUPPRESSED", "emit": False}
+    # T-1576: the efficiency KPI is a FINAL-boundary field. Even authorized
+    # progress chat may not carry it -- that is the KPI heartbeat silent
+    # execution forbids.
+    if kind in INTERMEDIATE and _KPI_LINE.search(text):
+        return {
+            "ok": False,
+            "code": "INTERMEDIATE_TEXT_SUPPRESSED",
+            "emit": False,
+            "reason": "kpi_heartbeat",
+        }
+    if kind in INTERMEDIATE and text.strip():
+        from .chat_style import chat_style_errors, running_style_contract
+
+        errors = chat_style_errors(text, contract=running_style_contract())
+        if errors:
+            return {"ok": False, "code": "CHAT_STYLE_DRIFT", "emit": False, "errors": errors}
+    return {"ok": True, "code": "OUTPUT_ALLOWED", "emit": bool(text.strip())}
 
 
 def strip_modifier(message: str) -> tuple[Policy, str]:

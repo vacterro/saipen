@@ -259,7 +259,8 @@ def killer(root: Path, kill_at: list[float], started: float, log: list[dict]) ->
         pid = int(record.get("pid") or 0)
         if os.name == "nt":
             done = subprocess.run(
-                ["taskkill", "/T", "/F", "/PID", str(pid)], capture_output=True, text=True
+                ["taskkill", "/T", "/F", "/PID", str(pid)], capture_output=True, text=True,
+                    encoding="utf-8"
             )
             ok = done.returncode == 0
         else:
@@ -290,11 +291,11 @@ def assess(root: Path) -> dict:
     readme = root / "README.md"
     tests = subprocess.run(
         [sys.executable, "-m", "unittest", "discover", "-s", "tests", "-t", "."],
-        cwd=str(root), capture_output=True, text=True, timeout=120,
+        cwd=str(root), capture_output=True, text=True, encoding="utf-8", timeout=120,
     ) if (root / "tests").exists() else None
     validate = subprocess.run(
         [sys.executable, str(TOOLS / "validate.py"), "--gate", "core"],
-        cwd=str(root), capture_output=True, text=True, timeout=300,
+        cwd=str(root), capture_output=True, text=True, encoding="utf-8", timeout=300,
     )
     verdict = (validate.stdout.strip().splitlines() or [""])[-1]
     return {

@@ -57,6 +57,8 @@ from pathlib import Path
 import fail_site_inventory as inventory
 from freshness import compute_role_revision, compute_source_identity
 from saipen_engine.journal import SETTLED_DIR
+from saipen_engine.knowledge import validate_knowledge, write_index
+from saipen_engine.retirement import bound_artifact_errors, load_ticket_retirement
 from saipen_engine.paths import project_lineage_identity
 from saipen_engine.subs import outbox_rel
 from saipen_engine.release_contract import locale_readme_paths
@@ -79,10 +81,13 @@ SUB = ".saipen/extensions/subs/saiwiki/STATE.md"
 CHANGELOG = "CHANGELOG.md"
 CORE = "saipen/CORE.md"
 IMPROVE = "saipen/IMPROVE.md"
+REGISTRY = "saipen/REGISTRY.json"
 INDEX = "saipen/INDEX.md"
 ACTIVATION = "saipen/ACTIVATION_BLOCK.md"
 CONVERGE = "saipen/CONVERGE.md"
 COMMANDS = "saipen/COMMANDS.md"
+STORAGE = "saipen/STORAGE.md"
+STORAGE_REGISTRY = ".saipen/STORAGE_REGISTRY.json"
 RUNTIME_SURFACE = "tools/saipen_engine/runtime_surface.py"
 AUTOINJECT = "tools/autoinject.py"
 CREW_BACKLOG = ".saipen/KNOWLEDGE/crew-v8-backlog.md"
@@ -143,7 +148,10 @@ def freshen_synthetic_outboxes(tree: Path) -> None:
         text = upsert_bold(text, "role_revision", compute_role_revision(wiki_charter))
         wiki.write_text(text, encoding="utf-8", newline="\n")
 
-    translate = tree / ".saipen/saitranslate/kitchen/OUTBOX.md"
+    # Same resolver the validator uses: canonical when the project has it,
+    # legacy only when it does not. A control package that stamps the
+    # SUPERSEDED copy proves nothing about the file actually shipped (T-313).
+    translate = tree / outbox_rel(tree, "saitranslate")
     translate_charter = tree / "extensions/subs/saitranslate.md"
     if translate.is_file() and translate_charter.is_file():
         text = translate.read_text(encoding="utf-8-sig")
@@ -343,7 +351,8 @@ def release_ledger_probe(source: Path, destination: Path) -> str | None:
 
     def git(*args: str) -> subprocess.CompletedProcess[str]:
         return subprocess.run(
-            ["git", *args], cwd=tree, capture_output=True, text=True, errors="replace"
+            ["git", *args], cwd=tree, capture_output=True, text=True,
+                encoding="utf-8", errors="replace"
         )
 
     for args in (
@@ -411,7 +420,7 @@ def release_ledger_probe(source: Path, destination: Path) -> str | None:
             cwd=tree,
             env=hermetic_child_env(),
             capture_output=True,
-            text=True,
+            text=True, encoding="utf-8",
             errors="replace",
         )
 
@@ -659,7 +668,8 @@ def warn_ownership_probe(source: Path, destination: Path) -> str | None:
 
     def git(*args: str) -> subprocess.CompletedProcess[str]:
         return subprocess.run(
-            ["git", *args], cwd=tree, capture_output=True, text=True, errors="replace"
+            ["git", *args], cwd=tree, capture_output=True, text=True,
+                encoding="utf-8", errors="replace"
         )
 
     # A copied pre-release worktree has no `.git/`, while VERSION/CHANGELOG
@@ -719,7 +729,7 @@ def warn_ownership_probe(source: Path, destination: Path) -> str | None:
             cwd=tree,
             env=hermetic_child_env(),
             capture_output=True,
-            text=True,
+            text=True, encoding="utf-8",
             errors="replace",
         )
 
@@ -854,20 +864,36 @@ def phase_rename_probe(source: Path, destination: Path) -> str | None:
     """
     tree = destination / "phase-rename"
     shutil.copytree(source, tree)
+    knowledge = validate_knowledge(tree)
+    if knowledge["errors"]:
+        return "phase rename needs valid knowledge evidence: " + "; ".join(knowledge["errors"])
     rebind_synthetic_milestones(tree)
     milestone_root = tree / ".saipen" / "milestones"
     immutable_source_roots = (
         tree / ".saipen" / "intake",
         tree / ".saipen" / "archive" / "source",
+        tree / ".saipen" / "archive" / "retired",
     )
+    immutable_evidence = set()
+    for record_path in (tree / ".saipen/archive/retired").glob("T-*.json"):
+        record, errors, _exists = load_ticket_retirement(tree, record_path.stem)
+        if record is not None and not errors:
+            errors = bound_artifact_errors(tree, record_path.stem, record["evidence"])
+        if errors or record is None:
+            return "phase rename needs valid retirement evidence: " + "; ".join(errors)
+        if record["evidence"]["kind"] == "artifact":
+            immutable_evidence.add(tree / record["evidence"]["ref"])
     changed = 0
     for path in tree.rglob("*"):
         if not path.is_file():
             continue
         # Restore evidence is historical, content-addressed exact bytes.  A
         # semantic rename of the live protocol must not rewrite its archived
-        # payloads or their immutable manifests.
-        if path.is_relative_to(milestone_root) or any(
+        # payloads or their immutable manifests.  Retired records (T-1391) bind
+        # a verbatim BOARD row under board_record_sha256; rewriting a SCOUT
+        # token inside that frozen text breaks the digest the retirement gate
+        # verifies, so the retired archive is off-limits to the rename too.
+        if path in immutable_evidence or path.is_relative_to(milestone_root) or any(
             path.is_relative_to(authority_root) for authority_root in immutable_source_roots
         ):
             continue
@@ -883,6 +909,13 @@ def phase_rename_probe(source: Path, destination: Path) -> str | None:
     old_doc = tree / "saipen" / "phases" / "scout.md"
     if old_doc.is_file():
         old_doc.rename(tree / "saipen" / "phases" / "scoutx.md")
+    # Renamed card bodies change the generated projection's source digest.
+    # Restamp only an index proven fresh before this synthetic mutation;
+    # existing corrupt evidence must fail rather than be silently repaired.
+    if knowledge["index"] == "fresh":
+        indexed = write_index(tree)
+        if not indexed["ok"]:
+            return "phase rename could not regenerate the knowledge index: " + indexed["detail"]
     # The probe deliberately changes README.md prose and every translated
     # copy.  Restamp the synthetic translations to that renamed English
     # source; otherwise the translation freshness gate correctly reports the
@@ -925,7 +958,7 @@ def phase_rename_probe(source: Path, destination: Path) -> str | None:
         cwd=tree,
         env=hermetic_child_env(),
         capture_output=True,
-        text=True,
+        text=True, encoding="utf-8",
         errors="replace",
     )
     if generated.returncode:
@@ -938,7 +971,7 @@ def phase_rename_probe(source: Path, destination: Path) -> str | None:
         cwd=tree,
         env=hermetic_child_env(),
         capture_output=True,
-        text=True,
+        text=True, encoding="utf-8",
         errors="replace",
     )
     if proc.returncode:
@@ -962,7 +995,7 @@ def audit_tags_batch_probe(root: Path, destination: Path) -> str | None:
         cwd=root,
         env=missing_env,
         capture_output=True,
-        text=True,
+        text=True, encoding="utf-8",
         errors="replace",
     )
     missing_output = missing.stdout + missing.stderr
@@ -1029,7 +1062,7 @@ raise SystemExit(8)
             cwd=root,
             env=env,
             capture_output=True,
-            text=True,
+            text=True, encoding="utf-8",
             errors="replace",
         )
         output = result.stdout + result.stderr
@@ -1055,7 +1088,7 @@ def observed_tag_queries(root: Path) -> tuple[int, str | None]:
             cwd=root,
             env=env,
             capture_output=True,
-            text=True,
+            text=True, encoding="utf-8",
             errors="replace",
         )
         output = result.stdout + result.stderr
@@ -1636,6 +1669,7 @@ def inject_unclaimed_doing(text: str) -> str:
 
 CREATE = "<create the file>"
 SWAP = "<swap the last two log entries>"
+DEMOTE_AMNESTIES = "<demote all anchored timestamp amnesties>"
 
 
 def write_new(content: str):
@@ -1673,6 +1707,10 @@ def case_target(root: Path, rel: str, mutation) -> Path:
 
 def mutation_files(root: Path, rel: str, mutation) -> list[Path]:
     """Every physical file a logical mutation will edit, for save/restore."""
+    if mutation == DEMOTE_AMNESTIES:
+        from saipen_engine.log import history_paths
+
+        return history_paths(root)
     if isinstance(mutation, tuple) and mutation and mutation[0] == "MULTI":
         return [root / r for r, _ in mutation[1]]
     return [case_target(root, rel, mutation)]
@@ -2133,21 +2171,31 @@ CASES: list[tuple[str, str, object, str]] = [
     ),
     (
         "nested success decoy launders a declared action",
-        CORE,
+        REGISTRY,
         (
             "MULTI",
             [
-                (CORE, lambda t: t.replace("abort, clean]", "abort, extra, clean]")),
-                (IMPROVE, lambda t: t.replace("abort, clean]", "abort, extra, clean]")),
+                (
+                    REGISTRY,
+                    lambda t: t.replace(
+                        '"retire",\n   "clean",', '"retire",\n   "extra",\n   "clean",'
+                    ),
+                ),
+                (
+                    IMPROVE,
+                    lambda t: t.replace(
+                        "abort, retire, clean,", "abort, retire, extra, clean,"
+                    ),
+                ),
                 (
                     "tools/saipen.py",
                     lambda t: t.replace(
-                        '    if action == "clean":',
+                        '    if action == "clean":\n        if len(args) < 2:',
                         '    if action == "extra":\n'
                         "        def decoy():\n"
                         "            return 0\n"
                         "        return 2\n"
-                        '    if action == "clean":',
+                        '    if action == "clean":\n        if len(args) < 2:',
                     ),
                 ),
             ],
@@ -2156,21 +2204,31 @@ CASES: list[tuple[str, str, object, str]] = [
     ),
     (
         "constant-false success decoy launders a declared action",
-        CORE,
+        REGISTRY,
         (
             "MULTI",
             [
-                (CORE, lambda t: t.replace("abort, clean]", "abort, extra, clean]")),
-                (IMPROVE, lambda t: t.replace("abort, clean]", "abort, extra, clean]")),
+                (
+                    REGISTRY,
+                    lambda t: t.replace(
+                        '"retire",\n   "clean",', '"retire",\n   "extra",\n   "clean",'
+                    ),
+                ),
+                (
+                    IMPROVE,
+                    lambda t: t.replace(
+                        "abort, retire, clean,", "abort, retire, extra, clean,"
+                    ),
+                ),
                 (
                     "tools/saipen.py",
                     lambda t: t.replace(
-                        '    if action == "clean":',
+                        '    if action == "clean":\n        if len(args) < 2:',
                         '    if action == "extra":\n'
                         "        if False:\n"
                         "            return 0\n"
                         "        return 2\n"
-                        '    if action == "clean":',
+                        '    if action == "clean":\n        if len(args) < 2:',
                     ),
                 ),
             ],
@@ -2315,8 +2373,8 @@ CASES: list[tuple[str, str, object, str]] = [
         "SAICRITIC drops PROVENANCE",
         "saipen/SAICRITIC.md",
         lambda t: t.replace(
-            "| PROVENANCE | does the evidence bind the exact source, session, "
-            "run, finding and result it claims? |\n",
+            "| PROVENANCE | Does evidence bind the exact source, session, "
+            "run, finding and result? |\n",
             "",
         ),
         "saicritic",
@@ -2325,12 +2383,12 @@ CASES: list[tuple[str, str, object, str]] = [
         "SAICRITIC swaps GATE and PROVENANCE",
         "saipen/SAICRITIC.md",
         lambda t: t.replace(
-            "| GATE | did the REQUIRED semantic/protocol gates actually occur? |\n"
-            "| PROVENANCE | does the evidence bind the exact source, session, "
-            "run, finding and result it claims? |",
-            "| PROVENANCE | does the evidence bind the exact source, session, "
-            "run, finding and result it claims? |\n"
-            "| GATE | did the REQUIRED semantic/protocol gates actually occur? |",
+            "| GATE | Did required semantic and protocol gates actually run? |\n"
+            "| PROVENANCE | Does evidence bind the exact source, session, "
+            "run, finding and result? |",
+            "| PROVENANCE | Does evidence bind the exact source, session, "
+            "run, finding and result? |\n"
+            "| GATE | Did required semantic and protocol gates actually run? |",
         ),
         "saicritic",
     ),
@@ -2338,9 +2396,9 @@ CASES: list[tuple[str, str, object, str]] = [
         "SAICRITIC duplicates UNIT",
         "saipen/SAICRITIC.md",
         lambda t: t.replace(
-            "| UNIT | is the operation locally correct? |",
-            "| UNIT | is the operation locally correct? |\n"
-            "| UNIT | is the operation locally correct? |",
+            "| UNIT | Is the operation locally correct? |",
+            "| UNIT | Is the operation locally correct? |\n"
+            "| UNIT | Is the operation locally correct? |",
         ),
         "saicritic",
     ),
@@ -2587,10 +2645,7 @@ CASES: list[tuple[str, str, object, str]] = [
     (
         "an amnesty demoted to prose stops suppressing",
         LOG,
-        replace(
-            "DEC: observed historical timestamp inversions",
-            "DEC: a note about observed historical timestamp inversions",
-        ),
+        DEMOTE_AMNESTIES,
         "timestamp moves backwards by",
     ),
     # T-### valve-wording: ANY safety-valve pause's resume key is `cc`, never
@@ -3497,6 +3552,45 @@ CASES: list[tuple[str, str, object, str]] = [
         lambda t: t + "- 01.01.20 00:00 [E-999998] RUN: inversion probe\n",
         "timestamp moves backwards by",
     ),
+    # T-1282. The `[op: ...]` tag is forgeable: an agent closing outside a
+    # SAIOPS run hand-mints an id and the presence check passes. Appending a
+    # NEW active-log structural event carrying a fabricated op id (no journaled
+    # operation record names it) must be caught -- it lands at the active head,
+    # above the newest resolvable event, exactly where a real forgery lands.
+    # The high event id keeps LOG ids monotonic so only the resolution rung
+    # fires. This is the control that proves the check goes red on a hand-typed
+    # id (the other half, green on a minted one, is the live tree passing).
+    (
+        "active-log op id names no operation record",
+        LOG,
+        lambda t: t
+        + "- 25.09.26 23:59 [E-999997] [agent: probe] "
+        "[op: transition-forgedforgedforgedforgedforged00] "
+        "RUN: transition to BUILD -- forged provenance probe\n",
+        "resolves to NO operation record",
+    ),
+    # T-1577. The control above proves an id that RESOLVES to nothing is
+    # caught; this one proves the other half -- an id no writer in this
+    # repository can emit is caught by SHAPE, on a line that never touches the
+    # journal. 31 hex: the writers emit 8, 12, 16, 20 or 32 (measured over
+    # every operation record on this checkout), so this tag is a typed bracket
+    # standing in for a transition that never ran. Appended at the head, so it
+    # lands above the resolved floor; the high event id keeps LOG monotonic so
+    # only the new rung fires.
+    (
+        "active-log op id matches no writer grammar",
+        LOG,
+        lambda t: t
+        + "- 25.09.26 23:59 [E-999996] [agent: probe] "
+        # 32 hex: a writer's width under a class no writer mints (T-1577).
+        "[op: verify-a0b1c2d3e4f5061728394a5b6c7d8e9f] "
+        "RUN: transition to BUILD -- off-grammar provenance probe\n",
+        # Deliberately NOT "hand-authored": that word is already in the
+        # UNMODIFIED tree's exempt-history WARN, and a control whose expected
+        # string is already printed proves nothing. This phrase is on the FAIL
+        # path alone.
+        "standing in for a transition that never ran",
+    ),
     # --- kitchen ---------------------------------------------------------
     (
         "digest is not three lines",
@@ -4342,9 +4436,82 @@ CASES.extend(
     ]
 )
 
+# STORE-SAFETY-01: the validator's new storage gates have independent controls.
+CASES.extend(
+    [
+        (
+            "storage contract deleted",
+            STORAGE,
+            DELETE,
+            "storage -- saipen/STORAGE.md contract missing",
+        ),
+        (
+            "storage contract loses deletion invariant",
+            STORAGE,
+            replace("safe to delete at any instant", "safe for this run"),
+            "storage -- STORAGE.md missing 'safe to delete at any instant'",
+        ),
+        (
+            "canonical storage registry names no durable store",
+            STORAGE_REGISTRY,
+            write_new(
+                json.dumps(
+                    {
+                        "schema_version": 1,
+                        "artifacts": {
+                            "OrphanModel": {
+                                "store": "UNDECLARED",
+                                "path": "missing-artifact",
+                                "sha256": "0" * 64,
+                                "size": 1,
+                                "recovery": "PARTIAL",
+                                "provenance": {},
+                            }
+                        },
+                    }
+                ) + "\n"
+            ),
+            "canonical artifact has no DURABLE store",
+        ),
+    ]
+)
 
-def apply_case(root: Path, rel: str, mutation) -> bool:
-    """Returns False when the case cannot be set up (skip it loudly)."""
+
+
+def demote_amnesty_control(root: Path) -> bool:
+    """Change only actual grants in the disposable complete history (T-1585)."""
+    from saipen_engine.log import parse_log_line
+
+    marker = "observed historical timestamp inversions"
+    changed = False
+    for path in mutation_files(root, LOG, DEMOTE_AMNESTIES):
+        original = path.read_text(encoding="utf-8-sig")
+        lines = []
+        for line in original.splitlines(keepends=True):
+            event = parse_log_line(line.rstrip("\r\n"))
+            updated_line = line
+            if event and event["taxonomy"] == "DEC" and event["text"].startswith(marker):
+                updated_line = line.replace("DEC: " + marker, "DEC: a note about " + marker, 1)
+            lines.append(updated_line)
+        updated = "".join(lines)
+        if updated != original:
+            path.write_text(updated, encoding="utf-8", newline="\n")
+            changed = True
+    return changed
+
+
+def apply_case(root: Path, rel: str, mutation) -> bool | str:
+    """Returns False when the case cannot be set up (skip it loudly).
+
+    T-1582: on the symlink path it returns a REASON string instead of a bare
+    False, because a host that cannot create symlinks and a missing target
+    file are different failures and the sweep used to report both as "the
+    file is missing". The caller distinguishes `False` (nothing to say) from
+    a non-empty string (the reason to print), so every other branch keeps its
+    existing contract.
+    """
+    if mutation == DEMOTE_AMNESTIES:
+        return demote_amnesty_control(root)
     p = case_target(root, rel, mutation)
     if mutation == SYMLINK_EXTERNAL:
         if not p.is_file() or p.is_symlink():
@@ -4354,7 +4521,12 @@ def apply_case(root: Path, rel: str, mutation) -> bool:
         p.unlink()
         try:
             os.symlink(external, p)
-        except (OSError, NotImplementedError):
+        except (OSError, NotImplementedError) as exc:
+            if _is_symlink_capability_refusal(exc):
+                return (
+                    "this host cannot create a symlink, so the case was never "
+                    f"constructed (a host capability, not a missing file): {exc}"
+                )
             return False
         return True
     if mutation == DELETE:
@@ -4427,7 +4599,7 @@ def validator_output(root: Path, gate: str | None = None) -> str:
         cwd=root,
         env=env,
         capture_output=True,
-        text=True,
+        text=True, encoding="utf-8",
         errors="replace",
     )
     keep = [
@@ -4529,6 +4701,8 @@ def case_declared_paths(rel: str, mutation) -> set[str]:
     `rel`. This reads the declaration and never the disk, so selection is
     decidable before any tree exists.
     """
+    if mutation == DEMOTE_AMNESTIES:
+        return {LOG, ".saipen/logs/"}
     if isinstance(mutation, tuple) and mutation and mutation[0] == "MULTI":
         return {str(r).replace("\\", "/") for r, _ in mutation[1]}
     return {str(rel).replace("\\", "/")}
@@ -4557,6 +4731,26 @@ def scoped_banner(selected: int, changed: frozenset[str]) -> list[str]:
 FULL_SWEEP_PHRASE = "validator check(s) still go red on their own condition"
 
 
+def skip_line(label: str, reason: str | None) -> str:
+    """The SKIP line for one case the sweep could not run.
+
+    T-1582. `reason` is None when the case could not be set up for a reason
+    the file itself explains -- it is missing, or its anchor moved (a LOG
+    line sealed into a segment at the next cap crossing being the usual way).
+    A non-empty `reason` is a case whose construction this HOST refused, which
+    is a different failure entirely: the old wording blamed a missing file
+    there, and sent its own author hunting for a file that was sitting right
+    there. Pure so a test can assert both wordings without a 26-minute gate.
+    """
+    if reason:
+        return f"SKIP: {label} -- {reason}"
+    return (
+        f"SKIP: {label} -- the mutation changed nothing: the file is "
+        f"missing, or its anchor text is (a LOG anchor sealed into "
+        f".saipen/logs/ is the usual cause)"
+    )
+
+
 def sweep_report(changed, selected: int, live: int, skipped: int, broken: int) -> list[str]:
     """The closing lines of one sweep, as text.
 
@@ -4570,6 +4764,12 @@ def sweep_report(changed, selected: int, live: int, skipped: int, broken: int) -
         tail = f" ({skipped} skipped)" if skipped else ""
         return [f"PASS: {live} of {selected} {FULL_SWEEP_PHRASE}{tail}"]
     unrun = FULL_CASE_COUNT - selected
+    if not selected:
+        return [
+            "SCOPED: no control declares any changed path as its target, so none "
+            f"ran. This proves nothing about the {unrun} control(s) that were not "
+            "run, and is not audit_checks evidence for a checkpoint or a release."
+        ]
     if broken:
         return [
             f"\nSCOPED: {broken} of the {selected} selected case(s) are not "
@@ -4587,7 +4787,10 @@ def select_cases(cases, changed: frozenset[str]) -> list:
     chosen = []
     for case in cases:
         _, rel, mutation, _, _ = case_parts(case)
-        if case_declared_paths(rel, mutation) & changed:
+        if (mutation == DEMOTE_AMNESTIES and any(
+            path == LOG or re.fullmatch(r"\.saipen/logs/LOG-\d+\.md", path)
+            for path in changed
+        )) or case_declared_paths(rel, mutation) & changed:
             chosen.append(case)
     return chosen
 
@@ -4863,7 +5066,9 @@ def mutation_sweep_probe(context: ProbeContext) -> str | None:
             continue
         runnable.append((label, rel, mutation, expected, gate))
 
-    worker_count = min(8, max(1, os.cpu_count() or 1), max(1, len(runnable)))
+    # Zero runnable controls is an answer, not a pool of one (T-1287): a worker
+    # would copy the whole tree and run the validator twice to test nothing.
+    worker_count = min(8, max(1, os.cpu_count() or 1), len(runnable))
     chunks = [runnable[index::worker_count] for index in range(worker_count)]
 
     # One copy per worker, not one per case. Every case touches exactly one
@@ -4885,8 +5090,11 @@ def mutation_sweep_probe(context: ProbeContext) -> str | None:
                 files = mutation_files(worker_root, rel, mutation)
                 saved = [(path, path.read_bytes() if path.exists() else None) for path in files]
                 try:
-                    if not apply_case(worker_root, rel, mutation):
-                        local_skipped.append(label)
+                    applied = apply_case(worker_root, rel, mutation)
+                    if applied is not True:
+                        # A reason string denotes an unconstructed control;
+                        # truthiness must never admit it as successful setup.
+                        local_skipped.append((label, applied if isinstance(applied, str) else None))
                         continue
                     if not matched(validator_output(worker_root, gate), expected, gate):
                         # Carry WHY, not just THAT. A dead control is almost
@@ -4904,7 +5112,8 @@ def mutation_sweep_probe(context: ProbeContext) -> str | None:
             shutil.rmtree(worker_root, ignore_errors=True)
 
     worker_errors = []
-    with ThreadPoolExecutor(max_workers=worker_count) as executor:
+    # No chunk means no submit, and a pool starts its threads only on submit.
+    with ThreadPoolExecutor(max_workers=max(1, worker_count)) as executor:
         futures = {
             executor.submit(run_chunk, index, chunk): index
             for index, chunk in enumerate(chunks)
@@ -4932,16 +5141,8 @@ def mutation_sweep_probe(context: ProbeContext) -> str | None:
             f"FAIL: {label!r} expects {expected!r}, which the UNMODIFIED "
             f"repository already prints -- the case proves nothing"
         )
-    for label in skipped:
-        # The old wording blamed a missing FILE, and a skip is far more often
-        # a present file whose ANCHOR moved -- a LOG line sealed into a
-        # segment at the next cap crossing being the usual way. That message
-        # sent its own author hunting for a file that was sitting right there.
-        context.extra.append(
-            f"SKIP: {label} -- the mutation changed nothing: the file is "
-            f"missing, or its anchor text is (a LOG anchor sealed into "
-            f".saipen/logs/ is the usual cause)"
-        )
+    for entry in skipped:
+        context.extra.append(skip_line(entry[0], entry[1]))
     for entry in dead:
         label, expected = entry[0], entry[1]
         occurrences = entry[2] if len(entry) > 2 else None
@@ -4959,10 +5160,21 @@ def mutation_sweep_probe(context: ProbeContext) -> str | None:
         )
 
     live = len(cases) - len(dead) - len(skipped) - len(always)
-    broken = len(dead) + len(always) + len(skipped)
-    context.extra.extend(sweep_report(context.changed, len(cases), live, len(skipped), broken))
+    capability = [(label, reason) for label, reason in skipped if reason]
+    broken = len(dead) + len(always) + len(skipped) - len(capability)
+    if capability:
+        # Continue all other cases, and refuse any real dead/missing control.
+        # Host absence is UNPROVEN, never the full-sweep success sentence.
+        context.extra.append(
+            f"PROVEN: {live} of {len(cases)} mutation controls; "
+            f"host capability unproven: {len(capability)}; broken: {broken}"
+        )
+    else:
+        context.extra.extend(sweep_report(context.changed, len(cases), live, len(skipped), broken))
     if broken:
         return f"{broken} of {len(cases)} mutation control(s) no longer prove anything"
+    if capability:
+        raise ProbeUnproven("; ".join(f"{label}: {reason}" for label, reason in capability))
     return None
 
 

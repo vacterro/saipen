@@ -1,7 +1,9 @@
-"""Install native Kiro/Gemini hooks without replacing unrelated user hooks.
+"""Install native Kiro/Gemini/Codex/Claude hooks without touching unrelated user hooks.
 
 Reports artifact/config freshness separately from runtime health. Installation
 cannot prove host execution; health and effective enforcement remain UNKNOWN.
+Host trust (Codex's hash-bound `/hooks` review) is an external boundary this
+installer never marks satisfied.
 """
 
 from __future__ import annotations
@@ -10,10 +12,12 @@ import argparse
 import json
 import os
 from pathlib import Path
+import re
 import shlex
 import subprocess
 import sys
 import tempfile
+import tomllib
 
 from saipen_engine.runtime_surface import (
     identity_session,
@@ -24,6 +28,42 @@ from saipen_engine.runtime_surface import (
 
 ROOT = Path(__file__).resolve().parent.parent
 NAME = "saipen-guard"
+
+
+def codex_hook_preflight(home: Path, *, hooks_json_present: bool) -> dict:
+    """Report independent host-proof boundaries without changing user hooks.
+
+    A trust record in config.toml is not a current host execution verdict. The
+    installer can identify dual hook representations, but only a live host run
+    can prove trust, checker reachability, and a refused effect.
+    """
+    config_toml = home / ".codex" / "config.toml"
+    inline_events: list[str] = []
+    config_error = None
+    if config_toml.is_file():
+        try:
+            parsed = tomllib.loads(config_toml.read_text(encoding="utf-8-sig"))
+            hooks = parsed.get("hooks", {})
+            if not isinstance(hooks, dict):
+                raise ValueError("hooks must be a TOML table")
+            inline_events = sorted(key for key in hooks if key != "state")
+        except (OSError, UnicodeError, ValueError) as exc:
+            config_error = str(exc)
+    if config_error is not None:
+        representation = "HOOK_CONFIG_UNREADABLE"
+    elif hooks_json_present and inline_events:
+        representation = "DUAL_HOOK_REPRESENTATION"
+    else:
+        representation = "SINGLE_HOOK_REPRESENTATION"
+    return {
+        "hook_trust": "HOOK_TRUST_UNPROVEN",
+        "hook_representation": representation,
+        "inline_events": inline_events,
+        "config_error": config_error,
+        "host_execution": "UNPROVEN",
+        "checker_reachability": "UNPROVEN",
+        "refused_effect": "UNPROVEN",
+    }
 
 
 def saipen_root_of(invocation: str) -> str | None:
@@ -104,6 +144,12 @@ def _same_invocation(configured: str, expected: str) -> bool:
 
 def command(host: str, artifact: Path, root: Path) -> str:
     argv = [sys.executable, str(artifact), "--host", host, "--saipen-root", str(root)]
+    if host == "claude":
+        # T-1558: Claude Code runs hook commands through Git Bash on Windows, so
+        # the command is a POSIX one. A backslash path inside a POSIX shell loses
+        # its separators, and `cmd.exe /c` becomes a path (T-1475): forward
+        # slashes and shlex quoting are the spelling both shells resolve.
+        return shlex.join(arg.replace("\\", "/") if os.sep == "\\" else arg for arg in argv)
     if os.name == "nt":
         # Hook commands are interpreted by cmd.exe on this platform. Refuse
         # expansion/control characters rather than invent shell escaping.
@@ -111,6 +157,132 @@ def command(host: str, artifact: Path, root: Path) -> str:
             raise ValueError("hook command path contains Windows shell control characters")
         return subprocess.list2cmdline(argv)
     return shlex.join(argv)
+
+
+def command_pair(host: str, artifact: Path, root: Path) -> tuple[str, str]:
+    """The same hook invocation as (POSIX spelling, cmd.exe spelling).
+
+    Codex's handler schema carries `command` plus an optional Windows-only
+    `commandWindows` override, so one install writes both spellings.
+    """
+    argv = [sys.executable, str(artifact), "--host", host, "--saipen-root", str(root)]
+    if os.name == "nt":
+        if any(any(c in arg for c in "%!&|<>^\r\n") for arg in argv):
+            raise ValueError("hook command path contains Windows shell control characters")
+    return shlex.join(argv), subprocess.list2cmdline(argv)
+
+
+def _codex_entry_is_ours(hook: dict, artifact_name: str) -> bool:
+    """Is this Codex handler entry ours?
+
+    The Codex hook-handler schema has no name field to own by, so ownership is
+    invocation identity: a command that names the SAIPEN guard artifact and
+    carries `--saipen-root`.
+    """
+    for key in ("command", "commandWindows"):
+        value = hook.get(key)
+        if (
+            isinstance(value, str)
+            and "--saipen-root" in value
+            and artifact_name in value
+        ):
+            return True
+    return False
+
+
+def _same_codex_entry(owned: dict, expected: dict) -> bool:
+    """Same hook definition, with the SAIPEN root treated as the variable.
+
+    Everything except the two invocation spellings must match exactly; each
+    spelling must match its own counterpart modulo `--saipen-root` (T-1338),
+    and the root it names must prove the accepted generation (T-1342).
+    """
+    if {k: v for k, v in owned.items() if k not in ("command", "commandWindows")} != {
+        k: v for k, v in expected.items() if k not in ("command", "commandWindows")
+    }:
+        return False
+    return _same_invocation(
+        str(owned.get("command", "")), str(expected.get("command", ""))
+    ) and _same_invocation(
+        str(owned.get("commandWindows", "")), str(expected.get("commandWindows", ""))
+    )
+
+
+#: A host hook that carries its own copy of the voice or language rule. STYLE.md
+#: is the one owner (`saipen response style`); a second, hand-written copy is
+#: what contradicted the `reply_language` pin on every prompt.
+_STYLE_RULE_TEXT = re.compile(r"(?i)caveman|STYLE\.md|reply_language|own language|style check")
+
+
+def _own_event_hooks(
+    hooks: dict, event: str, expected: dict, artifact_name: str, matcher: str | None = None
+) -> list[dict]:
+    """Replace this installer's entries for one event with `expected`, in place.
+
+    Every unrelated group and hook survives untouched. The first owned entry is
+    replaced where it stood, so a re-install is byte-stable; when there is none,
+    a new group (carrying `matcher` when one is required) is appended. Returns
+    the owned entries that were found, each marked `_matcher_ok` for whether its
+    group carries the matcher the event needs.
+    """
+    groups = hooks.setdefault(event, [])
+    if not isinstance(groups, list):
+        raise ValueError(f"{event} must be an array")
+    owned: list[dict] = []
+    inserted = False
+    for group in groups:
+        if not isinstance(group, dict) or not isinstance(group.get("hooks"), list):
+            raise ValueError(f"malformed {event} hook group")
+        remaining = []
+        for hook in group["hooks"]:
+            if not isinstance(hook, dict):
+                raise ValueError("malformed hook entry")
+            if _codex_entry_is_ours(hook, artifact_name):
+                owned.append({**hook, "_matcher_ok": group.get("matcher") == matcher})
+                if not inserted:
+                    remaining.append(expected)
+                    inserted = True
+            else:
+                remaining.append(hook)
+        group["hooks"] = remaining
+    if not inserted:
+        groups.append(
+            {"matcher": matcher, "hooks": [expected]} if matcher else {"hooks": [expected]}
+        )
+    return owned
+
+
+def _same_claude_entry(owned: dict, expected: dict) -> bool:
+    """Same hook definition with the SAIPEN root treated as the variable (T-1338),
+    and the generation it names as contract (T-1342)."""
+    if not owned.get("_matcher_ok", True):
+        return False
+    if {k: v for k, v in owned.items() if k not in ("command", "_matcher_ok")} != {
+        k: v for k, v in expected.items() if k != "command"
+    }:
+        return False
+    return _same_invocation(str(owned.get("command", "")), str(expected.get("command", "")))
+
+
+def _style_hook_conflicts(hooks: dict, artifact_name: str) -> list[dict]:
+    """Operator-owned prompt hooks that carry their own voice or language rule.
+
+    Reported, never removed: the hook is the operator's. The conflict is still a
+    finding, because two sources of the language rule is the defect.
+    """
+    found: list[dict] = []
+    for event in ("UserPromptSubmit", "SessionStart"):
+        groups = hooks.get(event)
+        for group in groups if isinstance(groups, list) else []:
+            entries = group.get("hooks") if isinstance(group, dict) else None
+            for hook in entries if isinstance(entries, list) else []:
+                if (
+                    isinstance(hook, dict)
+                    and not _codex_entry_is_ours(hook, artifact_name)
+                    and _STYLE_RULE_TEXT.search(str(hook.get("command", "")))
+                ):
+                    found.append({"event": event, "command": str(hook["command"])[:200]})
+    return found
 
 
 def atomic_write(path: Path, data: bytes) -> None:
@@ -200,6 +372,79 @@ def _install(host: str, home: Path, root: Path, *, check: bool) -> dict:
             )
         )
         hooks["BeforeTool"] = [*preserved, expected]
+    elif host == "codex":
+        # T-1551: Codex hooks.json is a SHARED host file. Preserve every
+        # unrelated event and hook entry; own exactly the Stop command hooks
+        # this installer produced, replacing ours in place so a re-install is
+        # byte-stable (Codex records hook trust against the hook definition's
+        # hash, so churn here would silently un-trust a correct install).
+        posix_invocation, windows_invocation = command_pair(host, artifact, root)
+        expected = {
+            "type": "command",
+            "command": posix_invocation,
+            "commandWindows": windows_invocation,
+            "timeout": 60,
+            "statusMessage": "SAIPEN EXEC-RESPONSE-01 final-response gate",
+        }
+        hooks = data.setdefault("hooks", {})
+        if not isinstance(hooks, dict):
+            raise ValueError("hooks must be an object")
+        groups = hooks.setdefault("Stop", [])
+        if not isinstance(groups, list):
+            raise ValueError("Stop must be an array")
+        owned = []
+        inserted = False
+        for group in groups:
+            if not isinstance(group, dict) or not isinstance(group.get("hooks"), list):
+                raise ValueError("malformed Stop hook group")
+            remaining = []
+            for hook in group["hooks"]:
+                if not isinstance(hook, dict):
+                    raise ValueError("malformed hook entry")
+                if _codex_entry_is_ours(hook, artifact.name):
+                    owned.append(hook)
+                    if not inserted:
+                        remaining.append(expected)
+                        inserted = True
+                else:
+                    remaining.append(hook)
+            group["hooks"] = remaining
+        named = str(owned[0].get("command", "")) if len(owned) == 1 else ""
+        named_root = saipen_root_of(named) if named else None
+        configured = len(owned) == 1 and _same_codex_entry(owned[0], expected)
+        if not inserted:
+            groups.append({"hooks": [expected]})
+    elif host == "claude":
+        # T-1558: settings.json is the operator's SHARED file (theme, statusLine,
+        # every other hook). Own exactly the Stop and UserPromptSubmit entries
+        # this installer produced; both events run the one artifact, which
+        # dispatches on `hook_event_name`.
+        # (event, matcher, timeout seconds). Every event the admission transport
+        # needs: SessionStart and PostModelSwitch invalidate, UserPromptSubmit is
+        # the pre-generation boundary, PostToolUse (Bash only) admits the same
+        # turn a real `saipen init` binds a project, Stop is the post-render gate.
+        # PreToolUse is deliberately absent: bootstrap tool activity is never gated.
+        events = (
+            ("SessionStart", None, 60),
+            ("UserPromptSubmit", None, 60),
+            ("PostToolUse", "Bash", 60),
+            ("PostModelSwitch", None, 30),
+            ("Stop", None, 60),
+        )
+        hooks = data.setdefault("hooks", {})
+        if not isinstance(hooks, dict):
+            raise ValueError("hooks must be an object")
+        configured = True
+        named_root = None
+        for event, matcher, timeout in events:
+            expected_hook = {"type": "command", "command": invocation, "timeout": timeout}
+            owned = _own_event_hooks(hooks, event, expected_hook, artifact.name, matcher)
+            configured = (
+                configured and len(owned) == 1 and _same_claude_entry(owned[0], expected_hook)
+            )
+            if event == "Stop" and len(owned) == 1:
+                named_root = saipen_root_of(str(owned[0].get("command", "")))
+        style_conflicts = _style_hook_conflicts(hooks, artifact.name)
     else:
         expected = {
             "version": "v1",
@@ -265,7 +510,7 @@ def _install(host: str, home: Path, root: Path, *, check: bool) -> dict:
         installed = current = configured = True
         named_root = str(root)
         root_current = root_resolves(named_root)
-    return {
+    result = {
         "host": host,
         "capability": True,
         "installed": installed,
@@ -278,11 +523,18 @@ def _install(host: str, home: Path, root: Path, *, check: bool) -> dict:
         "artifact": str(artifact),
         "config": str(config),
     }
+    if host == "codex":
+        result["proof_preflight"] = codex_hook_preflight(
+            home, hooks_json_present=config.is_file()
+        )
+    if host == "claude":
+        result["style_hook_conflicts"] = style_conflicts
+    return result
 
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("host", choices=("kiro", "gemini"))
+    parser.add_argument("host", choices=("kiro", "gemini", "codex", "claude"))
     parser.add_argument("--home", type=Path, default=Path.home())
     parser.add_argument("--check", action="store_true")
     args = parser.parse_args()

@@ -17,6 +17,7 @@ import tempfile
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+from test_fixture_support import CURRENT_STYLE_CONTRACT
 
 from saipen_engine import codec
 from saipen_engine.board import parse_board
@@ -40,7 +41,7 @@ BOARD_BASE = (
 STATE_BUILD = (
     '---\nphase: BUILD\ntask: T-1\nnext_action: "PHASE BUILD T-1"\n'
     'blocker: ""\ntransition_from: SCOUT\nsaipen_version: 7\n'
-    "schema_version: 3\nlast_event: 900\nstyle_contract: ded-4ae736e4\n"
+    'schema_version: 3\nlast_event: 900\nstyle_contract: ' + CURRENT_STYLE_CONTRACT + '\n'
     'saipen_home: "."\nagent: probe\nrequires:\n  - filesystem\n'
     "  - git\n  - python\nmode: full\nupdated: 2026-08-09T00:00:00Z\n"
     "---\n"
@@ -92,7 +93,7 @@ def r3_goal_intent_creates_scout_none() -> tuple[bool, str]:
     (root / ".saipen" / "STATE.md").write_text(
         '---\nphase: DONE\ntask: none\nnext_action: "saipen continue"\n'
         'blocker: ""\nsaipen_version: 7\nschema_version: 3\n'
-        "last_event: 900\nstyle_contract: ded-4ae736e4\n"
+        'last_event: 900\nstyle_contract: ' + CURRENT_STYLE_CONTRACT + '\n'
         'saipen_home: "."\nagent: probe\nmode: full\n'
         "updated: 2026-08-09T00:00:00Z\n---\n",
         encoding="utf-8",
@@ -252,9 +253,9 @@ def r9_cycle_path_traversal() -> tuple[bool, str]:
             f"cycle_dir resolves to {escaped.resolve()} -- "
             f"{'ESCAPES owner root' if ok else 'inside owner root'}"
         )
-    except Exception as exc:
+    except improve.ImproveError as exc:
         ok = False
-        detail = f"raised {type(exc).__name__}: {exc} (no clean validation)"
+        detail = f"protective refusal {type(exc).__name__}: {exc}; no escaped path returned"
     return ok, detail + " (required: .. refused before path construction)"
 
 
@@ -359,12 +360,15 @@ REPROS = [
 
 
 def main() -> int:
+    from saipen_engine.reproduction import run_reproduction
+
     print("NITRO integrity reproduction (R1..R13) -- defect present = REPRODUCED\n")
     all_ok = True
     for label, fn in REPROS:
-        ok, detail = fn()
-        tag = "REPRODUCED" if ok else "NOT REPRODUCED"
-        if not ok:
+        result = run_reproduction(fn)
+        tag = result["status"]
+        detail = result["evidence"]
+        if tag != "REPRODUCED":
             all_ok = False
         print(f"[{tag}] {label}")
         print(f"    {detail}")

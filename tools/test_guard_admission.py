@@ -90,6 +90,9 @@ class TestAdmissionAuthority(unittest.TestCase):
             ".saipen/intake/coverage/SRC-028.json",
             ".saipen/recovery/conformance/active.json",
             ".saipen/logs/audit.log",
+            ".saipen/cache/admission/probe.json",
+            ".saipen/cache/admission/nested/session.json",
+            ".saipen/cache/admission/.transport.key",
         ]
         for path in protected:
             self.assertTrue(
@@ -107,6 +110,10 @@ class TestAdmissionAuthority(unittest.TestCase):
             "README.md",
             "tests/test_app.py",
             "docs/architecture.md",
+            ".saipen/cache/gpu/index.json",
+            ".saipen/cache/core-unit/durations.json",
+            ".saipen/cache/continuation-liveness.json",
+            ".saipen/cache/autonomy-watchdog.json",
         ]
         for path in normal:
             self.assertFalse(is_protected_canonical_path(path))
@@ -114,6 +121,17 @@ class TestAdmissionAuthority(unittest.TestCase):
             self.assertTrue(res["ok"])
             self.assertTrue(res["admitted"])
             self.assertEqual(res["code"], "ADMITTED")
+
+    def test_admission_cache_protection_is_narrow(self):
+        self.assertTrue(is_protected_canonical_path(".saipen/cache/admission"))
+        self.assertFalse(is_protected_canonical_path(".saipen/cache"))
+        for path in (
+            ".saipen/cache/gpu/index.json",
+            ".saipen/cache/core-unit/durations.json",
+            ".saipen/cache/continuation-liveness.json",
+            ".saipen/cache/autonomy-watchdog.json",
+        ):
+            self.assertFalse(is_protected_canonical_path(path), path)
 
     def test_admitted_external_path(self):
         with tempfile.NamedTemporaryFile() as ext_file:

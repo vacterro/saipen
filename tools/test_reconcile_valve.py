@@ -22,6 +22,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
+from test_fixture_support import CURRENT_STYLE_CONTRACT
 from saipen_engine import phases
 from saipen_engine.reconcile import (
     _state_phase_repairs,
@@ -120,7 +121,7 @@ class ReconcileEndToEndTests(unittest.TestCase):
             "saipen_version: 7\n"
             "schema_version: 3\n"
             f"last_event: {tickets + 1}\n"
-            "style_contract: ded-4ae736e4\n"
+            'style_contract: ' + CURRENT_STYLE_CONTRACT + '\n'
             "agent: tester\n"
             "requires:\n  - filesystem\n  - git\n  - python\n"
             "mode: full\n"
@@ -280,7 +281,7 @@ def _t1318_project(phase: str = "IMPL", transition_from: str = "DONE") -> Path:
         "saipen_version: 7\n"
         "schema_version: 3\n"
         "last_event: 2\n"
-        "style_contract: ded-4ae736e4\n"
+        'style_contract: ' + CURRENT_STYLE_CONTRACT + '\n'
         "agent: tester\n"
         "mode: full\n"
         "updated: 2026-09-13T00:00:00Z\n"

@@ -142,7 +142,7 @@ def git(*args: str) -> str:
     out = subprocess.run(
         ["git", "-C", str(REPO), *args],
         capture_output=True,
-        text=True,
+        text=True, encoding="utf-8",
     )
     if out.returncode != 0:
         return ""

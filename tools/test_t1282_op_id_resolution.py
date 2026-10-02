@@ -55,6 +55,10 @@ class OpIdResolutionTests(unittest.TestCase):
         self.root = Path(self._tmp.name) / "project"
         self.root.mkdir()
         shutil.copytree(SCENARIO, self.root / ".saipen")
+        # T-1555: the fixture carries the placeholder; the copy claims THIS install.
+        from test_fixture_support import restamp_live_style
+
+        restamp_live_style(self.root / ".saipen")
         state_path = self.root / ".saipen" / "STATE.md"
         state = state_path.read_text(encoding="utf-8")
         state = state.replace("last_event: 1", "last_event: 2")

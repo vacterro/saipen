@@ -73,6 +73,10 @@ class ValveResumeFollowsTheAuditRoute(unittest.TestCase):
         self.root = Path(tmp.name) / "project"
         self.root.mkdir()
         shutil.copytree(SCENARIO, self.root / ".saipen")
+        # T-1555: the fixture carries the placeholder; the copy claims THIS install.
+        from test_fixture_support import restamp_live_style
+
+        restamp_live_style(self.root / ".saipen")
         (self.root / ".saipen" / "USERPERSON.md").unlink(missing_ok=True)
         env = patch.dict(
             os.environ, {"SAIPEN_USER_CONFIG_HOME": str(Path(tmp.name) / "user-config")}

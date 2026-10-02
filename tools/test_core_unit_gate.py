@@ -49,6 +49,7 @@ TOOLS = Path(__file__).resolve().parent
 ROOT = TOOLS.parent
 if str(TOOLS) not in sys.path:
     sys.path.insert(0, str(TOOLS))
+from test_fixture_support import CURRENT_STYLE_CONTRACT  # noqa: E402
 
 from saipen_engine import core_unit  # noqa: E402
 from saipen_engine.journal import ensure_project_lineage  # noqa: E402
@@ -79,7 +80,7 @@ def _state(phase: str, transition_from: str, last_event: int) -> str:
         "saipen_version: 7\n"
         "schema_version: 3\n"
         f"last_event: {last_event}\n"
-        "style_contract: ded-4ae736e4\n"
+        'style_contract: ' + CURRENT_STYLE_CONTRACT + '\n'
         f'saipen_home: "{home}"\n'
         "agent: tester\n"
         "requires:\n  - filesystem\n  - python\n"
@@ -327,6 +328,42 @@ class ReuseTests(CoreUnitFixture):
         payload = json.loads(out.getvalue())
         self.assertIn("changed after the family's copy was taken", payload["detail"])
         self.assertTrue((self.project / payload["record"]).is_file())
+        self.assertFalse(self.to("SHIP").ok)
+
+    def test_a_transient_concurrent_edit_is_re_snapshotted_and_cited(self):
+        """T-1530: a sibling edit mid-run drifts ONE snapshot; the bounded retry
+        takes a clean one and cites it, instead of a hard refusal."""
+        self.reach_review()
+        live = self.fingerprint()
+        # First run's copy drifted (a concurrent editor); the second run's copy
+        # matches the live tree. run_family is the only thing that "sees" a
+        # copy, so its returned fingerprint stands in for the snapshot taken.
+        transient = {**_run(INHERITED), "fingerprint": "0" * 64}
+        clean = {**_run(INHERITED), "fingerprint": live}
+        out = io.StringIO()
+        with mock.patch.object(
+            core_unit, "run_family", side_effect=[transient, clean]
+        ) as run, contextlib.redirect_stdout(out):
+            code = core_unit.main(["evidence", "T-7", "--project-root", str(self.project)])
+        self.assertEqual(run.call_count, 2)
+        self.assertEqual(code, 0, out.getvalue())
+        self.assertNotIn("changed after the family's copy", out.getvalue())
+        self.assertTrue(self.to("SHIP").ok)
+
+    def test_persistent_drift_still_fails_after_the_retry_bound(self):
+        """T-1530: the bound is finite -- a tree that keeps changing is a real
+        mismatch and must not loop forever or cite an unmatched copy."""
+        self.reach_review()
+        copied = {**_run(INHERITED), "fingerprint": "0" * 64}
+        out = io.StringIO()
+        with mock.patch.object(
+            core_unit, "run_family", return_value=copied
+        ) as run, contextlib.redirect_stdout(out):
+            code = core_unit.main(["evidence", "T-7", "--project-root", str(self.project)])
+        self.assertEqual(run.call_count, core_unit.EVIDENCE_DRIFT_RETRIES)
+        self.assertEqual(code, 1)
+        payload = json.loads(out.getvalue())
+        self.assertIn("kept changing", payload["detail"])
         self.assertFalse(self.to("SHIP").ok)
 
     def test_the_evidence_command_cites_a_reusable_run_without_rerunning(self):

@@ -37,6 +37,27 @@ from test_hermetic_env import isolate_host_session  # noqa: E402
 STYLE = (ROOT / "saipen" / "STYLE.md").read_text(encoding="utf-8-sig")
 
 
+def contract_with(pin: str) -> CS.StyleContract:
+    """The repository STYLE.md with its `reply_language:` line set to `pin`.
+
+    The measures are tested for every pin without depending on which value the
+    repository happens to ship."""
+    text = re.sub(
+        r"^\*\*`reply_language:[ \t]*[a-z]+`\*\*[ \t]*$",
+        f"**`reply_language: {pin}`**",
+        STYLE,
+        flags=re.MULTILINE,
+    )
+    return CS.compile_style_contract(text)
+
+
+CONTRACT = contract_with("et")
+
+
+def chat_errors(text, **kw):
+    return CS.chat_style_errors(text, contract=kw.pop("contract", CONTRACT), **kw)
+
+
 def setUpModule() -> None:
     isolate_host_session()
 
@@ -101,24 +122,70 @@ RUSSIAN = (
 MIXED_ET_RU = (
     "Õige stiil: caveman-дед. reply_language: et pin. Eesti, igal vastusel, isegi kui "
     "sa rusise. Минус: система тянет в другую сторону. Miks romaan: STYLE.md polnud "
-    "loetud enne esimest vastust. Он прямо конфликтует с правилом, и дрейф — это "
-    "молчаливый провал по умолчанию, а не случайность."
+    "loetud enne esimest vastust. Он прямо конфликтует с правилом, и дрейф — это "  # noqa: RUF001 -- Russian test data
+    "молчаливый провал по умолчанию, а не случайность."  # noqa: RUF001 -- Russian test data
 )
 
 
-class ConstantsMatchStyleTests(unittest.TestCase):
-    """The machine copy is bound to the document it copies."""
+class CompiledContractTests(unittest.TestCase):
+    """The measurer owns no fact: everything is compiled from STYLE.md."""
 
     def test_every_sentinel_phrase_is_in_style_md(self):
-        for phrase in CS.BANNED_OPENERS + CS.BANNED_CLOSERS + CS.BANNED_APOLOGIES:
+        for phrase in CONTRACT.openers + CONTRACT.closers + CONTRACT.apologies:
             self.assertRegex(STYLE, rf'"{re.escape(phrase)}[!.]?"', phrase)
 
-    def test_the_chat_line_budget_is_the_documented_absolute_max(self):
-        self.assertRegex(STYLE, rf"absolute max {CS.CHAT_LINE_BUDGET}\b")
+    def test_the_alternative_acknowledgement_is_not_a_banned_phrase(self):
+        # STYLE.md quotes the blunt acknowledgement it PREFERS on the same line
+        # as the banned apologies; compiling it as a ban would forbid the fix.
+        self.assertNotIn(
+            "\u041a\u043e\u0441\u044f\u043a. \u0424\u0438\u043a\u0441:", CONTRACT.apologies
+        )
+        self.assertEqual(len(CONTRACT.apologies), 3)
 
-    def test_character_ceilings_equal_the_execution_owner(self):
-        self.assertEqual(CS.CHAT_CHAR_BUDGET, RS.ORDINARY_RESPONSE_CHAR_BUDGET)
-        self.assertEqual(CS.DETAILED_CHAT_CHAR_BUDGET, RS.DETAILED_RESPONSE_CHAR_BUDGET)
+    def test_the_chat_line_budget_is_the_documented_absolute_max(self):
+        self.assertRegex(STYLE, rf"absolute max {CONTRACT.line_budget}\b")
+
+    def test_character_ceilings_are_read_from_the_execution_owner(self):
+        line = "x" * (RS.ORDINARY_RESPONSE_CHAR_BUDGET + 1)
+        errors = chat_errors(line, contract=contract_with("en"))
+        self.assertTrue(
+            any(str(RS.ORDINARY_RESPONSE_CHAR_BUDGET) in error for error in errors), errors
+        )
+        wide = "x" * (RS.DETAILED_RESPONSE_CHAR_BUDGET + 1)
+        detailed = chat_errors(wide, contract=contract_with("en"), detail_authorized=True)
+        self.assertTrue(
+            any(str(RS.DETAILED_RESPONSE_CHAR_BUDGET) in error for error in detailed), detailed
+        )
+
+    def test_the_compiled_contract_changes_when_the_authority_changes(self):
+        edited = STYLE.replace(f"absolute max {CONTRACT.line_budget}", "absolute max 6").replace(
+            '"Sure"', '"Absolutely"'
+        )
+        recompiled = CS.compile_style_contract(edited)
+        self.assertEqual(recompiled.line_budget, 6)
+        self.assertIn("Absolutely", recompiled.openers)
+        self.assertNotIn("Sure", recompiled.openers)
+        self.assertNotEqual(recompiled.source_token, CONTRACT.source_token)
+
+    def test_a_contract_is_stale_for_any_other_authority_text(self):
+        self.assertTrue(CONTRACT.current_for(STYLE))
+        self.assertTrue(CONTRACT.current_for(STYLE.replace("\n", "\r\n")))
+        self.assertFalse(CONTRACT.current_for(STYLE + "\nOne more rule.\n"))
+
+    def test_text_the_compiler_cannot_find_is_an_error_never_a_default(self):
+        broken = {
+            "no pin": re.sub(r"^\*\*`reply_language:.*$", "", STYLE, flags=re.MULTILINE),
+            "no line maximum": STYLE.replace("absolute max", "hard cap"),
+            "no sentinel section": STYLE.replace("Anti-Drift Sentinels", "Something Else"),
+            "empty": "",
+        }
+        for label, text in broken.items():
+            with self.assertRaises(CS.StyleContractError, msg=label):
+                CS.compile_style_contract(text)
+
+    def test_two_line_maxima_are_ambiguous_not_first_wins(self):
+        with self.assertRaises(CS.StyleContractError):
+            CS.compile_style_contract(STYLE + "\nOther text (absolute max 3).\n")
 
     def test_the_language_value_set_is_the_documented_table(self):
         rows = set(re.findall(r"^\| `([a-z]+)`\s*\|", STYLE, re.MULTILINE))
@@ -141,62 +208,80 @@ class ConstantsMatchStyleTests(unittest.TestCase):
 
 class BudgetTests(unittest.TestCase):
     def test_eight_lines_pass_and_nine_are_refused(self):
-        eight = "\n".join(f"Line {n} fact." for n in range(CS.CHAT_LINE_BUDGET))
-        self.assertEqual(CS.chat_style_errors(eight), [])
+        eight = "\n".join(f"Line {n} fact." for n in range(CONTRACT.line_budget))
+        self.assertEqual(chat_errors(eight), [])
         nine = eight + "\nOne more."
-        errors = CS.chat_style_errors(nine)
+        errors = chat_errors(nine)
         self.assertEqual(len(errors), 1, errors)
         self.assertIn("9 lines", errors[0])
 
     def test_fenced_code_is_fact_not_prose(self):
         code = "\n".join(f"    step_{n}()" for n in range(30))
         text = f"Ran it.\n```python\n{code}\n```\nDone."
-        self.assertEqual(CS.chat_style_errors(text), [])
+        self.assertEqual(chat_errors(text), [])
+
+    def test_an_unclosed_fence_does_not_hide_prose(self):
+        # A fence that never closes is not code: exempting it would let an essay
+        # opened with one stray marker pass every prose measure.
+        essay = "\n".join(f"Fact {n} is exact." for n in range(12))
+        errors = chat_errors("```\n" + essay)
+        self.assertTrue(any("12 lines" in error for error in errors), errors)
+
+    def test_an_essay_inside_a_closed_fence_still_meets_the_total_ceiling(self):
+        # Code is exempt from the PROSE measures, not from every measure: a
+        # natural-language essay wrapped in a fence must not pass unbounded.
+        hidden = "```text\n" + ("word " * 2000) + "\n```"
+        errors = chat_errors(hidden)
+        self.assertTrue(any("total" in error for error in errors), errors)
+        self.assertEqual(chat_errors("```text\n" + ("word " * 100) + "\n```"), [])
+        bigger = "```text\n" + ("word " * 4000) + "\n```"
+        detailed = chat_errors(bigger, detail_authorized=True)
+        self.assertTrue(any("total" in error for error in detailed), detailed)
 
     def test_one_enormous_line_still_breaks_the_ceiling(self):
         # T-1556 #2: a line count alone is not a compactness contract.
         text = "word " * 600
-        errors = CS.chat_style_errors(text)
+        errors = chat_errors(text)
         self.assertTrue(any("characters" in error for error in errors), errors)
 
     def test_an_authorized_report_lifts_the_line_budget_only(self):
         nine = "\n".join(f"Finding {n}." for n in range(9))
-        self.assertEqual(CS.chat_style_errors(nine, detail_authorized=True), [])
+        self.assertEqual(chat_errors(nine, detail_authorized=True), [])
         too_long = "word " * 1200
-        self.assertTrue(CS.chat_style_errors(too_long, detail_authorized=True))
+        self.assertTrue(chat_errors(too_long, detail_authorized=True))
         opener = "Sure.\n" + nine
-        self.assertTrue(CS.chat_style_errors(opener, detail_authorized=True))
+        self.assertTrue(chat_errors(opener, detail_authorized=True))
 
     def test_empty_and_non_text_are_not_judged(self):
         for value in ("", "   \n", None, 42):
-            self.assertEqual(CS.chat_style_errors(value), [])
+            self.assertEqual(chat_errors(value), [])
 
 
 class SentinelTests(unittest.TestCase):
     def test_each_banned_opener_is_refused(self):
-        for phrase in CS.BANNED_OPENERS:
-            errors = CS.chat_style_errors(f"{phrase} the file is fine.\nSecond line.")
+        for phrase in CONTRACT.openers:
+            errors = chat_errors(f"{phrase} the file is fine.\nSecond line.")
             self.assertTrue(any("banned opener" in e for e in errors), (phrase, errors))
 
     def test_each_banned_closer_is_refused(self):
-        for phrase in CS.BANNED_CLOSERS:
-            errors = CS.chat_style_errors(f"Fixed.\n{phrase}.")
+        for phrase in CONTRACT.closers:
+            errors = chat_errors(f"Fixed.\n{phrase}.")
             self.assertTrue(any("banned closer" in e for e in errors), (phrase, errors))
 
     def test_each_banned_apology_is_refused_anywhere(self):
-        for phrase in CS.BANNED_APOLOGIES:
-            errors = CS.chat_style_errors(f"Fixed.\nBut {phrase.lower()} about the delay.\nDone.")
+        for phrase in CONTRACT.apologies:
+            errors = chat_errors(f"Fixed.\nBut {phrase.lower()} about the delay.\nDone.")
             self.assertTrue(any("banned apology" in e for e in errors), (phrase, errors))
 
     def test_a_longer_word_is_not_the_banned_phrase(self):
         for text in ("Surely fine.", "Okayed by review.", "Sorrel soup recipe."):
-            self.assertEqual(CS.chat_style_errors(text), [], text)
+            self.assertEqual(chat_errors(text), [], text)
 
     def test_an_opener_inside_a_sentence_is_allowed(self):
-        self.assertEqual(CS.chat_style_errors("Cache is fine. Sure enough it held."), [])
+        self.assertEqual(chat_errors("Cache is fine. Sure enough it held."), [])
 
     def test_a_phrase_inside_fenced_code_is_not_judged(self):
-        self.assertEqual(CS.chat_style_errors("Output:\n```\nSorry, not found\n```"), [])
+        self.assertEqual(chat_errors("Output:\n```\nSorry, not found\n```"), [])
 
 
 class LanguageTests(unittest.TestCase):
@@ -251,7 +336,7 @@ class LanguageTests(unittest.TestCase):
 class ClassifierTests(unittest.TestCase):
     def test_an_essay_is_chat_style_drift_not_ordinary_chat(self):
         klass, errors = RS.classify_final_response(
-            ENGLISH_ESSAY, operational_turn=False, reply_language="et"
+            ENGLISH_ESSAY, operational_turn=False, style_contract=CONTRACT
         )
         self.assertEqual(klass, RS.CLASS_CHAT_STYLE_DRIFT)
         self.assertTrue(errors)
@@ -259,28 +344,33 @@ class ClassifierTests(unittest.TestCase):
 
     def test_compliant_estonian_stays_ordinary_chat(self):
         klass, errors = RS.classify_final_response(
-            ESTONIAN_COMPRESSED, operational_turn=False, reply_language="et"
+            ESTONIAN_COMPRESSED, operational_turn=False, style_contract=CONTRACT
         )
         self.assertEqual((klass, errors), (RS.CLASS_ORDINARY_CHAT, []))
 
     def test_the_language_pin_is_only_applied_when_supplied(self):
         klass, _errors = RS.classify_final_response(
-            COMPRESSED_ENGLISH, operational_turn=False, reply_language=None
+            COMPRESSED_ENGLISH, operational_turn=False, style_contract=contract_with("auto")
         )
         self.assertEqual(klass, RS.CLASS_ORDINARY_CHAT)
 
     def test_an_authorized_detail_request_lifts_the_line_budget(self):
         nine = "\n".join(f"Finding {n}." for n in range(9))
-        klass, _e = RS.classify_final_response(nine, operational_turn=False)
+        klass, _e = RS.classify_final_response(
+            nine, operational_turn=False, style_contract=contract_with("en")
+        )
         self.assertEqual(klass, RS.CLASS_CHAT_STYLE_DRIFT)
         klass, _e = RS.classify_final_response(
-            nine, operational_turn=False, detail_mode=RS.DETAIL_MODE_AUDIT
+            nine,
+            operational_turn=False,
+            style_contract=contract_with("en"),
+            detail_mode=RS.DETAIL_MODE_AUDIT,
         )
         self.assertEqual(klass, RS.CLASS_ORDINARY_CHAT)
 
     def test_an_operational_turn_is_never_reclassified_as_chat_drift(self):
         klass, _e = RS.classify_final_response(
-            ENGLISH_ESSAY, operational_turn=True, reply_language="et"
+            ENGLISH_ESSAY, operational_turn=True, style_contract=CONTRACT
         )
         self.assertEqual(klass, RS.CLASS_INVALID_OPERATIONAL_PROSE)
 
@@ -383,24 +473,23 @@ class StyleContractTests(unittest.TestCase):
     """The text a host injects is generated from STYLE.md, never hand-copied."""
 
     def test_the_context_names_the_pin_and_every_documented_ban(self):
-        contract = CS.style_contract(STYLE)
-        pin = CS.reply_language_pin(STYLE)
-        self.assertEqual(contract["reply_language"], pin)
-        context = contract["context"]
-        if pin:
-            self.assertIn(f"({pin})", context)
-        self.assertIn(str(CS.CHAT_LINE_BUDGET), context)
-        for phrase in CS.BANNED_OPENERS + CS.BANNED_CLOSERS + CS.BANNED_APOLOGIES:
+        summary = CS.contract_summary(CONTRACT)
+        self.assertEqual(summary["reply_language"], CONTRACT.reply_language)
+        context = summary["context"]
+        self.assertIn(f"({CONTRACT.reply_language})", context)
+        self.assertIn(str(CONTRACT.line_budget), context)
+        self.assertIn(CONTRACT.source_token, context)
+        for phrase in CONTRACT.openers + CONTRACT.closers + CONTRACT.apologies:
             self.assertIn(phrase, context)
         self.assertNotIn("user own language", context)
         self.assertNotIn("user's own language", context)
 
     def test_each_pin_is_reflected_and_auto_is_not_invented_into_a_pin(self):
         for pin, name in (("et", "Estonian"), ("en", "English"), ("ru", "Russian")):
-            contract = CS.style_contract(f"**`reply_language: {pin}`**\n")
-            self.assertEqual(contract["reply_language"], pin)
-            self.assertIn(name, contract["context"])
-        auto = CS.style_contract("**`reply_language: auto`**\n")
+            summary = CS.contract_summary(contract_with(pin))
+            self.assertEqual(summary["reply_language"], pin)
+            self.assertIn(name, summary["context"])
+        auto = CS.contract_summary(contract_with("auto"))
         self.assertIsNone(auto["reply_language"])
         self.assertEqual(auto["reply_language_setting"], "auto")
         self.assertIn("precedence", auto["context"])
@@ -417,9 +506,28 @@ class StyleContractTests(unittest.TestCase):
         payload = json.loads(proc.stdout)
         self.assertTrue(payload["ok"])
         self.assertEqual(payload["code"], "STYLE_CONTRACT")
-        expected = CS.style_contract()
+        expected = CS.contract_summary(CS.running_style_contract())
         for key in ("reply_language", "chat_line_budget", "chat_char_budget", "context"):
             self.assertEqual(payload[key], expected[key], key)
+
+
+class BoundaryStyleTests(unittest.TestCase):
+    """A green structural layer does not compensate for a failed style layer."""
+
+    def test_a_valid_surface_in_the_wrong_language_is_refused(self):
+        english = (
+            "The operator must choose the disposition of the retained files before the "
+            "next wave can start, because the previous wave left them in an ambiguous "
+            "state and nothing else can decide which of them should be kept or removed."
+        )
+        errors = CS.boundary_style_errors(
+            "STATUS\nWAIT\nRESULT\n" + english + "\nBLOCKER\nNONE", contract=CONTRACT
+        )
+        self.assertTrue(errors and "reply_language is et" in errors[0], errors)
+
+    def test_field_labels_and_short_values_are_not_language(self):
+        surface = "STATUS\nDONE\nRESULT\nNo work changed\nBLOCKER\nNONE"
+        self.assertEqual(CS.boundary_style_errors(surface, contract=CONTRACT), [])
 
 
 if __name__ == "__main__":

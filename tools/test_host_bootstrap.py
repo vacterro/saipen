@@ -653,15 +653,18 @@ if (!names || start < 0 || end < 0) {
   console.error("EXTRACT_FAILED");
   process.exit(3);
 }
+const pathNames = [
+  ...new Set(source.slice(start, end).match(/\\bpath\\d+\\b/g) || []),
+];
 const factory = new Function(
-  "fs", "path13", "os6", "getErrorObject",
+  "fs", ...pathNames, "os6", "getErrorObject",
   names[0] +
     "\\nconst KNOWLEDGE_FILE_NAMES_LOWERCASE = " +
     "KNOWLEDGE_FILE_NAMES.map((n) => n.toLowerCase());\\n" +
     source.slice(start, end) +
     "\\nreturn loadUserKnowledgeFiles;"
 );
-const load = factory(fs, path13, os6, (error) => error);
+const load = factory(fs, ...pathNames.map(() => path13), os6, (error) => error);
 const logger = { debug() {}, info() {}, warn() {}, error() {} };
 load({ homeDir, fs: fs.promises, logger })
   .then((files) => { process.stdout.write(JSON.stringify(files)); })

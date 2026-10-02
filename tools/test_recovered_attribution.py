@@ -516,6 +516,17 @@ class AttributionNegativeTests(RecoveredSourceFixture):
         self._refuse(self.proof(), "ARCHIVE_BODY_SHA_MISMATCH")
         self._blocked_global()
 
+    def test_body_line_ending_drift_is_named_and_still_refuses(self) -> None:
+        # T-1508: the measured SRC-038 shape -- Git rewrote the LF body with
+        # CRLF. Still not attributable, but named with its proven repair.
+        body = self.root / ".saipen/archive/source/SRC-038.md"
+        body.write_bytes(body.read_bytes().replace(b"\n", b"\r\n"))
+        result = self.proof()
+        self._refuse(result, "ARCHIVE_BODY_LINE_ENDING_DRIFT")
+        self.assertIn(".saipen/archive/source/SRC-038.md", result["detail"])
+        self.assertIn("-text", result["detail"])
+        self._blocked_global()
+
     def test_archive_meta_work_mismatch_refuses(self) -> None:
         meta = json.loads(
             (self.root / ".saipen/archive/source/SRC-038.meta.json").read_text(encoding="utf-8")
@@ -562,6 +573,19 @@ class AttributionNegativeTests(RecoveredSourceFixture):
         fabricated["clauses"] = {f"{RECEIPT}:R001": {"class": "requirement", "text": "x"}}
         self.build(contract=fabricated)
         self._refuse(self.proof(), "PRESERVED_ORIGINAL_REPLACED")
+        self._blocked_global()
+
+    def test_archived_contract_line_ending_drift_names_exact_path(self) -> None:
+        self.build()
+        contract = self.root / ".saipen/archive/source/SRC-038.contract.json"
+        original = base64.b64decode(self.record["original_contract"]["bytes"])
+        self.assertIn(b"\n", original)
+        self.assertNotIn(b"\r\n", original)
+        contract.write_bytes(original.replace(b"\n", b"\r\n"))
+        result = self.proof()
+        self._refuse(result, "ARCHIVE_ARTIFACT_LINE_ENDING_DRIFT")
+        self.assertIn(".saipen/archive/source/SRC-038.contract.json", result["detail"])
+        self.assertIn("-text", result["detail"])
         self._blocked_global()
 
     def test_current_coverage_differs_from_preserved_original(self) -> None:

@@ -52,7 +52,7 @@ def _with_published_release(project: Path, version: str = "0.4.2") -> str:
     return f"release:v{version}"
 
 
-def _install_runtime(project: Path) -> None:
+def _install_runtime(project: Path, *, downstream: bool = False) -> None:
     """Give the fixture a REAL SAIPEN installation to publish from.
 
     The no-publish release path runs `<project>/tools/validate.py --gate core`
@@ -62,10 +62,16 @@ def _install_runtime(project: Path) -> None:
     installation error long before it could judge anything. The fixture
     installs the three directories a real project has and nothing else --
     running the ACTUAL gate is the point of an end-to-end publication test.
+
+    `downstream=True` leaves out `tools/saipen_engine/test_runner.py`, the
+    declaration that makes a project SAIPEN's own home and arms the core-unit
+    SHIP gate (T-1344). A project that merely runs the installed validator has
+    no such declaration, and a fixture ticket cannot run the whole family.
     """
     if (project / "tools").exists():
         return
-    ignore = shutil.ignore_patterns("__pycache__", "*.pyc")
+    names = ("__pycache__", "*.pyc") + (("test_runner.py",) if downstream else ())
+    ignore = shutil.ignore_patterns(*names)
     shutil.copytree(TOOLS, project / "tools", ignore=ignore)
     shutil.copytree(ROOT / "saipen", project / "saipen", ignore=ignore)
     shutil.copytree(ROOT / "extensions", project / "extensions", ignore=ignore)
@@ -129,6 +135,11 @@ class PublicClosureCliTests(OrchestrationFixture):
         except ValueError:
             payload = {"_unparseable_stdout": proc.stdout}
         return proc.returncode, payload, proc.stderr
+
+    def record_scope(self, project: Path, ticket: str) -> None:
+        """Record the reviewed release scope inside the legal REVIEW/SHIP window."""
+        rc, payload, _err = self.run_cli(project, "scope", ticket, "assets/main.py")
+        self.assertEqual(rc, 0, payload)
 
     def test_control_a_inherited_cli(self):
         """A verification-only ticket closes through the PUBLIC CLI with
@@ -241,10 +252,12 @@ class PublicClosureCliTests(OrchestrationFixture):
         # The ticket never moved: every refusal above was zero-write.
         self.assertEqual(self.board(project)["tickets"]["T-7"]["section"], "## DOING")
 
-    def test_control_c_d_cohort_cli_and_publication(self):
-        """CONTROL C/D: two overlapping members join C-001 through the public
-        CLI; `saipen cohort ship C-001` publishes ONE batch scope through the
-        release machinery and flips the durable registry to shipped."""
+    def closed_cohort(self, *, scoped: bool) -> tuple[Path, str]:
+        """Two overlapping members closed into C-001, not yet published.
+
+        `scoped` records each member's reviewed release scope inside the
+        legal REVIEW/SHIP window, as a real ship must.
+        """
         project = self.make_project(active=True)
         # The shared accumulated bytes both members attribute (FastPrompter's
         # main.py), under a directory: the release gate enforces a CLOSED
@@ -262,10 +275,19 @@ class PublicClosureCliTests(OrchestrationFixture):
         # fixture's `saipen_version: 7` state; the release identity has to be
         # coherent with the state it publishes.
         _release_metadata(project, "7.5.0")
-        _install_runtime(project)
+        _install_runtime(project, downstream=True)
+        # CONTROL D: foreign dirty work elsewhere must survive publication. It
+        # is written BEFORE any scope is recorded: a release scope binds the
+        # tree it was reviewed against, so bytes that appear after review make
+        # every member's scope stale (T-1451).
+        (project / "assets" / "foreign.py").write_text(
+            "foreign = True\n", encoding="utf-8"
+        )
 
         second = self.add(project, "overlapping work")
         self.to_ship(project, "T-7")
+        if scoped:
+            self.record_scope(project, "T-7")
         rc, payload, _err = self.run_cli(
             project,
             "ticket",
@@ -289,6 +311,8 @@ class PublicClosureCliTests(OrchestrationFixture):
         claim = apply_claim(project, second, "tester", explicit=True)
         self.assertTrue(claim.ok, claim.to_dict())
         self.to_ship(project, second)
+        if scoped:
+            self.record_scope(project, second)
         rc, payload, _err = self.run_cli(
             project,
             "ticket",
@@ -302,6 +326,13 @@ class PublicClosureCliTests(OrchestrationFixture):
             "assets/main.py",
         )
         self.assertEqual(rc, 0, payload)
+        return project, second
+
+    def test_control_c_d_cohort_cli_and_publication(self):
+        """CONTROL C/D: two overlapping members join C-001 through the public
+        CLI; `saipen cohort ship C-001` publishes ONE batch scope through the
+        release machinery and flips the durable registry to shipped."""
+        project, second = self.closed_cohort(scoped=True)
 
         registry = json.loads(
             (project / ".saipen" / "kitchen" / "cohort_registry.json").read_text(
@@ -313,11 +344,6 @@ class PublicClosureCliTests(OrchestrationFixture):
         self.assertEqual(set(cohort["members"]), {"T-7", second})
         # No individual fake commit exists.
         self.assertFalse((project / ".git").exists())
-
-        # CONTROL D: foreign dirty work elsewhere must survive publication.
-        (project / "assets" / "foreign.py").write_text(
-            "foreign = True\n", encoding="utf-8"
-        )
 
         # Public cohort publication: one batch scope, registry flips shipped.
         rc, payload, _err = self.run_cli(
@@ -356,6 +382,22 @@ class PublicClosureCliTests(OrchestrationFixture):
         )
         self.assertEqual(receipt["cohort_id"], "C-001")
         self.assertEqual(receipt["op_id"], cohort["release_op_id"])
+
+    def test_control_d_scope_free_cohort_ship_refuses(self):
+        """Red control for T-1451: members closed WITHOUT a recorded release
+        scope cannot be published; the batch stays pending, nothing ships."""
+        project, _second = self.closed_cohort(scoped=False)
+        rc, payload, _err = self.run_cli(
+            project, "cohort", "ship", "C-001", capability="no-publish"
+        )
+        self.assertNotEqual(rc, 0, payload)
+        self.assertIn("SOURCE_SCOPE_MISSING", payload.get("detail", ""), payload)
+        registry = json.loads(
+            (project / ".saipen" / "kitchen" / "cohort_registry.json").read_text(
+                encoding="utf-8"
+            )
+        )
+        self.assertEqual(registry["cohorts"]["C-001"]["publication_status"], "pending")
 
     def test_control_e_fastprompter_verification_only(self):
         """CONTROL E: the original T-1201 class -- implementation already

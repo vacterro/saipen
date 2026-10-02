@@ -2513,7 +2513,8 @@ class AuditTombstoneDeleteGateTests(unittest.TestCase):
         )
         (root / "VERSION").write_text("8.0.1\n", encoding="utf-8")
         (root / ".saipen" / "BOARD.md").write_text(
-            "# Board\n## DOING\n## TODO\n## DONE\n- [x] T-001 [P1] done | verify: E-1\n## BLOCKED\n",
+            "# Board\n## DOING\n## TODO\n## DONE\n"
+            "- [x] T-001 [P1] done | verify: E-1\n## BLOCKED\n",
             encoding="utf-8",
         )
         (root / ".saipen" / "LOG.md").write_text(

@@ -122,7 +122,18 @@ def release_metadata_paths(
     ]
 
 
-_VERSION_BADGE_RE = re.compile(r"\*\*v\d+\.\d+\.\d+\*\*")
+#: A release version as this repository family writes it: three numeric
+#: components plus the bare pre-release suffix the project actually ships
+#: (``0.0.2a3``). The suffix sits INSIDE the bold, so a pattern that stops
+#: at the third digit can never match a badge this project writes, which
+#: made the release parity gate unsatisfiable for every version in its own
+#: history (T-131). The suffix class stops at whitespace and the pattern is
+#: anchored by the bold delimiters, so it is safe to read the hyphen/plus
+#: forms here (`1.2.3-rc.1`, `2.0.0+build.5`) that freshness.VERSION_TOKEN_RE
+#: deliberately refuses, because there a greedy tail would swallow the rest
+#: of a wheel filename and hide a real content change behind a version prefix.
+RELEASE_VERSION_CORE = r"\d+\.\d+\.\d+(?:[-+]?[0-9A-Za-z][0-9A-Za-z.+-]*)?"
+_VERSION_BADGE_RE = re.compile(r"\*\*v" + RELEASE_VERSION_CORE + r"\*\*")
 
 
 def version_badges(path: Path) -> list[str]:

@@ -128,7 +128,7 @@ def _git_revision(root: Path) -> str:
         proc = subprocess.run(
             ["git", "-C", str(root), "rev-parse", "HEAD"],
             capture_output=True,
-            text=True,
+            text=True, encoding="utf-8",
             timeout=5,
             check=False,
         )
@@ -1571,6 +1571,8 @@ def _undo_record_is_live(root: Path, record: dict) -> bool:
     """True only when a committed restore receipt still describes live state."""
     if record.get("operation") != "milestone_restore":
         return False
+    # Path-bound on purpose (T-1516): a restore receipt describes this
+    # checkout's live files and its op id hashes the path.
     if record.get("project_identity") != canonical_identity(root):
         return False
     expected_lineage = record.get("project_lineage")
@@ -1657,6 +1659,7 @@ def undo_confirm(
                 "VALIDATION_FAILED",
                 "undo op_id collision: committed receipt belongs to another operation",
             )
+        # Path-bound on purpose, as in _undo_record_is_live (T-1516).
         if record.get("project_identity") != canonical_identity(root) or (
             record.get("project_lineage")
             and record.get("project_lineage") != project_lineage_identity(root)

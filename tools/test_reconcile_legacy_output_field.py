@@ -28,6 +28,7 @@ from pathlib import Path
 TOOLS = Path(__file__).resolve().parent
 if str(TOOLS) not in sys.path:
     sys.path.insert(0, str(TOOLS))
+from test_fixture_support import CURRENT_STYLE_CONTRACT  # noqa: E402
 
 
 def _live(name: str):
@@ -46,7 +47,7 @@ def _state_fields(extra: str = "") -> str:
         "saipen_version: 7\n"
         "schema_version: 3\n"
         "last_event: 1\n"
-        "style_contract: ded-4ae736e4\n"
+        'style_contract: ' + CURRENT_STYLE_CONTRACT + '\n'
         "agent: tester\n"
         "requires:\n  - filesystem\n  - python\n"
         "mode: full\n"

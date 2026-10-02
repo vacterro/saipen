@@ -551,6 +551,13 @@ def classify(root: Path | str) -> dict:
         receipt_status = status.get("status")
         if receipt_status == intake.CLOSED_STATUS:
             item["state"] = CLOSED_PENDING_DELETE
+        elif status.get("location") == "retired":
+            # T-135: the same reading `delete_gate` now uses. A verified
+            # tombstone IS a closed receipt -- retirement is the only verb that
+            # mints one and it records INVALID, which is retirement's meaning
+            # everywhere else in this engine. Classifying that as a BLOCKED
+            # layer made a finished inbox report "it is not idle" forever.
+            item["state"] = CLOSED_PENDING_DELETE
         elif receipt_status == intake.ACTIVE_STATUS:
             item["state"] = ACTIVE
         else:
@@ -594,13 +601,19 @@ def classify(root: Path | str) -> dict:
 # --------------------------------------------------------------------------
 
 
-def projection(root: Path | str) -> dict | None:
+def projection(
+    root: Path | str,
+    *,
+    tickets: dict | None = None,
+    agent: str | None = None,
+    now=None,
+) -> dict | None:
     """What the Audit Inbox would own at the routing stage. Writes nothing.
 
     Returns None when the inbox holds nothing at all. Ordering is: settle a
     proven-closed layer first, then the lowest-numbered WORKABLE layer. A
-    BLOCKED/INVALID lower layer is retained and reported but never starves a
-    later workable one.
+    BLOCKED/INVALID lower layer or an ACTIVE layer with unworkable linked Work
+    is retained and reported but never starves a later workable one.
     """
     state = classify(root)
     if not state.get("ok", True):
@@ -651,29 +664,65 @@ def projection(root: Path | str) -> dict | None:
                     "settle the journaled cleanup"
                 ),
             }
+    board_tickets = tickets
+    board_error = None
+    unworkable_active = []
     for item in layers:
-        if item["state"] != ACTIVE:
-            continue
-        work = item.get("linked_work")
-        if not work:
+        if item["state"] == ACTIVE:
+            work = item.get("linked_work")
+            if not work:
+                return {
+                    **base,
+                    "action": "saipen audit ingest",
+                    "layer": item["layer"],
+                    "path": item["rel"],
+                    "receipt": item["receipt_id"],
+                    "detail": (
+                        f"{item['rel']} is captured as {item['receipt_id']} "
+                        "but carries no Work"
+                    ),
+                }
+            if board_tickets is None and board_error is None:
+                try:
+                    from .board import parse_board
+
+                    board_text = (Path(root) / ".saipen" / "BOARD.md").read_text(
+                        encoding="utf-8"
+                    )
+                    parsed_board = parse_board(board_text)
+                except (OSError, UnicodeError, ValueError) as exc:
+                    board_tickets = {}
+                    board_error = f"cannot read BOARD.md: {exc}"
+                else:
+                    board_tickets = parsed_board.get("tickets", {})
+                    errors = parsed_board.get("errors") or []
+                    if errors:
+                        details = "; ".join(str(error) for error in errors[:3])
+                        board_error = f"BOARD.md is invalid: {details}"
+            from .audit_route import linked_work_is_workable
+
+            workable = not board_error and linked_work_is_workable(
+                work, board_tickets, agent=agent, now=now
+            )
+            if not workable:
+                unworkable_active.append(
+                    {
+                        "layer": item["layer"],
+                        "work": work,
+                        "reason": board_error or "linked Work is not currently workable",
+                    }
+                )
+                base["unworkable_active"] = unworkable_active
+                continue
             return {
                 **base,
-                "action": "saipen audit ingest",
+                "action": f"PHASE SCOUT {work}",
                 "layer": item["layer"],
                 "path": item["rel"],
                 "receipt": item["receipt_id"],
-                "detail": f"{item['rel']} is captured as {item['receipt_id']} but carries no Work",
+                "work": work,
+                "detail": f"{item['rel']} owns continuation through {work}",
             }
-        return {
-            **base,
-            "action": f"PHASE SCOUT {work}",
-            "layer": item["layer"],
-            "path": item["rel"],
-            "receipt": item["receipt_id"],
-            "work": work,
-            "detail": f"{item['rel']} owns continuation through {work}",
-        }
-    for item in layers:
         if item["state"] == NEW:
             return {
                 **base,
@@ -688,6 +737,16 @@ def projection(root: Path | str) -> dict | None:
             "action": "saipen audit status",
             "invalid_only": True,
             "detail": "audit inbox holds only invalid layer(s); it is not idle",
+        }
+    if unworkable_active:
+        return {
+            **base,
+            "action": "saipen audit status",
+            "unworkable_active_only": True,
+            "detail": (
+                "audit inbox has no workable ACTIVE or NEW layer; linked Work "
+                "for the remaining ACTIVE layer(s) is not currently workable"
+            ),
         }
     if residue:
         # Every layer is settled and gone, but the directory is not empty.
@@ -1076,7 +1135,17 @@ def delete_gate(root: Path | str, rel: str) -> dict:
     status_out = intake.status(root, receipt_id)
     if not status_out.get("ok"):
         return {"ok": False, "code": "SOURCE_CORRUPTION", "detail": status_out.get("detail", "")}
-    if status_out.get("status") != intake.CLOSED_STATUS:
+    # T-134: this gate's documented condition is "receipt CLOSED WITH A
+    # TOMBSTONE", and the only verb that mints a tombstone is retirement --
+    # which writes INVALID into it, because INVALID is what retirement means
+    # everywhere else in this engine. Reading only `status` therefore refused
+    # every receipt the gate itself admits, and the consume path was
+    # unreachable. `location == "retired"` is reached only from the branch
+    # that already verified `is_retired_tombstone`, so it IS the "with a
+    # tombstone" half of the condition. This is the same reading the sibling
+    # `receipt_for_digest` in this module already uses.
+    _tombstoned = status_out.get("location") == "retired"
+    if status_out.get("status") != intake.CLOSED_STATUS and not _tombstoned:
         return {
             "ok": False,
             "code": "SOURCE_UNRESOLVED",

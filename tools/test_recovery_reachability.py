@@ -27,6 +27,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
+from test_fixture_support import CURRENT_STYLE_CONTRACT
 from saipen_engine.reconcile import (
     _board_adoption_repairs,
     _legacy_next_action,
@@ -140,7 +141,7 @@ def _project(
         "saipen_version: 7\n"
         "schema_version: 3\n"
         "last_event: 1\n"
-        "style_contract: ded-4ae736e4\n"
+        'style_contract: ' + CURRENT_STYLE_CONTRACT + '\n'
         "agent: tester\n"
         "mode: full\n"
         "updated: 2026-09-14T00:00:00Z\n"
@@ -644,7 +645,7 @@ def _legacy_project() -> Path:
         "saipen_version: 7\n"
         "schema_version: 3\n"
         "last_event: 2\n"
-        "style_contract: ded-4ae736e4\n"
+        'style_contract: ' + CURRENT_STYLE_CONTRACT + '\n'
         "agent: tester\n"
         "mode: full\n"
         "updated: 2026-09-14T00:00:00Z\n"
@@ -1247,7 +1248,7 @@ _UNBOUND_HISTORY_STATE = (
     "saipen_version: 8\n"
     "schema_version: 3\n"
     "last_event: 4\n"
-    "style_contract: ded-4ae736e4\n"
+    'style_contract: ' + CURRENT_STYLE_CONTRACT + '\n'
     'saipen_home: "{home}"\n'
     "agent: buffy\n"
     "requires:\n  - filesystem\n  - python\n"
@@ -1414,7 +1415,7 @@ _SAITULS_STATE = (
     "saipen_version: 8\n"
     "schema_version: 3\n"
     "last_event: 1303\n"
-    "style_contract: ded-4ae736e4\n"
+    'style_contract: ' + CURRENT_STYLE_CONTRACT + '\n'
     'saipen_home: "{home}"\n'
     "agent: buffy\n"
     "parked_work: T-999\n"
@@ -1812,7 +1813,7 @@ class StrandedClaimTests(unittest.TestCase):
             'next_action: "PHASE SCOUT T-188"\n'
             'blocker: ""\ntransition_from: DONE\n'
             "saipen_version: 8\nschema_version: 3\nlast_event: 2\n"
-            "style_contract: ded-4ae736e4\n"
+            'style_contract: ' + CURRENT_STYLE_CONTRACT + '\n'
             'saipen_home: "{}"\n'.format(str(_HOME).replace(chr(92), chr(92) * 2))
             + "agent: buffy\nrequires:\n  - filesystem\n  - python\nmode: full\n"
             'updated: "2026-09-17T00:00:00Z"\n---\n',

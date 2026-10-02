@@ -194,17 +194,91 @@ def upsert_member(
     return out
 
 
-def cohort_scope(cohort: dict) -> dict[str, str]:
+def member_hash_matches(content: bytes, recorded_hash: str) -> bool:
+    """True if content matches recorded_hash, either verbatim or via Git text normalization.
+
+    Proven Git text normalization: a file checked out on Windows with autocrlf
+    or committed with LF conversion may differ in CRLF vs LF line endings.
+    If the content is valid UTF-8 text without NUL bytes, both the LF-normalized
+    and CRLF-normalized hashes are accepted.
+    Binary content (carrying NUL or invalid UTF-8) must match verbatim -- no
+    line ending normalization is accepted for binary, preventing binary or source drift.
+    """
+    from .journal import hash_bytes
+
+    if hash_bytes(content) == recorded_hash:
+        return True
+    if b"\0" in content:
+        return False
+    try:
+        content.decode("utf-8")
+    except UnicodeDecodeError:
+        return False
+    lf = content.replace(b"\r\n", b"\n").replace(b"\r", b"\n")
+    if hash_bytes(lf) == recorded_hash:
+        return True
+    crlf = lf.replace(b"\n", b"\r\n")
+    return hash_bytes(crlf) == recorded_hash
+
+
+def cohort_member_mismatches(root: Path | str, cohort: dict) -> list[dict]:
+    """Audit member path hashes against the worktree.
+
+    Handles proven Git text normalization: if live bytes on disk differ from
+    the recorded member hash only by line endings (LF vs CRLF) in UTF-8 text,
+    it is NOT a mismatch. Binary drift or substantive source drift IS reported.
+    """
+    from .journal import hash_bytes
+
+    root = Path(root)
+    mismatches = []
+    for member_id, member in sorted((cohort.get("members") or {}).items()):
+        for rel, recorded in sorted((member.get("paths") or {}).items()):
+            fp = root / rel
+            if not fp.is_file():
+                mismatches.append(
+                    {
+                        "work": member_id,
+                        "path": rel,
+                        "recorded": recorded,
+                        "error": "missing",
+                    }
+                )
+                continue
+            raw = fp.read_bytes()
+            if not member_hash_matches(raw, recorded):
+                mismatches.append(
+                    {
+                        "work": member_id,
+                        "path": rel,
+                        "recorded": recorded,
+                        "live": hash_bytes(raw),
+                    }
+                )
+    return mismatches
+
+
+def cohort_scope(cohort: dict, root: Path | str | None = None) -> dict[str, str]:
     """The ONE frozen batch scope: every shared path exactly once.
 
     Two members that both changed ``main.py`` contribute ONE path, bound to the
     single live identity they both attribute. A path claimed with two different
-    hashes is a genuine disagreement and raises rather than picking a winner.
+    hashes is a genuine disagreement and raises rather than picking a winner,
+    unless the difference is proven Git text normalization against the live file.
     """
     scope: dict[str, str] = {}
     for member in (cohort.get("members") or {}).values():
         for rel, digest in (member.get("paths") or {}).items():
             if rel in scope and scope[rel] != digest:
+                if root is not None:
+                    fp = Path(root) / rel
+                    if fp.is_file():
+                        raw = fp.read_bytes()
+                        if (
+                            member_hash_matches(raw, scope[rel])
+                            and member_hash_matches(raw, digest)
+                        ):
+                            continue
                 raise ValueError(
                     f"cohort members disagree about {rel}: {scope[rel]} vs {digest}"
                 )

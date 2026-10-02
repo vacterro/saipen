@@ -31,8 +31,8 @@ CONTROLS
   RED 2  holder ## DONE    -> same release, holder left DONE;
   RED 3  live DOING holder -> the T-1473 arm still demotes it to TODO
          (regression guard on the pre-existing behavior);
-  RED 4  live DOING holder owned by ANOTHER seat -> still CONTINUATION_RESERVED,
-         zero writes (the actor never hands over a seat it does not hold);
+  RED 4  live DOING holder owned by ANOTHER seat -> live-seat guard refuses with
+         TICKET_NOT_WORKABLE, zero writes (the actor never hands over a seat it does not hold);
   RED 5  parked Work with its own unmet dependency -> still TICKET_NOT_WORKABLE,
          zero writes (the release is not a dependency bypass).
 """
@@ -51,10 +51,10 @@ from saipen_engine.board import parse_board  # noqa: E402
 from saipen_engine.fast_check import validate_texts  # noqa: E402
 from saipen_engine.operations import (  # noqa: E402
     apply_claim,
+    finish_ticket,
     ticket_move,
-    transition_phase,
 )
-from test_dependency_resume_liveness import AGENT  # noqa: E402
+from test_dependency_resume_liveness import AGENT, OTHER  # noqa: E402
 from test_hermetic_env import isolate_host_session  # noqa: E402
 from test_t1473_handback import HandbackFixture  # noqa: E402
 
@@ -98,7 +98,7 @@ class TerminalHolderHandback(HandbackFixture):
             self.assertEqual(tickets(project)[request]["section"], "## BLOCKED")
         else:  # ## DONE -- close the holder through its own lifecycle
             self.to_ship(project, request)
-            done = transition_phase(project, "DONE", AGENT, request, "finish")
+            done = finish_ticket(project, request, AGENT)
             self.assertTrue(done.ok, done.to_dict())
             self.assertEqual(tickets(project)[request]["section"], "## DONE")
         return parked, request
@@ -113,6 +113,11 @@ class TerminalHolderReleaseTests(TerminalHolderHandback):
     def test_red1_blocked_holder_releases_the_seat(self) -> None:
         project = self.make_project()
         parked, request = self.terminal_holder(project, "## BLOCKED")
+        holder_before = {
+            key: value
+            for key, value in tickets(project)[request].items()
+            if key != "line_no"
+        }
 
         result = self.release(project, parked, request)
         self.assertTrue(result.ok, result.to_dict())
@@ -128,6 +133,12 @@ class TerminalHolderReleaseTests(TerminalHolderHandback):
         # The terminal holder is NOT resurrected into TODO: it is still blocked
         # for its own reason, and the release must not fake progress on it.
         self.assertEqual(tickets(project)[request]["section"], "## BLOCKED")
+        holder_after = {
+            key: value
+            for key, value in tickets(project)[request].items()
+            if key != "line_no"
+        }
+        self.assertEqual(holder_after, holder_before)
 
         state = self.state(project)
         self.assertEqual(state["phase"], "VERIFY")
@@ -142,23 +153,23 @@ class TerminalHolderReleaseTests(TerminalHolderHandback):
         )
         self.assertEqual(clean(project), [])
 
-    def test_red2_terminal_holder_is_not_resurrected(self) -> None:
-        """A terminal holder keeps its own section; the release moves only the seat.
-
-        The ## DONE arm is covered by the same code path as ## BLOCKED (both
-        satisfy `holder_terminal`) rather than by a hand-built BOARD:
-        fabricating a DONE holder on disk fights the block-park invariant -- a
-        ticket the LOG says was block-parked must still be in BOARD.BLOCKED --
-        and that invariant is worth more than a second copy of one branch.
-        """
+    def test_red2_done_holder_finishes_and_resumes_parked_work(self) -> None:
+        """Finishing a DONE holder resumes parked work at its saved phase."""
         project = self.make_project()
-        parked, request = self.terminal_holder(project, "## BLOCKED")
-        self.assertEqual(tickets(project)[request]["section"], "## BLOCKED")
+        parked, request = self.terminal_holder(project, "## DONE")
 
-        result = self.release(project, parked, request)
-        self.assertTrue(result.ok, result.to_dict())
-        self.assertEqual(tickets(project)[parked]["section"], "## DOING")
-        self.assertEqual(tickets(project)[request]["section"], "## BLOCKED")
+        holder = tickets(project)[request]
+        restored = tickets(project)[parked]
+        self.assertEqual(holder["section"], "## DONE")
+        self.assertEqual(restored["section"], "## DOING")
+        for field in ("blocker", "blocker_scope", "blocked_on", "resume_phase",
+                      "resume_transition_from"):
+            self.assertNotIn(field, restored["fields"], restored["fields"])
+
+        state = self.state(project)
+        self.assertEqual(state["phase"], "VERIFY")
+        self.assertEqual(state["task"], parked)
+        self.assertEqual(state["next_action"], f"PHASE VERIFY {parked}")
         self.assertEqual(clean(project), [])
 
     def test_red3_live_doing_holder_still_demotes(self) -> None:
@@ -174,7 +185,26 @@ class TerminalHolderReleaseTests(TerminalHolderHandback):
         self.assertNotIn("owner", holder["fields"], holder["fields"])
         self.assertEqual(clean(project), [])
 
-    def test_red4_terminal_holder_does_not_bypass_a_dependency(self) -> None:
+    def test_red4_foreign_live_doing_holder_refuses_without_writes(self) -> None:
+        """A seat cannot be handed back while another seat owns its live holder."""
+        project = self.make_project()
+        parked, request = self.paused(project)
+        claimed = apply_claim(project, request, OTHER, explicit=True)
+        self.assertTrue(claimed.ok, claimed.to_dict())
+        holder = tickets(project)[request]
+        self.assertEqual(holder["section"], "## DOING")
+        self.assertEqual(holder["fields"].get("owner"), OTHER)
+        before = self.files(project)
+
+        result = self.release(project, parked, request)
+        self.assertFalse(result.ok)
+        self.assertEqual(result.code, "TICKET_NOT_WORKABLE", result.to_dict())
+        self.assertIn("live foreign claim", result.message)
+        self.assertEqual(
+            self.files(project), before
+        )
+
+    def test_red5_terminal_holder_does_not_bypass_a_dependency(self) -> None:
         """The release is not a dependency bypass: an unmet need still refuses."""
         project = self.make_project()
         parked, request = self.terminal_holder(project, "## BLOCKED")

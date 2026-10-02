@@ -1590,5 +1590,62 @@ class ReceiptReconcileTests(unittest.TestCase):
         self.assertEqual(self._tree_hashes(), before)
 
 
+class GenericCredentialAssignmentBoundaryTests(unittest.TestCase):
+    def test_multiline_documentation_punctuation_is_not_a_credential_value(self) -> None:
+        continuations = (
+            "- centralize only that CURRENT_STYLE_FIXTURE authority;",
+            "- documentation bullet",
+            ": documentation punctuation",
+            "= documentation punctuation",
+            ". documentation punctuation",
+        )
+        for newline in ("\n", "\r\n"):
+            for continuation in continuations:
+                body = f"literal STYLE token:{newline}{continuation}\n"
+                with self.subTest(newline=repr(newline), continuation=continuation):
+                    self.assertFalse(intake._looks_sensitive(body))
+                    self.assertEqual(intake._redact_text(body), body)
+
+    def test_same_line_generic_credentials_remain_detected_and_redacted(self) -> None:
+        cases = (
+            ("token: realvalue\n", "token: <redacted>\n"),
+            ("token = realvalue\n", "token = <redacted>\n"),
+            ("password: realvalue\r\n", "password: <redacted>\r\n"),
+            ("secret = realvalue\r\n", "secret = <redacted>\r\n"),
+        )
+        for body, expected in cases:
+            with self.subTest(body=body):
+                self.assertTrue(intake._looks_sensitive(body))
+                self.assertEqual(intake._redact_text(body), expected)
+
+    def test_existing_masked_forms_keep_their_semantics(self) -> None:
+        already_redacted = "token: <redacted>\n"
+        self.assertFalse(intake._looks_sensitive(already_redacted))
+        self.assertEqual(intake._redact_text(already_redacted), already_redacted)
+
+        masked = "password=***\n"
+        self.assertFalse(intake._looks_sensitive(masked))
+        self.assertEqual(intake._redact_text(masked), "password=<redacted>\n")
+
+    def test_high_confidence_credentials_remain_redacted(self) -> None:
+        github = "ghp_" + ("A" * 36)
+        aws = "AKIA" + ("A" * 16)
+        openai = "sk-" + ("A" * 32)
+        bearer = "Bearer " + ("A" * 30)
+        database_password = "postgresql://operator:dbpassword@localhost/example"
+        cases = (
+            (github, github),
+            (aws, aws),
+            (openai, openai),
+            (bearer, "A" * 30),
+            (database_password, "dbpassword"),
+        )
+        for body, credential in cases:
+            with self.subTest(body=body[:12]):
+                redacted = intake._redact_text(body)
+                self.assertNotEqual(redacted, body)
+                self.assertNotIn(credential, redacted)
+
+
 if __name__ == "__main__":
     unittest.main()

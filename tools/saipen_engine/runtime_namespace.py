@@ -18,6 +18,7 @@ This module is the ONE owner of the classification:
       .saipen/evidence/**, .saipen/archive/**, .saipen/intake/**,
       .saipen/recovery/log-detail/**, .saipen/recovery/board-compaction/**,
       .saipen/recovery/conformance/**, .saipen/recovery/settled/**,
+      .saipen/recovery/log-normalize/**, .saipen/recovery/log-foreign-tail/**,
       .saipen/extensions/**, and the canonical checkpoint files themselves.
 
 The policy is deliberately NOT `.saipen/**`: a blanket exclusion would drop
@@ -50,6 +51,8 @@ DURABLE_PROTECTED: tuple[str, ...] = (
     ".saipen/recovery/board-compaction/",
     ".saipen/recovery/conformance/",
     ".saipen/recovery/settled/",
+    ".saipen/recovery/log-normalize/",
+    ".saipen/recovery/log-foreign-tail/",
     ".saipen/extensions/",
 )
 
@@ -88,7 +91,8 @@ def ignore_block() -> str:
         IGNORE_MARKER + " -- T-1435.",
         "# Durable protocol/evidence history (.saipen/evidence, archive, intake,",
         "# recovery/log-detail, recovery/board-compaction, recovery/conformance,",
-        "# extensions) stays versioned; only the mechanics below are excluded.",
+        "# recovery/log-normalize, recovery/log-foreign-tail, extensions) stays",
+        "# versioned; only the mechanics below are excluded.",
     ]
     lines.extend(prefix for prefix, _class in NON_RELEASE_PATTERNS)
     return "\n".join(lines) + "\n"
@@ -133,6 +137,144 @@ def ensure_gitignore_policy(project_root: Path | str) -> dict:
             "detail": f"cannot establish the runtime ignore policy: {exc}",
         }
     return {"ok": True, "code": "IGNORE_POLICY_ADDED"}
+
+
+#: T-1508. Byte-bound evidence: every file under these paths is proven by a
+#: sha256 of its exact bytes, so Git's line-ending conversion (core.autocrlf,
+#: the Git for Windows default) turns honest evidence into a digest mismatch.
+#: Measured 2026-09-24 in a managed project with no `.gitattributes`: four
+#: `git stash -u` round-trips rewrote seven untracked archived sources with
+#: CRLF while their digests were of the LF bytes, and attribution refused
+#: them. `-text` is the only setting that keeps the bytes; `eol=lf` would
+#: still rewrite a source that genuinely arrived with CRLF.
+ATTRIBUTES_MARKER = "# SAIPEN byte-bound evidence (digest-verified; never convert line endings)"
+
+#: (pattern, probe) in declaration order. The probe is a representative path
+#: `git check-attr` answers for, so a rule the project already has -- another
+#: spelling, a broader pattern, a global attributes file -- is recognized
+#: instead of duplicated.
+BYTE_BOUND_PATTERNS: tuple[tuple[str, str], ...] = (
+    (".saipen/intake/**", ".saipen/intake/active/SRC-000.md"),
+    (".saipen/archive/source/**", ".saipen/archive/source/SRC-000.md"),
+    (".saipen/archive/retired/**", ".saipen/archive/retired/SRC-000.md"),
+    (".saipen/recovery/log-detail/**", ".saipen/recovery/log-detail/E-0-probe.LOG.md"),
+    (
+        ".saipen/recovery/board-compaction/**",
+        ".saipen/recovery/board-compaction/T-0/T-0-probe.json",
+    ),
+    # A ledger REWRITE keeps the LOG it replaced here; the repair's DEC names
+    # the copy, and `quarantine-log-tail` records its sha256.
+    (".saipen/recovery/log-normalize/**", ".saipen/recovery/log-normalize/op/LOG.md"),
+    (".saipen/recovery/log-foreign-tail/**", ".saipen/recovery/log-foreign-tail/op/LOG.md"),
+)
+
+
+def attributes_block(patterns=None) -> str:
+    """The canonical `.gitattributes` block, marker first, rules after."""
+    selected = [p for p, _probe in BYTE_BOUND_PATTERNS] if patterns is None else list(patterns)
+    lines = [ATTRIBUTES_MARKER + " -- T-1508."]
+    lines.extend(f"{pattern} -text" for pattern in selected)
+    return "\n".join(lines) + "\n"
+
+
+def _declared_unset(text: str) -> set[str]:
+    """Patterns whose LAST rule in `text` unsets `text` (`-text` or `binary`)."""
+    state: dict[str, bool] = {}
+    for line in text.splitlines():
+        fields = line.split()
+        if len(fields) < 2 or fields[0].startswith("#"):
+            continue
+        for attribute in fields[1:]:
+            if attribute in ("-text", "binary"):
+                state[fields[0]] = True
+            elif attribute == "text" or attribute.startswith(("text=", "!text")):
+                state[fields[0]] = False
+    return {pattern for pattern, unset in state.items() if unset}
+
+
+def _git_unset(root: Path, probes: list[str]) -> set[str] | None:
+    """Probes Git resolves to `text: unset`; None when Git cannot answer."""
+    try:
+        proc = subprocess.run(
+            ["git", "-C", str(root), "check-attr", "text", "--", *probes],
+            capture_output=True,
+            timeout=30,
+        )
+    except (OSError, subprocess.SubprocessError):
+        return None
+    if proc.returncode != 0:
+        return None
+    unset = set()
+    for line in proc.stdout.decode("utf-8", errors="replace").splitlines():
+        path, _sep, value = line.rpartition(": text: ")
+        if value.strip() == "unset":
+            unset.add(path)
+    return unset
+
+
+def attributes_policy(project_root: Path | str) -> dict:
+    """``{"state": CURRENT|PARTIAL|ABSENT, "missing": [pattern, ...]}``.
+
+    The project's own `.gitattributes` answers first (no subprocess when it
+    already carries every rule); whatever it does not declare is asked of
+    Git, which knows every attributes source. Without Git the file alone
+    decides, so a gitless project is judged by what it would carry into one.
+    """
+    root = Path(project_root)
+    try:
+        text = (root / ".gitattributes").read_text(encoding="utf-8-sig", errors="replace")
+    except OSError:
+        text = ""
+    declared = _declared_unset(text)
+    missing = [(p, probe) for p, probe in BYTE_BOUND_PATTERNS if p not in declared]
+    if missing:
+        answered = _git_unset(root, [probe for _p, probe in missing])
+        if answered is not None:
+            missing = [(p, probe) for p, probe in missing if probe not in answered]
+    patterns = [p for p, _probe in missing]
+    if not patterns:
+        state = "CURRENT"
+    elif len(patterns) == len(BYTE_BOUND_PATTERNS):
+        state = "ABSENT"
+    else:
+        state = "PARTIAL"
+    return {"state": state, "missing": patterns}
+
+
+def attributes_policy_state(project_root: Path | str) -> str:
+    """CURRENT when every byte-bound path is `-text`, else PARTIAL/ABSENT."""
+    return attributes_policy(project_root)["state"]
+
+
+def ensure_gitattributes_policy(project_root: Path | str) -> dict:
+    """Mark byte-bound evidence `-text` wherever it is not already (idempotent).
+
+    Only the missing rules are written, APPENDED to the existing file: its
+    bytes, BOM and line-ending style are never rewritten, and a rule the
+    project already carries in any spelling is never duplicated. Failure is
+    reported rather than raised, as for `ensure_gitignore_policy`.
+    """
+    root = Path(project_root)
+    policy = attributes_policy(root)
+    if policy["state"] == "CURRENT":
+        return {"ok": True, "code": "ATTRIBUTES_POLICY_CURRENT"}
+    path = root / ".gitattributes"
+    try:
+        existing = path.read_bytes() if path.is_file() else b""
+        newline = b"\r\n" if b"\r\n" in existing else b"\n"
+        prefix = b""
+        if existing:
+            prefix = (b"" if existing.endswith(b"\n") else newline) + newline
+        block = attributes_block(policy["missing"]).encode("utf-8").replace(b"\n", newline)
+        with path.open("ab") as handle:
+            handle.write(prefix + block)
+    except OSError as exc:
+        return {
+            "ok": False,
+            "code": "ATTRIBUTES_POLICY_UNAVAILABLE",
+            "detail": f"cannot establish the byte-bound attributes policy: {exc}",
+        }
+    return {"ok": True, "code": "ATTRIBUTES_POLICY_ADDED", "added": policy["missing"]}
 
 
 def tracked_runtime_paths(project_root: Path | str) -> dict:

@@ -33,6 +33,7 @@ TOOLS = Path(__file__).resolve().parent
 REPO = TOOLS.parent
 if str(TOOLS) not in sys.path:
     sys.path.insert(0, str(TOOLS))
+from test_fixture_support import CURRENT_STYLE_CONTRACT  # noqa: E402
 
 import saipen_engine.operations as operations  # noqa: E402
 from saipen_engine.codec import read_doc  # noqa: E402
@@ -63,22 +64,23 @@ def migrate_saipen_generation(*args, **kwargs):
     return operation(*args, **kwargs)
 
 
-STATE_TEMPLATE = """---
-phase: DONE
-task: none
-next_action: "saipen continue"
-blocker: ""
-transition_from: SHIP
-saipen_version: {version}
-schema_version: 3
-last_event: 100
-style_contract: ded-4ae736e4
-saipen_home: "{home}"
-mode: full
-updated: 2026-09-12T00:00:00Z
-agent: test-agent
----
-"""
+STATE_TEMPLATE = (
+    '---\n'
+    'phase: DONE\n'
+    'task: none\n'
+    'next_action: "saipen continue"\n'
+    'blocker: ""\n'
+    'transition_from: SHIP\n'
+    'saipen_version: {version}\n'
+    'schema_version: 3\n'
+    'last_event: 100\n'
+    'style_contract: ' + CURRENT_STYLE_CONTRACT + '\n'
+    'saipen_home: "{home}"\n'
+    'mode: full\n'
+    'updated: 2026-09-12T00:00:00Z\n'
+    'agent: test-agent\n'
+    '---\n'
+)
 
 BOARD = "## DOING\n## TODO\n## DONE\n## BLOCKED\n"
 LOG = "- 12.09.26 00:00 [E-100] [agent: test-agent] RUN: generation fixture\n"

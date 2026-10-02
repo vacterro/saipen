@@ -58,6 +58,13 @@ SCHEMA_VERSION = 1
 #: lands. `.git/` is history, not the tree under test.
 FINGERPRINT_EXCLUDED = (".git", ".saipen")
 
+#: T-1530: how many times `evidence` re-snapshots when the live tree drifts
+#: away from the copy that ran during the run window (a concurrent editor in a
+#: busy multi-session tree). Each retry is a fresh family run against a fresh
+#: copy, so the bound is small: a transient edit clears in one, and persistent
+#: drift is a real mismatch that should fail rather than loop.
+EVIDENCE_DRIFT_RETRIES = 3
+
 #: One red test in the unittest summary. ``-v`` prints a docstring in place of
 #: the id on the progress line, so ids come from these headers only. A subTest
 #: header appends ``[message]`` and/or ``(params)``; they are dropped, so every
@@ -779,7 +786,7 @@ def _git_head(root: Path) -> str | None:
             ["git", "rev-parse", "HEAD"],
             cwd=root,
             capture_output=True,
-            text=True,
+            text=True, encoding="utf-8",
             check=False,
         )
     except OSError:
@@ -1001,7 +1008,10 @@ def _baseline(root: Path, args) -> int:
         record = json.loads((root / args.from_record).read_text(encoding="utf-8"))
         run = {key: record.get(key) for key in ("status", "exit_code", "ran", "red", "command")}
     else:
-        run = run_family(root, timeout=args.timeout, jobs=args.jobs)
+        from .inflight import holding
+
+        with holding(root, "", "core_unit baseline"):
+            run = run_family(root, timeout=args.timeout, jobs=args.jobs)
         keep_durations(root, run.get("module_durations_s") or {})
     if run["status"] not in ("PASS", "FAIL") or not run["ran"]:
         return _emit({"ok": False, "detail": "the family did not complete", "run": run})
@@ -1037,27 +1047,51 @@ def _evidence(root: Path, args) -> int:
     reused = written is not None
     leaked: list[str] = []
     if written is None:
-        run = run_family(root, timeout=args.timeout, jobs=args.jobs)
-        leaked = run.get("sandboxes_leaked") or []
-        keep_durations(root, run.get("module_durations_s") or {})
-        # The record is the truth about the copy that ran, so it is kept either
-        # way; a tree that drifted since the copy only loses the citation.
-        written = write_record(root, run, run.get("fingerprint") or fingerprint)
-        keep_red_sections(root, written["path"], run.get("sections") or {})
-        if tree_fingerprint(root) != written["record"]["fingerprint"]:
-            return _emit(
-                {
-                    "ok": False,
-                    "detail": (
-                        "the working tree changed after the family's copy was taken; "
-                        "the record describes that copy and is not cited. Remove the "
-                        "drift and rerun this command (it reuses a PASS record of an "
-                        "identical tree) or rerun with --fresh"
-                    ),
-                    "verdict": written["record"]["verdict"],
-                    "record": written["path"],
-                }
-            )
+        # T-1530: the family runs against an immutable COPY, so the record is
+        # always true about the bytes it tested. Whether to CITE it compares
+        # that copy's fingerprint against the live tree -- and a SIBLING process
+        # editing a tracked file mid-run (a busy multi-session tree) drifts the
+        # live tree away from the copy through no fault of this ticket, which
+        # failed the citation and forced a manual serialize-and-rerun. The copy
+        # is the snapshot; the only fix needed is a bounded RE-SNAPSHOT retry so
+        # a transient concurrent edit gets a clean window instead of a hard
+        # refusal. Persistent drift still fails after the bound -- that is a
+        # tree that genuinely no longer matches, and citing it would overstate.
+        from .inflight import holding
+
+        # T-1575: the tested tree is frozen from the copy to the citation
+        # check, so the agent works the parallel lane instead of editing it.
+        with holding(root, args.ticket, "core_unit evidence"):
+            attempts = 0
+            while True:
+                attempts += 1
+                run = run_family(root, timeout=args.timeout, jobs=args.jobs)
+                leaked = run.get("sandboxes_leaked") or []
+                keep_durations(root, run.get("module_durations_s") or {})
+                # The record is the truth about the copy that ran, so it is kept
+                # either way; a tree that drifted since the copy only loses the
+                # citation.
+                written = write_record(root, run, run.get("fingerprint") or fingerprint)
+                keep_red_sections(root, written["path"], run.get("sections") or {})
+                if tree_fingerprint(root) == written["record"]["fingerprint"]:
+                    break
+                if attempts >= EVIDENCE_DRIFT_RETRIES:
+                    return _emit(
+                        {
+                            "ok": False,
+                            "detail": (
+                                "the working tree changed after the family's copy was taken, "
+                                f"and kept changing across {attempts} snapshots -- a concurrent "
+                                "editor of this tree, or an uncommitted edit this run did not "
+                                "settle. The record describes the copy that ran and is not "
+                                "cited. Remove the drift and rerun (it reuses a PASS record of "
+                                "an identical tree) or rerun with --fresh"
+                            ),
+                            "verdict": written["record"]["verdict"],
+                            "record": written["path"],
+                            "attempts": attempts,
+                        }
+                    )
     state = parse_state((root / ".saipen" / "STATE.md").read_text(encoding="utf-8"))
     agent = args.agent or state.get("agent") or "unknown"
     result = operations.checkpoint(root, agent, "RUN", args.ticket, evidence_line(written))

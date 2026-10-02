@@ -79,7 +79,7 @@ def main() -> int:
                 cwd=project,
                 env=env,
                 capture_output=True,
-                text=True,
+                text=True, encoding="utf-8",
                 timeout=360,
             )
             stdout = proc.stdout

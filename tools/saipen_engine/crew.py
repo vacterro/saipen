@@ -17,7 +17,7 @@ from .journal import (
     pending_ops,
     source_identity_dependency,
 )
-from .operations import RELEASE_SCOPE_DIR
+from .operations import RELEASE_SCOPE_DIR, release_scope_matches
 from .result import Result
 from .state import parse_state
 from .subs import (
@@ -34,6 +34,7 @@ from .subs import (
     ROLE_REGISTRY,
     SUBS_REL,
     current_local_role_revision,
+    outbox_rel,
     package_identity,
     parse_manifest_file,
     parse_outbox,
@@ -176,12 +177,6 @@ def _refuse(code: str, detail: str = "", **extra) -> Result:
     return Result(ok=False, code=code, message=detail, data=extra)
 
 
-def _quick_hash(raw: bytes) -> str:
-    import hashlib
-
-    return hashlib.sha256(raw).hexdigest()[:16]
-
-
 def _source_identity(root: Path):
     try:
         from freshness import compute_source_identity
@@ -250,7 +245,10 @@ def _root_dependency_specs(root: Path) -> dict[str, tuple[Path, bool]]:
         add(base, "listing")
         add(f"{base}/READY", "tree")
     for rel in (
-        ".saipen/saitranslate/kitchen/OUTBOX.md",
+        # Canonical-when-present, legacy-only-when-absent: the same answer the
+        # validator gives, from the same helper, so crew evidence and gate
+        # findings can never name different files for one producer (T-313).
+        outbox_rel(root, "saitranslate"),
         ".saipen/kitchen/crew_epoch.json",
         ".saipen/kitchen/release_receipt.json",
         ".saipen/kitchen/crew_release_evidence.json",
@@ -1633,7 +1631,7 @@ def derive_crew_scope(
         else:
             if not fp.is_file():
                 return {}, f"crew scope path {rel} is missing"
-            if _quick_hash(fp.read_bytes()) != expected:
+            if not release_scope_matches(fp.read_bytes(), expected):
                 return (
                     {},
                     f"crew scope path {rel} changed after the owning "

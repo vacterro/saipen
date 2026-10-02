@@ -153,7 +153,7 @@ def _git_root_is_project(root: Path) -> bool:
         run = subprocess.run(
             ["git", "-C", os.fspath(root), "rev-parse", "--show-toplevel"],
             capture_output=True,
-            text=True,
+            text=True, encoding="utf-8",
             timeout=5,
             check=False,
         )

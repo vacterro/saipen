@@ -133,5 +133,119 @@ class NotAnEntryTests(unittest.TestCase):
         self.assertEqual(counters(state_of(root)), ("goal", 0, 0))
 
 
+class ContinuationIsNotAnEntryTests(unittest.TestCase):
+    """T-1566: a target-free continuation cannot preempt unfinished goal Work."""
+
+    def active(self):
+        root = spent_project(self, "goal", 1, 5)
+        code, first, text = cli(root, "start", TASK, "--json")
+        self.assertEqual(code, 0, text)
+        code, _payload, text = cli(root, "transition", "BUILD", "--json")
+        self.assertEqual(code, 0, text)
+        for step in ("goal_waves 0->1", "goal_tickets 0->1"):
+            code, _payload, text = cli(root, "checkpoint", "DEC", step, "--json")
+            self.assertEqual(code, 0, text)
+        code, _payload, text = cli(root, "status", "--json")
+        self.assertEqual(code, 0, text)
+        return root, first["ticket"]
+
+    def test_target_free_continuations_preserve_work_phase_and_budget(self):
+        from saipen_engine.board import parse_board
+
+        phrases = (
+            "continue", "keep improving", "go further",
+            "Please continue improving the protocol logic and closing holes to the end.",
+            "Хорошо, продолжи пожалуйста дальше улучшать логику протокола "
+            "и закрывать мерзкие дыры до конца, Опус :)",
+        )
+        for phrase in phrases:
+            with self.subTest(phrase=phrase):
+                root, work = self.active()
+                before = parse_board(codec.read_doc(root / ".saipen" / "BOARD.md"))
+                code, result, text = cli(root, "start", phrase, "--json")
+                self.assertEqual(code, 0, text)
+                self.assertEqual(result["ticket"], work, text)
+                self.assertTrue(result["resumed"], text)
+                self.assertEqual(result["phase"], "BUILD", text)
+                self.assertIsNone(result["parked"], text)
+                self.assertEqual(counters(state_of(root)), ("goal", 1, 1))
+                after = parse_board(codec.read_doc(root / ".saipen" / "BOARD.md"))
+                self.assertEqual(set(after["tickets"]), set(before["tickets"]))
+                self.assertEqual(after["tickets"][work]["section"], "## DOING")
+                # Retry of captured continuation must not create a second Work.
+                code, again, text = cli(root, "start", "--receipt", result["receipt"], "--json")
+                self.assertEqual(code, 0, text)
+                self.assertEqual(again["ticket"], work, text)
+
+    def test_a_concrete_target_after_continue_is_still_a_new_request(self):
+        for phrase in (
+            "continue, and add OAuth login", "keep improving the admission signer",
+            "go further: repair src/app.py", "continue improving the protocol; add retries",
+        ):
+            with self.subTest(phrase=phrase):
+                root, work = self.active()
+                code, result, text = cli(root, "start", phrase, "--json")
+                self.assertEqual(code, 0, text)
+                self.assertNotEqual(result["ticket"], work, text)
+                self.assertEqual(result["parked"]["ticket"], work, text)
+
+    def test_without_active_goal_there_is_no_work_to_continue(self):
+        root = project(self)
+        code, result, text = cli(root, "start", "keep improving", "--json")
+        self.assertEqual(code, 0, text)
+        self.assertFalse(result["resumed"], text)
+
+    def test_continuation_preview_matches_apply_and_writes_nothing(self):
+        for door in ("start", "user-request"):
+            with self.subTest(door=door):
+                root, work = self.active()
+                before = {
+                    p.relative_to(root): p.read_bytes() for p in root.rglob("*") if p.is_file()
+                }
+                code, result, text = cli(root, door, "keep improving", "--dry-run", "--json")
+                self.assertEqual(code, 0, text)
+                self.assertTrue(result["continuation"], text)
+                self.assertEqual(result["ticket"], work, text)
+                after = {
+                    p.relative_to(root): p.read_bytes() for p in root.rglob("*") if p.is_file()
+                }
+                self.assertEqual(after, before)
+                code, applied, text = cli(root, door, "keep improving", "--json")
+                self.assertEqual(code, 0, text)
+                self.assertEqual(applied["ticket"], work, text)
+
+    def test_explicit_acceptance_metadata_is_not_swallowed_as_continuation(self):
+        for door in ("start", "user-request"):
+            with self.subTest(door=door):
+                root, work = self.active()
+                code, result, text = cli(
+                    root, door, "continue", "--verify", "OAuth integration passes", "--json"
+                )
+                self.assertEqual(code, 0, text)
+                self.assertNotEqual(result["ticket"], work, text)
+
+    def test_helper_requires_an_executable_goal_without_independent_metadata(self):
+        from saipen_engine.entry import continuation_work
+
+        state = {"execution_intent": "goal", "task": "T-1", "phase": "BUILD"}
+        tickets = {"T-1": {"section": "## DOING"}}
+        self.assertEqual(continuation_work(state, tickets, "continue"), "T-1")
+        for change in ({"execution_intent": "converge"}, {"phase": "BLOCKED"}, {"task": None}):
+            self.assertIsNone(continuation_work({**state, **change}, tickets, "continue"))
+        self.assertIsNone(continuation_work(state, {"T-1": {"section": "## TODO"}}, "continue"))
+        for metadata in ({"needs": ["T-2"]}, {"supersedes": "SRC-001"}, {"verify": "new proof"}):
+            self.assertIsNone(continuation_work(state, tickets, "continue", **metadata))
+
+    def test_user_request_door_binds_continuation_without_forking_work(self):
+        root, work = self.active()
+        before = counters(state_of(root))
+        code, result, text = cli(root, "user-request", "keep improving", "--json")
+        self.assertEqual(code, 0, text)
+        self.assertEqual(result["ticket"], work, text)
+        self.assertEqual(state_of(root)["task"], work)
+        self.assertEqual(state_of(root)["phase"], "BUILD")
+        self.assertEqual(counters(state_of(root)), before)
+
+
 if __name__ == "__main__":
     unittest.main()

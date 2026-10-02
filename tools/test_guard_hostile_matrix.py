@@ -22,6 +22,7 @@ from pathlib import Path
 TOOLS = Path(__file__).resolve().parent
 if str(TOOLS) not in sys.path:
     sys.path.insert(0, str(TOOLS))
+from test_fixture_support import CURRENT_STYLE_CONTRACT  # noqa: E402
 
 from saipen_engine import guard_events  # noqa: E402
 from saipen_engine.admission import (  # noqa: E402
@@ -53,21 +54,22 @@ def setUpModule() -> None:
 #: them, which is the exact failure this list exists to prevent.
 _TEMP: list = retained_fixtures()
 
-STATE_TEMPLATE = """---
-phase: {phase}
-task: {task}
-next_action: "{next_action}"
-blocker: "{blocker}"
-transition_from: SHIP
-saipen_version: 7
-schema_version: 3
-last_event: 100
-style_contract: ded-4ae736e4
-mode: {mode}
-updated: 2026-09-12T00:00:00Z
-agent: {agent}
----
-"""
+STATE_TEMPLATE = (
+    '---\n'
+    'phase: {phase}\n'
+    'task: {task}\n'
+    'next_action: "{next_action}"\n'
+    'blocker: "{blocker}"\n'
+    'transition_from: SHIP\n'
+    'saipen_version: 7\n'
+    'schema_version: 3\n'
+    'last_event: 100\n'
+    'style_contract: ' + CURRENT_STYLE_CONTRACT + '\n'
+    'mode: {mode}\n'
+    'updated: 2026-09-12T00:00:00Z\n'
+    'agent: {agent}\n'
+    '---\n'
+)
 
 BOARD_TEMPLATE = """## DOING
 ## TODO

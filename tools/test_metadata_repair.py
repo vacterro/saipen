@@ -39,6 +39,7 @@ TOOLS = Path(__file__).resolve().parent
 ROOT = TOOLS.parent
 if str(TOOLS) not in sys.path:
     sys.path.insert(0, str(TOOLS))
+from test_fixture_support import CURRENT_STYLE_CONTRACT  # noqa: E402
 
 from saipen_engine import metadata_repair as mr_mod  # noqa: E402
 from saipen_engine import remediation  # noqa: E402
@@ -51,21 +52,22 @@ SCENARIO = ROOT / "tests" / "scenarios" / "stale-state-reconciliation" / ".saipe
 
 LEGACY_TOKEN = "FASTPROMPTER - SMART_20260908_0645"
 
-STATE = """---
-phase: DONE
-task: none
-next_action: "PHASE DONE"
-blocker: none
-transition_from: DONE
-saipen_version: 8
-schema_version: 3
-last_event: 2
-style_contract: ded-4ae736e4
-agent: tester
-mode: full
-updated: "2026-09-21T00:00:00Z"
----
-"""
+STATE = (
+    '---\n'
+    'phase: DONE\n'
+    'task: none\n'
+    'next_action: "PHASE DONE"\n'
+    'blocker: none\n'
+    'transition_from: DONE\n'
+    'saipen_version: 8\n'
+    'schema_version: 3\n'
+    'last_event: 2\n'
+    'style_contract: ' + CURRENT_STYLE_CONTRACT + '\n'
+    'agent: tester\n'
+    'mode: full\n'
+    'updated: "2026-09-21T00:00:00Z"\n'
+    '---\n'
+)
 
 LOG = (
     "- 21.09.26 00:00 [E-001] [T-900] RUN: historical build finished\n"

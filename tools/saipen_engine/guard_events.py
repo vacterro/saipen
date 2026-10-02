@@ -1255,7 +1255,7 @@ def _quoted_payload_tokens(command: str) -> list[str] | None:
 
 
 def _windows_path_tokens(command: str) -> list[str] | None:
-    """Tokens of a canonical line whose ONLY metacharacter is a literal `\`.
+    r"""Tokens of a canonical line whose ONLY metacharacter is a literal `\`.
 
     MEASURED 2026-09-17, twice over. BOOT names `saipen start --file <path>` as
     the transport for a request the shell cannot carry, T-1380 made the refusal

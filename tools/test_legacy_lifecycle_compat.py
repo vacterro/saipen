@@ -35,6 +35,7 @@ from pathlib import Path
 TOOLS = Path(__file__).resolve().parent
 if str(TOOLS) not in sys.path:
     sys.path.insert(0, str(TOOLS))
+from test_fixture_support import CURRENT_STYLE_CONTRACT  # noqa: E402
 
 from saipen import main as saipen_main  # noqa: E402
 from saipen_engine.board import parse_board  # noqa: E402
@@ -62,21 +63,22 @@ def setUpModule() -> None:
 
 _TEMPS: list[tempfile.TemporaryDirectory] = []
 
-STATE_TEMPLATE = """---
-phase: BUILD
-task: {task}
-next_action: "PHASE BUILD {task}"
-blocker: ""
-transition_from: PLAN
-saipen_version: 7
-schema_version: 3
-last_event: {last_event}
-style_contract: ded-4ae736e4
-mode: full
-updated: 2026-09-15T00:00:00Z
-agent: test-agent
----
-"""
+STATE_TEMPLATE = (
+    '---\n'
+    'phase: BUILD\n'
+    'task: {task}\n'
+    'next_action: "PHASE BUILD {task}"\n'
+    'blocker: ""\n'
+    'transition_from: PLAN\n'
+    'saipen_version: 7\n'
+    'schema_version: 3\n'
+    'last_event: {last_event}\n'
+    'style_contract: ' + CURRENT_STYLE_CONTRACT + '\n'
+    'mode: full\n'
+    'updated: 2026-09-15T00:00:00Z\n'
+    'agent: test-agent\n'
+    '---\n'
+)
 
 
 @contextlib.contextmanager

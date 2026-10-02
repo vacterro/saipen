@@ -39,6 +39,10 @@ class GlobalUserpersonTests(unittest.TestCase):
         )
         self.sub_project = self.base / "sub-project"
         shutil.copytree(ROOT / "tests" / "scenarios" / "saiui-adoption", self.sub_project)
+        # T-1555: the fixture carries the placeholder; the copy claims THIS install.
+        from test_fixture_support import restamp_live_style
+
+        restamp_live_style(self.sub_project / ".saipen")
 
     def tearDown(self) -> None:
         self.temp.cleanup()

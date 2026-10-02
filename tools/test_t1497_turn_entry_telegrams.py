@@ -2,8 +2,9 @@
 
 The first slice of the future gate "SAITELEMES AUTOMATIC AGENT TELEGRAMS": at
 turn entry `saipen continue --json` reports how many telegrams wait for this
-seat. It runs only when the operator configured a workspace and SAIMAIL is on
-PATH, it asks SAIMAIL for header-only unread rows, and it reports counts. A
+seat. It runs only when a workspace is bound (explicit environment value or
+the per-user default `saipen mail init` provisioned, T-1557) and SAIMAIL is
+on PATH, it asks SAIMAIL for header-only unread rows, and it reports counts. A
 telegram is data: nothing it says reaches the route, nothing is opened, and a
 broken or slow SAIMAIL is a state, never a failed `continue`.
 """
@@ -15,9 +16,12 @@ import os
 import re
 import shutil
 import stat
+import subprocess
 import sys
 import tempfile
 import unittest
+from contextlib import redirect_stdout
+from io import StringIO
 from pathlib import Path
 from unittest import mock
 
@@ -98,7 +102,14 @@ STATE = {"task": "T-7", "agent": "builder"}
 
 class TurnEntryReadTests(unittest.TestCase):
     def test_unconfigured_starts_no_process(self):
-        with mock.patch.dict(os.environ, {}, clear=False), mock.patch.object(
+        # T-1557: an uninitialized per-user default home is also "no binding",
+        # so the isolation points LOCALAPPDATA at an empty directory -- a host
+        # that really ran `saipen mail init` must not leak into this test.
+        empty_home = Path(tempfile.mkdtemp(prefix="saipen-t1497-home-"))
+        self.addCleanup(shutil.rmtree, empty_home, True)
+        with mock.patch.dict(
+            os.environ, {"LOCALAPPDATA": str(empty_home)}, clear=False
+        ), mock.patch.object(
             telegrams.subprocess, "run", side_effect=AssertionError("no process may start")
         ):
             os.environ.pop(telegrams.WORKSPACE_ENV, None)
@@ -140,6 +151,24 @@ class TurnEntryReadTests(unittest.TestCase):
         self.assertEqual(answer["state"], telegrams.STATE_OK, answer)
         self.assertFalse(answer["complete"])
 
+    def test_read_command_preserves_paths_with_spaces_in_a_real_shell(self):
+        fake = FakeSaimail(self)
+        fake.workspace = str(fake.dir / "mailbox with space")
+        project = fake.dir / "project with space"
+        with mock.patch.dict(os.environ, fake.env("ok")):
+            answer = telegrams.turn_entry(project, STATE)
+            self.assertEqual(answer["state"], telegrams.STATE_OK, answer)
+            run = subprocess.run(
+                answer["read_command"], shell=True, capture_output=True,
+                text=True, timeout=30,
+            )
+        self.assertEqual(run.returncode, 0, run.stderr)
+        self.assertEqual(
+            json.loads(fake.args_file.read_text(encoding="utf-8")),
+            ["saipen", "brief", "--project-root", str(project),
+             "--workspace", fake.workspace, "--seat", "builder"],
+        )
+
     def test_a_broken_or_slow_saimail_is_a_state(self):
         fake = FakeSaimail(self)
         for mode in ("fail", "garbage"):
@@ -158,7 +187,11 @@ class ContinueTests(unittest.TestCase):
     def test_continue_reports_telegrams_and_routes_exactly_as_without_them(self):
         # Two identical fresh projects: `continue` itself may move state, so
         # the comparison is between first answers, with and without telegrams.
-        with mock.patch.dict(os.environ, {}, clear=False):
+        empty_home = Path(tempfile.mkdtemp(prefix="saipen-t1497-home-"))
+        self.addCleanup(shutil.rmtree, empty_home, True)
+        with mock.patch.dict(
+            os.environ, {"LOCALAPPDATA": str(empty_home)}, clear=False
+        ):
             os.environ.pop(telegrams.WORKSPACE_ENV, None)
             code, plain, text = cli(Path(healthy(self)), "continue", "--json")
         self.assertEqual(code, 0, text)
@@ -176,6 +209,72 @@ class ContinueTests(unittest.TestCase):
 
         for key in ("code", "action", "ticket", "reason", "load", "next"):
             self.assertEqual(same(loaded.get(key)), same(plain.get(key)), key)
+
+
+class TelegramActorTests(unittest.TestCase):
+    """The suggested read must use the invocation's actor, including overrides."""
+
+    ACTORS = (
+        ("explicit-worker", "environment-worker", "explicit-worker"),
+        ("explicit-worker", "", "explicit-worker"),
+        (None, "environment-worker", "environment-worker"),
+        (None, "", "test-agent"),
+    )
+
+    def _assert_read_actor(self, payload, expected, fake):
+        self.assertEqual(payload["telegrams"]["state"], telegrams.STATE_OK, payload)
+        self.assertTrue(payload["telegrams"]["read_command"].endswith(f"--seat {expected}"))
+        asked = json.loads(fake.args_file.read_text(encoding="utf-8"))
+        self.assertEqual(asked[:4], ["--json", "saipen", "telegrams", "--workspace"])
+        self.assertFalse(set(asked) & {"open", "brief", "telegram", "send", "notify"})
+
+    def test_emit_preserves_explicit_environment_and_inherited_actor(self):
+        import saipen as saipen_cli
+
+        for explicit, environment, expected in self.ACTORS:
+            with self.subTest(explicit=explicit, environment=environment):
+                project = healthy(self)
+                fake = FakeSaimail(self)
+                before = {
+                    name: (project / ".saipen" / name).read_bytes()
+                    for name in ("STATE.md", "BOARD.md", "LOG.md")
+                }
+                output = StringIO()
+                env = {**fake.env(), "SAIPEN_AGENT": environment}
+                with mock.patch.dict(os.environ, env), mock.patch.object(
+                    saipen_cli, "_AGENT_OVERRIDE", explicit
+                ), mock.patch.object(
+                    saipen_cli, "_TELEGRAM_ROOT", project
+                ), mock.patch.object(
+                    saipen_cli, "_ENTRY_HINT_ROOT", None
+                ), redirect_stdout(output):
+                    saipen_cli._emit({"ok": True}, True)
+                self._assert_read_actor(json.loads(output.getvalue()), expected, fake)
+                for name, content in before.items():
+                    self.assertEqual((project / ".saipen" / name).read_bytes(), content)
+
+    def test_continue_preserves_explicit_environment_and_inherited_actor(self):
+        import saipen as saipen_cli
+
+        for explicit, environment, expected in self.ACTORS:
+            with self.subTest(explicit=explicit, environment=environment):
+                project = healthy(self)
+                fake = FakeSaimail(self)
+                output = StringIO()
+                argv = ["continue", "--json", "--project-root", str(project)]
+                if explicit is not None:
+                    argv.extend(("--agent", explicit))
+                env = {**fake.env(), "SAIPEN_AGENT": environment}
+                with mock.patch.dict(os.environ, env), mock.patch.object(
+                    saipen_cli, "_AGENT_OVERRIDE", None
+                ), mock.patch.object(
+                    saipen_cli, "_TELEGRAM_ROOT", None
+                ), mock.patch.object(
+                    saipen_cli, "_ENTRY_HINT_ROOT", None
+                ), redirect_stdout(output):
+                    code = saipen_cli.main(argv)
+                self.assertEqual(code, 0, output.getvalue())
+                self._assert_read_actor(json.loads(output.getvalue()), expected, fake)
 
 
 if __name__ == "__main__":

@@ -62,7 +62,8 @@ MAX_UNKNOWN_CHARS = 200
 
 _ATTEMPT_ID = r"A-\d{3,}"
 OPEN_RE = re.compile(
-    rf"^attempt ({_ATTEMPT_ID}) open(?:; supersedes ({_ATTEMPT_ID}))?$"
+    rf"^attempt ({_ATTEMPT_ID}) open(?:; supersedes ({_ATTEMPT_ID}))?"
+    r"(?:; provenance ([A-Za-z0-9_-]+\.[0-9a-f]{64}))?$"
 )
 _CLOSE_HEAD_RE = re.compile(
     rf"^attempt ({_ATTEMPT_ID}) close result ([a-z_]+) stop ([a-z_]+)"
@@ -93,7 +94,16 @@ def parse_attempt_text(text: str):
 
     m = OPEN_RE.match(stripped)
     if m:
-        return {"kind": "open", "id": m.group(1), "supersedes": m.group(2)}
+        record = {"kind": "open", "id": m.group(1), "supersedes": m.group(2)}
+        record["runtime_provenance"] = None
+        if m.group(3):
+            from .runtime.provenance import RuntimeProvenanceError, parse_runtime_provenance
+
+            try:
+                record["runtime_provenance"] = parse_runtime_provenance(m.group(3))
+            except RuntimeProvenanceError as exc:
+                raise ValueError(f"invalid runtime provenance: {exc}") from None
+        return record
 
     head = _CLOSE_HEAD_RE.match(stripped)
     if not head:
@@ -158,6 +168,12 @@ def parse_attempt_event(ev: dict):
     record["event"] = ev["event"]
     record["ticket"] = ev.get("ticket")
     record["agent"] = ev.get("agent")
+    provenance = record.get("runtime_provenance")
+    if provenance is not None and provenance.get("executor_identity") != record["agent"]:
+        return None, (
+            f"attempt {record['id']} runtime provenance executor_identity does not "
+            "match the canonical LOG agent seat"
+        )
     return record, None
 
 
@@ -202,6 +218,7 @@ def build_attempts(events) -> tuple[dict, list[str]]:
                 "evidence": [],
                 "unknown": None,
                 "supersedes": record.get("supersedes"),
+                "runtime_provenance": record.get("runtime_provenance"),
                 # CORE-005 (audit ed1f86e8): the CLOSE actor is distinct from
                 # the OPEN owner. A successor a2 recovering a stale predecessor
                 # episode closes under its own seat; replay identity must match

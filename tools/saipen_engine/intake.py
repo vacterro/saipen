@@ -191,7 +191,8 @@ def _looks_sensitive(text: str) -> bool:
     """Conservative metadata signal; never redacts or echoes the source."""
     return bool(
         re.search(
-            r"(?im)\b(?:api[_-]?key|access[_-]?token|token|password|secret)\b[ \t]*[:=][ \t]*(?!<redacted>|\*{3})\S+",
+            r"(?im)\b(?:api[_-]?key|access[_-]?token|token|password|secret)"
+            r"\b[ \t]*[:=][ \t]*(?!<redacted>|\*{3})\S+",
             text,
         )
     )
@@ -2417,7 +2418,39 @@ def _coverage_summary_from_ledger(receipt_id: str, ledger: dict) -> dict:
 
 def coverage_complete(root: Path | str, receipt_id: str) -> bool:
     summary = coverage_summary(root, receipt_id)
-    return summary["actionable"] > 0 and not summary["unresolved"]
+    if not summary["actionable"]:
+        # A request that specified nothing has nothing outstanding, and the
+        # `actionable > 0` conjunct made such a request PERMANENTLY
+        # unclosable: the only two routes out were to invent a requirement or
+        # to abandon the Work. Inventing one is exactly the guess PROTOCOL.md
+        # section 2 forbids -- a request that arrived looking like a spec and
+        # is not one. Measured: SRC-015's body is the three words "guard probe
+        # payload", its contract carries zero clauses, and the closure gate
+        # answered SOURCE_UNRESOLVED with an EMPTY unresolved list and suggested
+        # the one move it must never suggest (T-259).
+        ledger = _read_coverage(root, receipt_id)
+        recorded = ledger.get("requirements") if isinstance(ledger, dict) else None
+        if recorded:
+            # The derivation RAN and found nothing actionable in a body that
+            # was captured as carrying requirements -- non-actionable examples
+            # must not silently become that contract's fake completion. The
+            # gate stays red and points at `source req`, the honest repair.
+            return False
+        meta = _read_meta(root, receipt_id)
+        # T-259 lives for REQUESTS: a request that specified nothing owes
+        # nothing, and demanding one was the guess PROTOCOL.md section 2
+        # forbids. Audit-kind bodies are findings that owe a derivation, and a
+        # missing receipt answers elsewhere (SOURCE_RECEIPT_MISSING) -- here it
+        # is only the T-259 fixture shape: nothing captured, nothing asked.
+        # A real receipt that derived nothing owes its own clause: the
+        # lazy T-1379 discharge at finish seeds it from the operator text
+        # and settles it from the Work evidence, so the gate stays red
+        # until the request itself is answered rather than vacuously
+        # complete. Only the fixture shape -- a receipt that does not
+        # exist at all, answered elsewhere as SOURCE_RECEIPT_MISSING --
+        # keeps T-259's nothing-asked-nothing-owed.
+        return not meta
+    return not summary["unresolved"]
 
 
 def verify_integrity(root: Path | str, receipt_id: str) -> dict:
@@ -2791,6 +2824,20 @@ def boundary_gate(root: Path | str, work: str, boundary: str) -> dict:
             return _invalid_receipt_id(receipt_id) | {"boundary": boundary}
         meta = _read_meta(root, receipt_id) if receipt_id in index.get("active", {}) else None
         if not meta:
+            # A RETIRED source has no body left to re-read -- that is what
+            # retirement means -- so this gate has nothing to verify about it
+            # and refusing unconditionally stranded every Work that cites one.
+            # It passes when the retirement is complete (CLOSED, nothing
+            # unresolved), the same rule `work_closure_gate` uses, and it
+            # refuses otherwise. See T-354.
+            tomb = index.get("tombstones", {}).get(receipt_id)
+            if (
+                isinstance(tomb, dict)
+                and tomb.get("status") == CLOSED_STATUS
+                and int(tomb.get("unresolved") or 0) == 0
+            ):
+                checked.append(receipt_id)
+                continue
             return {
                 "ok": False,
                 "code": "SOURCE_RECEIPT_MISSING",
@@ -3048,7 +3095,11 @@ def _release_scope_trust(root: Path, work: str, source_identity: object) -> _Rel
 
 
 def _release_relevant_work(
-    root: Path, current_work: str | None, board_links: dict[str, set[str]]
+    root: Path,
+    current_work: str | None,
+    board_links: dict[str, set[str]],
+    *,
+    publish: bool = True,
 ) -> _ReleaseRelevance:
     """Work that may constrain publication of the CURRENT release artifact.
 
@@ -3057,6 +3108,11 @@ def _release_relevant_work(
     (transitively -- a contributing Work's own scope joins the artifact). With
     no named release target the old repository-wide scope is preserved, which
     keeps the fail-closed behaviour wherever a caller cannot name an artifact.
+
+    `publish=False` (T-1570) is a no-publish LOCAL closure: no artifact leaves
+    the repository, so no other Work's unreleased bytes can ride along and
+    another Work's missing or stale scope says nothing about it. Only the
+    current Work is relevant, and ITS scope must still be trusted.
     """
     if not current_work:
         return _ReleaseRelevance(frozenset(board_links))
@@ -3071,6 +3127,12 @@ def _release_relevant_work(
             f"cannot compute source identity for release relevance: {exc}",
         )
         return _ReleaseRelevance(frozenset({current_work}), current_work, scope)
+
+    if not publish:
+        own = _release_scope_trust(root, current_work, source_identity)
+        if own.status != "TRUSTED_SCOPE":
+            return _ReleaseRelevance(frozenset({current_work}), current_work, own)
+        return _ReleaseRelevance(frozenset({current_work}))
 
     scopes: dict[str, _ReleaseScopeTrust] = {}
     for work in sorted(set(board_links) | {current_work}):
@@ -3110,18 +3172,25 @@ def _route_release_refusal(root: Path, gate: dict, work: str, relevant) -> dict:
     return gate
 
 
-def release_gate(root: Path | str, current_work: str | None = None) -> dict:
+def release_gate(
+    root: Path | str, current_work: str | None = None, *, publish: bool = True
+) -> dict:
     """Fail ship closed while active source coverage that CAN affect this release
     artifact is unresolved.
 
     Two classes of gate are deliberately kept apart:
 
     * REPOSITORY AUTHORITY / INTEGRITY -- credentials, receipt/index integrity
-      and unprojected authoritative receipts -- stays global: a corrupt or
-      unowned source must freeze every publication.
+      and unprojected authoritative receipts -- stays global for publication.
+      Integrity remains global for local closure too.
     * WORK CLOSURE -- receipt coverage for a Work -- is scoped to Work whose
       recorded release scope overlaps the artifact being released. An unrelated
       parked Work no longer freezes an independent release.
+
+    `publish=False` is a no-publish local closure of `current_work` (T-1570):
+    integrity stays global and the current Work's own scope and receipts stay
+    fail-closed, but unrelated scope or unprojected coverage cannot block it:
+    no artifact leaves the repository. A target-free call remains global.
     """
     root = Path(root)
     credential_gate = _legacy_sensitive_source_gate(root)
@@ -3132,7 +3201,7 @@ def release_gate(root: Path | str, current_work: str | None = None) -> dict:
     except (OSError, ValueError) as exc:
         return {"ok": False, "code": "VALIDATION_FAILED", "detail": str(exc)}
     try:
-        relevance = _release_relevant_work(root, current_work, board_links)
+        relevance = _release_relevant_work(root, current_work, board_links, publish=publish)
     except (OSError, ValueError) as exc:
         return {"ok": False, "code": "SOURCE_CORRUPTION", "detail": str(exc)}
     if relevance.scope is not None:
@@ -3170,6 +3239,12 @@ def release_gate(root: Path | str, current_work: str | None = None) -> dict:
         integrity = verify_integrity(root, receipt_id)
         if not integrity["ok"]:
             return integrity | {"receipt": receipt_id}
+        if not publish and current_work:
+            # The current Work's complete linkage/coverage was checked above.
+            # Unowned or otherwise unrelated coverage cannot constrain a local
+            # closure: no source bytes leave the repository. Integrity remains
+            # global, including for these receipts.
+            continue
         linked = item.get("linked_work")
         if not linked:
             # UNPROJECTED authoritative receipt: no Work owns its closure, so

@@ -58,6 +58,10 @@ class ExplicitClaimFixture(unittest.TestCase):
         self.root = Path(self.tmp.name) / "project"
         self.root.mkdir()
         shutil.copytree(SCENARIO, self.root / ".saipen")
+        # T-1555: the fixture carries the placeholder; the copy claims THIS install.
+        from test_fixture_support import restamp_live_style
+
+        restamp_live_style(self.root / ".saipen")
         (self.root / ".saipen" / "USERPERSON.md").unlink(missing_ok=True)
         self.board = self.root / ".saipen" / "BOARD.md"
         # CORE-003 / SRC-026:R003: ticket identity comes from a canonical

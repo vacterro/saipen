@@ -466,6 +466,84 @@ def running_home() -> Path:
     return Path(__file__).resolve().parents[2]
 
 
+def install_content_identity(home: Path | None = None) -> str:
+    """A content identity for one SAIPEN install, over its EXECUTABLE surface.
+
+    T-4. `VERSION` alone cannot identify an install: two divergent trees on
+    one machine both report 8.0.1, so a version check always passes and
+    detects nothing. This hashes what actually executes -- `VERSION`, the
+    protocol documents under `saipen/`, and the engine under `tools/` --
+    which is exactly the surface a fix lands on.
+
+    Records are FRAMED (relative_path + byte_length + raw_bytes) in sorted
+    relative-path order, so a byte moving across a file boundary changes the
+    hash, and the value carries no absolute path: the same install copied to
+    a different directory fingerprints identically.
+
+    `missing-v1` is returned for an install with no readable surface, so an
+    unreadable tree is distinguishable from a real identity and never reads
+    as a match.
+    """
+    import hashlib
+
+    root = Path(home) if home is not None else running_home()
+    frames: list[bytes] = []
+    for pattern in ("VERSION", "saipen/*.md", "saipen/*.json", "tools/**/*.py"):
+        for path in sorted(root.glob(pattern)):
+            if not path.is_file():
+                continue
+            rel = path.relative_to(root).as_posix()
+            try:
+                blob = path.read_bytes()
+            except OSError:
+                continue
+            frames.append(rel.encode("utf-8") + b"\0" + str(len(blob)).encode("ascii") + b"\0" + blob)
+    if not frames:
+        return "missing-v1"
+    digest = hashlib.sha256()
+    for frame in frames:
+        digest.update(frame)
+    return "install-v1:" + digest.hexdigest()
+
+
+def running_home_mismatch_error(persisted_home: object) -> str | None:
+    """Why the RUNNING install is not the one STATE names, else None.
+
+    T-4. `persisted_home_error` proves the persisted pointer still resolves
+    to a usable install; it says nothing about WHICH install is answering.
+    Two divergent installs both pass it, and nothing in a receipt records
+    which engine produced the evidence, so the wrong tree can serve a
+    project indefinitely and stay invisible.
+
+    Judged only on an ABSOLUTE pointer, for the same reason
+    `persisted_home_error` is: an absent, empty or relative value carries no
+    machine-local binding to contradict, and a sub-instance legitimately
+    runs under a parent install. This is a GATE, not a routing refusal --
+    `saipen validate` reports it, so an ambiguous install fails conformance
+    loudly without breaking ordinary project routing.
+    """
+    if persisted_home is None or not str(persisted_home).strip():
+        return None
+    text = str(persisted_home).strip()
+    if not is_absolute_home(text):
+        return None
+    try:
+        named = Path(text).resolve()
+    except OSError:
+        return None
+    running = running_home()
+    if named == running:
+        return None
+    return (
+        f"the RUNNING install is {running} but STATE.saipen_home names {named} -- "
+        f"two divergent installs answer to the same VERSION "
+        f"({_read_running('VERSION') or 'unknown'}). Evidence produced now is "
+        f"attributable to the running one, not the named one. Run saipen "
+        f"through the install STATE names, or repoint the state with "
+        f"`saipen rebind-home`."
+    )
+
+
 def _read_running(*parts: str) -> str | None:
     path = running_home().joinpath(*parts)
     try:
@@ -500,11 +578,17 @@ def running_schema_version() -> int | None:
     return int(value) if isinstance(value, int) else None
 
 
-def running_style_token() -> str | None:
-    """The running install's STYLE.md voice marker (§ 1.2)."""
+def running_style_text() -> str | None:
+    """The running install's STYLE.md text, in either install layout."""
     text = _read_running("saipen", "STYLE.md")
     if text is None:
         text = _read_running("STYLE.md")
+    return text
+
+
+def running_style_token() -> str | None:
+    """The running install's STYLE.md voice marker (§ 1.2)."""
+    text = running_style_text()
     return style_contract_token(text) if text is not None else None
 
 

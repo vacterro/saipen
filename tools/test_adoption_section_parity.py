@@ -34,6 +34,7 @@ from pathlib import Path
 TOOLS = Path(__file__).resolve().parent
 if str(TOOLS) not in sys.path:
     sys.path.insert(0, str(TOOLS))
+from test_fixture_support import CURRENT_STYLE_CONTRACT  # noqa: E402
 
 from saipen_engine.board import detached_ticket_id_known_ids, parse_board  # noqa: E402
 from saipen_engine.log import read_history_snapshot  # noqa: E402
@@ -45,21 +46,22 @@ from saipen_engine.reconcile import (  # noqa: E402
 
 _TEMPS: list[tempfile.TemporaryDirectory] = []
 
-STATE = """---
-phase: BUILD
-task: T-500
-next_action: "PHASE BUILD T-500"
-blocker: ""
-transition_from: PLAN
-saipen_version: 7
-schema_version: 3
-last_event: 3
-style_contract: ded-4ae736e4
-mode: full
-updated: 2026-09-15T00:00:00Z
-agent: test-agent
----
-"""
+STATE = (
+    '---\n'
+    'phase: BUILD\n'
+    'task: T-500\n'
+    'next_action: "PHASE BUILD T-500"\n'
+    'blocker: ""\n'
+    'transition_from: PLAN\n'
+    'saipen_version: 7\n'
+    'schema_version: 3\n'
+    'last_event: 3\n'
+    'style_contract: ' + CURRENT_STYLE_CONTRACT + '\n'
+    'mode: full\n'
+    'updated: 2026-09-15T00:00:00Z\n'
+    'agent: test-agent\n'
+    '---\n'
+)
 
 # T-500 is allocated by a real structured event. T-501..T-504 are detached
 # hand-injected records, one in each remaining section, so the fixture covers

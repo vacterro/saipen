@@ -20,6 +20,7 @@ TOOLS = Path(__file__).resolve().parent
 ROOT = TOOLS.parent
 if str(TOOLS) not in sys.path:
     sys.path.insert(0, str(TOOLS))
+from test_fixture_support import CURRENT_STYLE_CONTRACT  # noqa: E402
 
 from saipen_engine.controls import (  # noqa: E402
     confirm_cut,
@@ -109,7 +110,7 @@ class ControlFixture(unittest.TestCase):
             "saipen_version: 7\n"
             "schema_version: 3\n"
             "last_event: 1\n"
-            "style_contract: ded-4ae736e4\n"
+            'style_contract: ' + CURRENT_STYLE_CONTRACT + '\n'
             f'saipen_home: "{str(ROOT).replace(chr(92), chr(92) * 2)}"\n'
             "agent: tester\n"
             "requires:\n  - filesystem\n  - python\n"

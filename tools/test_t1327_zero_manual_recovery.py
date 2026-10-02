@@ -32,6 +32,7 @@ TOOLS = Path(__file__).resolve().parent
 REPO = TOOLS.parent
 if str(TOOLS) not in sys.path:
     sys.path.insert(0, str(TOOLS))
+from test_fixture_support import CURRENT_STYLE_CONTRACT  # noqa: E402
 
 from saipen_engine import runtime_bootstrap as rb  # noqa: E402
 from saipen_engine.board import MAX_LIVE_RECORD_CHARS  # noqa: E402
@@ -114,7 +115,7 @@ _TWO_GENERATION_STATE = (
     "saipen_version: 7\n"
     "schema_version: 3\n"
     "last_event: 2\n"
-    "style_contract: ded-4ae736e4\n"
+    'style_contract: ' + CURRENT_STYLE_CONTRACT + '\n'
     "agent: test-agent\n"
     "mode: full\n"
     "updated: 2026-09-13T00:00:00Z\n"

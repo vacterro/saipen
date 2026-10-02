@@ -175,7 +175,7 @@ def probe_gpu(timeout: float = 5.0) -> dict | None:
                 "--format=csv,noheader,nounits",
             ],
             capture_output=True,
-            text=True,
+            text=True, encoding="utf-8",
             timeout=timeout,
             check=False,
         )

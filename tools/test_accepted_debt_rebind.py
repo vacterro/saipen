@@ -38,7 +38,7 @@ from saipen_engine.journal import (  # noqa: E402
     validate_mutation_request,
     verify_accepted_debt,
 )
-from test_hermetic_env import hermetic_env, isolate_host_session  # noqa: E402
+from test_hermetic_env import isolate_host_session  # noqa: E402
 
 SCENARIO = ROOT / "tests" / "scenarios" / "userperson-valid" / ".saipen"
 AD_DIR = ".saipen/recovery/conformance/accepted_debt"
@@ -74,7 +74,16 @@ def _cas(operation: str, path: str) -> dict:
         "probe",
         "probe-identity",
         "0" * 64,
-        [{"path": path, "role": "report", "action": "write", "content": "{}", "before_hash": "", "after_hash": "0" * 64}],
+        [
+            {
+                "path": path,
+                "role": "report",
+                "action": "write",
+                "content": "{}",
+                "before_hash": "",
+                "after_hash": "0" * 64,
+            }
+        ],
         preconditions={},
     )
 
@@ -86,6 +95,10 @@ class RebindFixture(unittest.TestCase):
         self.root = Path(self._tmp.name) / "project"
         self.root.mkdir()
         shutil.copytree(SCENARIO, self.root / ".saipen")
+        # T-1555: the fixture carries the placeholder; the copy claims THIS install.
+        from test_fixture_support import restamp_live_style
+
+        restamp_live_style(self.root / ".saipen")
         (self.root / ".saipen" / "LOG.md").write_text(LOG_SEED, encoding="utf-8")
         state = self.root / ".saipen" / "STATE.md"
         state.write_text(
@@ -97,7 +110,9 @@ class RebindFixture(unittest.TestCase):
     def _register(self, events: list[str], authority: str = "SRC-047") -> dict:
         from saipen_engine.accepted_debt import register
 
-        result = register(self.root, agent="probe", events=events, reason=REASON, authority=authority)
+        result = register(
+            self.root, agent="probe", events=events, reason=REASON, authority=authority
+        )
         self.assertTrue(result.get("ok"), result)
         return result
 
@@ -141,7 +156,9 @@ class RebindFixture(unittest.TestCase):
 
     def test_rebind_refuses_an_empty_reason(self) -> None:
         self._register(["E-003"])
-        done = rebind(self.root, "AD-000001", agent="probe", reason="   ", expected_before=_sha(self.ad_path))
+        done = rebind(
+            self.root, "AD-000001", agent="probe", reason="   ", expected_before=_sha(self.ad_path)
+        )
         self.assertFalse(done["ok"], done)
         self.assertIn("reason is required", done["detail"])
 
@@ -153,13 +170,18 @@ class RebindFixture(unittest.TestCase):
 
     def test_rebind_refuses_a_stale_expected_before(self) -> None:
         self._register(["E-003"])
-        done = rebind(self.root, "AD-000001", agent="probe", reason="rotate", expected_before="f" * 64)
+        done = rebind(
+            self.root, "AD-000001", agent="probe", reason="rotate", expected_before="f" * 64
+        )
         self.assertFalse(done["ok"], done)
         self.assertEqual(done["code"], "STALE_PRECONDITION")
 
     def test_rebind_is_a_noop_when_the_evidence_already_resolves(self) -> None:
         self._register(["E-003"])
-        done = rebind(self.root, "AD-000001", agent="probe", reason="rotate", expected_before=_sha(self.ad_path))
+        done = rebind(
+            self.root, "AD-000001", agent="probe", reason="rotate",
+            expected_before=_sha(self.ad_path),
+        )
         self.assertFalse(done["ok"], done)
         self.assertEqual(done["code"], "ACCEPTED_DEBT_REBIND_NOOP")
 
@@ -190,19 +212,26 @@ class RebindFixture(unittest.TestCase):
         self.assertIn("accepted_debt.rebind", after["journal_op_id"])
         # The journalised receipt carries the closed policy, not "none".
         receipt = json.loads(
-            (self.root / ".saipen" / "recovery" / "settled" / after["journal_op_id"] / "operation.json").read_text(
-                encoding="utf-8"
-            )
+            (
+                self.root / ".saipen" / "recovery" / "settled" / after["journal_op_id"]
+                / "operation.json"
+            ).read_text(encoding="utf-8")
         )
         self.assertEqual(receipt["operation"], "accepted_debt.rebind")
         self.assertEqual(receipt["verification_policy"], "accepted_debt")
-        self.assertEqual(receipt["targets"][0]["before_hash"], _sha.__self__ if False else receipt["targets"][0]["before_hash"])
+        self.assertEqual(
+            receipt["targets"][0]["before_hash"],
+            _sha.__self__ if False else receipt["targets"][0]["before_hash"],
+        )
 
     def test_rebound_record_passes_the_semantic_verifier(self) -> None:
         self._register(["E-003"])
         self._rotate_shard()
         self.assertTrue(
-            rebind(self.root, "AD-000001", agent="probe", reason="rotate", expected_before=_sha(self.ad_path))["ok"]
+            rebind(
+                self.root, "AD-000001", agent="probe", reason="rotate",
+                expected_before=_sha(self.ad_path),
+            )["ok"]
         )
         errors = verify_accepted_debt(
             self.root, [{"path": f"{AD_DIR}/AD-000001.json", "action": "write"}]
@@ -216,12 +245,17 @@ class RebindFixture(unittest.TestCase):
             self.root, [{"path": f"{AD_DIR}/AD-000001.json", "action": "write"}]
         )
         self.assertTrue(errors, "a rotated-shard record must be reported")
-        self.assertTrue(any("record cites" in e or "no longer resolves" in e for e in errors), errors)
+        self.assertTrue(
+            any("record cites" in e or "no longer resolves" in e for e in errors), errors
+        )
 
     def test_rebind_cannot_widen_the_accepted_set(self) -> None:
         self._register(["E-003"])
         self._rotate_shard()
-        rebind(self.root, "AD-000001", agent="probe", reason="rotate", expected_before=_sha(self.ad_path))
+        rebind(
+            self.root, "AD-000001", agent="probe", reason="rotate",
+            expected_before=_sha(self.ad_path),
+        )
         after = json.loads(self.ad_path.read_text(encoding="utf-8"))
         self.assertEqual(after["accepted_missing_events"], ["E-3"])
 
@@ -235,14 +269,17 @@ class RebindFixture(unittest.TestCase):
             "not a log line at all\n", encoding="utf-8"
         )
         done = rebind(
-            self.root, "AD-000001", agent="probe", reason="rotate", expected_before=_sha(self.ad_path)
+            self.root, "AD-000001", agent="probe", reason="rotate",
+            expected_before=_sha(self.ad_path),
         )
         self.assertFalse(done["ok"], done)
         self.assertEqual(done["code"], "VALIDATION_FAILED")
         self.assertIn("no longer parse as LOG lines", done["detail"])
         # A refused rebind leaves the record byte-identical.
         after = json.loads(self.ad_path.read_text(encoding="utf-8"))
-        self.assertEqual([e["file"] for e in after["evidence"]], [".saipen/LOG.md", ".saipen/LOG.md"])
+        self.assertEqual(
+            [e["file"] for e in after["evidence"]], [".saipen/LOG.md", ".saipen/LOG.md"]
+        )
         self.assertNotIn("rebind_reason", after)
 
 

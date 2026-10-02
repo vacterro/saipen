@@ -200,6 +200,15 @@ def declare_store(
     lock_path = root / ".saipen" / "locks" / "storage.lock"
     with file_writer_lock(lock_path, root):
         current = load_stores(root)
+        if (
+            any(store["class"] == "DURABLE" for store in current["stores"].values())
+            and not (root / ".saipen" / REGISTRY_FILE).is_file()
+        ):
+            raise StoragePolicyError(
+                "STORAGE_REGISTRY_MISSING",
+                "declared DURABLE stores have lost their canonical registry; "
+                "inventory surviving objects and provenance before recovery",
+            )
         old = current["stores"].get(name)
         if old is not None and old != entry:
             raise StoragePolicyError(

@@ -23,6 +23,7 @@ from unittest.mock import patch
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "tools"))
+from test_fixture_support import CURRENT_STYLE_CONTRACT  # noqa: E402
 
 from saipen_engine import automation  # noqa: E402
 from saipen_engine.board import parse_board  # noqa: E402
@@ -72,7 +73,7 @@ def _state(
         "saipen_version: 7\n"
         "schema_version: 3\n"
         "last_event: 1\n"
-        "style_contract: ded-4ae736e4\n"
+        'style_contract: ' + CURRENT_STYLE_CONTRACT + '\n'
         "agent: probe\n"
         "mode: full\n"
         "updated: 2026-09-06T00:00:00Z\n"
@@ -92,6 +93,10 @@ class AutomationFixture(unittest.TestCase):
         self.root = Path(self.tmp.name) / "project"
         self.root.mkdir()
         shutil.copytree(SCENARIO, self.root / ".saipen")
+        # T-1555: the fixture carries the placeholder; the copy claims THIS install.
+        from test_fixture_support import restamp_live_style
+
+        restamp_live_style(self.root / ".saipen")
         (self.root / ".saipen" / "USERPERSON.md").unlink(missing_ok=True)
         self.config = Path(self.tmp.name) / "user-config"
         self.env = patch.dict(os.environ, {"SAIPEN_USER_CONFIG_HOME": str(self.config)})

@@ -39,6 +39,22 @@ class CanonicalResponseFacts(unittest.TestCase):
             surface("WAIT -- init valmis; phase PLAN", operator_action="Anna eesmärk."),
             current_phase="PLAN", operator_due=True,
         ), [])
+        for phase in ("PLAN", "DONE", "BLOCKED"):
+            with self.subTest(real_wait=phase):
+                self.assertEqual(RS.response_errors(
+                    surface("WAIT -- inimotsus vajalik", operator_action="Anna otsus."),
+                    current_phase=phase, operator_due=True,
+                ), [])
+        self.assertEqual(RS.response_errors(
+            surface("WAIT T-1567", operator_action="Anna otsus."),
+            **context, operator_due=True,
+        ), [])
+        for status in ("WAIT -- phase DONE T-1567", "WAIT VERIFY DONE T-1567"):
+            with self.subTest(contradictory_wait=status):
+                self.assertTrue(RS.response_errors(
+                    surface(status, operator_action="Anna otsus."),
+                    **context, operator_due=True,
+                ))
 
     def test_terminal_phases_are_bound_too(self):
         for phase, bad in (("DONE", "VERIFY"), ("BLOCKED", "DONE")):
@@ -102,6 +118,35 @@ class CanonicalResponseFacts(unittest.TestCase):
                     capture_output=True, timeout=60,
                 )
                 self.assertEqual(proc.returncode, expected, proc.stdout + proc.stderr)
+
+    def test_public_wait_uses_canonical_human_obligation_with_a_binding_blocker(self):
+        for category, expected_due in (("manual-verify", True), ("blocked", False)):
+            project = fresh_project(
+                next_action=f"WAIT: {category} -- await the required decision",
+                blocker="HUMAN_DECISION -- choose disposition",
+            )
+            status = subprocess.run(
+                [sys.executable, str(TOOLS / "saipen.py"), "status", "--json",
+                 "--project-root", str(project)], encoding="utf-8",
+                capture_output=True, timeout=60,
+            )
+            self.assertEqual(status.returncode, 0, status.stdout + status.stderr)
+            facts = json.loads(status.stdout)
+            self.assertEqual(facts["automation"]["operator_action_due"], expected_due)
+            validation = facts["conformance_status"]["status"]
+            for phase, expected in (("", 0 if expected_due else 1), ("VERIFY", 1)):
+                with self.subTest(category=category, claimed_phase=phase):
+                    text = surface(
+                        "WAIT" + (f" -- phase {phase}" if phase else ""),
+                        "HUMAN_DECISION -- choose disposition", validation, "Anna otsus.",
+                    )
+                    checked = subprocess.run(
+                        [sys.executable, str(TOOLS / "saipen.py"), "response", "check",
+                         "--stdin", "--classify", "--auto-eligibility", "--json",
+                         "--project-root", str(project)], input=text, encoding="utf-8",
+                        capture_output=True, timeout=60,
+                    )
+                    self.assertEqual(checked.returncode, expected, checked.stdout + checked.stderr)
 
 
 if __name__ == "__main__":

@@ -470,7 +470,7 @@ def gate_h_semantic_validation(extract_dir: Path) -> bool:
         ],
         cwd=str(extract_dir),
         capture_output=True,
-        text=True,
+        text=True, encoding="utf-8",
         timeout=120,
     )
     if r.returncode != 0:
@@ -489,7 +489,7 @@ def gate_h_semantic_validation(extract_dir: Path) -> bool:
         [sys.executable, str(validator), "--project-root", str(extract_dir)],
         cwd=str(extract_dir),
         capture_output=True,
-        text=True,
+        text=True, encoding="utf-8",
         timeout=600,
     )
     output = r.stdout + r.stderr
@@ -514,7 +514,7 @@ def gate_h_semantic_validation(extract_dir: Path) -> bool:
             [sys.executable, str(saipen_cli), cmd, "--project-root", str(extract_dir), "--json"],
             cwd=str(extract_dir),
             capture_output=True,
-            text=True,
+            text=True, encoding="utf-8",
             timeout=120,
         )
         if r.returncode != 0:
@@ -554,7 +554,7 @@ def gate_h_semantic_validation(extract_dir: Path) -> bool:
         ],
         cwd=str(extract_dir),
         capture_output=True,
-        text=True,
+        text=True, encoding="utf-8",
         timeout=120,
     )
 

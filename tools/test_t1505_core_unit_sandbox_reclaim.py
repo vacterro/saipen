@@ -14,6 +14,7 @@ saiwiki kitchen clone. These controls hold the three parts of the repair:
 
 from __future__ import annotations
 
+import contextlib
 import json
 import os
 import shutil
@@ -24,6 +25,7 @@ import tempfile
 import time
 import unittest
 from pathlib import Path
+from unittest import mock
 
 TOOLS = Path(__file__).resolve().parent
 if str(TOOLS) not in sys.path:
@@ -172,34 +174,85 @@ class RunFamilyLeavesNothingTests(unittest.TestCase):
     """A real (small) run through `run_family`, whole and sharded."""
 
     def run_small(self, jobs: int) -> tuple[dict, list[str]]:
-        temp = Path(tempfile.gettempdir())
-        before = {p.name for p in temp.glob(core_unit.SANDBOX_PREFIX + "*")}
+        created: list[Path] = []
+        new_sandbox_root = core_unit.new_sandbox_root
+
+        def track_sandbox() -> Path:
+            sandbox = new_sandbox_root()
+            created.append(sandbox)
+            self.addCleanup(core_unit.reclaim, sandbox)
+            return sandbox
+
         small = TestFamily(
             core_unit.FAMILY_NAME,
             (sys.executable, "-B", "-m", "unittest", "discover", "-s", "tools",
              "-p", "test_hermetic_env.py", "-v"),
             600,
         )
-        original = core_unit.family
-        core_unit.family = lambda: small
-        try:
+        with contextlib.ExitStack() as patches:
+            patches.enter_context(mock.patch.object(core_unit, "family", return_value=small))
+            patches.enter_context(
+                mock.patch.object(core_unit, "new_sandbox_root", side_effect=track_sandbox)
+            )
             run = core_unit.run_family(TOOLS.parent, jobs=jobs)
-        finally:
-            core_unit.family = original
-        after = {p.name for p in temp.glob(core_unit.SANDBOX_PREFIX + "*")}
-        return run, sorted(after - before)
+        self.assertEqual(len(created), jobs, "every run/shard must have a tracked sandbox")
+        # Other core-unit runs share the temp root. Inspect only this invocation's
+        # creations, independently of its self-reported sandboxes_leaked result.
+        return run, sorted(sandbox.name for sandbox in created if sandbox.exists())
+
+    def assert_run_leaves_no_sandbox(self, jobs: int) -> None:
+        run, left = self.run_small(jobs)
+        self.assertEqual(run["status"], "PASS", run)
+        self.assertEqual(left, [])
+        self.assertEqual(run["sandboxes_leaked"], [])
 
     def test_a_whole_run_leaves_no_sandbox(self):
-        run, left = self.run_small(1)
-        self.assertEqual(run["status"], "PASS", run)
-        self.assertEqual(left, [])
-        self.assertEqual(run["sandboxes_leaked"], [])
+        self.assert_run_leaves_no_sandbox(1)
 
     def test_a_sharded_run_leaves_no_sandbox(self):
-        run, left = self.run_small(2)
-        self.assertEqual(run["status"], "PASS", run)
-        self.assertEqual(left, [])
-        self.assertEqual(run["sandboxes_leaked"], [])
+        self.assert_run_leaves_no_sandbox(2)
+
+    def test_unrelated_sandboxes_before_and_during_a_run_are_not_its_leaks(self):
+        new_foreign_sandbox = core_unit.new_sandbox_root
+        for jobs in (1, 2):
+            with self.subTest(jobs=jobs):
+                foreign = [new_foreign_sandbox()]
+                self.addCleanup(core_unit.reclaim, foreign[0])
+
+                def run_with_foreign_sandbox(_root, *, jobs):
+                    # Bypass the tested invocation's factory, as another process
+                    # creating a sandbox in the same temp directory would do.
+                    foreign.append(new_foreign_sandbox())
+                    self.addCleanup(core_unit.reclaim, foreign[-1])
+                    for _ in range(jobs):
+                        sandbox = core_unit.new_sandbox_root()
+                        self.assertTrue(core_unit.reclaim(sandbox))
+                    return {"status": "PASS", "sandboxes_leaked": []}
+
+                with mock.patch.object(
+                    core_unit, "run_family", side_effect=run_with_foreign_sandbox
+                ):
+                    self.assert_run_leaves_no_sandbox(jobs)
+                self.assertTrue(all(sandbox.exists() for sandbox in foreign))
+
+    def test_an_unreported_own_leak_is_still_detected_including_the_last_shard(self):
+        for jobs in (1, 2):
+            with self.subTest(jobs=jobs):
+                created: list[Path] = []
+
+                def run_with_unreported_leak(_root, *, jobs):
+                    created.extend(core_unit.new_sandbox_root() for _ in range(jobs))
+                    for sandbox in created[:-1]:
+                        self.assertTrue(core_unit.reclaim(sandbox))
+                    return {"status": "PASS", "sandboxes_leaked": []}
+
+                leak = mock.patch.object(
+                    core_unit, "run_family", side_effect=run_with_unreported_leak
+                )
+                with leak, self.assertRaises(AssertionError) as caught:
+                    self.assert_run_leaves_no_sandbox(jobs)
+                self.assertIn(created[-1].name, str(caught.exception))
+                self.assertTrue(created[-1].exists())
 
 
 if __name__ == "__main__":

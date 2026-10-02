@@ -42,6 +42,7 @@ repository. The full finding set must agree across layouts for both.
 from __future__ import annotations
 
 import json
+import os
 import shutil
 import subprocess
 import sys
@@ -53,6 +54,7 @@ HOME = Path(__file__).resolve().parent.parent
 TOOLS = HOME / "tools"
 if str(TOOLS) not in sys.path:
     sys.path.insert(0, str(TOOLS))
+from test_fixture_support import CURRENT_STYLE_CONTRACT  # noqa: E402
 
 from saipen_engine.paths import identity_file_content, new_project_lineage  # noqa: E402
 
@@ -68,21 +70,23 @@ def setUpModule() -> None:
 _VALIDATOR = "tools/validate.py"
 _CAPTURE_TIMEOUT = 1800
 
-NEUTRAL_STATE = """---
-phase: SCOUT
-task: none
-next_action: "PHASE SCOUT"
-blocker: ""
-transition_from: DONE
-saipen_version: 7
-schema_version: 3
-last_event: 1
-style_contract: ded-4ae736e4
-mode: full
-updated: 2026-09-15T00:00:00Z
-agent: test-agent
----
-"""
+NEUTRAL_STATE = (
+    '---\n'
+    'phase: SCOUT\n'
+    'task: none\n'
+    'next_action: "PHASE SCOUT"\n'
+    'blocker: ""\n'
+    'transition_from: DONE\n'
+    'saipen_version: 7\n'
+    'schema_version: 3\n'
+    'last_event: 1\n'
+    'style_contract: '
+    + CURRENT_STYLE_CONTRACT +
+    '\nmode: full\n'
+    'updated: 2026-09-15T00:00:00Z\n'
+    'agent: test-agent\n'
+    '---\n'
+)
 
 NEUTRAL_BOARD = """## DOING
 ## TODO
@@ -249,9 +253,29 @@ class InstalledValidatorLayoutParityTests(unittest.TestCase):
             self._assert_parity(tmp, _neutral_project(tmp / "project"), "neutral")
 
     def test_layouts_agree_on_the_live_repository(self):
-        """The same parity against a real, fully populated project."""
+        """The same parity against a real, fully populated project.
+
+        The project under test is a FROZEN copy of the live home. Running the
+        two layouts against the live tree itself raced its own source
+        freshness: the validator fingerprints the project while sibling
+        activity (a family run's own checkpoint writes, a co-seat's edits)
+        touches the same tree, and the git-delta listing legitimately refused
+        a tree that changed mid-read -- red under load, green standalone,
+        proving nothing about layout parity. A frozen copy is the only input
+        whose immutability the comparison can rely on.
+        """
         with tempfile.TemporaryDirectory(prefix="saipen-layout-live-") as raw:
-            self._assert_parity(Path(raw), HOME, "live")
+            tmp = Path(raw)
+            frozen = tmp / "live-project"
+            shutil.copytree(
+                HOME,
+                frozen,
+                ignore=shutil.ignore_patterns(
+                    ".git", "__pycache__", "*.pyc", "node_modules",
+                    ".saipen/cache", ".saipen/locks", ".saipen/kitchen",
+                ),
+            )
+            self._assert_parity(tmp, frozen, "live")
 
     def test_packaging_metadata_at_the_home_root_cannot_reach_the_oracle(self):
         """The hermetic seal, proven rather than assumed.
@@ -274,6 +298,89 @@ class InstalledValidatorLayoutParityTests(unittest.TestCase):
             # repository clone, which is what gates the closed-set check.
             self.assertTrue((source / "saipen" / "RFC.md").is_file())
             self.assertFalse((flat / "saipen").exists())
+
+
+#: A root-file name in NO ANSI code page (box-drawing glyphs). A host hook that
+#: runs its payload as commands writes exactly this kind of stray when the text
+#: it read was Cyrillic and the console decoded it as cp866 (T-1475): four
+#: letters become eight glyphs that cp1251, cp1252 and ASCII all refuse.
+NON_LOCALE_STRAY = "╨╛╨┤╨╕╨╜"
+
+
+@unittest.skipUnless(
+    (HOME / "saipen" / "MANIFEST.json").is_file(),
+    "source home manifest is required to build the layout fixtures",
+)
+class RootStrayLocaleTests(unittest.TestCase):
+    """T-1558: a stray root file must FAIL the validator, never crash it.
+
+    `[root-file-set]` pipes the root names into `git check-ignore --stdin`. Text
+    mode encodes that pipe with the LOCALE (cp1251 on the operator's Windows
+    host), so a stray outside the locale raised UnicodeEncodeError out of the
+    validator: no findings artifact, `FINDINGS_CAPTURE_FAILED` on every
+    pre-BUILD baseline, and the FAIL that names the writing hook (T-1475) was
+    unreachable. Every other test here passes `PYTHONUTF8=1`, which is the
+    local environment answering a global question.
+    """
+
+    @staticmethod
+    def _narrow_locale_env() -> dict:
+        env = {
+            key: value
+            for key, value in os.environ.items()
+            if key not in {"PYTHONUTF8", "PYTHONIOENCODING", "LC_ALL", "LANG"}
+        }
+        # Windows: the ANSI code page decides. POSIX: the C locale is ASCII.
+        env.update(
+            {"PYTHONUTF8": "0", "PYTHONCOERCECLOCALE": "0", "LC_ALL": "C"}
+        )
+        return env
+
+    def test_non_locale_root_stray_is_reported_not_a_crash(self):
+        with tempfile.TemporaryDirectory(prefix="saipen-stray-home-") as raw:
+            tmp = Path(raw)
+            home = tmp / "home"
+            home.mkdir()
+            _build_home(home, flatten=False)
+            stray = home / NON_LOCALE_STRAY
+            try:
+                stray.write_text("", encoding="utf-8")
+            except OSError as exc:  # a filesystem that cannot hold the name
+                self.skipTest(f"filesystem refuses the stray name: {exc}")
+            project = _neutral_project(tmp / "project")
+            out_path = tmp / "findings.json"
+            completed = subprocess.run(
+                [
+                    sys.executable,
+                    str(home / _VALIDATOR),
+                    "--gate",
+                    "core",
+                    "--project-root",
+                    str(project),
+                    "--findings-json",
+                    str(out_path),
+                    "--no-receipt",
+                ],
+                cwd=str(project),
+                capture_output=True,
+                encoding="utf-8",
+                errors="replace",
+                env=self._narrow_locale_env(),
+                timeout=_CAPTURE_TIMEOUT,
+            )
+            self.assertNotIn(
+                "UnicodeEncodeError",
+                completed.stderr,
+                "the validator crashed on a root name outside the locale:\n"
+                + completed.stderr[-1500:],
+            )
+            self.assertTrue(
+                out_path.is_file(),
+                "no findings artifact: a stray root file must be a finding, "
+                f"not a crash (exit={completed.returncode})",
+            )
+            self.assertIn("[root-file-set]", completed.stdout)
+            self.assertIn(NON_LOCALE_STRAY, completed.stdout)
 
 
 if __name__ == "__main__":

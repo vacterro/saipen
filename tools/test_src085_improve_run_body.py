@@ -24,6 +24,7 @@ from pathlib import Path
 TOOLS = Path(__file__).resolve().parent
 if str(TOOLS) not in sys.path:
     sys.path.insert(0, str(TOOLS))
+from test_fixture_support import CURRENT_STYLE_CONTRACT  # noqa: E402
 
 import improve  # noqa: E402
 from saipen_engine.paths import identity_file_content, new_project_lineage  # noqa: E402
@@ -51,7 +52,7 @@ class RunBodyContractTests(unittest.TestCase):
             '---\nphase: DONE\ntask: none\nnext_action: "saipen continue"\n'
             'blocker: ""\ntransition_from: SHIP\n'
             "saipen_version: 8\nschema_version: 3\n"
-            "last_event: 900\nstyle_contract: ded-4ae736e4\n"
+            'last_event: 900\nstyle_contract: ' + CURRENT_STYLE_CONTRACT + '\n'
             'saipen_home: "."\nagent: probe\nmode: full\n'
             "updated: 2026-09-20T00:00:00Z\n---\n",
             encoding="utf-8",
@@ -133,6 +134,183 @@ class RunBodyContractTests(unittest.TestCase):
         self.assertTrue(improve._run_identity_problems([1, 1]))
         self.assertTrue(improve._run_identity_problems([2]))
         self.assertTrue(improve._run_identity_problems([2, 1]))
+
+
+
+class UnevidencedRunBodyTests(RunBodyContractTests):
+    """T-130: the sibling of the heading guard, for the OTHER unfinishable body.
+
+    A RUN body that carries neither an ``IMP-<n>`` finding nor a NO_FINDINGS
+    marker is an unfinished write, not an honest empty audit. The completion
+    bar reads it as the latter's absence, refuses the report, and because a
+    committed report is immutable the only exit left is ``improve abort`` --
+    so one malformed submit destroys a cycle. It is refused at append time,
+    before any write, with the stable code RUN_BODY_UNEVIDENCED.
+    """
+
+    def test_a_body_with_neither_finding_nor_marker_is_refused_before_write(self):
+        before = self.report.read_bytes()
+        for run_text in (
+            "probe",
+            "a bounded audit of the thing, and here is a paragraph about it",
+            "NO FINDINGS",
+            "  NO_FINDINGS -- indented, so it is not the marker",
+            "prose mentioning NO_FINDINGS mid-line, which is not the marker",
+        ):
+            with self.subTest(run_text=run_text):
+                with self.assertRaises(improve.ImproveError) as ctx:
+                    improve.append_run(self.report, run_text)
+                self.assertEqual(
+                    getattr(ctx.exception, "code", None), "RUN_BODY_UNEVIDENCED"
+                )
+                self.assertEqual(self.report.read_bytes(), before)
+
+    def test_both_evidenced_forms_are_accepted(self):
+        improve.append_run(self.report, "NO_FINDINGS -- audited X, nothing found\n")
+        improve.append_run(
+            self.report,
+            "IMP-001 [P2] [PROTOCOL_VIOLATION] [reproduced] [ticket]\n"
+            "expected: a\nactual: b\nevidence: c\n",
+        )
+        text = self.report.read_text(encoding="utf-8")
+        self.assertIn("## RUN 1", text)
+        self.assertIn("## RUN 2", text)
+        improve.complete_report(self.report)
+        self.assertIn("report_status: complete", self.report.read_text(encoding="utf-8"))
+
+    def test_a_refused_body_leaves_the_cycle_completable(self):
+        """The property the defect destroyed: abort is never the only exit."""
+        with self.assertRaises(improve.ImproveError):
+            improve.append_run(self.report, "probe")
+        improve.append_run(self.report, "NO_FINDINGS -- the honest empty form\n")
+        improve.complete_report(self.report)
+        self.assertIn("report_status: complete", self.report.read_text(encoding="utf-8"))
+
+    def test_the_marker_is_anchored_to_a_line_start(self):
+        self.assertTrue(improve._RUN_BODY_EVIDENCE_RE.search("IMP-004 x"))
+        self.assertTrue(improve._RUN_BODY_EVIDENCE_RE.search("NO_FINDINGS -- x"))
+        self.assertFalse(improve._RUN_BODY_EVIDENCE_RE.search("x NO_FINDINGS"))
+        self.assertFalse(improve._RUN_BODY_EVIDENCE_RE.search("  NO_FINDINGS"))
+        # The guard answers "does this body carry evidence", not "is the id
+        # canonical": IMP-<any digits> is what the report parser reads as a
+        # finding, and canonical-id shape stays the completion bar's business.
+        self.assertTrue(improve._RUN_BODY_EVIDENCE_RE.search("IMP-4 short id"))
+        self.assertFalse(improve._RUN_BODY_EVIDENCE_RE.search("IMPROVED-004 x"))
+        self.assertFalse(improve._RUN_BODY_EVIDENCE_RE.search("findings: none"))
+
+
+class ContradictoryRunBodyTests(RunBodyContractTests):
+    """T-364: the two evidenced forms are mutually EXCLUSIVE, not just one-of.
+
+    `_RUN_BODY_EVIDENCE_RE` is a disjunction, so a body carrying BOTH an
+    ``IMP-<n>`` finding line and a NO_FINDINGS marker satisfies it. The
+    completion bar then refuses the seat ("RUN 1 declares NO_FINDINGS but
+    carries findings") -- after the report is immutable, so the findings are
+    lost and `improve abort` is the only exit, which is exactly the property
+    T-130 removed for the NEITHER case. The contradiction is refused at append
+    time with the stable code RUN_BODY_CONTRADICTORY.
+    """
+
+    def test_a_body_with_both_a_finding_and_the_marker_is_refused_before_write(self):
+        before = self.report.read_bytes()
+        for run_text in (
+            "NO_FINDINGS -- nothing found\nIMP-001 [P2] and yet a finding\n",
+            "IMP-001 [P2] a finding\nNO_FINDINGS -- and yet nothing found\n",
+            "NO_FINDINGS -- x\n\nexpected: a\nactual: b\nevidence: c\n"
+            "IMP-002 and a second finding after the prose\n",
+        ):
+            with self.subTest(run_text=run_text):
+                with self.assertRaises(improve.ImproveError) as ctx:
+                    improve.append_run(self.report, run_text)
+                self.assertEqual(
+                    getattr(ctx.exception, "code", None), "RUN_BODY_CONTRADICTORY"
+                )
+                self.assertEqual(self.report.read_bytes(), before)
+
+    def test_a_refused_contradiction_leaves_the_cycle_completable(self):
+        """The property again: one contradictory submit must not destroy a cycle.
+
+        The code is asserted, not just the exception type: with the defect the
+        contradictory body is ACCEPTED, the report goes immutable carrying it,
+        and a bare `assertRaises` here would pass by swallowing the completion
+        bar's own later refusal -- the test would green on the bug it exists to
+        catch.
+        """
+        with self.assertRaises(improve.ImproveError) as ctx:
+            improve.append_run(
+                self.report,
+                "NO_FINDINGS -- nothing found\nIMP-001 [P2] and yet a finding\n",
+            )
+        self.assertEqual(getattr(ctx.exception, "code", None), "RUN_BODY_CONTRADICTORY")
+        improve.append_run(
+            self.report,
+            "IMP-001 [P2] [PROTOCOL_VIOLATION] [reproduced] [ticket]\n"
+            "expected: a\nactual: b\nevidence: c\n",
+        )
+        improve.complete_report(self.report)
+        self.assertIn("report_status: complete", self.report.read_text(encoding="utf-8"))
+
+    def test_each_form_alone_is_still_accepted(self):
+        """The exclusivity must not narrow either legal form."""
+        improve.append_run(self.report, "NO_FINDINGS -- audited X, empty\n")
+        improve.append_run(
+            self.report,
+            "IMP-001 [P2] [PROTOCOL_VIOLATION] [reproduced] [ticket]\n"
+            "expected: a\nactual: b\nevidence: c\n",
+        )
+        improve.complete_report(self.report)
+        self.assertIn("report_status: complete", self.report.read_text(encoding="utf-8"))
+
+    def test_the_cli_reports_the_stable_code_and_writes_nothing(self):
+        """The verify clause end to end: refused by append_run, not by the bar."""
+        payload = self.root / "findings.json"
+        payload.write_text(
+            json.dumps(
+                {
+                    "run_text": (
+                        "NO_FINDINGS -- nothing found\n"
+                        "IMP-001 [P2] and yet a finding\n"
+                    )
+                }
+            ),
+            encoding="utf-8",
+        )
+        before = self.report.read_bytes()
+        result = subprocess.run(
+            [
+                sys.executable,
+                str(TOOLS / "saipen.py"),
+                "--project-root",
+                str(self.root),
+                "--json",
+                "improve",
+                "submit",
+                self.cycle.name,
+                "seat-a",
+                "PROBE",
+                str(payload),
+            ],
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+        )
+        data = json.loads(result.stdout)
+        self.assertFalse(data.get("ok"), data)
+        self.assertEqual(data.get("code"), "RUN_BODY_CONTRADICTORY", data)
+        self.assertEqual(self.report.read_bytes(), before)
+
+    def test_the_finding_grammar_is_the_one_the_parser_reads(self):
+        """Not a second, stricter idea of what a finding is."""
+        self.assertTrue(improve._RUN_BODY_FINDING_RE.search("IMP-001 [P2] x"))
+        self.assertTrue(improve._RUN_BODY_FINDING_RE.search("IMP-4 short id"))
+        self.assertFalse(improve._RUN_BODY_FINDING_RE.search("IMPROVED-004 x"))
+        self.assertFalse(improve._RUN_BODY_FINDING_RE.search("  IMP-001 indented"))
+        self.assertFalse(improve._RUN_BODY_FINDING_RE.search("prose about IMP-001"))
+        # The marker must be the SAME grammar the parser and the completion bar
+        # read, or append-time and completion-time disagree about what a marker
+        # is -- which is the class of defect this whole guard exists to remove.
+        self.assertEqual(improve._NO_FINDINGS_RE.pattern, r"^NO_FINDINGS\b")
+        self.assertEqual(improve._NO_FINDINGS_RE.flags, improve._RUN_BODY_EVIDENCE_RE.flags)
 
 
 if __name__ == "__main__":

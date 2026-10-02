@@ -353,9 +353,10 @@ class EntryResolutionMatrix(unittest.TestCase):
                 self.assertEqual(started["code"], "STARTED", started)
                 receipt = next((root / ".saipen" / "intake").rglob(started["receipt"] + ".md"))
                 self.assertIn(token, receipt.read_text(encoding="utf-8"))
-                # START writes the project's .gitignore; nothing else may appear.
+                # START writes the project's .gitignore and, since T-1508, the
+                # byte-bound .gitattributes rules; nothing else may appear.
                 created = {p.name for p in root.iterdir()} - set(before)
-                self.assertLessEqual(created, {".gitignore"}, created)
+                self.assertLessEqual(created, {".gitignore", ".gitattributes"}, created)
 
     def test_host_actions_start_then_status_through_the_runner(self):
         # Basic host-action regression (SRC-114 O): Start and Status still

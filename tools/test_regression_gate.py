@@ -53,6 +53,7 @@ from saipen_engine.operations import (  # noqa: E402
     finish_ticket,
     transition_phase,
 )
+from saipen_engine.state import style_contract_token  # noqa: E402
 
 GREEN = "acceptance -> PASS conf: high"
 V1, V2 = "1111aaaa", "9999dddd"
@@ -66,6 +67,9 @@ def _evidence(result: str, verifier: str, subject: str) -> str:
 def _state(phase: str, transition_from: str, last_event: int) -> str:
     now = dt.datetime.now(dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
     home = str(ROOT).replace(chr(92), chr(92) * 2)
+    style_contract = style_contract_token(
+        (ROOT / "saipen" / "STYLE.md").read_text(encoding="utf-8")
+    )
     return (
         "---\n"
         f"phase: {phase}\n"
@@ -76,7 +80,7 @@ def _state(phase: str, transition_from: str, last_event: int) -> str:
         "saipen_version: 7\n"
         "schema_version: 3\n"
         f"last_event: {last_event}\n"
-        "style_contract: ded-4ae736e4\n"
+        f"style_contract: {style_contract}\n"
         f'saipen_home: "{home}"\n'
         "agent: tester\n"
         "requires:\n  - filesystem\n  - python\n"

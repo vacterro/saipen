@@ -119,6 +119,7 @@ CLOSURE_FILES = (
     ".saipen/kitchen/digest.md",
     ".saipen/kitchen/crew_release_evidence.json",
     ".saipen/kitchen/release_receipt.json",
+    ".saipen/kitchen/cohort_registry.json",
 )
 
 
@@ -137,6 +138,7 @@ def _closure_stage_paths(root: Path) -> list[str]:
     for conditional in (
         ".saipen/kitchen/crew_release_evidence.json",
         ".saipen/kitchen/release_receipt.json",
+        ".saipen/kitchen/cohort_registry.json",
     ):
         if not (root / conditional).is_file():
             paths = [p for p in paths if p != conditional]
@@ -1159,13 +1161,17 @@ def _plan_crew_release(
             raise ReleaseRefusal(
                 "SOURCE_SCOPE_MISSING", f"crew scope path {rel} is missing from the worktree"
             )
-        live = _quick_hash(fp.read_bytes())
+        live_bytes = fp.read_bytes()
+        live = _quick_hash(live_bytes)
         if live != expected:
-            raise ReleaseRefusal(
-                "STALE_PLAN",
-                f"crew scope path {rel} changed since the owning defer "
-                f"(live {live!r}, deferred {expected!r})",
-            )
+            from . import closure as _closure
+
+            if not _closure.member_hash_matches(live_bytes, expected):
+                raise ReleaseRefusal(
+                    "STALE_PLAN",
+                    f"crew scope path {rel} changed since the owning defer "
+                    f"(live {live!r}, deferred {expected!r})",
+                )
     phase = state.get("phase")
     task = state.get("task")
     if phase != "DONE" or task not in (None, "", "none"):
@@ -1844,10 +1850,23 @@ def _is_ancestor(root: Path, ancestor: str, descendant: str) -> bool:
 # ---------------------------------------------------------------------------
 
 
+def _plan_publishes(plan: ReleasePlan) -> bool:
+    """Does this plan put an artifact outside the repository? (T-1570)
+
+    Only the single-ticket no-publish closure does not: it commits, tags and
+    pushes nothing, so the source gate judges that ticket alone and another
+    Work's missing scope cannot block it. A crew/cohort no-publish closure
+    still carries a multi-Work scope and keeps the full relevance walk.
+    """
+    return not (plan.mode == "no-publish" and not plan.crew_closure)
+
+
 def _preflight_plan(root: Path, plan: ReleasePlan) -> dict:
     """Verify every plan binding against the live world before ANY write."""
     from .paths import project_identity as _project_identity, project_lineage_identity
 
+    # Path-bound on purpose (T-1516): a plan is live state built and applied in
+    # one run, so a checkout that moved in between is not the one it planned.
     if _project_identity(root) != plan.project_identity:
         return _release_failure(
             "PREFLIGHT", "plan was built for a different project; refusing cross-project execution"
@@ -1892,7 +1911,7 @@ def _preflight_plan(root: Path, plan: ReleasePlan) -> dict:
     # bodies; cold archives are deliberately excluded from ordinary ship.
     from .intake import release_gate
 
-    source_gate = release_gate(root, plan.ticket_id)
+    source_gate = release_gate(root, plan.ticket_id, publish=_plan_publishes(plan))
     if not source_gate.get("ok"):
         route = source_gate.get("canonical_next_command")
         return _release_failure(
@@ -2803,7 +2822,7 @@ def _run_gate(root: Path, gate: str) -> dict:
         [sys.executable, str(root / "tools" / "validate.py"), "--gate", gate],
         cwd=str(root),
         capture_output=True,
-        text=True,
+        text=True, encoding="utf-8",
         errors="replace",
     )
     if result.returncode != 0:
@@ -3210,6 +3229,95 @@ def _mark_target(journal, index: int) -> None:
     _try_journal(journal, "mark", "APPLYING", target_index=index)
 
 
+# ---------------------------------------------------------------------------
+# T-1278: a closure commit may never assert a terminal state its own bytes
+# contradict. Observed live: 058ab732 "closure v7.250.0: ticket T-1276 DONE"
+# and, found by the history scan, 794085e9 "closure v7.251.0: ticket T-1280
+# DONE" both carry a BOARD on which the named ticket is still in ## DOING.
+# The commit path now refuses to create such a commit, and the history scan
+# reports any published one. Published history is never rewritten: the two
+# known divergences are recorded here with their reason instead.
+# ---------------------------------------------------------------------------
+
+KNOWN_CLOSURE_DIVERGENCES = {
+    "058ab732": "v7.250.0 names T-1276 DONE over a DOING board; observed while "
+    "shipping v7.250.0 and filed as T-1278",
+    "794085e9": "v7.251.0 names T-1280 DONE over a DOING board; found by the "
+    "T-1278 history scan on 2026-09-24",
+}
+_CLOSURE_SUBJECT_RE = re.compile(r"\Aclosure v\S+: ticket (T-\d+) DONE\Z")
+
+
+def closure_board_contradiction(board_text: str, ticket_id: str) -> str | None:
+    """Why ``board_text`` does not close ``ticket_id``, or None when it does."""
+    from .board import parse_board
+
+    try:
+        board = parse_board(board_text)
+    except (ValueError, KeyError, TypeError) as exc:
+        return f"its BOARD does not parse ({exc})"
+    ticket = (board.get("tickets") or {}).get(ticket_id)
+    if ticket is None:
+        return f"{ticket_id} is not on its BOARD"
+    section = ticket.get("section")
+    if section != "## DONE":
+        return f"{ticket_id} is in {section or 'no section'} on its BOARD, not ## DONE"
+    return None
+
+
+def closure_history_contradictions(root: Path | str) -> list[dict]:
+    """Every published closure commit whose own BOARD contradicts its subject.
+
+    Read-only. One `git log` plus one `git cat-file --batch` for all BOARD
+    blobs, so the cost stays flat as the history grows. A repository without
+    Git, or one Git cannot read, reports nothing: absence of history is not a
+    contradiction. Recorded divergences (KNOWN_CLOSURE_DIVERGENCES) are
+    excluded by commit prefix.
+    """
+    root = Path(root)
+    log = _git(root, "log", "--format=%H%x1f%s", "--grep=^closure v")
+    if not log.ok:
+        return []
+    commits: list[tuple[str, str]] = []
+    for line in log.stdout.splitlines():
+        sha, _sep, subject = line.partition("\x1f")
+        match = _CLOSURE_SUBJECT_RE.match(subject.strip())
+        if not match or any(sha.startswith(known) for known in KNOWN_CLOSURE_DIVERGENCES):
+            continue
+        commits.append((sha, match.group(1)))
+    if not commits:
+        return []
+    request = "".join(f"{sha}:.saipen/BOARD.md\n" for sha, _ticket in commits).encode("utf-8")
+    try:
+        proc = subprocess.run(
+            ["git", "-C", str(root), "cat-file", "--batch"],
+            input=request,
+            capture_output=True,
+            timeout=120,
+        )
+    except (OSError, subprocess.SubprocessError):
+        return []
+    if proc.returncode != 0:
+        return []
+    out = proc.stdout
+    found: list[dict] = []
+    offset = 0
+    for sha, ticket in commits:
+        newline = out.index(b"\n", offset)
+        header = out[offset:newline].decode("utf-8", "replace").split()
+        offset = newline + 1
+        if len(header) == 3 and header[1] == "blob":
+            size = int(header[2])
+            text = out[offset : offset + size].decode("utf-8", "replace")
+            offset += size + 1
+            problem = closure_board_contradiction(text, ticket)
+        else:
+            problem = "the commit carries no .saipen/BOARD.md"
+        if problem:
+            found.append({"commit": sha, "ticket": ticket, "problem": problem})
+    return found
+
+
 def _commit_closure(root: Path, plan: ReleasePlan, journal) -> tuple[str, str]:
     """Stage ONLY the canonical closure files (+ sealed LOG segments),
     write-tree, commit B.
@@ -3221,6 +3329,20 @@ def _commit_closure(root: Path, plan: ReleasePlan, journal) -> tuple[str, str]:
     if not add.ok:
         raise ReleaseRefusal(
             "RELEASE_FAILED", f"closure staging failed: {add.stderr or add.stdout}"
+        )
+    # T-1278: the commit about to say "ticket T DONE" must carry a BOARD that
+    # closes T. Otherwise no commit is created at all.
+    staged = _git(root, "show", ":.saipen/BOARD.md")
+    problem = (
+        closure_board_contradiction(staged.stdout, plan.ticket_id)
+        if staged.ok
+        else "the closure stage carries no .saipen/BOARD.md"
+    )
+    if problem:
+        raise ReleaseRefusal(
+            "CLOSURE_CONTRADICTION",
+            f"closure commit would name {plan.ticket_id} DONE but {problem}; "
+            "no commit was created",
         )
     tree = _git(root, "write-tree")
     if not tree.ok:
@@ -3706,6 +3828,7 @@ def _check_parity(root: Path, version: str) -> None:
 
     from .release_contract import version_badges as _version_badges
     from .release_contract import version_metadata_paths
+    from .release_contract import RELEASE_VERSION_CORE
 
     problems: list[str] = []
     if _installed_version(root) != version:
@@ -3724,7 +3847,7 @@ def _check_parity(root: Path, version: str) -> None:
             continue
         if Path(rel).name == "CHANGELOG.md":
             text = fp.read_text(encoding="utf-8-sig")
-            heads = re.findall(r"(?m)^## (\d+\.\d+\.\d+)", text)
+            heads = re.findall(r"(?m)^## (" + RELEASE_VERSION_CORE + r")", text)
             if heads[:1] != [version]:
                 problems.append(f"{rel} head entry must be ## {version}")
             continue

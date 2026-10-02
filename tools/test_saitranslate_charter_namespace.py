@@ -34,7 +34,13 @@ if str(TOOLS) not in __import__("sys").path:
 from saipen_engine import crew as C  # noqa: E402
 from saipen_engine import producer as P  # noqa: E402
 from saipen_engine.subs import ROLE_REGISTRY, SUBS_REL  # noqa: E402
-from freshness import compute_role_revision  # noqa: E402
+from freshness import (  # noqa: E402
+    SHORT_DIGEST_MARKER_HEX,
+    compute_role_revision,
+    digest_marker_matches,
+    normalize_version_strings,
+    source_content_digest,
+)
 
 REPO_ROOT = TOOLS.parent
 SOURCE_CHARTER = REPO_ROOT / "extensions" / "subs" / "saitranslate.md"
@@ -125,6 +131,102 @@ class SaitranslateCharterNamespaceTests(unittest.TestCase):
         )
         self.assertEqual(
             compute_role_revision(PROJECTED_CHARTER), compute_role_revision(SOURCE_CHARTER)
+        )
+
+
+
+class TranslationDigestMarkerWidthTest(unittest.TestCase):
+    """T-125: the marker width the contract documents must actually verify.
+
+    ``phases/translate.md`` mandates a ``<16 hex>`` ``source-digest`` marker
+    while the digest the validator computes is a full 64-hex sha256. Before
+    this the two were compared for exact equality, so a producer that
+    followed the documented contract was reported stale forever and the
+    ``translation-stale`` WARN could never be cleared. Both documented widths
+    pass; every other width, and every wrong digest, is still stale, so the
+    gate did not become a gate that cannot fail.
+    """
+
+    WANT = "877128c30331e9502a2b2cde921db503e98f9e63ee38fb9a9acee408eacdbd0b"
+
+    def test_full_width_marker_matches(self):
+        self.assertIs(digest_marker_matches(self.WANT, self.WANT), True)
+
+    def test_documented_short_marker_matches(self):
+        self.assertIs(
+            digest_marker_matches(self.WANT[:SHORT_DIGEST_MARKER_HEX], self.WANT), True
+        )
+
+    def test_wrong_digest_is_stale_at_either_width(self):
+        self.assertIs(digest_marker_matches("deadbeef" + self.WANT[8:], self.WANT), False)
+        self.assertIs(digest_marker_matches("deadbeef" + self.WANT[8:24], self.WANT), False)
+
+    def test_only_the_two_documented_widths_pass(self):
+        for width in (1, 4, 8, 15, 17, 32, 63):
+            with self.subTest(width=width):
+                self.assertIs(
+                    digest_marker_matches(self.WANT[:width], self.WANT),
+                    width == SHORT_DIGEST_MARKER_HEX,
+                )
+
+    def test_empty_and_non_string_markers_are_stale(self):
+        self.assertIs(digest_marker_matches("", self.WANT), False)
+        self.assertIs(digest_marker_matches(None, self.WANT), False)
+        self.assertIs(digest_marker_matches(self.WANT, None), False)
+
+
+
+class VersionNormalisationTest(unittest.TestCase):
+    """T-127: a release-badge bump must not move the source digest.
+
+    The recipe normalised three numeric components only, so a pre-release
+    suffix survived: `0.0.2a3` became `VERSIONa3` and `0.0.2b1` became
+    `VERSIONb1`, which moved the digest and faked a `translation-stale`
+    warning on exactly the badge bump the gate's own comment claims can never
+    cause it. The suffix is now part of the version token.
+    """
+
+    def test_numeric_bump_does_not_move_the_digest(self):
+        self.assertEqual(
+            source_content_digest("v1.2.3"), source_content_digest("v4.5.6")
+        )
+
+    def test_prerelease_suffix_bump_does_not_move_the_digest(self):
+        """The defect itself: a3 -> b1 must be invisible to the digest."""
+        self.assertEqual(
+            source_content_digest("v0.0.2a3"), source_content_digest("v0.0.2b1")
+        )
+
+    def test_every_documented_token_shape_is_normalised_whole(self):
+        for token in ("1.2.3", "0.0.2a3", "0.0.2b1", "10.20.30", "2.0.0rc2"):
+            with self.subTest(token=token):
+                self.assertEqual(normalize_version_strings(token), "VERSION")
+
+    def test_a_version_inside_a_filename_does_not_swallow_the_filename(self):
+        """A greedy tail would hide a real change behind a version prefix."""
+        self.assertEqual(
+            normalize_version_strings('pip install "saimail-0.0.2a3-py3-none-any.whl"'),
+            'pip install "saimail-VERSION-py3-none-any.whl"',
+        )
+        self.assertNotEqual(
+            source_content_digest("saimail-0.0.2a3-cp311.whl"),
+            source_content_digest("saimail-0.0.2a3-cp312.whl"),
+        )
+
+    def test_prose_around_a_token_is_untouched(self):
+        self.assertEqual(
+            normalize_version_strings("ship 1.2.3 today, see NOTES.md"),
+            "ship VERSION today, see NOTES.md",
+        )
+
+    def test_a_bare_digest_is_not_a_version_token(self):
+        """A 40-hex commit sha has no dots and must never be normalised."""
+        sha = "3fa8f2295f564a6a75733905388ddee55b2f73b8"
+        self.assertEqual(normalize_version_strings(sha), sha)
+
+    def test_digest_changes_when_prose_moves(self):
+        self.assertNotEqual(
+            source_content_digest("v1.2.3 alpha"), source_content_digest("v1.2.3 beta")
         )
 
 

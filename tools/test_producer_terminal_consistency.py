@@ -36,6 +36,7 @@ TOOLS = Path(__file__).resolve().parent
 ROOT = TOOLS.parent
 if str(TOOLS) not in sys.path:
     sys.path.insert(0, str(TOOLS))
+from test_fixture_support import CURRENT_STYLE_CONTRACT  # noqa: E402
 
 from saipen_engine.paths import unbound_environment  # noqa: E402
 from saipen_engine import remediation  # noqa: E402
@@ -60,7 +61,7 @@ transition_from: DONE
 saipen_version: 8
 schema_version: 3
 last_event: 2
-style_contract: ded-4ae736e4
+style_contract: {CURRENT_STYLE_CONTRACT}
 saipen_home: "{ROOT}"
 agent: tester
 mode: full
@@ -107,7 +108,7 @@ def _sub_state(
         f"agent: {agent}\n"
         "saipen_version: 7\n"
         "schema_version: 3\n"
-        "style_contract: ded-4ae736e4\n"
+        'style_contract: ' + CURRENT_STYLE_CONTRACT + '\n'
         f'saipen_home: "{ROOT}"\n'
         "mode: read-only\n"
         f"transition_from: {transition_from}\n"

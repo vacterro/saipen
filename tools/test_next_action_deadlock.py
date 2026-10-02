@@ -35,6 +35,7 @@ from pathlib import Path
 TOOLS = Path(__file__).resolve().parent
 if str(TOOLS) not in sys.path:
     sys.path.insert(0, str(TOOLS))
+from test_fixture_support import CURRENT_STYLE_CONTRACT  # noqa: E402
 
 from saipen_engine.paths import identity_file_content, new_project_lineage  # noqa: E402
 from saipen_engine.reconcile import reconcile_protocol_state  # noqa: E402
@@ -49,22 +50,23 @@ def setUpModule() -> None:
 
 #: The measured field shape: phase DONE, task none, a free-text next_action.
 LEGACY_NEXT_ACTION = "BOARD empty; producer packages SAIT-002 + W-002 ready - collect with eee"
-STATE = """---
-phase: DONE
-task: none
-next_action: "{next_action}"
-blocker: ""
-transition_from: SHIP
-saipen_version: 8
-schema_version: 3
-last_event: 45
-style_contract: ded-4ae736e4
-saipen_home: "{home}"
-agent: buffy
-mode: full
-updated: "2026-09-15T00:00:00Z"
----
-"""
+STATE = (
+    '---\n'
+    'phase: DONE\n'
+    'task: none\n'
+    'next_action: "{next_action}"\n'
+    'blocker: ""\n'
+    'transition_from: SHIP\n'
+    'saipen_version: 8\n'
+    'schema_version: 3\n'
+    'last_event: 45\n'
+    'style_contract: ' + CURRENT_STYLE_CONTRACT + '\n'
+    'saipen_home: "{home}"\n'
+    'agent: buffy\n'
+    'mode: full\n'
+    'updated: "2026-09-15T00:00:00Z"\n'
+    '---\n'
+)
 BOARD = "## DOING\n## TODO\n- [ ] T-9 [P1] real todo | verify: x\n## DONE\n## BLOCKED\n"
 LOG = (
     "- 12.09.26 00:00 [E-44] [T-9] [agent: buffy] [op: ticket-fixture] "

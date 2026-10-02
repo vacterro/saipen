@@ -52,6 +52,8 @@ class QuarantineRouteTests(OrchestrationFixture):
             log_hash=release._log_hash(root),
             source_manifest=release._source_authority_manifest(root),
             ticket_id="T-7",
+            mode="full",
+            crew_closure=False,
         )
 
     def test_active_and_archived_refusals_emit_executable_lossless_repair(self):

@@ -28,6 +28,16 @@ from pathlib import Path
 TOOLS = Path(__file__).resolve().parent
 sys.path.insert(0, str(TOOLS))
 
+from saipen_engine.state import style_contract_token  # noqa: E402
+
+#: The voice marker is a property of the INSTALLED STYLE.md, not of the incident
+#: this fixture replays. Pinning a historical value here turned every STYLE.md
+#: edit into a stale-state refusal in a fixture that has nothing to say about
+#: voice -- a changelog entry reds as loudly as a real defect.
+LIVE_STYLE_CONTRACT = style_contract_token(
+    (TOOLS.parent / "saipen" / "STYLE.md").read_text(encoding="utf-8-sig")
+)
+
 from saipen_engine.cold_recovery import (  # noqa: E402
     NO_PROGRESS_THRESHOLD,
     Observation,
@@ -42,7 +52,7 @@ SAIPEN = TOOLS / "saipen.py"
 # The REAL incident fixture, distilled verbatim from the live surfaces at
 # E-7925 (STATE DONE after the cc-all pivots; T-1446 eligible; T-1449
 # bounded-timeout blocked; T-1450 duplicate blocked; T-1428 parked on T-1446).
-INCIDENT_STATE = """---
+INCIDENT_STATE = f"""---
 phase: DONE
 task: none
 next_action: "PHASE SCOUT T-1446"
@@ -51,7 +61,7 @@ transition_from: BUILD
 saipen_version: 8
 schema_version: 3
 last_event: 7925
-style_contract: ded-4ae736e4
+style_contract: {LIVE_STYLE_CONTRACT}
 agent: astra
 mode: full
 updated: "2026-09-21T21:43:02Z"

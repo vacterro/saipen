@@ -395,7 +395,8 @@ def _git_from(cwd: str | Path, *args: str) -> tuple[int, str]:
     directories that are not repositories at all."""
     try:
         result = subprocess.run(
-            ["git", *args], cwd=str(cwd), capture_output=True, text=True, check=False
+            ["git", *args], cwd=str(cwd), capture_output=True, text=True,
+                encoding="utf-8", check=False
         )
     except (OSError, subprocess.SubprocessError):
         return 1, ""
@@ -957,6 +958,24 @@ def project_lineage_identity(root: Path | str) -> str | None:
         return None
     lineage, _error = parse_identity_content(text)
     return lineage
+
+
+def history_bound_here(
+    recorded_identity: object, recorded_lineage: object, root: Path | str
+) -> bool:
+    """Does persisted history metadata belong to the project at ``root``?
+
+    T-1514. History is portable: a copy, a clone or a moved checkout is the
+    same history, so the durable lineage decides. `project_identity` is a
+    machine-local path identity (see its docstring); binding history to it
+    turned every compacted verdict into "unproven" the moment the project
+    lived at another path. A project that never received a lineage keeps the
+    path binding, because nothing portable exists to bind to.
+    """
+    lineage = project_lineage_identity(root)
+    if lineage is not None:
+        return recorded_lineage == lineage
+    return recorded_lineage is None and recorded_identity == project_identity(Path(root))
 
 
 # T-1342: there is exactly ONE shipped-runtime generation identity definition,

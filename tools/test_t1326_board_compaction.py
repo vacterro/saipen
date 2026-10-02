@@ -500,13 +500,29 @@ class TargetCDetailIntegrityTests(unittest.TestCase):
         meta_path.write_text(json.dumps(meta, indent=2) + "\n", encoding="utf-8")
         self._assert_fails_closed(root, "byte count mismatch")
 
-    def test_wrong_project_identity_fails_closed(self):
+    def test_a_path_identity_alone_is_provenance_not_authority(self):
+        # T-1514: `project_identity` is the machine-local checkout path
+        # (paths.project_identity says so); a copy or clone of the same lineage
+        # is the same history. The lineage test below keeps a foreign project
+        # out.
+        root, _ = _compacted_project()
+        meta_path = _metadata_path(root)
+        meta = json.loads(meta_path.read_text(encoding="utf-8"))
+        meta["project_identity"] = "a-checkout-at-another-path"
+        meta_path.write_text(json.dumps(meta, indent=2) + "\n", encoding="utf-8")
+        result = self._mutation(root)
+        self.assertTrue(result.ok, result.to_dict())
+
+    def test_a_lineage_less_project_stays_bound_to_its_path(self):
         root, _ = _compacted_project()
         meta_path = _metadata_path(root)
         meta = json.loads(meta_path.read_text(encoding="utf-8"))
         meta["project_identity"] = "not-this-project"
+        meta["project_lineage"] = None
         meta_path.write_text(json.dumps(meta, indent=2) + "\n", encoding="utf-8")
-        self._assert_fails_closed(root, "project identity mismatch")
+        (root / ".saipen" / "IDENTITY.md").unlink()
+        with self.assertRaisesRegex(ValueError, "project identity mismatch"):
+            resolve_detail(root, _ticket(root)["fields"]["detail_ref"])
 
     def test_wrong_lineage_fails_closed(self):
         root, _ = _compacted_project()
@@ -1878,12 +1894,13 @@ class LegacySupersessionCompatibilityTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "hash mismatch"):
             resolve_detail(root, ref1)
 
-        # Project identity is still enforced when the legacy key is absent.
+        # Project ownership is still enforced when the legacy key is absent
+        # (T-1514: the lineage owns history, never the checkout path).
         root2, ref2 = self._legacy_first_generation()
         evil = self._delete_edge_key(root2, ref2)
-        evil["project_identity"] = "not-this-project"
+        evil["project_lineage"] = "lineage-" + "f" * 32
         self._write_metadata(root2, ref2, evil)
-        with self.assertRaisesRegex(ValueError, "project identity mismatch"):
+        with self.assertRaisesRegex(ValueError, "lineage mismatch"):
             resolve_detail(root2, ref2)
 
     def test_modern_first_generation_with_an_explicit_empty_edge_resolves(self):

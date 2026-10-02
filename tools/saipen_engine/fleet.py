@@ -746,7 +746,7 @@ def _invoke_canonical_repair(
             cwd=str(root),
             env=env,
             capture_output=True,
-            text=True,
+            text=True, encoding="utf-8",
             timeout=90,
             check=False,
         )

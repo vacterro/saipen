@@ -505,10 +505,10 @@ def route_next(
     # every active-continuation branch above has already returned, so a fresh
     # file can never steal ownership from a live BUILD/VERIFY/REVIEW
     # transaction; it only wins the START decision that has not been made yet.
-    # `invalid_only` and `residue_only` are NOT routed here: an unreadable
-    # layer and an uncaptured leftover are diagnostics that must not outrank
-    # real workable BOARD Work (both are surfaced below, before the project
-    # can call itself idle).
+    # `invalid_only`, `residue_only`, and `unworkable_active_only` are NOT
+    # routed here: unreadable layers, uncaptured leftovers, and ACTIVE layers
+    # whose linked Work is unworkable must not outrank real workable BOARD Work
+    # (the router handles them below before the project can call itself idle).
     if not active and audit_inbox and audit_route_owns(
         audit_inbox, board["tickets"], agent=session_agent, now=now
     ):
@@ -646,6 +646,16 @@ def route_next(
             ),
         }
 
+    if audit_inbox and audit_inbox.get("unworkable_active_only"):
+        return {
+            "ok": True,
+            "action": audit_inbox.get("action", "saipen audit status"),
+            "reason": "audit-inbox-unworkable",
+            "executable_behavior": "RESTATE_AND_STOP",
+            "detail": audit_inbox.get(
+                "detail", "audit inbox has no currently workable layer"
+            ),
+        }
     # Every layer settled, but `audit/` still holds bytes SAIPEN never
     # captured. The work is genuinely finished, so this is not a failure and
     # never a refusal -- it is the difference between "the audit is closed"

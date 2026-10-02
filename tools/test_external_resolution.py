@@ -26,6 +26,7 @@ TOOLS = Path(__file__).resolve().parent
 ROOT = TOOLS.parent
 if str(TOOLS) not in sys.path:
     sys.path.insert(0, str(TOOLS))
+from test_fixture_support import CURRENT_STYLE_CONTRACT  # noqa: E402
 
 from saipen_engine import external as external_mod  # noqa: E402
 from saipen_engine.paths import unbound_environment  # noqa: E402
@@ -40,21 +41,22 @@ RUN_OK = "echo oracle-ok"
 RUN_FAIL = f'{sys.executable} -c "import sys; sys.exit(3)"'
 VERIFY = "the installed implementation satisfies the original defect contract"
 
-STATE = """---
-phase: DONE
-task: none
-next_action: "PHASE DONE"
-blocker: none
-transition_from: DONE
-saipen_version: 8
-schema_version: 3
-last_event: 2
-style_contract: ded-4ae736e4
-agent: tester
-mode: full
-updated: "2026-09-20T00:00:00Z"
----
-"""
+STATE = (
+    '---\n'
+    'phase: DONE\n'
+    'task: none\n'
+    'next_action: "PHASE DONE"\n'
+    'blocker: none\n'
+    'transition_from: DONE\n'
+    'saipen_version: 8\n'
+    'schema_version: 3\n'
+    'last_event: 2\n'
+    'style_contract: ' + CURRENT_STYLE_CONTRACT + '\n'
+    'agent: tester\n'
+    'mode: full\n'
+    'updated: "2026-09-20T00:00:00Z"\n'
+    '---\n'
+)
 
 LOG = (
     "- 20.09.26 00:00 [E-001] [T-030] RUN: transition to VERIFY\n"

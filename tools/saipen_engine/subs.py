@@ -63,12 +63,71 @@ from .lock import project_writer_lock
 from .paths import project_identity
 from .result import Result
 from .safeid import prove_inside, validate_safe_id
-from .state import patch_state
+from .state import parse_state_or_error, patch_state, running_style_token
 
 SUBS_REL = ".saipen/extensions/subs"
 MANIFEST_REL = f"{SUBS_REL}/MANIFEST.md"
 MANIFEST_HEADER = "# SubSaipen Manifest"
 MANIFEST_METADATA = frozenset({"last_collect"})
+
+#: saitranslate's state namespace, which is NOT `SUBS_REL`. Kept here beside
+#: `SUBS_REL` because it is the one value three modules resolve against.
+LEGACY_SUBS_REL = ".saipen/saitranslate"
+LEGACY_OUTBOX_REL = f"{LEGACY_SUBS_REL}/kitchen/OUTBOX.md"
+
+#: Which namespace owns each role's state -- the ONE authority, taken from the
+#: two places the engine already treats as decisive: `crew.py::_role_paths_for`
+#: and `producer.py::_resolve_namespace_ownership` both special-case saitranslate
+#: to `.saipen/saitranslate`, and the role charter says the same. `saiwiki` and
+#: every generic role live under ``SUBS_REL``.
+#:
+#: This used to be answered differently per call site. `validate.py` globbed
+#: `SUBS_REL/*/kitchen/OUTBOX.md` AND unconditionally added
+#: `.saipen/saitranslate/kitchen/OUTBOX.md`, so a project that had also spawned
+#: a stray `extensions/subs/saitranslate/` answered for the same producer twice
+#: and the collect gate judged whichever it happened to parse. In this project
+#: the stray copy is measurably INCOMPLETE -- it is missing all 29 root
+#: `kitchen/README.<locale>.md`, `TRANSLATION_CONTRACT.md` and `surface.md` --
+#: so the double read was not a harmless duplicate, it was a second answer to
+#: one question. One role, one namespace, one answer (T-313).
+ROLE_NAMESPACES: dict[str, str] = {"saitranslate": LEGACY_SUBS_REL}
+
+
+def role_namespace(project_root, role: str) -> Path:
+    """The one directory that owns `role`'s state in this project."""
+    return Path(project_root) / ROLE_NAMESPACES.get(role, f"{SUBS_REL}/{role}")
+
+
+def outbox_rel(project_root, role: str) -> str:
+    """Project-RELATIVE OUTBOX path for `role`, from its owning namespace.
+
+    Relative by contract, not by accident: the callers are evidence specs
+    (`crew.py::_root_dependency_specs` lists rels) and diagnostics, and a
+    function named `_rel` that answers with an absolute path makes a reader
+    guess whether the prefix is meaningful. `outbox_paths` is the one that
+    returns resolved `Path`s.
+    """
+    del project_root  # the answer is root-independent BY DESIGN; see ROLE_NAMESPACES
+    rel = ROLE_NAMESPACES.get(role, f"{SUBS_REL}/{role}")
+    return f"{rel}/kitchen/OUTBOX.md"
+
+
+def outbox_paths(project_root):
+    """Every role OUTBOX this project holds, one per role, stable order.
+
+    Enumerated from the ROLE REGISTRY rather than from a filesystem glob: a
+    producer is judged on the package it is REQUIRED to publish, so a stray
+    second namespace can never be admitted beside the real one -- it is reported
+    as drift by `sub sync`/T-238 instead of being read as a competing answer.
+    """
+    root = Path(project_root)
+    paths = []
+    for role in sorted(ROLE_REGISTRY):
+        outbox = role_namespace(root, role) / "kitchen" / "OUTBOX.md"
+        if outbox.is_file():
+            paths.append(outbox)
+    return paths
+
 
 # Shared inherited contract files (PROTOCOL.md section 7): the exact surface
 # `saipen sub sync` refreshes from <saipen_home>/extensions/subs/. A live
@@ -162,7 +221,7 @@ CREW_ROLES = (
         "explicit",
         "SC-8",
         "translation",
-        ".saipen/saitranslate/kitchen/OUTBOX.md",
+        f"{LEGACY_SUBS_REL}/kitchen/OUTBOX.md",
     ),
     CrewRole(
         "saiwiki",
@@ -1469,6 +1528,38 @@ def parse_outbox(text: str, producer: str | None = None) -> OutboxModel:
     return OutboxModel(tuple(packages), tuple(errors))
 
 
+def validate_outbox_text(text: str, producer: str | None = None) -> list[str]:
+    """WRITE-TIME grammar bar for an OUTBOX (T-351).
+
+    `parse_outbox` was only ever asked at CONSUMPTION. A role appends its
+    package by editing the file, and the only strict parse over it ran under
+    `--gate collect:<role>` -- so a role nobody collected kept whatever it
+    wrote, and `core` stayed green by design (T-568: producer findings are
+    WARN there). Measured: one OUTBOX written in a single session carried five
+    closed-grammar violations (malformed package heading, a `source_tree_
+    fingerprint` holding English prose, `status: resolved` outside the enum,
+    and four duplicate fields) and the tree reported conformant.
+
+    This is the same bar the consumer applies, callable BEFORE the write, so a
+    role learns its package was refused while it is still fixing it rather than
+    at a collect gate it may never run. It refuses; it never repairs, because a
+    validator that rewrites a package is not a validator.
+    """
+    return list(parse_outbox(text, producer).errors)
+
+
+def validate_outbox_file(root: Path | str, role: str) -> list[str]:
+    """`validate_outbox_text` against `role`'s OUTBOX, through the ONE resolver.
+
+    Same path the validator and the collect gate use, so a role cannot be told
+    it is clean here and then judged against a different file there.
+    """
+    path = Path(root) / outbox_rel(root, role)
+    if not path.is_file():
+        return [f"{role} has no OUTBOX at {outbox_rel(root, role)}"]
+    return validate_outbox_text(_read_maybe(path), role)
+
+
 def _outbox_model(root: Path, name: str, source_id, saipen_home: str = "") -> OutboxModel:
     """The parsed OUTBOX model for one role (used by health + linkage)."""
     outbox_path = root / SUBS_REL / name / "kitchen" / "OUTBOX.md"
@@ -2426,6 +2517,11 @@ def sub_spawn(
             "`saipen sub sync`",
             name=name,
         )
+    style_token = running_style_token()
+    if style_token is None:
+        return _refuse(
+            "VALIDATION_FAILED", "running install has no readable STYLE.md", name=name
+        )
     now = _utc_iso()
     template_state_doc = codec.read_document(template_paths["STATE.md"])
     state = template_state_doc.text_norm
@@ -2436,12 +2532,12 @@ def sub_spawn(
             "saipen_home": saipen_home,
             "updated": now,
             "role_revision": role_revision,
+            "style_contract": style_token,
         },
     )
-    from .state import parse_state as _parse_sub_state_text
-
-    proposed_state = _parse_sub_state_text(state)
-    state_errors = validate_sub_state(proposed_state)
+    # Use the same strict read as health before committing a new worker.
+    proposed_state, state_error = parse_state_or_error(state)
+    state_errors = [state_error] if state_error else validate_sub_state(proposed_state)
     if state_errors:
         return _refuse(
             "VALIDATION_FAILED",
@@ -2718,6 +2814,11 @@ def sub_adopt(
         return _refuse(
             "VALIDATION_FAILED", f"cannot derive role revision for {name!r}: {exc}", name=name
         )
+    style_token = running_style_token()
+    if style_token is None:
+        return _refuse(
+            "VALIDATION_FAILED", "running install has no readable STYLE.md", name=name
+        )
     doc = codec.read_document(state_path)
     rel = f"{SUBS_REL}/{name}/STATE.md"
     new_text = patch_state(
@@ -2725,8 +2826,17 @@ def sub_adopt(
         {
             "role_revision": role_revision,
             "updated": _utc_iso(),
+            "style_contract": style_token,
         },
     )
+    proposed_state, state_error = parse_state_or_error(new_text)
+    state_errors = [state_error] if state_error else validate_sub_state(proposed_state)
+    if state_errors:
+        return _refuse(
+            "VALIDATION_FAILED",
+            "proposed worker STATE fails lifecycle grammar: " + "; ".join(state_errors[:3]),
+            name=name,
+        )
     lifecycle_reads = _lifecycle_read_preconditions(root, name, manifest_raw, saipen_home)
     actor = agent or "saipen-cli"
     if dry_run:

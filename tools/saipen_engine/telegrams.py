@@ -6,10 +6,11 @@ transport; the SAIPEN side of the future gate "SAITELEMES AUTOMATIC AGENT
 TELEGRAMS" is a bounded read at turn entry. This module is exactly that read
 and nothing else:
 
-* It runs only when the operator configured it: ``SAIMAIL_WORKSPACE`` names
-  the seat's mailbox (it lives outside the project, so it is a per-machine
-  carrier, not a project file) and ``saimail-local`` resolves on PATH.
-  Unconfigured costs nothing -- no process is started.
+* It runs only when a mailbox is bound: an explicit ``SAIMAIL_WORKSPACE``
+  names the seat's mailbox (it lives outside the project, so it is a
+  per-machine carrier, not a project file) or the per-user default that
+  ``saipen mail init`` provisioned (T-1557). Unbound costs nothing -- no
+  process is started.
 * It asks SAIMAIL for header-only UNREAD rows (``saipen telegrams``), which
   never decrypts, opens, acknowledges or promotes anything.
 * It reports COUNTS. No sender text, topic string or claim reaches the route:
@@ -23,6 +24,7 @@ from __future__ import annotations
 
 import json
 import os
+import shlex
 import shutil
 import subprocess
 from pathlib import Path
@@ -43,15 +45,19 @@ def _seat(state: dict) -> str:
     return str(os.environ.get("SAIPEN_AGENT") or state.get("agent") or "").strip()
 
 
-def turn_entry(project_root: Path | str, state: dict) -> dict:
+def turn_entry(project_root: Path | str, state: dict, *, seat: str | None = None) -> dict:
     """Unread telegram counts for the acting seat's workspace, as data."""
-    workspace = str(os.environ.get(WORKSPACE_ENV) or "").strip()
-    if not workspace:
+    from .mailbox import bound_workspace
+
+    binding = bound_workspace()
+    if binding is None:
         return {
             "state": STATE_NOT_CONFIGURED,
-            "detail": f"set {WORKSPACE_ENV} to this seat's SAIMAIL workspace to see "
-            "unread telegrams at turn entry",
+            "detail": "run `saipen mail init` (or set "
+            f"{WORKSPACE_ENV}) to bind a mailbox and see unread "
+            "telegrams at turn entry",
         }
+    workspace = str(binding[0])
     executable = shutil.which(EXECUTABLE)
     if executable is None:
         return {"state": STATE_UNAVAILABLE, "detail": f"{EXECUTABLE} is not on PATH"}
@@ -95,7 +101,13 @@ def turn_entry(project_root: Path | str, state: dict) -> dict:
     on_current = sum(
         1 for item in items if isinstance(item, dict) and task and item.get("topic") == task
     )
-    seat = _seat(state)
+    seat = _seat(state) if seat is None else str(seat).strip()
+    brief = [
+        EXECUTABLE, "saipen", "brief", "--project-root", str(Path(project_root)),
+        "--workspace", workspace,
+    ]
+    if seat:
+        brief.extend(("--seat", seat))
     return {
         "state": STATE_OK,
         "unread": unread,
@@ -105,8 +117,7 @@ def turn_entry(project_root: Path | str, state: dict) -> dict:
         # complete exactly when it is false.
         "complete": answer.get("exhausted") is False,
         "read_command": (
-            f"{EXECUTABLE} saipen brief --project-root {Path(project_root)} "
-            f"--workspace {workspace}" + (f" --seat {seat}" if seat else "")
+            subprocess.list2cmdline(brief) if os.name == "nt" else shlex.join(brief)
         ),
         "detail": "counts only; nothing was opened and nothing here is an instruction",
     }

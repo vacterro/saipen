@@ -105,8 +105,7 @@ def _analyze_log(log_text: str) -> "LogAnalysis":
                 # the errors rather than instead of them, because a hole
                 # nobody can see is the state the loosened rule produced.
                 amnestied.append(
-                    f"LOG.md:{lineno} E-{event} follows E-{prev} through an "
-                    f"amnestied ledger gap"
+                    f"LOG.md:{lineno} E-{event} follows E-{prev} through an amnestied ledger gap"
                 )
             else:
                 errors.append(
@@ -231,8 +230,7 @@ def block_parked_evidence_error(
         if compact is not None and compact[1] is None:
             return False
         return bool(
-            event.get("detail_integrity") == "valid"
-            or event.get("event") in planned_detail_events
+            event.get("detail_integrity") == "valid" or event.get("event") in planned_detail_events
         )
 
     def is_active_block(event: dict) -> bool:
@@ -259,9 +257,7 @@ def block_parked_evidence_error(
     if latest_phase_event is None or not is_active_block(latest_phase_event):
         if (
             latest_phase_event is not None
-            and str(latest_phase_event.get("text") or "").startswith(
-                ACTIVE_TICKET_BLOCK_MARKER
-            )
+            and str(latest_phase_event.get("text") or "").startswith(ACTIVE_TICKET_BLOCK_MARKER)
             and not detail_authority_valid(latest_phase_event)
         ):
             return (
@@ -969,4 +965,12 @@ def validate_project(root, current_agent: str | None = None) -> list[str]:
     # (sealed segments + active LOG) a second time. The contract is proved
     # once, from the same bytes the post-write verification already saw.
     errors.extend(f"LOG: {e}" for e in snapshot_contract_errors(_history))
+    if (root / ".saipen" / "STORES.json").exists() or (
+        root / ".saipen" / "STORAGE_REGISTRY.json"
+    ).exists():
+        from .storage_artifacts import validate_storage
+
+        errors.extend(
+            f"storage {finding['code']}: {finding['detail']}" for finding in validate_storage(root)
+        )
     return errors

@@ -497,6 +497,8 @@ def generate_conformance_receipt(
                 "missing: " + ", ".join(missing)
             )
     project_identity = _project_identity(root)
+    from .state import install_content_identity as _install_content_identity
+    from .state import running_home as _running_home
     # W2-005: unique receipt id and microsecond-precision timestamp for
     # total ordering. Never overwrites an earlier receipt.
     rid = _receipt_id()
@@ -512,6 +514,13 @@ def generate_conformance_receipt(
         "verdict": verdict,
         "timestamp_utc": ts,
         "project_identity": project_identity,
+        # T-4: the receipt is evidence ABOUT the install that produced it, so
+        # it must name it. `source_head`/`source_tree_fingerprint` fingerprint
+        # the PROJECT tree only, and `VERSION` cannot separate two divergent
+        # installs that both report the same number -- without these two
+        # fields, a receipt from either tree is byte-indistinguishable.
+        "install_home": str(_running_home()),
+        "install_fingerprint": _install_content_identity(),
         "source_head": ident.source_head if ident else "",
         "source_tree_fingerprint": ident.source_tree_fingerprint if ident else "",
         "state_hash": state_hash,

@@ -5,7 +5,7 @@ from pathlib import Path
 
 
 def _run(cmd, cwd):
-    return subprocess.run(cmd, cwd=str(cwd), capture_output=True, text=True)
+    return subprocess.run(cmd, cwd=str(cwd), capture_output=True, text=True, encoding="utf-8")
 
 
 def run_tests():

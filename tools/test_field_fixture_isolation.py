@@ -42,6 +42,7 @@ TOOLS = Path(__file__).resolve().parent
 ROOT = TOOLS.parent
 if str(TOOLS) not in sys.path:
     sys.path.insert(0, str(TOOLS))
+from test_fixture_support import CURRENT_STYLE_CONTRACT  # noqa: E402
 
 import t1363_field_polygon as polygon  # noqa: E402
 from saipen_engine.board import parse_board  # noqa: E402
@@ -86,7 +87,7 @@ class LedgerIsolationTests(unittest.TestCase):
             'next_action: "saipen continue"\n'
             'blocker: ""\ntransition_from: DONE\n'
             "saipen_version: 8\nschema_version: 3\nlast_event: 1\n"
-            "style_contract: ded-4ae736e4\n"
+            'style_contract: ' + CURRENT_STYLE_CONTRACT + '\n'
             f'saipen_home: "{str(ROOT).replace(chr(92), chr(92) * 2)}"\n'
             "agent: tester\nrequires:\n  - filesystem\n  - python\n"
             "mode: full\n"

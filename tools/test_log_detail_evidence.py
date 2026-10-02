@@ -33,6 +33,7 @@ from pathlib import Path
 TOOLS = Path(__file__).resolve().parent
 if str(TOOLS) not in sys.path:
     sys.path.insert(0, str(TOOLS))
+from test_fixture_support import CURRENT_STYLE_CONTRACT  # noqa: E402
 
 from saipen_engine import log as L  # noqa: E402
 from saipen_engine import log_compaction  # noqa: E402
@@ -44,32 +45,35 @@ def setUpModule() -> None:
     isolate_host_session()
 
 
-STATE = """---
-phase: VERIFY
-task: T-1
-next_action: "PHASE VERIFY T-1"
-blocker: ""
-transition_from: BUILD
-saipen_version: 8
-schema_version: 3
-last_event: 100
-style_contract: ded-4ae736e4
-mode: full
-updated: 2026-09-16T00:00:00Z
-agent: test-agent
----
-"""
+STATE = (
+    '---\n'
+    'phase: VERIFY\n'
+    'task: T-1\n'
+    'next_action: "PHASE VERIFY T-1"\n'
+    'blocker: ""\n'
+    'transition_from: BUILD\n'
+    'saipen_version: 8\n'
+    'schema_version: 3\n'
+    'last_event: 100\n'
+    'style_contract: ' + CURRENT_STYLE_CONTRACT + '\n'
+    'mode: full\n'
+    'updated: 2026-09-16T00:00:00Z\n'
+    'agent: test-agent\n'
+    '---\n'
+)
 BOARD = (
     "## DOING\n- [/] T-1 [P1] compaction fixture | verify: the verdict is read "
     "| owner: test-agent | claim_time: 2026-09-16T00:00:00Z\n"
     "## TODO\n## DONE\n## BLOCKED\n"
 )
 BOUNDARY = (
-    "- 16.09.26 00:00 [E-100] [T-1] [agent: test-agent] [op: transition-fixture] "
+    "- 16.09.26 00:00 [E-100] [T-1] [agent: test-agent] "
+    "[op: transition-11a2b3c4d5e6f708192a3b4c5d6e7f80] "
     "RUN: transition to VERIFY -- fixture\n"
 )
 LOG = (
-    "- 16.09.26 00:00 [E-99] [T-1] [agent: test-agent] [op: ticket-fixture] "
+    "- 16.09.26 00:00 [E-99] [T-1] [agent: test-agent] "
+    "[op: ticket-9f8e7d6c5b4a39281706f5e4d3c2b1a0] "
     "DEC: ticket added via SAIOPS\n" + BOUNDARY
 )
 #: Long enough to be compacted, and a real verdict shape.
@@ -104,7 +108,11 @@ class CompactedVerdictTests(unittest.TestCase):
             ticket="T-1",
             agent="test-agent",
             now="16.09.26 00:01",
-            op_id="checkpoint-fixture",
+            # T-1577: the docstring above claims the CANONICAL writer, and the
+            # canonical writer emits `checkpoint-<32 hex>`. The old literal was
+            # off-grammar, so the very tag this fixture says it reproduces is
+            # one the grammar now refuses to believe (T-1577).
+            op_id="checkpoint-0f1e2d3c4b5a69788796a5b4c3d2e1f0",
         )
         for target in result.targets:
             path = self.root / target.path

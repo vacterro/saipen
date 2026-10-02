@@ -188,5 +188,98 @@ class LocalSourceClosure(unittest.TestCase):
         self._assert_closed(plan)
 
 
+    def _unprojected(self):
+        captured = intake.capture(
+            self.root, "unprojected independent operator request", source_kind="user_instruction"
+        )
+        self.assertTrue(captured["ok"], captured)
+        receipt = captured["receipt"]
+        added = intake.add_requirement(self.root, receipt, rid="R001", text="still owed elsewhere")
+        self.assertTrue(added["ok"], added)
+        return receipt
+
+    def _historical_scope(self):
+        self._scope_file("historical.py")
+        self._record_scope("T-003", ["historical.py"])
+        self._record_scope("T-001", ["current.py"])
+
+    def test_unprojected_unrelated_obligation_allows_local_execution_without_discharge(self):
+        self._project()
+        orphan = self._unprojected()
+        before = {
+            path: data for path, data in self._snapshot().items()
+            if path.startswith(".saipen/intake/")
+        }
+        plan = self._plan()
+        with patch.object(release, "_run_gate", return_value={"ok": True}):
+            result = release.execute_release(self.root, plan)
+        self.assertTrue(result["ok"], result)
+        self._assert_closed(plan)
+        after = {
+            path: data for path, data in self._snapshot().items()
+            if path.startswith(".saipen/intake/")
+        }
+        self.assertEqual(before, after)
+        self.assertEqual(
+            intake.coverage_summary(self.root, orphan)["unresolved"], [f"{orphan}:R001"]
+        )
+
+    def test_unprojected_obligation_still_blocks_publication(self):
+        self._project()
+        orphan = self._unprojected()
+        self._historical_scope()
+        before = self._snapshot()
+        result = release._preflight_plan(self.root, replace(self._plan(), mode="full"))
+        self.assertFalse(result["ok"], result)
+        self.assertEqual(result["stage"], "SOURCE_COVERAGE", result)
+        self.assertEqual(result["source_gate"]["code"], "SOURCE_UNRESOLVED", result)
+        self.assertEqual(result["source_gate"]["receipt"], orphan, result)
+        self.assertEqual(before, self._snapshot())
+
+    def test_unprojected_receipt_corruption_still_blocks_local_closure(self):
+        self._project()
+        orphan = self._unprojected()
+        body = self.root / f".saipen/intake/active/{orphan}.md"
+        body.write_bytes(body.read_bytes() + b" changed")
+        gate = intake.release_gate(self.root, "T-001", publish=False)
+        self.assertFalse(gate["ok"], gate)
+        self.assertEqual(gate["code"], "SOURCE_CORRUPTION", gate)
+
+    def test_local_current_receipt_missing_board_projection_still_blocks(self):
+        self._project()
+        extra = intake.capture(
+            self.root, "extra current obligation", source_kind="user_instruction", work="T-001"
+        )["receipt"]
+        board = self.root / ".saipen/BOARD.md"
+        board.write_text(
+            board.read_text(encoding="utf-8").replace(f",{extra}", ""), encoding="utf-8"
+        )
+        gate = intake.release_gate(self.root, "T-001", publish=False)
+        self.assertFalse(gate["ok"], gate)
+        self.assertEqual(gate["code"], "SOURCE_LINKAGE_MISSING", gate)
+
+    def test_unrelated_dangling_projection_does_not_block_local_closure(self):
+        parked = self._project()
+        board = self.root / ".saipen/BOARD.md"
+        board.write_text(
+            "\n".join(line for line in board.read_text(encoding="utf-8").splitlines()
+                      if not line.startswith("- [ ] T-003")) + "\n", encoding="utf-8"
+        )
+        gate = intake.release_gate(self.root, "T-001", publish=False)
+        self.assertTrue(gate["ok"], gate)
+        self.assertFalse(intake.coverage_complete(self.root, parked))
+        public = intake.release_gate(self.root, "T-001")
+        self.assertFalse(public["ok"], public)
+        self.assertEqual(public["code"], "SOURCE_WORK_ACTIVE", public)
+
+    def test_target_free_local_gate_keeps_global_coverage(self):
+        self._project()
+        self._unprojected()
+        gate = intake.release_gate(self.root, publish=False)
+        self.assertFalse(gate["ok"], gate)
+        self.assertEqual(gate["code"], "SOURCE_WORK_ACTIVE", gate)
+
+
+
 if __name__ == "__main__":
     unittest.main()

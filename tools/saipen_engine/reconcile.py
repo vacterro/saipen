@@ -847,6 +847,58 @@ def _board_lifecycle_repairs(
                     ),
                 }
             )
+        # STALE CLOSURE METADATA (T-1587). The placement rule is board.py's
+        # and stays armed: closure provenance describes a COMPLETED ticket and
+        # is illegal in every other section (T-1302). A parseable row under
+        # ## TODO / ## DOING / ## BLOCKED that carries terminal residue
+        # therefore refuses every ordinary mutator (each checks
+        # ``board["errors"]``), and before this class recovery proposed
+        # NOTHING for it -- the planner reads a board with parse errors fine,
+        # found no drift it owned, and answered RESIDUAL_DEFECTS with no
+        # route, so the operator's only exit was a hand edit of protected
+        # BOARD bytes (FastPrompter T-1371, 01.10.26: ``| closure_mode:
+        # own_patch`` under ## TODO froze every verb). Same family as the
+        # stale-blocker class above and the SAME vocabulary the DONE -> DOING
+        # reopen strips (``_reopen_field_removals``): remove exactly the
+        # closure-contract keys, never a general metadata editor. Unknown
+        # fields stay armed (not this vocabulary), and a row that REPEATS a
+        # known field is ambiguous bytes no repair may choose between, so the
+        # atom is a refusal, never a silent pick -- the strict duplicate-field
+        # corruption keeps its own fail-closed class.
+        from .board import CLOSURE_METADATA_FIELDS
+
+        stale_closure = [
+            name
+            for name in CLOSURE_METADATA_FIELDS
+            if section != "## DONE" and str(fields.get(name, "") or "").strip()
+        ]
+        if stale_closure:
+            atom = {
+                "field": "board",
+                "kind": "claim-clear",
+                "_class": "stale-closure-metadata",
+                "ticket": tid,
+                "surface": "board",
+                "section": section,
+                "fields": stale_closure,
+                "reason": (
+                    f"{tid} carries {', '.join('| ' + f + ':' for f in stale_closure)} "
+                    f"outside ## DONE ({section}); closure provenance describes a "
+                    "COMPLETED ticket, so the field is stale terminal residue and the "
+                    "deterministic repair removes exactly those keys -- the same "
+                    "vocabulary the DONE -> DOING reopen strips (T-1572)"
+                ),
+            }
+            if any(
+                f"ticket {tid} duplicates the known field" in str(error)
+                for error in (board.get("errors") or [])
+            ):
+                atom["refuse"] = True
+                atom["reason"] += (
+                    "; the row repeats a field, so the record is ambiguous and no "
+                    "repair may silently choose one value over the other"
+                )
+            repairs.append(atom)
         owner = str(fields.get("owner", "") or "").strip()
         claim_time = str(fields.get("claim_time", "") or "").strip()
         if bool(owner) == bool(claim_time):
@@ -1189,6 +1241,37 @@ def _residue_evidence(residue: list[str]) -> str:
     return ".saipen/STATE.md"
 
 
+#: Fields a reopened DONE row may not keep: active-block data belongs only to
+#: ## BLOCKED and a stale claim session would bind the reopened claim to a
+#: dead host process. Closure provenance comes from board.py's one vocabulary.
+_REOPEN_STRIP_FIELDS = (
+    "blocker", "blocker_scope", "blocked_on", "resume_phase",
+    "resume_transition_from", "retry_not_before",
+    "claim_session", "claim_run", "claim_generation",
+)
+
+
+def _reopen_field_removals(raw: str) -> list[str]:
+    """Field names a DONE -> DOING reopen removes from the live row.
+
+    Closure metadata and active-block fields are illegal under ## DOING, and a
+    keyed field outside the closed grammar (a hand-written `evidence:`, real
+    AUDAPACK T-261) would leave the reopened project invalid with no route. The
+    caller preserves the complete original BOARD bytes before writing, so the
+    removed values survive as recovery evidence.
+    """
+    from .board import CLOSURE_METADATA_FIELDS, KNOWN_FIELDS, PIPE_SENTINEL
+
+    present = []
+    for part in str(raw).replace("\\|", PIPE_SENTINEL).split(" | ")[1:]:
+        match = re.match(r"^\s*([a-z_]+):", part)
+        if match:
+            present.append(match.group(1))
+    strip = set(CLOSURE_METADATA_FIELDS) | set(_REOPEN_STRIP_FIELDS)
+    return [name for name in dict.fromkeys(present)
+            if name in strip or name not in KNOWN_FIELDS]
+
+
 def _apply_lifecycle_repairs(board_text: str, repairs: list[dict]) -> str:
     """Apply claim-clear and section-move repairs by bounded line surgery."""
     from .board import remove_ticket_field
@@ -1208,6 +1291,7 @@ def _apply_lifecycle_repairs(board_text: str, repairs: list[dict]) -> str:
             removals.setdefault(tid, []).extend(repair.get("fields", []))
         elif repair.get("kind") == "section-move":
             moves[tid] = repair["to_section"]
+            removals.setdefault(tid, []).extend(repair.get("fields", []))
 
     for tid, fields in removals.items():
         line_no = tickets[tid]["line_no"]
@@ -1220,7 +1304,8 @@ def _apply_lifecycle_repairs(board_text: str, repairs: list[dict]) -> str:
     for tid, target in sorted(moves.items()):
         line_no = tickets[tid]["line_no"]
         raw = lines[line_no - 1].rstrip("\n")
-        raw = _TICKET_BOX_RE.sub(r"\g<1> \g<3>", raw, count=1)
+        box = "/" if target == "## DOING" else " "
+        raw = _TICKET_BOX_RE.sub(r"\g<1>" + box + r"\g<3>", raw, count=1)
         lines[line_no - 1] = None
         moved.setdefault(target, []).append(raw + "\n")
 
@@ -1240,6 +1325,7 @@ def _plan_repair_id(
     state_repairs: list[dict],
     lifecycle_repairs: list[dict],
     attest_ids: list[str],
+    source_hashes: dict | None = None,
 ) -> str:
     """Content identity of the COMPLETE bounded repair set (SRC-043).
 
@@ -1252,6 +1338,7 @@ def _plan_repair_id(
 
     payload = {
         "schema": 1,
+        "source_hashes": source_hashes or {},
         "board_drifts": [
             {"line": d.get("line"), "ticket": d.get("ticket"), "to": d.get("expected")}
             for d in board_drifts
@@ -1466,7 +1553,9 @@ def _tripped_valve_repairs(state: dict) -> list[dict]:
 _PHASE_EVENT_RE = re.compile(r"^transition to ([A-Z][A-Z_]*)\b")
 
 
-def _transition_chain(events, budget: int | None) -> list[tuple[int, str]]:
+def _transition_chain(
+    events, budget: int | None, ticket: str | None = None
+) -> list[tuple[int, str]]:
     """Every phase a phase-changing event PROVES, oldest first, to `budget`.
 
     Each `transition to <PHASE>` event proves a DESTINATION; the phase a
@@ -1478,15 +1567,30 @@ def _transition_chain(events, budget: int | None) -> list[tuple[int, str]]:
     Evidence only: an event whose destination is outside the enum proves
     nothing, and an event after `STATE.last_event` describes a phase this STATE
     has not summarised yet.
+
+    THE EVENT-TO-TICKET BINDING, defined once (T-1572): the canonical writer
+    tags exactly the five ticket-bearing destinations with ``[T-###]``, so a
+    ticket's own lifecycle transitions are exactly the events that carry its
+    tag. With ``ticket`` set, this chain keeps ONLY those events -- an
+    untagged `transition to X` is project-level, and another ticket's
+    transition is that ticket's lifecycle, never this one's evidence. The
+    unscoped call (``ticket=None``) remains the project history. Scoped calls
+    stop at the newest fresh claim, so an older completion cannot authorize
+    a newly claimed lifecycle.
     """
     from . import phases as _phases
 
     chain: list[tuple[int, str]] = []
+    epoch = _ticket_epoch(events, ticket, budget) if ticket else 0
     for event in events:
         number = event.get("event")
         if not isinstance(number, int) or isinstance(number, bool):
             continue
         if budget is not None and number > budget:
+            continue
+        if number < epoch:
+            continue
+        if ticket is not None and event.get("ticket") != ticket:
             continue
         if not str(event.get("op_id") or "").startswith("transition-"):
             continue
@@ -1499,6 +1603,159 @@ def _transition_chain(events, budget: int | None) -> list[tuple[int, str]]:
         chain.append((number, candidate))
     chain.sort(key=lambda item: item[0])
     return chain
+
+
+def _ticket_epoch(events, ticket: str, budget: int | None) -> int:
+    """A fresh canonical claim starts a lifecycle; lease refreshes do not."""
+    return max((
+        ev["event"] for ev in events
+        if isinstance(ev.get("event"), int) and not isinstance(ev["event"], bool)
+        and (budget is None or ev["event"] <= budget)
+        and ev.get("ticket") == ticket
+        and str(ev.get("op_id") or "").startswith("claim-")
+        and str(ev.get("text") or "").startswith("claimed via SAIOPS")
+    ), default=0)
+
+
+def _proven_pair(state: dict, events, ticket: str | None):
+    """The destination and source belong to the same ticket claim epoch.
+
+    A fresh claim proves SCOUT; the previous local transition proves the
+    source. Legacy untagged project-entry SCOUT is handled explicitly below.
+    Other tickets never supply phase evidence. Taskless recovery retains the
+    project chain used by T-1318.
+    """
+    last_event = state.get("last_event")
+    budget = (
+        last_event
+        if isinstance(last_event, int) and not isinstance(last_event, bool)
+        else None
+    )
+    global_chain = _transition_chain(events, budget)
+    scoped = (
+        global_chain
+        if ticket is None
+        else _transition_chain(events, budget, ticket=ticket)
+    )
+    epoch = _ticket_epoch(events, ticket, budget) if ticket else 0
+    if not scoped and epoch:
+        # claim_ticket commits SCOUT atomically, without a transition event, so
+        # a fresh claim with no later transition proves exactly SCOUT. A
+        # same-phase source asserts no pre-claim history. Hand-written
+        # `RUN: BUILD`/`RUN: VERIFY` lines are not transitions (real AUDAPACK
+        # T-261 journal: canonical claim, then invented op ids).
+        return [(epoch, "SCOUT")], epoch, "SCOUT", "SCOUT"
+    if not scoped:
+        # Older project entry used an untagged SCOUT transition. It is the
+        # sole project-level destination admitted for a bound legacy task,
+        # only when no ticket-local lifecycle exists and it is the latest
+        # project transition. Tagged foreign transitions never qualify.
+        if ticket and global_chain and global_chain[-1][1] == "SCOUT":
+            entry = next((ev for ev in events if ev.get("event") == global_chain[-1][0]), {})
+            if not entry.get("ticket"):
+                return [global_chain[-1]], global_chain[-1][0], "SCOUT", None
+        return [], None, None, None
+    number, target = scoped[-1]
+    predecessors = [item for item in scoped if item[0] < number]
+    source = predecessors[-1][1] if predecessors else None
+    if source is None and epoch:
+        # claim_ticket commits SCOUT atomically, without a transition event.
+        source = "SCOUT"
+    if source is None and ticket and target == "BUILD":
+        # Historical project-entry SCOUT was untagged. Only the immediate
+        # project predecessor of the first bound BUILD may supply that entry;
+        # a transition tagged to any other ticket can never do so.
+        previous = [item for item in global_chain if item[0] < number]
+        if previous and previous[-1][1] == "SCOUT":
+            entry = next((ev for ev in events if ev.get("event") == previous[-1][0]), {})
+            if not entry.get("ticket"):
+                source = "SCOUT"
+    return scoped, number, target, source
+
+
+def _restored_seat(board: dict | None, gap: dict | None) -> str | None:
+    """The execution seat a gap recovery RESTORES, or None (T-1578).
+
+    The CURRENT_DONE_JOURNAL_GAP plan moves one existing DONE row back into
+    `## DOING` with its own owner and claim_time intact, so the seat the
+    committed STATE/BOARD pair must agree on is that row's owner: the ticket
+    already carries one and recovery only REOPENS it. Measured on an
+    AUDAPACK-class project (30.09.26): stamping the RECOVERY ACTOR into
+    `STATE.agent` instead produced exactly the split
+    `ownership_invariant_errors` exists to refuse, the approved plan could not
+    commit, and the gap stayed stranded. Only the already classified gap
+    qualifies; every other reconciliation keeps the ordinary actor semantics,
+    and an ownerless row yields None so the caller keeps them.
+    """
+    if board is None or not gap:
+        return None
+    row = (board.get("tickets") or {}).get(gap.get("ticket")) or {}
+    owner = (row.get("fields") or {}).get("owner")
+    owner = owner.strip() if isinstance(owner, str) else ""
+    return owner or None
+
+
+def _current_done_journal_gap(
+    state: dict,
+    board: dict | None,
+    events,
+    ticket: str | None,
+    number: int | None,
+    target: str | None,
+    source: str | None,
+) -> dict | None:
+    """Classify the CURRENT_DONE_JOURNAL_GAP (T-1572), or return None.
+
+    The downstream shape, measured on an AUDAPACK-class project (29.09.26):
+    STATE says `phase: DONE / task: T-N / transition_from: <a phase that
+    cannot reach DONE>` and the BOARD carries T-N under `## DONE`, but the
+    journal proves T-N only up to its last lifecycle phase -- no `transition
+    to SHIP` tagged T-N and no `finish-` event for it. Every strict reader
+    refuses the illegal pair, and the surface is one hand-edit away from
+    being "fixed" by fabrication; this classifier exists so neither happens.
+
+    Explicit boundaries, each a DIFFERENT class with its own owner:
+
+      * a block-park (`BUILD/VERIFY/REVIEW/SHIP -> DONE` with the live block
+        DEC) never reaches here -- the caller carved it out first;
+      * a `finish-` event for THIS ticket means the journal DID record the
+        completion -- not a gap, whatever else is wrong;
+      * a LEGACY-generation DONE row with no evidence in either grammar is
+        the `legacy-done-review` operator decision, never this class;
+      * DONE board fields (closure_mode, owner, claim_time, verify) classify
+        the record but PROVE nothing about the journal -- the journal alone
+        decides (report S7);
+      * a ticket NOT under `## DONE`, or no board at all, is STATE-side drift
+        alone and stays with the plain T-1318 repair path.
+
+    Returns the gap descriptor (`ticket`, `last_event`, `last_proven`,
+    `source`) that the STATE repairs and the BOARD atom both cite, so every
+    surface names the same evidence.
+    """
+    if board is None or ticket is None or number is None or target is None:
+        return None
+    if state.get("phase") != "DONE":
+        return None
+    row = (board.get("tickets", {}) or {}).get(ticket)
+    if not isinstance(row, dict) or row.get("section") != "## DONE":
+        return None
+    if _is_legacy_generation(ticket, _closure_contract_frontier(board),
+                             _mechanized_ticket_ids(events)):
+        return None
+    budget = state.get("last_event")
+    budget = budget if isinstance(budget, int) and not isinstance(budget, bool) else None
+    epoch = _ticket_epoch(events, ticket, budget)
+    for event in events or ():
+        op_id = str(event.get("op_id") or "")
+        if (op_id.startswith("finish-") and event.get("ticket") == ticket
+                and event.get("event", 0) >= epoch):
+            return None
+    return {
+        "ticket": ticket,
+        "last_event": number,
+        "last_proven": target,
+        "source": source,
+    }
 
 
 def _state_phase_repairs(state: dict, events, board: dict | None = None) -> list[dict]:
@@ -1579,22 +1836,105 @@ def _state_phase_repairs(state: dict, events, board: dict | None = None) -> list
             }
         ]
 
-    last_event = state.get("last_event")
-    budget = (
-        last_event
-        if isinstance(last_event, int) and not isinstance(last_event, bool)
-        else None
+    task = state.get("task")
+    bound = task if isinstance(task, str) and re.fullmatch(r"T-\d+", task) else None
+    scoped, number, target, source = _proven_pair(state, events, bound)
+    if source is None:
+        # A proving event with no predecessor proves a DESTINATION only. The
+        # state's own `transition_from` then remains the only claimed source,
+        # and the DFA check below decides whether that claim is commitable.
+        source = transition_from
+    gap = _current_done_journal_gap(
+        state, board, events, bound, number, target, source
     )
-    chain = _transition_chain(events, budget)
-    if not chain:
+    if gap is not None:
+        row = board["tickets"][bound]
+        if any(t.get("section") == "## DOING" for t in board["tickets"].values()):
+            return blocked("CURRENT_DONE_JOURNAL_GAP: another DOING Work owns the seat")
+        if not row.get("fields", {}).get("owner") or not row.get("fields", {}).get("claim_time"):
+            return blocked("CURRENT_DONE_JOURNAL_GAP: no complete claim to restore")
+        if not (target in _phases.TICKET_BEARING_PHASES and source in _phases.ALL_PHASES
+                and (source == target or _phases.transition_legal(source, target))):
+            return blocked("CURRENT_DONE_JOURNAL_GAP: no legal ticket-local phase pair")
+        # CURRENT_DONE_JOURNAL_GAP (T-1572): the STATE and the BOARD both
+        # claim a terminal the journal never recorded for THIS ticket. The
+        # conservative route restores the ticket's OWN last proven lifecycle
+        # phase and lets the ordinary REVIEW -> SHIP -> finish lifecycle
+        # re-establish completion -- no SHIP or finish event is fabricated,
+        # and the BOARD side of the plan is appended by the caller under the
+        # same approval, so the two surfaces can never disagree.
+        canonical_next = f"PHASE {gap['last_proven']} {gap['ticket']}"
+        reason_tail = (
+            f"the journal proves {gap['ticket']} at most {gap['last_proven']} "
+            f"(E-{gap['last_event']}), no finish event for this lifecycle, while STATE claims "
+            "DONE -- the current-done-journal-gap is repaired to the ticket's "
+            "own last proven lifecycle phase and completion is re-established "
+            "by the canonical lifecycle, never by a fabricated event (T-1572)"
+        )
+        repairs: list[dict] = []
+        if phase != gap["last_proven"]:
+            repairs.append(
+                {
+                    "field": "phase",
+                    "from": phase,
+                    "to": gap["last_proven"],
+                    "surface": "state",
+                    "_class": "current-done-journal-gap",
+                    "gap": gap,
+                    "reason": f"phase {phase!r} cannot be reconciled: {reason_tail}",
+                }
+            )
+        if gap["source"] is not None and transition_from != gap["source"]:
+            repairs.append(
+                {
+                    "field": "transition_from",
+                    "from": transition_from,
+                    "to": gap["source"],
+                    "surface": "state",
+                    "_class": "current-done-journal-gap",
+                    "gap": gap,
+                    "reason": (
+                        f"transition_from {transition_from!r} does not reach "
+                        f"{gap['last_proven']}; the ticket's own chain proves "
+                        f"the pair {gap['source']} -> {gap['last_proven']} "
+                        "(T-1572)"
+                    ),
+                }
+            )
+        if state.get("next_action") != canonical_next:
+            repairs.append(
+                {
+                    "field": "next_action",
+                    "from": state.get("next_action"),
+                    "to": canonical_next,
+                    "surface": "state",
+                    "_class": "current-done-journal-gap",
+                    "gap": gap,
+                    "reason": (
+                        f"next_action must point at the restored lifecycle: "
+                        f"the shared router projects {canonical_next!r} from "
+                        f"the proven phase/task pair ({reason_tail})"
+                    ),
+                }
+            )
+        return repairs
+    if not scoped:
+        if bound is not None:
+            return blocked(
+                f"phase {phase!r} with transition_from {transition_from!r} "
+                f"cannot be reconciled for task {bound}: no legal "
+                f"`transition to <PHASE>` event tagged [{bound}] at or before "
+                "STATE.last_event proves a destination for THIS ticket, and an "
+                "unrelated ticket's transitions are not evidence for it -- an "
+                "unprovable phase repair refuses with zero bytes written "
+                "(T-1572)"
+            )
         return blocked(
             f"phase {phase!r} with transition_from {transition_from!r} cannot be "
             "reconciled: no legal `transition to <PHASE>` event at or before "
             "STATE.last_event proves a replacement, and an unprovable phase "
             "repair refuses with zero bytes written (T-1318)"
         )
-    number, target = chain[-1]
-    source = chain[-2][1] if len(chain) > 1 else transition_from
     if not (
         target in _phases.ANY_FROM
         or (source in _phases.ALL_PHASES and _phases.transition_legal(source, target))
@@ -1651,6 +1991,24 @@ def _repair_summary(board_drifts: list[dict], state_repairs: list[dict]) -> str:
             continue
         parts.append(f"{repair['field']} {repair['from']!r}->{repair['to']!r}")
     return "; ".join(parts)
+
+
+def _foreign_tail_route(project_root: Path) -> str | None:
+    """`saipen recover quarantine-log-tail` when that repair is PROVEN, else None.
+
+    Asked only after the strict read refused HISTORY_LEDGER_CORRUPT. The same
+    `foreign_tail_cut` proof the repair runs decides it, so the route is never
+    advertised for damage the repair would refuse.
+    """
+    from .operations import TAIL_QUARANTINE_OBSERVABLE, _read
+
+    try:
+        docs, _state, _board, _tail = _read(project_root, observe=TAIL_QUARANTINE_OBSERVABLE)
+    except Exception:  # any refusal means "not provable"
+        return None
+    if docs.get("_foreign_tail") is None:
+        return None
+    return "saipen recover quarantine-log-tail"
 
 
 def _blocked_recovery_fields(
@@ -1794,7 +2152,18 @@ def _combined_decisions(
     decisions: list[dict] = []
     parts = ["saipen", "recover"]
     adopt_ids = sorted({str(r["ticket"]) for r in adoption_refusals if r.get("ticket")})
-    attest_ids = sorted({str(r["ticket"]) for r in lifecycle_refusals if r.get("ticket")})
+    # T-1587: --attest-legacy-done answers ONLY the legacy-done-review
+    # refusal. A refusal of any OTHER lifecycle class (a stale-closure row
+    # that repeats a field) has no attestation to give -- sweeping every
+    # refused ticket into the flag advertised a command that could not
+    # commit, the exact dead end T-1363 closed for the split decisions.
+    attest_ids = sorted(
+        {
+            str(r["ticket"])
+            for r in lifecycle_refusals
+            if r.get("ticket") and r.get("kind") == "legacy-done-review"
+        }
+    )
     if adopt_ids and approval_id is None:
         parts += ["--adopt-legacy", ",".join(adopt_ids)]
         decisions.append(
@@ -1995,9 +2364,17 @@ def reconcile_protocol_state(
             "detail": str(exc),
         }
         if result["code"] == "HISTORY_LEDGER_CORRUPT":
+            # Unrecoverable is a claim that no local mutation can reconstruct
+            # the truth. A proven foreign tail reconstructs nothing -- it cuts
+            # lines no checkpoint bound -- so that one shape names its exit
+            # instead of stranding the project (29.09.26).
+            quarantine = _foreign_tail_route(project_root)
             result.update(
                 _blocked_recovery_fields(
-                    terminal_disposition="FORENSICALLY_UNRECOVERABLE",
+                    command=quarantine,
+                    terminal_disposition=(
+                        None if quarantine else "FORENSICALLY_UNRECOVERABLE"
+                    ),
                     evidence_reference=".saipen/LOG.md",
                     reason_code="HISTORY_LEDGER_CORRUPT",
                 )
@@ -2013,22 +2390,38 @@ def reconcile_protocol_state(
     strict_state_error = docs.get("_state_error", "")
 
     board_drifts = _checkbox_drifts(board_text)
+    phase_repairs = _state_phase_repairs(state, events, _board)
+    gap = next((r["gap"] for r in phase_repairs if r.get("gap")), None)
     state_repairs = (
         _state_output_field_repairs(state)
         + _stale_improve_gate_repairs(state, _board)
         + _state_marker_repairs(state, log_tail)
         + _state_counter_repairs(state, events)
         + _tripped_valve_repairs(state)
-        + _state_phase_repairs(state, events, _board)
+        + phase_repairs
         + _state_blocker_repairs(state, _board, resolve_blocker)
-        + _state_next_action_repairs(
+        + ([] if gap else _state_next_action_repairs(
             state, state_text, board_text, agent, project_root, resolve_next_action
-        )
+        ))
     )
     adoption_repairs = _board_adoption_repairs(_board, docs.get("_history"), adopt_legacy)
     lifecycle_all = _board_lifecycle_repairs(
         _board, events, state, docs.get("_history")
     )
+    if gap:
+        lifecycle_all = [r for r in lifecycle_all if r.get("ticket") != gap["ticket"]]
+        dropped = _reopen_field_removals(_board["tickets"][gap["ticket"]].get("raw", ""))
+        lifecycle_all.append({
+            "field": "board", "surface": "board", "kind": "section-move",
+            "_class": "current-done-journal-gap", "ticket": gap["ticket"],
+            "from_section": "## DONE", "to_section": "## DOING",
+            "fields": dropped,
+            "requires_approval": True, "generation": "current",
+            "reason": f"CURRENT_DONE_JOURNAL_GAP: restore {gap['ticket']} to "
+                      f"its own proven {gap['last_proven']} lifecycle; preserve original bytes"
+                      + ("; drop from the live row, kept in the evidence copy: "
+                         + ", ".join(dropped) if dropped else ""),
+        })
     # A refusal atom is an OPERATOR DECISION, never a mutation. It is reported
     # with its exact command and is excluded from the applicable plan, so
     # approving the plan can never silently apply it.
@@ -2057,7 +2450,8 @@ def reconcile_protocol_state(
     attest_ids = sorted(r["ticket"] for r in adoption_repairs if r.get("refuse"))
     approval_needed = lifecycle_candidates if approved_repair_id is None else []
     repair_id = _plan_repair_id(
-        board_drifts, state_repairs, lifecycle_all, attest_ids
+        board_drifts, state_repairs, lifecycle_all, attest_ids,
+        {name: docs[name].raw_hash for name in ("state", "board", "log")},
     )
     if approved_repair_id is not None:
         # SRC-043: approval binds to the WHOLE plan. A recomputed surface that no
@@ -2201,10 +2595,11 @@ def reconcile_protocol_state(
                     reason_code="BOARD_RECORD_UNADDRESSABLE",
                 ),
             }
+    approval_result = None
     if approval_needed and approved_repair_id is None:
         # One approval authorizes the whole plan. Bare recover never reopens a
         # phantom DONE silently; it names the exact trusted command instead.
-        return {
+        approval_result = {
             "ok": False,
             "code": "RECONCILE_REAUTH_REQUIRED",
             "detail": "; ".join(r["reason"] for r in approval_needed),
@@ -2226,6 +2621,12 @@ def reconcile_protocol_state(
                 decisions=decision_list,
             ),
         }
+        # Advertise only after the SAME complete proposal passes validation.
+        # A plan that still owes an operator refusal decision cannot be built
+        # yet: it keeps the one combined answer, refusals included.
+        if lifecycle_refusals or any(r.get("refuse") for r in adoption_repairs):
+            return approval_result
+        lifecycle_repairs = lifecycle_candidates
     if lifecycle_refusals:
         # LEGACY COMPATIBILITY BOUNDARY. A `## DONE` record older than this
         # project's closure contract, with no execution evidence in either
@@ -2464,7 +2865,26 @@ def reconcile_protocol_state(
             }
     new_board = _apply_checkbox_repairs(board_text, board_drifts) if board_drifts else board_text
     if lifecycle_repairs:
-        new_board = _apply_lifecycle_repairs(new_board, lifecycle_repairs)
+        try:
+            new_board = _apply_lifecycle_repairs(new_board, lifecycle_repairs)
+        except ValueError as exc:
+            # A malformed record (a repeated field) cannot be edited safely, so
+            # the plan is undeliverable and no route may be advertised for it.
+            return {
+                "ok": False,
+                "code": "OPERATOR_DECISION_REQUIRED",
+                "detail": f"a BOARD lifecycle repair cannot be applied: {exc}",
+                "residual_defects": [str(exc)],
+                "operator_decision": _residue_decision([str(exc)]),
+                "changed": {"board": board_drifts, "state": state_repairs},
+                "strict_state_error": strict_state_error or None,
+                "dry_run": dry_run,
+                **_blocked_recovery_fields(
+                    terminal_disposition="OPERATOR_DECISION_REQUIRED",
+                    evidence_reference=".saipen/BOARD.md",
+                    reason_code="BOARD_RECORD_UNADDRESSABLE",
+                ),
+            }
 
     from .state import patch_state, remove_state_fields
 
@@ -2476,7 +2896,11 @@ def reconcile_protocol_state(
     }
     owned["last_event"] = event
     owned["updated"] = utc
-    owned["agent"] = agent
+    # T-1578: the CURRENT_DONE_JOURNAL_GAP route REOPENS an existing ticket
+    # under its own preserved owner, so the committed seat is RESTORED to that
+    # owner -- never transferred to whoever executed the recovery. The LOG
+    # event still names the real actor, so provenance is not rewritten.
+    owned["agent"] = _restored_seat(_board, gap) or agent
     try:
         new_state = patch_state(state_text, owned)
         if remove_fields:
@@ -2529,6 +2953,9 @@ def reconcile_protocol_state(
             "dry_run": dry_run,
         }
 
+    if approval_result is not None:
+        return approval_result
+
     # T-1326 P0: the ONE canonical LOG target set. Every artifact `prepare_event`
     # produced for an oversized DEC -- here, the operator's resolve-blocker
     # decision and each legacy-adoption rationale -- joins the SAME journaled
@@ -2576,6 +3003,18 @@ def reconcile_protocol_state(
             TargetPlan(preserved_rel, "generic", original, "", hash_bytes(original))
         )
         preserved_path = preserved_rel
+
+    if gap:
+        from .journal import hash_bytes
+        from .plan import TargetPlan
+
+        # Preserve evidence before canonical writes, including crash prefixes.
+        originals = []
+        for name in ("STATE", "BOARD", "LOG"):
+            original = (project_root / ".saipen" / (name + ".md")).read_bytes()
+            relative = f".saipen/recovery/terminal-gap/{op_id}.{name}.md"
+            originals.append(TargetPlan(relative, "generic", original, "", hash_bytes(original)))
+        targets = originals + targets
 
     # T-1354's mechanism, finally used by the verb that needs it most. The
     # post-write verifier judges the whole project, so a repair that strictly

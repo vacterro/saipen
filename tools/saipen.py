@@ -18,7 +18,8 @@ import json
 import os
 import re
 import sys
-from contextlib import suppress
+from contextlib import redirect_stdout, suppress
+from io import StringIO
 from pathlib import Path
 
 # Public commands promise not to dirty the project merely by importing their
@@ -28,7 +29,11 @@ sys.dont_write_bytecode = True
 
 from saipen_engine import codec, snapshot
 from saipen_engine.board import parse_board, ticket_is_workable
-from saipen_engine.commands import load_shortcut_table, resolve_shortcut
+from saipen_engine.commands import (
+    load_shortcut_table,
+    resolve_shortcut,
+    split_cli_compound_argv,
+)
 from saipen_engine.journal import auto_recover_pending
 from saipen_engine.operations import (
     _ticket_add_route,
@@ -725,12 +730,28 @@ def _validate(project_root: Path, as_json: bool) -> int:
             as_json,
         )
         return 1
+    # CORE-006: evaluate block-park semantics against the COMPLETE sealed+active
+    # history, exactly as validate_project does. Without `sealed_events` the
+    # active LOG is parsed raw and a log-compacted structural active-block event
+    # arrives at detail_authority_valid() with no detail_integrity key --
+    # `planned_detail_events` is empty by design on the live path -- so the
+    # block-parked phase -> DONE shape could never prove itself here and this
+    # gate refused a project every other reader certified. Reading the history
+    # can only ADD evidence: on any failure it degrades to the previous call
+    # rather than raising a new failure mode.
+    try:
+        from saipen_engine.log import read_history_snapshot
+
+        history = read_history_snapshot(project_root)
+    except Exception:
+        history = None
     try:
         errors = validate_texts(
             codec.read_doc(saipen / "STATE.md"),
             codec.read_doc(saipen / "BOARD.md"),
             codec.read_doc(saipen / "LOG.md"),
             current_agent=_agent_for(project_root),
+            sealed_events=history,
         )
     except Exception as exc:
         # A gate that cannot run is not a gate that passed: report the
@@ -781,6 +802,39 @@ def _validate(project_root: Path, as_json: bool) -> int:
     healthy = bool(decision["healthy"])
     code = CONFORMANCE_UNHEALTHY
     detail = f"conformance is {decision['status']}: {decision['reason']}".strip()
+    # T-4: a verdict is only as trustworthy as the engine that produced it.
+    # When the running install is not the one STATE names, this receipt was
+    # written by an install no reader can name -- and VERSION cannot separate
+    # the two, because divergent trees report the same number. Gate here
+    # rather than at routing: a wrong install must fail conformance loudly,
+    # but refusing ordinary commands would break legitimate sub-instances.
+    #
+    # Reported on its own field rather than folded into `detail`, so it stays
+    # visible when some OTHER gate is already failing -- an ambiguous install
+    # must never hide behind an unrelated verdict.
+    from saipen_engine.state import (
+        install_content_identity as _install_content_identity,
+        running_home as _running_home,
+        running_home_mismatch_error as _running_home_mismatch_error,
+    )
+
+    _state_fields, _state_err = parse_state_or_error(
+        codec.read_doc(_state_path(project_root))
+    )
+    _home_problem = (
+        None
+        if _state_fields is None
+        else _running_home_mismatch_error(_state_fields.get("saipen_home"))
+    )
+    _install_block = {
+        "running_home": str(_running_home()),
+        "install_fingerprint": _install_content_identity(),
+        "mismatch": _home_problem,
+    }
+    if _home_problem and healthy:
+        healthy = False
+        code = "INSTALL_IDENTITY_MISMATCH"
+        detail = _home_problem
     if run.error:
         code = CONFORMANCE_UNAVAILABLE
         detail = (
@@ -804,6 +858,7 @@ def _validate(project_root: Path, as_json: bool) -> int:
         "structural_gate": "pass",
         "validator": _validator_run_block(run),
         "conformance_status": decision["status_block"],
+        "install_identity": _install_block,
     }
     if healthy:
         payload["detail"] = (
@@ -1208,6 +1263,20 @@ def _guard(project_root: Path, args: list[str], as_json: bool) -> int:
                 "declared": entry.get("declared_strength"),
                 "effective": effective_strength(name)["effective"],
                 "reason": effective_strength(name)["reason"],
+                # T-1553 F: the FINAL-RESPONSE claim, reported separately from
+                # tool-admission strength. Reading one number as the other is
+                # exactly how "the response contract is fail-closed everywhere"
+                # gets said about a host that can only be asked politely.
+                "response_enforcement": entry.get("response_enforcement"),
+                "response_hook": entry.get("response_hook"),
+                # PROTOCOL-ADMISSION-01: each enforcement boundary is its own
+                # claim. A host strong at the final message can be weak (or
+                # unavailable) at admission, and one number must never stand in
+                # for the others.
+                "pre_output_interception": entry.get("pre_output_interception"),
+                "stop_output_interception": entry.get("stop_output_interception"),
+                "admission_enforcement": entry.get("admission_enforcement"),
+                "style_enforcement": entry.get("style_enforcement"),
             }
             for name, entry in ADAPTER_REGISTRY.items()
         }
@@ -1447,8 +1516,11 @@ def _status(project_root: Path, as_json: bool) -> int:
     if _owed.get("owed"):
         waiting_on_you.append(
             f"{_owed['code']}: this project owes its last refused ingress"
-            + (f" ({_owed.get('bytes')} bytes, sha256 {_owed.get('digest')})"
-               if _owed.get("digest") else "")
+            + (
+                f" ({_owed.get('bytes')} bytes, sha256 {_owed.get('digest')})"
+                if _owed.get("digest")
+                else ""
+            )
             + f" -- carry the ORIGINAL bytes with `{_owed['canonical_next_command']}`,"
             + f" or supersede it with `{_owed['supersede_command']}`"
         )
@@ -1524,6 +1596,22 @@ def _status(project_root: Path, as_json: bool) -> int:
         "pending_ops": pending,
         "conflict_ops": conflicts,
     }
+    if state.get("phase") == "CLEAN":
+        payload["clean_execution"] = "PENDING"
+    elif state.get("phase") == "DONE" and state.get("transition_from") == "CLEAN":
+        completed = False
+        # A DONE status can accumulate later checkpoints. Bind the completion
+        # marker to the latest CLEAN entry, not to an arbitrary tail length or
+        # a marker from an older CLEAN attempt.
+        for event in reversed(snap.history_events):
+            if event.get("taxonomy") != "RUN":
+                continue
+            event_text = str(event.get("text") or "")
+            if event_text == "transition to CLEAN":
+                break
+            if event_text.startswith("clean -> done @"):
+                completed = True
+        payload["clean_execution"] = "COMPLETED" if completed else "UNPROVEN"
     # Restore Milestones are a separate, optional authority domain.  Status
     # reads bounded metadata only; full payload integrity belongs to create,
     # undo and validate, never the common `sss` hot path.
@@ -1782,6 +1870,37 @@ def _status(project_root: Path, as_json: bool) -> int:
             "automation-projection-failed", f"{type(exc).__name__}: {exc}"
         )
 
+    # T-1576: the derived conditional efficiency KPI of the ticket in focus --
+    # the active Work, else the last one finished. Assembled LAST from the
+    # history already read, so nothing above can depend on it; a fault only
+    # withholds it. JSON only: the text status prints no KPI line.
+    from saipen_engine.efficiency import MACHINE_NAME as _kpi_name
+    from saipen_engine.efficiency import kpi_for_ticket as _kpi_for_ticket
+
+    try:
+        _kpi_ticket = str(state.get("task") or "").strip()
+        if not re.fullmatch(r"T-\d+", _kpi_ticket):
+            _kpi_ticket = next(
+                (
+                    ev.get("ticket")
+                    for ev in reversed(history_events or [])
+                    if ev.get("ticket")
+                    and str(ev.get("text", "")).startswith("ticket finished via SAIOPS")
+                ),
+                None,
+            )
+        payload[_kpi_name] = _kpi_for_ticket(
+            list(history_events or []),
+            _kpi_ticket,
+            validation=(payload.get("conformance_status") or {}).get("status"),
+        )
+    except Exception as exc:
+        payload[_kpi_name] = {
+            "percent": None,
+            "confidence": "UNKNOWN",
+            "withheld": f"kpi derivation failed: {type(exc).__name__}",
+        }
+
     _emit(payload, as_json)
     return 0
 
@@ -1843,6 +1962,7 @@ def _continue_improve_fallthrough(
                 "stop_reason": "idle",
             }
         _emit(payload, as_json)
+
     from saipen_engine.continue_fallback import (
         active_cycle_status,
         read_marker,
@@ -2078,8 +2198,14 @@ def _route_once(project_root: Path) -> dict:
             "pending_ops": pending,
             "parked_work": parked or None,
         }
-        for key in ("conformance_status", "canonical_next_command", "remediation",
-                    "diagnostic", "repair_status", "terminal"):
+        for key in (
+            "conformance_status",
+            "canonical_next_command",
+            "remediation",
+            "diagnostic",
+            "repair_status",
+            "terminal",
+        ):
             if key in routed:
                 emitted[key] = routed[key]
         route["emitted"] = emitted
@@ -2092,7 +2218,7 @@ def _turn_entry_telegrams(project_root: Path, state: dict) -> dict:
     try:
         from saipen_engine.telegrams import turn_entry
 
-        return turn_entry(project_root, state)
+        return turn_entry(project_root, state, seat=_start_actor(project_root)[0])
     except Exception as exc:  # the read must never fail `continue`
         return {"state": "ERROR", "detail": f"turn-entry telegram read failed: {exc}"[:300]}
 
@@ -2210,13 +2336,13 @@ def _continue_chain(
                 ticket = routed.get("ticket")
                 outcome = apply_append(project_root, str(routed.get("receipt")), actor=agent)
                 step_ok, step_code, failure_payload = (
-                    bool(outcome.get("ok")), str(outcome.get("code")), outcome
+                    bool(outcome.get("ok")),
+                    str(outcome.get("code")),
+                    outcome,
                 )
                 operation_name = "apply_append"
             else:
-                doing = next(
-                    t for t in board["tickets"].values() if t["section"] == "## DOING"
-                )
+                doing = next(t for t in board["tickets"].values() if t["section"] == "## DOING")
                 ticket = doing["id"]
                 if kind == continue_loop.FINISH_AT_SHIP:
                     result = finish_ticket(project_root, ticket, agent)
@@ -2229,7 +2355,9 @@ def _continue_chain(
                     result = apply_claim(project_root, ticket, agent, explicit=True)
                     operation_name = "claim"
                 step_ok, step_code, failure_payload = (
-                    bool(result.ok), result.code, result.to_dict()
+                    bool(result.ok),
+                    result.code,
+                    result.to_dict(),
                 )
             after_route = _route_once(project_root) if step_ok else None
             trace.append(
@@ -2320,8 +2448,12 @@ def _continue_chain(
         # A gate may refuse only AFTER preceding deterministic steps finish.
         # Preserve that refusal exactly; the ordinary success projection would
         # otherwise turn the final red boundary into ok:true and exit 0.
-        payload = dict(route["emitted"]) if route["emitted"] is not None else _route_payload(
-            project_root, route, reconciliation=reconciliation, dry_run=False, kind=kind
+        payload = (
+            dict(route["emitted"])
+            if route["emitted"] is not None
+            else _route_payload(
+                project_root, route, reconciliation=reconciliation, dry_run=False, kind=kind
+            )
         )
         payload["continue_trace"] = trace
         payload["iterations"] = iterations
@@ -2351,9 +2483,14 @@ def _next_action(
     # triggers a mutation. A `--dry-run` is purely observational -- the spec
     # forbids the fallthrough from generating work, and observers must see the
     # same idle-maintain verdict the prior release carried.
-    if fallthrough_to_improve and not dry_run and kind in (
-        continue_loop.FINISH_AT_SHIP,
-        continue_loop.APPLY_APPEND,
+    if (
+        fallthrough_to_improve
+        and not dry_run
+        and kind
+        in (
+            continue_loop.FINISH_AT_SHIP,
+            continue_loop.APPLY_APPEND,
+        )
     ):
         return _continue_chain(
             project_root,
@@ -2363,7 +2500,12 @@ def _next_action(
         )
     if fallthrough_to_improve and not dry_run and kind == continue_loop.IDLE_MAINTAIN:
         return _continue_improve_fallthrough(
-            project_root, as_json, dry_run, route["routed"], route["parked"], route["pending"],
+            project_root,
+            as_json,
+            dry_run,
+            route["routed"],
+            route["parked"],
+            route["pending"],
             reconciliation,
         )
     _emit(
@@ -2508,6 +2650,7 @@ def _recover(project_root: Path, args: list[str], as_json: bool, dry_run: bool =
     approved_repair_id: str | None = None
     migrate_generation = False
     normalize_log_requested = False
+    quarantine_tail_requested = False
     # T-1382: the OPERATOR'S duplicate-id decision, carried as content-bound
     # record digests. `--resolve-duplicate-id <T-###>` names the duplicated
     # identity; `--keep` / `--reassign` name the two records by their digest.
@@ -2555,9 +2698,7 @@ def _recover(project_root: Path, args: list[str], as_json: bool, dry_run: bool =
         token = args[index]
         if token == "--adopt-legacy":
             if index + 1 >= len(args):
-                return _refuse(
-                    "usage: recover --adopt-legacy <T-###[,T-###...]> (missing id list)"
-                )
+                return _refuse("usage: recover --adopt-legacy <T-###[,T-###...]> (missing id list)")
             ids = [t.strip() for t in args[index + 1].split(",") if t.strip()]
             if not ids or any(re.fullmatch(r"T-\d+", t) is None for t in ids):
                 return _refuse(
@@ -2570,8 +2711,7 @@ def _recover(project_root: Path, args: list[str], as_json: bool, dry_run: bool =
         if token == "--attest-legacy-done":
             if index + 1 >= len(args):
                 return _refuse(
-                    "usage: recover --attest-legacy-done <T-###[,T-###...]> "
-                    "(missing id list)"
+                    "usage: recover --attest-legacy-done <T-###[,T-###...]> (missing id list)"
                 )
             ids = [t.strip() for t in args[index + 1].split(",") if t.strip()]
             if not ids or any(re.fullmatch(r"T-\d+", t) is None for t in ids):
@@ -2601,6 +2741,13 @@ def _recover(project_root: Path, args: list[str], as_json: bool, dry_run: bool =
             normalize_log_requested = True
             index += 1
             continue
+        if token == "quarantine-log-tail":
+            # The exit for a foreign suffix after the checkpointed tail
+            # (29.09.26). No argument: the cut is PROVEN from the LOG and
+            # STATE.last_event, never named by the caller.
+            quarantine_tail_requested = True
+            index += 1
+            continue
         if token == "--resolve-duplicate-id":
             if index + 1 >= len(args):
                 return _refuse(
@@ -2618,9 +2765,7 @@ def _recover(project_root: Path, args: list[str], as_json: bool, dry_run: bool =
             continue
         if token in ("--keep", "--reassign"):
             if index + 1 >= len(args):
-                return _refuse(
-                    f"usage: recover {token} <64-hex record digest> (missing digest)"
-                )
+                return _refuse(f"usage: recover {token} <64-hex record digest> (missing digest)")
             candidate = args[index + 1].strip().lower()
             if re.fullmatch(r"[0-9a-f]{64}", candidate) is None:
                 return _refuse(
@@ -2636,9 +2781,7 @@ def _recover(project_root: Path, args: list[str], as_json: bool, dry_run: bool =
             continue
         if token == "--apply-approved-repair":
             if index + 1 >= len(args):
-                return _refuse(
-                    "usage: recover --apply-approved-repair <repair_id> (missing id)"
-                )
+                return _refuse("usage: recover --apply-approved-repair <repair_id> (missing id)")
             candidate = args[index + 1].strip()
             if re.fullmatch(r"[0-9a-f]{64}", candidate) is None:
                 return _refuse(
@@ -2660,9 +2803,7 @@ def _recover(project_root: Path, args: list[str], as_json: bool, dry_run: bool =
             # treating the separator as a flag boundary made every legal WAIT
             # value unsuppliable and dropped the rest of the line, `--json`
             # included, into the unknown-argument refusal.
-            while index < len(args) and not (
-                args[index].startswith("--") and len(args[index]) > 2
-            ):
+            while index < len(args) and not (args[index].startswith("--") and len(args[index]) > 2):
                 words.append(args[index])
                 index += 1
             proposed = " ".join(words).strip()
@@ -2696,9 +2837,7 @@ def _recover(project_root: Path, args: list[str], as_json: bool, dry_run: bool =
             # treating the separator as a flag boundary made every legal WAIT
             # value unsuppliable and dropped the rest of the line, `--json`
             # included, into the unknown-argument refusal.
-            while index < len(args) and not (
-                args[index].startswith("--") and len(args[index]) > 2
-            ):
+            while index < len(args) and not (args[index].startswith("--") and len(args[index]) > 2):
                 words.append(args[index])
                 index += 1
             decision = " ".join(words).strip()
@@ -2720,11 +2859,12 @@ def _recover(project_root: Path, args: list[str], as_json: bool, dry_run: bool =
         # `recover`. `inspect` and `resolve` carry their own arity checks below.
         return _refuse(
             f"unknown recover argument(s) {args!r}; usage: recover "
-            '[--adopt-legacy <T-###[,T-###...]>] '
-            '[--attest-legacy-done <T-###[,T-###...]>] '
+            "[--adopt-legacy <T-###[,T-###...]>] "
+            "[--attest-legacy-done <T-###[,T-###...]>] "
             "[--resolve-duplicate-id <T-###> --keep <digest> --reassign <digest>] "
             "[--migrate-generation] "
             "[normalize-log] "
+            "[quarantine-log-tail] "
             "[resolve-blocker <decision>] "
             "[resolve-next-action <next-action>] "
             "[--apply-approved-repair <repair_id>] "
@@ -2747,6 +2887,7 @@ def _recover(project_root: Path, args: list[str], as_json: bool, dry_run: bool =
             keep_record_digest is None
             or reassign_record_digest is None
             or normalize_log_requested
+            or quarantine_tail_requested
             or migrate_generation
             or adopt_legacy
             or attest_legacy_done
@@ -2776,6 +2917,25 @@ def _recover(project_root: Path, args: list[str], as_json: bool, dry_run: bool =
         )
         _emit(resolved, as_json)
         return 0 if resolved.get("ok") else 1
+    if quarantine_tail_requested:
+        # A targeted repair like `normalize-log`: it runs before the
+        # pending-operation machinery, which reads the ledger this repair
+        # exists to make readable, and combines with nothing.
+        if args or migrate_generation or normalize_log_requested:
+            return _refuse(
+                "recover quarantine-log-tail takes no other argument; it proves "
+                "the cut from the LOG and STATE.last_event"
+            )
+        if not dry_run and _negotiate_capability(project_root) == "read-only":
+            return _capability_refusal(as_json)
+        _ho = _ensure_handover(project_root, as_json, dry_run)
+        if _ho is not None:
+            return _ho
+        from saipen_engine.operations import quarantine_log_tail
+
+        quarantined = quarantine_log_tail(project_root, _agent_for(project_root), dry_run=dry_run)
+        _emit(quarantined.to_dict(), as_json)
+        return 0 if quarantined.ok else 1
     if normalize_log_requested:
         # T-1356: a targeted repair, not a journal replay. It runs before the
         # pending-operation machinery for the same reason `--migrate-generation`
@@ -3027,10 +3187,13 @@ def _recover(project_root: Path, args: list[str], as_json: bool, dry_run: bool =
         # so an explicit decision against a broken surface still reports truth.
         checkpoint_present = (project_root / ".saipen" / "STATE.md").is_file()
         blocked_checkpoint = block in ("PROTOCOL_STATE_INVALID", "RECOVERY_REQUIRED")
-        if adopt_legacy or attest_legacy_done or resolve_blocker or resolve_next_action or (
-            approved_repair_id
-        ) or (
-            blocked_checkpoint and checkpoint_present
+        if (
+            adopt_legacy
+            or attest_legacy_done
+            or resolve_blocker
+            or resolve_next_action
+            or (approved_repair_id)
+            or (blocked_checkpoint and checkpoint_present)
         ):
             reconciliation = reconcile_protocol_state(
                 project_root,
@@ -3136,8 +3299,7 @@ def _sub(project_root: Path, args: list[str], as_json: bool, dry_run: bool) -> i
                 {
                     "ok": False,
                     "code": "VALIDATION_FAILED",
-                    "detail": "sub reconcile takes exactly <role> --authority "
-                    "SRC-###",
+                    "detail": "sub reconcile takes exactly <role> --authority SRC-###",
                 },
                 as_json,
             )
@@ -3793,9 +3955,17 @@ def _continue(
     if claim_state is not None and claim_board is not None:
         active = claim_board["tickets"].get(claim_state.get("task"), {})
         if watchdog.can_continue_claim(project_root, active):
-            _emit({"ok": True, "action": f"saipen claim {active['id']}",
-                   "ticket": active["id"], "reason": "fenced-generation-continuation",
-                   "load": "saipen/OPS.md", "dry_run": dry_run}, as_json)
+            _emit(
+                {
+                    "ok": True,
+                    "action": f"saipen claim {active['id']}",
+                    "ticket": active["id"],
+                    "reason": "fenced-generation-continuation",
+                    "load": "saipen/OPS.md",
+                    "dry_run": dry_run,
+                },
+                as_json,
+            )
             return 0
 
     reconciliation = reconcile_protocol_state(
@@ -4122,9 +4292,7 @@ def _audit_manifest(project_root: Path, rest: list[str], as_json: bool, dry_run:
         return 0
     if _negotiate_capability(project_root) == "read-only":
         return _capability_refusal(as_json)
-    result = audit_manifest.ensure(
-        project_root, protocol_dir=PROTOCOL_DIR, force=force
-    )
+    result = audit_manifest.ensure(project_root, protocol_dir=PROTOCOL_DIR, force=force)
     _emit(result, as_json)
     return 0 if result.get("ok") else 1
 
@@ -4202,8 +4370,7 @@ def _audit(project_root: Path, args: list[str], as_json: bool, dry_run: bool) ->
                 "ok": False,
                 "code": "VALIDATION_FAILED",
                 "detail": (
-                    "audit needs a subcommand: "
-                    "status|inspect|trace|ingest|enqueue|manifest"
+                    "audit needs a subcommand: status|inspect|trace|ingest|enqueue|manifest"
                 ),
             },
             as_json,
@@ -4704,8 +4871,9 @@ def _source_append_command(
         return _capability_refusal(as_json)
     if action == "apply-append":
         if len(rest) != 1 or not re.fullmatch(r"SRC-\d+", rest[0]):
-            _emit({"ok": False, "code": "VALIDATION_FAILED", "detail": _SOURCE_APPEND_USAGE},
-                  as_json)
+            _emit(
+                {"ok": False, "code": "VALIDATION_FAILED", "detail": _SOURCE_APPEND_USAGE}, as_json
+            )
             return 2
         if dry_run:
             source, entry = source_append.find_append(project_root, rest[0])
@@ -4724,14 +4892,21 @@ def _source_append_command(
         result = source_append.apply_append(project_root, rest[0], actor=_agent_for(project_root))
         _emit(result, as_json)
         return 0 if result.get("ok") else 1
-    opts = {"to": None, "class": source_append.APPEND, "delta": "implementation",
-            "supersedes": "", "label": "", "file": None, "hex": None}
+    opts = {
+        "to": None,
+        "class": source_append.APPEND,
+        "delta": "implementation",
+        "supersedes": "",
+        "label": "",
+        "file": None,
+        "hex": None,
+    }
     body_tokens: list[str] = []
     i = 0
     while i < len(rest):
         token = rest[i]
         if token == "--":
-            body_tokens.extend(rest[i + 1:])
+            body_tokens.extend(rest[i + 1 :])
             break
         key = token[2:] if token.startswith("--") else None
         if key in opts:
@@ -4745,16 +4920,29 @@ def _source_append_command(
             i += 2
             continue
         if token.startswith("--"):
-            _emit({"ok": False, "code": "VALIDATION_FAILED", "detail": f"unknown flag {token!r}",
-                   "usage": _SOURCE_APPEND_USAGE}, as_json)
+            _emit(
+                {
+                    "ok": False,
+                    "code": "VALIDATION_FAILED",
+                    "detail": f"unknown flag {token!r}",
+                    "usage": _SOURCE_APPEND_USAGE,
+                },
+                as_json,
+            )
             return 2
         body_tokens.append(token)
         i += 1
     carriers = [bool(opts["file"]), bool(opts["hex"]), bool(body_tokens)]
     if sum(carriers) != 1:
-        _emit({"ok": False, "code": "VALIDATION_FAILED",
-               "detail": "source append takes exactly one of --file, --hex or -- TEXT",
-               "usage": _SOURCE_APPEND_USAGE}, as_json)
+        _emit(
+            {
+                "ok": False,
+                "code": "VALIDATION_FAILED",
+                "detail": "source append takes exactly one of --file, --hex or -- TEXT",
+                "usage": _SOURCE_APPEND_USAGE,
+            },
+            as_json,
+        )
         return 2
     try:
         if opts["file"]:
@@ -4764,18 +4952,28 @@ def _source_append_command(
         else:
             body = " ".join(body_tokens)
     except (OSError, ValueError) as exc:
-        _emit({"ok": False, "code": "VALIDATION_FAILED", "detail": f"cannot read append: {exc}"},
-              as_json)
+        _emit(
+            {"ok": False, "code": "VALIDATION_FAILED", "detail": f"cannot read append: {exc}"},
+            as_json,
+        )
         return 1
     supersedes = [part.strip() for part in str(opts["supersedes"]).split(",") if part.strip()]
     if dry_run:
         target = source_append.resolve_controlling_source(project_root, opts["to"])
-        _emit({"ok": bool(target.get("ok")),
-               "code": "PLAN" if target.get("ok") else target.get("code"),
-               "dry_run": True, "source": target.get("source"), "class": opts["class"],
-               "delta": opts["delta"], "supersedes": supersedes,
-               "derived_clauses": len(source_append.derive_normative_clauses(body)),
-               "detail": target.get("detail")}, as_json)
+        _emit(
+            {
+                "ok": bool(target.get("ok")),
+                "code": "PLAN" if target.get("ok") else target.get("code"),
+                "dry_run": True,
+                "source": target.get("source"),
+                "class": opts["class"],
+                "delta": opts["delta"],
+                "supersedes": supersedes,
+                "derived_clauses": len(source_append.derive_normative_clauses(body)),
+                "detail": target.get("detail"),
+            },
+            as_json,
+        )
         return 0 if target.get("ok") else 1
     result = source_append.append(
         project_root,
@@ -4820,7 +5018,7 @@ def _source(project_root: Path, args: list[str], as_json: bool, dry_run: bool) -
             {
                 "ok": False,
                 "code": "VALIDATION_FAILED",
-                "detail":                 "source needs a subcommand: capture|status|show|req|"
+                "detail": "source needs a subcommand: capture|status|show|req|"
                 "disp|quarantine|link|close|archive|purge|retire|recover|reconcile|"
                 "append|apply-append|appends",
             },
@@ -4884,9 +5082,7 @@ def _source(project_root: Path, args: list[str], as_json: bool, dry_run: bool) -
         # T-1437: canonical multi-work membership. ONE source receipt may
         # legitimately produce several Work items; this adds ONE Work to the
         # durable membership without moving the historical primary.
-        _opts, _pos, _opt_err = _parse_value_options(
-            rest[1:], {"--work": "work"}
-        )
+        _opts, _pos, _opt_err = _parse_value_options(rest[1:], {"--work": "work"})
         _link_usage = (
             "source link needs <SRC-###> --work T-### "
             "(adds one Work to the receipt's durable membership)"
@@ -4963,9 +5159,7 @@ def _source(project_root: Path, args: list[str], as_json: bool, dry_run: bool) -
         if _negotiate_capability(project_root) == "read-only":
             return _capability_refusal(as_json)
 
-    if dry_run and action in (
-        "capture", "close", "archive", "purge", "req", "disp", "quarantine"
-    ):
+    if dry_run and action in ("capture", "close", "archive", "purge", "req", "disp", "quarantine"):
         return _source_dry_run_plan(project_root, action, rest, as_json)
 
     if action == "capture":
@@ -5475,9 +5669,7 @@ def _source_dry_run_plan(project_root: Path, action: str, rest: list[str], as_js
             return 2
         # T-1277: same grammar authority as set_disposition (receipt id +
         # disposition), so dry-run cannot certify a disp the apply path refuses.
-        normalized_rid, refusal = intake.validate_disposition_request(
-            receipt_id, rid, disposition
-        )
+        normalized_rid, refusal = intake.validate_disposition_request(receipt_id, rid, disposition)
         if refusal is not None:
             _emit(refusal, as_json)
             return 1
@@ -6029,6 +6221,78 @@ def _attempt(project_root: Path, args: list[str], as_json: bool, dry_run: bool) 
     return 0 if payload.get("ok") else 1
 
 
+def _outbox_check(project_root: Path, args: list[str], as_json: bool) -> int:
+    """`saipen outbox check <role>` -- the write-time OUTBOX bar (T-351).
+
+    A role appends its package by editing `kitchen/OUTBOX.md`, and the only
+    strict parse over that file ran at CONSUMPTION, under
+    `--gate collect:<role>`. A role nobody collected therefore kept whatever it
+    wrote: measured, one OUTBOX written in a single session carried five
+    closed-grammar violations and the project still reported conformant, because
+    T-568 makes producer findings WARN under `core` on purpose.
+
+    This verb is the same bar the collect gate applies, resolved through the
+    same one-path resolver, exposed where the writer can run it. A non-zero exit
+    means the package is REFUSED: fix it before leaving the role. READ-ONLY --
+    it opens one file and has no write path, so it cannot turn a violation into
+    compliance on its own, which is what keeps it a check rather than a repair.
+    """
+    from saipen_engine.subs import ROLE_REGISTRY, validate_outbox_file
+
+    positional = [a for a in args if a != "--json"]
+    if positional[:1] != ["check"] or len(positional) != 2:
+        _emit(
+            {
+                "ok": False,
+                "code": "VALIDATION_FAILED",
+                "detail": "usage: saipen outbox check <role>",
+                "roles": sorted(ROLE_REGISTRY),
+            },
+            as_json,
+        )
+        return 2
+    role = positional[1]
+    if role not in ROLE_REGISTRY:
+        _emit(
+            {
+                "ok": False,
+                "code": "VALIDATION_FAILED",
+                "detail": f"unknown role {role!r}",
+                "roles": sorted(ROLE_REGISTRY),
+            },
+            as_json,
+        )
+        return 2
+    errors = validate_outbox_file(project_root, role)
+    if errors:
+        _emit(
+            {
+                "ok": False,
+                "code": "OUTBOX_INVALID",
+                "role": role,
+                "error_count": len(errors),
+                "errors": errors,
+                "detail": (
+                    f"{role} OUTBOX has {len(errors)} closed-grammar violation(s); "
+                    f"the package is refused (PROTOCOL.md section 2). Fix them "
+                    f"before leaving the role -- run this again until it exits 0."
+                ),
+            },
+            as_json,
+        )
+        return 1
+    _emit(
+        {
+            "ok": True,
+            "code": "OUTBOX_VALID",
+            "role": role,
+            "detail": f"{role} OUTBOX parses clean under the closed grammar",
+        },
+        as_json,
+    )
+    return 0
+
+
 def _acceptance(project_root: Path, args: list[str], as_json: bool) -> int:
     """`saipen acceptance <T-###>` -- what was promised, what proves it.
 
@@ -6374,6 +6638,101 @@ def _brief(project_root: Path, as_json: bool) -> int:
     else:
         print(result.get("surface", ""), end="")
     return 0
+
+
+def _mail(project_root: Path, args: list[str], as_json: bool, dry_run: bool) -> int:
+    """`saipen mail`: the per-user SAIMAIL mailbox binding (SRC-136, T-1557).
+
+    `saipen mail` answers where this seat's internal letters live and whether
+    the binding is live; `saipen mail init` provisions the per-user default
+    mailbox through `saimail-local saipen init` and is the one canonical way
+    a new user becomes reachable. Internal letters only -- electronic mail is
+    not part of this surface.
+    """
+    from saipen_engine import mailbox
+
+    import shutil
+
+    options = [item for item in args if item != "--json"]
+    if not options:
+        binding = mailbox.bound_workspace()
+        default = mailbox.default_workspace()
+        payload = {
+            "ok": True,
+            "code": "MAIL_STATUS",
+            "bound": binding is not None,
+            "source": binding[1] if binding else "none",
+            "workspace": str(binding[0]) if binding else (str(default) if default else None),
+            "default_initialized": mailbox.is_initialized(default),
+            "executable": shutil.which(mailbox.EXECUTABLE) is not None,
+            "detail": ("internal letters only; electronic mail is not provided"),
+        }
+        if binding is None:
+            payload["canonical_next_command"] = "saipen mail init"
+        _emit(payload, as_json)
+        return 0
+    if options[0] != "init":
+        _emit(
+            {
+                "ok": False,
+                "code": "VALIDATION_FAILED",
+                "detail": f"mail takes no subcommand {options[0]!r}; only init",
+            },
+            as_json,
+        )
+        return 2
+    workspace = None
+    surplus: list[str] = []
+    items = options[1:]
+    index = 0
+    while index < len(items):
+        item = items[index]
+        if item == "--workspace" and index + 1 < len(items):
+            workspace = items[index + 1]
+            index += 2
+        elif item.startswith("--workspace=") and len(item) > len("--workspace="):
+            workspace = item[len("--workspace=") :]
+            index += 1
+        else:
+            surplus.append(item)
+            index += 1
+    if surplus:
+        _emit(
+            {
+                "ok": False,
+                "code": "VALIDATION_FAILED",
+                "detail": f"mail init accepts only --workspace; surplus: {' '.join(surplus)}",
+            },
+            as_json,
+        )
+        return 2
+    if workspace is not None and not workspace.strip():
+        _emit(
+            {
+                "ok": False,
+                "code": "VALIDATION_FAILED",
+                "detail": "--workspace needs a path",
+            },
+            as_json,
+        )
+        return 2
+    if not dry_run and _negotiate_capability(project_root) == "read-only":
+        return _capability_refusal(as_json)
+    if dry_run:
+        _emit(
+            {
+                "ok": True,
+                "code": "MAIL_INIT_PLANNED",
+                "workspace": str(workspace or mailbox.default_workspace() or "<no per-user home>"),
+                "detail": "nothing written; --dry-run",
+            },
+            as_json,
+        )
+        return 0
+    result = mailbox.provision(project_root, _agent_for(project_root), workspace=workspace)
+    result["canonical_next_command"] = "saipen status"
+    _emit(result, as_json)
+    return 0 if result["ok"] else 1
 
 
 def _userperson_scope(args: list[str]) -> tuple[str, list[str], str | None]:
@@ -6741,7 +7100,6 @@ def _human_refusal_lines(payload: dict) -> list[str]:
     return lines
 
 
-
 def _reverify_default_timeout() -> int:
     """T-1332: ONE owner for the default verification-command budget.
 
@@ -6756,6 +7114,7 @@ def _reverify_default_timeout() -> int:
         return int(VALIDATOR_CAPTURE_TIMEOUT)
     except Exception:
         return 1800
+
 
 def _emit(payload: dict, as_json: bool) -> None:
     # ONE public refusal shape. CLI-side refusals have always carried
@@ -6784,6 +7143,15 @@ def _emit(payload: dict, as_json: bool) -> None:
                     "BOOT's entry table routes a new actionable task to `saipen start`"
                 ),
             }
+    if _TELEGRAM_ROOT is not None and as_json and "inflight" not in payload:
+        # T-1575: a gate in flight binds the tree it tests. The turn-entry
+        # answer names it and the parallel lane, so an agent keeps working
+        # instead of idle-waiting or editing the frozen tree.
+        from saipen_engine.inflight import lane as _inflight_lane
+
+        _lane = _inflight_lane(_TELEGRAM_ROOT)
+        if _lane is not None:
+            payload = {**payload, "inflight": _lane}
     if _TELEGRAM_ROOT is not None and as_json and "telegrams" not in payload:
         # T-1497: counts only, and data only -- the answer above was computed
         # before this line and nothing in it depends on the telegrams.
@@ -6821,6 +7189,7 @@ def _emit(payload: dict, as_json: bool) -> None:
         "load_path",
         "execution_instruction",
         "phase",
+        "clean_execution",
         "task",
         "next_action",
         "claimed_ticket",
@@ -6868,8 +7237,7 @@ def _emit(payload: dict, as_json: bool) -> None:
         print("Conformance: UNKNOWN (authoritative receipt status unavailable)")
     if payload.get("conformance"):
         print(
-            f"Validator history hint: {payload['conformance']} "
-            "(historical; not current authority)"
+            f"Validator history hint: {payload['conformance']} (historical; not current authority)"
         )
     if payload.get("staleness"):
         print(f"Staleness: {payload['staleness']}")
@@ -6992,6 +7360,37 @@ def _improve_dry_run_plan(project_root: Path, action: str, rest: list[str], as_j
                 "report": str(report),
                 "targets": [str(report), ".saipen/LOG.md"],
                 "detail": "planned report completion + LOG append; no writes",
+            },
+            as_json,
+        )
+        return 0
+    if action == "rebind":
+        if len(rest) < 3:
+            _emit(
+                {
+                    "ok": False,
+                    "code": "VALIDATION_FAILED",
+                    "detail": "improve rebind needs <cycle> <seat> <project>",
+                },
+                as_json,
+            )
+            return 2
+        cycle, seat, project = rest[0], rest[1], rest[2]
+        from improve import resolve_report_path
+
+        report = resolve_report_path(project_root, cycle, seat, project)
+        _emit(
+            {
+                "ok": True,
+                "code": "DRY_RUN_PLAN",
+                "action": "rebind",
+                "cycle": cycle,
+                "seat": seat,
+                "project": project,
+                "report": str(report),
+                "targets": [str(report)],
+                "detail": "planned draft identity re-stamp to the installed "
+                "protocol; RUN content untouched; no writes",
             },
             as_json,
         )
@@ -7190,6 +7589,7 @@ def _improve(project_root: Path, args: list[str], as_json: bool, dry_run: bool) 
         from improve import _cycle_schema as _cs
         from improve import _field as _imp_field
         from improve import validate_superseded_seat as _validate_superseded
+        from improve import protocol_git_status
 
         for cycle in sorted(imp_root.iterdir()):
             manifest = cycle / "MANIFEST.md"
@@ -7320,6 +7720,7 @@ def _improve(project_root: Path, args: list[str], as_json: bool, dry_run: bool) 
                     "invalid": invalid,
                     "manifest_errors": manifest_errors[:3],
                     "sweep_errors": sweep_errors[:3],
+                    "bookkeeping": protocol_git_status(project_root, cycle),
                 }
             )
         return rows
@@ -7331,7 +7732,9 @@ def _improve(project_root: Path, args: list[str], as_json: bool, dry_run: bool) 
     # same as non-dry; valid requests report concrete plan targets. The
     # previous `DRY_RUN_UNSUPPORTED` short-circuit hid the plan and made
     # dry-run observationally different from a real submission.
-    if dry_run and action in ("submit", "complete", "cycle-complete", "abort", "retire"):
+    if dry_run and action in (
+        "submit", "complete", "rebind", "cycle-complete", "abort", "retire"
+    ):
         return _improve_dry_run_plan(project_root, action, args[1:] if action else [], as_json)
     if action is None:
         # DOGFOOD V (T-617): bare `saipen improve` is the documented
@@ -7483,8 +7886,7 @@ def _improve(project_root: Path, args: list[str], as_json: bool, dry_run: bool) 
                 {
                     "ok": False,
                     "code": "VALIDATION_FAILED",
-                    "detail": "improve unhold accepts no arguments; surplus: "
-                    + " ".join(args[1:]),
+                    "detail": "improve unhold accepts no arguments; surplus: " + " ".join(args[1:]),
                     "canonical_next_command": "saipen improve unhold",
                 },
                 as_json,
@@ -7627,6 +8029,49 @@ def _improve(project_root: Path, args: list[str], as_json: bool, dry_run: bool) 
             return 0 if result.get("ok") else 1
         except ValueError as exc:
             _emit({"ok": False, "code": "VALIDATION_FAILED", "detail": str(exc)}, as_json)
+            return 1
+    if action == "rebind":
+        # T-6: a protocol-tree edit mid-audit moves the installed fingerprint
+        # and makes the draft unsubmittable. Rebind identity instead of
+        # discarding the audit. Draft-only, RUN content untouched.
+        if len(args) < 4:
+            _emit(
+                {
+                    "ok": False,
+                    "code": "VALIDATION_FAILED",
+                    "detail": "improve rebind needs <cycle> <seat> <project>",
+                },
+                as_json,
+            )
+            return 2
+        if len(args) > 4:
+            _emit(
+                {
+                    "ok": False,
+                    "code": "VALIDATION_FAILED",
+                    "detail": "improve rebind takes <cycle> <seat> <project>; "
+                    f"unsupported surplus argument {args[4]!r}",
+                },
+                as_json,
+            )
+            return 2
+        from improve import rebind_report_protocol as _rebind_report_protocol
+        from improve import resolve_report_path as _resolve_report_path
+
+        report = _resolve_report_path(project_root, args[1], args[2], args[3])
+        try:
+            result = _rebind_report_protocol(report)
+            _emit(result, as_json)
+            return 0 if result.get("ok") else 1
+        except ValueError as exc:
+            _emit(
+                {
+                    "ok": False,
+                    "code": getattr(exc, "code", None) or "VALIDATION_FAILED",
+                    "detail": str(exc),
+                },
+                as_json,
+            )
             return 1
     if action == "sweep-queue":
         # DOGFOOD V (T-617): deterministic enumeration of the unswept finding
@@ -8095,8 +8540,27 @@ def _public_improve(project_root: Path, args: list[str], as_json: bool, dry_run:
         _ho = _ensure_handover(project_root, as_json, dry_run)
         if _ho is not None:
             return _ho
+    from improve import ImproveError
+
     try:
         return _improve(project_root, args, as_json, dry_run)
+    except ImproveError as exc:
+        # A rejected Improve mutation must leave through the structured
+        # result contract like every other refusal. ImproveError subclasses
+        # ValueError and is raised all over the improve route -- including
+        # `_validate_safe_id` on the arguments themselves, which sits
+        # OUTSIDE any action-local handler -- so without this boundary the
+        # exception escaped main() and `--json` wrote nothing at all while
+        # Python printed a raw traceback on stderr.
+        _emit(
+            {
+                "ok": False,
+                "code": getattr(exc, "code", None) or "VALIDATION_FAILED",
+                "detail": str(exc),
+            },
+            as_json,
+        )
+        return 1
     except PermissionError as exc:
         if str(exc) == "WRITER_BUSY":
             _emit(
@@ -8449,6 +8913,77 @@ def _fleet_emit(payload: dict, as_json: bool) -> None:
     _emit(_fleet_envelope(payload), as_json)
 
 
+def _init_command(
+    args: list[str],
+    project_root_opt: str | None,
+    agent_opt: str | None,
+    as_json: bool,
+    dry_run: bool,
+) -> int:
+    """Canonical INIT: materialize the project this install bootstraps.
+
+    Dispatched before project-root resolution, because INIT runs exactly when
+    the root has no `.saipen/` yet. The bytes come from the shipped templates
+    through `saipen_engine.init_project`; this wrapper owns only the grammar
+    (`--seat`) and the refusal when a project is already there.
+    """
+    from saipen_engine.init_project import InitRefused, bootstrap_project
+
+    seat = agent_opt or os.environ.get("SAIPEN_AGENT") or "saipen"
+    root = Path(project_root_opt).resolve() if project_root_opt else Path.cwd().resolve()
+    if args:
+        _emit(
+            {
+                "ok": False,
+                "code": "VALIDATION_FAILED",
+                "detail": (
+                    f"init takes no positional arguments; surplus: {' '.join(args)}. "
+                    "Name the seat with the global --agent ID."
+                ),
+            },
+            as_json,
+        )
+        return 2
+    if dry_run:
+        _emit(
+            {
+                "ok": True,
+                "code": "INIT_PLANNED",
+                "project_root": str(root),
+                "seat": seat,
+                "detail": "nothing written; --dry-run",
+            },
+            as_json,
+        )
+        return 0
+    try:
+        written = bootstrap_project(root, agent=seat)
+    except InitRefused as exc:
+        _emit({"ok": False, "code": "INIT_REFUSED", "detail": str(exc)}, as_json)
+        return 1
+    payload = {"ok": True, "code": "INIT_COMPLETED", **written}
+    payload["route"] = "saipen start '<the first goal>'"
+    # SRC-136: a genuinely new user has no mailbox, and nothing else in the
+    # first turn would ever create one -- the turn-entry read would just say
+    # NOT_CONFIGURED forever. Attach the per-user default when SAIMAIL is
+    # installed and no binding exists yet. An attachment, never a dependency:
+    # any refusal lands in `mailbox` as data and INIT still succeeds.
+    import shutil
+
+    from saipen_engine import mailbox
+
+    if mailbox.bound_workspace() is None and shutil.which(mailbox.EXECUTABLE):
+        payload["mailbox"] = mailbox.provision(root, seat)
+    else:
+        payload["mailbox"] = {
+            "ok": False,
+            "code": "MAILBOX_ATTACH_SKIPPED",
+            "detail": "a mailbox is already bound or SAIMAIL is not installed",
+        }
+    _emit(payload, as_json)
+    return 0
+
+
 def _fleet_command(
     args: list[str], project_root_opt: str | None, as_json: bool, dry_run: bool
 ) -> int:
@@ -8627,6 +9162,729 @@ def unconsumed_quote_span(tokens: list[str]) -> tuple[int, int] | None:
     return None
 
 
+def _run_cli_compound(segments: list[list[str]], *, global_args: list[str], as_json: bool) -> int:
+    """Dispatch each decoded argv segment through the same canonical CLI.
+
+    No segment is passed through a shell or reconstructed by splitting text.
+    The default CMD-COMPOUND-01 stop policy is reflected in every segment's
+    disposition, including later segments that were never run.
+    """
+    outcomes: list[dict] = []
+    final_code = 0
+    for index, segment in enumerate(segments):
+        command_name = segment[0]
+        if final_code:
+            outcomes.append({"index": index, "command": command_name, "disposition": "NOT_RUN"})
+            if not as_json:
+                print(f"NOT_RUN [{index + 1}]: {command_name}")
+            continue
+        if as_json:
+            captured = StringIO()
+            with redirect_stdout(captured):
+                code = main([*global_args, "--json", *segment])
+            raw = captured.getvalue().strip()
+            try:
+                result = json.loads(raw)
+            except json.JSONDecodeError:
+                result = {"ok": False, "code": "NON_JSON_SEGMENT_OUTPUT"}
+                code = code or 1
+            outcomes.append(
+                {
+                    "index": index,
+                    "command": command_name,
+                    "disposition": "SUCCEEDED" if code == 0 else "FAILED",
+                    "exit_code": code,
+                    "result": result,
+                }
+            )
+        else:
+            print(f"SEGMENT [{index + 1}]: {command_name}")
+            code = main([*global_args, *segment])
+            print(f"DISPOSITION [{index + 1}]: {'SUCCEEDED' if code == 0 else 'FAILED'}")
+            outcomes.append(
+                {
+                    "index": index,
+                    "command": command_name,
+                    "disposition": "SUCCEEDED" if code == 0 else "FAILED",
+                    "exit_code": code,
+                }
+            )
+        final_code = code
+    if as_json:
+        print(
+            json.dumps(
+                {"ok": final_code == 0, "code": "COMPOUND_RESULT", "segments": outcomes},
+                ensure_ascii=False,
+            )
+        )
+    return final_code
+
+
+#: Canonical EXEC-RESPONSE-01 field name -> the `OperationalBoundary` kwarg.
+#: `render` accepts either spelling; see the note at the render branch.
+_RENDER_FIELD_ALIASES = {
+    "STATUS": "status",
+    "RESULT": "result",
+    "BLOCKER": "blocker",
+    "OPERATOR ACTION": "operator_action",
+    "NEXT EXACT ACTION": "next_exact_action",
+    "VALIDATION": "validation",
+    "EFFICIENCY": "efficiency",
+    "DETAILS": "details",
+}
+
+
+def _flag_value(args: list[str], flag: str) -> str | None:
+    """The value after `flag`, or None. Raises when the flag has no value."""
+    if flag not in args:
+        return None
+    index = args.index(flag)
+    if index + 1 >= len(args):
+        raise ValueError(f"{flag} needs a value")
+    return args[index + 1]
+
+
+def _admission_context(args: list[str], project_root_opt: str | None):
+    """The session facts a host transport observed, or None without a session.
+
+    The owner infers none of them: session, host, model and the diagnostic
+    authority/home roots arrive as flags; the provider is the runtime's own
+    environment observation unless a carrier names one.
+    """
+    from saipen_engine import protocol_admission as pa
+
+    session = _flag_value(args, "--admission-session") or _flag_value(args, "--session")
+    if not session:
+        return None
+    host = _flag_value(args, "--host")
+    if not host:
+        raise ValueError("--host is required with a session")
+    root = None
+    if project_root_opt:
+        candidate = Path(project_root_opt).resolve()
+        root = candidate if (candidate / ".saipen" / "STATE.md").is_file() else None
+    authority = _flag_value(args, "--authority-root")
+    home = _flag_value(args, "--home")
+    return pa.Context(
+        project_root=root,
+        session_id=session,
+        host=host,
+        model=_flag_value(args, "--model"),
+        provider=_flag_value(args, "--provider") or pa.provider_fingerprint(),
+        authority_root=Path(authority) if authority else None,
+        home=Path(home) if home else None,
+    )
+
+
+def _admission_cli(args: list[str], as_json: bool, project_root_opt: str | None) -> int:
+    """`saipen admission status|check|establish|invalidate|matrix` (PROTOCOL-ADMISSION-01).
+
+    `status` and `check` are read-only. `establish` and `invalidate` are host
+    transport operations: the transport gate lives in the write boundary
+    (`saipen_engine.protocol_admission`), so this wrapper enforces nothing of
+    its own and a direct Python call is refused by the same authority.
+    """
+    from saipen_engine import protocol_admission as pa
+    from saipen_engine.chat_style import (
+        StyleContractError,
+        compile_style_contract,
+        contract_summary,
+    )
+
+    verbs = ("status", "check", "establish", "invalidate", "matrix")
+    if len(args) < 2 or args[1] not in verbs:
+        _emit(
+            {
+                "ok": False,
+                "code": "VALIDATION_FAILED",
+                "detail": "use: saipen admission " + "|".join(verbs) + " --session S --host H "
+                "[--model M] [--provider P] [--project-root PATH]",
+            },
+            as_json,
+        )
+        return 2
+    verb = args[1]
+    try:
+        if verb == "matrix":
+            _emit(
+                {"ok": True, "code": "ADMISSION_MATRIX", "matrix": pa.capability_matrix()}, as_json
+            )
+            return 0
+        ctx = _admission_context(args[2:], project_root_opt)
+        if ctx is None:
+            raise ValueError("--session is required")
+        if verb == "invalidate":
+            result = pa.invalidate(
+                ctx.project_root,
+                ctx.session_id,
+                _flag_value(args, "--reason") or "",
+            )
+            if not result.get("ok"):
+                _emit(
+                    {
+                        "ok": False,
+                        "code": result.get("code") or pa.CODE_TRANSPORT_REQUIRED,
+                        "detail": (
+                            "`admission invalidate` writes runtime evidence and is gated by the "
+                            "canonical write boundary: "
+                            + str(result.get("detail") or "transport capability did not verify")
+                        ),
+                    },
+                    as_json,
+                )
+                return 1
+            _emit(
+                {"ok": True, "code": "ADMISSION_INVALIDATED", "removed": result.get("removed")},
+                as_json,
+            )
+            return 0
+        verdict = pa.establish(ctx) if verb == "establish" else pa.evaluate(ctx)
+        contract_text = None
+        if verdict["permitted"] and verdict["applies"]:
+            try:
+                contract_text = contract_summary(
+                    compile_style_contract(pa.read_authority(ctx, "STYLE.md") or "")
+                )["context"]
+            except StyleContractError:
+                contract_text = None
+        _emit(
+            {
+                "ok": verdict["permitted"],
+                **{k: v for k, v in verdict.items() if k != "code"},
+                "code": verdict["code"] or "ADMISSION_CURRENT",
+                "diagnostic": None if verdict["permitted"] else pa.diagnostic(verdict),
+                "contract": contract_text,
+            },
+            as_json,
+        )
+        return 0 if verdict["permitted"] else 1
+    except ValueError as exc:
+        _emit({"ok": False, "code": "VALIDATION_FAILED", "detail": str(exc)}, as_json)
+        return 2
+
+
+def _response_cli(args: list[str], as_json: bool, project_root_opt: str | None) -> int:
+    """Single read-only renderer/checker for host operational handbacks."""
+    from saipen_engine.response_surface import (
+        DETAIL_MODE_NONE,
+        DETAIL_MODES,
+        OperationalBoundary,
+        detail_mode_for_request,
+        render_boundary,
+        response_errors,
+    )
+
+    if len(args) >= 2 and args[1] in {"policy", "intermediate"}:
+        from saipen_engine.hush import for_request, intermediate_verdict
+
+        def option(name, default=""):
+            if name not in args:
+                return default
+            pos = args.index(name)
+            if pos + 1 >= len(args):
+                raise ValueError(f"{name} needs a value")
+            return args[pos + 1]
+
+        try:
+            request = option("--request")
+            if args[1] == "policy":
+                result = {"ok": True, "code": "EXECUTION_POLICY", **for_request(request).describe()}
+            else:
+                if "--stdin" not in args:
+                    raise ValueError("response intermediate requires --stdin")
+                stream = getattr(sys.stdin, "buffer", None)
+                text = stream.read().decode("utf-8-sig") if stream is not None else sys.stdin.read()
+                result = intermediate_verdict(
+                    text, request=request, kind=option("--kind", "progress")
+                )
+        except (ValueError, UnicodeError) as exc:
+            result = {"ok": False, "code": "VALIDATION_FAILED", "detail": str(exc)}
+        _emit(result, as_json)
+        return 0 if result.get("ok") else 1
+
+    if len(args) >= 2 and args[1] == "style":
+        # T-1558: the chat contract as machine data, generated from the running
+        # STYLE.md so a host hook injects the document, not a copy of it.
+        from saipen_engine.chat_style import contract_summary, running_style_contract
+
+        _emit(
+            {"ok": True, "code": "STYLE_CONTRACT", **contract_summary(running_style_contract())},
+            as_json,
+        )
+        return 0
+
+    if len(args) < 2 or args[1] not in {"render", "check"} or "--stdin" not in args[2:]:
+        _emit(
+            {
+                "ok": False,
+                "code": "VALIDATION_FAILED",
+                "detail": (
+                    "use: saipen response style | saipen response render|check --stdin "
+                    "[--eligible-next|--auto-eligibility|--classify] "
+                    f"[--detail-mode {'|'.join(DETAIL_MODES)}] [--request <user text>]"
+                ),
+            },
+            as_json,
+        )
+        return 2
+    # T-1558: a host hook writes UTF-8. Decoding the pipe with the locale
+    # (cp1251 on the operator's Windows host) turned every Estonian diacritic
+    # into a Cyrillic letter and made correct Estonian read as Russian. Text
+    # stream stand-ins (no `.buffer`) keep their own decoding.
+    _stdin_bytes = getattr(sys.stdin, "buffer", None)
+    source = (
+        _stdin_bytes.read().decode("utf-8-sig", errors="replace")
+        if _stdin_bytes is not None
+        else sys.stdin.read()
+    )
+    try:
+        current_validation = None
+        current_phase = None
+        current_task = None
+        current_blocker = None
+        operator_due = False
+        executable_action_remains = "--eligible-next" in args[2:]
+        # T-1556 #1: authorization is transported, never inferred from the text
+        # being checked. `--detail-mode` is the explicit machine fact; `--request`
+        # carries the HUMAN's ingress and the canonical owner classifies it. With
+        # neither, DETAILS is forbidden -- the closed default.
+        detail_mode = DETAIL_MODE_NONE
+        if "--detail-mode" in args[2:]:
+            index = args[2:].index("--detail-mode")
+            if index + 1 >= len(args) - 2:
+                raise ValueError("--detail-mode needs a value")
+            detail_mode = args[3 + index]
+            if detail_mode not in DETAIL_MODES:
+                raise ValueError(
+                    f"unknown --detail-mode {detail_mode!r}; the closed set is "
+                    + ", ".join(DETAIL_MODES)
+                )
+        elif "--request" in args[2:]:
+            index = args[2:].index("--request")
+            if index + 1 >= len(args) - 2:
+                raise ValueError("--request needs the human's request text")
+            detail_mode = detail_mode_for_request(args[3 + index])
+        if project_root_opt:
+            root = Path(project_root_opt).resolve()
+            if not (root / ".saipen" / "STATE.md").is_file():
+                raise ValueError("response checker project root has no canonical STATE")
+            captured = StringIO()
+            with redirect_stdout(captured):
+                status_code = _status(root, True)
+            if status_code:
+                raise ValueError("canonical status unavailable for response gate")
+            status_payload = json.loads(captured.getvalue())
+            current_validation = (status_payload.get("conformance_status") or {}).get("status")
+            if not isinstance(current_validation, str) or not current_validation:
+                raise ValueError("current conformance authority unavailable for response gate")
+            current_phase = status_payload.get("phase")
+            current_task = status_payload.get("task")
+            current_blocker = status_payload.get("blocker")
+            automation = status_payload.get("automation") or {}
+            # T-1553: `OPERATOR_ACTION_DUE` is not one of the six closed
+            # dispositions, so comparing against it here was dead code that
+            # always read False -- the gate could then never accept an
+            # OPERATOR ACTION on an operational turn, and a fresh INIT project
+            # (where the human owes the first goal) had no valid handback at
+            # all. The automation projection owns the answer; read its field.
+            operator_due = bool(automation.get("operator_action_due"))
+            if "--auto-eligibility" in args[2:]:
+                executable_action_remains = bool(
+                    automation.get("disposition") == "CONTINUE" and automation.get("next_command")
+                )
+        elif "--auto-eligibility" in args[2:]:
+            raise ValueError("--auto-eligibility requires --project-root")
+        if "--classify" in args[2:]:
+            # T-1551: the host final-response gate. ONE classifier in the
+            # canonical authority decides whether EXEC-RESPONSE-01 governs
+            # the text at all, then delegates every structural rule to
+            # `response_errors`. Host adapters transport; they never restate
+            # the schema. Only `check` classifies.
+            if args[1] != "check":
+                raise ValueError("--classify is only valid with `saipen response check`")
+            from saipen_engine.cold_recovery import auto_recall
+            from saipen_engine import protocol_admission as _pa
+            from saipen_engine.chat_style import (
+                StyleContractError,
+                compile_style_contract,
+                contract_summary,
+            )
+            from saipen_engine.response_surface import (
+                CLASS_ADMISSION_BLOCKED,
+                CLASS_ORDINARY_CHAT,
+                CLASS_VALID_BOUNDARY,
+                gate_final_response,
+            )
+
+            decision = "ORDINARY"
+            if project_root_opt:
+                recall = auto_recall(Path(project_root_opt).resolve(), None)
+                decision = str((recall.get("turn") or {}).get("decision") or "ORDINARY")
+            # PROTOCOL-ADMISSION-01: the chain is binding -> ADMISSION ->
+            # EXEC-RESPONSE -> chat style, and the first failing layer decides.
+            # Admission is consulted only when the host supplied a session AND
+            # its registry claim says it can enforce it; otherwise the layer is
+            # reported NOT_CONSULTED / NOT_ENFORCEABLE, never passed as admitted.
+            admission_ctx = _admission_context(args[2:], project_root_opt)
+            admission_verdict = None
+            consulted = False
+            skip_reason = "NOT_CONSULTED"
+            if admission_ctx is not None:
+                if _pa.consulted(admission_ctx):
+                    admission_verdict = _pa.evaluate(admission_ctx)
+                    consulted = True
+                else:
+                    skip_reason = "NOT_ENFORCEABLE"
+            contract = None
+            blocked = consulted and not admission_verdict["permitted"]
+            if not blocked:
+                # The contract is compiled from the SAME authority admission
+                # judged (the running install unless a diagnostic root is named).
+                if admission_ctx is not None:
+                    style_text = _pa.read_authority(admission_ctx, "STYLE.md")
+                else:
+                    from saipen_engine.state import running_style_text
+
+                    style_text = running_style_text()
+                try:
+                    contract = compile_style_contract(style_text or "")
+                except StyleContractError as exc:
+                    raise ValueError(f"STYLE.md cannot be compiled into a chat contract: {exc}")
+            verdict = gate_final_response(
+                source,
+                admission=admission_verdict,
+                admission_consulted=consulted,
+                admission_skip_reason=skip_reason,
+                operational_turn=decision != "ORDINARY",
+                executable_action_remains=executable_action_remains,
+                style_contract=contract,
+                current_validation=current_validation,
+                current_phase=current_phase,
+                current_task=current_task,
+                current_blocker=current_blocker,
+                operator_due=operator_due,
+                detail_mode=detail_mode,
+            )
+            klass = verdict["class"]
+            class_errors = verdict["errors"]
+            ok = verdict["ok"]
+            _emit(
+                {
+                    "ok": ok,
+                    "code": (
+                        "NON_OPERATIONAL"
+                        if klass == CLASS_ORDINARY_CHAT
+                        else "RESPONSE_VALID"
+                        if klass == CLASS_VALID_BOUNDARY
+                        else _pa.CODE_REQUIRED
+                        if klass == CLASS_ADMISSION_BLOCKED
+                        else "EXEC_RESPONSE_INVALID"
+                    ),
+                    "class": klass,
+                    "layer": verdict["layer"],
+                    "layers": verdict["layers"],
+                    "errors": class_errors,
+                    "detail_mode": detail_mode,
+                    "turn_decision": decision,
+                    "detail": "; ".join(class_errors) if class_errors else None,
+                    "diagnostic": verdict.get("diagnostic"),
+                    "contract": (
+                        contract_summary(contract)["context"]
+                        if contract is not None and not ok
+                        else None
+                    ),
+                },
+                as_json,
+            )
+            return 0 if ok else 1
+        if args[1] == "render":
+            values = json.loads(source)
+            if not isinstance(values, dict):
+                raise ValueError("response fields must be an object")
+            # T-1553: accept the CANONICAL field names as well as the dataclass
+            # spellings. The OpenCode binding system message tells the model to
+            # "assemble the structured fields with `saipen response render
+            # --stdin`", and EXECUTION.md names render as the host API -- but
+            # every field it lists there is uppercase (`OPERATOR ACTION`), and
+            # feeding those names back raised a raw TypeError surfaced to the
+            # model as EXEC_RESPONSE_INVALID. The schema's own field names are
+            # the natural input; the lowercase kwargs are an implementation
+            # detail and stay accepted.
+            values = {
+                _RENDER_FIELD_ALIASES.get(str(key).strip().upper(), str(key).strip().lower()): value
+                for key, value in values.items()
+            }
+            # T-1576: `"EFFICIENCY": "auto"` asks the KPI owner for the line of
+            # the ticket STATUS names; the renderer never computes history.
+            if str(values.get("efficiency", "")).strip().lower() == "auto":
+                if not project_root_opt:
+                    raise ValueError("EFFICIENCY auto requires --project-root")
+                from saipen_engine.efficiency import kpi_for_project, render_line
+
+                _named = re.findall(r"(?<![\w-])T-\d+(?![\w-])", str(values.get("status", "")))
+                values["efficiency"] = render_line(
+                    kpi_for_project(
+                        Path(project_root_opt).resolve(),
+                        _named[0] if len(_named) == 1 else None,
+                        validation=current_validation,
+                    )
+                )
+            rendered = render_boundary(
+                OperationalBoundary(**values),
+                current_validation=current_validation,
+                detail_mode=detail_mode,
+            )
+            autonomy_errors = response_errors(
+                rendered,
+                executable_action_remains=executable_action_remains,
+                response_boundary=not executable_action_remains,
+                current_phase=current_phase,
+                current_task=current_task,
+                current_blocker=current_blocker,
+                operator_due=operator_due,
+                detail_mode=detail_mode,
+            )
+            if autonomy_errors:
+                raise ValueError("; ".join(autonomy_errors))
+            if as_json:
+                _emit({"ok": True, "code": "RESPONSE_RENDERED", "text": rendered}, True)
+            else:
+                print(rendered)
+            return 0
+        errors = response_errors(
+            source,
+            executable_action_remains=executable_action_remains,
+            response_boundary=not executable_action_remains,
+            current_validation=current_validation,
+            current_phase=current_phase,
+            current_task=current_task,
+            current_blocker=current_blocker,
+            operator_due=operator_due,
+            detail_mode=detail_mode,
+        )
+        _emit(
+            {
+                "ok": not errors,
+                "code": "RESPONSE_VALID" if not errors else "EXEC_RESPONSE_INVALID",
+                "errors": errors,
+                "detail_mode": detail_mode,
+                "detail": "; ".join(errors) if errors else None,
+            },
+            as_json,
+        )
+        return 0 if not errors else 1
+    except (TypeError, ValueError, json.JSONDecodeError) as exc:
+        _emit({"ok": False, "code": "EXEC_RESPONSE_INVALID", "detail": str(exc)}, as_json)
+        return 1
+
+
+def _storage_command(
+    project_root: Path | None, args: list[str], as_json: bool, dry_run: bool
+) -> int:
+    """Machine storage policy and declared project artifact stores."""
+    from saipen_engine.storage import (
+        StoragePolicyError,
+        classify_path,
+        configure_root,
+        effective_ephemeral_roots,
+        load_policy,
+        policy_path,
+    )
+    from saipen_engine.storage_artifacts import (
+        declare_store,
+        load_registry,
+        load_stores,
+        promote_artifact,
+        validate_storage,
+    )
+
+    usage = (
+        "saipen storage status|classify <path> <DURABLE|EPHEMERAL|CACHE|EXTERNAL>|"
+        "durable show|set|add|remove <root>|ephemeral show|add|remove <root>|"
+        "scratch show|set <root>|unset|store list|declare <name> <class> <path> "
+        "<lifetime> <owner> <recovery>|verify|promote <id> <source> <store> "
+        "[--sha256 <hash>] [--rebuild-command <command>]|migrate <id> <store>"
+    )
+
+    def finish(payload: dict, *, syntax: bool = False) -> int:
+        _emit(payload, as_json)
+        return 0 if payload.get("ok") else (2 if syntax else 1)
+
+    if not args:
+        return finish({"ok": False, "code": "VALIDATION_FAILED", "detail": usage}, syntax=True)
+    action = args[0]
+    try:
+        policy = load_policy()
+        if action == "status" and len(args) == 1:
+            return finish(
+                {
+                    "ok": True,
+                    "code": "STORAGE_STATUS",
+                    "policy_path": str(policy_path()),
+                    "durable_roots": policy["durable_roots"],
+                    "ephemeral_roots": policy["ephemeral_roots"],
+                    "effective_ephemeral_roots": [
+                        str(path) for path in effective_ephemeral_roots(policy)
+                    ],
+                    "scratch_root": policy["scratch_root"],
+                }
+            )
+        if action == "classify":
+            # These verbs dispatch with project_root=None on purpose, so a
+            # wrong arity must not fall through to the project guard below and
+            # blame the project for a malformed command (T-1579).
+            if len(args) != 3:
+                return finish(
+                    {"ok": False, "code": "VALIDATION_FAILED", "detail": usage}, syntax=True
+                )
+            return finish(classify_path(args[1], args[2].upper(), policy=policy))
+        if action in {"durable", "ephemeral", "scratch"}:
+            if len(args) == 2 and args[1] == "show":
+                key = {
+                    "durable": "durable_roots",
+                    "ephemeral": "ephemeral_roots",
+                    "scratch": "scratch_root",
+                }[action]
+                return finish({"ok": True, "code": "STORAGE_ROOTS", key: policy[key]})
+            valid = (
+                (action == "durable" and len(args) == 3 and args[1] in {"set", "add", "remove"})
+                or (action == "ephemeral" and len(args) == 3 and args[1] in {"add", "remove"})
+                or (
+                    action == "scratch"
+                    and (
+                        (len(args) == 3 and args[1] == "set")
+                        or (len(args) == 2 and args[1] == "unset")
+                    )
+                )
+            )
+            if not valid:
+                return finish(
+                    {"ok": False, "code": "VALIDATION_FAILED", "detail": usage}, syntax=True
+                )
+            if not dry_run and _negotiate_capability(project_root or Path.cwd()) == "read-only":
+                return _capability_refusal(as_json)
+            op = f"{action}-{args[1]}"
+            if dry_run:
+                return finish(
+                    {
+                        "ok": True,
+                        "code": "DRY_RUN",
+                        "operation": op,
+                        "path": args[2] if len(args) > 2 else None,
+                    }
+                )
+            return finish(configure_root(op, args[2] if len(args) > 2 else None))
+        if project_root is None:
+            return finish(
+                {
+                    "ok": False,
+                    "code": "NOT_SAIPEN_PROJECT",
+                    "detail": "store and artifact operations require a SAIPEN project",
+                }
+            )
+        if action == "store" and len(args) == 2 and args[1] == "list":
+            return finish(
+                {"ok": True, "code": "STORES", "stores": load_stores(project_root)["stores"]}
+            )
+        if action == "store" and len(args) == 8 and args[1] == "declare":
+            if not dry_run and _negotiate_capability(project_root) == "read-only":
+                return _capability_refusal(as_json)
+            if dry_run:
+                return finish({"ok": True, "code": "DRY_RUN", "store": args[2], "path": args[4]})
+            return finish(
+                declare_store(
+                    project_root,
+                    args[2],
+                    args[3],
+                    args[4],
+                    lifetime=args[5],
+                    owner=args[6],
+                    recovery=args[7],
+                )
+            )
+        if action == "verify" and len(args) == 1:
+            findings = validate_storage(project_root, policy=policy)
+            return finish(
+                {
+                    "ok": not findings,
+                    "code": "STORAGE_VALID" if not findings else "STORAGE_INVALID",
+                    "findings": findings,
+                    "detail": findings[0]["detail"] if findings else "",
+                }
+            )
+        if action == "promote" and len(args) >= 4:
+            extras = args[4:]
+            if (
+                len(extras) % 2
+                or any(
+                    extras[i] not in {"--sha256", "--rebuild-command"}
+                    for i in range(0, len(extras), 2)
+                )
+                or len(set(extras[::2])) != len(extras[::2])
+            ):
+                return finish(
+                    {"ok": False, "code": "VALIDATION_FAILED", "detail": usage}, syntax=True
+                )
+            options = dict(zip(extras[::2], extras[1::2]))
+            if not dry_run and _negotiate_capability(project_root) == "read-only":
+                return _capability_refusal(as_json)
+            if dry_run:
+                return finish(
+                    {
+                        "ok": True,
+                        "code": "DRY_RUN",
+                        "artifact": args[1],
+                        "source": args[2],
+                        "store": args[3],
+                    }
+                )
+            return finish(
+                promote_artifact(
+                    project_root,
+                    args[1],
+                    args[2],
+                    args[3],
+                    expected_sha256=options.get("--sha256"),
+                    provenance={"rebuild_command": options["--rebuild-command"]}
+                    if "--rebuild-command" in options
+                    else None,
+                )
+            )
+        if action == "migrate" and len(args) == 3:
+            record = load_registry(project_root)["artifacts"].get(args[1])
+            if record is None:
+                raise StoragePolicyError(
+                    "STORAGE_REGISTRY_INVALID", f"artifact {args[1]} is not registered"
+                )
+            if not dry_run and _negotiate_capability(project_root) == "read-only":
+                return _capability_refusal(as_json)
+            if dry_run:
+                return finish(
+                    {
+                        "ok": True,
+                        "code": "DRY_RUN",
+                        "artifact": args[1],
+                        "source": record["path"],
+                        "store": args[2],
+                    }
+                )
+            return finish(
+                promote_artifact(
+                    project_root,
+                    args[1],
+                    record["path"],
+                    args[2],
+                    expected_sha256=record["sha256"],
+                    migration=True,
+                )
+            )
+        return finish({"ok": False, "code": "VALIDATION_FAILED", "detail": usage}, syntax=True)
+    except StoragePolicyError as exc:
+        return finish({"ok": False, "code": exc.code, "detail": exc.detail})
+    except (OSError, ValueError, PermissionError) as exc:
+        return finish({"ok": False, "code": "STORAGE_OPERATION_FAILED", "detail": str(exc)})
+
+
 def main(argv: list[str] | None = None) -> int:
     global _ROUTE_ECHO  # noqa: PLW0603
     # ``main`` is normally one process/one invocation, but tests and embedded
@@ -8745,6 +10003,27 @@ def main(argv: list[str] | None = None) -> int:
         _emit({"ok": False, "code": "VALIDATION_FAILED", "detail": option_error}, as_json)
         return 2
 
+    try:
+        compound_segments = split_cli_compound_argv(args)
+    except ValueError as exc:
+        _emit({"ok": False, "code": "VALIDATION_FAILED", "detail": str(exc)}, as_json)
+        return 2
+    if len(compound_segments) > 1:
+        inherited: list[str] = []
+        if dry_run:
+            inherited.append("--dry-run")
+        if project_root_opt is not None:
+            inherited.extend(("--project-root", project_root_opt))
+        if agent_opt is not None:
+            inherited.extend(("--agent", agent_opt))
+        if runtime_info_opt is not None:
+            inherited.extend(("--runtime-info", runtime_info_opt))
+        return _run_cli_compound(compound_segments, global_args=inherited, as_json=as_json)
+    if args and args[0] == "response":
+        return _response_cli(args, as_json, project_root_opt)
+    if args and args[0] == "admission":
+        return _admission_cli(args, as_json, project_root_opt)
+
     # CORE-004: bare `saipen` (only global options, no command) is the
     # canonical resume family -- equivalent to `continue`/`cc` (CORE § 1.10).
     # Explicit help does NOT resume. T-1363: help is a DIAGNOSTIC that answers
@@ -8752,13 +10031,15 @@ def main(argv: list[str] | None = None) -> int:
     # once became a goal named "--help" (T-1321) and `saipen user-request
     # --help` a refusal. It exits 0: a usage probe that "fails" teaches a weak
     # model the tool is broken.
-    if (args and args[0] == "help") or any(
-        token in ("-h", "--help") for token in clean_before
-    ):
+    if (args and args[0] == "help") or any(token in ("-h", "--help") for token in clean_before):
         usage_msg = (
-            "usage: saipen (start '<task in one line>' [--file PATH] [--hex HEX] "
+            "usage: saipen (init|"
+            "start '<task in one line>' [--file PATH] [--hex HEX] "
             "[--receipt SRC-###]|"
-            "continue|status|next|runtime [--prelaunch [--adapter ID] "
+            "continue|status|storage status|classify|durable|ephemeral|scratch|"
+            "store|verify|promote|migrate|"
+            "response render|check --stdin|next|runtime "
+            "[--prelaunch [--adapter ID] "
             "[--no-resync]|--bootstrap|--check-freshness]|search [--hex HEX]|"
             "validate|recover|fleet preflight|scan|prepare|claim <T-###> [--explicit]|"
             "handoff <T-###> --to <agent> [--authority SRC-###]|"
@@ -8819,6 +10100,16 @@ def main(argv: list[str] | None = None) -> int:
         if _scope == "global" or _scope_error:
             return _userperson(None, args[1:], as_json, dry_run)
 
+    # Machine storage policy lives in the existing user configuration home,
+    # so inspection and root configuration must work outside any project.
+    if (
+        args
+        and args[0] == "storage"
+        and args[1:2]
+        and args[1] in {"status", "classify", "durable", "ephemeral", "scratch"}
+    ):
+        return _storage_command(None, args[1:], as_json, dry_run)
+
     # The structured guard event (SRC-030 Part 6) binds from the SESSION cwd
     # carried in the event, which may be a detached staging directory the
     # ordinary project-root gate would refuse before the guard could speak.
@@ -8827,6 +10118,16 @@ def main(argv: list[str] | None = None) -> int:
 
     if args and args[0] == "fleet":
         return _fleet_command(args, project_root_opt, as_json, dry_run)
+
+    # T-1553: INIT is the one canonical command whose whole effect is to CREATE
+    # the project binding, so it dispatches before project-root resolution --
+    # there is nothing to resolve yet, and the root gate would make the
+    # canonical bootstrap unreachable from the very host that must run it.
+    # `init` is already declared in `saipen/REGISTRY.json` and classified
+    # EXECUTION in `saipen/COMMAND_EFFECTS.json`; it simply had no dispatch, so
+    # the advertised command could not run.
+    if args and args[0] == "init":
+        return _init_command(args[1:], project_root_opt, agent_opt, as_json, dry_run)
 
     # T-1424: the host-bootstrap diagnostic answers "can THIS host reach a
     # canonical SAIPEN runtime for THIS project, and if not, which leg of the
@@ -8838,10 +10139,16 @@ def main(argv: list[str] | None = None) -> int:
     # question: is the canonical activation contract loadable for this project.
     # T-1501: `host entry` is the transport half of the same question -- which
     # proven invocation runs a logical command -- so it dispatches here too.
-    if args and args[0] == "host" and len(args) >= 2 and args[1] in (
-        "bootstrap",
-        "activation",
-        "entry",
+    if (
+        args
+        and args[0] == "host"
+        and len(args) >= 2
+        and args[1]
+        in (
+            "bootstrap",
+            "activation",
+            "entry",
+        )
     ):
         return _host_command(args[1:], project_root_opt, as_json)
 
@@ -8861,9 +10168,7 @@ def main(argv: list[str] | None = None) -> int:
     from saipen_engine.command_effects import DIAGNOSTIC as _DIAGNOSTIC, classify_invocation
 
     _authority = (
-        "observe"
-        if args and classify_invocation(args[0], args[1:]) == _DIAGNOSTIC
-        else "mutation"
+        "observe" if args and classify_invocation(args[0], args[1:]) == _DIAGNOSTIC else "mutation"
     )
     project_root_res = resolve_project_root(
         Path.cwd().resolve(), explicit=project_root_opt, authority=_authority
@@ -8897,6 +10202,9 @@ def main(argv: list[str] | None = None) -> int:
         )
 
     command = args[0]
+
+    if command == "storage":
+        return _storage_command(project_root, args[1:], as_json, dry_run)
 
     if _RUNTIME_INFO_OVERRIDE is not None and command != "runtime":
         _emit(
@@ -9381,7 +10689,10 @@ def main(argv: list[str] | None = None) -> int:
             return _capability_refusal(as_json)
         actor, actor_source = _start_actor(project_root)
         result = handoff_claim(
-            project_root, actor, positional[0], opts["to"],
+            project_root,
+            actor,
+            positional[0],
+            opts["to"],
             actor_source=actor_source,
             authority=opts.get("authority"),
             dry_run=dry_run,
@@ -9440,9 +10751,9 @@ def main(argv: list[str] | None = None) -> int:
                 {
                     "ok": False,
                     "code": "VALIDATION_FAILED",
-                "detail": "ticket needs an action: "
-                "add|compact|verify|reasoning|done|supersede|retire|resolve-external|"
-                "repair-metadata|block|block-for|unblock",
+                    "detail": "ticket needs an action: "
+                    "add|compact|verify|reasoning|done|supersede|retire|resolve-external|"
+                    "repair-metadata|block|block-for|unblock",
                 },
                 as_json,
             )
@@ -9713,9 +11024,7 @@ def main(argv: list[str] | None = None) -> int:
                 )
             return 0 if result.ok else 1
         if action == "supersede":
-            _opts, _pos, _opt_err = _parse_value_options(
-                rest[1:], _TICKET_SUPERSEDE_OPTIONS
-            )
+            _opts, _pos, _opt_err = _parse_value_options(rest[1:], _TICKET_SUPERSEDE_OPTIONS)
             if not rest or not re.fullmatch(r"T-\d+", rest[0], re.IGNORECASE):
                 _emit(
                     {
@@ -10074,8 +11383,7 @@ def main(argv: list[str] | None = None) -> int:
                         "ok": False,
                         "code": "VALIDATION_FAILED",
                         "detail": (
-                            "--scope and --retry_not_before describe a BLOCK; "
-                            "unblock takes neither"
+                            "--scope and --retry_not_before describe a BLOCK; unblock takes neither"
                         ),
                     },
                     as_json,
@@ -10365,9 +11673,7 @@ def main(argv: list[str] | None = None) -> int:
             _ho = _ensure_handover(project_root, as_json, dry_run)
             if _ho is not None:
                 return _ho
-            result = rebind_home_auto(
-                project_root, _agent_for(project_root), dry_run=dry_run
-            )
+            result = rebind_home_auto(project_root, _agent_for(project_root), dry_run=dry_run)
             payload = result.to_dict()
             payload["route"] = "rebind-home --auto"
             _emit(payload, as_json)
@@ -10411,6 +11717,8 @@ def main(argv: list[str] | None = None) -> int:
         return _crew(project_root, args[1:], as_json, dry_run)
     if command == "context":
         return _context(project_root, args[1:], as_json, dry_run)
+    if command == "mail":
+        return _mail(project_root, args[1:], as_json, dry_run)
     if command == "knowledge":
         return _knowledge(project_root, args[1:], as_json, dry_run)
     if command == "attempt":
@@ -10567,6 +11875,8 @@ def main(argv: list[str] | None = None) -> int:
         return 0
     if command == "acceptance":
         return _acceptance(project_root, args[1:], as_json)
+    if command == "outbox":
+        return _outbox_check(project_root, args[1:], as_json)
     if command == "brief":
         surplus = [a for a in args[1:] if a != "--json"]
         if surplus:
@@ -10730,7 +12040,10 @@ def main(argv: list[str] | None = None) -> int:
             event_text="",
             dry_run=dry_run,
         )
-        _emit(result.to_dict(), as_json)
+        phase_result = result.to_dict()
+        if command == "clean" and result.ok and not dry_run:
+            phase_result["clean_execution"] = "PENDING"
+        _emit(phase_result, as_json)
         return 0 if result.ok else 1
 
     if command in ("plan", "dd"):

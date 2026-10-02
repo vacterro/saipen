@@ -415,7 +415,7 @@ def build_archive(output: Path, project: Path) -> None:
             [sys.executable, str(verifier), str(tmpzip), "--project-root", str(project)],
             cwd=str(project),
             capture_output=True,
-            text=True,
+            text=True, encoding="utf-8",
             timeout=600,
         )
         print(r.stdout[-2000:] if len(r.stdout) > 2000 else r.stdout)

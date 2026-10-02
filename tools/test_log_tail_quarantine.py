@@ -29,7 +29,13 @@ if str(TOOLS) not in sys.path:
     sys.path.insert(0, str(TOOLS))
 from test_fixture_support import CURRENT_STYLE_CONTRACT  # noqa: E402
 
-from saipen_engine.operations import quarantine_log_tail  # noqa: E402
+def quarantine_log_tail(*args, **kwargs):
+    # Import at execution, not collection: the behavioral public-CLI control
+    # must reach a pre-fix runtime that has no quarantine API.
+    from saipen_engine.operations import quarantine_log_tail as repair
+
+    return repair(*args, **kwargs)
+
 from saipen_engine.paths import identity_file_content, new_project_lineage  # noqa: E402
 from test_hermetic_env import hermetic_env, isolate_host_session  # noqa: E402
 
@@ -113,6 +119,30 @@ class QuarantineLogTailTests(unittest.TestCase):
         blocked = checkpoint(root, "test-agent", "RUN", "T-1", "ordinary work").to_dict()
         self.assertFalse(blocked.get("ok"), blocked)
         self.assertEqual(blocked.get("code"), "HISTORY_LEDGER_CORRUPT", blocked)
+
+    def test_public_recovery_same_damage_preserves_bytes_and_resumes(self) -> None:
+        """Same oracle reaches the old runtime, not an absent-API import.
+
+        Pre-fix: checkpoint HISTORY_LEDGER_CORRUPT; bare recover reports
+        FORENSICALLY_UNRECOVERABLE and no canonical repair. Post-fix must name
+        the repair, preserve original/prefix bytes and pass validate.
+        """
+        root = project(self.base)
+        before = self.log_bytes(root)
+        blocked = cli(root, "checkpoint", "RUN", "ordinary work")
+        self.assertEqual(blocked.get("code"), "HISTORY_LEDGER_CORRUPT", blocked)
+        recovery = cli(root, "recover")
+        self.assertEqual(self.log_bytes(root), before, "diagnosis must not cut bytes")
+        route = recovery.get("canonical_next_command")
+        self.assertEqual(route, "saipen recover quarantine-log-tail", recovery)
+        repaired = cli(root, "recover", "quarantine-log-tail")
+        self.assertTrue(repaired.get("ok"), repaired)
+        self.assertEqual((root / repaired["evidence_path"]).read_bytes(), before)
+        self.assertEqual(repaired["evidence_sha256"], hashlib.sha256(before).hexdigest())
+        prefix = before[:before.index(b"--help")]
+        self.assertTrue(self.log_bytes(root).startswith(prefix))
+        self.assertIn(b"LOG foreign tail quarantined", self.log_bytes(root))
+        self.assertTrue(cli(root, "validate").get("ok"))
 
     def test_the_cut_keeps_the_ledger_and_records_itself(self) -> None:
         root = project(self.base)
@@ -226,6 +256,30 @@ class QuarantineLogTailTests(unittest.TestCase):
         record = cli(root, "recover", "quarantine-log-tail", "normalize-log")
         self.assertFalse(record.get("ok"), record)
         self.assertEqual(self.log_bytes(root), before)
+
+    def test_every_repair_evidence_root_is_durable_and_byte_bound(self) -> None:
+        """A preserved LOG whose digest the ledger records must keep its bytes.
+
+        `normalize-log` and `quarantine-log-tail` both keep the LOG they
+        rewrote, and neither root was on the runtime-namespace policy: a
+        managed project would have released it as debris candidates and let
+        Git's CRLF conversion break the digest the DEC names.
+        """
+        from saipen_engine import operations
+        from saipen_engine import runtime_namespace as rn
+
+        roots = [
+            value
+            for name, value in vars(operations).items()
+            if name.endswith("_EVIDENCE_ROOT") and str(value).startswith(".saipen/recovery/")
+        ]
+        self.assertIn(operations.QUARANTINE_EVIDENCE_ROOT, roots)
+        byte_bound = {pattern for pattern, _probe in rn.BYTE_BOUND_PATTERNS}
+        for root in roots:
+            with self.subTest(root=root):
+                self.assertTrue(rn.is_durable_protected(root + "/op/LOG.md"))
+                self.assertIsNone(rn.runtime_class(root + "/op/LOG.md"))
+                self.assertIn(root + "/**", byte_bound)
 
     def test_reconcile_never_plans_on_the_cut_ledger(self) -> None:
         """The observation is the cut; only the op that writes the cut may ask."""

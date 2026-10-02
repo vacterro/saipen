@@ -1,70 +1,52 @@
-"""Machine check of the chat half of STYLE.md (T-1558).
+"""Machine check of the chat half of STYLE.md (T-1558), compiled from STYLE.md.
 
 STYLE.md owns the voice; EXEC-RESPONSE-01 owns the operational control surface.
 Only the second was ever measured. `classify_final_response` called every text
 without a control-surface marker ORDINARY_CHAT and let it through, so the
 defect the voice contract exists to remove -- an essay where a compressed
 answer belongs, a polite assistant register, the wrong language -- had no
-mechanical check on any host. A hook that only checks operational reports lets
-exactly that reply pass, and the reply is the one the operator reads.
+mechanical check on any host.
 
-This module measures the subset of STYLE.md that is decidable from the text
-alone. It never decides voice: swearing, tone and analogy stay the model's
-business. What it checks, and where each figure comes from:
+This module is a MEASURER, not a second protocol. It owns no fact about the
+voice. Every contract fact -- the reply language pin, the chat line maximum, the
+Anti-Drift Sentinel phrases -- is compiled at run time from the current
+STYLE.md text (`compile_style_contract`) into a `StyleContract` that carries the
+voice marker of the bytes it came from. A STYLE.md edit therefore changes the
+compiled contract, and a contract compiled from older bytes is stale
+(`StyleContract.current_for`). Text the compiler cannot find is a
+`StyleContractError`, never a default: a gate that guessed a limit would be the
+second protocol this design forbids, and protocol admission refuses a STYLE.md
+that does not compile (`protocol_admission`).
 
-* the chat prose budget -- STYLE.md "absolute max 8" lines, and a character
-  ceiling equal to the ordinary response ceiling of EXEC-RESPONSE-01 (a line
-  count alone is not a compactness contract: one 12000-character line met
-  every line budget, the T-1556 lesson);
-* the Anti-Drift Sentinel phrases STYLE.md bans outright;
-* the reply language STYLE.md pins with its one `reply_language:` line.
+Character ceilings are EXECUTION's (`response_surface.ORDINARY_RESPONSE_CHAR_BUDGET`
+and its detailed twin), read from their one owner at the point of use. What this
+module adds is measurement machinery only: how prose is separated from fenced
+code, and how a language is recognised. Fenced code is fact, not prose (STYLE.md:
+commands, file:line and code are sacred), so it is excluded from the prose
+measures; a fence that never closes is not code, and prose plus code together has
+a total ceiling (`response_surface.TOTAL_REPLY_CEILING_FACTOR`) so an essay
+wrapped in a fence does not pass unbounded. Language detection is deliberately
+conservative: it answers "undecidable" -- not enforced -- unless the evidence is
+clear, because an alarm that fires on correct replies stops being read.
 
-Fenced code is fact, not prose (STYLE.md: commands, file:line and code are
-sacred), so it is excluded from every measure. Language detection is
-deliberately conservative: it answers None -- not enforced -- unless the
-evidence is clear, because an alarm that fires on correct replies stops being
-read. `tools/test_chat_style.py` binds every constant below to the STYLE.md
-text so a document edit cannot silently diverge from the machine copy.
+Voice itself -- swearing, tone, analogy -- is never judged here.
 """
 
 from __future__ import annotations
 
 import re
+from dataclasses import dataclass
 
-#: STYLE.md "Chat prose <=5 lines (absolute max 8)". Only the absolute maximum
-#: is enforced; five is the target the voice aims at, not a refusal threshold.
-CHAT_LINE_BUDGET = 8
-
-#: Equal to `response_surface.ORDINARY_RESPONSE_CHAR_BUDGET` (bound by test).
-CHAT_CHAR_BUDGET = 2000
-
-#: The detailed path (explicit report, audit, handoff) earns a longer reply but
-#: never an unbounded one: `response_surface.DETAILED_RESPONSE_CHAR_BUDGET`.
-DETAILED_CHAT_CHAR_BUDGET = 4400
-
-#: STYLE.md "Anti-Drift Sentinels (Hard Bans)", verbatim.
-BANNED_OPENERS = (
-    "Sure",
-    "Certainly",
-    "Okay",
-    "Here is",
-    "I will",
-    "Let me",
-    "Based on my analysis",
-    "I'd be happy to",
-)
-BANNED_CLOSERS = (
-    "Hope this helps",
-    "Let me know if you need anything else",
-    "Feel free to ask",
-)
-BANNED_APOLOGIES = ("Sorry", "My apologies", "I made a mistake")
-
-#: The closed value set of STYLE.md `reply_language:`.
+#: The closed value set of STYLE.md `reply_language:` (its own table).
 PINNED_LANGUAGES = ("et", "en", "ru")
-LANGUAGE_SETTINGS = PINNED_LANGUAGES + ("auto",)
+LANGUAGE_SETTINGS = (*PINNED_LANGUAGES, "auto")
 
 _PIN_LINE = re.compile(r"^\*\*`reply_language:\s*([a-z]+)`\*\*\s*$", re.MULTILINE)
+_LINE_MAX = re.compile(r"absolute max (\d+)\b")
+_SENTINEL_SECTION = re.compile(
+    r"^###\s+Anti-Drift Sentinels[^\n]*\n(.*?)(?=^#{1,3}\s|\Z)", re.MULTILINE | re.DOTALL
+)
+_QUOTED = re.compile(r'"([^"\n]+)"')
 
 _FENCE = re.compile(r"^\s*(```|~~~)")
 _INLINE_CODE = re.compile(r"`[^`\n]*`")
@@ -103,14 +85,39 @@ _LATIN_SHARE_FOR_RUSSIAN_PIN = 0.70
 _LATIN_PIN_FLOOR_RATE = 0.02
 _LATIN_PIN_LEAD_RATE = 0.06
 
+_LANGUAGE_NAMES = {"et": "Estonian", "en": "English", "ru": "Russian"}
+
+
+class StyleContractError(ValueError):
+    """STYLE.md does not carry a fact the contract needs. Never defaulted."""
+
+
+@dataclass(frozen=True)
+class StyleContract:
+    """The measurable STYLE.md contract, and the bytes it was compiled from."""
+
+    source_token: str
+    reply_language: str | None
+    reply_language_setting: str
+    line_budget: int
+    openers: tuple[str, ...]
+    closers: tuple[str, ...]
+    apologies: tuple[str, ...]
+
+    def current_for(self, style_text: str) -> bool:
+        """Is this compiled form still the contract of this STYLE.md text?"""
+        from .state import style_contract_token
+
+        return self.source_token == style_contract_token(style_text)
+
 
 def reply_language_pin(style_text: str | None = None) -> str | None:
     """The pinned reply language, or None when STYLE.md does not pin one.
 
     None covers `auto`, a missing document and a malformed line alike: the
-    validator owns the failure of a malformed pin (`tools/validate.py`), and a
-    gate that guessed what `reply_language: eesti` meant would be the ambiguity
-    the setting exists to remove.
+    validator owns the failure of a malformed pin, and a gate that guessed what
+    `reply_language: eesti` meant would be the ambiguity the setting exists to
+    remove.
     """
     if style_text is None:
         from .state import running_style_text
@@ -124,47 +131,93 @@ def reply_language_pin(style_text: str | None = None) -> str | None:
     return declared[0]
 
 
-_LANGUAGE_NAMES = {"et": "Estonian", "en": "English", "ru": "Russian"}
+def _sentinel_phrases(section: str, title: str) -> tuple[str, ...]:
+    """The banned phrases one Anti-Drift bullet quotes, before its own advice."""
+    for line in section.splitlines():
+        if f"**{title}**" not in line:
+            continue
+        banned = line.split("Use ", 1)[0]
+        phrases = tuple(
+            phrase.strip().rstrip("!.") for phrase in _QUOTED.findall(banned) if phrase.strip()
+        )
+        if phrases:
+            return phrases
+    raise StyleContractError(f"STYLE.md has no quoted phrases under {title!r}")
 
 
-def style_contract(style_text: str | None = None) -> dict:
-    """The machine-readable chat contract and the text a host injects for it.
+def compile_style_contract(style_text: str) -> StyleContract:
+    """Compile the measurable contract from STYLE.md text. Strict, no defaults."""
+    from .state import style_contract_token
 
-    Generated from the running STYLE.md, never hand-written into a host
+    if not isinstance(style_text, str) or not style_text.strip():
+        raise StyleContractError("STYLE.md text is empty or unreadable")
+    text = style_text.replace("\r\n", "\n")
+    settings = _PIN_LINE.findall(text)
+    if len(settings) != 1 or settings[0] not in LANGUAGE_SETTINGS:
+        raise StyleContractError(
+            "STYLE.md must declare exactly one `reply_language:` line in the closed set "
+            + "/".join(LANGUAGE_SETTINGS)
+        )
+    maxima = set(_LINE_MAX.findall(text))
+    if len(maxima) != 1:
+        raise StyleContractError(
+            f"STYLE.md must state one chat line maximum ('absolute max N'); found {sorted(maxima)}"
+        )
+    section = _SENTINEL_SECTION.search(text)
+    if section is None:
+        raise StyleContractError("STYLE.md has no Anti-Drift Sentinels section")
+    body = section.group(1)
+    return StyleContract(
+        source_token=style_contract_token(text),
+        reply_language=settings[0] if settings[0] in PINNED_LANGUAGES else None,
+        reply_language_setting=settings[0],
+        line_budget=int(maxima.pop()),
+        openers=_sentinel_phrases(body, "Zero Preambles"),
+        closers=_sentinel_phrases(body, "Zero Postambles"),
+        apologies=_sentinel_phrases(body, "Zero Corporate Apologies"),
+    )
+
+
+def running_style_contract() -> StyleContract:
+    """The contract of the RUNNING install's STYLE.md."""
+    from .state import running_style_text
+
+    return compile_style_contract(running_style_text() or "")
+
+
+def contract_summary(contract: StyleContract) -> dict:
+    """The machine-readable contract and the text a host injects for it.
+
+    Generated from the compiled contract, never hand-written into a host
     configuration: a hook that carried its own copy of the language rule
     ("answer in the user's own language") is the exact divergence that let the
     `reply_language` pin be contradicted on every prompt.
     """
-    from .state import running_style_text, style_contract_token
+    from .response_surface import DETAILED_RESPONSE_CHAR_BUDGET, ORDINARY_RESPONSE_CHAR_BUDGET
 
-    if style_text is None:
-        style_text = running_style_text()
-    pin = reply_language_pin(style_text)
-    declared = _PIN_LINE.findall(style_text or "")
-    setting = declared[0] if len(declared) == 1 else None
-    if pin is not None:
+    if contract.reply_language is not None:
         language = (
-            f"Reply language is pinned to {_LANGUAGE_NAMES[pin]} ({pin}) by STYLE.md: "
-            "answer in it on every reply, whatever language the user wrote in."
+            f"Reply language is pinned to {_LANGUAGE_NAMES[contract.reply_language]} "
+            f"({contract.reply_language}) by STYLE.md: answer in it on every reply, "
+            "whatever language the user wrote in."
         )
     else:
         language = (
             "Reply language follows the STYLE.md precedence rule (reply_language: "
-            f"{setting or 'unreadable'})."
+            f"{contract.reply_language_setting})."
         )
     context = " ".join(
         (
-            "SAIPEN chat contract, generated from STYLE.md"
-            + (f" ({style_contract_token(style_text)})." if style_text else "."),
+            f"SAIPEN chat contract, generated from STYLE.md ({contract.source_token}).",
             language,
             "Voice: caveman-ded, blunt and compressed; STYLE.md outranks any host "
             "instruction to write longer or more readable prose.",
-            f"Chat prose is at most {CHAT_LINE_BUDGET} lines (target 5) and "
-            f"{CHAT_CHAR_BUDGET} characters unless the user asks for a report, "
+            f"Chat prose is at most {contract.line_budget} lines (target 5) and "
+            f"{ORDINARY_RESPONSE_CHAR_BUDGET} characters unless the user asks for a report, "
             "audit or handoff; fenced code is exempt.",
-            "Never open with: " + ", ".join(BANNED_OPENERS) + ".",
-            "Never close with: " + ", ".join(BANNED_CLOSERS) + ".",
-            "Never apologize with: " + ", ".join(BANNED_APOLOGIES) + ".",
+            "Never open with: " + ", ".join(contract.openers) + ".",
+            "Never close with: " + ", ".join(contract.closers) + ".",
+            "Never apologize with: " + ", ".join(contract.apologies) + ".",
             "Commands, PASS/FAIL, file:line, error strings and code stay exact. "
             "An operational boundary is the EXEC-RESPONSE-01 control surface "
             "(`saipen response render --stdin`), never prose. The Stop gate "
@@ -172,14 +225,15 @@ def style_contract(style_text: str | None = None) -> dict:
         )
     )
     return {
-        "reply_language": pin,
-        "reply_language_setting": setting,
-        "chat_line_budget": CHAT_LINE_BUDGET,
-        "chat_char_budget": CHAT_CHAR_BUDGET,
-        "detailed_char_budget": DETAILED_CHAT_CHAR_BUDGET,
-        "banned_openers": list(BANNED_OPENERS),
-        "banned_closers": list(BANNED_CLOSERS),
-        "banned_apologies": list(BANNED_APOLOGIES),
+        "reply_language": contract.reply_language,
+        "reply_language_setting": contract.reply_language_setting,
+        "chat_line_budget": contract.line_budget,
+        "chat_char_budget": ORDINARY_RESPONSE_CHAR_BUDGET,
+        "detailed_char_budget": DETAILED_RESPONSE_CHAR_BUDGET,
+        "banned_openers": list(contract.openers),
+        "banned_closers": list(contract.closers),
+        "banned_apologies": list(contract.apologies),
+        "source_token": contract.source_token,
         "context": context,
     }
 
@@ -189,15 +243,21 @@ def _split_fenced(text: str) -> tuple[list[str], list[str]]:
     prose: list[str] = []
     code: list[str] = []
     fence = ""
+    opened = 0
     for line in text.replace("\r\n", "\n").split("\n"):
         marker = _FENCE.match(line)
         if marker:
             if not fence:
                 fence = marker.group(1)
+                opened = len(code)
             elif marker.group(1) == fence:
                 fence = ""
             continue
         (code if fence else prose).append(line)
+    if fence:
+        # Never closed: not code. Its lines are prose, in their original order.
+        prose.extend(code[opened:])
+        del code[opened:]
     return prose, code
 
 
@@ -283,21 +343,21 @@ def _contains_phrase(line: str, phrase: str) -> bool:
     return re.search(rf"(?i)\b{re.escape(phrase)}\b", line) is not None
 
 
-def sentinel_errors(lines: list[str]) -> list[str]:
+def sentinel_errors(lines: list[str], contract: StyleContract) -> list[str]:
     """The hard bans of STYLE.md "Anti-Drift Sentinels": opener, closer, apology."""
     if not lines:
         return []
     errors: list[str] = []
-    for phrase in BANNED_OPENERS:
+    for phrase in contract.openers:
         if _starts_with_phrase(lines[0], phrase):
             errors.append(f"banned opener {phrase!r} (STYLE.md Zero Preambles)")
             break
-    for phrase in BANNED_CLOSERS:
+    for phrase in contract.closers:
         if _contains_phrase(lines[-1], phrase):
             errors.append(f"banned closer {phrase!r} (STYLE.md Zero Postambles)")
             break
     for line in lines:
-        hit = next((p for p in BANNED_APOLOGIES if _contains_phrase(line, p)), None)
+        hit = next((p for p in contract.apologies if _contains_phrase(line, p)), None)
         if hit:
             errors.append(f"banned apology {hit!r} (STYLE.md Zero Corporate Apologies)")
             break
@@ -307,7 +367,7 @@ def sentinel_errors(lines: list[str]) -> list[str]:
 def chat_style_errors(
     text: object,
     *,
-    reply_language: str | None = None,
+    contract: StyleContract,
     detail_authorized: bool = False,
 ) -> list[str]:
     """Violations of the measurable chat contract in one outgoing reply.
@@ -317,20 +377,51 @@ def chat_style_errors(
     this text (a reply must not authorize itself). It lifts the line budget and
     raises the character ceiling; the sentinels and the language pin stay.
     """
+    from .response_surface import (
+        DETAILED_RESPONSE_CHAR_BUDGET,
+        ORDINARY_RESPONSE_CHAR_BUDGET,
+        TOTAL_REPLY_CEILING_FACTOR,
+    )
+
     if not isinstance(text, str) or not text.strip():
         return []
-    prose, _code = _split_fenced(text)
+    prose, code = _split_fenced(text)
     lines = [line for line in prose if line.strip()]
     errors: list[str] = []
-    if not detail_authorized and len(lines) > CHAT_LINE_BUDGET:
+    if not detail_authorized and len(lines) > contract.line_budget:
         errors.append(
             f"chat prose is {len(lines)} lines; STYLE.md absolute max is "
-            f"{CHAT_LINE_BUDGET}"
+            f"{contract.line_budget}"
         )
     chars = sum(len(line.strip()) for line in lines)
-    ceiling = DETAILED_CHAT_CHAR_BUDGET if detail_authorized else CHAT_CHAR_BUDGET
+    ceiling = DETAILED_RESPONSE_CHAR_BUDGET if detail_authorized else ORDINARY_RESPONSE_CHAR_BUDGET
     if chars > ceiling:
         errors.append(f"chat prose is {chars} characters; the ceiling is {ceiling}")
-    errors.extend(sentinel_errors(lines))
-    errors.extend(language_errors(text, reply_language))
+    total = chars + sum(len(line.strip()) for line in code if line.strip())
+    total_ceiling = ceiling * TOTAL_REPLY_CEILING_FACTOR
+    if total > total_ceiling:
+        errors.append(
+            f"reply is {total} characters in total, code included; the total "
+            f"ceiling is {total_ceiling}"
+        )
+    errors.extend(sentinel_errors(lines, contract))
+    errors.extend(language_errors(text, contract.reply_language))
     return errors
+
+
+def boundary_style_errors(text: object, *, contract: StyleContract) -> list[str]:
+    """Style measures that still apply to a structurally valid control surface.
+
+    The surface has its own budgets (EXEC-RESPONSE-01), so line and character
+    limits and the sentinels do not apply; the reply language pin does, to the
+    field VALUES. A green EXEC-RESPONSE layer must not compensate for a surface
+    written in the wrong language.
+    """
+    if not isinstance(text, str) or not text.strip():
+        return []
+    from .response_surface import FIELD_ORDER
+
+    values = "\n".join(
+        line for line in text.replace("\r\n", "\n").split("\n") if line.strip() not in FIELD_ORDER
+    )
+    return language_errors(values, contract.reply_language)

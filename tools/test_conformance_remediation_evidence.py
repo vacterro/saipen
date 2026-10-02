@@ -57,7 +57,7 @@ def _idle(action: str = "saipen continue") -> dict:
 def write_fail_receipt(root: Path, *, work: str, ts: str, extra_problem: str = "") -> dict:
     """A CURRENT_FAIL core receipt that blocks `work`, like the validator's own."""
     write_receipt(root, "FAIL", ts=ts)
-    path = sorted((root / C.RECEIPT_DIRNAME).glob("*.json"))[-1]
+    path = max((root / C.RECEIPT_DIRNAME).glob("*.json"))
     receipt = json.loads(path.read_text(encoding="utf-8"))
     problems = [
         {
@@ -97,7 +97,8 @@ def write_fail_receipt(root: Path, *, work: str, ts: str, extra_problem: str = "
 def _hash16(body: dict) -> str:
     import hashlib
 
-    return hashlib.sha256(json.dumps(body, indent=2, sort_keys=True).encode("utf-8")).hexdigest()[:16]
+    payload = json.dumps(body, indent=2, sort_keys=True).encode("utf-8")
+    return hashlib.sha256(payload).hexdigest()[:16]
 
 
 def write_reverify(

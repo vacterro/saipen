@@ -43,6 +43,7 @@ from unittest.mock import patch
 ROOT = Path(__file__).resolve().parents[1]
 TOOLS = ROOT / "tools"
 sys.path.insert(0, str(TOOLS))
+from test_fixture_support import CURRENT_STYLE_CONTRACT  # noqa: E402
 
 HOME_ESCAPED = str(ROOT).replace("\\", "\\\\")
 
@@ -115,7 +116,7 @@ class ScoutTransitionFixture(unittest.TestCase):
             "saipen_version: 7\n"
             "schema_version: 3\n"
             "last_event: 2\n"
-            "style_contract: ded-4ae736e4\n"
+            'style_contract: ' + CURRENT_STYLE_CONTRACT + '\n'
             f'saipen_home: "{HOME_ESCAPED}"\n'
             "agent: tester\n"
             "requires:\n"

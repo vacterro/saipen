@@ -35,6 +35,7 @@ from pathlib import Path
 TOOLS = Path(__file__).resolve().parent
 if str(TOOLS) not in sys.path:
     sys.path.insert(0, str(TOOLS))
+from test_fixture_support import CURRENT_STYLE_CONTRACT  # noqa: E402
 
 from saipen_engine.admission import evaluate_admission  # noqa: E402
 from saipen_engine.paths import identity_file_content, new_project_lineage  # noqa: E402
@@ -45,21 +46,22 @@ def setUpModule() -> None:
     isolate_host_session()
 
 
-STATE = """---
-phase: BUILD
-task: T-1
-next_action: "PHASE BUILD T-1"
-blocker: ""
-transition_from: SCOUT
-saipen_version: 7
-schema_version: 3
-last_event: 100
-style_contract: ded-4ae736e4
-mode: full
-updated: 2026-09-12T00:00:00Z
-agent: test-agent
----
-"""
+STATE = (
+    '---\n'
+    'phase: BUILD\n'
+    'task: T-1\n'
+    'next_action: "PHASE BUILD T-1"\n'
+    'blocker: ""\n'
+    'transition_from: SCOUT\n'
+    'saipen_version: 7\n'
+    'schema_version: 3\n'
+    'last_event: 100\n'
+    'style_contract: ' + CURRENT_STYLE_CONTRACT + '\n'
+    'mode: full\n'
+    'updated: 2026-09-12T00:00:00Z\n'
+    'agent: test-agent\n'
+    '---\n'
+)
 
 BOARD = (
     "## DOING\n"

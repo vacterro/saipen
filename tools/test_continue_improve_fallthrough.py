@@ -44,6 +44,7 @@ from unittest import mock
 TOOLS = Path(__file__).resolve().parent
 if str(TOOLS) not in sys.path:
     sys.path.insert(0, str(TOOLS))
+from test_fixture_support import CURRENT_STYLE_CONTRACT  # noqa: E402
 
 import saipen as CLI  # noqa: E402
 
@@ -124,7 +125,7 @@ class ContinueImproveFallthroughTests(unittest.TestCase):
             "saipen_version": "7",
             "schema_version": "3",
             "last_event": "1",
-            "style_contract": "ded-4ae736e4",
+            "style_contract": CURRENT_STYLE_CONTRACT,
             "agent": "tester",
             "mode": "full",
             "updated": now,

@@ -118,6 +118,40 @@ class XPatchCommitSurvivalTests(unittest.TestCase):
             report["uncommitted"], [{"patch_id": patch_id, "paths": ["src/session.py"]}]
         )
 
+    def test_crlf_bytes_committed_under_text_auto_are_not_reported(self) -> None:
+        # T-1522: after_sha256 hashes the CRLF working-tree bytes the patch
+        # applied, but `* text=auto` normalizes the committed blob to LF, so
+        # comparing after_sha256 against the raw blob reported a correctly
+        # committed CRLF path forever. The smudge-back comparison must clear it.
+        (self.root / ".gitattributes").write_bytes(b"* text=auto\n")
+        self.git("add", ".gitattributes")
+        self.commit("declare text=auto", "2026-09-01T10:45:00Z")
+        self.apply({"src/session.py": b"line-a\r\nline-b\r\n"})
+        self.git("add", "src/session.py")
+        self.commit("carry CRLF applied bytes", T2)
+        self.assertEqual(self.git("status", "--porcelain", "src/session.py").stdout, "")
+        self.assertEqual(xpatch.commit_survival(self.root)["uncommitted"], [])
+
+    def test_uncommitted_crlf_and_lf_bytes_are_still_reported(self) -> None:
+        (self.root / ".gitattributes").write_bytes(b"* text=auto\n")
+        self.git("add", ".gitattributes")
+        self.commit("declare text=auto", "2026-09-01T10:45:00Z")
+        crlf = self.apply({"src/session.py": b"line-a\r\nline-b\r\n"})
+        self.assertEqual(
+            xpatch.commit_survival(self.root)["uncommitted"],
+            [{"patch_id": crlf, "paths": ["src/session.py"]}],
+        )
+
+    def test_bytes_reachable_only_from_a_stash_are_reported(self) -> None:
+        # refs/stash is reachable from --all, but its bytes were never
+        # committed to a branch; a path held only in a stash must still warn.
+        patch_id = self.apply()
+        self.git("stash", "push", "-u", "src/session.py")
+        self.assertEqual(
+            xpatch.commit_survival(self.root)["uncommitted"],
+            [{"patch_id": patch_id, "paths": ["src/session.py"]}],
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

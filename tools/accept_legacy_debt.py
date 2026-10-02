@@ -22,7 +22,7 @@ import json
 import sys
 from pathlib import Path
 
-from saipen_engine.accepted_debt import register
+from saipen_engine.accepted_debt import rebind, register
 from saipen_engine.state import parse_state
 
 
@@ -39,19 +39,56 @@ def main(argv: list[str]) -> int:
     parser.add_argument("--project-root", default=".", help="project root (default: cwd)")
     parser.add_argument(
         "--events",
-        required=True,
+        default=None,
         help="comma-separated exact event ids, e.g. E-964,E-981",
     )
     parser.add_argument(
         "--authority",
-        required=True,
+        default=None,
         help="canonical authority token: SRC-### | E-### | lineage-<32hex>",
     )
     parser.add_argument("--reason", required=True, help="why this debt is accepted immutable")
+    parser.add_argument(
+        "--rebind",
+        metavar="AD-######",
+        default=None,
+        help="T-312 rebind mode: re-point this record's evidence at where its events "
+        "live NOW (a LOG shard was rotated). The accepted event set is immutable; "
+        "combine with --expect-before (the live 16-hex hash being replaced).",
+    )
+    parser.add_argument(
+        "--expect-before",
+        default=None,
+        help="live hash of the record being repaired; a rebind without it is refused, "
+        "because it cannot then prove which bytes it replaces",
+    )
     parser.add_argument("--agent", default=None, help="recording agent (default: STATE.agent)")
     args = parser.parse_args(argv)
 
+    if not args.rebind:
+        if not args.events:
+            parser.error("--events is required unless --rebind is used")
+        if not args.authority:
+            parser.error("--authority is required unless --rebind is used")
     root = Path(args.project_root).resolve()
+    if args.rebind:
+        if args.events:
+            parser.error("--events and --rebind are mutually exclusive: a rebind never "
+                         "changes which events a record accepts")
+        if args.authority:
+            parser.error("--authority and --rebind are mutually exclusive: the authority "
+                         "belongs to the original registration and is immutable")
+        if not args.expect_before:
+            parser.error("--rebind requires --expect-before")
+        result = rebind(
+            root,
+            args.rebind,
+            agent=args.agent or _agent(root),
+            reason=args.reason,
+            expected_before=args.expect_before,
+        )
+        print(json.dumps(result, indent=2, sort_keys=True))
+        return 0 if result.get("ok") else 1
     events = [part.strip() for part in args.events.split(",") if part.strip()]
     result = register(
         root,

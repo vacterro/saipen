@@ -22,6 +22,10 @@ from unittest.mock import patch
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "tools"))
+from test_fixture_support import (  # noqa: E402
+    CURRENT_STYLE_CONTRACT,
+    read_scenario_state,
+)
 
 from saipen_engine import audit_inbox, intake  # noqa: E402
 from saipen_engine.router import route_next  # noqa: E402
@@ -29,7 +33,7 @@ from saipen_engine.router import route_next  # noqa: E402
 CLI = ROOT / "tools" / "saipen.py"
 SCENARIO = ROOT / "tests" / "scenarios" / "userperson-valid" / ".saipen"
 
-STATE_DONE = SCENARIO.joinpath("STATE.md").read_text(encoding="utf-8")
+STATE_DONE = read_scenario_state("userperson-valid")
 BOARD_EMPTY = "# Board\n## DOING\n## TODO\n## DONE\n## BLOCKED\n"
 
 def _live_claim_time() -> str:
@@ -70,7 +74,7 @@ def _state(
         "saipen_version: 7\n"
         "schema_version: 3\n"
         "last_event: 1\n"
-        "style_contract: ded-4ae736e4\n"
+        'style_contract: ' + CURRENT_STYLE_CONTRACT + '\n'
         "agent: probe\n"
         "mode: full\n"
         "updated: 2026-08-31T00:00:00Z\n"
@@ -84,6 +88,10 @@ class AuditInboxFixture(unittest.TestCase):
         self.root = Path(self.tmp.name) / "project"
         self.root.mkdir()
         shutil.copytree(SCENARIO, self.root / ".saipen")
+        # T-1555: the fixture carries the placeholder; the copy claims THIS install.
+        from test_fixture_support import restamp_live_style
+
+        restamp_live_style(self.root / ".saipen")
         (self.root / ".saipen" / "USERPERSON.md").unlink(missing_ok=True)
         self.config = Path(self.tmp.name) / "user-config"
         self.env = patch.dict(os.environ, {"SAIPEN_USER_CONFIG_HOME": str(self.config)})
@@ -433,6 +441,84 @@ class InvalidLayerDoesNotStarveTests(AuditInboxFixture):
 
 
 # ---------------------------------------------------------------------------
+# ROUTING WORKABILITY REGRESSION
+# ---------------------------------------------------------------------------
+
+class BlockedActiveLayerDoesNotStarveTests(AuditInboxFixture):
+    def bind_active(self, number: int, work: str) -> dict:
+        body = f"# audit {number}\n\nlinked work\n"
+        self.layer(number, body)
+        rel = f"audit/{number}.md"
+        captured = audit_inbox.capture_layer(self.root, rel, work=work)
+        self.assertTrue(captured["ok"], captured)
+        return audit_inbox.bind_layer(
+            self.root,
+            rel,
+            layer=number,
+            generation=1,
+            file_sha256=captured["file_sha256"],
+            size_bytes=len(body.encode("utf-8")),
+            receipt_id=captured["receipt"],
+            receipt_sha256=captured["file_sha256"],
+            binding="exact",
+            linked_work=work,
+            state=audit_inbox.ACTIVE,
+        )
+
+    def add_ticket(self, section: str, line: str) -> None:
+        board = self.root / ".saipen" / "BOARD.md"
+        text = board.read_text(encoding="utf-8")
+        heading = f"{section}\n"
+        self.assertIn(heading, text)
+        board.write_text(
+            text.replace(heading, heading + line + "\n", 1), encoding="utf-8"
+        )
+
+    def test_blocked_active_does_not_starve_later_new_and_recovers_order(self) -> None:
+        blocked = (
+            "- [ ] T-900 [P1] audit work | verify: proof "
+            "| blocker: SOURCE_UNRESOLVED"
+        )
+        self.add_ticket("## BLOCKED", blocked)
+        self.bind_active(16, "T-900")
+        self.layer(17, "# later audit\n\nnew generation\n")
+
+        board_path = self.root / ".saipen" / "BOARD.md"
+
+        projection = audit_inbox.projection(self.root)
+        layers = audit_inbox.classify(self.root)["layers"]
+        self.assertEqual(layers[0]["state"], audit_inbox.ACTIVE)
+        self.assertEqual(layers[0]["linked_work"], "T-900")
+        self.assertEqual(projection["pending"], [16, 17])
+        self.assertEqual(projection["unworkable_active"][0]["work"], "T-900")
+        self.assertEqual(projection["action"], "saipen audit ingest")
+        self.assertEqual(projection["layer"], 17)
+
+        board_text = board_path.read_text(encoding="utf-8")
+        routed = route_next(_state(), board_text, audit_inbox=projection)
+        self.assertEqual(routed["reason"], "audit-inbox")
+        self.assertEqual(routed["audit_layer"], 17)
+
+        blocked_record = next(
+            line for line in board_text.splitlines() if line.startswith("- [ ] T-900 ")
+        )
+        todo = blocked_record.replace(" | blocker: SOURCE_UNRESOLVED", "")
+        self.assertNotEqual(blocked_record, todo)
+        board_text = board_text.replace(
+            f"## TODO\n## DONE\n## BLOCKED\n{blocked_record}\n",
+            f"## TODO\n{todo}\n## DONE\n## BLOCKED\n",
+            1,
+        )
+        board_path.write_text(board_text, encoding="utf-8")
+
+        projection = audit_inbox.projection(self.root)
+        self.assertEqual(projection["action"], "PHASE SCOUT T-900", projection)
+        self.assertEqual(projection["layer"], 16)
+        routed = route_next(_state(), board_text, audit_inbox=projection)
+        self.assertEqual(routed["reason"], "audit-inbox")
+        self.assertEqual(routed["ticket"], "T-900")
+
+
 # SOURCE INTEGRATION
 # ---------------------------------------------------------------------------
 

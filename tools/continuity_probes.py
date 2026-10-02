@@ -61,7 +61,7 @@ def cli(project: Path, agent: str, *args: str) -> dict:
         ],
         cwd=str(project),
         capture_output=True,
-        text=True,
+        text=True, encoding="utf-8",
         errors="replace",
         timeout=300,
     )
@@ -86,7 +86,7 @@ def cli_raw(project: Path, agent: str, *args: str) -> str:
         ],
         cwd=str(project),
         capture_output=True,
-        text=True,
+        text=True, encoding="utf-8",
         errors="replace",
         timeout=300,
     )
@@ -98,7 +98,7 @@ def validate(project: Path) -> tuple[int, str]:
         [sys.executable, str(VALIDATE_PY), "--project-root", str(project)],
         cwd=str(HOME),
         capture_output=True,
-        text=True,
+        text=True, encoding="utf-8",
         errors="replace",
         timeout=600,
     )
@@ -211,7 +211,12 @@ def run_continuity_probes() -> tuple[list[str], int]:
     expect(
         "grammar parses open with predecessor",
         att.parse_attempt_text("attempt A-002 open; supersedes A-001")
-        == {"kind": "open", "id": "A-002", "supersedes": "A-001"},
+        == {
+            "kind": "open",
+            "id": "A-002",
+            "supersedes": "A-001",
+            "runtime_provenance": None,
+        },
     )
     try:
         att.parse_attempt_text("attempt A-1 open")

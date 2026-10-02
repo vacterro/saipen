@@ -27,6 +27,22 @@ import re
 _CONTINUATION = re.compile(r"PHASE\s+[A-Z]+\s+(T-\d+)\s*$")
 
 
+def linked_work_is_workable(
+    work: str | None,
+    tickets: dict | None,
+    agent: str | None = None,
+    now: datetime.datetime | None = None,
+) -> bool:
+    """Apply the shared BOARD workability decision to an Audit Inbox link."""
+    if not work or tickets is None:
+        return False
+    from saipen_engine.board import ticket_is_workable
+
+    return ticket_is_workable(
+        tickets.get(work, {}), tickets, agent=agent, now=now
+    )
+
+
 def audit_route_owns(
     projection: object,
     tickets: dict | None = None,
@@ -37,7 +53,7 @@ def audit_route_owns(
 
     True when:
     1. projection is a dict with an 'action'
-    2. not invalid_only and not residue_only
+    2. not invalid_only, residue_only, or unworkable_active_only
     3. if the action is a PHASE action bound to a work ticket:
        when tickets is provided, that work ticket must be workable.
        A blocked or unworkable ticket must not own continuation -- the router
@@ -45,15 +61,16 @@ def audit_route_owns(
     """
     if not isinstance(projection, dict) or not projection.get("action"):
         return False
-    if projection.get("invalid_only") or projection.get("residue_only"):
+    if (
+        projection.get("invalid_only")
+        or projection.get("residue_only")
+        or projection.get("unworkable_active_only")
+    ):
         return False
     work = projection.get("work")
     action_str = str(projection.get("action", ""))
     if work and action_str.startswith("PHASE ") and tickets is not None:
-        from saipen_engine.board import ticket_is_workable
-
-        ticket = tickets.get(work, {})
-        if not ticket_is_workable(ticket, tickets, agent=agent, now=now):
+        if not linked_work_is_workable(work, tickets, agent=agent, now=now):
             return False
     return True
 
@@ -61,11 +78,11 @@ def audit_route_owns(
 def route_applies(projection: object) -> bool:
     """Does the inbox own a routable action right now?
 
-    False for an absent or empty inbox, and false for the two diagnostic
-    verdicts. An unreadable layer and an uncaptured leftover are conditions
-    the operator must see, not Work -- the router does not route them either,
-    so a check that fired on them would demand an agent follow a route that
-    does not exist.
+    False for an absent or empty inbox and for any diagnostic verdict. An
+    unreadable layer, uncaptured leftover, or linked Work that is not currently
+    workable is a condition the operator must see. The router does not route
+    these verdicts as Work, so the operator is never asked to follow a route
+    that does not exist.
     """
     return audit_route_owns(projection)
 

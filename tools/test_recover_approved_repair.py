@@ -29,6 +29,7 @@ TOOLS = Path(__file__).resolve().parent
 REPO = TOOLS.parent
 if str(TOOLS) not in sys.path:
     sys.path.insert(0, str(TOOLS))
+from test_fixture_support import CURRENT_STYLE_CONTRACT  # noqa: E402
 
 from saipen import main as saipen_main  # noqa: E402
 from saipen_engine.board import parse_board  # noqa: E402
@@ -46,21 +47,22 @@ def setUpModule() -> None:
 
 _TEMPS: list[tempfile.TemporaryDirectory] = []
 
-STATE = """---
-phase: BUILD
-task: T-9000
-next_action: "PHASE BUILD T-9000"
-blocker: ""
-transition_from: DONE
-saipen_version: 7
-schema_version: 3
-last_event: 100
-style_contract: ded-4ae736e4
-mode: full
-updated: 2026-09-15T00:00:00Z
-agent: test-agent
----
-"""
+STATE = (
+    '---\n'
+    'phase: BUILD\n'
+    'task: T-9000\n'
+    'next_action: "PHASE BUILD T-9000"\n'
+    'blocker: ""\n'
+    'transition_from: DONE\n'
+    'saipen_version: 7\n'
+    'schema_version: 3\n'
+    'last_event: 100\n'
+    'style_contract: ' + CURRENT_STYLE_CONTRACT + '\n'
+    'mode: full\n'
+    'updated: 2026-09-15T00:00:00Z\n'
+    'agent: test-agent\n'
+    '---\n'
+)
 
 BOARD = """## DOING
 - [/] T-9000 w | verify: resume | owner: test-agent | claim_time: 2026-09-15T00:00:00Z

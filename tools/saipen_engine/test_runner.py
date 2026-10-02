@@ -157,6 +157,40 @@ def _read_tail_from_path(path: Path, limit: int = 8000) -> str:
     return _tail(data.decode("utf-8", errors="replace"), limit)
 
 
+def _install_quiet_child_site(spool_dir: Path, env: dict[str, str]) -> None:
+    """Prevent Windows subprocesses launched by tests from opening windows.
+
+    Family stdout and stderr already go to spool files. This temporary
+    ``sitecustomize`` carries the no-window policy into Python test children,
+    whose own subprocess calls could otherwise create fresh console windows.
+    """
+    if os.name != "nt":
+        return
+    hook = spool_dir / "sitecustomize.py"
+    hook.write_text(
+        "import os\n"
+        "import subprocess\n"
+        "\n"
+        "if os.name == 'nt' and os.environ.get('SAIPEN_CANONICAL_TEST_CHILD') == '1':\n"
+        "    _original_init = subprocess.Popen.__init__\n"
+        "    def _quiet_init(self, *args, **kwargs):\n"
+        "        flags = int(kwargs.get('creationflags', 0))\n"
+        "        flags &= ~getattr(subprocess, 'CREATE_NEW_CONSOLE', 0)\n"
+        "        kwargs['creationflags'] = flags | getattr(subprocess, 'CREATE_NO_WINDOW', 0)\n"
+        "        startup = kwargs.get('startupinfo') or subprocess.STARTUPINFO()\n"
+        "        startup.dwFlags |= subprocess.STARTF_USESHOWWINDOW\n"
+        "        startup.wShowWindow = subprocess.SW_HIDE\n"
+        "        kwargs['startupinfo'] = startup\n"
+        "        return _original_init(self, *args, **kwargs)\n"
+        "    subprocess.Popen.__init__ = _quiet_init\n",
+        encoding="utf-8",
+    )
+    inherited = env.get("PYTHONPATH", "")
+    env["PYTHONPATH"] = os.pathsep.join(
+        part for part in (str(spool_dir), inherited) if part
+    )
+
+
 def _terminate_process_tree(process: subprocess.Popen) -> None:
     """Terminate the owned family process and all descendants."""
     if os.name == "nt":
@@ -210,8 +244,16 @@ def _run_family(root: Path, family: TestFamily, *, spool: Path | None = None) ->
     env["PYTHONDONTWRITEBYTECODE"] = "1"
     env["SAIPEN_CANONICAL_TEST_CHILD"] = "1"
     creation = {"start_new_session": True} if os.name != "nt" else {
-        "creationflags": getattr(subprocess, "CREATE_NEW_PROCESS_GROUP", 0),
+        "creationflags": (
+            getattr(subprocess, "CREATE_NEW_PROCESS_GROUP", 0)
+            | getattr(subprocess, "CREATE_NO_WINDOW", 0)
+        ),
     }
+    if os.name == "nt":
+        hidden_startup = subprocess.STARTUPINFO()
+        hidden_startup.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+        hidden_startup.wShowWindow = subprocess.SW_HIDE
+        creation["startupinfo"] = hidden_startup
     spool_context = (
         nullcontext(str(spool))
         if spool is not None
@@ -225,6 +267,7 @@ def _run_family(root: Path, family: TestFamily, *, spool: Path | None = None) ->
         timed_out = False
         try:
             try:
+                _install_quiet_child_site(spool_dir, env)
                 with open(stdout_path, "wb") as out, open(stderr_path, "wb") as err:
                     process = subprocess.Popen(
                         family.command,

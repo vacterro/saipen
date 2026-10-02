@@ -167,16 +167,24 @@ class DebtGateFixtureTests(unittest.TestCase):
         self.assertEqual(caught.exception.code, "DEBT_SNAPSHOT_CORRUPT")
 
     def test_snapshot_from_another_project_refuses(self) -> None:
+        # T-1516: another project is another lineage; a same-lineage copy at
+        # another path keeps its baseline (test_t1516_portable_receipts).
+        from saipen_engine.paths import (
+            IDENTITY_NAME,
+            identity_file_content,
+            new_project_lineage,
+        )
+
         created = debt_mod.create_snapshot(self.root, "probe", "capture")
         self.assertTrue(created["ok"], created)
         other = Path(self.tmp.name) / "other"
         shutil.copytree(self.root, other)
+        (other / ".saipen" / IDENTITY_NAME).write_text(
+            identity_file_content(new_project_lineage()), encoding="utf-8"
+        )
         with self.assertRaises(debt_mod.DebtRefusal) as caught:
             debt_mod.load_snapshot(other, created["snapshot_id"])
-        self.assertIn(
-            caught.exception.code,
-            ("DEBT_SNAPSHOT_FOREIGN_PROJECT", "DEBT_SNAPSHOT_FOREIGN_LINEAGE"),
-        )
+        self.assertEqual(caught.exception.code, "DEBT_SNAPSHOT_FOREIGN_LINEAGE")
 
     def test_ruleset_change_refuses_comparison(self) -> None:
         created = debt_mod.create_snapshot(self.root, "probe", "capture")

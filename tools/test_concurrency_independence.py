@@ -242,12 +242,22 @@ class LiveTreeControlNamesWhatMoved(unittest.TestCase):
         self.source = (TOOLS / "perf_wave_regressions.py").read_text(encoding="utf-8-sig")
 
     def test_control_snapshots_per_path_instead_of_one_opaque_hash(self):
-        self.assertIn("def tree_snapshot(", self.source)
+        # The helper was renamed tree_snapshot -> probe_memory_snapshot when it
+        # was lifted to module scope; pin the INTENT (per-path digests, a
+        # delta that names paths, never one opaque tree hash), not the old
+        # identifier, which a rename must not be able to silently break.
+        self.assertRegex(self.source, r"def (tree|probe_memory)_snapshot\(")
         self.assertIn("def snapshot_delta(", self.source)
         self.assertNotIn("def tree_hash(", self.source)
 
     def test_control_skips_the_process_local_runtime_cache(self):
-        self.assertIn('transient = ("cache/",)', self.source)
+        # Same: the skip set moved inline with the helper. Assert the excluded
+        # path is named wherever the exclusion now lives.
+        self.assertRegex(
+            self.source,
+            r'transient = \("cache/",\)|\("cache/", "locks/"\)',
+            "the snapshot must still skip the process-local runtime cache",
+        )
         gitignore = (HOME / ".gitignore").read_text(encoding="utf-8-sig")
         self.assertIn(".saipen/cache/", gitignore)
 

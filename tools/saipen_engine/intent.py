@@ -1700,7 +1700,7 @@ def _try_satisfy_convergence(root: Path, dry_run: bool = False) -> dict:
             result = subprocess.run(
                 [sys.executable, str(validate_path)],
                 capture_output=True,
-                text=True,
+                text=True, encoding="utf-8",
                 timeout=120,
                 cwd=str(root / "tools"),
             )

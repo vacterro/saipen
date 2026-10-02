@@ -7,18 +7,29 @@ import json
 import tempfile
 import unittest
 from copy import deepcopy
+from contextlib import ExitStack
 from pathlib import Path
+from unittest.mock import patch
 
 from saipen_engine import storage
 
-ROOT = Path(__file__).resolve().parents[1]
-
-
 class StoragePolicyTests(unittest.TestCase):
     def setUp(self) -> None:
-        self.tmp = tempfile.TemporaryDirectory(prefix="storage-policy-", dir=ROOT)
+        # The core-unit runner copies this suite under the OS temp root. A
+        # durable fixture must live outside that deliberately disposable tree.
+        self.tmp = tempfile.TemporaryDirectory(prefix="storage-policy-", dir=Path.home())
         self.addCleanup(self.tmp.cleanup)
         self.base = Path(self.tmp.name)
+        # The family runs in an OS-temp copy. Give this fixture its own real
+        # TEMP boundary so its explicit durable store is outside that boundary.
+        os_temp = self.base / "os-temporary"
+        os_temp.mkdir()
+        fixture_context = ExitStack()
+        self.addCleanup(fixture_context.close)
+        fixture_context.enter_context(patch.dict(os.environ, {
+            name: str(os_temp) for name in ("TEMP", "TMP", "TMPDIR")
+        }))
+        fixture_context.enter_context(patch.object(tempfile, "tempdir", str(os_temp)))
         self.config = self.base / "user-config"
         self.durable = self.base / "durable"
         self.cleanup_root = self.base / "auto-cleaned"
