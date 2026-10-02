@@ -4679,16 +4679,20 @@ def sub_disposition(
             continue
         candidates.append(package)
     if not candidates:
+        # Neither refusal may say "current": since the source triple left the selection,
+        # currency is not a property this function tests, and a message naming a staleness
+        # problem sends the reader hunting for one that is not there. READY is what is
+        # actually required, and what a package stops being once its payload is collected.
         return _refuse(
             "PACKAGE_INCOMPLETE",
-            f"{name}: no current READY package to dispose"
+            f"{name}: no READY package to dispose"
             + (f" ({package_id})" if package_id else ""),
             name=name,
         )
     if len(candidates) > 1:
         return _refuse(
             "MALFORMED_PACKAGE",
-            f"{name}: multiple current READY packages; dispose exactly one by package id",
+            f"{name}: multiple READY packages; dispose exactly one by package id",
             name=name,
         )
     package = candidates[0]
