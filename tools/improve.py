@@ -284,13 +284,47 @@ def allocate_cycle_id(project_root: Path, project_key: str, now: str | None = No
 
 
 def resolve_report_path(project_root: Path, cycle_id: str, seat_id: str, project_name: str) -> Path:
-    """Canonical report path for a Core seat, proven inside the owner root."""
+    """Canonical report path for a Core seat, proven inside the owner root.
+
+    The roster is the authority. Registration records each seat's `report_path`
+    in MANIFEST.md, but the mutators used to RECOMPOSE that filename from a
+    caller-supplied `project_name` and never read the roster. The two spellings
+    diverge in practice -- the cycle is opened with the audit scope while
+    `improve submit <cycle> <seat> <project>` is handed the project identity --
+    so a cycle the engine opened was one it refused to finish (T-175). Read the
+    recorded path whenever the roster has an entry for this seat; fall back to
+    the composed name only when it does not, so an archived or hand-written
+    cycle predating the roster still resolves.
+    """
     seat = _validate_safe_id(seat_id, "seat_id")
     cycle = _validate_safe_id(cycle_id, "cycle_id")
     name = _validate_safe_id(project_name, "project_name")
-    path = Path(project_root) / _IMP_DIR / cycle / seat / f"saipen_improve_{name}.md"
+    directory = Path(project_root) / _IMP_DIR / cycle / seat
+    filename = f"saipen_improve_{name}.md"
+    recorded = _recorded_report_path(directory.parent, seat)
+    if recorded is not None:
+        filename = recorded
+    path = directory / filename
     _prove_inside(project_root, path)
     return path
+
+
+def _recorded_report_path(cycle_root: Path, seat: str) -> str | None:
+    """The `report_path` the roster records for `seat`, or None if it has none.
+
+    An unreadable or malformed roster is not an answer here: resolve_report_path
+    is called on paths that need not exist yet, so a manifest that cannot be read
+    or parsed falls back to the caller's spelling rather than refusing.
+    """
+    manifest = cycle_root / "MANIFEST.md"
+    if not manifest.is_file():
+        return None
+    try:
+        block = _seat_block(_read_maybe(manifest), seat)
+        recorded = _field(block, "report_path") if block is not None else None
+        return _validate_report_path(recorded, seat) if recorded else None
+    except ImproveError:
+        return None
 
 
 def cycle_dir(project_root: Path, cycle_id: str) -> Path:
@@ -3681,13 +3715,14 @@ def create_report(
             "create_report refuses an invalid active manifest: " + "; ".join(_manifest_errors[:3])
         )
     roster_block = _seat_block(roster_text, seat)
-    if (
-        roster_block is None
-        or _field(roster_block, "report_path") != f"saipen_improve_{project_name}.md"
-    ):
+    # The roster owns the name; the caller's `project_name` is only a spelling of
+    # it, and the two diverge when the cycle was opened under the audit scope.
+    # Compare against what resolve_report_path will actually return (T-175).
+    owned = resolve_report_path(root, cycle_id, seat, project_name).name
+    if roster_block is None or _field(roster_block, "report_path") != owned:
         raise ImproveError(
             f"create_report refuses: seat {seat} has no roster entry owning "
-            f"saipen_improve_{project_name}.md -- register the seat first"
+            f"{owned} -- register the seat first"
         )
     if _field(roster_block, "role") != selected_role:
         raise ImproveError(
