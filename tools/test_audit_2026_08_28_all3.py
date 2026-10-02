@@ -842,7 +842,14 @@ class PerformanceAuditTests(ControlFixture):
                 "dirty": [],
             }
 
-        with mock.patch.object(autoinject, "distribution_report", drifting_report):
+        # `TARGETS` is pinned empty above, which is exactly the state in which
+        # PERF-004 (T-1544) makes `_status` skip `distribution_report()`
+        # entirely -- so the drifting projection would never reach the payload
+        # and the control would compare nothing. Claim an installed target so
+        # the drift the control exists to detect actually happens.
+        with mock.patch.object(
+            autoinject, "distribution_report", drifting_report
+        ), mock.patch.object(autoinject, "has_installed_targets", lambda: True):
             full = self._routing_output_with_capture_mode(root, "status", False)
             lean = self._routing_output_with_capture_mode(root, "status", True)
         self.assertNotEqual(full, lean, "a drifting projection slipped through parity")
@@ -863,7 +870,11 @@ class PerformanceAuditTests(ControlFixture):
             r"patch\.dict\(\s*os\.environ[^)]*LOCALAPPDATA"
             r"|patch\.object\(\s*(?:autoinject|\w*\.)?\s*autoinject\s*,\s*[\"']HOME"
             r"|patch\.object\(\s*\w+\s*,\s*[\"']HOME"
-            r"|patch\.object\(\s*autoinject\s*,\s*[\"']TARGETS"
+            r"|patch\.object\(\s*(?:\w+\.)?autoinject\s*,\s*[\"']TARGETS"
+            # Patching the host-reading function ITSELF is a stronger pin than an
+            # env patch: the live read cannot happen at all.
+            r"|(?:mock\.)?patch\.object\(\s*(?:\w+\.)?autoinject\s*,\s*[\"']"
+            r"(?:distribution_report|scheduler_log|last_inject_run)"
         )
         tools = Path(__file__).resolve().parent
         offenders = [

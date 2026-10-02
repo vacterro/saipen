@@ -381,20 +381,43 @@ def _index(root: Path) -> dict:
         return {"active": {}, "tombstones": {}}
 
 
-def receipt_for_digest(root: Path | str, digest: str) -> dict | None:
+def _receipts_by_digest(root: Path) -> dict[str, dict]:
+    """`source_sha256` -> receipt, from ONE `_index` read.
+
+    The same order `receipt_for_digest` answered one digest at a time: an
+    ACTIVE receipt wins over a tombstone, and the lowest receipt id wins
+    inside each. A four-layer inbox used to pay one full index read PER DIGEST
+    (PERF-003); the table is built once per classification and reused.
+    """
+    index = _index(root)
+    by_digest: dict[str, dict] = {}
+    for bucket, receipt_status in (
+        ("tombstones", intake.CLOSED_STATUS),
+        ("active", intake.ACTIVE_STATUS),
+    ):
+        for receipt_id, record in sorted((index.get(bucket) or {}).items()):
+            digest = record.get("source_sha256") if isinstance(record, dict) else None
+            if digest and digest not in by_digest:
+                by_digest[digest] = {
+                    "receipt_id": receipt_id,
+                    "status": receipt_status,
+                    "record": record,
+                }
+    return by_digest
+
+
+def receipt_for_digest(
+    root: Path | str, digest: str, *, by_digest: dict[str, dict] | None = None
+) -> dict | None:
     """The existing receipt whose EXACT source digest is `digest`, if any.
 
     Index-only: no source body is opened. Source Intake deduplication stays
-    the authority -- this is the cheap read-only projection of it.
+    the authority -- this is the cheap read-only projection of it. A caller
+    resolving several digests in one pass passes the `_receipts_by_digest`
+    table and pays for one index read instead of one per digest.
     """
-    index = _index(Path(root))
-    for receipt_id, record in sorted((index.get("active") or {}).items()):
-        if isinstance(record, dict) and record.get("source_sha256") == digest:
-            return {"receipt_id": receipt_id, "status": intake.ACTIVE_STATUS, "record": record}
-    for receipt_id, record in sorted((index.get("tombstones") or {}).items()):
-        if isinstance(record, dict) and record.get("source_sha256") == digest:
-            return {"receipt_id": receipt_id, "status": intake.CLOSED_STATUS, "record": record}
-    return None
+    table = by_digest if by_digest is not None else _receipts_by_digest(Path(root))
+    return table.get(digest)
 
 
 def _normalize_eol(text: str) -> str:
@@ -487,6 +510,11 @@ def classify(root: Path | str) -> dict:
     bound = binding.get("layers") or {}
     layers: list[dict] = []
     seen: set[str] = set()
+    # PERF-003: the digest -> receipt table is built ONCE, on the first layer
+    # that needs it, from a single `_index` read. `intake._read_index` walks
+    # every layer directory, so the per-digest form was O(layers x receipts)
+    # inside a classification that already walks the layers once.
+    receipts_by_digest: dict[str, dict] | None = None
     for entry in scan_layers(root):
         rel = entry["rel"]
         seen.add(rel)
@@ -531,7 +559,9 @@ def classify(root: Path | str) -> dict:
             "state": NEW,
         }
         if receipt_id is None:
-            found = receipt_for_digest(root, digest)
+            if receipts_by_digest is None:
+                receipts_by_digest = _receipts_by_digest(root)
+            found = receipts_by_digest.get(digest)
             if found:
                 receipt_id = found["receipt_id"]
                 item["receipt_id"] = receipt_id
@@ -615,7 +645,28 @@ def projection(
     BLOCKED/INVALID lower layer or an ACTIVE layer with unworkable linked Work
     is retained and reported but never starves a later workable one.
     """
-    state = classify(root)
+    return projection_from_classification(
+        classify(root), root, tickets=tickets, agent=agent, now=now
+    )
+
+
+def projection_from_classification(
+    state: dict,
+    root: Path | str | None = None,
+    *,
+    tickets: dict | None = None,
+    agent: str | None = None,
+    now=None,
+) -> dict | None:
+    """`projection` over an ALREADY classified inbox (PERF-003).
+
+    Classification walks every layer, snapshots every source body and reads
+    the intake index; `status` needs both the routing projection and the
+    per-layer report, so re-classifying inside `projection` did that work
+    twice per answer. This entry point takes the classification the caller
+    already paid for. `root` is needed only for the BOARD.md fallback when
+    the caller supplies no `tickets`.
+    """
     if not state.get("ok", True):
         # A corrupt binding is not an idle inbox. Route it at the same stage a
         # layer would be routed, so `cc` prescribes the repair instead of
@@ -686,6 +737,8 @@ def projection(
                 try:
                     from .board import parse_board
 
+                    if root is None:
+                        raise ValueError("no project root for the BOARD.md fallback")
                     board_text = (Path(root) / ".saipen" / "BOARD.md").read_text(
                         encoding="utf-8"
                     )
@@ -769,7 +822,25 @@ def projection(
 
 def status(root: Path | str) -> dict:
     """Compact operator projection. Never dumps audit body text."""
-    state = classify(root)
+    return status_from_classification(root, classify(root))
+
+
+def status_from_classification(
+    root: Path | str,
+    state: dict,
+    *,
+    tickets: dict | None = None,
+    agent: str | None = None,
+    now=None,
+) -> dict:
+    """`status` over an ALREADY classified inbox (PERF-003).
+
+    One classification answers both the operator report and the routing
+    projection. `saipen.py` asks three logical consumers for the same inbox
+    (`audit_inbox_projection`, `audit_inbox_status`, and the status handed to
+    `automation_block`), so the old shape walked every layer, hashed every
+    source body and re-read the intake index five times to print one answer.
+    """
     if not state.get("ok", True):
         return {
             "ok": False,
@@ -779,9 +850,13 @@ def status(root: Path | str) -> dict:
             "directory": AUDIT_DIRNAME,
             "binding_state": state.get("binding_state"),
             "clean": False,
-            "next": projection(root),
+            "next": projection_from_classification(
+                state, root, tickets=tickets, agent=agent, now=now
+            ),
         }
-    routed = projection(root)
+    routed = projection_from_classification(
+        state, root, tickets=tickets, agent=agent, now=now
+    )
     layers = state["layers"]
     return {
         "ok": True,

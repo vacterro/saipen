@@ -73,7 +73,12 @@ from pathlib import Path, PurePosixPath, PureWindowsPath
 
 from .command_effects import SHELL_CANONICAL_VERBS
 from .phases import ENTRY_COMMAND
-from .paths import project_lineage_identity, resolve_project_root
+from .paths import (
+    ENV_PROJECT_LINEAGE,
+    ENV_PROJECT_ROOT,
+    project_lineage_identity,
+    resolve_project_root,
+)
 
 PROTECTED_CANONICAL_NAMESPACES = (
     ".saipen/STATE.md",
@@ -1047,19 +1052,37 @@ def effective_strength(
     }
 
 
-#: Per-process memo of project-root resolutions. `resolve_project_root` may
-#: consult git subprocesses; a guard loop evaluating many calls in one process
-#: must not pay that twice for the same start. Keyed by (start, explicit).
-_RESOLVE_CACHE: dict[tuple[str, str], object] = {}
+#: Per-process memo of SUCCESSFUL project-root resolutions. `resolve_project_root`
+#: may consult git subprocesses; a guard loop evaluating many calls in one process
+#: must not pay that twice for the same binding. Keyed by (start, explicit,
+#: SAIPEN_PROJECT_ROOT, SAIPEN_PROJECT_LINEAGE) -- the two env carriers are part of
+#: the ANSWER (resolution step 2), not part of the question, so a key without them
+#: would hand a rebound session the previous project's root.
+#:
+#: A REFUSAL is never memoized: it answers "no project is bound HERE", which the
+#: next `.saipen/` creation (or the next identity write) invalidates without any
+#: change to the key. Measured: admission on a directory with no `.saipen` returned
+#: `NOT_SAIPEN_PROJECT` for the life of the process after one, until this memo was
+#: cleared by hand.
+_RESOLVE_CACHE: dict[tuple[str, str, str, str], object] = {}
 
 
 def _resolve_cached(project_root_or_start, explicit_root):
     start_key = str(Path(project_root_or_start).resolve()) if project_root_or_start else ""
     explicit_key = str(explicit_root) if explicit_root is not None else ""
-    key = (start_key, explicit_key)
-    if key not in _RESOLVE_CACHE:
-        _RESOLVE_CACHE[key] = resolve_project_root(project_root_or_start, explicit_root)
-    return _RESOLVE_CACHE[key]
+    key = (
+        start_key,
+        explicit_key,
+        os.environ.get(ENV_PROJECT_ROOT, "").strip(),
+        os.environ.get(ENV_PROJECT_LINEAGE, "").strip(),
+    )
+    hit = _RESOLVE_CACHE.get(key)
+    if hit is not None:
+        return hit
+    resolved = resolve_project_root(project_root_or_start, explicit_root)
+    if resolved[0] is not None:
+        _RESOLVE_CACHE[key] = resolved
+    return resolved
 
 
 def evaluate_admission(

@@ -1,0 +1,14 @@
+{
+  "requirements": {
+    "SRC-127:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/T-1543-audit19-triage.md: F1, F2 and F3 all terminal as already-fixed, each reproduced end to end on a faithful fixture -- recover names apply-approved-repair, the repair lands REPAIRED, validate and status go clean, and the same start command then projects the receipt. One narrower residual recorded as unproven",
+      "text": "audit/19 execution: every finding in the audit/19.md layer must be terminal with live evidence -- an already-fixed finding is dispositioned against the reproduction or the test that pins it, a live finding is built and pinned",
+      "verification": "tools/test_recovery_reachability.py UnboundHistoryDeadlockTests 5 passed and the start/continue convergence control at :1341-1360; tools/test_canonical_write_route.py 13 passed; tools/test_refusal_routes.py:228-237; tools/test_canonical_command_reachability.py 11 passed",
+      "work": "T-1543"
+    }
+  },
+  "schema_version": 1
+}

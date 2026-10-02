@@ -9,6 +9,7 @@ import json
 import os
 import stat
 from dataclasses import dataclass
+from collections import deque
 from pathlib import Path
 from typing import Iterable
 
@@ -192,6 +193,57 @@ class HistorySnapshot:
     # Ticket IDs that exist ONLY in sealed history remain permanently
     # reserved, so allocation must never consult only the active LOG/BOARD.
     max_ticket_id: int = 0
+
+
+#: How many events a routing summary keeps verbatim. Routing asks what the
+#: newest events say, not what every sealed event ever said; the bound is what
+#: makes the summary O(1) in lifetime event count.
+ROUTING_TAIL_EVENTS = 16
+#: The same bound on each diagnostic list. A hostile or damaged ledger must not
+#: be able to trade one linear structure for another.
+ROUTING_DIAGNOSTIC_CAP = 32
+
+
+@dataclass(frozen=True)
+class HistoryRoutingSummary:
+    """The routing facts of the complete LOG history, retained in O(1) events.
+
+    PERF-005. `read_history_snapshot(..., lean=True)` dropped the combined
+    `text` and the `event_lines` renderings but still appended one parsed dict
+    per LIFETIME event and returned `tuple(events)`, so both time and peak
+    memory stayed linear in the project's whole history (measured through the
+    production reader: 50 000 events -> 0.25 s, 42.96 MB peak, 34.2 MB of it
+    RETAINED). This summary is the same single pass with no per-event
+    retention: it keeps the framed `hash`, `tail`, `illegal_lines`,
+    `max_ticket_id`, the event count, the duplicate/parent/ordering evidence,
+    and the newest `ROUTING_TAIL_EVENTS` events.
+
+    What is still linear, deliberately: the SEEN-ID SET the duplicate and
+    parent checks consume (plain ints, no dicts, no strings -- ~2.6 MB at 50k
+    events against the 18.6 MB of per-event dicts it replaces) and
+    `illegal_lines`, which is already unbounded in the full snapshot and must
+    stay identical to it. Every diagnostic list is capped at
+    `ROUTING_DIAGNOSTIC_CAP` so a damaged ledger cannot trade one linear
+    structure for another.
+
+    It is a ROUTING view, not an audit one: a caller that renders history,
+    plans a mutation or forensically inspects an event must use
+    `read_history_snapshot`, which is unchanged.
+    """
+
+    hash: str
+    tail: int | None
+    illegal_lines: tuple[str, ...]
+    max_ticket_id: int
+    event_count: int
+    #: E-IDs the complete history records more than once. The immutable-ledger
+    #: contract forbids reuse, so this is evidence, not a diagnostic detail.
+    duplicate_event_ids: tuple[int, ...]
+    #: `parent: E-n` that names a later event, an event already passed, or an
+    #: E-ID this history never recorded.
+    ordering_errors: tuple[str, ...]
+    #: The newest `ROUTING_TAIL_EVENTS` parsed events, oldest first.
+    routing_events: tuple[dict, ...] = ()
 
 
 def _normalised_doc_text(raw: bytes) -> str:
@@ -518,6 +570,112 @@ def read_history_snapshot(
         illegal_lines=tuple(illegal),
         event_lines=() if lean else tuple(event_lines),
         max_ticket_id=max_ticket_id,
+    )
+
+
+def read_history_routing_summary(project_root: Path | str) -> HistoryRoutingSummary:
+    """ONE pass over the complete LOG history, retaining O(1) events (PERF-005).
+
+    Same framing, same parse, same ownership refusal as
+    `read_history_snapshot`: every canonical history node is lstat-checked
+    first (`HistoryOwnershipError`), each segment is opened exactly once, and
+    `hash` is FRAMED per node so a resegment still changes it. What differs is
+    only what the pass KEEPS -- nothing per lifetime event except the newest
+    `ROUTING_TAIL_EVENTS`, so memory is flat in history size.
+
+    `tail` is derived by the same rule the snapshot uses, including the
+    `_SAITULS` 17.09.26 case: an id a damaged line still CLAIMS is spent, so
+    the illegal-line pass can raise the tail above the highest parsable event.
+    """
+    root = Path(project_root)
+    logs_dir = root / ".saipen" / "logs"
+    valid_paths = _validate_history_ownership(root, logs_dir)
+    h = hashlib.sha256()
+    illegal: list[str] = []
+    routing: deque[dict] = deque(maxlen=ROUTING_TAIL_EVENTS)
+    duplicates: list[int] = []
+    ordering: list[str] = []
+    max_ticket_id = 0
+    event_count = 0
+    highest = 0
+    seen_ids: set[int] = set()
+    for p in valid_paths:
+        try:
+            raw = p.read_bytes()
+        except FileNotFoundError:
+            continue
+        except OSError as exc:
+            raise HistoryOwnershipError(
+                f"history node {p.name} unreadable ({type(exc).__name__}): {exc}"
+            )
+        _require_canonical_active_log(p, raw)
+        rel = p.relative_to(root).as_posix()
+        # FRAMED digest identity, byte-for-byte what `read_history_snapshot`
+        # computes: canonical relative path, raw length, raw bytes.
+        h.update(rel.encode("utf-8"))
+        h.update(str(len(raw)).encode("ascii"))
+        h.update(raw)
+        text = _normalised_doc_text(raw)
+        for idx, line in enumerate(text.splitlines()):
+            parsed = parse_log_line(line)
+            if parsed is not None:
+                number = parsed["event"]
+                event_count += 1
+                if number in seen_ids:
+                    if len(duplicates) < ROUTING_DIAGNOSTIC_CAP:
+                        duplicates.append(number)
+                else:
+                    seen_ids.add(number)
+                if number > highest:
+                    highest = number
+                parent = parsed.get("parent")
+                if (
+                    isinstance(parent, int)
+                    and not isinstance(parent, bool)
+                    and parent >= number
+                ):
+                    # A `parent:` is a link BACKWARD. `parent >= number` is a
+                    # forward or self link, which no append-only ledger can
+                    # justify; a well-formed log always names an EARLIER
+                    # event, so nothing ordinary is reported here.
+                    if len(ordering) < ROUTING_DIAGNOSTIC_CAP:
+                        ordering.append(
+                            f"{p.name}:{idx + 1}: E-{number} declares parent "
+                            f"E-{parent}, which is not an earlier event"
+                        )
+                t = parsed.get("ticket")
+                if t:
+                    m = re.match(r"T-(\d+)$", t)
+                    if m:
+                        tid = int(m.group(1))
+                        if tid > max_ticket_id:
+                            max_ticket_id = tid
+                reference, restored = _restored_detail_text(root, parsed)
+                if reference is not None:
+                    parsed["detail_ref"] = reference
+                    parsed["detail_integrity"] = "valid" if restored is not None else "invalid"
+                if restored is not None:
+                    parsed["text"] = restored
+                routing.append(parsed)
+                continue
+            stripped = line.strip()
+            if not stripped or stripped.startswith("#"):
+                continue
+            illegal.append(f"{p.name}:{idx + 1}: not a legal LOG event: {stripped[:80]!r}")
+    tail: int | None = highest or None
+    for problem in illegal:
+        claimed = declared_event_id(problem)
+        if claimed is not None and (tail is None or claimed > tail):
+            tail = claimed
+    return HistoryRoutingSummary(
+        hash=h.hexdigest()[:16],
+        tail=tail,
+        illegal_lines=tuple(illegal),
+        max_ticket_id=max_ticket_id,
+        event_count=event_count,
+        duplicate_event_ids=tuple(sorted(set(duplicates))),
+        ordering_errors=tuple(ordering),
+        routing_events=tuple(routing),
     )
 
 
@@ -892,13 +1050,18 @@ def foreign_tail_cut(
 
 
 def history_hash(project_root: Path | str) -> str:
-    """Deterministic hash over all history files (sealed + active)."""
-    return read_history_snapshot(project_root).hash
+    """Deterministic hash over all history files (sealed + active).
+
+    PERF-005: this answers one 16-character question. The summary pass is the
+    same read, the same framing and the same bytes -- it just does not build
+    the per-event dict graph to throw it away afterwards.
+    """
+    return read_history_routing_summary(project_root).hash
 
 
 def history_log_tail(project_root: Path | str) -> int | None:
     """The global max E-ID across all sealed segments and active LOG.md."""
-    return read_history_snapshot(project_root).tail
+    return read_history_routing_summary(project_root).tail
 
 
 def log_tail_event(text: str) -> int | None:

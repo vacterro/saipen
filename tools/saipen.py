@@ -1377,6 +1377,22 @@ def _cold_route(project_root: Path, state: dict | None, state_text: str = "") ->
     }
 
 
+def _malformed_route(state_text: str, board_text: str, state_error: str) -> dict:
+    """The ROUTER's own verdict for a STATE it cannot read whole (CORE-002).
+
+    A wrapper that intercepts the parse failure still owes the caller the same
+    classification `route_next` computes: `action: "saipen recover"` plus the
+    `state-malformed` reason. A refusal carrying no route is the self-loop
+    `recover` exists to break -- the caller reads `action`, finds nothing to
+    run, and stops. The verdict is read FROM the router through the same seam
+    its callers use, rather than restated here, or it drifts the moment the
+    router's wording moves.
+    """
+    from saipen_engine.router import route_next
+
+    return route_next(state_text, board_text, _state_error=state_error)
+
+
 def _status(project_root: Path, as_json: bool) -> int:
     state_path = _state_path(project_root)
     if not state_path.is_file():
@@ -1394,10 +1410,15 @@ def _status(project_root: Path, as_json: bool) -> int:
     board_text = snap.board_text
     state, state_error = parse_state_or_error(state_text)
     if state_error:
+        # CORE-002: the router owns this classification, so the refusal carries
+        # its route -- not a local copy of "invalid, no action available".
+        _refusal = _malformed_route(state_text, board_text, state_error)
         _emit(
             {
                 "ok": False,
                 "code": "VALIDATION_FAILED",
+                "action": _refusal.get("action"),
+                "reason": _refusal.get("reason"),
                 "detail": f"state-malformed: {state_error}",
                 # A malformed checkpoint must not cost the caller its locator:
                 # the route is how the recovery command and the protocol
@@ -1728,10 +1749,18 @@ def _status(project_root: Path, as_json: bool) -> int:
     # never triggers a run.
     try:
         sys.path.insert(0, str(Path(__file__).resolve().parent))
-        from autoinject import distribution_line, distribution_report
+        from autoinject import (
+            distribution_line,
+            distribution_report,
+            has_installed_targets,
+        )
 
-        _dist = distribution_report()
-        if _dist["installed"]:
+        # PERF-004: `distribution_report` opens with a full runtime-generation
+        # hash, and this projection throws the whole report away when nothing is
+        # installed. Ask the registry first -- one `is_dir()` sweep instead of
+        # a full-home walk whose only product was a discarded dict.
+        _dist = distribution_report() if has_installed_targets() else None
+        if _dist and _dist["installed"]:
             _last_run = _dist.get("last_run")
             if _last_run is not None:
                 _last_run = {**_last_run, "dirty": _last_run["dirty"][:5]}
@@ -1795,6 +1824,24 @@ def _status(project_root: Path, as_json: bool) -> int:
     if staleness is not None:
         payload["staleness"] = staleness
 
+    # PERF-001: ONE source identity for the whole projection. The conformance
+    # decision, the convergence verdict and the automation block each captured
+    # their own, so a single `saipen status --json` walked the tree three times
+    # and published three independently-derived fingerprints -- which disagree
+    # in form (`1bad7c4b` vs `no-git+no-git-tree-v1:1bad7c4b`) whenever the
+    # checkpoints are not a Git work-tree, and can disagree in VALUE when they
+    # straddle a mutation. Captured once, after the checkpoint snapshot, and
+    # threaded into every consumer: the cheap answer and the coherent one are
+    # the same answer.
+    _source_identity = None
+    try:
+        sys.path.insert(0, str(Path(__file__).resolve().parent))
+        from freshness import compute_source_identity as _csi_auto
+
+        _source_identity = _csi_auto(project_root)
+    except Exception:
+        _source_identity = None
+
     # §8 Conformance Closure: the authoritative current-conformance status,
     # derived from the canonical validator receipt, not from prose in the LOG.
     # `conformance_history` (above) is the legacy history-derived hint; this is
@@ -1807,7 +1854,9 @@ def _status(project_root: Path, as_json: bool) -> int:
         # SRC-085 M3: the machine-readable conformance disposition travels with
         # the authoritative status block, so a consumer never has to decide by
         # prose whether CURRENT_FAIL may coexist with a continuation route.
-        _conf_decision = conformance_decision(project_root, gate="core")
+        _conf_decision = conformance_decision(
+            project_root, gate="core", source_identity=_source_identity
+        )
         payload["conformance_status"] = {
             **_conf_decision["status_block"],
             "disposition": _conf_decision["disposition"],
@@ -1845,17 +1894,11 @@ def _status(project_root: Path, as_json: bool) -> int:
         try:
             from saipen_engine.convergence import convergence_verdict
 
-            _convergence = convergence_verdict(project_root).as_dict()
+            _convergence = convergence_verdict(
+                project_root, source_id=_source_identity
+            ).as_dict()
         except Exception:
             _convergence = None
-        _source_identity = None
-        try:
-            sys.path.insert(0, str(Path(__file__).resolve().parent))
-            from freshness import compute_source_identity as _csi_auto
-
-            _source_identity = _csi_auto(project_root)
-        except Exception:
-            _source_identity = None
         payload["automation"] = automation_block(
             project_root,
             state=state,
@@ -2126,10 +2169,15 @@ def _route_once(project_root: Path) -> dict:
     board_text = snap.board_text
     state, state_error = parse_state_or_error(state_text)
     if state_error:
+        # CORE-002: `continue` routes through the same owner as `status` and
+        # `explain-next`, so its refusal carries the same route.
+        _refusal = _malformed_route(state_text, board_text, state_error)
         return {
             "emitted": {
                 "ok": False,
                 "code": "VALIDATION_FAILED",
+                "action": _refusal.get("action"),
+                "reason": _refusal.get("reason"),
                 "detail": f"state-malformed: {state_error}",
             },
             "rc": 1,
@@ -2553,10 +2601,15 @@ def _explain_next(project_root: Path, as_json: bool) -> int:
 
     state, state_error = parse_state_or_error(state_text)
     if state_error:
+        # CORE-002: an explanation of a refusal that names no route explains
+        # nothing the caller can act on.
+        _refusal = _malformed_route(state_text, board_text, state_error)
         _emit(
             {
                 "ok": False,
                 "code": "VALIDATION_FAILED",
+                "action": _refusal.get("action"),
+                "reason": _refusal.get("reason"),
                 "detail": f"state-malformed: {state_error}",
             },
             as_json,

@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-128:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "audit/20 execution: every finding in the audit/20.md layer must be terminal with live evidence before the receipt closes."
+    }
+  },
+  "derived_at": "2026-10-02T11:31:28Z",
+  "derived_from": "SRC-128",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "a567d89ad4b12a9de07b8abaf4a7241e2271e8e64d36f03af792a73072570cd1"
+}

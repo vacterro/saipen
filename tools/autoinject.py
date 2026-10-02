@@ -771,6 +771,19 @@ def home_surface_status(target: Path) -> dict:
     }
 
 
+def has_installed_targets() -> bool:
+    """Whether ANY registered agent home exists on this machine.
+
+    PERF-004: `distribution_report` hashes the full runtime generation before it
+    knows whether it has a home to compare that hash against, so on a host with
+    no installed homes the whole walk (~160 ms) built a report nobody could read
+    -- `installed` is 0, so every consumer discards it. One `is_dir()` sweep over
+    the SAME `TARGETS` registry the report loops is the authoritative answer;
+    there is no second source of truth to drift.
+    """
+    return any(target.is_dir() for target in TARGETS)
+
+
 def distribution_report(source_head: str | None = None) -> dict:
     """Read-only answer to: do the installed agent homes run current SAIPEN?
 

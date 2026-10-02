@@ -1,0 +1,14 @@
+{
+  "requirements": {
+    "SRC-128:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "IMPLEMENTED",
+      "evidence": "E-PENDING",
+      "text": "audit/20 execution: every finding in the audit/20.md layer must be terminal with live evidence before the receipt closes.",
+      "verification": "pending",
+      "work": "T-1544"
+    }
+  },
+  "schema_version": 1
+}

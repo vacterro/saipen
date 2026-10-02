@@ -67,6 +67,23 @@ ARCHIVED_STATUS = "ARCHIVED"
 
 STATUSES = (ACTIVE_STATUS, CLOSED_STATUS, SUPERSEDED_STATUS, INVALID_STATUS)
 
+
+def _write_refusal(exc: Exception) -> dict:
+    """Classify a mutator's filesystem refusal.
+
+    `project_writer_lock` raises `PermissionError("WRITER_BUSY")` when another
+    live writer holds the project. A blanket `except (OSError, PermissionError,
+    ValueError)` flattened that into `VALIDATION_FAILED`, so a busy lock read as
+    a malformed receipt -- indistinguishable from real corruption, and with no
+    way for a caller to tell "retry later" from "fix your data". Only the lock's
+    own signal is reclassified; every other `PermissionError` keeps the
+    validation code, because an unopenable file is still a validation failure.
+    """
+    if isinstance(exc, PermissionError) and "WRITER_BUSY" in str(exc):
+        return {"ok": False, "code": "WRITER_BUSY", "detail": str(exc)}
+    return {"ok": False, "code": "VALIDATION_FAILED", "detail": str(exc)}
+
+
 SOURCE_KINDS = (
     "user_audit",
     "user_instruction",
@@ -830,14 +847,44 @@ def _board_link_proposal(root: Path, work: str, receipt_id: str, *, op_id: str) 
     }
 
 
+def _link_undo(root: Path, rel: str) -> tuple[str, bytes | None]:
+    """Snapshot one path before the linkage transaction can overwrite it.
+
+    `None` means the path does not exist yet, so its undo is a delete. A
+    rollback that cannot express "this did not exist" leaves a half-committed
+    transaction behind, which is what the newly-created half of a commit set
+    needs. The plan targets carry only a `before_hash`, which proves what a
+    path WAS but cannot put it back.
+    """
+    path = _safe_path(root, rel)
+    if path.is_file() and not _is_link_or_reparse(path):
+        return rel, path.read_bytes()
+    return rel, None
+
+
+def _run_link_undo(root: Path, undo: list[tuple[str, bytes | None]]) -> None:
+    for rel, content in reversed(undo):
+        path = _safe_path(root, rel)
+        if content is None:
+            with contextlib.suppress(OSError, ValueError):
+                path.unlink()
+        else:
+            _atomic_write(path, content, ownership_root=root)
+
+
 def _commit_source_link(root: Path, work: str, receipt_id: str, *, op_id: str) -> dict:
     """ONE linkage transaction: metadata + index + BOARD (or none of them).
 
     Commit order is BOARD first (its projection carries the only operator-visible
     truth and it is the step that can fail), then the durable metadata and the
-    intake index. If either durable write fails the BOARD projection is ROLLED
-    BACK, so every failure leaves all three authorities agreeing that the source
-    is NOT linked -- which is exactly what a retry needs to converge from.
+    intake index. If ANY durable write fails, EVERY authority this transaction
+    touched is rolled back -- the BOARD projection, the compaction detail files
+    it externalized, the receipt metadata and the intake index -- so every
+    failure leaves all of them agreeing that the source is NOT linked, which is
+    exactly what a retry needs to converge from. Restoring BOARD alone left the
+    detail files and the durable metadata describing a link nobody committed,
+    and `intake.validate_project` then reported an active receipt whose linkage
+    was missing from BOARD.
     """
     proposal = _board_link_proposal(root, work, receipt_id, op_id=op_id)
     if not proposal.get("ok"):
@@ -860,15 +907,21 @@ def _commit_source_link(root: Path, work: str, receipt_id: str, *, op_id: str) -
         root, ".saipen/BOARD.md", kind="source BOARD authority", max_bytes=_BOARD_MAX
     )
     board_written = False
+    undo: list[tuple[str, bytes | None]] = [_link_undo(root, ".saipen/BOARD.md")]
     try:
         from . import codec
 
         document = codec.read_document(path, raw=before)
         for target in proposal["targets"]:
             owned_target_path(root, target.path, kind="source BOARD compaction detail")
+            undo.append(_link_undo(root, target.path))
             _atomic_write(root / target.path, target.content, ownership_root=root)
         _atomic_write(path, document.encode(proposal["board_text"]), ownership_root=root)
         board_written = True
+        # `_relink_authorities` writes the metadata and THEN the index, so a
+        # failure between them is the exact split this rollback has to cover.
+        undo.append(_link_undo(root, f".saipen/intake/active/{receipt_id}.meta.json"))
+        undo.append(_link_undo(root, ".saipen/intake/index.json"))
         linked = _relink_authorities(root, work, receipt_id)
         if not linked.get("ok"):
             raise OSError(str(linked.get("detail") or "durable linkage refused"))
@@ -876,7 +929,7 @@ def _commit_source_link(root: Path, work: str, receipt_id: str, *, op_id: str) -
         if board_written:
             # pragma: no cover - rollback is best effort
             with contextlib.suppress(OSError, ValueError):
-                _atomic_write(path, before, ownership_root=root)
+                _run_link_undo(root, undo)
         return {
             "ok": False,
             "code": "ORPHAN_RECEIPT",
@@ -1648,7 +1701,7 @@ def capture(
                 "detail": linkage.get("detail"),
             }
     except (OSError, PermissionError, ValueError) as exc:
-        return {"ok": False, "code": "VALIDATION_FAILED", "detail": str(exc)}
+        return _write_refusal(exc)
 
 
 def quarantine_receipt(
@@ -1774,7 +1827,7 @@ def quarantine_receipt(
                 "source_authority": _source_authority(meta),
             }
     except (OSError, PermissionError, ValueError) as exc:
-        return {"ok": False, "code": "VALIDATION_FAILED", "detail": str(exc)}
+        return _write_refusal(exc)
 
 
 def distribution_status(root: Path | str, receipt_id: str) -> dict:
@@ -2085,7 +2138,7 @@ def add_requirements(root: Path | str, receipt_id: str, clauses: list[dict]) -> 
             "revision": new_revision,
         }
     except (OSError, PermissionError, ValueError) as exc:
-        return {"ok": False, "code": "VALIDATION_FAILED", "detail": str(exc)}
+        return _write_refusal(exc)
 
 
 def _probe_environment_absence(environment: str) -> dict:
@@ -2228,7 +2281,7 @@ def set_disposition(
                 "disposition": disposition,
             }
     except (OSError, PermissionError, ValueError) as exc:
-        return {"ok": False, "code": "VALIDATION_FAILED", "detail": str(exc)}
+        return _write_refusal(exc)
 
 
 #: The header the durable request document puts the operator's own words under
@@ -3847,7 +3900,7 @@ def close_receipt(root: Path | str, receipt_id: str, *, closure_event: str | Non
                 "archive_ref": archived["archive_ref"],
             }
     except (OSError, PermissionError, ValueError) as exc:
-        return {"ok": False, "code": "VALIDATION_FAILED", "detail": str(exc)}
+        return _write_refusal(exc)
 
 
 def archive_receipt(root: Path | str, receipt_id: str) -> dict:
@@ -3915,7 +3968,7 @@ def archive_receipt(root: Path | str, receipt_id: str) -> dict:
                 "archive_ref": archived["archive_ref"],
             }
     except (OSError, PermissionError, ValueError) as exc:
-        return {"ok": False, "code": "VALIDATION_FAILED", "detail": str(exc)}
+        return _write_refusal(exc)
 
 
 def purge_receipt(root: Path | str, receipt_id: str) -> dict:
@@ -3934,115 +3987,116 @@ def purge_receipt(root: Path | str, receipt_id: str) -> dict:
     if not _valid_receipt_id(receipt_id):
         return _invalid_receipt_id(receipt_id)
     try:
-        index = _read_index(root)
-        tomb = index.get("tombstones", {}).get(receipt_id)
-        if not tomb:
-            return {"ok": False, "code": "TICKET_NOT_FOUND", "detail": receipt_id}
-        if tomb.get("purged"):
-            return {"ok": True, "code": "SOURCE_PURGED", "receipt": receipt_id}
-        archive_dir = _archive_dir(root)
-        delete_suffixes = (".md", ".meta.json", ".coverage.json", ".contract.json")
-        archive_targets: list[Path] = []
-        for suffix in delete_suffixes:
-            rel = f".saipen/archive/source/{receipt_id}{suffix}"
-            path = _safe_path(root, rel, expect_file=True)
-            if path.is_file() and not _is_link_or_reparse(path):
-                archive_targets.append(path)
-        distribution = _read_distribution_record(root, receipt_id)
-        if distribution is not None:
-            protected = _safe_path(
-                root, distribution["body_ref"], expect_file=True
-            )
-            if protected.is_file() and not _is_link_or_reparse(protected):
-                archive_targets.append(protected)
-        revision_targets: list[Path] = []
-        if archive_dir.is_dir() and not _is_link_or_reparse(archive_dir):
-            for revision in sorted(archive_dir.glob(f"{receipt_id}.r*.json")):
-                if revision.is_file() and not _is_link_or_reparse(revision):
-                    revision_targets.append(revision)
-        new_tomb = dict(tomb)
-        new_tomb["purged"] = True
-        new_tomb["purged_at"] = _utc()
-        index_out = _read_index(root)
-        index_out["tombstones"][receipt_id] = new_tomb
-        from .journal import hash_bytes, run_mutation
-        from .paths import project_identity as _project_identity
-        from .plan import semantic_payload_hash
+        with project_writer_lock(root):
+            index = _read_index(root)
+            tomb = index.get("tombstones", {}).get(receipt_id)
+            if not tomb:
+                return {"ok": False, "code": "TICKET_NOT_FOUND", "detail": receipt_id}
+            if tomb.get("purged"):
+                return {"ok": True, "code": "SOURCE_PURGED", "receipt": receipt_id}
+            archive_dir = _archive_dir(root)
+            delete_suffixes = (".md", ".meta.json", ".coverage.json", ".contract.json")
+            archive_targets: list[Path] = []
+            for suffix in delete_suffixes:
+                rel = f".saipen/archive/source/{receipt_id}{suffix}"
+                path = _safe_path(root, rel, expect_file=True)
+                if path.is_file() and not _is_link_or_reparse(path):
+                    archive_targets.append(path)
+            distribution = _read_distribution_record(root, receipt_id)
+            if distribution is not None:
+                protected = _safe_path(
+                    root, distribution["body_ref"], expect_file=True
+                )
+                if protected.is_file() and not _is_link_or_reparse(protected):
+                    archive_targets.append(protected)
+            revision_targets: list[Path] = []
+            if archive_dir.is_dir() and not _is_link_or_reparse(archive_dir):
+                for revision in sorted(archive_dir.glob(f"{receipt_id}.r*.json")):
+                    if revision.is_file() and not _is_link_or_reparse(revision):
+                        revision_targets.append(revision)
+            new_tomb = dict(tomb)
+            new_tomb["purged"] = True
+            new_tomb["purged_at"] = _utc()
+            index_out = _read_index(root)
+            index_out["tombstones"][receipt_id] = new_tomb
+            from .journal import hash_bytes, run_mutation
+            from .paths import project_identity as _project_identity
+            from .plan import semantic_payload_hash
 
-        targets: list[dict] = []
-        for path in archive_targets:
+            targets: list[dict] = []
+            for path in archive_targets:
+                targets.append(
+                    {
+                        "path": path.relative_to(root).as_posix(),
+                        "role": "generic",
+                        "action": "delete_file",
+                        "content": b"",
+                        "before_hash": hash_bytes(path.read_bytes()),
+                        "after_hash": "",
+                    }
+                )
+            for path in revision_targets:
+                targets.append(
+                    {
+                        "path": path.relative_to(root).as_posix(),
+                        "role": "generic",
+                        "action": "delete_file",
+                        "content": b"",
+                        "before_hash": hash_bytes(path.read_bytes()),
+                        "after_hash": "",
+                    }
+                )
+            tomb_rel = f".saipen/intake/tombstones/{receipt_id}.json"
+            index_rel = ".saipen/intake/index.json"
+            new_tomb_bytes = _json_bytes(new_tomb)
+            new_index_bytes = _json_bytes(index_out)
             targets.append(
                 {
-                    "path": path.relative_to(root).as_posix(),
+                    "path": tomb_rel,
                     "role": "generic",
-                    "action": "delete_file",
-                    "content": b"",
-                    "before_hash": hash_bytes(path.read_bytes()),
-                    "after_hash": "",
+                    "action": "write",
+                    "content": new_tomb_bytes,
+                    "before_hash": hash_bytes(
+                        (_tombstone_dir(root) / f"{receipt_id}.json").read_bytes()
+                    ),
+                    "after_hash": hash_bytes(new_tomb_bytes),
                 }
             )
-        for path in revision_targets:
             targets.append(
                 {
-                    "path": path.relative_to(root).as_posix(),
+                    "path": index_rel,
                     "role": "generic",
-                    "action": "delete_file",
-                    "content": b"",
-                    "before_hash": hash_bytes(path.read_bytes()),
-                    "after_hash": "",
+                    "action": "write",
+                    "content": new_index_bytes,
+                    "before_hash": hash_bytes(_index_path(root).read_bytes()),
+                    "after_hash": hash_bytes(new_index_bytes),
                 }
             )
-        tomb_rel = f".saipen/intake/tombstones/{receipt_id}.json"
-        index_rel = ".saipen/intake/index.json"
-        new_tomb_bytes = _json_bytes(new_tomb)
-        new_index_bytes = _json_bytes(index_out)
-        targets.append(
-            {
-                "path": tomb_rel,
-                "role": "generic",
-                "action": "write",
-                "content": new_tomb_bytes,
-                "before_hash": hash_bytes(
-                    (_tombstone_dir(root) / f"{receipt_id}.json").read_bytes()
-                ),
-                "after_hash": hash_bytes(new_tomb_bytes),
-            }
-        )
-        targets.append(
-            {
-                "path": index_rel,
-                "role": "generic",
-                "action": "write",
-                "content": new_index_bytes,
-                "before_hash": hash_bytes(_index_path(root).read_bytes()),
-                "after_hash": hash_bytes(new_index_bytes),
-            }
-        )
-        semantic_request = {
-            "receipt": receipt_id,
-            "delete_targets": [t["path"] for t in targets if t["action"] == "delete_file"],
-        }
-        committed = run_mutation(
-            root,
-            op_id=f"source.purge-{hash_bytes(tomb_rel.encode('utf-8'))[:12]}",
-            operation="source.purge",
-            agent=_agent_for_intake(root),
-            project_identity=_project_identity(root),
-            semantic_payload_hash=semantic_payload_hash(semantic_request),
-            targets=targets,
-            preconditions={t["path"]: t["before_hash"] for t in targets},
-            verification_policy="none",
-        )
-        if not committed.get("ok"):
-            return {
-                "ok": False,
-                "code": committed.get("code", "VALIDATION_FAILED"),
+            semantic_request = {
                 "receipt": receipt_id,
-                "detail": committed.get("detail", "plan apply failed"),
+                "delete_targets": [t["path"] for t in targets if t["action"] == "delete_file"],
             }
-        return {"ok": True, "code": "SOURCE_PURGED", "receipt": receipt_id}
+            committed = run_mutation(
+                root,
+                op_id=f"source.purge-{hash_bytes(tomb_rel.encode('utf-8'))[:12]}",
+                operation="source.purge",
+                agent=_agent_for_intake(root),
+                project_identity=_project_identity(root),
+                semantic_payload_hash=semantic_payload_hash(semantic_request),
+                targets=targets,
+                preconditions={t["path"]: t["before_hash"] for t in targets},
+                verification_policy="none",
+            )
+            if not committed.get("ok"):
+                return {
+                    "ok": False,
+                    "code": committed.get("code", "VALIDATION_FAILED"),
+                    "receipt": receipt_id,
+                    "detail": committed.get("detail", "plan apply failed"),
+                }
+            return {"ok": True, "code": "SOURCE_PURGED", "receipt": receipt_id}
     except (OSError, PermissionError, ValueError) as exc:
-        return {"ok": False, "code": "VALIDATION_FAILED", "detail": str(exc)}
+        return _write_refusal(exc)
 
 
 def read_body(root: Path | str, receipt_id: str) -> dict:
@@ -5345,7 +5399,7 @@ def reconcile_receipt(root: Path | str, receipt_id: str, *, apply: bool = False)
                 "terminal_requirements": findings["coverage_requirements"],
             }
     except (OSError, PermissionError, ValueError) as exc:
-        return {"ok": False, "code": "VALIDATION_FAILED", "detail": str(exc)}
+        return _write_refusal(exc)
 
 
 # ---------------------------------------------------------------------------
