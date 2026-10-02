@@ -232,6 +232,17 @@ def build_fixture(
 
 def build_plain_project(project: Path, saipen_root: Path) -> None:
     sys.path.insert(0, str(saipen_root / "tools"))
+    # T-1555: never hardcode the STYLE marker -- the checkout this repro runs
+    # against owns it; a hardcoded token goes stale the moment its STYLE.md
+    # is edited.
+    def _live_style_marker(root):
+        import re as _re
+        text = (root / "saipen" / "STYLE.md").read_text(encoding="utf-8-sig")
+        found = _re.search(r"`style_contract:\s*(ded-[0-9a-f]{8})`", text)
+        if found is None:
+            raise FileNotFoundError("STYLE.md declares no style_contract marker")
+        return found.group(1)
+
     from saipen_engine.journal import ensure_project_lineage
 
     sp = project / ".saipen"
@@ -239,7 +250,7 @@ def build_plain_project(project: Path, saipen_root: Path) -> None:
     (sp / "STATE.md").write_text(
         "---\nphase: DONE\ntask: none\nnext_action: \"saipen continue\"\nblocker: \"\"\n"
         "transition_from: DONE\nsaipen_version: 8\nschema_version: 3\nlast_event: 1\n"
-        "style_contract: ded-4ae736e4\n"
+        f"style_contract: {_live_style_marker(saipen_root)}\n"
         f"saipen_home: \"{str(saipen_root).replace(chr(92), chr(92) * 2)}\"\n"
         "agent: tester\nmode: full\nupdated: \"2026-09-16T00:00:00Z\"\nexecution_intent: normal\n---\n",
         encoding="utf-8",

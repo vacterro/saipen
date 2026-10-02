@@ -26,6 +26,13 @@ TOOLS = REPO / "tools"
 sys.path.insert(0, str(TOOLS))
 
 from saipen_engine.paths import identity_file_content, new_project_lineage  # noqa: E402
+from saipen_engine.state import style_contract_token  # noqa: E402
+
+#: The voice marker belongs to the INSTALLED STYLE.md, not to this matrix's
+#: history; pinning a retired value made every STYLE.md edit red this evidence.
+LIVE_STYLE_CONTRACT = style_contract_token(
+    (REPO / "saipen" / "STYLE.md").read_text(encoding="utf-8-sig")
+)
 
 # The same canonical shape tools/test_guard_hostile_matrix.py uses. A fixture
 # whose STATE is structurally invalid makes the guard refuse EVERY consequential
@@ -36,7 +43,7 @@ from saipen_engine.paths import identity_file_content, new_project_lineage  # no
 # guard answers NO_ACTIVE_WORK to every consequential mutation, including the
 # ordinary source edits this matrix has to prove are ALLOWED -- a uniform
 # refusal that would read as conformance while proving nothing.
-STATE = """---
+STATE = f"""---
 phase: BUILD
 task: T-1
 next_action: "PHASE BUILD T-1"
@@ -45,7 +52,7 @@ transition_from: SCOUT
 saipen_version: 7
 schema_version: 3
 last_event: 100
-style_contract: ded-4ae736e4
+style_contract: {LIVE_STYLE_CONTRACT}
 mode: full
 updated: 2026-09-12T00:00:00Z
 agent: test-agent
