@@ -153,6 +153,40 @@ class HeldSandboxTests(unittest.TestCase):
         holder.wait()
         self.assertTrue(left.exists(), "nothing ever reclaims it after the holder exits")
 
+    def held_within(self, path: Path, seconds: float = 30.0) -> bool:
+        """Whether a holder has taken the tree inside the bound.
+
+        T-1597: the control used to sleep 0.5 s and assume the child had
+        started. Nothing guarantees that under six shards, so the assumption
+        was the flake: a tree that was not held yet was reclaimed, and the
+        assertion "a held tree is reported, not raised" failed for a reason it
+        never named. Poll the real condition instead, and name it on failure.
+        """
+        deadline = time.monotonic() + seconds
+        while path.exists() and time.monotonic() < deadline:
+            if not core_unit.reclaim(path):
+                return True
+            time.sleep(0.05)
+        return False
+
+    def sweep_within(self, root: Path, seconds: float = 30.0) -> list[str]:
+        """Sweep until the dead owner's handle is released, or report empty.
+
+        Windows releases a just-exited process's directory handle on its own
+        schedule; `reclaim` is documented to retry a few times and then
+        REPORT. One sweep taken at the instant `wait()` returned is therefore
+        a race, and the retry is bounded so a sandbox that is never reclaimed
+        still fails loudly.
+        """
+        deadline = time.monotonic() + seconds
+        swept: list[str] = []
+        while time.monotonic() < deadline:
+            swept = core_unit.sweep_stale_sandboxes(root)
+            if swept:
+                return swept
+            time.sleep(0.2)
+        return swept
+
     def test_a_held_sandbox_is_reported_then_swept_once_its_owner_is_gone(self):
         temp = Path(tempfile.mkdtemp(prefix="t1505-held-"))
         self.addCleanup(core_unit.reclaim, temp)
@@ -162,12 +196,24 @@ class HeldSandboxTests(unittest.TestCase):
             json.dumps({"pid": dead_pid()}), encoding="utf-8"
         )
         holder = self.hold(sandbox)
-        self.assertFalse(core_unit.reclaim(sandbox), "a held tree is reported, not raised")
+        self.assertTrue(self.held_within(sandbox), "the holder never took the sandbox")
         self.assertTrue(sandbox.exists())
         holder.kill()
         holder.wait()
-        self.assertEqual(core_unit.sweep_stale_sandboxes(temp), [sandbox.name])
+        self.assertEqual(self.sweep_within(temp), [sandbox.name])
         self.assertFalse(sandbox.exists())
+
+    def test_waiting_for_a_sweep_never_reclaims_a_live_owner(self):
+        """The retry waits for the handle; it must not wait the owner away."""
+        temp = Path(tempfile.mkdtemp(prefix="t1505-live-"))
+        self.addCleanup(core_unit.reclaim, temp)
+        sandbox = temp / (core_unit.SANDBOX_PREFIX + "live")
+        sandbox.mkdir()
+        (sandbox / core_unit.SANDBOX_OWNER).write_text(
+            json.dumps({"pid": os.getpid()}), encoding="utf-8"
+        )
+        self.assertEqual(self.sweep_within(temp, seconds=1.0), [])
+        self.assertTrue(sandbox.exists())
 
 
 class RunFamilyLeavesNothingTests(unittest.TestCase):
