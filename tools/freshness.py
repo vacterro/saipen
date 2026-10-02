@@ -20,6 +20,7 @@ from __future__ import annotations
 import hashlib
 import json
 import os
+import re
 import stat
 import struct
 import subprocess
@@ -30,6 +31,54 @@ from typing import Callable, Iterable
 
 class FreshnessError(RuntimeError):
     """Freshness evidence could not be computed without omitting input."""
+
+
+#: The width ``phases/translate.md`` mandates for a locale
+#: ``source-digest`` marker. The digest it carries is a full sha256.
+SHORT_DIGEST_MARKER_HEX = 16
+
+#: A version token: three numeric components plus the bare pre-release
+#: suffix this project actually ships (``1.2.3``, ``0.0.2a3``, ``0.0.2b1``).
+#: The suffix belongs to the token: leaving it out made a pre-release bump
+#: (``0.0.2a3`` -> ``0.0.2b1``) move the source digest, which is exactly the
+#: badge bump the gate's own comment says can never move it. It stops at the
+#: first non-alphanumeric character on purpose -- a greedy ``-``/``.`` tail
+#: would swallow the rest of a wheel filename (``0.0.2a3-py3-none-any.whl``)
+#: and hide a real content change behind a version-shaped prefix.
+VERSION_TOKEN_RE = r"\d+\.\d+\.\d+[0-9A-Za-z]*"
+
+
+def normalize_version_strings(text: str) -> str:
+    """Replace every version token in ``text`` with the literal ``VERSION``."""
+    return re.sub(VERSION_TOKEN_RE, "VERSION", text)
+
+
+def source_content_digest(text: str) -> str:
+    """sha256 of ``text`` with version tokens normalised out.
+
+    This is the digest a locale ``source-digest`` marker claims, so the
+    recipe lives here beside the other source-identity helpers instead of
+    inline in a validator branch where a producer cannot reproduce it.
+    """
+    return hashlib.sha256(normalize_version_strings(text).encode("utf-8")).hexdigest()
+
+
+def digest_marker_matches(marker_hex: object, want_hex: object) -> bool:
+    """Does a locale ``source-digest`` marker equal the canonical digest?
+
+    ``phases/translate.md`` mandates a ``<16 hex>`` marker while the digest
+    the validator computes is a full 64-hex sha256, so an exact-width
+    comparison could never be satisfied by a conformant marker: the
+    ``translation-stale`` WARN was unreachable by design, and a producer that
+    followed the documented contract could never clear it. Accept exactly the
+    two widths the contract and the digest itself name; any other width, and
+    any wrong digest, is still stale.
+    """
+    if not isinstance(marker_hex, str) or not isinstance(want_hex, str):
+        return False
+    if marker_hex == want_hex:
+        return True
+    return len(marker_hex) == SHORT_DIGEST_MARKER_HEX and want_hex.startswith(marker_hex)
 
 
 @dataclass(frozen=True)
@@ -793,7 +842,7 @@ def _bind_nested(fingerprint: str, binding: bytes) -> str:
     """Mix the nested binding into ``model:hex`` without changing its shape."""
     if not binding:
         return fingerprint
-    model, _, hexdigest = fingerprint.partition(":")
+    model, _, _hexdigest = fingerprint.partition(":")
     mixed = hashlib.sha256()
     mixed.update(fingerprint.encode("ascii"))
     mixed.update(b"\x00")
