@@ -6408,7 +6408,9 @@ def compact_board(
                 )
         return _refuse(
             "VALIDATION_FAILED",
-            f"{ticket_id} is already within the {MAX_LIVE_RECORD_CHARS}-character BOARD cap",
+            f"{ticket_id} is already within the {MAX_LIVE_RECORD_CHARS}-character BOARD cap. "
+            "compact repairs one oversized ticket record and never prunes a section, so an "
+            "oversized BOARD section is outside what it can do.",
             ticket=ticket_id,
         )
     # T-1326 TARGET C: ONE DEC event PER compacted row in the SAME journaled
