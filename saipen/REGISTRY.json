@@ -695,7 +695,7 @@
   "budgets": {
    "cold": 26880,
    "ordinary_continue": 35840,
-   "command_resolution": 46080,
+   "command_resolution": 47104,
    "ordinary_phase": 40960,
    "ship_improve": 56320,
    "single_doc": 51200

@@ -584,16 +584,13 @@ next action as `next`/`cc` WITHOUT executing and reports the disposition,
 the owner (agent/user), the selected action, and why the human is or is not
 required. Decision-trace output for debugging autonomy; writes nothing.
 
-**Telemetry**: `saipen stats` (READ_ONLY, `--json`, `--work T-####`, `--days N`)
-derives execution time from the canonical LOG alone: how long the current Work
-and phase have run, since the last checkpoint and the last real progress, and
-per-day observed/active/waiting/blocked time. TIME IS OBSERVED. TIME DOES NOT
-DEFINE TRUTH -- nothing is written, cached or gated, so deleting
-`saipen_engine/telemetry` changes no Work state, no acceptance, no PASS and no
-DONE; telemetry degrades to `TELEMETRY_UNAVAILABLE`, never the protocol. Gaps
-longer than 30 minutes and any time after a stop are `UNOBSERVED`, never zero.
-Counters the supervisor holds outside the LOG (`worker_generations`,
-`agent_incarnations`, `manual_recoveries`) are `None`, never zero.
+**Telemetry**: `saipen stats` (READ_ONLY, `--json`, `--work T-####`,
+`--days N`) derives execution time from the canonical LOG alone: current Work
+and phase elapsed, since the last checkpoint and the last real progress, and
+per-day observed/active/waiting/blocked. TIME IS OBSERVED. TIME DOES NOT DEFINE
+TRUTH -- it writes nothing and gates nothing, so deleting it changes no Work
+state, no PASS and no DONE; telemetry degrades to TELEMETRY_UNAVAILABLE, never
+the protocol. Gaps over 30m and time after a stop are UNOBSERVED, never zero.
 
 **Meaningful automatic reconciliations** (state repaired against authority,
 stale evidence regenerated, traceability reconstructed) are recorded through
