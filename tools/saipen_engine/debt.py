@@ -1770,6 +1770,14 @@ def latest_pass_reverify(root, work):
     simply returns None (the caller treats the Work as unverified). A newest
     receipt whose bytes fail its digest returns None the same way (T-1517):
     an edited verdict is no verdict, and it never lets an older PASS through.
+
+    T-151: "the newest receipt" means the newest receipt FOR THIS WORK. The
+    integrity guard used to precede the work filter, so one edited file in one
+    Work's directory returned None out of the whole scan and every other Work
+    read as unverified -- a project-wide false red whose named remedy is a
+    strict gate re-run per ticket for receipts that already existed. The retry
+    path in `_reverify_body` already had the correct order (skip the untrusted
+    record, keep scanning); the read path now matches it.
     """
     root = Path(root)
     for path in reversed(_existing_reverify_receipts(root)):
@@ -1777,10 +1785,10 @@ def latest_pass_reverify(root, work):
             record = json.loads(path.read_text(encoding="utf-8"))
         except (OSError, ValueError):
             continue
-        if not _reverify_intact(record):
-            return None
         if record.get("work") != work:
             continue
+        if not _reverify_intact(record):
+            return None
         if not history_bound_here(
             record.get("project_identity"), record.get("project_lineage"), root
         ):
