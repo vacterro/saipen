@@ -1686,7 +1686,7 @@ def legacy_done_attestation_text(ticket_id: str) -> str:
 
 
 def bulk_legacy_completion_evidence(
-    events: list[dict], ticket_ids: Iterable[str]
+    events: list[dict], ticket_ids: Iterable[str], *, generation_end: int | None = None
 ) -> dict[str, tuple[bool, str]]:
     """ONE backward pass: did each legacy-generation ticket actually execute?
 
@@ -1702,16 +1702,46 @@ def bulk_legacy_completion_evidence(
     No VERIFY boundary is required and no `conf:` token is required: neither
     existed when these records were written. Absence of decisive evidence is
     reported as ambiguity for an operator, never as proof of fabrication.
+
+    T-150: only evidence from the ticket's OWN generation may decide. A RUN
+    line written after the legacy generation closed is bookkeeping about the
+    present -- it carries the old ticket's id, but it says nothing about what
+    that ticket did in the grammar it was executed under. Scanning newest-first
+    across the whole history let an unrelated progress note decide the question
+    in either direction: one without a marker reported `unproven` and raised an
+    operator decision over a settled closure, and one that happened to contain
+    the token VERIFY reported `proven` -- so the verdict tracked the vocabulary
+    of the most recent sentence, not the history. `generation_end` (the highest
+    ticket number of the legacy generation) bounds the RUN scan. An attestation
+    is exempt: it is a deliberate operator decision recorded now, and it must
+    keep working after the boundary.
     """
     wanted = set(ticket_ids)
+    events = list(events or ())
+    cutoff = len(events)
+    if generation_end is not None:
+        # The legacy generation closes where the newer one opens: the FIRST
+        # event allocated above `generation_end`. Keying the boundary on the
+        # ticket being judged instead would be exactly the bug -- a later RUN
+        # carries the old ticket's own id and would push the boundary out to
+        # itself.
+        for pos, ev in enumerate(events):
+            tid_text = str(ev.get("ticket") or "")
+            if tid_text.startswith("T-") and tid_text[2:].isdigit():
+                if int(tid_text[2:]) > generation_end:
+                    cutoff = pos
+                    break
     verdicts: dict[str, tuple[bool, str]] = {}
-    for ev in reversed(events or ()):
+    for pos in range(len(events) - 1, -1, -1):
+        ev = events[pos]
         tid = ev.get("ticket")
         if tid not in wanted or tid in verdicts:
             continue
         txt = ev.get("text", "")
         if LEGACY_DONE_ATTESTATION in txt:
             verdicts[tid] = (True, txt)
+            continue
+        if pos >= cutoff:
             continue
         if ev.get("taxonomy") != "RUN":
             continue
