@@ -1,0 +1,24 @@
+{
+  "clauses": {
+    "SRC-166:R001": {
+      "actionable": false,
+      "class": "context",
+      "text": "\"Self-check before sending\" must not be the only enforcement boundary."
+    },
+    "SRC-166:R002": {
+      "actionable": false,
+      "class": "context",
+      "text": "For normal operational outputs, the model must not control the final response shape freely."
+    },
+    "SRC-166:R003": {
+      "actionable": false,
+      "class": "context",
+      "text": "The regression suite must include repeated-turn testing:"
+    }
+  },
+  "derived_at": "2026-10-02T22:09:18Z",
+  "derived_from": "SRC-166",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "03239595f76bb4618ab71aa7c24f889ad11273e24aa0edf70accd42e01c5737c"
+}

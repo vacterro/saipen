@@ -1,0 +1,6 @@
+test_unwitnessed_goal_cannot_preempt_or_reset_trusted_work (__main__.GoalAuthority.test_unwitnessed_goal_cannot_preempt_or_reset_trusted_work) ... ok
+
+----------------------------------------------------------------------
+Ran 1 test in 0.629s
+
+OK

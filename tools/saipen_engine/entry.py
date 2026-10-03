@@ -64,8 +64,13 @@ def _normalized_request(text: str) -> str:
 
 
 def continuation_work(
-    state: dict | None, tickets: dict, text: str, *,
-    verify: str | None = None, needs: list[str] | None = None, supersedes: str | None = None,
+    state: dict | None,
+    tickets: dict,
+    text: str,
+    *,
+    verify: str | None = None,
+    needs: list[str] | None = None,
+    supersedes: str | None = None,
 ) -> str | None:
     """Recognize only complete target-free continuation forms, never a prefix.
 
@@ -192,9 +197,7 @@ RECEIPT_AUTHORITY_ONLY = "AUTHORITY_ONLY"
 RECEIPT_NOT_A_REQUEST = "NOT_A_REQUEST"
 
 
-def request_from_receipt(
-    root: Path, receipt: str
-) -> tuple[dict | None, str | None, str | None]:
+def request_from_receipt(root: Path, receipt: str) -> tuple[dict | None, str | None, str | None]:
     """(request, problem, problem_class) of a `user-request` receipt body.
 
     THE admissibility owner for starting a receipt. The queued-Source router
@@ -215,11 +218,15 @@ def request_from_receipt(
         # T-1414: an authority-only Source is typed data, not a task. It
         # exists to be cited by `saipen ticket retire --authority` and must
         # never be re-projected into Work.
-        return None, (
-            f"{receipt} is captured operator authority (projection_policy "
-            "authority_only) and never projects Work; cite it with "
-            f"saipen ticket retire <T-###> --authority {receipt}"
-        ), RECEIPT_AUTHORITY_ONLY
+        return (
+            None,
+            (
+                f"{receipt} is captured operator authority (projection_policy "
+                "authority_only) and never projects Work; cite it with "
+                f"saipen ticket retire <T-###> --authority {receipt}"
+            ),
+            RECEIPT_AUTHORITY_ONLY,
+        )
     body = str(found.get("body") or "")
     head, sep, request = body.partition("\n" + _REQUEST_HEADER + "\n")
     if not sep or not head.startswith("# User request"):
@@ -233,14 +240,19 @@ def request_from_receipt(
         key, colon, value = line.partition(": ")
         if colon and key in ("priority", "verify", "needs", "supersedes"):
             fields[key] = value
-    return {
-        "priority": fields.get("priority") or "P1",
-        "verify": fields.get("verify"),
-        "needs": [part.strip() for part in fields.get("needs", "").split(",") if part.strip()],
-        "supersedes": (fields.get("supersedes") or "").strip() or None,
-        "text": request.strip("\n"),
-        "linked_work": (found.get("meta") or {}).get("linked_work"),
-    }, None, None
+    return (
+        {
+            "priority": fields.get("priority") or "P1",
+            "verify": fields.get("verify"),
+            "needs": [part.strip() for part in fields.get("needs", "").split(",") if part.strip()],
+            "supersedes": (fields.get("supersedes") or "").strip() or None,
+            "text": request.strip("\n"),
+            "linked_work": (found.get("meta") or {}).get("linked_work"),
+            "request_provenance": meta.get("request_provenance"),
+        },
+        None,
+        None,
+    )
 
 
 def _pending_touches_intake(root: Path) -> bool:
@@ -305,9 +317,7 @@ def _foreign_seat_route(
             None,
         )
     resume = (
-        f"saipen start --receipt {queue_id}"
-        if str(queue_id or "").startswith("SRC-")
-        else None
+        f"saipen start --receipt {queue_id}" if str(queue_id or "").startswith("SRC-") else None
     )
     return (
         f"{held} The request is durable as {queue_id} and starts when that seat is free.",
@@ -431,9 +441,7 @@ def start_work(
     # request that is not those bytes cannot enter here silently -- that is how
     # a model's paraphrase earned a receipt asserting the operator's own words.
     obligation = pending_ingress.pending(root)
-    owed = pending_ingress.enforce(
-        root, text, supersede=supersede_ingress, commit=not dry_run
-    )
+    owed = pending_ingress.enforce(root, text, supersede=supersede_ingress, commit=not dry_run)
     if owed is not None:
         return _refuse(owed.pop("code"), owed.pop("detail"), **owed)
     # T-1376: the obligation above only exists when something REFUSED these
@@ -446,6 +454,11 @@ def start_work(
     )
     if "code" in provenance:
         return _refuse(provenance.pop("code"), provenance.pop("detail"), **provenance)
+    # A receipt's recorded provenance is immutable. The current session's
+    # carrier is not a retroactive witness for bytes an earlier model supplied.
+    if receipt:
+        provenance = request.get("request_provenance") or {}
+    authority = operator_task.authority_for_provenance(provenance)
     verify_text = (verify or "").strip() or USER_REQUEST_VERIFY
 
     def render(supersedes: str | None) -> str:
@@ -465,16 +478,17 @@ def start_work(
         state, board, problem = _snapshot(root)
         preview = reconcile_protocol_state(root, actor, dry_run=True)
         seat = (
-            ownership.classify_active_ownership(
-                state, board["tickets"], actor, root=root
-            ).status
+            ownership.classify_active_ownership(state, board["tickets"], actor, root=root).status
             if state is not None and board is not None
             else None
         )
         continued = continuation_work(
-            state, (board or {}).get("tickets") or {}, text,
+            state,
+            (board or {}).get("tickets") or {},
+            text,
             verify=verify_text if verify_text != USER_REQUEST_VERIFY else None,
-            needs=needs, supersedes=supersedes,
+            needs=needs,
+            supersedes=supersedes,
         )
         return {
             "ok": True,
@@ -489,18 +503,28 @@ def start_work(
             "snapshot_problem": problem,
             "continuation": continued is not None,
             "ticket": continued,
-            "steps": ([
-                "capture request receipt",
-                "recover journal / reconcile",
-                "bind continuation to current Work",
-                "resume current phase without a goal pivot",
-            ] if continued else [
-                "capture request receipt",
-                "recover journal / reconcile",
-                "project user_explicit Work",
-                "park own interrupted Work (ticket block-for)" if seat == ownership.SELF else None,
-                "claim Work into SCOUT",
-            ]),
+            "steps": (
+                [
+                    "capture request receipt",
+                    "recover journal / reconcile",
+                    "bind continuation to current Work",
+                    "resume current phase without a goal pivot",
+                ]
+                if continued
+                else [
+                    "capture request receipt",
+                    "recover journal / reconcile",
+                    "project user_explicit Work"
+                    if authority["user_explicit"]
+                    else "project unwitnessed local candidate (P2 or lower)",
+                    "park own interrupted Work (ticket block-for)"
+                    if seat == ownership.SELF and authority["preempt_active_work"]
+                    else None,
+                    "claim Work into SCOUT"
+                    if seat != ownership.SELF or authority["preempt_active_work"]
+                    else "preserve active Work and its bounded authority",
+                ]
+            ),
         }
 
     # 1. INGRESS before execution debt. The receipt is intake-only bytes; an
@@ -571,9 +595,7 @@ def start_work(
             if not adopted.ok:
                 return _refuse(adopted.code, adopted.message, **identity)
             state, board, problem = _snapshot(root)
-        seat = ownership.classify_active_ownership(
-            state, board["tickets"], actor, root=root
-        )
+        seat = ownership.classify_active_ownership(state, board["tickets"], actor, root=root)
         if seat.status == ownership.FOREIGN_LIVE:
             detail, resume = _foreign_seat_route(
                 seat, receipt_form=receipt is not None, queue_id=captured_receipt
@@ -591,10 +613,13 @@ def start_work(
                 "resume_command": resume,
             }
 
-    # Reconciliation, with the valve cleared by the new explicit task.
+    # Derive authority again from the receipt that actually survived capture
+    # and dedupe. Source persistence can never strengthen it.
+    authority = operator_task.authority_for_receipt(root, captured_receipt)
+    # Reconciliation; only witnessed operator ingress can reset its valve.
     reconciliation = reconcile_protocol_state(root, actor, dry_run=False)
     valve_reauthorized = False
-    if reconciliation.get("safety_valve_tripped"):
+    if reconciliation.get("safety_valve_tripped") and authority["reset_bounded_authority"]:
         reauth = reauthorize_valve(root, actor)
         if not reauth.ok:
             return _refuse(reauth.code, reauth.message, receipt=captured_receipt, **identity)
@@ -603,6 +628,7 @@ def start_work(
     state, board, problem = _snapshot(root)
     if (
         state is not None
+        and authority["reset_bounded_authority"]
         and state.get("execution_intent") == "goal"
         and ((state.get("goal_waves") or 0) >= 3 or (state.get("goal_tickets") or 0) >= 20)
     ):
@@ -655,9 +681,12 @@ def start_work(
     ticket = linked_work if linked_work in tickets else None
     if ticket is None and captured_receipt:
         existing = continuation_work(
-            state, tickets, text,
+            state,
+            tickets,
+            text,
             verify=verify_text if verify_text != USER_REQUEST_VERIFY else None,
-            needs=needs, supersedes=supersedes,
+            needs=needs,
+            supersedes=supersedes,
         )
         if existing is None:
             existing = existing_work_for_request(root, tickets, text)
@@ -697,10 +726,14 @@ def start_work(
         # 1 wave / 18 tickets and would have tripped after two VERIFY passes.
         # An echo bound to existing Work never reaches this branch (T-1469).
         state, board, problem = _snapshot(root)
-        if state is not None and not (
-            state.get("execution_intent") == "goal"
-            and not state.get("goal_waves")
-            and not state.get("goal_tickets")
+        if (
+            authority["goal_pivot"]
+            and state is not None
+            and not (
+                state.get("execution_intent") == "goal"
+                and not state.get("goal_waves")
+                and not state.get("goal_tickets")
+            )
         ):
             objective = " ".join(str(text or "").split())[:200]
             pivot = set_goal_intent(root, actor, f"{ticket} ({captured_receipt}): {objective}")
@@ -725,6 +758,7 @@ def start_work(
         "ticket": ticket,
         "valve_reauthorized": valve_reauthorized,
         "preserved_decisions": preserved,
+        "ingress_authority": authority,
     }
     if section == "## DONE":
         return _refuse(
@@ -783,6 +817,17 @@ def start_work(
             ticket,
         )
     if seat.active_ticket and seat.active_ticket != ticket:
+        if not authority["preempt_active_work"]:
+            return {
+                "ok": True,
+                "code": "USER_REQUEST_RECORDED",
+                **base,
+                "active_ticket": seat.active_ticket,
+                "action": state.get("next_action"),
+                "next_action": state.get("next_action"),
+                "parked": None,
+                "preempted": False,
+            }
         active = seat.active_ticket
         resume_phase = state.get("phase")
         if seat.status in (ownership.UNCLAIMED, ownership.FOREIGN_STALE):

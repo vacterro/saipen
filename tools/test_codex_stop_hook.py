@@ -58,14 +58,23 @@ def validation_of(project: Path) -> str:
 def card(project: Path, *, wait: bool = False) -> str:
     validation = validation_of(project)
     if wait:
-        boundary = RS.OperationalBoundary(
-            "WAIT -- manual verify",
-            "Work paused",
-            "HUMAN_DECISION -- choose disposition",
-            "Choose the disposition for the retained files",
-            "saipen continue",
-            validation,
+        # Operational delivery is generated, not freely authored fixture prose.
+        proc = subprocess.run(
+            [
+                sys.executable,
+                str(TOOLS / "saipen.py"),
+                "response",
+                "digest",
+                "--project-root",
+                str(project),
+                "--json",
+            ],
+            capture_output=True,
+            encoding="utf-8",
+            cwd=ROOT,
+            check=True,
         )
+        return json.loads(proc.stdout)["text"]
     else:
         boundary = RS.OperationalBoundary(
             "DONE", "No work changed", "NONE", "NONE", "NONE", validation
@@ -145,7 +154,11 @@ class CanonicalClassifierTests(unittest.TestCase):
 
     def test_a_valid_boundary_passes(self):
         project = fresh_project()
-        rc, out = classify(project, card(project))
+        from saipen_engine.operations import stop_checkpoint
+
+        stopped = stop_checkpoint(project, "test-agent")
+        self.assertTrue(stopped.ok, stopped.to_dict())
+        rc, out = classify(project, stopped.data["delivery"])
         self.assertEqual(rc, 0, out)
         self.assertTrue(out["ok"])
         self.assertEqual(out["class"], RS.CLASS_VALID_BOUNDARY)
@@ -209,8 +222,9 @@ class CodexStopHookTests(unittest.TestCase):
         self.assertEqual(out.get("decision"), "block")
         reason = out.get("reason", "")
         self.assertIn("INVALID_OPERATIONAL_PROSE", reason)
-        self.assertIn("saipen response render --stdin", reason)
-        self.assertIn("saipen response check --stdin --classify", reason)
+        self.assertIn("SAIPEN canonical delivery", reason)
+        self.assertLessEqual(len(reason.splitlines()), 9)
+        self.assertNotIn("Everything is fine", reason)
 
     def test_chat_style_drift_is_intercepted_with_chat_guidance(self):
         # T-1558: an ordinary reply over the STYLE.md chat budget is refused, and
@@ -250,7 +264,11 @@ class CodexStopHookTests(unittest.TestCase):
 
     def test_a_valid_boundary_passes_untouched(self):
         project = fresh_project()
-        rc, out, _ = stop_event(project, card(project))
+        from saipen_engine.operations import stop_checkpoint
+
+        stopped = stop_checkpoint(project, "test-agent")
+        self.assertTrue(stopped.ok, stopped.to_dict())
+        rc, out, _ = stop_event(project, stopped.data["delivery"])
         self.assertEqual(rc, 0)
         self.assertIsNone(out)
 
@@ -373,9 +391,7 @@ class InstallAndPreservationTests(unittest.TestCase):
                                 "hooks": [{"type": "command", "command": "echo user-tool"}],
                             }
                         ],
-                        "Stop": [
-                            {"hooks": [{"type": "command", "command": "echo user-stop"}]}
-                        ],
+                        "Stop": [{"hooks": [{"type": "command", "command": "echo user-stop"}]}],
                     },
                 },
                 indent=2,
@@ -395,16 +411,10 @@ class InstallAndPreservationTests(unittest.TestCase):
         self.assertTrue(result["configured"], result)
         artifact = home / ".codex" / "hooks" / "saipen-guard.py"
         self.assertEqual(artifact.read_bytes(), HOOK.read_bytes())
-        config = json.loads(
-            (home / ".codex" / "hooks.json").read_text(encoding="utf-8-sig")
-        )
+        config = json.loads((home / ".codex" / "hooks.json").read_text(encoding="utf-8-sig"))
         self.assertEqual(config["description"], "user hooks")
-        self.assertEqual(
-            config["hooks"]["PreToolUse"][0]["hooks"][0]["command"], "echo user-tool"
-        )
-        stop_entries = [
-            hook for group in config["hooks"]["Stop"] for hook in group["hooks"]
-        ]
+        self.assertEqual(config["hooks"]["PreToolUse"][0]["hooks"][0]["command"], "echo user-tool")
+        stop_entries = [hook for group in config["hooks"]["Stop"] for hook in group["hooks"]]
         self.assertIn("echo user-stop", [e.get("command") for e in stop_entries])
         ours = [
             e
@@ -567,9 +577,7 @@ class NoSecondValidatorTests(unittest.TestCase):
 
 class RegistryWiringTests(unittest.TestCase):
     def test_codex_declares_the_installed_stop_gate(self):
-        self.assertEqual(
-            CODEX_ADAPTER["hook_install_surface"], "~/.codex/hooks/saipen-guard.py"
-        )
+        self.assertEqual(CODEX_ADAPTER["hook_install_surface"], "~/.codex/hooks/saipen-guard.py")
         self.assertEqual(
             CODEX_ADAPTER["hook_artifact"], "extensions/adapters/codex/saipen-guard.py"
         )

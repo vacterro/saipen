@@ -365,6 +365,14 @@ class ClassifierTests(unittest.TestCase):
             operational_turn=False,
             style_contract=contract_with("en"),
             detail_mode=RS.DETAIL_MODE_AUDIT,
+            human_request="produce a full technical audit",
+            request_authority={
+                "witness": "operator_carrier",
+                "declared_by": "SAIPEN_TASK_SHA256",
+                "compared_digest": __import__(
+                    "saipen_engine.pending_ingress", fromlist=["ingress_digest"]
+                ).ingress_digest("produce a full technical audit"),
+            },
         )
         self.assertEqual(klass, RS.CLASS_ORDINARY_CHAT)
 

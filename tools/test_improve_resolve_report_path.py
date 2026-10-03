@@ -20,7 +20,7 @@ TOOLS = Path(__file__).resolve().parent
 if str(TOOLS) not in __import__("sys").path:
     __import__("sys").path.insert(0, str(TOOLS))
 
-from improve import resolve_report_path  # noqa: E402
+from improve import ImproveError, resolve_report_path  # noqa: E402
 
 CYCLE = "imp-key-20260101"
 SEAT = "seat-1"
@@ -73,6 +73,26 @@ class ResolveReportPathTests(unittest.TestCase):
 
     def test_a_roster_without_this_seat_falls_back_rather_than_refusing(self):
         root = self._root(MANIFEST.replace(f"seat_id: {SEAT}", "seat_id: seat-2"))
+        self.assertEqual(
+            resolve_report_path(root, CYCLE, SEAT, "PROJ").name, "saipen_improve_PROJ.md"
+        )
+
+    def test_a_roster_recording_an_unusable_path_is_refused_not_ignored(self):
+        """T-178: absent roster falls back; a roster that cannot be trusted refuses.
+
+        A corrupt roster used to be answered with the caller's composed name, so
+        the cycle resolved onto a file the roster never recorded -- the divergence
+        T-175 exists to stop, reintroduced by a different route.
+        """
+        for unusable in ("../../escape.md", "sub/dir.md", "bad name.md", "."):
+            with self.subTest(report_path=unusable):
+                root = self._root(MANIFEST.replace(SCOPE_NAME, unusable))
+                with self.assertRaises(ImproveError):
+                    resolve_report_path(root, CYCLE, SEAT, "PROJ")
+
+    def test_a_roster_that_records_no_path_for_this_seat_still_falls_back(self):
+        """A seat registered without a report_path is a gap, not a corruption."""
+        root = self._root(MANIFEST.replace(f"report_path: {SCOPE_NAME}\n", ""))
         self.assertEqual(
             resolve_report_path(root, CYCLE, SEAT, "PROJ").name, "saipen_improve_PROJ.md"
         )

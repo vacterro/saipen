@@ -15,6 +15,7 @@ The twenty numbered controls below are the SRC-104 test matrix, in order.
 from __future__ import annotations
 
 import json
+import os
 import subprocess
 import sys
 import unittest
@@ -27,7 +28,7 @@ if str(TOOLS) not in sys.path:
 
 from test_dependency_resume_liveness import AGENT, ResumeFixture  # noqa: E402
 
-from saipen_engine import intake, source_append  # noqa: E402
+from saipen_engine import intake, source_append, operator_task, pending_ingress  # noqa: E402
 from saipen_engine.board import parse_board  # noqa: E402
 from saipen_engine.operations import (  # noqa: E402
     apply_claim,
@@ -72,15 +73,26 @@ class AppendFixture(ResumeFixture):
         for step in order[1 : order.index(phase) + 1]:
             if step == "REVIEW":
                 self.assertTrue(
-                    checkpoint(project, AGENT, "RUN", work,
-                               f"verify -> PASS [target: {work}] conf: high -- fixture").ok
+                    checkpoint(
+                        project,
+                        AGENT,
+                        "RUN",
+                        work,
+                        f"verify -> PASS [target: {work}] conf: high -- fixture",
+                    ).ok
                 )
             moved = transition_phase(project, step, AGENT, work, f"{step}: fixture")
             self.assertTrue(moved.ok, moved.to_dict())
         return work, captured["receipt"]
 
     def append(self, project: Path, body: str, **kwargs) -> dict:
-        result = source_append.append(project, body, actor=AGENT, **kwargs)
+        # These are externally supplied operator updates, not model proposals.
+        with mock.patch.dict(
+            os.environ,
+            {operator_task.ENV_TASK_SHA256: pending_ingress.ingress_digest(body)},
+            clear=True,
+        ):
+            result = source_append.append(project, body, actor=AGENT, **kwargs)
         self.assertTrue(result.get("ok"), result)
         return result
 
@@ -99,8 +111,12 @@ class AppendFixture(ResumeFixture):
     def cli(self, project: Path, *args: str) -> dict:
         done = subprocess.run(
             [sys.executable, str(SAIPEN), *args, "--json"],
-            cwd=str(project), capture_output=True, text=True, encoding="utf-8",
-            errors="replace", timeout=300,
+            cwd=str(project),
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            timeout=300,
         )
         return json.loads(done.stdout or "{}")
 
@@ -130,9 +146,7 @@ class PhaseMatrixTests(AppendFixture):
     def test_03_append_to_a_done_mission_projects_new_work(self):
         project = self.make_project()
         work, source = self.mission(project, "SHIP")
-        self.assertTrue(
-            checkpoint(project, AGENT, "RUN", work, "mission acceptance -> PASS").ok
-        )
+        self.assertTrue(checkpoint(project, AGENT, "RUN", work, "mission acceptance -> PASS").ok)
         finished = finish_ticket(project, work, AGENT)
         self.assertTrue(finished.ok, finished.to_dict())
         received = self.append(project, BRICKS[2], to=source)
@@ -147,8 +161,9 @@ class PhaseMatrixTests(AppendFixture):
         project = self.make_project()
         work, _source = self.mission(project, "BUILD")
         parked = self.add(project, "external gate", priority="P2")
-        blocked = ticket_move(project, "block", parked, AGENT,
-                              "BLOCKED_EXTERNAL -- waiting on a vendor")
+        blocked = ticket_move(
+            project, "block", parked, AGENT, "BLOCKED_EXTERNAL -- waiting on a vendor"
+        )
         self.assertTrue(blocked.ok, blocked.to_dict())
         received = self.append(project, BRICKS[3])
         self.project_it(project, received["receipt"])
@@ -256,7 +271,8 @@ class ContinuityTests(AppendFixture):
             "fragile error-code allowlists.\n",
             encoding="utf-8",
         )
-        received = self.cli(project, "source", "append", "--file", str(handoff))
+        with mock.patch.dict(os.environ, {operator_task.ENV_TASK_FILE: str(handoff)}, clear=True):
+            received = self.cli(project, "source", "append", "--file", str(handoff))
         self.assertEqual(received.get("code"), "APPEND_RECEIVED", received)
         routed = self.cli(project, "next")
         self.assertEqual(routed.get("reason"), "unprojected-source-append", routed)
@@ -298,8 +314,17 @@ class ContinuityTests(AppendFixture):
         self.assertEqual(body_path.read_bytes(), before)
         self.assertTrue(intake.verify_integrity(project, source)["ok"])
         entry = source_append.read_ledger(project, source)["appends"][0]
-        for field in ("receipt", "seq", "class", "delta", "received_at", "source_sha256",
-                      "derived_clauses", "work", "projected_at"):
+        for field in (
+            "receipt",
+            "seq",
+            "class",
+            "delta",
+            "received_at",
+            "source_sha256",
+            "derived_clauses",
+            "work",
+            "projected_at",
+        ):
             with self.subTest(field=field):
                 self.assertIn(field, entry)
         self.assertEqual(entry["label"], "regression brick")
@@ -366,9 +391,11 @@ class ContinuityTests(AppendFixture):
             calls.append(len(clauses))
             return real(root, receipt, clauses)
 
-        with mock.patch.object(intake, "add_requirements", counting), \
-                mock.patch.object(intake, "add_requirement", side_effect=AssertionError(
-                    "the per-clause transaction is not the projection path")):
+        with mock.patch.object(intake, "add_requirements", counting), mock.patch.object(
+            intake,
+            "add_requirement",
+            side_effect=AssertionError("the per-clause transaction is not the projection path"),
+        ):
             self.project_it(project, received["receipt"])
         self.assertEqual(calls, [4])
         contract = intake._read_contract(project, received["receipt"])
@@ -387,7 +414,8 @@ class ContinuityTests(AppendFixture):
         again = source_append.apply_append(project, repeat["receipt"], actor=AGENT)
         self.assertEqual(again["code"], "ALREADY_PROJECTED")
         titles = [
-            t for t in self.tickets(project).values()
+            t
+            for t in self.tickets(project).values()
             if first["receipt"] in str(t.get("description") or "")
         ]
         self.assertEqual([t["id"] for t in titles], [created])
@@ -419,12 +447,17 @@ class RewindAndTerminalityTests(AppendFixture):
         done_rid = f"{earlier['receipt']}:R001"
         open_rid = f"{earlier['receipt']}:R002"
         marked = intake.set_disposition(
-            project, earlier["receipt"], done_rid, "IMPLEMENTED",
-            evidence="E-001", verification="fixture -> PASS",
+            project,
+            earlier["receipt"],
+            done_rid,
+            "IMPLEMENTED",
+            evidence="E-001",
+            verification="fixture -> PASS",
         )
         self.assertTrue(marked.get("ok"), marked)
         replacement = self.append(
-            project, "The launcher must classify every binding failure semantically.",
+            project,
+            "The launcher must classify every binding failure semantically.",
             klass=source_append.SUPERSEDE,
         )
         self.project_it(project, replacement["receipt"])
@@ -458,8 +491,10 @@ class ClassificationTests(AppendFixture):
         project = self.make_project()
         self.mission(project, "BUILD")
         received = self.append(
-            project, "By 'direct launch' the handoff means the launcher must call opencode.",
-            klass=source_append.CLARIFICATION, delta="context",
+            project,
+            "By 'direct launch' the handoff means the launcher must call opencode.",
+            klass=source_append.CLARIFICATION,
+            delta="context",
         )
         self.project_it(project, received["receipt"])
         summary = intake.coverage_summary(project, received["receipt"])
@@ -480,8 +515,9 @@ class ClassificationTests(AppendFixture):
         status = self.cli(project, "status")
         mission = (status.get("appends") or [{}])[0]
         self.assertEqual(mission.get("unprojected"), [received["receipt"]])
-        self.assertEqual(mission.get("next_action"),
-                         f"saipen source apply-append {received['receipt']}")
+        self.assertEqual(
+            mission.get("next_action"), f"saipen source apply-append {received['receipt']}"
+        )
         self.project_it(project, received["receipt"])
         status = self.cli(project, "status")
         mission = (status.get("appends") or [{}])[0]

@@ -88,9 +88,7 @@ def _release_metadata(project: Path, version: str) -> None:
     """
     (project / "VERSION").write_text(version + "\n", encoding="utf-8")
     for name in ("README.md", "README.ee.md", "README.ded.md", "README.ja.md"):
-        (project / name).write_text(
-            "# fixture\n\n**v" + version + "**\n", encoding="utf-8"
-        )
+        (project / name).write_text("# fixture\n\n**v" + version + "**\n", encoding="utf-8")
     (project / "CHANGELOG.md").write_text(
         "# Changelog\n\n## " + version + "\n- cohort fixture\n", encoding="utf-8"
     )
@@ -111,6 +109,10 @@ class PublicClosureCliTests(OrchestrationFixture):
         say so through `SAIPEN_CAPABILITY` like every real caller.
         """
         env = {**os.environ, "PYTHONIOENCODING": "utf-8", "PYTHONUTF8": "1"}
+        if len(args) > 1 and args[0] == "user-request":
+            from test_fixture_support import operator_request_env
+
+            env.update(operator_request_env(args[1]))
         if capability:
             env["SAIPEN_CAPABILITY"] = capability
         proc = subprocess.run(
@@ -280,9 +282,7 @@ class PublicClosureCliTests(OrchestrationFixture):
         # is written BEFORE any scope is recorded: a release scope binds the
         # tree it was reviewed against, so bytes that appear after review make
         # every member's scope stale (T-1451).
-        (project / "assets" / "foreign.py").write_text(
-            "foreign = True\n", encoding="utf-8"
-        )
+        (project / "assets" / "foreign.py").write_text("foreign = True\n", encoding="utf-8")
 
         second = self.add(project, "overlapping work")
         self.to_ship(project, "T-7")
@@ -335,9 +335,7 @@ class PublicClosureCliTests(OrchestrationFixture):
         project, second = self.closed_cohort(scoped=True)
 
         registry = json.loads(
-            (project / ".saipen" / "kitchen" / "cohort_registry.json").read_text(
-                encoding="utf-8"
-            )
+            (project / ".saipen" / "kitchen" / "cohort_registry.json").read_text(encoding="utf-8")
         )
         cohort = registry["cohorts"]["C-001"]
         self.assertEqual(cohort["publication_status"], "pending")
@@ -352,9 +350,7 @@ class PublicClosureCliTests(OrchestrationFixture):
         self.assertEqual(rc, 0, payload)
         self.assertTrue(payload.get("ok"), payload)
         registry = json.loads(
-            (project / ".saipen" / "kitchen" / "cohort_registry.json").read_text(
-                encoding="utf-8"
-            )
+            (project / ".saipen" / "kitchen" / "cohort_registry.json").read_text(encoding="utf-8")
         )
         cohort = registry["cohorts"]["C-001"]
         self.assertEqual(cohort["publication_status"], "shipped")
@@ -376,9 +372,7 @@ class PublicClosureCliTests(OrchestrationFixture):
         self.assertIn("already published", payload.get("detail", ""))
         # Durable publication receipt exists (FINDING 4).
         receipt = json.loads(
-            (project / ".saipen" / "kitchen" / "release_receipt.json").read_text(
-                encoding="utf-8"
-            )
+            (project / ".saipen" / "kitchen" / "release_receipt.json").read_text(encoding="utf-8")
         )
         self.assertEqual(receipt["cohort_id"], "C-001")
         self.assertEqual(receipt["op_id"], cohort["release_op_id"])
@@ -393,9 +387,7 @@ class PublicClosureCliTests(OrchestrationFixture):
         self.assertNotEqual(rc, 0, payload)
         self.assertIn("SOURCE_SCOPE_MISSING", payload.get("detail", ""), payload)
         registry = json.loads(
-            (project / ".saipen" / "kitchen" / "cohort_registry.json").read_text(
-                encoding="utf-8"
-            )
+            (project / ".saipen" / "kitchen" / "cohort_registry.json").read_text(encoding="utf-8")
         )
         self.assertEqual(registry["cohorts"]["C-001"]["publication_status"], "pending")
 
@@ -483,9 +475,7 @@ class PublicClosureCliTests(OrchestrationFixture):
             "goal",
         )
         self.assertEqual(rc, 0, payload)
-        rc, payload, _err = self.run_cli(
-            project, "user-request", "make checkbox indicators square"
-        )
+        rc, payload, _err = self.run_cli(project, "user-request", "make checkbox indicators square")
         self.assertEqual(rc, 0, payload)
         new_ticket = payload.get("data", {}).get("ticket") or payload.get("ticket")
         # Public status agrees on the workable pick.
@@ -614,9 +604,7 @@ class ForeignActorRefusalTests(OrchestrationFixture):
         self.assertEqual(rc, 0, payload)
         self.assertTrue(payload.get("ticket"), payload)
         self.assertEqual(self.state(project)["agent"], "tester")
-        self.assertEqual(
-            self.board(project)["tickets"]["T-7"]["fields"]["owner"], "tester"
-        )
+        self.assertEqual(self.board(project)["tickets"]["T-7"]["fields"]["owner"], "tester")
 
 
 if __name__ == "__main__":

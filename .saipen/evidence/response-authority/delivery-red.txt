@@ -1,0 +1,20 @@
+test_real_hook_replaces_three_fresh_oversized_turns (test_response_delivery.CompletedPartDelivery.test_real_hook_replaces_three_fresh_oversized_turns) ... FAIL
+test_all_default_classes_have_constant_inventory_weight (test_response_delivery.RepeatedStateDigest.test_all_default_classes_have_constant_inventory_weight) ... ok
+test_three_fresh_turns_cannot_deliver_model_retrospective (test_response_delivery.RepeatedStateDigest.test_three_fresh_turns_cannot_deliver_model_retrospective) ... ok
+
+======================================================================
+FAIL: test_real_hook_replaces_three_fresh_oversized_turns (test_response_delivery.CompletedPartDelivery.test_real_hook_replaces_three_fresh_oversized_turns)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_response_delivery.py", line 51, in test_real_hook_replaces_three_fresh_oversized_turns
+    self.assertEqual(record["outcome"], "allowed", record)
+AssertionError: 'blocked' != 'allowed'
+- blocked
++ allowed
+ : {'id': 'fresh-0', 'outcome': 'blocked', 'message': 'EXEC_RESPONSE_INVALID: EXEC_RESPONSE_INVALID', 'hooks': ['experimental.chat.system.transform', 'chat.message', 'experimental.text.complete', 'tool.execute.before'], 'system': ['SAIPEN_BOOTSTRAP_BINDING {"binding_code":"ADMITTED","project_root":"V:\\\\_TEMP_\\\\tmpcfb6qd8f","project_lineage":"lineage-0617e20759a34329bf21fdab310eb4d2","provenance":"ancestor"}\nBinding was resolved mechanically by the canonical SAIPEN resolver before tool admission. Use project_root directly; do not run generic shell root discovery and do not ask the user for a root. Before output, read BOOT, STYLE and EXECUTION and the bound project\'s .saipen state. EXECUTION/EXEC-RESPONSE-01 owns operational response structure and outranks STYLE. During runnable work its default is silent tool-to-tool continuation, with one final boundary and immediate real blockers. An explicit user progress request permits bounded commentary; higher-priority host instructions retain precedence. Native Thought UI is host-owned. For an operational handback, assemble the structured fields with `saipen response render --stdin`, then check the exact text with `saipen response check --stdin --project-root <root>`; use `--auto-eligibility` for work handbacks. An explicit status-only request may return its canonical status card. If the checker reports eligible work remains, execute the route instead of returning. A later consequential-tool refusal means protocol repair is required, not that the binding is unknown. For saipen continue, bare saipen, cc or сс, run saipen continue --json after the boot reads, open load_path and execute action in this turn; respect WAIT and actual refusals. Skill loading only returns instructions, never Git status or completion evidence. Missing state reads are your next tool calls, not a question for the user.'], 'exports': ['default']}
+
+----------------------------------------------------------------------
+Ran 3 tests in 3.217s
+
+FAILED (failures=1)
+

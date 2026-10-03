@@ -1,0 +1,159 @@
+Subject: f462ddc018977f06598f332356f9229f23b2e830
+Exit: 1
+test_duplicate_captured_model_bytes_cannot_gain_carrier_authority (test_ingress_authority.IngressAuthorityTests.test_duplicate_captured_model_bytes_cannot_gain_carrier_authority) ... FAIL
+test_exact_src164_does_not_preempt_trusted_work (test_ingress_authority.IngressAuthorityTests.test_exact_src164_does_not_preempt_trusted_work) ... FAIL
+test_identical_trusted_bytes_have_different_authority (test_ingress_authority.IngressAuthorityTests.test_identical_trusted_bytes_have_different_authority) ... ok
+test_idle_model_request_remains_usable_and_distinguishable (test_ingress_authority.IngressAuthorityTests.test_idle_model_request_remains_usable_and_distinguishable) ... FAIL
+test_other_ingress_door_does_not_promote_model_bytes (test_ingress_authority.IngressAuthorityTests.test_other_ingress_door_does_not_promote_model_bytes) ... FAIL
+test_real_looking_model_request_has_no_operator_preemption (test_ingress_authority.IngressAuthorityTests.test_real_looking_model_request_has_no_operator_preemption) ... FAIL
+test_transport_obligation_is_fidelity_not_operator_identity (test_ingress_authority.IngressAuthorityTests.test_transport_obligation_is_fidelity_not_operator_identity) ... FAIL
+test_src146_invalid_classification_cannot_be_unblocked_as_accept_empty (test_ingress_authority.NonWorkHistoryTests.test_src146_invalid_classification_cannot_be_unblocked_as_accept_empty) ... FAIL
+
+======================================================================
+FAIL: test_duplicate_captured_model_bytes_cannot_gain_carrier_authority (test_ingress_authority.IngressAuthorityTests.test_duplicate_captured_model_bytes_cannot_gain_carrier_authority)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_ingress_authority.py", line 108, in test_duplicate_captured_model_bytes_cannot_gain_carrier_authority
+    self.assertNotEqual(board(root)[local["ticket"]]["fields"].get("user_explicit"), "true")
+AssertionError: 'true' == 'true'
+
+======================================================================
+FAIL: test_exact_src164_does_not_preempt_trusted_work (test_ingress_authority.IngressAuthorityTests.test_exact_src164_does_not_preempt_trusted_work)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_ingress_authority.py", line 57, in test_exact_src164_does_not_preempt_trusted_work
+    self.assertEqual(after["task"], active, output)
+AssertionError: 'T-2' != 'T-1'
+- T-2
+?   ^
++ T-1
+?   ^
+ : {
+  "ok": true,
+  "code": "STARTED",
+  "project_root": "V:\\_TEMP_\\t1363-eg2adg5c",
+  "actor": "test-agent",
+  "actor_source": "explicit",
+  "receipt": "SRC-002",
+  "ticket": "T-2",
+  "valve_reauthorized": false,
+  "preserved_decisions": [],
+  "resumed": false,
+  "phase": "SCOUT",
+  "action": "PHASE SCOUT T-2",
+  "next_action": "PHASE SCOUT T-2",
+  "event_id": "E-7",
+  "parked": {
+    "ticket": "T-1",
+    "resume_phase": "SCOUT",
+    "blocked_on": "T-2"
+  },
+  "load_path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\phases\\scout.md",
+  "load": "saipen/phases/scout.md",
+  "execution_instruction": "The task is claimed Work. Read load_path, then execute action now under that phase; do not run status, continue, source or recover first."
+}
+
+
+======================================================================
+FAIL: test_idle_model_request_remains_usable_and_distinguishable (test_ingress_authority.IngressAuthorityTests.test_idle_model_request_remains_usable_and_distinguishable)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_ingress_authority.py", line 83, in test_idle_model_request_remains_usable_and_distinguishable
+    self.assertNotEqual(work["fields"].get("user_explicit"), "true")
+AssertionError: 'true' == 'true'
+
+======================================================================
+FAIL: test_other_ingress_door_does_not_promote_model_bytes (test_ingress_authority.IngressAuthorityTests.test_other_ingress_door_does_not_promote_model_bytes)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_ingress_authority.py", line 94, in test_other_ingress_door_does_not_promote_model_bytes
+    self.assertNotEqual(work["fields"].get("user_explicit"), "true")
+AssertionError: 'true' == 'true'
+
+======================================================================
+FAIL: test_real_looking_model_request_has_no_operator_preemption (test_ingress_authority.IngressAuthorityTests.test_real_looking_model_request_has_no_operator_preemption)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_ingress_authority.py", line 68, in test_real_looking_model_request_has_no_operator_preemption
+    self.assertEqual(state(root)["task"], active, output)
+AssertionError: 'T-2' != 'T-1'
+- T-2
+?   ^
++ T-1
+?   ^
+ : {
+  "ok": true,
+  "code": "STARTED",
+  "project_root": "V:\\_TEMP_\\t1363-sj3nf1cb",
+  "actor": "test-agent",
+  "actor_source": "explicit",
+  "receipt": "SRC-002",
+  "ticket": "T-2",
+  "valve_reauthorized": false,
+  "preserved_decisions": [],
+  "resumed": false,
+  "phase": "SCOUT",
+  "action": "PHASE SCOUT T-2",
+  "next_action": "PHASE SCOUT T-2",
+  "event_id": "E-7",
+  "parked": {
+    "ticket": "T-1",
+    "resume_phase": "SCOUT",
+    "blocked_on": "T-2"
+  },
+  "load_path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\phases\\scout.md",
+  "load": "saipen/phases/scout.md",
+  "execution_instruction": "The task is claimed Work. Read load_path, then execute action now under that phase; do not run status, continue, source or recover first."
+}
+
+
+======================================================================
+FAIL: test_transport_obligation_is_fidelity_not_operator_identity (test_ingress_authority.IngressAuthorityTests.test_transport_obligation_is_fidelity_not_operator_identity)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_ingress_authority.py", line 101, in test_transport_obligation_is_fidelity_not_operator_identity
+    self.assertEqual(state(root)["task"], active, output)
+AssertionError: 'T-2' != 'T-1'
+- T-2
+?   ^
++ T-1
+?   ^
+ : {
+  "ok": true,
+  "code": "STARTED",
+  "project_root": "V:\\_TEMP_\\t1363-k358c3nx",
+  "actor": "test-agent",
+  "actor_source": "explicit",
+  "receipt": "SRC-002",
+  "ticket": "T-2",
+  "valve_reauthorized": false,
+  "preserved_decisions": [],
+  "resumed": false,
+  "phase": "SCOUT",
+  "action": "PHASE SCOUT T-2",
+  "next_action": "PHASE SCOUT T-2",
+  "event_id": "E-7",
+  "parked": {
+    "ticket": "T-1",
+    "resume_phase": "SCOUT",
+    "blocked_on": "T-2"
+  },
+  "load_path": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\saipen\\phases\\scout.md",
+  "load": "saipen/phases/scout.md",
+  "execution_instruction": "The task is claimed Work. Read load_path, then execute action now under that phase; do not run status, continue, source or recover first."
+}
+
+
+======================================================================
+FAIL: test_src146_invalid_classification_cannot_be_unblocked_as_accept_empty (test_ingress_authority.NonWorkHistoryTests.test_src146_invalid_classification_cannot_be_unblocked_as_accept_empty)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_ingress_authority.py", line 121, in test_src146_invalid_classification_cannot_be_unblocked_as_accept_empty
+    self.assertFalse(rejected.ok, rejected.to_dict())
+AssertionError: True is not false : {'ok': True, 'code': 'UNBLOCK', 'op_id': 'ticket-7ff208a242ac4a63964b3a8cb48a6ebf', 'changed_files': ['.saipen/LOG.md', '.saipen/BOARD.md', '.saipen/STATE.md'], 'recovery_required': False, 'ticket': 'T-1', 'blocked_on': None, 'event_id': 'E-6'}
+
+----------------------------------------------------------------------
+Ran 8 tests in 6.730s
+
+FAILED (failures=7)
+

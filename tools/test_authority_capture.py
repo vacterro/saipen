@@ -42,6 +42,7 @@ if str(TOOLS) not in sys.path:
 from saipen_engine import guard_events, intake  # noqa: E402
 from saipen_engine.board import parse_board  # noqa: E402
 from saipen_engine.entry import start_work  # noqa: E402
+from test_fixture_support import witnessed_operator  # noqa: E402
 from saipen_engine.operations import retire_ticket, ticket_add  # noqa: E402
 
 try:  # the pre-fix subject carries no capability; THIS oracle must go red there
@@ -65,7 +66,8 @@ def _capture(project: Path, text: str, *, dry_run: bool = False):
         "authority_capture is missing on this subject -- the ROOT A capability "
         "does not exist, which is exactly the pre-fix red"
     )
-    return authority_capture(project, AGENT, text, dry_run=dry_run)
+    with witnessed_operator(text):
+        return authority_capture(project, AGENT, text, dry_run=dry_run)
 
 
 def _cli(project: Path, *args: str) -> dict:
@@ -162,13 +164,9 @@ class AuthorityCaptureTests(RetirementFixture):
         self.assertTrue(retired.ok, retired.to_dict())
         self.assertEqual(retired.code, "RETIRED")
         record = json.loads(
-            (
-                project
-                / ".saipen"
-                / "archive"
-                / "retired"
-                / f"{child}.json"
-            ).read_text(encoding="utf-8")
+            (project / ".saipen" / "archive" / "retired" / f"{child}.json").read_text(
+                encoding="utf-8"
+            )
         )
         self.assertEqual(record["authority_receipt"], captured.data["receipt"])
         self.assertEqual(record["reason"], REASON)

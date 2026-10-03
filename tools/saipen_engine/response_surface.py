@@ -1,8 +1,8 @@
 """The default SAIPEN response surface -- EXEC-RESPONSE-01 (T-1419).
 
-One schema for every ordinary user-facing operational boundary: a control
-block that renders vertically in a fixed semantic order, with no prose before
-it. The rule is prose in ``saipen/EXECUTION.md``; this module is its
+One schema for every ordinary user-facing operational boundary: typed machine
+facts rendered as bounded inline fields, never a model retrospective.
+The rule is prose in ``saipen/EXECUTION.md``; this module is its
 behavioural projection so the contract can be decided without re-reading the
 document, exactly as the guard shares one classifier with the router.
 
@@ -20,17 +20,17 @@ from __future__ import annotations
 
 import re
 import shlex
+from collections import Counter
 from dataclasses import dataclass
 
 from .efficiency import LINE_CHAR_BUDGET as _EFFICIENCY_LINE_CHARS
 from .efficiency import line_problem as _efficiency_line_problem
-from .guard_events import saipen_line_problem
 from .phases import ALL_PHASES
 
 RULE_ID = "EXEC-RESPONSE-01"
 
-#: The mandatory control surface, in canonical order. Every field is present on
-#: every ordinary response.
+#: The semantic control fields, in canonical order. NONE action fields may be
+#: omitted from the inline renderer and are restored by the shared parser.
 MANDATORY_FIELDS = (
     "STATUS",
     "RESULT",
@@ -92,69 +92,73 @@ DETAIL_MODES = (
 #: made "fix audit logging", negations and quoted examples authorize essays.
 #: Ambiguous wording stays on the compact path; callers can transport an
 #: explicitly authorized closed mode instead of guessing from a noun.
-_DETAIL_REQUEST_PREFIX = (
-    r"(?i)^\s*(?:please\s+)?(?:(?:can|could|would|will)\s+you\s+(?:please\s+)?)?"
-)
-_DETAIL_REQUEST_VERB = (
+# Closed affirmative depth grammars. Summary/brief/final report and a claim
+# of exceptional importance deliberately have no grant. A whole clause must
+# match; quoted examples, nested requests, negations and extra instructions
+# cannot supply authority. Reply language is unrelated to ingress language.
+_EN_VERB = (
+    r"(?:please\s+)?(?:(?:can|could|would) you (?:please )?)?"
     r"(?:write|prepare|produce|generate|give|send|render)\s+"
-    r"(?:me\s+|us\s+)?(?:an?\s+|the\s+)?"
+    r"(?:(?:me|us)\s+)?(?:(?:a|an|the)\s+)?"
 )
-# Recognize a whole, unambiguous request clause. A prefix alone authorized
-# "write a report? No, fix the bug" and command names described as examples.
-# Topics with negation, quotation or declarative wording stay conservative;
-# broader requests can carry an explicitly authorized closed mode.
-_DETAIL_REQUEST_SUBJECT = (
-    r"(?:(?!\b(?:no|not|never|instead|rather|but|is|are|was|were|means|"
-    r"example|quoted|literal)\b)[^\r\n.!?;:\"'`])+?"
+_DEPTH = r"(?:(?:detailed|full|verbose|complete)\s+)+"
+_TYPE = r"(?:(?:forensic|technical|implementation)\s+)?"
+_TAIL = (
+    r"(?:\s+(?:(?:with|including)\s+(?:all\s+)?(?:evidence|evidence and root cause)"
+    r"|of (?:the findings|the change)))?"
 )
-_DETAIL_REQUEST_END = r"\s*[.!?]?\s*$"
-_DETAIL_REQUEST_TOPIC = (
-    r"(?:\s+(?:on|about|for|of|covering)\s+" + _DETAIL_REQUEST_SUBJECT + r")?"
-)
-_DETAIL_REQUEST_GRAMMARS = (
-    (
-        DETAIL_MODE_HANDOFF,
-        re.compile(
-            _DETAIL_REQUEST_PREFIX + _DETAIL_REQUEST_VERB + r"hand[\s-]?off\b"
-            + _DETAIL_REQUEST_TOPIC + _DETAIL_REQUEST_END
+_DETAIL_REQUEST_GRAMMARS = tuple(
+    (mode, re.compile(r"\s*(?:" + grammar + r")\s*[.!?]?\s*", re.IGNORECASE))
+    for mode, grammar in (
+        (DETAIL_MODE_HANDOFF, _EN_VERB + _DEPTH + _TYPE + r"hand[\s-]?off"),
+        (DETAIL_MODE_AUDIT, _EN_VERB + _DEPTH + _TYPE + r"audit" + _TAIL),
+        (DETAIL_MODE_REPORT, _EN_VERB + _DEPTH + _TYPE + r"(?:report|write[\s-]?up)" + _TAIL),
+        (
+            DETAIL_MODE_REPORT,
+            r"(?:please\s+)?explain everything in full detail including evidence and root cause",
         ),
-    ),
-    (
-        DETAIL_MODE_AUDIT,
-        re.compile(
-            _DETAIL_REQUEST_PREFIX + r"audit(?:\s+(?:the|this|these|my|our|your|all)\s+"
-            + _DETAIL_REQUEST_SUBJECT + r")?" + _DETAIL_REQUEST_END
+        (
+            DETAIL_MODE_HANDOFF,
+            r"(?:дай|подготовь)\s+(?:(?:полный|подробный|детальный)\s+)+"
+            r"(?:хендофф|хэнд[\u043e\u0430]фф|handoff)",
         ),
-    ),
-    (
-        DETAIL_MODE_REPORT,
-        re.compile(
-            _DETAIL_REQUEST_PREFIX + _DETAIL_REQUEST_VERB +
-            r"(?:detailed\s+|full\s+|verbose\s+|complete\s+|final\s+|formal\s+)?"
-            r"(?:report|write[\s-]?up|summary|brief)\b"
-            + _DETAIL_REQUEST_TOPIC + _DETAIL_REQUEST_END
+        (
+            DETAIL_MODE_AUDIT,
+            r"(?:сделай|дай|подготовь)\s+(?:(?:полный|подробный|детальный)\s+)+(?:технический\s+)?аудит",
         ),
-    ),
-    (
-        DETAIL_MODE_BOUNDARY,
-        re.compile(
-            _DETAIL_REQUEST_PREFIX + r"this\s+is\s+an?\s+exceptional\s+boundary\s*[.!?]?\s*$"
+        (
+            DETAIL_MODE_REPORT,
+            r"(?:дай|напиши|подготовь)\s+(?:(?:полный|подробный|детальный)\s+)+"
+            r"(?:(?:технический|форензик)[\s-]+)?отч[её]т"
+            r"(?:\s+\u0441\u043e всеми доказательствами)?",
         ),
-    ),
+        (
+            DETAIL_MODE_HANDOFF,
+            r"(?:anna|koosta)\s+(?:(?:täielik|detailne|põhjalik)\s+)+(?:handoff|üleandmine)",
+        ),
+        (
+            DETAIL_MODE_AUDIT,
+            r"(?:tee|koosta|anna)\s+(?:(?:täielik|detailne|põhjalik)\s+)+(?:tehniline\s+)?audit",
+        ),
+        (
+            DETAIL_MODE_REPORT,
+            r"(?:anna|koosta)\s+(?:(?:täielik|detailne|põhjalik)\s+)+"
+            r"(?:tehniline\s+)?(?:aruanne|raport)(?:\s+koos tõenditega)?",
+        ),
+    )
 )
 
-#: T-1553: the compactness budget, measured over FIELD CONTENT in NON-EMPTY
-#: lines -- never over the mandatory labels themselves, which would contradict
-#: the schema (six mandatory headings plus values cannot fit a five-line cap).
+#: Per-field budgets count nonempty content lines. The response-reason ceiling
+#: separately counts every visible line and character, including labels.
 #: Without this the control surface degraded into a free-form report wearing six
 #: headings: a RESULT of any length and a DETAILS field of any length both read
 #: as VALID_BOUNDARY.
 FIELD_LINE_BUDGETS = {
-    "RESULT": 3,
+    "RESULT": 1,
     "BLOCKER": 1,
     "OPERATOR ACTION": 1,
     "NEXT EXACT ACTION": 1,
-    "VALIDATION": 5,
+    "VALIDATION": 1,
     "EFFICIENCY": 1,
     # DETAILS stays permitted for the intentional detailed-report path, but it
     # is bounded: an unbounded DETAILS is the overflow bucket the surface
@@ -168,12 +172,12 @@ FIELD_LINE_BUDGETS = {
 #: budgets over the same field CONTENT, machine-owned beside `FIELD_LINE_BUDGETS`
 #: so no adapter has to know them and no document may drift from them.
 FIELD_CHAR_BUDGETS = {
-    "STATUS": 240,
-    "RESULT": 720,
+    "STATUS": 64,
+    "RESULT": 300,
     "BLOCKER": 300,
     "OPERATOR ACTION": 300,
     "NEXT EXACT ACTION": 240,
-    "VALIDATION": 480,
+    "VALIDATION": 160,
     "EFFICIENCY": _EFFICIENCY_LINE_CHARS,
     "DETAILS": 2400,
 }
@@ -182,15 +186,30 @@ FIELD_CHAR_BUDGETS = {
 #: prose ceiling. Fenced code is exempt from the PROSE measures (it is fact), not
 #: from every measure: without a total an essay wrapped in a fence passes. One
 #: owner, here, beside the budgets it multiplies; `chat_style` reads it.
-TOTAL_REPLY_CEILING_FACTOR = 3
+TOTAL_REPLY_CEILING_FACTOR = 1
 
 #: Whole rendered boundary, labels included. It is deliberately BELOW the sum
 #: of the per-field maxima: a response whose every field is individually legal
 #: is still not a compact handback, and a ceiling that can never fire is
 #: decoration rather than a contract.
-ORDINARY_RESPONSE_CHAR_BUDGET = 2000
+ORDINARY_RESPONSE_CHAR_BUDGET = 900
 #: The detailed path earns the DETAILS budget and nothing else.
-DETAILED_RESPONSE_CHAR_BUDGET = ORDINARY_RESPONSE_CHAR_BUDGET + FIELD_CHAR_BUDGETS["DETAILS"]
+DETAILED_RESPONSE_CHAR_BUDGET = 3600
+
+SILENT_CONTINUATION = "SILENT_CONTINUATION"
+COMPACT_FINAL = "COMPACT_FINAL"
+STOP_HANDBACK = "STOP_HANDBACK"
+HUMAN_ACTION_BLOCKER = "HUMAN_ACTION_BLOCKER"
+SAFETY_BOUNDARY = "SAFETY_BOUNDARY"
+EXPLICIT_DETAILED_REPORT = "EXPLICIT_DETAILED_REPORT"
+REASON_BUDGETS = {
+    SILENT_CONTINUATION: (0, 0),
+    COMPACT_FINAL: (6, ORDINARY_RESPONSE_CHAR_BUDGET),
+    STOP_HANDBACK: (6, ORDINARY_RESPONSE_CHAR_BUDGET),
+    HUMAN_ACTION_BLOCKER: (8, 1200),
+    SAFETY_BOUNDARY: (8, 1200),
+    EXPLICIT_DETAILED_REPORT: (16, DETAILED_RESPONSE_CHAR_BUDGET),
+}
 
 #: T-1556 #3: EXACTLY ONE ACTION. Chaining and sequencing are rejected by
 #: shape; a value that names a canonical SAIPEN command is additionally held to
@@ -199,9 +218,7 @@ DETAILED_RESPONSE_CHAR_BUDGET = ORDINARY_RESPONSE_CHAR_BUDGET + FIELD_CHAR_BUDGE
 #: built here: a quoted canonical payload may legally contain a separator, and
 #: the recognizer already knows that.
 _ACTION_CHAIN = re.compile(r"&&|\|\||[;|&\n]")
-_ACTION_SEQUENCE = re.compile(
-    r"(?i)\b(?:then|after\s+that|afterwards?|followed\s+by|and\s+next)\b"
-)
+_ACTION_SEQUENCE = re.compile(r"(?i)\b(?:then|after\s+that|afterwards?|followed\s+by|and\s+next)\b")
 _ACTION_COMMAND_START = re.compile(
     r"^\s*`?(?:saipen(?:\.cmd|\.py)?|python(?:\d+(?:\.\d+)*)?|py|git|uv|ruff|"
     r"pytest|npm|node|powershell|pwsh|cmd|bash)\b",
@@ -211,8 +228,21 @@ _ACTION_COMMAND_START = re.compile(
 #: in one field, which is what `saipen validate saipen continue` is.
 _ACTION_COMMAND_WORDS = frozenset(
     {
-        "saipen", "saipen.cmd", "saipen.py", "python", "py", "git", "uv", "ruff",
-        "pytest", "npm", "node", "powershell", "pwsh", "cmd", "bash",
+        "saipen",
+        "saipen.cmd",
+        "saipen.py",
+        "python",
+        "py",
+        "git",
+        "uv",
+        "ruff",
+        "pytest",
+        "npm",
+        "node",
+        "powershell",
+        "pwsh",
+        "cmd",
+        "bash",
     }
 )
 
@@ -234,6 +264,370 @@ def detail_mode_for_request(request: object) -> str:
 
 def detail_mode_is_valid(mode: object) -> bool:
     return isinstance(mode, str) and mode in DETAIL_MODES
+
+
+def human_response_authority(request: object, provenance: object) -> bool:
+    """The original, exact HUMAN carrier is the sole response expansion grant."""
+    from .operator_task import authority_for_provenance
+    from .pending_ingress import ingress_digest
+
+    return bool(
+        isinstance(request, str)
+        and isinstance(provenance, dict)
+        and authority_for_provenance(provenance)["detailed_response"]
+        and provenance.get("compared_digest") == ingress_digest(request)
+    )
+
+
+def artifact_for_request(request: object) -> str | None:
+    """Explicit requested document content, not a retrospective chosen by us.
+
+    Artifact bytes have a separate bounded carrier; surrounding chat remains
+    compact. A fence, filename or DETAILS in outgoing text is never a grant.
+    """
+    if not isinstance(request, str):
+        return None
+    mode = detail_mode_for_request(request)
+    if mode == DETAIL_MODE_HANDOFF:
+        return "HANDOFF"
+    grammars = (
+        ("HANDOFF", _EN_VERB + r"(?:implementation\s+)?hand[\s-]?off(?:\s+for this project)?"),
+        ("AUDIT", _EN_VERB + r"(?:the\s+)?audit"),
+        ("AUDIT", r"(?:please\s+)?audit (?:this project|the accepted debt)"),
+        ("SPEC", _EN_VERB + r"(?:implementation\s+)?(?:spec|specification)"),
+        ("AUDIT", r"(?:напиши|подготовь)\s+аудит"),
+        ("SPEC", r"(?:напиши|подготовь)\s+(?:техническую\s+)?спецификацию"),
+        ("AUDIT", r"(?:kirjuta|koosta)\s+audit"),
+        ("SPEC", r"(?:kirjuta|koosta)\s+(?:tehniline\s+)?spetsifikatsioon"),
+        (
+            "INVENTORY",
+            r"(?:please\s+)?(?:list every remaining blocker|list all "
+            r"(?:blockers|commits|evidence records|changed files|test failures|workers|warnings))",
+        ),
+        ("RAW_LOG", r"(?:please\s+)?(?:show|provide|give me)\s+(?:the\s+)?raw logs"),
+    )
+    for kind, grammar in grammars:
+        if re.fullmatch(r"\s*(?:" + grammar + r")\s*[.!?]?\s*", request, re.IGNORECASE):
+            return kind
+    if mode == DETAIL_MODE_AUDIT:
+        return "AUDIT"
+    return None
+
+
+ARTIFACT_CHAR_BUDGET = 160_000
+
+
+def response_reason(
+    *,
+    reason: str = "final",
+    operator_due: bool = False,
+    executable: bool = False,
+    detail_mode: str = DETAIL_MODE_NONE,
+) -> str:
+    if detail_mode != DETAIL_MODE_NONE:
+        return EXPLICIT_DETAILED_REPORT
+    if reason in ("stop", STOP_HANDBACK):
+        return STOP_HANDBACK
+    if reason in ("safety", SAFETY_BOUNDARY):
+        return SAFETY_BOUNDARY
+    if operator_due:
+        return HUMAN_ACTION_BLOCKER
+    if executable and reason not in ("status", "summary"):
+        return SILENT_CONTINUATION
+    return COMPACT_FINAL
+
+
+def parse_surface(rendered: str) -> tuple[dict[str, str], list[str]]:
+    """One parser for canonical inline fields and legacy diagnostic records.
+
+    Empty optional action fields have a canonical NONE value, not a second
+    presentation. Legacy vertical records are readable but still pay their
+    actual visible line budget at the delivery gate.
+    """
+    lines = rendered.splitlines()
+    headings = []
+    for index, line in enumerate(lines):
+        name = line if line in FIELD_ORDER else line.split(":", 1)[0]
+        if name in FIELD_ORDER and (line == name or line.startswith(name + ": ")):
+            headings.append((index, name, line[len(name) + 2 :] if line != name else ""))
+    names = [name for _, name, _ in headings]
+    errors = []
+    if not lines or not headings or headings[0][0] != 0 or headings[0][1] != "STATUS":
+        errors.append("prose before STATUS or missing STATUS header")
+    for name in ("STATUS", "RESULT", "NEXT EXACT ACTION", "VALIDATION"):
+        if names.count(name) != 1:
+            errors.append(f"{name} must occur exactly once")
+    for name in FIELD_ORDER:
+        if names.count(name) > 1:
+            errors.append(f"{name} must occur at most once")
+    if [FIELD_ORDER.index(name) for name in names] != sorted(
+        FIELD_ORDER.index(name) for name in names
+    ):
+        errors.append("fields render outside the canonical order")
+    values = {"BLOCKER": "NONE", "OPERATOR ACTION": "NONE"}
+    for offset, (index, name, inline) in enumerate(headings):
+        end = headings[offset + 1][0] if offset + 1 < len(headings) else len(lines)
+        values[name] = "\n".join(([inline] if inline else []) + lines[index + 1 : end]).strip()
+        if not values[name]:
+            errors.append(f"{name} has no value")
+    return values, errors
+
+
+def _machine_scalar(value: object, *, limit: int, fallback: str) -> str:
+    """Do not truncate claims. Invalid unbounded facts receive a closed sentinel."""
+    text = str(value or "").strip()
+    return text if text and len(text) <= limit and not re.search(r"[\r\n\x00]", text) else fallback
+
+
+def digest_from_facts(facts: dict, *, reason: str = "final", language: str = "et") -> str:
+    """Fail compactly even when a facts carrier itself is malformed."""
+    try:
+        if not isinstance(facts, dict):
+            raise TypeError("response facts must be a mapping")
+        return _digest_from_facts(facts, reason=reason, language=language)
+    except (TypeError, ValueError, AttributeError, OverflowError):
+        return compact_failure(language=language)
+
+
+def compact_failure(*, language: str = "et", operator_due: bool = False) -> str:
+    """Closed failure carrier, never the rejected prose or a guessed state."""
+    action = {
+        "et": "Kinnita puuduv operaatori otsus; tõendid .saipen/evidence/response.",
+        "ru": "Подтвердите требуемое решение; доказательства .saipen/evidence/response.",
+        "en": "Confirm the required decision; evidence .saipen/evidence/response.",
+    }.get(language, "Confirm the required decision; evidence .saipen/evidence/response.")
+    return render_boundary(
+        OperationalBoundary(
+            "UNKNOWN",
+            "RESPONSE_FACT_INVALID",
+            "NONE",
+            action if operator_due else "NONE",
+            "NONE",
+            "UNKNOWN | .saipen/evidence/response",
+        )
+    )
+
+
+def _digest_from_facts(facts: dict, *, reason: str, language: str) -> str:
+    """State -> fixed response facts -> canonical renderer, O(1) visible size.
+
+    Full inventories remain in their canonical evidence/ledger carriers. We
+    aggregate counts, never copy model retrospectives or truncate evidence.
+    This builder has no free prose/report input and cannot authorize detail.
+    """
+    phase = _machine_scalar(facts.get("phase"), limit=24, fallback="UNKNOWN")
+    task = str(facts.get("task") or "none")
+    task = task if re.fullmatch(r"T-\d{1,8}", task) else "none"
+    due = bool(
+        facts.get("operator_due") or (facts.get("automation") or {}).get("operator_action_due")
+    )
+    auto = facts.get("automation") or {}
+    executable = bool(
+        facts.get("executable_action_remains")
+        or (auto.get("disposition") == "CONTINUE" and auto.get("next_command"))
+    )
+    klass = response_reason(reason=reason, operator_due=due, executable=executable)
+    if klass == SILENT_CONTINUATION:
+        return ""
+    words = {
+        "et": (
+            "Peatatud operaatori soovil",
+            "Valmis",
+            "Vajab operaatori otsust",
+            "Töö säilitatud",
+            "lõpetatud",
+            "blokeeritud",
+            "tõendid säilitatud",
+        ),
+        "ru": (
+            "Остановлено оператором",
+            "Готово",
+            "Нужно решение оператора",
+            "Работа сохранена",
+            "завершено",
+            "блокеров",
+            "доказательства сохранены",
+        ),
+        "en": (
+            "Stopped by operator",
+            "Complete",
+            "Operator decision required",
+            "Work preserved",
+            "completed",
+            "blockers",
+            "evidence recorded",
+        ),
+    }.get(
+        language,
+        (
+            "Stopped by operator",
+            "Complete",
+            "Operator decision required",
+            "Work preserved",
+            "completed",
+            "blockers",
+            "evidence recorded",
+        ),
+    )
+    result = (
+        words[0]
+        if klass == STOP_HANDBACK
+        else words[2]
+        if due
+        else words[1]
+        if phase == "DONE"
+        else words[3]
+    )
+    completed = facts.get("completed") or []
+    completed_ids = [str(t) for t in completed if re.fullmatch(r"T-\d{1,8}", str(t))]
+    if completed_ids:
+        result += (
+            "; "
+            + (completed_ids[0] if len(completed_ids) == 1 else str(len(completed_ids)))
+            + " "
+            + words[4]
+        )
+    blockers = facts.get("blockers") or []
+    if blockers:
+        counts = Counter(
+            str(b.get("blocker") or "UNKNOWN").split(" -- ", 1)[0]
+            for b in blockers
+            if isinstance(b, dict)
+        )
+        # A bounded category summary, never a row/ticket inventory.
+        categories = [
+            (k, n)
+            for k, n in sorted(counts.items(), key=lambda kv: (-kv[1], kv[0]))
+            if re.fullmatch(r"[A-Z_]{1,30}", k)
+        ][:3]
+        result += f"; {len(blockers)} {words[5]}"
+        if categories:
+            result += " (" + ", ".join(f"{k} {n}" for k, n in categories) + ")"
+    validation = _machine_scalar(facts.get("validation"), limit=40, fallback="UNKNOWN")
+    groups = facts.get("test_groups") or []
+    if groups:
+        ran = sum(max(0, int(g.get("ran", 0))) for g in groups if isinstance(g, dict))
+        red = sum(max(0, int(g.get("red", 0))) for g in groups if isinstance(g, dict))
+        new_red = sum(max(0, int(g.get("new_red", 0))) for g in groups if isinstance(g, dict))
+        validation += f" | full core {ran} | red {red} | new_red {new_red}"
+    if facts.get("evidence"):
+        validation += " | " + words[6]
+    blocker = (
+        "NONE"
+        if _is_none(facts.get("blocker"))
+        else _machine_scalar(
+            facts.get("blocker"), limit=300, fallback="RESPONSE_FACT_INVALID -- evidence recorded"
+        )
+    )
+    if _is_none(blocker):
+        blocker = "NONE"
+    elif not _BLOCKER_CODE.match(blocker):
+        blocker = "RESPONSE_FACT_INVALID -- evidence recorded"
+    action = _machine_scalar(facts.get("operator_action"), limit=300, fallback="NONE")
+    if due and _is_none(action):
+        action = {
+            "et": "Anna puuduva otsuse volitus.",
+            "ru": "Подтвердите требуемое решение.",
+            "en": "Supply the required decision.",
+        }.get(language, "Supply the required decision.")
+    next_action = _machine_scalar(facts.get("next_action"), limit=240, fallback="NONE")
+    if due and next_action.startswith("WAIT:"):
+        next_action = "NONE"  # the human decision has exactly one owner: ACTION
+    boundary = OperationalBoundary(
+        phase + (" " + task if task != "none" else ""),
+        result,
+        blocker,
+        action,
+        next_action,
+        validation,
+    )
+    return render_boundary(boundary, response_class=klass)
+
+
+def canonical_facts(root, *, status: dict | None = None) -> dict:
+    """Read owned state/evidence once; a host never supplies its own history."""
+    from pathlib import Path
+    from . import codec, core_unit
+    from .board import parse_board
+    from .conformance import conformance_status
+    from .log import read_history_snapshot
+    from .state import parse_state
+
+    base = Path(root)
+    state = parse_state(codec.read_doc(base / ".saipen/STATE.md"))
+    board = parse_board(codec.read_doc(base / ".saipen/BOARD.md"))
+    events = read_history_snapshot(base, lean=True).events
+    since = max(
+        (e["event"] for e in events if str(e.get("op_id") or "").startswith("stop-")), default=0
+    )
+    completed = sorted(
+        {
+            e.get("ticket")
+            for e in events
+            if e["event"] > since
+            and str(e.get("op_id") or "").startswith("finish-")
+            and str(e.get("text") or "").startswith("ticket finished via SAIOPS")
+            and e.get("taxonomy") == "DEC"
+            and e.get("ticket")
+        }
+    )
+    record = core_unit.reusable_record(base, core_unit.tree_fingerprint(base))
+    current = (status or {}).get("conformance_status") or conformance_status(base, gate="core")
+    auto = (status or {}).get("automation") or {}
+    facts = {
+        **state,
+        "validation": current.get("status", "UNKNOWN"),
+        "completed": completed,
+        "automation": auto,
+        "operator_due": bool(auto.get("operator_action_due")),
+        "blockers": [
+            {"ticket": t["id"], "blocker": (t.get("fields") or {}).get("blocker", "UNKNOWN")}
+            for t in board["tickets"].values()
+            if t["section"] == "## BLOCKED"
+        ],
+        "evidence": [record["path"]] if record else [],
+        "test_groups": [
+            {
+                "ran": record["record"].get("ran", 0),
+                "red": len(record["record"].get("red", [])),
+                "new_red": len(
+                    core_unit.judge(
+                        record["record"], (core_unit.load_baseline(base)[0] or {}).get("red", [])
+                    )["new_red"]
+                ),
+            }
+        ]
+        if record
+        else [],
+        "response_reason": "stop" if since and state.get("last_event") == since else "final",
+    }
+    if facts["operator_due"]:
+        # STATE's legal WAIT owns the actual required decision. Do not print
+        # the router's generic prose or assign its command to the operator.
+        wait = str(state.get("next_action") or "")
+        if wait.startswith("WAIT:"):
+            facts["operator_action"] = wait[5:].strip()
+    return facts
+
+
+def reason_for_request(request: object) -> str:
+    if not isinstance(request, str):
+        return "final"
+    if re.fullmatch(
+        r"\s*(?:(?:saipen\s+)?(?:stop|st)|peatu|стоп|остановись)\s*[.!]?\s*", request, re.IGNORECASE
+    ):
+        return "stop"
+    if re.fullmatch(
+        r"\s*(?:(?:saipen\s+)?(?:status|sss)|what happened\??|where are we\??|"
+        r"give me a (?:summary|brief|final report)|(?:brief|quick) update|short (?:report|status)|"
+        r"tell me the result|дай (?:сводку|краткий отч[её]т)|"
+        r"что (?:там|сделал|получилось)\??|где мы\??|статус|"
+        r"anna kokkuvõte|lühike raport|mis juhtus\??|staatus|kus me oleme\??)\s*[.!]?\s*",
+        request,
+        re.IGNORECASE,
+    ):
+        return "summary"
+    return "final"
 
 
 def _carries_a_second_command(text: str) -> bool:
@@ -259,6 +653,8 @@ def _action_is_single(value: str) -> bool:
         return False
     if not _ACTION_COMMAND_START.match(text):
         return True
+    from .guard_events import saipen_line_problem
+
     return saipen_line_problem(text) is None and not _carries_a_second_command(text)
 
 
@@ -309,12 +705,20 @@ def render_boundary(
     *,
     current_validation: str | None = None,
     detail_mode: str = DETAIL_MODE_NONE,
+    response_class: str | None = None,
 ) -> str:
     """Assemble one operational handback from typed fields, then validate it."""
     fields = boundary.fields()
-    rendered = "\n".join(f"{key}\n{value.strip()}" for key, value in fields.items())
+    rendered = "\n".join(
+        f"{key}: {value.strip()}"
+        for key, value in fields.items()
+        if key not in ("BLOCKER", "OPERATOR ACTION") or not _is_none(value)
+    )
     errors = response_errors(
-        rendered, current_validation=current_validation, detail_mode=detail_mode
+        rendered,
+        current_validation=current_validation,
+        detail_mode=detail_mode,
+        response_class=response_class,
     )
     if errors:
         raise ValueError("; ".join(errors))
@@ -332,6 +736,7 @@ def response_errors(
     current_blocker: str | None = None,
     operator_due: bool = False,
     detail_mode: str = DETAIL_MODE_NONE,
+    response_class: str | None = None,
 ) -> list[str]:
     """Validate the actual text a host will return, including its first byte."""
     if not detail_mode_is_valid(detail_mode):
@@ -339,27 +744,7 @@ def response_errors(
     if not isinstance(rendered, str) or not rendered:
         return ["empty operational response"]
     lines = rendered.splitlines()
-    errors: list[str] = []
-    if not lines or lines[0] != "STATUS":
-        errors.append("prose before STATUS or missing STATUS header")
-    headings = [(index, line) for index, line in enumerate(lines) if line in FIELD_ORDER]
-    names = [name for _, name in headings]
-    for name in MANDATORY_FIELDS:
-        if names.count(name) != 1:
-            errors.append(f"{name} must occur exactly once")
-    if names.count("DETAILS") > 1:
-        errors.append("DETAILS must occur at most once")
-    positions = [FIELD_ORDER.index(name) for name in names]
-    if positions != sorted(positions):
-        errors.append("fields render outside the canonical order")
-    if "DETAILS" in names and names[-1] != "DETAILS":
-        errors.append("DETAILS must render last")
-    values: dict[str, str] = {}
-    for offset, (line_index, name) in enumerate(headings):
-        end = headings[offset + 1][0] if offset + 1 < len(headings) else len(lines)
-        values[name] = "\n".join(lines[line_index + 1 : end]).strip()
-        if not values[name]:
-            errors.append(f"{name} has no value")
+    values, errors = parse_surface(rendered)
     blocker = values.get("BLOCKER", "")
     if blocker and not _is_none(blocker) and not _BLOCKER_CODE.match(blocker):
         errors.append("BLOCKER needs a canonical code and bounded reason")
@@ -421,16 +806,49 @@ def response_errors(
                 "EFFICIENCY belongs to the final boundary -- an in-flight STATUS "
                 "carries no KPI (silent execution)"
             )
-    total_budget = (
-        DETAILED_RESPONSE_CHAR_BUDGET
-        if detail_mode != DETAIL_MODE_NONE
-        else ORDINARY_RESPONSE_CHAR_BUDGET
+    klass = response_class or response_reason(
+        operator_due=operator_due or not _is_none(operator_action), detail_mode=detail_mode
     )
+    if klass not in REASON_BUDGETS:
+        return [*errors, f"unknown response_class {klass!r}"]
+    if klass == EXPLICIT_DETAILED_REPORT and detail_mode == DETAIL_MODE_NONE:
+        errors.append("detailed response class requires human depth authority")
+    line_budget, total_budget = REASON_BUDGETS[klass]
+    if len(lines) > line_budget:
+        errors.append(f"actual rendered reply exceeds {line_budget} visible lines ({len(lines)})")
     if len(rendered) > total_budget:
         errors.append(
             f"the whole response is {len(rendered)} characters -- the budget for "
             f"this boundary is {total_budget}"
         )
+    if detail_mode == DETAIL_MODE_NONE:
+        for name in ("RESULT", "VALIDATION"):
+            value = values.get(name, "")
+            if len(re.findall(r"(?<![\w-])(?:T|SRC|E)-\d+(?![\w-])", value)) > 3:
+                errors.append(
+                    f"{name} contains an inventory; store rows and render aggregate counts"
+                )
+            if re.search(r"(?i)(?:[0-9a-f]{40,64}[ ,|;]*){2,}", value):
+                errors.append(
+                    f"{name} contains commit/evidence hashes; evidence is the durable owner"
+                )
+        result = values.get("RESULT", "")
+        if re.search(
+            r"\b(?:CURRENT_PASS|STALE_PASS|CURRENT_FAIL)\b|\b(?:red|new_red)\s+\d+", result
+        ):
+            errors.append("validation facts belong only to VALIDATION")
+        for name in ("RESULT", "VALIDATION", "BLOCKER", "OPERATOR ACTION", "NEXT EXACT ACTION"):
+            value = values.get(name, "")
+            if len(value) > 15 and not _is_none(value):
+                for other in (
+                    "RESULT",
+                    "VALIDATION",
+                    "BLOCKER",
+                    "OPERATOR ACTION",
+                    "NEXT EXACT ACTION",
+                ):
+                    if other != name and value in values.get(other, ""):
+                        errors.append(f"duplicate semantic fact across {name} and {other}")
     for name in ("BLOCKER", "OPERATOR ACTION", "NEXT EXACT ACTION"):
         value = values.get(name, "")
         if "\n" not in value and value.strip().startswith("-"):
@@ -507,9 +925,7 @@ def surface_errors(fields: dict, *, status: str = "") -> list[str]:
             errors.append("EFFICIENCY belongs to the final boundary (silent execution)")
     # A WAIT that names no human action is the exact ambiguity the surface
     # exists to remove: the human cannot discover whether they must act.
-    if str(status).strip().upper().startswith("WAIT") and _is_none(
-        fields.get("OPERATOR ACTION")
-    ):
+    if str(status).strip().upper().startswith("WAIT") and _is_none(fields.get("OPERATOR ACTION")):
         errors.append("WAIT without OPERATOR ACTION is invalid")
     return errors
 
@@ -634,7 +1050,31 @@ def classify_final_response(
     is the canonical automation fact; it is enforced ONLY on operational
     turns, mirroring the OpenCode gate's ``enforceAutonomy``.
     """
-    detail_mode = check_context.get("detail_mode", DETAIL_MODE_NONE)
+    # Only a witnessed HUMAN carrier may expand delivery. A caller's closed
+    # mode is a request, not authority. Low-level render/check remain useful
+    # for diagnostic fixtures; the final delivery gate settles the grant.
+    requested_mode = check_context.get("detail_mode", DETAIL_MODE_NONE)
+    if not detail_mode_is_valid(requested_mode):
+        return CLASS_INVALID_OPERATIONAL_PROSE, [
+            f"unknown detail_mode {requested_mode!r}; authorization requires a closed mode"
+        ]
+    human_request = check_context.pop("human_request", "")
+    request_authority = check_context.pop("request_authority", None)
+    witnessed = human_response_authority(human_request, request_authority)
+    detail_mode = detail_mode_for_request(human_request) if witnessed else DETAIL_MODE_NONE
+    if requested_mode != DETAIL_MODE_NONE and requested_mode != detail_mode:
+        return CLASS_INVALID_OPERATIONAL_PROSE, [
+            "detail_mode is not authorized by witnessed human ingress"
+        ]
+    check_context["detail_mode"] = detail_mode
+    artifact = artifact_for_request(human_request) if witnessed else None
+    if artifact and not operational_turn:
+        text = rendered if isinstance(rendered, str) else ""
+        if len(text) > ARTIFACT_CHAR_BUDGET:
+            return CLASS_CHAT_STYLE_DRIFT, [
+                "requested artifact exceeds its bounded carrier; provide the actual file"
+            ]
+        return CLASS_ORDINARY_CHAT, []
     if not detail_mode_is_valid(detail_mode):
         return CLASS_INVALID_OPERATIONAL_PROSE, [
             f"unknown detail_mode {detail_mode!r}; authorization requires a closed mode"
@@ -642,6 +1082,13 @@ def classify_final_response(
     text = rendered if isinstance(rendered, str) else ""
     claims = claims_operational_finality(text)
     if not operational_turn and not claims:
+        if detail_mode != DETAIL_MODE_NONE and (
+            len(text.splitlines()) > REASON_BUDGETS[EXPLICIT_DETAILED_REPORT][0]
+            or len(text) > REASON_BUDGETS[EXPLICIT_DETAILED_REPORT][1]
+        ):
+            return CLASS_CHAT_STYLE_DRIFT, [
+                "explicit report exceeds its bounded visible carrier; store the report"
+            ]
         if style_contract is not None:
             from .chat_style import chat_style_errors
 
@@ -665,6 +1112,8 @@ def classify_final_response(
     # context, so it is read here rather than re-derived.
     if check_context.get("operator_due"):
         executable_action_remains = False
+    if operational_turn and executable_action_remains and not text.strip():
+        return CLASS_VALID_BOUNDARY, []
     if operational_turn and executable_action_remains:
         return CLASS_AUTONOMOUS_HANDBACK, [
             "eligible autonomous action remains; returning control is invalid"
@@ -690,11 +1139,7 @@ def classify_final_response(
             if drift:
                 return CLASS_CHAT_STYLE_DRIFT, drift
         return CLASS_VALID_BOUNDARY, []
-    if any(
-        marker in error
-        for error in errors
-        for marker in _AUTONOMY_ERROR_MARKERS
-    ):
+    if any(marker in error for error in errors for marker in _AUTONOMY_ERROR_MARKERS):
         return CLASS_AUTONOMOUS_HANDBACK, errors
     return CLASS_INVALID_OPERATIONAL_PROSE, errors
 
@@ -708,6 +1153,8 @@ def gate_final_response(
     style_contract: object | None,
     admission_skip_reason: str = "NOT_ENFORCEABLE",
     executable_action_remains: bool = False,
+    facts: dict | None = None,
+    reason: str = "final",
     **check_context: object,
 ) -> dict:
     """The layered verdict over one outgoing reply (PROTOCOL-ADMISSION-01).
@@ -744,6 +1191,23 @@ def gate_final_response(
             "diagnostic": message,
             "layers": layers,
         }
+    ingress = check_context.get("human_request", "")
+    provenance = check_context.get("request_authority")
+    authorized = human_response_authority(ingress, provenance)
+    delivered_reason = (
+        reason_for_request(ingress) if authorized else (facts or {}).get("response_reason", "final")
+    )
+    if facts is not None:
+        # Canonical automation owns liveness even when an adapter forgot the
+        # diagnostic --auto-eligibility flag. A runnable project must not emit
+        # an empty digest and then reject it as an invalid empty boundary.
+        auto = facts.get("automation") or {}
+        executable_action_remains = bool(
+            facts.get("executable_action_remains")
+            or (auto.get("disposition") == "CONTINUE" and auto.get("next_command"))
+        )
+    if delivered_reason in ("stop", "status", "summary"):
+        executable_action_remains = False
     klass, errors = classify_final_response(
         text,
         operational_turn=operational_turn,
@@ -751,14 +1215,60 @@ def gate_final_response(
         style_contract=style_contract,
         **check_context,
     )
+    delivery = None
+    delivery_validation = "NOT_APPLICABLE"
+    expanded = authorized and (
+        detail_mode_for_request(ingress) != DETAIL_MODE_NONE or artifact_for_request(ingress)
+    )
+    if (
+        facts is not None
+        and (operational_turn or claims_operational_finality(text))
+        and not expanded
+    ):
+        # A model-provided --request/--reason cannot manufacture a stop/status
+        # exception to silent execution. Canonical stop facts or exact HUMAN
+        # ingress own that boundary, independent of the outgoing prose.
+        language = getattr(style_contract, "reply_language", None) or "et"
+        delivery = digest_from_facts(facts, reason=delivered_reason, language=language)
+        # Validate the candidate that the capable host will actually deliver,
+        # not only the model text it rejected. Current state/style constraints
+        # cannot be bypassed by the fact that the renderer is machine-owned.
+        candidate_class, _candidate_errors = classify_final_response(
+            delivery,
+            operational_turn=True,
+            executable_action_remains=executable_action_remains,
+            style_contract=style_contract,
+            **check_context,
+        )
+        if candidate_class != CLASS_VALID_BOUNDARY:
+            delivery = compact_failure(
+                language=language, operator_due=bool(check_context.get("operator_due"))
+            )
+            # UNKNOWN is a failure disposition, not a conflicting assertion
+            # about current Work. Validate that closed failure carrier against
+            # its own schema/style, not as an implementation success claim.
+            failure_class, _failure_errors = classify_final_response(
+                delivery,
+                operational_turn=True,
+                style_contract=style_contract,
+            )
+            if failure_class != CLASS_VALID_BOUNDARY:
+                delivery = None
+            delivery_validation = "COMPACT_FAILURE"
+            klass = CLASS_INVALID_OPERATIONAL_PROSE
+            errors = ["canonical response facts failed delivery validation"]
+        else:
+            delivery_validation = "PASS"
+        normalized = str(text or "").replace("\r\n", "\n").replace("\r", "\n").strip()
+        if klass == CLASS_VALID_BOUNDARY and normalized != delivery:
+            klass = CLASS_INVALID_OPERATIONAL_PROSE
+            errors = ["operational delivery must equal the canonical machine digest"]
     if klass in (CLASS_INVALID_OPERATIONAL_PROSE, CLASS_AUTONOMOUS_HANDBACK):
         layers["exec_response"] = "FAIL"
         layer = LAYER_EXEC_RESPONSE
     elif klass == CLASS_CHAT_STYLE_DRIFT:
         layers["exec_response"] = (
-            "PASS"
-            if operational_turn or claims_operational_finality(text)
-            else "NOT_APPLICABLE"
+            "PASS" if operational_turn or claims_operational_finality(text) else "NOT_APPLICABLE"
         )
         layers["chat_style"] = "FAIL"
         layer = LAYER_CHAT_STYLE
@@ -773,4 +1283,8 @@ def gate_final_response(
         "errors": errors,
         "diagnostic": None,
         "layers": layers,
+        # This is the delivery candidate, not an apology or a second model
+        # attempt. A capable host replaces operational model output with it.
+        "delivery": delivery,
+        "delivery_validation": delivery_validation,
     }

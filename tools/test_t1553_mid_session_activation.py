@@ -67,21 +67,23 @@ from saipen_engine.response_surface import (  # noqa: E402
     DETAIL_MODE_HANDOFF,
     DETAIL_MODE_NONE,
     DETAIL_MODE_REPORT,
-    DETAIL_MODES,
     FIELD_CHAR_BUDGETS,
     FIELD_LINE_BUDGETS,
     ORDINARY_RESPONSE_CHAR_BUDGET,
     classify_final_response,
     detail_mode_for_request,
+    parse_surface,
     response_errors,
 )
 
 from test_fixture_support import CURRENT_STYLE_CONTRACT  # noqa: E402
 from test_hermetic_env import isolate_host_session  # noqa: E402
 
+
 def setUpModule() -> None:
     # An outer host session must never bind this module's disposable fixtures.
     isolate_host_session()
+
 
 PLUGIN = Path(
     os.environ.get(
@@ -245,15 +247,25 @@ for (const item of request.cases) {
 
   async function textStep(spec) {
     const step = { kind: "text", outcome: "allowed", message: "" };
+    const output = { text: spec.text, messageID: spec.messageID || null };
     try {
       await textHook(
         { sessionID: item.session },
-        { text: spec.text, messageID: spec.messageID || null },
+        output,
       );
     } catch (error) {
       step.outcome = "blocked";
       step.message = String((error && error.message) || error);
     }
+    step.original = spec.text;
+    step.delivered = output.text;
+    const expected = spawnSync(process.env.SAIPEN_CARRIER_PYTHON || "python",
+      [path.join(item.repo, "tools", "saipen.py"), "response", "digest",
+       "--project-root", item.project, "--reason", "final", "--json"],
+      { encoding: "utf8", timeout: 120000, windowsHide: true });
+    step.digest_status = expected.status;
+    try { step.canonical = JSON.parse(expected.stdout).text; }
+    catch (_e) { step.canonical = null; }
     record.steps.push(step);
   }
 
@@ -280,8 +292,11 @@ process.stdout.write(JSON.stringify(results));
 
 def _init_steps(free_form: str, valid: str) -> list[dict]:
     return [
-        {"kind": "tool", "input": {"tool": "bash", "sessionID": "ses_t1553"},
-         "output": {"args": {"command": INIT_COMMAND}}},
+        {
+            "kind": "tool",
+            "input": {"tool": "bash", "sessionID": "ses_t1553"},
+            "output": {"args": {"command": INIT_COMMAND}},
+        },
         {"kind": "init"},
         {"kind": "text", "text": free_form},
         {"kind": "text", "text": valid},
@@ -295,11 +310,16 @@ def _spawn_carrier(case: dict, workdir: Path, env: dict):
     driver = workdir / "driver.mjs"
     driver.write_text(DRIVER, encoding="utf-8")
     request = workdir / "request.json"
-    request.write_text(json.dumps({"cases": [{**case, "ready": str(ready), "go": str(go)}]}),
-                        encoding="utf-8")
+    request.write_text(
+        json.dumps({"cases": [{**case, "ready": str(ready), "go": str(go)}]}), encoding="utf-8"
+    )
     proc = subprocess.Popen(
         [NODE, str(driver), str(PLUGIN), str(request)],
-        stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, env=env,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True,
+        encoding="utf-8",
+        env=env,
     )
     try:
         deadline = time.time() + 180
@@ -343,6 +363,21 @@ class _PluginCarrier(unittest.TestCase):
     """Shared real-plugin carrier. Subclasses choose what materializes `.saipen/`."""
 
     maxDiff = None
+
+    def assert_machine_delivery(self, step: dict) -> None:
+        """The model's bytes must never reach the completed-part delivery."""
+        self.assertEqual(step["digest_status"], 0, step)
+        if step["canonical"] == "":
+            self.assertEqual(step["outcome"], "blocked", step)
+            self.assertIn("eligible autonomous action remains", step["message"])
+            return
+        self.assertEqual(step["outcome"], "allowed", step)
+        self.assertEqual(step["delivered"], step["canonical"], step)
+        self.assertNotEqual(step["delivered"], step["original"], step)
+        if step["delivered"]:
+            self.assertEqual(response_errors(step["delivered"]), [], step)
+            self.assertLessEqual(len(step["delivered"].splitlines()), 8)
+            self.assertLessEqual(len(step["delivered"]), 1200)
 
     def _run_carrier(self, steps: list[dict]):
         workdir = Path(tempfile.mkdtemp(prefix="saipen-t1553-carrier-"))
@@ -407,9 +442,7 @@ def bootstrap_canonical_project(root: Path) -> None:
         "---\n",
         encoding="utf-8",
     )
-    (saipen / "BOARD.md").write_text(
-        "## DOING\n## TODO\n## DONE\n## BLOCKED\n", encoding="utf-8"
-    )
+    (saipen / "BOARD.md").write_text("## DOING\n## TODO\n## DONE\n## BLOCKED\n", encoding="utf-8")
     (saipen / "LOG.md").write_text(
         "- 28.09.26 00:00 [E-100] [agent: test-agent] RUN: init carrier fixture\n",
         encoding="utf-8",
@@ -430,8 +463,11 @@ class RealLauncherInit(_PluginCarrier):
 
     def _launcher_steps(self, free_form: str, valid: str) -> list[dict]:
         return [
-            {"kind": "tool", "input": {"tool": "bash", "sessionID": "ses_t1553"},
-             "output": {"args": {"command": INIT_COMMAND}}},
+            {
+                "kind": "tool",
+                "input": {"tool": "bash", "sessionID": "ses_t1553"},
+                "output": {"args": {"command": INIT_COMMAND}},
+            },
             {"kind": "init-launcher"},
             {"kind": "text", "text": free_form},
             {"kind": "text", "text": valid},
@@ -439,16 +475,15 @@ class RealLauncherInit(_PluginCarrier):
         ]
 
     def test_the_installed_launcher_init_gates_its_own_turn(self):
-        before, record, project = self._run_carrier(
-            self._launcher_steps(FREE_FORM, VALID_SURFACE)
-        )
+        before, record, project = self._run_carrier(self._launcher_steps(FREE_FORM, VALID_SURFACE))
         self.assert_started_outside_saipen(before, record)
 
         tool_step, init_step, first, valid, later = record["steps"][1:6]
         self.assertEqual(tool_step["outcome"], "allowed", tool_step)
         self.assertEqual(init_step["kind"], "init-launcher", init_step)
         self.assertEqual(
-            init_step["outcome"], "allowed",
+            init_step["outcome"],
+            "allowed",
             f"the installed CLI launcher did not complete the init: {init_step.get('message')}",
         )
         # The launcher really ran, and it really wrote the canonical project.
@@ -458,20 +493,17 @@ class RealLauncherInit(_PluginCarrier):
             Path(written["project_root"]) / ".saipen" / "STATE.md",
             "the launcher must have written canonical STATE at the bound root",
         )
-        self.assertIn("EXEC_RESPONSE_INVALID", first["message"])
+        self.assert_machine_delivery(first)
         self.assertEqual(valid["outcome"], "allowed", valid)
-        self.assertEqual(later["outcome"], "blocked", later)
+        self.assert_machine_delivery(later)
         state = (project / ".saipen" / "STATE.md").read_text(encoding="utf-8")
         self.assertIn("transition_from: INIT", state)
 
     def test_the_launcher_carrier_rejects_prose_before_status_too(self):
         escaped = "STATUS: done\n\n" + FREE_FORM
-        _before, record, _project = self._run_carrier(
-            self._launcher_steps(escaped, VALID_SURFACE)
-        )
+        _before, record, _project = self._run_carrier(self._launcher_steps(escaped, VALID_SURFACE))
         first = record["steps"][3]
-        self.assertEqual(first["outcome"], "blocked", first)
-        self.assertIn("EXEC_RESPONSE_INVALID", first["message"])
+        self.assert_machine_delivery(first)
 
 
 @unittest.skipUnless(NODE, "node runtime unavailable")
@@ -493,30 +525,24 @@ class RealInitSameTurn(_PluginCarrier):
         tool_step, init_step, first, valid, later = record["steps"][1:6]
         self.assertEqual(tool_step["kind"], "tool")
         self.assertEqual(
-            tool_step["outcome"], "allowed",
+            tool_step["outcome"],
+            "allowed",
             f"the canonical init command must be admitted from a non-SAIPEN cwd: {tool_step}",
         )
+        self.assertEqual(init_step["kind"], "init", "the host must execute the real init effect")
         self.assertEqual(
-            init_step["kind"], "init", "the host must execute the real init effect"
-        )
-        self.assertEqual(
-            init_step["outcome"], "allowed",
+            init_step["outcome"],
+            "allowed",
             f"the real canonical INIT did not run: {init_step.get('message')}",
         )
         self.assertIn("state", init_step.get("written") or [], init_step)
         self.assertIn("identity", init_step.get("written") or [], init_step)
 
         self.assertEqual(first["kind"], "text")
-        self.assertEqual(
-            first["outcome"], "blocked",
-            "free-form operational prose escaped the EXEC-RESPONSE-01 gate after init",
-        )
-        self.assertIn("EXEC_RESPONSE_INVALID", first["message"])
+        self.assert_machine_delivery(first)
         self.assertEqual(valid["outcome"], "allowed", f"a canonical surface must pass: {valid}")
         self.assertNotIn("EXEC_RESPONSE_INVALID", valid["message"])
-        self.assertEqual(
-            later["outcome"], "blocked", "the later turn in the same session stopped being enforced"
-        )
+        self.assert_machine_delivery(later)
         # The project really did become a SAIPEN project inside the session,
         # from the shipped templates rather than from test-authored strings.
         state = (project / ".saipen" / "STATE.md").read_text(encoding="utf-8")
@@ -540,19 +566,14 @@ class RealInitSameTurn(_PluginCarrier):
         ]
         _before, record, _project = self._run_carrier(steps)
         _init, first, valid = record["steps"][1:4]
-        self.assertEqual(
-            first["outcome"], "blocked",
-            f"the init turn escaped the gate with no tool event: {first}",
-        )
-        self.assertIn("EXEC_RESPONSE_INVALID", first["message"])
+        self.assert_machine_delivery(first)
         self.assertEqual(valid["outcome"], "allowed", f"a canonical surface must pass: {valid}")
 
     def test_prose_before_status_is_rejected_in_the_init_turn(self):
         escaped = "STATUS: done\n\n" + FREE_FORM
         _before, record, _project = self._run_carrier(_init_steps(escaped, VALID_SURFACE))
         first = record["steps"][3]
-        self.assertEqual(first["outcome"], "blocked", first)
-        self.assertIn("EXEC_RESPONSE_INVALID", first["message"])
+        self.assert_machine_delivery(first)
 
     def test_a_replacement_model_is_still_enforced_immediately_after_init(self):
         """Matrix K: provider/model replacement in the same turn loses nothing.
@@ -567,18 +588,17 @@ class RealInitSameTurn(_PluginCarrier):
         _tool, _init, model_step, first, valid, later = record["steps"][1:7]
         self.assertEqual(model_step["kind"], "system")
         self.assertEqual(model_step["outcome"], "allowed", model_step)
-        self.assertEqual(
-            first["outcome"], "blocked",
-            f"a replaced model escaped the gate on the init turn: {first}",
-        )
-        self.assertIn("EXEC_RESPONSE_INVALID", first["message"])
+        self.assert_machine_delivery(first)
         self.assertEqual(valid["outcome"], "allowed", valid)
-        self.assertEqual(later["outcome"], "blocked", later)
+        self.assert_machine_delivery(later)
 
     def test_a_replacement_model_cannot_smuggle_free_form_later_either(self):
         steps = [
-            {"kind": "tool", "input": {"tool": "bash", "sessionID": "ses_t1553"},
-             "output": {"args": {"command": INIT_COMMAND}}},
+            {
+                "kind": "tool",
+                "input": {"tool": "bash", "sessionID": "ses_t1553"},
+                "output": {"args": {"command": INIT_COMMAND}},
+            },
             {"kind": "init"},
             {"kind": "text", "text": VALID_SURFACE},
             {"kind": "system"},
@@ -588,8 +608,7 @@ class RealInitSameTurn(_PluginCarrier):
         # steps[0] is the plugin's own startup system step, so the five carrier
         # steps land at 1..5 and the free-form smuggling attempt is the LAST.
         tail = record["steps"][5]
-        self.assertEqual(tail["outcome"], "blocked", tail)
-        self.assertIn("EXEC_RESPONSE_INVALID", tail["message"])
+        self.assert_machine_delivery(tail)
 
 
 @unittest.skipUnless(NODE, "node runtime unavailable")
@@ -606,11 +625,13 @@ class MaterializationRebind(_PluginCarrier):
         # This materialized fixture is PLAN without an operator WAIT route.
         # Only real canonical INIT owns VALID_SURFACE's required human action.
         if valid is None:
-            valid = _surface(**{
-                "STATUS": "PLAN -- materialized",
-                "RESULT": "Kontroll tehtud.",
-                "NEXT EXACT ACTION": "NONE",
-            })
+            valid = _surface(
+                **{
+                    "STATUS": "PLAN -- materialized",
+                    "RESULT": "Kontroll tehtud.",
+                    "NEXT EXACT ACTION": "NONE",
+                }
+            )
         workdir = Path(tempfile.mkdtemp(prefix="saipen-t1553-materialized-"))
         self.addCleanup(lambda: shutil.rmtree(workdir, ignore_errors=True))
         project = workdir / "host-project"
@@ -621,8 +642,11 @@ class MaterializationRebind(_PluginCarrier):
             "repo": REPO.as_posix(),
             "session": "ses_t1553",
             "steps": [
-                {"kind": "tool", "input": {"tool": "bash", "sessionID": "ses_t1553"},
-                 "output": {"args": {"command": "saipen status"}}},
+                {
+                    "kind": "tool",
+                    "input": {"tool": "bash", "sessionID": "ses_t1553"},
+                    "output": {"args": {"command": "saipen status"}},
+                },
                 {"kind": "text", "text": free_form},
                 {"kind": "text", "text": valid},
                 {"kind": "text", "text": free_form},
@@ -633,12 +657,17 @@ class MaterializationRebind(_PluginCarrier):
         driver = workdir / "driver.mjs"
         driver.write_text(DRIVER, encoding="utf-8")
         request = workdir / "request.json"
-        request.write_text(json.dumps({"cases": [{**case, "ready": str(ready), "go": str(go)}]}),
-                           encoding="utf-8")
+        request.write_text(
+            json.dumps({"cases": [{**case, "ready": str(ready), "go": str(go)}]}), encoding="utf-8"
+        )
         env = _carrier_env()
         proc = subprocess.Popen(
             [NODE, str(driver), str(PLUGIN), str(request)],
-            stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, env=env,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+            encoding="utf-8",
+            env=env,
         )
         try:
             deadline = time.time() + 180
@@ -666,17 +695,15 @@ class MaterializationRebind(_PluginCarrier):
         self.assert_started_outside_saipen(before, record)
         tool_step, first, valid, later = record["steps"][1:5]
         self.assertEqual(tool_step["outcome"], "allowed", tool_step)
-        self.assertEqual(first["outcome"], "blocked", first)
-        self.assertIn("EXEC_RESPONSE_INVALID", first["message"])
-        self.assertEqual(valid["outcome"], "allowed", valid)
-        self.assertEqual(later["outcome"], "blocked", later)
+        self.assert_machine_delivery(first)
+        self.assert_machine_delivery(valid)
+        self.assert_machine_delivery(later)
 
     def test_prose_before_status_is_rejected(self):
         escaped = "STATUS: done\n\n" + FREE_FORM
         _before, record, _project = self._run_materialized(free_form=escaped)
         first = record["steps"][2]
-        self.assertEqual(first["outcome"], "blocked", first)
-        self.assertIn("EXEC_RESPONSE_INVALID", first["message"])
+        self.assert_machine_delivery(first)
 
 
 def _surface(**fields) -> str:
@@ -690,11 +717,21 @@ def _surface(**fields) -> str:
         "VALIDATION": "NOT_RUN -- focused carrier green",
     }
     defaults.update(fields)
-    order = ("STATUS", "RESULT", "BLOCKER", "OPERATOR ACTION", "NEXT EXACT ACTION",
-             "VALIDATION", "DETAILS")
+    order = (
+        "STATUS",
+        "RESULT",
+        "BLOCKER",
+        "OPERATOR ACTION",
+        "NEXT EXACT ACTION",
+        "VALIDATION",
+        "DETAILS",
+    )
     return chr(10).join(
-        f"{name}{chr(10)}{content}" for name, content in defaults.items()
-        if name in order and content
+        f"{name}: {content}"
+        for name, content in defaults.items()
+        if name in order
+        and content
+        and not (name in ("BLOCKER", "OPERATOR ACTION") and content == "NONE")
     ) + chr(10)
 
 
@@ -709,18 +746,38 @@ class HostileResponseMatrix(unittest.TestCase):
 
     maxDiff = None
 
+    def _human_context(self, context):
+        """Positive detail-budget controls carry the actual operator grant."""
+        from saipen_engine.operator_task import witness
+        from test_fixture_support import operator_request_env
+
+        requests = {
+            DETAIL_MODE_REPORT: "write a detailed report of the change",
+            DETAIL_MODE_AUDIT: "produce a full technical audit",
+            DETAIL_MODE_HANDOFF: "write a complete implementation handoff",
+        }
+        request = requests.get(context.get("detail_mode"))
+        return (
+            {
+                **context,
+                "human_request": request,
+                "request_authority": witness(request, env=operator_request_env(request)),
+            }
+            if request
+            else context
+        )
+
     def _reject(self, rendered: str, **context) -> list[str]:
         errors = response_errors(rendered, **context)
         klass, reasons = classify_final_response(
-            rendered, operational_turn=True, **context
+            rendered, operational_turn=True, **self._human_context(context)
         )
         self.assertTrue(
             errors or reasons,
             f"the canonical checker accepted a hostile response:\n{rendered[:400]}",
         )
         self.assertNotEqual(
-            klass, "VALID_BOUNDARY",
-            f"classified VALID_BOUNDARY:{chr(10)}{rendered[:400]}"
+            klass, "VALID_BOUNDARY", f"classified VALID_BOUNDARY:{chr(10)}{rendered[:400]}"
         )
         # Both canonical verdicts are reasons to refuse; a caller that reads one
         # authority must not be able to call a hostile surface acceptable
@@ -730,7 +787,7 @@ class HostileResponseMatrix(unittest.TestCase):
     def _accept(self, rendered: str, **context) -> None:
         self.assertEqual(response_errors(rendered, **context), [], rendered[:400])
         klass, reasons = classify_final_response(
-            rendered, operational_turn=True, **context
+            rendered, operational_turn=True, **self._human_context(context)
         )
         self.assertEqual(klass, "VALID_BOUNDARY", f"{klass}: {reasons}")
 
@@ -747,8 +804,8 @@ class HostileResponseMatrix(unittest.TestCase):
     # C -- RESULT over three content lines.
     def test_c_result_over_three_content_lines_is_rejected(self):
         errors = self._reject(_surface(RESULT="one\ntwo\nthree\nfour"))
-        self.assertTrue(any("RESULT exceeds 3" in error for error in errors), errors)
-        self.assertEqual(response_errors(_surface(RESULT="one\ntwo\nthree")), [])
+        self.assertTrue(any("RESULT exceeds 1" in error for error in errors), errors)
+        self.assertEqual(response_errors(_surface(RESULT="one bounded result")), [])
 
     # D -- BLOCKER essay.
     def test_d_blocker_essay_is_rejected(self):
@@ -798,13 +855,15 @@ class HostileResponseMatrix(unittest.TestCase):
         ):
             with self.subTest(action=action):
                 errors = self._reject(_surface(**{"NEXT EXACT ACTION": action}))
-                self.assertTrue(
-                    any("exactly one action" in error for error in errors), errors
-                )
+                self.assertTrue(any("exactly one action" in error for error in errors), errors)
 
     def test_f_one_canonical_action_still_passes(self):
-        for action in ("NONE", "saipen continue", "saipen continue --json",
-                       "saipen validate --json"):
+        for action in (
+            "NONE",
+            "saipen continue",
+            "saipen continue --json",
+            "saipen validate --json",
+        ):
             with self.subTest(action=action):
                 self._accept(_surface(**{"NEXT EXACT ACTION": action}))
 
@@ -837,9 +896,7 @@ class HostileResponseMatrix(unittest.TestCase):
         )
 
     def test_one_enormous_blocker_line_is_rejected(self):
-        errors = self._reject(
-            _surface(BLOCKER="SOME_CODE -- " + "reason " * 2000)
-        )
+        errors = self._reject(_surface(BLOCKER="SOME_CODE -- " + "reason " * 2000))
         self.assertTrue(any("BLOCKER exceeds" in e for e in errors), errors)
 
     def test_eight_enormous_authorized_detail_lines_are_rejected(self):
@@ -853,7 +910,8 @@ class HostileResponseMatrix(unittest.TestCase):
                 self.assertIsInstance(budget, int, field)
                 self.assertGreater(budget, 0, field)
         self.assertEqual(
-            set(FIELD_CHAR_BUDGETS), set(FIELD_LINE_BUDGETS) | {"STATUS"},
+            set(FIELD_CHAR_BUDGETS),
+            set(FIELD_LINE_BUDGETS) | {"STATUS"},
             "every line-budgeted field is also character-budgeted, plus STATUS",
         )
 
@@ -861,10 +919,8 @@ class HostileResponseMatrix(unittest.TestCase):
         """The budgets must not have strangled the useful report."""
         self._accept(
             _surface(
-                RESULT="Guard rebind fix landed in the OpenCode adapter\n"
-                       "Response gate now re-resolves the live binding\n"
-                       "154 focused tests green",
-                VALIDATION="CURRENT_PASS -- focused suite green",
+                RESULT="Guard rebind fix landed; response gate uses the live binding",
+                VALIDATION="CURRENT_PASS | focused 154/154",
             )
         )
 
@@ -872,9 +928,7 @@ class HostileResponseMatrix(unittest.TestCase):
         """A ceiling that can never fire is decoration, not a contract."""
         self.assertLess(
             ORDINARY_RESPONSE_CHAR_BUDGET,
-            sum(
-                budget for name, budget in FIELD_CHAR_BUDGETS.items() if name != "DETAILS"
-            ),
+            sum(budget for name, budget in FIELD_CHAR_BUDGETS.items() if name != "DETAILS"),
             "the whole-response ceiling must bind before every field can max out",
         )
         # Every field at its own legal maximum, and every one of them still
@@ -882,15 +936,12 @@ class HostileResponseMatrix(unittest.TestCase):
         legal = _surface(
             STATUS="BUILD T-1556 " + "s" * (FIELD_CHAR_BUDGETS["STATUS"] - 14),
             RESULT="r" * FIELD_CHAR_BUDGETS["RESULT"],
-            BLOCKER="SOME_CODE -- " + "b" * (
-                FIELD_CHAR_BUDGETS["BLOCKER"] - len("SOME_CODE -- ")
-            ),
+            BLOCKER="SOME_CODE -- " + "b" * (FIELD_CHAR_BUDGETS["BLOCKER"] - len("SOME_CODE -- ")),
             **{
                 "OPERATOR ACTION": "o" * FIELD_CHAR_BUDGETS["OPERATOR ACTION"],
                 "NEXT EXACT ACTION": "n" * FIELD_CHAR_BUDGETS["NEXT EXACT ACTION"],
-                "VALIDATION": "CURRENT_PASS " + "v" * (
-                    FIELD_CHAR_BUDGETS["VALIDATION"] - len("CURRENT_PASS ")
-                ),
+                "VALIDATION": "CURRENT_PASS "
+                + "v" * (FIELD_CHAR_BUDGETS["VALIDATION"] - len("CURRENT_PASS ")),
             },
         )
         errors = self._reject(legal)
@@ -900,7 +951,7 @@ class HostileResponseMatrix(unittest.TestCase):
 
     def test_validation_bound_is_unchanged(self):
         errors = self._reject(_surface(VALIDATION="NOT_RUN -- a\nb\nc\nd\ne\nf"))
-        self.assertTrue(any("VALIDATION exceeds 5" in error for error in errors), errors)
+        self.assertTrue(any("VALIDATION exceeds 1" in error for error in errors), errors)
 
     # I and J are runtime facts of the plugin carrier -- the init turn and a
     # later turn of the same session -- so they live in `RealInitSameTurn` and
@@ -931,17 +982,18 @@ class HostileResponseMatrix(unittest.TestCase):
 
     def test_l_an_authorized_report_audit_or_handoff_still_renders(self):
         details = chr(10).join(f"finding {n}: measured, bounded" for n in range(1, 6))
-        for mode in (DETAIL_MODE_REPORT, DETAIL_MODE_AUDIT, DETAIL_MODE_HANDOFF,
-                     DETAIL_MODE_BOUNDARY):
+        for mode in (DETAIL_MODE_REPORT, DETAIL_MODE_AUDIT, DETAIL_MODE_HANDOFF):
             with self.subTest(mode=mode):
                 self._accept(_surface(DETAILS=details), detail_mode=mode)
 
     def test_l_authorization_comes_from_the_human_request_never_the_response(self):
         for request, expected in (
             ("write a detailed report of the change", DETAIL_MODE_REPORT),
-            ("please audit the accepted debt", DETAIL_MODE_AUDIT),
-            ("prepare the handoff", DETAIL_MODE_HANDOFF),
-            ("this is an exceptional boundary", DETAIL_MODE_BOUNDARY),
+            ("produce a full technical audit", DETAIL_MODE_AUDIT),
+            ("prepare a complete handoff", DETAIL_MODE_HANDOFF),
+            ("this is an exceptional boundary", DETAIL_MODE_NONE),
+            ("please audit the accepted debt", DETAIL_MODE_NONE),
+            ("prepare the handoff", DETAIL_MODE_NONE),
             ("continue", DETAIL_MODE_NONE),
             ("fix the failing test", DETAIL_MODE_NONE),
             ("", DETAIL_MODE_NONE),
@@ -951,9 +1003,8 @@ class HostileResponseMatrix(unittest.TestCase):
                 self.assertEqual(detail_mode_for_request(request), expected)
         # A response that NAMES the detailed path does not authorize itself.
         self._reject(
-            "This response is an explicit report, so DETAILS follows.\n\n" + _surface(
-                DETAILS="smuggled"
-            )
+            "This response is an explicit report, so DETAILS follows.\n\n"
+            + _surface(DETAILS="smuggled")
         )
 
     def test_l_authorized_details_is_still_bounded(self):
@@ -989,10 +1040,28 @@ class ResponseCliTransportTests(unittest.TestCase):
     maxDiff = None
 
     def _check(self, text: str, *flags: str) -> dict:
+        from test_fixture_support import operator_request_env
+
+        env = dict(os.environ)
+        if "--request" in flags:
+            env.update(operator_request_env(flags[flags.index("--request") + 1]))
         proc = subprocess.run(
-            [PYTHON, str(REPO / "tools" / "saipen.py"), "response", "check",
-             "--stdin", "--json", *flags],
-            input=text, capture_output=True, text=True, timeout=120, cwd=str(REPO),
+            [
+                PYTHON,
+                str(REPO / "tools" / "saipen.py"),
+                "response",
+                "check",
+                "--stdin",
+                "--json",
+                *flags,
+            ],
+            input=text,
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            timeout=120,
+            cwd=str(REPO),
+            env=env,
         )
         return json.loads(proc.stdout or "{}")
 
@@ -1000,9 +1069,7 @@ class ResponseCliTransportTests(unittest.TestCase):
         answer = self._check(_surface(DETAILS="a bounded detail line"))
         self.assertEqual(answer["detail_mode"], DETAIL_MODE_NONE)
         self.assertFalse(answer["ok"], answer)
-        self.assertTrue(
-            any("DETAILS is not authorized" in e for e in answer["errors"]), answer
-        )
+        self.assertTrue(any("DETAILS is not authorized" in e for e in answer["errors"]), answer)
 
     def test_the_explicit_authorized_path_passes(self):
         answer = self._check(
@@ -1014,13 +1081,12 @@ class ResponseCliTransportTests(unittest.TestCase):
     def test_the_human_request_is_classified_by_the_canonical_owner(self):
         answer = self._check(
             _surface(DETAILS="a bounded detail line"),
-            "--request", "write a detailed report of the repair",
+            "--request",
+            "write a detailed report of the change",
         )
         self.assertEqual(answer["detail_mode"], DETAIL_MODE_REPORT)
         self.assertTrue(answer["ok"], answer)
-        ordinary = self._check(
-            _surface(DETAILS="a bounded detail line"), "--request", "continue"
-        )
+        ordinary = self._check(_surface(DETAILS="a bounded detail line"), "--request", "continue")
         self.assertEqual(ordinary["detail_mode"], DETAIL_MODE_NONE)
         self.assertFalse(ordinary["ok"], ordinary)
 
@@ -1063,10 +1129,10 @@ class CompactnessContractCoherence(unittest.TestCase):
         self.execution = (REPO / "saipen" / "EXECUTION.md").read_text(encoding="utf-8-sig")
 
     def test_execution_owns_the_operational_compactness_budget(self):
-        self.assertIn("COMPACTNESS BUDGET", self.execution)
+        self.assertIn("RESPONSE REASONS", self.execution)
 
     def test_execution_states_the_budget_over_field_content_not_labels(self):
-        budget = self.execution.partition("COMPACTNESS BUDGET")[2][:1200]
+        budget = self.execution.partition("RESPONSE REASONS")[2][:1200]
         self.assertIn("CONTENT", budget.upper())
         self.assertIn("label", budget.lower())
 
@@ -1079,7 +1145,8 @@ class CompactnessContractCoherence(unittest.TestCase):
         flat = " ".join(self.execution.split())
         for field, budget in FIELD_LINE_BUDGETS.items():
             self.assertIn(
-                f"{field} <= {budget}", flat,
+                f"{field} {budget}/{FIELD_CHAR_BUDGETS[field]}",
+                flat,
                 f"EXECUTION.md does not state the enforced budget for {field}",
             )
 
@@ -1089,25 +1156,33 @@ class CompactnessContractCoherence(unittest.TestCase):
         flat = " ".join(self.execution.split())
         for field, budget in FIELD_CHAR_BUDGETS.items():
             self.assertIn(
-                f"{field} <= {budget}", flat,
+                f"{field} {FIELD_LINE_BUDGETS.get(field, 1)}/{budget}",
+                flat,
                 f"EXECUTION.md does not state the character budget for {field}",
             )
         self.assertIn(str(ORDINARY_RESPONSE_CHAR_BUDGET), flat)
 
     def test_execution_states_the_details_authorization_rule(self):
         flat = " ".join(self.execution.split())
-        self.assertIn("DETAILS AUTHORIZATION", flat)
-        self.assertIn("detail_mode", flat)
-        for mode in DETAIL_MODES:
+        self.assertIn("DETAILS forbidden by default", flat)
+        self.assertIn("--detail-mode", flat)
+        for mode in (
+            DETAIL_MODE_REPORT,
+            DETAIL_MODE_AUDIT,
+            DETAIL_MODE_HANDOFF,
+            DETAIL_MODE_BOUNDARY,
+        ):
             self.assertIn(mode, flat, f"EXECUTION.md omits the closed mode {mode}")
 
     def test_style_defers_to_execution_for_the_operational_surface(self):
         self.assertRegex(
-            self.style, r"EXEC-RESPONSE-01",
+            self.style,
+            r"EXEC-RESPONSE-01",
             "STYLE must recognize the operational control surface",
         )
         self.assertRegex(
-            self.style, r"(?is)compactness budget.*EXECUTION|EXECUTION.*compactness budget",
+            self.style,
+            r"(?is)compactness budget.*EXECUTION|EXECUTION.*compactness budget",
             "STYLE must defer the operational compactness budget to EXECUTION",
         )
 
@@ -1120,7 +1195,8 @@ class CompactnessContractCoherence(unittest.TestCase):
         ]
         for line in offenders:
             self.assertRegex(
-                line, r"(?i)chat prose|voice|not the operational response|EXECUTION",
+                line,
+                r"(?i)chat prose|voice|not the operational response|EXECUTION",
                 f"STYLE re-declares a whole-response line cap: {line!r}",
             )
 
@@ -1153,7 +1229,7 @@ class InitCarrierClaimHonesty(unittest.TestCase):
         )
 
     def test_the_lower_level_carrier_does_not_claim_launcher_end_to_end(self):
-        doc = (RealInitSameTurn.__doc__ or "")
+        doc = RealInitSameTurn.__doc__ or ""
         self.assertIn("REAL_CANONICAL_INIT_EFFECT_SAME_TURN_PROVED", doc)
         self.assertIn("does NOT prove launcher/CLI end-to-end", doc)
         self.assertNotIn("REAL_INIT" + "_SAME_TURN_PROVED", doc)
@@ -1208,7 +1284,8 @@ class HostResponseEnforcementClaims(unittest.TestCase):
         """A MECHANICAL claim is honest only with the host surface that carries
         the outgoing text, present in the artifact the registry names."""
         mechanical = [
-            entry for entry in self.registry["adapters"]
+            entry
+            for entry in self.registry["adapters"]
             if entry["response_enforcement"] == "MECHANICAL"
         ]
         self.assertTrue(mechanical, "the registry must still be able to say MECHANICAL")
@@ -1227,7 +1304,8 @@ class HostResponseEnforcementClaims(unittest.TestCase):
         it to ADVISORY would read as 'the contract is merely not enforced yet
         here', which is a stronger claim than the installation supports."""
         gaps = {
-            entry["id"] for entry in self.registry["adapters"]
+            entry["id"]
+            for entry in self.registry["adapters"]
             if entry.get("declared_strength") == "ENFORCEMENT_GAP"
         }
         for entry in self.registry["adapters"]:
@@ -1255,7 +1333,10 @@ class HostResponseEnforcementClaims(unittest.TestCase):
         from the tool-admission column next to it."""
         proc = subprocess.run(
             [PYTHON, str(REPO / "tools" / "saipen.py"), "guard", "--action", "read", "--json"],
-            capture_output=True, text=True, timeout=120, cwd=str(REPO),
+            capture_output=True,
+            text=True,
+            timeout=120,
+            cwd=str(REPO),
         )
         self.assertEqual(proc.returncode, 0, proc.stdout + proc.stderr)
         adapters = json.loads(proc.stdout).get("adapters") or {}
@@ -1286,14 +1367,22 @@ class OperatorDueHandback(unittest.TestCase):
 
     maxDiff = None
 
-    SURFACE = chr(10).join([
-        "STATUS", "PLAN -- WAIT, init complete",
-        "RESULT", "canonical handback after the real init",
-        "BLOCKER", "NONE",
-        "OPERATOR ACTION", "provide the first project goal",
-        "NEXT EXACT ACTION", "NONE",
-        "VALIDATION", "NOT_RUN -- fresh project",
-    ]) + chr(10)
+    SURFACE = chr(10).join(
+        [
+            "STATUS",
+            "PLAN -- WAIT, init complete",
+            "RESULT",
+            "canonical handback after the real init",
+            "BLOCKER",
+            "NONE",
+            "OPERATOR ACTION",
+            "provide the first project goal",
+            "NEXT EXACT ACTION",
+            "NONE",
+            "VALIDATION",
+            "NOT_RUN -- fresh project",
+        ]
+    ) + chr(10)
 
     def _fresh_project(self) -> Path:
         workdir = Path(tempfile.mkdtemp(prefix="saipen-t1553-init-"))
@@ -1301,9 +1390,20 @@ class OperatorDueHandback(unittest.TestCase):
         project = workdir / "proj"
         project.mkdir()
         proc = subprocess.run(
-            [PYTHON, str(REPO / "tools" / "saipen.py"), "init",
-             "--project-root", str(project), "--agent", "test-agent", "--json"],
-            capture_output=True, text=True, timeout=180, env=_carrier_env(),
+            [
+                PYTHON,
+                str(REPO / "tools" / "saipen.py"),
+                "init",
+                "--project-root",
+                str(project),
+                "--agent",
+                "test-agent",
+                "--json",
+            ],
+            capture_output=True,
+            text=True,
+            timeout=180,
+            env=_carrier_env(),
         )
         self.assertEqual(proc.returncode, 0, proc.stdout + proc.stderr)
         self.assertTrue((project / ".saipen" / "STATE.md").is_file())
@@ -1311,9 +1411,23 @@ class OperatorDueHandback(unittest.TestCase):
 
     def _check(self, project: Path, surface: str, *flags: str) -> tuple[int, dict]:
         proc = subprocess.run(
-            [PYTHON, str(REPO / "tools" / "saipen.py"), "response", "check", "--stdin",
-             *flags, "--auto-eligibility", "--project-root", str(project), "--json"],
-            input=surface, capture_output=True, text=True, timeout=180,
+            [
+                PYTHON,
+                str(REPO / "tools" / "saipen.py"),
+                "response",
+                "check",
+                "--stdin",
+                *flags,
+                "--auto-eligibility",
+                "--project-root",
+                str(project),
+                "--json",
+            ],
+            input=surface,
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            timeout=180,
             env=_carrier_env(),
         )
         try:
@@ -1324,7 +1438,27 @@ class OperatorDueHandback(unittest.TestCase):
 
     def test_the_classifying_checker_accepts_the_operator_due_handback(self):
         project = self._fresh_project()
-        code, payload = self._check(project, self.SURFACE, "--classify")
+        digest = subprocess.run(
+            [
+                PYTHON,
+                str(REPO / "tools" / "saipen.py"),
+                "response",
+                "digest",
+                "--reason",
+                "final",
+                "--project-root",
+                str(project),
+                "--json",
+            ],
+            capture_output=True,
+            encoding="utf-8",
+            timeout=180,
+            env=_carrier_env(),
+        )
+        self.assertEqual(digest.returncode, 0, digest.stdout + digest.stderr)
+        surface = json.loads(digest.stdout)["text"]
+        self.assertTrue(parse_surface(surface)[0]["OPERATOR ACTION"])
+        code, payload = self._check(project, surface, "--classify")
         self.assertEqual(code, 0, payload)
         self.assertEqual(payload.get("class"), "VALID_BOUNDARY", payload)
 
@@ -1340,10 +1474,7 @@ class OperatorDueHandback(unittest.TestCase):
         """The control: the handback must NAME the operator action."""
         project = self._fresh_project()
         tail = self.SURFACE.split("NEXT EXACT ACTION", 1)[1]
-        waiving = (
-
-            "OPERATOR ACTION" + chr(10) + "NONE" + chr(10) + chr(10) + tail
-        )
+        waiving = "OPERATOR ACTION" + chr(10) + "NONE" + chr(10) + chr(10) + tail
         self.assertNotEqual(waiving, self.SURFACE, "the control must differ from the surface")
         code, payload = self._check(project, waiving, "--classify")
         self.assertNotEqual(code, 0, payload)
@@ -1368,7 +1499,8 @@ class InitCommandAdmissionGrammar(unittest.TestCase):
             encoding="utf-8"
         )
         line = next(
-            ln for ln in self.source.splitlines()
+            ln
+            for ln in self.source.splitlines()
             if ln.startswith("const PROJECT_CREATING_COMMAND_RE")
         )
         pattern = line.split("=", 1)[1].strip().rstrip(";").strip()
@@ -1381,8 +1513,13 @@ class InitCommandAdmissionGrammar(unittest.TestCase):
         self.regex = re.compile(pattern[1:], flags)
 
     def test_the_bare_init_command_is_exempt(self):
-        for command in ("saipen init", "  saipen init  ", "saipen init --json",
-                        "saipen.py init", "saipen init --project-root ."):
+        for command in (
+            "saipen init",
+            "  saipen init  ",
+            "saipen init --json",
+            "saipen.py init",
+            "saipen init --project-root .",
+        ):
             self.assertTrue(self.regex.search(command), command)
 
     def test_a_command_that_only_mentions_init_is_not_exempt(self):
@@ -1396,8 +1533,14 @@ class InitCommandAdmissionGrammar(unittest.TestCase):
             self.assertFalse(self.regex.search(command), command)
 
     def test_no_other_command_shape_is_exempt(self):
-        for command in ("saipen status", "saipen continue", "saipen recover",
-                        "git init", "npm init", "saipen"):
+        for command in (
+            "saipen status",
+            "saipen continue",
+            "saipen recover",
+            "git init",
+            "npm init",
+            "saipen",
+        ):
             self.assertFalse(self.regex.search(command), command)
 
 
@@ -1445,15 +1588,14 @@ class HostStrengthHonesty(unittest.TestCase):
             if not self.registry[host].get("blocking_capability"):
                 self.fail(f"{host} reports effective BLOCKING without blocking capability")
             if answer.get("installed") is not True or answer.get("current") is not True:
-                self.fail(
-                    f"{host} reports effective BLOCKING on an unproven install: {answer}"
-                )
+                self.fail(f"{host} reports effective BLOCKING on an unproven install: {answer}")
 
     def test_no_host_is_presented_as_blocking_without_the_hook_surface(self):
         for host in sorted(self.registry):
             if not self.registry[host].get("hook_install_surface"):
                 self.assertNotEqual(
-                    self.effective(host).get("effective"), "BLOCKING",
+                    self.effective(host).get("effective"),
+                    "BLOCKING",
                     f"{host} has no hook surface and can never be effectively BLOCKING",
                 )
 
@@ -1485,7 +1627,8 @@ class HostStrengthHonesty(unittest.TestCase):
             if "declared=" in cells[1]:  # the prose list, not the table
                 continue
             self.assertEqual(
-                cells[1].strip("*"), entry.get("declared_strength"),
+                cells[1].strip("*"),
+                entry.get("declared_strength"),
                 f"the matrix misreports the DECLARED strength of {host}",
             )
 
@@ -1499,18 +1642,20 @@ class HostStrengthHonesty(unittest.TestCase):
             if claimed != "BLOCKING":
                 continue
             self.assertEqual(
-                self.effective(host).get("effective"), "BLOCKING",
+                self.effective(host).get("effective"),
+                "BLOCKING",
                 f"the matrix claims effective BLOCKING for {host}; the live engine "
                 f"says {self.effective(host).get('effective')}",
             )
 
     def test_the_matrix_states_the_measured_not_the_declared_answer(self):
-        matrix = (REPO / ".saipen" / "evidence" / "T-1553-host-enforcement-matrix" / "MATRIX.md")
+        matrix = REPO / ".saipen" / "evidence" / "T-1553-host-enforcement-matrix" / "MATRIX.md"
         text = matrix.read_text(encoding="utf-8")
         self.assertRegex(text, r"(?i)effective")
         self.assertRegex(text, r"(?i)live")
         self.assertRegex(
-            text, r"(?i)not .{0,40}stronger than the installed state proves|"
-                   r"never .{0,40}stronger than the installed state proves",
+            text,
+            r"(?i)not .{0,40}stronger than the installed state proves|"
+            r"never .{0,40}stronger than the installed state proves",
             "the matrix must restate the declared-is-a-claim contract",
         )

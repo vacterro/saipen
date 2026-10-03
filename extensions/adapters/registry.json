@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "description": "Single declarative host adapter registry (SRC-028:R008). Every consumer -- tools/saipen_engine/admission.py, bootstrap/inject.ps1, bootstrap/inject.sh, tools/autoinject.py, status/freshness reporting and the parity tests -- reads host identity, install surfaces and enforcement capability from THIS file. No consumer may keep a second handwritten host inventory. declared_strength is what the adapter CLAIMS for an installed, current, healthy install; effective enforcement is computed at runtime by admission.effective_strength and is never stronger than the installed state proves. `response_enforcement` is a SEPARATE claim about the FINAL-RESPONSE contract only (EXEC-RESPONSE-01), never derived from `declared_strength`: MECHANICAL means a host hook can refuse the outgoing final message, ADVISORY means the contract reaches the model as instructions only, UNAVAILABLE means the host has no final-response surface at all. A host may claim MECHANICAL only with a `response_hook` token its own `hook_artifact` actually contains, and host-level trust evidence stays separate from the capability claim.",
+  "description": "Single declarative host adapter registry (SRC-028:R008). Every consumer -- tools/saipen_engine/admission.py, bootstrap/inject.ps1, bootstrap/inject.sh, tools/autoinject.py, status/freshness reporting and the parity tests -- reads host identity, install surfaces and enforcement capability from THIS file. No consumer may keep a second handwritten host inventory. declared_strength is what the adapter CLAIMS for an installed, current, healthy install; effective enforcement is computed at runtime by admission.effective_strength and is never stronger than the installed state proves. `response_enforcement` is a SEPARATE claim about the FINAL-RESPONSE contract only (EXEC-RESPONSE-01), never derived from `declared_strength`: MECHANICAL means a completed-part hook can replace/refuse model text or a post-render Stop hook can request one correction; it never implies invisible pre-stream prevention, ADVISORY means the contract reaches the model as instructions only, UNAVAILABLE means the host has no final-response surface at all. A host may claim MECHANICAL only with a `response_hook` token its own `hook_artifact` actually contains, and host-level trust evidence stays separate from the capability claim.",
   "activation_template": "saipen/ACTIVATION_BLOCK.md",
   "adapters": [
     {
@@ -31,7 +31,7 @@
       "declared_strength": "BLOCKING",
       "response_enforcement": "MECHANICAL",
       "response_hook": "experimental.text.complete",
-      "response_enforcement_note": "The final completed text part is checked through the same canonical authority; a mid-session `saipen init` activates it without a host restart.",
+      "response_enforcement_note": "Default operational completed parts are replaced by the canonical machine digest; oversized model text is not the delivered completed part. This is not a token-stream gate; previously streamed text and intermediate narration cannot be retracted. Explicit witnessed depth/artifacts remain separately gated.",
       "artifact_version": 1,
       "install": {
         "home": "~/.config/opencode",
@@ -54,7 +54,17 @@
         "host_thought_visibility_control": "UNAVAILABLE",
         "final_response_gate": "MECHANICAL"
       },
-      "execution_capability_note": "EXECUTION.md instructs silent tool continuation. No supported pre-render intermediate-text interception is installed; final/Stop hooks cannot retract streamed text. Machine progress uses canonical status and runtime heartbeat. Native thought UI is host-owned. Higher-priority host narration requirements take precedence and prevent a silence guarantee."
+      "execution_capability_note": "EXECUTION.md instructs silent tool continuation. No supported pre-render intermediate-text interception is installed; final/Stop hooks cannot retract streamed text. Machine progress uses canonical status and runtime heartbeat. Native thought UI is host-owned. Higher-priority host narration requirements take precedence and prevent a silence guarantee.",
+      "operator_ingress_capability": {
+        "exact_before_work_projection": "LAUNCH_CARRIER_ONLY",
+        "witness_without_launch_carrier": "model_supplied",
+        "transport_obligation": "PAYLOAD_FIDELITY_NOT_OPERATOR_IDENTITY",
+        "local_candidate_policy": "P2_OR_LOWER_NO_PREEMPTION_OR_GOAL_RESET",
+        "host_prompt_available": true,
+        "prompt_to_work_binding": "NOT_INSTALLED",
+        "response_depth_carrier": "CHAT_MESSAGE_TEXT_AT_COMPLETED_PART"
+      },
+      "visible_prevention": "COMPLETED_PART_ONLY_NOT_TOKEN_STREAM"
     },
     {
       "id": "claude",
@@ -79,7 +89,7 @@
       "declared_strength": "ADVISORY",
       "response_enforcement": "MECHANICAL",
       "response_hook": "last_assistant_message",
-      "response_enforcement_note": "The Stop event supplies the outgoing final message and one correction continuation is enforced for operational boundaries AND for ordinary chat that breaks the measurable STYLE.md contract (CHAT_STYLE_DRIFT). SEPARATE EVIDENCE, not part of this claim: a stop that is already a continuation records CLAUDE_STOP_REENTRY_NO_FAIL_CLOSED rather than closing fail-closed, and the hook is inert until installed (`python tools/install_host_guard.py claude`).",
+      "response_enforcement_note": "The Stop event supplies the outgoing final message and one correction continuation is enforced for operational boundaries AND for ordinary chat that breaks the measurable STYLE.md contract (CHAT_STYLE_DRIFT). SEPARATE EVIDENCE, not part of this claim: a stop that is already a continuation records CLAUDE_STOP_REENTRY_NO_FAIL_CLOSED rather than closing fail-closed, and the hook is inert until installed (`python tools/install_host_guard.py claude`). POST-RENDER: text already exists and may already be visible; no retraction or hard invisible prevention. Each fresh Stop gets the same canonical gate; re-entry remains one correction, not fail-closed.",
       "artifact_version": 1,
       "install": {
         "home": "~/.claude",
@@ -102,7 +112,17 @@
         "host_thought_visibility_control": "UNAVAILABLE",
         "final_response_gate": "MECHANICAL"
       },
-      "execution_capability_note": "EXECUTION.md instructs silent tool continuation. No supported pre-render intermediate-text interception is installed; final/Stop hooks cannot retract streamed text. Machine progress uses canonical status and runtime heartbeat. Native thought UI is host-owned. Higher-priority host narration requirements take precedence and prevent a silence guarantee."
+      "execution_capability_note": "EXECUTION.md instructs silent tool continuation. No supported pre-render intermediate-text interception is installed; final/Stop hooks cannot retract streamed text. Machine progress uses canonical status and runtime heartbeat. Native thought UI is host-owned. Higher-priority host narration requirements take precedence and prevent a silence guarantee.",
+      "operator_ingress_capability": {
+        "exact_before_work_projection": "LAUNCH_CARRIER_ONLY",
+        "witness_without_launch_carrier": "model_supplied",
+        "transport_obligation": "PAYLOAD_FIDELITY_NOT_OPERATOR_IDENTITY",
+        "local_candidate_policy": "P2_OR_LOWER_NO_PREEMPTION_OR_GOAL_RESET",
+        "host_prompt_available": true,
+        "prompt_to_work_binding": "NOT_INSTALLED",
+        "response_depth_carrier": "TRANSCRIPT_USER_TEXT_AT_STOP"
+      },
+      "visible_prevention": "POST_RENDER_ONE_CORRECTION_NO_RETRACTION"
     },
     {
       "id": "codex",
@@ -127,7 +147,7 @@
       "declared_strength": "ADVISORY",
       "response_enforcement": "MECHANICAL",
       "response_hook": "last_assistant_message",
-      "response_enforcement_note": "The supported Stop event supplies the outgoing final message and one correction continuation is enforced. SEPARATE EVIDENCE, not part of this claim: the hook requires host trust, and a Stop that is already a continuation records CODEX_STOP_REENTRY_NO_FAIL_CLOSED rather than closing fail-closed.",
+      "response_enforcement_note": "The supported Stop event supplies the outgoing final message and one correction continuation is enforced. SEPARATE EVIDENCE, not part of this claim: the hook requires host trust, and a Stop that is already a continuation records CODEX_STOP_REENTRY_NO_FAIL_CLOSED rather than closing fail-closed. POST-RENDER: text already exists and may already be visible; no retraction or hard invisible prevention. Each fresh Stop gets the same canonical gate; re-entry remains one correction, not fail-closed.",
       "artifact_version": 1,
       "install": {
         "home": "~/.codex",
@@ -148,7 +168,17 @@
         "host_thought_visibility_control": "UNAVAILABLE",
         "final_response_gate": "MECHANICAL"
       },
-      "execution_capability_note": "EXECUTION.md instructs silent tool continuation. No supported pre-render intermediate-text interception is installed; final/Stop hooks cannot retract streamed text. Machine progress uses canonical status and runtime heartbeat. Native thought UI is host-owned. Higher-priority host narration requirements take precedence and prevent a silence guarantee."
+      "execution_capability_note": "EXECUTION.md instructs silent tool continuation. No supported pre-render intermediate-text interception is installed; final/Stop hooks cannot retract streamed text. Machine progress uses canonical status and runtime heartbeat. Native thought UI is host-owned. Higher-priority host narration requirements take precedence and prevent a silence guarantee.",
+      "operator_ingress_capability": {
+        "exact_before_work_projection": "LAUNCH_CARRIER_ONLY",
+        "witness_without_launch_carrier": "model_supplied",
+        "transport_obligation": "PAYLOAD_FIDELITY_NOT_OPERATOR_IDENTITY",
+        "local_candidate_policy": "P2_OR_LOWER_NO_PREEMPTION_OR_GOAL_RESET",
+        "host_prompt_available": false,
+        "prompt_to_work_binding": "NOT_INSTALLED",
+        "response_depth_carrier": "UNAVAILABLE_AT_STOP_NO_TURN_INGRESS"
+      },
+      "visible_prevention": "POST_RENDER_ONE_CORRECTION_NO_RETRACTION"
     },
     {
       "id": "zaicode",
@@ -190,7 +220,17 @@
         "host_thought_visibility_control": "UNAVAILABLE",
         "final_response_gate": "ADVISORY"
       },
-      "execution_capability_note": "EXECUTION.md instructs silent tool continuation. No supported pre-render intermediate-text interception is installed; final/Stop hooks cannot retract streamed text. Machine progress uses canonical status and runtime heartbeat. Native thought UI is host-owned. Higher-priority host narration requirements take precedence and prevent a silence guarantee."
+      "execution_capability_note": "EXECUTION.md instructs silent tool continuation. No supported pre-render intermediate-text interception is installed; final/Stop hooks cannot retract streamed text. Machine progress uses canonical status and runtime heartbeat. Native thought UI is host-owned. Higher-priority host narration requirements take precedence and prevent a silence guarantee.",
+      "operator_ingress_capability": {
+        "exact_before_work_projection": "LAUNCH_CARRIER_ONLY",
+        "witness_without_launch_carrier": "model_supplied",
+        "transport_obligation": "PAYLOAD_FIDELITY_NOT_OPERATOR_IDENTITY",
+        "local_candidate_policy": "P2_OR_LOWER_NO_PREEMPTION_OR_GOAL_RESET",
+        "host_prompt_available": false,
+        "prompt_to_work_binding": "NOT_INSTALLED",
+        "response_depth_carrier": "LAUNCH_CARRIER_ONLY"
+      },
+      "visible_prevention": "ADVISORY_OR_UNAVAILABLE"
     },
     {
       "id": "zcode-production",
@@ -231,7 +271,17 @@
         "host_thought_visibility_control": "UNAVAILABLE",
         "final_response_gate": "ADVISORY"
       },
-      "execution_capability_note": "EXECUTION.md instructs silent tool continuation. No supported pre-render intermediate-text interception is installed; final/Stop hooks cannot retract streamed text. Machine progress uses canonical status and runtime heartbeat. Native thought UI is host-owned. Higher-priority host narration requirements take precedence and prevent a silence guarantee."
+      "execution_capability_note": "EXECUTION.md instructs silent tool continuation. No supported pre-render intermediate-text interception is installed; final/Stop hooks cannot retract streamed text. Machine progress uses canonical status and runtime heartbeat. Native thought UI is host-owned. Higher-priority host narration requirements take precedence and prevent a silence guarantee.",
+      "operator_ingress_capability": {
+        "exact_before_work_projection": "LAUNCH_CARRIER_ONLY",
+        "witness_without_launch_carrier": "model_supplied",
+        "transport_obligation": "PAYLOAD_FIDELITY_NOT_OPERATOR_IDENTITY",
+        "local_candidate_policy": "P2_OR_LOWER_NO_PREEMPTION_OR_GOAL_RESET",
+        "host_prompt_available": false,
+        "prompt_to_work_binding": "NOT_INSTALLED",
+        "response_depth_carrier": "LAUNCH_CARRIER_ONLY"
+      },
+      "visible_prevention": "ADVISORY_OR_UNAVAILABLE"
     },
     {
       "id": "gemini",
@@ -276,7 +326,17 @@
         "host_thought_visibility_control": "UNAVAILABLE",
         "final_response_gate": "ADVISORY"
       },
-      "execution_capability_note": "EXECUTION.md instructs silent tool continuation. No supported pre-render intermediate-text interception is installed; final/Stop hooks cannot retract streamed text. Machine progress uses canonical status and runtime heartbeat. Native thought UI is host-owned. Higher-priority host narration requirements take precedence and prevent a silence guarantee."
+      "execution_capability_note": "EXECUTION.md instructs silent tool continuation. No supported pre-render intermediate-text interception is installed; final/Stop hooks cannot retract streamed text. Machine progress uses canonical status and runtime heartbeat. Native thought UI is host-owned. Higher-priority host narration requirements take precedence and prevent a silence guarantee.",
+      "operator_ingress_capability": {
+        "exact_before_work_projection": "LAUNCH_CARRIER_ONLY",
+        "witness_without_launch_carrier": "model_supplied",
+        "transport_obligation": "PAYLOAD_FIDELITY_NOT_OPERATOR_IDENTITY",
+        "local_candidate_policy": "P2_OR_LOWER_NO_PREEMPTION_OR_GOAL_RESET",
+        "host_prompt_available": false,
+        "prompt_to_work_binding": "NOT_INSTALLED",
+        "response_depth_carrier": "LAUNCH_CARRIER_ONLY"
+      },
+      "visible_prevention": "ADVISORY_OR_UNAVAILABLE"
     },
     {
       "id": "codebuddy",
@@ -312,7 +372,17 @@
         "host_thought_visibility_control": "UNAVAILABLE",
         "final_response_gate": "ADVISORY"
       },
-      "execution_capability_note": "EXECUTION.md instructs silent tool continuation. No supported pre-render intermediate-text interception is installed; final/Stop hooks cannot retract streamed text. Machine progress uses canonical status and runtime heartbeat. Native thought UI is host-owned. Higher-priority host narration requirements take precedence and prevent a silence guarantee."
+      "execution_capability_note": "EXECUTION.md instructs silent tool continuation. No supported pre-render intermediate-text interception is installed; final/Stop hooks cannot retract streamed text. Machine progress uses canonical status and runtime heartbeat. Native thought UI is host-owned. Higher-priority host narration requirements take precedence and prevent a silence guarantee.",
+      "operator_ingress_capability": {
+        "exact_before_work_projection": "LAUNCH_CARRIER_ONLY",
+        "witness_without_launch_carrier": "model_supplied",
+        "transport_obligation": "PAYLOAD_FIDELITY_NOT_OPERATOR_IDENTITY",
+        "local_candidate_policy": "P2_OR_LOWER_NO_PREEMPTION_OR_GOAL_RESET",
+        "host_prompt_available": false,
+        "prompt_to_work_binding": "NOT_INSTALLED",
+        "response_depth_carrier": "LAUNCH_CARRIER_ONLY"
+      },
+      "visible_prevention": "ADVISORY_OR_UNAVAILABLE"
     },
     {
       "id": "freebuff",
@@ -370,7 +440,17 @@
         "host_thought_visibility_control": "UNAVAILABLE",
         "final_response_gate": "ADVISORY"
       },
-      "execution_capability_note": "EXECUTION.md instructs silent tool continuation. No supported pre-render intermediate-text interception is installed; final/Stop hooks cannot retract streamed text. Machine progress uses canonical status and runtime heartbeat. Native thought UI is host-owned. Higher-priority host narration requirements take precedence and prevent a silence guarantee."
+      "execution_capability_note": "EXECUTION.md instructs silent tool continuation. No supported pre-render intermediate-text interception is installed; final/Stop hooks cannot retract streamed text. Machine progress uses canonical status and runtime heartbeat. Native thought UI is host-owned. Higher-priority host narration requirements take precedence and prevent a silence guarantee.",
+      "operator_ingress_capability": {
+        "exact_before_work_projection": "LAUNCH_CARRIER_ONLY",
+        "witness_without_launch_carrier": "model_supplied",
+        "transport_obligation": "PAYLOAD_FIDELITY_NOT_OPERATOR_IDENTITY",
+        "local_candidate_policy": "P2_OR_LOWER_NO_PREEMPTION_OR_GOAL_RESET",
+        "host_prompt_available": false,
+        "prompt_to_work_binding": "NOT_INSTALLED",
+        "response_depth_carrier": "LAUNCH_CARRIER_ONLY"
+      },
+      "visible_prevention": "ADVISORY_OR_UNAVAILABLE"
     },
     {
       "id": "aider",
@@ -406,7 +486,17 @@
         "host_thought_visibility_control": "UNAVAILABLE",
         "final_response_gate": "ADVISORY"
       },
-      "execution_capability_note": "EXECUTION.md instructs silent tool continuation. No supported pre-render intermediate-text interception is installed; final/Stop hooks cannot retract streamed text. Machine progress uses canonical status and runtime heartbeat. Native thought UI is host-owned. Higher-priority host narration requirements take precedence and prevent a silence guarantee."
+      "execution_capability_note": "EXECUTION.md instructs silent tool continuation. No supported pre-render intermediate-text interception is installed; final/Stop hooks cannot retract streamed text. Machine progress uses canonical status and runtime heartbeat. Native thought UI is host-owned. Higher-priority host narration requirements take precedence and prevent a silence guarantee.",
+      "operator_ingress_capability": {
+        "exact_before_work_projection": "LAUNCH_CARRIER_ONLY",
+        "witness_without_launch_carrier": "model_supplied",
+        "transport_obligation": "PAYLOAD_FIDELITY_NOT_OPERATOR_IDENTITY",
+        "local_candidate_policy": "P2_OR_LOWER_NO_PREEMPTION_OR_GOAL_RESET",
+        "host_prompt_available": false,
+        "prompt_to_work_binding": "NOT_INSTALLED",
+        "response_depth_carrier": "LAUNCH_CARRIER_ONLY"
+      },
+      "visible_prevention": "ADVISORY_OR_UNAVAILABLE"
     },
     {
       "id": "antigravity",
@@ -442,7 +532,17 @@
         "host_thought_visibility_control": "UNAVAILABLE",
         "final_response_gate": "ADVISORY"
       },
-      "execution_capability_note": "EXECUTION.md instructs silent tool continuation. No supported pre-render intermediate-text interception is installed; final/Stop hooks cannot retract streamed text. Machine progress uses canonical status and runtime heartbeat. Native thought UI is host-owned. Higher-priority host narration requirements take precedence and prevent a silence guarantee."
+      "execution_capability_note": "EXECUTION.md instructs silent tool continuation. No supported pre-render intermediate-text interception is installed; final/Stop hooks cannot retract streamed text. Machine progress uses canonical status and runtime heartbeat. Native thought UI is host-owned. Higher-priority host narration requirements take precedence and prevent a silence guarantee.",
+      "operator_ingress_capability": {
+        "exact_before_work_projection": "LAUNCH_CARRIER_ONLY",
+        "witness_without_launch_carrier": "model_supplied",
+        "transport_obligation": "PAYLOAD_FIDELITY_NOT_OPERATOR_IDENTITY",
+        "local_candidate_policy": "P2_OR_LOWER_NO_PREEMPTION_OR_GOAL_RESET",
+        "host_prompt_available": false,
+        "prompt_to_work_binding": "NOT_INSTALLED",
+        "response_depth_carrier": "LAUNCH_CARRIER_ONLY"
+      },
+      "visible_prevention": "ADVISORY_OR_UNAVAILABLE"
     },
     {
       "id": "kiro",
@@ -487,7 +587,17 @@
         "host_thought_visibility_control": "UNAVAILABLE",
         "final_response_gate": "UNAVAILABLE"
       },
-      "execution_capability_note": "EXECUTION.md instructs silent tool continuation. No supported pre-render intermediate-text interception is installed; final/Stop hooks cannot retract streamed text. Machine progress uses canonical status and runtime heartbeat. Native thought UI is host-owned. Higher-priority host narration requirements take precedence and prevent a silence guarantee."
+      "execution_capability_note": "EXECUTION.md instructs silent tool continuation. No supported pre-render intermediate-text interception is installed; final/Stop hooks cannot retract streamed text. Machine progress uses canonical status and runtime heartbeat. Native thought UI is host-owned. Higher-priority host narration requirements take precedence and prevent a silence guarantee.",
+      "operator_ingress_capability": {
+        "exact_before_work_projection": "LAUNCH_CARRIER_ONLY",
+        "witness_without_launch_carrier": "model_supplied",
+        "transport_obligation": "PAYLOAD_FIDELITY_NOT_OPERATOR_IDENTITY",
+        "local_candidate_policy": "P2_OR_LOWER_NO_PREEMPTION_OR_GOAL_RESET",
+        "host_prompt_available": false,
+        "prompt_to_work_binding": "NOT_INSTALLED",
+        "response_depth_carrier": "LAUNCH_CARRIER_ONLY"
+      },
+      "visible_prevention": "ADVISORY_OR_UNAVAILABLE"
     },
     {
       "id": "deepseek",
@@ -516,7 +626,17 @@
         "host_thought_visibility_control": "UNAVAILABLE",
         "final_response_gate": "ADVISORY"
       },
-      "execution_capability_note": "EXECUTION.md instructs silent tool continuation. No supported pre-render intermediate-text interception is installed; final/Stop hooks cannot retract streamed text. Machine progress uses canonical status and runtime heartbeat. Native thought UI is host-owned. Higher-priority host narration requirements take precedence and prevent a silence guarantee."
+      "execution_capability_note": "EXECUTION.md instructs silent tool continuation. No supported pre-render intermediate-text interception is installed; final/Stop hooks cannot retract streamed text. Machine progress uses canonical status and runtime heartbeat. Native thought UI is host-owned. Higher-priority host narration requirements take precedence and prevent a silence guarantee.",
+      "operator_ingress_capability": {
+        "exact_before_work_projection": "LAUNCH_CARRIER_ONLY",
+        "witness_without_launch_carrier": "model_supplied",
+        "transport_obligation": "PAYLOAD_FIDELITY_NOT_OPERATOR_IDENTITY",
+        "local_candidate_policy": "P2_OR_LOWER_NO_PREEMPTION_OR_GOAL_RESET",
+        "host_prompt_available": false,
+        "prompt_to_work_binding": "NOT_INSTALLED",
+        "response_depth_carrier": "LAUNCH_CARRIER_ONLY"
+      },
+      "visible_prevention": "ADVISORY_OR_UNAVAILABLE"
     },
     {
       "id": "openai",
@@ -545,7 +665,17 @@
         "host_thought_visibility_control": "UNAVAILABLE",
         "final_response_gate": "ADVISORY"
       },
-      "execution_capability_note": "EXECUTION.md instructs silent tool continuation. No supported pre-render intermediate-text interception is installed; final/Stop hooks cannot retract streamed text. Machine progress uses canonical status and runtime heartbeat. Native thought UI is host-owned. Higher-priority host narration requirements take precedence and prevent a silence guarantee."
+      "execution_capability_note": "EXECUTION.md instructs silent tool continuation. No supported pre-render intermediate-text interception is installed; final/Stop hooks cannot retract streamed text. Machine progress uses canonical status and runtime heartbeat. Native thought UI is host-owned. Higher-priority host narration requirements take precedence and prevent a silence guarantee.",
+      "operator_ingress_capability": {
+        "exact_before_work_projection": "LAUNCH_CARRIER_ONLY",
+        "witness_without_launch_carrier": "model_supplied",
+        "transport_obligation": "PAYLOAD_FIDELITY_NOT_OPERATOR_IDENTITY",
+        "local_candidate_policy": "P2_OR_LOWER_NO_PREEMPTION_OR_GOAL_RESET",
+        "host_prompt_available": false,
+        "prompt_to_work_binding": "NOT_INSTALLED",
+        "response_depth_carrier": "LAUNCH_CARRIER_ONLY"
+      },
+      "visible_prevention": "ADVISORY_OR_UNAVAILABLE"
     },
     {
       "id": "qwen",
@@ -574,7 +704,17 @@
         "host_thought_visibility_control": "UNAVAILABLE",
         "final_response_gate": "ADVISORY"
       },
-      "execution_capability_note": "EXECUTION.md instructs silent tool continuation. No supported pre-render intermediate-text interception is installed; final/Stop hooks cannot retract streamed text. Machine progress uses canonical status and runtime heartbeat. Native thought UI is host-owned. Higher-priority host narration requirements take precedence and prevent a silence guarantee."
+      "execution_capability_note": "EXECUTION.md instructs silent tool continuation. No supported pre-render intermediate-text interception is installed; final/Stop hooks cannot retract streamed text. Machine progress uses canonical status and runtime heartbeat. Native thought UI is host-owned. Higher-priority host narration requirements take precedence and prevent a silence guarantee.",
+      "operator_ingress_capability": {
+        "exact_before_work_projection": "LAUNCH_CARRIER_ONLY",
+        "witness_without_launch_carrier": "model_supplied",
+        "transport_obligation": "PAYLOAD_FIDELITY_NOT_OPERATOR_IDENTITY",
+        "local_candidate_policy": "P2_OR_LOWER_NO_PREEMPTION_OR_GOAL_RESET",
+        "host_prompt_available": false,
+        "prompt_to_work_binding": "NOT_INSTALLED",
+        "response_depth_carrier": "LAUNCH_CARRIER_ONLY"
+      },
+      "visible_prevention": "ADVISORY_OR_UNAVAILABLE"
     },
     {
       "id": "generic",
@@ -603,7 +743,17 @@
         "host_thought_visibility_control": "UNAVAILABLE",
         "final_response_gate": "UNAVAILABLE"
       },
-      "execution_capability_note": "EXECUTION.md instructs silent tool continuation. No supported pre-render intermediate-text interception is installed; final/Stop hooks cannot retract streamed text. Machine progress uses canonical status and runtime heartbeat. Native thought UI is host-owned. Higher-priority host narration requirements take precedence and prevent a silence guarantee."
+      "execution_capability_note": "EXECUTION.md instructs silent tool continuation. No supported pre-render intermediate-text interception is installed; final/Stop hooks cannot retract streamed text. Machine progress uses canonical status and runtime heartbeat. Native thought UI is host-owned. Higher-priority host narration requirements take precedence and prevent a silence guarantee.",
+      "operator_ingress_capability": {
+        "exact_before_work_projection": "LAUNCH_CARRIER_ONLY",
+        "witness_without_launch_carrier": "model_supplied",
+        "transport_obligation": "PAYLOAD_FIDELITY_NOT_OPERATOR_IDENTITY",
+        "local_candidate_policy": "P2_OR_LOWER_NO_PREEMPTION_OR_GOAL_RESET",
+        "host_prompt_available": false,
+        "prompt_to_work_binding": "NOT_INSTALLED",
+        "response_depth_carrier": "LAUNCH_CARRIER_ONLY"
+      },
+      "visible_prevention": "ADVISORY_OR_UNAVAILABLE"
     }
   ]
 }

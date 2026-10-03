@@ -47,6 +47,7 @@ import subprocess
 import sys
 import tempfile
 import unittest
+from unittest.mock import patch
 from pathlib import Path
 
 TOOLS = Path(__file__).resolve().parent
@@ -55,7 +56,7 @@ if str(TOOLS) not in sys.path:
     sys.path.insert(0, str(TOOLS))
 from test_fixture_support import CURRENT_STYLE_CONTRACT  # noqa: E402
 
-from saipen_engine import fast_check, intake  # noqa: E402
+from saipen_engine import fast_check, intake, operator_task, pending_ingress  # noqa: E402
 from saipen_engine.board import parse_board  # noqa: E402
 from saipen_engine.journal import ensure_project_lineage  # noqa: E402
 from saipen_engine.log import read_history_snapshot  # noqa: E402
@@ -125,7 +126,7 @@ class RetirementFixture(unittest.TestCase):
             "saipen_version: 8\n"
             "schema_version: 3\n"
             "last_event: 1\n"
-            'style_contract: ' + CURRENT_STYLE_CONTRACT + '\n'
+            "style_contract: " + CURRENT_STYLE_CONTRACT + "\n"
             f'saipen_home: "{str(ROOT).replace(chr(92), chr(92) * 2)}"\n'
             f"agent: {agent}\n"
             "requires:\n  - filesystem\n  - python\n"
@@ -170,13 +171,24 @@ class RetirementFixture(unittest.TestCase):
         return "T-7", child, receipt
 
     def capture(self, project: Path, text: str, kind: str = "user_instruction") -> str:
-        captured = intake.capture(project, text, source_kind=kind)
+        captured = intake.capture(
+            project,
+            text,
+            source_kind=kind,
+            request_provenance=operator_task.witness(
+                text, env={operator_task.ENV_TASK_SHA256: pending_ingress.ingress_digest(text)}
+            ),
+        )
         self.assertTrue(captured["ok"], captured)
         return captured["receipt"]
 
     def authority(self, project: Path, ticket: str, receipt: str | None, agent: str = AGENT) -> str:
         """Capture the operator decision the way the real one arrived."""
-        decision = user_request(project, agent, authority_text(ticket, receipt))
+        text = authority_text(ticket, receipt)
+        with patch.dict(
+            os.environ, {operator_task.ENV_TASK_SHA256: pending_ingress.ingress_digest(text)}
+        ):
+            decision = user_request(project, agent, text)
         self.assertTrue(decision.ok, decision.to_dict())
         return decision.data["receipt"]
 
@@ -416,14 +428,11 @@ class GreenPathTests(RetirementFixture):
             ).ok
         )
         # ONE operator decision covering both, exactly like SRC-049.
-        decision = user_request(
+        authority = self.capture(
             project,
-            AGENT,
             "OPERATOR DECISION\n\nBoth are contamination.\n\n"
             + capsule(f"{child} / {child_receipt}", f"{grandchild} / {grand_receipt}"),
         )
-        self.assertTrue(decision.ok, decision.to_dict())
-        authority = decision.data["receipt"]
 
         first = self.retire(project, grandchild, authority)
         self.assertTrue(first.ok, first.to_dict())
@@ -524,7 +533,15 @@ class HostileControlTests(RetirementFixture):
             self.assertFalse(refused.ok, bogus)
             self.assertEqual(refused.code, "RETIREMENT_REASON_UNKNOWN", bogus)
         self.assertIn(child, self.board(project)["tickets"])
-        self.assertEqual(RETIREMENT_REASONS, (REASON, "TEST_FIXTURE_CONTAMINATION"))
+        self.assertEqual(
+            RETIREMENT_REASONS,
+            (
+                REASON,
+                "TEST_FIXTURE_CONTAMINATION",
+                "FALSE_AUTHORITY_PROJECTION",
+                "INVALID_INVOCATION",
+            ),
+        )
 
     def test_control_7_repeating_a_retirement_is_deterministic(self):
         project = self.make_project()

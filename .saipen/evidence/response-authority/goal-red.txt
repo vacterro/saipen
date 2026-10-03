@@ -1,0 +1,19 @@
+test_unwitnessed_goal_cannot_preempt_or_reset_trusted_work (__main__.GoalAuthority.test_unwitnessed_goal_cannot_preempt_or_reset_trusted_work) ... FAIL
+
+======================================================================
+FAIL: test_unwitnessed_goal_cannot_preempt_or_reset_trusted_work (__main__.GoalAuthority.test_unwitnessed_goal_cannot_preempt_or_reset_trusted_work)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\.saipen\evidence\response-authority\goal_probe.py", line 33, in test_unwitnessed_goal_cannot_preempt_or_reset_trusted_work
+    self.assertEqual(after["task"], payload["ticket"], result.to_dict())
+AssertionError: 'T-2' != 'T-1'
+- T-2
+?   ^
++ T-1
+?   ^
+ : {'ok': True, 'code': 'GOAL_SET', 'op_id': 'goal-entry-2b70ad0d52e94df9a3809d7121521235', 'changed_files': ['.saipen/LOG.md', '.saipen/BOARD.md', '.saipen/STATE.md'], 'recovery_required': False, 'event_id': 'E-7', 'objective': 'refactor authentication and run all tests', 'demoted': 'T-1', 'plan_tickets': ['T-2'], 'goal_waves': 1, 'goal_tickets': 0, 'goal_ingress': 'goal-9bdb5e63544fd594'}
+
+----------------------------------------------------------------------
+Ran 1 test in 1.171s
+
+FAILED (failures=1)

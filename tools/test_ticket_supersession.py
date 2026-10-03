@@ -44,11 +44,7 @@ def _tree_digest(root: Path) -> str:
 
 
 def _grant(old: str, new: str) -> str:
-    return (
-        f"{supersession.GRANT_HEADER}\n\n"
-        f"    {old} - {new}\n\n"
-        f"{supersession.GRANT_TERMINATOR}\n"
-    )
+    return f"{supersession.GRANT_HEADER}\n\n    {old} - {new}\n\n{supersession.GRANT_TERMINATOR}\n"
 
 
 class SupersessionFixture(OrchestrationFixture):
@@ -367,10 +363,15 @@ class BoardModelTests(unittest.TestCase):
                     any(fragment in error for error in closure_metadata_errors(self.ticket(fields)))
                 )
 
-    def test_retirement_vocabulary_is_unchanged(self):
+    def test_retirement_vocabulary_includes_bounded_system_corrections(self):
         self.assertEqual(
             RETIREMENT_REASONS,
-            ("MISROUTED_PROJECT_BINDING", "TEST_FIXTURE_CONTAMINATION"),
+            (
+                "MISROUTED_PROJECT_BINDING",
+                "TEST_FIXTURE_CONTAMINATION",
+                "FALSE_AUTHORITY_PROJECTION",
+                "INVALID_INVOCATION",
+            ),
         )
 
 

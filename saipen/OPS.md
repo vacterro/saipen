@@ -253,9 +253,11 @@ upgraded, and the request text is never rewritten. PLAN refuses -- zero
 writes -- unless all of these hold:
 
 - `--reason` is in the registered closed set (`RETIREMENT_REASONS`;
-  `MISROUTED_PROJECT_BINDING` today). A free-text reason is
+  MISROUTED_PROJECT_BINDING, TEST_FIXTURE_CONTAMINATION,
+  FALSE_AUTHORITY_PROJECTION, INVALID_INVOCATION). A free-text reason is
   `RETIREMENT_REASON_UNKNOWN`;
-- `--authority` is an ACTIVE operator-ingress receipt (not an imported spec or
+- For ordinary retirement, `--authority` is an ACTIVE witnessed
+  operator_carrier ingress receipt (not an imported spec or
   external audit, not linked to the Work being retired) whose OWN STORED BYTES
   carry an operator-authority capsule GRANTING this ticket with exactly the
   receipts it carries. Naming Work is not authorizing it: "DO NOT retire
@@ -275,6 +277,14 @@ writes -- unless all of these hold:
   inside a fenced code block is a quotation; two grants of one ticket with
   different receipt sets grant nothing. The grammar is consumed by
   retirement only;
+- Narrow SYSTEM_CORRECTION needs no invented human capsule: false authority
+  requires the original user_explicit projection, unwitnessed exact source,
+  exclusively linked Work, zero clauses/requirements, and no implementation
+  phase in canonical history. INVALID_INVOCATION requires its prior canonical
+  non-Work event and intact empty ledgers. Machine proof, not a model label,
+  owns this capability. Archived ledgers/provenance and prior history are
+  revalidated; a DONE history is never rewritten. Repair the false seat via
+  canonical handback, then retirement restores the legitimate parent.
 - `--evidence` RESOLVES: a canonical LOG event `E-###` that precedes the
   retirement, or an owned regular artifact under `.saipen/evidence/` whose
   sha256 (CRLF folded to LF, so a checkout's line-ending policy is not a

@@ -34,10 +34,17 @@ from saipen_engine.operations import (  # noqa: E402
     ticket_add,
     ticket_move,
     transition_phase,
-    user_request,
+    user_request as _user_request,
 )
 from saipen_engine.router import route_next  # noqa: E402
 from saipen_engine.state import parse_state  # noqa: E402
+from test_fixture_support import witnessed_operator  # noqa: E402
+
+
+def user_request(project, actor, text, **kwargs):
+    """This suite's operator interruptions carry an exact external witness."""
+    with witnessed_operator(text):
+        return _user_request(project, actor, text, **kwargs)
 
 
 class OrchestrationFixture(unittest.TestCase):
@@ -61,7 +68,7 @@ class OrchestrationFixture(unittest.TestCase):
             "saipen_version: 7\n"
             "schema_version: 3\n"
             "last_event: 1\n"
-            'style_contract: ' + CURRENT_STYLE_CONTRACT + '\n'
+            "style_contract: " + CURRENT_STYLE_CONTRACT + "\n"
             f'saipen_home: "{str(ROOT).replace(chr(92), chr(92) * 2)}"\n'
             "agent: tester\n"
             "requires:\n  - filesystem\n  - python\n"
@@ -494,15 +501,11 @@ class ClosureProvenanceTests(OrchestrationFixture):
         # FINDING 4: durable cohort authority, not BOARD prose -- membership
         # binds each ticket to the exact shared-bytes identity.
         registry = json.loads(
-            (project / ".saipen" / "kitchen" / "cohort_registry.json").read_text(
-                encoding="utf-8"
-            )
+            (project / ".saipen" / "kitchen" / "cohort_registry.json").read_text(encoding="utf-8")
         )
         cohort = registry["cohorts"]["C-001"]
         self.assertEqual(cohort["publication_status"], "pending")
-        self.assertEqual(
-            set(cohort["members"]), {"T-7", second}, cohort["members"]
-        )
+        self.assertEqual(set(cohort["members"]), {"T-7", second}, cohort["members"])
         for member, record in cohort["members"].items():
             # Hash of the LIVE bytes on disk (write_text may newline-translate).
             from saipen_engine.operations import hash_bytes

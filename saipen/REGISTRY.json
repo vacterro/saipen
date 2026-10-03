@@ -1087,6 +1087,7 @@
   "CLOSURE_CONTRADICTION",
   "ATTRIBUTES_POLICY_UNAVAILABLE",
   "EXEC_RESPONSE_INVALID",
+  "RESPONSE_FACT_INVALID",
   "INIT_REFUSED",
   "NON_JSON_SEGMENT_OUTPUT",
   "MAILBOX_ATTACH_SKIPPED",
@@ -1168,7 +1169,7 @@
    "final_report",
    "evidence"
   ],
-  "final_report_max_lines": 20
+  "final_report_max_lines": 6
  },
  "audit_enqueue": {
   "rule_id": "SOURCE-AUDIT-ENQUEUE-01",

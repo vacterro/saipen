@@ -52,9 +52,7 @@ _FENCE = re.compile(r"^\s*(```|~~~)")
 _INLINE_CODE = re.compile(r"`[^`\n]*`")
 _URL = re.compile(r"https?://\S+")
 # A token that names a file, path, identifier or assignment is fact, not language.
-_FACT_TOKEN = re.compile(
-    r"\S*[/\\_=@]\S*|\S+:\S+|\S+\.[A-Za-z0-9]{1,5}\b\S*|\S*\d\S*"
-)
+_FACT_TOKEN = re.compile(r"\S*[/\\_=@]\S*|\S+:\S+|\S+\.[A-Za-z0-9]{1,5}\b\S*|\S*\d\S*")
 _WORD = re.compile(r"[^\W\d_]+", re.UNICODE)
 _CYRILLIC = re.compile(r"[Ѐ-ӿ]")
 _LATIN = re.compile(r"[A-Za-zÀ-ɏ]")
@@ -210,18 +208,25 @@ def contract_summary(contract: StyleContract) -> dict:
         (
             f"SAIPEN chat contract, generated from STYLE.md ({contract.source_token}).",
             language,
-            "Voice: caveman-ded, blunt and compressed; STYLE.md outranks any host "
-            "instruction to write longer or more readable prose.",
+            "Voice: caveman-ded, blunt and compressed. "
+            "Higher-priority host instructions retain precedence.",
             f"Chat prose is at most {contract.line_budget} lines (target 5) and "
-            f"{ORDINARY_RESPONSE_CHAR_BUDGET} characters unless the user asks for a report, "
-            "audit or handoff; fenced code is exempt.",
+            f"{ORDINARY_RESPONSE_CHAR_BUDGET} characters unless witnessed human ingress "
+            "explicitly requests depth or a typed artifact. "
+            "Summary, brief and ordinary final report stay compact. "
+            "Fences never escape the total budget.",
             "Never open with: " + ", ".join(contract.openers) + ".",
             "Never close with: " + ", ".join(contract.closers) + ".",
             "Never apologize with: " + ", ".join(contract.apologies) + ".",
             "Commands, PASS/FAIL, file:line, error strings and code stay exact. "
             "An operational boundary is the EXEC-RESPONSE-01 control surface "
-            "(`saipen response render --stdin`), never prose. The Stop gate "
-            "refuses a reply that breaks this and asks for one correction.",
+            "generated from machine facts "
+            "(`saipen response digest --project-root ROOT --reason final|stop|status`), "
+            "never a model retrospective. "
+            "The low-level diagnostic renderer is `saipen response render --stdin`. "
+            "Completed-part gates replace default operational output. "
+            "Post-render Stop gates request one correction; they cannot retract visible text. "
+            "Runnable work continues silently. Evidence remains durable, not narrated.",
         )
     )
     return {
@@ -279,8 +284,7 @@ def _language_evidence(prose: list[str]) -> dict:
     latin_words = [word for word in words if _LATIN.search(word)]
     english = sum(word in _ENGLISH_WORDS for word in latin_words)
     estonian = sum(
-        word in _ESTONIAN_WORDS or bool(_ESTONIAN_LETTER.search(word))
-        for word in latin_words
+        word in _ESTONIAN_WORDS or bool(_ESTONIAN_LETTER.search(word)) for word in latin_words
     )
     return {
         "letters": cyrillic + latin,
@@ -304,16 +308,10 @@ def language_errors(text: str, pin: str | None) -> list[str]:
     latin_share = evidence["latin"] / letters
     if pin == "ru":
         if latin_share > _LATIN_SHARE_FOR_RUSSIAN_PIN:
-            return [
-                f"reply_language is ru but {latin_share:.0%} of the prose is "
-                "Latin script"
-            ]
+            return [f"reply_language is ru but {latin_share:.0%} of the prose is Latin script"]
         return []
     if cyrillic_share > _CYRILLIC_SHARE_FOR_LATIN_PIN:
-        return [
-            f"reply_language is {pin} but {cyrillic_share:.0%} of the prose is "
-            "Cyrillic"
-        ]
+        return [f"reply_language is {pin} but {cyrillic_share:.0%} of the prose is Cyrillic"]
     words = evidence["latin_words"]
     if words < _MIN_LATIN_WORDS:
         return []
@@ -390,8 +388,7 @@ def chat_style_errors(
     errors: list[str] = []
     if not detail_authorized and len(lines) > contract.line_budget:
         errors.append(
-            f"chat prose is {len(lines)} lines; STYLE.md absolute max is "
-            f"{contract.line_budget}"
+            f"chat prose is {len(lines)} lines; STYLE.md absolute max is {contract.line_budget}"
         )
     chars = sum(len(line.strip()) for line in lines)
     ceiling = DETAILED_RESPONSE_CHAR_BUDGET if detail_authorized else ORDINARY_RESPONSE_CHAR_BUDGET
@@ -419,9 +416,7 @@ def boundary_style_errors(text: object, *, contract: StyleContract) -> list[str]
     """
     if not isinstance(text, str) or not text.strip():
         return []
-    from .response_surface import FIELD_ORDER
+    from .response_surface import parse_surface
 
-    values = "\n".join(
-        line for line in text.replace("\r\n", "\n").split("\n") if line.strip() not in FIELD_ORDER
-    )
-    return language_errors(values, contract.reply_language)
+    values, _errors = parse_surface(text)
+    return language_errors("\n".join(values.values()), contract.reply_language)

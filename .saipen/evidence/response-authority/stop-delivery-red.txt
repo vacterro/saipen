@@ -1,0 +1,15 @@
+F
+======================================================================
+FAIL: test_stop_checkpoint_has_canonical_delivery_and_durable_facts (test_response_delivery.RepeatedStateDigest.test_stop_checkpoint_has_canonical_delivery_and_durable_facts)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_response_delivery.py", line 39, in test_stop_checkpoint_has_canonical_delivery_and_durable_facts
+    self.assertIn("delivery", result.data)
+AssertionError: 'delivery' not found in {'next_action': 'saipen continue', 'digest': 'V:\\_TEMP_\\tmp9nhxvo4v\\.saipen\\kitchen\\digest.md', 'digest_lines': ['done: stopped via SAIOPS checkpoint', 'remaining: none', 'awaiting: nothing'], 'op_id': 'stop-0e8e4d96b47548b29bcd48b7f18c6fe6', 'recovery_required': False, 'changed_files': ['.saipen/LOG.md', '.saipen/STATE.md', '.saipen/kitchen/digest.md']}
+
+----------------------------------------------------------------------
+Ran 1 test in 0.071s
+
+FAILED (failures=1)
+
+

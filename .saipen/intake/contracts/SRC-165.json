@@ -1,0 +1,189 @@
+{
+  "clauses": {
+    "SRC-165:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "`model_supplied` remains distinguishable from trusted operator provenance."
+    },
+    "SRC-165:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Source persistence no longer silently grants operator authority."
+    },
+    "SRC-165:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Unwitnessed/model-supplied ingress cannot silently preempt active legitimate\n   Work as `user_explicit`."
+    },
+    "SRC-165:R004": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Unwitnessed ingress cannot silently pivot `/goal` as trusted human authority."
+    },
+    "SRC-165:R005": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Exact SRC-164/T-1599 incident is RED before and GREEN after."
+    },
+    "SRC-165:R006": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Exact SRC-146/T-1573 history has a regression preventing INVALID/NON_WORK\n   from drifting through a fake implementation lifecycle."
+    },
+    "SRC-165:R007": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "T-1599 is canonically disposed without manual BOARD/STATE/LOG mutation."
+    },
+    "SRC-165:R008": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "T-1510 trajectory is restored coherently if still applicable."
+    },
+    "SRC-165:R009": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Runnable work defaults to silent continuation."
+    },
+    "SRC-165:R010": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Normal DONE is compact."
+    },
+    "SRC-165:R011": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "`saipen stop` produces a compact handback, not a retrospective."
+    },
+    "SRC-165:R012": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Human blocker output contains only decision/action-relevant information."
+    },
+    "SRC-165:R013": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Large internal evidence does not linearly enlarge default chat."
+    },
+    "SRC-165:R014": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Large blocker inventories are summarized by default."
+    },
+    "SRC-165:R015": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Commit/evidence/test inventories are summarized by default."
+    },
+    "SRC-165:R016": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Requested deep reports remain possible."
+    },
+    "SRC-165:R017": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Requested handoffs/audits/specs remain possible as explicit artifacts."
+    },
+    "SRC-165:R018": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "A request for \"summary\" or \"brief\" does NOT authorize a larger detail\n    budget."
+    },
+    "SRC-165:R019": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Explicit deep-detail authorization works in supported ingress languages."
+    },
+    "SRC-165:R020": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Model reasoning cannot authorize its own verbosity."
+    },
+    "SRC-165:R021": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "DETAILS is never available by default."
+    },
+    "SRC-165:R022": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "No code-fence or artifact-shaped bypass allows unsolicited novels."
+    },
+    "SRC-165:R023": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Semantic facts are not redundantly repeated across response fields."
+    },
+    "SRC-165:R024": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Default response size is approximately constant relative to internal\n    evidence volume."
+    },
+    "SRC-165:R025": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "OpenCode claims match actual installed behavior."
+    },
+    "SRC-165:R026": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Claude claims match actual Stop/prompt capabilities."
+    },
+    "SRC-165:R027": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Codex claims match actual Stop/trust/post-render limitations."
+    },
+    "SRC-165:R028": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "ZAICODE/ZCode remain honestly ADVISORY where no hook exists."
+    },
+    "SRC-165:R029": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Intermediate suppression and final-response enforcement remain separate\n    capabilities."
+    },
+    "SRC-165:R030": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "No post-render hook is described as pre-render prevention."
+    },
+    "SRC-165:R031": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Same-incident RED -> GREEN evidence exists."
+    },
+    "SRC-165:R032": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Canonical validate is CURRENT_PASS."
+    },
+    "SRC-165:R033": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Full declared core has red=0 and new_red=0."
+    },
+    "SRC-165:R034": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "No protocol state was manually falsified."
+    },
+    "SRC-165:R035": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "No unrelated publication occurred."
+    },
+    "SRC-165:R036": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "No unrelated Work was fabricated."
+    }
+  },
+  "derived_at": "2026-10-02T23:09:36Z",
+  "derived_from": "SRC-165",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "e1240a14786a1a49850d89d73c70f53fdf49aeba638465670d5cf59f9a395f97"
+}

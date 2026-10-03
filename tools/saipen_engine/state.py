@@ -419,8 +419,7 @@ def binding_brake(state: dict, *, empty_todo: bool = False) -> tuple[str, str] |
     if blocker and blocker.lower() != "none":
         return (
             "blocker",
-            f"binding WAIT/BLOCKED state: blocker={blocker!r} "
-            f"next_action={na[:60]!r}",
+            f"binding WAIT/BLOCKED state: blocker={blocker!r} next_action={na[:60]!r}",
         )
     if na.startswith("WAIT:") and binding_wait(
         na,
@@ -497,7 +496,9 @@ def install_content_identity(home: Path | None = None) -> str:
                 blob = path.read_bytes()
             except OSError:
                 continue
-            frames.append(rel.encode("utf-8") + b"\0" + str(len(blob)).encode("ascii") + b"\0" + blob)
+            frames.append(
+                rel.encode("utf-8") + b"\0" + str(len(blob)).encode("ascii") + b"\0" + blob
+            )
     if not frames:
         return "missing-v1"
     digest = hashlib.sha256()
@@ -668,9 +669,7 @@ def state_contract_errors(
         errors.append(f"converge_target {target!r} not one of {'|'.join(STATE_CONVERGE_TARGETS)}")
     gate = fields.get("improve_gate")
     if gate is not None and (not isinstance(gate, str) or not re.fullmatch(r"T-\d+", gate)):
-        errors.append(
-            f"improve_gate {gate!r} is not a T-### id -- the hold names one gate ticket"
-        )
+        errors.append(f"improve_gate {gate!r} is not a T-### id -- the hold names one gate ticket")
     for key, minimum in STATE_INTEGER_FIELDS.items():
         value = fields.get(key)
         if value is None:
@@ -733,10 +732,7 @@ def state_contract_errors(
                 # accepts the shape; the validator adds the LOG-evidence proof.
                 if not (
                     ph == "DONE"
-                    and (
-                        tf in ("SCOUT", "BUILD", "VERIFY", "REVIEW", "SHIP")
-                        or tf == "HUNT"
-                    )
+                    and (tf in ("SCOUT", "BUILD", "VERIFY", "REVIEW", "SHIP") or tf == "HUNT")
                 ):
                     if ph not in allowed:
                         errors.append(

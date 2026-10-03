@@ -1,0 +1,802 @@
+{
+  "receipts": {
+    "SRC-164": {
+      "body": "# User request\n\npriority: P1\nverify: the requested change is present and demonstrated against the user own description of it\nsupersedes: SRC-146\n\n## Request\n\ntest1\n",
+      "meta": {
+        "linked_work": "T-1599",
+        "receipt_id": "SRC-164",
+        "received_at": "2026-10-02T21:17:36Z",
+        "redaction": {
+          "applied": false,
+          "authoritative": false,
+          "original_sha256": "4c86d94aaa3166ae687ff84210d5753292e78df2016b14dae75cb2de4cf0ce92",
+          "sanitized_sha256": "4c86d94aaa3166ae687ff84210d5753292e78df2016b14dae75cb2de4cf0ce92"
+        },
+        "request_provenance": {
+          "compared_digest": "1b4f0e9851971998e732078544c96b36c3d01cedf7caa332359d6f1d83567014",
+          "note": "no operator carrier and no transport obligation: the stored bytes are what this session supplied, and nothing compared them with what the operator wrote",
+          "witness": "model_supplied"
+        },
+        "schema_version": 1,
+        "sensitive": false,
+        "source_authority": {
+          "body_sha256": "4c86d94aaa3166ae687ff84210d5753292e78df2016b14dae75cb2de4cf0ce92",
+          "mode": "exact",
+          "original_available": true
+        },
+        "source_kind": "user_instruction",
+        "source_sha256": "4c86d94aaa3166ae687ff84210d5753292e78df2016b14dae75cb2de4cf0ce92",
+        "status": "ACTIVE",
+        "transport": {
+          "newline_normalization": "none",
+          "source_encoding": "utf-8",
+          "transport_transform": "none"
+        }
+      },
+      "contract": {
+        "clauses": {},
+        "derived_at": null,
+        "derived_from": "SRC-164",
+        "interpretation_revision": 0,
+        "schema_version": 1,
+        "source_sha256": "4c86d94aaa3166ae687ff84210d5753292e78df2016b14dae75cb2de4cf0ce92"
+      },
+      "coverage": {
+        "requirements": {},
+        "schema_version": 1
+      }
+    },
+    "SRC-146": {
+      "body": "# User request\n\npriority: P1\nverify: the requested change is present and demonstrated against the user own description of it\n\n## Request\n\ntest1\n",
+      "meta": {
+        "linked_work": "T-1573",
+        "receipt_id": "SRC-146",
+        "received_at": "2026-09-30T17:01:22Z",
+        "redaction": {
+          "applied": false,
+          "authoritative": false,
+          "original_sha256": "58ea598a87aa4e5ad3148ff7ee8bead5fab2daab6a3869f63bf4a9d6fe5a581b",
+          "sanitized_sha256": "58ea598a87aa4e5ad3148ff7ee8bead5fab2daab6a3869f63bf4a9d6fe5a581b"
+        },
+        "request_provenance": {
+          "compared_digest": "1b4f0e9851971998e732078544c96b36c3d01cedf7caa332359d6f1d83567014",
+          "note": "no operator carrier and no transport obligation: the stored bytes are what this session supplied, and nothing compared them with what the operator wrote",
+          "witness": "model_supplied"
+        },
+        "schema_version": 1,
+        "sensitive": false,
+        "source_authority": {
+          "body_sha256": "58ea598a87aa4e5ad3148ff7ee8bead5fab2daab6a3869f63bf4a9d6fe5a581b",
+          "mode": "exact",
+          "original_available": true
+        },
+        "source_kind": "user_instruction",
+        "source_sha256": "58ea598a87aa4e5ad3148ff7ee8bead5fab2daab6a3869f63bf4a9d6fe5a581b",
+        "status": "ACTIVE",
+        "transport": {
+          "newline_normalization": "none",
+          "source_encoding": "utf-8",
+          "transport_transform": "none"
+        }
+      },
+      "contract": {
+        "clauses": {
+          "SRC-146:R001": {
+            "actionable": true,
+            "class": "requirement",
+            "text": "test1"
+          }
+        },
+        "derived_at": "2026-10-02T08:21:07Z",
+        "derived_from": "SRC-146",
+        "interpretation_revision": 1,
+        "schema_version": 1,
+        "source_sha256": "58ea598a87aa4e5ad3148ff7ee8bead5fab2daab6a3869f63bf4a9d6fe5a581b"
+      },
+      "coverage": {
+        "requirements": {
+          "SRC-146:R001": {
+            "actionable": true,
+            "class": "requirement",
+            "disposition": "VERIFIED",
+            "evidence": "T-1573 closed with verification evidence in LOG: verify -> PASS [target: T-1573] conf: high -- re-checked on the current tree: SRC-146's contract and coverage remain empty (clauses 0, requirements 0), so the requested change set is still empty and this vehicle still carries no code delta; the declared family ran 4623 checks with 0 red and its PASS record was reused unchanged on the same fingerprint",
+            "text": "test1",
+            "verification": "the Work this request created reached its own verification gate; see the T-1573 VERIFY cycle in .saipen/LOG.md",
+            "work": "T-1573"
+          }
+        },
+        "schema_version": 1
+      }
+    }
+  },
+  "events": [
+    "- 30.09.26 19:31 [E-10986] [parent: E-10985] [T-1573] [agent: saipen-cli] [op: checkpoint-098c63d795d94638b9a9b6185a2383ea] RUN: SCOUT -- SRC-146 body is the single token test1: no requested change, target or acceptance; captured as a user ingress probe while T-1572 was in BUILD. Nothing to implement or verify; same class as T-1321/T-1172/T-1155 (INVALID_INVOCATION). Kept as history, never closed DONE.",
+    "- 30.09.26 19:31 [E-10987] [parent: E-10986] [T-1573] [agent: saipen-cli] [op: ticket-23e586d7114f4fb6a4be5c7fb32e05b9] DEC: ticket block via SAIOPS (active) -- INVALID_INVOCATION -- SRC-146 is the probe test1 with no actionable content; nothing to implement or verify; the parked T-1572 is released by its terminal holder (T-1533)",
+    "- 02.10.26 07:48 [E-11567] [parent: E-11566] [T-1573] [agent: saipen-cli] [op: transition-70b6e83af36540b0b6895534887d46ad] RUN: transition to VERIFY -- SRC-146 carries no clause and no requirement; the requested change set is empty, so VERIFY asserts absence of any requested delta and confirms the tree is unchanged by this vehicle",
+    "- 02.10.26 07:48 [E-11569] [parent: E-11568] [T-1573] [agent: saipen-cli] [op: checkpoint-93fb5c2dea1c4dfaa57bbcfb3bcc68c4] RUN: verify -> PASS [target: T-1573] conf: high -- python -c load .saipen/intake/contracts/SRC-146.json and coverage/SRC-146.json, assert both empty: printed clauses=0 requirements=0; the probe request SRC-146 names no file, no behavior and no clause, so the requested change set is empty and this vehicle's tree delta is nil by construction",
+    "- 02.10.26 07:48 [E-11570] [parent: E-11569] [T-1573] [agent: saipen-cli] [op: transition-34392352b8b84a8cadc3dcd930f68fcd] RUN: transition to REVIEW -- review: the correct deliverable for a receipt with zero clauses and zero requirements is no code change; inventing a delta to fill the vehicle would be fabrication, so the review verdict is accept-empty and the seat is released to T-1572",
+    "- 02.10.26 08:20 [E-11591] [parent: E-11590] [T-1573] [agent: saipen-cli] [op: checkpoint-56992e2e9fa44f059e1584184e324135] RUN: verify -> PASS [target: T-1573] conf: high -- re-checked on the current tree: SRC-146's contract and coverage remain empty (clauses 0, requirements 0), so the requested change set is still empty and this vehicle still carries no code delta; the declared family ran 4623 checks with 0 red and its PASS record was reused unchanged on the same fingerprint",
+    "- 02.10.26 08:20 [E-11592] [parent: E-11591] [T-1573] [agent: saipen-cli] [op: transition-66f86ea71beb41c1a116c78264f035bb] RUN: transition to REVIEW -- review on the current tree: nothing to change, the accept-empty verdict stands",
+    "- 02.10.26 08:21 [E-11595] [parent: E-11594] [T-1573] [agent: saipen-cli] [op: finish-2cd0288dbd254f3aaa2bfdc4fbda1a1c] DEC: ticket finished via SAIOPS -- completion (from SHIP)",
+    "- 02.10.26 21:17 [E-11871] [parent: E-11870] [T-1599] [agent: saipen-cli] [op: userreq-cfa8360496cd4b4d90aa55fed31f73a1] DEC: user request SRC-164 projected as T-1599 (user_explicit)",
+    "- 02.10.26 21:17 [E-11872] [parent: E-11871] [agent: saipen-cli] [op: goal-b14d64dda57b46b6bd33833a2b93b776] DEC: goal pivot -- T-1599 (SRC-164): test1",
+    "- 02.10.26 21:17 [E-11873] [parent: E-11872] [T-1510] [agent: saipen-cli] [op: ticket-b2b4e54d1d9a4104af828c1676452355] DEC: ticket block via SAIOPS (active) -- dependency T-1599 -- PAUSED by user request SRC-164: explicit new task T-1599 takes the seat; resumes at SCOUT when T-1599 closes",
+    "- 02.10.26 21:18 [E-11874] [parent: E-11873] [T-1599] [agent: saipen-cli] [op: claim-461b8adefbd5429abea77379f1702188] DEC: claimed via SAIOPS -- owner saipen-cli"
+  ],
+  "blocker_rows": [
+    {
+      "ticket": "T-1534",
+      "blocker": ""
+    },
+    {
+      "ticket": "T-1521",
+      "blocker": ""
+    },
+    {
+      "ticket": "T-1477",
+      "blocker": ""
+    },
+    {
+      "ticket": "T-1443",
+      "blocker": ""
+    },
+    {
+      "ticket": "T-576",
+      "blocker": ""
+    },
+    {
+      "ticket": "T-1303",
+      "blocker": ""
+    },
+    {
+      "ticket": "T-1301",
+      "blocker": ""
+    },
+    {
+      "ticket": "T-1475",
+      "blocker": ""
+    },
+    {
+      "ticket": "T-1278",
+      "blocker": ""
+    },
+    {
+      "ticket": "T-1508",
+      "blocker": ""
+    },
+    {
+      "ticket": "T-1499",
+      "blocker": ""
+    },
+    {
+      "ticket": "T-1492",
+      "blocker": ""
+    },
+    {
+      "ticket": "T-1293",
+      "blocker": ""
+    },
+    {
+      "ticket": "T-1287",
+      "blocker": ""
+    },
+    {
+      "ticket": "T-1284",
+      "blocker": ""
+    },
+    {
+      "ticket": "T-1451",
+      "blocker": ""
+    },
+    {
+      "ticket": "T-1518",
+      "blocker": ""
+    },
+    {
+      "ticket": "T-1286",
+      "blocker": ""
+    },
+    {
+      "ticket": "T-1529",
+      "blocker": ""
+    },
+    {
+      "ticket": "T-1531",
+      "blocker": ""
+    },
+    {
+      "ticket": "T-1530",
+      "blocker": ""
+    },
+    {
+      "ticket": "T-1366",
+      "blocker": ""
+    },
+    {
+      "ticket": "T-1365",
+      "blocker": ""
+    },
+    {
+      "ticket": "T-1364",
+      "blocker": ""
+    },
+    {
+      "ticket": "T-1277",
+      "blocker": ""
+    },
+    {
+      "ticket": "T-1282",
+      "blocker": ""
+    },
+    {
+      "ticket": "T-1522",
+      "blocker": ""
+    },
+    {
+      "ticket": "T-1523",
+      "blocker": ""
+    },
+    {
+      "ticket": "T-1524",
+      "blocker": ""
+    },
+    {
+      "ticket": "T-1525",
+      "blocker": ""
+    },
+    {
+      "ticket": "T-1527",
+      "blocker": ""
+    },
+    {
+      "ticket": "T-1517",
+      "blocker": ""
+    },
+    {
+      "ticket": "T-1516",
+      "blocker": ""
+    },
+    {
+      "ticket": "T-1514",
+      "blocker": ""
+    },
+    {
+      "ticket": "T-1526",
+      "blocker": ""
+    },
+    {
+      "ticket": "T-1487",
+      "blocker": ""
+    },
+    {
+      "ticket": "T-1300",
+      "blocker": ""
+    },
+    {
+      "ticket": "T-1299",
+      "blocker": ""
+    },
+    {
+      "ticket": "T-1315",
+      "blocker": ""
+    },
+    {
+      "ticket": "T-1503",
+      "blocker": ""
+    },
+    {
+      "ticket": "T-1506",
+      "blocker": ""
+    },
+    {
+      "ticket": "T-1505",
+      "blocker": ""
+    },
+    {
+      "ticket": "T-1513",
+      "blocker": ""
+    },
+    {
+      "ticket": "T-1511",
+      "blocker": ""
+    },
+    {
+      "ticket": "T-1519",
+      "blocker": ""
+    },
+    {
+      "ticket": "T-1520",
+      "blocker": ""
+    },
+    {
+      "ticket": "T-1512",
+      "blocker": ""
+    },
+    {
+      "ticket": "T-1501",
+      "blocker": ""
+    },
+    {
+      "ticket": "T-1504",
+      "blocker": ""
+    },
+    {
+      "ticket": "T-1502",
+      "blocker": ""
+    },
+    {
+      "ticket": "T-1500",
+      "blocker": ""
+    },
+    {
+      "ticket": "T-1497",
+      "blocker": ""
+    },
+    {
+      "ticket": "T-1498",
+      "blocker": ""
+    },
+    {
+      "ticket": "T-1462",
+      "blocker": ""
+    },
+    {
+      "ticket": "T-1374",
+      "blocker": ""
+    },
+    {
+      "ticket": "T-1430",
+      "blocker": ""
+    },
+    {
+      "ticket": "T-1495",
+      "blocker": ""
+    },
+    {
+      "ticket": "T-1496",
+      "blocker": ""
+    },
+    {
+      "ticket": "T-1387",
+      "blocker": ""
+    },
+    {
+      "ticket": "T-1491",
+      "blocker": ""
+    },
+    {
+      "ticket": "T-1490",
+      "blocker": ""
+    },
+    {
+      "ticket": "T-1442",
+      "blocker": ""
+    },
+    {
+      "ticket": "T-1466",
+      "blocker": ""
+    },
+    {
+      "ticket": "T-1465",
+      "blocker": ""
+    },
+    {
+      "ticket": "T-1488",
+      "blocker": ""
+    },
+    {
+      "ticket": "T-1489",
+      "blocker": ""
+    },
+    {
+      "ticket": "T-1478",
+      "blocker": ""
+    },
+    {
+      "ticket": "T-1402",
+      "blocker": ""
+    },
+    {
+      "ticket": "T-1401",
+      "blocker": ""
+    },
+    {
+      "ticket": "T-1474",
+      "blocker": ""
+    },
+    {
+      "ticket": "T-1445",
+      "blocker": ""
+    },
+    {
+      "ticket": "T-1383",
+      "blocker": ""
+    },
+    {
+      "ticket": "T-1486",
+      "blocker": ""
+    },
+    {
+      "ticket": "T-1472",
+      "blocker": ""
+    },
+    {
+      "ticket": "T-1485",
+      "blocker": ""
+    },
+    {
+      "ticket": "T-1484",
+      "blocker": ""
+    },
+    {
+      "ticket": "T-1481",
+      "blocker": ""
+    },
+    {
+      "ticket": "T-1482",
+      "blocker": ""
+    },
+    {
+      "ticket": "T-1483",
+      "blocker": ""
+    },
+    {
+      "ticket": "T-1476",
+      "blocker": ""
+    },
+    {
+      "ticket": "T-1479",
+      "blocker": ""
+    },
+    {
+      "ticket": "T-1480",
+      "blocker": ""
+    },
+    {
+      "ticket": "T-1344",
+      "blocker": ""
+    },
+    {
+      "ticket": "T-1473",
+      "blocker": ""
+    },
+    {
+      "ticket": "T-1470",
+      "blocker": ""
+    },
+    {
+      "ticket": "T-1469",
+      "blocker": ""
+    },
+    {
+      "ticket": "T-1468",
+      "blocker": ""
+    },
+    {
+      "ticket": "T-1467",
+      "blocker": ""
+    },
+    {
+      "ticket": "T-1463",
+      "blocker": ""
+    },
+    {
+      "ticket": "T-1460",
+      "blocker": ""
+    },
+    {
+      "ticket": "T-1461",
+      "blocker": ""
+    },
+    {
+      "ticket": "T-1454",
+      "blocker": ""
+    },
+    {
+      "ticket": "T-1455",
+      "blocker": ""
+    },
+    {
+      "ticket": "T-1456",
+      "blocker": ""
+    },
+    {
+      "ticket": "T-1452",
+      "blocker": ""
+    },
+    {
+      "ticket": "T-1453",
+      "blocker": ""
+    },
+    {
+      "ticket": "T-1458",
+      "blocker": ""
+    },
+    {
+      "ticket": "T-1459",
+      "blocker": ""
+    },
+    {
+      "ticket": "T-1457",
+      "blocker": ""
+    },
+    {
+      "ticket": "T-1302",
+      "blocker": ""
+    },
+    {
+      "ticket": "T-1448",
+      "blocker": ""
+    },
+    {
+      "ticket": "T-1447",
+      "blocker": ""
+    },
+    {
+      "ticket": "T-1345",
+      "blocker": ""
+    },
+    {
+      "ticket": "T-1346",
+      "blocker": ""
+    },
+    {
+      "ticket": "T-1361",
+      "blocker": ""
+    },
+    {
+      "ticket": "T-1435",
+      "blocker": ""
+    },
+    {
+      "ticket": "T-1437",
+      "blocker": ""
+    },
+    {
+      "ticket": "T-1444",
+      "blocker": ""
+    },
+    {
+      "ticket": "T-1440",
+      "blocker": ""
+    },
+    {
+      "ticket": "T-1439",
+      "blocker": ""
+    },
+    {
+      "ticket": "T-1441",
+      "blocker": ""
+    },
+    {
+      "ticket": "T-1438",
+      "blocker": ""
+    },
+    {
+      "ticket": "T-1436",
+      "blocker": ""
+    },
+    {
+      "ticket": "T-1434",
+      "blocker": ""
+    },
+    {
+      "ticket": "T-1432",
+      "blocker": ""
+    },
+    {
+      "ticket": "T-1433",
+      "blocker": ""
+    },
+    {
+      "ticket": "T-1420",
+      "blocker": ""
+    },
+    {
+      "ticket": "T-1427",
+      "blocker": ""
+    },
+    {
+      "ticket": "T-1424",
+      "blocker": ""
+    },
+    {
+      "ticket": "T-1422",
+      "blocker": ""
+    },
+    {
+      "ticket": "T-1421",
+      "blocker": ""
+    },
+    {
+      "ticket": "T-1347",
+      "blocker": ""
+    },
+    {
+      "ticket": "T-1423",
+      "blocker": ""
+    },
+    {
+      "ticket": "T-1403",
+      "blocker": ""
+    },
+    {
+      "ticket": "T-1419",
+      "blocker": ""
+    },
+    {
+      "ticket": "T-1418",
+      "blocker": ""
+    },
+    {
+      "ticket": "T-1412",
+      "blocker": ""
+    },
+    {
+      "ticket": "T-1417",
+      "blocker": ""
+    },
+    {
+      "ticket": "T-1413",
+      "blocker": ""
+    },
+    {
+      "ticket": "T-1416",
+      "blocker": ""
+    },
+    {
+      "ticket": "T-1415",
+      "blocker": ""
+    },
+    {
+      "ticket": "T-1414",
+      "blocker": ""
+    },
+    {
+      "ticket": "T-1411",
+      "blocker": ""
+    },
+    {
+      "ticket": "T-1407",
+      "blocker": ""
+    },
+    {
+      "ticket": "T-1371",
+      "blocker": ""
+    },
+    {
+      "ticket": "T-1409",
+      "blocker": ""
+    },
+    {
+      "ticket": "T-1386",
+      "blocker": ""
+    },
+    {
+      "ticket": "T-1400",
+      "blocker": ""
+    },
+    {
+      "ticket": "T-1406",
+      "blocker": ""
+    },
+    {
+      "ticket": "T-1405",
+      "blocker": ""
+    },
+    {
+      "ticket": "T-1399",
+      "blocker": ""
+    },
+    {
+      "ticket": "T-1398",
+      "blocker": ""
+    },
+    {
+      "ticket": "T-1394",
+      "blocker": ""
+    },
+    {
+      "ticket": "T-1393",
+      "blocker": ""
+    },
+    {
+      "ticket": "T-1367",
+      "blocker": ""
+    },
+    {
+      "ticket": "T-1397",
+      "blocker": ""
+    },
+    {
+      "ticket": "T-1396",
+      "blocker": ""
+    },
+    {
+      "ticket": "T-1385",
+      "blocker": ""
+    },
+    {
+      "ticket": "T-1389",
+      "blocker": ""
+    },
+    {
+      "ticket": "T-1388",
+      "blocker": ""
+    },
+    {
+      "ticket": "T-1392",
+      "blocker": ""
+    },
+    {
+      "ticket": "T-1395",
+      "blocker": ""
+    },
+    {
+      "ticket": "T-1382",
+      "blocker": ""
+    },
+    {
+      "ticket": "T-1384",
+      "blocker": ""
+    },
+    {
+      "ticket": "T-1380",
+      "blocker": ""
+    },
+    {
+      "ticket": "T-1381",
+      "blocker": ""
+    },
+    {
+      "ticket": "T-1378",
+      "blocker": ""
+    },
+    {
+      "ticket": "T-1376",
+      "blocker": ""
+    },
+    {
+      "ticket": "T-1377",
+      "blocker": ""
+    },
+    {
+      "ticket": "T-1379",
+      "blocker": ""
+    },
+    {
+      "ticket": "T-1372",
+      "blocker": ""
+    },
+    {
+      "ticket": "T-1373",
+      "blocker": ""
+    },
+    {
+      "ticket": "T-1370",
+      "blocker": ""
+    },
+    {
+      "ticket": "T-1363",
+      "blocker": ""
+    },
+    {
+      "ticket": "T-1326",
+      "blocker": ""
+    },
+    {
+      "ticket": "T-1324",
+      "blocker": ""
+    },
+    {
+      "ticket": "T-1320",
+      "blocker": ""
+    },
+    {
+      "ticket": "T-1318",
+      "blocker": ""
+    }
+  ],
+  "stop_excerpt": "Peatusin. Täiesti lõpetatud on T-1598",
+  "stop_report_availability": "Supplied excerpt and canonical T-1598 history; full human report not yet located."
+}

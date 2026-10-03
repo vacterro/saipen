@@ -50,11 +50,75 @@ MAX_TASK_FILE_BYTES = 256 * 1024
 WITNESS_CARRIER = "operator_carrier"
 WITNESS_OBLIGATION = "transport_obligation"
 WITNESS_MODEL = "model_supplied"
+WITNESSES = (WITNESS_CARRIER, WITNESS_OBLIGATION, WITNESS_MODEL)
 
 CODE_MISMATCH = "INGRESS_TASK_MISMATCH"
 CODE_CARRIER_INVALID = "INGRESS_TASK_CARRIER_INVALID"
 
 _SHA256 = re.compile(r"[0-9a-f]{64}")
+
+
+def authority_for_provenance(provenance: object) -> dict:
+    """Persistence/fidelity are not operator authority (SRC-164).
+
+    A transport obligation was created from a tool payload, not necessarily
+    from human ingress. Only an external operator carrier can grant the
+    operator capabilities. None of these capabilities grants publication or
+    retirement: those operations still require their own scoped authority.
+    """
+    record = provenance if isinstance(provenance, dict) else {}
+    witness_kind = record.get("witness")
+    if witness_kind not in WITNESSES:
+        witness_kind = WITNESS_MODEL
+    trusted = (
+        witness_kind == WITNESS_CARRIER
+        and isinstance(record.get("compared_digest"), str)
+        and bool(_SHA256.fullmatch(record["compared_digest"]))
+        and record.get("declared_by") in (ENV_TASK_SHA256, ENV_TASK_FILE)
+    )
+    return {
+        "witness": witness_kind,
+        "capture": True,
+        "local_work": True,
+        "user_explicit": trusted,
+        "preempt_active_work": trusted,
+        "goal_pivot": trusted,
+        "reset_bounded_authority": trusted,
+        "detailed_response": trusted,
+        "external_action": False,
+    }
+
+
+def authority_for_receipt(root: Path | str, receipt: str) -> dict:
+    """Derive capabilities from immutable, integrity-checked ingress bytes.
+
+    A retry with a stronger launch carrier does not promote an older receipt.
+    A later operator decision must be a separate authority event/receipt.
+    """
+    from . import intake
+    from .pending_ingress import ingress_digest
+
+    found = intake.read_body(Path(root), receipt)
+    if not found.get("ok"):
+        return authority_for_provenance(None)
+    meta = found.get("meta") or {}
+    record = meta.get("request_provenance")
+    body = str(found.get("body") or "")
+    if body.startswith("# User request\n"):
+        _head, separator, request = body.partition("\n## Request\n")
+        if not separator:
+            return authority_for_provenance(None)
+        body = request
+    if not isinstance(record, dict) or record.get("compared_digest") != ingress_digest(body):
+        return authority_for_provenance(None)
+    return authority_for_provenance(record)
+
+
+def projection_priority(priority: str, authority: dict) -> str:
+    """Unwitnessed candidates cannot acquire P0/P1 by arrival alone."""
+    if authority.get("user_explicit"):
+        return priority
+    return "P" + str(max(2, int(priority[1:])))
 
 
 def declared(env: dict | None = None) -> dict | None:
@@ -166,8 +230,7 @@ def witness(text: str, *, obligation_met: bool = False, env: dict | None = None)
                     + ") and the text supplied to the ingress has digest "
                     + supplied
                     + ". A receipt built from it would carry the session's words under "
-                    "the operator's authority. "
-                    + reach
+                    "the operator's authority. " + reach
                 ),
                 "declared_digest": record["digest"],
                 "supplied_digest": supplied,
@@ -242,10 +305,14 @@ __all__ = [
     "ENV_TASK_FILE",
     "ENV_TASK_SHA256",
     "MAX_TASK_FILE_BYTES",
+    "WITNESSES",
     "WITNESS_CARRIER",
     "WITNESS_MODEL",
     "WITNESS_OBLIGATION",
+    "authority_for_provenance",
+    "authority_for_receipt",
     "declared",
+    "projection_priority",
     "unstarted",
     "witness",
 ]

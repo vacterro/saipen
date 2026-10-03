@@ -83,7 +83,11 @@ def surface(**overrides) -> str:
         "EFFICIENCY": "~85% LOW | progress 100 | rework 60 | autonomy 100 | human n/a",
     }
     fields.update(overrides)
-    return "\n".join(f"{key}\n{value}" for key, value in fields.items() if value is not None)
+    return "\n".join(
+        f"{key}: {value}"
+        for key, value in fields.items()
+        if value is not None and not (key in ("BLOCKER", "OPERATOR ACTION") and value == "NONE")
+    )
 
 
 class RegressionMatrix(unittest.TestCase):
@@ -196,7 +200,7 @@ class RegressionMatrix(unittest.TestCase):
         ok = surface(DETAILS=details)
         self.assertEqual(RS.response_errors(ok, detail_mode=RS.DETAIL_MODE_REPORT), [])
         # Order: EFFICIENCY after VALIDATION, DETAILS still last.
-        heads = [line for line in ok.splitlines() if line in RS.FIELD_ORDER]
+        heads = [name for name in RS.parse_surface(ok)[0] if name in ("EFFICIENCY", "DETAILS")]
         self.assertEqual(heads[-2:], ["EFFICIENCY", "DETAILS"])
         long_line = "~85% LOW" + " | progress 100" * 30
         errors = RS.response_errors(
@@ -319,7 +323,7 @@ class Contract(unittest.TestCase):
             "",
             E.render_line(kpi(CLEAN_RUN)),
         )
-        self.assertIn("\nEFFICIENCY\n~", RS.render_boundary(boundary))
+        self.assertIn("\nEFFICIENCY: ~", RS.render_boundary(boundary))
 
 
 class Exposure(unittest.TestCase):
@@ -388,7 +392,7 @@ class Exposure(unittest.TestCase):
         }
         payload = self._cli("response", "render", "--stdin", stdin=json.dumps(fields))
         self.assertTrue(payload.get("ok"), payload)
-        line = payload["text"].split("\nEFFICIENCY\n", 1)[1].splitlines()[0]
+        line = RS.parse_surface(payload["text"])[0]["EFFICIENCY"]
         self.assertTrue(line.startswith("PRELIMINARY ~"), line)
         self.assertIsNone(E.line_problem(line))
 

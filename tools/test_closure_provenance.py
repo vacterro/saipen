@@ -42,9 +42,8 @@ from saipen_engine.operations import (  # noqa: E402
     finish_ticket,
     ticket_add,
     ticket_move,
-    user_request,
 )
-from test_orchestration_repair import OrchestrationFixture  # noqa: E402
+from test_orchestration_repair import OrchestrationFixture, user_request  # noqa: E402
 
 
 def _tree_digest(root: Path) -> str:
@@ -546,7 +545,6 @@ class UnknownFieldTests(ProvenanceFixture):
         self.assertTrue(any("under ## TODO" in p for p in problems), problems)
 
 
-
 class ReleaseVersionSurfaceTests(unittest.TestCase):
     """T-131: the release version surface must read the versions we ship.
 
@@ -578,9 +576,7 @@ class ReleaseVersionSurfaceTests(unittest.TestCase):
             "10.20.30",
         ):
             with self.subTest(version=version):
-                self.assertEqual(
-                    self._badges(f"# x\n\n**v{version}**\n"), [f"**v{version}**"]
-                )
+                self.assertEqual(self._badges(f"# x\n\n**v{version}**\n"), [f"**v{version}**"])
 
     def test_badge_does_not_match_a_bare_or_misspelled_version(self):
         self.assertEqual(self._badges("# x\n\nv0.0.2a3\n"), [])
@@ -590,13 +586,9 @@ class ReleaseVersionSurfaceTests(unittest.TestCase):
     def test_changelog_head_reads_the_same_shape(self):
         from saipen_engine.release_contract import RELEASE_VERSION_CORE
 
-        heads = re.findall(
-            r"(?m)^## (" + RELEASE_VERSION_CORE + ")", "## 0.0.2a3\n\n- x\n"
-        )
+        heads = re.findall(r"(?m)^## (" + RELEASE_VERSION_CORE + ")", "## 0.0.2a3\n\n- x\n")
         self.assertEqual(heads[:1], ["0.0.2a3"])
-        plain = re.findall(
-            r"(?m)^## (" + RELEASE_VERSION_CORE + ")", "## 1.2.3\n\n- x\n"
-        )
+        plain = re.findall(r"(?m)^## (" + RELEASE_VERSION_CORE + ")", "## 1.2.3\n\n- x\n")
         self.assertEqual(plain[:1], ["1.2.3"])
 
     def test_a_conformant_project_satisfies_the_badge_rule(self):

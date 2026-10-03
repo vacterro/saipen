@@ -100,15 +100,23 @@ for (const item of request.cases) {
     // tool gate, on the same real module and the same fixtures. Absent, the
     // case keeps its original tool-gate meaning.
     if (typeof item.text_complete === "string") {
+      const sessionID = item.session_id || (item.input && item.input.sessionID);
+      if (item.user_request && typeof plugin["chat.message"] === "function") {
+        await plugin["chat.message"]({ sessionID, messageID: item.id },
+          { parts: [{ type: "text", text: item.user_request }] });
+      }
+      if (item.operational_command) {
+        await plugin["tool.execute.before"]({ tool: "bash", sessionID },
+          { args: { command: item.operational_command } });
+      }
       const textHook = plugin ? plugin["experimental.text.complete"] : undefined;
       if (typeof textHook !== "function") {
         record.outcome = "no_hook";
         record.message = "experimental.text.complete is not callable";
       } else {
-        await textHook(
-          { sessionID: item.session_id || (item.input && item.input.sessionID) },
-          { text: item.text_complete },
-        );
+        const textOutput = { text: item.text_complete };
+        await textHook({ sessionID }, textOutput);
+        record.delivered = textOutput.text;
       }
     } else {
       const hook = plugin ? plugin["tool.execute.before"] : undefined;
@@ -156,6 +164,7 @@ def run_cases(
         [NODE, str(driver), str(plugin_path), str(request)],
         capture_output=True,
         text=True,
+        encoding="utf-8",
         timeout=600,
         env=env,
     )
@@ -244,12 +253,16 @@ class OpenCodeAdapterIntegration(unittest.TestCase):
             product = root / "product.txt"
             product.write_text("original", encoding="utf-8")
             products.append((root, product))
-            cases.append({
-                "id": tool, "project": str(root), "env": self._env(SAIPEN_AGENT="tester"),
-                "input": {"tool": tool, "sessionID": f"ses_fleet_{tool}"},
-                "output": {"args": args},
-                "simulate_effect": {"path": str(product), "contents": "STALE"},
-            })
+            cases.append(
+                {
+                    "id": tool,
+                    "project": str(root),
+                    "env": self._env(SAIPEN_AGENT="tester"),
+                    "input": {"tool": tool, "sessionID": f"ses_fleet_{tool}"},
+                    "output": {"args": args},
+                    "simulate_effect": {"path": str(product), "contents": "STALE"},
+                }
+            )
         records = run_cases(PLUGIN, cases, self.tmp / "fleet-consequential")
         for record, (root, product) in zip(records, products):
             self.assertEqual(record["outcome"], "blocked", record)

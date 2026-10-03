@@ -878,9 +878,7 @@ def _validate(project_root: Path, as_json: bool) -> int:
         running_home_mismatch_error as _running_home_mismatch_error,
     )
 
-    _state_fields, _state_err = parse_state_or_error(
-        codec.read_doc(_state_path(project_root))
-    )
+    _state_fields, _state_err = parse_state_or_error(codec.read_doc(_state_path(project_root)))
     _home_problem = (
         None
         if _state_fields is None
@@ -1954,9 +1952,7 @@ def _status(project_root: Path, as_json: bool) -> int:
         try:
             from saipen_engine.convergence import convergence_verdict
 
-            _convergence = convergence_verdict(
-                project_root, source_id=_source_identity
-            ).as_dict()
+            _convergence = convergence_verdict(project_root, source_id=_source_identity).as_dict()
         except Exception:
             _convergence = None
         payload["automation"] = automation_block(
@@ -3153,7 +3149,9 @@ def _recover(project_root: Path, args: list[str], as_json: bool, dry_run: bool =
                         {
                             "ok": False,
                             "code": "VALIDATION_FAILED",
-                            "detail": "unknown resolution " + repr(extra[1]) + "; use "
+                            "detail": "unknown resolution "
+                            + repr(extra[1])
+                            + "; use "
                             + "|".join(RESOLUTION_CLASSES),
                         },
                         as_json,
@@ -3203,7 +3201,9 @@ def _recover(project_root: Path, args: list[str], as_json: bool, dry_run: bool =
                 "code": "VALIDATION_FAILED",
                 "detail": "recover takes no arguments (bare recover), or "
                 "`inspect <op_id>` / `resolve <op_id> [--resolution "
-                "|".join(RESOLUTION_CLASSES) + "]`; unexpected: " + " ".join(args),
+                "|".join(RESOLUTION_CLASSES)
+                + "]`; unexpected: "
+                + " ".join(args),
             },
             as_json,
         )
@@ -7304,6 +7304,9 @@ def _emit(payload: dict, as_json: bool) -> None:
         return
     if payload.get("code") == "NOT_SAIPEN_PROJECT":
         return
+    if payload.get("code") in ("STOP", "STOPPED") and isinstance(payload.get("delivery"), str):
+        print(payload["delivery"])
+        return
     for key in (
         "action",
         "ticket",
@@ -7859,9 +7862,7 @@ def _improve(project_root: Path, args: list[str], as_json: bool, dry_run: bool) 
     # same as non-dry; valid requests report concrete plan targets. The
     # previous `DRY_RUN_UNSUPPORTED` short-circuit hid the plan and made
     # dry-run observationally different from a real submission.
-    if dry_run and action in (
-        "submit", "complete", "rebind", "cycle-complete", "abort", "retire"
-    ):
+    if dry_run and action in ("submit", "complete", "rebind", "cycle-complete", "abort", "retire"):
         return _improve_dry_run_plan(project_root, action, args[1:] if action else [], as_json)
     if action is None:
         # DOGFOOD V (T-617): bare `saipen improve` is the documented
@@ -9507,7 +9508,57 @@ def _response_cli(args: list[str], as_json: bool, project_root_opt: str | None) 
         detail_mode_for_request,
         render_boundary,
         response_errors,
+        canonical_facts,
+        digest_from_facts,
+        reason_for_request,
+        human_response_authority,
     )
+
+    if len(args) >= 2 and args[1] == "digest":
+        if not project_root_opt:
+            _emit(
+                {
+                    "ok": False,
+                    "code": "VALIDATION_FAILED",
+                    "detail": "response digest requires --project-root",
+                },
+                as_json,
+            )
+            return 2
+        try:
+            reason = args[args.index("--reason") + 1] if "--reason" in args else "final"
+            if reason not in ("final", "stop", "status", "summary", "safety"):
+                raise ValueError("unknown response reason")
+            from saipen_engine.chat_style import running_style_contract
+
+            captured = StringIO()
+            with redirect_stdout(captured):
+                result = _status(Path(project_root_opt).resolve(), True)
+            if result:
+                raise ValueError("canonical status unavailable")
+            facts = canonical_facts(
+                Path(project_root_opt).resolve(), status=json.loads(captured.getvalue())
+            )
+            text = digest_from_facts(
+                facts, reason=reason, language=running_style_contract().reply_language or "et"
+            )
+            if as_json:
+                _emit(
+                    {
+                        "ok": True,
+                        "code": "RESPONSE_RENDERED",
+                        "text": text,
+                        "reason": reason,
+                        "emit": bool(text),
+                    },
+                    True,
+                )
+            else:
+                print(text, end="\n" if text else "")
+            return 0
+        except (ValueError, OSError, IndexError) as exc:
+            _emit({"ok": False, "code": "RESPONSE_FACT_INVALID", "detail": str(exc)[:160]}, as_json)
+            return 1
 
     if len(args) >= 2 and args[1] in {"policy", "intermediate"}:
         from saipen_engine.hush import for_request, intermediate_verdict
@@ -9584,6 +9635,8 @@ def _response_cli(args: list[str], as_json: bool, project_root_opt: str | None) 
         # carries the HUMAN's ingress and the canonical owner classifies it. With
         # neither, DETAILS is forbidden -- the closed default.
         detail_mode = DETAIL_MODE_NONE
+        human_request = ""
+        request_authority = None
         if "--detail-mode" in args[2:]:
             index = args[2:].index("--detail-mode")
             if index + 1 >= len(args) - 2:
@@ -9598,7 +9651,16 @@ def _response_cli(args: list[str], as_json: bool, project_root_opt: str | None) 
             index = args[2:].index("--request")
             if index + 1 >= len(args) - 2:
                 raise ValueError("--request needs the human's request text")
-            detail_mode = detail_mode_for_request(args[3 + index])
+            human_request = args[3 + index]
+            from saipen_engine.operator_task import witness
+
+            witnessed = witness(human_request)
+            request_authority = witnessed if not witnessed.get("code") else None
+            detail_mode = (
+                detail_mode_for_request(human_request)
+                if human_response_authority(human_request, request_authority)
+                else DETAIL_MODE_NONE
+            )
         if project_root_opt:
             root = Path(project_root_opt).resolve()
             if not (root / ".saipen" / "STATE.md").is_file():
@@ -9690,8 +9752,14 @@ def _response_cli(args: list[str], as_json: bool, project_root_opt: str | None) 
                 admission=admission_verdict,
                 admission_consulted=consulted,
                 admission_skip_reason=skip_reason,
-                operational_turn=decision != "ORDINARY",
-                executable_action_remains=executable_action_remains,
+                operational_turn=decision != "ORDINARY" or "--operational-turn" in args,
+                executable_action_remains=(
+                    executable_action_remains
+                    and not (
+                        human_response_authority(human_request, request_authority)
+                        and reason_for_request(human_request) in ("stop", "summary")
+                    )
+                ),
                 style_contract=contract,
                 current_validation=current_validation,
                 current_phase=current_phase,
@@ -9699,6 +9767,10 @@ def _response_cli(args: list[str], as_json: bool, project_root_opt: str | None) 
                 current_blocker=current_blocker,
                 operator_due=operator_due,
                 detail_mode=detail_mode,
+                human_request=human_request,
+                request_authority=request_authority,
+                facts=canonical_facts(root, status=status_payload) if project_root_opt else None,
+                reason=reason_for_request(human_request),
             )
             klass = verdict["class"]
             class_errors = verdict["errors"]
@@ -9723,6 +9795,7 @@ def _response_cli(args: list[str], as_json: bool, project_root_opt: str | None) 
                     "turn_decision": decision,
                     "detail": "; ".join(class_errors) if class_errors else None,
                     "diagnostic": verdict.get("diagnostic"),
+                    "delivery": verdict.get("delivery"),
                     "contract": (
                         contract_summary(contract)["context"]
                         if contract is not None and not ok

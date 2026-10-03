@@ -117,6 +117,7 @@ KNOWN_FIELDS = frozenset(
         "closure_mode",
         "closure_cohort",
         "user_explicit",
+        "request_witness",
         "implementation_delta",
         "implementation_source",
         "closure_paths",
@@ -695,10 +696,7 @@ def closure_metadata_errors(ticket: dict) -> list[str]:
 
     mode = str(fields.get("closure_mode", "")).strip()
     if mode and mode.lower() not in CLOSURE_MODES:
-        errors.append(
-            f"{tid} declares closure_mode {mode!r}, outside "
-            f"{'|'.join(CLOSURE_MODES)}"
-        )
+        errors.append(f"{tid} declares closure_mode {mode!r}, outside {'|'.join(CLOSURE_MODES)}")
     delta = str(fields.get("implementation_delta", "")).strip()
     if delta and delta.lower() not in ("none", "patch"):
         errors.append(f"{tid} declares implementation_delta {delta!r}, outside none|patch")
@@ -717,9 +715,7 @@ def closure_metadata_errors(ticket: dict) -> list[str]:
     if mode.lower() == "inherited_verified" and not implementation_source_value:
         errors.append(f"{tid} closes inherited_verified with no | implementation_source:")
     if implementation_source_value and mode.lower() != "inherited_verified":
-        errors.append(
-            f"{tid} names implementation_source outside closure_mode inherited_verified"
-        )
+        errors.append(f"{tid} names implementation_source outside closure_mode inherited_verified")
 
     supersession = {
         "superseded_by": str(fields.get("superseded_by", "")).strip(),
@@ -730,9 +726,7 @@ def closure_metadata_errors(ticket: dict) -> list[str]:
     if mode.lower() == "superseded_verified":
         missing = [name for name, value in supersession.items() if not value]
         if missing:
-            errors.append(
-                f"{tid} closes superseded_verified with missing " + ", ".join(missing)
-            )
+            errors.append(f"{tid} closes superseded_verified with missing " + ", ".join(missing))
         if supersession["superseded_by"] and not re.fullmatch(
             r"T-\d+", supersession["superseded_by"]
         ):
@@ -748,9 +742,7 @@ def closure_metadata_errors(ticket: dict) -> list[str]:
         ):
             errors.append(f"{tid} supersession_authority is not an SRC-### identity")
         if delta.lower() != "none":
-            errors.append(
-                f"{tid} closes superseded_verified without implementation_delta none"
-            )
+            errors.append(f"{tid} closes superseded_verified without implementation_delta none")
     elif present_supersession:
         errors.append(
             f"{tid} carries {', '.join(present_supersession)} outside "
@@ -780,15 +772,11 @@ def closure_metadata_errors(ticket: dict) -> list[str]:
         if external["external_authority"] and not re.fullmatch(
             r"lineage-[0-9a-f]{32}", external["external_authority"]
         ):
-            errors.append(
-                f"{tid} external_authority is not a lineage-<32 hex> identity"
-            )
+            errors.append(f"{tid} external_authority is not a lineage-<32 hex> identity")
         if external["external_implementation"] and not re.fullmatch(
             r"T-\d+@[0-9a-f]{7,40}", external["external_implementation"]
         ):
-            errors.append(
-                f"{tid} external_implementation is not a T-###@<commit> identity"
-            )
+            errors.append(f"{tid} external_implementation is not a T-###@<commit> identity")
         if external["external_evidence"] and not re.fullmatch(
             r"EX-\d{6}", external["external_evidence"]
         ):
@@ -803,15 +791,21 @@ def closure_metadata_errors(ticket: dict) -> list[str]:
                 "outside the registered reason set"
             )
         if delta.lower() != "none":
-            errors.append(
-                f"{tid} closes external_implementation without implementation_delta none"
-            )
+            errors.append(f"{tid} closes external_implementation without implementation_delta none")
     elif present_external:
         errors.append(
             f"{tid} carries {', '.join(present_external)} outside "
             "closure_mode external_implementation"
         )
     explicit = str(fields.get("user_explicit", "")).strip()
+    witness = str(fields.get("request_witness", "")).strip()
+    if witness:
+        from .operator_task import WITNESSES, WITNESS_CARRIER
+
+        if witness not in WITNESSES:
+            errors.append(f"{tid} request_witness is not a closed ingress witness")
+        if explicit.lower() == USER_EXPLICIT_TRUE and witness != WITNESS_CARRIER:
+            errors.append(f"{tid} unwitnessed ingress cannot declare user_explicit authority")
     if explicit and explicit.lower() != USER_EXPLICIT_TRUE:
         errors.append(
             f"{tid} declares user_explicit {explicit!r}; only 'true' arms "
@@ -830,8 +824,7 @@ def closure_metadata_errors(ticket: dict) -> list[str]:
     if present and len(present) != len(reservation_fields):
         missing = [name for name, value in reservation.items() if not value]
         errors.append(
-            f"{tid} carries a partial continuation reservation; missing "
-            + ", ".join(missing)
+            f"{tid} carries a partial continuation reservation; missing " + ", ".join(missing)
         )
     if reservation["blocked_on"] and not re.fullmatch(r"T-\d+", reservation["blocked_on"]):
         errors.append(f"{tid} blocked_on {reservation['blocked_on']!r} is not T-###")
@@ -915,9 +908,7 @@ def board_graph_errors(tickets: dict) -> list[str]:
             errors.append(f"{tid} blocked_on {blocked_on} is missing from its needs graph")
         prior = reserved_children.get(blocked_on)
         if prior is not None and prior != tid:
-            errors.append(
-                f"{blocked_on} has multiple continuation parents: {prior}, {tid}"
-            )
+            errors.append(f"{blocked_on} has multiple continuation parents: {prior}, {tid}")
         reserved_children[blocked_on] = tid
     # Cycle detection over the needs: dependency DAG (iterative three-color).
     WHITE, GRAY, BLACK = 0, 1, 2
@@ -1134,7 +1125,10 @@ def is_user_explicit(ticket: dict) -> bool:
     earlier. Only the exact token `true` arms it -- prose never decides
     control flow, and a typo must not silently reorder the queue.
     """
-    return _field(ticket, "user_explicit").lower() == USER_EXPLICIT_TRUE
+    witness = _field(ticket, "request_witness")
+    return _field(ticket, "user_explicit").lower() == USER_EXPLICIT_TRUE and (
+        not witness or witness == "operator_carrier"
+    )
 
 
 def blocker_scope(ticket: dict) -> str:
@@ -1332,9 +1326,7 @@ def pick_next_work(tickets: dict, agent: str | None = None, now=None) -> tuple[s
     return None, "none"
 
 
-def reserved_continuation_child(
-    tickets: dict, agent: str | None = None, now=None
-) -> dict | None:
+def reserved_continuation_child(tickets: dict, agent: str | None = None, now=None) -> dict | None:
     """Return the one workable child reserved by a BLOCKED parent.
 
     The BOARD validator rejects duplicate child reservations.  A reservation

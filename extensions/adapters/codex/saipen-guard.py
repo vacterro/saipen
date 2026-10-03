@@ -122,8 +122,7 @@ def canonical_verdict(saipen_root: Path, project: Path, text: str) -> dict | Non
 def correction_reason(klass: str, errors: list[str], project: Path) -> str:
     """The continuation prompt that requires correction through the authority."""
     checker = (
-        "`saipen response check --stdin --classify --auto-eligibility "
-        f"--project-root {project}`"
+        f"`saipen response check --stdin --classify --auto-eligibility --project-root {project}`"
     )
     if klass == "AUTONOMOUS_HANDBACK":
         return (
@@ -191,11 +190,7 @@ def main() -> int:
     reentry = event.get("stop_hook_active") is True
     text = event.get("last_assistant_message")
     if not isinstance(text, str):
-        record(
-            BOUNDARY_UNAVAILABLE.format(
-                reason="Stop event has no last_assistant_message text"
-            )
-        )
+        record(BOUNDARY_UNAVAILABLE.format(reason="Stop event has no last_assistant_message text"))
         return 0
     project = project_root(event.get("cwd") or os.getcwd())
     if project is None:
@@ -240,7 +235,12 @@ def main() -> int:
         json.dumps(
             {
                 "decision": "block",
-                "reason": correction_reason(klass, errors, project),
+                "reason": (
+                    f"SAIPEN canonical delivery ({klass}; do not add prose):\n"
+                    + verdict["delivery"]
+                    if isinstance(verdict.get("delivery"), str) and verdict["delivery"]
+                    else correction_reason(klass, errors, project)
+                ),
             }
         )
     )

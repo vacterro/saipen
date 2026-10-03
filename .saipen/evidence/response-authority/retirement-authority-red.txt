@@ -1,0 +1,23 @@
+test_duplicate_captured_model_bytes_cannot_gain_carrier_authority (test_ingress_authority.IngressAuthorityTests.test_duplicate_captured_model_bytes_cannot_gain_carrier_authority) ... ok
+test_exact_src164_does_not_preempt_trusted_work (test_ingress_authority.IngressAuthorityTests.test_exact_src164_does_not_preempt_trusted_work) ... ok
+test_identical_trusted_bytes_have_different_authority (test_ingress_authority.IngressAuthorityTests.test_identical_trusted_bytes_have_different_authority) ... ok
+test_idle_model_request_remains_usable_and_distinguishable (test_ingress_authority.IngressAuthorityTests.test_idle_model_request_remains_usable_and_distinguishable) ... ok
+test_other_ingress_door_does_not_promote_model_bytes (test_ingress_authority.IngressAuthorityTests.test_other_ingress_door_does_not_promote_model_bytes) ... ok
+test_real_looking_model_request_has_no_operator_preemption (test_ingress_authority.IngressAuthorityTests.test_real_looking_model_request_has_no_operator_preemption) ... ok
+test_transport_obligation_is_fidelity_not_operator_identity (test_ingress_authority.IngressAuthorityTests.test_transport_obligation_is_fidelity_not_operator_identity) ... ok
+test_model_authored_operator_capsule_is_not_retirement_authority (test_ingress_authority.NonWorkHistoryTests.test_model_authored_operator_capsule_is_not_retirement_authority) ... FAIL
+test_src146_invalid_classification_cannot_be_unblocked_as_accept_empty (test_ingress_authority.NonWorkHistoryTests.test_src146_invalid_classification_cannot_be_unblocked_as_accept_empty) ... ok
+
+======================================================================
+FAIL: test_model_authored_operator_capsule_is_not_retirement_authority (test_ingress_authority.NonWorkHistoryTests.test_model_authored_operator_capsule_is_not_retirement_authority)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_ingress_authority.py", line 130, in test_model_authored_operator_capsule_is_not_retirement_authority
+    self.assertIsNotNone(error, "model-supplied grant retired other Work as human authority")
+AssertionError: unexpectedly None : model-supplied grant retired other Work as human authority
+
+----------------------------------------------------------------------
+Ran 9 tests in 4.139s
+
+FAILED (failures=1)
+

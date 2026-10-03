@@ -29,6 +29,7 @@ TOOLS = Path(__file__).resolve().parent
 sys.path.insert(0, str(TOOLS))
 
 from saipen_engine.state import style_contract_token  # noqa: E402
+from test_fixture_support import operator_request_env  # noqa: E402
 
 #: The voice marker is a property of the INSTALLED STYLE.md, not of the incident
 #: this fixture replays. Pinning a historical value here turned every STYLE.md
@@ -428,12 +429,20 @@ class GoalIngressIdempotenceTests(unittest.TestCase):
         self.assertNotEqual(first, goal_ingress_identity("cc everything", "proj-x"))
 
     def test_red_control_repeated_goal_mints_one_goal(self):
-        first = _run(self.project, "goal", "ship the recovery wave", "--json")
+        # `goal` is an ingress authority door (SRC-164): the objective's bytes
+        # are the operator's own, so the fixture carries them.
+        first = _run(
+            self.project, "goal", "ship the recovery wave", "--json",
+            env_extra=operator_request_env("ship the recovery wave"),
+        )
         self.assertTrue(first.get("ok"), first)
         self.assertEqual(first.get("code"), "GOAL_SET")
         before = (self.project / ".saipen" / "BOARD.md").read_bytes()
 
-        second = _run(self.project, "goal", "ship the recovery wave", "--json")
+        second = _run(
+            self.project, "goal", "ship the recovery wave", "--json",
+            env_extra=operator_request_env("ship the recovery wave"),
+        )
         self.assertTrue(second.get("ok"), second)
         self.assertEqual(second.get("code"), "GOAL_ALREADY_CAPTURED", second)
         # ZERO semantic mutation: same plan tickets, no wave bump, no rows.
@@ -449,9 +458,15 @@ class GoalIngressIdempotenceTests(unittest.TestCase):
         self.assertEqual(before, after, "duplicate ingress must not touch BOARD")
 
     def test_materially_changed_scope_is_a_new_goal(self):
-        first = _run(self.project, "goal", "ship the recovery wave", "--json")
+        first = _run(
+            self.project, "goal", "ship the recovery wave", "--json",
+            env_extra=operator_request_env("ship the recovery wave"),
+        )
         self.assertEqual(first.get("code"), "GOAL_SET")
-        second = _run(self.project, "goal", "ship the documentation wave", "--json")
+        second = _run(
+            self.project, "goal", "ship the documentation wave", "--json",
+            env_extra=operator_request_env("ship the documentation wave"),
+        )
         self.assertEqual(second.get("code"), "GOAL_SET", second)
 
 

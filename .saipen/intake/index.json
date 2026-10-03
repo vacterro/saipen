@@ -507,9 +507,17 @@
     "SRC-163": {
       "linked_work": "T-1596",
       "source_sha256": "9ba0411b780008c18df11c97370222af4f1c0527f6954e8e06cce40ed1761ac8"
+    },
+    "SRC-165": {
+      "linked_work": "T-1600",
+      "source_sha256": "e1240a14786a1a49850d89d73c70f53fdf49aeba638465670d5cf59f9a395f97"
+    },
+    "SRC-166": {
+      "linked_work": "T-1601",
+      "source_sha256": "03239595f76bb4618ab71aa7c24f889ad11273e24aa0edf70accd42e01c5737c"
     }
   },
-  "next_id": 164,
+  "next_id": 167,
   "schema_version": 1,
   "tombstones": {
     "SRC-001": {
@@ -1132,6 +1140,30 @@
       "source_sha256": "dd6e7e3f7517f9ee728ac9bd467e4e59dd788afd779cf960fb57b7cc753d29e5",
       "status": "INVALID",
       "ticket_ref": ".saipen/archive/retired/T-1580.json"
+    },
+    "SRC-164": {
+      "archive_ref": ".saipen/archive/retired/SRC-164.md",
+      "authority_grant": "system:FALSE_AUTHORITY_PROJECTION",
+      "authority_receipt": null,
+      "authority_sha256": null,
+      "discovery_event": null,
+      "evidence": {
+        "kind": "artifact",
+        "ref": ".saipen/evidence/response-authority/authority-red.txt",
+        "sha256": "129fc79918ae509923632b74535d9fd2c23041c59b46a0cdecf7f27f2bd0ec86"
+      },
+      "evidence_bound_event": "E-11885",
+      "evidence_note": "SRC-164 model_supplied; zero clauses and requirements; revoke false operator projection, not implementation completion",
+      "linked_work": "T-1599",
+      "reason": "FALSE_AUTHORITY_PROJECTION",
+      "receipt_id": "SRC-164",
+      "retired_at": "2026-10-02T22:20:01Z",
+      "retired_by": "saipen-cli",
+      "retirement_event": "E-11885",
+      "schema_version": 2,
+      "source_sha256": "4c86d94aaa3166ae687ff84210d5753292e78df2016b14dae75cb2de4cf0ce92",
+      "status": "INVALID",
+      "ticket_ref": ".saipen/archive/retired/T-1599.json"
     }
   }
 }

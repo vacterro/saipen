@@ -65,6 +65,7 @@ def setUpModule() -> None:
 # produces proves nothing about the gate under test.
 # ---------------------------------------------------------------------------
 
+
 def _stamp(delta_hours: int = 0) -> str:
     # T-1478: the clock is read when the fixture is BUILT, never at import. A
     # module-level "now" is discovery time, and the declared family reaches
@@ -300,11 +301,21 @@ def own_interrupted_project(case: unittest.TestCase) -> Path:
 # ---------------------------------------------------------------------------
 
 
-def cli(root: Path, *args: str, agent: str = "test-agent", timeout: int = 300):
+def cli(
+    root: Path,
+    *args: str,
+    agent: str = "test-agent",
+    timeout: int = 300,
+    operator_text: str | None = None,
+):
     """One real CLI invocation: (returncode, parsed JSON or None, output)."""
     env = {**os.environ}
     for key in ("SAIPEN_PROJECT_ROOT", "SAIPEN_PROJECT_LINEAGE", "SAIPEN_AGENT"):
         env.pop(key, None)
+    if operator_text is not None:
+        from test_fixture_support import operator_request_env
+
+        env.update(operator_request_env(operator_text))
     proc = subprocess.run(
         [PYTHON, str(CLI), *args, "--project-root", str(root), "--agent", agent],
         capture_output=True,
@@ -334,8 +345,7 @@ def section_of(root: Path, ticket: str) -> str | None:
 
 def _canonical_bytes(root: Path) -> dict:
     return {
-        name: (root / ".saipen" / name).read_bytes()
-        for name in ("STATE.md", "BOARD.md", "LOG.md")
+        name: (root / ".saipen" / name).read_bytes() for name in ("STATE.md", "BOARD.md", "LOG.md")
     }
 
 
@@ -692,9 +702,9 @@ class IngressGrammarTests(unittest.TestCase):
         rc, payload, text = cli(root, "start", "--file", "task.txt", "--json")
         self.assertEqual(rc, 0, text)
         self.assertEqual(payload.get("code"), "STARTED", text)
-        body = (
-            root / ".saipen" / "intake" / "active" / f"{payload['receipt']}.md"
-        ).read_text(encoding="utf-8")
+        body = (root / ".saipen" / "intake" / "active" / f"{payload['receipt']}.md").read_text(
+            encoding="utf-8"
+        )
         self.assertIn(task.strip(), body)
 
     def test_the_file_transport_refuses_what_it_cannot_read(self):
@@ -765,13 +775,20 @@ class IngressGrammarTests(unittest.TestCase):
         for task in LITERAL_TASKS + HEX_ONLY_TASKS:
             with self.subTest(task=task):
                 encoded = task.encode("utf-8").hex()
-                rc, payload, text = cli(root, "start", "--hex", encoded, "--json")
+                rc, payload, text = cli(
+                    root,
+                    "start",
+                    "--hex",
+                    encoded,
+                    "--json",
+                    operator_text=bytes.fromhex(encoded).decode("utf-8"),
+                )
                 self.assertEqual(rc, 0, text)
                 self.assertEqual(payload.get("code"), "STARTED", text)
                 receipt = payload["receipt"]
-                body = (
-                    root / ".saipen" / "intake" / "active" / f"{receipt}.md"
-                ).read_text(encoding="utf-8")
+                body = (root / ".saipen" / "intake" / "active" / f"{receipt}.md").read_text(
+                    encoding="utf-8"
+                )
                 self.assertIn(task, body)
                 cli(root, "ticket", "done", payload["ticket"], "--json")
 
@@ -790,9 +807,9 @@ class IngressGrammarTests(unittest.TestCase):
         task = "rewrite the importer\n\n- keep the CSV path\n- drop the XML branch\n"
         rc, payload, text = cli(root, "start", "--hex", task.encode("utf-8").hex(), "--json")
         self.assertEqual(rc, 0, text)
-        body = (
-            root / ".saipen" / "intake" / "active" / f"{payload['receipt']}.md"
-        ).read_text(encoding="utf-8")
+        body = (root / ".saipen" / "intake" / "active" / f"{payload['receipt']}.md").read_text(
+            encoding="utf-8"
+        )
         self.assertIn(task.strip(), body)
 
 
@@ -1065,14 +1082,18 @@ class StartEntryTests(unittest.TestCase):
         self.assertTrue(receipt, f"the request was not captured at all: {text}")
         self.assertIn(
             "add a CSV export button",
-            (root / ".saipen" / "intake" / "active" / f"{receipt}.md").read_text(
-                encoding="utf-8"
-            ),
+            (root / ".saipen" / "intake" / "active" / f"{receipt}.md").read_text(encoding="utf-8"),
         )
 
     def test_c_the_seat_is_inherited_not_negotiated(self):
         root = own_interrupted_project(self)
-        rc, payload, text = cli(root, "start", "urgent: patch the crash", "--json")
+        rc, payload, text = cli(
+            root,
+            "start",
+            "urgent: patch the crash",
+            "--json",
+            operator_text="urgent: patch the crash",
+        )
         self.assertEqual(rc, 0, text)
         self.assertEqual(payload.get("code"), "STARTED", text)
         self.assertEqual(section_of(root, payload["ticket"]), "## DOING")
@@ -1102,7 +1123,13 @@ class StartEntryTests(unittest.TestCase):
         # P0-7 negative control. The new explicit task IS the human authority
         # for the valve; it is not authority over an unrelated gate.
         root = valve_and_blocker_project(self)
-        _rc, payload, text = cli(root, "start", "add a CSV export button", "--json")
+        _rc, payload, text = cli(
+            root,
+            "start",
+            "add a CSV export button",
+            "--json",
+            operator_text="add a CSV export button",
+        )
         self.assertEqual(payload.get("code"), "WAIT_OPERATOR", text)
         decision = payload.get("decision") or {}
         self.assertEqual(decision.get("field"), "blocker", payload)
@@ -1117,16 +1144,20 @@ class StartEntryTests(unittest.TestCase):
 
     def test_the_decision_is_asked_once_and_the_retry_starts(self):
         root = valve_and_blocker_project(self)
-        rc, first, text = cli(root, "start", "add a CSV export button", "--json")
+        rc, first, text = cli(
+            root,
+            "start",
+            "add a CSV export button",
+            "--json",
+            operator_text="add a CSV export button",
+        )
         self.assertEqual(first.get("code"), "WAIT_OPERATOR", text)
         command = (first.get("decision") or {})["command"].replace(
             "<decision>", "the upstream contract landed"
         )
         rc, _payload, text = cli(root, *command.split(" ")[1:], "--json")
         self.assertEqual(rc, 0, text)
-        rc, second, text = cli(
-            root, "start", "--receipt", first["receipt"], "--json"
-        )
+        rc, second, text = cli(root, "start", "--receipt", first["receipt"], "--json")
         self.assertEqual(second.get("code"), "STARTED", text)
         self.assertEqual(second.get("receipt"), first["receipt"])
 
@@ -1256,9 +1287,9 @@ class RequestIdentityTests(unittest.TestCase):
         root = completed_request_project(self, self.TASK)
         original = receipts_of(root)[0]
         _rc, again, _text = self._start(root)
-        body = (
-            root / ".saipen" / "intake" / "active" / f"{again['receipt']}.md"
-        ).read_text(encoding="utf-8")
+        body = (root / ".saipen" / "intake" / "active" / f"{again['receipt']}.md").read_text(
+            encoding="utf-8"
+        )
         self.assertIn("supersedes: " + original, body)
         self.assertIn(self.TASK, body)
 
@@ -1279,9 +1310,7 @@ class OversizedProjectionTests(unittest.TestCase):
     def test_an_oversized_verify_becomes_a_compact_row_pointing_at_the_receipt(self):
         root = healthy(self)
         verify = self._verify(2400)
-        rc, payload, text = cli(
-            root, "start", self.TASK, "--verify", verify, "--json"
-        )
+        rc, payload, text = cli(root, "start", self.TASK, "--verify", verify, "--json")
         self.assertEqual(rc, 0, text)
         self.assertEqual(payload.get("code"), "STARTED", text)
         record = board_of(root)["tickets"][payload["ticket"]]
@@ -1289,9 +1318,9 @@ class OversizedProjectionTests(unittest.TestCase):
         fields = record.get("fields") or {}
         self.assertIn(payload["receipt"], fields.get("source_receipts", ""))
         self.assertIn(payload["receipt"], fields.get("verify", ""))
-        body = (
-            root / ".saipen" / "intake" / "active" / f"{payload['receipt']}.md"
-        ).read_text(encoding="utf-8")
+        body = (root / ".saipen" / "intake" / "active" / f"{payload['receipt']}.md").read_text(
+            encoding="utf-8"
+        )
         self.assertIn(verify, body)
 
     def test_exactly_one_work_is_created_and_a_retry_adds_none(self):
@@ -1308,9 +1337,7 @@ class OversizedProjectionTests(unittest.TestCase):
     def test_a_request_that_cannot_fit_at_all_returns_one_bounded_answer(self):
         root = healthy(self)
         huge_title = "rebuild " + ("the exporter pipeline component " * 60)
-        rc, payload, text = cli(
-            root, "start", huge_title, "--verify", self._verify(2400), "--json"
-        )
+        rc, payload, text = cli(root, "start", huge_title, "--verify", self._verify(2400), "--json")
         self.assertIsNotNone(payload, text)
         self.assertTrue(payload.get("receipt"), text)
         if payload.get("ok"):
@@ -1344,17 +1371,13 @@ class HumanRefusalTests(unittest.TestCase):
         self.assertIn("REFUSE [", text)
         self.assertIn("reason:", text)
         self.assertIn("next:", text)
-        command = next(
-            line for line in text.splitlines() if line.startswith("next:")
-        )
+        command = next(line for line in text.splitlines() if line.startswith("next:"))
         self.assertIn("saipen ", command)
         if expect_then:
             self.assertIn("then:", text)
 
     def test_wait_operator_prints_reason_next_and_then(self):
-        text = self._refusal(
-            valve_and_blocker_project(self), "start", "add a CSV export button"
-        )
+        text = self._refusal(valve_and_blocker_project(self), "start", "add a CSV export button")
         self._assert_actionable(text, expect_then=True)
         self.assertIn("resolve-blocker", text)
 
@@ -1384,9 +1407,7 @@ class HumanRefusalTests(unittest.TestCase):
             "--verify",
             verify,
         )
-        self.assertTrue(
-            "STARTED" in text or ("REFUSE [" in text and "reason:" in text), text
-        )
+        self.assertTrue("STARTED" in text or ("REFUSE [" in text and "reason:" in text), text)
         self.assertTrue(any(name in text for name in receipts_of(root)), text)
 
 
@@ -1520,9 +1541,7 @@ class PluginFleetRoutingTests(unittest.TestCase):
         ):
             with self.subTest(command=command):
                 prepared, result = self._run(root, command)
-                self.assertEqual(
-                    prepared, 0, f"{command} ran Fleet prepare {prepared}x: {result}"
-                )
+                self.assertEqual(prepared, 0, f"{command} ran Fleet prepare {prepared}x: {result}")
 
     def test_the_exemption_survives_unrelated_recovery_debt(self):
         root = corrupt_receipt_project(self)
@@ -1566,9 +1585,7 @@ class PluginFleetRoutingTests(unittest.TestCase):
         self.assertIn("INGRESS_TRANSPORT_UNSAFE", result["message"], result)
         self.assertIn("next: saipen start --hex ", result["message"], result)
         payload = result["message"].split("next: saipen start --hex ", 1)[1].strip()
-        self.assertEqual(
-            bytes.fromhex(payload.split()[0]).decode("utf-8"), "fix the user's page"
-        )
+        self.assertEqual(bytes.fromhex(payload.split()[0]).decode("utf-8"), "fix the user's page")
 
     def test_a_field_fixture_is_a_worktree_before_a_model_sees_it(self):
         """A sandbox the host cannot see the edge of is not a sandbox.
@@ -1667,7 +1684,7 @@ class LiveTranscriptConvergenceTests(unittest.TestCase):
         root = valve_and_blocker_project(self)
         transcript = []
 
-        _rc, first, text = cli(root, "start", self.TASK, "--json")
+        _rc, first, text = cli(root, "start", self.TASK, "--json", operator_text=self.TASK)
         transcript.append(("saipen start", first.get("code")))
         self.assertEqual(first.get("code"), "WAIT_OPERATOR", text)
 
@@ -1691,16 +1708,15 @@ class LiveTranscriptConvergenceTests(unittest.TestCase):
         ):
             with self.subTest(project=build.__name__):
                 root = build(self)
-                _rc, first, text = cli(root, "start", self.TASK, "--json")
+                _rc, first, text = cli(root, "start", self.TASK, "--json", operator_text=self.TASK)
                 if first.get("ok"):
                     continue
-                command = first.get("canonical_next_command") or (
-                    first.get("decision") or {}
-                ).get("command")
+                command = first.get("canonical_next_command") or (first.get("decision") or {}).get(
+                    "command"
+                )
                 self.assertTrue(command, first)
-                named = (
-                    command.replace("<decision>", "cleared")
-                    .replace("<next-action>", "saipen continue")
+                named = command.replace("<decision>", "cleared").replace(
+                    "<next-action>", "saipen continue"
                 )
                 # Every remaining `<a|b|c>` is a CLOSED CLASS VOCABULARY the
                 # refusal prints so the reader picks a member; fill it with its
@@ -1714,7 +1730,7 @@ class LiveTranscriptConvergenceTests(unittest.TestCase):
                     named,
                 )
                 cli(root, *named.split(" ")[1:], "--json")
-                _rc, second, text = cli(root, "start", self.TASK, "--json")
+                _rc, second, text = cli(root, "start", self.TASK, "--json", operator_text=self.TASK)
                 self.assertNotEqual(
                     (second.get("code"), second.get("detail")),
                     (first.get("code"), first.get("detail")),
@@ -1724,5 +1740,3 @@ class LiveTranscriptConvergenceTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)
-
-

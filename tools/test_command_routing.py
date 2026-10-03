@@ -751,12 +751,21 @@ class CommandSemanticsTests(unittest.TestCase):
         if dry_run:
             cmd.append("--dry-run")
         cmd += list(args)
+        env = {**os.environ, "PYTHONIOENCODING": "utf-8", "PYTHONUTF8": "1"}
+        # `gg`/`goal` is an ingress authority door (SRC-164): an objective only
+        # pivots execution when the operator's own bytes are carried. These
+        # fixtures exercise the trusted door; unwitnessed ingress has its own
+        # incident controls in test_ingress_authority.
+        if args and args[0] in ("gg", "goal") and len(args) > 1 and not args[1].startswith("--"):
+            from test_fixture_support import operator_request_env
+
+            env.update(operator_request_env(args[1]))
         proc = subprocess.run(
             cmd,
             capture_output=True,
             text=True,
             encoding="utf-8",
-            env={**os.environ, "PYTHONIOENCODING": "utf-8", "PYTHONUTF8": "1"},
+            env=env,
             timeout=120,
         )
         payload = {}

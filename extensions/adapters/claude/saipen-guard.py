@@ -128,6 +128,7 @@ def _run_engine(
     stdin: str | None,
     timeout: int,
     transport: str | None = None,
+    operator_request: str | None = None,
 ):
     """One canonical engine call. Bytes both ways: text mode would use the host
     LOCALE (cp1251 on the operator's Windows host), where an Estonian diacritic
@@ -136,6 +137,14 @@ def _run_engine(
     env.pop(TRANSPORT_ENV, None)
     if transport:
         env[TRANSPORT_ENV] = transport
+    if operator_request:
+        # Native transcript USER bytes bind response depth only. This does
+        # not mint admission or supply Work preemption authority.
+        import hashlib
+
+        env["SAIPEN_TASK_SHA256"] = hashlib.sha256(
+            operator_request.replace("\r\n", "\n").replace("\r", "\n").strip().encode("utf-8")
+        ).hexdigest()
     proc = subprocess.run(
         [sys.executable, str(Path(saipen_root) / "tools" / "saipen.py"), *args],
         input=stdin.encode("utf-8") if stdin is not None else None,
@@ -200,7 +209,7 @@ def last_human_request(transcript_path: object) -> str:
             continue
         text = _SYSTEM_REMINDER.sub("", content).strip()
         if text:
-            return text[:MAX_REQUEST_CHARS]
+            return text if len(text) <= MAX_REQUEST_CHARS else ""
     return ""
 
 
@@ -273,7 +282,14 @@ def canonical_verdict(
     if request:
         args.extend(["--request", request])
     try:
-        payload = _run_engine(saipen_root, project, args, stdin=text, timeout=CHECK_TIMEOUT_SECONDS)
+        payload = _run_engine(
+            saipen_root,
+            project,
+            args,
+            stdin=text,
+            timeout=CHECK_TIMEOUT_SECONDS,
+            operator_request=request or None,
+        )
     except (OSError, ValueError, subprocess.SubprocessError):
         return None
     if payload is None or not isinstance(payload.get("ok"), bool):
@@ -454,7 +470,13 @@ def handle_stop(saipen_root: Path, project: Path, event: dict, options) -> int:
     if reentry:
         record(BOUNDARY_REENTRY.format(klass=klass, errors="; ".join(errors)))
         return 0
-    print(json.dumps({"decision": "block", "reason": correction_reason(verdict, project)}))
+    delivery = verdict.get("delivery")
+    correction = (
+        f"SAIPEN canonical delivery ({klass}; do not add prose):\n" + delivery
+        if isinstance(delivery, str) and delivery
+        else correction_reason(verdict, project)
+    )
+    print(json.dumps({"decision": "block", "reason": correction}))
     return 0
 
 

@@ -100,6 +100,7 @@ COMPACTION_DISPOSITION = {
     "supersession_authority": "inline",
     "supersession_evidence": "inline",
     "user_explicit": "inline",
+    "request_witness": "inline",
     "verify": "compact",
     "verify_attempts": "inline",
     "weak_model": "inline",
@@ -128,6 +129,7 @@ _CRITICAL_FIELDS = frozenset(
         "supersession_authority",
         "supersession_evidence",
         "user_explicit",
+        "request_witness",
         "verify",
         "verify_attempts",
     }
@@ -379,11 +381,7 @@ def _fit_compact(tid: str, checkbox: str, parts: list, detail_ref: str) -> str:
         line = _render_compact(tid, checkbox, parts, detail_ref)
     if len(line) > MAX_LIVE_RECORD_CHARS:
         pinned = sorted(
-            {
-                name
-                for name, _ in parts
-                if COMPACTION_DISPOSITION.get(name) == "tokenized"
-            }
+            {name for name, _ in parts if COMPACTION_DISPOSITION.get(name) == "tokenized"}
         )
         raise ValueError(
             "BOARD compaction cannot represent required machine truth within "
@@ -527,9 +525,7 @@ def gather_lineage(
                 # The plan may be creating this very artifact. Not a break.
                 if not (root / cursor).is_file():
                     return None
-            raise ValueError(
-                f"BOARD detail predecessor {cursor} is not resolvable: {exc}"
-            ) from exc
+            raise ValueError(f"BOARD detail predecessor {cursor} is not resolvable: {exc}") from exc
         entries.append(_entry_for(root, cursor, metadata))
         checkpoint = metadata.get("supersedes_checkpoint")
         if isinstance(checkpoint, str) and checkpoint.strip():
@@ -583,8 +579,7 @@ def checkpoint_plan(
             "operation_id": op_id,
             "event_id": event_id,
             "reason": (
-                "supersession ancestry exceeds the bounded depth; "
-                "flattened lossless checkpoint"
+                "supersession ancestry exceeds the bounded depth; flattened lossless checkpoint"
             ),
         },
         "lossless": True,
@@ -741,9 +736,7 @@ def prepare_existing(
     root = Path(root).resolve()
     broken = detail_integrity_error(root, board_text, ticket_ids)
     if broken:
-        raise ValueError(
-            "BOARD compact record has no reachable detail authority -- " + broken
-        )
+        raise ValueError("BOARD compact record has no reachable detail authority -- " + broken)
     tolerated = frozenset(ticket_ids) if tolerated_ids is None else frozenset(tolerated_ids)
     current = board_text
     targets: list[TargetPlan] = []
@@ -888,9 +881,7 @@ def prepare_new(
     )
 
 
-_UNRECOGNIZED_FIELD_RE = re.compile(
-    r"BOARD\.md:\d+ ticket (T-\d+) has unrecognized field "
-)
+_UNRECOGNIZED_FIELD_RE = re.compile(r"BOARD\.md:\d+ ticket (T-\d+) has unrecognized field ")
 
 
 def unrecognized_field_ticket(error: str) -> str | None:
@@ -958,12 +949,8 @@ def carried_detail_ref(original: bytes, ticket_id: str) -> str:
     try:
         text = original.decode("utf-8")
     except UnicodeError as exc:  # pragma: no cover - writer emits UTF-8
-        raise ValueError(
-            f"BOARD detail original record is not decodable UTF-8: {exc}"
-        ) from exc
-    parsed = parse_board(
-        "## DOING\n" + text.rstrip("\n") + "\n## TODO\n## DONE\n## BLOCKED\n"
-    )
+        raise ValueError(f"BOARD detail original record is not decodable UTF-8: {exc}") from exc
+    parsed = parse_board("## DOING\n" + text.rstrip("\n") + "\n## TODO\n## DONE\n## BLOCKED\n")
     for error in parsed.get("errors", []):
         if unrecognized_field_ticket(error) != ticket_id:
             raise ValueError(
@@ -999,9 +986,7 @@ def _verified_detail(
     owned_target_path(root, detail_ref, kind="BOARD compaction metadata")
     metadata_path = (root / detail_ref).resolve()
     if not metadata_path.is_file() or metadata_path.is_symlink():
-        raise ValueError(
-            f"BOARD detail metadata is missing or not a regular file: {detail_ref}"
-        )
+        raise ValueError(f"BOARD detail metadata is missing or not a regular file: {detail_ref}")
     try:
         metadata = json.loads(metadata_path.read_text(encoding="utf-8"))
     except (json.JSONDecodeError, UnicodeError) as exc:
@@ -1125,8 +1110,7 @@ def _verified_checkpoint(root: Path, checkpoint_ref: str, ticket_id: str) -> dic
     )
     _require(
         len(entries) <= _MAX_LINEAGE_ENTRIES,
-        "BOARD detail lineage checkpoint exceeds the bounded entry count "
-        f"{_MAX_LINEAGE_ENTRIES}",
+        f"BOARD detail lineage checkpoint exceeds the bounded entry count {_MAX_LINEAGE_ENTRIES}",
     )
     _require(
         payload.get("entry_count") == len(entries),
@@ -1193,8 +1177,7 @@ def resolve_detail(
         )
     if len(seen) >= _MAX_SUPERSESSION_DEPTH:
         raise ValueError(
-            "BOARD detail supersession chain exceeds the bounded depth "
-            f"{_MAX_SUPERSESSION_DEPTH}"
+            f"BOARD detail supersession chain exceeds the bounded depth {_MAX_SUPERSESSION_DEPTH}"
         )
     seen.add(reference)
     return _resolve_detail_seen(root, reference, expected_ticket_id, seen)

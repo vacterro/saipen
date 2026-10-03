@@ -34,9 +34,7 @@ class RegistrationTests(unittest.TestCase):
         facts = REGISTRY["semantic_baseline"]["facts"]
         self.assertIn("EXEC-RESPONSE-01", facts)
         self.assertEqual(facts["EXEC-RESPONSE-01"]["owner"], "saipen/EXECUTION.md")
-        self.assertEqual(
-            REGISTRY["rule_owners"]["EXEC-RESPONSE-01"], "saipen/EXECUTION.md"
-        )
+        self.assertEqual(REGISTRY["rule_owners"]["EXEC-RESPONSE-01"], "saipen/EXECUTION.md")
 
     def test_exact_owner_file_is_execution_not_style(self):
         # It is NOT a STYLE rule: the owner is EXECUTION.md.
@@ -103,17 +101,14 @@ class SurfaceBehaviourTests(unittest.TestCase):
 
     def test_out_of_order_fields_refuse(self):
         block = {field: "x" for field in reversed(RS.MANDATORY_FIELDS)}
-        self.assertTrue(
-            any("canonical order" in error for error in RS.surface_errors(block))
-        )
+        self.assertTrue(any("canonical order" in error for error in RS.surface_errors(block)))
 
     def test_details_before_a_mandatory_field_refuses(self):
         block = {field: "x" for field in RS.MANDATORY_FIELDS}
         block["DETAILS"] = "x"
         # Reinsert DETAILS in the middle: dicts preserve insertion order.
         block = {
-            k: block[k]
-            for k in (*RS.MANDATORY_FIELDS[:3], "DETAILS", *RS.MANDATORY_FIELDS[3:])
+            k: block[k] for k in (*RS.MANDATORY_FIELDS[:3], "DETAILS", *RS.MANDATORY_FIELDS[3:])
         }
         self.assertTrue(
             any("DETAILS must render last" in error for error in RS.surface_errors(block))
@@ -135,21 +130,22 @@ class SurfaceBehaviourTests(unittest.TestCase):
             validation="CURRENT_FAIL",
         )
         rendered = RS.render_boundary(boundary)
-        self.assertEqual(rendered.splitlines()[0], "STATUS")
+        self.assertEqual(rendered.splitlines()[0], "STATUS: " + boundary.status)
         self.assertEqual(RS.response_errors(rendered), [])
 
     def test_actual_text_refuses_prose_duplicates_missing_and_vague_action(self):
         valid = RS.render_boundary(
-            RS.OperationalBoundary(
-                "DONE", "Work completed", "NONE", "NONE", "NONE", "CURRENT_PASS"
-            )
+            RS.OperationalBoundary("DONE", "Work completed", "NONE", "NONE", "NONE", "CURRENT_PASS")
         )
         cases = (
             "An explanation before the card\n" + valid,
-            valid.replace("BLOCKER\nNONE", "BLOCKER\nNONE\nBLOCKER\nNONE"),
-            valid.replace("OPERATOR ACTION\nNONE\n", ""),
-            valid.replace("NEXT EXACT ACTION\nNONE", "NEXT EXACT ACTION\ninvestigate further"),
-            valid.replace("BLOCKER\nNONE", "BLOCKER\nThere is still a problem"),
+            valid.replace("RESULT: Work completed", "RESULT: Work completed\nRESULT: duplicated"),
+            valid.replace("RESULT: Work completed\n", ""),
+            valid.replace("NEXT EXACT ACTION: NONE", "NEXT EXACT ACTION: investigate further"),
+            valid.replace(
+                "RESULT: Work completed",
+                "RESULT: Work completed\nBLOCKER: There is still a problem",
+            ),
         )
         for text in cases:
             with self.subTest(text=text[:70]):
@@ -166,50 +162,55 @@ class SurfaceBehaviourTests(unittest.TestCase):
         ):
             with self.subTest(action=action):
                 boundary = RS.OperationalBoundary(
-                    "BLOCKED", "Work is paused", "HUMAN_DECISION -- choose disposition",
-                    action, "saipen continue", "CURRENT_FAIL",
+                    "BLOCKED",
+                    "Work is paused",
+                    "HUMAN_DECISION -- choose disposition",
+                    action,
+                    "saipen continue",
+                    "CURRENT_FAIL",
                 )
-                rendered = "\n".join(
-                    f"{key}\n{value}" for key, value in boundary.fields().items()
-                )
+                rendered = "\n".join(f"{key}\n{value}" for key, value in boundary.fields().items())
                 errors = RS.response_errors(rendered)
-                self.assertTrue(
-                    any("agent command" in error for error in errors), errors
-                )
+                self.assertTrue(any("agent command" in error for error in errors), errors)
         boundary = RS.OperationalBoundary(
-            "BLOCKED", "Work is paused", "HUMAN_DECISION -- choose disposition",
-            "Approve deletion of the retained ignored scripts", "saipen continue",
+            "BLOCKED",
+            "Work is paused",
+            "HUMAN_DECISION -- choose disposition",
+            "Approve deletion of the retained ignored scripts",
+            "saipen continue",
             "CURRENT_FAIL",
         )
-        rendered = "\n".join(
-            f"{key}\n{value}" for key, value in boundary.fields().items()
-        )
+        rendered = "\n".join(f"{key}: {value}" for key, value in boundary.fields().items())
         self.assertEqual(RS.response_errors(rendered), [])
 
     def test_autonomous_repair_is_not_a_response_boundary(self):
         rendered = RS.render_boundary(
             RS.OperationalBoundary(
-                "VERIFY failure", "Repairable debt found", "NONE", "NONE",
-                "saipen continue", "CURRENT_FAIL",
+                "VERIFY failure",
+                "Repairable debt found",
+                "NONE",
+                "NONE",
+                "saipen continue",
+                "CURRENT_FAIL",
             )
         )
         self.assertIn(
             "eligible autonomous action remains; returning control is invalid",
-            RS.response_errors(
-                rendered, executable_action_remains=True, response_boundary=False
-            ),
+            RS.response_errors(rendered, executable_action_remains=True, response_boundary=False),
         )
         invented = RS.render_boundary(
             RS.OperationalBoundary(
-                "VERIFY failure", "Repairable debt found", "NONE",
-                "Decide whether I should repair this", "saipen continue", "CURRENT_FAIL",
+                "VERIFY failure",
+                "Repairable debt found",
+                "NONE",
+                "Decide whether I should repair this",
+                "saipen continue",
+                "CURRENT_FAIL",
             )
         )
         self.assertIn(
             "OPERATOR ACTION is not due on the current route",
-            RS.response_errors(
-                invented, executable_action_remains=True, response_boundary=False
-            ),
+            RS.response_errors(invented, executable_action_remains=True, response_boundary=False),
         )
 
     def test_fresh_conformance_truth_supersedes_a_cached_pass(self):
@@ -235,7 +236,9 @@ class SurfaceBehaviourTests(unittest.TestCase):
             operator_due=True,
         )
         for required in (
-            "current phase BUILD", "current task T-1548", "current HUMAN_DECISION",
+            "current phase BUILD",
+            "current task T-1548",
+            "current HUMAN_DECISION",
             "OPERATOR ACTION is required",
         ):
             self.assertTrue(any(required in error for error in errors), errors)
@@ -244,29 +247,39 @@ class SurfaceBehaviourTests(unittest.TestCase):
         for result in ("Töö valmis", "Работа завершена", "Work complete"):
             with self.subTest(result=result):
                 rendered = RS.render_boundary(
-                    RS.OperationalBoundary(
-                        "DONE", result, "NONE", "NONE", "NONE", "CURRENT_PASS"
-                    )
+                    RS.OperationalBoundary("DONE", result, "NONE", "NONE", "NONE", "CURRENT_PASS")
                 )
                 self.assertEqual(RS.response_errors(rendered), [])
-                headings = [line for line in rendered.splitlines() if line in RS.FIELD_ORDER]
-                self.assertEqual(headings, list(RS.MANDATORY_FIELDS))
+                values, errors = RS.parse_surface(rendered)
+                self.assertFalse(errors)
+                self.assertTrue(set(RS.MANDATORY_FIELDS).issubset(values))
 
     def test_public_runtime_renderer_and_checker_share_the_same_contract(self):
         fields = {
-            "status": "DONE", "result": "Work completed", "blocker": "NONE",
-            "operator_action": "NONE", "next_exact_action": "NONE",
+            "status": "DONE",
+            "result": "Work completed",
+            "blocker": "NONE",
+            "operator_action": "NONE",
+            "next_exact_action": "NONE",
             "validation": "CURRENT_PASS",
         }
         rendered = subprocess.run(
             [sys.executable, str(TOOLS / "saipen.py"), "response", "render", "--stdin", "--json"],
-            input=json.dumps(fields), cwd=ROOT, capture_output=True, text=True, check=False,
+            input=json.dumps(fields),
+            cwd=ROOT,
+            capture_output=True,
+            text=True,
+            check=False,
         )
         self.assertEqual(rendered.returncode, 0, rendered.stdout + rendered.stderr)
         text = json.loads(rendered.stdout)["text"]
         checked = subprocess.run(
             [sys.executable, str(TOOLS / "saipen.py"), "response", "check", "--stdin", "--json"],
-            input=text, cwd=ROOT, capture_output=True, text=True, check=False,
+            input=text,
+            cwd=ROOT,
+            capture_output=True,
+            text=True,
+            check=False,
         )
         self.assertEqual(checked.returncode, 0, checked.stdout + checked.stderr)
         self.assertEqual(json.loads(checked.stdout)["code"], "RESPONSE_VALID")
@@ -279,14 +292,31 @@ class SurfaceBehaviourTests(unittest.TestCase):
         validation = conformance_decision(project, gate="core")["status"]
         rendered = RS.render_boundary(
             RS.OperationalBoundary(
-                "BUILD T-9001", "Work remains", "NONE", "NONE",
-                "saipen continue", validation,
+                "BUILD T-9001",
+                "Work remains",
+                "NONE",
+                "NONE",
+                "saipen continue",
+                validation,
             )
         )
         proc = subprocess.run(
-            [sys.executable, str(TOOLS / "saipen.py"), "response", "check", "--stdin",
-             "--auto-eligibility", "--project-root", str(project), "--json"],
-            input=rendered, cwd=ROOT, capture_output=True, text=True, check=False,
+            [
+                sys.executable,
+                str(TOOLS / "saipen.py"),
+                "response",
+                "check",
+                "--stdin",
+                "--auto-eligibility",
+                "--project-root",
+                str(project),
+                "--json",
+            ],
+            input=rendered,
+            cwd=ROOT,
+            capture_output=True,
+            text=True,
+            check=False,
         )
         self.assertEqual(proc.returncode, 1, proc.stdout + proc.stderr)
         self.assertIn("eligible autonomous action remains", proc.stdout)
@@ -331,11 +361,13 @@ await hooks['tool.execute.before'](
   { tool: 'bash', sessionID: 'response-test' }, { args: { command: 'saipen status' } },
 );
 let rejected = false;
+const attempted = { text: 'Everything is fine.' };
 try {
   await hooks['experimental.text.complete'](
     { sessionID: 'response-test', messageID: 'reply', partID: 'part' },
-    { text: 'Everything is fine.' },
+    attempted,
   );
+  rejected = attempted.text !== 'Everything is fine.' && attempted.text.startsWith('STATUS:');
 } catch (error) {
   rejected = String(error.message).includes('EXEC_RESPONSE_INVALID');
 }
@@ -347,9 +379,20 @@ process.stdout.write(JSON.stringify({ rejected, prompt: system.system.join('\\n'
 """
         env = {**os.environ, "SAIPEN_SKILL_ROOT": str(ROOT), "SAIPEN_PYTHON": sys.executable}
         proc = subprocess.run(
-            [shutil.which("node") or "node", "--input-type=module", "-e", script,
-             str(plugin), str(project), valid],
-            cwd=ROOT, env=env, capture_output=True, text=True, check=False,
+            [
+                shutil.which("node") or "node",
+                "--input-type=module",
+                "-e",
+                script,
+                str(plugin),
+                str(project),
+                valid,
+            ],
+            cwd=ROOT,
+            env=env,
+            capture_output=True,
+            text=True,
+            check=False,
         )
         self.assertEqual(proc.returncode, 0, proc.stdout + proc.stderr)
         result = json.loads(proc.stdout)
@@ -370,8 +413,12 @@ process.stdout.write(JSON.stringify({ rejected, prompt: system.system.join('\\n'
         validation = conformance_decision(project, gate="core")["status"]
         valid = RS.render_boundary(
             RS.OperationalBoundary(
-                "BUILD T-9001", "Work remains", "NONE", "NONE",
-                "saipen continue --json", validation,
+                "BUILD T-9001",
+                "Work remains",
+                "NONE",
+                "NONE",
+                "saipen continue --json",
+                validation,
             )
         )
         plugin = ROOT / "extensions" / "adapters" / "opencode" / "saipen-guard.js"
@@ -402,9 +449,20 @@ process.stdout.write(JSON.stringify({ blocked, errorText }));
 """
         env = {**os.environ, "SAIPEN_SKILL_ROOT": str(ROOT), "SAIPEN_PYTHON": sys.executable}
         proc = subprocess.run(
-            [shutil.which("node") or "node", "--input-type=module", "-e", script,
-             str(plugin), str(project), valid],
-            cwd=ROOT, env=env, capture_output=True, text=True, check=False,
+            [
+                shutil.which("node") or "node",
+                "--input-type=module",
+                "-e",
+                script,
+                str(plugin),
+                str(project),
+                valid,
+            ],
+            cwd=ROOT,
+            env=env,
+            capture_output=True,
+            text=True,
+            check=False,
         )
         self.assertEqual(proc.returncode, 0, proc.stdout + proc.stderr)
         self.assertTrue(json.loads(proc.stdout)["blocked"], proc.stdout)
@@ -418,8 +476,12 @@ process.stdout.write(JSON.stringify({ blocked, errorText }));
         validation = conformance_decision(project, gate="core")["status"]
         valid = RS.render_boundary(
             RS.OperationalBoundary(
-                "BUILD T-9001", "Current status requested", "NONE", "NONE",
-                "saipen continue --json", validation,
+                "BUILD T-9001",
+                "Current status requested",
+                "NONE",
+                "NONE",
+                "saipen continue --json",
+                validation,
             )
         )
         plugin = ROOT / "extensions" / "adapters" / "opencode" / "saipen-guard.js"
@@ -443,9 +505,20 @@ process.stdout.write(JSON.stringify({ accepted: true }));
 """
         env = {**os.environ, "SAIPEN_SKILL_ROOT": str(ROOT), "SAIPEN_PYTHON": sys.executable}
         proc = subprocess.run(
-            [shutil.which("node") or "node", "--input-type=module", "-e", script,
-             str(plugin), str(project), valid],
-            cwd=ROOT, env=env, capture_output=True, text=True, check=False,
+            [
+                shutil.which("node") or "node",
+                "--input-type=module",
+                "-e",
+                script,
+                str(plugin),
+                str(project),
+                valid,
+            ],
+            cwd=ROOT,
+            env=env,
+            capture_output=True,
+            text=True,
+            check=False,
         )
         self.assertEqual(proc.returncode, 0, proc.stdout + proc.stderr)
         self.assertTrue(json.loads(proc.stdout)["accepted"])

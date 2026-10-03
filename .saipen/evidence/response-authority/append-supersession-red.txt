@@ -1,0 +1,26 @@
+FF
+======================================================================
+FAIL: test_model_conflict_does_not_supersede_accepted_requirement (test_ingress_authority.AppendAuthorityTests.test_model_conflict_does_not_supersede_accepted_requirement)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_ingress_authority.py", line 138, in test_model_conflict_does_not_supersede_accepted_requirement
+    self.assertEqual(intake._read_coverage(project, received["receipt"]), before)
+AssertionError: {'req[85 chars]n': 'SUPERSEDED', 'evidence': 'superseded by a[149 chars]': 1} != {'req[85 chars]n': 'UNKNOWN', 'evidence': None, 'text': 'The [98 chars]': 1}
+Diff is 863 characters long. Set self.maxDiff to None to see it.
+
+======================================================================
+FAIL: test_unwitnessed_append_does_not_rewrite_active_acceptance_or_rewind (test_ingress_authority.AppendAuthorityTests.test_unwitnessed_append_does_not_rewrite_active_acceptance_or_rewind)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_ingress_authority.py", line 120, in test_unwitnessed_append_does_not_rewrite_active_acceptance_or_rewind
+    self.assertEqual(self.phase(project), "VERIFY")
+AssertionError: 'BUILD' != 'VERIFY'
+- BUILD
++ VERIFY
+
+
+----------------------------------------------------------------------
+Ran 2 tests in 2.467s
+
+FAILED (failures=2)
+

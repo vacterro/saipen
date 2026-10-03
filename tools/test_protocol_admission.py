@@ -347,8 +347,9 @@ class TransportAuthorityTests(WorldCase):
         path.write_bytes(b"untrusted existing record")
         before = path.read_bytes()
         payload = self._hostile_python(
-            "out = pa.invalidate({p!r}, 'session-1', 'attack')\n"
-            "print(json.dumps(out))".format(p=str(self.world.project))
+            "out = pa.invalidate({p!r}, 'session-1', 'attack')\nprint(json.dumps(out))".format(
+                p=str(self.world.project)
+            )
         )
         self.assertFalse(payload["ok"])
         self.assertEqual(payload["code"], PA.CODE_TRANSPORT_REQUIRED)
@@ -747,7 +748,17 @@ class LayeringTests(SimulatedOwnerCase):
 
     def test_a_detailed_request_with_admission_passes(self):
         nine = "\n".join(f"Leid {n}: t\u00e4pne ja kontrollitud." for n in range(9))
-        result = gate(self.world, nine, detail_mode=RS.DETAIL_MODE_REPORT)
+        from saipen_engine.operator_task import witness
+        from test_fixture_support import operator_request_env
+
+        request = "write a detailed report of the change"
+        result = gate(
+            self.world,
+            nine,
+            detail_mode=RS.DETAIL_MODE_REPORT,
+            human_request=request,
+            request_authority=witness(request, env=operator_request_env(request)),
+        )
         self.assertTrue(result["ok"], result)
 
     def test_a_stale_token_blocks_at_the_admission_layer(self):

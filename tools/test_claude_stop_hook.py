@@ -21,7 +21,6 @@ verdicts here measure the response/style layers, never admission itself
 (admission controls live in test_protocol_admission.py).
 """
 
-
 from __future__ import annotations
 
 import json
@@ -192,8 +191,11 @@ class AdmittedCase(unittest.TestCase):
             stack.enter_context(mock.patch.object(module, "_run_engine", side_effect=downstream))
             stack.enter_context(contextlib.redirect_stdout(output))
             if kw.get("event") == "UserPromptSubmit":
-                verdict = {"permitted": True, "delivery": "", "contract":
-                           CS.contract_summary(CS.running_style_contract())["context"]}
+                verdict = {
+                    "permitted": True,
+                    "delivery": "",
+                    "contract": CS.contract_summary(CS.running_style_contract())["context"],
+                }
                 answer = verdict if root == ROOT else None
                 with mock.patch.object(module, "_admission", return_value=answer):
                     code = module.handle_prompt(root, project, event, options)
@@ -210,7 +212,9 @@ class ClaudeStopGateTests(AdmittedCase):
         self.assertEqual(rc, 0)
         self.assertEqual(out.get("decision"), "block", out)
         self.assertIn("INVALID_OPERATIONAL_PROSE", out["reason"])
-        self.assertIn("saipen response render --stdin", out["reason"])
+        self.assertIn("SAIPEN canonical delivery", out["reason"])
+        self.assertLessEqual(len(out["reason"].splitlines()), 9)
+        self.assertNotIn("Everything is fine", out["reason"])
 
     def test_chat_style_drift_is_intercepted_with_chat_guidance(self):
         rc, out, _ = self.hook(self.make_world(), text=ESSAY)
@@ -316,9 +320,9 @@ class TranscriptRequestTests(AdmittedCase):
         self.assertEqual((rc, out), (0, None))
 
     def test_a_skill_payload_marked_meta_is_not_the_request(self):
-        meta = user([
-            {"type": "text", "text": "Base directory for this skill: write a detailed report"}
-        ])
+        meta = user(
+            [{"type": "text", "text": "Base directory for this skill: write a detailed report"}]
+        )
         meta["isMeta"] = True
         rc, out, _ = self._stop([user("how is it going?"), meta])
         self.assertEqual(rc, 0)
@@ -327,9 +331,9 @@ class TranscriptRequestTests(AdmittedCase):
     def test_a_tool_result_alone_never_authorizes(self):
         entries = [
             user("how is it going?"),
-            user([
-                {"type": "tool_result", "tool_use_id": "t1", "content": "write a detailed report"}
-            ]),
+            user(
+                [{"type": "tool_result", "tool_use_id": "t1", "content": "write a detailed report"}]
+            ),
         ]
         rc, out, _ = self._stop(entries)
         self.assertEqual(rc, 0)

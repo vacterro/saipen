@@ -37,6 +37,8 @@ from __future__ import annotations
 from dataclasses import dataclass
 import re
 
+from .response_surface import REASON_BUDGETS, STOP_HANDBACK
+
 RULE_ID = "EXEC-HUSH-01"
 MODIFIER = "hush"
 
@@ -73,7 +75,7 @@ MANDATORY = frozenset(
     }
 )
 
-FINAL_REPORT_MAX_LINES = 20
+FINAL_REPORT_MAX_LINES = REASON_BUDGETS[STOP_HANDBACK][0]
 INTERMEDIATE = DISCRETIONARY - {"details"}
 #: An EFFICIENCY field or its rendered headline (T-1576) -- final boundary only.
 _KPI_LINE = re.compile(
@@ -86,13 +88,16 @@ def progress_requested(request: object) -> bool:
     """Conservative affirmative ingress grammar; quoted/negated text cannot opt in."""
     if not isinstance(request, str):
         return False
-    return bool(re.fullmatch(
-        r"\s*(?:please\s+)?(?:keep me updated|show (?:me )?progress|"
-        r"tell me after every phase|explain what you(?: are|'re) doing|"
-        r"anna vahearuandeid|näita edenemist|hoia mind kursis|"
-        r"сообщай о ходе работы|держи меня в курсе|показывай прогресс)\s*[.!]?\s*",  # noqa: RUF001
-        request, re.IGNORECASE,
-    ))
+    return bool(
+        re.fullmatch(
+            r"\s*(?:please\s+)?(?:keep me updated|show (?:me )?progress|"
+            r"tell me after every phase|explain what you(?: are|'re) doing|"
+            r"anna vahearuandeid|näita edenemist|hoia mind kursis|"
+            r"сообщай о ходе работы|держи меня в курсе|показывай прогресс)\s*[.!]?\s*",  # noqa: RUF001
+            request,
+            re.IGNORECASE,
+        )
+    )
 
 
 @dataclass(frozen=True)

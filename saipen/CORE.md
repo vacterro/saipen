@@ -443,9 +443,10 @@ COMMANDS prose to reconstruct commands.
   change) that no active Work/source authority already represents, persist it
   through `saipen user-request` BEFORE performing further completion/block/SHIP
   mutations on unrelated active work. It captures a durable source receipt and
-  projects one `user_explicit` ticket; legitimate active Work is left
-  untouched and routing selects the new ticket at the next safe scheduling
-  boundary. Do NOT ticket read-only questions, explanations,
+  projects one ticket: only an original operator carrier grants `user_explicit`
+  (SOURCES/REQUEST-PROVENANCE-01). Unwitnessed ingress is a local P2-or-lower
+  candidate, never an interrupt; active Work stays intact until safe routing.
+  Do NOT ticket read-only questions, explanations,
   acknowledgements, refinements of the active ticket, or stop requests.
 - `saipen userperson` is DEFAULT DIRECTION, never ORDER. Precedence is
   current explicit request > project/task requirements > SAIPEN normative rules > verified evidence > project USERPERSON > global USERPERSON.

@@ -79,8 +79,8 @@ MAX_CLAUSES = 250
 
 
 def _now() -> str:
-    return _dt.datetime.now(_dt.timezone.utc).replace(microsecond=0).isoformat().replace(
-        "+00:00", "Z"
+    return (
+        _dt.datetime.now(_dt.timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
     )
 
 
@@ -190,8 +190,11 @@ def derive_normative_clauses(body: str) -> list[tuple[str, str]]:
         if is_list is None or (
             not is_list
             and not _NORMATIVE.search(text)
-            and (_HEADING.match(text) or _CAPS_TITLE.match(text)
-                 or (text.endswith(":") and len(text) <= 80))
+            and (
+                _HEADING.match(text)
+                or _CAPS_TITLE.match(text)
+                or (text.endswith(":") and len(text) <= 80)
+            )
         ):
             heading = text
             continue
@@ -216,6 +219,7 @@ def derive_normative_clauses(body: str) -> list[tuple[str, str]]:
 
 
 # -- ledger ------------------------------------------------------------------
+
 
 def ledger_path(root: Path | str, source: str) -> Path:
     return Path(root).joinpath(".saipen", *LEDGER_DIR, f"{source}.json")
@@ -280,6 +284,7 @@ def find_append(root: Path | str, receipt: str) -> tuple[str, dict] | tuple[None
 
 # -- resolution --------------------------------------------------------------
 
+
 def _state_and_board(root: Path) -> tuple[dict, dict]:
     from .board import parse_board
     from .codec import read_doc
@@ -333,6 +338,7 @@ def resolve_controlling_source(root: Path | str, explicit: str | None = None) ->
 
 # -- append (durable receipt + ledger entry) -----------------------------------
 
+
 def append(
     root: Path | str,
     body: str,
@@ -347,11 +353,19 @@ def append(
     """Make one operational append durable. Never interprets beyond its inputs."""
     root = Path(root)
     if klass not in CLASSES:
-        return {"ok": False, "code": "APPEND_CLASS_INVALID", "detail": f"class {klass!r}",
-                "allowed": list(CLASSES)}
+        return {
+            "ok": False,
+            "code": "APPEND_CLASS_INVALID",
+            "detail": f"class {klass!r}",
+            "allowed": list(CLASSES),
+        }
     if delta not in DELTAS:
-        return {"ok": False, "code": "APPEND_DELTA_INVALID", "detail": f"delta {delta!r}",
-                "allowed": list(DELTAS)}
+        return {
+            "ok": False,
+            "code": "APPEND_DELTA_INVALID",
+            "detail": f"delta {delta!r}",
+            "allowed": list(DELTAS),
+        }
     if klass == NEW_MISSION:
         return {
             "ok": False,
@@ -380,7 +394,14 @@ def append(
             "code": "APPEND_SUPERSEDES_UNKNOWN",
             "detail": f"nothing to supersede at {', '.join(unknown)}",
         }
-    captured = intake.capture(root, body, source_kind=APPEND_KIND, amends=source)
+    from .operator_task import witness
+
+    provenance = witness(body)
+    if provenance.get("code"):
+        return {"ok": False, **provenance}
+    captured = intake.capture(
+        root, body, source_kind=APPEND_KIND, amends=source, request_provenance=provenance
+    )
     if not captured.get("ok"):
         return captured
     receipt = captured["receipt"]
@@ -478,6 +499,7 @@ def _supersedable(root: Path, source: str, value: str) -> bool:
 
 # -- projection --------------------------------------------------------------
 
+
 def minimum_rewind(phase: str, delta: str) -> str | None:
     """The phase an active Work must return to, or None to stay where it is."""
     if delta == DELTA_IMPLEMENTATION and phase in _PAST_BUILD:
@@ -519,15 +541,46 @@ def apply_append(root: Path | str, receipt: str, *, actor: str | None = None) ->
     root = Path(root)
     source, entry = find_append(root, receipt)
     if entry is None:
-        return {"ok": False, "code": "APPEND_NOT_FOUND",
-                "detail": f"{receipt} is not a recorded append of any source"}
+        return {
+            "ok": False,
+            "code": "APPEND_NOT_FOUND",
+            "detail": f"{receipt} is not a recorded append of any source",
+        }
     if entry["state"] == PROJECTED:
-        return {"ok": True, "code": "ALREADY_PROJECTED", "receipt": receipt, "source": source,
-                "work": entry.get("work", []), "derived_clauses": entry.get("derived_clauses", [])}
+        return {
+            "ok": True,
+            "code": "ALREADY_PROJECTED",
+            "receipt": receipt,
+            "source": source,
+            "work": entry.get("work", []),
+            "derived_clauses": entry.get("derived_clauses", []),
+        }
     if entry["state"] == SUPERSEDED:
         return {"ok": True, "code": "APPEND_SUPERSEDED", "receipt": receipt, "source": source}
 
+    from .operator_task import authority_for_receipt
+
+    body = intake.read_body(root, receipt)
+    if not body.get("ok"):
+        return {**body, "receipt": receipt, "step": "read"}
+    authority = authority_for_receipt(root, receipt)
     work, state = _live_work(root, source)
+    if not authority["user_explicit"]:
+        # Durability is not permission to replace live acceptance, supersede
+        # prior intent or rewind Work. Keep an unwitnessed append usable as a
+        # separate P2 candidate; retries reuse ONLY its own linked candidate.
+        linked = intake.linked_works(body.get("meta") or {})
+        _state, board = _state_and_board(root)
+        work = next(
+            (
+                w
+                for w in sorted(linked)
+                if w != work
+                and w in board["tickets"]
+                and board["tickets"][w]["section"] != "## DONE"
+            ),
+            None,
+        )
     created = None
     if work is None:
         # The mission's Work is finished: the append's actionable content is
@@ -537,14 +590,18 @@ def apply_append(root: Path | str, receipt: str, *, actor: str | None = None) ->
         added = ticket_add(
             root,
             actor or str(state.get("agent") or "saipen"),
-            "P1",
+            "P1" if authority["user_explicit"] else "P2",
             f"Append {receipt} to {source}: {label}",
             [],
             f"every derived clause of {receipt} carries a terminal disposition with evidence",
         )
         if not added.ok:
-            return {"ok": False, "code": added.code, "detail": added.to_dict().get("message")
-                    or added.to_dict().get("detail"), "receipt": receipt}
+            return {
+                "ok": False,
+                "code": added.code,
+                "detail": added.to_dict().get("message") or added.to_dict().get("detail"),
+                "receipt": receipt,
+            }
         work = added.data["ticket"]
         created = work
     linked = intake.link_work_to(root, receipt, work)
@@ -592,7 +649,9 @@ def apply_append(root: Path | str, receipt: str, *, actor: str | None = None) ->
             }
     _mark_step(root, source, receipt, "derived")
 
-    superseded = _apply_supersession(root, source, entry, receipt)
+    superseded = (
+        _apply_supersession(root, source, entry, receipt) if authority["user_explicit"] else []
+    )
     if isinstance(superseded, dict):
         return superseded
     _mark_step(root, source, receipt, "superseded")
@@ -600,7 +659,7 @@ def apply_append(root: Path | str, receipt: str, *, actor: str | None = None) ->
     rewind = None
     target = minimum_rewind(str(state.get("phase") or ""), entry.get("delta", DELTA_IMPLEMENTATION))
     task = str(state.get("task") or "none")
-    if target and task == work:
+    if target and task == work and authority["user_explicit"]:
         moved = transition_phase(
             root,
             target,
@@ -610,8 +669,13 @@ def apply_append(root: Path | str, receipt: str, *, actor: str | None = None) ->
             f"implementation to {work}; minimum truthful rewind from {state.get('phase')}",
         )
         if not moved.ok:
-            return {"ok": False, "code": moved.code, "receipt": receipt, "step": "rewind",
-                    "detail": moved.to_dict().get("message") or moved.to_dict().get("detail")}
+            return {
+                "ok": False,
+                "code": moved.code,
+                "receipt": receipt,
+                "step": "rewind",
+                "detail": moved.to_dict().get("message") or moved.to_dict().get("detail"),
+            }
         rewind = {"from": state.get("phase"), "to": target, "work": work}
     ledger = read_ledger(root, source)
     current = _entry(ledger, receipt)
@@ -623,6 +687,7 @@ def apply_append(root: Path | str, receipt: str, *, actor: str | None = None) ->
         projected_at=_now(),
         created_work=created,
         superseded=superseded,
+        request_witness=authority["witness"],
     )
     _write_ledger(root, source, ledger)
     event = _journal(
@@ -644,6 +709,7 @@ def apply_append(root: Path | str, receipt: str, *, actor: str | None = None) ->
         "derived_clauses": clause_ids,
         "superseded": superseded,
         "rewind": rewind,
+        "authority": authority,
         "canonical_next_command": "saipen continue --json",
     }
 
@@ -664,7 +730,8 @@ def _apply_supersession(root: Path, source: str, entry: dict, receipt: str):
         targets = [
             item["receipt"]
             for item in ledger["appends"]
-            if item["receipt"] != receipt and item["seq"] < entry["seq"]
+            if item["receipt"] != receipt
+            and item["seq"] < entry["seq"]
             and item["state"] != SUPERSEDED
         ]
     evidence = f"superseded by append {receipt} to {source} ({entry.get('class')})"
@@ -704,6 +771,7 @@ def _apply_supersession(root: Path, source: str, entry: dict, receipt: str):
 
 # -- observation ---------------------------------------------------------------
 
+
 def pending_appends(root: Path | str) -> list[dict]:
     """Received-but-unprojected appends, oldest first. Read-only."""
     pending = []
@@ -722,8 +790,11 @@ def pending_append_projection(root: Path | str | None) -> dict | None:
     try:
         pending = pending_appends(root)
     except (OSError, ValueError) as exc:
-        return {"invalid": True, "action": "saipen source appends",
-                "detail": f"append ledger unreadable: {exc}"}
+        return {
+            "invalid": True,
+            "action": "saipen source appends",
+            "detail": f"append ledger unreadable: {exc}",
+        }
     if not pending:
         return None
     first = pending[0]
@@ -760,21 +831,26 @@ def append_status(root: Path | str) -> dict:
                     active_clauses += 1
         latest = appends[-1] if appends else {}
         unprojected = [item["receipt"] for item in appends if item.get("state") == RECEIVED]
-        missions.append({
-            "source": ledger["source"],
-            "appends": len(appends),
-            "latest_append": latest.get("receipt"),
-            "latest_class": latest.get("class"),
-            "unprojected": unprojected,
-            "active_requirements": active_clauses,
-            "superseded_requirements": superseded_clauses,
-            "affected_work": sorted({work for item in appends for work in item.get("work") or []}),
-            "next_action": (
-                f"saipen source apply-append {unprojected[0]}" if unprojected
-                else "saipen continue --json"
-            ),
-            "error": ledger.get("error"),
-        })
+        missions.append(
+            {
+                "source": ledger["source"],
+                "appends": len(appends),
+                "latest_append": latest.get("receipt"),
+                "latest_class": latest.get("class"),
+                "unprojected": unprojected,
+                "active_requirements": active_clauses,
+                "superseded_requirements": superseded_clauses,
+                "affected_work": sorted(
+                    {work for item in appends for work in item.get("work") or []}
+                ),
+                "next_action": (
+                    f"saipen source apply-append {unprojected[0]}"
+                    if unprojected
+                    else "saipen continue --json"
+                ),
+                "error": ledger.get("error"),
+            }
+        )
     return {"ok": True, "missions": missions}
 
 

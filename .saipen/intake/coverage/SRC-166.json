@@ -1,0 +1,50 @@
+{
+  "requirements": {
+    "SRC-166:R001": {
+      "actionable": false,
+      "class": "context",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "\"Self-check before sending\" must not be the only enforcement boundary.",
+      "verification": null,
+      "work": "T-1601"
+    },
+    "SRC-166:R002": {
+      "actionable": false,
+      "class": "context",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "For normal operational outputs, the model must not control the final response shape freely.",
+      "verification": null,
+      "work": "T-1601"
+    },
+    "SRC-166:R003": {
+      "actionable": false,
+      "class": "context",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "The regression suite must include repeated-turn testing:",
+      "verification": null,
+      "work": "T-1601"
+    },
+    "SRC-166:R004": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "The regression suite must include repeated-turn testing:\nturn 1:\n        model attempts oversized response\n        -> blocked/compressed\n\n    turn 2:\n        fresh response, same semantic pressure\n        -> blocked/compressed again\n\n    turn 3:\n        large evidence set\n        -> still compact",
+      "verification": null,
+      "work": "T-1601"
+    },
+    "SRC-166:R005": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Acceptance requires the invalid response to become mechanically unreachable\nwhere the host capability allows it.",
+      "verification": null,
+      "work": "T-1601"
+    }
+  },
+  "schema_version": 1
+}

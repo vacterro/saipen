@@ -31,6 +31,7 @@ import test_host_bootstrap as hbt  # noqa: E402
 from saipen_engine import entry_resolver as er  # noqa: E402
 from saipen_engine.command_effects import classify_invocation  # noqa: E402
 from saipen_engine.state import parse_frontmatter, persisted_home_error  # noqa: E402
+from test_fixture_support import operator_request_env  # noqa: E402
 
 LAUNCHER = "saipen.cmd" if os.name == "nt" else "saipen"
 _SHIM = (
@@ -347,7 +348,9 @@ class EntryResolutionMatrix(unittest.TestCase):
             with self.subTest(token=token):
                 root = hbt._project(home=str(_runnable_home()))
                 before = sorted(p.name for p in root.iterdir())
-                proc = _entry_cli(["--", "start", token, "--json"], root)
+                proc = _entry_cli(
+                    ["--", "start", token, "--json"], root, _cold_env(**operator_request_env(token))
+                )
                 self.assertEqual(proc.returncode, 0, proc.stdout + proc.stderr)
                 started = json.loads(proc.stdout)
                 self.assertEqual(started["code"], "STARTED", started)
@@ -363,7 +366,11 @@ class EntryResolutionMatrix(unittest.TestCase):
         # work when every call goes through the resolved transport.
         home = _runnable_home()
         root = hbt._project(home=str(home))
-        started = _entry_cli(["--", "start", "runner smoke task", "--json"], root)
+        started = _entry_cli(
+            ["--", "start", "runner smoke task", "--json"],
+            root,
+            _cold_env(**operator_request_env("runner smoke task")),
+        )
         self.assertEqual(started.returncode, 0, started.stdout + started.stderr)
         started = json.loads(started.stdout)
         self.assertEqual(started["code"], "STARTED", started)

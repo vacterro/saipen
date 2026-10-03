@@ -1116,6 +1116,15 @@ def _plan_claim(
     if ticket_id not in tickets:
         return _refuse("TICKET_NOT_FOUND", f"{ticket_id} not on the board", ticket=ticket_id)
     ticket = tickets[ticket_id]
+    from .retirement import non_work_event
+
+    if non_work_event(ticket_id, docs["_history"].events):
+        return _refuse(
+            "TICKET_NOT_WORKABLE",
+            f"{ticket_id} is INVALID_INVOCATION; "
+            "use canonical retirement, never an accept-empty lifecycle",
+            ticket=ticket_id,
+        )
     from . import watchdog
 
     if watchdog.carrier_present() and watchdog.current_carrier(root) is None:
@@ -2042,6 +2051,16 @@ def _plan_transition(
     if _guard is not None:
         return _guard
     current = state.get("phase")
+    from .retirement import non_work_event
+
+    if destination in phases.TICKET_BEARING_PHASES and non_work_event(
+        str(state.get("task") or ""), docs["_history"].events
+    ):
+        return _refuse(
+            "TICKET_NOT_WORKABLE",
+            "INVALID_INVOCATION cannot enter an implementation phase; use canonical retirement",
+            ticket=state.get("task"),
+        )
     if destination not in phases.VALID_TRANSITIONS and destination not in phases.ANY_FROM:
         return _refuse(
             "ILLEGAL_TRANSITION",
@@ -2946,6 +2965,15 @@ def _ticket_targets(
             )
         target_section, checkbox = "## BLOCKED", "[ ]"
     elif action == "unblock":
+        from .retirement import non_work_event
+
+        if non_work_event(ticket_id, docs["_history"].events):
+            return _refuse(
+                "TICKET_NOT_WORKABLE",
+                f"{ticket_id} is INVALID_INVOCATION; "
+                "removing a blocker does not reclassify non-Work",
+                ticket=ticket_id,
+            )
         if not payload or not payload.strip():
             return _refuse(
                 "VALIDATION_FAILED",
@@ -3398,6 +3426,14 @@ def _plan_finish_ticket(
     # source still has missing, corrupt, or uncovered clauses. This gate
     # rereads the original body and verifies its digest; model memory and a
     # green umbrella ticket are not closure evidence.
+    from .retirement import non_work_event
+
+    if non_work_event(ticket_id, docs["_history"].events):
+        return _refuse(
+            "TICKET_NOT_WORKABLE",
+            f"{ticket_id} is INVALID_INVOCATION and cannot claim implementation DONE",
+            ticket=ticket_id,
+        )
     from .intake import discharge_request_clauses, work_closure_gate
 
     source_gate = work_closure_gate(root, ticket_id)
@@ -5451,14 +5487,15 @@ def _retire_targets(
     note_problem = _ret.note_error(note)
     if note_problem:
         return _refuse("VALIDATION_FAILED", note_problem, ticket=ticket_id)
-    if not authority or not str(authority).strip():
+    system_correction = reason in _ret.SYSTEM_CORRECTIONS
+    if not system_correction and (not authority or not str(authority).strip()):
         return _refuse(
             "RETIREMENT_AUTHORITY_REQUIRED",
             "retirement requires --authority SRC-### naming the operator decision "
             "whose capsule grants this retirement -- " + _ret.grammar_hint(),
             ticket=ticket_id,
         )
-    authority = str(authority).strip().upper()
+    authority = "SYSTEM_CORRECTION" if system_correction else str(authority).strip().upper()
     evidence = evidence.strip()
     note = note.strip() if isinstance(note, str) else None
     if isinstance(discovery_event, str) and discovery_event.strip():
@@ -5565,9 +5602,19 @@ def _retire_targets(
     # along. A live foreign claim needs no separate gate for the same reason --
     # Work another seat is running is retired only when the operator granted
     # exactly that, in writing.
-    authority_problem, authority_binding = _ret.authority_error(
-        root, authority, ticket_id=ticket_id, receipts=receipts
-    )
+    if system_correction:
+        authority_problem = _ret.system_correction_error(
+            root, ticket, docs["_history"].events, reason
+        )
+        authority_binding = {
+            "authority_receipt": None,
+            "authority_sha256": None,
+            "authority_grant": "system:" + reason,
+        }
+    else:
+        authority_problem, authority_binding = _ret.authority_error(
+            root, authority, ticket_id=ticket_id, receipts=receipts
+        )
     if authority_problem:
         return _refuse("RETIREMENT_AUTHORITY_REQUIRED", authority_problem, ticket=ticket_id)
 
@@ -6111,7 +6158,7 @@ def retire_ticket(
     *,
     reason: str,
     evidence: str,
-    authority: str,
+    authority: str | None = None,
     discovery_event: str | None = None,
     note: str | None = None,
     dry_run: bool = False,
@@ -7084,7 +7131,7 @@ def user_request(
         data={
             "receipt": receipt,
             "ticket": ticket_id,
-            "user_explicit": True,
+            "user_explicit": operator_task.authority_for_receipt(root, receipt)["user_explicit"],
             "next_action": projected.data.get("next_action"),
             "event_id": projected.data.get("event_id"),
         },
@@ -7198,6 +7245,10 @@ def _project_user_request(
     needs: list[str],
 ) -> Result:
     """ONE journaled transaction: LOG + BOARD Work + recomputed routing."""
+    from . import operator_task
+
+    authority = operator_task.authority_for_receipt(root, receipt)
+    priority = operator_task.projection_priority(priority, authority)
     op_id = "userreq-" + uuid4_hex()
     now, utc = _now(), _utc_iso()
     docs, state, board, log_tail = _read(root)
@@ -7226,8 +7277,9 @@ def _project_user_request(
             + (" | needs: " + ", ".join(needs) if needs else "")
             + " | verify: "
             + escape_ticket_description(redact_credentials(verify_text))
-            + " | user_explicit: "
-            + USER_EXPLICIT_TRUE
+            + (" | user_explicit: " + USER_EXPLICIT_TRUE if authority["user_explicit"] else "")
+            + " | request_witness: "
+            + authority["witness"]
             + " | source_receipts: "
             + receipt
         )
@@ -7296,7 +7348,15 @@ def _project_user_request(
         _actor_provenance(
             state,
             agent,
-            "user request " + receipt + " projected as " + ticket_id + " (user_explicit)",
+            "user request "
+            + receipt
+            + " projected as "
+            + ticket_id
+            + " ("
+            + ("user_explicit" if authority["user_explicit"] else "local candidate")
+            + "; witness "
+            + authority["witness"]
+            + ")",
         ),
         now,
         op_id,
@@ -7853,6 +7913,35 @@ def goal_entry(
     if goal_err is not None:
         return _refuse("INVALID_GOAL", goal_err, objective=objective)
 
+    # The public /goal door is an ingress authority boundary too. A model
+    # cannot bypass start's capability policy by spelling the same bytes as
+    # `goal`. Preserve an unwitnessed request through the existing local-Work
+    # lane; never demote an active ticket, pivot intent, or reset its budget.
+    from . import operator_task
+
+    provenance = operator_task.witness(objective)
+    if provenance.get("code"):
+        return _refuse(provenance["code"], provenance.get("detail", "invalid goal carrier"))
+    authority = operator_task.authority_for_provenance(provenance)
+    if not authority["goal_pivot"]:
+        from .entry import start_work
+
+        captured = start_work(
+            project_root,
+            agent,
+            actor_source="operations.goal_entry",
+            text=objective,
+            dry_run=dry_run,
+        )
+        return Result(
+            bool(captured.get("ok")),
+            captured.get("code", "VALIDATION_FAILED"),
+            message=captured.get("detail", ""),
+            data={
+                key: value for key, value in captured.items() if key not in ("ok", "code", "detail")
+            },
+        )
+
     root = Path(project_root)
     now, utc = _now(), _utc_iso()
     op_id = "goal-entry-" + uuid4_hex()
@@ -8061,6 +8150,7 @@ def goal_entry(
         "goal_waves": 1,
         "goal_tickets": 0,
         "goal_ingress": ingress,
+        "ingress_authority": authority,
     }
     plan = build_plan(
         "goal_entry",
@@ -8072,6 +8162,7 @@ def goal_entry(
             "agent": agent,
             "plan_tickets": plan_ids,
             "goal_ingress": ingress,
+            "request_provenance": provenance,
         },
         _docs_preconditions(docs, "state", "board", "log"),
         targets,
@@ -9466,6 +9557,36 @@ def stop_checkpoint(
         f"done: stopped via SAIOPS checkpoint\nremaining: {remaining}\nawaiting: {awaiting}\n"
     )
     digest_lines = digest_content.rstrip("\n").splitlines()
+    # The journal retains machine history; the delivery route receives ONLY
+    # the canonical typed STOP handback. Neither reason prose nor inventories
+    # are model-controlled response fields. Commit facts and delivery together.
+    from .response_surface import canonical_facts, digest_from_facts, STOP_HANDBACK
+    from .chat_style import running_style_contract
+
+    response_facts = canonical_facts(root)
+    response_facts.update(parse_state(new_state))
+    response_facts["next_action"] = na
+    response_facts["response_reason"] = "stop"
+    response_facts["operator_due"] = is_legal_wait(na)
+    response_facts["operator_action"] = na[5:].strip() if is_legal_wait(na) else "NONE"
+    delivery = digest_from_facts(
+        response_facts, reason="stop", language=running_style_contract().reply_language or "et"
+    )
+    response_record = f".saipen/evidence/response/{op_id}.json"
+    response_bytes = (
+        json.dumps(
+            {
+                "schema": 1,
+                "reason": STOP_HANDBACK,
+                "facts": response_facts,
+                "delivery": delivery,
+                "event": event,
+            },
+            ensure_ascii=False,
+            indent=2,
+        )
+        + "\n"
+    ).encode("utf-8")
     targets = [
         *_log_targets(docs, new_log),
     ]
@@ -9482,6 +9603,16 @@ def stop_checkpoint(
             hash_bytes(digest_doc.encode(digest_content)),
         )
     )
+    response_doc = codec.read_document(root / response_record)
+    targets.append(
+        TargetPlan(
+            response_record,
+            "report",
+            response_bytes,
+            _live_before(root, response_record, response_doc),
+            hash_bytes(response_bytes),
+        )
+    )
     plan = build_plan(
         "stop",
         agent,
@@ -9495,6 +9626,8 @@ def stop_checkpoint(
             "next_action": na,
             "digest": str(root / ".saipen" / "kitchen" / "digest.md"),
             "digest_lines": digest_lines,
+            "delivery": delivery,
+            "response_record": response_record,
         },
         op_id=op_id,
     )
@@ -9986,6 +10119,39 @@ def record_first_publish_wait(
     return apply_plan(root, plan)
 
 
+def _first_publish_wait_journaled(docs: dict) -> bool:
+    """Has the release engine actually journaled a first-publish WAIT event?
+
+    The prose prefix in STATE.next_action is NOT evidence that the gate fired.
+    `next_action` is a free-text field that any writer -- a hand edit, or a
+    reconcile op -- can set, and an earlier seat proved the engine has no way to
+    tell a real WAIT from prose that borrows the prefix (T-184/T-185). The
+    engine's canonical WAIT writer (`_plan_first_publish_wait`) always emits a
+    LOG event with taxonomy `WAIT` whose text starts with `first-publish --`,
+    and that event is journaled like every other. So confirmation now requires
+    BOTH: the pending prose WAIT (the shipped contract, kept so the operator
+    still sees why they are being asked) AND a journaled WAIT event proving a
+    gate actually fired.
+
+    This does NOT grant publication authority over an established remote:
+    `execute_release` recomputes `first_publish_wait` from the live
+    RemoteSnapshot classification (release.py:1337) and consults confirmation
+    only when that is true. This bound is that a confirmation record can no
+    longer be journaled for a gate that never fired.
+    """
+    from .log import parse_log_line
+
+    for line in docs["_history"].event_lines:
+        event = parse_log_line(line)
+        if event is None:
+            continue
+        if event.get("taxonomy") == "WAIT" and str(event.get("text") or "").startswith(
+            "first-publish --"
+        ):
+            return True
+    return False
+
+
 def _plan_first_publish_confirm(
     root: Path, agent: str, remote_name: str, visibility: str, now: str, utc: str
 ) -> OperationPlan | Result:
@@ -9995,6 +10161,9 @@ def _plan_first_publish_confirm(
     agent journal-records the repo name + public/private decision into STATE
     bound to the exact remote identity, so a later `saipen ship` can verify
     the publication is authorized for THIS endpoint.
+
+    The precondition is journaled evidence that a first-publish gate actually
+    fired, not the STATE prose alone (T-185); see `_first_publish_wait_journaled`.
     """
     op_id = "fpc-" + uuid4_hex()
     docs, state, _board, log_tail = _read(root)
@@ -10005,6 +10174,14 @@ def _plan_first_publish_confirm(
             "first-publish confirmation requires a pending "
             "first-publish WAIT in STATE.next_action; current "
             f"next_action is {na!r}",
+        )
+    if not _first_publish_wait_journaled(docs):
+        return _refuse(
+            "VALIDATION_FAILED",
+            "first-publish confirmation requires a journaled first-publish WAIT "
+            "event in LOG (taxonomy WAIT, text starting 'first-publish --'); "
+            "STATE.next_action alone is not evidence that the gate fired, since "
+            "it is a free-text field any writer can set (T-185)",
         )
     if visibility not in ("public", "private"):
         return _refuse("VALIDATION_FAILED", f"visibility {visibility!r} outside public|private")

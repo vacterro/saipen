@@ -1,0 +1,329 @@
+{
+  "requirements": {
+    "SRC-165:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "`model_supplied` remains distinguishable from trusted operator provenance.",
+      "verification": null,
+      "work": "T-1600"
+    },
+    "SRC-165:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Source persistence no longer silently grants operator authority.",
+      "verification": null,
+      "work": "T-1600"
+    },
+    "SRC-165:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Unwitnessed/model-supplied ingress cannot silently preempt active legitimate\n   Work as `user_explicit`.",
+      "verification": null,
+      "work": "T-1600"
+    },
+    "SRC-165:R004": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Unwitnessed ingress cannot silently pivot `/goal` as trusted human authority.",
+      "verification": null,
+      "work": "T-1600"
+    },
+    "SRC-165:R005": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Exact SRC-164/T-1599 incident is RED before and GREEN after.",
+      "verification": null,
+      "work": "T-1600"
+    },
+    "SRC-165:R006": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Exact SRC-146/T-1573 history has a regression preventing INVALID/NON_WORK\n   from drifting through a fake implementation lifecycle.",
+      "verification": null,
+      "work": "T-1600"
+    },
+    "SRC-165:R007": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "T-1599 is canonically disposed without manual BOARD/STATE/LOG mutation.",
+      "verification": null,
+      "work": "T-1600"
+    },
+    "SRC-165:R008": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "T-1510 trajectory is restored coherently if still applicable.",
+      "verification": null,
+      "work": "T-1600"
+    },
+    "SRC-165:R009": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Runnable work defaults to silent continuation.",
+      "verification": null,
+      "work": "T-1600"
+    },
+    "SRC-165:R010": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Normal DONE is compact.",
+      "verification": null,
+      "work": "T-1600"
+    },
+    "SRC-165:R011": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "`saipen stop` produces a compact handback, not a retrospective.",
+      "verification": null,
+      "work": "T-1600"
+    },
+    "SRC-165:R012": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Human blocker output contains only decision/action-relevant information.",
+      "verification": null,
+      "work": "T-1600"
+    },
+    "SRC-165:R013": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Large internal evidence does not linearly enlarge default chat.",
+      "verification": null,
+      "work": "T-1600"
+    },
+    "SRC-165:R014": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Large blocker inventories are summarized by default.",
+      "verification": null,
+      "work": "T-1600"
+    },
+    "SRC-165:R015": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Commit/evidence/test inventories are summarized by default.",
+      "verification": null,
+      "work": "T-1600"
+    },
+    "SRC-165:R016": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Requested deep reports remain possible.",
+      "verification": null,
+      "work": "T-1600"
+    },
+    "SRC-165:R017": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Requested handoffs/audits/specs remain possible as explicit artifacts.",
+      "verification": null,
+      "work": "T-1600"
+    },
+    "SRC-165:R018": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "A request for \"summary\" or \"brief\" does NOT authorize a larger detail\n    budget.",
+      "verification": null,
+      "work": "T-1600"
+    },
+    "SRC-165:R019": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Explicit deep-detail authorization works in supported ingress languages.",
+      "verification": null,
+      "work": "T-1600"
+    },
+    "SRC-165:R020": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Model reasoning cannot authorize its own verbosity.",
+      "verification": null,
+      "work": "T-1600"
+    },
+    "SRC-165:R021": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "DETAILS is never available by default.",
+      "verification": null,
+      "work": "T-1600"
+    },
+    "SRC-165:R022": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "No code-fence or artifact-shaped bypass allows unsolicited novels.",
+      "verification": null,
+      "work": "T-1600"
+    },
+    "SRC-165:R023": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Semantic facts are not redundantly repeated across response fields.",
+      "verification": null,
+      "work": "T-1600"
+    },
+    "SRC-165:R024": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Default response size is approximately constant relative to internal\n    evidence volume.",
+      "verification": null,
+      "work": "T-1600"
+    },
+    "SRC-165:R025": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "OpenCode claims match actual installed behavior.",
+      "verification": null,
+      "work": "T-1600"
+    },
+    "SRC-165:R026": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Claude claims match actual Stop/prompt capabilities.",
+      "verification": null,
+      "work": "T-1600"
+    },
+    "SRC-165:R027": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Codex claims match actual Stop/trust/post-render limitations.",
+      "verification": null,
+      "work": "T-1600"
+    },
+    "SRC-165:R028": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "ZAICODE/ZCode remain honestly ADVISORY where no hook exists.",
+      "verification": null,
+      "work": "T-1600"
+    },
+    "SRC-165:R029": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Intermediate suppression and final-response enforcement remain separate\n    capabilities.",
+      "verification": null,
+      "work": "T-1600"
+    },
+    "SRC-165:R030": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "No post-render hook is described as pre-render prevention.",
+      "verification": null,
+      "work": "T-1600"
+    },
+    "SRC-165:R031": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Same-incident RED -> GREEN evidence exists.",
+      "verification": null,
+      "work": "T-1600"
+    },
+    "SRC-165:R032": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Canonical validate is CURRENT_PASS.",
+      "verification": null,
+      "work": "T-1600"
+    },
+    "SRC-165:R033": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Full declared core has red=0 and new_red=0.",
+      "verification": null,
+      "work": "T-1600"
+    },
+    "SRC-165:R034": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "No protocol state was manually falsified.",
+      "verification": null,
+      "work": "T-1600"
+    },
+    "SRC-165:R035": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "No unrelated publication occurred.",
+      "verification": null,
+      "work": "T-1600"
+    },
+    "SRC-165:R036": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "No unrelated Work was fabricated.",
+      "verification": null,
+      "work": "T-1600"
+    }
+  },
+  "schema_version": 1
+}

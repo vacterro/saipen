@@ -184,6 +184,25 @@ write the text but not a digest. Digests normalize line endings and outer
 whitespace exactly as INGRESS-AUTHORITY-01 does, so a launcher's file and a
 shell payload are the same request.
 
+Persistence != authorization. `operator_task.authority_for_receipt` derives
+capabilities from original integrity-checked provenance, never BOARD labels
+or retry environment. Only `operator_carrier` may
+project `user_explicit:true`, retain arrival P0/P1, preempt active Work, pivot a
+goal or reset bounded authority. A transport obligation proves payload
+fidelity, not operator identity. Both it and `model_supplied` may persist and
+project mechanically distinct P2-or-lower local candidate Work; idle projects
+may execute it, but an active trajectory keeps its seat/intent/counters.
+No promotion by dedupe, supersession or arrival.
+No provenance capability alone authorizes external actions or retirement;
+those still need their own scoped decision. Hosts without a real carrier use
+this degraded policy honestly; never fabricate a digest as an operator witness.
+
+An INVALID_INVOCATION canonical classification is sticky history: unblock,
+claim, BUILD, VERIFY, SHIP and DONE cannot turn it into accept-empty Work.
+A new witnessed request creates new Work, never launders old classification.
+Evidence-backed system correction can retire an
+empty false-authority projection/non-Work without claiming implementation.
+
 ### A request is one requirement, and the Work's own proof discharges it
 
 <!-- RULE-OWNER: REQUEST-CLAUSE-01 -->
@@ -196,7 +215,7 @@ could not be finished by any command the CLI offers** -- the two functions that
 could have changed it are Python-only. Two independent field sessions drove the
 whole chain, edited their target, and looped there.
 
-A request is not zero requirements. It is exactly one: the text the operator
+A valid Work request is not zero requirements. It is exactly one: the text the operator
 wrote. At closure, each linked `user_instruction` receipt gets that clause if it
 has none, and the clause is settled from the SAME verification evidence the Work
 gate already demands -- one proof, not two. Nothing is settled when that
@@ -211,14 +230,11 @@ declared.
 
 <!-- RULE-OWNER: SOURCE-APPEND-01 -->
 
-The defect class this ends: the operator hands a RUNNING mission one more
-operational file -- a replacement handoff after `/new`, ten small bricks over an
-afternoon, or one line saying a recoverable binding failure must fall back to
-direct launch -- and the agent answers with a summary of it. The requirement
-reaches no receipt, no coverage and no routing, so it exists only in a chat
-transcript the next incarnation will not see, and the operator has to restate it
-by hand. Transport was never the variable: pasted text, an attached `.md`, a
-2,000-line mega handoff and a one-invariant brick are the same input form.
+Appends preserve a running mission's new requirement files as machine state,
+not summaries: pasted text, attached handoffs and single invariants alike.
+REQUEST-PROVENANCE-01 applies: only an original operator carrier may modify
+live acceptance, supersede intent or rewind Work. Unwitnessed appends persist
+and project separate P2 candidates without changing the active trajectory.
 
 An append is an immutable receipt captured VERBATIM with `amends: <SRC-###>`.
 The controlling source's bytes are never edited, and exact-digest dedupe makes
@@ -266,8 +282,9 @@ digest and closure tombstone, so full forensic reproduction is honestly lost.
 A receipt reaches a tombstone by exactly two routes, and they mean opposite
 things. CLOSED means the request was implemented and proven here. INVALID
 means it never belonged to this project's execution history at all: the
-ingress resolved the wrong project root and minted Work in the wrong
-repository. A misrouted receipt has no terminal coverage and must never be
+ingress resolved the wrong project root, falsely projected operator authority,
+or was canonically classified INVALID_INVOCATION (no Work). Such a receipt has
+no successful implementation coverage and must never be
 given any -- inventing a disposition to reach CLOSED is the fraud retirement
 exists to remove.
 

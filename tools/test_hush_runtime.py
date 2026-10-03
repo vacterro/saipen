@@ -122,7 +122,11 @@ class Lifecycle(unittest.TestCase):
             hush.HUSHED.hushed = False  # type: ignore[misc]
 
     def test_activation_reports_the_bounded_final_report(self) -> None:
-        self.assertEqual(hush.activate("hush cc")["final_report_max_lines"], 20)
+        from saipen_engine.response_surface import REASON_BUDGETS, STOP_HANDBACK
+
+        self.assertEqual(
+            hush.activate("hush cc")["final_report_max_lines"], REASON_BUDGETS[STOP_HANDBACK][0]
+        )
         self.assertIsNone(hush.activate("cc")["final_report_max_lines"])
 
 

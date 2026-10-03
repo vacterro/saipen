@@ -114,7 +114,76 @@ LEGACY_SCHEMA_VERSION = 1
 #:       (request provenance `model_supplied`, no operator carrier). The
 #:       request was never the operator's; it must never be implemented,
 #:       completed, or closed with coverage.
-RETIREMENT_REASONS = ("MISROUTED_PROJECT_BINDING", "TEST_FIXTURE_CONTAMINATION")
+REASON_FALSE_AUTHORITY = "FALSE_AUTHORITY_PROJECTION"
+REASON_NON_WORK = "INVALID_INVOCATION"
+SYSTEM_CORRECTIONS = (REASON_FALSE_AUTHORITY, REASON_NON_WORK)
+RETIREMENT_REASONS = (
+    "MISROUTED_PROJECT_BINDING",
+    "TEST_FIXTURE_CONTAMINATION",
+    *SYSTEM_CORRECTIONS,
+)
+
+
+def non_work_event(ticket_id: str, events) -> dict | None:
+    """A canonical non-work classification survives later block removal.
+
+    SRC-146's canonical INVALID_INVOCATION event remained truth after its
+    blocker was removed. Retrospective mentions are not classification events.
+    """
+    for event in reversed(events):
+        text = str(event.get("text") or "")
+        if (
+            event.get("ticket") == ticket_id
+            and event.get("taxonomy") == "DEC"
+            and str(event.get("op_id") or "").startswith("ticket-")
+            and "ticket block via SAIOPS" in text
+            and re.search(r"(?:^| -- )INVALID_INVOCATION(?: -- |$)", text)
+        ):
+            return event
+    return None
+
+
+def system_correction_error(root: Path, ticket: dict, events, reason: str) -> str | None:
+    """Narrow evidence-backed de-escalation; never a grant from model prose."""
+    from .operator_task import authority_for_receipt
+
+    fields = ticket.get("fields") or {}
+    receipts = [r.strip() for r in str(fields.get("source_receipts") or "").split(",") if r.strip()]
+    if not receipts:
+        return "system correction requires an integrity-checked source receipt"
+    if reason == REASON_NON_WORK and non_work_event(ticket["id"], events) is None:
+        return "INVALID_INVOCATION requires its canonical non-work classification event"
+    if reason == REASON_FALSE_AUTHORITY and fields.get("user_explicit") != "true":
+        return "false-authority correction requires the original user_explicit projection"
+    if reason == REASON_FALSE_AUTHORITY and any(
+        event.get("ticket") == ticket["id"]
+        and event.get("taxonomy") == "RUN"
+        and re.search(r"transition to (?:BUILD|VERIFY|REVIEW|SHIP)\b", str(event.get("text") or ""))
+        for event in events
+    ):
+        return (
+            "started implementation requires a canonical non-work classification, "
+            "not automatic retraction"
+        )
+    for receipt in receipts:
+        if not intake.verify_integrity(root, receipt).get("ok"):
+            return f"{receipt} integrity is not proven"
+        meta = intake._read_meta(root, receipt) or {}
+        if intake.linked_works(meta) != {ticket["id"]}:
+            return f"{receipt} is not exclusively linked to this Work"
+        if (
+            reason == REASON_FALSE_AUTHORITY
+            and authority_for_receipt(root, receipt)["user_explicit"]
+        ):
+            return f"{receipt} carries operator authority; system retraction cannot retire it"
+        contract = intake._read_contract(root, receipt)
+        coverage = intake._read_coverage(root, receipt)
+        if not isinstance(contract, dict) or not isinstance(coverage, dict):
+            return f"{receipt} requires intact contract and coverage ledgers"
+        if contract.get("clauses") or coverage.get("requirements"):
+            return f"{receipt} carries normalized Work; system correction cannot discard it"
+    return None
+
 
 #: Forensic cold storage. Deliberately NOT `.saipen/archive/source/`: that
 #: namespace means "closed with proven terminal coverage" and every reader of
@@ -347,6 +416,10 @@ def authority_error(
     integrity = intake.verify_integrity(root, authority_receipt)
     if not integrity["ok"]:
         return f"authority receipt {authority_receipt}: {integrity['code']}", None
+    from .operator_task import authority_for_receipt
+
+    if not authority_for_receipt(root, authority_receipt)["user_explicit"]:
+        return f"authority receipt {authority_receipt} has no witnessed operator grant", None
     body = intake.read_body(root, authority_receipt)
     if not body.get("ok"):
         return f"authority receipt {authority_receipt} body unreadable", None
@@ -738,14 +811,23 @@ def _shared_field_errors(label: str, doc: dict) -> list[str]:
     note = doc.get("evidence_note")
     if note is not None and (not isinstance(note, str) or not note.strip() or "\n" in note):
         errors.append(f"{label} evidence_note is neither null nor a single line")
-    if not intake._valid_receipt_id(str(doc.get("authority_receipt", ""))):
+    system = doc.get("reason") in SYSTEM_CORRECTIONS
+    if system:
+        if (
+            doc.get("authority_receipt") is not None
+            or doc.get("authority_sha256") is not None
+            or doc.get("authority_grant") != "system:" + str(doc.get("reason"))
+        ):
+            errors.append(f"{label} system correction must not claim operator authority")
+    elif not intake._valid_receipt_id(str(doc.get("authority_receipt", ""))):
         errors.append(f"{label} authority_receipt is not a receipt id")
-    if not isinstance(doc.get("authority_sha256"), str) or not _SHA256_RE.fullmatch(
-        doc["authority_sha256"]
+    if not system and (
+        not isinstance(doc.get("authority_sha256"), str)
+        or not _SHA256_RE.fullmatch(doc["authority_sha256"])
     ):
         errors.append(f"{label} authority_sha256 is not a sha256")
     grant = doc.get("authority_grant")
-    if not isinstance(grant, str) or not _GRANT_ITEM_RE.fullmatch(grant):
+    if not system and (not isinstance(grant, str) or not _GRANT_ITEM_RE.fullmatch(grant)):
         errors.append(f"{label} authority_grant is not a capsule grant line")
     if not valid_stamp(doc.get("retired_at")):
         errors.append(f"{label} retired_at is not a UTC timestamp")
@@ -865,9 +947,10 @@ def legacy_ticket_record_errors(ticket_id: str, record: object) -> list[str]:
         errors.append(f"{label} retired_by is empty")
     if _event_number(record.get("retirement_event")) is None:
         errors.append(f"{label} retirement_event is not an event id")
-    if record.get("discovery_event") is not None and _event_number(
-        record.get("discovery_event")
-    ) is None:
+    if (
+        record.get("discovery_event") is not None
+        and _event_number(record.get("discovery_event")) is None
+    ):
         errors.append(f"{label} discovery_event is neither null nor an event id")
     return errors
 
@@ -1033,9 +1116,9 @@ def meta_retirement_errors(receipt_id: str, meta: dict, tomb: dict) -> list[str]
     errors.extend(_shared_field_errors(label, block))
     if meta.get("receipt_id") != receipt_id:
         errors.append(f"{label} identity drift")
-    if meta.get("linked_work") != tomb.get("linked_work") or block.get(
-        "retired_work"
-    ) != tomb.get("linked_work"):
+    if meta.get("linked_work") != tomb.get("linked_work") or block.get("retired_work") != tomb.get(
+        "linked_work"
+    ):
         errors.append(f"{label} names different Work than its tombstone")
     board_record = block.get("board_record")
     if not isinstance(board_record, str) or board_record_digest(board_record) != block.get(
@@ -1160,9 +1243,7 @@ def retired_namespace_errors(root: Path, index: dict, board_tickets: dict) -> li
     root = Path(root)
     directory = root / RETIRED_DIR
     tombstones = index.get("tombstones", {})
-    retired_tombs = {
-        rid: tomb for rid, tomb in tombstones.items() if is_retired_tombstone(tomb)
-    }
+    retired_tombs = {rid: tomb for rid, tomb in tombstones.items() if is_retired_tombstone(tomb)}
     if not os.path.lexists(directory):
         return []
     errors: list[str] = []
@@ -1259,7 +1340,9 @@ def retirement_history_errors(ticket_id: str, record: dict, events: dict) -> lis
     bound = _event_number(record.get("evidence_bound_event"))
     evidence = record.get("evidence") or {}
     reason = record.get("reason")
-    authority = record.get("authority_receipt")
+    authority = (
+        "SYSTEM_CORRECTION" if reason in SYSTEM_CORRECTIONS else record.get("authority_receipt")
+    )
 
     retire_event = events.get(retired) if retired is not None else None
     if retire_event is None:
@@ -1282,8 +1365,10 @@ def retirement_history_errors(ticket_id: str, record: dict, events: dict) -> lis
             errors.append(f"{label} retired_by disagrees with the retirement event's agent")
         elif bound == retired and evidence_token(evidence) not in text:
             errors.append(f"{label} evidence is not the evidence its retirement event recorded")
-        elif bound == retired and record.get("evidence_note") and (
-            f"note: {record['evidence_note']}" not in text
+        elif (
+            bound == retired
+            and record.get("evidence_note")
+            and (f"note: {record['evidence_note']}" not in text)
         ):
             errors.append(f"{label} evidence_note is not the note its retirement event recorded")
     if bound is not None and retired is not None and bound != retired:
@@ -1306,8 +1391,10 @@ def retirement_history_errors(ticket_id: str, record: dict, events: dict) -> lis
                     f"{label} cites {record.get('evidence_bound_event')}, which is not this "
                     "ticket's evidence binding"
                 )
-        if retire_event is not None and record.get("evidence_note") and (
-            f" -- {record['evidence_note']}" not in str(retire_event.get("text") or "")
+        if (
+            retire_event is not None
+            and record.get("evidence_note")
+            and (f" -- {record['evidence_note']}" not in str(retire_event.get("text") or ""))
         ):
             errors.append(
                 f"{label} evidence_note is not the evidence text its retirement event recorded"
@@ -1320,6 +1407,16 @@ def retirement_history_errors(ticket_id: str, record: dict, events: dict) -> lis
         number = _event_number(evidence.get("ref"))
         if number is None or number not in events:
             errors.append(f"{label} evidence event {evidence.get('ref')} is absent from LOG")
+    prior = [e for n, e in events.items() if retired is not None and n < retired]
+    if reason == REASON_NON_WORK and non_work_event(ticket_id, prior) is None:
+        errors.append(f"{label} has no prior canonical non-work classification")
+    if reason == REASON_FALSE_AUTHORITY and any(
+        e.get("ticket") == ticket_id
+        and e.get("taxonomy") == "RUN"
+        and re.search(r"transition to (?:BUILD|VERIFY|REVIEW|SHIP)\b", str(e.get("text") or ""))
+        for e in prior
+    ):
+        errors.append(f"{label} automatic correction retired started implementation")
     return errors
 
 
@@ -1343,9 +1440,7 @@ def retired_archive_errors(root: Path, receipt_id: str, tomb: dict) -> list[str]
     # digest is what the archived copy must reproduce, so corruption stays
     # visible instead of being "fixed" during cold storage.
     expected = (
-        block.get("measured_sha256")
-        if receipt_only and block.get("digest_mismatch")
-        else digest
+        block.get("measured_sha256") if receipt_only and block.get("digest_mismatch") else digest
     )
     if hashlib.sha256(body).hexdigest() != expected:
         errors.append(f"retired receipt {receipt_id} archived body digest mismatch")
@@ -1373,6 +1468,42 @@ def retired_archive_errors(root: Path, receipt_id: str, tomb: dict) -> list[str]
             errors.extend(retired_link_errors(root, receipt_id, tomb))
     if os.path.lexists(root / ".saipen" / "intake" / "active" / f"{receipt_id}.md"):
         errors.append(f"retired receipt {receipt_id} still holds an active body")
+    if tomb.get("reason") in SYSTEM_CORRECTIONS:
+        from .operator_task import authority_for_provenance
+        from .pending_ingress import ingress_digest
+
+        for kind, key in (("contract", "clauses"), ("coverage", "requirements")):
+            try:
+                raw = intake._read_owned_file(
+                    root,
+                    f"{RETIRED_DIR}/{receipt_id}.{kind}.json",
+                    kind="retired non-work ledger",
+                    max_bytes=intake._META_MAX,
+                )
+                ledger = json.loads(raw.decode("utf-8-sig"))
+                if not isinstance(ledger, dict) or ledger.get(key) != {}:
+                    errors.append(
+                        f"retired receipt {receipt_id} system correction discarded normalized Work"
+                    )
+            except (OSError, ValueError):
+                errors.append(f"retired receipt {receipt_id} system correction lacks intact {kind}")
+        if tomb.get("reason") == REASON_FALSE_AUTHORITY:
+            provenance = meta.get("request_provenance") or {}
+            request = body.decode("utf-8-sig")
+            if request.startswith("# User request\n"):
+                request = request.partition("\n## Request\n")[2]
+            if (
+                provenance.get("compared_digest") != ingress_digest(request)
+                or authority_for_provenance(provenance)["user_explicit"]
+            ):
+                errors.append(
+                    f"retired receipt {receipt_id} false-authority provenance is unproven"
+                )
+            board_record = (meta.get("retirement") or {}).get("board_record", "")
+            if "user_explicit: true" not in board_record:
+                errors.append(
+                    f"retired receipt {receipt_id} has no original false-authority projection"
+                )
     return errors
 
 
@@ -1587,8 +1718,7 @@ def source_retirement_errors(
     if unresolved:
         problems.append(
             f"{receipt_id} still carries {len(unresolved)} unresolved actionable "
-            f"requirement(s): {', '.join(unresolved[:3])}"
-            + (" ..." if len(unresolved) > 3 else "")
+            f"requirement(s): {', '.join(unresolved[:3])}" + (" ..." if len(unresolved) > 3 else "")
         )
     if reason == "EMPTY_STALE_SOURCE" and summary.get("requirements"):
         problems.append(
@@ -1605,9 +1735,7 @@ def source_retirement_errors(
             successor_meta = intake._read_meta(root, successor)
             successor_tomb = intake._read_index(root).get("tombstones", {}).get(successor)
             if not successor_meta and not successor_tomb:
-                problems.append(
-                    f"successor {successor} exists in neither ACTIVE nor tombstones"
-                )
+                problems.append(f"successor {successor} exists in neither ACTIVE nor tombstones")
     from .board import parse_board
 
     board_raw = _existing(root, ".saipen/BOARD.md")
@@ -1651,9 +1779,7 @@ def source_retirement_errors(
                 and tid not in live
             ]
             if referencing:
-                problems.append(
-                    f"{receipt_id} is claimed by BOARD Work {referencing[0]}"
-                )
+                problems.append(f"{receipt_id} is claimed by BOARD Work {referencing[0]}")
     # A broken body-digest identity has exactly ONE provable reason class: it
     # may not be buried under EMPTY_STALE_SOURCE or ORPHANED_RECEIPT, because
     # then the corruption disappears from the retirement record's meaning.
@@ -1701,9 +1827,7 @@ def source_only_retirement_targets(
     recorded = meta.get("source_sha256")
     body = _existing(root, f".saipen/intake/active/{receipt_id}.md")
     if body is None:
-        raise ValueError(
-            f"receipt {receipt_id} body missing; original bytes cannot be preserved"
-        )
+        raise ValueError(f"receipt {receipt_id} body missing; original bytes cannot be preserved")
     measured = hashlib.sha256(body).hexdigest()
     retirement = {
         "schema_version": RETIREMENT_SCHEMA_VERSION,

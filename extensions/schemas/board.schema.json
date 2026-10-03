@@ -158,7 +158,12 @@
         "enum": [
           "true"
         ],
-        "description": "Orchestration repair (T-1302): marks a ticket created from an explicit user request (USER_INTERRUPT). Only 'true' arms the scheduler signal."
+        "description": "Operator-authority scheduler signal. Modern projections may write true only from an integrity-checked operator_carrier receipt; persisted model_supplied or transport_obligation bytes do not grant this capability. Legacy records remain readable without retroactive provenance fabrication."
+      },
+      "request_witness": {
+        "type": "string",
+        "enum": ["operator_carrier", "transport_obligation", "model_supplied"],
+        "description": "Original ingress witness, projected without promotion by operator_task. Only operator_carrier can accompany modern user_explicit:true; transport obligations prove tool-payload fidelity, not operator identity."
       },
       "implementation_delta": {
         "type": "string",

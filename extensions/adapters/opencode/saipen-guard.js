@@ -631,7 +631,7 @@ function sessionMemory(sessionID) {
   if (!memory) {
     memory = {
       seen: false, lastIncarnation: null, pending: null, last: null,
-      operational: false, enforceAutonomy: false,
+      operational: false, enforceAutonomy: false, responseRequest: "",
     };
     recallSessions.set(key, memory);
   }
@@ -645,7 +645,7 @@ function checkOperationalResponse(pythonBin, saipenPy, projectRoot, text, enforc
   }
   const proc = spawnSync(
     pythonBin,
-    [saipenPy, "response", "check", "--stdin", "--json", "--project-root", projectRoot,
+    [saipenPy, "response", "check", "--stdin", "--json", "--classify", "--operational-turn", "--project-root", projectRoot,
       ...(enforceAutonomy ? ["--auto-eligibility"] : []),
       // T-1556: the HUMAN's ingress, transported. The canonical owner decides
       // whether this turn authorized the detailed path; this adapter never
@@ -655,15 +655,34 @@ function checkOperationalResponse(pythonBin, saipenPy, projectRoot, text, enforc
     {
       input: text, encoding: "utf8", timeout: GUARD_TIMEOUT_MS,
       windowsHide: true, maxBuffer: MAX_EVENT_BYTES, cwd: projectRoot,
+      // Exact bytes came from chat.message, not a model shell substitution.
+      // This is a host-carried digest, not protocol-admission signing.
+      env: responseCarrierEnv(requestText),
     },
   );
   let answer;
   try { answer = JSON.parse(proc.stdout || ""); } catch (_error) { answer = null; }
-  if (proc.status === 0 && answer && answer.ok === true) return;
+  if (answer && answer.layer !== "ADMISSION" && typeof answer.delivery === "string") {
+    if (answer.delivery === "" && answer.class === "AUTONOMOUS_HANDBACK") {
+      throw new Error("EXEC_RESPONSE_INVALID: eligible autonomous action remains; continue silently");
+    }
+    return answer.delivery;
+  }
+  if (proc.status === 0 && answer && answer.ok === true) return text;
   const reason = answer && Array.isArray(answer.errors)
     ? answer.errors.slice(0, 3).join("; ")
     : (answer && answer.code) || (proc.error && proc.error.code) || "checker failed";
   throw new Error(`EXEC_RESPONSE_INVALID: ${reason}`);
+}
+
+function responseCarrierEnv(requestText) {
+  // Only response checking receives this exact host prompt. It does NOT
+  // become the environment of model tools, admission or Work projection.
+  const env = { ...process.env };
+  delete env.SAIPEN_TASK_FILE;
+  delete env.SAIPEN_TASK_SHA256;
+  if (requestText) env.SAIPEN_TASK_SHA256 = sha256(Buffer.from(requestText.replace(/\r\n?/g, "\n").trim(), "utf8"));
+  return env;
 }
 
 // T-1568: the ORDINARY_CHAT half of the contract had no mechanical check on
@@ -685,6 +704,7 @@ function checkOrdinaryChat(pythonBin, saipenPy, projectRoot, text, requestText) 
     {
       input: text, encoding: "utf8", timeout: GUARD_TIMEOUT_MS,
       windowsHide: true, maxBuffer: MAX_EVENT_BYTES, cwd: projectRoot,
+      env: responseCarrierEnv(requestText),
     },
   );
   let answer;
@@ -731,7 +751,10 @@ function userMessageText(output) {
     .map((part) => part.text)
     .join("\n")
     .trim();
-  return text.slice(0, MAX_INGRESS_TEXT_CHARS);
+  // Recall has a bounded excerpt; authorization must NEVER digest an excerpt
+  // as if it were the complete operator message. Oversize ingress has no
+  // response expansion grant until carried by the ordinary file transport.
+  return text.length <= MAX_INGRESS_TEXT_CHARS ? text : "";
 }
 
 function recallCarrier(input, memory) {
@@ -936,6 +959,7 @@ const SaipenGuard = async (context) => {
       if (!text && !id) return;
       const memory = sessionMemory(input && input.sessionID);
       memory.pending = { id: id ? String(id) : null, text: text || "" };
+      memory.responseRequest = text || "";
       memory.operational = false;
       memory.enforceAutonomy = false;
     },
@@ -946,18 +970,19 @@ const SaipenGuard = async (context) => {
       const binding = await currentBinding({ sessionId: input && input.sessionID });
       if (binding.code !== "ADMITTED" || !binding.project_root) return;
       const memory = sessionMemory(input && input.sessionID);
-      const request = memory.pending || memory.last;
-      const ingress =
-        request && typeof request.text === "string"
-          ? request.text.slice(0, MAX_INGRESS_TEXT_CHARS) : "";
+      const ingress = memory.responseRequest || "";
       // T-1568: a non-operational turn is still MEASURED, never unchecked.
       // An empty reply stays the operational gate's error so that wording is
       // untouched; any other text goes to the branch that owns its turn.
+      // The carrier is NOT cleared here: one operator message may complete
+      // more than once in a turn, and a second check that silently lost the
+      // witness would judge the same request as unwitnessed ingress. A new
+      // `chat.message` rebinds it, so authority still lasts exactly one turn.
       if (memory.operational) {
-        if (!output || typeof output.text !== "string" || !output.text.trim()) {
-          throw new Error("EXEC_RESPONSE_INVALID: empty operational response");
+        if (!output || typeof output.text !== "string") {
+          throw new Error("EXEC_RESPONSE_INVALID: missing operational response carrier");
         }
-        checkOperationalResponse(
+        output.text = checkOperationalResponse(
           pythonBin, saipenPy, binding.project_root, output.text,
           memory.enforceAutonomy, ingress,
         );

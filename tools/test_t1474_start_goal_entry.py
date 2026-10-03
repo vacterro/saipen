@@ -27,9 +27,23 @@ if str(TOOLS) not in sys.path:
 from saipen_engine import codec  # noqa: E402
 from saipen_engine.state import parse_state  # noqa: E402
 from test_hermetic_env import isolate_host_session  # noqa: E402
-from test_t1363_zero_manual_entry import cli, project, valve_project  # noqa: E402
+from test_t1363_zero_manual_entry import cli as transport_cli, project, valve_project  # noqa: E402
 
 TASK = "add a one-line docstring to the top of src/app.py"
+
+
+def cli(root, *args):
+    """These Entry fixtures explicitly carry an operator's fresh request.
+
+    Receipt retries preserve their original witness; diagnostic commands
+    grant nothing. Unwitnessed ingress has its own incident controls.
+    """
+    request = (
+        args[1]
+        if len(args) > 1 and args[0] in ("start", "user-request") and not args[1].startswith("--")
+        else None
+    )
+    return transport_cli(root, *args, operator_text=request)
 
 
 def setUpModule() -> None:
@@ -153,7 +167,9 @@ class ContinuationIsNotAnEntryTests(unittest.TestCase):
         from saipen_engine.board import parse_board
 
         phrases = (
-            "continue", "keep improving", "go further",
+            "continue",
+            "keep improving",
+            "go further",
             "Please continue improving the protocol logic and closing holes to the end.",
             "Хорошо, продолжи пожалуйста дальше улучшать логику протокола "
             "и закрывать мерзкие дыры до конца, Опус :)",
@@ -179,8 +195,10 @@ class ContinuationIsNotAnEntryTests(unittest.TestCase):
 
     def test_a_concrete_target_after_continue_is_still_a_new_request(self):
         for phrase in (
-            "continue, and add OAuth login", "keep improving the admission signer",
-            "go further: repair src/app.py", "continue improving the protocol; add retries",
+            "continue, and add OAuth login",
+            "keep improving the admission signer",
+            "go further: repair src/app.py",
+            "continue improving the protocol; add retries",
         ):
             with self.subTest(phrase=phrase):
                 root, work = self.active()

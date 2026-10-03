@@ -32,8 +32,10 @@ import improve  # noqa: E402
 from saipen_engine.paths import identity_file_content, new_project_lineage  # noqa: E402
 from test_hermetic_env import isolate_host_session  # noqa: E402
 
+
 def setUpModule() -> None:
     isolate_host_session()
+
 
 def run_cli(root: Path, *args: str) -> subprocess.CompletedProcess[str]:
     return subprocess.run(
@@ -61,7 +63,7 @@ class ImproveErrorBoundaryTests(unittest.TestCase):
             '---\nphase: DONE\ntask: none\nnext_action: "saipen continue"\n'
             'blocker: ""\ntransition_from: SHIP\n'
             "saipen_version: 8\nschema_version: 3\n"
-            'last_event: 900\nstyle_contract: ' + CURRENT_STYLE_CONTRACT + "\n"
+            "last_event: 900\nstyle_contract: " + CURRENT_STYLE_CONTRACT + "\n"
             'saipen_home: "."\nagent: probe\nmode: full\n'
             "updated: 2026-09-20T00:00:00Z\n---\n",
             encoding="utf-8",
@@ -151,9 +153,9 @@ class ImproveErrorBoundaryTests(unittest.TestCase):
         def raise_unrelated(*_args, **_kwargs):
             raise ValueError("not an improve refusal")
 
-        with mock.patch.object(saipen_cli, "_improve", side_effect=raise_unrelated):
-            with self.assertRaises(ValueError) as ctx:
-                saipen_cli._public_improve(self.root, ["status"], True, False)
+        patched = mock.patch.object(saipen_cli, "_improve", side_effect=raise_unrelated)
+        with patched, self.assertRaises(ValueError) as ctx:
+            saipen_cli._public_improve(self.root, ["status"], True, False)
         self.assertEqual(str(ctx.exception), "not an improve refusal")
 
 

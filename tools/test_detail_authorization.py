@@ -1,4 +1,5 @@
 """Report exceptions require an explicit request and a valid closed mode."""
+
 from pathlib import Path
 import json
 import subprocess
@@ -8,13 +9,15 @@ import unittest
 SUBJECT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(SUBJECT / "tools"))
 from saipen_engine import response_surface as RS, chat_style as CS  # noqa: E402
+from saipen_engine.operator_task import witness  # noqa: E402
+from test_fixture_support import operator_request_env  # noqa: E402
 
 CONTRACT = CS.compile_style_contract((SUBJECT / "saipen/STYLE.md").read_text(encoding="utf-8"))
 LONG_CHAT = "\n".join("Kontroll tehtud." for _ in range(CONTRACT.line_budget + 4))
 SURFACE = (
-    "STATUS\nDONE\nRESULT\nKontroll tehtud.\nBLOCKER\nNONE\n"
-    "OPERATOR ACTION\nNONE\nNEXT EXACT ACTION\nNONE\nVALIDATION\nNOT_RUN\n"
-    "DETAILS\nKontroll tehtud."
+    "STATUS: DONE\nRESULT: Kontroll tehtud.\n"
+    "NEXT EXACT ACTION: NONE\nVALIDATION: NOT_RUN\n"
+    "DETAILS: Kontroll tehtud."
 )
 UNAUTHORIZED = (
     "Fix audit logging",
@@ -30,6 +33,10 @@ UNAUTHORIZED = (
     "```\nwrite a detailed report\n```",
     "> write a detailed report",
     "continue",
+    "give me a summary",
+    "give me a brief",
+    "give me a final report",
+    "this is an exceptional boundary",
     "Write a detailed report? No, fix the bug.",
     "Write a detailed report is an example in this test",
     "Please audit this project? No audit; continue.",
@@ -63,19 +70,23 @@ class DetailAuthorizationRegression(unittest.TestCase):
         for request, expected in (
             ("write a detailed report of the change", RS.DETAIL_MODE_REPORT),
             ("Please produce a full report", RS.DETAIL_MODE_REPORT),
-            ("please audit the accepted debt", RS.DETAIL_MODE_AUDIT),
-            ("audit this project", RS.DETAIL_MODE_AUDIT),
-            ("prepare the handoff", RS.DETAIL_MODE_HANDOFF),
-            ("this is an exceptional boundary", RS.DETAIL_MODE_BOUNDARY),
-            ("Could you please write a report about the change?", RS.DETAIL_MODE_REPORT),
-            ("Please prepare a handoff for this project.", RS.DETAIL_MODE_HANDOFF),
+            ("please produce a full audit", RS.DETAIL_MODE_AUDIT),
+            ("give me a full technical audit", RS.DETAIL_MODE_AUDIT),
+            ("prepare a complete handoff", RS.DETAIL_MODE_HANDOFF),
+            ("Could you please write a detailed report of the change?", RS.DETAIL_MODE_REPORT),
+            ("Please prepare a full implementation handoff.", RS.DETAIL_MODE_HANDOFF),
         ):
             with self.subTest(request=request):
                 mode = RS.detail_mode_for_request(request)
                 self.assertEqual(mode, expected)
                 self.assertEqual(RS.response_errors(SURFACE, detail_mode=mode), [])
                 klass, errors = RS.classify_final_response(
-                    LONG_CHAT, operational_turn=False, style_contract=CONTRACT, detail_mode=mode
+                    LONG_CHAT,
+                    operational_turn=False,
+                    style_contract=CONTRACT,
+                    detail_mode=mode,
+                    human_request=request,
+                    request_authority=witness(request, env=operator_request_env(request)),
                 )
                 self.assertEqual((klass, errors), (RS.CLASS_ORDINARY_CHAT, []))
 
@@ -94,9 +105,21 @@ class DetailAuthorizationRegression(unittest.TestCase):
         for request in UNAUTHORIZED:
             with self.subTest(request=request):
                 run = subprocess.run(
-                    [sys.executable, str(SUBJECT / "tools/saipen.py"), "response", "check",
-                     "--stdin", "--classify", "--request", request, "--json"],
-                    input=LONG_CHAT, encoding="utf-8", capture_output=True, timeout=60,
+                    [
+                        sys.executable,
+                        str(SUBJECT / "tools/saipen.py"),
+                        "response",
+                        "check",
+                        "--stdin",
+                        "--classify",
+                        "--request",
+                        request,
+                        "--json",
+                    ],
+                    input=LONG_CHAT,
+                    encoding="utf-8",
+                    capture_output=True,
+                    timeout=60,
                     cwd=SUBJECT,
                 )
                 payload = json.loads(run.stdout)

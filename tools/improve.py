@@ -312,19 +312,21 @@ def resolve_report_path(project_root: Path, cycle_id: str, seat_id: str, project
 def _recorded_report_path(cycle_root: Path, seat: str) -> str | None:
     """The `report_path` the roster records for `seat`, or None if it has none.
 
-    An unreadable or malformed roster is not an answer here: resolve_report_path
-    is called on paths that need not exist yet, so a manifest that cannot be read
-    or parsed falls back to the caller's spelling rather than refusing.
+    ABSENT and UNUSABLE are different answers. resolve_report_path is called on
+    paths that need not exist yet, so a cycle with no roster at all -- archived,
+    or hand-written before the roster existed -- falls back to the caller's
+    spelling, and a roster that simply has no block for this seat does too. A
+    roster that IS there, has this seat, and records a path the sanitizer refuses
+    is neither case: it is the authority T-175 installed, and swallowing that
+    refusal composed the caller's name instead -- reproducing the exact divergence
+    T-175 removed, from a corrupt roster rather than a stale one (T-178).
     """
     manifest = cycle_root / "MANIFEST.md"
     if not manifest.is_file():
         return None
-    try:
-        block = _seat_block(_read_maybe(manifest), seat)
-        recorded = _field(block, "report_path") if block is not None else None
-        return _validate_report_path(recorded, seat) if recorded else None
-    except ImproveError:
-        return None
+    block = _seat_block(_read_maybe(manifest), seat)
+    recorded = _field(block, "report_path") if block is not None else None
+    return _validate_report_path(recorded, seat) if recorded else None
 
 
 def cycle_dir(project_root: Path, cycle_id: str) -> Path:
@@ -1310,9 +1312,7 @@ def _amend_sweep_entry(cycle_dir: Path, entry: dict, disposition: str) -> dict:
         )
     reproduced = str(entry.get("reproduced", "-"))
     if reproduced not in {"y", "n"}:
-        raise ImproveError(
-            f"--amend refuses: reproduced {reproduced!r} outside the closed set y|n"
-        )
+        raise ImproveError(f"--amend refuses: reproduced {reproduced!r} outside the closed set y|n")
     imp_raw = str(entry.get("imp_id", ""))
     if re.fullmatch(r"\d+", imp_raw):
         imp_num = imp_raw
@@ -1322,9 +1322,7 @@ def _amend_sweep_entry(cycle_dir: Path, entry: dict, disposition: str) -> dict:
         raise ImproveError(f"--amend refuses: imp_id {imp_raw!r} is not IMP-###")
     run_m = re.fullmatch(r"(?:RUN-)?(\d+)", str(entry.get("run", "")).strip())
     if not run_m:
-        raise ImproveError(
-            f"--amend refuses: run {entry.get('run')!r} is not RUN-<N>"
-        )
+        raise ImproveError(f"--amend refuses: run {entry.get('run')!r} is not RUN-<N>")
     finding_ref = f"RUN-{run_m.group(1)}/IMP-{imp_num}"
 
     text = _read_maybe(ledger)
@@ -1985,12 +1983,8 @@ def prepare_audit_seat(
                         continue
                     if (_field(_block, "availability") or "expected") != "expected":
                         continue
-                    _existing = resolve_report_path(
-                        root, active_cycle, _candidate, project_name
-                    )
-                    if _existing.is_file() and _un_audited_report(
-                        _read_maybe(_existing)
-                    ):
+                    _existing = resolve_report_path(root, active_cycle, _candidate, project_name)
+                    if _existing.is_file() and _un_audited_report(_read_maybe(_existing)):
                         seat = _candidate
                         break
             if seat is None:
@@ -2317,7 +2311,8 @@ def prepare_audit_seat(
                     "report_path": report.relative_to(root).as_posix(),
                     "resumed": False,
                     "detail": f"session {seat} report fails the bound "
-                    f"provenance bar: " + "; ".join(_bound_errors[:3])
+                    f"provenance bar: "
+                    + "; ".join(_bound_errors[:3])
                     + " -- a draft with committed RUN evidence is never "
                     "re-bound; if this seat can never continue, retire it "
                     "with `saipen improve retire <cycle> <seat> --reason "
@@ -2623,14 +2618,10 @@ def _historical_bound_report_errors(
     if strict:
         tree = _field(report_text, "source_tree_fingerprint")
         if not re.match(r"^(git-delta-v1|no-git-tree-v1):", tree):
-            errors.append(
-                f"source_tree_fingerprint {tree!r} is not a mechanical fingerprint"
-            )
+            errors.append(f"source_tree_fingerprint {tree!r} is not a mechanical fingerprint")
         protocol_fp = _field(report_text, "protocol_fingerprint")
         if not re.fullmatch(r"sha256:[0-9a-f]{64}", protocol_fp):
-            errors.append(
-                f"protocol_fingerprint {protocol_fp!r} is not canonical sha256 evidence"
-            )
+            errors.append(f"protocol_fingerprint {protocol_fp!r} is not canonical sha256 evidence")
     return errors
 
 
@@ -2749,9 +2740,7 @@ def validate_superseded_seat(
     try:
         replacement_text = _read_maybe(replacement_report)
     except (OSError, UnicodeError) as exc:
-        errors.append(
-            f"seat {seat_id}: replacement report cannot be read ({type(exc).__name__})"
-        )
+        errors.append(f"seat {seat_id}: replacement report cannot be read ({type(exc).__name__})")
         return errors
     if not replacement_text:
         errors.append(f"seat {seat_id}: replacement seat {replacement} has no report")
@@ -2759,9 +2748,7 @@ def validate_superseded_seat(
     if _field(replacement_text, "report_status") != "complete":
         errors.append(f"seat {seat_id}: replacement seat {replacement} is not COMPLETE")
     if _field(block, "role") != _field(replacement_block, "role"):
-        errors.append(
-            f"seat {seat_id}: replacement seat {replacement} has a different role"
-        )
+        errors.append(f"seat {seat_id}: replacement seat {replacement} has a different role")
     if _field(report_text, "context_scope") != _field(replacement_text, "context_scope"):
         errors.append(
             f"seat {seat_id}: replacement seat {replacement} has a different context_scope"
@@ -2769,9 +2756,7 @@ def validate_superseded_seat(
     return errors
 
 
-def resolve_stale_complete_seat(
-    cycle_dir: Path, seat_id: str, replacement_seat: str
-) -> dict:
+def resolve_stale_complete_seat(cycle_dir: Path, seat_id: str, replacement_seat: str) -> dict:
     """Supersede one stale immutable COMPLETE report with a fresh seat.
 
     The old report and SWEEP ledger are read-only evidence.  The sole write is
@@ -2796,9 +2781,7 @@ def resolve_stale_complete_seat(
             cycle_dir, seat, roster_text=roster, sweep_text=_read_maybe(cycle_dir / "SWEEP.md")
         )
         if integrity_errors:
-            raise ImproveError(
-                "supersession integrity failure: " + "; ".join(integrity_errors[:5])
-            )
+            raise ImproveError("supersession integrity failure: " + "; ".join(integrity_errors[:5]))
         if existing == replacement:
             return {
                 "ok": True,
@@ -2946,8 +2929,7 @@ def resolve_stale_complete_seat(
     proposed_errors = validate_manifest(proposed, expected_cycle_id=cycle_dir.name)
     if proposed_errors:
         raise ImproveError(
-            "supersession refuses its own proposed manifest: "
-            + "; ".join(proposed_errors[:5])
+            "supersession refuses its own proposed manifest: " + "; ".join(proposed_errors[:5])
         )
     result = _journaled_write(manifest, proposed, "seat", base_hash=_base_hash(manifest))
     if not result.get("ok"):
@@ -3035,12 +3017,14 @@ def verify_cycle(cycle_dir: Path) -> list[str]:
                 _project_root_of(cycle_dir), report_text, strict, cycle_active
             )
             if stale:
-                historical = derive_status(report_path, text, report_text, sweep_text,
-                                           seat_id=seat_id)
+                historical = derive_status(
+                    report_path, text, report_text, sweep_text, seat_id=seat_id
+                )
                 missing = historical.get("missing", [])
                 if missing:
-                    errors.append(stale_complete_route_hint(
-                        cycle_dir.name, seat_id, report_path, missing))
+                    errors.append(
+                        stale_complete_route_hint(cycle_dir.name, seat_id, report_path, missing)
+                    )
                 errors.append(
                     f"seat {seat_id}: stale COMPLETE recovery route: "
                     f"`saipen improve reconcile {cycle_dir.name}`; it requires a current "
@@ -3322,8 +3306,8 @@ def classify_cycle_seat(cycle_dir: Path, block: str, sweep_text: str, roster_tex
         record["terminal"] = True
         return record
     if missing:
-        record["detail"] = (
-            "complete but stale COMPLETE with unswept finding(s): " + ", ".join(missing)
+        record["detail"] = "complete but stale COMPLETE with unswept finding(s): " + ", ".join(
+            missing
         )
         record["routes"] = [
             stale_complete_route_hint(cycle_dir.name, seat_id, report_path, missing)
@@ -3418,8 +3402,7 @@ def reconcile_cycle(cycle_dir: Path, *, dry_run: bool = False) -> dict:
         raise ImproveError(
             "reconcile refuses: genuine actionable work remains: "
             + "; ".join(
-                f"seat {record['seat_id']} ({record['detail']})"
-                for record in actionable[:5]
+                f"seat {record['seat_id']} ({record['detail']})" for record in actionable[:5]
             )
             + " -- resolve each named route first"
         )
@@ -3486,12 +3469,9 @@ def reconcile_cycle(cycle_dir: Path, *, dry_run: bool = False) -> dict:
     errors = verify_cycle(cycle_dir)
     if errors:
         raise ImproveError(
-            "reconcile refuses: the cycle bar is unmet after resolution: "
-            + "; ".join(errors[:5])
+            "reconcile refuses: the cycle bar is unmet after resolution: " + "; ".join(errors[:5])
         )
-    banned = any(
-        record["class"] == "BLOCKED_EXTERNAL" for record in refreshed
-    )
+    banned = any(record["class"] == "BLOCKED_EXTERNAL" for record in refreshed)
     has_unavailable = any(
         record["class"] in ("CANONICALLY_UNAVAILABLE", "BLOCKED_EXTERNAL") for record in refreshed
     )
@@ -3516,8 +3496,7 @@ def reconcile_cycle(cycle_dir: Path, *, dry_run: bool = False) -> dict:
         proposed_errors = validate_manifest(new_text, expected_cycle_id=cycle_dir.name)
         if proposed_errors:
             raise ImproveError(
-                "reconcile refuses its own proposed manifest: "
-                + "; ".join(proposed_errors[:3])
+                "reconcile refuses its own proposed manifest: " + "; ".join(proposed_errors[:3])
             )
         written = _journaled_write(manifest, new_text, "cycle", base_hash=_base_hash(manifest))
         if not written.get("ok"):
@@ -3590,15 +3569,19 @@ def protocol_git_status(project_root: Path, history_dir: Path) -> dict:
     import subprocess
 
     def git(*args):
-        return subprocess.run(["git", "-C", str(project_root), *args],
-                              capture_output=True, timeout=30)
+        return subprocess.run(
+            ["git", "-C", str(project_root), *args], capture_output=True, timeout=30
+        )
 
     try:
         status = git("status", "--porcelain=v1", "-z", "--untracked-files=all", "--", ".saipen")
         tracked = git("ls-files", "-z", "--", ".saipen")
         if status.returncode or tracked.returncode:
-            return {"status": "UNAVAILABLE", "persisted": None,
-                    "detail": "Git persistence could not be measured; no commit was attempted"}
+            return {
+                "status": "UNAVAILABLE",
+                "persisted": None,
+                "detail": "Git persistence could not be measured; no commit was attempted",
+            }
         records = status.stdout.decode("utf-8", errors="replace").split("\0")
         changed = []
         i = 0
@@ -3611,8 +3594,7 @@ def protocol_git_status(project_root: Path, history_dir: Path) -> dict:
             if "R" in entry[:2] or "C" in entry[:2]:
                 i += 1  # porcelain -z rename source; destination was recorded above
         cached = set(tracked.stdout.decode("utf-8", errors="replace").split("\0"))
-        required = [project_root / ".saipen" / (name + ".md")
-                    for name in ("STATE", "BOARD", "LOG")]
+        required = [project_root / ".saipen" / (name + ".md") for name in ("STATE", "BOARD", "LOG")]
         required.extend(p for p in history_dir.rglob("*") if p.is_file())
         relative = {p.relative_to(project_root).as_posix() for p in required if p.is_file()}
         untracked = sorted(relative - cached)
@@ -3620,13 +3602,16 @@ def protocol_git_status(project_root: Path, history_dir: Path) -> dict:
         return {"status": "UNAVAILABLE", "persisted": None, "detail": str(exc)}
     pending = bool(changed or untracked)
     return {
-        "status": "PENDING" if pending else "PERSISTED", "persisted": not pending,
-        "changed": changed, "untracked_history": untracked,
+        "status": "PENDING" if pending else "PERSISTED",
+        "persisted": not pending,
+        "changed": changed,
+        "untracked_history": untracked,
         "next_action": (
             "Review listed protocol files; explicitly stage approved paths (including ignored "
             "history when appropriate), then git commit --only -- <those exact paths>. "
             "Keep unrelated staged changes outside that commit; ship is a release operation."
-            if pending else "NONE"
+            if pending
+            else "NONE"
         ),
         "review_command": "git status --short --untracked-files=all -- .saipen",
         "automatic_commit": False,
@@ -3975,8 +3960,7 @@ def rebind_report_protocol(report_path: Path) -> dict:
     if other:
         raise ImproveError(
             "rebind refuses: the report carries bound error(s) that are not "
-            "install-identity drift, so rebinding would launder them: "
-            + "; ".join(other[:3])
+            "install-identity drift, so rebinding would launder them: " + "; ".join(other[:3])
         )
     if not base_errors:
         return {
@@ -4015,13 +3999,10 @@ def rebind_report_protocol(report_path: Path) -> dict:
         )
     if proposed == text:
         raise ImproveError("rebind refuses: no install-identity scalar changed")
-    committed = _journaled_write(
-        report_path, proposed, "report", base_hash=_base_hash(report_path)
-    )
+    committed = _journaled_write(report_path, proposed, "report", base_hash=_base_hash(report_path))
     if not committed.get("ok"):
         raise ImproveError(
-            f"rebind not committed: {committed.get('code')} "
-            f"{committed.get('message', '')}"
+            f"rebind not committed: {committed.get('code')} {committed.get('message', '')}"
         )
     return {
         "ok": True,
@@ -4029,7 +4010,9 @@ def rebind_report_protocol(report_path: Path) -> dict:
         "report": str(report_path),
         "protocol_fingerprint": installed_fp,
         "saipen_version": installed_version,
-        "detail": "draft report identity re-stamped to the installed protocol; RUN content untouched",
+        "detail": (
+            "draft report identity re-stamped to the installed protocol; RUN content untouched"
+        ),
     }
 
 
@@ -4182,17 +4165,12 @@ def _run_identity_problems(runs: "tuple[int, ...] | list[int]") -> list[str]:
     problems: list[str] = []
     if len(runs) != len(set(runs)):
         dup = sorted({n for n in runs if runs.count(n) > 1})
-        problems.append(
-            "repeats RUN section number(s): " + ", ".join(f"RUN {n}" for n in dup)
-        )
+        problems.append("repeats RUN section number(s): " + ", ".join(f"RUN {n}" for n in dup))
     if list(runs) != sorted(runs):
-        problems.append(
-            "RUN numbers are not ascending: " + ", ".join(f"RUN {n}" for n in runs)
-        )
+        problems.append("RUN numbers are not ascending: " + ", ".join(f"RUN {n}" for n in runs))
     if runs and sorted(runs) != list(range(1, max(runs) + 1)):
         problems.append(
-            "RUN numbers are not contiguous 1..N: "
-            + ", ".join(f"RUN {n}" for n in sorted(runs))
+            "RUN numbers are not contiguous 1..N: " + ", ".join(f"RUN {n}" for n in sorted(runs))
         )
     return problems
 
@@ -4421,9 +4399,7 @@ def validate_manifest(text: str, expected_cycle_id: str | None = None) -> list[s
         errors.append("manifest must open with '# IMPROVE CYCLE ROSTER'")
     status = re.search(r"(?m)^cycle_status:\s*([A-Za-z_]+)", text)
     if status and status.group(1) not in CYCLE_STATUS:
-        errors.append(
-            f"cycle_status {status.group(1)!r} outside {'|'.join(CYCLE_STATUS)}"
-        )
+        errors.append(f"cycle_status {status.group(1)!r} outside {'|'.join(CYCLE_STATUS)}")
     # T-638/§7: `cycle_aborted` is ONE legal lifecycle meaning -- it marks an
     # ARCHIVED cycle whose drafts are non-authoritative. ACTIVE or COMPLETE
     # with the marker is a contradictory state; a duplicate or non-canonical
@@ -4495,13 +4471,10 @@ def validate_manifest(text: str, expected_cycle_id: str | None = None) -> list[s
             reason_value = _field(block, "retire_reason")
             if reason_value and not _RETIRE_REASON_RE.fullmatch(reason_value):
                 errors.append(
-                    f"seat {seat_id}: retire_reason {reason_value!r} is not "
-                    "[A-Z][A-Z0-9_-]{0,63}"
+                    f"seat {seat_id}: retire_reason {reason_value!r} is not [A-Z][A-Z0-9_-]{{0,63}}"
                 )
         elif retire_reasons:
-            errors.append(
-                f"seat {seat_id}: retire_reason requires availability: unavailable"
-            )
+            errors.append(f"seat {seat_id}: retire_reason requires availability: unavailable")
         resolution_fields = (
             "resolution",
             "replacement_seat",
@@ -4516,9 +4489,7 @@ def validate_manifest(text: str, expected_cycle_id: str | None = None) -> list[s
                         f"exactly once, found {count}"
                     )
             if _field(block, "resolution") != "stale-complete":
-                errors.append(
-                    f"seat {seat_id}: superseded resolution must be stale-complete"
-                )
+                errors.append(f"seat {seat_id}: superseded resolution must be stale-complete")
             replacement = _field(block, "replacement_seat")
             try:
                 _validate_safe_id(replacement, "replacement_seat")
@@ -4528,9 +4499,7 @@ def validate_manifest(text: str, expected_cycle_id: str | None = None) -> list[s
                 errors.append(f"seat {seat_id}: replacement_seat must be distinct")
             preserved_hash = _field(block, "preserved_report_sha256")
             if not re.fullmatch(r"[0-9a-f]{64}", preserved_hash):
-                errors.append(
-                    f"seat {seat_id}: preserved_report_sha256 must be 64 lowercase hex"
-                )
+                errors.append(f"seat {seat_id}: preserved_report_sha256 must be 64 lowercase hex")
         else:
             present = [key for key in resolution_fields if _field(block, key)]
             if present:
@@ -4548,14 +4517,10 @@ def validate_manifest(text: str, expected_cycle_id: str | None = None) -> list[s
         replacement = _field(block, "replacement_seat")
         replacement_block = blocks.get(replacement)
         if replacement_block is None:
-            errors.append(
-                f"seat {seat_id}: replacement_seat {replacement!r} is not registered"
-            )
+            errors.append(f"seat {seat_id}: replacement_seat {replacement!r} is not registered")
             continue
         if _field(block, "role") != _field(replacement_block, "role"):
-            errors.append(
-                f"seat {seat_id}: replacement_seat {replacement} has a different role"
-            )
+            errors.append(f"seat {seat_id}: replacement_seat {replacement} has a different role")
         seen_chain: set[str] = set()
         cursor = seat_id
         while cursor in blocks and _field(blocks[cursor], "availability") == "superseded":
