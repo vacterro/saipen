@@ -1369,6 +1369,17 @@ def _run_verification_command(root, command, timeout):
     entry["duration_ms"] = int(
         (datetime.now(timezone.utc) - started).total_seconds() * 1000
     )
+    # T-149: `--run` takes an operator-supplied command string and executes it
+    # with cwd set to the PROJECT ROOT, which nothing stated anywhere. A
+    # module-form command (`python -m unittest some.test`) resolves against
+    # that root rather than the directory the tests live in, dies before
+    # touching the code under test, and is recorded as an honest FAIL -- which
+    # reads exactly like the capability being broken. Measured: eighteen
+    # consecutive receipts minted FAIL for commands that pass from `tools/`.
+    # Recording the directory turns an undiagnosable failure into a legible
+    # one, without guessing from stderr whether a non-zero exit was a launch
+    # problem or a real regression.
+    entry["cwd"] = str(root)
     entry["output_digest"] = hash_bytes(output.encode("utf-8", "replace"))
     entry["output_bytes"] = len(output)
     return entry
