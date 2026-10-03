@@ -8748,7 +8748,15 @@ def migrate_saipen_generation(
     now, utc = _now(), _utc_iso()
     # Same allowance as `rebind_saipen_home`: the pointer this reads may be
     # exactly what is stale, and proving the home is this operation's job.
-    _docs, state, _board, _tail = _read(root, allow_dead_home=True)
+    # T-147: `observe=("state",)` for the same reason. A project whose STYLE.md
+    # marker moved fails the style_contract check on EVERY read, so the exit
+    # that exists to re-record the generation could not read the state whose
+    # generation had fallen behind. Observing is not authority -- the proposal
+    # is still proved against the same strict validator below (`repair=True`),
+    # so a state the exit cannot actually repair is still refused.
+    _docs, state, _board, _tail = _read(
+        root, allow_dead_home=True, observe=("state",)
+    )
     home = str(state.get("saipen_home") or "").strip()
     if not home:
         return _refuse(
@@ -8773,11 +8781,28 @@ def migrate_saipen_generation(
         )
     task = state.get("task")
 
+    # T-147: recording a generation means recording the WHOLE generation.
+    # `saipen_version` is only one axis of that identity -- the home's STYLE.md
+    # marker is the other, and every strict reader checks it. Writing the
+    # version alone left the marker stale, so the exit returned
+    # GENERATION_RECORDED and the project was exactly as stuck as before,
+    # only with a different refusal message. Only the RUNNING home may forge
+    # the contract: a foreign home is judged against its own generation, and
+    # inventing a value for it would be a guess dressed as a fact.
+    from .state import running_home
+
+    identity: dict[str, object] = {"saipen_version": int(major)}
+    if Path(home).resolve() == running_home():
+        style = running_style_token()
+        if style:
+            identity["style_contract"] = style
+    identity.update(_schema_upgrade_owned(state))
+
     def mutate(text: str, event: int) -> str:
         return patch_state(
             text,
             {
-                "saipen_version": int(major),
+                **identity,
                 "last_event": event,
                 "updated": utc,
                 "agent": agent,
@@ -8794,15 +8819,22 @@ def migrate_saipen_generation(
             "ok": True,
             "code": "GENERATION_RECORDED",
             "saipen_version": int(major),
+            "style_contract": str(identity.get("style_contract") or ""),
             "previous_saipen_version": int(declared) if declared.isdigit() else declared,
             "saipen_home": home,
         },
         now,
         utc,
-        {"saipen_version", "last_event", "updated", "agent"},
+        {"saipen_version", "style_contract", "schema_version", "last_event", "updated", "agent"},
         ticket_id=task if task not in (None, "", "none") else None,
         allow_dead_home=True,
         read_once=(_docs, state, _board, _tail),
+        # T-147: the drifted style_contract IS this operation's subject, and the
+        # write gate refuses before `mutate` ever runs -- so the exit could not
+        # repair the one thing it exists to repair. A repair walks in on damage
+        # by definition; what it inherits is exempted here and still judged by
+        # every other reader.
+        repair=True,
     )
     if isinstance(plan, Result):
         return plan
