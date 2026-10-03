@@ -347,6 +347,22 @@ through CLEAN's own recovery gate.
 
 ### Work re-verification transaction
 
+### When a receipt goes stale
+
+A receipt binds the tree it was measured against, so ANY tracked-file edit after
+it invalidates it — including an edit to STATE.md or the BOARD, which is why
+ordinary protocol bookkeeping can drop a DONE ticket back to `unproven`. The
+fingerprint is the tree, not the file under test. Receipts under
+`.saipen/recovery/` are gitignored and are NOT tracked in any commit, so a
+fresh clone of a project carries no receipts at all and its validator FAILs
+every ticket whose only proof was a receipt. That is a distribution question
+about what the ledger ships, not a defect in the ticket it names.
+
+When this happens, re-run the check for real and record a NEW receipt; never
+re-assert the old verdict.
+
+### Work re-verification transaction
+
 `saipen work reverify <T-###> [--verification <command>:PASS]...
 [--run <command>]... [--timeout SECONDS]` re-checks already-DONE Work
 against the CURRENT tree and writes ONE immutable `RV-NNNNNN` receipt under
