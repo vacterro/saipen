@@ -216,6 +216,47 @@ class QuarantineRouteTests(OrchestrationFixture):
         self.assertEqual(gate["code"], "SOURCE_CORRUPTION")
         self.assertNotIn("canonical_next_command", gate)
 
+    def test_a_quarantined_body_absent_from_the_checkout_is_not_corruption(self):
+        """The quarantine surface is excluded from distribution on purpose.
+
+        Measured on this repository: SRC-130's authoritative body lives at
+        `.saipen/quarantine/source/SRC-130.md`, which `.gitignore` excludes
+        ("never a Git or archive distribution surface"). Every clone therefore
+        lacks it, and the validator answered `active receipt SRC-130: INVALID`
+        on a clean checkout -- reading the policy working as a tampered body.
+        The refusal itself STANDS (an unreadable body is never handed out);
+        only the corruption verdict changes, and only for this surface.
+        """
+        root = self.make_project()
+        receipt, _ = self.source(root, archived=False)
+        command = f"saipen source quarantine {receipt} --reason CREDENTIAL_PATTERN"
+        argv = [
+            sys.executable, "-B", str(TOOLS / "saipen.py"),
+            *shlex.split(command)[1:], "--project-root", str(root), "--json",
+        ]
+        applied = subprocess.run(
+            argv, capture_output=True, text=True, encoding="utf-8",
+            env=hermetic_env(), timeout=60,
+        )
+        self.assertEqual(applied.returncode, 0, applied.stdout + applied.stderr)
+        protected = root / f".saipen/quarantine/source/{receipt}.md"
+        self.assertTrue(protected.is_file())
+        protected.unlink()  # what every clone but the quarantining host sees
+
+        verdict = intake.verify_integrity(root, receipt)
+        self.assertFalse(verdict["ok"], "an unreadable body is still refused")
+        self.assertEqual(verdict["code"], "SOURCE_BODY_NOT_DISTRIBUTED")
+        self.assertEqual(
+            intake.validate_project(root), [],
+            "an excluded body is not repository corruption",
+        )
+        # ...and a body that IS distributed still refuses as deleted. Quarantine
+        # MOVED the body, so this needs its own project.
+        clean = self.make_project()
+        kept, _ = self.source(clean, archived=False)
+        (clean / f".saipen/intake/active/{kept}.md").unlink()
+        self.assertEqual(intake.verify_integrity(clean, kept)["code"], "INVALID")
+
 
 if __name__ == "__main__":
     unittest.main()

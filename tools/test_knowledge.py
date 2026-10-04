@@ -412,6 +412,32 @@ class KnowledgeTests(unittest.TestCase):
         self.assertFalse(payload["ok"])
         self.assertIn("notakind", payload["error"])
 
+    def test_the_index_digest_is_not_the_line_endings_of_the_checkout(self) -> None:
+        """One card, two checkouts, one index.
+
+        Measured on this repository: `.saipen/KNOWLEDGE` held a card carrying
+        71 CRLF endings in the Windows working copy and LF in every clone, so
+        the index generated here hashed CRLF and read `INDEX.md is stale` on
+        Linux. A digest that changes with the line endings of the host is not
+        a digest of the card.
+        """
+        card = self.add("line-endings")
+        self.index()
+        index_path = self.root / ".saipen" / "KNOWLEDGE" / "INDEX.md"
+        generated = index_path.read_text(encoding="utf-8")
+        # Normalize first: `write_text` already translated to CRLF on Windows,
+        # so appending a second ending here would test a `\r\r\n` file, which
+        # is a different fixture on every host.
+        card.write_bytes(card.read_bytes().replace(b"\r\n", b"\n").replace(b"\n", b"\r\n"))
+        self.assertEqual(
+            index_path.read_text(encoding="utf-8"),
+            generated,
+            "a CRLF checkout of the same card must not stale the index",
+        )
+        verdict = validate_knowledge(self.root)
+        self.assertEqual(verdict["index"], "fresh")
+        self.assertEqual(verdict["errors"], [])
+
 
 if __name__ == "__main__":
     unittest.main()

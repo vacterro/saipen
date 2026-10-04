@@ -2506,8 +2506,23 @@ def coverage_complete(root: Path | str, receipt_id: str) -> bool:
     return not summary["unresolved"]
 
 
+#: The one distribution surface `.gitignore` excludes on purpose. A body
+#: resolved here is one this repository has already decided not to distribute.
+QUARANTINE_BODY_REL = ".saipen/quarantine/source/"
+
+
+def _body_excluded_from_distribution(rel: str) -> bool:
+    return str(rel).replace("\\", "/").startswith(QUARANTINE_BODY_REL)
+
+
 def verify_integrity(root: Path | str, receipt_id: str) -> dict:
-    """Reread boundary gate: stored body digest MUST equal recorded digest."""
+    """Reread boundary gate: stored body digest MUST equal recorded digest.
+
+    A body that resolves into the quarantine surface is refused with
+    ``SOURCE_BODY_NOT_DISTRIBUTED`` rather than ``INVALID`` when it is absent:
+    a body that is deliberately not distributed cannot have been deleted by
+    anything, and a clean clone is not a tampered checkout.
+    """
     root = Path(root)
     if not _valid_receipt_id(receipt_id):
         return _invalid_receipt_id(receipt_id)
@@ -2523,6 +2538,21 @@ def verify_integrity(root: Path | str, receipt_id: str) -> dict:
     try:
         body = _read_owned_file(root, rel, kind="source body", max_bytes=_BODY_MAX)
     except FileNotFoundError:
+        if _body_excluded_from_distribution(rel):
+            # The tracked metadata itself says where this body lives, and that
+            # place is the quarantine surface -- which `.gitignore` excludes by
+            # design ("never a Git or archive distribution surface"). So on any
+            # checkout that did not itself quarantine, the absence is the
+            # policy working, not a deleted body. It is still `ok: False`: every
+            # execution gate still refuses to hand out a receipt whose body it
+            # cannot read. Only repository conformance stops calling it
+            # corruption, because a stranger's clone is not evidence of one.
+            return {
+                "ok": False,
+                "code": "SOURCE_BODY_NOT_DISTRIBUTED",
+                "detail": f"{receipt_id} body lives at {rel}, a quarantine "
+                "surface excluded from distribution",
+            }
         return {"ok": False, "code": "INVALID", "detail": "receipt body missing"}
     except (ValueError, OSError) as exc:
         return {"ok": False, "code": "SOURCE_CORRUPTION", "detail": str(exc)}
@@ -4560,7 +4590,8 @@ def validate_project(root: Path | str) -> list[str]:
         except (OSError, ValueError) as exc:
             integrity = {"ok": False, "code": "SOURCE_CORRUPTION", "detail": str(exc)}
         if not integrity["ok"]:
-            errors.append(f"active receipt {receipt_id}: {integrity['code']}")
+            if integrity["code"] != "SOURCE_BODY_NOT_DISTRIBUTED":
+                errors.append(f"active receipt {receipt_id}: {integrity['code']}")
         digest = meta.get("source_sha256")
         if not isinstance(digest, str) or not re.fullmatch(r"[0-9a-f]{64}", digest):
             errors.append(f"active receipt {receipt_id} has invalid source_sha256")

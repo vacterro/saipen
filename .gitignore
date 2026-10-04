@@ -9,7 +9,19 @@ desktop.ini
 __pycache__/
 *.py[cod]
 .freebuff/
-.saipen/recovery/
+# The tree is `*` rather than the bare directory: git cannot re-include a file
+# whose parent directory is excluded, so the one subdirectory that MUST ship
+# would be unreachable by a negation.
+.saipen/recovery/*
+# ...except the compacted LOG detail bodies. A tracked LOG line reading
+# `detail_ref: .saipen/recovery/log-detail/...` delegates its own evidence
+# there, and `verification_evidence` classifies on that resolved text. With
+# the directory excluded, every clone re-read those lines as a bare pointer:
+# 11 DONE closures on this repository read unproven the moment anyone else
+# cloned it, and the canonical validator went red on a clean checkout while
+# green in the maintainer's tree. Half a megabyte makes the shipped LOG read
+# the same everywhere it is read.
+!.saipen/recovery/log-detail/
 .saipen/locks/
 # Exact quarantined receipt bodies are local source authority, never a Git or
 # archive distribution surface. Export-safe state stays under intake/distribution.

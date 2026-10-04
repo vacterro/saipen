@@ -214,7 +214,12 @@ def parse_card(text: str, path: str = "cards/card.md") -> KnowledgeCard:
             raise ValueError("card contains a secret-like value")
     if _LOG_LEAK_RE.search(text):
         raise ValueError("card contains event-journal syntax; history belongs in LOG")
-    raw = text.encode("utf-8")
+    # The digest covers the NORMALIZED text, not the bytes on disk. Every
+    # field above is parsed from the normalized lines, so two checkouts of one
+    # card that differ only in line endings are one card -- and an index
+    # generated on a Windows working copy went stale on every Linux clone
+    # because it had hashed the CRLF the checkout happened to carry.
+    raw = "\n".join(lines).encode("utf-8")
     return KnowledgeCard(
         path=rel,
         kind=fields["kind"],
