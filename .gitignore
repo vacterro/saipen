@@ -108,3 +108,11 @@ impl1.md
 # with `git add -A`, so on such a checkout the very first probe died on git's
 # error and the 247-control sweep never ran.
 /.saipen/evidence/tool-module-identity/
+
+# scenario/unit run transcripts written at the repository root by the runner
+# harnesses (`scen1612.log`, `unit1612.log`). Scratch, never evidence: they are
+# not read by any tool, and validate.py [root-file-set] FAILs on any root file the
+# closed set does not name. Its own message names .gitignore as the place a
+# scratch file belongs, which is what this is.
+scen*.log
+unit*.log
