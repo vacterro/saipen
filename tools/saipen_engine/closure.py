@@ -349,12 +349,23 @@ def cohort_readiness(root: Path | str, cohort: dict) -> dict:
 def _published_releases(root: Path) -> list[dict]:
     """Every record that proves an ACTUAL durable publication.
 
-    Two independent authorities, both required to be TERMINAL: COMMITTED
-    release journal receipts, and the published `release_receipt.json` closure
-    artifact a fresh clone can see. A kitchen receipt that names no commit and
+    Three independent authorities, all required to be TERMINAL: COMMITTED
+    release journal receipts, the published `release_receipt.json` closure
+    artifact a fresh clone can see, and the additional identities in
+    `release_receipts/`. A kitchen receipt that names no commit and
     no committed operation is a release IN FLIGHT, and an in-flight release is
     not publication -- accepting it is exactly how "it shipped" becomes true
     before anything shipped.
+
+    T-219: `release_receipt.json` is ONE publication identity per project root,
+    and `_release_matches` compares five single-valued slots, so a second DONE
+    closure naming a different release could only be recorded by displacing the
+    first one -- which made it impossible for two legitimate closures to both
+    resolve, and tempted a fix that put two identities in one record. The
+    directory is the honest shape: one identity per file, each one still
+    terminal and still clone-visible. It widens WHERE evidence is read from, not
+    WHAT counts -- `_is_published` is unchanged, so an authority that resolves to
+    nothing still fails exactly as before.
     """
     from .release import _committed_release_receipts
 
@@ -367,6 +378,14 @@ def _published_releases(root: Path) -> list[dict]:
     if published.is_file():
         try:
             raw = json.loads(published.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            raw = None
+        if isinstance(raw, dict) and raw not in records:
+            records.append(raw)
+    # sorted() so two projects with the same evidence resolve identically.
+    for extra in sorted((root / ".saipen" / "kitchen" / "release_receipts").glob("*.json")):
+        try:
+            raw = json.loads(extra.read_text(encoding="utf-8"))
         except (OSError, json.JSONDecodeError):
             raw = None
         if isinstance(raw, dict) and raw not in records:

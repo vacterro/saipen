@@ -845,5 +845,69 @@ class ReleaseVersionSurfaceTests(unittest.TestCase):
                 self.assertEqual(self._badges(body + "\n"), [f"**v{version}**"])
 
 
+class PublicationSlotTests(ProvenanceFixture):
+    """T-219: two DONE closures, two publication identities, both resolvable.
+
+    Reproduced live in a real project: T-107 closed inherited_verified naming
+    `release:release-T-108-046a5fb44352`, T-169 closed naming
+    `release:0b78ff22...`, and `release_receipt.json` is ONE slot -- so the second
+    closure displaced the first and the validator could never be green for both.
+    The tempting fix (one record carrying both ids) is a fabricated receipt.
+    """
+
+    def _slot(self, project: Path, work: str, commit: str) -> None:
+        slots = project / ".saipen" / "kitchen" / "release_receipts"
+        slots.mkdir(parents=True, exist_ok=True)
+        (slots / f"{work}.json").write_text(
+            json.dumps(
+                {
+                    "operation": "release",
+                    "status": "COMMITTED",
+                    "release_stage": "COMMITTED",
+                    "mode": "no-publish",
+                    "work": work,
+                    "release_commit": commit,
+                    "op_id": f"release-{work}-{commit[:12]}",
+                }
+            ),
+            encoding="utf-8",
+        )
+
+    def test_two_closures_each_naming_their_own_release_both_resolve(self):
+        project = self.make_project(active=True)
+        first = _publish(project, version="0.4.2")
+        self._slot(project, "T-169", "0b78ff221ea19d2bf87f18cddd8f1b9bc61fbabf")
+        second = "release:0b78ff221ea19d2bf87f18cddd8f1b9bc61fbabf"
+
+        for source in (first, second):
+            with self.subTest(source=source):
+                verdict = closure.resolve_implementation_source(project, source)
+                self.assertTrue(verdict.ok, verdict.to_dict())
+
+    def test_the_appended_receipt_does_not_displace_the_current_one(self):
+        """The control: reading the second identity must not cost the first."""
+        project = self.make_project(active=True)
+        first = _publish(project, version="0.4.2")
+        self._slot(project, "T-169", "0b78ff221ea19d2bf87f18cddd8f1b9bc61fbabf")
+        receipt = json.loads(
+            (project / ".saipen" / "kitchen" / "release_receipt.json").read_text(encoding="utf-8")
+        )
+        self.assertEqual(receipt["version"], "0.4.2")
+        self.assertTrue(closure.resolve_implementation_source(project, first).ok)
+
+    def test_an_appended_receipt_that_names_nothing_still_fails(self):
+        """The bar is UNCHANGED: more places to read from, never more to accept."""
+        project = self.make_project(active=True)
+        _publish(project, version="0.4.2")
+        slots = project / ".saipen" / "kitchen" / "release_receipts"
+        slots.mkdir(parents=True, exist_ok=True)
+        (slots / "T-169.json").write_text(
+            json.dumps({"operation": "release", "status": "COMMITTED"}), encoding="utf-8"
+        )
+        verdict = closure.resolve_implementation_source(project, "release:0b78ff221ea1")
+        self.assertFalse(verdict.ok)
+        self.assertIn("cannot be resolved", verdict.detail)
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

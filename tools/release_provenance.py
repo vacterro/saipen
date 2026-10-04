@@ -36,11 +36,17 @@ WHAT THIS TOOL GUARANTEES
 3. A receipt is a RECORD, not a claim: it names the Work it belongs to, the
    commit whose bytes shipped, whether a release was published or explicitly
    not, and when it was written. It never asserts more than that.
+4. `write` overwrites the one current-release artifact, exactly as before.
+   `write --slot` APPENDS under ``release_receipts/`` and refuses to replace a
+   Work's recorded receipt (T-219): one publication identity per file, so a
+   second closure no longer has to displace the first one's.
 
 Usage::
 
     python tools/release_provenance.py write --project-root R \\
         --work T-108 --commit 046a5fb --mode no-publish --note "..."
+    python tools/release_provenance.py write --project-root R --slot \\
+        --work T-169 --commit 0b78ff2 --mode no-publish --note "..."
     python tools/release_provenance.py verify --project-root R
 """
 
@@ -48,13 +54,24 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import subprocess
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
 RECEIPT_RELPATH = ".saipen/kitchen/release_receipt.json"
+# T-219: the path above is ONE identity per project root. A second closure that
+# names a different release could only be recorded by overwriting the first, so
+# two legitimate closures could never both resolve -- and the tempting fix (one
+# record carrying two identities) is a fabricated receipt. `write --slot`
+# records into this directory instead: one identity per file, still terminal,
+# still visible to a fresh clone. Reading them back is closure.py's job.
+SLOT_RELDIR = ".saipen/kitchen/release_receipts"
 MODES = ("publish", "no-publish")
+# The slot file is NAMED for its Work, so the id is a path component. Validate it
+# here rather than trusting a caller that reached the CLI with a string.
+WORK_ID_RE = re.compile(r"T-\d+")
 
 
 class ReceiptError(RuntimeError):
@@ -135,12 +152,58 @@ def build_receipt(
     return record
 
 
-def write_receipt(root: Path, **kwargs) -> dict:
+def slot_dir(root: Path) -> Path:
+    return Path(root) / SLOT_RELDIR
+
+
+def slot_path(root: Path, work: str) -> Path:
+    """One identity per file, named for the Work that owns it."""
+    if not WORK_ID_RE.fullmatch(work or ""):
+        raise ReceiptError(
+            f"work {work!r} is not a Work id; a slot file is named for it and the "
+            f"name must not be able to escape {SLOT_RELDIR}"
+        )
+    return slot_dir(root) / f"{work}.json"
+
+
+def write_receipt(root: Path, *, slot: bool = False, **kwargs) -> dict:
+    """Record one terminal release receipt.
+
+    `slot=False` is the historical behaviour, unchanged: overwrite the single
+    current-release artifact. `slot=True` APPENDS beside it and refuses to
+    replace a Work's existing receipt -- an append that silently overwrote would
+    re-create the very displacement this directory exists to prevent.
+    """
     record = build_receipt(root, **kwargs)
-    path = receipt_path(root)
+    if slot:
+        path = slot_path(root, str(record.get("work") or ""))
+        if path.exists():
+            raise ReceiptError(
+                f"{SLOT_RELDIR}/{path.name} already records {record.get('work')}; "
+                f"an appended receipt never replaces a recorded one"
+            )
+    else:
+        path = receipt_path(root)
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(record, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     return record
+
+
+def slot_receipts(root: Path) -> list[tuple[Path, dict]]:
+    """Every appended identity, in a stable order.
+
+    An unreadable or non-object file is skipped: this is evidence collection, and
+    an unreadable receipt proves nothing -- exactly as the journal arm above.
+    """
+    out: list[tuple[Path, dict]] = []
+    for path in sorted(slot_dir(root).glob("*.json")):
+        try:
+            raw = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            continue
+        if isinstance(raw, dict):
+            out.append((path, raw))
+    return out
 
 
 def read_receipt(root: Path) -> dict:
@@ -179,6 +242,35 @@ def verify_receipt(root: Path, record: dict | None = None) -> list[str]:
     return problems
 
 
+def verify_all(root: Path) -> list[str]:
+    """Every way ANY recorded receipt can be false. Empty list means true.
+
+    T-219: the single artifact and the appended identities are checked TOGETHER.
+    A `verify` that only read the first would report OK over appended receipts
+    nobody ever re-checked, which is the same "it shipped" illusion this tool
+    exists to prevent -- just one directory deeper.
+    """
+    problems: list[str] = []
+    current: dict | None = None
+    absent = ""
+    try:
+        current = read_receipt(root)
+    except ReceiptError as exc:
+        absent = str(exc)
+    if current is not None:
+        problems.extend(f"{RECEIPT_RELPATH}: {p}" for p in verify_receipt(root, current))
+    appended = slot_receipts(root)
+    for path, record in appended:
+        problems.extend(
+            f"{SLOT_RELDIR}/{path.name}: {p}" for p in verify_receipt(root, record)
+        )
+    if current is None and not appended:
+        raise ReceiptError(
+            absent or f"no receipt at {RECEIPT_RELPATH} and none under {SLOT_RELDIR}"
+        )
+    return problems
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(prog="release_provenance", description=__doc__.splitlines()[0])
     parser.add_argument(
@@ -195,8 +287,16 @@ def main(argv: list[str] | None = None) -> int:
     write.add_argument("--tag", default=None)
     write.add_argument("--version", default=None)
     write.add_argument("--note", default="")
+    write.add_argument(
+        "--slot",
+        action="store_true",
+        help=(
+            f"append the receipt under {SLOT_RELDIR}/ instead of overwriting "
+            f"{RECEIPT_RELPATH}, so a second closure does not displace the first"
+        ),
+    )
 
-    sub.add_parser("verify", help="re-check an existing receipt against the repository")
+    sub.add_parser("verify", help="re-check every recorded receipt against the repository")
 
     args = parser.parse_args(argv)
     root = Path(args.project_root).resolve()
@@ -204,6 +304,7 @@ def main(argv: list[str] | None = None) -> int:
         try:
             record = write_receipt(
                 root,
+                slot=args.slot,
                 work=args.work,
                 commit=args.commit,
                 mode=args.mode,
@@ -218,7 +319,7 @@ def main(argv: list[str] | None = None) -> int:
         return 0
 
     try:
-        problems = verify_receipt(root)
+        problems = verify_all(root)
     except ReceiptError as exc:
         print(f"REFUSED: {exc}", file=sys.stderr)
         return 2
@@ -226,7 +327,8 @@ def main(argv: list[str] | None = None) -> int:
         for problem in problems:
             print(f"FAIL: {problem}", file=sys.stderr)
         return 1
-    print(f"OK: {RECEIPT_RELPATH} names a real commit and a terminal operation")
+    counted = len(slot_receipts(root)) + (1 if receipt_path(root).is_file() else 0)
+    print(f"OK: {counted} receipt(s) name real commits and terminal operations")
     return 0
 
 

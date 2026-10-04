@@ -1,4 +1,5 @@
 import importlib.util
+import json
 import subprocess
 import tempfile
 import unittest
@@ -148,6 +149,67 @@ class CliTests(RepositoryFixture):
         )
         self.assertEqual(result.returncode, 2)
         self.assertIn("does not resolve", result.stderr)
+
+
+class SlotTests(RepositoryFixture):
+    """T-219: a second closure must not have to displace the first one's receipt."""
+
+    def test_a_slot_append_leaves_the_current_receipt_alone(self):
+        release_provenance.write_receipt(
+            self.root, work="T-9", commit="HEAD", mode="no-publish"
+        )
+        release_provenance.write_receipt(
+            self.root, slot=True, work="T-107", commit="HEAD", mode="no-publish"
+        )
+        self.assertEqual(release_provenance.read_receipt(self.root)["work"], "T-9")
+        self.assertEqual(
+            [(p.name, r["work"]) for p, r in release_provenance.slot_receipts(self.root)],
+            [("T-107.json", "T-107")],
+        )
+
+    def test_two_appended_receipts_coexist_and_both_verify(self):
+        for work in ("T-107", "T-169"):
+            release_provenance.write_receipt(
+                self.root, slot=True, work=work, commit="HEAD", mode="no-publish"
+            )
+        self.assertEqual(len(release_provenance.slot_receipts(self.root)), 2)
+        self.assertEqual(release_provenance.verify_all(self.root), [])
+
+    def test_appending_the_same_work_twice_is_refused(self):
+        release_provenance.write_receipt(
+            self.root, slot=True, work="T-169", commit="HEAD", mode="no-publish"
+        )
+        with self.assertRaises(ReceiptError) as caught:
+            release_provenance.write_receipt(
+                self.root, slot=True, work="T-169", commit="HEAD", mode="no-publish"
+            )
+        self.assertIn("never replaces", str(caught.exception))
+
+    def test_a_work_id_that_is_not_one_cannot_become_a_file_name(self):
+        with self.assertRaises(ReceiptError) as caught:
+            release_provenance.write_receipt(
+                self.root, slot=True, work="../../escape", commit="HEAD", mode="no-publish"
+            )
+        self.assertIn("not a Work id", str(caught.exception))
+
+    def test_verify_covers_the_appended_receipts_too(self):
+        """The control on the whole point: a bad APPENDED receipt is not invisible."""
+        release_provenance.write_receipt(
+            self.root, slot=True, work="T-169", commit="HEAD", mode="no-publish"
+        )
+        path = release_provenance.slot_path(self.root, "T-169")
+        record = json.loads(path.read_text(encoding="utf-8"))
+        record["release_commit"] = "0" * 40
+        path.write_text(json.dumps(record), encoding="utf-8")
+        problems = release_provenance.verify_all(self.root)
+        self.assertTrue(
+            any("release_receipts/T-169.json" in p and "does not resolve" in p for p in problems),
+            problems,
+        )
+
+    def test_verify_with_nothing_recorded_is_an_error_not_a_pass(self):
+        with self.assertRaises(ReceiptError):
+            release_provenance.verify_all(self.root)
 
 
 if __name__ == "__main__":
