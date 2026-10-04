@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import json
 import os
+import re
 import signal
 import shutil
 import subprocess
@@ -142,6 +143,40 @@ def _ignore_copy(_directory: str, names: list[str]) -> set[str]:
 
 def _tail(text: str, limit: int = 8000) -> str:
     return text if len(text) <= limit else text[-limit:]
+
+
+_FAILURE_HEADER = re.compile(r"^(?:FAIL|ERROR): ([A-Za-z0-9_]+)")
+
+def _read_failure_roster_from_path(path: Path, limit: int = 400) -> list[str]:
+    """Every failing test id in a child run, scanned but never retained whole.
+
+    ``_read_tail_from_path`` bounds what the REPORT carries, which is right for
+    a verdict and wrong for a diagnosis: a run that fails 21 tests prints its
+    headers long before the tail, and a truncated log leaves CI showing a count
+    with no names. This walks the spooled file line by line and keeps only the
+    de-duplicated ids, so the roster survives any truncation of the log.
+    """
+    roster: list[str] = []
+    seen: set[str] = set()
+    try:
+        with open(path, "rb") as handle:
+            for raw in handle:
+                line = raw.decode("utf-8", errors="replace").strip()
+                if not line.startswith(("FAIL:", "ERROR:")):
+                    continue
+                match = _FAILURE_HEADER.match(line)
+                if match is None:
+                    continue
+                name = match.group(1)
+                if name in seen:
+                    continue
+                seen.add(name)
+                roster.append(name)
+                if len(roster) >= limit:
+                    break
+    except OSError:
+        return roster
+    return roster
 
 
 def _read_tail_from_path(path: Path, limit: int = 8000) -> str:
@@ -299,6 +334,7 @@ def _run_family(root: Path, family: TestFamily, *, spool: Path | None = None) ->
                     process.stderr.close()
             stdout_text = _read_tail_from_path(stdout_path)
             stderr_text = _read_tail_from_path(stderr_path)
+            roster = _read_failure_roster_from_path(stdout_path)
             return {
                 "name": family.name,
                 "status": (
@@ -307,6 +343,7 @@ def _run_family(root: Path, family: TestFamily, *, spool: Path | None = None) ->
                     else ("PASS" if process.returncode == 0 else "FAIL")
                 ),
                 "exit_code": None if timed_out else process.returncode,
+                "failures": roster,
                 "stdout": stdout_text,
                 "stderr": stderr_text,
             }
@@ -387,6 +424,14 @@ def main(argv: list[str] | None = None) -> int:
         for item in report["families"]:
             print(f"{item['name']}: {item['status']}")
             if item["status"] != "PASS":
+                # The roster goes LAST so it survives a truncated CI log, and it
+                # names every failing test rather than the four the log tail
+                # happened to keep.
+                roster = item.get("failures") or []
+                if roster:
+                    print(f"failing tests ({len(roster)}):")
+                    for name in roster:
+                        print(f"  FAIL {name}")
                 detail = item.get("detail") or item.get("stderr") or item.get("stdout")
                 if detail:
                     print(detail)
