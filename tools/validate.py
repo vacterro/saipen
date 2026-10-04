@@ -3764,6 +3764,23 @@ if log_files:
             # Exempt = every named id the FAIL above did not take: the WARN
             # must not call a forged line history, nor drop the ids a real
             # operation record backs.
+            #
+            # An empty ledger is "no ledger here" -- a fresh clone, a consumer
+            # checkout -- never "every logged id is forged", and
+            # `resolvable_op_ids` says so in its own contract. With no floor
+            # every off-grammar id lands in the exempt set below, so on such a
+            # checkout the [saio] gate did not run and said nothing about it.
+            # Name that, rather than let a check that never ran read as one
+            # that found nothing.
+            if not _ha_ledger and _off_grammar:
+                warn(
+                    "op-id-ledger-absent",
+                    f"this checkout holds no journaled operation record, so the "
+                    f"{len(_off_grammar)} off-grammar `[op: ...]` id(s) below "
+                    f"have no floor above which they could be forged and the "
+                    f"[saio] gate that refuses one did not run here "
+                    f"(T-1282)",
+                )
             _exempt = [row for row in _off_grammar if row not in _forged]
             if _exempt:
                 warn(
@@ -5561,6 +5578,18 @@ if saiui_mission.is_file():
         )
     elif "hypothes" in _mission.lower() and "VERIFY" in _mission:
         ok("SAIUI SAISENT mission labels findings as hypotheses to verify")
+elif IS_SAIPEN_HOME:
+    # A consuming project has no mission and needs none. A SAIPEN home does,
+    # and the mission lives under the gitignored `.saipen/kitchen/`, so a
+    # fresh clone skipped this check in silence. The same reason as the
+    # translation surface: say which check did not run.
+    warn(
+        "saiui-mission-absent",
+        f"this SAIPEN home has no {saiui_mission.as_posix()} (gitignored "
+        f"producer state, absent from a fresh clone), so the rule that a "
+        f"target mission must label its findings as hypotheses to verify -- "
+        f"never as an audit already performed -- did not run here",
+    )
 
 # ------------------------------------------------------------ KNOWLEDGE
 
@@ -6460,6 +6489,22 @@ if adapter_dir.is_dir():
 # one layout every actual user of SAIPEN runs. Found by installing into a
 # sandbox HOME and running the copy, which nothing had ever done.
 kitchen = Path(".saipen/saitranslate/kitchen")
+if IS_SAIPEN_HOME and not kitchen.is_dir():
+    # A consuming project never has this directory and never needs the checks
+    # under it. A SAIPEN home DOES, and on a fresh clone of one it is
+    # gitignored: the whole block below was skipped in silence, so a reader
+    # saw a clean run that had proved nothing about locale coverage, badge
+    # parity, translation staleness or the shortcut callouts those sources
+    # feed. Name the surface rather than let the silence stand for a verdict.
+    warn(
+        "translation-surface-absent",
+        "this SAIPEN home has no .saipen/saitranslate/kitchen/ (gitignored "
+        "producer state, absent from a fresh clone), so nothing below it ran: "
+        "locale README badge parity and staleness digests, the 32 locale "
+        "sources, and the shortcut callouts compared across those sources, "
+        "the 3 root mirrors and the 33 shipped guides/ files. This checkout "
+        "has proved nothing about locale coverage",
+    )
 if IS_SAIPEN_HOME and kitchen.is_dir():
     repo_version = Path("VERSION").read_text(encoding="utf-8-sig").strip()
     if GATE == "ship":

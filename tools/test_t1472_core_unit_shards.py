@@ -89,7 +89,10 @@ class PlanTests(unittest.TestCase):
         # modules than jobs is the common case, not an edge.
         plan = core_unit.plan_shards(["test_only"], {}, 4)
         self.assertEqual(plan, [["test_only"]])
-        self.assertEqual(core_unit.plan_shards(["test_a", "test_b"], {}, 8), [["test_a"], ["test_b"]])
+        self.assertEqual(
+            core_unit.plan_shards(["test_a", "test_b"], {}, 8),
+            [["test_a"], ["test_b"]],
+        )
 
     def test_only_the_declared_discovery_shape_is_sharded(self):
         self.assertEqual(core_unit.shardable(DECLARED_SHAPE), ("tools", "test_*.py"))

@@ -271,13 +271,32 @@ def main() -> int:
     cases = [ac.case_parts(case) for case in ac.CASES]
     unavailable = [
         label
-        for label, rel, mutation, _expected, _gate in cases
-        if not ac.case_available(pristine, rel, mutation)
+        for label, rel, mutation, _expected, _gate, needs in cases
+        if not ac.needs_absent(needs, ctl_v.stdout)
+        and not ac.case_available(pristine, rel, mutation)
     ]
     if unavailable:
         for label in unavailable:
             print(f"FAIL: skipped canonical mutation: {label}")
         print("FAIL: parity denominator would change because a canonical mutation cannot be set up")
+        shutil.rmtree(tmp, ignore_errors=True)
+        return 1
+
+    # A control whose check the validator has already reported as not running
+    # on this checkout has nothing to measure here: parity asks whether the
+    # floor catches what the canonical catches, and on such a tree the
+    # canonical catches nothing at all. Naming them keeps the denominator
+    # visible rather than quietly smaller.
+    not_exercised = [
+        (label, needs) for label, _rel, _m, _e, _g, needs in cases
+        if ac.needs_absent(needs, ctl_v.stdout)
+    ]
+    if not_exercised:
+        for label, needs in not_exercised:
+            print(f"NOT EXERCISED HERE: {label} -- the validator reported [{needs}]")
+    cases = [case for case in cases if not ac.needs_absent(case[5], ctl_v.stdout)]
+    if not cases:
+        print("nothing to measure: every canonical mutation's check is absent on this checkout")
         shutil.rmtree(tmp, ignore_errors=True)
         return 1
 
@@ -292,7 +311,7 @@ def main() -> int:
         shutil.copytree(pristine, root, copy_function=os.link)
         local_both, local_only, local_skipped = [], [], []
         timeout_case = None
-        for position, (label, rel, mutation, _expected, _gate) in enumerate(chunk, 1):
+        for position, (label, rel, mutation, _expected, _gate, _needs) in enumerate(chunk, 1):
             files = ac.mutation_files(root, rel, mutation)
             saved = [(file, file.read_bytes() if file.exists() else None) for file in files]
             for file, content in saved:

@@ -63,7 +63,7 @@ class EmptyScopedSelectionTests(unittest.TestCase):
 
     def test_a_real_worker_failure_is_still_a_gate_failure(self):
         case = A.CASES[0]
-        label, rel, mutation, _expected, gate = A.case_parts(case)
+        label, rel, mutation, _expected, gate, _needs = A.case_parts(case)
         never_printed = (label, rel, mutation, "an expectation no control prints", gate)
         context = _Context(self.sandbox, [never_printed], CHANGED)
         verdict = A.mutation_sweep_probe(context)

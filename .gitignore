@@ -99,3 +99,12 @@ impl1.md
 /.saipen/saitranslate/.translation-cache/
 /.saipen/saitranslate/.prepare-staging/
 /.saipen/saitranslate/SUPERSEDED/
+
+# tool-module-identity is a tool-comparison scratchpad: a copied-out subject
+# repo plus the candidate modules and green/red transcripts a build step wrote
+# next to them. Not protocol, not evidence -- 3809 untracked files, and the
+# nested subject tree carries paths past what `git add -A` will index on Windows.
+# That is not merely untidy: `tools/audit_checks.py` opens its mutation sweep
+# with `git add -A`, so on such a checkout the very first probe died on git's
+# error and the 247-control sweep never ran.
+/.saipen/evidence/tool-module-identity/

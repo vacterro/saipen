@@ -258,7 +258,7 @@ class RedControlIsDeclaredTests(unittest.TestCase):
         import audit_checks as A
 
         case = next(case for case in A.CASES if "audit route" in case[0].lower())
-        _, rel, mutation, _, _ = A.case_parts(case)
+        _, rel, mutation, _, _, _ = A.case_parts(case)
         paths = A.case_declared_paths(rel, mutation)
         self.assertIn("audit/1.md", paths)
         self.assertIn(".saipen/STATE.md", paths)

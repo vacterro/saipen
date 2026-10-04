@@ -1484,6 +1484,16 @@ UTF16 = "<rewrite as utf-16>"  # sentinel, not a mutation function
 DELETE = "<delete the file>"
 SYMLINK_EXTERNAL = "<replace with an external symlink>"
 
+# Availability categories the VALIDATOR names when a check it owns could not
+# run on this checkout, because the surface it reads is this repository's own
+# gitignored producer state and a fresh clone does not carry it. Each string is
+# the WARN category `tools/validate.py` emits -- the case names the category,
+# never a path it checked for itself, so a control can only be excused by the
+# validator saying out loud that the check did not run.
+TRANSLATION_SURFACE = "translation-surface-absent"
+OP_ID_LEDGER = "op-id-ledger-absent"
+SAIUI_MISSION = "saiui-mission-absent"
+
 
 def strip_done_verify(text: str) -> str:
     """T-431: take the evidence off the first ## DONE ticket, keep the ticket.
@@ -3148,6 +3158,8 @@ CASES: list[tuple[str, str, object, str]] = [
             "`cc` keeps active Goal Mode moving",
         ),
         "shortcut-callouts",
+        None,
+        TRANSLATION_SURFACE,
     ),
     # § 1.10 ordered `saipen status` to report the last validator result from
     # LOG.md before anything gave that record a shape. Break the fixed form
@@ -3585,6 +3597,8 @@ CASES: list[tuple[str, str, object, str]] = [
         "[op: transition-forgedforgedforgedforgedforged00] "
         "RUN: transition to BUILD -- forged provenance probe\n",
         "resolves to NO operation record",
+        None,
+        OP_ID_LEDGER,
     ),
     # T-1577. The control above proves an id that RESOLVES to nothing is
     # caught; this one proves the other half -- an id no writer in this
@@ -3607,6 +3621,8 @@ CASES: list[tuple[str, str, object, str]] = [
         # string is already printed proves nothing. This phrase is on the FAIL
         # path alone.
         "standing in for a transition that never ran",
+        None,
+        OP_ID_LEDGER,
     ),
     # --- kitchen ---------------------------------------------------------
     (
@@ -3828,6 +3844,8 @@ CASES: list[tuple[str, str, object, str]] = [
         ".saipen/saitranslate/kitchen/ru/README_RU.md",
         replace("`reply_language:`", "строку языка"),
         "never mentions `reply_language:`",
+        None,
+        TRANSLATION_SURFACE,
     ),
     (
         "BOOT.md presents the precedence rule without the setting",
@@ -3887,7 +3905,8 @@ CASES: list[tuple[str, str, object, str]] = [
         replace('"first_seen": "7.72.0"', '"first_seen": "banana"'),
         "has non-semver first_seen/last_seen",
     ),
-    ("a locale loses its guide", "guides/GUIDE_UK.md", DELETE, "locale coverage"),
+    ("a locale loses its guide", "guides/GUIDE_UK.md", DELETE, "locale coverage",
+        None, TRANSLATION_SURFACE),
     (
         "a locale guide loses its shortcut callout",
         "guides/GUIDE_AR.md",
@@ -3895,6 +3914,8 @@ CASES: list[tuple[str, str, object, str]] = [
             r"^\*\*[^\n]*`cc`[^\n]*#110-command-surface[^\n]*\n", "", t, count=1, flags=re.MULTILINE
         ),
         "shortcut-callouts",
+        None,
+        TRANSLATION_SURFACE,
     ),
     (
         "root device artifact is no longer Git-ignored",
@@ -4226,6 +4247,8 @@ CASES: list[tuple[str, str, object, str]] = [
             "confirmed finding -- SAISENT was audited and is non-compliant",
         ),
         "claims the target was audited",
+        None,
+        SAIUI_MISSION,
     ),
     (
         "saiui built-in role charter deleted from shipped library",
@@ -4628,7 +4651,7 @@ def validator_output(root: Path, gate: str | None = None) -> str:
 
 
 def case_parts(case):
-    """Unpack a CASES entry, which is 4 items or 5.
+    """Unpack a CASES entry, which is 4, 5 or 6 items.
 
     The optional 5th is the validator GATE the case must run at. T-568 made
     producer-package severity a property of the gate, so a producer control
@@ -4637,9 +4660,31 @@ def case_parts(case):
     reporting itself as evidence while proving only that the defect is
     NOTICED, never that it is refused. A control has to run where its finding
     is hard.
+
+    The optional 6th is the AVAILABILITY CATEGORY the control needs. Some
+    validator checks are gated on a surface this repository deliberately does
+    not distribute -- `.saipen/saitranslate/kitchen/` is gitignored producer
+    state, and the operation ledger lives under the gitignored recovery tree --
+    so on a fresh clone those checks do not run at all. Before the validator
+    said so, a control for one of them mutated a tracked file, watched the
+    output stay identical, and was recorded as a BROKEN check: the honest
+    "this cannot be exercised here" reading was unavailable to it.
+
+    Naming the category ties the exemption to what the validator itself
+    reported, so it cannot be used to excuse a control that would otherwise
+    have run: the category is printed only when the surface is really absent.
+    It is still visible -- the summary counts these, and editing the mutation
+    table re-triggers the parity measurement in CI.
     """
     label, rel, mutation, expected = case[:4]
-    return label, rel, mutation, expected, (case[4] if len(case) > 4 else None)
+    return (
+        label,
+        rel,
+        mutation,
+        expected,
+        (case[4] if len(case) > 4 else None),
+        (case[5] if len(case) > 5 else None),
+    )
 
 # ---------------------------------------------------------------------------
 # Development-time scoping (T-1273)
@@ -4803,7 +4848,7 @@ def select_cases(cases, changed: frozenset[str]) -> list:
     """The controls whose declared target appears in the changed-path set."""
     chosen = []
     for case in cases:
-        _, rel, mutation, _, _ = case_parts(case)
+        _, rel, mutation, _, _, _ = case_parts(case)
         if (mutation == DEMOTE_AMNESTIES and any(
             path == LOG or re.fullmatch(r"\.saipen/logs/LOG-\d+\.md", path)
             for path in changed
@@ -5036,12 +5081,28 @@ def gated_producer_probe(context: ProbeContext) -> str | None:
     return None
 
 
+def needs_absent(needs: str | None, output: str) -> bool:
+    """Did the validator itself report that this control's surface is absent?
+
+    The exemption is keyed to what the validator PRINTS, never to the state of
+    this checkout: a control whose check never ran is out of scope here, and
+    the validator is the party that knows which of its checks did not run.
+    """
+    return bool(needs) and needs in output
+
+
 def case_availability_probe(context: ProbeContext) -> str | None:
-    """The mutation suite cannot start with a changing denominator."""
+    """The mutation suite cannot start with a changing denominator.
+
+    A case whose availability category the validator has already reported is
+    not missing a target -- it has no check to drive on this checkout at all,
+    so it is out of the denominator here rather than broken in it.
+    """
     unavailable = [
         parts[0]
         for parts in map(case_parts, context.cases)
-        if not case_available(context.pristine, parts[1], parts[2])
+        if not needs_absent(parts[5], context.control)
+        and not case_available(context.pristine, parts[1], parts[2])
     ]
     if unavailable:
         return "skipped canonical mutation(s): " + ", ".join(sorted(unavailable))
@@ -5076,8 +5137,15 @@ def mutation_sweep_probe(context: ProbeContext) -> str | None:
         return any(ln.startswith("FAIL") and expected in ln for ln in output.splitlines())
 
     dead, skipped, always = [], [], []
+    # Controls whose check did not run on this checkout, kept apart from both
+    # the broken list and the host-capability skips: nothing is wrong here and
+    # nothing was proven, and the summary has to say which is which.
+    not_exercised = []
     runnable = []
-    for label, rel, mutation, expected, gate in map(case_parts, cases):
+    for label, rel, mutation, expected, gate, needs in map(case_parts, cases):
+        if needs_absent(needs, control):
+            not_exercised.append((label, needs))
+            continue
         if matched(control_for(gate), expected, gate):
             always.append((label, expected))
             continue
@@ -5176,15 +5244,23 @@ def mutation_sweep_probe(context: ProbeContext) -> str | None:
             f"That check no longer goes red on its own condition{why}"
         )
 
-    live = len(cases) - len(dead) - len(skipped) - len(always)
+    live = len(cases) - len(dead) - len(skipped) - len(always) - len(not_exercised)
     capability = [(label, reason) for label, reason in skipped if reason]
     broken = len(dead) + len(always) + len(skipped) - len(capability)
-    if capability:
+    for label, needs in not_exercised:
+        context.extra.append(
+            f"NOT EXERCISED HERE: {label} -- the validator reported "
+            f"[{needs}], so the check this control drives does not run on "
+            f"this checkout and the mutation had nothing to move"
+        )
+    if capability or not_exercised:
         # Continue all other cases, and refuse any real dead/missing control.
-        # Host absence is UNPROVEN, never the full-sweep success sentence.
+        # Host absence and an undistributed surface are UNPROVEN, never the
+        # full-sweep success sentence.
         context.extra.append(
             f"PROVEN: {live} of {len(cases)} mutation controls; "
-            f"host capability unproven: {len(capability)}; broken: {broken}"
+            f"host capability unproven: {len(capability)}; "
+            f"not exercised here: {len(not_exercised)}; broken: {broken}"
         )
     else:
         context.extra.extend(sweep_report(context.changed, len(cases), live, len(skipped), broken))

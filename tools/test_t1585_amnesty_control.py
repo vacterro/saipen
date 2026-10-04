@@ -50,7 +50,7 @@ class AmnestyControlTests(unittest.TestCase):
         return structural_marker_events([event for event in events if event], MARKER, ("DEC",))
 
     def apply(self):
-        _label, rel, mutation, _expected, _gate = A.case_parts(self.case)
+        _label, rel, mutation, _expected, _gate, _needs = A.case_parts(self.case)
         return A.apply_case(self.root, rel, mutation)
 
     def test_all_actual_grants_are_demoted_across_complete_history(self):
@@ -63,7 +63,7 @@ class AmnestyControlTests(unittest.TestCase):
                       self.active.read_text(encoding="utf-8"))
 
     def test_save_restore_declares_every_touched_file_and_preserves_raw_bytes(self):
-        _label, rel, mutation, _expected, _gate = A.case_parts(self.case)
+        _label, rel, mutation, _expected, _gate, _needs = A.case_parts(self.case)
         paths = A.mutation_files(self.root, rel, mutation)
         self.assertEqual(set(paths), set(history_paths(self.root)))
         saved = [(path, path.read_bytes()) for path in paths]

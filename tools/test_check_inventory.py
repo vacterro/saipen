@@ -73,7 +73,7 @@ class CasePresenceTests(unittest.TestCase):
 
     def test_both_failure_classes_have_a_case(self) -> None:
         for label, expected in KNOWLEDGE_CASES:
-            _, rel, _, declared_expected, gate = case_by_label(label)
+            _, rel, _, declared_expected, gate, _needs = case_by_label(label)
             self.assertEqual(rel, A.KNOWLEDGE_CARD, label)
             self.assertEqual(declared_expected, expected, label)
             self.assertIsNone(gate, label)
@@ -133,7 +133,7 @@ class MutationEfficacyTests(unittest.TestCase):
 
     def test_each_mutation_goes_red_then_green_again(self) -> None:
         for label, expected in KNOWLEDGE_CASES:
-            _, _, mutation, _, _ = case_by_label(label)
+            _, _, mutation, _, _, _needs = case_by_label(label)
             with self.subTest(label):
                 text = self.card.read_text(encoding="utf-8")
                 mutated = mutation(text)
@@ -153,7 +153,7 @@ class MutationEfficacyTests(unittest.TestCase):
     def test_the_stale_mutation_does_not_rely_on_prose_wording(self) -> None:
         # An anchor inside the card's claim would silently no-op the day the
         # prose is rewritten; this mutation appends instead.
-        _, _, mutation, _, _ = case_by_label(KNOWLEDGE_CASES[1][0])
+        _, _, mutation, _, _, _needs = case_by_label(KNOWLEDGE_CASES[1][0])
         self.assertIsNone(getattr(mutation, "anchor", None))
         rewritten = "---\nkind: convention\n---\n\nEvery word of this card was rewritten.\n"
         self.assertNotEqual(mutation(rewritten), rewritten)

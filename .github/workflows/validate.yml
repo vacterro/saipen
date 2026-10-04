@@ -45,24 +45,38 @@ jobs:
           python -B tools/test_runner.py --family unit
 
       # Import-closure smoke: every shipped module + declared unittest must import cleanly.
+      #
+      # This step had never run, and it was broken twice over. It loaded every
+      # module with `spec_from_file_location`, which gives a module no package,
+      # so every relative import in `saipen_engine/` raised "attempted relative
+      # import with no known parent package"; and it caught only `Exception`, so
+      # `tools/validate.py` -- a CLI that runs the whole validation on import
+      # and ends in `sys.exit(0)`, a BaseException -- killed the step before it
+      # reached its own PASS line. A real import is what the shipped layout
+      # actually does, so import it that way.
       - name: Import closure smoke
         run: |
           python -c "
-          import pathlib, importlib.util, sys
-          root=pathlib.Path('tools')
-          mods=list(root.glob('test_*.py')) + list((root/'saipen_engine').glob('*.py')) + [root/'validate.py', root/'saipen.py']
-          bad=[]
-          for p in mods:
-              name=p.stem
-              spec=importlib.util.spec_from_file_location(name, p)
+          import importlib, pathlib, sys
+          root = pathlib.Path('tools')
+          sys.path.insert(0, str(root.resolve()))
+          mods = [(p.stem, p) for p in sorted(root.glob('test_*.py'))]
+          mods += [('saipen_engine.' + p.stem, p) for p in sorted((root / 'saipen_engine').glob('*.py'))]
+          mods += [('validate', root / 'validate.py'), ('saipen', root / 'saipen.py')]
+          bad = []
+          for name, p in mods:
               try:
-                  m=importlib.util.module_from_spec(spec)
-                  spec.loader.exec_module(m)
+                  importlib.import_module(name)
+              except SystemExit as e:
+                  # A clean exit IS a clean import -- validate.py is a CLI.
+                  # Only a non-zero exit is a failure, and it must name the module.
+                  if e.code not in (0, None):
+                      bad.append(f'{name}: exited {e.code} on import')
               except Exception as e:
                   # platform-gated skips allowed only with explicit marker
-                  text=p.read_text(encoding='utf-8', errors='ignore')
+                  text = p.read_text(encoding='utf-8', errors='ignore')
                   if 'platform-gated' not in text.lower():
-                      bad.append(f'{p}: {e}')
+                      bad.append(f'{name}: {type(e).__name__}: {e}')
           if bad:
               print('\n'.join(bad)); sys.exit(1)
           print(f'import closure PASS: {len(mods)} modules')

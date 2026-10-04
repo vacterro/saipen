@@ -29,7 +29,7 @@ RELEASE = ROOT / "tools" / "saipen_engine" / "release.py"
 
 
 def declared(case) -> set[str]:
-    _, rel, mutation, _, _ = A.case_parts(case)
+    _, rel, mutation, _, _, _ = A.case_parts(case)
     return A.case_declared_paths(rel, mutation)
 
 
