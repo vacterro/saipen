@@ -130,11 +130,21 @@ rm_aider() {
 }
 
 task_exists() {
-  schtasks /Query /TN "$1" >/dev/null 2>&1 && return 0
+  # MSYS rewrites a leading-slash argument into a Windows path before a native
+  # binary ever sees it: under Git Bash `schtasks /Query` arrives as
+  # `schtasks C:/Program Files/Git/Query`, which exits 1 with "Invalid
+  # argument/option". The caller reads that as "Task Scheduler is unreachable"
+  # and fails closed, so every Windows user who followed the README's Git Bash
+  # uninstall got a non-zero exit over two task names that were never there.
+  # The scenario runner stubs `schtasks` with a bash script, which MSYS does not
+  # convert, so the harness agreed with a host that real Windows never was.
+  # Scoped to the call: setting it for the whole script would break every path
+  # the rest of it legitimately converts.
+  MSYS_NO_PATHCONV=1 schtasks /Query /TN "$1" >/dev/null 2>&1 && return 0
   # A successful all-task query proves Task Scheduler is reachable, so only
   # this name is absent. If that query also fails, access/service state is
   # unknown and cleanup must fail closed instead of deleting the wrapper.
-  schtasks /Query /FO CSV /NH >/dev/null 2>&1 && return 1
+  MSYS_NO_PATHCONV=1 schtasks /Query /FO CSV /NH >/dev/null 2>&1 && return 1
   return 2
 }
 
@@ -153,7 +163,7 @@ rm_task() {
         failed=1
         continue
       fi
-      if schtasks /Delete /TN "$task" /F >/dev/null 2>&1; then
+      if MSYS_NO_PATHCONV=1 schtasks /Delete /TN "$task" /F >/dev/null 2>&1; then
         removed=1
       else
         rc=$?

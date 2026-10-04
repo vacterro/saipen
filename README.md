@@ -117,6 +117,17 @@ saipen validate
 `continue` asks for the first goal or backlog; give the agent your task, then
 use `saipen continue` in later sessions. Validation must report PASS.
 
+Commit the project memory once after `set`, so the lineage carrier is inside the
+repository rather than only on your disk:
+
+```bash
+git add .saipen && git commit -m "saipen: init project memory"
+```
+
+Until you do, `validate` refuses with `.saipen/IDENTITY.md exists but is not
+tracked by git` — the carrier is what lets a fresh clone recover the same
+identity. Every later commit keeps the memory; you never commit it by hand again.
+
 <details>
 <summary>Run the same smoke check directly in a terminal</summary>
 
