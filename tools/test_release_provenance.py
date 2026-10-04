@@ -123,6 +123,25 @@ class VerifyTests(RepositoryFixture):
         problems = release_provenance.verify_receipt(self.root, record)
         self.assertTrue(any("op_id" in p for p in problems), problems)
 
+    def test_the_receipt_names_its_work_in_both_spellings(self):
+        """The resolver reads `ticket_id`; a receipt that only said `work` was
+        invisible to the own_patch branch that consumes it."""
+        record = self.good()
+        self.assertEqual(record["ticket_id"], record["work"])
+
+    def test_a_ticket_id_that_disagrees_with_the_work_is_reported(self):
+        record = self.good()
+        record["ticket_id"] = "T-999"
+        problems = release_provenance.verify_receipt(self.root, record)
+        self.assertTrue(any("cannot belong to two Works" in p for p in problems), problems)
+
+    def test_a_ship_shaped_receipt_with_only_a_ticket_id_still_verifies(self):
+        """The artifact `saipen ship` writes carries no `work`; that is legal."""
+        record = self.good()
+        record.pop("work")
+        self.assertEqual(record["ticket_id"], "T-9")
+        self.assertEqual(release_provenance.verify_receipt(self.root, record), [])
+
     def test_a_missing_receipt_is_an_error_not_a_pass(self):
         with self.assertRaises(ReceiptError):
             release_provenance.read_receipt(self.root)

@@ -137,6 +137,12 @@ def build_receipt(
         "release_stage": "COMMITTED",
         "mode": mode,
         "work": work,
+        # The closure resolver looks for release evidence that NAMES a Work by
+        # reading `ticket_id`; this writer emitted only `work`, so a genuine
+        # own_patch receipt was invisible to the very branch that consumes it.
+        # Both spellings, one value -- never one without the other, which is
+        # why `verify_receipt` refuses a pair that disagrees.
+        "ticket_id": work,
         # The spelling the resolver's own comment names. A bare `commit` is
         # never written here.
         "release_commit": full,
@@ -239,6 +245,13 @@ def verify_receipt(root: Path, record: dict | None = None) -> list[str]:
             problems.append(str(exc))
     if not record.get("op_id"):
         problems.append("receipt names no op_id, so nothing it claims can be tied to an operation")
+    # A `ticket_id` with no `work` is the ship-shaped artifact and is fine; a
+    # pair that DISAGREES is a receipt that points at two different Works.
+    if record.get("ticket_id") and record.get("work") and record["ticket_id"] != record["work"]:
+        problems.append(
+            f"receipt names ticket_id {record.get('ticket_id')!r} but work "
+            f"{record.get('work')!r}; one receipt cannot belong to two Works"
+        )
     return problems
 
 
