@@ -885,6 +885,28 @@ def warn(category, msg):
     warnings.setdefault(category, []).append(msg)
 
 
+def readable_name(name):
+    """The name a user would actually see, for a message that quotes it.
+
+    A filename the host could not decode comes back from `os.listdir()`
+    surrogate-escaped: under `LC_ALL=C` on Linux the C runtime decodes each
+    directory-entry byte with ASCII, so the UTF-8 bytes of a Cyrillic or
+    box-drawing name become U+DC80..U+DCFF. Printing that verbatim emits
+    invalid UTF-8, and every reader downstream -- a log, a findings artifact,
+    a human -- sees mojibake instead of the offending file. Round-tripping the
+    escaped bytes back through UTF-8 recovers the real name.
+
+    A name with no surrogates, or one that is genuinely not UTF-8, is returned
+    unchanged: this is a display aid and must never alter a verdict.
+    """
+    if not any(0xDC80 <= ord(ch) <= 0xDCFF for ch in str(name)):
+        return name
+    try:
+        return str(name).encode("utf-8", "surrogateescape").decode("utf-8")
+    except (UnicodeEncodeError, UnicodeDecodeError):
+        return name
+
+
 # T-1162: source-receipt validation is hermetic project state. It never reads
 # global USERPERSON or archived bodies during ordinary validation; only active
 # source authority, compact tombstones, contracts and coverage are structural
@@ -7966,7 +7988,8 @@ else:
         _hint = stray_hint(_tools_parent)
         fail(
             "cross-doc drift [root-file-set] -- file(s) at the repository "
-            f"root that the closed set does not name: {_stray}. Both orphans "
+            f"root that the closed set does not name: "
+            f"{[readable_name(n) for n in _stray]}. Both orphans "
             "removed alongside this check arrived that way, on a "
             "`git add -A` in a commit about something else, and neither was "
             "referenced by any document or tool -- so no other check here "

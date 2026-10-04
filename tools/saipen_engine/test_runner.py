@@ -155,6 +155,9 @@ def _read_failure_roster_from_path(path: Path, limit: int = 400) -> list[str]:
     headers long before the tail, and a truncated log leaves CI showing a count
     with no names. This walks the spooled file line by line and keeps only the
     de-duplicated ids, so the roster survives any truncation of the log.
+
+    ``unittest`` writes its ``FAIL:``/``ERROR:`` headers -- and the whole
+    failure report -- to STDERR, not stdout, so the caller scans both spools.
     """
     roster: list[str] = []
     seen: set[str] = set()
@@ -334,7 +337,17 @@ def _run_family(root: Path, family: TestFamily, *, spool: Path | None = None) ->
                     process.stderr.close()
             stdout_text = _read_tail_from_path(stdout_path)
             stderr_text = _read_tail_from_path(stderr_path)
-            roster = _read_failure_roster_from_path(stdout_path)
+            # unittest reports on stderr; a family whose command writes its own
+            # verdict to stdout still gets named. stderr first, so the order is
+            # the order a reader expects.
+            seen_names: set[str] = set()
+            roster = []
+            for spool in (stderr_path, stdout_path):
+                for name in _read_failure_roster_from_path(spool):
+                    if name in seen_names:
+                        continue
+                    seen_names.add(name)
+                    roster.append(name)
             return {
                 "name": family.name,
                 "status": (
