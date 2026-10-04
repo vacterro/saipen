@@ -982,7 +982,9 @@ def _board_lifecycle_repairs(
                 )
 
                 evidence_ok = bulk_verification_evidence(events, done_ids)
-                legacy_ok = bulk_legacy_completion_evidence(events, done_ids)
+                legacy_ok = bulk_legacy_completion_evidence(
+                    events, done_ids, generation_end=frontier
+                )
             except Exception:
                 evidence_ok = {}
                 legacy_ok = {}

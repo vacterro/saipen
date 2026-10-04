@@ -4259,11 +4259,25 @@ if log_files:
                 # from the failure text, so an error that only described the
                 # report produced a receipt whose remediation named unrelated
                 # tickets. The cycle is the report's grandparent directory.
-                _cycles = sorted(
-                    {r.parent.parent.name for r in _reports if r.parent.parent.name}
-                )
+                #
+                # T-152: the route set was drawn from EVERY scanned report and
+                # then cut with `[:4]`, so on a project with five cycles the
+                # only FAILING cycle -- the newest, and the one an operator can
+                # act on -- was named by no route at all, while the four named
+                # cycles were sealed history. That is the T-1333 defect
+                # reintroduced one level up. The set is now the cycles that
+                # PRODUCED an error, in scan order, uncapped: every route here
+                # is a closed-table shape that `_bounded_remediation_commands`
+                # already caps and resolves, so an extra failing cycle costs a
+                # bounded receipt entry, never an unbounded message.
+                _failing_cycles: list[str] = []
+                for _msg in _report_errors:
+                    _head = str(_msg).split(":", 1)[0]
+                    _cycle = Path(_head).parent.parent.name
+                    if _cycle and _cycle not in _failing_cycles:
+                        _failing_cycles.append(_cycle)
                 _routes = ", ".join(
-                    f"saipen improve reconcile {c}" for c in _cycles[:4]
+                    f"saipen improve reconcile {c}" for c in _failing_cycles
                 )
                 fail(
                     "improve report [improve-report] -- "
@@ -4305,6 +4319,15 @@ if log_files:
             for _lf in log_files:
                 _known_tickets.update(re.findall(r"\bT-\d+\b", read_doc(_lf)))
             _sweep_errors = []
+            # T-154: the executable repair used to be embedded INSIDE one
+            # `_sweep_errors` element, and the emitted message then cut the
+            # list with `[:6]` -- so a repair on the seventh error or later
+            # never reached the failure text, `remediation.extract_commands`
+            # recovered nothing, and a registered route degraded the receipt
+            # to ENGINEERING_REQUIRED / action: None. Repairs now travel their
+            # own channel, appended after the (still bounded) prose, so no cap
+            # on diagnostic text can ever reach them.
+            _sweep_repairs: list[str] = []
             _sweep_records = []
             for _sweep in sorted(_imp_root.rglob("SWEEP.md")):
                 _st = _sweep.read_text(encoding="utf-8-sig")
@@ -4419,6 +4442,9 @@ if log_files:
                                     "answer>`, which refuses unless this exact "
                                     "strict-sweep linkage resolves"
                                 )
+                                _sweep_repairs.append(
+                                    f"saipen ticket reasoning {_ticket}"
+                                )
                             if _cls == "ACCIDENTAL_SUCCESS" and _repro == "y":
                                 _sweep_errors.append(
                                     f"{_sweep}:{_line_no} ACCIDENTAL_SUCCESS "
@@ -4517,7 +4543,15 @@ if log_files:
                         "composite <cycle>/<seat>/<report>#RUN-N/IMP-NNN)"
                     )
             if _sweep_errors:
-                fail("core sweep [sweep-ticket-link] -- " + "; ".join(_sweep_errors[:6]))
+                fail(
+                    "core sweep [sweep-ticket-link] -- "
+                    + "; ".join(_sweep_errors[:6])
+                    + (
+                        "; executable repairs: " + ", ".join(_sweep_repairs[:10])
+                        if _sweep_repairs
+                        else ""
+                    )
+                )
             else:
                 ok(
                     "core sweep linkage valid: every disposition resolves to "

@@ -1269,6 +1269,35 @@ def _reverify_intact(record: dict) -> bool:
     return hash_bytes(canonical) == record.get("integrity_digest")
 
 
+def _reverify_minted_work(record: dict):
+    """The Work this receipt was MINTED for, from an undigested field, or None.
+
+    T-155: once the Work filter runs before the integrity guard (T-151), an
+    edited `work` field hides the receipt from the lookup that should have been
+    refused, and an older PASS for the same Work comes back as closure
+    evidence. The `work` field can no longer be asked who it belongs to once it
+    is the thing that was edited.
+
+    `journal_op_id` can. It is written by the journal AFTER the digest is taken
+    precisely so it can sit outside it, and it is a hash over the Work -- so a
+    receipt whose `work` no longer reproduces its own op id is a receipt whose
+    Work identity was tampered with, and no Work can be honestly attributed.
+    A receipt that still reproduces its op id was minted for the Work it names,
+    whatever else was done to its bytes.
+    """
+    try:
+        expected = "reverify." + hash_bytes(
+            (
+                f"{record['project_lineage']}|{record['work']}|"
+                f"{record['findings_digest']}|{record['verification_contract_digest']}|"
+                f"{record['receipt_id']}"
+            ).encode("utf-8")
+        )[:12]
+    except (KeyError, TypeError):
+        return None
+    return record["work"] if record.get("journal_op_id") == expected else None
+
+
 def _last_ticket_event_id(root, work):
     """Highest `[E-###]` in the ACTIVE LOG bearing this exact ticket slot.
 
@@ -1369,6 +1398,17 @@ def _run_verification_command(root, command, timeout):
     entry["duration_ms"] = int(
         (datetime.now(timezone.utc) - started).total_seconds() * 1000
     )
+    # T-149: `--run` takes an operator-supplied command string and executes it
+    # with cwd set to the PROJECT ROOT, which nothing stated anywhere. A
+    # module-form command (`python -m unittest some.test`) resolves against
+    # that root rather than the directory the tests live in, dies before
+    # touching the code under test, and is recorded as an honest FAIL -- which
+    # reads exactly like the capability being broken. Measured: eighteen
+    # consecutive receipts minted FAIL for commands that pass from `tools/`.
+    # Recording the directory turns an undiagnosable failure into a legible
+    # one, without guessing from stderr whether a non-zero exit was a launch
+    # problem or a real regression.
+    entry["cwd"] = str(root)
     entry["output_digest"] = hash_bytes(output.encode("utf-8", "replace"))
     entry["output_bytes"] = len(output)
     return entry
@@ -1759,6 +1799,22 @@ def latest_pass_reverify(root, work):
     simply returns None (the caller treats the Work as unverified). A newest
     receipt whose bytes fail its digest returns None the same way (T-1517):
     an edited verdict is no verdict, and it never lets an older PASS through.
+
+T-151: "the newest receipt" means the newest receipt FOR THIS WORK. The
+    integrity guard used to precede the work filter, so one edited file in one
+    Work's directory returned None out of the whole scan and every other Work
+    read as unverified -- a project-wide false red whose named remedy is a
+    strict gate re-run per ticket for receipts they already held. The retry
+    path in `_reverify_body` already had the correct order (skip the untrusted
+    record, keep scanning); the read path now matches it.
+
+    T-155: the reorder alone traded one hole for another. Filtering on the
+    edited `work` field means a receipt whose Work was rewritten simply stops
+    existing for the Work it used to be evidence against, and the scan falls
+    through to an older PASS for it. The corrupt receipt is now attributed
+    through `journal_op_id`, which the journal wrote after the digest and which
+    hashes the Work: attributed to another Work, it is skipped; attributed to
+    THIS Work, or unattributable at all, it still returns None.
     """
     root = Path(root)
     for path in reversed(_existing_reverify_receipts(root)):
@@ -1767,7 +1823,10 @@ def latest_pass_reverify(root, work):
         except (OSError, ValueError):
             continue
         if not _reverify_intact(record):
-            return None
+            minted = _reverify_minted_work(record)
+            if minted is None or minted == work:
+                return None
+            continue
         if record.get("work") != work:
             continue
         if not history_bound_here(

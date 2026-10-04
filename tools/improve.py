@@ -862,7 +862,8 @@ def _resolve_report_owner(cycle_dir: Path, report_identity: str) -> tuple[str, s
 
 
 def _require_finding(
-    cycle_dir: Path, seat_dir: str, report_ident: str, run: int | None, imp: str, strict: bool
+    cycle_dir: Path, seat_dir: str, report_ident: str, run: int | None, imp: str, strict: bool,
+    disposition: str = "CONFIRMED",
 ) -> None:
     """A Core sweep mutation must name a finding that ACTUALLY exists in the
     named run of the named report (DOGFOOD V, T-615). A nonexistent
@@ -882,8 +883,15 @@ def _require_finding(
     # malformed-but-parseable report with a real IMP must never authorize a
     # disposition (ZERO sweep writes on malformed evidence).
     if strict:
+        # T-148: only a CONFIRMED disposition claims CURRENT authority, so only
+        # it is bound against the installed generation. A non-CONFIRMED disposal
+        # is a statement about HISTORICAL evidence and is proved against the
+        # report's OWN stored identity; requiring it to match today's install
+        # made the mandated stale-seat disposal (IMPROVE.md sec7 step 2)
+        # unreachable. Structural, roster and role checks still apply.
         _report_errors = validate_bound_report(
-            cycle_dir, seat_dir, text, require_runs=True, require_fresh=False, cycle_active=True
+            cycle_dir, seat_dir, text, require_runs=True, require_fresh=False,
+            cycle_active=(disposition == "CONFIRMED"),
         )
         if _report_errors:
             raise ImproveError(
@@ -1011,7 +1019,7 @@ def write_sweep_entry(cycle_dir: Path, entry: dict) -> dict:
     ledger = cycle_dir / "SWEEP.md"
     _prove_inside(_project_root_of(ledger), ledger)
     _require_cycle_active(cycle_dir, "write_sweep_entry")
-    _require_finding(cycle_dir, seat_dir, report_path, run, imp_id, strict)
+    _require_finding(cycle_dir, seat_dir, report_path, run, imp_id, strict, disposition)
 
     reproduced = str(entry.get("reproduced", "-"))
     if reproduced not in {"y", "n"}:

@@ -211,7 +211,17 @@ REMEDIATIONS = (
     ),
     _cmd(
         "producer lifecycle:terminal",
-        r"saipen sub reconcile [A-Za-z0-9_-]+ --authority SRC-\d+",
+        # T-153: the validator cannot know WHICH receipt a reconciliation is
+        # authorised by -- `sub reconcile` demands a receipt this project owns
+        # that names the decision -- so the message it emits necessarily
+        # carries the fill-in, not an id. The pattern therefore admits both
+        # the concrete and the placeholder shape of the SAME rule, and the
+        # rule's template (`<SRC-###>`) is what an operator is shown, so a
+        # routed placeholder reads as the fill-in it is instead of as a
+        # command that exists. Before this, extraction returned [] and a
+        # registered producer-owned repair degraded to ENGINEERING_REQUIRED
+        # on the only message that ever emits it.
+        r"saipen sub reconcile [A-Za-z0-9_-]+ --authority SRC-(?:\d+|#+)",
         "saipen sub reconcile <role> --authority <SRC-###>",
         "sub",
         "reconcile",
