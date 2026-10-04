@@ -219,7 +219,7 @@ class HeldSandboxTests(unittest.TestCase):
 class RunFamilyLeavesNothingTests(unittest.TestCase):
     """A real (small) run through `run_family`, whole and sharded."""
 
-    def run_small(self, jobs: int) -> tuple[dict, list[str]]:
+    def run_small(self, jobs: int) -> tuple[dict, list[Path], list[str]]:
         created: list[Path] = []
         new_sandbox_root = core_unit.new_sandbox_root
 
@@ -241,22 +241,30 @@ class RunFamilyLeavesNothingTests(unittest.TestCase):
                 mock.patch.object(core_unit, "new_sandbox_root", side_effect=track_sandbox)
             )
             run = core_unit.run_family(TOOLS.parent, jobs=jobs)
-        self.assertEqual(len(created), jobs, "every run/shard must have a tracked sandbox")
         # Other core-unit runs share the temp root. Inspect only this invocation's
         # creations, independently of its self-reported sandboxes_leaked result.
-        return run, sorted(sandbox.name for sandbox in created if sandbox.exists())
+        return run, created, sorted(sandbox.name for sandbox in created if sandbox.exists())
 
-    def assert_run_leaves_no_sandbox(self, jobs: int) -> None:
-        run, left = self.run_small(jobs)
+    def assert_run_leaves_no_sandbox(self, jobs: int, *, shards: int | None = None) -> None:
+        run, created, left = self.run_small(jobs)
         self.assertEqual(run["status"], "PASS", run)
         self.assertEqual(left, [])
         self.assertEqual(run["sandboxes_leaked"], [])
+        if shards is not None:
+            # One tracked sandbox per shard that actually runs. The fixture
+            # family discovers ONE module, so a sharded run has one shard to
+            # run: `plan_shards` drops a shard that drew no module (an empty
+            # shard exits 5, "no tests ran") and a sandbox with no shard to run
+            # is a copy of the tree paid for nothing. Counted here rather than
+            # inside `run_small`, because the two controls below replace
+            # `run_family` with a stub that makes its own sandboxes.
+            self.assertEqual(len(created), shards, "every run/shard must have a tracked sandbox")
 
     def test_a_whole_run_leaves_no_sandbox(self):
-        self.assert_run_leaves_no_sandbox(1)
+        self.assert_run_leaves_no_sandbox(1, shards=1)
 
     def test_a_sharded_run_leaves_no_sandbox(self):
-        self.assert_run_leaves_no_sandbox(2)
+        self.assert_run_leaves_no_sandbox(2, shards=1)
 
     def test_unrelated_sandboxes_before_and_during_a_run_are_not_its_leaks(self):
         new_foreign_sandbox = core_unit.new_sandbox_root
