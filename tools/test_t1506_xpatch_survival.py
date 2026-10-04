@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import os
+import shutil
 import subprocess
 import tempfile
 import unittest
@@ -31,6 +32,9 @@ class XPatchCommitSurvivalTests(unittest.TestCase):
         self.git("init", "-q")
         self.git("add", "src/session.py", "src/other.py")
         self.commit("baseline", "2026-09-01T10:30:00Z")
+        # The untouched fixture, for a test that needs to run the same scenario
+        # twice from the same starting state.
+        self.pristine = self.root
 
     def git(self, *args: str, date: str | None = None) -> subprocess.CompletedProcess:
         env = os.environ.copy()
@@ -131,6 +135,31 @@ class XPatchCommitSurvivalTests(unittest.TestCase):
         self.commit("carry CRLF applied bytes", T2)
         self.assertEqual(self.git("status", "--porcelain", "src/session.py").stdout, "")
         self.assertEqual(xpatch.commit_survival(self.root)["uncommitted"], [])
+
+    def test_the_crlf_verdict_does_not_depend_on_the_host_eol_config(self) -> None:
+        # `core.eol` defaults to `native`, so `git cat-file --filters`
+        # smudges the stored LF back to CRLF on a Windows host and to LF on a
+        # Linux one. Matching the applied CRLF bytes against that smudge
+        # therefore passed or failed purely by platform, and CI reported a
+        # correctly committed CRLF path forever while the developer's machine
+        # was green. Pin BOTH host configurations so the verdict belongs to
+        # the repository, not to the machine running it.
+        for eol in ("crlf", "lf"):
+            with self.subTest(core_eol=eol):
+                base = Path(tempfile.mkdtemp(prefix=f"saipen-eol-{eol}-"))
+                self.addCleanup(shutil.rmtree, base, ignore_errors=True)
+                root = base / "project"
+                shutil.copytree(self.pristine, root)
+                self.root = root
+                self.git("config", "core.eol", eol)
+                self.git("config", "core.autocrlf", "false")
+                (root / ".gitattributes").write_bytes(b"* text=auto\n")
+                self.git("add", ".gitattributes")
+                self.commit("declare text=auto again", "2026-09-01T11:00:00Z")
+                self.apply({"src/session.py": b"line-a\r\nline-b\r\n"})
+                self.git("add", "src/session.py")
+                self.commit("carry CRLF applied bytes", "2026-09-01T11:01:00Z")
+                self.assertEqual(xpatch.commit_survival(root)["uncommitted"], [])
 
     def test_uncommitted_crlf_and_lf_bytes_are_still_reported(self) -> None:
         (self.root / ".gitattributes").write_bytes(b"* text=auto\n")

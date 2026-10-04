@@ -618,6 +618,26 @@ def commit_survival(root: Path | str) -> dict:
                 )
                 continue
             committed = False
+            # after_sha256 is the hash of WORKING-TREE bytes, and the stored
+            # blob is their eol-normalized form, so the two never match
+            # directly. Which direction `cat-file --filters` walks is a
+            # property of the HOST -- core.eol defaults to `native`, so a
+            # Windows runner smudges the blob back to CRLF and matches, while
+            # a Linux runner smudges it to LF and never does, and a correctly
+            # committed CRLF path was reported forever on one host only. Ask
+            # Git instead for the blob these bytes CLEAN to: that is the
+            # repository's own configuration, identical on every machine.
+            clean_oid = None
+            working = root / rel
+            try:
+                resolved = working.resolve()
+                resolved.relative_to(root)
+            except (OSError, ValueError):
+                resolved = None
+            if resolved is not None and resolved.is_file():
+                hashed = git("hash-object", f"--path={rel}", "--", str(resolved))
+                if hashed.returncode == 0:
+                    clean_oid = hashed.stdout.decode("ascii", "replace").strip() or None
             for line in history.stdout.splitlines():
                 if not line.startswith(b":"):
                     continue
@@ -632,6 +652,9 @@ def commit_survival(root: Path | str) -> dict:
                     continue
                 if set(oid) == {"0"}:
                     continue
+                if clean_oid is not None and oid == clean_oid:
+                    committed = True
+                    break
                 # after_sha256 is the hash of the WORKING-TREE bytes the patch
                 # applied. The committed blob may be the CLEANED (eol-normalized)
                 # form -- `* text=auto` or core.autocrlf stores LF while the

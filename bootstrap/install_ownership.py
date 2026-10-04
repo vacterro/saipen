@@ -118,10 +118,19 @@ def record(stage: Path, destination: Path) -> None:
 
 
 def stamp(destination: Path) -> None:
+    """Record the provenance marker's digest in the ownership ledger.
+
+    A destination with no ledger owns nothing, so there is nothing to stamp:
+    that is the legacy or partial-install shape, and `remove` already treats it
+    as `legacy` rather than as damage. Failing the whole install over that
+    bookkeeping detail turned a re-run into a hard error, and the installer's
+    only correct recovery would have been to install again -- so this is a
+    no-op, not a raise.
+    """
     destination = safe_root(destination)
     data = load(destination)
     if data is None:
-        raise ValueError("installation ownership ledger missing")
+        return
     marker = safe_path(destination, PROVENANCE)
     if marker.is_file():
         data["files"][PROVENANCE] = digest(marker)
