@@ -1,6 +1,16 @@
 # Changelog
 > Older entries live in [CHANGELOG_ARCHIVE.md](CHANGELOG_ARCHIVE.md) -- this file keeps the most recent ~10.
 
+## 8.1.0 -- 2026-10-04 -- Public installation and removal
+
+- Make the documented install, set, cold continue, validate, uninstall, and reinstall lifecycle executable through the installed launchers on Windows, macOS, Linux, and Git Bash.
+- Preserve instruction-file bytes, user settings and hooks, project memory, added files, and edited installed files during removal. Record per-file ownership instead of recursively deleting skill directories.
+- Fix Git Bash removal of native hooks when Windows Python emits CRLF; preserve edited OpenCode guard artifacts.
+- Integrate completed continuation, recovery, module-identity, evidence-cleanup, closure, and remediation fixes from the development branches. Leave unfinished source normalization and failed operator-WAIT work in their existing branches.
+- Preserve exact project-memory bytes across checkouts. Validate exported closed quarantine records without requiring private bodies that are deliberately excluded; authority reads and recovery still require the originals.
+- Refresh Quick Start with Python prerequisites, exact platform commands, installed terminal launchers, cold-start behavior, removal guarantees, and reinstall steps.
+- Require successful validation of the exact tagged commit before GitHub creates a release. All runtime operations remain local and use Python's standard library.
+
 ## 8.0.2 -- 2026-10-02 -- A tree that actually runs (T-1582, T-1593)
 
 The committed tree at the previous tag could not execute: 33 modules failed to import, so every command that touched them was dead on arrival. This release ships the accumulated `tools/` delta as four commits and restores the run.

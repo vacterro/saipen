@@ -1647,5 +1647,195 @@ class GenericCredentialAssignmentBoundaryTests(unittest.TestCase):
                 self.assertNotIn(credential, redacted)
 
 
+class ReceiptRangeNormalizationTests(SourceReceiptTests):
+    """T-1301 (AUDAPACK T-52): the structured source_receipts field accepts
+    explicit ids only; the strict range form migrates through one journaled
+    BOARD rewrite; malformed ranges fail closed."""
+
+    def test_strict_range_expansion(self) -> None:
+        expanded = intake._expand_receipt_range("SRC-009..SRC-029")
+        self.assertEqual(len(expanded), 21)
+        self.assertEqual(expanded[0], "SRC-009")
+        self.assertEqual(expanded[-1], "SRC-029")
+        self.assertEqual(expanded[5], "SRC-014")
+
+    def test_mutating_normalization_is_registered_as_recovery(self) -> None:
+        from saipen_engine.command_effects import classify_invocation
+
+        self.assertEqual(classify_invocation("source", ["normalize"]), "RECOVERY")
+
+    def test_malformed_ranges_refuse(self) -> None:
+        for token in (
+            "SRC-029..SRC-009",
+            "SRC-009...",
+            "SRC-A..SRC-B",
+            "SRC-009..T-029",
+            "SRC-09..SRC-029",
+            "SRC-001..SRC-2000",
+            "src-009..SRC-029",
+            "SRC-009 ..SRC-029",
+        ):
+            self.assertIsNone(intake._expand_receipt_range(token), token)
+
+    def _board_with_range(self, field_value: str) -> None:
+        board = self.root / ".saipen/BOARD.md"
+        text = board.read_text(encoding="utf-8")
+        text = text.replace(
+            "## TODO\n",
+            "## TODO\n- [ ] T-099 [P2] ranged receipt ticket | verify: explicit ids | "
+            f"source_receipts: {field_value}\n",
+        )
+        board.write_text(text, encoding="utf-8")
+
+    def test_normalize_expands_and_is_idempotent(self) -> None:
+        self._board_with_range("SRC-009..SRC-029")
+        board_path = self.root / ".saipen/BOARD.md"
+        log_path = self.root / ".saipen/LOG.md"
+        log_before = log_path.read_bytes()
+        plan = intake.normalize_receipt_ranges(self.root, dry_run=True)
+        self.assertTrue(plan["ok"], plan)
+        self.assertEqual(plan["code"], "RECEIPT_RANGE_PLAN")
+        self.assertEqual(len(plan["expanded"]["T-099"]), 21)
+        self.assertEqual(board_path.read_bytes(), self._tree_hashes_board(board_path))
+        result = intake.normalize_receipt_ranges(self.root)
+        self.assertTrue(result["ok"], result)
+        self.assertEqual(result["code"], "RECEIPT_RANGES_NORMALIZED")
+        text = board_path.read_text(encoding="utf-8")
+        self.assertIn(
+            "source_receipts: "
+            + ", ".join(f"SRC-{n:03d}" for n in range(9, 30)),
+            text,
+        )
+        self.assertNotIn("..", text)
+        self.assertEqual(log_path.read_bytes(), log_before)
+        again = intake.normalize_receipt_ranges(self.root)
+        self.assertTrue(again["ok"], again)
+        self.assertEqual(again["code"], "ALREADY_NORMALIZED")
+
+    def test_normalize_refuses_malformed_range(self) -> None:
+        self._board_with_range("SRC-029..SRC-009")
+        board_path = self.root / ".saipen/BOARD.md"
+        before = board_path.read_bytes()
+        result = intake.normalize_receipt_ranges(self.root)
+        self.assertFalse(result["ok"], result)
+        self.assertIn("SRC-029..SRC-009", result["detail"])
+        self.assertEqual(board_path.read_bytes(), before)
+
+    def _all_bytes(self) -> dict[str, bytes]:
+        return {
+            path.relative_to(self.root).as_posix(): path.read_bytes()
+            for path in self.root.rglob("*") if path.is_file()
+        }
+
+    def test_dry_run_leaves_every_file_and_namespace_unchanged(self) -> None:
+        self._board_with_range("SRC-009..SRC-029")
+        before = self._all_bytes()
+        result = intake.normalize_receipt_ranges(self.root, dry_run=True)
+        self.assertEqual(result["code"], "RECEIPT_RANGE_PLAN", result)
+        self.assertEqual(self._all_bytes(), before)
+
+    def test_rewrite_only_the_structured_field_not_identical_prose(self) -> None:
+        self._board_with_range("SRC-009..SRC-011")
+        board = self.root / ".saipen/BOARD.md"
+        text = board.read_text(encoding="utf-8").replace(
+            "ranged receipt ticket", "Example source_receipts: SRC-009..SRC-011",
+        )
+        board.write_text(text, encoding="utf-8")
+        result = intake.normalize_receipt_ranges(self.root)
+        self.assertTrue(result["ok"], result)
+        expected = text.replace(
+            "| source_receipts: SRC-009..SRC-011",
+            "| source_receipts: SRC-009, SRC-010, SRC-011",
+        )
+        self.assertEqual(board.read_text(encoding="utf-8"), expected)
+
+    def test_mixed_ranges_and_explicit_ids_preserve_order(self) -> None:
+        self._board_with_range("SRC-005, SRC-009..SRC-011, SRC-020..SRC-021")
+        result = intake.normalize_receipt_ranges(self.root)
+        self.assertTrue(result["ok"], result)
+        self.assertEqual(result["expanded"]["T-099"],
+                         ["SRC-009", "SRC-010", "SRC-011", "SRC-020", "SRC-021"])
+        self.assertIn("source_receipts: SRC-005, SRC-009, SRC-010, SRC-011, SRC-020, SRC-021",
+                      (self.root / ".saipen/BOARD.md").read_text(encoding="utf-8"))
+
+    def test_one_malformed_range_refuses_the_whole_plan(self) -> None:
+        self._board_with_range("SRC-009..SRC-011")
+        board = self.root / ".saipen/BOARD.md"
+        board.write_text(board.read_text(encoding="utf-8").replace(
+            "## TODO\n", "## TODO\n- [ ] T-098 bad | source_receipts: SRC-029..SRC-009\n",
+        ), encoding="utf-8")
+        before = self._all_bytes()
+        for dry_run in (True, False):
+            result = intake.normalize_receipt_ranges(self.root, dry_run=dry_run)
+            self.assertFalse(result["ok"], result)
+            self.assertEqual(self._all_bytes(), before)
+
+    def test_expansion_has_a_hard_bound_and_ascii_receipt_identity(self) -> None:
+        self.assertEqual(len(intake._expand_receipt_range("SRC-001..SRC-512")), 512)
+        for token in ("SRC-001..SRC-513", "SRC-００１..SRC-００２", "SRC-١..SRC-٢"):  # noqa: RUF001
+            self.assertIsNone(intake._expand_receipt_range(token), token)
+
+    def test_rewrite_preserves_crlf_and_log_bytes(self) -> None:
+        self._board_with_range("SRC-009..SRC-011")
+        board = self.root / ".saipen/BOARD.md"
+        text = board.read_text(encoding="utf-8")
+        board.write_bytes(text.replace("\n", "\r\n").encode("utf-8"))
+        log = (self.root / ".saipen/LOG.md").read_bytes()
+        result = intake.normalize_receipt_ranges(self.root)
+        self.assertTrue(result["ok"], result)
+        expected = text.replace("| source_receipts: SRC-009..SRC-011",
+                                "| source_receipts: SRC-009, SRC-010, SRC-011")
+        self.assertEqual(
+            board.read_bytes(), expected.replace("\n", "\r\n").encode("utf-8"),
+        )
+        self.assertEqual((self.root / ".saipen/LOG.md").read_bytes(), log)
+
+    def test_noncanonical_bom_refuses_without_writes(self) -> None:
+        self._board_with_range("SRC-009..SRC-011")
+        board = self.root / ".saipen/BOARD.md"
+        board.write_bytes(b"\xef\xbb\xbf" + board.read_bytes())
+        before = self._all_bytes()
+        result = intake.normalize_receipt_ranges(self.root)
+        self.assertFalse(result["ok"], result)
+        self.assertEqual(self._all_bytes(), before)
+
+    def test_board_byte_precondition_refuses_concurrent_foreign_edit(self) -> None:
+        # Load consumers before patching so their module-level imports never
+        # retain the temporary mock beyond this test's context.
+        from saipen_engine import journal, plan
+
+        self.assertIs(plan.run_mutation, journal.run_mutation)
+
+        self._board_with_range("SRC-009..SRC-011")
+        board = self.root / ".saipen/BOARD.md"
+        original = journal.run_mutation
+        foreign = board.read_bytes().replace(b"ranged receipt ticket", b"foreign concurrent edit")
+
+        def race(*args, **kwargs):
+            board.write_bytes(foreign)
+            return original(*args, **kwargs)
+
+        with patch.object(journal, "run_mutation", side_effect=race):
+            result = intake.normalize_receipt_ranges(self.root)
+        self.assertFalse(result["ok"], result)
+        self.assertEqual(board.read_bytes(), foreign)
+
+    def test_canonical_cli_dry_run_and_surplus_arguments(self) -> None:
+        self._board_with_range("SRC-009..SRC-011")
+        before = self._all_bytes()
+        for tail, code in (([], "RECEIPT_RANGE_PLAN"), (["unexpected"], "VALIDATION_FAILED")):
+            result = subprocess.run(
+                [sys.executable, str(CLI), "source", "normalize", *tail,
+                 "--project-root", str(self.root), "--dry-run", "--json"],
+                cwd=self.root, capture_output=True, text=True, encoding="utf-8", timeout=60,
+            )
+            self.assertEqual(json.loads(result.stdout)["code"], code, result.stdout + result.stderr)
+            self.assertEqual(self._all_bytes(), before)
+
+    @staticmethod
+    def _tree_hashes_board(path) -> bytes:
+        return path.read_bytes()
+
+
 if __name__ == "__main__":
     unittest.main()

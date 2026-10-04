@@ -1,2 +1,0 @@
-﻿FAIL: tools/validate.py rejects an UNMODIFIED copy (exit 1) -- every number below would be measuring that instead of the floor's coverage. What it said:
-    FAIL: KNOWLEDGE/ structured card/index: INDEX.md is stale; run `saipen knowledge index`

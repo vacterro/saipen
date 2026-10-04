@@ -1,1 +1,0 @@
-["stdlib-only canonical", "validator", "reads the live", "STATE schema", "and checks phase", "transitions, ticket dependencies, event-graph links, cross-document", "invariants, capabilities, and recovery state.", "Failure coverage.", "CONFORMANCE.md", "maps", "requirements to", "scenario fixtures"]

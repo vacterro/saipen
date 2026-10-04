@@ -1,6 +1,15 @@
 {
-  "next_id": 23,
+  "next_id": 25,
   "operations": {
+    "audapack 1eef4bbc-5113-4fdd-8ad2-08930acd0e73": {
+      "created_at": "2026-10-03T22:36:36Z",
+      "layer": 23,
+      "producer": "audapack",
+      "producer_item_id": "1eef4bbc-5113-4fdd-8ad2-08930acd0e73",
+      "producer_operation_id": "1eef4bbc-5113-4fdd-8ad2-08930acd0e73",
+      "sha256": "e65de1f0c46a5857799fecdccfdd4f18961961805462d7b9cc053489c8e5f01c",
+      "state": "COMMITTED"
+    },
     "audapack 304d56f8-6a09-4c5d-821b-360277b5971a": {
       "created_at": "2026-09-24T23:16:13Z",
       "layer": 21,
@@ -35,6 +44,15 @@
       "producer_item_id": "5ab3fedb-dad9-483b-a71c-34ca5fb4c45a",
       "producer_operation_id": "5ab3fedb-dad9-483b-a71c-34ca5fb4c45a",
       "sha256": "cc23e599db5a531fbace40a24319125b481b8b3d013c4e4f3befa6705758975d",
+      "state": "COMMITTED"
+    },
+    "audapack c3fbbc42-e2ef-4298-8311-d2cb4dbe253f": {
+      "created_at": "2026-10-04T03:23:26Z",
+      "layer": 24,
+      "producer": "audapack",
+      "producer_item_id": "c3fbbc42-e2ef-4298-8311-d2cb4dbe253f",
+      "producer_operation_id": "c3fbbc42-e2ef-4298-8311-d2cb4dbe253f",
+      "sha256": "02465cc1bfbd3422c152a5bb1b911364a365aa1bae26cea5a08f9d8d880f3ebf",
       "state": "COMMITTED"
     },
     "audapack c76dcebd-6642-5ecb-9981-3f479d7e6cd0": {

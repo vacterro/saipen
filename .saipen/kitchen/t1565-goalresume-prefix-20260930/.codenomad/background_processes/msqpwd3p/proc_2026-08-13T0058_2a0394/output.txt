@@ -1,9 +1,0 @@
-PASS: a real root `nul` entry is excluded from audit snapshots
-PASS: release-ledger clean/new-tag/new-changelog/stale-baseline controls behave distinctly
-PASS: aged unowned WARN slug fails; identical aged slug with a live naming ticket passes; baseline data, never validator wording
-PASS: consistent SCOUT->SCOUTX rename stays green across the DFA, RFC table, schema enum and phase doc -- edge gates catch drift, not deliberate renames
-PASS: audit-tags missing-Git skip plus enumeration, nonzero, malformed, truncated, and surplus fail-closed controls behave
-PASS: callable no-op mutations are rejected before validation
-PASS: every producer-OUTBOX control runs at a gate where its finding is hard
-PASS: release-ledger tag query is observed once; duplicate-query and invalid-validator controls both go red
-PASS: 270 of 270 validator check(s) still go red on their own condition

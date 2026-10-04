@@ -369,6 +369,11 @@ copy_skill() { # $1=dst
     echo "copy FAILED ($1) -- staged copy or verification failed"
     return 1
   fi
+  if ! "$PYTHON_BIN" -B "$ROOT/bootstrap/install_ownership.py" record "$dst" --stage "$stage"; then
+    rm -rf "$stage" 2>/dev/null || true
+    echo "copy FAILED ($1) -- installation ownership record"
+    return 1
+  fi
   if [ -e "$dst" ] || [ -L "$dst" ]; then
     mv "$dst" "$backup" \
       || { rm -rf "$stage" 2>/dev/null || true; echo "copy FAILED ($1) -- preserve active install"; return 1; }
@@ -568,6 +573,10 @@ if problems:
     sys.exit("provenance FAILED: invalid: " + ",".join(problems))
 print("verified")
 PY
+  local proof_status=$?
+  [ "$proof_status" -eq 0 ] || return "$proof_status"
+  "$PYTHON_BIN" -B "$ROOT/bootstrap/install_ownership.py" stamp "$dst" \
+    || { echo "provenance FAILED: ownership stamp"; return 1; }
 }
 
 echo "saipen injector (source: $SKILL_HOME)"

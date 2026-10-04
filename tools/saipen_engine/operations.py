@@ -4022,6 +4022,140 @@ def finish_ticket(
 _COHORT_ID_RE = re.compile(r"C-\d+")
 
 
+def _plan_bind_closed_cohort(root, ticket_id, agent, cohort_id, paths, now, utc):
+    """Bind proved unpublished own_patch DONE without replaying its lifecycle."""
+    from . import closure
+    from .journal import hash_file_dependency, hash_tree_dependency, semantic_receipt_snapshot
+    from .log import verification_evidence
+    from .safeid import prove_inside
+
+    if not re.fullmatch(r"T-\d+", ticket_id or ""):
+        return _refuse("INVALID_ID", f"ticket {ticket_id!r}")
+    problem = closure_request_error("cohort", cohort_id, None, paths)
+    if problem:
+        return _refuse("VALIDATION_FAILED", problem, ticket=ticket_id)
+    checked_paths = []
+    for raw in paths:
+        rel = str(raw).replace("\\", "/")
+        if any(ord(ch) < 32 or ord(ch) == 127 for ch in rel):
+            return _refuse("VALIDATION_FAILED", "cohort path contains control characters")
+        rel = rel.strip()
+        parts = rel.split("/")
+        if (":" in rel or rel.startswith("/") or any(part in ("", ".", "..") for part in parts)
+                or parts[0].lower() in (".git", ".saipen")):
+            return _refuse("VALIDATION_FAILED", f"cohort path {rel!r} is not a source path")
+        try:
+            resolved = prove_inside(root / rel, root, kind="cohort source")
+            if resolved.relative_to(root.resolve()).parts[0].lower() in (".git", ".saipen"):
+                raise ValueError("cohort source resolves into protocol or Git metadata")
+        except (OSError, ValueError) as exc:
+            return _refuse("VALIDATION_FAILED", str(exc), ticket=ticket_id)
+        checked_paths.append(rel)
+    paths = sorted(set(checked_paths))
+    read_once = _read(root)
+    docs, _state, board, _tail = read_once
+    ticket = board["tickets"].get(ticket_id)
+    if ticket is None:
+        return _refuse("TICKET_NOT_FOUND", f"{ticket_id} not on the board", ticket=ticket_id)
+    fields = ticket.get("fields") or {}
+    if ticket["section"] != "## DONE" or ticket["checkbox"] != "x":
+        return _refuse("ILLEGAL_TICKET_LIFECYCLE", "cohort binding requires DONE [x] Work")
+    if fields.get("owner") != agent or not fields.get("claim_time"):
+        return _refuse("VALIDATION_FAILED", "cohort binding requires the original canonical owner")
+    if fields.get("closure_mode") not in ("own_patch", "cohort"):
+        return _refuse("VALIDATION_FAILED", "only proved own_patch DONE may acquire a cohort")
+    authority = semantic_receipt_snapshot(root)
+    if authority.errors:
+        return _refuse("CORRUPT_JOURNAL", "; ".join(authority.errors[:3]))
+    finishes = {record["op_id"] for record in authority.records
+                if record.get("operation") == "finish" and record.get("status") == "COMMITTED"}
+    proof = next((event for event in reversed(docs["_history"].events)
+                  if event.get("ticket") == ticket_id and event.get("op_id") in finishes), None)
+    proven, reason = verification_evidence(ticket_id, docs["_history"].events)
+    if proof is None or not proven:
+        return _refuse("INCOMPLETE_TICKET", f"canonical finish and verification required: {reason}")
+    from .intake import work_closure_gate
+
+    evidence_preconditions = {
+        ".saipen/recovery": authority.digest,
+        ".saipen/intake": hash_tree_dependency(root / ".saipen/intake"),
+        ".saipen/kitchen/release_receipt.json": hash_file_dependency(
+            root / ".saipen/kitchen/release_receipt.json"),
+        closure.COHORT_REGISTRY_REL: hash_file_dependency(closure.registry_path(root)),
+    }
+    source_gate = work_closure_gate(root, ticket_id)
+    if not source_gate.get("ok"):
+        return _refuse(source_gate.get("code", "SOURCE_UNRESOLVED"), str(source_gate))
+    if closure.resolve_implementation_source(root, ticket_id).ok:
+        return _refuse("VALIDATION_FAILED", "published Work cannot acquire a different closure")
+    try:
+        registry = closure.read_registry(root)
+        hashes = closure.hash_paths(root, paths)
+    except FileNotFoundError as exc:
+        return _refuse("SOURCE_SCOPE_MISSING", f"cohort source is missing: {exc}")
+    except (OSError, ValueError) as exc:
+        return _refuse("VALIDATION_FAILED", str(exc))
+    existing = (registry.get("cohorts") or {}).get(cohort_id) or {}
+    if existing.get("publication_status") == "shipped":
+        return _refuse("VALIDATION_FAILED", "published cohort cannot accept a new binding")
+    if fields.get("closure_mode") == "cohort":
+        member = (existing.get("members") or {}).get(ticket_id) or {}
+        if (fields.get("closure_cohort") == cohort_id and member.get("paths") == hashes
+                and fields.get("closure_paths") == ", ".join(paths)):
+            return Result(True, "ALREADY_APPLIED", data={"ticket": ticket_id, "cohort": cohort_id,
+                "idempotent": True}, message="exact unpublished cohort binding already exists")
+        return _refuse("VALIDATION_FAILED",
+                       "an existing cohort binding cannot be moved or rewritten")
+    if any(ticket_id in (cohort.get("members") or {})
+           for cohort in registry.get("cohorts", {}).values()):
+        return _refuse("VALIDATION_FAILED",
+                       "existing registry membership disagrees with own_patch row")
+    updated = closure.upsert_member(registry, cohort_id, ticket_id, paths=hashes,
+        verification=str(fields.get("verify", "")), closed_at=utc, agent=agent)
+    try:
+        closure.cohort_scope(updated["cohorts"][cohort_id])
+    except ValueError as exc:
+        return _refuse("VALIDATION_FAILED", str(exc), ticket=ticket_id)
+    op_id = "bind-cohort-" + uuid4_hex()
+    evidence_path = f".saipen/recovery/closure-binding/{op_id}/before.json"
+    preserved = (json.dumps({"ticket": ticket_id, "original_row": ticket["raw"],
+        "original_finish": proof["op_id"], "original_finish_event": proof["event"],
+        "cohort": cohort_id, "paths": hashes}, sort_keys=True, indent=2) + "\n").encode("utf-8")
+    registry_doc = codec.read_document(closure.registry_path(root))
+    registry_bytes = registry_doc.encode(closure.render_registry(updated))
+    evidence_preconditions.update(hashes)
+    extras = [TargetPlan(evidence_path, "generic", preserved, "", hash_bytes(preserved)),
+        _target(docs["board"], ".saipen/BOARD.md", "board", _set_closure_fields(
+            docs["board"].text_norm, ticket_id, mode="cohort", cohort=cohort_id,
+            implementation_source="", paths=paths)),
+        TargetPlan(closure.COHORT_REGISTRY_REL, "report", registry_bytes,
+                   _live_before(root, closure.COHORT_REGISTRY_REL, registry_doc),
+                   hash_bytes(registry_bytes))]
+
+    def mutate(text, event):
+        return patch_state(text, {"last_event": event, "updated": utc, "agent": agent})
+
+    return _state_only_plan(root, "ticket_bind_cohort", agent, mutate,
+        f"unpublished DONE {ticket_id} bound to cohort {cohort_id}; "
+        f"original finish {proof['op_id']} preserved",
+        {"ok": True, "code": "COHORT_BOUND", "ticket": ticket_id, "cohort": cohort_id,
+         "original_finish": proof["op_id"], "evidence_path": evidence_path}, now, utc,
+        {"last_event", "updated", "agent"}, ticket_id=ticket_id, extra_targets=extras,
+        evidence_preconditions=evidence_preconditions, op_id=op_id, read_once=read_once)
+
+
+@_state_guard
+def bind_closed_cohort(project_root, ticket_id, agent, *, cohort_id, paths, dry_run=False):
+    """Explicit recovery of default closure; publication and lifecycle stay separate."""
+    root = Path(project_root)
+    plan = _plan_bind_closed_cohort(root, ticket_id, agent, cohort_id, paths, _now(), _utc_iso())
+    if isinstance(plan, Result):
+        return plan
+    if dry_run:
+        return _render_plan(plan)
+    return apply_plan(root, plan)
+
+
 def _set_closure_fields(
     board_text: str,
     ticket_id: str,

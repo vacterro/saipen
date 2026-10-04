@@ -54,3 +54,36 @@ saipen-delivery.zip
 # Wave 15 handoff artifact: large roadmap file, not shipped runtime. Keep out of
 # root-file-set and coverage checks; validator honours .gitignore.
 impl1.md
+
+# Installed launcher bytes are RENDERED at install time from the single source
+# owner bootstrap/cli_launcher.py, into <skill>/bin/. The repository copy would
+# only ever name the maintainer clone (absolute interpreter + checkout path), so
+# it is a generated artifact, never a tracked one.
+/bin/
+
+# The top-level research kitchen. Its scratch held 4547 files / 90 MB: per-ticket
+# run logs, one-shot probe and mutation-candidate scripts, live-agent
+# stdout/stderr, and five whole-repo candidate trees. None of it is protocol,
+# runtime, or evidence -- it is what a ticket's build step happened to write --
+# and a fresh `git clone` was paying 90 MB to receive it. The CI TEST TREE CLEAN
+# gate already declared untracked `.saipen/kitchen/` debris a failure; tracking
+# it was the only reason that gate never fired.
+#
+# The two registry files are project memory and stay tracked, so the directory
+# keeps saying what it is.
+/.saipen/kitchen/*
+!/.saipen/kitchen/cohort_registry.json
+!/.saipen/kitchen/digest.md
+
+# saitranslate is a subSaipen, so its kitchen is a sandbox under the same rule
+# as `.saipen/extensions/subs/*/kitchen/` above, and its `.translation-cache` is
+# a process-local cache under the same rule as `.saipen/cache/` (T-994). Both
+# shipped anyway: 2093 files, 20 MB, none of it a translated locale anyone reads
+# from the repository. `.prepare-staging/` is the loader's scratch. SUPERSEDED/
+# holds packages that lost their race and can never be published.
+#
+# READY/ and SETTLED/ stay tracked: those are packages still owed a publish.
+/.saipen/saitranslate/kitchen/
+/.saipen/saitranslate/.translation-cache/
+/.saipen/saitranslate/.prepare-staging/
+/.saipen/saitranslate/SUPERSEDED/

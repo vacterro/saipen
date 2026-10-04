@@ -5402,6 +5402,139 @@ def reconcile_receipt(root: Path | str, receipt_id: str, *, apply: bool = False)
         return _write_refusal(exc)
 
 
+_RANGE_RE = re.compile(r"\A(SRC-[0-9]+)\.\.(SRC-[0-9]+)\Z")
+MAX_RECEIPT_RANGE_EXPANSION = 512
+
+
+def _expand_receipt_range(token: str) -> list[str] | None:
+    """Expand one bounded range with matching endpoint padding, or refuse it."""
+    match = _RANGE_RE.fullmatch(token)
+    if not match:
+        return None
+    first, last = (value[4:] for value in match.groups())
+    if len(first) != len(last):
+        return None
+    try:
+        start, end = int(first), int(last)
+    except ValueError:
+        return None
+    if start > end or end - start + 1 > MAX_RECEIPT_RANGE_EXPANSION:
+        return None
+    return [f"SRC-{number:0{len(first)}d}" for number in range(start, end + 1)]
+
+
+def _plan_receipt_range_rewrite(
+    board_text: str, tickets: dict,
+) -> tuple[dict[str, list[str]], list[tuple[str, str]], list[str]]:
+    """Plan structured field rewrites; malformed ranges refuse the whole plan."""
+    from .board import set_ticket_field
+
+    expansions: dict[str, list[str]] = {}
+    rewrites: list[tuple[str, str]] = []
+    malformed: list[str] = []
+    lines = board_text.splitlines()
+    for work, ticket in sorted(tickets.items()):
+        field = str(ticket.get("fields", {}).get("source_receipts") or "")
+        tokens = [value.strip() for value in field.split(",") if value.strip()]
+        if not any(".." in token for token in tokens):
+            continue
+        explicit: list[str] = []
+        expanded_ids: list[str] = []
+        invalid = False
+        for token in tokens:
+            if ".." not in token:
+                explicit.append(token)
+                continue
+            ids = _expand_receipt_range(token)
+            if ids is None:
+                malformed.append(f"{work}: {token}")
+                invalid = True
+            else:
+                explicit.extend(ids)
+                expanded_ids.extend(ids)
+        if invalid:
+            continue
+        line = ticket["raw"]
+        index = ticket["line_no"] - 1
+        if index < 0 or index >= len(lines) or lines[index] != line:
+            malformed.append(f"{work}: BOARD record differs from its parsed line")
+            continue
+        # Reuse the canonical field mutator: identical text in a description
+        # is opaque prose, never the location of this migration's write.
+        rewrites.append((line, set_ticket_field(line, "source_receipts", ", ".join(explicit))))
+        expansions[work] = expanded_ids
+    return expansions, rewrites, malformed
+
+
+def normalize_receipt_ranges(root: Path | str, *, dry_run: bool = False) -> dict:
+    """Restore XP-000001's journaled BOARD migration; never rewrite LOG history."""
+    root = Path(root)
+    try:
+        raw = _read_owned_file(
+            root, ".saipen/BOARD.md", kind="source BOARD authority", max_bytes=_BOARD_MAX,
+        )
+        document = codec.read_document(root / ".saipen/BOARD.md", raw=raw)
+        from .board import parse_board
+
+        board = parse_board(document.text_norm)
+        if board.get("errors"):
+            return {"ok": False, "code": "VALIDATION_FAILED",
+                    "detail": "BOARD parse error: " + "; ".join(board["errors"][:3])}
+        expansions, rewrites, malformed = _plan_receipt_range_rewrite(
+            document.text_norm, board.get("tickets", {}),
+        )
+        if malformed:
+            return {"ok": False, "code": "VALIDATION_FAILED",
+                    "detail": "malformed receipt range shorthand refuses normalization: "
+                    + "; ".join(malformed[:5])}
+        if not rewrites:
+            return {"ok": True, "code": "ALREADY_NORMALIZED", "expanded": {}, "rewrites": 0}
+        if dry_run:
+            return {"ok": True, "code": "RECEIPT_RANGE_PLAN", "expanded": expansions,
+                    "rewrites": len(rewrites)}
+        replacements = dict(rewrites)
+        updated = "".join(
+            replacements.get(line.rstrip("\n"), line.rstrip("\n"))
+            + ("\n" if line.endswith("\n") else "")
+            for line in document.text_norm.splitlines(keepends=True)
+        )
+        new_bytes = document.encode(updated)
+        from .journal import hash_bytes, run_mutation
+        from .paths import project_identity as _project_identity
+        from .plan import semantic_payload_hash
+
+        fingerprint = hash_bytes(raw) + ";" + ";".join(
+            f"{work}:{','.join(ids)}" for work, ids in sorted(expansions.items())
+        )
+        # The byte precondition still refuses a changed BOARD after planning.
+        # A separate before-hash in the operation identity avoids borrowing an
+        # earlier migration's receipt after a later legitimate BOARD change.
+        with project_writer_lock(root):
+            committed = run_mutation(
+                root,
+                op_id="source.receipt-range-" + hash_bytes(fingerprint.encode("utf-8"))[:12],
+                operation="source.receipt_range_normalize",
+                agent=_agent_for_intake(root),
+                project_identity=_project_identity(root),
+                semantic_payload_hash=semantic_payload_hash(
+                    {"operation": "source.receipt_range_normalize", "tickets": expansions,
+                     "before_hash": hash_bytes(raw)},
+                ),
+                targets=[{"path": ".saipen/BOARD.md", "role": "board", "action": "write",
+                          "content": new_bytes, "before_hash": hash_bytes(raw),
+                          "after_hash": hash_bytes(new_bytes)}],
+                preconditions={".saipen/BOARD.md": hash_bytes(raw)},
+                verification_policy="none",
+            )
+        if not committed.get("ok"):
+            return {"ok": False, "code": committed.get("code", "VALIDATION_FAILED"),
+                    "detail": committed.get("detail", "plan apply failed")}
+        return {"ok": True, "code": "RECEIPT_RANGES_NORMALIZED", "expanded": expansions,
+                "rewrites": len(rewrites)}
+    except (OSError, PermissionError, ValueError) as exc:
+        return _write_refusal(exc)
+
+
 # ---------------------------------------------------------------------------
 # Terminal recovered-source attribution proof (SAIPEN T-1315 / AUDAPACK T-183)
 #

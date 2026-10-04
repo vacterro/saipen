@@ -38,6 +38,7 @@ from saipen_engine.journal import auto_recover_pending
 from saipen_engine.operations import (
     _ticket_add_route,
     apply_claim,
+    bind_closed_cohort,
     checkpoint,
     compact_board,
     finish_ticket,
@@ -5147,7 +5148,7 @@ def _source(project_root: Path, args: list[str], as_json: bool, dry_run: bool) -
                 "ok": False,
                 "code": "VALIDATION_FAILED",
                 "detail": "source needs a subcommand: capture|status|show|req|"
-                "disp|quarantine|link|close|archive|purge|retire|recover|reconcile|"
+                "disp|quarantine|link|close|archive|purge|retire|recover|reconcile|normalize|"
                 "append|apply-append|appends",
             },
             as_json,
@@ -5442,6 +5443,20 @@ def _source(project_root: Path, args: list[str], as_json: bool, dry_run: bool) -
         if apply and _negotiate_capability(project_root) == "read-only":
             return _capability_refusal(as_json)
         result = intake.reconcile_receipt(project_root, rest[0], apply=apply)
+        _emit(result, as_json)
+        return 0 if result.get("ok") else 1
+
+    if action == "normalize":
+        if rest:
+            _emit(
+                {"ok": False, "code": "VALIDATION_FAILED",
+                 "detail": "source normalize accepts no arguments"},
+                as_json,
+            )
+            return 2
+        if not dry_run and _negotiate_capability(project_root) == "read-only":
+            return _capability_refusal(as_json)
+        result = intake.normalize_receipt_ranges(project_root, dry_run=dry_run)
         _emit(result, as_json)
         return 0 if result.get("ok") else 1
 
@@ -10258,6 +10273,7 @@ def main(argv: list[str] | None = None) -> int:
             "done <T-###> [--closure-mode own_patch|inherited_verified|cohort] "
             "[--closure-cohort C-###] [--implementation-source "
             "<release:<id>|T-###|SRC-###>] [--paths <p1,p2>]|"
+            "ticket bind-cohort <T-###> --cohort <C-###> --paths <p1,p2>|"
             "ticket supersede <T-OLD> --by <T-NEW> --evidence <E-###> "
             "--authority <SRC-###>|ticket resolve-external <T-###> --authority "
             "<lineage-32hex> --implementation <T-###@commit> --reason <CLASS> "
@@ -10272,7 +10288,7 @@ def main(argv: list[str] | None = None) -> int:
             "[--verification <cmd>:PASS]... [--run <command>]... "
             "[--timeout SECONDS]|source retire <SRC-###> --reason <CLASS> "
             "[--successor SRC-###]|source quarantine <SRC-###> [--reason CODE]|"
-            "source recover|source reconcile <SRC-###> [--confirm]|"
+            "source recover|source reconcile <SRC-###> [--confirm]|source normalize [--dry-run]|"
             "cohort status <C-###>|cohort ship "
             "<C-###>|improve|improve hold <T-###> [reason]|improve unhold|improve "
             "status|improve sweep <cycle> <RUN-N/IMP-NNN> <DISPOSITION> "
@@ -10334,7 +10350,7 @@ def main(argv: list[str] | None = None) -> int:
     # `init` is already declared in `saipen/REGISTRY.json` and classified
     # EXECUTION in `saipen/COMMAND_EFFECTS.json`; it simply had no dispatch, so
     # the advertised command could not run.
-    if args and args[0] == "init":
+    if args and args[0] in ("init", "set"):
         return _init_command(args[1:], project_root_opt, agent_opt, as_json, dry_run)
 
     # T-1424: the host-bootstrap diagnostic answers "can THIS host reach a
@@ -10967,7 +10983,7 @@ def main(argv: list[str] | None = None) -> int:
                     "code": "VALIDATION_FAILED",
                     "detail": "ticket needs an action: "
                     "add|compact|verify|reasoning|done|supersede|retire|resolve-external|"
-                    "repair-metadata|block|block-for|unblock",
+                    "repair-metadata|bind-cohort|block|block-for|unblock",
                 },
                 as_json,
             )
@@ -11516,6 +11532,25 @@ def main(argv: list[str] | None = None) -> int:
                 note=_opts.get("note"),
                 dry_run=dry_run,
             )
+            _emit(result.to_dict(), as_json)
+            return 0 if result.ok else 1
+        if action == "bind-cohort":
+            if not rest or not re.fullmatch(r"T-\d+", rest[0], re.IGNORECASE):
+                _emit({"ok": False, "code": "VALIDATION_FAILED",
+                       "detail": "ticket bind-cohort needs <T-###> --cohort C-### --paths p1,p2"},
+                      as_json)
+                return 2
+            _opts, _pos, _opt_err = _parse_value_options(
+                rest[1:], {"--cohort": "cohort", "--paths": "paths"})
+            if _opt_err or _pos:
+                _emit({"ok": False, "code": "VALIDATION_FAILED",
+                       "detail": _opt_err or "surplus bind-cohort arguments"}, as_json)
+                return 2
+            if not dry_run and _negotiate_capability(project_root) == "read-only":
+                return _capability_refusal(as_json)
+            result = bind_closed_cohort(project_root, rest[0].upper(), _agent_for(project_root),
+                cohort_id=_opts.get("cohort", ""),
+                paths=str(_opts.get("paths", "")).replace(",", " ").split(), dry_run=dry_run)
             _emit(result.to_dict(), as_json)
             return 0 if result.ok else 1
         if action == "done":

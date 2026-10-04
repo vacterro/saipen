@@ -13700,6 +13700,9 @@ def run_nitro_m3_probes() -> tuple[list[str], int]:
     STATE to SCOUT/T-ID with the allocated event, and a second claim on the
     same ticket is refused.
     """
+    from test_fixture_support import witnessed_operator
+    from test_hermetic_env import hermetic_env
+
     problems: list[str] = []
     checked = 0
 
@@ -13987,8 +13990,8 @@ def run_nitro_m3_probes() -> tuple[list[str], int]:
     )
 
     # ---- T-1100: goal_entry regression ----
-    # goal_entry demotes an active DOING ticket to TODO, sets goal intent,
-    # clears task, and logs the pivot.
+    # A witnessed operator goal demotes active Work and logs its pivot.
+    # Carrier-free model text must retain the existing Work and budget.
     ge_root = make_project()
     ge_saipen = ge_root / ".saipen"
     # Setup: claim T-1 and advance to BUILD so there's an active DOING ticket
@@ -14000,7 +14003,8 @@ def run_nitro_m3_probes() -> tuple[list[str], int]:
         ge_state_before.get("task") == "T-1" and ge_state_before.get("phase") == "BUILD",
         repr(ge_state_before),
     )
-    ge_result = goal_entry(ge_root, "probe", "T-1100 goal entry test")
+    with witnessed_operator("T-1100 goal entry test"):
+        ge_result = goal_entry(ge_root, "probe", "T-1100 goal entry test")
     ge_state_after = parse_state(codec.read_doc(ge_saipen / "STATE.md"))
     ge_board = parse_board(codec.read_doc(ge_saipen / "BOARD.md"))
     expect(
@@ -14072,7 +14076,8 @@ def run_nitro_m3_probes() -> tuple[list[str], int]:
         ge_empty_state.get("task") == "none",
         repr(ge_empty_state),
     )
-    ge_empty_result = goal_entry(ge_empty, "probe", "empty board goal")
+    with witnessed_operator("empty board goal"):
+        ge_empty_result = goal_entry(ge_empty, "probe", "empty board goal")
     ge_empty_after = parse_state(codec.read_doc(ge_empty_saipen / "STATE.md"))
     expect(
         "goal_entry with no active ticket still sets goal intent",
@@ -14084,16 +14089,56 @@ def run_nitro_m3_probes() -> tuple[list[str], int]:
 
     # ---- T-1100: goal_entry credential redaction ----
     ge_cred = make_project()
-    goal_entry(
-        ge_cred,
-        "probe",
-        "fix the ghp_abcdefghijklmnopqrstuvwxyz0123456789ab token leak",
-    )
+    cred_objective = "fix the ghp_abcdefghijklmnopqrstuvwxyz0123456789ab token leak"
+    with witnessed_operator(cred_objective):
+        cred_result = goal_entry(ge_cred, "probe", cred_objective)
     ge_cred_log = codec.read_doc(ge_cred / ".saipen" / "LOG.md")
     expect(
         "goal_entry redacts ghp_ credentials in LOG",
-        "ghp_***" in ge_cred_log and "ghp_abcdefgh" not in ge_cred_log,
+        cred_result.get("ok")
+        and "ghp_***" in ge_cred_log and "ghp_abcdefgh" not in ge_cred_log,
         repr(ge_cred_log[-200:]),
+    )
+
+    # ---- T-1603: the SAME goal door without operator authority ----
+    ge_model = make_project()
+    apply_claim(ge_model, "T-1", "probe")
+    transition_phase(ge_model, "BUILD", "probe", "T-1", "b")
+    set_goal_intent(ge_model, "probe", "existing goal")
+    model_before = parse_state(codec.read_doc(ge_model / ".saipen/STATE.md"))
+    no_carrier = hermetic_env(SAIPEN_TASK_SHA256=None, SAIPEN_TASK_FILE=None)
+    with mock.patch.dict(os.environ, no_carrier, clear=True):
+        model_result = goal_entry(ge_model, "probe", "T-1100 goal entry test")
+    model_after = parse_state(codec.read_doc(ge_model / ".saipen/STATE.md"))
+    model_board = parse_board(codec.read_doc(ge_model / ".saipen/BOARD.md"))
+    expect(
+        "unwitnessed goal preserves active Work, phase and bounded counters",
+        model_result.get("ok")
+        and model_result.get("code") == "USER_REQUEST_RECORDED"
+        and all(model_after.get(key) == model_before.get(key) for key in (
+            "task", "phase", "execution_intent", "goal_waves", "goal_tickets"))
+        and model_board["tickets"]["T-1"]["section"] == "## DOING",
+        repr((model_result, model_before, model_after)),
+    )
+    candidate = model_board["tickets"].get(model_result.get("ticket"), {})
+    expect(
+        "unwitnessed goal remains a model-supplied local candidate",
+        candidate.get("fields", {}).get("request_witness") == "model_supplied"
+        and candidate.get("fields", {}).get("user_explicit") != "true"
+        and candidate.get("section") == "## TODO",
+        repr(candidate),
+    )
+    ge_idle_model = make_project()
+    with mock.patch.dict(os.environ, no_carrier, clear=True):
+        idle_result = goal_entry(ge_idle_model, "probe", "empty board goal")
+    idle_after = parse_state(codec.read_doc(ge_idle_model / ".saipen/STATE.md"))
+    expect(
+        "idle unwitnessed goal is usable without goal pivot or operator grant",
+        idle_result.get("ok")
+        and idle_after.get("task") == idle_result.get("ticket")
+        and idle_after.get("execution_intent", "normal") == "normal"
+        and not idle_result.get("ingress_authority", {}).get("goal_pivot"),
+        repr((idle_result, idle_after)),
     )
 
     return problems, checked
@@ -16888,12 +16933,16 @@ def run_nitro_integrity_probes() -> tuple[list[str], int]:
     )
     (saipen_cf / "STATE.md").write_bytes(external_cf)
     recover(conf_root, "op-t592")
+    inspect_before = {path: (conf_root / path).read_bytes() for path in (
+        ".saipen/LOG.md", ".saipen/STATE.md", ".saipen/BOARD.md")}
     insp = _inspect_op(conf_root, "op-t592")
     expect(
         "conflict inspect reports the conflicting location read-only",
         insp.get("code") == "CONFLICT_INSPECT"
         and insp.get("conflicting_locations") == [".saipen/STATE.md"]
-        and insp.get("safe_resolution_classes") == ["accept_live", "replan"],
+        and insp.get("safe_resolution_classes") == ["accept_live", "replan", "reconcile"]
+        and all((conf_root / path).read_bytes() == content
+                for path, content in inspect_before.items()),
         repr(insp),
     )
     # Only the selected conflict may be settled: a second unrelated unresolved

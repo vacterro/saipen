@@ -120,11 +120,11 @@
     "SRC-027:R014": {
       "actionable": true,
       "class": "requirement",
-      "disposition": "DEFERRED",
-      "evidence": "Transcript: focused tools.test_t1316_recovery_already_applied 26/26 OK; related test_settled_projection+test_audit_2026_08_28_all3 79/79 OK; pre-fix control 26 tests -> 17 FAIL 4 ERROR; ruff + py_compile clean; full per-module sweep 1511 run / 1468 PASS / 31 FAIL / 10 ERROR / 2 SKIPPED with both skips reported as SKIPPED and never converted to PASS; canonical tools/validate.py on a clean fixture copied OUTSIDE the git worktree -> 'Validation complete. Agent is conformant.' 0 problems / 18 warnings. UNMET ITEM: complete discover green, blocked by 6 modules owned by other in-flight tickets (test_check_inventory 5F, test_command_routing 1F, test_concurrency_independence 1E, test_explicit_claim 5F, test_recovered_attribution 20F+1E, test_t1304_r004_transition 8E).",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/T-1316-current/VERIFY.md; family-counts.json and exact raw shard transcripts; fixture-validation.json CURRENT_PASS outside Git worktree; existing original incident regression retained",
       "text": "Targeted recovery and journal tests pass first, then the complete repository test suite with exact PASS FAIL SKIPPED counts reported and environmental skips never converted to PASS; canonical project validation or conformance runs on a clean fixture --verification test transcript reports journal unit, recovery, mutation apply, source requirement add, conformance validate, idempotent retry and hostile fault-injection counts",
-      "verification": null,
-      "work": null
+      "verification": "Focused 34 PASS, 0 FAIL, 0 ERROR, 0 SKIPPED; declared family 4896 ran: 4839 PASS, 0 FAIL, 0 ERROR, 57 SKIPPED; jobs=6 timeout=5400 baseline unchanged; clean fixture CURRENT_PASS 0 blocking 13 warnings; Ruff and whitespace pass; conf: high",
+      "work": "T-1316"
     },
     "SRC-027:R015": {
       "actionable": true,

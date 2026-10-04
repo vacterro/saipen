@@ -181,11 +181,7 @@ def _codex_entry_is_ours(hook: dict, artifact_name: str) -> bool:
     """
     for key in ("command", "commandWindows"):
         value = hook.get(key)
-        if (
-            isinstance(value, str)
-            and "--saipen-root" in value
-            and artifact_name in value
-        ):
+        if isinstance(value, str) and "--saipen-root" in value and artifact_name in value:
             return True
     return False
 
@@ -360,10 +356,7 @@ def _install(host: str, home: Path, root: Path, *, check: bool) -> dict:
             len(owned) == 1
             and owned[0][0] == ".*"
             and (
-                (
-                    owned == [(".*", expected["hooks"][0])]
-                    and _named_root_is_current(named)
-                )
+                (owned == [(".*", expected["hooks"][0])] and _named_root_is_current(named))
                 or (
                     {k: v for k, v in owned[0][1].items() if k != "command"}
                     == {k: v for k, v in expected["hooks"][0].items() if k != "command"}
@@ -474,9 +467,7 @@ def _install(host: str, home: Path, root: Path, *, check: bool) -> dict:
             action_want = entry_want["action"]
             named_command = str(action_now.get("command", ""))
             named_root = saipen_root_of(named_command)
-            configured = (
-                data == expected and _named_root_is_current(named_command)
-            ) or (
+            configured = (data == expected and _named_root_is_current(named_command)) or (
                 data.get("version") == expected["version"]
                 and {k: v for k, v in entry_now.items() if k != "action"}
                 == {k: v for k, v in entry_want.items() if k != "action"}
@@ -489,9 +480,7 @@ def _install(host: str, home: Path, root: Path, *, check: bool) -> dict:
     installed = artifact.is_file()
     root_current = named_root is not None and root_resolves(named_root)
     current = (
-        installed
-        and content_bytes(artifact.read_bytes()) == content_bytes(shipped)
-        and configured
+        installed and content_bytes(artifact.read_bytes()) == content_bytes(shipped) and configured
     )
     if not check:
         # Preserve original settings once by content identity; never overwrite
@@ -524,12 +513,121 @@ def _install(host: str, home: Path, root: Path, *, check: bool) -> dict:
         "config": str(config),
     }
     if host == "codex":
-        result["proof_preflight"] = codex_hook_preflight(
-            home, hooks_json_present=config.is_file()
-        )
+        result["proof_preflight"] = codex_hook_preflight(home, hooks_json_present=config.is_file())
     if host == "claude":
         result["style_hook_conflicts"] = style_conflicts
     return result
+
+
+def _uninstall_entry_is_ours(hook: dict, host: str, artifact: Path) -> bool:
+    """Match the actual guard invocation, never a mention inside user prose."""
+    action = hook.get("action") if isinstance(hook.get("action"), dict) else {}
+    commands = (hook.get("command"), hook.get("commandWindows"), action.get("command"))
+    expected = os.path.normcase(str(artifact)).replace("\\", "/")
+    for invocation in commands:
+        if not isinstance(invocation, str):
+            continue
+        for posix in (True, False):
+            try:
+                argv = [arg.strip("\"'") for arg in shlex.split(invocation, posix=posix)]
+            except ValueError:
+                continue
+            if len(argv) < 6 or os.path.normcase(argv[1]).replace("\\", "/") != expected:
+                continue
+            try:
+                if argv[argv.index("--host") + 1] == host and argv[argv.index("--saipen-root") + 1]:
+                    return True
+            except (ValueError, IndexError):
+                continue
+    return False
+
+
+def uninstall(host: str, home: Path, root: Path = ROOT) -> dict:
+    """Remove this host's configured guard entries and unchanged guard artifact."""
+    home = home.resolve()
+    registry = json.loads((root / "extensions/adapters/registry.json").read_text(encoding="utf-8"))
+    entry = next(item for item in registry["adapters"] if item["id"] == host)
+    artifact = home / entry["hook_install_surface"].removeprefix("~/")
+    config = home / entry["hook_config_surface"].removeprefix("~/")
+    for path in (artifact, config):
+        if path.is_symlink() or not path.resolve().is_relative_to(home):
+            raise ValueError("hook uninstall path escapes the selected home")
+    removed = 0
+    if config.exists():
+        original = config.read_bytes()
+        data = json.loads(original.decode("utf-8-sig"))
+        if not isinstance(data, dict):
+            raise ValueError("hook config must be a JSON object")
+        hooks = data.get("hooks", {})
+        if host == "kiro":
+            if not isinstance(hooks, list):
+                raise ValueError("Kiro hooks must be an array")
+            kept = [
+                h
+                for h in hooks
+                if not isinstance(h, dict) or not _uninstall_entry_is_ours(h, host, artifact)
+            ]
+            removed = len(hooks) - len(kept)
+            data["hooks"] = kept
+            if removed and not kept and set(data) <= {"version", "hooks"}:
+                data = {}
+        else:
+            if not isinstance(hooks, dict):
+                raise ValueError("hooks must be an object")
+            for event, groups in list(hooks.items()):
+                if not isinstance(groups, list):
+                    raise ValueError("hook event must be an array")
+                kept_groups = []
+                for group in groups:
+                    if not isinstance(group, dict) or not isinstance(group.get("hooks"), list):
+                        raise ValueError("malformed hook group")
+                    kept = [
+                        h
+                        for h in group["hooks"]
+                        if not isinstance(h, dict)
+                        or not _uninstall_entry_is_ours(h, host, artifact)
+                    ]
+                    own_count = len(group["hooks"]) - len(kept)
+                    removed += own_count
+                    if kept or not own_count or set(group) - {"matcher", "hooks"}:
+                        kept_groups.append({**group, "hooks": kept})
+                if kept_groups:
+                    hooks[event] = kept_groups
+                elif groups:
+                    hooks.pop(event)
+            if removed and not hooks:
+                data.pop("hooks", None)
+        if removed:
+            atomic_write(config.with_name(config.name + ".uninstalled.bak"), original)
+            restored = False
+            # Restore exact original bytes when no later user edit prevents it.
+            for backup in sorted(config.parent.glob(config.name + ".*.bak")):
+                if (
+                    not re.fullmatch(re.escape(config.name) + r"\.[0-9a-f]{16}\.bak", backup.name)
+                    or backup.is_symlink()
+                ):
+                    continue
+                try:
+                    content = backup.read_bytes()
+                    previous = json.loads(content.decode("utf-8-sig"))
+                except (OSError, ValueError):
+                    continue
+                if previous == data:
+                    atomic_write(config, content)
+                    restored = True
+                    break
+            if not restored:
+                if not data:
+                    config.unlink()
+                else:
+                    atomic_write(config, (json.dumps(data, indent=2) + "\n").encode("utf-8"))
+    artifact_removed = False
+    if artifact.is_file():
+        shipped = root / entry["hook_artifact"]
+        if content_bytes(artifact.read_bytes()) == content_bytes(shipped.read_bytes()):
+            artifact.unlink()
+            artifact_removed = True
+    return {"host": host, "removed_hooks": removed, "artifact_removed": artifact_removed}
 
 
 def main() -> int:
@@ -537,9 +635,17 @@ def main() -> int:
     parser.add_argument("host", choices=("kiro", "gemini", "codex", "claude"))
     parser.add_argument("--home", type=Path, default=Path.home())
     parser.add_argument("--check", action="store_true")
+    parser.add_argument("--uninstall", action="store_true")
     args = parser.parse_args()
     try:
-        print(json.dumps(install(args.host, args.home, check=args.check), indent=2))
+        if args.uninstall and args.check:
+            raise ValueError("--check and --uninstall are mutually exclusive")
+        result = (
+            uninstall(args.host, args.home)
+            if args.uninstall
+            else install(args.host, args.home, check=args.check)
+        )
+        print(json.dumps(result, indent=2))
         return 0
     except (OSError, ValueError) as exc:
         print(json.dumps({"effective": "UNKNOWN", "error": str(exc)}))

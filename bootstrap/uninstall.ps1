@@ -12,13 +12,14 @@ function Get-NativePath([string]$path) {
 function Remove-Block([string]$file) {
   if (Test-Path $file) {
     if (-not (Test-Path $file -PathType Leaf)) { throw "config path is not a file: $file" }
-    $text = [System.IO.File]::ReadAllText((Get-NativePath $file))
+    $bytes = [System.IO.File]::ReadAllBytes((Get-NativePath $file))
+    $text = [System.Text.Encoding]::GetEncoding(28591).GetString($bytes)
     $match = [regex]::Match($text, '(?s)(?:\r\n|\n)?<!-- SAIPEN:BEGIN -->.*?<!-- SAIPEN:END -->(?:\r\n|\n)?')
     if ($match.Success) {
       $clean = $text.Substring(0, $match.Index) + $text.Substring($match.Index + $match.Length)
       # Backup the file before uninstalling just in case
       Copy-Item $file "$file.uninstalled.bak" -Force -ErrorAction Stop
-      [System.IO.File]::WriteAllText((Get-NativePath $file), $clean, $Utf8NoBom)
+      [System.IO.File]::WriteAllBytes((Get-NativePath $file), [System.Text.Encoding]::GetEncoding(28591).GetBytes($clean))
       return "block removed"
     }
   }
@@ -28,8 +29,9 @@ function Remove-Block([string]$file) {
 function Remove-Skill([string]$path) {
   if (Test-Path $path) {
     try {
-      Remove-Item -Recurse -Force $path -ErrorAction Stop
-      return "skill removed"
+      $result = & $script:Python -B (Join-Path $PSScriptRoot "install_ownership.py") remove (Get-NativePath $path) 2>&1
+      if ($LASTEXITCODE -ne 0) { throw "ownership cleanup: $result" }
+      return "skill removed; unowned/edited files preserved ($result)"
     } catch {
       return "remove FAILED ($path): $($_.Exception.Message)"
     }
@@ -163,6 +165,7 @@ function Remove-Aider([string]$file) {
 
 $h = $env:USERPROFILE
 $script:BootstrapFailed = $false
+$script:Python = if ($env:SAIPEN_PYTHON) { $env:SAIPEN_PYTHON } else { (Get-Command python -ErrorAction Stop).Source }
 
 function Remove-Hooks {
   # Hook surfaces come from the ONE adapter registry, never a second
@@ -178,23 +181,29 @@ function Remove-Hooks {
   }
   $surfaces = @()
   foreach ($adapter in @($registry.adapters)) {
+    if ($adapter.PSObject.Properties.Name -contains "hook_installer" -and $adapter.hook_installer) {
+      $result = & $script:Python -B (Get-NativePath (Join-Path (Split-Path $PSScriptRoot) ([string]$adapter.hook_installer))) ([string]$adapter.id) --home $h --uninstall 2>&1
+      if ($LASTEXITCODE -ne 0) { return "native hook remove FAILED: $result" }
+      continue
+    }
     if ($adapter.PSObject.Properties.Name -contains "install" -and $adapter.install) {
       if ($adapter.install.PSObject.Properties.Name -contains "hook" -and $adapter.install.hook) {
-        $surfaces += [string]$adapter.install.hook
+        $surfaces += @{ path = [string]$adapter.install.hook; source = [string]$adapter.hook_artifact }
       }
     }
     if ($adapter.PSObject.Properties.Name -contains "legacy_hook_surfaces") {
       foreach ($surface in @($adapter.legacy_hook_surfaces)) {
-        if ($surface) { $surfaces += [string]$surface }
+        if ($surface) { $surfaces += @{ path = [string]$surface; source = [string]$adapter.hook_artifact } }
       }
     }
   }
   $removed = 0
   foreach ($surface in $surfaces) {
-    $path = $surface.Replace("~", $h)
+    $path = $surface.path.Replace("~", $h)
     if (-not (Test-Path $path -PathType Leaf)) { continue }
     try {
-      Remove-Item -LiteralPath $path -Force -ErrorAction Stop
+      $result = & $script:Python -B (Join-Path $PSScriptRoot "install_ownership.py") remove-artifact (Get-NativePath $path) --source (Get-NativePath (Join-Path (Split-Path $PSScriptRoot) $surface.source)) --home $h 2>&1
+      if ($LASTEXITCODE -ne 0) { throw "hook ownership cleanup: $result" }
       $removed++
     } catch {
       return "hook remove FAILED ($path): $($_.Exception.Message)"
@@ -225,6 +234,8 @@ if (-not [string]::IsNullOrWhiteSpace($env:ZAICODE_HOME)) {
 }
 Report "Gemini GEMINI.md" (Remove-Block "$h\.gemini\GEMINI.md")
 Report "~/.agents skills" (Remove-Skill "$h\.agents\skills\saipen")
+Report "FreeBuff knowledge" (Remove-Block "$h\.knowledge.md")
+Report "FreeBuff AGENTS.md" (Remove-Block "$h\.AGENTS.md")
 $plugRoot = "$h\.gemini\config\plugins"
 if (Test-Path $plugRoot) {
   Get-ChildItem $plugRoot -Directory | ForEach-Object {

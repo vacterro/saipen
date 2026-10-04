@@ -78,6 +78,8 @@ from importlib.machinery import ModuleSpec
 from pathlib import Path
 from types import ModuleType
 
+from ._module_identity import install as _install_tool_finder
+
 _TOOLS = Path(__file__).resolve().parent
 _TOOLS_PATH = str(_TOOLS)
 if _TOOLS_PATH not in sys.path:
@@ -232,3 +234,5 @@ def _install_canonical_engine_finder() -> None:
 saipen_engine = _load_canonical_engine()
 _install_canonical_engine_finder()
 sys.modules[ALIAS_ENGINE] = saipen_engine
+
+_install_tool_finder(_TOOLS)

@@ -1,1 +1,0 @@
-Test: Agent should bootstrap .saipen/ using templates/ and proceed to PLAN.

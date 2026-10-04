@@ -1,1 +1,0 @@
-["SPEC.md", " määrittää tiedostojen perustuva", " jatkuva malli ja stabilinen on-diski kontrakti; ", "CORE.md", " ja ", "MAINTENANCE.md", " oikaisi nykyisen normatiivisen toiminnan.", "Machin-checked state.", " The stdlib-only canonical", "validator", " lukee live", "STATE schema", " ja tarkistaa vaiheen "]

@@ -69,7 +69,8 @@ foreach ($line in $boardLines) {
     # check below FAILed a legal board. validate.sh always used [^|]* here;
     # the two halves of the portable floor disagreed, and nobody noticed
     # because this repo runs the Python validator.
-    if ($line -match "- \[( |x|/)\] (T-\d+).*needs: ([^|]*)") {
+    # Only a delimited field declares dependencies; prose stays opaque.
+    if ($line -match "- \[( |x|/)\] (T-\d+).*\| needs: ([^|]*)") {
         $taskId = $matches[2]
         $needsRaw = $matches[3]
         $needsList = $needsRaw -split "," | ForEach-Object { $_.Trim() }

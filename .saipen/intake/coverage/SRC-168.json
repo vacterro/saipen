@@ -1,0 +1,113 @@
+{
+  "requirements": {
+    "SRC-168:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Publish the currently recommended stable SAIPEN implementation to vacterro/saipen canonical main now, after the release gates. Preserve useful changes from other branches; exclude known unfinished/WIP implementation and preserve ongoing local work.",
+      "verification": null,
+      "work": "T-1607"
+    },
+    "SRC-168:R002": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "A fresh clone from the published recommended version can be installed in a clean user environment using only the current README commands.",
+      "verification": null,
+      "work": "T-1607"
+    },
+    "SRC-168:R003": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "After installation, saipen set bootstraps a new project successfully.",
+      "verification": null,
+      "work": "T-1607"
+    },
+    "SRC-168:R004": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "After set, saipen continue cold-routes a new agent to exact protocol, project memory and a real next action; the instructions explain execution rather than merely acknowledging a skill.",
+      "verification": null,
+      "work": "T-1607"
+    },
+    "SRC-168:R005": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Canonical validate passes on the clean installed project and the release candidate; complete declared tests and CI/validation are green before tag/release publication.",
+      "verification": null,
+      "work": "T-1607"
+    },
+    "SRC-168:R006": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Uninstall succeeds and reverses only SAIPEN-owned changes, preserving unrelated user instructions, config, hooks, skills and project memory.",
+      "verification": null,
+      "work": "T-1607"
+    },
+    "SRC-168:R007": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Installing again after uninstall succeeds; demonstrate the entire install/set/continue/validate/uninstall/reinstall lifecycle in a clean isolated environment.",
+      "verification": null,
+      "work": "T-1607"
+    },
+    "SRC-168:R008": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "GitHub main equals the verified version actually recommended in README; observe green GitHub CI on that exact published commit.",
+      "verification": null,
+      "work": "T-1607"
+    },
+    "SRC-168:R009": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "README and Quick Start match the actual current installer and removal commands. Installation and removal are short and understandable; a stranger can reproduce all acceptance steps from README alone.",
+      "verification": null,
+      "work": "T-1607"
+    },
+    "SRC-168:R010": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "If implementation has substantially advanced beyond v8.0.1, choose a proper new version and publish its matching new tag and GitHub release only after full green validation; release metadata must agree with the tested bytes.",
+      "verification": null,
+      "work": "T-1607"
+    },
+    "SRC-168:R011": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Preserve local-first behavior: no mandatory external services. Fix release-blocking defects immediately; do not start unrelated feature expansion.",
+      "verification": null,
+      "work": "T-1607"
+    },
+    "SRC-168:R012": {
+      "actionable": false,
+      "class": "context",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "This new direct user message explicitly authorizes GitHub main push and, once the green gates pass, new release/tag publication for this public-stability objective. It supersedes the earlier cc-all source's publication exclusion only for this objective; the stored intake witness remains model_supplied and is not fabricated host authentication.",
+      "verification": null,
+      "work": "T-1607"
+    }
+  },
+  "schema_version": 1
+}

@@ -27,6 +27,22 @@ $Utf8NoBom = New-Object System.Text.UTF8Encoding($false)
 function Get-NativePath([string]$path) {
   return $path.Replace('\', [System.IO.Path]::DirectorySeparatorChar)
 }
+function Get-FileSha256([string]$filePath) {
+  $stream = [System.IO.File]::OpenRead((Get-NativePath $filePath))
+  try {
+    $sha = [System.Security.Cryptography.SHA256]::Create()
+    $bytes = $sha.ComputeHash($stream)
+    return [System.BitConverter]::ToString($bytes).Replace("-", "").ToLowerInvariant()
+  } finally {
+    $stream.Dispose()
+  }
+}
+$Utf8WithBom = New-Object System.Text.UTF8Encoding($true)
+function Write-ContentWithEncoding([string]$file, [string]$text, [bool]$hasBom) {
+  if ((Test-Path $file) -and -not (Test-Path "$file.bak")) { Copy-Item $file "$file.bak" -Force }
+  $enc = if ($hasBom) { $Utf8WithBom } else { $Utf8NoBom }
+  [System.IO.File]::WriteAllText((Get-NativePath $file), $text, $enc)
+}
 function Write-NoBom([string]$file, [string]$text) {
   if ((Test-Path $file) -and -not (Test-Path "$file.bak")) { Copy-Item $file "$file.bak" -Force }
   [System.IO.File]::WriteAllText((Get-NativePath $file), $text, $Utf8NoBom)
@@ -176,6 +192,8 @@ function Get-BlockCore([string]$text) {
 function Add-Block([string]$file) {
   if (Test-Path $file) {
     if (-not (Test-Path $file -PathType Leaf)) { throw "config path is not a file: $file" }
+    $rawBytes = [System.IO.File]::ReadAllBytes((Get-NativePath $file))
+    $hasBom = ($rawBytes.Length -ge 3 -and $rawBytes[0] -eq 0xef -and $rawBytes[1] -eq 0xbb -and $rawBytes[2] -eq 0xbf)
     $text = [System.IO.File]::ReadAllText((Get-NativePath $file))
     $match = [regex]::Match($text, '(?s)<!-- SAIPEN:BEGIN -->.*?<!-- SAIPEN:END -->')
     $core = Get-BlockCore $text
@@ -184,11 +202,11 @@ function Add-Block([string]$file) {
       $canonical = $blockCore -replace "`r`n", "`n"
       if ($existing -eq $canonical) { return "already" }
       $clean = $text.Substring(0, $match.Index) + $core + $text.Substring($match.Index + $match.Length)
-      Write-NoBom $file $clean
+      Write-ContentWithEncoding $file $clean $hasBom
       return "block refreshed"
     }
     $nl = Get-Newline $text
-    Write-NoBom $file ($text + $nl + $core + $nl)
+    Write-ContentWithEncoding $file ($text + $nl + $core + $nl) $hasBom
     return "block added"
   }
   $dir = Split-Path $file
@@ -313,6 +331,9 @@ function Copy-Skill([string]$dst) {
     # SAIPEN-CLI-LAUNCHER-OWNERSHIP:BEGIN
     $launcher = Write-CliLaunchers -StageDir $stage -SkillDir $dst
     if ($launcher -ne "ok") { throw "cli launcher render failed: $launcher" }
+    $ownership = Get-SourcePath "bootstrap/install_ownership.py"
+    $ownershipOutput = & (Get-PythonBin) -B $ownership record (Get-NativePath $dst) --stage (Get-NativePath $stage) 2>&1
+    if ($LASTEXITCODE -ne 0) { throw "ownership record failed: $ownershipOutput" }
     # SAIPEN-CLI-LAUNCHER-OWNERSHIP:END
     if (Test-Path $dst) { Move-Item -LiteralPath $dst -Destination $backup -ErrorAction Stop }
     try {
@@ -367,8 +388,8 @@ function Copy-Hook($adapter) {
     $parent = Split-Path $destination
     if (-not (Test-Path $parent)) { New-Item -ItemType Directory -Force $parent -ErrorAction Stop | Out-Null }
     Copy-Item -LiteralPath $source -Destination $destination -Force -ErrorAction Stop
-    $shippedHash = (Get-FileHash -LiteralPath $source -Algorithm SHA256 -ErrorAction Stop).Hash.ToLowerInvariant()
-    $installedHash = (Get-FileHash -LiteralPath $destination -Algorithm SHA256 -ErrorAction Stop).Hash.ToLowerInvariant()
+    $shippedHash = Get-FileSha256 $source
+    $installedHash = Get-FileSha256 $destination
     if ($installedHash -ne $shippedHash) { throw "installed SHA-256 differs from shipped artifact" }
     if ([string]$adapter.id -eq 'opencode') {
       return "guard hook installed sha256=$installedHash; already-running OpenCode processes require restart"
@@ -514,7 +535,12 @@ function Write-RuntimeProvenance($adapter, [string]$skillDir) {
     if ($problems.Count -gt 0) {
       return ("FAILED: provenance invalid: " + ($problems -join ","))
     }
-    return "verified"
+    $ownership = Get-SourcePath "bootstrap/install_ownership.py"
+    $stampResult = & (Get-PythonBin) -B $ownership stamp (Get-NativePath $skillDir) 2>&1
+    if ($LASTEXITCODE -ne 0) {
+      return "FAILED: ownership stamp: $stampResult"
+    }
+    return "verified" 
   } catch {
     return ("FAILED: provenance write/validate: " + $_.Exception.Message)
   }

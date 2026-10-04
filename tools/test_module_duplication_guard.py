@@ -1,26 +1,10 @@
-"""T-1353: one file, one live module object -- and say so when it is not.
+"""T-1348: direct tools modules share identity across import spellings.
 
-`tools/` is on `sys.path` and `tools` is a package, so every file here has two
-resolvable spellings. The DECLARED harness never mixes them: a full
-`discover -s tools` import of every test module produces zero files with two
-live objects, because discover imports them flat and they flat-import their
-siblings. The mix does produce it --
-
-    python -m unittest tools.test_guard_hostile_matrix tools.test_hermetic_env
-
-loads the named modules DOTTED while they flat-import their siblings, and three
-files then carry two module objects each. That is not a curiosity: the affected
-modules hold the harness's own state. `test_hermetic_env` holds the
-host-session snapshot isolation restores from, `test_guard_hostile_matrix`
-holds the handles that keep disposable fixtures alive.
-
-T-1353 made that state cooperate rather than duplicate, and this file is the
-other half: the condition is MEASURED, so a regression is visible instead of
-being something someone notices years later while debugging a hung suite.
-
-The claim is deliberately scoped to what is true: green for the declared
-harness, and a red control proving the detector fires on the mix rather than
-being green because it looks at nothing.
+The declared discovery and the mixed package/flat form must both load one
+live object per file. CLI mutable state and test-harness state then have one
+owner. A deliberate second execution through an explicit file-location spec
+bypasses ordinary import routing and supplies the detector's known-bad
+control; fixing ordinary imports must never make the detector blind.
 """
 
 from __future__ import annotations
@@ -71,6 +55,16 @@ if MODE == "discover":
 else:
     loader.loadTestsFromNames(sys.argv[2:])
 
+assert not loader.errors, loader.errors
+
+if MODE == "forced-duplicate":
+    import importlib.util
+    original = sys.modules["test_hermetic_env"]
+    spec = importlib.util.spec_from_file_location("t1348_forced_duplicate", original.__file__)
+    duplicate = importlib.util.module_from_spec(spec)
+    sys.modules[spec.name] = duplicate
+    spec.loader.exec_module(duplicate)
+
 by_file = {}
 for name, module in list(sys.modules.items()):
     path = getattr(module, "__file__", None)
@@ -101,7 +95,7 @@ def _probe(mode: str, *names: str) -> dict:
         env=hermetic_env(),
         timeout=900,
     )
-    if "<<<DUP>>>" not in completed.stdout:
+    if completed.returncode or "<<<DUP>>>" not in completed.stdout:
         raise AssertionError(
             f"probe exited {completed.returncode}\n{completed.stdout[-1500:]}\n"
             f"{completed.stderr[-1500:]}"
@@ -116,24 +110,20 @@ class DeclaredHarnessTests(unittest.TestCase):
         self.assertGreater(report["loaded"], 100, report)
         self.assertEqual(report["duplicated"], [], report)
 
-    def test_the_detector_fires_on_the_mixed_form(self) -> None:
-        """The red control: a guard that cannot go red measures nothing.
-
-        This is the invocation that produces the condition, so the detector
-        must SEE it. The mixed form is not being endorsed by being measured --
-        the case above is the one that has to stay clean.
-        """
+    def test_the_mixed_form_shares_every_loaded_file(self) -> None:
         report = _probe(
-            "names",
-            "tools.test_guard_hostile_matrix",
-            "tools.test_t1327_zero_manual_recovery",
-            "tools.test_hermetic_env",
+            "names", "tools.test_guard_hostile_matrix",
+            "tools.test_t1327_zero_manual_recovery", "tools.test_hermetic_env",
         )
-        self.assertTrue(
-            report["duplicated"],
-            "the mixed form stopped producing duplicates, so this control no "
-            f"longer proves the detector works: {report}",
+        self.assertGreater(report["loaded"], 20, report)
+        self.assertEqual(report["duplicated"], [], report)
+
+    def test_the_detector_fires_on_a_forced_second_copy(self) -> None:
+        report = _probe(
+            "forced-duplicate", "tools.test_guard_hostile_matrix",
+            "tools.test_t1327_zero_manual_recovery", "tools.test_hermetic_env",
         )
+        self.assertIn("tools/test_hermetic_env.py", report["duplicated"], report)
 
 
 class CooperatingHarnessStateTests(unittest.TestCase):

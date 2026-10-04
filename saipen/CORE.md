@@ -4,8 +4,8 @@
 
 <!-- RULE-OWNER: CONTEXT-BUDGET-01 -->
 
-CORE owns authority, durable state semantics, the state machine, deterministic
-selection, completion truth, and high-level recovery. Closed executable sets
+CORE owns authority, durable state, the state machine, deterministic
+selection, completion truth and high-level recovery. Closed executable sets
 live in `REGISTRY.json`; command semantics live in `COMMANDS.md`; operation
 mechanics live in `OPS.md`. Prose is never a runtime database.
 
@@ -79,9 +79,9 @@ external validation mirror. Unknown fields refuse.
   may carry `converge_target`. Current-schema state with history requires
   `last_event`; current-schema state requires `style_contract`.
 - `schema_version` below current is readable legacy and upgrades at the next
-  checkpoint. A future incompatible schema or protocol major forces read-only
-  refusal. `saipen_version` is the installed `VERSION` major; missing/unreadable
-  `VERSION` forbids a guessed write.
+  checkpoint. Incompatible future schema/major forces read-only refusal.
+  `saipen_version` is the installed `VERSION` major; missing/unreadable VERSION
+  forbids writes.
 - `updated` and claim timestamps are real UTC ISO-8601 (`Z` or `+00:00`). Read
   the clock; never estimate or fabricate time.
 - `last_event` equals the highest real E-ID across sealed and active history.
@@ -128,7 +128,12 @@ BOARD is Work authority. It contains `## DOING`, `## TODO`, `## DONE`, and
 - DOING represents the one active Core Work and carries the current owner and
   real claim time. Assignment records do not create a second DOING ticket.
 - A permanently unsatisfiable ticket, or Work owned by an isolated producer,
-  stays BLOCKED rather than poisoning the deterministic TODO queue.
+  stays BLOCKED with its exact reason. This includes permanent warning owners
+  and conditions no credential, operator decision or external resource can
+  satisfy. Leaving them TODO poisons PICK-01 with apparently workable Work
+  that Core cannot complete.
+- Reject unknown ticket fields: the closed list is owned by `REGISTRY.json`,
+  as declared above. Do not duplicate it in prose or silently pass extras.
 - BOARD is not append-only. CLEAN prunes closed prose after durable evidence
   exists in LOG/CHANGELOG. The validator warns when cold-start size exceeds its
   soft budget.
@@ -166,9 +171,9 @@ LOG is append-only event authority. Each line is one bounded UTF-8 event:
 - Attempt OPEN/CLOSE events use the same operation identity and preserve the
   Work/Attempt distinction.
 - When active LOG crosses its cap, seal complete lines to the next monotonic
-  `.saipen/logs/LOG-NNN.md`. Seal by staged file plus fsync/atomic replace;
-  never begin below the cap. Recovery detects already-completed seals and is
-  idempotent. Ordinary append also preserves the preceding line boundary.
+  `.saipen/logs/LOG-NNN.md` via staging, fsync and atomic replace. Never seal
+  below cap. Recovery recognizes completed seals idempotently; append preserves
+  the preceding line boundary.
 - Sealed history is cold. Read it only for parent-chain, counter-rebuild,
   audit, or explicit forensic work.
 
@@ -184,16 +189,13 @@ escaped defect to the exact earlier PASS event without rewriting either event.
 <!-- RULE-OWNER: EVIDENCE-RETENTION-01 -->
 
 - `EVIDENCE-SANDBOX-RETENTION-001` is eliminated by keeping execution
-  environments outside durable `.saipen` evidence under one explicitly owned
-  temporary root. Evidence retains the smallest sufficient proof, never a
-  complete synthetic HOME, dependency/package cache, provider profile,
-  duplicated repository, `node_modules`, build tree, or matrix sandbox.
-  Terminal success, failure, and blocked runs extract bounded proof, remove
-  only registered run-owned ephemera, and write a retention manifest.
-  A cumulative per-ticket hard-threshold excess refuses terminal finalization
-  before cleanup unless retained artifacts explicitly carry sufficient
-  `large_evidence_required` reasons. Refusal reports total bytes and largest
-  paths and leaves durable proof and the run-owned root available for diagnosis.
+  environments in one owned temporary root outside durable `.saipen` evidence.
+  Retain minimal proof, never synthetic HOME, caches, provider profiles,
+  repository copies, `node_modules`, build trees or matrix sandboxes. Every
+  terminal run extracts proof, removes only registered run-owned ephemera and
+  writes a retention manifest. Per-ticket hard-threshold excess refuses
+  finalization before cleanup unless sufficient `large_evidence_required`
+  reasons exist. Report total/largest paths; preserve proof and the run root.
 - Historical evidence is classified `DURABLE_REQUIRED`,
   `EPHEMERAL_REPRODUCIBLE`, `SUPERSEDED`, or `UNKNOWN` before cleanup. Only
   proven reproducible or superseded data is automatically collectable;
@@ -204,13 +206,11 @@ escaped defect to the exact earlier PASS event without rewriting either event.
 - `.saipen/KNOWLEDGE/` stores verified, reusable project facts. Do not copy
   tasks, logs, guesses, credentials, or protocol rules there.
 - Optional `KNOWLEDGE/cards/*.md` lessons are promoted only when verified,
-  reusable, decision-bearing, not cheaply derivable, non-duplicate,
-  non-transient, and safe. Any false condition means no card; ordinary Work
-  defaults to zero and normally promotes at most one independent lesson.
+  reusable, decision-bearing, not cheaply derivable, non-duplicate, non-transient
+  and safe. Otherwise no card; default zero, normally at most one lesson.
 - `KNOWLEDGE/INDEX.md` is a generated, deletable projection. Retrieval loads
-  only relevant active cards; superseded cards remain forensic evidence and
-  need one explicit active replacement link. Opening memory alone logs nothing;
-  a discretionary decision materially changed by it names the source in evidence.
+  relevant active cards only. Superseded cards remain forensic with one active
+  replacement link. Reads log nothing; influenced decisions cite their source.
 - `.saipen/kitchen/` stores transient plans, digests, generated packages, and
   rollback material. It is never canonical state and may use simpler writes.
 - `.saipen/intake/` obeys `SOURCE-AUTHORITY-01`; source bodies, contracts, and
@@ -241,45 +241,34 @@ escaped defect to the exact earlier PASS event without rewriting either event.
   claim may be adopted only after checking recent LOG/STATE/filesystem evidence
   and recording the handover.
 - `agent` is a stable acting seat, not provider/model telemetry. Bare continuation
-  inherits STATE.agent. Explicit handover records old and new seats before the
-  first admissible mutation. Unknown runtime metadata remains UNKNOWN.
-- Host admission uses the same continuation rule: an explicit actor carrier is
-  checked as the acting actor; without one, canonical `STATE.agent` is inherited.
-  Host session ids, UI slots, process ids, titles and ports never become actors.
-  An explicit carrier is provenance, not authentication, and cannot override a
-  foreign live owner or repair contradictory canonical ownership.
+  and host admission inherit STATE.agent without an explicit actor carrier.
+  Check explicit carriers; they prove provenance, not authentication, and cannot
+  override foreign live owners or contradictory ownership. Host session ids,
+  slots, pids, titles and ports are never actors. Handover records both seats
+  before mutation; unknown runtime metadata stays UNKNOWN.
 - Host-event preflight closes the protected-namespace shell bypass: shell text
-  visibly naming a `.saipen` path is refused before execution, while a
-  standalone canonical `saipen <verb>` keeps its operation exemption and
-  ordinary source-development shell use remains available. The same preflight
-  resolves a shell command's destructive EFFECTS and judges each one exactly
-  as the file-tool effect it is; an operand or working directory it cannot
-  prove is refused as unresolved, never admitted. It is an accidental-mutation
-  barrier over explicit command text, not a sandbox: obfuscated or dynamically
-  computed paths stay outside its proof. Exact verb/wrapper vocabulary and
-  resolution bounds live in `OPS.md` (`OPS-EFFECT-01`).
+  naming `.saipen` refuses before execution, except standalone canonical
+  `saipen <verb>`. Ordinary source-development shell use remains available.
+  Destructive EFFECTS receive file-tool rules; unproved operands/cwd refuse
+  as unresolved. Explicit-text proof is no sandbox for obfuscated/computed
+  paths. OPS-EFFECT-01 owns verb/wrapper vocabulary and resolution bounds.
 - The exact built-in OpenCode `task` call is consequential delegation, not an
-  unnamed file mutation. It passes normal canonical state, actor and recovery
-  admission; the delegated session's concrete tool calls receive their own
-  guard decisions. A native child-session smoke proves ordinary source writing
-  proceeds while protected structured and shell mutations are refused.
-  Namespaced or unclassified task-like tools retain the unresolved refusal.
+  unnamed mutation. It requires canonical state, actor and recovery admission;
+  child tool calls receive their own guards. Namespaced or unclassified
+  task-like tools retain the unresolved refusal.
 - Core has one writer and at most one DOING ticket. A second writer uses the
   project writer lock; lock timeout refuses rather than races.
 - When active Work A discovers required Work B, `ticket block-for A B REASON`
   atomically moves A from DOING to BLOCKED, adds the durable `A needs B` edge,
   and records A's `blocked_on`, `resume_phase`, and `resume_transition_from`.
-  The reservation makes B the only claimable continuation even under an
-  explicit priority override. A is neither DONE nor active while B executes.
-  B's DONE transaction consumes the reservation, moves A back to DOING, and
-  restores its saved phase in the same journaled commit. If B remains TODO or
-  BLOCKED, A remains BLOCKED. Recovery replays the same all-or-nothing plan.
+  B is the only claimable continuation, even under priority override. A stays
+  BLOCKED until B's DONE transaction atomically restores A and its saved phase.
+  Recovery replays this reservation all-or-nothing.
 - A BLOCKED Work ticket is lifecycle truth, not a blanket host-tool denial.
-  Diagnostic reads/search/status and canonical recovery remain admissible.
-  Ordinary consequential mutation requires a valid binding plus exactly one
-  STATE-bound DOING Work owned by the acting seat; source-receipt completeness
-  is a closure gate, not tool-effect authority. An explicitly/host-bound
-  project identity never authorizes mutation outside its root or lineage.
+  Reads/search/status/recovery remain admissible. Consequential mutations need
+  valid binding and one STATE-bound DOING owned by the actor. Source completeness
+  gates closure, not tool effects. Bound identity grants no outside-root/lineage
+  mutation.
 - Attempt follows claim. Before handover or phase switch, close/park any live
   Attempt truthfully; an unresolved foreign Attempt blocks adoption.
 - Producer parallelism is allowed only under the producer protocol: isolated
@@ -307,33 +296,30 @@ action. A success message from the writer is not evidence; readback is.
 
 At continuation, dirty work is normal. Attribute it against DOING, LOG, and
 kitchen, then against the XPATCH receipts in `.saipen/exchange/xpatch/`. A
-change is attributed foreign Work when a receipt's target lineage, exact path
-and recorded hash all match. A receipt proves provenance, never correctness:
-re-read those bytes and verify them as ordinary Work, and never stop merely
-because they exist. Attributable changes are in-flight Work.
-Unattributed changes are user data: never commit, revert, stash, delete, or
-overwrite them. Stop only when an unattributed edit overlaps a file the
-authorized Work must change.
+foreign receipt must match target lineage, exact path and hash. It proves
+provenance, not correctness: reread/verify the bytes; their existence is no stop.
+Attributable changes are in-flight Work. Unattributed changes are user data:
+never commit, revert, stash, delete or overwrite them. Stop only on overlap with
+a file authorized Work must change.
 
 #### Recovery
 
 Recovery is read-only in `mode: read-only`. Otherwise:
 
 1. Preserve a corrupt/stale STATE under `.saipen/recovery/<timestamp>-STATE.md`.
-2. Recover interrupted journal operations before reconstructing checkpoint
-   metadata. Conflicting or ownership-unsafe evidence refuses.
-3. BOARD DOING outranks LOG heuristics. Without DOING, use the newest open
-   ticket-bearing event; if none exists, rebuild DONE/none and route normally.
-4. Rebuild phase/task/next action from BOARD and LOG, not mtimes alone. Mtimes
-   may distinguish an interrupted write only after ruling out claim refresh.
-5. Rebuild schema/style/last_event and goal counters from the complete event
-   chain. Count from the newest goal or reauthorization marker, including sealed
-   segments. Never invent legacy evidence.
-6. Reconcile derived BOARD checkboxes and STATE counters. Validate, then route.
+2. Recover journals first; refuse conflicting or ownership-unsafe evidence.
+3. BOARD DOING outranks LOG. Otherwise use the newest open ticket event;
+   absent one, rebuild DONE/none and route.
+4. Derive phase/task/next action from BOARD/LOG. Mtimes distinguish interrupted
+   writes only after excluding claim refresh; they are never sole proof.
+5. Derive schema/style/last_event/counters from the full event chain, including
+   sealed segments, starting at the newest goal/reauthorization. No invented
+   legacy evidence.
+6. Reconcile BOARD checkboxes and STATE counters; validate, then route.
 
 Recovery MUST be idempotent. A second run over unchanged evidence writes
-nothing. Deterministic drift repairs automatically; contradictory semantic
-authority returns a precise CORRUPT/BLOCKED result rather than a guessed state.
+nothing. Repair deterministic drift; contradictory authority returns precise
+CORRUPT/BLOCKED, never a guessed state.
 
 ### 1.6 Core State Machine & Ticket DAG
 
@@ -341,24 +327,19 @@ authority returns a precise CORRUPT/BLOCKED result rather than a guessed state.
 <!-- RULE-OWNER: PHASE-DELTA-01 -->
 
 `REGISTRY.json.phases` is the executable DFA, including the phase enum, legal
-edges, from-any-phase destinations, and ticket-bearing subset. Runtime,
-validator, STATE validation, and phase-doc existence checks consume that same
-registry object.
+edges, from-any-phase destinations and ticket-bearing subset. Runtime and all
+validation consume this object.
 
 - Core lifecycle is INIT → PLAN → SCOUT → BUILD → VERIFY → REVIEW → SHIP →
   DONE, with only registry-declared edges and universal BLOCKED exits.
 - SHIP's backward edge to BUILD is only for a fixable pre-publish preflight;
   successful publication cannot return to editing.
 - Explicit commands may enter registry `any_from` phases from any phase. Command
-  recognition does not make SHIP from-any-phase; phase SHIP begins only through
-  approved REVIEW.
-- Workable means TODO, every dependency DONE, no blocker, and no foreign live
-  claim. `PICK-01`: choose the topmost workable line. Board order is priority;
-  explicit override cannot bypass eligibility or authorization. The override is
-  reachable as `saipen claim <T-###> --explicit` and records the ticket it
-  stepped over in its own LOG event, so ordering can be overridden but never
-  silently. A refusal that names a remedy no surface exposes drives the
-  operator to hand-edit BOARD.md, which is the one path OPS.md 4a forbids.
+  recognition never bypasses SHIP's approved-REVIEW prerequisite.
+- Workable means TODO, all dependencies DONE, no blocker or foreign live claim.
+  `PICK-01` selects the topmost workable line in BOARD priority order.
+  `saipen claim <T-###> --explicit` logs the skipped ticket; it never bypasses
+  eligibility or authorization. Expose remedies; never require BOARD hand-edits.
 - VERIFY runs real evidence. Failure loops through diagnosis/repair, not success
   relabeling. At its bounded dead-hypothesis/fix-cycle cap, block the Work and
   continue other workable tickets. Manual-verify waits for human confirmation.
@@ -375,8 +356,8 @@ registry object.
 ### 1.7 Workspace Hygiene
 
 - Discover repository policy before editing. Preserve existing style and user
-  changes. Search for an existing helper, standard-library solution, then an
-  existing dependency before writing a new private implementation.
+  changes. Reuse in order: existing helper, standard library, dependency, then
+  new private implementation.
 - Temporary artifacts live in kitchen or a bounded temp directory. Never clean
   ambiguous files. CLEAN owns safe pruning and confirmation boundaries.
 - Do not commit generated caches, secrets, recovery journals, or producer
@@ -399,7 +380,7 @@ registry object.
   or the installed protocol's declared extension surface. Never scan unrelated
   directories or user memory for command ownership.
 - A project extension may add a command/phase hook only with an explicit owner,
-  validation, and conflict rule. Two active owners of one word are a refusal.
+  validation and conflict rule. Refuse two active owners of one word.
 - Legacy and current extension layouts may coexist only when one is a declared
   redirect. Otherwise choose neither and report the ambiguity.
 - Extensions may tighten capability and isolation. They cannot weaken CORE,
@@ -419,54 +400,69 @@ COMMANDS prose to reconstruct commands.
   malformed quoting refuses the whole compound. Each recognized segment gets a
   terminal disposition. Default policy is registry STOP_ON_FAILURE.
 - A shortcut payload belongs to its destination, which validates it. Unknown
-  short tokens remain unknown. Public command vocabulary is not renamed or
-  compressed as a documentation optimization.
+  tokens stay unknown. Documentation compression never renames commands.
 - `cc`, bare `saipen`, and `saipen continue` use one recovery/reconcile/route
-  implementation. Persisted intent decides resume behavior.
-  With `execution_intent: converge`, continue resumes convergence from the
-  persisted target on a cold restart, never from a lucky `next_action` string.
-  `ccc` binds ship convergence; `sc` is the serial crew circuit, never style or
-  parallel mode.
+  implementation. Persisted intent owns resume.
+  With `execution_intent: converge`, continue resumes convergence from its
+  persisted target on cold restart, never a lucky `next_action`.
+  `ccc` binds ship convergence; `sc` is serial crew, never style or parallel mode.
 - Continue-to-improve fallthrough obeys `CMD-CONTINUE-01`: only after recovery,
-  active/blocked/queued/follow-up Work is exhausted; resume an active cycle;
-  at most one new discovery per invocation; never recurse into a carousel.
+  active/blocked/queued/follow-up Work is exhausted. Resume its cycle;
+  discover once per invocation, without recursion.
 - Phase-switching commands checkpoint live Work first. Stop is a checkpointed
-  pause. Status is read-only and reports waits, blocked Work, unverified claims,
-  last validation, and meaningful staleness without running validation.
+  pause. Read-only status reports waits, blocked Work, unverified claims, last
+  validation and staleness; it never runs validation.
 - Producer OUTBOX readiness is evidence. Never edit a draft/blocked OUTBOX to
   `ready`; run/fix the producer and verify the package.
 - `hush <task>` changes narration through `EXEC-HUSH-01`; it changes no safety,
-  lifecycle, evidence, or final-report duty.
+  lifecycle, evidence or final duty.
 - `saipen user-request <text>` is the USER_INTERRUPT surface (orchestration
-  repair, T-1302). When the current user supplies a NEW actionable
-  implementation request (bug report, new feature/target, independent UI
-  change) that no active Work/source authority already represents, persist it
-  through `saipen user-request` BEFORE performing further completion/block/SHIP
-  mutations on unrelated active work. It captures a durable source receipt and
-  projects one ticket: only an original operator carrier grants `user_explicit`
-  (SOURCES/REQUEST-PROVENANCE-01). Unwitnessed ingress is a local P2-or-lower
-  candidate, never an interrupt; active Work stays intact until safe routing.
-  Do NOT ticket read-only questions, explanations,
-  acknowledgements, refinements of the active ticket, or stop requests.
+  repair, T-1302). Capture NEW actionable implementation requests not already
+  represented by active Work/source BEFORE unrelated completion/block/SHIP
+  mutations. Persist one receipt/ticket; only an original operator carrier
+  grants `user_explicit` (REQUEST-PROVENANCE-01). Unwitnessed ingress remains
+  a local P2-or-lower candidate; no interrupt or active-Work displacement.
+  Read-only questions, explanations, acknowledgements, active-ticket
+  refinements and stop requests create no ticket.
 - `saipen userperson` is DEFAULT DIRECTION, never ORDER. Precedence is
   current explicit request > project/task requirements > SAIPEN normative rules > verified evidence > project USERPERSON > global USERPERSON.
-  A preference never overrides a higher source or a verified fact. Report once
-  at completion: `USERPERSON alignment:` when a preference materially
-  influenced a decision the task did not already specify, or a compact
-  `USERPERSON deviation:` when a relevant one was deliberately overridden by
-  stronger evidence or requirements. Emit neither when USERPERSON had no
-  material effect, and never credit it for an explicit current instruction.
-  `OPS.md` owns source locations, validation and write mechanics.
+  Preferences never override higher authority or verified facts. At completion
+  report `USERPERSON alignment:` for material discretionary influence, or
+  `USERPERSON deviation:` for a relevant preference overridden by evidence or
+  requirements. Otherwise omit both; never credit an explicit task instruction.
+  OPS owns source locations, validation and writes.
+- Prevent shortcut invention: read the declared row, then execute it or its
+  exact no-op. Recall is not authority. Length grants no semantics; repeated
+  forms are distinct only when declared. Triplication cannot invent a command.
+- Proposal exception: `dd` followed by a bare goal key in the SAME message
+  starts that plan in goal mode. Bare `dd` ends at `goal_mode: false`;
+  separate `dd` and `cc` messages do not form this compound. A later lone goal
+  key neither becomes a continuation alias nor opens a goal.
+- Prevent unearned budget renewal: resume (`cc`, `saipen continue`, bare
+  `saipen`) resets `goal_waves`/`goal_tickets` only at or above caps under
+  MAINTENANCE's entry contract. Bare `saipen goal` is create/pivot usage,
+  never a counter reset. Stop checkpoints and returns control.
+- Prevent invented handoffs: unproduced `saipen package ee` returns
+  `Not ready: run ee first.`; `saipen package qq` without a main-project
+  surface returns `Not ready: run qq first.`. Refusal changes no project file,
+  checkpoint, Git ref or remote.
 
 ### 1.11 Determinism Invariants
 
 <!-- RULE-OWNER: PICK-01 -->
 
+Prevent future-stamp deadlock: repair with a DEC naming original/replacement
+stamps and an INHERITED enclosing-event minute when no measured minute exists.
+Do not wait for the clock or rewrite append-only LOG; preserve the original in
+the correction evidence.
+
 Action priority is `REGISTRY.json.routing_precedence`; first match wins:
 
 1. **RECOVER** interrupted operations and deterministic state drift.
 2. **OBEY** the current user command/objective. It supersedes persisted
-   `next_action`; every compound segment still receives a disposition.
+   `next_action`; every compound segment receives a disposition. Prevent lost
+   deferred commands: persist an ineligible segment in `next_action` if legal
+   next continue, otherwise at the top of TODO; never drop it into chat only.
 3. **UNBLOCK** only from fresh evidence or explicit authority. Internal ordering,
    stale evidence, or repair is agent work, not a human choice.
 4. **FINISH** the one DOING ticket, whoever originally claimed it after legal
@@ -476,32 +472,29 @@ Action priority is `REGISTRY.json.routing_precedence`; first match wins:
    maintenance. Convergence never invents ADD work.
 
 - Core carries at most one DOING ticket in total. Explicit concurrency belongs
-  to an extension with isolated owners and merge semantics.
+  to an extension with isolation and merge semantics (§1.4).
 - Read every decision-bearing file/list/output to EOF. Truncated observation
-  cannot prove emptiness, closure, or lack of workable Work.
+  proves neither emptiness, closure nor lack of workable Work.
 - Missing product intent, destructive authority, secrets, or external choice is
-  a concrete WAIT. Operational choices and repair are not. Before user wait,
-  name the missing authority, why repository evidence cannot answer, and what
-  consequence depends on it.
+  a concrete WAIT; operational choices/repair are not. Name missing authority,
+  why repository evidence cannot supply it and its dependent consequence.
 - Every non-read-only session that acts leaves durable evidence. A read-only
-  session reports exactly what was inspected and what was deliberately not
-  written. Thinking and chat narration are not progress.
+  session names inspected scope and omitted writes. Thinking/chat is not progress.
 - Do not guess. A next step requiring “presumably” or an undelegated default
   stops at the exact missing fact.
 
 ### 1.12 Default Goal-Driven Execution
 
 - Actionable natural-language objectives enter `execution_intent: goal` without
-  requiring a special command. Read-only and plan-only requests remain so.
+  a special command; preserve read-only/plan-only scope.
 - `MAINTENANCE.md` owns goal entry, counters, reauthorization, and safety valve.
   New objective pivots; bare continuation resumes and never replaces it.
 - Continue while an authorized actionable path remains. Terminal result is
   COMPLETE only when acceptance, local behavior, regressions/integration, and
   persistent state all pass; BLOCKED only for a concrete hard boundary.
 - Failed verification routes diagnose → repair → verify. It is not a blocker by
-  itself. Once acceptance passes, stop; do not add unrelated polish. Completion
-  obeys phase read-only locks, destructive confirmation, source closure, and the
-  strongest available verification; no autonomy flag bypasses them.
+  itself. Stop at acceptance; no unrelated polish. Autonomy never bypasses phase
+  read-only locks, destructive confirmation, source closure or strongest checks.
 - Interruption or context pressure checkpoints PARTIAL/resumable state and never
   masquerades as completion.
 
@@ -516,9 +509,8 @@ Dry-run plans the same semantics against projected post-recovery state, writes
 nothing, and must surface the same refusal class as apply.
 
 - Structural corruption, dead/incompatible identity, and contradictory records
-  are CORRUPT. Deterministic drift is REPAIRED/WARN. Legacy evidence stays
-  legacy/unknown. Only irreducible semantic ambiguity is BLOCKED, naming the
-  exact record and decision.
+  are CORRUPT; deterministic drift is REPAIRED/WARN; legacy stays legacy/unknown.
+  Only irreducible semantic ambiguity is BLOCKED; name its record and decision.
 - Validator output is a sensor, never authority to falsify state. Repair order:
   preserve truth → preserve valid evidence → refresh stale evidence → reconstruct
   traceability → normalize representation → revalidate.
@@ -529,11 +521,11 @@ nothing, and must surface the same refusal class as apply.
   `CREW_STALLED`, not silent polling. Runtime-home drift reports both homes and
   a safe action; it never falls back silently.
 - Ship converges approved Work to shipped or a genuine terminal boundary.
-  Fixable prerequisites are repaired autonomously; undefined product intent is
-  a concrete wait. Ship never invents requirements to become green.
+  Repair fixable prerequisites autonomously; wait for undefined product intent.
+  Never invent requirements to become green.
 - Completed but untracked Work is reconstructed from durable evidence. Umbrella
-  Work is legal only when every finding retains identity, disposition, evidence,
-  and verification. Evidence freshness never erases finding validity.
+  Work preserves every finding's identity, disposition, evidence and verification.
+  Stale evidence never erases a valid finding.
 - Authorization, enforcement, and audit are distinct. Unknown enforcement is
   reported as unavailable, never “prevented”. Mutation provenance uses KNOWN,
   UNKNOWN, and UNAVAILABLE literally; mechanical mismatch does not imply intent.

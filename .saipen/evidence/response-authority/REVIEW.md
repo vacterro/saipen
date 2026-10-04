@@ -1,6 +1,7 @@
-# Authority / response review — open verification notes
+# Authority / response review
 
-This artifact records machine-work findings; it does not claim closure.
+Independent review is complete for the authority/delivery implementation.
+Final acceptance remains pending the current full declared core run.
 
 ## Proven causal owners
 
@@ -62,29 +63,69 @@ adjacent long response exists at
 .saipen/evidence/T-1583-response-escape-20261001/reply.txt. The complete supplied
 mission and repeated-turn steering are SRC-165 and SRC-166, respectively.
 
-## Pending final review / evidence
+## Independent controls and findings
 
-- Full declared core is running; resolve actual red tests rather than baseline.
-- Format changed Python owners, then rerun the paired oracle with identical
-  final verifier bytes against the original f462ddc018977f06598f332356f9229f23b2e830
-  production and final live production. Earlier RED records remain preserved.
-- Validate the canonical delivery candidate itself, including style/state
-  constraints, not merely the rejected model text; fail compactly if facts are
-  malformed. Never deliver an unvalidated oversized original.
-- Check the Codex detail capability claim: Stop has no turn ingress, and its
-  current transport does not forward a launch carrier's readable text. Either
-  route the existing read-only carrier honestly or mark depth unavailable.
-- Complete normal compact status intent grammars without widening depth.
-- Expand lifecycle regression across BUILD/VERIFY/REVIEW/SHIP/finish, and test
-  explicit artifact / quote / fence / three fresh installed-route pressures.
-- Update only concrete new refusal/fail-site registry changes; retain budget
-  ceilings and the portable Python floor (local Python is 3.11.9).
-- Synchronize local installed generations through their canonical installers.
-  Codex hook trust is operator-owned; do not approve hashes or remove unrelated
-  inline hooks. Claude's operator-owned prompt style hook conflict is likewise
-  not permission to delete that hook. OpenCode already-running processes may
-  still have an older loaded plugin; on-disk parity is not proof of hot reload.
-- Complete T-1510's fresh core evidence and zero-change reconciliation through
-  canonical lifecycle. No fake own-patch or publication-dependent inheritance.
-- Record the actual final validation/core/installed matrix before terminal
-  acceptance; unsupported or post-render hosts remain honestly limited.
+The same final ingress/digest/delivery oracle is `12b954a7d9c4664a` on both
+subjects. Original f462ddc0 production is RED (34 tests, 39 failures and 12
+errors); current production `56e4c53352b2ff2e` is GREEN (34 tests in 80.154s).
+The exact SRC-164 preemption and SRC-146 unblock failures are present in RED;
+missing new APIs account for some additional errors, not those incident failures.
+Records: `paired/head.json`, `paired/head.txt`, `paired/live.json`, `paired/live.txt`.
+Current verifier and production hashes were independently recomputed and match.
+E-11909/E-11910 bind this pair. No oracle or fixture was weakened between halves.
+
+The canonical delivery candidate itself is classified after rendering. Malformed
+facts fail compactly rather than delivering the oversized original. The lifecycle
+control covers SCOUT, BUILD, VERIFY, REVIEW, SHIP and finish. Exact human-request
+grammars preserve summary/brief compactness and explicit EN/ET/RU depth.
+
+Concurrent documentation additions produced a real full-core FAIL: 4770 tests,
+three new red, record `8ceffa6b28850c67-20261003T030014Z.json`. All three concerned
+context budgets. Shortening repeated CORE explanations preserved the new rules
+and the registry-owned closed vocabulary. The original current bytes remain in
+`CORE-before-budget-fix.md`; no foreign edit was reverted. No ceiling or test
+changed. After repair, the affected modules pass all 51 tests (`budget-tests.txt`):
+CORE 31314 bytes, largest ordinary phase 39987/40960, human Markdown
+308195/308224. The new full declared core is still pending; an older passing
+generation is not spent as current proof.
+
+## Installed boundary observations
+
+`installed-dogfood/results.json` uses the installed OpenCode plugin and its
+installed delegated engine, not a source-engine override. Source/plugin hashes
+match. Three fresh sessions each replace oversized retrospective pressure with
+the same six-line, 216-character digest; the third pressure is ten times larger.
+Runnable operational prose is blocked with no delivered part. An explicitly
+requested specification is preserved on ordinary artifact turns. At an existing
+operational WAIT boundary, free-form artifact prose remains blocked by the
+control-surface requirement; the positive artifact fixture is not a WAIT fixture.
+
+Installed Codex standalone Stop events block all three oversized attempts and
+supply the canonical compact correction. These are synthetic transport controls,
+not proof that the active Codex process trusted or executed the hook. The real
+preflight remains `HOOK_TRUST_UNPROVEN`, dual hook representations remain, and
+Stop has `UNAVAILABLE_AT_STOP_NO_TURN_INGRESS` depth capability.
+
+Installed Claude standalone Stop events all refuse at admission, before response
+classification. No separated admission authority exists or was granted. A
+standalone installed prompt probe separately tests that pre-generation refusal;
+this does not prove live-host execution. The operator-owned prompt style hook
+conflict remains preserved. No response-layer PASS is claimed beyond admission.
+
+OpenCode is a completed-part gate, not a token-stream interceptor. Claude/Codex
+Stop are post-render, permit one correction, cannot retract visible text, and do
+not claim fail-closed re-entry. OpenCode running-process reload is NOT_PROVEN.
+ZAICODE and ZCode production remain ADVISORY with no final hook; canonical
+installers refreshed their instructions, without inventing mechanical protection.
+Intermediate suppression remains ADVISORY and separate on every inspected host.
+Host-required commentary in this session prevents a silence guarantee.
+
+## Remaining acceptance boundary
+
+Source clauses are mapped separately before canonical dispositions. Final
+conformance and the current full-core result must be recorded before T-1600
+closes. T-1510's owed fresh-core/zero-change reconciliation remains explicit
+continuation work after this dependency; no fake personal patch or publication
+claim is a remedy. SRC-165 Part Q excludes release publication. Shared local
+evidence closure must preserve that limit. No reusable memory card is promoted:
+the lesson duplicates the existing authority and evidence rules.

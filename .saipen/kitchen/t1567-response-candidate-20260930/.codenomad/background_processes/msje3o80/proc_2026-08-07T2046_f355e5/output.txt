@@ -1,2 +1,0 @@
-PASS: a real root `nul` entry is excluded from audit snapshots
-FAIL: release-ledger divergence probe -- clean synthetic ledger is not clean

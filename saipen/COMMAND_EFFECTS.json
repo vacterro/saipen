@@ -111,6 +111,7 @@
         "capture": "INGRESS",
         "recover": "DIAGNOSTIC",
         "reconcile": "RECOVERY",
+        "normalize": "RECOVERY",
         "req": "EXECUTION",
         "disp": "EXECUTION",
         "close": "EXECUTION",

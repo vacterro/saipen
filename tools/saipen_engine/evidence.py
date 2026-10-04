@@ -37,6 +37,7 @@ from __future__ import annotations
 import hashlib
 import json
 import shutil
+import stat
 import tempfile
 import time
 from pathlib import Path
@@ -303,9 +304,12 @@ class EvidenceRun:
                 continue
             self._guard(path)
             if path.is_dir() and not path.is_symlink():
-                shutil.rmtree(path)
+                shutil.rmtree(path, onerror=self._retry_readonly_remove)
             else:
-                path.unlink()
+                try:
+                    path.unlink()
+                except PermissionError as exc:
+                    self._retry_readonly_remove(Path.unlink, path, (type(exc), exc, None))
             removed.append(raw)
             self.ephemeral.remove(raw)
             self.discarded.append(
@@ -316,6 +320,22 @@ class EvidenceRun:
                 }
             )
         return removed
+
+    def _retry_readonly_remove(self, operation, raw_path, exc_info) -> None:
+        """Retry a read-only removal only inside this run's owned allocation."""
+        error = exc_info[1]
+        if not isinstance(error, PermissionError):
+            raise error
+        path = Path(raw_path)
+        root = self._owned_temp_root
+        resolved = path.resolve()
+        if path.is_symlink() or (resolved != root and not _is_within(resolved, root)):
+            raise EvidenceRefusal(f"read-only retry is outside the run-owned root: {path}")
+        mode = path.stat().st_mode
+        if mode & stat.S_IWRITE:
+            raise error
+        path.chmod(mode | stat.S_IWRITE)
+        operation(path)
 
     def _cleanup_owned_root(self) -> bool:
         """Remove the exact root created by this run, never a caller path."""
@@ -328,7 +348,7 @@ class EvidenceRun:
             raise EvidenceRefusal(f"refusing unsafe runtime-root cleanup: {root}")
         if ".saipen" in {part.lower() for part in root.parts}:
             raise EvidenceRefusal(f"refusing .saipen runtime-root cleanup: {root}")
-        shutil.rmtree(root)
+        shutil.rmtree(root, onerror=self._retry_readonly_remove)
         self.discarded.append(
             {
                 "path": str(root),

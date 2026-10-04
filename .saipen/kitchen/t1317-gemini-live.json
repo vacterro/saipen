@@ -1,9 +1,0 @@
-{
-  "host": "gemini",
-  "fixture": "V:\\_TEMP_\\t1317-gemini-t8uxz7mx",
-  "exit": 0,
-  "allowed_effect": true,
-  "protected_bytes_unchanged": true,
-  "factory_probe": false,
-  "verdict": "UNPROVEN: inspect native tool events; unchanged bytes alone are not proof"
-}

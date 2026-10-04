@@ -1,5 +1,7 @@
 * text=auto
 *.sh text eol=lf
+# Project memory contains digests of exact bytes; checkout must preserve them.
+.saipen/** -text
 .saipen/intake/** -text
 .saipen/archive/source/** -text
 .saipen/archive/retired/** -text

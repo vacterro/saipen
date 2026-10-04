@@ -7,6 +7,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+      actions: read
     steps:
       # fetch-depth: 0 fetches tags. The default shallow checkout has none,
       # and both jobs read the tag list: the validator treats tags as half
@@ -17,6 +18,17 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+      # A tag must not publish bytes that never passed the complete workflow.
+      - name: Require green validation on this exact commit
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          sha="$(git rev-parse HEAD)"
+          verdict="$(gh api "repos/$GITHUB_REPOSITORY/actions/workflows/validate.yml/runs?head_sha=$sha&per_page=100" --jq '.workflow_runs | map(select(.status == "completed")) | sort_by(.run_number) | last | .conclusion // "missing"')"
+          if [ "$verdict" != "success" ]; then
+            echo "::error::commit $sha has no successful current validation run ($verdict)"
+            exit 1
+          fi
       # A tag whose VERSION file disagrees with it must not become a release.
       # v7.99.0 was published from a commit that still said 7.98.0, carrying
       # v7.98.0's notes and a VERSION asset reading 7.98.0 -- the tag had been

@@ -1,7 +1,0 @@
-Traceback (most recent call last):
-  File "V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\tools\test_audit_enqueue.py", line 127, in test_a_number_consumed_before_this_allocator_existed_is_never_reissued
-    self.assertEqual(self.enqueue("op-1")["layer"], 4)
-                     ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
-KeyError: 'layer'
-
-====

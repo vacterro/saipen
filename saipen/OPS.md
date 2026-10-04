@@ -165,6 +165,17 @@ no historical event is fabricated. `resolve-next-action` cannot override the
 plan, and the complete proposal is validated before approval is advertised.
 Legacy-DONE attestation and canonical block-park stay separate.
 
+Default-mode closure recovery (T-1605): after an explicit cohort finish refusal,
+a separate continuation can legitimately finish using the default own_patch
+mode. `ticket bind-cohort` repairs that unpublished ownership choice without
+replaying the completed lifecycle. Only the canonical original owner may bind
+verified DONE backed by an intact committed finish. Original row/finish proof,
+BOARD cohort fields, registry membership and one new DEC commit together; the
+active Work and goal counters are preserved. Source and journal read dependencies
+remain CAS-bound. Published Work/batches, legacy closure, different existing
+membership and conflicting hashes refuse with zero writes. Exact retries and
+dry-run write nothing. This operation creates no publication authority grant.
+
 ## 4. Idempotency
 
 Every mutating operation carries an op_id owned by its journal. A retry after

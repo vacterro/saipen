@@ -167,7 +167,7 @@ def main() -> int:
             return _Result(124, "", "timeout")
 
     def run_floor(root):
-        if sys.platform == "nt":
+        if os.name == "nt":
             try:
                 return subprocess.run(
                     [
@@ -213,7 +213,9 @@ def main() -> int:
     # keeps finding in its own checks.
     ctl_v, ctl_f = run_validate(pristine), run_floor(pristine)
     if ctl_v.returncode != 0 or ctl_f.returncode != 0:
-        who = "tools/validate.py" if ctl_v.returncode != 0 else "tests/validate.sh"
+        who = "tools/validate.py" if ctl_v.returncode != 0 else (
+            "tests/validate.ps1" if os.name == "nt" else "tests/validate.sh"
+        )
         bad = ctl_v if ctl_v.returncode != 0 else ctl_f
         print(
             f"FAIL: {who} rejects an UNMODIFIED copy (exit "

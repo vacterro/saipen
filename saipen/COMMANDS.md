@@ -10,13 +10,13 @@ global authority and deterministic priority rules.
 
 | Input | Routes to | Rule ref | Notes |
 |-------|-----------|-----------------|-------|
-| `gg` | `saipen goal` | CMD-ROUTING-01 | New goal; payload is the objective |
+| `gg` | `saipen goal` | CMD-ROUTING-01 | NEW GOAL ONLY; `gg <objective>` names it, and it is never a continuation alias -- `cc` resumes |
 | `hh` | `saipen hunt` | CMD-ROUTING-01 | Autonomous defect/improvement scan |
 | `ff` | `saipen focus` | CMD-ROUTING-01 | Read-only closer inspection |
 | `xx` | `saipen cut` | CMD-ROUTING-01 | `xx confirm <CUT-ID>` authorizes the planned mutation |
 | `vv` | `saipen build` | CMD-ROUTING-01 | Bounded foreground Work |
 | `zz` | `saipen undo` | CMD-ROUTING-01 | Restore the last safe milestone |
-| `cc` | `saipen continue` | CMD-CONTINUE-01 | Resume the active intent through deterministic routing |
+| `cc` | `saipen continue` | CMD-CONTINUE-01 | It enters convergence from `normal` and resumes `execution_intent: goal`, and it never asks for an objective; `cc <args>` is not a goal |
 | `ccc` | `saipen continue` | CMD-CONTINUE-01 | Converge target `ship`, then refresh stages J-M |
 | `st` | `saipen stop` | CMD-ROUTING-01 | Checkpoint and return control; `ss` retired |
 | `sss` | `saipen status` | CMD-ROUTING-01 | Read-only status |
@@ -78,14 +78,16 @@ global authority and deterministic priority rules.
 | `saipen ticket repair-metadata <T-###> --field source_receipts (--to <SRC-###> \| --legacy-unbound [--authority <SRC-###\|lineage-32hex>])` | RECOVERY: migrate malformed legacy metadata on historical DONE Work; `--to` needs an exact linked receipt, `--legacy-unbound` removes an unprovable token and preserves its bytes in an immutable `MR-NNNNNN` receipt; non-DONE rows and conflicting second migrations refuse with zero writes (T-1435) | CMD-ROUTING-01 |
 | `saipen ticket reasoning <T-###> --recurrence <text> --weak-model <text>` | EXECUTION: canonical writer for the strict-sweep reasoning gates; refuses unless a strict CONFIRMED PROTOCOL_VIOLATION disposition names the ticket | CMD-ROUTING-01 |
 | `saipen cohort [status\|ship] <C-###>` | batch publication authority | CMD-ROUTING-01 |
+| `saipen ticket bind-cohort <T-###> --cohort <C-###> --paths <p1,p2>` | RECOVERY: bind canonically finished, verified, unpublished own_patch DONE to a pending cohort; preserve original row/finish, current active Work and history; exact retry is byte-noop, published/legacy/foreign/conflicting bindings refuse (OPS.md) | CMD-ROUTING-01 |
 | `saipen source` | intake | CMD-ROUTING-01 |
-| `saipen source retire <SRC-###> --reason <CLASS> [--successor SRC-###] [--note TEXT]` | EXECUTION: receipt-only source retirement; cold-copies the original bytes, refuses while any unresolved actionable requirement would be discarded or live Work names the receipt (OPS.md) | CMD-ROUTING-01 |
-| `saipen source link <SRC-###> --work T-###` | EXECUTION: canonical multi-work membership (T-1437); adds ONE Work to a receipt's durable membership, never moves the historical primary `linked_work`, idempotent, refuses an unknown receipt / Work / integrity failure with zero writes | CMD-ROUTING-01 |
+| `saipen source retire <SRC-###> --reason <CLASS> [--successor SRC-###] [--note TEXT]` | EXECUTION: receipt-only retirement; preserve cold original bytes; unresolved clauses or live Work refuse (OPS.md) | CMD-ROUTING-01 |
+| `saipen source link <SRC-###> --work T-###` | EXECUTION: add one durable Work membership, preserve primary; idempotent; unknown receipt/Work or failed integrity refuses with zero writes (T-1437) | CMD-ROUTING-01 |
 | `saipen source append [--to <SRC-###>] [--class APPEND\|SUPERSEDE\|CLARIFICATION\|CONFLICT] [--delta implementation\|evidence\|review\|packaging\|context] [--supersedes <ID,...>] [--label TEXT] (--file <PATH> \| --hex <HEX> \| -- <TEXT>)` | INGRESS: make ONE operational handoff/brick durable against the controlling mission source (T-1461); verbatim immutable receipt with `amends:`, exact-digest dedupe, ordered per-source ledger; never edits the source it amends (SOURCES.md) | CMD-ROUTING-01 |
 | `saipen source apply-append <SRC-###>` | EXECUTION: project the oldest RECEIVED append into requirements, Work and the minimum truthful rewind; idempotent and crash-resumable; what it supersedes becomes SUPERSEDED, never deleted (SOURCES.md) | CMD-ROUTING-01 |
 | `saipen source appends` | DIAGNOSTIC: read-only per-mission append view status shares -- latest append, active and superseded clause counts, unprojected appends, affected Work | CMD-ROUTING-01 |
 | `saipen source recover` | DIAGNOSTIC: read-only orphan/crash diagnostic; never deletes or invents source intent | CMD-ROUTING-01 |
 | `saipen source reconcile <SRC-###> [--confirm]` | RECOVERY: read-only contradiction report; `--confirm` converges tombstone-authoritatively only on strong proof, else zero writes | CMD-ROUTING-01 |
+| `saipen source normalize [--dry-run]` | RECOVERY: journal BOARD ranges as explicit receipt IDs; malformed ranges refuse; preview writes zero | CMD-ROUTING-01 |
 | `saipen source quarantine <SRC-###> [--reason CODE]` | EXECUTION: preserve the exact active or archived body locally and exclude it from release/export; `--dry-run` previews without writing; does not close Work or waive coverage (SOURCES.md) | CMD-ROUTING-01 |
 | `saipen authority capture --file <UTF8_FILE>\|--hex <UTF8_HEX>` | persist ONE operator-authority Source from exact bytes; never projects Work | CMD-ROUTING-01 |
 | `saipen audit [status\|inspect\|ingest]` | intake transport | CMD-CONTINUE-01 |

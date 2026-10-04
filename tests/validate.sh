@@ -78,7 +78,7 @@ PAIRS=""
 while IFS= read -r line; do
     [ -z "$line" ] && continue
     tid=$(echo "$line" | grep -oE 'T-[0-9]+' | head -1)
-    needs=$(echo "$line" | grep -oE 'needs:[^|]*' | sed 's/needs://' | grep -oE 'T-[0-9]+' | tr '\n' ',')
+    needs=$(echo "$line" | grep -oE '\| needs:[^|]*' | sed 's/| needs://' | grep -oE 'T-[0-9]+' | tr '\n' ',')
     PAIRS="${PAIRS}${tid}|${needs}
 "
 done <<< "$(grep -oE '\- \[[ x/]\] T-[0-9]+.*' .saipen/BOARD.md || true)"
@@ -125,7 +125,7 @@ echo -e "${GREEN}PASS: BOARD.md no duplicate tickets${NC}"
 # a needs: pointing at a T-### that doesn't exist anywhere on the board
 # leaves the Pick Rule permanently unsatisfiable with zero diagnostic signal.
 ALL_IDS=$(grep -oE '\- \[[ x/]\] T-[0-9]+' .saipen/BOARD.md | grep -oE 'T-[0-9]+' | sort -u)
-NEEDS_REFS=$(grep -oE 'needs:[^|]*' .saipen/BOARD.md | sed 's/needs://' | tr ',' '\n' | grep -oE 'T-[0-9]+' | sort -u)
+NEEDS_REFS=$(grep -oE '\| needs:[^|]*' .saipen/BOARD.md | sed 's/| needs://' | tr ',' '\n' | grep -oE 'T-[0-9]+' | sort -u)
 DANGLING=""
 for ref in $NEEDS_REFS; do
     echo "$ALL_IDS" | grep -qx "$ref" || DANGLING="$DANGLING $ref"

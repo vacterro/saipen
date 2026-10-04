@@ -52,8 +52,10 @@ strip_block() {
 
 rm_skill() {
   if [ -e "$1" ] || [ -L "$1" ]; then
-    if rm -rf "$1"; then
-      echo "skill removed"
+    local reader
+    reader=$(json_reader) || { echo "remove FAILED: Python runtime unavailable"; return 1; }
+    if "$reader" -B "$SCRIPT_DIR/install_ownership.py" remove "$1"; then
+      echo "skill removed; unowned/edited files preserved"
     else
       echo "remove FAILED ($1)"
       return 1
@@ -214,25 +216,40 @@ remove_hooks() {
 import json
 import sys
 
+sys.stdout.reconfigure(newline="\n")
 with open(sys.argv[1], encoding="utf-8") as handle:
     registry = json.load(handle)
 for adapter in registry.get("adapters") or []:
+    if adapter.get("hook_installer"):
+        print("H|" + adapter["id"] + "|" + adapter["hook_installer"])
+        continue
     install = adapter.get("install") or {}
     hook = install.get("hook")
     if isinstance(hook, str) and hook:
-        print(hook)
+        print("F|" + hook + "|" + adapter["hook_artifact"])
     legacy = adapter.get("legacy_hook_surfaces") or []
     if isinstance(legacy, list):
         for surface in legacy:
             if isinstance(surface, str) and surface:
-                print(surface)
+                print("F|" + surface + "|" + adapter["hook_artifact"])
 PY
   ) || { echo "adapter registry read FAILED"; return 1; }
-  while IFS= read -r surface; do
+  local kind installer
+  while IFS='|' read -r kind surface installer; do
+    # A native Windows Python writes CRLF even when invoked from Git Bash.
+    surface="${surface%$'\r'}"
+    installer="${installer%$'\r'}"
     [ -n "$surface" ] || continue
+    if [ "$kind" = H ]; then
+      "$reader" -B "$SAIPEN_ROOT/$installer" "$surface" --home "$HOME" --uninstall \
+        || { echo "native hook remove FAILED ($surface)"; return 1; }
+      removed=1
+      continue
+    fi
     surface="${surface/#\~/$HOME}"
     [ -e "$surface" ] || continue
-    rm -f "$surface" \
+    "$reader" -B "$SCRIPT_DIR/install_ownership.py" remove-artifact "$surface" \
+      --source "$SAIPEN_ROOT/$installer" --home "$HOME" \
       || { echo "hook remove FAILED ($surface)"; return 1; }
     removed=1
   done <<< "$surfaces"
@@ -266,6 +283,8 @@ if [ -n "${ZAICODE_HOME:-}" ]; then
 fi
 report "Gemini GEMINI.md" strip_block "$HOME/.gemini/GEMINI.md"
 report "~/.agents skills" rm_skill "$HOME/.agents/skills/saipen"
+report "FreeBuff knowledge" strip_block "$HOME/.knowledge.md"
+report "FreeBuff AGENTS.md" strip_block "$HOME/.AGENTS.md"
 PLUG_ROOT="$HOME/.gemini/config/plugins"
 if [ -d "$PLUG_ROOT" ]; then
   for plugin_dir in "$PLUG_ROOT"/*/; do

@@ -209,7 +209,11 @@ class ProtocolRegistryTests(unittest.TestCase):
         # OPS.md telemetry entry cost 12 + 539 bytes on a tree that had 6 and
         # 905 bytes of slack. No rule or document was dropped to pay for it --
         # see .saipen/evidence/T-1595-budget-rederivation.md.
-        self.assertLessEqual(measured["human_markdown_total"], 301 * 1024)
+        # T-1605: the command catalog and closure-recovery contract add 1122
+        # bytes to the measured 308224-byte surface. 309346 bytes require
+        # 303 KiB; 302 KiB is 98 bytes short. No document/rule was dropped.
+        # See .saipen/evidence/T-1605-current/load-budget.md.
+        self.assertLessEqual(measured["human_markdown_total"], 303 * 1024)
 
     def test_phase_metrics_measure_all_registry_phases_and_actual_bytes(self):
         phase_names = self.registry["phases"]["all"]

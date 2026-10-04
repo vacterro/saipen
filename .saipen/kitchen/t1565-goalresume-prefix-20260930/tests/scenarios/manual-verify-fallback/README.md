@@ -1,1 +1,0 @@
-Test: Agent without shell capability should downgrade to manual verify and prompt user.

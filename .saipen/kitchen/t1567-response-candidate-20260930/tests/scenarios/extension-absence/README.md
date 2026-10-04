@@ -1,1 +1,0 @@
-Test: Project has no `.saipen/extensions/security/` or `.saipen/extensions/performance/` (the common case -- RFC § 1.9 hooks are opt-in, not auto-populated). Agent entering VERIFY/REVIEW MUST proceed exactly as `phases/verify.md`/`phases/review.md` describe with zero extension overhead, never block or wait on something that was never going to exist.

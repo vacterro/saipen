@@ -22,6 +22,7 @@ from __future__ import annotations
 import hashlib
 import json
 import re
+import subprocess
 import sys
 import unittest
 from pathlib import Path
@@ -44,6 +45,7 @@ from saipen_engine.operations import (  # noqa: E402
     ticket_move,
 )
 from test_orchestration_repair import OrchestrationFixture, user_request  # noqa: E402
+from test_hermetic_env import hermetic_env  # noqa: E402
 
 
 def _tree_digest(root: Path) -> str:
@@ -261,6 +263,247 @@ class CohortAuthorityTests(ProvenanceFixture):
         cohort = registry["cohorts"]["C-001"]
         self.assertEqual(set(cohort["members"]), {"T-7", second})
         self.assertEqual(sorted(closure.cohort_scope(cohort)), ["main.py"])
+
+
+class ClosedCohortBindingTests(ProvenanceFixture):
+    """T-1605: repair default closure without replaying the completed lifecycle."""
+
+    def closed_project(self):
+        project = self.make_project(active=True)
+        (project / "main.py").write_text("shared = 1\n", encoding="utf-8")
+        self.to_ship(project, "T-7")
+        result = finish_ticket(project, "T-7", "tester")
+        self.assertTrue(result.ok, result.to_dict())
+        return project, result
+
+    def bind(self, project, *, ticket="T-7", agent="tester", **kwargs):
+        from saipen_engine import operations
+
+        return operations.bind_closed_cohort(
+            project, ticket, agent, cohort_id=kwargs.pop("cohort_id", "C-002"),
+            paths=kwargs.pop("paths", ("main.py",)), **kwargs,
+        )
+
+    def assert_refusal_unchanged(self, project, **kwargs):
+        before = _tree_digest(project)
+        result = self.bind(project, **kwargs)
+        self.assertFalse(result.ok, result.to_dict())
+        self.assertEqual(_tree_digest(project), before)
+        return result
+
+    def test_public_binding_preserves_original_finish_and_active_work(self):
+        project, finished = self.closed_project()
+        original = (project / ".saipen/LOG.md").read_bytes()
+        next_work = self.add(project, "independent next work")
+        from saipen_engine.operations import apply_claim
+
+        self.assertTrue(apply_claim(project, next_work, "tester", explicit=True).ok)
+        state = self.state(project)
+        native = subprocess.run(
+            [sys.executable, str(TOOLS / "saipen.py"), "--project-root", str(project),
+             "ticket", "bind-cohort", "T-7", "--cohort", "C-002", "--paths", "main.py", "--json"],
+            cwd=project, env=hermetic_env(), capture_output=True, text=True,
+            encoding="utf-8", timeout=90,
+        )
+        self.assertEqual(native.returncode, 0, native.stdout + native.stderr)
+        bound = json.loads(native.stdout)
+        self.assertEqual(bound["code"], "COHORT_BOUND")
+        after = self.state(project)
+        for key in ("phase", "task", "next_action", "transition_from", "agent"):
+            self.assertEqual(after.get(key), state.get(key), key)
+        self.assertTrue((project / ".saipen/LOG.md").read_bytes().startswith(original))
+        fields = self.board(project)["tickets"]["T-7"]["fields"]
+        self.assertEqual(fields["closure_mode"], "cohort")
+        self.assertEqual(fields["closure_cohort"], "C-002")
+        cohort = closure.read_registry(project)["cohorts"]["C-002"]
+        self.assertTrue(closure.cohort_readiness(project, cohort)["ready"])
+        preserved = json.loads((project / bound["evidence_path"]).read_text(encoding="utf-8"))
+        self.assertEqual(preserved["original_finish"], finished.op_id)
+        self.assertIn("closure_mode: own_patch", preserved["original_row"])
+        self.assertFalse(closure.resolve_implementation_source(project, "T-7").ok)
+
+    def test_dry_run_writes_zero_bytes(self):
+        project, _ = self.closed_project()
+        before = _tree_digest(project)
+        result = self.bind(project, dry_run=True)
+        self.assertTrue(result.ok, result.to_dict())
+        self.assertTrue(result.data["dry_run"])
+        self.assertEqual(_tree_digest(project), before)
+
+    def test_exact_retry_is_byte_noop(self):
+        project, _ = self.closed_project()
+        self.assertTrue(self.bind(project).ok)
+        before = _tree_digest(project)
+        result = self.bind(project)
+        self.assertTrue(result.ok, result.to_dict())
+        self.assertEqual(result.code, "ALREADY_APPLIED")
+        self.assertEqual(_tree_digest(project), before)
+
+    def test_retry_refuses_changed_member_bytes(self):
+        project, _ = self.closed_project()
+        self.assertTrue(self.bind(project).ok)
+        (project / "main.py").write_text("shared = 2\n", encoding="utf-8")
+        self.assert_refusal_unchanged(project)
+
+    def test_conflicting_shared_hash_refuses_without_default_fallback(self):
+        project = self.make_project(active=True)
+        (project / "main.py").write_text("shared = 1\n", encoding="utf-8")
+        second = self.add(project, "shared successor")
+        self.to_ship(project, "T-7")
+        self.assertTrue(finish_ticket(project, "T-7", "tester", closure_mode="cohort",
+                                     closure_cohort="C-002", closure_paths=("main.py",)).ok)
+        from saipen_engine.operations import apply_claim
+
+        (project / "main.py").write_text("shared = 2\n", encoding="utf-8")
+        self.assertTrue(apply_claim(project, second, "tester", explicit=True).ok)
+        self.to_ship(project, second)
+        self.assertTrue(finish_ticket(project, second, "tester").ok)
+        self.assert_refusal_unchanged(project, ticket=second)
+
+    def test_published_work_cannot_be_reclassified(self):
+        project, _ = self.closed_project()
+        _publish(project, ticket="T-7")
+        self.assert_refusal_unchanged(project)
+
+    def test_foreign_historical_owner_cannot_bind(self):
+        project, _ = self.closed_project()
+        self.assert_refusal_unchanged(project, agent="stranger")
+
+    def test_unfinished_work_cannot_bind(self):
+        project = self.make_project(active=True)
+        (project / "main.py").write_text("shared = 1\n", encoding="utf-8")
+        self.assert_refusal_unchanged(project)
+
+    def test_other_cohort_membership_is_not_moved(self):
+        project, _ = self.closed_project()
+        self.assertTrue(self.bind(project).ok)
+        self.assert_refusal_unchanged(project, cohort_id="C-003")
+
+    def test_published_cohort_cannot_accept_member(self):
+        project, _ = self.closed_project()
+        registry = closure.upsert_member(closure.empty_registry(), "C-002", "T-90",
+            paths={"main.py": "fixture"}, verification="fixture only",
+            closed_at="2026-10-03T00:00:00Z", agent="fixture")
+        registry["cohorts"]["C-002"]["publication_status"] = "shipped"
+        target = closure.registry_path(project)
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_text(closure.render_registry(registry), encoding="utf-8")
+        self.assert_refusal_unchanged(project)
+
+    def test_missing_path_refuses_zero_write(self):
+        project, _ = self.closed_project()
+        self.assert_refusal_unchanged(project, paths=("missing.py",))
+
+    def test_foreign_and_protocol_paths_refuse_zero_write(self):
+        project, _ = self.closed_project()
+        (project.parent / "outside.py").write_text("foreign = 1\n", encoding="utf-8")
+        for path in ("../outside.py", str(project / "main.py"), ".saipen/STATE.md",
+                     "C:/foreign.py", "main.py:alternate", "main.py\n"):
+            with self.subTest(path=path):
+                self.assert_refusal_unchanged(project, paths=(path,))
+
+    def test_missing_canonical_finish_receipt_refuses(self):
+        project, finished = self.closed_project()
+        (project / ".saipen/recovery/settled" / finished.op_id / "operation.json").unlink()
+        self.assert_refusal_unchanged(project)
+
+    def test_legacy_done_is_not_given_new_closure_authority(self):
+        project, _ = self.closed_project()
+        board = project / ".saipen/BOARD.md"
+        board.write_text(board.read_text(encoding="utf-8").replace(
+            "## DONE\n", "## DONE\n- [x] T-90 [P1] legacy completion | verify: old proof\n"),
+            encoding="utf-8")
+        self.assert_refusal_unchanged(project, ticket="T-90")
+
+    def planned_binding(self, project):
+        from saipen_engine import operations
+
+        return operations._plan_bind_closed_cohort(
+            project, "T-7", "tester", "C-002", ("main.py",),
+            operations._now(), operations._utc_iso(),
+        )
+
+    def test_source_change_after_plan_refuses(self):
+        project, _ = self.closed_project()
+        plan = self.planned_binding(project)
+        (project / "main.py").write_text("shared = 2\n", encoding="utf-8")
+        before = _tree_digest(project)
+        from saipen_engine.plan import apply_plan
+
+        result = apply_plan(project, plan)
+        self.assertFalse(result.ok, result.to_dict())
+        self.assertEqual(_tree_digest(project), before)
+
+    def test_registry_change_after_plan_refuses(self):
+        project, _ = self.closed_project()
+        plan = self.planned_binding(project)
+        target = closure.registry_path(project)
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_text(closure.render_registry(closure.empty_registry()), encoding="utf-8")
+        before = _tree_digest(project)
+        from saipen_engine.plan import apply_plan
+
+        result = apply_plan(project, plan)
+        self.assertFalse(result.ok, result.to_dict())
+        self.assertEqual(_tree_digest(project), before)
+
+    def test_finish_authority_change_after_plan_refuses(self):
+        project, finished = self.closed_project()
+        plan = self.planned_binding(project)
+        (project / ".saipen/recovery/settled" / finished.op_id / "operation.json").unlink()
+        before = _tree_digest(project)
+        from saipen_engine.plan import apply_plan
+
+        result = apply_plan(project, plan)
+        self.assertFalse(result.ok, result.to_dict())
+        self.assertEqual(_tree_digest(project), before)
+
+    def test_intake_change_after_plan_refuses(self):
+        project, _ = self.closed_project()
+        plan = self.planned_binding(project)
+        target = project / ".saipen/intake/coverage/concurrent.json"
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_text('{"concurrent": true}\n', encoding="utf-8")
+        before = _tree_digest(project)
+        from saipen_engine.plan import apply_plan
+
+        result = apply_plan(project, plan)
+        self.assertFalse(result.ok, result.to_dict())
+        self.assertEqual(_tree_digest(project), before)
+
+    def test_publication_after_plan_refuses(self):
+        project, _ = self.closed_project()
+        plan = self.planned_binding(project)
+        _publish(project, ticket="T-7")
+        before = _tree_digest(project)
+        from saipen_engine.plan import apply_plan
+
+        result = apply_plan(project, plan)
+        self.assertFalse(result.ok, result.to_dict())
+        self.assertEqual(_tree_digest(project), before)
+
+    def test_registry_change_during_plan_is_not_overwritten(self):
+        project, _ = self.closed_project()
+        original_hash_paths = closure.hash_paths
+        from unittest.mock import patch
+
+        def concurrent_member(root, paths):
+            registry = closure.upsert_member(closure.empty_registry(), "C-003", "T-90",
+                paths={"main.py": "concurrent"}, verification="concurrent writer",
+                closed_at="2026-10-03T00:00:00Z", agent="tester")
+            target = closure.registry_path(project)
+            target.parent.mkdir(parents=True, exist_ok=True)
+            target.write_text(closure.render_registry(registry), encoding="utf-8")
+            return original_hash_paths(root, paths)
+
+        with patch.object(closure, "hash_paths", side_effect=concurrent_member):
+            plan = self.planned_binding(project)
+        before = _tree_digest(project)
+        from saipen_engine.plan import apply_plan
+
+        result = apply_plan(project, plan)
+        self.assertFalse(result.ok, result.to_dict())
+        self.assertEqual(_tree_digest(project), before)
 
 
 class ClosureGrammarTests(ProvenanceFixture):

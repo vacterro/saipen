@@ -14,6 +14,7 @@ T-1501); `command_form`, what the host's shell types, is what changes.
 
 from __future__ import annotations
 
+import json
 import os
 import shutil
 import subprocess
@@ -31,6 +32,30 @@ import test_t1501_entry_resolver as t1501  # noqa: E402
 from saipen_engine import entry_resolver as er  # noqa: E402
 
 WINDOWS_ONLY = unittest.skipUnless(os.name == "nt", "a cmd.exe launcher exists only on Windows")
+
+
+def git_bash() -> str | None:
+    """A native MSYS shell, not Windows' same-named WSL launcher."""
+    candidates = []
+    git = shutil.which("git")
+    if git:
+        candidates.append(Path(git).resolve().parent.parent / "bin" / "bash.exe")
+    for variable in ("ProgramFiles", "ProgramFiles(x86)"):
+        if os.environ.get(variable):
+            candidates.append(Path(os.environ[variable]) / "Git" / "bin" / "bash.exe")
+    on_path = shutil.which("bash")
+    if on_path:
+        candidates.append(Path(on_path))
+    for candidate in dict.fromkeys(candidates):
+        if not candidate.is_file():
+            continue
+        probe = subprocess.run(
+            [str(candidate), "--noprofile", "--norc", "-c", "uname -s"],
+            capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=15,
+        )
+        if probe.returncode == 0 and probe.stdout.startswith(("MINGW", "MSYS", "CYGWIN")):
+            return str(candidate)
+    return None
 
 
 @WINDOWS_ONLY
@@ -74,18 +99,37 @@ class PosixShellHostTransport(unittest.TestCase):
             any(d["code"] == "posix_launcher_unavailable" for d in resolved["diagnostics"])
         )
 
-    @unittest.skipUnless(shutil.which("bash"), "needs a POSIX shell on this Windows host")
+    def assert_intact_argument(self, result, argument):
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        payload = json.loads(result.stdout)
+        self.assertTrue(payload.get("ok"), payload)
+        self.assertEqual(payload.get("query"), argument)
+
+    def test_failed_or_changed_execution_is_not_an_argument_transport_pass(self):
+        for result in (
+            subprocess.CompletedProcess([], 127, "", "shell never started"),
+            subprocess.CompletedProcess([], 0, '{"ok": true, "query": "changed"}', ""),
+        ):
+            with self.subTest(rc=result.returncode), self.assertRaises(self.failureException):
+                self.assert_intact_argument(result, 'x"y > injected.txt')
+
     def test_argument_text_reaches_the_engine_without_cmd_reparsing_it(self):
+        bash = git_bash()
+        if bash is None:
+            self.skipTest("needs a proven native MSYS/Cygwin shell; WSL is not Git Bash")
         env = t1501._cold_env(MSYSTEM="MINGW64")
         resolved = er.resolve_entry(self.root, env=env, honor_environment=False)
         with tempfile.TemporaryDirectory(prefix="saipen-t1515-") as scratch:
             script = f'{resolved["command_form"]} search \'x"y > injected.txt\' --json'
-            subprocess.run(
-                [shutil.which("bash"), "-c", script],
+            result = subprocess.run(
+                [bash, "--noprofile", "--norc", "-c", script],
                 cwd=scratch, capture_output=True, text=True, timeout=120,
-                env={**env, "PATH": os.environ.get("PATH", "")},
+                encoding="utf-8", errors="replace",
+                env={**env, "PATH": os.environ.get("PATH", ""),
+                     "SAIPEN_PROJECT_ROOT": str(self.root)},
             )
             self.assertEqual(sorted(os.listdir(scratch)), [])
+            self.assert_intact_argument(result, 'x"y > injected.txt')
 
 
 if __name__ == "__main__":

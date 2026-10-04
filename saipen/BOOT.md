@@ -140,7 +140,10 @@ Never reword the user's task to get past a refusal.
    for source authority, `SOURCES.md`; for execution/output policy,
    `EXECUTION.md`; for goal/autonomous behavior, `MAINTENANCE.md`; for a global
    state invariant only, `CORE.md`. `CONFORMANCE.md` and `CHANGELOG.md` are
-   excluded from routine execution.
+   excluded from routine execution. A shortcut token resolves by reading
+   CORE.md § 1.10's table BEFORE acting on it, and never from recall:
+   Memory is never a source for it. Do not copy that table into this file,
+   because a second copy drifts and defeats the read-the-source rule.
 
 8. **Load exactly one phase delta.** Use the phase returned by the current
    route and open `phases/<phase>.md`. Replace it when the phase changes. Never

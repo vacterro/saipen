@@ -459,6 +459,7 @@ OP_CLASSES: dict[str, frozenset[int]] = {
         (
             "attempt-close-",
             "attempt-open-",
+            "bind-cohort-",
             "board-compact-",
             "ccc-entry-",
             "clear-wait-role-",
@@ -535,6 +536,7 @@ OP_CLASSES: dict[str, frozenset[int]] = {
             "receipt-",
             "reverify.",
             "source.purge-",
+            "source.receipt-range-",
             "source.reconcile-",
         ),
         frozenset({12}),

@@ -1,7 +1,0 @@
-# T-1320 Fleet Recovery implementation plan
-
-1. Keep `paths.resolve_project_root` as the sole root resolver. Add a bounded context distinction for non-SAIPEN Git repositories versus detached/unbound contexts without changing its existing guard codes.
-2. Put the Fleet preflight and single-attempt orchestration in `tools/saipen_engine/fleet.py`. Read current identity, canonical checkpoint and the T-1318 reconciliation preview. Treat unresolved journals and failed/ambiguous previews as blocked. Mutation delegates through the public `saipen recover` entrypoint.
-3. Add `saipen fleet preflight|scan|prepare` to `tools/saipen.py` before ordinary project-root dispatch. `scan` accepts only explicit roots and is read-only. `prepare` verifies the binding again, makes at most one recovery call, then rereads the canonical snapshot and requires `BOUND_VALID`; its result always requires reissuing a consequential tool payload after repair.
-4. Wire OpenCode to the canonical Fleet CLI. Before consequential admission, ask `fleet prepare`; if recovery occurred, refuse the original hook call with a fixed fresh-retry instruction. The normal guard still judges a newly issued call. Keep bootstrap authority to bounded machine facts and a fixed instruction.
-5. Extend existing binding/recovery/OpenCode test owners with synthetic multi-project fixtures, stale-payload and no-loop controls. Prove focused and broad gates; use live projects only for read-only inspection.

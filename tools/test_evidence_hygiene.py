@@ -8,10 +8,11 @@ native-smoke placement guarantee.
 from __future__ import annotations
 
 import json
+import stat
 import sys
 import tempfile
 import unittest
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 from pathlib import Path
 
 TOOLS = Path(__file__).resolve().parent
@@ -19,6 +20,7 @@ if str(TOOLS) not in sys.path:
     sys.path.insert(0, str(TOOLS))
 
 from saipen_engine import evidence as ev  # noqa: E402
+from saipen_engine.core_unit import reclaim  # noqa: E402
 from saipen_engine.evidence import (  # noqa: E402
     EvidenceRefusal,
     EvidenceRun,
@@ -187,6 +189,125 @@ class CleanupSafety(unittest.TestCase):
         m2 = run.finalize(verdict="VERIFIED")
         self.assertEqual(m1["verdict"], m2["verdict"])
         self.assertTrue(Path.home().exists())
+
+
+class ReadOnlyProducerCleanup(unittest.TestCase):
+    """T-1604: completed gates can discard only their own read-only objects."""
+
+    def make_run(self):
+        run = EvidenceRun("readonly-cleanup", "T-1604", durable_dir=tempdir() / "proof")
+        self.addCleanup(reclaim, run.temp_root)
+        return run
+
+    def readonly_file(self, path):
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_bytes(b"read-only Git object")
+        path.chmod(stat.S_IREAD)
+        return path
+
+    def assert_finalizes(self, placement):
+        run = self.make_run()
+        if placement == "tree":
+            tree = run.register_ephemeral("home")[0]
+            blob = tree / ".git/objects/aa/object"
+        elif placement == "file":
+            blob = run.register_ephemeral("object")[0]
+        else:
+            blob = run.temp_root / "object"
+        self.readonly_file(blob)
+        proof = run.temp_root / "result.txt"
+        proof.write_bytes(b"completed native gate proof")
+        retained = run.retain(proof)
+        retained_hash = run.retained[0]["sha256"]
+        manifest = run.finalize(verdict="VERIFIED")
+        self.assertFalse(run.temp_root.exists())
+        self.assertTrue(run.finalized)
+        self.assertEqual(retained.read_bytes(), b"completed native gate proof")
+        self.assertEqual(manifest["retained"][0]["sha256"], retained_hash)
+        self.assertEqual(manifest["verdict"], "VERIFIED")
+        self.assertEqual(run.finalize(verdict="FAILED"), manifest)
+
+    def test_registered_readonly_git_tree_finalizes(self):
+        self.assert_finalizes("tree")
+
+    def test_registered_readonly_file_finalizes(self):
+        self.assert_finalizes("file")
+
+    def test_residual_readonly_owned_root_finalizes(self):
+        self.assert_finalizes("root")
+
+    def test_readonly_retry_refuses_foreign_bytes_and_permissions(self):
+        run = self.make_run()
+        foreign = self.readonly_file(tempdir() / "foreign-object")
+        mode = foreign.stat().st_mode
+        self.addCleanup(foreign.chmod, mode | stat.S_IWRITE)
+        before = foreign.read_bytes()
+        operation = Mock()
+        error = PermissionError("read-only")
+        with self.assertRaises(EvidenceRefusal):
+            run._retry_readonly_remove(operation, foreign, (PermissionError, error, None))
+        operation.assert_not_called()
+        self.assertEqual(foreign.read_bytes(), before)
+        self.assertEqual(foreign.stat().st_mode, mode)
+
+    def test_rebound_temp_root_never_grants_foreign_retry_authority(self):
+        run = self.make_run()
+        foreign = self.readonly_file(tempdir() / "foreign-object")
+        self.addCleanup(foreign.chmod, foreign.stat().st_mode | stat.S_IWRITE)
+        owned = run.temp_root
+        run.temp_root = foreign.parent
+        self.addCleanup(setattr, run, "temp_root", owned)
+        operation = Mock()
+        error = PermissionError("read-only")
+        with self.assertRaises(EvidenceRefusal):
+            run._retry_readonly_remove(operation, foreign, (PermissionError, error, None))
+        operation.assert_not_called()
+        self.assertFalse(foreign.stat().st_mode & stat.S_IWRITE)
+
+    def test_writable_permission_error_is_not_retried(self):
+        run = self.make_run()
+        blob = run.temp_root / "writable"
+        blob.write_bytes(b"locked")
+        mode = blob.stat().st_mode
+        operation = Mock()
+        error = PermissionError("open handle")
+        with self.assertRaises(PermissionError) as raised:
+            run._retry_readonly_remove(operation, blob, (PermissionError, error, None))
+        self.assertIs(raised.exception, error)
+        operation.assert_not_called()
+        self.assertEqual(blob.stat().st_mode, mode)
+
+    def test_other_filesystem_errors_are_preserved(self):
+        run = self.make_run()
+        operation = Mock()
+        error = OSError("device error")
+        with self.assertRaises(OSError) as raised:
+            run._retry_readonly_remove(operation, run.temp_root, (OSError, error, None))
+        self.assertIs(raised.exception, error)
+        operation.assert_not_called()
+
+    def test_retry_failure_is_not_swallowed(self):
+        run = self.make_run()
+        blob = self.readonly_file(run.temp_root / "object")
+        error = PermissionError("still locked after writable bit")
+        operation = Mock(side_effect=error)
+        with self.assertRaises(PermissionError) as raised:
+            run._retry_readonly_remove(operation, blob, (PermissionError, error, None))
+        self.assertIs(raised.exception, error)
+        operation.assert_called_once_with(blob)
+        self.assertTrue(blob.is_file())
+
+    def test_readonly_retry_refuses_symlink_permission_changes(self):
+        run = self.make_run()
+        blob = self.readonly_file(run.temp_root / "object")
+        mode = blob.stat().st_mode
+        operation = Mock()
+        error = PermissionError("read-only")
+        symlink_check = patch.object(Path, "is_symlink", return_value=True)
+        with symlink_check, self.assertRaises(EvidenceRefusal):
+            run._retry_readonly_remove(operation, blob, (PermissionError, error, None))
+        operation.assert_not_called()
+        self.assertEqual(blob.stat().st_mode, mode)
 
 
 class ManifestAdequacy(unittest.TestCase):
