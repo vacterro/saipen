@@ -1838,6 +1838,17 @@ def _status(project_root: Path, as_json: bool) -> int:
                 # that clears it. Without it a stale home reads as bad luck,
                 # and the repairs that cannot reach it read as missing.
                 "blocker": _dist.get("blocker"),
+                # T-1613: what the publisher holds (`published_head`) and what
+                # has not caught up with it (`pending_consumers`) are two
+                # facts, and the operator sentence above says both. A pending
+                # consumer is retried by the scheduler and never asks for a
+                # human, so `requires_human` is reported, not inferred.
+                "published_head": _dist.get("published_head"),
+                "publication": _dist.get("publication"),
+                "consumer_convergence": _dist.get("consumer_convergence"),
+                "pending_consumers": _dist.get("pending_consumers"),
+                "consumers_converged": _dist.get("consumers_converged"),
+                "requires_human": _dist.get("requires_human"),
                 "summary": distribution_line(_dist),
             }
     except Exception as exc:

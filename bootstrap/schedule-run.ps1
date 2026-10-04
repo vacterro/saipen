@@ -59,6 +59,54 @@ function Restore-PublishedSource {
   return $ok
 }
 
+function Write-ConvergenceRecord([string]$head, [string]$publication, [string]$recordPath) {
+  # T-1613: PUBLICATION and CONSUMER CONVERGENCE are two questions and this
+  # record is where both answers live. Collapsing them into one boolean is
+  # what produced the incident: a locked, non-blocking plugin directory made a
+  # valid published generation look like a failed publication, and the rollback
+  # that followed left consumer homes on the NEW generation while
+  # scheduled-source went back to the old one -- generation skew under a
+  # tidier name. Nothing here decides anything; it records what the two
+  # components already decided, so no reader has to infer one from the other.
+  $record = $null
+  if (Test-Path -LiteralPath $recordPath) {
+    try {
+      $record = Get-Content -LiteralPath $recordPath -Raw -Encoding utf8 | ConvertFrom-Json
+    } catch {
+      $record = $null
+    }
+  }
+  $consumers = @()
+  $pending = @()
+  $verdict = "CURRENT"
+  if ($null -ne $record) {
+    if ($record.PSObject.Properties.Name -contains "consumers") { $consumers = @($record.consumers) }
+    if ($record.PSObject.Properties.Name -contains "pending") { $pending = @($record.pending) }
+    if ($record.PSObject.Properties.Name -contains "convergence") { $verdict = [string]$record.convergence }
+  }
+  if ($pending.Count -gt 0 -and $verdict -eq "CURRENT") { $verdict = "DEGRADED" }
+  $summary = [ordered]@{
+    schema           = "SAIPEN_CONVERGENCE_1"
+    generated_at     = (Get-Date).ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ")
+    published_head   = $head
+    publication      = $publication
+    convergence      = $verdict
+    consumers        = $consumers
+    pending          = $pending
+    pending_consumers = $pending
+    requires_human   = $false
+    retry            = "scheduled"
+  }
+  try {
+    [System.IO.File]::WriteAllText($recordPath, ($summary | ConvertTo-Json -Depth 6), (New-Object System.Text.UTF8Encoding($false)))
+  } catch {
+    Write-Log "convergence: record not written -- $($_.Exception.Message)"
+  }
+  $shortHead = if ($head.Length -ge 8) { $head.Substring(0, 8) } else { $head }
+  Write-Log ("convergence: head={0} publication={1} convergence={2} pending={3} requires_human=false" -f `
+    $shortHead, $publication, $verdict, $pending.Count)
+}
+
 function Stop-Run([string]$message, [int]$code) {
   Write-Log $message
   $cleanupOk = Remove-RunFiles
@@ -200,9 +248,18 @@ try {
   }
   if ($null -eq $rc) { $rc = 0 }
   Write-Log "inject: head=$head exit=$rc"
+  # T-1613: the injector's exit code now answers ONE question -- did a
+  # consumer the adapter registry declares BLOCKING fail to converge? A
+  # non-blocking consumer that is locked, busy or absent no longer rolls a
+  # valid publication back; it is recorded as pending and the next scheduled
+  # run converges it. Rollback stays for failures that invalidate the
+  # PUBLICATION itself, which are refused before this point or reported here
+  # as a blocking failure.
   if ($rc -ne 0) {
     if (-not (Restore-PublishedSource)) { $rc = 1 }
+    Write-ConvergenceRecord $head "ROLLED_BACK" (Join-Path $logDir "convergence.json")
   } else {
+    Write-ConvergenceRecord $head "CURRENT" (Join-Path $logDir "convergence.json")
     # T-1252: inject.ps1 copies the protocol but writes no freshness stamp, so
     # every refreshed home read as "installed unstamped" forever and a drifted
     # copy was indistinguishable from a current one. The digest has exactly one

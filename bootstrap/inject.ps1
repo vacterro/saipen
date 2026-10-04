@@ -267,20 +267,122 @@ function Write-CliLaunchers([string]$StageDir, [string]$SkillDir) {
 }
 # SAIPEN-CLI-LAUNCHER-OWNERSHIP:END
 
+#: How many times ONE destination switch is attempted inside a single run.
+#: The staged tree is already built and verified, so every extra attempt is
+#: three cheap file operations; the scheduler's own cadence is the real retry.
+$script:SwapAttempts = 3
+
+function Test-DestinationContention([string]$parent, [string]$dst, $record) {
+  # Is this failure CONTENTION on the target, or a real refusal?
+
+  # T-1613. Windows refuses the swap of a directory another process holds open
+  # in more than one shape, and they cannot be told apart by HRESULT: a holder
+  # that asked for delete access produces ERROR_SHARING_VIOLATION, a holder
+  # that did not produces "Access to the path ... is denied" -- which PowerShell
+  # surfaces as an IOException with HResult 0x80131600, a managed wrapper that
+  # says nothing about the underlying reason. Measured on this machine's
+  # Antigravity IDE: sharing violation on one plugin, 0x80131600 on the other.
+  #
+  # So the HRESULT list below is only the FAST path. The authority is a probe
+  # we own: create a fresh sibling in the destination's parent and rename it.
+  # If that works, the parent is writable and the refusal is specific to the
+  # target -- which on Windows means a handle held open with share mode 0. If
+  # our own sibling is refused too, the parent itself is the problem and no
+  # retry will ever help. Per
+  # .saipen/KNOWLEDGE/cards/windows-replace-read-sharing-race.md this is
+  # contention: retryable, never a broken generation.
+
+  $sharing = @(-2147024864, -2147024863, 32, 33)   # SHARING / LOCK violation
+  $ex = $record.Exception
+  while ($null -ne $ex) {
+    if ($sharing -contains [int]$ex.HResult) { return $true }
+    $ex = $ex.InnerException
+  }
+  if (-not (Test-Path $dst -PathType Container)) { return $false }        # nothing held open
+  if ([string]::IsNullOrWhiteSpace($parent) -or -not (Test-Path $parent -PathType Container)) {
+    return $false
+  }
+  $probe = Join-Path $parent ".saipen-probe-$PID"
+  $moved = "$probe-moved"
+  try {
+    if (Test-Path $probe) { Remove-Item -LiteralPath $probe -Recurse -Force -ErrorAction SilentlyContinue }
+    New-Item -ItemType Directory -Path $probe -ErrorAction Stop | Out-Null
+    Move-Item -LiteralPath $probe -Destination $moved -ErrorAction Stop
+    return $true
+  } catch {
+    return $false
+  } finally {
+    Remove-Item -LiteralPath $probe -Recurse -Force -ErrorAction SilentlyContinue
+    Remove-Item -LiteralPath $moved -Recurse -Force -ErrorAction SilentlyContinue
+  }
+}
+
+function Sync-CliLauncherSurface([string]$dst) {
+  # The CLI launchers live OUTSIDE the shipped runtime surface -- bin/ is not
+  # in MANIFEST.json, so the runtime fingerprint says nothing about them. An
+  # install that already holds this generation has therefore not yet proven
+  # that its launcher surface is intact, and stale launcher bytes surviving an
+  # "already current" verdict is exactly the drift the ownership contract
+  # exists to prevent. Repair in place: re-render when the block below is
+  # present, drop the directory when it has been stripped and the launchers
+  # are no longer ours to keep.
+  $bin = Join-Path $dst "bin"
+  # SAIPEN-CLI-LAUNCHER-OWNERSHIP:BEGIN
+  $launcher = Write-CliLaunchers -StageDir $dst -SkillDir $dst
+  if ($launcher -ne "ok") { throw "cli launcher render failed: $launcher" }
+  $ownership = Get-SourcePath "bootstrap/install_ownership.py"
+  $ownershipOutput = & (Get-PythonBin) -B $ownership record (Get-NativePath $dst) --stage (Get-NativePath $dst) 2>&1
+  if ($LASTEXITCODE -ne 0) { throw "ownership record failed: $ownershipOutput" }
+  $ownsLaunchers = $true
+  # SAIPEN-CLI-LAUNCHER-OWNERSHIP:END
+  # With the block stripped the launchers are not ours, and an install that
+  # keeps them is what the red control for this function exists to forbid.
+  if (-not $ownsLaunchers -and (Test-Path $bin)) {
+    Remove-Item -LiteralPath $bin -Recurse -Force -ErrorAction Stop
+  }
+}
+
 function Copy-Skill([string]$dst) {
   # MANIFEST.json owns every copied file/tree and replaced destination. Any
   # copy failure surfaces -- a claimed "copied" over a half-copy is exactly
   # the silent-failure class hunt.md exists to catch.
+  #
+  # T-1613: a failure while SWAPPING an existing destination is classified
+  # separately from a failure while BUILDING the staged tree. Only the swap can
+  # be contention (another process holding the directory open); every
+  # source-side failure means the generation itself is unfit and stays fatal.
   if ([string]::IsNullOrWhiteSpace($dst)) { return "copy FAILED ($dst): unsafe destination" }
+  # T-1613: an install that already holds THIS generation is not rewritten.
+  # "Already current" is a result a consumer can reach, and reporting it as a
+  # fresh copy would make a converged machine look like it had just been
+  # re-installed. The proof is the same manifest-derived identity the
+  # provenance stamp uses; an install that cannot prove itself is copied.
+  if (Test-Path $dst -PathType Container) {
+    try {
+      $installedFp = [string](Get-RuntimeIdentity $dst).runtime_fingerprint
+      $sourceFp = [string](Get-SourceRuntimeIdentity).runtime_fingerprint
+      if (-not [string]::IsNullOrWhiteSpace($installedFp) -and $installedFp -eq $sourceFp) {
+        # Current bytes, but not yet a complete install: the launcher surface
+        # sits outside the fingerprint and is repaired before the verdict.
+        Sync-CliLauncherSurface $dst
+        return "already current ($dst)"
+      }
+    } catch {
+      # Unprovable, or the launcher surface could not be repaired: fall
+      # through and install.
+    }
+  }
   $stage = $null
   $backup = $null
+  $deferred = $false
+  $deferredDetail = ""
   try {
-    $parent = Split-Path $dst
-    if ([string]::IsNullOrWhiteSpace($parent)) { throw "unsafe destination parent" }
-    if (-not (Test-Path $parent)) { New-Item -ItemType Directory -Force $parent -ErrorAction Stop | Out-Null }
+    $dstParent = Split-Path $dst
+    if ([string]::IsNullOrWhiteSpace($dstParent)) { throw "unsafe destination parent" }
+    if (-not (Test-Path $dstParent)) { New-Item -ItemType Directory -Force $dstParent -ErrorAction Stop | Out-Null }
     $leaf = Split-Path $dst -Leaf
-    $stage = Join-Path $parent ".$leaf.saipen-stage-$PID"
-    $backup = Join-Path $parent ".$leaf.saipen-backup-$PID"
+    $stage = Join-Path $dstParent ".$leaf.saipen-stage-$PID"
+    $backup = Join-Path $dstParent ".$leaf.saipen-backup-$PID"
     if ((Test-Path $stage) -or (Test-Path $backup)) {
       throw "stale staging/backup path exists; inspect before retry"
     }
@@ -335,18 +437,46 @@ function Copy-Skill([string]$dst) {
     $ownershipOutput = & (Get-PythonBin) -B $ownership record (Get-NativePath $dst) --stage (Get-NativePath $stage) 2>&1
     if ($LASTEXITCODE -ne 0) { throw "ownership record failed: $ownershipOutput" }
     # SAIPEN-CLI-LAUNCHER-OWNERSHIP:END
-    if (Test-Path $dst) { Move-Item -LiteralPath $dst -Destination $backup -ErrorAction Stop }
-    try {
-      Move-Item -LiteralPath $stage -Destination $dst -ErrorAction Stop
-      $stage = $null
-    } catch {
-      if ((Test-Path $backup) -and -not (Test-Path $dst)) {
-        Move-Item -LiteralPath $backup -Destination $dst -ErrorAction SilentlyContinue
+    # --- destination switch (T-1613) -------------------------------------
+    # The staged tree is complete and verified by this point. What can still
+    # fail is the swap, and on Windows that is exactly where another process
+    # holding the destination open turns a valid generation into a refusal.
+    # Retry it a bounded number of times; whatever stays locked is DEFERRED,
+    # which keeps the installed known-good copy, keeps the publication, and
+    # lets the next scheduled run converge it with no operator action.
+    for ($attempt = 1; $attempt -le $script:SwapAttempts; $attempt++) {
+      try {
+        # Recomputed per attempt: the catch clears it after restoring, and
+        # Test-Path rejects a null Path before it ever reads one.
+        $backup = Join-Path $dstParent ".$leaf.saipen-backup-$PID"
+        if (Test-Path $dst) { Move-Item -LiteralPath $dst -Destination $backup -ErrorAction Stop }
+        try {
+          Move-Item -LiteralPath $stage -Destination $dst -ErrorAction Stop
+          $stage = $null
+        } catch {
+          if ((Test-Path $backup) -and -not (Test-Path $dst)) {
+            Move-Item -LiteralPath $backup -Destination $dst -ErrorAction SilentlyContinue
+          }
+          throw
+        }
+        $stage = $null
+        if (Test-Path $backup) { Remove-Item -LiteralPath $backup -Recurse -Force -ErrorAction Stop }
+        break
+      } catch {
+        if ((Test-Path $backup) -and -not (Test-Path $dst)) {
+          Move-Item -LiteralPath $backup -Destination $dst -ErrorAction SilentlyContinue
+        }
+        $backup = $null
+        if (-not (Test-DestinationContention $dstParent $dst $_)) { throw }
+        $deferredDetail = [string]$_.Exception.Message
+        if ($attempt -lt $script:SwapAttempts) {
+          Start-Sleep -Milliseconds (250 * $attempt)
+          continue
+        }
+        $deferred = $true
+        throw
       }
-      throw
     }
-    if (Test-Path $backup) { Remove-Item -LiteralPath $backup -Recurse -Force -ErrorAction Stop }
-    $backup = $null
     return "copied (re-run after updates)"
   } catch {
     if ($stage -and (Test-Path $stage)) {
@@ -354,6 +484,11 @@ function Copy-Skill([string]$dst) {
     }
     if ($backup -and (Test-Path $backup) -and -not (Test-Path $dst)) {
       Move-Item -LiteralPath $backup -Destination $dst -ErrorAction SilentlyContinue
+    }
+    if ($deferred) {
+      # The known-good install is intact and the generation is fine; only this
+      # consumer has not converged yet.
+      return "DEFERRED_RETRYABLE ($dst): $deferredDetail"
     }
     return "copy FAILED ($dst): $($_.Exception.Message)"
   }
@@ -463,7 +598,13 @@ function Get-RuntimeIdentity([string]$candidate) {
     "from saipen_engine.runtime_bootstrap import GENERATION;" +
     "from saipen_engine.runtime_surface import require_runtime_generation_identity as identity;" +
     "print(json.dumps({'installer_generation':GENERATION,'runtime_fingerprint':identity(sys.argv[2])}))"
-  $output = @(& $pythonBin -I -B -c $code $tools $candidate)
+  # The child's stderr is dropped on purpose. A PROBE asks a question -- "can
+  # you prove what is installed here?" -- and "no" is an ordinary answer that
+  # arrives as a traceback. schedule-run.ps1 invokes the injector with
+  # $ErrorActionPreference "Stop", where one child stderr line aborts preflight,
+  # so an unprovable candidate has to fail HERE, quietly, and let the caller
+  # decide what to do about it.
+  $output = @(& $pythonBin -I -B -c $code $tools $candidate 2>$null)
   if ($LASTEXITCODE -ne 0 -or $output.Count -eq 0) {
     throw "runtime identity unprovable for $candidate (exit $LASTEXITCODE)"
   }
@@ -575,11 +716,11 @@ foreach ($adapter in @($AdapterRegistry.adapters)) {
         $agentsSkillRes = $null
         if (Test-Path "$h\.agents\skills") {
           $agentsSkillRes = (Copy-Skill $agentsSkillDir)
-          [void]$report.Add(@("~/.agents skills", $agentsSkillRes))
+          [void]$report.Add(@("~/.agents skills", $agentsSkillRes, [string]$adapter.id))
         } elseif ($agentsSupported) {
           # Host supports generic skill root but hasn't created the directory yet -- create it.
           $agentsSkillRes = (Copy-Skill $agentsSkillDir)
-          [void]$report.Add(@("~/.agents skills", $agentsSkillRes))
+          [void]$report.Add(@("~/.agents skills", $agentsSkillRes, [string]$adapter.id))
         } else { [void]$report.Add(@("~/.agents", "not installed - skip")) }
         if ($agentsSkillRes -and ($agentsSkillRes -match '^(copied|already)')) {
           [void]$report.Add(@("~/.agents provenance", (Write-RuntimeProvenance $adapter $agentsSkillDir)))
@@ -651,7 +792,7 @@ foreach ($adapter in @($AdapterRegistry.adapters)) {
             if (Test-Path $skillsDir) {
               $agDst = (Join-Path $skillsDir "saipen")
               $agRes = (Copy-Skill $agDst)
-              [void]$report.Add(@("Antigravity [$($_.Name)]", $agRes))
+              [void]$report.Add(@("Antigravity [$($_.Name)]", $agRes, [string]$adapter.id))
               if ($agRes -match '^(copied|already)') {
                 [void]$report.Add(@("Antigravity [$($_.Name)] provenance", (Write-RuntimeProvenance $adapter $agDst)))
               }
@@ -671,13 +812,13 @@ foreach ($adapter in @($AdapterRegistry.adapters)) {
   # pwsh 7 during the T-1317 audit).
   $hostHome = Expand-Home ([string]$install.home)
   if ([string]::IsNullOrWhiteSpace($hostHome) -or -not (Test-Path $hostHome)) {
-    [void]$report.Add(@($label, "not installed - skip"))
+    [void]$report.Add(@($label, "not installed - skip", [string]$adapter.id))
     continue
   }
   if ((Has-Prop $install 'skill') -and $install.skill) {
     $skillDst = Expand-Home ([string]$install.skill)
     $skillResult = Copy-Skill $skillDst
-    [void]$report.Add(@("$label skill", $skillResult))
+    [void]$report.Add(@("$label skill", $skillResult, [string]$adapter.id))
     if ($skillResult -match '^(copied|already)') {
       [void]$report.Add(@("$label provenance", (Write-RuntimeProvenance $adapter $skillDst)))
     }
@@ -697,12 +838,81 @@ Write-Host "saipen injector report (source: $SkillHome)" -ForegroundColor Yellow
 Write-Host ("-" * 60)
 foreach ($r in $report) {
   $color = if ($r[1] -match "FAILED|manually") { "Red" }
+           elseif ($r[1] -match "DEFERRED_RETRYABLE") { "Yellow" }
            elseif ($r[1] -match "already|skip") { "DarkGray" } else { "Green" }
   Write-Host ("{0,-28} {1}" -f $r[0], $r[1]) -ForegroundColor $color
 }
+# --- Consumer result model (T-1613) ------------------------------------
+# A consumer copy of the runtime converges to the published generation or it
+# does not. That question is NOT the same as "is the published generation
+# valid", and collapsing the two is what let one locked directory roll back a
+# valid publication (see bootstrap/schedule-run.ps1). Each installed surface
+# therefore reports one of five results, and only a result the adapter
+# registry declares blocking decides this run's exit code.
+$script:ConsumerResults = @(
+  "APPLIED", "ALREADY_CURRENT", "SKIPPED_NOT_INSTALLED",
+  "DEFERRED_RETRYABLE", "FAILED_TERMINAL"
+)
+
+function Get-ConsumerResult([string]$text) {
+  if ($text -match '^DEFERRED_RETRYABLE') { return "DEFERRED_RETRYABLE" }
+  if ($text -match 'FAILED') { return "FAILED_TERMINAL" }
+  if ($text -match '^already') { return "ALREADY_CURRENT" }
+  if ($text -match 'skip') { return "SKIPPED_NOT_INSTALLED" }
+  return "APPLIED"
+}
+
+$blockingById = @{}
+foreach ($a in @($AdapterRegistry.adapters)) { $blockingById[[string]$a.id] = [bool]$a.blocking_capability }
+
+$consumers = New-Object System.Collections.ArrayList
+foreach ($r in $report) {
+  # Rows without an adapter are side surfaces of one adapter (provenance,
+  # instruction block, hook); they are reported, never modelled as consumers.
+  if ($r.Count -lt 3) { continue }
+  $aid = [string]$r[2]
+  # An unknown adapter is treated as blocking: this script refuses to invent
+  # weaker authority than the registry grants.
+  $blocking = if ($blockingById.ContainsKey($aid)) { $blockingById[$aid] } else { $true }
+  [void]$consumers.Add([ordered]@{
+      consumer = [string]$r[0]
+      adapter  = $aid
+      blocking = $blocking
+      result   = (Get-ConsumerResult ([string]$r[1]))
+      detail   = [string]$r[1]
+    })
+}
+$deferred = @($consumers | Where-Object { $_.result -eq "DEFERRED_RETRYABLE" })
+$failedBlocking = @($consumers | Where-Object { $_.result -eq "FAILED_TERMINAL" -and $_.blocking })
+$failedAdvisory = @($consumers | Where-Object { $_.result -eq "FAILED_TERMINAL" -and -not $_.blocking })
+# Side-surface failures keep today's authority: they are never downgraded.
+$sideFailed = @($report | Where-Object { $_[1] -match "FAILED" -and $_.Count -lt 3 })
+
+$convergencePath = Join-Path $env:LOCALAPPDATA "saipen\convergence.json"
+try {
+  New-Item -ItemType Directory -Force (Split-Path $convergencePath) -ErrorAction Stop | Out-Null
+  $record = [ordered]@{
+    schema        = "SAIPEN_CONVERGENCE_1"
+    generated_at  = (Get-Date).ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ")
+    source        = $SkillHome
+    consumers     = @($consumers)
+    pending       = @($deferred | ForEach-Object { $_.consumer })
+    convergence   = if (($deferred.Count + $failedAdvisory.Count) -gt 0) { "DEGRADED" } else { "CURRENT" }
+    requires_human = $false
+  }
+  [System.IO.File]::WriteAllText((Get-NativePath $convergencePath), ($record | ConvertTo-Json -Depth 6), $Utf8NoBom)
+} catch {
+  # The record is evidence, never a precondition for installing: a machine
+  # that cannot write it still gets its consumers converged.
+  Write-Host ("WARN: convergence record not written ($($_.Exception.Message))") -ForegroundColor Yellow
+}
+
+if ($deferred.Count -gt 0 -or $failedAdvisory.Count -gt 0) {
+  Write-Host ("consumers: {0} deferred, {1} failed (non-blocking); queued for the next scheduled run -- no operator action" -f $deferred.Count, $failedAdvisory.Count) -ForegroundColor Yellow
+}
 Write-Host ("-" * 60)
-$failed = @($report | Where-Object { $_[1] -match "FAILED" })
-if ($failed.Count -gt 0) {
+$fatal = @($failedBlocking) + @($sideFailed)
+if ($fatal.Count -gt 0) {
   Write-Host "FAILED. Fix reported errors and re-run." -ForegroundColor Red
   exit 1
 }

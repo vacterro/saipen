@@ -321,6 +321,37 @@ def scheduler_log() -> Path | None:
     return path if path.is_file() else None
 
 
+#: What the publisher wrote last, split into the two questions it answers
+#: separately. T-1613: "which generation is published" and "which consumers
+#: have applied it" are different facts. A consumer copy that is temporarily
+#: locked (an IDE holding its directory open, a busy removable volume) does
+#: not make the published generation invalid, and a report that collapses the
+#: two teaches its reader to ignore it. Missing record -> {} -> no claims.
+CONVERGENCE_SCHEMA = "SAIPEN_CONVERGENCE_1"
+
+
+def convergence_record() -> dict:
+    """The last publication/convergence record, or {} when there is none.
+
+    Written by `bootstrap/inject.ps1` (consumer results) and completed by
+    `bootstrap/schedule-run.ps1` (the published head and the publication
+    verdict). A truncated or foreign record reads as absent: the honest
+    answer to "did every consumer converge" is never inferred from a file
+    that cannot be parsed.
+    """
+    base = os.environ.get("LOCALAPPDATA")
+    if not base:
+        return {}
+    path = Path(base) / "saipen" / "convergence.json"
+    try:
+        record = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, ValueError, UnicodeDecodeError):
+        return {}
+    if not isinstance(record, dict) or record.get("schema") != CONVERGENCE_SCHEMA:
+        return {}
+    return record
+
+
 def last_inject_run(log: Path | None = None) -> dict | None:
     """The newest complete-or-partial run block in the runner's log.
 
@@ -784,6 +815,25 @@ def has_installed_targets() -> bool:
     return any(target.is_dir() for target in TARGETS)
 
 
+def convergence_facts() -> dict:
+    """The publisher's own answers, read through one tolerant accessor.
+
+    Every field defaults to the honest "unknown / nothing pending": a machine
+    that never ran the scheduler has no publication to report, and saying so
+    beats inventing a verdict. `requires_human` is read, never computed --
+    this class of failure is retried by the scheduler, and no reader may be
+    told a human is required on the strength of a stale file.
+    """
+    record = convergence_record()
+    return {
+        "published_head": record.get("published_head"),
+        "publication": record.get("publication"),
+        "consumer_convergence": record.get("convergence"),
+        "pending_consumers": [str(name) for name in (record.get("pending_consumers") or ())],
+        "requires_human": bool(record.get("requires_human", False)),
+    }
+
+
 def distribution_report(source_head: str | None = None) -> dict:
     """Read-only answer to: do the installed agent homes run current SAIPEN?
 
@@ -856,6 +906,7 @@ def distribution_report(source_head: str | None = None) -> dict:
         elif heads:
             newest = heads[0]
     run = last_inject_run()
+    pending = [str(name) for name in (convergence_record().get("pending_consumers") or ())]
     stale = [item["home"] for item in homes if item["stale"]]
     surface_unknown = len(
         [item for item in homes if any(s == "unknown" for s in item["surfaces"].values())]
@@ -876,6 +927,12 @@ def distribution_report(source_head: str | None = None) -> dict:
         # success cannot hide today's stale bytes. The current verdict below
         # must never consult this again.
         "last_run": _last_run_provenance(run),
+        # T-1613: PUBLICATION and CONSUMER CONVERGENCE stay separate facts.
+        # `published_head` is what the publisher holds; `pending_consumers`
+        # is what has not caught up yet, retried by the scheduler and never
+        # a reason for a human. `consumers_converged` is the joint truth:
+        # every installed home byte-current AND no consumer pending.
+        **convergence_facts(),
         # T-1454: the CURRENT blocking condition, not history. `last_run` says
         # what the scheduler did; this says why the next run will do the same.
         "blocker": injection_blockers(),
@@ -891,6 +948,18 @@ def distribution_report(source_head: str | None = None) -> dict:
         and expected is not None
         and not stale
         and surface_unknown == 0,
+        # T-1613: `fresh` stays a statement about installed home BYTES and
+        # keeps its meaning on every host. Whether the publisher's generation
+        # is current and whether every consumer applied it are separate
+        # facts, reported above; `consumers_converged` is the one place that
+        # joins them, and it reads false whenever a consumer is pending.
+        "consumers_converged": bool(
+            homes
+            and expected is not None
+            and not stale
+            and surface_unknown == 0
+            and not pending
+        ),
     }
 
 
@@ -1024,6 +1093,25 @@ def _last_run_sentence(run: dict) -> str:
     return f"last scheduled injection: {status}{at}"
 
 
+def _convergence_sentence(report: dict) -> str:
+    """T-1613: publication truth and convergence truth in one clause.
+
+    "Every home runs current" and "every consumer applied the published
+    generation" are different statements, and a pending consumer -- a plugin
+    directory an IDE is holding open, retried by the scheduler -- must never
+    read as either a failure needing a human or a clean bill of health.
+    """
+    pending = report.get("pending_consumers") or []
+    if not pending:
+        return ""
+    published = str(report.get("published_head") or "")[:12] or "unknown"
+    return (
+        f"{len(pending)} consumer(s) pending at {published} "
+        f"({', '.join(str(name) for name in pending[:4])}); queued for the "
+        "next scheduled run, no operator action"
+    )
+
+
 def distribution_line(report: dict) -> str:
     """One operator sentence from `distribution_report`. Never a verdict."""
     if not report["installed"]:
@@ -1034,7 +1122,7 @@ def distribution_line(report: dict) -> str:
         return (
             f"distribution: {report['installed']} home(s) current at "
             f"{str(report['source_head'] or '?')[:12]}{history}"
-        )
+        ) + _convergence_sentence(report)
     parts = [
         f"distribution: {report['stale']} of {report['installed']} home(s) stale",
         f"newest installed head {str(report['newest_installed_head'] or 'unknown')[:12]}",
@@ -1049,6 +1137,9 @@ def distribution_line(report: dict) -> str:
         parts.append(f"BLOCKED {blocker['condition']}: {blocker['detail']}")
         if blocker.get("canonical_next_command"):
             parts.append(f"clears with: {blocker['canonical_next_command']}")
+    sentence = _convergence_sentence(report)
+    if sentence:
+        parts.append(sentence)
     return " -- ".join(parts)
 
 
