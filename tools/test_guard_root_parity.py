@@ -241,7 +241,15 @@ class GeminiCheckTests(AuthorityPatch, unittest.TestCase):
             clone = _fake_root(base / "clone")
             self._install_from(home, clone)
             artifact = home / ".gemini" / "hooks" / "saipen-guard.py"
-            artifact.write_bytes(artifact.read_bytes().replace(b"\n", b"\r\n"))
+            # Normalise to LF first, then convert. A Windows checkout with
+            # core.autocrlf already installed a CRLF artifact, so a bare
+            # `\n` -> `\r\n` replacement produced `\r\r\n` -- genuinely drifted
+            # bytes, and the guard correctly called it stale. The test asserted
+            # the wrong thing on half the platforms it ships to, and CI runs
+            # ubuntu only, so nothing ever saw it.
+            artifact.write_bytes(
+                artifact.read_bytes().replace(b"\r\n", b"\n").replace(b"\n", b"\r\n")
+            )
             self.assertTrue(self._check_against(home, clone)["current"])
 
     def test_a_genuinely_different_artifact_still_reads_stale(self):

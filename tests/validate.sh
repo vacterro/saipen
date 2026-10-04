@@ -162,9 +162,21 @@ if [ -f ".saipen/LOG.md" ]; then
     # utf-8-sig and never sees one; this floor did, so a BOM'd LOG.md failed
     # here while passing there -- the two validators disagreeing about the same
     # file. Bug fix, not a new check (this file is frozen against the latter).
+    #
+    # Strip CR for the same reason, and the same disagreement. LOG.md is stored
+    # CRLF -- `.gitattributes` pins `.saipen/** -text` so the bytes survive
+    # verbatim -- so on a Linux runner every blank line is a bare CR, which
+    # `^$` does not match and the event pattern does not either. Those lines
+    # survived into BAD_LINES and printed as a blank line under the FAIL. The
+    # PowerShell half never saw it: Get-Content drops the CR and `.Trim()`
+    # empties the line. The BOARD.md check two blocks up already used
+    # `tr -d '\r'` for exactly this. Git Bash hid it because its grep opens in
+    # text mode and strips the CR itself, so only a Linux CI runner could ever
+    # report it. Same class as the BOM fix: a bug, not a new check.
     if ! BAD_LINES=$(
         set -o pipefail
-        sed '1s/^\xef\xbb\xbf//' .saipen/LOG.md \
+        tr -d '\r' < .saipen/LOG.md \
+            | sed '1s/^\xef\xbb\xbf//' \
             | grep_without_matches "^#" \
             | grep_without_matches "^$" \
             | grep_without_matches "$LOG_PATTERN"
