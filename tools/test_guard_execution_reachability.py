@@ -378,6 +378,13 @@ class RecoveryDebtScopeTests(unittest.TestCase):
             ("mixed-case", "SRC/APP.PY", False),
             ("absolute", "src/app.py", True),
         ]
+        # Two of these spellings only NAME the same file on Windows. On a
+        # case-sensitive POSIX filesystem `SRC/APP.PY` is a different file, and
+        # a backslash is a legal filename character rather than a separator --
+        # so demanding the match there would demand a normalization that is
+        # itself the bug.
+        if os.name != "nt":
+            spellings = [item for item in spellings if item[0] not in ("backslash", "mixed-case")]
         for label, spelling, absolute in spellings:
             with self.subTest(spelling=label):
                 root = self._with_pending(

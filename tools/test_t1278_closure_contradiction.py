@@ -43,6 +43,12 @@ class Repo:
         env = {k: v for k, v in os.environ.items() if not k.startswith("GIT_")}
         self.env = env
         self.git("init", "-q")
+        # The identity goes IN the repository, not only on this helper's command
+        # line: the code under test runs its own `git commit` inside this repo
+        # and inherits nothing from `-c`. Those commits picked up the
+        # maintainer's global config here, and failed on a runner that has none.
+        self.git("config", "user.name", "fixture")
+        self.git("config", "user.email", "fixture@example.invalid")
         (self.root / ".saipen").mkdir()
 
     def git(self, *args: str) -> str:

@@ -357,10 +357,11 @@ class ConformanceLineageTests(unittest.TestCase):
                 f"2026-01-01T00:{index // 60:02d}:{index % 60:02d}Z",
             )
         head_path = self.root / CL.HEAD_REL
-        head_path_posix = self.root / CL.HEAD_REL.replace("/", "\\")
-        document = json.loads(
-            head_path.read_text() if head_path.exists() else head_path_posix.read_text()
-        )
+        # Write back through whichever path was read. On POSIX a backslash is a
+        # legal filename character, so `HEAD_REL` with backslashes is a second
+        # file -- writing the forgery there would leave the real head untouched
+        # and the assertion would pass for the wrong reason.
+        document = json.loads(head_path.read_text())
         # Forge a current-head binding for a gate whose generation the head
         # does not authenticate (locally re-hashed so the head self-hash
         # still passes: the deep authority is the subject, not the root).
@@ -384,7 +385,7 @@ class ConformanceLineageTests(unittest.TestCase):
             )
         }
         document["root"] = CL._content_root(CL._HEAD_DOMAIN, payload)
-        head_path_posix.write_text(json.dumps(document))
+        head_path.write_text(json.dumps(document))
         deep_ok, deep_errors = CL.validate_lineage_deep(self.root)
         self.assertFalse(deep_ok)
         self.assertTrue(

@@ -21,9 +21,11 @@ from pathlib import Path
 TOOLS = Path(__file__).resolve().parent
 ROOT = TOOLS.parent
 sys.path.insert(0, str(TOOLS))
+sys.path.insert(0, str(ROOT / "bootstrap"))
 
 from saipen_engine import protocol_admission as PA  # noqa: E402
 from saipen_engine import response_surface as RS  # noqa: E402
+import cli_launcher  # noqa: E402
 from t1563_transport_carrier import run  # noqa: E402
 from test_protocol_admission import World, guard  # noqa: E402
 
@@ -144,7 +146,16 @@ class AuthorityMintingTests(unittest.TestCase):
     def test_real_init_still_binds_the_same_session_but_cannot_invent_host_admission(self):
         project = Path(self.temp.name) / "fresh-project"
         project.mkdir()
-        launcher = ROOT / "bin" / ("saipen.cmd" if os.name == "nt" else "saipen")
+        # Rendered by its one owner rather than read out of ROOT/bin, which is an
+        # install artifact no clone has -- on CI that path simply does not
+        # exist, so the test failed before it asserted anything.
+        launcher_home = Path(self.temp.name) / "launcher-home"
+        cli_launcher.write_launchers(
+            sys.executable, str(ROOT / "tools" / "saipen.py"), launcher_home / "bin"
+        )
+        launcher = launcher_home / "bin" / ("saipen.cmd" if os.name == "nt" else "saipen")
+        if os.name != "nt":
+            os.chmod(launcher, 0o755)
         process = subprocess.run(
             [str(launcher), "init", "--project-root", str(project),
              "--agent", "test-agent", "--json"],

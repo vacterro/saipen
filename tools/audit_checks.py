@@ -100,6 +100,23 @@ TAG_QUERY = ("git", "tag", "-l", "v*")
 AUDIT_TAGS_GIT_SHIM = "SAIPEN_AUDIT_TAGS_GIT_SHIM"
 AUDIT_TAGS_MODE = "SAIPEN_AUDIT_TAGS_MODE"
 
+
+def _git_failure(args, result) -> str:
+    """Name the git step and BOTH streams, never one of them.
+
+    `stderr or stdout` is a coin toss that lands wrong exactly when it costs
+    something: on a host with `core.autocrlf` set, `git add -A` fills stderr
+    with hundreds of advisory "LF will be replaced by CRLF" lines while the
+    `fatal:` line that actually explains the non-zero exit sits in stdout. The
+    probe then reports 4 KB of noise as the cause of a failure it cannot see.
+    """
+    streams = [
+        f"{name}: {(text or '').strip()}"
+        for name, text in (("stdout", result.stdout), ("stderr", result.stderr))
+        if (text or "").strip()
+    ]
+    return f"git {' '.join(args)} failed (exit {result.returncode}): " + " | ".join(streams)
+
 #: The adjudicated fail surface of `tools/validate.py`, by identity. Owned by
 #: `tools/fail_site_inventory.py` and recorded in `tools/validator_fail_sites.json`.
 #:
@@ -370,7 +387,7 @@ def release_ledger_probe(source: Path, destination: Path) -> str | None:
     ):
         result = git(*args)
         if result.returncode:
-            return f"git {' '.join(args)} failed: {(result.stderr or result.stdout).strip()}"
+            return _git_failure(args, result)
 
     # The copied real `.saipen/LOG.md` carries `hunt -> clean @<hash>` marks
     # that name this repository's real commits. In this synthetic repo only
@@ -693,7 +710,7 @@ def warn_ownership_probe(source: Path, destination: Path) -> str | None:
     ):
         result = git(*args)
         if result.returncode:
-            return f"git {' '.join(args)} failed: {(result.stderr or result.stdout).strip()}"
+            return _git_failure(args, result)
 
     active_log = tree / LOG
     short = git("rev-parse", "--short", "HEAD").stdout.strip()
@@ -704,7 +721,7 @@ def warn_ownership_probe(source: Path, destination: Path) -> str | None:
         for args in (("add", LOG), ("commit", "-q", "-m", "re-point synthetic hunt marks")):
             result = git(*args)
             if result.returncode:
-                return f"git {' '.join(args)} failed: {(result.stderr or result.stdout).strip()}"
+                return _git_failure(args, result)
 
     changelog_only = set(baseline["changelog_only"])
     changelog_versions: set[str] = set()

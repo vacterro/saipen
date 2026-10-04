@@ -760,14 +760,25 @@ class ProtectedShellNamespace(unittest.TestCase):
 
     def test_explicit_protected_shell_paths_are_refused(self):
         root = fresh_project()
-        commands = (
+        # The spelling has to be one the host can actually execute. On POSIX a
+        # backslash is an ordinary filename character, so `del src\..\.saipen\
+        # BOARD.md` names one file called that and cannot touch the board --
+        # refusing it would be refusing a harmless command, and demanding the
+        # refusal tested a Windows shell syntax on a Linux runner.
+        windows_only = (
+            r"del .saipen\STATE.md",
+            r"del src\..\.saipen\BOARD.md",
+        )
+        posix_only = (
+            "rm -f src/../.saipen/BOARD.md",
+        )
+        commands = [
             "python -c \"from pathlib import Path; Path('.saipen/STATE.md').write_text('boom')\"",
             "rm -f .saipen/BOARD.md",
-            r"del .saipen\STATE.md",
             "python -c \"open('src/../.saipen/STATE.md', 'w').write('boom')\"",
-            r"del src\..\.saipen\BOARD.md",
             "rm -rf ./.saipen",
-        )
+            *(windows_only if os.name == "nt" else posix_only),
+        ]
         for command in commands:
             event = GuardEventHarness.tool_event(root, "bash", {"command": command})
             mapped = guard_events.map_event(event)

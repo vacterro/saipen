@@ -176,7 +176,11 @@ class ActualSweepCapabilityTests(unittest.TestCase):
         verdict, text = self.run_sweep([self.link_case])
         self.assertEqual(verdict, "UNPROVEN", text)
         self.assertIn("SKIP: portable project identity -- this host cannot create a symlink", text)
-        self.assertIn("1314", text)
+        # The host's OWN refusal text must reach the report -- that is the whole
+        # claim. Pinning it to "1314" pinned the test to Windows: the fixture
+        # builds an OSError, so CPython renders `[WinError 1314]` here and
+        # `[Errno 1]` on a Linux runner, and the sweep text was right either way.
+        self.assertIn("symlink privilege unavailable", text)
         self.assertNotIn("the validator did not report", text)
         self.assertNotIn(audit_checks.FULL_SWEEP_PHRASE, text)
 

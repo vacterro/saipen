@@ -82,6 +82,15 @@ class PlanTests(unittest.TestCase):
             [shard for shard in plan if "test_b" in shard],
         )
 
+    def test_a_shard_with_no_module_is_never_planned(self):
+        # `unittest` exits 5 for "no tests ran" since CPython 3.12, so an empty
+        # shard is a red family on a newer interpreter and a green one on an
+        # older one -- over a shard that could never assert anything. Fewer
+        # modules than jobs is the common case, not an edge.
+        plan = core_unit.plan_shards(["test_only"], {}, 4)
+        self.assertEqual(plan, [["test_only"]])
+        self.assertEqual(core_unit.plan_shards(["test_a", "test_b"], {}, 8), [["test_a"], ["test_b"]])
+
     def test_only_the_declared_discovery_shape_is_sharded(self):
         self.assertEqual(core_unit.shardable(DECLARED_SHAPE), ("tools", "test_*.py"))
         self.assertIsNone(core_unit.shardable(DECLARED_SHAPE[:-1]))

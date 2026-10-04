@@ -355,6 +355,12 @@ def plan_shards(modules, weights: dict, jobs: int) -> list[list[str]]:
 
     A module with no measured weight is costed at the mean of the measured
     ones, so a new module neither starves nor swamps a shard.
+
+    A shard that drew no module is dropped rather than returned empty. An
+    empty shard runs no test, and `unittest` has exited 5 for "no tests ran"
+    since CPython 3.12 -- so keeping one turned every run with fewer modules
+    than jobs into a red family on a newer interpreter and a green one on an
+    older one, over a shard that was never going to assert anything.
     """
     modules = sorted(set(modules))
     known = [float(weights[name]) for name in modules if name in weights]
@@ -366,7 +372,7 @@ def plan_shards(modules, weights: dict, jobs: int) -> list[list[str]]:
         index = min(range(len(shards)), key=lambda item: (loads[item], item))
         shards[index].append(name)
         loads[index] += cost[name]
-    return shards
+    return [shard for shard in shards if shard]
 
 
 def load_durations(root: Path | str) -> dict:
@@ -687,7 +693,10 @@ def run_family(root: Path | str, *, timeout: int | None = None, jobs: int = 1) -
             declared_family.name, declared_family.command, timeout
         )
     shape = shardable(declared_family.command) if int(jobs) > 1 else None
-    count = int(jobs) if shape else 1
+    # No sandbox past the module count: `plan_shards` drops a shard that drew
+    # no module, and a sandbox with no shard to run is a copy of the tree
+    # paid for nothing.
+    count = max(1, min(int(jobs), len(_modules(source, *shape)))) if shape else 1
     started = time.monotonic()
     swept = sweep_stale_sandboxes()
     tmps: list[Path] = []
@@ -715,12 +724,12 @@ def run_family(root: Path | str, *, timeout: int | None = None, jobs: int = 1) -
             # Shard 0 is the catch-all: every module no other shard names.
             named = sorted({name for shard in plan[1:] for name in shard})
             specs = [{"exclude": named}, *({"include": shard} for shard in plan[1:])]
-            with ThreadPoolExecutor(max_workers=count) as pool:
+            with ThreadPoolExecutor(max_workers=len(specs)) as pool:
                 shards = list(pool.map(
                     lambda index: _run_shard(
                         sandboxes[index], declared_family, shape, specs[index], tmps[index]
                     ),
-                    range(count),
+                    range(len(specs)),
                 ))
             run = merge_shards(shards)
     finally:

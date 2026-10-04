@@ -691,6 +691,12 @@ load({ homeDir, fs: fs.promises, logger })
         __import__("shutil").which("powershell") or __import__("shutil").which("pwsh"),
         "PowerShell runtime unavailable",
     )
+    @unittest.skipUnless(
+        os.name == "nt",
+        "the pinned blob writes its home surfaces through Windows-spelled paths "
+        "(`$h\\.knowledge.md`), so on POSIX it names files OUTSIDE the home and "
+        "there is no pre-fix home to control",
+    )
     def test_33_pre_fix_injector_is_a_red_control(self):
         # The pinned pre-fix installer left ~/.AGENTS.md untouched whenever
         # ~/.knowledge.md existed -- the exact live RED shape. The desktop

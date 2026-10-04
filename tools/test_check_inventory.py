@@ -44,15 +44,15 @@ from saipen_engine.knowledge import validate_knowledge, write_index  # noqa: E40
 #: moment anything above them moved -- that is the defect this module closes,
 #: so the record of it does not repeat the mistake.
 E6743_UNCOVERED = (
-    "47f4631bae337eff",  # activation template missing
-    "9fe5817a2892b4fe",  # installed_relpath unavailable
-    "8652bef78b223149",  # installed_relpath maps to the wrong name
-    "8bebdf7a2b783dbd",  # activation template lost a marker
-    "b4503430f7a17189",  # next_action disagrees with the shared Pick Rule
-    "3bfe417dbc47866b",  # BOARD record with no allocation event
-    "d0bcef4953fcb024",  # GOAL_BLOCKED beside workable Work
-    "c299b922092d1c56",  # CONVERGE.md converge_targets differ from CORE.md
-    "1e93fe466d2496cb",  # COMMANDS.md shortcut table differs from REGISTRY.json
+    "e90de7eb325ce31f",  # activation template missing
+    "34d8728a6938093d",  # installed_relpath unavailable
+    "34e10047c4585c04",  # installed_relpath maps to the wrong name
+    "8c8b69c5dfdecdf9",  # activation template lost a marker
+    "c2caa697e1e7e9e1",  # next_action disagrees with the shared Pick Rule
+    "294221992862755c",  # BOARD record with no allocation event
+    "2479c7b42bdabe26",  # GOAL_BLOCKED beside workable Work
+    "595cfc5cf3f12cc7",  # CONVERGE.md converge_targets differ from CORE.md
+    "fc5c14b337b823f1",  # COMMANDS.md shortcut table differs from REGISTRY.json
 )
 
 KNOWLEDGE_CASES = (
@@ -206,6 +206,27 @@ class FailSiteIdentityTests(unittest.TestCase):
             site.site_id, I.compute_site_id(site.qualname, site.signature, site.ordinal)
         )
         self.assertNotIn(str(site.line), site.signature)
+
+    def test_the_identity_is_not_the_interpreter_pretty_printer(self) -> None:
+        """The control that was missing, and the whole reason CI was red.
+
+        Identity used to be `ast.dump(call)`. PEP 701 rewrote f-string parsing
+        in CPython 3.12, so the SAME validator pretty-printed differently
+        there: all 341 ids changed at once and every host but the one the
+        ledger was cut on reported the whole validator as newly added.
+        `test_the_identity_is_deterministic` could never see it -- the ids
+        were perfectly stable, and perfectly wrong on the next interpreter.
+        """
+        site = I.fail_sites("def check():\n    fail('a ' 'b')\n")[0]
+        self.assertEqual(site.signature, "a b")
+        self.assertNotIn("Constant", site.signature)
+        self.assertNotIn("Call(", site.signature)
+
+    def test_one_check_spelled_two_ways_is_one_site(self) -> None:
+        """An f-string and a concatenation declare the same check."""
+        spelled = I.fail_sites("def check(n):\n    fail(f'a {n} b')\n")[0]
+        joined = I.fail_sites("def check(n):\n    fail('a ' + n + ' b')\n")[0]
+        self.assertEqual(spelled.site_id, joined.site_id)
 
     def test_identical_calls_in_one_function_stay_distinct(self) -> None:
         twice = (

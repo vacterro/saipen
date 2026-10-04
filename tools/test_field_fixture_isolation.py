@@ -819,10 +819,21 @@ class WindowsPathAuthorityTests(unittest.TestCase):
 
         root = self.build()
         task = polygon.condition_task("windows_path_task", root)
-        named = re.search(r"([A-Za-z]:\\.+\.txt)$", task)
+        # Anchored on the fixture's own prose: the path carries spaces, so no
+        # `\S+\.txt` can span it, and a bare `.*\.txt$` would swallow the
+        # sentence in front of it.
+        named = re.search(r"written in (.+\.txt)$", task)
         self.assertIsNotNone(named, task)
         path = named.group(1)
-        self.assertRegex(path, r"^[A-Za-z]:\\", "no drive colon and backslash")
+        # The drive colon and backslashes are what makes this the Windows-path
+        # transport case, and only a Windows path carries them -- on POSIX the
+        # same fixture file is named with a leading slash. What has to hold on
+        # every host is the part that matters: the task names the file that is
+        # actually there, and that file holds the value.
+        if os.name == "nt":
+            self.assertRegex(path, r"^[A-Za-z]:\\", "no drive colon and backslash")
+        else:
+            self.assertTrue(path.startswith("/"), f"not an absolute path: {path}")
         self.assertIn(" ", path, "no space in the path")
         self.assertTrue(Path(path).is_file(), f"the task names a file that is not there: {path}")
         value = polygon.notes_value(root)

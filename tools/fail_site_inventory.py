@@ -134,6 +134,24 @@ def compute_site_id(qualname: str, signature: str, ordinal: int) -> str:
     return digest.hexdigest()[:16]
 
 
+def _call_signature(node: ast.Call) -> str:
+    """Each argument's literal text, in order.
+
+    This projection used to be `ast.dump(node)`, which made a fail site's
+    identity a property of the INTERPRETER rather than of this repository:
+    PEP 701 rewrote f-string parsing in CPython 3.12, so the same validator
+    pretty-prints differently there, every id changes at once, and each host
+    but the one the ledger was cut on reads the whole validator as newly
+    added. Reading the tree directly keeps identity to this source.
+
+    Two sites differ exactly when a reader would call them different checks:
+    a different message, or the same message over different data. That is what
+    the positional literal text captures, and `ordinal` separates repeats
+    within one function.
+    """
+    return "\x00".join(_literal_text(arg) for arg in node.args)
+
+
 def fail_sites(source: str) -> tuple[FailSite, ...]:
     """Every `fail(...)` site the validator declares, in identity order.
 
@@ -152,7 +170,7 @@ def fail_sites(source: str) -> tuple[FailSite, ...]:
         ):
             continue
         qualname = qualnames.get(node, "") or "<module>"
-        signature = ast.dump(node, annotate_fields=True, include_attributes=False)
+        signature = _call_signature(node)
         ordinal = seen[(qualname, signature)]
         seen[(qualname, signature)] += 1
         sites.append(

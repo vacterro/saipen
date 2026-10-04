@@ -31,11 +31,12 @@ from pathlib import Path
 
 TOOLS = Path(__file__).resolve().parent
 ROOT = TOOLS.parent
-for _entry in (str(TOOLS), str(ROOT)):
+for _entry in (str(TOOLS), str(ROOT), str(ROOT / "bootstrap")):
     if _entry not in sys.path:
         sys.path.insert(0, _entry)
 
 import autoinject  # noqa: E402
+import cli_launcher  # noqa: E402
 import install_host_guard  # noqa: E402
 from saipen_engine import chat_style as CS  # noqa: E402
 from saipen_engine import protocol_admission as PA  # noqa: E402
@@ -1043,7 +1044,17 @@ class SameTurnInitTests(unittest.TestCase):
                     authority=authority,
                 )
             )
-            launcher = ROOT / "bin" / ("saipen.cmd" if os.name == "nt" else "saipen")
+            # The REAL launcher, rendered by its one owner. Reaching into
+            # ROOT/bin for it meant depending on an install artifact that no
+            # clone has: on CI the directory does not exist, the test died on
+            # FileNotFoundError, and the admission behaviour it exists to pin
+            # was never exercised at all.
+            cli_launcher.write_launchers(
+                sys.executable, str(ROOT / "tools" / "saipen.py"), world_home / "bin"
+            )
+            launcher = world_home / "bin" / ("saipen.cmd" if os.name == "nt" else "saipen")
+            if os.name != "nt":
+                os.chmod(launcher, 0o755)
             init = subprocess.run(
                 [
                     str(launcher),
