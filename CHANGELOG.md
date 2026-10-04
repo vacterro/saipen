@@ -10,6 +10,8 @@
 - Preserve exact project-memory bytes across checkouts. Validate exported closed quarantine records without requiring private bodies that are deliberately excluded; authority reads and recovery still require the originals.
 - Refresh Quick Start with Python prerequisites, exact platform commands, installed terminal launchers, cold-start behavior, removal guarantees, and reinstall steps.
 - Require successful validation of the exact tagged commit before GitHub creates a release. All runtime operations remain local and use Python's standard library.
+- Name a root file outside the host's encoding the way a user sees it. Under `LC_ALL=C` the C runtime decodes each directory-entry byte with ASCII, so `os.listdir()` returns a non-ASCII filename surrogate-escaped and `[root-file-set]` printed those escapes instead of the name, which is the unreadable finding T-1475 exists to prevent.
+- Report every failing test id in the CI unit gate, not only the ones the log tail kept. The family report carried an 8,000-character tail, so a run with 21 failures showed four names and hid the rest behind GitHub's log truncation.
 
 ## 8.0.2 -- 2026-10-02 -- A tree that actually runs (T-1582, T-1593)
 
