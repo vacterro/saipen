@@ -4363,11 +4363,19 @@ if log_files:
                                 "report to canonical work"
                             )
                         if _repro != "y":
+                            # T-1612: this is the reproduction gate, and it is
+                            # the ONLY one. `reproduced` (was the observed
+                            # behaviour actually reproduced) and the finding
+                            # class (what that observation means for the
+                            # suspected hypothesis) are orthogonal facts, so no
+                            # class -- ACCIDENTAL_SUCCESS included -- can
+                            # substitute for reproduction evidence here.
                             _sweep_errors.append(
                                 f"{_sweep}:{_line_no} {_ref} produced "
                                 f"ticket {_ticket} with reproduced={_repro}; "
                                 "an unverified finding cannot authorize a "
-                                "ticket"
+                                "ticket; no finding class, ACCIDENTAL_SUCCESS "
+                                "included, substitutes for reproduction"
                             )
                     elif _disp in ("INVALID", "ALREADY_FIXED", "NOT_REPRODUCED"):
                         if _ticket != "-":
@@ -4415,9 +4423,24 @@ if log_files:
                         # T-558 reasoning gates: a PROTOCOL_VIOLATION finding
                         # that produced a ticket MUST carry the META-IMPROVEMENT
                         # recurrence reasoning and the WEAK-MODEL PRECEDENT
-                        # answer on the ticket (red controls 15/16); an
-                        # ACCIDENTAL_SUCCESS result is never recorded as PASS
-                        # (red control 5).
+                        # answer on the ticket (red controls 15/16).
+                        #
+                        # T-1612: red control 5 is NOT a class check here.
+                        # Reproduction status and finding class are orthogonal
+                        # facts -- `reproduced=y` says the observed behaviour
+                        # was reproduced, and says nothing about whether the
+                        # suspected defect is what the observation shows. An
+                        # `ACCIDENTAL_SUCCESS` finding is a reproduced
+                        # observation that is a CORRECT result which does not
+                        # establish the suspected defect (an accidental-success
+                        # condition, a false premise, a misleading pass
+                        # condition). The arm that used to live here read
+                        # `reproduced=y` as "recorded as PASS" and so failed
+                        # five truthful completed sweep rows whose accidental
+                        # success really was reproduced. What ACCIDENTAL_SUCCESS
+                        # never is, is authority without reproduction -- and
+                        # the CONFIRMED/reproduced gate above enforces that for
+                        # every class without exception.
                         _cls_m = re.search(
                             rf"^{_imp}\b[^\n]*?\[[^\]]*\]\s*"
                             r"\[([A-Z_]+)\]",
@@ -4444,15 +4467,6 @@ if log_files:
                                 )
                                 _sweep_repairs.append(
                                     f"saipen ticket reasoning {_ticket}"
-                                )
-                            if _cls == "ACCIDENTAL_SUCCESS" and _repro == "y":
-                                _sweep_errors.append(
-                                    f"{_sweep}:{_line_no} ACCIDENTAL_SUCCESS "
-                                    f"{_ref} recorded as verified "
-                                    "(reproduced=y); a correct result reached "
-                                    "without the required verification is "
-                                    "ACCIDENTAL_SUCCESS, never PASS (red "
-                                    "control 5)"
                                 )
             # red control 20 + DOGFOOD V (T-615): every `source_reports:` ref
             # must resolve EXACTLY to a real SWEEP disposition -- no substring

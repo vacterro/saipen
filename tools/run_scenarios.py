@@ -10486,8 +10486,9 @@ def run_improve_probes() -> tuple[list[str], int]:
     )
 
     # T-558 reasoning gates: a PROTOCOL_VIOLATION finding that produced a
-    # ticket MUST carry recurrence + weak_model (red 15/16); ACCIDENTAL_SUCCESS
-    # is never PASS (red 5).
+    # ticket MUST carry recurrence + weak_model (red 15/16). Red control 5 is
+    # the reproduction gate, not a class check: ACCIDENTAL_SUCCESS is never
+    # PASS, and a reproducible one is still a reproduced observation (T-1612).
     def sweep_ticket_project(
         finding_class: str, fields: dict[str, str], reproduced: str = "y"
     ) -> Path:
@@ -10525,11 +10526,34 @@ def run_improve_probes() -> tuple[list[str], int]:
         validator_rc(with_gates) == 0,
         repr(validator_rc(with_gates)),
     )
-    acc_success = sweep_ticket_project("ACCIDENTAL_SUCCESS", {})
+    acc_reproduced = sweep_ticket_project("ACCIDENTAL_SUCCESS", {})
     expect(
-        "sweep: an ACCIDENTAL_SUCCESS result recorded as PASS fails (red control 5, validator red)",
-        validator_rc(acc_success) != 0,
-        repr(validator_rc(acc_success)),
+        "sweep: a reproduced ACCIDENTAL_SUCCESS authorizes its own ticket "
+        "(red control 5, validator green -- T-1612 reproduction and class "
+        "are orthogonal facts)",
+        validator_rc(acc_reproduced) == 0,
+        repr(validator_rc(acc_reproduced)),
+    )
+    acc_unreproduced = sweep_ticket_project("ACCIDENTAL_SUCCESS", {}, reproduced="n")
+    expect(
+        "sweep: an unreproduced ACCIDENTAL_SUCCESS cannot authorize a ticket "
+        "(red control 5, validator red)",
+        validator_rc(acc_unreproduced) != 0,
+        repr(validator_rc(acc_unreproduced)),
+    )
+    acc_unbacked = sweep_project(
+        ["- IMP-001 [CONFIRMED] T-901 report=saipen_improve_A.md reproduced=y"],
+        ["T-901"],
+        {},
+        _rep_header
+        + "IMP-001 [P1] [ACCIDENTAL_SUCCESS] [reproduced] [ticket]\n"
+        + "expected: x\nactual: y\nevidence: z\n",
+    )
+    expect(
+        "sweep: reproduced=y confers no authority without a canonical ticket "
+        "(red control 5, validator red)",
+        validator_rc(acc_unbacked) != 0,
+        repr(validator_rc(acc_unbacked)),
     )
     # T-559 archive-with-provenance: deleting SWEEP.md to "clean up" breaks an
     # archived report's ticket provenance (red control 24); partial/timed-out

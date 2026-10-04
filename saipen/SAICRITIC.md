@@ -24,7 +24,7 @@ VALID RESULT + VALID PROCESS != VALID EVIDENCE LINK.
 2. Audit the wave's mechanical layer: finish gate, sweep linkage, report schema, reasoning gates, verifier, context projection and command surface.
 3. Give each finding the five-level classification in `expected/actual/evidence`. A `PROTOCOL_VIOLATION` records cross-project recurrence reasoning and the weak-model answer on its canonical ticket.
 4. Core sweeps findings and deduplicates by root cause, yielding one ticket per cause.
-5. ACCIDENTAL_SUCCESS is reclassified as LOGIC_ERROR or disposed as unverified; it is never promoted to PASS.
+5. ACCIDENTAL_SUCCESS is reclassified as LOGIC_ERROR or disposed as unverified; it is never promoted to PASS. Reproduction and classification are separate facts: a reproduced observation may be an ACCIDENTAL_SUCCESS, and `reproduced=y` never turns one into a PASS of the suspected defect.
 6. Complete the cycle only with full sweep coverage, then archive it with provenance.
 
 ## Permanent lenses

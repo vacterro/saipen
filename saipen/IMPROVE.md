@@ -385,8 +385,13 @@ softened. Closed vocabularies:
 
 `context_available: complete` is refused when the stated scope is partial.
 `NO_FINDINGS` with a stated scope is legal. `LATER_RULE` is distinct from a
-historical violation. `ACCIDENTAL_SUCCESS` is first-class: a correct result
-reached without the required verification is never PASS.
+historical violation. `ACCIDENTAL_SUCCESS` is first-class: the observed
+behaviour is a correct result that does not establish the suspected defect --
+an accidental-success condition, a false premise, or a misleading pass
+condition. It is never PASS. `reproduced` and class are orthogonal facts:
+`reproduced=y` says the observed behaviour was reproduced and says nothing
+about the suspected hypothesis, so a reproducible accidental success is a
+legal finding and may authorize its own ticket.
 
 `USERPERSON_MISS` is a preference class, not automatically a protocol
 violation. A seat may only be classified `USERPERSON_MISS` for a preference it
@@ -604,10 +609,14 @@ ticket no strict `CONFIRMED` `PROTOCOL_VIOLATION` disposition names, so the
 reasoning text can never be attached to an arbitrary ticket and the validator
 remediation is executable by construction. A fix answered
 only with prose where a state field or validator was available is flagged.
-`ACCIDENTAL_SUCCESS` is first-class: a finding whose result was correct but
-whose verification never ran is classified `ACCIDENTAL_SUCCESS`, never PASS
--- a sweep disposition recording it as verified (`reproduced=y`) fails (red
-control 5).
+`ACCIDENTAL_SUCCESS` is first-class: a finding whose observation is a
+correct result that does not establish the suspected defect is classified
+`ACCIDENTAL_SUCCESS`, never PASS. Reproduction is a separate fact, so red
+control 5 is the reproduction gate and not a class check: a `CONFIRMED`
+disposition that authorizes a ticket needs `reproduced=y` for EVERY class,
+`ACCIDENTAL_SUCCESS` included (an unreproduced finding cannot buy authority by
+choosing the class), and a reproduced `ACCIDENTAL_SUCCESS` authorizes its own
+ticket without any false disposition (T-1612).
 
 ## 14. Strict-cycle reconciliation (T-1434 M4)
 
