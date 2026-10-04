@@ -182,6 +182,50 @@ def _read_failure_roster_from_path(path: Path, limit: int = 400) -> list[str]:
     return roster
 
 
+_BLOCK_END = re.compile(r"^-{20,}$")
+_RULE = re.compile(r"^[-=~]{20,}$")
+
+def _read_failure_causes_from_path(path: Path, limit: int = 400) -> dict[str, str]:
+    """The one line each failure ends on, keyed by test id.
+
+    A name alone is a count, not a diagnosis: twenty-one names and no cause
+    is the same dead end as a bare total. unittest prints each failure report
+    between a header and a closing rule, and the last non-blank line of that
+    block is the exception -- the `AssertionError` or `RuntimeError` that says
+    what actually broke. That line is short, so every cause fits where the
+    tracebacks cannot.
+    """
+    causes: dict[str, str] = {}
+    name = ""
+    candidate = ""
+    try:
+        with open(path, "rb") as handle:
+            for raw in handle:
+                line = raw.decode("utf-8", errors="replace").rstrip()
+                header = _FAILURE_HEADER.match(line)
+                if header is not None:
+                    if name and candidate and name not in causes:
+                        causes[name] = candidate
+                    name, candidate = header.group(1), ""
+                    continue
+                if name and _BLOCK_END.match(line.strip()) and line.strip():
+                    # unittest underlines the header with a rule of its own
+                    # before the body starts; only a rule that CLOSES a body
+                    # we have seen ends the block.
+                    if candidate:
+                        if name not in causes and len(causes) < limit:
+                            causes[name] = candidate
+                        name, candidate = "", ""
+                    continue
+                if name and line.strip() and not _RULE.match(line.strip()):
+                    candidate = line.strip()
+    except OSError:
+        pass
+    if name and candidate and name not in causes and len(causes) < limit:
+        causes[name] = candidate
+    return causes
+
+
 def _read_tail_from_path(path: Path, limit: int = 8000) -> str:
     """Read the bounded suffix of a temp-file child output without retaining
     the full file in memory."""
@@ -342,12 +386,15 @@ def _run_family(root: Path, family: TestFamily, *, spool: Path | None = None) ->
             # the order a reader expects.
             seen_names: set[str] = set()
             roster = []
+            causes: dict[str, str] = {}
             for spool in (stderr_path, stdout_path):
                 for name in _read_failure_roster_from_path(spool):
                     if name in seen_names:
                         continue
                     seen_names.add(name)
                     roster.append(name)
+                for name, cause in _read_failure_causes_from_path(spool).items():
+                    causes.setdefault(name, cause)
             return {
                 "name": family.name,
                 "status": (
@@ -357,6 +404,7 @@ def _run_family(root: Path, family: TestFamily, *, spool: Path | None = None) ->
                 ),
                 "exit_code": None if timed_out else process.returncode,
                 "failures": roster,
+                "causes": causes,
                 "stdout": stdout_text,
                 "stderr": stderr_text,
             }
@@ -437,17 +485,19 @@ def main(argv: list[str] | None = None) -> int:
         for item in report["families"]:
             print(f"{item['name']}: {item['status']}")
             if item["status"] != "PASS":
+                detail = item.get("detail") or item.get("stderr") or item.get("stdout")
+                if detail:
+                    print(detail)
                 # The roster goes LAST so it survives a truncated CI log, and it
                 # names every failing test rather than the four the log tail
-                # happened to keep.
+                # happened to keep -- each with the one line that says why.
+                causes = item.get("causes") or {}
                 roster = item.get("failures") or []
                 if roster:
                     print(f"failing tests ({len(roster)}):")
                     for name in roster:
-                        print(f"  FAIL {name}")
-                detail = item.get("detail") or item.get("stderr") or item.get("stdout")
-                if detail:
-                    print(detail)
+                        cause = causes.get(name)
+                        print(f"  FAIL {name}" + (f"\n       {cause}" if cause else ""))
     return 0 if report["ok"] else 1
 
 

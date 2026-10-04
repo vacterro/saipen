@@ -447,6 +447,12 @@ $ProvenanceName = ".saipen_runtime.json"
 $script:SourceRuntimeIdentity = $null
 
 function Get-RuntimeIdentity([string]$candidate) {
+  # Every caller spells its skill home in Windows form ("$h\.agents\skills\saipen"),
+  # which PowerShell cmdlets normalize but a raw argv does not: on a Unix host
+  # the backslashes are legal filename characters, so the child Python is handed
+  # one long bogus name and the identity is unprovable. Normalize at the
+  # boundary where the string leaves PowerShell's own path handling.
+  $candidate = Get-NativePath $candidate
   $pythonBin = Get-PythonBin
   if ([string]::IsNullOrWhiteSpace($pythonBin)) { throw "no Python runtime to prove the runtime identity" }
   $tools = Join-Path $Root "tools"
