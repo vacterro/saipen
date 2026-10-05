@@ -1216,13 +1216,19 @@ def run_injector_probes() -> tuple[list[str], int, int]:
                 errors="replace",
             )
             output = result.stdout + result.stderr
-            if result.returncode or "Done." not in output or skill.exists():
+            if (
+                result.returncode
+                or "Done." not in output
+                or not skill.is_file()
+                or skill.read_text(encoding="utf-8") != "stale managed path\n"
+                or not re.search(r'"preserved":\s*1\b', output)
+            ):
                 probe_failures.append(
-                    "bootstrap/uninstall.sh regular-file skill: expected removal "
+                    "bootstrap/uninstall.sh regular-file skill: expected unowned bytes preserved "
                     f"and truthful success, got rc={result.returncode} exists={skill.exists()}"
                 )
             else:
-                print("PASS: bootstrap/uninstall.sh regular-file skill -- removed")
+                print("PASS: bootstrap/uninstall.sh regular-file skill -- unowned bytes preserved")
 
         with tempfile.TemporaryDirectory(prefix="saipen-inject-sh-atomic-") as raw:
             root = Path(raw)

@@ -311,6 +311,33 @@
       ],
       "tag": "",
       "version": ""
+    },
+    "C-005": {
+      "cohort_id": "C-005",
+      "commit": "",
+      "members": {
+        "T-1609": {
+          "closed_at": "2026-10-04T14:37:21Z",
+          "closed_by": "saipen-cli",
+          "paths": {
+            "saipen/OPS.md": "d08cf764b6db6a7b",
+            "tools/saipen_engine/reconcile.py": "6a06fb1851199fb2",
+            "tools/test_t1609_unproven_done_recovery.py": "116683b0092e6180"
+          },
+          "ticket_id": "T-1609",
+          "verification": "the requested change is present and demonstrated against the user own description of it"
+        }
+      },
+      "publication_status": "pending",
+      "release_op_id": "",
+      "schema_version": 1,
+      "scope": [
+        "saipen/OPS.md",
+        "tools/saipen_engine/reconcile.py",
+        "tools/test_t1609_unproven_done_recovery.py"
+      ],
+      "tag": "",
+      "version": ""
     }
   },
   "schema_version": 1

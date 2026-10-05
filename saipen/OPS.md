@@ -165,6 +165,17 @@ no historical event is fabricated. `resolve-next-action` cannot override the
 plan, and the complete proposal is validated before approval is advertised.
 Legacy-DONE attestation and canonical block-park stay separate.
 
+CURRENT_DONE_UNPROVEN (T-1609) closes the narrower no-claim/no-transition
+dead end: a current DONE row matching the invalid DONE STATE has no proven
+ticket-local phase to restore. One content-bound approved plan revokes that
+closure NOW, queues the row as unclaimed TODO, and clears the active task to
+idle DONE. Original STATE/BOARD/LOG bytes survive unchanged in recovery
+evidence. The ordinary fresh claim starts SCOUT and requires the complete
+verification lifecycle; prose `verify`/`deliver` events prove no old phase or
+completion. Bare recovery writes nothing. An existing DOING seat, incomplete
+claim, genuine finish, legacy record or unaddressable row keeps its own refusal
+or recovery class; none authorizes this restart.
+
 Default-mode closure recovery (T-1605): after an explicit cohort finish refusal,
 a separate continuation can legitimately finish using the default own_patch
 mode. `ticket bind-cohort` repairs that unpublished ownership choice without

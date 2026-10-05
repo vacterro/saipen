@@ -1689,7 +1689,7 @@ def _restored_seat(board: dict | None, gap: dict | None) -> str | None:
     qualifies; every other reconciliation keeps the ordinary actor semantics,
     and an ownerless row yields None so the caller keeps them.
     """
-    if board is None or not gap:
+    if board is None or not gap or gap.get("restart"):
         return None
     row = (board.get("tickets") or {}).get(gap.get("ticket")) or {}
     owner = (row.get("fields") or {}).get("owner")
@@ -1732,9 +1732,11 @@ def _current_done_journal_gap(
 
     Returns the gap descriptor (`ticket`, `last_event`, `last_proven`,
     `source`) that the STATE repairs and the BOARD atom both cite, so every
-    surface names the same evidence.
+    surface names the same evidence. When no claim/transition proves any
+    phase, `restart: TODO` distinguishes CURRENT_DONE_UNPROVEN (T-1609):
+    approval can queue a new lifecycle, never restore an invented old phase.
     """
-    if board is None or ticket is None or number is None or target is None:
+    if board is None or ticket is None:
         return None
     if state.get("phase") != "DONE":
         return None
@@ -1752,12 +1754,18 @@ def _current_done_journal_gap(
         if (op_id.startswith("finish-") and event.get("ticket") == ticket
                 and event.get("event", 0) >= epoch):
             return None
-    return {
+    gap = {
         "ticket": ticket,
         "last_event": number,
         "last_proven": target,
         "source": source,
     }
+    if target is None:
+        # No canonical claim/transition exists: no previous phase is known.
+        # Approval can revoke the current closure and queue a NEW lifecycle,
+        # never turn free-form verification prose into historical authority.
+        gap["restart"] = "TODO"
+    return gap
 
 
 def _state_phase_repairs(state: dict, events, board: dict | None = None) -> list[dict]:
@@ -1780,6 +1788,9 @@ def _state_phase_repairs(state: dict, events, board: dict | None = None) -> list
     event, or with an unreachable pair, the repair is `blocked`: it refuses with
     ZERO bytes written rather than inventing a phase, because a phase with no
     history behind it is exactly the fabrication this ticket exists to prevent.
+    CURRENT_DONE_UNPROVEN (T-1609) has no historical replacement: a bounded
+    approval may instead revoke that ticket's closure now and queue TODO for
+    a fresh canonical claim, preserving all original bytes.
     """
     from . import phases as _phases
 
@@ -1855,6 +1866,26 @@ def _state_phase_repairs(state: dict, events, board: dict | None = None) -> list
             return blocked("CURRENT_DONE_JOURNAL_GAP: another DOING Work owns the seat")
         if not row.get("fields", {}).get("owner") or not row.get("fields", {}).get("claim_time"):
             return blocked("CURRENT_DONE_JOURNAL_GAP: no complete claim to restore")
+        if gap.get("restart"):
+            reason = (
+                f"CURRENT_DONE_UNPROVEN: the journal proves no lifecycle phase for {bound}; "
+                "explicit approval revokes its unproven closure now and returns it to TODO "
+                "without a claim. STATE becomes idle DONE/task:none; a fresh canonical "
+                "claim and the complete verification lifecycle are required, never a "
+                "fabricated historical phase or finish (T-1609)"
+            )
+            return [
+                {
+                    "field": field, "from": state.get(field), "to": value,
+                    "surface": "state", "_class": "current-done-unproven",
+                    "gap": gap, "reason": reason,
+                }
+                for field, value in (
+                    ("transition_from", "DONE"), ("task", "none"),
+                    ("next_action", "saipen continue"),
+                )
+                if state.get(field) != value
+            ]
         if not (target in _phases.TICKET_BEARING_PHASES and source in _phases.ALL_PHASES
                 and (source == target or _phases.transition_legal(source, target))):
             return blocked("CURRENT_DONE_JOURNAL_GAP: no legal ticket-local phase pair")
@@ -2413,14 +2444,24 @@ def reconcile_protocol_state(
     if gap:
         lifecycle_all = [r for r in lifecycle_all if r.get("ticket") != gap["ticket"]]
         dropped = _reopen_field_removals(_board["tickets"][gap["ticket"]].get("raw", ""))
+        restart = bool(gap.get("restart"))
+        if restart:
+            dropped += ["owner", "claim_time"]
+        recovery_class = "current-done-unproven" if restart else "current-done-journal-gap"
+        reason = (
+            f"CURRENT_DONE_UNPROVEN: the journal proves no lifecycle phase for {gap['ticket']}; "
+            "revoke its closure now and queue TODO without a claim for a fresh lifecycle"
+            if restart else
+            f"CURRENT_DONE_JOURNAL_GAP: restore {gap['ticket']} to "
+            f"its own proven {gap['last_proven']} lifecycle"
+        )
         lifecycle_all.append({
             "field": "board", "surface": "board", "kind": "section-move",
-            "_class": "current-done-journal-gap", "ticket": gap["ticket"],
-            "from_section": "## DONE", "to_section": "## DOING",
+            "_class": recovery_class, "ticket": gap["ticket"],
+            "from_section": "## DONE", "to_section": "## TODO" if restart else "## DOING",
             "fields": dropped,
             "requires_approval": True, "generation": "current",
-            "reason": f"CURRENT_DONE_JOURNAL_GAP: restore {gap['ticket']} to "
-                      f"its own proven {gap['last_proven']} lifecycle; preserve original bytes"
+            "reason": reason + "; preserve original bytes"
                       + ("; drop from the live row, kept in the evidence copy: "
                          + ", ".join(dropped) if dropped else ""),
         })
@@ -2764,6 +2805,11 @@ def reconcile_protocol_state(
     # tail AFTER this trace is appended, because the repair's own DEC is then
     # the newest event; the drift it reports is the one it was asked to fix.
     description = "reconcile protocol state -- " + _repair_summary(board_drifts, state_repairs)
+    if gap and gap.get("restart"):
+        description += (
+            f"; current-done-unproven {gap['ticket']}: closure revoked now; "
+            "no lifecycle phase proven, queued TODO for fresh claim and verification"
+        )
     # T-1358: the DEC names the field each decision actually authorized. It
     # said `STATE.blocker clear` for every operator-authorized repair and read
     # `resolve_blocker` directly, so the moment a second field gained an
