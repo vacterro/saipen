@@ -1,7 +1,7 @@
 # OUTBOX
 
 ## HUNT-014: current continuation sweep — known test debt and receipt CLI gap
-- **status:** ready
+- **status:** reviewed
 - **summary:** Bounded six-signal pass: six closure-readiness tests pass; four intent failures remain owned by T-1346; receipt writers still have no production CLI caller; the old timestamp claim lacks support after reading the strict decoder.
 - **main_project_refs:** [tools/saipen.py, tools/saipen_engine/operations.py, tools/saipen_engine/conformance.py, tools/saipen_engine/closure_readiness.py, tools/test_intent_audit_fixes.py]
 - **critical:** true

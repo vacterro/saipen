@@ -1,7 +1,7 @@
 # OUTBOX
 
 ## TEST-11: continuation is read-only; T-1347 false positive reproduced
-- **status:** ready
+- **status:** reviewed
 - **summary:** Three bounded continuation/help scenarios are NOT_REPRODUCED; thread.join misclassification is REPRODUCED and already belongs to T-1347.
 - **main_project_refs:** [tools/saipen.py, tools/test_concurrency_independence.py, tools/test_opencode_bound_launch_smoke.py]
 - **critical:** true

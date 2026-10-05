@@ -1,7 +1,7 @@
 # OUTBOX
 
 ## PY-14: T-1347 subprocess timeout detector patch
-- **status:** ready
+- **status:** reviewed
 - **summary:** One-file tested patch excludes thread.join and unrelated timeout methods while retaining subprocess calls and Popen.communicate.
 - **main_project_refs:** [tools/test_concurrency_independence.py]
 - **critical:** true
