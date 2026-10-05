@@ -1,0 +1,8 @@
+
+saipen injector report (source: V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPEN\saipen)
+------------------------------------------------------------
+ZCode (production ~/.zcode home) skill copied (re-run after updates)
+ZCode (production ~/.zcode home) provenance verified
+ZCode (production ~/.zcode home) instructions already
+------------------------------------------------------------
+Done. Test: open any project in any agent, say: saipen set
