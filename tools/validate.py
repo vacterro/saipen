@@ -5671,6 +5671,200 @@ if knowledge.is_dir():
             f"index {_knowledge_validation['index']})"
         )
 
+# ------------------------------------------------------- FUTURE GATE (T-1614)
+
+# A future gate is a DEFERRED AUTHORITY CANDIDATE: recorded, evaluated,
+# promoted as ONE bounded slice, closed. Seven rules, owned by FUTURE.md
+# (FUTURE-GATE-01) and enforced by `validate_future_gate`: an unreadable index
+# is never an empty one, a missing index is UNINDEXED rather than READY, one
+# identity is claimed once, a record's state agrees with what it proves, a
+# resolved gate is not READY, an unpromoted gate owns no active implementation
+# while a promoted one links to canonical Work, and the historical corpus is
+# classified truthfully with nothing destroyed.
+_future_gate_dir = Path("future_gate")
+_future_gate_index = Path(".saipen/future/index.json")
+if _future_gate_dir.is_dir() or _future_gate_index.is_file():
+    from saipen_engine.board import parse_board as _parse_future_board
+    from saipen_engine.future_gate import validate_future_gate as _validate_future_gate
+
+    _future_board_tickets = {}
+    _future_board_path = Path(".saipen/BOARD.md")
+    if _future_board_path.is_file():
+        _future_board_tickets = _parse_future_board(
+            _future_board_path.read_text(encoding="utf-8-sig")
+        )["tickets"]
+    _future_report = _validate_future_gate(Path("."), _future_board_tickets)
+    for _future_error in _future_report["errors"]:
+        fail(f"FUTURE GATE: {_future_error}")
+    for _future_warning in _future_report["warnings"]:
+        warn("future-gate-unindexed", _future_warning)
+    if not _future_report["errors"] and _future_report["indexed"]:
+        _future_counts = _future_report["counts"]
+        ok(
+            "FUTURE GATE deferred-authority surface valid "
+            f"({_future_report['documents']} document(s); "
+            + ", ".join(f"{n} {state}" for state, n in sorted(_future_counts.items()) if n)
+            + ")"
+        )
+    elif not _future_report["indexed"] and not _future_report["warnings"]:
+        ok("FUTURE GATE: no corpus and no index; nothing to validate")
+
+# (FUTURE-GATE-01) the OWNER DOCUMENT itself, not just the data it describes.
+# A rule owner nothing reads is a rule nobody enforces, and a gate vocabulary
+# the engine has outgrown is a document that now lies. These checks consume
+# saipen/FUTURE.md on purpose -- exempting it as "irrelevant" is the defect.
+# The rule OWNER ships with the protocol; the corpus and its index are project
+# data. `os.chdir(PROJECT_ROOT)` above means a project-relative path here would
+# read the CONSUMING project and fail a home document as missing.
+_future_home = _tools_parent / "saipen"
+_future_owner_path = _future_home / "FUTURE.md"
+if _future_owner_path.is_file():
+    from saipen_engine import future_gate as _fg
+
+    _future_owner_text = _future_owner_path.read_text(encoding="utf-8-sig")
+    # 1. The owner exists, declares its rule id, and the registry agrees on
+    #    which document that is.
+    if "RULE-OWNER: FUTURE-GATE-01" not in _future_owner_text:
+        fail(
+            "FUTURE-OWNER: saipen/FUTURE.md declares no `RULE-OWNER: FUTURE-GATE-01` "
+            "marker, so nothing identifies it as the owner of the future-gate class"
+        )
+    try:
+        _registry = json.loads((_future_home / "REGISTRY.json").read_text(encoding="utf-8-sig"))
+    except (OSError, json.JSONDecodeError):
+        _registry = {}
+    _registered_owner = (_registry or {}).get("rule_owners", {}).get("FUTURE-GATE-01")
+    if _registered_owner != "saipen/FUTURE.md":
+        fail(
+            f"FUTURE-OWNER: saipen/REGISTRY.json rule_owners[FUTURE-GATE-01] is "
+            f"{_registered_owner!r}, not the document that carries the rules"
+        )
+    # 2. Command/engine agreement: every subcommand the engine accepts is a
+    #    declared effect AND a published command, and the reverse. A gate verb
+    #    that exists only in code is an operator-invisible mutation.
+    try:
+        _effects = json.loads((_future_home / "COMMAND_EFFECTS.json").read_text(encoding="utf-8-sig"))
+    except (OSError, json.JSONDecodeError):
+        _effects = {}
+    _declared = set((_effects.get("verbs") or {}).get("future", {}).get("subcommands", {}) or {})
+    _engine_verbs = {"status", "list", "next", "refresh", "add", "promote", "refine"}
+    _mutating = {"refresh", "add", "promote", "refine"}
+    for _verb in sorted(_engine_verbs - _declared):
+        warn(
+            "future-gate-command-undeclared",
+            f"the engine answers `saipen future {_verb}` but saipen/COMMAND_EFFECTS.json "
+            "declares no effect for it",
+        )
+    for _verb in sorted(_mutating - _declared):
+        fail(
+            f"FUTURE-OWNER: `saipen future {_verb}` mutates but is absent from "
+            "saipen/COMMAND_EFFECTS.json -- an undeclared mutation is a rule with no effect class"
+        )
+    _commands_text = (_future_home / "COMMANDS.md").read_text(encoding="utf-8-sig")
+    for _verb in sorted(_mutating):
+        if f"`saipen future {_verb}" not in _commands_text:
+            fail(
+                f"FUTURE-OWNER: `saipen future {_verb}` is implemented and declared but "
+                "never published in saipen/COMMANDS.md"
+            )
+    # 3. The idle ladder is published in BOTH owners and agrees in order: a gate
+    #    that outranks a rung it is not actually compared against is a doc lie.
+    _ladder_rungs = ("workable TODO", "actionable unconsumed audit", "eligible FUTURE GATE", "HUNT", "ADD")
+    # Inside the ladder SECTION only: the same words legitimately appear in the
+    # freshness rule and in the prose around it, and a whole-document search
+    # would grade the document's word order instead of the ladder's.
+    _ladder_match = re.search(
+        r"^##\s*5\.\s*Idle priority.*?(?=^##\s)", _future_owner_text, re.MULTILINE | re.DOTALL
+    )
+    _ladder_text = _ladder_match.group(0) if _ladder_match else ""
+    _future_rung_at = {r: _ladder_text.find(r) for r in _ladder_rungs}
+    if any(at < 0 for at in _future_rung_at.values()):
+        fail(
+            "FUTURE-OWNER: saipen/FUTURE.md § 5 does not publish the whole idle ladder "
+            f"({', '.join(r for r, at in _future_rung_at.items() if at < 0)} missing)"
+        )
+    elif list(_future_rung_at.values()) != sorted(_future_rung_at.values()):
+        fail(
+            "FUTURE-OWNER: saipen/FUTURE.md publishes the idle ladder out of order; "
+            "the ladder IS the priority"
+        )
+    _maintenance_text = (_future_home / "MAINTENANCE.md").read_text(encoding="utf-8-sig")
+    if "eligible FUTURE GATE > HUNT > ADD" not in _maintenance_text:
+        fail(
+            "FUTURE-OWNER: saipen/MAINTENANCE.md no longer publishes "
+            "`eligible FUTURE GATE > HUNT > ADD`, so the two owners disagree on the ladder"
+        )
+    # 4. The document speaks the engine's vocabulary. These are the exact terms a
+    #    reader is given to act on, so a rename in code without a rename here is
+    #    a published rule that no longer describes the system.
+    for _token in (
+        "CURRENT",
+        "STALE",
+        "MISSING",
+        "CORRUPT",
+        "NEEDS_REVIEW",
+        ".saipen/future/records/FG-####.json",
+        "HUNT/ADD fallthrough",
+        "Never activate more than one gate at a time",
+    ):
+        if _token not in _future_owner_text:
+            fail(
+                f"FUTURE-OWNER: saipen/FUTURE.md never publishes `{_token}`; the engine "
+                "and its owner document disagree about the future-gate class"
+            )
+    # 5. Non-rule, non-Work authority: a deferred candidate is not a rule source
+    #    and does not own implementation, wherever it is found.
+    _future_docs = sorted(Path("future_gate").rglob("*.md")) if Path("future_gate").is_dir() else []
+    _rule_leaks = [
+        doc.as_posix() for doc in _future_docs if "RULE-OWNER:" in doc.read_text(encoding="utf-8-sig", errors="replace")
+    ]
+    if _rule_leaks:
+        fail(
+            "FUTURE-OWNER: future-gate document(s) declare rule ownership "
+            f"({', '.join(_rule_leaks[:4])}): a deferred candidate is never a rule source"
+        )
+    _sidecars = sorted(Path(".saipen/future/records").glob("FG-*.json")) if Path(".saipen/future/records").is_dir() else []
+    _bad_sidecars = []
+    for _side in _sidecars:
+        try:
+            _record = json.loads(_side.read_text(encoding="utf-8-sig"))
+        except (OSError, json.JSONDecodeError):
+            _record = {}
+        if _record.get("marker") != _fg.RECORD_MARKER or _record.get("gate") != _side.stem:
+            _bad_sidecars.append(_side.as_posix())
+        elif int(_record.get("schema") or 0) != _fg.SCHEMA_VERSION:
+            _bad_sidecars.append(f"{_side.as_posix()} (schema {_record.get('schema')})")
+    if _bad_sidecars:
+        fail(
+            "FUTURE-OWNER: reviewed record(s) are not canonical engine records "
+            f"({', '.join(_bad_sidecars[:4])}); a side-car is machine authority and "
+            "must carry its marker, gate id and schema"
+        )
+    try:
+        _future_index_raw = json.loads(Path(".saipen/future/index.json").read_text(encoding="utf-8-sig"))
+    except (OSError, json.JSONDecodeError):
+        _future_index_raw = {}
+    if _future_index_raw and (
+        _future_index_raw.get("marker") != _fg.INDEX_MARKER
+        or int(_future_index_raw.get("schema") or 0) != _fg.SCHEMA_VERSION
+    ):
+        fail(
+            "FUTURE-OWNER: .saipen/future/index.json is not the canonical projection "
+            f"the engine writes (marker {_future_index_raw.get('marker')!r}, schema "
+            f"{_future_index_raw.get('schema')})"
+        )
+    if not _rule_leaks and not _bad_sidecars:
+        ok(
+            "FUTURE-OWNER valid (rule owner registered, ladder published and ordered, "
+            f"{len(_mutating)} mutating verbs declared and published, "
+            f"{len(_future_docs)} document(s) non-normative, {len(_sidecars)} reviewed record(s) canonical)"
+        )
+else:
+    fail(
+        "FUTURE-OWNER: saipen/FUTURE.md is missing; FUTURE-GATE-01 has no owner document "
+        "and the future-gate class has no published rule"
+    )
+
 # ------------------------------------------------- USERPERSON (T-574)
 
 # Optional preference profile, OFF by default. Absence is silent -- no
@@ -8859,6 +9053,11 @@ else:
         (
             "saipen/EXECUTION.md",
             "execution-policy Rule ID ownership checked against saipen/REGISTRY.json",
+        ),
+        (
+            "saipen/FUTURE.md",
+            "rule-owner registration, published idle ladder, engine vocabulary, declared "
+            "command effects and canonical reviewed records checked with the future-gate surface",
         ),
         ("saipen/phases/*.md", "phase-enum sync + prescribed-WAIT category check"),
         ("extensions/**/*.md", "prescribed-WAIT category check"),

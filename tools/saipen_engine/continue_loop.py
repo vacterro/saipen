@@ -71,6 +71,20 @@ ADOPT = "adopt"
 #: class, delta and supersession were recorded when the operator's bytes were
 #: captured -- so `cc` executes it instead of stopping to hand it back.
 APPLY_APPEND = "apply-append"
+#: FUTURE-GATE-01 (T-1614): consuming ONE eligible deferred authority
+#: candidate is a mechanical canonical mutation, exactly like ADOPT -- `cc`
+#: executes it instead of stopping to hand a gate back as advice. The route
+#: names the gate id, and the executor re-checks eligibility at apply time.
+PROMOTE_FUTURE_GATE = "promote-future-gate"
+#: FUTURE-GATE-01 (T-1614): rebuilding the derived projection and normalizing
+#: ONE ambiguous record are bounded mechanical operations on derived state --
+#: no ticket, no authority, no operator. `cc` performs them itself instead of
+#: handing back "run saipen future refresh" as a required human action.
+REFRESH_FUTURE_GATE = "refresh-future-gate"
+REFINE_FUTURE_GATE = "refine-future-gate"
+#: A 45-document corpus must not consume an unbounded autonomous invocation:
+#: one refinement per chain, then ordinary routing.
+MAX_REFINEMENTS_PER_CHAIN = 1
 IDLE_MAINTAIN = "idle-maintain"
 REFUSAL = "refusal"
 STOP = "boundary"
@@ -101,6 +115,26 @@ def classify_route(routed: dict, state: dict, board: dict) -> str:
         ticket = str(doing[0].get("id") or "")
         if ticket and action == f"saipen claim {ticket}":
             return ADOPT
+    if (
+        reason == "future-gate-refresh"
+        and routed.get("action_kind") == "FUTURE_GATE_REFRESH"
+        and action == "saipen future refresh"
+    ):
+        return REFRESH_FUTURE_GATE
+    if (
+        reason == "future-gate-refinement"
+        and routed.get("action_kind") == "FUTURE_GATE_REFINEMENT"
+        and routed.get("future_gate")
+        and action == f"saipen future refine {routed.get('future_gate')}"
+    ):
+        return REFINE_FUTURE_GATE
+    if (
+        reason == "future-gate-promotion"
+        and routed.get("action_kind") == "FUTURE_GATE_PROMOTION"
+        and routed.get("future_gate")
+        and action == f"saipen future promote {routed.get('future_gate')}"
+    ):
+        return PROMOTE_FUTURE_GATE
     if len(doing) == 1:
         ticket = str(doing[0].get("id") or "")
         if (

@@ -1,0 +1,13 @@
+{
+  "declared_status": "RECORDED FOLLOW-UP WORK / NOT AUTHORIZED FOR IMPLEMENTATION",
+  "digest": "e6bc967bb1a27c779fa4eb6b4d0f67f2474f9c6c9de8122b7cf0e27ff699d45f",
+  "facts": {},
+  "gate": "FG-0005",
+  "marker": "saipen-future-record-v1",
+  "path": "future_gate/FUTURE GATE — CONTINUE SILENTLY SETS CONVERGE INTENT ON A FRESH PROJECT_20260917.md",
+  "reason": "recorded, explicitly not authorized for implementation",
+  "reviewed": true,
+  "schema": 2,
+  "title": "FUTURE GATE — `continue` SILENTLY SETS CONVERGE/DONE INTENT ON A FRESH PROJECT",
+  "verdict": "DEFERRED"
+}

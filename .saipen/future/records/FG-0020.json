@@ -1,0 +1,13 @@
+{
+  "declared_status": "PROPOSAL / UPSTREAM PROTOCOL CAPABILITY GAP",
+  "digest": "660d68f281c82484e248755bb6e1a45e789c505177fbe513fb46350049688227",
+  "facts": {},
+  "gate": "FG-0020",
+  "marker": "saipen-future-record-v1",
+  "path": "future_gate/FUTURE GATE — VOLUNTARY MID-WORK CLAIM HANDOFF.md",
+  "reason": "no explicit historical status found; review before any promotion",
+  "reviewed": true,
+  "schema": 2,
+  "title": "FUTURE GATE — VOLUNTARY MID-WORK CLAIM HANDOFF",
+  "verdict": "NEEDS_REVIEW"
+}

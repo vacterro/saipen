@@ -139,7 +139,16 @@
         "manifest": "EXECUTION"
       }
     },
-    "knowledge": {
+    "future": {
+   "default": "DIAGNOSTIC",
+   "subcommands": {
+    "refresh": "EXECUTION",
+    "refine": "EXECUTION",
+    "add": "INGRESS",
+    "promote": "INGRESS"
+   }
+  },
+  "knowledge": {
       "default": "DIAGNOSTIC",
       "subcommands": {
         "index": "EXECUTION"

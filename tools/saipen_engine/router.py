@@ -28,6 +28,25 @@ from .result import Result
 from .state import binding_brake
 
 
+def _goal_valve_exhausted(state: dict) -> bool:
+    """True when the goal safety valve has already tripped (T-1614).
+
+    The caps themselves are owned by `operations`; this asks the same two
+    numbers so the router can never hold a different ceiling. The valve trips
+    on EITHER counter reaching its cap, which is exactly what
+    `operations.reauthorize_valve` requires before it grants a fresh budget --
+    so a gate held here is released by the same reauthorization that releases
+    every other START.
+    """
+    if state.get("execution_intent") != "goal":
+        return False
+    from .operations import GOAL_TICKET_CAP, GOAL_WAVE_CAP
+
+    return (int(state.get("goal_waves") or 0) >= GOAL_WAVE_CAP) or (
+        int(state.get("goal_tickets") or 0) >= GOAL_TICKET_CAP
+    )
+
+
 def _top_workable(board: dict, agent: str | None = None, now=None) -> str | None:
     """Backward-compatible name for the BOARD Pick Rule's chosen ticket.
 
@@ -51,6 +70,7 @@ def route_next(
     audit_inbox: dict | None = None,
     queued_source: dict | None = None,
     pending_append: dict | None = None,
+    future_gate: dict | None = None,
     # PERF-004: optional pre-parsed objects from the caller to avoid
     # redundant STATE/BOARD parsing. When provided, these take precedence
     # over parsing state_text/board_text.
@@ -90,6 +110,12 @@ def route_next(
     ordinary BOARD Pick Rule: a fresh external audit usually corrects current
     project truth and must not sit unseen behind a stale backlog, but it never
     preempts a legitimately active ticket mid-transaction.
+
+    `future_gate` is the FUTURE GATE projection (`future_gate.projection`),
+    supplied for the same reason. `FUTURE-GATE-01` places it BELOW every
+    audit-idle branch, below the Improve gate and below the BOARD Pick Rule, so
+    a gate is consumed only on an honest AUTONOMOUS WORK EXHAUSTED verdict --
+    never ahead of active Work, an actionable audit, or a live operator hold.
     """
     pending = list(pending_ops or [])
     conflicts = list(conflict_ops or [])
@@ -698,6 +724,80 @@ def route_next(
                 ),
             }
 
+    # FUTURE GATE (T-1614 / FUTURE-GATE-01): the idle ladder's fourth rung,
+    # between an actionable audit and HUNT. It sits AFTER every executable
+    # branch above and after the Improve gate: a gate is a DEFERRED AUTHORITY
+    # CANDIDATE, so it must never preempt active Work, a live operator hold or
+    # an unconsumed audit layer. It fires ONLY on the honest
+    # AUTONOMOUS WORK EXHAUSTED verdict (BOARD HALT + no actionable audit + one
+    # eligible gate); with no eligible gate the MAINTAIN verdict below is
+    # byte-for-byte today's behavior.
+    #
+    # Goal mode: a promotion consumes a ticket, so the safety valve governs it
+    # exactly as it governs any other START. Evaluating readiness is free; only
+    # the promotion spends, and a closed valve defers the gate rather than
+    # exceeding the cap.
+    #
+    # Index freshness is a PRECONDITION of this layer, not a detail of it: a
+    # stale, missing or corrupt projection does not mean "there is no future
+    # work", it means nobody has looked. Rebuilding it is a bounded mechanical
+    # repair derived from the corpus, so routing names it and `cc` executes it
+    # instead of falling through to HUNT over invisible preserved intent.
+    if future_gate and future_gate.get("refresh_required"):
+        return {
+            "ok": True,
+            "action": "saipen future refresh",
+            "reason": "future-gate-refresh",
+            "action_kind": "FUTURE_GATE_REFRESH",
+            "executable_behavior": "REFRESH_AND_REROUTE",
+            "future_gate": "",
+            "detail": future_gate.get(
+                "detail",
+                "the future gate projection is not current; refresh it before "
+                "idle routing invents fresh work",
+            ),
+            "load": load_for_action("saipen future status"),
+        }
+
+    # Bounded refinement (FUTURE.md section 8): ONE ambiguous record is
+    # normalized before HUNT so preserved intent is consumed rather than
+    # skipped. It is NOT implementation and it never grants authority; it only
+    # records machine lifecycle facts the prose could not carry.
+    if future_gate and future_gate.get("refinable") and not future_gate.get("eligible"):
+        _refine_id = str(future_gate["refinable"][0])
+        return {
+            "ok": True,
+            "action": f"saipen future refine {_refine_id}",
+            "reason": "future-gate-refinement",
+            "action_kind": "FUTURE_GATE_REFINEMENT",
+            "executable_behavior": "REFINE_AND_REROUTE",
+            "future_gate": _refine_id,
+            "detail": (
+                f"{_refine_id} is an unrefined historical record; ONE bounded "
+                f"refinement normalizes it (`saipen future refine {_refine_id}`) "
+                "before idle routing falls through to HUNT"
+            ),
+            "load": load_for_action("saipen future status"),
+        }
+
+    if future_gate and future_gate.get("eligible"):
+        _valve = _goal_valve_exhausted(state)
+        if not _valve:
+            _gate_id = str(future_gate["eligible"][0])
+            return {
+                "ok": True,
+                "action": f"saipen future promote {_gate_id}",
+                "reason": "future-gate-promotion",
+                "action_kind": "FUTURE_GATE_PROMOTION",
+                "executable_behavior": "PROMOTE_AND_SCOUT",
+                "future_gate": _gate_id,
+                "detail": future_gate.get(
+                    "detail",
+                    f"{_gate_id} is an eligible deferred authority candidate",
+                ),
+                "load": load_for_action("saipen future status"),
+            }
+
     # MAINTAIN: fall through to the persisted next_action only when it is a
     # legal non-ticket action (saipen continue / saipen <verb>), never a stale
     # PHASE echo and never a WAIT -- a WAIT reaching here already failed the
@@ -860,6 +960,35 @@ def audit_inbox_projection(project_root) -> dict | None:
             "pending": [],
             "closed_pending_delete": [],
             "invalid": [],
+        }
+
+
+def future_gate_projection(project_root, board_text: str | None = None) -> dict | None:
+    """The FUTURE GATE read-only routing projection, or None.
+
+    The ONE seam between the pure router and the filesystem-backed gate
+    index, mirroring `audit_inbox_projection`. Writes nothing. A failure
+    degrades to `indexed: False`, never to a fabricated eligibility: a gate
+    that cannot be read is an unindexed gate, and routing then reproduces the
+    ordinary HUNT -> ADD fallthrough instead of inventing work.
+    """
+    if project_root is None:
+        return None
+    try:
+        from . import future_gate as _gates
+        from .board import parse_board
+
+        tickets = parse_board(board_text)["tickets"] if board_text is not None else {}
+        return _gates.projection(project_root, tickets)
+    except Exception as exc:  # transport failure is a diagnostic, never a gate
+        return {
+            "indexed": False,
+            "eligible": [],
+            "counts": {},
+            "detail": (
+                "future gate index could not be classified "
+                f"({type(exc).__name__}: {exc}); run `saipen future refresh`"
+            ),
         }
 
 

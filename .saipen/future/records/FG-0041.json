@@ -1,0 +1,13 @@
+{
+  "declared_status": "ARCHITECTURE GOVERNANCE",
+  "digest": "b6d9e1eeaa8c05da3229116aa18f127dbc3f967ed13e359f89331c88708cee86",
+  "facts": {},
+  "gate": "FG-0041",
+  "marker": "saipen-future-record-v1",
+  "path": "future_gate/SAIPEN_FUTURE_ARCHITECTURE_20260918/future_architecture/16_ADOPTION_RULES.md",
+  "reason": "broad architecture record; kept gated until one bounded slice is named",
+  "reviewed": true,
+  "schema": 2,
+  "title": "ADOPTION RULES",
+  "verdict": "DEFERRED"
+}

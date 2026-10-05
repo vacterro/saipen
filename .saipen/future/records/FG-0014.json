@@ -1,0 +1,13 @@
+{
+  "declared_status": "PROPOSAL / NOT ACTIVE",
+  "digest": "e720accd13877427565d05acdad948cd3b984f6d31ade405d3faa040c0bf34f2",
+  "facts": {},
+  "gate": "FG-0014",
+  "marker": "saipen-future-record-v1",
+  "path": "future_gate/FUTURE GATE — SAIGPU LIBRARIAN_20260925.md",
+  "reason": "broad architecture record; kept gated until one bounded slice is named",
+  "reviewed": true,
+  "schema": 2,
+  "title": "FUTURE GATE PROPOSAL — SAIGPU LIBRARIAN",
+  "verdict": "DEFERRED"
+}

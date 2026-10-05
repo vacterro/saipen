@@ -12,6 +12,7 @@ Rule-ID ownership.
 - `EXECUTION.md` -- execution/output policy and HUSH.
 - `CORE.md` -- global state, checkpoint, priority and transition invariants.
 - `MAINTENANCE.md` -- goal-driven and autonomous maintenance semantics.
+- `FUTURE.md` -- deferred authority candidates: intake, readiness, promotion.
 - `OPS.md` -- journaled operations, recovery, reconciliation and rebind mechanics.
 - `STORAGE.md` -- storage policy, stores and promotion.
 - `SOURCES.md` -- receipt authority, Work Contract and coverage lifecycle.

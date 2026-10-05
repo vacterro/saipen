@@ -1,0 +1,13 @@
+{
+  "declared_status": "PART 3 (TURN-ENTRY READ) IMPLEMENTED BY T-1497 / PARTS 1-2 (AUTOMATIC SEND)",
+  "digest": "01196a05752d5a772dfb32d28bb4813204d4682912d5a2c71bb3ad2611aee33d",
+  "facts": {},
+  "gate": "FG-0015",
+  "marker": "saipen-future-record-v1",
+  "path": "future_gate/FUTURE GATE — SAITELEMES AUTOMATIC AGENT TELEGRAMS_20260922.md",
+  "reason": "already implemented by T-1497 (verified ## DONE on BOARD)",
+  "reviewed": true,
+  "schema": 2,
+  "title": "FUTURE GATE — SAITELEMES AUTOMATIC AGENT TELEGRAMS",
+  "verdict": "INELIGIBLE"
+}

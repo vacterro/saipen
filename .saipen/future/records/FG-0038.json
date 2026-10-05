@@ -1,0 +1,13 @@
+{
+  "declared_status": "ARCHITECTURE SEED",
+  "digest": "5b25e6171cc9ca1774dd7d87eabe8306c00ec5dcccd63ca641d71aa831b1ae37",
+  "facts": {},
+  "gate": "FG-0038",
+  "marker": "saipen-future-record-v1",
+  "path": "future_gate/SAIPEN_FUTURE_ARCHITECTURE_20260918/future_architecture/13_FUTURE_GATE_SPAWN_MAP.md",
+  "reason": "broad architecture record; kept gated until one bounded slice is named",
+  "reviewed": true,
+  "schema": 2,
+  "title": "FUTURE GATE SPAWN MAP",
+  "verdict": "DEFERRED"
+}

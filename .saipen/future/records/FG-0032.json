@@ -1,0 +1,13 @@
+{
+  "declared_status": "DEFERRED ARCHITECTURE",
+  "digest": "529e8d716d30a369b2dbaf5f930105cce4d5eeb6cf4074080cea16e5cc187ac5",
+  "facts": {},
+  "gate": "FG-0032",
+  "marker": "saipen-future-record-v1",
+  "path": "future_gate/SAIPEN_FUTURE_ARCHITECTURE_20260918/future_architecture/07_MULTI_WORK_PER_PROJECT_DEFERRED.md",
+  "reason": "no explicit historical status found; review before any promotion",
+  "reviewed": true,
+  "schema": 2,
+  "title": "MULTI-WORK PER PROJECT — DEFERRED ARCHITECTURE",
+  "verdict": "NEEDS_REVIEW"
+}

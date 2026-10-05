@@ -1,0 +1,13 @@
+{
+  "declared_status": "PROPOSAL / DEFERRED UNTIL THE ELIGIBILITY GATE BELOW HOLDS",
+  "digest": "b512d7bf21e28f1c5370063ef0b359aaba3dd45a8d012b5bf5119e11873e29a0",
+  "facts": {},
+  "gate": "FG-0010",
+  "marker": "saipen-future-record-v1",
+  "path": "future_gate/FUTURE GATE — OPER-SHARE AUTHOR IDEAS_20260924.md",
+  "reason": "no explicit historical status found; review before any promotion",
+  "reviewed": true,
+  "schema": 2,
+  "title": "FUTURE GATE — OPER-SHARE AUTHOR IDEAS",
+  "verdict": "NEEDS_REVIEW"
+}

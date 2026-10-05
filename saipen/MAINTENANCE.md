@@ -16,6 +16,16 @@ or adopted before maintenance begins.
 
 - **DEFAULT BEHAVIOR**: bare `saipen` aliases `saipen continue`. An unhalted
   board MUST resume work; CORE.md § 1.11's action priority decides which.
+- **THE IDLE LADDER (FUTURE.md)**: a halt falls through in exactly this order --
+  operator input > DOING/recovery > workable TODO > actionable unconsumed audit
+  > eligible FUTURE GATE > HUNT > ADD. A BOARD HALT (no workable TODO, no DOING)
+  is not AUTONOMOUS WORK EXHAUSTED (BOARD HALT **and** no actionable audit
+  **and** no eligible gate); only the latter falls through to HUNT/ADD. An
+  eligible gate is consumed BEFORE new maintenance work is invented, one gate at
+  a time, never ahead of active Work or an actionable audit. Eligibility,
+  selection and promotion live in `FUTURE.md`; this bullet owns only the order.
+  With no eligible gate, routing reproduces the HUNT -> ADD behavior below
+  unchanged, so idle can never deadlock.
 - **ZERO-PROMPT AUTO-TRANSITION**: a halted board enters HUNT without asking.
   Clean HUNT routes to ADD on normal/goal intent. Under converge it routes by
   CONVERGE stages F/I and MUST NOT enter ADD.

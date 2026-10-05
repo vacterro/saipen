@@ -155,6 +155,7 @@
   }
  },
  "rule_owners": {
+  "FUTURE-GATE-01": "saipen/FUTURE.md",
   "VERIFY-ORACLE-01": "saipen/phases/verify.md",
   "STATE-SHAPE-01": "saipen/CORE.md",
   "STATE-DFA-01": "saipen/CORE.md",

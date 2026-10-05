@@ -1511,6 +1511,7 @@ def _status(project_root: Path, as_json: bool) -> int:
         return 1
     from saipen_engine.router import (
         audit_inbox_projection,
+        future_gate_projection,
         pending_append_projection,
         queued_source_projection,
         route_next,
@@ -1531,6 +1532,7 @@ def _status(project_root: Path, as_json: bool) -> int:
         audit_inbox=audit_inbox_projection(project_root),
         queued_source=queued_source_projection(project_root),
         pending_append=pending_append_projection(project_root),
+        future_gate=future_gate_projection(project_root, board_text),
     )
     # SRC-085 M3: `computed_next_action`, `computed_reason` and the automation
     # block must classify the SAME gated route every other surface executes --
@@ -2255,6 +2257,7 @@ def _route_once(project_root: Path) -> dict:
     parked = _parked_work(board["tickets"], state)
     from saipen_engine.router import (
         audit_inbox_projection,
+        future_gate_projection,
         pending_append_projection,
         queued_source_projection,
         route_next,
@@ -2277,6 +2280,7 @@ def _route_once(project_root: Path) -> dict:
         audit_inbox=audit_inbox_projection(project_root),
         queued_source=queued_source_projection(project_root),
         pending_append=pending_append_projection(project_root),
+        future_gate=future_gate_projection(project_root, board_text),
     )
     # T-1412 + T-1403 + SRC-085 M3: the SAME ordered gate chain the Result
     # wrapper applies, so `continue` can never hand out a route another surface
@@ -2371,6 +2375,11 @@ def _route_payload(
         "reason": routed.get("reason"),
         "detail": routed.get("detail") or None,
         "executable_behavior": routed.get("executable_behavior"),
+        # T-1614: a closed, machine-readable action KIND so an agent never has
+        # to re-derive the idle ladder from prose. Absent for every route that
+        # is not one of the typed kinds.
+        "action_kind": routed.get("action_kind"),
+        "future_gate": routed.get("future_gate"),
         "load": load,
         "load_path": load_path,
         "cold_route": cold_route,
@@ -2404,6 +2413,24 @@ def _route_payload(
             payload["projection_ends_at"] = (
                 "after that closure, the next route depends on bytes the "
                 "execution would create; projection ends there"
+            )
+        elif kind == continue_loop.PROMOTE_FUTURE_GATE:
+            _fg = str(routed.get("future_gate") or "")
+            payload["projected_steps"] = [
+                {
+                    "step": 1,
+                    "action": f"saipen future promote {_fg}",
+                    "condition": f"{_fg} is still ELIGIBLE on current bytes",
+                },
+                {
+                    "step": 2,
+                    "action": "PHASE SCOUT <T-###>",
+                    "condition": "the promotion filed exactly one bounded slice",
+                },
+            ]
+            payload["projection_ends_at"] = (
+                "the promoted Work's own execution depends on bytes it would create; "
+                "projection ends there"
             )
         elif kind == continue_loop.IDLE_MAINTAIN:
             payload["projected_steps"] = [
@@ -2441,14 +2468,74 @@ def _continue_chain(
     agent = _agent_for(project_root)
     trace: list[dict] = []
     iterations = 0
+    refinements = 0
     route = first_route
-    seen = {continue_loop.state_identity(route["state"], route["board_text"])}
+    # The fixed-point witness is (canonical state, routed action): an operation
+    # on derived state (a projection rebuild, a refinement) moves routing
+    # WITHOUT journaling STATE, and calling that a fixed point would report a
+    # defect where the chain made progress.
+    def _witness(current: dict) -> tuple[str, str]:
+        return (
+            continue_loop.state_identity(current["state"], current["board_text"]),
+            str(current["routed"].get("action") or ""),
+        )
+
+    seen = {_witness(route)}
     while True:
         routed = route["routed"]
         state = route["state"]
         board = route["board"]
         kind = continue_loop.classify_route(routed, state, board)
-        if kind in (continue_loop.FINISH_AT_SHIP, continue_loop.ADOPT, continue_loop.APPLY_APPEND):
+        if kind in (
+            continue_loop.REFRESH_FUTURE_GATE,
+            continue_loop.REFINE_FUTURE_GATE,
+        ) and _negotiate_capability(project_root) == "read-only":
+            # Read-only mode detects and reports; it never mutates derived
+            # state. The route still names the mechanical repair truthfully.
+            payload = _route_payload(
+                project_root, route, reconciliation=reconciliation, dry_run=False, kind=kind
+            )
+            payload["continue_trace"] = trace
+            payload["iterations"] = iterations
+            payload["stop_reason"] = "boundary"
+            payload["detail"] = (
+                "current session capability is read-only: the future gate projection "
+                + (
+                    f"is {routed.get('detail', 'not current')} and is reported, "
+                    "not repaired"
+                )
+            )
+            _emit(payload, as_json)
+            return 0
+        if kind == continue_loop.REFINE_FUTURE_GATE and refinements >= (
+            continue_loop.MAX_REFINEMENTS_PER_CHAIN
+        ):
+            # Bounded per chain: a 45-record corpus must not consume one
+            # autonomous invocation. The verdict is already persisted, so
+            # ordinary routing resumes exactly where it would have.
+            trace.append(
+                {
+                    "iteration": iterations + 1,
+                    "action": str(routed.get("action") or ""),
+                    "kind": kind,
+                    "ok": True,
+                    "skipped": "REFINEMENT_BUDGET_EXHAUSTED",
+                    "detail": (
+                        f"refinement budget {continue_loop.MAX_REFINEMENTS_PER_CHAIN} "
+                        "per continue chain is spent; the record stays "
+                        "NEEDS_REVIEW and ordinary routing continues"
+                    ),
+                }
+            )
+            break
+        if kind in (
+            continue_loop.FINISH_AT_SHIP,
+            continue_loop.ADOPT,
+            continue_loop.APPLY_APPEND,
+            continue_loop.PROMOTE_FUTURE_GATE,
+            continue_loop.REFRESH_FUTURE_GATE,
+            continue_loop.REFINE_FUTURE_GATE,
+        ):
             before_event = state.get("last_event")
             if kind == continue_loop.APPLY_APPEND:
                 from saipen_engine.source_append import apply_append
@@ -2461,6 +2548,52 @@ def _continue_chain(
                     outcome,
                 )
                 operation_name = "apply_append"
+            elif kind == continue_loop.REFRESH_FUTURE_GATE:
+                # Rebuilding the derived projection is a mechanical repair of
+                # derived state: no BOARD line, no ticket, no authority.
+                from saipen_engine import future_gate as _chain_gates
+
+                outcome = _chain_gates.refresh_if_needed(project_root)
+                ticket = None
+                step_ok = True
+                step_code = "FUTURE_GATE_REFRESHED"
+                failure_payload = outcome
+                operation_name = "future_refresh"
+            elif kind == continue_loop.REFINE_FUTURE_GATE:
+                from saipen_engine import future_gate as _chain_gates
+
+                refinements += 1
+                outcome = _chain_gates.refine(
+                    project_root,
+                    str(routed.get("future_gate") or ""),
+                    board_tickets=board["tickets"],
+                )
+                ticket = None
+                step_ok = bool(outcome.get("ok"))
+                step_code = str(outcome.get("code"))
+                failure_payload = outcome
+                operation_name = "future_refine"
+            elif kind == continue_loop.PROMOTE_FUTURE_GATE:
+                # T-1614: consuming an eligible deferred gate is the same
+                # mechanical canonical mutation as an append, so `cc` executes
+                # it instead of stopping to hand advice back. The promotion
+                # owner re-checks eligibility against CURRENT bytes, so a gate
+                # that stopped being eligible in the meantime refuses here
+                # rather than filing Work.
+                gate_id = str(routed.get("future_gate") or "")
+                outcome, _rc = _execute_future_promotion(
+                    project_root,
+                    gate_id,
+                    False,
+                    tickets=board["tickets"],
+                )
+                ticket = outcome.get("ticket")
+                step_ok, step_code, failure_payload = (
+                    bool(outcome.get("ok")),
+                    str(outcome.get("code")),
+                    outcome,
+                )
+                operation_name = "future_promote"
             else:
                 doing = next(t for t in board["tickets"].values() if t["section"] == "## DOING")
                 ticket = doing["id"]
@@ -2529,7 +2662,7 @@ def _continue_chain(
                 _emit(payload, as_json)
                 return 0
             route = after_route
-            identity = continue_loop.state_identity(route["state"], route["board_text"])
+            identity = _witness(route)
             if identity in seen:
                 payload = {
                     "ok": True,
@@ -2610,6 +2743,9 @@ def _next_action(
         in (
             continue_loop.FINISH_AT_SHIP,
             continue_loop.APPLY_APPEND,
+            continue_loop.PROMOTE_FUTURE_GATE,
+            continue_loop.REFRESH_FUTURE_GATE,
+            continue_loop.REFINE_FUTURE_GATE,
         )
     ):
         return _continue_chain(
@@ -2690,6 +2826,7 @@ def _explain_next(project_root: Path, as_json: bool) -> int:
     _gates = operator_gates(_parsed_board["tickets"])
     from saipen_engine.router import (
         audit_inbox_projection,
+        future_gate_projection,
         gate_route,
         pending_append_projection,
         queued_source_projection,
@@ -2711,6 +2848,7 @@ def _explain_next(project_root: Path, as_json: bool) -> int:
         audit_inbox=audit_inbox_projection(project_root),
         queued_source=queued_source_projection(project_root),
         pending_append=pending_append_projection(project_root),
+        future_gate=future_gate_projection(project_root, board_text),
     )
     # Explain the executable route, including the same conformance and closure
     # gates used by status/next/continue. A raw route can name a refused action.
@@ -6166,6 +6304,404 @@ def _context(project_root: Path, args: list[str], as_json: bool, dry_run: bool) 
     else:
         print(result.get("surface", ""), end="")
     return 0
+
+
+_FUTURE_USAGE = (
+    "future needs status | list | refresh | next | promote <FG-####> | "
+    "refine <FG-####> [--slice TEXT --evidence PATH[,PATH]] | "
+    "add <title> [--body TEXT] [--priority P0-P3] [--evidence PATH[,PATH]]"
+)
+_FUTURE_READ_ONLY = frozenset({"status", "list", "next"})
+
+
+def _future(project_root: Path, args: list[str], as_json: bool, dry_run: bool) -> int:
+    """FUTURE GATE: deferred authority candidates (T-1614 / FUTURE-GATE-01).
+
+    `status`/`list`/`next` are read-only and never touch the filesystem beyond
+    reading the index. `refresh`/`add`/`promote` are canonical mutations and
+    take the read-only brake, so a read-only session can look at every gate in
+    the project and promote none of them.
+    """
+    from saipen_engine import future_gate as _gates
+    from saipen_engine.board import parse_board
+    from saipen_engine.state import parse_state_or_error
+
+    if not args or args[0] not in (
+        "status", "list", "refresh", "next", "promote", "add", "refine"
+    ):
+        _emit(
+            {
+                "ok": False,
+                "code": "VALIDATION_FAILED",
+                "detail": _FUTURE_USAGE,
+                "canonical_next_command": "saipen future status",
+            },
+            as_json,
+        )
+        return 2
+    action, rest = args[0], args[1:]
+
+    board_text = (project_root / ".saipen" / "BOARD.md").read_text(encoding="utf-8-sig")
+    board = parse_board(board_text)
+    if board["errors"]:
+        _emit(
+            {
+                "ok": False,
+                "code": "VALIDATION_FAILED",
+                "detail": "BOARD is malformed; future gates are not projected over broken state: "
+                + "; ".join(board["errors"][:3]),
+            },
+            as_json,
+        )
+        return 1
+    tickets = board["tickets"]
+
+    if action in ("status", "list", "next"):
+        state, _state_error = parse_state_or_error(
+            (project_root / ".saipen" / "STATE.md").read_text(encoding="utf-8-sig")
+        )
+        if action == "next":
+            proj = _gates.projection(project_root, tickets)
+            if not proj.get("eligible"):
+                _emit(
+                    {
+                        "ok": True,
+                        "code": "FUTURE_GATE_NONE",
+                        "indexed": bool(proj.get("indexed")),
+                        "counts": proj.get("counts") or {},
+                        "detail": proj.get(
+                            "detail",
+                            "no eligible future gate; idle routing falls through to HUNT -> ADD",
+                        ),
+                        "canonical_next_command": "saipen future status",
+                    },
+                    as_json,
+                )
+                return 0
+            gate_id = proj["eligible"][0]
+            _emit(
+                {
+                    "ok": True,
+                    "code": "FUTURE_GATE_NEXT",
+                    "gate": proj.get("gate"),
+                    "detail": proj.get("detail"),
+                    "canonical_next_command": f"saipen future promote {gate_id}",
+                },
+                as_json,
+            )
+            return 0
+        report = _gates.status(project_root, tickets)
+        if action == "list":
+            rows = [
+                {
+                    "id": g["id"],
+                    "state": g["state"],
+                    "title": g["title"],
+                    "path": g.get("path"),
+                    "declared_status": g.get("declared_status"),
+                    "reasons": g.get("reasons") or g.get("problems") or [],
+                }
+                for g in report["gates"]
+            ]
+            _emit(
+                {
+                    "ok": True,
+                    "code": "FUTURE_GATE_LIST",
+                    "indexed": report["indexed"],
+                    "gates": rows,
+                    "detail": (
+                        f"{len(rows)} gate(s); "
+                        + ", ".join(
+                            f"{n} {state}"
+                            for state, n in sorted(report["counts"].items())
+                            if n
+                        )
+                    ),
+                },
+                as_json,
+            )
+            return 0 if report["indexed"] else 1
+        payload = {
+            "ok": True,
+            "code": "FUTURE_GATE_STATUS",
+            "indexed": report["indexed"],
+            "counts": report["counts"],
+            "next": report.get("next"),
+            "evaluated": report.get("evaluated") or [],
+            "execution_intent": (state or {}).get("execution_intent"),
+        }
+        if report.get("corrupt"):
+            payload["ok"] = False
+            payload["detail"] = (
+                f"future gate index is unreadable ({report['corrupt']}); "
+                "an unreadable index is not an empty one"
+            )
+        _emit(payload, as_json)
+        return 0 if payload["ok"] else 1
+
+    if not dry_run and _negotiate_capability(project_root) == "read-only":
+        return _capability_refusal(as_json)
+
+    if action == "refresh":
+        before = _gates.freshness(project_root)
+        index, path = _gates.refresh(project_root)
+        evaluated = _gates.evaluate(project_root, tickets)
+        _emit(
+            {
+                "ok": True,
+                "code": "FUTURE_GATE_REFRESHED",
+                "index": path.name,
+                "index_state_before": before["state"],
+                "index_state_after": _gates.freshness(project_root)["state"],
+                "corpus": index["corpus"],
+                "counts": evaluated["counts"],
+                "next": evaluated.get("next"),
+            },
+            as_json,
+        )
+        return 0
+
+    if action == "refine":
+        gate_id = rest[0].strip() if rest else ""
+        slice_text = None
+        evidence: tuple[str, ...] = ()
+        index = 1
+        while index < len(rest):
+            token = rest[index]
+            if token in ("--slice", "--evidence"):
+                if index + 1 >= len(rest):
+                    _emit(
+                        {
+                            "ok": False,
+                            "code": "VALIDATION_FAILED",
+                            "detail": f"{token} needs a value",
+                        },
+                        as_json,
+                    )
+                    return 2
+                value = rest[index + 1]
+                if token == "--slice":
+                    slice_text = value
+                else:
+                    evidence = tuple(p.strip() for p in value.split(",") if p.strip())
+                index += 2
+                continue
+            _emit(
+                {
+                    "ok": False,
+                    "code": "VALIDATION_FAILED",
+                    "detail": f"future refine takes one FG-#### id; surplus: {token}",
+                },
+                as_json,
+            )
+            return 2
+        if not gate_id:
+            _emit(
+                {
+                    "ok": False,
+                    "code": "VALIDATION_FAILED",
+                    "detail": "future refine needs an FG-#### id",
+                    "canonical_next_command": "saipen future list",
+                },
+                as_json,
+            )
+            return 2
+        try:
+            outcome = _gates.refine(
+                project_root,
+                gate_id,
+                board_tickets=tickets,
+                slice_text=slice_text,
+                evidence=evidence,
+            )
+        except (OSError, ValueError) as exc:
+            _emit(
+                {
+                    "ok": False,
+                    "code": "VALIDATION_FAILED",
+                    "detail": f"future refine: {exc}",
+                },
+                as_json,
+            )
+            return 1
+        recorded = _gates.status(project_root, tickets)
+        _emit(
+            {
+                **outcome,
+                "counts": recorded["counts"],
+                "canonical_next_command": "saipen continue",
+            },
+            as_json,
+        )
+        return 0 if outcome.get("ok") else 1
+
+    if action == "add":
+        title = rest[0].strip() if rest else ""
+        body = ""
+        priority = "P2"
+        evidence: tuple[str, ...] = ()
+        i = 1
+        while i < len(rest):
+            token = rest[i]
+            if token in ("--body", "--priority", "--evidence"):
+                if i + 1 >= len(rest):
+                    _emit(
+                        {
+                            "ok": False,
+                            "code": "VALIDATION_FAILED",
+                            "detail": f"{token} needs a value",
+                        },
+                        as_json,
+                    )
+                    return 2
+                value = rest[i + 1]
+                if token == "--body":
+                    body = value
+                elif token == "--priority":
+                    priority = value
+                else:
+                    evidence = tuple(p.strip() for p in value.split(",") if p.strip())
+                i += 2
+                continue
+            _emit(
+                {
+                    "ok": False,
+                    "code": "VALIDATION_FAILED",
+                    "detail": f"future add takes one title; surplus: {token}",
+                },
+                as_json,
+            )
+            return 2
+        if not title:
+            _emit(
+                {"ok": False, "code": "VALIDATION_FAILED", "detail": "future add needs a title"},
+                as_json,
+            )
+            return 2
+        try:
+            written = _gates.add(project_root, title, body, priority=priority, evidence=evidence)
+        except (OSError, ValueError) as exc:
+            _emit(
+                {"ok": False, "code": "VALIDATION_FAILED", "detail": f"future add: {exc}"},
+                as_json,
+            )
+            return 1
+        index, _path = _gates.refresh(project_root)
+        recorded = _gates.status(project_root, tickets)
+        gate_id = next(
+            (
+                g["id"]
+                for g in index["gates"]
+                if g.get("path") == written.relative_to(project_root).as_posix()
+            ),
+            None,
+        )
+        _emit(
+            {
+                "ok": True,
+                "code": "FUTURE_GATE_RECORDED",
+                "gate": gate_id,
+                "path": written.relative_to(project_root).as_posix(),
+                "counts": recorded["counts"],
+                "detail": (
+                    "deferred authority candidate recorded. It is not Work, not a rule source "
+                    "and not implementation authority until `saipen future promote`."
+                ),
+            },
+            as_json,
+        )
+        return 0
+
+    # promote
+    gate_id = rest[0].strip() if rest else ""
+    surplus = rest[1:]
+    if surplus:
+        _emit(
+            {
+                "ok": False,
+                "code": "VALIDATION_FAILED",
+                "detail": f"future promote takes one gate id; surplus: {' '.join(surplus)}",
+            },
+            as_json,
+        )
+        return 2
+    if not gate_id:
+        _emit(
+            {
+                "ok": False,
+                "code": "VALIDATION_FAILED",
+                "detail": "future promote needs an FG-#### id",
+                "canonical_next_command": "saipen future next",
+            },
+            as_json,
+        )
+        return 2
+    payload, rc = _execute_future_promotion(project_root, gate_id, dry_run, tickets=tickets)
+    _emit(payload, as_json)
+    return rc
+
+
+def _execute_future_promotion(
+    project_root: Path,
+    gate_id: str,
+    dry_run: bool,
+    *,
+    tickets: dict | None = None,
+) -> tuple[dict, int]:
+    """Promote ONE bounded slice of an ELIGIBLE gate into ordinary Work.
+
+    ONE owner for both call sites -- the explicit `saipen future promote` and
+    the `cc` chain -- so a gate cannot be promoted twice through two answers.
+
+    The ONLY authority allowed to create a ticket is the ordinary Source/Work
+    ingress. Promotion therefore routes through `entry.start_work`, which
+    captures the receipt, dedupes an identical request, honours the seat and
+    reuses the goal valve: a gate can never file Work around any of those.
+    """
+    from saipen_engine import future_gate as _gates
+    from saipen_engine.entry import start_work
+
+    try:
+        plan = _gates.promote(project_root, gate_id, board_tickets=tickets)
+    except ValueError as exc:
+        return {"ok": False, "code": "VALIDATION_FAILED", "detail": f"future promote: {exc}"}, 1
+    if not plan["ok"]:
+        return plan, 1
+    if dry_run:
+        return {**plan, "future_gate": gate_id, "dry_run": True}, 0
+    started = start_work(
+        project_root,
+        _agent_for(project_root),
+        actor_source="cli",
+        text=plan["request_text"],
+        priority=plan.get("priority") or "P1",
+        verify=(
+            f"future gate {gate_id} slice implemented and verified; the Work record names "
+            f"{gate_id} and the gate index records the slice closure"
+        ),
+    )
+    if not started.get("ok"):
+        return {
+            **started,
+            "code": started.get("code") or "FUTURE_GATE_PROMOTION_REFUSED",
+            "future_gate": gate_id,
+        }, 1
+    ticket = str(started.get("ticket") or "")
+    record = _gates.record_slice(project_root, gate_id, ticket=ticket, digest=plan.get("digest"))
+    return (
+        {
+            **started,
+            "code": "FUTURE_GATE_PROMOTED",
+            "future_gate": gate_id,
+            "slice": plan["slice"],
+            "gate_record": record,
+            "detail": (
+                f"{gate_id} promoted as {ticket} for ONE bounded slice; the residual stays "
+                "deferred and the gate closes only when every slice is resolved"
+            ),
+        },
+        0,
+    )
 
 
 def _knowledge(project_root: Path, args: list[str], as_json: bool, dry_run: bool) -> int:
@@ -10316,7 +10852,9 @@ def main(argv: list[str] | None = None) -> int:
             "<candidate-home>|context cold|hot|audit|orient [--handoff JSON]|"
             "acceptance <T-###>|attempt open|attempt close <RESULT> "
             "<STOP>|brief|focus [text]|build <directive>|knowledge "
-            "status|index|retrieve <objective>|launch opencode [-- HOST-ARGS]|cut <target>|"
+            "status|index|retrieve <objective>|future "
+            "status|list|refresh|next|refine <FG-####>|promote <FG-####>|add <title>|"
+            "launch opencode [-- HOST-ARGS]|cut <target>|"
             "cut confirm <CUT-ID>|undo|undo confirm <CP-ID> --reason <text>) "
             "[--dry-run] "
             "[--json] [--project-root PATH] [--agent ID] [--runtime-info JSON-FILE]"
@@ -11981,6 +12519,8 @@ def main(argv: list[str] | None = None) -> int:
         return _mail(project_root, args[1:], as_json, dry_run)
     if command == "knowledge":
         return _knowledge(project_root, args[1:], as_json, dry_run)
+    if command == "future":
+        return _future(project_root, args[1:], as_json, dry_run)
     if command == "attempt":
         return _attempt(project_root, args[1:], as_json, dry_run)
     if command == "audit":

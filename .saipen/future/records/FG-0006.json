@@ -1,0 +1,13 @@
+{
+  "declared_status": "RECORDED FOLLOW-UP WORK / NOT AUTHORIZED FOR IMPLEMENTATION",
+  "digest": "573d37a6307ded23220f90b2ba9dc0300d994beacb4e14fbddaa0c0e6fa26a69",
+  "facts": {},
+  "gate": "FG-0006",
+  "marker": "saipen-future-record-v1",
+  "path": "future_gate/FUTURE GATE — CORE MAINTAINER AUDIT FINDINGS_20260912.md",
+  "reason": "recorded, explicitly not authorized for implementation",
+  "reviewed": true,
+  "schema": 2,
+  "title": "FUTURE GATE — CORE MAINTAINER AUDIT FINDINGS",
+  "verdict": "DEFERRED"
+}

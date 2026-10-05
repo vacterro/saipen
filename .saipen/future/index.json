@@ -1,0 +1,684 @@
+{
+  "corpus": {
+    "absent": 0,
+    "documents": 45,
+    "machine_readable": 0
+  },
+  "gates": [
+    {
+      "digest": "5798e86c2a33eaf56bbb02f30eb983764e534b26aba2bcae3cc9319293e8ac91",
+      "id": "FG-0001",
+      "identity_source": "digest",
+      "machine_readable": false,
+      "path": "future_gate/ASTRA_HANDOFF_20260921.md",
+      "present": true,
+      "reasons": [
+        "no explicit historical status found; review before any promotion"
+      ],
+      "reviewed": true,
+      "state": "NEEDS_REVIEW",
+      "title": "Astra continuation — five-hour release stabilization plan"
+    },
+    {
+      "declared_status": "IMPLEMENTED by T-1373 (SRC-054, user-authorized 2026-09-16) -- see",
+      "digest": "aed1f1e15c24aa7d523762c1d4dcbd615eab3de0dc1c7fe60583cefeca0de6f1",
+      "id": "FG-0002",
+      "identity_source": "digest",
+      "machine_readable": false,
+      "path": "future_gate/FUTURE GATE — AUDIT CONTRACT OMITS EVIDENCE DIR_20260916.md",
+      "present": true,
+      "reasons": [
+        "already implemented by T-1373 (verified ## DONE on BOARD)"
+      ],
+      "reviewed": true,
+      "state": "INELIGIBLE",
+      "title": "FUTURE GATE — SAIPEN AUDIT CONTRACT OMITS `.saipen/evidence/**`"
+    },
+    {
+      "declared_status": "RECORDED FOLLOW-UP WORK / NOT AUTHORIZED FOR IMPLEMENTATION",
+      "digest": "21701512d8c3f3e1022d4d28d3d8cde76178f0a287f3b9231d745a0c1e1f872a",
+      "id": "FG-0003",
+      "identity_source": "digest",
+      "machine_readable": false,
+      "path": "future_gate/FUTURE GATE — AUDIT CONTRACT OPTIONAL ROOTS EXPORT RUNTIME STATE_20260916.md",
+      "present": true,
+      "reasons": [
+        "recorded, explicitly not authorized for implementation"
+      ],
+      "reviewed": true,
+      "state": "DEFERRED",
+      "title": "FUTURE GATE — AUDIT CONTRACT `optional` ROOTS EXPORT RUNTIME STATE; PROJECT-LOCAL SCOPING IS ERASED BY REGENERATION"
+    },
+    {
+      "declared_status": "RECORDED FOLLOW-UP WORK / NOT AUTHORIZED FOR IMPLEMENTATION",
+      "digest": "6ad13d6a3a6f3c1ea3436c1007c2fdaea6af3312b3a49cfe5e21b516655cfe6d",
+      "id": "FG-0004",
+      "identity_source": "digest",
+      "machine_readable": false,
+      "path": "future_gate/FUTURE GATE — CLAIM PATH OVERSIZE AND IDLE CONVERGE ROUTING_20260916.md",
+      "present": true,
+      "reasons": [
+        "recorded, explicitly not authorized for implementation"
+      ],
+      "reviewed": true,
+      "state": "DEFERRED",
+      "title": "FUTURE GATE — CLAIM-PATH EXTERNALIZATION GAP AND IDLE CONVERGE ROUTING"
+    },
+    {
+      "declared_status": "RECORDED FOLLOW-UP WORK / NOT AUTHORIZED FOR IMPLEMENTATION",
+      "digest": "e6bc967bb1a27c779fa4eb6b4d0f67f2474f9c6c9de8122b7cf0e27ff699d45f",
+      "id": "FG-0005",
+      "identity_source": "digest",
+      "machine_readable": false,
+      "path": "future_gate/FUTURE GATE — CONTINUE SILENTLY SETS CONVERGE INTENT ON A FRESH PROJECT_20260917.md",
+      "present": true,
+      "reasons": [
+        "recorded, explicitly not authorized for implementation"
+      ],
+      "reviewed": true,
+      "state": "DEFERRED",
+      "title": "FUTURE GATE — `continue` SILENTLY SETS CONVERGE/DONE INTENT ON A FRESH PROJECT"
+    },
+    {
+      "declared_status": "RECORDED FOLLOW-UP WORK / NOT AUTHORIZED FOR IMPLEMENTATION",
+      "digest": "573d37a6307ded23220f90b2ba9dc0300d994beacb4e14fbddaa0c0e6fa26a69",
+      "id": "FG-0006",
+      "identity_source": "digest",
+      "machine_readable": false,
+      "path": "future_gate/FUTURE GATE — CORE MAINTAINER AUDIT FINDINGS_20260912.md",
+      "present": true,
+      "reasons": [
+        "recorded, explicitly not authorized for implementation"
+      ],
+      "reviewed": true,
+      "state": "DEFERRED",
+      "title": "FUTURE GATE — CORE MAINTAINER AUDIT FINDINGS"
+    },
+    {
+      "declared_status": "FUTURE_ARCHITECTURE / KEEP_GATED / NOT AUTHORIZED FOR RUNTIME IMPLEMENTATION",
+      "digest": "4e677594790a3ef91eac1dfb9ab589d58d59eb72f45035fcc1315388081264d0",
+      "id": "FG-0007",
+      "identity_source": "digest",
+      "machine_readable": false,
+      "path": "future_gate/FUTURE GATE — EXTERNAL ARCHITECTURE MINING PROTOCOLIST BENCH.md",
+      "present": true,
+      "reasons": [
+        "broad architecture record; kept gated until one bounded slice is named"
+      ],
+      "reviewed": true,
+      "state": "DEFERRED",
+      "title": "future_gate/FUTURE GATE — EXTERNAL ARCHITECTURE MINING PROTOCOLIST BENCH.md"
+    },
+    {
+      "declared_status": "RECORDED FOLLOW-UP WORK / NOT AUTHORIZED FOR IMPLEMENTATION",
+      "digest": "815955458d87c872a870bddead8affbc0851265ea3db01bf0e5bf5db4ebb66c8",
+      "id": "FG-0008",
+      "identity_source": "digest",
+      "machine_readable": false,
+      "path": "future_gate/FUTURE GATE — GREENFIELD BIRTH HAS NO MECHANICAL OPERATION_20260917.md",
+      "present": true,
+      "reasons": [
+        "recorded, explicitly not authorized for implementation"
+      ],
+      "reviewed": true,
+      "state": "DEFERRED",
+      "title": "FUTURE GATE — GREENFIELD BIRTH HAS NO MECHANICAL OPERATION"
+    },
+    {
+      "digest": "a1190802ba9a04b3bf7c43cf3bdc0cd7f43d7f557d54bea36e3f68ca7d26af57",
+      "id": "FG-0009",
+      "identity_source": "digest",
+      "machine_readable": false,
+      "path": "future_gate/FUTURE GATE — MINIMUM NECESSARY IMPLEMENTATION PONYTAIL-INSPIRED CORE DISCIPLINE.md",
+      "present": true,
+      "reasons": [
+        "broad architecture record; kept gated until one bounded slice is named"
+      ],
+      "reviewed": true,
+      "state": "DEFERRED",
+      "title": "future_gate/FUTURE GATE — MINIMUM NECESSARY IMPLEMENTATION PONYTAIL-INSPIRED CORE DISCIPLINE.md"
+    },
+    {
+      "declared_status": "PROPOSAL / DEFERRED UNTIL THE ELIGIBILITY GATE BELOW HOLDS",
+      "digest": "b512d7bf21e28f1c5370063ef0b359aaba3dd45a8d012b5bf5119e11873e29a0",
+      "id": "FG-0010",
+      "identity_source": "digest",
+      "machine_readable": false,
+      "path": "future_gate/FUTURE GATE — OPER-SHARE AUTHOR IDEAS_20260924.md",
+      "present": true,
+      "reasons": [
+        "no explicit historical status found; review before any promotion"
+      ],
+      "reviewed": true,
+      "state": "NEEDS_REVIEW",
+      "title": "FUTURE GATE — OPER-SHARE AUTHOR IDEAS"
+    },
+    {
+      "declared_status": "REGISTERED / NOT IMPLEMENTED",
+      "digest": "05409b36d6049590458b610b19ac4b302e4342fad0278c18680ec51e4ad07ad6",
+      "id": "FG-0011",
+      "identity_source": "digest",
+      "machine_readable": false,
+      "path": "future_gate/FUTURE GATE — OPTIONAL PORTFOLIO CONTEXT PROVIDER.md",
+      "present": true,
+      "reasons": [
+        "explicitly recorded as not implemented; preserved deferred intent"
+      ],
+      "reviewed": true,
+      "state": "DEFERRED",
+      "title": "future_gate/FUTURE GATE — OPTIONAL PORTFOLIO CONTEXT PROVIDER.md"
+    },
+    {
+      "declared_status": "RECORDED FOLLOW-UP WORK / NOT AUTHORIZED FOR IMPLEMENTATION",
+      "digest": "45c41f3df54de1e883dbcea248fb29c62e040900d9a8a66cfcce0b79e141844f",
+      "id": "FG-0012",
+      "identity_source": "digest",
+      "machine_readable": false,
+      "path": "future_gate/FUTURE GATE — RECONCILE DEADLOCK ON DONE-WITHOUT-VERIFY PLUS INVALID ACTIVE CLAIM_20260917.md",
+      "present": true,
+      "reasons": [
+        "recorded, explicitly not authorized for implementation"
+      ],
+      "reviewed": true,
+      "state": "DEFERRED",
+      "title": "FUTURE GATE — RECONCILE DEADLOCK: UNAPPLIABLE DETERMINISTIC REPAIR + UNROUTABLE DONE-WITHOUT-VERIFY"
+    },
+    {
+      "declared_status": "RECORDED FOLLOW-UP WORK / NOT AUTHORIZED FOR IMPLEMENTATION",
+      "digest": "fe2ce63f2d1ae2f45925e599da2ea9d1f7dd30d73ce48698e7857bc012907210",
+      "id": "FG-0013",
+      "identity_source": "digest",
+      "machine_readable": false,
+      "path": "future_gate/FUTURE GATE — REPAIR-VERB DEADLOCK ON MALFORMED STATE PLUS ILLEGAL LOG PLUS DUPLICATE BOARD ID_20260917.md",
+      "present": true,
+      "reasons": [
+        "recorded, explicitly not authorized for implementation"
+      ],
+      "reviewed": true,
+      "state": "DEFERRED",
+      "title": "FUTURE GATE — REPAIR-VERB DEADLOCK: MALFORMED STATE x ILLEGAL LOG x DUPLICATE BOARD ID"
+    },
+    {
+      "declared_status": "PROPOSAL / NOT ACTIVE",
+      "digest": "e720accd13877427565d05acdad948cd3b984f6d31ade405d3faa040c0bf34f2",
+      "id": "FG-0014",
+      "identity_source": "digest",
+      "machine_readable": false,
+      "path": "future_gate/FUTURE GATE — SAIGPU LIBRARIAN_20260925.md",
+      "present": true,
+      "reasons": [
+        "broad architecture record; kept gated until one bounded slice is named"
+      ],
+      "reviewed": true,
+      "state": "DEFERRED",
+      "title": "FUTURE GATE PROPOSAL — SAIGPU LIBRARIAN"
+    },
+    {
+      "declared_status": "PART 3 (TURN-ENTRY READ) IMPLEMENTED BY T-1497 / PARTS 1-2 (AUTOMATIC SEND)",
+      "digest": "01196a05752d5a772dfb32d28bb4813204d4682912d5a2c71bb3ad2611aee33d",
+      "id": "FG-0015",
+      "identity_source": "digest",
+      "machine_readable": false,
+      "path": "future_gate/FUTURE GATE — SAITELEMES AUTOMATIC AGENT TELEGRAMS_20260922.md",
+      "present": true,
+      "reasons": [
+        "already implemented by T-1497 (verified ## DONE on BOARD)"
+      ],
+      "reviewed": true,
+      "state": "INELIGIBLE",
+      "title": "FUTURE GATE — SAITELEMES AUTOMATIC AGENT TELEGRAMS"
+    },
+    {
+      "declared_status": "AUTHORIZED BY THE OPERATOR, NOT STARTED (SAIPEN-project Work)",
+      "digest": "86fc1368231d72952fab64a4e03ebed484ccec74a29353a92960877f0cab8d48",
+      "id": "FG-0016",
+      "identity_source": "digest",
+      "machine_readable": false,
+      "path": "future_gate/FUTURE GATE — SAITELEMES RELIABLE DELIVERY SAIPEN HALF_20260924.md",
+      "present": true,
+      "reasons": [
+        "recorded, explicitly not authorized for implementation"
+      ],
+      "reviewed": true,
+      "state": "DEFERRED",
+      "title": "FUTURE GATE — SAITELEMES RELIABLE DELIVERY, SAIPEN HALF"
+    },
+    {
+      "declared_status": "STRUCTURAL FINDING — observed live, reproduced deterministically, not fixed.",
+      "digest": "9cd02808e33d6052afb1b92cc4add964aed598e32609b0a2e79db3df671db65d",
+      "id": "FG-0017",
+      "identity_source": "digest",
+      "machine_readable": false,
+      "path": "future_gate/FUTURE GATE — SHIP DEADLOCK ON ACTIVE SOURCE COVERAGE_20260912.md",
+      "present": true,
+      "reasons": [
+        "recorded, explicitly not authorized for implementation"
+      ],
+      "reviewed": true,
+      "state": "DEFERRED",
+      "title": "FUTURE GATE — SHIP DEADLOCK ON UNRESOLVED ACTIVE SOURCE COVERAGE"
+    },
+    {
+      "declared_status": "RECORDED FOLLOW-UP WORK / NOT AUTHORIZED FOR IMPLEMENTATION",
+      "digest": "ffbbc101d4454bcc337a11d5c867e93fa02e631a3a9511390d1961cd058a4e22",
+      "id": "FG-0018",
+      "identity_source": "digest",
+      "machine_readable": false,
+      "path": "future_gate/FUTURE GATE — TICKET ADD PREPENDS SO A PLANNED WAVE LANDS IN REVERSE PRIORITY_20260917.md",
+      "present": true,
+      "reasons": [
+        "recorded, explicitly not authorized for implementation"
+      ],
+      "reviewed": true,
+      "state": "DEFERRED",
+      "title": "FUTURE GATE — `ticket add` PREPENDS, SO A PLANNED WAVE LANDS IN REVERSE PRIORITY"
+    },
+    {
+      "declared_status": "REFERENCE ONLY / NOT AUTHORIZED FOR IMPLEMENTATION",
+      "digest": "1a6bdcf00ec5de70aecca0cf72cf43594ac32ff88017f5beab205d471fd05b99",
+      "id": "FG-0019",
+      "identity_source": "digest",
+      "machine_readable": false,
+      "path": "future_gate/FUTURE GATE — VERIFIED SHARED KNOWLEDGE LAYER_20260910_0607.md",
+      "present": true,
+      "reasons": [
+        "recorded, explicitly not authorized for implementation"
+      ],
+      "reviewed": true,
+      "state": "DEFERRED",
+      "title": "FUTURE GATE — VERIFIED SHARED KNOWLEDGE LAYER"
+    },
+    {
+      "declared_status": "PROPOSAL / UPSTREAM PROTOCOL CAPABILITY GAP",
+      "digest": "660d68f281c82484e248755bb6e1a45e789c505177fbe513fb46350049688227",
+      "id": "FG-0020",
+      "identity_source": "digest",
+      "machine_readable": false,
+      "path": "future_gate/FUTURE GATE — VOLUNTARY MID-WORK CLAIM HANDOFF.md",
+      "present": true,
+      "reasons": [
+        "no explicit historical status found; review before any promotion"
+      ],
+      "reviewed": true,
+      "state": "NEEDS_REVIEW",
+      "title": "FUTURE GATE — VOLUNTARY MID-WORK CLAIM HANDOFF"
+    },
+    {
+      "declared_status": "PLANNING ONLY. Not execution authority. Current STATE, BOARD, source",
+      "digest": "b80a9aafae79abdd76aea2c549155b2f3c392075e7026f99bc20f1f97b719f5c",
+      "id": "FG-0021",
+      "identity_source": "digest",
+      "machine_readable": false,
+      "path": "future_gate/ROADMAP_FUTURE_IDEA1_20260929.md",
+      "present": true,
+      "reasons": [
+        "broad architecture record; kept gated until one bounded slice is named"
+      ],
+      "reviewed": true,
+      "state": "DEFERRED",
+      "title": "SAIPEN — logical roadmap from the MCP / Cloud idea thread"
+    },
+    {
+      "digest": "86024f230614cf59abe192f6cffd9c28ab7ffd8efe4eb3c29f77417a77e3d49a",
+      "id": "FG-0022",
+      "identity_source": "digest",
+      "machine_readable": false,
+      "path": "future_gate/ROADMAP_NEXT_20260920.md",
+      "present": true,
+      "reasons": [
+        "broad architecture record; kept gated until one bounded slice is named"
+      ],
+      "reviewed": true,
+      "state": "DEFERRED",
+      "title": "SAIPEN — next stabilization roadmap"
+    },
+    {
+      "digest": "c4569d862330855a6b8d9c41c23de5cee4600249a6c76a67469052a6f9192b25",
+      "id": "FG-0023",
+      "identity_source": "digest",
+      "machine_readable": false,
+      "path": "future_gate/SAIPEN_agent_stillWritesProses.md",
+      "present": true,
+      "reasons": [
+        "no explicit historical status found; review before any promotion"
+      ],
+      "reviewed": true,
+      "state": "NEEDS_REVIEW",
+      "title": "future_gate/SAIPEN_agent_stillWritesProses.md"
+    },
+    {
+      "digest": "2fa89de46ac8dfe7e603426c4a906a81c13e6e3c735024f2eb3f4147d6815972",
+      "id": "FG-0024",
+      "identity_source": "digest",
+      "machine_readable": false,
+      "path": "future_gate/SAIPEN_FUTURE_ARCHITECTURE_20260918/DROP_IN_README.md",
+      "present": true,
+      "reasons": [
+        "broad architecture record; kept gated until one bounded slice is named"
+      ],
+      "reviewed": true,
+      "state": "DEFERRED",
+      "title": "DROP-IN"
+    },
+    {
+      "declared_status": "ARCHITECTURE SEED",
+      "digest": "936a409d340ceefd3d71eb0f2143f614f7d048c368803f268783e0812eed37a8",
+      "id": "FG-0025",
+      "identity_source": "digest",
+      "machine_readable": false,
+      "path": "future_gate/SAIPEN_FUTURE_ARCHITECTURE_20260918/future_architecture/00_ARCHITECTURE_MAP.md",
+      "present": true,
+      "reasons": [
+        "broad architecture record; kept gated until one bounded slice is named"
+      ],
+      "reviewed": true,
+      "state": "DEFERRED",
+      "title": "ARCHITECTURE MAP"
+    },
+    {
+      "declared_status": "ARCHITECTURE SEED",
+      "digest": "3acfff95a7c0bad5d6da6641e085050b8e82eb860de1df7b6042c1cc058ca756",
+      "id": "FG-0026",
+      "identity_source": "digest",
+      "machine_readable": false,
+      "path": "future_gate/SAIPEN_FUTURE_ARCHITECTURE_20260918/future_architecture/01_GLOBAL_PROJECT_DISPATCHER.md",
+      "present": true,
+      "reasons": [
+        "broad architecture record; kept gated until one bounded slice is named"
+      ],
+      "reviewed": true,
+      "state": "DEFERRED",
+      "title": "GLOBAL PROJECT DISPATCHER"
+    },
+    {
+      "declared_status": "ARCHITECTURE SEED",
+      "digest": "2f3b55a5bc0024239aa5033a0191b75ffd159f0489b18207d5e674e9a2c44b04",
+      "id": "FG-0027",
+      "identity_source": "digest",
+      "machine_readable": false,
+      "path": "future_gate/SAIPEN_FUTURE_ARCHITECTURE_20260918/future_architecture/02_PROJECT_REGISTRY.md",
+      "present": true,
+      "reasons": [
+        "broad architecture record; kept gated until one bounded slice is named"
+      ],
+      "reviewed": true,
+      "state": "DEFERRED",
+      "title": "PROJECT REGISTRY"
+    },
+    {
+      "declared_status": "ARCHITECTURE SEED",
+      "digest": "71a9994296b1dba2577d0c279c525b21b08bbd29fdb64000257bc53e5bc79f45",
+      "id": "FG-0028",
+      "identity_source": "digest",
+      "machine_readable": false,
+      "path": "future_gate/SAIPEN_FUTURE_ARCHITECTURE_20260918/future_architecture/03_GLOBAL_LEASE_BROKER.md",
+      "present": true,
+      "reasons": [
+        "broad architecture record; kept gated until one bounded slice is named"
+      ],
+      "reviewed": true,
+      "state": "DEFERRED",
+      "title": "GLOBAL LEASE BROKER"
+    },
+    {
+      "declared_status": "ARCHITECTURE SEED",
+      "digest": "41f7d91e3dd7106b1ea17738b2af9e6ea4d461abc6882bc6b98ae75165b9f043",
+      "id": "FG-0029",
+      "identity_source": "digest",
+      "machine_readable": false,
+      "path": "future_gate/SAIPEN_FUTURE_ARCHITECTURE_20260918/future_architecture/04_DISPATCH_POLICY.md",
+      "present": true,
+      "reasons": [
+        "broad architecture record; kept gated until one bounded slice is named"
+      ],
+      "reviewed": true,
+      "state": "DEFERRED",
+      "title": "DISPATCH POLICY"
+    },
+    {
+      "declared_status": "ARCHITECTURE SEED",
+      "digest": "ea7d3a3930a492867d323039b6b6d8fd406eca3d2318227a4e97fe4ea804cdf0",
+      "id": "FG-0030",
+      "identity_source": "digest",
+      "machine_readable": false,
+      "path": "future_gate/SAIPEN_FUTURE_ARCHITECTURE_20260918/future_architecture/05_CONTINUOUS_WORKER_MODE.md",
+      "present": true,
+      "reasons": [
+        "broad architecture record; kept gated until one bounded slice is named"
+      ],
+      "reviewed": true,
+      "state": "DEFERRED",
+      "title": "CONTINUOUS WORKER MODE"
+    },
+    {
+      "declared_status": "ARCHITECTURE SEED",
+      "digest": "139e6c484c77faa4424640cf7fc14742dc71d79a457f7156e12e26d692424055",
+      "id": "FG-0031",
+      "identity_source": "digest",
+      "machine_readable": false,
+      "path": "future_gate/SAIPEN_FUTURE_ARCHITECTURE_20260918/future_architecture/06_MULTI_PROJECT_OBSERVABILITY.md",
+      "present": true,
+      "reasons": [
+        "broad architecture record; kept gated until one bounded slice is named"
+      ],
+      "reviewed": true,
+      "state": "DEFERRED",
+      "title": "MULTI-PROJECT OBSERVABILITY"
+    },
+    {
+      "declared_status": "DEFERRED ARCHITECTURE",
+      "digest": "529e8d716d30a369b2dbaf5f930105cce4d5eeb6cf4074080cea16e5cc187ac5",
+      "id": "FG-0032",
+      "identity_source": "digest",
+      "machine_readable": false,
+      "path": "future_gate/SAIPEN_FUTURE_ARCHITECTURE_20260918/future_architecture/07_MULTI_WORK_PER_PROJECT_DEFERRED.md",
+      "present": true,
+      "reasons": [
+        "no explicit historical status found; review before any promotion"
+      ],
+      "reviewed": true,
+      "state": "NEEDS_REVIEW",
+      "title": "MULTI-WORK PER PROJECT — DEFERRED ARCHITECTURE"
+    },
+    {
+      "declared_status": "ARCHITECTURE REFERENCE",
+      "digest": "ccd9f8c02d6a2b1f7d82c8053cf70eafcf1c1d21156128c926b6373c071dd05c",
+      "id": "FG-0033",
+      "identity_source": "digest",
+      "machine_readable": false,
+      "path": "future_gate/SAIPEN_FUTURE_ARCHITECTURE_20260918/future_architecture/08_PORTFOLIO_CONTEXT_RELATION.md",
+      "present": true,
+      "reasons": [
+        "no explicit historical status found; review before any promotion"
+      ],
+      "reviewed": true,
+      "state": "NEEDS_REVIEW",
+      "title": "RELATION TO OPTIONAL PORTFOLIO CONTEXT"
+    },
+    {
+      "declared_status": "DESIGN SEED ONLY",
+      "digest": "4e38a474a22431e83da5f2a8bc2df22d5facc4f0bda78da28c0dd67aabd16ff7",
+      "id": "FG-0034",
+      "identity_source": "digest",
+      "machine_readable": false,
+      "path": "future_gate/SAIPEN_FUTURE_ARCHITECTURE_20260918/future_architecture/09_COMMAND_SEMANTICS.md",
+      "present": true,
+      "reasons": [
+        "explicitly recorded as not implemented; preserved deferred intent"
+      ],
+      "reviewed": true,
+      "state": "DEFERRED",
+      "title": "FUTURE COMMAND SEMANTICS"
+    },
+    {
+      "declared_status": "ARCHITECTURE SEED",
+      "digest": "e691a6a6a81ee7734a5c2664360bfb78d5d22a4cd7f5dbba4ac7f9a128c5f37e",
+      "id": "FG-0035",
+      "identity_source": "digest",
+      "machine_readable": false,
+      "path": "future_gate/SAIPEN_FUTURE_ARCHITECTURE_20260918/future_architecture/10_FAILURE_MODEL.md",
+      "present": true,
+      "reasons": [
+        "broad architecture record; kept gated until one bounded slice is named"
+      ],
+      "reviewed": true,
+      "state": "DEFERRED",
+      "title": "FAILURE MODEL"
+    },
+    {
+      "declared_status": "ARCHITECTURE SEED",
+      "digest": "41f11c74a284e6a53d1c91b67067e1d2ad385aaa6d92389df2af31111a255155",
+      "id": "FG-0036",
+      "identity_source": "digest",
+      "machine_readable": false,
+      "path": "future_gate/SAIPEN_FUTURE_ARCHITECTURE_20260918/future_architecture/11_SECURITY_AND_AUTHORITY.md",
+      "present": true,
+      "reasons": [
+        "broad architecture record; kept gated until one bounded slice is named"
+      ],
+      "reviewed": true,
+      "state": "DEFERRED",
+      "title": "SECURITY AND AUTHORITY BOUNDARY"
+    },
+    {
+      "declared_status": "PLANNING ONLY",
+      "digest": "a21356dd35e4713028849d5dc231fe386e8fa8831c63175e849aa85498dccac7",
+      "id": "FG-0037",
+      "identity_source": "digest",
+      "machine_readable": false,
+      "path": "future_gate/SAIPEN_FUTURE_ARCHITECTURE_20260918/future_architecture/12_ROADMAP.md",
+      "present": true,
+      "reasons": [
+        "broad architecture record; kept gated until one bounded slice is named"
+      ],
+      "reviewed": true,
+      "state": "DEFERRED",
+      "title": "FUTURE ARCHITECTURE ROADMAP"
+    },
+    {
+      "declared_status": "ARCHITECTURE SEED",
+      "digest": "5b25e6171cc9ca1774dd7d87eabe8306c00ec5dcccd63ca641d71aa831b1ae37",
+      "id": "FG-0038",
+      "identity_source": "digest",
+      "machine_readable": false,
+      "path": "future_gate/SAIPEN_FUTURE_ARCHITECTURE_20260918/future_architecture/13_FUTURE_GATE_SPAWN_MAP.md",
+      "present": true,
+      "reasons": [
+        "broad architecture record; kept gated until one bounded slice is named"
+      ],
+      "reviewed": true,
+      "state": "DEFERRED",
+      "title": "FUTURE GATE SPAWN MAP"
+    },
+    {
+      "declared_status": "ARCHITECTURE SEED",
+      "digest": "6ecf0be5b2ae8fd3a6bb0044791a1fc02ed807aa77e3e567bca6dca46c7b16d8",
+      "id": "FG-0039",
+      "identity_source": "digest",
+      "machine_readable": false,
+      "path": "future_gate/SAIPEN_FUTURE_ARCHITECTURE_20260918/future_architecture/14_ACCEPTANCE_INVARIANTS.md",
+      "present": true,
+      "reasons": [
+        "broad architecture record; kept gated until one bounded slice is named"
+      ],
+      "reviewed": true,
+      "state": "DEFERRED",
+      "title": "ARCHITECTURE ACCEPTANCE INVARIANTS"
+    },
+    {
+      "declared_status": "ARCHITECTURE SEED",
+      "digest": "8246502df47d9e181d5bc810656f5b1bc3dc05daafc06f38c6fa242e49dd87a2",
+      "id": "FG-0040",
+      "identity_source": "digest",
+      "machine_readable": false,
+      "path": "future_gate/SAIPEN_FUTURE_ARCHITECTURE_20260918/future_architecture/15_EXAMPLE_SCENARIOS.md",
+      "present": true,
+      "reasons": [
+        "broad architecture record; kept gated until one bounded slice is named"
+      ],
+      "reviewed": true,
+      "state": "DEFERRED",
+      "title": "EXAMPLE SCENARIOS"
+    },
+    {
+      "declared_status": "ARCHITECTURE GOVERNANCE",
+      "digest": "b6d9e1eeaa8c05da3229116aa18f127dbc3f967ed13e359f89331c88708cee86",
+      "id": "FG-0041",
+      "identity_source": "digest",
+      "machine_readable": false,
+      "path": "future_gate/SAIPEN_FUTURE_ARCHITECTURE_20260918/future_architecture/16_ADOPTION_RULES.md",
+      "present": true,
+      "reasons": [
+        "broad architecture record; kept gated until one bounded slice is named"
+      ],
+      "reviewed": true,
+      "state": "DEFERRED",
+      "title": "ADOPTION RULES"
+    },
+    {
+      "digest": "ac0bf46342fb887d41778b6afe62aea3f7c82f47e0388e10b3d5dc9af2b648fb",
+      "id": "FG-0042",
+      "identity_source": "digest",
+      "machine_readable": false,
+      "path": "future_gate/SAIPEN_FUTURE_ARCHITECTURE_20260918/future_architecture/MANIFEST.md",
+      "present": true,
+      "reasons": [
+        "broad architecture record; kept gated until one bounded slice is named"
+      ],
+      "reviewed": true,
+      "state": "DEFERRED",
+      "title": "MANIFEST"
+    },
+    {
+      "declared_status": "ARCHITECTURE SEED",
+      "digest": "18e84ed845f42589c5b66eb7c4a05c5ffcbb8ae8aa7c1a43faffb19a8fe35b3e",
+      "id": "FG-0043",
+      "identity_source": "digest",
+      "machine_readable": false,
+      "path": "future_gate/SAIPEN_FUTURE_ARCHITECTURE_20260918/future_architecture/README.md",
+      "present": true,
+      "reasons": [
+        "broad architecture record; kept gated until one bounded slice is named"
+      ],
+      "reviewed": true,
+      "state": "DEFERRED",
+      "title": "SAIPEN FUTURE ARCHITECTURE"
+    },
+    {
+      "digest": "27417ab512ef64409d20e554130326d3cce8643db4fc4d18126bc1738a6227ea",
+      "id": "FG-0044",
+      "identity_source": "digest",
+      "machine_readable": false,
+      "path": "future_gate/SAIPEN_FUTURE_IDEA1.md",
+      "present": true,
+      "reasons": [
+        "no explicit historical status found; review before any promotion"
+      ],
+      "reviewed": true,
+      "state": "NEEDS_REVIEW",
+      "title": "future_gate/SAIPEN_FUTURE_IDEA1.md"
+    },
+    {
+      "digest": "f8eb29c7ee9bb06e173b46f17b3cf75d0fbd6acc8dce1be5fe5478f0bf57129b",
+      "id": "FG-0045",
+      "identity_source": "digest",
+      "machine_readable": false,
+      "path": "future_gate/SAIPEN_FUTURE_WORKER_POOL.md",
+      "present": true,
+      "reasons": [
+        "broad architecture record; kept gated until one bounded slice is named"
+      ],
+      "reviewed": true,
+      "state": "DEFERRED",
+      "title": "future_gate/SAIPEN_FUTURE_WORKER_POOL.md"
+    }
+  ],
+  "marker": "saipen-future-index-v1",
+  "schema": 2,
+  "witness": {
+    "documents": 45,
+    "fingerprint": "bd4a4f005b096dbea91693a1212d194a15c2724602523350546e1116ce84cf2e",
+    "schema": 2,
+    "unreadable": 0
+  }
+}
