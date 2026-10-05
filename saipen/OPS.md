@@ -738,6 +738,8 @@ longer an assumption). Each semantic class has its durable representation:
                                               PROTOCOL_HOME_FIX_VERIFIED
     superseded local Work                     closure_mode: superseded_verified
                                               + superseded_by
+    disproven premise, nothing owed            closure_mode: finding_invalidated
+                                              + invalidation_evidence
 
 External authority is a STABLE IDENTITY, never a URL: `--authority` must be a
 portable `lineage-<32hex>`, the implementation a `T-###@commit`, and the

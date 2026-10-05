@@ -20,9 +20,12 @@ Closure provenance is mandatory at DONE (orchestration repair, T-1302):
   through explicit DONE successor Work. Only `saipen ticket supersede` writes
   this mode with successor, old-target PASS evidence and operator authority.
   It is terminal locally and asserts no publication.
+- `finding_invalidated` — the PREMISE was disproven by a recorded event, so no
+  delta is owed. `--invalidated-by E-###` (required) must name an event in this
+  ticket's own LOG chain. Terminal locally.
 
-A DONE ticket may carry zero Git commits in `inherited_verified`/`cohort`
-modes; that is state evidence, not publication.
+A DONE ticket may carry zero Git commits in `inherited_verified`/`cohort`/
+`finding_invalidated` modes; that is state evidence, not publication.
 
 ## Route
 

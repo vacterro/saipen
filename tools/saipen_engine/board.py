@@ -127,6 +127,11 @@ KNOWN_FIELDS = frozenset(
         "superseded_by",
         "supersession_evidence",
         "supersession_authority",
+        # T-406: the E-### event that disproved this ticket's premise. A DONE
+        # line closing `finding_invalidated` without it is an unfalsifiable
+        # claim that nothing was wrong, which is the one closure shape that
+        # must never be assertable on a hunch.
+        "invalidation_evidence",
         # Active-parent dependency handoff. These fields exist only while the
         # parent is BLOCKED on one child Work item; finish_ticket consumes
         # them atomically when that child reaches DONE.
@@ -233,6 +238,17 @@ CLOSURE_MODES = (
     "cohort",
     "superseded_verified",
     "external_implementation",
+    # T-406: the ticket's PREMISE was disproven by a recorded event, so no
+    # delta is owed and none is claimed. The mode had no member and the gap
+    # was not cosmetic -- `own_patch` would assert a patch that does not
+    # exist, `inherited_verified` demands published release evidence naming a
+    # ticket that shipped the behaviour, and `external_implementation` records
+    # an implementation living elsewhere. None of those is the shape, so a
+    # truth-telling agent had no verb and the ticket parked forever. Like every
+    # other mode this one is falsifiable: `--invalidated-by E-###` names the
+    # event that disproved the claim, and the gate requires it to sit in THIS
+    # ticket's own LOG chain, so a stranger's disproof cannot close a ticket.
+    "finding_invalidated",
 )
 DEFAULT_CLOSURE_MODE = "own_patch"
 
@@ -629,6 +645,11 @@ CLOSURE_METADATA_FIELDS = (
     "external_implementation",
     "external_evidence",
     "resolution_reason",
+    # T-406: the event that disproved this ticket's premise. Carried as a
+    # FIELD rather than folded into the verify clause because a DONE line has
+    # to stay readable at a glance: the mode says WHAT kind of closure this
+    # is, and this field says WHICH event proved it.
+    "invalidation_evidence",
 )
 
 
@@ -716,6 +737,30 @@ def closure_metadata_errors(ticket: dict) -> list[str]:
         errors.append(f"{tid} closes inherited_verified with no | implementation_source:")
     if implementation_source_value and mode.lower() != "inherited_verified":
         errors.append(f"{tid} names implementation_source outside closure_mode inherited_verified")
+
+    # T-406: `finding_invalidated` is a claim like any other -- "this ticket's
+    # premise was disproven" -- so it carries the same discipline the other
+    # modes do. It must name the event that did the disproving, and the field
+    # may not travel with any other mode, for the same reason
+    # `closure_cohort` may not: an evidence field that appears on a DONE line
+    # whose mode claims a real implementation reads as corroboration it never
+    # carried.
+    invalidation = str(fields.get("invalidation_evidence", "")).strip()
+    if invalidation and not re.fullmatch(r"E-\d+", invalidation):
+        errors.append(
+            f"{tid} declares invalidation_evidence {invalidation!r}, which is not an E-### identity"
+        )
+    if mode.lower() == "finding_invalidated" and not invalidation:
+        errors.append(
+            f"{tid} closes finding_invalidated with no | invalidation_evidence: E-### -- "
+            "an invalidated premise names the event that disproved it"
+        )
+    if invalidation and mode.lower() != "finding_invalidated":
+        errors.append(
+            f"{tid} names invalidation_evidence but closes as "
+            f"{mode or DEFAULT_CLOSURE_MODE} -- invalidation evidence is only "
+            "valid with closure_mode finding_invalidated"
+        )
 
     supersession = {
         "superseded_by": str(fields.get("superseded_by", "")).strip(),

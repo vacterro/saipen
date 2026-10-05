@@ -3284,6 +3284,7 @@ def closure_request_error(
     closure_cohort: str | None,
     implementation_source: str | None,
     closure_paths,
+    invalidation_evidence: str | None = None,
 ) -> str | None:
     """Why this closure request is malformed, or None (CORE-003).
 
@@ -3307,6 +3308,32 @@ def closure_request_error(
             "--implementation T-###@<commit> --reason <CLASS> --run <command>`; "
             "`ticket done` can never claim local implementation for externally "
             "implemented work"
+        )
+    # T-406: the same paired grammar every other authority-bearing mode has.
+    # `finding_invalidated` asserts that no delta was owed, which is a claim
+    # about the world and needs the event that established it -- a mode that
+    # could be closed on a hunch would be the weakest provenance the engine
+    # can write.
+    #
+    # Checked BEFORE the per-mode requirements on purpose. A caller who passed
+    # --invalidated-by with the wrong mode made one specific mistake, and
+    # answering "you forgot --implementation-source" instead would send them
+    # off to satisfy a requirement they never had. Measured: that ordering is
+    # what made the first version of this gate refuse `inherited_verified` for
+    # the wrong reason.
+    invalidation = (invalidation_evidence or "").strip()
+    if mode != "finding_invalidated" and invalidation:
+        return (
+            f"--invalidated-by is only valid with closure_mode finding_invalidated, "
+            f"not {mode}; run: saipen ticket done <T-###> --closure-mode {mode}"
+        )
+    if invalidation and not re.fullmatch(r"E-\d+", invalidation):
+        return f"invalidation_evidence {invalidation!r} is not an E-### identity"
+    if mode == "finding_invalidated" and not invalidation:
+        return (
+            "closure_mode finding_invalidated requires --invalidated-by E-###: the "
+            "event that disproved this ticket's premise is what closes it, and it "
+            "must be named rather than asserted"
         )
     if mode == "inherited_verified" and not (implementation_source or "").strip():
         return (
@@ -3362,6 +3389,7 @@ def _plan_finish_ticket(
     closure_cohort: str | None = None,
     implementation_source: str | None = None,
     closure_paths=None,
+    invalidation_evidence: str | None = None,
 ) -> OperationPlan | Result:
     """PLAN the ONE atomic ticket-closure operation (NITRO dogfood III).
 
@@ -3396,7 +3424,8 @@ def _plan_finish_ticket(
     # CORE-003: the closure GRAMMAR is checked before the project is even
     # read, so a malformed request cannot touch the filesystem at all.
     _grammar = closure_request_error(
-        closure_mode, closure_cohort, implementation_source, closure_paths
+        closure_mode, closure_cohort, implementation_source, closure_paths,
+        invalidation_evidence,
     )
     if _grammar is not None:
         # T-1377: the grammar sentence already knows the corrected command;
@@ -3420,6 +3449,7 @@ def _plan_finish_ticket(
     _mode = (closure_mode or DEFAULT_CLOSURE_MODE).strip()
     _cohort_id = (closure_cohort or "").strip()
     _impl_source = (implementation_source or "").strip()
+    _invalidation = (invalidation_evidence or "").strip().upper()
     _paths = [str(x).strip().replace("\\", "/") for x in (closure_paths or []) if str(x).strip()]
     docs, state, board, log_tail = _read(root)
     # T-1162: a short BOARD title cannot close Work whose authoritative
@@ -3745,6 +3775,18 @@ def _plan_finish_ticket(
         _verdict = resolve_implementation_source(root, _impl_source)
         if not _verdict.ok:
             return _refuse("VALIDATION_FAILED", _verdict.detail, ticket=ticket_id)
+    if _mode == "finding_invalidated":
+        # T-406: same discipline, cheaper source of truth. The disproof is
+        # already in this project's own LOG because the agent had to record it
+        # there to do anything else with it -- there is no second place it
+        # could have been smuggled into.
+        _bad = invalidation_error(
+            docs["_history"].events,
+            _invalidation,
+            ticket_id=ticket_id,
+        )
+        if _bad is not None:
+            return _refuse("VALIDATION_FAILED", _bad, ticket=ticket_id)
     if _mode == "cohort":
         # Membership is DURABLE authority, not a BOARD adjective: the registry
         # write is a TARGET of this same journaled closure, so a ticket can
@@ -3803,6 +3845,7 @@ def _plan_finish_ticket(
             cohort=_cohort_id,
             implementation_source=_impl_source,
             paths=_paths,
+            invalidation=_invalidation,
             enforce_cap=False,
         )
         if resume_parent is not None:
@@ -3972,6 +4015,42 @@ def _plan_finish_ticket(
 
 
 @_state_guard
+def invalidation_error(
+    events,
+    evidence_ref: str,
+    *,
+    ticket_id: str,
+) -> str | None:
+    """Why this premise-disproof cannot close `ticket_id`, or None (T-406).
+
+    Deliberately STRUCTURAL and prose-free. The obvious stronger check --
+    match the word `INVALID` in the cited event -- is exactly the
+    Narrative Authority Leakage that `log.py` documents at length and that
+    CORE-001 exists to prevent: a validator reading free text for a magic
+    phrase. CORE-001 already fixed the neighbouring case that way, by making
+    the red half its own RECORD type. So the closed mode name is the claim,
+    and the cited event only has to be REAL and OURS.
+
+    Owning it matters: without the ticket check, any event in the project could
+    close any ticket, and "this premise was disproven" would become a claim a
+    single well-placed unrelated checkpoint could satisfy.
+    """
+    text = str(evidence_ref or "").strip().upper()
+    if not re.fullmatch(r"E-\d+", text):
+        return f"invalidation evidence {evidence_ref!r} is not an exact canonical E-### event"
+    number = int(text[2:])
+    for event in events:
+        if not isinstance(event, dict) or event.get("event") != number:
+            continue
+        if event.get("ticket") != ticket_id:
+            return (
+                f"E-{number} belongs to {event.get('ticket') or 'no ticket'}, not to "
+                f"{ticket_id}: a premise disproof closes only the ticket it disproved"
+            )
+        return None
+    return f"invalidation evidence E-{number} does not exist in this project's LOG"
+
+
 def finish_ticket(
     project_root: Path | str,
     ticket_id: str,
@@ -3985,6 +4064,7 @@ def finish_ticket(
     closure_cohort: str | None = None,
     implementation_source: str | None = None,
     closure_paths=None,
+    invalidation_evidence: str | None = None,
 ) -> Result:
     """Atomically finish a ticket: LOG + BOARD + STATE in ONE journaled plan.
     The public `ticket done` semantics become this operation.
@@ -4011,6 +4091,7 @@ def finish_ticket(
         closure_cohort=closure_cohort,
         implementation_source=implementation_source,
         closure_paths=closure_paths,
+        invalidation_evidence=invalidation_evidence,
     )
     if isinstance(plan, Result):
         return plan
@@ -4164,6 +4245,7 @@ def _set_closure_fields(
     cohort: str,
     implementation_source: str,
     paths,
+    invalidation: str = "",
     enforce_cap: bool = True,
 ) -> str:
     """Write closure provenance onto the DONE line, surgically (CORE-003).
@@ -4197,6 +4279,14 @@ def _set_closure_fields(
             escape_ticket_description(", ".join(paths)),
             enforce_cap=enforce_cap,
         )
+    if mode == "finding_invalidated":
+        # T-406: `implementation_delta: none` says BUILD produced no code,
+        # which is the fact; `invalidation_evidence` says WHICH recorded event
+        # established that the ticket owed none. Both are written because a
+        # reader of the DONE line has to be able to tell "nothing was wrong"
+        # apart from "we changed something" without opening the LOG.
+        new = set_ticket_field(new, "implementation_delta", "none", enforce_cap=enforce_cap)
+        new = set_ticket_field(new, "invalidation_evidence", invalidation, enforce_cap=enforce_cap)
     lines = board_text.splitlines(keepends=True)
     idx = ticket["line_no"] - 1
     suffix = "\n" if lines[idx].endswith("\n") else ""

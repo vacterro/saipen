@@ -105,9 +105,10 @@
           "inherited_verified",
           "cohort",
           "superseded_verified",
-          "external_implementation"
+          "external_implementation",
+          "finding_invalidated"
         ],
-        "description": "Orchestration repair (T-1302): closure provenance on DONE tickets. own_patch = attributable implementation diff; inherited_verified = no new implementation added, verification-only closeout against a durable publication authority; cohort = evidence complete but publication deferred to a C-### cohort; superseded_verified (T-1418) = legitimate old Work implemented and verified through an explicit DONE successor, written only by `saipen ticket supersede`; external_implementation (T-1434 M2 / SRC-088) = the defect was implemented by an EXTERNAL authority and verified locally against the installed implementation, written only by `saipen ticket resolve-external`, carrying the EXTERNAL_IMPLEMENTATION_LOCAL_VERIFICATION provenance class. Both new modes assert LOCAL lifecycle terminality, not publication. Absent reads as 'own_patch'."
+        "description": "Orchestration repair (T-1302): closure provenance on DONE tickets. own_patch = attributable implementation diff; inherited_verified = no new implementation added, verification-only closeout against a durable publication authority; cohort = evidence complete but publication deferred to a C-### cohort; superseded_verified (T-1418) = legitimate old Work implemented and verified through an explicit DONE successor, written only by `saipen ticket supersede`; external_implementation (T-1434 M2 / SRC-088) = the defect was implemented by an EXTERNAL authority and verified locally against the installed implementation, written only by `saipen ticket resolve-external`, carrying the EXTERNAL_IMPLEMENTATION_LOCAL_VERIFICATION provenance class. Both new modes assert LOCAL lifecycle terminality, not publication. finding_invalidated (T-406) = the ticket's PREMISE was disproven by a recorded event, so no implementation delta is owed and none is claimed; it must name that event in invalidation_evidence. Absent reads as 'own_patch'."
       },
       "external_authority": {
         "type": "string",
@@ -176,6 +177,11 @@
       "implementation_source": {
         "type": "string",
         "description": "Orchestration repair (T-1302): the DURABLE publication authority an inherited_verified closure resolves against -- release:<id>, T-###, or SRC-###. Resolved by one strict resolver shared by the closure operation and the validator; an unresolvable or unpublished authority REFUSES the closure."
+      },
+      "invalidation_evidence": {
+        "type": "string",
+        "pattern": "^E-\\d+$",
+        "description": "T-406: the recorded LOG event that disproved this ticket's premise, and the only thing that can close it as finding_invalidated. Valid ONLY with closure_mode finding_invalidated. The event must exist in this project's LOG and belong to this ticket's own chain; a premise disproof closes only the ticket it disproved. Structural by construction -- the gate reads the event index, never prose, because a validator that searches free text for a phrase is the Narrative Authority Leakage CORE-001 already removed."
       },
       "closure_paths": {
         "type": "string",
@@ -348,7 +354,8 @@
                 "own_patch",
                 "inherited_verified",
                 "cohort",
-                "superseded_verified"
+                "superseded_verified",
+                "finding_invalidated"
               ]
             },
             "closure_cohort": {
@@ -373,6 +380,10 @@
                 "none",
                 "patch"
               ]
+            },
+            "invalidation_evidence": {
+              "type": "string",
+              "pattern": "^E-\\d+$"
             }
           }
         },
@@ -412,6 +423,11 @@
               {
                 "required": [
                   "supersession_authority"
+                ]
+              },
+              {
+                "required": [
+                  "invalidation_evidence"
                 ]
               }
             ]

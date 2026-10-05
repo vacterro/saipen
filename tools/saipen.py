@@ -4958,6 +4958,11 @@ _TICKET_DONE_OPTIONS = {
     "--closure-cohort": "closure_cohort",
     "--implementation-source": "implementation_source",
     "--paths": "closure_paths",
+    # T-406: the E-### event that disproved this ticket's premise. Paired with
+    # `--closure-mode finding_invalidated` and refused with every other mode,
+    # so "nothing was wrong" can never ride along on a closure that claims a
+    # real implementation.
+    "--invalidated-by": "invalidation_evidence",
 }
 _TICKET_BLOCK_OPTIONS = {"--scope": "scope", "--retry_not_before": "retry_not_before"}
 #: `ticket retire` grammar. The first three are MANDATORY and each one is a
@@ -10818,9 +10823,11 @@ def main(argv: list[str] | None = None) -> int:
             "[T-###] [text]|goal <text>|user-request <text> [--priority P#] "
             "[--verify <text>] [--needs T-X,T-Y]|ticket add <PRIORITY> <text> --verify <proof> "
             "[--needs T-X,T-Y] [--regression required]|ticket "
-            "done <T-###> [--closure-mode own_patch|inherited_verified|cohort] "
+            "done <T-###> [--closure-mode "
+            "own_patch|inherited_verified|cohort|finding_invalidated] "
             "[--closure-cohort C-###] [--implementation-source "
-            "<release:<id>|T-###|SRC-###>] [--paths <p1,p2>]|"
+            "<release:<id>|T-###|SRC-###>] [--invalidated-by <E-###>] "
+            "[--paths <p1,p2>]|"
             "ticket bind-cohort <T-###> --cohort <C-###> --paths <p1,p2>|"
             "ticket supersede <T-OLD> --by <T-NEW> --evidence <E-###> "
             "--authority <SRC-###>|ticket resolve-external <T-###> --authority "
@@ -12151,6 +12158,7 @@ def main(argv: list[str] | None = None) -> int:
                 closure_cohort=_opts.get("closure_cohort"),
                 implementation_source=_opts.get("implementation_source"),
                 closure_paths=_paths,
+                invalidation_evidence=_opts.get("invalidation_evidence"),
             )
             _emit(result.to_dict(), as_json)
             return 0 if result.ok else 1

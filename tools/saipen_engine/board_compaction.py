@@ -82,6 +82,11 @@ COMPACTION_DISPOSITION = {
     "external_implementation": "inline",
     "implementation_delta": "inline",
     "implementation_source": "inline",
+    # T-406: an E-### identity, exactly like `supersession_evidence`. Inline
+    # because a DONE line whose invalidation evidence sat behind a detail_ref
+    # would assert "nothing was wrong" with the proof one click away -- the
+    # same reason every identifier in this map stays inline.
+    "invalidation_evidence": "inline",
     "resolution_reason": "inline",
     "needs": "tokenized",
     "owner": "inline",
@@ -119,6 +124,10 @@ _CRITICAL_FIELDS = frozenset(
         "external_authority",
         "external_evidence",
         "external_implementation",
+        # T-406: never reduced away. If compaction dropped the disproof id, the
+        # mode would survive while its only falsifiable half vanished, and the
+        # line would read as a bare unexplained "nothing was wrong".
+        "invalidation_evidence",
         "needs",
         "resolution_reason",
         "resume_phase",
