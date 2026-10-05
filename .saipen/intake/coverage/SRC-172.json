@@ -1,0 +1,23 @@
+{
+  "requirements": {
+    "SRC-172:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "For a returned audit/SAIHANDOFF mentioning a FastPrompter archive, do not ask the user for its full local path. Determine whether archive bytes are actually required, resolve any required carrier autonomously from bounded proven locations, and continue all work available from the supplied handoff and current bound repository.",
+      "verification": null,
+      "work": "T-1610"
+    },
+    "SRC-172:R002": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "A missing required archive payload or exact snapshot remains an explicit clause-level evidence blocker; never fabricate its location, identity, contents or verification, and never turn incidental archive provenance into a new blocking requirement.",
+      "verification": null,
+      "work": "T-1610"
+    }
+  },
+  "schema_version": 1
+}

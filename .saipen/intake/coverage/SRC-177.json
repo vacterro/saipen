@@ -1,0 +1,14 @@
+{
+  "requirements": {
+    "SRC-177:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-12300",
+      "text": "Repair SAIPEN validator semantics so reproduction (reproduced=y) and finding disposition (ACCIDENTAL_SUCCESS) are treated as orthogonal facts: preserve the invariant that a CONFIRMED swept finding naming a ticket must carry actual reproduction evidence, and remove the invariant that ACCIDENTAL_SUCCESS categorically implies reproduced != y -- without editing the completed SWEEP, rewriting the immutable improve report, flipping reproduced=y, or adding any project-level workaround",
+      "verification": "python -B -m unittest tools.test_t1612_accidental_success_reproduction => Ran 11 tests, OK; python tools/validate.py --project-root /v/---SAILEARN--- --gate core => conformant, IMP-060 row passes, SWEEP.md byte-identical",
+      "work": "T-1615"
+    }
+  },
+  "schema_version": 1
+}

@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-176:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Make FUTURE GATE a first-class deferred-work lifecycle: record, defer, evaluate readiness, and promote one bounded eligible gate before idle maintenance invents new work"
+    }
+  },
+  "derived_at": "2026-10-05T02:28:22Z",
+  "derived_from": "SRC-176",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "a178f04ccf1e8182da6e15a047d82df8fa8af13f2958e9d083d00aa09a30f1e8"
+}

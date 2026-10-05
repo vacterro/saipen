@@ -10811,7 +10811,8 @@ def main(argv: list[str] | None = None) -> int:
             "response render|check --stdin|next|runtime "
             "[--prelaunch [--adapter ID] "
             "[--no-resync]|--bootstrap|--check-freshness]|search [--hex HEX]|"
-            "validate|recover|fleet preflight|scan|prepare|claim <T-###> [--explicit]|"
+            "validate|recover|fleet preflight|scan|prepare|collect <producer>|"
+            "claim <T-###> [--explicit]|"
             "handoff <T-###> --to <agent> [--authority SRC-###]|"
             "transition <PHASE> [T-###] [text]|checkpoint <TAXONOMY> "
             "[T-###] [text]|goal <text>|user-request <text> [--priority P#] "
@@ -12898,6 +12899,36 @@ def main(argv: list[str] | None = None) -> int:
         from saipen_engine.intent import ensure_producer_ready
 
         result = ensure_producer_ready(
+            project_root,
+            args[1] if len(args) == 2 else "saiwiki",
+            dry_run=dry_run,
+            current_capability=_negotiate_capability(project_root),
+            current_agent=_agent_for(project_root),
+        )
+        _emit(result, as_json)
+        return 0 if result.get("ok") else 1
+    if command == "collect":
+        # CMD-ROUTING-01 publishes `saipen collect <producer>` (COMMANDS.md,
+        # PROTOCOL.md's targeted complete-package path, REGISTRY.json's qqq/eee
+        # expansions). It routed nowhere, so the documented integrate path was
+        # a dead end while the shortcuts behind it worked. Same engine call the
+        # shortcuts already make; the spelled-out verb must not be a second path.
+        invalid_producer = len(args) == 2 and (not args[1].strip() or args[1].startswith("-"))
+        if len(args) > 2 or invalid_producer:
+            surplus = args[2:] if len(args) > 2 else args[1:]
+            _emit(
+                {
+                    "ok": False,
+                    "code": "VALIDATION_FAILED",
+                    "detail": "collect accepts at most one producer name; invalid/surplus: "
+                    + " ".join(surplus),
+                },
+                as_json,
+            )
+            return 2
+        from saipen_engine.intent import collect_and_ship_producer
+
+        result = collect_and_ship_producer(
             project_root,
             args[1] if len(args) == 2 else "saiwiki",
             dry_run=dry_run,

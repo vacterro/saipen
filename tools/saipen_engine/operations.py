@@ -6753,13 +6753,32 @@ def ticket_verify(
     if ticket_id not in board["tickets"]:
         return _refuse("TICKET_NOT_FOUND", f"{ticket_id} not on the board", ticket=ticket_id)
     verify = escape_ticket_description(redact_credentials(verify))
+    # T-1616: the verify field is the ticket's FALSIFIABLE acceptance surface,
+    # and `_ticket_fields_in_place` below replaces it wholesale -- so the
+    # superseded clause used to exist nowhere in the project once this verb
+    # returned. Measured: run the mutator once, then grep the whole tree for
+    # the first clause and it is absent from every file, LOG included, because
+    # this event carried a constant. The LOG is the append-only Event Graph
+    # and the only history a finished ticket keeps, so it is where the
+    # pre-image belongs. The bounded producer externalizes an oversized clause
+    # losslessly into the SAME journaled commit (`_log_targets` already carries
+    # the detail artifacts), so preservation does not depend on the clause
+    # being short.
+    #
+    # The separator is deliberately NOT " -- ": that is `_VERDICT_SEPARATOR`,
+    # and splitting a DEC event on it would hand a verify clause's prose to the
+    # verdict readers in `log.py`. A semicolon keeps the event one clause.
+    _prior = (board["tickets"][ticket_id].get("fields") or {}).get("verify") or ""
+    _message = "ticket verify updated via SAIOPS"
+    if _prior.strip():
+        _message += f"; superseded clause: {_prior}"
     event, line = _event_line(
         docs,
         log_tail,
         "DEC",
         ticket_id,
         agent,
-        "ticket verify updated via SAIOPS",
+        _message,
         now,
         op_id,
     )

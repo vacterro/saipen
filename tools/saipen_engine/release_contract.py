@@ -45,6 +45,16 @@ def version_metadata_paths(root: Path) -> list[Path]:
     set. All returned paths are repository-relative, so callers can feed them
     directly to `git add --` and compare them against `git diff --cached`
     output.
+
+    T-1617: a locale README that Git ignores is NOT on this surface. The whole
+    kitchen is ignored by `.gitignore` (added at v8.1.0 to drop sandbox WIP),
+    so enumerating the kitchen unconditionally made the ship gate demand files
+    that `git add` refuses without `-f` -- the gate was unsatisfiable by
+    construction, and only stayed silent while no translation run happened to
+    leave locale READMEs behind. The release surface is by definition the set
+    of paths that SURVIVE a fresh clone; a path the repository ignores cannot
+    be part of it. The tracked root mirrors (README.ee/ded/ja.md) remain the
+    published translations and are still listed unconditionally above.
     """
     root = Path(root)
     kitchen = root / ".saipen" / "saitranslate" / "kitchen"
@@ -59,11 +69,36 @@ def version_metadata_paths(root: Path) -> list[Path]:
     ]
     for readme in locale_readme_paths(kitchen):
         try:
-            paths.append(readme.relative_to(root))
+            relative = readme.relative_to(root)
         except ValueError:
             # A kitchen outside the repository root is not a release surface.
             continue
+        # Ask Git, not a second copy of the ignore rules: only a path the
+        # repository would actually carry into a clone belongs here.
+        if _git_ignored(root, relative):
+            continue
+        paths.append(relative)
     return paths
+
+
+def _git_ignored(root: Path, relative: Path) -> bool:
+    """True when `git check-ignore` refuses `relative` in this repository.
+
+    Fails CLOSED in the safe direction: an unrunnable or absent Git answers
+    False, so a path is kept on the release surface exactly as it was before
+    this filter existed. Only a positive ignore answer removes it, which is
+    the case the v8.1.0 kitchen rule creates.
+    """
+    try:
+        result = subprocess.run(
+            ["git", "-C", str(root), "check-ignore", "-q", "--", str(relative)],
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+            check=False,
+        )
+    except OSError:
+        return False
+    return result.returncode == 0
 
 
 def source_authority_paths(root: Path) -> list[Path]:
