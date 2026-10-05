@@ -23,6 +23,7 @@ module that reads it.
 from __future__ import annotations
 
 import json
+import re
 import sys
 import unittest
 from pathlib import Path
@@ -35,6 +36,71 @@ if str(TOOLS) not in sys.path:
 from saipen_engine import board, cold_recovery, entry, intake, state, supervisor  # noqa: E402
 
 REGISTRY = json.loads((ROOT / "saipen" / "REGISTRY.json").read_text(encoding="utf-8"))
+
+#: One routing-table row: a backticked `saipen <verb> ...` command literal in
+#: any column. The table is the surface an agent routes by, so a verb the
+#: engine dispatches but no row names is a command that exists only in source.
+_ROW_COMMAND = re.compile(r"\|\s*`saipen ([a-z][a-z0-9-]*)([^`]*)`")
+
+class RoutingTableCoverageTests(unittest.TestCase):
+    """T-407: every registered subcommand has a COMMANDS.md row naming it.
+
+    Measured live on `Wintage` 2026-10-05: `COMMAND_EFFECTS.json` carried 15
+    `source` subcommands and the routing table named 9, so `saipen source
+    capture` and `saipen source close` -- the two verbs that bound the
+    SOURCE-AUDIT-INBOX-01 lifecycle, capture being the ingress and close the
+    ONLY writer of the tombstone the consume gate requires -- were discoverable
+    only by reading `saipen.py`. Ten verbs were affected and 32 subcommands
+    appeared nowhere in the document at all.
+
+    The registry was already complete, so this is not a second registry: it is
+    the check that the prose routing table keeps up with the machine facts it
+    claims to own. Harvested, never restated -- a new subcommand fails here
+    instead of in a session that greps for it.
+    """
+
+    def setUp(self):
+        effects = json.loads(
+            (ROOT / "saipen" / "COMMAND_EFFECTS.json").read_text(encoding="utf-8-sig")
+        )
+        document = (ROOT / "saipen" / "COMMANDS.md").read_text(encoding="utf-8-sig")
+        rows: dict[str, list[str]] = {}
+        for match in _ROW_COMMAND.finditer(document):
+            rows.setdefault(match.group(1), []).append(match.group(2))
+        self.rows = rows
+        self.subcommands = {
+            verb: spec["subcommands"]
+            for verb, spec in effects["verbs"].items()
+            if isinstance(spec, dict) and spec.get("subcommands")
+        }
+
+    def test_every_registered_verb_has_a_row(self):
+        missing = sorted(verb for verb in self.subcommands if verb not in self.rows)
+        self.assertEqual(missing, [], "a dispatching verb with no routing-table row")
+
+    def test_every_registered_subcommand_is_named_by_a_row(self):
+        gaps: dict[str, list[str]] = {}
+        for verb, subcommands in self.subcommands.items():
+            named = self.rows.get(verb, [])
+            # A row may bundle its subcommands in brackets
+            # (`saipen storage [status|...]`) or spread them over several rows,
+            # so any word-boundary match in ANY row of that verb counts.
+            unnamed = [
+                sub
+                for sub in subcommands
+                if not any(
+                    re.search(rf"(?<![a-z0-9-]){re.escape(sub)}(?![a-z0-9-])", row)
+                    for row in named
+                )
+            ]
+            if unnamed:
+                gaps[verb] = unnamed
+        self.assertEqual(
+            gaps,
+            {},
+            "COMMANDS.md owns command semantics; a subcommand the engine "
+            "dispatches but no row names is discoverable only by reading source",
+        )
 
 
 class PhaseVocabularyTests(unittest.TestCase):

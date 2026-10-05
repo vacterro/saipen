@@ -46,10 +46,11 @@ global authority and deterministic priority rules.
 | `saipen ship` | SHIP | CMD-ROUTING-01 |
 | `saipen push` | SHIP | CMD-ROUTING-01 |
 | `saipen improve [action]` | meta | CMD-CONTINUE-01 |
+| `saipen improve [status\|sweep-queue\|verify] <cycle>` | DIAGNOSTIC: read-only derived lifecycle status, the exact unswept composite finding queue in deterministic order, and the bounded DELTA audit; status refuses to round malformed evidence up to a normal lifecycle state (IMPROVE.md) | CMD-ROUTING-01 |
 | `saipen improve reconcile <cycle>` | BUILD/RECOVERY: strict-cycle finite exit; classify every seat, execute lossless transitions, refuse while actionable work remains, terminalize COMPLETE/SUPERSEDED/BLOCKED_EXTERNAL; idempotent | CMD-ROUTING-01 |
 | `saipen ticket reasoning <T-###> --recurrence <text> --weak-model <text>` | BUILD: canonical writer for the strict-sweep reasoning gates; refuses unless a strict CONFIRMED PROTOCOL_VIOLATION disposition names the ticket | CMD-ROUTING-01 |
 | `saipen status` | read-only | CMD-ROUTING-01 |
-| `saipen storage <operation>` | Durable/scratch policy, stores and promotion; STORAGE.md lists forms | STORE-SAFETY-01 |
+| `saipen storage [status\|classify\|durable\|ephemeral\|scratch\|store\|verify\|promote\|migrate]` | Durable/scratch policy, stores and promotion; `status`/`classify`/`verify` and every `show` action are DIAGNOSTIC, the set/remove/declare/promote actions are EXECUTION and `migrate` is RECOVERY; STORAGE.md lists the exact forms | STORE-SAFETY-01 |
 | `saipen response render\|check --stdin`, `saipen response style [--json]` | response gate; `style` prints the chat contract generated from STYLE.md | EXEC-RESPONSE-01 |
 | `saipen admission status\|check\|matrix --session S --host H` | read-only: admission state (UNBOUND, BINDING, ADMITTED, STALE, REFUSED) / per-host enforcement boundaries | PROTOCOL-ADMISSION-01 |
 | `saipen admission establish\|invalidate --session S --host H` | host-hook transport only, gated inside the write boundary by a keyed capability; refuses from a shell or a direct import | PROTOCOL-ADMISSION-01 |
@@ -69,9 +70,15 @@ global authority and deterministic priority rules.
 | `saipen search <pattern>` | read-only bounded search | CMD-ROUTING-01 |
 | `saipen --agent <seat> launch opencode -- [args]` | optional explicit-actor host process | CMD-ROUTING-01 |
 | `saipen knowledge [status\|index\|retrieve]` | project knowledge | CMD-ROUTING-01 |
+| `saipen future [status\|list\|next]` | DIAGNOSTIC: deferred authority candidates (FUTURE.md) -- lifecycle counts, per-gate verdicts, and the ONE deterministic next candidate; writes nothing and cannot mutate because it performs none | FUTURE-GATE-01 |
+| `saipen future refresh` | EXECUTION: rebuild `.saipen/future/index.json` from the `future_gate/` corpus by identity (id > digest > title), never by filename alone, then recompute each gate's readiness. Routing runs this itself whenever the projection is not CURRENT, so a NEW document in `future_gate/` needs no import command | FUTURE-GATE-01 |
+| `saipen future refine FG-#### [--slice TEXT --evidence PATH[,PATH]]` | EXECUTION: read ONE ambiguous gate document, classify it from its own recorded status into the closed vocabulary, and write the bound verdict to `.saipen/future/records/FG-####.json`. Bounded by construction (one document, one verdict); never rewrites the original, never grants implementation authority; `--slice`/`--evidence` bind the facts the prose never declared. Routing runs this itself once per chain when no gate is ELIGIBLE and an ambiguous record exists | FUTURE-GATE-01 |
+| `saipen future promote FG-####` | INGRESS: promote ONE bounded slice of an ELIGIBLE gate into ordinary Work through the same Source/Work ingress `saipen start` uses (receipt, dedupe, seat, goal valve). Refuses an ineligible or already-owned gate; the residual stays deferred and the gate closes only when every slice resolves | FUTURE-GATE-01 |
+| `saipen future add <title> [--body TEXT] [--priority P0-P3] [--evidence PATH[,PATH]]` | INGRESS: record a deferred authority candidate; the new document defaults to DEFERRED and is never Work, a rule source or implementation authority on its own | FUTURE-GATE-01 |
 | `saipen start '<task>' [--file PATH] [--hex HEX] [--receipt SRC-###]` | THE entry command for a new actionable task: capture, recover, seat, claim | CMD-ROUTING-01 |
 | `saipen handoff <T-###> --to <agent> [--authority SRC-###]` | Owner or operator-authorized live claim transfer; same Work and phase | CMD-ROUTING-01 |
 | `saipen user-request <text>` | USER_INTERRUPT ingress | CMD-ROUTING-01 |
+| `saipen ticket compact <T-###>` | RECOVERY: compact one historical BOARD record to its minimum truthful form (OPS.md) | CMD-ROUTING-01 |
 | `saipen ticket retire <T-###> --reason <CODE> --evidence <E-###\|.saipen/evidence/PATH> --authority <SRC-###> [--discovery-event E-###] [--note TEXT]` | canonical retirement of misrouted/invalid Work -- NOT done, NOT close; the authority must GRANT it (OPS.md) | CMD-ROUTING-01 |
 | `saipen work reverify <T-###> [--verification <command>:PASS]... [--run <command>]... [--timeout <SECONDS>]` | RECOVERY: re-verify already-DONE Work against the CURRENT tree; writes ONE immutable `RV-NNNNNN` receipt, keeps DONE, never rewrites history (OPS.md); only an EXECUTED contract is current-tree closure evidence, an attested-only contract is recorded but never closure proof | CMD-ROUTING-01 |
 | `saipen ticket resolve-external <T-###> --authority <lineage-32hex> --implementation <T-###@commit> --reason <CLASS> --run <command>...` | EXECUTION: close BLOCKED Work implemented by an external authority with an immutable `EX-NNNNNN` receipt bound to the installed engine generation (OPS.md) | CMD-ROUTING-01 |
@@ -80,6 +87,12 @@ global authority and deterministic priority rules.
 | `saipen cohort [status\|ship] <C-###>` | batch publication authority | CMD-ROUTING-01 |
 | `saipen ticket bind-cohort <T-###> --cohort <C-###> --paths <p1,p2>` | RECOVERY: bind canonically finished, verified, unpublished own_patch DONE to a pending cohort; preserve original row/finish, current active Work and history; exact retry is byte-noop, published/legacy/foreign/conflicting bindings refuse (OPS.md) | CMD-ROUTING-01 |
 | `saipen source` | intake | CMD-ROUTING-01 |
+| `saipen source capture (--file <UTF8_FILE>\|--hex <UTF8_HEX>\|-- <TEXT>)` | INGRESS: the ingress half of the audit-inbox contract -- persists ONE verbatim source body and a receipt; nothing else in this table bounds a receipt's lifetime, so an audit layer that reached `ingest` without it has no receipt to close (SOURCES.md) | CMD-ROUTING-01 |
+| `saipen source req <SRC-###> <RID> <CLASS> <TEXT...> [--when-environment <HOST>]` | EXECUTION: add one requirement clause to a live receipt (SOURCES.md) | CMD-ROUTING-01 |
+| `saipen source disp <SRC-###> <RID> <DISPOSITION> [--work T-###] [--evidence E-###]` | EXECUTION: adjudicate one clause to a disposition and bind its Work and evidence (SOURCES.md) | CMD-ROUTING-01 |
+| `saipen source close <SRC-###>` | EXECUTION: prove a receipt's evidence and mint the tombstone; this is the ONLY verb that writes one, so it is the precondition of every later consume/archive (SOURCES.md) | CMD-ROUTING-01 |
+| `saipen source archive <SRC-###>` | EXECUTION: move an already-CLOSED receipt's artifacts into the archive; refuses while the receipt is still active (SOURCES.md) | CMD-ROUTING-01 |
+| `saipen source purge <SRC-###> --confirm` | EXECUTION: destroy an ARCHIVED receipt's cold bytes; the explicit `--confirm` is mandatory and its absence is CONFIRMATION_REQUIRED, not a preview (SOURCES.md) | CMD-ROUTING-01 |
 | `saipen source retire <SRC-###> --reason <CLASS> [--successor SRC-###] [--note TEXT]` | EXECUTION: receipt-only retirement; preserve cold original bytes; unresolved clauses or live Work refuse (OPS.md) | CMD-ROUTING-01 |
 | `saipen source link <SRC-###> --work T-###` | EXECUTION: add one durable Work membership, preserve primary; idempotent; unknown receipt/Work or failed integrity refuses with zero writes (T-1437) | CMD-ROUTING-01 |
 | `saipen source append [--to <SRC-###>] [--class APPEND\|SUPERSEDE\|CLARIFICATION\|CONFLICT] [--delta implementation\|evidence\|review\|packaging\|context] [--supersedes <ID,...>] [--label TEXT] (--file <PATH> \| --hex <HEX> \| -- <TEXT>)` | INGRESS: make ONE operational handoff/brick durable against the controlling mission source (T-1461); verbatim immutable receipt with `amends:`, exact-digest dedupe, ordered per-source ledger; never edits the source it amends (SOURCES.md) | CMD-ROUTING-01 |
@@ -90,9 +103,13 @@ global authority and deterministic priority rules.
 | `saipen source normalize [--dry-run]` | RECOVERY: journal BOARD ranges as explicit receipt IDs; malformed ranges refuse; preview writes zero | CMD-ROUTING-01 |
 | `saipen source quarantine <SRC-###> [--reason CODE]` | EXECUTION: preserve the exact active or archived body locally and exclude it from release/export; `--dry-run` previews without writing; does not close Work or waive coverage (SOURCES.md) | CMD-ROUTING-01 |
 | `saipen authority capture --file <UTF8_FILE>\|--hex <UTF8_HEX>` | persist ONE operator-authority Source from exact bytes; never projects Work | CMD-ROUTING-01 |
-| `saipen audit [status\|inspect\|ingest]` | intake transport | CMD-CONTINUE-01 |
-| `saipen userperson` | meta | CMD-ROUTING-01 |
-| `saipen sub <verb> <name>` | sub | CMD-ROUTING-01 |
+| `saipen audit [status\|inspect\|ingest\|enqueue\|manifest]` | intake transport; `status`/`inspect` are DIAGNOSTIC, `ingest`/`enqueue`/`manifest [--write [--force]]` are EXECUTION, and `manifest` is read-only unless `--write` is passed so a packager can ASK about a project it is about to snapshot (SOURCES.md) | CMD-CONTINUE-01 |
+| `saipen userperson [show\|add\|remove\|reset]` | meta; direction is DEFAULT not ORDER (CORE.md), `reset` deletes the profile and needs `--confirm`, and `show --effective` is read-only (CORE.md) | CMD-ROUTING-01 |
+| `saipen sub [spawn\|adopt\|sync\|pause\|resume\|clean\|collect\|dispose\|reconcile] <name>` | sub; `sync`/`spawn`/`adopt`/`pause`/`resume`/`clean`/`collect`/`dispose` are EXECUTION and `reconcile` is RECOVERY (CONVERGE.md, COMMANDS.md below) | CMD-ROUTING-01 |
+| `saipen undo confirm` | EXECUTION: the confirmation leg of the `zz` milestone restore; without it the restore is a preview (CONTROLS.md) | CMD-ROUTING-01 |
+| `saipen cut confirm <CUT-ID> -- <mutation>` | EXECUTION: authorize ONE already-previewed planned mutation; the preview alone writes nothing (CONTROLS.md) | CMD-ROUTING-01 |
+| `saipen recover [inspect]` | DIAGNOSTIC: read-only recovery inspection; the mutating legs are `saipen recover resolve-blocker "<decision>"` and the `ab`/`aa`/`qq` shortcuts (CONTROLS.md) | CMD-ROUTING-01 |
+| `saipen fleet [preflight\|scan\|prepare]` | install-scoped Fleet binding; `preflight` and `scan` are read-only, `prepare` is RECOVERY and the only mutating leg -- it refuses `--root` and is never a dry-run, and `scan` inspects ONLY the explicit roots it is given and never enumerates children | CMD-ROUTING-01 |
 | `saipen sub reconcile <role> --authority <SRC-###>` | RECOVERY: producer-owned terminal reconciliation (T-1435); A clears stale task/residue on a DONE producer whose BOARD proves all work terminal, B restores a truthful nonterminal projection (SCOUT/PLAN/BLOCKED) without touching real open work; malformed STATE/BOARD and a foreign owner refuse with zero writes (`sub_lifecycle` backstop) | CMD-ROUTING-01 |
 
 `clean_execution`: CLEAN = `PENDING`; DONE with `RUN: clean -> done @HASH` =
