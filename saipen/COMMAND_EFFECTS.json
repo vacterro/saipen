@@ -142,6 +142,9 @@
     "future": {
    "default": "DIAGNOSTIC",
    "subcommands": {
+    "status": "DIAGNOSTIC",
+    "list": "DIAGNOSTIC",
+    "next": "DIAGNOSTIC",
     "refresh": "EXECUTION",
     "refine": "EXECUTION",
     "add": "INGRESS",

@@ -4516,6 +4516,117 @@ CASES.extend(
     ]
 )
 
+# FUTURE-GATE-01: the rule owner, its registry entry, its published ladder and
+# its machine records each have a control that breaks exactly one of them.
+FUTURE = "saipen/FUTURE.md"
+FUTURE_EFFECTS = "saipen/COMMAND_EFFECTS.json"
+FUTURE_MAINTENANCE = "saipen/MAINTENANCE.md"
+FUTURE_INDEX = ".saipen/future/index.json"
+FUTURE_RECORD = ".saipen/future/records/FG-0001.json"
+FUTURE_DOC = "future_gate/ASTRA_HANDOFF_20260921.md"
+
+def future_ladder(old: str, new: str):
+    """Mutate inside FUTURE.md's § 5 only.
+
+    The ladder check reads that SECTION, and "HUNT", "ADD" and the rung names
+    legitimately appear in § 2 and § 4 as well -- a whole-document mutation would
+    edit prose the check never reads and the control would silently stop being
+    evidence.
+    """
+    def fn(t):
+        return re.sub(
+            r"(^##\s*5\..*?)(?=^##\s)",
+            lambda m: m.group(1).replace(old, new, 1),
+            t,
+            count=1,
+            flags=re.MULTILINE | re.DOTALL,
+        )
+    fn.anchor = old
+    return fn
+
+CASES.extend(
+    [
+        (
+            "future-gate index carries a state no lifecycle defines",
+            FUTURE_INDEX,
+            replace('"state": "NEEDS_REVIEW"', '"state": "READY"'),
+            "FUTURE GATE: ",
+        ),
+        (
+            "future-gate owner loses its rule marker",
+            FUTURE,
+            replace("RULE-OWNER: FUTURE-GATE-01", "RULE-OWNER: FUTURE-GATE-99"),
+            "FUTURE-OWNER: saipen/FUTURE.md declares no `RULE-OWNER: FUTURE-GATE-01`",
+        ),
+        (
+            "future-gate owner renamed in the registry",
+            REGISTRY,
+            replace('"FUTURE-GATE-01": "saipen/FUTURE.md"', '"FUTURE-GATE-01": "saipen/CORE.md"'),
+            "FUTURE-OWNER: saipen/REGISTRY.json rule_owners[FUTURE-GATE-01] is",
+        ),
+        (
+            "a future verb loses its declared effect",
+            FUTURE_EFFECTS,
+            replace('"refine": "EXECUTION"', '"rescale": "EXECUTION"'),
+            "FUTURE-OWNER: `saipen future refine` mutates but is absent from",
+        ),
+        (
+            "a future verb stops being published",
+            COMMANDS,
+            replace("`saipen future refine", "`saipen future rescale"),
+            "FUTURE-OWNER: `saipen future refine` is implemented and declared but",
+        ),
+        (
+            "the idle ladder loses a rung",
+            FUTURE,
+            future_ladder("eligible FUTURE GATE", "candidate FUTURE GATE"),
+            "FUTURE-OWNER: saipen/FUTURE.md § 5 does not publish the whole idle ladder",
+        ),
+        (
+            "the idle ladder publishes out of order",
+            FUTURE,
+            future_ladder("→ HUNT → ADD", "→ ADD → HUNT"),
+            "FUTURE-OWNER: saipen/FUTURE.md publishes the idle ladder out of order",
+        ),
+        (
+            "the two owners disagree on the ladder",
+            FUTURE_MAINTENANCE,
+            replace("eligible FUTURE GATE > HUNT > ADD", "eligible FUTURE GATE"),
+            "FUTURE-OWNER: saipen/MAINTENANCE.md no longer publishes",
+        ),
+        (
+            "the owner stops speaking the engine's vocabulary",
+            FUTURE,
+            replace("HUNT/ADD fallthrough", "the fallthrough"),
+            "FUTURE-OWNER: saipen/FUTURE.md never publishes `HUNT/ADD fallthrough`",
+        ),
+        (
+            "a deferred candidate claims rule ownership",
+            FUTURE_DOC,
+            lambda t: t + "\nRULE-OWNER: FUTURE-GATE-01\n",
+            "FUTURE-OWNER: future-gate document(s) declare rule ownership",
+        ),
+        (
+            "a reviewed record loses its marker",
+            FUTURE_RECORD,
+            replace('"saipen-future-record-v1"', '"saipen-future-record-v0"'),
+            "FUTURE-OWNER: reviewed record(s) are not canonical engine records",
+        ),
+        (
+            "the projection is not the canonical one",
+            FUTURE_INDEX,
+            replace('"saipen-future-index-v1"', '"saipen-future-index-v0"'),
+            "FUTURE-OWNER: .saipen/future/index.json is not the canonical projection",
+        ),
+        (
+            "the future-gate owner document disappears",
+            FUTURE,
+            DELETE,
+            "FUTURE-OWNER: saipen/FUTURE.md is missing",
+        ),
+    ]
+)
+
 
 
 def demote_amnesty_control(root: Path) -> bool:

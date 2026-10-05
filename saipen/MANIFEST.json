@@ -106,6 +106,10 @@
       "required": true
     },
     {
+      "src": "saipen/FUTURE.md",
+      "required": true
+    },
+    {
       "src": "saipen/RFC.md",
       "required": true
     },

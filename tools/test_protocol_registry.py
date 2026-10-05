@@ -213,7 +213,12 @@ class ProtocolRegistryTests(unittest.TestCase):
         # bytes to the measured 308224-byte surface. 309346 bytes require
         # 303 KiB; 302 KiB is 98 bytes short. No document/rule was dropped.
         # See .saipen/evidence/T-1605-current/load-budget.md.
-        self.assertLessEqual(measured["human_markdown_total"], 303 * 1024)
+        # T-1614: FUTURE.md lands as a rule owner (12274 bytes) beside the
+        # command rows committed with it (COMMANDS.md +5287, INDEX/MAINTENANCE
+        # +~1554): the measured surface is 329328, so the tripwire is re-derived
+        # one KiB step to 322 KiB. No document or rule was dropped to pay for it
+        # -- see .saipen/evidence/T-1614-budget-rederivation.md.
+        self.assertLessEqual(measured["human_markdown_total"], 322 * 1024)
 
     def test_phase_metrics_measure_all_registry_phases_and_actual_bytes(self):
         phase_names = self.registry["phases"]["all"]

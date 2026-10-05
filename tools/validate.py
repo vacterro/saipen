@@ -5714,11 +5714,13 @@ if _future_gate_dir.is_dir() or _future_gate_index.is_file():
 # the engine has outgrown is a document that now lies. These checks consume
 # saipen/FUTURE.md on purpose -- exempting it as "irrelevant" is the defect.
 # The rule OWNER ships with the protocol; the corpus and its index are project
-# data. `os.chdir(PROJECT_ROOT)` above means a project-relative path here would
-# read the CONSUMING project and fail a home document as missing.
-_future_home = _tools_parent / "saipen"
-_future_owner_path = _future_home / "FUTURE.md"
-if _future_owner_path.is_file():
+# data. `home_doc` is the one layout-aware resolver: `os.chdir(PROJECT_ROOT)`
+# above means a project-relative `saipen/FUTURE.md` would read the CONSUMING
+# project, and a hard-coded `_tools_parent / "saipen"` finds nothing in a
+# flattened install -- which is how these checks would have gone vacuously red
+# in every injected home (T-1332).
+_future_owner_path = home_doc("FUTURE.md")
+if _future_owner_path is not None:
     from saipen_engine import future_gate as _fg
 
     _future_owner_text = _future_owner_path.read_text(encoding="utf-8-sig")
@@ -5730,7 +5732,7 @@ if _future_owner_path.is_file():
             "marker, so nothing identifies it as the owner of the future-gate class"
         )
     try:
-        _registry = json.loads((_future_home / "REGISTRY.json").read_text(encoding="utf-8-sig"))
+        _registry = json.loads(home_doc("REGISTRY.json").read_text(encoding="utf-8-sig"))
     except (OSError, json.JSONDecodeError):
         _registry = {}
     _registered_owner = (_registry or {}).get("rule_owners", {}).get("FUTURE-GATE-01")
@@ -5743,7 +5745,7 @@ if _future_owner_path.is_file():
     #    declared effect AND a published command, and the reverse. A gate verb
     #    that exists only in code is an operator-invisible mutation.
     try:
-        _effects = json.loads((_future_home / "COMMAND_EFFECTS.json").read_text(encoding="utf-8-sig"))
+        _effects = json.loads(home_doc("COMMAND_EFFECTS.json").read_text(encoding="utf-8-sig"))
     except (OSError, json.JSONDecodeError):
         _effects = {}
     _declared = set((_effects.get("verbs") or {}).get("future", {}).get("subcommands", {}) or {})
@@ -5760,7 +5762,7 @@ if _future_owner_path.is_file():
             f"FUTURE-OWNER: `saipen future {_verb}` mutates but is absent from "
             "saipen/COMMAND_EFFECTS.json -- an undeclared mutation is a rule with no effect class"
         )
-    _commands_text = (_future_home / "COMMANDS.md").read_text(encoding="utf-8-sig")
+    _commands_text = home_doc("COMMANDS.md").read_text(encoding="utf-8-sig")
     for _verb in sorted(_mutating):
         if f"`saipen future {_verb}" not in _commands_text:
             fail(
@@ -5788,7 +5790,7 @@ if _future_owner_path.is_file():
             "FUTURE-OWNER: saipen/FUTURE.md publishes the idle ladder out of order; "
             "the ladder IS the priority"
         )
-    _maintenance_text = (_future_home / "MAINTENANCE.md").read_text(encoding="utf-8-sig")
+    _maintenance_text = home_doc("MAINTENANCE.md").read_text(encoding="utf-8-sig")
     if "eligible FUTURE GATE > HUNT > ADD" not in _maintenance_text:
         fail(
             "FUTURE-OWNER: saipen/MAINTENANCE.md no longer publishes "

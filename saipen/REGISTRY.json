@@ -151,6 +151,11 @@
     "owner": "saipen/STORAGE.md",
     "test": "tools/test_storage_artifacts.py",
     "subject": "explicit durable trust, disposable scratch, verified atomic artifact promotion and honest state-loss recovery"
+   },
+   "FUTURE-GATE-01": {
+    "owner": "saipen/FUTURE.md",
+    "test": "tools/test_t1614_future_gate.py",
+    "subject": "deferred authority is a lifecycle, not a document pile: a freshness witness over the corpus, an ambiguous document is never executable by guess, and routing refreshes and refines it itself so no dropped file waits on a manual command"
    }
   }
  },
@@ -696,7 +701,7 @@
   "budgets": {
    "cold": 27648,
    "ordinary_continue": 35840,
-   "command_resolution": 47104,
+   "command_resolution": 53248,
    "ordinary_phase": 40960,
    "ship_improve": 56320,
    "single_doc": 51200
@@ -1102,7 +1107,9 @@
   "PROTOCOL_ADMISSION_TRANSPORT_REQUIRED",
   "CHAT_STYLE_DRIFT",
   "INTERMEDIATE_TEXT_SUPPRESSED",
-  "TREE_UNDER_TEST"
+  "TREE_UNDER_TEST",
+  "FUTURE_GATE_ABSENT",
+  "FUTURE_GATE_NOT_ELIGIBLE"
  ],
  "continue_fallback": {
   "invariant": "continue may fall through to improve ONLY after recovery, blocked/retryable, queued and required-follow-up routing are exhausted; it resumes an existing active Improve cycle and never creates an unbounded improve carousel",
