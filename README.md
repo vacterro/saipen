@@ -1,42 +1,35 @@
-<p align="center">
-  <img src="assets/SAIPEN_TEXT1.png" alt="SAIPEN Logo"/>
-</p>
-
 <div align="center">
-  <h3><a href="README.ee.md">🇪🇪 LOE SEDA EESTI KEELES / ESTONIAN 🇪🇪</a></h3>
-  <a href="README.md">🇬🇧 English</a> &nbsp;|&nbsp;
-  <a href="README.ded.md">👴 Дед-Версия (Russian)</a> &nbsp;|&nbsp;
-  <a href="README.ja.md">🇯🇵 日本語 (Japanese)</a>
-</div>
+
+<img src="assets/SAIPEN_TEXT1.png" alt="SAIPEN" width="520">
 
 # SAIPEN
 
-**Continuation protocol for AI coding agents.** Project memory lives in plain
-Markdown files inside the project (`.saipen/`), so any compatible cold agent —
-no chat history, no session memory — can run `/saipen continue`, read the
-persisted `next_action`, and resume work without asking the user to re-explain
-anything. State belongs to the project, not to one model vendor's memory.
+**Continuation protocol for AI coding agents.**
+
+Project memory lives beside the code in plain files, so a cold agent can resume from the persisted next action without relying on chat history or one vendor's memory.
+
+[![Version](https://img.shields.io/badge/version-8.1.0-D4B86A?style=flat-square)](VERSION)
+[![Validation](https://github.com/vacterro/saipen/actions/workflows/validate.yml/badge.svg)](https://github.com/vacterro/saipen/actions/workflows/validate.yml)
+[![Release](https://img.shields.io/github/v/release/vacterro/saipen?sort=semver&label=release&style=flat-square)](https://github.com/vacterro/saipen/releases)
+[![License](https://img.shields.io/github/license/vacterro/saipen?style=flat-square&color=blue)](LICENSE)
+
+[**Quick start**](#quick-start) · [Spec](SPEC.md) · [Guide](GUIDE.md) · [Core](saipen/CORE.md) · [Conformance](saipen/CONFORMANCE.md) · [Commands](#common-commands)
+
+**English** · [Eesti](README.ee.md) · [日本語](README.ja.md) · [Дед-Версия](README.ded.md)
+
+</div>
 
 **One command to resume. Plain-file state. Machine-checked contracts.**
 
-The repository validates itself on every push; install, state, checks, and
-uninstall are all local — no cloud service, no daemon, no database.
-
-[![Validation](https://github.com/vacterro/saipen/actions/workflows/validate.yml/badge.svg)](https://github.com/vacterro/saipen/actions/workflows/validate.yml)
-[![Release](https://img.shields.io/github/v/release/vacterro/saipen?sort=semver&label=release)](https://github.com/vacterro/saipen/releases)
-[![License: MIT](https://img.shields.io/github/license/vacterro/saipen?color=blue)](LICENSE)
-
-**v8.1.0** | [Spec](SPEC.md) | [Guide](GUIDE.md) | [Core](saipen/CORE.md) | [Maintenance](saipen/MAINTENANCE.md) | [Style](saipen/STYLE.md) | [UI](saipen/UI.md) | [Conformance](saipen/CONFORMANCE.md) | MIT
-
-**Shortcut keys.** A shortcut is the whole message, never a prefix: `cc` continues, `sss` reports status, `st` stops; Cyrillic twins `сс`, `ссс`, `аа`, `ее`, `еее`, `рр` work too. [Full 19-key map](saipen/CORE.md#110-command-surface). `ff` → `focus`; `xx` → `cut`; `vv` → `build`; `zz` → `undo`.
+The repository validates itself on every push. Install, state, checks, recovery, and uninstall remain local: no hosted database, daemon, or mandatory cloud service.
 
 ```text
 Project
   |
-  +-- .saipen/STATE.md ------ what is happening right now (phase, ticket, mode, next_action)
-  +-- .saipen/BOARD.md ------ what work exists (DOING / TODO / DONE / BLOCKED)
-  +-- .saipen/LOG.md -------- why the project reached this state (event history)
-  +-- .saipen/KNOWLEDGE/ ---- what durable facts must survive sessions
+  +-- .saipen/STATE.md ------ what is happening right now
+  +-- .saipen/BOARD.md ------ what work exists
+  +-- .saipen/LOG.md -------- why the project reached this state
+  +-- .saipen/KNOWLEDGE/ ---- durable verified project facts
           |
           v
    /saipen continue
@@ -45,8 +38,10 @@ Project
       cold agent
           |
           v
-     next_action -> work -> checkpoint -> next ticket
+     next_action -> work -> checkpoint
 ```
+
+**Shortcut keys.** A shortcut is the whole message, never a prefix: `cc` continues, `sss` reports status, `st` stops. [Full key map](saipen/CORE.md#110-command-surface).
 
 ## What persists
 
