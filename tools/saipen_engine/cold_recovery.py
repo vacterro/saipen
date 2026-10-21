@@ -98,11 +98,7 @@ def classify_blocker(blocker: str) -> dict:
     text = str(blocker or "").strip()
     upper = " ".join(text.upper().split())
     is_gate = deferred_operator_class(text) is not None
-    is_hold = (
-        is_gate
-        or blocker_class(text) is not None
-        or upper.startswith(DEPENDENCY_HOLD_PREFIX)
-    )
+    is_hold = is_gate or blocker_class(text) is not None or upper.startswith(DEPENDENCY_HOLD_PREFIX)
     duplicate = upper.startswith(WORKABLE_BLOCKER_PREFIXES)
     timeout = (
         "BOUNDED" in upper and ("600-SECOND" in upper or "WINDOW" in upper)
@@ -192,10 +188,7 @@ class SemanticProgressTracker:
         completed cycle, so it never counts toward the loop threshold.
         """
         fingerprint = observation.semantic_fingerprint()
-        legit = (
-            bool(observation.authoritative_changed)
-            or bool(observation.completed_attempt)
-        )
+        legit = bool(observation.authoritative_changed) or bool(observation.completed_attempt)
         moved = bool(self.history) and fingerprint != self.history[-1][0]
         self.history.append((fingerprint, legit, bool(observation.heartbeat)))
         self.observations.append(observation)
@@ -227,9 +220,7 @@ class SemanticProgressTracker:
         if not self._fingerprint:
             return 0
         return sum(
-            1
-            for fp, lg, hb in self.history
-            if fp == self._fingerprint and not lg and not hb
+            1 for fp, lg, hb in self.history if fp == self._fingerprint and not lg and not hb
         )
 
 
@@ -301,9 +292,7 @@ def build_recovery_package(
             entry["blocked_on"] = fields.get("blocked_on", "")
             blocked.append(entry)
 
-    deps_ok = {
-        entry["id"]: all(n in done_ids for n in entry["needs"]) for entry in todos
-    }
+    deps_ok = {entry["id"]: all(n in done_ids for n in entry["needs"]) for entry in todos}
     # The seat is the ticket STATE.task names, whatever section holds it: a
     # claimed DOING ticket or a PAUSED BLOCKED corridor is still the Work a
     # cold worker resumes. Only when STATE carries no active task does the
@@ -381,9 +370,7 @@ def build_recovery_package(
                 evidence.append(op)
     evidence = evidence[-8:]
 
-    active_from_blocked = active is not None and any(
-        entry is active for entry in blocked
-    )
+    active_from_blocked = active is not None and any(entry is active for entry in blocked)
     # The seat STATE names keeps its own phase. Answering `PHASE SCOUT` for a
     # claimed DOING seat (measured live 2026-09-22: T-1446 in BUILD) told a
     # cold successor to reset the phase it had to resume. STATE's next_action
@@ -435,13 +422,9 @@ def build_recovery_package(
         "MUTATION_LEASE": runtime.get("watchdog") or {},
         "BLOCKER": {
             "id": active["id"] if active else None,
-            "unmet_needs": [
-                n for n in (active["needs"] if active else []) if n not in done_ids
-            ],
+            "unmet_needs": [n for n in (active["needs"] if active else []) if n not in done_ids],
         },
-        "BLOCKER_SCOPE": (active_fields.get("blocker_scope") or "ticket").strip()
-        if active
-        else "",
+        "BLOCKER_SCOPE": (active_fields.get("blocker_scope") or "ticket").strip() if active else "",
         "BLOCKED_ON": (active_fields.get("blocked_on") or "").strip(),
         "EVIDENCE": evidence,
         "DEFERRED": deferred,
@@ -450,9 +433,7 @@ def build_recovery_package(
         # carrying a machine due instant that has passed qualifies. Publishing
         # every parked ticket here was the false operator stop that ended
         # autonomous runs with nothing for the operator to actually do.
-        "DUE": [
-            row["id"] for row in operator_gate_rows if row["state"] == "DUE_OPERATOR_ACTION"
-        ],
+        "DUE": [row["id"] for row in operator_gate_rows if row["state"] == "DUE_OPERATOR_ACTION"],
         "DUE_MODEL": "retry_not_before (strict UTC) on an operator-owned blocker; T-1429",
         "KNOWN_REDS": known_reds,
         "UNRELATED_REDS": unrelated_reds,
@@ -591,8 +572,7 @@ def agent_incarnation(carrier: dict | None) -> str | None:
     """
     carrier = carrier or {}
     parts = [
-        str(carrier.get(key) or "").strip()
-        for key in ("host", "host_session", "provider", "model")
+        str(carrier.get(key) or "").strip() for key in ("host", "host_session", "provider", "model")
     ]
     if not any(parts):
         return None
@@ -606,9 +586,17 @@ def is_continuation_command(text: str | None) -> bool:
         return False
     if compact.lower() in _CONTINUE_SPELLINGS:
         return True
-    if " " in compact:
+    from .commands import is_prose_or_handoff, resolve_shortcut
+
+    if is_prose_or_handoff(compact):
         return False
-    from .commands import resolve_shortcut
+    if " " in compact:
+        words = compact.lower().split()
+        return (
+            len(words) == 2
+            and words[0] in ("cc", "\u0441\u0441")
+            and words[1] in ("all", "--all", "-a")
+        )
 
     try:
         key = resolve_shortcut(compact)
@@ -664,8 +652,7 @@ def turn_entry(recall: dict, ingress_class: str, *, continuation: bool = False) 
     elif recall.get("continuation_required"):
         decision = TURN_AUTO_KICK
         reason = (
-            "active executable Work exists and no new user input, WAIT or "
-            "safety stop outranks it"
+            "active executable Work exists and no new user input, WAIT or safety stop outranks it"
         )
     elif continuation or ingress_class == INGRESS_CONTINUATION:
         # Old or new, `cc` asked for the canonical continuation, and that
@@ -779,7 +766,21 @@ def auto_recall(root, carrier: dict | None = None) -> dict:
     phase = str(state.get("phase") or "").strip().upper()
     next_action = str(state.get("next_action") or "").strip()
     blocker = str(state.get("blocker") or "").strip()
-    wait = next_action.upper().startswith("WAIT")
+    from . import goal_authority
+    from .state import parse_wait
+
+    grant_errors = goal_authority.prove(root, state)
+    if grant_errors:
+        recall = {**base, "readable": False, "problem": "; ".join(grant_errors)}
+        recall["turn"] = turn_entry(recall, ingress["class"], continuation=ingress["continuation"])
+        return recall
+    checkpoint = (
+        (goal_authority.persistent(state) or goal_authority.protocol_home(root))
+        and parse_wait(next_action) == "safety valve"
+        and phase != "BLOCKED"
+        and blocker.lower() in ("", "none")
+    )
+    wait = next_action.upper().startswith("WAIT") and not checkpoint
     section = (ticket or {}).get("section", "")
     continuation_required = bool(
         task
@@ -787,7 +788,7 @@ def auto_recall(root, carrier: dict | None = None) -> dict:
         and section == "## DOING"
         and phase not in _NON_EXECUTING_PHASES
         and not wait
-        and binding_brake(state) is None
+        and (binding_brake(state) is None or checkpoint)
     )
     previous = str(carrier.get("previous_incarnation") or "").strip() or None
     incarnation = base["agent_incarnation"]

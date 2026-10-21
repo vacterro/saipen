@@ -27,7 +27,7 @@ import hashlib
 import json
 import re
 
-RULESET_VERSION = 1
+RULESET_VERSION = 2
 
 SEVERITIES = ("problem", "warning")
 
@@ -295,6 +295,11 @@ def _normalized_detail(rule: Rule, message: str) -> str:
             return found.group(1)
     if rule.rule_id == "log_provenance_marker":
         return "structural-event-missing-op-marker"
+    # A global rule's captured subtype is semantic evidence; incidental
+    # ticket-shaped filenames must not replace the whole condition.
+    matched = rule.re.search(text)
+    if rule.subject_kind == "global" and matched and any(matched.groups()):
+        return re.sub(r"\s+", " ", text).strip()
     # Multi-id subjects (e.g. a ticket ref naming several tickets) keep the
     # id set, order-normalized, so ordering never changes identity.
     ids = re.findall(r"T-\d+|SRC-\d+|E-\d+", text)

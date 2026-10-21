@@ -103,6 +103,17 @@ def provenance_of(root: Path) -> dict:
     return json.loads(meta.read_text(encoding="utf-8"))["request_provenance"]
 
 
+def assert_integrity_only(case: unittest.TestCase, record: dict) -> None:
+    """These fixtures supply bytes, never an independently observed human event.
+
+    Genuine origin and privileged projections are exercised by the separate
+    broker/worker controls in test_t1844_origin_broker, including the file route.
+    """
+    case.assertEqual(record["witness"], operator_task.WITNESS_MODEL)
+    case.assertEqual(record["carrier_integrity"], "MATCHED")
+    case.assertFalse(operator_task.authority_for_provenance(record)["user_explicit"])
+
+
 class NobodyComparedItAndTheReceiptSaysSoTests(unittest.TestCase):
     """The ordinary case: no carrier, no obligation, and no pretending."""
 
@@ -137,7 +148,7 @@ class AnOperatorCarrierIsComparedTests(unittest.TestCase):
         )
         self.assertEqual(code, 0, text)
         witness = provenance_of(root)
-        self.assertEqual(witness["witness"], operator_task.WITNESS_CARRIER)
+        assert_integrity_only(self, witness)
         self.assertEqual(witness["declared_by"], operator_task.ENV_TASK_SHA256)
 
     def test_a_task_file_carries_it_when_a_digest_cannot(self):
@@ -149,7 +160,7 @@ class AnOperatorCarrierIsComparedTests(unittest.TestCase):
         )
         self.assertEqual(code, 0, text)
         witness = provenance_of(root)
-        self.assertEqual(witness["witness"], operator_task.WITNESS_CARRIER)
+        assert_integrity_only(self, witness)
         self.assertEqual(witness["declared_by"], operator_task.ENV_TASK_FILE)
 
     def test_a_paraphrase_of_a_declared_task_is_refused_with_both_digests(self):
@@ -206,7 +217,7 @@ class AnOperatorCarrierIsComparedTests(unittest.TestCase):
         code, payload, text = start_raw(root, ["start", "--file", str(task_file)], env_key)
         self.assertEqual(code, 0, text)
         self.assertEqual(payload["code"], "STARTED", text)
-        self.assertEqual(provenance_of(root)["witness"], operator_task.WITNESS_CARRIER)
+        assert_integrity_only(self, provenance_of(root))
 
     def test_a_malformed_carrier_fails_closed(self):
         """An environment that meant to declare a task and failed is not silence."""
@@ -299,7 +310,7 @@ class WitnessIsDecidedFromBytesTests(unittest.TestCase):
             TASK + "\r\n",
             env={operator_task.ENV_TASK_SHA256: pending_ingress.ingress_digest(TASK)},
         )
-        self.assertEqual(outcome["witness"], operator_task.WITNESS_CARRIER)
+        assert_integrity_only(self, outcome)
 
     def test_an_oversized_task_file_is_refused(self):
         root = healthy(self)
@@ -411,7 +422,7 @@ class TheFileRouteSurvivesEveryShellTests(unittest.TestCase):
                 self.assertIn("{", out, f"{shell}: {out[-400:]} {proc.stderr[-400:]}")
                 payload, _end = json.JSONDecoder().raw_decode(out[out.index("{"):])
                 self.assertEqual(payload.get("code"), "STARTED", f"{shell}: {payload}")
-                self.assertEqual(provenance_of(root)["witness"], operator_task.WITNESS_CARRIER)
+                assert_integrity_only(self, provenance_of(root))
 
     def test_a_path_no_quoted_argument_carries_gets_no_route(self):
         for hostile in (r"C:\tasks\$HOME\task.txt", 'C:\\tasks\\a"b.txt', "C:\\tasks\\"):

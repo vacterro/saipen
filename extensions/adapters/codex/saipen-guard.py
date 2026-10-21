@@ -18,8 +18,9 @@ message, and exposes no turn ingress or tool context at Stop, so a second
 continuation would be an uncontrolled loop and terminal fail-closed correction
 is NOT claimed.
 
-Unenforceable moments (unreadable hook payload, unreachable checker, no bound
-project) are recorded the same honest way and never pretended into a verdict.
+Unenforceable moments (unreadable command line, unreadable hook payload,
+unreachable checker, no bound project) are recorded the same honest way and
+never pretended into a verdict.
 
 Trust is an external host boundary: Codex skips non-managed hooks until the
 operator reviews and trusts the hash-bound hook definition via ``/hooks``.
@@ -60,20 +61,67 @@ BOUNDARY_UNAVAILABLE = (
 )
 
 
+class CommandLineFault(Exception):
+    """This artifact could not read the command line it was started with."""
+
+
+class _Arguments(argparse.ArgumentParser):
+    """argparse reports a bad command line by exiting with status 2, which
+    Codex reads as a hook-level failure and repeats forever (T-1630). The
+    fault is raised to `main` instead, which records the capability boundary
+    and lets the stop complete."""
+
+    def error(self, message: str) -> None:
+        raise CommandLineFault(message)
+
+
+def read_command_line(argv: list[str] | None = None) -> tuple[argparse.Namespace, str | None]:
+    """The options, and what is wrong with the command line when something is.
+
+    Never exits: a foreign or missing ``--host``, a missing ``--saipen-root``,
+    an argument argparse itself refuses, and an option of another generation
+    all come back as one unreadable-command-line fault beside the defaults,
+    decided by `main` through `record()`. The normal command line
+    (``--host codex --saipen-root <root>``, all this hook is ever configured
+    with) returns ``(args, None)`` unchanged.
+    """
+    parser = _Arguments(description=__doc__, allow_abbrev=False)
+    parser.add_argument("--host", nargs="?")
+    parser.add_argument("--saipen-root", type=Path, nargs="?")
+    try:
+        args, unread = parser.parse_known_args(argv)
+    except CommandLineFault as exc:
+        args = argparse.Namespace(host=None, saipen_root=None)
+        return args, "hook command line: " + str(exc).replace("\n", " ")[:200]
+    if args.host != "codex":
+        return args, f"hook command line names host {args.host!r}; this artifact serves codex"
+    if args.saipen_root is None:
+        return args, "hook command line names no --saipen-root"
+    if unread:
+        # An argument of another generation: reading past it would silently
+        # treat an invalid command line as valid (T-1630).
+        return args, "hook command line: unrecognized option(s): " + " ".join(unread)[:200]
+    return args, None
+
+
 def project_root(cwd: str | None) -> Path | None:
     """The bound SAIPEN project for this Stop, or None.
 
-    Explicit ``SAIPEN_PROJECT_ROOT`` wins; otherwise the nearest ancestor of
-    the session cwd carrying canonical STATE. No project means no SAIPEN
+    An explicit ``SAIPEN_PROJECT_ROOT`` naming a project wins; otherwise the
+    nearest ancestor of the session cwd carrying canonical STATE. No project means no SAIPEN
     operational context at all, and the stop is ordinary chat.
     """
     declared = os.environ.get("SAIPEN_PROJECT_ROOT", "").strip()
     if declared:
         try:
             root = Path(declared).resolve()
-            return root if (root / ".saipen" / "STATE.md").is_file() else None
         except OSError:
-            return None
+            root = None
+        if root is not None and (root / ".saipen" / "STATE.md").is_file():
+            return root
+        # T-1636: a carrier that names nothing usable never hides the project
+        # the session directory belongs to. The walk below finds it, and the
+        # engine judges the carrier from there (BINDING_CARRIER_INVALID).
     if cwd:
         try:
             start = Path(cwd).resolve()
@@ -117,6 +165,41 @@ def canonical_verdict(saipen_root: Path, project: Path, text: str) -> dict | Non
     if not isinstance(payload, dict) or not isinstance(payload.get("ok"), bool):
         return None
     return payload
+
+
+def preserve_refused(saipen_root: Path, project: Path, text: str) -> str | None:
+    """Keep the reply the gate refused before anything corrects it; its reference.
+
+    T-1657: the correction that follows asks for a compact surface, and detail
+    written only into the refused reply would otherwise live in a host
+    transcript alone. The engine owns the bytes and the overflow account kept
+    beside them; this transport only hands the reply over. None when the
+    engine cannot keep it: the stop is still handled, and nothing is claimed.
+    """
+    engine = Path(saipen_root) / "tools" / "saipen.py"
+    try:
+        proc = subprocess.run(
+            [
+                sys.executable,
+                str(engine),
+                "response",
+                "preserve",
+                "--stdin",
+                "--json",
+                "--project-root",
+                str(project),
+            ],
+            # Bytes both ways, for the reason the checker call above gives.
+            input=text.encode("utf-8"),
+            capture_output=True,
+            timeout=CHECK_TIMEOUT_SECONDS,
+            cwd=str(project),
+        )
+        kept = json.loads((proc.stdout or b"").decode("utf-8", errors="replace") or "null")
+    except (OSError, ValueError, subprocess.SubprocessError):
+        return None
+    reference = kept.get("ref") if isinstance(kept, dict) and kept.get("ok") is True else None
+    return reference if isinstance(reference, str) and reference else None
 
 
 def correction_reason(klass: str, errors: list[str], project: Path) -> str:
@@ -168,10 +251,7 @@ def record(boundary: str) -> None:
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--host", choices=("codex",), required=True)
-    parser.add_argument("--saipen-root", type=Path, required=True)
-    args = parser.parse_args()
+    args, fault = read_command_line()
     try:
         raw = sys.stdin.buffer.read(MAX_BYTES + 1)
     except OSError:
@@ -187,6 +267,17 @@ def main() -> int:
     if not isinstance(event, dict) or event.get("hook_event_name") != "Stop":
         # Not the supported event: this transport gates nothing.
         return 0
+    if fault is not None:
+        # The command line itself is unreadable (T-1630): this generation
+        # cannot know which root it must enforce, so the exact capability
+        # boundary is recorded instead of a guessed verdict -- argparse must
+        # never exit 2 here, which Codex reads as a hook failure and repeats.
+        # Outside a bound project the transport does nothing, whatever the
+        # command line says.
+        if project_root(event.get("cwd") or os.getcwd()) is None:
+            return 0
+        record(BOUNDARY_UNAVAILABLE.format(reason=fault))
+        return 0
     reentry = event.get("stop_hook_active") is True
     text = event.get("last_assistant_message")
     if not isinstance(text, str):
@@ -194,14 +285,7 @@ def main() -> int:
         return 0
     project = project_root(event.get("cwd") or os.getcwd())
     if project is None:
-        if os.environ.get("SAIPEN_PROJECT_ROOT", "").strip():
-            record(
-                BOUNDARY_UNAVAILABLE.format(
-                    reason="explicit SAIPEN_PROJECT_ROOT is not a bound SAIPEN project"
-                )
-            )
-            return 0
-        # No SAIPEN project: ordinary non-operational chat.
+        # No SAIPEN project, whatever a carrier says: ordinary chat (T-1636).
         return 0
     verdict = canonical_verdict(args.saipen_root, project, text)
     if verdict is None:
@@ -228,8 +312,16 @@ def main() -> int:
         return 0
     raw_errors = verdict.get("errors")
     errors = [str(item) for item in raw_errors][:3] if isinstance(raw_errors, list) else []
+    # T-1657: kept BEFORE the correction is requested or the boundary recorded.
+    # An admission refusal judges the session, not a reply.
+    kept = (
+        None
+        if klass == "ADMISSION_BLOCKED"
+        else preserve_refused(args.saipen_root, project, text)
+    )
+    kept_note = f" The refused reply is kept at {kept}." if kept else ""
     if reentry:
-        record(BOUNDARY_REENTRY.format(klass=klass, errors="; ".join(errors)))
+        record(BOUNDARY_REENTRY.format(klass=klass, errors="; ".join(errors)) + kept_note)
         return 0
     print(
         json.dumps(
@@ -239,7 +331,7 @@ def main() -> int:
                     f"SAIPEN canonical delivery ({klass}; do not add prose):\n"
                     + verdict["delivery"]
                     if isinstance(verdict.get("delivery"), str) and verdict["delivery"]
-                    else correction_reason(klass, errors, project)
+                    else correction_reason(klass, errors, project) + kept_note
                 ),
             }
         )

@@ -21,6 +21,7 @@ These tests keep both properties from silently coming back.
 
 import ast
 import re
+import shutil
 import subprocess
 import sys
 import unittest
@@ -312,6 +313,54 @@ class ConcurrentGateWritesAreBounded(unittest.TestCase):
         )
         # And they really are the runtime cache the tree excludes by design.
         self.assertTrue(all('"cache"' in tail for tail in expressions), expressions)
+
+
+class NoGitRuntimeWritesCannotReddenTheFingerprint(unittest.TestCase):
+    """T-34: a no-Git tree's runtime output is not source.
+
+    `compute_source_identity` on the no-git-tree-v1 model walks the whole
+    tree except named runtime dirs. Before this fix `logs/` and `state/` were
+    counted as source, so any concurrent test suite that rewrote
+    `state/acceptance-*.json` moved the fingerprint mid-walk and failed
+    validation with the two-walk race. The regression proves runtime writes
+    are invisible while real source edits still move the identity.
+    """
+
+    def test_runtime_state_and_logs_writes_do_not_move_the_identity(self):
+        import tempfile
+
+        import freshness
+
+        base = Path(tempfile.mkdtemp(prefix="saipen-t34-"))
+        self.addCleanup(shutil.rmtree, base, ignore_errors=True)
+        (base / "state").mkdir()
+        (base / "logs").mkdir()
+        (base / "src").mkdir()
+        (base / "src" / "app.js").write_text("module.exports = 1;\n", encoding="utf-8")
+        (base / "state" / "acceptance-v0.0.1.json").write_text(
+            '{"pass": 1}\n', encoding="utf-8"
+        )
+        (base / "logs" / "run.log").write_text("one\n", encoding="utf-8")
+
+        before = freshness.compute_source_identity(base)
+
+        # What a concurrent npm test writes on every run.
+        (base / "state" / "acceptance-v0.0.1.json").write_text(
+            '{"pass": 191, "fail": 0}\n', encoding="utf-8"
+        )
+        (base / "logs" / "run.log").write_text("two\n", encoding="utf-8")
+
+        after = freshness.compute_source_identity(base)
+        self.assertEqual(
+            before.source_tree_fingerprint, after.source_tree_fingerprint
+        )
+
+        # Control: a real source edit must still move the identity.
+        (base / "src" / "app.js").write_text("module.exports = 2;\n", encoding="utf-8")
+        drifted = freshness.compute_source_identity(base)
+        self.assertNotEqual(
+            after.source_tree_fingerprint, drifted.source_tree_fingerprint
+        )
 
 
 class ConcurrentDiscoveryIsGreen(unittest.TestCase):

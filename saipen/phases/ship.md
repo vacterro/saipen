@@ -1,154 +1,109 @@
 # Phase: SHIP
 
-## Purpose and entry
+Publish Work. PUBLISH: action, not phase. Entry ONLY: saipen ship,
+opted-in repo (origin + prior ship evidence), or goal + origin. Required
+verification/REVIEW green.
 
-Publish one reviewed ticket: finalize release metadata, commit the exact
-reviewed scope, push the branch, push its release tag, then finish atomically.
-`PUBLISH` is an action, not a phase. Enter only on `saipen ship`, an opted-in
-repository (existing `origin` plus prior ship evidence), or goal execution
-with an existing `origin`. All mandatory verification and REVIEW must be green.
+Fixable before publication: SHIP -> BUILD -> VERIFY -> REVIEW -> SHIP.
+BLOCKED needs human input/no safe fix. After commit/tag/push starts use recovery;
+pushed Work never returns to BUILD.
 
-Pre-publish defects route `SHIP -> BUILD`, then repeat `VERIFY -> REVIEW ->
-SHIP`. Use BLOCKED only when user input or an unknown safe fix is required.
-Once commit/tag/push starts, use the recovery rules below; a successful push
-never routes this ticket back to BUILD.
+## mode: no-publish
 
-## `mode: no-publish`
+CORE §1.3: no commit/tag/push. It does NOT mean git is absent; check Git.
+Run Board/README/version/junk/local metadata/core; omit tag equality; skip
+remote classification/staging/ship gate.
 
-The phase still runs, but CORE.md §1.3 forbids commit, tag and push.
-**`no-publish` means publishing is not permitted. It does NOT mean git is
-absent.** Test git availability independently.
+LOG (DATE/E-ID/parent Event Graph), exactly:
+RUN: ship vX.Y.Z -> skipped publish (no-publish: <reason>)
+Reason: policy for working Git; no git ONLY if Git cannot answer.
+Not failure; digest then DONE.
 
-| Work | `no-publish` |
-|---|---|
-| Board, README, version, junk, local metadata, core gate | run |
-| Release-tag equality clause | omit |
-| Remote classification, staging, ship gate, commit, branch/tag push | skip |
+## Closure BEFORE Git scope
 
-LOG exactly: `- DATE [E-###] [parent: E-###] RUN: ship vX.Y.Z -> skipped
-publish (no-publish: <reason>)`, where `<reason>` is `policy` when git works
-but publishing is disabled, or `no git` only when git cannot answer. This is
-not a failure. Write the digest, then finish into DONE.
+Opt-in tools/verification_policy.json admits current focused proof to SHIP,
+not publication. Pending cohorts collect related edits. Full core-unit runs
+once AFTER final batch content/metadata edits, before binding gate. Release
+executor AND binding ship validator (6b.6) require full PASS for exact bytes/
+baseline; focused cannot substitute. No repeat for members/unchanged REVIEW.
 
-## Closure intent: determine BEFORE demanding a Git scope
+Closure differs from Git publication: only own_patch needs a personal diff.
+Never block verification-only/cohort solely on inseparability
 
-Ticket closure (`saipen ticket done --closure-mode ...`) is NOT the same
-operation as Git publication. The exact per-ticket diff requirement applies
-only to `own_patch`. Decide the mode first; a verification-only or cohort
-ticket must never BLOCK solely because its personal diff cannot be isolated
-(orchestration repair, T-1302 / FastPrompter regression):
+- own_patch: attributable delta; full procedure below.
+  Foreign deltas: --paths refuses outside cohort; saipen scope refuses outside
+  this root. At closure, verify: names carrying commit; state foreign publication.
+- inherited_verified: NO delta; independently verify durable publication
+  authority elsewhere. BUILD no-delta/VERIFY PASS/REVIEW PASS; then:
+  saipen ticket done <T-###> --closure-mode inherited_verified --implementation-source <T-###|SRC-###|release:<id>>
+  No invented diff/unrelated staging/empty release.
+- cohort: shared verified batch, no fictional per-ticket blobs:
+  saipen ticket done <T-###> --closure-mode cohort --closure-cohort C-### --paths <shared paths>
+  Bind live registry bytes. saipen cohort ship C-### freezes paths once,
+  uses exact release integrity, publishes, records shipped/release identity.
+  Pending: evidence-complete, NOT published.
 
-- `own_patch` — this ticket owns an attributable implementation delta. Run
-  the full reviewed-scope release path below unchanged: exact path
-  attribution, explicit staging, foreign bytes preserved, ship gate,
-  commit/tag/push when publishing is enabled.
-  A delta that lives in ANOTHER repository has no path channel: `--paths` is
-  refused outside `cohort`, and `saipen scope` refuses a path that resolves
-  outside this project root. Name the carrying commit in the ticket's
-  `verify:` text at closure so the board line still points at the bytes, and
-  say plainly that publication happened in the other repository.
-- `inherited_verified` — this ticket adds NO implementation delta; it
-  independently verified implementation whose durable publication authority
-  already exists elsewhere. Record `BUILD` no-delta evidence, `VERIFY` PASS,
-  `REVIEW` PASS, then close with
-  `saipen ticket done <T-###> --closure-mode inherited_verified
-  --implementation-source <T-###|SRC-###|release:<id>>`. Do NOT demand a
-  synthetic per-ticket Git diff, do NOT stage unrelated inherited files, do
-  NOT create an empty release commit. Evidence closure, not a fake patch.
-- `cohort` — this ticket owns part of a shared verified batch (overlapping
-  files such as one accumulated `main.py`). Members never isolate fictional
-  per-ticket blobs; each closes with
-  `saipen ticket done <T-###> --closure-mode cohort --closure-cohort C-###
-  --paths <shared paths>`, which binds the live bytes into the durable
-  cohort registry. Publication belongs to the cohort authority:
-  `saipen cohort ship C-###` freezes ONE batch scope (each shared path
-  once), publishes through the exact release-integrity machinery, and flips
-  the registry record to shipped with the release identity. While a cohort
-  is pending, a member is evidence-complete but NOT published.
+## Steps
 
-## Procedure
-
-0. Confirm every shipped work unit has a ticket and the active ticket remains
-   in `## DOING`; CORE.md §1.2 owns board freshness and attribution. For a
-   cohort/crew terminal publication the local Core phase is DONE / task none
-   and the batch authority (cohort registry) is the active surface.
-1. Update README release-facing material and choose the semantic version bump.
-2. Make the release identity consistent before push:
-   - `VERSION` is canonical;
-   - the root and every discovered locale README badge equal it exactly once;
-   - the newest CHANGELOG entry equals it;
-   - the intended tag is `vVERSION`.
-   `tools/validate.py --gate ship` discovers locale mirrors from the
-   translation kitchen; do not maintain a second list.
-3. Apply `.gitignore`, secret, temporary-file and debug-output hygiene.
-4. **Classify the remote BEFORE any external write.** Read `origin`, then
-   `git ls-remote --heads --tags origin`. No `origin`, or an origin with no
-   commit/tag, is first publish. Stop before all writes with
-   `next_action: WAIT: first-publish -- confirm repo name '<name>' and
-   public/private before I push`. Goal execution never bypasses this gate.
-5. Finalize local metadata and run `tools/validate.py --gate core` after the
-   last edit. Producer-package freshness is enforced when that package is
-   consumed, not as a Core ship prerequisite. This core gate is a signal; the
-   binding staged-set gate is below.
-6a. **LOCAL. Touches no repository and no remote.** Complete steps 0-5 only.
-6b. **GIT. Writes the repository and the remote.** Run in this order:
-
-   1. Read `git status --porcelain=v1 -uall` and the staged set. Save the
-      pre-ship index with `git write-tree` for rollback.
-   2. Attribute every intended path to this ticket/wave. Unattributed work
-      stops SHIP.
-   3. Preserve all user-prestaged bytes. A foreign staged path must not enter
-      the release; stop unless it can be isolated without changing that path.
-   4. **Stage ONLY the reviewed files this ship owns** with explicit paths.
+0. Ticket every shipped unit (CORE §1.2 freshness/attribution).
+   The shipped ticket was still in `## DOING` when this phase began; stays so.
+   Terminal cohort/crew: DONE/task none, cohort registry authority.
+1. Update release-facing README; choose semver bump.
+2. Align canonical VERSION, root/discovered locale README badges (exactly once),
+   newest CHANGELOG and vVERSION before push. Binding ship validator
+   discovers kitchen mirrors; no duplicate list.
+3. Apply .gitignore, secret, temporary-file/debug-output hygiene.
+4. **Classify the remote BEFORE any external write.** Read origin;
+   git ls-remote --heads --tags origin.
+   Missing origin/remote commit+tag = first publish. Stop before ALL writes:
+   next_action: WAIT: first-publish -- confirm repo name '<name>' and public/private before I push
+   Goal never bypasses this gate.
+5. After last metadata edit: tools/validate.py --gate core. Producer freshness
+   gates consumption, not Core ship; Core signals, staged-set gate binds.
+6a. **LOCAL. Touches no repository and no remote.** 0-5 only.
+6b. **GIT.** Repository/remote writes, ordered:
+   1. Read git status --porcelain=v1 -uall/staged set; git write-tree backs up
+      pre-ship index.
+   2. Attribute intended paths to Work/wave; any unattributed stops SHIP.
+   3. Preserve user staging; exclude foreign paths. Stop unless isolated
+      without changing their bytes.
+   4. Stage ONLY the reviewed files this ship owns; explicit paths.
       **`git add .` and `git add -A` are
-      forbidden here** because they widen the reviewed scope.
-   5. Re-read the index and prove it equals the intended scope.
-   6. **Run `tools/validate.py --gate ship` NOW.** It binds the staged release,
-      requires a non-empty release index, checks discovered release paths and
-      refuses staged/working divergence on the version surface.
-   7. Run `git diff --cached --check`.
-   8. **Commit exactly the staged scope.** Never use `-a` or widening paths.
-   9. **Push the branch.** Immediately before branch push, and again before
-      tag push, re-read remote first-publish state. If it changed to
-      established, continue; otherwise return to step 4's gate.
-
-   If the binding gate or diff check fails, do not commit/push/tag. Restore
-   owned release paths in the index from the saved index tree, never from
-   `HEAD`; leave foreign staging byte-identical, then route to BUILD.
-7. **ONLY AFTER step 6b's branch push has LANDED** (push success, or fetched
-   remote branch equals local branch), create `vVERSION` and push only
-   `git push origin refs/tags/vVERSION:refs/tags/vVERSION`. Never use
-   `--tags` or `--follow-tags`. A failed branch push means no tag push.
-8. LOG success exactly: `- DATE [E-###] [parent: E-###] RUN: ship vX.Y.Z ->
-   pushed HASH`.
+      forbidden here**.
+   5. Re-read index; prove exact intended scope.
+   6. Run `tools/validate.py --gate ship` NOW: nonempty index/discovered
+      release paths; reject staged/working version divergence.
+   7. git diff --cached --check.
+   8. Commit exactly the staged scope; never -a/widening paths.
+   9. **Push the branch.** Recheck first-publish immediately before branch AND tag:
+      established continues; otherwise step 4.
+   Gate/diff fail: no commit/tag/push. Restore owned index paths ONLY from
+   backup tree, NEVER HEAD; foreign staging byte-identical. Return BUILD.
+7. ONLY AFTER step 6b's branch push has LANDED (success or fetched remote
+   branch = local), create vVERSION; push only:
+   git push origin refs/tags/vVERSION:refs/tags/vVERSION
+   Never --tags/--follow-tags. Branch push failure forbids tag push.
+8. Event Graph LOG exactly: RUN: ship vX.Y.Z -> pushed HASH.
 
 ## Push recovery
 
-On failure LOG exactly: `- DATE [E-###] [parent: E-###] RUN: ship vX.Y.Z ->
-push FAILED <reason>`; never claim success. The commit/local tag remain local.
+Event Graph failure LOG: RUN: ship vX.Y.Z -> push FAILED <reason>.
+No success claim; commit/tag stay local.
 
-- Transient network/auth failure: retry once with the changed condition named
-  in LOG; a retry without delta is illegal. A second failure -> BLOCKED.
-- Non-fast-forward: fetch and inspect incoming changes. Read changes touching
-  `.saipen/` or this release; otherwise rebase, rerun validation, recreate the
-  local tag on rebased HEAD, verify tag commit equals HEAD, then retry. This
-  local tag was never pushed because step 7 follows landed branch push. A tag
-  from an earlier completed release is remote history and needs the global
-  force-push confirmation gate. Rebase conflict -> BLOCKED with file facts.
-- Other non-transient or unsafe ambiguity -> BLOCKED. Never force-push to
-  resolve rejection.
+- Transient network/auth: one LOGged changed-condition retry.
+  Second failure -> BLOCKED.
+- Non-fast-forward: fetch/inspect incoming changes; read .saipen/release changes.
+  Otherwise rebase, revalidate, recreate unpushed local tag on rebased HEAD, prove tag =
+  HEAD, retry. prior completed-release tags are remote
+  history requiring global force-push confirmation. Conflict: BLOCKED + files.
+- Other non-transient/unsafe ambiguity -> BLOCKED; never force-push rejection.
 
-## Exit and evidence
+Success/intentionally skipped publish: overwrite .saipen/kitchen/digest.md
+with three short lines done:, remaining:, awaiting: (snapshot, not history).
 
-After successful or intentionally skipped publish, overwrite
-`.saipen/kitchen/digest.md` with exactly three short lines: `done:`,
-`remaining:` and `awaiting:`. It is a snapshot, not history.
-
-Finish with the journaled `saipen ticket done`: only phase SHIP may atomically
-move the ticket `## DOING -> ## DONE`, record completion and transition to
-DONE. **The shipped ticket was still in `## DOING` when this phase began**;
-REVIEW never closes it. Under goal execution, DONE immediately follows its
-MAINTENANCE routing instead of becoming a stopping point.
+Only SHIP's journaled ticket done atomically moves ## DOING -> ## DONE,
+enters DONE. REVIEW never closes it.
+Goal DONE: MAINTENANCE immediately.
 
 Failure summary: fixable and pre-publish -> BUILD; classified push failure ->
 recovery above; user decision or no known safe action -> BLOCKED with facts.

@@ -1,5 +1,18 @@
 #!/usr/bin/env python
-"""Measure every registry-declared SAIPEN runtime load profile."""
+"""Measure every registry-declared SAIPEN runtime load profile.
+
+The admission gate is the ROUTE (T-1670, SRC-191): what one execution route
+mandatorily loads into an agent's context, measured against that route's
+declared budget. A route's mandatory set is its `must` list closed over the
+optional `load_profiles.requires` graph (document -> documents it always
+loads), so a dependency a route pulls in transitively is counted without a
+second hand-maintained list. `conditional` documents are reported and never
+counted. The repository-wide `human_markdown_total` is reported as a growth
+statistic only: a document no route loads costs no context, so growing it is
+not a budget event. One guard stays global -- no single protocol document may
+exceed the `single_doc` budget -- so removing the aggregate cap is never a
+licence for one enormous file.
+"""
 
 from __future__ import annotations
 
@@ -131,8 +144,45 @@ def _token_size(protocol_dir: Path, surfaces: dict[str, Any], token: str) -> int
     return _size(path)
 
 
+def _requires(graph: dict[str, Any]) -> dict[str, list[str]]:
+    requires = graph.get("requires", {})
+    if not isinstance(requires, dict) or any(
+        not isinstance(doc, str)
+        or doc.startswith("@")
+        or not isinstance(deps, list)
+        or any(not isinstance(dep, str) or dep.startswith("@") for dep in deps)
+        for doc, deps in requires.items()
+    ):
+        raise ValueError("load_profiles requires must map a document to a document array")
+    return requires
+
+
+def _closure(must: list[str], requires: dict[str, list[str]]) -> list[str]:
+    """`must` followed by every document it transitively requires, each once,
+    in first-reached order. A cycle is a declaration error, never a loop."""
+    ordered: list[str] = []
+    seen: set[str] = set()
+
+    def visit(token: str, path: tuple[str, ...]) -> None:
+        if token in path:
+            raise ValueError("load_profiles requires has a cycle: " + " -> ".join((*path, token)))
+        if token in seen:
+            return
+        seen.add(token)
+        ordered.append(token)
+        for dep in requires.get(token, ()):
+            visit(dep, (*path, token))
+
+    for token in must:
+        visit(token, ())
+    return ordered
+
+
 def _measure_route(
-    protocol_dir: Path, surfaces: dict[str, Any], route: dict[str, Any]
+    protocol_dir: Path,
+    surfaces: dict[str, Any],
+    route: dict[str, Any],
+    requires: dict[str, list[str]] | None = None,
 ) -> dict[str, Any]:
     must = route.get("must")
     conditional = route.get("conditional")
@@ -144,7 +194,8 @@ def _measure_route(
         or any(not isinstance(item, str) for item in [*must, *conditional, *excluded])
     ):
         raise ValueError("each load route needs string-array must/conditional/exclude")
-    must_sizes = {item: _token_size(protocol_dir, surfaces, item) for item in must}
+    mandatory = _closure(must, requires or {})
+    must_sizes = {item: _token_size(protocol_dir, surfaces, item) for item in mandatory}
     conditional_sizes = {
         item: _token_size(protocol_dir, surfaces, item) for item in conditional
     }
@@ -152,6 +203,7 @@ def _measure_route(
         "name": str(route.get("name", "")),
         "bytes": sum(must_sizes.values()),
         "must": must_sizes,
+        "transitive": [item for item in mandatory if item not in must],
         "conditional": conditional_sizes,
         "exclude": excluded,
     }
@@ -162,13 +214,15 @@ def load_profiles(protocol_dir: Path | None = None) -> dict[str, Any]:
     registry = _load_registry(base)
     graph = _load_graph(registry)
     surfaces = graph["surfaces"]
+    requires = _requires(graph)
+    documents = _documents(base)
     measured: dict[str, int] = {}
     detail: dict[str, list[dict[str, Any]]] = {}
     for name, profile in graph["profiles"].items():
         routes = profile.get("routes") if isinstance(profile, dict) else None
         if not isinstance(routes, list) or not routes:
             raise ValueError(f"load profile {name!r} must declare at least one route")
-        route_detail = [_measure_route(base, surfaces, route) for route in routes]
+        route_detail = [_measure_route(base, surfaces, route, requires) for route in routes]
         detail[name] = route_detail
         measured[name] = max(route["bytes"] for route in route_detail)
     return {
@@ -179,23 +233,59 @@ def load_profiles(protocol_dir: Path | None = None) -> dict[str, Any]:
         "core": _size(base / "CORE.md"),
         "boot": _size(base / "BOOT.md"),
         **_phase_metrics(base, registry, graph),
-        "human_markdown_total": sum(_size(path) for path in base.rglob("*.md")),
+        "documents": documents,
+        # Informational only (T-1670): repository growth, never admission.
+        "human_markdown_total": sum(documents.values()),
+        "informational": ["human_markdown_total"],
     }
 
 
+def _documents(base: Path) -> dict[str, int]:
+    return {path.relative_to(base).as_posix(): _size(path) for path in sorted(base.rglob("*.md"))}
+
+
 def check(protocol_dir: Path | None = None) -> list[str]:
+    """Every budget violation: a route over its declared budget, or one
+    protocol document over `single_doc` whether or not a route loads it."""
     measured = load_profiles(protocol_dir)
-    return [
+    errors = [
         f"{name} {measured[name]} > {limit}"
         for name, limit in measured["budgets"].items()
         if measured[name] > limit
     ]
+    file_limit = measured["budgets"].get("single_doc")
+    if isinstance(file_limit, int):
+        errors.extend(
+            f"file {rel} {size} > single_doc {file_limit}"
+            for rel, size in measured["documents"].items()
+            if size > file_limit
+        )
+    return errors
+
+
+def summary(protocol_dir: Path | None = None) -> list[str]:
+    """The compact operator view: one line per route budget, then the
+    informational repository total."""
+    measured = load_profiles(protocol_dir)
+    errors = set(check(protocol_dir))
+    lines = []
+    for name, limit in measured["budgets"].items():
+        verdict = "FAIL" if f"{name} {measured[name]} > {limit}" in errors else "PASS"
+        lines.append(f"{name:<20} {measured[name]:>6} / {limit:<6} {verdict}")
+    largest = max(measured["documents"].items(), key=lambda item: (item[1], item[0]))
+    lines.append(f"largest document     {largest[1]:>6}  {largest[0]}")
+    lines.append(f"human markdown total {measured['human_markdown_total']:>6}  informational")
+    lines.extend(sorted(error for error in errors if error.startswith("file ")))
+    return lines
 
 
 if __name__ == "__main__":
     import sys
 
     errors = check()
+    if "--summary" in sys.argv[1:]:
+        print("\n".join(summary()))
+        sys.exit(1 if errors else 0)
     print(json.dumps(load_profiles(), indent=2))
     if errors:
         print("BUDGET FAIL:", "; ".join(errors), file=sys.stderr)

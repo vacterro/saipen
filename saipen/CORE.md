@@ -75,8 +75,10 @@ external validation mirror. Unknown fields refuse.
 - `phase`, `task`, `next_action`, `blocker`, `agent`, `saipen_version`, `mode`,
   and `updated` are always required. `transition_from` is additionally required
   except on fresh INIT.
-- Goal intent requires integer `goal_waves` and `goal_tickets`. Converge intent
-  may carry `converge_target`. Current-schema state with history requires
+- Goal intent requires integer `goal_waves` and `goal_tickets`. Its optional
+  authority quartet is all-or-none; absence means bounded, never persistent.
+  MAINTENANCE owns origin/scope proof. Converge may carry `converge_target`.
+  Current-schema state with history requires
   `last_event`; current-schema state requires `style_contract`.
 - `schema_version` below current is readable legacy and upgrades at the next
   checkpoint. Incompatible future schema/major forces read-only refusal.
@@ -135,8 +137,8 @@ BOARD is Work authority. It contains `## DOING`, `## TODO`, `## DONE`, and
 - Reject unknown ticket fields: the closed list is owned by `REGISTRY.json`,
   as declared above. Do not duplicate it in prose or silently pass extras.
 - BOARD is not append-only. CLEAN prunes closed prose after durable evidence
-  exists in LOG/CHANGELOG. The validator warns when cold-start size exceeds its
-  soft budget.
+  exists in LOG/CHANGELOG. The validator warns when closed text nothing pins
+  passes its cap.
 - Work minted into the WRONG PROJECT is RETIRED, never finished -- the third
   terminal verdict beside DONE and BLOCKED. The row leaves scheduling, its
   request bytes move to forensic cold storage, and no completion, coverage or
@@ -246,18 +248,26 @@ escaped defect to the exact earlier PASS event without rewriting either event.
   override foreign live owners or contradictory ownership. Host session ids,
   slots, pids, titles and ports are never actors. Handover records both seats
   before mutation; unknown runtime metadata stays UNKNOWN.
-- Host-event preflight closes the protected-namespace shell bypass: shell text
-  naming `.saipen` refuses before execution, except standalone canonical
-  `saipen <verb>`. Ordinary source-development shell use remains available.
-  Destructive EFFECTS receive file-tool rules; unproved operands/cwd refuse
-  as unresolved. Explicit-text proof is no sandbox for obfuscated/computed
-  paths. OPS-EFFECT-01 owns verb/wrapper vocabulary and resolution bounds.
+- Host-event preflight refuses direct shell mutation of protected canonical
+  state; standalone canonical `saipen <verb>` keeps its operation exemption.
+  Ordinary source-development and unprotected evidence files remain available.
+  Relative file-tool targets resolve from the host's actual working directory,
+  separately from its project binding, then receive the same containment and
+  ownership checks. Shell-effect checks retain the original actor and session
+  proof. Destructive
+  effects, literal output redirection and bounded named file writers receive
+  file-tool rules even when the command omits `.saipen`; unproved operands/cwd
+  refuse as unresolved. Explicit-text proof is no sandbox for obfuscated or
+  computed paths. OPS-EFFECT-01 owns vocabulary and resolution bounds; a host
+  without a blocking hook remains ADVISORY.
 - The exact built-in OpenCode `task` call is consequential delegation, not an
   unnamed mutation. It requires canonical state, actor and recovery admission;
   child tool calls receive their own guards. Namespaced or unclassified
   task-like tools retain the unresolved refusal.
-- Core has one writer and at most one DOING ticket. A second writer uses the
-  project writer lock; lock timeout refuses rather than races.
+- Core has one writer and one DOING ticket. A second writer waits
+  SAIPEN_WRITER_LOCK_TIMEOUT (default 5 s), then refuses WRITER_BUSY naming the
+  recorded holder or that it is unknown; `saipen lock status` answers lock-free.
+  Captures run outside the lock; it re-proves checkpoint and identity.
 - When active Work A discovers required Work B, `ticket block-for A B REASON`
   atomically moves A from DOING to BLOCKED, adds the durable `A needs B` edge,
   and records A's `blocked_on`, `resume_phase`, and `resume_transition_from`.
@@ -339,7 +349,9 @@ validation consume this object.
 - Workable means TODO, all dependencies DONE, no blocker or foreign live claim.
   `PICK-01` selects the topmost workable line in BOARD priority order.
   `saipen claim <T-###> --explicit` logs the skipped ticket; it never bypasses
-  eligibility or authorization. Expose remedies; never require BOARD hand-edits.
+  eligibility or authorization. The Work the router's audit route or START
+  names needs no override, and its DEC names that basis (T-1757). Expose
+  remedies; never require BOARD hand-edits.
 - VERIFY runs real evidence. Failure loops through diagnosis/repair, not success
   relabeling. At its bounded dead-hypothesis/fix-cycle cap, block the Work and
   continue other workable tickets. Manual-verify waits for human confirmation.

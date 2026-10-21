@@ -2,7 +2,13 @@
 
 The positive vulnerable control and repaired control use the identical carrier
 and evaluate oracle. These controls prove refusal, not working host admission.
-The original positive host tests must remain red until a separated host exists.
+The positive host path exists since T-1623/T-1624 and is proven where a host
+can be put on real processes (`test_protocol_admission.ClaudeHostTests`,
+`test_t1624_host_integration`); nothing here needs one.
+
+Every case meets an authority endpoint that nothing serves (T-1624). Before,
+these attacks reached whatever broker happened to run on the machine, so the
+same test passed or failed with the operator's session.
 """
 
 from __future__ import annotations
@@ -27,7 +33,12 @@ from saipen_engine import protocol_admission as PA  # noqa: E402
 from saipen_engine import response_surface as RS  # noqa: E402
 import cli_launcher  # noqa: E402
 from t1563_transport_carrier import run  # noqa: E402
+from test_hermetic_env import isolate_host_session  # noqa: E402
 from test_protocol_admission import World, guard  # noqa: E402
+
+
+def setUpModule() -> None:
+    isolate_host_session()
 
 SUBJECT = ROOT / "tests" / "fixtures" / "t1563-vulnerable"
 HOOK = ROOT / "extensions" / "adapters" / "claude" / "saipen-guard.py"

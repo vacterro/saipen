@@ -9,7 +9,8 @@ import json
 
 from saipen_engine import response_surface as RS
 from test_guard_hostile_matrix import fresh_project
-from test_opencode_adapter import run_cases, REPO, NODE, PYTHON
+from test_opencode_adapter import REPO, NODE, PYTHON
+from test_operator_origin_support import run_native_cases as run_cases
 from test_hermetic_env import isolate_host_session
 from test_orchestration_repair import OrchestrationFixture
 
@@ -223,6 +224,7 @@ class CompletedPartDelivery(unittest.TestCase):
                     "SAIPEN_SKILL_ROOT": str(REPO),
                     "SAIPEN_PYTHON": PYTHON,
                     "SAIPEN_AGENT": "test-agent",
+                    "SAIPEN_HOST_SESSION": f"stale-response-session-{n}",
                 },
             }
             for n, (request, _outcome) in enumerate(prompts)
@@ -232,6 +234,30 @@ class CompletedPartDelivery(unittest.TestCase):
             self.assertEqual(record["outcome"], outcome, record)
             if outcome == "allowed":
                 self.assertEqual(record["delivered"], "```text\n" + text + "```")
+
+    def test_a_response_cannot_borrow_another_native_sessions_proof(self):
+        from test_operator_origin_support import native_adapter_env
+        from test_opencode_adapter import run_cases as ordinary_cases
+
+        project = fresh_project()
+        directory = Path(tempfile.mkdtemp(prefix="saipen-wrong-native-session-"))
+        self.addCleanup(shutil.rmtree, directory)
+        plugin = Path(
+            os.environ.get("SAIPEN_OPENCODE_PLUGIN")
+            or REPO / "extensions/adapters/opencode/saipen-guard.js"
+        )
+        request = "write an implementation handoff"
+        with native_adapter_env(
+            project, request, session="native-session-A", message_id="foreign-origin",
+        ) as environment:
+            (record,) = ordinary_cases(plugin, [{
+                "id": "foreign-origin", "project": str(project),
+                "session_id": "actual-response-B", "user_request": request,
+                "text_complete": "```text\n" + "evidence\n" * 400 + "```",
+                "env": {"SAIPEN_SKILL_ROOT": str(REPO), "SAIPEN_PYTHON": PYTHON,
+                        "SAIPEN_AGENT": "test-agent", **environment},
+            }], directory)
+        self.assertEqual(record["outcome"], "blocked", record)
 
     def test_real_hook_replaces_three_fresh_oversized_turns(self):
         project = fresh_project()

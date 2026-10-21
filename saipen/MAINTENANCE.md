@@ -112,12 +112,57 @@ demoting. A bare invocation in the same message right after a plan command is
 an Entry (CORE.md § 1.10 pair carve-out): `execution_intent: goal`, both
 counters `0`, and that `PLAN` is wave 1 with one `DEC: goal_waves 0->1`.
 
-**A resume resets the counters only when the valve tripped** (at or over the
-caps). Untripped counters carry over and no re-authorization line is written.
-A reset MUST leave exactly
-`DEC: goal reauthorized -- goal_waves N->0, goal_tickets M->0`
-with the real pre-reset counts; otherwise CORE.md § 1.5's rebuild re-counts
-the cancelled bumps and re-trips the valve.
+**Continuation authority (SRC-112).** Operator-backed goal Entry records
+`continuation_authority: operator_persistent`, `authority_source: E-<pivot>`,
+`authority_until: goal_complete`, `safety_valve_mode: checkpoint`. Its committed
+Entry journal binds that grant to `goal_ingress` and the existing operator
+provenance. Unknown, mismatched or missing proof refuses; a model receipt, CLI
+spelling, transcript, compaction or later carrier cannot upgrade an old grant.
+Absent quartet means bounded (`operator_required`, budget, hard_wait); a fresh
+operator resume records that complete bounded tuple. Goal exit clears it.
+
+**Prospective authorization of a legacy goal (SRC-112).**
+`saipen goal authorize --file <operator-capsule.json>` authorizes the exact
+existing objective without a new Entry, roadmap, claim or counter reset.
+The closed JSON capsule contains `kind: saipen-goal-continuation`, canonical
+`project_lineage`, the same four persistent fields above, `goal_objective`
+(the exact current pivot text after `goal pivot -- `), and
+`goal_event_sha256`, and `goal_ingress`. The ingress must match the original
+Entry journal or, for legacy absence, the prospective event/lineage binding
+below. A leftover ingress from another goal refuses. The event digest is
+SHA256 over UTF-8 JSON of the pivot's
+`date,event,parent,ticket,agent,op_id,taxonomy,text` fields, with sorted keys,
+compact separators and unescaped Unicode. Extra/duplicate fields refuse.
+The host must witness the exact instruction through the existing operator
+ingress mechanism. A model-written capsule or environment declaration is not
+operator provenance; a stronger later carrier cannot promote a model/imported
+receipt. No project path, agent role or maintenance label grants an exception;
+the protocol home (Safety valve below) is the one standing exception.
+
+The existing source intake preserves that fresh instruction as an
+`authority_only` receipt. The separate committed `goal_authorize` journal
+binds its digest and original provenance to the canonical project lineage,
+committed original pivot/objective and `goal_ingress`. An absent legacy
+ingress binding is established prospectively from the original event digest
+and lineage. Old Entry receipts remain unchanged. One explicit authority
+transition DEC and the quartet commit together, preserving active Work,
+phase, owner, BOARD, counters and pending audits. Proof requires both journals,
+the transition event and intact operator source. Missing, revoked, corrupt,
+foreign-project or changed-goal proof refuses. An identical committed replay
+returns the original operation without another grant/event. Recovery follows
+OPS: an unapplied prepared attempt can abort without granting authority;
+partial application replays the exact prepared bytes. A fresh attempt after an
+abort has its own operation identity. Status exposes bounded, verified or
+invalid authority and its original event. Ordinary checkpoints spend the
+existing grant; they never create another operator authorization.
+
+**A resume resets the counters only when the valve tripped.** Untripped counts
+carry over. A fresh operator reset leaves
+`DEC: goal reauthorized -- goal_waves N->0, goal_tickets M->0`;
+a standing persistent grant leaves
+`DEC: goal checkpoint -- goal_waves N->0, goal_tickets M->0` plus its
+`authority_source` and safety-review evidence. Recovery recognizes both with
+real counts. BOOT/agent `continue` reads the grant; it creates none.
 
 **A resume landing on no workable ticket** asks nothing: it falls through to
 § 2.1 under the still-set goal intent (`HUNT`, then `ADD` if clean).
@@ -154,10 +199,17 @@ the counters from those lines, never from prose.
 **Safety valve.** One `saipen goal` invocation MUST NOT process more than
 3 waves or 20 tickets, whichever comes first (`goal_tickets` counts
 VERIFY-passes, so a re-passing ticket counts again: the valve trips early,
-never late). At the ceiling the agent MUST stop, write a full BOARD/STATE
-checkpoint and report progress; the user re-invokes `cc` to re-authorize. A
-tripped valve is a pause, NOT an exit: the goal intent stays set, because
-CORE.md § 1.10 recognizes the resume only while `execution_intent: goal`.
+never late). At the ceiling checkpoint BOARD/STATE and review binding brakes.
+A proven persistent goal checkpoints and continues under its original grant.
+A bounded run waits for a fresh operator `cc` (or new goal), never a synthetic
+transport retry. A tripped valve is a budget boundary, NOT a goal exit.
+
+**Protocol home (SRC-249).** The project whose `.saipen/IDENTITY.md` lineage is
+the running engine's -- the protocolist working on SAIPEN itself -- holds
+standing operator authority. Its valve is a checkpoint `cc` clears without a
+carrier (`DEC: goal reauthorized -- ...; authority_source protocol_home`);
+status exposes CONTINUE with no operator action due. A consumer project never
+inherits it.
 
 **The tripped state has one exact shape:**
 
@@ -172,10 +224,13 @@ CORE.md § 1.10 recognizes the resume only while `execution_intent: goal`.
   Exit condition and makes the prescribed resume illegal.
 - `blocker: none` -- a budget pause is not a session-level block.
 
-An agent resuming with `goal_waves >= 3` or `goal_tickets >= 20` MUST NOT
-continue: it restates the `WAIT:` and waits. `cc` resets both counters to `0`
-(`reauthorize_valve`, only when tripped). Never tidy the counters without an
-actual re-authorization.
+At `goal_waves >= 3` or `goal_tickets >= 20`, the shared route verifies the
+grant. Persistent authority exposes checkpoint-and-reroute as CONTINUE, with
+no operator action due; the physical WAIT above records the unspent boundary.
+Bounded authority elsewhere exposes WAIT_USER; an agent `continue` changes
+nothing. `reauthorize_valve` resets both counters only under the proved grant,
+a fresh operator carrier or the protocol home; other human/safety/external
+brakes retain their decisions.
 
 **Unchanged under Goal-Driven Execution.** All caps still apply (3 dead
 hypotheses / 2 fix cycles per ticket in VERIFY; 2 review passes per finding in
@@ -189,7 +244,7 @@ concludes the product is mature and logically complete (`phases/add.md`), or
 `STATE.phase: BLOCKED` is reached (not a single ticket in `## BLOCKED`). A
 tripped valve and `saipen stop` are budget pauses, not exits; an empty
 `BOARD.md` is never an exit by itself. On exit, clear
-`goal_waves`/`goal_tickets`.
+`goal_waves`/`goal_tickets` and the authority quartet.
 
 **Final report.** Tickets done/verified/shipped, blocked ones and the next
 action, separating the user's original ask from work picked up along the way

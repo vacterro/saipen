@@ -42,7 +42,6 @@ from saipen_engine.controls import (  # noqa: E402
     create_milestone,
     undo_confirm,
 )
-from saipen_engine.paths import project_lineage_identity  # noqa: E402
 from saipen_engine.journal import (  # noqa: E402
     SETTLED_DIR,
     SETTLED_INDEX_REL,
@@ -453,14 +452,16 @@ class PerformanceAuditTests(ControlFixture):
             _ensure_lineage=False,
         )
         self.assertTrue(result["ok"], result)
-        journal._bootstrap_settled_index(root)
-        self.assertTrue(index_path.is_file(), "settled index was not bootstrapped")
+        # SRC-026:R009: the settlement itself advanced the bounded projection
+        # and its decode memo; the monolithic index is retired and unwritten.
+        from saipen_engine import settled_projection
+
+        self.assertFalse(index_path.exists(), "the retired settled index was written")
+        self.assertEqual(settled_projection.state(root), settled_projection.STATE_CURRENT)
+        self.assertIn("index-op", {name for name, _m, _p in settled_projection.record_memo(root)})
         first = semantic_receipt_snapshot(root)
         self.assertEqual(len(first.errors), 0, first.errors)
         self.assertTrue(any(record.get("op_id") == "index-op" for record in first.records))
-        self.assertIsNotNone(
-            journal._read_settled_index(root, live_lineage=project_lineage_identity(root))
-        )
         with mock.patch.object(
             journal,
             "decode_operation_record",
@@ -684,11 +685,17 @@ class PerformanceAuditTests(ControlFixture):
                     # timeout is only a hang guard, so it is generous: a tight
                     # one turns a stable-code control into a timing race with
                     # whatever else runs beside the suite.
+                    #
+                    # T-1827: WriterLock now waits for a bounded budget before
+                    # refusing (SRC-282:R001). Keep the control about the code:
+                    # give the contender a budget far below the holder's 5s
+                    # sleep so the assertion cannot race the holder's exit.
+                    contender_env = {**env, "SAIPEN_WRITER_LOCK_TIMEOUT": "0.2"}
                     contender = subprocess.run(
                         [sys.executable, "-c", contender_code, str(root)],
                         capture_output=True,
                         text=True,
-                        env=env,
+                        env=contender_env,
                         timeout=60,
                     )
                     self.assertEqual(contender.returncode, 0, contender.stderr)

@@ -1,148 +1,168 @@
 # Phase: VERIFY
 
-## Purpose and entry
+If .saipen/extensions/security/ (or
+legacy extensions/security/) exists, read its required scanners/constraints
+first (CORE §1.9).
 
-Prove the current ticket works before REVIEW. If
-`.saipen/extensions/security/` (or legacy `extensions/security/`) exists, read
-its required scanners and constraints first (CORE §1.9).
-
-Under `mode: manual-verify`, do not auto-transition. Ask the user to run the
-ticket's `verify:` command and record:
-`next_action: WAIT: manual-verify -- run '<verify: command>' and report pass or fail`.
-Proceed only from their reported result.
+Under mode: manual-verify, never auto-transition. Ask the human to run verify:
+and report the result; record:
+next_action: WAIT: manual-verify -- run '<verify: command>' and report pass or fail
+Proceed only from that result.
 
 ## Verification
 
-Use the repository's own harness, strongest available, in this order:
-parse -> import -> unit -> repro -> smoke. **That order is cheapest-first**;
-stop when a mandatory rung fails. **The first failed MANDATORY gate ends the PASS claim for this pass.** Later green cannot repair that red. An advisory
-failure is non-blocking only when the repository or ticket explicitly declares
-it advisory; unclassified gates are mandatory.
+Strongest repository harness, cheapest-first: parse -> import -> unit -> repro
+-> smoke. First failed mandatory gate: this pass cannot claim PASS;
+later green cannot override it.
+Only repository/ticket-declared advisory gates are non-blocking; unclassified
+means mandatory.
 
-**Read the project's canonical commands from `KNOWLEDGE/`**; SCOUT records
-them once. If absent, derive from repository-owned build/CI configuration. If
-still unknown, use `WAIT: blocked` naming the missing command, never an invented
-harness.
+Read the project's canonical commands from `KNOWLEDGE/` (SCOUT records once);
+absent: derive from build/CI. Still unknown: WAIT: blocked naming the missing command, no invented
+harness. BOARD verify: is minimum: execute/prove it with the strongest applicable
+harness; LOG how. Before commands: CORE destructive-effect confirmation and
+OPS-EFFECT-01; BOARD grants no authority. Manual-verify gives the human that
+same command.
 
-The ticket's `| verify:` is the minimum check. Execute a command or satisfy a
-prose criterion with the strongest applicable harness and LOG how. Before any
-command, apply CORE's destructive-effect confirmation and OPS `OPS-EFFECT-01`;
-text on BOARD is not authorization. Under manual-verify, give the same command
-to the user.
+- Nontrivial new logic needs a repository-style test.
+- Bug fixes need the SAME regression test, fixture, oracle and configuration:
+  pre-fix red, post-fix green; only implementation changes (VERIFY-ORACLE-01).
+- Unavailable GUI/environment checks: LOG MANUAL-VERIFY STEPS + EXPECTED;
+  never fabricate PASS. Steps cannot satisfy VERIFY. A separate verdict event
+  must BEGIN MANUAL-VERIFY RESULT: PASS or MANUAL-VERIFY RESULT: FAIL, only
+  from the human's actual report; mentioning the markers grants no verdict.
+- End conf: high for green tests, med for smoke only, low for manual evidence.
 
-- New nontrivial logic requires a repository-style test.
-- A fixed bug requires a regression test that failed before the fix -- the
-  SAME test, fixture, oracle and verification configuration, red against the
-  pre-fix subject and green against the post-fix one (`VERIFY-ORACLE-01`
-  below). The variable between red and green is the implementation, never
-  the definition of success.
-- Unavailable GUI/environment checks require LOGged `MANUAL-VERIFY STEPS +
-  EXPECTED`, never a fabricated PASS. **Those steps are a REQUEST, not a
-  verdict, and they do not satisfy this phase.** The verdict is a separate
-  event that BEGINS with `MANUAL-VERIFY RESULT: PASS` or
-  `MANUAL-VERIFY RESULT: FAIL`, written only from what the human reported.
-  Anchoring is the point: a line that merely contains the words is describing
-  the check, and the steps record exists precisely when nobody has looked yet,
-  so treating it as success made the instruction to wait for a person satisfy
-  the gate that was waiting for that person.
-- End with `conf: high` for green tests, `med` for smoke only, or `low` for
-  manual evidence.
+### Proportional ticket checks
+
+Full-family reruns consume small-edit loops. Opt-in
+tools/verification_policy.json permits:
+python tools/core_unit.py focused T-### --pattern test_name.py
+Repeat --pattern for affected direct consumers, selecting the regression and
+contract/failure paths from the owned diff. The isolated current-tree record
+rejects zero tests/reds; the entire local run is limited to 300 seconds and
+proves only its selection. REVIEW checks selection/delta, reuses unchanged evidence. Further runs need
+changed subject, failure or uncovered hypothesis. Over budget: split Work or
+explicit full family; never omit required coverage.
+
+Static import edges do not prove dependency completeness.
+python tools/core_unit.py impact T-### --plan reports a generation-bound Git
+delta plan; repeat --changed PATH for explicit scope. Planning executes nothing.
+Without --plan, only a certified static subset executes through existing
+discovery/shards. Unknown dependencies/safety boundaries require FULL, with no
+narrow citation. Import failures remain selected. Actual IMPACT retains the
+focused family, exact manifest/configuration; never full publication evidence.
+Manual FOCUSED retains its reviewed-scope contract. Other families and RELEASE
+gates remain independent.
+
+Run the complete family once on the finished publication batch after its last
+content/metadata edit; publication and CI still require it. Pending cohort
+closure collects related verified tickets (phases/ship.md). Regression/oracle
+and acceptance gates remain mandatory. No policy: retain the existing full gate.
 
 ### Instrument controls
 
 <!-- RULE-OWNER: VERIFY-ORACLE-01 -->
 
-**A gate that cannot fail is not a gate.** Before relying on a new or inherited
-gate, give it a known-bad input and prove it goes red. Treat zero collected
-tests, missing targets, `continue-on-error`/`allow_failure`, `|| true`, or a
-self-caught failure as UNVERIFIED. LOG the real run and deliberate red control;
-without both, `conf: high` is forbidden.
+New/inherited gates need demonstrated known-bad red. Zero tests, missing
+targets, continue-on-error/allow_failure, || true and self-caught failures are
+UNVERIFIED. LOG actual run AND deliberate red control for conf: high.
 
-**A gate stuck red lies as loudly as one stuck green.** Before reporting a
-broad negative, run a known-good control. If the instrument cannot recognize
-it, report verifier unavailability/instrument failure, repair the harness, and
-do not classify the subject as failed. A real mandatory failure and an
-unavailable verifier are different outcomes.
+Known-good control before broad negatives. Failure means verifier unavailability,
+not subject failure: repair it. Pin verifier versions/explicit rules;
+unpinned defaults can change verdicts for identical bytes.
 
-Pin verifier versions and explicit rule sets. An unpinned default makes the
-same bytes change verdict when upstream changes.
+For fixes, the known-bad input is the PRE-FIX SUBJECT. Restore its bug without
+changing the test and prove red again; a still-green regression proves neither
+defect nor fix. Declare regression: required on BOARD (prose cannot classify
+bug-fix authority), with anchored records:
 
-**For a bug fix the known-bad input is the PRE-FIX SUBJECT.** Restore the
-buggy implementation, change nothing about the test, and prove it goes red
-again. A regression that stays green against the restored bug proved
-nothing, and the fix was never necessary for the green. Weakening a fixture
-closes a ticket faster than fixing anything, every downstream guard reads
-green, and REVIEW re-running the same weakened oracle agrees.
-
-**The rule is enforced, not merely written.** A ticket that owes this
-comparison declares `regression: required` on its BOARD line -- a machine-owned
-field, because a gate that decided "this is a bug fix" by reading a description
-would be the prose-authority failure the rule exists to stop. It then records
-the two halves as anchored events:
-
-```
 REGRESSION-EVIDENCE FAIL verifier:<hex> subject:<hex> -- <what ran>
 REGRESSION-EVIDENCE PASS verifier:<hex> subject:<hex> -- <what ran>
+
+VERIFY -> REVIEW and atomic finish consume
+saipen_engine.oracle.regression_pair_verdict: only ADMISSIBLE passes.
+Missing half: NO_REGRESSION_EVIDENCE; weaker/changed oracle: ORACLE_CHANGED.
+Describing a record is not anchoring it. Work without the field is untouched.
+
+### Declared acceptance preservation (SRC-216)
+
+Native REVIEW/finish enforce AC-NN [WITNESS] outcome through acceptance_contract;
+ordinary PASS never waives criteria. ticket verify preserves full preimages.
+Deletion, redefinition or weaker witnesses require OPS §13's exact operator
+amendment AND independently proven replacements at no weaker floor. Equivalent
+implementation changes need none; legacy untyped Work gains no LIVE proof.
+
+LIVE/MANUAL AC-EVIDENCE requires source=SRC-N: immutable operator observation
+bound to Work, full contract digest, latest BUILD, criterion/result/witness/
+surface. It proves the human report, not automated observation. Model prose or
+a stronger retry cannot authenticate it. Missing/weak/stale/contested inputs
+refuse without writes. Typed supersession preserves independently satisfied
+equivalent criteria; dedicated authority/completion gates remain due.
+
+### Active execution (SRC-212)
+
+Without regression_evidence: executed, evidence is legacy attestation.
+ticket regression ... --evidence executed strengthens it; never downgrade.
+work regression ... --file measures owned VERIFY Work: atomic pair/receipt/
+profile, unchanged phase.
+
+Closed schema:
+```json
+{"schema":1,"command":["node","--test","--test-reporter=tap","control.cjs"],
+ "format":"tap","context":["subject.cjs","control.cjs"],
+ "oracle_files":["control.cjs"],"subject_files":["subject.cjs"],
+ "before":{"subject.cjs":".saipen/evidence/pre/subject.cjs"},"timeout":60}
 ```
 
-`VERIFY -> REVIEW` and the atomic finish both consume
-`saipen_engine.oracle.regression_pair_verdict` over those records and refuse
-anything but `ADMISSIBLE`. A green run is not enough, a weakened oracle is
-`ORACLE_CHANGED`, and a missing half is `NO_REGRESSION_EVIDENCE`. Anchoring
-matters as everywhere else: a line DESCRIBING an evidence record is not one.
-Tickets that do not declare the field are untouched.
+Context: all dependencies/config/owned inputs, disjoint oracle/subject.
+Before material: evidence (null=absent). Refuse links/root memory/Git.
+Timeout: 1..5400s; native argv; {python} selects Python.
+Formats: unittest, pytest, tap, playwright-json; pin reporters
+(--reporter=json for Playwright). One runtime/environment/oracle, completed
+FAIL/exit1 before and PASS/exit0 after. Startup/timeout/zero tests refuse;
+reap descendants. REVIEW/finish recheck committed carrier integrity, Work/lineage/Source/
+acceptance, cycle/Attempt/inputs: forged/changed/stale refuse. Replay grants no
+authority. Dry-run executes/writes nothing; read-only refuses. Other checks
+remain due; copies claim no sandbox.
 
-**Changing the verifier is allowed, and it spends the old evidence.** A test
-can be wrong and a requirement can move, so tests are not frozen during a
-fix; what is forbidden is spending the old FAIL on a new oracle. A changed
-test, fixture, expected value, mock, seed, tolerance, golden file, discovery
-pattern, timeout or verification command means three things: record why it
-changed on its own evidence, give the new oracle its own red control, and
-re-establish the pre-fix FAIL against it. Old-version FAIL plus new-version
-PASS is not a pair. Changing implementation and test in one pass is the same
-refusal for a different reason -- nothing attributes the green to either
-side. `saipen_engine/oracle.py` decides that arithmetic; a digest proves the
-verifier changed or did not, never that it is correct, which is why the red
-control above is the other half and neither is sufficient alone.
+Changing the verifier is allowed; tests are not frozen during a fix. Any test, fixture, expectation,
+mock, seed, tolerance, golden, discovery pattern, timeout or command change
+invalidates old evidence: record why on its evidence, give the new oracle
+its own red control and re-establish pre-fix FAIL. Old FAIL plus new-oracle PASS is not a pair.
+Changing implementation and test together refuses because attribution
+is lost. oracle.py decides arithmetic; digests prove identity, not correctness:
+both identity and red control are required.
 
 ## Failure and retry
 
-Reproduce exactly and quote the decisive error. Check cheap suspects first;
-LOG each hypothesis, test it, and fix the root cause. CORE `PHASE-DELTA-01`
-forbids repeating a failed attempt without changed evidence, input,
-environment, or hypothesis.
+Reproduce exactly; quote the decisive error. Check cheap suspects, LOG each
+hypothesis/test and fix the cause. CORE PHASE-DELTA-01 forbids retry without
+changed evidence/input/environment/hypothesis.
 
-**Cap: 3 dead hypotheses OR 2 failed fix cycles -> block this ticket.** Each
-failed fix cycle increments `| verify_attempts: N`; absent means zero. At the
-cap, canonical `ticket block` moves it to `## BLOCKED` and sets `| blocker:`.
-Attempt history remains in `verify_attempts:` and LOG. `ticket unblock`
-requires the lifting decision, removes the active blocker, and resets the
-current attempt budget; an identical retry remains forbidden.
+Cap: 3 dead hypotheses OR 2 failed fix cycles -> block. Each failed cycle
+increments | verify_attempts: N (absent=0). At cap, canonical ticket block
+moves Work to ## BLOCKED and sets | blocker:. Preserve attempts in BOARD/LOG.
+ticket unblock needs the lifting decision, removes blocker, resets the current
+attempt budget; identical retries stay forbidden.
 
-Another workable TODO exists: leave this ticket blocked and route to SCOUT or
-BUILD for that work. None exists: enter session-level BLOCKED with a concrete
-`WAIT:`. `phases/blocked.md` owns that decision.
+Another workable TODO: keep this Work blocked, route to its SCOUT/BUILD.
+None: session BLOCKED with concrete WAIT: (phases/blocked.md).
 
-Before another ticket, preserve and remove only this failed attempt's partial
-edits:
-
-- With Git, save `git diff` to `.saipen/kitchen/failed/T-###.patch`, restore
-  only its tracked paths, and move only untracked files proven created by this
-  attempt beside the patch. Never use blanket `git clean`; preserve unrelated
-  dirty work. Record any mid-attempt commit in the blocker.
-- Without Git, copy its edited files to the same bounded kitchen area and say
-  plainly that the tree still carries partial changes.
-
-These steps are reversible failed-attempt recovery; generic authorization and
-checkpoint mechanics remain in CORE/OPS.
+Before switching tickets, preserve/remove ONLY this failed attempt's partial
+edits. With Git: save git diff to .saipen/kitchen/failed/T-###.patch, restore
+only owned tracked paths, move only proven attempt-created untracked files
+beside it. Never blanket git clean or disturb unrelated dirt; record mid-attempt
+commits in the blocker. Without Git: copy edited files to that bounded kitchen
+and state that partial changes remain in the tree. Recovery is reversible;
+generic authorization/checkpoints remain CORE/OPS.
 
 ## Exit and evidence
 
-PASS requires the ticket check, applicable harness, regression coverage, both
-instrument controls where required, LOGged command/results, and confidence.
-Transition to REVIEW; there is no next-ticket branch after a PASS.
+PASS needs the ticket check, applicable harness/regressions, both required
+instrument controls, LOGged commands/results and confidence. Then
+REVIEW, never next ticket.
 
-Under `execution_intent: goal`, VERIFY's unique accounting point increments
-`goal_tickets` once per pass and writes `DEC: goal_tickets N->M` before the
-checkpoint. MAINTENANCE §2.4 owns persistence, the 20-ticket cap, stop shape,
-and reauthorization.
+For execution_intent: goal, this unique accounting point increments
+goal_tickets once per pass and writes DEC: goal_tickets N->M before checkpoint.
+Persistence/20-ticket cap/stop/reauthorization: MAINTENANCE §2.4.

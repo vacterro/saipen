@@ -944,12 +944,19 @@ def validate_project(root, current_agent: str | None = None) -> list[str]:
     # CORE-006: evaluate block-park semantics against the complete sealed+active
     # history, not just the active LOG. Reuse the frozen HistorySnapshot that
     # _read already captures; here we capture it fresh for post-write verification.
+    # SRC-026:R005 (T-1304): a history that cannot be read is a FINDING, kept
+    # with its cause. It used to be swallowed here and the None handed to the
+    # ledger contract below, which dereferenced it -- so the one condition a
+    # post-write verifier most needs to report reached the operator as
+    # `AttributeError: 'NoneType' object has no attribute 'illegal_lines'`.
+    _history_unreadable = None
     try:
         from .log import read_history_snapshot
 
         _history = read_history_snapshot(root)
-    except Exception:
+    except Exception as exc:
         _history = None
+        _history_unreadable = f"{type(exc).__name__}: {exc}"
     errors.extend(
         validate_texts(state, board, log, current_agent=current_agent, sealed_events=_history)
     )
@@ -964,7 +971,13 @@ def validate_project(root, current_agent: str | None = None) -> list[str]:
     # history_contract_errors(root), which would re-read the entire ledger
     # (sealed segments + active LOG) a second time. The contract is proved
     # once, from the same bytes the post-write verification already saw.
-    errors.extend(f"LOG: {e}" for e in snapshot_contract_errors(_history))
+    if _history is None:
+        errors.append(
+            "LOG: complete history unreadable, so the ledger contract cannot be proved "
+            f"-- {_history_unreadable}"
+        )
+    else:
+        errors.extend(f"LOG: {e}" for e in snapshot_contract_errors(_history))
     if (root / ".saipen" / "STORES.json").exists() or (
         root / ".saipen" / "STORAGE_REGISTRY.json"
     ).exists():

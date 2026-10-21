@@ -207,7 +207,9 @@ class DryRunPurityFixture(unittest.TestCase):
 #: never bring any of them into existence on a pristine project.
 LINEAGE_ARTIFACTS = (
     ".saipen/IDENTITY.md",
-    ".saipen/recovery/settled/.receipt-index.json",
+    # SRC-026:R009: a settlement advances the bounded projection; the
+    # monolithic `.receipt-index.json` it used to write is retired.
+    ".saipen/recovery/settled-index/head.json",
     ".saipen/recovery/ops/op-migrate-lineage/operation.json",
     ".saipen/recovery/settled/op-migrate-lineage/operation.json",
     ".saipen/locks/core.lock",
@@ -496,10 +498,11 @@ class ReverifyDryRunPurityTests(DryRunPurityFixture):
         receipts_before = _receipt_names(project)
         _result, before, created = self._plan(project, "T-001")
 
-        # the carrier, the migration receipt and the settled receipt index this
+        # the carrier, the migration receipt and the settled projection this
         # project already owns must all survive byte-identical
         self.assertTrue((project / ".saipen/IDENTITY.md").is_file())
-        self.assertTrue((project / ".saipen/recovery/settled/.receipt-index.json").is_file())
+        self.assertTrue((project / ".saipen/recovery/settled-index/head.json").is_file())
+        self.assertFalse((project / ".saipen/recovery/settled/.receipt-index.json").exists())
         self.assertEqual(before, _tree_state(project), "dry-run changed existing bytes")
         self.assertEqual(created, [], "dry-run created durable paths")
         self.assertEqual(_receipt_names(project), receipts_before)

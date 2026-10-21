@@ -13,7 +13,9 @@ Layers (SRC-030 Parts 2-5):
 
 2. Protected canonical namespace -- `.saipen/STATE.md`, `.saipen/BOARD.md`,
    `.saipen/LOG.md`, `.saipen/IDENTITY.md`, `.saipen/logs/**`,
-   `.saipen/intake/**`, `.saipen/recovery/**`, and the exact
+   `.saipen/intake/**`, `.saipen/recovery/**`, the engine-written
+   `.saipen/evidence/suite/**` and `.saipen/evidence/core-unit/**` records,
+   and the exact
    `.saipen/cache/admission/**` runtime-evidence namespace. Other
    `.saipen/cache/` projections remain mutable. The proposed target is
    CANONICALLY resolved against the project root before classification, so
@@ -87,10 +89,23 @@ PROTECTED_CANONICAL_NAMESPACES = (
     ".saipen/IDENTITY.md",
     ".saipen/logs",
     ".saipen/intake",
+    ".saipen/improve-reconciliation",
     ".saipen/recovery",
     # Durable host admission evidence is protected exactly; disposable siblings
     # under `.saipen/cache/` remain ordinary runtime caches.
     ".saipen/cache/admission",
+    ".saipen/cache/ingress",
+    # T-1658: the declared suite and its records are written by the engine
+    # that ran the suite. A file tool writing one would put a model-written
+    # number on the operator's VALIDATION line; the rest of `.saipen/evidence/`
+    # stays an ordinary place to keep evidence.
+    ".saipen/evidence/suite",
+    # T-1660: the same for the declared core-unit family. A record there is
+    # what the SHIP gate and the digest accept once a LOG line cites its
+    # digest, so it is written by the process that ran the family and by
+    # nothing else. `.saipen/cache/core-unit/` (durations, red sections)
+    # decides nothing and stays an ordinary runtime cache.
+    ".saipen/evidence/core-unit",
 )
 
 ENFORCEMENT_STRENGTH_BLOCKING = "BLOCKING"
@@ -517,8 +532,13 @@ def _hard_link_alias(root: Path, absolute: Path) -> tuple[str, str] | None:
     )
 
 
-def canonicalize_target(root: Path, target_path: str | Path) -> tuple[str, str, str]:
-    """Resolve a proposed target against the project root before classification.
+def canonicalize_target(
+    root: Path, target_path: str | Path, *, target_base: Path | str | None = None,
+) -> tuple[str, str, str]:
+    """Resolve a proposed target before classification against the project root.
+
+    Native admission targets default to the project root. A host tool's
+    relative targets instead use its actual working directory (T-1705).
 
     Returns ``(classification, canonical_relative_or_abs, detail)`` where
     classification is one of:
@@ -543,7 +563,8 @@ def canonicalize_target(root: Path, target_path: str | Path) -> tuple[str, str, 
     decide.
     """
     raw = Path(_win32_spelling(str(target_path)))
-    absolute = raw if raw.is_absolute() else Path(root) / raw
+    base = Path(target_base if target_base is not None else root)
+    absolute = raw if raw.is_absolute() else base / raw
     try:
         canonical = absolute.resolve(strict=False)
     except OSError:
@@ -705,7 +726,7 @@ def _pending_operation_targets(root: Path, ops) -> set[str] | None:
 #: The one command that lifts each hard stop `state.binding_brake` reports.
 #: A refusal that names the brake but not its exit is the loop T-1377 measured.
 _BRAKE_ROUTES = {
-    "blocker": "saipen recover resolve-blocker <decision>",
+    "blocker": "saipen recover resolve-blocker <SRC-###>",
     "blocked": "saipen ticket unblock <T-###> <decision>",
     # A printed command has to BE a command: the reachability control refuses a
     # route its own guard would not classify, and a trailing comment made this
@@ -747,7 +768,7 @@ def protocol_snapshot(
     """
     from .board import claim_session_digest, claim_status, parse_board
     from .journal import scan_pending
-    from .state import binding_brake, parse_state_or_error, persisted_home_error
+    from .state import binding_brake, home_refusal, parse_state_or_error
 
     snapshot: dict = {"block": None, "detail": ""}
 
@@ -781,10 +802,14 @@ def protocol_snapshot(
     # demanding a path. `rebind-home --auto` adopts the runtime host bootstrap
     # already proved and refuses with the manual route when nothing is proven,
     # so a refusal never asks the operator to retype what SAIPEN already knows.
-    home_problem = persisted_home_error(state.get("saipen_home"))
-    if home_problem is not None:
-        snapshot["route"] = "saipen rebind-home --auto"
-        return refuse("HOME_REQUIRED", home_problem)
+    # T-1647: a home another account owns is refused under its own code and
+    # with no rebind route -- it is unreadable, not dead.
+    home_refused = home_refusal(state.get("saipen_home"))
+    if home_refused is not None:
+        code, home_problem, route = home_refused
+        if route:
+            snapshot["route"] = route
+        return refuse(code, home_problem)
 
     board_text = _read_text_bounded(root / ".saipen" / "BOARD.md", _BOARD_READ_LIMIT)
     if board_text is None:
@@ -1098,12 +1123,16 @@ def evaluate_admission(
     shell_effects: "list[dict] | None" = None,
     shell_effects_unresolved: str | None = None,
     session_id: str | None = None,
+    target_base: Path | str | None = None,
 ) -> dict:
     """Evaluate admission for a proposed tool call or file modification.
 
     ``target_paths`` carries the FULL target set of one proposed effect (a
     multi-file patch, both endpoints of a move). ``targets_unresolved`` marks
     a consequential mutation whose target set could not be trusted.
+    ``target_base`` is the host's working directory for relative file targets;
+    native project-relative callers omit it. Relative escape detection retains
+    the original relative spelling, so rebasing never grants external scope.
     ``shell_effects`` are the destructive filesystem effects a shell command
     was resolved to (`guard_events.destructive_shell_effects`): each is judged
     exactly as the file-tool effect it is, so one effect gets one answer
@@ -1161,6 +1190,19 @@ def evaluate_admission(
     root = Path(root_res.root).resolve()
 
     if (
+        effect == "mutating"
+        and target_base is not None
+        and not Path(_win32_spelling(str(target_base))).is_absolute()
+        and any(not Path(_win32_spelling(candidate)).is_absolute() for candidate in targets)
+    ):
+        return result(
+            ok=False, code=CODE_TARGET_UNRESOLVED, admitted=False,
+            project_root=str(root), action=action_name, effect=effect,
+            target=None, targets=targets, provenance=root_res.provenance,
+            detail="relative host target has no proven absolute working directory",
+        )
+
+    if (
         action_name == "shell"
         and shell_protected_namespace
         and not _ordinary_namespace_targets(root, shell_namespace_targets)
@@ -1210,6 +1252,7 @@ def evaluate_admission(
             action=str(shell_effect.get("action") or "unknown"),
             agent=agent,
             explicit_root=explicit_root,
+            session_id=session_id,
         )
         if not verdict.get("admitted"):
             refused = {key: value for key, value in verdict.items() if key != "duration_ms"}
@@ -1248,7 +1291,9 @@ def evaluate_admission(
     # them refuses the whole host tool before execution.
     resolved: list[tuple[str, str]] = []
     for candidate in targets:
-        classification, canonical, _detail = canonicalize_target(root, candidate)
+        classification, canonical, _detail = canonicalize_target(
+            root, candidate, target_base=target_base,
+        )
         resolved.append((classification, canonical))
         if classification == "protected":
             if effect == "read":

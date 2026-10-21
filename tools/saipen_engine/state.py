@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
 import re
 from pathlib import Path
 
@@ -384,6 +385,32 @@ def binding_wait(
     return None
 
 
+def goal_valve_wait_is_proven(state: dict, goal_counters: dict | None) -> bool:
+    """A budget WAIT needs exact counts reconstructed from canonical history.
+
+    The caller owns that history snapshot. STATE or WAIT wording alone cannot
+    prove a cap, and a counter jump in prose cannot replace counted events.
+    This proves the budget boundary only; it grants no continuation authority.
+    """
+    if state.get("execution_intent") != "goal" or not isinstance(goal_counters, dict):
+        return False
+    counts = []
+    for key in ("goal_waves", "goal_tickets"):
+        value = state.get(key)
+        evidence = goal_counters.get(key)
+        if type(value) is not int or type(evidence) is not int or value < 0 or value != evidence:
+            return False
+        counts.append(value)
+    from .operations import GOAL_TICKET_CAP, GOAL_WAVE_CAP
+
+    waves, tickets = counts
+    if waves < GOAL_WAVE_CAP and tickets < GOAL_TICKET_CAP:
+        return False
+    expected = (f"WAIT: safety valve reached ({waves} waves / {tickets} tickets) "
+                "-- run 'cc' to continue")
+    return state.get("next_action") == expected
+
+
 def binding_brake(state: dict, *, empty_todo: bool = False) -> tuple[str, str] | None:
     """The ONE authoritative hard-stop truth (T-1322).
 
@@ -483,66 +510,26 @@ def install_content_identity(home: Path | None = None) -> str:
     unreadable tree is distinguishable from a real identity and never reads
     as a match.
     """
-    import hashlib
+    from .install_identity import install_fingerprint
 
-    root = Path(home) if home is not None else running_home()
-    frames: list[bytes] = []
-    for pattern in ("VERSION", "saipen/*.md", "saipen/*.json", "tools/**/*.py"):
-        for path in sorted(root.glob(pattern)):
-            if not path.is_file():
-                continue
-            rel = path.relative_to(root).as_posix()
-            try:
-                blob = path.read_bytes()
-            except OSError:
-                continue
-            frames.append(
-                rel.encode("utf-8") + b"\0" + str(len(blob)).encode("ascii") + b"\0" + blob
-            )
-    if not frames:
-        return "missing-v1"
-    digest = hashlib.sha256()
-    for frame in frames:
-        digest.update(frame)
-    return "install-v1:" + digest.hexdigest()
+    return install_fingerprint(home)
 
 
 def running_home_mismatch_error(persisted_home: object) -> str | None:
     """Why the RUNNING install is not the one STATE names, else None.
 
-    T-4. `persisted_home_error` proves the persisted pointer still resolves
+    T-4 / T-1798. `persisted_home_error` proves the persisted pointer still resolves
     to a usable install; it says nothing about WHICH install is answering.
     Two divergent installs both pass it, and nothing in a receipt records
     which engine produced the evidence, so the wrong tree can serve a
     project indefinitely and stay invisible.
-
-    Judged only on an ABSOLUTE pointer, for the same reason
-    `persisted_home_error` is: an absent, empty or relative value carries no
-    machine-local binding to contradict, and a sub-instance legitimately
-    runs under a parent install. This is a GATE, not a routing refusal --
-    `saipen validate` reports it, so an ambiguous install fails conformance
-    loudly without breaking ordinary project routing.
     """
-    if persisted_home is None or not str(persisted_home).strip():
+    from .install_identity import diagnose_install_mismatch
+
+    diag = diagnose_install_mismatch(persisted_home)
+    if not diag["is_blocking"]:
         return None
-    text = str(persisted_home).strip()
-    if not is_absolute_home(text):
-        return None
-    try:
-        named = Path(text).resolve()
-    except OSError:
-        return None
-    running = running_home()
-    if named == running:
-        return None
-    return (
-        f"the RUNNING install is {running} but STATE.saipen_home names {named} -- "
-        f"two divergent installs answer to the same VERSION "
-        f"({_read_running('VERSION') or 'unknown'}). Evidence produced now is "
-        f"attributable to the running one, not the named one. Run saipen "
-        f"through the install STATE names, or repoint the state with "
-        f"`saipen rebind-home`."
-    )
+    return diag.get("detail")
 
 
 def _read_running(*parts: str) -> str | None:
@@ -687,6 +674,9 @@ def state_contract_errors(
     gm = fields.get("goal_mode")
     if gm is not None and not isinstance(gm, bool):
         errors.append("goal_mode must be a boolean")
+    from . import goal_authority
+
+    errors.extend(goal_authority.shape_errors(fields))
     # Execution-intent family conditionals (schema if/then + § 2.4 delegated
     # checks): goal requires its counters; converge requires its target and
     # forbids goal counters; every other intent forbids both families.
@@ -868,44 +858,164 @@ def is_absolute_home(value: object) -> bool:
     return text.startswith("/") or bool(_DRIVE_ABS_RE.match(text)) or bool(_UNC_ABS_RE.match(text))
 
 
-def persisted_home_error(home: object) -> str | None:
-    """Why `STATE.saipen_home` is DEAD, or None when it is usable/unverifiable.
+HOME_USABLE = "usable"
+HOME_UNVERIFIABLE = "unverifiable"
+HOME_DEAD = "dead"
+HOME_INACCESSIBLE = "inaccessible"
+#: The refusal for a home this account may not read (T-1647).
+CODE_HOME_INACCESSIBLE = "CROSS_USER_RUNTIME_UNAVAILABLE"
+CODE_HOME_DEAD = "HOME_REQUIRED"
+HOME_REBIND_ROUTE = "saipen rebind-home --auto"
+
+
+def persisted_home_access(home: object) -> tuple[str, str | None]:
+    """How THIS account stands to `STATE.saipen_home`: `(status, reason)`.
 
     A pointer is judged only when it is ABSOLUTE: that is the form CORE § 1.2
     defines ("the absolute path to the SAIPEN home on the machine that last
     checkpointed"), and it is the only form a later agent can resolve. An
     absent, empty or relative value carries no machine-local binding at all, so
-    it is legacy/unverifiable -- reported as usable here and left to the
-    release gate, exactly like a pre-v7.25.0 state with no pointer.
+    it is legacy/unverifiable and left to the release gate.
 
-    A DEAD absolute pointer is not a warning: the bootloader cannot load the
-    protocol it names, so ordinary mutation must refuse and `saipen
-    rebind-home` is the one operation allowed to repair it.
+    DEAD and INACCESSIBLE are different facts with different cures (T-1647).
+    Defect class: an install in another user's profile answers ACCESS_DENIED,
+    that read as "the runtime is gone", and the two remedies on offer were the
+    two that damage the project -- rebind its pointer for every account, or
+    continue on some other copy of some other version. A dead pointer is
+    repaired by `saipen rebind-home`; an inaccessible one is never rebound.
     """
     if home is None or not str(home).strip():
-        return None
+        return HOME_UNVERIFIABLE, None
     text = str(home).strip()
     path = Path(text)
     if not is_absolute_home(text):
-        return None
-    if not path.is_dir():
-        return f"STATE.saipen_home {text!r} does not resolve to a directory on this machine"
-    if not ((path / "saipen" / "BOOT.md").is_file() or (path / "BOOT.md").is_file()):
+        return HOME_UNVERIFIABLE, None
+    from . import machine_runtime
+
+    # A recorded machine-runtime generation is the machine runtime: it is
+    # judged as the current generation, never as a pruned directory (T-1743).
+    path = machine_runtime.current_generation_for(text) or path
+    denied = (
+        f"STATE.saipen_home {text!r} cannot be read by this account "
+        f"({CODE_HOME_INACCESSIBLE}): the install belongs to another user. It is not a "
+        "dead pointer and is never rebound; " + _inaccessible_remedy(text)
+    )
+    try:
+        os.stat(path)
+        if not path.is_dir():
+            return (
+                HOME_DEAD,
+                f"STATE.saipen_home {text!r} does not resolve to a directory on this machine",
+            )
+        boots = [path / "saipen" / "BOOT.md", path / "BOOT.md"]
+        if not any(candidate.is_file() for candidate in boots):
+            for candidate in boots:
+                # `is_file` reads a refusal as absence on some interpreters.
+                try:
+                    os.stat(candidate)
+                except PermissionError:
+                    return HOME_INACCESSIBLE, denied
+                except OSError:
+                    continue
+            return (
+                HOME_DEAD,
+                f"STATE.saipen_home {text!r} has no saipen/BOOT.md -- the "
+                f"cold-start kernel is not there",
+            )
+        missing = [
+            Path(*parts).as_posix()
+            for parts in HOME_LAYOUT_MARKERS
+            if not path.joinpath(*parts).is_file()
+        ]
+    except PermissionError:
+        return HOME_INACCESSIBLE, denied
+    except OSError:
         return (
-            f"STATE.saipen_home {text!r} has no saipen/BOOT.md -- the "
-            f"cold-start kernel is not there"
+            HOME_DEAD,
+            f"STATE.saipen_home {text!r} does not resolve to a directory on this machine",
         )
-    missing = [
-        Path(*parts).as_posix()
-        for parts in HOME_LAYOUT_MARKERS
-        if not path.joinpath(*parts).is_file()
-    ]
     if missing:
         return (
+            HOME_DEAD,
             f"STATE.saipen_home {text!r} is missing "
-            f"{', '.join(missing)} -- not a usable SAIPEN install"
+            f"{', '.join(missing)} -- not a usable SAIPEN install",
         )
+    return HOME_USABLE, None
+
+
+def _inaccessible_remedy(home: str) -> str:
+    """The ONE next step for a home this account may not read.
+
+    Three situations, three different steps, and the wrong one sends an agent
+    in a circle: told to run the machine runtime while it IS the machine
+    runtime, it can only ask a person what that means.
+    """
+    from . import machine_runtime
+
+    running = machine_runtime.executing()
+    if running is not None:
+        if machine_runtime.projects(running, home):
+            return "the machine runtime running this command stands in for it"
+        return (
+            f"the machine runtime running this command projects "
+            f"{running.get('source_root')!r}, not that home. This needs the operator: "
+            "install the machine runtime from that home, or rebind this project from an "
+            "account that can read it"
+        )
+    launcher = machine_runtime.launcher_path()
+    if launcher:
+        return f"run SAIPEN through the machine runtime installed on this machine: {launcher}"
+    return (
+        "run SAIPEN through the machine runtime, which the operator provides with "
+        "`saipen host machine install`"
+    )
+
+
+def machine_runtime_covers(home: object) -> bool:
+    """Is the engine running this call the registered machine runtime OF `home`?
+
+    That runtime exists for exactly the account that cannot read the project's
+    recorded home, so under it an inaccessible home is covered, not missing --
+    when it is the projection of that home. The projection of another install
+    covers nothing here: serving this project from it would be a substitution.
+    """
+    from . import machine_runtime
+
+    return machine_runtime.projects(machine_runtime.executing(), home)
+
+
+def home_refusal(home: object) -> tuple[str, str, str | None] | None:
+    """`(code, detail, route)` when ordinary mutation must refuse over the
+    persisted home, or None. ONE decision for every gate that asks."""
+    status, reason = persisted_home_access(home)
+    if status == HOME_DEAD:
+        return CODE_HOME_DEAD, str(reason), HOME_REBIND_ROUTE
+    if status == HOME_INACCESSIBLE and not machine_runtime_covers(home):
+        return CODE_HOME_INACCESSIBLE, str(reason), None
+    if status == HOME_USABLE and Path(str(home)).resolve() != running_home():
+        from .install_identity import STATUS_PERSISTED_HOME_UNREADABLE, diagnose_install_mismatch
+
+        diagnosis = diagnose_install_mismatch(home)
+        if diagnosis["status"] == STATUS_PERSISTED_HOME_UNREADABLE:
+            return CODE_HOME_INACCESSIBLE, str(diagnosis["detail"]), None
+        if diagnosis["is_blocking"]:
+            return (
+                CODE_HOME_DEAD,
+                f"home-divergent: {diagnosis['detail']}",
+                HOME_REBIND_ROUTE,
+            )
     return None
+
+
+def persisted_home_error(home: object) -> str | None:
+    """Why ordinary work must refuse over `STATE.saipen_home`, or None.
+
+    None when the home is usable or unverifiable, and when it is unreadable
+    for this account while the running engine is the machine runtime that
+    stands in for it. `home_refusal` adds the code and the route.
+    """
+    refusal = home_refusal(home)
+    return refusal[1] if refusal else None
 
 
 def parse_state_or_error(text: str):
@@ -1137,8 +1247,11 @@ def transition_execution_intent(
     if goal_waves < 0 or goal_tickets < 0:
         raise ValueError("goal counters must be non-negative")
 
+    from .goal_authority import FIELDS as authority_fields
+
     clean = remove_state_fields(
-        text, ("execution_intent", "goal_mode", "goal_waves", "goal_tickets", "converge_target")
+        text, ("execution_intent", "goal_mode", "goal_waves", "goal_tickets",
+               "converge_target", *authority_fields)
     )
     owned = {"execution_intent": intent}
     if intent == "goal":

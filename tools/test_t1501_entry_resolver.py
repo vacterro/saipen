@@ -103,7 +103,29 @@ def _home_of(root: Path) -> str:
     return fields.get("saipen_home")
 
 
-def _entry_cli(args: list[str], root: Path, env: dict | None = None) -> subprocess.CompletedProcess:
+def _entry_cli(args: list[str], root: Path, env: dict | None = None,
+               operator_text=None) -> subprocess.CompletedProcess:
+    if operator_text is not None:
+        from saipen_engine import operator_task
+        from test_operator_origin_support import host_for
+
+        host = host_for(root, create=True)
+        host.offer(root, operator_text, action="goal")
+        env = dict(env or _cold_env())
+        env[operator_task.ENV_HOST_SESSION] = host.session
+        # The resolver still executes its actual rendered launcher and this
+        # fixture's shim. Only that shim's test authority endpoint is supplied;
+        # hostile task bytes remain argv data throughout the original route.
+        helper = str(TOOLS / "test_operator_origin_support.py")
+        native = (
+            f"HELPER = {helper!r}\n"
+            f"sys.argv = [HELPER, '--cold-cli', {str(host.runtime)!r}, REAL, *sys.argv[1:]]\n"
+            "runpy.run_path(HELPER, run_name='__main__')\n"
+        )
+        shim = Path(_home_of(root)) / "tools/saipen.py"
+        shim.write_text(_SHIM.format(real=str(TOOLS / "saipen.py")).replace(
+            "runpy.run_path(REAL, run_name='__main__')\n", native,
+        ), encoding="utf-8")
     return _run([sys.executable, str(TOOLS / "saipen.py"), "host", "entry", *args], root, env)
 
 
@@ -349,7 +371,9 @@ class EntryResolutionMatrix(unittest.TestCase):
                 root = hbt._project(home=str(_runnable_home()))
                 before = sorted(p.name for p in root.iterdir())
                 proc = _entry_cli(
-                    ["--", "start", token, "--json"], root, _cold_env(**operator_request_env(token))
+                    ["--", "start", token, "--json"], root,
+                    _cold_env(**operator_request_env(token)),
+                    operator_text=token,
                 )
                 self.assertEqual(proc.returncode, 0, proc.stdout + proc.stderr)
                 started = json.loads(proc.stdout)
@@ -370,6 +394,7 @@ class EntryResolutionMatrix(unittest.TestCase):
             ["--", "start", "runner smoke task", "--json"],
             root,
             _cold_env(**operator_request_env("runner smoke task")),
+            operator_text="runner smoke task",
         )
         self.assertEqual(started.returncode, 0, started.stdout + started.stderr)
         started = json.loads(started.stdout)

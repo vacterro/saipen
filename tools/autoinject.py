@@ -1195,6 +1195,46 @@ def state_report() -> list[str]:
     return lines
 
 
+def machine_runtime_drift(home: Path | None = None) -> str | None:
+    """`STALE: ...` when a machine runtime projected from this source is not
+    this source's generation; None when it is, or when this source owns none.
+    Read-only: the half `--check` may run."""
+    home = HOME if home is None else home
+    try:
+        from saipen_engine import machine_runtime
+
+        if not machine_runtime.follows(home):
+            return None
+        status = machine_runtime.status(canonical=home)
+    except Exception as exc:  # a report never fails the run that prints it
+        return f"STALE: machine runtime unreadable ({exc})"
+    if status.get("code") == machine_runtime.CODE_READY:
+        return None
+    return f"STALE: machine runtime {status.get('root')} ({status.get('code')})"
+
+
+def converge_machine_runtime(home: Path | None = None) -> str | None:
+    """Refresh the machine runtime on the run that refreshes the agent homes.
+
+    T-1647. The accounts that cannot read this install run its projection, so
+    an upgrade that refreshed every agent home and left the projection behind
+    would strand exactly them, silently. Only a runtime that exists and was
+    projected from THIS source is touched; one line says what happened, None
+    says nothing did. Never raises: a timer is not blocked by it.
+    """
+    home = HOME if home is None else home
+    try:
+        from saipen_engine.host_integration import refresh_machine_runtime
+
+        step = refresh_machine_runtime(home)
+    except Exception as exc:
+        return f"machine runtime NOT refreshed: {exc}"
+    if step is None:
+        return None
+    verdict = "refreshed" if step.get("ok") else "NOT refreshed"
+    return f"machine runtime {verdict}: {step.get('code')} {step.get('detail') or ''}".rstrip()
+
+
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument(
@@ -1236,9 +1276,15 @@ def main(argv: list[str] | None = None) -> int:
     stale = [t for t in present if actual[t] != digest]
     unstamped = [t for t in present if t not in stale and _installed(t) != digest]
 
+    # The machine runtime rides every run that may write, before any early
+    # exit: it has no agent home of its own to be found stale by.
+    machine_line = machine_runtime_drift() if args.check else converge_machine_runtime()
+    if machine_line:
+        print(machine_line)
+
     if not present:
         print("no agent home installed on this machine -- nothing to inject")
-        return 0
+        return 1 if args.check and machine_line else 0
 
     if args.stamp_only:
         # T-1252: `bootstrap/inject.ps1` is the injector the scheduled task
@@ -1279,7 +1325,7 @@ def main(argv: list[str] | None = None) -> int:
             )
         if not stale:
             print(f"fresh: {len(present)} agent home(s) at {digest}")
-        return 1 if stale else 0
+        return 1 if stale or machine_line else 0
 
     if args.quiet_when_fresh:
         if stale or args.force:

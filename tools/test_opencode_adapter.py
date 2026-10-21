@@ -189,6 +189,11 @@ class OpenCodeAdapterIntegration(unittest.TestCase):
             encoding="utf-8",
         )
         cls.tmp = Path(tempfile.mkdtemp(prefix="saipen-opencode-adapter-"))
+        cls.policy_home = cls.tmp / "strict-profile"
+        (cls.policy_home / ".saipen").mkdir(parents=True)
+        (cls.policy_home / ".saipen/authority.json").write_text(
+            '{"mode":"strict"}', encoding="utf-8"
+        )
         cls.staging = cls.tmp / "fastprompter_drag"
         cls.staging.mkdir()
         cls.non_saipen = cls.tmp / "ordinary-project"
@@ -271,10 +276,12 @@ class OpenCodeAdapterIntegration(unittest.TestCase):
             state = (root / ".saipen" / "STATE.md").read_text(encoding="utf-8")
             self.assertIn("phase: BUILD", state)
 
-    @staticmethod
-    def _env(**overrides):
+    @classmethod
+    def _env(cls, **overrides):
         env = {
             "SAIPEN_SKILL_ROOT": str(REPO),
+            "USERPROFILE": str(cls.policy_home),
+            "HOME": str(cls.policy_home),
             "SAIPEN_PYTHON": PYTHON,
             "SAIPEN_GUARD_STARTUP_PROBE": None,
         }
@@ -746,11 +753,17 @@ try {
   process.stdout.write(String(error.message));
 }
 """
+            policy_home = Path(temp) / "strict-profile"
+            (policy_home / ".saipen").mkdir(parents=True)
+            (policy_home / ".saipen/authority.json").write_text(
+                '{"mode":"strict"}', encoding="utf-8"
+            )
+            env = {**os.environ, "USERPROFILE": str(policy_home), "HOME": str(policy_home)}
             proc = subprocess.run(
                 [NODE, "--input-type=module", "-e", script, str(plugin)],
                 capture_output=True,
                 text=True,
-                timeout=30,
+                timeout=30, env=env,
             )
             self.assertEqual(proc.returncode, 0, proc.stderr)
             self.assertIn("PLUGIN_RESTART_REQUIRED", proc.stdout)

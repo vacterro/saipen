@@ -48,6 +48,17 @@ def _grant(old: str, new: str) -> str:
 
 
 class SupersessionFixture(OrchestrationFixture):
+    def command(self, project, argv):
+        from test_hermetic_env import hermetic_env
+        from test_operator_origin_support import cold_command
+
+        env = hermetic_env()
+        command = cold_command(project, argv, env)
+        return subprocess.run(
+            command, cwd=ROOT, env=env, text=True, capture_output=True, check=False,
+            encoding="utf-8", errors="replace",
+        )
+
     def prepare(self, *, evidence_target: str = "T-7") -> tuple[Path, str, str, str]:
         project = self.make_project(active=True, phase="BUILD")
         blocked = ticket_move(
@@ -84,11 +95,19 @@ class SupersessionFixture(OrchestrationFixture):
             self.assertTrue(moved.ok, moved.to_dict())
         finished = finish_ticket(project, successor, "tester")
         self.assertTrue(finished.ok, finished.to_dict())
-        captured = intake.capture(
-            project,
-            _grant("T-7", successor),
-            source_kind="user_instruction",
-        )
+        from test_operator_origin_support import native_operator
+        from saipen_engine import operator_task
+
+        text = _grant("T-7", successor)
+        with native_operator(project, text, action="supersede"):
+            captured = intake.capture(
+                project, text, source_kind="user_instruction",
+                request_provenance=operator_task.witness(text, root=project),
+            )
+            if captured.get("ok"):
+                operator_task.authority_for_receipt(
+                    project, captured["receipt"], existing_only=False,
+                )
         self.assertTrue(captured["ok"], captured)
         return project, successor, evidence, captured["receipt"]
 
@@ -145,12 +164,9 @@ class GreenPathTests(SupersessionFixture):
         project, successor, evidence, authority = self.prepare()
         self.assertTrue(self.supersede(project, successor, evidence, authority).ok)
 
-        proc = subprocess.run(
+        proc = self.command(
+            project,
             [sys.executable, str(TOOLS / "validate.py"), "--project-root", str(project)],
-            cwd=ROOT,
-            text=True,
-            capture_output=True,
-            check=False,
         )
         output = proc.stdout + proc.stderr
         self.assertIn(
@@ -185,19 +201,17 @@ class GreenPathTests(SupersessionFixture):
             ),
             encoding="utf-8",
         )
-        proc = subprocess.run(
+        proc = self.command(
+            project,
             [sys.executable, str(TOOLS / "validate.py"), "--project-root", str(project)],
-            cwd=ROOT,
-            text=True,
-            capture_output=True,
-            check=False,
         )
         output = proc.stdout + proc.stderr
         self.assertIn("supersession T-7 names non-DONE successor", output)
 
     def test_public_cli_is_the_canonical_operation(self):
         project, successor, evidence, authority = self.prepare()
-        proc = subprocess.run(
+        proc = self.command(
+            project,
             [
                 sys.executable,
                 str(TOOLS / "saipen.py"),
@@ -216,10 +230,6 @@ class GreenPathTests(SupersessionFixture):
                 "tester",
                 "--json",
             ],
-            cwd=ROOT,
-            text=True,
-            capture_output=True,
-            check=False,
         )
         self.assertEqual(proc.returncode, 0, proc.stderr or proc.stdout)
         self.assertEqual(json.loads(proc.stdout)["code"], "SUPERSEDED")

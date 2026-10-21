@@ -119,7 +119,6 @@ _READ_TOOLS = frozenset(
         # read class by verified identity. Bootstrap access must not fail
         # merely because mutation admission is unavailable.
         "skill",
-        "question",
     }
 )
 
@@ -236,6 +235,7 @@ _SHELL_DELETE_VERBS = frozenset(
 _SHELL_MOVE_VERBS = frozenset({"mv", "move", "move-item", "mi"})
 _SHELL_RENAME_VERBS = frozenset({"ren", "rename", "rename-item", "rni"})
 _SHELL_MIRROR_VERBS = frozenset({"robocopy", "rsync"})
+_SHELL_WRITE_VERBS = frozenset({"tee", "tee-object", "set-content", "add-content", "out-file"})
 _POSIX_SHELL_VERBS = frozenset({"bash", "sh", "zsh", "dash", "ksh", "busybox"})
 _POWERSHELL_VERBS = frozenset({"powershell", "pwsh"})
 _EVAL_VERBS = frozenset({"eval", "iex", "invoke-expression"})
@@ -289,12 +289,19 @@ _PS_VALUE_PARAMETERS = (
     "credential",
     "stream",
 )
-_PS_ONLY_VERBS = frozenset({"remove-item", "ri", "move-item", "mi", "rename-item", "rni"})
+_PS_WRITE_VERBS = _SHELL_WRITE_VERBS - {"tee"}
+_PS_WRITE_PARAMETERS = (
+    *_PS_VALUE_PARAMETERS, "filepath", "value", "encoding", "width", "inputobject",
+)
+_PS_ONLY_VERBS = (
+    frozenset({"remove-item", "ri", "move-item", "mi", "rename-item", "rni"}) | _PS_WRITE_VERBS
+)
 #: A destructive verb spelled anywhere in a segment the parser could not read.
 #: Used to fail closed rather than report an unread segment as read.
 _DESTRUCTIVE_TEXT = re.compile(
     r"(?i)\b(rm|rmdir|rd|del|erase|remove-item|move-item|mv|move)\b"
 )
+_FILE_WRITE_TEXT = re.compile(r"(?i)\b(tee|tee-object|set-content|add-content|out-file)\b")
 #: A backslash-escaped quote. `_shell_words` runs `shlex` with escaping
 #: disabled, so these tokenize into nonsense rather than raising.
 _ESCAPED_QUOTE = re.compile(r"\\[\"']")
@@ -448,9 +455,9 @@ def _shell_verb(word: str) -> str:
     return name
 
 
-def _ps_parameter(name: str) -> str | None:
-    matches = [full for full in _PS_VALUE_PARAMETERS if full.startswith(name)]
-    return matches[0] if len(matches) == 1 or name in _PS_VALUE_PARAMETERS else None
+def _ps_parameter(name: str, parameters: tuple[str, ...] = _PS_VALUE_PARAMETERS) -> str | None:
+    matches = [full for full in parameters if full.startswith(name)]
+    return matches[0] if len(matches) == 1 or name in parameters else None
 
 
 def _is_redirection(word: str) -> bool:
@@ -465,6 +472,7 @@ def _parse_arguments(verb: str, words: list[str]) -> tuple[list[str], dict, set]
     named: dict[str, list[str]] = {}
     switches: set[str] = set()
     powershell = verb in _PS_ONLY_VERBS
+    parameters = _PS_WRITE_PARAMETERS if verb in _PS_WRITE_VERBS else _PS_VALUE_PARAMETERS
     index = 0
     options_done = False
     while index < len(words):
@@ -484,7 +492,8 @@ def _parse_arguments(verb: str, words: list[str]) -> tuple[list[str], dict, set]
             name, _sep, bound = word[1:].partition(":")
             lowered = name.lower().lstrip("-")
             parameter = (
-                _ps_parameter(lowered) if (powershell or len(lowered) >= 3) and lowered else None
+                _ps_parameter(lowered, parameters)
+                if (powershell or len(lowered) >= 3) and lowered else None
             )
             if parameter:
                 if bound:
@@ -517,7 +526,7 @@ def _absolute(token: str, cwd: str | None) -> str | None:
     pure = PureWindowsPath(token) if windows else PurePosixPath(token)
     if pure.is_absolute() or (windows and pure.root):
         return str(Path(token))
-    if cwd is None:
+    if cwd is None or not Path(cwd).is_absolute():
         return None
     return str(Path(cwd) / token)
 
@@ -667,8 +676,69 @@ def _navigate(verb: str, args: list[str], cwd: str | None, stack: list[str | Non
     return _absolute(os.path.expanduser(destination), cwd)
 
 
+def _output_redirections(segment: str) -> tuple[list[str], str | None]:
+    """Literal output operands, preserving quote boundaries (T-1705).
+
+    Quoted text containing ``>>`` is data. An actual redirection is a write
+    even if the command never spells ``.saipen``. The existing operand owner
+    resolves its target; computed or unreadable operands stay unresolved.
+    """
+    if ">" not in segment:
+        return [], None
+    if _ESCAPED_QUOTE.search(segment):
+        return [], "output redirection has escaped quoting the guard cannot read"
+    targets: list[str] = []
+    quote: str | None = None
+    index = 0
+    while index < len(segment):
+        char = segment[index]
+        if quote is not None:
+            if char == quote:
+                quote = None
+            index += 1
+            continue
+        if char in "'\"":
+            quote = char
+            index += 1
+            continue
+        if char != ">":
+            index += 1
+            continue
+        index += 1
+        if segment[index:index + 1] == ">":
+            index += 1
+        while index < len(segment) and segment[index].isspace():
+            index += 1
+        start = index
+        while index < len(segment):
+            char = segment[index]
+            if quote is not None:
+                if char == quote:
+                    quote = None
+            elif char in "'\"":
+                quote = char
+            elif char.isspace() or char in "<>|;":
+                break
+            index += 1
+        if quote is not None or start == index:
+            return [], "output redirection has no readable literal target"
+        raw = segment[start:index]
+        if re.fullmatch(r"&(?:\d+|-)", raw):
+            continue  # descriptor duplication/closure writes no file
+        if raw.startswith("&"):
+            raw = raw[1:]  # POSIX >&file redirects both output descriptors
+        words = _shell_words(raw)
+        if not words or len(words) != 1:
+            return [], "output redirection target cannot be read as one operand"
+        targets.append(words[0])
+    return targets, None
+
+
 def destructive_shell_effects(command: str, cwd: str | None, _depth: int = 0) -> dict:
-    """Resolve the delete/move effects of one shell command line (T-1354).
+    """Resolve bounded filesystem effects of one shell command line.
+
+    The public name is retained for existing adapters. T-1705 adds literal
+    output redirection and named file writers to T-1354's delete/move effects.
 
     Returns ``{"effects": [{"action", "verb", "targets"}...], "unresolved": str
     | None}``. Targets are absolute. An effect is reported whenever a bounded
@@ -686,12 +756,18 @@ def destructive_shell_effects(command: str, cwd: str | None, _depth: int = 0) ->
         effects.extend(inner["effects"])
         unresolved = unresolved or inner["unresolved"]
     for segment, piped in segments:
+        outputs, why = _output_redirections(segment)
+        effect, operand_error = _operand_effect("write", "redirection", outputs, cwd)
+        effects.extend([effect] if effect else [])
+        unresolved = unresolved or why or operand_error
         words = _shell_words(segment)
         if words is None:
-            if _DESTRUCTIVE_TEXT.search(segment):
+            if _DESTRUCTIVE_TEXT.search(segment) or _FILE_WRITE_TEXT.search(segment):
                 unresolved = unresolved or f"destructive command cannot be parsed: {segment[:80]}"
             continue
-        if _ESCAPED_QUOTE.search(segment) and _DESTRUCTIVE_TEXT.search(segment):
+        if _ESCAPED_QUOTE.search(segment) and (
+            _DESTRUCTIVE_TEXT.search(segment) or _FILE_WRITE_TEXT.search(segment)
+        ):
             # Escaping is disabled in the lexer, so `\"` does not raise -- it
             # tokenizes into nonsense, and the guard then reports a reading it
             # never made. Measured: `rm -rf \".\"` resolved to the single path
@@ -727,6 +803,20 @@ def destructive_shell_effects(command: str, cwd: str | None, _depth: int = 0) ->
         if verb in _CD_VERBS or verb in _PUSHD_VERBS or verb in _POPD_VERBS:
             cwd = _navigate(verb, args, cwd, cwd_stack)
             continue
+        if verb in _SHELL_WRITE_VERBS:
+            operands, named, _switches = _parse_arguments(verb, args)
+            paths = named.get("path") or named.get("literalpath") or named.get("filepath")
+            if paths is None:
+                paths = operands if verb == "tee" else operands[:1]
+            if verb in _PS_WRITE_VERBS and any("," in token for token in paths):
+                unresolved = unresolved or f"{verb} uses a path array the guard cannot resolve"
+                continue
+            effect, why = _operand_effect("write", verb, paths, cwd)
+            effects.extend([effect] if effect else [])
+            unresolved = unresolved or why
+            if not paths and verb != "tee":
+                unresolved = unresolved or f"{verb} supplies no inspectable file target"
+            continue
         if verb == "xargs":
             if any(_shell_verb(word) in _SHELL_DELETE_VERBS | _SHELL_MOVE_VERBS for word in args):
                 unresolved = unresolved or (
@@ -759,7 +849,7 @@ def destructive_shell_effects(command: str, cwd: str | None, _depth: int = 0) ->
         if verb not in (
             _SHELL_DELETE_VERBS | _SHELL_MOVE_VERBS | _SHELL_RENAME_VERBS | _SHELL_MIRROR_VERBS
         ):
-            if launched and _DESTRUCTIVE_TEXT.search(segment):
+            if launched and (_DESTRUCTIVE_TEXT.search(segment) or _FILE_WRITE_TEXT.search(segment)):
                 # A launcher ran something the guard could not reduce to a
                 # verb it knows -- `timeout 5 rm -rf .`, `sudo -u root rm -rf .`
                 # -- so the destructive word in the line is unaccounted for.
@@ -868,6 +958,10 @@ def load_event(raw: str) -> dict:
         value = event.get(field)
         if not isinstance(value, str) or not value.strip():
             raise EventError(f"guard event field {field!r} must be a non-empty string")
+    if "tool_cwd" in event:
+        value = event["tool_cwd"]
+        if not isinstance(value, str) or not value.strip():
+            raise EventError("guard event field 'tool_cwd' must be a non-empty string")
     tool_input = event.get("tool_input", {})
     if tool_input is None:
         tool_input = {}
@@ -1332,6 +1426,26 @@ def _saipen_cli_tokens(command: str) -> list[str] | None:
     return tokens
 
 
+#: A verb the CLI dispatches but a shell line never runs as one canonical
+#: operation, with what is true about it and the spelling that IS admitted
+#: (T-1665: the guard used to call these "not a verb", which they are).
+_NOT_FROM_A_SHELL = {
+    "init": (
+        "`saipen set` is the same command and is admitted from a shell",
+        "saipen set",
+    ),
+    "launch": (
+        "it starts a host process, which the operator runs from their own shell, "
+        "never from inside a host session",
+        None,
+    ),
+    "first-publish-confirm": (
+        "it records the operator's own publication consent, which an agent never types",
+        None,
+    ),
+}
+
+
 def saipen_line_problem(command: str | None) -> tuple[str, str | None] | None:
     """Why a line that starts with `saipen` is not a canonical operation, with
     the corrected command when the verb is a near miss (T-1401); None for a
@@ -1343,6 +1457,18 @@ def saipen_line_problem(command: str | None) -> tuple[str, str | None] | None:
         return None
     if len(words) > 1 and not words[1].startswith(("-", "'", '"')):
         verb = words[1]
+        if not command_effects.is_shell_canonical_verb(verb, words[2:]) and (
+            command_effects.is_known_verb(verb, words[2:])
+        ):
+            routed = command_effects.routed_verb(verb, words[2:])
+            truth, spelling = _NOT_FROM_A_SHELL.get(
+                routed, ("this route admits no shell spelling of it", None)
+            )
+            return (
+                f"`saipen {verb}` is a SAIPEN verb this guard does not run from a "
+                f"shell line: {truth}",
+                spelling,
+            )
         if not command_effects.is_shell_canonical_verb(verb, words[2:]):
             import difflib
 
@@ -1580,6 +1706,14 @@ def provably_read_only_shell(command: str) -> bool:
     return True
 
 
+def is_operator_question(event: dict) -> bool:
+    """Exact registered native identity; a friendly MCP suffix grants nothing."""
+    from .admission import get_adapter
+
+    adapter = get_adapter(str(event.get("host") or "")) or {}
+    return _tool_identity(str(event.get("tool_name") or "")) in adapter.get("question_tools", [])
+
+
 def map_event(event: dict) -> dict:
     """Map a validated event onto the admission action/effect model.
 
@@ -1610,7 +1744,10 @@ def map_event(event: dict) -> dict:
     shell_effects: list[dict] = []
     shell_effects_unresolved: str | None = None
 
-    if tool in _READ_TOOLS:
+    if is_operator_question(event):
+        # No filesystem mutation, but a separate CONTROL boundary below.
+        action = "read"
+    elif tool in _READ_TOOLS:
         action = "read"
     elif tool == "todowrite" and event["host"].lower() == "opencode":
         # Verified OpenCode builtin: updates host/session-local Todo state in
@@ -1664,11 +1801,15 @@ def map_event(event: dict) -> dict:
                     # path list. Carry the finding separately: no fake file target.
                     shell_protected_namespace = True
                     # T-1387: the paths named, for admission to canonicalize.
-                    shell_namespace_targets = shell_namespace_paths(command, event["cwd"])
+                    shell_namespace_targets = shell_namespace_paths(
+                        command, event.get("tool_cwd", event["cwd"]),
+                    )
                     detail = (
                         "shell command explicitly references the protected .saipen namespace"
                     )
-                resolved = destructive_shell_effects(command, event["cwd"])
+                resolved = destructive_shell_effects(
+                    command, event.get("tool_cwd", event["cwd"]),
+                )
                 shell_effects = resolved["effects"]
                 shell_effects_unresolved = resolved["unresolved"]
                 if not detail and (shell_effects or shell_effects_unresolved):
@@ -1796,7 +1937,9 @@ def _record_pending_ingress(event: dict, project_root: str | None, mapped: dict)
     record(root, payload, str(mapped["canonical_next_command"]))
 
 
-def evaluate_event(event: dict, project_root: str | None = None) -> dict:
+def evaluate_event(
+    event: dict, project_root: str | None = None, *, question_context_provider=None,
+) -> dict:
     """One host event -> one admission verdict carrying its mapped event.
 
     The guard CLI and every in-process caller share this, so the effect class a
@@ -1806,6 +1949,19 @@ def evaluate_event(event: dict, project_root: str | None = None) -> dict:
     from .admission import effective_strength, evaluate_admission
 
     mapped = map_event(event)
+    if isinstance(event.get("host_ingress"), dict):
+        from . import operator_task
+        from .paths import resolve_project_root
+        resolved = resolve_project_root(
+            Path(event["cwd"]) if event.get("cwd") else None,
+            explicit=project_root,
+        )
+        if resolved.ok and resolved.root:
+            operator_task.admit_host_ingress(
+                event["host_ingress"],
+                resolved.root,
+                event_session=event.get("session_id"),
+            )
     verdict = evaluate_admission(
         event["cwd"] if not project_root else None,
         target_path=mapped["target_path"],
@@ -1819,7 +1975,26 @@ def evaluate_event(event: dict, project_root: str | None = None) -> dict:
         shell_effects=mapped["shell_effects"],
         shell_effects_unresolved=mapped["shell_effects_unresolved"],
         session_id=mapped["session_id"],
+        target_base=event.get("tool_cwd", event["cwd"]),
     )
+    if is_operator_question(event) and verdict.get("admitted") and verdict.get("applicable"):
+        from .response_surface import gate_operator_question
+
+        context = None
+        if question_context_provider is not None:
+            try:
+                context = question_context_provider(Path(verdict["project_root"]))
+            except Exception:
+                # Missing authority is a diagnostic, never a model menu.
+                context = None
+        question = gate_operator_question(event.get("tool_input"), context=context)
+        verdict["operator_question"] = question
+        if not question["admitted"]:
+            verdict.update(
+                ok=False, admitted=False, code="VALIDATION_FAILED",
+                detail=question["detail"],
+                canonical_next_command=question["canonical_next_command"],
+            )
     if mapped.get("canonical_next_command"):
         # T-1363: an ingress line whose payload cannot travel literally is not
         # admitted as an ordinary shell effect. Running it would hand the

@@ -61,6 +61,7 @@ def max_iterations() -> int:
             return value
     return MAX_ITERATIONS
 
+
 CONTINUE_BUDGET_EXHAUSTED = "CONTINUE_BUDGET_EXHAUSTED"
 CONTINUE_FIXED_POINT = "CONTINUE_FIXED_POINT"
 
@@ -82,12 +83,26 @@ PROMOTE_FUTURE_GATE = "promote-future-gate"
 #: handing back "run saipen future refresh" as a required human action.
 REFRESH_FUTURE_GATE = "refresh-future-gate"
 REFINE_FUTURE_GATE = "refine-future-gate"
+#: T-1797 / SRC-257: Auto-consuming an external audit generation in audit/ is
+#: mechanical when the session has continuation authority -- no manual routing needed.
+APPLY_AUDIT_INGEST = "apply-audit-ingest"
+#: T-1798 / SRC-258: Auto-converging install pointer onto verified running engine
+#: is mechanical under active continuation authority -- no manual routing needed.
+APPLY_REBIND_HOME = "apply-rebind-home"
 #: A 45-document corpus must not consume an unbounded autonomous invocation:
 #: one refinement per chain, then ordinary routing.
 MAX_REFINEMENTS_PER_CHAIN = 1
 IDLE_MAINTAIN = "idle-maintain"
 REFUSAL = "refusal"
 STOP = "boundary"
+
+#: Truthful idle / terminal disposition constants (SAIHANDOFF / T-1807 / T-1619).
+NO_ADMISSIBLE_WORK = "no-admissible-work"
+ALL_REQUIREMENTS_COMPLETE = "all-requirements-complete"
+ALL_WORK_COMPLETE = "all-work-complete"
+IDLE_BLOCKED_EXTERNAL = "idle-blocked-external"
+IDLE_OPERATOR_REQUIRED = "idle-operator-required"
+IDLE_FUTURE_GATED = "idle-future-gated"
 
 
 def classify_route(routed: dict, state: dict, board: dict) -> str:
@@ -101,6 +116,10 @@ def classify_route(routed: dict, state: dict, board: dict) -> str:
         return REFUSAL
     action = str(routed.get("action") or "")
     reason = str(routed.get("reason") or "")
+    if action == "saipen rebind-home --auto" or reason == "rebind-home":
+        return APPLY_REBIND_HOME
+    if reason == "audit-inbox" and action == "saipen audit ingest":
+        return APPLY_AUDIT_INGEST
     if (
         reason == "unprojected-source-append"
         and routed.get("receipt")
@@ -144,6 +163,11 @@ def classify_route(routed: dict, state: dict, board: dict) -> str:
         ):
             return FINISH_AT_SHIP
     if action == "saipen continue" and reason == "maintain":
+        if (
+            state.get("execution_intent") == "goal"
+            and routed.get("stop_reason") == "NO_ADMISSIBLE_WORK"
+        ):
+            return STOP
         return IDLE_MAINTAIN
     return STOP
 
@@ -151,7 +175,5 @@ def classify_route(routed: dict, state: dict, board: dict) -> str:
 def state_identity(state: dict, board_text: str) -> str:
     """Cheap productive-change witness: phase, task, last_event + BOARD bytes."""
     board_digest = hashlib.sha256((board_text or "").encode("utf-8")).hexdigest()[:16]
-    payload = (
-        f"{state.get('phase')}|{state.get('task')}|{state.get('last_event')}|{board_digest}"
-    )
+    payload = f"{state.get('phase')}|{state.get('task')}|{state.get('last_event')}|{board_digest}"
     return hashlib.sha256(payload.encode("utf-8")).hexdigest()[:16]

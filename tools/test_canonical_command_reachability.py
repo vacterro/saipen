@@ -112,7 +112,7 @@ class CanonicalCommandReachabilityTests(unittest.TestCase):
         """Guard: an empty harvest would pass this file silently."""
         found = harvested()
         self.assertGreater(len(found), 10, found)
-        self.assertIn("saipen recover resolve-blocker <decision>", found)
+        self.assertIn("saipen recover resolve-blocker <SRC-###>", found)
 
     def test_a_literal_is_harvested_whole(self):
         """T-1383: the harvest read a literal only up to its first quote of

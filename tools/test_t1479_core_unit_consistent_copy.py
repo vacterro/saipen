@@ -121,7 +121,7 @@ class ConsistentCopyTests(unittest.TestCase):
                 write()
             return real_ignore(directory, names)
 
-        def family(sandbox, _family, *, spool):
+        def family(sandbox, _family, *, spool, owner=None):
             sandbox_saipen = Path(sandbox) / ".saipen"
             self.seen.append((_state_event(sandbox_saipen), _log_tail(sandbox_saipen)))
             (Path(spool) / "stderr").write_bytes(b"\nRan 0 tests in 0.0s\n\nOK\n")

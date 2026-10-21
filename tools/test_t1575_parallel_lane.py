@@ -143,14 +143,14 @@ class RunnerWiringTests(unittest.TestCase):
             seen["live"] = inflight.current(root)
             raise Stop
 
-        args = mock.Mock(ticket="T-9", fresh=True, timeout=None, jobs=1)
+        args = mock.Mock(ticket="T-9001", agent=None, fresh=True, timeout=None, jobs=1)
         with mock.patch.object(core_unit, "load_baseline", return_value=({}, None)), \
                 mock.patch.object(core_unit, "tree_fingerprint", return_value="f"), \
                 mock.patch.object(core_unit, "run_family", side_effect=fake_run), \
                 self.assertRaises(Stop):
             core_unit._evidence(Path(root), args)
         self.assertIsNotNone(seen["live"])
-        self.assertEqual(seen["live"]["ticket"], "T-9")
+        self.assertEqual(seen["live"]["ticket"], "T-9001")
         self.assertIsNone(inflight.current(root))
 
 

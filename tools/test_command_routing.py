@@ -54,6 +54,7 @@ def _sandbox_user_config(testcase: unittest.TestCase) -> None:
     patcher.start()
     testcase.addCleanup(patcher.stop)
 
+
 # The seven Cyrillic-confusable twins, pinned as an explicit expectation so a
 # silent change to either the table or the map cannot recreate drift without
 # this test going red. DERIVED twins are cross-checked against this dict in
@@ -738,9 +739,12 @@ class CommandSemanticsTests(unittest.TestCase):
             "# Log\n\n- 01.01.20 00:00 [E-001] [T-010] [agent: aleks] RUN: build\n",
             encoding="utf-8",
         )
+        from saipen_engine.journal import ensure_project_lineage
+
+        ensure_project_lineage(proj)
         return proj
 
-    def _cli(self, proj, *args, dry_run=True):
+    def _cli(self, proj, *args, dry_run=True, operator_text=None):
         cmd = [
             sys.executable,
             str(SAIPEN_PY),
@@ -752,14 +756,24 @@ class CommandSemanticsTests(unittest.TestCase):
             cmd.append("--dry-run")
         cmd += list(args)
         env = {**os.environ, "PYTHONIOENCODING": "utf-8", "PYTHONUTF8": "1"}
+        env.pop("SAIPEN_TASK_SHA256", None)
         # `gg`/`goal` is an ingress authority door (SRC-164): an objective only
         # pivots execution when the operator's own bytes are carried. These
         # fixtures exercise the trusted door; unwitnessed ingress has its own
         # incident controls in test_ingress_authority.
-        if args and args[0] in ("gg", "goal") and len(args) > 1 and not args[1].startswith("--"):
+        witnessed_text = operator_text
+        if operator_text is not None:
+            from test_fixture_support import operator_request_env
+
+            env.update(operator_request_env(operator_text))
+        elif args and args[0] in ("gg", "goal") and len(args) > 1 and not args[1].startswith("--"):
             from test_fixture_support import operator_request_env
 
             env.update(operator_request_env(args[1]))
+            witnessed_text = args[1]
+        from test_operator_origin_support import cold_command
+
+        cmd = cold_command(proj, cmd, env, operator_text=witnessed_text)
         proc = subprocess.run(
             cmd,
             capture_output=True,
@@ -775,6 +789,33 @@ class CommandSemanticsTests(unittest.TestCase):
             except ValueError:
                 payload = {"_unparseable_stdout": proc.stdout}
         return proc.returncode, payload, proc.stdout
+
+    def _make_goal_valve(self, name, objective):
+        """Build a bounded goal with a real objective pivot and spent cap."""
+        from saipen_engine import codec, operations, state
+
+        proj = self._make(
+            name,
+            intent="goal",
+            state_extra="goal_waves: 0\ngoal_tickets: 0\n",
+        )
+        result = operations.set_goal_intent(proj, "aleks", objective)
+        self.assertTrue(result.ok, result.to_dict())
+        state_path = proj / ".saipen" / "STATE.md"
+        state_path.write_text(
+            state.patch_state(
+                codec.read_doc(state_path),
+                {
+                    "goal_waves": 3,
+                    "goal_tickets": 20,
+                    "next_action": (
+                        "WAIT: safety valve reached (3 waves / 20 tickets) -- run 'cc' to continue"
+                    ),
+                },
+            ),
+            encoding="utf-8",
+        )
+        return proj
 
     def _state(self, proj):
         import saipen_engine.state as ST
@@ -820,25 +861,48 @@ class CommandSemanticsTests(unittest.TestCase):
         self.assertEqual(results["continue"], results["cc"])
 
     def test_bare_continue_cc_identical_on_tripped_goal_valve(self):
-        """Even under a tripped goal valve the three forms route to the same
-        reauthorize-valve transition (they are one handler)."""
-        proj = self._make(
-            "equiv-valve", intent="goal", state_extra="goal_waves: 3\ngoal_tickets: 20\n"
-        )
-        results = {}
-        for label, args in (
-            ("bare", []),
-            ("continue", ["continue"]),
-            ("cc", ["cc"]),
-        ):
-            rc, payload, _raw = self._cli(proj, *args)
-            results[label] = (rc, self._semantic(payload))
-        for label in ("bare", "continue", "cc"):
-            rc, sem = results[label]
+        """Aliases share routing semantics; authority comes from the caller."""
+        aliases = (("bare", []), ("continue", ["continue"]), ("cc", ["cc"]))
+
+        unwitnessed = {}
+        for label, args in aliases:
+            proj = self._make(
+                f"equiv-valve-unwitnessed-{label}",
+                intent="goal",
+                state_extra="goal_waves: 3\ngoal_tickets: 20\n",
+            )
+            rc, payload, _raw = self._cli(proj, *args, dry_run=False)
+            self.assertEqual(rc, 1, label)
+            self.assertEqual(payload["code"], "RECONCILE_REAUTH_REQUIRED", label)
+            self.assertTrue(payload["operator_action_due"], label)
+            self.assertTrue(payload["next_action"].startswith("WAIT:"), label)
+            current = self._state(proj)
+            self.assertEqual((current["goal_waves"], current["goal_tickets"]), (3, 20), label)
+            unwitnessed[label] = (
+                rc,
+                payload["code"],
+                payload["operator_action_due"],
+                payload["next_action"],
+            )
+        self.assertEqual(unwitnessed["bare"], unwitnessed["continue"])
+        self.assertEqual(unwitnessed["continue"], unwitnessed["cc"])
+
+        authorized = {}
+        for label, args in aliases:
+            proj = self._make(
+                f"equiv-valve-authorized-{label}",
+                intent="goal",
+                state_extra="goal_waves: 3\ngoal_tickets: 20\n",
+            )
+            rc, payload, _raw = self._cli(proj, *args, operator_text="cc")
             self.assertEqual(rc, 0, label)
-            self.assertEqual(sem["code"], "VALVE_REAUTHORIZED", label)
-        self.assertEqual(results["bare"], results["continue"])
-        self.assertEqual(results["continue"], results["cc"])
+            self.assertEqual(payload["code"], "VALVE_REAUTHORIZED", label)
+            self.assertEqual((payload["goal_waves"], payload["goal_tickets"]), (0, 0), label)
+            self.assertEqual(payload["execution_intent"], "goal", label)
+            self.assertNotIn("objective", payload, label)
+            authorized[label] = (rc, self._semantic(payload))
+        self.assertEqual(authorized["bare"], authorized["continue"])
+        self.assertEqual(authorized["continue"], authorized["cc"])
 
     # ---- normal execution: no implicit ADD --------------------------
     def test_normal_cc_enters_converge_never_implicit_add(self):
@@ -893,28 +957,65 @@ class CommandSemanticsTests(unittest.TestCase):
 
     # ---- tripped goal valve: cc reauthorizes, objective unchanged ---
     def test_tripped_goal_valve_cc_reauthorizes_keeps_objective(self):
-        proj = self._make(
-            "goal-valve", intent="goal", state_extra="goal_waves: 3\ngoal_tickets: 20\n"
-        )
+        objective = "Preserve the existing bounded goal objective"
+        proj = self._make_goal_valve("goal-valve-unwitnessed", objective)
         log_before = (proj / ".saipen" / "LOG.md").read_text(encoding="utf-8")
-        # dry-run captures the VALVE_REAUTHORIZED outcome code.
-        rc, payload, _raw = self._cli(proj, "cc")
-        self.assertEqual(rc, 0)
+        before = {
+            str(path.relative_to(proj)): path.read_bytes()
+            for path in proj.rglob("*")
+            if path.is_file()
+        }
+        rc, payload, _raw = self._cli(proj, "cc", dry_run=False)
+        self.assertEqual(rc, 1)
+        self.assertEqual(payload["code"], "RECONCILE_REAUTH_REQUIRED")
+        self.assertTrue(payload["operator_action_due"])
+        self.assertIn("fresh operator cc", payload["detail"])
+        current = self._state(proj)
+        self.assertEqual((current["goal_waves"], current["goal_tickets"]), (3, 20))
+        self.assertEqual((current["execution_intent"], current["task"]), ("goal", "T-010"))
+        self.assertEqual(
+            {
+                str(path.relative_to(proj)): path.read_bytes()
+                for path in proj.rglob("*")
+                if path.is_file()
+            },
+            before,
+        )
+        log_after = (proj / ".saipen" / "LOG.md").read_text(encoding="utf-8")
+        self.assertIn(f"goal pivot -- {objective}", log_after)
+        self.assertEqual(log_before.count("goal pivot --"), log_after.count("goal pivot --"))
+        self.assertNotIn("goal reauthorized --", log_after)
+
+        proj = self._make_goal_valve("goal-valve-authorized", objective)
+        before_state = self._state(proj)
+        log_before = (proj / ".saipen" / "LOG.md").read_text(encoding="utf-8")
+        rc, payload, _raw = self._cli(proj, "cc", dry_run=False, operator_text="cc")
+        self.assertEqual(rc, 0, payload)
         self.assertEqual(payload["code"], "VALVE_REAUTHORIZED")
-        self.assertEqual(payload["goal_waves"], 0)
-        self.assertEqual(payload["goal_tickets"], 0)
-        self.assertEqual(payload["execution_intent"], "goal")
-        # Reauthorization is RESUME semantics: no new objective, no pivot.
-        self.assertNotIn("objective", payload)
-        # A real run persists the reauthorization (counters 0, WAIT cleared).
-        rc2, _payload2, _raw2 = self._cli(proj, "cc", dry_run=False)
-        self.assertEqual(rc2, 0)
         st = self._state(proj)
         self.assertEqual((st["goal_waves"], st["goal_tickets"]), (0, 0))
         self.assertFalse(st["next_action"].startswith("WAIT:"))
-        self.assertEqual(st["execution_intent"], "goal")
+        self.assertEqual(st["execution_intent"], before_state["execution_intent"])
+        self.assertEqual(st["task"], before_state["task"])
+        self.assertEqual(st["phase"], before_state["phase"])
         log_after = (proj / ".saipen" / "LOG.md").read_text(encoding="utf-8")
+        self.assertIn(f"goal pivot -- {objective}", log_after)
         self.assertEqual(log_before.count("goal pivot --"), log_after.count("goal pivot --"))
+        self.assertIn("DEC: goal reauthorized --", log_after)
+
+        operation_path = (
+            proj / ".saipen" / "recovery" / "settled" / payload["op_id"] / "operation.json"
+        )
+        self.assertTrue(operation_path.is_file())
+        operation = json.loads(operation_path.read_text(encoding="utf-8"))
+        self.assertEqual(operation["operation"], "valve")
+        self.assertEqual(operation["status"], "COMMITTED")
+        self.assertEqual(operation["progress_index"], 2)
+        self.assertEqual(
+            {target["path"] for target in operation["targets"]},
+            {".saipen/LOG.md", ".saipen/STATE.md"},
+        )
+        self.assertTrue(all(target["applied"] for target in operation["targets"]))
 
     def test_gg_new_goal_is_create_pivot_not_resume(self):
         proj = self._make("gg-pivot", intent="goal", state_extra="goal_waves: 1\ngoal_tickets: 2\n")
@@ -947,9 +1048,12 @@ class CommandSemanticsTests(unittest.TestCase):
         self.assertEqual(rc, 0, payload)
         self.assertEqual(len(payload["plan_tickets"]), 2)
         from saipen_engine.log import parse_log_line
-        events = [parse_log_line(line) for line in
-                  (proj / ".saipen/LOG.md").read_text(encoding="utf-8").splitlines()
-                  if line.startswith("- ")]
+
+        events = [
+            parse_log_line(line)
+            for line in (proj / ".saipen/LOG.md").read_text(encoding="utf-8").splitlines()
+            if line.startswith("- ")
+        ]
         for ticket in payload["plan_tickets"]:
             self.assertTrue(any(e.get("ticket") == ticket for e in events), ticket)
         self.assertEqual(int(self._state(proj)["last_event"]), events[-1]["event"])
@@ -1023,9 +1127,7 @@ class RetiredShortcutMigrationTests(unittest.TestCase):
         (proj / ".saipen").mkdir(parents=True)
         import datetime
 
-        now = datetime.datetime.now(datetime.timezone.utc).strftime(
-            "%Y-%m-%dT%H:%M:%SZ"
-        )
+        now = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
         (proj / ".saipen" / "STATE.md").write_text(
             "---\n"
             "phase: BUILD\n"
@@ -1098,9 +1200,7 @@ class RetiredShortcutMigrationTests(unittest.TestCase):
         proj = self._make("retired")
         before = self._tree_digest(proj)
         rc, payload, raw, err = self._cli(proj, "ss", dry_run=False)
-        self.assertEqual(
-            self._cli(proj, "ss", dry_run=False), (rc, payload, raw, err)
-        )
+        self.assertEqual(self._cli(proj, "ss", dry_run=False), (rc, payload, raw, err))
         after = self._tree_digest(proj)
         self.assertEqual(before, after)
         self.assertNotEqual(rc, 0)
@@ -1158,9 +1258,7 @@ class RetiredShortcutMigrationTests(unittest.TestCase):
                 with self.subTest(token=token):
                     registry = json.loads(original)
                     registry["shortcuts"][token] = "saipen stop"
-                    (protocol / "REGISTRY.json").write_text(
-                        json.dumps(registry), encoding="utf-8"
-                    )
+                    (protocol / "REGISTRY.json").write_text(json.dumps(registry), encoding="utf-8")
                     binding = mock.patch.dict(table.__globals__, PROTOCOL_DIR=protocol)
                     with binding, self.assertRaises(AssertionError):
                         self.test_registry_holds_st_not_ss()
@@ -1210,9 +1308,7 @@ class RetiredShortcutMigrationTests(unittest.TestCase):
             return _detonate
 
         patches = [
-            mock.patch.object(
-                ops, "stop_checkpoint", side_effect=_spy("stop_checkpoint")
-            ),
+            mock.patch.object(ops, "stop_checkpoint", side_effect=_spy("stop_checkpoint")),
             mock.patch.object(cli, "_status", side_effect=_spy("_status")),
         ]
         return fired, patches
@@ -1317,9 +1413,7 @@ class StorageArityRoutingTests(unittest.TestCase):
         self.assertIn("DURABLE|EPHEMERAL|CACHE|EXTERNAL", payload["detail"])
 
     def test_extra_argument_is_a_command_error(self):
-        rc, payload = self._invoke(
-            "storage", "classify", "V:/_TEMP_/home", "DURABLE", "EXTRA"
-        )
+        rc, payload = self._invoke("storage", "classify", "V:/_TEMP_/home", "DURABLE", "EXTRA")
         self.assertEqual(rc, 2, payload)
         self.assertEqual(payload["code"], "VALIDATION_FAILED")
         self.assertNotEqual(payload["code"], "NOT_SAIPEN_PROJECT")
@@ -1339,7 +1433,10 @@ class StorageArityRoutingTests(unittest.TestCase):
         bare.mkdir()
         for argv, expected in (
             (["storage", "status"], "STORAGE_STATUS"),
-            (["storage", "classify", "V:/_TEMP_/home", "DURABLE"], "STORAGE_POLICY_VIOLATION"),
+            (
+                ["storage", "classify", str(Path(tempfile.gettempdir()) / "home"), "DURABLE"],
+                "STORAGE_POLICY_VIOLATION",
+            ),
             (["storage", "durable", "show"], "STORAGE_ROOTS"),
             (["storage", "ephemeral", "show"], "STORAGE_ROOTS"),
             (["storage", "scratch", "show"], "STORAGE_ROOTS"),

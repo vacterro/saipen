@@ -26,8 +26,8 @@ SAIPEN decides, SAIPATCH transports):
 
 - EXECUTE_SELF and RECONCILE_SELF -> CONTINUE: a mechanical next action
   exists and no human/external authority owns it (recovery is agent work,
-  never a human question; the safety valve is re-authorized by exactly the
-  ordinary ``cc`` its own resume key names -- R7).
+  never a human question). A proven persistent goal checkpoints its budget;
+  a bounded safety valve needs a fresh operator carrier (SRC-112).
 - WAIT_USER -> WAIT_USER; WAIT_EXTERNAL -> WAIT_EXTERNAL; BLOCKED -> BLOCKED.
   COMPLETE -> COMPLETE, only through the eight-condition closure gate (R5).
   INVALID -> INVALID: the state cannot be safely interpreted, a hard stop.
@@ -80,11 +80,11 @@ _NEXT_COMMAND = {CONTINUE: "cc"}
 # pre-authorizes these -- manual verification, destructive confirmation,
 # secrets/input the user owns, first publish, user brakes).
 _HUMAN_WAIT_CATEGORIES = frozenset(
-    {"user brake", "manual-verify", "destructive-op", "first-publish"}
+    {"user brake", "manual-verify", "destructive-op", "first-publish", "safety valve"}
 )
-# R7: only the soft safety-valve boundary (and INIT, which is mechanical
-# bootstrapping, not a human question) keeps ordinary cc legal.
-_PREAUTHORIZED_WAIT_CATEGORIES = frozenset({"safety valve", "init"})
+# INIT is mechanical bootstrap. The persistent goal checkpoint is an executable
+# router action; an unproven bounded safety valve remains a human boundary.
+_PREAUTHORIZED_WAIT_CATEGORIES = frozenset({"init"})
 
 # T-1553: a pre-authorized WAIT keeps ROUTING legal, which is a different
 # question from whether a HUMAN must act before the agent may hand control
@@ -231,6 +231,13 @@ def _routing_disposition(routed: dict | None, action: str, reason: str) -> tuple
             return BLOCKED, "conformance-remediation"
         if reason == "conformance-unknown":
             return INVALID, "conformance-unknown"
+        # T-1751: recovery needs ONE operator decision before the
+        # continuation routes at all (`router.reconcile_gate`) -- a human
+        # boundary, never `cc`; a refusal with no command is a stop.
+        if reason == "reconcile-decision":
+            return WAIT_USER, "reconcile-decision"
+        if reason == "reconcile-refused":
+            return BLOCKED, "reconcile-refused"
         if reason in (
             "state-malformed",
             "board-malformed",
@@ -255,8 +262,10 @@ def _routing_disposition(routed: dict | None, action: str, reason: str) -> tuple
         "read-only-mode": (BLOCKED, "read-only-mode"),
         "unblock": (BLOCKED, "unblock"),
         "audit-inbox-residue": (WAIT_USER, "audit-inbox-residue"),
-        "audit-inbox-invalid": (CONTINUE, "audit-inbox-invalid"),
+        "audit-inbox-invalid": (INVALID, "audit-inbox-invalid"),
+        "queued-source-invalid": (INVALID, "queued-source-invalid"),
         "audit-inbox": (CONTINUE, "audit-inbox"),
+        "audit-inbox-unworkable": (BLOCKED, "audit-inbox-unworkable"),
         "bootstrap": (CONTINUE, "bootstrap"),
         # SRC-085 M3: a red conformance gate that owns the route is a STOP for
         # the transport, never a synthetic `cc` -- the routed action itself
@@ -484,6 +493,13 @@ def automation_block(
                 # the unmet conditions instead of a bare "maintain".
                 missing = [k for k, v in gate["conditions"].items() if not v]
                 reason_code = f"closure-conditions-{'-'.join(missing)}"
+        if reason_code == "wait-safety-valve" and state:
+            from .goal_authority import protocol_home_checkpoint
+
+            # SRC-249: the protocol home's valve is a checkpoint `cc` clears
+            # itself; no human action is due.
+            if protocol_home_checkpoint(project_root, state):
+                disposition = CONTINUE
 
         # Source identity: needed for the fingerprint field and, on the
         # closure path, as the C6 binding truth.
@@ -563,6 +579,12 @@ def automation_block(
         if reason_code in ("conformance-remediation", "conformance-unknown"):
             block["remediation_command"] = remediation_command
             block["diagnostic"] = (routed or {}).get("diagnostic")
+        if reason_code in ("reconcile-decision", "reconcile-refused"):
+            # T-1751: the refusal travels with its owner's words: the code, the
+            # human decision, and the command the agent runs once it is made.
+            block["reconcile_code"] = (routed or {}).get("code")
+            block["operator_action"] = (routed or {}).get("operator_action")
+            block["remediation_command"] = (routed or {}).get("canonical_next_command")
         return block
     except Exception as exc:
         return failed_automation_block(RC_AUTOMATION_FAILURE, f"{type(exc).__name__}: {exc}")

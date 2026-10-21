@@ -200,4 +200,9 @@ def guard_core_mutation(path: str | Path) -> tuple[bool, str]:
                 return True, (
                     f"path {str(p)!r} resolves to Core KNOWLEDGE tree; producers may not mutate it"
                 )
+            if next_part == "improve-reconciliation":
+                return True, (
+                    f"path {str(p)!r} resolves to Core retrospective evidence; "
+                    "producers may not mutate it"
+                )
     return False, ""

@@ -545,6 +545,10 @@ class RealAdapterEvidence(unittest.TestCase):
     PLUGIN = TOOLS.parent / "extensions" / "adapters" / "opencode" / "saipen-guard.js"
 
     def _node_decision(self, status: int | None, stdout: str) -> dict:
+        import shutil
+
+        if shutil.which("node") is None:
+            raise unittest.SkipTest("node executable not installed on this host")
         # Private decision-core probe only. Production exports must contain
         # solely the factory because OpenCode invokes every export.
         tmp = tempfile.TemporaryDirectory()

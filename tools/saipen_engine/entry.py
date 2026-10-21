@@ -345,7 +345,9 @@ def _terminal(root: Path, found: dict | None) -> bool:
     return record.get("section") == "## DONE"
 
 
-def _request_identity(root: Path, render, text: str) -> tuple[str, str | None, dict | None]:
+def _request_identity(
+    root: Path, render, text: str, *, request_provenance=None,
+) -> tuple[str, str | None, dict | None]:
     """(body, supersedes, existing receipt record) for THIS submission.
 
     P0-4. Identical bytes mean "the same transport attempt" only while the
@@ -357,11 +359,20 @@ def _request_identity(root: Path, render, text: str) -> tuple[str, str | None, d
     supersedes: str | None = None
     for _ in range(_MAX_SUPERSEDE_CHAIN):
         body = render(supersedes)
-        found = intake.find_by_body(root, body)
+        found = intake.find_by_body(root, body, request_provenance=request_provenance)
+        if found is None:
+            # Event identity prevents borrowing old authority; the independent
+            # closed predecessor still explains why these words are new Work.
+            predecessor = intake.find_by_body(root, body)
+            if _terminal(root, predecessor):
+                supersedes = predecessor["receipt"]
+                continue
         if not _terminal(root, found):
             return body, supersedes, found
         supersedes = found["receipt"]
-    return render(supersedes), supersedes, intake.find_by_body(root, render(supersedes))
+    return render(supersedes), supersedes, intake.find_by_body(
+        root, render(supersedes), request_provenance=request_provenance,
+    )
 
 
 def _decisions_of(reconciliation: dict | None) -> list[dict]:
@@ -451,6 +462,7 @@ def start_work(
     provenance = operator_task.witness(
         text,
         obligation_met=bool(obligation) and not obligation.get("malformed"),
+        root=root,
     )
     if "code" in provenance:
         return _refuse(provenance.pop("code"), provenance.pop("detail"), **provenance)
@@ -458,7 +470,9 @@ def start_work(
     # carrier is not a retroactive witness for bytes an earlier model supplied.
     if receipt:
         provenance = request.get("request_provenance") or {}
-    authority = operator_task.authority_for_provenance(provenance)
+    authority = operator_task.authority_for_provenance(
+        provenance, root=root, receipt=receipt, existing_only=True,
+    )
     verify_text = (verify or "").strip() or USER_REQUEST_VERIFY
 
     def render(supersedes: str | None) -> str:
@@ -469,7 +483,9 @@ def start_work(
         # successor derived from its text.
         body, supersedes = render(explicit_supersedes), explicit_supersedes
     else:
-        body, supersedes, _existing = _request_identity(root, render, text)
+        body, supersedes, _existing = _request_identity(
+            root, render, text, request_provenance=provenance,
+        )
     identity = {"project_root": str(root.resolve()), "actor": actor, "actor_source": actor_source}
 
     if dry_run:
@@ -496,7 +512,9 @@ def start_work(
             "operation": "start",
             "dry_run": True,
             **identity,
-            "existing_receipt": (intake.find_by_body(root, body) or {}).get("receipt"),
+            "existing_receipt": (intake.find_by_body(
+                root, body, request_provenance=provenance,
+            ) or {}).get("receipt"),
             "reconciliation": preview.get("code"),
             "remediation": preview.get("remediation"),
             "seat": seat,
@@ -615,12 +633,12 @@ def start_work(
 
     # Derive authority again from the receipt that actually survived capture
     # and dedupe. Source persistence can never strengthen it.
-    authority = operator_task.authority_for_receipt(root, captured_receipt)
+    authority = operator_task.authority_for_receipt(root, captured_receipt, existing_only=False)
     # Reconciliation; only witnessed operator ingress can reset its valve.
     reconciliation = reconcile_protocol_state(root, actor, dry_run=False)
     valve_reauthorized = False
     if reconciliation.get("safety_valve_tripped") and authority["reset_bounded_authority"]:
-        reauth = reauthorize_valve(root, actor)
+        reauth = reauthorize_valve(root, actor, operator_authority_source=captured_receipt)
         if not reauth.ok:
             return _refuse(reauth.code, reauth.message, receipt=captured_receipt, **identity)
         valve_reauthorized = True
@@ -634,7 +652,7 @@ def start_work(
     ):
         # A valve already stating its own WAIT reconciles CLEAN; the new task
         # is still the reauthorization it waits for.
-        reauth = reauthorize_valve(root, actor)
+        reauth = reauthorize_valve(root, actor, operator_authority_source=captured_receipt)
         if not reauth.ok:
             return _refuse(reauth.code, reauth.message, receipt=captured_receipt, **identity)
         valve_reauthorized = True
@@ -709,6 +727,7 @@ def start_work(
             verify=verify_text,
             needs=needs,
             supersedes=supersedes,
+            source_receipt=captured_receipt,
         )
         if not projected.ok:
             return wait_on_decision(
@@ -767,13 +786,22 @@ def start_work(
             **base,
         )
     if section == "## BLOCKED":
+        fields = record.get("fields") or {}
+        holder_id = str(fields.get("blocked_on") or "").strip()
+        blocker_str = str(fields.get("blocker") or "").strip()
+        is_handback = bool(
+            holder_id
+            and blocker_str.startswith(f"ACTIVE_DEPENDENCY:{holder_id}")
+            and holder_id in record.get("needs", [])
+        )
+        cmd = f"saipen ticket unblock {ticket}" if is_handback else "saipen status"
         return _decision_wait(
             {
                 "field": "blocker",
                 "surface": "board",
                 "ticket": ticket,
-                "command": f"saipen ticket unblock {ticket} <decision>",
-                "reason": str((record.get("fields") or {}).get("blocker") or "")[:400],
+                "command": cmd,
+                "reason": blocker_str[:400],
             },
             receipt=captured_receipt,
             ticket=ticket,
@@ -795,6 +823,7 @@ def start_work(
             "action": f"PHASE {phase} {ticket}",
             "next_action": state.get("next_action"),
             "parked": None,
+            "work_claimed": True,
         }
     if seat.status == ownership.FOREIGN_LIVE:
         detail, resume = _foreign_seat_route(
@@ -822,7 +851,17 @@ def start_work(
                 "ok": True,
                 "code": "USER_REQUEST_RECORDED",
                 **base,
+                "work_claimed": False,
                 "active_ticket": seat.active_ticket,
+                "ownership_boundary": (
+                    f"active Work {seat.active_ticket} retains execution seat; "
+                    f"new request {ticket} recorded in queue"
+                ),
+                "detail": (
+                    f"user request recorded as {ticket} ({captured_receipt}); "
+                    f"unrelated active Work {seat.active_ticket} is not preempted; "
+                    f"execute next_action for {seat.active_ticket}"
+                ),
                 "action": state.get("next_action"),
                 "next_action": state.get("next_action"),
                 "parked": None,
@@ -866,8 +905,12 @@ def start_work(
             )
         parked = {"ticket": active, "resume_phase": resume_phase, "blocked_on": ticket}
 
-    # 5. Claim into SCOUT.
-    claimed = _call(apply_claim, root, ticket, actor, explicit=True)
+    # 5. Claim into SCOUT. The request is the basis, never a bare override
+    # (T-1757): OBEY outranks START, and the DEC says so.
+    claimed = _call(
+        apply_claim, root, ticket, actor, explicit=True,
+        basis=f"user request {captured_receipt}" if captured_receipt else None,
+    )
     if not claimed.get("ok"):
         return wait_on_decision(
             f"{ticket} could not be claimed: {claimed.get('message') or claimed.get('detail')}",
@@ -884,6 +927,7 @@ def start_work(
         "next_action": claimed.get("next_action"),
         "event_id": claimed.get("event_id"),
         "parked": parked,
+        "work_claimed": True,
     }
 
 

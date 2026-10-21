@@ -43,7 +43,7 @@ from test_fixture_support import witnessed_operator  # noqa: E402
 
 def user_request(project, actor, text, **kwargs):
     """This suite's operator interruptions carry an exact external witness."""
-    with witnessed_operator(text):
+    with witnessed_operator(text, project):
         return _user_request(project, actor, text, **kwargs)
 
 

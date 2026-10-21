@@ -83,7 +83,11 @@
     },
     "converge_target": {
       "type": "string",
-      "enum": ["done", "ship", "crew"],
+      "enum": [
+        "done",
+        "ship",
+        "crew"
+      ],
       "description": "Optional only with execution_intent: converge. Absent or done is plain cc (A-M). ship is ccc: converge through I, SHIP, then run J-M against the shipped HEAD. crew is sc/saipen crew: the serial full-platoon convergence circuit (SC-0..SC-13, extensions/subs/crew.md) whose fixed point is the whole built-in crew; `cc` while crew is active resumes the crew. Cleared with execution_intent at closure."
     },
     "goal_mode": {
@@ -175,6 +179,31 @@
     "improve_gate": {
       "type": "string",
       "description": "T-1415: the named parked gate that holds AUTOMATIC improvement discovery. Written only by `saipen improve hold <T-###>` and removed by `saipen improve unhold` or deterministically when the named ticket resolves (DONE or gone from BOARD). While it names an unresolved ticket, `continue` must route to that gate / WAIT instead of starting an Improve cycle. It never blocks an explicit operator `saipen improve` invocation."
+    },
+    "continuation_authority": {
+      "type": "string",
+      "enum": [
+        "operator_required",
+        "operator_persistent"
+      ]
+    },
+    "authority_source": {
+      "type": "string",
+      "pattern": "^(E|SRC)-0*[1-9][0-9]*$"
+    },
+    "authority_until": {
+      "type": "string",
+      "enum": [
+        "budget",
+        "goal_complete"
+      ]
+    },
+    "safety_valve_mode": {
+      "type": "string",
+      "enum": [
+        "hard_wait",
+        "checkpoint"
+      ]
     }
   },
   "required": [
@@ -199,5 +228,94 @@
       "goal_waves",
       "goal_tickets"
     ]
-  }
+  },
+  "allOf": [
+    {
+      "if": {
+        "anyOf": [
+          {
+            "required": [
+              "continuation_authority"
+            ]
+          },
+          {
+            "required": [
+              "authority_source"
+            ]
+          },
+          {
+            "required": [
+              "authority_until"
+            ]
+          },
+          {
+            "required": [
+              "safety_valve_mode"
+            ]
+          }
+        ]
+      },
+      "then": {
+        "required": [
+          "continuation_authority",
+          "authority_source",
+          "authority_until",
+          "safety_valve_mode",
+          "execution_intent"
+        ],
+        "properties": {
+          "execution_intent": {
+            "const": "goal"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "required": [
+          "continuation_authority"
+        ],
+        "properties": {
+          "continuation_authority": {
+            "const": "operator_persistent"
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "goal_ingress"
+        ],
+        "properties": {
+          "authority_until": {
+            "const": "goal_complete"
+          },
+          "safety_valve_mode": {
+            "const": "checkpoint"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "required": [
+          "continuation_authority"
+        ],
+        "properties": {
+          "continuation_authority": {
+            "const": "operator_required"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "authority_until": {
+            "const": "budget"
+          },
+          "safety_valve_mode": {
+            "const": "hard_wait"
+          }
+        }
+      }
+    }
+  ]
 }

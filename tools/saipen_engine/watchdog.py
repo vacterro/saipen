@@ -212,20 +212,29 @@ class WatchdogStatus:
         }
 
 
+#: How long `_contended` keeps repeating one access. The count alone bounded it
+#: while every attempt returned at once; the lease write now waits out a refused
+#: replace by itself (paths.safe_atomic_write_bytes, T-1648), and fifty repeats
+#: of that wait would stall a single heartbeat for more than a minute.
+_CONTENDED_BUDGET_S = 0.5
+
+
 def _contended(action, attempts: int = 50):
     """Retry a lease-file access that lost a Windows sharing race.
 
     Workers read the lease while the supervisor replaces it; Windows reports
     either side of that race as PermissionError. It is contention, never a
-    missing or fenced lease, so it is retried briefly before it is believed.
+    missing or fenced lease, so it is retried briefly before it is believed:
+    until the attempts or the time budget are spent, whichever comes first.
     """
     import time
 
+    started = time.monotonic()
     for attempt in range(attempts):
         try:
             return action()
         except PermissionError:
-            if attempt == attempts - 1:
+            if attempt == attempts - 1 or time.monotonic() - started >= _CONTENDED_BUDGET_S:
                 raise
             time.sleep(0.01)
 

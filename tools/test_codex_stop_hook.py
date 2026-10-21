@@ -346,15 +346,17 @@ class CodexStopHookTests(unittest.TestCase):
         self.assertEqual(rc, 0)
         self.assertIsNone(out)
 
-    def test_invalid_explicit_project_binding_does_not_fall_back_to_cwd(self):
+    def test_an_invalid_carrier_never_hides_the_session_project(self):
+        # T-1636: a carrier that names nothing usable used to turn this Stop
+        # into ordinary chat. The session's own project is gated instead.
         project = wait_project()
         with tempfile.TemporaryDirectory() as tmp, mock.patch.dict(
             os.environ, {"SAIPEN_PROJECT_ROOT": tmp}
         ):
-            rc, out, _ = stop_event(project, "STATUS: probe")
+            rc, out, _ = stop_event(project, "Everything is fine.")
         self.assertEqual(rc, 0, out)
-        self.assertNotIn("decision", out)
-        self.assertIn("explicit SAIPEN_PROJECT_ROOT", out["systemMessage"])
+        self.assertEqual(out["decision"], "block")
+        self.assertIn("INVALID_OPERATIONAL_PROSE", out["reason"])
 
     def test_valid_explicit_project_binding_wins_over_cwd(self):
         declared = wait_project()
@@ -540,6 +542,162 @@ class InstallAndPreservationTests(unittest.TestCase):
         self.assertEqual(proof["hook_representation"], "SINGLE_HOOK_REPRESENTATION")
         self.assertEqual(proof["inline_events"], [])
         self.assertEqual(proof["hook_trust"], "HOOK_TRUST_UNPROVEN")
+
+
+class CommandLineFaultTests(unittest.TestCase):
+    """T-1630: an unreadable command line records the boundary, never exit 2.
+
+    argparse answers each malformed command line below with status 2, which
+    Codex reads as a hook-level failure and corrects in an unbounded loop.
+    The artifact must instead exit 0 with a parseable, non-blocking capability
+    boundary that names the command-line fault.
+    """
+
+    def _run(self, arguments: list[str], *, reentry: bool = False):
+        tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(tmp.cleanup)
+        project = Path(tmp.name) / "project"
+        (project / ".saipen").mkdir(parents=True)
+        (project / ".saipen" / "STATE.md").write_text("---\nphase: DONE\n---\n", "utf-8")
+        payload = {
+            "hook_event_name": "Stop",
+            "cwd": str(project),
+            "session_id": "codex-stop-test",
+            "turn_id": "turn-1",
+            "stop_hook_active": reentry,
+            "last_assistant_message": "An ordinary explanation.",
+        }
+        proc = subprocess.run(
+            [sys.executable, str(HOOK), *arguments],
+            input=json.dumps(payload),
+            capture_output=True,
+            text=True,
+            cwd=str(ROOT),
+            check=False,
+        )
+        out = proc.stdout.strip()
+        try:
+            parsed = json.loads(out) if out else None
+        except json.JSONDecodeError:
+            parsed = {"raw": out}
+        return proc.returncode, parsed, proc.stderr
+
+    def assert_boundary(self, rc, out, cause):
+        self.assertEqual(rc, 0, out)
+        self.assertIsNotNone(out, "the malformed command line produced no answer")
+        self.assertNotIn("decision", out)
+        self.assertIs(out.get("continue"), True)
+        self.assertEqual(out.get("stopReason"), "SAIPEN_STOP_BOUNDARY_UNENFORCED")
+        message = out.get("systemMessage", "")
+        self.assertIn("SAIPEN_CAPABILITY_BOUNDARY", message)
+        self.assertIn(cause, message)
+
+    def test_an_unknown_argument_records_the_boundary(self):
+        rc, out, _ = self._run(
+            ["--host", "codex", "--saipen-root", ".", "--unexpected", "x"]
+        )
+        self.assert_boundary(rc, out, "unrecognized option(s): --unexpected x")
+
+    def test_a_missing_saipen_root_records_the_boundary(self):
+        rc, out, _ = self._run(["--host", "codex", "--saipen-root"])
+        self.assert_boundary(rc, out, "names no --saipen-root")
+
+    def test_a_foreign_host_records_the_boundary(self):
+        rc, out, _ = self._run(["--host", "claude", "--saipen-root", "."])
+        self.assert_boundary(rc, out, "names host 'claude'")
+
+    def test_a_malformed_command_line_on_reentry_still_never_blocks(self):
+        # stop_hook_active=true must not change the answer: still exit 0, still
+        # the recorded boundary, never a decision that could loop.
+        rc, out, _ = self._run(
+            ["--host", "codex", "--saipen-root", ".", "--unexpected", "x"], reentry=True
+        )
+        self.assert_boundary(rc, out, "unrecognized option(s): --unexpected x")
+
+
+class BrokenArtifactInstallTests(unittest.TestCase):
+    """T-1630: an artifact that cannot read its command line never installs.
+
+    The staged probe runs the real artifact with malformed arguments; a
+    refusal must leave the installed artifact and the shared hooks.json
+    byte-identical, with a named preflight failure instead of a write.
+    """
+
+    #: What a pre-T-1630 artifact answers a command line it cannot read:
+    #: argparse's usage text on stderr and exit status 2 -- the exact
+    #: hook-level failure Codex corrects forever.
+    BROKEN = (
+        b"import sys\n"
+        b'sys.stderr.write("usage: saipen-guard.py --host {codex} --saipen-root ROOT\\n")\n'
+        b'sys.stderr.write("saipen-guard.py: error: unrecognized arguments: --unexpected x\\n")\n'
+        b"sys.exit(2)\n"
+    )
+
+    def _fixture(self, *, seed_artifact: bytes | None = None):
+        tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(tmp.cleanup)
+        base = Path(tmp.name)
+        home = base / "home"
+        codex = home / ".codex"
+        codex.mkdir(parents=True)
+        hooks_json = codex / "hooks.json"
+        hooks_json.write_text(
+            json.dumps(
+                {
+                    "description": "user hooks",
+                    "hooks": {
+                        "Stop": [{"hooks": [{"type": "command", "command": "echo user-stop"}]}]
+                    },
+                },
+                indent=2,
+            )
+            + "\n",
+            encoding="utf-8",
+        )
+        original_config = hooks_json.read_bytes()
+        root = base / "distribution"
+        (root / "extensions" / "adapters" / "codex").mkdir(parents=True)
+        (root / "extensions" / "adapters" / "registry.json").write_bytes(
+            (ROOT / "extensions" / "adapters" / "registry.json").read_bytes()
+        )
+        (root / "extensions" / "adapters" / "codex" / "saipen-guard.py").write_bytes(
+            self.BROKEN
+        )
+        installed = codex / "hooks" / "saipen-guard.py"
+        if seed_artifact is not None:
+            installed.parent.mkdir()
+            installed.write_bytes(seed_artifact)
+        return home, root, hooks_json, original_config, installed
+
+    def test_installer_refuses_an_artifact_that_exits_two(self):
+        from install_host_guard import install
+
+        home, root, hooks_json, original_config, installed = self._fixture()
+        result = install("codex", home, root)
+        activation = result.get("activation") or {}
+        self.assertFalse(activation.get("activated"), result)
+        self.assertEqual(activation.get("code"), "INSTALL_PREFLIGHT_FAILED")
+        self.assertIn("exit 2", str(activation.get("detail")))
+        self.assertTrue(
+            any(p.startswith("install-preflight-failed") for p in result["problems"]),
+            result["problems"],
+        )
+        self.assertFalse(installed.exists(), "a refused artifact was installed")
+        self.assertEqual(hooks_json.read_bytes(), original_config)
+        self.assertFalse(installed.with_name(installed.name + ".staged").exists())
+
+    def test_a_refused_installation_preserves_the_installed_bytes(self):
+        from install_host_guard import install
+
+        previous = b"# the previous, working generation of this hook\n"
+        home, root, hooks_json, original_config, installed = self._fixture(
+            seed_artifact=previous
+        )
+        result = install("codex", home, root)
+        self.assertFalse((result.get("activation") or {}).get("activated"), result)
+        self.assertEqual(installed.read_bytes(), previous)
+        self.assertEqual(hooks_json.read_bytes(), original_config)
+        self.assertFalse(installed.with_name(installed.name + ".previous").exists())
 
 
 class NoSecondValidatorTests(unittest.TestCase):

@@ -55,9 +55,9 @@ def board(root):
 
 class IngressAuthorityTests(unittest.TestCase):
     def trusted(self, root, text=TASK):
-        rc, payload, output = start(
-            root, text, **{operator_task.ENV_TASK_SHA256: pending_ingress.ingress_digest(text)}
-        )
+        from test_t1363_zero_manual_entry import cli
+
+        rc, payload, output = cli(root, "start", text, "--json", operator_text=text)
         self.assertEqual(rc, 0, output)
         return payload
 

@@ -66,7 +66,8 @@ def _capture(project: Path, text: str, *, dry_run: bool = False):
         "authority_capture is missing on this subject -- the ROOT A capability "
         "does not exist, which is exactly the pre-fix red"
     )
-    with witnessed_operator(text):
+    event_id = "authority-capture-" + hashlib.sha256(text.encode()).hexdigest()
+    with witnessed_operator(text, project, action="retire", event_id=event_id):
         return authority_capture(project, AGENT, text, dry_run=dry_run)
 
 

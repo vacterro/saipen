@@ -137,10 +137,12 @@ def authority_error(root: Path, receipt: str, *, ticket: str, agent: str) -> str
             f"authority receipt {receipt} is a {meta.get('source_kind')!r} source; a "
             "handoff needs the operator's own ingress"
         )
-    provenance = meta.get("request_provenance") or {}
-    if provenance.get("witness") != "operator_carrier":
+    from .operator_task import authority_for_receipt
+
+    # A historical witness label is not independently authenticated origin.
+    if not authority_for_receipt(root, receipt)["claim_handoff"]:
         return (
-            f"authority receipt {receipt} has no operator carrier; "
+            f"authority receipt {receipt} has no authenticated operator origin; "
             "model-supplied text cannot grant a live claim handoff. Reachable "
             "routes: the owner runs the handoff, or `saipen claim` once the "
             "owner's lease lapses"

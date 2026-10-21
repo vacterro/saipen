@@ -465,7 +465,7 @@ class TargetDFleetOutputSchemaTests(unittest.TestCase):
 
     def _run(self, *args: str, cwd: Path | None = None) -> tuple[int, dict]:
         proc = subprocess.run(
-            [sys.executable, str(CLI), "fleet", *args, "--json"],
+            [sys.executable, str(CLI), "--json", "fleet", *args],
             capture_output=True, text=True, cwd=str(cwd or REPO), timeout=180, check=False,
         )
         self.assertTrue(proc.stdout.strip(), f"empty stdout; stderr={proc.stderr[-800:]}")
@@ -753,7 +753,11 @@ class TargetCRuntimeFreshnessTests(unittest.TestCase):
             return _fail
 
         project = fresh_project(agent="test-agent")
+        # T-1628: the registry's degraded_mode decides which branch a host
+        # takes, and OpenCode now degrades like Claude. The refusal branch is
+        # pinned here for a host whose integration fails closed.
         with unittest.mock.patch.object(bootstrap, "prelaunch", return_value=refused), \
+                unittest.mock.patch.object(host_launch, "launch_degrades", return_value=False), \
                 unittest.mock.patch.object(
                     bootstrap, "_invoke_installer", side_effect=never("installer")
                 ), \
@@ -763,6 +767,40 @@ class TargetCRuntimeFreshnessTests(unittest.TestCase):
                 self.assertRaises(host_launch.HostLaunchRefusal) as caught:
             host_launch.launch_host("opencode", project, "tester")
         self.assertIn("not the canonical generation", str(caught.exception))
+
+    def test_a_degrading_host_starts_on_unproven_bytes_with_a_warning(self) -> None:
+        import contextlib
+        import importlib
+        import io
+        import unittest.mock
+
+        from saipen_engine import host_authority_client, host_launch
+
+        bootstrap = importlib.import_module(".runtime_bootstrap", host_launch.__package__)
+        refused = {"ok": False, "code": bootstrap.PRELAUNCH_FAILED, "detail": "injected"}
+        project = fresh_project(agent="test-agent")
+        warning = io.StringIO()
+        # This is the degraded-policy control, regardless of the operator's
+        # real admission mode. T-1686 covers real strict/default policy files.
+        with unittest.mock.patch.object(
+            host_authority_client, "authority_mode", return_value="degraded"
+        ):
+            self.assertTrue(host_launch.launch_degrades("opencode"))
+            self.assertTrue(host_launch.launch_degrades("claude"))
+        with unittest.mock.patch.object(
+            host_authority_client, "authority_mode", return_value="degraded"
+        ), \
+                unittest.mock.patch.object(bootstrap, "prelaunch", return_value=refused), \
+                unittest.mock.patch.object(
+                    host_launch.shutil, "which", return_value=str(project / "opencode.cmd")
+                ), \
+                unittest.mock.patch.dict(os.environ, {host_launch.ENV_FORBID_HOST_SPAWN: "1"}), \
+                contextlib.redirect_stderr(warning), \
+                self.assertRaises(host_launch.HostLaunchRefusal) as caught:
+            host_launch.launch_host("opencode", project, "tester")
+        # Past the unproven runtime, stopped only by the harness spawn interlock.
+        self.assertIn("forbids starting a real host process", str(caught.exception))
+        self.assertIn("starting opencode without a proven installed runtime", warning.getvalue())
 
     def test_the_prelaunch_cli_is_reachable_outside_any_project(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:

@@ -7,6 +7,10 @@ separate real-tree probe supplies whole-validator integration evidence.
 
 from __future__ import annotations
 
+import contextlib
+import hashlib
+import io
+import json
 import subprocess
 import sys
 import tempfile
@@ -80,8 +84,8 @@ class PhaseRenameKnowledgeTests(unittest.TestCase):
         text = (tree / ".saipen/KNOWLEDGE/cards/rename-control.md").read_text(
             encoding="utf-8"
         )
-        self.assertIn("SCOUTX", text)
-        self.assertIn("scoutx", text)
+        self.assertIn("TRACE", text)
+        self.assertIn("trace", text)
         self.assertEqual(validate_knowledge(tree)["index"], "fresh")
         self.assertNotEqual(
             (tree / INDEX_REL).read_bytes(), (self.source / INDEX_REL).read_bytes()
@@ -185,7 +189,8 @@ class RetirementEvidenceRenameTests(PhaseRenameKnowledgeTests):
             (tree / ".saipen/archive/retired/T-1580.json").read_bytes(), original_record
         )
         self.assertEqual(self.evidence.read_bytes(), original_evidence)
-        self.assertIn(b"SCOUTX", (tree / ".saipen/evidence/incident/live.txt").read_bytes())
+        self.assertIn(b"TRACE", (tree / ".saipen/evidence/incident/live.txt").read_bytes())
+
 
     def test_corrupt_original_artifact_is_refused_before_rename(self):
         self.evidence.write_bytes(b"SCOUT corrupt evidence\n")
@@ -204,6 +209,148 @@ class RetirementEvidenceRenameTests(PhaseRenameKnowledgeTests):
             return
         self.assertIsNotNone(error)
         self.assertIn("retirement evidence", error)
+
+
+class NativeHistoryFixtureTests(unittest.TestCase):
+    def setUp(self):
+        import stat
+        from test_t1586_scenario_inputs import source_runtime_fixture
+
+        temporary = tempfile.TemporaryDirectory(prefix="saipen-native-history-fixture-")
+        self.addCleanup(temporary.cleanup)
+        self.base = Path(temporary.name)
+        self.source = self.base / "source"
+        source_runtime_fixture(A.HOME, self.source)
+        self.proof = self.source / ".saipen/evidence/opaque/proof.json"
+        self.proof.parent.mkdir(parents=True)
+        self.original = b'{"phase": "SCOUT", "note": "synthetic immutable control"}\r\n'
+        self.proof.write_bytes(self.original)
+        self.proof.chmod(stat.S_IREAD)
+
+    def test_real_rename_preserves_read_only_history_outside_fresh_authority(self):
+        destination = self.base / "rename"
+        destination.mkdir()
+        error = A.phase_rename_probe(self.source, destination)
+        self.assertIsNone(error, error)
+        retained = destination / "phase-rename-history/evidence/opaque/proof.json"
+        self.assertEqual(retained.read_bytes(), self.original)
+        self.assertEqual(self.proof.read_bytes(), self.original)
+        tree = destination / "phase-rename"
+        self.assertTrue((tree / "saipen/phases/trace.md").is_file())
+        self.assertFalse((tree / ".saipen/evidence/opaque/proof.json").exists())
+
+    def test_real_warn_ownership_control_is_not_masked_by_copied_historical_work(self):
+        import shutil
+        from saipen_engine import lifecycle_authority
+        from saipen_engine.log import parse_log_line
+        from saipen_engine.state import parse_state
+
+        for name in ("CHANGELOG_ARCHIVE.md", "GUIDE.md"):
+            shutil.copyfile(A.HOME / name, self.source / name)
+        (self.source / ".saipen/kitchen").mkdir(parents=True, exist_ok=True)
+        board = self.source / ".saipen/BOARD.md"
+        foreign = board.read_text("utf-8").replace(
+            "## DONE\n", "## DONE\n- [x] T-1680 [P2] foreign historical closure "
+            "| verify: not this fixture | closure_mode: inherited_verified "
+            "| implementation_source: T-1630\n")
+        board.write_text(foreign, encoding="utf-8")
+        original_board = board.read_bytes()
+        destination = self.base / "warn"
+        destination.mkdir()
+        error = A.warn_ownership_probe(self.source, destination)
+        self.assertIsNone(error, error)
+        self.assertEqual(board.read_bytes(), original_board)
+        retained = destination / "warn-ownership-history"
+        self.assertEqual((retained / "BOARD.md").read_bytes(), original_board)
+        self.assertEqual((retained / "evidence/opaque/proof.json").read_bytes(), self.original)
+        self.assertEqual(self.proof.read_bytes(), self.original)
+        project = destination / "warn-ownership"
+        events = list(filter(None, map(parse_log_line,
+                      (project / ".saipen/LOG.md").read_text("utf-8").splitlines())))
+        floor, unbacked = lifecycle_authority.journal_floor(project, events)
+        self.assertFalse(unbacked, unbacked)
+        state = parse_state((project / ".saipen/STATE.md").read_text("utf-8"))
+        self.assertEqual(state["last_event"], floor)
+
+    def test_real_tag_query_control_is_not_masked_by_copied_historical_work(self):
+        destination = self.base / "query"
+        destination.mkdir()
+        context = A.ProbeContext(destination, [], None)
+        context.pristine = self.source
+        self.assertIsNone(A.tag_query_probe(context))
+        self.assertEqual(self.proof.read_bytes(), self.original)
+
+class FullAuditCacheTests(unittest.TestCase):
+    def setUp(self):
+        temporary = tempfile.TemporaryDirectory(prefix="saipen-audit-cache-control-")
+        self.addCleanup(temporary.cleanup)
+        self.root = Path(temporary.name)
+        (self.root / "tools").mkdir()
+        (self.root / "tools/validate.py").write_bytes(b"validator input\n")
+        (self.root / "tools/audit_checks.py").write_bytes(b"audit input\n")
+        self.cache = self.root / ".saipen/cache/audit_checks_cache.json"
+
+    def execute(self, *, arguments=(), overrides=None, move_source=False, partial=False):
+        def verdicts(probes, _context):
+            self.probes_seen = {probe.name for probe in probes}
+            result = {probe.name: "PASS" for probe in probes}
+            result.update(overrides or {})
+            if partial:
+                result.pop("mutation-sweep")
+            if move_source:
+                (self.root / "tools/validate.py").write_bytes(b"changed validator input\n")
+            return result
+
+        with mock.patch.object(A, "HOME", self.root), \
+                mock.patch.object(sys, "argv", ["audit_checks.py", *arguments]), \
+                mock.patch.object(A, "run_probes", side_effect=verdicts), \
+                contextlib.redirect_stdout(io.StringIO()):
+            return A.main()
+
+    def test_completed_full_audit_publishes_the_existing_consumer_key(self):
+        self.assertEqual(self.execute(), 0)
+        self.assertTrue(self.cache.is_file(), "real full PASS has no reusable canonical proof")
+        expected = hashlib.sha256(b"validator input\naudit input\n").hexdigest()[:16]
+        self.assertEqual(json.loads(self.cache.read_text("utf-8"))["key"], expected)
+
+    def test_missing_cache_binding_does_not_hide_independent_probe_failures(self):
+        (self.root / "tools/validate.py").unlink()
+        self.probes_seen = set()
+        try:
+            result = self.execute(overrides={"validator-baseline": "FAIL"})
+        except OSError as error:
+            self.fail(f"optional cache binding prevented mandatory probe dispatch: {error}")
+        self.assertEqual(result, 1)
+        self.assertTrue({"root-nul-snapshot", "symlink-restore", "audit-tags-batch",
+                         "gated-producer-cases"} <= self.probes_seen)
+        self.assertFalse(self.cache.exists())
+
+    def test_scoped_success_never_publishes_full_suite_proof(self):
+        self.assertEqual(self.execute(arguments=("--changed", "saipen/STYLE.md")), 0)
+        self.assertFalse(self.cache.exists())
+
+    def test_required_failure_never_publishes_passing_proof(self):
+        self.assertEqual(self.execute(overrides={"validator-baseline": "FAIL"}), 1)
+        self.assertFalse(self.cache.exists())
+
+    def test_required_skip_never_publishes_passing_proof(self):
+        self.assertEqual(self.execute(overrides={"mutation-sweep": "SKIP"}), 1)
+        self.assertFalse(self.cache.exists())
+
+    def test_advisory_host_gap_remains_named_in_the_completed_proof(self):
+        self.assertEqual(self.execute(overrides={"symlink-restore": "UNPROVEN"}), 0)
+        self.assertTrue(self.cache.is_file(), "completed advisory result was not reusable")
+        self.assertEqual(json.loads(self.cache.read_text("utf-8"))["unproven"],
+                         ["symlink-restore"])
+
+    def test_moving_inputs_cannot_publish_current_source_proof(self):
+        self.assertEqual(self.execute(move_source=True), 0)
+        self.assertFalse(self.cache.exists())
+
+    def test_incomplete_probe_verdicts_cannot_publish_full_suite_proof(self):
+        self.assertEqual(self.execute(partial=True), 0)
+        self.assertFalse(self.cache.exists())
+
 
 if __name__ == "__main__":
     unittest.main()

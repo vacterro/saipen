@@ -20,6 +20,12 @@ hook output:
 - valid EXEC-RESPONSE-01 boundary and ordinary non-operational chat -> the
   stop completes untouched.
 
+A refused reply is handed to `saipen response preserve` before the correction
+is requested or a re-entry boundary recorded, so it is kept byte for byte
+under `.saipen/evidence/response/` with its overflow account beside it
+(T-1657). Preserving is evidence, not a gate: when the engine cannot keep the
+reply the stop is handled exactly as before.
+
 No response schema lives in the adapter: EXEC-RESPONSE-01's fields and rules
 exist only in `saipen/EXECUTION.md` and `tools/saipen_engine/response_surface.py`.
 

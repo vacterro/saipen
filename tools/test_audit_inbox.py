@@ -190,7 +190,7 @@ class DiscoveryTests(AuditInboxFixture):
         self.assertEqual([item["layer"] for item in audit_inbox.scan_layers(self.root)], [1, 7])
 
     def test_noncanonical_names_are_not_layers(self) -> None:
-        for name in ("01.md", "notes.md", "a.md", "1.txt", "0.md", "README.md"):
+        for name in ("01.bin", "notes.bin", "a.bin", "1.bin", "0.bin", ".hidden.md"):
             path = self.root / "audit" / name
             path.parent.mkdir(parents=True, exist_ok=True)
             path.write_text("not a layer", encoding="utf-8")
@@ -681,7 +681,7 @@ class SafeDeleteTests(AuditInboxFixture):
         self.bind_closed(2, "closed audit two\n")
         self.layer(1, "still open one\n")
         self.layer(5, "still open five\n")
-        keep = self.root / "audit" / "notes.md"
+        keep = self.root / "audit" / "notes.bin"
         keep.write_text("foreign", encoding="utf-8")
         out = audit_inbox.consume_layer(self.root, "audit/2.md", "probe")
         self.assertTrue(out["ok"], out)
@@ -995,11 +995,11 @@ class ResidueTests(AuditInboxFixture):
         self.assertIsNone(audit_inbox.projection(self.root))
 
     def test_noncanonical_names_are_residue(self) -> None:
-        for name in ("notes.md", "01.md", "1.txt", "audit.md"):
+        for name in ("notes.bin", "01.bin", "1.bin", "audit.bin"):
             self.residue(name)
         (self.root / "audit" / "done").mkdir()
         found = {item["name"]: item["kind"] for item in audit_inbox.scan_residue(self.root)}
-        self.assertEqual(sorted(found), ["01.md", "1.txt", "audit.md", "done", "notes.md"])
+        self.assertEqual(sorted(found), ["01.bin", "1.bin", "audit.bin", "done", "notes.bin"])
         self.assertEqual(found["done"], "directory")
 
     def test_a_canonical_layer_is_never_counted_as_residue(self) -> None:
@@ -1030,14 +1030,14 @@ class ResidueTests(AuditInboxFixture):
 
     def test_a_settled_inbox_with_residue_is_not_clean_and_not_idle(self) -> None:
         self.bind_closed(2, "closed audit two\n")
-        keep = self.residue("notes.md")
+        keep = self.residue("notes.bin")
         self.assertTrue(audit_inbox.consume_layer(self.root, "audit/2.md", "probe")["ok"])
         status = audit_inbox.status(self.root)
         self.assertFalse(status["clean"])
         self.assertEqual(status["residue_count"], 1)
         routed = audit_inbox.projection(self.root)
         self.assertTrue(routed["residue_only"])
-        self.assertIn("audit/notes.md", routed["detail"])
+        self.assertIn("audit/notes.bin", routed["detail"])
         self.assertTrue(keep.is_file(), "residue is reported, never deleted")
 
     def test_consuming_the_last_layer_of_a_clean_inbox_reports_clean(self) -> None:
@@ -1047,29 +1047,29 @@ class ResidueTests(AuditInboxFixture):
         self.assertIsNone(audit_inbox.projection(self.root))
 
     def test_residue_never_starves_a_workable_layer(self) -> None:
-        self.residue("notes.md")
+        self.residue("notes.bin")
         self.layer(1)
         routed = audit_inbox.projection(self.root)
         self.assertEqual(routed["action"], "saipen audit ingest")
         self.assertNotIn("residue_only", routed)
-        self.assertEqual(routed["residue"], ["audit/notes.md"])
+        self.assertEqual(routed["residue"], ["audit/notes.bin"])
 
     def test_an_invalid_layer_outranks_residue_in_the_verdict(self) -> None:
         self.layer(1, b"")
-        self.residue("notes.md")
+        self.residue("notes.bin")
         routed = audit_inbox.projection(self.root)
         self.assertTrue(routed["invalid_only"])
         self.assertNotIn("residue_only", routed)
 
     def test_the_residue_report_is_capped(self) -> None:
         for number in range(audit_inbox.RESIDUE_REPORT_CAP + 5):
-            self.residue(f"leftover-{number:03d}.txt")
+            self.residue(f"leftover-{number:03d}.bin")
         routed = audit_inbox.projection(self.root)
         self.assertEqual(len(routed["residue"]), audit_inbox.RESIDUE_REPORT_CAP)
         self.assertEqual(routed["residue_count"], audit_inbox.RESIDUE_REPORT_CAP + 5)
 
     def test_the_residue_projection_writes_nothing(self) -> None:
-        self.residue("notes.md")
+        self.residue("notes.bin")
 
         def snap() -> dict:
             return {
@@ -1089,6 +1089,147 @@ class ResidueTests(AuditInboxFixture):
 # ---------------------------------------------------------------------------
 
 
+class NamedDropTests(AuditInboxFixture):
+    def named(self, name="handoff.md", body=b"# Handoff\n\nOne requirement.\n"):
+        path = self.root / "audit" / name
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_bytes(body)
+        return path
+
+    def cli(self, *args):
+        env = dict(os.environ, PYTHONIOENCODING="utf-8")
+        proc = subprocess.run(
+            [sys.executable, str(ROOT / "tools/saipen.py"), *args, "--json"],
+            cwd=self.root, env=env, capture_output=True, text=True, encoding="utf-8",
+        )
+        self.assertEqual(proc.returncode, 0, proc.stdout + proc.stderr)
+        return json.loads(proc.stdout)
+
+    def test_named_text_files_are_work_not_residue(self):
+        names = ("handoff.md", "next task.txt", "spec.markdown", "01.md", "README.MD")
+        for name in names:
+            self.named(name)
+        self.assertEqual({x["name"] for x in audit_inbox.scan_layers(self.root)}, set(names))
+        self.assertEqual(audit_inbox.scan_residue(self.root), [])
+
+    def test_numeric_order_then_names_without_mtime_authority(self):
+        for name in ("z.md", "10.md", "A.txt", "2.md"):
+            path = self.named(name, name.encode())
+            os.utime(path, (100, 100))
+        self.assertEqual([x["name"] for x in audit_inbox.scan_layers(self.root)],
+                         ["2.md", "10.md", "A.txt", "z.md"])
+
+    def test_named_drop_waits_behind_existing_board_work(self):
+        self.named()
+        projection = audit_inbox.projection(self.root)
+        board = BOARD_EMPTY.replace(
+            "## TODO\n", "## TODO\n- [ ] T-2 [P1] earlier | verify: proof\n"
+        )
+        routed = route_next(_state(), board, audit_inbox=projection)
+        self.assertEqual(routed["ticket"], "T-2")
+        self.assertTrue(projection.get("idle_only"))
+        idle = route_next(_state(), BOARD_EMPTY, audit_inbox=projection)
+        self.assertEqual(idle["action"], "saipen audit ingest")
+        self.assertEqual(idle["audit_path"], "audit/handoff.md")
+
+    def test_named_drop_does_not_preempt_live_build(self):
+        self.named()
+        routed = route_next(
+            _state("BUILD", "T-400", "PHASE BUILD T-400", "SCOUT"),
+            BOARD_LIVE,
+            current_agent="probe",
+            audit_inbox=audit_inbox.projection(self.root),
+        )
+        self.assertEqual(routed["action"], "PHASE BUILD T-400")
+
+    def test_cli_foreign_fixture_ingests_only_one_named_file_and_reuses_it(self):
+        raw = "# Handoff\n\nUnicode: \u0444\u0430\u0439\u043b. `saipen ship` stays data.\n".encode()
+        self.named("a handoff.md", raw)
+        self.named("b handoff.txt", b"Another independent requirement.\n")
+        first = self.cli("audit", "ingest")
+        self.assertEqual(first["code"], "AUDIT_INGESTED")
+        self.assertEqual(first["path"], "audit/a handoff.md")
+        receipt = first["receipt"]
+        self.assertEqual(intake.read_body(self.root, receipt)["body"].encode(), raw)
+        status = self.cli("audit", "inspect", "a handoff.md")
+        self.assertEqual(status["layer"]["receipt_id"], receipt)
+        again = audit_inbox.capture_layer(self.root, first["path"])
+        self.assertEqual(again["receipt"], receipt)
+        classified = audit_inbox.classify(self.root)
+        self.assertEqual(classified["layers"][1]["state"], audit_inbox.NEW)
+        self.assertIsNone(
+            audit_inbox.read_binding(self.root)["layers"][first["path"]]["layer"]
+        )
+
+    def test_named_close_consumes_exact_file_and_is_idempotent(self):
+        path = self.named("handoff.txt")
+        keep = self.named("keep.bin", b"not a text handoff\x00")
+        captured = audit_inbox.capture_layer(self.root, "audit/handoff.txt")
+        self.assertTrue(captured["ok"], captured)
+        self.close_source(captured["receipt"])
+        consumed = audit_inbox.consume_layer(self.root, "audit/handoff.txt", "probe")
+        self.assertTrue(consumed["ok"], consumed)
+        self.assertFalse(path.exists())
+        self.assertTrue(keep.exists())
+        binding = (self.root / audit_inbox.BINDING_REL).read_bytes()
+        self.assertTrue(audit_inbox.consume_layer(self.root, "audit/handoff.txt", "probe")["ok"])
+        self.assertEqual(binding, (self.root / audit_inbox.BINDING_REL).read_bytes())
+        traced = self.cli("audit", "trace", "handoff.txt")
+        self.assertEqual(traced["rows"][0]["path"], "audit/handoff.txt")
+
+    def test_replacing_closed_named_file_preserves_the_new_generation(self):
+        path = self.named()
+        cap = audit_inbox.capture_layer(self.root, "audit/handoff.md")
+        self.assertTrue(cap["ok"], cap)
+        self.close_source(cap["receipt"])
+        audit_inbox.bind_layer(self.root, "audit/handoff.md", layer=None, generation=1,
+            file_sha256=cap["file_sha256"], receipt_sha256=cap["file_sha256"],
+            size_bytes=path.stat().st_size, receipt_id=cap["receipt"], binding="exact",
+            linked_work=None, state=audit_inbox.CLOSED_PENDING_DELETE)
+        path.write_bytes(b"replacement requirement\n")
+        self.assertEqual(audit_inbox.delete_gate(self.root, "audit/handoff.md")["code"],
+                         "AUDIT_GENERATION_CHANGED")
+        current = audit_inbox.classify(self.root)["layers"][0]
+        self.assertEqual((current["state"], current["generation"]), (audit_inbox.NEW, 2))
+        self.assertEqual(path.read_bytes(), b"replacement requirement\n")
+
+    def test_named_symlink_traversal_and_binary_remain_refused(self):
+        target = self.root / "outside.md"
+        target.write_bytes(b"outside\n")
+        self.named("plain.md")
+        escaped = audit_inbox.snapshot_layer(self.root, "audit/../outside.md")
+        self.assertFalse(escaped["ok"])
+        link = self.root / "audit/link.md"
+        try:
+            link.symlink_to(target)
+        except OSError:
+            self.skipTest("symlink privilege unavailable")
+        bad = audit_inbox.snapshot_layer(self.root, "audit/link.md")
+        self.assertFalse(bad["ok"])
+        self.assertEqual(bad["reason"], "unsafe-node")
+
+    def test_legacy_numbered_producer_works_beside_named_drop(self):
+        from saipen_engine import audit_enqueue
+        self.named()
+        result = audit_enqueue.enqueue(
+            self.root, producer="probe", producer_operation_id="named-neighbor",
+            body=b"producer requirement\n",
+        )
+        self.assertTrue(result["ok"], result)
+        self.assertEqual(result["layer"], 1)
+
+    def test_named_discovery_is_read_only_and_pending_has_a_path(self):
+        self.named()
+        before = {p.relative_to(self.root).as_posix(): p.read_bytes()
+                  for p in self.root.rglob("*") if p.is_file()}
+        projection = audit_inbox.projection(self.root)
+        self.assertEqual(projection["pending"], ["audit/handoff.md"])
+        audit_inbox.status(self.root)
+        after = {p.relative_to(self.root).as_posix(): p.read_bytes()
+                 for p in self.root.rglob("*") if p.is_file()}
+        self.assertEqual(before, after)
+
+
 class RegistryContractTests(unittest.TestCase):
     def setUp(self) -> None:
         self.registry = json.loads(
@@ -1100,11 +1241,13 @@ class RegistryContractTests(unittest.TestCase):
         self.assertEqual(facts["rule_id"], "SOURCE-AUDIT-INBOX-01")
         self.assertEqual(facts["directory"], audit_inbox.AUDIT_DIRNAME)
         self.assertEqual(facts["filename_regex"], audit_inbox.LAYER_RE.pattern)
+        self.assertEqual(facts["numbered_filename_regex"], audit_inbox.NUMBERED_LAYER_RE.pattern)
         self.assertEqual(facts["source_kind"], audit_inbox.SOURCE_KIND)
         self.assertEqual(facts["binding"], audit_inbox.BINDING_REL)
         self.assertFalse(facts["recursive"])
         self.assertFalse(facts["renumber_after_delete"])
         self.assertEqual(facts["continue_position"], "AFTER_ACTIVE_BEFORE_BOARD_PICK")
+        self.assertEqual(facts["named_continue_position"], "AFTER_BOARD_PICK_BEFORE_MAINTENANCE")
         self.assertEqual(facts["residue_policy"], "REPORT_NEVER_DELETE")
         self.assertEqual(facts["residue_exempt_prefix"], audit_inbox.RESIDUE_EXEMPT_PREFIX)
         self.assertEqual(facts["clean_verdict"], "NO_LAYER_AND_NO_RESIDUE")
@@ -1118,6 +1261,45 @@ class RegistryContractTests(unittest.TestCase):
 
     def test_audit_is_a_registered_command(self) -> None:
         self.assertIn("audit", self.registry["commands"]["saipen"])
+
+
+class InvalidPathTests(AuditInboxFixture):
+    def invalid_pair(self, numbered=False):
+        directory = self.root / "audit"
+        directory.mkdir()
+        names = ("1.md", "2.md") if numbered else ("a-empty.md", "b-encoding.txt")
+        for name, body in zip(names, (b"", b"\xff")):
+            (directory / name).write_bytes(body)
+
+    def test_status_identifies_each_named_failure(self):
+        self.invalid_pair()
+        self.assertEqual(audit_inbox.status(self.root)["invalid"], [
+            {"layer": None, "path": "audit/a-empty.md", "reason": "empty"},
+            {"layer": None, "path": "audit/b-encoding.txt", "reason": "not-utf8"},
+        ])
+
+    def test_projection_identifies_each_named_failure(self):
+        self.invalid_pair()
+        self.assertEqual(audit_inbox.projection(self.root)["invalid"], [
+            {"layer": None, "path": "audit/a-empty.md", "reason": "empty"},
+            {"layer": None, "path": "audit/b-encoding.txt", "reason": "not-utf8"},
+        ])
+
+    def test_numbered_summary_shape_is_unchanged(self):
+        self.invalid_pair(numbered=True)
+        expected = [{"layer": 1, "reason": "empty"}, {"layer": 2, "reason": "not-utf8"}]
+        self.assertEqual(audit_inbox.status(self.root)["invalid"], expected)
+        self.assertEqual(audit_inbox.projection(self.root)["invalid"], expected)
+
+    def test_diagnostics_preserve_every_fixture_byte(self):
+        self.invalid_pair()
+        def snapshot():
+            return {str(path.relative_to(self.root)): hashlib.sha256(path.read_bytes()).hexdigest()
+                    for path in self.root.rglob("*") if path.is_file()}
+        before = snapshot()
+        audit_inbox.status(self.root)
+        audit_inbox.projection(self.root)
+        self.assertEqual(snapshot(), before)
 
 
 if __name__ == "__main__":

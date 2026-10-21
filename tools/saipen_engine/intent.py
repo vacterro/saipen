@@ -70,7 +70,7 @@ def _validated_prepare_context(root: Path) -> tuple[dict | None, dict | None]:
     from . import codec
     from .fast_check import validate_project
     from .paths import parse_identity_content
-    from .state import is_absolute_home, parse_state_or_error, persisted_home_error
+    from .state import home_refusal, is_absolute_home, parse_state_or_error
 
     problem = codec.checkpoint_preflight(root)
     if problem is not None:
@@ -106,9 +106,9 @@ def _validated_prepare_context(root: Path) -> tuple[dict | None, dict | None]:
             "code": "HOME_REQUIRED",
             "message": f"STATE.saipen_home must be absolute, got {home!r}",
         }
-    home_problem = persisted_home_error(home)
-    if home_problem is not None:
-        return None, {"ok": False, "code": "HOME_REQUIRED", "message": home_problem}
+    home_refused = home_refusal(home)
+    if home_refused is not None:
+        return None, {"ok": False, "code": home_refused[0], "message": home_refused[1]}
     identity_path = root / ".saipen/IDENTITY.md"
     if identity_path.exists():
         try:

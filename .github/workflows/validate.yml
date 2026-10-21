@@ -37,12 +37,14 @@ jobs:
         with:
           python-version: '3.x'
 
-      # Wave 0 FAST UNIT: deterministic import + unittest discover gate.
+      # Full unit family through the same immutable/sharded engine used locally.
+      # Keep one worker until this CI host's full copy/memory cost is measured;
+      # --jobs is explicit and does not narrow coverage or allow baseline red.
       # Must run BEFORE validator so a broken import never ships green.
-      - name: Fast unit gate (import + unittest discover)
+      - name: Core unit gate (import + complete canonical family)
         run: |
           python -c "import py_compile, pathlib, sys; [py_compile.compile(str(p), doraise=True) for p in pathlib.Path('tools').rglob('*.py')]; print('py_compile PASS')"
-          python -B tools/test_runner.py --family unit
+          python -B tools/test_runner.py --family unit --jobs 1
 
       # Import-closure smoke: every shipped module + declared unittest must import cleanly.
       #

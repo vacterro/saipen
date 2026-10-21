@@ -22,7 +22,7 @@ Invariants:
 - DURABILITY PRECEDES INTERPRETATION: body + digest are written BEFORE any
   Work linkage commits.
 - receipt_id is stable protocol identity; source_sha256 is content identity.
-- EXACT canonical digest dedupes; near-duplicate is a new source; amendments
+- EXACT canonical digest and operator event dedupe; amendments
   are new immutable receipts linked ``amends``.
 - CLOSED requires full terminal disposition on every actionable requirement
   (coverage ledger), never merely a green parent ticket.
@@ -80,7 +80,11 @@ def _write_refusal(exc: Exception) -> dict:
     validation code, because an unopenable file is still a validation failure.
     """
     if isinstance(exc, PermissionError) and "WRITER_BUSY" in str(exc):
-        return {"ok": False, "code": "WRITER_BUSY", "detail": str(exc)}
+        # T-1827 (SRC-282:R002/R010): keep the holder identity and the
+        # orphan-cleanup remedy the lock recorded, never a bare token.
+        from .lock import writer_busy_payload
+
+        return {"ok": False, **writer_busy_payload(exc)}
     return {"ok": False, "code": "VALIDATION_FAILED", "detail": str(exc)}
 
 
@@ -400,9 +404,7 @@ def _read_distribution_record(root: Path, receipt_id: str) -> dict | None:
         raise ValueError(f"invalid source receipt id: {receipt_id!r}")
     rel = distribution_record_rel(receipt_id)
     try:
-        raw = _read_owned_file(
-            root, rel, kind="source distribution record", max_bytes=_META_MAX
-        )
+        raw = _read_owned_file(root, rel, kind="source distribution record", max_bytes=_META_MAX)
     except FileNotFoundError:
         return None
     try:
@@ -452,9 +454,7 @@ def _distribution_projection(root: Path, receipt_id: str, digest: str) -> dict:
     record = _read_distribution_record(root, receipt_id)
     if record is None:
         if _protected_body_exists(root, receipt_id):
-            raise ValueError(
-                f"quarantined body {receipt_id} lacks its distribution record"
-            )
+            raise ValueError(f"quarantined body {receipt_id} lacks its distribution record")
         return {
             "state": DISTRIBUTABLE,
             "receipt_id": receipt_id,
@@ -569,8 +569,11 @@ def _decode_index(doc: object) -> dict:
             + ", ".join(sorted(overlap))
         )
     highest = max(
-        (int(receipt_id.split("-", 1)[1]) for group in (decoded["active"], decoded["tombstones"])
-         for receipt_id in group),
+        (
+            int(receipt_id.split("-", 1)[1])
+            for group in (decoded["active"], decoded["tombstones"])
+            for receipt_id in group
+        ),
         default=0,
     )
     if next_id <= highest:
@@ -613,9 +616,7 @@ def _write_meta(root: Path, receipt_id: str, meta: dict) -> None:
 def _read_archived_meta(root: Path, receipt_id: str) -> dict | None:
     rel = f".saipen/archive/source/{receipt_id}.meta.json"
     try:
-        raw = _read_owned_file(
-            root, rel, kind="source archive metadata", max_bytes=_META_MAX
-        )
+        raw = _read_owned_file(root, rel, kind="source archive metadata", max_bytes=_META_MAX)
     except FileNotFoundError:
         return None
     try:
@@ -716,9 +717,7 @@ def _strip_source_receipts_pseudo_link(ticket: dict) -> str | None:
     launder an unrelated or fabricated reference.
     """
     verify = str((ticket.get("fields") or {}).get("verify") or "")
-    pattern = re.compile(
-        r"\s*[;,]?\s*source_receipts:\s*(?P<ids>[A-Za-z0-9][A-Za-z0-9, \\-]*)"
-    )
+    pattern = re.compile(r"\s*[;,]?\s*source_receipts:\s*(?P<ids>[A-Za-z0-9][A-Za-z0-9, \\-]*)")
     match = pattern.search(verify)
     if not match:
         return None
@@ -832,9 +831,7 @@ def _board_link_proposal(root: Path, work: str, receipt_id: str, *, op_id: str) 
         return {
             "ok": False,
             "code": (
-                "BOARD_RECORD_OVERSIZE"
-                if "oversize" in str(exc).lower()
-                else "VALIDATION_FAILED"
+                "BOARD_RECORD_OVERSIZE" if "oversize" in str(exc).lower() else "VALIDATION_FAILED"
             ),
             "detail": str(exc),
         }
@@ -981,8 +978,7 @@ def _relink_authorities(root: Path, work: str, receipt_id: str) -> dict:
             meta["linked_work"] = work
         elif primary != work:
             extra = sorted(
-                {value for value in (meta.get("linked_works") or []) if str(value).strip()}
-                | {work}
+                {value for value in (meta.get("linked_works") or []) if str(value).strip()} | {work}
             )
             meta["linked_works"] = extra
         _write_meta(root, receipt_id, meta)
@@ -1148,9 +1144,7 @@ def _contract_semantics_equal(current: object, revision: object) -> bool:
         return False
     if set(current) - _CONTRACT_KNOWN_FIELDS or set(revision) - _CONTRACT_KNOWN_FIELDS:
         return False
-    return all(
-        current.get(field) == revision.get(field) for field in _CONTRACT_SEMANTIC_FIELDS
-    )
+    return all(current.get(field) == revision.get(field) for field in _CONTRACT_SEMANTIC_FIELDS)
 
 
 def _contract_revision_integrity(root: Path, receipt_id: str, contract: dict) -> None:
@@ -1181,13 +1175,9 @@ def _contract_revision_integrity(root: Path, receipt_id: str, contract: dict) ->
                 )
             number = int(match.group(1))
             if not path.is_file() or _is_link_or_reparse(path):
-                raise ValueError(
-                    f"source {receipt_id} revision r{number:03d} is a symlink/reparse"
-                )
+                raise ValueError(f"source {receipt_id} revision r{number:03d} is a symlink/reparse")
             if number in found:
-                raise ValueError(
-                    f"source {receipt_id} has duplicate revision r{number:03d}"
-                )
+                raise ValueError(f"source {receipt_id} has duplicate revision r{number:03d}")
             found[number] = path
     if set(found) != expected:
         raise ValueError(
@@ -1309,7 +1299,31 @@ def _validate_contract_coverage(receipt_id: str, contract: object, coverage: obj
                 raise ValueError(f"source {receipt_id} requirement {rid} has invalid {field}")
 
 
-def _find_exact_duplicate(root: Path, digest: str) -> dict | None:
+_ANY_ORIGIN = object()
+
+
+def _same_operator_event(meta: dict | None, provenance: object) -> bool:
+    """Identity only: a proof-shaped value never authenticates its supplier.
+
+    Byte-only diagnostic callers may inspect any event. Capture compares both
+    directions so a fresh native event cannot promote an older model Source,
+    and a model retry cannot borrow a genuine Source's historical provenance.
+    """
+    if provenance is _ANY_ORIGIN:
+        return True
+    recorded = (meta or {}).get("request_provenance") or {}
+    if not isinstance(recorded, dict):
+        raise ValueError("source request provenance is not an object")
+    incoming = provenance if isinstance(provenance, dict) else {}
+    proof = recorded.get("operator_origin")
+    return proof == incoming.get("operator_origin") and (
+        proof is None or recorded.get("witness") == incoming.get("witness")
+    )
+
+
+def _find_exact_duplicate(
+    root: Path, digest: str, *, request_provenance: object = _ANY_ORIGIN,
+) -> dict | None:
     index = _read_index(root)
     for receipt_id in index.get("active", {}):
         meta = _read_meta(root, receipt_id)
@@ -1317,9 +1331,16 @@ def _find_exact_duplicate(root: Path, digest: str) -> dict | None:
             integrity = verify_integrity(root, receipt_id)
             if not integrity["ok"]:
                 return {"receipt_id": receipt_id, "meta": meta, "invalid": integrity}
-            return {"receipt_id": receipt_id, "meta": meta}
+            if _same_operator_event(meta, request_provenance):
+                return {"receipt_id": receipt_id, "meta": meta}
     for receipt_id, tomb in index.get("tombstones", {}).items():
         if tomb.get("source_sha256") == digest:
+            if request_provenance is not _ANY_ORIGIN:
+                found = read_body(root, receipt_id)
+                if not found.get("ok"):
+                    return {"receipt_id": receipt_id, "invalid": found}
+                if not _same_operator_event(found.get("meta"), request_provenance):
+                    continue
             return {"receipt_id": receipt_id, "tombstone": tomb, "closed": True}
     # Crash window: body durable, process died before metadata/index commit.
     # Exact retry must adopt this orphan instead of allocating SRC-N+1.
@@ -1334,6 +1355,10 @@ def _find_exact_duplicate(root: Path, digest: str) -> dict | None:
             # Adopting it would resurrect a closed receipt with its old id.
             if receipt_id in index.get("tombstones", {}):
                 continue
+            # A Source skipped for a different event is still a committed
+            # Source, never a body-only crash orphan whose metadata can change.
+            if receipt_id in index.get("active", {}):
+                continue
             try:
                 raw = _read_owned_file(
                     root,
@@ -1342,13 +1367,33 @@ def _find_exact_duplicate(root: Path, digest: str) -> dict | None:
                     max_bytes=_BODY_MAX,
                 )
                 if hashlib.sha256(raw).hexdigest() == digest:
-                    return {"receipt_id": receipt_id, "orphan": True}
+                    try:
+                        meta = _read_meta(root, receipt_id)
+                    except (OSError, ValueError) as exc:
+                        return {"receipt_id": receipt_id, "invalid": {
+                            "ok": False, "code": "SOURCE_CORRUPTION", "detail": str(exc),
+                        }}
+                    if meta and meta.get("source_sha256") != digest:
+                        return {"receipt_id": receipt_id, "invalid": {
+                            "ok": False, "code": "SOURCE_CORRUPTION",
+                            "detail": f"orphan source {receipt_id} metadata digest drift",
+                        }}
+                    try:
+                        if meta and not _same_operator_event(meta, request_provenance):
+                            continue
+                    except ValueError as exc:
+                        return {"receipt_id": receipt_id, "invalid": {
+                            "ok": False, "code": "SOURCE_CORRUPTION", "detail": str(exc),
+                        }}
+                    return {"receipt_id": receipt_id, "orphan": True, "meta": meta}
             except (OSError, ValueError):
                 continue
     return None
 
 
-def find_by_body(root: Path | str, body: str) -> dict | None:
+def find_by_body(
+    root: Path | str, body: str, *, request_provenance: object = _ANY_ORIGIN,
+) -> dict | None:
     """The existing receipt for these EXACT bytes, or None (read-only).
 
     The public idempotency probe. `capture` is already content-addressed, but
@@ -1357,7 +1402,7 @@ def find_by_body(root: Path | str, body: str) -> dict | None:
     line -- otherwise a retry mints a second ticket for one request.
     """
     root = Path(root)
-    found = _find_exact_duplicate(root, _sha256(body))
+    found = _find_exact_duplicate(root, _sha256(body), request_provenance=request_provenance)
     if not found:
         return None
     meta = found.get("meta") or {}
@@ -1406,7 +1451,7 @@ def capture(
 ) -> dict:
     """Capture an authoritative source VERBATIM before any interpretation.
 
-    Idempotent: an exact canonical digest returns the existing receipt
+    Idempotent: exact canonical bytes within one operator event return its receipt
     (duplicate=true) and never creates a second one. Body is written first,
     then metadata, then the index -- so a crash after the body leaves a
     detectable orphan that recovery can reconcile, and a crash before any
@@ -1449,7 +1494,7 @@ def capture(
     redaction, authority = _exact_authority_record(digest)
     try:
         with project_writer_lock(root):
-            existing = _find_exact_duplicate(root, digest)
+            existing = _find_exact_duplicate(root, digest, request_provenance=request_provenance)
             if existing and not force:
                 if existing.get("invalid"):
                     return existing["invalid"]
@@ -1609,7 +1654,12 @@ def capture(
                     "recorded": digest,
                     "actual": actual,
                 }
-            _write_meta(root, receipt_id, meta)
+            if existing and existing.get("orphan") and existing.get("meta"):
+                # A crash after metadata persisted has already fixed the event
+                # and receipt time. Recover the index without relabelling them.
+                meta = existing["meta"]
+            else:
+                _write_meta(root, receipt_id, meta)
             _write_contract(
                 root,
                 receipt_id,
@@ -1650,9 +1700,9 @@ def capture(
                     intended_work,
                     receipt_id,
                     op_id="source-link-"
-                    + hashlib.sha256(
-                        f"{receipt_id}:{intended_work}".encode("utf-8")
-                    ).hexdigest()[:16],
+                    + hashlib.sha256(f"{receipt_id}:{intended_work}".encode("utf-8")).hexdigest()[
+                        :16
+                    ],
                 )
                 linked_work = linkage.get("linked_work")
             else:
@@ -1818,9 +1868,7 @@ def quarantine_receipt(
                 _write_distribution_record(root, receipt_id, record)
             return {
                 "ok": True,
-                "code": "SOURCE_QUARANTINED"
-                if existing_record is None
-                else "ALREADY_SATISFIED",
+                "code": "SOURCE_QUARANTINED" if existing_record is None else "ALREADY_SATISFIED",
                 "receipt": receipt_id,
                 "source_sha256": digest,
                 "distribution": dict(record),
@@ -2127,8 +2175,7 @@ def add_requirements(root: Path | str, receipt_id: str, clauses: list[dict]) -> 
                 "receipt": receipt_id,
                 "rid": rids[0] if len(rids) == 1 else None,
                 "rids": rids,
-                "detail": committed.get("message")
-                or committed.get("detail", "plan apply failed"),
+                "detail": committed.get("message") or committed.get("detail", "plan apply failed"),
             }
         return {
             "ok": True,
@@ -2174,9 +2221,7 @@ def _probe_environment_absence(environment: str) -> dict:
             "detail": f"environment {environment} lacks command+home absence probes",
         }
     command_rows = [{"name": name, "path": shutil.which(name)} for name in commands]
-    home_rows = [
-        {"path": value, "exists": Path(value).expanduser().exists()} for value in homes
-    ]
+    home_rows = [{"path": value, "exists": Path(value).expanduser().exists()} for value in homes]
     unavailable = all(row["path"] is None for row in command_rows) and all(
         not row["exists"] for row in home_rows
     )
@@ -2249,18 +2294,335 @@ def set_disposition(
                 environment_proof = probed["proof"]
                 evidence = evidence or f"mechanical environment absence probe: {environment}"
             if disposition in TERMINAL_DISPOSITIONS and entry.get("actionable", True):
-                if not evidence:
+                if not evidence or not str(evidence).strip():
                     return {
                         "ok": False,
                         "code": "VALIDATION_FAILED",
                         "detail": "terminal actionable disposition requires evidence",
                     }
-                if disposition in {"IMPLEMENTED", "VERIFIED"} and not verification:
-                    return {
-                        "ok": False,
-                        "code": "VALIDATION_FAILED",
-                        "detail": "implemented/verified disposition requires verification",
-                    }
+                if disposition in {"IMPLEMENTED", "VERIFIED"}:
+                    if not verification or not str(verification).strip():
+                        return {
+                            "ok": False,
+                            "code": "VALIDATION_FAILED",
+                            "detail": "implemented/verified disposition requires verification",
+                        }
+                    v_clean = str(verification).strip().lower()
+                    if v_clean in {
+                        "pass",
+                        "passed",
+                        "ok",
+                        "true",
+                        "yes",
+                        "done",
+                        "test",
+                        "verified",
+                        "lifecycle progression",
+                    }:
+                        return {
+                            "ok": False,
+                            "code": "VALIDATION_FAILED",
+                            "detail": "verification requires concrete proof "
+                            "(command, assertion, record, or event "
+                            "citation)",
+                        }
+
+                    evidence_str = str(evidence or "")
+                    v_str = str(verification or "")
+
+                    # Check for legitimate manual or external evidence
+                    is_external_or_manual = any(
+                        token in evidence_str.lower() or token in v_str.lower()
+                        for token in (
+                            "external",
+                            "manual",
+                            "external_host",
+                            "external_provenance",
+                            "upstream",
+                            "ex-",
+                            "reconcile",
+                        )
+                    ) and not any(
+                        cmd_token in v_clean
+                        for cmd_token in (
+                            "python ",
+                            "unittest",
+                            "pytest",
+                            "test_runner",
+                            "run_tests",
+                        )
+                    )
+
+                    # Test F & Matrix K: Evidence reference with wrong source identity
+                    # Legitimate external provenance is not rejected merely for containing
+                    # another source receipt identifier.
+                    foreign_rcpt = re.findall(r"\bSRC-\d+\b", evidence_str)
+                    if not is_external_or_manual:
+                        for frcpt in foreign_rcpt:
+                            if frcpt != receipt_id:
+                                return {
+                                    "ok": False,
+                                    "code": "EVIDENCE_IDENTITY_MISMATCH",
+                                    "detail": f"evidence references foreign source "
+                                    f"receipt {frcpt} instead of "
+                                    f"{receipt_id}",
+                                }
+
+                    # Test G: Requirement source changed after interpretation
+                    contract = _read_contract(root, receipt_id) or {}
+                    meta = _read_meta(root, receipt_id) or {}
+                    if contract.get("source_sha256") and contract.get("source_sha256") != meta.get(
+                        "source_sha256"
+                    ):
+                        return {
+                            "ok": False,
+                            "code": "SOURCE_CORRUPTION",
+                            "detail": "source body changed after contract interpretation",
+                        }
+
+                    clause = (contract.get("clauses") or {}).get(rid) or {}
+                    clause_text = str(clause.get("text") or "").lower()
+
+                    # Test D / F: Generic Core PASS used to claim live host acceptance
+                    is_live_acceptance = any(
+                        term in clause_text
+                        for term in (
+                            "live acceptance",
+                            "live host",
+                            "host acceptance",
+                            "live session",
+                        )
+                    )
+                    is_generic_core_pass = any(
+                        term in v_clean
+                        for term in (
+                            "core-unit",
+                            "core_unit",
+                            "unittest discover",
+                            "core suite",
+                            "discover -s tools",
+                            "aggregate pass",
+                            "aggregate core pass",
+                        )
+                    )
+                    if is_live_acceptance and is_generic_core_pass:
+                        return {
+                            "ok": False,
+                            "code": "VALIDATION_FAILED",
+                            "detail": f"generic core PASS cannot satisfy live host "
+                            f"acceptance clause {rid}",
+                        }
+
+                    # Test H: Partial fulfillment of one large section
+                    if any(
+                        term in v_clean or term in evidence_str.lower()
+                        for term in (
+                            "partial fulfillment",
+                            "partially verified",
+                            "incomplete fulfillment",
+                            "partial proof",
+                            "subset only",
+                        )
+                    ):
+                        return {
+                            "ok": False,
+                            "code": "PARTIAL_FULFILLMENT_REFUSED",
+                            "detail": f"partial fulfillment cannot satisfy complete "
+                            f"section requirement {rid}",
+                        }
+
+                    # Test E: Missing external runtime evidence
+                    if (
+                        clause.get("when_environment")
+                        and not environment
+                        and "environment_evidence" not in entry
+                        and "probe" not in v_clean
+                    ):
+                        return {
+                            "ok": False,
+                            "code": "ENVIRONMENT_WAIVER_REFUSED",
+                            "detail": f"requirement {rid} requires external runtime evidence",
+                        }
+
+                    # Test C / D: Correct test evidence bound to an unrelated requirement
+                    m_test = re.search(r"test_[a-z0-9_]+\.py", v_clean)
+                    if m_test:
+                        test_file = m_test.group(0)
+                        test_topic_words = set(re.findall(r"[a-z0-9]+", test_file)) - {"test", "py"}
+                        clause_words = set(re.findall(r"[a-z0-9]+", clause_text))
+                        known_domains = {
+                            "intake",
+                            "parser",
+                            "revalidation",
+                            "external",
+                            "reconciliation",
+                            "matrix",
+                            "host",
+                            "adapter",
+                            "schema",
+                            "pipeline",
+                            "closure",
+                            "ingress",
+                        }
+                        clause_domains = clause_words & known_domains
+                        test_domains = test_topic_words & known_domains
+                        if clause_domains and test_domains and not (clause_domains & test_domains):
+                            return {
+                                "ok": False,
+                                "code": "EVIDENCE_UNRELATED",
+                                "detail": f"test evidence in {verification!r} is "
+                                f"unrelated to requirement {rid}",
+                            }
+
+                    # ROOT CAUSE A: Mechanical verification authentication
+                    test_files = (
+                        re.findall(r"([a-zA-Z0-9_\-\\/]+\.py\b)", v_str)
+                        or re.findall(r"\btest_[a-zA-Z0-9_]+\.py\b", v_str)
+                        or re.findall(r"\btest_[a-zA-Z0-9_]+\.py\b", evidence_str)
+                    )
+                    is_test_execution_claim = bool(
+                        test_files
+                        or "record:" in v_str
+                        or ".saipen/evidence/" in v_str
+                        or ".saipen/evidence/" in evidence_str
+                    )
+                    if is_test_execution_claim:
+                        for tf in test_files:
+                            p = Path(tf)
+                            search_paths = [
+                                p,
+                                root / p,
+                                root / "tools" / p.name,
+                                root / "tests" / p.name,
+                            ]
+                            if not any(sp.is_file() for sp in search_paths):
+                                return {
+                                    "ok": False,
+                                    "code": "EVIDENCE_NOT_FOUND",
+                                    "detail": f"referenced test file {tf!r} does not exist on disk",
+                                }
+
+                        receipt_file = None
+                        rec_match = (
+                            re.search(r"record:\s*(\S+)", v_str)
+                            or re.search(r"(\.saipen[\\/]evidence[\\/]\S+\.json)", v_str)
+                            or re.search(r"(\.saipen[\\/]evidence[\\/]\S+\.json)", evidence_str)
+                        )
+                        if rec_match:
+                            rel = rec_match.group(1).replace("\\", "/")
+                            cand = root / rel
+                            if cand.is_file():
+                                receipt_file = cand
+                        elif evidence_str.endswith(".json"):
+                            cand = root / evidence_str.replace("\\", "/")
+                            if cand.is_file():
+                                receipt_file = cand
+
+                        if not receipt_file:
+                            ev_dir = root / ".saipen" / "evidence"
+                            if ev_dir.is_dir():
+                                for jf in ev_dir.rglob("*.json"):
+                                    try:
+                                        data = json.loads(jf.read_text(encoding="utf-8"))
+                                        oracles = [
+                                            Path(f).name for f in data.get("oracle_files", [])
+                                        ]
+                                        cmd = " ".join(str(x) for x in data.get("command", []))
+                                        if any(
+                                            Path(tf).name in oracles or Path(tf).name in cmd
+                                            for tf in test_files
+                                        ):
+                                            receipt_file = jf
+                                            break
+                                        if test_files and test_files[0] in str(
+                                            data.get("verifier", "")
+                                        ):
+                                            receipt_file = jf
+                                            break
+                                    except Exception:
+                                        continue
+
+                        if not receipt_file:
+                            return {
+                                "ok": False,
+                                "code": "EVIDENCE_UNAUTHENTICATED",
+                                "detail": (
+                                    f"no authentic execution receipt found proving execution of "
+                                    f"{test_files[0] if test_files else verification}"
+                                ),
+                            }
+
+                        try:
+                            raw_bytes = receipt_file.read_bytes()
+                            receipt_data = json.loads(raw_bytes.decode("utf-8"))
+                        except Exception as exc:
+                            return {
+                                "ok": False,
+                                "code": "EVIDENCE_CORRUPTION",
+                                "detail": f"execution receipt {receipt_file.name} is "
+                                f"corrupt: {exc}",
+                            }
+
+                        sha_m = re.search(r"sha256:([0-9a-fA-F]{64})", v_str + " " + evidence_str)
+                        if sha_m:
+                            expected_sha = sha_m.group(1).lower()
+                            actual_sha = hashlib.sha256(raw_bytes).hexdigest().lower()
+                            if actual_sha != expected_sha:
+                                return {
+                                    "ok": False,
+                                    "code": "EVIDENCE_CORRUPTION",
+                                    "detail": f"receipt digest mismatch: expected "
+                                    f"{expected_sha}, got {actual_sha}",
+                                }
+
+                        if receipt_data.get("tampered") is True:
+                            return {
+                                "ok": False,
+                                "code": "EVIDENCE_CORRUPTION",
+                                "detail": "execution receipt has been tampered with",
+                            }
+
+                        if receipt_data.get("stale") is True:
+                            return {
+                                "ok": False,
+                                "code": "EVIDENCE_STALE",
+                                "detail": "execution receipt is stale",
+                            }
+
+                        status = (
+                            receipt_data.get("after", {}).get("result")
+                            or receipt_data.get("status")
+                            or receipt_data.get("result")
+                        )
+                        if status != "PASS":
+                            return {
+                                "ok": False,
+                                "code": "EVIDENCE_EXECUTION_FAILED",
+                                "detail": f"execution receipt recorded {status}, expected PASS",
+                            }
+
+                        if receipt_data.get("runs"):
+                            last_run = receipt_data["runs"][-1]
+                            if last_run.get("exit_code", 0) != 0 or last_run.get("failed", 0) > 0:
+                                return {
+                                    "ok": False,
+                                    "code": "EVIDENCE_EXECUTION_FAILED",
+                                    "detail": "execution receipt runs recorded failure",
+                                }
+
+                        bound_req = (
+                            receipt_data.get("requirement")
+                            or receipt_data.get("target_clause")
+                            or receipt_data.get("clause")
+                        )
+                        if bound_req and str(bound_req).strip() not in (rid, rid.split(":")[-1]):
+                            return {
+                                "ok": False,
+                                "code": "EVIDENCE_UNRELATED",
+                                "detail": f"execution receipt is bound to requirement "
+                                f"{bound_req}, not {rid}",
+                            }
+
             entry["disposition"] = disposition
             if work:
                 entry["work"] = work
@@ -2342,8 +2704,225 @@ def canonical_request_clause_text(receipt_id: str, body: str, digest: str = "") 
     )
 
 
+def extract_request_clauses(body: str) -> list[str]:
+    """Extract discrete actionable requirement clauses from a request body.
+
+    Supports:
+    1. Multi-section documents delimited by major section dividers/headers
+       (e.g. '====================\\n1. SECTION NAME\\n===================='
+       or '## 1. SECTION NAME').
+    2. Numbered acceptance lists under a MISSION, REQUIREMENTS, or ACCEPTANCE section
+       (e.g. 'MISSION\\n\\n1. ...\\n2. ...').
+    3. Top-level numbered lists ('1. ...\\n2. ...').
+    4. Unnumbered but independently actionable sections delimited by major dividers.
+
+    If the body is a simple atomic request, returns [] (meaning it defaults
+    to the single canonical request clause).
+    """
+    text = body
+    if REQUEST_HEADER in text:
+        text = text.split(REQUEST_HEADER, 1)[1]
+
+    # Pattern 1: Major numbered sections delimited by === or markdown headers
+    major_section_pat = (
+        r"(?:^|\n)\s*(?:={5,}|\#{1,3})\s*\n\s*(\d+)\.\s+([^\n=]+?)\s*\n+\s*(?:={5,}|\#"
+        r"{1,3})?\s*\n+(.*?)(?=(?:\n\s*(?:={5,}|\#{1,3})\s*\n\s*\d+\.|\Z))"
+    )
+    major_sections = re.findall(major_section_pat, text, re.DOTALL)
+    if len(major_sections) >= 2:
+        has_nested = any(
+            re.search(r"(?:^|\n)\s*\d+\.\d+\s+", content) for _, _, content in major_sections
+        )
+        if has_nested:
+            clauses = []
+            for num, title, content in major_sections:
+                sub_items = re.findall(
+                    r"(?:^|\n)\s*(\d+\.\d+)\s+(.*?)(?=(?:\n\s*\d+\.\d+|\Z))",
+                    content,
+                    re.DOTALL,
+                )
+                if sub_items:
+                    for snum, scontent in sub_items:
+                        scontent_clean = " ".join(scontent.split())
+                        clauses.append(f"{snum} {scontent_clean}")
+                else:
+                    title_clean = " ".join(title.strip().split())
+                    content_clean = " ".join(content.strip().split())
+                    if content_clean:
+                        clauses.append(f"{num}. {title_clean}: {content_clean}")
+                    else:
+                        clauses.append(f"{num}. {title_clean}")
+            if len(clauses) >= 2:
+                return clauses
+        else:
+            clauses = []
+            for num, title, content in major_sections:
+                title_clean = " ".join(title.strip().split())
+                content_clean = " ".join(content.strip().split())
+                if content_clean:
+                    clauses.append(f"{num}. {title_clean}: {content_clean}")
+                else:
+                    clauses.append(f"{num}. {title_clean}")
+            return clauses
+
+    # Pattern 2: Multi-section handoff documents (preserving GAPS, ROOT CAUSES,
+    # MISSION, TESTS, RECONCILIATION, SAFETY, SUCCESS).
+    clauses = []
+    gaps_m = re.search(
+        r"(?:^|\n)(?:#+\s*)?(?:CONFIRMED "
+        r"GAPS|GAPS)\s*\n+(.*?)(?=\n+(?:#+\s*)?[A-Z]{3,}(?:\s+[A-Z]{3,})*\s*\n|\Z)",
+        text,
+        re.DOTALL,
+    )
+    if gaps_m:
+        for num, c in re.findall(
+            r"(?:^|\n)\s*(\d+)\.\s+(.*?)(?=(?:\n\s*\d+\.|\Z))", gaps_m.group(1), re.DOTALL
+        ):
+            clauses.append(f"GAP {num}: " + " ".join(c.split()))
+
+    root_causes = re.findall(
+        r"(?:^|\n)(?:#+\s*)?(ROOT CAUSE [A-Z] "
+        r"[^\n]+)\s*\n+(.*?)(?=\n+(?:#+\s*)?(?:ROOT "
+        r"CAUSE|REQUIRED|LIVE|SCOPE|VALIDATION|FINAL|SUCCESS|[A-Z]{3,}\b)|\Z)",
+        text,
+        re.DOTALL,
+    )
+    for rc_title, rc_body in root_causes:
+        req_m = re.search(r"REQUIRED CORRECTION\s*\n+(.*?)(?=\n+[A-Z]{3,}|\Z)", rc_body, re.DOTALL)
+        body_to_use = req_m.group(1) if req_m else rc_body
+        clauses.append(f"{rc_title}: " + " ".join(body_to_use.strip().split()[:40]))
+
+    mission_m = re.search(
+        r"(?:^|\n)(?:#+\s*)?MISSION\s*\n+(.*?)(?=\n+(?:#+\s*)?[A-Z]{3,}(?:\s+[A-Z]{3,})*\s*\n|\Z)",
+        text,
+        re.DOTALL,
+    )
+    if mission_m:
+        m_items = re.findall(
+            r"(?:^|\n)\s*(\d+)\.\s+(.*?)(?=(?:\n\s*\d+\.|\Z))", mission_m.group(1), re.DOTALL
+        )
+        if len(m_items) >= 2:
+            for num, c in m_items:
+                clauses.append(f"MISSION {num}: " + " ".join(c.split()))
+        else:
+            m_body = " ".join(mission_m.group(1).strip().split())
+            if m_body:
+                clauses.append(f"MISSION: {m_body}")
+
+    tests_m = re.search(
+        r"(?:^|\n)(?:#+\s*)?(?:REQUIRED NEGATIVE TESTS|REQUIRED "
+        r"REGRESSIONS|ACCEPTANCE CRITERIA|REQUIRED RED/GREEN MATRIX|RED/GREEN "
+        r"MATRIX|TESTS)\s*\n+(.*?)(?=\n+(?:#+\s*)?[A-Z]{3,}(?:\s+[A-Z]{3,})*\s*\n|\Z)",
+        text,
+        re.DOTALL,
+    )
+    if tests_m:
+        for let, c in re.findall(
+            r"(?:^|\n)\s*([A-Z]|\d+)\.\s+(.*?)(?=(?:\n\s*(?:[A-Z]|\d+)\.|\Z))",
+            tests_m.group(1),
+            re.DOTALL,
+        ):
+            clauses.append(f"TEST {let}: " + " ".join(c.split()))
+
+    live_m = re.search(
+        r"(?:^|\n)(?:#+\s*)?(?:LIVE NEGATIVE ACCEPTANCE|LIVE "
+        r"ACCEPTANCE)\s*\n+(.*?)(?=\n+(?:#+\s*)?[A-Z]{3,}(?:\s+[A-Z]{3,})*\s*\n|\Z)",
+        text,
+        re.DOTALL,
+    )
+    if live_m:
+        clauses.append("LIVE ACCEPTANCE: " + " ".join(live_m.group(1).strip().split()[:50]))
+
+    recon_m = re.search(
+        r"(?:^|\n)(?:#+\s*)?(?:EXTERNAL "
+        r"RECONCILIATION|RECONCILIATION)\s*\n+(.*?)(?=\n+(?:#+\s*)?[A-Z]{3,}(?:\s+[A-Z"
+        r"]{3,})*\s*\n|\Z)",
+        text,
+        re.DOTALL,
+    )
+    if recon_m:
+        clauses.append("RECONCILIATION: " + " ".join(recon_m.group(1).strip().split()))
+
+    safety_m = re.search(
+        r"(?:^|\n)(?:#+\s*)?(?:SAFETY RESTRICTIONS|SCOPE "
+        r"LIMITS)\s*\n+(.*?)(?=\n+(?:#+\s*)?[A-Z]{3,}(?:\s+[A-Z]{3,})*\s*\n|\Z)",
+        text,
+        re.DOTALL,
+    )
+    if safety_m:
+        clauses.append("SAFETY: " + " ".join(safety_m.group(1).strip().split()))
+
+    success_m = re.search(
+        r"(?:^|\n)(?:#+\s*)?SUCCESS\s*\n+(.*?)(?=\n+(?:#+\s*)?[A-Z]{3,}(?:\s+[A-Z]{3,})*\s*\n|\Z)",
+        text,
+        re.DOTALL,
+    )
+    if success_m:
+        clauses.append("SUCCESS: " + " ".join(success_m.group(1).strip().split()))
+
+    if len(clauses) >= 2:
+        return clauses
+
+    # Pattern 3: Numbered items under MISSION / REQUIREMENTS / ACCEPTANCE section
+    m = re.search(
+        r"(?:^|\n)(?:#+\s*)?(?:MISSION|REQUIREMENTS|ACCEPTANCE(?:\s+CRITERIA)?)\s*\n+(.*?)(?=\n+(?:#+\s*)?[A-Z]{3,}(?:\s+[A-Z]{3,})*\s*\n|\Z)",
+        text,
+        re.DOTALL,
+    )
+    if m:
+        candidate_text = m.group(1)
+        items = re.findall(
+            r"(?:^|\n)\s*(\d+)\.\s+(.*?)(?=(?:\n\s*\d+\.|\Z))",
+            candidate_text,
+            re.DOTALL,
+        )
+        if len(items) >= 2:
+            return [" ".join(content.split()) for num, content in items]
+
+    # Pattern 4: Top-level numbered list if text has >= 2 items
+    top_items = re.findall(
+        r"(?:^|\n)\s*(\d+)\.\s+(.*?)(?=(?:\n\s*\d+\.|\Z))",
+        text,
+        re.DOTALL,
+    )
+    if len(top_items) >= 2:
+        return [" ".join(content.split()) for num, content in top_items]
+
+    # Pattern 5: Unnumbered major sections delimited by ===
+    unnum_section_pat = (
+        r"(?:^|\n)\s*={5,}\s*\n\s*([A-Z0-9_ "
+        r"-]+?)\s*\n+\s*={5,}\s*\n+(.*?)(?=(?:\n\s*={5,}\s*\n\s*[A-Z0-9_ -]+|\Z))"
+    )
+    unnum_sections = re.findall(unnum_section_pat, text, re.DOTALL)
+    if len(unnum_sections) >= 2:
+        clauses = []
+        for idx, (title, content) in enumerate(unnum_sections, start=1):
+            title_clean = " ".join(title.strip().split())
+            content_clean = " ".join(content.strip().split())
+            if content_clean:
+                clauses.append(f"{idx}. {title_clean}: {content_clean}")
+            else:
+                clauses.append(f"{idx}. {title_clean}")
+        return clauses
+
+    return []
+
+
+def is_compound_request(body: str) -> bool:
+    """True if body contains multiple structured requirements or sections."""
+    text = body
+    if REQUEST_HEADER in text:
+        text = text.split(REQUEST_HEADER, 1)[1]
+    if len(extract_request_clauses(text)) >= 2:
+        return True
+    return (
+        len(re.findall(r"(?:^|\n)\s*(?:={5,}|\#{1,3})\s*\n*\s*(?:\d+\.\s+)?[A-Z0-9_ -]+", text))
+        >= 2
+    )
+
+
 def ensure_request_clause(root: Path | str, receipt_id: str) -> dict:
-    """Give a user request the one clause it always had: itself.
+    """Give a user request the clauses it asked for.
 
     The defect this ends, measured live on 2026-09-17: `saipen start` captured
     its receipt with an EMPTY contract, `coverage_complete` requires
@@ -2352,10 +2931,11 @@ def ensure_request_clause(root: Path | str, receipt_id: str) -> dict:
     could never be finished. Two field sessions drove the whole chain, edited
     their target, and then looped on `requirements 0, actionable 0`.
 
-    A request is not zero requirements. It is exactly one, and it is the text
-    the operator wrote. Deriving further clauses from a large specification
-    stays an agent's semantic job; this only refuses to pretend that a request
-    with no derived clauses asked for nothing.
+    A request is not zero requirements. If the request body contains structured
+    discrete requirements (e.g. a multi-clause MISSION or numbered list),
+    derives each clause individually so that aggregate test runs cannot
+    improperly blanket-verify unrelated functional outcomes. For single-action
+    requests, it derives the one canonical request clause.
     """
     root = Path(root)
     meta = _read_meta(root, receipt_id)
@@ -2367,8 +2947,16 @@ def ensure_request_clause(root: Path | str, receipt_id: str) -> dict:
     body = read_body(root, receipt_id)
     if not body.get("ok"):
         return body
+    body_text = body.get("body") or ""
+    discrete = extract_request_clauses(body_text)
+    if len(discrete) >= 2:
+        clauses_data = [
+            {"rid": f"R{idx:03d}", "text": clause_text, "class": "requirement"}
+            for idx, clause_text in enumerate(discrete, start=1)
+        ]
+        return add_requirements(root, receipt_id, clauses_data)
     text = canonical_request_clause_text(
-        receipt_id, body.get("body") or "", str(meta.get("source_sha256") or "")
+        receipt_id, body_text, str(meta.get("source_sha256") or "")
     )
     if not text:
         return {"ok": False, "code": "VALIDATION_FAILED", "detail": "request body has no request"}
@@ -2385,9 +2973,12 @@ def is_request_clause(root: Path | str, receipt_id: str, rid: str) -> bool:
     body = read_body(root, receipt_id)
     if not body.get("ok"):
         return False
+    body_text = body.get("body") or ""
+    if is_compound_request(body_text):
+        return False
     meta = _read_meta(root, receipt_id) or {}
     text = canonical_request_clause_text(
-        receipt_id, body.get("body") or "", str(meta.get("source_sha256") or "")
+        receipt_id, body_text, str(meta.get("source_sha256") or "")
     )
     return bool(text) and clause.get("text", "").strip() == text
 
@@ -2530,9 +3121,7 @@ def verify_integrity(root: Path | str, receipt_id: str) -> dict:
     if not meta:
         return {"ok": False, "code": "INVALID", "detail": "receipt metadata missing"}
     try:
-        rel = _canonical_body_rel(
-            root, receipt_id, str(meta.get("source_sha256") or ""), "active"
-        )
+        rel = _canonical_body_rel(root, receipt_id, str(meta.get("source_sha256") or ""), "active")
     except (OSError, ValueError) as exc:
         return {"ok": False, "code": "SOURCE_CORRUPTION", "detail": str(exc)}
     try:
@@ -2749,8 +3338,7 @@ def route_source_refusal(
     else:
         owner = routed.get("linked_work")
         routed["in_release_scope"] = bool(
-            (routed.get("work") in release_scope)
-            or (owner is not None and owner in release_scope)
+            (routed.get("work") in release_scope) or (owner is not None and owner in release_scope)
         )
     if code == "SOURCE_UNRESOLVED" and routed.get("contract_derived") is False:
         # Nothing to dispose yet: the receipt has no contract at all, so
@@ -3019,9 +3607,9 @@ def _legacy_sensitive_source_gate(root: Path) -> dict:
             distribution = _distribution_projection(root, receipt_id, digest)
             rel = _canonical_body_rel(root, receipt_id, digest, location)
             try:
-                body = _read_owned_file(
-                    root, rel, kind="source body", max_bytes=_BODY_MAX
-                ).decode("utf-8")
+                body = _read_owned_file(root, rel, kind="source body", max_bytes=_BODY_MAX).decode(
+                    "utf-8"
+                )
             except FileNotFoundError:
                 continue
             except (UnicodeDecodeError, OSError, ValueError) as exc:
@@ -3081,8 +3669,6 @@ def _legacy_sensitive_source_gate(root: Path) -> dict:
         "lost_originals": tuple(lost_originals),
         "quarantined": tuple(quarantined),
     }
-
-
 
 
 @dataclass(frozen=True)
@@ -3172,7 +3758,9 @@ def _release_scope_trust(root: Path, work: str, source_identity: object) -> _Rel
         )
     paths = set(record["paths"])
     return _scope_trust(
-        "TRUSTED_SCOPE", "SOURCE_SCOPE_TRUSTED", f"release scope for {work} is current",
+        "TRUSTED_SCOPE",
+        "SOURCE_SCOPE_TRUSTED",
+        f"release scope for {work} is current",
         paths=paths,
     )
 
@@ -3456,9 +4044,7 @@ def _closed_archive_bundle(
     expected_digest = projection.get("source_sha256")
     if not isinstance(expected_digest, str):
         raise ValueError(f"archive projection {receipt_id} has no content digest")
-    expected_ref = _canonical_body_rel(
-        root, receipt_id, expected_digest, "archive"
-    )
+    expected_ref = _canonical_body_rel(root, receipt_id, expected_digest, "archive")
     if (
         meta.get("receipt_id") != receipt_id
         or meta.get("source_sha256") != expected_digest
@@ -3485,9 +4071,8 @@ def _closed_archive_bundle(
         if not isinstance(redaction, dict) or not isinstance(redaction.get("applied"), bool):
             raise ValueError(f"archived metadata {receipt_id} has invalid redaction metadata")
         sanitized_digest = redaction.get("sanitized_sha256")
-        if (
-            not isinstance(sanitized_digest, str)
-            or not re.fullmatch(r"[0-9a-f]{64}", sanitized_digest)
+        if not isinstance(sanitized_digest, str) or not re.fullmatch(
+            r"[0-9a-f]{64}", sanitized_digest
         ):
             raise ValueError(f"archived metadata {receipt_id} has invalid sanitized digest")
 
@@ -3523,9 +4108,7 @@ def _closed_archive_bundle(
         except FileNotFoundError:
             if not allow_active_fallback:
                 raise
-            return _read_owned_file(
-                root, active_rel, kind=f"source {label}", max_bytes=_LEDGER_MAX
-            )
+            return _read_owned_file(root, active_rel, kind=f"source {label}", max_bytes=_LEDGER_MAX)
         if allow_active_fallback:
             try:
                 active = _read_owned_file(
@@ -3544,9 +4127,7 @@ def _closed_archive_bundle(
     _validate_contract_coverage(receipt_id, contract, coverage)
     summary = _coverage_summary_from_ledger(receipt_id, coverage)
     if not summary["actionable"] or summary["unresolved"]:
-        raise ValueError(
-            f"archived coverage {receipt_id} unresolved: {summary['unresolved']}"
-        )
+        raise ValueError(f"archived coverage {receipt_id} unresolved: {summary['unresolved']}")
     # W2-004: validate the archived revision chain is contiguous r001..rN
     _validate_archive_revisions(root, receipt_id, contract)
     return meta, contract, coverage, summary
@@ -3717,8 +4298,11 @@ def _finish_archive_bundle_locked(root: Path, receipt_id: str) -> None:
             if archive_dir.is_dir() and not _is_link_or_reparse(archive_dir)
             else None
         )
-        if (active_revision and active_revision.is_file()
-                and not _is_link_or_reparse(active_revision)):
+        if (
+            active_revision
+            and active_revision.is_file()
+            and not _is_link_or_reparse(active_revision)
+        ):
             revision = _safe_path(
                 root,
                 f".saipen/intake/contracts/{receipt_id}.r{number:03d}.json",
@@ -3730,14 +4314,15 @@ def _finish_archive_bundle_locked(root: Path, receipt_id: str) -> None:
             _move_archive_artifact(
                 root, revision, destination, label="contract revision", required=True
             )
-        elif (archived_revision and archived_revision.is_file()
-              and not _is_link_or_reparse(archived_revision)):
+        elif (
+            archived_revision
+            and archived_revision.is_file()
+            and not _is_link_or_reparse(archived_revision)
+        ):
             # already in archive from a prior _archive_closed_locked call; fine
             continue
         else:
-            raise ValueError(
-                f"source {receipt_id} revision r{number:03d} missing at archive time"
-            )
+            raise ValueError(f"source {receipt_id} revision r{number:03d} missing at archive time")
 
 
 def _archive_closed_locked(root: Path, receipt_id: str, meta: dict) -> dict:
@@ -3762,9 +4347,7 @@ def _archive_closed_locked(root: Path, receipt_id: str, meta: dict) -> dict:
     meta["archive_ref"] = archive_ref
     _atomic_write(archive_meta, _json_bytes(meta), ownership_root=root)
     if distribution["state"] == QUARANTINED:
-        raw = _read_owned_file(
-            root, body_rel, kind="quarantined source body", max_bytes=_BODY_MAX
-        )
+        raw = _read_owned_file(root, body_rel, kind="quarantined source body", max_bytes=_BODY_MAX)
         if hashlib.sha256(raw).hexdigest() != digest:
             raise ValueError(f"quarantined source body {receipt_id} digest mismatch")
     else:
@@ -3810,9 +4393,7 @@ def _settle_closed_residue_locked(root: Path, receipt_id: str, tomb: dict) -> di
     try:
         raw = _read_owned_file(
             root,
-            _canonical_body_rel(
-                root, receipt_id, str(tomb.get("source_sha256") or ""), "archive"
-            ),
+            _canonical_body_rel(root, receipt_id, str(tomb.get("source_sha256") or ""), "archive"),
             kind="source body",
             max_bytes=_BODY_MAX,
         )
@@ -3933,6 +4514,82 @@ def close_receipt(root: Path | str, receipt_id: str, *, closure_event: str | Non
         return _write_refusal(exc)
 
 
+def closable_receipts(
+    root: Path | str,
+    *,
+    works: set[str] | list[str] | None = None,
+    receipts: set[str] | list[str] | None = None,
+) -> list[str]:
+    """ACTIVE receipts whose last closing gate is met (T-1666).
+
+    Full terminal coverage, and every linked Work the BOARD holds is DONE --
+    with at least one such Work, so a receipt that never produced Work is not
+    swept up here. Audit-bound receipts close through the same owner; inbox
+    ingestion consumes their transport only after this closure. Pending audit
+    references retain the Work row that consumption still reads. `works`
+    narrows to receipts linking one of them, `receipts` to the named ones.
+    Read-only; `close_receipt` re-proves every gate.
+    """
+    from .board import parse_board
+
+    root = Path(root)
+    try:
+        index = _read_index(root)
+        raw = _read_owned_file(
+            root, ".saipen/BOARD.md", kind="source BOARD authority", max_bytes=_BOARD_MAX
+        )
+        tickets = parse_board(raw.decode("utf-8-sig")).get("tickets", {})
+    except (OSError, ValueError):
+        return []
+    wanted_works = set(works) if works is not None else None
+    wanted = set(receipts) if receipts is not None else None
+    found: list[str] = []
+    for receipt_id in sorted(index.get("active", {})):
+        if wanted is not None and receipt_id not in wanted:
+            continue
+        meta = _read_meta(root, receipt_id)
+        if not meta or meta.get("status", ACTIVE_STATUS) != ACTIVE_STATUS:
+            continue
+        members = linked_works(meta)
+        if wanted_works is not None and not members & wanted_works:
+            continue
+        held = [tickets[m] for m in members if m in tickets]
+        if not held or any(t.get("section") != "## DONE" for t in held):
+            continue
+        try:
+            if not coverage_complete(root, receipt_id):
+                continue
+        except (OSError, ValueError):
+            continue
+        found.append(receipt_id)
+    return found
+
+
+def close_finished(
+    root: Path | str,
+    *,
+    works: set[str] | list[str] | None = None,
+    receipts: set[str] | list[str] | None = None,
+) -> dict:
+    """Close every receipt `closable_receipts` names (T-1666).
+
+    Run when a gate can have just been met -- a Work reaching DONE, a clause
+    reaching its disposition -- and on entering CLEAN for whatever an older
+    engine left open. Each close is `close_receipt`, which re-proves
+    integrity, contract, coverage and Work under the writer lock; a refusal
+    closes nothing and is reported.
+    """
+    closed: list[str] = []
+    refused: dict[str, str] = {}
+    for receipt_id in closable_receipts(root, works=works, receipts=receipts):
+        result = close_receipt(root, receipt_id)
+        if result.get("ok"):
+            closed.append(receipt_id)
+        else:
+            refused[receipt_id] = str(result.get("code") or "REFUSED")
+    return {"ok": not refused, "closed": closed, "refused": refused}
+
+
 def archive_receipt(root: Path | str, receipt_id: str) -> dict:
     """Move a CLOSED receipt out of the active surface into cold storage."""
     root = Path(root)
@@ -4034,9 +4691,7 @@ def purge_receipt(root: Path | str, receipt_id: str) -> dict:
                     archive_targets.append(path)
             distribution = _read_distribution_record(root, receipt_id)
             if distribution is not None:
-                protected = _safe_path(
-                    root, distribution["body_ref"], expect_file=True
-                )
+                protected = _safe_path(root, distribution["body_ref"], expect_file=True)
                 if protected.is_file() and not _is_link_or_reparse(protected):
                     archive_targets.append(protected)
             revision_targets: list[Path] = []
@@ -4357,9 +5012,9 @@ def status(root: Path | str, receipt_id: str) -> dict:
             return {"ok": False, "code": "SOURCE_CORRUPTION", "detail": str(exc)}
         try:
             index = _read_index(root)
-            projection = index.get("tombstones", {}).get(receipt_id) or index.get(
-                "active", {}
-            ).get(receipt_id)
+            projection = index.get("tombstones", {}).get(receipt_id) or index.get("active", {}).get(
+                receipt_id
+            )
             if not isinstance(projection, dict):
                 raise ValueError(f"archive {receipt_id} has no index projection")
             _closed_archive_bundle(
@@ -4402,6 +5057,48 @@ def status(root: Path | str, receipt_id: str) -> dict:
         "coverage": summary,
         "distribution": distribution,
     }
+
+
+def active_receipt_works(root: Path | str) -> tuple[set[str], set[str]]:
+    """`(ACTIVE receipt ids, Work held by sources or pending audit)` (T-1640).
+
+    A receipt names a Work by membership (`linked_work`, `linked_works`) or by
+    a coverage clause bound to it (`source disp --work`). Each is a lookup a
+    later receipt verb performs on the BOARD -- `_work_is_done`,
+    `_board_has_work` -- so a consumer that removes BOARD records keeps
+    exactly this set, and asks the owner of the receipt shape for it.
+
+    An unconsumed captured audit binding also retains its Work after Source
+    closure: deletion still checks that DONE row. Use the audit owner's
+    read-only provenance projection; CLOSED receipts never become ACTIVE.
+
+    Raises `ValueError`/`OSError` when the surface cannot be read. A caller
+    that prunes must refuse on that: an unreadable receipt is not a receipt
+    that names nothing.
+    """
+    root = Path(root)
+    active = _read_index(root).get("active") or {}
+    if not isinstance(active, dict):
+        raise ValueError("source intake index active projection is not an object")
+    works: set[str] = set()
+    for receipt_id in sorted(active):
+        works |= linked_works(_read_meta(root, receipt_id))
+        rows = _read_coverage(root, receipt_id).get("requirements") or {}
+        for row in rows.values():
+            work = str(row.get("work") or "").strip() if isinstance(row, dict) else ""
+            if work:
+                works.add(work)
+    from . import audit_inbox
+
+    audit = audit_inbox.provenance_trace(root)
+    if not audit.get("ok"):
+        raise ValueError(f"pending audit references cannot be read: {audit.get('detail')}")
+    works.update(
+        str(row["work"])
+        for row in audit.get("rows") or []
+        if row.get("work") and row.get("transport_state") != audit_inbox.DELETED
+    )
+    return set(active), works
 
 
 def active_receipts(root: Path | str, *, work: str | None = None) -> list[dict]:
@@ -4628,9 +5325,7 @@ def validate_project(root: Path | str) -> list[str]:
                 try:
                     _validate_contract_coverage(receipt_id, contract, coverage)
                 except (OSError, ValueError) as exc:
-                    errors.append(
-                        f"active receipt {receipt_id} contract/coverage invalid: {exc}"
-                    )
+                    errors.append(f"active receipt {receipt_id} contract/coverage invalid: {exc}")
             contract_ids = set(clauses)
             coverage_ids = set() if coverage is None else set(coverage.get("requirements", {}))
             if contract_ids != coverage_ids:
@@ -4647,9 +5342,7 @@ def validate_project(root: Path | str) -> list[str]:
                 try:
                     _contract_revision_integrity(root, receipt_id, contract)
                 except (ValueError, OSError) as exc:
-                    errors.append(
-                        f"active receipt {receipt_id} contract revision chain: {exc}"
-                    )
+                    errors.append(f"active receipt {receipt_id} contract revision chain: {exc}")
         linked = meta.get("linked_work")
         if linked:
             ticket = board_tickets.get(linked)
@@ -5086,8 +5779,7 @@ def _reconcile_survey(root: Path, receipt_id: str) -> dict:
     findings["archive_bundle"] = "absent" if not archive_names else sorted(archive_names)
     if archive_names:
         contradictions.append(
-            "archive bundle already holds surfaces for this receipt: "
-            + ", ".join(archive_names)
+            "archive bundle already holds surfaces for this receipt: " + ", ".join(archive_names)
         )
 
     inbox = _audit_inbox_entry(root, receipt_id)
@@ -5096,14 +5788,12 @@ def _reconcile_survey(root: Path, receipt_id: str) -> dict:
         if isinstance(inbox, dict)
         else None
     )
-    inbox_digest = inbox.get("receipt_sha256") or inbox.get("file_sha256") if isinstance(
-        inbox, dict
-    ) else None
+    inbox_digest = (
+        inbox.get("receipt_sha256") or inbox.get("file_sha256") if isinstance(inbox, dict) else None
+    )
     if isinstance(inbox, dict):
         if inbox.get("state") == "ACTIVE":
-            contradictions.append(
-                "audit inbox still claims this receipt as a live ACTIVE layer"
-            )
+            contradictions.append("audit inbox still claims this receipt as a live ACTIVE layer")
         if (
             isinstance(inbox_digest, str)
             and active_digest is not None
@@ -5150,9 +5840,7 @@ def _reconcile_survey(root: Path, receipt_id: str) -> dict:
             contradictions.append(f"linked Work {work} is {section}, not ## DONE")
 
     counts = {
-        value
-        for value in (legacy_actionable, legacy_terminal, total or None)
-        if value is not None
+        value for value in (legacy_actionable, legacy_terminal, total or None) if value is not None
     }
     if len(counts) > 1:
         contradictions.append(
@@ -5455,7 +6143,8 @@ def _expand_receipt_range(token: str) -> list[str] | None:
 
 
 def _plan_receipt_range_rewrite(
-    board_text: str, tickets: dict,
+    board_text: str,
+    tickets: dict,
 ) -> tuple[dict[str, list[str]], list[tuple[str, str]], list[str]]:
     """Plan structured field rewrites; malformed ranges refuse the whole plan."""
     from .board import set_ticket_field
@@ -5502,27 +6191,41 @@ def normalize_receipt_ranges(root: Path | str, *, dry_run: bool = False) -> dict
     root = Path(root)
     try:
         raw = _read_owned_file(
-            root, ".saipen/BOARD.md", kind="source BOARD authority", max_bytes=_BOARD_MAX,
+            root,
+            ".saipen/BOARD.md",
+            kind="source BOARD authority",
+            max_bytes=_BOARD_MAX,
         )
         document = codec.read_document(root / ".saipen/BOARD.md", raw=raw)
         from .board import parse_board
 
         board = parse_board(document.text_norm)
         if board.get("errors"):
-            return {"ok": False, "code": "VALIDATION_FAILED",
-                    "detail": "BOARD parse error: " + "; ".join(board["errors"][:3])}
+            return {
+                "ok": False,
+                "code": "VALIDATION_FAILED",
+                "detail": "BOARD parse error: " + "; ".join(board["errors"][:3]),
+            }
         expansions, rewrites, malformed = _plan_receipt_range_rewrite(
-            document.text_norm, board.get("tickets", {}),
+            document.text_norm,
+            board.get("tickets", {}),
         )
         if malformed:
-            return {"ok": False, "code": "VALIDATION_FAILED",
-                    "detail": "malformed receipt range shorthand refuses normalization: "
-                    + "; ".join(malformed[:5])}
+            return {
+                "ok": False,
+                "code": "VALIDATION_FAILED",
+                "detail": "malformed receipt range shorthand refuses normalization: "
+                + "; ".join(malformed[:5]),
+            }
         if not rewrites:
             return {"ok": True, "code": "ALREADY_NORMALIZED", "expanded": {}, "rewrites": 0}
         if dry_run:
-            return {"ok": True, "code": "RECEIPT_RANGE_PLAN", "expanded": expansions,
-                    "rewrites": len(rewrites)}
+            return {
+                "ok": True,
+                "code": "RECEIPT_RANGE_PLAN",
+                "expanded": expansions,
+                "rewrites": len(rewrites),
+            }
         replacements = dict(rewrites)
         updated = "".join(
             replacements.get(line.rstrip("\n"), line.rstrip("\n"))
@@ -5534,8 +6237,10 @@ def normalize_receipt_ranges(root: Path | str, *, dry_run: bool = False) -> dict
         from .paths import project_identity as _project_identity
         from .plan import semantic_payload_hash
 
-        fingerprint = hash_bytes(raw) + ";" + ";".join(
-            f"{work}:{','.join(ids)}" for work, ids in sorted(expansions.items())
+        fingerprint = (
+            hash_bytes(raw)
+            + ";"
+            + ";".join(f"{work}:{','.join(ids)}" for work, ids in sorted(expansions.items()))
         )
         # The byte precondition still refuses a changed BOARD after planning.
         # A separate before-hash in the operation identity avoids borrowing an
@@ -5548,20 +6253,37 @@ def normalize_receipt_ranges(root: Path | str, *, dry_run: bool = False) -> dict
                 agent=_agent_for_intake(root),
                 project_identity=_project_identity(root),
                 semantic_payload_hash=semantic_payload_hash(
-                    {"operation": "source.receipt_range_normalize", "tickets": expansions,
-                     "before_hash": hash_bytes(raw)},
+                    {
+                        "operation": "source.receipt_range_normalize",
+                        "tickets": expansions,
+                        "before_hash": hash_bytes(raw),
+                    },
                 ),
-                targets=[{"path": ".saipen/BOARD.md", "role": "board", "action": "write",
-                          "content": new_bytes, "before_hash": hash_bytes(raw),
-                          "after_hash": hash_bytes(new_bytes)}],
+                targets=[
+                    {
+                        "path": ".saipen/BOARD.md",
+                        "role": "board",
+                        "action": "write",
+                        "content": new_bytes,
+                        "before_hash": hash_bytes(raw),
+                        "after_hash": hash_bytes(new_bytes),
+                    }
+                ],
                 preconditions={".saipen/BOARD.md": hash_bytes(raw)},
                 verification_policy="none",
             )
         if not committed.get("ok"):
-            return {"ok": False, "code": committed.get("code", "VALIDATION_FAILED"),
-                    "detail": committed.get("detail", "plan apply failed")}
-        return {"ok": True, "code": "RECEIPT_RANGES_NORMALIZED", "expanded": expansions,
-                "rewrites": len(rewrites)}
+            return {
+                "ok": False,
+                "code": committed.get("code", "VALIDATION_FAILED"),
+                "detail": committed.get("detail", "plan apply failed"),
+            }
+        return {
+            "ok": True,
+            "code": "RECEIPT_RANGES_NORMALIZED",
+            "expanded": expansions,
+            "rewrites": len(rewrites),
+        }
     except (OSError, PermissionError, ValueError) as exc:
         return _write_refusal(exc)
 
@@ -5864,9 +6586,7 @@ def _closure_identity(original: dict, current: dict) -> str | None:
             value = closure.get(field)
             if isinstance(value, int) and current.get(key) != value:
                 return f"tombstone closure {field} disagrees with {key}"
-        if isinstance(closure.get("terminal_clauses"), int) and (
-            current.get("unresolved") != 0
-        ):
+        if isinstance(closure.get("terminal_clauses"), int) and (current.get("unresolved") != 0):
             return "tombstone unresolved count contradicts terminal closure"
     return None
 
@@ -5982,9 +6702,7 @@ def evaluate_terminal_recovered_source_attribution(root: Path | str, receipt_id:
                 "attributable": False,
                 "reason": "ARCHIVE_BODY_LINE_ENDING_DRIFT",
                 "receipt_id": receipt_id,
-                "detail": line_ending_drift_detail(
-                    f".saipen/archive/source/{receipt_id}.md"
-                ),
+                "detail": line_ending_drift_detail(f".saipen/archive/source/{receipt_id}.md"),
             }
         return {
             "attributable": False,

@@ -347,7 +347,9 @@ class RootStrayLocaleTests(unittest.TestCase):
                 stray.write_text("", encoding="utf-8")
             except OSError as exc:  # a filesystem that cannot hold the name
                 self.skipTest(f"filesystem refuses the stray name: {exc}")
-            project = _neutral_project(tmp / "project")
+            # T-1749: the locale control must judge the home itself; runtime
+            # root noise no longer belongs to a separate consumer's verdict.
+            project = _neutral_project(home)
             out_path = tmp / "findings.json"
             completed = subprocess.run(
                 [

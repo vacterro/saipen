@@ -90,6 +90,11 @@
         "type": "string",
         "description": "CORE-001: `required` declares that this ticket owes a regression PAIR -- a FAIL against the pre-fix subject and a PASS against the post-fix one under the SAME verifier -- and arms the extra gate in VERIFY -> REVIEW and finish. A machine-owned field, never inferred from prose."
       },
+      "regression_evidence": {
+        "type": "string",
+        "enum": ["executed"],
+        "description": "Monotonic native execution profile; requires regression: required and a current committed paired execution receipt. Absence retains legacy attested identity comparisons."
+      },
       "blocker_scope": {
         "type": "string",
         "enum": [
@@ -166,6 +171,10 @@
         "enum": ["operator_carrier", "transport_obligation", "model_supplied"],
         "description": "Original ingress witness, projected without promotion by operator_task. Only operator_carrier can accompany modern user_explicit:true; transport obligations prove tool-payload fidelity, not operator identity."
       },
+      "requires": {
+        "type": "string",
+        "description": "T-1663: what this ticket's steps need of an executor beyond the phase -- a comma list of name[@PHASE[+PHASE]] (no phase = every phase) plus the word read_only (reading and the control plane only). Read by saipen iteration; written by saipen ticket requires; a value the grammar cannot read is required and granted by nobody."
+      },
       "implementation_delta": {
         "type": "string",
         "enum": [
@@ -205,6 +214,10 @@
       "resume_transition_from": {
         "type": "string",
         "description": "The parent's prior transition_from value, restored with resume_phase."
+      },
+      "verification_contract": {
+        "type": "string",
+        "description": "T-1705/SRC-225: relative path or identifier for the verification contract artifact validating external or debt resolution."
       }
     },
     "allOf": [

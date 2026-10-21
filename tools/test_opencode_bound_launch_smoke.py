@@ -22,6 +22,8 @@ import unittest
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
+from saipen_engine.process_tree import run as run_host
+
 TOOLS = Path(__file__).resolve().parent
 REPO = TOOLS.parent
 if str(TOOLS) not in sys.path:
@@ -280,7 +282,7 @@ class BoundOpenCodeNativeSmoke(unittest.TestCase):
                     "--",
                     *host_args,
                 ]
-            proc = subprocess.run(
+            proc = run_host(
                 command,
                 cwd=root,
                 env=env,
@@ -392,6 +394,25 @@ class BoundOpenCodeNativeSmoke(unittest.TestCase):
         self.assertIn("TARGET_UNRESOLVED", combined)
         self.assertNotIn("ACTOR_UNBOUND", combined)
         self.assertNotIn("GUARD_UNREACHABLE", combined)
+
+    def test_shell_workdir_cannot_hide_a_canonical_append(self):
+        """T-1705: native execution cwd must survive the guard transport."""
+        root = project_with_doing_owner("test-agent", agent="test-agent")
+        self.addCleanup(lambda: shutil.rmtree(root, ignore_errors=True))
+        log = root / ".saipen" / "LOG.md"
+        before = log.read_bytes()
+        actions = [("bash", {
+            "command": 'echo "typed completion" >> LOG.md',
+            "workdir": str(root / ".saipen"),
+            "description": "Sacrificial canonical append prevention control",
+        })]
+        proc, _probe, requests = self._launch(root, None, actions)
+        self.assertEqual(log.read_bytes(), before)
+        self.assertTrue(
+            _provider_reports_tool_code(requests, "PROTECTED_CANONICAL_NAMESPACE"),
+            requests,
+        )
+        self.assertEqual(proc.returncode, 1, proc.stdout + proc.stderr)
 
     def test_optional_explicit_launch_is_checked_and_does_not_leak(self):
         foreign = project_with_doing_owner("other-seat")

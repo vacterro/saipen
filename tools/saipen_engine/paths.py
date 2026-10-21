@@ -36,6 +36,7 @@ import os
 import re
 import stat
 import subprocess
+import time
 import uuid
 from contextlib import suppress
 from dataclasses import dataclass
@@ -192,6 +193,21 @@ def update_digest_regular_bytes(
 _REPARSE = getattr(stat, "FILE_ATTRIBUTE_REPARSE_POINT", 0x400)
 
 
+class OwnedPathUnavailable(ValueError):
+    """An ownership probe could not read a node, retaining its OS evidence.
+
+    ValueError compatibility preserves existing topology callers' refusal
+    behavior. Lifecycle boundaries can distinguish unavailable storage from
+    unsafe topology without parsing or discarding the original Windows error.
+    """
+
+    def __init__(self, message: str, path: Path, error: OSError, operation: str):
+        super().__init__(message)
+        self.path = Path(path)
+        self.os_error = error
+        self.operation = operation
+
+
 def prove_owned_regular(path: Path, *, kind: str = "path") -> os.stat_result:
     """Prove `path` is an owned regular non-link/non-reparse final node.
 
@@ -205,7 +221,9 @@ def prove_owned_regular(path: Path, *, kind: str = "path") -> os.stat_result:
     except FileNotFoundError:
         raise
     except OSError as exc:
-        raise ValueError(f"{kind} {path} is unreadable: {exc}") from None
+        raise OwnedPathUnavailable(
+            f"{kind} {path} is unreadable: {exc}", path, exc, "lstat"
+        ) from exc
     if os.path.islink(path) or bool(getattr(st, "st_file_attributes", 0) & _REPARSE):
         raise ValueError(f"{kind} {path} is a link/reparse node")
     if not stat.S_ISREG(st.st_mode):
@@ -232,13 +250,17 @@ def prove_owned_dir_chain(
         if absolute != owner and not absolute.is_relative_to(owner):
             raise ValueError(f"{kind} {absolute} escapes ownership root {owner}")
     chain = list(reversed((absolute, *absolute.parents)))
+    if ownership_root is not None:
+        chain = [node for node in chain if node == owner or node.is_relative_to(owner)]
     for node in chain:
         try:
             st = node.lstat()
         except FileNotFoundError:
             continue
         except OSError as exc:
-            raise ValueError(f"{kind} ancestor {node} unreadable: {exc}") from None
+            raise OwnedPathUnavailable(
+                f"{kind} ancestor {node} unreadable: {exc}", node, exc, "ancestor_lstat"
+            ) from exc
         if os.path.islink(node) or bool(getattr(st, "st_file_attributes", 0) & _REPARSE):
             raise ValueError(f"{kind} ancestor {node} is a link/reparse node")
         if not stat.S_ISDIR(st.st_mode):
@@ -315,6 +337,70 @@ def safe_create_bytes_exclusive(
         os.close(descriptor)
 
 
+#: A reader that opens a file without delete-sharing makes Windows refuse the
+#: replace with ERROR_ACCESS_DENIED or ERROR_SHARING_VIOLATION for as long as it
+#: holds the handle. CPython opens files that way, so the usual holder is
+#: another SAIPEN process reading the same project memory (a host hook, a
+#: status poll, a second session); a backup tool, an indexer or antivirus does
+#: the same. That is a wait, not a verdict: the replace is retried on exactly
+#: those two codes, with the ownership and unchanged-target proofs re-run
+#: before every attempt, and the original error surfaces once the bound is
+#: spent (T-1648). Holders let go within milliseconds, so the pauses start
+#: short and are capped: what clears a busy file is the number of looks at it,
+#: not the length of one sleep. The whole wait is under two seconds.
+_TRANSIENT_REPLACE_WINERRORS = frozenset({5, 32})
+_REPLACE_ATTEMPTS = 40
+_REPLACE_PAUSE_FIRST_S = 0.005
+_REPLACE_PAUSE_MAX_S = 0.05
+
+
+def _transient_replace_error(exc: BaseException) -> bool:
+    return (
+        os.name == "nt"
+        and isinstance(exc, PermissionError)
+        and getattr(exc, "winerror", None) in _TRANSIENT_REPLACE_WINERRORS
+    )
+
+
+def _mode_to_carry(before: os.stat_result | None, created: os.stat_result) -> int | None:
+    """The permission bits a replacement takes over from the file it replaces.
+
+    T-1655: the temporary is created owner-only and then BECOMES the target,
+    so every replaced file ended 0600 whatever it had been -- a patched script
+    lost its execute bit, a file other accounts read became owner-only. None
+    when nothing is replaced (a new file keeps the owner-only default) or the
+    bits already agree. Only the nine permission bits travel: a replacement
+    never inherits set-id or sticky bits from the bytes it overwrites.
+    """
+    if before is None:
+        return None
+    mode = stat.S_IMODE(before.st_mode) & 0o777
+    return None if mode == stat.S_IMODE(created.st_mode) & 0o777 else mode
+
+
+def _carry_mode(
+    descriptor: int, before: os.stat_result | None, created: os.stat_result
+) -> os.stat_result | None:
+    """Set the replaced file's permission bits on the open temporary.
+
+    Through the descriptor, never the path: the temporary is still the node
+    this process created. Returns the stat to witness the temporary by from
+    now on (`_same_stat` compares the mode), or None when nothing was set.
+    A host without `os.fchmod` has no such bits to lose.
+    """
+    mode = _mode_to_carry(before, created)
+    fchmod = getattr(os, "fchmod", None)
+    if mode is None or fchmod is None:
+        return None
+    fchmod(descriptor, mode)
+    return os.fstat(descriptor)
+
+
+def _replace_pause(attempt: int) -> float:
+    """Seconds to wait after refused attempt number `attempt` (1-based)."""
+    return min(_REPLACE_PAUSE_FIRST_S * 2 ** (attempt - 1), _REPLACE_PAUSE_MAX_S)
+
+
 def safe_atomic_write_bytes(
     path: Path,
     data: bytes,
@@ -341,21 +427,31 @@ def safe_atomic_write_bytes(
     descriptor, tmp_stat = _open_exclusive_regular(tmp_path, kind=f"{kind} temporary")
     try:
         _write_all(descriptor, data)
+        carried = _carry_mode(descriptor, before, tmp_stat)
+        if carried is not None:
+            tmp_stat = carried
         os.close(descriptor)
         descriptor = -1
-        prove_owned_dir_chain(parent, kind=kind, ownership_root=ownership_root)
-        try:
-            current = prove_owned_regular(path, kind=kind)
-        except FileNotFoundError:
-            current = None
-        if (before is None) != (current is None) or (
-            before is not None and current is not None and not _same_stat(before, current)
-        ):
-            raise ValueError(f"{kind} {path} changed before atomic replacement")
-        tmp_current = prove_owned_regular(tmp_path, kind=f"{kind} temporary")
-        if not _same_stat(tmp_stat, tmp_current):
-            raise ValueError(f"{kind} temporary {tmp_path} changed before replacement")
-        os.replace(tmp_path, path)
+        for attempt in range(1, _REPLACE_ATTEMPTS + 1):
+            prove_owned_dir_chain(parent, kind=kind, ownership_root=ownership_root)
+            try:
+                current = prove_owned_regular(path, kind=kind)
+            except FileNotFoundError:
+                current = None
+            if (before is None) != (current is None) or (
+                before is not None and current is not None and not _same_stat(before, current)
+            ):
+                raise ValueError(f"{kind} {path} changed before atomic replacement")
+            tmp_current = prove_owned_regular(tmp_path, kind=f"{kind} temporary")
+            if not _same_stat(tmp_stat, tmp_current):
+                raise ValueError(f"{kind} temporary {tmp_path} changed before replacement")
+            try:
+                os.replace(tmp_path, path)
+                break
+            except OSError as exc:
+                if attempt == _REPLACE_ATTEMPTS or not _transient_replace_error(exc):
+                    raise
+            time.sleep(_replace_pause(attempt))
     except BaseException:
         if descriptor >= 0:
             os.close(descriptor)
@@ -417,18 +513,41 @@ def is_git_project_root(root: Path) -> bool:
     return False
 
 
+def _refused_to_this_account(root: Path) -> bool:
+    """True when the project's memory exists for someone and this account is
+    refused it (T-1647). That is a grant nobody made, not a project that lost
+    its memory: the two were one answer, and the first one was a traceback."""
+    saipen = root / SAIPEN_DIR
+    try:
+        saipen.stat()
+        with os.scandir(saipen):
+            pass
+    except PermissionError:
+        return True
+    except OSError:
+        return False
+    return False
+
+
+def _not_granted(root: Path, named: str) -> str:
+    return (
+        f"{named} is a project this account may not read (access denied): {root}; "
+        "it needs a grant to this account, not a repair"
+    )
+
+
 def _valid_saipen_dir(root: Path) -> bool:
     saipen = root / SAIPEN_DIR
-    if not saipen.is_dir():
-        return False
     try:
+        if not saipen.is_dir():
+            return False
         if saipen.is_symlink():
             return False
         # Reparse point check (Windows junctions)
         st = saipen.lstat()
         if getattr(st, "st_file_attributes", 0) & 0x400:
             return False
-    except OSError:
+    except (FileNotFoundError, NotADirectoryError):
         return False
     return True
 
@@ -460,6 +579,31 @@ def unbound_environment(base: dict | None = None, **overrides) -> dict:
         else:
             env[key] = str(value)
     return env
+
+
+#: T-1662. A test session names the repository it runs from, and no engine
+#: process that inherits the name may bind that repository for a write. A test
+#: that shells the engine and loses its explicit root binds the working
+#: directory's project instead, and every such write SUCCEEDS against the wrong
+#: ledger (measured: receipts and tickets minted here on 16.09.26, five LOG
+#: events on 07.10.26). Not a project binding, so `unbound_environment` leaves
+#: it in place: a child stripped of every carrier is exactly the child that
+#: falls back to the working directory. For the same reason the name does not
+#: open with `SAIPEN`: fourteen test modules build a child environment by
+#: dropping every variable that does, and an interlock they drop is not one.
+ENV_FORBID_PROJECT_WRITE = "FORBID_SAIPEN_PROJECT_WRITE"
+
+
+def write_forbidden_root(root: Path | str) -> str | None:
+    """The repository a test session holds, when ``root`` is that repository."""
+    held = os.environ.get(ENV_FORBID_PROJECT_WRITE, "").strip()
+    if not held:
+        return None
+    try:
+        same = os.path.samefile(held, root)
+    except OSError:
+        same = _same_path(Path(os.path.abspath(held)), Path(os.path.abspath(str(root))))
+    return held if same else None
 
 
 def _nearest_checkpoint_root(start: Path) -> Path | None:
@@ -530,11 +674,13 @@ class ResolvedProjectRoot(tuple):
         code: str | None = None,
         lineage: str | None = None,
         context_kind: str | None = None,
+        filesystem_failure: dict | None = None,
     ) -> ResolvedProjectRoot:
         inst = super().__new__(cls, (root, source))
         inst._code = code
         inst._lineage = lineage
         inst._context_kind = context_kind
+        inst.filesystem_failure = filesystem_failure
         return inst
 
     @property
@@ -609,6 +755,35 @@ def resolve_project_root(
     honor_environment: bool = True,
     authority: str = "mutation",
 ) -> ResolvedProjectRoot:
+    """Resolve a binding while retaining OS denial as unavailable runtime."""
+    try:
+        return _resolve_project_root(
+            start, explicit, host_root=host_root, host_lineage=host_lineage,
+            honor_environment=honor_environment, authority=authority,
+        )
+    except OSError as exc:
+        from .host_bootstrap import filesystem_unavailable
+
+        attempted = explicit or host_root or (
+            os.environ.get(ENV_PROJECT_ROOT) if honor_environment else None
+        ) or start or Path.cwd()
+        failure = filesystem_unavailable(
+            attempted, exc, stage="before_admission", operation="project_binding"
+        )
+        return ResolvedProjectRoot(
+            None, failure["detail"], code=failure["code"], filesystem_failure=failure
+        )
+
+
+def _resolve_project_root(
+    start: Path | None = None,
+    explicit: str | Path | None = None,
+    *,
+    host_root: str | Path | None = None,
+    host_lineage: str | None = None,
+    honor_environment: bool = True,
+    authority: str = "mutation",
+) -> ResolvedProjectRoot:
     """Resolve the one root whose checkpoint files this run may touch.
 
     Returns `ResolvedProjectRoot(root, provenance)` on success and
@@ -666,7 +841,9 @@ def resolve_project_root(
         if not _valid_saipen_dir(root):
             return ResolvedProjectRoot(
                 None,
-                f"explicit --project-root has no .saipen/ directory: {root}",
+                _not_granted(root, "explicit --project-root")
+                if _refused_to_this_account(root)
+                else f"explicit --project-root has no .saipen/ directory: {root}",
                 code="PROJECT_BINDING_INVALID",
             )
         lineage = project_lineage_identity(root)
@@ -710,7 +887,9 @@ def resolve_project_root(
         if not _valid_saipen_dir(candidate):
             return ResolvedProjectRoot(
                 None,
-                f"{ENV_PROJECT_ROOT} has no valid owned .saipen/ directory: {candidate}",
+                _not_granted(candidate, ENV_PROJECT_ROOT)
+                if _refused_to_this_account(candidate)
+                else f"{ENV_PROJECT_ROOT} has no valid owned .saipen/ directory: {candidate}",
                 code="PROJECT_BINDING_INVALID",
             )
         lineage = project_lineage_identity(candidate)

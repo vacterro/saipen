@@ -89,8 +89,13 @@
    },
    "GOAL-01": {
     "owner": "saipen/MAINTENANCE.md",
-    "test": "tools/test_goal_driven.py",
+    "test": "tools/test_t1494_continuation_authority.py",
     "subject": "goal execution and safety valve"
+   },
+   "OPERATOR-QUESTION-01": {
+    "owner": "saipen/EXECUTION.md",
+    "test": "tools/test_t1627_operator_question.py",
+    "subject": "native questions require canonical operator authority"
    },
    "EXEC-HUSH-01": {
     "owner": "saipen/EXECUTION.md",
@@ -179,6 +184,7 @@
   "GOAL-01": "saipen/MAINTENANCE.md",
   "EXEC-HUSH-01": "saipen/EXECUTION.md",
   "EXEC-RESPONSE-01": "saipen/EXECUTION.md",
+  "OPERATOR-QUESTION-01": "saipen/EXECUTION.md",
   "PHASE-DELTA-01": "saipen/CORE.md",
   "CONFORMANCE-CORPUS-01": "tests/conformance_cases.jsonl",
   "CONTEXT-BUDGET-01": "saipen/CORE.md",
@@ -405,6 +411,7 @@
    "permissions",
    "explain-next",
    "stats",
+   "iteration",
    "runtime",
    "host",
    "launch",
@@ -441,7 +448,8 @@
    "start",
    "cohort",
    "autonomy",
-   "gpu"
+   "gpu",
+   "lock"
   ],
   "improve_actions": [
    "bare",
@@ -505,7 +513,11 @@
    "transition_from",
    "stop_reason",
    "improve_gate",
-   "goal_ingress"
+   "goal_ingress",
+   "continuation_authority",
+   "authority_source",
+   "authority_until",
+   "safety_valve_mode"
   ],
   "string_fields": [
    "task",
@@ -522,7 +534,11 @@
    "paused_from_phase",
    "paused_from_na",
    "stop_reason",
-   "improve_gate"
+   "improve_gate",
+   "continuation_authority",
+   "authority_source",
+   "authority_until",
+   "safety_valve_mode"
   ],
   "integer_fields": {
    "saipen_version": null,
@@ -578,6 +594,47 @@
    "priority",
    "title",
    "verify"
+  ],
+  "known_fields": [
+   "blocked_on",
+   "blocker",
+   "blocker_scope",
+   "claim_generation",
+   "claim_run",
+   "claim_session",
+   "claim_time",
+   "closure_cohort",
+   "closure_mode",
+   "closure_paths",
+   "detail_ref",
+   "external_authority",
+   "external_evidence",
+   "external_implementation",
+   "implementation_delta",
+   "implementation_source",
+   "invalidation_evidence",
+   "needs",
+   "owner",
+   "recurrence",
+   "regression",
+   "regression_evidence",
+   "request_witness",
+   "requires",
+   "resolution_reason",
+   "resume_phase",
+   "resume_transition_from",
+   "retry_not_before",
+   "review_passes",
+   "source_receipts",
+   "source_reports",
+   "superseded_by",
+   "supersession_authority",
+   "supersession_evidence",
+   "user_explicit",
+   "verify",
+   "verification_contract",
+   "verify_attempts",
+   "weak_model"
   ]
  },
  "next_action_forms": {
@@ -701,7 +758,7 @@
   "budgets": {
    "cold": 27648,
    "ordinary_continue": 35840,
-   "command_resolution": 53248,
+   "command_resolution": 56320,
    "ordinary_phase": 40960,
    "ship_improve": 56320,
    "single_doc": 51200
@@ -904,6 +961,7 @@
   "INVALID_MANIFEST",
   "INVALID_GOAL",
   "HOME_REQUIRED",
+  "INSTALL_IDENTITY_MISMATCH",
   "CREW_BLOCKED",
   "COHORT_NOT_READY",
   "CREW_NOT_READY",
@@ -944,6 +1002,20 @@
   "EXTERNAL_RESOLUTION_REQUIRES_BLOCKED",
   "EXTERNAL_RECEIPT_MISSING",
   "EXTERNAL_RECEIPT_CORRUPT",
+  "EXTERNAL_PROJECT_INACCESSIBLE",
+  "EXTERNAL_LINEAGE_MISMATCH",
+  "EXTERNAL_IMPLEMENTATION_MALFORMED",
+  "EXTERNAL_BOARD_MISSING",
+  "EXTERNAL_BOARD_MALFORMED",
+  "EXTERNAL_TICKET_ABSENT",
+  "EXTERNAL_TICKET_NOT_DONE",
+  "EXTERNAL_GIT_EVIDENCE_MISSING",
+  "EXTERNAL_GIT_ERROR",
+  "EXTERNAL_COMMIT_MISSING",
+  "EXTERNAL_COMMIT_NOT_IN_HEAD",
+  "EXTERNAL_GIT_UNAVAILABLE",
+  "BOARD_MISSING",
+  "BOARD_UNREADABLE",
   "FALLBACK_NEEDS_MODEL_PLACEHOLDER",
   "GPU_LANE_UNAVAILABLE",
   "GPU_RECALL",
@@ -954,6 +1026,7 @@
   "INGRESS_SHELL_CONTROL",
   "INGRESS_TASK_MISMATCH",
   "INGRESS_TASK_CARRIER_INVALID",
+  "HOST_PROVENANCE_UNAVAILABLE",
   "ARGV_QUOTES_UNCONSUMED",
   "CONFORMANCE_UNHEALTHY",
   "CONFORMANCE_UNKNOWN",
@@ -982,6 +1055,7 @@
   "CAPABILITY_READ_ONLY",
   "CLOSURE_NOT_READY",
   "CLOSURE_UNKNOWN",
+  "PREMISE_NOT_DISPROVEN",
   "CONFIRMATION_REQUIRED",
   "CONTRACT_DRIFT",
   "CONVERGENCE_EVIDENCE_MISSING",
@@ -1035,6 +1109,7 @@
   "RUNTIME_DRIFT",
   "SETTLED_CORRUPT",
   "SETTLED_DIR_UNREADABLE",
+  "BROKER_CAPABILITY_INVALID",
   "SHORTCUT_NOT_EXECUTABLE",
   "SHORTCUT_RETIRED",
   "SOURCE_BODY_NOT_DISTRIBUTED",
@@ -1054,6 +1129,7 @@
   "STALE_PACKAGE",
   "STALE_WORKER",
   "TEST_REPORT",
+  "UNAUTHORIZED_LIFECYCLE_WRITE",
   "UNHANDLED_ACTION",
   "UNKNOWN_ACTION",
   "UNSEATED_MUTATION",
@@ -1109,7 +1185,19 @@
   "INTERMEDIATE_TEXT_SUPPRESSED",
   "TREE_UNDER_TEST",
   "FUTURE_GATE_ABSENT",
-  "FUTURE_GATE_NOT_ELIGIBLE"
+  "FUTURE_GATE_NOT_ELIGIBLE",
+  "BAD_REQUEST",
+  "HANDLER_ERROR",
+  "IO_FAILED",
+  "CROSS_USER_RUNTIME_UNAVAILABLE",
+  "EVIDENCE_IDENTITY_MISMATCH",
+  "EVIDENCE_UNRELATED",
+  "EVIDENCE_CORRUPTION",
+  "EVIDENCE_EXECUTION_FAILED",
+  "EVIDENCE_NOT_FOUND",
+  "EVIDENCE_STALE",
+  "EVIDENCE_UNAUTHENTICATED",
+  "PARTIAL_FULFILLMENT_REFUSED"
  ],
  "continue_fallback": {
   "invariant": "continue may fall through to improve ONLY after recovery, blocked/retryable, queued and required-follow-up routing are exhausted; it resumes an existing active Improve cycle and never creates an unbounded improve carousel",
@@ -1120,12 +1208,14 @@
  "audit_inbox": {
   "rule_id": "SOURCE-AUDIT-INBOX-01",
   "directory": "audit",
-  "filename_regex": "^[1-9][0-9]*\\.md$",
+  "filename_regex": "^(?!\\.)[^/\\\\\\x00-\\x1f\\x7f-\\x9f\\u2028\\u2029]+\\.(?i:md|markdown|txt)$",
+  "numbered_filename_regex": "^[1-9][0-9]*\\.md$",
   "recursive": false,
   "source_kind": "external_audit",
   "generation_identity": "relative_path+sha256",
-  "ordering": "LOWEST_WORKABLE_LAYER",
+  "ordering": "NUMBERED_THEN_CASEFOLDED_NAME",
   "continue_position": "AFTER_ACTIVE_BEFORE_BOARD_PICK",
+  "named_continue_position": "AFTER_BOARD_PICK_BEFORE_MAINTENANCE",
   "delete_gate": "SOURCE_CLOSED_AND_CURRENT_HASH_MATCHES",
   "delete_operation": "audit_inbox.consume",
   "renumber_after_delete": false,
@@ -1206,22 +1296,39 @@
  },
  "protocol_admission": {
   "host_authority": {
-   "status": "UNAVAILABLE",
-   "reason": "T-1563: same-user Python can reproduce a local hook; project keys and importable signers do not prove host provenance",
-   "required_boundary": "host-owned authenticated broker outside the ordinary model child-process surface",
+   "status": "AVAILABLE",
+   "proof": "hook-invocation",
+   "broker": "tools/saipen_engine/host_authority_broker.py",
+   "identity": "tools/saipen_engine/host_authority_identity.py",
+   "client": "tools/saipen_engine/host_authority_client.py",
+   "service_entry": "tools/authority_service.py",
    "local_minting": "UNAVAILABLE",
-   "legacy_project_key_provenance": "UNTRUSTED"
+   "legacy_project_key_provenance": "UNTRUSTED",
+   "host_images": [
+    "claude.exe",
+    "claude",
+    "claude-code",
+    "claude-code.exe"
+   ],
+   "host_signers": [
+    "Anthropic, PBC"
+   ],
+   "ancestry_limit": 16,
+   "capability_ttl_seconds": 900,
+   "idle_exit_seconds": 1800,
+   "identity_cache_seconds": 30
   },
   "rule_id": "PROTOCOL-ADMISSION-01",
   "owner": "tools/saipen_engine/protocol_admission.py",
   "test": "tools/test_protocol_admission.py",
-  "invariant": "no current protocol admission -> no normal user-visible assistant output; admission is machine-derived from delivered authority fingerprints, never from model prose, and is generational: any change to what it proved makes the old token fail",
+  "invariant": "admission is machine-derived from delivered authority fingerprints, never from model prose, and generational; ADMITTED only for a session the separated authority proved, DEGRADED (permitted, UNVERIFIED) or REFUSED otherwise by the taxonomy's decision table",
   "states": [
    "UNBOUND",
    "BINDING",
    "ADMITTED",
    "STALE",
-   "REFUSED"
+   "REFUSED",
+   "DEGRADED"
   ],
   "layers": [
    "binding",
@@ -1250,6 +1357,34 @@
     ],
     "decision": "B for the observed failure, C for the protocol: the skill exists by identity under ~/.claude/skills/synced/*/ and ~/.agents/skills/, the identity anthropic-skills:caveman exists nowhere, and the voice is carried by delivered STYLE.md, so it is not admission-critical; unresolvable is a reported warning; set critical true to REFUSE."
    }
+  ],
+  "taxonomy": "tools/saipen_engine/host_taxonomy.py",
+  "default_mode": "degraded"
+ },
+ "host_integration": {
+  "rule_id": "HOST-INTEGRATION-01",
+  "owner": "tools/saipen_engine/host_integration.py",
+  "taxonomy": "tools/saipen_engine/host_taxonomy.py",
+  "test": "tools/test_t1624_host_integration.py",
+  "invariant": "a supported host that can run is never locked out by its integration: a failure that is not a conflict degrades truthfully, and every refusal names one action",
+  "commands": [
+   "host doctor",
+   "host repair",
+   "host mode"
+  ]
+ },
+ "goal_authority": {
+  "continuation": [
+   "operator_required",
+   "operator_persistent"
+  ],
+  "until": [
+   "budget",
+   "goal_complete"
+  ],
+  "valve": [
+   "hard_wait",
+   "checkpoint"
   ]
  }
 }

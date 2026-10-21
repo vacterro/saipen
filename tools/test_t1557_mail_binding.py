@@ -230,7 +230,7 @@ class CliTests(unittest.TestCase):
             code, payload, text = cli(project, "mail", "explode", "--json")
             self.assertEqual(code, 2, text)
             self.assertFalse(payload["ok"], payload)
-            code, payload, text = cli(project, "mail", "init", "--workspace", "--json")
+            code, payload, text = cli(project, "--json", "mail", "init", "--workspace")
             self.assertEqual(code, 2, text)
             self.assertFalse(payload["ok"], payload)
             code, payload, text = cli(project, "mail", "init", "extra", "--json")

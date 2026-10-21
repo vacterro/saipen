@@ -21,7 +21,8 @@
 //   allowed action            -> host tool proceeds (guard exit 0)
 //   guard refusal             -> host tool does not execute (thrown error)
 //   guard failure / invalid
-//   output / unreachable      -> fail closed for consequential mutations
+//   declared integration gap  -> operator policy; allowed work is UNVERIFIED
+//   invalid output / payload  -> consequential tool does not execute
 //   verified built-in reads   -> never consequential; no guard round trip
 //
 // This file TRANSLATES only: it forwards one bounded JSON event
@@ -49,10 +50,454 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 const MAX_EVENT_BYTES = 256 * 1024;
-const GUARD_TIMEOUT_MS = 15000;
+// T-1826: every canonical check this adapter runs is its own `saipen` process.
+// Measured on this host: `response check --classify --operational-turn` costs
+// 20.2 s cold and 12.1 s warm, and 15.7 s per call at six-way concurrency. The
+// previous 15000 ms bound was under the measured cost, so under host load the
+// adapter killed a HEALTHY engine and reported EXEC_RESPONSE_INVALID:
+// ETIMEDOUT (observed as two t1553 RealLauncherInit reds). This bound is the
+// slowest measured check plus headroom, and it matches the Claude hook's 45 s
+// rather than inventing a third number.
+const GUARD_TIMEOUT_MS = 45000;
 const FLEET_TIMEOUT_MS = 120000;
 const BUILD_ID = "T-1327-zero-manual-recovery-20260914.1";
 const MAX_DIAGNOSTIC_BYTES = 4096;
+
+// BEGIN GENERATED HOST-INTEGRATION-01 POLICY
+const HOST_INTEGRATION_POLICY = {
+  "version": 1,
+  "default_mode": "degraded",
+  "strict_mode": "strict",
+  "aliases": {
+    "strict": "strict",
+    "degraded": "degraded",
+    "degraded_allowed": "degraded",
+    "degraded-allowed": "degraded"
+  },
+  "labels": {
+    "strict": "STRICT",
+    "degraded": "DEGRADED_ALLOWED"
+  },
+  "gap_codes": {
+    "SAIPEN_GUARD_UNINSTALLED": "ENGINE_UNREACHABLE",
+    "SAIPEN_GUARD_UNREACHABLE": "ENGINE_UNREACHABLE",
+    "PLUGIN_RESTART_REQUIRED": "PLUGIN_RESTART_REQUIRED"
+  },
+  "identity_observation": {
+    "root_env": "SAIPEN_PROJECT_ROOT",
+    "lineage_env": "SAIPEN_PROJECT_LINEAGE",
+    "memory_dir": ".saipen",
+    "identity_file": "IDENTITY.md",
+    "canonical_pattern": "^\\-\\-\\-\\r?\\nproject_lineage:\\ (lineage-[0-9a-f]{32})\\r?\\n\\-\\-\\-\\r?\\n$",
+    "max_bytes": 4096
+  },
+  "failures": {
+    "AUTHORITY_UNREACHABLE": {
+      "decisions": {
+        "strict": "BLOCK",
+        "degraded": "ALLOW_DEGRADED"
+      },
+      "operator_action": "saipen host repair"
+    },
+    "AUTHORITY_FAULT": {
+      "decisions": {
+        "strict": "BLOCK",
+        "degraded": "ALLOW_DEGRADED"
+      },
+      "operator_action": "saipen host repair"
+    },
+    "AUTHORITY_GENERATION_MISMATCH": {
+      "decisions": {
+        "strict": "BLOCK",
+        "degraded": "ALLOW_DEGRADED"
+      },
+      "operator_action": "saipen host repair"
+    },
+    "AUTHORITY_IMPOSTOR": {
+      "decisions": {
+        "strict": "BLOCK",
+        "degraded": "ALLOW_DEGRADED"
+      },
+      "operator_action": "saipen host doctor"
+    },
+    "AUTHORITY_CLIENT_UNPROVEN": {
+      "decisions": {
+        "strict": "BLOCK",
+        "degraded": "ALLOW_DEGRADED"
+      },
+      "operator_action": "saipen host doctor"
+    },
+    "AUTHORITY_IDENTITY_UNSUPPORTED": {
+      "decisions": {
+        "strict": "BLOCK",
+        "degraded": "ALLOW_DEGRADED"
+      },
+      "operator_action": "saipen host doctor"
+    },
+    "HOST_AUTHORITY_UNAVAILABLE": {
+      "decisions": {
+        "strict": "BLOCK",
+        "degraded": "ALLOW_DEGRADED"
+      },
+      "operator_action": "saipen host repair"
+    },
+    "CAPABILITY_FORGED": {
+      "decisions": {
+        "strict": "BLOCK",
+        "degraded": "BLOCK"
+      },
+      "operator_action": "remove SAIPEN_ADMISSION_TRANSPORT from the host environment and restart the host"
+    },
+    "CAPABILITY_REPLAYED": {
+      "decisions": {
+        "strict": "BLOCK",
+        "degraded": "BLOCK"
+      },
+      "operator_action": "remove SAIPEN_ADMISSION_TRANSPORT from the host environment and restart the host"
+    },
+    "CAPABILITY_EXPIRED": {
+      "decisions": {
+        "strict": "BLOCK",
+        "degraded": "BLOCK"
+      },
+      "operator_action": "remove SAIPEN_ADMISSION_TRANSPORT from the host environment and restart the host"
+    },
+    "CAPABILITY_BINDING_MISMATCH": {
+      "decisions": {
+        "strict": "BLOCK",
+        "degraded": "BLOCK"
+      },
+      "operator_action": "remove SAIPEN_ADMISSION_TRANSPORT from the host environment and restart the host"
+    },
+    "HOST_EVIDENCE_UNAVAILABLE": {
+      "decisions": {
+        "strict": "BLOCK",
+        "degraded": "ALLOW_DEGRADED"
+      },
+      "operator_action": "saipen host doctor"
+    },
+    "PROTOCOL_ADMISSION_REQUIRED": {
+      "decisions": {
+        "strict": "BLOCK",
+        "degraded": "BLOCK"
+      },
+      "operator_action": "send the prompt again"
+    },
+    "PROTOCOL_ADMISSION_TRANSPORT_REQUIRED": {
+      "decisions": {
+        "strict": "BLOCK",
+        "degraded": "BLOCK"
+      },
+      "operator_action": "send a prompt through the host; the hook establishes admission"
+    },
+    "BINDING_FOREIGN_PROJECT": {
+      "decisions": {
+        "strict": "BLOCK",
+        "degraded": "BLOCK"
+      },
+      "operator_action": "start the host in the intended project, or clear SAIPEN_PROJECT_ROOT and SAIPEN_PROJECT_LINEAGE"
+    },
+    "BINDING_CONFLICT": {
+      "decisions": {
+        "strict": "BLOCK",
+        "degraded": "BLOCK"
+      },
+      "operator_action": "start the host in the intended project, or clear SAIPEN_PROJECT_ROOT and SAIPEN_PROJECT_LINEAGE"
+    },
+    "BINDING_CARRIER_INVALID": {
+      "decisions": {
+        "strict": "BLOCK",
+        "degraded": "ALLOW_DEGRADED"
+      },
+      "operator_action": "clear SAIPEN_PROJECT_ROOT and SAIPEN_PROJECT_LINEAGE, or start the host in the project"
+    },
+    "PROJECT_IDENTITY_UNREADABLE": {
+      "decisions": {
+        "strict": "BLOCK",
+        "degraded": "ALLOW_DEGRADED"
+      },
+      "operator_action": "saipen recover"
+    },
+    "ENGINE_UNREACHABLE": {
+      "decisions": {
+        "strict": "BLOCK",
+        "degraded": "ALLOW_DEGRADED"
+      },
+      "operator_action": "saipen host repair"
+    },
+    "AUTHORITY_DOCUMENT_UNREADABLE": {
+      "decisions": {
+        "strict": "BLOCK",
+        "degraded": "ALLOW_DEGRADED"
+      },
+      "operator_action": "saipen host repair"
+    },
+    "AUTHORITY_DOCUMENT_INVALID": {
+      "decisions": {
+        "strict": "BLOCK",
+        "degraded": "ALLOW_DEGRADED"
+      },
+      "operator_action": "saipen host repair"
+    },
+    "ACTIVATION_BLOCK_ABSENT": {
+      "decisions": {
+        "strict": "BLOCK",
+        "degraded": "ALLOW_DEGRADED"
+      },
+      "operator_action": "saipen host repair"
+    },
+    "HOST_UNREGISTERED": {
+      "decisions": {
+        "strict": "BLOCK",
+        "degraded": "ALLOW_DEGRADED"
+      },
+      "operator_action": "saipen host repair"
+    },
+    "HOOK_UNOBSERVABLE": {
+      "decisions": {
+        "strict": "BLOCK",
+        "degraded": "ALLOW_DEGRADED"
+      },
+      "operator_action": "saipen host repair"
+    },
+    "SKILL_UNRESOLVED": {
+      "decisions": {
+        "strict": "BLOCK",
+        "degraded": "ALLOW_DEGRADED"
+      },
+      "operator_action": "saipen host repair"
+    },
+    "CANONICAL_RUNTIME_SOURCE_UNPROVEN": {
+      "decisions": {
+        "strict": "BLOCK",
+        "degraded": "ALLOW_DEGRADED"
+      },
+      "operator_action": "saipen host repair"
+    },
+    "HOST_UNIDENTIFIED": {
+      "decisions": {
+        "strict": "BLOCK",
+        "degraded": "ALLOW_DEGRADED"
+      },
+      "operator_action": "name the host: saipen runtime --prelaunch --adapter <id>"
+    },
+    "INSTALL_PREFLIGHT_FAILED": {
+      "decisions": {
+        "strict": "BLOCK",
+        "degraded": "ALLOW_DEGRADED"
+      },
+      "operator_action": "saipen host repair"
+    },
+    "POLICY_INVALID": {
+      "decisions": {
+        "strict": "BLOCK",
+        "degraded": "ALLOW_DEGRADED"
+      },
+      "operator_action": "saipen host mode degraded"
+    },
+    "HOOK_STALE": {
+      "decisions": {
+        "strict": "BLOCK",
+        "degraded": "ALLOW_DEGRADED"
+      },
+      "operator_action": "saipen host repair"
+    },
+    "ACTIVATION_BLOCK_STALE": {
+      "decisions": {
+        "strict": "BLOCK",
+        "degraded": "ALLOW_DEGRADED"
+      },
+      "operator_action": "saipen host repair"
+    },
+    "HOST_RUNTIME_STALE": {
+      "decisions": {
+        "strict": "BLOCK",
+        "degraded": "ALLOW_DEGRADED"
+      },
+      "operator_action": "saipen host repair"
+    },
+    "RUNTIME_STALE": {
+      "decisions": {
+        "strict": "BLOCK",
+        "degraded": "ALLOW_DEGRADED"
+      },
+      "operator_action": "saipen host repair"
+    },
+    "PLUGIN_RESTART_REQUIRED": {
+      "decisions": {
+        "strict": "BLOCK",
+        "degraded": "ALLOW_DEGRADED"
+      },
+      "operator_action": "restart the host application"
+    },
+    "HOST_LAUNCH_REFUSED": {
+      "decisions": {
+        "strict": "BLOCK",
+        "degraded": "ALLOW_DEGRADED"
+      },
+      "operator_action": "start the host application normally"
+    },
+    "CLAUDE_STOP_GATE_UNAVAILABLE": {
+      "decisions": {
+        "strict": "BLOCK",
+        "degraded": "ALLOW_DEGRADED"
+      },
+      "operator_action": "saipen host doctor"
+    },
+    "CLAUDE_STOP_REENTRY_NO_FAIL_CLOSED": {
+      "decisions": {
+        "strict": "BLOCK",
+        "degraded": "ALLOW_DEGRADED"
+      },
+      "operator_action": "none"
+    },
+    "RUNTIME_RESYNC_FAILED": {
+      "decisions": {
+        "strict": "BLOCK",
+        "degraded": "ALLOW_DEGRADED"
+      },
+      "operator_action": "saipen host repair"
+    },
+    "BOOTSTRAP_INSTALL_FAILED": {
+      "decisions": {
+        "strict": "BLOCK",
+        "degraded": "ALLOW_DEGRADED"
+      },
+      "operator_action": "saipen host repair"
+    },
+    "BOOTSTRAP_INCOMPLETE": {
+      "decisions": {
+        "strict": "BLOCK",
+        "degraded": "ALLOW_DEGRADED"
+      },
+      "operator_action": "saipen host repair"
+    },
+    "BOOTSTRAP_PROVENANCE_INVALID": {
+      "decisions": {
+        "strict": "BLOCK",
+        "degraded": "ALLOW_DEGRADED"
+      },
+      "operator_action": "saipen host repair"
+    },
+    "REPAIR_INCOMPLETE": {
+      "decisions": {
+        "strict": "BLOCK",
+        "degraded": "ALLOW_DEGRADED"
+      },
+      "operator_action": "saipen host doctor"
+    }
+  }
+};
+// END GENERATED HOST-INTEGRATION-01 POLICY
+
+// The native policy reader mirrors host_authority_client.policy: a missing
+// file uses the product default; unreadable bytes or an unknown mode use
+// STRICT. Only the canonical generated table decides whether a gap degrades.
+function admissionPolicy() {
+  const policyPath = path.join(os.homedir(), ".saipen", "authority.json");
+  const invalid = { mode: HOST_INTEGRATION_POLICY.strict_mode, source: "invalid" };
+  let bytes;
+  try { bytes = fs.readFileSync(policyPath); } catch (error) {
+    return error && error.code === "ENOENT"
+      ? { mode: HOST_INTEGRATION_POLICY.default_mode, source: "default" }
+      : invalid;
+  }
+  try {
+    const payload = JSON.parse(new TextDecoder("utf-8", { fatal: true }).decode(bytes));
+    const spelling = payload && typeof payload.mode === "string"
+      ? payload.mode.trim().toLowerCase().replaceAll(" ", "_") : "";
+    const mode = HOST_INTEGRATION_POLICY.aliases[spelling];
+    return typeof mode === "string" ? { mode, source: "operator" } : invalid;
+  } catch (_error) { return invalid; }
+}
+
+function integrationDecision(adapterCode, bindingConflict = null) {
+  const policy = admissionPolicy();
+  const code = bindingConflict ? "BINDING_CONFLICT" : HOST_INTEGRATION_POLICY.gap_codes[adapterCode];
+  const row = HOST_INTEGRATION_POLICY.failures[code];
+  const actionRow = policy.source === "invalid"
+    ? HOST_INTEGRATION_POLICY.failures.POLICY_INVALID : row;
+  return {
+    status: "UNVERIFIED",
+    adapter_code: adapterCode,
+    binding_conflict: bindingConflict,
+    failure_code: code || "UNCLASSIFIED",
+    decision: row ? row.decisions[policy.mode] : "BLOCK",
+    policy: HOST_INTEGRATION_POLICY.labels[policy.mode],
+    policy_source: policy.source,
+    operator_action: actionRow ? actionRow.operator_action : "saipen host doctor",
+  };
+}
+
+function integrationSystemMessage(gap) {
+  return `SAIPEN_HOST_INTEGRATION ${JSON.stringify(gap)}\n` +
+    (gap.decision === "ALLOW_DEGRADED"
+      ? "Ordinary work may proceed under the selected host policy. SAIPEN could not " +
+        "verify consequential tools; retain the UNVERIFIED status and claim no validation."
+      : "The selected host policy blocks consequential tools while this integration " +
+        "gap remains. Exact built-in diagnostic tools remain available.");
+}
+
+const TERMINAL_GUARD_CODES = new Set([
+  "PROTECTED_CANONICAL_NAMESPACE", "PATH_ESCAPES_PROJECT", "TARGET_UNRESOLVED",
+  "PROJECT_BINDING_INVALID", "PROJECT_LINEAGE_MISMATCH", "PROJECT_BINDING_AMBIGUOUS",
+  "OWNERSHIP_CONFLICT",
+]);
+
+// A negative observation only, never a resolver or an admission. During an
+// interpreter gap the host may still present two mechanically contradictory
+// identities. Read only a direct canonical, bounded, ordinary identity file;
+// unknown/changed/link bytes prove nothing and confer no project authority.
+// The recognized canonical byte grammar comes from paths.identity_file_content.
+function observedLineage(root) {
+  if (typeof root !== "string" || !path.isAbsolute(root)) return null;
+  const spec = HOST_INTEGRATION_POLICY.identity_observation;
+  const memory = path.join(root, spec.memory_dir);
+  const identity = path.join(memory, spec.identity_file);
+  let descriptor;
+  const same = (left, right) => left.dev === right.dev && left.ino === right.ino &&
+    left.size === right.size && left.mtimeMs === right.mtimeMs;
+  try {
+    const directoryBefore = fs.lstatSync(memory);
+    const before = fs.lstatSync(identity);
+    if (!directoryBefore.isDirectory() || directoryBefore.isSymbolicLink() ||
+        !before.isFile() || before.isSymbolicLink() || before.size > spec.max_bytes) return null;
+    descriptor = fs.openSync(identity, "r");
+    if (!same(before, fs.fstatSync(descriptor))) return null;
+    const bytes = fs.readFileSync(descriptor);
+    const after = fs.lstatSync(identity);
+    const directoryAfter = fs.lstatSync(memory);
+    if (bytes.length > spec.max_bytes || !same(before, after) ||
+        !same(directoryBefore, directoryAfter) || after.isSymbolicLink() ||
+        directoryAfter.isSymbolicLink() || bytes.subarray(0, 3).equals(Buffer.from([239, 187, 191]))) {
+      return null;
+    }
+    const text = new TextDecoder("utf-8", { fatal: true }).decode(bytes);
+    const match = new RegExp(spec.canonical_pattern).exec(text);
+    return match ? match[1] : null;
+  } catch (_error) { return null; }
+  finally {
+    if (descriptor !== undefined) {
+      try { fs.closeSync(descriptor); } catch (_error) { /* observation only */ }
+    }
+  }
+}
+
+function observedBindingConflict(context) {
+  const spec = HOST_INTEGRATION_POLICY.identity_observation;
+  const root = process.env[spec.root_env];
+  const expected = process.env[spec.lineage_env];
+  const asserted = observedLineage(root);
+  if (asserted && expected && asserted !== expected.trim()) return "PROJECT_LINEAGE_MISMATCH";
+  for (const candidate of contextCandidates(context)) {
+    const local = observedLineage(candidate);
+    if (!local) continue;
+    if (asserted && asserted !== local) return "PROJECT_BINDING_AMBIGUOUS";
+    if (!root && expected && local !== expected.trim()) return "PROJECT_LINEAGE_MISMATCH";
+    break;
+  }
+  return null;
+}
 
 // P0-1 (SRC-028:R012): system authority carries ONLY bounded machine facts.
 // The model-visible bootstrap payload is a closed record -- binding code,
@@ -95,7 +540,6 @@ const OPENCODE_READ_ONLY_TOOLS = new Set([
   "list",
   "webfetch",
   "skill",
-  "question",
 ]);
 
 // Exact native session-local state. OpenCode persists this in its own session
@@ -384,6 +828,8 @@ function buildEvent(context, toolName, toolInput, options) {
   };
   if (actor) event.actor = actor;
   if (opts.sessionId) event.session_id = String(opts.sessionId);
+  if (opts.toolCwd !== undefined) event.tool_cwd = opts.toolCwd;
+  if (opts.hostIngress) event.host_ingress = opts.hostIngress;
   return event;
 }
 
@@ -421,9 +867,14 @@ function guardRefusal(verdict, guardPayload, toolName, args) {
     args && typeof args.command === "string"
       ? ` attempted: ${args.command.slice(0, 160)}`
       : "";
+  const questionClass = guardPayload && guardPayload.operator_question &&
+    guardPayload.operator_question.class;
+  const questionDiagnostic = ["AUTONOMOUS_HANDBACK", "INVALID_OPERATIONAL_PROSE"]
+    .includes(questionClass) ? ` (${questionClass}; OPERATOR-QUESTION-01)` : "";
   return new Error(
     `SAIPEN_GUARD_REFUSAL: ${verdict.code}: the saipen guard refused tool '${toolName}'; ` +
       `the host tool did not execute` +
+      questionDiagnostic +
       (verdict.diagnostic ? ` (${verdict.diagnostic})` : "") +
       attempted +
       (route ? ` next: ${route}` : ""),
@@ -498,6 +949,11 @@ async function resolveBootstrapBinding(context, actor, pythonBin, saipenPy) {
 // is a fixed string chosen by the guard's bounded code, never composed from
 // project content.
 function bindingInstruction(binding) {
+  if (binding.code === "GUARD_UNREACHABLE") {
+    return "The canonical SAIPEN resolver could not be consulted. The separate " +
+      "SAIPEN_HOST_INTEGRATION record states the selected gap policy; no project " +
+      "binding or validation is claimed. Do not adopt an ambient project.";
+  }
   if (binding.project_root) {
     return "Binding was resolved mechanically by the canonical SAIPEN resolver before tool " +
       "admission. Use project_root directly; do not run generic shell root discovery and " +
@@ -590,7 +1046,7 @@ function startupProbe(
 
 const RECALL_TIMEOUT_MS = 10000;
 const MAX_RECALL_DIRECTIVE_BYTES = 4096;
-const MAX_INGRESS_TEXT_CHARS = 2048;
+const MAX_INGRESS_TEXT_CHARS = 256 * 1024;
 const RECALL_UNAVAILABLE =
   "SAIPEN_AUTO_RECALL_UNAVAILABLE: the canonical recall could not be computed for this " +
   "request. Run `saipen continue --json` before interpreting any earlier user message.";
@@ -638,8 +1094,32 @@ function sessionMemory(sessionID) {
   return memory;
 }
 
+// T-1657: the reply the gate refuses is kept BEFORE this adapter replaces it or
+// throws. This host REPLACES the completed part, so detail a model wrote only
+// into its reply would be gone with it. The engine owns the bytes and the
+// overflow account beside them (`saipen response preserve`); this adapter only
+// hands the reply over. A reply that cannot be kept changes no verdict.
+function preserveRefused(pythonBin, saipenPy, projectRoot, text) {
+  if (typeof text !== "string" || !text.trim()) return null;
+  try {
+    const proc = spawnSync(
+      pythonBin,
+      [saipenPy, "response", "preserve", "--stdin", "--json", "--project-root", projectRoot],
+      {
+        input: text, encoding: "utf8", timeout: GUARD_TIMEOUT_MS,
+        windowsHide: true, maxBuffer: MAX_EVENT_BYTES, cwd: projectRoot,
+        env: responseCarrierEnv(""),
+      },
+    );
+    const kept = JSON.parse(proc.stdout || "");
+    return kept && kept.ok === true && typeof kept.ref === "string" ? kept.ref : null;
+  } catch (_error) {
+    return null;
+  }
+}
+
 function checkOperationalResponse(pythonBin, saipenPy, projectRoot, text, enforceAutonomy,
-                                 requestText) {
+                                 requestText, sessionID) {
   if (!pythonBin || !saipenPy || !projectRoot) {
     throw new Error("EXEC_RESPONSE_UNAVAILABLE: canonical response checker is unreachable");
   }
@@ -655,32 +1135,42 @@ function checkOperationalResponse(pythonBin, saipenPy, projectRoot, text, enforc
     {
       input: text, encoding: "utf8", timeout: GUARD_TIMEOUT_MS,
       windowsHide: true, maxBuffer: MAX_EVENT_BYTES, cwd: projectRoot,
-      // Exact bytes came from chat.message, not a model shell substitution.
-      // This is a host-carried digest, not protocol-admission signing.
-      env: responseCarrierEnv(requestText),
+      // Digest/session select transport; the separated origin verifier alone
+      // authenticates the human event and its delivering worker.
+      env: responseCarrierEnv(requestText, sessionID),
     },
   );
   let answer;
   try { answer = JSON.parse(proc.stdout || ""); } catch (_error) { answer = null; }
   if (answer && answer.layer !== "ADMISSION" && typeof answer.delivery === "string") {
+    // A reply the authority accepted IS the delivery; anything else is about
+    // to be replaced or dropped, so it is kept first.
+    if (answer.ok !== true) preserveRefused(pythonBin, saipenPy, projectRoot, text);
     if (answer.delivery === "" && answer.class === "AUTONOMOUS_HANDBACK") {
       throw new Error("EXEC_RESPONSE_INVALID: eligible autonomous action remains; continue silently");
     }
     return answer.delivery;
   }
   if (proc.status === 0 && answer && answer.ok === true) return text;
+  // Refused with no delivery to put in its place. An admission refusal judges
+  // the session, not a reply, and an unreadable answer is no verdict.
+  if (answer && answer.ok === false && answer.layer !== "ADMISSION") {
+    preserveRefused(pythonBin, saipenPy, projectRoot, text);
+  }
   const reason = answer && Array.isArray(answer.errors)
     ? answer.errors.slice(0, 3).join("; ")
     : (answer && answer.code) || (proc.error && proc.error.code) || "checker failed";
   throw new Error(`EXEC_RESPONSE_INVALID: ${reason}`);
 }
 
-function responseCarrierEnv(requestText) {
+function responseCarrierEnv(requestText, sessionID) {
   // Only response checking receives this exact host prompt. It does NOT
   // become the environment of model tools, admission or Work projection.
   const env = { ...process.env };
   delete env.SAIPEN_TASK_FILE;
   delete env.SAIPEN_TASK_SHA256;
+  delete env.SAIPEN_HOST_SESSION;
+  if (sessionID) env.SAIPEN_HOST_SESSION = String(sessionID);
   if (requestText) env.SAIPEN_TASK_SHA256 = sha256(Buffer.from(requestText.replace(/\r\n?/g, "\n").trim(), "utf8"));
   return env;
 }
@@ -692,7 +1182,7 @@ function responseCarrierEnv(requestText) {
 // passed unmeasured -- while the registry called this host's response gate
 // MECHANICAL. Same authority, same refusal shape as every other host: this
 // adapter transports the verdict and never restates a STYLE rule.
-function checkOrdinaryChat(pythonBin, saipenPy, projectRoot, text, requestText) {
+function checkOrdinaryChat(pythonBin, saipenPy, projectRoot, text, requestText, sessionID) {
   if (!pythonBin || !saipenPy || !projectRoot) {
     throw new Error("EXEC_RESPONSE_UNAVAILABLE: canonical response checker is unreachable");
   }
@@ -704,7 +1194,7 @@ function checkOrdinaryChat(pythonBin, saipenPy, projectRoot, text, requestText) 
     {
       input: text, encoding: "utf8", timeout: GUARD_TIMEOUT_MS,
       windowsHide: true, maxBuffer: MAX_EVENT_BYTES, cwd: projectRoot,
-      env: responseCarrierEnv(requestText),
+      env: responseCarrierEnv(requestText, sessionID),
     },
   );
   let answer;
@@ -716,6 +1206,8 @@ function checkOrdinaryChat(pythonBin, saipenPy, projectRoot, text, requestText) 
   if (answer.ok === true) return;
   const klass = answer.class;
   if (typeof klass !== "string" || !klass) return;
+  // The throw below asks for a rewrite; the reply it refuses is kept first.
+  if (answer.layer !== "ADMISSION") preserveRefused(pythonBin, saipenPy, projectRoot, text);
   const errors = Array.isArray(answer.errors)
     ? answer.errors.slice(0, 3).join("; ")
     : (answer.code || "checker failed");
@@ -911,6 +1403,21 @@ const SaipenGuard = async (context) => {
     return liveBinding;
   }
   let attemptedCondition = null;
+  function knownBindingConflict(gap) {
+    if (TERMINAL_GUARD_CODES.has(liveBinding.code)) return liveBinding.code;
+    return gap ? observedBindingConflict(context) : null;
+  }
+  function integrationGap() {
+    let installedSha256;
+    try { installedSha256 = sha256(fs.readFileSync(MODULE_PATH)); } catch (_error) {
+      installedSha256 = "missing";
+    }
+    if (installedSha256 !== LOADED_SHA256) return "PLUGIN_RESTART_REQUIRED";
+    if (!guardInstalled) return "SAIPEN_GUARD_UNINSTALLED";
+    if (!pythonBin) return "SAIPEN_GUARD_UNREACHABLE";
+    return null;
+  }
+
 
   return {
     "experimental.chat.system.transform": async (input, output) => {
@@ -918,14 +1425,19 @@ const SaipenGuard = async (context) => {
       const binding = await currentBinding({
         rateLimitMs: BINDING_RECHECK_MS, sessionId: input && input.sessionID,
       });
-      output.system.push(bindingSystemMessage(binding));
+      const gap = integrationGap();
+      const conflict = knownBindingConflict(gap);
+      output.system.push(bindingSystemMessage(conflict ? { ...binding, code: conflict } : binding));
+      if (gap) {
+        output.system.push(integrationSystemMessage(integrationDecision(gap, conflict)));
+      }
       // T-1446 AUTO_RECALL / AUTO_KICK. This hook runs before EVERY model
       // request -- including the first request a replacement model serves
       // after a router swaps providers mid-work (SAIFREN, SRC-105). The
       // canonical execution is recomputed here from project state on each
       // request, so the successor receives the decision instead of needing a
       // memory it does not have.
-      if (binding.code !== "ADMITTED" || !binding.project_root) return;
+      if (conflict || binding.code !== "ADMITTED" || !binding.project_root) return;
       const sessionID = input && input.sessionID;
       const memory = sessionMemory(sessionID);
       const recall = runRecall(
@@ -984,12 +1496,14 @@ const SaipenGuard = async (context) => {
         }
         output.text = checkOperationalResponse(
           pythonBin, saipenPy, binding.project_root, output.text,
-          memory.enforceAutonomy, ingress,
+          memory.enforceAutonomy, ingress, input && input.sessionID,
         );
         return;
       }
       if (!output || typeof output.text !== "string" || !output.text.trim()) return;
-      checkOrdinaryChat(pythonBin, saipenPy, binding.project_root, output.text, ingress);
+      checkOrdinaryChat(
+        pythonBin, saipenPy, binding.project_root, output.text, ingress, input && input.sessionID,
+      );
     },
     "tool.execute.before": async (input, output) => {
       // Safe diagnostics must remain reachable after an installer replaces
@@ -998,19 +1512,10 @@ const SaipenGuard = async (context) => {
       const toolName =
         input && typeof input.tool === "string" && input.tool.trim() ? input.tool : "unknown";
       if (isBuiltinNonProject(toolName)) return;
-      // A running host keeps its imported module after an on-disk overwrite.
-      // Report that generation mismatch before consequential admission.
-      let installedSha256;
-      try { installedSha256 = sha256(fs.readFileSync(MODULE_PATH)); } catch (_error) {
-        installedSha256 = "missing";
-      }
-      if (installedSha256 !== LOADED_SHA256) {
-        throw new Error(
-          `SAIPEN_GUARD_REFUSAL: PLUGIN_RESTART_REQUIRED: loaded build=${BUILD_ID} ` +
-            `sha256=${LOADED_SHA256}; installed sha256=${installedSha256}; ` +
-            `restart OpenCode; the host tool did not execute`,
-        );
-      }
+      // An empty native question list emits no operator question. Ordinary
+      // diagnostics stay reachable, including the no-runtime control.
+      if (toolName.trim().toLowerCase() === "question" && output && output.args &&
+          Array.isArray(output.args.questions) && output.args.questions.length === 0) return;
       // Tool name comes from the real hook INPUT; arguments come from the
       // real mutable hook OUTPUT. No adapter-local alternative schema.
       const args = output ? output.args : undefined;
@@ -1022,19 +1527,30 @@ const SaipenGuard = async (context) => {
         );
       }
 
-      if (!guardInstalled) {
-        throw new Error(
-          `SAIPEN_GUARD_UNINSTALLED: no saipen guard at '${saipenPy}'; ` +
-            `the saipen guard could not be consulted for tool '${toolName}' ` +
-            `(consequential mutations fail closed)`,
-        );
+      // A known binding/ownership conflict is a refusal in every policy,
+      // including when this loaded plugin has subsequently become stale.
+      const gap = integrationGap();
+      const conflict = knownBindingConflict(gap);
+      if (conflict) {
+        throw guardRefusal({ block: true, code: conflict }, null, toolName, args);
       }
-      if (!pythonBin) {
-        throw new Error(
-          `SAIPEN_GUARD_UNREACHABLE: no Python runtime found; ` +
-            `the saipen guard could not be consulted for tool '${toolName}' ` +
-            `(consequential mutations fail closed)`,
-        );
+      // T-1688: a replaced plugin still has its guard and its interpreter, so
+      // the previous generation keeps asking. A refusal that is a fact about
+      // the target or the actor does not depend on which generation forwarded
+      // the event and survives the gap; every other answer, an unreadable one
+      // included, is the UNVERIFIED part and degrades. The two gaps with
+      // nothing to ask return here as before.
+      let degradedStale = false;
+      if (gap) {
+        const decision = integrationDecision(gap);
+        if (decision.decision !== "ALLOW_DEGRADED") {
+          throw new Error(
+            `SAIPEN_GUARD_REFUSAL: ${gap}: UNVERIFIED ${decision.policy}; ` +
+            `next: ${decision.operator_action}; the host tool did not execute`,
+          );
+        }
+        if (gap !== "PLUGIN_RESTART_REQUIRED") return;
+        degradedStale = true;
       }
 
       // T-1384: export this session's identity for the command that is about
@@ -1053,11 +1569,36 @@ const SaipenGuard = async (context) => {
       // this project became a SAIPEN project (the guard round trip is spawned
       // for the event anyway), and eventCwd follows the upgraded binding.
       const binding = await currentBinding({ sessionId: hostSession });
+      // T-1705: binding cwd may be a worktree or placeholder, not the tool's
+      // execution directory. Preserve both facts; never rebase file effects
+      // onto the project merely because the project binding was verified.
+      // A relative explicit workdir stays relative: the guard refuses an
+      // unknown base instead of guessing the host process's resolution.
+      const toolCwd = toolName === "bash" && typeof args.workdir === "string" && args.workdir
+        ? args.workdir
+        : ((context && context.directory) || contextStart(context));
+      const memory = sessionMemory(hostSession);
+      let hostIngress = null;
+      if (memory.pending && memory.pending.text) {
+        const text = memory.pending.text;
+        const digest = createHash("sha256")
+          .update(text.replace(/\r\n/g, "\n").replace(/\r/g, "\n").trim(), "utf8")
+          .digest("hex");
+        hostIngress = {
+          message_id: memory.pending.id,
+          request_text: text,
+          request_digest: digest,
+          session_id: hostSession ? String(hostSession) : null,
+          project_lineage: (binding && binding.project_lineage) || null,
+        };
+      }
       const payload = JSON.stringify(
         buildEvent(context, toolName, args, {
           actor: launchActor,
           sessionId: hostSession,
           cwd: eventCwd,
+          toolCwd,
+          hostIngress,
         }),
       );
       if (Buffer.byteLength(payload, "utf8") > MAX_EVENT_BYTES) {
@@ -1066,15 +1607,18 @@ const SaipenGuard = async (context) => {
       const result = await runGuard(pythonBin, saipenPy, payload, eventCwd);
       const verdict = decide(result);
       const guardPayload = parseGuardPayload(result);
-      // Intrinsically forbidden effects and asserted binding conflicts keep
-      // their exact guard refusal. Recovery cannot make such payloads safe.
-      const terminalGuardCodes = new Set([
-        "PROTECTED_CANONICAL_NAMESPACE", "PATH_ESCAPES_PROJECT", "TARGET_UNRESOLVED",
-        "PROJECT_BINDING_INVALID", "PROJECT_LINEAGE_MISMATCH", "OWNERSHIP_CONFLICT",
-      ]);
-      if (verdict.block && terminalGuardCodes.has(verdict.code)) {
+      // The question control boundary is independent of installed-runtime
+      // admission. A stale/default-degraded plugin still has this canonical
+      // verdict; it cannot turn a forbidden menu into operator authority.
+      if (verdict.block && guardPayload && guardPayload.operator_question) {
         throw guardRefusal(verdict, guardPayload, toolName, args);
       }
+      // Intrinsically forbidden effects and asserted binding conflicts keep
+      // their exact guard refusal. Recovery cannot make such payloads safe.
+      if (verdict.block && TERMINAL_GUARD_CODES.has(verdict.code)) {
+        throw guardRefusal(verdict, guardPayload, toolName, args);
+      }
+      if (degradedStale) return;
       // Fleet owns classification and the single canonical recovery attempt.
       // A repaired project NEVER receives this old tool payload: the hook
       // refuses it and the model must issue a fresh action against current bytes.

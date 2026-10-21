@@ -283,7 +283,8 @@ def _reconcile(root: Path, doc: dict) -> dict:
     """
     highest = 0
     for item in audit_inbox.scan_layers(root):
-        highest = max(highest, item["layer"])
+        if item["layer"] is not None:
+            highest = max(highest, item["layer"])
     for record in doc["operations"].values():
         layer = record.get("layer")
         if isinstance(layer, int) and not isinstance(layer, bool):

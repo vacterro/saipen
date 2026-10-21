@@ -118,7 +118,7 @@ Every condition must hold, all of them mechanically checkable:
 3. `evidence:` references at least one existing path in the repository;
 4. every `needs:` prerequisite is `## DONE` on BOARD (`needs: none` declares
    that there are none);
-5. no BOARD ticket already records this gate id and is not `## DONE`;
+5. no ticket bound by a slice record is still open (a mention binds none);
 6. `basis:` is not `speculative` when a measurable alternative exists;
 7. the document is machine-readable (or carries a reviewed record bound to
    these exact bytes, §9) and carries no secret-like value.

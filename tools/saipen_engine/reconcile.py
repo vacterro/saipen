@@ -54,7 +54,7 @@ _TICKET_BOX_RE = re.compile(r"^(\s*- \[)([ x/])(\])")
 # CORE section 1.5: two LOG lines are goal MARKERS -- the `DEC: goal pivot`
 # line a new objective writes, and the `DEC: goal reauthorized` line section
 # 2.4 requires from a re-authorizing `cc`.
-_GOAL_MARKER_RE = re.compile(r"^goal (?:pivot|reauthorized)\b")
+_GOAL_MARKER_RE = re.compile(r"^goal (?:pivot|reauthorized|checkpoint)\b")
 # CORE section 1.5: "Only increments are completion events -- a marker's own
 # `N->0` records the reset, it is not a wave or a ticket."
 _GOAL_INCREMENT_RE = re.compile(r"^goal_(waves|tickets) (\d+)->(\d+)$")
@@ -322,13 +322,9 @@ def _state_blocker_repairs(
         active phase. Reset to `none` (never dropped: CORE requires the key),
         with the original STATE bytes archived as recovery evidence.
 
-    Target C operator gate: when `resolve_blocker` carries an explicit operator
-    DECISION, the gate is no longer ambiguous -- the engine is TOLD the gate is
-    resolved. The blocker it owns (and only it) is cleared to `none`, the old
-    value is preserved as recovery evidence, and the DEC records the authority.
-    A live `## BLOCKED` board ticket is NOT owned here and is named in the
-    reason for the follow-up `saipen ticket unblock`. Empty decision text never
-    resolves a gate -- there is no generic unblock-anything path.
+    Decision text is not operator provenance. The compatibility argument
+    `resolve_blocker` cannot authorize this pure classifier: scoped decisions
+    are validated by `gate_decision.resolve` at the recovery entry point.
     """
     from .board import blocker_class
     from . import phases as _phases
@@ -355,37 +351,6 @@ def _state_blocker_repairs(
             if live_blocked
             else f"recognised gate class {cls!r}"
         )
-        if isinstance(resolve_blocker, str) and resolve_blocker.strip():
-            decision = resolve_blocker.strip()
-            board_note = (
-                f"; {', '.join(live_blocked)} remain ## BLOCKED -- lift each with "
-                '`saipen ticket unblock <T-###> "<decision>"`'
-                if live_blocked
-                else ""
-            )
-            return [
-                {
-                    "field": "blocker",
-                    "from": blocker,
-                    "to": "none",
-                    "surface": "state",
-                    "operator_authorized": True,
-                    "authority": decision,
-                    "follow_up": (
-                        f'saipen ticket unblock {live_blocked[0]} "<decision>"'
-                        if live_blocked
-                        else None
-                    ),
-                    "reason": (
-                        f"phase {phase!r} carries blocker {blocker!r} with "
-                        f"{authority}; cleared by EXPLICIT operator authority "
-                        f"{decision!r}. Only STATE.blocker is owned here, the "
-                        "original bytes are archived as recovery evidence, and "
-                        "the surface is revalidated immediately "
-                        f"(OPERATOR_AUTHORIZED){board_note}"
-                    ),
-                }
-            ]
         return [
             {
                 "field": "blocker",
@@ -394,13 +359,13 @@ def _state_blocker_repairs(
                 "surface": "state",
                 "refuse": True,
                 "operator_decision_available": True,
-                "canonical_next_command": "saipen recover resolve-blocker <decision>",
+                "canonical_next_command": "saipen recover resolve-blocker <SRC-###>",
                 "reason": (
                     f"phase {phase!r} carries blocker {blocker!r} with {authority}; "
                     "the engine cannot infer whether that gate still applies, so "
                     "clearing it requires an explicit operator decision "
                     '(OPERATOR_DECISION_REQUIRED): run `saipen recover '
-                    'resolve-blocker <decision>`'
+                    'resolve-blocker <SRC-###>`'
                     + (
                         f' or `saipen ticket unblock {live_blocked[0]} "<decision>"`'
                         if live_blocked
@@ -497,35 +462,8 @@ def _state_next_action_repairs(
                 "surface": "state",
                 "refuse": True,
                 "operator_decision_available": True,
-                "canonical_next_command": "saipen recover resolve-next-action <next-action>",
+                "canonical_next_command": "saipen recover resolve-next-action <SRC-###>",
                 "reason": reason + " (OPERATOR_DECISION_REQUIRED)",
-            }
-        ]
-
-    if isinstance(resolve_next_action, str) and resolve_next_action.strip():
-        proposed = resolve_next_action.strip()
-        if _legacy_next_action(proposed):
-            return refuse(
-                f"the supplied next_action {proposed!r} is not executable either: it "
-                f"must start with one of {_LEGAL_NEXT_PREFIXES} or be a legal "
-                "`PHASE <phase> <T-###>` line. The operator decides the VALUE; the "
-                "grammar is not theirs to waive"
-            )
-        return [
-            {
-                "field": "next_action",
-                "from": na,
-                "to": proposed,
-                "surface": "state",
-                "operator_authorized": True,
-                "authority": proposed,
-                "reason": (
-                    f"legacy next_action {na!r} has no executable form and the router "
-                    f"cannot project one; set to {proposed!r} by EXPLICIT operator "
-                    "authority. Only STATE.next_action is owned here, the original "
-                    "bytes are archived as recovery evidence, and the supplied value "
-                    "passes the executable grammar (OPERATOR_AUTHORIZED)"
-                ),
             }
         ]
 
@@ -728,8 +666,15 @@ def _mechanized_ticket_ids(events) -> set[str]:
     contract -- the refusal's own cure did not clear the refusal. An
     attestation is the operator's legacy classification, never closure-
     generation evidence.
+
+    The SAME holds for a `--adopt-legacy` DEC (T-1743, measured on
+    SMART_VAC_CLEANER): adoption gives a legacy record the allocation event it
+    never had, so counting it flipped the adopted rows to `current` and the
+    very next `recover` demanded a reopen approval for rows the operator had
+    just adopted AND attested in the same repair -- the cure re-armed the
+    refusal it answered.
     """
-    from .log import LEGACY_DONE_ATTESTATION
+    from .log import LEGACY_ADOPTION, LEGACY_DONE_ATTESTATION
 
     return {
         ev.get("ticket")
@@ -737,6 +682,7 @@ def _mechanized_ticket_ids(events) -> set[str]:
         if ev.get("ticket")
         and ev.get("op_id")
         and LEGACY_DONE_ATTESTATION not in (ev.get("text") or "")
+        and LEGACY_ADOPTION not in (ev.get("text") or "")
     }
 
 
@@ -865,12 +811,20 @@ def _board_lifecycle_repairs(
         # known field is ambiguous bytes no repair may choose between, so the
         # atom is a refusal, never a silent pick -- the strict duplicate-field
         # corruption keeps its own fail-closed class.
-        from .board import CLOSURE_METADATA_FIELDS
+        from .board import CLOSURE_METADATA_FIELDS, _EXTERNAL_DECLARATION_FIELDS
 
         stale_closure = [
             name
             for name in CLOSURE_METADATA_FIELDS
-            if section != "## DONE" and str(fields.get(name, "") or "").strip()
+            # A ## BLOCKED row's authority/implementation pair is an upstream
+            # dependency DECLARATION the external auto-doctor inspects and
+            # canonically resolves; it is not terminal residue, and stripping
+            # it would destroy the authoritative structured dependency
+            # evidence. Provenance fields (closure_mode, external_evidence,
+            # resolution_reason, ...) stay DONE-only everywhere else.
+            if section != "## DONE"
+            and not (section == "## BLOCKED" and name in _EXTERNAL_DECLARATION_FIELDS)
+            and str(fields.get(name, "") or "").strip()
         ]
         if stale_closure:
             atom = {
@@ -899,6 +853,58 @@ def _board_lifecycle_repairs(
                     "repair may silently choose one value over the other"
                 )
             repairs.append(atom)
+        # TYPED CLOSURE MODE (T-1674). board.py's closed set is the whole
+        # vocabulary a closure operation writes, so a `## DONE` row whose
+        # `closure_mode` lies outside it was closed by a hand. The row is a
+        # board parse error every reader refuses, and it had no repair owner:
+        # the phantom-DONE and legacy-review classes below skip any row that
+        # carries a closure_mode at all, so recovery answered RESIDUAL_DEFECTS
+        # with no command (a copy of AUDAPACK, 08.10.26: `closure_mode:
+        # duplicate_reconciled`, typed two days earlier, and the only exit was
+        # a hand edit of BOARD.md). Same shape and same approval as phantom
+        # DONE: the row returns to `## TODO` without closure metadata or
+        # claim, and the completion it asserted is re-established by an
+        # operation -- `ticket supersede` for a duplicate, the lifecycle for
+        # anything else. A row STATE is bound to is left to the current-done
+        # classes, which move STATE and BOARD together.
+        from .board import CLOSURE_MODES
+
+        typed_mode = str(fields.get("closure_mode", "") or "").strip()
+        if (
+            section == "## DONE"
+            and typed_mode
+            and typed_mode.lower() not in CLOSURE_MODES
+            and tid != (state or {}).get("task")
+        ):
+            dropped = _reopen_field_removals(ticket.get("raw", ""))
+            for name in ("owner", "claim_time"):
+                if name in fields and name not in dropped:
+                    dropped.append(name)
+            repairs.append(
+                {
+                    "field": "board",
+                    "kind": "section-move",
+                    "_class": "typed-closure-mode",
+                    "ticket": tid,
+                    "surface": "board",
+                    "from_section": "## DONE",
+                    "to_section": "## TODO",
+                    "fields": dropped,
+                    "requires_approval": True,
+                    "generation": "current",
+                    "reason": (
+                        f"{tid} sits under ## DONE with closure_mode {typed_mode!r}, "
+                        "which no closure operation writes (closed set: "
+                        + "|".join(CLOSURE_MODES)
+                        + "); the completion was typed, so the row returns to "
+                        "## TODO without closure metadata or claim under ONE "
+                        "operator approval of the repair plan -- close a "
+                        "duplicate with `saipen ticket supersede`, anything else "
+                        "through its lifecycle"
+                    ),
+                }
+            )
+            continue
         owner = str(fields.get("owner", "") or "").strip()
         claim_time = str(fields.get("claim_time", "") or "").strip()
         if bool(owner) == bool(claim_time):
@@ -1103,6 +1109,16 @@ def _residue_route(residue: list[str], board: dict | None = None) -> str | None:
     for marker, command in _RESIDUE_ROUTES:
         if any(marker in item for item in residue):
             return command
+    # T-1743: a row whose ONLY fault is a field outside the closed grammar has
+    # a lossless canonical repair. Naming nothing here was the dead end that
+    # left SMART_VAC_CLEANER's every lifecycle verb refused.
+    errors = list((board or {}).get("errors") or [])
+    if errors:
+        from .board_compaction import unrecognized_field_ticket
+
+        foreign = [unrecognized_field_ticket(error) for error in errors]
+        if all(foreign):
+            return f"saipen ticket compact {foreign[0]}"
     for item in residue:
         match = _STRANDED_TASK_RE.search(item)
         if not match:
@@ -2011,6 +2027,143 @@ def _state_phase_repairs(state: dict, events, board: dict | None = None) -> list
     return repairs
 
 
+def _lifecycle_authority_repairs(
+    state: dict, board: dict | None, events, verdict: dict | None
+) -> dict:
+    """Repairs for an UNAUTHORIZED lifecycle head (T-1671, SRC-192).
+
+    Defect class: canonical lifecycle state typed by an executor that lost the
+    control route. `lifecycle_authority.assess` names it from the journal; the
+    classes above cannot, because they read a closure from BOARD fields
+    (`closure_mode`, `owner`) and from LOG prose (`verify -> PASS`), and a hand
+    types all three.
+
+    The repair demotes exactly what no operation produced and invents nothing:
+
+      * a `## DONE` row vouched for only by hand-written head events returns
+        to `## TODO` with its closure metadata and claim dropped, so the
+        ordinary lifecycle re-establishes the completion. It is a BOARD
+        lifecycle atom and therefore rides the one-approval plan (SRC-043);
+      * a STATE bound to such a ticket, or to a ticket no operation ever
+        touched, goes idle (`DONE` / `task: none`): the journal proves no
+        phase for it, and an invented phase is the fabrication T-1318 refuses;
+      * `last_event` is rebound, which is what makes this reconciliation
+        commit its own journaled event even when nothing else is owed -- the
+        hand-written lines stay in the append-only LOG as history, and the
+        operation that says so becomes the new floor.
+
+    A STATE bound to a ticket the journal DOES know keeps its phase: judging a
+    hand-moved phase of a journaled ticket needs the per-ticket lifecycle
+    proof, which `_state_phase_repairs` owns for the pairs it can decide.
+    """
+    from . import lifecycle_authority as _la
+
+    plan: dict = {"state": [], "board": [], "idle": False, "trace": ""}
+    if not verdict or verdict.get("status") != _la.UNAUTHORIZED:
+        return plan
+    floor = verdict.get("floor")
+    findings = verdict.get("findings") or []
+    tickets = (board or {}).get("tickets", {}) or {}
+    unbacked = sorted(
+        f["ticket"] for f in findings if f.get("rule") == _la.TERMINAL_UNBACKED
+    )
+
+    def reopen(tid: str, origin: str, reason: str) -> dict:
+        row = tickets.get(tid) or {}
+        dropped = _reopen_field_removals(row.get("raw", ""))
+        for name in ("owner", "claim_time"):
+            if name in (row.get("fields") or {}) and name not in dropped:
+                dropped.append(name)
+        return {
+            "field": "board", "surface": "board", "kind": "section-move",
+            "_class": _la.REPAIR_CLASS, "ticket": tid,
+            "from_section": origin, "to_section": "## TODO",
+            "fields": dropped, "requires_approval": True, "generation": "current",
+            "reason": reason,
+        }
+
+    for finding in findings:
+        if finding.get("rule") != _la.TERMINAL_UNBACKED:
+            continue
+        plan["board"].append(reopen(
+            finding["ticket"], "## DONE",
+            f"UNAUTHORIZED_LIFECYCLE_WRITE: {finding['detail']}; it returns to "
+            "## TODO without closure metadata or claim and the canonical "
+            "lifecycle re-establishes the completion -- original bytes preserved",
+        ))
+    task = state.get("task")
+    bound = task if isinstance(task, str) and re.fullmatch(r"T-\d+", task) else None
+    journaled = bound is not None and any(
+        event.get("ticket") == bound
+        and event.get("op_id")
+        and isinstance(event.get("event"), int)
+        and not isinstance(event.get("event"), bool)
+        and (floor is None or event["event"] <= floor)
+        for event in (events or ())
+    )
+    state_ahead = any(f.get("rule") == _la.STATE_AHEAD for f in findings)
+    if bound is not None and (bound in unbacked or (state_ahead and not journaled)):
+        plan["idle"] = True
+        why = (
+            f"UNAUTHORIZED_LIFECYCLE_WRITE: STATE is bound to {bound}, "
+            + (
+                "whose completion no operation produced"
+                if bound in unbacked
+                else "which no operation ever touched"
+            )
+            + "; the journal proves no phase for it, so STATE goes idle and the "
+            "queue decides -- never an invented phase"
+        )
+        for field, value in (
+            ("phase", "DONE"), ("transition_from", "DONE"),
+            ("task", "none"), ("next_action", "saipen continue"),
+        ):
+            if state.get(field) != value:
+                plan["state"].append({
+                    "field": field, "from": state.get(field), "to": value,
+                    "surface": "state", "_class": _la.REPAIR_CLASS, "reason": why,
+                })
+        row = tickets.get(bound)
+        if bound not in unbacked and isinstance(row, dict) and row.get("section") == "## DOING":
+            plan["board"].append(reopen(
+                bound, "## DOING",
+                f"UNAUTHORIZED_LIFECYCLE_WRITE: {bound} sits under ## DOING on a "
+                "claim no operation wrote; it returns to ## TODO unclaimed",
+            ))
+    if state_ahead:
+        plan["state"].append({
+            "field": "last_event", "from": state.get("last_event"), "to": floor,
+            "surface": "state", "_class": _la.REPAIR_CLASS,
+            "reason": (
+                f"UNAUTHORIZED_LIFECYCLE_WRITE: STATE.last_event sits above "
+                f"E-{floor}, the newest event an operation record stands behind; "
+                "this reconciliation's own journaled event becomes the marker"
+            ),
+        })
+    head = verdict.get("head") or []
+    if head:
+        span = f"E-{head[0]}" + (f"..E-{head[-1]}" if len(head) > 1 else "")
+        plan["trace"] = (
+            f"lifecycle authority: {span} above E-{floor} carry no operation record "
+            "(written by hand); kept as history, nothing stands on their word"
+        )
+    elif any(f.get("origin") == "board-only" for f in findings):
+        # T-1673: BOARD.md alone was edited; no LOG line names the move.
+        plan["trace"] = (
+            "lifecycle authority: rows moved under ## DONE by an edit of BOARD.md "
+            "that no LOG event records have no operation behind them"
+        )
+    else:
+        # T-1679: the typed lines were quarantined; their event named the rows.
+        plan["trace"] = (
+            "lifecycle authority: rows closed by a quarantined typed head have no "
+            "operation behind them"
+        )
+    if unbacked:
+        plan["trace"] += "; reopened " + ", ".join(unbacked)
+    return plan
+
+
 def _repair_summary(board_drifts: list[dict], state_repairs: list[dict]) -> str:
     parts: list[str] = []
     if board_drifts:
@@ -2033,10 +2186,12 @@ def _foreign_tail_route(project_root: Path) -> str | None:
     `foreign_tail_cut` proof the repair runs decides it, so the route is never
     advertised for damage the repair would refuse.
     """
-    from .operations import TAIL_QUARANTINE_OBSERVABLE, _read
+    from .operations import TYPED_HEAD_QUARANTINE_OBSERVABLE, _read
 
     try:
-        docs, _state, _board, _tail = _read(project_root, observe=TAIL_QUARANTINE_OBSERVABLE)
+        docs, _state, _board, _tail = _read(
+            project_root, observe=TYPED_HEAD_QUARANTINE_OBSERVABLE
+        )
     except Exception:  # any refusal means "not provable"
         return None
     if docs.get("_foreign_tail") is None:
@@ -2267,11 +2422,10 @@ def _ensure_audit_contract(result: dict, project_root: Path) -> dict:
 
     Deliberately narrow:
       * a dry-run reconciliation writes nothing (that is what dry_run means);
-      * a refused enrollment NEVER fails the reconciliation -- the canonical
-        mutation is already committed when this runs, and a derived
-        declaration may not un-commit real work -- but it IS reported, because
-        a refusal that says nothing is the silent no-op this exists to
-        prevent;
+      * derived declaration refusals retain their existing recovery semantics;
+      * filesystem unavailability is a hard boundary. Preflight and any required
+        manifest write run before a canonical repair commits, so a denied
+        resource never admits Work or partially advances LOG and STATE;
       * `audit_manifest.ensure` owns every legality rule (no protocol memory,
         unloadable checkpoint, declaration that is not this contract, a NEWER
         contract), so there is exactly one implementation of the contract's
@@ -2305,15 +2459,12 @@ def _ensure_audit_contract(result: dict, project_root: Path) -> dict:
     try:
         outcome = audit_manifest.ensure(project_root)
     except OSError as exc:
-        return {
-            **result,
-            "audit_manifest": {
-                "ok": False,
-                "code": "AUDIT_MANIFEST_REFUSED",
-                "reason_code": "AUDIT_MANIFEST_UNWRITABLE",
-                "detail": str(exc),
-            },
-        }
+        from .host_bootstrap import filesystem_unavailable
+
+        outcome = filesystem_unavailable(project_root, exc)
+    if outcome.get("code") == "SAIPEN_HOST_RUNTIME_UNAVAILABLE":
+        return {**outcome, "changed": result.get("changed", []),
+                "canonical_result": result, "audit_manifest": outcome}
     if outcome.get("changed") or not outcome.get("ok"):
         merged = {**result, "audit_manifest": outcome}
         if outcome.get("changed") and result.get("code") == "CLEAN":
@@ -2334,6 +2485,42 @@ def _ensure_audit_contract(result: dict, project_root: Path) -> dict:
             )
         return merged
     return result
+
+
+def _history_ledger_refusal(project_root: Path, detail: str) -> dict:
+    """The same proven quarantine-or-terminal decision for every projection."""
+    quarantine = _foreign_tail_route(project_root)
+    return {
+        "ok": False,
+        "code": "HISTORY_LEDGER_CORRUPT",
+        "detail": detail,
+        **_blocked_recovery_fields(
+            command=quarantine,
+            terminal_disposition=None if quarantine else "FORENSICALLY_UNRECOVERABLE",
+            evidence_reference=".saipen/LOG.md",
+            reason_code="HISTORY_LEDGER_CORRUPT",
+        ),
+    }
+
+
+def checkpoint_ledger_diagnostic(project_root: Path | str, routed: dict) -> dict | None:
+    """Refine an already invalid checkpoint using recovery's existing typed read.
+
+    Healthy routing performs no additional history read or traversal. The
+    strict recovery reader retains binding, error precedence and quarantine
+    proof; projection code must not infer a terminal diagnosis from prose.
+    """
+    if routed.get("ok") is not False:
+        return None
+    from . import lifecycle_authority
+
+    if (routed.get("reason") != "checkpoint-invalid"
+            and routed.get("code") != lifecycle_authority.CODE):
+        return None
+    result = reconcile_protocol_state(project_root, "diagnostic", dry_run=True)
+    if result.get("code") == "HISTORY_LEDGER_CORRUPT":
+        return result
+    return None
 
 
 def reconcile_protocol_state(
@@ -2360,12 +2547,44 @@ def reconcile_protocol_state(
     that had none and rewrites no historical LOG line. It is the explicit
     answer to a `legacy-done-review` refusal.
 
-    `resolve_blocker` carries an explicit operator decision (Target C) that
-    clears a gated `STATE.blocker`. It is not a generic unblock: empty text is
-    ignored, a live `## BLOCKED` board ticket is never owned here, and the
-    decision is recorded in the LOG DEC with the original STATE archived.
+    `resolve_blocker` and `resolve_next_action` name immutable authority-only
+    Sources. The shared gate-decision owner validates original operator origin
+    and exact scope before journaled projection; plain text grants nothing.
+    A live `## BLOCKED` board ticket is never owned here.
     """
     project_root = Path(root)
+    if resolve_blocker is not None or resolve_next_action is not None:
+        from .gate_decision import resolve as resolve_gate
+
+        if (
+            (resolve_blocker is not None and resolve_next_action is not None)
+            or adopt_legacy or attest_legacy_done or approved_repair_id is not None
+        ):
+            return {
+                "ok": False, "code": "VALIDATION_FAILED",
+                "detail": "apply the scoped gate decision separately from other recovery decisions",
+            }
+        # Gate scope cannot mask a lifecycle repair (T-1572/T-1671). The
+        # authority checks inside `gate_decision.resolve` run first, so an
+        # invalid or unauthenticated decision reports the gate's own reason;
+        # the owner diverts only once the decision is verified, immediately
+        # before the journaled write, when a phase, Work or closure repair is
+        # the honest answer.
+        return resolve_gate(
+            project_root, agent,
+            resolve_blocker if resolve_blocker is not None else resolve_next_action,
+            dry_run=dry_run, only_next_action=resolve_next_action is not None,
+        )
+    # Detect manifest access denial before any canonical repair can commit.
+    # Other manifest refusals retain their existing recovery semantics.
+    try:
+        from . import audit_manifest
+    except ImportError:
+        audit_manifest = None  # Existing derived-module recovery semantics.
+    if audit_manifest is not None:
+        manifest_preflight = audit_manifest.ensure(project_root, dry_run=True)
+        if manifest_preflight.get("code") == "SAIPEN_HOST_RUNTIME_UNAVAILABLE":
+            return manifest_preflight
     try:
         from .operations import (
             _docs_preconditions,
@@ -2377,13 +2596,17 @@ def reconcile_protocol_state(
             _target,
         )
         from .fast_check import validate_texts
-        from .log import legacy_done_attestation_text
+        from .log import LEGACY_ADOPTION, legacy_done_attestation_text
         from .plan import apply_plan, build_plan
     except ImportError as exc:  # pragma: no cover - import graph is static
         return {"ok": False, "code": "VALIDATION_FAILED", "detail": str(exc)}
 
     try:
-        docs, state, _board, log_tail = _read(project_root, observe=REPAIR_OBSERVABLE)
+        from .lifecycle_authority import OBSERVABLE as _LIFECYCLE_OBSERVABLE
+
+        docs, state, _board, log_tail = _read(
+            project_root, observe=(*REPAIR_OBSERVABLE, _LIFECYCLE_OBSERVABLE)
+        )
     except Exception as exc:
         # CheckpointError / HomeDeadError / OSError all mean the surface cannot
         # be reconciled mechanically. Refuse loudly -- none of them is the
@@ -2397,21 +2620,7 @@ def reconcile_protocol_state(
             "detail": str(exc),
         }
         if result["code"] == "HISTORY_LEDGER_CORRUPT":
-            # Unrecoverable is a claim that no local mutation can reconstruct
-            # the truth. A proven foreign tail reconstructs nothing -- it cuts
-            # lines no checkpoint bound -- so that one shape names its exit
-            # instead of stranding the project (29.09.26).
-            quarantine = _foreign_tail_route(project_root)
-            result.update(
-                _blocked_recovery_fields(
-                    command=quarantine,
-                    terminal_disposition=(
-                        None if quarantine else "FORENSICALLY_UNRECOVERABLE"
-                    ),
-                    evidence_reference=".saipen/LOG.md",
-                    reason_code="HISTORY_LEDGER_CORRUPT",
-                )
-            )
+            return _history_ledger_refusal(project_root, str(exc))
         return result
 
     events = docs["_history"].events if docs.get("_history") is not None else ()
@@ -2423,7 +2632,11 @@ def reconcile_protocol_state(
     strict_state_error = docs.get("_state_error", "")
 
     board_drifts = _checkbox_drifts(board_text)
-    phase_repairs = _state_phase_repairs(state, events, _board)
+    # T-1671: an unauthorized head is judged FIRST. Where it sends STATE idle,
+    # the phase and next_action it replaces were typed by hand, and deriving a
+    # repair from them would be reconciling toward a forgery.
+    authority = _lifecycle_authority_repairs(state, _board, events, docs.get("_lifecycle"))
+    phase_repairs = [] if authority["idle"] else _state_phase_repairs(state, events, _board)
     gap = next((r["gap"] for r in phase_repairs if r.get("gap")), None)
     state_repairs = (
         _state_output_field_repairs(state)
@@ -2433,14 +2646,24 @@ def reconcile_protocol_state(
         + _tripped_valve_repairs(state)
         + phase_repairs
         + _state_blocker_repairs(state, _board, resolve_blocker)
-        + ([] if gap else _state_next_action_repairs(
+        + ([] if gap or authority["idle"] else _state_next_action_repairs(
             state, state_text, board_text, agent, project_root, resolve_next_action
         ))
     )
+    if authority["state"]:
+        _owned_fields = {repair["field"] for repair in authority["state"]}
+        state_repairs = [
+            repair for repair in state_repairs if repair.get("field") not in _owned_fields
+        ] + authority["state"]
     adoption_repairs = _board_adoption_repairs(_board, docs.get("_history"), adopt_legacy)
     lifecycle_all = _board_lifecycle_repairs(
         _board, events, state, docs.get("_history")
     )
+    if authority["board"]:
+        _reopened = {repair["ticket"] for repair in authority["board"]}
+        lifecycle_all = [
+            repair for repair in lifecycle_all if repair.get("ticket") not in _reopened
+        ] + authority["board"]
     if gap:
         lifecycle_all = [r for r in lifecycle_all if r.get("ticket") != gap["ticket"]]
         dropped = _reopen_field_removals(_board["tickets"][gap["ticket"]].get("raw", ""))
@@ -2810,6 +3033,8 @@ def reconcile_protocol_state(
             f"; current-done-unproven {gap['ticket']}: closure revoked now; "
             "no lifecycle phase proven, queued TODO for fresh claim and verification"
         )
+    if authority["trace"]:
+        description += "; " + authority["trace"]
     # T-1358: the DEC names the field each decision actually authorized. It
     # said `STATE.blocker clear` for every operator-authorized repair and read
     # `resolve_blocker` directly, so the moment a second field gained an
@@ -2843,7 +3068,7 @@ def reconcile_protocol_state(
             "DEC",
             _adopt_tid,
             agent,
-            f"LEGACY_ADOPTED {_adopt_tid} -- no canonical allocation event is "
+            f"{LEGACY_ADOPTION} {_adopt_tid} -- no canonical allocation event is "
             "available in the complete history; adopted now by explicit operator "
             "decision, original ticket id/title/bytes preserved, no historical "
             "allocation or actor fabricated (Target E)",
@@ -3052,11 +3277,13 @@ def reconcile_protocol_state(
         )
         preserved_path = preserved_rel
 
-    if gap:
+    if gap or authority["trace"]:
         from .journal import hash_bytes
         from .plan import TargetPlan
 
         # Preserve evidence before canonical writes, including crash prefixes.
+        # T-1671: an unauthorized head is the same obligation -- the bytes an
+        # executor typed are the only record of what it claimed.
         originals = []
         for name in ("STATE", "BOARD", "LOG"):
             original = (project_root / ".saipen" / (name + ".md")).read_bytes()
@@ -3114,6 +3341,13 @@ def reconcile_protocol_state(
             "dry_run": True,
         }
 
+    # Complete a required manifest write before committing a canonical repair.
+    # A denied write must not discover itself after advancing LOG and STATE.
+    contract = _ensure_audit_contract(
+        {"ok": True, "code": "CLEAN", "changed": [], "dry_run": False}, project_root
+    )
+    if contract.get("code") == "SAIPEN_HOST_RUNTIME_UNAVAILABLE":
+        return contract
     applied = apply_plan(project_root, plan)
     if not applied.get("ok"):
         return {
@@ -3123,8 +3357,7 @@ def reconcile_protocol_state(
             "changed": {"board": board_drifts, "state": state_repairs},
             "dry_run": False,
         }
-    return _ensure_audit_contract(
-        {
+    result = {
             "ok": True,
             "code": "REPAIRED",
             "changed": {"board": board_drifts, "state": state_repairs},
@@ -3136,9 +3369,10 @@ def reconcile_protocol_state(
             "agent": agent,
             "strict_state_error": strict_state_error or None,
             "dry_run": False,
-        },
-        project_root,
-    )
+        }
+    if "audit_manifest" in contract:
+        result["audit_manifest"] = contract["audit_manifest"]
+    return result
 
 
 #: Where a duplicate-id repair keeps the exact BOARD bytes the operator's
@@ -3249,7 +3483,14 @@ def resolve_duplicate_id(
         return {"ok": False, "code": "VALIDATION_FAILED", "detail": str(exc)}
 
     try:
-        docs, state, _board, log_tail = _read(project_root, observe=REPAIR_OBSERVABLE)
+        # T-1761: every later repair waits for this decision, so it reads past
+        # an unauthorized head -- and carries the rows that head closed, so
+        # its own event is never the floor that buries them.
+        from . import lifecycle_authority as _authority
+
+        docs, state, _board, log_tail = _read(
+            project_root, observe=(*REPAIR_OBSERVABLE, _authority.OBSERVABLE)
+        )
     except Exception as exc:  # CheckpointError / HomeDeadError / OSError
         return {
             "ok": False,
@@ -3357,6 +3598,9 @@ def resolve_duplicate_id(
     utc = now.replace(microsecond=0).isoformat().replace("+00:00", "Z")
     op_id = "duplicate-id-" + uuid4_hex()
     evidence = f"{DUPLICATE_ID_EVIDENCE_ROOT}/{op_id}/BOARD.md"
+    carried = _authority.carried_rows(
+        docs.get("_lifecycle"), new_id if loser["section"] == "## DONE" else None
+    )
 
     new_log_base = docs["log"].text_norm.rstrip("\n") + "\n"
     tail, line = _event_line(
@@ -3370,6 +3614,7 @@ def resolve_duplicate_id(
             f"record {keep_digest[:12]} ({survivor['section']}) keeps {ticket_id}; "
             f"record {reassign_digest[:12]} ({loser['section']}) reassigned to "
             f"{new_id}. Original BOARD bytes preserved at {evidence}"
+            + (f". {_authority.carry_note(carried)}" if carried else "")
         ),
         stamp,
         op_id,

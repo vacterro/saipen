@@ -65,6 +65,7 @@ from __future__ import annotations
 
 import json
 import stat as stat_module
+from contextlib import suppress
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -77,6 +78,9 @@ from .paths import (
     LOGS_DIR,
     SAIPEN_DIR,
     STATE_NAME,
+    OwnedPathUnavailable,
+    prove_owned_dir_chain,
+    prove_owned_regular,
     safe_atomic_write_bytes,
 )
 
@@ -478,12 +482,9 @@ def classify_layout(root: Path | str) -> dict[str, Any]:
                 "detail": f"no real {SAIPEN_DIR}/ directory at {root}",
                 "missing": list(MANDATORY_FILES),
             }
-    except OSError as exc:
-        return {
-            "state": LAYOUT_ABSENT,
-            "detail": f"{SAIPEN_DIR}/ is not readable: {exc}",
-            "missing": list(MANDATORY_FILES),
-        }
+    except FileNotFoundError:
+        return {"state": LAYOUT_ABSENT, "detail": f"no {SAIPEN_DIR}/ at {root}",
+                "missing": list(MANDATORY_FILES)}
 
     present: list[str] = []
     missing: list[str] = []
@@ -492,7 +493,7 @@ def classify_layout(root: Path | str) -> dict[str, Any]:
         path = saipen_dir / name
         try:
             st = path.lstat()
-        except OSError:
+        except FileNotFoundError:
             missing.append(name)
             continue
         if path.is_symlink() or not stat_module.S_ISREG(st.st_mode):
@@ -518,12 +519,9 @@ def classify_layout(root: Path | str) -> dict[str, Any]:
                 "detail": f"{SAIPEN_DIR}/{STATE_NAME} is empty",
                 "missing": [STATE_NAME],
             }
-    except OSError as exc:
-        return {
-            "state": LAYOUT_MALFORMED,
-            "detail": f"{SAIPEN_DIR}/{STATE_NAME} is unreadable: {exc}",
-            "missing": [STATE_NAME],
-        }
+    except FileNotFoundError:
+        return {"state": LAYOUT_MALFORMED, "detail": f"{STATE_NAME} disappeared",
+                "missing": [STATE_NAME]}
 
     if IDENTITY_NAME not in present:
         return {
@@ -555,13 +553,13 @@ def declared(root: Path | str, *, protocol_dir: Path | str | None = None) -> dic
     }
     try:
         st = path.lstat()
-    except OSError:
+    except FileNotFoundError:
         return base
     if path.is_symlink() or not stat_module.S_ISREG(st.st_mode):
         return {**base, "state": DECLARED_MALFORMED, "detail": "not a regular file"}
     try:
         data = json.loads(path.read_text(encoding="utf-8"))
-    except (OSError, ValueError, UnicodeDecodeError) as exc:
+    except (ValueError, UnicodeDecodeError) as exc:
         return {**base, "state": DECLARED_MALFORMED, "detail": f"unreadable: {exc}"}
     if not isinstance(data, dict) or data.get("kind") != "saipen_audit_manifest":
         return {
@@ -599,6 +597,22 @@ def declared(root: Path | str, *, protocol_dir: Path | str | None = None) -> dic
 
 
 def ensure(
+    root: Path | str,
+    *,
+    protocol_dir: Path | str | None = None,
+    force: bool = False,
+    dry_run: bool = False,
+) -> dict[str, Any]:
+    """Contain manifest lifecycle I/O refusal without changing its authority."""
+    try:
+        return _ensure(root, protocol_dir=protocol_dir, force=force, dry_run=dry_run)
+    except (OSError, OwnedPathUnavailable) as exc:
+        from .host_bootstrap import filesystem_unavailable
+
+        return filesystem_unavailable(root, exc)
+
+
+def _ensure(
     root: Path | str,
     *,
     protocol_dir: Path | str | None = None,
@@ -681,6 +695,11 @@ def ensure(
 
     upgrading = current["state"] in (DECLARED_STALE, DECLARED_UNSUPPORTED)
     code = CODE_UPGRADED if upgrading else CODE_WRITTEN
+    # Read-only preflight names a denied ancestor before reconciliation can
+    # commit a checkpoint. It never creates a missing or inaccessible path.
+    prove_owned_dir_chain(path.parent, kind="audit manifest", ownership_root=root)
+    with suppress(FileNotFoundError):
+        prove_owned_regular(path, kind="audit manifest")
     # Regeneration may legally replace a drifted document, but never narrow
     # the declared evidence without saying which surface it removed.
     dropped = _dropped_declarations(root, build(root, protocol_dir=protocol_dir))
@@ -699,6 +718,8 @@ def ensure(
 
     written = write(root, protocol_dir=protocol_dir, force=True)
     if not written.get("ok"):
+        if written.get("code") == "SAIPEN_HOST_RUNTIME_UNAVAILABLE":
+            return written
         return {
             **result,
             "reason_code": REASON_LAYOUT_MALFORMED,
@@ -722,7 +743,7 @@ def _dropped_declarations(root: Path, wanted: dict[str, Any]) -> list[str]:
     """`tier:path` evidence declarations on disk that `wanted` no longer makes."""
     try:
         on_disk = json.loads(manifest_path(root).read_text(encoding="utf-8"))
-    except (OSError, ValueError, UnicodeDecodeError):
+    except (FileNotFoundError, ValueError, UnicodeDecodeError):
         return []
     evidence = on_disk.get("evidence") if isinstance(on_disk, dict) else None
     if not isinstance(evidence, dict):
@@ -763,6 +784,21 @@ def write(
     protocol_dir: Path | str | None = None,
     force: bool = False,
 ) -> dict[str, Any]:
+    """The public low-level writer also contains genuine I/O unavailability."""
+    try:
+        return _write(root, protocol_dir=protocol_dir, force=force)
+    except (OSError, OwnedPathUnavailable) as exc:
+        from .host_bootstrap import filesystem_unavailable
+
+        return filesystem_unavailable(root, exc, operation="manifest_write")
+
+
+def _write(
+    root: Path | str,
+    *,
+    protocol_dir: Path | str | None = None,
+    force: bool = False,
+) -> dict[str, Any]:
     """Write `.saipen/MANIFEST.json` atomically. Idempotent unless `force`.
 
     The low-level writer. Callers that are NOT the operator (any lifecycle
@@ -784,7 +820,7 @@ def write(
     saipen_dir = root / SAIPEN_DIR
     try:
         valid_root = not saipen_dir.is_symlink() and saipen_dir.is_dir()
-    except OSError:
+    except FileNotFoundError:
         valid_root = False
     if not valid_root:
         return {
@@ -792,7 +828,7 @@ def write(
             "code": "VALIDATION_FAILED",
             "detail": f"no {SAIPEN_DIR}/ at {root}",
         }
-    safe_atomic_write_bytes(path, render(manifest), kind="audit manifest")
+    safe_atomic_write_bytes(path, render(manifest), kind="audit manifest", ownership_root=root)
     return {
         "ok": True,
         "code": CODE_WRITTEN,
@@ -804,6 +840,16 @@ def write(
 
 
 def status(root: Path | str, *, protocol_dir: Path | str | None = None) -> dict[str, Any]:
+    """Contain read-only manifest inspection failures as runtime evidence."""
+    try:
+        return _status(root, protocol_dir=protocol_dir)
+    except (OSError, OwnedPathUnavailable) as exc:
+        from .host_bootstrap import filesystem_unavailable
+
+        return filesystem_unavailable(root, exc, operation="manifest_inspection")
+
+
+def _status(root: Path | str, *, protocol_dir: Path | str | None = None) -> dict[str, Any]:
     """Read-only projection: what the contract declares and what exists."""
     root = Path(root)
     saipen_dir = root / SAIPEN_DIR

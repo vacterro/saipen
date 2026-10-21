@@ -274,6 +274,18 @@ def route_next(
     if _brake is not None:
         _kind, _detail = _brake
         if _kind == "wait":
+            from . import goal_authority
+            from .state import parse_wait
+
+            if parse_wait(na) == "safety valve" and goal_authority.persistent(state):
+                return {
+                    "ok": True,
+                    "action": "saipen continue",
+                    "reason": "goal-checkpoint",
+                    "executable_behavior": "CHECKPOINT_AND_REROUTE",
+                    "authority_source": state["authority_source"],
+                    "detail": "persistent goal budget checkpoint; no fresh operator grant",
+                }
             # CORE-004: the safety valve is an AUTHORIZATION boundary, not a
             # resumable yield. Once the 3-wave / 20-ticket budget is exhausted,
             # the persisted WAIT is a HARD STOP (RESTATE_AND_STOP) until the
@@ -308,9 +320,7 @@ def route_next(
     if pending_append and not pending_append.get("invalid"):
         _append_seat_ok = True
         if active:
-            _append_own = ownership.classify_active_ownership(
-                state, board, session_agent, now=now
-            )
+            _append_own = ownership.classify_active_ownership(state, board, session_agent, now=now)
             _append_seat_ok = _append_own.status == "SELF" and not _append_own.misbound
         if _append_seat_ok:
             return {
@@ -487,9 +497,7 @@ def route_next(
                 "action": queued_source.get("action", "saipen source status"),
                 "reason": "queued-source-invalid",
                 "executable_behavior": "RESTATE_AND_STOP",
-                "detail": queued_source.get(
-                    "detail", "the queued Source projection is unreadable"
-                ),
+                "detail": queued_source.get("detail", "the queued Source projection is unreadable"),
             }
         # T-1446: a workable user_explicit Work outranks the stale queue.
         # T-1458: so does a dependency reservation. `ticket block-for` parks
@@ -535,10 +543,9 @@ def route_next(
     # routed here: unreadable layers, uncaptured leftovers, and ACTIVE layers
     # whose linked Work is unworkable must not outrank real workable BOARD Work
     # (the router handles them below before the project can call itself idle).
-    if not active and audit_inbox and audit_route_owns(
-        audit_inbox, board["tickets"], agent=session_agent, now=now
-    ):
-        routed_audit = {
+    def audit_carrier_route() -> dict:
+        """The same audit continuation at its legacy or idle selection point."""
+        routed = {
             "ok": True,
             "action": audit_inbox["action"],
             "reason": "audit-inbox",
@@ -548,8 +555,15 @@ def route_next(
             "load": load_for_action(audit_inbox["action"]),
         }
         if audit_inbox.get("work"):
-            routed_audit["ticket"] = audit_inbox["work"]
-        return routed_audit
+            routed["ticket"] = audit_inbox["work"]
+        return routed
+
+    if (
+        not active
+        and audit_inbox
+        and audit_route_owns(audit_inbox, board["tickets"], agent=session_agent, now=now)
+    ):
+        return audit_carrier_route()
 
     # START: no DOING + a workable TODO -> the ONE shared Pick Rule chooses.
     # CORE-003: explicit user intent outranks speculative backlog inside this
@@ -588,6 +602,13 @@ def route_next(
                 "ticket: " + "; ".join(_graph_errors[:3]),
             }
 
+        # The shared audit eligibility decision also owns the idle fallback.
+        # Recovery, WAIT, urgent and explicit Work already retained priority.
+        if audit_inbox and audit_route_owns(
+            audit_inbox, board["tickets"], agent=session_agent, now=now
+        ):
+            return audit_carrier_route()
+
         # T-1429: an operator due-time GATE is a REAL human boundary, never a
         # maintenance candidate and never a fabricated agent action. It fires
         # here, after no Work remains workable: with unrelated agent-owned Work
@@ -610,7 +631,8 @@ def route_next(
                     "operator_gates": _gates,
                     "detail": (
                         "no unrelated executable Work remains and the operator "
-                        "gate is due: " + ", ".join(g["ticket"] for g in _due)
+                        "gate is due: "
+                        + ", ".join(g["ticket"] for g in _due)
                         + " is operator-actionable now (DUE_OPERATOR_ACTION); "
                         "this is a human boundary -- the operator gate is "
                         "surfaced, not executed"
@@ -640,9 +662,7 @@ def route_next(
         # global halt.
         _goal_blocked = goal_blocked_tickets(board["tickets"])
         if _goal_blocked:
-            _blocked = [
-                t["id"] for t in board["tickets"].values() if t["section"] == "## BLOCKED"
-            ]
+            _blocked = [t["id"] for t in board["tickets"].values() if t["section"] == "## BLOCKED"]
             return {
                 "ok": True,
                 "action": "saipen status",
@@ -673,15 +693,28 @@ def route_next(
         }
 
     if audit_inbox and audit_inbox.get("unworkable_active_only"):
-        return {
+        idle_cls = audit_inbox.get("idle_classification") or "IDLE_BLOCKED_EXTERNAL"
+        next_act = audit_inbox.get("next_exact_action") or audit_inbox.get(
+            "action", "saipen audit status"
+        )
+        if "<decision>" in str(next_act):
+            next_act = "saipen status"
+        unresolved = audit_inbox.get("unresolved_audit_count", len(audit_inbox.get("pending", [])))
+        res = {
             "ok": True,
             "action": audit_inbox.get("action", "saipen audit status"),
             "reason": "audit-inbox-unworkable",
+            "stop_reason": "NO_ADMISSIBLE_WORK",
+            "terminal_classification": idle_cls,
+            "idle_classification": idle_cls,
+            "unresolved_audit_count": unresolved,
+            "next_exact_action": next_act,
             "executable_behavior": "RESTATE_AND_STOP",
-            "detail": audit_inbox.get(
-                "detail", "audit inbox has no currently workable layer"
-            ),
+            "detail": audit_inbox.get("detail", "audit inbox has no currently workable layer"),
         }
+        if audit_inbox.get("decision_request"):
+            res["decision_request"] = audit_inbox["decision_request"]
+        return res
     # Every layer settled, but `audit/` still holds bytes SAIPEN never
     # captured. The work is genuinely finished, so this is not a failure and
     # never a refusal -- it is the difference between "the audit is closed"
@@ -803,14 +836,46 @@ def route_next(
     # PHASE echo and never a WAIT -- a WAIT reaching here already failed the
     # hard-stop gate above (the narrow DONE+empty-TODO exception), so it is a
     # stale WAIT to route past, not a brake to restate.
-    if na.startswith("saipen ") or na.startswith("RUN:"):
-        return {"ok": True, "action": na, "reason": "maintain"}
+    from .board import classify_idle_work
+
+    idle = classify_idle_work(
+        board["tickets"],
+        audit_inbox=audit_inbox,
+        future_gate=future_gate,
+        state=state,
+        now=now,
+    )
+    res_action = na if (na.startswith("saipen ") or na.startswith("RUN:")) else "saipen continue"
+    if idle["no_admissible_work"]:
+        res = {
+            "ok": True,
+            "action": res_action,
+            "reason": "maintain",
+            "stop_reason": "NO_ADMISSIBLE_WORK",
+            "terminal_classification": idle["disposition"],
+            "idle_classification": idle["disposition"],
+            "unresolved_audit_count": idle["unresolved_audit_count"],
+            "next_exact_action": idle["next_exact_action"],
+            "externally_blocked": idle.get("externally_blocked", []),
+            "operator_required": idle.get("operator_required", []),
+            "future_gated": idle.get("future_gated", []),
+            "detail": idle["detail"],
+        }
+        if idle.get("decision_request"):
+            res["decision_request"] = idle["decision_request"]
+        return res
     return {
         "ok": True,
-        "action": "saipen continue",
+        "action": res_action,
         "reason": "maintain",
-        "detail": "no pending recovery, no active ticket, no workable "
-        "TODO; continue ordinary maintenance",
+        "stop_reason": "ALL_REQUIREMENTS_COMPLETE",
+        "terminal_classification": "ALL_WORK_COMPLETE",
+        "idle_classification": "ALL_WORK_COMPLETE",
+        "unresolved_audit_count": 0,
+        "next_exact_action": "saipen status",
+        "detail": (
+            "no pending recovery, no active ticket, no workable TODO; continue ordinary maintenance"
+        ),
     }
 
 
@@ -835,6 +900,10 @@ ROUTING_FAILURE_CODES = {
     "conformance-remediation": "CONFORMANCE_UNHEALTHY",
     "conformance-unhealthy": "CONFORMANCE_UNHEALTHY",
     "conformance-unknown": "CONFORMANCE_UNKNOWN",
+    # T-1751: the reconcile verdict the continuation enforces before routing.
+    # Readable state with a named owner, never a malformed-input failure.
+    "reconcile-decision": "RECONCILE_REAUTH_REQUIRED",
+    "reconcile-refused": "RECONCILE_REFUSED",
 }
 
 
@@ -857,8 +926,11 @@ def pending_append_projection(project_root) -> dict | None:
 
         return _projection(project_root)
     except Exception as exc:  # metadata trouble never takes routing down
-        return {"invalid": True, "action": "saipen source appends",
-                "detail": f"append ledger unreadable ({type(exc).__name__}: {exc})"}
+        return {
+            "invalid": True,
+            "action": "saipen source appends",
+            "detail": f"append ledger unreadable ({type(exc).__name__}: {exc})",
+        }
 
 
 def queued_source_projection(project_root) -> dict | None:
@@ -901,9 +973,7 @@ def queued_source_projection(project_root) -> dict | None:
                 continue
             if meta.get("source_kind") != "user_instruction":
                 continue
-            _request, problem, problem_class = request_from_receipt(
-                Path(project_root), receipt
-            )
+            _request, problem, problem_class = request_from_receipt(Path(project_root), receipt)
             if problem_class == RECEIPT_UNREADABLE:
                 return {
                     "action": "saipen source status",
@@ -1030,12 +1100,17 @@ def conformance_crew_gate(project_root, routed: dict) -> dict | None:
             "code": CONFORMANCE_UNHEALTHY,
             "action": command,
             "reason": "conformance-unhealthy",
-            "detail": decision["diagnostic"]["detail"] if decision["diagnostic"] else (
+            "detail": decision["diagnostic"]["detail"]
+            if decision["diagnostic"]
+            else (
                 "crew convergence requires a CURRENT_PASS canonical conformance "
                 f"receipt, got {decision['status']}: {decision['reason']} -- run "
                 f"'{command}' before crew work"
             ),
             "conformance_status": decision["status"],
+            # T-1823: the typed staleness code travels with the refusal, so a
+            # repair consumer never infers safety from the prose in `detail`.
+            "stale_reason": decision.get("stale_reason"),
             "canonical_next_command": command,
             "diagnostic": decision["diagnostic"],
             "repair_status": decision["repair_status"],
@@ -1081,11 +1156,7 @@ def conformance_idle_gate(project_root, routed: dict) -> dict | None:
     ONE owner, two consumers: `route_next_result` and the CLI continuation and
     status paths reach it through `gate_route`.
     """
-    if not (
-        routed.get("ok")
-        and routed.get("reason") == "maintain"
-        and project_root is not None
-    ):
+    if not (routed.get("ok") and routed.get("reason") == "maintain" and project_root is not None):
         return None
     try:
         from .conformance import (
@@ -1110,13 +1181,16 @@ def conformance_idle_gate(project_root, routed: dict) -> dict | None:
             "code": CONFORMANCE_UNHEALTHY,
             "action": command,
             "reason": "conformance-remediation",
-            "detail": decision["diagnostic"]["detail"] if decision["diagnostic"] else (
+            "detail": decision["diagnostic"]["detail"]
+            if decision["diagnostic"]
+            else (
                 "idle continuation is owned by the unaccepted conformance red "
                 f"gate (CURRENT_FAIL: {decision['reason']}); run "
                 f"'{command}' before continuing"
             ),
             "conformance_status": decision["status"],
             "conformance_disposition": decision["disposition"],
+            "stale_reason": decision.get("stale_reason"),
             "canonical_next_command": command,
             "diagnostic": decision["diagnostic"],
             "repair_status": decision["repair_status"],
@@ -1139,18 +1213,152 @@ def conformance_idle_gate(project_root, routed: dict) -> dict | None:
         }
 
 
-def gate_route(project_root, routed: dict) -> dict | None:
+def gate_route(
+    project_root, routed: dict, *, reconciled: dict | None = None, agent: str | None = None
+) -> dict | None:
     """The ONE ordered gate chain every production route surface applies.
 
     Returns the first gate's rewrite, or None when the route stands. Consumers:
     `route_next_result` and the CLI continuation, status and explain-next
     paths must agree on the executable action.
+
+    `reconciled` is the reconciliation the caller already ran: the CLI
+    continuation reconciles before it routes, so it hands its verdict over
+    instead of paying for a second one. `agent` is the acting actor the
+    continuation would reconcile as.
     """
-    for gate in (conformance_crew_gate, closure_finish_gate, conformance_idle_gate):
+    rewritten = reconcile_gate(project_root, routed, reconciled=reconciled, agent=agent)
+    if rewritten is not None:
+        return rewritten
+    for gate in (
+        goal_checkpoint_gate,
+        conformance_crew_gate,
+        closure_finish_gate,
+        conformance_idle_gate,
+    ):
         rewritten = gate(project_root, routed)
         if rewritten is not None:
             return rewritten
     return None
+
+
+def reconcile_gate(
+    project_root, routed: dict, *, reconciled: dict | None = None, agent: str | None = None
+) -> dict | None:
+    """T-1751: never advertise a route the continuation refuses before routing.
+
+    `continue` reconciles first and stops on the refusal. Status, `next`,
+    explain-next and the automation block routed past it: they advertised
+    `cc` with no operator action due while `continue` and `recover` answered
+    RECONCILE_REAUTH_REQUIRED, and the operator-question gate then refused the
+    handback that very refusal needs (measured: SMART_VAC_CLEANER E-241,
+    audit/SAIPEN_20261013_1451_SMARTVAC_RECONCILE_HANDOFF.md). The verdict has
+    one owner, `reconcile_protocol_state`; this gate projects its dry run.
+
+    Only an executable route is rewritten -- a route that already refuses
+    keeps its own refusal -- and a tripped safety valve alone stands, because
+    `cc` is itself that reauthorization (CORE-001). A refusal that names a
+    command is an operator decision; one that names none is a stop.
+
+    The dry run asks as the acting actor, else STATE.agent, as `continue`
+    does: under a placeholder actor reconcile proposes that actor as
+    STATE.agent and refuses its own plan as an owner split.
+    """
+    if project_root is None or not routed.get("ok"):
+        return None
+    if reconciled is None:
+        try:
+            from . import codec
+            from .reconcile import reconcile_protocol_state
+            from .state import parse_state
+
+            actor = agent or parse_state(
+                codec.read_doc(Path(project_root) / ".saipen/STATE.md")
+            ).get("agent")
+            reconciled = reconcile_protocol_state(
+                project_root, str(actor or "diagnostic"), dry_run=True
+            )
+        except Exception:
+            # The continuation runs the same owner and reports its own fault;
+            # a projection never invents a refusal it could not read.
+            return None
+    if not isinstance(reconciled, dict) or reconciled.get("ok", True):
+        return None
+    from .reconcile import SAFETY_VALVE_TRIPPED
+
+    if reconciled.get("remediation") == SAFETY_VALVE_TRIPPED:
+        return None
+    command = str(reconciled.get("canonical_next_command") or "")
+    decision = bool(reconciled.get("operator_decision_available")) and bool(command)
+    code = str(reconciled.get("code") or "RECONCILE_REFUSED")
+    return {
+        "ok": False,
+        "code": code,
+        "reason": "reconcile-decision" if decision else "reconcile-refused",
+        # No executable action: the decision's command runs only once the
+        # operator has made it, and a terminal refusal names none, because a
+        # bare `recover` would only repeat it (T-1324).
+        "action": None,
+        "canonical_next_command": command or None,
+        "detail": " ".join(str(reconciled.get("detail") or code).split())[:600],
+        "repair_id": reconciled.get("repair_id"),
+        "operator_action": _reconcile_operator_action(reconciled) if decision else None,
+    }
+
+
+def _reconcile_operator_action(reconciled: dict) -> str:
+    """The one human decision a reconcile refusal carries, bounded (T-1751).
+
+    Named by its plan id and tickets, never by restating the reasons, which
+    stay in `saipen recover --json` where the operator reads them whole; the
+    BLOCKER beside this action points there.
+    """
+    decisions = [
+        item for item in (reconciled.get("operator_decisions") or []) if isinstance(item, dict)
+    ]
+    tickets = sorted({str(t) for item in decisions for t in (item.get("tickets") or [])})
+    named = ", ".join(tickets[:6]) + (f" and {len(tickets) - 6} more" if len(tickets) > 6 else "")
+    plan = str(reconciled.get("repair_id") or "")[:12]
+    if plan:
+        text = f"Approve recovery plan {plan}" + (f" ({named})" if named else "")
+    else:
+        text = " ".join(str(reconciled.get("operator_decision") or "").split())
+        if not text or len(text) > 200:
+            text = "Decide the recovery refusal"
+    return text
+
+
+def goal_checkpoint_gate(project_root, routed: dict) -> dict | None:
+    """Filesystem proof for the pure router's proposed persistent checkpoint."""
+    if routed.get("reason") != "goal-checkpoint":
+        return None
+    from . import codec, goal_authority
+    from .log import read_history_snapshot
+    from .reconcile import _derived_goal_counters
+    from .state import goal_valve_wait_is_proven, parse_state
+
+    try:
+        current = parse_state(codec.read_doc(Path(project_root) / ".saipen/STATE.md"))
+        history = read_history_snapshot(Path(project_root), lean=True)
+        errors = goal_authority.prove(project_root, current, history_events=history.events)
+        if not goal_valve_wait_is_proven(current, _derived_goal_counters(history.events)):
+            errors.append("checkpoint budget WAIT is not proved by canonical counter history")
+        if not goal_authority.persistent(current) or current.get("authority_source") != routed.get(
+            "authority_source"
+        ):
+            errors.append("checkpoint grant no longer owns the current goal")
+    except (OSError, ValueError, TypeError) as exc:
+        errors = ["checkpoint authority unavailable: " + str(exc)]
+    if not errors:
+        return None
+    return {
+        "ok": False,
+        "code": "VALIDATION_FAILED",
+        "reason": "state-malformed",
+        "action": "saipen status",
+        "detail": "; ".join(errors),
+        "canonical_next_command": "saipen status",
+    }
 
 
 def closure_finish_gate(project_root, routed: dict) -> dict | None:

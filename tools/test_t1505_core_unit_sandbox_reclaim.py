@@ -10,6 +10,12 @@ saiwiki kitchen clone. These controls hold the three parts of the repair:
 * `sweep_stale_sandboxes` reclaims a sandbox whose owning run is gone and
   never touches a live run's sandbox or anything not named like one;
 * `run_family` leaves no sandbox of its own behind.
+
+T-1823 added the other half of "a live run's sandbox": the temp root is shared
+by every project on the machine, the family always runs as a CHILD of the run
+that copies the tree, and so the stamp now names both the project the sandbox
+belongs to and the child that reads it -- a stamp that named only the creating
+process could not tell a sweep, in another tree, that this one was in use.
 """
 
 from __future__ import annotations
@@ -124,6 +130,64 @@ class SweepTests(unittest.TestCase):
         self.assertFalse(core_unit.pid_alive(dead_pid()))
         self.assertFalse(core_unit.pid_alive(0))
 
+    def test_a_new_sandbox_names_the_project_it_belongs_to(self):
+        """T-1823: the temp root is shared, so a stamp must say whose tree it is."""
+        root = core_unit.new_sandbox_root(self.temp)
+        self.addCleanup(core_unit.reclaim, root)
+        stamp = json.loads((root / core_unit.SANDBOX_OWNER).read_text(encoding="utf-8"))
+        self.assertEqual(stamp["project"], str(Path(self.temp).resolve()))
+        self.assertTrue(core_unit.pid_alive(stamp["pid"]))
+
+    def test_a_sandbox_of_another_project_is_never_swept(self):
+        """A pid is only meaningful inside one process space: a foreign stamp's
+        liveness says nothing about the tree, and reclaiming on it deletes a
+        live run's working copy."""
+        other = self.sandbox(
+            core_unit.SANDBOX_PREFIX + "other-project",
+            {"pid": dead_pid(), "project": str(self.temp / "someone-elses-tree")},
+        )
+        self.assertEqual(core_unit.sweep_stale_sandboxes(self.temp, project=self.temp), [])
+        self.assertTrue(other.exists())
+
+    def test_a_sandbox_whose_family_child_is_still_reading_is_kept(self):
+        """The tree is read by the family child, not by the run that copied it.
+        Measured 2026-10-19: a run whose own record was written at the end --
+        so whose creator lived throughout -- had its sandbox emptied under the
+        child (2767 red, 8 modules deleted mid-discovery)."""
+        reading = self.sandbox(
+            core_unit.SANDBOX_PREFIX + "reading",
+            {"pid": dead_pid(), "reader": os.getpid(), "project": str(Path(self.temp).resolve())},
+        )
+        self.assertEqual(core_unit.sweep_stale_sandboxes(self.temp, project=self.temp), [])
+        self.assertTrue(reading.exists())
+
+    def test_a_sandbox_of_this_project_with_no_live_reader_is_swept(self):
+        mine = self.sandbox(
+            core_unit.SANDBOX_PREFIX + "mine",
+            {"pid": dead_pid(), "reader": dead_pid(), "project": str(Path(self.temp).resolve())},
+        )
+        self.assertEqual(
+            core_unit.sweep_stale_sandboxes(self.temp, project=self.temp), [mine.name]
+        )
+        self.assertFalse(mine.exists())
+
+    def test_a_real_family_stamps_the_child_reading_the_tree(self):
+        from saipen_engine import test_runner
+
+        root = Path(tempfile.mkdtemp(prefix="t1505-reader-"))
+        self.addCleanup(core_unit.reclaim, root)
+        stamp = root / core_unit.SANDBOX_OWNER
+        stamp.write_text(json.dumps({"pid": os.getpid()}), encoding="utf-8")
+        run = test_runner._run_family(
+            root,
+            TestFamily("reader", (sys.executable, "-c", "pass"), 60),
+            owner=stamp,
+        )
+        self.assertEqual(run["status"], "PASS", run)
+        data = json.loads(stamp.read_text(encoding="utf-8"))
+        self.assertIsInstance(data["reader"], int)
+        self.assertNotEqual(data["reader"], os.getpid())
+
 
 @unittest.skipUnless(os.name == "nt", "an open handle blocks deletion only on Windows")
 class HeldSandboxTests(unittest.TestCase):
@@ -222,9 +286,23 @@ class RunFamilyLeavesNothingTests(unittest.TestCase):
     def run_small(self, jobs: int) -> tuple[dict, list[Path], list[str]]:
         created: list[Path] = []
         new_sandbox_root = core_unit.new_sandbox_root
+        # T-1831: the acceptance is cleanup of a real small run. Copying the
+        # operator's live repository paid twice for 1.32 GiB / 85k state files
+        # (136.656 s for this module) before running 0.422 s of test processes.
+        # Keep the SAME three hermetic-environment tests and runtime code, plus
+        # the read-only object store that made Windows cleanup fail originally.
+        fixture = Path(tempfile.mkdtemp(prefix="t1505-source-"))
+        self.addCleanup(core_unit.reclaim, fixture)
+        source = read_only_tree(fixture) / "project"
+        (source / "tools").mkdir()
+        shutil.copy2(TOOLS / "test_hermetic_env.py", source / "tools/test_hermetic_env.py")
+        shutil.copytree(
+            TOOLS / "saipen_engine", source / "tools/saipen_engine",
+            ignore=shutil.ignore_patterns("__pycache__", "*.pyc"),
+        )
 
-        def track_sandbox() -> Path:
-            sandbox = new_sandbox_root()
+        def track_sandbox(*args, **kwargs) -> Path:
+            sandbox = new_sandbox_root(*args, **kwargs)
             created.append(sandbox)
             self.addCleanup(core_unit.reclaim, sandbox)
             return sandbox
@@ -234,13 +312,14 @@ class RunFamilyLeavesNothingTests(unittest.TestCase):
             (sys.executable, "-B", "-m", "unittest", "discover", "-s", "tools",
              "-p", "test_hermetic_env.py", "-v"),
             600,
+            environment_tools=(),
         )
         with contextlib.ExitStack() as patches:
             patches.enter_context(mock.patch.object(core_unit, "family", return_value=small))
             patches.enter_context(
                 mock.patch.object(core_unit, "new_sandbox_root", side_effect=track_sandbox)
             )
-            run = core_unit.run_family(TOOLS.parent, jobs=jobs)
+            run = core_unit.run_family(source, jobs=jobs)
         # Other core-unit runs share the temp root. Inspect only this invocation's
         # creations, independently of its self-reported sandboxes_leaked result.
         return run, created, sorted(sandbox.name for sandbox in created if sandbox.exists())

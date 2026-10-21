@@ -15,13 +15,6 @@
   ],
   "recorded_at": "d4c56c4d1b1782a68e4381467fb9be958a604d93",
   "ran": 5038,
-  "grown_because": "6 inherited reds, not caused by this work: measured in a detached worktree at the pre-T-1614 base d99cfb15, where tools.test_legacy_lifecycle_compat fails the SAME 6 tests and the other implicated suites are green. They read the live .saipen/BOARD.md, whose T-113 and T-114 ## DONE rows predate this project's closure contract (frontier T-190) and carry no execution evidence in either grammar; the engine classifies that as OPERATOR_DECISION (remediation: 'saipen recover --attest-legacy-done T-113,T-114') and forbids automatic repair, so the debt cannot be cleared by the agent and belongs in the baseline. T-1614 repaired the other 22 (down from 22 new reds to these 6).",
-  "red": [
-    "test_legacy_lifecycle_compat.AttestLegacyDoneTests.test_attestation_clears_the_ambiguity_without_rewriting_history",
-    "test_legacy_lifecycle_compat.AttestLegacyDoneTests.test_cli_attest_round_trip_and_id_grammar",
-    "test_legacy_lifecycle_compat.PlanIdentityTests.test_attestation_plus_approval_commits_both_in_one_pass",
-    "test_legacy_lifecycle_compat.TargetCLegacyDoneTests.test_1_pre_closure_mode_done_with_build_evidence_remains_done",
-    "test_legacy_lifecycle_compat.TargetCLegacyDoneTests.test_2_pre_closure_mode_done_with_ship_evidence_remains_legacy_valid",
-    "test_legacy_lifecycle_compat.TargetDLegacyAttributionTests.test_4_legacy_attribution_survives_a_full_reconciliation"
-  ]
+  "grown_because": null,
+  "red": []
 }

@@ -47,7 +47,6 @@ import subprocess
 import sys
 import tempfile
 import unittest
-from unittest.mock import patch
 from pathlib import Path
 
 TOOLS = Path(__file__).resolve().parent
@@ -56,7 +55,7 @@ if str(TOOLS) not in sys.path:
     sys.path.insert(0, str(TOOLS))
 from test_fixture_support import CURRENT_STYLE_CONTRACT  # noqa: E402
 
-from saipen_engine import fast_check, intake, operator_task, pending_ingress  # noqa: E402
+from saipen_engine import fast_check, intake, operator_task  # noqa: E402
 from saipen_engine.board import parse_board  # noqa: E402
 from saipen_engine.journal import ensure_project_lineage  # noqa: E402
 from saipen_engine.log import read_history_snapshot  # noqa: E402
@@ -171,23 +170,26 @@ class RetirementFixture(unittest.TestCase):
         return "T-7", child, receipt
 
     def capture(self, project: Path, text: str, kind: str = "user_instruction") -> str:
-        captured = intake.capture(
-            project,
-            text,
-            source_kind=kind,
-            request_provenance=operator_task.witness(
-                text, env={operator_task.ENV_TASK_SHA256: pending_ingress.ingress_digest(text)}
-            ),
-        )
+        from test_operator_origin_support import native_operator
+
+        with native_operator(project, text, action="retire"):
+            captured = intake.capture(
+                project, text, source_kind=kind,
+                request_provenance=operator_task.witness(text, root=project),
+            )
+            if captured.get("ok"):
+                operator_task.authority_for_receipt(
+                    project, captured["receipt"], existing_only=False,
+                )
         self.assertTrue(captured["ok"], captured)
         return captured["receipt"]
 
     def authority(self, project: Path, ticket: str, receipt: str | None, agent: str = AGENT) -> str:
         """Capture the operator decision the way the real one arrived."""
         text = authority_text(ticket, receipt)
-        with patch.dict(
-            os.environ, {operator_task.ENV_TASK_SHA256: pending_ingress.ingress_digest(text)}
-        ):
+        from test_operator_origin_support import native_operator
+
+        with native_operator(project, text, action="retire"):
             decision = user_request(project, agent, text)
         self.assertTrue(decision.ok, decision.to_dict())
         return decision.data["receipt"]
@@ -482,6 +484,12 @@ class HostileControlTests(RetirementFixture):
         text = text.replace(row + "\n", "")
         text = text.replace("## DONE\n", "## DONE\n" + row.replace("- [ ] ", "- [x] ", 1) + "\n")
         board_path.write_text(text, encoding="utf-8")
+        # The row stands for Work an operation closed: leave the terminal
+        # baseline that operation would have written (T-1673), or the edit
+        # above reads as a typed completion and status refuses first.
+        from saipen_engine import lifecycle_authority
+
+        lifecycle_authority.record_terminal(project)
 
         authority = self.capture(project, authority_text(ticket, None))
         refused = self.retire(project, ticket, authority)

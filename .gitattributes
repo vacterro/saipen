@@ -9,7 +9,14 @@
 .saipen/recovery/board-compaction/** -text
 .saipen/recovery/log-normalize/** -text
 .saipen/recovery/log-foreign-tail/** -text
+.saipen/recovery/board-scrub/** -text
 .saipen/evidence/**/*.residue -text
 .saipen/evidence/**/*.txt -whitespace
 # T-1563 frozen vulnerable subject: preserve the exact paired-test bytes.
 tests/fixtures/t1563-vulnerable/protocol_admission.py -text
+# T-1624 frozen lockout subject: the pre-fix Claude hook, byte-exact.
+tests/fixtures/t1624-lockout/saipen-guard.py -text
+# T-1654 measured legacy project block: the pre-fix subject, byte-exact.
+tests/fixtures/t1654-legacy-block/AGENTS.md.measured -text
+# T-1656 incident reply, transcribed from the operator screenshot: kept byte-exact.
+tests/fixtures/t1656-operator-wall/response.transcribed.txt -text

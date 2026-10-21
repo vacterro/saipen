@@ -72,6 +72,29 @@ def audit_route_owns(
     if work and action_str.startswith("PHASE ") and tickets is not None:
         if not linked_work_is_workable(work, tickets, agent=agent, now=now):
             return False
+    if projection.get("idle_only") and tickets is not None:
+        from saipen_engine.board import (
+            is_user_explicit,
+            operator_gates,
+            reserved_continuation_child,
+            workable_tickets,
+        )
+
+        _gates = operator_gates(tickets, now=now)
+        if any(g.get("state") == "DUE_OPERATOR_ACTION" for g in _gates):
+            return False
+        if reserved_continuation_child(tickets, agent=agent, now=now) is not None:
+            return False
+        for tid in workable_tickets(tickets, agent=agent, now=now):
+            t = tickets.get(tid, {})
+            prio = str((t.get("fields") or {}).get("priority") or "").strip().upper()
+            if not prio:
+                desc = str(t.get("description") or t.get("raw") or "")
+                m = re.search(r"\[(P[0-4])\]", desc, re.IGNORECASE)
+                if m:
+                    prio = m.group(1).upper()
+            if prio in ("P0", "P1") or is_user_explicit(t):
+                return False
     return True
 
 
@@ -109,6 +132,9 @@ def route_violation(
     tickets: dict | None = None,
     agent: str | None = None,
     now: datetime.datetime | None = None,
+    *,
+    state: dict | None = None,
+    goal_counters: dict | None = None,
 ) -> str | None:
     """Why the audit route was not followed, or None when it was.
 
@@ -120,6 +146,22 @@ def route_violation(
     assert isinstance(projection, dict)  # narrowed by audit_route_owns
     routed = str(projection["action"])
     current = (next_action or "").strip()
+    if state is not None and state.get("next_action") == current:
+        from .state import binding_brake, goal_valve_wait_is_proven, parse_wait
+
+        empty_todo = tickets is not None and not any(
+            ticket.get("section") == "## TODO" for ticket in tickets.values()
+        )
+        brake = binding_brake(state, empty_todo=empty_todo)
+        if brake is not None and (
+            brake[0] != "wait"
+            or parse_wait(current) != "safety valve"
+            or goal_valve_wait_is_proven(state, goal_counters)
+        ):
+            # Same priority owner as route_next and mutation admission. A
+            # safety-valve exception additionally needs canonical counter
+            # evidence; neither a WAIT string nor invented STATE counts earn it.
+            return None
     if current == routed or live_continuation(current, doing_ids):
         return None
     why = (

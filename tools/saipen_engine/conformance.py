@@ -183,6 +183,47 @@ STATUS_INVALID = "INVALID_RECEIPT"
 # week-old green stamp.
 FRESHNESS_WINDOW_SECONDS = 24 * 3600
 
+# T-1823: TYPED STALE reasons. Every STALE_* status travels with the closed
+# code of the condition that produced it, so a consumer never has to read a
+# human sentence -- least of all for absence of a word -- to decide what the
+# staleness MEANS. The distinction that matters is recoverability by the one
+# canonical cure (`saipen validate`): a receipt that merely aged or lost its
+# source binding is re-measurable from current bytes, while a fabricated
+# future timestamp and an unavailable identity are integrity/evidence
+# boundaries that re-running the validator cannot establish and must never
+# auto-cure.
+STALE_REASON_SOURCE_BINDING_STALE = "source-binding-stale"
+STALE_REASON_AGED_BEYOND_WINDOW = "aged-beyond-freshness-window"
+STALE_REASON_CHECKPOINT_HASHES_STALE = "checkpoint-hashes-stale"
+STALE_REASON_REMEDIATION_EVIDENCE_ADVANCED = "remediation-evidence-advanced"
+STALE_REASON_FUTURE_TIMESTAMP = "future-timestamp-fabricated"
+STALE_REASON_SOURCE_IDENTITY_UNAVAILABLE = "source-identity-unavailable"
+
+#: The reasons the canonical validator re-run can genuinely settle: the
+#: receipt is a stale VIEW of the current tree, not an untrustworthy one.
+STALE_REASONS_RECOVERABLE = frozenset(
+    {
+        STALE_REASON_SOURCE_BINDING_STALE,
+        STALE_REASON_AGED_BEYOND_WINDOW,
+        STALE_REASON_CHECKPOINT_HASHES_STALE,
+        STALE_REASON_REMEDIATION_EVIDENCE_ADVANCED,
+    }
+)
+
+
+def stale_recoverable(status: dict | None) -> bool:
+    """Whether THIS conformance status is a staleness the validator re-run cures.
+
+    Single owner of the question for every consumer (the Auto-Doctor is the
+    only one today). An unknown or absent `stale_reason` is NOT recoverable:
+    the typed field is the only accepted evidence, so a payload that carries
+    no code -- or carries one this version does not know -- fails closed
+    instead of inheriting authority from a sentence.
+    """
+    if not isinstance(status, dict):
+        return False
+    return status.get("stale_reason") in STALE_REASONS_RECOVERABLE
+
 
 class ReceiptDiscoveryError(ValueError):
     """A canonical receipt candidate exists but cannot be trusted.
@@ -1417,6 +1458,7 @@ def conformance_status(
         return {
             "status": STATUS_STALE_FAIL,
             "gate": gate,
+            "stale_reason": STALE_REASON_FUTURE_TIMESTAMP,
             "reason": "conformance receipt timestamp is in the future beyond "
             "allowed skew (fabricated)",
             "receipt": receipt,
@@ -1431,6 +1473,7 @@ def conformance_status(
         return {
             "status": STATUS_STALE_FAIL,
             "gate": gate,
+            "stale_reason": STALE_REASON_SOURCE_IDENTITY_UNAVAILABLE,
             "reason": (
                 "current source identity is unavailable (empty source_head/"
                 "source_tree_fingerprint) -- the receipt cannot be proven bound "
@@ -1450,14 +1493,17 @@ def conformance_status(
         age_seconds = (ref - rdt).total_seconds()
     except Exception:
         pass
+    stale_reason = None
     if not bound:
         status = STATUS_STALE_PASS if is_pass else STATUS_STALE_FAIL
+        stale_reason = STALE_REASON_SOURCE_BINDING_STALE
         reason = (
             "conformance receipt is bound to a different source identity "
             "than the current checkpoint"
         )
     elif age_seconds > FRESHNESS_WINDOW_SECONDS:
         status = STATUS_STALE_PASS if is_pass else STATUS_STALE_FAIL
+        stale_reason = STALE_REASON_AGED_BEYOND_WINDOW
         reason = (
             f"conformance receipt is {int(age_seconds // 3600)}h old (older than "
             f"the {int(FRESHNESS_WINDOW_SECONDS // 3600)}h freshness window)"
@@ -1471,6 +1517,7 @@ def conformance_status(
             cp_err = _checkpoint_hash_mismatch(receipt, root)
             if cp_err:
                 status = STATUS_STALE_PASS
+                stale_reason = STALE_REASON_CHECKPOINT_HASHES_STALE
                 reason = f"receipt checkpoint hashes invalid: {cp_err}"
             else:
                 status = STATUS_CURRENT_PASS
@@ -1488,6 +1535,7 @@ def conformance_status(
             advanced = _remediation_evidence_after(receipt, root)
             if advanced:
                 status = STATUS_STALE_FAIL
+                stale_reason = STALE_REASON_REMEDIATION_EVIDENCE_ADVANCED
                 reason = (
                     f"remediation evidence {advanced['receipt_id']} for "
                     f"{advanced['work']} was executed after this receipt "
@@ -1501,6 +1549,9 @@ def conformance_status(
     return {
         "status": status,
         "gate": gate,
+        # T-1823: the typed condition travels beside the status; None for a
+        # CURRENT_*/NOT_RUN/INVALID verdict, which is not a staleness at all.
+        "stale_reason": stale_reason,
         "reason": reason,
         "receipt": receipt,
         "validator": info.as_dict(),
@@ -1633,6 +1684,9 @@ def conformance_decision(
         "status": kind,
         "gate": status.get("gate", gate),
         "healthy": healthy,
+        # T-1823: the typed staleness code, so a repair consumer decides from a
+        # value -- never from the prose in `reason`.
+        "stale_reason": status.get("stale_reason"),
         # SRC-085 M3: the routing meaning of this status, machine-readable, so
         # "CURRENT_FAIL" next to "CONTINUE" is explained by a value rather than
         # by historical LOG prose.

@@ -39,6 +39,7 @@ import contextlib
 import dataclasses
 import datetime
 import functools
+import hashlib
 import importlib.util
 import io
 import json
@@ -54,7 +55,7 @@ import zipfile
 from pathlib import Path
 from unittest import mock
 
-from test_fixture_support import CURRENT_STYLE_CONTRACT
+from test_fixture_support import CURRENT_STYLE_CONTRACT, operator_request_env
 import freshness
 from freshness import (
     FreshnessError,
@@ -103,7 +104,7 @@ from saipen_engine.board import parse_board
 from saipen_engine.state import parse_state
 from saipen_engine.journal import Journal, pending_ops, recover, recovery_preflight, run_mutation
 from saipen_engine.lock import WriterLock
-from saipen_engine.log import build_event, parse_log_line
+from saipen_engine.log import parse_log_line
 from saipen_engine.operations import (
     apply_claim,
     checkpoint,
@@ -966,6 +967,15 @@ def run_injector_probe(
             )
     if not problems:
         aider_config.write_bytes(aider_installed + AIDER_SUFFIX_BYTES)
+        ownership = json.loads((destination / ".saipen_install.json").read_text(
+            encoding="utf-8"))["files"]
+        preserved = {
+            path.relative_to(destination).as_posix(): path.read_bytes()
+            for path in destination.rglob("*") if path.is_file()
+            and path.name != ".saipen_install.json"
+            and ownership.get(path.relative_to(destination).as_posix()) != hashlib.sha256(
+                path.read_bytes()).hexdigest()
+        }
         uninstall = subprocess.run(
             uninstall_command, cwd=HOME, env=env, capture_output=True, text=True,
                 encoding="utf-8", errors="replace"
@@ -984,8 +994,14 @@ def run_injector_probe(
                 "Aider install/uninstall changed surrounding user bytes: "
                 f"expected {aider_expected!r}, got {aider_after!r}"
             )
-        if destination.exists():
-            problems.append("uninstaller left the installed skill directory")
+        remaining = {
+            path.relative_to(destination).as_posix(): path.read_bytes()
+            for path in destination.rglob("*") if path.is_file()
+        } if destination.exists() else {}
+        if remaining != preserved:
+            problems.append("uninstaller changed preserved files or left owned runtime bytes")
+        if not preserved and destination.exists():
+            problems.append("uninstaller left an empty installed skill directory")
     if problems:
         detail = next(
             (
@@ -6272,7 +6288,7 @@ def run_release_freshness_probes() -> tuple[list[str], int]:
             Path("CHANGELOG.md"),
             *(path.relative_to(project) for path in locale_paths),
         ]
-        git("add", "--", *(str(path) for path in release_paths[:3]))
+        git("add", "--", *(path.as_posix() for path in release_paths[:3]))
 
         stale_gate = validate(bind=True)
         stale_output = stale_gate.stdout + stale_gate.stderr
@@ -6294,7 +6310,7 @@ def run_release_freshness_probes() -> tuple[list[str], int]:
             f"--source={pre_ship_tree}",
             "--staged",
             "--",
-            *(str(path) for path in release_paths),
+            *(path.as_posix() for path in release_paths),
         )
         staged_after_rollback = set(
             filter(None, git("diff", "--cached", "--name-only").stdout.splitlines())
@@ -6314,7 +6330,7 @@ def run_release_freshness_probes() -> tuple[list[str], int]:
         for path in locale_paths:
             text = path.read_text(encoding="utf-8-sig")
             path.write_text(text.replace(old_badge, new_badge, 1), encoding="utf-8", newline="\n")
-        git("add", "--", *(str(path) for path in release_paths))
+        git("add", "--", *(path.as_posix() for path in release_paths))
 
         final_gate = validate(bind=True)
         probe_locale = locale_paths[0]
@@ -6333,10 +6349,10 @@ def run_release_freshness_probes() -> tuple[list[str], int]:
         probe_locale.write_text(
             final_locale_text.replace(new_badge, old_badge, 1), encoding="utf-8", newline="\n"
         )
-        git("add", "--", str(probe_locale.relative_to(project)))
+        git("add", "--", probe_locale.relative_to(project).as_posix())
         probe_locale.write_text(final_locale_text, encoding="utf-8", newline="\n")
         staged_worktree_divergence_gate = validate(bind=True)
-        git("add", "--", str(probe_locale.relative_to(project)))
+        git("add", "--", probe_locale.relative_to(project).as_posix())
         cached_check = git("diff", "--cached", "--check")
         staged_final = set(filter(None, git("diff", "--cached", "--name-only").stdout.splitlines()))
         expected_final = {path.as_posix() for path in release_paths}
@@ -6389,6 +6405,169 @@ def run_release_freshness_probes() -> tuple[list[str], int]:
     return problems, checked
 
 
+def build_release_fixture(
+    tmp: Path, *, mode: str = "full", gitless: bool = False, foreign: bool = False,
+    stop_at_review: bool = False,
+) -> tuple:
+    """A real disposable consumer project driven by the installed engine.
+
+    Release mechanics do not need the author's historical Work, opaque
+    evidence or private runtime state. This project publishes a real utility
+    source file and executes its own two-test contract. SAIPEN's own declared
+    full-unit family remains binding on projects that actually declare it.
+    """
+    from saipen_engine.paths import unbound_environment
+    from saipen_engine.runtime_namespace import (
+        ensure_gitattributes_policy, ensure_gitignore_policy,
+    )
+
+    tmp = Path(tmp).resolve()
+    if not tmp.is_relative_to(Path(tempfile.gettempdir()).resolve()):
+        raise ValueError("release fixture must be inside the disposable temp root")
+    project = tmp / "home"
+    project.mkdir()
+    env = {
+        **unbound_environment(), "SAIPEN_CAPABILITY": mode,
+        "GIT_AUTHOR_NAME": "probe", "GIT_AUTHOR_EMAIL": "probe@example.invalid",
+        "GIT_COMMITTER_NAME": "probe", "GIT_COMMITTER_EMAIL": "probe@example.invalid",
+        "GIT_CONFIG_NOSYSTEM": "1", "GIT_CONFIG_GLOBAL": os.devnull,
+        "GIT_TERMINAL_PROMPT": "0",
+    }
+    source = project / "tools/saipen_engine/release_contract.py"
+    source.parent.mkdir(parents=True)
+    shutil.copyfile(HOME / "tools/saipen_engine/release_contract.py", source)
+    launcher = project / "tools/saipen.py"
+    launcher.write_text(
+        "import sys\n"
+        f"sys.path.insert(0, {str(HOME / 'tools')!r})\n"
+        "from saipen import main\n"
+        "raise SystemExit(main())\n", encoding="utf-8",
+    )
+    (project / "tools/validate.py").write_text(
+        "import runpy\nimport sys\n"
+        f"sys.path.insert(0, {str(HOME / 'tools')!r})\n"
+        f"runpy.run_path({str(HOME / 'tools/validate.py')!r}, run_name='__main__')\n",
+        encoding="utf-8",
+    )
+    old_ver = (HOME / "VERSION").read_text(encoding="utf-8").strip()
+    major, minor, patch = old_ver.split(".")
+    new_ver = f"{major}.{minor}.{int(patch) + 1}"
+    (project / "VERSION").write_text(old_ver + "\n", encoding="utf-8")
+    for name in ("README.md", "README.ee.md", "README.ded.md", "README.ja.md"):
+        (project / name).write_text(f"# Release fixture\n\n**v{old_ver}**\n", encoding="utf-8")
+    (project / "CHANGELOG.md").write_text(f"## {old_ver}\n\nBaseline.\n", encoding="utf-8")
+    (project / ".gitattributes").write_text("* -text\n", encoding="utf-8")
+    attributes = ensure_gitattributes_policy(project)
+    if not attributes["ok"]:
+        raise RuntimeError(str(attributes))
+    ignored = ensure_gitignore_policy(project)
+    if not ignored["ok"]:
+        raise RuntimeError(str(ignored))
+    (project / "tests").mkdir()
+    (project / "tests/test_payload.py").write_text(
+        "import importlib.util\nimport unittest\nfrom pathlib import Path\n"
+        "ROOT = Path(__file__).resolve().parents[1]\n"
+        "SPEC = importlib.util.spec_from_file_location('payload', "
+        "ROOT / 'tools/saipen_engine/release_contract.py')\n"
+        "PAYLOAD = importlib.util.module_from_spec(SPEC)\nSPEC.loader.exec_module(PAYLOAD)\n"
+        "class Payload(unittest.TestCase):\n"
+        "    def test_release_badge_matches_version(self):\n"
+        "        version = (ROOT / 'VERSION').read_text().strip()\n"
+        "        self.assertEqual(PAYLOAD.version_badges(ROOT / 'README.md'), "
+        "[f'**v{version}**'])\n"
+        "    def test_owned_source_marker_is_present(self):\n"
+        "        self.assertIn('version_badges_owned(path)', "
+        "(ROOT / 'tools/saipen_engine/release_contract.py').read_text())\n",
+        encoding="utf-8",
+    )
+
+    def git(*args: str) -> subprocess.CompletedProcess[str]:
+        return subprocess.run(["git", "-C", str(project), *args], env=env,
+                              capture_output=True, text=True, encoding="utf-8",
+                              errors="replace", timeout=120)
+
+    def cli(*args: str) -> subprocess.CompletedProcess[str]:
+        return subprocess.run(
+            [sys.executable, str(launcher), "--project-root", str(project),
+             "--agent", "probe", *args], cwd=project, env=env,
+            capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=180,
+        )
+
+    def admitted(*args: str) -> dict:
+        result = cli(*args, "--json")
+        try:
+            body = json.loads(result.stdout)
+        except ValueError as error:
+            raise RuntimeError(
+                f"fixture {args[0]} did not return JSON: {result.stderr[-500:]}"
+            ) from error
+        if result.returncode or not body.get("ok"):
+            raise RuntimeError(f"fixture {' '.join(args[:2])} refused: {body}")
+        return body
+
+    admitted("init")
+    # The release matrix models an initialized working project. This empty
+    # derived summary carries no Work, verification or operator authority.
+    digest = project / ".saipen/kitchen/digest.md"
+    digest.parent.mkdir(parents=True, exist_ok=True)
+    digest.write_bytes(b"done: none\nremaining: fixture release\nawaiting: none\n")
+    admitted("transition", "PLAN")
+    added = admitted("ticket", "add", "P1", "publish the reviewed fixture utility",
+                     "--verify", "python -B -m unittest discover -s tests passes two payload tests")
+    ticket = added["ticket"]
+    admitted("claim", ticket)
+    admitted("transition", "BUILD", ticket, "prepare reviewed fixture source")
+    origin = tmp / "origin.git"
+    if not gitless:
+        for args in (("init", "-q"), ("config", "core.longpaths", "true"),
+                     ("config", "core.autocrlf", "false"),
+                     ("config", "core.whitespace",
+                      "blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol"),
+                     ("config", "core.hooksPath", ".git/hooks"),
+                     ("add", "-A"), ("commit", "-qm", "probe: canonical BUILD baseline"),
+                     ("branch", "-M", "main")):
+            result = git(*args)
+            if result.returncode:
+                raise RuntimeError(f"fixture Git {args}: {result.stderr[-500:]}")
+        subprocess.run(["git", "init", "-q", "--bare", str(origin)], env=env,
+                       check=True, capture_output=True, timeout=120)
+        git("remote", "add", "origin", origin.as_uri())
+        result = git("push", "-q", "origin", "HEAD:main")
+        if result.returncode:
+            raise RuntimeError("fixture baseline push failed: " + result.stderr[-500:])
+        subprocess.run(["git", "-C", str(origin), "symbolic-ref", "HEAD", "refs/heads/main"],
+                       env=env, check=True, capture_output=True, timeout=120)
+    else:
+        origin.mkdir()
+
+    source.write_text(source.read_text(encoding="utf-8").replace(
+        "version_badges(path)", "version_badges_owned(path)"), encoding="utf-8")
+    (project / "VERSION").write_text(new_ver + "\n", encoding="utf-8")
+    for name in ("README.md", "README.ee.md", "README.ded.md", "README.ja.md"):
+        path = project / name
+        path.write_text(path.read_text(encoding="utf-8").replace(old_ver, new_ver),
+                        encoding="utf-8")
+    changelog = project / "CHANGELOG.md"
+    changelog.write_text(f"## {new_ver}\n\nTest release.\n\n"
+                         + changelog.read_text(encoding="utf-8"),
+                         encoding="utf-8")
+    if foreign:
+        (project / "tools/foreign_file.py").write_text("FOREIGN = True\n", encoding="utf-8")
+    admitted("transition", "VERIFY", ticket, "execute fixture payload contract")
+    checked = subprocess.run([sys.executable, "-B", "-m", "unittest", "discover", "-s", "tests"],
+                             cwd=project, env=env, capture_output=True, text=True,
+                             encoding="utf-8", errors="replace", timeout=60)
+    if checked.returncode or "Ran 2 tests" not in checked.stderr or "\nOK" not in checked.stderr:
+        raise RuntimeError("fixture payload tests failed: " + checked.stderr[-1000:])
+    admitted("checkpoint", "RUN", ticket, "verify -> PASS conf: high two executable payload tests")
+    admitted("transition", "REVIEW", ticket, "fixture review accepted")
+    admitted("validate")
+    if not stop_at_review:
+        admitted("transition", "SHIP", ticket, "fixture release matrix")
+        admitted("scope", ticket, "tools/saipen_engine/release_contract.py")
+    return project, origin, git, cli, new_ver
+
+
 def run_release_executor_probes() -> tuple[list[str], int]:
     """T-994: comprehensive hostile release matrix.
 
@@ -6413,8 +6592,6 @@ def run_release_executor_probes() -> tuple[list[str], int]:
         "GIT_COMMITTER_NAME": "probe",
         "GIT_COMMITTER_EMAIL": "probe@example.invalid",
     }
-
-    home = VALIDATOR.parent.parent
 
     def expect(label: str, condition: bool, detail: str = "") -> None:
         nonlocal checked
@@ -6459,317 +6636,13 @@ def run_release_executor_probes() -> tuple[list[str], int]:
                 ),
             }
 
-    def _cut_log(saipen_dir: Path) -> None:
-        """Cut the copied LOG at the last sealed-segment boundary so the
-        fixture history holds no commit references (hunt marks etc.) the fresh
-        `git init` cannot back. Aligns STATE.last_event / goal counters to the
-        validator's OWN § 1.5 replay rule so the fixture is internally valid
-        (T-994 / § 21: one valid fixture, never hand-hacked STATE shapes)."""
-        sealed_max = 0
-        logs_dir = saipen_dir / "logs"
-        if logs_dir.is_dir():
-            for seg in sorted(logs_dir.glob("LOG-*.md")):
-                for ln in seg.read_text(encoding="utf-8-sig").splitlines():
-                    m = re.search(r"\[E-(\d+)\]", ln)
-                    if m:
-                        sealed_max = max(sealed_max, int(m.group(1)))
-        if not sealed_max:
-            return
-        log_text = (saipen_dir / "LOG.md").read_text(encoding="utf-8-sig")
-        kept = [
-            ln
-            for ln in log_text.splitlines()
-            if not (m := re.search(r"\[E-(\d+)\]", ln)) or int(m.group(1)) <= sealed_max
-        ]
-        (saipen_dir / "LOG.md").write_text("\n".join(kept) + "\n", encoding="utf-8")
-        st = (saipen_dir / "STATE.md").read_text(encoding="utf-8")
-        st = re.sub(r"(?m)^(\s*last_event:\s*)\d+$", f"\\g<1>{sealed_max}", st)
-        # § 1.5 replay: goal counters rebuild from the NEWEST
-        # `DEC: goal pivot|reauthorized` marker across SEALED + active logs
-        # (the validator reads every log file). Reconcile STATE to the cut log
-        # so the ship gate never fails on the fixture's own editing.
-        all_lines = list(kept)
-        if logs_dir.is_dir():
-            for seg in sorted(logs_dir.glob("LOG-*.md")):
-                all_lines += seg.read_text(encoding="utf-8-sig").splitlines()
-        marker = re.compile(r"\]\s+DEC: goal (?:pivot|reauthorized)\b")
-        last_marker = max((i for i, ln in enumerate(all_lines) if marker.search(ln)), default=None)
-        for counter in ("goal_waves", "goal_tickets"):
-            if not re.search(rf"(?m)^{counter}:", st):
-                continue
-            if last_marker is None:
-                continue  # validator only WARNs in the no-marker shape
-            rebuilt = sum(
-                1
-                for ln in all_lines[last_marker + 1 :]
-                for m in [re.search(rf"DEC: {counter} (\d+)->(\d+)", ln)]
-                if m and int(m.group(2)) > int(m.group(1))
-            )
-            st = re.sub(rf"(?m)^({counter}:\s*)\d+$", f"\\g<1>{rebuilt}", st)
-        (saipen_dir / "STATE.md").write_text(st, encoding="utf-8")
+    fixture_ticket = None
 
-    def _append_fixture_verification(saipen_dir: Path) -> None:
-        """Give synthetic T-9000 real current-cycle VERIFY evidence.
-
-        The release fixture used to patch STATE straight to SHIP while
-        omitting the VERIFY boundary and PASS that production closure
-        requires.  That made the harness itself invalid and collapsed most
-        release assertions into the same INCOMPLETE_TICKET refusal. Build the
-        complete VERIFY/PASS/REVIEW/SHIP chain with the canonical event
-        renderer and bind STATE.last_event to the resulting tail.
-        """
-        log_path = saipen_dir / "LOG.md"
-        log_text = log_path.read_text(encoding="utf-8-sig")
-        events = [
-            parsed["event"]
-            for line in log_text.splitlines()
-            if (parsed := parse_log_line(line)) is not None
-        ]
-        logs_dir = saipen_dir / "logs"
-        if logs_dir.is_dir():
-            for segment in sorted(logs_dir.glob("LOG-*.md")):
-                events.extend(
-                    parsed["event"]
-                    for line in segment.read_text(encoding="utf-8-sig").splitlines()
-                    if (parsed := parse_log_line(line)) is not None
-                )
-        tail = max(events, default=0)
-        now_dt = datetime.datetime.now(datetime.timezone.utc)
-        now = now_dt.strftime("%d.%m.%y %H:%M")
-        boundary, boundary_line = build_event(
-            tail,
-            "RUN",
-            "transition to VERIFY -- release fixture verification boundary",
-            ticket="T-9000",
-            agent="probe",
-            now=now,
-            op_id=f"transition-{tail + 1:08x}",
-        )
-        verdict, verdict_line = build_event(
-            boundary,
-            "RUN",
-            "verify -> PASS: release fixture invariants proven conf: high",
-            ticket="T-9000",
-            agent="probe",
-            now=now,
-            op_id=f"checkpoint-{tail + 2:08x}",
-        )
-        review, review_line = build_event(
-            verdict,
-            "RUN",
-            "transition to REVIEW -- release fixture verification accepted",
-            ticket="T-9000",
-            agent="probe",
-            now=now,
-            op_id=f"transition-{tail + 3:08x}",
-        )
-        ship, ship_line = build_event(
-            review,
-            "RUN",
-            "transition to SHIP -- release fixture review accepted",
-            ticket="T-9000",
-            agent="probe",
-            now=now,
-            op_id=f"transition-{tail + 4:08x}",
-        )
-        log_path.write_text(
-            log_text.rstrip("\n")
-            + "\n"
-            + "\n".join((boundary_line, verdict_line, review_line, ship_line))
-            + "\n",
-            encoding="utf-8",
-        )
-        state_path = saipen_dir / "STATE.md"
-        state_text = state_path.read_text(encoding="utf-8-sig")
-        state_text = re.sub(
-            r"(?m)^(\s*last_event:\s*)\d+$", f"\\g<1>{ship}", state_text
-        )
-        state_text = re.sub(
-            r"(?m)^(\s*updated:\s*).*$",
-            f"\\g<1>{now_dt.strftime('%Y-%m-%dT%H:%M:%SZ')}",
-            state_text,
-        )
-        state_path.write_text(state_text, encoding="utf-8")
-
-    def build_fixture(
-        tmp: Path, *, mode: str = "full", gitless: bool = False, foreign: bool = False
-    ) -> tuple:
-        """ONE valid SHIP-phase fixture builder (T-994 / § 21): the copied
-        project's real STATE keeps every required field (blocker,
-        saipen_version, mode, ...) and only the SHIP-relevant fields are
-        patched, so the ship gate never fails on the fixture's own corruption.
-        """
-        project = tmp / "home"
-        shutil.copytree(
-            home,
-            project,
-            ignore=_without_probe_runtime(shutil.ignore_patterns(
-                ".git", ".venv", "__pycache__", ".freebuff", "node_modules", "nul"
-            )),
-        )
-        # Release probes build their own synthetic BOARD/STATE/LOG and source
-        # scope. Do not let an unrelated live receipt from the host project
-        # become a hidden release precondition in every copied fixture.
-        shutil.rmtree(project / ".saipen" / "intake", ignore_errors=True)
-        # Live improve cycles belong to the host checkout, not this synthetic
-        # release project. Copying them makes unrelated sweep tickets a
-        # hidden precondition for every release assertion.
-        shutil.rmtree(project / ".saipen" / "improve", ignore_errors=True)
-
-        def git(*args: str) -> subprocess.CompletedProcess[str]:
-            return subprocess.run(
-                ["git", "-C", str(project), *args],
-                env=env,
-                capture_output=True,
-                text=True, encoding="utf-8",
-                check=False,
-            )
-
-        def cli(*args: str) -> subprocess.CompletedProcess[str]:
-            return subprocess.run(
-                [sys.executable, str(project / "tools" / "saipen.py"), *args],
-                cwd=str(project),
-                env={**env, "SAIPEN_CAPABILITY": mode},
-                capture_output=True,
-                text=True, encoding="utf-8",
-                errors="replace",
-            )
-
-        if not gitless:
-            if git("init", "-q").returncode != 0:
-                print("SKIP: release executor probes -- git unavailable")
-                return None
-            git("add", "-A")
-            git("commit", "-q", "-m", "probe: baseline")
-            git("branch", "-M", "main")
-            origin = tmp / "origin.git"
-            subprocess.run(["git", "init", "-q", "--bare", str(origin)], capture_output=True)
-            git("remote", "add", "origin", f"file://{origin}")
-            git("push", "-q", "origin", "HEAD:main")
-            subprocess.run(
-                ["git", "-C", str(origin), "symbolic-ref", "HEAD", "refs/heads/main"],
-                capture_output=True,
-            )
-        else:
-            origin = tmp / "origin.git"
-            origin.mkdir()
-
-        saipen_dir = project / ".saipen"
-        st = (saipen_dir / "STATE.md").read_text(encoding="utf-8-sig")
-        lines = st.splitlines()
-        lines = [
-            ln
-            for ln in lines
-            if not (
-                ln.strip().startswith("converge_target:")
-                or ln.strip().startswith("goal_waves:")
-                or ln.strip().startswith("goal_tickets:")
-            )
-        ]
-        out = []
-        for ln in lines:
-            new_ln = ln
-            for key, val in (
-                ("phase:", "SHIP"),
-                ("task:", "T-9000"),
-                ("next_action:", "PHASE SHIP T-9000"),
-                ("transition_from:", "REVIEW"),
-                ("mode:", mode),
-                ("agent:", "probe"),
-                ("execution_intent:", "normal"),
-                # The copied STATE carries the AUTHORING machine's absolute
-                # `saipen_home`. That path exists on exactly one host, so every
-                # other one -- a Linux CI runner above all -- refuses the very
-                # first fixture command with HOME_REQUIRED. The fixture is
-                # self-hosting (the copy contains `saipen/BOOT.md`), so it
-                # rebinds the pointer at its own root and stops depending on
-                # where the repository happened to be written.
-                ("saipen_home:", json.dumps(str(project))),
-            ):
-                if new_ln.strip().startswith(key):
-                    new_ln = new_ln.replace(new_ln.split(":", 1)[1], " " + val)
-                    break
-            out.append(new_ln)
-        (saipen_dir / "STATE.md").write_text("\n".join(out) + "\n", encoding="utf-8")
-
-        # ONE SYNTHETIC work surface (T-994 / § 21): the copied repository's
-        # own DONE tickets carry evidence in LOG history the _cut_log trim
-        # below removes, so a copied real board would fail the ship gate's
-        # closure-evidence check on tickets this fixture never touched. The
-        # fixture's board is exactly its own synthetic ticket -- repo-state
-        # independent by construction.
-        (saipen_dir / "BOARD.md").write_text(
-            "# Board\n"
-            "## DOING\n"
-            "- [/] T-9000 synthetic fixture ticket "
-            "| verify: canonical release executor matrix passes "
-            "| owner: probe | claim_time: 2026-01-01T00:00:00Z\n"
-            "## TODO\n"
-            "## DONE\n"
-            "## BLOCKED\n",
-            encoding="utf-8",
-        )
-
-        _cut_log(saipen_dir)
-        _append_fixture_verification(saipen_dir)
-        if not gitless:
-            git("add", "-A")
-            git("commit", "-q", "-m", "probe: fixture ship")
-            git("push", "-q", "origin", "HEAD:main")
-
-        # Real, non-metadata source change: the reviewed scope the release
-        # must actually ship (T-994 / § 2, § 22).
-        src = project / "tools" / "saipen_engine" / "release_contract.py"
-        src.write_text(
-            src.read_text(encoding="utf-8-sig").replace(
-                "version_badges(path)", "version_badges_owned(path)"
-            ),
-            encoding="utf-8",
-        )
-        old_ver = (project / "VERSION").read_text(encoding="utf-8").strip()
-        major, minor, patch = old_ver.split(".")
-        new_ver = f"{major}.{minor}.{int(patch) + 1}"
-        (project / "VERSION").write_text(new_ver + "\n", encoding="utf-8")
-        readme = (project / "README.md").read_text(encoding="utf-8-sig")
-        (project / "README.md").write_text(
-            readme.replace(f"**v{old_ver}**", f"**v{new_ver}**"), encoding="utf-8"
-        )
-        # The three ROOT locale mirrors are part of the release surface
-        # (release_contract.release_metadata_paths); a fixture that bumps
-        # VERSION must bump their badges too, or every probe that plans a
-        # release dies in _check_parity before it tests what it came for.
-        for mirror in ("README.ee.md", "README.ded.md", "README.ja.md"):
-            mirror_path = project / mirror
-            if mirror_path.is_file():
-                mirror_text = mirror_path.read_text(encoding="utf-8-sig")
-                mirror_path.write_text(
-                    mirror_text.replace(f"**v{old_ver}**", f"**v{new_ver}**"),
-                    encoding="utf-8",
-                )
-        changelog = (project / "CHANGELOG.md").read_text(encoding="utf-8-sig")
-        (project / "CHANGELOG.md").write_text(
-            f"## {new_ver}\n\nTest release.\n\n" + changelog, encoding="utf-8"
-        )
-        kitchen = saipen_dir / "saitranslate" / "kitchen"
-        if kitchen.is_dir():
-            for rm in kitchen.glob("*/README_*.md"):
-                t = rm.read_text(encoding="utf-8-sig")
-                rm.write_text(t.replace(f"**v{old_ver}**", f"**v{new_ver}**"), encoding="utf-8")
-        if foreign:
-            # The intended final source tree includes this foreign untracked
-            # file: the release must keep it out of its commits and preserve it
-            # in the worktree. It has to exist BEFORE the scope identity is
-            # recorded -- the fingerprint covers untracked non-.saipen bytes,
-            # so writing it afterwards makes the reviewed scope stale.
-            (project / "tools" / "foreign_file.py").write_text(
-                "FOREIGN = True\n", encoding="utf-8"
-            )
-        # Scope binds the complete reviewed tree, including release metadata.
-        # Recording it before the version bump creates a stale fixture.
-        r = cli("scope", "T-9000", "tools/saipen_engine/release_contract.py")
-        if r.returncode != 0:
-            raise RuntimeError("fixture scope failed: " + r.stdout + r.stderr)
-        return project, origin, git, cli, new_ver
+    def build_fixture(tmp: Path, *, mode="full", gitless=False, foreign=False):
+        nonlocal fixture_ticket
+        built = build_release_fixture(tmp, mode=mode, gitless=gitless, foreign=foreign)
+        fixture_ticket = parse_state(codec.read_doc(built[0] / ".saipen/STATE.md"))["task"]
+        return built
 
     def remote_branch_tip(origin: Path) -> str:
         r = subprocess.run(
@@ -6951,7 +6824,7 @@ def run_release_executor_probes() -> tuple[list[str], int]:
             "4f. canonical STATE becomes DONE", "phase: DONE" in st and "task: none" in st, st[:160]
         )
         board = (project / ".saipen" / "BOARD.md").read_text(encoding="utf-8")
-        expect("4g. ticket becomes DONE", "- [x] T-9000" in board, "")
+        expect("4g. ticket becomes DONE", f"- [x] {fixture_ticket}" in board, "")
         log_text = (project / ".saipen" / "LOG.md").read_text(encoding="utf-8")
         expect(
             "4h. truthful skipped-publish LOG event",
@@ -7149,16 +7022,16 @@ def run_release_executor_probes() -> tuple[list[str], int]:
                 "",
             )
             clone_board = (clone / ".saipen" / "BOARD.md").read_text(encoding="utf-8-sig")
-            expect("8k. fresh clone sees ticket DONE", "- [x] T-9000" in clone_board, "")
+            expect("8k. fresh clone sees ticket DONE", f"- [x] {fixture_ticket}" in clone_board, "")
             clone_log = (clone / ".saipen" / "LOG.md").read_text(encoding="utf-8-sig")
             expect(
                 "8l. fresh clone LOG carries truthful release evidence",
                 "ship v" + new_ver in clone_log
-                and "T-9000" in clone_log
+                and fixture_ticket in clone_log
                 and "content commit" in clone_log,
                 "release evidence missing in cloned LOG",
             )
-            scope_rec = clone / ".saipen" / "kitchen" / "release_scope" / "T-9000.json"
+            scope_rec = clone / ".saipen" / "kitchen" / "release_scope" / f"{fixture_ticket}.json"
             expect(
                 "8m. scope record reaches the fresh clone",
                 scope_rec.is_file(),
@@ -7187,7 +7060,8 @@ def run_release_executor_probes() -> tuple[list[str], int]:
         expect(
             "8q. scope record is committed (no tracked dirt)",
             git(
-                "ls-files", "--error-unmatch", ".saipen/kitchen/release_scope/T-9000.json"
+                "ls-files", "--error-unmatch",
+                f".saipen/kitchen/release_scope/{fixture_ticket}.json"
             ).returncode
             == 0,
             "scope record untracked",
@@ -7433,7 +7307,7 @@ def run_release_executor_probes() -> tuple[list[str], int]:
         # is still the review subject; the deleted file is a reviewed removal).
         r = cli(
             "scope",
-            "T-9000",
+            fixture_ticket,
             "tools/saipen_engine/release_contract.py",
             "tools/doomed_helper.py",
             "--json",
@@ -7529,7 +7403,7 @@ def run_release_executor_probes() -> tuple[list[str], int]:
         git("checkout", "HEAD", "--", "tools/saipen_engine/release_contract.py")
         new_file = project / "tools" / "brand_new_helper.py"
         new_file.write_text("BRAND_NEW = True\n", encoding="utf-8")
-        r = cli("scope", "T-9000", "tools/brand_new_helper.py", "--json")
+        r = cli("scope", fixture_ticket, "tools/brand_new_helper.py", "--json")
         expect(
             "14. scope records a brand-new untracked file",
             r.returncode == 0 and "SCOPE_RECORDED" in r.stdout,
@@ -7590,6 +7464,7 @@ def run_release_executor_probes() -> tuple[list[str], int]:
         project, origin, git, cli, _new_ver = built
         saipen_dir = project / ".saipen"
         segment = saipen_dir / "logs" / "LOG-999.md"
+        segment.parent.mkdir(parents=True, exist_ok=True)
         segment.write_text("# Log\n", encoding="utf-8")
         result = cli("ship", "--json")
         rd = j(result)
@@ -7621,6 +7496,7 @@ def run_release_executor_probes() -> tuple[list[str], int]:
                 ln
                 for ln in (cv.stdout + cv.stderr).splitlines()
                 if ln.startswith("FAIL")
+                and not ln.startswith("FAIL: mechanical provenance [saio]")
                 and ("LOG" in ln or "parent" in ln or "duplicate event" in ln)
             ]
             expect(
@@ -7628,6 +7504,29 @@ def run_release_executor_probes() -> tuple[list[str], int]:
                 not log_graph_fails,
                 str(log_graph_fails[:2]),
             )
+            # An ignored machine-local journal is not portable authority.
+            # Keep its real admission refusal distinct from the event graph.
+            expect(
+                "15. missing operation provenance is still refused",
+                "FAIL: mechanical provenance [saio]" in cv.stdout + cv.stderr,
+                (cv.stdout + cv.stderr)[-300:],
+            )
+            clone_log = clone15 / ".saipen/LOG.md"
+            original_log = clone_log.read_bytes()
+            bad_log, count = re.subn(rb"\[parent: E-\d+\]", b"[parent: E-999999]",
+                                     original_log, count=1)
+            expect("15. dangling-parent control has a target", count == 1, str(count))
+            try:
+                clone_log.write_bytes(bad_log)
+                bad = subprocess.run(
+                    [sys.executable, str(clone15 / "tools/validate.py")], cwd=clone15,
+                    capture_output=True, text=True, encoding="utf-8", timeout=120,
+                )
+                expect("15. dangling parent still reddens the real graph",
+                       bad.returncode != 0 and "dangling parent" in bad.stdout + bad.stderr,
+                       (bad.stdout + bad.stderr)[-300:])
+            finally:
+                clone_log.write_bytes(original_log)
 
     return problems, checked
 
@@ -16855,7 +16754,10 @@ def run_nitro_integrity_probes() -> tuple[list[str], int]:
         _finV.get("code") == "ILLEGAL_PHASE",
         repr(_finV),
     )
-    _re = reauthorize_valve(gE, "probe")
+    # An explicit external test carrier is scoped to this disposable fixture.
+    # Calling the reset function alone supplies no operator authorization.
+    with mock.patch.dict(os.environ, operator_request_env("cc")):
+        _re = reauthorize_valve(gE, "probe")
     expect(
         "valve control: explicit reauthorization resets the counters",
         _re.get("ok") and _re.get("code") == "VALVE_REAUTHORIZED",
@@ -19000,7 +18902,7 @@ def run_t1012_strict_grammar_probes() -> tuple[list[str], int]:
                     _src,
                     _dst,
                     dirs_exist_ok=True,
-                    ignore=shutil.ignore_patterns("__pycache__", "*.pyc"),
+                    ignore=_IGNORE_RUNTIME,
                 )
         for _f in ["VERSION", "README.md", "CHANGELOG.md"]:
             _src = HOME / _f

@@ -563,7 +563,7 @@ class RouterConformanceGateTests(T1412Base):
         self.assertTrue(allowed.ok, allowed)
         self.assertEqual(allowed.data.get("action"), "saipen crew")
 
-    def test_continue_crew_route_is_refused_and_the_named_remediation_clears_it(self) -> None:
+    def test_continue_refreshes_missing_evidence_before_resuming_the_crew_route(self) -> None:
         """The PRODUCTION continuation path, not just the Result wrapper.
 
         Measured in the T-1412 installed field acceptance: `saipen continue`
@@ -575,25 +575,12 @@ class RouterConformanceGateTests(T1412Base):
         self.assert_fast_gate_clean(root)
 
         rc, payload, text = self.run_cli(root, "continue")
-        self.assertNotEqual(rc, 0, text)
-        self.assertFalse(payload.get("ok"), payload)
-        self.assertEqual(payload.get("code"), "CONFORMANCE_UNHEALTHY", payload)
-        self.assertEqual(
-            payload.get("action"), C.CONFORMANCE_REMEDIATION_COMMAND, payload
-        )
-        self.assertEqual(
-            payload.get("canonical_next_command"), C.CONFORMANCE_REMEDIATION_COMMAND
-        )
-        self.assertEqual(payload.get("conformance_status"), "NOT_RUN", payload)
-
-        rc, payload, text = self.run_cli(root, "validate")
-        self.assertEqual(rc, 0, text)
-        self.assertEqual(payload.get("code"), "VALID", payload)
-
-        rc, payload, text = self.run_cli(root, "continue")
         self.assertEqual(rc, 0, text)
         self.assertTrue(payload.get("ok"), payload)
         self.assertEqual(payload.get("action"), "saipen crew", payload)
+        self.assertEqual(payload["doctor"]["status_before"], "NOT_RUN", payload)
+        self.assertEqual(payload["doctor"]["status_after"], "CURRENT_PASS", payload)
+        self.assertTrue(C.conformance_decision(root)["healthy"])
 
 
 if __name__ == "__main__":

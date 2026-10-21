@@ -26,6 +26,7 @@ import sys
 sys.path[0] = os.getcwd()
 
 import json  # noqa: E402
+import hashlib  # noqa: E402
 import time  # noqa: E402
 import unittest  # noqa: E402
 import unittest.loader  # noqa: E402
@@ -57,6 +58,8 @@ def main(argv: list[str]) -> None:
     manifest: dict = {"discovered": None, "selected": None, "modules": {}}
 
     def keep(test) -> bool:
+        if spec.get("include_import_errors") and isinstance(test, unittest.loader._FailedTest):
+            return True
         module = module_of(test)
         return module not in exclude if catch_all else module in include
 
@@ -70,15 +73,52 @@ def main(argv: list[str]) -> None:
 
     class ShardLoader(unittest.TestLoader):
         def discover(self, start_dir, pattern="test*.py", top_level_dir=None):
+            began = time.perf_counter()
             whole = super().discover(start_dir, pattern, top_level_dir)
             tests = list(flatten(whole))
             # Discovery order is kept, so class and module fixtures run exactly
             # as they do in the sequential run.
-            kept = [test for test in tests if keep(test)]
+            indices = [index for index, test in enumerate(tests) if keep(test)]
+            kept = [tests[index] for index in indices]
             manifest["discovered"] = len(tests)
             manifest["selected"] = len(kept)
+            # Positions preserve canonical multiplicity when discovery imports
+            # the same TestCase through multiple modules. Counts alone allow a
+            # duplicate in one shard to conceal an omission in another.
+            inventory = [(test.id(), module_of(test)) for test in tests]
+            manifest["inventory_sha256"] = hashlib.sha256(
+                json.dumps(inventory, ensure_ascii=True, separators=(",", ":")).encode("utf-8")
+            ).hexdigest()
+            manifest["selected_indices"] = indices
+            if spec.get("include_import_errors"):
+                manifest["requested_modules"] = sorted(include)
+                manifest["inventory"] = inventory
+                manifest["import_error_indices"] = [index for index, test in enumerate(tests)
+                    if isinstance(test, unittest.loader._FailedTest)]
+                expected_paths = spec.get("expected_module_paths") or {}
+                origins, origin_errors = {}, []
+                for module, expected_path in expected_paths.items():
+                    observed = getattr(sys.modules.get(module), "__file__", None)
+                    if observed is not None:
+                        normalized = os.path.realpath(observed)
+                        relative = os.path.relpath(normalized, os.getcwd())
+                        origins[module] = relative.replace("\\", "/")
+                        if os.path.normcase(normalized) == os.path.normcase(
+                                os.path.realpath(expected_path)):
+                            continue
+                    origin_errors.append(f"{module}: expected {expected_path}, observed {observed}")
+                manifest["expected_module_paths"] = expected_paths
+                manifest["module_origins"] = origins
+                manifest["dependency_origin_errors"] = origin_errors
+                manifest["selected_modules"] = sorted({module_of(test) for test in kept})
+                manifest["import_error_modules"] = sorted({module_of(test) for test in kept
+                    if isinstance(test, unittest.loader._FailedTest)})
+            manifest["discovery_s"] = round(time.perf_counter() - began, 6)
             # Written now too: a shard killed mid-run still tells what it held.
             write_manifest()
+            if (spec.get("include_import_errors") and origin_errors
+                    and not manifest["import_error_indices"]):
+                raise RuntimeError("impact dependency origin mismatch: " + "; ".join(origin_errors))
             return self.suiteClass(kept)
 
     class TimingResult(unittest.TextTestResult):

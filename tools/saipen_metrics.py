@@ -19,6 +19,7 @@ what it measures is not evidence.
     python tools/saipen_metrics.py                 # text report, default window
     python tools/saipen_metrics.py --since 2026-08-01
     python tools/saipen_metrics.py --json
+    python tools/saipen_metrics.py --verification --json
     python tools/saipen_metrics.py --transcripts ~/.claude/projects/<project>
 
 Token traffic is the one number the repository cannot hold, because it lives in
@@ -862,6 +863,10 @@ def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--since", default="2026-08-01", help="window start, YYYY-MM-DD")
     ap.add_argument("--json", action="store_true", help="emit the raw record")
+    ap.add_argument("--verification", action="store_true",
+                    help="read execution/request economics; does not run or authorize checks")
+    ap.add_argument("--project-root", type=Path,
+                    help="verification-report root (requires --verification)")
     ap.add_argument(
         "--transcripts",
         default=None,
@@ -869,6 +874,20 @@ def main(argv=None) -> int:
     )
     args = ap.parse_args(argv)
 
+    if args.verification:
+        from verification_metrics import collect as verification_collect
+        from verification_metrics import render as verification_render
+
+        try:
+            data = verification_collect(args.project_root or REPO, args.since)
+        except ValueError as exc:
+            ap.error(str(exc))
+        output = (json.dumps(data, indent=2, sort_keys=True)
+                  if args.json else verification_render(data))
+        print(output)
+        return 0
+    if args.project_root:
+        ap.error("--project-root requires --verification")
     data = collect(args.since, Path(args.transcripts) if args.transcripts else None)
     print(json.dumps(data, indent=2, sort_keys=True) if args.json else render(data))
     return 0

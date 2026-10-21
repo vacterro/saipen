@@ -126,7 +126,7 @@ of them works standalone, with no crew and no other window running.
 | SC-8 | `saitranslate` | PRODUCER | current pre-ship package was prepared and integrated, or the epoch-bound release receipt proves that integration | PRODUCER_INTEGRATION_CURRENT |
 | SC-9 | `saiwiki` | PRODUCER | current pre-ship package was prepared and integrated, or the epoch-bound release receipt proves that integration | PRODUCER_INTEGRATION_CURRENT |
 | SC-10 | `final-fixed-point` | CORE_AND_SENSORS | Core closure still holds and every sensor is CURRENT after producer integration | FINAL_FIXED_POINT_CURRENT |
-| SC-11 | `ship` | RELEASE_EXECUTOR | one COMMITTED, REMOTE_VERIFIED release receipt binds this crew epoch and closure commit | RELEASE_VERIFIED |
+| SC-11 | `ship` | RELEASE_EXECUTOR | one COMMITTED release receipt binds this crew epoch: REMOTE_VERIFIED with its closure commit, or, in a no-publish session, a local closure whose receipt says publication NOT_PERFORMED | RELEASE_VERIFIED |
 | SC-12 | `post-ship` | CORE | every core-review role CURRENT against shipped HEAD (RUN_ROLE -> COLLECT_ROLE -> Core review -> disposition), and final EE/QQ remain READY/current against shipped HEAD/tree | POST_SHIP_CERTIFIED |
 | SC-13 | `finalize` | CORE_FINALIZER | one final LOG/STATE mutation returns to targetless `execution_intent: normal`, `phase: DONE`; fresh `--gate crew` has zero problems | CREW_FINALIZED |
 

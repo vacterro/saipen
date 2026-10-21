@@ -35,7 +35,9 @@ Rules enforced here:
 from __future__ import annotations
 
 from pathlib import Path
+import re
 
+from .cli_grammar import option_value_positions
 from .registry import RegistryError
 from .registry import load_registry as _load_registry
 from .registry import require_mapping, require_string_list
@@ -146,6 +148,42 @@ def is_declared_shortcut(token: str, table: dict[str, str] | None = None) -> boo
     return token.strip() in full or normalize_shortcut_token(token) in full
 
 
+_CONTINUATION_ALLOWED_PAYLOADS = frozenset(
+    {"", "all", "--all", "-a", "--json", "--dry-run", "--json --all", "--all --json"}
+)
+
+
+def is_prose_or_handoff(text: str) -> bool:
+    """True when text is natural-language prose, a handoff, or markdown document.
+
+    Such text must never be split on newlines into independent command segments,
+    and occurrences of 'cc' or other shortcut tokens within it remain payload.
+    """
+    raw = text.strip()
+    if not raw:
+        return False
+    if "```" in raw or "~~~" in raw:
+        return True
+    if any(
+        line.strip().startswith(("#", ">", "- ", "* ", "1.", "2.")) for line in raw.splitlines()
+    ):
+        return True
+    if any(
+        marker in raw
+        for marker in ("SAIHANDOFF", "## Request", "priority:", "verify:", "MISSION:", "OBSERVED")
+    ):
+        return True
+    if re.search(r'["\'][^"\']+\.(?:md|txt|json|py|js)["\']', raw) or re.search(
+        r"[A-Za-z]:\\[^\s]+\.(?:md|txt|json)", raw
+    ):
+        return True
+    return "\n" in raw and any(
+        line.strip().endswith((".", "!", "?", ":", ";"))
+        for line in raw.splitlines()
+        if len(line.strip()) > 20
+    )
+
+
 def parse_compound_command(message: str) -> list[str]:
     """Split a possibly-compound command message into ordered segments.
 
@@ -157,6 +195,8 @@ def parse_compound_command(message: str) -> list[str]:
     """
     if not message or not message.strip():
         return []
+    if is_prose_or_handoff(message):
+        return [message.strip()]
     raw = message.strip()
     parts: list[str] = []
     current: list[str] = []
@@ -221,7 +261,11 @@ def split_cli_compound_argv(argv: list[str]) -> list[list[str]]:
         return [[]]
     segments: list[list[str]] = [[]]
     opaque = False
-    for arg in argv:
+    values = option_value_positions(argv)
+    for index, arg in enumerate(argv):
+        if index in values:
+            segments[-1].append("+" if arg == r"\+" and not opaque else arg)
+            continue
         if arg == "--":
             opaque = True
         if arg == "+" and not opaque:
@@ -262,6 +306,16 @@ def resolve_compound_command(
     segments = parse_compound_command(message)
     resolved: list[dict] = []
     for index, segment in enumerate(segments):
+        if is_prose_or_handoff(segment):
+            if segment.startswith("saipen "):
+                resolved.append(
+                    {"index": index, "segment": segment, "command": segment, "kind": "command"}
+                )
+            else:
+                resolved.append(
+                    {"index": index, "segment": segment, "command": "", "kind": "unknown"}
+                )
+            continue
         if segment.startswith("saipen "):
             resolved.append(
                 {"index": index, "segment": segment, "command": segment, "kind": "command"}
@@ -298,9 +352,7 @@ def resolve_compound_command(
             # Narrowed to the single normative idiom `build ccc` (CORE §1.10) --
             # arbitrary trailing shortcuts are NOT commands (Wave 4 payload safety).
             trailing = words[-1]
-            target = table.get(trailing) or table.get(
-                normalize_shortcut_token(trailing)
-            )
+            target = table.get(trailing) or table.get(normalize_shortcut_token(trailing))
             if target is not None and segment == "build ccc":
                 # Only `build ccc` is authorized trailing; twin `build ссс` same.
                 resolved.append(
@@ -363,9 +415,7 @@ _DISPOSITION_FACTS = require_mapping(_REGISTRY, "dispositions")
     DISPOSITION_NOT_RUN,
     DISPOSITION_FAILED,
 ) = require_string_list(_DISPOSITION_FACTS, "closed_set")
-_FAILURE_DISPOSITIONS = frozenset(
-    require_string_list(_DISPOSITION_FACTS, "failure")
-)
+_FAILURE_DISPOSITIONS = frozenset(require_string_list(_DISPOSITION_FACTS, "failure"))
 
 
 def chain_disposition(

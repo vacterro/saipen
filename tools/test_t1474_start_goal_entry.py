@@ -214,13 +214,18 @@ class ContinuationIsNotAnEntryTests(unittest.TestCase):
         self.assertFalse(result["resumed"], text)
 
     def test_continuation_preview_matches_apply_and_writes_nothing(self):
+        from test_operator_origin_support import host_for
+
         for door in ("start", "user-request"):
             with self.subTest(door=door):
                 root, work = self.active()
+                host_for(root, create=True).offer(root, "keep improving", action="goal")
                 before = {
                     p.relative_to(root): p.read_bytes() for p in root.rglob("*") if p.is_file()
                 }
-                code, result, text = cli(root, door, "keep improving", "--dry-run", "--json")
+                code, result, text = transport_cli(
+                    root, door, "keep improving", "--dry-run", "--json",
+                )
                 self.assertEqual(code, 0, text)
                 self.assertTrue(result["continuation"], text)
                 self.assertEqual(result["ticket"], work, text)
@@ -228,7 +233,7 @@ class ContinuationIsNotAnEntryTests(unittest.TestCase):
                     p.relative_to(root): p.read_bytes() for p in root.rglob("*") if p.is_file()
                 }
                 self.assertEqual(after, before)
-                code, applied, text = cli(root, door, "keep improving", "--json")
+                code, applied, text = transport_cli(root, door, "keep improving", "--json")
                 self.assertEqual(code, 0, text)
                 self.assertEqual(applied["ticket"], work, text)
 

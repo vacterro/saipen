@@ -22,6 +22,24 @@ __pycache__/
 # green in the maintainer's tree. Half a megabyte makes the shipped LOG read
 # the same everywhere it is read.
 !.saipen/recovery/log-detail/
+# ...and the closed BOARD rows a CLEAN scrub pruned (T-1640). The scrub's DEC
+# names the copy and its sha256, and a row closed since the last commit has no
+# other durable home once it leaves BOARD.md: with the directory excluded it
+# would exist on one machine only, and "moved, never dropped" would be false.
+!.saipen/recovery/board-scrub/
+# ...and the full records of compacted BOARD rows (T-1668). A row over the
+# live cap keeps a compact projection and cites its record by detail_ref;
+# with the store excluded a clone read 101 live rows with their text gone
+# and nothing reported it. The compaction's lineage checkpoints and the LOG
+# tails a repair cut away are cited by tracked lines the same way.
+!.saipen/recovery/board-compaction/
+!.saipen/recovery/board-compaction-lineage/
+!.saipen/recovery/log-foreign-tail/
+!.saipen/recovery/log-normalize/
+# Durable stores this repository does not ship, one line each with its
+# reason; tools/test_t1668_durable_stores_ship.py fails on any other.
+# unshipped-durable: .saipen/recovery/settled/ -- the per-operation journal (110 MB, 10984 records on 2026-10-08); a checkout without it reads as no ledger here (journal.resolvable_op_ids), never as forged history
+# unshipped-durable: .saipen/recovery/conformance/ -- per-machine validation receipts (23 MB); a clone validates for itself and inherits no verdict
 .saipen/locks/
 # Exact quarantined receipt bodies are local source authority, never a Git or
 # archive distribution surface. Export-safe state stays under intake/distribution.
@@ -86,6 +104,12 @@ impl1.md
 /.saipen/kitchen/*
 !/.saipen/kitchen/cohort_registry.json
 !/.saipen/kitchen/digest.md
+# ...and the release receipts (T-1668). closure._published_releases reads
+# them as the publication evidence a fresh clone can see; ignored, a clone
+# could not resolve one inherited_verified closure and validate --gate core
+# failed there while green here.
+!/.saipen/kitchen/release_receipt.json
+!/.saipen/kitchen/release_receipts/
 
 # saitranslate is a subSaipen, so its kitchen is a sandbox under the same rule
 # as `.saipen/extensions/subs/*/kitchen/` above, and its `.translation-cache` is
@@ -116,3 +140,9 @@ impl1.md
 # scratch file belongs, which is what this is.
 scen*.log
 unit*.log
+
+# `provable` is a 20-byte scratch marker a host hook wrote at the repository
+# root (content: one `code: CHECKPOINTED` line, no consumer in any tool or
+# document). validate.py [root-file-set] names .gitignore as the home for
+# scratch at the root, and git must never offer this to `git add -A`.
+/provable

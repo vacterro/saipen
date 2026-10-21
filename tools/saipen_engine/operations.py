@@ -22,6 +22,7 @@ There is no `_render_state` anymore.
 
 from __future__ import annotations
 
+import dataclasses
 import json
 import os
 import re
@@ -55,8 +56,11 @@ from .board import (
     ticket_is_workable,
 )
 from .codec import redact_credentials
+from . import board_scrub
+from .board_scrub import SCRUB_EVIDENCE_ROOT
 from .board_compaction import (
     CompactionResult,
+    foreign_field_ticket_ids,
     oversized_ticket_ids,
     unrecognized_field_ticket,
     prepare_existing,
@@ -183,6 +187,14 @@ class HomeDeadError(ValueError):
     """
 
 
+class HomeInaccessibleError(ValueError):
+    """`STATE.saipen_home` is another user's install this account cannot read.
+
+    Not a dead pointer (T-1647): rebinding it would move the project off its
+    runtime for every account, so the refusal names no rebind.
+    """
+
+
 def _state_guard(fn):
     """Convert a checkpoint/STATE raise into the operation's structured refusal.
 
@@ -205,6 +217,8 @@ def _state_guard(fn):
                 str(exc),
                 next_action="saipen rebind-home --auto",
             )
+        except HomeInaccessibleError as exc:
+            return _refuse("CROSS_USER_RUNTIME_UNAVAILABLE", str(exc))
         except (StateMalformedError, CheckpointError) as exc:
             return _refuse(getattr(exc, "code", "VALIDATION_FAILED"), str(exc))
         except ValueError as exc:
@@ -253,6 +267,15 @@ REPAIR_OBSERVABLE = ("state", "log", "history_binding")
 #: validate one ledger and commit another -- which is why reconcile, and every
 #: other caller of `REPAIR_OBSERVABLE`, never sees this class.
 TAIL_QUARANTINE_OBSERVABLE = ("foreign_tail",)
+
+#: What the quarantine itself reads with (T-1679). A typed head brings two more
+#: classes with it: a STATE the same hand left malformed, and the unauthorized
+#: marker the cut is about to replace. The quarantine writes the LOG without
+#: the suffix and its own event becomes `last_event`; the rows the suffix had
+#: closed are named in that event for the reconciliation that follows
+#: (`lifecycle_authority.quarantine_note`). `TAIL_QUARANTINE_OBSERVABLE` stays
+#: the one class no planner may share.
+TYPED_HEAD_QUARANTINE_OBSERVABLE = (*TAIL_QUARANTINE_OBSERVABLE, "state", "lifecycle_authority")
 
 
 def _read(
@@ -325,7 +348,7 @@ def _read(
             raise StateMalformedError(f"state-malformed: {parse_error}")
     board = parse_board(board_doc.text_norm)
     from .log import read_history_snapshot_and_logs_digest, snapshot_contract_errors
-    from .state import persisted_home_error, running_home
+    from .state import CODE_HOME_INACCESSIBLE, home_refusal, running_home
 
     # The PERSISTED bootloader pointer is validated as a POINTER, separately
     # from the running install that owns VERSION/schema/STYLE
@@ -334,7 +357,10 @@ def _read(
     # every ORDINARY mutation refuses BEFORE journaling; `rebind-home` passes
     # allow_dead_home=True because repairing that pointer is its whole job.
     if not allow_dead_home:
-        home_problem = persisted_home_error(state.get("saipen_home"))
+        refused = home_refusal(state.get("saipen_home"))
+        if refused is not None and refused[0] == CODE_HOME_INACCESSIBLE:
+            raise HomeInaccessibleError(f"home-inaccessible: {refused[1]}")
+        home_problem = refused[1] if refused else None
         if home_problem is not None:
             raise HomeDeadError(
                 f"home-dead: {home_problem} -- the bootloader cannot load the "
@@ -383,8 +409,13 @@ def _read(
                 _bound = int(str(state.get("last_event")).strip())
             except (TypeError, ValueError):
                 _bound = None
+            from .lifecycle_authority import journal_floor as _journal_floor
+
             foreign_tail, foreign_tail_refusal = foreign_tail_cut(
-                snapshot, log_doc.text_norm, _bound
+                snapshot,
+                log_doc.text_norm,
+                _bound,
+                journal_floor=_journal_floor(root, snapshot.events)[0],
             )
             if foreign_tail is not None:
                 observed["foreign_tail"] = "; ".join(_ledger_errors(snapshot)[:4])
@@ -441,6 +472,32 @@ def _read(
                 ),
                 code="HISTORY_LEDGER_CORRUPT",
             )
+    # T-1671 (SRC-192): canonical lifecycle state must stand on an operation.
+    # A STATE whose `last_event` sits above the newest journaled event, or a
+    # `## DONE` row vouched for only by events no operation wrote, was typed by
+    # an executor that lost the control route -- and every reader used to
+    # accept it because the bytes parse. Refusing here is what keeps a later
+    # operation from building on that head and burying it under a new floor.
+    # Only the reconciliation planner names the class, because it is the one
+    # reader that repairs it (`lifecycle_authority.OBSERVABLE`).
+    from . import lifecycle_authority as _lifecycle_authority
+
+    lifecycle = _lifecycle_authority.assess(root, state, board, snapshot.events)
+    if lifecycle["status"] == _lifecycle_authority.UNAUTHORIZED:
+        if _lifecycle_authority.OBSERVABLE not in observe:
+            raise CheckpointError(
+                _lifecycle_authority.refusal_detail(lifecycle),
+                code=_lifecycle_authority.CODE,
+            )
+        observed[_lifecycle_authority.OBSERVABLE] = lifecycle["detail"]
+    from . import goal_authority
+
+    authority_preconditions = {}
+    grant_errors = goal_authority.prove(
+        root, state, history_events=snapshot.events, dependencies=authority_preconditions,
+    )
+    if grant_errors:
+        raise CheckpointError("goal-authority: " + "; ".join(grant_errors))
     log_tail = snapshot.tail
     # ALWAYS bind the complete sealed history (`.saipen/logs` numeric segments)
     # as a read precondition so APPLY rechecks it under the lock and refuses
@@ -467,12 +524,16 @@ def _read(
         # present, as the strict verdict text. A caller that named a class and
         # finds nothing here read a surface that is clean on that class.
         "_observed": observed,
+        # T-1671: the lifecycle-authority verdict of THIS read, for the planner
+        # that asked to observe an unauthorized head and must repair it.
+        "_lifecycle": lifecycle,
         # T-1326 P0: the canonical project root travels WITH the documents. Every
         # later `_event_line` therefore externalizes an oversized event
         # losslessly without the caller having to remember a `root=` keyword --
         # lossless construction is a property of the checkpoint, not an
         # accidental caller opt-in.
         "_root": Path(root),
+        "_authority_preconditions": authority_preconditions,
     }
     if state_error:
         # Set only on the CORE-002 tolerant path: the STRICT verdict the
@@ -516,6 +577,7 @@ def _docs_preconditions(docs: dict, *keys: str) -> dict:
     _ld = docs.get("_logs_digest")
     if _ld:
         pc[".saipen/logs"] = _ld
+    pc.update(docs.get("_authority_preconditions") or {})
     return pc
 
 
@@ -783,6 +845,15 @@ def _regression_gate(docs: dict, ticket_id: str) -> str | None:
         return None
     ok, reason = regression_evidence(ticket_id, docs["_history"].events)
     if ok:
+        if ticket.get("fields", {}).get("regression_evidence") == "executed":
+            from .regression_execution import evidence_gate
+
+            from .state import parse_state
+
+            error = evidence_gate(docs["_root"], ticket_id, docs,
+                                  parse_state(docs["state"].text_norm))
+            if error:
+                return error
         return None
     return (
         f"ticket {ticket_id} declares `regression: required`, so a green run is "
@@ -791,8 +862,38 @@ def _regression_gate(docs: dict, ticket_id: str) -> str | None:
     )
 
 
+def _acceptance_gate(docs: dict, ticket_id: str) -> str | None:
+    """Use the same declared-outcome admission at REVIEW and atomic finish."""
+    from .acceptance_contract import gate
+
+    ticket = parse_board(docs["board"].text_norm)["tickets"].get(ticket_id, {})
+    try:
+        dependencies = gate(docs["_root"], ticket_id,
+                            ticket.get("fields", {}).get("verify", ""), docs["_history"].events)
+    except (ValueError, OSError, TypeError, KeyError) as exc:
+        return str(exc)
+    docs.setdefault("_authority_preconditions", {}).update(dependencies)
+    return None
+
+
 def _refuse(code: str, detail: str = "", **extra) -> Result:
     return Result(ok=False, code=code, message=detail, data=extra)
+
+
+def _source_refusal_code(diagnostic: dict, default: str) -> str:
+    """The closed operation code for one intake diagnostic (SRC-026:R006).
+
+    Intake names its own findings. An operation answers in the closed
+    vocabulary of `errors.CODES`, so a diagnostic passes through here: a code
+    that vocabulary holds is kept, and one it does not hold -- a diagnostic
+    intake grew after this operation was written -- becomes `default`, the
+    fail-closed class of the gate that asked. The original diagnostic always
+    travels in the refusal's text, so nothing is hidden by the mapping.
+    """
+    from .errors import CODES
+
+    code = diagnostic.get("code")
+    return code if isinstance(code, str) and code in CODES else default
 
 
 def _iter_operation_records(root: Path):
@@ -1092,6 +1193,30 @@ def _refresh_active_claim(
     )
 
 
+def _audit_route_basis(
+    root: Path, tickets: dict, agent: str, now: datetime.datetime, ticket_id: str
+) -> str | None:
+    """The route that continues with `ticket_id` ahead of the Pick Rule, or None.
+
+    T-1757: the router owns continuation, and its audit-inbox route names Work
+    ahead of the BOARD order (SOURCE-AUDIT-INBOX-01). The claim asked only
+    `pick_next_work`, so the router's own `PHASE SCOUT <T>` could be followed
+    only with `--explicit`, which wrote a DEC saying the Pick Rule was stepped
+    over when nothing was. This asks the router's own seam and decision.
+    """
+    try:
+        from .audit_route import audit_route_owns
+        from .router import audit_inbox_projection
+
+        projection = audit_inbox_projection(root)
+        owns = audit_route_owns(projection, tickets, agent=agent, now=now)
+    except Exception:
+        return None
+    if owns and isinstance(projection, dict) and projection.get("work") == ticket_id:
+        return "audit route (SOURCE-AUDIT-INBOX-01)"
+    return None
+
+
 def _plan_claim(
     root: Path,
     ticket_id: str,
@@ -1100,6 +1225,7 @@ def _plan_claim(
     utc: str,
     instant: datetime.datetime | None = None,
     explicit: bool = False,
+    basis: str | None = None,
 ) -> OperationPlan | Result:
     op_id = "claim-" + uuid4_hex()
     # ONE frozen operation instant: classify and stamp from the same clock.
@@ -1420,7 +1546,12 @@ def _plan_claim(
     # eligibility or authorization" -- which is why every gate above this point
     # runs first and refuses with the flag present.
     top_workable, _pick_reason = pick_next_work(tickets, agent=agent, now=instant)
-    if not explicit:
+    # T-1757: a claim of the Work the router or START prescribes is not an
+    # override: START names the request it was handed (`basis`), the router's
+    # audit route is asked here.
+    if basis is None and top_workable != ticket_id:
+        basis = _audit_route_basis(root, tickets, agent, instant, ticket_id)
+    if not explicit and basis is None:
         if top_workable is None or top_workable != ticket_id:
             return _refuse(
                 "NOT_TOP_WORKABLE",
@@ -1434,9 +1565,11 @@ def _plan_claim(
     # `--explicit` on a ticket that WAS topmost is a redundant flag, not an
     # override: annotating it would put a false "stepped over" claim in
     # immutable history.
-    stepped_over = top_workable if (explicit and top_workable != ticket_id) else None
+    stepped_over = top_workable if ((explicit or basis) and top_workable != ticket_id) else None
     detail = f"claimed via SAIOPS -- owner {agent}"
-    if stepped_over is not None:
+    if stepped_over is not None and basis is not None:
+        detail += f" -- {basis}, ahead of PICK-01 topmost workable {stepped_over}"
+    elif stepped_over is not None:
         detail += f" -- EXPLICIT claim over PICK-01: topmost workable was {stepped_over}"
     event, line = _event_line(docs, log_tail, "DEC", ticket_id, agent, detail, now, op_id)
     new_log = docs["log"].text_norm.rstrip("\n") + "\n" + line + "\n"
@@ -1569,7 +1702,11 @@ def _claim_move(
 
 @_state_guard
 def plan_claim(
-    project_root: Path | str, ticket_id: str, agent: str, explicit: bool = False
+    project_root: Path | str,
+    ticket_id: str,
+    agent: str,
+    explicit: bool = False,
+    basis: str | None = None,
 ) -> Result:
     # ONE frozen operation instant (CORE-001 REVIEW repair, SRC-026:R001/R002):
     # the ownership classification and the claim_time written to BOARD derive
@@ -1584,6 +1721,7 @@ def plan_claim(
         clock.utc,
         instant=clock.instant,
         explicit=explicit,
+        basis=basis,
     )
     if isinstance(plan, Result):
         return plan
@@ -1592,7 +1730,11 @@ def plan_claim(
 
 @_state_guard
 def apply_claim(
-    project_root: Path | str, ticket_id: str, agent: str, explicit: bool = False
+    project_root: Path | str,
+    ticket_id: str,
+    agent: str,
+    explicit: bool = False,
+    basis: str | None = None,
 ) -> Result:
     clock = _operation_clock()
     plan = _plan_claim(
@@ -1603,6 +1745,7 @@ def apply_claim(
         clock.utc,
         instant=clock.instant,
         explicit=explicit,
+        basis=basis,
     )
     if isinstance(plan, Result):
         return plan
@@ -2134,7 +2277,7 @@ def _plan_transition(
         source_boundary = boundary_gate(root, subject, destination)
         if not source_boundary.get("ok"):
             return _refuse(
-                source_boundary.get("code", "SOURCE_CORRUPTION"),
+                _source_refusal_code(source_boundary, "SOURCE_CORRUPTION"),
                 f"source reread gate at {destination}: {source_boundary}",
                 ticket=subject,
                 receipt=source_boundary.get("receipt"),
@@ -2143,9 +2286,9 @@ def _plan_transition(
     if subject and destination == "SHIP":
         from .core_unit import evidence_command, ship_gate
 
-        # T-1344: closures recorded green from narrower invocations while the
-        # declared core-unit family was red. A project that declares the family
-        # ships only on a current-cycle run of it with no red outside baseline.
+        # T-1344/T-1828: current-cycle executed evidence is mandatory. Legacy
+        # projects require the full family here; opted-in projects may use
+        # focused evidence locally and require the full family at publication.
         core_unit_problem = ship_gate(root, subject, docs["_history"].events)
         if core_unit_problem is not None:
             return _refuse(
@@ -2184,6 +2327,11 @@ def _plan_transition(
                 ticket=subject,
             )
 
+        acceptance_problem = _acceptance_gate(docs, subject)
+        if acceptance_problem is not None:
+            return _refuse("INCOMPLETE_TICKET", f"VERIFY -> REVIEW: {acceptance_problem}",
+                           phase=destination, ticket=subject)
+
     # Machine-owned marker (hostile-regression): the transition text is ALWAYS
     # `transition to {destination}` -- a caller-supplied reason is appended
     # after ` -- `, never replaces the marker. verification_evidence treats
@@ -2197,6 +2345,15 @@ def _plan_transition(
     new_log = docs["log"].text_norm.rstrip("\n") + "\n" + line + "\n"
     if destination in phases.TICKET_BEARING_PHASES:
         na = f"PHASE {destination} {subject}"
+    elif destination == "DONE":
+        # T-1669: DONE is terminal lifecycle state, and `PHASE DONE` is NOT a
+        # route. What follows DONE is the shared router's answer -- the
+        # runnable Work CLEAN may have made available, or the ordinary
+        # maintenance continuation -- and it is projected below, over the
+        # PROPOSED post-transition bytes, exactly as `_plan_finish_ticket`
+        # already does. This provisional value is what the router replaces
+        # when it has something more specific to say.
+        na = "saipen continue"
     else:
         na = f"PHASE {destination}"
     owned = {
@@ -2277,6 +2434,21 @@ def _plan_transition(
     )
     new_board = refreshed_board if refreshed_board is not None else docs["board"].text_norm
 
+    # T-1669: terminal DONE projects its continuation from the SAME proposed
+    # bytes this operation is about to commit. `_plan_finish_ticket` settles
+    # the question exactly this way -- ONE pure `route_next` call over the
+    # operation's own state/board snapshot, never a second routing authority
+    # and never a fresh filesystem walk. A conformant CLEAN that made Work
+    # runnable before it left therefore commits `PHASE SCOUT T-###` instead of
+    # a route the validator has to reject as producer drift. The provisional
+    # `saipen continue` stands when the router has nothing more specific.
+    if destination == "DONE":
+        from .router import route_next
+
+        routed = route_next(new_state, new_board, current_agent=agent)
+        if routed.get("ok") and routed.get("action") != "saipen continue":
+            new_state = patch_state(new_state, {"next_action": routed["action"]})
+
     errors = validate_texts(
         new_state, new_board, new_log, current_agent=agent, sealed_events=docs["_history"]
     )
@@ -2295,7 +2467,11 @@ def _plan_transition(
         "ok": True,
         "code": "TRANSITIONED",
         "phase": destination,
-        "next_action": na,
+        # T-1669: report the next_action this operation actually COMMITS. `na`
+        # is the planned value and later branches re-patch `new_state` (the
+        # DONE projection above, the goal-valve WAIT), so echoing the pre-patch
+        # value here would let a Result disagree with the bytes on disk.
+        "next_action": parse_state(new_state).get("next_action"),
         "event_id": f"E-{event}",
         "ticket": subject,
     }
@@ -3008,6 +3184,27 @@ def _ticket_targets(
     # The ACTIVE case must be provable from the LOG alone: the block event
     # carries an explicit (active) marker so the validator's block-park
     # exception can never be satisfied by a TODO-ticket block event.
+    # T-1715: block-for IS the active-parent handoff, never a way for an
+    # unopened queue item to reserve an ordering. Without this guard the
+    # generic TODO-block path below accepted block-for on a merely TODO
+    # parent and stored STATE's unrelated active phase tuple as its resume
+    # (E-14412/E-14444): a never-built ticket was later resumed in a phase it
+    # never reached. The parent MUST be the owned, active DOING ticket; a
+    # merely TODO, unclaimed or foreign parent is refused with zero writes.
+    if action == "block-for" and not (
+        ticket["section"] == "## DOING"
+        and state.get("task") == ticket_id
+        and state.get("phase") in phases.TICKET_BEARING_PHASES
+    ):
+        return _refuse(
+            "ILLEGAL_TICKET_LIFECYCLE",
+            f"block-for is the active-parent handoff: it requires {ticket_id} to be "
+            f"the owned active DOING ticket, but it is {ticket['section']} with "
+            f"STATE task {state.get('task')!r} in phase {state.get('phase')!r}. A "
+            "merely TODO, unclaimed or foreign parent declares its dependency at "
+            "ticket creation, never by borrowing the active-parent handoff",
+            ticket=ticket_id,
+        )
     if action == "block-for":
         child_id = str(blocked_on or "").strip()
         if not re.fullmatch(r"T-\d+", child_id):
@@ -3375,6 +3572,45 @@ def closure_request_error(
     return None
 
 
+#: A BUILD record that states plainly it carried no implementation delta.
+#: Measured on this repository: `RUN: build -> implementation_delta none: ...`
+#: (T-6, E-73) is the established sentence, and a ticket closed as `own_patch`
+#: on top of it asserted an implementation patch that does not exist.
+_NO_DELTA_BUILD_RE = re.compile(r"implementation_delta\s+none", re.IGNORECASE)
+
+
+def no_delta_build_events(ticket_id: str, events) -> list[dict]:
+    """This ticket's BUILD records that declared no implementation delta."""
+    found = []
+    for event in events:
+        text = str(event.get("text") or "")
+        if (
+            event.get("ticket") == ticket_id
+            and "build" in text.lower()
+            and _NO_DELTA_BUILD_RE.search(text)
+        ):
+            found.append(event)
+    return found
+
+
+def latest_build_declares_no_delta(ticket_id: str, events) -> bool:
+    """Whether this ticket's most recent BUILD record declared no delta (T-1781).
+
+    A BUILD record is an event of the ticket whose text opens with `build`
+    (after an optional `RUN:`). Only the latest one describes the patch the
+    closure asserts: an earlier no-delta BUILD superseded by a real one is
+    history, not the current claim.
+    """
+    builds = [
+        event
+        for event in events
+        if event.get("ticket") == ticket_id
+        and re.match(r"(?:RUN:\s*)?build\b", str(event.get("text") or ""), re.IGNORECASE)
+    ]
+    return bool(builds) and bool(_NO_DELTA_BUILD_RE.search(str(builds[-1].get("text") or "")))
+
+
+
 def _plan_finish_ticket(
     root: Path,
     ticket_id: str,
@@ -3452,6 +3688,29 @@ def _plan_finish_ticket(
     _invalidation = (invalidation_evidence or "").strip().upper()
     _paths = [str(x).strip().replace("\\", "/") for x in (closure_paths or []) if str(x).strip()]
     docs, state, board, log_tail = _read(root)
+    # T-37 (vacterro-saiwebsite improve 20261013-1 IMP-003): an `own_patch`
+    # closure asserts THIS ticket's implementation patch. When the ticket's
+    # own BUILD recorded `implementation_delta none`, no such patch exists and
+    # the closure is a provenance lie -- measured live: a no-delta fixture
+    # ticket closed FINISHED under `own_patch` with no refusal of any kind.
+    # The BUILD record is machine-grammar and sits in the LOG, so the check
+    # reads it rather than trusting the declared mode. The refusal names the
+    # two modes that fit a no-delta closure, so a weak model can act on it.
+    # T-1781: the LATEST BUILD record decides; a no-delta BUILD that a later
+    # BUILD with a real patch superseded no longer refuses own_patch.
+    if _mode == "own_patch" and latest_build_declares_no_delta(
+        ticket_id, docs["_history"].events
+    ):
+        return _refuse(
+            "VALIDATION_FAILED",
+            "closure_mode own_patch asserts this ticket's own implementation "
+            "patch, but its BUILD recorded implementation_delta none; close with "
+            "saipen ticket done <T-###> --closure-mode inherited_verified "
+            "--implementation-source <T-###|SRC-###|release:<id>>, or "
+            "saipen ticket done <T-###> --closure-mode cohort --closure-cohort "
+            "C-### --paths <p1,p2>",
+            ticket=ticket_id,
+        )
     # T-1162: a short BOARD title cannot close Work whose authoritative
     # source still has missing, corrupt, or uncovered clauses. This gate
     # rereads the original body and verifies its digest; model memory and a
@@ -3517,7 +3776,7 @@ def _plan_finish_ticket(
         except Exception:
             _route = None
         return _refuse(
-            source_gate.get("code", "SOURCE_UNRESOLVED"),
+            _source_refusal_code(source_gate, "SOURCE_UNRESOLVED"),
             f"source coverage gate for {ticket_id}: {source_gate}",
             ticket=ticket_id,
             receipt=source_gate.get("receipt"),
@@ -3666,6 +3925,10 @@ def _plan_finish_ticket(
             ticket=ticket_id,
         )
 
+    acceptance_problem = _acceptance_gate(docs, ticket_id)
+    if acceptance_problem is not None:
+        return _refuse("INCOMPLETE_TICKET", f"finish: {acceptance_problem}", ticket=ticket_id)
+
     # A parent parked by `ticket block-for` owns the continuation after this
     # child closes. The relation is read from BOARD authority, never inferred
     # from prose or queue order. It is consumed below in the SAME journaled
@@ -3776,17 +4039,22 @@ def _plan_finish_ticket(
         if not _verdict.ok:
             return _refuse("VALIDATION_FAILED", _verdict.detail, ticket=ticket_id)
     if _mode == "finding_invalidated":
-        # T-406: same discipline, cheaper source of truth. The disproof is
-        # already in this project's own LOG because the agent had to record it
-        # there to do anything else with it -- there is no second place it
-        # could have been smuggled into.
+        # T-406 / T-1795: same discipline, cheaper source of truth. The disproof
+        # is already in this project's own LOG because the agent had to record it
+        # there to do anything else with it -- there is no second place it could
+        # have been smuggled into. Semantics enforced: structured disproof required.
         _bad = invalidation_error(
             docs["_history"].events,
             _invalidation,
             ticket_id=ticket_id,
         )
         if _bad is not None:
-            return _refuse("VALIDATION_FAILED", _bad, ticket=ticket_id)
+            code = (
+                "PREMISE_NOT_DISPROVEN"
+                if _bad.startswith("PREMISE_NOT_DISPROVEN")
+                else "VALIDATION_FAILED"
+            )
+            return _refuse(code, _bad, ticket=ticket_id)
     if _mode == "cohort":
         # Membership is DURABLE authority, not a BOARD adjective: the registry
         # write is a TARGET of this same journaled closure, so a ticket can
@@ -3800,6 +4068,9 @@ def _plan_finish_ticket(
                 "VALIDATION_FAILED", f"cohort registry is unreadable: {exc}", ticket=ticket_id
             )
         _existing = (_registry.get("cohorts") or {}).get(_cohort_id) or {}
+        if "reconciliation" in _existing or "publication_successor" in _existing:
+            return _refuse("VALIDATION_FAILED", "reconciled cohort membership is frozen; "
+                           "use a new reviewed batch", ticket=ticket_id)
         if _existing.get("publication_status") == "shipped":
             return _refuse(
                 "VALIDATION_FAILED",
@@ -4014,6 +4285,24 @@ def _plan_finish_ticket(
     )
 
 
+_PREMISE_DISPROOF_RE = re.compile(
+    r"\b("
+    r"premise\s+(?:(?:is|was|were)\s+)?(?:therefore\s+)?(?:disproven|disproved|refuted|invalid(?:ated)?)|"
+    r"premise-disproof|"
+    r"premise\s+disproof|"
+    r"disproven\s+premise|"
+    r"disproved\s+premise|"
+    r"refuted\s+premise|"
+    r"invalidated\s+premise|"
+    r"finding\s+(?:(?:is|was|were)\s+)?invalidated|"
+    r"PREMISE-INVALIDATED|"
+    r"INVALIDATION-EVIDENCE|"
+    r"PREMISE-DISPROOF"
+    r")\b",
+    re.IGNORECASE,
+)
+
+
 @_state_guard
 def invalidation_error(
     events,
@@ -4021,19 +4310,17 @@ def invalidation_error(
     *,
     ticket_id: str,
 ) -> str | None:
-    """Why this premise-disproof cannot close `ticket_id`, or None (T-406).
+    """Why this premise-disproof cannot close `ticket_id`, or None (T-406 / T-1795).
 
-    Deliberately STRUCTURAL and prose-free. The obvious stronger check --
-    match the word `INVALID` in the cited event -- is exactly the
-    Narrative Authority Leakage that `log.py` documents at length and that
-    CORE-001 exists to prevent: a validator reading free text for a magic
-    phrase. CORE-001 already fixed the neighbouring case that way, by making
-    the red half its own RECORD type. So the closed mode name is the claim,
-    and the cited event only has to be REAL and OURS.
-
-    Owning it matters: without the ticket check, any event in the project could
-    close any ticket, and "this premise was disproven" would become a claim a
-    single well-placed unrelated checkpoint could satisfy.
+    The cited event must exist in this project's LOG and belong to `ticket_id`'s
+    own LOG chain. Furthermore, per T-1795 / SRC-255 semantic closure integrity:
+    - Events recording blockers or waiting states (WAIT, BLOCKED, BLOCKED_EXTERNAL,
+      WAIT_USER_DECISION, EXTERNAL_GATE_PENDING) are refused (R004).
+    - Lifecycle transitions (transition to ...) are refused.
+    - Events lacking a typed premise-disproof record or structured invalidation reason
+      (e.g., mere preparation, progress, or unrelated checks) are refused with
+      diagnostic code PREMISE_NOT_DISPROVEN (R003, R007).
+    - Genuine typed premise disproof is accepted (R008).
     """
     text = str(evidence_ref or "").strip().upper()
     if not re.fullmatch(r"E-\d+", text):
@@ -4047,10 +4334,35 @@ def invalidation_error(
                 f"E-{number} belongs to {event.get('ticket') or 'no ticket'}, not to "
                 f"{ticket_id}: a premise disproof closes only the ticket it disproved"
             )
+        taxonomy = str(event.get("taxonomy") or "").strip().upper()
+        event_text = str(event.get("text") or "").strip()
+        if taxonomy in ("WAIT", "BLOCKED") or re.search(
+            r"\b(BLOCKED_EXTERNAL|WAIT_USER_DECISION|EXTERNAL_GATE_PENDING)\b",
+            event_text,
+            re.IGNORECASE,
+        ):
+            return (
+                f"PREMISE_NOT_DISPROVEN: E-{number} records a blocker or waiting state "
+                f"({taxonomy}: {event_text}), not a premise disproof; a requirement "
+                f"blocked externally must not be closed under finding_invalidated"
+            )
+        if taxonomy == "RUN" and re.match(r"^transition\s+to\s+", event_text, re.IGNORECASE):
+            return (
+                f"PREMISE_NOT_DISPROVEN: E-{number} is a lifecycle transition "
+                f"({event_text}), not a premise disproof"
+            )
+        if not _PREMISE_DISPROOF_RE.search(event_text):
+            return (
+                f"PREMISE_NOT_DISPROVEN: E-{number} ({taxonomy}: {event_text}) does not "
+                f"record a structured premise disproof; same-ticket events recording "
+                f"preparation, progress, or unrelated checks cannot close a ticket "
+                f"under finding_invalidated"
+            )
         return None
     return f"invalidation evidence E-{number} does not exist in this project's LOG"
 
 
+@_state_guard
 def finish_ticket(
     project_root: Path | str,
     ticket_id: str,
@@ -4166,7 +4478,7 @@ def _plan_bind_closed_cohort(root, ticket_id, agent, cohort_id, paths, now, utc)
     }
     source_gate = work_closure_gate(root, ticket_id)
     if not source_gate.get("ok"):
-        return _refuse(source_gate.get("code", "SOURCE_UNRESOLVED"), str(source_gate))
+        return _refuse(_source_refusal_code(source_gate, "SOURCE_UNRESOLVED"), str(source_gate))
     if closure.resolve_implementation_source(root, ticket_id).ok:
         return _refuse("VALIDATION_FAILED", "published Work cannot acquire a different closure")
     try:
@@ -4179,6 +4491,8 @@ def _plan_bind_closed_cohort(root, ticket_id, agent, cohort_id, paths, now, utc)
     existing = (registry.get("cohorts") or {}).get(cohort_id) or {}
     if existing.get("publication_status") == "shipped":
         return _refuse("VALIDATION_FAILED", "published cohort cannot accept a new binding")
+    if "reconciliation" in existing or "publication_successor" in existing:
+        return _refuse("VALIDATION_FAILED", "reconciled cohort membership is frozen")
     if fields.get("closure_mode") == "cohort":
         member = (existing.get("members") or {}).get(ticket_id) or {}
         if (fields.get("closure_cohort") == cohort_id and member.get("paths") == hashes
@@ -4519,6 +4833,17 @@ def _plan_supersede_ticket(
     if evidence_problem:
         return _refuse("SUPERSESSION_EVIDENCE_INVALID", evidence_problem, ticket=old_ticket)
 
+    from .acceptance_contract import supersession_gate
+
+    try:
+        dependencies = supersession_gate(
+            root, old_ticket, fields.get("verify", ""), successor_ticket,
+            successor.get("fields", {}).get("verify", ""), authority, docs["_history"].events,
+        )
+    except (ValueError, OSError, TypeError, KeyError) as exc:
+        return _refuse("SUPERSESSION_EVIDENCE_INVALID", str(exc), ticket=old_ticket)
+    docs.setdefault("_authority_preconditions", {}).update(dependencies)
+
     try:
         seat = _seat_agent(state, docs["board"].text_norm, agent)
     except OwnershipSplitError as exc:
@@ -4688,6 +5013,9 @@ def _plan_resolve_external_ticket(
     timeout: int,
     now: str,
     utc: str,
+    plans=None,
+    renewal=None,
+    read_once=None,
 ) -> OperationPlan | Result:
     """Plan ONE external-implementation resolution transaction (SRC-088 M2).
 
@@ -4698,6 +5026,12 @@ def _plan_resolve_external_ticket(
     FAIL records its own receipt and changes no lifecycle byte. The immutable
     receipt binds the installed engine GENERATION, so a later dependency
     rollback makes the closure non-green instead of silently green.
+
+    Executable checks arrive ONLY as authenticated argv plans (from the sealed
+    regression-execution contract the ticket names) or as commands the
+    operator typed at the CLI; BOARD verify/external_run prose is never an
+    executable authority. A WAIT_USER_DECISION-class row carries the
+    operator's own decision and no external implementation lifts it.
     """
     from . import external as _external
     from .debt import _run_verification_command, _verification_contract_digest
@@ -4708,6 +5042,7 @@ def _plan_resolve_external_ticket(
     resolution_reason = str(resolution_reason or "").strip()
     runs = [str(item) for item in (runs or []) if str(item).strip()]
     verification = list(verification or [])
+    plans = [plan for plan in (plans or []) if isinstance(plan, dict) and plan.get("argv")]
 
     if not re.fullmatch(r"T-\d+", work):
         return _refuse("INVALID_ID", f"ticket {work!r}")
@@ -4727,15 +5062,8 @@ def _plan_resolve_external_ticket(
                 f"attested verification is not PASS: {entry.get('command')}",
                 ticket=work,
             )
-    if not runs and not verification:
-        return _refuse(
-            "EXTERNAL_VERIFICATION_REQUIRED",
-            "external resolution requires at least one --run <command> so the "
-            "local verification is executed evidence, not an assertion",
-            ticket=work,
-        )
 
-    docs, state, board, log_tail = _read(root)
+    docs, state, board, log_tail = read_once if read_once is not None else _read(root)
     if board["errors"]:
         return _refuse(
             "VALIDATION_FAILED",
@@ -4747,6 +5075,25 @@ def _plan_resolve_external_ticket(
     if ticket is None:
         return _refuse("TICKET_NOT_FOUND", f"{work} not on the board", ticket=work)
     fields = ticket.get("fields") or {}
+
+    problem = _external.operator_gate_problem(ticket)
+    if problem:
+        return _refuse("OPERATOR_DECISION_REQUIRED", f"{work}: {problem}", ticket=work)
+
+    if not runs and not plans and not verification:
+        contract_plan_result, code, detail = _external.contract_plan(root, fields)
+        if contract_plan_result is None:
+            return _refuse(code, f"{work}: {detail}", ticket=work)
+        plans = [contract_plan_result]
+
+    if not runs and not plans and not verification:
+        return _refuse(
+            "EXTERNAL_VERIFICATION_REQUIRED",
+            "external resolution requires at least one --run <command> so the "
+            "local verification is executed evidence, not an assertion",
+            ticket=work,
+        )
+
     already_done = False
     if ticket.get("section") == "## DONE":
         same = (
@@ -4755,14 +5102,14 @@ def _plan_resolve_external_ticket(
             and str(fields.get("external_implementation") or "") == implementation
             and str(fields.get("resolution_reason") or "") == resolution_reason
         )
-        if not same:
+        if not same and renewal is None:
             return _refuse(
                 "TICKET_ALREADY_DONE",
                 f"{work} is already terminal with a different closure; external "
                 "resolution never rewrites another closure mode",
                 ticket=work,
             )
-        if not _external.resolution_problems(root, work, ticket):
+        if renewal is None and not _external.resolution_problems(root, work, ticket):
             return Result(
                 ok=True,
                 code="ALREADY_APPLIED",
@@ -4816,9 +5163,18 @@ def _plan_resolve_external_ticket(
             ticket=work,
         )
 
-    executed = [_run_verification_command(root, command, timeout) for command in runs]
+    executed = (
+        [_external.execution_entry(root, plan) for plan in plans]
+        + [_run_verification_command(root, command, timeout) for command in runs]
+    )
     entries = verification + executed
     verdict = "PASS" if all(entry.get("result") == "PASS" for entry in entries) else "FAIL"
+    if renewal is not None:
+        from .external_renewal import snapshot_problem
+
+        problem = snapshot_problem(root, renewal["external_snapshot"])
+        if problem:
+            return _refuse("VALIDATION_FAILED", problem, ticket=work)
     contract_identity = _verification_contract_digest(entries, "external")
     prior_blocker = str(fields.get("blocker") or "")
     op_id = "resolve-external-" + uuid4_hex()
@@ -4856,6 +5212,8 @@ def _plan_resolve_external_ticket(
         verification_contract_digest=contract_identity,
         verdict=verdict,
         op_id=op_id,
+        predecessor=renewal["predecessor"] if renewal else None,
+        external_snapshot=renewal["external_snapshot"] if renewal else None,
     )
     content = json.dumps(record, indent=2, sort_keys=True).encode("utf-8")
     rel = f"{_external.EXTERNAL_DIR}/{receipt_id}.json"
@@ -4880,7 +5238,8 @@ def _plan_resolve_external_ticket(
                 "receipt": receipt_id,
                 "verdict": verdict,
             },
-            {**_docs_preconditions(docs, "state", "board", "log"), rel: ""},
+            {**_docs_preconditions(docs, "state", "board", "log"),
+             **(renewal["preconditions"] if renewal else {}), rel: ""},
             [receipt_target],
             {
                 "ok": False,
@@ -4913,6 +5272,25 @@ def _plan_resolve_external_ticket(
     )
     new_log = docs["log"].text_norm.rstrip("\n") + "\n" + line + "\n"
 
+    resume_parent = continuation_parent(tickets, work, require_done=False)
+    if resume_parent is not None:
+        parent_id = resume_parent["id"]
+        resume_detail = (
+            f"blocked parent resumed after dependency {work} reached DONE; "
+            "dependency completion is not a claim event -- no live claim restored"
+        )
+        event, resume_line = _producer_event(
+            docs,
+            event,
+            "DEC",
+            resume_detail,
+            ticket=parent_id,
+            agent=agent,
+            now=now,
+            op_id=op_id,
+        )
+        new_log = new_log.rstrip("\n") + "\n" + resume_line + "\n"
+
     def _propose_resolved(board_text: str) -> str:
         if already_done:
             mutated = board_text
@@ -4926,7 +5304,7 @@ def _plan_resolve_external_ticket(
                 "",
                 enforce_cap=False,
             )
-        return _ticket_fields_in_place(
+        mutated = _ticket_fields_in_place(
             mutated,
             work,
             {
@@ -4940,13 +5318,33 @@ def _plan_resolve_external_ticket(
             remove=("blocker", "blocker_scope", "verify_attempts"),
             enforce_cap=False,
         )
+        if resume_parent is not None:
+            parent_tid = resume_parent["id"]
+            mutated = _move_ticket(
+                mutated, parent_tid, "## DOING", "[/]", "resume", "", enforce_cap=False
+            )
+            remove_fields = [
+                "blocker",
+                "blocker_scope",
+                "blocked_on",
+                "resume_phase",
+                "resume_transition_from",
+            ]
+            mutated = _ticket_fields_in_place(
+                mutated, parent_tid, {}, remove=remove_fields, enforce_cap=False
+            )
+        return mutated
+
+    compaction_ids = [work]
+    if resume_parent is not None:
+        compaction_ids.append(resume_parent["id"])
 
     try:
         projected = _project_board_mutation(
             root,
             docs["board"].text_norm,
             _propose_resolved,
-            [work],
+            compaction_ids,
             op_id=op_id,
             event_id=f"E-{event}",
             reason="external implementation resolution requires canonical projection",
@@ -4959,7 +5357,20 @@ def _plan_resolve_external_ticket(
         {"last_event": event, "updated": utc, "agent": seat},
     )
     new_state = _settle_stop_reason(new_state, new_board, agent)
-    if str(parse_state(new_state).get("task") or "none") == "none":
+    if resume_parent is not None:
+        parent_id = resume_parent["id"]
+        resume_phase = str(resume_parent.get("fields", {}).get("resume_phase") or "SCOUT")
+        resume_from = str(resume_parent.get("fields", {}).get("resume_transition_from") or "DONE")
+        new_state = patch_state(
+            new_state,
+            {
+                "phase": resume_phase,
+                "task": parent_id,
+                "transition_from": resume_from,
+                "next_action": f"PHASE {resume_phase} {parent_id}",
+            },
+        )
+    elif str(parse_state(new_state).get("task") or "none") == "none":
         from .router import route_next
 
         routed = route_next(new_state, new_board, current_agent=agent)
@@ -4994,8 +5405,10 @@ def _plan_resolve_external_ticket(
             "authority": authority,
             "implementation": implementation,
             "verdict": verdict,
+            "resumed_parent": resume_parent["id"] if resume_parent else None,
         },
-        {**_docs_preconditions(docs, "state", "board", "log"), rel: ""},
+        {**_docs_preconditions(docs, "state", "board", "log"),
+         **(renewal["preconditions"] if renewal else {}), rel: ""},
         targets,
         {
             "ok": True,
@@ -5006,9 +5419,26 @@ def _plan_resolve_external_ticket(
             "authority": authority,
             "implementation": implementation,
             "event_id": f"E-{event}",
+            "resumed_parent": resume_parent["id"] if resume_parent else None,
         },
         op_id=op_id,
     )
+
+
+@_state_guard
+def renew_external_ticket(project_root, work, agent, *, implementation, verification_contract,
+                          implementation_paths, external_root=None, native_inputs=(),
+                          dry_run=False):
+    """Explicit current proof renewal; original receipt and closure remain history."""
+    from .external_renewal import plan as renewal_plan
+
+    root = Path(project_root)
+    planned = renewal_plan(root, work, agent, implementation, verification_contract,
+                           implementation_paths, external_root=external_root,
+                           native_inputs=native_inputs, dry_run=dry_run)
+    if isinstance(planned, Result):
+        return planned
+    return _apply_external_resolution(root, planned, work)
 
 
 @_state_guard
@@ -5025,8 +5455,15 @@ def resolve_external_ticket(
     contract: str | None = None,
     timeout: int = 300,
     dry_run: bool = False,
+    plans=None,
 ) -> Result:
-    """Resolve locally reported Work through an externally implemented fix."""
+    """Resolve locally reported Work through an externally implemented fix.
+
+    Executable evidence arrives either as authentic argv `plans` (the sealed
+    regression-execution contract, argv + proven runtime + scrubbed
+    environment) or as `runs` the operator typed at the CLI. BOARD prose is
+    never accepted as an executable check.
+    """
     root = Path(project_root)
     now, utc = _now(), _utc_iso()
     plan = _plan_resolve_external_ticket(
@@ -5042,13 +5479,19 @@ def resolve_external_ticket(
         timeout=timeout,
         now=now,
         utc=utc,
+        plans=plans,
     )
     if isinstance(plan, Result):
         return plan
     if dry_run:
         return _render_plan(plan)
+    return _apply_external_resolution(root, plan, work)
+
+
+def _apply_external_resolution(root, plan, work):
+    """A committed FAIL observation is a failed verification, never success."""
     applied = apply_plan(root, plan)
-    if not isinstance(applied, Result):
+    if not isinstance(applied, Result) or not applied.ok:
         return applied
     expected = plan.expected if isinstance(plan.expected, dict) else {}
     if expected.get("code") == "EXTERNAL_VERIFICATION_FAILED":
@@ -5057,7 +5500,7 @@ def resolve_external_ticket(
             code="EXTERNAL_VERIFICATION_FAILED",
             message=(
                 f"local verification of the claimed external implementation did "
-                f"not pass; FAIL receipt recorded, {work} stays BLOCKED"
+                f"not pass; FAIL receipt recorded, {work} lifecycle stays unchanged"
             ),
             data={
                 "ticket": work,
@@ -6625,6 +7068,30 @@ def ticket_add(
     return apply_plan(root, plan)
 
 
+def _foreign_field_skew(state: dict) -> str | None:
+    """Refuse a foreign-field repair when the project is NEWER than this runtime.
+
+    A field this runtime does not know may belong to a later canonical writer;
+    stripping it from the live projection would then be version skew, not a
+    repair. A project at or below the running protocol major has no such
+    writer, so the field is foreign by construction.
+    """
+    from .state import running_protocol_major
+
+    running = running_protocol_major()
+    try:
+        declared = int(str((state or {}).get("saipen_version") or "0").strip())
+    except ValueError:
+        declared = 0
+    if running is not None and declared > running:
+        return (
+            f"project declares saipen_version {declared}, newer than this runtime "
+            f"({running}); a field this runtime does not know may be a newer "
+            "writer's, so it is not compacted away here -- run the newer runtime"
+        )
+    return None
+
+
 @_state_guard
 def compact_board(
     project_root: Path | str,
@@ -6646,8 +7113,21 @@ def compact_board(
     # fault -- or a refused field on a row this plan does NOT rewrite -- still
     # refuses here, and validate_texts below re-proves strict validity.
     repairable = oversized_ticket_ids(board_text)
+    # T-1743: naming a row whose only fault is a field outside the closed
+    # grammar IS the repair request for that row. Its full bytes are journaled
+    # into the detail authority first, exactly like an oversized row, so the
+    # refused field is preserved, never silently dropped.
+    foreign: list[str] = []
+    tolerated_rows = set(repairable)
+    if ticket_id not in repairable and ticket_id in foreign_field_ticket_ids(board_text):
+        skew = _foreign_field_skew(state)
+        if skew:
+            return _refuse("VALIDATION_FAILED", skew, ticket=ticket_id)
+        foreign = [ticket_id]
+        repairable = [*repairable, ticket_id]
+        tolerated_rows = set(repairable) | set(foreign_field_ticket_ids(board_text))
     if board["errors"]:
-        allowed = set(repairable)
+        allowed = tolerated_rows
         if not allowed or any(
             unrecognized_field_ticket(error) not in allowed for error in board["errors"]
         ):
@@ -6699,7 +7179,10 @@ def compact_board(
             "DEC",
             tid,
             agent,
-            "legacy oversized BOARD record compacted losslessly via SAIOPS",
+            "BOARD record carrying a field outside the closed grammar compacted "
+            "losslessly via SAIOPS (original bytes externalized)"
+            if tid in foreign
+            else "legacy oversized BOARD record compacted losslessly via SAIOPS",
             now,
             op_id,
         )
@@ -6716,7 +7199,8 @@ def compact_board(
             # names ITS OWN event -- never the first row's.
             event_id={tid: f"E-{number}" for tid, number in zip(repairable, event_numbers)},
             reason="explicit canonical legacy BOARD compaction",
-            tolerated_ids=set(repairable),
+            tolerated_ids=tolerated_rows,
+            foreign_ids=set(foreign),
         )
     except ValueError as exc:
         return _refuse("VALIDATION_FAILED", str(exc), ticket=ticket_id)
@@ -6820,17 +7304,33 @@ def ticket_verify(
     project_root: Path | str,
     ticket_id: str,
     agent: str,
-    verify: str,
+    verify: str | None,
     dry_run: bool = False,
+    *,
+    regression: str | None = None,
+    evidence_profile: str | None = None,
+    amendment: str | None = None,
+    authority: str | None = None,
 ) -> Result:
-    """Canonical verify-field update, including legacy BOARD repair."""
+    """Update verification metadata through its existing journaled writer."""
     root = Path(project_root)
-    if not verify or not verify.strip():
+    if evidence_profile is not None and evidence_profile != "executed":
+        return _refuse("VALIDATION_FAILED", "evidence profile must be executed", ticket=ticket_id)
+    if regression is not None:
+        if not isinstance(regression, str) or regression.strip().lower() != REGRESSION_REQUIRED:
+            return _refuse(
+                "VALIDATION_FAILED", "regression must be required", ticket=ticket_id
+            )
+        regression = REGRESSION_REQUIRED
+    if verify is None and regression is None and evidence_profile is None:
         return _refuse("VALIDATION_FAILED", "verify text is required", ticket=ticket_id)
-    try:
-        assert_single_record(verify, "verify")
-    except ValueError as exc:
-        return _refuse("VALIDATION_FAILED", str(exc), ticket=ticket_id)
+    if verify is not None:
+        if not verify or not verify.strip():
+            return _refuse("VALIDATION_FAILED", "verify text is required", ticket=ticket_id)
+        try:
+            assert_single_record(verify, "verify")
+        except ValueError as exc:
+            return _refuse("VALIDATION_FAILED", str(exc), ticket=ticket_id)
     op_id = "ticket-verify-" + uuid4_hex()
     now, utc = _now(), _utc_iso()
     docs, state, board, log_tail = _read(root)
@@ -6842,7 +7342,47 @@ def ticket_verify(
         )
     if ticket_id not in board["tickets"]:
         return _refuse("TICKET_NOT_FOUND", f"{ticket_id} not on the board", ticket=ticket_id)
-    verify = escape_ticket_description(redact_credentials(verify))
+    from . import acceptance_contract
+
+    prior_contract = (board["tickets"][ticket_id].get("fields") or {}).get("verify", "")
+    if verify is not None:
+        dependencies = {}
+        try:
+            prior_contract = acceptance_contract.resolve(root, ticket_id, prior_contract,
+                                                         dependencies)
+        except (ValueError, OSError, TypeError, KeyError) as exc:
+            return _refuse("VALIDATION_FAILED", str(exc), ticket=ticket_id)
+        docs.setdefault("_authority_preconditions", {}).update(dependencies)
+    typed_contract = verify is not None and (
+        acceptance_contract.protected(prior_contract, verify)
+        or acceptance_contract._recorded(ticket_id, docs["_history"].events)
+    )
+    if typed_contract or amendment or authority:
+        ownership_problem = _active_claim_refusal(state, docs["board"].text_norm, agent, ticket_id)
+        if ownership_problem is not None:
+            return ownership_problem
+        if board["tickets"][ticket_id]["section"] == "## DONE":
+            return _refuse("TICKET_NOT_WORKABLE", "historical DONE cannot amend acceptance",
+                           ticket=ticket_id)
+        if not typed_contract:
+            return _refuse("VALIDATION_FAILED", "amendment requires declared acceptance criteria",
+                           ticket=ticket_id)
+    if ((regression is not None or evidence_profile is not None)
+            and board["tickets"][ticket_id]["section"] == "## DONE"):
+        return _refuse(
+            "TICKET_NOT_WORKABLE", "historical DONE cannot declare regression", ticket=ticket_id
+        )
+    fields = {}
+    if verify is not None:
+        fields["verify"] = escape_ticket_description(redact_credentials(verify))
+    if regression is not None:
+        fields["regression"] = regression
+    if evidence_profile is not None:
+        declared = board["tickets"][ticket_id].get("fields", {}).get("regression")
+        if regression != "required" and declared != "required":
+            return _refuse("VALIDATION_FAILED", "executed profile requires regression: required",
+                           ticket=ticket_id)
+        fields["regression_evidence"] = evidence_profile
     # T-1616: the verify field is the ticket's FALSIFIABLE acceptance surface,
     # and `_ticket_fields_in_place` below replaces it wholesale -- so the
     # superseded clause used to exist nowhere in the project once this verb
@@ -6859,9 +7399,18 @@ def ticket_verify(
     # and splitting a DEC event on it would hand a verify clause's prose to the
     # verdict readers in `log.py`. A semicolon keeps the event one clause.
     _prior = (board["tickets"][ticket_id].get("fields") or {}).get("verify") or ""
-    _message = "ticket verify updated via SAIOPS"
-    if _prior.strip():
+    _message = (
+        "ticket verify updated via SAIOPS" if verify is not None
+        else "ticket regression declared via SAIOPS"
+    )
+    if verify is not None and _prior.strip():
         _message += f"; superseded clause: {_prior}"
+    if typed_contract:
+        _message += acceptance_contract.MARKER
+    if regression is not None:
+        _message += f"; regression: {regression}"
+    if evidence_profile is not None:
+        _message += "; regression_evidence: executed"
     event, line = _event_line(
         docs,
         log_tail,
@@ -6877,7 +7426,7 @@ def ticket_verify(
             root,
             docs["board"].text_norm,
             lambda board: _ticket_fields_in_place(
-                board, ticket_id, {"verify": verify}, enforce_cap=False
+                board, ticket_id, fields, enforce_cap=False
             ),
             [ticket_id],
             op_id=op_id,
@@ -6887,6 +7436,20 @@ def ticket_verify(
     except ValueError as exc:
         return _refuse("VALIDATION_FAILED", str(exc), ticket=ticket_id)
     new_board = projected.board_text
+    contract_metadata = None
+    if typed_contract:
+        # Journal the complete semantic input, before its bounded BOARD
+        # projection. Compaction targets preserve the exact full row in the
+        # same transaction; the projection is not the acceptance contract.
+        replacement = redact_credentials(verify)
+        try:
+            contract_metadata, dependencies = acceptance_contract.prepare(
+                root, ticket_id, prior_contract, replacement, event, docs["_history"].events,
+                amendment=amendment, authority=authority,
+            )
+        except (ValueError, OSError, TypeError, KeyError) as exc:
+            return _refuse("VALIDATION_FAILED", str(exc), ticket=ticket_id)
+        docs.setdefault("_authority_preconditions", {}).update(dependencies)
     new_log = docs["log"].text_norm.rstrip("\n") + "\n" + line + "\n"
     new_state = patch_state(
         docs["state"].text_norm,
@@ -6915,10 +7478,150 @@ def ticket_verify(
         "ticket_verify",
         agent,
         _identity(root),
-        {"operation": "ticket_verify", "ticket": ticket_id},
+        {"operation": "ticket_verify", "ticket": ticket_id,
+         **({"regression": regression} if regression is not None else {}),
+         **({"evidence_profile": evidence_profile} if evidence_profile is not None else {}),
+         **(contract_metadata or {})},
         _docs_preconditions(docs, "state", "board", "log"),
         targets,
         {"ok": True, "code": "TICKET_VERIFIED", "ticket": ticket_id, "event_id": f"E-{event}"},
+        op_id=op_id,
+        receipt_metadata=contract_metadata,
+    )
+    if dry_run:
+        return _render_plan(plan)
+    return apply_plan(root, plan)
+
+
+def ticket_requires(
+    project_root: Path | str,
+    ticket_id: str,
+    agent: str,
+    value: str,
+    dry_run: bool = False,
+) -> Result:
+    """Canonical writer of one ticket's `requires:` field (T-1663, SRC-189 R018).
+
+    What a ticket's steps need of an executor beyond the phase, in the
+    grammar `iteration_verdict.parse_ticket_requires` owns; `none` removes the
+    field. The field is the only thing that moves: phase, claim and section
+    stay where they are, so the current step finishes on the executor it has
+    and the next verdict reads the new requirement. A malformed value refuses
+    with zero writes; an identical repeat writes nothing.
+    """
+    from .iteration_verdict import (
+        CAPABILITY_INVENTORY,
+        format_ticket_requires,
+        parse_ticket_requires,
+    )
+
+    root = Path(project_root)
+    clear = (value or "").strip().lower() == "none"
+    try:
+        spec, read_only = parse_ticket_requires("" if clear else value)
+    except ValueError as exc:
+        return _refuse("VALIDATION_FAILED", str(exc), ticket=ticket_id)
+    stored = format_ticket_requires(spec, read_only)
+    # Accepted, and shown: a name outside the shared inventory is met only by
+    # an executor advertising exactly that word.
+    unlisted = sorted(name for name in spec if name not in CAPABILITY_INVENTORY)
+    if not clear and not stored:
+        return _refuse(
+            "VALIDATION_FAILED", "requires needs a capability list or `none`", ticket=ticket_id
+        )
+    op_id = "ticket-requires-" + uuid4_hex()
+    now, utc = _now(), _utc_iso()
+    docs, state, board, log_tail = _read(root)
+    if board["errors"]:
+        return _refuse(
+            "VALIDATION_FAILED",
+            "BOARD parse error(s): " + "; ".join(board["errors"][:3]),
+            ticket=ticket_id,
+        )
+    if ticket_id not in board["tickets"]:
+        return _refuse("TICKET_NOT_FOUND", f"{ticket_id} not on the board", ticket=ticket_id)
+    prior = (board["tickets"][ticket_id].get("fields") or {}).get("requires") or ""
+    if prior == stored:
+        return Result(
+            True,
+            "ALREADY_SET",
+            data={
+                "ticket": ticket_id,
+                "requires": stored,
+                "unlisted": unlisted,
+                "idempotent": True,
+            },
+            message="the ticket already carries exactly this requirement",
+        )
+    event, line = _event_line(
+        docs,
+        log_tail,
+        "DEC",
+        ticket_id,
+        agent,
+        f"ticket requires set via SAIOPS: {stored or 'none'}"
+        + (f"; was {prior}" if prior else ""),
+        now,
+        op_id,
+    )
+    try:
+        projected = _project_board_mutation(
+            root,
+            docs["board"].text_norm,
+            lambda board: _ticket_fields_in_place(
+                board,
+                ticket_id,
+                {"requires": stored} if stored else {},
+                remove=() if stored else ("requires",),
+                enforce_cap=False,
+            ),
+            [ticket_id],
+            op_id=op_id,
+            event_id=f"E-{event}",
+            reason="existing/proposed oversized BOARD record requires canonical requires update",
+        )
+    except ValueError as exc:
+        return _refuse("VALIDATION_FAILED", str(exc), ticket=ticket_id)
+    new_board = projected.board_text
+    new_log = docs["log"].text_norm.rstrip("\n") + "\n" + line + "\n"
+    new_state = patch_state(
+        docs["state"].text_norm,
+        {
+            "last_event": event,
+            "updated": utc,
+            "agent": _seat_agent(state, docs["board"].text_norm, agent),
+        },
+    )
+    errors = validate_texts(
+        new_state, new_board, new_log, current_agent=agent, sealed_events=docs["_history"]
+    )
+    if errors:
+        return _refuse(
+            "VALIDATION_FAILED",
+            "proposed requires update fails fast validation: " + "; ".join(errors[:5]),
+            ticket=ticket_id,
+        )
+    targets = [
+        *_log_targets(docs, new_log),
+        *projected.targets,
+        _target(docs["board"], ".saipen/BOARD.md", "board", new_board),
+        _target(docs["state"], ".saipen/STATE.md", "state", new_state),
+    ]
+    plan = build_plan(
+        "ticket_requires",
+        agent,
+        _identity(root),
+        {"operation": "ticket_requires", "ticket": ticket_id, "requires": stored},
+        _docs_preconditions(docs, "state", "board", "log"),
+        targets,
+        {
+            "ok": True,
+            "code": "TICKET_REQUIRES_SET",
+            "ticket": ticket_id,
+            "requires": stored,
+            "unlisted": unlisted,
+            "event_id": f"E-{event}",
+        },
         op_id=op_id,
     )
     if dry_run:
@@ -7158,6 +7861,7 @@ def user_request(
     dry_run: bool = False,
     supersedes: str | None = None,
     supersede_ingress: bool = False,
+    source_receipt: str | None = None,
 ) -> Result:
     """Persist an explicit user request as durable authority, THEN project it.
 
@@ -7211,9 +7915,10 @@ def user_request(
     if owed is not None:
         return _refuse(owed.pop("code"), owed.pop("detail"), **owed)
     # T-1376: the same witness the other ingress door asks for.
-    provenance = operator_task.witness(
+    provenance = {} if source_receipt else operator_task.witness(
         text.strip(),
         obligation_met=bool(obligation) and not obligation.get("malformed"),
+        root=root,
     )
     if "code" in provenance:
         return _refuse(provenance.pop("code"), provenance.pop("detail"), **provenance)
@@ -7241,10 +7946,25 @@ def user_request(
 
     from . import intake
 
+    captured_source = None
+    if source_receipt:
+        # START has already captured and bound the delivery. Its exact Source
+        # remains the authority after transport retirement; a new witness would
+        # relabel that event as model-supplied and allocate another Source.
+        captured_source = intake.read_body(root, source_receipt)
+        if (not captured_source.get("ok") or captured_source.get("body") != body
+                or captured_source.get("location") != "active"):
+            return _refuse("VALIDATION_FAILED", "captured request does not match this exact Source")
+        provenance = (captured_source.get("meta") or {}).get("request_provenance") or {}
+
     # Idempotency BEFORE any write: an identical request already captured and
     # already projected returns the SAME receipt and the SAME Work. Retrying a
     # request must never fork the authority for it.
-    existing = intake.find_by_body(root, body)
+    existing = (
+        {"receipt": source_receipt,
+         "linked_work": (captured_source.get("meta") or {}).get("linked_work")}
+        if captured_source else intake.find_by_body(root, body, request_provenance=provenance)
+    )
     if existing and existing.get("linked_work"):
         board_now = parse_board(codec.read_doc(root / ".saipen" / "BOARD.md"))
         if existing["linked_work"] in board_now["tickets"]:
@@ -7303,12 +8023,12 @@ def user_request(
             },
         )
 
-    captured = intake.capture(
+    captured = {"ok": True, "receipt": source_receipt} if captured_source else intake.capture(
         root, body, source_kind="user_instruction", request_provenance=provenance
     )
     if not captured.get("ok"):
         return _refuse(
-            captured.get("code", "SOURCE_UNRESOLVED"),
+            _source_refusal_code(captured, "SOURCE_UNRESOLVED"),
             "user request could not be captured durably: "
             + str(captured.get("detail") or captured),
         )
@@ -7328,7 +8048,7 @@ def user_request(
     if continued is not None:
         linked = intake.link_work_to(root, receipt, continued)
         if not linked.get("ok"):
-            return _refuse(linked.get("code", "SOURCE_UNRESOLVED"), str(linked))
+            return _refuse(_source_refusal_code(linked, "SOURCE_UNRESOLVED"), str(linked))
         return Result(
             True,
             "USER_REQUEST_RECORDED",
@@ -7348,13 +8068,7 @@ def user_request(
         # is not.
         return projected
     ticket_id = projected.data.get("ticket")
-    linked = intake.capture(
-        root,
-        body,
-        source_kind="user_instruction",
-        work=ticket_id,
-        request_provenance=provenance,
-    )
+    linked = intake.link_work_to(root, receipt, ticket_id)
     if not linked.get("ok"):
         return _refuse(
             linked.get("code", "ORPHAN_RECEIPT"),
@@ -7409,8 +8123,15 @@ def authority_capture(
             "INVALID_AUTHORITY_CAPTURE",
             "authority capture needs the exact UTF-8 capsule bytes from --file or --hex",
         )
-    problem = _ret.capsule_problem(text)
-    if problem and not _ret.authority_grants(text).problems:
+    from . import gate_decision, goal_authority
+
+    try:
+        _gate_capsule = goal_authority.parse_capsule(text)
+    except (ValueError, TypeError):
+        _gate_capsule = {}
+    is_gate = _gate_capsule.get("kind") == gate_decision.KIND
+    problem = gate_decision.capsule_problem(text) if is_gate else _ret.capsule_problem(text)
+    if not is_gate and problem and not _ret.authority_grants(text).problems:
         from . import handoff as _handoff
 
         handed = _handoff.handoff_grants(text)
@@ -7422,10 +8143,18 @@ def authority_capture(
             problem += "; or a claim handoff: " + _handoff.grammar_hint()
     if problem:
         return _refuse("INVALID_AUTHORITY_CAPTURE", problem)
+    from . import operator_task
+
+    provenance = operator_task.witness(text, root=root)
+    if "code" in provenance:
+        return _refuse(provenance["code"], provenance["detail"])
     digest = hashlib.sha256(text.encode("utf-8")).hexdigest()
     operation_id = "authority-capture-" + digest[:16]
     if dry_run:
-        existing = _intake.find_by_body(root, text)
+        existing = _intake.find_by_body(root, text, request_provenance=provenance)
+        if existing and existing.get("invalid"):
+            invalid = existing["invalid"]
+            return _refuse(_source_refusal_code(invalid, "SOURCE_UNRESOLVED"), str(invalid))
         return Result(
             True,
             "PLAN",
@@ -7440,11 +8169,6 @@ def authority_capture(
                 "targets": [".saipen/intake/active (source receipt)"],
             },
         )
-    from . import operator_task
-
-    provenance = operator_task.witness(text)
-    if "code" in provenance:
-        return _refuse(provenance["code"], provenance["detail"])
     captured = _intake.capture(
         root,
         text,
@@ -7454,10 +8178,11 @@ def authority_capture(
     )
     if not captured.get("ok"):
         return _refuse(
-            captured.get("code", "SOURCE_UNRESOLVED"),
+            _source_refusal_code(captured, "SOURCE_UNRESOLVED"),
             "operator-authority capsule could not be captured durably: "
             + str(captured.get("detail") or captured),
         )
+    operator_task.authority_for_receipt(root, captured["receipt"], existing_only=False)
     duplicate = str(captured.get("code") or "").startswith("SOURCE_DUPLICATE")
     return Result(
         True,
@@ -7465,7 +8190,8 @@ def authority_capture(
         message="operator-authority capsule captured as "
         + str(captured.get("receipt"))
         + (" (already present)" if duplicate else "")
-        + "; it authorizes retirement and projects no Work",
+        + ("; scoped gate authority, no Work projected" if is_gate
+           else "; it authorizes retirement and projects no Work"),
         data={
             "receipt": captured.get("receipt"),
             "source_sha256": captured.get("source_sha256") or digest,
@@ -7490,7 +8216,7 @@ def _project_user_request(
     """ONE journaled transaction: LOG + BOARD Work + recomputed routing."""
     from . import operator_task
 
-    authority = operator_task.authority_for_receipt(root, receipt)
+    authority = operator_task.authority_for_receipt(root, receipt, existing_only=False)
     priority = operator_task.projection_priority(priority, authority)
     op_id = "userreq-" + uuid4_hex()
     now, utc = _now(), _utc_iso()
@@ -7656,6 +8382,18 @@ def _project_user_request(
     if isinstance(plan, Result):
         return plan
     return apply_plan(root, plan)
+
+
+@_state_guard
+def cohort_reconcile(project_root, cohort_id, agent, *, sources, review_work, dry_run=False):
+    """Preserve old pending membership while adopting its reviewed final batch."""
+    from .cohort_reconcile import plan as reconcile_plan
+
+    root = Path(project_root)
+    planned = reconcile_plan(root, cohort_id, agent, sources, review_work)
+    if isinstance(planned, Result):
+        return planned
+    return _render_plan(planned) if dry_run else apply_plan(root, planned)
 
 
 def cohort_status(project_root: Path | str, cohort_id: str) -> Result:
@@ -7907,12 +8645,12 @@ def _state_only_plan(
     # and cannot reach (_SAITULS, 17.09.26). A repair is judged on its DELTA;
     # what it inherits is declared, exempted for this one operation, and still
     # reported everywhere else.
-    # `log_text` REPLACES the LOG this plan appends its event to. Exactly two
-    # callers supply it -- `normalize_log` and `quarantine_log_tail`, whose
-    # whole point is that the bytes on disk are not a legal ledger -- and the
-    # proposed text still passes
-    # `validate_texts` below, so the append-only contract is proved on the
-    # result rather than assumed from the input.
+    # `log_text` REPLACES the LOG this plan appends its event to. Three callers
+    # supply it: `normalize_log` and `quarantine_log_tail`, whose whole point is
+    # that the bytes on disk are not a legal ledger, and `seal_log`, which
+    # moves those bytes into the sealed history in the same plan. The proposed
+    # text still passes `validate_texts` below, so the append-only contract is
+    # proved on the result rather than assumed from the input.
     op_id = op_id or (operation + "-" + uuid4_hex())
     # ONE frozen read (second-wave P0): an operation that already read the
     # project for its authorization/derivation decision MUST hand that exact
@@ -8077,6 +8815,161 @@ def set_goal_intent(
     return apply_plan(root, plan)
 
 
+@_state_guard
+def authorize_goal_continuation(
+    project_root: Path | str, agent: str, text: str, dry_run: bool = False
+) -> Result:
+    """Prospective SRC-112 grant; preserve the original goal and all active Work."""
+    from . import goal_authority, intake, operator_task
+
+    root = Path(project_root)
+    snapshot = _read(root)
+    docs, current, board, _ = snapshot
+    if board["errors"]:
+        return _refuse(
+            "VALIDATION_FAILED", "BOARD parse error(s): " + "; ".join(board["errors"][:3])
+        )
+    guard = _active_claim_refusal(current, docs["board"].text_norm, agent)
+    if guard is not None:
+        return guard
+    dependencies = {}
+    try:
+        binding = goal_authority.current_binding(
+            root, current, docs["_history"].events, dependencies
+        )
+        if goal_authority.parse_capsule(text) != binding:
+            return _refuse(
+                "VALIDATION_FAILED", "authorization does not name this exact existing goal"
+            )
+        if current.get("goal_ingress") not in (None, binding["goal_ingress"]):
+            return _refuse("VALIDATION_FAILED", "the existing ingress is not bound to this goal")
+        if goal_authority.persistent(current):
+            old = goal_authority.transition_grant(
+                root, current, docs["_history"].events, dependencies
+            )
+            if (
+                old
+                and (old.get("receipt_metadata") or {})
+                .get("goal_authority_transition", {})
+                .get("authorization_sha256")
+                == hashlib.sha256(text.encode("utf-8")).hexdigest()
+            ):
+                return Result(
+                    True,
+                    "GOAL_AUTHORITY_ALREADY_SET",
+                    op_id=old["op_id"],
+                    data={"authority_source": current["authority_source"]},
+                )
+            return _refuse("VALIDATION_FAILED", "the goal already has a different persistent grant")
+    except (OSError, ValueError, KeyError, TypeError) as exc:
+        return _refuse("VALIDATION_FAILED", str(exc))
+    provenance = operator_task.witness(text, root=root)
+    if provenance.get("code"):
+        return _refuse(provenance["code"], provenance.get("detail", "invalid operator carrier"))
+    authorized = operator_task.authority_for_provenance(provenance, root=root)["goal_pivot"]
+    if not authorized:
+        # A refused APPLY may already have retired the transport after binding
+        # its Source. Reuse only that Source's independently live scoped proof;
+        # a fresh carrier can never promote an older model-supplied record.
+        digest = hashlib.sha256(text.encode("utf-8")).hexdigest()
+        for receipt, indexed in intake._read_index(root).get("active", {}).items():
+            if indexed.get("source_sha256") != digest:
+                continue
+            found = intake.read_body(root, receipt)
+            if not found.get("ok"):
+                return _refuse(_source_refusal_code(found, "SOURCE_UNRESOLVED"), str(found))
+            if operator_task.authority_for_receipt(
+                root, receipt, existing_only=True,
+            )["goal_pivot"]:
+                provenance = (found.get("meta") or {}).get("request_provenance") or {}
+                authorized = True
+                break
+    if not authorized:
+        return _refuse(
+            "VALIDATION_FAILED", "a fresh externally witnessed operator authorization is required"
+        )
+    if dry_run:
+        return Result(True, "GOAL_AUTHORITY_PREVIEW", data={"binding": binding})
+    captured = intake.capture(
+        root,
+        text,
+        source_kind="user_instruction",
+        request_provenance=provenance,
+        projection_policy=intake.PROJECTION_AUTHORITY_ONLY,
+    )
+    if not captured.get("ok"):
+        return _refuse(
+            captured.get("code", "VALIDATION_FAILED"), captured.get("detail", "capture refused")
+        )
+    receipt = captured["receipt"]
+    try:
+        operator_task.authority_for_receipt(root, receipt, existing_only=False)
+        source = goal_authority.source_proof(root, receipt, binding, dependencies)
+    except (OSError, ValueError, KeyError, TypeError) as exc:
+        return _refuse("VALIDATION_FAILED", str(exc))
+    # Capture is its own immutable ingress operation. Lifecycle APPLY still
+    # uses the original frozen snapshot/CAS; a concurrent writer cannot turn
+    # an authorization for that goal into a grant for a later one.
+    ingress = binding["goal_ingress"]
+    # Committed replay is resolved by the proven original receipt above.
+    # An unapplied PREPARED attempt may be ABORTED by Recovery; a later fresh
+    # authorization must not reuse that terminal operation identity.
+    op_id = "goal-authorize-" + provenance["operator_origin"]["nonce"]
+    metadata = {
+        "binding": binding,
+        "goal_ingress": ingress,
+        "authorization_receipt": receipt,
+        "authorization_sha256": source["source_sha256"],
+        "request_provenance": source["request_provenance"],
+    }
+    now, utc = _now(), _utc_iso()
+
+    def mutate(raw, event):
+        metadata["transition_event"] = event
+        return patch_state(
+            raw,
+            {
+                **goal_authority.grant_fields(binding["authority_source"]),
+                "goal_ingress": ingress,
+                "last_event": event,
+                "updated": utc,
+            },
+        )
+
+    plan = _state_only_plan(
+        root,
+        "goal_authorize",
+        agent,
+        mutate,
+        ("goal authority transition -- bounded->operator_persistent; "
+         f"{binding['authority_source']}; {receipt}"),
+        {
+            "ok": True,
+            "code": "GOAL_AUTHORIZED",
+            "authority_source": binding["authority_source"],
+            "authorization_receipt": receipt,
+        },
+        now,
+        utc,
+        {*goal_authority.FIELDS, "goal_ingress"},
+        read_once=snapshot,
+        op_id=op_id,
+        evidence_preconditions=dependencies,
+        receipt_metadata={"goal_authority_transition": metadata},
+    )
+    if isinstance(plan, Result):
+        return plan
+    from .host_authority_client import prepare_operator_goal
+
+    if not prepare_operator_goal(
+        provenance["operator_origin"], project=root, operation=op_id,
+        semantic_hash=plan.semantic_payload_hash,
+        grant={**goal_authority.grant_fields(binding["authority_source"]), "goal_ingress": ingress},
+        authorization=binding,
+    ):
+        return _refuse("VALIDATION_FAILED", "the existing goal origin reservation was refused")
+    return apply_plan(root, plan)
+
 def _validate_goal_objective(objective: str | None) -> tuple[str, str | None]:
     """W2-004: ONE shared goal-pivot objective validator.
 
@@ -8162,10 +9055,10 @@ def goal_entry(
     # lane; never demote an active ticket, pivot intent, or reset its budget.
     from . import operator_task
 
-    provenance = operator_task.witness(objective)
+    provenance = operator_task.witness(objective, root=project_root)
     if provenance.get("code"):
         return _refuse(provenance["code"], provenance.get("detail", "invalid goal carrier"))
-    authority = operator_task.authority_for_provenance(provenance)
+    authority = operator_task.authority_for_provenance(provenance, root=project_root)
     if not authority["goal_pivot"]:
         from .entry import start_work
 
@@ -8187,7 +9080,9 @@ def goal_entry(
 
     root = Path(project_root)
     now, utc = _now(), _utc_iso()
-    op_id = "goal-entry-" + uuid4_hex()
+    # A native event owns one stable operation, including a crash/recovery retry.
+    # A second delivery cannot choose another UUID and spend the same intent.
+    op_id = "goal-entry-" + provenance["operator_origin"]["nonce"]
 
     # ONE frozen read (second-wave P0 discipline).
     docs, state, board, log_tail = _read(root)
@@ -8331,6 +9226,9 @@ def goal_entry(
             session_binding=host_session_binding(root),
         )
 
+    from . import goal_authority
+
+    grant = goal_authority.grant_fields(f"E-{pivot_event}")
     # --- STATE: record Entry PLAN exactly once (wave 1) --------------------
     # CORE-009: when the current phase is a ticket-bearing phase (BUILD,
     # VERIFY, etc.), keep it -- goal_entry only changes the intent/task,
@@ -8357,6 +9255,7 @@ def goal_entry(
             "task": first_id if first_id is not None else "none",
             "next_action": next_action,
             "goal_ingress": ingress,
+            **grant,
             # CORE-009: only set transition_from when the phase actually changes
             "transition_from": (
                 (state.get("phase") or "DONE")
@@ -8394,6 +9293,7 @@ def goal_entry(
         "goal_tickets": 0,
         "goal_ingress": ingress,
         "ingress_authority": authority,
+        **grant,
     }
     plan = build_plan(
         "goal_entry",
@@ -8411,12 +9311,25 @@ def goal_entry(
         targets,
         expected,
         op_id=op_id,
+        receipt_metadata={"goal_authority": {
+            **grant, "goal_ingress": ingress, "request_provenance": provenance,
+        }},
     )
     if isinstance(plan, Result):
         return plan
     if dry_run:
         return _render_plan(plan)
-    return apply_plan(root, plan)
+    from .host_authority_client import prepare_operator_goal
+
+    if not prepare_operator_goal(
+        provenance["operator_origin"], project=root, operation=op_id,
+        semantic_hash=plan.semantic_payload_hash, grant={**grant, "goal_ingress": ingress},
+    ):
+        return _refuse("VALIDATION_FAILED", "the native goal origin reservation was refused")
+    result = apply_plan(root, plan)
+    if result.ok and provenance.get("ingress_id"):
+        operator_task.consume_host_ingress(root, provenance["ingress_id"], op_id)
+    return result
 
 
 @_state_guard
@@ -8995,7 +9908,7 @@ def quarantine_log_tail(project_root: Path | str, agent: str, dry_run: bool = Fa
     """
     root = Path(project_root)
     now, utc = _now(), _utc_iso()
-    read_once = _read(root, observe=TAIL_QUARANTINE_OBSERVABLE)
+    read_once = _read(root, observe=TYPED_HEAD_QUARANTINE_OBSERVABLE)
     docs, state, _board, _tail = read_once
     cut = docs.get("_foreign_tail")
     if cut is None:
@@ -9015,6 +9928,32 @@ def quarantine_log_tail(project_root: Path | str, agent: str, dry_run: bool = Fa
     if len(cut.claimed_ids) > 6:
         claimed += f" (+{len(cut.claimed_ids) - 6})"
     task = state.get("task")
+    message = (
+        f"LOG foreign tail quarantined: {len(cut.suffix_lines)} line(s) after the "
+        f"checkpointed tail at LOG.md:{cut.anchor_line} were never bound by a checkpoint "
+        f"(claimed ids {claimed}, all at or below the tail; {cut.non_event_lines} "
+        f"non-event line(s)). Original LOG preserved at {evidence} sha256:{digest[:16]}"
+    )
+    if cut.journal_floor is not None:
+        # T-1679: a typed head, cut at the journal floor. Its lines leave the
+        # LOG, so the rows they closed are named HERE -- this event is what the
+        # reconciliation that follows reads to reopen them. The event carries
+        # no ticket tag: STATE.task was typed by the same hand.
+        from . import lifecycle_authority as _lifecycle_authority
+        from .log import parse_log_line as _parse_cut_line
+
+        cut_events = [
+            parsed for parsed in map(_parse_cut_line, cut.suffix_lines) if parsed is not None
+        ]
+        rows = _lifecycle_authority.typed_rows(
+            cut_events, _board, cut.snapshot.events, cut.journal_floor
+        )
+        message = (
+            _lifecycle_authority.quarantine_note(cut.journal_floor, len(cut.suffix_lines), rows)
+            + f". Claimed ids {claimed}; {cut.non_event_lines} non-event line(s). "
+            f"Original LOG preserved at {evidence} sha256:{digest[:16]}"
+        )
+        task = None
 
     def mutate(text: str, event: int) -> str:
         return patch_state(text, {"last_event": event, "updated": utc, "agent": agent})
@@ -9024,10 +9963,7 @@ def quarantine_log_tail(project_root: Path | str, agent: str, dry_run: bool = Fa
         "quarantine_log_tail",
         agent,
         mutate,
-        f"LOG foreign tail quarantined: {len(cut.suffix_lines)} line(s) after the "
-        f"checkpointed tail at LOG.md:{cut.anchor_line} were never bound by a checkpoint "
-        f"(claimed ids {claimed}, all at or below the tail; {cut.non_event_lines} "
-        f"non-event line(s)). Original LOG preserved at {evidence} sha256:{digest[:16]}",
+        message,
         {
             "ok": True,
             "code": "LOG_TAIL_QUARANTINED",
@@ -9037,6 +9973,7 @@ def quarantine_log_tail(project_root: Path | str, agent: str, dry_run: bool = Fa
             "non_event_lines": cut.non_event_lines,
             "evidence_path": evidence,
             "evidence_sha256": digest,
+            "journal_floor": cut.journal_floor,
         },
         now,
         utc,
@@ -9050,6 +9987,473 @@ def quarantine_log_tail(project_root: Path | str, agent: str, dry_run: bool = Fa
     )
     if isinstance(plan, Result):
         return plan
+    if dry_run:
+        return _render_plan(plan)
+    return apply_plan(root, plan)
+
+
+def _sealed_segment_bindings(root: Path, docs: dict) -> dict[str, str] | None:
+    """The plan's `.saipen/logs` tree binding restated as one token per file.
+
+    Every plan binds the sealed history as ONE tree digest, and recovery
+    rechecks every read-only dependency before it rolls a partly applied
+    operation forward. A seal WRITES into that tree, so its own first target
+    would move the digest it was planned against and recovery would refuse to
+    finish a seal it had interrupted. Per-file tokens say the same thing about
+    every sealed byte that already exists and stay true while the new segment
+    lands beside them.
+
+    Returns None when the files read here are not the tree the snapshot was
+    validated against: the tokens must describe the history the plan was
+    decided on, never a later one.
+    """
+    from .journal import hash_tree_dependency
+
+    seen: dict[Path, bytes] = {}
+
+    def _read_once(candidate) -> bytes:
+        path = Path(candidate)
+        if path not in seen:
+            seen[path] = path.read_bytes()
+        return seen[path]
+
+    if hash_tree_dependency(root / ".saipen" / "logs", read_file=_read_once) != docs.get(
+        "_logs_digest"
+    ):
+        return None
+    return {path.relative_to(root).as_posix(): hash_bytes(raw) for path, raw in seen.items()}
+
+
+@_state_guard
+def seal_log(project_root: Path | str, agent: str, dry_run: bool = False) -> Result:
+    """Move the active LOG, verbatim, into the next sealed segment (T-1640).
+
+    CORE states a cap for the active LOG and nothing applied it: `.saipen/LOG.md`
+    and `.saipen/logs/` are protected canonical namespaces, so the agent the
+    validator told to "seal it" was refused by the guard, and no engine verb
+    did it instead. The active tail of this repository stood at 6113 lines /
+    2 MB against a stated ~300 / ~64 KB, reported on every validator run.
+
+    One journaled operation, three targets, in this order:
+
+      1. the next `.saipen/logs/LOG-NNN.md` -- the active LOG's exact bytes;
+      2. `.saipen/LOG.md` -- its own heading and this operation's DEC, whose
+         parent is the last sealed event, so the parent chain crosses the
+         segment boundary unbroken and the active tail is never eventless;
+      3. STATE `last_event`.
+
+    The sealed copy lands FIRST: at no instant does the history exist only as
+    staged journal bytes. A crash after it leaves the events in both files,
+    and recovery rolls the two remaining targets forward.
+
+    It runs in CLEAN with `## DOING` empty, the moment `phases/clean.md` gives
+    it. A seal in the middle of a ticket would take that ticket's own record
+    out of the tail a successor reads to resume it. It is ordinary work, not a
+    repair: a project that fails the write gate is refused, so sealing cannot
+    turn a defect of the active LOG into immutable history.
+    """
+    from .log import (
+        ACTIVE_LOG_MAX_BYTES,
+        ACTIVE_LOG_MAX_LINES,
+        next_segment_rel,
+        parse_log_line,
+        seal_due,
+        snapshot_contract_errors,
+    )
+
+    root = Path(project_root)
+    now, utc = _now(), _utc_iso()
+    read_once = _read(root)
+    docs, state, board, _tail = read_once
+    phase = state.get("phase")
+    if phase != "CLEAN":
+        return _refuse(
+            "ILLEGAL_PHASE",
+            f"the active LOG is sealed in CLEAN (phases/clean.md step 4); actual phase {phase}",
+            phase=phase,
+            next_action="saipen transition CLEAN",
+        )
+    log_doc = docs["log"]
+    sealed_bytes = log_doc.bom + log_doc.text.encode(log_doc.encoding)
+    lines = log_doc.text_norm.splitlines()
+    events = [parsed for parsed in map(parse_log_line, lines) if parsed is not None]
+    # "Not due" is answered before every gate below: entering CLEAN reports a
+    # refused step, and a project with nothing to seal has no step to refuse.
+    if not seal_due(len(lines), len(sealed_bytes)) or not events:
+        return _refuse(
+            "VALIDATION_FAILED",
+            f"the active LOG is {len(lines)} lines / {len(sealed_bytes)} bytes with "
+            f"{len(events)} event(s), not past the {ACTIVE_LOG_MAX_LINES} line / "
+            f"{ACTIVE_LOG_MAX_BYTES} byte cap; nothing is sealed below it",
+            due=False,
+            lines=len(lines),
+            bytes=len(sealed_bytes),
+        )
+    doing = [t["id"] for t in board["tickets"].values() if t["section"] == "## DOING"]
+    if doing:
+        return _refuse(
+            "VALIDATION_FAILED",
+            f"## DOING holds {', '.join(doing)}; CLEAN is not a ticket-bearing phase and a "
+            "seal would take in-flight Work's record out of the active tail",
+            phase=phase,
+        )
+    # Every other operation APPENDS, so a defect of the active LOG is still in
+    # the text it proposes and the write gate refuses it there. A seal proposes
+    # a LOG those lines have left: the gate would be shown a clean tail, the
+    # defect would land in a file nobody may edit, and the post-write verifier
+    # would only find it after the bytes moved. So the gate is put to the
+    # ledger AS IT STANDS -- the whole of it, which `_read` proves only for a
+    # project bound to the running home.
+    standing = snapshot_contract_errors(docs["_history"]) + validate_texts(
+        docs["state"].text_norm,
+        docs["board"].text_norm,
+        log_doc.text_norm,
+        current_agent=agent,
+        sealed_events=docs["_history"],
+    )
+    if standing:
+        return _refuse(
+            "VALIDATION_FAILED",
+            "the ledger as it stands fails the write gate, and a seal would make that "
+            "immutable history: " + "; ".join(standing[:4]),
+        )
+    if hash_bytes(sealed_bytes) != log_doc.raw_hash:
+        return _refuse(
+            "VALIDATION_FAILED",
+            "the active LOG does not re-encode to the bytes that were read; a seal is a "
+            "verbatim move and refuses to write anything else",
+        )
+    bindings = _sealed_segment_bindings(root, docs)
+    if bindings is None:
+        return _refuse(
+            "STALE_STATE",
+            "the sealed history under .saipen/logs changed while the seal was planned",
+        )
+    segment = next_segment_rel(root)
+    if segment in bindings or (root / segment).exists():
+        return _refuse("CONFLICT", f"{segment} already exists; a sealed segment is never rewritten")
+    heading: list[str] = []
+    for line in lines:
+        if line.strip() and not line.lstrip().startswith("#"):
+            break
+        heading.append(line)
+    while heading and not heading[-1].strip():
+        heading.pop()
+    digest = hashlib.sha256(sealed_bytes).hexdigest()
+    first, last = events[0]["event"], events[-1]["event"]
+    op_id = "seal-log-" + uuid4_hex()
+
+    def mutate(text: str, event: int) -> str:
+        return patch_state(text, {"last_event": event, "updated": utc, "agent": agent})
+
+    plan = _state_only_plan(
+        root,
+        "seal_log",
+        agent,
+        mutate,
+        f"log sealed -- E-{first}..E-{last} ({len(events)} events, {len(lines)} lines, "
+        f"{len(sealed_bytes)} bytes) moved verbatim into {segment} sha256:{digest[:16]}; "
+        "the active tail continues here",
+        {
+            "ok": True,
+            "code": "LOG_SEALED",
+            "segment": segment,
+            "sealed_from": f"E-{first}",
+            "sealed_to": f"E-{last}",
+            "sealed_events": len(events),
+            "sealed_lines": len(lines),
+            "sealed_bytes": len(sealed_bytes),
+            "sealed_sha256": digest,
+        },
+        now,
+        utc,
+        {"last_event", "updated", "agent"},
+        extra_targets=[TargetPlan(segment, "generic", sealed_bytes, "", hash_bytes(sealed_bytes))],
+        op_id=op_id,
+        read_once=read_once,
+        log_text="\n".join(heading or ["# Log"]),
+    )
+    if isinstance(plan, Result):
+        return plan
+    # Two departures from the shared plan shape, both forced by WHERE the extra
+    # target lives. Order: the sealed copy must be durable before the active
+    # LOG is shortened. Binding: see `_sealed_segment_bindings`.
+    preconditions = {k: v for k, v in plan.preconditions.items() if k != ".saipen/logs"}
+    preconditions.update(bindings)
+    preconditions[segment] = ""
+    plan = dataclasses.replace(
+        plan,
+        targets=(
+            *(t for t in plan.targets if t.path == segment),
+            *(t for t in plan.targets if t.path != segment),
+        ),
+        preconditions=preconditions,
+    )
+    if dry_run:
+        return _render_plan(plan)
+    return apply_plan(root, plan)
+
+
+#: How many operation ids one compaction answer lists by name; the counts are whole.
+_COMPACTION_ID_SHOWN = 20
+
+
+def _journal_debt(root: Path) -> dict:
+    """What bounded compaction can still act on: terminal or live operations in
+    the journal's working directory, queued cleanup markers, and the staged
+    bytes both hold. Bounded by those two places, never the settled ledger."""
+    from .journal import CLEANUP_QUEUE_DIR, OPS_DIR, SETTLED_DIR
+
+    ops = [p for p in (root / OPS_DIR).iterdir() if p.is_dir()] if (root / OPS_DIR).is_dir() else []
+    queue = root / CLEANUP_QUEUE_DIR
+    queued = [p.name for p in queue.iterdir() if p.is_file()] if queue.is_dir() else []
+    staged = 0
+    for entry in [*ops, *((root / SETTLED_DIR / name) for name in queued)]:
+        try:
+            staged += sum(p.stat().st_size for p in entry.glob("*.staged") if p.is_file())
+        except OSError:
+            continue
+    return {"ops": len(ops), "queued": len(queued), "staged_bytes": staged}
+
+
+def compact_journal(project_root: Path | str, agent: str, dry_run: bool = False) -> Result:
+    """CLEAN step 4: bounded journal compaction, run and reported (T-1667).
+
+    `journal.compact_committed` under the project writer lock: terminal
+    operations still in the working directory move to the settled ledger with
+    their staged payloads dropped, and queued post-settlement cleanup is
+    retried -- after the one sweep per checkout that queues staged bytes older
+    than the queue (`journal.enqueue_legacy_staged`). Only COMMITTED/RESOLVED
+    operations lose staged bytes; every other status is skipped and keeps all
+    of its evidence, and a settled record keeps its tombstone identity,
+    status, hashes and time. The answer names what was dropped and what was
+    left. Nothing to act on is `due: False`.
+    """
+    from .journal import LEGACY_SWEEP_MARKER, compact_committed, enqueue_legacy_staged
+    from .lock import project_writer_lock
+
+    root = Path(project_root)
+    before = _journal_debt(root)
+    swept = (root / LEGACY_SWEEP_MARKER).exists()
+    if not before["ops"] and not before["queued"] and swept:
+        return _refuse(
+            "VALIDATION_FAILED",
+            "the operation journal holds no unsettled operation and no queued cleanup; "
+            "nothing is compacted",
+            due=False,
+            before=before,
+        )
+    if dry_run:
+        return Result(
+            True, "DRY_RUN", data={"due": True, "before": before, "legacy_sweep": not swept}
+        )
+    try:
+        with project_writer_lock(root):
+            legacy = enqueue_legacy_staged(root)
+            before = _journal_debt(root)
+            outcome = compact_committed(root)
+            after = _journal_debt(root)
+    except PermissionError as exc:
+        from .lock import writer_busy_payload
+
+        busy = writer_busy_payload(exc)
+        return _refuse(
+            "WRITER_BUSY",
+            busy["detail"],
+            remediation=busy["remediation"],
+            **({"holder": busy["holder"]} if "holder" in busy else {}),
+        )
+    if not outcome.get("ok"):
+        return _refuse(
+            str(outcome.get("code") or "CORRUPT_JOURNAL"),
+            str(outcome.get("detail") or "journal compaction refused"),
+            before=before,
+        )
+    compacted = list(outcome.get("compacted") or [])
+    skipped = list(outcome.get("skipped") or [])
+    return Result(
+        True,
+        "JOURNAL_COMPACTED",
+        data={
+            "due": True,
+            "compacted_count": len(compacted),
+            "compacted": compacted[:_COMPACTION_ID_SHOWN],
+            "skipped_count": len(skipped),
+            "skipped": skipped[:_COMPACTION_ID_SHOWN],
+            "legacy_queued": legacy[:_COMPACTION_ID_SHOWN],
+            "before": before,
+            "after": after,
+        },
+        message=(
+            f"compacted {len(compacted)} settled operation(s), dropped "
+            f"{before['staged_bytes'] - after['staged_bytes']} staged byte(s); left "
+            f"{after['ops']} operation(s) and {after['queued']} queued cleanup(s)"
+        ),
+    )
+
+
+@_state_guard
+def scrub_board(project_root: Path | str, agent: str, dry_run: bool = False) -> Result:
+    """Prune the closed BOARD records nothing pins, keeping their bytes (T-1640).
+
+    The second half of the same defect `seal_log` closes: `phases/clean.md`
+    step 1 and the validator's `board-soft-cap` finding both told an agent to
+    scrub `## DONE`, the guard refuses an agent's write to the BOARD, and no
+    engine verb pruned a record. `board_scrub` owns WHICH records may go; this
+    owns the move.
+
+    One journaled plan: the pruned rows land verbatim under
+    `SCRUB_EVIDENCE_ROOT` FIRST, then the LOG gains the DEC that names that
+    copy and its digest, then the BOARD loses exactly those lines and nothing
+    else, then STATE. The receipts the retention rule read are bound as a
+    dependency, so a receipt that started naming a pruned record between PLAN
+    and APPLY refuses the scrub instead of orphaning itself.
+    """
+    from .intake import active_receipt_works
+    from .journal import hash_tree_dependency
+
+    root = Path(project_root)
+    now, utc = _now(), _utc_iso()
+    intake_binding = hash_tree_dependency(root / ".saipen" / "intake")
+    docs, state, board, log_tail = _read(root)
+    phase = state.get("phase")
+    if phase != "CLEAN":
+        return _refuse(
+            "ILLEGAL_PHASE",
+            f"the BOARD is scrubbed in CLEAN (phases/clean.md step 1); actual phase {phase}",
+            phase=phase,
+            next_action="saipen transition CLEAN",
+        )
+    if board["errors"]:
+        return _refuse(
+            "VALIDATION_FAILED", "BOARD parse error(s): " + "; ".join(board["errors"][:3])
+        )
+    tickets = board["tickets"]
+    try:
+        active_receipts, receipt_works = active_receipt_works(root)
+    except (OSError, ValueError) as exc:
+        return _refuse(
+            "VALIDATION_FAILED",
+            f"the source receipts cannot be read, so what they hold is unknown: {exc}",
+        )
+    if hash_tree_dependency(root / ".saipen" / "intake") != intake_binding:
+        return _refuse("STALE_STATE", "the source intake changed while the scrub was planned")
+    selection = board_scrub.select(
+        tickets, docs["_history"].events, active_receipts, receipt_works
+    )
+    if not selection.due:
+        return _refuse(
+            "VALIDATION_FAILED",
+            f"{len(selection.pruned)} closed record(s) / {selection.pruned_bytes} bytes are "
+            f"prunable, not past the {board_scrub.SCRUB_DUE_BYTES} byte cap; nothing is scrubbed "
+            "below it",
+            due=False,
+            prunable_records=len(selection.pruned),
+            prunable_bytes=selection.pruned_bytes,
+        )
+    doing = [t["id"] for t in tickets.values() if t["section"] == "## DOING"]
+    if doing:
+        return _refuse(
+            "VALIDATION_FAILED",
+            f"## DOING holds {', '.join(doing)}; CLEAN is not a ticket-bearing phase",
+            phase=phase,
+        )
+    board_doc = docs["board"]
+    if hash_bytes(board_doc.bom + board_doc.text.encode(board_doc.encoding)) != board_doc.raw_hash:
+        return _refuse(
+            "VALIDATION_FAILED",
+            "the BOARD does not re-encode to the bytes that were read; a scrub removes whole "
+            "physical lines and refuses to rewrite anything else",
+        )
+    # Built from the PHYSICAL lines, not from re-rendered records: the new
+    # BOARD is the old one minus exactly these lines, byte for byte, and the
+    # evidence file is exactly those lines.
+    physical = board_doc.text.splitlines(keepends=True)
+    drop = {tickets[tid]["line_no"] for tid in selection.pruned}
+    pruned_bytes = "".join(physical[n - 1] for n in sorted(drop)).encode(board_doc.encoding)
+    new_board_text = "".join(line for n, line in enumerate(physical, 1) if n not in drop)
+    new_board_bytes = board_doc.bom + new_board_text.encode(board_doc.encoding)
+    new_board_norm = new_board_text.replace("\r\n", "\n").replace("\r", "\n")
+    digest = hashlib.sha256(pruned_bytes).hexdigest()
+    op_id = "board-scrub-" + uuid4_hex()
+    evidence = f"{SCRUB_EVIDENCE_ROOT}/{op_id}/BOARD.md"
+    kept_by = selection.kept_by()
+    event, line = _event_line(
+        docs,
+        log_tail,
+        "DEC",
+        None,
+        agent,
+        _actor_provenance(
+            state,
+            agent,
+            f"board scrubbed -- {len(selection.pruned)} closed record(s) nothing pins "
+            f"({len(pruned_bytes)} bytes) moved verbatim into {evidence} sha256:{digest[:16]}; "
+            f"{len(selection.kept)} closed record(s) stay ("
+            + (", ".join(f"{guard} {count}" for guard, count in kept_by.items()) or "none")
+            + ")",
+        ),
+        now,
+        op_id,
+    )
+    new_log = docs["log"].text_norm.rstrip("\n") + "\n" + line + "\n"
+    new_state = patch_state(
+        docs["state"].text_norm,
+        {
+            "last_event": event,
+            "updated": utc,
+            "agent": _seat_agent(state, board_doc.text_norm, agent),
+        },
+    )
+    errors = validate_texts(
+        new_state,
+        new_board_norm,
+        new_log,
+        current_agent=agent,
+        sealed_events=docs["_history"],
+    )
+    if errors:
+        return _refuse(
+            "VALIDATION_FAILED",
+            "proposed BOARD scrub fails fast validation: " + "; ".join(errors[:5]),
+        )
+    preconditions = _docs_preconditions(docs, "state", "board", "log")
+    preconditions[".saipen/intake"] = intake_binding
+    preconditions[evidence] = ""
+    plan = build_plan(
+        "scrub_board",
+        agent,
+        _identity(root),
+        {"operation": "scrub_board", "agent": agent},
+        preconditions,
+        [
+            TargetPlan(evidence, "generic", pruned_bytes, "", hash_bytes(pruned_bytes)),
+            *_log_targets(docs, new_log),
+            TargetPlan(
+                ".saipen/BOARD.md",
+                "board",
+                new_board_bytes,
+                board_doc.raw_hash,
+                hash_bytes(new_board_bytes),
+            ),
+            _target(docs["state"], ".saipen/STATE.md", "state", new_state),
+        ],
+        {
+            "ok": True,
+            "code": "BOARD_SCRUBBED",
+            "event_id": f"E-{event}",
+            "pruned": list(selection.pruned),
+            "pruned_records": len(selection.pruned),
+            "pruned_bytes": len(pruned_bytes),
+            "kept_closed": len(selection.kept),
+            "kept_by": kept_by,
+            "board_bytes_before": len(new_board_bytes) + len(pruned_bytes),
+            "board_bytes_after": len(new_board_bytes),
+            "evidence_path": evidence,
+            "evidence_sha256": digest,
+        },
+        op_id=op_id,
+    )
     if dry_run:
         return _render_plan(plan)
     return apply_plan(root, plan)
@@ -9243,41 +10647,35 @@ def rebind_home_auto(
     *,
     engine_root: Path | str | None = None,
 ) -> Result:
-    """Converge a DEAD persisted home onto an already-PROVEN canonical runtime.
-
-    The zero-manual repair for the contradiction this operation exists to end
-    (T-1425 REPAIR 1): bootstrap proves a canonical runtime (the executing
-    engine, a verified installed carrier, a verified canonical bridge), the
-    persisted `STATE.saipen_home` names a previous host/OS and does not resolve
-    here, and admission refuses `HOME_REQUIRED`. Operator-directed
-    `rebind-home <candidate>` already repaired that, but required the human to
-    type a path SAIPEN had already proven.
-
-    Semantics, one deterministic rule:
-
-        dead persisted home + no proven replacement  -> HOME_REQUIRED (refuse)
-        dead persisted home + proven replacement     -> journal the pointer
-                                                        (HOST_BINDING_CONVERGED)
-        live persisted home                          -> HOME_ALREADY_BOUND,
-                                                        zero writes (idempotent)
-
-    Candidates come only from `host_bootstrap.replacement_candidates` (SAIPEN-
-    controlled sources, never a disk scan), and each one is proved with the
-    SAME `_candidate_home_errors` the explicit rebind uses (readable VERSION,
-    compatible major, core BOOT layout, required protocol files). No candidate
-    is adopted on discovery alone. `engine_root` is a fixture-only override that
-    models a host whose executing engine is not a usable install.
-    """
+    """Converge a DEAD or DIVERGENT persisted home onto a proven canonical runtime."""
     from . import host_bootstrap
-    from .state import persisted_home_error
+    from .state import (
+        CODE_HOME_INACCESSIBLE,
+        home_refusal,
+    )
 
     root = Path(project_root)
     read_once = _read(root, allow_dead_home=True)
     _docs, state, _board, _tail = read_once
 
     current_home = str(state.get("saipen_home") or "").strip()
-    current_problem = persisted_home_error(state.get("saipen_home"))
-    if current_home and current_problem is None:
+    refused = home_refusal(state.get("saipen_home"))
+    current_problem = refused[1] if refused else None
+    if refused is not None and refused[0] == CODE_HOME_INACCESSIBLE:
+        # Unreadable is not dead: adopting the engine that happens to be
+        # running would move the project onto whatever copy this account
+        # holds, for every account (T-1647).
+        return _refuse(CODE_HOME_INACCESSIBLE, current_problem)
+    try:
+        current_posix = Path(current_home).expanduser().resolve().as_posix()
+    except Exception:
+        current_posix = current_home
+
+    from .install_identity import diagnose_install_mismatch
+
+    diag = diagnose_install_mismatch(state.get("saipen_home"), running_home_path=engine_root)
+
+    if current_home and current_problem is None and not diag["is_blocking"]:
         return Result(
             ok=True,
             code="HOME_ALREADY_BOUND",
@@ -9299,8 +10697,8 @@ def rebind_home_auto(
         except Exception:  # pragma: no cover - defensive: unrepresentable path
             resolved = raw
         record = {"source": candidate.get("source"), "path": resolved, "ok": False}
-        if not raw or resolved == current_home:
-            record["why"] = "candidate is the dead persisted pointer itself"
+        if not raw or resolved == current_posix:
+            record["why"] = "candidate is the persisted pointer itself"
             tried.append(record)
             continue
         errors = _candidate_home_errors(root, state, resolved)
@@ -9363,6 +10761,11 @@ def rebind_saipen_home(
     # ONE frozen snapshot for the whole rebind operation (second-wave P0).
     read_once = _read(root, allow_dead_home=True)
     _docs, state, _board, _tail = read_once
+    from .state import CODE_HOME_INACCESSIBLE, HOME_INACCESSIBLE, persisted_home_access
+
+    access, access_reason = persisted_home_access(state.get("saipen_home"))
+    if access == HOME_INACCESSIBLE:
+        return _refuse(CODE_HOME_INACCESSIBLE, str(access_reason))
     errors = _candidate_home_errors(root, state, resolved_home)
     if errors:
         return _refuse(
@@ -9568,6 +10971,7 @@ def handover_agent(
 _SEAT_ID_RE = re.compile(r"[A-Za-z0-9][A-Za-z0-9._:-]{0,63}")
 
 
+@_state_guard
 def handoff_claim(
     project_root: Path | str,
     actor: str,
@@ -9664,7 +11068,10 @@ GOAL_TICKET_CAP = 20
 
 
 @_state_guard
-def reauthorize_valve(project_root: Path | str, agent: str, dry_run: bool = False) -> Result:
+def reauthorize_valve(
+    project_root: Path | str, agent: str, dry_run: bool = False,
+    *, operator_authority_source: str | None = None,
+) -> Result:
     """Conditional safety-valve reauthorization: reset BOTH counters to 0 only
     when a counter has tripped its cap. Never grants a fresh budget on a run
     that did not trip the valve."""
@@ -9682,6 +11089,48 @@ def reauthorize_valve(project_root: Path | str, agent: str, dry_run: bool = Fals
             goal_tickets=tickets,
         )
 
+    from . import goal_authority
+    from .state import binding_brake, parse_wait
+
+    brake = binding_brake(state)
+    other_brake = bool(brake and not (
+        brake[0] == "wait" and parse_wait(state.get("next_action")) == "safety valve"
+    ))
+    authority = goal_authority.reset_authority(root, state, operator_authority_source)
+    if authority["mode"] == "checkpoint" and other_brake:
+        return _refuse("RECONCILE_REAUTH_REQUIRED", "binding brake remains: " + brake[1])
+    if authority["mode"] == "wait":
+        wait = (f"WAIT: safety valve reached ({waves} waves / {tickets} tickets) "
+                "-- run 'cc' to continue")
+        return _refuse(
+            "RECONCILE_REAUTH_REQUIRED", authority["detail"] + "; " + wait,
+            next_action=wait, operator_action_due=True,
+        )
+
+    checkpoint_review = None
+    if authority["mode"] == "checkpoint":
+        from .reconcile import _derived_goal_counters
+        from .state import goal_valve_wait_is_proven
+
+        counts = _derived_goal_counters(_docs["_history"].events)
+        if not goal_valve_wait_is_proven(state, counts):
+            return _refuse(
+                "VALIDATION_FAILED",
+                "checkpoint budget WAIT is not proved by canonical counter history",
+            )
+        guard = _active_claim_refusal(state, _docs["board"].text_norm, agent)
+        if guard is not None:
+            return guard
+        checkpoint_review = {
+            "authority_source": authority["source"],
+            "based_on_event": state["last_event"],
+            "task": state.get("task"), "phase": state.get("phase"),
+            "old_counters": counts,
+            "new_counters": {"goal_waves": 0, "goal_tickets": 0},
+            "binding_brakes": "passed", "ownership": "passed",
+            "counter_history": "verified", "authority": "verified",
+        }
+
     def mutate(text: str, event: int) -> str:
         # The persisted safety-valve WAIT describes the pre-reset
         # authorization state. Keeping it after reauthorization would make
@@ -9696,7 +11145,12 @@ def reauthorize_valve(project_root: Path | str, agent: str, dry_run: bool = Fals
             {
                 "goal_waves": 0,
                 "goal_tickets": 0,
-                "next_action": "saipen continue",
+                **({
+                    "continuation_authority": "operator_required",
+                    "authority_source": f"E-{event}",
+                    "authority_until": "budget", "safety_valve_mode": "hard_wait",
+                } if authority["mode"] == "reauthorize" else {}),
+                "next_action": state.get("next_action") if other_brake else "saipen continue",
                 "last_event": event,
                 "updated": utc,
                 "agent": agent,
@@ -9724,12 +11178,17 @@ def reauthorize_valve(project_root: Path | str, agent: str, dry_run: bool = Fals
         "valve",
         agent,
         mutate,
-        f"goal reauthorized -- goal_waves {waves}->0, goal_tickets {tickets}->0",
+        (f"goal checkpoint -- goal_waves {waves}->0, goal_tickets {tickets}->0; "
+         f"authority_source {authority['source']}; safety review: binding brakes preserved"
+         if authority["mode"] == "checkpoint" else
+         f"goal reauthorized -- goal_waves {waves}->0, goal_tickets {tickets}->0; "
+         f"authority_source {authority['source']}"),
         {"ok": True, "code": "VALVE_REAUTHORIZED"},
         now,
         utc,
         {"goal_waves", "goal_tickets", "next_action"},
         read_once=(_docs, state, _board, _log_tail),
+        receipt_metadata=({"goal_checkpoint": checkpoint_review} if checkpoint_review else None),
     )
     if isinstance(plan, Result):
         return plan
@@ -9903,6 +11362,9 @@ def stop_checkpoint(
             "digest_lines": digest_lines,
             "delivery": delivery,
             "response_record": response_record,
+            "stop_lifecycle": "STOP_TRANSACTION_COMPLETED",
+            "handback_semantics": "HANDBACK_ONLY",
+            "mutation_authorized": False,
         },
         op_id=op_id,
     )
@@ -10544,6 +12006,7 @@ def _plan_crew_closure(
     utc: str,
     digest_text: str | None = None,
     prefix_run: str | None = None,
+    published: bool = True,
 ) -> OperationPlan | Result:
     """PLAN the terminal CREW release closure (T-1003 sweep, hostile finding
     3/5/16). The ordinary release executor closes an ordinary ticket through
@@ -10579,7 +12042,12 @@ def _plan_crew_closure(
             docs,
             run_event,
             "DEC",
-            "crew terminal release closure -- all deferred tickets shipped",
+            # T-1746: a local closure publishes nothing and says so; "shipped"
+            # under a skipped-publish RUN line read as a publication.
+            "crew terminal release closure -- all deferred tickets shipped"
+            if published
+            else "crew terminal closure -- all deferred tickets closed locally, "
+            "nothing published",
             ticket=None,
             agent=agent,
             now=now,

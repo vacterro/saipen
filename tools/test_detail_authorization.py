@@ -10,7 +10,9 @@ SUBJECT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(SUBJECT / "tools"))
 from saipen_engine import response_surface as RS, chat_style as CS  # noqa: E402
 from saipen_engine.operator_task import witness  # noqa: E402
-from test_fixture_support import operator_request_env  # noqa: E402
+from test_t1363_zero_manual_entry import project  # noqa: E402
+from test_operator_origin_support import native_operator  # noqa: E402
+from test_hermetic_env import isolate_host_session  # noqa: E402
 
 CONTRACT = CS.compile_style_contract((SUBJECT / "saipen/STYLE.md").read_text(encoding="utf-8"))
 LONG_CHAT = "\n".join("Kontroll tehtud." for _ in range(CONTRACT.line_budget + 4))
@@ -50,6 +52,10 @@ UNAUTHORIZED = (
 )
 
 
+def setUpModule():
+    isolate_host_session()
+
+
 class DetailAuthorizationRegression(unittest.TestCase):
     def test_incidental_negated_and_quoted_requests_never_grant(self):
         for request in UNAUTHORIZED:
@@ -80,14 +86,17 @@ class DetailAuthorizationRegression(unittest.TestCase):
                 mode = RS.detail_mode_for_request(request)
                 self.assertEqual(mode, expected)
                 self.assertEqual(RS.response_errors(SURFACE, detail_mode=mode), [])
-                klass, errors = RS.classify_final_response(
-                    LONG_CHAT,
-                    operational_turn=False,
-                    style_contract=CONTRACT,
-                    detail_mode=mode,
-                    human_request=request,
-                    request_authority=witness(request, env=operator_request_env(request)),
-                )
+                root = project(self)
+                with native_operator(root, request, action="report"):
+                    klass, errors = RS.classify_final_response(
+                        LONG_CHAT,
+                        operational_turn=False,
+                        style_contract=CONTRACT,
+                        detail_mode=mode,
+                        human_request=request,
+                        request_authority=witness(request, root=root),
+                        diagnosis_root=root,
+                    )
                 self.assertEqual((klass, errors), (RS.CLASS_ORDINARY_CHAT, []))
 
     def test_unknown_context_cannot_authorize_chat_or_details(self):

@@ -95,19 +95,67 @@ def closure_readiness(root: Path | str, ticket_id: str) -> dict:
                 "INCOMPLETE_TICKET",
                 _evidence_route(ticket_id),
             )
-        # A derived actionable clause is settled by its own receipt's dispense
-        # command -- name the FIRST such clause, the exact one that will still
-        # be unresolved after the request clause discharges.
+        # T-1789: a clause another Work owns is not this Work's to dispense.
+        # Routing a child to `source disp` on its parent's open clause invited
+        # a fabricated disposition; the agent handed the seat back instead, the
+        # child returned to TODO and the router picked it again (T-1762,
+        # T-1770). When every open clause belongs elsewhere the child waits on
+        # that owner; otherwise name the first clause this Work owns.
+        owners = _foreign_owners(root, ticket_id, receipt, non_request)
+        if owners:
+            count = len(non_request)
+            clauses = " ".join(non_request[:3])
+            if count > 3:
+                clauses += f" +{count - 3} more"
+            owner = owners[0]
+            if len(owners) > 1:
+                owner += f" (+{len(owners) - 1} other owners)"
+            return _not_ready(
+                ticket_id,
+                receipt,
+                unresolved,
+                code,
+                f'saipen ticket block {ticket_id} "ACTIVE_DEPENDENCY:{owners[0]} -- '
+                f'{receipt}: {count} open clause{"s" if count != 1 else ""} '
+                f'({clauses}) owner: {owner}"',
+            )
+        own = _own_clauses(root, ticket_id, receipt, non_request)
         return _not_ready(
             ticket_id,
             receipt,
             unresolved,
             code,
-            f"saipen source disp {receipt} {non_request[0]} <STATUS> --evidence <REF>",
+            f"saipen source disp {receipt} {own[0]} <STATUS> --evidence <REF>",
         )
     return _not_ready(
         ticket_id, receipt, unresolved, code, _remediation(root, ticket_id, gate, unresolved)
     )
+
+
+def _clause_owners(root: Path, receipt: str, clauses: list) -> dict:
+    """Clause -> the Work its coverage row names (empty when unrecorded)."""
+    from .intake import _read_coverage
+
+    try:
+        rows = _read_coverage(root, str(receipt)).get("requirements") or {}
+    except (OSError, ValueError):
+        return {rid: "" for rid in clauses}
+    return {rid: str((rows.get(rid) or {}).get("work") or "").strip() for rid in clauses}
+
+
+def _foreign_owners(root: Path, ticket_id: str, receipt: str, clauses: list) -> list:
+    """The other Work owning EVERY open clause, or [] when this Work owns one."""
+    owners = _clause_owners(root, receipt, clauses)
+    if not owners or any(owner in ("", ticket_id) for owner in owners.values()):
+        return []
+    return sorted(set(owners.values()))
+
+
+def _own_clauses(root: Path, ticket_id: str, receipt: str, clauses: list) -> list:
+    """Open clauses this Work owns or nobody owns, in order; never empty."""
+    owners = _clause_owners(root, receipt, clauses)
+    own = [rid for rid in clauses if owners.get(rid) in ("", ticket_id)]
+    return own or list(clauses)
 
 
 def _events(root: Path) -> list:

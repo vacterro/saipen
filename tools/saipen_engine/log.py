@@ -99,6 +99,26 @@ def history_paths(project_root: Path | str) -> list[Path]:
     return [*sealed, active]
 
 
+#: CORE "LOG.md": the cap of the ACTIVE segment. Crossing either bound makes
+#: the active LOG due for sealing. The validator's `log-soft-cap` finding and
+#: the operation that clears it (`operations.seal_log`) both read the two
+#: numbers from here (T-1640): while the validator held its own copy, the cap
+#: was a sentence one module printed and no module could act on.
+ACTIVE_LOG_MAX_LINES = 300
+ACTIVE_LOG_MAX_BYTES = 64 * 1024
+
+
+def seal_due(line_count: int, byte_count: int) -> bool:
+    """Whether an active LOG of this size has crossed its cap."""
+    return line_count > ACTIVE_LOG_MAX_LINES or byte_count > ACTIVE_LOG_MAX_BYTES
+
+
+def next_segment_rel(project_root: Path | str) -> str:
+    """The project-relative path of the next monotonic sealed segment."""
+    newest = max((_segment_number(p) for p in history_paths(project_root)), default=0)
+    return f".saipen/logs/LOG-{max(newest, 0) + 1:03d}.md"
+
+
 def _validate_history_ownership(root: Path, logs_dir: Path) -> list[Path]:
     """lstat every canonical history node and reject symlink/junction/reparse
     or non-regular files BEFORE any bytes are read (second-wave P1).
@@ -906,10 +926,16 @@ class ForeignTail:
     claimed_ids: tuple[int, ...]
     non_event_lines: int
     snapshot: HistorySnapshot
+    #: Set when the cut is bound by the journal floor instead of
+    #: `STATE.last_event` (T-1679): the suffix is a typed head, not a stray tail.
+    journal_floor: int | None = None
 
 
 def foreign_tail_cut(
-    snapshot: HistorySnapshot, active_text: str, last_event: int | None
+    snapshot: HistorySnapshot,
+    active_text: str,
+    last_event: int | None,
+    journal_floor: int | None = None,
 ) -> tuple[ForeignTail | None, str | None]:
     """Prove that the ledger damage is confined to lines STATE never bound.
 
@@ -932,7 +958,23 @@ def foreign_tail_cut(
       journal's recovery, never to a cut;
     * the ledger WITHOUT the suffix passes the complete immutable-ledger
       contract. Damage anywhere else is not a tail problem.
+
+    THE JOURNAL BOUND (T-1679). `last_event` is only a boundary while an
+    operation wrote it. An executor that types its own lifecycle moves that
+    marker onto its own lines, and when it also breaks the parent chain the
+    proof above refuses twice over: the typed lines sit at or below the
+    marker, so nothing is "suffix", and the ledger is void. `journal_floor`
+    is the newest event a journal record stands behind
+    (`lifecycle_authority.journal_floor`), supplied by the caller that owns
+    the journal. When it lies below `last_event` it is the boundary, and the
+    third condition does not apply: an event above the floor cannot be "a
+    genuine event whose checkpoint never landed", because a genuine event has
+    an operation record and the floor is by definition the newest one that
+    does.
     """
+    journal = journal_floor is not None and (last_event is None or journal_floor < last_event)
+    if journal:
+        last_event = journal_floor
     if last_event is None:
         return None, "STATE.last_event is unset, so there is no checkpointed boundary to cut at"
     lines = active_text.splitlines()
@@ -971,7 +1013,7 @@ def foreign_tail_cut(
         declared = declared_event_id(line)
         if declared is None:
             continue
-        if declared > last_event:
+        if declared > last_event and not journal:
             return None, (
                 f"LOG.md:{offset} claims E-{declared}, above the checkpointed E-{last_event}; "
                 "it may be a genuine event whose checkpoint never landed, so the tail is "
@@ -1044,6 +1086,7 @@ def foreign_tail_cut(
             claimed_ids=tuple(claimed),
             non_event_lines=len(foreign) - len(claimed),
             snapshot=clean,
+            journal_floor=journal_floor if journal else None,
         ),
         None,
     )
@@ -1275,8 +1318,21 @@ _VERDICT_SEPARATOR = " -- "
 #: produces them by accident: a nonzero count before the token (`2 FAIL`,
 #: `3 failures`) and a nonzero field of the FAIL family (`failures=2`, the shape
 #: unittest prints; `failed=3` and `failed: 3`, the shapes other runners print).
+#:
+#: T-1632: the count is BARE. Digits that end an identifier are a citation: an
+#: event, ticket or receipt id keeps its number behind a letter and a hyphen
+#: (`E-12503`), an identity token or a file:line behind its colon
+#: (`subject:5004164`, `log.py:1278`). The word boundary alone admitted both,
+#: because a hyphen and a colon are boundaries, so `E-12503 FAIL / E-12504
+#: PASS` -- the red half of a regression pair, cited -- read as 12503 failures
+#: and refused a green cycle. `tests: 3 failed` keeps its space and still counts.
+_NOT_AN_IDENTIFIER_TAIL = r"(?<![A-Za-z]-)(?<![A-Za-z0-9_]:)"
 _FAIL_COUNTED_RE = re.compile(
-    r"\b(?!0+\b)\d+\s+FAIL(?:S|ED|URE|URES)?\b" + _NOT_A_FIELD_KEY, re.IGNORECASE
+    r"\b"
+    + _NOT_AN_IDENTIFIER_TAIL
+    + r"(?!0+\b)\d+\s+FAIL(?:S|ED|URE|URES)?\b"
+    + _NOT_A_FIELD_KEY,
+    re.IGNORECASE,
 )
 _FAIL_FIELD_RE = re.compile(r"\bFAIL(?:S|ED|URE|URES)?\s*[=:]\s*(?!0+\b)\d+", re.IGNORECASE)
 #: Their zero twins, which exempt a token instead of claiming one.
@@ -1303,6 +1359,76 @@ _FOREIGN_FAIL_RE = re.compile(
     r"(?:\(\s*" + _FOREIGN_SCOPE + r"\s*\)|\b" + _FOREIGN_SCOPE + r"\b)",
     re.IGNORECASE,
 )
+
+# T-1620: a count ATTRIBUTED to a previous run is narrative about history,
+# not this checkpoint's claim. Measured on a verify checkpoint that honestly
+# reported "previous run: 5 failed / 23 passed" next to its clean current
+# run: the historical count vetoed the PASS and the green cycle could not
+# close. The current verdict takes precedence over historical narration.
+#
+# The attribution vocabulary is CLOSED and the count must sit adjacent to it
+# -- `previous run: 5 failed`, `5 failed in the previous run` -- so an
+# unattributed count (`2 failed now`, `the last 5 failed attempts`) still
+# claims from anywhere and a real failure cannot be talked past. Bare tokens
+# and `failures=N` fields are untouched: only the counted shape carries an
+# attribution worth honouring, and ambiguity stays fail-safe.
+_HISTORICAL_SCOPE = r"(?:previous|prior|last|earlier)"
+_HISTORICAL_RUN = r"(?:runs?|results?|attempts?)"
+_HIST_FAIL_RE = re.compile(
+    r"\b" + _HISTORICAL_SCOPE + r"\s+" + _HISTORICAL_RUN + r"\s*[:;,]?\s*"
+    r"(?:had|showed|with|of\s+)?\s*\b\d+\s+FAIL(?:S|ED|URE|URES)?\b"
+    r"|\b\d+\s+FAIL(?:S|ED|URE|URES)?\b\s+(?:in|on|during|for)\s+the\s+"
+    + _HISTORICAL_SCOPE + r"\s+" + _HISTORICAL_RUN + r"\b",
+    re.IGNORECASE,
+)
+
+# vacterro-saiwebsite T-39 (improve 20261013-1 IMP-004): a count ATTRIBUTED to
+# a measured red control is evidence data, not this checkpoint's claim. The
+# verify vocabulary REQUIRES a control: `verify -> PASS [target: T-33] conf:
+# high -- pre-fix 4 failed (red control), post-fix 0 failed` is the honest
+# record of a measured pair, and the counted shape vetoed it -- the same
+# narrative-authority leak T-1444 (foreign scope) and T-1620 (previous run)
+# each cured, at a third polarity. Same cure, same discipline: CLOSED
+# vocabulary, ADJACENT attribution, and only the counted shape is honoured, so
+# an unattributed `2 FAIL`, a `failures=2` field, a bare `FAIL` verdict and a
+# current nonzero count beside the control still claim and a real failure
+# cannot be talked past. Landed here as T-1762 (SRC-248) with one narrowing:
+# the scope word keeps its separator, because `prefix` is an ordinary word
+# and a current count beside it is nobody's red control.
+_CONTROL_SCOPE = r"(?:red[- ]?controls?|pre[- ]fix)"
+_CONTROL_RUN = r"(?:runs?|measures?|measurements?|baselines?|states?)"
+_CONTROL_FAIL_RE = re.compile(
+    r"\b" + _CONTROL_SCOPE + r"(?:\s+" + _CONTROL_RUN + r")?\s*[:;,]?\s*"
+    r"(?:had|showed|with|of\s+)?\s*\b\d+\s+FAIL(?:S|ED|URE|URES)?\b"
+    r"|\b\d+\s+FAIL(?:S|ED|URE|URES)?\b"
+    r"(?:\s*/?\s*\d*\s*WARN(?:ING|INGS)?\b)?\s*"
+    r"(?:\(\s*" + _CONTROL_SCOPE
+    + r"(?:\s*[,;][^()]{0,40})?\s*\)|\b" + _CONTROL_SCOPE + r"\b)",
+    re.IGNORECASE,
+)
+
+# T-1770 (SRC-248 R005): the red half of a measured pair, in the stage words
+# `saipen work regression` records (`stage`, `exit_code`, `ran`, `failed`), is
+# evidence data, not this checkpoint's claim. The line the operator's mission
+# cites (_sairelay T-8, its E-112) transcribes its receipt as `before exit 1
+# (28 ran, 7 failed) / after exit 0 (28 passed)`; T-1762's vocabulary (red
+# control, pre-fix) does not cover it, and the count vetoed the green cycle.
+# `before` is an ordinary word, so the WORD is not the scope: the scope is the
+# whole red half -- `before exit 1` and its count, nothing else -- and only
+# when its green twin `after exit 0` follows it. A count outside that half,
+# a red half with no green twin, and the twin's own counts are left in place
+# and still claim.
+_PAIR_OTHER_COUNT = r"\d+\s+(?:ran|passed|skipped)"
+_PAIR_EXIT = r"\s*:?\s*exit\s*(?:code\s*)?[:=]?\s*"
+_PAIR_RED_HALF_RE = re.compile(
+    r"\bbefore" + _PAIR_EXIT + r"1\b\s*"
+    r"(?:\(\s*(?:" + _PAIR_OTHER_COUNT + r"\s*,\s*)*\d+\s+FAIL(?:S|ED|URE|URES)?\b"
+    r"(?:\s*,\s*" + _PAIR_OTHER_COUNT + r")*\s*\)"
+    r"|,\s*(?:" + _PAIR_OTHER_COUNT + r"\s*,\s*)*\d+\s+FAIL(?:S|ED|URE|URES)?\b)"
+    r"(?=\s*[/;,]?\s*(?:and\s+|then\s+)?after" + _PAIR_EXIT + r"0\b)",
+    re.IGNORECASE,
+)
+
 
 
 def _claims_failure(text: str) -> bool:
@@ -1346,6 +1472,25 @@ def _claims_failure(text: str) -> bool:
     foreign scope (`inherited 4 FAIL`, `4 FAIL / 22 WARN (inherited)`,
     `4 FAIL 22 WARN inherited`) reports ANOTHER acceptance surface and is
     removed before the scan. An unattributed count is untouched.
+
+    T-1620 scopes them once more: a count explicitly attributed to a previous
+    run (`previous run: 5 failed`, `5 failed in the previous run`) reports
+    history, and the current verdict takes precedence over it. A current
+    nonzero count beside the history still claims, and an unattributed count
+    stays fail-safe.
+
+    vacterro-saiwebsite T-39 scopes them a third time: a count explicitly
+    attributed to a measured red control (`red control: 4 failed`,
+    `4 failed (red control)`, `pre-fix 3 failures`) is the REQUIRED red half of
+    a control pair -- the very thing the verify grammar asks an agent to
+    measure and record -- and reports another state, not this checkpoint's
+    claim. The `verify -> PASS`/`verify -> FAIL` verdict token keeps owning
+    the current-state claim exactly as before.
+
+    T-1770 scopes them a fourth time: the red half of a measured pair in the
+    stage words of a regression receipt (`before exit 1 (28 ran, 7 failed)`),
+    when its green twin `after exit 0` follows it. The word `before` alone
+    attributes nothing.
     """
     if _NEGATION_RE.search(text):
         return True
@@ -1353,6 +1498,15 @@ def _claims_failure(text: str) -> bool:
     # T-1444: counts explicitly attributed to a foreign/inherited scope are
     # narrative about another acceptance surface, never this ticket's claim.
     scoped = _FOREIGN_FAIL_RE.sub(" ", body)
+    # T-1620: counts explicitly attributed to a previous run are narrative
+    # about history, never the current checkpoint's claim.
+    scoped = _HIST_FAIL_RE.sub(" ", scoped)
+    # vacterro-saiwebsite T-39: a count attributed to a measured red control
+    # is evidence data, never this checkpoint's claim.
+    scoped = _CONTROL_FAIL_RE.sub(" ", scoped)
+    # T-1770: the red half of a measured pair, written in the receipt's own
+    # stage words and followed by its green twin, is evidence data too.
+    scoped = _PAIR_RED_HALF_RE.sub(" ", scoped)
     # Machine shapes: unambiguous wherever they appear.
     if _FAIL_COUNTED_RE.search(scoped) or _FAIL_FIELD_RE.search(scoped):
         return True
@@ -1438,15 +1592,30 @@ def regression_evidence(ticket_id: str, events: list[dict]) -> tuple[bool, str]:
     if boundary is None:
         return False, NO_VERIFY_BOUNDARY
 
+    from .attempt import build_attempts
+
+    attempts, errors = build_attempts(events)
+    if errors:
+        return False, "NOT_A_REGRESSION_PAIR: invalid producing Attempt history"
+    own = [item for item in attempts.values() if item.get("ticket") == ticket_id]
+    latest_open = max((item["open_event"] for item in own), default=0)
     records = []
     for ev in events[boundary:]:
         if ev.get("ticket") != ticket_id or ev.get("taxonomy") != "RUN":
             continue
-        if _hand_authored(ev):
+        if _hand_authored(ev) or ev.get("event", 0) < latest_open:
             continue
         record = parse_evidence(ev.get("text", ""))
         if record is not None:
+            producing = [item["id"] for item in own
+                         if item["open_event"] <= ev["event"]
+                         and (item["close_event"] is None or ev["event"] <= item["close_event"])]
+            record["attempt"] = producing[0] if len(producing) == 1 else None
             records.append(record)
+    before = next((item for item in reversed(records) if item["result"] == "FAIL"), None)
+    after = next((item for item in reversed(records) if item["result"] == "PASS"), None)
+    if before is not None and after is not None and before["attempt"] != after["attempt"]:
+        return False, "NOT_A_REGRESSION_PAIR: different producing Attempts"
     verdict = regression_evidence_verdict(records)
     return bool(verdict.get("admissible")), f"{verdict['code']}: {verdict['reason']}"
 
@@ -1508,6 +1677,25 @@ def structural_marker_events(
     return found
 
 
+def _closes_the_cycle(ev: dict, ticket_id: str) -> bool:
+    """Is this the canonical finish of `ticket_id`, the end of its cycle? (T-1758)
+
+    A note logged after a ticket finished -- a continuation boundary, a later
+    diagnosis that names it -- is history about the closure, never evidence
+    for or against it. Read as part of the cycle, the post-finish checkpoint
+    E-14046 outranked T-1695's review PASS and turned this repository's own
+    validation red. A ticket re-verified after a reopen opens a new cycle at
+    its new VERIFY boundary, which this never reaches past.
+    """
+    return (
+        ev.get("ticket") == ticket_id
+        and ev.get("taxonomy") == "DEC"
+        and str(ev.get("op_id") or "").startswith("finish-")
+        and str(ev.get("text") or "").startswith("ticket finished via SAIOPS")
+        and not _hand_authored(ev)
+    )
+
+
 def verification_evidence(ticket_id: str, events: list[dict]) -> tuple[bool, str]:
     """Classify verification evidence for a ticket (hostile-regression).
 
@@ -1526,7 +1714,9 @@ def verification_evidence(ticket_id: str, events: list[dict]) -> tuple[bool, str
       explicit `conf: low`/`conf: med` disqualifies;
     - MANUAL-VERIFY evidence is the exact `MANUAL-VERIFY` token not
       negated;
-    - no boundary or no evidence after it -> unproven/failed.
+    - no boundary or no evidence after it -> unproven/failed;
+    - the cycle ends with the ticket's canonical finish: what was logged
+      after it is not evidence (`_closes_the_cycle`, T-1758).
     """
     if not ticket_id:
         return False, "no ticket id provided"
@@ -1541,7 +1731,12 @@ def verification_evidence(ticket_id: str, events: list[dict]) -> tuple[bool, str
     if verify_start_idx is None:
         return False, NO_VERIFY_BOUNDARY
 
-    for i in range(len(events) - 1, verify_start_idx - 1, -1):
+    cycle_end = len(events) - 1
+    for i in range(verify_start_idx, len(events)):
+        if _closes_the_cycle(events[i], ticket_id):
+            cycle_end = i
+            break
+    for i in range(cycle_end, verify_start_idx - 1, -1):
         ev = events[i]
         if ev.get("ticket") != ticket_id or ev.get("taxonomy") != "RUN":
             continue
@@ -1602,9 +1797,15 @@ def bulk_verification_evidence(
     boundary_seen: set[str] = set()
     pending: dict[str, tuple[bool, str]] = {}
     for ev in reversed(events):
+        tid = ev.get("ticket")
+        if tid in wanted and tid not in verdicts and tid not in boundary_seen:
+            if _closes_the_cycle(ev, tid):
+                # T-1758: everything newer was logged after the ticket
+                # finished; the cycle is judged from here back.
+                pending.pop(tid, None)
+                continue
         if ev.get("taxonomy") != "RUN":
             continue
-        tid = ev.get("ticket")
         if tid not in wanted or tid in verdicts:
             continue
         if tid in boundary_seen:
@@ -1674,6 +1875,11 @@ _LEGACY_EXECUTION_RE = re.compile(r"\b(BUILD|SHIP|VERIFY|PASS)\b")
 #: historical completion stands.
 LEGACY_DONE_ATTESTATION = "legacy completion attested"
 
+#: The DEC text prefix `saipen recover --adopt-legacy` writes for a record that
+#: had no allocation event. Like an attestation it is a NOW-dated operator
+#: classification of a LEGACY record, never closure-generation evidence.
+LEGACY_ADOPTION = "LEGACY_ADOPTED"
+
 
 def legacy_done_attestation_text(ticket_id: str) -> str:
     """The exact DEC text one legacy-completion attestation writes."""
@@ -1720,17 +1926,24 @@ def bulk_legacy_completion_evidence(
     events = list(events or ())
     cutoff = len(events)
     if generation_end is not None:
-        # The legacy generation closes where the newer one opens: the FIRST
-        # event allocated above `generation_end`. Keying the boundary on the
-        # ticket being judged instead would be exactly the bug -- a later RUN
-        # carries the old ticket's own id and would push the boundary out to
-        # itself.
+        # The legacy generation closes where the newer one starts EXECUTING:
+        # the FIRST `RUN` of a ticket allocated above `generation_end`.
+        # Allocating newer Work closes nothing -- tickets are added to a board
+        # while older ones still run, and the AUDAPACK production shape records
+        # T-113's BUILD after T-190..T-900 were added (T-1643). Keying the
+        # boundary on the ticket being judged instead would be exactly the bug
+        # -- a later RUN carries the old ticket's own id and would push the
+        # boundary out to itself.
         for pos, ev in enumerate(events):
             tid_text = str(ev.get("ticket") or "")
-            if tid_text.startswith("T-") and tid_text[2:].isdigit():
-                if int(tid_text[2:]) > generation_end:
-                    cutoff = pos
-                    break
+            if (
+                ev.get("taxonomy") == "RUN"
+                and tid_text.startswith("T-")
+                and tid_text[2:].isdigit()
+                and int(tid_text[2:]) > generation_end
+            ):
+                cutoff = pos
+                break
     verdicts: dict[str, tuple[bool, str]] = {}
     for pos in range(len(events) - 1, -1, -1):
         ev = events[pos]

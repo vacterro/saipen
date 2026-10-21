@@ -145,7 +145,7 @@ def non_work_event(ticket_id: str, events) -> dict | None:
 
 def system_correction_error(root: Path, ticket: dict, events, reason: str) -> str | None:
     """Narrow evidence-backed de-escalation; never a grant from model prose."""
-    from .operator_task import authority_for_receipt
+    from .operator_task import WITNESS_MODEL, WITNESS_OBLIGATION
 
     fields = ticket.get("fields") or {}
     receipts = [r.strip() for r in str(fields.get("source_receipts") or "").split(",") if r.strip()]
@@ -173,9 +173,13 @@ def system_correction_error(root: Path, ticket: dict, events, reason: str) -> st
             return f"{receipt} is not exclusively linked to this Work"
         if (
             reason == REASON_FALSE_AUTHORITY
-            and authority_for_receipt(root, receipt)["user_explicit"]
+            and (meta.get("request_provenance") or {}).get("witness")
+            not in (WITNESS_MODEL, WITNESS_OBLIGATION)
         ):
-            return f"{receipt} carries operator authority; system retraction cannot retire it"
+            # Lost/expired/revoked current capabilities cannot prove that the
+            # original projection was model-authored. Unknown history is also
+            # insufficient evidence for an automatic retirement.
+            return f"{receipt} lacks proven non-operator origin; system retraction cannot retire it"
         contract = intake._read_contract(root, receipt)
         coverage = intake._read_coverage(root, receipt)
         if not isinstance(contract, dict) or not isinstance(coverage, dict):
@@ -418,7 +422,7 @@ def authority_error(
         return f"authority receipt {authority_receipt}: {integrity['code']}", None
     from .operator_task import authority_for_receipt
 
-    if not authority_for_receipt(root, authority_receipt)["user_explicit"]:
+    if not authority_for_receipt(root, authority_receipt)["retirement"]:
         return f"authority receipt {authority_receipt} has no witnessed operator grant", None
     body = intake.read_body(root, authority_receipt)
     if not body.get("ok"):
@@ -1469,7 +1473,7 @@ def retired_archive_errors(root: Path, receipt_id: str, tomb: dict) -> list[str]
     if os.path.lexists(root / ".saipen" / "intake" / "active" / f"{receipt_id}.md"):
         errors.append(f"retired receipt {receipt_id} still holds an active body")
     if tomb.get("reason") in SYSTEM_CORRECTIONS:
-        from .operator_task import authority_for_provenance
+        from .operator_task import WITNESS_MODEL, WITNESS_OBLIGATION
         from .pending_ingress import ingress_digest
 
         for kind, key in (("contract", "clauses"), ("coverage", "requirements")):
@@ -1494,7 +1498,7 @@ def retired_archive_errors(root: Path, receipt_id: str, tomb: dict) -> list[str]
                 request = request.partition("\n## Request\n")[2]
             if (
                 provenance.get("compared_digest") != ingress_digest(request)
-                or authority_for_provenance(provenance)["user_explicit"]
+                or provenance.get("witness") not in (WITNESS_MODEL, WITNESS_OBLIGATION)
             ):
                 errors.append(
                     f"retired receipt {receipt_id} false-authority provenance is unproven"

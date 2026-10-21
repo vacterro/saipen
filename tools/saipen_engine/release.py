@@ -33,6 +33,8 @@ Key invariants (T-994):
 from __future__ import annotations
 
 import base64
+import contextlib
+import contextvars
 import datetime
 import hashlib
 import json
@@ -111,6 +113,15 @@ REMOTE_AMBIGUOUS = "AMBIGUOUS"  # multiple push destinations
 START_PREPARED = "PREPARED"  # nothing external happened yet
 START_CLOSURE = "CLOSURE"  # content commit A committed + pushed
 START_TAG = "TAG"  # closure commit B committed + pushed, tag missing
+
+# How a release ENDED (T-1746). Read from the committed receipt's own mode,
+# never from persisted STATE.mode: a published release and a local closure are
+# different facts, and the third outcome -- refused or incomplete -- is the
+# absence of an admissible receipt (`release_verdict` unknown / ambiguous).
+TERMINAL_PUBLISHED = "PUBLISHED"
+TERMINAL_LOCAL_NO_PUBLISH = "LOCAL_NO_PUBLISH"
+PUBLICATION_PERFORMED = "PERFORMED"
+PUBLICATION_NOT_PERFORMED = "NOT_PERFORMED"
 
 CLOSURE_FILES = (
     ".saipen/STATE.md",
@@ -248,20 +259,23 @@ def _capture_index_state(root: Path) -> IndexSnapshot:
     )
     index_entries: dict[str, tuple[str, str]] = {}
     if query_paths:
-        ls = _git(root, "ls-files", "-s", "-z", "--", *query_paths, literal=True)
-        if not ls.ok:
-            raise ValueError(f"cannot batch-read index entries: {ls.stderr or ls.stdout}")
-        for piece in ls.stdout.split("\0"):
-            if not piece or "\t" not in piece:
-                continue
-            meta_text, path = piece.split("\t", 1)
-            meta = meta_text.split()
-            if len(meta) < 3:
-                raise ValueError(f"malformed git ls-files -s entry: {piece!r}")
-            mode, blob, stage = meta[:3]
-            if stage != "0" or path in index_entries:
-                raise ValueError(f"unmerged/multi-stage index entry for {path!r}")
-            index_entries[path] = (mode, blob)
+        batch_size = 50
+        for i in range(0, len(query_paths), batch_size):
+            chunk = query_paths[i : i + batch_size]
+            ls = _git(root, "ls-files", "-s", "-z", "--", *chunk, literal=True)
+            if not ls.ok:
+                raise ValueError(f"cannot batch-read index entries: {ls.stderr or ls.stdout}")
+            for piece in ls.stdout.split("\0"):
+                if not piece or "\t" not in piece:
+                    continue
+                meta_text, path = piece.split("\t", 1)
+                meta = meta_text.split()
+                if len(meta) < 3:
+                    raise ValueError(f"malformed git ls-files -s entry: {piece!r}")
+                mode, blob, stage = meta[:3]
+                if stage != "0" or path in index_entries:
+                    raise ValueError(f"unmerged/multi-stage index entry for {path!r}")
+                index_entries[path] = (mode, blob)
 
     entries: list[tuple[str, str, str]] = []
     for status, old_path, new_path in changes:
@@ -326,6 +340,27 @@ def _exact_index_bytes(root: Path) -> tuple[str, str]:
             "index snapshot unavailable -- refuse"
         ) from exc
     return hashlib.sha256(raw).hexdigest(), base64.b64encode(raw).decode("ascii")
+
+
+def _staged_index_drift(root: Path, owned_post_stage_sha: str) -> str | None:
+    """Has another writer touched the index this release staged?
+
+    T-1827 (SRC-282:R003): the ship gate runs with the writer lock RELEASED,
+    so a concurrent writer could stage something meanwhile. The release must
+    commit exactly the index it proved at CONTENT_STAGED, never a tree another
+    writer modified in the window.
+    """
+    try:
+        live_sha, _ = _exact_index_bytes(root)
+    except ValueError as exc:
+        return f"index unreadable after the gate window: {exc}"
+    if live_sha != owned_post_stage_sha:
+        return (
+            "the git index changed while the ship gate ran without the writer "
+            "lock; the reviewed release is no longer the staged tree -- "
+            "rebuild the plan"
+        )
+    return None
 
 
 def _restore_index_bytes(
@@ -671,6 +706,53 @@ def _targeted_integration_op(root: Path, invocation: str, ticket_id: str) -> str
     return max(matches, key=lambda m: (iso_utc_sort_key(m[0]) or _earliest, m[1]))[1]
 
 
+def _crew_terminal_route(
+    state: dict, crew_carrier: dict | None, cohort_carrier: dict | None, targeted_ticket: bool
+) -> bool:
+    """Is this plan the terminal closure of a crew epoch? (T-1746)
+
+    The one route that may be unversioned: a targeted producer ticket and a
+    cohort publish a versioned release, and an ordinary ticket of a project
+    without VERSION closes through `ticket done`, as `_installed_version` says.
+    """
+    if targeted_ticket or cohort_carrier is not None:
+        return False
+    if crew_carrier is not None:
+        return bool(crew_carrier.get("crew_epoch"))
+    return state.get("execution_intent") == "converge" and state.get("converge_target") == "crew"
+
+
+def _crew_carrier_problem(root: Path, crew_epoch: str, ticket_id: str) -> str | None:
+    """Why a crew carrier is not the project's own durable epoch, or None.
+
+    T-1746: a carrier naming another epoch, or a ticket the epoch does not own,
+    carries a borrowed identity -- and an absent ticket must stay absent rather
+    than be filled from an older epoch. A project without the tracked carrier
+    derives its epoch from recovery receipts; `crew_release_context` judges it
+    again at APPLY, so nothing is claimed here.
+    """
+    from .crew import CrewEpochCarrierError, read_durable_crew_epoch
+
+    try:
+        durable = read_durable_crew_epoch(root)
+    except CrewEpochCarrierError as exc:
+        return f"the durable crew epoch carrier is not canonical: {exc}"
+    if durable is None:
+        return None
+    if durable["op_id"] != crew_epoch:
+        return (
+            f"terminal carrier names crew epoch {crew_epoch}; the project's "
+            f"durable epoch is {durable['op_id']}"
+        )
+    owned = durable.get("ticket_id") or ""
+    if owned != ticket_id:
+        return (
+            f"terminal carrier names ticket {ticket_id or '(none)'}; crew epoch "
+            f"{crew_epoch} owns {owned or 'no ticket'} -- an epoch never borrows one"
+        )
+    return None
+
+
 def plan_release(
     root: Path,
     invocation: str,
@@ -699,8 +781,25 @@ def plan_release(
         )
     _recovery_preflight(root)
 
-    version = _installed_version(root)
-    state_text, state = _read_state(root)
+    # T-1746: VERSION names a PUBLISHED release. A terminal crew closure in a
+    # no-publish session publishes nothing, so a project without the file may
+    # still close locally. Every other route keeps the refusal, raised from the
+    # point it always was, so no existing ordering moves.
+    version, version_refusal = "", None
+    try:
+        version = _installed_version(root)
+    except ReleaseRefusal as exc:
+        version_refusal = exc
+    try:
+        state_text, state = _read_state(root)
+    except ReleaseRefusal:
+        if version_refusal is not None:
+            raise version_refusal from None
+        raise
+    if version_refusal is not None and not _crew_terminal_route(
+        state, crew_carrier, cohort_carrier, targeted_ticket
+    ):
+        raise version_refusal
     targeted_integration_op = ""
     if targeted_ticket:
         if invocation not in _TARGETED_PRODUCER_INVOCATIONS:
@@ -732,6 +831,10 @@ def plan_release(
     # P0#4: the negotiated current-session capability -- not the persisted
     # STATE.mode -- decides whether this release may publish.
     mode = _read_mode(state, current_capability)
+    if version_refusal is not None and mode != "no-publish":
+        # Missing VERSION + a real publication: the refusal every versioned
+        # route gets, whatever the crew state is.
+        raise version_refusal
 
     from .paths import project_identity as _project_identity, project_lineage_identity
 
@@ -769,7 +872,8 @@ def plan_release(
     from .release_contract import source_authority_paths
     _source_paths = source_authority_paths(root)
 
-    tag = f"v{version}"
+    # No version, no tag: an unversioned local closure never borrows one.
+    tag = f"v{version}" if version else ""
 
     # ---- crew terminal carrier (T-1003 sweep) ------------------------------
     # An active crew epoch publishes exactly once, through the EXISTING
@@ -796,11 +900,22 @@ def plan_release(
                 "scope": ctx.get("crew_defer_scope") or {},
                 "ticket_id": ctx.get("ticket_id") or "",
             }
-            if not crew_carrier["scope"] or not crew_carrier["ticket_id"]:
+            if not crew_carrier["scope"]:
                 raise ReleaseRefusal(
                     "CREW_NOT_READY",
                     "crew is terminal but no deferred crew scope is "
                     "derivable -- DEFER_FOR_CREW ran for zero tickets?",
+                )
+            if not crew_carrier["ticket_id"] and mode != "no-publish":
+                # T-1746: an epoch may own no ticket (the carrier keeps
+                # ticket_id optional). A publication binds its closure commit
+                # and its scope record to one ticket, so it is refused by
+                # name instead of under the empty-scope sentence above.
+                raise ReleaseRefusal(
+                    "CREW_NOT_READY",
+                    "this crew epoch names no ticket: a publication binds its "
+                    "closure commit and scope record to one ticket, so a "
+                    "ticketless epoch closes only locally, in a no-publish session",
                 )
     # CORE-003: a cohort carrier is the SAME batch-publication shape as a crew
     # carrier -- an owned scope of shared paths, closed at local DONE / task
@@ -829,6 +944,7 @@ def plan_release(
             current_capability=current_capability,
             current_agent=release_actor,
             cohort_id=str((cohort_carrier or {}).get("cohort_id") or ""),
+            source_identity=ident,
         )
 
     # ---- no-publish needs NO git facts at all (T-994 / § 10) --------------
@@ -887,6 +1003,7 @@ def plan_release(
             targeted_ticket=targeted_ticket,
             targeted_integration_op=targeted_integration_op,
             current_agent=release_actor,
+            _source_identity=ident,
         )
 
     # ---- mode full: remote + continuation classification ------------------
@@ -1113,6 +1230,7 @@ def _plan_crew_release(
     current_capability: str | None = None,
     current_agent: str | None = None,
     cohort_id: str = "",
+    source_identity: object = None,
 ) -> "ReleasePlan":
     """Plan the terminal crew release from a derived crew carrier.
 
@@ -1140,11 +1258,19 @@ def _plan_crew_release(
     ticket_id = crew_carrier.get("ticket_id") or ""
     # Exactly one batch identity must be present: a crew epoch or a cohort id.
     # An anonymous batch could not be recovered or re-verified afterwards.
-    if not (crew_epoch or cohort_id) or not ticket_id or not scope:
+    # T-1746: a crew epoch may own no ticket. Its LOCAL closure is owned by the
+    # epoch identity and the derived deferred scope; a publication and a cohort
+    # still need the one ticket their commit, scope record and receipt name.
+    epoch_owned = bool(crew_epoch) and not cohort_id and mode == "no-publish"
+    if not (crew_epoch or cohort_id) or not scope or not (ticket_id or epoch_owned):
         raise ReleaseRefusal(
             "VALIDATION_FAILED",
             "terminal batch carrier is missing crew_epoch/cohort_id, ticket_id or scope",
         )
+    if crew_epoch and not cohort_id:
+        borrowed = _crew_carrier_problem(root, crew_epoch, ticket_id)
+        if borrowed:
+            raise ReleaseRefusal("CREW_NOT_READY", borrowed)
     # Deferred ownership is an edge: the CURRENT bytes MUST equal the bytes
     # the latest owning review approved (item 5 -- later unreviewed mutation
     # is stale/refuse; a deleted path stays an exact deletion identity).
@@ -1162,15 +1288,14 @@ def _plan_crew_release(
                 "SOURCE_SCOPE_MISSING", f"crew scope path {rel} is missing from the worktree"
             )
         live_bytes = fp.read_bytes()
-        live = _quick_hash(live_bytes)
-        if live != expected:
+        if not _scope_identity_holds(live_bytes, expected):
             from . import closure as _closure
 
             if not _closure.member_hash_matches(live_bytes, expected):
                 raise ReleaseRefusal(
                     "STALE_PLAN",
                     f"crew scope path {rel} changed since the owning defer "
-                    f"(live {live!r}, deferred {expected!r})",
+                    f"(live {_quick_hash(live_bytes)!r}, deferred {expected!r})",
                 )
     phase = state.get("phase")
     task = state.get("task")
@@ -1180,13 +1305,34 @@ def _plan_crew_release(
             f"crew terminal release requires local Core phase DONE / task "
             f"none; live {phase}/{task}",
         )
-    _check_parity(root, version)
+    if version:
+        _check_parity(root, version)
+    elif mode != "no-publish":
+        raise ReleaseRefusal(
+            "VALIDATION_FAILED",
+            "a publication needs the release version; only a no-publish crew "
+            "closure may be unversioned",
+        )
 
     # Second-wave P0: the acting identity is the CURRENT-SESSION agent, never
     # persisted STATE.agent (historical last-writer evidence).
     release_actor = current_agent or state.get("agent") or "saipen-cli"
 
     if mode == "no-publish":
+        if crew_epoch and not cohort_id:
+            # T-1746: a local closure leaves no commit or tag for a second
+            # attempt to collide with, so the verified receipt is what makes
+            # the closure single. A receipt that stopped verifying (the source
+            # moved on) does not count, and the epoch may close again.
+            settled = release_verdict(root, crew_epoch=crew_epoch)
+            if settled["status"] == "ok":
+                raise ReleaseRefusal(
+                    "VALIDATION_FAILED",
+                    f"crew epoch {crew_epoch} already holds a verified terminal "
+                    f"release ({settled['evidence']['op_id']}, "
+                    f"{settled['evidence']['terminal_outcome']}); a second local "
+                    "closure would only restate it",
+                )
         index = IndexSnapshot((), (), hashlib.sha256(b"no-publish-no-git").hexdigest()[:16])
         return ReleasePlan(
             invocation=invocation,
@@ -1195,7 +1341,7 @@ def _plan_crew_release(
             branch="",
             tag=tag,
             ticket_id=ticket_id,
-            commit_message=f"ship v{version}",
+            commit_message=_ship_label(version),
             scope_paths=tuple(sorted(scope)),
             metadata_paths=tuple(_metadata_paths(root, source_paths)),
             project_identity=project_identity,
@@ -1227,6 +1373,7 @@ def _plan_crew_release(
             cohort_id=cohort_id,
             source_manifest=_source_authority_manifest(root, source_paths),
             current_agent=release_actor,
+            _source_identity=source_identity,
         )
 
     if not _branch_exists(root, _branch(root)):
@@ -1343,6 +1490,7 @@ def _plan_crew_release(
         crew_scope=tuple(sorted(scope.items())),
         cohort_id=cohort_id,
         current_agent=release_actor,
+        _source_identity=source_identity,
     )
 
 
@@ -1861,6 +2009,142 @@ def _plan_publishes(plan: ReleasePlan) -> bool:
     return not (plan.mode == "no-publish" and not plan.crew_closure)
 
 
+def _scope_identity_holds(live: bytes, expected: object) -> bool:
+    """Do the live bytes carry the exact identity a defer recorded?
+
+    T-1746: a reviewed scope records a full sha256 (`release_scope_hash`),
+    while cohort members and scopes recorded before it carry the 16-hex
+    journal token. The crew planner compared every one with the 16-hex token,
+    so each crew scope deferred since the full identity read as changed and no
+    terminal crew release could be planned.
+    """
+    from .operations import release_scope_matches
+
+    return release_scope_matches(live, expected)
+
+
+def _gate_window_drift(root: Path, plan: ReleasePlan) -> str | None:
+    """Re-prove the plan's local bindings after a gate ran without the lock.
+
+    T-1827 (SRC-282:R003): the validator (or another external process) runs
+    with the project writer lock RELEASED, so another writer may have moved
+    canonical state in that window. Coming back, this compares the persisted
+    STATE/BOARD/LOG hashes to the plan and re-derives the source identity --
+    the cheap in-process reads only. A moved checkpoint means the gate judged
+    a tree this plan can no longer name, so the release must refuse and be
+    planned again, never proceed on stale evidence.
+    """
+    try:
+        state_text, _state = _read_state(root)
+        board_text, _board = _read_board(root)
+        log_hash = _log_hash(root)
+    except Exception as exc:
+        return f"canonical state unreadable after the gate window: {exc}"
+    if _quick_hash(state_text) != plan.state_hash:
+        return "STATE.md changed while the gate ran without the writer lock; rebuild the plan"
+    if _quick_hash(board_text) != plan.board_hash:
+        return "BOARD.md changed while the gate ran without the writer lock; rebuild the plan"
+    if log_hash != plan.log_hash:
+        return "LOG.md changed while the gate ran without the writer lock; rebuild the plan"
+    return _bounded_source_drift(root, plan)
+
+
+#: T-1827 (SRC-282:R003): every Git subprocess this release runs while it HOLDS
+#: the writer lock is bounded by this small budget, so no external process can
+#: outlast the critical section.
+LOCKED_GIT_TIMEOUT = 10.0
+
+# Ambient bound for `_git` calls made inside a writer-locked release body.
+# Nested helpers (index capture, staging, closure commit) do not each take a
+# `timeout` argument; setting it once for the region keeps the declared bound
+# true for every one of them. An explicit `timeout=` still wins.
+_LOCKED_GIT_BOUND: contextvars.ContextVar[float | None] = contextvars.ContextVar(
+    "saipen_locked_git_bound", default=None
+)
+
+
+@contextlib.contextmanager
+def _writer_locked_git_bound(bound: float = LOCKED_GIT_TIMEOUT):
+    token = _LOCKED_GIT_BOUND.set(bound)
+    try:
+        yield
+    finally:
+        _LOCKED_GIT_BOUND.reset(token)
+
+
+def _bounded_source_drift(root: Path, plan: ReleasePlan) -> str | None:
+    """Source-identity drift proven with only cheap, bounded reads.
+
+    This runs UNDER the writer lock, so it never re-hashes the working tree:
+    the plan's own revalidation token gives two HEAD reads and two changed-path
+    listings, each bounded by ``LOCKED_GIT_TIMEOUT``. A plan without a usable
+    token cannot be confirmed cheaply, and an unconfirmed identity is a
+    refusal -- never a full capture under the mutex.
+    """
+    token = plan.source_revalidation_token
+    if token is None:
+        return (
+            "the plan carries no source revalidation token, so the live source "
+            "cannot be confirmed without a full capture under the writer lock; "
+            "rebuild the plan"
+        )
+    from freshness import listing_token_unchanged
+
+    if getattr(token, "discovery_model", "") == "git-delta-v1":
+        ok, detail = listing_token_unchanged(root, token, timeout=LOCKED_GIT_TIMEOUT)
+    else:
+        from freshness import revalidate_source_identity
+
+        ok, detail = revalidate_source_identity(root, token)
+    if not ok:
+        return f"source identity moved while the gate ran without the writer lock: {detail}"
+    if token.source_head != plan.source_head:
+        return (
+            f"source HEAD changed: planned {plan.source_head[:12]}, live "
+            f"{token.source_head[:12]}; rebuild the plan"
+        )
+    if token.source_tree_fingerprint != plan.source_tree_fingerprint:
+        return "source tree fingerprint changed since the plan was built; rebuild the plan"
+    return None
+
+
+def _source_identity_drift(root: Path, plan: ReleasePlan) -> str | None:
+    """Why the live source is not the source the plan bound, or None.
+
+    PERF-002: reuse the planning SourceIdentity via bounded revalidation when
+    it is present and bound to this root/model. This turns the second full
+    capture into a cheaper revalidation. Absent/invalid/stale tokens fall
+    back to the full capture.
+    """
+    plan_token = plan.source_revalidation_token
+    live = None
+    if plan_token is not None:
+        try:
+            from freshness import revalidate_source_identity
+
+            ok, _err = revalidate_source_identity(root, plan_token)
+            if ok:
+                live = plan_token
+        except Exception:
+            live = None
+    if live is None:
+        try:
+            from freshness import compute_source_identity
+
+            live = compute_source_identity(root)
+        except Exception as exc:
+            return f"cannot recompute source identity: {exc}"
+    if live.source_head != plan.source_head:
+        return (
+            f"source HEAD changed: planned "
+            f"{plan.source_head[:12]}, live "
+            f"{live.source_head[:12]}; rebuild the plan"
+        )
+    if live.source_tree_fingerprint != plan.source_tree_fingerprint:
+        return "source tree fingerprint changed since the plan was built; rebuild the plan"
+    return None
+
+
 def _preflight_plan(root: Path, plan: ReleasePlan) -> dict:
     """Verify every plan binding against the live world before ANY write."""
     from .paths import project_identity as _project_identity, project_lineage_identity
@@ -1962,8 +2246,14 @@ def _preflight_plan(root: Path, plan: ReleasePlan) -> dict:
                 continue
             if not fp.is_file():
                 return _release_failure("PREFLIGHT", f"crew scope path {rel} missing")
-            if _quick_hash(fp.read_bytes()) != expected:
+            if not _scope_identity_holds(fp.read_bytes(), expected):
                 return _release_failure("PREFLIGHT", f"crew scope path {rel} changed since defer")
+        # T-1746: the receipt this closure writes binds the plan's source
+        # identity; a tree that moved since the plan would leave a receipt
+        # that can never verify.
+        drift = _source_identity_drift(root, plan)
+        if drift:
+            return _release_failure("PREFLIGHT", drift)
         return {"ok": True}
 
     if plan.mode == "no-publish":
@@ -2038,40 +2328,9 @@ def _preflight_plan(root: Path, plan: ReleasePlan) -> dict:
             )
 
     # Source identity must still match the plan.
-    # PERF-002: reuse the planning SourceIdentity via bounded revalidation when
-    # it is present and bound to this root/model. This turns the second full
-    # capture into a cheaper revalidation. Absent/invalid/stale tokens fall
-    # back to the full capture.
-    plan_token = plan.source_revalidation_token
-    live = None
-    if plan_token is not None:
-        try:
-            from freshness import revalidate_source_identity
-
-            ok, _err = revalidate_source_identity(root, plan_token)
-            if ok:
-                live = plan_token
-        except Exception:
-            live = None
-    if live is None:
-        try:
-            from freshness import compute_source_identity
-
-            live = compute_source_identity(root)
-        except Exception as exc:
-            return _release_failure("PREFLIGHT", f"cannot recompute source identity: {exc}")
-    if live.source_head != plan.source_head:
-        return _release_failure(
-            "PREFLIGHT",
-            f"source HEAD changed: planned "
-            f"{plan.source_head[:12]}, live "
-            f"{live.source_head[:12]}; rebuild the plan",
-        )
-    if live.source_tree_fingerprint != plan.source_tree_fingerprint:
-        return _release_failure(
-            "PREFLIGHT",
-            "source tree fingerprint changed since the plan was built; rebuild the plan",
-        )
+    drift = _source_identity_drift(root, plan)
+    if drift:
+        return _release_failure("PREFLIGHT", drift)
 
     # Exact index identity.
     index = _capture_index_state(root)
@@ -2092,7 +2351,7 @@ def _preflight_plan(root: Path, plan: ReleasePlan) -> dict:
                 continue
             if not fp.is_file():
                 return _release_failure("PREFLIGHT", f"crew scope path {rel} missing")
-            if _quick_hash(fp.read_bytes()) != expected:
+            if not _scope_identity_holds(fp.read_bytes(), expected):
                 return _release_failure("PREFLIGHT", f"crew scope path {rel} changed since defer")
     else:
         try:
@@ -2369,15 +2628,48 @@ def _apply_no_publish(root: Path, plan: ReleasePlan) -> dict:
     Runs the local validator, writes the truthful skipped-publish LOG event
     through canonical machinery, closes the ticket with the digest, and goes
     SHIP -> DONE. Works even when Git is genuinely unavailable.
+
+    T-1827 (SRC-282:R003): the validator is an external process and runs in a
+    yielded window with the writer lock RELEASED; only the local journal and
+    closure work holds it. Losing the lock to another writer during that
+    window leaves this operation unresolved, which is a recovery situation,
+    never a silent write without the mutex.
     """
-    from .lock import project_writer_lock
+    from .lock import WriterBusy, project_writer_lock
     from .operations import RELEASE_SCOPE_DIR  # noqa: F401
 
     try:
-        with project_writer_lock(root):
-            return _apply_no_publish_locked(root, plan)
-    except PermissionError:
-        return _release_failure("WRITER_BUSY", "another live writer holds the project lock")
+        with project_writer_lock(root) as lock, _writer_locked_git_bound():
+            return _apply_no_publish_locked(root, plan, lock)
+    except WriterBusy as exc:
+        if not _release_op_started(root, plan):
+            from .lock import writer_busy_payload
+
+            busy = writer_busy_payload(exc)
+            return _release_failure(
+                "WRITER_BUSY",
+                busy["detail"],
+                remediation=busy["remediation"],
+                **({"holder": busy["holder"]} if "holder" in busy else {}),
+            )
+        return _release_failure(
+            "RECOVERY_REQUIRED",
+            "another writer took the project lock while local validation ran; "
+            "this release op is unresolved and no closure target was written -- "
+            "recover it before retrying",
+            op_id=plan.op_id,
+            recovery_required=True,
+        )
+
+
+def _release_op_started(root: Path, plan: ReleasePlan) -> bool:
+    """True when this release's journal already exists (the op is unresolved)."""
+    from .journal import Journal
+
+    try:
+        return Journal(root, plan.op_id).exists()
+    except (OSError, ValueError):
+        return True
 
 
 def _git_available(root: Path) -> bool:
@@ -2386,7 +2678,7 @@ def _git_available(root: Path) -> bool:
     return is_git_project_root(root)
 
 
-def _apply_no_publish_locked(root: Path, plan: ReleasePlan) -> dict:
+def _apply_no_publish_locked(root: Path, plan: ReleasePlan, lock) -> dict:
     from .journal import Journal, _drop_settled_staged
     from .operations import record_scope  # noqa: F401
 
@@ -2411,6 +2703,18 @@ def _apply_no_publish_locked(root: Path, plan: ReleasePlan) -> dict:
                 "CREW_NOT_READY",
                 (crew_context or {}).get("detail", "")
                 or "crew is not ready for terminal no-publish closure",
+            )
+        # T-1746: the receipt this op writes names the PLAN's epoch and ticket,
+        # so both must be the live epoch's own before the op becomes pending.
+        if crew_context["crew_epoch"] != plan.crew_epoch or (
+            crew_context.get("ticket_id") or ""
+        ) != plan.ticket_id:
+            return _release_failure(
+                "CREW_NOT_READY",
+                f"the plan names crew epoch {plan.crew_epoch} / ticket "
+                f"{plan.ticket_id or '(none)'}; the live epoch is "
+                f"{crew_context['crew_epoch']} / "
+                f"{crew_context.get('ticket_id') or '(none)'} -- rebuild the plan",
             )
     _try_journal(
         journal,
@@ -2458,9 +2762,16 @@ def _apply_no_publish_locked(root: Path, plan: ReleasePlan) -> dict:
             crew_closure=True,
         )
     try:
-        _no_publish_body(root, plan, journal)
+        _no_publish_body(root, plan, journal, lock)
     except ReleaseRefusal as exc:
-        return _release_failure("NO_PUBLISH", exc.detail)
+        untouched = _no_publish_targets_untouched(root, journal.read())
+        if untouched:
+            _try_journal(journal, "mark", "ABORTED")
+            _try_journal(journal, "update", release_stage="ABORTED")
+            _drop_settled_staged(journal)
+        return _release_failure(
+            "NO_PUBLISH", exc.detail, op_id=plan.op_id, recovery_required=not untouched
+        )
     _try_journal(journal, "mark", "COMMITTED")
     _try_journal(journal, "update", release_stage="COMMITTED")
     cleanup_pending = _drop_settled_staged(journal)
@@ -2471,6 +2782,8 @@ def _apply_no_publish_locked(root: Path, plan: ReleasePlan) -> dict:
         "stages_reached": ["NO_PUBLISH_MODE"],
         "op_id": plan.op_id,
         "tag": plan.tag,
+        "terminal_outcome": TERMINAL_LOCAL_NO_PUBLISH,
+        "publication": PUBLICATION_NOT_PERFORMED,
         "detail": "no-publish: local validation passed, skipped-publish event "
         "recorded, ticket closed; zero git writes",
     }
@@ -2479,9 +2792,52 @@ def _apply_no_publish_locked(root: Path, plan: ReleasePlan) -> dict:
     return result
 
 
-def _no_publish_body(root: Path, plan: ReleasePlan, journal) -> None:
-    """Local validation + canonical closure for no-publish (zero git)."""
-    gate = _run_gate(root, "core")
+def _no_publish_targets_untouched(root: Path, record: dict) -> bool:
+    """Prove that no effective closure target landed, including marker lag."""
+    from .journal import (
+        MISSING_FILE_DEPENDENCY,
+        TARGET_ALREADY_APPLIED,
+        TARGET_PENDING,
+        classify_target,
+        hash_file_dependency,
+        is_noop_target,
+        owned_target_path,
+    )
+
+    try:
+        for target in record.get("targets", []):
+            live = hash_file_dependency(owned_target_path(root, target["path"]))
+            if live == MISSING_FILE_DEPENDENCY:
+                live = ""
+            classification = classify_target(live, target["before_hash"], target["after_hash"])
+            if is_noop_target(target) and classification == TARGET_ALREADY_APPLIED:
+                continue
+            if target.get("applied") or classification != TARGET_PENDING:
+                return False
+    except (OSError, ValueError, KeyError, TypeError):
+        return False
+    return True
+
+
+def _no_publish_body(root: Path, plan: ReleasePlan, journal, lock=None) -> None:
+    """Local validation + canonical closure for no-publish (zero git).
+
+    T-1827 (SRC-282:R003): the validator runs with the writer lock RELEASED
+    (``writer_lock_yielded``), so a concurrent mutation waits seconds instead
+    of the gate's whole runtime. The plan's checkpoint hashes and source
+    identity are re-proven as soon as the lock is back, before anything is
+    journaled or written.
+    """
+    from .lock import writer_lock_yielded
+
+    if lock is None:
+        gate = _run_gate(root, "core")
+    else:
+        with writer_lock_yielded(lock):
+            gate = _run_gate(root, "core")
+        drift = _gate_window_drift(root, plan)
+        if drift:
+            raise ReleaseRefusal("VALIDATION_FAILED", drift)
     if not gate["ok"]:
         raise ReleaseRefusal(
             "VALIDATION_FAILED", f"no-publish local validation failed: {gate['detail']}"
@@ -2492,10 +2848,11 @@ def _no_publish_body(root: Path, plan: ReleasePlan, journal) -> None:
     _maybe_crash("NO_PUBLISH_GATE")
     git_ok = _git_available(root)
     reason = "policy" if git_ok else "no git"
-    run_msg = f"ship v{plan.version} -> skipped publish (no-publish: {reason})"
+    label = _ship_label(plan.version)
+    run_msg = f"{label} -> skipped publish (no-publish: {reason})"
     top = _top_todo(root)
     digest = (
-        f"done: ship v{plan.version} -> skipped publish "
+        f"done: {label} -> skipped publish "
         f"(no-publish: {reason})\n"
         f"remaining: {top}\n"
         f"awaiting: {'git needed to publish' if not git_ok else 'nothing'}\n"
@@ -2510,16 +2867,32 @@ def _no_publish_body(root: Path, plan: ReleasePlan, journal) -> None:
 
 
 def _apply_release(root: Path, plan: ReleasePlan) -> dict:
-    from .lock import project_writer_lock
+    from .lock import WriterBusy, project_writer_lock
 
     try:
-        with project_writer_lock(root):
-            return _apply_release_locked(root, plan)
-    except PermissionError:
-        return _release_failure("WRITER_BUSY", "another live writer holds the project lock")
+        with project_writer_lock(root) as lock, _writer_locked_git_bound():
+            return _apply_release_locked(root, plan, lock)
+    except WriterBusy as exc:
+        if not _release_op_started(root, plan):
+            from .lock import writer_busy_payload
+
+            busy = writer_busy_payload(exc)
+            return _release_failure(
+                "WRITER_BUSY",
+                busy["detail"],
+                remediation=busy["remediation"],
+                **({"holder": busy["holder"]} if "holder" in busy else {}),
+            )
+        return _release_failure(
+            "RECOVERY_REQUIRED",
+            "another writer took the project lock while an external gate ran; "
+            "this release op is unresolved -- recover it before retrying",
+            op_id=plan.op_id,
+            recovery_required=True,
+        )
 
 
-def _apply_release_locked(root: Path, plan: ReleasePlan) -> dict:
+def _apply_release_locked(root: Path, plan: ReleasePlan, lock) -> dict:
     from .journal import Journal, _drop_settled_staged
 
     journal = Journal(root, plan.op_id)
@@ -2633,7 +3006,7 @@ def _apply_release_locked(root: Path, plan: ReleasePlan) -> dict:
         else:
             if plan.start_stage == START_PREPARED:
                 # ---- content commit A --------------------------------------
-                commit_result = _stage_and_commit(root, plan, journal)
+                commit_result = _stage_and_commit(root, plan, journal, lock)
                 if not commit_result["ok"]:
                     try:
                         _restore_index(
@@ -2817,9 +3190,28 @@ def _stage_release_content(root: Path, plan: ReleasePlan) -> dict:
     return {"ok": True}
 
 
+def _gate_command(root: Path, gate: str) -> list[str]:
+    """The validator that judges this release, as argv.
+
+    The running home validates itself. A managed project is judged by that
+    same validator, bound through `--project-root`; the presence of an
+    unrelated project-local `tools/validate.py` grants it no authority.
+    """
+    canonical = Path(__file__).resolve().parent.parent / "validate.py"
+    if root.resolve() == canonical.parent.parent:
+        return [sys.executable, str(canonical), "--gate", gate]
+    return [sys.executable, str(canonical), "--project-root", str(root), "--gate", gate]
+
+
 def _run_gate(root: Path, gate: str) -> dict:
+    if gate == "ship":
+        from .focused_unit import publication_gate
+
+        problem = publication_gate(root)
+        if problem:
+            return {"ok": False, "detail": problem}
     result = subprocess.run(
-        [sys.executable, str(root / "tools" / "validate.py"), "--gate", gate],
+        _gate_command(root, gate),
         cwd=str(root),
         capture_output=True,
         text=True, encoding="utf-8",
@@ -2891,7 +3283,7 @@ def _verify_index_after_gate(root: Path, plan: ReleasePlan) -> dict:
     return {"ok": True}
 
 
-def _stage_and_commit(root: Path, plan: ReleasePlan, journal) -> dict:
+def _stage_and_commit(root: Path, plan: ReleasePlan, journal, lock=None) -> dict:
     """Stage, gate, verify, commit -- the local content commit A.
 
     The intended tree is captured with `git write-tree` and PERSISTED to the
@@ -2903,7 +3295,13 @@ def _stage_and_commit(root: Path, plan: ReleasePlan, journal) -> dict:
     HEAD^{tree} MUST equal the recorded intended tree. A hook or a concurrent
     git process that changes the selected tree is a refusal with zero
     publication, never "the reviewed release".
+
+    T-1827 (SRC-282:R003): the ship gate is an external validator and runs in
+    a yielded window with the writer lock RELEASED. Back under the lock, the
+    staged index and the plan bindings are re-proven before any commit.
     """
+    from .lock import writer_lock_yielded
+
     stage_result = _stage_release_content(root, plan)
     if not stage_result["ok"]:
         return stage_result
@@ -2922,7 +3320,17 @@ def _stage_and_commit(root: Path, plan: ReleasePlan, journal) -> dict:
     # journal evidence, never leave release staging behind (T-1003 exact
     # index rollback).
     _maybe_crash("CONTENT_STAGED")
-    gate_result = _run_gate(root, "ship")
+    if lock is None:
+        gate_result = _run_gate(root, "ship")
+    else:
+        with writer_lock_yielded(lock):
+            gate_result = _run_gate(root, "ship")
+        drift = _gate_window_drift(root, plan)
+        if drift:
+            return {"ok": False, "stage": "SHIP_GATE", "detail": drift}
+        staged_drift = _staged_index_drift(root, owned_post_stage_sha)
+        if staged_drift:
+            return {"ok": False, "stage": "SHIP_GATE", "detail": staged_drift}
     if not gate_result["ok"]:
         return {"ok": False, "stage": "SHIP_GATE", "detail": gate_result["detail"]}
     idx_result = _verify_index_after_gate(root, plan)
@@ -2980,7 +3388,13 @@ def _publish_branch(
     The returned snapshot is the post-branch-push observation."""
     # W2-001: publish to the captured raw push endpoint, not the symbolic
     # `origin` alias which may have drifted after planning.
-    result = _git(root, "push", plan.remote_push_endpoint or "origin", plan.branch)
+    result = _git(
+        root,
+        "push",
+        plan.remote_push_endpoint or "origin",
+        plan.branch,
+        timeout=REMOTE_GIT_TIMEOUT,
+    )
     if not result.ok:
         raise ReleaseRefusal(
             "RELEASE_FAILED", f"branch push failed: {result.stderr or result.stdout}"
@@ -3007,12 +3421,13 @@ def _publish_branch(
 
 def _finish_targets(
     root: Path, plan: ReleasePlan, digest: str, run_msg: str, crew: bool = False
-) -> list[dict]:
+) -> tuple[list[dict], str]:
     """Build the ONE atomic closure plan: RUN event + finish event + BOARD +
     STATE + digest, all through the canonical SAIOPS planner. The journal
     carries a SINGLE LOG target whose after-bytes recovery can verify. A
     terminal CREW release (no ## DOING ticket) closes through
-    _plan_crew_closure instead of the ordinary ticket closure."""
+    _plan_crew_closure instead of the ordinary ticket closure. Returns the
+    targets and the closure plan's op id, which its LOG lines carry."""
     import datetime
 
     now = datetime.datetime.now(datetime.timezone.utc).strftime("%d.%m.%y %H:%M")
@@ -3027,6 +3442,7 @@ def _finish_targets(
             utc,
             digest_text=digest,
             prefix_run=run_msg,
+            published=plan.mode != "no-publish",
         )
     else:
         finish = _plan_finish_ticket(
@@ -3043,7 +3459,7 @@ def _finish_targets(
             "RELEASE_FAILED",
             f"closure finish could not be planned: {getattr(finish, 'message', '')}",
         )
-    return [
+    targets = [
         {
             "path": t.path,
             "role": t.role,
@@ -3053,12 +3469,20 @@ def _finish_targets(
         }
         for t in finish.targets
     ]
+    return targets, finish.op_id
 
 
 def _apply_finish_targets(
     root: Path, journal, plan: ReleasePlan, digest: str, run_msg: str
 ) -> None:
-    targets = _finish_targets(root, plan, digest, run_msg, crew=plan.crew_closure)
+    targets, closure_op_id = _finish_targets(root, plan, digest, run_msg, crew=plan.crew_closure)
+    # T-1681: the closure's LOG lines carry the finish plan's own op id while
+    # its targets are applied inside THIS journal, so that id has no record of
+    # its own. The release record names it before any target lands, and
+    # `journal.resolvable_op_ids` resolves an id a release record names -- or
+    # the shipped ticket reads as typed by hand to `lifecycle_authority` and
+    # to the [saio] provenance gate.
+    _try_journal(journal, "update", closure_op_id=closure_op_id)
     # W2-005: the release receipt is MANDATORY, not optional. Any failure
     # to construct it raises ReleaseRefusal before closure targets are applied.
     receipt_target = _release_receipt_target(root, plan)
@@ -3384,6 +3808,7 @@ def _push_tag(root: Path, plan: ReleasePlan, target: str) -> RemoteSnapshot:
         "push",
         plan.remote_push_endpoint or "origin",
         f"refs/tags/{plan.tag}:refs/tags/{plan.tag}",
+        timeout=REMOTE_GIT_TIMEOUT,
     )
     if not result.ok:
         raise ReleaseRefusal("RELEASE_FAILED", f"tag push failed: {result.stderr or result.stdout}")
@@ -3630,6 +4055,8 @@ def _head_relation(root: Path, remote_tip: str) -> str:
 
 
 def _git(root: Path, *args: str, literal: bool = False, timeout: float | None = None) -> GitResult:
+    if timeout is None:
+        timeout = _LOCKED_GIT_BOUND.get()
     env = None
     if literal:
         env = {**os.environ, "GIT_LITERAL_PATHSPECS": "1"}
@@ -3708,6 +4135,12 @@ def _installed_version(root: Path) -> str:
             ),
         )
     return version.read_text(encoding="utf-8-sig").strip().split("\n")[0]
+
+
+def _ship_label(version: str) -> str:
+    """How a release names itself in LOG, digest and commit text. An
+    unversioned local closure says so; it never prints an invented number."""
+    return f"ship v{version}" if version else "ship (no version)"
 
 
 def _branch(root: Path) -> str:
@@ -3980,13 +4413,10 @@ def recover_release_op(project_root: Path | str, op_id: str) -> dict:
     try:
         with _recover_lock(root):
             return _recover_release_op_locked(root, op_id)
-    except PermissionError:
-        return {
-            "ok": False,
-            "code": "WRITER_BUSY",
-            "op_id": op_id,
-            "detail": "another live writer holds the project lock; retry after it releases",
-        }
+    except PermissionError as exc:
+        from .lock import writer_busy_payload
+
+        return {"ok": False, **writer_busy_payload(exc), "op_id": op_id}
 
 
 def _recover_release_op_locked(root: Path, op_id: str) -> dict:
@@ -4128,14 +4558,14 @@ def _recover_no_publish(root: Path, journal, record: dict) -> dict:
     """no-publish recovery: replay any unapplied closure targets, verify,
     COMMITTED. No git facts exist to classify.
 
-    A PREPARED no-publish op with NO applied closure target never began: the
+    A no-publish op with byte-proven untouched closure targets never began: the
     journal was created (Journal.start) and possibly the local gate ran, but
     no canonical byte changed. Marking it COMMITTED would fabricate a
     successful release completion out of a crash-before-body -- the journal's
     own rule for a PREPARED op with nothing applied is ABORTED, and the
-    no-publish path must mirror it (T-1003 release recovery)."""
-    targets = record.get("targets", [])
-    if not any(t.get("applied") for t in targets):
+    no-publish path must mirror it (T-1003 release recovery). Progress markers
+    alone cannot prove absence of a write or waive a third-state conflict."""
+    if _no_publish_targets_untouched(root, record):
         _try_recovery_journal(journal, "mark", "ABORTED")
         _try_recovery_journal(journal, "update", release_stage="ABORTED")
         return {
@@ -4571,9 +5001,14 @@ def _is_admissible_terminal_receipt(record: dict) -> bool:
         return False
     if record.get("release_stage") != "COMMITTED":
         return False
-    if not record.get("op_id") or not record.get("ticket_id") or not record.get("source_head"):
+    if not record.get("op_id") or not record.get("source_head"):
         return False
     mode = record.get("mode") or "full"
+    # T-1746: the closure identity is a ticket, except for the LOCAL closure of
+    # a crew epoch that owns none -- the epoch is its identity. A publication
+    # without a ticket stays a malformed sibling.
+    if not record.get("ticket_id") and not (mode == "no-publish" and record.get("crew_epoch")):
+        return False
     if mode == "no-publish":
         return True
     if mode != "full":
@@ -4615,7 +5050,11 @@ def _select_terminal_receipt(candidates: list[dict]) -> dict:
 
 
 def _receipt_evidence(record: dict) -> dict:
+    local = (record.get("mode") or "full") == "no-publish"
     return {
+        "terminal_outcome": TERMINAL_LOCAL_NO_PUBLISH if local else TERMINAL_PUBLISHED,
+        "publication": PUBLICATION_NOT_PERFORMED if local else PUBLICATION_PERFORMED,
+        "crew_epoch": record.get("crew_epoch", ""),
         "op_id": record.get("op_id", ""),
         "ticket_id": record.get("ticket_id", ""),
         "tag": record.get("tag", ""),
@@ -4833,6 +5272,14 @@ def release_verdict(root: Path | str, crew_epoch: str | None = None, receipt_sna
         }
     for record in snapshot.records:
         if record.get("operation") != "release":
+            continue
+        if record.get("status") == "ABORTED":
+            # T-1746: recovery writes ABORTED only for a release that never
+            # began -- no closure target applied, no commit, the index
+            # restored. Counted as a malformed sibling, one refused local
+            # validation left the epoch's lineage unclean for good, with no
+            # route but deleting evidence by hand. A non-release competes
+            # with nothing; CONFLICT and RESOLVED siblings still do.
             continue
         raw_records.append(record)
     if crew_epoch is not None:

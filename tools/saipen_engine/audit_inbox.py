@@ -1,9 +1,8 @@
 """Audit Inbox -- external transport adapter into Source Intake (T-1227).
 
 `SOURCE-AUDIT-INBOX-01`. The canonical inbox is exactly `<project-root>/audit/`
-and its canonical layers are DIRECT regular files matching `^[1-9][0-9]*\\.md$`.
-Nothing else in that directory is an audit layer, nothing else is ever read,
-captured or deleted, and the scan never recurses.
+and its layers are direct Markdown or plain-text handoffs, with ordinary names
+or legacy numeric names. Other entries remain residue; the scan never recurses.
 
 This module is TRANSPORT ONLY. It enumerates layers, snapshots one safely,
 hashes it, classifies its generation against the existing Source Receipt
@@ -40,9 +39,10 @@ from .paths import prove_owned_dir_chain, prove_owned_regular, read_bound_regula
 from .plan import semantic_payload_hash
 
 RULE_ID = "SOURCE-AUDIT-INBOX-01"
-SCHEMA_VERSION = 1
+SCHEMA_VERSION = 2
 AUDIT_DIRNAME = "audit"
-LAYER_RE = re.compile(r"^[1-9][0-9]*\.md$")
+NUMBERED_LAYER_RE = re.compile(r"^[1-9][0-9]*\.md$")
+LAYER_RE = re.compile(r"^(?!\.)[^/\\\x00-\x1f\x7f-\x9f\u2028\u2029]+\.(?i:md|markdown|txt)$")
 BINDING_REL = ".saipen/intake/audit_inbox.json"
 SOURCE_KIND = "external_audit"
 MAX_LAYER_BYTES = intake._BODY_MAX
@@ -98,19 +98,45 @@ def audit_dir(root: Path | str) -> Path:
 
 
 def layer_number(name: str) -> int | None:
-    """The positive layer number of a canonical filename, else None."""
-    if not LAYER_RE.fullmatch(name):
+    """A legacy positive numeric identity; named drops have no number."""
+    if not NUMBERED_LAYER_RE.fullmatch(name):
         return None
     return int(name[:-3])
 
 
-def scan_layers(root: Path | str) -> list[dict]:
-    """Canonical layers, lowest number first.
+def layer_path(selector: str) -> str | None:
+    """Resolve an inspection selector without opening or traversing a path."""
+    if selector.isascii() and selector.isdigit() and int(selector) > 0:
+        return f"{AUDIT_DIRNAME}/{int(selector)}.md"
+    path = Path(selector)
+    if path.parent.as_posix() not in (".", AUDIT_DIRNAME):
+        return None
+    if not LAYER_RE.fullmatch(path.name):
+        return None
+    return f"{AUDIT_DIRNAME}/{path.name}"
 
-    Direct entries only -- `audit/done/1.md` is not a layer. Zero-padded
-    (`01.md`), non-numeric (`notes.md`) and non-Markdown (`1.txt`) names are
-    foreign files: ignored here and therefore never deleted by cleanup.
+
+def _layer_key(item: dict) -> int | str:
+    """Legacy numbers stay numbers; a named drop is identified by its path."""
+    return item["layer"] if item["layer"] is not None else item["rel"]
+
+
+def _invalid_summary(item: dict) -> dict:
+    """Identify named failures while retaining the legacy numeric shape."""
+    summary = {"layer": item["layer"], "reason": item.get("reason") or item.get("detail")}
+    if item["layer"] is None:
+        summary["path"] = item["rel"]
+    return summary
+
+
+def scan_layers(root: Path | str) -> list[dict]:
+    """Numbered layers first, then named text files in durable first-seen order.
+
+    Direct entries only -- `audit/done/1.md` is not a layer. A named drop has
+    `layer: None`: its path+digest is identity, never a fabricated layer ID.
     An absent or unsafe `audit/` directory is a normal empty inbox.
+    Order preserves numeric layers, then persisted first-seen order for named
+    generations independently of mtime (SRC-209:R004).
     """
     root = Path(root)
     directory = audit_dir(root)
@@ -127,7 +153,7 @@ def scan_layers(root: Path | str) -> list[dict]:
         return []
     for entry in entries:
         number = layer_number(entry.name)
-        if number is None:
+        if not LAYER_RE.fullmatch(entry.name):
             continue
         layers.append(
             {
@@ -136,16 +162,78 @@ def scan_layers(root: Path | str) -> list[dict]:
                 "name": entry.name,
             }
         )
-    layers.sort(key=lambda item: item["layer"])
+
+    # The order belongs to exact generations, not reusable filenames.
+    doc, state, _ = read_binding_state(root)
+    order_map: dict[tuple[str, str], int] = {}
+    if state == BINDING_OK:
+        for idx, item in enumerate(doc.get("named_first_seen", [])):
+            order_map[(item["rel"], item["file_sha256"])] = idx
+
+    generations = {}
+    if order_map:
+        for item in layers:
+            if item["layer"] is None:
+                snap = snapshot_layer(root, item["rel"])
+                generations[item["rel"]] = snap["sha256"] if snap.get("ok") else ""
+
+    def _sort_key(item: dict):
+        if item["layer"] is not None:
+            return (0, item["layer"], "", "")
+        rel = item["rel"]
+        position = order_map.get((rel, generations.get(rel, "")), len(order_map))
+        return (1, position, item["name"].casefold(), item["name"])
+
+    layers.sort(key=_sort_key)
     return layers
+
+
+def _remember_named_generation(doc: dict, rel: str, digest: str, observed_at: str) -> dict | None:
+    """Append one observation without replacing an earlier generation's evidence."""
+    first_seen = doc.setdefault("named_first_seen", [])
+    if any(item["rel"] == rel and item["file_sha256"] == digest for item in first_seen):
+        return None
+    record = {"rel": rel, "file_sha256": digest, "first_seen_at": observed_at}
+    first_seen.append(record)
+    return record
+
+
+def record_named_first_seen(root: Path | str, entries: list[dict] | None = None) -> list[dict]:
+    """Observe exact named generations under the canonical writer lock.
+
+    Durable order without filesystem mtime (SRC-209:R004). Pure transport
+    chronology; never creates or moves tickets or receipts.
+    """
+    from .lock import project_writer_lock
+
+    root = Path(root)
+    added = []
+    with project_writer_lock(root):
+        doc = read_binding(root)
+        candidates = scan_layers(root) if entries is None else entries
+        for entry in candidates:
+            rel = entry.get("rel")
+            if not isinstance(rel, str) or layer_path(rel) != rel:
+                continue
+            if layer_number(Path(rel).name) is not None:
+                continue
+            snap = snapshot_layer(root, rel)
+            # An unreadable observation retains its path, without claiming a
+            # digest. Repaired bytes acquire their own position on observation.
+            sha = snap["sha256"] if snap.get("ok") else ""
+            rec = _remember_named_generation(doc, rel, sha, _utc())
+            if rec is not None:
+                added.append(rec)
+        if added:
+            write_binding(root, doc)
+    return added
 
 
 def scan_residue(root: Path | str) -> list[dict]:
     """Direct non-layer entries in `audit/`, sorted by name.
 
-    `notes.md`, `01.md`, `1.txt` and a `done/` subdirectory are all residue:
-    foreign to the transport, so never read and never deleted, but still
-    physically in the inbox. The scan does not recurse -- a subdirectory is
+    Unsupported files and subdirectories are residue: never read or deleted.
+    The scan does not recurse -- a subdirectory is
     ONE entry, whatever it contains. Dot-prefixed names are exempt
     infrastructure. An absent or unsafe `audit/` holds no residue.
     """
@@ -166,7 +254,7 @@ def scan_residue(root: Path | str) -> list[dict]:
         name = entry.name
         if name.startswith(RESIDUE_EXEMPT_PREFIX):
             continue
-        if layer_number(name) is not None:
+        if LAYER_RE.fullmatch(name):
             # A canonical NAME is a layer even when its bytes are unusable --
             # it is classified (and possibly reported INVALID) as a layer, so
             # counting it here too would report the same file twice.
@@ -201,7 +289,7 @@ def snapshot_layer(root: Path | str, rel: str) -> dict:
     never deleted.
     """
     root = Path(root)
-    if layer_number(Path(rel).name) is None or Path(rel).parent.as_posix() != AUDIT_DIRNAME:
+    if not LAYER_RE.fullmatch(Path(rel).name) or Path(rel).parent.as_posix() != AUDIT_DIRNAME:
         return _invalid("noncanonical", f"{rel} is not a canonical audit layer")
     try:
         owned_target_path(root, rel, kind="audit layer")
@@ -283,7 +371,8 @@ def _binding_record_problem(rel: object, record: object) -> str | None:
     if not isinstance(record, dict):
         return f"{rel} is not a record"
     layer = record.get("layer")
-    if not isinstance(layer, int) or isinstance(layer, bool) or layer < 1:
+    named = layer is None and layer_path(rel) == rel and layer_number(Path(rel).name) is None
+    if not named and (not isinstance(layer, int) or isinstance(layer, bool) or layer < 1):
         return f"{rel} layer {record.get('layer')!r} is not a layer number"
     generation = record.get("generation")
     if not isinstance(generation, int) or isinstance(generation, bool) or generation < 1:
@@ -331,6 +420,27 @@ def read_binding_state(root: Path | str) -> tuple[dict, str, str]:
         problem = _binding_record_problem(rel, record)
         if problem is not None:
             return empty, BINDING_CORRUPT, f"{BINDING_REL} record is undecodable: {problem}"
+    first_seen = doc.get("named_first_seen", [])
+    if not isinstance(first_seen, list):
+        return empty, BINDING_CORRUPT, f"{BINDING_REL} named_first_seen is not a list"
+    seen = set()
+    for record in first_seen:
+        if not isinstance(record, dict):
+            return empty, BINDING_CORRUPT, f"{BINDING_REL} has an invalid named observation"
+        rel, digest = record.get("rel"), record.get("file_sha256")
+        observed_at = record.get("first_seen_at")
+        if (
+            not isinstance(rel, str)
+            or layer_path(rel) != rel
+            or layer_number(Path(rel).name) is not None
+            or not isinstance(digest, str)
+            or (digest != "" and not _SHA256_RE.fullmatch(digest))
+            or not isinstance(observed_at, str)
+            or not observed_at
+            or (rel, digest) in seen
+        ):
+            return empty, BINDING_CORRUPT, f"{BINDING_REL} has an invalid named observation"
+        seen.add((rel, digest))
     doc.setdefault("schema_version", SCHEMA_VERSION)
     return doc, BINDING_OK, ""
 
@@ -597,26 +707,39 @@ def classify(root: Path | str) -> dict:
 
     # Bindings whose transport file is gone. The Source Receipt is already
     # durable authority: a vanished ACTIVE transport is a DIAGNOSTIC, never a
-    # reason to lose Work; a vanished closed one is settled cleanup.
+    # reason to lose Work. A vanished closed one still owes journaled binding
+    # settlement unless consumption already recorded DELETED.
     orphans: list[dict] = []
     for rel, record in sorted(bound.items()):
         if rel in seen or not isinstance(record, dict):
             continue
         state = record.get("state")
-        orphans.append(
-            {
-                "rel": rel,
-                "layer": record.get("layer"),
-                "receipt_id": record.get("receipt_id"),
-                "linked_work": record.get("linked_work"),
-                "sha256": record.get("file_sha256"),
-                "state": (
-                    DELETED
-                    if state in (DELETED, CLOSED_PENDING_DELETE)
-                    else MISSING_AFTER_CAPTURE
-                ),
-            }
-        )
+        item = {
+            "rel": rel,
+            "layer": record.get("layer"),
+            "receipt_id": record.get("receipt_id"),
+            "linked_work": record.get("linked_work"),
+            "sha256": record.get("file_sha256"),
+            "state": (
+                DELETED if state in (DELETED, CLOSED_PENDING_DELETE) else MISSING_AFTER_CAPTURE
+            ),
+        }
+        if state != DELETED:
+            missing = snapshot_layer(root, rel)
+            if missing.get("code") == "AUDIT_LAYER_ABSENT":
+                status = intake.status(root, record.get("receipt_id"))
+                if status.get("ok") and (
+                    status.get("status") == intake.CLOSED_STATUS
+                    or status.get("location") == "retired"
+                ):
+                    item.update(
+                        state=CLOSED_PENDING_DELETE,
+                        already_absent=True,
+                        linked_work=status.get("linked_work") or record.get("linked_work"),
+                    )
+                    layers.append(item)
+                    continue
+        orphans.append(item)
     return {
         "ok": True,
         "binding_state": binding_state,
@@ -690,16 +813,14 @@ def projection_from_classification(
     invalid = [item for item in layers if item["state"] in (INVALID, BLOCKED)]
     base = {
         "rule_id": RULE_ID,
-        "pending": [item["layer"] for item in layers if item["state"] in (NEW, ACTIVE)],
+        "pending": [_layer_key(item) for item in layers if item["state"] in (NEW, ACTIVE)],
         "closed_pending_delete": [
-            item["layer"] for item in layers if item["state"] == CLOSED_PENDING_DELETE
+            _layer_key(item) for item in layers if item["state"] == CLOSED_PENDING_DELETE
         ],
-        "invalid": [
-            {"layer": item["layer"], "reason": item.get("reason") or item.get("detail")}
-            for item in invalid
-        ],
+        "invalid": [_invalid_summary(item) for item in invalid],
         "residue": [item["rel"] for item in residue[:RESIDUE_REPORT_CAP]],
         "residue_count": len(residue),
+        "unresolved_audit_count": len([item for item in layers if item["state"] in (NEW, ACTIVE)]),
     }
     for item in layers:
         if item["state"] == CLOSED_PENDING_DELETE:
@@ -711,7 +832,10 @@ def projection_from_classification(
                 "receipt": item["receipt_id"],
                 "work": item.get("linked_work"),
                 "detail": (
-                    f"{item['rel']} source {item['receipt_id']} is CLOSED and unchanged; "
+                    f"{item['rel']} source {item['receipt_id']} is CLOSED and its "
+                    "transport is already absent; settle the journaled binding"
+                    if item.get("already_absent")
+                    else f"{item['rel']} source {item['receipt_id']} is CLOSED and unchanged; "
                     "settle the journaled cleanup"
                 ),
             }
@@ -729,8 +853,7 @@ def projection_from_classification(
                     "path": item["rel"],
                     "receipt": item["receipt_id"],
                     "detail": (
-                        f"{item['rel']} is captured as {item['receipt_id']} "
-                        "but carries no Work"
+                        f"{item['rel']} is captured as {item['receipt_id']} but carries no Work"
                     ),
                 }
             if board_tickets is None and board_error is None:
@@ -739,9 +862,7 @@ def projection_from_classification(
 
                     if root is None:
                         raise ValueError("no project root for the BOARD.md fallback")
-                    board_text = (Path(root) / ".saipen" / "BOARD.md").read_text(
-                        encoding="utf-8"
-                    )
+                    board_text = (Path(root) / ".saipen" / "BOARD.md").read_text(encoding="utf-8")
                     parsed_board = parse_board(board_text)
                 except (OSError, UnicodeError, ValueError) as exc:
                     board_tickets = {}
@@ -758,11 +879,35 @@ def projection_from_classification(
                 work, board_tickets, agent=agent, now=now
             )
             if not workable:
+                from .board import resolve_root_blocker
+
+                root_tid, root_cls, _root_raw = (
+                    resolve_root_blocker(work, board_tickets)
+                    if board_tickets
+                    else (work, "UNKNOWN", "")
+                )
+                if root_cls == "BLOCKED_EXTERNAL":
+                    rem_act = f"saipen ticket resolve-external {root_tid}"
+                elif root_cls in (
+                    "WAIT_USER_DECISION",
+                    "WAIT_USER_CONFIRMATION",
+                    "DEFERRED_BY_OPERATOR",
+                    "WAIT_ROLE",
+                ):
+                    rem_act = "saipen status"
+                else:
+                    rem_act = "saipen status"
                 unworkable_active.append(
                     {
                         "layer": item["layer"],
                         "work": work,
-                        "reason": board_error or "linked Work is not currently workable",
+                        "root_ticket": root_tid,
+                        "blocker_class": root_cls,
+                        "remediation_action": rem_act,
+                        "reason": (
+                            board_error
+                            or f"linked Work {work} is not currently workable ({root_cls})"
+                        ),
                     }
                 )
                 base["unworkable_active"] = unworkable_active
@@ -779,6 +924,7 @@ def projection_from_classification(
         if item["state"] == NEW:
             return {
                 **base,
+                **({"idle_only": True} if item["layer"] is None else {}),
                 "action": "saipen audit ingest",
                 "layer": item["layer"],
                 "path": item["rel"],
@@ -792,13 +938,45 @@ def projection_from_classification(
             "detail": "audit inbox holds only invalid layer(s); it is not idle",
         }
     if unworkable_active:
+        ext_items = [
+            item for item in unworkable_active if item.get("blocker_class") == "BLOCKED_EXTERNAL"
+        ]
+        op_items = [
+            item
+            for item in unworkable_active
+            if item.get("blocker_class")
+            in (
+                "WAIT_USER_DECISION",
+                "WAIT_USER_CONFIRMATION",
+                "DEFERRED_BY_OPERATOR",
+                "WAIT_ROLE",
+            )
+        ]
+        if ext_items:
+            idle_cls = "IDLE_BLOCKED_EXTERNAL"
+            first_rem = (
+                ext_items[0].get("remediation_action")
+                or f"saipen ticket resolve-external {ext_items[0].get('root_ticket', '')}"
+            )
+        elif op_items:
+            idle_cls = "IDLE_OPERATOR_REQUIRED"
+            first_rem = op_items[0].get("remediation_action") or "saipen status"
+        else:
+            idle_cls = "IDLE_BLOCKED_EXTERNAL"
+            first_rem = unworkable_active[0].get("remediation_action") or "saipen status"
+        unresolved_count = len(base["pending"])
         return {
             **base,
             "action": "saipen audit status",
             "unworkable_active_only": True,
+            "unresolved_audit_count": unresolved_count,
+            "idle_classification": idle_cls,
+            "stop_reason": "NO_ADMISSIBLE_WORK",
+            "next_exact_action": first_rem,
             "detail": (
-                "audit inbox has no workable ACTIVE or NEW layer; linked Work "
-                "for the remaining ACTIVE layer(s) is not currently workable"
+                f"audit inbox has no workable ACTIVE or NEW layer; {len(unworkable_active)} "
+                f"linked Work item(s) unworkable ({idle_cls}); "
+                f"next exact action: {first_rem}"
             ),
         }
     if residue:
@@ -854,9 +1032,7 @@ def status_from_classification(
                 state, root, tickets=tickets, agent=agent, now=now
             ),
         }
-    routed = projection_from_classification(
-        state, root, tickets=tickets, agent=agent, now=now
-    )
+    routed = projection_from_classification(state, root, tickets=tickets, agent=agent, now=now)
     layers = state["layers"]
     return {
         "ok": True,
@@ -875,12 +1051,10 @@ def status_from_classification(
             for item in layers
         ],
         "closed_pending_delete": [
-            item["layer"] for item in layers if item["state"] == CLOSED_PENDING_DELETE
+            _layer_key(item) for item in layers if item["state"] == CLOSED_PENDING_DELETE
         ],
         "invalid": [
-            {"layer": item["layer"], "reason": item.get("reason") or item.get("detail")}
-            for item in layers
-            if item["state"] in (INVALID, BLOCKED)
+            _invalid_summary(item) for item in layers if item["state"] in (INVALID, BLOCKED)
         ],
         "orphans": state["orphans"],
         "residue": state["residue"][:RESIDUE_REPORT_CAP],
@@ -905,7 +1079,7 @@ def _last_allocated_id(root: Path | str) -> int | None:
     return next_id - 1 if next_id > 1 else None
 
 
-def provenance_trace(root: Path | str, layer: int | None = None) -> dict:
+def provenance_trace(root: Path | str, layer: int | str | None = None) -> dict:
     """Read-only audit -> receipt -> Work -> disposition trace (T-1232).
 
     Built from the durable binding plus the Source index, so it SURVIVES the
@@ -929,7 +1103,9 @@ def provenance_trace(root: Path | str, layer: int | None = None) -> dict:
     for rel, record in sorted((binding.get("layers") or {}).items()):
         if not isinstance(record, dict):
             continue
-        if layer is not None and record.get("layer") != layer:
+        if isinstance(layer, int) and record.get("layer") != layer:
+            continue
+        if isinstance(layer, str) and rel != layer:
             continue
         receipt_id = record.get("receipt_id")
         entry = (index.get("active") or {}).get(receipt_id)
@@ -975,7 +1151,7 @@ def bind_layer(
     root: Path | str,
     rel: str,
     *,
-    layer: int,
+    layer: int | None,
     generation: int,
     file_sha256: str,
     size_bytes: int,
@@ -998,31 +1174,34 @@ def bind_layer(
     cannot be decoded (SRC-019:R6): the write would otherwise replace unread
     authority with a document holding only this record.
     """
+    from .lock import project_writer_lock
+
     root = Path(root)
-    doc = read_binding(root)
-    layers = doc.setdefault("layers", {})
-    previous = layers.get(rel) if isinstance(layers.get(rel), dict) else {}
-    record = {
-        "layer": layer,
-        "generation": generation,
-        "file_sha256": file_sha256,
-        "receipt_sha256": receipt_sha256,
-        "binding": binding,
-        "size_bytes": size_bytes,
-        "receipt_id": receipt_id,
-        "linked_work": linked_work,
-        "state": state,
-        "captured_at": previous.get("captured_at") or _utc(),
-        "closed_at": previous.get("closed_at"),
-    }
-    # Provenance is written ONCE, at capture, and never revised by a later
-    # binding update: a producer that could rewrite its own claims after the
-    # fact would make the trace worthless.
-    carried = previous.get("provenance") or provenance
-    if carried:
-        record["provenance"] = carried
-    layers[rel] = record
-    write_binding(root, doc)
+    with project_writer_lock(root):
+        doc = read_binding(root)
+        layers = doc.setdefault("layers", {})
+        previous = layers.get(rel) if isinstance(layers.get(rel), dict) else {}
+        record = {
+            "layer": layer,
+            "generation": generation,
+            "file_sha256": file_sha256,
+            "receipt_sha256": receipt_sha256,
+            "binding": binding,
+            "size_bytes": size_bytes,
+            "receipt_id": receipt_id,
+            "linked_work": linked_work,
+            "state": state,
+            "captured_at": previous.get("captured_at") or _utc(),
+            "closed_at": previous.get("closed_at"),
+        }
+        # Preserve the original producer claims across later binding updates.
+        carried = previous.get("provenance") or provenance
+        if carried:
+            record["provenance"] = carried
+        layers[rel] = record
+        if layer is None:
+            _remember_named_generation(doc, rel, file_sha256, record["captured_at"])
+        write_binding(root, doc)
     return record
 
 
@@ -1157,9 +1336,7 @@ def delete_gate(root: Path | str, rel: str) -> dict:
         # resolves to a receipt is still bound truth, not an unknown file.
         # Derive the binding from that identity rather than refusing (the
         # migration case) -- an unresolvable layer still refuses.
-        derived = (
-            receipt_for_digest(root, snap["sha256"]) if snap.get("ok") else None
-        )
+        derived = receipt_for_digest(root, snap["sha256"]) if snap.get("ok") else None
         if not derived:
             return {
                 "ok": False,
@@ -1301,9 +1478,7 @@ def consume_layer(root: Path | str, rel: str, agent: str, *, dry_run: bool = Fal
     binding_bytes = _binding_bytes(binding_doc)
 
     docs, state, _board, log_tail = operations._read(root)
-    op_id = "audit-consume-" + hash_bytes(
-        f"{rel}:{record.get('file_sha256')}".encode("utf-8")
-    )[:16]
+    op_id = "audit-consume-" + hash_bytes(f"{rel}:{record.get('file_sha256')}".encode("utf-8"))[:16]
     now, utc = operations._now(), operations._utc_iso()
     event, line = operations._event_line(
         docs,
@@ -1347,6 +1522,10 @@ def consume_layer(root: Path | str, rel: str, agent: str, *, dry_run: bool = Fal
             }
         )
         preconditions[rel] = targets[0]["before_hash"]
+    else:
+        # Settlement must not release a reference if a new file arrived after
+        # the absence proof, even though this plan has no delete target.
+        preconditions[rel] = ""
     binding_before = _binding_precondition(root)
     targets.append(
         {

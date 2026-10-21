@@ -97,11 +97,17 @@ class NextActionDeadlockTests(unittest.TestCase):
         self.base = Path(self._tmp.name).resolve()
 
     def cli(self, root: Path, *argv: str) -> dict:
+        from test_operator_origin_support import cold_command
+
+        env = hermetic_env()
+        command = cold_command(
+            root, [sys.executable, str(TOOLS / "saipen.py"), "--project-root", str(root),
+                   *argv, "--json"], env,
+        )
         completed = subprocess.run(
-            [sys.executable, str(TOOLS / "saipen.py"), "--project-root", str(root),
-             *argv, "--json"],
+            command,
             capture_output=True, text=True, encoding="utf-8", errors="replace",
-            env=hermetic_env(), timeout=600,
+            env=env, timeout=600,
         )
         try:
             return json.loads(completed.stdout)
@@ -135,7 +141,7 @@ class NextActionDeadlockTests(unittest.TestCase):
         )
         self.assertEqual(
             record.get("canonical_next_command"),
-            "saipen recover resolve-next-action <next-action>",
+            "saipen recover resolve-next-action <SRC-###>",
             record,
         )
 
@@ -143,7 +149,9 @@ class NextActionDeadlockTests(unittest.TestCase):
         root = project(self.base)
         named = self.cli(root, "recover")["canonical_next_command"]
         self.assertTrue(named.startswith("saipen recover resolve-next-action"))
-        repaired = self.cli(root, "recover", "resolve-next-action", "saipen", "continue")
+        from test_t1729_operator_gate import fixture_authority
+        receipt = fixture_authority(root, resolve=("next_action",), next_action="saipen continue")
+        repaired = self.cli(root, "recover", "resolve-next-action", receipt)
         self.assertTrue(repaired.get("ok"), repaired)
         self.assertIn('next_action: "saipen continue"', self.next_action(root))
         self.assertTrue(self.cli(root, "validate").get("ok"))
@@ -161,10 +169,14 @@ class NextActionDeadlockTests(unittest.TestCase):
     def test_the_decision_is_recorded_against_its_own_field(self) -> None:
         """The DEC used to say `STATE.blocker clear` whatever was authorized."""
         root = project(self.base)
-        self.cli(root, "recover", "resolve-next-action", "saipen", "continue")
+        from test_t1729_operator_gate import fixture_authority
+        receipt = fixture_authority(root, resolve=("next_action",), next_action="saipen continue")
+        result = self.cli(root, "recover", "resolve-next-action", receipt)
+        self.assertTrue(result["ok"], result)
         tail = (root / ".saipen" / "LOG.md").read_text(encoding="utf-8").strip().splitlines()[-1]
-        self.assertIn("operator-authorized STATE.next_action", tail)
-        self.assertNotIn("STATE.blocker", tail)
+        self.assertIn("operator gate decision -- " + receipt, tail)
+        self.assertIn("fields:next_action", tail)
+        self.assertNotIn("fields:blocker", tail)
 
     def test_a_wait_value_with_its_separator_is_suppliable(self) -> None:
         """`WAIT: <category> -- <text>` is the canonical WAIT grammar.
@@ -179,11 +191,20 @@ class NextActionDeadlockTests(unittest.TestCase):
         ends the CLI's own flag parsing.
         """
         root = project(self.base)
+        from test_t1729_operator_gate import fixture_authority
+        receipt = fixture_authority(root, resolve=("next_action",),
+                                    next_action="WAIT: blocked -- waiting")
+        from test_operator_origin_support import cold_command
+
+        env = hermetic_env()
+        command = cold_command(
+            root, [sys.executable, str(TOOLS / "saipen.py"), "--json", "--project-root", str(root),
+                   "recover", "resolve-next-action", receipt], env,
+        )
         completed = subprocess.run(
-            [sys.executable, str(TOOLS / "saipen.py"), "--json", "--project-root", str(root),
-             "recover", "resolve-next-action", "WAIT:", "blocked", "--", "waiting"],
+            command,
             capture_output=True, text=True, encoding="utf-8", errors="replace",
-            env=hermetic_env(), timeout=600,
+            env=env, timeout=600,
         )
         record = json.loads(completed.stdout)
         self.assertTrue(record.get("ok"), record)

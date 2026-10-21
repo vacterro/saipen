@@ -19,8 +19,15 @@ from typing import Callable
 
 from .admission import _read_text_bounded, protocol_snapshot
 from .board import MAX_LIVE_RECORD_CHARS, parse_board
-from .board_compaction import compacted_ticket_ids, detail_integrity_error, oversized_ticket_ids
+from .board_compaction import (
+    compacted_ticket_ids,
+    detail_integrity_error,
+    foreign_field_ticket_ids,
+    oversized_ticket_ids,
+    unrecognized_field_ticket,
+)
 from .journal import scan_pending
+from .operations import _foreign_field_skew
 from .paths import (
     ENV_AGENT,
     ENV_PROJECT_LINEAGE,
@@ -55,6 +62,8 @@ _OPERATOR_DECISION_CODES = frozenset(
         "NO_ACTIVE_WORK",
         "PROTOCOL_MODE_READONLY",
         "PROTOCOL_STATE_INVALID",
+        # T-1676: recovery reopens what no operation closed, on an approved repair.
+        "UNAUTHORIZED_LIFECYCLE_WRITE",
     }
 )
 _AUTO_RECOVERY_CODES = frozenset({"REPAIR_REQUIRED", "RECOVERY_REQUIRED"})
@@ -66,7 +75,7 @@ _BOARD_COMPACTION_COMMAND = "saipen ticket compact"
 #: T-1357: printed UNQUOTED. A quote character disqualifies the whole line
 #: from the guard's canonical grammar, so a quoted form is a command the
 #: engine advertises and its own guard can never admit.
-_BLOCKER_DECISION_COMMAND = 'saipen recover resolve-blocker <decision>'
+_BLOCKER_DECISION_COMMAND = 'saipen recover resolve-blocker <SRC-###>'
 
 #: T-1327 TARGET A: the CLOSED set of canonical repairs Fleet may execute by
 #: itself. A `canonical_next_command` is never run as a shell string and never
@@ -84,6 +93,7 @@ _BLOCKING_SURFACE = {
     "REPAIR_REQUIRED": "state",
     "PROTOCOL_STATE_INVALID": "state",
     "PROTOCOL_MODE_READONLY": "state",
+    "UNAUTHORIZED_LIFECYCLE_WRITE": "state",
     "NO_ACTIVE_WORK": "board",
     "CORRUPT_JOURNAL": "journal",
     "RECOVERY_CONFLICT": "journal",
@@ -91,6 +101,7 @@ _BLOCKING_SURFACE = {
     "RECOVERY_EVIDENCE_UNBOUND": "binding",
     "HISTORY_LEDGER_CORRUPT": "log",
     "BOARD_RECORD_OVERSIZE": "board",
+    "BOARD_FOREIGN_FIELD": "board",
     "BOARD_DETAIL_UNRESOLVABLE": "board",
     "PROJECT_BINDING_INVALID": "binding",
     "PROJECT_BINDING_AMBIGUOUS": "binding",
@@ -244,6 +255,12 @@ def _remediation(
                 None,
             )
             command = f"{_BOARD_COMPACTION_COMMAND} {ticket_id or '<T-###>'}"
+        elif reason_code == "BOARD_FOREIGN_FIELD":
+            errors = ((snapshot or {}).get("board") or {}).get("errors") or []
+            ticket_id = next(
+                (tid for tid in map(unrecognized_field_ticket, errors) if tid), None
+            )
+            command = f"{_BOARD_COMPACTION_COMMAND} {ticket_id or '<T-###>'}"
         return {
             "needs_local_mutation": True,
             "safe_auto_repair_available": True,
@@ -262,6 +279,8 @@ def _remediation(
             # operator decision that records authority and clears the field it
             # owns, not a generic unblock.
             command = _BLOCKER_DECISION_COMMAND
+        elif code == "BOARD_FOREIGN_FIELD":
+            command = "run the newer runtime"
         return {
             "needs_local_mutation": auto,
             "safe_auto_repair_available": auto,
@@ -565,6 +584,49 @@ def preflight(
                 provenance=resolved.provenance,
             )
         return oversize
+
+    # T-1743: a row whose ONLY fault is a field outside the closed grammar has
+    # the same lossless repair as an oversized one. Naming nothing here left
+    # every lifecycle command refused with no reachable route. A pending STATE
+    # repair still goes first (T-1327 ordering): it is named further below.
+    try:
+        foreign_rows = foreign_field_ticket_ids(board_text)
+    except (NameError, OSError, UnicodeError, ValueError):
+        foreign_rows = []
+    if foreign_rows:
+        prerequisite = reconcile_protocol_state(root, agent, dry_run=True)
+        if not (prerequisite.get("ok") and prerequisite.get("code") == "REPAIR_REQUIRED"):
+            # T-1744: a project newer than this runtime must not be classified
+            # SAFE; compact_board refuses foreign-field repair when saipen_version
+            # exceeds the running major, so preflight classifies BLOCKED and names
+            # the newer runtime instead of naming a repair that will refuse.
+            skew = _foreign_field_skew(snapshot.get("state") or {})
+            if skew:
+                return _result(
+                    CLASS_BLOCKED,
+                    root=root,
+                    lineage=lineage,
+                    reason_code="BOARD_FOREIGN_FIELD",
+                    reason=skew,
+                    snapshot=snapshot,
+                    provenance=resolved.provenance,
+                )
+            snapshot["board"] = parse_board(board_text)
+            foreign = _result(
+                CLASS_SAFE,
+                root=root,
+                lineage=lineage,
+                reason_code="BOARD_FOREIGN_FIELD",
+                reason=(
+                    "BOARD row(s) carry a field outside the closed grammar; lossless "
+                    "canonical compaction externalizes the original bytes: "
+                    + ", ".join(foreign_rows[:8])
+                ),
+                snapshot=snapshot,
+                provenance=resolved.provenance,
+            )
+            if foreign.get("condition_id") is not None:
+                return foreign
 
     # T-1326 TARGET C: a compacted row whose externalized original record or
     # metadata is missing/tampered is an ORPHAN authority edge. The operator

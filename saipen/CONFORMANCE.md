@@ -1,7 +1,7 @@
 # SAIPEN CONFORMANCE
 
 <!-- RULE-VIEW: CONFORMANCE-CORPUS-01 -->
-<!-- GENERATED: tools/conformance_corpus.py; corpus-sha256: 2417200feb29ef2d05fe0373a9454dbb8ef378f7aff93fc1292d0242a573a437 -->
+<!-- GENERATED: tools/conformance_corpus.py; corpus-sha256: 017392a7d54f351a91d77f862b2681e217841a57c5f7946d4eae3e40ec581e83 -->
 
 Conformance means observable protocol behavior agrees across normative prose,
 machine registry, schemas, validator checks and executable fixtures. A green

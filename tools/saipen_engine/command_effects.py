@@ -32,6 +32,7 @@ import json
 import re
 from collections.abc import Sequence
 
+from .cli_grammar import has_option, option_value_positions
 from .commands import load_shortcut_table, resolve_shortcut
 from .registry import (
     RegistryError,
@@ -120,19 +121,25 @@ SHELL_CANONICAL_VERBS = frozenset(_VERBS) - frozenset(
 def _operands(tokens: Sequence[str]) -> list[str]:
     """The invocation's own words, with the CLI's global options removed."""
     out: list[str] = []
-    skip = False
-    for token in tokens:
-        if skip:
-            skip = False
+    values = option_value_positions(tokens)
+    index = 0
+    while index < len(tokens):
+        token = tokens[index]
+        if index in values:
+            out.append(token)
+        elif token == "--":
+            out.extend(tokens[index:])
+            break
+        elif token in _GLOBAL_FLAGS:
+            pass
+        elif token in _GLOBAL_VALUE_OPTIONS:
+            index += 2
             continue
-        if token in _GLOBAL_FLAGS:
-            continue
-        if token in _GLOBAL_VALUE_OPTIONS:
-            skip = True
-            continue
-        if any(token.startswith(option + "=") for option in _GLOBAL_VALUE_OPTIONS):
-            continue
-        out.append(token)
+        elif any(token.startswith(option + "=") for option in _GLOBAL_VALUE_OPTIONS):
+            pass
+        else:
+            out.append(token)
+        index += 1
     return out
 
 
@@ -166,19 +173,22 @@ def classify_invocation(verb: str | None, rest: Sequence[str] = ()) -> str:
     """The effect class of `saipen <verb> <rest...>`.
 
     `verb=None` is bare `saipen`, which the CLI resolves to `continue`. A help
-    token anywhere before `--` makes the whole invocation DIAGNOSTIC: the CLI
+    option before `--` makes the whole invocation DIAGNOSTIC: the CLI
     answers it with usage and writes nothing, so a help probe must never be
     judged -- or refused -- as the command it is asking about.
     """
     words = _operands(list(rest))
-    if verb == "host" and words[:1] == ["entry"] and "--" in words:
+    values = option_value_positions(words)
+    boundary = next((index for index, word in enumerate(words)
+                     if word == "--" and index not in values), None)
+    if verb == "host" and words[:1] == ["entry"] and boundary is not None:
         # The transport runner has the effect of the command it launches: a
         # wrapped `ticket done` must never be judged DIAGNOSTIC (T-1501).
-        inner = words[words.index("--") + 1 :]
+        inner = words[boundary + 1 :]
         return classify_invocation(inner[0], inner[1:]) if inner else DIAGNOSTIC
-    if "--" in words:
-        words = words[: words.index("--")]
-    if verb in HELP_TOKENS or any(word in HELP_TOKENS - {"help"} for word in words):
+    if boundary is not None:
+        words = words[:boundary]
+    if verb in HELP_TOKENS or has_option(words, HELP_TOKENS - {"help"}):
         return DIAGNOSTIC
     if verb == _MODIFIER and not words:
         # A bare modifier modifies nothing and is REPORTED (EXECUTION.md). A
@@ -223,6 +233,31 @@ def classify_tokens(tokens: Sequence[str]) -> str:
 def fleet_preflight_required(command_class: str) -> bool:
     """Whether a host must run Fleet preparation before this effect."""
     return command_class not in FLEET_EXEMPT_CLASSES
+
+
+def is_known_verb(token: str, rest: Sequence[str] = ()) -> bool:
+    """Whether `saipen <token> <rest...>` names a verb the CLI dispatches at
+    all -- shell-canonical or not (T-1665)."""
+    return token in _VERBS or routed_verb(token, rest) in _VERBS
+
+
+def nested_routes(token: str) -> list[str]:
+    """Where a token that is no top-level verb IS dispatched (T-1767).
+
+    `saipen run` answered a bare "unknown command" while `saipen test suite
+    run` exists; an executor read the flat usage line, failed twice and
+    reported the capability missing (SRC-246).
+    """
+    routes = []
+    for verb, entry in _VERBS.items():
+        if not isinstance(entry, dict):
+            continue
+        for sub, sub_entry in (entry.get("subcommands") or {}).items():
+            if sub == token:
+                routes.append(" ".join(("saipen", verb, sub)))
+            if isinstance(sub_entry, dict) and token in (sub_entry.get("actions") or {}):
+                routes.append(" ".join(("saipen", verb, sub, token)))
+    return sorted(routes)
 
 
 def routed_verb(token: str, rest: Sequence[str] = ()) -> str:

@@ -164,6 +164,9 @@ def upsert_member(
     cohort membership and the BOARD line that claims it commit together or not
     at all.
     """
+    existing = (registry.get("cohorts") or {}).get(cohort_id) or {}
+    if "reconciliation" in existing or "publication_successor" in existing:
+        raise ValueError("reconciled cohort membership is frozen; use a new reviewed batch")
     out = json.loads(json.dumps(registry))
     cohorts = out.setdefault("cohorts", {})
     cohort = cohorts.setdefault(
@@ -340,6 +343,20 @@ def cohort_readiness(root: Path | str, cohort: dict) -> dict:
             problems.append(
                 f"{tid} source coverage gate: {gate.get('code') or gate.get('detail')}"
             )
+    if "publication_successor" in cohort:
+        edge = cohort["publication_successor"]
+        next_cohort = edge.get("cohort") if isinstance(edge, dict) else None
+        if isinstance(next_cohort, str) and COHORT_ID_RE.fullmatch(next_cohort):
+            problems.append("cohort has a publication successor; use saipen cohort ship "
+                            + next_cohort)
+        else:
+            problems.append("cohort publication successor is malformed")
+    if "reconciliation" in cohort:
+        from .cohort_reconcile import target_problem
+
+        problem = target_problem(root, cohort)
+        if problem:
+            problems.append(problem)
     return {"ready": not problems, "problems": problems}
 
 
@@ -650,6 +667,15 @@ def _resolve_work(root: Path, ticket_id: str, chain: tuple[str, ...]) -> SourceV
                 f"registry record -- BOARD prose is not cohort authority",
                 chain=chain,
             )
+        if "publication_successor" in cohort:
+            from .cohort_reconcile import successor
+
+            try:
+                cohort = successor(root, registry, cohort_id)
+                cohort_id = cohort["cohort_id"]
+            except (OSError, ValueError, KeyError, TypeError) as exc:
+                return SourceVerdict(False, ticket_id, "work",
+                    "cohort publication successor is unproven: " + str(exc), chain=chain)
         if cohort.get("publication_status") != "shipped":
             return SourceVerdict(
                 False,

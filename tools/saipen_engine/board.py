@@ -6,6 +6,8 @@ import datetime
 import hashlib
 import re
 
+from .registry import load_registry, require_mapping, require_string_list
+
 REQUIRED_HEADINGS = ["## DOING", "## TODO", "## DONE", "## BLOCKED"]
 TICKET_RE = re.compile(r"^- \[([ x/])\] (T-\d+)\s+(.*)$")
 
@@ -74,99 +76,102 @@ def iso_utc_sort_key(value: object) -> datetime.datetime | None:
 # prose -- it is a second identity and a parse error.
 EMBEDDED_TICKET_RE = re.compile(r"\[[ x/]\]\s+T-\d+")
 PIPE_SENTINEL = "\x00"
+#: The closed ticket-field list. REGISTRY.json owns it
+#: (`ticket_states.known_fields`, CORE.md 1.2) and this grammar derives it,
+#: so the parser, the validator and the documents read one set (T-1637).
 KNOWN_FIELDS = frozenset(
-    {
-        "needs",
-        "owner",
-        "claim_time",
-        "blocker",
-        "verify",
-        "review_passes",
-        "verify_attempts",
-        "source_reports",
-        "source_receipts",
-        "recurrence",
-        "weak_model",
-        # CORE-001: does this ticket owe a regression PAIR, not merely a green
-        # run? `regression: required` is the machine-owned declaration that the
-        # VERIFY -> REVIEW and finish gates must additionally consume
-        # `oracle.regression_pair_verdict`. It is a FIELD on purpose: inferring
-        # "this is a bug fix" from the description would make the gate depend
-        # on prose, which is the one thing this whole rule exists to stop.
-        "regression",
-        # ---- orchestration repair (T-1302 / CORE-003, SRC-026:R003) -------
-        # These seven are declared by the Board schema and the DONE/SHIP phase
-        # contracts while the parser still rejected them as unrecognized, so a
-        # board written to the documented contract failed to PARSE. Docs and
-        # schema must never advertise a value the runtime ignores -- here it
-        # did worse than ignore it, it refused the whole record.
-        #
-        # blocker_scope         ticket | goal -- a ticket block parks one
-        #                       ticket; only a goal block may stop the loop.
-        # closure_mode          own_patch | inherited_verified | cohort --
-        #                       the provenance of a DONE closure.
-        # closure_cohort        C-### batch identity for cohort closure.
-        # user_explicit         `true` marks Work created from an explicit
-        #                       user request; it arms scheduler precedence.
-        # implementation_delta  none | patch -- did BUILD produce code?
-        # implementation_source the durable publication authority an
-        #                       inherited_verified closure resolves against.
-        # closure_paths         the shared worktree paths a cohort member
-        #                       attributes to its batch.
-        "blocker_scope",
-        "closure_mode",
-        "closure_cohort",
-        "user_explicit",
-        "request_witness",
-        "implementation_delta",
-        "implementation_source",
-        "closure_paths",
-        # Terminal local lifecycle supersession. These fields assert neither
-        # retirement nor publication; they bind OLD -> NEW, the old-target
-        # PASS event, and the operator authority that granted the pair.
-        "superseded_by",
-        "supersession_evidence",
-        "supersession_authority",
-        # T-406: the E-### event that disproved this ticket's premise. A DONE
-        # line closing `finding_invalidated` without it is an unfalsifiable
-        # claim that nothing was wrong, which is the one closure shape that
-        # must never be assertable on a hunch.
-        "invalidation_evidence",
-        # Active-parent dependency handoff. These fields exist only while the
-        # parent is BLOCKED on one child Work item; finish_ticket consumes
-        # them atomically when that child reaches DONE.
-        "blocked_on",
-        "resume_phase",
-        "resume_transition_from",
-        "retry_not_before",
-        # T-1326: a compact execution-index pointer to losslessly externalized
-        # historical detail.  The resolver is canonical; the pointer itself
-        # carries no authority beyond naming that artifact.
-        "detail_ref",
-        # T-1384: which HOST SESSION holds this claim, as a salted digest.
-        # `owner` says who, and a name is not a process -- an arriving window
-        # reads the same `owner` the incumbent wrote and inherits it, which
-        # is how an unseated agent mutated product bytes while the ledger
-        # stayed clean. This field is the half `owner` cannot carry: proof
-        # that the CURRENT process is the one that claimed. It is a digest,
-        # never the session id, so BOARD and every audit archive built from
-        # it carry no reusable bearer value.
-        "claim_session",
-        "claim_run",
-        "claim_generation",
-        # External implementation resolution (SRC-088 / T-1434 M2): the LOCAL
-        # ticket was implemented by an EXTERNAL authority and verified locally.
-        # external_authority     the portable lineage identity of the
-        #                        implementing project;
-        # external_implementation the upstream T-###@<commit> identity;
-        # external_evidence      the append-only EX-###### receipt;
-        # resolution_reason      the registered reason class.
-        "external_authority",
-        "external_implementation",
-        "external_evidence",
-        "resolution_reason",
-    }
+    require_string_list(require_mapping(load_registry(), "ticket_states"), "known_fields")
 )
+# Why individual fields exist (history; the list above is the registry's):
+#   - needs
+#   - owner
+#   - claim_time
+#   - blocker
+#   - verify
+#   - review_passes
+#   - verify_attempts
+#   - source_reports
+#   - source_receipts
+#   - recurrence
+#   - weak_model
+# CORE-001: does this ticket owe a regression PAIR, not merely a green
+# run? `regression: required` is the machine-owned declaration that the
+# VERIFY -> REVIEW and finish gates must additionally consume
+# `oracle.regression_pair_verdict`. It is a FIELD on purpose: inferring
+# "this is a bug fix" from the description would make the gate depend
+# on prose, which is the one thing this whole rule exists to stop.
+#   - regression
+# ---- orchestration repair (T-1302 / CORE-003, SRC-026:R003) -------
+# These seven are declared by the Board schema and the DONE/SHIP phase
+# contracts while the parser still rejected them as unrecognized, so a
+# board written to the documented contract failed to PARSE. Docs and
+# schema must never advertise a value the runtime ignores -- here it
+# did worse than ignore it, it refused the whole record.
+#
+# blocker_scope         ticket | goal -- a ticket block parks one
+#                       ticket; only a goal block may stop the loop.
+# closure_mode          own_patch | inherited_verified | cohort --
+#                       the provenance of a DONE closure.
+# closure_cohort        C-### batch identity for cohort closure.
+# user_explicit         `true` marks Work created from an explicit
+#                       user request; it arms scheduler precedence.
+# implementation_delta  none | patch -- did BUILD produce code?
+# implementation_source the durable publication authority an
+#                       inherited_verified closure resolves against.
+# closure_paths         the shared worktree paths a cohort member
+#                       attributes to its batch.
+#   - blocker_scope
+#   - closure_mode
+#   - closure_cohort
+#   - user_explicit
+#   - request_witness
+#   - implementation_delta
+#   - implementation_source
+#   - closure_paths
+# Terminal local lifecycle supersession. These fields assert neither
+# retirement nor publication; they bind OLD -> NEW, the old-target
+# PASS event, and the operator authority that granted the pair.
+#   - superseded_by
+#   - supersession_evidence
+#   - supersession_authority
+# T-406: the E-### event that disproved this ticket's premise. A DONE
+# line closing `finding_invalidated` without it is an unfalsifiable
+# claim that nothing was wrong, which is the one closure shape that
+# must never be assertable on a hunch.
+#   - invalidation_evidence
+# Active-parent dependency handoff. These fields exist only while the
+# parent is BLOCKED on one child Work item; finish_ticket consumes
+# them atomically when that child reaches DONE.
+#   - blocked_on
+#   - resume_phase
+#   - resume_transition_from
+#   - retry_not_before
+# T-1326: a compact execution-index pointer to losslessly externalized
+# historical detail.  The resolver is canonical; the pointer itself
+# carries no authority beyond naming that artifact.
+#   - detail_ref
+# T-1384: which HOST SESSION holds this claim, as a salted digest.
+# `owner` says who, and a name is not a process -- an arriving window
+# reads the same `owner` the incumbent wrote and inherits it, which
+# is how an unseated agent mutated product bytes while the ledger
+# stayed clean. This field is the half `owner` cannot carry: proof
+# that the CURRENT process is the one that claimed. It is a digest,
+# never the session id, so BOARD and every audit archive built from
+# it carry no reusable bearer value.
+#   - claim_session
+#   - claim_run
+#   - claim_generation
+# External implementation resolution (SRC-088 / T-1434 M2): the LOCAL
+# ticket was implemented by an EXTERNAL authority and verified locally.
+# external_authority     the portable lineage identity of the
+#                        implementing project;
+# external_implementation the upstream T-###@<commit> identity;
+# external_evidence      the append-only EX-###### receipt;
+# resolution_reason      the registered reason class.
+#   - external_authority
+#   - external_implementation
+#   - external_evidence
+#   - resolution_reason
 
 
 def claim_session_digest(project_lineage: str | None, session_id: str | None) -> str | None:
@@ -355,6 +360,10 @@ def parse_board(text: str) -> dict:
                     needs = re.findall(r"T-\d+", fm.group(2))
             if tid in tickets:
                 errors.append(f"BOARD.md:{line_no} duplicate ticket ID {tid}")
+                # T-1761: the dropped record has no name of its own, but the
+                # section it sits under is a fact: a typed `## DONE` record
+                # behind a live id was invisible to lifecycle authority.
+                tickets[tid].setdefault("shadowed", []).append(section)
                 continue
             tickets[tid] = {
                 "id": tid,
@@ -624,6 +633,9 @@ def board_semantic_errors(ticket: dict) -> list[str]:
     if isinstance(ticket.get("description"), str):
         scalars["description"] = ticket["description"]
     errors.extend(board_scalar_errors(scalars, tid))
+    profile = fields.get("regression_evidence")
+    if profile is not None and (profile != "executed" or fields.get("regression") != "required"):
+        errors.append(f"{tid} regression_evidence must be executed with regression: required")
     errors.extend(closure_metadata_errors(ticket))
     return errors
 
@@ -651,6 +663,26 @@ CLOSURE_METADATA_FIELDS = (
     # is, and this field says WHICH event proved it.
     "invalidation_evidence",
 )
+
+#: A ## BLOCKED row may DECLARE an upstream external dependency with these
+#: two fields: they name where the fix lives (authority lineage and the
+#: T-###@commit implementation), so the external auto-doctor can inspect and
+#: canonically resolve it. They are NOT closure provenance -- that pair only
+#: exists on a ## DONE row -- so the placement rule above exempts them here,
+#: and reconcile must not strip them as stale terminal residue.
+_EXTERNAL_DECLARATION_FIELDS = ("external_authority", "external_implementation")
+
+#: The grammar each declared field admits -- the SAME shapes
+#: :func:`external_authority` / :func:`external_implementation` read. A value
+#: outside it is dead weight, never dependency evidence.
+_FIELD_VALUE_RE = {
+    "external_authority": ("lineage-[0-9a-f]{32}",),
+    "external_implementation": (r"T-\d+@[0-9a-f]{7,40}",),
+}
+
+
+def _value_matches_field(name: str, value: str) -> bool:
+    return any(re.fullmatch(pattern, value) for pattern in _FIELD_VALUE_RE[name])
 
 
 def closure_metadata_errors(ticket: dict) -> list[str]:
@@ -708,7 +740,28 @@ def closure_metadata_errors(ticket: dict) -> list[str]:
                 "-- a due instant nobody can action is dead metadata"
             )
 
-    declared = [name for name in CLOSURE_METADATA_FIELDS if str(fields.get(name, "")).strip()]
+    # A ## BLOCKED row DECLARES an upstream external dependency: the
+    # authority/implementation pair names where the fix lives, it does not
+    # claim this ticket completed. Provenance fields (closure_mode,
+    # external_evidence, resolution_reason, ...) stay DONE-only.
+    declaration = list(_EXTERNAL_DECLARATION_FIELDS)
+    if section == "## BLOCKED":
+        for name in declaration:
+            value = str(fields.get(name, "")).strip()
+            if value and not _value_matches_field(name, value):
+                errors.append(
+                    f"{tid} declares {name} {value!r}, outside "
+                    f"{'|'.join(sorted(_FIELD_VALUE_RE[name]))} -- a malformed "
+                    "declaration is never dependency evidence"
+                )
+    else:
+        declaration = []
+
+    declared = [
+        name
+        for name in CLOSURE_METADATA_FIELDS
+        if name not in declaration and str(fields.get(name, "")).strip()
+    ]
     if declared and section != "## DONE":
         errors.append(
             f"{tid} carries closure metadata ({', '.join(declared)}) under "
@@ -838,10 +891,20 @@ def closure_metadata_errors(ticket: dict) -> list[str]:
         if delta.lower() != "none":
             errors.append(f"{tid} closes external_implementation without implementation_delta none")
     elif present_external:
-        errors.append(
-            f"{tid} carries {', '.join(present_external)} outside "
-            "closure_mode external_implementation"
+        # ## BLOCKED declares the upstream dependency with the authority/
+        # implementation pair; it is not closure provenance, so the pairing
+        # rule does not arm there. Provenance fields (external_evidence,
+        # resolution_reason) stay mode-bound everywhere.
+        declaration_only = (
+            section == "## BLOCKED"
+            and present_external
+            and all(name in _EXTERNAL_DECLARATION_FIELDS for name in present_external)
         )
+        if not declaration_only:
+            errors.append(
+                f"{tid} carries {', '.join(present_external)} outside "
+                "closure_mode external_implementation"
+            )
     explicit = str(fields.get("user_explicit", "")).strip()
     witness = str(fields.get("request_witness", "")).strip()
     if witness:
@@ -1710,3 +1773,234 @@ def remove_ticket_field(raw: str, field: str) -> str:
     pattern = re.compile(rf"^{re.escape(field)}:\s*")
     kept = [part for part in parts if not pattern.match(part)]
     return _fields_join(kept)
+
+
+# Closed idle / terminal disposition vocabulary (SAIHANDOFF / T-1807 / T-1619).
+ALL_REQUIREMENTS_COMPLETE = "ALL_REQUIREMENTS_COMPLETE"
+ALL_WORK_COMPLETE = "ALL_WORK_COMPLETE"
+IDLE_BLOCKED_EXTERNAL = "IDLE_BLOCKED_EXTERNAL"
+IDLE_OPERATOR_REQUIRED = "IDLE_OPERATOR_REQUIRED"
+IDLE_FUTURE_GATED = "IDLE_FUTURE_GATED"
+NO_ADMISSIBLE_WORK = "NO_ADMISSIBLE_WORK"
+
+IDLE_DISPOSITIONS = frozenset(
+    {
+        ALL_REQUIREMENTS_COMPLETE,
+        ALL_WORK_COMPLETE,
+        IDLE_BLOCKED_EXTERNAL,
+        IDLE_OPERATOR_REQUIRED,
+        IDLE_FUTURE_GATED,
+        NO_ADMISSIBLE_WORK,
+    }
+)
+
+
+def resolve_root_blocker(
+    ticket_id: str,
+    tickets: dict,
+    seen: set | None = None,
+) -> tuple[str, str, str]:
+    """Resolve (root_ticket_id, blocker_class, blocker_raw_text) following dependency chains."""
+    if seen is None:
+        seen = set()
+    if ticket_id in seen or ticket_id not in tickets:
+        return (ticket_id, "UNKNOWN", "")
+    seen.add(ticket_id)
+    t = tickets[ticket_id]
+    fields = t.get("fields") or {}
+    raw = str(fields.get("blocker") or "").strip()
+    blocked_on = str(fields.get("blocked_on") or "").strip()
+
+    m = re.match(r"^ACTIVE_DEPENDENCY\s*:\s*(T-\d+)", raw)
+    dep = m.group(1) if m else (blocked_on if blocked_on and blocked_on in tickets else None)
+    if dep and dep in tickets and tickets[dep].get("section") == "## BLOCKED":
+        return resolve_root_blocker(dep, tickets, seen)
+
+    tok = re.split(r"[\s:\-]+", raw)[0] if raw else ""
+    return (ticket_id, tok, raw)
+
+
+def classify_idle_work(
+    tickets: dict,
+    audit_inbox: dict | None = None,
+    future_gate: dict | None = None,
+    state: dict | None = None,
+    now: datetime.datetime | None = None,
+) -> dict:
+    """Classify project state when no runnable work remains (SAIHANDOFF / T-1807).
+
+    Distinguishes ALL_WORK_COMPLETE (ALL_REQUIREMENTS_COMPLETE) from
+    NO_ADMISSIBLE_WORK with exact idle subcategories:
+      - IDLE_OPERATOR_REQUIRED
+      - IDLE_BLOCKED_EXTERNAL
+      - IDLE_FUTURE_GATED
+    """
+    doing = [t for t in tickets.values() if t.get("section") == "## DOING"]
+    todo = [t for t in tickets.values() if t.get("section") == "## TODO"]
+    blocked = [t for t in tickets.values() if t.get("section") == "## BLOCKED"]
+
+    unresolved_audit_count = 0
+    has_residue = False
+    has_invalid_audit = False
+    if isinstance(audit_inbox, dict):
+        unresolved_audit_count = int(
+            audit_inbox.get("unresolved_audit_count", len(audit_inbox.get("pending", [])))
+        )
+        has_residue = bool(audit_inbox.get("residue") or audit_inbox.get("residue_only"))
+        has_invalid_audit = bool(audit_inbox.get("invalid") or audit_inbox.get("invalid_only"))
+
+    if (
+        not doing
+        and not todo
+        and not blocked
+        and unresolved_audit_count == 0
+        and not has_residue
+        and not has_invalid_audit
+    ):
+        return {
+            "disposition": ALL_WORK_COMPLETE,
+            "stop_reason": ALL_REQUIREMENTS_COMPLETE,
+            "no_admissible_work": False,
+            "all_requirements_complete": True,
+            "unresolved_audit_count": 0,
+            "next_exact_action": "saipen status",
+            "externally_blocked": [],
+            "operator_required": [],
+            "future_gated": [],
+            "detail": "all requirements complete; no runnable, blocked tickets or "
+            "unresolved audits remain",
+        }
+
+    operator_required: list[str] = []
+    externally_blocked: list[str] = []
+    future_gated: list[str] = []
+
+    gates = operator_gates(tickets, now=now)
+    if gates:
+        due = [g for g in gates if g.get("state") == "DUE_OPERATOR_ACTION"]
+        if due:
+            operator_required.extend([str(g.get("ticket")) for g in due if g.get("ticket")])
+        else:
+            operator_required.extend([str(g.get("ticket")) for g in gates if g.get("ticket")])
+
+    for tid, t in tickets.items():
+        if t.get("section") == "## BLOCKED":
+            root_tid, root_cls, _ = resolve_root_blocker(tid, tickets)
+            if root_cls in (
+                "WAIT_USER_DECISION",
+                "WAIT_USER_CONFIRMATION",
+                "DEFERRED_BY_OPERATOR",
+                "WAIT_ROLE",
+            ):
+                operator_required.append(root_tid)
+            elif root_cls == "BLOCKED_EXTERNAL":
+                externally_blocked.append(root_tid)
+            elif root_cls in ("FUTURE_GATE", "HELD", "FUTURE/STRATEGIC"):
+                future_gated.append(root_tid)
+
+    if isinstance(audit_inbox, dict):
+        unworkable = audit_inbox.get("unworkable_active", [])
+        for item in unworkable:
+            work = item.get("work")
+            if work and work in tickets:
+                root_tid, root_cls, _ = resolve_root_blocker(work, tickets)
+                if root_cls in (
+                    "WAIT_USER_DECISION",
+                    "WAIT_USER_CONFIRMATION",
+                    "DEFERRED_BY_OPERATOR",
+                ):
+                    operator_required.append(root_tid)
+                elif root_cls == "BLOCKED_EXTERNAL":
+                    externally_blocked.append(root_tid)
+
+    if isinstance(future_gate, dict):
+        if future_gate.get("eligible"):
+            future_gated.extend(future_gate["eligible"])
+        elif future_gate.get("refinable"):
+            future_gated.extend(future_gate["refinable"])
+
+    operator_required = sorted(set(filter(None, operator_required)))
+    externally_blocked = sorted(set(filter(None, externally_blocked)))
+    future_gated = sorted(set(filter(None, future_gated)))
+
+    decision_req = None
+
+    if externally_blocked:
+        disposition = IDLE_BLOCKED_EXTERNAL
+        next_exact_action = f"saipen ticket resolve-external {externally_blocked[0]}"
+        detail = (
+            f"no runnable work remains; {len(externally_blocked)} item(s) externally blocked "
+            f"({', '.join(externally_blocked[:3])}); next exact action: {next_exact_action}"
+        )
+    elif operator_required:
+        disposition = IDLE_OPERATOR_REQUIRED
+        target_tid = operator_required[0]
+        t_data = tickets.get(target_tid, {})
+        t_fields = t_data.get("fields", {}) if isinstance(t_data, dict) else {}
+        holder_id = str(t_fields.get("blocked_on", "")).strip()
+        blocker_str = str(t_fields.get("blocker", "")).strip()
+        has_handback_holder = bool(
+            holder_id
+            and blocker_str.startswith(f"ACTIVE_DEPENDENCY:{holder_id}")
+            and holder_id in t_data.get("needs", [])
+        )
+        if has_handback_holder:
+            next_exact_action = f"saipen ticket unblock {target_tid}"
+        else:
+            next_exact_action = "saipen status"
+        detail = (
+            f"no runnable work remains; {len(operator_required)} item(s) require operator decision "
+            f"({', '.join(operator_required[:3])}); next exact action: {next_exact_action}"
+        )
+        raw_blocker = blocker_str or "WAIT_USER_DECISION"
+        try:
+            from .decision_request import create_decision_request
+
+            auth_val = state or {
+                "authority_source": "board",
+                "continuation_authority": "none",
+                "execution_intent": "none",
+            }
+            decision_req = create_decision_request(
+                blocked_operation=f"ticket progress {target_tid}",
+                existing_authority=auth_val,
+                missing_authorization=f"Operator decision on {target_tid}: {raw_blocker}",
+                consequences_approval=f"Resolve blocker on {target_tid} and allow continuation",
+                consequences_refusal=f"{target_tid} remains blocked on BOARD",
+                safe_default=f"Keep {target_tid} blocked",
+                recording_mechanism=f"saipen ticket block {target_tid} --scope ticket",
+            )
+        except Exception:
+            decision_req = None
+    elif future_gated:
+        disposition = IDLE_FUTURE_GATED
+        if isinstance(future_gate, dict) and future_gate.get("eligible"):
+            next_exact_action = f"saipen future promote {future_gate['eligible'][0]}"
+        elif isinstance(future_gate, dict) and future_gate.get("refresh_required"):
+            next_exact_action = "saipen future refresh"
+        else:
+            next_exact_action = "saipen future status"
+        detail = (
+            f"no runnable work remains; deferred architecture gates hold continuation "
+            f"({disposition})"
+        )
+    else:
+        disposition = NO_ADMISSIBLE_WORK
+        next_exact_action = "saipen status"
+        detail = "no runnable work remains; backlog is unworkable or blocked"
+
+    res = {
+        "disposition": disposition,
+        "stop_reason": NO_ADMISSIBLE_WORK,
+        "no_admissible_work": True,
+        "all_requirements_complete": False,
+        "unresolved_audit_count": unresolved_audit_count,
+        "next_exact_action": next_exact_action,
+        "externally_blocked": externally_blocked,
+        "operator_required": operator_required,
+        "future_gated": future_gated,
+        "detail": detail,
+    }
+    if decision_req:
+        res["decision_request"] = decision_req
+    return res

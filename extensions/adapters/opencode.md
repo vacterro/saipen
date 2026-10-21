@@ -19,9 +19,22 @@
   `python <skill>/tools/saipen.py guard --event-json - --json`:
   - exit 0 -> the tool proceeds;
   - nonzero exit -> the plugin throws, so the tool does not execute;
-  - guard failure, invalid output, unreadable `output.args` or no Python
-    runtime -> fail closed for consequential mutations (verified built-in
-    read-only tools skip the round trip and stay usable).
+  - a missing guard, no Python or a replaced loaded plugin -> the operator's
+    `~/.saipen/authority.json` policy. The default DEGRADED_ALLOWED permits
+    the tool with an `UNVERIFIED` system record; STRICT refuses with one
+    taxonomy action. An unreadable or invalid policy selects STRICT.
+  - invalid guard output or unreadable `output.args` -> the tool is refused.
+    Known binding conflicts remain refused in every policy. Verified built-in
+    read-only tools skip the round trip and stay usable.
+  - a replaced loaded plugin whose guard and interpreter are still present
+    keeps asking the guard under DEGRADED_ALLOWED: a refusal about the target
+    or the actor (protected canonical path, path escape, unresolved target,
+    ownership or binding conflict) still refuses with its own code; any
+    other answer, an unreadable one included, degrades.
+  The self-contained native policy facet is generated from HOST-INTEGRATION-01
+  by `python -m saipen_engine.native_host_policy --write` in `tools/`; its
+  regression requires exact parity with the canonical table. The plugin reads
+  policy and marks the gap before each model request without claiming a binding.
    Actor identity: an OpenCode session id is diagnostic only and is never a
    SAIPEN actor. `SAIPEN_AGENT` is an optional explicit actor/provenance carrier,
    not authentication. When it exists, the plugin forwards it and Core checks it

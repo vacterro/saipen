@@ -117,6 +117,11 @@ class ReleaseEvidence:
     pre_ship_applicability: dict = field(default_factory=dict)
     verdict: str = "ok"
     verdict_reason: str = ""
+    # T-1746: the mode the verified receipt itself records -- how this release
+    # ENDED. Post-ship certification reads it instead of persisted STATE.mode,
+    # which only says what the last handshake negotiated. Empty means the
+    # evidence does not say, and that is judged as a publication.
+    mode: str = ""
 
 
 @dataclass(frozen=True)
@@ -624,6 +629,7 @@ def _release_evidence(
             ev.get("pre_ship_evidence") or {},
             ev.get("source_tree_fingerprint", ""),
             ev.get("pre_ship_applicability") or {},
+            mode=ev.get("mode") or "full",
         )
     return ReleaseEvidence(
         op_id="",
@@ -1162,8 +1168,11 @@ def _sensor_executed(snapshot: CrewSnapshot, role) -> tuple[bool, str]:
     kind = health.get("health")
     ok = kind in (HEALTH_CURRENT, HEALTH_READY_FOR_REVIEW, HEALTH_REVIEW_PENDING)
     if kind == HEALTH_INVALID:
-        errors = health.get("board", {}).get("errors", []) + health.get("outbox", {}).get(
-            "errors", []
+        # A role BOARD snapshot may carry its errors as a tuple (T-923, seen
+        # live when a role BOARD put a checkbox row under ## BLOCKED): tuple +
+        # list is a TypeError and took the whole fixed point down with it.
+        errors = list(health.get("board", {}).get("errors") or []) + list(
+            health.get("outbox", {}).get("errors") or []
         )
         return False, "invalid role evidence: " + "; ".join(errors[:2])
     if kind == HEALTH_BLOCKED:
@@ -1305,7 +1314,18 @@ def _release_current(
         return False, "no canonical release receipt binds this crew epoch"
     if release.verdict != "ok":
         return False, f"crew release truth {release.verdict.upper()}: " + release.verdict_reason
-    mode = snapshot.state.get("mode") or "full"
+    epoch = getattr(snapshot, "epoch", None)
+    if epoch is not None and (release.ticket or "") != (epoch.ticket or ""):
+        # T-1746: the planner copies the epoch's own ticket, or none. A receipt
+        # naming another one was not written for this epoch.
+        return False, (
+            f"release receipt names ticket {release.ticket or '(none)'}; this crew "
+            f"epoch owns {epoch.ticket or 'no ticket'}"
+        )
+    # T-1746: persisted STATE.mode is the last handshake, not what happened. A
+    # project left at `full` closed locally stays a local closure, and one left
+    # at `no-publish` cannot waive the HEAD and worktree proof of a publication.
+    mode = release.mode or "full"
     if mode == "no-publish":
         # Item 16: a no-publish terminal crew release is verified for LOCAL
         # closure truth (release_verdict already proved it) -- zero Git
@@ -1601,6 +1621,7 @@ def derive_crew_scope(
     if epoch is None:
         return {}, "active crew epoch missing"
     by_path: dict[str, tuple[tuple[str, str], object]] = {}
+    claims: dict[str, list[tuple[tuple[str, str], object]]] = {}
     for record in _iter_operation_records(root, records):
         meta = record.get("receipt_metadata") or {}
         if record.get("operation") != "crew_defer":
@@ -1615,11 +1636,24 @@ def derive_crew_scope(
         op_id = record.get("op_id") or ""
         for rel, expected in (meta.get("paths") or {}).items():
             key = (created, op_id)
+            claims.setdefault(rel, []).append((key, expected))
             prev = by_path.get(rel)
             if prev is None or key > prev[0]:
                 by_path[rel] = (key, expected)
     scope: dict[str, object] = {}
-    for rel, (_key, expected) in by_path.items():
+    for rel, (key, expected) in by_path.items():
+        # T-1746: created_at has one-second resolution and op ids are random,
+        # so two defers of the LATEST instant approving different bytes have no
+        # latest owner -- the larger id is not one. Superseded ties are history.
+        if any(
+            other[0] == key[0] and other[1] != key[1] and approved != expected
+            for other, approved in claims[rel]
+        ):
+            return (
+                {},
+                f"crew scope path {rel} has ambiguous deferred ownership: two "
+                f"defers recorded at {key[0]} approve different bytes",
+            )
         fp = root / rel
         if expected is None:
             if fp.exists():
@@ -1681,14 +1715,43 @@ def _producer_package_records(snapshot: CrewSnapshot, role) -> list[dict]:
     """Current source-bound producer package evidence for the release receipt.
     Producers are proven by their integration EDGE; the receipt still records
     the exact package identity + source bindings (item 13: labels are not
-    evidence)."""
+    evidence).
+
+    T-1746: the OUTBOX is read first and, when it is unusable, the EDGE itself
+    is the record. SC-8/SC-9 authorize the terminal ship from the committed
+    `producer_integration` receipt; this reader asked the OUTBOX alone and
+    voided every package on one malformed historical entry, so a plan could
+    advertise SHIP that the release context then refused for a producer the
+    stages called integrated."""
     if snapshot.source_id is None:
         return []
+    current_role = current_local_role_revision(snapshot.root, role.name, snapshot.saipen_home)
+    records = _outbox_package_records(snapshot, role, current_role)
+    if records:
+        return records
+    edge = _producer_integration_edge(snapshot, role)
+    if edge is None:
+        return []
+    return [
+        {
+            "status": "integrated",
+            "role_revision": current_role,
+            "producer": role.name,
+            "package_identity": edge["package_identity"],
+            "integration_op": edge["op_id"],
+            "input_source": edge["input_source"],
+            "source_head": edge["resulting_source"],
+            "source_tree_fingerprint": edge["resulting_source_fingerprint"],
+            "crew_epoch": snapshot.epoch.op_id if snapshot.epoch else None,
+        }
+    ]
+
+
+def _outbox_package_records(snapshot: CrewSnapshot, role, current_role) -> list[dict]:
     path = snapshot.root / role.outbox_path
     model = parse_outbox(_read_maybe(path), role.name) if path.is_file() else None
     if model is None or model.errors:
         return []
-    current_role = current_local_role_revision(snapshot.root, role.name, snapshot.saipen_home)
     out = []
     for package in model.packages:
         if package.fields.get("status") not in ("ready", "reviewed"):
@@ -1863,14 +1926,18 @@ def _post_ship(snapshot: CrewSnapshot) -> tuple[bool, str, CrewAction | None]:
 
 
 def _producer_integrated(snapshot: CrewSnapshot, role) -> bool:
+    return _producer_integration_edge(snapshot, role) is not None
+
+
+def _producer_integration_edge(snapshot: CrewSnapshot, role) -> dict | None:
     """Item 11: a producer is integrated iff a structured integration EDGE
     binds its immutable package identity to an input source (S0) that the
     package STILL records, with a resulting source (S1) equal to the current
     source. The package is truthfully bound to S0 -- integration makes it
     naturally stale against newer sources; it must never be rewritten to
-    claim S1."""
+    claim S1. Returns that edge's identity and bindings, or None."""
     if snapshot.epoch is None or snapshot.source_id is None:
-        return False
+        return None
     receipts = _producer_integration_receipts(
         snapshot.root, snapshot.epoch.op_id, snapshot.op_records
     )
@@ -1880,7 +1947,7 @@ def _producer_integrated(snapshot: CrewSnapshot, role) -> bool:
         if (record.get("receipt_metadata") or {}).get("producer") == role.name
     ]
     if not matching:
-        return False
+        return None
     from .board import iso_utc_sort_key
 
     _earliest = iso_utc_sort_key("0000-01-01T00:00:00Z")
@@ -1905,7 +1972,7 @@ def _producer_integrated(snapshot: CrewSnapshot, role) -> bool:
                     ready_path=path,
                 )
             except Exception:
-                return False
+                return None
             if candidate.package_identity == meta.get("package_identity"):
                 package = candidate
                 break
@@ -1921,9 +1988,9 @@ def _producer_integrated(snapshot: CrewSnapshot, role) -> bool:
             None,
         )
         if legacy is None:
-            return False
+            return None
         if legacy.fields.get("source_head") != meta.get("input_source"):
-            return False
+            return None
     else:
         # Found a SETTLED package matching the receipt's package identity.
         # A content-identical re-bind (same package_identity and content,
@@ -1934,10 +2001,18 @@ def _producer_integrated(snapshot: CrewSnapshot, role) -> bool:
         # fix (E-3836): without it every content-identical re-integration
         # never satisfies SC-8/SC-9.
         pass
-    return (
-        meta.get("resulting_source") == snapshot.source_id.source_head
-        and meta.get("resulting_source_fingerprint") == snapshot.source_id.source_tree_fingerprint
-    )
+    if (
+        meta.get("resulting_source") != snapshot.source_id.source_head
+        or meta.get("resulting_source_fingerprint") != snapshot.source_id.source_tree_fingerprint
+    ):
+        return None
+    return {
+        "op_id": latest.get("op_id") or "",
+        "package_identity": meta.get("package_identity"),
+        "input_source": meta.get("input_source"),
+        "resulting_source": meta.get("resulting_source"),
+        "resulting_source_fingerprint": meta.get("resulting_source_fingerprint"),
+    }
 
 
 def _producer_oscillation(snapshot: CrewSnapshot) -> str | None:
@@ -2452,7 +2527,8 @@ def _evaluate(
                 None,
                 "canonical terminal release bound to the crew epoch",
                 "committed release receipt verified by the release engine",
-                "release closure is current HEAD and remote-verified",
+                "release receipt verified: published at current HEAD, or closed "
+                "locally with publication NOT_PERFORMED",
             )
         )
         reason = release_reason if ship_ok else "terminal ship not authorized: " + ship_reason

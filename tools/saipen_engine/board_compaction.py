@@ -80,6 +80,11 @@ COMPACTION_DISPOSITION = {
     "external_authority": "inline",
     "external_evidence": "inline",
     "external_implementation": "inline",
+    # The sealed execution-contract pointer a BLOCKED external row resolves
+    # against. Inline like every other path-bearing identifier: a pointer moved
+    # to externalized detail would silently turn an executable contract into
+    # prose the resolver cannot execute.
+    "verification_contract": "inline",
     "implementation_delta": "inline",
     "implementation_source": "inline",
     # T-406: an E-### identity, exactly like `supersession_evidence`. Inline
@@ -92,6 +97,7 @@ COMPACTION_DISPOSITION = {
     "owner": "inline",
     "recurrence": "inline",
     "regression": "inline",
+    "regression_evidence": "inline",
     "resume_phase": "inline",
     "resume_transition_from": "inline",
     # T-1429: the deferred due instant is machine-routing truth -- a cold
@@ -106,6 +112,9 @@ COMPACTION_DISPOSITION = {
     "supersession_evidence": "inline",
     "user_explicit": "inline",
     "request_witness": "inline",
+    # T-1663: `saipen iteration` reads it for the active ticket, so it is
+    # routing truth a cold verdict must see without opening the detail.
+    "requires": "inline",
     "verify": "compact",
     "verify_attempts": "inline",
     "weak_model": "inline",
@@ -139,6 +148,8 @@ _CRITICAL_FIELDS = frozenset(
         "supersession_evidence",
         "user_explicit",
         "request_witness",
+        "requires",
+        "regression_evidence",
         "verify",
         "verify_attempts",
     }
@@ -637,6 +648,7 @@ def _one(
     event_id: "str | Mapping[str, str] | None",
     reason: str,
     tolerated_ids: frozenset[str] | set[str] = frozenset(),
+    foreign_ids: frozenset[str] | set[str] = frozenset(),
 ) -> tuple[str, tuple[TargetPlan, ...], str | None, str | None]:
     parsed = parse_board(board_text)
     tolerated = set(tolerated_ids)
@@ -654,7 +666,9 @@ def _one(
     if ticket is None:
         raise ValueError(f"{ticket_id} not on the board")
     raw = str(ticket["raw"])
-    if len(raw) <= MAX_LIVE_RECORD_CHARS:
+    # A row within the cap is rewritten only when the caller named it as a
+    # foreign-field repair (T-1743); otherwise there is nothing to compact.
+    if len(raw) <= MAX_LIVE_RECORD_CHARS and ticket_id not in foreign_ids:
         return board_text, (), None, None
     prior_ref = str((ticket.get("fields") or {}).get("detail_ref") or "").strip() or None
     original = _record_bytes(board_text, ticket["line_no"])
@@ -724,6 +738,7 @@ def prepare_existing(
     event_id: "str | Mapping[str, str] | None",
     reason: str,
     tolerated_ids: frozenset[str] | set[str] | None = None,
+    foreign_ids: frozenset[str] | set[str] | None = None,
 ) -> CompactionResult:
     """Compact each requested oversized existing row exactly once.
 
@@ -761,6 +776,7 @@ def prepare_existing(
             event_id=event_id,
             reason=reason,
             tolerated_ids=tolerated,
+            foreign_ids=frozenset(foreign_ids or ()),
         )
         targets.extend(extra)
         if ref:
@@ -906,6 +922,29 @@ def unrecognized_field_ticket(error: str) -> str | None:
     """
     match = _UNRECOGNIZED_FIELD_RE.match(error)
     return match.group(1) if match else None
+
+
+def foreign_field_ticket_ids(board_text: str) -> list[str]:
+    """Rows whose ONLY parse fault is a refused field outside the closed grammar.
+
+    T-1743: such a row has a lossless canonical repair -- compaction journals
+    its complete physical bytes (the foreign field included) into the detail
+    authority and rewrites only the live projection. Measured dead end before
+    this: SMART_VAC_CLEANER T-199 carried `source: saihunt HUNT-001` from a
+    hand-written collect, `ticket compact T-199` refused VALIDATION_FAILED, and
+    Fleet named nothing, so every lifecycle command in the project stopped at a
+    board nobody could repair. Any OTHER parse fault keeps the board fatal, so
+    this returns [] for it.
+    """
+    parsed = parse_board(board_text)
+    found: list[str] = []
+    for error in parsed.get("errors", []):
+        ticket_id = unrecognized_field_ticket(error)
+        if ticket_id is None or ticket_id not in parsed["tickets"]:
+            return []
+        if ticket_id not in found:
+            found.append(ticket_id)
+    return found
 
 
 def oversized_ticket_ids(board_text: str) -> list[str]:

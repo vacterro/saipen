@@ -13,16 +13,62 @@ canonical ``STATE.agent`` inheritance and every safety check.
 
 from __future__ import annotations
 
+import json
 import os
 import re
 import shutil
 import subprocess
+import sys
 from pathlib import Path
 from typing import Mapping, Sequence
 
+from . import host_authority_client, host_taxonomy
 from .paths import ENV_AGENT, ENV_PROJECT_LINEAGE, ENV_PROJECT_ROOT, project_lineage_identity
 
-SUPPORTED_HOSTS = {"opencode": "opencode"}
+
+def _registry_adapters() -> list[dict]:
+    """The adapter registry entries, or [] when the registry cannot be read."""
+    path = Path(__file__).resolve().parents[2] / "extensions" / "adapters" / "registry.json"
+    try:
+        registry = json.loads(path.read_text(encoding="utf-8-sig"))
+    except (OSError, ValueError):
+        return []
+    adapters = registry.get("adapters") if isinstance(registry, dict) else None
+    return [item for item in adapters or [] if isinstance(item, dict)]
+
+
+def registry_launch_hosts() -> dict[str, str]:
+    """Registry host id -> the executable a launch starts.
+
+    T-1624. The launchable hosts are whatever the adapter registry DECLARES
+    (`launch_executable`), read here and listed nowhere else. The table used to
+    be a literal in this file, so a host could be a first-class adapter with a
+    prompt-blocking hook and still be answered `unsupported SAIPEN host
+    launch` -- the registry and the launcher disagreed about the same host.
+    """
+    return {
+        str(item["id"]): str(item["launch_executable"])
+        for item in _registry_adapters()
+        if item.get("id") and item.get("launch_executable")
+    }
+
+
+def launch_degrades(host_id: str) -> bool:
+    """May this host start when its installed runtime could not be proven?
+
+    STRICT operator policy never permits degradation. Otherwise the registry's
+    `degraded_mode` decides: a degrading host starts with a warning, and a host
+    whose tool gate fails closed keeps its refusal.
+    """
+    if host_authority_client.authority_mode() == host_taxonomy.MODE_STRICT:
+        return False
+    for item in _registry_adapters():
+        if str(item.get("id")) == host_id:
+            return item.get("degraded_mode") == "DEGRADED_ALLOWED_DEFAULT"
+    return False
+
+
+SUPPORTED_HOSTS = registry_launch_hosts()
 _SEAT_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_.:@-]{0,127}$")
 
 #: T-1343. An interlock, not a feature: set to ``1`` it refuses to create a host
@@ -157,7 +203,20 @@ def launch_host(
 
     env = build_launch_environment(project_root, seat, base_env=base_env)
     if prelaunch:
-        prelaunch_runtime(host_id)
+        try:
+            prelaunch_runtime(host_id)
+        except HostLaunchRefusal as exc:
+            if not launch_degrades(host_id):
+                raise HostLaunchRefusal(
+                    f"{exc}; operator action: {host_taxonomy.REPAIR}"
+                ) from exc
+            # The host itself still works and its own hook degrades truthfully:
+            # say what could not be proven and start it anyway.
+            print(
+                f"SAIPEN: starting {host_id} without a proven installed runtime ({exc}). "
+                "The session will run degraded until: saipen host repair",
+                file=sys.stderr,
+            )
     executable = shutil.which(executable_name, path=env.get("PATH"))
     if executable is None:
         raise HostLaunchRefusal(f"supported host executable is unavailable: {executable_name}")

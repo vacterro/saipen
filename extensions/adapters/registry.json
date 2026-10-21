@@ -31,7 +31,7 @@
       "declared_strength": "BLOCKING",
       "response_enforcement": "MECHANICAL",
       "response_hook": "experimental.text.complete",
-      "response_enforcement_note": "Default operational completed parts are replaced by the canonical machine digest; oversized model text is not the delivered completed part. This is not a token-stream gate; previously streamed text and intermediate narration cannot be retracted. Explicit witnessed depth/artifacts remain separately gated.",
+      "response_enforcement_note": "Default operational completed parts are replaced by the canonical machine digest; oversized model text is not the delivered completed part, and a refused part is handed to `saipen response preserve` before it is replaced, so it is kept byte for byte with its overflow account. This is not a token-stream gate; previously streamed text and intermediate narration cannot be retracted. Explicit witnessed depth/artifacts remain separately gated.",
       "artifact_version": 1,
       "install": {
         "home": "~/.config/opencode",
@@ -64,7 +64,17 @@
         "prompt_to_work_binding": "NOT_INSTALLED",
         "response_depth_carrier": "CHAT_MESSAGE_TEXT_AT_COMPLETED_PART"
       },
-      "visible_prevention": "COMPLETED_PART_ONLY_NOT_TOKEN_STREAM"
+      "visible_prevention": "COMPLETED_PART_ONLY_NOT_TOKEN_STREAM",
+      "launch_executable": "opencode",
+      "auto_recovery": "PRELAUNCH_RESYNC",
+      "degraded_mode": "DEGRADED_ALLOWED_DEFAULT",
+      "degraded_mode_note": "No prompt-level admission hook exists. The consequential tool gate applies the operator policy for a missing guard, unavailable interpreter or replaced loaded plugin: DEGRADED_ALLOWED permits the tool with a bounded UNVERIFIED system record, and a replaced plugin whose guard still answers keeps that guard's target and actor refusals; STRICT refuses with the taxonomy action. Missing policy uses the canonical default, invalid policy uses STRICT. Known forged or foreign binding and normal guard refusals still block in every mode. Decisions are compiled from HOST-INTEGRATION-01 and checked against its owner.",
+      "question_enforcement": "MECHANICAL",
+      "question_hook": "tool.execute.before",
+      "question_tools": [
+        "question"
+      ],
+      "question_enforcement_note": "OPERATOR-QUESTION-01: capability only; installed generation and actual hook execution remain separate evidence. Canonical status/response owns human eligibility; no typed canonical choices means no improvised menu."
     },
     {
       "id": "claude",
@@ -80,7 +90,7 @@
       "hook_artifact": "extensions/adapters/claude/saipen-guard.py",
       "hook_config_surface": "~/.claude/settings.json",
       "hook_installer": "tools/install_host_guard.py",
-      "hook_surface_note": "Executable native Claude Code transport for PROTOCOL-ADMISSION-01 and the layered final-response gate (T-1558). ONE artifact dispatches on `hook_event_name`: SessionStart (invalidate, deliver again), UserPromptSubmit (the pre-generation boundary: establish admission and deliver BOTH BOOT/STYLE/EXECUTION and the generated chat contract, or block the prompt with a runtime-written diagnostic), PostToolUse on Bash (a real `saipen init` binds the SAME turn; admission remains refused until separated host authority exists), PostModelSwitch (invalidate), Stop (forward `last_assistant_message` to `tools/saipen.py response check --classify --admission-session`, the SAME authority the Codex and OpenCode gates use, with the human's request read from the transcript so only a genuine report request earns the detailed budget). Enforcement at Stop is one correction continuation (`decision: block`); a stop that is already a continuation (`stop_hook_active`) records CLAUDE_STOP_REENTRY_NO_FAIL_CLOSED. The command is POSIX-spelled (forward slashes) because Claude Code runs hooks through Git Bash on Windows. The installer merges into the operator's shared settings.json, preserves every unrelated hook, and REPORTS (never removes) an operator hook that carries its own voice or language rule (`style_hook_conflicts`).",
+      "hook_surface_note": "Executable native Claude Code transport for PROTOCOL-ADMISSION-01 and the layered final-response gate (T-1558). ONE artifact dispatches on `hook_event_name`: SessionStart (drop the record and deliver again, one engine call), UserPromptSubmit (the pre-generation boundary: establish admission and deliver BOTH BOOT/STYLE/EXECUTION and the generated chat contract; a runtime REFUSAL blocks the prompt with a runtime-written diagnostic and its one operator action; a DEGRADED permit proceeds, marked UNVERIFIED for operator and model), PostToolUse on Bash (a real `saipen init` binds the SAME turn), PostModelSwitch (invalidate), Stop (forward `last_assistant_message` to `tools/saipen.py response check --classify --admission-session`, the SAME authority the Codex and OpenCode gates use). The hook holds exactly one rule of its own (T-1624): an engine that cannot be run is ENGINE_UNREACHABLE, which lets the prompt through with a plain notice under the default policy and blocks only under STRICT. The command names the host's INSTALLED runtime (`hook_delegate`), never the source checkout, and is POSIX-spelled (forward slashes) because Claude Code runs hooks through Git Bash on Windows. The installer stages the artifact, proves it starts, stays silent outside a project and fails open without a runtime, and only then activates it; the previous generation is kept for `--rollback`. It merges into the operator's shared settings.json, preserves every unrelated hook, and REPORTS (never removes) an operator hook that carries its own voice or language rule (`style_hook_conflicts`).",
       "freshness_surfaces": [
         "skill",
         "instruction",
@@ -99,12 +109,14 @@
       },
       "pre_output_interception": "PROMPT_LEVEL",
       "stop_output_interception": "MECHANICAL",
-      "admission_enforcement": "UNAVAILABLE",
+      "admission_enforcement": "MECHANICAL",
       "admission_required": true,
       "admission_hook": "UserPromptSubmit",
+      "admission_authority": "tools/saipen_engine/host_authority_broker.py",
+      "admission_recovery": "tools/saipen_engine/host_authority_client.py",
       "style_enforcement": "MECHANICAL",
       "style_hook": "CHAT_STYLE_DRIFT",
-      "admission_enforcement_note": "UNAVAILABLE: the hook runs as the same OS principal as ordinary model Python. Project keys and importable signing helpers cannot prove host provenance. T-1563 disables local minting and fails closed until a separated host authority exists. Prompt interception and Stop correction remain separate capabilities; admission_required keeps the admission layer closed.",
+      "admission_enforcement_note": "MECHANICAL, through a separated host authority (T-1623, hardened T-1624): the hook mints nothing. It asks the SAIPEN host-authority broker (`saipen_engine/host_authority_broker.py`), which runs as its own process, keeps its signing key in memory only, and admits exactly one caller shape proven from the operating system (`saipen_engine/host_authority_identity.py`): a host image that carries the registered code signer, shells that were started to run exactly the hook command, and the shipped hook bytes declaring this host. A descendant of the host that is not that invocation -- a command the model runs through the shell tool, a direct CLI call, a module import -- is refused, as is an interpreter renamed after the host. The broker mints a short-lived capability bound to the host adapter, project, session, model, provider, authority fingerprints and generation, and owns the ledger write. T-1563 still holds for everything else: project keys, importable signing helpers, environment strings, prompt text and legacy `hook:<event>:<mac>` values prove nothing. MECHANICAL is the claim for a session the broker ADMITTED; a session it could not prove runs DEGRADED under the default policy and is reported as such, never as admitted. Known limits, recorded rather than hidden: the proof is what the OS reports about live processes, so it is not a boundary against code injected into the host process, a same-user process that rewrites the installed hook, or a forged parent; the code-signer check exists on Windows only, and a platform that does not report process identity (no /proc) has no mechanical admission at all.",
       "execution_capabilities": {
         "silent_tool_continuation": "ADVISORY",
         "intermediate_text_suppression": "ADVISORY",
@@ -122,7 +134,23 @@
         "prompt_to_work_binding": "NOT_INSTALLED",
         "response_depth_carrier": "TRANSCRIPT_USER_TEXT_AT_STOP"
       },
-      "visible_prevention": "POST_RENDER_ONE_CORRECTION_NO_RETRACTION"
+      "visible_prevention": "POST_RENDER_ONE_CORRECTION_NO_RETRACTION",
+      "routine_launch": "native Claude Code launch (desktop app, IDE extension or `claude`); no SAIPEN seat, wrapper, launcher, environment variable or prompt phrase is ever required",
+      "hook_delegate": "installed_runtime",
+      "launch_executable": "claude",
+      "launch_command": "saipen --agent <seat> launch claude -- [arguments]",
+      "launch_implementation": "tools/saipen_engine/host_launch.py",
+      "launch_requirement": "optional_explicit_actor",
+      "prelaunch_command": "saipen runtime --prelaunch --adapter claude --json",
+      "auto_recovery": "AUTHORITY_RESTART_THEN_DEGRADE",
+      "degraded_mode": "DEGRADED_ALLOWED_DEFAULT",
+      "admission_taxonomy": "tools/saipen_engine/host_taxonomy.py",
+      "question_enforcement": "MECHANICAL",
+      "question_hook": "PreToolUse",
+      "question_tools": [
+        "askuserquestion"
+      ],
+      "question_enforcement_note": "OPERATOR-QUESTION-01: capability only; installed generation and actual hook execution remain separate evidence. Canonical status/response owns human eligibility; no typed canonical choices means no improvised menu."
     },
     {
       "id": "codex",
@@ -178,7 +206,17 @@
         "prompt_to_work_binding": "NOT_INSTALLED",
         "response_depth_carrier": "UNAVAILABLE_AT_STOP_NO_TURN_INGRESS"
       },
-      "visible_prevention": "POST_RENDER_ONE_CORRECTION_NO_RETRACTION"
+      "visible_prevention": "POST_RENDER_ONE_CORRECTION_NO_RETRACTION",
+      "routine_launch": "native Codex CLI launch; no SAIPEN seat, wrapper or launcher is required",
+      "auto_recovery": "NONE",
+      "degraded_mode": "NOT_APPLICABLE",
+      "question_enforcement": "ADVISORY",
+      "question_hook": null,
+      "question_tools": [
+        "request_user_input",
+        "request_user_input_async"
+      ],
+      "question_enforcement_note": "No registered blocking question hook; canonical activation/EXECUTION instructions and available final-response guard apply. No native Question UI refusal is proved on this host."
     },
     {
       "id": "zaicode",
@@ -230,7 +268,26 @@
         "prompt_to_work_binding": "NOT_INSTALLED",
         "response_depth_carrier": "LAUNCH_CARRIER_ONLY"
       },
-      "visible_prevention": "ADVISORY_OR_UNAVAILABLE"
+      "visible_prevention": "ADVISORY_OR_UNAVAILABLE",
+      "iteration_controller": {
+        "model_turn_vs_goal": "MODEL_TURN_FINISHED != SAIPEN_GOAL_FINISHED; a provider returning a final answer ends its turn, never the goal",
+        "decision_owner": [
+          "saipen iteration --json (canonical public verdict, schema v1)",
+          "saipen_engine.iteration_verdict.project_iteration_verdict",
+          "saipen_engine.host_iteration.HostIterationController (reference HOST FLOW)",
+          "saipen_engine.iteration.decide_turn (internal precedence primitive)"
+        ],
+        "executor_admission": "saipen_engine.iteration_verdict.admit_normalized + host_iteration.admit_candidates/admit_one -- STATE requires plus process_execution/patch_application, normalized per switch, never inferred from model identity",
+        "goal_complete_gate": "saipen_engine.iteration_verdict.verdict_allows_goal_complete_ui -- true on known-schema VALID_TERMINAL with proven terminality only",
+        "enforcement": "ADVISORY -- no iteration gate is installed on this host; the native controller must query `saipen iteration` before printing goal-complete, and must reroute (never block the project) on EXECUTOR_CAPABILITY_MISMATCH. Reference wiring proven SAIPEN-side only (E2E-01..E2E-10); see .saipen/evidence/T-1619-zaicode-handoff.md"
+      },
+      "routine_launch": "native ZAICODE launch; no SAIPEN seat, wrapper or launcher is required",
+      "auto_recovery": "NONE",
+      "degraded_mode": "NOT_APPLICABLE",
+      "question_enforcement": "ADVISORY",
+      "question_hook": null,
+      "question_tools": [],
+      "question_enforcement_note": "No registered blocking question hook; canonical activation/EXECUTION instructions and available final-response guard apply. No native Question UI refusal is proved on this host."
     },
     {
       "id": "zcode-production",
@@ -281,7 +338,14 @@
         "prompt_to_work_binding": "NOT_INSTALLED",
         "response_depth_carrier": "LAUNCH_CARRIER_ONLY"
       },
-      "visible_prevention": "ADVISORY_OR_UNAVAILABLE"
+      "visible_prevention": "ADVISORY_OR_UNAVAILABLE",
+      "routine_launch": "native ZCode (production ~/.zcode home) launch; no SAIPEN seat, wrapper or launcher is required",
+      "auto_recovery": "NONE",
+      "degraded_mode": "NOT_APPLICABLE",
+      "question_enforcement": "ADVISORY",
+      "question_hook": null,
+      "question_tools": [],
+      "question_enforcement_note": "No registered blocking question hook; canonical activation/EXECUTION instructions and available final-response guard apply. No native Question UI refusal is proved on this host."
     },
     {
       "id": "gemini",
@@ -336,7 +400,14 @@
         "prompt_to_work_binding": "NOT_INSTALLED",
         "response_depth_carrier": "LAUNCH_CARRIER_ONLY"
       },
-      "visible_prevention": "ADVISORY_OR_UNAVAILABLE"
+      "visible_prevention": "ADVISORY_OR_UNAVAILABLE",
+      "routine_launch": "native Gemini CLI / Antigravity launch; no SAIPEN seat, wrapper or launcher is required",
+      "auto_recovery": "NONE",
+      "degraded_mode": "NOT_APPLICABLE",
+      "question_enforcement": "ADVISORY",
+      "question_hook": null,
+      "question_tools": [],
+      "question_enforcement_note": "No registered blocking question hook; canonical activation/EXECUTION instructions and available final-response guard apply. No native Question UI refusal is proved on this host."
     },
     {
       "id": "codebuddy",
@@ -382,7 +453,14 @@
         "prompt_to_work_binding": "NOT_INSTALLED",
         "response_depth_carrier": "LAUNCH_CARRIER_ONLY"
       },
-      "visible_prevention": "ADVISORY_OR_UNAVAILABLE"
+      "visible_prevention": "ADVISORY_OR_UNAVAILABLE",
+      "routine_launch": "native CodeBuddy Code launch; no SAIPEN seat, wrapper or launcher is required",
+      "auto_recovery": "NONE",
+      "degraded_mode": "NOT_APPLICABLE",
+      "question_enforcement": "ADVISORY",
+      "question_hook": null,
+      "question_tools": [],
+      "question_enforcement_note": "No registered blocking question hook; canonical activation/EXECUTION instructions and available final-response guard apply. No native Question UI refusal is proved on this host."
     },
     {
       "id": "freebuff",
@@ -442,15 +520,28 @@
       },
       "execution_capability_note": "EXECUTION.md instructs silent tool continuation. No supported pre-render intermediate-text interception is installed; final/Stop hooks cannot retract streamed text. Machine progress uses canonical status and runtime heartbeat. Native thought UI is host-owned. Higher-priority host narration requirements take precedence and prevent a silence guarantee.",
       "operator_ingress_capability": {
-        "exact_before_work_projection": "LAUNCH_CARRIER_ONLY",
+        "exact_before_work_projection": "NONE_VERIFIED",
         "witness_without_launch_carrier": "model_supplied",
         "transport_obligation": "PAYLOAD_FIDELITY_NOT_OPERATOR_IDENTITY",
         "local_candidate_policy": "P2_OR_LOWER_NO_PREEMPTION_OR_GOAL_RESET",
         "host_prompt_available": false,
         "prompt_to_work_binding": "NOT_INSTALLED",
-        "response_depth_carrier": "LAUNCH_CARRIER_ONLY"
+        "response_depth_carrier": "NONE_VERIFIED",
+        "supported_carrier_mechanisms": [],
+        "provenance_transport_note": "SPECIFIED, NOT INSTALLED (T-1823 review of SRC-277/T-1818). The two carrier mechanisms -- SAIPEN_TASK_FILE/SAIPEN_TASK_SHA256 exported by the tool-process spawner, or .saipen/cache/ingress/ envelopes written on operator input -- are a FreeBuff-side obligation that has NOT been implemented or observed: T-1822 measured live that a genuine operator 'cc' typed in the FreeBuff UI reaches the engine with no SAIPEN_TASK_FILE, no SAIPEN_TASK_SHA256 and no host ingress envelope, so its witness is model_supplied and operator_required hard_wait correctly refuses it. This registry records installed, verified host behaviour; it must stay at host_prompt_available false / prompt_to_work_binding NOT_INSTALLED / no supported carrier until a real FreeBuff-launched tool process delivers a carrier that host-to-engine acceptance can verify. SAIPEN cannot and must not manufacture that carrier itself."
       },
-      "visible_prevention": "ADVISORY_OR_UNAVAILABLE"
+      "visible_prevention": "ADVISORY_OR_UNAVAILABLE",
+      "routine_launch": "native FreeBuff / generic ~/.agents skills launch; no SAIPEN seat, wrapper or launcher is required",
+      "auto_recovery": "NONE",
+      "degraded_mode": "NOT_APPLICABLE",
+      "question_enforcement": "ADVISORY",
+      "question_hook": null,
+      "question_tools": [
+        "question",
+        "askuser",
+        "ask_user"
+      ],
+      "question_enforcement_note": "No registered blocking question hook; canonical activation/EXECUTION instructions and available final-response guard apply. No native Question UI refusal is proved on this host."
     },
     {
       "id": "aider",
@@ -496,7 +587,14 @@
         "prompt_to_work_binding": "NOT_INSTALLED",
         "response_depth_carrier": "LAUNCH_CARRIER_ONLY"
       },
-      "visible_prevention": "ADVISORY_OR_UNAVAILABLE"
+      "visible_prevention": "ADVISORY_OR_UNAVAILABLE",
+      "routine_launch": "native Aider launch; no SAIPEN seat, wrapper or launcher is required",
+      "auto_recovery": "NONE",
+      "degraded_mode": "NOT_APPLICABLE",
+      "question_enforcement": "ADVISORY",
+      "question_hook": null,
+      "question_tools": [],
+      "question_enforcement_note": "No registered blocking question hook; canonical activation/EXECUTION instructions and available final-response guard apply. No native Question UI refusal is proved on this host."
     },
     {
       "id": "antigravity",
@@ -542,7 +640,14 @@
         "prompt_to_work_binding": "NOT_INSTALLED",
         "response_depth_carrier": "LAUNCH_CARRIER_ONLY"
       },
-      "visible_prevention": "ADVISORY_OR_UNAVAILABLE"
+      "visible_prevention": "ADVISORY_OR_UNAVAILABLE",
+      "routine_launch": "native Antigravity plugins launch; no SAIPEN seat, wrapper or launcher is required",
+      "auto_recovery": "NONE",
+      "degraded_mode": "NOT_APPLICABLE",
+      "question_enforcement": "ADVISORY",
+      "question_hook": null,
+      "question_tools": [],
+      "question_enforcement_note": "No registered blocking question hook; canonical activation/EXECUTION instructions and available final-response guard apply. No native Question UI refusal is proved on this host."
     },
     {
       "id": "kiro",
@@ -597,7 +702,14 @@
         "prompt_to_work_binding": "NOT_INSTALLED",
         "response_depth_carrier": "LAUNCH_CARRIER_ONLY"
       },
-      "visible_prevention": "ADVISORY_OR_UNAVAILABLE"
+      "visible_prevention": "ADVISORY_OR_UNAVAILABLE",
+      "routine_launch": "native Kiro launch; no SAIPEN seat, wrapper or launcher is required",
+      "auto_recovery": "NONE",
+      "degraded_mode": "NOT_APPLICABLE",
+      "question_enforcement": "ADVISORY",
+      "question_hook": null,
+      "question_tools": [],
+      "question_enforcement_note": "No registered blocking question hook; canonical activation/EXECUTION instructions and available final-response guard apply. No native Question UI refusal is proved on this host."
     },
     {
       "id": "deepseek",
@@ -636,7 +748,14 @@
         "prompt_to_work_binding": "NOT_INSTALLED",
         "response_depth_carrier": "LAUNCH_CARRIER_ONLY"
       },
-      "visible_prevention": "ADVISORY_OR_UNAVAILABLE"
+      "visible_prevention": "ADVISORY_OR_UNAVAILABLE",
+      "routine_launch": "native DeepSeek launch; no SAIPEN seat, wrapper or launcher is required",
+      "auto_recovery": "NONE",
+      "degraded_mode": "NOT_APPLICABLE",
+      "question_enforcement": "ADVISORY",
+      "question_hook": null,
+      "question_tools": [],
+      "question_enforcement_note": "No registered blocking question hook; canonical activation/EXECUTION instructions and available final-response guard apply. No native Question UI refusal is proved on this host."
     },
     {
       "id": "openai",
@@ -675,7 +794,14 @@
         "prompt_to_work_binding": "NOT_INSTALLED",
         "response_depth_carrier": "LAUNCH_CARRIER_ONLY"
       },
-      "visible_prevention": "ADVISORY_OR_UNAVAILABLE"
+      "visible_prevention": "ADVISORY_OR_UNAVAILABLE",
+      "routine_launch": "native OpenAI launch; no SAIPEN seat, wrapper or launcher is required",
+      "auto_recovery": "NONE",
+      "degraded_mode": "NOT_APPLICABLE",
+      "question_enforcement": "ADVISORY",
+      "question_hook": null,
+      "question_tools": [],
+      "question_enforcement_note": "No registered blocking question hook; canonical activation/EXECUTION instructions and available final-response guard apply. No native Question UI refusal is proved on this host."
     },
     {
       "id": "qwen",
@@ -714,7 +840,14 @@
         "prompt_to_work_binding": "NOT_INSTALLED",
         "response_depth_carrier": "LAUNCH_CARRIER_ONLY"
       },
-      "visible_prevention": "ADVISORY_OR_UNAVAILABLE"
+      "visible_prevention": "ADVISORY_OR_UNAVAILABLE",
+      "routine_launch": "native Qwen launch; no SAIPEN seat, wrapper or launcher is required",
+      "auto_recovery": "NONE",
+      "degraded_mode": "NOT_APPLICABLE",
+      "question_enforcement": "ADVISORY",
+      "question_hook": null,
+      "question_tools": [],
+      "question_enforcement_note": "No registered blocking question hook; canonical activation/EXECUTION instructions and available final-response guard apply. No native Question UI refusal is proved on this host."
     },
     {
       "id": "generic",
@@ -753,7 +886,43 @@
         "prompt_to_work_binding": "NOT_INSTALLED",
         "response_depth_carrier": "LAUNCH_CARRIER_ONLY"
       },
-      "visible_prevention": "ADVISORY_OR_UNAVAILABLE"
+      "visible_prevention": "ADVISORY_OR_UNAVAILABLE",
+      "routine_launch": "native Generic (no interception) launch; no SAIPEN seat, wrapper or launcher is required",
+      "auto_recovery": "NONE",
+      "degraded_mode": "NOT_APPLICABLE",
+      "question_enforcement": "ADVISORY",
+      "question_hook": null,
+      "question_tools": [],
+      "question_enforcement_note": "No registered blocking question hook; canonical activation/EXECUTION instructions and available final-response guard apply. No native Question UI refusal is proved on this host."
     }
-  ]
+  ],
+  "capability_contract": {
+    "rule_id": "HOST-INTEGRATION-01",
+    "owner": "tools/saipen_engine/host_integration.py",
+    "test": "tools/test_t1624_host_integration.py",
+    "projection": "capability_contract(adapter)",
+    "cells": [
+      "install_surfaces",
+      "tool_interception",
+      "prompt_interception",
+      "response_interception",
+      "host_authority_source",
+      "separated_authority",
+      "mechanical_admission",
+      "launch",
+      "auto_recovery",
+      "degraded_mode"
+    ],
+    "auto_recovery_values": [
+      "AUTHORITY_RESTART_THEN_DEGRADE",
+      "PRELAUNCH_RESYNC",
+      "NONE"
+    ],
+    "degraded_mode_values": [
+      "DEGRADED_ALLOWED_DEFAULT",
+      "FAIL_CLOSED_TOOL_GATE",
+      "NOT_APPLICABLE"
+    ],
+    "note": "Every cell is read from this file by one projection; no consumer infers a host capability from an implementation file. A cell an adapter does not declare is reported UNDECLARED, never guessed stronger or weaker."
+  }
 }

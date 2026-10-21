@@ -122,18 +122,25 @@ _NO_GIT_EXCLUDED_DIRS = frozenset(
         ".ruff_cache",
         "__pycache__",
         "node_modules",
+        # Runtime output mirrors a git project's .gitignore: logs/ and state/
+        # change on every run (acceptance artifacts, locks, pids), so counting
+        # them as source makes the fingerprint move under a concurrent test
+        # suite and blocks every freshness check with the two-walk race.
+        "logs",
+        "state",
     }
 )
 _NO_GIT_EXCLUDED_ROOT_FILES = frozenset({"nul"})
 
 
-def _run_git(root: Path, *args: str) -> bytes:
+def _run_git(root: Path, *args: str, timeout: float | None = None) -> bytes:
     try:
         result = subprocess.run(
             ["git", "-C", os.fspath(root), *args],
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             check=False,
+            timeout=timeout,
         )
     except (OSError, subprocess.SubprocessError) as exc:
         raise FreshnessError(f"Git discovery failed: {exc}") from exc
@@ -606,7 +613,7 @@ def _walk_no_git_evidence(
     return _iter_no_git(root, full=False, record_observer=record_observer)
 
 
-def _git_delta_listing(root: Path) -> tuple[bytes, bytes]:
+def _git_delta_listing(root: Path, *, timeout: float | None = None) -> tuple[bytes, bytes]:
     raw = _run_git(
         root,
         "diff",
@@ -617,9 +624,45 @@ def _git_delta_listing(root: Path) -> tuple[bytes, bytes]:
         "--ignore-submodules=none",
         "HEAD",
         "--",
+        timeout=timeout,
     )
-    untracked = _run_git(root, "ls-files", "-z", "--others", "--exclude-standard", "--")
+    untracked = _run_git(
+        root, "ls-files", "-z", "--others", "--exclude-standard", "--", timeout=timeout
+    )
     return raw, untracked
+
+
+def _filtered_git_listing(
+    listing: tuple[bytes, bytes],
+) -> tuple[tuple[bytes, ...], tuple[bytes, ...]]:
+    """Project a Git delta listing onto the paths source identity fingerprints.
+
+    T-1827 (SRC-282:R003). A protocol operation releases the writer lock around
+    a long external process and then re-proves the source it captured. Its own
+    journal, lock sidecar and recovery files live under ``.saipen`` and appear
+    in ``git diff --raw``/``ls-files`` as untracked, while the source identity
+    deliberately excludes every ``.saipen`` path. Comparing the RAW listing
+    bytes therefore reported the caller's own bookkeeping as source drift.
+    Both sides of a bounded comparison are filtered here -- the same path
+    space ``_parse_git_delta`` uses -- so only fingerprinted paths can trip it.
+    """
+    raw, untracked = listing
+    fields = raw.split(b"\0")
+    kept: list[bytes] = []
+    index = 0
+    while index < len(fields) and fields[index]:
+        header = fields[index]
+        index += 1
+        if index >= len(fields) or not fields[index]:
+            raise FreshnessError("Git returned a truncated --raw delta record")
+        raw_path = fields[index]
+        index += 1
+        if not _is_saipen_path(raw_path):
+            kept.extend((header, raw_path))
+    paths = tuple(
+        path for path in untracked.split(b"\0") if path and not _is_saipen_path(path)
+    )
+    return tuple(kept), paths
 
 
 def _parse_git_delta(root: Path, raw: bytes, untracked: bytes) -> list[_Record]:
@@ -906,8 +949,50 @@ def compute_source_identity(project_root: Path | str) -> SourceIdentity:
     return SourceIdentity("no-git", fingerprint, model, token)
 
 
+def listing_token_unchanged(
+    project_root: Path | str, identity: SourceIdentity, *, timeout: float | None = None
+) -> tuple[bool, str | None]:
+    """The cheap half of revalidation: HEAD and the changed-path LISTING only.
+
+    T-1827 (SRC-282:R003/R006). The writer lock may hold this check, so it
+    re-derives only what Git reports (two HEAD reads, two delta listings) and
+    never re-hashes changed file contents: a 70k-entry working tree made the
+    full content confirmation take minutes, which is exactly the hold the
+    audit measured. Tracked edits are still caught because `git diff --raw`
+    carries the blob hashes; untracked content edits are not, and no
+    lock-respecting writer can cause those anyway.
+    """
+    root = Path(project_root).resolve()
+    token = identity._revalidation
+    if not isinstance(token, _RevalidationToken):
+        return False, "source identity has no bounded revalidation token"
+    if token.root != os.fspath(root) or token.model != identity.discovery_model:
+        return False, "source revalidation token is bound to another root/model"
+    if token.model != "git-delta-v1" or token.listing is None:
+        return False, "source identity has no bounded Git listing token"
+    try:
+        head_before = _run_git(
+            root, "rev-parse", "--verify", "HEAD", timeout=timeout
+        ).decode("ascii").strip()
+        listing_before = _git_delta_listing(root, timeout=timeout)
+        listing_after = _git_delta_listing(root, timeout=timeout)
+        head_after = _run_git(
+            root, "rev-parse", "--verify", "HEAD", timeout=timeout
+        ).decode("ascii").strip()
+        listing_stable = (
+            _filtered_git_listing(listing_before)
+            == _filtered_git_listing(listing_after)
+            == _filtered_git_listing(token.listing)
+        )
+    except (FreshnessError, OSError, UnicodeError) as exc:
+        return False, str(exc)
+    if not (head_before == head_after == token.head == identity.source_head and listing_stable):
+        return False, "source HEAD or changed-path listing moved after capture"
+    return True, None
+
+
 def revalidate_source_identity(
-    project_root: Path | str, identity: SourceIdentity
+    project_root: Path | str, identity: SourceIdentity, *, timeout: float | None = None
 ) -> tuple[bool, str | None]:
     """Confirm a captured identity without repeating the full capture.
 
@@ -915,6 +1000,10 @@ def revalidate_source_identity(
     subprocesses total) plus bounded content evidence, instead of another ten
     subprocess full identity.  No-Git confirmation performs one evidence walk
     and one checked streaming digest.  Any missing/foreign token fails closed.
+
+    ``timeout`` bounds each Git subprocess. T-1827 (SRC-282:R003): a caller
+    that runs this confirmation while holding the project writer lock passes
+    its declared bound, so no external process under that lock can outlast it.
     """
     root = Path(project_root).resolve()
     token = identity._revalidation
@@ -926,17 +1015,23 @@ def revalidate_source_identity(
         if token.model == "git-delta-v1":
             if token.listing is None:
                 return False, "Git source revalidation token has no listing"
-            head_before = _run_git(root, "rev-parse", "--verify", "HEAD").decode("ascii").strip()
-            listing_before = _git_delta_listing(root)
+            head_before = _run_git(
+                root, "rev-parse", "--verify", "HEAD", timeout=timeout
+            ).decode("ascii").strip()
+            listing_before = _git_delta_listing(root, timeout=timeout)
             digest, observe = _digest_capture(token.model)
             evidence = _parse_git_delta_evidence(
                 root, *listing_before, record_observer=observe
             )
-            listing_after = _git_delta_listing(root)
-            head_after = _run_git(root, "rev-parse", "--verify", "HEAD").decode("ascii").strip()
+            listing_after = _git_delta_listing(root, timeout=timeout)
+            head_after = _run_git(
+                root, "rev-parse", "--verify", "HEAD", timeout=timeout
+            ).decode("ascii").strip()
             if not (
                 head_before == head_after == token.head == identity.source_head
-                and listing_before == listing_after == token.listing
+                and _filtered_git_listing(listing_before)
+                == _filtered_git_listing(listing_after)
+                == _filtered_git_listing(token.listing)
                 and tuple(evidence) == token.evidence
             ):
                 return False, "source tree or HEAD changed after snapshot capture"

@@ -45,7 +45,7 @@ from saipen_engine import chat_style as CS  # noqa: E402
 from saipen_engine import protocol_admission as PA  # noqa: E402
 from saipen_engine import response_surface as RS  # noqa: E402
 from test_guard_hostile_matrix import fresh_project  # noqa: E402
-from test_hermetic_env import isolate_host_session  # noqa: E402
+from test_hermetic_env import isolate_host_session, isolated_authority_runtime  # noqa: E402
 from test_protocol_admission import HOST_POSITIVE_BLOCKED, World  # noqa: E402
 
 HOOK = ROOT / "extensions" / "adapters" / "claude" / "saipen-guard.py"
@@ -110,6 +110,10 @@ def hook_event(
             str(root or ROOT),
             *(["--home", str(home)] if home is not None else []),
             *(["--authority-root", str(authority)] if authority is not None else []),
+            # A child is outside the module's in-process endpoint isolation:
+            # without this it asks the operator's live authority service.
+            "--runtime",
+            str(isolated_authority_runtime()),
         ],
         input=raw_input if raw_input is not None else json.dumps(payload).encode("utf-8"),
         capture_output=True,
@@ -142,10 +146,10 @@ class AdmittedCase(unittest.TestCase):
     test_protocol_admission and test_t1563_authority_minting.
     """
 
-    def make_world(self, project: Path | None = None) -> World:
+    def make_world(self, project: Path | None = None, mode: str | None = "strict") -> World:
         tmp = tempfile.TemporaryDirectory()
         self.addCleanup(tmp.cleanup)
-        world = World(Path(tmp.name), project=project)
+        world = World(Path(tmp.name), project=project, mode=mode)
         self.admit(world)
         return world
 
@@ -166,22 +170,57 @@ class AdmittedCase(unittest.TestCase):
             "stop_hook_active": kw.get("reentry", False),
             "transcript_path": str(kw["transcript"]) if kw.get("transcript") else None,
         }
-        options = argparse.Namespace(home=world.home, authority_root=world.authority)
+        # Every option the transport's parser defines: a namespace missing one
+        # raised AttributeError inside the handler instead of measuring it.
+        options = argparse.Namespace(
+            saipen_root=root,
+            home=world.home,
+            authority_root=world.authority,
+            runtime=world.runtime,
+        )
         original = module._run_engine
+        operator_text = kw.get("operator_text")
 
         def downstream(saipen_root, bound, args, **fields):
             # The real canonical response/style oracle, isolated from unavailable
             # admission. No production flag or signer bypass is introduced.
             clean = []
             index = 0
-            paired = {"--admission-session", "--host", "--model", "--home", "--authority-root"}
+            paired = {
+                "--admission-session",
+                "--host",
+                "--model",
+                "--home",
+                "--authority-root",
+                "--runtime",
+            }
             while index < len(args):
                 if args[index] in paired:
                     index += 2
                 else:
                     clean.append(args[index])
                     index += 1
-            result = original(saipen_root, bound, clean, **fields)
+            if operator_text and fields.get("operator_request"):
+                from test_operator_origin_support import cold_command, native_operator
+
+                actual_run = subprocess.run
+
+                def native_transport(command, *positional, **options):
+                    env = dict(options.get("env") or {})
+                    if (isinstance(command, (list, tuple)) and len(command) > 1
+                            and Path(command[1]).resolve() == saipen_root / "tools/saipen.py"):
+                        command = cold_command(bound, command, env)
+                        options["env"] = env
+                    return actual_run(command, *positional, **options)
+
+                # The fixture supplies separate native-event authority. Neither
+                # the transcript nor the synthetic admission grants it.
+                with native_operator(bound, operator_text, action="report"), mock.patch.object(
+                    module.subprocess, "run", side_effect=native_transport,
+                ):
+                    result = original(saipen_root, bound, clean, **fields)
+            else:
+                result = original(saipen_root, bound, clean, **fields)
             if isinstance(result, dict):
                 result["layers"] = {**result.get("layers", {}), "admission": "SYNTHETIC_UNIT_ONLY"}
             return result
@@ -190,15 +229,19 @@ class AdmittedCase(unittest.TestCase):
         with contextlib.ExitStack() as stack:
             stack.enter_context(mock.patch.object(module, "_run_engine", side_effect=downstream))
             stack.enter_context(contextlib.redirect_stdout(output))
-            if kw.get("event") == "UserPromptSubmit":
+            if kw.get("event") == "UserPromptSubmit" and root == ROOT:
                 verdict = {
                     "permitted": True,
                     "delivery": "",
                     "contract": CS.contract_summary(CS.running_style_contract())["context"],
                 }
-                answer = verdict if root == ROOT else None
-                with mock.patch.object(module, "_admission", return_value=answer):
+                with mock.patch.object(module, "_admission", return_value=verdict):
                     code = module.handle_prompt(root, project, event, options)
+            elif kw.get("event") == "UserPromptSubmit":
+                # Another root is a runtime that is not there. Nothing is
+                # stubbed: the transport's own engine call fails the way it
+                # fails in the field, and the transport decides what follows.
+                code = module.handle_prompt(root, project, event, options)
             else:
                 code = module.handle_stop(root, project, event, options)
         raw = output.getvalue().strip()
@@ -274,13 +317,19 @@ class TranscriptRequestTests(AdmittedCase):
     def setUp(self):
         self.world = self.make_world()
 
-    def _stop(self, entries: list[dict], text: str = NINE):
+    def _stop(self, entries: list[dict], text: str = NINE,
+              operator_text: str = "how is it going?"):
         with tempfile.TemporaryDirectory() as raw:
             path = transcript_file(Path(raw), entries)
-            return self.hook(self.world, text=text, transcript=path)
+            spec = importlib.util.spec_from_file_location("claude_request_reader", HOOK)
+            reader = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(reader)
+            self.assertEqual(reader.last_human_request(str(path)), operator_text)
+            return self.hook(self.world, text=text, transcript=path, operator_text=operator_text)
 
     def test_a_report_request_earns_the_detailed_budget(self):
-        rc, out, _ = self._stop([user("Write me a detailed report of the findings.")])
+        request = "Write me a detailed report of the findings."
+        rc, out, _ = self._stop([user(request)], operator_text=request)
         self.assertEqual((rc, out), (0, None))
 
     def test_without_such_a_request_the_same_reply_is_refused(self):
@@ -294,7 +343,9 @@ class TranscriptRequestTests(AdmittedCase):
             {"type": "assistant", "message": {"role": "assistant", "content": []}},
             user([{"type": "tool_result", "tool_use_id": "t1", "content": "ok"}]),
         ]
-        rc, out, _ = self._stop(entries)
+        rc, out, _ = self._stop(
+            entries, operator_text="Write me a detailed report of the findings.",
+        )
         self.assertEqual((rc, out), (0, None))
 
     def test_the_request_survives_a_long_agentic_turn_of_tool_output(self):
@@ -303,7 +354,9 @@ class TranscriptRequestTests(AdmittedCase):
         # request, so a genuine report request was refused as over-budget.
         noise = user([{"type": "tool_result", "tool_use_id": "t", "content": "x" * 20000}])
         entries = [user("Write me a detailed report of the findings.")] + [noise] * 60
-        rc, out, _ = self._stop(entries)
+        rc, out, _ = self._stop(
+            entries, operator_text="Write me a detailed report of the findings.",
+        )
         self.assertEqual((rc, out), (0, None))
 
     def test_only_a_human_origin_can_be_the_request(self):
@@ -316,7 +369,9 @@ class TranscriptRequestTests(AdmittedCase):
         self.assertEqual(out.get("decision"), "block", out)
         human = user("Write me a detailed report of the findings.")
         human["origin"] = {"kind": "human"}
-        rc, out, _ = self._stop([human])
+        rc, out, _ = self._stop(
+            [human], operator_text="Write me a detailed report of the findings.",
+        )
         self.assertEqual((rc, out), (0, None))
 
     def test_a_skill_payload_marked_meta_is_not_the_request(self):
@@ -393,18 +448,34 @@ class ClaudePromptContextTests(AdmittedCase):
             rc, out, _ = hook_event(Path(raw), event="UserPromptSubmit")
         self.assertEqual((rc, out), (0, None))
 
-    def test_an_unreachable_engine_blocks_the_prompt_with_the_runtime_diagnostic(self):
-        # SRC-138: the pre-generation boundary fail-closes. An unreachable
-        # engine means no admission can be proven, so the prompt is blocked and
-        # the only text is the bounded runtime diagnostic.
+    def test_an_unreachable_engine_follows_the_operators_admission_policy(self):
+        # SRC-182 (T-1624) replaced SRC-138's unconditional fail-closed
+        # boundary: it locked a working host out of every prompt whenever the
+        # hook could not run its own runtime. An engine that does not answer is
+        # ENGINE_UNREACHABLE and the operator's policy decides what follows.
         with tempfile.TemporaryDirectory() as raw:
+            # STRICT (explicit opt-in; `World` writes it): blocked, with the
+            # one restoring action and the way to allow unverified work.
             rc, out, _ = self.hook(self.make_world(), event="UserPromptSubmit", root=Path(raw))
-        self.assertEqual(rc, 0)
-        self.assertEqual(rc, 0)
-        self.assertEqual(out.get("decision"), "block", out)
-        self.assertTrue(
-            str(out.get("reason") or "").startswith("SAIPEN PROTOCOL ADMISSION REFUSED"), out
-        )
+            self.assertEqual(rc, 0)
+            self.assertEqual(out.get("decision"), "block", out)
+            self.assertIn("ENGINE_UNREACHABLE", out["reason"])
+            self.assertIn("host repair", out["reason"])
+            self.assertIn("host mode degraded", out["reason"])
+            # DEGRADED_ALLOWED, the default: the prompt proceeds, and the
+            # operator and the model are told the same UNVERIFIED thing.
+            for mode in (None, "degraded"):
+                with self.subTest(mode=mode):
+                    rc, out, _ = self.hook(
+                        self.make_world(mode=mode), event="UserPromptSubmit", root=Path(raw)
+                    )
+                    self.assertEqual(rc, 0)
+                    self.assertNotIn("decision", out)
+                    self.assertIn("SAIPEN_ADMISSION_UNVERIFIED", out["systemMessage"])
+                    self.assertIn("ENGINE_UNREACHABLE", out["systemMessage"])
+                    self.assertEqual(
+                        out["hookSpecificOutput"]["additionalContext"], out["systemMessage"]
+                    )
 
 
 class RegistryClaimTests(unittest.TestCase):
@@ -483,7 +554,13 @@ class ClaudeInstallerTests(unittest.TestCase):
             settings = json.loads((home / ".claude" / "settings.json").read_text("utf-8"))
         self.assertEqual(settings["theme"], "auto")
         expected = _settings_with_user_hooks()["hooks"]["PreToolUse"]
-        self.assertEqual(settings["hooks"]["PreToolUse"], expected)
+        unrelated = [group for group in settings["hooks"]["PreToolUse"]
+                     if group.get("matcher") != "^AskUserQuestion$"]
+        self.assertEqual(unrelated, expected)
+        question_hooks = [group for group in settings["hooks"]["PreToolUse"]
+                          if group.get("matcher") == "^AskUserQuestion$"]
+        self.assertEqual(len(question_hooks), 1)
+        self.assertEqual(len(self._owned(settings, "PreToolUse")), 1)
         commands = {
             event: [h["command"] for g in settings["hooks"][event] for h in g["hooks"]]
             for event in ("Stop", "UserPromptSubmit")

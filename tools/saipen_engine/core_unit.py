@@ -20,6 +20,8 @@ This module is that tie, in three parts:
   declares the family and the ticket's current VERIFY cycle cites no admissible
   record: none, a digest that does not match, a run with a new red, a run that
   did not complete, or a fingerprint that is not the tree being shipped.
+  A repository may explicitly opt into focused ticket evidence; then the full
+  family gates publication of the final batch instead (``focused_unit``).
 """
 
 from __future__ import annotations
@@ -57,6 +59,14 @@ SCHEMA_VERSION = 1
 #: fingerprinting it would make any record stale the moment its own LOG line
 #: lands. `.git/` is history, not the tree under test.
 FINGERPRINT_EXCLUDED = (".git", ".saipen")
+
+#: T-1779: top-level operator INPUT, not tested subject. The audit inbox takes
+#: handoff drops at any moment; inside the family it moved the fingerprint
+#: mid-run (a full re-snapshot) and could move a validator verdict in the
+#: sandbox. It is left out of the copy AND the fingerprint, so a record still
+#: describes exactly the bytes that ran. Only the top level: a directory named
+#: `audit` anywhere below it stays subject.
+FAMILY_INPUT_EXCLUDED = ("audit",)
 
 #: T-1530: how many times `evidence` re-snapshots when the live tree drifts
 #: away from the copy that ran during the run window (a concurrent editor in a
@@ -180,7 +190,7 @@ def _sha256_file(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
-def tree_fingerprint(root: Path | str) -> str:
+def tree_fingerprint(root: Path | str, *, exclude_top=None) -> str:
     """Content digest of the tested subject, tracked or not.
 
     The file set is the one ``run_family`` copies into its sandbox -- the same
@@ -190,12 +200,14 @@ def tree_fingerprint(root: Path | str) -> str:
     from .test_runner import _ignore_copy
 
     base = Path(root)
+    excluded = (FINGERPRINT_EXCLUDED + FAMILY_INPUT_EXCLUDED
+                if exclude_top is None else tuple(exclude_top))
     files = []
     for directory, dirnames, filenames in os.walk(base):
         here = Path(directory)
         ignored = _ignore_copy(directory, [*dirnames, *filenames])
         if here == base:
-            ignored |= set(FINGERPRINT_EXCLUDED)
+            ignored |= set(excluded)
         dirnames[:] = sorted(name for name in dirnames if name not in ignored)
         files.extend(here / name for name in filenames if name not in ignored)
     digest = hashlib.sha256()
@@ -277,7 +289,9 @@ def _copy_saipen_once(source: Path, target: Path, ignore, *, lock: bool) -> bool
     from .lock import WriterLock
 
     held = False
-    writer = WriterLock(source)
+    # timeout=0: this is a probe, not a wait. A held lock must not stall the
+    # family run for the bounded writer budget; the retry path handles it.
+    writer = WriterLock(source, timeout=0)
     if lock:
         try:
             held = writer.acquire()
@@ -292,7 +306,7 @@ def _copy_saipen_once(source: Path, target: Path, ignore, *, lock: bool) -> bool
             writer.release()
 
 
-def copy_tree_consistent(source: Path, sandbox: Path, ignore) -> None:
+def copy_tree_consistent(source: Path, sandbox: Path, ignore) -> dict:
     """``shutil.copytree`` whose ``.saipen`` part is ONE checkpoint (T-1479).
 
     A checkpoint written while the tree is being copied left the sandbox with
@@ -303,13 +317,18 @@ def copy_tree_consistent(source: Path, sandbox: Path, ignore) -> None:
 
     def ignore_top_saipen(directory: str, names: list[str]) -> set[str]:
         ignored = set(ignore(directory, names))
-        if Path(directory) == source and ".saipen" in names:
-            ignored.add(".saipen")
+        if Path(directory) == source:
+            if ".saipen" in names:
+                ignored.add(".saipen")
+            ignored |= set(FAMILY_INPUT_EXCLUDED) & set(names)
         return ignored
 
+    began = time.monotonic()
     shutil.copytree(source, sandbox, symlinks=True, ignore=ignore_top_saipen)
+    observed = {"subject_copy_s": round(time.monotonic() - began, 6),
+                "canonical_copy_s": 0.0, "canonical_copy_attempts": 0}
     if not (source / ".saipen").is_dir():
-        return
+        return observed
     for attempt in range(CONSISTENT_COPY_ATTEMPTS):
         # Each attempt gets a fresh directory BESIDE the sandbox, never inside
         # it: a torn copy is abandoned, not deleted. `.saipen` holds read-only
@@ -317,9 +336,14 @@ def copy_tree_consistent(source: Path, sandbox: Path, ignore) -> None:
         # Windows, and a half-deleted copy made the next attempt fail with
         # FileExistsError. The enclosing temporary directory reclaims them.
         staging = sandbox.parent / f"saipen-copy-{attempt}"
-        if _copy_saipen_once(source, staging, ignore, lock=attempt > 0):
+        began = time.monotonic()
+        consistent = _copy_saipen_once(source, staging, ignore, lock=attempt > 0)
+        observed["canonical_copy_s"] += time.monotonic() - began
+        observed["canonical_copy_attempts"] += 1
+        if consistent:
             os.replace(staging, sandbox / ".saipen")
-            return
+            observed["canonical_copy_s"] = round(observed["canonical_copy_s"], 6)
+            return observed
         time.sleep(min(0.25 * (attempt + 1), 2.0))
     raise RuntimeError(
         f"CORE_UNIT_COPY_TORN: .saipen changed during each of {CONSISTENT_COPY_ATTEMPTS} copies"
@@ -419,14 +443,21 @@ def _modules(sandbox: Path, start: str, pattern: str) -> list[str]:
 def _run_whole(sandbox: Path, declared_family, spool: Path) -> dict:
     from .test_runner import _run_family
 
-    report = _run_family(sandbox, declared_family, spool=spool)
+    report = _run_family(
+        sandbox, declared_family, spool=spool, owner=sandbox.parent / SANDBOX_OWNER
+    )
     # unittest's runner writes to stderr; stdout is the tests' own output.
     text = (spool / "stderr").read_bytes().decode("utf-8", errors="replace")
     return {
         "status": report["status"],
         "exit_code": report.get("exit_code"),
+        "processes_leaked": report.get("processes_leaked") or [],
+        "duration_s": report.get("duration_s"),
+        "process_create_s": report.get("process_create_s"),
         **parse_output(text),
         "sections": red_sections(text),
+        "stdout": report.get("stdout") or "",
+        "stderr": report.get("stderr") or "",
     }
 
 
@@ -451,6 +482,7 @@ def _run_shard(sandbox: Path, declared_family, shape: tuple, spec: dict, work: P
         sandbox,
         TestFamily(declared_family.name, command, declared_family.timeout),
         spool=spool,
+        owner=work / SANDBOX_OWNER,
     )
     text = (spool / "stderr").read_bytes().decode("utf-8", errors="replace")
     try:
@@ -460,27 +492,49 @@ def _run_shard(sandbox: Path, declared_family, shape: tuple, spec: dict, work: P
     return {
         "status": report["status"],
         "exit_code": report.get("exit_code"),
+        "processes_leaked": report.get("processes_leaked") or [],
         **parse_output(text),
         "sections": red_sections(text),
+        "stdout": report.get("stdout") or "",
+        "stderr": report.get("stderr") or "",
         "manifest": manifest if isinstance(manifest, dict) else None,
+        "membership_required": True,
         "duration_s": round(time.monotonic() - began, 1),
     }
 
 
+def _empty_partition_member(shard: dict, proof) -> bool:
+    """A discovered worker may own no occurrences, never the whole family.
+
+    Imported cases are attributed to their defining module. A planned alias
+    module (or a helper with no tests) can therefore have an empty partition.
+    CPython 3.12 reports that worker with exit 5, while 3.11 reports exit 0.
+    Only the exact nonempty full-inventory partition proof may justify it.
+    """
+    if (not isinstance(proof, dict) or type(proof.get("occurrences")) is not int
+            or proof["occurrences"] < 1
+            or not isinstance(proof.get("inventory_sha256"), str)
+            or not re.fullmatch(r"[0-9a-f]{64}", proof["inventory_sha256"])):
+        return False
+    manifest = shard.get("manifest")
+    manifest = manifest if isinstance(manifest, dict) else shard
+    return (type(shard.get("ran")) is int and shard["ran"] == 0
+            and type(manifest.get("selected")) is int and manifest["selected"] == 0
+            and manifest.get("selected_indices") == []
+            and manifest.get("inventory_sha256") == proof["inventory_sha256"]
+            and type(manifest.get("discovered")) is int
+            and manifest.get("discovered") == proof["occurrences"]
+            and (shard.get("status"), shard.get("exit_code")) in {("PASS", 0), ("FAIL", 5)}
+            and not shard.get("red") and shard.get("headers") == 0
+            and shard.get("unparsed") == 0 and shard.get("tallied") in (None, 0))
+
+
 def merge_shards(shards: list[dict]) -> dict:
-    """One run from its shards: red is the union, counts are sums, and the
-    partition is proven by arithmetic -- every shard discovered the same
-    family, and together they kept every discovered test exactly once."""
-    statuses = [shard["status"] for shard in shards]
-    if "TIMEOUT" in statuses:
-        status = "TIMEOUT"
-    else:
-        status = "PASS" if all(item == "PASS" for item in statuses) else "FAIL"
-    exits = [shard.get("exit_code") for shard in shards]
-    if status == "TIMEOUT" or None in exits:
-        exit_code = None
-    else:
-        exit_code = next((code for code in exits if code != 0), 0)
+    """Merge verdicts and prove every canonical test occurrence exactly once.
+
+    Current runners bind the ordered inventory digest and selected positions;
+    arithmetic alone is retained only for readable legacy records.
+    """
     rans = [shard.get("ran") for shard in shards]
     tallies = [shard.get("tallied") for shard in shards]
     manifests = [shard.get("manifest") or {} for shard in shards]
@@ -500,6 +554,42 @@ def merge_shards(shards: list[dict]) -> dict:
         partition_error = f"shards discovered different families: {sorted(discovered)}"
     elif sum(selected) != min(discovered):
         partition_error = f"shards kept {sum(selected)} of {min(discovered)} discovered tests"
+    membership_required = any(
+        shard.get("membership_required") or "inventory_sha256" in manifest
+        for shard, manifest in zip(shards, manifests)
+    )
+    membership_proof = None
+    if membership_required and partition_error is None:
+        digests = [manifest.get("inventory_sha256") for manifest in manifests]
+        indices = [manifest.get("selected_indices") for manifest in manifests]
+        if any(not isinstance(value, str) or not re.fullmatch(r"[0-9a-f]{64}", value)
+               for value in digests) or len(set(digests)) != 1:
+            partition_error = "shards do not prove the same exact test inventory"
+        elif any(not isinstance(value, list) or len(value) != count
+                 for value, count in zip(indices, selected)):
+            partition_error = "shards did not report their selected test occurrences"
+        else:
+            positions = [position for values in indices for position in values]
+            size = min(discovered)
+            if (any(type(position) is not int for position in positions)
+                    or len(positions) != size or sorted(positions) != list(range(size))):
+                partition_error = "shards duplicate, omit or misidentify required test occurrences"
+            else:
+                membership_proof = {"inventory_sha256": digests[0], "occurrences": size}
+    empty = [index for index, shard in enumerate(shards)
+             if _empty_partition_member(shard, membership_proof)]
+    # Keep each worker's raw status/exit/count below. Only a proved empty
+    # partition is neutral in the complete family's aggregate verdict.
+    statuses = ["PASS" if index in empty else shard["status"]
+                for index, shard in enumerate(shards)]
+    status = "TIMEOUT" if "TIMEOUT" in statuses else (
+        "PASS" if all(item == "PASS" for item in statuses) else "FAIL"
+    )
+    exits = [0 if index in empty else shard.get("exit_code")
+             for index, shard in enumerate(shards)]
+    exit_code = None if status == "TIMEOUT" or None in exits else next(
+        (code for code in exits if code != 0), 0
+    )
     return {
         "status": status,
         "exit_code": exit_code,
@@ -509,19 +599,36 @@ def merge_shards(shards: list[dict]) -> dict:
         "unparsed": sum(int(shard.get("unparsed") or 0) for shard in shards),
         "tallied": sum(tallies) if None not in tallies else None,
         "sections": sections,
+        "stdout": "\n".join(shard.get("stdout") or "" for shard in shards)[-8000:],
+        "stderr": "\n".join(shard.get("stderr") or "" for shard in shards)[-8000:],
+        "processes_leaked": sorted({pid for shard in shards
+                                    for pid in shard.get("processes_leaked") or []}),
         "discovered": next(iter(discovered)) if len(discovered) == 1 else None,
         "partition_error": partition_error,
+        "membership_required": membership_required,
+        "membership_proof": membership_proof,
+        "empty_shards": empty,
+        "discovery_process_s": (
+            round(sum(float(manifest["discovery_s"]) for manifest in manifests), 6)
+            if all(isinstance(manifest.get("discovery_s"), (int, float))
+                   for manifest in manifests) else None
+        ),
         "shards": [
             {
                 "status": shard["status"],
                 "exit_code": shard.get("exit_code"),
                 "ran": shard.get("ran"),
                 "selected": manifest.get("selected"),
+                "discovered": manifest.get("discovered"),
                 "red": shard.get("red") or [],
                 "headers": shard.get("headers"),
                 "unparsed": shard.get("unparsed"),
                 "tallied": shard.get("tallied"),
                 "duration_s": shard.get("duration_s"),
+                "inventory_sha256": manifest.get("inventory_sha256"),
+                "selected_indices": manifest.get("selected_indices"),
+                "discovery_s": manifest.get("discovery_s"),
+                "processes_leaked": shard.get("processes_leaked") or [],
             }
             for shard, manifest in zip(shards, manifests)
         ],
@@ -628,24 +735,59 @@ def reclaim(path: Path) -> bool:
     return not path.exists()
 
 
-def new_sandbox_root() -> Path:
-    """One owner-stamped `saipen-core-unit-*` directory under the temp root."""
-    root = Path(tempfile.mkdtemp(prefix=SANDBOX_PREFIX))
-    (root / SANDBOX_OWNER).write_text(
-        json.dumps({"pid": os.getpid(), "created": time.time()}), encoding="utf-8"
-    )
+def new_sandbox_root(project: Path | str | None = None) -> Path:
+    """One owner-stamped `saipen-core-unit-*` directory under the temp root.
+
+    The stamp names the project the sandbox belongs to when the caller knows
+    it: the temp root is shared by every project on the machine, and a run in
+    another tree has no business reclaiming this one's sandboxes (T-1823).
+    """
+    root = Path(tempfile.mkdtemp(prefix=SANDBOX_PREFIX)).resolve()
+    stamp = {"pid": os.getpid(), "created": time.time(), "spawn_phase": "COPYING"}
+    if project is not None:
+        stamp["project"] = str(Path(project).resolve())
+    (root / SANDBOX_OWNER).write_text(json.dumps(stamp), encoding="utf-8")
+    from .verification_cache import register_sandbox
+
+    register_sandbox(root)
     return root
 
 
-def sweep_stale_sandboxes(temp_root: Path | None = None, now: float | None = None) -> list[str]:
+def _owner_pids(owner: dict) -> list:
+    """Every process a stamp names as reading the tree: the process that
+    created the sandbox, and the family child it handed the tree to.
+
+    The two are different processes by construction -- the family always runs
+    as a child of the run that copies the tree -- so a stamp that named only
+    the creator could not tell a sweep that the tree was in use. Measured
+    2026-10-19 (T-1823): a sandbox was emptied under a live family child while
+    the run that created it was itself still alive to write the record.
+    """
+    return [owner.get("pid"), owner.get("reader")]
+
+
+def sweep_stale_sandboxes(
+    temp_root: Path | None = None,
+    now: float | None = None,
+    project: Path | str | None = None,
+) -> list[str]:
     """Reclaim sandboxes whose owning run is gone; returns the names reclaimed.
 
     Only direct children of the temp root named `saipen-core-unit-*` are
-    considered. A stamped one is stale when its owner pid is not running; an
-    unstamped one (pre-T-1505) only when it holds a `project/` sandbox and is
-    older than LEGACY_SANDBOX_AGE_S. Nothing outside those trees is touched.
+    considered. A stamped one is stale when NO process its stamp names is
+    running; an unstamped one (pre-T-1505) only when it holds a `project/`
+    sandbox and is older than LEGACY_SANDBOX_AGE_S. Nothing outside those
+    trees is touched.
+
+    ``project`` is the tree the caller is running; a sandbox stamped with a
+    DIFFERENT project is never reclaimed, whatever its stamp says about
+    liveness. A pid is only meaningful inside one process space, so the
+    liveness of a foreign stamp says nothing about the tree, and reclaiming on
+    it deletes a live run's working copy (T-1823).
     """
-    base = Path(temp_root) if temp_root is not None else Path(tempfile.gettempdir())
+    base = (Path(temp_root).resolve() if temp_root is not None
+            else Path(tempfile.gettempdir()).resolve())
+    mine = str(Path(project).resolve()) if project is not None else None
     now = time.time() if now is None else now
     reclaimed: list[str] = []
     try:
@@ -663,7 +805,10 @@ def sweep_stale_sandboxes(temp_root: Path | None = None, now: float | None = Non
         except (OSError, ValueError):
             continue
         if isinstance(owner, dict):
-            stale = not pid_alive(owner.get("pid"))
+            recorded = owner.get("project")
+            if isinstance(recorded, str) and recorded != mine:
+                continue
+            stale = not any(pid_alive(pid) for pid in _owner_pids(owner))
         elif owner is None:
             try:
                 age = now - candidate.stat().st_mtime
@@ -682,48 +827,73 @@ def run_family(root: Path | str, *, timeout: int | None = None, jobs: int = 1) -
     discovery runs as that many concurrent shards, each in its own copy of the
     one consistent snapshot, and every copy must carry the tested fingerprint.
     """
+    started = time.monotonic()
     from concurrent.futures import ThreadPoolExecutor
 
     from .test_runner import _ignore_copy
 
+    if os.name == "nt":
+        for var in ("TEMP", "TMP"):
+            val = os.environ.get(var)
+            if val:
+                with contextlib.suppress(OSError):
+                    os.environ[var] = str(Path(val).resolve())
     source = Path(root).resolve()
     declared_family = family()
     if timeout is not None:
         declared_family = type(declared_family)(
-            declared_family.name, declared_family.command, timeout
+            declared_family.name, declared_family.command, timeout,
+            environment_tools=declared_family.environment_tools,
         )
     shape = shardable(declared_family.command) if int(jobs) > 1 else None
+    from .verification_cache import capture
+
+    mark = time.monotonic()
+    verification_identity = capture(source, verification_configuration(timeout=timeout, jobs=jobs))
+    identity_wall_s = time.monotonic() - mark
     # No sandbox past the module count: `plan_shards` drops a shard that drew
     # no module, and a sandbox with no shard to run is a copy of the tree
     # paid for nothing.
     count = max(1, min(int(jobs), len(_modules(source, *shape)))) if shape else 1
-    started = time.monotonic()
-    swept = sweep_stale_sandboxes()
+    timings = {"shard_copy_wall_s": 0.0,
+               "environment_identity_wall_s": round(identity_wall_s, 6)}
+    mark = time.monotonic()
+    swept = sweep_stale_sandboxes(project=source)
+    timings["sweep_wall_s"] = round(time.monotonic() - mark, 6)
     tmps: list[Path] = []
     try:
         # Each shard lives where the sequential run lives -- its own
         # `saipen-core-unit-*/project` -- so no test sees a longer path.
-        tmps = [new_sandbox_root() for _ in range(count)]
+        tmps = [new_sandbox_root(source) for _ in range(count)]
         sandboxes = [tmp / "project" for tmp in tmps]
-        copy_tree_consistent(source, sandboxes[0], _ignore_copy)
+        mark = time.monotonic()
+        copy_metrics = copy_tree_consistent(source, sandboxes[0], _ignore_copy)
+        timings["copy_wall_s"] = round(time.monotonic() - mark, 6)
         # The subject is what was copied, fingerprinted where it was tested:
         # a write to the real tree after this line changes nothing here.
+        mark = time.monotonic()
         tested = tree_fingerprint(sandboxes[0])
+        timings["hash_wall_s"] = round(time.monotonic() - mark, 6)
         if count == 1:
             spool = tmps[0] / "spool"
             spool.mkdir()
+            mark = time.monotonic()
             run = _run_whole(sandboxes[0], declared_family, spool)
+            timings["execution_wall_s"] = round(time.monotonic() - mark, 6)
         else:
+            mark = time.monotonic()
             with ThreadPoolExecutor(max_workers=count) as pool:
                 list(pool.map(lambda target: shutil.copytree(sandboxes[0], target, symlinks=True),
                               sandboxes[1:]))
                 copies = list(pool.map(tree_fingerprint, sandboxes[1:]))
+            timings["shard_copy_wall_s"] = round(time.monotonic() - mark, 6)
             if any(item != tested for item in copies):
                 raise RuntimeError("CORE_UNIT_SHARD_COPY: a shard copy is not the tested subject")
             plan = plan_shards(_modules(sandboxes[0], *shape), load_durations(source), count)
             # Shard 0 is the catch-all: every module no other shard names.
             named = sorted({name for shard in plan[1:] for name in shard})
             specs = [{"exclude": named}, *({"include": shard} for shard in plan[1:])]
+            mark = time.monotonic()
             with ThreadPoolExecutor(max_workers=len(specs)) as pool:
                 shards = list(pool.map(
                     lambda index: _run_shard(
@@ -732,14 +902,20 @@ def run_family(root: Path | str, *, timeout: int | None = None, jobs: int = 1) -
                     range(len(specs)),
                 ))
             run = merge_shards(shards)
+            timings["execution_wall_s"] = round(time.monotonic() - mark, 6)
     finally:
+        mark = time.monotonic()
         leaked = [str(tmp) for tmp in tmps if not reclaim(tmp)]
+        timings["cleanup_wall_s"] = round(time.monotonic() - mark, 6)
     return {
         **run,
         "sandboxes_swept": swept,
         "sandboxes_leaked": leaked,
         "fingerprint": tested,
         "jobs": count,
+        "timings_s": timings,
+        "copy_metrics": copy_metrics,
+        "verification_identity": verification_identity,
         "duration_s": round(time.monotonic() - started, 1),
         "timeout_s": declared_family.timeout,
         "command": ["python", *declared_family.command[1:]],
@@ -775,10 +951,15 @@ def judge(run: dict, baseline_red) -> dict:
     fixed = sorted(inherited - red)
     problems = _consistency(run)
     for index, shard in enumerate(run.get("shards") or []):
+        if (run.get("ran") and not run.get("partition_error")
+                and _empty_partition_member(shard, run.get("membership_proof"))):
+            continue
         shard_run = {**shard, "timeout_s": run.get("timeout_s")}
         problems.extend(f"shard {index}: {problem}" for problem in _consistency(shard_run))
     if run.get("partition_error"):
         problems.append(str(run["partition_error"]))
+    if run.get("membership_required") and not run.get("membership_proof"):
+        problems.append("the run has no exact shard membership proof")
     if new_red:
         problems.append(f"{len(new_red)} new red outside the baseline")
     return {
@@ -794,31 +975,56 @@ def _git_head(root: Path) -> str | None:
         out = subprocess.run(
             ["git", "rev-parse", "HEAD"],
             cwd=root,
+            # No shared stdin and a bound: this one call sat for two hours
+            # behind an orphaned test child that was reading the stdin both
+            # had inherited (T-1624), so the record was never written.
+            stdin=subprocess.DEVNULL,
             capture_output=True,
             text=True, encoding="utf-8",
             check=False,
+            timeout=120,
         )
-    except OSError:
+    except (OSError, subprocess.SubprocessError):
         return None
     if out.returncode != 0:
         return None
     return out.stdout.strip() or None
 
 
+def full_scope_problem(record: dict) -> str | None:
+    """A scoped executor/configuration cannot be relabelled as full evidence."""
+    if (record.get("scope_kind") == "impact-subset"
+            or record.get("verification_tier") not in (None, "FULL")):
+        return "narrow verification scope cannot authorize a full core-unit family"
+    identity = record.get("verification_identity")
+    configuration = identity.get("configuration") if isinstance(identity, dict) else None
+    if isinstance(configuration, dict) and configuration.get("family") != FAMILY_NAME:
+        return "full core-unit evidence uses a scoped verification configuration"
+    return None
+
+
 def write_record(root: Path | str, run: dict, fingerprint: str) -> dict:
     """Judge ``run`` against the current baseline and persist the record."""
+    if issue := full_scope_problem(run):
+        raise ValueError(issue)
     base = Path(root)
     baseline, error = load_baseline(base)
     if error:
         raise ValueError(error)
     verdict = judge(run, baseline["red"])
     now = datetime.datetime.now(datetime.timezone.utc)
+    from .verification_cache import capture
+
+    verification_identity = run.get("verification_identity")
+    if verification_identity is None:
+        verification_identity = capture(base, verification_configuration())
     record = {
         "schema": SCHEMA_VERSION,
         "family": FAMILY_NAME,
         "command": run["command"],
         "fingerprint": fingerprint,
-        "fingerprint_excludes": list(FINGERPRINT_EXCLUDED),
+        "verification_identity": verification_identity,
+        "fingerprint_excludes": list(FINGERPRINT_EXCLUDED + FAMILY_INPUT_EXCLUDED),
         "baseline_sha256": baseline_digest(base),
         "head": _git_head(base),
         "finished_utc": now.strftime("%Y-%m-%dT%H:%M:%SZ"),
@@ -831,18 +1037,22 @@ def write_record(root: Path | str, run: dict, fingerprint: str) -> dict:
         "unparsed": run.get("unparsed"),
         "tallied": run.get("tallied"),
         "red": run["red"],
+        "red_sections": run.get("sections") or {},
+        "processes_leaked": run.get("processes_leaked") or [],
         # T-1472: how the one discovery was executed, and the proof that its
         # shards covered it. Absent for a whole (single-process) run.
         **{
             key: run[key]
-            for key in ("jobs", "discovered", "partition_error", "shards", "module_durations_s")
+            for key in ("jobs", "discovered", "partition_error", "shards", "module_durations_s",
+                        "timings_s", "copy_metrics", "membership_required", "membership_proof",
+                        "discovery_process_s")
             if run.get(key) is not None
         },
         **verdict,
     }
     directory = base / RECORD_DIR_REL
     directory.mkdir(parents=True, exist_ok=True)
-    path = directory / f"{fingerprint[:16]}-{now.strftime('%Y%m%dT%H%M%SZ')}.json"
+    path = directory / f"{fingerprint[:16]}-{now.strftime('%Y%m%dT%H%M%S%fZ')}.json"
     path.write_text(json.dumps(record, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
     return {
         "record": record,
@@ -851,7 +1061,18 @@ def write_record(root: Path | str, run: dict, fingerprint: str) -> dict:
     }
 
 
-def reusable_record(root: Path | str, fingerprint: str) -> dict | None:
+def verification_configuration(*, timeout=None, jobs=None) -> dict:
+    declared_family = family()
+    return {"family": FAMILY_NAME, "command": list(declared_family.command),
+            "timeout": timeout if timeout is not None else declared_family.timeout,
+            "jobs": DEFAULT_JOBS if jobs is None else int(jobs),
+            "environment_tools": (list(declared_family.environment_tools)
+                                  if declared_family.environment_tools is not None else None)}
+
+
+def reusable_record(
+    root: Path | str, fingerprint: str, *, verification_identity=None
+) -> dict | None:
     """The newest PASS record of exactly this tree and baseline, or None.
 
     The family's subject is the fingerprinted content, so a Work that changed
@@ -862,17 +1083,30 @@ def reusable_record(root: Path | str, fingerprint: str) -> dict | None:
     baseline, error = load_baseline(base)
     if error:
         return None
+    from .verification_cache import capture
+
+    from .verification_cache import replay_supported
+
+    expected = verification_identity or capture(base, verification_configuration())
+    if not replay_supported(expected):
+        return None
     digest = baseline_digest(base)
     for path in sorted((base / RECORD_DIR_REL).glob(f"{fingerprint[:16]}-*.json"), reverse=True):
         try:
             record = json.loads(path.read_text(encoding="utf-8"))
         except (OSError, ValueError):
-            continue
+            return None
+        if not isinstance(record, dict):
+            return None
         if (
             record.get("fingerprint") == fingerprint
             and record.get("baseline_sha256") == digest
-            and judge(record, baseline["red"])["verdict"] == "PASS"
+            and record.get("verification_identity") == expected
         ):
+            # Latest compatible outcome wins. A new red must not resurrect
+            # an older PASS of the same generation/environment/configuration.
+            if full_scope_problem(record) or judge(record, baseline["red"])["verdict"] != "PASS":
+                return None
             return {
                 "record": record,
                 "path": path.relative_to(base).as_posix(),
@@ -920,13 +1154,22 @@ def ship_gate(root: Path | str, ticket_id: str, events: list[dict]) -> str | Non
     """Why ``ticket_id`` may not enter SHIP, or None.
 
     Silent for a project that does not declare the family. Otherwise the
-    ticket's CURRENT VERIFY cycle must cite a record of the declared family
-    that is intact, complete, has no red outside the baseline, was judged
-    against the baseline in force now, and tested the trees being shipped.
+    ticket's CURRENT VERIFY cycle must cite intact executed evidence for the
+    current tree. A focused-policy project may use focused evidence locally;
+    otherwise the full family and current baseline are mandatory here.
     """
     base = Path(root)
     if not declared(base):
         return None
+    from . import focused_unit
+
+    focused, policy_error = focused_unit.policy(base)
+    if policy_error:
+        return policy_error
+    if focused:
+        cited, problem = focused_unit.ship_gate(base, ticket_id, events)
+        if cited:
+            return problem
     baseline, error = load_baseline(base)
     if error:
         return f"the declared core-unit family has no usable baseline: {error}"
@@ -956,6 +1199,8 @@ def ship_gate(root: Path | str, ticket_id: str, events: list[dict]) -> str | Non
         return f"cited record {cited['record']} is unreadable: {exc}"
     if record.get("family") != FAMILY_NAME or record.get("schema") != SCHEMA_VERSION:
         return f"cited record {cited['record']} is not a {FAMILY_NAME!r} family record"
+    if issue := full_scope_problem(record):
+        return issue
     verdict = judge(record, baseline["red"])
     if verdict["verdict"] != "PASS":
         return f"cited core-unit run is not admissible: {'; '.join(verdict['problems'])}"
@@ -966,6 +1211,12 @@ def ship_gate(root: Path | str, ticket_id: str, events: list[dict]) -> str | Non
             "cited core-unit run tested a different tree: the working tree "
             f"(outside {', '.join(FINGERPRINT_EXCLUDED)}) changed after it ran"
         )
+    from .verification_cache import compatible, replay_supported
+
+    if not compatible(base, record.get("verification_identity")):
+        return "cited core-unit run has missing or incompatible verification environment identity"
+    if not replay_supported(record["verification_identity"]):
+        return "cited core-unit run has unresolved verification runtime dependencies"
     return None
 
 
@@ -989,6 +1240,30 @@ def main(argv: list[str] | None = None) -> int:
     evidence.add_argument(
         "--fresh", action="store_true", help="run even when a PASS record of this tree exists"
     )
+    focused = sub.add_parser(
+        "focused", help="bounded ticket checks; full evidence is still required to publish"
+    )
+    focused.add_argument("ticket")
+    focused.add_argument("--project-root", default=".")
+    focused.add_argument("--agent")
+    focused.add_argument(
+        "--pattern", action="append", required=True,
+        help="test filename/glob in tools/; repeat for direct consumers",
+    )
+    focused.add_argument(
+        "--timeout", type=int, default=300, help="total local test budget, 1..300 seconds"
+    )
+    focused.add_argument("--fresh", action="store_true")
+    impact = sub.add_parser("impact", help="conservative impact plan or scoped execution")
+    impact.add_argument("ticket")
+    impact.add_argument("--project-root", default=".")
+    impact.add_argument("--agent")
+    impact.add_argument("--changed", action="append",
+                        help="explicit changed path; default: Git delta")
+    impact.add_argument("--plan", action="store_true",
+                        help="read-only; never executes or cites a check")
+    impact.add_argument("--timeout", type=int, default=300)
+    impact.add_argument("--fresh", action="store_true")
     baseline = sub.add_parser("baseline", help="record the family's current red set")
     baseline.add_argument("--project-root", default=".")
     baseline.add_argument("--from-record", help="a record path to take the red set from")
@@ -1002,8 +1277,16 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
     root = Path(args.project_root).resolve()
 
+    if args.command == "impact":
+        from .verification_impact import command
+
+        return command(root, args)
     if args.command == "baseline":
         return _baseline(root, args)
+    if args.command == "focused":
+        from .focused_unit import evidence as focused_evidence
+
+        return focused_evidence(root, args)
     return _evidence(root, args)
 
 
@@ -1044,66 +1327,79 @@ def _baseline(root: Path, args) -> int:
     return _emit({"ok": True, "red": len(data["red"]), "grown": grown})
 
 
+class _EvidenceIncomplete(ValueError):
+    def __init__(self, payload):
+        super().__init__(payload["detail"])
+        self.payload = payload
+
+
+def _produce_evidence(root: Path, args, fingerprint: str, expected: dict) -> dict:
+    from .inflight import holding
+
+    with holding(root, args.ticket, "core_unit evidence"):
+        for attempts in range(1, EVIDENCE_DRIFT_RETRIES + 1):
+            run = run_family(root, timeout=args.timeout, jobs=args.jobs)
+            run.setdefault("verification_identity", expected)
+            keep_durations(root, run.get("module_durations_s") or {})
+            written = write_record(root, run, run.get("fingerprint") or fingerprint)
+            keep_red_sections(root, written["path"], run.get("sections") or {})
+            written["sandboxes_leaked"] = run.get("sandboxes_leaked") or []
+            if tree_fingerprint(root) == written["record"]["fingerprint"]:
+                return written
+        raise _EvidenceIncomplete({
+            "ok": False,
+            "detail": (
+                "the working tree changed after the family's copy was taken, "
+                f"and kept changing across {attempts} snapshots; the record describes "
+                "the copy that ran and is not cited. Remove the drift and request "
+                "evidence of the stable generation."
+            ),
+            "verdict": written["record"]["verdict"], "record": written["path"],
+            "attempts": attempts,
+        })
+
+
 def _evidence(root: Path, args) -> int:
+    request_started = time.monotonic()
+    request_started_ns = time.time_ns()
     from . import operations
     from .state import parse_state
+    from .verification_cache import capture, compatible, single_flight
 
     _baseline_data, error = load_baseline(root)
     if error:
         return _emit({"ok": False, "detail": error})
-    fingerprint = tree_fingerprint(root)
-    written = None if args.fresh else reusable_record(root, fingerprint)
-    reused = written is not None
-    leaked: list[str] = []
-    if written is None:
-        # T-1530: the family runs against an immutable COPY, so the record is
-        # always true about the bytes it tested. Whether to CITE it compares
-        # that copy's fingerprint against the live tree -- and a SIBLING process
-        # editing a tracked file mid-run (a busy multi-session tree) drifts the
-        # live tree away from the copy through no fault of this ticket, which
-        # failed the citation and forced a manual serialize-and-rerun. The copy
-        # is the snapshot; the only fix needed is a bounded RE-SNAPSHOT retry so
-        # a transient concurrent edit gets a clean window instead of a hard
-        # refusal. Persistent drift still fails after the bound -- that is a
-        # tree that genuinely no longer matches, and citing it would overstate.
-        from .inflight import holding
-
-        # T-1575: the tested tree is frozen from the copy to the citation
-        # check, so the agent works the parallel lane instead of editing it.
-        with holding(root, args.ticket, "core_unit evidence"):
-            attempts = 0
-            while True:
-                attempts += 1
-                run = run_family(root, timeout=args.timeout, jobs=args.jobs)
-                leaked = run.get("sandboxes_leaked") or []
-                keep_durations(root, run.get("module_durations_s") or {})
-                # The record is the truth about the copy that ran, so it is kept
-                # either way; a tree that drifted since the copy only loses the
-                # citation.
-                written = write_record(root, run, run.get("fingerprint") or fingerprint)
-                keep_red_sections(root, written["path"], run.get("sections") or {})
-                if tree_fingerprint(root) == written["record"]["fingerprint"]:
-                    break
-                if attempts >= EVIDENCE_DRIFT_RETRIES:
-                    return _emit(
-                        {
-                            "ok": False,
-                            "detail": (
-                                "the working tree changed after the family's copy was taken, "
-                                f"and kept changing across {attempts} snapshots -- a concurrent "
-                                "editor of this tree, or an uncommitted edit this run did not "
-                                "settle. The record describes the copy that ran and is not "
-                                "cited. Remove the drift and rerun (it reuses a PASS record of "
-                                "an identical tree) or rerun with --fresh"
-                            ),
-                            "verdict": written["record"]["verdict"],
-                            "record": written["path"],
-                            "attempts": attempts,
-                        }
-                    )
-    state = parse_state((root / ".saipen" / "STATE.md").read_text(encoding="utf-8"))
+    state = parse_state((root / ".saipen/STATE.md").read_text(encoding="utf-8"))
     agent = args.agent or state.get("agent") or "unknown"
-    result = operations.checkpoint(root, agent, "RUN", args.ticket, evidence_line(written))
+    board = (root / ".saipen/BOARD.md").read_text(encoding="utf-8")
+    refusal = operations._active_claim_refusal(state, board, agent)
+    if refusal is not None:
+        return _emit(refusal.to_dict())
+    fingerprint = tree_fingerprint(root)
+    try:
+        expected = capture(root, verification_configuration(timeout=args.timeout, jobs=args.jobs))
+        written = None if args.fresh else reusable_record(
+            root, fingerprint, verification_identity=expected
+        )
+        identity = {"family": FAMILY_NAME, "fingerprint": fingerprint,
+                    "verification_identity": expected}
+        with single_flight(root, identity, fresh=args.fresh, available=written,
+                           request_started_ns=request_started_ns,
+                           request_started_monotonic=request_started,
+                           consumer=args.ticket) as flight:
+            if flight.written is None:
+                if tree_fingerprint(root) != fingerprint:
+                    raise ValueError("source generation changed while waiting for verification")
+                flight.publish(_produce_evidence(root, args, fingerprint, expected))
+            written = flight.written
+            reused, joined = flight.reused, flight.joined
+            if not compatible(root, written["record"].get("verification_identity")):
+                raise ValueError("verification environment changed before citation")
+            result = cite_evidence(root, agent, args.ticket, evidence_line(written))
+    except _EvidenceIncomplete as exc:
+        return _emit(exc.payload)
+    except (OSError, ValueError, TimeoutError) as exc:
+        return _emit({"ok": False, "detail": str(exc)})
     record = written["record"]
     return _emit(
         {
@@ -1116,9 +1412,22 @@ def _evidence(root: Path, args) -> int:
             "problems": record["problems"],
             "record": written["path"],
             "reused": reused,
+            "shared": joined,
+            "request_wall_s": round(time.monotonic() - request_started, 6),
             "checkpoint": result.code,
             "checkpoint_detail": result.message or None,
             # T-1505: a sandbox a process still held; a later run sweeps it.
-            "sandboxes_leaked": leaked,
+            "sandboxes_leaked": written.get("sandboxes_leaked") or [],
         }
     )
+
+
+def cite_evidence(root: Path, agent: str, ticket: str, line: str):
+    """Replan only a stale canonical citation; never rerun its tested subject."""
+    from . import operations
+
+    for _attempt in range(3):
+        result = operations.checkpoint(root, agent, "RUN", ticket, line)
+        if result.code != "STALE_STATE":
+            break
+    return result

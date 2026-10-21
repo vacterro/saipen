@@ -8,6 +8,7 @@ validation still walks everything and exact receipt bytes stay the authority.
 
 from __future__ import annotations
 
+import contextlib
 import hashlib
 import json
 import shutil
@@ -419,6 +420,35 @@ class ConformanceLineageTests(unittest.TestCase):
         # bounded active-generation guard -- never the sealed history.
         self.assertLess(receipt_hashes["n"], CL.GEN_BOUND)
         self.assertGreater(receipt_hashes["n"], 0)
+
+    def test_production_consumer_reads_the_bounded_lineage_not_the_legacy_scan(self) -> None:
+        """R010/PERF-002: the PRODUCTION consumer must obtain the answer through
+        the authenticated bounded lineage. Proving `latest_receipt_bounded` in
+        isolation never proves `conformance.latest_receipt` is still wired to
+        it, so every legacy fallback below is armed to explode: a healthy
+        current lineage that reaches one is the failure."""
+        for index in range(5):
+            gate = "core" if index % 2 else "crew"
+            _write_and_append(self.root, f"r{index}", gate, f"2026-01-01T00:00:0{index}Z")
+
+        def _legacy_scan_reached(*_args, **_kwargs):
+            raise AssertionError(
+                "conformance.latest_receipt left the bounded lineage for the legacy path"
+            )
+
+        legacy_paths = (
+            "_lookup_receipt_index",
+            "_read_indexed_receipt",
+            "_iter_receipts",
+            "_receipt_inventory",
+            "_receipt_content_inventory",
+        )
+        with contextlib.ExitStack() as armed:
+            for name in legacy_paths:
+                armed.enter_context(mock.patch.object(conformance, name, _legacy_scan_reached))
+            latest = conformance.latest_receipt(self.root, "core")
+        self.assertIsNotNone(latest)
+        self.assertEqual(latest["receipt_id"], "r3")
 
     def test_rebuild_then_bounded_latest_per_gate(self) -> None:
         for index in range(5):

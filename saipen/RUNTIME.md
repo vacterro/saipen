@@ -50,11 +50,72 @@ PROJECT's resolved runtime carries the canonical activation contract
 (`ACTIVATION_PRESENT`). The argument is the project root, never the install
 home; a flattened installed home has no `.saipen/` and still answers green.
 
-## Turn entry — AUTO_RECALL / AUTO_KICK (T-1446)
+## Machine runtime — an account that cannot read the home
+
+A managed account opens a granted project while `saipen_home` and the
+interpreter sit in the operator's profile; ACCESS_DENIED must not read as a
+dead home. `saipen host machine [status|install|remove]`: `install` projects
+the running runtime, read-only for other accounts, into
+`%ProgramData%\SAI\SAIPEN`; `status` answers `saipen_runtime_ready`;
+`host repair` refreshes it. Under it the unreadable `STATE.saipen_home` it
+projects is covered and unchanged; any other engine refuses
+`CROSS_USER_RUNTIME_UNAVAILABLE` and never rebinds it.
+
+## Host integration — state, doctor, repair (HOST-INTEGRATION-01)
+
+Lockout-by-integration: a supported host that could run was refused every
+prompt by its own hook, a substring of a failure message decided whether it
+blocked, and installer, launcher and hook reported different states for one
+host. One owner each:
+
+- `host_taxonomy` -- every failure is ONE registered code (family, severity,
+  automatic recovery, one operator action, fallback). `decide(mode, problems)`
+  is the only policy: a conflict (a forged, replayed or transplanted
+  capability; a binding that contradicts the project) is BLOCK in every mode;
+  a gap is ALLOW_DEGRADED under `degraded`, the default, and BLOCK under
+  `strict`. An unregistered code blocks, and `problem()` refuses to build one.
+- `host_integration` -- what a host CAN do is `capability_contract(adapter)`,
+  a pure projection of `extensions/adapters/registry.json` (an undeclared cell
+  reads UNDECLARED). What it IS, is one of nine states derived from observed
+  facts; installed, current, healthy and verified are four facts.
+  `HEALTHY_VERIFIED` needs a recorded ADMITTED prompt newer than the installed
+  hook; a host with no evidence channel stays `INSTALLED_UNVERIFIED`.
+
+    saipen host doctor [--host ID] [--json]    read-only; writes and starts nothing
+    saipen host repair [--host ID] [--json]    the canonical installer, host-scoped
+    saipen host mode [strict|degraded|default]
+
+Claude profile conflation (T-1635): doctor lists default, `CLAUDE_CONFIG_DIR`,
+registered launcher `env.CLAUDE_CONFIG_DIR` and sibling `.claude-*` directories
+separately. `saipen host repair --host claude --profile PATH` installs only the
+named profile; other profiles are observed only. Hook proof uses the host
+process's observed profile, never the authority service's environment.
+Credentials are neither read nor copied.
+
+All three run outside a bound project. `repair` acts only on present hosts
+that are BROKEN, STALE_RUNTIME or INSTALLING, retires an authority service of
+another generation and never touches a project.
+
+A hook that can block a prompt (`tools/install_host_guard.py`):
+
+- is installed stage -> self-test -> activate: one that would block with its
+  engine missing is never activated, and the replaced generation is kept for
+  `--rollback`;
+- runs the INSTALLED runtime, never a checkout; an engine that cannot run is
+  `ENGINE_UNREACHABLE`, decided by the same policy inside the hook;
+- is started through `HOOK_BOOTSTRAP` (`host_authority_identity`): a missing
+  script exits 2 and a host reads 2 as "block", so the command is a no-op when
+  its file is gone, and an uninstall under a live host leaves the inert
+  `tools/retired_host_hook.py` for sessions that loaded an older command.
+
+The authority service starts only for the host's own hook invocation
+(`host_authority_client.hook_invocation`). `bootstrap/uninstall.ps1` needs no
+Python.
+
+## Turn entry — AUTO_RECALL / AUTO_KICK
 
 The agent is disposable; the execution is not. A host may swap model, provider
-or session mid-Work; the successor has no private memory but still sees the
-conversation, including the `cc` that started the mission.
+or session mid-Work; the successor has no private memory, only the conversation.
 
     saipen autonomy recall [--carrier-json JSON | --carrier-hex HEX] [--directive] [--json]
 
@@ -78,15 +139,49 @@ A kick means: run `saipen continue --json` before any conversational text. A
 message becomes HISTORICAL only after the host saw an admitted canonical
 `saipen` command after it; identity comes from the host, never prose
 similarity, and unreadable input stays NEW. The injected directive carries only
-closed-grammar fields, so project text never becomes system instruction (P0-1).
+closed-grammar fields, so project text never becomes system instruction.
 
-Host seams. OpenCode `saipen-guard.js` runs the recall in
-`experimental.chat.system.transform` (before EVERY model request), takes
-message identity from `chat.message` and marks consumption in
-`tool.execute.before`. Hosts without a per-request hook get the rule only as
-instruction text: an external host boundary, not a solved case.
+Host seams. The OpenCode plugin runs the recall before EVERY model request.
+Hosts without a per-request hook get the rule only as instruction text: an
+external host boundary, not a solved case.
 
-## Unattended execution owner (T-1446)
+## Iteration exit — turn finality vs goal finality
+
+Premature-goal-handback (a model turn ending read as task completion on an
+ADVISORY host) and unadmitted-executor routing (a worker without
+shell/filesystem owning SAIPEN execution). Prose never owns terminality;
+`saipen iteration` does — the ONE public verdict, derived read-only from
+STATE/BOARD/router/recall/valve via `iteration_verdict.project_iteration_verdict`
+(schema v1); the reference HOST FLOW lives in `host_iteration`. After every
+model turn the controller queries that verdict:
+
+- executor unfits what the phase needs (STATE `requires`, control, plus
+  run/patch only where the phase runs or edits, plus the active ticket's
+  `requires:` -- `name[@PHASE[+PHASE]]`, or `read_only` for reading and
+  control only -- set by `saipen ticket requires`; shared names in
+  `iteration_verdict.CAPABILITY_INVENTORY`; per switch via
+  `iteration.admit`, never from model identity) →
+  `EXECUTOR_CAPABILITY_MISMATCH`: reroute with bounded failover
+  (`iteration.Failover`, epoch-scoped), never a BOARD/STATE blocker; all
+  routes exhausted → `RUNTIME_PAUSED` with Work preserved;
+- operator due or safety valve tripped → `OPERATOR_WAIT` (the valve is
+  never weakened);
+- canonical terminal boundary proven and nothing executable remains →
+  `VALID_TERMINAL` — the only decision on which the UI may print goal
+  completion (`iteration.may_report_goal_complete`);
+- executable action remains → `AUTO_KICK`: run the next iteration;
+- otherwise → `OPERATOR_WAIT`: an unproven end pauses truthfully.
+
+`response_surface`'s `AUTONOMOUS_HANDBACK` and `autonomy recall`'s
+`AUTO_KICK` are the same invariant at their own layers; this section only
+names the exit order. A host with no iteration gate enforces this at its
+iteration controller by querying
+`saipen iteration --json` (guard-safe: `--caps-file PATH`, `--cap NAME=VALUE`,
+`--executor ID`, `--all-exhausted`) instead of trusting the model's final
+return. Unknown or unreadable verdicts fail safe to `RUNTIME_PAUSED`, never
+to goal completion.
+
+## Unattended execution owner
 
 `supervisor.decide` names ONE verdict; `worker.supervise` acts on it. From
 `<saipen_home>/tools`:
@@ -139,13 +234,6 @@ non-symlink/non-reparse file, and never persisted by this projection.
 Schema version 1 accepts optional `harness`, `provider`, `model`, `variant`,
 `effort` and `capabilities`. Identity values are bounded strings or null;
 capability values are `true`, `false` or null (absent = null = UNKNOWN):
-
-```json
-{"schema_version": 1, "harness": "opencode", "provider": "openai",
- "model": "example-model", "variant": "high", "effort": "xhigh",
- "capabilities": {"shell": true, "parallel_subagents": null,
-                  "structured_output": true}}
-```
 
 Canonical Attempt provenance is captured only from a host-launch
 `SAIPEN_RUNTIME_INFO`; `--runtime-info` is read-only telemetry, never
@@ -266,10 +354,8 @@ injector.
 
 ## Staged delivery
 
-Wave 1 supplies truthful identity/capability discovery; Wave 2 the executable
-strategy/context economy. Neither claims a speed, quality, token or cost gain.
-Waves 3-5 (thin host adapters, measured evaluations, evidence-only adaptive
-routing) are not landed: until they are, no strategy/model/evaluator
-recommendation is inferred, adapters preserve UNKNOWN when the harness cannot
-establish a fact, never fake unsupported reasoning controls, and keep project
-state portable across provider/model switches.
+Waves 1-2 claim no speed, quality, token or cost gain. Until Waves 3-5 land,
+no strategy/model/evaluator recommendation is inferred; adapters preserve
+UNKNOWN where the harness cannot establish a fact, never fake unsupported
+reasoning controls, and keep project state portable across provider/model
+switches.

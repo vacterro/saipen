@@ -5,14 +5,7 @@ contract for SAIOPS, the zero-dependency Python mechanical layer that performs
 deterministic protocol operations agents would otherwise do by hand-editing
 STATE.md / BOARD.md / LOG.md.
 
-The division of labour:
-
-```
-PROSE DEFINES WHY.      the phase docs / CORE define reasoning and checks
-LLM DECIDES WHAT.       ticket choice, classification, severity, intent
-PYTHON DEFINES HOW.     SAIOPS commits the decided representation safely
-TESTS PROVE THE RESULT. red controls + crash injection + full gates
-```
+Prose owns rules; models choose; PYTHON DEFINES HOW: commits; tests prove.
 
 OPS does NOT restate phase semantics, the Pick Rule, HUNT, CLEAN, Improve, or
 SubSaipen semantics. Those live where they already live.
@@ -70,9 +63,8 @@ APPLY consumes THAT plan object under the writer lock:
    invariants; only then journal VERIFIED;
 7. journal COMMITTED; release the lock.
 
-The plan's op_id is the applied op_id; the plan's bytes are the committed
-bytes; the plan is never recomputed during APPLY. A retry of a committed op
-returns ALREADY_APPLIED.
+APPLY commits the plan's exact op_id/bytes without recomputation.
+Committed retries return ALREADY_APPLIED.
 
 CORE.md § 1.5's `LOG -> BOARD -> STATE` order is preserved for canonical Core
 checkpoints (TransactionPolicy.CORE_CHECKPOINT). Single-file Improve writes use
@@ -187,7 +179,40 @@ remain CAS-bound. Published Work/batches, legacy closure, different existing
 membership and conflicting hashes refuse with zero writes. Exact retries and
 dry-run write nothing. This operation creates no publication authority grant.
 
+Pending cumulative-batch reconciliation (T-1839) eliminates a later reviewed
+wave stranding earlier pending cohorts on obsolete shared-file hashes.
+`saipen cohort reconcile C-FINAL --from C-OLD[,C-OLD] --review-work T-N`
+uses existing PLAN/APPLY, ownership, Source, current verification and release
+owners. Every cohort must be pending and locally complete under the original
+owner. T-N is an actually finished, currently verified member of C-FINAL and
+owns its complete current scope, including every inherited path. Old member
+hashes, BOARD rows and finishes remain unchanged. One journal-bound immutable
+receipt records the original cohorts and reviewed target; the old cohorts name
+that target as their publication successor. All participating membership freezes.
+Missing coverage, stale/unreviewed bytes, foreign owners, existing/nested links,
+shipped cohorts, corruption and conflicting retries refuse without writes.
+Exact retry and dry-run write nothing. Pending links publish nothing: inherited
+publication resolves only after the target has a matching terminal release
+receipt. The ordinary final-generation full evidence, exact staging and release
+gates still own publication. This bounded route grants no raw Git or host bypass.
+
 ## 4. Idempotency
+
+Legacy goal authority reuses PLAN/APPLY/recovery. `goal authorize --file`
+validates a fresh exact operator capsule against one frozen goal, captures its
+immutable authority-only Source, then commits LOG/STATE only. CAS pins the
+original goal journal, lineage, Source body/metadata, BOARD and full history.
+Capture, CLI spelling and four fields grant nothing: SRC-112 proves the
+committed transition. Replay returns its original op; preserve aborted
+zero-write attempts and require fresh witnessed retries. No counter reset
+or Work admission.
+
+SRC-228 prevents decision-text authority and stale WAIT. Scoped gate recovery
+uses original witnessed authority-only Sources and the existing journal.
+Preview/schema: `recover resolve-blocker preview --dry-run` (COMMANDS.md).
+Bind content, lineage, gate version, fields and expiry; digest is never origin.
+Preserve independent stops, original STATE and Source/identity CAS. Recovery:
+§3. Model text or revoked/mismatched grants cannot discharge a gate.
 
 Every mutating operation carries an op_id owned by its journal. A retry after
 client/model/process failure must not duplicate ticket movement, LOG events, or
@@ -210,9 +235,8 @@ structural SAIOPS-owned event after the boundary that lacks `[op: ...]`, so a
 manual structural edit that bypassed the engine is detectable and reported.
 Pre-boundary history is exempt (append-only, cannot be rewritten).
 
-In `mode: full` with Python available, covered maintenance MUST use SAIOPS;
-manual structural editing is FALLBACK / RECOVERY ONLY and must record why the
-mechanical path was unavailable.
+Covered maintenance MUST use SAIOPS; a structural edit by hand is never a
+fallback, whatever reason it records (§ 8).
 
 ### Dependency continuation transaction
 
@@ -228,7 +252,8 @@ the successor as seated before the journal commits. Missing witnesses, a new
 supervisor run, a live foreign window or a fenced caller cannot authorize the
 transfer. A lapsed claim keeps the ordinary stale takeover whichever run
 stamped it. Fencing and canonical APPLY share the project mutex; the heartbeat
-never takes it, because APPLY fails fast on WRITER_BUSY. Replay retains the
+never takes it, because APPLY refuses WRITER_BUSY once its bounded wait
+expires. Replay retains the
 existing journal's idempotency. Runtime witnesses are not credentials.
 
 `saipen ticket block-for A B REASON` is the sole active-parent handoff. PLAN
@@ -383,8 +408,6 @@ about what the ledger ships, not a defect in the ticket it names.
 When this happens, re-run the check for real and record a NEW receipt; never
 re-assert the old verdict.
 
-### Work re-verification transaction
-
 `saipen work reverify <T-###> [--verification <command>:PASS]...
 [--run <command>]... [--timeout SECONDS]` re-checks already-DONE Work
 against the CURRENT tree and writes ONE immutable `RV-NNNNNN` receipt under
@@ -410,6 +433,27 @@ source receipts, last ticket-bearing event) and `verifier`. It is idempotent
 for the same Work + same findings digest + same ruleset + same contract +
 a successful receipt; after repair, a re-run writes a NEW receipt rather
 than resurrecting an old verdict.
+
+Post-closure drift (SRC-225): status/`work contracts` compare journal-bound scopes
+and focused RV dependencies. Changed bytes are REGRESSION_SUSPECT; missing proof,
+changed/deleted oracle, runtime/environment or timeout is UNVERIFIED. Diagnostics
+execute nothing and freeze no unrelated Work. `work reverify --contract FILE`
+uses the active execution schema without `before`, in owned evidence. Native argv,
+bounded context and nonzero collection remain required. CURRENT_REGRESSION needs
+changed dependencies and an earlier executed PASS under the unchanged verifier.
+Generic strict PASS cannot conceal it. Current focused PASS survives unrelated
+tree changes only while every declared dependency, verifier and environment still
+matches; undeclared dependencies stay uncovered. RV journals, writer lock and
+ordinary owned repair remain the owners; no automatic duplicate Work, reopening
+or historical rewrite. DONE stays DONE.
+
+Prevent permanent stale-environment refusal: explicit remeasurement may refresh
+runtime/environment under the identical contract and oracle. Current execution
+proves current behavior; historical regression attribution still requires the
+same full verifier. Changed contract/oracle remains UNVERIFIED.
+
+Prevent cache-only false suspicion: directory expansion follows canonical harness
+cache exclusions. Explicit cache paths and named oracle/subject files stay bound.
 
 ### Work supersession transaction
 
@@ -441,6 +485,16 @@ returns `ALREADY_APPLIED` with zero writes.
 Publication resolution may follow `T-OLD -> T-NEW` recursively, but success
 still requires the successor chain to reach committed release evidence. DONE
 and local Git commits remain insufficient publication authority.
+
+### Existing Work regression declaration
+
+This eliminates a creation-only regression gate leaving existing bug-fix Work
+without a canonical updater. `saipen ticket regression T-N required` uses the
+existing `ticket_verify` PLAN/APPLY writer to strengthen only that field from
+one snapshot. Verify, Sources, phase, ownership, goal and authority are preserved.
+Invalid values and historical DONE refuse with zero writes; removal is unsupported.
+Dry-run follows §6; capability admission is unchanged. Existing verify updates retain
+their lossless preimage history; CORE owns the declared regression gate.
 
 ## 5. Locks
 
@@ -495,6 +549,11 @@ The codes whose meaning is not self-evident from the name:
   mechanical rebind, which proves the candidate install (readable `VERSION`,
   compatible major, `BOOT` layout, required protocol files) and journals a
   single narrowly-owned `STATE.saipen_home` pointer update.
+  SRC-258: normalize repo/flat protocol/Python fingerprints; no partial identity.
+  Divergent engines refuse mutation; identical copies pass; protocol-only homes
+  stay distinct. `validate`: `REBIND_REQUIRED` -> `saipen rebind-home --auto`.
+  Explicit rebind/active continuation adopts a proven runtime with all existing
+  brakes, dry-run and cross-user gates; other trees stay intact. Both layouts keep T-1771.
 - `CREW_BLOCKED` -- the EXPECTED crew result when the circuit has no executable
   semantic continuation: an unsatisfied stage needs inspection, not invention.
   The result carries the unsatisfied `stage`/`role`/`reason` and an
@@ -527,11 +586,12 @@ traceback.
 
 ## 8. Fallback
 
-Python is the preferred mechanical path under `mode: full`. If Python is
-genuinely unavailable, use the documented manual protocol as compatibility
-fallback, state that mechanical enforcement was unavailable, and run available
-validation afterwards. A repository must remain readable without an executable
-environment: canonical files are the cold truth, never a cache or engine state.
+None (SRC-192: an executor without `saipen` typed STATE, BOARD and LOG by
+hand and readers accepted them). No `saipen` -> BOOT's launcher, then the
+machine runtime, else stop: `SAIPEN_HOST_RUNTIME_UNAVAILABLE` (RUNTIME.md).
+State above the newest journaled event is UNAUTHORIZED_LIFECYCLE_WRITE:
+operations refuse it, `saipen recover` reopens it. Files stay readable
+without an engine.
 
 ## 9. Effect-based authorization (T-1160, INC-PERMISSION-EFFECT-BYPASS-001)
 <!-- RULE-OWNER: OPS-EFFECT-01 -->
@@ -563,10 +623,19 @@ effects are capability metadata for humans and diagnostics -- never proof.
 
 **Shell preflight resolution bounds** (CORE § 1.4). Shell text visibly naming a
 `.saipen` path -- quoted, Windows/POSIX separator, or simple-traversal
-spellings -- is refused before execution; a standalone canonical `saipen
-<verb>` keeps its operation exemption, and ordinary source-development shell
-use remains available. Destructive EFFECTS are resolved from a bounded
-delete/move/rename verb set with its documented flags, the explicit `bash -c` /
+spellings -- receives the structured tools' canonical namespace checks;
+unresolved namespace mentions refuse before execution. A standalone canonical
+`saipen <verb>` keeps its operation exemption, and ordinary source-development
+shell use remains available. File-tool relative targets use the host working
+directory, never an assumed project root; containment still belongs to the
+bound project. Normalized `cwd` locates the binding; optional `tool_cwd` carries
+a distinct execution directory as nonempty text, defaulting to `cwd` when
+absent. OpenCode transports its native directory or explicit `bash.workdir`;
+a relative, unproved execution base refuses instead of falling back to the
+project. Recursive shell-effect admission retains the original actor and host
+session proof. The shell resolver covers delete/move/rename, literal output
+redirection, `tee`, `tee-object`, `set-content`, `add-content` and `out-file`,
+with bounded flags, the explicit `bash -c` /
 `powershell -Command` / `cmd /c` / `eval` wrappers, command substitution, and
 the working directory as `cd`, `pushd` and `popd` move it; each resolved
 effect is judged exactly as the file-tool effect it is. An effect whose
@@ -574,7 +643,10 @@ operands or working directory cannot be proven -- a variable, a pipeline, an
 encoded command, a directory stack deeper than the guard tracks -- is refused
 as unresolved, never admitted as ordinary shell. This is an accidental-
 mutation barrier over explicit command text, not a sandbox: obfuscated or
-dynamically computed paths stay outside its proof.
+dynamically computed paths stay outside its proof. Quoted redirection text
+and descriptor duplication are not file writes. These decisions prevent host
+execution only where an installed blocking hook actually invokes the guard;
+an ADVISORY host does not acquire that capability from a green test.
 
 **Coverage evaluation** (`evaluate_coverage`) answers one question
 mechanically: WHAT AUTHORIZATION COVERS THIS OBSERVED EFFECT? DENY fails
@@ -747,3 +819,70 @@ receipt binds the installed engine generation. Arbitrary URLs, ticket ids and
 free text are refused by the grammar; the receipt predicate is shared by the
 closure resolver and the validator
 (`tools/test_foreign_observation_authority.py`).
+
+### Authenticated external proof renewal
+
+Defect class: a legacy DONE receipt can become stale without authenticated
+argv or a carrying commit for the current acceptance artifacts.
+`saipen ticket renew-external T-N --implementation T-UPSTREAM@COMMIT
+--verification-contract .saipen/evidence/CHECK.json --paths p1,p2`
+requires the original owner, local defect contract, external Work and lineage,
+an intact committed predecessor, a descendant external commit, matching
+declared artifact bytes and the existing Source/operator gates. Optional
+`--external-root` fixes the locator; `--runtime-inputs` binds declared absolute
+native paths. The owned closed execution contract must run nonzero unskipped
+tests. Dry run executes nothing. A new append-only EX receipt preserves DONE
+history and the predecessor bytes; an unchanged valid repeat writes nothing.
+Host-equivalent executable spelling still requires the same file and SHA256;
+other argv, context and environment identities retain their checks. Legacy
+command prose never becomes executable authority.
+
+## 13. Declared acceptance admission (T-1718)
+
+Closes predicate deletion and fixture-only LIVE closure. VERIFY owns meaning;
+`acceptance_contract.py` gates REVIEW and finish. Existing `ticket verify`
+preserves full old/new text and SHA256 in its journal and binds inspected inputs
+to APPLY. Refusal writes nothing. Amend with `--amendment FILE --authority SRC-N`;
+FILE and evidence must be owned regular files in `.saipen/evidence/`:
+
+```json
+{"schema":1,"work":"T-7","original_sha256":"<64hex>",
+ "replacement_sha256":"<64hex>","reason":"why outcomes are equivalent",
+ "evidence":[{"path":".saipen/evidence/retirement.json","sha256":"<64hex>"}],
+ "mapping":{"AC-01":["AC-02"]},"remaining":["AC-02"]}
+```
+
+Map every old criterion to nonempty replacements with no weaker witness floor;
+list every new criterion in `remaining`. Current replacement evidence is due
+before APPLY. No empty outcome set or unsupported optionalization. The operator
+judges equivalence and approves the exact manifest SHA256 with this Source body:
+
+```json
+{"schema":1,"kind":"acceptance_amendment","work":"T-7","sha256":"<64hex>"}
+```
+
+New approval needs ACTIVE `user_instruction` and verified immutable operator
+provenance; model text grants nothing. CLOSED archival approval remains
+checkable. Retired, missing, changed, foreign, stale or replayed authority
+refuses. All JSON schemas are closed; duplicate/unknown fields refuse.
+LIVE/MANUAL uses the existing anchored RUN record:
+
+```text
+AC-EVIDENCE AC-02 PASS manual witness=LIVE surface=chatgpt.com source=SRC-9 -- observed outcome
+```
+
+Its operator observation Source body:
+
+```json
+{"schema":1,"kind":"acceptance_witness","work":"T-7",
+ "contract_sha256":"<64hex>","build_boundary":123,
+ "criteria":{"AC-02":{"result":"PASS","witness":"LIVE","surface":"chatgpt.com"}}}
+```
+
+Hash the complete canonical verify field. `build_boundary` is the latest native
+BUILD event, or zero if absent. Match criterion/result/witness/surface exactly.
+This is human-reported scope. Journaled note-only changes retain evidence only
+with identical parsed criteria and witness specifications; unknown digests
+grant nothing. Check integrity before selection. New BUILD, changed outcomes
+or tampered evidence invalidates observations. Legacy untyped Work is unaffected
+and gains no historical LIVE proof.
