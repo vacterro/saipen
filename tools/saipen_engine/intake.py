@@ -2555,8 +2555,23 @@ def set_disposition(
                                 "detail": f"execution carrier has no valid journal binding: {exc}",
                             }
 
-                        base_auth = {k: v for k, v in authenticated.items() if k != "ticket"} if authenticated else None
-                        if authenticated is None or base_auth != receipt_data:
+                        # The focused-unit and core-unit readers synthesize `ticket` from
+                        # the journal event that proved the run; the regression reader
+                        # returns the carrier exactly as committed, `ticket` included.
+                        # Drop that one key from BOTH sides: stripping one side only made
+                        # every carrier that records its own `ticket` -- all 167 of them --
+                        # compare unequal to its own authentication, so no regression
+                        # receipt could ever discharge a clause. The Work binding is
+                        # checked against the journal copy below, not here.
+                        base_auth = (
+                            {k: v for k, v in authenticated.items() if k != "ticket"}
+                            if authenticated
+                            else None
+                        )
+                        base_carrier = {
+                            k: v for k, v in receipt_data.items() if k != "ticket"
+                        }
+                        if authenticated is None or base_auth != base_carrier:
                             test_target = Path(test_files[0]).name if test_files else Path(str(verification or "")).name
                             target_work = work or "<T-###>"
                             command = f"python tools/core_unit.py focused {target_work} --pattern {test_target}"
