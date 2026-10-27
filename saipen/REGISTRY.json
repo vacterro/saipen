@@ -387,6 +387,7 @@
   ]
  },
  "commands": {
+  "reference_document": "COMMANDS_REFERENCE.md",
   "saipen": [
    "set",
    "init",

@@ -1312,26 +1312,45 @@ def _validate_contract_coverage(receipt_id: str, contract: object, coverage: obj
 _ANY_ORIGIN = object()
 
 
+def _same_operator_event(meta: dict | None, provenance: object) -> bool:
+    """Identity only: a proof-shaped value never authenticates its supplier.
+
+    Byte-only diagnostic callers may inspect any event. Capture compares both
+    directions so a fresh native event cannot promote an older model Source,
+    and a model retry cannot borrow a genuine Source's historical provenance.
+    """
+    if provenance is _ANY_ORIGIN:
+        return True
+    recorded = (meta or {}).get("request_provenance") or {}
+    if not isinstance(recorded, dict):
+        raise ValueError("source request provenance is not an object")
+    incoming = provenance if isinstance(provenance, dict) else {}
+    proof = recorded.get("operator_origin")
+    return proof == incoming.get("operator_origin") and (
+        proof is None or recorded.get("witness") == incoming.get("witness")
+    )
+
+
 def _find_exact_duplicate(
-    root: Path,
-    digest: str,
-    *,
-    request_provenance: Any = _ANY_ORIGIN,
+    root: Path, digest: str, *, request_provenance: object = _ANY_ORIGIN,
 ) -> dict | None:
     index = _read_index(root)
     for receipt_id in index.get("active", {}):
         meta = _read_meta(root, receipt_id)
         if meta and meta.get("source_sha256") == digest:
-            if request_provenance is not _ANY_ORIGIN and meta.get("request_provenance") != request_provenance:
-                continue
             integrity = verify_integrity(root, receipt_id)
             if not integrity["ok"]:
                 return {"receipt_id": receipt_id, "meta": meta, "invalid": integrity}
-            return {"receipt_id": receipt_id, "meta": meta}
+            if _same_operator_event(meta, request_provenance):
+                return {"receipt_id": receipt_id, "meta": meta}
     for receipt_id, tomb in index.get("tombstones", {}).items():
         if tomb.get("source_sha256") == digest:
-            if request_provenance is not _ANY_ORIGIN and tomb.get("request_provenance") != request_provenance:
-                continue
+            if request_provenance is not _ANY_ORIGIN:
+                found = read_body(root, receipt_id)
+                if not found.get("ok"):
+                    return {"receipt_id": receipt_id, "invalid": found}
+                if not _same_operator_event(found.get("meta"), request_provenance):
+                    continue
             return {"receipt_id": receipt_id, "tombstone": tomb, "closed": True}
     # Crash window: body durable, process died before metadata/index commit.
     # Exact retry must adopt this orphan instead of allocating SRC-N+1.
@@ -1346,6 +1365,10 @@ def _find_exact_duplicate(
             # Adopting it would resurrect a closed receipt with its old id.
             if receipt_id in index.get("tombstones", {}):
                 continue
+            # A Source skipped for a different event is still a committed
+            # Source, never a body-only crash orphan whose metadata can change.
+            if receipt_id in index.get("active", {}):
+                continue
             try:
                 raw = _read_owned_file(
                     root,
@@ -1354,7 +1377,25 @@ def _find_exact_duplicate(
                     max_bytes=_BODY_MAX,
                 )
                 if hashlib.sha256(raw).hexdigest() == digest:
-                    return {"receipt_id": receipt_id, "orphan": True}
+                    try:
+                        meta = _read_meta(root, receipt_id)
+                    except (OSError, ValueError) as exc:
+                        return {"receipt_id": receipt_id, "invalid": {
+                            "ok": False, "code": "SOURCE_CORRUPTION", "detail": str(exc),
+                        }}
+                    if meta and meta.get("source_sha256") != digest:
+                        return {"receipt_id": receipt_id, "invalid": {
+                            "ok": False, "code": "SOURCE_CORRUPTION",
+                            "detail": f"orphan source {receipt_id} metadata digest drift",
+                        }}
+                    try:
+                        if meta and not _same_operator_event(meta, request_provenance):
+                            continue
+                    except ValueError as exc:
+                        return {"receipt_id": receipt_id, "invalid": {
+                            "ok": False, "code": "SOURCE_CORRUPTION", "detail": str(exc),
+                        }}
+                    return {"receipt_id": receipt_id, "orphan": True, "meta": meta}
             except (OSError, ValueError):
                 continue
     return None
@@ -1364,7 +1405,7 @@ def find_by_body(
     root: Path | str,
     body: str,
     *,
-    request_provenance: dict | None = None,
+    request_provenance: object = _ANY_ORIGIN,
 ) -> dict | None:
     """The existing receipt for these EXACT bytes, or None (read-only).
 
@@ -1374,8 +1415,7 @@ def find_by_body(
     line -- otherwise a retry mints a second ticket for one request.
     """
     root = Path(root)
-    prov = request_provenance if request_provenance is not None else _ANY_ORIGIN
-    found = _find_exact_duplicate(root, _sha256(body), request_provenance=prov)
+    found = _find_exact_duplicate(root, _sha256(body), request_provenance=request_provenance)
     if not found:
         return None
     meta = found.get("meta") or {}
@@ -1467,7 +1507,7 @@ def capture(
     redaction, authority = _exact_authority_record(digest)
     try:
         with project_writer_lock(root):
-            existing = _find_exact_duplicate(root, digest)
+            existing = _find_exact_duplicate(root, digest, request_provenance=request_provenance)
             if existing and not force:
                 if existing.get("invalid"):
                     return existing["invalid"]
@@ -1627,7 +1667,12 @@ def capture(
                     "recorded": digest,
                     "actual": actual,
                 }
-            _write_meta(root, receipt_id, meta)
+            if existing and existing.get("orphan") and existing.get("meta"):
+                # A crash after metadata persisted has already fixed the event
+                # and receipt time. Recover the index without relabelling them.
+                meta = existing["meta"]
+            else:
+                _write_meta(root, receipt_id, meta)
             _write_contract(
                 root,
                 receipt_id,
