@@ -1371,8 +1371,17 @@ def render_boundary(
         detail_mode=detail_mode,
         response_class=response_class,
     )
-    if errors:
-        raise ValueError("; ".join(errors))
+    # A renderer asserts FORM, not OUTCOME. The autonomy verdict (`is this an
+    # invalid handback?`) is a CLASS, and `classify_final_response` owns it --
+    # `_AUTONOMY_ERROR_MARKERS` exists precisely so a host maps that verdict
+    # without re-parsing rule prose. Raising here made the one caller that
+    # renders a handback in order to CLASSIFY it impossible to reach its own
+    # classifier: test_t1557 builds a BUILD-phase boundary that must be
+    # refused, and could not obtain the text to refuse.
+    structural = [error for error in errors
+                  if not any(marker in error for marker in _AUTONOMY_ERROR_MARKERS)]
+    if structural:
+        raise ValueError("; ".join(structural))
     return rendered
 
 
@@ -1416,12 +1425,20 @@ def response_errors(
     status_upper = values.get("STATUS", "").upper()
     is_terminal = status_upper.startswith(("DONE", "COMPLETE", "UNKNOWN", "IDLE"))
     has_blocker = not _is_none(blocker) and bool(blocker.strip())
-    # Continuation discipline (T-1916): an agent that has named an executable next
-    # action must execute it in the same turn tool-to-tool. A COMPACT_FINAL handback
-    # naming an executable command without a human gate, blocker or terminal result
-    # is an invalid autonomous handback.
+    # Continuation discipline (T-1916): an agent in an IN-FLIGHT phase that has
+    # named an executable next action must execute it in the same turn
+    # tool-to-tool. A COMPACT_FINAL handback naming an executable command without
+    # a human gate, blocker or terminal result is an invalid autonomous handback.
+    #
+    # The phase qualifier is load-bearing, not decoration: a STATUS that names
+    # no in-flight phase (`PLAN -- carrier`, `WAIT`, `DONE`) is a plan or a
+    # stop, and naming the command that would follow it is exactly what those
+    # surfaces exist to do. `_names_in_flight_phase` is the one predicate for
+    # that distinction; applying the rule to every STATUS refused the ordinary
+    # planned handback as though it were an autonomous one.
     if (
-        is_executable_command(next_action)
+        _names_in_flight_phase(status_upper)
+        and is_executable_command(next_action)
         and _is_none(operator_action)
         and not operator_due
         and not has_blocker

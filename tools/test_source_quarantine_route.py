@@ -54,6 +54,13 @@ class QuarantineRouteTests(OrchestrationFixture):
             ticket_id="T-7",
             mode="full",
             crew_closure=False,
+            # The APPLY-time prohibition re-read rebuilds its candidate set from
+            # the plan's own carrier identity, so it reads these three. The
+            # fixture keeps them unset: this test exercises the source-RECEIPT
+            # refusal route, which is decided before carrier scoping matters.
+            version="",
+            crew_epoch=None,
+            cohort_id=None,
         )
 
     def test_active_and_archived_refusals_emit_executable_lossless_repair(self):
