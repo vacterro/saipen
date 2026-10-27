@@ -1,0 +1,59 @@
+{
+  "clauses": {
+    "SRC-253:R001": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "SAIPEN has a documented canonical Auto-Doctor contract (SELF_HEALING_CONTINUATION): typed failure classes that each produce a canonical action, reusing existing owners"
+    },
+    "SRC-253:R002": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "cc can invoke authorized recovery automatically inside the normal continuation path, without a separate operator command"
+    },
+    "SRC-253:R003": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "The reference STALE_PASS conformance condition recovers without a manual saipen validate"
+    },
+    "SRC-253:R004": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "CURRENT_PASS is verified after recovery rather than assumed; a zero exit code alone is insufficient"
+    },
+    "SRC-253:R005": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "The original Work resumes automatically after a successful recovery, without a second cc"
+    },
+    "SRC-253:R006": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "The recovery stays bound to the real original operator command: no new operator decision is synthesized"
+    },
+    "SRC-253:R007": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "No duplicate execution occurs across the original cc, the recovery, validation and the resumed Work"
+    },
+    "SRC-253:R008": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "Unsafe failures preserve STOP, NO_GO, operator and integrity boundaries and stop with an exact canonical reason"
+    },
+    "SRC-253:R009": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "Recovery attempts are bounded and idempotent: one automatic revalidation per chain, no cc-validate-cc loop"
+    },
+    "SRC-253:R010": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "Race conditions and restart behavior are tested (concurrent writer, crash between recovery and resume)"
+    }
+  },
+  "derived_at": "2026-10-14T21:26:05Z",
+  "derived_from": "SRC-253",
+  "interpretation_revision": 10,
+  "schema_version": 1,
+  "source_sha256": "b2f054144a5ef75c56105ec53c6d4d01d29841324030c5a06e1b56ddccc17da2"
+}

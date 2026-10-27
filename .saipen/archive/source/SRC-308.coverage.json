@@ -1,0 +1,14 @@
+{
+  "requirements": {
+    "SRC-308:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "T-1883 closed with verification evidence in LOG: FOCUSED-UNIT-EVIDENCE PASS conf: high ran:189 record:.saipen/evidence/focused-unit/646179cb8997368d-20261024T144829783915Z.json sha256:096a68cfa877df6fd8ae474d5826a0748dba19a676ea78718057bee750532a9e -- focused gate on 9 reconcile modules; red control 8/8 expected-red 5/5 security green; e2e before/after 4/4",
+      "text": "Execute SRC paste SAIHANDOFF P0 RECONCILIATION SELF-DEADLOCK / AUTOMATIC CAUSAL RECOVERY: (1) repair global BOARD-blocker contamination in tools/saipen_engine/reconcile.py _state_blocker_repairs() so an unrelated BLOCKED ticket cannot veto repair of a provably stale ACTIVE-phase STATE blocker, with causal classification by exact identifiers and journal evidence, never prose; (2) make an unsupported 40-50 char agent-authored STATE blocker a typed or refused condition instead of unowned authority; (3) automatic journaled, idempotent, CAS-protected canonical repair of a proven-stale blocker with the original bytes preserved; (4) Auto-Doctor runs one bounded structural diagnosis after a refusal and resumes rather than requiring another operator cc; (5) correct test_recovery_reachability.BlockerClassificationTests.test_a_live_board_block_refuses and add the AC-01..AC-24 matrix without weakening any real gate; (6) preserve genuine operator, publication and budget gates and never reset counters. Required result: ROOT_CAUSE, EXACT_CODE_CHANGES, REPRODUCTION_BEFORE/AFTER, REGRESSION_RESULTS, AUTHORITY_INVARIANTS, CANONICAL_REPAIR_EVIDENCE, DEPLOYMENT_PARITY, FASTPROMPTER_INCIDENT_STATUS, REMAINING_GENUINE_GATES, NEXT_EXACT_ACTION. FastPrompter live state may be unavailable; then close the engine repair and keep live acceptance pending.",
+      "verification": "the Work this request created reached its own verification gate; see the T-1883 VERIFY cycle in .saipen/LOG.md",
+      "work": "T-1883"
+    }
+  },
+  "schema_version": 1
+}

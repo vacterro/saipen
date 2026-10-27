@@ -1,0 +1,149 @@
+{
+  "requirements": {
+    "SRC-237:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/T-1739-wait-boundary/DELIVERY.md",
+      "text": "Inspect live SAIPEN implementation and existing contracts; establish authority and meaning of blocker, next_action, continuation_authority, safety_valve_mode, claimedTicket, topWorkableTicket, actionable and disposition.",
+      "verification": "Nine-test oracle sha256 ccdad540441f4786e64a706937ebb38954ac8b52b557bb8a17d5ea10189cf822; core-unit 532993ba599bc5b3 PASS 6719/0; core receipt-7e62ea3684a2 CURRENT_PASS; see clause witness table.",
+      "work": "T-1739"
+    },
+    "SRC-237:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/T-1739-wait-boundary/DELIVERY.md",
+      "text": "Build a deterministic read-only fixture matching captured T-260 state; compare SAIPEN projection and CLI continuation against the same snapshot.",
+      "verification": "Nine-test oracle sha256 ccdad540441f4786e64a706937ebb38954ac8b52b557bb8a17d5ea10189cf822; core-unit 532993ba599bc5b3 PASS 6719/0; core receipt-7e62ea3684a2 CURRENT_PASS; see clause witness table.",
+      "work": "T-1739"
+    },
+    "SRC-237:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/T-1739-wait-boundary/DELIVERY.md",
+      "text": "Determine whether WAIT is non-executable and operator-required, and whether T-283 is independently eligible without inferring from actionable counts.",
+      "verification": "Nine-test oracle sha256 ccdad540441f4786e64a706937ebb38954ac8b52b557bb8a17d5ea10189cf822; core-unit 532993ba599bc5b3 PASS 6719/0; core receipt-7e62ea3684a2 CURRENT_PASS; see clause witness table.",
+      "work": "T-1739"
+    },
+    "SRC-237:R004": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/T-1739-wait-boundary/DELIVERY.md",
+      "text": "Correct only a reproduced SAIPEN defect; if current SAIPEN contract is correct, preserve protocol and identify ZAICODE host responsibility with evidence for its agent.",
+      "verification": "Nine-test oracle sha256 ccdad540441f4786e64a706937ebb38954ac8b52b557bb8a17d5ea10189cf822; core-unit 532993ba599bc5b3 PASS 6719/0; core receipt-7e62ea3684a2 CURRENT_PASS; see clause witness table.",
+      "work": "T-1739"
+    },
+    "SRC-237:R005": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/T-1739-wait-boundary/DELIVERY.md",
+      "text": "Regression: operator-required WAIT remains non-executable.",
+      "verification": "Nine-test oracle sha256 ccdad540441f4786e64a706937ebb38954ac8b52b557bb8a17d5ea10189cf822; core-unit 532993ba599bc5b3 PASS 6719/0; core receipt-7e62ea3684a2 CURRENT_PASS; see clause witness table.",
+      "work": "T-1739"
+    },
+    "SRC-237:R006": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/T-1739-wait-boundary/DELIVERY.md",
+      "text": "Regression: blocked claimed ticket does not create false execution authority.",
+      "verification": "Nine-test oracle sha256 ccdad540441f4786e64a706937ebb38954ac8b52b557bb8a17d5ea10189cf822; core-unit 532993ba599bc5b3 PASS 6719/0; core receipt-7e62ea3684a2 CURRENT_PASS; see clause witness table.",
+      "work": "T-1739"
+    },
+    "SRC-237:R007": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/T-1739-wait-boundary/DELIVERY.md",
+      "text": "Regression: independent executable ticket is eligible when no session WAIT forbids it.",
+      "verification": "Nine-test oracle sha256 ccdad540441f4786e64a706937ebb38954ac8b52b557bb8a17d5ea10189cf822; core-unit 532993ba599bc5b3 PASS 6719/0; core receipt-7e62ea3684a2 CURRENT_PASS; see clause witness table.",
+      "work": "T-1739"
+    },
+    "SRC-237:R008": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/T-1739-wait-boundary/DELIVERY.md",
+      "text": "Regression: no executable work is distinguished from completion.",
+      "verification": "Nine-test oracle sha256 ccdad540441f4786e64a706937ebb38954ac8b52b557bb8a17d5ea10189cf822; core-unit 532993ba599bc5b3 PASS 6719/0; core receipt-7e62ea3684a2 CURRENT_PASS; see clause witness table.",
+      "work": "T-1739"
+    },
+    "SRC-237:R009": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/T-1739-wait-boundary/DELIVERY.md",
+      "text": "Regression: genuine completion requires current complete closure proof.",
+      "verification": "Nine-test oracle sha256 ccdad540441f4786e64a706937ebb38954ac8b52b557bb8a17d5ea10189cf822; core-unit 532993ba599bc5b3 PASS 6719/0; core receipt-7e62ea3684a2 CURRENT_PASS; see clause witness table.",
+      "work": "T-1739"
+    },
+    "SRC-237:R010": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/T-1739-wait-boundary/DELIVERY.md",
+      "text": "Regression: stale projection cannot certify current completion.",
+      "verification": "Nine-test oracle sha256 ccdad540441f4786e64a706937ebb38954ac8b52b557bb8a17d5ea10189cf822; core-unit 532993ba599bc5b3 PASS 6719/0; core receipt-7e62ea3684a2 CURRENT_PASS; see clause witness table.",
+      "work": "T-1739"
+    },
+    "SRC-237:R011": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/T-1739-wait-boundary/DELIVERY.md",
+      "text": "Regression: contradictory authority metadata fails closed.",
+      "verification": "Nine-test oracle sha256 ccdad540441f4786e64a706937ebb38954ac8b52b557bb8a17d5ea10189cf822; core-unit 532993ba599bc5b3 PASS 6719/0; core receipt-7e62ea3684a2 CURRENT_PASS; see clause witness table.",
+      "work": "T-1739"
+    },
+    "SRC-237:R012": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/T-1739-wait-boundary/DELIVERY.md",
+      "text": "Regression: existing safety gates remain enforced.",
+      "verification": "Nine-test oracle sha256 ccdad540441f4786e64a706937ebb38954ac8b52b557bb8a17d5ea10189cf822; core-unit 532993ba599bc5b3 PASS 6719/0; core receipt-7e62ea3684a2 CURRENT_PASS; see clause witness table.",
+      "work": "T-1739"
+    },
+    "SRC-237:R013": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/T-1739-wait-boundary/DELIVERY.md",
+      "text": "Verify backward compatibility with existing CLI consumers; all relevant regressions pass; preserve exact observed and corrected behavior evidence.",
+      "verification": "Nine-test oracle sha256 ccdad540441f4786e64a706937ebb38954ac8b52b557bb8a17d5ea10189cf822; core-unit 532993ba599bc5b3 PASS 6719/0; core receipt-7e62ea3684a2 CURRENT_PASS; see clause witness table.",
+      "work": "T-1739"
+    },
+    "SRC-237:R014": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/T-1739-wait-boundary/DELIVERY.md",
+      "text": "No unauthorized operator decision, durability-ceiling acceptance or T-260 bypass; no silent closure, artificial real lifecycle transition or evidence-free reopening.",
+      "verification": "Nine-test oracle sha256 ccdad540441f4786e64a706937ebb38954ac8b52b557bb8a17d5ea10189cf822; core-unit 532993ba599bc5b3 PASS 6719/0; core receipt-7e62ea3684a2 CURRENT_PASS; see clause witness table.",
+      "work": "T-1739"
+    },
+    "SRC-237:R015": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/T-1739-wait-boundary/DELIVERY.md",
+      "text": "No unrelated rule changes, ZAICODE host code modifications or speculative finding tickets; missing historical contract never permits invention.",
+      "verification": "Nine-test oracle sha256 ccdad540441f4786e64a706937ebb38954ac8b52b557bb8a17d5ea10189cf822; core-unit 532993ba599bc5b3 PASS 6719/0; core receipt-7e62ea3684a2 CURRENT_PASS; see clause witness table.",
+      "work": "T-1739"
+    },
+    "SRC-237:R016": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/T-1739-wait-boundary/DELIVERY.md",
+      "text": "Deliver verified authority-boundary result; runtime fix only for reproduced protocol defect; if contractually correct, report ZAICODE as required implementation owner.",
+      "verification": "Nine-test oracle sha256 ccdad540441f4786e64a706937ebb38954ac8b52b557bb8a17d5ea10189cf822; core-unit 532993ba599bc5b3 PASS 6719/0; core receipt-7e62ea3684a2 CURRENT_PASS; see clause witness table.",
+      "work": "T-1739"
+    }
+  },
+  "schema_version": 1
+}

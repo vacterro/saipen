@@ -1,0 +1,104 @@
+{
+  "requirements": {
+    "SRC-285:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "IMPLEMENTED",
+      "evidence": "record:.saipen/evidence/focused-unit/2799a962b86f6709-20261027T044120108634Z.json sha256:67917534539a79c18a6a643a20d09ffd94bfb8571ef23a836862788d754066c1",
+      "text": "Measure historical cost A-N, distinguish historical/direct/estimated/unknown data, and rank preventable mechanisms without beginning with another full suite.",
+      "verification": "baseline.json/baseline.md/dependency-evidence.json present; CAMPAIGN.md wave ledger records A-N and ranks preventable mechanisms; no second full suite was begun to obtain them",
+      "work": "T-1829"
+    },
+    "SRC-285:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "IMPLEMENTED",
+      "evidence": "single-flight, environment-aware identity, ownership and crash recovery in tools/saipen_engine/verification_cache.py",
+      "text": "Implement canonical single-flight execution with environment/configuration/runtime-aware compatible evidence, ownership, provenance, crash recovery and cancellation safety.",
+      "verification": "test_t1832_single_flight.py test_t1833_verification_owner.py -> PASS record:.saipen/evidence/focused-unit/2799a962b86f6709-20261027T044649193390Z.json sha256:e74a27d2a0616dd006d648e721777f286572b7379143aeb5312b37cc1d4886af",
+      "work": "T-1829"
+    },
+    "SRC-285:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "IMPLEMENTED",
+      "evidence": "record:.saipen/evidence/focused-unit/2799a962b86f6709-20261027T044120108634Z.json sha256:67917534539a79c18a6a643a20d09ffd94bfb8571ef23a836862788d754066c1",
+      "text": "Map progressive STATIC/FOCUSED/IMPACT/FULL/RELEASE verification onto canonical lifecycle contracts; document old/new invariants and preserve full publication safety and scope.",
+      "verification": "this ticket: release._run_gate consults focused_unit.publication_gate before the validator and release._gate_command runs the engine-owned validator; 7 focused witnesses PASS, 3/3 red controls caught",
+      "work": "T-1829"
+    },
+    "SRC-285:R004": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "IMPLEMENTED",
+      "evidence": "conservative escalation with declared boundaries in tools/saipen_engine/verification_impact.py",
+      "text": "Implement conservative evidence-backed impact analysis with reasons, unknown-coverage escalation, protocol/fixture/adapter/validator boundaries and new-test controls.",
+      "verification": "test_t1836_verification_impact.py -> PASS record:.saipen/evidence/focused-unit/2799a962b86f6709-20261027T044649193390Z.json sha256:e74a27d2a0616dd006d648e721777f286572b7379143aeb5312b37cc1d4886af",
+      "work": "T-1829"
+    },
+    "SRC-285:R005": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "IMPLEMENTED",
+      "evidence": "bounded private source measured 136.656s before / 6.578s after in CAMPAIGN.md wave 4",
+      "text": "Profile and optimize the slowest mechanisms/modules without weakening assertions, isolation or real-platform acceptance; preserve rejected hypotheses and measurements.",
+      "verification": "test_t1831_cleanup_fixture_cost.py -> PASS record:.saipen/evidence/focused-unit/2799a962b86f6709-20261027T044649193390Z.json sha256:e74a27d2a0616dd006d648e721777f286572b7379143aeb5312b37cc1d4886af",
+      "work": "T-1829"
+    },
+    "SRC-285:R006": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "IMPLEMENTED",
+      "evidence": "record:.saipen/evidence/focused-unit/2799a962b86f6709-20261027T044120108634Z.json sha256:67917534539a79c18a6a643a20d09ffd94bfb8571ef23a836862788d754066c1",
+      "text": "Measure and optimize immutable sandbox copying, cleanup and repeated discovery; prove exact test membership and preserve state consistency on Windows and Linux.",
+      "verification": "SANDBOX.md and sandbox-pair-audit-20261020.json: exact 126351-file/1622323227-byte pair, 7076 discovered occurrences, owned roots removed",
+      "work": "T-1829"
+    },
+    "SRC-285:R007": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "IMPLEMENTED",
+      "evidence": "local suite, CI family CLI and unrelated-directory installed engine share one full unit engine",
+      "text": "Unify canonical CI and local execution through the existing verified family engine; select concurrency from measured net savings.",
+      "verification": "test_t1837_ci_family_parity.py -> PASS record:.saipen/evidence/focused-unit/2799a962b86f6709-20261027T044649193390Z.json sha256:e74a27d2a0616dd006d648e721777f286572b7379143aeb5312b37cc1d4886af",
+      "work": "T-1829"
+    },
+    "SRC-285:R008": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "IMPLEMENTED",
+      "evidence": "tools/verification_metrics.py and tools/saipen_metrics.py report wall versus process time with explicit unknowns",
+      "text": "Add advisory verification-economics telemetry with actual wall time versus summed process time, cache/attempt/latency/generation/ticket/tier measures and explicit unknowns.",
+      "verification": "test_t1835_verification_economics.py -> PASS record:.saipen/evidence/focused-unit/2799a962b86f6709-20261027T044649193390Z.json sha256:e74a27d2a0616dd006d648e721777f286572b7379143aeb5312b37cc1d4886af",
+      "work": "T-1829"
+    },
+    "SRC-285:R009": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "IMPLEMENTED",
+      "evidence": "record:.saipen/evidence/focused-unit/2799a962b86f6709-20261027T044120108634Z.json sha256:67917534539a79c18a6a643a20d09ffd94bfb8571ef23a836862788d754066c1",
+      "text": "Prove all 16 adversarial acceptance controls in mission section 15, including RED controls, incompatible/stale/forged/failed/incomplete evidence and failure visibility.",
+      "verification": "16 adversarial controls mapped in ACCEPTANCE.md with named executable witnesses; the 177-test campaign control set runs green on Windows with 9 platform skips",
+      "work": "T-1829"
+    },
+    "SRC-285:R010": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "IMPLEMENTED",
+      "evidence": "record:.saipen/evidence/focused-unit/2799a962b86f6709-20261027T044120108634Z.json sha256:67917534539a79c18a6a643a20d09ffd94bfb8571ef23a836862788d754066c1",
+      "text": "Deliver A-J and per-wave change/cost/savings/regression/risk/next-action reports with equivalent-scope before/after measurements, parity/debt/roadmap and exact canonical state.",
+      "verification": "CAMPAIGN.md waves 0-7 and DELIVERY.md A-J carry change/cost/savings/regression/risk/next-action per wave; nothing is presented as campaign completion",
+      "work": "T-1829"
+    },
+    "SRC-285:R011": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "IMPLEMENTED",
+      "evidence": "record:.saipen/evidence/focused-unit/2799a962b86f6709-20261027T044120108634Z.json sha256:67917534539a79c18a6a643a20d09ffd94bfb8571ef23a836862788d754066c1",
+      "text": "Preserve all mandatory safety invariants and honest source/ownership/authority; proceed through bounded incremental work, without uncontrolled suites, fabricated PASS or unreviewed protocol bypasses.",
+      "verification": "all work closed through canonical saipen operations; no baseline was expanded, no assertion weakened, no foreign path touched; 172 other-actor reds left unclaimed",
+      "work": "T-1829"
+    }
+  },
+  "schema_version": 1
+}

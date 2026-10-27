@@ -1,0 +1,14 @@
+{
+  "requirements": {
+    "SRC-288:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-17145",
+      "text": "\u041d\u0443 \u0435\u0441\u043b\u0438 \u0447\u0442\u043e \u043f\u0443\u0448\u0438 \u0438\u043d\u043e\u0433\u0434\u0430 \u043d\u0430 \u0433\u0438\u0442\u0445\u0430\u0431 \u0442\u043e\u0433\u0434\u0430 \u0434\u043b\u044f \u0441\u043e\u0445\u0440\u0430\u043d\u043d\u043e\u0441\u0442\u0438.",
+      "verification": "Fresh artifact verifier PASS413; normal commit canonical/floor PASS; git ls-remote github-backup independently confirms ee215e0a0bbd5154806673b9baa23533e1eb7402 on exact backup branch; original main and staged entries preserved",
+      "work": "T-1848"
+    }
+  },
+  "schema_version": 1
+}

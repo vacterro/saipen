@@ -1,0 +1,24 @@
+{
+  "clauses": {
+    "SRC-237:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Inspect live SAIPEN implementation and existing contracts; establish authority and meaning of blocker, next_action, continuation_authority, safety_valve_mode, claimedTicket, topWorkableTicket, actionable and disposition."
+    },
+    "SRC-237:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Build a deterministic read-only fixture matching captured T-260 state; compare SAIPEN projection and CLI continuation against the same snapshot."
+    },
+    "SRC-237:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Determine whether WAIT is non-executable and operator-required, and whether T-283 is independently eligible without inferring from actionable counts."
+    }
+  },
+  "derived_at": "2026-10-13T07:38:21Z",
+  "derived_from": "SRC-237",
+  "interpretation_revision": 3,
+  "schema_version": 1,
+  "source_sha256": "5aac1699cf8f8919489dd7a1ff05d4800c67b789e56102efa076d5b88a8ac1ae"
+}

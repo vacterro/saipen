@@ -1,0 +1,16 @@
+{
+  "actionable": 16,
+  "archive_ref": ".saipen/archive/source/SRC-343.md",
+  "closed_at": "2026-10-27T13:38:03Z",
+  "closure_event": null,
+  "linked_work": "T-1944",
+  "linked_works": [
+    "T-1944"
+  ],
+  "receipt_id": "SRC-343",
+  "requirements": 16,
+  "schema_version": 1,
+  "source_sha256": "1d66a2ad2c03f92a6180e149df42d3760e965de8623436ef22f6aad77abd47d4",
+  "status": "CLOSED",
+  "unresolved": 0
+}

@@ -1,0 +1,14 @@
+{
+  "requirements": {
+    "SRC-281:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "T-1823 closed with verification evidence in LOG: ship -> local PASS [target: T-1823] conf: high -- reviewed harness delta is in the working tree; publication deferred (saipen ship --dry-run refused: remote origin https://github.com/vacterro/saipen.git is UNAVAILABLE, HTTP 403 account suspended, so the remote cannot be classified and no external write is attempted); same deferral as T-1807/T-1758 under T-1644",
+      "text": "SAIHANDOFF: recover test harness after 2767-RED core-unit event; review Freebuff authority changes, adapter capability truth, mock-test misclassification; complete T-1820/T-1818",
+      "verification": "the Work this request created reached its own verification gate; see the T-1823 VERIFY cycle in .saipen/LOG.md",
+      "work": "T-1823"
+    }
+  },
+  "schema_version": 1
+}

@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-246:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Restore a supported, evidence-correct verification lifecycle for an active externally owned project ticket, with SAI_WEBSITE T-31 as the real-world acceptance case"
+    }
+  },
+  "derived_at": "2026-10-14T01:06:54Z",
+  "derived_from": "SRC-246",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "48d399faed85f0a8e4cfb2926e870120c4d19c8fa4f9b79eb516a2aacd4eb4e2"
+}

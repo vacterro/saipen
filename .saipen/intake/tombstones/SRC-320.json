@@ -1,0 +1,16 @@
+{
+  "actionable": 1,
+  "archive_ref": ".saipen/archive/source/SRC-320.md",
+  "closed_at": "2026-10-25T05:34:10Z",
+  "closure_event": null,
+  "linked_work": "T-1905",
+  "linked_works": [
+    "T-1905"
+  ],
+  "receipt_id": "SRC-320",
+  "requirements": 1,
+  "schema_version": 1,
+  "source_sha256": "d3911d81cf2644d24cbfd2ebe0410dfb56e68bc6fea2b806d06be81e09fc6850",
+  "status": "CLOSED",
+  "unresolved": 0
+}

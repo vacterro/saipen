@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-318:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "source identity capture: _git_delta_listing enumerates 42572 untracked files only to discard 42515 as .saipen; use the exact :(exclude).saipen pathspec so git never emits them"
+    }
+  },
+  "derived_at": "2026-10-25T02:33:18Z",
+  "derived_from": "SRC-318",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "60631511c924af8feb020f9a71b9c229185974c9c56a289384e72f4dedd88f33"
+}

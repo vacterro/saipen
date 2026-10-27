@@ -1,0 +1,109 @@
+{
+  "clauses": {
+    "SRC-254:R001": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not assume which cause applies without evidence."
+    },
+    "SRC-254:R002": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "An otherwise functional Windows SAIPEN installation must not unnecessarily depend on one hardcoded Git Bash path."
+    },
+    "SRC-254:R003": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not weaken security or bypass the host's execution boundaries."
+    },
+    "SRC-254:R004": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not conflate host process-spawn failure with SAIPEN lifecycle refusal."
+    },
+    "SRC-254:R005": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not introduce another competing runtime manager."
+    },
+    "SRC-254:R006": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not require Git Bash merely to execute a Python-based SAIPEN continuation if an existing supported native launcher provides equivalent behavior."
+    },
+    "SRC-254:R007": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not translate arbitrary POSIX commands into PowerShell without proving behavioral equivalence."
+    },
+    "SRC-254:R008": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not patch Freebuff source from SAIPEN authority."
+    },
+    "SRC-254:R009": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Avoid adding SAIPEN compatibility layers that cannot repair a failure occurring before the SAIPEN process starts."
+    },
+    "SRC-254:R010": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not repeatedly execute the same command when its executable is known to be missing."
+    },
+    "SRC-254:R011": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not treat installation of Git Bash as the only possible recovery."
+    },
+    "SRC-254:R012": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not silently install software, modify system PATH, or elevate privileges without the required authorization."
+    },
+    "SRC-254:R013": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Its actual project root and live authority must be established independently."
+    },
+    "SRC-254:R014": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not claim T-52 is repaired."
+    },
+    "SRC-254:R015": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not modify its project source from SAIPEN authority."
+    },
+    "SRC-254:R016": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "The final host acceptance must distinguish:"
+    },
+    "SRC-254:R017": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not promote unit-test success to real host acceptance."
+    },
+    "SRC-254:R018": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not add:"
+    },
+    "SRC-254:R019": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "A missing shell executable must not become a week-long protocol recovery incident."
+    },
+    "SRC-254:R020": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "The responsible host or runtime component must provide a deterministic execution route or an accurate actionable refusal."
+    }
+  },
+  "derived_at": "2026-10-14T23:40:30Z",
+  "derived_from": "SRC-254",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "19ebb44ec01d9b4fde11568d3253e6ae7408315bc2aace0baf5b2a0875f1fb94"
+}

@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-307:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "P0: recover the 110-failure core-unit regression baseline, then measured optimization"
+    }
+  },
+  "derived_at": "2026-10-27T05:59:21Z",
+  "derived_from": "SRC-307",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "6cbf33c527a6712e29c9eb718b7887f338742e9211ce3d099af5fc5d8cf9605c"
+}

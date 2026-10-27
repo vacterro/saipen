@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-177:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Repair SAIPEN validator semantics so reproduction (reproduced=y) and finding disposition (ACCIDENTAL_SUCCESS) are treated as orthogonal facts: preserve the invariant that a CONFIRMED swept finding naming a ticket must carry actual reproduction evidence, and remove the invariant that ACCIDENTAL_SUCCESS categorically implies reproduced != y -- without editing the completed SWEEP, rewriting the immutable improve report, flipping reproduced=y, or adding any project-level workaround"
+    }
+  },
+  "derived_at": "2026-10-05T04:41:02Z",
+  "derived_from": "SRC-177",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "02465cc1bfbd3422c152a5bb1b911364a365aa1bae26cea5a08f9d8d880f3ebf"
+}

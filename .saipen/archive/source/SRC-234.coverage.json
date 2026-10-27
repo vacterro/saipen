@@ -1,0 +1,95 @@
+{
+  "requirements": {
+    "SRC-234:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-14891",
+      "text": "Inspect live repository, HEAD, dirty state, admission gates, and backlog",
+      "verification": "repository state, backlog and gates inspected in SCOUT",
+      "work": "T-1736"
+    },
+    "SRC-234:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-14891",
+      "text": "Check existing execution, recovery, tool-use, and validation contracts without duplicating findings, rules, tasks, or mechanisms",
+      "verification": "existing contracts inspected without duplication",
+      "work": "T-1736"
+    },
+    "SRC-234:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-14891",
+      "text": "Evaluate recovery contract on tool schema validation failure: inspect available tool contract, correct argument types, avoid blind retries, stop and report after repeated failures",
+      "verification": "schema failure recovery evaluated and tested in test_schema_invalid_then_corrected and test_schema_blind_repeats_bounded",
+      "work": "T-1736"
+    },
+    "SRC-234:R004": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-14891",
+      "text": "Evaluate recovery contract on read-before-write rejection: read target file, establish current content, retry against valid current state",
+      "verification": "read-before-write recovery evaluated and tested in test_read_before_edit_contract",
+      "work": "T-1736"
+    },
+    "SRC-234:R005": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-14891",
+      "text": "Evaluate recovery contract on stale-write rejection: reread, reconcile concurrent changes, preserve optimistic concurrency guards",
+      "verification": "stale-write optimistic concurrency evaluated and tested in test_stale_write_reconcile_contract",
+      "work": "T-1736"
+    },
+    "SRC-234:R006": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-14891",
+      "text": "Evaluate recovery contract on completed task operations: distinguish idempotent terminal state from real failure without manufacturing false blockers",
+      "verification": "completed task stop idempotence evaluated and tested in test_idempotent_task_stop_terminal_state",
+      "work": "T-1736"
+    },
+    "SRC-234:R007": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-14891",
+      "text": "Strengthen protocol validation evidence handling: preserve actual validator exit status, preserve attributable conformance receipts, resolve installed instance identity",
+      "verification": "validation exit status and instance identity evaluated and tested in test_pipelined_validator_exit_status_preservation and test_installation_identity_beyond_version_string",
+      "work": "T-1736"
+    },
+    "SRC-234:R008": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-14891",
+      "text": "Add positive and negative regression controls covering schema correction, bounded retry, read-before-edit, stale edit, task stop, pipelined validator hiding, duplicate installations",
+      "verification": "8 positive and negative regression controls verified in test_t1736_tool_safety_and_evidence.py",
+      "work": "T-1736"
+    },
+    "SRC-234:R009": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-14891",
+      "text": "Compare proposed normative change against existing authority: record host ownership boundary where enforcement belongs to ZAICODE and do not falsely claim SAIPEN enforces host behaviors",
+      "verification": "boundary comparison against host authority recorded in REPORT.md",
+      "work": "T-1736"
+    },
+    "SRC-234:R010": {
+      "actionable": true,
+      "class": "non-goal",
+      "disposition": "VERIFIED",
+      "evidence": "E-14891",
+      "text": "No modification of ZAICODE or FREEBUFF_SAI source, no rewriting historical evidence, no inventing rule identifiers, no modifying DONE project without authorization",
+      "verification": "non-goal boundaries respected, no ZAICODE edits or invented rules",
+      "work": "T-1736"
+    }
+  },
+  "schema_version": 1
+}

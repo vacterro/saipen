@@ -1,0 +1,29 @@
+{
+  "clauses": {
+    "SRC-215:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Investigate the stated systemic-availability hypotheses without presuming defect; distinguish correct, avoidable, recoverable and incorrect refusals using current authoritative source and evidence."
+    },
+    "SRC-215:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Audit SAI_WEBSITE T-31 and reported E-336 through E-354 against the actual runtime contract; preserve the distinction between consumer observations and proven upstream root cause, with unavailable original evidence explicitly unresolved."
+    },
+    "SRC-215:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Corroborate incident families A-E from original evidence: bounded continuation, ownership contention, runtime/skill mismatch, recovery/evidence reachability and global versus scoped stopping; otherwise mark them unproven."
+    },
+    "SRC-215:R004": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Deliver all twelve blocker taxonomy classes. For each state the operation that stops, independent allowed operations, permitted recovery, retained evidence, genuine human requirement, automatic retry conditions and authority or duplicate-effect risk."
+    }
+  },
+  "derived_at": "2026-10-11T14:17:53Z",
+  "derived_from": "SRC-215",
+  "interpretation_revision": 4,
+  "schema_version": 1,
+  "source_sha256": "8d54708e5daccb690cc464918d4c81d7f1d2d4ed0f036a62a6e0c2f5ab0c2ce6"
+}

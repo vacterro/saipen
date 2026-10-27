@@ -1,0 +1,29 @@
+{
+  "clauses": {
+    "SRC-287:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Diagnose the actual line-break boundary across raw response, canonical SAIPEN render, stored host payload and host Markdown display; correct the SAIPEN-owned renderer when it owns the defect."
+    },
+    "SRC-287:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Produce deterministic readable canonical fields on separate visible lines, retain the existing schema and CORE-RESPONSE checks and budgets, and preserve full technical detail in durable evidence with a bounded summary/reference."
+    },
+    "SRC-287:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Prove regressions A, B, C and L for this SAIPEN corrective: multiline rendering remains visible, fields retain labels, canonical checks pass without relaxed budgets, and details do not flood normal output."
+    },
+    "SRC-287:R004": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Preserve the existing T-301 implementation and journal, avoid false acceptance claims, foreign repository patches, unauthorized deployment or input injection, and keep Future Gates closed."
+    }
+  },
+  "derived_at": "2026-10-20T23:47:24Z",
+  "derived_from": "SRC-287",
+  "interpretation_revision": 4,
+  "schema_version": 1,
+  "source_sha256": "ebc5c44d765cd50fa1d4a4869aa93ad65a33e758082b2524e83e30b28f11fdd9"
+}

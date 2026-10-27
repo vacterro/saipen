@@ -1,0 +1,89 @@
+{
+  "clauses": {
+    "SRC-191:R001": {
+      "actionable": false,
+      "class": "context",
+      "text": "APPEND -- route-budgeted protocol size; remove global markdown scarcity (high priority; resolves T-1639, unblocks T-1663)"
+    },
+    "SRC-191:R002": {
+      "actionable": true,
+      "class": "non-goal",
+      "text": "Do not solve this by increasing human_markdown_total by another arbitrary constant"
+    },
+    "SRC-191:R003": {
+      "actionable": false,
+      "class": "context",
+      "text": "human_markdown_total stood at 334844 of 334848 and blocked protocol evolution though no route loads the whole protocol"
+    },
+    "SRC-191:R004": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Replace the global human_markdown_total admission gate with route-aware protocol load budgets derived from existing SAIPEN registries"
+    },
+    "SRC-191:R005": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Each canonical route reports mandatory files, mandatory bytes, optional references, applicable budget and verdict, measured mechanically"
+    },
+    "SRC-191:R006": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Transitive mandatory references are counted whole; optional links, KNOWLEDGE trees, README links and archives are not counted unless a route loads them"
+    },
+    "SRC-191:R007": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Route dependencies come from machine-readable declarations (registry), never from parsing prose"
+    },
+    "SRC-191:R008": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "human_markdown_total remains informational telemetry only and never blocks"
+    },
+    "SRC-191:R009": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "A per-document guard bounds any single protocol file, routed or not"
+    },
+    "SRC-191:R010": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "BOOT (cold start) is measured separately and unrelated documentation growth cannot raise its mandatory load"
+    },
+    "SRC-191:R011": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Phase-local loading is preserved: a route budget counts only that route's documents; KNOWLEDGE and translations/public docs count only where a route loads them"
+    },
+    "SRC-191:R012": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "PRE-FIX control: a tiny valid clause in a document no route loads is red under the old aggregate cap while every route is within budget"
+    },
+    "SRC-191:R013": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "POST-FIX: the same clause is accepted when every route stays within budget"
+    },
+    "SRC-191:R014": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "ROUTE OVERFLOW control: mandatory BOOT or phase growth past its budget fails validation"
+    },
+    "SRC-191:R015": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "UNRELATED GROWTH control: the total rises, route loads stay unchanged, validation stays PASS"
+    },
+    "SRC-191:R016": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "TRANSITIVE control: a new mandatory dependency's bytes are included automatically"
+    }
+  },
+  "derived_at": "2026-10-08T10:12:27Z",
+  "derived_from": "SRC-191",
+  "interpretation_revision": 16,
+  "schema_version": 1,
+  "source_sha256": "3b655949bce7c53e33a04ef5b6589e397bd4bb5204effd1c10025419b1794e84"
+}

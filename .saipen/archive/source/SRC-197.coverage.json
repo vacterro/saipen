@@ -1,0 +1,77 @@
+{
+  "requirements": {
+    "SRC-197:R001": {
+      "actionable": false,
+      "class": "context",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "1.1 reports a switch to Russian despite pinned reply_language: et and proposes LLM conditioning / missing STYLE read as causes; preserve these as reported claims without a supplied original host transcript.",
+      "verification": null,
+      "work": "T-1691"
+    },
+    "SRC-197:R002": {
+      "actionable": false,
+      "class": "context",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "1.2 reports a multi-page response exceeding compression; preserve the incident claim without inventing delivered line/character measurements.",
+      "verification": null,
+      "work": "T-1691"
+    },
+    "SRC-197:R003": {
+      "actionable": false,
+      "class": "context",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "1.3 reports T-273 manually inserted under DOING while STATE names T-271; independently assess the current contradictory consumer floor without inferring writer identity or repairing the consumer.",
+      "verification": null,
+      "work": "T-1691"
+    },
+    "SRC-197:R004": {
+      "actionable": false,
+      "class": "context",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "1.4 reports antigravity_b ACL refusal at the private SAIPEN path; preserve the claim and separate it from unperformed same-account access verification.",
+      "verification": null,
+      "work": "T-1691"
+    },
+    "SRC-197:R005": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "REJECTED",
+      "evidence": ".saipen/KNOWLEDGE/roadmaps/saihandoff-agent-drift-2026-10-09.md",
+      "text": "Language Enforcement: If STYLE.md specifies reply_language: et, all chat responses MUST be in Estonian. If operator demands Russian, operator can set reply_language: ru in STYLE.md or give explicit inline override.",
+      "verification": null,
+      "work": "T-1691"
+    },
+    "SRC-197:R006": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "REJECTED",
+      "evidence": ".saipen/KNOWLEDGE/roadmaps/saihandoff-agent-drift-2026-10-09.md",
+      "text": "Compression Enforcement: Chat answers must be <= 5 lines of raw, blunt facts. No intro, no outro, no essays.",
+      "verification": null,
+      "work": "T-1691"
+    },
+    "SRC-197:R007": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "REJECTED",
+      "evidence": ".saipen/KNOWLEDGE/roadmaps/saihandoff-agent-drift-2026-10-09.md",
+      "text": "Toolchain Discipline: Always run C:\\ProgramData\\SAI\\SAIPEN\\bin\\saipen.cmd status to verify protocol state. Never leave contradictory multiple openers in BOARD.md without state synchronization.",
+      "verification": null,
+      "work": "T-1691"
+    },
+    "SRC-197:R008": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "NOT_APPLICABLE",
+      "evidence": ".saipen/KNOWLEDGE/roadmaps/saihandoff-agent-drift-2026-10-09.md",
+      "text": "Preserve Invariants: T-271 console files remain strictly untouched; SAISPIN tests remain 100% green.",
+      "verification": null,
+      "work": "T-1691"
+    }
+  },
+  "schema_version": 1
+}

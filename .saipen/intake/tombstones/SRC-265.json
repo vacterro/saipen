@@ -1,0 +1,16 @@
+{
+  "actionable": 12,
+  "archive_ref": ".saipen/archive/source/SRC-265.md",
+  "closed_at": "2026-10-17T00:59:46Z",
+  "closure_event": null,
+  "linked_work": "T-1806",
+  "linked_works": [
+    "T-1806"
+  ],
+  "receipt_id": "SRC-265",
+  "requirements": 12,
+  "schema_version": 1,
+  "source_sha256": "9aafb214f8de6868410665d531efb3b214255dee83a7eb09443f779621ea0a31",
+  "status": "CLOSED",
+  "unresolved": 0
+}

@@ -1,0 +1,14 @@
+{
+  "requirements": {
+    "SRC-320:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "T-1905 closed with verification evidence in LOG: FOCUSED-UNIT-EVIDENCE PASS conf: high ran:12 record:.saipen/evidence/focused-unit/608f8ebf3c47b6f7-20261025T052923948985Z.json sha256:72b1dde94cf28c07006f4efa4327927fd30148110c1ad3934d44205df27b8e71",
+      "text": "P0 forensic: establish canonical SAIPEN state authority for FastPrompter lineage-c13f771bc2924a5a81b65fc79e5aca08 after observed 5404 -> 4396 event rollback; diagnose only, no destructive repair",
+      "verification": "the Work this request created reached its own verification gate; see the T-1905 VERIFY cycle in .saipen/LOG.md",
+      "work": "T-1905"
+    }
+  },
+  "schema_version": 1
+}

@@ -1,0 +1,23 @@
+{
+  "requirements": {
+    "SRC-200:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-14040",
+      "text": "Continue strengthening SAIPEN through admitted local work under the existing goal and canonical cc routing.",
+      "verification": ".saipen/evidence/T-1695-invalid-stops/review-evidence.md",
+      "work": "T-1695"
+    },
+    "SRC-200:R002": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-14040",
+      "text": "Continue all runnable work truthfully; preserve real invalid, blocked, external and operator boundaries without claiming global closure or widening authority.",
+      "verification": ".saipen/evidence/T-1695-invalid-stops/review-evidence.md",
+      "work": "T-1695"
+    }
+  },
+  "schema_version": 1
+}

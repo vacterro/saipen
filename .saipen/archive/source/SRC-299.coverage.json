@@ -1,0 +1,14 @@
+{
+  "requirements": {
+    "SRC-299:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "external audit layer verified: focused-unit PASS 25f4a68b062a71dd-20261024T032105038484Z.json sha256:462bac1651790dfb9a03c793246994f7eb5283ed43834c222f6bfba34b2ebd61",
+      "text": "Acknowledge bootstrap omission and maintain canonical ticket/checkpoint routing",
+      "verification": "external audit acknowledgment verified in LOG E-17641 and E-17646",
+      "work": "T-1870"
+    }
+  },
+  "schema_version": 1
+}

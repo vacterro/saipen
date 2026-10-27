@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-294:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "SAIHANDOFF: SAIPEN project completion semantics and audit-debt visibility -- separate EXECUTION_PHASE from PROJECT_READINESS across audit/source/backlog/external/authority dimensions, add a computed canonical readiness contract, reproduce the SAITULS DONE-with-162-UNKNOWN state on a disposable fixture, and satisfy regression matrix A-L without resetting authority or fabricating work"
+    }
+  },
+  "derived_at": "2026-10-23T13:08:42Z",
+  "derived_from": "SRC-294",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "0b1463bf127ba00da89cac9370c8a321596c60a9a7eb5f4d677f85a86f696ff2"
+}

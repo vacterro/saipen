@@ -1,0 +1,68 @@
+{
+  "requirements": {
+    "SRC-305:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "DUPLICATE",
+      "evidence": "tools/test_guard_admission.py:195 test_blocked_work_allows_reads_but_not_consequential_mutation (read admitted, write refused with NO_ACTIVE_WORK while STATE is DONE/task none); 26 _active_claim_refusal call sites across tools/saipen_engine/operations.py incl. every mutating verb; verified green in this cycle: python -B -m unittest tools.test_guard_admission -> 18 tests OK",
+      "text": "SAIPEN admission enforcement: a development Write/Edit or consequential Bash for SAIPEN-managed work must require an authoritative start/claim receipt and an active STATE-bound DOING owned by the actor BEFORE the first mutation. Retrospective phase replay is explicitly insufficient. Test a new request against phase:DONE task:none: tools refuse before claim, succeed after claim, and preserve non-mutating reads.",
+      "verification": null,
+      "work": "T-1880"
+    },
+    "SRC-305:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "BLOCKED",
+      "evidence": "T-1644 (BOARD BLOCKED, blocker: WAIT_USER_DECISION -- the operator chooses this repository's publication policy: full vs local-commits-only vs no-publish; blocker_scope: ticket) already owns 'Publication authority has no single machine owner'. The requested structured scoped authority {scope, source_receipt, tickets, effective_until, owner} is the SAME requirement, so this clause cannot be implemented until that operator decision lands. Measured absent in this tree: grep for effective_until/publication_authority/publish_grant over tools/saipen_engine and REGISTRY returns nothing. Not implemented here, and not auto-committed or pushed.",
+      "text": "SAIPEN SHIP/closure must not let a ticket-scoped operator no-publication decision silently govern a different later ticket. Publication policy must be represented as structured scoped authority {scope, source_receipt, tickets, effective_until, owner}; an uncovered ticket records SHIP_PUBLICATION_PENDING and needs an operator decision instead of auto-commit/push.",
+      "verification": null,
+      "work": "T-1880"
+    },
+    "SRC-305:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "DUPLICATE",
+      "evidence": "tools/saipen_engine/install_identity.py + tools/saipen.py:1100-1180 emit a structured install_identity block (running_home, persisted_home, install_fingerprint, persisted_fingerprint, status) and refuse consequential work with INSTALL_IDENTITY_MISMATCH naming canonical_next_command 'saipen rebind-home --auto'; RUNTIME_DRIFT exists for unknown-command/version divergence; tools/saipen_engine/runtime/provenance.py captures host launch metadata. Verified green: python -B -m unittest tools.test_install_identity_doctor -> 17 tests OK; tools.test_t1687_identity_diagnostics -> 3 tests OK",
+      "text": "SAIPEN invocation must record and expose concrete runtime provenance: project_root, resolved saipen_home, actual executable path, version/hash, and refuse consequential work on an unresolved install mismatch (INSTALL_IDENTITY_MISMATCH / RUNTIME_DRIFT already exist as registered codes); snapshot, live-runtime and UI-projection counters must stay distinguishable.",
+      "verification": null,
+      "work": "T-1880"
+    },
+    "SRC-305:R004": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "IMPLEMENTED",
+      "evidence": ".saipen/evidence/focused-unit/030b403109977cbd-20261024T120734695383Z.json",
+      "text": "SAIPEN refusal/response registry completeness must cover codes emitted through named constants, not only string literals: every code a production path can emit must be registered in saipen/REGISTRY.json error_codes, and the completeness oracle must fail when a code reaches a caller marked unregistered_code.",
+      "verification": "python -B tools/core_unit.py focused T-1880 --pattern test_refusal_registry.py --pattern test_t1880_wait_survives_phase_shortcut.py --pattern test_t1619_iteration_boundary.py --pattern test_guard_admission.py -> PASS (38 tests); record .saipen/evidence/focused-unit/030b403109977cbd-20261024T120734695383Z.json; tool:test_refusal_registry.py 6 tests OK; tool:test_t1880_wait_survives_phase_shortcut.py 3 tests OK with a red control (fix removed -> 1 failure naming next_action 'PHASE HUNT')",
+      "work": "T-1880"
+    },
+    "SRC-305:R005": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "IMPLEMENTED",
+      "evidence": ".saipen/evidence/focused-unit/030b403109977cbd-20261024T120734695383Z.json",
+      "text": "A phase transition must not replace a tripped bounded safety-valve WAIT with a fresh phase next_action: phase change and brake normalization are one atomic decision, and continue still refuses without witnessed operator reauthorization.",
+      "verification": "python -B tools/core_unit.py focused T-1880 --pattern test_t1880_wait_survives_phase_shortcut.py -> PASS; record .saipen/evidence/focused-unit/030b403109977cbd-20261024T120734695383Z.json; red control executed: removing the operations._plan_transition WAIT preservation makes test_the_tripped_valve_wait_survives_the_phase_shortcut fail with next_action 'PHASE HUNT'; controls test_an_ordinary_transition_still_writes_the_destination_route and test_a_plain_continue_is_not_treated_as_a_brake stay green",
+      "work": "T-1880"
+    },
+    "SRC-305:R006": {
+      "actionable": true,
+      "class": "non-goal",
+      "disposition": "NOT_APPLICABLE",
+      "evidence": "SRC-305's external-owner findings are recorded here as handoffs and nothing in this repository was changed for them: DRIFT-02 (ZAICODE goal verifier), DRIFT-03 (ZAICODE tool-boundary effect guard), DRIFT-04/05/08 (SAIPAL budget and observation vocabulary), DRIFT-06/07 (ZAICODE/Freebuff host cold-start routing and installed-skill sync), DRIFT-11 (SAIPAL verification freshness). The mission forbids modifying any other repository from this campaign, so these are dispositioned as external owners, not as this ticket's implementation.",
+      "text": "Do not implement findings owned by other repositories from this campaign: the ZAICODE goal verifier, ZAICODE/Freebuff tool-boundary effect guard, host cold-start routing harness, and SAIPAL budget/observation vocabulary are external owners. Record them as handoffs, never patch them here.",
+      "verification": null,
+      "work": "T-1880"
+    },
+    "SRC-305:R007": {
+      "actionable": false,
+      "class": "context",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "SRC-305 is a read-only external audit of ZAICODE session sess_74370988 in the SAIPAL workspace. Its DRIFT-02/03/06/07 findings are ZAICODE-host-owned; DRIFT-04/05/08 are SAIPAL-owned; DRIFT-11 concerns SAIPAL verification freshness. Only DRIFT-01 (admission ordering), DRIFT-08 (scoped publication authority surface), DRIFT-09/10 (typed causes, runtime provenance) and the audit's own 'SAIPEN protocol owner' list touch this repository.",
+      "verification": null,
+      "work": "T-1880"
+    }
+  },
+  "schema_version": 1
+}

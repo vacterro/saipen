@@ -1,0 +1,77 @@
+{
+  "requirements": {
+    "SRC-339:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-18489; the shipped hook now derives the action through declared_action(text, root) (extensions/adapters/zaicode/saipen-guard.py:535), so operator_origin's goal reservation for action in {goal, authorize-goal} is reachable from the ZAICODE adapter",
+      "text": "extensions/adapters/zaicode/saipen-guard.py must seal the operator's declared intent instead of hardcoding action = \"continue\": a goal request seals action \"goal\" and an explicit grant seals action \"authorize-goal\". saipen_engine/operator_origin.py reserves goal authority only for those two actions, so a guard that seals only \"continue\" makes persistent grants unreachable for a ZAICODE operator.",
+      "verification": "record:.saipen/evidence/focused-unit/c86c432efe87a4bc-20261026T184401369669Z.json sha256:a57e9def779b2c86c522b835294b750862bb9a1d08f32fef1f4224a2d0e8177c; test_t1933_zaicode_goal_seal.py TheHookSealsTheDeclaredIntent proves the seal is the declared action, not a constant: test_a_goal_objective_is_sealed_as_goal, test_a_canonical_goal_command_is_sealed_as_goal, test_a_host_aliased_goal_is_sealed_as_goal and test_a_grant_capsule_is_sealed_as_authorize_goal assert the exact action this hook hands the broker (goal / authorize-goal), while test_a_continuation_is_still_sealed_as_continue keeps the ordinary path unchanged; test_t1859_zaicode_seal.py test_the_registered_worker_is_this_hook_process_not_its_parent pins that the seal reaches the broker at all",
+      "work": "T-1933"
+    },
+    "SRC-339:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-18489; declared_action() takes only the request_text the broker hashes into request_digest -- there is no intent field a caller could claim, so a model cannot manufacture a goal seal it was not handed",
+      "text": "The sealed action must be derived from the operator's own request text, not from model-supplied metadata: a prompt that is not a goal or an explicit grant still seals \"continue\", and an agent must not be able to manufacture a goal or authorize-goal seal by claiming one.",
+      "verification": "record:.saipen/evidence/focused-unit/c86c432efe87a4bc-20261026T184401369669Z.json sha256:a57e9def779b2c86c522b835294b750862bb9a1d08f32fef1f4224a2d0e8177c; test_t1933_zaicode_goal_seal.py TheHookSealsTheDeclaredIntent proves the action is read from the operator's own bytes: test_prose_that_mentions_goal_or_cc_is_never_a_goal refuses a sentence that merely talks about a goal, test_a_bare_goal_token_is_not_an_objective keeps the protocol's own use-line out of the seal, and test_the_pre_fix_hardcoded_action_is_refused_by_this_suite is the red control: the shipped one-line action = \"continue\" is replaced in a copy of the real hook and the suite then observes continue instead of goal; test_operator_ingress_matrix.py test_clause_d_agent_authored_text_cannot_impersonate and test_clause_e_model_created_task_files_cannot_forge_authority prove model-authored bytes carry no operator authority",
+      "work": "T-1933"
+    },
+    "SRC-339:R003": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-18489; the SRC-339 repair adds no new valve-clearing route: it changes which ACTION the existing broker proof declares, and RECONCILE_REAUTH_REQUIRED still refuses an agent CLI replay of a spent bounded run",
+      "text": "The safety valve must keep working: hitting goal_tickets must still trip continuation_authority to operator_required with safety_valve_mode hard_wait, and an agent CLI replay must still be refused with RECONCILE_REAUTH_REQUIRED. Renewal requires fresh operator carrier provenance, never an agent call.",
+      "verification": "record:.saipen/evidence/focused-unit/c86c432efe87a4bc-20261026T184401369669Z.json sha256:a57e9def779b2c86c522b835294b750862bb9a1d08f32fef1f4224a2d0e8177c; test_reconcile_valve.py test_tickets_at_the_cap_refuses_even_when_counters_agree, test_waves_at_the_cap_trips_independently, test_a_state_already_stating_the_pause_needs_no_repair and test_the_counters_are_never_tidied_by_this_rule prove the trip condition is unchanged and the counters are never silently cleared; test_t1729_operator_gate.py test_requested_resume_cannot_override_a_computed_budget_stop and test_limitation_acceptance_preserves_a_computed_budget_stop prove a request cannot override a computed stop; {HOME_VALVE} test_consumer_project_keeps_the_bounded_operator_gate proves the consumer project still demands the operator, and test_protocol_home_cc_clears_the_valve_without_an_operator_carrier scopes the only exception to the protocol home itself; test_t1933_zaicode_goal_seal.py test_an_unsealed_prompt_spends_nothing proves no engine runs without a broker seal",
+      "work": "T-1933"
+    },
+    "SRC-339:R004": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-18489; broker_worker._worker accepts a verifier only BELOW the registered worker and register_worker refuses pid == proof[host_pid], so the spend must run from the hook -- the agent's shell is the hook's sibling and could never verify its own seal",
+      "text": "Worker registration must make the sealed origin recognizable: the registered worker process must match the ancestry the broker requires, so a seal issued by the guard is recognized and spent exactly once rather than refused as unproven.",
+      "verification": "record:.saipen/evidence/focused-unit/c86c432efe87a4bc-20261026T184401369669Z.json sha256:a57e9def779b2c86c522b835294b750862bb9a1d08f32fef1f4224a2d0e8177c; test_t1933_zaicode_goal_seal.py test_the_engine_runs_below_the_worker_that_registered_the_proof asserts the engine process that spends the seal is a CHILD of the worker row the broker accepted (ran.parent_pid == registered.worker); test_a_sealed_goal_runs_the_goal_entry_from_the_hook and test_a_sealed_grant_runs_goal_authorize_on_the_exact_bytes prove the sealed entry is actually spent once, from the hook; {HOOK} test_the_registered_worker_is_this_hook_process_not_its_parent and test_the_pre_fix_registration_is_refused_by_this_suite prove the host pid is refused as a worker and the hook's own pid is the accepted one",
+      "work": "T-1933"
+    },
+    "SRC-339:R005": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-18489; every goal/grant spend in the hook is inside `if sealed`, and `sealed` requires a broker-issued proof PLUS a successful register_operator_worker, so no budget moves without a native operator carrier",
+      "text": "No budget may be renewed or extended without a native operator carrier. A direct CLI call by an agent, a replayed message, and a forged or copied seal all fail closed.",
+      "verification": "record:.saipen/evidence/focused-unit/c86c432efe87a4bc-20261026T184401369669Z.json sha256:a57e9def779b2c86c522b835294b750862bb9a1d08f32fef1f4224a2d0e8177c; test_t1933_zaicode_goal_seal.py TheSafetyValveStillHolds proves the repair opens no unsealed path: test_an_unsealed_prompt_spends_nothing drives the hook with a HOST_PROVENANCE_UNAVAILABLE broker answer and observes zero engine runs, and test_the_hook_still_requires_a_broker_sealed_origin_to_spend_anything asserts the spend is gated on sealed; {AUTHORITY} test_real_looking_model_request_has_no_operator_preemption, test_identical_trusted_bytes_have_different_authority and test_duplicate_captured_model_bytes_cannot_gain_carrier_authority prove copied or replayed bytes carry no carrier authority; {GATE} test_plain_model_decision_does_not_authorize_a_gate and test_missing_or_wrong_source_digest_cannot_grant_authority prove a forged or wrong-digest capsule grants nothing",
+      "work": "T-1933"
+    },
+    "SRC-339:R006": {
+      "actionable": true,
+      "class": "non-goal",
+      "disposition": "VERIFIED",
+      "evidence": "E-18489; this Work added no hand-edit route: the SRC-339 source itself offers a manual goal_tickets edit as an operator-side alternative, it was recorded as a non-goal (R006) rather than implemented, and no file in the repair writes .saipen/STATE.md directly",
+      "text": "Manually editing .saipen/STATE.md to clear a tripped goal_tickets counter is not a supported repair and must not be implemented as one. The protocol's own canonical reauthorization route is the only sanctioned path.",
+      "verification": "record:.saipen/evidence/focused-unit/c86c432efe87a4bc-20261026T184401369669Z.json sha256:a57e9def779b2c86c522b835294b750862bb9a1d08f32fef1f4224a2d0e8177c; test_reconcile_valve.py test_the_counters_are_never_tidied_by_this_rule and test_the_refusal_writes_nothing prove the reconcile route refuses to tidy counters and writes nothing when it refuses, and test_an_unprovable_phase_refuses_with_zero_writes proves an unprovable repair is a zero-write refusal; {GATE} test_changed_authority_during_apply_refuses_without_state_writes proves a changed authority refuses before any state write",
+      "work": "T-1933"
+    },
+    "SRC-339:R007": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-18489; the red control is a genuine counterexample, not a label: it patches the shipped file text, re-runs the real hook in a subprocess, and requires the pre-fix behaviour. Live acceptance is explicitly UNVERIFIED -- no receipt from an installed ZAICODE host exists, and no mock is presented as one",
+      "text": "A ZAICODE operator who sends a goal request through the native host hook is sealed with action \"goal\", and one who sends an explicit grant is sealed with action \"authorize-goal\", demonstrated by a control that would fail if the action were the hardcoded \"continue\".",
+      "verification": "record:.saipen/evidence/focused-unit/c86c432efe87a4bc-20261026T184401369669Z.json sha256:a57e9def779b2c86c522b835294b750862bb9a1d08f32fef1f4224a2d0e8177c; test_t1933_zaicode_goal_seal.py is the acceptance control: test_a_goal_objective_is_sealed_as_goal, test_a_canonical_goal_command_is_sealed_as_goal and test_a_host_aliased_goal_is_sealed_as_goal observe the operator's goal prompt sealed as action goal, test_a_grant_capsule_is_sealed_as_authorize_goal observes the explicit grant sealed as authorize-goal, and test_the_pre_fix_hardcoded_action_is_refused_by_this_suite runs a copy of the real hook with the ONE line action = declared_action(text, root) put back to action = \"continue\" and asserts the suite then sees continue, which fails the criterion; {INGRESS} test_the_admitted_envelope_carries_the_engine_digest_of_the_prompt proves the sealed envelope is the one the host actually delivered",
+      "work": "T-1933"
+    },
+    "SRC-339:R008": {
+      "actionable": false,
+      "class": "context",
+      "disposition": "VERIFIED",
+      "evidence": "E-18489; this clause is context and is not claimed satisfied: T-435 (A3 Autopilot Mode 2 Hardening) is an upstream consumer, and nothing in this Work claims T-435 is complete or that its live end-to-end positive-finding run has happened",
+      "text": "The upstream consumer is ZAICODE task T-435 (A3 Autopilot Mode 2 Hardening), which cannot complete its live end-to-end positive-finding acceptance run while every 20 tickets trip the valve into hard_wait. T-1933 repairs the protocol side only; it does not claim T-435 is complete.",
+      "verification": "record:.saipen/evidence/focused-unit/c86c432efe87a4bc-20261026T184401369669Z.json sha256:a57e9def779b2c86c522b835294b750862bb9a1d08f32fef1f4224a2d0e8177c; test_t1933_zaicode_goal_seal.py exercises the protocol side only -- the hook, the broker seal and the engine spend -- and its module docstring records that no live ZAICODE host delivered these events; test_t1504_zaicode_adapter.py test_surfaces_follow_the_zcode_loader_contract pins the adapter surface this repair ships, and {SURFACE} / {PENDING} / {NATIVE} keep the surrounding admission contracts unchanged",
+      "work": "T-1933"
+    }
+  },
+  "schema_version": 1
+}

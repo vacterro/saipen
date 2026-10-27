@@ -1,0 +1,24 @@
+{
+  "clauses": {
+    "SRC-298:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "A ZAICODE session has a supported, verifiable way to deliver a genuine operator cc that renews a bounded run: a host adapter exists, is installed, and is dispatched on the operator's prompt event."
+    },
+    "SRC-298:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "An agent CLI replay, a shell call or another session's envelope cannot renew the bounded grant: an unsealed or wrong-session carrier retains hard_wait."
+    },
+    "SRC-298:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "When the native bridge is absent, the refusal names the infrastructure owner and the accurate recovery prerequisite, and never reports an advisory skill or a repeated cc as authenticated recovery."
+    }
+  },
+  "derived_at": "2026-10-23T23:26:50Z",
+  "derived_from": "SRC-298",
+  "interpretation_revision": 3,
+  "schema_version": 1,
+  "source_sha256": "2410aeaa46d23a842b881d6ef155a27fa00c2a2a1e68f74c05dfa1cea048bc08"
+}

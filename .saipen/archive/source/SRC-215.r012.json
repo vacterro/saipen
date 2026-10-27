@@ -1,0 +1,69 @@
+{
+  "clauses": {
+    "SRC-215:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Investigate the stated systemic-availability hypotheses without presuming defect; distinguish correct, avoidable, recoverable and incorrect refusals using current authoritative source and evidence."
+    },
+    "SRC-215:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Audit SAI_WEBSITE T-31 and reported E-336 through E-354 against the actual runtime contract; preserve the distinction between consumer observations and proven upstream root cause, with unavailable original evidence explicitly unresolved."
+    },
+    "SRC-215:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Corroborate incident families A-E from original evidence: bounded continuation, ownership contention, runtime/skill mismatch, recovery/evidence reachability and global versus scoped stopping; otherwise mark them unproven."
+    },
+    "SRC-215:R004": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Deliver all twelve blocker taxonomy classes. For each state the operation that stops, independent allowed operations, permitted recovery, retained evidence, genuine human requirement, automatic retry conditions and authority or duplicate-effect risk."
+    },
+    "SRC-215:R005": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Evaluate NORMAL, DEGRADED, QUARANTINED and HARD_STOP; verify ticket-level isolation, safe engineering without lifecycle admission and possible narrower locks while preserving provenance, concurrency, authorization and integrity."
+    },
+    "SRC-215:R006": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Audit goal, cc, cc all, converge and bounded/runtime/session/ticket budgets; distinguish scope, ownership, lifecycle and external effects; propose checkpointed continuation, cancellation and resource limits that cannot override explicit user limits or revoked authority."
+    },
+    "SRC-215:R007": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Audit protocol, installed skills, CLI, runtime, schema, evidence services and consumer compatibility; document capability discovery, a versioned contract and honest outdated-skill degradation; preserve cryptographic/canonical byte integrity while evaluating semantic compatibility."
+    },
+    "SRC-215:R008": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Evaluate evidence order, ownership, provenance, stale selection, active admission, replay, crash, partial writes and migration; propose non-authoritative pending observations whose promotion needs full supported admission and never fabricates history."
+    },
+    "SRC-215:R009": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Map existing tests and missing coverage to the ten stated invariants; propose state-machine/property, fault/crash/concurrency, cross-version, idempotency, metamorphic, consumer and negative-control tests; disclose bounded coverage and never claim all states verified."
+    },
+    "SRC-215:R010": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Define all seven requested resilience metrics with source of truth, collection, denominator, false-positive and gaming risks, and reporting interval; do not invent baselines, percentages or trade correctness for availability."
+    },
+    "SRC-215:R011": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Provide evidence-based common causes and a root-cause dependency graph; assess Resilience Layer feasibility by mapping existing owners first, minimum coherent invariants, migration complexity and consumer compatibility; avoid speculative rewrite or accumulating exceptions."
+    },
+    "SRC-215:R012": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Deliver the sixteen required report sections: verdict, confirmed problems, rejected/unproven hypotheses, cause graph, incident mapping, constraints, containment model, continuation matrix, recovery and capability strategies, test plan, KPIs, ranked queue, migration risks, NON_GOALS and runtime evidence gaps."
+    }
+  },
+  "derived_at": "2026-10-11T14:17:58Z",
+  "derived_from": "SRC-215",
+  "interpretation_revision": 12,
+  "schema_version": 1,
+  "source_sha256": "8d54708e5daccb690cc464918d4c81d7f1d2d4ed0f036a62a6e0c2f5ab0c2ce6"
+}

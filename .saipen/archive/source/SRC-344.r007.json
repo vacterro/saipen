@@ -1,0 +1,44 @@
+{
+  "clauses": {
+    "SRC-344:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "AUT-001: host acceptance receipts must be authenticated by the live authority broker (host_authority_client.verify_record), not by caller-supplied field equality or a substring blacklist; matching fields that any caller can write are not host identity."
+    },
+    "SRC-344:R002": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "AUT-001: DISPATCH_REQUEST_PERSISTED must never satisfy acceptance; an accepted, turn-started or turn-completed receipt is required, and the receipt status is reported as it is."
+    },
+    "SRC-344:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "AUT-001: a malformed numeric receipt field (iteration_id, worker_generation) must be a typed refusal, never an uncaught exception, and a boolean is not an integer."
+    },
+    "SRC-344:R004": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "AUT-005: discovery must consume the bounded incremental report transport (iter_new_qualified_findings) so the paginated reader has a production caller, rather than materialising the whole corpus through _run_cmd report."
+    },
+    "SRC-344:R005": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "AUT-006: the campaign must have a real driver that advances successive bounded steps; a step that makes no productive progress, hits a blocking state or fails must stop the driver rather than spin."
+    },
+    "SRC-344:R006": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "AUT-007: a SAIPAL analysis slice that reports ANALYSIS_PROGRESS must keep the campaign schedulable in FORENSIC_ANALYSIS with an explicit next action, and must not be reported as DISCOVERY_NO_NEW_FINDINGS or parked in QUIESCENT_WAIT."
+    },
+    "SRC-344:R007": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "AUT-002: SAIPAL qualification must not accept a self-asserted authenticated/signature pair; a qualified finding needs a broker-verified qualification proof."
+    }
+  },
+  "derived_at": "2026-10-27T14:27:28Z",
+  "derived_from": "SRC-344",
+  "interpretation_revision": 7,
+  "schema_version": 1,
+  "source_sha256": "ec9397a199f250daa4adf5a5258efe7aa04079ece508dacf0f83fb1ca911aeec"
+}

@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-209:R001": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "Follow the reconciled dependency order through T-1705 correction, truthful T-1703 REVIEW, and current T-1707 chronology verification; preserve ownership and all prior evidence."
+    }
+  },
+  "derived_at": "2026-10-10T14:14:40Z",
+  "derived_from": "SRC-209",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "850b272b88bc0241270fb976ef960bdcdc9fb15cea02f959aaef852d100c1549"
+}

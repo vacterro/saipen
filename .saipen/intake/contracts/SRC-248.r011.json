@@ -1,0 +1,64 @@
+{
+  "clauses": {
+    "SRC-248:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Resolve the five reproduced Improve findings of cycle imp-_sairelay-20261013-1 (saipen-cli-01 RUN-1 IMP-001..003, saipen-cli-02 RUN-1 IMP-001..002) and repair the continuation dead ends; the operator explicitly requests canonical admission and resolution of all five"
+    },
+    "SRC-248:R002": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "First verify the authoritative SAIPEN installation, current Work ownership, admission and mutation gates"
+    },
+    "SRC-248:R003": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Use the normal workflow to create and claim bounded repair tickets; do not request separate operator approval merely because the previous Work is DONE"
+    },
+    "SRC-248:R004": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Repair 1: regression closure must not invalidate its own source_receipts execution binding"
+    },
+    "SRC-248:R005": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Repair 2: a canonical verification PASS must not be vetoed by historical failure counts within the red half of an otherwise successful regression pair"
+    },
+    "SRC-248:R006": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Repair 3: empty-draft reconciliation must expose a finite, lossless or explicitly sanctioned exit instead of recommending an impossible transition"
+    },
+    "SRC-248:R007": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Repair 4: continue must resume an existing Improve seat using the correct session identity and must never grow the roster through an accidental bare improve"
+    },
+    "SRC-248:R008": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Repair 5: sweep-queue human rendering must expose finding references, contents and precheck errors, preserving the machine-readable JSON contract"
+    },
+    "SRC-248:R009": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Investigate the existing continue router, Improve manager and CLI _emit implementation; reuse existing session resume and status rendering contracts rather than introducing another framework"
+    },
+    "SRC-248:R010": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "Regression: no repeated seat creation through continue"
+    },
+    "SRC-248:R011": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "Regression: deterministic and idempotent resume"
+    }
+  },
+  "derived_at": "2026-10-14T01:11:06Z",
+  "derived_from": "SRC-248",
+  "interpretation_revision": 11,
+  "schema_version": 1,
+  "source_sha256": "673bd4a3078e7d56c56edc39ec493df5d14525888671ee07fb06f96bafca7c5f"
+}

@@ -1,0 +1,39 @@
+{
+  "clauses": {
+    "SRC-332:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Ingest and evaluate external audit report audit/SAIHANDOFF_FREEBUFF_STARTUP_AND_PROTOCOL_DESYNC.md across Freebuff application fixes and SAIPEN protocol deadlock recommendations."
+    },
+    "SRC-332:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Evaluate deterministic auto-heal for clock skew: reconcile last_event in STATE.md when lagging behind LOG.md tail."
+    },
+    "SRC-332:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Evaluate BOARD section vs checkbox reconciliation: ensure deterministic alignment between [x] status and section placement (## DOING vs ## DONE)."
+    },
+    "SRC-332:R004": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Guard next_action grammar during state mutations: reject non-conforming descriptive strings before persistence."
+    },
+    "SRC-332:R005": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Document forensic analysis artifact at .saipen/evidence/T-1923-freebuff-startup-desync/ANALYSIS.md."
+    },
+    "SRC-332:R006": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Cleanly consume audit/SAIHANDOFF_FREEBUFF_STARTUP_AND_PROTOCOL_DESYNC.md via journaled audit inbox closure upon terminal settlement."
+    }
+  },
+  "derived_at": "2026-10-25T14:00:42Z",
+  "derived_from": "SRC-332",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "2544f52d0628d17290805809647223bde4e832af7736a87141440971b469f249"
+}

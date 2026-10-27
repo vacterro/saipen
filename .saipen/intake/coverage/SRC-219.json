@@ -1,0 +1,14 @@
+{
+  "requirements": {
+    "SRC-219:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "BLOCKED",
+      "evidence": ".saipen/evidence/SRC-218-delivery-20261012/DELIVERY.md",
+      "text": "Execute the preserved staged mission through existing T-1719 and T-442 through T-451: complete the owned T-1718/T-1717 lifecycle as evidence permits, reconcile exact SRC-218, establish the finite unchanged stability admission path, and after lawful authorization prove two real isolated engineering workers, durable fresh-session recovery, negative controls and measured capacity as specified in .saipen/evidence/SRC-218-delivery-20261012/ACCEPTANCE.md. Mapping and documentation alone do not complete the engineering outcome; preserve every unresolved Source and all stop boundaries.",
+      "verification": null,
+      "work": "T-1719"
+    }
+  },
+  "schema_version": 1
+}

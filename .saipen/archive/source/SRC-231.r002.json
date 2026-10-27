@@ -1,0 +1,19 @@
+{
+  "clauses": {
+    "SRC-231:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Canonical head determination: verify the real live FastPrompter project state and authoritative SAIPEN head"
+    },
+    "SRC-231:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "T-1450 closure provenance reconstructed: admission, claim, transition, verification and closure events identified"
+    }
+  },
+  "derived_at": "2026-10-13T02:30:32Z",
+  "derived_from": "SRC-231",
+  "interpretation_revision": 2,
+  "schema_version": 1,
+  "source_sha256": "0f8e236b2d182ed5ec6567776b02af3fba674b266d2aa1355d92324932746add"
+}

@@ -1,0 +1,49 @@
+{
+  "clauses": {
+    "SRC-339:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "extensions/adapters/zaicode/saipen-guard.py must seal the operator's declared intent instead of hardcoding action = \"continue\": a goal request seals action \"goal\" and an explicit grant seals action \"authorize-goal\". saipen_engine/operator_origin.py reserves goal authority only for those two actions, so a guard that seals only \"continue\" makes persistent grants unreachable for a ZAICODE operator."
+    },
+    "SRC-339:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "The sealed action must be derived from the operator's own request text, not from model-supplied metadata: a prompt that is not a goal or an explicit grant still seals \"continue\", and an agent must not be able to manufacture a goal or authorize-goal seal by claiming one."
+    },
+    "SRC-339:R003": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "The safety valve must keep working: hitting goal_tickets must still trip continuation_authority to operator_required with safety_valve_mode hard_wait, and an agent CLI replay must still be refused with RECONCILE_REAUTH_REQUIRED. Renewal requires fresh operator carrier provenance, never an agent call."
+    },
+    "SRC-339:R004": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Worker registration must make the sealed origin recognizable: the registered worker process must match the ancestry the broker requires, so a seal issued by the guard is recognized and spent exactly once rather than refused as unproven."
+    },
+    "SRC-339:R005": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "No budget may be renewed or extended without a native operator carrier. A direct CLI call by an agent, a replayed message, and a forged or copied seal all fail closed."
+    },
+    "SRC-339:R006": {
+      "actionable": true,
+      "class": "non-goal",
+      "text": "Manually editing .saipen/STATE.md to clear a tripped goal_tickets counter is not a supported repair and must not be implemented as one. The protocol's own canonical reauthorization route is the only sanctioned path."
+    },
+    "SRC-339:R007": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "A ZAICODE operator who sends a goal request through the native host hook is sealed with action \"goal\", and one who sends an explicit grant is sealed with action \"authorize-goal\", demonstrated by a control that would fail if the action were the hardcoded \"continue\"."
+    },
+    "SRC-339:R008": {
+      "actionable": false,
+      "class": "context",
+      "text": "The upstream consumer is ZAICODE task T-435 (A3 Autopilot Mode 2 Hardening), which cannot complete its live end-to-end positive-finding acceptance run while every 20 tickets trip the valve into hard_wait. T-1933 repairs the protocol side only; it does not claim T-435 is complete."
+    }
+  },
+  "derived_at": "2026-10-26T17:34:45Z",
+  "derived_from": "SRC-339",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "2b8979aaaeb1a65cc63d2528c3b382c65adf469f7af295c282b667bd6b102d42"
+}

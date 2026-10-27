@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-277:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "V:\\_TEMP_\\fastprompter_drag\\SAIHANDOFF \u2014 SAIPEN_20261018_1907.md"
+    }
+  },
+  "derived_at": "2026-10-18T17:07:04Z",
+  "derived_from": "SRC-277",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "f05d02f06fef77eddbc88c1cdb25779ab8376ae53896abf5a0519041e15833f8"
+}

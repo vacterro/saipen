@@ -1,0 +1,23 @@
+{
+  "requirements": {
+    "SRC-223:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Safely enable the agent to perform authorized work using every applicable supported runtime, binding and recovery route; explanation of refusal alone is insufficient.",
+      "verification": null,
+      "work": "T-1647"
+    },
+    "SRC-223:R002": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Keep the affected continuation incident open until working authorized continuation is proven; test available safe alternatives and name exact residual prerequisites honestly without weakening identity, isolation or canonical authority.",
+      "verification": null,
+      "work": "T-1647"
+    }
+  },
+  "schema_version": 1
+}

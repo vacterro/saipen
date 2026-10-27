@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-319:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "test"
+    }
+  },
+  "derived_at": "2026-10-25T02:40:30Z",
+  "derived_from": "SRC-319",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "23524e865ca15c4eb5303e4b298c6fb28ddb282e43b341e66db2f61a907df7a9"
+}

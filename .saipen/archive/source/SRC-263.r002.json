@@ -1,0 +1,19 @@
+{
+  "clauses": {
+    "SRC-263:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Extend existing REVIEW phase (saipen/phases/review.md) with a lightweight ticket-scoped self-audit triggered on attributable implementation delta after VERIFY and before SHIP without adding phases, AutoHunt, queues, or full repo scans"
+    },
+    "SRC-263:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Specify the 10-point delta-driven self-audit scope (diff, callers, public contracts, error paths, null/empty/invalid boundaries, resource lifecycle/repeated execution, concurrency/state, test coverage, fixture/assertion concealment, unrelated workflows)"
+    }
+  },
+  "derived_at": "2026-10-17T01:05:48Z",
+  "derived_from": "SRC-263",
+  "interpretation_revision": 2,
+  "schema_version": 1,
+  "source_sha256": "5e1079128526b831b201d828a66c6ec1833fc04a6f33945531e2d33dc18bee47"
+}

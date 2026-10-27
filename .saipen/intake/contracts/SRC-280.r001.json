@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-280:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Freebuff: real user 'cc' loses trusted operator provenance (RECONCILE_REAUTH_REQUIRED, request classified model_supplied). Trace Freebuff user-message -> model -> SAIPEN invocation -> carrier; implement smallest host-owned carrier (SAIPEN_TASK_FILE/SAIPEN_TASK_SHA256/host_ingress) bound to the exact user message/session/lineage; real user cc resumes bounded goal, model-authored/tool-generated/replayed carriers refused; live GUI acceptance in an authorized disposable SAIPEN project"
+    }
+  },
+  "derived_at": "2026-10-20T11:36:03Z",
+  "derived_from": "SRC-280",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "0d453950c3e214346b878d53236e73a1577724500fe1cdb17328ce20301aad26"
+}

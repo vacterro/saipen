@@ -1,0 +1,64 @@
+{
+  "clauses": {
+    "SRC-295:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Defense / counter-evidence:** The overall engineering objective remained recognizable. `/goal cc all` is not automatically equivalent to the registered `cc` shortcut, and mixed prose+command semantics must be checked against a historical parser, not guessed. The engine safely queued T-251 instead of preempting T-250."
+    },
+    "SRC-295:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Rule / owner:** **BOOT.md** transport binding, `CORE` authority boundary, **EXECUTION.md** `PROTOCOL-ADMISSION-01` and **HOST-INTEGRATION-01**; provenance must be demonstrated independently of session labels, hashes or model content. See copy-time docs near source lines 235809\u2013235835 and 236160ff. Whether all were loaded when the session began is not proven."
+    },
+    "SRC-295:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Root cause / repair:** Closure validation accepts a claimed `own_patch` phase without binding a specific, current, published delta. **SAIPEN owner:** require immutable commit/diff and source identity for `own_patch` before DONE, with a separate pending-publication state or explicit cohort binding. **ZAICODE owner:** stage only ticket-owned paths; commit/push before claiming full shipment. Regress\u2026"
+    },
+    "SRC-295:R004": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "Real GUI user supplies a Russian multi-clause message with `/goal cc all`: the stored receipt is byte-identical; the command is parsed according to registered grammar, or explicitly reported unknown without losing the task."
+    },
+    "SRC-295:R005": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "An automated model repeats the same text without a trusted operator event: it cannot reset bounded authority or perform approved external-action transitions."
+    },
+    "SRC-295:R006": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "A genuine native GUI `cc` passes the OS-bound broker, resets only the correct bounded goal authority and resumes the existing ticket/lineage."
+    },
+    "SRC-295:R007": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "A T-251-like ticket with ten dirty MPI-related files cannot enter completed `own_patch` state before verified publication/cohort evidence."
+    },
+    "SRC-295:R008": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "A successful 11-script fixture suite plus zero two-client runs reports `LOCAL_PASS / LIVE_MPI_UNVERIFIED`; a real two-client pass is required for full MPI acceptance."
+    },
+    "SRC-295:R009": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "A 200-step autonomous run emits no intermediate chatter, and its final response uses the exact SAIPEN digest contract."
+    },
+    "SRC-295:R010": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "A real \u201ccontinue, and now I authorize X\u201d message creates a new authenticated source/amendment before any X-scope mutation."
+    },
+    "SRC-295:R011": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "The system must preserve correct refusals for unsafe CLEAN, competing claims and unresolved external human gates."
+    }
+  },
+  "derived_at": "2026-10-23T17:05:58Z",
+  "derived_from": "SRC-295",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "42db83f27b766861d6b2b463b14731b33ffd2a5dc89ebf2575ea308e01fd5d1c"
+}

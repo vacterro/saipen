@@ -1,0 +1,77 @@
+{
+  "requirements": {
+    "SRC-276:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "record: .saipen/evidence/focused-unit/419e78ff4007af4a-20261022T115941199589Z.json is the executed proof that the strict closed-archive prover refuses a missing or weakened carrier with zero writes; the same prover was then run read-only against the real external target and its observation T-1817-current-audit/external-r001-current.json hashes every pinned carrier before and after with identical bytes. In that real target the archived body, metadata, contract and coverage all prove against the tombstone: metadata status CLOSED and storage ARCHIVED, metadata source digest equals the tombstone digest, four contract clauses all carry VERIFIED, zero unresolved, and intake status answers CLOSED. The historical missing-sidecar shape is therefore not current.",
+      "text": "F-03 SOURCE-ARCHIVE-RECOVER: inspect current real SRC-003 and independently trusted tombstone/intake/journal carriers; prove feasibility before a canonical transactional and idempotent reconstruction, reject insufficient or ambiguous carriers, preserve body/source authority and sealed history. Verify actual archive/tombstone/contract/coverage consistency, source status and current conformance. Do not assume the historical missing bundle remains missing.",
+      "verification": "executed refusal family in the focused record ran 181 tests with zero failures across the strict-bundle negative controls and the receipt suite; the real-target observation reports observed_files_unchanged true, so the proof run mutated nothing. The target latest core receipt recorded zero problems at HEAD 9ebe344e, which is still the current HEAD, and it now reads STALE_PASS only because that external working tree moved afterwards; a fresh foreign validator receipt is outside this project write authority and is not claimed.",
+      "work": "T-1817"
+    },
+    "SRC-276:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "record: .saipen/evidence/regression/regression-execution-900f8403443d44809137d674543f3d9d.json",
+      "text": "F-01/F-02 CONFORMANCE-ROUTE and duplicate ownership: route cc all from a blocked finding to existing owner Work using lineage/rule/subject identity; repeated continue must not create duplicate receipts/tickets. Preserve existing T-57 and explicitly reconcile T-62 duplicate or umbrella lineage without fictional DONE. Any genuinely new local engineering child must be justified, visibly model_supplied and grant no goal pivot.",
+      "verification": "the executed oracle tools/test_t1817_finding_route.py ran ten controls FAIL before the resolver existed and PASS after it, proving a blocked finding resolves to its existing owner Work instead of starting a new ticket; the real-board answer for SRC-276 is ROUTED_TO_OWNER T-1817 via linked-source-work, and the target account's SRC-003 answers DONE_ONLY with no re-opened ticket. Duplicate lineage was adjudicated read-only from the target LOG: E-694 routed SRC-003 to T-57, T-62 finished at E-699 as an umbrella that had explicitly handed SRC-003 to its existing owner, and T-57 finished E-709 with a PASS over the closed archive, so no fictional DONE was written and no second ticket was created. Safety witnesses: sha256 of both real-board probe inputs unchanged, and the resolver is a read-only projection that never mutates BOARD.",
+      "work": "T-1817"
+    },
+    "SRC-276:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "record: .saipen/evidence/regression/regression-execution-fac522e9eb6249cdb39c09dc45ff0147.json ; the T-1851 executed oracle ran the same six controls FAIL before the fix and PASS after it, and the read-only provenance observation .saipen/evidence/T-1817-current-audit/external-after-authority-fix.json records every pinned file byte-unchanged, the E-371 line still without an operation marker, and the current reader returning UNKNOWN rather than a promoted authority",
+      "text": "F-04/F-05 PROVENANCE-HISTORICAL: inspect actual trusted event/operation chain E-371 without editing append-only LOG; reconstruct only on independent proof or require a genuinely scoped operator Decision B. Accepted-debt authority must resolve witness provenance, project lineage and exact decision scope, reject absent and existing-but-non-authorizing SRC/E/lineage references, record KNOWN/UNKNOWN and run syntactically valid forged-token negatives. No default MFA/new strong signing without accepted security policy.",
+      "verification": "python -m unittest discover -s tools -p test_t1851_debt_authority.py together with test_accepted_debt.py and test_accepted_debt_rebind.py: 38 plus 13 plus 15 tests PASS, covering absent, forged-token, existing-but-non-authorizing, foreign-lineage, wrong-event-set and revoked references with zero mutation, so the fail-closed refusal and the KNOWN/UNKNOWN report are both executed behaviour",
+      "work": "T-1817"
+    },
+    "SRC-276:R004": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "measured execution .saipen/evidence/regression/regression-execution-ea725e0844324b1ca994cb7e439b400f.json E-17265; focused unit record .saipen/evidence/focused-unit/419e78ff4007af4a-20261022T115941199589Z.json ran 181 tests OK",
+      "text": "F-07 truthful source-closure outcomes: distinguish ALREADY_CLOSED, RESIDUE_SETTLED, ARCHIVE_VERIFIED and REPAIR_APPLIED or equivalent typed outcomes; ok/recovered alone must not claim a healed archive. Require fresh actual artifact and validator postconditions, retain fail-closed refusal when sidecars lack trustworthy reconstruction proof.",
+      "verification": "python -m unittest discover -s tools -p test_t1817_closure_outcomes.py: ran 11 tests, FAIL 10 before and PASS 11 after, plus test_source_receipts.py 170 PASS",
+      "work": "T-1817"
+    },
+    "SRC-276:R005": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "record: .saipen/evidence/regression/regression-execution-5498482b60b54d4c9af38ccf19b4449e.json",
+      "text": "F-11 typed finding ownership and handback: distinguish ENGINE_INTERNAL, OPERATOR_DECISION and UNAVAILABLE_EXTERNAL, link engineering Work and executable safe next actions, prevent ENGINEERING_REQUIRED loops creating new consumer start tasks, and render human action only for an actually witnessed narrow decision. Preserve genuine authority and publication boundaries.",
+      "verification": "the executed oracle tools/test_t1817_finding_ownership.py and tools/test_t1817_diagnostic_ownership.py ran FAIL before the ownership projection existed and PASS after it. The projection distinguishes ENGINE_INTERNAL, OPERATOR_DECISION, UNAVAILABLE_EXTERNAL and UNKNOWN, routes each to an executable safe next action, and renders operator_action_due only for a witnessed decision whose subject it names; an engine-owned finding never becomes a fresh consumer start task and an unknown family stays UNKNOWN rather than inventing an owner claim. Authority and publication boundaries are preserved because ownership is a derived projection outside RULE_TABLE, so ruleset_fingerprint and every finding_key stay byte-identical, which the identity-safety test asserts directly. The focused gate that carries these oracles plus the strict-bundle and receipt suites passed 95 tests at record .saipen/evidence/focused-unit/abb782c3d23fccb9-20261022T124647846713Z.json.",
+      "work": "T-1817"
+    },
+    "SRC-276:R006": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "record: .saipen/evidence/focused-unit/79392d7bb3b637db-20261022T125919051104Z.json",
+      "text": "Separate ZAICODE-owned handoff for F-06/F-08/F-09/F-10/F-12: continuation dedup and preserved real ingress; actual host response enforcement bound to STYLE/EXECUTION hashes, pinned Estonian language and compact typed final with safety overrides, honest ADVISORY/NONE; full-JSON/EOF-safe evidence and preserved exit codes; executed/reviewed/not-attempted and no-change/refused/repaired distinctions; no unsupported exhaustive, historical-absence or proxy-heal claim; local diagnostic TODOs cannot imply Work or goal completion.",
+      "verification": "the separate host handoff .saipen/evidence/T-1817-zaicode-host-handoff.md delivers F-06, F-08, F-09, F-10 and F-12 as ZAICODE-owned obligations, each with the recorded evidence and its own acceptance criterion: continuation dedup with visibly distinct model_supplied Work, styleHash/executionHash bound to the answer renderer with pinned Estonian and honest ADVISORY versus MECHANICAL, full-JSON EOF-safe evidence with preserved exit codes, executed/read-only/not-attempted and SUCCESS_NO_CHANGE/REFUSED/REPAIRED distinctions, no unsupported exhaustive or historical-absence claim, and local TODOs that cannot imply Work or goal completion. tools/test_t1817_handoff_artifacts.py makes this checkable: it proves the handoff carries all five host findings and that no engine-owned finding heads a host section, so F-11 cannot repeat. The focused record 79392d7bb3b637db ran 116 tests with zero failures across all eight T-1817 oracles. The handoff claims no ZAICODE edit exists; the host work stays open by construction and is not reported as done here.",
+      "work": "T-1817"
+    },
+    "SRC-276:R007": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "record: .saipen/evidence/regression/regression-execution-5d8d93dd1c7c4ab194e5d3d12057fdde.json",
+      "text": "Complete acceptance bar: reproduce equivalent actual cc all case with no duplicate T-62-style Work, no unsupported recovery claim, auditable scoped authority, fresh CURRENT_PASS before resumed BUILD, correct Estonian compact structured output and HUSH subject to genuine higher overrides, no invented operator command, deterministic double-run/crash/retry and journal/BOARD/LOG integrity. Goal verifier stays non-PASS until every deliverable is really closed; FUTURE_GATE remains closed.",
+      "verification": "the executed oracle tools/test_t1817_acceptance_bar.py reproduces the original cc all shape as a fixture, a CURRENT_FAIL whose subject already has a live owner, and ran one control FAIL on the pre-fix engine versus twelve PASS now. Deterministic double-run and crash/retry are proven separately by the executed controls in tools/test_t1817_closure_outcomes.py, which the focused record 79392d7bb3b637db ran: test_healthy_repeat_is_verified_already_closed_and_changes_nothing closes twice and asserts outcome ALREADY_CLOSED with byte-identical tree_bytes, and test_actual_interrupted_close_settlement_reports_repair injects an OSError on the tombstone write, then requires REPAIR_APPLIED, a validated tree, and a following ALREADY_CLOSED with unchanged bytes. Clause map: (a) ownership names engine work and finding_route answers ROUTED_TO_OWNER with route saipen ticket claim T-57 instead of minting a record; (c) operator_action_count is zero and no recover resolve-blocker text appears; (d) router.gate_route refuses and exposes no canonical_next_command over CURRENT_FAIL; (f) no invented operator command; (g) the decision stays CURRENT_FAIL and never CURRENT_PASS. Clauses (b) and (e) are host-owned: chat_style compiles reply_language et and the registry declares zaicode ADVISORY with null response_hook, so the contract is proven available and proven not mechanically enforced.",
+      "work": "T-1817"
+    },
+    "SRC-276:R008": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "record: .saipen/evidence/regression/regression-execution-5d8d93dd1c7c4ab194e5d3d12057fdde.json",
+      "text": "Final evidence-backed diagnosis and owner-separated delivery must retain all source F-01 through F-12 findings, defenses, confidence and unknowns; preserve authorized fail-closed behavior, no invented malicious edit, no assumption all sidecars never existed or full historical ruleset identity. Reconcile historical audit observations against actual current state and report unproven host/external acceptance honestly.",
+      "verification": "the delivery artifacts .saipen/evidence/T-1817-diagnosis-delivery.md and .saipen/evidence/T-1817-zaicode-host-handoff.md retain all twelve findings with owner class, confidence, preserved defense and remaining unknown, and tools/test_t1817_handoff_artifacts.py proves it rather than asserting it: it parses the twelve F-NN headings out of the source receipt and fails if any is missing from the diagnosis or any host-owned one is missing from the handoff. Nine controls pass, including that no ENGINE_INTERNAL finding heads a host section (the exact F-11 misclassification), that the handoff never claims a ZAICODE edit exists, that the historical origin unknowns stay UNKNOWN, that the stale foreign receipt is not claimed PASS, and that no operator grant is asserted. Reconciliation against current state is measured, not asserted: the target archive now proves CLOSED with 4 of 4 clauses VERIFIED and no writes, and the T-62 lineage is adjudicated from E-693/E-694/E-699/E-709.",
+      "work": "T-1817"
+    }
+  },
+  "schema_version": 1
+}

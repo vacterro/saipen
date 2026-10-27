@@ -1,0 +1,69 @@
+{
+  "clauses": {
+    "SRC-265:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Authenticate the actual operator command behind E-3221, including carrier, scope and precedence."
+    },
+    "SRC-265:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Determine whether that authority permits bounded software security remediation independently from T-261 hardware acceptance."
+    },
+    "SRC-265:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Verify whether later operator directives supersede or restrict the recorded authorization."
+    },
+    "SRC-265:R004": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Inspect the canonical dependency semantics."
+    },
+    "SRC-265:R005": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not silently remove needs: T-261."
+    },
+    "SRC-265:R006": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "If existing authority permits remediation, establish the correct canonical admission and ownership using supported SAIPEN operations."
+    },
+    "SRC-265:R007": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Keep hardware acceptance and publication blocked."
+    },
+    "SRC-265:R008": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Preserve the existing corrected source and test evidence without fabricating historical execution."
+    },
+    "SRC-265:R009": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "If valid authority is absent, produce exactly one precise operator decision request."
+    },
+    "SRC-265:R010": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not make the operator manually edit BOARD, STATE, LOG or rerun ordinary diagnostic commands."
+    },
+    "SRC-265:R011": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "Verify conformance before and after any authorized canonical transition."
+    },
+    "SRC-265:R012": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Preserve task ownership and all unrelated blockers."
+    }
+  },
+  "derived_at": "2026-10-17T00:42:39Z",
+  "derived_from": "SRC-265",
+  "interpretation_revision": 12,
+  "schema_version": 1,
+  "source_sha256": "9aafb214f8de6868410665d531efb3b214255dee83a7eb09443f779621ea0a31"
+}

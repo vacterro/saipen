@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-190:R001": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "TWO SURFACES: the operator checkpoint and machine evidence are different surfaces; the default checkpoint answers state, material change, blocker, next action and validation, and detail stays behind canonical evidence, log and detail references. The rule is named OPERATOR-READABILITY-01 or its repository equivalent."
+    }
+  },
+  "derived_at": "2026-10-07T05:07:21Z",
+  "derived_from": "SRC-190",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "1126df1e7e0f1e7ab68afc6fad67868babd2579cd80fae018caa2b19450c6cb0"
+}

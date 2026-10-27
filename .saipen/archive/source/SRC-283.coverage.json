@@ -1,0 +1,14 @@
+{
+  "requirements": {
+    "SRC-283:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "T-1828 closed with verification evidence in LOG: REVIEW -> PASS conf: high; review_passes: 2 (receipt compatibility finding fixed and rechecked). Source coverage now accepts the actual generated status/verdict receipt; focused record is current and reused on review. No new defect in owned delta. DEC: SHIP via pending C-007; no publication claim. Final evidence .saipen/evidence/focused-unit/7ca3b9b4e7be6717-20261020T143234244847Z.json.",
+      "text": "Reduce excessive test overhead with proportional validation",
+      "verification": "the Work this request created reached its own verification gate; see the T-1828 VERIFY cycle in .saipen/LOG.md",
+      "work": "T-1828"
+    }
+  },
+  "schema_version": 1
+}

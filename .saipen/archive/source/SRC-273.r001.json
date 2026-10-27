@@ -1,0 +1,104 @@
+{
+  "clauses": {
+    "SRC-273:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "ROOT CAUSE A \u2014 UNAUTHENTICATED VERIFICATION CLAIMS: File: tools/saipen_engine/intake.py Function: set_disposition Current verification checks inspect string content, a short domain-keyword overlap list and several explicit refusal phrases. They do not establish that the referenced verification actually executed successfully. The existing positive regression test I accepts agent-supplied text"
+    },
+    "SRC-273:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "ROOT CAUSE B \u2014 INDEPENDENT SUBREQUIREMENT COLLAPSE: File: tools/saipen_engine/intake.py Function: extract_request_clauses The existing SAMPLE_NESTED_SUBSECTIONS example contains: 1.1 Core database schema integrity 1.2 Migration pipeline safety 2.1 Ingress contract validation 2.2 Closure gate verification Current extraction produces two major clauses instead of independently addressable acceptance outcomes. The associated"
+    },
+    "SRC-273:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "ROOT CAUSE C \u2014 UNSOUND POSITIVE REGRESSION: File: tools/test_source_contract_derivation.py The positive regression currently proves acceptance of a textual claim, not acceptance of genuine evidence. Replace that assertion with an actual canonical verification receipt produced by a controlled test run."
+    },
+    "SRC-273:R004": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "MISSION: Close the remaining acceptance-truth defects. A ticket must not become DONE merely because the model supplies a convincing verification string. Do not solve this by adding more keyword filters. Use existing durable evidence, regression receipts, source integrity and closure-gate mechanisms. ROOT CAUSE A \u2014 UNAUTHENTICATED VERIFICATION CLAIMS File: tools/saipen_engine/intake.py Function: set_disposition Current verification checks inspect string content, a short domain-keyword overlap list and several explicit refusal phrases. They do not establish that the referenced verification actually executed successfully. The existing positive regression test I accepts agent-supplied text without requiring a real execution receipt."
+    },
+    "SRC-273:R005": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "TEST A: Fabricated nonexistent test PASS is refused."
+    },
+    "SRC-273:R006": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "TEST B: Correctly formatted but unexecuted PASS is refused."
+    },
+    "SRC-273:R007": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "TEST C: Authentic execution receipt is accepted for its matching requirement."
+    },
+    "SRC-273:R008": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "TEST D: Authentic but unrelated execution receipt is refused."
+    },
+    "SRC-273:R009": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "TEST E: Stale or tampered execution receipt is refused."
+    },
+    "SRC-273:R010": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "TEST F: Generic core-unit evidence cannot satisfy real host acceptance."
+    },
+    "SRC-273:R011": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "TEST G: Nested 1.1 / 1.2 requirements cannot be discharged by proof covering only 1.1."
+    },
+    "SRC-273:R012": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "TEST H: Multi-section requests preserve all material outcome and safety obligations."
+    },
+    "SRC-273:R013": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "TEST I: SRC-272 remains immutable; its known gaps are handled through a valid corrective receipt."
+    },
+    "SRC-273:R014": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "TEST J: Existing simple atomic requests still work."
+    },
+    "SRC-273:R015": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "TEST K: Legitimate external provenance is not rejected merely for containing another source receipt identifier."
+    },
+    "SRC-273:R016": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "TEST L: Existing T-1808/T-1810/T-1811/T-1812/T-1813 lifecycle and source integrity contracts remain valid."
+    },
+    "SRC-273:R017": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "LIVE ACCEPTANCE: In a disposable canonical project: 1. Create an admitted ticket with two independently required acceptance outcomes. 2. Produce genuine verification evidence for only one. 3. Attempt to mark both VERIFIED using the same receipt. 4. Prove the unrelated second requirement remains open. 5. Attempt ticket completion. 6. Prove canonical closure"
+    },
+    "SRC-273:R018": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "SAFETY: No new lifecycle phases. No new approval bureaucracy. No blanket operator PASS. No foreign repository modifications. No future-gate promotion. No mass BLOCKED transitions. No semantic guesswork presented as mechanical proof. Preserve ordinary engineering autonomy."
+    },
+    "SRC-273:R019": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "SUCCESS: A valid-looking PASS string cannot substitute for a trustworthy verification result. Independent acceptance outcomes cannot be silently collapsed into a single easy-to-close requirement. The correction strengthens existing v8 mechanisms without introducing another framework. KEEP FUTURE GATES CLOSED."
+    }
+  },
+  "derived_at": "2026-10-18T14:55:09Z",
+  "derived_from": "SRC-273",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "0d837ff8b00d887cf8eb0d5989955b0655a42a227758cd774127405f099e1e12"
+}

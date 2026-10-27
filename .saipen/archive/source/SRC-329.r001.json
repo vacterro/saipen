@@ -1,0 +1,39 @@
+{
+  "clauses": {
+    "SRC-329:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Ingest and evaluate external audit report audit/SAIHANDOFF_AGENT_DRIFT_ZAICODE_2026-10-25.md across findings DRIFT-01 through DRIFT-12."
+    },
+    "SRC-329:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Verify SAIPEN protocol invariant: canonical .saipen/ state is immutable via Git checkout/reset; mutations occur strictly through journaled CLI / engine operations."
+    },
+    "SRC-329:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Enforce phase and effect guards: HUNT read-only boundary, blocked state commit guards, and regression requirements enforced without synthetic waivers."
+    },
+    "SRC-329:R004": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Enforce ownership boundaries: ZAICODE host/adapter issues belong to host adapter; FastPrompter implementation work remains unadmitted without valid operator grant."
+    },
+    "SRC-329:R005": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Document forensic analysis artifact at .saipen/evidence/T-1920-fastprompter-drift/ANALYSIS.md."
+    },
+    "SRC-329:R006": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Cleanly consume audit/SAIHANDOFF_AGENT_DRIFT_ZAICODE_2026-10-25.md via journaled audit inbox closure upon terminal settlement."
+    }
+  },
+  "derived_at": "2026-10-25T13:52:36Z",
+  "derived_from": "SRC-329",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "1e5ee157618ada174c4de85ad75651d0eb290b6324bc82927b821f3aca6a13f1"
+}

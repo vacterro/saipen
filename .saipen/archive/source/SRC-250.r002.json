@@ -1,0 +1,19 @@
+{
+  "clauses": {
+    "SRC-250:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Continue the existing authorized SAIPEN mission non-disruptively: do not interrupt the active ticket, override ownership, bypass admission or create a new meta-project; integrate these principles into admitted work"
+    },
+    "SRC-250:R002": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Correctness before speed: prioritize root causes of unauthorized transitions, state or journal corruption, concurrent overwrites, lost or duplicated work, recovery deadlocks, contradictory instructions, false success, stale or fabricated evidence, unsafe identity handling, needless operator intervention and state/behaviour divergence; remove whole failure classes; never weaken security, provenance, ownership or forensic integrity for throughput"
+    }
+  },
+  "derived_at": "2026-10-14T17:55:35Z",
+  "derived_from": "SRC-250",
+  "interpretation_revision": 2,
+  "schema_version": 1,
+  "source_sha256": "a6f646bb1692c459c6359bd5ddf686885524c72d8feddd78e49af5d77b421084"
+}

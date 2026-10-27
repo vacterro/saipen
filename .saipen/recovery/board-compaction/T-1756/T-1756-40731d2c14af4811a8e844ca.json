@@ -1,0 +1,20 @@
+{
+  "externalization_event": {
+    "event_id": "E-15245",
+    "operation_id": "ticket-f58264e074a44af5a2c20dca51ceae41",
+    "reason": "existing/proposed oversized BOARD record requires canonical ticket block update"
+  },
+  "lossless": true,
+  "metadata_path": ".saipen/recovery/board-compaction/T-1756/T-1756-40731d2c14af4811a8e844ca.json",
+  "operation": "board_legacy_compaction",
+  "original_record_bytes": 2045,
+  "original_record_path": ".saipen/recovery/board-compaction/T-1756/T-1756-40731d2c14af4811a8e844ca.BOARD.md",
+  "original_record_sha256": "40731d2c14af4811a8e844ca4936845c5db90898e110d28031598f183613a5e8",
+  "project_identity": "v:\\___vac\\__k\\__code\\_ai_stuff_agentic\\_saipen",
+  "project_lineage": "lineage-b512942bac884a8691f6c98afcd6ddb9",
+  "schema_version": 1,
+  "source": ".saipen/BOARD.md",
+  "status": "COMMITTED",
+  "supersedes_detail_ref": "",
+  "ticket_id": "T-1756"
+}

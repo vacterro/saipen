@@ -1,0 +1,54 @@
+{
+  "clauses": {
+    "SRC-229:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Verify whether the sidecar is genuinely absent from the live authoritative project tree."
+    },
+    "SRC-229:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Identify the original ledger citation and any authorized recovery location."
+    },
+    "SRC-229:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Check whether a durable verified source contains byte-identical or hash-verifiable original evidence."
+    },
+    "SRC-229:R004": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "If recovery is possible, use only the canonical evidence recovery mechanism."
+    },
+    "SRC-229:R005": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "If recovery is not possible, preserve the incomplete verdict and record the unresolved integrity incident."
+    },
+    "SRC-229:R006": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Check whether the canonical validator correctly distinguishes missing evidence from an exporter omission."
+    },
+    "SRC-229:R007": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Do not interpret Wintage T-916 BUILD as an engine failure unless independent evidence demonstrates such a failure; do not rewrite T-916 on behalf of its active owner."
+    },
+    "SRC-229:R008": {
+      "actionable": true,
+      "class": "non-goal",
+      "text": "No Wintage product modifications, historical evidence fabrication, hand edits to STATE/BOARD/LOG, deleting citation to make validation green, broad protocol migration, or weakening of evidence integrity rules."
+    },
+    "SRC-229:R009": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "Return a precise classification: RECOVERED_VERIFIED, MISSING_CONFIRMED, EXPORTER_DEFECT, UNRESOLVED. Provide original citation location, recovery source and provenance, hash/integrity evidence, canonical validator outcome, and any strictly necessary corrective ticket. A missing durable record must never become a synthetic PASS."
+    }
+  },
+  "derived_at": "2026-10-13T00:54:49Z",
+  "derived_from": "SRC-229",
+  "interpretation_revision": 9,
+  "schema_version": 1,
+  "source_sha256": "fdacbb8bce13646bebc911d723cf01456c58fb7eeb72c971fdc07e8370e977df"
+}

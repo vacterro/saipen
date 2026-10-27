@@ -1,0 +1,24 @@
+{
+  "clauses": {
+    "SRC-266:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Wave A-B: Complete 95-record blocker inventory and remove proven stale blockers canonically"
+    },
+    "SRC-266:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Wave C-E: Reconcile external dependencies and active audit bindings while preserving administrative debt rules and critical safety gates"
+    },
+    "SRC-266:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Wave F-H: Provide clean operational board projection, rebuild actionable queue, and execute autonomous continuation"
+    }
+  },
+  "derived_at": "2026-10-17T02:37:35Z",
+  "derived_from": "SRC-266",
+  "interpretation_revision": 3,
+  "schema_version": 1,
+  "source_sha256": "ceac2b7f9d808b218e5181cc7708bbcebab34c88a421835973e6aa0be779e616"
+}

@@ -1,0 +1,14 @@
+{
+  "requirements": {
+    "SRC-315:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "T-1897 closed with verification evidence in LOG: FOCUSED-UNIT-EVIDENCE PASS conf: high ran:45 record:.saipen/evidence/focused-unit/123a2e7caef73b8d-20261024T224532472371Z.json sha256:68a3a74f5cea0a9f50b021df1244608bf5ff25d2fc051d8f2ed156c9cca0a064",
+      "text": "Classify the validator's own manifest-failure and closure-provenance families so 41 findings stop collapsing into 2 UNKNOWN finding keys, adding subject extraction for the offending path",
+      "verification": "the Work this request created reached its own verification gate; see the T-1897 VERIFY cycle in .saipen/LOG.md",
+      "work": "T-1897"
+    }
+  },
+  "schema_version": 1
+}

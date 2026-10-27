@@ -1,0 +1,54 @@
+{
+  "clauses": {
+    "SRC-232:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Establish current canonical SAIPEN state, source documents, and applicable protocol version"
+    },
+    "SRC-232:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Inspect existing audit findings, future gates, and current tickets covering deterministic tool failures, bounded retry, failure recovery, and response contracts"
+    },
+    "SRC-232:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Read and verify authoritative contracts EXEC-HUSH-01 and EXEC-RESPONSE-01 before citing them"
+    },
+    "SRC-232:R004": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Evaluate authority boundary: tool argument validation, host diagnostics, and model runtime are ZAICODE-owned; do not transfer host bugs to SAIPEN"
+    },
+    "SRC-232:R005": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Determine whether protocol rules address observed tool failure patterns; assess narrow rule and preserve agent autonomy for transient failures"
+    },
+    "SRC-232:R006": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Define criteria for equivalent repeated failures vs valid recovery evidence (corrected parameters, changed state, authorized retry)"
+    },
+    "SRC-232:R007": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Review stale STATE narrative against existing audit ownership without duplicating tickets"
+    },
+    "SRC-232:R008": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Preserve provenance authority: synthetic reminders must not become human instructions"
+    },
+    "SRC-232:R009": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Produce comprehensive forensic evaluation report and record bounded NO_CHANGE determination where evidence does not justify protocol modification"
+    }
+  },
+  "derived_at": "2026-10-13T04:00:00Z",
+  "derived_from": "SRC-232",
+  "interpretation_revision": 9,
+  "schema_version": 1,
+  "source_sha256": "ef6e7af8f075af6baf728c83abe4be998d13cd4b681a5ff3c7cce25c2a2bcc2a"
+}

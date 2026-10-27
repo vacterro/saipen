@@ -1,0 +1,34 @@
+{
+  "clauses": {
+    "SRC-230:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "START/CONTINUE ordering is deterministic: new actionable ingress routes through START before CONTINUE"
+    },
+    "SRC-230:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Recorded user intent cannot masquerade as a claimed work item: USER_REQUEST_RECORDED reports work_claimed=false and preserves active ticket ownership"
+    },
+    "SRC-230:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "STOP has a documented and regression-tested execution boundary: handback-only semantics, mutation_authorized=false"
+    },
+    "SRC-230:R004": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Unsupported host-level enforcement is reported honestly: distinguish mechanical boundary from advisory/unavailable host tool cancellation"
+    },
+    "SRC-230:R005": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Runnable work is HUSH-compliant within supported enforcement surfaces: discretionary progress narration suppressed by default"
+    }
+  },
+  "derived_at": "2026-10-13T01:03:08Z",
+  "derived_from": "SRC-230",
+  "interpretation_revision": 5,
+  "schema_version": 1,
+  "source_sha256": "bed49b8d192aa074e52e11be151b0ed0f7a0c5d3291ed723d734df4655091eeb"
+}

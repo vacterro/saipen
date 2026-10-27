@@ -1,0 +1,94 @@
+{
+  "clauses": {
+    "SRC-218:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Provide one command or UI action that starts the authorized parallel worker pool for SAIPEN engineering. Source asks for one click or command. T-442 and T-443/T-444 admission remain required."
+    },
+    "SRC-218:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "SAIPEN assigns distinct eligible task or audit generations autonomously. Bind each assignment to exact Source bytes and one current owner; duplicate delivery cannot assign the same generation twice."
+    },
+    "SRC-218:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Use separate Git worktrees for engineering workers, with separate indexes and bounded writable scope. Prove source isolation before concurrent edits. Source explicitly requests worktrees."
+    },
+    "SRC-218:R004": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Parallel workers perform actual engineering improvements to admitted SAIPEN tasks or audits and produce source patches. Read-only research or a toy arithmetic demonstration cannot satisfy this request."
+    },
+    "SRC-218:R005": {
+      "actionable": false,
+      "class": "context",
+      "text": "Proposed acceptance R5: each worker durably checkpoints identity, assignment generation, owned changes, verification status and remaining work independently of chat. Original source does not explicitly specify this recovery format."
+    },
+    "SRC-218:R006": {
+      "actionable": false,
+      "class": "context",
+      "text": "Proposed acceptance R6: worker loss, provider limit or restart preserves accepted work. This is a proposed operational completion criterion, not evidence that failover exists or authority to implement before admission."
+    },
+    "SRC-218:R007": {
+      "actionable": false,
+      "class": "context",
+      "text": "Proposed acceptance R7: a fresh replacement resumes the same assignment from durable verified progress without repeating unchanged completed checks. Prove an actual model-session restart after lawful admission."
+    },
+    "SRC-218:R008": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Engineering handbacks are immutable patch-and-evidence proposals bound to base source identity, worker, Work, declared resources and verification. Reuse ProducerPackage and the existing Core integration owners rather than creating an incompatible format."
+    },
+    "SRC-218:R009": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Refuse stale proposals and conflicting read/write or logical-resource claims before canonical mutation. Preserve refused proposals and their evidence; never silently rebase or merge changed dependencies."
+    },
+    "SRC-218:R010": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "One canonical Core integrator accepts eligible proposals sequentially through the existing writer lock and journal. Workers do not become concurrent authors of canonical STATE, BOARD or LOG."
+    },
+    "SRC-218:R011": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Each accepted engineering proposal requires independent verification on the relevant source generation and the mandatory integration gates. A worker cannot approve its own handback or replace complete required regression coverage with focused tests."
+    },
+    "SRC-218:R012": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Consume an audit only through exact-generation Source closure and the canonical audit delete gate after linked Work is terminal. Patch acceptance alone never authorizes Source deletion."
+    },
+    "SRC-218:R013": {
+      "actionable": false,
+      "class": "context",
+      "text": "Proposed acceptance R13: worker count is configurable with an initial two-worker milestone; twelve is not a source requirement. The original Source gives no fixed pool size."
+    },
+    "SRC-218:R014": {
+      "actionable": false,
+      "class": "context",
+      "text": "Proposed acceptance R14: resource pressure bounds simultaneous tests and builds independently of worker count. Benchmark 1, 2 and 4 only after capabilities exist; no worker-per-family multiplication without evidence."
+    },
+    "SRC-218:R015": {
+      "actionable": false,
+      "class": "context",
+      "text": "Proposed acceptance R15: inspect assignments, generation, progress, blockers and accepted results through local files or a command. No GUI, database or proprietary runtime is required for authority or recovery."
+    },
+    "SRC-218:R016": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Keep ordinary sequential SAIPEN operation available and authoritative while the admitted pool operates. Concurrent Mode is the existing future saipen concurrent concept; saipen crew remains the serial circuit."
+    },
+    "SRC-218:R017": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "An engineering worker cannot independently modify canonical authority, collect its own output, grant a lease, integrate, ship or consume an audit. Worktree isolation does not itself prove a protected mutation boundary."
+    }
+  },
+  "derived_at": "2026-10-12T03:58:13Z",
+  "derived_from": "SRC-218",
+  "interpretation_revision": 17,
+  "schema_version": 1,
+  "source_sha256": "d68856ed7858ead8d7b41f35d02b767ebd56d82248bd2c57cc2f8fc58d6cf805"
+}

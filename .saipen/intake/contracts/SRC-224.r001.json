@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-224:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Fulfill the entire exact SRC-224 mission using existing canonical authority; preserve its user outcome and target state, not just local test counts."
+    }
+  },
+  "derived_at": "2026-10-12T09:44:22Z",
+  "derived_from": "SRC-224",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "b5084aa983f064f0d6c0b1083a59f2a722184712dd7aa23c61a94539807716f0"
+}

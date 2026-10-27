@@ -1,0 +1,86 @@
+{
+  "requirements": {
+    "SRC-344:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-18959",
+      "text": "AUT-001: host acceptance receipts must be authenticated by the live authority broker (host_authority_client.verify_record), not by caller-supplied field equality or a substring blacklist; matching fields that any caller can write are not host identity.",
+      "verification": "test_t1945_host_trust.py HostIdentityIsNotASubstringTest InventedHostIsRefused AnyPlausibleNameIsRefusedWithoutABroker record:.saipen/evidence/focused-unit/2f39f2b17a09e411-20261027T143230409880Z.json",
+      "work": "T-1945"
+    },
+    "SRC-344:R002": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-18959",
+      "text": "AUT-001: DISPATCH_REQUEST_PERSISTED must never satisfy acceptance; an accepted, turn-started or turn-completed receipt is required, and the receipt status is reported as it is.",
+      "verification": "test_t1945_host_trust.py PersistedRequestIsNotAcceptanceTest A_PersistedRequestIsNotAnAcceptedOne record:.saipen/evidence/focused-unit/2f39f2b17a09e411-20261027T143230409880Z.json",
+      "work": "T-1945"
+    },
+    "SRC-344:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-18959",
+      "text": "AUT-001: a malformed numeric receipt field (iteration_id, worker_generation) must be a typed refusal, never an uncaught exception, and a boolean is not an integer.",
+      "verification": "test_t1945_host_trust.py MalformedReceiptIsATypedRefusalTest record:.saipen/evidence/focused-unit/2f39f2b17a09e411-20261027T143230409880Z.json",
+      "work": "T-1945"
+    },
+    "SRC-344:R004": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-18959",
+      "text": "AUT-005: discovery must consume the bounded incremental report transport (iter_new_qualified_findings) so the paginated reader has a production caller, rather than materialising the whole corpus through _run_cmd report.",
+      "verification": "test_t1945_incremental_discovery.py IncrementalDiscoveryTest DiscoveryUsesThePagedTransportTest record:.saipen/evidence/focused-unit/2f39f2b17a09e411-20261027T143230409880Z.json",
+      "work": "T-1945"
+    },
+    "SRC-344:R005": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-18959",
+      "text": "AUT-006: the campaign must have a real driver that advances successive bounded steps; a step that makes no productive progress, hits a blocking state or fails must stop the driver rather than spin.",
+      "verification": "test_t1945_campaign_driver.py DriverIsBoundedTest DriverStopsOnBlockingStatesTest DriverRespectsUnproductiveWorkTest ProductionCallerTest record:.saipen/evidence/focused-unit/2f39f2b17a09e411-20261027T143230409880Z.json",
+      "work": "T-1945"
+    },
+    "SRC-344:R006": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-18959",
+      "text": "AUT-007: a SAIPAL analysis slice that reports ANALYSIS_PROGRESS must keep the campaign schedulable in FORENSIC_ANALYSIS with an explicit next action, and must not be reported as DISCOVERY_NO_NEW_FINDINGS or parked in QUIESCENT_WAIT.",
+      "verification": "test_t1945_analysis_progress.py AnalysisProgressStaysSchedulableTest AnalysisProgressOrderTest record:.saipen/evidence/focused-unit/2f39f2b17a09e411-20261027T143230409880Z.json",
+      "work": "T-1945"
+    },
+    "SRC-344:R007": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "DUPLICATE",
+      "evidence": "E-18941 already repaired as SRC-343 CORE-001 (broker-verified qualification proof); re-executed against current bytes during T-1945 triage, no self-asserted signature is accepted",
+      "text": "AUT-002: SAIPAL qualification must not accept a self-asserted authenticated/signature pair; a qualified finding needs a broker-verified qualification proof.",
+      "verification": null,
+      "work": "T-1945"
+    },
+    "SRC-344:R008": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "DUPLICATE",
+      "evidence": "E-18942 already repaired as SRC-343 W2-002 (acknowledgment requires a COMMITTED allocator operation); cursor is an observability watermark and is never a resume gate",
+      "text": "AUT-003: a paginated report walk must not mark a finding delivered when it is merely yielded; acknowledgement follows an observed committed publication.",
+      "verification": null,
+      "work": "T-1945"
+    },
+    "SRC-344:R009": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "DUPLICATE",
+      "evidence": "E-18942 already repaired as SRC-343 W2-006 (_CorpusIdentity folds every field except finding_id); changed body and changed qualification each change the digest",
+      "text": "AUT-004: the corpus fingerprint must change when any finding content changes, not only when count or ids change.",
+      "verification": null,
+      "work": "T-1945"
+    }
+  },
+  "schema_version": 1
+}

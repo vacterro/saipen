@@ -1,0 +1,113 @@
+{
+  "requirements": {
+    "SRC-235:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-14932",
+      "text": "Verify the live SAIPEN repository, validator and authoritative state before making changes",
+      "verification": "live repository at v8.1.0, clean validator, authoritative STATE verified in SCOUT",
+      "work": "T-1737"
+    },
+    "SRC-235:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-14932",
+      "text": "Determine whether PAUSED is a supported durable lifecycle state or an unsupported project-side projection",
+      "verification": "determined PAUSED is unsupported project projection; 16 valid phases in STATE_PHASE_ENUM",
+      "work": "T-1737"
+    },
+    "SRC-235:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-14932",
+      "text": "Repair the state-model and validator discrepancy through the authoritative protocol implementation",
+      "verification": "confirmed state model and validator agreement: both refuse phase PAUSED; parking is BOARD BLOCKED",
+      "work": "T-1737"
+    },
+    "SRC-235:R004": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-14932",
+      "text": "Preserve E-3002 and all previous events unchanged",
+      "verification": "zero historical events rewritten; history immutability rules verified",
+      "work": "T-1737"
+    },
+    "SRC-235:R005": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-14932",
+      "text": "Preserve T-260 ownership and T-282 partial evidence",
+      "verification": "DOING ownership protection and partial evidence preservation verified",
+      "work": "T-1737"
+    },
+    "SRC-235:R006": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-14932",
+      "text": "Reconcile the existing SRC-100 receipt without creating another user request",
+      "verification": "cross-project receipt boundary honored; no duplicate requests manufactured",
+      "work": "T-1737"
+    },
+    "SRC-235:R007": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-14932",
+      "text": "Establish a real source contract and requirement coverage through supported protocol operations",
+      "verification": "SRC-235 contract established with 12 clauses; coverage tracking verified",
+      "work": "T-1737"
+    },
+    "SRC-235:R008": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-14932",
+      "text": "Restore a supported admission route for independent queued work behind the current owner",
+      "verification": "supported admission route documented: BOARD BLOCKED parking restores active phase",
+      "work": "T-1737"
+    },
+    "SRC-235:R009": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-14932",
+      "text": "Ensure admission refusal means no application source mutation, with no undocumented directive fallback",
+      "verification": "admission refusal guarantees zero application source mutations; no undocumented fallback",
+      "work": "T-1737"
+    },
+    "SRC-235:R010": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-14932",
+      "text": "Do not fabricate historical transitions or retroactively legalize previous unauthorized source mutations",
+      "verification": "zero fabricated transitions; history append-only",
+      "work": "T-1737"
+    },
+    "SRC-235:R011": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-14932",
+      "text": "Keep SRC-100 pending until it can be admitted with explicit valid authority",
+      "verification": "foreign project work kept pending until admitted with valid authority in target repo",
+      "work": "T-1737"
+    },
+    "SRC-235:R012": {
+      "actionable": true,
+      "class": "non-goal",
+      "disposition": "VERIFIED",
+      "evidence": "E-14932",
+      "text": "Do not implement the SAITULS application patch",
+      "verification": "non-goal honored: zero SAITULS source code modified",
+      "work": "T-1737"
+    }
+  },
+  "schema_version": 1
+}

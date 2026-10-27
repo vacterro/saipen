@@ -1,0 +1,64 @@
+{
+  "clauses": {
+    "SRC-250:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Continue the existing authorized SAIPEN mission non-disruptively: do not interrupt the active ticket, override ownership, bypass admission or create a new meta-project; integrate these principles into admitted work"
+    },
+    "SRC-250:R002": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Correctness before speed: prioritize root causes of unauthorized transitions, state or journal corruption, concurrent overwrites, lost or duplicated work, recovery deadlocks, contradictory instructions, false success, stale or fabricated evidence, unsafe identity handling, needless operator intervention and state/behaviour divergence; remove whole failure classes; never weaken security, provenance, ownership or forensic integrity for throughput"
+    },
+    "SRC-250:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Establish a lightweight reproducible protocol-cost baseline from existing logs, tests and lifecycle evidence (lifecycle duration, engineering versus administration, validation time, repeated attempts, recoveries, manual actions, repeated validation, duplicates, blockers, completion rate, complexity delta), separating elapsed time from work and ticket classes, without a new telemetry subsystem"
+    },
+    "SRC-250:R004": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Every meaningful correction justifies its complexity: the failure class it eliminates, the owning mechanism, no new competing authority, no new mandatory ordinary step, no unexpiring fallback, no needless persistent metadata, reuse before new code, simplification where safe"
+    },
+    "SRC-250:R005": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Keep the cold path small (BOOT, continue --json, phase file); optional machinery stays off the ordinary path; a weaker model follows the ordinary path deterministically"
+    },
+    "SRC-250:R006": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Self-healing without false authority: bounded canonical repair of recoverable conditions the protocol already authorizes, resuming the original request idempotently; never auto-repair untrusted provenance, foreign ownership, missing privileged authorization, unadmitted forensic corruption, ambiguous destructive operations, conflicting identities or missing cutover approval; bounded failures end with a terminal reason"
+    },
+    "SRC-250:R007": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Make completion complete: investigate Work DONE with ACTIVE receipts, passing verification with blocked completion, continue recommending what claim rejects, redundant manual reconciliation, dry runs mistaken for execution and recoveries leaving unexplained work; where evidence and authority exist make canonical completion deterministic, never inventing evidence or closing unresolved audit requirements"
+    },
+    "SRC-250:R008": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Maintain a small representative acceptance matrix (clean continuation, cold start, interrupted resume, recoverable stale evidence, unauthorized or foreign refusal, completion with source reconciliation, Windows managed-account execution, concurrent access without lost updates) with real host verification where required; no simulation reported as acceptance"
+    },
+    "SRC-250:R009": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Maintenance economics: weigh observed current cost, expected benefit and implementation cost; no invented savings; expensive corrections only for significant recurring failure classes"
+    },
+    "SRC-250:R010": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "No unnecessary framework growth: no new orchestration frameworks, parallel authorities, unexpiring compatibility paths, duplicate registries, redundant lifecycle states, unbounded self-repair or long-lived metadata for transient observations; simplify while correcting; remove obsolete behaviour only with proof"
+    },
+    "SRC-250:R011": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Weaker-model acceptance: concise structured machine-readable answers with one exact next action; diagnostics available without flooding the ordinary agent"
+    }
+  },
+  "derived_at": "2026-10-14T17:55:43Z",
+  "derived_from": "SRC-250",
+  "interpretation_revision": 11,
+  "schema_version": 1,
+  "source_sha256": "a6f646bb1692c459c6359bd5ddf686885524c72d8feddd78e49af5d77b421084"
+}

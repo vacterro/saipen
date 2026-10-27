@@ -1,0 +1,167 @@
+{
+  "requirements": {
+    "SRC-278:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-17180",
+      "text": "How FREEBUFF distinguishes user messages from model-generated text.",
+      "verification": "Installed Desktop archive and orchestrator hashes rechecked; exact native input/API/engine/tool-spawn interfaces inspected. Concrete call-chain, missing event-origin context and source-level limits are preserved in SAIHANDOFF_FREEBUFF_PROVENANCE.md and DELIVERY.md. No live UI/Luna acceptance claimed.",
+      "work": "T-1819"
+    },
+    "SRC-278:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-17180",
+      "text": "Whether FREEBUFF creates host-authenticated user command envelopes.",
+      "verification": "Installed Desktop archive and orchestrator hashes rechecked; exact native input/API/engine/tool-spawn interfaces inspected. Concrete call-chain, missing event-origin context and source-level limits are preserved in SAIHANDOFF_FREEBUFF_PROVENANCE.md and DELIVERY.md. No live UI/Luna acceptance claimed.",
+      "work": "T-1819"
+    },
+    "SRC-278:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-17180",
+      "text": "Whether SAIPEN receives these envelopes.",
+      "verification": "Installed Desktop archive and orchestrator hashes rechecked; exact native input/API/engine/tool-spawn interfaces inspected. Concrete call-chain, missing event-origin context and source-level limits are preserved in SAIHANDOFF_FREEBUFF_PROVENANCE.md and DELIVERY.md. No live UI/Luna acceptance claimed.",
+      "work": "T-1819"
+    },
+    "SRC-278:R004": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "BLOCKED",
+      "evidence": "E-17180",
+      "text": "Whether the trusted carrier reaches process creation, SCOUT, admission, start, continue, recover and re-entry.",
+      "verification": "Native FreeBuff authenticated input/worker integration, actual selected Luna route and real UI A-Q acceptance remain unproven; FastPrompter T-1479 current proof is UNVERIFIED and orientation refuses bounded STATE. Local origin kernel and diagnostics verified separately; no simulated proof, historical promotion or environmental waiver substitutes. Full requirement audit in DELIVERY.md.",
+      "work": "T-1819"
+    },
+    "SRC-278:R005": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "BLOCKED",
+      "evidence": "E-17180",
+      "text": "Whether carrier metadata is lost when Luna invokes a tool, subprocess, shell, or nested agent.",
+      "verification": "Native FreeBuff authenticated input/worker integration, actual selected Luna route and real UI A-Q acceptance remain unproven; FastPrompter T-1479 current proof is UNVERIFIED and orientation refuses bounded STATE. Local origin kernel and diagnostics verified separately; no simulated proof, historical promotion or environmental waiver substitutes. Full requirement audit in DELIVERY.md.",
+      "work": "T-1819"
+    },
+    "SRC-278:R006": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-17180",
+      "text": "Whether the task file is created by the host or by the model.",
+      "verification": "Installed Desktop archive and orchestrator hashes rechecked; exact native input/API/engine/tool-spawn interfaces inspected. Concrete call-chain, missing event-origin context and source-level limits are preserved in SAIHANDOFF_FREEBUFF_PROVENANCE.md and DELIVERY.md. No live UI/Luna acceptance claimed.",
+      "work": "T-1819"
+    },
+    "SRC-278:R007": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "BLOCKED",
+      "evidence": "E-17180",
+      "text": "Whether the carrier is bound to the correct session, task, repository, operator action and content digest.",
+      "verification": "Native FreeBuff authenticated input/worker integration, actual selected Luna route and real UI A-Q acceptance remain unproven; FastPrompter T-1479 current proof is UNVERIFIED and orientation refuses bounded STATE. Local origin kernel and diagnostics verified separately; no simulated proof, historical promotion or environmental waiver substitutes. Full requirement audit in DELIVERY.md.",
+      "work": "T-1819"
+    },
+    "SRC-278:R008": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-17180",
+      "text": "Whether the host provides a verified ingress receipt accepted by SAIPEN.",
+      "verification": "Installed Desktop archive and orchestrator hashes rechecked; exact native input/API/engine/tool-spawn interfaces inspected. Concrete call-chain, missing event-origin context and source-level limits are preserved in SAIHANDOFF_FREEBUFF_PROVENANCE.md and DELIVERY.md. No live UI/Luna acceptance claimed.",
+      "work": "T-1819"
+    },
+    "SRC-278:R009": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-17180",
+      "text": "Whether existing provenance integration exists but is not enabled or propagated in FREEBUFF.",
+      "verification": "Installed Desktop archive and orchestrator hashes rechecked; exact native input/API/engine/tool-spawn interfaces inspected. Concrete call-chain, missing event-origin context and source-level limits are preserved in SAIHANDOFF_FREEBUFF_PROVENANCE.md and DELIVERY.md. No live UI/Luna acceptance claimed.",
+      "work": "T-1819"
+    },
+    "SRC-278:R010": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "BLOCKED",
+      "evidence": "E-17180",
+      "text": "Whether the current protocol makes an impossible demand of the FREEBUFF host. Produce a concrete call-chain and root-cause finding. Do not stop at \"missing SAIPEN_TASK_FILE\". Explain WHY it is missing. ============================================================ STAGE 2 \u2014 ARCHITECTURAL CORRECTION ============================================================ The required architecture is: A. FREEBUFF receives a real user-originated command. B. FREEBUFF retains authenticated event-origin metadata. C. FREEBUFF creates the trusted carrier or equivalent host-attested ingress record through a supported contract. D. SAIPEN verifies the carrier independently. E. SAIPEN associates the verified authority with the correct task and bounded operation. F. Luna executes only after canonical admission. G. Continuation preserves the correct authority lineage without inventing additional approvals. H. New or broader operations require appropriate new authorization when policy demands it. Do not allow an arbitrary model-written file, environment variable, or SHA-256 hash to become trusted by itself. Trust must originate at the authenticated host boundary. The digest proves content integrity, not human identity. Use the existing SAIPEN ingress contract where possible. Prefer one authoritative mechanism over another layer of fallback wrappers. ============================================================ STAGE 3 \u2014 FREEBUFF HOST INTEGRATION ============================================================ If FREEBUFF currently lacks an appropriate trusted ingress: Prepare a precise implementation handoff for FREEBUFF agent. The handoff must identify: - Actual FREEBUFF source files and symbols. - Current input and process-launch path. - Required trusted ingress interface. - Provenance transport mechanism. - Session and task binding. - Failure reporting. - Required regression tests. - SAIPEN compatibility contracts. Do not place speculative implementation details into a generic task. Investigate the actual source first. If a valid integration already exists, identify why Luna's execution path is not using it. Fix routing instead of building a duplicate system. FREEBUFF must handle the required technical transport without asking the operator to manually execute commands. If explicit confirmation is genuinely required, provide a normal FREEBUFF-native operator approval interaction. Do not require external terminals for routine approval. ============================================================ STAGE 4 \u2014 SAIPEN AUTO-DOCTOR ============================================================ Investigate the combination: recover = CLEAN validation = STALE_FAIL admission = NO_ADMISSIBLE_WORK Determine which conditions are genuinely blocking and which are recoverable state freshness problems. When safely authorized: - Refresh stale validation. - Recheck canonical conformance. - Preserve original authority lineage. - Re-evaluate admissibility. - Resume the original requested task. Do not ask the human to run routine recovery commands that the host can safely execute. Do not allow Auto-Doctor to create operator authority. Do not convert model_supplied into trusted evidence. Keep hard_wait effective whenever genuine authorization is missing. ============================================================ STAGE 5 \u2014 T-1479 RECOVERY ============================================================ The existing ticket T-1479 must be reused. Do not create another Chest corrective ticket. After the FREEBUFF provenance path is repaired:",
+      "verification": "Native FreeBuff authenticated input/worker integration, actual selected Luna route and real UI A-Q acceptance remain unproven; FastPrompter T-1479 current proof is UNVERIFIED and orientation refuses bounded STATE. Local origin kernel and diagnostics verified separately; no simulated proof, historical promotion or environmental waiver substitutes. Full requirement audit in DELIVERY.md.",
+      "work": "T-1819"
+    },
+    "SRC-278:R011": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "BLOCKED",
+      "evidence": "E-17180",
+      "text": "Obtain fresh legitimate host-confirmed authority.",
+      "verification": "Native FreeBuff authenticated input/worker integration, actual selected Luna route and real UI A-Q acceptance remain unproven; FastPrompter T-1479 current proof is UNVERIFIED and orientation refuses bounded STATE. Local origin kernel and diagnostics verified separately; no simulated proof, historical promotion or environmental waiver substitutes. Full requirement audit in DELIVERY.md.",
+      "work": "T-1819"
+    },
+    "SRC-278:R012": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "BLOCKED",
+      "evidence": "E-17180",
+      "text": "Associate it with the approved T-1479 scope.",
+      "verification": "Native FreeBuff authenticated input/worker integration, actual selected Luna route and real UI A-Q acceptance remain unproven; FastPrompter T-1479 current proof is UNVERIFIED and orientation refuses bounded STATE. Local origin kernel and diagnostics verified separately; no simulated proof, historical promotion or environmental waiver substitutes. Full requirement audit in DELIVERY.md.",
+      "work": "T-1819"
+    },
+    "SRC-278:R013": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "BLOCKED",
+      "evidence": "E-17180",
+      "text": "Run canonical admission.",
+      "verification": "Native FreeBuff authenticated input/worker integration, actual selected Luna route and real UI A-Q acceptance remain unproven; FastPrompter T-1479 current proof is UNVERIFIED and orientation refuses bounded STATE. Local origin kernel and diagnostics verified separately; no simulated proof, historical promotion or environmental waiver substitutes. Full requirement audit in DELIVERY.md.",
+      "work": "T-1819"
+    },
+    "SRC-278:R014": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "BLOCKED",
+      "evidence": "E-17180",
+      "text": "Resolve stale validation if safely recoverable.",
+      "verification": "Native FreeBuff authenticated input/worker integration, actual selected Luna route and real UI A-Q acceptance remain unproven; FastPrompter T-1479 current proof is UNVERIFIED and orientation refuses bounded STATE. Local origin kernel and diagnostics verified separately; no simulated proof, historical promotion or environmental waiver substitutes. Full requirement audit in DELIVERY.md.",
+      "work": "T-1819"
+    },
+    "SRC-278:R015": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "BLOCKED",
+      "evidence": "E-17180",
+      "text": "Resume T-1479 from its existing checkpoint.",
+      "verification": "Native FreeBuff authenticated input/worker integration, actual selected Luna route and real UI A-Q acceptance remain unproven; FastPrompter T-1479 current proof is UNVERIFIED and orientation refuses bounded STATE. Local origin kernel and diagnostics verified separately; no simulated proof, historical promotion or environmental waiver substitutes. Full requirement audit in DELIVERY.md.",
+      "work": "T-1819"
+    },
+    "SRC-278:R016": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "BLOCKED",
+      "evidence": "E-17180",
+      "text": "Continue the original Chest/Stash correction.",
+      "verification": "Native FreeBuff authenticated input/worker integration, actual selected Luna route and real UI A-Q acceptance remain unproven; FastPrompter T-1479 current proof is UNVERIFIED and orientation refuses bounded STATE. Local origin kernel and diagnostics verified separately; no simulated proof, historical promotion or environmental waiver substitutes. Full requirement audit in DELIVERY.md.",
+      "work": "T-1819"
+    },
+    "SRC-278:R017": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "BLOCKED",
+      "evidence": "E-17180",
+      "text": "Run regression tests and real Windows GUI verification.",
+      "verification": "Native FreeBuff authenticated input/worker integration, actual selected Luna route and real UI A-Q acceptance remain unproven; FastPrompter T-1479 current proof is UNVERIFIED and orientation refuses bounded STATE. Local origin kernel and diagnostics verified separately; no simulated proof, historical promotion or environmental waiver substitutes. Full requirement audit in DELIVERY.md.",
+      "work": "T-1819"
+    },
+    "SRC-278:R018": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "BLOCKED",
+      "evidence": "E-17180",
+      "text": "Preserve all unrelated dirty files. Do not pretend historical model_supplied evidence has become trustworthy retroactively. Do not falsely report successful admission. GitHub publication remains independently restricted. ============================================================ STAGE 6 \u2014 MANDATORY REGRESSION TESTS ============================================================ A. User directly approves a task in FREEBUFF. SAIPEN receives valid trusted provenance. B. Luna generates authorization text itself. SAIPEN rejects it. C. Luna copies an old authorization. SAIPEN rejects unauthorized replay. D. FREEBUFF starts a SAIPEN task. Provenance reaches admission. E. FREEBUFF resumes an admitted task. Valid authority lineage is preserved. F. Nested tool/process invocation. Provenance is not silently lost. G. FREEBUFF restarts. Durable authorization is recovered only where valid. H. Wrong repository or task identity. Admission is rejected. I. Stale validation with valid authority. Safe recovery occurs without extra manual commands. J. Stale validation without authority. No privilege is invented. K. Rapid repeated continue requests. No duplicated authority receipts or tickets. L. T-1479 already exists in SCOUT. Original ticket is resumed, not recreated. M. Model-supplied environment variables. They are insufficient to establish human provenance. N. Expired or revoked authorization. SAIPEN refuses execution. O. FREEBUFF user approval through the actual UI. End-to-end admission succeeds. P. FREEBUFF user approval followed by Luna continuation. No unnecessary second approval. Q. Tool errors and missing host capabilities. Clear actionable diagnostic, no infinite retry loop. Use actual integration tests for the host boundary. Mock-only tests do not establish trusted ingress. ============================================================ STAGE 7 \u2014 PREVENT RECURRENCE ============================================================ Build a permanent protocol regression gate. Whenever SAIPEN runs under FREEBUFF: - Detect the actual host identity. - Verify host-ingress support. - Validate provenance propagation. - Identify missing required carriers before BUILD. - Return the exact broken interface. - Avoid repeated identical blocked continuations. - Preserve diagnostic evidence. Prefer fail-safe recovery for ordinary technical faults. Remain fail-closed for missing or invalid authority. Do not turn the entire system into a permanent STOP because a safe, supported host transport was never wired. ============================================================ FINAL DELIVERY ============================================================ STATUS: DONE / PARTIAL / BLOCKED ROOT CAUSE: Exact point where FREEBUFF loses operator provenance. SAIPEN CHANGES: Actual files, symbols, contracts and tests. FREEBUFF REQUIREMENTS: Separate concrete implementation handoff if needed. VALIDATION: Negative and positive trust-boundary tests. End-to-end FREEBUFF + Luna + SAIPEN verification. T-1479: Actual admission and continuation status. NEXT: One exact authorized action. SUCCESS DEFINITION The operator issues an instruction inside FREEBUFF. FREEBUFF correctly authenticates and transports the human command origin. SAIPEN verifies it and admits the requested operation when the canonical conditions are satisfied. Luna continues the authorized task autonomously. The operator does not manually create task files, calculate hashes, run PowerShell, or repeatedly approve an unchanged scope because the host lost provenance. Security is preserved. The workflow actually works.",
+      "verification": "Native FreeBuff authenticated input/worker integration, actual selected Luna route and real UI A-Q acceptance remain unproven; FastPrompter T-1479 current proof is UNVERIFIED and orientation refuses bounded STATE. Local origin kernel and diagnostics verified separately; no simulated proof, historical promotion or environmental waiver substitutes. Full requirement audit in DELIVERY.md.",
+      "work": "T-1819"
+    }
+  },
+  "schema_version": 1
+}

@@ -1,0 +1,44 @@
+{
+  "clauses": {
+    "SRC-211:R001": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "Operate only on the approved separate AUDAPACK_RECOVERY_20261010 root using a new canonical INIT lineage; preserve the original, unsupported historical claims and all exclusions: no reconstruction, cutover, publication, reset, clean or unrelated external change."
+    },
+    "SRC-211:R002": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "Perform live installation, ownership and complete original/Git/source/protected-namespace preflight against the approved baseline; refuse unexplained discrepancies, existing destination, aliases, shared Git storage, conflicting writers or pending operations; record exact fingerprints."
+    },
+    "SRC-211:R003": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "Before recovery, isolated unchanged controls A-G prove valid INIT, existing-namespace refusal, foreign/stale binding refusal, corrupt history and unsupported DONE rejection, partial-init nonacceptance and unauthorized zero-byte refusal."
+    },
+    "SRC-211:R004": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "Inspect canonical _init_command optional mailbox provisioning; do not provision unrelated external workspaces or exceed the scoped authorization."
+    },
+    "SRC-211:R005": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "Create an independent copy preserving source, Git history/refs/index/dirty and relevant untracked bytes, complete old .saipen and forensic manifests as passive evidence outside new authority; verify each digest and reject reparse points, hardlinks or linked Git storage."
+    },
+    "SRC-211:R006": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "Execute the real installed CLI with global --project-root and --agent against the approved root; capture INIT outcome, runtime, actual distinct lineage, canonical files, fingerprints and side effects; preserve failure without manual editing or invented retry."
+    },
+    "SRC-211:R007": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "Independently verify native core, complete operation-backed ledger, identity/binding, pending/conflicts, source/Git integrity and namespace ownership; prove one authorized small canonical verification operation and unauthorized refusal while preserving the original."
+    }
+  },
+  "derived_at": "2026-10-11T04:32:13Z",
+  "derived_from": "SRC-211",
+  "interpretation_revision": 7,
+  "schema_version": 1,
+  "source_sha256": "0d2e6c67d9723a3e350e66865a2b2fed5e366d7a87ffd9f294eeebcc931b68e3"
+}

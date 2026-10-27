@@ -1,0 +1,64 @@
+{
+  "clauses": {
+    "SRC-188:R001": {
+      "actionable": false,
+      "class": "context",
+      "text": "INCIDENT / ROOT DEFECT: a managed Windows account (antigravity_b) could read and write its granted project and could execute nothing of SAIPEN -- the saipen command was not found and STATE.saipen_home named an operator-private path the account is denied by the intended isolation; the agent then proposed an ACL grant, a public clone and a protocol bypass."
+    },
+    "SRC-188:R002": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "SECURITY INVARIANT: preserve Windows account isolation; never solve this by granting a managed execution account broad read access to the operator profile, its .agents directory, the development tree or unrelated private configuration; runtime access is provisioned through a least-privilege shared boundary."
+    },
+    "SRC-188:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "DESIGN GOAL / ACCOUNT-INDEPENDENT RUNTIME SURFACE: introduce one account-independent canonical runtime surface (machine-scoped read-only runtime, broker, or per-account projection) through which any managed account allowed to work a SAIPEN project executes the exact runtime that project requires; do not create several competing runtime truths."
+    },
+    "SRC-188:R004": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "LAUNCHER AVAILABILITY: every managed execution account receives a usable SAIPEN entrypoint without depending on another user's profile or on an inherited PATH; PATH may be one presentation mechanism but never the only recovery mechanism; nobody edits PATH by hand."
+    },
+    "SRC-188:R005": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "EXACT RUNTIME COMPATIBILITY: bootstrap mechanically determines compatibility from the project's protocol and runtime metadata (saipen_version, schema_version, runtime identity and provenance) and resolves exact runtime bytes from trusted local machine authority."
+    },
+    "SRC-188:R006": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "PUBLIC REPOSITORY IS NOT RUNTIME AUTHORITY: the public repository is a distribution origin, never an automatic runtime replacement; no opportunistic Git clone during ordinary continuation and no silent substitution of the latest public source."
+    },
+    "SRC-188:R007": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "PROJECT PORTABILITY: a project-local absolute path into one human profile is not the sole means of finding protocol authority; cross-account continuation resolves the runtime through a relocatable machine authority, and historical STATE paths are not rewritten without migration semantics."
+    },
+    "SRC-188:R008": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "BACKWARD COMPATIBILITY: a project that records an operator-private saipen_home keeps working -- the path is detected as inaccessible to the current account, ACCESS_DENIED is not read as corruption, the same canonical runtime is resolved through machine authority with compatibility verified, the exact Work continues, and without a compatible runtime one precise provisioning diagnostic is returned."
+    },
+    "SRC-188:R009": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "SAI ACCOUNTS INTEGRATION: account readiness distinguishes provider, project-access and SAIPEN-runtime readiness (or equivalent), and an account is not reported ready for autonomous SAIPEN execution while the protocol runtime is unreachable."
+    },
+    "SRC-188:R010": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "ACCOUNT CREATION / REPAIR: creating or repairing a managed account verifies launcher access, provider access, project access, SAIPEN bootstrap availability, exact runtime compatibility, BOOT accessibility, child-process environment and independence from another user's profile, with a canonical repair operation on the account management surface and no manual ACL commands."
+    },
+    "SRC-188:R011": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "LEAST PRIVILEGE: machine-scoped runtime files are read and execute for managed accounts, never writable by them, give no access to unrelated operator repositories or secrets, and are updated only by the trusted updater; account SID isolation is preserved."
+    }
+  },
+  "derived_at": "2026-10-07T01:07:23Z",
+  "derived_from": "SRC-188",
+  "interpretation_revision": 11,
+  "schema_version": 1,
+  "source_sha256": "cf552a04864d807d044eef586f3140510c945d91c58212b0e114ab6b286368df"
+}

@@ -1,0 +1,14 @@
+{
+  "requirements": {
+    "SRC-202:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-14079",
+      "text": "Allow named UTF-8 Markdown or text handoffs dropped into any bound project audit directory to enter normal continuation one source at a time after existing workable BOARD work, without interrupting active Work, retaining exact source and closure provenance.",
+      "verification": "python .saipen/evidence/T-1697-audit-drop-queue/review-checks.py:PASS",
+      "work": "T-1697"
+    }
+  },
+  "schema_version": 1
+}

@@ -1,0 +1,24 @@
+{
+  "clauses": {
+    "SRC-203:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Adjudicate LIMISAW IMP-001 against the current shared engine: canonical validate must refresh and enforce the same receipt-derived conformance truth used by the router; retain historical evidence and distinguish source behavior from installed deployment."
+    },
+    "SRC-203:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Adjudicate LIMISAW IMP-002 against the current shared engine: human and JSON status must present authoritative conformance truth and label legacy LOG PASS as history, never current acceptance."
+    },
+    "SRC-203:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Adjudicate LIMISAW IMP-003: provide or identify a canonical provenance-preserving recovery for an active draft Improve report after installed protocol fingerprint drift; preserve RUN body and immutable completed/swept evidence; do not claim the foreign cycle repaired without live proof."
+    }
+  },
+  "derived_at": "2026-10-10T01:48:56Z",
+  "derived_from": "SRC-203",
+  "interpretation_revision": 3,
+  "schema_version": 1,
+  "source_sha256": "d9728ba4347d453f8eac37de866ef7bb17da4368e0aecb1dcb33bb6f64febf11"
+}

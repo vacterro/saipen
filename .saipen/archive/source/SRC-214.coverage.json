@@ -1,0 +1,104 @@
+{
+  "requirements": {
+    "SRC-214:R001": {
+      "actionable": false,
+      "class": "context",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/T-1713-attribution/ACCEPTANCE.md",
+      "text": "Do not presume the previous executor caused the incident.",
+      "verification": ".saipen/evidence/T-1713-attribution/REVIEW.md",
+      "work": "T-1713"
+    },
+    "SRC-214:R002": {
+      "actionable": false,
+      "class": "context",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/T-1713-attribution/ACCEPTANCE.md",
+      "text": "Do not modify unrelated historical code or reopen completed tickets without new evidence.",
+      "verification": ".saipen/evidence/T-1713-attribution/REVIEW.md",
+      "work": "T-1713"
+    },
+    "SRC-214:R003": {
+      "actionable": false,
+      "class": "context",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/T-1713-attribution/ACCEPTANCE.md",
+      "text": "Do not rewrite historical logs.",
+      "verification": ".saipen/evidence/T-1713-attribution/REVIEW.md",
+      "work": "T-1713"
+    },
+    "SRC-214:R004": {
+      "actionable": false,
+      "class": "context",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/T-1713-attribution/ACCEPTANCE.md",
+      "text": "Do not fabricate attribution.",
+      "verification": ".saipen/evidence/T-1713-attribution/REVIEW.md",
+      "work": "T-1713"
+    },
+    "SRC-214:R005": {
+      "actionable": false,
+      "class": "context",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/T-1713-attribution/ACCEPTANCE.md",
+      "text": "Do not interrupt currently admissible work.",
+      "verification": ".saipen/evidence/T-1713-attribution/REVIEW.md",
+      "work": "T-1713"
+    },
+    "SRC-214:R006": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/T-1713-attribution/ACCEPTANCE.md",
+      "text": "Identify the introducing or last materially changing commit and recover author, timestamp, ticket, ownership and verification evidence where it exists; distinguish Git authors from verified executor identity.",
+      "verification": ".saipen/evidence/T-1713-attribution/REVIEW.md",
+      "work": "T-1713"
+    },
+    "SRC-214:R007": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/T-1713-attribution/ACCEPTANCE.md",
+      "text": "Compare the previous Gemini protocolist with the last verified predecessor only when that executor boundary is evidenced; otherwise explicitly report the missing attribution evidence.",
+      "verification": ".saipen/evidence/T-1713-attribution/REVIEW.md",
+      "work": "T-1713"
+    },
+    "SRC-214:R008": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/T-1713-attribution/ACCEPTANCE.md",
+      "text": "Initially bound historical inspection to runtime availability, Windows ACL/isolated execution, manifest lifecycle writes, permission handling, canonical binding and host bootstrap/admission.",
+      "verification": ".saipen/evidence/T-1713-attribution/REVIEW.md",
+      "work": "T-1713"
+    },
+    "SRC-214:R009": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/T-1713-attribution/ACCEPTANCE.md",
+      "text": "Classify findings as confirmed previous-executor regression, pre-existing environment-exposed defect, intentional security denial, external host configuration defect or insufficient evidence.",
+      "verification": ".saipen/evidence/T-1713-attribution/REVIEW.md",
+      "work": "T-1713"
+    },
+    "SRC-214:R010": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/T-1713-attribution/ACCEPTANCE.md",
+      "text": "Add preventive regression coverage only for confirmed implementation defects, preserve correct isolation, and refuse broad ACL workarounds.",
+      "verification": ".saipen/evidence/T-1713-attribution/REVIEW.md",
+      "work": "T-1713"
+    },
+    "SRC-214:R011": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/T-1713-attribution/ACCEPTANCE.md",
+      "text": "Produce the requested compact matrix with defect, introducing commit/earliest occurrence, verified historical owner, first failing evidence, prior verification expectation, repair project owner, preventive regression and current status.",
+      "verification": ".saipen/evidence/T-1713-attribution/REVIEW.md",
+      "work": "T-1713"
+    }
+  },
+  "schema_version": 1
+}

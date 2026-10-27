@@ -1,0 +1,311 @@
+{
+  "requirements": {
+    "SRC-238:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "BLOCKED",
+      "evidence": ".saipen/evidence/ZAICODE-ledger-2026-10-13/REPORT.md",
+      "text": "Resolve canonical SAIPEN install, canonical ZAICODE root, installed kernel revision, actual launcher invocation and bound root, admission/recovery restrictions, writer ownership and current recovery disposition.",
+      "verification": "Current configured install/root/generation observed; actual failing invocation host admission and historical OS writer are unidentified",
+      "work": "T-1740"
+    },
+    "SRC-238:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/ZAICODE-ledger-2026-10-13/REPORT.md",
+      "text": "Read STATE.md IDENTITY.md MANIFEST.json active LOG.md and all canonical sealed LOG segments including newer ones; record absolute path existence byte count SHA256 encoding first/last event and parser rejection count for each.",
+      "verification": "Complete five-file ledger inventory plus live STATE IDENTITY MANIFEST recorded with exact hashes encoding event bounds and zero parser rejections",
+      "work": "T-1740"
+    },
+    "SRC-238:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/ZAICODE-ledger-2026-10-13/REPORT.md",
+      "text": "Compare live LOG-004 SHA256 with b5371837efc745ed8101d9c99d4fbcb112eb93abf017f66fc7b155c7bc9843ca and locate live E-3133 E-3134 E-3136 E-3137 E-3145 E-3146 lines.",
+      "verification": "LOG-004 matches supplied b5371837 SHA256; all six exact event IDs parse at lines 667 668 670 671 679 680",
+      "work": "T-1740"
+    },
+    "SRC-238:R004": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "BLOCKED",
+      "evidence": ".saipen/evidence/ZAICODE-ledger-2026-10-13/REPORT.md",
+      "text": "Determine whether parents are missing malformed skipped differently bound inconsistent changed after snapshot or rejected under differing installed semantics; never infer loss from error text.",
+      "verification": "Current parents are present and legal; historical missing-parent cause cannot be selected without original carrier",
+      "work": "T-1740"
+    },
+    "SRC-238:R005": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "BLOCKED",
+      "evidence": ".saipen/evidence/ZAICODE-ledger-2026-10-13/REPORT.md",
+      "text": "Inspect installed log.py history_paths read_history_snapshot read_history_routing_summary parse_log_line snapshot_contract_errors history_contract_errors; compare with actual launcher source revision.",
+      "verification": "All named functions and current source/machine code measured; incident actual launcher revision still unproven",
+      "work": "T-1740"
+    },
+    "SRC-238:R006": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/ZAICODE-ledger-2026-10-13/REPORT.md",
+      "text": "Reproduce ledger verdict on a disposable byte-identical copy and independently parse the same complete sealed and active history.",
+      "verification": "469-file capture is source-stable and byte-identical; source and bundled-machine parsers plus independent parser agree on full copied history",
+      "work": "T-1740"
+    },
+    "SRC-238:R007": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "BLOCKED",
+      "evidence": ".saipen/evidence/ZAICODE-ledger-2026-10-13/REPORT.md",
+      "text": "Determine and evidence incident classification A record loss B invalid syntax C root binding D segment discovery E parser/routing-summary regression or F export/concurrent-read inconsistency.",
+      "verification": "Current CASE A health proven; original A-F incident mechanism is NOT_REPRODUCED UNKNOWN",
+      "work": "T-1740"
+    },
+    "SRC-238:R008": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/ZAICODE-ledger-2026-10-13/REPORT.md",
+      "text": "Case A valid live bytes: investigate runtime and launcher; do not rewrite a valid ledger; any validator/history-loader correction needs separate authorized SAIPEN Work.",
+      "verification": "Valid live ledger unchanged; no validator fix or ledger rewrite performed or implicitly authorized",
+      "work": "T-1740"
+    },
+    "SRC-238:R009": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "BLOCKED",
+      "evidence": ".saipen/evidence/ZAICODE-ledger-2026-10-13/REPORT.md",
+      "text": "Case B changed bytes: identify every changed/missing record; inspect authenticated snapshot sealed metadata Git journals and operation receipts; archive is not overwrite authority; prove any supported provenance-preserving recovery operation on disposable copy.",
+      "verification": "Only LOG-004 historical digest supplied; no authenticated changed-record restoration proposal or recovery authority exists",
+      "work": "T-1740"
+    },
+    "SRC-238:R010": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/ZAICODE-ledger-2026-10-13/REPORT.md",
+      "text": "Case C unauthenticated records: remain BLOCKED; no synthetic events artificial parents renumbering or weakened validation; report precise limitation and operator decision.",
+      "verification": "Unproved recovery remains blocked; no synthetic real events parent reconnection renumbering or weakened checks",
+      "work": "T-1740"
+    },
+    "SRC-238:R011": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/ZAICODE-ledger-2026-10-13/REPORT.md",
+      "text": "Case D insufficient recovery: prepare separate SAIPEN-owned correction under its own admission/ownership; never implement it in ZAICODE application code.",
+      "verification": "No application correction; any future runtime defect requires separate admitted SAIPEN Work",
+      "work": "T-1740"
+    },
+    "SRC-238:R012": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/ZAICODE-ledger-2026-10-13/REPORT.md",
+      "text": "Negative control rejects truly missing parents.",
+      "verification": "Disposable removal of E-3133 rejected by published full-ledger predicate; zero-write native missing-parent tests PASS",
+      "work": "T-1740"
+    },
+    "SRC-238:R013": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/ZAICODE-ledger-2026-10-13/REPORT.md",
+      "text": "Negative control rejects duplicate event IDs.",
+      "verification": "Disposable duplicate E-3133 rejected; native duplicate-ledger refusal tests PASS",
+      "work": "T-1740"
+    },
+    "SRC-238:R014": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/ZAICODE-ledger-2026-10-13/REPORT.md",
+      "text": "Negative control rejects reordered events.",
+      "verification": "Disposable event reorder rejected; native out-of-order and materialization tests PASS",
+      "work": "T-1740"
+    },
+    "SRC-238:R015": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/ZAICODE-ledger-2026-10-13/REPORT.md",
+      "text": "Negative control rejects forged parent references.",
+      "verification": "Disposable forged parent E-9999999 rejected by full-ledger predicate",
+      "work": "T-1740"
+    },
+    "SRC-238:R016": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/ZAICODE-ledger-2026-10-13/REPORT.md",
+      "text": "Negative control rejects modified sealed records without valid recovery evidence.",
+      "verification": "Legal sealed-text rewrite changes original committed sealed dependency; native stale-segment apply refusal tests PASS; parsing alone not authentication",
+      "work": "T-1740"
+    },
+    "SRC-238:R017": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/ZAICODE-ledger-2026-10-13/REPORT.md",
+      "text": "Negative control rejects cross-project ledger substitution.",
+      "verification": "Real foreign active ledger substitution into disposable sealed tree breaks bound original dependency; native root and foreign-lineage tests PASS",
+      "work": "T-1740"
+    },
+    "SRC-238:R018": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/ZAICODE-ledger-2026-10-13/REPORT.md",
+      "text": "Negative control rejects incorrect lineage.",
+      "verification": "Disposable wrong identity rejected PROJECT_MISMATCH by existing journal binding; native foreign-lineage tests PASS",
+      "work": "T-1740"
+    },
+    "SRC-238:R019": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/ZAICODE-ledger-2026-10-13/REPORT.md",
+      "text": "Negative control rejects stale history snapshots.",
+      "verification": "Old captured history hash differs after copied sealed change; original dependency mismatches; native stale-plan effect tests PASS",
+      "work": "T-1740"
+    },
+    "SRC-238:R020": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/ZAICODE-ledger-2026-10-13/REPORT.md",
+      "text": "Negative control rejects incomplete restoration; no repair weakens immutable-ledger contract.",
+      "verification": "Missing copied LOG-002 breaks parent/dependency checks; native interrupted-materialization and third-state refusal tests PASS",
+      "work": "T-1740"
+    },
+    "SRC-238:R021": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "BLOCKED",
+      "evidence": ".saipen/evidence/ZAICODE-ledger-2026-10-13/REPORT.md",
+      "text": "Acceptance 1: actual missing-parent mechanism identified.",
+      "verification": "Actual missing-parent mechanism unproven; original failing command and binding absent",
+      "work": "T-1740"
+    },
+    "SRC-238:R022": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/ZAICODE-ledger-2026-10-13/REPORT.md",
+      "text": "Acceptance 2: baseline and live file hashes documented.",
+      "verification": "Exact all-current-segment hashes inventoried and supplied historical LOG-004 hash matches; other historical digests not claimed",
+      "work": "T-1740"
+    },
+    "SRC-238:R023": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "BLOCKED",
+      "evidence": ".saipen/evidence/ZAICODE-ledger-2026-10-13/REPORT.md",
+      "text": "Acceptance 3: installed launcher revision established.",
+      "verification": "Configured source and machine launchers pinned; which kernel produced original refusal is unknown",
+      "work": "T-1740"
+    },
+    "SRC-238:R024": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/ZAICODE-ledger-2026-10-13/REPORT.md",
+      "text": "Acceptance 4: canonical project identity established.",
+      "verification": "Live canonical root lineage-b0732ed2f98947b9a3c97bfe71427eca and identity hashes measured",
+      "work": "T-1740"
+    },
+    "SRC-238:R025": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/ZAICODE-ledger-2026-10-13/REPORT.md",
+      "text": "Acceptance 5: no historical evidence fabricated.",
+      "verification": "Original ledger IDs untouched; deliberate invalid inputs confined to labeled disposable controls",
+      "work": "T-1740"
+    },
+    "SRC-238:R026": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/ZAICODE-ledger-2026-10-13/REPORT.md",
+      "text": "Acceptance 6: no operator data silently modified.",
+      "verification": "Protected live metadata and complete ledger hashes stable before/after observation; no target writer operation executed",
+      "work": "T-1740"
+    },
+    "SRC-238:R027": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "BLOCKED",
+      "evidence": ".saipen/evidence/ZAICODE-ledger-2026-10-13/REPORT.md",
+      "text": "Acceptance 7: recovery authorized through canonical contract.",
+      "verification": "No canonical recovery approval granted; no justified recovery plan executed",
+      "work": "T-1740"
+    },
+    "SRC-238:R028": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "BLOCKED",
+      "evidence": ".saipen/evidence/ZAICODE-ledger-2026-10-13/REPORT.md",
+      "text": "Acceptance 8: full ledger validation passes after recovery.",
+      "verification": "Current pre-recovery full ledger passes; after-recovery acceptance not claimed because no recovery authorized or executed",
+      "work": "T-1740"
+    },
+    "SRC-238:R029": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/ZAICODE-ledger-2026-10-13/REPORT.md",
+      "text": "Acceptance 9: all historical event identities remain consistent.",
+      "verification": "Complete current 5050 events have unique increasing identities and valid parents; tail5051; source/copy/machine agree",
+      "work": "T-1740"
+    },
+    "SRC-238:R030": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "BLOCKED",
+      "evidence": ".saipen/evidence/ZAICODE-ledger-2026-10-13/REPORT.md",
+      "text": "Acceptance 10: ZAICODE continuation tested only after recovery approval.",
+      "verification": "ZAICODE continuation deliberately not tested because recovery approval is absent",
+      "work": "T-1740"
+    },
+    "SRC-238:R031": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/ZAICODE-ledger-2026-10-13/REPORT.md",
+      "text": "No ZAICODE UI Queue changes session cleanup direct LOG edits event deletion history-from-memory integrity bypass unapproved recovery project reset or archive replacement without supported contract.",
+      "verification": "No target UI Queue cleanup LOG editing reset integrity bypass archive replacement or unapproved recovery",
+      "work": "T-1740"
+    },
+    "SRC-238:R032": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/ZAICODE-ledger-2026-10-13/REPORT.md",
+      "text": "Final report includes exact failure mechanism live/snapshot comparison authoritative recovery classification permitted action and owner authorized mutations validation evidence residual risk and safe-resume verdict; report BLOCKED when restoration cannot be proved.",
+      "verification": "REPORT.md delivers measured comparison classification UNKNOWN limitations owner permitted next action zero target mutations and no-resume verdict",
+      "work": "T-1740"
+    },
+    "SRC-238:R033": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/ZAICODE-ledger-2026-10-13/REPORT.md",
+      "text": "Handoff alone authorizes no target mutation; if HISTORY_LEDGER_CORRUPT blocks admission use read-only forensics without normal engineering commands through blocked launcher.",
+      "verification": "Forensic readers bypass blocked launcher; target engineering recovery and continuation not invoked",
+      "work": "T-1740"
+    },
+    "SRC-238:R034": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/ZAICODE-ledger-2026-10-13/REPORT.md",
+      "text": "Historical snapshot is evidence, never current live authorization; establish truth of live and snapshot independently.",
+      "verification": "Historical baseline used only for LOG-004 byte comparison; independent live/copy checks grant no mutation authority",
+      "work": "T-1740"
+    }
+  },
+  "schema_version": 1
+}

@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-265:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Authenticate the actual operator command behind E-3221, including carrier, scope and precedence."
+    }
+  },
+  "derived_at": "2026-10-17T00:42:31Z",
+  "derived_from": "SRC-265",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "9aafb214f8de6868410665d531efb3b214255dee83a7eb09443f779621ea0a31"
+}

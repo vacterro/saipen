@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-285:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Measure historical cost A-N, distinguish historical/direct/estimated/unknown data, and rank preventable mechanisms without beginning with another full suite."
+    }
+  },
+  "derived_at": "2026-10-20T14:38:57Z",
+  "derived_from": "SRC-285",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "8368c33bb655192afa79909514bc0f55d3e1b39ccb69c3eb1f1976ae20df4940"
+}

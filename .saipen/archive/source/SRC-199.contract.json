@@ -1,0 +1,34 @@
+{
+  "clauses": {
+    "SRC-199:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "A requested explanation of protocol deviation must answer that request; an engineering inventory or general handoff cannot substitute."
+    },
+    "SRC-199:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Use both supplied FreeBuff handoffs as fixed regression witnesses; separate verified deviations from genuine recovery/transport boundaries and unverified claims."
+    },
+    "SRC-199:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Diagnosis names actual evidence, violated rule and owner, cause, and corrective action; never invent an internal motive, successful recovery or ticket completion."
+    },
+    "SRC-199:R004": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Reuse the common response/artifact owner and available host enforcement. Check instruction/distribution freshness and strongest actually supported FreeBuff surfaces; disclose advisory or unverified runtime limits."
+    },
+    "SRC-199:R005": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Prove fixed pre-subject red and unchanged-oracle final green, inverse legitimate diagnosis/ordinary handoff controls, source contracts, validator and declared core family without baseline growth."
+    }
+  },
+  "derived_at": "2026-10-09T05:35:25Z",
+  "derived_from": "SRC-199",
+  "interpretation_revision": 5,
+  "schema_version": 1,
+  "source_sha256": "caefd1fbe6eb8d966f197408911f311b2193a4ea78b3cc50886cdf964f7f2242"
+}

@@ -1,0 +1,59 @@
+{
+  "requirements": {
+    "SRC-209:R001": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "T-1705 verified and DONE (E-14280..E-14283), T-1703 verified and DONE (E-14299..E-14300), T-1707 chronology verified and DONE (E-14306..E-14307); T-1709 claimed canonically under SAIOPS with satisfied needs.",
+      "text": "Follow the reconciled dependency order through T-1705 correction, truthful T-1703 REVIEW, and current T-1707 chronology verification; preserve ownership and all prior evidence.",
+      "verification": "Reconciled dependency order followed strictly; ownership and all prior evidence preserved.",
+      "work": "T-1709"
+    },
+    "SRC-209:R002": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "T-1704 blocked via canonical ticket block (E-14311) as DUPLICATE_CONTINUATION; T-1706 blocked via canonical ticket block (E-14312) as DUPLICATE_CONTINUATION. No raw BOARD edits, no fabricated DONE, Source authority preserved.",
+      "text": "Inspect T-1704 and T-1706 for independently actionable scope; use a supported administrative disposition for mere duplicate continuation without fabricated DONE, raw BOARD edits or erasing Source authority.",
+      "verification": "Both tickets inspected and administratively blocked using supported canonical ticket block route.",
+      "work": "T-1709"
+    },
+    "SRC-209:R003": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/T-1709-review/REVIEW.md;tools/test_t1709_audit_starvation.py",
+      "text": "Eligible audits advance within a bounded number of nonurgent BOARD selections despite replenishment; preserve active Work, recovery, human gates, urgent P0/P1 and ownership.",
+      "verification": "Current 14-case isolated oracle passes: nonurgent P2 yields to eligible intake; urgent P0/P1, active BUILD/VERIFY/REVIEW/SHIP, recovery and WAIT retain priority. Real SRC-212/T-1711 intake advanced while T-1709 remained active.",
+      "work": "T-1709"
+    },
+    "SRC-209:R004": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/T-1709-review/red-final.json;.saipen/evidence/T-1709-review/green-final.json;.saipen/intake/audit_inbox.json",
+      "text": "Preserve numeric-layer ordering; persist first-seen generation order for named audits independently of mtime; skip blocked/invalid entries while retaining identity and evidence.",
+      "verification": "Exact path/digest generations retain durable first-seen order without mtime, including replacement and repaired-invalid entries. Corrupt chronology refuses without writes; competing binding/observation writers serialize. Numeric ordering and 96 neighbors pass with 2 host skips.",
+      "work": "T-1709"
+    },
+    "SRC-209:R005": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-14342",
+      "text": "Run unchanged adversarial red-before-green controls including replenishment, active BUILD/REVIEW, urgency, invalid authority, blocked numeric evidence, duplicate continuation, interrupted idempotent intake, and proven-closure-only cleanup; pass focused and full declared family plus current native validation.",
+      "verification": "Fresh final VERIFY cycle: identical 14-case oracle red E-14334 / green E-14335; 96 neighbors (2 Windows symlink skips); pinned Ruff and whitespace; native core 0 problems / 9 warnings. Mandatory complete unit family PASS 6135 ran, 0 red, no leaked sandboxes. Immutable record .saipen/evidence/core-unit/e9e011114d6f67b1-20261011T054512Z.json sha256:e1bf5a3e757920a11c59315677c6a6cb539b48f8683924eb625e8a836298f4e7. First inventory FAIL remains preserved; bounded clone relocation and portable controls corrected its cause.",
+      "work": "T-1709"
+    },
+    "SRC-209:R006": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "IMPLEMENTED",
+      "evidence": ".saipen/evidence/T-1709-review/REVIEW.md;.saipen/intake/active/SRC-212.meta.json;.saipen/intake/audit_inbox.json",
+      "text": "Process one admissible source transaction at a time; continue the oldest eligible real audit and report exact path, receipt, Work and reason, counts, current task/phase, root cause, verification and actual next action; if none is eligible give every file its actual blocker.",
+      "verification": "One real source transaction admitted oldest eligible audit/SAIPEN_20261010_1123.md as SRC-212 and queued T-1711. Inspection proves exact ACTIVE generation 1; active T-1709 retained its seat. Pending 7 (1 ACTIVE,6 NEW); consumed this run 0, prior DELETED bindings 22, missing captured paths 2. Next audit Work is T-1711 SCOUT after current Work.",
+      "work": "T-1709"
+    }
+  },
+  "schema_version": 1
+}

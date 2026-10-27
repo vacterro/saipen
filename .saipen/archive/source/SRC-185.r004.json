@@ -1,0 +1,29 @@
+{
+  "clauses": {
+    "SRC-185:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Operator questions during an operational turn require a canonical human boundary; CONTINUE forbids lifecycle menus and continues canonically (OPERATOR-QUESTION-01)."
+    },
+    "SRC-185:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Unreadable local sessions, cache loss, absent handoffs and keeper prose cannot override project memory; resolve canonical automation and continue, read load_path, execute its action."
+    },
+    "SRC-185:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Audit all registered host question surfaces; intercept tool-call boundaries where available and use strongest supported instructions/final enforcement elsewhere, with honest capability claims."
+    },
+    "SRC-185:R004": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Exact FreeBuff BUILD goal incident with unavailable session state and invented VERIFY choices is refused/autokicked by shared authority; prove canonical BUILD survives."
+    }
+  },
+  "derived_at": "2026-10-09T03:47:06Z",
+  "derived_from": "SRC-185",
+  "interpretation_revision": 4,
+  "schema_version": 1,
+  "source_sha256": "5fd854e17f66e3a305310ca6bce0fdbff04dad4b3b27e8929cb12f1de920e505"
+}

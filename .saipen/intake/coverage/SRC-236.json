@@ -1,0 +1,113 @@
+{
+  "requirements": {
+    "SRC-236:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/T-1738-saituls-audit/REPORT.md",
+      "text": "Verify live repository root, HEAD, working tree and protocol state.",
+      "verification": "Live target root HEAD dirty count and STATE measured in observation.json",
+      "work": "T-1738"
+    },
+    "SRC-236:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/T-1738-saituls-audit/REPORT.md",
+      "text": "Inspect the existing T-282 source receipt, board records, execution evidence and event chain.",
+      "verification": "Actual SRC-099 body metadata full BOARD evidence and event chain read",
+      "work": "T-1738"
+    },
+    "SRC-236:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/T-1738-saituls-audit/REPORT.md",
+      "text": "Confirm whether the extra PARTIAL section is consumed by any active parser or validator.",
+      "verification": "Current parser valid control passes and duplicate PARTIAL controls fail",
+      "work": "T-1738"
+    },
+    "SRC-236:R004": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/T-1738-saituls-audit/REPORT.md",
+      "text": "Determine the correct canonical state of T-282 from durable evidence, not from its descriptive text alone.",
+      "verification": "Live T-282 is TODO; historical delivery prose does not prove completion",
+      "work": "T-1738"
+    },
+    "SRC-236:R005": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/T-1738-saituls-audit/REPORT.md",
+      "text": "Use supported SAIOPS mutation mechanisms if current authority permits this metadata reconciliation.",
+      "verification": "No duplicate remains to repair; no foreign mutation authority manufactured",
+      "work": "T-1738"
+    },
+    "SRC-236:R006": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/T-1738-saituls-audit/REPORT.md",
+      "text": "Preserve E-3001, E-3002, SRC-099 and existing evidence.",
+      "verification": "Protected target inputs hash-identical before and after evidence collection",
+      "work": "T-1738"
+    },
+    "SRC-236:R007": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "NOT_APPLICABLE",
+      "evidence": ".saipen/evidence/T-1738-saituls-audit/REPORT.md",
+      "text": "Remove duplicate ticket representation only through a valid, authorized transaction.",
+      "verification": "Current target has one T-282 record so no duplicate-removal action applies",
+      "work": "T-1738"
+    },
+    "SRC-236:R008": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "BLOCKED",
+      "evidence": ".saipen/evidence/T-1738-saituls-audit/REPORT.md",
+      "text": "Verify board uniqueness, recognized sections, state/event consistency and source linkage.",
+      "verification": "T-282 has metadata linkage but no BOARD source_receipts field; target conformance fails",
+      "work": "T-1738"
+    },
+    "SRC-236:R009": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/T-1738-saituls-audit/REPORT.md",
+      "text": "Exactly one authoritative T-282 ticket; existing partial work remains discoverable.",
+      "verification": "One physical T-282 record and discoverable existing partial evidence",
+      "work": "T-1738"
+    },
+    "SRC-236:R010": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/T-1738-saituls-audit/REPORT.md",
+      "text": "No fabricated DONE or hardware acceptance; no unrelated ticket transitions.",
+      "verification": "No target Work transition hardware acceptance publication or deployment performed",
+      "work": "T-1738"
+    },
+    "SRC-236:R011": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "BLOCKED",
+      "evidence": ".saipen/evidence/T-1738-saituls-audit/REPORT.md",
+      "text": "T-260 remains PAUSED unless separately authorized.",
+      "verification": "Actual T-260 is SCOUT with WAIT; literal PAUSED and separate authorization unproven",
+      "work": "T-1738"
+    },
+    "SRC-236:R012": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "BLOCKED",
+      "evidence": ".saipen/evidence/T-1738-saituls-audit/REPORT.md",
+      "text": "Protocol validation passes; no publication or deployment; if operator_required authority prohibits board mutation, perform read-only validation and report AUTHORITY_REQUIRED.",
+      "verification": "Canonical target core CURRENT_FAIL exit1 receipt-66261157f63a: 29 problems 41 warnings",
+      "work": "T-1738"
+    }
+  },
+  "schema_version": 1
+}

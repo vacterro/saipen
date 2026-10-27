@@ -1,0 +1,24 @@
+{
+  "clauses": {
+    "SRC-240:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Section 1 LIVE ADMISSION: establish the canonical SAIPEN root, HEAD, dirty tree, protocol version, current work owner, STOP/NO_GO state and permitted mutation scope; check the Wintage project admission separately before any integration check that could mutate it; a valid handoff does not itself authorize execution; no hand alteration of canonical ledgers or durable epoch carriers"
+    },
+    "SRC-240:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Section 2 CONFIRMED DEFECT BOUNDARY: recheck the reported locations in release.py (plan_release, crew release context, _plan_crew_release, _apply_no_publish_locked) and crew.py (epoch validation, crew_release_context, _release_current, ReleaseEvidence) against the live installed code before editing; verify the live epoch carrier"
+    },
+    "SRC-240:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Section 3 CONTRACT AND FEASIBILITY SPIKE: decide whether terminal crew closure can use the existing epoch identity plus independently derived deferred scope without inventing a ticket; prove the minimal legal path on a disposable fixture; published release, local no-publish completion and refused or incomplete convergence must never be interchangeable; document schema and recovery compatibility before changing stored evidence"
+    }
+  },
+  "derived_at": "2026-10-13T14:56:36Z",
+  "derived_from": "SRC-240",
+  "interpretation_revision": 3,
+  "schema_version": 1,
+  "source_sha256": "7a7afbcab27e635b152af9903766c752c5ebdab28a9ad75978e195c7c60bb230"
+}

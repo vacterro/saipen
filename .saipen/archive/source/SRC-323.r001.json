@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-323:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "A substantial handoff is evaluated against the current implementation and canonical history BEFORE redundant Work is created."
+    }
+  },
+  "derived_at": "2026-10-25T06:10:13Z",
+  "derived_from": "SRC-323",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "abf632fde39d5233c3dd5479650db517408a07aed4a06b70d60dc35bdc08f9e1"
+}

@@ -1,0 +1,14 @@
+{
+  "requirements": {
+    "SRC-312:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "T-1894 closed with verification evidence in LOG: verify -> PASS [target: T-1894] conf: high -- 24 declared modules run together in one narrowed sandbox: 206 tests PASS in 73.0s with copy_wall_s 0.39 and mode=DECLARED trees=[], against 1229.9s of FULL-copy runs for the same 18 modules measured one by one",
+      "text": "Widen T-1889 sandbox scope declarations: 18 more focused test modules copy the source tree only, proven module-by-module with measured before/after",
+      "verification": "the Work this request created reached its own verification gate; see the T-1894 VERIFY cycle in .saipen/LOG.md",
+      "work": "T-1894"
+    }
+  },
+  "schema_version": 1
+}

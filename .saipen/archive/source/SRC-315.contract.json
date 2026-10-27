@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-315:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Classify the validator's own manifest-failure and closure-provenance families so 41 findings stop collapsing into 2 UNKNOWN finding keys, adding subject extraction for the offending path"
+    }
+  },
+  "derived_at": "2026-10-24T22:48:07Z",
+  "derived_from": "SRC-315",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "0f202862f13189325690c9f46ae123e442969e991c3a09a9623a86ffcc405153"
+}

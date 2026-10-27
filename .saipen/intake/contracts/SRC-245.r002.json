@@ -1,0 +1,19 @@
+{
+  "clauses": {
+    "SRC-245:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Establish the writer and provenance of the two empty artifacts found in the SAIPEN installation root (T-1446 and tuple[bool), preserving their metadata and any needed evidence before an owner-authorized quarantine"
+    },
+    "SRC-245:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Fix an unsafe host hook if it is actually demonstrated to be the writer"
+    }
+  },
+  "derived_at": "2026-10-14T01:03:32Z",
+  "derived_from": "SRC-245",
+  "interpretation_revision": 2,
+  "schema_version": 1,
+  "source_sha256": "11872776d2bfeb0face6820e405d04f3319d5d7b3ce36b2d698db68bf79a3535"
+}

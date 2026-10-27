@@ -1,0 +1,44 @@
+{
+  "clauses": {
+    "SRC-240:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Section 1 LIVE ADMISSION: establish the canonical SAIPEN root, HEAD, dirty tree, protocol version, current work owner, STOP/NO_GO state and permitted mutation scope; check the Wintage project admission separately before any integration check that could mutate it; a valid handoff does not itself authorize execution; no hand alteration of canonical ledgers or durable epoch carriers"
+    },
+    "SRC-240:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Section 2 CONFIRMED DEFECT BOUNDARY: recheck the reported locations in release.py (plan_release, crew release context, _plan_crew_release, _apply_no_publish_locked) and crew.py (epoch validation, crew_release_context, _release_current, ReleaseEvidence) against the live installed code before editing; verify the live epoch carrier"
+    },
+    "SRC-240:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Section 3 CONTRACT AND FEASIBILITY SPIKE: decide whether terminal crew closure can use the existing epoch identity plus independently derived deferred scope without inventing a ticket; prove the minimal legal path on a disposable fixture; published release, local no-publish completion and refused or incomplete convergence must never be interchangeable; document schema and recovery compatibility before changing stored evidence"
+    },
+    "SRC-240:R004": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Section 4 VERSIONLESS NO-PUBLISH: an authorized local no-publish completion needs no VERSION file; strict version validation stays for real publication; never synthesize version 0, a fake release tag or a publication claim; no change to Wintage package.json, userscript versions, CHANGELOG, HEAD or source fingerprint as a workaround"
+    },
+    "SRC-240:R005": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Section 5 TICKETLESS CREW EPOCH: resolve the producer/consumer contradiction (a valid epoch may have no ticket_id, terminal planning required one); own the terminal closure by canonical epoch identity and verified deferred-scope receipts; never invent or borrow a ticket or mutate a committed carrier; refuse clearly on empty deferred scope and on ambiguous ownership; protect multi-ticket deferred scope, lineage, exact file hashes, review bindings and epoch identity"
+    },
+    "SRC-240:R006": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Section 6 POST-SHIP TRUTH: the release verdict and its immutable evidence identify the actual terminal outcome, never inferred from historical STATE.mode; the validator distinguishes no-publish with a valid receipt, real publish with commit/tag/remote evidence, missing or forged receipt, stale source identity, wrong epoch, incomplete convergence; read-only and current-session authority stay enforced; an authorized no-publish closure performs zero Git mutations and zero remote operations; real publication keeps every existing gate; SC-11 is not skipped globally"
+    },
+    "SRC-240:R007": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "Section 7 RECOVERY AND NEGATIVE CONTROLS: the twenty listed cases are tested (missing VERSION with no-publish and with full publication, epoch ticket absent/present/borrowed, empty scope, ambiguous ownership, foreign source mutation after review, changed fingerprint, missing producer evidence, stale role evidence, operator-dependent unrelated ticket, STATE.mode differing from capability, interrupted operation, idempotent retry, duplicate finalization, forged receipt, lineage mismatch, read-only session, no publication permission); negative controls remain RED; historical receipts stay compatible without rewriting history"
+    }
+  },
+  "derived_at": "2026-10-13T14:56:39Z",
+  "derived_from": "SRC-240",
+  "interpretation_revision": 7,
+  "schema_version": 1,
+  "source_sha256": "7a7afbcab27e635b152af9903766c752c5ebdab28a9ad75978e195c7c60bb230"
+}

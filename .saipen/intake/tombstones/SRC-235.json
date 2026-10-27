@@ -1,0 +1,16 @@
+{
+  "actionable": 12,
+  "archive_ref": ".saipen/archive/source/SRC-235.md",
+  "closed_at": "2026-10-13T06:46:00Z",
+  "closure_event": null,
+  "linked_work": "T-1737",
+  "linked_works": [
+    "T-1737"
+  ],
+  "receipt_id": "SRC-235",
+  "requirements": 12,
+  "schema_version": 1,
+  "source_sha256": "73d4366f9927e763a5ddd2a1b1f6826549239069460aea715c320a66838703fa",
+  "status": "CLOSED",
+  "unresolved": 0
+}

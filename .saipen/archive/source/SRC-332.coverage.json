@@ -1,0 +1,59 @@
+{
+  "requirements": {
+    "SRC-332:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "documentary analysis in T-1923-freebuff-startup-desync ANALYSIS.md",
+      "text": "Ingest and evaluate external audit report audit/SAIHANDOFF_FREEBUFF_STARTUP_AND_PROTOCOL_DESYNC.md across Freebuff application fixes and SAIPEN protocol deadlock recommendations.",
+      "verification": "verified against live codebase",
+      "work": "T-1923"
+    },
+    "SRC-332:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "documentary analysis in T-1923-freebuff-startup-desync ANALYSIS.md",
+      "text": "Evaluate deterministic auto-heal for clock skew: reconcile last_event in STATE.md when lagging behind LOG.md tail.",
+      "verification": "verified against live codebase",
+      "work": "T-1923"
+    },
+    "SRC-332:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "documentary analysis in T-1923-freebuff-startup-desync ANALYSIS.md",
+      "text": "Evaluate BOARD section vs checkbox reconciliation: ensure deterministic alignment between [x] status and section placement (## DOING vs ## DONE).",
+      "verification": "verified against live codebase",
+      "work": "T-1923"
+    },
+    "SRC-332:R004": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "documentary analysis in T-1923-freebuff-startup-desync ANALYSIS.md",
+      "text": "Guard next_action grammar during state mutations: reject non-conforming descriptive strings before persistence.",
+      "verification": "verified against live codebase",
+      "work": "T-1923"
+    },
+    "SRC-332:R005": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "documentary analysis in T-1923-freebuff-startup-desync ANALYSIS.md",
+      "text": "Document forensic analysis artifact at .saipen/evidence/T-1923-freebuff-startup-desync/ANALYSIS.md.",
+      "verification": "verified against live codebase",
+      "work": "T-1923"
+    },
+    "SRC-332:R006": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "documentary analysis in T-1923-freebuff-startup-desync ANALYSIS.md",
+      "text": "Cleanly consume audit/SAIHANDOFF_FREEBUFF_STARTUP_AND_PROTOCOL_DESYNC.md via journaled audit inbox closure upon terminal settlement.",
+      "verification": "verified against live codebase",
+      "work": "T-1923"
+    }
+  },
+  "schema_version": 1
+}

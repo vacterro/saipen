@@ -1,0 +1,39 @@
+{
+  "clauses": {
+    "SRC-323:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "A substantial handoff is evaluated against the current implementation and canonical history BEFORE redundant Work is created."
+    },
+    "SRC-323:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Already-satisfied clauses are supported by real current evidence, never by semantic similarity or an agent narrative."
+    },
+    "SRC-323:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Missing, defective or unverified clauses remain actionable and are not swallowed by a duplicate verdict."
+    },
+    "SRC-323:R004": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Source and Work reach a consistent terminal state when the request is fully satisfied."
+    },
+    "SRC-323:R005": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Work that already owns a Source can be terminally superseded, so attached receipts cannot create a permanent supersession/retirement cycle."
+    },
+    "SRC-323:R006": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "A genuine repeat request from the operator stays actionable and is never silently discarded as a duplicate."
+    }
+  },
+  "derived_at": "2026-10-25T06:10:21Z",
+  "derived_from": "SRC-323",
+  "interpretation_revision": 6,
+  "schema_version": 1,
+  "source_sha256": "abf632fde39d5233c3dd5479650db517408a07aed4a06b70d60dc35bdc08f9e1"
+}

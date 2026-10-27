@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-247:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Prevent recurrence of the proven admission, runtime-binding and verification-order drift from a ZAICODE-hosted 9router session"
+    }
+  },
+  "derived_at": "2026-10-14T01:09:50Z",
+  "derived_from": "SRC-247",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "dcb0df86fc458502eca0497c106d85a08e838332ad0a0e32384b6c1b44d802fb"
+}

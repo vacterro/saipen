@@ -1,0 +1,23 @@
+{
+  "requirements": {
+    "SRC-324:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/focused-unit/cd858721889c0286-20261025T115615858017Z.json",
+      "text": "Authenticates and delivers a valid native operator event with a verified worker and correct continuation result, or",
+      "verification": "test_t1911_native_origin_diagnostics.py -> PASS",
+      "work": "T-1911"
+    },
+    "SRC-324:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/focused-unit/cd858721889c0286-20261025T115615858017Z.json",
+      "text": "Returns a precise actionable failure without falsely claiming operator authority. A recoverable infrastructure defect is repaired automatically when this can be done without inventing human authority. No unsealed event renews a bounded goal. No legitimate event is silently dropped during recoverable retry. Real installed-host acceptance is mandatory before declaring this incident completely solved.",
+      "verification": "test_t1911_native_origin_diagnostics.py -> PASS",
+      "work": "T-1911"
+    }
+  },
+  "schema_version": 1
+}

@@ -1,0 +1,37 @@
+{
+  "appends": [
+    {
+      "class": "CLARIFICATION",
+      "created_work": "T-1713",
+      "delta": "evidence",
+      "derived_clauses": [
+        "SRC-214:R001",
+        "SRC-214:R002",
+        "SRC-214:R003",
+        "SRC-214:R004",
+        "SRC-214:R005"
+      ],
+      "label": "Historical failure-path attribution; previous Gemini protocolist distinct from AG3 and forensic assignment",
+      "projected_at": "2026-10-11T05:24:24Z",
+      "receipt": "SRC-214",
+      "received_at": "2026-10-11T05:24:17Z",
+      "request_witness": "model_supplied",
+      "rewind": null,
+      "seq": 1,
+      "source_sha256": "44405c18a8f2ad300130b02de1a865acb9a605279586f55df849eca36fdb11ad",
+      "state": "PROJECTED",
+      "steps": [
+        "linked",
+        "derived",
+        "superseded"
+      ],
+      "superseded": [],
+      "supersedes": [],
+      "work": [
+        "T-1713"
+      ]
+    }
+  ],
+  "schema_version": 1,
+  "source": "SRC-213"
+}

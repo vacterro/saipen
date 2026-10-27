@@ -1,0 +1,29 @@
+{
+  "clauses": {
+    "SRC-291:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Diagnose and repair the supported ZAICODE authenticated native ingress for a genuine operator cc directed to AUDAPACK; prove event, project, session and actual worker identity without a fabricated witness or model-supplied authority."
+    },
+    "SRC-291:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Prove fresh genuine operator reauthorization and normal authorized continuation through the real supported deployed host. Test doubles and source-only changes cannot satisfy this LIVE outcome; preserve unauthorized hard_wait."
+    },
+    "SRC-291:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Check the bounded wave/ticket policy, including the observed 0/28 overshoot and large queued batches; add missing-hook, invalid-origin, successful kernel-recovery and real native recovery controls. Never edit counters, spoof provenance, or disable the valve."
+    },
+    "SRC-291:R004": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Provide an accurate documented recovery path when the supported host hook or native issuer is unavailable; expose the infrastructure owner and exact missing prerequisite, never require an ineffective repeated cc or claim unsupported installation is recovered."
+    }
+  },
+  "derived_at": "2026-10-23T05:37:56Z",
+  "derived_from": "SRC-291",
+  "interpretation_revision": 4,
+  "schema_version": 1,
+  "source_sha256": "b5704418d14845ae107c0369298210066e6892521a4f8495ea777fd227809c63"
+}
