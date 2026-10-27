@@ -2979,6 +2979,21 @@ def extract_request_clauses(body: str) -> list[str]:
     if len(top_items) >= 2:
         return [" ".join(content.split()) for num, content in top_items]
 
+    # Pattern 4b: An inline numbered sequence on one line
+    # ("Deliver the audit: 1. Publish the artifact; 2. Bind the identity").
+    # A user who enumerates two deliverables in one sentence has asked for two
+    # things; without this they received a single blanket clause that any one
+    # of them could discharge. A lone "1." is not a list, so two are required.
+    inline_items = re.findall(
+        r"(?:^|[;:,]\s*|\s)(\d+)\.\s+([^;]+)",
+        text,
+        re.DOTALL,
+    )
+    if len(inline_items) >= 2:
+        numbered = [" ".join(content.split()).strip(" ;,") for num, content in inline_items]
+        if all(len(item.split()) >= 3 for item in numbered):
+            return numbered
+
     # Pattern 5: Unnumbered major sections delimited by ===
     unnum_section_pat = (
         r"(?:^|\n)\s*={5,}\s*\n\s*([A-Z0-9_ "

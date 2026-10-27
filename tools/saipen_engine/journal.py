@@ -481,6 +481,7 @@ OP_CLASSES: dict[str, frozenset[int]] = {
             "improve-unhold-",
             "metadata-repair-",
             "migrate_generation-",
+            "needs-detach-",
             "normalize-log-",
             "producer-integration-",
             "quarantine-log-tail-",

@@ -86,6 +86,10 @@
       "required": true
     },
     {
+      "src": "saipen/COMPOUND_RESPONSE_POLICY.json",
+      "required": true
+    },
+    {
       "src": "saipen/MAINTENANCE.md",
       "required": true
     },
