@@ -11,11 +11,24 @@ What this module pins, in both directions:
 
   * `ticket add`, `ticket unblock` and `claim` are refused with WAIT_BLOCKED
     while a brake binds, and the refusal names the brake's own exit route;
-  * a phase move inside the Work that already holds the seat still WORKS.
-    That is not a tolerance: D-05 of the same audit records the opposite bug (a
-    phase shortcut overwriting a tripped valve), and T-1880 fixed it by keeping
-    the WAIT verbatim while letting the phase move. Refusing `transition` here
-    would re-break the repair that audit asked for;
+  * a phase move under a tripped safety VALVE still WORKS. That is not a
+    tolerance: D-05 of the same audit records the opposite bug (a phase
+    shortcut overwriting a tripped valve), and T-1880 fixed it by keeping the
+    WAIT verbatim while letting the phase move. Refusing `transition` here
+    would re-break the repair that audit asked for.
+
+    A phase move under an OPEN OPERATOR DECISION is the other case, and this
+    module originally asserted it moved too. T-1884 (same day, later: 15:13
+    against this module's 12:29) deliberately reversed that half. Its measured
+    defect was that `_plan_transition` never touched `blocker`, so a
+    transition carried whatever it inherited into the next phase while
+    `binding_brake` went on treating it as a hard stop -- the deadlock simply
+    arrived one step later. T-1884's rule: a recognised gate class or a
+    causally related `## BLOCKED` ticket REFUSES an ordinary phase move and
+    keeps the field, because laundering real security authority away on a
+    phase move is worse than the deadlock. The two tickets use the same
+    literal (`BLOCKED_EXTERNAL`), so they cannot both hold; the later,
+    narrower rule owns the behaviour, and the assertion below states it;
   * read-only diagnosis keeps working under the brake, and so does `--dry-run`,
     because a preview grants nothing;
   * the clean state is untouched: with no brake, every route above still works.
@@ -182,12 +195,24 @@ class TheWorkAlreadyHeldStillMovesTests(unittest.TestCase):
 
         return parse_state(codec.read_doc(root / ".saipen" / "STATE.md"))
 
-    def test_a_transition_still_moves_under_an_open_decision(self):
+    def test_a_transition_refuses_under_an_open_decision(self):
+        """T-1884 supersedes the move half; the brake is the one truth.
+
+        A phase move must not launder a recognised gate away: `binding_brake`
+        reads the blocker as a hard stop in EVERY phase, so moving the phase
+        while keeping it only relocates the deadlock. The refusal is therefore
+        the correct outcome, it names its own exit route, and it writes no
+        bytes.
+        """
         root = self._root("decision")
+        before = (root / ".saipen" / "STATE.md").read_bytes()
         _rc, payload = _cli(root, "transition", "VERIFY", "T-010", "probe")
-        self.assertTrue(payload.get("ok"), payload)
-        self.assertEqual(payload.get("phase"), "VERIFY", payload)
-        self.assertEqual(self._state(root).get("phase"), "VERIFY")
+        self.assertFalse(payload.get("ok"), payload)
+        self.assertEqual(payload.get("code"), "OPERATOR_DECISION_REQUIRED", payload)
+        self.assertTrue(payload.get("canonical_next_command"), payload)
+        self.assertEqual(self._state(root).get("phase"), "BUILD")
+        self.assertEqual((root / ".saipen" / "STATE.md").read_bytes(), before,
+                         "a refused transition wrote bytes")
 
     def test_a_transition_still_moves_under_a_tripped_valve(self):
         """T-1880's repair: the phase moves, the WAIT survives verbatim."""
