@@ -43,7 +43,9 @@ from saipen_engine.operations import (  # noqa: E402
     finish_ticket,
     ticket_add,
     ticket_move,
+    user_request as native_user_request,
 )
+from test_fixture_support import witnessed_operator  # noqa: E402
 from test_orchestration_repair import OrchestrationFixture, user_request  # noqa: E402
 from test_hermetic_env import hermetic_env  # noqa: E402
 
@@ -547,11 +549,14 @@ class DryRunPurityTests(ProvenanceFixture):
 
     def test_user_request_dry_run_writes_nothing(self):
         project = self.make_project(active=True)
-        before = _tree_digest(project)
-        result = user_request(project, "tester", "make checkbox indicators square", dry_run=True)
-        self.assertTrue(result.ok, result.to_dict())
-        self.assertEqual(result.code, "PLAN")
-        self.assertEqual(_tree_digest(project), before)
+        text = "make checkbox indicators square"
+        # Delivering the fixture's native event precedes the measured PLAN.
+        with witnessed_operator(text, project):
+            before = _tree_digest(project)
+            result = native_user_request(project, "tester", text, dry_run=True)
+            self.assertTrue(result.ok, result.to_dict())
+            self.assertEqual(result.code, "PLAN")
+            self.assertEqual(_tree_digest(project), before)
         self.assertFalse((project / ".saipen" / "intake").exists())
 
     def test_ticket_block_scope_dry_run_writes_nothing(self):
@@ -627,10 +632,13 @@ class IdempotencyTests(ProvenanceFixture):
 
     def test_repeating_a_user_request_creates_no_second_source_or_work(self):
         project = self.make_project(active=True)
-        first = user_request(project, "tester", "make checkbox indicators square")
-        self.assertTrue(first.ok, first.to_dict())
-        second = user_request(project, "tester", "make checkbox indicators square")
-        self.assertTrue(second.ok, second.to_dict())
+        text = "make checkbox indicators square"
+        # A transport retry repeats one physical event, not two human events.
+        with witnessed_operator(text, project):
+            first = native_user_request(project, "tester", text)
+            self.assertTrue(first.ok, first.to_dict())
+            second = native_user_request(project, "tester", text)
+            self.assertTrue(second.ok, second.to_dict())
         self.assertEqual(second.code, "USER_REQUEST_DUPLICATE")
         self.assertEqual(first.data["receipt"], second.data["receipt"])
         self.assertEqual(first.data["ticket"], second.data["ticket"])

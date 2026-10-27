@@ -23,6 +23,7 @@ from __future__ import annotations
 import hashlib
 import re
 from dataclasses import dataclass
+from pathlib import Path
 
 NO_PROGRESS_THRESHOLD = 5
 
@@ -98,11 +99,7 @@ def classify_blocker(blocker: str) -> dict:
     text = str(blocker or "").strip()
     upper = " ".join(text.upper().split())
     is_gate = deferred_operator_class(text) is not None
-    is_hold = (
-        is_gate
-        or blocker_class(text) is not None
-        or upper.startswith(DEPENDENCY_HOLD_PREFIX)
-    )
+    is_hold = is_gate or blocker_class(text) is not None or upper.startswith(DEPENDENCY_HOLD_PREFIX)
     duplicate = upper.startswith(WORKABLE_BLOCKER_PREFIXES)
     timeout = (
         "BOUNDED" in upper and ("600-SECOND" in upper or "WINDOW" in upper)
@@ -192,10 +189,7 @@ class SemanticProgressTracker:
         completed cycle, so it never counts toward the loop threshold.
         """
         fingerprint = observation.semantic_fingerprint()
-        legit = (
-            bool(observation.authoritative_changed)
-            or bool(observation.completed_attempt)
-        )
+        legit = bool(observation.authoritative_changed) or bool(observation.completed_attempt)
         moved = bool(self.history) and fingerprint != self.history[-1][0]
         self.history.append((fingerprint, legit, bool(observation.heartbeat)))
         self.observations.append(observation)
@@ -227,9 +221,7 @@ class SemanticProgressTracker:
         if not self._fingerprint:
             return 0
         return sum(
-            1
-            for fp, lg, hb in self.history
-            if fp == self._fingerprint and not lg and not hb
+            1 for fp, lg, hb in self.history if fp == self._fingerprint and not lg and not hb
         )
 
 
@@ -301,9 +293,7 @@ def build_recovery_package(
             entry["blocked_on"] = fields.get("blocked_on", "")
             blocked.append(entry)
 
-    deps_ok = {
-        entry["id"]: all(n in done_ids for n in entry["needs"]) for entry in todos
-    }
+    deps_ok = {entry["id"]: all(n in done_ids for n in entry["needs"]) for entry in todos}
     # The seat is the ticket STATE.task names, whatever section holds it: a
     # claimed DOING ticket or a PAUSED BLOCKED corridor is still the Work a
     # cold worker resumes. Only when STATE carries no active task does the
@@ -381,9 +371,7 @@ def build_recovery_package(
                 evidence.append(op)
     evidence = evidence[-8:]
 
-    active_from_blocked = active is not None and any(
-        entry is active for entry in blocked
-    )
+    active_from_blocked = active is not None and any(entry is active for entry in blocked)
     # The seat STATE names keeps its own phase. Answering `PHASE SCOUT` for a
     # claimed DOING seat (measured live 2026-09-22: T-1446 in BUILD) told a
     # cold successor to reset the phase it had to resume. STATE's next_action
@@ -435,13 +423,9 @@ def build_recovery_package(
         "MUTATION_LEASE": runtime.get("watchdog") or {},
         "BLOCKER": {
             "id": active["id"] if active else None,
-            "unmet_needs": [
-                n for n in (active["needs"] if active else []) if n not in done_ids
-            ],
+            "unmet_needs": [n for n in (active["needs"] if active else []) if n not in done_ids],
         },
-        "BLOCKER_SCOPE": (active_fields.get("blocker_scope") or "ticket").strip()
-        if active
-        else "",
+        "BLOCKER_SCOPE": (active_fields.get("blocker_scope") or "ticket").strip() if active else "",
         "BLOCKED_ON": (active_fields.get("blocked_on") or "").strip(),
         "EVIDENCE": evidence,
         "DEFERRED": deferred,
@@ -450,9 +434,7 @@ def build_recovery_package(
         # carrying a machine due instant that has passed qualifies. Publishing
         # every parked ticket here was the false operator stop that ended
         # autonomous runs with nothing for the operator to actually do.
-        "DUE": [
-            row["id"] for row in operator_gate_rows if row["state"] == "DUE_OPERATOR_ACTION"
-        ],
+        "DUE": [row["id"] for row in operator_gate_rows if row["state"] == "DUE_OPERATOR_ACTION"],
         "DUE_MODEL": "retry_not_before (strict UTC) on an operator-owned blocker; T-1429",
         "KNOWN_REDS": known_reds,
         "UNRELATED_REDS": unrelated_reds,
@@ -536,6 +518,114 @@ _CONTINUE_SPELLINGS = frozenset(
     {"saipen", "saipen continue", "saipen continue --json", "saipen cc"}
 )
 
+#: Typed host-command wrappers. A leading slash names HOST syntax, so the body
+#: after it is a command, not prose -- the native CLI delivers its legitimate
+#: continuation as `/goal cc all`, which the plain shortcut grammar could never
+#: read (SRC-324 Gap C). The wrapper decides nothing about intent: the body must
+#: itself be exactly a declared continuation form.
+_HOST_COMMAND_WRAPPERS = ("saipen", "goal")
+
+
+def host_command_body(text: str | None) -> str | None:
+    """The command body of a typed host command, or None when text is not one."""
+    compact = " ".join(str(text or "").split())
+    if not compact.startswith("/"):
+        return None
+    body = compact[1:].strip()
+    lowered = body.lower()
+    for wrapper in _HOST_COMMAND_WRAPPERS:
+        if lowered == wrapper:
+            return ""
+        if lowered.startswith(wrapper + " "):
+            return body[len(wrapper):].strip()
+    return body
+
+
+#: The registry route a shortcut must declare to be a goal entry. Kept as one
+#: constant here because both this module and the ZAICODE hook read it.
+GOAL_ROUTE = "saipen goal"
+
+
+def goal_objective_text(text: str | None, *, protocol_dir: Path | str | None = None) -> str | None:
+    """The OBJECTIVE a native goal entry declared, or None when it is not one.
+
+    SRC-342 R003. A goal proof must bind the objective BYTES, not the command
+    line that carried them: `operations.goal_entry` persists
+    `goal_ingress_identity(safe_objective, identity)`, so a broker that hashes
+    `gg <objective>` seals a target the CLI can never match. Measured
+    2026-10-27 across every accepted spelling -- `gg x`, `saipen goal x`,
+    `/goal gg x` -- none equalled the objective's own hash, while the hook
+    already extracted the objective correctly and then handed the raw line to
+    the broker.
+
+    ONE parser for the whole host surface: this is the same shape grammar the
+    ZAICODE hook applied, moved here so the hook, the broker and any future
+    adapter read the operator's bytes one way. The shortcut token is resolved
+    through the REGISTRY table (`commands.resolve_shortcut`), never a word list,
+    so a redeclared goal shortcut needs no edit here.
+
+    Fails closed to None, and every caller must then treat the text as not a
+    goal entry: prose, a bare token and an unknown head are never promoted.
+
+    A MULTILINE body is not one command (SRC-342 section 4). `" ".join(split())`
+    used to flatten `gg fix the importer\\n\\nHere is what I measured: ...` into a
+    single-line goal whose objective was the entire handoff, so a report that
+    merely OPENED with the shortcut minted a persistent campaign. The command is
+    the operator's first line; anything after it is a document, not a command
+    argument, and a document that needs to become Work enters through
+    `saipen start`/`user-request` and a receipt instead. One trailing newline is
+    not a document -- it is how a terminal ends a line.
+    """
+    raw = str(text or "")
+    lines = raw.splitlines()
+    if len([line for line in lines if line.strip()]) > 1:
+        return None
+    compact = " ".join(raw.split())
+    if not compact:
+        return None
+    aliased = compact.startswith("/")
+    body = compact[1:].strip() if aliased else compact
+    if not body:
+        return None
+    lowered = body.lower()
+    for wrapper in _HOST_COMMAND_WRAPPERS:
+        if lowered == wrapper:
+            return None
+        if lowered.startswith(wrapper + " "):
+            body = body[len(wrapper):].strip()
+            aliased = True
+            break
+    if not body:
+        return None
+    tokens = body.split()
+    canonical = False
+    if tokens[0].lower() == "saipen":
+        tokens = tokens[1:]
+        canonical = True
+        if not tokens:
+            return None
+    head, rest = tokens[0], tokens[1:]
+    if not rest:
+        # Bare `gg` / `saipen goal` is the protocol's own zero-write refusal
+        # ("Use: gg <objective>"), never a goal entry.
+        return None
+    if head.lower() == "goal" and (canonical or aliased):
+        # `saipen goal authorize --file <capsule>` is the CLI's own documented
+        # authorization spelling. Measured 2026-10-27: this parser returned
+        # "authorize --file <path>" as an OBJECTIVE, so the operator's genuine
+        # grant was sealed as a new goal named after the flag string and the
+        # capsule was never verified. It is an authorization, never an entry.
+        if rest[0].lower() == "authorize":
+            return None
+        return " ".join(rest)
+    from .commands import load_shortcut_table, resolve_shortcut
+
+    table = load_shortcut_table(protocol_dir)
+    key = resolve_shortcut(head, table=table)
+    if key is not None and table.get(key) == GOAL_ROUTE:
+        return " ".join(rest)
+    return None
+
 
 def _digest16(prefix: str, *parts: str) -> str:
     material = "\0".join(str(part or "").strip() for part in parts)
@@ -591,8 +681,7 @@ def agent_incarnation(carrier: dict | None) -> str | None:
     """
     carrier = carrier or {}
     parts = [
-        str(carrier.get(key) or "").strip()
-        for key in ("host", "host_session", "provider", "model")
+        str(carrier.get(key) or "").strip() for key in ("host", "host_session", "provider", "model")
     ]
     if not any(parts):
         return None
@@ -606,9 +695,26 @@ def is_continuation_command(text: str | None) -> bool:
         return False
     if compact.lower() in _CONTINUE_SPELLINGS:
         return True
-    if " " in compact:
+    from .commands import is_prose_or_handoff, resolve_shortcut
+
+    if is_prose_or_handoff(compact):
         return False
-    from .commands import resolve_shortcut
+    if " " in compact:
+        words = compact.lower().split()
+        if (
+            len(words) == 2
+            and words[0] in ("cc", "\u0441\u0441")
+            and words[1] in ("all", "--all", "-a")
+        ):
+            return True
+
+    body = host_command_body(compact)
+    if body is not None:
+        # A typed host command: its BODY must be exactly a continuation, so
+        # `/goal cc all` authorizes and `/goal summarize cc usage` does not.
+        if not body or body.startswith("/"):
+            return False
+        return is_continuation_command(body)
 
     try:
         key = resolve_shortcut(compact)
@@ -664,8 +770,7 @@ def turn_entry(recall: dict, ingress_class: str, *, continuation: bool = False) 
     elif recall.get("continuation_required"):
         decision = TURN_AUTO_KICK
         reason = (
-            "active executable Work exists and no new user input, WAIT or "
-            "safety stop outranks it"
+            "active executable Work exists and no new user input, WAIT or safety stop outranks it"
         )
     elif continuation or ingress_class == INGRESS_CONTINUATION:
         # Old or new, `cc` asked for the canonical continuation, and that
@@ -779,7 +884,21 @@ def auto_recall(root, carrier: dict | None = None) -> dict:
     phase = str(state.get("phase") or "").strip().upper()
     next_action = str(state.get("next_action") or "").strip()
     blocker = str(state.get("blocker") or "").strip()
-    wait = next_action.upper().startswith("WAIT")
+    from . import goal_authority
+    from .state import parse_wait
+
+    grant_errors = goal_authority.prove(root, state)
+    if grant_errors:
+        recall = {**base, "readable": False, "problem": "; ".join(grant_errors)}
+        recall["turn"] = turn_entry(recall, ingress["class"], continuation=ingress["continuation"])
+        return recall
+    checkpoint = (
+        (goal_authority.persistent(state) or goal_authority.protocol_home(root))
+        and parse_wait(next_action) == "safety valve"
+        and phase != "BLOCKED"
+        and blocker.lower() in ("", "none")
+    )
+    wait = next_action.upper().startswith("WAIT") and not checkpoint
     section = (ticket or {}).get("section", "")
     continuation_required = bool(
         task
@@ -787,7 +906,7 @@ def auto_recall(root, carrier: dict | None = None) -> dict:
         and section == "## DOING"
         and phase not in _NON_EXECUTING_PHASES
         and not wait
-        and binding_brake(state) is None
+        and (binding_brake(state) is None or checkpoint)
     )
     previous = str(carrier.get("previous_incarnation") or "").strip() or None
     incarnation = base["agent_incarnation"]

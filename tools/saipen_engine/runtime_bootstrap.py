@@ -116,14 +116,27 @@ def prove_canonical_root(root: Path | str) -> Path:
 
 
 def canonical_source_root(skill_root: Path | str | None = None) -> Path:
-    """Resolve the canonical clone from the installed provenance marker."""
+    """The canonical clone for this skill root: itself, or the one a marker names.
+
+    Two legitimate shapes, and the architecture proof is what tells them apart --
+    never the cwd and never a hand-written file. A source CLONE carries the
+    clone-only markers (`saipen/BOOT.md`, `saipen/MANIFEST.json`) as its own
+    files and no installer ever wrote anything for it, so it IS its own canonical
+    source. An installed skill home carries the runtime surface (`VERSION`,
+    `tools/...`) but not those two clone markers, so it must carry the installer's
+    marker naming the clone it delegates to. A home that is neither is unproven.
+    """
     root = Path(skill_root) if skill_root is not None else _skill_root()
     record = read_provenance(root)
     if record is None:
-        raise CanonicalSourceUnproven(
-            f"no installer provenance marker at {root / PROVENANCE_FILENAME}; "
-            "run the canonical injector once (LEGACY_BOOTSTRAP_MIGRATION)"
-        )
+        try:
+            return prove_canonical_root(root)
+        except CanonicalSourceUnproven as exc:
+            raise CanonicalSourceUnproven(
+                f"no installer provenance marker at {root / PROVENANCE_FILENAME} and "
+                f"this root is not a canonical source clone ({exc}); "
+                "run the canonical injector once (LEGACY_BOOTSTRAP_MIGRATION)"
+            ) from None
     raw = record.get("canonical_source_root")
     if not isinstance(raw, str) or not raw.strip():
         raise CanonicalSourceUnproven("provenance marker names no canonical_source_root")
@@ -300,7 +313,8 @@ def _powershell() -> str | None:
     return None
 
 
-def _invoke_installer(source: Path, adapter_id: str) -> subprocess.CompletedProcess | None:
+def _invoke_installer(source: Path, adapter_id: str, *,
+                      profile: Path | None = None) -> subprocess.CompletedProcess | None:
     """Run the ONE canonical installer, host-scoped. No caller-supplied paths."""
     if os.name == "nt":
         shell = _powershell()
@@ -326,6 +340,8 @@ def _invoke_installer(source: Path, adapter_id: str) -> subprocess.CompletedProc
     # `bin/saipen` names a real interpreter instead of guessing from PATH.
     env = dict(os.environ)
     env["SAIPEN_PYTHON"] = sys.executable
+    if profile is not None:
+        env["CLAUDE_CONFIG_DIR"] = str(profile)
     kwargs["env"] = env
     if os.name == "nt":
         kwargs["creationflags"] = getattr(subprocess, "CREATE_NO_WINDOW", 0)
@@ -333,6 +349,26 @@ def _invoke_installer(source: Path, adapter_id: str) -> subprocess.CompletedProc
         return subprocess.run(cmd, **kwargs)
     except (OSError, subprocess.SubprocessError):
         return None
+
+
+def _launch_profile(host: str | None) -> Path | None:
+    """The Claude configuration profile this launch starts, unless it is the default.
+
+    T-1747: a host started with CLAUDE_CONFIG_DIR has its own installed runtime,
+    hook and instruction file under that profile, and the installer writes
+    there because it reads the same carrier. The freshness measurement did not:
+    it judged the default profile, so a stale second profile read current and
+    opened degraded, and a stale default one was "resynced" into the other
+    profile and failed. Measurement and write now name one profile, selected
+    by the one owner of write selection, as host repair does.
+    """
+    if host != "claude":
+        return None
+    from .claude_profiles import write_directory
+
+    home = Path.home()
+    selected = write_directory(home)
+    return None if _norm(selected) == _norm(home / ".claude") else selected
 
 
 def run_bootstrap() -> dict:
@@ -352,6 +388,11 @@ def run_bootstrap() -> dict:
             "generation": GENERATION,
         }
     adapter = next((a for a in registry.get("adapters", []) if str(a.get("id")) == host), None)
+    profile = _launch_profile(host) if adapter else None
+    if profile is not None:
+        from .claude_profiles import adapter_for
+
+        adapter = adapter_for(adapter, Path.home(), profile)
     skill = _adapter_skill(adapter) if adapter else None
     if not skill:
         return {
@@ -361,7 +402,12 @@ def run_bootstrap() -> dict:
             "generation": GENERATION,
         }
 
-    proc = _invoke_installer(source, host)
+    # The default profile keeps the call it always had; a named one is passed on.
+    proc = (
+        _invoke_installer(source, host, profile=profile)
+        if profile is not None
+        else _invoke_installer(source, host)
+    )
     installed = _expand(skill)
     diff = surface_diff(source, installed)
     expected = surface_fingerprint(source)
@@ -584,6 +630,11 @@ def prelaunch(
         result["detail"] = f"canonical registry unreadable: {exc}"
         return result
     adapter = adapter_entry(registry, host) if host else None
+    profile = _launch_profile(host) if adapter else None
+    if profile is not None:
+        from .claude_profiles import adapter_for
+
+        adapter = adapter_for(adapter, Path.home(), profile)
     skill = _adapter_skill(adapter) if adapter else None
     if adapter is None or not skill:
         result["code"] = PRELAUNCH_HOST_UNIDENTIFIED
@@ -649,7 +700,12 @@ def prelaunch(
         result["detail"] = "installed runtime is stale and resync was not requested"
         return result
 
-    proc = _invoke_installer(source, host)
+    # The default profile keeps the call it always had; a named one is passed on.
+    proc = (
+        _invoke_installer(source, host, profile=profile)
+        if profile is not None
+        else _invoke_installer(source, host)
+    )
     after = _measure()
     result.update(after)
     rc = proc.returncode if proc is not None else None

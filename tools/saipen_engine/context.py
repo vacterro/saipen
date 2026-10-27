@@ -83,6 +83,11 @@ def _state_fields(state: dict) -> str:
         "requires",
         "goal_waves",
         "goal_tickets",
+        "continuation_authority",
+        "authority_source",
+        "authority_until",
+        "safety_valve_mode",
+        "goal_ingress",
         "last_event",
         "updated",
     ):

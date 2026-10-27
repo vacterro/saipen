@@ -27,12 +27,32 @@ import hashlib
 import json
 import re
 
-RULESET_VERSION = 1
+RULESET_VERSION = 2
 
 SEVERITIES = ("problem", "warning")
 
 # Canonical subject vocabulary.
 SUBJECT_KINDS = ("work", "source", "event", "receipt", "path", "global")
+
+#: The typed owner of a finding (SRC-276 R005 / F-11). Closed set: a consumer
+#: renders a human action for OPERATOR_DECISION only, and an engine-ownable
+#: defect must never be handed to the operator as one.
+#:
+#: * ``ENGINE_INTERNAL`` -- this protocol's own code owes the repair; the
+#:   executable safe move is engine Work, never a new consumer start.
+#: * ``OPERATOR_DECISION`` -- an authority only the operator can grant. The
+#:   decision must be witnessed and narrowly scoped; the class alone is not one.
+#: * ``UNAVAILABLE_EXTERNAL`` -- a different managed project, host or resource
+#:   owes it, so no local mutation can discharge it.
+#: * ``UNKNOWN`` -- ownership was not established. Never rendered as an
+#:   operator action and never silently treated as engine-ownable.
+OWNER_CLASSES = ("ENGINE_INTERNAL", "OPERATOR_DECISION", "UNAVAILABLE_EXTERNAL")
+
+#: The refusal-shaped fourth value. Distinct from membership in OWNER_CLASSES
+#: so callers that must render or route cannot mistake "not established" for a
+#: decision to render a human action or to start engine Work.
+OWNER_UNKNOWN = "UNKNOWN"
+ALL_OWNER_CLASSES = (*OWNER_CLASSES, OWNER_UNKNOWN)
 
 _ID_PATTERNS = {
     "work": re.compile(r"T-\d+"),
@@ -235,6 +255,30 @@ _RULES: tuple[Rule, ...] = (
         r"OUTBOX\.md fails strict OUTBOX parsing",
         "global",
     ),
+    # T-1897: the canonical validator's OWN outputs. Measured 2026-10-24 on
+    # this repository: 41 problems, 40 of them fell through to "unclassified"
+    # with no subject, so `finding_key` collapsed every distinct offending file
+    # into ONE key and ownership routed the whole set to UNKNOWN.
+    #
+    # The manifest subject is the offending PATH, so two untracked files are
+    # two findings and a genuinely fixed file leaves the delta.
+    Rule(
+        "runtime_manifest_untracked",
+        r"runtime manifest names a file git does not track",
+        "path",
+        subject_pattern=r"(?<=does not track: )[^\s]+\.\w+",
+    ),
+    Rule(
+        "closure_provenance_drift",
+        r"closure provenance does not resolve",
+        "event",
+        subject_pattern=r"EX-\d+",
+    ),
+    Rule(
+        "coverage_gap",
+        r"coverage gap -- .*shipped document",
+        "global",
+    ),
 )
 
 RULE_TABLE = tuple(
@@ -295,9 +339,17 @@ def _normalized_detail(rule: Rule, message: str) -> str:
             return found.group(1)
     if rule.rule_id == "log_provenance_marker":
         return "structural-event-missing-op-marker"
+    # A global rule's captured subtype is semantic evidence; incidental
+    # ticket-shaped filenames must not replace the whole condition.
+    matched = rule.re.search(text)
+    if rule.subject_kind == "global" and matched and any(matched.groups()):
+        return re.sub(r"\s+", " ", text).strip()
     # Multi-id subjects (e.g. a ticket ref naming several tickets) keep the
     # id set, order-normalized, so ordering never changes identity.
-    ids = re.findall(r"T-\d+|SRC-\d+|E-\d+", text)
+    # T-1897: the id must START a token. Without the lookbehind, `CORE-003`
+    # yields a phantom `E-003` event and every message that cites a CORE rule
+    # acquires someone else's identity.
+    ids = re.findall(r"(?<![A-Za-z])(?:T-\d+|SRC-\d+|E-\d+)", text)
     if ids:
         return ",".join(sorted(set(ids)))
     return re.sub(r"\s+", " ", text).strip()

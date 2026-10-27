@@ -131,6 +131,34 @@ def _build_home(destination: Path, *, flatten: bool) -> None:
         shutil.copy2(member, target)
 
 
+def _ignore_runtime_state(source_root: Path):
+    """Build the ``copytree`` ignore hook for a frozen copy of ``source_root``.
+
+    ``shutil.ignore_patterns`` compares each candidate NAME against the
+    patterns, so a nested pattern like ``.saipen/locks`` never matches and the
+    exclusion silently does nothing: the copy then reads lock files the live
+    verifier holds open and dies with EACCES instead of comparing layouts.
+    Match the path RELATIVE to the copy root instead.
+    """
+    root = source_root.resolve()
+    runtime = {".saipen/cache", ".saipen/locks", ".saipen/kitchen"}
+    transient = {".git", "__pycache__", "node_modules"}
+
+    def ignore(directory: str, names: list[str]) -> set[str]:
+        try:
+            relative = Path(directory).resolve().relative_to(root).as_posix()
+        except ValueError:
+            # A tree outside `source_root` still gets the transient filter; the
+            # nested runtime paths simply cannot match without a common base.
+            relative = ""
+        prefix = "" if relative == "." else relative + "/"
+        ignored = {name for name in names if name in transient or name.endswith(".pyc")}
+        ignored.update(name for name in names if prefix + name in runtime)
+        return ignored
+
+    return ignore
+
+
 def _neutral_project(destination: Path) -> Path:
     """A minimal valid project whose root carries nothing but `.saipen/`."""
     memory = destination / ".saipen"
@@ -267,14 +295,7 @@ class InstalledValidatorLayoutParityTests(unittest.TestCase):
         with tempfile.TemporaryDirectory(prefix="saipen-layout-live-") as raw:
             tmp = Path(raw)
             frozen = tmp / "live-project"
-            shutil.copytree(
-                HOME,
-                frozen,
-                ignore=shutil.ignore_patterns(
-                    ".git", "__pycache__", "*.pyc", "node_modules",
-                    ".saipen/cache", ".saipen/locks", ".saipen/kitchen",
-                ),
-            )
+            shutil.copytree(HOME, frozen, ignore=_ignore_runtime_state(HOME))
             self._assert_parity(tmp, frozen, "live")
 
     def test_packaging_metadata_at_the_home_root_cannot_reach_the_oracle(self):
@@ -347,7 +368,9 @@ class RootStrayLocaleTests(unittest.TestCase):
                 stray.write_text("", encoding="utf-8")
             except OSError as exc:  # a filesystem that cannot hold the name
                 self.skipTest(f"filesystem refuses the stray name: {exc}")
-            project = _neutral_project(tmp / "project")
+            # T-1749: the locale control must judge the home itself; runtime
+            # root noise no longer belongs to a separate consumer's verdict.
+            project = _neutral_project(home)
             out_path = tmp / "findings.json"
             completed = subprocess.run(
                 [

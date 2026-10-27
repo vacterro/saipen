@@ -41,14 +41,19 @@ from saipen_engine.operations import (
     bind_closed_cohort,
     checkpoint,
     compact_board,
+    compact_journal,
+    detach_needs,
     finish_ticket,
     plan_claim,
     repair_metadata,
     resolve_external_ticket,
+    scrub_board,
+    seal_log,
     supersede_ticket,
     ticket_add,
     ticket_move,
     ticket_reasoning,
+    ticket_requires,
     ticket_verify,
     transition_phase,
 )
@@ -114,6 +119,13 @@ _ENTRY_HINT_ROOT: Path | None = None
 #: T-1497: set for the turn-entry questions (`continue`/`cc`/`status`); every
 #: JSON answer they emit carries the seat's unread SAIMAIL telegram counts.
 _TELEGRAM_ROOT: Path | None = None
+#: SRC-190: set for the lifecycle writes (`checkpoint`, `transition`, `ticket`)
+#: so their answer can say when the write left the project waiting for the
+#: operator -- the moment a reply is about to be composed.
+_BOUNDARY_ROOT: Path | None = None
+#: T-1661: set for the turn-entry questions and for `transition`; their answer
+#: names the declared suite's run command while the tree has no record of it.
+_SUITE_HINT_ROOT: Path | None = None
 
 
 def _agent_for(project_root: Path) -> str:
@@ -183,6 +195,98 @@ def _command_mutates(command: str, rest: list[str]) -> bool:
     if command in ("build", "vv"):
         return bool(" ".join(rest).strip())
     return classify_invocation(command, rest) != DIAGNOSTIC
+
+
+#: The commands that GRANT authority rather than consume it. SRC-306:R002
+#: (T-1881) measured `ticket add` and `claim` succeeding while an open operator
+#: decision -- and a tripped safety valve -- still stood, because the brake was
+#: enforced only by continuation entry. A route that creates or takes Work is
+#: the exact thing the decision is waiting to authorize, so it stays refused.
+#:
+#: Ingress is deliberately absent: `start`/`user-request` are how a NEW operator
+#: decision arrives, and refusing them would leave the brake with no way to be
+#: answered. Recovery is absent for the same reason -- `recover resolve-blocker`
+#: IS the brake's documented exit (`admission._BRAKE_ROUTES`).
+_AUTHORITY_GRANTING: frozenset[tuple[str, str | None]] = frozenset({
+    ("ticket", "add"),
+    ("ticket", "unblock"),
+    ("claim", None),
+    ("handoff", None),
+})
+
+
+def _authority_refusal(project_root: Path, command: str, rest: list[str]) -> dict | None:
+    """SRC-306:R002 -- does a binding brake refuse THIS authority-granting route?
+
+    One question, asked of the ONE authoritative brake (`state.binding_brake`),
+    the same truth `router.route_next` and the host's `admission` guard already
+    consume. Read-only diagnosis stays available everywhere: only the routes in
+    `_AUTHORITY_GRANTING` are refused, and only when a brake actually binds.
+
+    `transition` is deliberately NOT in that set, and that is not an oversight.
+    D-05 (the same audit) records the opposite bug -- a phase shortcut
+    overwriting a tripped valve -- and T-1880 fixed it by keeping the WAIT
+    verbatim while letting the phase move. A phase move within the Work that
+    already holds the seat manufactures no new authority; creating or taking
+    Work does. So the valve refuses `ticket add`/`claim` while `transition`
+    still moves and the WAIT survives.
+
+    `rest` carries the subcommand FIRST (`["add", "P1", ...]`), the same shape
+    the caller was dispatched with: a caller that has already peeled the
+    subcommand off would otherwise hand this function a priority and read the
+    route as unknown -- which is exactly how the first version of this gate
+    let `ticket add` through while refusing `claim`.
+    """
+    sub = rest[0] if rest and not rest[0].startswith("-") else None
+    if (command, sub) not in _AUTHORITY_GRANTING and (command, None) not in _AUTHORITY_GRANTING:
+        return None
+    from saipen_engine.board import parse_board
+    from saipen_engine.state import binding_brake, parse_state_or_error, parse_wait
+
+    state_path = _state_path(project_root)
+    board_path = project_root / ".saipen" / "BOARD.md"
+    if not state_path.is_file() or not board_path.is_file():
+        return None
+    state, state_error = parse_state_or_error(codec.read_doc(state_path))
+    if state_error or state is None:
+        return None
+    # SRC-307 (T-1882): the `init` pause is not an authority stop. INIT ends with
+    # `WAIT: init -- provide the first project goal or raw backlog`, and creating
+    # that first Work -- `ticket add`, `start`, `goal` -- IS its only documented
+    # answer. Refusing it here left a fresh project with no reachable exit, which
+    # is what `source_runtime_fixture` measured: a copied runtime could `init`
+    # and then could not seed its first ticket. The exemption is by CATEGORY, not
+    # by wording, so a rephrased init pause stays answerable too.
+    if parse_wait(state.get("next_action")) == "init":
+        return None
+    try:
+        board = parse_board(board_path.read_text(encoding="utf-8-sig"))
+    except (OSError, UnicodeDecodeError, ValueError):
+        return None
+    empty_todo = not any(
+        ticket.get("section") == "## TODO" for ticket in board["tickets"].values()
+    )
+    brake = binding_brake(state, empty_todo=empty_todo)
+    if brake is None:
+        return None
+    kind, detail = brake
+    from saipen_engine.admission import _BRAKE_ROUTES
+
+    route = _BRAKE_ROUTES.get(kind)
+    return {
+        "ok": False,
+        "code": "WAIT_BLOCKED",
+        "detail": (
+            f"{command}"
+            + (f" {sub}" if sub else "")
+            + " would grant authority while a hard stop binds: "
+            + detail
+            + " -- answer the stop first; read-only diagnosis stays available"
+        ),
+        "brake": kind,
+        "canonical_next_command": route,
+        "resume_command": route,
+    }
 
 
 def _ensure_handover(
@@ -436,6 +540,77 @@ def _invalid_capability_refusal() -> dict | None:
     }
 
 
+def _close_finished_receipts(project_root, answer: dict, **narrow) -> None:
+    """Close the source receipts whose last gate this command met (T-1666).
+
+    After the command's own write has committed: a receipt that is complete
+    and whose Work is all DONE leaves the hot surface instead of being
+    re-proved on every validation. Reported only when it did something.
+    """
+    from saipen_engine import intake as _intake
+
+    outcome = _intake.close_finished(project_root, **narrow)
+    if outcome["closed"] or outcome["refused"]:
+        answer["source_closed"] = outcome
+
+
+def _clean_entry_steps(project_root, answer: dict) -> None:
+    """Run CLEAN's mechanical steps on entry and report them (T-1640, T-1667).
+
+    The BOARD scrub, the LOG seal and the bounded journal compaction, in the
+    order phases/clean.md gives them.
+    They run HERE because nothing else may write the paths they touch: an
+    agent's write to BOARD, LOG or `.saipen/logs/` is refused by the guard.
+    Both ways into the phase call this -- the phase verb and
+    `transition CLEAN`, which is the only one of the two a guarded shell admits
+    while no Work is active.
+
+    Under its cap a step refuses with `due: False` and there is nothing to
+    say. Any other refusal is reported beside the entry into CLEAN, which it
+    never undoes: the phase is entered, and re-entering it retries the steps.
+    """
+    # T-1666: first, so the scrub below can prune the rows a receipt this
+    # closes was the last thing to hold.
+    _close_finished_receipts(project_root, answer)
+    for key, step in (
+        ("board_scrub", scrub_board),
+        ("log_seal", seal_log),
+        ("journal_compaction", compact_journal),
+    ):
+        outcome = step(project_root, _agent_for(project_root)).to_dict()
+        if outcome.get("ok") or outcome.get("due") is not False:
+            answer[key] = outcome
+
+
+def _test_session_refusal(project_root: Path) -> dict | None:
+    """Why a test session's child may not write this project, or None (T-1662).
+
+    A test that shells the engine and loses its explicit root binds the
+    working directory's project, and the write succeeds against the wrong
+    ledger. The session names the repository it runs from; a mutating command
+    that resolves to it is refused here, before dispatch, with zero writes.
+    """
+    from saipen_engine.paths import ENV_FORBID_PROJECT_WRITE, write_forbidden_root
+
+    held = write_forbidden_root(project_root)
+    if held is None:
+        return None
+    return {
+        "ok": False,
+        # The session's capability does not include this write: the code a
+        # read-only session already gets, with the cause in the detail.
+        "code": "CAPABILITY_DENIED",
+        "interlock": ENV_FORBID_PROJECT_WRITE,
+        "detail": (
+            f"{ENV_FORBID_PROJECT_WRITE} names {held}: a test session runs from this "
+            "repository, and no command it starts may write this project's memory. "
+            "Nothing was written. A test binds its fixture twice: pass --project-root "
+            "<fixture> BEFORE the command words and run from the fixture as the working "
+            "directory"
+        ),
+    }
+
+
 def _capability_refusal(as_json: bool) -> int:
     """Emit the read-only capability refusal and return exit 1 (CORE-002).
 
@@ -487,6 +662,31 @@ def _parked_work(board_tickets: dict, state: dict) -> list[str]:
             parked.append(f"{tid} untriaged [MARKHUNT]")
             seen.add(tid)
     return parked
+
+
+#: T-1787: a routing answer is read by a model that must act on `action` and
+#: `load_path`; the full parked text (87 records, 28 KB of a 32 KB `cc` answer
+#: in this repository) buried both. Routing keeps every id and its blocker
+#: class; `status` keeps the full text.
+PARKED_DETAIL = "saipen status --json"
+PARKED_LABEL_CHARS = 80
+
+
+def _parked_brief(parked: list[str] | None) -> list[str] | None:
+    """`_parked_work` cut to id and blocker class for routing answers."""
+    if not parked:
+        return None
+    brief: list[str] = []
+    for original in parked:
+        entry = original
+        head, separator, blocker = entry.partition(" blocked: ")
+        if separator:
+            label = blocker.split(" -- ", 1)[0].strip()
+            if len(label) > PARKED_LABEL_CHARS:
+                label = label[: PARKED_LABEL_CHARS - 3] + "..."
+            entry = f"{head} blocked: {label}"
+        brief.append(entry)
+    return brief
 
 
 def _permissions(project_root: Path, as_json: bool) -> int:
@@ -611,6 +811,125 @@ def _stats(project_root: Path, args: list[str], as_json: bool) -> int:
         return 0 if payload.get("ok") else 2
     print(telemetry.render(payload))
     return 0 if payload.get("ok") else 2
+
+
+def _iteration(project_root: Path, args: list[str], as_json: bool) -> int:
+    """T-1619: canonical outer-iteration verdict (DIAGNOSTIC, READ_ONLY).
+
+    The ONE machine-facing projection a host iteration controller queries
+    after every model turn, so the host never manufactures canonical
+    booleans itself. Derives terminality from STATE/BOARD/router/autonomy
+    recall/valve via ``iteration_verdict.project_iteration_verdict`` and
+    writes nothing.
+
+    Guard-safe grammar only: ``--caps-file PATH``, ``--cap NAME=0/1``
+    (repeatable), ``--executor ID``, ``--all-exhausted``. Raw inline JSON
+    is deliberately NOT an argument: ``{}"[],$`` are shell-syntax and fall
+    outside the canonical argument alphabet, so a host passes runtime
+    capabilities as a file (e.g. saved ``saipen runtime --json`` output).
+    """
+    import json as _json
+
+    caps: dict[str, object] = {}
+    caps_file: str | None = None
+    executor_id: str | None = None
+    all_exhausted = False
+    refusal: str | None = None
+    cursor = 0
+    while cursor < len(args) and refusal is None:
+        flag = args[cursor]
+        if flag == "--caps-file" and cursor + 1 < len(args):
+            caps_file = args[cursor + 1]
+            cursor += 2
+        elif flag == "--cap" and cursor + 1 < len(args):
+            pair = args[cursor + 1]
+            cursor += 2
+            if "=" not in pair:
+                refusal = f"iteration --cap needs NAME=VALUE, not {pair!r}"
+            else:
+                name, _, value = pair.partition("=")
+                name = name.strip()
+                if not name:
+                    refusal = f"iteration --cap needs NAME=VALUE, not {pair!r}"
+                else:
+                    caps[name] = value.strip()
+        elif flag == "--executor" and cursor + 1 < len(args):
+            executor_id = args[cursor + 1]
+            cursor += 2
+        elif flag == "--all-exhausted":
+            all_exhausted = True
+            cursor += 1
+        elif flag in ("--caps-file", "--cap", "--executor"):
+            refusal = f"iteration {flag} needs a value"
+        else:
+            refusal = (
+                "iteration accepts only --caps-file PATH, --cap NAME=VALUE, "
+                f"--executor ID and --all-exhausted; surplus: {flag!r}"
+            )
+    if refusal is not None:
+        _emit(
+            {
+                "ok": False,
+                "code": "VALIDATION_FAILED",
+                "detail": refusal,
+                "canonical_next_command": "saipen iteration",
+            },
+            as_json,
+        )
+        return 2
+    executor_caps: dict[str, object] | None = dict(caps) if caps else None
+    runtime_info_path = None
+    if caps_file is not None:
+        try:
+            blob = Path(caps_file).read_bytes()
+            if len(blob) > 65536:
+                raise ValueError("caps file exceeds 64 KiB")
+            document = _json.loads(blob.decode("utf-8"))
+        except (OSError, ValueError, UnicodeDecodeError) as exc:
+            _emit(
+                {
+                    "ok": False,
+                    "code": "VALIDATION_FAILED",
+                    "detail": f"iteration --caps-file unreadable: {exc}",
+                    "canonical_next_command": "saipen iteration",
+                },
+                as_json,
+            )
+            return 2
+        if isinstance(document, dict) and isinstance(document.get("capabilities"), dict):
+            merged = dict(document["capabilities"])
+            merged.update(caps)
+            executor_caps = merged
+        elif isinstance(document, dict):
+            merged = dict(document)
+            merged.update(caps)
+            executor_caps = merged
+        else:
+            _emit(
+                {
+                    "ok": False,
+                    "code": "VALIDATION_FAILED",
+                    "detail": "iteration --caps-file must hold a JSON object",
+                    "canonical_next_command": "saipen iteration",
+                },
+                as_json,
+            )
+            return 2
+    from saipen_engine import iteration_verdict
+
+    verdict = iteration_verdict.project_iteration_verdict(
+        project_root,
+        executor_caps=executor_caps,
+        runtime_info_path=runtime_info_path,
+        executor_id=executor_id,
+        all_candidates_exhausted=all_exhausted,
+    )
+    payload = {"ok": True, **verdict}
+    if as_json:
+        _emit(payload, True)
+        return 0
+    print(f"{verdict.get('decision')} {verdict.get('next_action')}")
+    return 0
 
 
 def _hex_decode(text: str) -> str | None:
@@ -866,33 +1185,37 @@ def _validate(project_root: Path, as_json: bool) -> int:
     # T-4: a verdict is only as trustworthy as the engine that produced it.
     # When the running install is not the one STATE names, this receipt was
     # written by an install no reader can name -- and VERSION cannot separate
-    # the two, because divergent trees report the same number. Gate here
-    # rather than at routing: a wrong install must fail conformance loudly,
-    # but refusing ordinary commands would break legitimate sub-instances.
+    # the two, because divergent trees report the same number. Use the same
+    # identity decision as mutation admission and continuation recovery.
     #
     # Reported on its own field rather than folded into `detail`, so it stays
     # visible when some OTHER gate is already failing -- an ambiguous install
     # must never hide behind an unrelated verdict.
-    from saipen_engine.state import (
-        install_content_identity as _install_content_identity,
-        running_home as _running_home,
-        running_home_mismatch_error as _running_home_mismatch_error,
+    from saipen_engine.install_identity import (
+        STATUS_PERSISTED_HOME_UNREADABLE, diagnose_install_mismatch,
     )
 
     _state_fields, _state_err = parse_state_or_error(codec.read_doc(_state_path(project_root)))
-    _home_problem = (
-        None
-        if _state_fields is None
-        else _running_home_mismatch_error(_state_fields.get("saipen_home"))
+    _identity = diagnose_install_mismatch(
+        _state_fields.get("saipen_home") if _state_fields else None
     )
+    _home_problem = _identity["detail"] if _identity["is_blocking"] else None
     _install_block = {
-        "running_home": str(_running_home()),
-        "install_fingerprint": _install_content_identity(),
+        "running_home": _identity["running_home"],
+        "persisted_home": _identity["persisted_home"],
+        "install_fingerprint": _identity["running_fingerprint"],
+        "persisted_fingerprint": _identity["persisted_fingerprint"],
+        "status": _identity["status"],
         "mismatch": _home_problem,
     }
-    if _home_problem and healthy:
+    if _home_problem:
         healthy = False
-        code = "INSTALL_IDENTITY_MISMATCH"
+        code = (
+            "CROSS_USER_RUNTIME_UNAVAILABLE"
+            if _identity["status"] == STATUS_PERSISTED_HOME_UNREADABLE
+            and _identity.get("remediation_command") is None
+            else "INSTALL_IDENTITY_MISMATCH"
+        )
         detail = _home_problem
     if run.error:
         code = CONFORMANCE_UNAVAILABLE
@@ -929,6 +1252,16 @@ def _validate(project_root: Path, as_json: bool) -> int:
         payload["detail"] = detail
         if code == CONFORMANCE_UNAVAILABLE:
             payload["canonical_next_command"] = CONFORMANCE_REMEDIATION_COMMAND
+        elif code == "CROSS_USER_RUNTIME_UNAVAILABLE":
+            payload["canonical_next_command"] = None
+            payload["repair_status"] = "ENGINEERING_REQUIRED"
+            payload["diagnostic"] = code
+            payload["terminal"] = False
+        elif code == "INSTALL_IDENTITY_MISMATCH":
+            payload["canonical_next_command"] = "saipen rebind-home --auto"
+            payload["repair_status"] = "REBIND_REQUIRED"
+            payload["diagnostic"] = "INSTALL_IDENTITY_MISMATCH"
+            payload["terminal"] = False
         else:
             command = decision["remediation_command"]
             payload["canonical_next_command"] = command
@@ -1218,7 +1551,26 @@ def _guard_event(project_root_opt: str | None, args: list[str], as_json: bool) -
             as_json,
         )
         return 1
-    admission_result = guard_events.evaluate_event(event, project_root_opt)
+    def question_context(root: Path) -> dict:
+        # The SAME status owner used by continuation, not a second work/WAIT
+        # predicate in a host adapter. This callback runs only for a question
+        # in a resolved project; ordinary diagnostics pay nothing for it.
+        captured = StringIO()
+        with redirect_stdout(captured):
+            rc = _status(root, True)
+        status = json.loads(captured.getvalue())
+        context = {"status": status if rc == 0 else {"ok": False}}
+        if rc == 0 and (status.get("automation") or {}).get("operator_action_due") is True:
+            from saipen_engine import response_surface
+
+            facts = response_surface.canonical_facts(root, status=status)
+            context["operator_action"] = facts.get("operator_action")
+            context["canonical_surface"] = response_surface.digest_from_facts(facts)
+        return context
+
+    admission_result = guard_events.evaluate_event(
+        event, project_root_opt, question_context_provider=question_context,
+    )
     _guard_event_probe(event, admission_result)
     _emit(admission_result, as_json)
     return 0 if admission_result.get("admitted") else 1
@@ -1396,6 +1748,19 @@ def _cold_route(project_root: Path, state: dict | None, state_text: str = "") ->
             match = re.search(r'^phase:\s*"?([^"\r\n]+?)"?\s*$', head, re.MULTILINE | re.IGNORECASE)
             phase = match.group(1).strip() if match else ""
     home = Path(home_text).expanduser() if home_text else None
+    runtime_source = None
+    if home is not None:
+        from saipen_engine import machine_runtime
+        from saipen_engine.state import HOME_INACCESSIBLE, persisted_home_access
+
+        if persisted_home_access(home_text)[0] == HOME_INACCESSIBLE:
+            # The recorded home is another user's install. The documents this
+            # account can open are the machine runtime's, when it is the one
+            # running (T-1647); the project's pointer is left as it is.
+            machine = machine_runtime.executing()
+            if machine is not None:
+                home = Path(machine["home"])
+                runtime_source = "MACHINE_RUNTIME"
     protocol_dir = None
     if home is not None:
         try:
@@ -1420,7 +1785,7 @@ def _cold_route(project_root: Path, state: dict | None, state_text: str = "") ->
         candidate = root / ".saipen" / name
         if candidate.is_file():
             project_memory[name] = str(candidate)
-    return {
+    located = {
         "project_root": str(root),
         "saipen_home": str(home) if home is not None else None,
         "protocol_dir": str(protocol_dir) if protocol_dir is not None else None,
@@ -1434,6 +1799,18 @@ def _cold_route(project_root: Path, state: dict | None, state_text: str = "") ->
         # host search layer, so a broken ripgrep cannot stop skill startup.
         "search_required": False,
     }
+    if runtime_source:
+        located["runtime_source"] = runtime_source
+        located["recorded_saipen_home"] = home_text
+    # T-1654: the project's own instruction file is the first thing the NEXT
+    # cold agent reads. A SAIPEN block of another generation in it is named
+    # here, on the command every session runs; absent when nothing is owed.
+    from saipen_engine import project_block
+
+    instructions = project_block.projection(root)
+    if instructions.get("action"):
+        located["instructions"] = instructions
+    return located
 
 
 def _malformed_route(state_text: str, board_text: str, state_error: str) -> dict:
@@ -1488,6 +1865,44 @@ def _status(project_root: Path, as_json: bool) -> int:
         )
         return 1
     board = parse_board(board_text)
+    from saipen_engine.reconcile import checkpoint_ledger_diagnostic
+
+    # T-1671: a lifecycle head no operation produced is not a status to
+    # project. Reporting phase DONE and an idle route over a hand-written
+    # completion is how the forgery became the project's truth; the refusal
+    # carries the same route an invalid checkpoint does.
+    from saipen_engine import lifecycle_authority as _lifecycle_authority
+
+    _lifecycle = _lifecycle_authority.assess(project_root, state, board, snap.history_events)
+    if _lifecycle["status"] == _lifecycle_authority.UNAUTHORIZED:
+        diagnostic = checkpoint_ledger_diagnostic(
+            project_root, {"ok": False, "code": _lifecycle_authority.CODE}
+        )
+        if diagnostic is not None:
+            _emit(
+                {**diagnostic, "cold_route": _cold_route(project_root, state, state_text)}, as_json
+            )
+            return 1
+        _emit(
+            {
+                "ok": False,
+                "code": _lifecycle_authority.CODE,
+                "action": "saipen recover",
+                "reason": _lifecycle_authority.CLASS,
+                "detail": _lifecycle_authority.refusal_detail(_lifecycle),
+                "lifecycle_authority": {
+                    "floor": _lifecycle["floor"],
+                    "head": _lifecycle["head"][:16],
+                    "findings": [
+                        {key: value for key, value in finding.items() if key != "detail"}
+                        for finding in _lifecycle["findings"]
+                    ],
+                },
+                "cold_route": _cold_route(project_root, state, state_text),
+            },
+            as_json,
+        )
+        return 1
     doing = [t for t in board["tickets"].values() if t["section"] == "## DOING"]
     todo = [t for t in board["tickets"].values() if t["section"] == "## TODO"]
     done_tickets = [t for t in board["tickets"].values() if t["section"] == "## DONE"]
@@ -1540,9 +1955,18 @@ def _status(project_root: Path, as_json: bool) -> int:
     # provably refuses. One owner: `router.gate_route`.
     from saipen_engine.router import gate_route
 
-    _status_gated = gate_route(project_root, routed)
+    _status_gated = gate_route(project_root, routed, agent=resolved_agent)
     if _status_gated is not None:
         routed = _status_gated
+    # T-1751: a reconcile decision the continuation refuses on is the
+    # operator's, so it is listed where every human wait is listed.
+    _reconcile_wait = (
+        routed.get("operator_action") if routed.get("reason") == "reconcile-decision" else None
+    )
+    diagnostic = checkpoint_ledger_diagnostic(project_root, routed)
+    if diagnostic is not None:
+        _emit({**diagnostic, "cold_route": _cold_route(project_root, state, state_text)}, as_json)
+        return 1
     if not routed.get("ok") and routing_failure_code(routed) == "VALIDATION_FAILED":
         # A malformed/binding failure must NOT project a healthy surface from
         # corrupt input (T-1003): status fails closed with the router's
@@ -1575,6 +1999,8 @@ def _status(project_root: Path, as_json: bool) -> int:
     next_act = state.get("next_action") or ""
     if next_act.startswith("WAIT:"):
         waiting_on_you.append(next_act)
+    if _reconcile_wait:
+        waiting_on_you.append(f"{routed.get('code')}: {_reconcile_wait}")
     for bt in blocked_tickets:
         # Human waits live in the parsed BOARD field map (`fields`), never at
         # the ticket-record level -- `ticket["fields"]["blocker"]` is the
@@ -1668,6 +2094,9 @@ def _status(project_root: Path, as_json: bool) -> int:
         "computed_reason": routed.get("reason"),
         "blocker": state.get("blocker"),
         "execution_intent": state.get("execution_intent"),
+        **{key: state[key] for key in (
+            "continuation_authority", "authority_source", "authority_until", "safety_valve_mode"
+        ) if key in state},
         "claimed_ticket": doing[0]["id"] if doing else None,
         "top_workable_ticket": top_workable,
         "log_tail_event": snap.log_tail,
@@ -1678,6 +2107,10 @@ def _status(project_root: Path, as_json: bool) -> int:
         "pending_ops": pending,
         "conflict_ops": conflicts,
     }
+    if not board["errors"]:
+        from saipen_engine.board import project_blockers
+
+        payload["blocker_projection"] = project_blockers(board["tickets"])
     if state.get("phase") == "CLEAN":
         payload["clean_execution"] = "PENDING"
     elif state.get("phase") == "DONE" and state.get("transition_from") == "CLEAN":
@@ -1694,6 +2127,11 @@ def _status(project_root: Path, as_json: bool) -> int:
             if event_text.startswith("clean -> done @"):
                 completed = True
         payload["clean_execution"] = "COMPLETED" if completed else "UNPROVEN"
+    from saipen_engine.goal_authority import describe as describe_goal_authority
+
+    payload["goal_authority"] = describe_goal_authority(
+        project_root, state, history_events=snap.history_events
+    )
     # Restore Milestones are a separate, optional authority domain.  Status
     # reads bounded metadata only; full payload integrity belongs to create,
     # undo and validate, never the common `sss` hot path.
@@ -1754,10 +2192,12 @@ def _status(project_root: Path, as_json: bool) -> int:
     # T-1234: the operator surface names the inbox in counts, never in prose
     # from an audit body. An absent `audit/` renders nothing at all -- a
     # project with no inbox should not grow a permanent empty section.
+    _status_inbox = None
     try:
         from saipen_engine.audit_inbox import status as audit_inbox_status
 
         _inbox = audit_inbox_status(project_root)
+        _status_inbox = _inbox
         _summary = {
             "pending": len(_inbox.get("pending") or []),
             "active_layer": next(
@@ -1802,6 +2242,83 @@ def _status(project_root: Path, as_json: bool) -> int:
         # The inbox is transport, not terminal truth: a projection failure is
         # reported as a condition, never allowed to hide behind a green status.
         payload["audit_inbox"] = {"error": f"{type(exc).__name__}: {exc}"}
+        _status_inbox = None
+
+    # T-1862/SRC-294: the DIMENSIONS THAT OUTLIVE THE EXECUTION PHASE.
+    # `phase` above is the lifecycle verdict for the last execution ticket and
+    # keeps exactly its original meaning. It is not, and never was, a project
+    # completeness claim: a project can be DONE with an unconsumed audit layer
+    # and non-terminal source clauses, and until this projection existed no
+    # field could say so. Every input is a fact this command already holds plus
+    # two read-only aggregates; it writes nothing and grants nothing.
+    from saipen_engine import intake as _intake
+    from saipen_engine import readiness as _readiness
+
+    _readiness_error = None
+    try:
+        try:
+            _index = _intake._read_index(project_root)
+        except (OSError, ValueError):
+            # Unreadable is not empty. `None` reaches the derivation as
+            # receipts_known: False so the status refuses to claim acceptance;
+            # an empty list would read as "no obligation outstanding".
+            _index = None
+        if _index is None:
+            _receipts = None
+            _tombstones = {}
+        else:
+            _active = sorted((_index.get("active") or {}))
+            _receipts = []
+            for _rid in _active:
+                try:
+                    _summary = _intake.coverage_summary(project_root, _rid)
+                except (OSError, ValueError) as exc:
+                    # A malformed ledger is INTEGRITY, never zero coverage:
+                    # counting it as nothing outstanding is the false-
+                    # completion defect.
+                    raise ValueError(f"coverage {_rid}: {type(exc).__name__}") from exc
+                _receipts.append(
+                    {
+                        "receipt": _rid,
+                        "requirements": _summary["requirements"],
+                        "unresolved": len(_summary["unresolved"]),
+                    }
+                )
+            _tombstones = _index.get("tombstones") or {}
+        try:
+            _orphans = _intake.recover_orphans(project_root)
+        except (OSError, ValueError):
+            _orphans = None
+        payload["readiness"] = _readiness.derive(
+            state=state,
+            tickets=board["tickets"],
+            top_workable=top_workable,
+            inbox=_status_inbox,
+            receipts=_receipts,
+            tombstones=_tombstones,
+            orphans=_orphans,
+            goal_authority=payload.get("goal_authority"),
+        )
+    except Exception as exc:
+        _readiness_error = f"{type(exc).__name__}: {exc}"
+        # A readiness fault may never hide behind a green status, and it may
+        # never be reported as acceptance either.
+        payload["readiness"] = {
+            "schema_version": _readiness.SCHEMA_VERSION,
+            "rule_id": _readiness.RULE_ID,
+            "status": "UNKNOWN",
+            "headline": "readiness projection unavailable",
+            "accepted": False,
+            "ready": False,
+            "reasons": [f"readiness derivation failed: {_readiness_error}"],
+            "execution": {
+                "phase": state.get("phase"),
+                "task": state.get("task"),
+                "terminal_phase": str(state.get("phase") or "").upper() in ("DONE", "SHIP"),
+            },
+            "grants_authority": False,
+            "authority_unchanged": True,
+        }
 
     # T-1271: whether an installed agent home runs current SAIPEN was
     # answerable only by opening a log under LOCALAPPDATA. The stamps and the
@@ -1950,6 +2467,26 @@ def _status(project_root: Path, as_json: bool) -> int:
         )
         return 1
 
+    # Historical drift is an observation, never a project-wide admission brake.
+    from saipen_engine.closed_contracts import inspect as inspect_contracts
+
+    payload["closed_contracts"] = inspect_contracts(project_root, limit=5)
+    payload["closed_contracts"].pop("duration_ms", None)
+
+    # T-1734: source-drift advisory. A DONE Work's closure can cite verified
+    # bytes; a later tree change drifts away from them silently. Read-only
+    # observation only -- it is never a gate, so a projection fault reports a
+    # condition and never hides behind a green status.
+    try:
+        from saipen_engine.source_binding import advisory as _source_binding
+
+        _drift = _source_binding(project_root)
+    except Exception as exc:
+        payload["source_drift_error"] = f"{type(exc).__name__}: {exc}"
+    else:
+        if _drift:
+            payload["source_drift"] = _drift
+
     # SRC-021 R2: the read-only Run-to-Closure automation block. Classified
     # from the SAME evidence this projection already holds (parsed state and
     # board, the route verdict, history events, the audit inbox status), so
@@ -1960,7 +2497,9 @@ def _status(project_root: Path, as_json: bool) -> int:
         from saipen_engine.audit_inbox import status as _audit_inbox_status
 
         try:
-            _audit_status = _audit_inbox_status(project_root)
+            _audit_status = (
+                _status_inbox if _status_inbox is not None else _audit_inbox_status(project_root)
+            )
         except Exception:
             _audit_status = None
         try:
@@ -2071,6 +2610,12 @@ def _continue_improve_fallthrough(
     """
 
     def _emit_result(payload: dict) -> None:
+        # T-38: every outcome of this fallthrough names the assigned cycle's
+        # liveness (age, draft/no-RUN state, submit route), so a stale cycle
+        # is visible work rather than a clean idle verdict.
+        from saipen_engine.continue_fallback import with_cycle_liveness
+
+        payload = with_cycle_liveness(payload, project_root)
         if chain_trace:
             payload = {
                 **payload,
@@ -2083,6 +2628,7 @@ def _continue_improve_fallthrough(
     from saipen_engine.continue_fallback import (
         active_cycle_status,
         read_marker,
+        resume_action,
         source_unchanged,
         write_marker,
     )
@@ -2097,20 +2643,23 @@ def _continue_improve_fallthrough(
             # The improvement discovery is already in flight (an active cycle
             # was prepared by a prior `continue`). Resume is `improve`'s own
             # semantics; re-preparing here would duplicate. Emit the resume
-            # point rather than a second discovery.
+            # point rather than a second discovery. T-1775: the point is read
+            # from the cycle; bare `saipen improve` admits a new seat whenever
+            # every seat has content, so it is never the resume point. The
+            # family is the one `improve` allocates seats under: STATE.agent.
+            _seat_state, _ = parse_state_or_error(codec.read_doc(_state_path(project_root)))
+            _resume, _resume_detail = resume_action(
+                project_root, prior_cycle, str((_seat_state or {}).get("agent") or "agent")
+            )
             _emit_result(
                 {
                     "ok": True,
                     "code": "CONTINUE_IMPROVE_IN_FLIGHT",
                     "cycle_id": prior_cycle,
-                    "action": "saipen improve",
+                    "action": _resume,
                     "reason": "improve-in-flight",
                     "dry_run": bool(dry_run),
-                    "detail": (
-                        "improvement discovery cycle "
-                        f"{prior_cycle} is already active; resume it "
-                        "(saipen improve) instead of preparing a duplicate"
-                    ),
+                    "detail": _resume_detail,
                 }
             )
             return 0
@@ -2122,10 +2671,20 @@ def _continue_improve_fallthrough(
     # blocked by this -- only the automatic fallthrough is.
     _unchanged, _identity_detail = source_unchanged(project_root, marker)
     if _unchanged:
+        from saipen_engine import goal_authority as _ga
+        _st, _ = parse_state_or_error(codec.read_doc(_state_path(project_root)))
+        # T-1875 (SRC-304): a quiescent campaign is a claim the grant must
+        # prove. `is_continuous_maintenance` reads only the STATE tuple, so
+        # emitting QUIESCENT on it alone let a state file assert a standing
+        # campaign. The proven predicate keeps the same public shape while
+        # making the claim falsifiable.
+        _is_cm = _ga.continuous_maintenance_proven(project_root, _st or {})
         _emit_result(
             {
                 "ok": True,
-                "code": "CONTINUE_IDLE_SOURCE_UNCHANGED",
+                "code": "CONTINUE_QUIESCENT_IDLE" if _is_cm else "CONTINUE_IDLE_SOURCE_UNCHANGED",
+                "quiescent": _is_cm,
+                "continuous_maintenance": _is_cm,
                 "action": "saipen status",
                 "reason": "improve-source-unchanged",
                 "dry_run": bool(dry_run),
@@ -2206,7 +2765,7 @@ def _continue_improve_fallthrough(
     return 1
 
 
-def _route_once(project_root: Path) -> dict:
+def _route_once(project_root: Path, *, reconciled: dict | None = None) -> dict:
     """ONE read-only route computation, shared by `next` and the chain (T-1416).
 
     Returns either a terminal `emitted` payload with its exit code, or the
@@ -2263,12 +2822,19 @@ def _route_once(project_root: Path) -> dict:
         route_next,
         routing_failure_code,
     )
+    from saipen_engine import dispatch_admission
 
     # P0#4: the freshly negotiated current-session capability gates routing.
     # T-1006: routing judges claim truth against the canonical acting seat.
     resolved_agent = (
         _AGENT_OVERRIDE if _AGENT_OVERRIDE is not None else (state.get("agent") or AGENT)
     )
+    # SRC-274:R003: the queued receipt is read ONCE and answered for, not only
+    # consulted when the seat happens to be free. `dispatch_admission` turns it
+    # into the admitted/queued/refused verdict this route answer carries, so a
+    # fresh objective is never silently substituted out of view by persisted
+    # Work. Read-only: nothing here consumes the receipt.
+    _queued = queued_source_projection(project_root)
     routed = route_next(
         state_text,
         board_text,
@@ -2278,7 +2844,7 @@ def _route_once(project_root: Path) -> dict:
         current_agent=resolved_agent,
         snap=snap,
         audit_inbox=audit_inbox_projection(project_root),
-        queued_source=queued_source_projection(project_root),
+        queued_source=_queued,
         pending_append=pending_append_projection(project_root),
         future_gate=future_gate_projection(project_root, board_text),
     )
@@ -2287,9 +2853,14 @@ def _route_once(project_root: Path) -> dict:
     # provably refuses. One owner: `router.gate_route`.
     from saipen_engine.router import gate_route
 
-    _gated = gate_route(project_root, routed)
+    _gated = gate_route(project_root, routed, reconciled=reconciled, agent=resolved_agent)
     if _gated is not None:
         routed = _gated
+    from saipen_engine.reconcile import checkpoint_ledger_diagnostic
+
+    diagnostic = checkpoint_ledger_diagnostic(project_root, routed)
+    if diagnostic is not None:
+        return {"emitted": diagnostic, "rc": 1}
     route = {
         "emitted": None,
         "rc": 0,
@@ -2302,6 +2873,9 @@ def _route_once(project_root: Path) -> dict:
         "pending": pending,
         "conflicts": conflicts,
         "routed": routed,
+        "dispatch_admission": dispatch_admission.decision(
+            project_root, state=state, board=board, queued_source=_queued
+        ),
     }
     if not routed.get("ok"):
         # The router owns the stable failure code: recovery conflicts/pending
@@ -2347,6 +2921,69 @@ def _turn_entry_telegrams(project_root: Path, state: dict) -> dict:
         return {"state": "ERROR", "detail": f"turn-entry telegram read failed: {exc}"[:300]}
 
 
+#: Where a source receipt's bytes may live, by canonical relative path. A
+#: locator names only paths that exist; it never searches (T-1645).
+_SOURCE_LOCATIONS = (
+    ("body", ".saipen/intake/active/{rid}.md"),
+    ("meta", ".saipen/intake/active/{rid}.meta.json"),
+    ("archived_body", ".saipen/archive/source/{rid}.md"),
+    ("contract", ".saipen/intake/contracts/{rid}.json"),
+    ("coverage", ".saipen/intake/coverage/{rid}.json"),
+)
+_WORK_RECORD_MAX = 1200
+
+
+def _current_work(project_root: Path, board_text: str, ticket_id) -> dict | None:
+    """The routed ticket's own record and locators (T-1645), or None.
+
+    The router already resolved WHICH Work is current; this hands the agent
+    that Work's BOARD record, detail reference and source receipts by exact
+    path, so entering the phase never needs a BOARD grep or a `.saipen`
+    search. Read-only and bounded: one parse of the BOARD text the route used.
+    """
+    tid = str(ticket_id or "").strip()
+    if not re.fullmatch(r"T-\d+", tid) or not board_text:
+        return None
+    try:
+        from saipen_engine.board import parse_board
+
+        ticket = parse_board(board_text).get("tickets", {}).get(tid)
+    except Exception:  # a malformed BOARD is the route's finding, not this one
+        return None
+    if ticket is None:
+        return {"id": tid, "on_board": False}
+    root = Path(project_root)
+    fields = ticket.get("fields", {})
+    sources = []
+    for rid in [r.strip() for r in str(fields.get("source_receipts") or "").split(",")]:
+        if not re.fullmatch(r"SRC-\d+", rid):
+            continue
+        located = {"id": rid}
+        for key, pattern in _SOURCE_LOCATIONS:
+            candidate = root / pattern.format(rid=rid)
+            if candidate.is_file():
+                located[key] = str(candidate)
+        sources.append(located)
+    detail = str(fields.get("detail_ref") or "").strip()
+    raw = str(ticket.get("raw") or "")
+    return {
+        "id": tid,
+        "on_board": True,
+        "section": ticket.get("section"),
+        "board": str(root / ".saipen" / "BOARD.md"),
+        "board_line": ticket.get("line_no"),
+        "record": raw[:_WORK_RECORD_MAX],
+        "record_truncated": len(raw) > _WORK_RECORD_MAX,
+        "verify": fields.get("verify"),
+        "needs": list(ticket.get("needs") or []),
+        "blocker": fields.get("blocker"),
+        "detail_ref": (
+            str(root / detail) if detail and (root / detail).is_file() else (detail or None)
+        ),
+        "source_receipts": sources,
+    }
+
+
 def _route_payload(
     project_root: Path,
     route: dict,
@@ -2382,6 +3019,9 @@ def _route_payload(
         "future_gate": routed.get("future_gate"),
         "load": load,
         "load_path": load_path,
+        "work": _current_work(
+            project_root, route.get("board_text") or "", routed.get("ticket") or subject
+        ),
         "cold_route": cold_route,
         "execution_instruction": (
             "Routing is not completion evidence. Read load_path when present, "
@@ -2392,12 +3032,48 @@ def _route_payload(
         "converge_target": state.get("converge_target"),
         "goal_waves": state.get("goal_waves"),
         "goal_tickets": state.get("goal_tickets"),
+        **{key: state[key] for key in (
+            "continuation_authority", "authority_source", "authority_until", "safety_valve_mode"
+        ) if key in state},
         "recovery_pending": bool(route["pending"]),
         "recovery_conflict": False,
         "pending_ops": route["pending"],
-        "parked_work": route["parked"] or None,
+        "parked_work": _parked_brief(route["parked"]),
+        "parked_detail": PARKED_DETAIL if route["parked"] else None,
         "reconciliation": reconciliation,
+        "stop_reason": routed.get("stop_reason"),
+        "terminal_classification": routed.get("terminal_classification"),
     }
+    # SRC-274:R003: a fresh objective waiting behind this route is a FACT the
+    # answer states, not something a reader infers from silence. Absent means
+    # no fresh unprojected operator receipt exists at all.
+    if route.get("dispatch_admission") is not None:
+        payload["dispatch_admission"] = route["dispatch_admission"]
+    if routed.get("stop_reason") == "NO_ADMISSIBLE_WORK":
+        from saipen_engine.external import classify_blocked_inventory
+
+        payload["blocked_classification"] = classify_blocked_inventory(
+            route["board"]["tickets"], project_root
+        )["counts"]
+    if route.get("doctor"):
+        # T-1792: the revalidation that made this route reachable.
+        payload["doctor"] = route["doctor"]
+    try:
+        from saipen_engine import sailearn_consumer as _sc
+        _lib_stat = _sc.status()
+        if _lib_stat.get("available"):
+            _target = str(
+                routed.get("ticket") or routed.get("action") or routed.get("detail") or ""
+            )
+            if _target:
+                _ans = _sc.query(_target, limit=2)
+                if _ans.get("hits"):
+                    payload["librarian_advisory"] = _sc.format_advisory(_ans)
+                    _metrics = dict(_ans.get("metrics") or {})
+                    _metrics.pop("duration_ms", None)
+                    payload["librarian_metrics"] = _metrics
+    except Exception:
+        pass
     if dry_run and kind is not None:
         from saipen_engine import continue_loop
 
@@ -2446,12 +3122,61 @@ def _route_payload(
     return payload
 
 
+def _auto_external_revalidate(
+    project_root: Path,
+    route: dict,
+    reconciliation: dict | None,
+    budget: dict,
+    *,
+    dry_run: bool = False,
+    cache: dict | None = None,
+) -> tuple[dict, dict | None]:
+    """Autonomous cross-repository dependency verification and reconciliation.
+
+    When NO_ADMISSIBLE_WORK is reached during continuation, boundedly inspect
+    external dependencies, verify authoritative evidence, and canonically
+    reconcile eligible local tickets via ticket resolve-external.
+    """
+    read_only = not dry_run and _negotiate_capability(project_root) == "read-only"
+    if budget.get("left", 0) < 1 or read_only:
+        return route, None
+    from saipen_engine.external import revalidate_external_dependencies
+
+    agent = _agent_for(project_root)
+    budget["left"] = budget.get("left", 0) - 1
+    outcome = revalidate_external_dependencies(
+        project_root, agent, dry_run=dry_run, cache=cache
+    )
+    record = {
+        "iteration": 0,
+        "action": "revalidate-external",
+        "kind": "revalidate-external",
+        "operation": "revalidate_external",
+        "discovered": outcome.get("discovered", 0),
+        "inspected": outcome.get("inspected", 0),
+        "revalidated": outcome.get("revalidated", 0),
+        "resolved": outcome.get("resolved", []),
+        "resumed_parents": outcome.get("resumed_parents", []),
+        "still_blocked": outcome.get("still_blocked", []),
+        "inaccessible": outcome.get("inaccessible", []),
+        "ok": bool(outcome.get("ok")),
+    }
+    if outcome.get("resolved"):
+        after_route = _route_once(project_root, reconciled=reconciliation)
+        return after_route, record
+    return route, record
+
+
 def _continue_chain(
     project_root: Path,
     as_json: bool,
     first_route: dict,
     *,
     reconciliation: dict | None,
+    doctor_budget: dict | None = None,
+    external_budget: dict | None = None,
+    external_cache: dict | None = None,
+    external_trace: list[dict] | None = None,
 ) -> int:
     """Drive deterministic canonical operations until a real boundary (T-1416).
 
@@ -2466,7 +3191,13 @@ def _continue_chain(
     from saipen_engine.operations import apply_claim, finish_ticket
 
     agent = _agent_for(project_root)
-    trace: list[dict] = []
+    # T-1792: a revalidation the doctor ran before the chain is its first step.
+    trace: list[dict] = [first_route["doctor"]] if first_route.get("doctor") else []
+    if external_trace:
+        trace.extend(external_trace)
+    doctor_budget = doctor_budget if doctor_budget is not None else {"left": 5}
+    external_budget = external_budget if external_budget is not None else {"left": 1}
+    external_cache = external_cache if external_cache is not None else {}
     iterations = 0
     refinements = 0
     route = first_route
@@ -2535,9 +3266,28 @@ def _continue_chain(
             continue_loop.PROMOTE_FUTURE_GATE,
             continue_loop.REFRESH_FUTURE_GATE,
             continue_loop.REFINE_FUTURE_GATE,
+            continue_loop.APPLY_AUDIT_INGEST,
+            continue_loop.APPLY_REBIND_HOME,
         ):
             before_event = state.get("last_event")
-            if kind == continue_loop.APPLY_APPEND:
+            closure: dict = {}
+            if kind == continue_loop.APPLY_REBIND_HOME:
+                from saipen_engine.operations import rebind_home_auto
+
+                outcome = rebind_home_auto(project_root, agent, dry_run=False)
+                ticket = None
+                step_ok = bool(outcome.ok)
+                step_code = str(outcome.code or "HOST_BINDING_CONVERGED")
+                failure_payload = outcome.to_dict()
+                operation_name = "rebind_home_auto"
+            elif kind == continue_loop.APPLY_AUDIT_INGEST:
+                outcome, _rc = _perform_audit_ingest(project_root, agent, dry_run=False)
+                ticket = outcome.get("work") or outcome.get("ticket")
+                step_ok = bool(outcome.get("ok"))
+                step_code = str(outcome.get("code") or "AUDIT_INGESTED")
+                failure_payload = outcome
+                operation_name = "audit_ingest"
+            elif kind == continue_loop.APPLY_APPEND:
                 from saipen_engine.source_append import apply_append
 
                 ticket = routed.get("ticket")
@@ -2600,6 +3350,11 @@ def _continue_chain(
                 if kind == continue_loop.FINISH_AT_SHIP:
                     result = finish_ticket(project_root, ticket, agent)
                     operation_name = "ticket_done"
+                    if result.ok:
+                        # T-1778: the receipt closure `ticket done` runs
+                        # (T-1666), so a Work finished here does not leave
+                        # its fully covered Source ACTIVE.
+                        _close_finished_receipts(project_root, closure, works=[ticket])
                 else:
                     # T-1436: the resumed parent is UNCLAIMED, so the router's own
                     # adoption action is the next mechanical step. It is the same
@@ -2612,7 +3367,16 @@ def _continue_chain(
                     result.code,
                     result.to_dict(),
                 )
-            after_route = _route_once(project_root) if step_ok else None
+            after_route = (
+                _route_once(project_root, reconciled=reconciliation) if step_ok else None
+            )
+            if after_route is not None and after_route["emitted"] is not None:
+                # T-1792: the chain's own write (a finish, a claim) can stale
+                # the receipt the next route needs; the same one revalidation
+                # per cc applies here.
+                after_route = _auto_doctor(
+                    project_root, after_route, reconciliation, doctor_budget
+                )
             trace.append(
                 {
                     "iteration": iterations + 1,
@@ -2628,12 +3392,16 @@ def _continue_chain(
                     ),
                 }
             )
+            if closure.get("source_closed"):
+                trace[-1]["source_closed"] = closure["source_closed"]
+            if after_route is not None and after_route.get("doctor"):
+                trace.append(after_route["doctor"])
             if not step_ok:
                 payload = dict(failure_payload)
                 payload.update(
                     {
                         "recovery_pending": bool(route["pending"]),
-                        "parked_work": route["parked"] or None,
+                        "parked_work": _parked_brief(route["parked"]),
                         "continue_trace": trace,
                         "iterations": iterations,
                         "stop_reason": "refusal",
@@ -2683,6 +3451,27 @@ def _continue_chain(
                 return 0
             seen.add(identity)
             continue
+        if (
+            routed.get("stop_reason") == "NO_ADMISSIBLE_WORK"
+            and external_budget.get("left", 0) > 0
+        ):
+            after_ext, ext_record = _auto_external_revalidate(
+                project_root,
+                route,
+                reconciliation,
+                external_budget,
+                dry_run=False,
+                cache=external_cache,
+            )
+            if ext_record:
+                ext_record["iteration"] = iterations + 1
+                trace.append(ext_record)
+            if ext_record and ext_record.get("resolved"):
+                route = after_ext
+                identity = _witness(route)
+                if identity not in seen:
+                    seen.add(identity)
+                    continue
         if kind == continue_loop.IDLE_MAINTAIN:
             # The single bounded Improve fallthrough keeps its existing owner
             # and semantics; the hold from ROOT B gates it when it must, and
@@ -2710,9 +3499,228 @@ def _continue_chain(
         )
         payload["continue_trace"] = trace
         payload["iterations"] = iterations
-        payload["stop_reason"] = "refusal" if route["emitted"] is not None else "boundary"
+        payload["stop_reason"] = routed.get("stop_reason") or (
+            "refusal" if route["emitted"] is not None else "boundary"
+        )
         _emit(payload, as_json)
         return route["rc"]
+
+
+#: T-1792 (SRC-253), T-1818 (SRC-277): conformance statuses whose canonical cure is re-running
+#: the validator -- the evidence aged, is absent, another validator version wrote it, or code
+#: changes invalidated an earlier failure. CURRENT_FAIL is a measured failure, INVALID_RECEIPT
+#: an integrity question, and fabricated future-dated receipts stop.
+_DOCTOR_REVALIDATE = frozenset({"STALE_PASS", "NOT_RUN", "VALIDATOR_VERSION_MISMATCH"})
+
+
+def _auto_doctor(
+    project_root: Path,
+    route: dict,
+    reconciliation: dict | None,
+    budget: dict,
+    *,
+    dry_run: bool = False,
+) -> dict:
+    """Self-healing continuation, stage 3 (T-1792, SRC-253, T-1818): ONE revalidation.
+
+    A `cc` whose route the conformance gate refused for stale evidence handed
+    the operator `saipen validate` and stopped; they had to leave the cc
+    workflow, run it and send cc again (the Wintage STALE_PASS incident). The
+    doctor runs that exact canonical command -- its only write is the receipt
+    -- re-reads the decision through a fresh route from current bytes, and
+    resumes the original continuation. Bounded: one revalidation per cc
+    (`budget`); a receipt that is stale again right after it, a validator
+    that does not reach CURRENT_PASS, a status outside `_DOCTOR_REVALIDATE` or
+    a read-only session stops with the gate's own refusal and a `doctor`
+    record naming why. It writes nothing else: a LOG line after the receipt
+    would make the receipt stale again.
+    """
+    emitted = route.get("emitted") or {}
+    status = emitted.get("conformance_status")
+    can_revalidate = status in _DOCTOR_REVALIDATE
+    if not can_revalidate and status == "STALE_FAIL":
+        # T-1823: the safety question is TYPED, never textual. "Does this
+        # refusal's sentence avoid a word?" is not a conformance condition: any
+        # rewording of `detail` minted revalidation authority, and a genuinely
+        # fabricated receipt could buy one by saying something else. The
+        # authority to revalidate a measured FAIL therefore comes from
+        # re-measuring the receipt through its single owner, whose STALE
+        # statuses now carry the closed code of the condition that produced
+        # them; only the recoverable codes -- the receipt is a stale VIEW of
+        # the current tree -- may be cured by the canonical validator, and only
+        # under active authorized work. A fabricated future timestamp, an
+        # unavailable identity or any unknown/absent code fails closed, and no
+        # revalidation can ever manufacture operator authority: it re-runs the
+        # validator and re-reads the gate, nothing else.
+        from saipen_engine.conformance import conformance_status, stale_recoverable
+
+        try:
+            live = conformance_status(project_root, gate="core")
+        except Exception:
+            live = {}
+        recoverable = stale_recoverable(live)
+        ticket_val = route.get("ticket")
+        ticket_id = ticket_val.get("id") if isinstance(ticket_val, dict) else ticket_val
+        task_val = route.get("task")
+        task_active = (task_val not in (None, "", "none")) or (ticket_id not in (None, "", "none"))
+        goal_active = route.get("execution_intent") == "goal"
+        if not (task_active or goal_active):
+            state_file = project_root / ".saipen" / "STATE.md"
+            st = parse_state(state_file.read_text(encoding="utf-8")) if state_file.is_file() else {}
+            st_task = st.get("task")
+            task_active = st_task not in (None, "", "none")
+            goal_active = st.get("execution_intent") == "goal"
+        if recoverable and (task_active or goal_active):
+            can_revalidate = True
+
+    canonical_cmd = str(emitted.get("canonical_next_command") or "").strip()
+    is_pure_validate = canonical_cmd == "saipen validate" and can_revalidate
+    is_reverify = bool(canonical_cmd and canonical_cmd.startswith("saipen work reverify "))
+
+    if (
+        emitted.get("code") != "CONFORMANCE_UNHEALTHY"
+        or (not is_pure_validate and not is_reverify)
+    ):
+        return route
+    record = {
+        "iteration": 0,
+        "action": canonical_cmd,
+        "kind": "revalidate-conformance" if is_pure_validate else "remediate-conformance",
+        "operation": "validate" if is_pure_validate else "work-reverify",
+        "status_before": status,
+        "reason_before": str(emitted.get("detail") or "")[:400],
+    }
+    if dry_run or budget.get("left", 0) < 1 or _negotiate_capability(project_root) == "read-only":
+        record["stage"] = "DIAGNOSING" if dry_run else "BLOCKED"
+        record["ok"] = False
+        record["why_stopped"] = (
+            ("dry run: the doctor would revalidate once" if is_pure_validate else f"dry run: the doctor would execute '{canonical_cmd}'") if dry_run
+            else "revalidation budget for this cc is spent" if budget.get("left", 0) < 1
+            else "session capability is read-only: stale evidence is reported, not repaired"
+        )
+        route = dict(route)
+        route["emitted"] = {**emitted, "doctor": record}
+        return route
+    budget["left"] = budget.get("left", 0) - 1
+
+    if is_reverify:
+        from saipen_engine import debt as _debt_mod
+        agent = _agent_for(project_root)
+        remedy_commands = emitted.get("remediation_commands") or [canonical_cmd]
+        reverify_cmds = [
+            c for c in remedy_commands
+            if isinstance(c, str) and c.startswith("saipen work reverify ")
+        ]
+        if not reverify_cmds:
+            reverify_cmds = [canonical_cmd]
+
+        try:
+            capture = _debt_mod.capture_findings(project_root)
+        except Exception:
+            capture = None
+
+        reverify_failed = False
+        failure_detail = ""
+        for rcmd in reverify_cmds:
+            tokens = rcmd.split()
+            if len(tokens) < 4:
+                continue
+            work_id = tokens[3]
+            try:
+                res = _debt_mod.reverify_work(
+                    project_root,
+                    work_id,
+                    agent,
+                    derive_default=True,
+                    dry_run=False,
+                    timeout=_reverify_default_timeout(),
+                    capture=capture,
+                )
+                if not res.get("ok"):
+                    reverify_failed = True
+                    failure_detail = f"remediation command '{rcmd}' failed ({res.get('code')}: {res.get('detail')})"[:400]
+                    break
+            except Exception as exc:
+                reverify_failed = True
+                failure_detail = f"remediation command '{rcmd}' raised ({type(exc).__name__}: {exc})"[:400]
+                break
+
+        if reverify_failed:
+            record["stage"] = "BLOCKED"
+            record["ok"] = False
+            record["why_stopped"] = failure_detail
+            stopped = dict(route.get("emitted") or {})
+            stopped["doctor"] = record
+            return {**route, "emitted": stopped, "rc": 1}
+
+    buffer = StringIO()
+    with redirect_stdout(buffer):
+        rc = _validate(project_root, True)
+    try:
+        validated = json.loads(buffer.getvalue())
+    except ValueError:
+        validated = {"ok": False, "code": "VALIDATION_UNAVAILABLE"}
+    record["result"] = validated.get("code")
+    record["validator_ok"] = bool(validated.get("ok")) and rc == 0
+    after = _route_once(project_root, reconciled=reconciliation)
+    # A different next route can stop requiring the crew gate. Its absence
+    # must never turn failed validation, or an aged receipt, into CURRENT_PASS.
+    from saipen_engine.conformance import conformance_decision
+
+    try:
+        decision = conformance_decision(project_root, gate="core")
+    except Exception as exc:
+        record.update(stage="BLOCKED", ok=False, why_stopped=(
+            "conformance could not be established after revalidation "
+            f"({type(exc).__name__}: {exc})"
+        ))
+        stopped = dict(after.get("emitted") or {
+            "ok": False,
+            "code": "CONFORMANCE_UNAVAILABLE",
+            "detail": record["why_stopped"],
+        })
+        stopped["doctor"] = record
+        return {**after, "emitted": stopped, "rc": after.get("rc") or 1}
+    record["status_after"] = decision["status"]
+    receipt = decision["status_block"].get("receipt") or {}
+    record["receipt_after"] = {
+        key: receipt.get(key)
+        for key in ("receipt_id", "project_identity", "state_hash", "board_hash", "log_hash")
+    }
+    record["ok"] = record["validator_ok"] and decision["healthy"] and after.get("emitted") is None
+    if record["ok"]:
+        record["stage"] = "RESUMING"
+        after["doctor"] = record
+        return after
+    stopped = dict(after.get("emitted") or validated)
+    if stopped.get("ok"):
+        stopped.update(
+            ok=False,
+            code="CONFORMANCE_UNHEALTHY",
+            conformance_status=decision["status"],
+            canonical_next_command=decision["remediation_command"],
+            detail=decision["reason"],
+            repair_status=decision["repair_status"],
+            diagnostic=decision["diagnostic"],
+            terminal=decision["remediation_command"] is None,
+        )
+    record["stage"] = "BLOCKED"
+    record["why_stopped"] = (
+        "the receipt is stale again right after one canonical revalidation: a "
+        "concurrent writer or a lifecycle/hashing defect; no second revalidation "
+        "in this cc"
+        if decision["status"] in _DOCTOR_REVALIDATE or decision["status"] == "STALE_FAIL"
+        else str(stopped.get("detail") or (
+            f"the canonical validator did not reach CURRENT_PASS ({validated.get('code')})"
+        ))
+    )
+    stopped["doctor"] = record
+    after_route = {**after, "emitted": stopped, "rc": after.get("rc") or 1}
+    if is_reverify and budget.get("left", 0) > 0:
+        next_cmd = str(stopped.get("canonical_next_command") or "").strip()
+        if next_cmd.startswith("saipen work reverify "):
+            return _auto_doctor(project_root, after_route, reconciliation, budget, dry_run=dry_run)
+    return after_route
 
 
 def _next_action(
@@ -2723,10 +3731,36 @@ def _next_action(
     fallthrough_to_improve: bool = False,
     dry_run: bool = False,
 ) -> int:
-    route = _route_once(project_root)
+    route = _route_once(project_root, reconciled=reconciliation)
+    doctor_budget = {"left": 5}
+    if route["emitted"] is not None and fallthrough_to_improve:
+        route = _auto_doctor(
+            project_root, route, reconciliation, doctor_budget, dry_run=dry_run
+        )
     if route["emitted"] is not None:
         _emit(route["emitted"], as_json)
         return route["rc"]
+
+    external_budget = {"left": 1}
+    external_cache: dict[str, bool] = {}
+    external_trace: list[dict] = []
+    if (
+        fallthrough_to_improve
+        and not dry_run
+        and route["routed"].get("stop_reason") == "NO_ADMISSIBLE_WORK"
+        and external_budget.get("left", 0) > 0
+    ):
+        route, ext_record = _auto_external_revalidate(
+            project_root,
+            route,
+            reconciliation,
+            external_budget,
+            dry_run=dry_run,
+            cache=external_cache,
+        )
+        if ext_record:
+            external_trace.append(ext_record)
+
     from saipen_engine import continue_loop
 
     kind = continue_loop.classify_route(route["routed"], route["state"], route["board"])
@@ -2742,10 +3776,13 @@ def _next_action(
         and kind
         in (
             continue_loop.FINISH_AT_SHIP,
+            continue_loop.ADOPT,
             continue_loop.APPLY_APPEND,
+            continue_loop.APPLY_AUDIT_INGEST,
             continue_loop.PROMOTE_FUTURE_GATE,
             continue_loop.REFRESH_FUTURE_GATE,
             continue_loop.REFINE_FUTURE_GATE,
+            continue_loop.APPLY_REBIND_HOME,
         )
     ):
         return _continue_chain(
@@ -2753,6 +3790,10 @@ def _next_action(
             as_json,
             route,
             reconciliation=reconciliation,
+            doctor_budget=doctor_budget,
+            external_budget=external_budget,
+            external_cache=external_cache,
+            external_trace=external_trace,
         )
     if fallthrough_to_improve and not dry_run and kind == continue_loop.IDLE_MAINTAIN:
         return _continue_improve_fallthrough(
@@ -2763,13 +3804,14 @@ def _next_action(
             route["parked"],
             route["pending"],
             reconciliation,
+            chain_trace=([route["doctor"]] if route.get("doctor") else []) + external_trace,
         )
-    _emit(
-        _route_payload(
-            project_root, route, reconciliation=reconciliation, dry_run=dry_run, kind=kind
-        ),
-        as_json,
+    payload = _route_payload(
+        project_root, route, reconciliation=reconciliation, dry_run=dry_run, kind=kind
     )
+    if external_trace:
+        payload["continue_trace"] = external_trace
+    _emit(payload, as_json)
     return 0
 
 
@@ -2852,12 +3894,18 @@ def _explain_next(project_root: Path, as_json: bool) -> int:
     )
     # Explain the executable route, including the same conformance and closure
     # gates used by status/next/continue. A raw route can name a refused action.
-    gated = gate_route(project_root, routed)
+    gated = gate_route(project_root, routed, agent=resolved_agent)
     if gated is not None:
         routed = gated
+    from saipen_engine.reconcile import checkpoint_ledger_diagnostic
+
+    diagnostic = checkpoint_ledger_diagnostic(project_root, routed)
+    if diagnostic is not None:
+        routed = diagnostic
     if not routed.get("ok"):
         carrier = {
-            "code": routing_failure_code(routed),
+            **routed,
+            "code": routed.get("code") or routing_failure_code(routed),
             "action": routed.get("action"),
             "reason": routed.get("reason"),
             "next_action": routed.get("action"),
@@ -2878,16 +3926,22 @@ def _explain_next(project_root: Path, as_json: bool) -> int:
             "execute_in_current_agent": True,
         }
     verdict = classify_carrier(carrier)
+    from saipen_engine.goal_authority import describe as describe_goal_authority
+
     payload = {
         "ok": True,
         "code": "EXPLAIN_NEXT",
+        "goal_authority": describe_goal_authority(
+            project_root, state, history_events=snap.history_events
+        ),
         "state": {
             "phase": state.get("phase"),
             "task": state.get("task"),
             "execution_intent": state.get("execution_intent") or "normal",
             "converge_target": state.get("converge_target"),
         },
-        "carrier": {k: v for k, v in carrier.items() if v is not None},
+        "carrier": carrier if diagnostic is not None else
+        {k: v for k, v in carrier.items() if v is not None},
         "disposition": verdict["disposition"],
         "owner": "user" if verdict["requires_human"] else "agent",
         "human_required": verdict["requires_human"],
@@ -3072,13 +4126,10 @@ def _recover(project_root: Path, args: list[str], as_json: bool, dry_run: bool =
             proposed = " ".join(words).strip()
             if not proposed:
                 return _refuse(
-                    "recover resolve-next-action requires the next_action to set; "
+                    "recover resolve-next-action requires an authority Source; "
                     "usage: saipen [--json] recover resolve-next-action "
-                    "<next-action words>. The decision runs to the end of the "
-                    "line, so global flags go BEFORE it -- a WAIT value carries a "
-                    "bare -- separator, which ends flag parsing. The operator "
-                    "decides the VALUE, and the engine still checks it against "
-                    "the executable grammar"
+                    "<SRC-###>. Capture the original witnessed scoped capsule "
+                    "with authority capture; supplied action text grants no authority"
                 )
             resolve_next_action = proposed
             continue
@@ -3106,11 +4157,10 @@ def _recover(project_root: Path, args: list[str], as_json: bool, dry_run: bool =
             decision = " ".join(words).strip()
             if not decision:
                 return _refuse(
-                    "recover resolve-blocker requires non-empty decision/authority "
-                    "text; usage: recover resolve-blocker <decision words>. There "
-                    "is no generic unblock-anything path, and no quoting: a quote "
-                    "character disqualifies the whole line from the canonical "
-                    "grammar the guard admits"
+                    "recover resolve-blocker requires non-empty decision receipt; "
+                    "usage: recover resolve-blocker <SRC-###>. Capture the original "
+                    "witnessed scoped capsule with authority capture; plain "
+                    "decision text grants no authority"
                 )
             resolve_blocker = decision
             continue
@@ -3128,8 +4178,8 @@ def _recover(project_root: Path, args: list[str], as_json: bool, dry_run: bool =
             "[--migrate-generation] "
             "[normalize-log] "
             "[quarantine-log-tail] "
-            "[resolve-blocker <decision>] "
-            "[resolve-next-action <next-action>] "
+            "[resolve-blocker <SRC-###>] "
+            "[resolve-next-action <SRC-###>] "
             "[--apply-approved-repair <repair_id>] "
             "| recover inspect <op_id> | recover resolve <op_id> [--resolution <mode>]"
         )
@@ -3991,6 +5041,11 @@ def _start(project_root: Path, args: list[str], as_json: bool, dry_run: bool) ->
         state_path = _state_path(project_root)
         state, _error = parse_state_or_error(codec.read_doc(state_path))
         route = _cold_route(project_root, state)
+        # T-1654: START is the first command of a new task, and on a host that
+        # delivers no block of its own the project block sends the agent to
+        # this answer for the cold-start kernel -- so it names it, as
+        # `continue` and `status` always have.
+        result["cold_route"] = route
         result["load_path"] = route.get("phase_module")
         result["load"] = (
             f"saipen/phases/{str(result.get('phase') or 'SCOUT').lower()}.md"
@@ -4000,6 +5055,13 @@ def _start(project_root: Path, args: list[str], as_json: bool, dry_run: bool) ->
         result["execution_instruction"] = (
             "The task is claimed Work. Read load_path, then execute action now under that "
             "phase; do not run status, continue, source or recover first."
+        )
+    elif result.get("code") == "USER_REQUEST_RECORDED":
+        result["execution_instruction"] = (
+            f"Request recorded as {result.get('ticket')} ({result.get('receipt')}), "
+            f"but active Work {result.get('active_ticket')} retains the execution seat. "
+            f"Do not claim or mutate source for {result.get('ticket')}; "
+            f"execute {result.get('action')} for {result.get('active_ticket')}."
         )
     _emit(result, as_json)
     return 0 if result.get("ok") else 1
@@ -4022,8 +5084,10 @@ def _exact_no_args(command: str, args: list[str], as_json: bool) -> int | None:
     return 2
 
 
-def _converge_home_binding(project_root: Path, as_json: bool, dry_run: bool) -> int | None:
-    """Auto-converge a dead persisted home before an ordinary entry command.
+def _converge_home_binding(
+    project_root: Path, as_json: bool, dry_run: bool, *, allow_divergent: bool = False
+) -> int | None:
+    """Converge a dead home, or a divergent home during active continuation.
 
     The zero-manual half of T-1425 REPAIR 1. When `STATE.saipen_home` names a
     previous host/OS and a replacement runtime is already PROVEN (the
@@ -4046,10 +5110,29 @@ def _converge_home_binding(project_root: Path, as_json: bool, dry_run: bool) -> 
     fields, error = parse_state_or_error(codec.read_doc(path))
     if error or not isinstance(fields, dict):
         return None
-    from saipen_engine.state import persisted_home_error
+    from saipen_engine.state import (
+        CODE_HOME_INACCESSIBLE, HOME_USABLE, binding_brake, home_refusal, persisted_home_access,
+    )
 
-    if persisted_home_error(fields.get("saipen_home")) is None:
+    refused = home_refusal(fields.get("saipen_home"))
+    if refused is None:
         return None
+    if refused[0] == CODE_HOME_INACCESSIBLE:
+        _emit({"ok": False, "code": CODE_HOME_INACCESSIBLE, "detail": refused[1]}, as_json)
+        return 1
+    home_access, _home_reason = persisted_home_access(fields.get("saipen_home"))
+    if home_access == HOME_USABLE:
+        if (
+            not allow_divergent
+            or fields.get("execution_intent") not in ("goal", "converge")
+            or binding_brake(fields) is not None
+        ):
+            return None
+        from saipen_engine.board import operator_gates
+
+        board = parse_board(codec.read_doc(project_root / ".saipen" / "BOARD.md"))
+        if any(gate["state"] == "DUE_OPERATOR_ACTION" for gate in operator_gates(board["tickets"])):
+            return None
     if _negotiate_capability(project_root) == "read-only":
         return None
     from saipen_engine.operations import rebind_home_auto
@@ -4080,7 +5163,9 @@ def _continue(
     target and is routed by ``route_next`` when that target actually owns the
     run.
     """
-    if args:
+    from saipen_engine.commands import resume_policy
+
+    if tuple(args) not in resume_policy()["arguments"]:
         detail = (
             "Use: gg <objective>"
             if shortcut
@@ -4193,7 +5278,9 @@ def _continue(
     # with no proven replacement returns the operation's structured
     # HOME_REQUIRED (never a conversational fallback).
     if not dry_run:
-        _converged = _converge_home_binding(project_root, as_json, dry_run)
+        _converged = _converge_home_binding(
+            project_root, as_json, dry_run, allow_divergent=True
+        )
         if _converged is not None:
             return _converged
 
@@ -4351,9 +5438,9 @@ def _continue(
         )
 
     if execution_intent == "goal":
-        waves = state.get("goal_waves") or 0
-        tickets = state.get("goal_tickets") or 0
-        if waves >= 3 or tickets >= 20:
+        from saipen_engine.goal_authority import budget_exhausted
+
+        if budget_exhausted(state):
             from saipen_engine.operations import reauthorize_valve
 
             result = reauthorize_valve(project_root, actor, dry_run=dry_run)
@@ -4563,16 +5650,216 @@ def _audit_manifest(project_root: Path, rest: list[str], as_json: bool, dry_run:
         return 0 if result.get("ok") else 1
 
     if dry_run:
-        _emit(
-            audit_manifest.ensure(project_root, protocol_dir=PROTOCOL_DIR, dry_run=True),
-            as_json,
-        )
-        return 0
+        result = audit_manifest.ensure(project_root, protocol_dir=PROTOCOL_DIR, dry_run=True)
+        _emit(result, as_json)
+        return 0 if result.get("ok") else 1
     if _negotiate_capability(project_root) == "read-only":
         return _capability_refusal(as_json)
     result = audit_manifest.ensure(project_root, protocol_dir=PROTOCOL_DIR, force=force)
     _emit(result, as_json)
     return 0 if result.get("ok") else 1
+
+
+def _perform_audit_ingest(
+    project_root: Path,
+    agent: str,
+    *,
+    dry_run: bool = False,
+) -> tuple[dict, int]:
+    """Execute canonical audit inbox ingestion (SRC-257 / T-1797).
+
+    Captures fresh layers, derives umbrella work, cleans up closed layers,
+    and returns (payload, exit_code). Reusable by both CLI 'saipen audit ingest'
+    and autonomous '_continue_chain'.
+    """
+    from saipen_engine import audit_inbox
+
+    state = audit_inbox.classify(project_root)
+    if not state.get("ok", True):
+        return (
+            {
+                **state,
+                "action": "saipen audit status",
+                "detail": state.get("detail", "audit inbox binding is unreadable"),
+                "layers": None,
+                "orphans": None,
+                "residue": None,
+            },
+            1,
+        )
+    try:
+        migrated = audit_inbox.reconcile_bootstrap(project_root, state=state) if not dry_run else []
+        observed = (
+            audit_inbox.record_named_first_seen(project_root, entries=state["layers"])
+            if not dry_run
+            else []
+        )
+    except PermissionError as exc:
+        from saipen_engine.lock import writer_busy_payload
+
+        return ({**writer_busy_payload(exc)}, 1)
+    except audit_inbox.BindingCorrupt:
+        return (audit_inbox.classify(project_root), 1)
+    if migrated or observed:
+        state = audit_inbox.classify(project_root)
+    layers = state["layers"]
+
+    consumed: list[dict] = []
+    for item in layers:
+        if item["state"] != audit_inbox.CLOSED_PENDING_DELETE:
+            continue
+        outcome = audit_inbox.consume_layer(project_root, item["rel"], agent, dry_run=dry_run)
+        consumed.append(outcome)
+        if not outcome.get("ok"):
+            return (
+                {
+                    **outcome,
+                    "action": "saipen audit status",
+                    "detail": outcome.get("detail", "audit cleanup refused; the file is retained"),
+                },
+                1,
+            )
+        break
+    if consumed:
+        return (
+            {
+                "ok": True,
+                "code": "AUDIT_CONSUME_PLAN" if dry_run else "AUDIT_CONSUMED",
+                "dry_run": dry_run,
+                "migrated": migrated or None,
+                "consumed": consumed,
+                "next": audit_inbox.projection(project_root) if not dry_run else None,
+            },
+            0,
+        )
+
+    fresh = next((item for item in layers if item["state"] == audit_inbox.NEW), None)
+    if fresh is None:
+        fresh = next(
+            (
+                item
+                for item in layers
+                if item["state"] == audit_inbox.ACTIVE and not item.get("linked_work")
+            ),
+            None,
+        )
+    if fresh is None:
+        settled = audit_inbox.status_from_classification(project_root, state)
+        return (
+            {
+                **settled,
+                "code": "AUDIT_INBOX_STATUS",
+                "migrated": migrated or None,
+                "detail": (
+                    "no unconsumed audit generation and nothing to settle; "
+                    + (
+                        "audit/ is clean"
+                        if settled.get("clean")
+                        else f"audit/ still holds {settled.get('residue_count', 0)} "
+                        "entr(y/ies) SAIPEN never captured -- listed under residue, "
+                        "never deleted for you"
+                    )
+                ),
+            },
+            0,
+        )
+    if dry_run:
+        return (
+            {
+                "ok": True,
+                "code": "DRY_RUN_PLAN",
+                "action": "audit ingest",
+                "layer": fresh["layer"],
+                "path": fresh["rel"],
+                "sha256": fresh["sha256"],
+                "would_capture_as": "external_audit source receipt",
+                "detail": "no capture, no BOARD mutation, no journal, no deletion",
+            },
+            0,
+        )
+
+    captured = audit_inbox.capture_layer(project_root, fresh["rel"])
+    if not captured.get("ok"):
+        return (captured, 1)
+    receipt = captured["receipt"]
+    work = captured.get("linked_work")
+    if not work:
+        from saipen_engine import intake
+
+        status_out = intake.status(project_root, receipt)
+        work = status_out.get("linked_work") if status_out.get("ok") else None
+
+    if not work:
+        work = _work_for_source_receipt(project_root, receipt)
+    if not work:
+        from saipen_engine.operations import ticket_add
+
+        added = ticket_add(
+            project_root,
+            agent,
+            "P1",
+            f"Execute external audit inbox layer {fresh['rel']} ({receipt}); "
+            f"source_receipt={receipt}",
+            [],
+            (
+                f"every actionable clause of {receipt} is terminal with evidence; "
+                f"linked Work DONE; source closure succeeds; {fresh['rel']} consumed "
+                f"by the journaled audit inbox cleanup; source_receipt={receipt}"
+            ),
+        )
+        if not added.ok:
+            return (added.to_dict(), 1)
+        work = added.data.get("ticket")
+
+    if work and not captured.get("linked_work"):
+        linked = audit_inbox.capture_layer(project_root, fresh["rel"], work=work)
+        if not linked.get("ok"):
+            return (linked, 1)
+
+    try:
+        record = audit_inbox.bind_layer(
+            project_root,
+            fresh["rel"],
+            layer=fresh["layer"],
+            generation=fresh["generation"],
+            file_sha256=captured["file_sha256"],
+            size_bytes=fresh["size_bytes"],
+            receipt_id=receipt,
+            receipt_sha256=captured.get("source_sha256") or captured["file_sha256"],
+            binding=captured.get("binding", "exact"),
+            linked_work=work,
+            state=audit_inbox.ACTIVE,
+            provenance=captured.get("provenance"),
+        )
+    except PermissionError as exc:
+        # T-1827 (SRC-282:R002): `bind_layer` takes the project writer lock, so
+        # the refusal is WriterBusy. The previous clause named a class that
+        # does not exist (`audit_inbox.BindingBusy`), which would have raised
+        # AttributeError instead of answering WRITER_BUSY.
+        from saipen_engine.lock import writer_busy_payload
+
+        return ({**writer_busy_payload(exc)}, 1)
+
+    return (
+        {
+            "ok": True,
+            "code": "AUDIT_INGESTED",
+            "migrated": migrated or None,
+            "layer": fresh["layer"],
+            "path": fresh["rel"],
+            "receipt": receipt,
+            "work": work,
+            "binding": record["binding"],
+            "file_sha256": record["file_sha256"],
+            "source_sha256": record["receipt_sha256"],
+            "action": f"PHASE SCOUT {work}" if work else "saipen audit status",
+            "detail": (
+                "audit captured as durable source authority; normalize its "
+                "requirements through `saipen source req` before execution"
+            ),
+        },
+        0,
+    )
 
 
 def _audit(project_root: Path, args: list[str], as_json: bool, dry_run: bool) -> int:
@@ -4615,23 +5902,29 @@ def _audit(project_root: Path, args: list[str], as_json: bool, dry_run: bool) ->
         return 0
 
     if action == "trace":
-        if len(rest) > 1 or (rest and not rest[0].isdigit()):
+        selector = audit_inbox.layer_path(rest[0]) if rest else None
+        if len(rest) > 1 or (rest and selector is None):
             _emit(
-                {"ok": False, "code": "VALIDATION_FAILED", "detail": "trace takes an optional <N>"},
+                {
+                    "ok": False,
+                    "code": "VALIDATION_FAILED",
+                    "detail": "trace takes an optional <N|filename>",
+                },
                 as_json,
             )
             return 2
-        _emit(audit_inbox.provenance_trace(project_root, int(rest[0]) if rest else None), as_json)
+        selected = int(rest[0]) if rest and rest[0].isascii() and rest[0].isdigit() else selector
+        _emit(audit_inbox.provenance_trace(project_root, selected), as_json)
         return 0
 
     if action == "inspect":
-        if len(rest) != 1 or not rest[0].isdigit():
+        rel = audit_inbox.layer_path(rest[0]) if len(rest) == 1 else None
+        if rel is None:
             _emit(
-                {"ok": False, "code": "VALIDATION_FAILED", "detail": "inspect needs <N>"},
+                {"ok": False, "code": "VALIDATION_FAILED", "detail": "inspect needs <N|filename>"},
                 as_json,
             )
             return 2
-        rel = f"{audit_inbox.AUDIT_DIRNAME}/{int(rest[0])}.md"
         for item in audit_inbox.classify(project_root)["layers"]:
             if item["rel"] == rel:
                 _emit({"ok": True, "code": "AUDIT_INBOX_STATUS", "layer": item}, as_json)
@@ -4667,231 +5960,14 @@ def _audit(project_root: Path, args: list[str], as_json: bool, dry_run: bool) ->
     if not dry_run and _negotiate_capability(project_root) == "read-only":
         return _capability_refusal(as_json)
 
-    agent = _agent_for(project_root)
-    # SRC-019:R6 -- classify FIRST. A corrupt inbox binding is refused here,
-    # before `reconcile_bootstrap` reads it, because every mutation below
-    # (bootstrap binding, journaled cleanup, capture) would otherwise decide
-    # from authority nobody could read.
-    state = audit_inbox.classify(project_root)
-    if not state.get("ok", True):
-        _emit(
-            {
-                **state,
-                "action": "saipen audit status",
-                "detail": state.get("detail", "audit inbox binding is unreadable"),
-                "layers": None,
-                "orphans": None,
-                "residue": None,
-            },
-            as_json,
-        )
-        return 1
-    # Bootstrap migration: layers that already own canonical Work are BOUND,
-    # never recaptured. Without this the first activation would look at a
-    # hand-converted audit and manufacture a duplicate receipt and ticket.
-    try:
-        migrated = audit_inbox.reconcile_bootstrap(project_root) if not dry_run else []
-    except audit_inbox.BindingBusy as exc:
-        _emit(
-            {"ok": False, "code": "WRITER_BUSY", "detail": str(exc)},
-            as_json,
-        )
-        return 1
-    if migrated:
-        state = audit_inbox.classify(project_root)
-    layers = state["layers"]
-
-    # CLEANUP FIRST: a completed audit must disappear on the next `cc` without
-    # a separate ritual. Every settle re-proves the closure gate and the
-    # current digest, so a layer replaced since closure is preserved, not
-    # deleted (`AUDIT_GENERATION_CHANGED`).
-    consumed: list[dict] = []
-    for item in layers:
-        if item["state"] != audit_inbox.CLOSED_PENDING_DELETE:
-            continue
-        outcome = audit_inbox.consume_layer(project_root, item["rel"], agent, dry_run=dry_run)
-        consumed.append(outcome)
-        if not outcome.get("ok"):
-            _emit(
-                {
-                    **outcome,
-                    "action": "saipen audit status",
-                    "detail": outcome.get("detail", "audit cleanup refused; the file is retained"),
-                },
-                as_json,
-            )
-            return 1
-    if consumed:
-        _emit(
-            {
-                "ok": True,
-                "code": "AUDIT_CONSUME_PLAN" if dry_run else "AUDIT_CONSUMED",
-                "dry_run": dry_run,
-                "migrated": migrated or None,
-                "consumed": consumed,
-                "next": audit_inbox.projection(project_root) if not dry_run else None,
-            },
-            as_json,
-        )
-        return 0
-
-    fresh = next((item for item in layers if item["state"] == audit_inbox.NEW), None)
-    if fresh is None:
-        # W2-004: RESUME. Ingestion commits BOARD Work, then the Source link,
-        # then the inbox binding, and a crash between them left a layer that is
-        # already ACTIVE -- so this selection, which only ever looked for NEW,
-        # returned status-only success. `projection()` meanwhile kept routing
-        # `saipen audit ingest`, so the router prescribed a command whose
-        # implementation refused to consume the state it prescribed it for: a
-        # permanent no-progress loop, and `SOURCE-AUDIT-INBOX-01` REQUIRES an
-        # agent to follow that route. Picking up the partial state here is what
-        # makes the action consume every state the projection emits.
-        fresh = next(
-            (
-                item
-                for item in layers
-                if item["state"] == audit_inbox.ACTIVE and not item.get("linked_work")
-            ),
-            None,
-        )
-    if fresh is None:
-        settled = audit_inbox.status(project_root)
-        _emit(
-            {
-                **settled,
-                "code": "AUDIT_INBOX_STATUS",
-                "migrated": migrated or None,
-                "detail": (
-                    "no unconsumed audit generation and nothing to settle; "
-                    + (
-                        "audit/ is clean"
-                        if settled.get("clean")
-                        else f"audit/ still holds {settled.get('residue_count', 0)} "
-                        "entr(y/ies) SAIPEN never captured -- listed under residue, "
-                        "never deleted for you"
-                    )
-                ),
-            },
-            as_json,
-        )
-        return 0
-    if dry_run:
-        _emit(
-            {
-                "ok": True,
-                "code": "DRY_RUN_PLAN",
-                "action": "audit ingest",
-                "layer": fresh["layer"],
-                "path": fresh["rel"],
-                "sha256": fresh["sha256"],
-                "would_capture_as": "external_audit source receipt",
-                "detail": "no capture, no BOARD mutation, no journal, no deletion",
-            },
-            as_json,
-        )
-        return 0
-
     _ho = _ensure_handover(project_root, as_json, dry_run)
     if _ho is not None:
         return _ho
 
-    captured = audit_inbox.capture_layer(project_root, fresh["rel"])
-    if not captured.get("ok"):
-        _emit(captured, as_json)
-        return 1
-    receipt = captured["receipt"]
-    work = captured.get("linked_work")
-    if not work:
-        from saipen_engine import intake
-
-        status_out = intake.status(project_root, receipt)
-        work = status_out.get("linked_work") if status_out.get("ok") else None
-
-    # DERIVE ORDINARY WORK. One umbrella ticket per audit source; individual
-    # requirements link through the existing coverage `work` field. Priority is
-    # P1, never P0 merely because the file came from `audit/` -- inbox
-    # precedence is a ROUTING property and must not corrupt BOARD priority.
-    if not work:
-        # W2-004: a retry after the ticket committed must ADOPT that ticket,
-        # never manufacture a second one. The link is a structured
-        # `source_receipt=<SRC-NNN>` token -- the same machine-owned key=value
-        # linkage the sub-collect tickets already use for package identity --
-        # so discovery is a field lookup, not a guess from title prose.
-        work = _work_for_source_receipt(project_root, receipt)
-    if not work:
-        from saipen_engine.operations import ticket_add
-
-        added = ticket_add(
-            project_root,
-            agent,
-            "P1",
-            f"Execute external audit inbox layer {fresh['rel']} ({receipt}); "
-            f"source_receipt={receipt}",
-            [],
-            (
-                f"every actionable clause of {receipt} is terminal with evidence; "
-                f"linked Work DONE; source closure succeeds; {fresh['rel']} consumed "
-                f"by the journaled audit inbox cleanup; source_receipt={receipt}"
-            ),
-        )
-        if not added.ok:
-            _emit(added.to_dict(), as_json)
-            return 1
-        work = added.data.get("ticket")
-
-    # W2-004: the Source link is written for a DISCOVERED ticket exactly as for
-    # a freshly created one. It used to live inside the creation branch, so a
-    # resumed ingest adopted the right ticket and then left the receipt
-    # unlinked -- the same wedge one step further along, and the projection
-    # would have kept routing here forever.
-    if work and not captured.get("linked_work"):
-        linked = audit_inbox.capture_layer(project_root, fresh["rel"], work=work)
-        if not linked.get("ok"):
-            _emit(linked, as_json)
-            return 1
-
-    try:
-        record = audit_inbox.bind_layer(
-            project_root,
-            fresh["rel"],
-            layer=fresh["layer"],
-            generation=fresh["generation"],
-            file_sha256=captured["file_sha256"],
-            size_bytes=fresh["size_bytes"],
-            receipt_id=receipt,
-            receipt_sha256=captured.get("source_sha256") or captured["file_sha256"],
-            binding=captured.get("binding", "exact"),
-            linked_work=work,
-            state=audit_inbox.ACTIVE,
-            provenance=captured.get("provenance"),
-        )
-    except audit_inbox.BindingBusy as exc:
-        # SRC-025:R007: a contested binding writer is a structured busy
-        # result the producer can retry, never a raw race exception and
-        # never a success reported before the record is committed.
-        _emit({"ok": False, "code": "WRITER_BUSY", "detail": str(exc)}, as_json)
-        return 1
-    _emit(
-        {
-            "ok": True,
-            "code": "AUDIT_INGESTED",
-            "migrated": migrated or None,
-            "layer": fresh["layer"],
-            "path": fresh["rel"],
-            "receipt": receipt,
-            "work": work,
-            "binding": record["binding"],
-            "file_sha256": record["file_sha256"],
-            "source_sha256": record["receipt_sha256"],
-            "action": f"PHASE SCOUT {work}" if work else "saipen audit status",
-            "detail": (
-                "audit captured as durable source authority; normalize its "
-                "requirements through `saipen source req` before execution"
-            ),
-        },
-        as_json,
-    )
-    return 0
+    agent = _agent_for(project_root)
+    payload, rc = _perform_audit_ingest(project_root, agent, dry_run=dry_run)
+    _emit(payload, as_json)
+    return rc
 
 
 def _work_for_source_receipt(project_root: Path, receipt: str) -> str | None:
@@ -5017,7 +6093,7 @@ def _parse_value_options(tokens: list[str], spec: dict[str, str]) -> tuple[dict,
 
 
 def _cohort(project_root: Path, args: list[str], as_json: bool, dry_run: bool) -> int:
-    """`saipen cohort status|ship C-###` -- durable batch publication (CORE-003).
+    """`saipen cohort status|reconcile|ship C-###` -- batch publication (CORE-003).
 
     A cohort exists because several tickets can legitimately share ONE
     unpublished implementation. Its publication is a single batch through the
@@ -5031,12 +6107,28 @@ def _cohort(project_root: Path, args: list[str], as_json: bool, dry_run: bool) -
             {
                 "ok": False,
                 "code": "VALIDATION_FAILED",
-                "detail": "cohort needs an action and an id: cohort status|ship C-###",
+                "detail": "cohort needs an action and an id: cohort status|reconcile|ship C-###",
             },
             as_json,
         )
         return 2
     action, cohort_id = args[0], args[1]
+    if action == "reconcile":
+        options, positional, error = _parse_value_options(
+            args[2:], {"--from": "sources", "--review-work": "review_work"})
+        if error or positional:
+            _emit({"ok": False, "code": "VALIDATION_FAILED",
+                   "detail": error or "surplus cohort reconcile arguments"}, as_json)
+            return 2
+        if not dry_run and _negotiate_capability(project_root) == "read-only":
+            return _capability_refusal(as_json)
+        from saipen_engine.operations import cohort_reconcile
+
+        result = cohort_reconcile(project_root, cohort_id, _agent_for(project_root),
+            sources=str(options.get("sources", "")).split(",") if options.get("sources") else [],
+            review_work=options.get("review_work", ""), dry_run=dry_run)
+        _emit(result.to_dict(), as_json)
+        return 0 if result.ok else 1
     if len(args) > 2:
         _emit(
             {
@@ -5108,7 +6200,7 @@ def _cohort(project_root: Path, args: list[str], as_json: bool, dry_run: bool) -
             {
                 "ok": False,
                 "code": "VALIDATION_FAILED",
-                "detail": "unknown cohort action " + repr(action) + "; use status|ship",
+                "detail": "unknown cohort action " + repr(action) + "; use status|reconcile|ship",
             },
             as_json,
         )
@@ -5124,7 +6216,30 @@ def _cohort(project_root: Path, args: list[str], as_json: bool, dry_run: bool) -
         dry_run=dry_run,
         current_capability=_negotiate_capability(project_root),
     )
-    _emit(result.to_dict(), as_json)
+    payload = result.to_dict()
+    if not dry_run:
+        # T-1881 / SRC-306:R004 (D-06): a cohort publication is an ATTEMPT at
+        # the same boundary as `ship`/`push`, and it records one for the same
+        # reason -- the batch's closure records who finished each member, never
+        # that a publication was tried. `result.data` may carry the surviving
+        # plan identity, so it is read rather than guessed.
+        from saipen_engine.release_attempt import record_result
+
+        data = payload.get("data") or {}
+        members = data.get("members") or []
+        logged = record_result(
+            project_root,
+            invocation="cohort-ship",
+            result=payload,
+            # The batch's carrier identity is its lowest member, the same
+            # non-arbitrary choice cohort_ship pins the release receipt to.
+            ticket=str(members[0]) if members else "",
+            mode=str(data.get("mode") or ""),
+            op_id=str(data.get("release_op_id") or payload.get("op_id") or ""),
+        )
+        if not logged.get("ok"):
+            payload["attempt_record_error"] = logged.get("error", "unknown")
+    _emit(payload, as_json)
     return 0 if result.ok else 1
 
 
@@ -5279,6 +6394,9 @@ def _source(project_root: Path, args: list[str], as_json: bool, dry_run: bool) -
       capture           capture a large audit/instruction verbatim (mutating)
       status <SRC>      read-only projection (identity, work, coverage)
       show <SRC>        forensic body retrieval (active or archived)
+      delta <SRC>       read-only classification of the UNADMITTED worktree delta
+                        against this receipt's clauses (SRC-325 §10); reports
+                        provenance, never admits, settles or writes
       recover           read-only orphan-receipt crash diagnostic
       req <SRC> <RID> <class> [--when-environment HOST] <text...>
       disp <SRC> <RID> <DISPOSITION> [--work T-x] [--evidence E-y]
@@ -5301,7 +6419,7 @@ def _source(project_root: Path, args: list[str], as_json: bool, dry_run: bool) -
             {
                 "ok": False,
                 "code": "VALIDATION_FAILED",
-                "detail": "source needs a subcommand: capture|status|show|req|"
+                "detail": "source needs a subcommand: capture|status|show|delta|req|"
                 "disp|quarantine|link|close|archive|purge|retire|recover|reconcile|normalize|"
                 "append|apply-append|appends",
             },
@@ -5551,6 +6669,12 @@ def _source(project_root: Path, args: list[str], as_json: bool, dry_run: bool) -
                     as_json,
                 )
                 return 2
+        from saipen_engine import operator_task
+
+        provenance = operator_task.witness(body, root=project_root)
+        if provenance.get("code"):
+            _emit({"ok": False, **provenance}, as_json)
+            return 1
         result = intake.capture(
             project_root,
             body,
@@ -5558,7 +6682,12 @@ def _source(project_root: Path, args: list[str], as_json: bool, dry_run: bool) -
             work=work,
             amends=amends,
             transport_transform=transport_transform,
+            request_provenance=provenance,
         )
+        if result.get("ok"):
+            operator_task.authority_for_receipt(
+                project_root, result["receipt"], existing_only=False,
+            )
         _emit(result, as_json)
         return 0 if result.get("ok") else 1
 
@@ -5649,6 +6778,30 @@ def _source(project_root: Path, args: list[str], as_json: bool, dry_run: bool) -
         print(result["body"])
         return 0
 
+    if action == "delta":
+        # SRC-325 §10: implementation that happened OUTSIDE the canonical
+        # lifecycle is evidence, not history. This reports it and stops -- no
+        # Source minted, no LOG event, no Work claimed, nothing marked DONE.
+        if len(rest) != 1:
+            _emit(
+                {
+                    "ok": False,
+                    "code": "VALIDATION_FAILED",
+                    "detail": "source delta needs <SRC-ID>",
+                },
+                as_json,
+            )
+            return 2
+        from saipen_engine.handoff_reconciliation import classify_external_delta
+
+        record = classify_external_delta(project_root, receipt=rest[0])
+        result = record.to_dict()
+        observable = record.delta_status == "KNOWN"
+        result["ok"] = observable
+        result["code"] = record.disposition
+        _emit(result, as_json)
+        return 0 if observable else 1
+
     if action == "req":
         if len(rest) < 4:
             _emit(
@@ -5737,6 +6890,8 @@ def _source(project_root: Path, args: list[str], as_json: bool, dry_run: bool) -
             verification=verification,
             environment=environment,
         )
+        if result.get("ok"):
+            _close_finished_receipts(project_root, result, receipts=[receipt_id])
         _emit(result, as_json)
         return 0 if result.get("ok") else 1
 
@@ -6332,7 +7487,7 @@ def _future(project_root: Path, args: list[str], as_json: bool, dry_run: bool) -
     from saipen_engine.state import parse_state_or_error
 
     if not args or args[0] not in (
-        "status", "list", "refresh", "next", "promote", "add", "refine"
+        "status", "list", "refresh", "next", "promote", "add", "refine", "reconcile"
     ):
         _emit(
             {
@@ -6449,6 +7604,11 @@ def _future(project_root: Path, args: list[str], as_json: bool, dry_run: bool) -
 
     if action == "refresh":
         before = _gates.freshness(project_root)
+        # T-1937: derive the closure FIRST and report what moved -- `refresh`
+        # itself reconciles, so reporting AFTER it would always name nothing.
+        # The rebuild then carries these closures forward because build_index
+        # takes each gate's slices from the prior index.
+        reconciled = _gates.reconcile_slice_closures(project_root, tickets)
         index, path = _gates.refresh(project_root)
         evaluated = _gates.evaluate(project_root, tickets)
         _emit(
@@ -6461,10 +7621,27 @@ def _future(project_root: Path, args: list[str], as_json: bool, dry_run: bool) -
                 "corpus": index["corpus"],
                 "counts": evaluated["counts"],
                 "next": evaluated.get("next"),
+                "slice_closures": reconciled.get("changes") or [],
             },
             as_json,
         )
         return 0
+
+    if action == "reconcile":
+        # T-1937: the canonical command that closes a promoted slice whose
+        # ticket is DONE. Derived from BOARD truth only -- there is no argument
+        # an operator or agent could use to declare a slice finished.
+        reconciled = _gates.reconcile_slice_closures(project_root, tickets)
+        evaluated = _gates.evaluate(project_root, tickets)
+        _emit(
+            {
+                **reconciled,
+                "counts": evaluated["counts"],
+                "canonical_next_command": "saipen future status",
+            },
+            as_json,
+        )
+        return 0 if reconciled.get("ok") else 1
 
     if action == "refine":
         gate_id = rest[0].strip() if rest else ""
@@ -6998,6 +8175,7 @@ def _acceptance(project_root: Path, args: list[str], as_json: bool) -> int:
     is a statement about the evidence found, never a gate anything passes.
     """
     from saipen_engine.acceptance import reconcile, render
+    from saipen_engine.acceptance_contract import resolve
     from saipen_engine.board import parse_board
     from saipen_engine.log import parse_log_line
 
@@ -7046,7 +8224,13 @@ def _acceptance(project_root: Path, args: list[str], as_json: bool) -> int:
             if parsed is not None:
                 events.append(parsed)
 
-    projection = reconcile(ticket_id, ticket.get("fields", {}).get("verify", ""), events)
+    try:
+        contract = resolve(project_root, ticket_id, ticket.get("fields", {}).get("verify", ""))
+        projection = reconcile(ticket_id, contract, events)
+    except (ValueError, OSError, TypeError, KeyError) as exc:
+        _emit({"ok": False, "code": "VALIDATION_FAILED", "ticket": ticket_id,
+               "detail": str(exc)}, as_json)
+        return 1
     if as_json:
         _emit({"ok": True, "code": "ACCEPTANCE", **projection}, as_json)
     else:
@@ -7057,6 +8241,52 @@ def _acceptance(project_root: Path, args: list[str], as_json: bool) -> int:
 _GPU_USAGE = (
     "saipen gpu [status|on|off|index [--budget SECONDS]|recall <text> [--k N]|triage] [--json]"
 )
+
+
+_LOCK_USAGE = "saipen lock [status] [--json]"
+
+
+def _lock_command(project_root: Path, args: list[str], as_json: bool) -> int:
+    """saipen lock: the read-only holder answer for the project writer lock.
+
+    T-1827 (SRC-282:R002/R010): an exhausted acquisition refuses WRITER_BUSY
+    and names the recorded holder only when its sidecar is readable, so the
+    diagnostic that reads the same record is part of the refusal's remedy.
+    This probe never holds the canonical lock, never creates it, and never
+    deletes it -- the OS lock dies with its holder, and the file is permanent.
+    """
+    from saipen_engine.lock import lock_status
+
+    args = [a for a in args if a != "--json"]
+    if args and args != ["status"]:
+        _emit(
+            {
+                "ok": False,
+                "code": "VALIDATION_FAILED",
+                "detail": f"lock takes only `status`; surplus: {' '.join(args)}",
+                "canonical_next_command": _LOCK_USAGE,
+            },
+            as_json,
+        )
+        return 2
+    payload = lock_status(project_root)
+    if as_json:
+        _emit(payload, as_json)
+        return 0
+    print(f"code: {payload['code']}")
+    print(f"lock: {payload['state']} ({payload['path']})")
+    if payload.get("detail"):
+        print(payload["detail"])
+    holder = payload.get("holder") or payload.get("last_holder")
+    if isinstance(holder, dict):
+        print(
+            "holder: pid {}  acquired_at: {}  command: {}".format(
+                holder.get("pid"),
+                holder.get("acquired_at") or "unknown",
+                holder.get("command") or "unknown",
+            )
+        )
+    return 0
 
 
 def _gpu(project_root: Path, args: list[str], as_json: bool) -> int:
@@ -7168,6 +8398,8 @@ def _gpu(project_root: Path, args: list[str], as_json: bool) -> int:
             return 1
         _gpu_out(answer, as_json)
         return 0
+    if action == "librarian":
+        return _librarian(project_root, rest, as_json)
     return refuse(f"gpu: unknown action {' '.join(args)!r}")
 
 
@@ -7234,6 +8466,137 @@ def _gpu_echo_advisory(project_root: Path, text: str, new_ticket: str) -> None:
             f"{hit['ref']} (similarity {hit['score']}); if so, supersede one of them",
             file=sys.stderr,
         )
+
+
+def _librarian(project_root: Path, args: list[str], as_json: bool) -> int:
+    """saipen librarian: semantic advisory query over local knowledge index (SRC-256)."""
+    from saipen_engine import sailearn_consumer as _sc
+
+    args = [a for a in args if a != "--json"]
+    action = args[0] if args else "status"
+    rest = args[1:]
+
+    if action == "status" and not rest:
+        stat = _sc.status()
+        if as_json:
+            _emit(stat, as_json)
+        else:
+            print("code: LIBRARIAN_STATUS")
+            print(f"available: {stat.get('available')}")
+            print(f"reason: {stat.get('reason')}")
+            if stat.get("home"):
+                print(f"home: {stat['home']}")
+            if stat.get("index"):
+                print(f"index: {stat['index']} ({stat.get('index_size_bytes', 0)} bytes)")
+            if stat.get("advisory"):
+                print(f"advisory: {stat['advisory']}")
+        return 0
+
+    if action in ("query", "incidents"):
+        limit = 3
+        if "--limit" in rest:
+            at = rest.index("--limit")
+            try:
+                limit = int(rest[at + 1])
+            except (IndexError, ValueError):
+                _emit(
+                    {"ok": False, "code": "VALIDATION_FAILED",
+                     "detail": "--limit needs an integer"},
+                    as_json,
+                )
+                return 2
+            rest = rest[:at] + rest[at + 2 :]
+        text = " ".join(rest).strip()
+        if not text:
+            _emit(
+                {"ok": False, "code": "VALIDATION_FAILED",
+                 "detail": f"librarian {action} needs <text>"},
+                as_json,
+            )
+            return 2
+        res = _sc.query(text, limit=limit, cross_project=(action == "incidents"))
+        if as_json:
+            _emit(res, as_json)
+        else:
+            formatted = _sc.format_advisory(res)
+            if formatted:
+                print(formatted)
+            else:
+                print(f"No results for {text!r} ({res.get('reason')})")
+        return 0
+
+    _emit(
+        {
+            "ok": False,
+            "code": "VALIDATION_FAILED",
+            "detail": f"unknown librarian action {action!r}; use status|query|incidents",
+            "canonical_next_command": "saipen librarian status",
+        },
+        as_json,
+    )
+    return 2
+
+
+def _admission(project_root: Path, args: list[str], as_json: bool) -> int:
+    """T-1797 / SRC-257: Admission Auto-Doctor admin and diagnostic surface."""
+    from saipen_engine import admission_doctor
+    from saipen_engine.board import parse_board
+    from saipen_engine.state import parse_state
+
+    subcmd = args[0] if args else "doctor"
+    if subcmd in ("doctor", "status"):
+        target_tid = args[1] if len(args) > 1 and not args[1].startswith("-") else None
+        board_file = project_root / ".saipen" / "BOARD.md"
+        state_file = project_root / ".saipen" / "STATE.md"
+        board = (
+            parse_board(board_file.read_text(encoding="utf-8"))
+            if board_file.exists() else {"tickets": {}}
+        )
+        state = parse_state(state_file.read_text(encoding="utf-8")) if state_file.exists() else {}
+
+        if target_tid:
+            ticket = board["tickets"].get(target_tid)
+            if not ticket:
+                _emit(
+                    {"ok": False, "code": "TICKET_NOT_FOUND",
+                     "detail": f"Ticket {target_tid} not found on BOARD"},
+                    as_json,
+                )
+                return 1
+            report = admission_doctor.classify_blocked_ticket(ticket, board["tickets"], state)
+            _emit({"ok": True, "code": "ADMISSION_DOCTOR_TICKET", **report}, as_json)
+            return 0
+        else:
+            blocked_reports = {}
+            for tid, ticket in board["tickets"].items():
+                if ticket.get("section") == "## BLOCKED" or ticket.get("blocker") or (
+                    ticket.get("section") == "## TODO" and ticket.get("needs")
+                ):
+                    rep = admission_doctor.classify_blocked_ticket(ticket, board["tickets"], state)
+                    blocked_reports[tid] = rep
+            _emit({
+                "ok": True,
+                "code": "ADMISSION_DOCTOR_STATUS",
+                "blocked_tickets_count": len(blocked_reports),
+                "reports": blocked_reports,
+            }, as_json)
+            return 0
+    elif subcmd == "saituls":
+        report = admission_doctor.evaluate_live_case_saituls()
+        _emit(report, as_json)
+        return 0 if report.get("ok") else 1
+    elif subcmd == "src078":
+        report = admission_doctor.evaluate_src078_traceability()
+        _emit(report, as_json)
+        return 0 if report.get("ok") else 1
+
+    _emit({
+        "ok": False,
+        "code": "VALIDATION_FAILED",
+        "detail": f"unknown admission subcommand: {subcmd}; "
+        "use: doctor [T-###] | status | saituls | src078",
+    }, as_json)
+    return 2
 
 
 def _autonomy_recall(project_root: Path, args: list[str], as_json: bool) -> int:
@@ -7811,6 +9174,30 @@ def _reverify_default_timeout() -> int:
         return 1800
 
 
+def _operator_boundary_hint(root: Path) -> dict | None:
+    """What to reply with when a lifecycle write left the project waiting.
+
+    A host with no final-response gate has nothing between the model and the
+    operator, and the wall of text is composed right after the last write. So
+    that write names the one command whose output IS the checkpoint. Reads
+    STATE only; never raises; None while there is runnable work.
+    """
+    try:
+        state = parse_state((root / ".saipen" / "STATE.md").read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return None
+    if not str(state.get("next_action") or "").startswith("WAIT:"):
+        return None
+    return {
+        "command": f'saipen response digest --project-root "{root}" --reason final --json',
+        "instruction": (
+            "The project now waits for the operator. To end the turn, reply with the "
+            "`text` of that command verbatim and nothing else: the detail is already in "
+            "LOG, and a DETAILS line, when there is one, names where."
+        ),
+    }
+
+
 def _emit(payload: dict, as_json: bool) -> None:
     # ONE public refusal shape. CLI-side refusals have always carried
     # `detail`; engine `Result` refusals carry `message`, so the same public
@@ -7838,6 +9225,10 @@ def _emit(payload: dict, as_json: bool) -> None:
                     "BOOT's entry table routes a new actionable task to `saipen start`"
                 ),
             }
+    if _BOUNDARY_ROOT is not None and payload.get("ok") is True:
+        _boundary = _operator_boundary_hint(_BOUNDARY_ROOT)
+        if _boundary is not None:
+            payload = {**payload, "operator_boundary": _boundary}
     if _TELEGRAM_ROOT is not None and as_json and "inflight" not in payload:
         # T-1575: a gate in flight binds the tree it tests. The turn-entry
         # answer names it and the parallel lane, so an agent keeps working
@@ -7856,6 +9247,15 @@ def _emit(payload: dict, as_json: bool) -> None:
         except (OSError, ValueError):
             _telegram_state = {}
         payload = {**payload, "telegrams": _turn_entry_telegrams(_TELEGRAM_ROOT, _telegram_state)}
+    if _SUITE_HINT_ROOT is not None and payload.get("ok") is True and "suite" not in payload:
+        # T-1661: a project that declares a suite gets its run command named
+        # where the next act is chosen, while this tree has no record of it.
+        # Absent otherwise, so its presence always means there is a run to do.
+        from saipen_engine.suite_record import projection as _suite_projection
+
+        _suite = _suite_projection(_SUITE_HINT_ROOT)
+        if _suite is not None:
+            payload = {**payload, "suite": _suite}
     if _ROUTE_ECHO is not None:
         # Route echo: the invocation resolved through the shared shortcut
         # resolver, so every emitted payload names its canonical route. This
@@ -7868,7 +9268,13 @@ def _emit(payload: dict, as_json: bool) -> None:
         print(f"REFUSE [{payload.get('code', 'ERROR')}]")
         for line in _human_refusal_lines(payload):
             print(line)
+        if payload.get("decision_request"):
+            from saipen_engine.decision_request import format_decision_request
+            print(format_decision_request(payload["decision_request"]))
         return
+    if payload.get("decision_request"):
+        from saipen_engine.decision_request import format_decision_request
+        print(format_decision_request(payload["decision_request"]))
     if payload.get("code") == "NOT_SAIPEN_PROJECT":
         return
     if payload.get("code") in ("STOP", "STOPPED") and isinstance(payload.get("delivery"), str):
@@ -7900,6 +9306,44 @@ def _emit(payload: dict, as_json: bool) -> None:
         value = payload.get(key)
         if value is not None and value != []:
             print(f"{key}: {value}")
+    _visible_readiness = payload.get("readiness")
+    if isinstance(_visible_readiness, dict) and _visible_readiness.get("status"):
+        # T-1862: the human surface must not answer `phase: DONE` alone while
+        # the machine surface says AUDIT_OUTSTANDING. Both read this same
+        # projection; this block prints it and never recomputes it. Authority
+        # is quoted so a reader sees that readiness changed nothing.
+        _headline = _visible_readiness.get("headline") or ""
+        _line = f"Readiness: {_visible_readiness['status']}"
+        if _headline:
+            _line += f" -- {_headline}"
+        print(_line)
+        for _reason in list(_visible_readiness.get("reasons") or [])[:4]:
+            print(f"  {_reason}")
+        _dimensions = _visible_readiness.get("dimensions") or {}
+        _authority = _dimensions.get("authority") or {}
+        _quoted = [
+            f"{key}={_authority[key]}"
+            for key in ("continuation_authority", "safety_valve_mode")
+            if _authority.get(key)
+        ]
+        if _quoted:
+            print(f"  authority unchanged: {' '.join(_quoted)}")
+    if payload.get("dry_run") is True or (payload.get("data") or {}).get("dry_run") is True:
+        # T-1785 (SRC-251 phase 5): a plan printed as `code: <code>` alone read
+        # as the committed transition -- `checkpoint --dry-run` answered exactly
+        # what the real call answers. The JSON carries the flag; this is its
+        # human half.
+        print("dry_run: true -- planned only; nothing was written")
+    if isinstance(payload.get("suite"), dict) and payload["suite"].get("command"):
+        print(f"suite: {payload['suite']['command']}")
+    if payload.get("librarian_advisory"):
+        print(payload["librarian_advisory"])
+    for step, where in (("board_scrub", "evidence_path"), ("log_seal", "segment")):
+        # T-1640: CLEAN's entry steps, present only when one ran or refused.
+        outcome = payload.get(step)
+        if isinstance(outcome, dict):
+            said = outcome.get(where) if outcome.get("ok") else outcome.get("message")
+            print(f"{step}: {outcome.get('code')} -- {said}")
     if payload.get("actor_source") == "inherited" and payload.get("actor"):
         print(
             f"actor: {payload['actor']} (inherited from STATE.agent; set SAIPEN_AGENT "
@@ -7979,259 +9423,6 @@ def _runtime_identity() -> str:
     if _re.search(r"[\x00-\x1f\x7f]", value):
         return "unknown"
     return value
-
-
-def _improve_dry_run_plan(project_root: Path, action: str, rest: list[str], as_json: bool) -> int:
-    """CORE-002: semantic PLAN for an improve mutator under --dry-run.
-
-    Validates the closed grammar of `submit` / `complete` / `cycle-complete` /
-    `abort` / `retire` and returns concrete planned journal/LOG/state targets
-    with zero writes. The pre-improve state error surface (NOT_SAIPEN_PROJECT /
-    state-malformed) is shared between dry-run and the real mutator so an
-    invalid session refuses consistently.
-    """
-    state_path = _state_path(project_root)
-    if not state_path.is_file():
-        _emit({"ok": False, "code": "NOT_SAIPEN_PROJECT"}, as_json)
-        return 3
-    _state, state_error = parse_state_or_error(codec.read_doc(state_path))
-    if state_error:
-        _emit(
-            {"ok": False, "code": "VALIDATION_FAILED", "detail": f"state-malformed: {state_error}"},
-            as_json,
-        )
-        return 1
-    if action == "submit":
-        if len(rest) < 4:
-            _emit(
-                {
-                    "ok": False,
-                    "code": "VALIDATION_FAILED",
-                    "detail": "improve submit needs <cycle> <seat> <project> <findings.json>",
-                },
-                as_json,
-            )
-            return 2
-        cycle, seat, project = rest[0], rest[1], rest[2]
-        from improve import resolve_report_path
-
-        report = resolve_report_path(project_root, cycle, seat, project)
-        _emit(
-            {
-                "ok": True,
-                "code": "DRY_RUN_PLAN",
-                "action": "submit",
-                "cycle": cycle,
-                "seat": seat,
-                "project": project,
-                "report": str(report),
-                "targets": [str(report), ".saipen/LOG.md"],
-                "detail": "planned RUN append + LOG append; no writes",
-            },
-            as_json,
-        )
-        return 0
-    if action == "complete":
-        if len(rest) < 3:
-            _emit(
-                {
-                    "ok": False,
-                    "code": "VALIDATION_FAILED",
-                    "detail": "improve complete needs <cycle> <seat> <project>",
-                },
-                as_json,
-            )
-            return 2
-        cycle, seat, project = rest[0], rest[1], rest[2]
-        from improve import resolve_report_path
-
-        report = resolve_report_path(project_root, cycle, seat, project)
-        _emit(
-            {
-                "ok": True,
-                "code": "DRY_RUN_PLAN",
-                "action": "complete",
-                "cycle": cycle,
-                "seat": seat,
-                "project": project,
-                "report": str(report),
-                "targets": [str(report), ".saipen/LOG.md"],
-                "detail": "planned report completion + LOG append; no writes",
-            },
-            as_json,
-        )
-        return 0
-    if action == "rebind":
-        if len(rest) < 3:
-            _emit(
-                {
-                    "ok": False,
-                    "code": "VALIDATION_FAILED",
-                    "detail": "improve rebind needs <cycle> <seat> <project>",
-                },
-                as_json,
-            )
-            return 2
-        cycle, seat, project = rest[0], rest[1], rest[2]
-        from improve import resolve_report_path
-
-        report = resolve_report_path(project_root, cycle, seat, project)
-        _emit(
-            {
-                "ok": True,
-                "code": "DRY_RUN_PLAN",
-                "action": "rebind",
-                "cycle": cycle,
-                "seat": seat,
-                "project": project,
-                "report": str(report),
-                "targets": [str(report)],
-                "detail": "planned draft identity re-stamp to the installed "
-                "protocol; RUN content untouched; no writes",
-            },
-            as_json,
-        )
-        return 0
-    if action == "cycle-complete":
-        if len(rest) < 1:
-            _emit(
-                {
-                    "ok": False,
-                    "code": "VALIDATION_FAILED",
-                    "detail": "improve cycle-complete needs <cycle>",
-                },
-                as_json,
-            )
-            return 2
-        cycle = rest[0]
-        cycle_root = project_root / ".saipen" / "improve" / cycle
-        _emit(
-            {
-                "ok": True,
-                "code": "DRY_RUN_PLAN",
-                "action": "cycle-complete",
-                "cycle": cycle,
-                "targets": [
-                    str(cycle_root / "MANIFEST.md"),
-                    str(cycle_root / "REPORTS"),
-                    ".saipen/LOG.md",
-                ],
-                "detail": "planned cycle ACTIVE -> COMPLETE; no writes",
-            },
-            as_json,
-        )
-        return 0
-    if action == "abort":
-        if len(rest) < 1:
-            _emit(
-                {
-                    "ok": False,
-                    "code": "VALIDATION_FAILED",
-                    "detail": "improve abort needs <cycle>",
-                },
-                as_json,
-            )
-            return 2
-        cycle = rest[0]
-        cycle_root = project_root / ".saipen" / "improve" / cycle
-        _emit(
-            {
-                "ok": True,
-                "code": "DRY_RUN_PLAN",
-                "action": "abort",
-                "cycle": cycle,
-                "targets": [str(cycle_root / "MANIFEST.md"), ".saipen/LOG.md"],
-                "detail": "planned cycle ABORTED transition; no writes",
-            },
-            as_json,
-        )
-        return 0
-    if action == "retire":
-        if len(rest) < 2:
-            _emit(
-                {
-                    "ok": False,
-                    "code": "VALIDATION_FAILED",
-                    "detail": "improve retire needs <cycle> <seat> --reason <CODE>",
-                },
-                as_json,
-            )
-            return 2
-        cycle, seat = rest[0], rest[1]
-        reason = ""
-        replacement = ""
-        tail = rest[2:]
-        while tail:
-            if tail[0] == "--reason" and len(tail) > 1 and not reason:
-                reason, tail = tail[1], tail[2:]
-            elif tail[0] == "--replacement" and len(tail) > 1 and not replacement:
-                replacement, tail = tail[1], tail[2:]
-            else:
-                _emit(
-                    {
-                        "ok": False,
-                        "code": "VALIDATION_FAILED",
-                        "detail": f"unsupported or duplicate improve retire option {tail[0]!r}",
-                    },
-                    as_json,
-                )
-                return 2
-        if not reason:
-            _emit(
-                {
-                    "ok": False,
-                    "code": "VALIDATION_FAILED",
-                    "detail": "improve retire needs --reason <CODE> "
-                    "(pattern [A-Z][A-Z0-9_-]{0,63})",
-                },
-                as_json,
-            )
-            return 2
-        if reason == "STALE_COMPLETE" and not replacement:
-            _emit(
-                {
-                    "ok": False,
-                    "code": "VALIDATION_FAILED",
-                    "detail": "stale-COMPLETE retire needs --replacement <fresh-seat>",
-                },
-                as_json,
-            )
-            return 2
-        if replacement and reason != "STALE_COMPLETE":
-            _emit(
-                {
-                    "ok": False,
-                    "code": "VALIDATION_FAILED",
-                    "detail": "--replacement is valid only with --reason STALE_COMPLETE",
-                },
-                as_json,
-            )
-            return 2
-        cycle_root = project_root / ".saipen" / "improve" / cycle
-        _emit(
-            {
-                "ok": True,
-                "code": "DRY_RUN_PLAN",
-                "action": "retire",
-                "cycle": cycle,
-                "seat": seat,
-                "reason": reason,
-                "replacement_seat": replacement,
-                "targets": [str(cycle_root / "MANIFEST.md"), ".saipen/LOG.md"],
-                "detail": (
-                    "planned stale COMPLETE -> superseded binding; no writes"
-                    if replacement
-                    else "planned seat availability -> unavailable; no writes"
-                ),
-            },
-            as_json,
-        )
-        return 0
-    _emit(
-        {"ok": False, "code": "VALIDATION_FAILED", "detail": f"unknown improve action {action!r}"},
-        as_json,
-    )
-    return 2
 
 
 def _improve(project_root: Path, args: list[str], as_json: bool, dry_run: bool) -> int:
@@ -8423,14 +9614,11 @@ def _improve(project_root: Path, args: list[str], as_json: bool, dry_run: bool) 
         return rows
 
     action = args[0] if args and not args[0].startswith("--") else None
-    # CORE-002 (audit fdc73e06): the improve MUTATORS (submit/complete/
-    # cycle-complete/abort) now run their semantic PLAN under --dry-run and
-    # return the planned targets with zero writes. Refusal classes are the
-    # same as non-dry; valid requests report concrete plan targets. The
-    # previous `DRY_RUN_UNSUPPORTED` short-circuit hid the plan and made
-    # dry-run observationally different from a real submission.
-    if dry_run and action in ("submit", "complete", "rebind", "cycle-complete", "abort", "retire"):
-        return _improve_dry_run_plan(project_root, action, args[1:] if action else [], as_json)
+    # CORE-002 / T-1784: under --dry-run the improve MUTATORS (submit,
+    # complete, rebind, cycle-complete, abort, retire) take their real branch
+    # and the mutator returns its plan where it would write, after every
+    # gate has run: one implementation, so a plan can never promise what the
+    # real call refuses (a separate grammar-only planner did, T-1784).
     if action is None:
         # DOGFOOD V (T-617): bare `saipen improve` is the documented
         # meta-control -- it PREPARES the current seat's bounded audit
@@ -8671,7 +9859,7 @@ def _improve(project_root: Path, args: list[str], as_json: bool, dry_run: bool) 
             return 2
         report = _resolve_report_path(project_root, args[1], args[2], args[3])
         try:
-            result = _append_run(report, run_text)
+            result = _append_run(report, run_text, dry_run=dry_run)
             _emit(result, as_json)
             return 0 if result.get("ok") else 1
         except ValueError as exc:
@@ -8719,7 +9907,7 @@ def _improve(project_root: Path, args: list[str], as_json: bool, dry_run: bool) 
 
         report = _resolve_report_path(project_root, args[1], args[2], args[3])
         try:
-            result = _complete_report(report)
+            result = _complete_report(report, dry_run=dry_run)
             _emit(result, as_json)
             return 0 if result.get("ok") else 1
         except ValueError as exc:
@@ -8755,7 +9943,7 @@ def _improve(project_root: Path, args: list[str], as_json: bool, dry_run: bool) 
 
         report = _resolve_report_path(project_root, args[1], args[2], args[3])
         try:
-            result = _rebind_report_protocol(report)
+            result = _rebind_report_protocol(report, dry_run=dry_run)
             _emit(result, as_json)
             return 0 if result.get("ok") else 1
         except ValueError as exc:
@@ -8832,6 +10020,30 @@ def _improve(project_root: Path, args: list[str], as_json: bool, dry_run: bool) 
                         "evidence": finding.evidence,
                     }
                 )
+        historical = None
+        from improve import _cycle_status, _cycle_schema, TERMINAL_CYCLE_STATUSES
+
+        if (
+            _cycle_schema(cycle / "MANIFEST.md") == "strict"
+            and _cycle_status(cycle / "MANIFEST.md") in TERMINAL_CYCLE_STATUSES
+        ):
+            from saipen_engine.improve_retrospective import inspect_archive
+
+            historical = inspect_archive(cycle)
+            if historical.get("pending_findings_known"):
+                queue = []
+                for item in historical["pending_findings"]:
+                    run, imp = item["finding_ref"].split("/", 1)
+                    queue.append({
+                        **item,
+                        "finding_ref": f"{cycle.name}/{item['report']}#{item['finding_ref']}",
+                        "run": int(run.removeprefix("RUN-")), "imp": imp,
+                    })
+                precheck = []
+            else:
+                precheck = [historical.get(
+                    "detail", "historical reconciliation evidence unavailable"
+                )]
         _emit(
             {
                 "ok": True,
@@ -8839,12 +10051,27 @@ def _improve(project_root: Path, args: list[str], as_json: bool, dry_run: bool) 
                 "cycle": args[1],
                 "queue": queue,
                 "precheck_errors": precheck[:5],
+                **({"retrospective": historical} if historical is not None else {}),
                 "note": "semantic adjudication (reproduce/classify/dedupe/"
                 "decide) is Core-owned; commit each decision via "
                 "saipen improve sweep",
             },
             as_json,
         )
+        if not as_json:
+            # T-1774 (SRC-248 R008): the human surface of an enumeration shows
+            # what it enumerated. `_emit` prints an allow-list of scalars and
+            # this verb's content lives in two lists, so its whole human answer
+            # was `code: IMPROVE_SWEEP_QUEUE`. The JSON payload is unchanged.
+            print(f"cycle: {args[1]}")
+            print(f"queue: {len(queue)} unswept finding(s)")
+            for item in queue:
+                print(f"  {item['finding_ref']} [{item['severity']}] [{item['class']}]")
+                for key in ("expected", "actual", "evidence"):
+                    print(f"    {key}: {item[key]}")
+            print(f"precheck_errors: {len(precheck)}")
+            for error in precheck:
+                print(f"  - {error}")
         return 0
     if action == "status":
         rows = _cycle_statuses()
@@ -8909,7 +10136,7 @@ def _improve(project_root: Path, args: list[str], as_json: bool, dry_run: bool) 
                     "detail": "improve sweep needs <cycle> <finding_ref> "
                     "<disposition> [--ticket T-###] [--report "
                     "<ident>] [--reproduced y|n] [--fixed-by <ref>] "
-                    "[--verification <ref>] [--amend] where finding_ref "
+                    "[--verification <ref>] [--amend] [--retrospective] where finding_ref "
                     "is RUN-N/IMP-NNN (strict) or IMP-NNN (legacy); "
                     "--verification binds a historical SUPERSEDED/"
                     "NOT_REPRODUCED disposition to its successor evidence; "
@@ -8943,6 +10170,7 @@ def _improve(project_root: Path, args: list[str], as_json: bool, dry_run: bool) 
         fixed_by = "-"
         verification = "-"
         amend = False
+        retrospective = False
         rest = args[4:]
         while rest:
             if rest[0] == "--ticket" and len(rest) > 1:
@@ -8957,9 +10185,11 @@ def _improve(project_root: Path, args: list[str], as_json: bool, dry_run: bool) 
                 verification, rest = rest[1], rest[2:]
             elif rest[0] == "--amend":
                 amend, rest = True, rest[1:]
+            elif rest[0] == "--retrospective":
+                retrospective, rest = True, rest[1:]
             else:
                 rest = rest[1:]
-        if dry_run:
+        if dry_run and not retrospective:
             _emit(
                 {
                     "ok": True,
@@ -8982,6 +10212,9 @@ def _improve(project_root: Path, args: list[str], as_json: bool, dry_run: bool) 
                 "fixed_by": fixed_by,
                 "verification": verification,
                 "amend": amend,
+                "retrospective": retrospective,
+                "actor": _agent_for(project_root),
+                "dry_run": dry_run,
             }
             if run_raw is not None:
                 entry["run"] = f"RUN-{run_raw}"
@@ -9023,7 +10256,7 @@ def _improve(project_root: Path, args: list[str], as_json: bool, dry_run: bool) 
 
         cycle = cycle_dir(project_root, args[1])
         try:
-            result = _reconcile_cycle(cycle, dry_run=dry_run)
+            result = _reconcile_cycle(cycle, dry_run=dry_run, actor=_agent_for(project_root))
             _emit(result, as_json)
             return 0 if result.get("ok") else 1
         except ValueError as exc:
@@ -9056,7 +10289,7 @@ def _improve(project_root: Path, args: list[str], as_json: bool, dry_run: bool) 
             return 2
         cycle = cycle_dir(project_root, args[1])
         try:
-            result = complete_cycle(cycle)
+            result = complete_cycle(cycle, dry_run=dry_run)
             _emit(result, as_json)
             return 0 if result.get("ok") else 1
         except ValueError as exc:
@@ -9090,7 +10323,7 @@ def _improve(project_root: Path, args: list[str], as_json: bool, dry_run: bool) 
 
         cycle = cycle_dir(project_root, args[1])
         try:
-            result = _abort_cycle(cycle)
+            result = _abort_cycle(cycle, dry_run=dry_run)
             _emit(result, as_json)
             return 0 if result.get("ok") else 1
         except ValueError as exc:
@@ -9151,7 +10384,7 @@ def _improve(project_root: Path, args: list[str], as_json: bool, dry_run: bool) 
                     "ok": False,
                     "code": "VALIDATION_FAILED",
                     "detail": "improve retire needs <cycle_id> <seat_id> "
-                    "--reason <CODE> [--replacement <fresh-seat>] "
+                    "--reason <CODE> [--replacement <fresh-seat>] [--retrospective] "
                     "(pattern [A-Z][A-Z0-9_-]{0,63})",
                 },
                 as_json,
@@ -9159,12 +10392,15 @@ def _improve(project_root: Path, args: list[str], as_json: bool, dry_run: bool) 
             return 2
         reason = ""
         replacement = ""
+        retrospective = False
         tail = args[3:]
         while tail:
             if tail[0] == "--reason" and len(tail) > 1 and not reason:
                 reason, tail = tail[1], tail[2:]
             elif tail[0] == "--replacement" and len(tail) > 1 and not replacement:
                 replacement, tail = tail[1], tail[2:]
+            elif tail[0] == "--retrospective" and not retrospective:
+                retrospective, tail = True, tail[1:]
             else:
                 _emit(
                     {
@@ -9184,6 +10420,12 @@ def _improve(project_root: Path, args: list[str], as_json: bool, dry_run: bool) 
                 },
                 as_json,
             )
+            return 2
+        if retrospective and (reason == "STALE_COMPLETE" or replacement):
+            _emit({
+                "ok": False, "code": "VALIDATION_FAILED",
+                "detail": "retrospective retirement cannot rewrite an active replacement binding",
+            }, as_json)
             return 2
         if reason == "STALE_COMPLETE" and not replacement:
             _emit(
@@ -9211,9 +10453,15 @@ def _improve(project_root: Path, args: list[str], as_json: bool, dry_run: bool) 
         cycle = cycle_dir(project_root, args[1])
         try:
             if reason == "STALE_COMPLETE":
-                result = _resolve_stale_complete_seat(cycle, args[2], replacement)
+                result = _resolve_stale_complete_seat(
+                    cycle, args[2], replacement, dry_run=dry_run
+                )
             else:
-                result = _retire_seat(cycle, args[2], reason)
+                if retrospective:
+                    result = _retire_seat(cycle, args[2], reason, dry_run=dry_run,
+                                          retrospective=True, actor=_agent_for(project_root))
+                else:
+                    result = _retire_seat(cycle, args[2], reason, dry_run=dry_run)
             _emit(result, as_json)
             return 0 if result.get("ok") else 1
         except ValueError as exc:
@@ -9266,14 +10514,11 @@ def _public_improve(project_root: Path, args: list[str], as_json: bool, dry_run:
         return 1
     except PermissionError as exc:
         if str(exc) == "WRITER_BUSY":
-            _emit(
-                {
-                    "ok": False,
-                    "code": "WRITER_BUSY",
-                    "detail": "another live writer holds the project lock",
-                },
-                as_json,
-            )
+            # T-1827 (SRC-282:R002/R010): carry the recorded holder and the
+            # orphan-cleanup remedy through the CLI boundary.
+            from saipen_engine.lock import writer_busy_payload
+
+            _emit(writer_busy_payload(exc), as_json)
             return 1
         raise
 
@@ -9406,8 +10651,11 @@ def _host_command(tokens: list[str], project_root_opt: str | None, as_json: bool
     host: str | None = None
     root_opt = project_root_opt
     command: list[str] = []
-    if sub == "entry" and "--" in tokens:
-        cut = tokens.index("--")
+    # T-1684: an option operand spelled `--` is data, not the transport boundary.
+    values = _option_value_positions(tokens)
+    cut = next((index for index, token in enumerate(tokens)
+                if token == "--" and index not in values), None)
+    if sub == "entry" and cut is not None:
         tokens, command = tokens[:cut], tokens[cut + 1 :]
     index = 1
     while index < len(tokens):
@@ -9661,6 +10909,13 @@ def _init_command(
         return 0
     try:
         written = bootstrap_project(root, agent=seat)
+    except OSError as exc:
+        from saipen_engine.host_bootstrap import filesystem_unavailable
+
+        _emit(
+            filesystem_unavailable(root, exc, stage="before_admission", operation="init"), as_json
+        )
+        return 1
     except InitRefused as exc:
         _emit({"ok": False, "code": "INIT_REFUSED", "detail": str(exc)}, as_json)
         return 1
@@ -9968,6 +11223,11 @@ def _admission_context(args: list[str], project_root_opt: str | None):
         root = candidate if (candidate / ".saipen" / "STATE.md").is_file() else None
     authority = _flag_value(args, "--authority-root")
     home = _flag_value(args, "--home")
+    # `--event-cwd` is the directory the host session is really in: the binding
+    # owner judges project carriers against it. `--runtime` is a diagnostic
+    # endpoint for test carriers, like `--home` and `--authority-root`.
+    event_cwd = _flag_value(args, "--event-cwd")
+    runtime = _flag_value(args, "--runtime")
     return pa.Context(
         project_root=root,
         session_id=session,
@@ -9976,6 +11236,8 @@ def _admission_context(args: list[str], project_root_opt: str | None):
         provider=_flag_value(args, "--provider") or pa.provider_fingerprint(),
         authority_root=Path(authority) if authority else None,
         home=Path(home) if home else None,
+        event_cwd=Path(event_cwd) if event_cwd else None,
+        runtime=Path(runtime) if runtime else None,
     )
 
 
@@ -9994,7 +11256,10 @@ def _admission_cli(args: list[str], as_json: bool, project_root_opt: str | None)
         contract_summary,
     )
 
-    verbs = ("status", "check", "establish", "invalidate", "matrix")
+    verbs = (
+        "status", "check", "establish", "invalidate", "matrix", "table",
+        "doctor", "saituls", "src078"
+    )
     if len(args) < 2 or args[1] not in verbs:
         _emit(
             {
@@ -10007,11 +11272,21 @@ def _admission_cli(args: list[str], as_json: bool, project_root_opt: str | None)
         )
         return 2
     verb = args[1]
+    if verb in ("doctor", "saituls", "src078"):
+        project_root = (
+            Path(project_root_opt).resolve() if project_root_opt else Path.cwd().resolve()
+        )
+        return _admission(project_root, args[1:], as_json)
     try:
         if verb == "matrix":
             _emit(
                 {"ok": True, "code": "ADMISSION_MATRIX", "matrix": pa.capability_matrix()}, as_json
             )
+            return 0
+        if verb == "table":
+            # The decision table as data: every registered failure and what
+            # each admission mode does with it (HOST-INTEGRATION-01).
+            _emit({"ok": True, "code": "ADMISSION_TABLE", **pa.decision_table()}, as_json)
             return 0
         ctx = _admission_context(args[2:], project_root_opt)
         if ctx is None:
@@ -10021,6 +11296,12 @@ def _admission_cli(args: list[str], as_json: bool, project_root_opt: str | None)
                 ctx.project_root,
                 ctx.session_id,
                 _flag_value(args, "--reason") or "",
+                host=ctx.host,
+                model=ctx.model,
+                provider=ctx.provider,
+                authority_root=ctx.authority_root,
+                home=ctx.home,
+                runtime=ctx.runtime,
             )
             if not result.get("ok"):
                 _emit(
@@ -10041,7 +11322,14 @@ def _admission_cli(args: list[str], as_json: bool, project_root_opt: str | None)
                 as_json,
             )
             return 0
-        verdict = pa.establish(ctx) if verb == "establish" else pa.evaluate(ctx)
+        verdict = (
+            pa.establish(ctx, fresh="--fresh" in args[2:])
+            if verb == "establish"
+            else pa.evaluate(ctx)
+        )
+        # The policy the verdict was decided under travels with it, so a
+        # transport and a diagnostic never have to guess why a state permits.
+        verdict.setdefault("mode", pa.admission_mode(ctx))
         contract_text = None
         if verdict["permitted"] and verdict["applies"]:
             try:
@@ -10066,6 +11354,327 @@ def _admission_cli(args: list[str], as_json: bool, project_root_opt: str | None)
         return 2
 
 
+def _install_surface_writer(args: list[str]) -> str | None:
+    """The install-surface WRITER `args` names, as the operator would spell it.
+
+    T-1747: these commands dispatch before a project is resolved, which is
+    also before `--dry-run` used to be looked at, so the flag was parsed and
+    then dropped. `host repair` answers a dry run with its plan; the writers
+    named here have no plan to show and refuse, because a refusal writes
+    nothing and a silent run does.
+    """
+    if len(args) >= 2 and args[0] == "host":
+        action = args[2] if len(args) >= 3 and not args[2].startswith("--") else "status"
+        if args[1] in ("machine", "launcher") and action != "status":
+            return f"host {args[1]} {action}"
+    if args and args[0] == "runtime":
+        for flag in ("--prelaunch", "--bootstrap"):
+            if flag in args[1:]:
+                return "runtime " + flag
+    return None
+
+
+def _host_integration_command(tokens: list[str], as_json: bool, dry_run: bool = False) -> int:
+    """`saipen host doctor|repair|mode` (HOST-INTEGRATION-01, T-1624).
+
+    The operator surface of host integration, and the only one: `doctor` reads
+    every registered host and says in one view what is installed, what is
+    healthy and what the next action is; `repair` brings installed hosts back to
+    the canonical generation and restores the authority service; `mode` shows
+    or sets the admission policy (`strict`, `degraded`, or `default` to remove
+    the operator's choice). None of them needs a SAIPEN project, none touches
+    one, and ordinary use of a host never needs any of them: the prompt
+    boundary recovers by itself and degrades truthfully when it cannot.
+    """
+    from saipen_engine import host_integration
+
+    sub = tokens[0]
+    rest = tokens[1:]
+    home = None
+    host = None
+    profile = None
+    positional: list[str] = []
+    index = 0
+    while index < len(rest):
+        token = rest[index]
+        if token in ("--home", "--host", "--profile") and index + 1 < len(rest):
+            if token == "--home":
+                home = Path(rest[index + 1])
+            elif token == "--host":
+                host = rest[index + 1]
+            else:
+                profile = Path(rest[index + 1])
+            index += 2
+        elif token.startswith("--"):
+            _emit(
+                {
+                    "ok": False,
+                    "code": "VALIDATION_FAILED",
+                    "detail": (f"host {sub} accepts --host ID, --home PATH and --profile PATH; "
+                               f"surplus: {token}"),
+                },
+                as_json,
+            )
+            return 2
+        else:
+            positional.append(token)
+            index += 1
+    try:
+        if profile is not None and (host != "claude" or sub not in ("doctor", "repair")):
+            raise ValueError("--profile requires host doctor or repair with --host claude")
+        if sub == "doctor":
+            report = host_integration.doctor(home=home, only=host, profile=profile)
+            _emit_host_report(report, as_json)
+            return 0 if report.get("ok") else 1
+        if sub == "repair" and dry_run:
+            # T-1747: the plan IS the doctor's report -- repair acts on exactly
+            # the hosts it lists under `needs_action`. Nothing is installed,
+            # stopped or started.
+            report = host_integration.doctor(home=home, only=host, profile=profile)
+            report = {
+                **report,
+                "code": "DRY_RUN_PLAN",
+                "dry_run": True,
+                "would_repair": list(report.get("needs_action") or []),
+                "detail": "no install, no authority restart, no machine runtime write",
+            }
+            _emit_host_report(report, as_json)
+            if not as_json:
+                print("DRY RUN: " + report["detail"])
+            return 0 if report.get("ok") else 1
+        if sub == "repair":
+            report = host_integration.repair(home=home, only=host, profile=profile)
+            _emit_host_report(report, as_json)
+            return 0 if report.get("ok") else 1
+        if dry_run and positional:
+            # Refused here, where the value is known whatever came before it:
+            # `host mode --home X strict` names its value third.
+            raise ValueError(
+                f"--dry-run is not available for `host mode {positional[0]}`: it changes "
+                "this machine's admission policy and has no plan-only form. Nothing was "
+                "written. The read-only view is host mode without a value"
+            )
+        report = host_integration.mode(positional[0] if positional else None, home=home)
+        _emit(report, as_json)
+        return 0 if report.get("ok") else 2
+    except (OSError, ValueError) as exc:
+        _emit({"ok": False, "code": "VALIDATION_FAILED", "detail": str(exc)}, as_json)
+        return 2
+
+
+def _host_machine_command(tokens: list[str], as_json: bool) -> int:
+    """`saipen host machine [status|install|remove]` (T-1647, SRC-188).
+
+    The machine-scoped runtime: one read-only projection of this runtime that
+    every account on the machine can execute, for the account that can open a
+    managed project and cannot read the operator's own install. `status` is
+    read-only and is the readiness an account manager consumes
+    (`saipen_runtime_ready`); `install` projects the runtime that is running
+    this command and is idempotent; `remove` deletes it. None of them needs a
+    project.
+    """
+    from saipen_engine import machine_runtime
+
+    rest = list(tokens)
+    action = rest.pop(0) if rest and not rest[0].startswith("--") else "status"
+    target: Path | None = None
+    python: str | None = None
+    bundle: bool | None = None
+    index = 0
+    while index < len(rest):
+        token = rest[index]
+        if token in ("--root", "--python") and index + 1 < len(rest):
+            if token == "--root":
+                target = Path(rest[index + 1])
+            else:
+                python = rest[index + 1]
+            index += 2
+        elif token in ("--bundle-python", "--no-bundle-python"):
+            bundle = token == "--bundle-python"
+            index += 1
+        else:
+            _emit(
+                {
+                    "ok": False,
+                    "code": "VALIDATION_FAILED",
+                    "detail": (
+                        "host machine accepts status|install|remove with --root PATH, "
+                        f"--python PATH and --bundle-python|--no-bundle-python; surplus: {token}"
+                    ),
+                },
+                as_json,
+            )
+            return 2
+    source = Path(__file__).resolve().parents[1]
+    try:
+        if action == "status":
+            report = machine_runtime.status(target, canonical=source)
+        elif action == "install":
+            report = machine_runtime.install(source, target, python=python, bundle_python=bundle)
+        elif action == "remove":
+            report = machine_runtime.remove(target)
+        else:
+            report = {
+                "ok": False,
+                "code": "VALIDATION_FAILED",
+                "detail": f"host machine has no action {action!r}; use status, install or remove",
+            }
+    except (OSError, ValueError) as exc:
+        report = {"ok": False, "code": "VALIDATION_FAILED", "detail": str(exc)}
+    if not report.get("ok") and not report.get("detail") and report.get("reasons"):
+        report = {**report, "detail": "; ".join(str(item) for item in report["reasons"][:4])}
+    _emit(report, as_json)
+    return 0 if report.get("ok") else 1
+
+
+def _host_launcher_command(tokens: list[str], as_json: bool) -> int:
+    """`saipen host launcher [status|install|remove]` (T-1678, SRC-192).
+
+    The `saipen` a shell finds on PATH, owned: `install` writes both launchers
+    for the canonical engine into the first declared per-user directory PATH
+    already names and records them; `remove` deletes only launchers still as
+    written; `status` is read-only. PATH itself is never edited. None of them
+    needs a project; the installer runs `install` and `host repair` refreshes.
+    """
+    from saipen_engine import host_integration, path_launcher
+    from saipen_engine.runtime_bootstrap import CanonicalSourceUnproven, canonical_source_root
+
+    rest = list(tokens)
+    action = rest.pop(0) if rest and not rest[0].startswith("--") else "status"
+    home: Path | None = None
+    python: str | None = None
+    index = 0
+    while index < len(rest):
+        token = rest[index]
+        if token in ("--home", "--python") and index + 1 < len(rest):
+            if token == "--home":
+                home = Path(rest[index + 1])
+            else:
+                python = rest[index + 1]
+            index += 2
+        else:
+            _emit(
+                {
+                    "ok": False,
+                    "code": "VALIDATION_FAILED",
+                    "detail": (
+                        "host launcher accepts status|install|remove with --home PATH and "
+                        f"--python PATH; surplus: {token}"
+                    ),
+                },
+                as_json,
+            )
+            return 2
+    try:
+        canonical = canonical_source_root(host_integration.source_root())
+    except CanonicalSourceUnproven:
+        canonical = None
+    engine = host_integration.launcher_engine(canonical)
+    try:
+        if action == "status":
+            report = path_launcher.status(engine, home)
+        elif action == "install" and canonical is None:
+            report = {
+                "ok": False,
+                "code": "CANONICAL_RUNTIME_SOURCE_UNPROVEN",
+                "detail": "no proven source engine for a PATH launcher to run",
+            }
+        elif action == "install":
+            report = path_launcher.install(engine, home, python=python)
+        elif action == "remove":
+            report = path_launcher.remove(home)
+        else:
+            report = {
+                "ok": False,
+                "code": "VALIDATION_FAILED",
+                "detail": f"host launcher has no action {action!r}; use status, install or remove",
+            }
+    except (OSError, ValueError) as exc:
+        report = {"ok": False, "code": "VALIDATION_FAILED", "detail": str(exc)}
+    if not report.get("ok") and not report.get("detail") and report.get("reasons"):
+        report = {**report, "detail": "; ".join(str(item) for item in report["reasons"][:4])}
+    _emit(report, as_json)
+    return 0 if report.get("ok") else 1
+
+
+def _host_instructions_command(
+    tokens: list[str], project_root_opt: str | None, as_json: bool, dry_run: bool
+) -> int:
+    """`saipen host instructions [status|repair] [--project-root PATH]` (T-1654).
+
+    The SAIPEN block inside the project's OWN instruction file (`AGENTS.md`
+    and its siblings). `status` is read-only: it names a block of another
+    generation and the one repair. `repair` rewrites only the bytes from
+    marker to marker and never creates a block. Neither reads or writes
+    project memory, so both answer for a project whose runtime binding is
+    broken -- the condition a stale block produces.
+    """
+    from saipen_engine import project_block
+
+    action = tokens[0] if tokens else "status"
+    if action not in ("status", "repair") or len(tokens) > 1:
+        _emit(
+            {
+                "ok": False,
+                "code": "VALIDATION_FAILED",
+                "detail": (
+                    "host instructions accepts status|repair with --project-root PATH; "
+                    f"surplus: {' '.join(tokens[1:] if action in ('status', 'repair') else tokens)}"
+                ),
+            },
+            as_json,
+        )
+        return 2
+    resolved = resolve_project_root(
+        Path.cwd().resolve(),
+        explicit=project_root_opt,
+        authority="observe" if action == "status" else "mutation",
+    )
+    if resolved.root is None:
+        _emit(
+            {
+                "ok": False,
+                "code": getattr(resolved, "code", None) or project_block.NOT_SAIPEN,
+                "detail": resolved.source,
+            },
+            as_json,
+        )
+        return 3
+    # The repair writes a file of the project, so a session declared
+    # read-only is refused exactly as for every other project mutation.
+    if action == "repair" and not dry_run and _negotiate_capability(resolved.root) == "read-only":
+        return _capability_refusal(as_json)
+    try:
+        if action == "status":
+            report = project_block.status(resolved.root)
+        else:
+            report = project_block.repair(resolved.root, dry_run=dry_run)
+    except (OSError, ValueError) as exc:
+        report = {"ok": False, "code": project_block.CODE_FAILED, "detail": str(exc)}
+    _emit(report, as_json)
+    return 0 if report.get("ok") else 1
+
+
+def _emit_host_report(report: dict, as_json: bool) -> None:
+    """JSON as data; otherwise the compact view a person reads."""
+    if as_json:
+        _emit(report, True)
+        return
+    from saipen_engine import host_integration
+
+    print(host_integration.render(report))
+
+
+def _overflow_with_home(overflow: dict | None, project_root_opt: str | None) -> dict | None:
+    """The overflow diagnostic plus whether its original is already kept."""
+    if not isinstance(overflow, dict):
+        return None
+    preserved = None
+    if project_root_opt:
+        preserved = (Path(project_root_opt).resolve() / str(overflow.get("detail_ref"))).is_file()
+    return {**overflow, "preserved": preserved}
+
+
 def _response_cli(args: list[str], as_json: bool, project_root_opt: str | None) -> int:
     """Single read-only renderer/checker for host operational handbacks."""
     from saipen_engine.response_surface import (
@@ -10080,6 +11689,45 @@ def _response_cli(args: list[str], as_json: bool, project_root_opt: str | None) 
         reason_for_request,
         human_response_authority,
     )
+
+    # SRC-190: the checkpoint is Estonian or Russian text, and a pipe on a host
+    # whose locale is not UTF-8 refused to carry it -- the one command that
+    # produces the operator checkpoint answered RESPONSE_FACT_INVALID there
+    # unless `--json` had already switched the stream. Every form writes UTF-8.
+    if hasattr(sys.stdout, "reconfigure"):
+        with suppress(OSError, ValueError):
+            sys.stdout.reconfigure(encoding="utf-8")
+
+    if len(args) >= 2 and args[1] == "preserve":
+        # The lossless home of a reply the gate refused: whoever replaces the
+        # reply with the compact form stores the original first.
+        from saipen_engine.response_surface import preserve_rejected
+
+        if "--stdin" not in args[2:] or not project_root_opt:
+            _emit(
+                {
+                    "ok": False,
+                    "code": "VALIDATION_FAILED",
+                    "detail": "use: saipen response preserve --stdin --project-root ROOT",
+                },
+                as_json,
+            )
+            return 2
+        _preserve_root = Path(project_root_opt).resolve()
+        if _negotiate_capability(_preserve_root) == "read-only":
+            return _capability_refusal(as_json)
+        _preserve_bytes = getattr(sys.stdin, "buffer", None)
+        _preserve_text = (
+            _preserve_bytes.read().decode("utf-8-sig", errors="replace")
+            if _preserve_bytes is not None
+            else sys.stdin.read()
+        )
+        try:
+            _preserved = preserve_rejected(_preserve_root, _preserve_text)
+        except (OSError, ValueError) as exc:
+            _preserved = {"ok": False, "code": "VALIDATION_FAILED", "detail": str(exc)[:300]}
+        _emit(_preserved, as_json)
+        return 0 if _preserved.get("ok") else 1
 
     if len(args) >= 2 and args[1] == "digest":
         if not project_root_opt:
@@ -10172,7 +11820,9 @@ def _response_cli(args: list[str], as_json: bool, project_root_opt: str | None) 
                 "ok": False,
                 "code": "VALIDATION_FAILED",
                 "detail": (
-                    "use: saipen response style | saipen response render|check --stdin "
+                    "use: saipen response style | saipen response digest --project-root "
+                    "ROOT | saipen response preserve --stdin --project-root ROOT | "
+                    "saipen response render|check --stdin "
                     "[--eligible-next|--auto-eligibility|--classify] "
                     f"[--detail-mode {'|'.join(DETAIL_MODES)}] [--request <user text>]"
                 ),
@@ -10193,6 +11843,7 @@ def _response_cli(args: list[str], as_json: bool, project_root_opt: str | None) 
     try:
         current_validation = None
         current_phase = None
+        current_idle_disposition = None
         current_task = None
         current_blocker = None
         operator_due = False
@@ -10221,11 +11872,13 @@ def _response_cli(args: list[str], as_json: bool, project_root_opt: str | None) 
             human_request = args[3 + index]
             from saipen_engine.operator_task import witness
 
-            witnessed = witness(human_request)
+            witnessed = witness(human_request, root=project_root_opt)
             request_authority = witnessed if not witnessed.get("code") else None
             detail_mode = (
                 detail_mode_for_request(human_request)
-                if human_response_authority(human_request, request_authority)
+                if human_response_authority(
+                    human_request, request_authority, root=project_root_opt,
+                )
                 else DETAIL_MODE_NONE
             )
         if project_root_opt:
@@ -10245,6 +11898,7 @@ def _response_cli(args: list[str], as_json: bool, project_root_opt: str | None) 
             current_task = status_payload.get("task")
             current_blocker = status_payload.get("blocker")
             automation = status_payload.get("automation") or {}
+            current_idle_disposition = automation.get("disposition")
             # T-1553: `OPERATOR_ACTION_DUE` is not one of the six closed
             # dispositions, so comparing against it here was dead code that
             # always read False -- the gate could then never accept an
@@ -10323,19 +11977,23 @@ def _response_cli(args: list[str], as_json: bool, project_root_opt: str | None) 
                 executable_action_remains=(
                     executable_action_remains
                     and not (
-                        human_response_authority(human_request, request_authority)
+                        human_response_authority(
+                            human_request, request_authority, root=root,
+                        )
                         and reason_for_request(human_request) in ("stop", "summary")
                     )
                 ),
                 style_contract=contract,
                 current_validation=current_validation,
                 current_phase=current_phase,
+                current_idle_disposition=current_idle_disposition,
                 current_task=current_task,
                 current_blocker=current_blocker,
                 operator_due=operator_due,
                 detail_mode=detail_mode,
                 human_request=human_request,
                 request_authority=request_authority,
+                diagnosis_root=root if project_root_opt else None,
                 facts=canonical_facts(root, status=status_payload) if project_root_opt else None,
                 reason=reason_for_request(human_request),
             )
@@ -10357,12 +12015,18 @@ def _response_cli(args: list[str], as_json: bool, project_root_opt: str | None) 
                     "class": klass,
                     "layer": verdict["layer"],
                     "layers": verdict["layers"],
+                    **({"diagnosis_verification": verdict["diagnosis_verification"],
+                        "semantic_review": verdict["semantic_review"]}
+                       if "diagnosis_verification" in verdict else {}),
                     "errors": class_errors,
                     "detail_mode": detail_mode,
                     "turn_decision": decision,
                     "detail": "; ".join(class_errors) if class_errors else None,
                     "diagnostic": verdict.get("diagnostic"),
                     "delivery": verdict.get("delivery"),
+                    "overflow": _overflow_with_home(
+                        verdict.get("overflow"), project_root_opt
+                    ),
                     "contract": (
                         contract_summary(contract)["context"]
                         if contract is not None and not ok
@@ -10414,6 +12078,7 @@ def _response_cli(args: list[str], as_json: bool, project_root_opt: str | None) 
                 executable_action_remains=executable_action_remains,
                 response_boundary=not executable_action_remains,
                 current_phase=current_phase,
+                current_idle_disposition=current_idle_disposition,
                 current_task=current_task,
                 current_blocker=current_blocker,
                 operator_due=operator_due,
@@ -10432,11 +12097,14 @@ def _response_cli(args: list[str], as_json: bool, project_root_opt: str | None) 
             response_boundary=not executable_action_remains,
             current_validation=current_validation,
             current_phase=current_phase,
+            current_idle_disposition=current_idle_disposition,
             current_task=current_task,
             current_blocker=current_blocker,
             operator_due=operator_due,
             detail_mode=detail_mode,
         )
+        from saipen_engine.response_surface import overflow_diagnostic
+
         _emit(
             {
                 "ok": not errors,
@@ -10444,6 +12112,12 @@ def _response_cli(args: list[str], as_json: bool, project_root_opt: str | None) 
                 "errors": errors,
                 "detail_mode": detail_mode,
                 "detail": "; ".join(errors) if errors else None,
+                "overflow": _overflow_with_home(
+                    overflow_diagnostic(
+                        source, detail_mode=detail_mode, operator_due=operator_due
+                    ),
+                    project_root_opt,
+                ),
             },
             as_json,
         )
@@ -10660,6 +12334,15 @@ def _storage_command(
         return finish({"ok": False, "code": "STORAGE_OPERATION_FAILED", "detail": str(exc)})
 
 
+# Options whose next argv token is data, including a token shaped like a global
+# switch. Boolean verb options stay outside this set so real trailing globals
+# keep their established spelling and placement.
+from saipen_engine.cli_grammar import has_option as _has_cli_option
+from saipen_engine.cli_grammar import (
+    option_value_positions as _option_value_positions,
+)
+
+
 def main(argv: list[str] | None = None) -> int:
     global _ROUTE_ECHO  # noqa: PLW0603
     # ``main`` is normally one process/one invocation, but tests and embedded
@@ -10667,6 +12350,7 @@ def main(argv: list[str] | None = None) -> int:
     # command only; never let a previous shortcut label a later direct verb.
     _ROUTE_ECHO = None
     raw_args = list(argv if argv is not None else sys.argv[1:])
+    value_positions = _option_value_positions(raw_args)
     # T-1513: judged on the raw words, before anything reads them -- a damaged
     # text can carry a split `--` that would end option parsing below.
     damaged = unconsumed_quote_span(raw_args)
@@ -10686,18 +12370,23 @@ def main(argv: list[str] | None = None) -> int:
                     "names the proven transport."
                 ),
             },
-            "--json" in raw_args,
+            # A damaged text may hold a split `--`, so no boundary is trusted
+            # here; only an option operand stays literal.
+            any(token == "--json" and index not in value_positions
+                for index, token in enumerate(raw_args)),
         )
         return 2
-    if "--" in raw_args:
-        dd_idx = raw_args.index("--")
+    dd_idx = next((index for index, token in enumerate(raw_args)
+                   if token == "--" and index not in value_positions), None)
+    if dd_idx is not None:
         before_dashdash = raw_args[:dd_idx]
         after_dashdash = raw_args[dd_idx + 1 :]
     else:
         before_dashdash = raw_args
         after_dashdash = []
 
-    as_json = "--json" in before_dashdash
+    as_json = any(token == "--json" and index not in value_positions
+                  for index, token in enumerate(before_dashdash))
     if as_json and hasattr(sys.stdout, "reconfigure"):
         # Windows shells frequently inherit an ANSI code page. JSON is UTF-8;
         # a read-only focus result containing a Unicode filename must not die
@@ -10716,7 +12405,8 @@ def main(argv: list[str] | None = None) -> int:
     if _capability_problem is not None:
         _emit(_capability_problem, as_json)
         return 2
-    dry_run = "--dry-run" in before_dashdash
+    dry_run = any(token == "--dry-run" and index not in value_positions
+                  for index, token in enumerate(before_dashdash))
     project_root_opt: str | None = None
     runtime_info_opt: str | None = None
     option_error: str | None = None
@@ -10726,7 +12416,10 @@ def main(argv: list[str] | None = None) -> int:
     agent_opt: str | None = None
     while i < len(before_dashdash):
         arg = before_dashdash[i]
-        if arg in ("--json", "--dry-run"):
+        if i in value_positions:
+            clean_before.append(arg)
+            i += 1
+        elif arg in ("--json", "--dry-run"):
             i += 1
         elif arg == "--agent" and i + 1 < len(before_dashdash):
             agent_opt = before_dashdash[i + 1]
@@ -10762,7 +12455,7 @@ def main(argv: list[str] | None = None) -> int:
             clean_before.append(arg)
             i += 1
 
-    args = clean_before + (["--", *after_dashdash] if "--" in raw_args else [])
+    args = clean_before + (["--", *after_dashdash] if dd_idx is not None else [])
 
     # T-1006: an explicit `--agent <id>` names the ACTING ACTOR for this
     # invocation (CORE-001, SRC-026:R001): it does not by itself transfer the
@@ -10796,6 +12489,27 @@ def main(argv: list[str] | None = None) -> int:
         return _run_cli_compound(compound_segments, global_args=inherited, as_json=as_json)
     if args and args[0] == "response":
         return _response_cli(args, as_json, project_root_opt)
+    if args and args[0] == "policy":
+        # The normative schema is only normative if its claims are checked
+        # against the runtimes they describe (SRC-274:R005).
+        rest = args[1:]
+        if rest and rest[0] == "verify":
+            from saipen_engine.policy_contract import verify as _verify_policy
+
+            result = _verify_policy(
+                resolve_project_root(project_root_opt) if project_root_opt else Path.cwd()
+            )
+            _emit(result, as_json)
+            return 0 if result.get("ok") else 1
+        _emit(
+            {
+                "ok": False,
+                "code": "VALIDATION_FAILED",
+                "detail": "usage: saipen policy verify [--json]",
+            },
+            as_json,
+        )
+        return 2
     if args and args[0] == "admission":
         return _admission_cli(args, as_json, project_root_opt)
 
@@ -10806,23 +12520,24 @@ def main(argv: list[str] | None = None) -> int:
     # once became a goal named "--help" (T-1321) and `saipen user-request
     # --help` a refusal. It exits 0: a usage probe that "fails" teaches a weak
     # model the tool is broken.
-    if (args and args[0] == "help") or any(token in ("-h", "--help") for token in clean_before):
+    if (args and args[0] == "help") or _has_cli_option(clean_before, {"-h", "--help"}):
         usage_msg = (
             "usage: saipen (init|"
             "start '<task in one line>' [--file PATH] [--hex HEX] "
             "[--receipt SRC-###]|"
-            "continue|status|storage status|classify|durable|ephemeral|scratch|"
-            "store|verify|promote|migrate|"
-            "response render|check --stdin|next|runtime "
+            "continue|status|storage (status|classify|durable|ephemeral|scratch|"
+            "store|verify|promote|migrate)|"
+            "response (render|check) --stdin|next|runtime "
             "[--prelaunch [--adapter ID] "
             "[--no-resync]|--bootstrap|--check-freshness]|search [--hex HEX]|"
-            "validate|recover|fleet preflight|scan|prepare|collect <producer>|"
+            "validate|recover|fleet (preflight|scan)|prepare|collect <producer>|"
             "claim <T-###> [--explicit]|"
             "handoff <T-###> --to <agent> [--authority SRC-###]|"
-            "transition <PHASE> [T-###] [text]|checkpoint <TAXONOMY> "
+            "transition <PHASE> [T-###] [text]|checkpoint <DEC|RUN> "
             "[T-###] [text]|goal <text>|user-request <text> [--priority P#] "
             "[--verify <text>] [--needs T-X,T-Y]|ticket add <PRIORITY> <text> --verify <proof> "
             "[--needs T-X,T-Y] [--regression required]|ticket "
+            "regression <T-###> required|ticket "
             "done <T-###> [--closure-mode "
             "own_patch|inherited_verified|cohort|finding_invalidated] "
             "[--closure-cohort C-###] [--implementation-source "
@@ -10835,16 +12550,19 @@ def main(argv: list[str] | None = None) -> int:
             "--run <command>...|ticket repair-metadata <T-###> --field "
             "source_receipts (--to SRC-### | --legacy-unbound "
             "[--authority SRC-###|lineage-<32hex>])|ticket reasoning <T-###> --recurrence <text> "
-            "--weak-model <text>|ticket compact <T-###>|ticket block <T-###> "
+            "--weak-model <text>|ticket requires <T-###> <CAP[@PHASE],...|none>|"
+            "ticket compact <T-###>|ticket block <T-###> "
             "<reason> [--scope ticket|goal]|ticket "
             "block-for <parent T-###> <blocker T-###> <reason> "
             "[--scope ticket|goal]|ticket "
-            "unblock <T-###> <decision>|work reverify <T-###> "
+            "unblock <T-###> <decision>|work contracts [T-###] [--limit N] [--offset N]|"
+            "work reverify <T-###> "
             "[--verification <cmd>:PASS]... [--run <command>]... "
-            "[--timeout SECONDS]|source retire <SRC-###> --reason <CLASS> "
+            "[--timeout SECONDS] [--contract FILE]|source retire <SRC-###> --reason <CLASS> "
             "[--successor SRC-###]|source quarantine <SRC-###> [--reason CODE]|"
             "source recover|source reconcile <SRC-###> [--confirm]|source normalize [--dry-run]|"
-            "cohort status <C-###>|cohort ship "
+            "cohort status <C-###>|cohort reconcile <C-###> --from C-###[,C-###] "
+            "--review-work T-###|cohort ship "
             "<C-###>|improve|improve hold <T-###> [reason]|improve unhold|improve "
             "status|improve sweep <cycle> <RUN-N/IMP-NNN> <DISPOSITION> "
             "|improve sweep-queue <cycle>|improve submit <cycle> <seat> "
@@ -10853,16 +12571,18 @@ def main(argv: list[str] | None = None) -> int:
             "<cycle>|improve reconcile <cycle>|improve abort <cycle>|improve clean <cycle>|"
             "ship|push|scope <T-###> <path>...|first-publish-confirm "
             "<name> <public|private>|userperson show "
-            "[--project|--global|--effective]|userperson add|remove <text> "
+            "[--project|--global|--effective]|userperson (add|remove) <text> "
             "[--category NAME] [--project|--global]|userperson reset "
             "[--project|--global] --confirm|authority capture [--file PATH|--hex HEX]|"
             "sub reconcile <role> --authority <SRC-###>|sub|rebind-home "
-            "<candidate-home>|context cold|hot|audit|orient [--handoff JSON]|"
-            "acceptance <T-###>|attempt open|attempt close <RESULT> "
-            "<STOP>|brief|focus [text]|build <directive>|knowledge "
-            "status|index|retrieve <objective>|future "
-            "status|list|refresh|next|refine <FG-####>|promote <FG-####>|add <title>|"
-            "launch opencode [-- HOST-ARGS]|cut <target>|"
+            "<candidate-home>|context (cold|hot|audit|orient [--handoff JSON])|"
+            "acceptance <T-###>|test suite [status|declare -- <command>|run [T-###]|withdraw]|"
+            "attempt open|attempt close <RESULT> "
+            "<STOP>|brief|lock [status]|focus [text]|build <directive>|knowledge "
+            "(status|index|retrieve <objective>)|future "
+            "(status|list|refresh|next|refine <FG-####>|promote <FG-####>|add <title>)|"
+            "launch <host> [-- HOST-ARGS]|host (doctor|repair|mode [strict|degraded|default])|"
+            "cut <target>|"
             "cut confirm <CUT-ID>|undo|undo confirm <CP-ID> --reason <text>) "
             "[--dry-run] "
             "[--json] [--project-root PATH] [--agent ID] [--runtime-info JSON-FILE]"
@@ -10939,8 +12659,41 @@ def main(argv: list[str] | None = None) -> int:
     # clone, which is not a project at all), so these flags dispatch here --
     # before project-root resolution -- or the freshness operation is
     # unreachable in the only situation that needs it.
+    _writer = _install_surface_writer(args) if dry_run else None
+    if _writer is not None:
+        _emit(
+            {
+                "ok": False,
+                "code": "VALIDATION_FAILED",
+                "detail": (
+                    f"--dry-run is not available for `{_writer}`: it changes this machine's "
+                    "SAIPEN installation and has no plan-only form. Nothing was written. "
+                    "The read-only views are host doctor, host machine status, "
+                    "host launcher status and runtime --check-freshness"
+                ),
+            },
+            as_json,
+        )
+        return 2
     if args and args[0] == "runtime" and _runtime_install_flags(args[1:]):
         return _runtime_install_command(args[1:], as_json)
+
+    # T-1624: host integration is not project state either. A host whose
+    # integration is broken is exactly the one that cannot resolve a project,
+    # so its diagnosis and its repair dispatch here, before any binding.
+    if args and args[0] == "host" and len(args) >= 2 and args[1] in ("doctor", "repair", "mode"):
+        return _host_integration_command(args[1:], as_json, dry_run)
+    # T-1647: the machine runtime is install state as well, and the account it
+    # exists for is the one that cannot bind anything through its own profile.
+    if args and args[0] == "host" and len(args) >= 2 and args[1] == "machine":
+        return _host_machine_command(args[2:], as_json)
+    # T-1678: the per-user PATH launcher is install state of the account.
+    if args and args[0] == "host" and len(args) >= 2 and args[1] == "launcher":
+        return _host_launcher_command(args[2:], as_json)
+    # T-1654: a project's own instruction block is asked of the project's
+    # files, never of its memory, so it answers while the binding is broken.
+    if args and args[0] == "host" and len(args) >= 2 and args[1] == "instructions":
+        return _host_instructions_command(args[2:], project_root_opt, as_json, dry_run)
 
     # T-1434 M6: the command's own effect class decides the authority mode of
     # the explicit-root binding. A DIAGNOSTIC run observes deliberately and
@@ -10957,9 +12710,17 @@ def main(argv: list[str] | None = None) -> int:
     project_root = project_root_res.root
     root_reason = project_root_res.source
     if project_root is None:
+        if getattr(project_root_res, "filesystem_failure", None):
+            _emit(project_root_res.filesystem_failure, as_json)
+            return 3
         fail_code = getattr(project_root_res, "code", None) or "NOT_SAIPEN_PROJECT"
         _emit({"ok": False, "code": fail_code, "detail": root_reason}, as_json)
         return 3
+    if _authority == "mutation" and not dry_run:
+        _interlock = _test_session_refusal(project_root)
+        if _interlock is not None:
+            _emit(_interlock, as_json)
+            return 1
 
     # CORE-004: a genuinely bare invocation (no command after global option
     # parsing) resumes through the same `_continue` path as `continue`/`cc`.
@@ -11002,6 +12763,28 @@ def main(argv: list[str] | None = None) -> int:
         # This optional explicit-envelope command pins one actor before host
         # startup. Routine generic host launches do not use this command; Core
         # applies canonical continuation semantics to their guard events.
+        #
+        # T-1936: `--list` is a READ-ONLY question about this machine's provider
+        # accounts, so it is answered BEFORE the seat requirement. Asking which
+        # accounts exist is not acting as one of them, and demanding a seat
+        # first is why SRC-184's own documented `saipen launch --list` answered
+        # ACTOR_UNBOUND instead of a list.
+        if len(args) > 1 and args[1] == "--list":
+            from saipen_engine.account_list import discover_accounts
+
+            report = discover_accounts()
+            if as_json:
+                _emit(report, as_json)
+            else:
+                for row in report["accounts"]:
+                    alias = row["alias"] or "-"
+                    where = row["profile"] or "(not installed)"
+                    print(
+                        f"{alias:<4} {row['provider']:<12} account={row['account'] or '-':<2} "
+                        f"installed={str(row['installed']):<5} auth={row['authenticated']:<13} "
+                        f"{row['launchability']:<36} {where}"
+                    )
+            return 0
         if _AGENT_OVERRIDE is None:
             _emit(
                 {
@@ -11009,7 +12792,8 @@ def main(argv: list[str] | None = None) -> int:
                     "code": "ACTOR_UNBOUND",
                     "detail": (
                         "optional explicit host launch requires a SAIPEN seat: "
-                        "saipen --agent <seat> launch opencode -- [host args]"
+                        "saipen --agent <seat> launch <host> -- [host args]. "
+                        "Starting the host normally needs no seat and no launcher"
                     ),
                 },
                 as_json,
@@ -11021,7 +12805,7 @@ def main(argv: list[str] | None = None) -> int:
                 {
                     "ok": False,
                     "code": "VALIDATION_FAILED",
-                    "detail": "Use: saipen --agent <seat> launch opencode -- [host args]",
+                    "detail": "Use: saipen --agent <seat> launch <host> -- [host args]",
                 },
                 as_json,
             )
@@ -11057,7 +12841,7 @@ def main(argv: list[str] | None = None) -> int:
     # proceeds exactly as if the Latin row had been typed, and this file
     # deliberately holds no Cyrillic literal, no confusable map and no twin
     # dictionary for the resolver to drift from. A resolver that cannot load
-    # CORE.md returns None for everything: every token then fails closed at
+    # REGISTRY.json returns None for everything: every token then fails closed at
     # its own branch or at the unknown-command refusal -- a failed lookup is
     # NEVER guessed into a command.
     _canonical_shortcut = resolve_shortcut(command, table=load_shortcut_table(PROTOCOL_DIR))
@@ -11084,6 +12868,15 @@ def main(argv: list[str] | None = None) -> int:
         # same telegram counts -- `sss` is `status` (test_command_routing).
         global _TELEGRAM_ROOT  # noqa: PLW0603
         _TELEGRAM_ROOT = project_root
+    if command in ("checkpoint", "transition", "ticket"):
+        global _BOUNDARY_ROOT  # noqa: PLW0603
+        _BOUNDARY_ROOT = project_root
+    global _SUITE_HINT_ROOT  # noqa: PLW0603
+    _SUITE_HINT_ROOT = (
+        project_root
+        if command in ("status", "sss", "cc", "ccc", "continue", "transition")
+        else None
+    )
 
     if command == "status":
         if len(args) > 1:
@@ -11191,6 +12984,11 @@ def main(argv: list[str] | None = None) -> int:
         # never when the question is "is this Work finished" -- the latter is the
         # LOG's stamped transitions and nothing else.
         return _stats(project_root, args[1:], as_json)
+    if command == "iteration":
+        # T-1619: the canonical outer-iteration verdict. Read-only; the host
+        # controller queries this after every model turn instead of inferring
+        # terminality itself. "saipen iteration" is the decision owner.
+        return _iteration(project_root, args[1:], as_json)
     if command == "explain-next":
         if len(args) > 1:
             _emit(
@@ -11440,6 +13238,14 @@ def main(argv: list[str] | None = None) -> int:
             return 2
         if not dry_run and _negotiate_capability(project_root) == "read-only":
             return _capability_refusal(as_json)
+        # SRC-306:R002 (T-1881): `claim` takes an execution seat, which is new
+        # authority, so a binding brake refuses it here. `claim` has no
+        # subcommand, and the pass-through below keeps that explicit.
+        if not dry_run:
+            _brake = _authority_refusal(project_root, "claim", claim_rest[:1])
+            if _brake is not None:
+                _emit(_brake, as_json)
+                return 1
         _ho = _ensure_handover(project_root, as_json, dry_run)
         if _ho is not None:
             return _ho
@@ -11507,7 +13313,10 @@ def main(argv: list[str] | None = None) -> int:
         result = transition_phase(
             project_root, args[1], _agent_for(project_root), ticket, text, dry_run=dry_run
         )
-        _emit(result.to_dict(), as_json)
+        transition_result = result.to_dict()
+        if result.ok and not dry_run and transition_result.get("phase") == "CLEAN":
+            _clean_entry_steps(project_root, transition_result)
+        _emit(transition_result, as_json)
         return 0 if result.ok else 1
     if command == "checkpoint":
         if len(args) < 2:
@@ -11515,7 +13324,7 @@ def main(argv: list[str] | None = None) -> int:
                 {
                     "ok": False,
                     "code": "VALIDATION_FAILED",
-                    "detail": "checkpoint needs <TAXONOMY> [T-###] [text]",
+                    "detail": "checkpoint needs <DEC|RUN> [T-###] [text]",
                 },
                 as_json,
             )
@@ -11539,14 +13348,24 @@ def main(argv: list[str] | None = None) -> int:
                     "ok": False,
                     "code": "VALIDATION_FAILED",
                     "detail": "ticket needs an action: "
-                    "add|compact|verify|reasoning|done|supersede|retire|resolve-external|"
-                    "repair-metadata|bind-cohort|block|block-for|unblock",
+                    "add|compact|verify|regression|requires|reasoning|done|supersede|retire|resolve-external|"
+                    "repair-metadata|bind-cohort|block|block-for|unblock|detach-needs",
                 },
                 as_json,
             )
             return 2
         action = args[1]
         rest = args[2:]
+        # SRC-306:R002 (T-1881): an open operator decision outranks a route that
+        # would grant NEW authority. Placed before every per-action branch so a
+        # future `ticket` subcommand cannot reopen the hole this closed, and
+        # after the arity refusal above so a malformed invocation still reports
+        # its own syntax rather than a brake.
+        if not dry_run:
+            _brake = _authority_refusal(project_root, "ticket", [action, *rest])
+            if _brake is not None:
+                _emit(_brake, as_json)
+                return 1
         if action == "compact":
             if len(rest) != 1 or not re.fullmatch(r"T-\d+", rest[0], re.IGNORECASE):
                 _emit(
@@ -11569,12 +13388,17 @@ def main(argv: list[str] | None = None) -> int:
             _emit(result.to_dict(), as_json)
             return 0 if result.ok else 1
         if action == "verify":
-            if len(rest) < 2 or not re.fullmatch(r"T-\d+", rest[0], re.IGNORECASE):
+            _opts, _pos, _opt_err = {}, rest, ""
+            if any(token in ("--amendment", "--authority") for token in rest):
+                _opts, _pos, _opt_err = _parse_value_options(
+                    rest, {"--amendment": "amendment", "--authority": "authority"}
+                )
+            if _opt_err or len(_pos) < 2 or not re.fullmatch(r"T-\d+", _pos[0], re.IGNORECASE):
                 _emit(
                     {
                         "ok": False,
                         "code": "VALIDATION_FAILED",
-                        "detail": "ticket verify needs <T-###> <text>",
+                        "detail": _opt_err or "ticket verify needs <T-###> <text>",
                     },
                     as_json,
                 )
@@ -11586,10 +13410,56 @@ def main(argv: list[str] | None = None) -> int:
                 return _ho
             result = ticket_verify(
                 project_root,
-                rest[0].upper(),
+                _pos[0].upper(),
                 _agent_for(project_root),
-                " ".join(rest[1:]),
+                " ".join(_pos[1:]),
                 dry_run=dry_run,
+                amendment=_opts.get("amendment"),
+                authority=_opts.get("authority"),
+            )
+            _emit(result.to_dict(), as_json)
+            return 0 if result.ok else 1
+        if action == "regression":
+            _opts, _pos, _opt_err = _parse_value_options(rest, {"--evidence": "evidence"})
+            if _opt_err or len(_pos) != 2 or not re.fullmatch(r"T-\d+", _pos[0], re.IGNORECASE):
+                _emit(
+                    {"ok": False, "code": "VALIDATION_FAILED",
+                     "detail": "ticket regression needs exactly <T-###> required"},
+                    as_json,
+                )
+                return 2
+            if not dry_run and _negotiate_capability(project_root) == "read-only":
+                return _capability_refusal(as_json)
+            _ho = _ensure_handover(project_root, as_json, dry_run)
+            if _ho is not None:
+                return _ho
+            result = ticket_verify(
+                project_root, _pos[0].upper(), _agent_for(project_root), None,
+                dry_run=dry_run, regression=_pos[1], evidence_profile=_opts.get("evidence"),
+            )
+            _emit(result.to_dict(), as_json)
+            return 0 if result.ok else 1
+        if action == "requires":
+            # T-1663: what this ticket's steps need of an executor, read by
+            # `saipen iteration`; `none` removes it. One value, the grammar is
+            # iteration_verdict's, and nothing but the field moves.
+            if len(rest) != 2 or not re.fullmatch(r"T-\d+", rest[0], re.IGNORECASE):
+                _emit(
+                    {
+                        "ok": False,
+                        "code": "VALIDATION_FAILED",
+                        "detail": "ticket requires needs <T-###> <CAP[@PHASE[+PHASE]],...|none>",
+                    },
+                    as_json,
+                )
+                return 2
+            if not dry_run and _negotiate_capability(project_root) == "read-only":
+                return _capability_refusal(as_json)
+            _ho = _ensure_handover(project_root, as_json, dry_run)
+            if _ho is not None:
+                return _ho
+            result = ticket_requires(
+                project_root, rest[0].upper(), _agent_for(project_root), rest[1], dry_run=dry_run
             )
             _emit(result.to_dict(), as_json)
             return 0 if result.ok else 1
@@ -11677,8 +13547,11 @@ def main(argv: list[str] | None = None) -> int:
             has_needs = False
             has_regression = False
 
-            if "--" in rest:
-                dd_idx = rest.index("--")
+            # T-1684: `--verify --` carries a literal proof, not the boundary.
+            rest_values = _option_value_positions(rest)
+            dd_idx = next((index for index, token in enumerate(rest)
+                           if token == "--" and index not in rest_values), None)
+            if dd_idx is not None:
                 pre_dd = rest[:dd_idx]
                 post_dd = rest[dd_idx + 1 :]
             else:
@@ -11852,6 +13725,33 @@ def main(argv: list[str] | None = None) -> int:
             )
             _emit(result.to_dict(), as_json)
             return 0 if result.ok else 1
+        if action == "renew-external":
+            if not rest or not re.fullmatch(r"T-\d+", rest[0], re.IGNORECASE):
+                _emit({"ok": False, "code": "VALIDATION_FAILED",
+                       "detail": "ticket renew-external needs T-###"}, as_json)
+                return 2
+            options, positional, error = _parse_value_options(rest[1:], {
+                "--implementation": "implementation",
+                "--verification-contract": "verification_contract",
+                "--runtime-inputs": "native_inputs",
+                "--external-root": "external_root", "--paths": "implementation_paths"})
+            if error or positional:
+                _emit({"ok": False, "code": "VALIDATION_FAILED",
+                       "detail": error or "surplus external renewal arguments"}, as_json)
+                return 2
+            if not dry_run and _negotiate_capability(project_root) == "read-only":
+                return _capability_refusal(as_json)
+            from saipen_engine.operations import renew_external_ticket
+
+            result = renew_external_ticket(project_root, rest[0].upper(), _agent_for(project_root),
+                implementation=options.get("implementation", ""),
+                verification_contract=options.get("verification_contract", ""),
+                implementation_paths=str(options.get("implementation_paths", "")).split(","),
+                native_inputs=str(options.get("native_inputs", "")).split(",")
+                              if options.get("native_inputs") else [],
+                external_root=options.get("external_root"), dry_run=dry_run)
+            _emit(result.to_dict(), as_json)
+            return 0 if result.ok else 1
         if action == "resolve-external":
             # SRC-088 M2: a locally reported defect that was implemented in an
             # EXTERNAL authority and is observable in the installed dependency
@@ -11861,6 +13761,7 @@ def main(argv: list[str] | None = None) -> int:
             # engine generation, so a dependency rollback turns the closure
             # non-green instead of silently green.
             _usage = (
+                "ticket resolve-external [<T-###>] [--revalidate] | "
                 "ticket resolve-external <T-###> --authority lineage-<32hex> "
                 "--implementation T-###@<commit> --reason "
                 "PROTOCOL_HOME_FIX_VERIFIED|DEPENDENCY_UPGRADE_VERIFIED|"
@@ -11868,6 +13769,25 @@ def main(argv: list[str] | None = None) -> int:
                 "[--verification <command>:PASS]... [--contract sha256:...] "
                 "[--timeout SECONDS]"
             )
+            if rest and "--revalidate" in rest:
+                if not dry_run and _negotiate_capability(project_root) == "read-only":
+                    return _capability_refusal(as_json)
+                from saipen_engine.external import revalidate_external_dependencies
+
+                target = None
+                for tok in rest:
+                    if re.fullmatch(r"T-\d+", tok, re.IGNORECASE):
+                        target = tok.upper()
+                        break
+                outcome = revalidate_external_dependencies(
+                    project_root,
+                    _agent_for(project_root),
+                    dry_run=dry_run,
+                    target_ticket=target,
+                )
+                _emit(outcome, as_json)
+                return 0 if outcome.get("ok") else 1
+
             if not rest or not re.fullmatch(r"T-\d+", rest[0], re.IGNORECASE):
                 _emit(
                     {"ok": False, "code": "VALIDATION_FAILED", "detail": _usage},
@@ -12160,6 +14080,37 @@ def main(argv: list[str] | None = None) -> int:
                 closure_paths=_paths,
                 invalidation_evidence=_opts.get("invalidation_evidence"),
             )
+            answer = result.to_dict()
+            if result.ok and not dry_run:
+                _close_finished_receipts(project_root, answer, works=[rest[0].upper()])
+            _emit(answer, as_json)
+            return 0 if result.ok else 1
+        if action == "detach-needs":
+            if len(rest) < 2:
+                _emit(
+                    {
+                        "ok": False,
+                        "code": "VALIDATION_FAILED",
+                        "detail": (
+                            "ticket detach-needs needs <T-###> <NEED T-###>: the "
+                            "proof is read from BOARD and the receipt ledger, never supplied"
+                        ),
+                    },
+                    as_json,
+                )
+                return 2
+            if not dry_run and _negotiate_capability(project_root) == "read-only":
+                return _capability_refusal(as_json)
+            _ho = _ensure_handover(project_root, as_json, dry_run)
+            if _ho is not None:
+                return _ho
+            result = detach_needs(
+                project_root,
+                rest[0],
+                rest[1],
+                _agent_for(project_root),
+                dry_run=dry_run,
+            )
             _emit(result.to_dict(), as_json)
             return 0 if result.ok else 1
         if action in ("block", "block-for", "unblock"):
@@ -12224,6 +14175,43 @@ def main(argv: list[str] | None = None) -> int:
         )
         return 2
     if command == "work":
+        if len(args) > 1 and args[1] == "contracts":
+            opts, pos, error = _parse_value_options(
+                args[2:], {"--limit": "limit", "--offset": "offset"}
+            )
+            try:
+                if error or len(pos) > 1:
+                    raise ValueError(error or "contracts takes at most one Work id")
+                limit, offset = int(opts.get("limit", "50")), int(opts.get("offset", "0"))
+                if not 0 <= limit <= 100 or offset < 0:
+                    raise ValueError("limit must be 0..100 and offset nonnegative")
+            except ValueError as exc:
+                _emit({"ok": False, "code": "VALIDATION_FAILED", "detail": str(exc)}, as_json)
+                return 2
+            from saipen_engine.closed_contracts import inspect as inspect_contracts
+
+            result = inspect_contracts(project_root, pos[0] if pos else None,
+                                       limit=limit, offset=offset)
+            _emit(result, as_json)
+            return 0 if result["ok"] else 1
+        if len(args) > 1 and args[1] == "regression":
+            _opts, _pos, _opt_err = _parse_value_options(args[2:], {"--file": "file"})
+            if _opt_err or len(_pos) != 1 or not _opts.get("file"):
+                _emit({"ok": False, "code": "VALIDATION_FAILED",
+                       "detail": "work regression requires one Work id and --file contract"},
+                      as_json)
+                return 2
+            if not dry_run and _negotiate_capability(project_root) == "read-only":
+                return _capability_refusal(as_json)
+            _ho = _ensure_handover(project_root, as_json, dry_run)
+            if _ho is not None:
+                return _ho
+            from saipen_engine.regression_execution import execute_pair
+
+            result = execute_pair(project_root, _pos[0], _agent_for(project_root),
+                                  _opts["file"], dry_run=dry_run)
+            _emit(result.to_dict(), as_json)
+            return 0 if result.ok else 1
         # T-1434 M1: first-class DONE-Work re-verification. The engine logic
         # existed (debt.reverify_work) but no canonical CLI route reached it,
         # so the validator's own remediation named a move this surface could
@@ -12247,6 +14235,7 @@ def main(argv: list[str] | None = None) -> int:
         work_id = ""
         verification: list[dict] = []
         runs: list[str] = []
+        closed_contract_path = None
         # T-1332: the CLI default is the engine's own capture budget, not a
         # 300 s guess. A project whose strict gate runs longer than the
         # default made the prescribed single-command remediation record an
@@ -12255,7 +14244,14 @@ def main(argv: list[str] | None = None) -> int:
         i = 0
         while i < len(rest):
             tok = rest[i]
-            if tok == "--verification":
+            if tok == "--contract":
+                if i + 1 >= len(rest) or closed_contract_path is not None:
+                    _emit({"ok": False, "code": "VALIDATION_FAILED",
+                           "detail": "--contract needs one evidence path"}, as_json)
+                    return 2
+                i += 1
+                closed_contract_path = rest[i]
+            elif tok == "--verification":
                 if i + 1 >= len(rest):
                     _emit(
                         {
@@ -12368,6 +14364,7 @@ def main(argv: list[str] | None = None) -> int:
                 timeout=timeout,
                 derive_default=not verification and not runs,
                 dry_run=dry_run,
+                **({"contract_path": closed_contract_path} if closed_contract_path else {}),
             )
         except _debt_mod.DebtRefusal as exc:
             _emit(
@@ -12436,6 +14433,29 @@ def main(argv: list[str] | None = None) -> int:
     if command == "cohort":
         return _cohort(project_root, args[1:], as_json, dry_run)
     if command in ("goal", "gg"):
+        if len(args) > 1 and args[1] == "authorize":
+            if len(args) != 4 or args[2] != "--file":
+                _emit({"ok": False, "code": "VALIDATION_FAILED",
+                       "detail": "Use: saipen goal authorize --file <exact operator capsule>"},
+                      as_json)
+                return 2
+            try:
+                capsule_bytes = Path(args[3]).read_bytes()
+                if len(capsule_bytes) > 65536:
+                    raise ValueError("goal authorization capsule exceeds 65536 bytes")
+                capsule = capsule_bytes.decode("utf-8")
+            except (OSError, ValueError) as exc:
+                _emit({"ok": False, "code": "VALIDATION_FAILED", "detail": str(exc)}, as_json)
+                return 1
+            if not dry_run and _negotiate_capability(project_root) == "read-only":
+                return _capability_refusal(as_json)
+            from saipen_engine.operations import authorize_goal_continuation
+
+            result = authorize_goal_continuation(
+                project_root, _agent_for(project_root), capsule, dry_run=dry_run
+            )
+            _emit(result.to_dict(), as_json)
+            return 0 if result.ok else 1
         if len(args) < 2 or not args[1].strip():
             # CORE-005: bare `goal`/`gg` is zero-write and emits exactly
             # `Use: gg <objective text>` (CORE § 1.10).
@@ -12645,6 +14665,10 @@ def main(argv: list[str] | None = None) -> int:
         return 0 if result.ok else 1
     if command == "gpu":
         return _gpu(project_root, args[1:], as_json)
+    if command == "lock":
+        return _lock_command(project_root, args[1:], as_json)
+    if command == "librarian":
+        return _librarian(project_root, args[1:], as_json)
     if command == "autonomy":
         # T-1446: the read-only autonomy picture a supervisor or a cold worker
         # reads before deciding anything. Writes nothing; `decide` is included
@@ -12781,6 +14805,38 @@ def main(argv: list[str] | None = None) -> int:
             )
             return 2
         from saipen_engine.release import ReleaseRefusal, execute_release, plan_release
+        from saipen_engine.release_attempt import record_result
+
+        # T-1881 / SRC-306:R004 (D-06): the ATTEMPT is recorded here, at the
+        # public verb, and separately from ticket lifecycle closure. D-06's
+        # measured defect was that a session ran `saipen ship` under an
+        # explicit prohibition and NO durable record said a publication had
+        # even been tried -- the DONE line answered "is this ticket done?" and
+        # carried no attempt at all. Every exit below (refusal, wait, local
+        # closure, publication) leaves one row, except `--dry-run`: a preview
+        # is not an attempt.
+        def _record_attempt(
+            verdict: dict,
+            *,
+            ticket: str = "",
+            mode: str = "",
+            forbidden_by: str = "",
+        ) -> None:
+            if dry_run:
+                return
+            logged = record_result(
+                project_root,
+                invocation=command,
+                result=verdict,
+                ticket=ticket,
+                mode=mode,
+                forbidden_by=forbidden_by,
+            )
+            if not logged.get("ok"):
+                # Never silent: an audit trail that can disappear without
+                # saying so is a lie (release_attempt's own contract). The
+                # release verdict itself is untouched.
+                verdict["attempt_record_error"] = logged.get("error", "unknown")
 
         try:
             # P0#4: inject the freshly negotiated current-session capability so
@@ -12794,20 +14850,32 @@ def main(argv: list[str] | None = None) -> int:
                 current_agent=_agent_for(project_root),
             )
         except ReleaseRefusal as exc:
-            _emit(
-                {
-                    "ok": False,
-                    "code": exc.code,
-                    "detail": exc.detail,
-                    "canonical_next_command": getattr(exc, "next_command", None),
-                },
-                as_json,
+            refusal = {
+                "ok": False,
+                "code": exc.code,
+                "detail": exc.detail,
+                "canonical_next_command": getattr(exc, "next_command", None),
+            }
+            # A prohibition refusal is raised BEFORE a plan exists, so there is
+            # no plan identity to read. The builder attaches the ticket it
+            # found, and without it D-06's own case -- a forbidden attempt --
+            # would leave the least informative row in the ledger.
+            _record_attempt(
+                refusal,
+                ticket=str(getattr(exc, "forbidden_ticket", "") or ""),
+                forbidden_by=str(getattr(exc, "forbidden_ticket", "") or ""),
             )
+            _emit(refusal, as_json)
             return 1
         except ValueError as exc:
-            _emit({"ok": False, "code": "VALIDATION_FAILED", "detail": str(exc)}, as_json)
+            refusal = {"ok": False, "code": "VALIDATION_FAILED", "detail": str(exc)}
+            _record_attempt(refusal)
+            _emit(refusal, as_json)
             return 1
         result = execute_release(project_root, plan)
+        _record_attempt(result, ticket=str(getattr(plan, "ticket_id", "") or ""), mode=str(getattr(plan, "mode", "") or ""))
+        if result.get("ok") and getattr(plan, "ticket_id", None):
+            _close_finished_receipts(project_root, result, works=[plan.ticket_id])
         _emit(result, as_json)
         return 0 if result.get("ok") else 1
     # ── Autonomous command closure (SAIPEN intent handlers) ────────
@@ -12852,6 +14920,7 @@ def main(argv: list[str] | None = None) -> int:
         phase_result = result.to_dict()
         if command == "clean" and result.ok and not dry_run:
             phase_result["clean_execution"] = "PENDING"
+            _clean_entry_steps(project_root, phase_result)
         _emit(phase_result, as_json)
         return 0 if result.ok else 1
 
@@ -13061,6 +15130,19 @@ def main(argv: list[str] | None = None) -> int:
         if result.ok:
             payload["operation_code"] = payload.get("code")
             payload["code"] = "STOP"
+            payload["stop_lifecycle"] = "STOP_TRANSACTION_COMPLETED"
+            payload["handback_semantics"] = "HANDBACK_ONLY"
+            payload["mutation_authorized"] = False
+            payload["host_enforcement"] = {
+                "host_cancellation": "UNAVAILABLE",
+                "tool_interception": "ADVISORY_OR_UNAVAILABLE",
+                "mechanical_boundary": False,
+                "note": (
+                    "Host tool-call cancellation and mechanical interception "
+                    "are host-owned (ZAICODE). "
+                    "SAIPEN enforces protocol-side handback only."
+                ),
+            }
             payload["detail"] = (
                 "read-only stop projection"
                 if capability == "read-only"
@@ -13070,6 +15152,24 @@ def main(argv: list[str] | None = None) -> int:
         return 0 if result.ok else 1
     if command in ("test", "tt"):
         # CORE § 1.10: `tt` routes to `saipen test` -- read-only suite report.
+        if args[1:2] == ["suite"]:
+            # T-1658: the project's own declared suite, run by the engine and
+            # kept as a typed record. `declare`, `run` and `withdraw` write; the
+            # bare form and `status` only read.
+            from saipen_engine import suite_record
+
+            if (
+                not dry_run
+                and _command_mutates("test", args[1:])
+                and _negotiate_capability(project_root) == "read-only"
+            ):
+                return _capability_refusal(as_json)
+            payload, exit_code = suite_record.cli(
+                project_root, args[2:], agent=_agent_for(project_root), dry_run=dry_run
+            )
+            payload["route"] = command
+            _emit(payload, as_json)
+            return exit_code
         if len(args) > 1:
             _emit(
                 {
@@ -13116,6 +15216,161 @@ def main(argv: list[str] | None = None) -> int:
                 as_json,
             )
             return 1
+    if command == "campaign":
+        from saipen_engine import campaign as campaign_mod
+
+        sub = args[1] if len(args) > 1 else "status"
+        if dry_run and sub != "status":
+            _emit({"ok": False, "code": "DRY_RUN_UNSUPPORTED", "dry_run": True,
+                   "detail": "Campaign mutation is not executed in dry-run mode"}, as_json)
+            return 2
+        if sub != "status" and _negotiate_capability(project_root) == "read-only":
+            return _capability_refusal(as_json)
+        ctrl = campaign_mod.CampaignController(project_root)
+        if sub == "status":
+            # CORE-005: `load_campaign_state` answers None for BOTH "no campaign"
+            # and "unreadable campaign", so a corrupt state.json was reported as
+            # `ok: true, campaign: null`. Status now carries the inspection
+            # verdict and refuses on corruption, staying read-only throughout.
+            inspection = campaign_mod.inspect_campaign_state(project_root)
+            state_status = inspection.get("status")
+            if state_status == campaign_mod.STATE_VALID:
+                _emit(
+                    {
+                        "ok": True,
+                        "campaign": inspection.get("state"),
+                        "state_status": state_status,
+                        "route": command,
+                    },
+                    as_json,
+                )
+                return 0
+            if state_status == campaign_mod.STATE_ABSENT:
+                _emit(
+                    {
+                        "ok": True,
+                        "campaign": None,
+                        "state_status": state_status,
+                        "route": command,
+                    },
+                    as_json,
+                )
+                return 0
+            _emit(
+                {
+                    "ok": False,
+                    "campaign": None,
+                    "state_status": state_status,
+                    "error": inspection.get("error"),
+                    "detail": (
+                        "A campaign state exists but is not valid; absence and "
+                        "corruption are distinct outcomes and status never "
+                        "reports the second as success."
+                    ),
+                    "route": command,
+                },
+                as_json,
+            )
+            return 1
+        if sub == "admit":
+            cid = None
+            horizon = "SHORT"
+            grant_ref = None
+            scope = None
+            force_new = False
+            custom_budget = {}
+            idx = 2
+            while idx < len(args):
+                arg = args[idx]
+                if arg == "--id" and idx + 1 < len(args):
+                    cid = args[idx + 1]
+                    idx += 2
+                elif arg == "--horizon" and idx + 1 < len(args):
+                    horizon = args[idx + 1]
+                    idx += 2
+                elif (arg == "--grant" or arg == "--authority") and idx + 1 < len(args):
+                    grant_ref = args[idx + 1]
+                    idx += 2
+                elif arg == "--scope" and idx + 1 < len(args):
+                    scope = args[idx + 1]
+                    idx += 2
+                elif arg == "--force-new":
+                    force_new = True
+                    idx += 1
+                elif arg == "--max-wall" and idx + 1 < len(args):
+                    try:
+                        custom_budget["max_wall_seconds"] = float(args[idx + 1])
+                    except ValueError:
+                        _emit({"ok": False, "code": "INVALID_RESOURCE_BUDGET",
+                               "detail": "--max-wall needs a finite positive number"}, as_json)
+                        return 2
+                    idx += 2
+                elif arg == "--max-cycles" and idx + 1 < len(args):
+                    try:
+                        custom_budget["max_cycles"] = int(args[idx + 1])
+                    except ValueError:
+                        _emit({"ok": False, "code": "INVALID_RESOURCE_BUDGET",
+                               "detail": "--max-cycles needs a positive integer"}, as_json)
+                        return 2
+                    idx += 2
+                elif arg == "--max-generations" and idx + 1 < len(args):
+                    try:
+                        custom_budget["max_generations"] = int(args[idx + 1])
+                    except ValueError:
+                        _emit({"ok": False, "code": "INVALID_RESOURCE_BUDGET",
+                               "detail": "--max-generations needs a positive integer"}, as_json)
+                        return 2
+                    idx += 2
+                else:
+                    _emit({"ok": False, "code": "VALIDATION_FAILED",
+                           "detail": f"Unknown or incomplete campaign argument: {arg}"}, as_json)
+                    return 2
+            res = ctrl.admit_campaign(
+                campaign_id=cid,
+                horizon=horizon,
+                authority_proof_reference=grant_ref,
+                authority_scope=scope,
+                resource_budget=custom_budget if custom_budget else None,
+                force_new=force_new,
+            )
+            _emit({**res, "route": command}, as_json)
+            return 0 if res.get("ok") else 1
+        if sub == "step":
+            res = ctrl.step()
+            _emit({**res, "route": command}, as_json)
+            return 0 if res.get("ok") else 1
+        if sub == "run":
+            # AUT-006: a bounded driver, not a scheduler. The operator (or a
+            # host hook) chooses how many steps one invocation may take and
+            # the persisted budget still stops it from inside. No new
+            # authority is granted here: every step re-verifies the grant.
+            bound = 1
+            idx = 2
+            while idx < len(args):
+                arg = args[idx]
+                if arg == "--steps" and idx + 1 < len(args):
+                    try:
+                        bound = int(args[idx + 1])
+                    except ValueError:
+                        _emit({"ok": False, "code": "INVALID_STEP_BOUND",
+                               "detail": "--steps needs a positive integer"}, as_json)
+                        return 2
+                    idx += 2
+                else:
+                    _emit({"ok": False, "code": "VALIDATION_FAILED",
+                           "detail": f"Unknown or incomplete campaign run argument: {arg}"},
+                          as_json)
+                    return 2
+            res = ctrl.run(max_steps=bound)
+            _emit({**res, "route": command}, as_json)
+            return 0 if res.get("ok") else 1
+        if sub == "cancel":
+            res = ctrl.cancel()
+            _emit({**res, "route": command}, as_json)
+            return 0 if res.get("ok") else 1
+        _emit({"ok": False, "code": "VALIDATION_FAILED", "detail": f"unknown campaign subcommand: {sub}"}, as_json)
+        return 2
+
     if command == "ccc":
         # CORE § 1.10: `ccc` is `saipen continue` with converge_target: ship,
         # then SHIP, then stages J-M. Minimal deterministic entry per Wave 1:
@@ -13190,13 +15445,21 @@ def main(argv: list[str] | None = None) -> int:
             print("Runtime cannot execute it safely.")
             print(f"Action: {drift['action']}")
         return 2
+    from saipen_engine.command_effects import nested_routes
+
+    detail = f"unknown command: {command}"
+    routes = nested_routes(command)
+    if routes:
+        # T-1767: name the real spelling; a bare refusal sent executors to
+        # report a present capability as missing.
+        detail += f"; it is dispatched as {' or '.join(routes)}"
     if as_json:
-        _emit(
-            {"ok": False, "code": "VALIDATION_FAILED", "detail": f"unknown command: {command}"},
-            as_json,
-        )
+        payload = {"ok": False, "code": "VALIDATION_FAILED", "detail": detail}
+        if routes:
+            payload["dispatched_as"] = routes
+        _emit(payload, as_json)
     else:
-        print(f"unknown command: {command}")
+        print(detail)
     return 2
 
 

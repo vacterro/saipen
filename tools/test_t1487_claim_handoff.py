@@ -61,6 +61,9 @@ def run(
     argv = [PYTHON, str(CLI), *args, "--project-root", str(root)]
     if agent is not None:
         argv += ["--agent", agent]
+    from test_operator_origin_support import cold_command
+
+    argv = cold_command(root, argv, env, operator_text=task_carrier, action="handoff")
     proc = subprocess.run(
         argv, capture_output=True, text=True, env=env, timeout=300,
         encoding="utf-8", errors="replace",

@@ -338,6 +338,760 @@
       ],
       "tag": "",
       "version": ""
+    },
+    "C-006": {
+      "cohort_id": "C-006",
+      "commit": "",
+      "members": {
+        "T-1752": {
+          "closed_at": "2026-10-15T17:22:07Z",
+          "closed_by": "saipen-cli",
+          "paths": {
+            "tools/saipen_engine/board_scrub.py": "61aa6adec8c8c053",
+            "tools/saipen_engine/intake.py": "19f2ee80b35824ca",
+            "tools/test_t1666_receipt_close.py": "f737b4b8eafb7716",
+            "tools/test_t1752_audit_auto_close.py": "e5984ce256d14a58"
+          },
+          "ticket_id": "T-1752",
+          "verification": "a Work that reaches DONE with its audit-bound receipt fully covered leaves that layer CLOSED_PENDING_DELETE without a hand-typed command, the next audit ingest consumes it before capturing a new generation, and the sentence in closable_receipts describes what the code does; regression pair on a fixture inbox"
+        },
+        "T-1755": {
+          "closed_at": "2026-10-15T17:21:38Z",
+          "closed_by": "saipen-cli",
+          "paths": {
+            "tools/saipen_engine/board_scrub.py": "61aa6adec8c8c053",
+            "tools/saipen_engine/intake.py": "19f2ee80b35824ca",
+            "tools/test_t1666_receipt_close.py": "f737b4b8eafb7716",
+            "tools/test_t1752_audit_auto_close.py": "e5984ce256d14a58"
+          },
+          "ticket_id": "T-1755",
+          "verification": "the requested change is present and demonstrated against the user own description of it"
+        }
+      },
+      "publication_status": "pending",
+      "release_op_id": "",
+      "schema_version": 1,
+      "scope": [
+        "tools/saipen_engine/board_scrub.py",
+        "tools/saipen_engine/intake.py",
+        "tools/test_t1666_receipt_close.py",
+        "tools/test_t1752_audit_auto_close.py"
+      ],
+      "tag": "",
+      "version": ""
+    },
+    "C-007": {
+      "cohort_id": "C-007",
+      "commit": "",
+      "members": {
+        "T-1828": {
+          "closed_at": "2026-10-20T14:33:30Z",
+          "closed_by": "saipen-cli",
+          "paths": {
+            "saipen/phases/ship.md": "ec599340a1133698",
+            "saipen/phases/verify.md": "bff7defbec3cc058",
+            "tools/saipen_engine/core_unit.py": "c315f8fadcefef78",
+            "tools/saipen_engine/focused_unit.py": "957ad5747862cd7a",
+            "tools/saipen_engine/operations.py": "e74b7c5874c6e6af",
+            "tools/saipen_engine/release.py": "877ebd7642d87868",
+            "tools/test_t1828_verification_policy.py": "517785ef6d96a6b4",
+            "tools/validate.py": "23b39ab429ef6f9e",
+            "tools/verification_policy.json": "d68a072b6217c163"
+          },
+          "ticket_id": "T-1828",
+          "verification": "the requested change is present and demonstrated against the user own description of it"
+        },
+        "T-1833": {
+          "closed_at": "2026-10-20T16:40:44Z",
+          "closed_by": "saipen-cli",
+          "paths": {
+            "tools/saipen_engine/process_tree.py": "e5f07f80d2a6802d",
+            "tools/saipen_engine/test_runner.py": "ddc432151d26fad4",
+            "tools/saipen_engine/verification_bootstrap.py": "00dcaa6a3b542aa8",
+            "tools/test_t1833_verification_owner.py": "d0b1753d64d3d284"
+          },
+          "ticket_id": "T-1833",
+          "verification": "A real POSIX verifier cannot start before its reader ownership is recorded; killing its owner reaps the owned process group and allows a bounded fresh execution; Windows job behavior and existing process-tree controls remain intact"
+        },
+        "T-1834": {
+          "closed_at": "2026-10-20T16:40:11Z",
+          "closed_by": "saipen-cli",
+          "paths": {
+            "tools/saipen_engine/test_runner.py": "ddc432151d26fad4",
+            "tools/test_t1834_tool_call_identity.py": "d8fad98ef381fe2f"
+          },
+          "ticket_id": "T-1834",
+          "verification": "Different CODEX_TOOL_CALL_ID values produce the same actual canonical child environment and compatible verification identity; one unchanged generation reuses its real focused receipt across separate tool calls and reaches SHIP; real test-mode changes still invalidate evidence"
+        }
+      },
+      "publication_status": "pending",
+      "release_op_id": "",
+      "schema_version": 1,
+      "scope": [
+        "saipen/phases/ship.md",
+        "saipen/phases/verify.md",
+        "tools/saipen_engine/core_unit.py",
+        "tools/saipen_engine/focused_unit.py",
+        "tools/saipen_engine/operations.py",
+        "tools/saipen_engine/process_tree.py",
+        "tools/saipen_engine/release.py",
+        "tools/saipen_engine/test_runner.py",
+        "tools/saipen_engine/verification_bootstrap.py",
+        "tools/test_t1828_verification_policy.py",
+        "tools/test_t1833_verification_owner.py",
+        "tools/test_t1834_tool_call_identity.py",
+        "tools/validate.py",
+        "tools/verification_policy.json"
+      ],
+      "tag": "",
+      "version": ""
+    },
+    "C-008": {
+      "cohort_id": "C-008",
+      "commit": "",
+      "members": {
+        "T-1830": {
+          "closed_at": "2026-10-20T14:56:42Z",
+          "closed_by": "saipen-cli",
+          "paths": {
+            "tools/saipen_engine/core_unit.py": "d9b894465075a31a",
+            "tools/saipen_engine/core_unit_shard.py": "d6b2893bb0582c7e",
+            "tools/saipen_engine/focused_unit.py": "d71af38b7263e01a",
+            "tools/saipen_engine/test_runner.py": "154d2ad749d4271e",
+            "tools/test_t1830_verification_observations.py": "6bc1f3c4a717dacc"
+          },
+          "ticket_id": "T-1830",
+          "verification": "Lightweight timers report observed stage wall time and counts without changing verdicts; adversarial equal-count duplicate/omission partition refuses; existing copy, shard, cleanup and failure-roster controls pass"
+        },
+        "T-1831": {
+          "closed_at": "2026-10-20T15:02:30Z",
+          "closed_by": "saipen-cli",
+          "paths": {
+            "tools/test_t1505_core_unit_sandbox_reclaim.py": "dfc1191ec3612298",
+            "tools/test_t1831_cleanup_fixture_cost.py": "e15eadd46ffb57b8"
+          },
+          "ticket_id": "T-1831",
+          "verification": "Same 21 cleanup/ownership controls pass on the same host with a bounded isolated fixture; before/after wall and copy time reported; old whole-repository input rejected by an independent regression control"
+        }
+      },
+      "publication_status": "pending",
+      "release_op_id": "",
+      "schema_version": 1,
+      "scope": [
+        "tools/saipen_engine/core_unit.py",
+        "tools/saipen_engine/core_unit_shard.py",
+        "tools/saipen_engine/focused_unit.py",
+        "tools/saipen_engine/test_runner.py",
+        "tools/test_t1505_core_unit_sandbox_reclaim.py",
+        "tools/test_t1830_verification_observations.py",
+        "tools/test_t1831_cleanup_fixture_cost.py"
+      ],
+      "tag": "",
+      "version": ""
+    },
+    "C-009": {
+      "cohort_id": "C-009",
+      "commit": "",
+      "members": {
+        "T-1832": {
+          "closed_at": "2026-10-20T16:50:23Z",
+          "closed_by": "saipen-cli",
+          "paths": {
+            "tools/saipen_engine/core_unit.py": "24aca431614c7a20",
+            "tools/saipen_engine/focused_unit.py": "0998f7005b8a1184",
+            "tools/saipen_engine/test_runner.py": "ddc432151d26fad4",
+            "tools/saipen_engine/verification_bootstrap.py": "df9bdce3388bf251",
+            "tools/saipen_engine/verification_cache.py": "317b52e9620ea974",
+            "tools/test_core_unit_gate.py": "fb033b9d70b3ce8b",
+            "tools/test_t1828_verification_policy.py": "d501259c412de9ae",
+            "tools/test_t1832_single_flight.py": "f0f5ffbe35a635f9"
+          },
+          "ticket_id": "T-1832",
+          "verification": "Real concurrent callers of one compatible immutable verification share one execution; source/config/runtime/environment/baseline changes refuse stale evidence; failure, cancellation, interruption, timeout and tamper controls preserve exact verdict and ownership"
+        }
+      },
+      "publication_status": "pending",
+      "release_op_id": "",
+      "schema_version": 1,
+      "scope": [
+        "tools/saipen_engine/core_unit.py",
+        "tools/saipen_engine/focused_unit.py",
+        "tools/saipen_engine/test_runner.py",
+        "tools/saipen_engine/verification_bootstrap.py",
+        "tools/saipen_engine/verification_cache.py",
+        "tools/test_core_unit_gate.py",
+        "tools/test_t1828_verification_policy.py",
+        "tools/test_t1832_single_flight.py"
+      ],
+      "tag": "",
+      "version": ""
+    },
+    "C-010": {
+      "cohort_id": "C-010",
+      "commit": "",
+      "members": {
+        "T-1835": {
+          "closed_at": "2026-10-20T17:20:19Z",
+          "closed_by": "saipen-cli",
+          "paths": {
+            "tools/saipen_engine/core_unit.py": "8e777d8cbf574618",
+            "tools/saipen_engine/focused_unit.py": "972f0e5f43086cc7",
+            "tools/saipen_engine/verification_cache.py": "27af1612947740b5",
+            "tools/saipen_metrics.py": "028b215da92e81e8",
+            "tools/test_t1832_single_flight.py": "7225595909b7c69c",
+            "tools/test_t1835_verification_economics.py": "b11ce39d83b3c7e5",
+            "tools/verification_metrics.py": "3efcdaa26e6486f7"
+          },
+          "ticket_id": "T-1835",
+          "verification": "The existing metrics CLI reports execution frequency, stage/process versus request wall time, cache/repeat/feedback/generation/ticket measures and red visibility without double counting shared executions; absent implementation/impact/escape observations remain explicitly unknown; reports cannot mutate lifecycle or authorize work"
+        }
+      },
+      "publication_status": "pending",
+      "release_op_id": "",
+      "schema_version": 1,
+      "scope": [
+        "tools/saipen_engine/core_unit.py",
+        "tools/saipen_engine/focused_unit.py",
+        "tools/saipen_engine/verification_cache.py",
+        "tools/saipen_metrics.py",
+        "tools/test_t1832_single_flight.py",
+        "tools/test_t1835_verification_economics.py",
+        "tools/verification_metrics.py"
+      ],
+      "tag": "",
+      "version": ""
+    },
+    "C-011": {
+      "cohort_id": "C-011",
+      "commit": "",
+      "members": {
+        "T-1836": {
+          "closed_at": "2026-10-20T18:23:21Z",
+          "closed_by": "saipen-cli",
+          "paths": {
+            "saipen/phases/verify.md": "4d2be7f8accf1e91",
+            "tools/saipen_engine/core_unit.py": "a0772dd9d2cfe2bd",
+            "tools/saipen_engine/core_unit_shard.py": "b31bafde4ad2f780",
+            "tools/saipen_engine/focused_unit.py": "222a2398bb19f508",
+            "tools/saipen_engine/verification_cache.py": "5d724c800f1435f6",
+            "tools/saipen_engine/verification_impact.py": "cf5c146ee2931cc1",
+            "tools/test_t1836_verification_impact.py": "73835e794c4dad47",
+            "tools/verification_metrics.py": "663ae557c5699ea8"
+          },
+          "ticket_id": "T-1836",
+          "verification": "Plans bind changed paths, current source and test inventory with selection reasons; static consumers/new tests are covered; protocol/fixture/adapter/validator boundaries and unproven dependencies escalate; real impact execution preserves fixtures and import errors, keeps focused evidence identity, and cannot satisfy full publication"
+        }
+      },
+      "publication_status": "pending",
+      "release_op_id": "",
+      "schema_version": 1,
+      "scope": [
+        "saipen/phases/verify.md",
+        "tools/saipen_engine/core_unit.py",
+        "tools/saipen_engine/core_unit_shard.py",
+        "tools/saipen_engine/focused_unit.py",
+        "tools/saipen_engine/verification_cache.py",
+        "tools/saipen_engine/verification_impact.py",
+        "tools/test_t1836_verification_impact.py",
+        "tools/verification_metrics.py"
+      ],
+      "tag": "",
+      "version": ""
+    },
+    "C-012": {
+      "cohort_id": "C-012",
+      "commit": "",
+      "members": {
+        "T-1837": {
+          "closed_at": "2026-10-20T18:43:17Z",
+          "closed_by": "saipen-cli",
+          "paths": {
+            ".github/workflows/validate.yml": "774380e6627820e5",
+            "tools/saipen_engine/core_unit.py": "988c9b9cfb2c3b81",
+            "tools/saipen_engine/test_runner.py": "4f2950036436bd97",
+            "tools/test_t1837_ci_family_parity.py": "d922350b7aa479e3"
+          },
+          "ticket_id": "T-1837",
+          "verification": "Local suite and CI family entry points use the same declared unit family and core execution; strict CI rejects every red including inherited baseline, incomplete/zero/timeout/partition failure, preserves names/causes and read-only state; jobs validated and representative same-scope Windows/Linux concurrency measured before CI choice; other families remain independently required"
+        }
+      },
+      "publication_status": "pending",
+      "release_op_id": "",
+      "schema_version": 1,
+      "scope": [
+        ".github/workflows/validate.yml",
+        "tools/saipen_engine/core_unit.py",
+        "tools/saipen_engine/test_runner.py",
+        "tools/test_t1837_ci_family_parity.py"
+      ],
+      "tag": "",
+      "version": ""
+    },
+    "C-013": {
+      "cohort_id": "C-013",
+      "commit": "",
+      "members": {
+        "T-1840": {
+          "closed_at": "2026-10-20T22:13:52Z",
+          "closed_by": "saipen-cli",
+          "paths": {
+            "saipen/COMMANDS.md": "29631c5042a290c0",
+            "saipen/COMMAND_EFFECTS.json": "0f63f7460519d20f",
+            "saipen/OPS.md": "cf65745da9135e21",
+            "tools/saipen.py": "3c1c4b8863b897b3",
+            "tools/saipen_engine/external.py": "e57ad57d4dcbb596",
+            "tools/saipen_engine/external_renewal.py": "82da1d331575d265",
+            "tools/saipen_engine/operations.py": "bda0ea40e51a469f",
+            "tools/saipen_engine/regression_execution.py": "659719ad5f971a64",
+            "tools/saipen_engine/test_runner.py": "4fbf4ea850cf5db3",
+            "tools/test_external_revalidation.py": "1092d9a00fcf5a8e",
+            "tools/test_t1840_external_renewal.py": "e9e793f311abba6f",
+            "tools/verify_accounts_readiness.py": "2c71057a1530dd8f"
+          },
+          "ticket_id": "T-1840",
+          "verification": "Canonical core conformance clears the remaining EX-000010 stale-generation finding through an existing safe recovery or a separately reviewed canonical correction; preserve the original immutable receipt, DONE history, original SAI Accounts readiness contract, actual external lineage and carrying-commit provenance, source/ownership/operator gates and real platform acceptance. Legacy unauthenticated command text is never re-shelled or treated as PASS, a generic SAIPEN unit check cannot impersonate SAI Accounts live readiness, no downstream application is rewritten, and missing authority/live observations remain explicit rather than waived."
+        }
+      },
+      "publication_status": "pending",
+      "release_op_id": "",
+      "schema_version": 1,
+      "scope": [
+        "saipen/COMMANDS.md",
+        "saipen/COMMAND_EFFECTS.json",
+        "saipen/OPS.md",
+        "tools/saipen.py",
+        "tools/saipen_engine/external.py",
+        "tools/saipen_engine/external_renewal.py",
+        "tools/saipen_engine/operations.py",
+        "tools/saipen_engine/regression_execution.py",
+        "tools/saipen_engine/test_runner.py",
+        "tools/test_external_revalidation.py",
+        "tools/test_t1840_external_renewal.py",
+        "tools/verify_accounts_readiness.py"
+      ],
+      "tag": "",
+      "version": ""
+    },
+    "C-014": {
+      "cohort_id": "C-014",
+      "commit": "",
+      "members": {
+        "T-1839": {
+          "closed_at": "2026-10-20T22:32:50Z",
+          "closed_by": "saipen-cli",
+          "paths": {
+            "saipen/OPS.md": "cf65745da9135e21",
+            "tools/saipen.py": "3c1c4b8863b897b3",
+            "tools/saipen_engine/closure.py": "e880c0e65f813b68",
+            "tools/saipen_engine/cohort_reconcile.py": "15ff6829037057ed",
+            "tools/saipen_engine/operations.py": "bda0ea40e51a469f",
+            "tools/test_t1839_cohort_reconciliation.py": "dca04e7ae1641190"
+          },
+          "ticket_id": "T-1839",
+          "verification": "Earlier pending cohort/member hashes and original finishes remain immutable; a current reviewed cumulative batch covers every inherited path and requirement before any successor publication can resolve earlier Work;... [detail_ref: .saipen/recovery/board-compaction/T-1839/T-1839-a4b8b8f7b87e65d33097c6b4.json]"
+        }
+      },
+      "publication_status": "pending",
+      "release_op_id": "",
+      "schema_version": 1,
+      "scope": [
+        "saipen/OPS.md",
+        "tools/saipen.py",
+        "tools/saipen_engine/closure.py",
+        "tools/saipen_engine/cohort_reconcile.py",
+        "tools/saipen_engine/operations.py",
+        "tools/test_t1839_cohort_reconciliation.py"
+      ],
+      "tag": "",
+      "version": ""
+    },
+    "C-015": {
+      "cohort_id": "C-015",
+      "commit": "",
+      "members": {
+        "T-1841": {
+          "closed_at": "2026-10-20T23:00:10Z",
+          "closed_by": "saipen-cli",
+          "paths": {
+            "tools/saipen_engine/admission_doctor.py": "bb51957bdf60601c",
+            "tools/saipen_engine/audit_inbox.py": "c4cbc6543d15a215",
+            "tools/saipen_engine/board.py": "0bf548f3e2051c55",
+            "tools/saipen_engine/board_compaction.py": "8e1173e869bd1c13",
+            "tools/saipen_engine/cold_recovery.py": "4ea8dd65b581eba4",
+            "tools/saipen_engine/commands.py": "187942c23665de0c",
+            "tools/saipen_engine/continue_loop.py": "66110abb852f0da4",
+            "tools/saipen_engine/intake.py": "0ba0abed0aaf78c6",
+            "tools/saipen_engine/operator_task.py": "c16998ce3b17ce5c",
+            "tools/saipen_engine/router.py": "3343e1eb52267a41",
+            "tools/test_command_routing.py": "9100208b85cea604",
+            "tools/test_external_authentication_contract.py": "f57e01dae6919e9a",
+            "tools/test_external_revalidation.py": "ec41e19b072e2383",
+            "tools/test_freebuff_operator_provenance.py": "02648c3a4fb10246",
+            "tools/test_operator_ingress_matrix.py": "aa82f3a4363619da",
+            "tools/test_source_contract_derivation.py": "20f469bb5f6bee53",
+            "tools/test_t119_stale_complete_exit.py": "3205aab43bf9e3b8",
+            "tools/test_t1807_audit_liveness_regression.py": "3830b7cd76b7f168",
+            "tools/test_t1821_markdown_surface.py": "92d2e7c7daa65d49",
+            "tools/test_t1822_carrier_binding.py": "30cf1eb5df2ee3bd"
+          },
+          "ticket_id": "T-1841",
+          "verification": "python -m ruff check tools/ tests/ exits 0; inspect duplicate keys and unused assignments before removal, preserve every runtime/security assertion, run affected tests and final current-generation campaign gates; evidence T-1840-external-refresh/lint-current.json"
+        }
+      },
+      "publication_status": "pending",
+      "release_op_id": "",
+      "schema_version": 1,
+      "scope": [
+        "tools/saipen_engine/admission_doctor.py",
+        "tools/saipen_engine/audit_inbox.py",
+        "tools/saipen_engine/board.py",
+        "tools/saipen_engine/board_compaction.py",
+        "tools/saipen_engine/cold_recovery.py",
+        "tools/saipen_engine/commands.py",
+        "tools/saipen_engine/continue_loop.py",
+        "tools/saipen_engine/intake.py",
+        "tools/saipen_engine/operator_task.py",
+        "tools/saipen_engine/router.py",
+        "tools/test_command_routing.py",
+        "tools/test_external_authentication_contract.py",
+        "tools/test_external_revalidation.py",
+        "tools/test_freebuff_operator_provenance.py",
+        "tools/test_operator_ingress_matrix.py",
+        "tools/test_source_contract_derivation.py",
+        "tools/test_t119_stale_complete_exit.py",
+        "tools/test_t1807_audit_liveness_regression.py",
+        "tools/test_t1821_markdown_surface.py",
+        "tools/test_t1822_carrier_binding.py"
+      ],
+      "tag": "",
+      "version": ""
+    },
+    "C-016": {
+      "cohort_id": "C-016",
+      "commit": "",
+      "members": {
+        "T-1842": {
+          "closed_at": "2026-10-21T03:14:06Z",
+          "closed_by": "saipen-cli",
+          "paths": {
+            "saipen/COMMANDS.md": "11936f29f40ae838",
+            "saipen/phases/ship.md": "65fbf0e6333a959c",
+            "saipen/phases/verify.md": "3ea0e70188c1debb"
+          },
+          "ticket_id": "T-1842",
+          "verification": "python tools/protocol_budget.py --summary exits 0 with unchanged REGISTRY budgets and load graph; existing registry/response budget controls fail against the saved current prose and pass after compaction; trace every compacted instruction and run affected contract checks"
+        }
+      },
+      "publication_status": "pending",
+      "release_op_id": "",
+      "schema_version": 1,
+      "scope": [
+        "saipen/COMMANDS.md",
+        "saipen/phases/ship.md",
+        "saipen/phases/verify.md"
+      ],
+      "tag": "",
+      "version": ""
+    },
+    "C-017": {
+      "cohort_id": "C-017",
+      "commit": "",
+      "members": {
+        "T-1843": {
+          "closed_at": "2026-10-21T03:29:34Z",
+          "closed_by": "saipen-cli",
+          "paths": {
+            "tools/validator_fail_sites.json": "02074993235115f9"
+          },
+          "ticket_id": "T-1843",
+          "verification": "python tools/fail_site_inventory.py --check exits 0 with the new core-unit publication site explicitly adjudicated by a named CASE or a truthful reason; the real audit_checks.check_inventory_probe returns None, including its added/removed/same-count swap controls; native focused discovery of test_check_inventory.py and test_t1828_verification_policy.py passes; all old identities/dispositions and shrink-only BASELINE remain unchanged. The earlier positional audit_checks.py validator-check-inventory spelling is unsupported and selects the entire unrelated sweep; use the actual named-probe tests here, preserving full final-batch audit/publication obligations."
+        }
+      },
+      "publication_status": "pending",
+      "release_op_id": "",
+      "schema_version": 1,
+      "scope": [
+        "tools/validator_fail_sites.json"
+      ],
+      "tag": "",
+      "version": ""
+    },
+    "C-018": {
+      "cohort_id": "C-018",
+      "commit": "",
+      "members": {
+        "T-1844": {
+          "closed_at": "2026-10-21T22:13:18Z",
+          "closed_by": "saipen-cli",
+          "paths": {
+            "extensions/adapters/opencode/saipen-guard.js": "8a0c6e6ac8c7ed9b",
+            "saipen/REGISTRY.json": "c87a2a67314096c0",
+            "tools/saipen.py": "62fad31fa8cd0686",
+            "tools/saipen_engine/acceptance_contract.py": "55d030ecb73f77d4",
+            "tools/saipen_engine/decision_request.py": "79378fa3558b0631",
+            "tools/saipen_engine/entry.py": "6bc3a59b37151da7",
+            "tools/saipen_engine/gate_decision.py": "2227181297d42a6b",
+            "tools/saipen_engine/goal_authority.py": "96149a4827b8d6b1",
+            "tools/saipen_engine/handoff.py": "070180345c630c14",
+            "tools/saipen_engine/host_authority_broker.py": "c89025d341830c9d",
+            "tools/saipen_engine/host_authority_client.py": "1e9e88690fd6a5b4",
+            "tools/saipen_engine/intake.py": "537ff4fdaaf99b4d",
+            "tools/saipen_engine/operations.py": "83101fab75af09f0",
+            "tools/saipen_engine/operator_origin.py": "dce8b7d513959edc",
+            "tools/saipen_engine/operator_task.py": "b840b345e7f4a8f8",
+            "tools/saipen_engine/response_surface.py": "0745296d5c180fb3",
+            "tools/saipen_engine/retirement.py": "c6dc889c85b68b89",
+            "tools/saipen_engine/source_append.py": "144ffe4701ee1d89",
+            "tools/saipen_engine/supersession.py": "1a09d7250de1d28e",
+            "tools/test_authority_capture.py": "8fea46292c5acd98",
+            "tools/test_chat_style.py": "a320cc0d3c2e7e21",
+            "tools/test_claude_stop_hook.py": "8cea2ca0cca97cf2",
+            "tools/test_closure_provenance.py": "1d7739d37df2a629",
+            "tools/test_cold_recovery.py": "2c259336851889f2",
+            "tools/test_command_routing.py": "8cc1c7de39039b0c",
+            "tools/test_detail_authorization.py": "2f679dc5a718ddfe",
+            "tools/test_fixture_support.py": "5a1258c96a3bd079",
+            "tools/test_hostile_wave_regressions.py": "6732cd574bb07cce",
+            "tools/test_ingress_authority.py": "f4974fa1f04cbcb7",
+            "tools/test_intent_audit_fixes.py": "ba4ba469a20acaaa",
+            "tools/test_next_action_deadlock.py": "226f1bb75d0ed6ec",
+            "tools/test_operator_ingress_matrix.py": "eac4e83c2d1f31be",
+            "tools/test_operator_origin_support.py": "8172d9110824b742",
+            "tools/test_orchestration_repair.py": "4da7ff8079b1ee61",
+            "tools/test_protocol_admission.py": "f26f4287337b6b29",
+            "tools/test_public_closure_cli.py": "52b29195f1cd103e",
+            "tools/test_recovery_reachability.py": "22310eb861832459",
+            "tools/test_response_delivery.py": "a12ea991519b24d2",
+            "tools/test_response_digest.py": "2886b749c7c53ca1",
+            "tools/test_response_surface_contract.py": "a70421543b231b67",
+            "tools/test_t1293_valve_resume_audit_route.py": "9da8940973860337",
+            "tools/test_t1363_zero_manual_entry.py": "29596f79b98dc67d",
+            "tools/test_t1461_source_append.py": "1f15ce83ec997203",
+            "tools/test_t1474_start_goal_entry.py": "cd0f605e47230b54",
+            "tools/test_t1487_claim_handoff.py": "2291cc03eb5eacd2",
+            "tools/test_t1494_continuation_authority.py": "628202c21fefbab0",
+            "tools/test_t1501_entry_resolver.py": "dec8b7b3beecb10e",
+            "tools/test_t1553_mid_session_activation.py": "83a3c861ef2f6f80",
+            "tools/test_t1657_refused_reply_preserved.py": "165750f0d9354ba7",
+            "tools/test_t1704_legacy_goal_authority.py": "e8ddaced90fdff4a",
+            "tools/test_t1718_acceptance_contract.py": "f21f190147032c56",
+            "tools/test_t1729_gate_decision_lifecycle.py": "f03e73652748dd7e",
+            "tools/test_t1729_operator_gate.py": "157b46d22c532705",
+            "tools/test_t1822_carrier_binding.py": "91f14acc6fdd4a20",
+            "tools/test_t1844_authority_preview.py": "8dfc4965ad59a719",
+            "tools/test_t1844_goal_turns.py": "200f52678ae66097",
+            "tools/test_t1844_operator_origin.py": "d51851cf7b403b1e",
+            "tools/test_t1844_origin_broker.py": "764f7617982b9ccf",
+            "tools/test_t1844_source_event.py": "f849bbe71def5577",
+            "tools/test_ticket_retirement.py": "bbea8847bf2f1d80",
+            "tools/test_ticket_supersession.py": "7cf9cac033ae9a37",
+            "tools/validate.py": "2f52724745a9cfa8"
+          },
+          "ticket_id": "T-1844",
+          "verification": "Unchanged regression rejects model-forged real SAIPEN_TASK_SHA256/FILE and cache envelopes before and after the repair; only independently verified host-event proof grants privileged effects. Bind proof to exact... [detail_ref: .saipen/recovery/board-compaction/T-1844/T-1844-99d6bbc32a6524293a691119.json]"
+        },
+        "T-1845": {
+          "closed_at": "2026-10-21T13:14:13Z",
+          "closed_by": "saipen-cli",
+          "paths": {
+            "saipen/COMMANDS.md": "23d8fdff164802d7"
+          },
+          "ticket_id": "T-1845",
+          "verification": "The unchanged protocol_registry, response_surface_contract budget and t1670 route-budget controls pass on the current documents; the deliberate over-budget controls still fail; no ceiling increase or lost command/rule."
+        },
+        "T-1846": {
+          "closed_at": "2026-10-21T13:34:10Z",
+          "closed_by": "saipen-cli",
+          "paths": {
+            "tools/saipen_engine/journal.py": "50bc68c65a7bde78"
+          },
+          "ticket_id": "T-1846",
+          "verification": "The unchanged test_t1577_op_id_provenance.py registry controls pass with the genuine cohort-reconcile writer registered, and unknown class, malformed width and forged lookalike controls still refuse."
+        },
+        "T-1847": {
+          "closed_at": "2026-10-21T13:41:32Z",
+          "closed_by": "saipen-cli",
+          "paths": {
+            "tools/test_t1575_parallel_lane.py": "9fcd34d6287a86f7",
+            "tools/test_t1687_identity_diagnostics.py": "dda96e2098365beb",
+            "tools/test_t1847_fixture_contract.py": "415d2e7ee26f8436"
+          },
+          "ticket_id": "T-1847",
+          "verification": "The original identity diagnostic retains the actual one-test traceback and sentinel; the original marker test observes a live marker during fake_run and its release on exception; genuine preflight failures remain refused without executing tests."
+        }
+      },
+      "publication_status": "pending",
+      "release_op_id": "",
+      "schema_version": 1,
+      "scope": [
+        "extensions/adapters/opencode/saipen-guard.js",
+        "saipen/COMMANDS.md",
+        "saipen/REGISTRY.json",
+        "tools/saipen.py",
+        "tools/saipen_engine/acceptance_contract.py",
+        "tools/saipen_engine/decision_request.py",
+        "tools/saipen_engine/entry.py",
+        "tools/saipen_engine/gate_decision.py",
+        "tools/saipen_engine/goal_authority.py",
+        "tools/saipen_engine/handoff.py",
+        "tools/saipen_engine/host_authority_broker.py",
+        "tools/saipen_engine/host_authority_client.py",
+        "tools/saipen_engine/intake.py",
+        "tools/saipen_engine/journal.py",
+        "tools/saipen_engine/operations.py",
+        "tools/saipen_engine/operator_origin.py",
+        "tools/saipen_engine/operator_task.py",
+        "tools/saipen_engine/response_surface.py",
+        "tools/saipen_engine/retirement.py",
+        "tools/saipen_engine/source_append.py",
+        "tools/saipen_engine/supersession.py",
+        "tools/test_authority_capture.py",
+        "tools/test_chat_style.py",
+        "tools/test_claude_stop_hook.py",
+        "tools/test_closure_provenance.py",
+        "tools/test_cold_recovery.py",
+        "tools/test_command_routing.py",
+        "tools/test_detail_authorization.py",
+        "tools/test_fixture_support.py",
+        "tools/test_hostile_wave_regressions.py",
+        "tools/test_ingress_authority.py",
+        "tools/test_intent_audit_fixes.py",
+        "tools/test_next_action_deadlock.py",
+        "tools/test_operator_ingress_matrix.py",
+        "tools/test_operator_origin_support.py",
+        "tools/test_orchestration_repair.py",
+        "tools/test_protocol_admission.py",
+        "tools/test_public_closure_cli.py",
+        "tools/test_recovery_reachability.py",
+        "tools/test_response_delivery.py",
+        "tools/test_response_digest.py",
+        "tools/test_response_surface_contract.py",
+        "tools/test_t1293_valve_resume_audit_route.py",
+        "tools/test_t1363_zero_manual_entry.py",
+        "tools/test_t1461_source_append.py",
+        "tools/test_t1474_start_goal_entry.py",
+        "tools/test_t1487_claim_handoff.py",
+        "tools/test_t1494_continuation_authority.py",
+        "tools/test_t1501_entry_resolver.py",
+        "tools/test_t1553_mid_session_activation.py",
+        "tools/test_t1575_parallel_lane.py",
+        "tools/test_t1657_refused_reply_preserved.py",
+        "tools/test_t1687_identity_diagnostics.py",
+        "tools/test_t1704_legacy_goal_authority.py",
+        "tools/test_t1718_acceptance_contract.py",
+        "tools/test_t1729_gate_decision_lifecycle.py",
+        "tools/test_t1729_operator_gate.py",
+        "tools/test_t1822_carrier_binding.py",
+        "tools/test_t1844_authority_preview.py",
+        "tools/test_t1844_goal_turns.py",
+        "tools/test_t1844_operator_origin.py",
+        "tools/test_t1844_origin_broker.py",
+        "tools/test_t1844_source_event.py",
+        "tools/test_t1847_fixture_contract.py",
+        "tools/test_ticket_retirement.py",
+        "tools/test_ticket_supersession.py",
+        "tools/validate.py"
+      ],
+      "tag": "",
+      "version": ""
+    },
+    "C-019": {
+      "cohort_id": "C-019",
+      "commit": "",
+      "members": {
+        "T-1850": {
+          "closed_at": "2026-10-22T00:05:39Z",
+          "closed_by": "saipen-cli",
+          "paths": {
+            "tools/saipen_engine/admission_doctor.py": "fb8cc56aba3e93ec",
+            "tools/saipen_engine/host_taxonomy.py": "66e66d673a92d564",
+            "tools/saipen_engine/operator_task.py": "eed35875bbd58f12",
+            "tools/test_t1850_freebuff_diagnostics.py": "f136bbf7be6c05c4"
+          },
+          "ticket_id": "T-1850",
+          "verification": "Same unchanged regression recognizes the actual Desktop marker, preserves non-FreeBuff callers, emits a registered actionable provenance gap without granting authority, and Auto-Doctor names native event proof while retaining hard_wait and the original Work. Plain real carrier variables remain untrusted."
+        },
+        "T-1851": {
+          "closed_at": "2026-10-22T11:49:08Z",
+          "closed_by": "saipen-cli",
+          "paths": {
+            "tools/accept_legacy_debt.py": "2bf8d192be40692d",
+            "tools/saipen_engine/accepted_debt.py": "cd557bfecbe6753d",
+            "tools/saipen_engine/debt_authority.py": "e6a70d98b4bce5ef",
+            "tools/saipen_engine/host_authority_broker.py": "154a68024bf9838a",
+            "tools/saipen_engine/host_authority_client.py": "2f84344b2599ac51",
+            "tools/saipen_engine/journal.py": "c39f93dcf4ab0a36",
+            "tools/saipen_engine/operator_origin.py": "c0ba048b4a505520",
+            "tools/test_accepted_debt.py": "890dcae298682ccb",
+            "tools/test_accepted_debt_rebind.py": "74e79bf0d3aff809",
+            "tools/test_operator_origin_support.py": "7e977df16e999b3d",
+            "tools/test_t1851_debt_authority.py": "32020c7c34b26023"
+          },
+          "ticket_id": "T-1851",
+          "verification": "Unchanged native controls reject missing, forged, model-supplied, unrelated, foreign-lineage, wrong-event-set and expired/revoked authority with zero mutation; genuine scoped operator-origin Source is accepted...... [detail_ref: .saipen/recovery/board-compaction/T-1851/T-1851-2fe264f11a7017da3bf5db42.json]"
+        },
+        "T-1852": {
+          "closed_at": "2026-10-22T05:58:37Z",
+          "closed_by": "saipen-cli",
+          "paths": {
+            "extensions/adapters/opencode/saipen-guard.js": "8cd916664244d868"
+          },
+          "ticket_id": "T-1852",
+          "verification": "Same unchanged native facet oracle red before and green after; existing NativePolicyTests pass through actual node plugin, generator check agrees and is idempotent, exact diff is confined to generated facet, canonical executed regression and affected verification pass; full corrected batch remains mandatory before publication. Preserve the original T-1850 diagnostics and parent mission."
+        }
+      },
+      "publication_status": "pending",
+      "release_op_id": "",
+      "schema_version": 1,
+      "scope": [
+        "extensions/adapters/opencode/saipen-guard.js",
+        "tools/accept_legacy_debt.py",
+        "tools/saipen_engine/accepted_debt.py",
+        "tools/saipen_engine/admission_doctor.py",
+        "tools/saipen_engine/debt_authority.py",
+        "tools/saipen_engine/host_authority_broker.py",
+        "tools/saipen_engine/host_authority_client.py",
+        "tools/saipen_engine/host_taxonomy.py",
+        "tools/saipen_engine/journal.py",
+        "tools/saipen_engine/operator_origin.py",
+        "tools/saipen_engine/operator_task.py",
+        "tools/test_accepted_debt.py",
+        "tools/test_accepted_debt_rebind.py",
+        "tools/test_operator_origin_support.py",
+        "tools/test_t1850_freebuff_diagnostics.py",
+        "tools/test_t1851_debt_authority.py"
+      ],
+      "tag": "",
+      "version": ""
+    },
+    "C-020": {
+      "cohort_id": "C-020",
+      "commit": "",
+      "members": {
+        "T-1849": {
+          "closed_at": "2026-10-22T00:21:51Z",
+          "closed_by": "saipen-cli",
+          "paths": {
+            "tools/saipen_engine/external.py": "863f288d41da28c3",
+            "tools/saipen_engine/external_renewal.py": "485e1ef256e1083c",
+            "tools/test_t1840_external_renewal.py": "8adfa790de999490",
+            "tools/test_t1849_external_git_environment.py": "3f1313e0ea3b54dc"
+          },
+          "ticket_id": "T-1849",
+          "verification": "Unchanged regression with two actual Git repositories rejects a foreign or missing implementation while a real implementation in the declared external repository remains verifiable under conflicting caller GIT_DIR, GIT_WORK_TREE and GIT_INDEX_FILE. Preserve lineage, receipt, commit ancestry and immutable predecessor checks; ordinary callers unchanged."
+        }
+      },
+      "publication_status": "pending",
+      "release_op_id": "",
+      "schema_version": 1,
+      "scope": [
+        "tools/saipen_engine/external.py",
+        "tools/saipen_engine/external_renewal.py",
+        "tools/test_t1840_external_renewal.py",
+        "tools/test_t1849_external_git_environment.py"
+      ],
+      "tag": "",
+      "version": ""
     }
   },
   "schema_version": 1

@@ -39,15 +39,24 @@ import autoinject  # noqa: E402
 import cli_launcher  # noqa: E402
 import install_host_guard  # noqa: E402
 from saipen_engine import chat_style as CS  # noqa: E402
+from saipen_engine import host_authority_client as HAC  # noqa: E402
 from saipen_engine import protocol_admission as PA  # noqa: E402
 from saipen_engine import response_surface as RS  # noqa: E402
 from test_guard_hostile_matrix import fresh_project  # noqa: E402
 from test_hermetic_env import isolate_host_session  # noqa: E402
+from test_host_fixture import HostFixture  # noqa: E402
 
 HOOK = ROOT / "extensions" / "adapters" / "claude" / "saipen-guard.py"
 REAL_POLICY = PA.load_policy()
+#: The three cases still skipped drive the LEGACY transport, in which a caller
+#: presents a capability it was handed. Nothing in production hands one out any
+#: more: the separated authority admits the host's own hook and owns the write
+#: (T-1623/T-1624). The positive host path those cases stood in for is proven
+#: on real processes by `ClaudeHostTests` below and by
+#: `test_t1624_host_integration`.
 HOST_POSITIVE_BLOCKED = (
-    "CAPABILITY_UNAVAILABLE: separated production host authority required; SRC-140:R009 BLOCKED"
+    "LEGACY_TRANSPORT: no production path presents a capability; the positive host "
+    "path is proven through the hook (ClaudeHostTests, test_t1624_host_integration)"
 )
 
 VALID_REPLY = "Kontroll l\u00e4bitud."
@@ -59,7 +68,21 @@ def setUpModule() -> None:
 
 
 class World:
-    """A complete, disposable admission world: project, authorities, host home."""
+    """A complete, disposable admission world: project, authorities, host home.
+
+    Two things are explicit here because the tests depend on them and nothing
+    on the machine may decide them (T-1624):
+
+    * the admission POLICY. The product default is DEGRADED_ALLOWED, under
+      which a session that is merely not proven is permitted. Most of this
+      module asserts the strict state machine -- BINDING, STALE and REFUSED are
+      not permitted -- so the world writes `strict` unless a test asks for
+      another policy (`mode="degraded"`, or `mode=None` for the default).
+    * the authority ENDPOINT. Every context names an isolated runtime root that
+      nothing serves, so a broker running on the operator's machine can never
+      answer a test. Before this, the suite passed or failed on whether one
+      happened to be alive.
+    """
 
     def __init__(
         self,
@@ -69,10 +92,14 @@ class World:
         instruction: bool = True,
         skill: bool = True,
         project: Path | None = None,
+        mode: str | None = "strict",
     ):
         self.tmp = Path(tmp)
         self.home = self.tmp / "home"
         self.home.mkdir()
+        self.runtime = self.tmp / "authority-runtime"
+        if mode is not None:
+            HAC.set_authority_mode(mode, self.home)
         self.authority = self.tmp / "authority"
         (self.authority / "saipen").mkdir(parents=True)
         for name in PA.AUTHORITY_DOCUMENTS:
@@ -90,7 +117,12 @@ class World:
             self.put_skill(".agents/skills/caveman")
         if hook:
             (self.home / ".claude").mkdir(parents=True, exist_ok=True)
-            install_host_guard.install("claude", self.home, ROOT)
+            # The staged self-test is the installer's own subject
+            # (test_t1624_host_integration); a fixture built for every case
+            # does not re-run it.
+            install_host_guard.install(
+                "claude", self.home, ROOT, verify=False, profile=self.home / ".claude"
+            )
         self.policy = json.loads(json.dumps(REAL_POLICY))
 
     def put_skill(self, relative: str, name: str = "caveman") -> Path:
@@ -116,6 +148,7 @@ class World:
             "home": self.home,
             "policy": self.policy,
             "adapters": getattr(self, "adapters", None),
+            "runtime": self.runtime,
         }
         fields.update(overrides)
         return PA.Context(**fields)
@@ -136,6 +169,7 @@ class World:
             session_id,
             reason,
             transport=self.transport("invalidate", session_id=session_id),
+            runtime=self.runtime,
         )
 
 
@@ -281,6 +315,13 @@ class SelfReportTests(SimulatedOwnerCase):
                 "session-1",
                 "--host",
                 "claude",
+                # The disposable home, never the operator's: the admission mode
+                # is read from it, and a machine whose owner explicitly chose the
+                # degraded policy must not decide this test's verdict.
+                "--home",
+                str(self.world.home),
+                "--runtime",
+                str(self.world.runtime),
             ],
             capture_output=True,
             encoding="utf-8",
@@ -305,13 +346,25 @@ class TransportAuthorityTests(WorldCase):
     """
 
     def _hostile_python(self, body: str) -> dict:
+        """Run `body` as an ordinary same-user process with the engine imported.
+
+        The body names the world's authority endpoint (`RUNTIME`). A child
+        process is outside the module's in-process endpoint isolation, so
+        without it the hostile call met the operator's LIVE service: its
+        verdict was that service's (an older generation admitted any process
+        under the host, and this test went red on that machine only), and
+        under a host session with no service running `establish` started the
+        operator's real service from a fixture root.
+        """
         env = {k: v for k, v in os.environ.items() if k != PA.TRANSPORT_ENV}
         code = (
             f"import sys\n"
             f"sys.path.insert(0, {str(TOOLS)!r})\n"
             f"sys.path.insert(0, {str(ROOT)!r})\n"
             f"import json\n"
+            f"from pathlib import Path\n"
             f"from saipen_engine import protocol_admission as pa\n"
+            f"RUNTIME = Path({str(self.world.runtime)!r})\n"
             f"{body}\n"
         )
         proc = subprocess.run(
@@ -329,7 +382,7 @@ class TransportAuthorityTests(WorldCase):
         payload = self._hostile_python(
             "ctx = pa.Context(project_root={p!r}, session_id='session-9', host='claude',\n"
             "    model='model-a', provider='provider-a',\n"
-            "    authority_root={a!r}, home={h!r})\n"
+            "    authority_root={a!r}, home={h!r}, runtime=RUNTIME)\n"
             "out = pa.establish(ctx)\n"
             "print(json.dumps({{'state': out['state'], 'code': out.get('code'), "
             "'permitted': out['permitted']}}))".format(
@@ -348,9 +401,8 @@ class TransportAuthorityTests(WorldCase):
         path.write_bytes(b"untrusted existing record")
         before = path.read_bytes()
         payload = self._hostile_python(
-            "out = pa.invalidate({p!r}, 'session-1', 'attack')\nprint(json.dumps(out))".format(
-                p=str(self.world.project)
-            )
+            "out = pa.invalidate({p!r}, 'session-1', 'attack', runtime=RUNTIME)\n"
+            "print(json.dumps(out))".format(p=str(self.world.project))
         )
         self.assertFalse(payload["ok"])
         self.assertEqual(payload["code"], PA.CODE_TRANSPORT_REQUIRED)
@@ -380,6 +432,8 @@ class TransportAuthorityTests(WorldCase):
                 str(self.world.authority),
                 "--home",
                 str(self.world.home),
+                "--runtime",
+                str(self.world.runtime),
             ],
             capture_output=True,
             encoding="utf-8",
@@ -418,6 +472,8 @@ class TransportAuthorityTests(WorldCase):
                 str(self.world.authority),
                 "--home",
                 str(self.world.home),
+                "--runtime",
+                str(self.world.runtime),
             ],
             capture_output=True,
             encoding="utf-8",
@@ -750,16 +806,18 @@ class LayeringTests(SimulatedOwnerCase):
     def test_a_detailed_request_with_admission_passes(self):
         nine = "\n".join(f"Leid {n}: t\u00e4pne ja kontrollitud." for n in range(9))
         from saipen_engine.operator_task import witness
-        from test_fixture_support import operator_request_env
+        from test_operator_origin_support import native_operator
 
         request = "write a detailed report of the change"
-        result = gate(
-            self.world,
-            nine,
-            detail_mode=RS.DETAIL_MODE_REPORT,
-            human_request=request,
-            request_authority=witness(request, env=operator_request_env(request)),
-        )
+        with native_operator(self.world.project, request, action="report"):
+            result = gate(
+                self.world,
+                nine,
+                detail_mode=RS.DETAIL_MODE_REPORT,
+                human_request=request,
+                request_authority=witness(request, root=self.world.project),
+                diagnosis_root=self.world.project,
+            )
         self.assertTrue(result["ok"], result)
 
     def test_a_stale_token_blocks_at_the_admission_layer(self):
@@ -828,6 +886,8 @@ class PreFixOracleTests(WorldCase):
             str(self.world.authority),
             "--home",
             str(self.world.home),
+            "--runtime",
+            str(self.world.runtime),
         )
 
     def test_missing_style_evidence_escaped_before_and_is_refused_now(self):
@@ -879,6 +939,9 @@ def guard(project: Path | None, event: dict, home: Path, *, authority: Path | No
     ]
     if authority is not None:
         argv += ["--authority-root", str(authority)]
+    # The world's own isolated endpoint (`World.runtime`), which nothing serves:
+    # the hook must never reach a broker that happens to run on this machine.
+    argv += ["--runtime", str(Path(home).parent / "authority-runtime")]
     proc = subprocess.run(
         argv,
         input=json.dumps(payload).encode("utf-8"),
@@ -891,17 +954,43 @@ def guard(project: Path | None, event: dict, home: Path, *, authority: Path | No
 
 
 class ClaudeHostTests(WorldCase):
-    """HOST evidence: the Claude Code hook, real subprocesses, real CLI."""
+    """HOST evidence: the Claude Code hook, real subprocesses, real CLI.
 
-    def _prompt(self, **extra):
-        return guard(
-            self.world.project,
-            {"hook_event_name": "UserPromptSubmit", "user_prompt": "hi", **extra},
-            self.world.home,
+    Two carriers, and the difference between them is the subject:
+
+    * `self.host` -- a stand-in host image that starts the INSTALLED hook the
+      way the real host does, in front of a real broker (`HostFixture`). This
+      is the host's own hook invocation, so admission is mechanical.
+    * `guard(...)` -- the hook artifact run directly by this test interpreter.
+      That is exactly an ordinary same-user process running the hook script,
+      and the authority never admits it.
+    """
+
+    def setUp(self):
+        super().setUp()
+        self.host = HostFixture(
+            self.world.tmp,
+            home=self.world.home,
+            project=self.world.project,
             authority=self.world.authority,
         )
+        self.addCleanup(self.host.close)
+        if not self.host.available:
+            self.skipTest("no stand-in host interpreter on this platform")
 
-    @unittest.skip(HOST_POSITIVE_BLOCKED)
+    def _prompt(self, **extra):
+        return self.host.prompt(**extra)
+
+    def _direct(self, event: dict):
+        return guard(self.world.project, event, self.world.home, authority=self.world.authority)
+
+    def _state(self) -> str:
+        """The session's state as the HOOK's own session facts describe it: the
+        event names no model, and the provider is whatever this machine runs."""
+        return PA.evaluate(
+            self.world.ctx(model=None, provider=PA.provider_fingerprint())
+        )["state"]
+
     def test_the_first_prompt_delivers_authority_before_the_model_runs(self):
         out = self._prompt()
         context = out["hookSpecificOutput"]["additionalContext"]
@@ -909,50 +998,69 @@ class ClaudeHostTests(WorldCase):
         for name in PA.AUTHORITY_DOCUMENTS:
             self.assertIn(f"=== {name} sha256:", context)
         self.assertNotIn("decision", out)
+        self.assertNotIn("systemMessage", out, "an ADMITTED prompt carries no degraded marker")
+        self.assertEqual(self._state(), PA.STATE_ADMITTED)
 
-    @unittest.skip(HOST_POSITIVE_BLOCKED)
     def test_the_second_prompt_is_not_charged_the_full_delivery(self):
         self._prompt()
         second = self._prompt()["hookSpecificOutput"]["additionalContext"]
         self.assertNotIn("=== BOOT.md", second)
         self.assertIn("SAIPEN chat contract", second)
 
+    def test_the_host_may_start_its_hook_without_a_shell(self):
+        out = self._prompt(via="direct")
+        self.assertIn("=== BOOT.md sha256:", out["hookSpecificOutput"]["additionalContext"])
+        self.assertEqual(self._state(), PA.STATE_ADMITTED)
+
     def test_a_refused_admission_blocks_the_prompt_with_a_runtime_diagnostic(self):
+        # STRICT world: a damaged runtime is a refusal, written by the runtime.
         (self.world.authority / "saipen" / "EXECUTION.md").unlink()
         out = self._prompt()
         self.assertEqual(out["decision"], "block")
         self.assertTrue(out["reason"].startswith("SAIPEN PROTOCOL ADMISSION REFUSED"))
+        self.assertIn("AUTHORITY_DOCUMENT_UNREADABLE", out["reason"])
+        self.assertIn("Do this: saipen host repair", out["reason"])
         self.assertNotIn("hookSpecificOutput", out)
 
-    @unittest.skip(HOST_POSITIVE_BLOCKED)
     def test_a_changed_style_is_redelivered_on_the_next_prompt(self):
         self._prompt()
         self.world.edit_authority("STYLE.md", "\nNew rule.\n")
         out = self._prompt()
         self.assertIn("=== STYLE.md", out["hookSpecificOutput"]["additionalContext"])
 
-    @unittest.skip(HOST_POSITIVE_BLOCKED)
     def test_compaction_wipes_the_context_so_the_next_session_start_redelivers(self):
         self._prompt()
-        out = guard(
-            self.world.project,
-            {"hook_event_name": "SessionStart", "source": "compact"},
-            self.world.home,
-            authority=self.world.authority,
-        )
+        out = self.host.run({"hook_event_name": "SessionStart", "source": "compact"})
         self.assertIn("=== BOOT.md", out["hookSpecificOutput"]["additionalContext"])
         self.assertEqual(out["hookSpecificOutput"]["hookEventName"], "SessionStart")
 
     def test_a_model_switch_invalidates_the_admission(self):
         self._prompt()
-        guard(
-            self.world.project,
-            {"hook_event_name": "PostModelSwitch", "model": "model-b"},
-            self.world.home,
-            authority=self.world.authority,
-        )
-        self.assertFalse(PA.evaluate(self.world.ctx())["permitted"])
-        self.assertFalse((self.world.project / PA.LEDGER_DIR).exists())
+        self.assertEqual(self._state(), PA.STATE_ADMITTED)
+        self.host.run({"hook_event_name": "PostModelSwitch", "model": "model-b"})
+        self.assertEqual(self._state(), PA.STATE_BINDING)
+        self.assertFalse(PA._ledger_path(self.world.project, "session-1").exists())
+
+    def test_the_hook_script_run_by_an_ordinary_process_is_not_the_host(self):
+        # The same artifact, the same event, started by this interpreter instead
+        # of by the host: the authority answers and refuses the caller.
+        out = self._direct({"hook_event_name": "UserPromptSubmit", "user_prompt": "hi"})
+        self.assertEqual(out["decision"], "block")
+        self.assertIn("AUTHORITY_CLIENT_UNPROVEN", out["reason"])
+        self.assertFalse(PA._ledger_path(self.world.project, "session-1").exists())
+
+    def test_a_shell_tool_call_under_the_host_is_not_the_hook(self):
+        # Under the host, through a shell -- and not the hook invocation: the
+        # shell was started with a WRAPPED command, which is what a model's
+        # shell tool does to everything it runs.
+        for via in ("tool", "nested"):
+            with self.subTest(via=via):
+                out = self._prompt(via=via, session=f"session-{via}")
+                self.assertEqual(out["decision"], "block")
+                self.assertIn("AUTHORITY_CLIENT_UNPROVEN", out["reason"])
+                self.assertFalse(
+                    PA._ledger_path(self.world.project, f"session-{via}").exists()
+                )
 
     def test_bootstrap_tool_activity_is_never_gated_while_unadmitted(self):
         # Before admission the model must still be able to read, resolve and run.
@@ -965,52 +1073,361 @@ class ClaudeHostTests(WorldCase):
                 "tool_input": {"command": "saipen status --json"},
             },
         ):
-            self.assertIsNone(
-                guard(self.world.project, event, self.world.home, authority=self.world.authority),
-                event,
-            )
+            self.assertIsNone(self.host.run(event), event)
         self.assertFalse(PA.evaluate(self.world.ctx())["permitted"])
 
     def test_the_stop_gate_blocks_an_unadmitted_perfect_reply_with_a_runtime_reason(self):
-        out = guard(
-            self.world.project,
+        out = self.host.run(
             {
                 "hook_event_name": "Stop",
                 "stop_hook_active": False,
                 "last_assistant_message": VALID_REPLY,
-            },
-            self.world.home,
-            authority=self.world.authority,
+            }
         )
         self.assertEqual(out["decision"], "block")
         self.assertIn("PROTOCOL ADMISSION", out["reason"])
 
-    @unittest.skip(HOST_POSITIVE_BLOCKED)
     def test_the_stop_gate_passes_an_admitted_compliant_reply(self):
         self._prompt()
-        out = guard(
-            self.world.project,
+        out = self.host.run(
             {
                 "hook_event_name": "Stop",
                 "stop_hook_active": False,
                 "last_assistant_message": VALID_REPLY,
-            },
-            self.world.home,
-            authority=self.world.authority,
+            }
         )
         self.assertIsNone(out, out)
 
-    @unittest.skip(HOST_POSITIVE_BLOCKED)
     def test_the_stop_gate_still_rejects_a_style_invalid_reply_after_admission(self):
         self._prompt()
-        out = guard(
-            self.world.project,
-            {"hook_event_name": "Stop", "stop_hook_active": False, "last_assistant_message": ESSAY},
-            self.world.home,
-            authority=self.world.authority,
+        out = self.host.run(
+            {"hook_event_name": "Stop", "stop_hook_active": False, "last_assistant_message": ESSAY}
         )
         self.assertEqual(out["decision"], "block")
         self.assertIn("CHAT_STYLE_DRIFT", out["reason"])
+
+
+class DegradedRecoveryTests(WorldCase):
+    """The admission POLICY and its limits (HOST-INTEGRATION-01, T-1624).
+
+    The field failure this covers: host authority could not be established, so
+    every prompt was refused with HOST_AUTHORITY_UNAVAILABLE and the operator
+    could not use the host at all. T-1623 answered with an operator-explicit
+    degraded switch that tolerated exactly two reasons, picked by a substring.
+    T-1624 replaces that with one decision table over registered failure codes:
+
+    RED      STRICT still blocks the very input the operator could not get past
+    GREEN    the default policy permits it, visibly, claiming nothing
+    GREEN    a damaged or stale installation degrades too -- "could not be
+             proven" and "is broken" both leave the operator a working model
+    RED      a CONFLICT blocks in every mode: a forged capability, a project
+             carrier that contradicts the project the session is in
+    TRUTHFUL no ledger record, no verification claim, one re-delivery per context
+    """
+
+    def unproven(self, **overrides) -> World:
+        """A world shaped like the failing machine: no authority answering."""
+        tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(tmp.cleanup)
+        overrides.setdefault("mode", None)
+        return World(Path(tmp.name), **overrides)
+
+    def strict(self, world: World) -> dict:
+        return HAC.set_authority_mode("strict", world.home)
+
+    def prompt(self, world: World, **extra):
+        return guard(
+            world.project,
+            {"hook_event_name": "UserPromptSubmit", "user_prompt": "hi", **extra},
+            world.home,
+            authority=world.authority,
+        )
+
+    # -- the policy itself ---------------------------------------------------
+
+    def test_degraded_allowed_is_the_default_and_strict_is_an_explicit_choice(self):
+        world = self.unproven()
+        self.assertFalse(HAC.mode_path(world.home).exists())
+        self.assertEqual(HAC.policy(world.home), {
+            "mode": "degraded", "source": "default", "path": str(HAC.mode_path(world.home)),
+        })
+        self.assertEqual(self.strict(world)["code"], "AUTHORITY_MODE_SET")
+        self.assertEqual(HAC.policy(world.home)["source"], "operator")
+        self.assertEqual(HAC.authority_mode(world.home), "strict")
+        self.assertEqual(HAC.clear_authority_mode(world.home)["mode"], "degraded")
+        self.assertFalse(HAC.mode_path(world.home).exists())
+
+    def test_an_unreadable_policy_file_is_strict_never_a_silent_downgrade(self):
+        # A file that is THERE and names no recognized mode is never read as the
+        # weaker policy: the operator wrote something, and it was not "degraded".
+        world = self.unproven()
+        path = HAC.mode_path(world.home)
+        path.parent.mkdir(parents=True, exist_ok=True)
+        for damaged in ('{"mode": "permissive"}', '{"mode": ""}', "not json", "[]", "{}"):
+            with self.subTest(damaged=damaged):
+                path.write_text(damaged, encoding="utf-8")
+                self.assertEqual(HAC.policy(world.home)["source"], "invalid")
+                self.assertEqual(HAC.authority_mode(world.home), "strict")
+                self.assertEqual(PA.establish(world.ctx())["state"], PA.STATE_REFUSED)
+        self.assertEqual(
+            HAC.set_authority_mode("permissive", world.home)["code"], "VALIDATION_FAILED"
+        )
+
+    def test_the_hook_and_the_engine_read_the_policy_by_one_rule(self):
+        # The hook applies the policy itself when its engine cannot be run, so
+        # the two readers must agree on every file content.
+        import importlib.util
+
+        spec = importlib.util.spec_from_file_location("saipen_guard_under_test", HOOK)
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        world = self.unproven()
+        path = HAC.mode_path(world.home)
+        self.assertEqual(module.authority_mode(world.home), HAC.authority_mode(world.home))
+        path.parent.mkdir(parents=True, exist_ok=True)
+        for content in (
+            '{"mode": "strict"}', '{"mode": "degraded"}', '{"mode": "DEGRADED_ALLOWED"}',
+            '{"mode": "degraded-allowed"}', '{"mode": "x"}', "garbage", "{}", "[1]", "",
+        ):
+            with self.subTest(content=content):
+                path.write_text(content, encoding="utf-8")
+                self.assertEqual(
+                    module.authority_mode(world.home), HAC.authority_mode(world.home)
+                )
+
+    # -- RED: the reported field failure, reproduced under STRICT -------------
+
+    def test_red_strict_policy_blocks_the_prompt_the_operator_could_not_get_past(self):
+        world = self.unproven()
+        self.strict(world)
+        out = self.prompt(world)
+        self.assertEqual(out["decision"], "block")
+        self.assertIn("HOST_AUTHORITY_UNAVAILABLE", out["reason"])
+        self.assertIn("AUTHORITY_UNREACHABLE", out["reason"])
+        # Never a dead end: the refusal names what was tried and the one action.
+        self.assertIn("automatic recovery attempted", out["reason"])
+        self.assertIn("Do this: saipen host repair", out["reason"])
+
+    def test_red_establish_under_strict_policy_refuses(self):
+        world = self.unproven()
+        self.strict(world)
+        verdict = PA.establish(world.ctx())
+        self.assertEqual(verdict["state"], PA.STATE_REFUSED)
+        self.assertFalse(verdict["permitted"])
+        self.assertEqual(verdict["failure"], "AUTHORITY_UNREACHABLE")
+        self.assertIn(PA.AUTHORITY_UNAVAILABLE, verdict["problems"][0]["reason"])
+
+    # -- GREEN: the default policy permits, truthfully -------------------------
+
+    def test_the_default_policy_turns_unproven_authority_into_a_degraded_permit(self):
+        world = self.unproven()
+        verdict = PA.establish(world.ctx())
+        self.assertEqual(verdict["state"], PA.STATE_DEGRADED)
+        self.assertTrue(verdict["permitted"])
+        self.assertFalse(verdict["verified"])
+        self.assertEqual(verdict["failure"], "AUTHORITY_UNREACHABLE")
+        self.assertIn("=== BOOT.md sha256:", verdict["delivery"])
+        evaluated = PA.evaluate(world.ctx())
+        self.assertEqual(evaluated["state"], PA.STATE_DEGRADED)
+        self.assertFalse(evaluated["verified"])
+
+    def test_the_claude_hook_allows_the_prompt_and_marks_it_degraded(self):
+        world = self.unproven()
+        out = self.prompt(world)
+        self.assertNotIn("decision", out)
+        # The operator sees it and the model is told the same thing.
+        for surface in (out["systemMessage"], out["hookSpecificOutput"]["additionalContext"]):
+            self.assertIn("degraded mode", surface)
+            self.assertIn(PA.DEGRADED_MARKER, surface)
+            self.assertIn("Model access works", surface)
+            self.assertIn("saipen host repair", surface)
+        self.assertNotIn("ADMITTED.", out["systemMessage"].replace("claims ADMITTED.", ""))
+        self.assertIn("=== BOOT.md sha256:", out["hookSpecificOutput"]["additionalContext"])
+
+    def test_a_degraded_session_is_handed_the_authority_once_per_context(self):
+        world = self.unproven()
+        first = self.prompt(world)["hookSpecificOutput"]["additionalContext"]
+        again = self.prompt(world)
+        second = again["hookSpecificOutput"]["additionalContext"]
+        self.assertIn("=== BOOT.md sha256:", first)
+        self.assertNotIn("=== BOOT.md", second, "the authority text is not paid for twice")
+        self.assertIn(PA.DEGRADED_MARKER, second)
+        self.assertLess(len(again["systemMessage"]), 200, "the repeat marker is one line")
+        # A new or compacted context holds nothing: it is handed again.
+        restarted = guard(
+            world.project,
+            {"hook_event_name": "SessionStart", "source": "compact"},
+            world.home,
+            authority=world.authority,
+        )
+        self.assertIn("=== BOOT.md", restarted["hookSpecificOutput"]["additionalContext"])
+
+    def test_a_degraded_session_still_passes_the_reply_gate_as_unverified(self):
+        world = self.unproven()
+        verdict = PA.evaluate(world.ctx())
+        result = RS.gate_final_response(
+            VALID_REPLY,
+            admission=verdict,
+            admission_consulted=True,
+            operational_turn=False,
+            style_contract=CS.compile_style_contract(PA.read_authority(world.ctx(), "STYLE.md")),
+        )
+        self.assertTrue(result["ok"], result)
+        self.assertEqual(result["layers"]["admission"], PA.STATE_DEGRADED)
+
+    def test_a_damaged_installation_degrades_instead_of_locking_the_host_out(self):
+        # Each of these was a refusal before T-1624. None is a conflict: the
+        # installation is damaged or stale, the model still works, and the
+        # marker names exactly what is wrong and the one action that fixes it.
+        cases = {
+            "AUTHORITY_DOCUMENT_UNREADABLE": lambda w: (
+                w.authority / "saipen" / "EXECUTION.md"
+            ).unlink(),
+            "AUTHORITY_DOCUMENT_INVALID": lambda w: (
+                w.authority / "saipen" / "STYLE.md"
+            ).write_text("# not a style contract\n", encoding="utf-8"),
+            "ACTIVATION_BLOCK_ABSENT": lambda w: (w.home / ".claude" / "CLAUDE.md").unlink(),
+            "HOOK_STALE": lambda w: (
+                w.home / ".claude" / "hooks" / "saipen-guard.py"
+            ).write_text("# older\n", encoding="utf-8"),
+            "PROJECT_IDENTITY_UNREADABLE": lambda w: (
+                w.project / ".saipen" / "IDENTITY.md"
+            ).unlink(),
+        }
+        for code, damage in cases.items():
+            with self.subTest(code=code):
+                world = self.unproven()
+                damage(world)
+                verdict = PA.establish(world.ctx())
+                self.assertEqual(verdict["state"], PA.STATE_DEGRADED, verdict.get("problems"))
+                self.assertIn(code, [item["code"] for item in verdict["problems"]])
+                self.assertIn("saipen", verdict["actions"][0])
+                self.assertFalse((world.project / PA.LEDGER_DIR / "x").exists())
+                # The same damage under STRICT is still a refusal, with the action.
+                self.strict(world)
+                refused = PA.establish(world.ctx())
+                self.assertEqual(refused["state"], PA.STATE_REFUSED)
+                self.assertIn("Do this:", PA.diagnostic(refused))
+
+    # -- RED: a conflict blocks in every mode ----------------------------------
+
+    def test_control_d_a_forged_capability_blocks_under_the_default_policy(self):
+        world = self.unproven()
+        for forged in (
+            "hook:UserPromptSubmit:" + "0" * 64,
+            "cap.broker-000000000000000000000000.9999999999.deadbeefdeadbeef." + "a" * 64,
+            "sha256:" + "f" * 64,
+        ):
+            with self.subTest(forged=forged[:24]):
+                verdict = PA.establish(world.ctx(), transport=forged)
+                self.assertEqual(verdict["state"], PA.STATE_REFUSED)
+                self.assertFalse(verdict["permitted"])
+                self.assertEqual(verdict["failure"], "CAPABILITY_FORGED")
+                self.assertFalse((world.project / PA.LEDGER_DIR).exists())
+
+    def test_control_c_a_foreign_project_binding_blocks_under_the_default_policy(self):
+        world = self.unproven()
+        tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(tmp.cleanup)
+        other = World(Path(tmp.name), mode=None)
+        # The carrier's lineage belongs to ANOTHER project than the one the
+        # session is in: this session was started for something else.
+        from saipen_engine.paths import project_lineage_identity
+
+        foreign = {
+            "SAIPEN_PROJECT_ROOT": str(world.project),
+            "SAIPEN_PROJECT_LINEAGE": project_lineage_identity(other.project),
+        }
+        verdict = PA.establish(
+            world.ctx(event_cwd=world.project, carriers=foreign)
+        )
+        self.assertEqual(verdict["state"], PA.STATE_REFUSED)
+        self.assertEqual(verdict["failure"], "BINDING_FOREIGN_PROJECT")
+        self.assertIn("SAIPEN_PROJECT_ROOT", PA.diagnostic(verdict))
+        # A carrier that names a different project than the session directory.
+        conflict = {"SAIPEN_PROJECT_ROOT": str(other.project)}
+        verdict = PA.establish(
+            world.ctx(event_cwd=world.project, carriers=conflict)
+        )
+        self.assertEqual(verdict["state"], PA.STATE_REFUSED)
+        self.assertEqual(verdict["failure"], "BINDING_CONFLICT")
+        # No carrier at all, or one that agrees: nothing to refuse.
+        agreed = {
+            "SAIPEN_PROJECT_ROOT": str(world.project),
+            "SAIPEN_PROJECT_LINEAGE": project_lineage_identity(world.project),
+        }
+        for carriers in ({}, agreed):
+            verdict = PA.establish(
+                world.ctx(event_cwd=world.project, carriers=carriers)
+            )
+            self.assertEqual(verdict["state"], PA.STATE_DEGRADED, carriers)
+
+    def test_the_hook_blocks_a_foreign_binding_before_the_model_runs(self):
+        world = self.unproven()
+        tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(tmp.cleanup)
+        other = World(Path(tmp.name), mode=None)
+        from saipen_engine.paths import project_lineage_identity
+
+        argv = [
+            sys.executable, str(HOOK), "--host", "claude", "--saipen-root", str(ROOT),
+            "--home", str(world.home), "--authority-root", str(world.authority),
+            "--runtime", str(world.runtime),
+        ]
+        env = {key: value for key, value in os.environ.items() if not key.startswith("SAIPEN_")}
+        env["SAIPEN_PROJECT_ROOT"] = str(world.project)
+        env["SAIPEN_PROJECT_LINEAGE"] = project_lineage_identity(other.project)
+        proc = subprocess.run(
+            argv,
+            input=json.dumps(
+                {"hook_event_name": "UserPromptSubmit", "session_id": "session-1",
+                 "cwd": str(world.project)}
+            ).encode("utf-8"),
+            capture_output=True, cwd=str(ROOT), env=env, check=False,
+        )
+        out = json.loads(proc.stdout.decode("utf-8"))
+        self.assertEqual(out["decision"], "block")
+        self.assertIn("BINDING_FOREIGN_PROJECT", out["reason"])
+
+    # -- TRUTHFUL: nothing mechanical is claimed or written --------------------
+
+    def test_a_degraded_permit_writes_no_ledger_record(self):
+        world = self.unproven()
+        verdict = PA.establish(world.ctx())
+        self.assertEqual(verdict["state"], PA.STATE_DEGRADED)
+        self.assertFalse(PA._ledger_path(world.project, "session-1").exists())
+        self.assertNotIn("token", verdict)
+        self.assertNotIn("capability", verdict)
+        self.assertIsNone(PA._read_record(world.project, "session-1"))
+
+    def test_the_decision_is_made_from_codes_never_from_wording(self):
+        degradable = {"component": "transport", "code": "AUTHORITY_UNREACHABLE", "reason": "x"}
+        self.assertTrue(PA.degradable_only([]))
+        self.assertTrue(PA.degradable_only([degradable]))
+        # The same sentence without a registered code is not degradable, and
+        # neither is a reason that merely SAYS it is harmless.
+        self.assertFalse(PA.degradable_only([{"component": "transport", "reason": "x"}]))
+        self.assertFalse(
+            PA.degradable_only(
+                [{"component": "host", "reason": "host claude hook is not installed and current"}]
+            )
+        )
+        self.assertFalse(
+            PA.degradable_only([degradable, {"component": "t", "code": "CAPABILITY_FORGED"}])
+        )
+        table = PA.decision_table()
+        self.assertEqual(table["default_mode"], "degraded")
+        self.assertEqual(table["not_yet_admitted"], {
+            "strict": "BLOCK", "degraded_allowed": "ALLOW_DEGRADED",
+        })
+        blocking = {row["code"] for row in table["failures"] if row["degraded_allowed"] == "BLOCK"}
+        self.assertEqual(
+            blocking & {"CAPABILITY_FORGED", "CAPABILITY_REPLAYED", "BINDING_FOREIGN_PROJECT",
+                        "BINDING_CONFLICT"},
+            {"CAPABILITY_FORGED", "CAPABILITY_REPLAYED", "BINDING_FOREIGN_PROJECT",
+             "BINDING_CONFLICT"},
+        )
+        self.assertTrue(all(row["strict"] == "BLOCK" for row in table["failures"]))
 
 
 class SameTurnInitTests(unittest.TestCase):
@@ -1029,7 +1446,9 @@ class SameTurnInitTests(unittest.TestCase):
             (world_home / ".claude").mkdir()
             block = autoinject.rendered_activation_block(ROOT / "saipen")
             (world_home / ".claude" / "CLAUDE.md").write_text(block + "\n", encoding="utf-8")
-            install_host_guard.install("claude", world_home, ROOT)
+            install_host_guard.install(
+                "claude", world_home, ROOT, verify=False, profile=world_home / ".claude"
+            )
             skill = world_home / ".agents" / "skills" / "caveman"
             skill.mkdir(parents=True)
             (skill / "SKILL.md").write_text("---\nname: caveman\n---\nTerse.\n", encoding="utf-8")
@@ -1083,9 +1502,15 @@ class SameTurnInitTests(unittest.TestCase):
                 world_home,
                 authority=authority,
             )
-            self.assertIn("HOST_AUTHORITY_UNAVAILABLE", out["systemMessage"])
-            self.assertNotIn("hookSpecificOutput", out)
-            self.assertFalse((project / PA.LEDGER_DIR).exists())
+            # No authority answers on this disposable machine and nobody chose
+            # STRICT: the same turn is handed the protocol, marked UNVERIFIED,
+            # and no admission record is written for it.
+            self.assertIn(PA.DEGRADED_MARKER, out["systemMessage"])
+            self.assertIn("AUTHORITY_UNREACHABLE", out["systemMessage"])
+            self.assertIn(
+                "=== BOOT.md sha256:", out["hookSpecificOutput"]["additionalContext"]
+            )
+            self.assertFalse(PA._ledger_path(project, "session-1").exists())
             # Same turn, no restart, no grace turn: the final reply meets admission.
             reply = guard(
                 project,
@@ -1098,10 +1523,29 @@ class SameTurnInitTests(unittest.TestCase):
                 authority=authority,
             )
             # The fresh project routes as an operational WAIT (the human owes the
-            # first goal): the EXEC-RESPONSE layer, not admission, speaks now.
+            # first goal). Under the default policy the unverified session is
+            # PERMITTED, so admission does not speak: the EXEC-RESPONSE layer
+            # does, with the canonical delivery.
             self.assertEqual(reply.get("decision"), "block", reply)
-            self.assertIn("PROTOCOL ADMISSION", reply["reason"])
-            self.assertNotIn("EXEC-RESPONSE-01 gate", reply["reason"])
+            self.assertIn("SAIPEN canonical delivery", reply["reason"])
+            self.assertIn("OPERATOR ACTION", reply["reason"])
+            self.assertNotIn("PROTOCOL ADMISSION", reply["reason"])
+            # The SAME reply under STRICT never reaches that layer: with no
+            # provable admission the first layer refuses, in its own words.
+            HAC.set_authority_mode("strict", world_home)
+            strict_reply = guard(
+                project,
+                {
+                    "hook_event_name": "Stop",
+                    "stop_hook_active": False,
+                    "last_assistant_message": VALID_REPLY,
+                },
+                world_home,
+                authority=authority,
+            )
+            self.assertEqual(strict_reply.get("decision"), "block", strict_reply)
+            self.assertIn("PROTOCOL ADMISSION", strict_reply["reason"])
+            self.assertNotIn("SAIPEN canonical delivery", strict_reply["reason"])
 
 
 class CapabilityMatrixTests(unittest.TestCase):
@@ -1138,12 +1582,21 @@ class CapabilityMatrixTests(unittest.TestCase):
                     self.assertIn(token, artifact, f"{name}: {token_key} not in its artifact")
 
     def test_claude_is_mechanical_at_the_prompt_boundary_and_not_universal(self):
+        # T-1623 replaced the UNAVAILABLE claim this test used to pin. The claim
+        # is still not a free pass, so its teeth move rather than disappear: the
+        # host that owns the mechanical boundary must name the separated
+        # authority that decides it and the client that recovers it, and no
+        # other host may claim the same boundary without an evidence channel.
         claude = self.adapters["claude"]
-        self.assertEqual(claude["admission_enforcement"], "UNAVAILABLE")
+        self.assertEqual(claude["admission_enforcement"], "MECHANICAL")
         self.assertTrue(claude["admission_required"])
         self.assertEqual(claude["pre_output_interception"], "PROMPT_LEVEL")
         self.assertEqual(claude["stop_output_interception"], "MECHANICAL")
         self.assertIn("separated host authority", claude["admission_enforcement_note"])
+        broker = ROOT / claude["admission_authority"]
+        self.assertTrue(broker.is_file(), broker)
+        self.assertIn("host-authority", broker.read_text(encoding="utf-8"))
+        self.assertTrue((ROOT / claude["admission_recovery"]).is_file())
 
     def test_no_other_host_claims_admission_without_an_evidence_channel(self):
         for name, entry in self.adapters.items():

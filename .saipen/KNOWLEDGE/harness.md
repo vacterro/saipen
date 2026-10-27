@@ -39,7 +39,7 @@ modules (`python -m unittest tools.test_x`) is not a run of it: those import
 dotted, skip discovery order and never see the rest of the family, and waves
 closed green that way while the family carried dozens of red tests.
 
-So a transition into SHIP in this repository requires, in the ticket's current
+Under the legacy default, a transition into SHIP requires, in the ticket's current
 VERIFY cycle, an anchored `CORE-UNIT-EVIDENCE` line written by
 `core_unit.py evidence`. It cites a JSON record under
 `.saipen/evidence/core-unit/` by path and sha256; the gate refuses a record
@@ -56,6 +56,26 @@ The baseline only shrinks freely: `baseline` refuses to add a red id without
 `--grow "<reason>"`, and the reason is stored in the file. A run that fixed an
 inherited red reports it under `fixed`; shrink the baseline in the same Work.
 Projects without `tools/saipen_engine/test_runner.py` are untouched.
+
+This repository now explicitly selects `tools/verification_policy.json`'s
+focused-ticket policy (T-1828). Reviewed local member tickets may use
+`python tools/core_unit.py focused T-### --pattern test_x.py`, and related
+edits collect in pending cohorts. That does not publish them. The complete
+current final batch still needs full-family evidence before publication;
+independent other-family/whole-suite/release acceptance stays required.
+`saipen/phases/verify.md`, `saipen/phases/ship.md` and the existing engine own
+the invariant; this memory is a locator, not an exception or new authority.
+
+Canonical CI, the local suite and installed tools share the existing full unit
+engine (T-1837): `python -B tools/test_runner.py --family unit --jobs 1`.
+This command creates no lifecycle citation and admits no baseline-red allowance.
+`--jobs N` preserves the complete discovery and exact partition proof. A
+reduced 46-control corpus measured two workers faster than one and four slower
+than two on Windows and Linux; it does not size production/CI memory or the
+1.3 GiB durable-state copy, so the workflow keeps one until its host is measured.
+Evidence: `.saipen/evidence/T-1837-ci-parity/concurrency-windows.json` and
+`concurrency-linux.json`. T-1836's `impact ... --plan` performs analysis only;
+unknown dependencies require FULL, and executed IMPACT remains focused evidence.
 
 `tools/validate.py --gate <name>` narrows the gate (`core`, `ship`,
 `collect:<sub>`). `tests/validate.sh` / `tests/validate.ps1` are the portable

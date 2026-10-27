@@ -1,14 +1,14 @@
 {
-  "ok": true,
-  "code": "PASS",
-  "exit": 0,
-  "source_hash": "742a792f91dcc21ffc8f6d657e31a0cec49866bef18131a267ccf21c0e1cbe7a",
-  "installed_hash": "742a792f91dcc21ffc8f6d657e31a0cec49866bef18131a267ccf21c0e1cbe7a",
+  "ok": false,
+  "code": "HOST_CHAIN_FAILED",
+  "exit": 1,
+  "source_hash": "8cd916664244d868b4bc53ac3352d54db5b447ca9d3915a92176421be426e3bd",
+  "installed_hash": "8cd916664244d868b4bc53ac3352d54db5b447ca9d3915a92176421be426e3bd",
   "loaded_hashes": [
-    "742a792f91dcc21ffc8f6d657e31a0cec49866bef18131a267ccf21c0e1cbe7a"
+    "8cd916664244d868b4bc53ac3352d54db5b447ca9d3915a92176421be426e3bd"
   ],
   "binding_roots": [
-    "V:\\_TEMP_\\t1320-opencode-fleet-bezxec39\\FastPrompter-product"
+    "V:\\_TEMP_\\t1320-opencode-fleet-667mzzcs\\FastPrompter-product"
   ],
   "requests": [
     {

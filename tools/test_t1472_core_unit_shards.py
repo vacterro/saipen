@@ -176,7 +176,7 @@ class RealShardedRunTests(unittest.TestCase):
             "    def test_deep(self):\n        pass\n",
             encoding="utf-8",
         )
-        family = TestFamily(core_unit.FAMILY_NAME, DECLARED_SHAPE, 120)
+        family = TestFamily(core_unit.FAMILY_NAME, DECLARED_SHAPE, 120, environment_tools=())
         patcher = mock.patch.object(core_unit, "family", return_value=family)
         patcher.start()
         self.addCleanup(patcher.stop)

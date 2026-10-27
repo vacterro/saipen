@@ -7,6 +7,7 @@ from it, but must never recover missing facts by scraping English prose.
 from __future__ import annotations
 
 import json
+import re
 from pathlib import Path
 from typing import Any
 
@@ -58,3 +59,20 @@ def require_string_list(container: dict[str, Any], key: str) -> tuple[str, ...]:
     if not isinstance(value, list) or any(not isinstance(item, str) for item in value):
         raise RegistryError(f"REGISTRY.json `{key}` must be a string array")
     return tuple(value)
+
+
+def command_reference_path(protocol_dir: Path | str | None = None) -> Path:
+    """Locate the human inventory for validators, never for command dispatch.
+
+    Schema-1 installations predating the split keep COMMANDS.md. An explicit
+    projection must exist inside the protocol; it never falls back silently.
+    """
+    base = registry_path(protocol_dir).parent
+    specification = require_mapping(load_registry(base), "commands")
+    name = specification.get("reference_document", "COMMANDS.md")
+    if not isinstance(name, str) or not re.fullmatch(r"[A-Za-z][A-Za-z0-9_.-]*\.md", name):
+        raise RegistryError("commands.reference_document must be a Markdown filename")
+    target = base / name
+    if not target.is_file() or target.is_symlink() or target.resolve().parent != base.resolve():
+        raise RegistryError(f"command reference is absent or outside the protocol: {name}")
+    return target

@@ -12,14 +12,16 @@ This module is the ONE owner of the classification:
 
   NON-RELEASE (machine-local mechanics; never source, never release input)
       .saipen/locks/**, .saipen/cache/**, .saipen/recovery/ops/**,
-      .saipen/snapshots/**
+      .saipen/recovery/settled-index/**, .saipen/recovery/board-terminal.json,
+      .saipen/recovery/legacy-staged-swept, .saipen/snapshots/**
 
   DURABLE (protocol/evidence history the contract requires to survive)
       .saipen/evidence/**, .saipen/archive/**, .saipen/intake/**,
       .saipen/recovery/log-detail/**, .saipen/recovery/board-compaction/**,
       .saipen/recovery/conformance/**, .saipen/recovery/settled/**,
       .saipen/recovery/log-normalize/**, .saipen/recovery/log-foreign-tail/**,
-      .saipen/extensions/**, and the canonical checkpoint files themselves.
+      .saipen/recovery/board-scrub/**, .saipen/extensions/**, and the canonical
+      checkpoint files themselves.
 
 The policy is deliberately NOT `.saipen/**`: a blanket exclusion would drop
 the durable half. `.gitignore` is also not a repair -- it does not untrack a
@@ -39,6 +41,19 @@ NON_RELEASE_PATTERNS: tuple[tuple[str, str], ...] = (
     (".saipen/locks/", "os-writer-lock"),
     (".saipen/cache/", "liveness-cache"),
     (".saipen/recovery/ops/", "operation-journal-scratch"),
+    # SRC-026:R009 (T-1304): every settlement now advances this projection.
+    # It is rebuilt from the settled receipts beside it and carries a
+    # directory-mtime token of THIS machine, so a tracked copy is churn on
+    # every command and stale the moment it is cloned. The receipts it is
+    # derived from (`.saipen/recovery/settled/`) stay durable.
+    (".saipen/recovery/settled-index/", "rebuildable-projection"),
+    # T-1673: the terminal baseline of the newest committed BOARD write. Every
+    # such commit rewrites it, so a tracked copy is churn; a checkout without
+    # it only leaves the BOARD-only rule unavailable until the next operation.
+    (".saipen/recovery/board-terminal.json", "terminal-baseline"),
+    # T-1667: the settled ledger of THIS checkout was swept once for staged
+    # bytes older than the cleanup queue; a clone sweeps its own.
+    (".saipen/recovery/legacy-staged-swept", "maintenance-marker"),
     (".saipen/snapshots/", "rebuildable-snapshot"),
 )
 
@@ -49,10 +64,12 @@ DURABLE_PROTECTED: tuple[str, ...] = (
     ".saipen/intake/",
     ".saipen/recovery/log-detail/",
     ".saipen/recovery/board-compaction/",
+    ".saipen/recovery/board-compaction-lineage/",
     ".saipen/recovery/conformance/",
     ".saipen/recovery/settled/",
     ".saipen/recovery/log-normalize/",
     ".saipen/recovery/log-foreign-tail/",
+    ".saipen/recovery/board-scrub/",
     ".saipen/extensions/",
 )
 
@@ -166,6 +183,9 @@ BYTE_BOUND_PATTERNS: tuple[tuple[str, str], ...] = (
     # the copy, and `quarantine-log-tail` records its sha256.
     (".saipen/recovery/log-normalize/**", ".saipen/recovery/log-normalize/op/LOG.md"),
     (".saipen/recovery/log-foreign-tail/**", ".saipen/recovery/log-foreign-tail/op/LOG.md"),
+    # A BOARD scrub keeps the closed rows it pruned here; its DEC names the
+    # copy and records its sha256.
+    (".saipen/recovery/board-scrub/**", ".saipen/recovery/board-scrub/op/BOARD.md"),
 )
 
 

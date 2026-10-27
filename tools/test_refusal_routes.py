@@ -194,7 +194,7 @@ class BlockedProjectNamesItsExitTests(unittest.TestCase):
         self.assertFalse(verdict["admitted"])
         self.assertEqual(verdict["code"], "WAIT_BLOCKED")
         self.assertEqual(
-            verdict["canonical_next_command"], "saipen recover resolve-blocker <decision>"
+            verdict["canonical_next_command"], "saipen recover resolve-blocker <SRC-###>"
         )
         self.assertIn("BLOCKED_EXTERNAL", verdict["detail"])
 

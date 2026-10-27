@@ -60,6 +60,12 @@ IS_WINDOWS = os.name == "nt"
 
 sys.path.insert(0, str(ROOT / "tools"))
 
+from test_hermetic_env import isolate_host_session, nested_run  # noqa: E402
+
+
+def setUpModule() -> None:
+    isolate_host_session()
+
 
 def _surface_files() -> list[str]:
     """The runtime surface, read from the ONE owner (saipen/MANIFEST.json).
@@ -541,7 +547,7 @@ class NeighbouringSuitesStayGreenTests(unittest.TestCase):
             "test_runtime_generation_identity",
         ]
         suite = unittest.TestSuite(loader.loadTestsFromName(name) for name in names)
-        with open(os.devnull, "w") as sink:
+        with open(os.devnull, "w") as sink, nested_run():
             result = unittest.TextTestRunner(stream=sink, verbosity=0).run(suite)
         broken = [str(f[0]) for f in result.failures + result.errors]
         self.assertTrue(result.wasSuccessful(), broken)

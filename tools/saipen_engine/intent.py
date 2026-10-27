@@ -70,7 +70,7 @@ def _validated_prepare_context(root: Path) -> tuple[dict | None, dict | None]:
     from . import codec
     from .fast_check import validate_project
     from .paths import parse_identity_content
-    from .state import is_absolute_home, parse_state_or_error, persisted_home_error
+    from .state import home_refusal, is_absolute_home, parse_state_or_error
 
     problem = codec.checkpoint_preflight(root)
     if problem is not None:
@@ -106,9 +106,9 @@ def _validated_prepare_context(root: Path) -> tuple[dict | None, dict | None]:
             "code": "HOME_REQUIRED",
             "message": f"STATE.saipen_home must be absolute, got {home!r}",
         }
-    home_problem = persisted_home_error(home)
-    if home_problem is not None:
-        return None, {"ok": False, "code": "HOME_REQUIRED", "message": home_problem}
+    home_refused = home_refusal(home)
+    if home_refused is not None:
+        return None, {"ok": False, "code": home_refused[0], "message": home_refused[1]}
     identity_path = root / ".saipen/IDENTITY.md"
     if identity_path.exists():
         try:
@@ -1397,6 +1397,28 @@ def _execute_crew_action(
     if action_type == "SHIP":
         from .release import ReleaseRefusal, execute_release, plan_release
 
+        def _record_ship_attempt(verdict: dict, *, ticket: str = "", mode: str = "") -> dict:
+            """D-06: the attempt is logged at the CALLER, once per real attempt.
+
+            `_execute_crew_action` is reached from the autonomous loop as well
+            as from tests; a preview must leave nothing behind, and a ledger
+            failure must never change the release verdict.
+            """
+            if dry_run:
+                return verdict
+            from .release_attempt import record_result
+
+            logged = record_result(
+                root,
+                invocation="ship",
+                result=verdict,
+                ticket=ticket,
+                mode=mode,
+            )
+            if not logged.get("ok"):
+                verdict = {**verdict, "attempt_record_error": logged.get("error", "unknown")}
+            return verdict
+
         try:
             release_plan = plan_release(
                 root,
@@ -1406,8 +1428,15 @@ def _execute_crew_action(
                 current_agent=agent,
             )
         except ReleaseRefusal as exc:
-            return {"ok": False, "code": exc.code, "message": exc.detail}
-        return execute_release(root, release_plan)
+            return _record_ship_attempt(
+                {"ok": False, "code": exc.code, "message": exc.detail}
+            )
+        released = execute_release(root, release_plan)
+        return _record_ship_attempt(
+            released,
+            ticket=str(getattr(release_plan, "ticket_id", "") or ""),
+            mode=str(getattr(release_plan, "mode", "") or ""),
+        )
     if action_type == "CONTINUE_CORE":
         return {
             "ok": False,

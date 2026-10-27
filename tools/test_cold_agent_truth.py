@@ -166,6 +166,47 @@ updated: "2026-09-14T10:00:00Z"
         self.assertEqual(out["handoff_status"], "CONFLICT")
         self.assertEqual(out["next_action"], "PHASE VERIFY T-9")
 
+    def test_large_historical_state_body_does_not_hide_complete_frontmatter(self) -> None:
+        from saipen_engine.cold_truth import STATE_READ_CAP
+
+        path = self.root / ".saipen/STATE.md"
+        original = path.read_bytes()
+        path.write_bytes(original + ("historical notes: \u00f5\n" * 2000).encode("utf-8"))
+        before = path.read_bytes()
+        out = orientation_projection(self.root)
+        self.assertTrue(out["ok"], out)
+        self.assertEqual((out["phase"], out["task"], out["last_event"]), ("VERIFY", "T-9", 205))
+        self.assertEqual(out["read_budget"]["sources"]["STATE.md"], STATE_READ_CAP)
+        self.assertTrue(out["read_budget"]["state_body_omitted"])
+        self.assertTrue(out["read_only"])
+        self.assertEqual(path.read_bytes(), before)
+
+    def test_large_body_cannot_hide_duplicate_authority_fields(self) -> None:
+        path = self.root / ".saipen/STATE.md"
+        raw = path.read_bytes().replace(b"phase: VERIFY", b"phase: VERIFY\nphase: DONE", 1)
+        path.write_bytes(raw + b"historical data\n" * 2000)
+        out = orientation_projection(self.root)
+        self.assertFalse(out["ok"], out)
+        self.assertIn("duplicate STATE field", out["diagnosis"])
+
+    def test_partial_closing_fence_at_cap_cannot_validate_a_malformed_state(self) -> None:
+        from saipen_engine.cold_truth import STATE_READ_CAP
+
+        path = self.root / ".saipen/STATE.md"
+        header = path.read_bytes().rsplit(b"---", 1)[0]
+        raw = header + b" " * (STATE_READ_CAP - len(header) - 4) + b"\n---invalid\n"
+        self.assertEqual(raw[:STATE_READ_CAP][-3:], b"---")
+        path.write_bytes(raw + b"historical data\n" * 2000)
+        out = orientation_projection(self.root)
+        self.assertFalse(out["ok"], out)
+
+    def test_valid_multibyte_body_can_be_cut_without_decoding_the_omitted_body(self) -> None:
+        path = self.root / ".saipen/STATE.md"
+        path.write_bytes(path.read_bytes() + "\U0001f41e".encode("utf-8") * 5000)
+        out = orientation_projection(self.root)
+        self.assertTrue(out["ok"], out)
+        self.assertEqual(out["task"], "T-9")
+
     def test_generated_handoff_has_complete_provenance(self) -> None:
         row = self.handoff()
         self.assertEqual(

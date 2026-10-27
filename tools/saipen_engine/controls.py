@@ -1903,7 +1903,17 @@ def undo_confirm(
                 },
             )
     except PermissionError as exc:
-        return _refuse("WRITER_BUSY", str(exc))
+        # T-1827 (SRC-282:R002/R010): name the recorded holder and the
+        # orphan-cleanup remedy; `str(exc)` alone is just the busy token.
+        from .lock import writer_busy_payload
+
+        busy = writer_busy_payload(exc)
+        return _refuse(
+            "WRITER_BUSY",
+            busy["detail"],
+            remediation=busy["remediation"],
+            **({"holder": busy["holder"]} if "holder" in busy else {}),
+        )
     if not commit.get("ok"):
         code = commit.get("code", "VALIDATION_FAILED")
         return _refuse(

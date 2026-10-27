@@ -183,6 +183,47 @@ STATUS_INVALID = "INVALID_RECEIPT"
 # week-old green stamp.
 FRESHNESS_WINDOW_SECONDS = 24 * 3600
 
+# T-1823: TYPED STALE reasons. Every STALE_* status travels with the closed
+# code of the condition that produced it, so a consumer never has to read a
+# human sentence -- least of all for absence of a word -- to decide what the
+# staleness MEANS. The distinction that matters is recoverability by the one
+# canonical cure (`saipen validate`): a receipt that merely aged or lost its
+# source binding is re-measurable from current bytes, while a fabricated
+# future timestamp and an unavailable identity are integrity/evidence
+# boundaries that re-running the validator cannot establish and must never
+# auto-cure.
+STALE_REASON_SOURCE_BINDING_STALE = "source-binding-stale"
+STALE_REASON_AGED_BEYOND_WINDOW = "aged-beyond-freshness-window"
+STALE_REASON_CHECKPOINT_HASHES_STALE = "checkpoint-hashes-stale"
+STALE_REASON_REMEDIATION_EVIDENCE_ADVANCED = "remediation-evidence-advanced"
+STALE_REASON_FUTURE_TIMESTAMP = "future-timestamp-fabricated"
+STALE_REASON_SOURCE_IDENTITY_UNAVAILABLE = "source-identity-unavailable"
+
+#: The reasons the canonical validator re-run can genuinely settle: the
+#: receipt is a stale VIEW of the current tree, not an untrustworthy one.
+STALE_REASONS_RECOVERABLE = frozenset(
+    {
+        STALE_REASON_SOURCE_BINDING_STALE,
+        STALE_REASON_AGED_BEYOND_WINDOW,
+        STALE_REASON_CHECKPOINT_HASHES_STALE,
+        STALE_REASON_REMEDIATION_EVIDENCE_ADVANCED,
+    }
+)
+
+
+def stale_recoverable(status: dict | None) -> bool:
+    """Whether THIS conformance status is a staleness the validator re-run cures.
+
+    Single owner of the question for every consumer (the Auto-Doctor is the
+    only one today). An unknown or absent `stale_reason` is NOT recoverable:
+    the typed field is the only accepted evidence, so a payload that carries
+    no code -- or carries one this version does not know -- fails closed
+    instead of inheriting authority from a sentence.
+    """
+    if not isinstance(status, dict):
+        return False
+    return status.get("stale_reason") in STALE_REASONS_RECOVERABLE
+
 
 class ReceiptDiscoveryError(ValueError):
     """A canonical receipt candidate exists but cannot be trusted.
@@ -232,28 +273,48 @@ def _safe_filename_component(value: str) -> str:
     return "".join(result)
 
 
-def _strict_iso_utc(value) -> str:
-    """Strict ISO-8601 UTC (Z or +00:00, utcoffset == 0), else ''."""
+def _strict_utc_datetime(value) -> datetime.datetime | None:
+    """The ONE strict ISO-8601 UTC parser for conformance evidence (T-1891).
+
+    Returns the aware instant a stamp denotes, or None when the stamp is not
+    an aware UTC one. Surrounding whitespace is tolerated because a padded
+    stamp still carries one unambiguous instant; what must not exist is a
+    second opinion about that instant.
+
+    Why this function exists at all: `_strict_iso_utc` used to strip and
+    parse, while `conformance_status` parsed the RAW string for its freshness
+    arithmetic inside `except Exception: pass`. A padded stamp therefore
+    passed validation and then failed ageing, leaving `age_seconds = 0` --
+    maximally fresh -- so `FRESHNESS_WINDOW_SECONDS` could never fire. A
+    measured 6.81-year-old receipt classified CURRENT_PASS. Both consumers now
+    call this one function, so no code path can hold a different opinion about
+    when a receipt was written.
+    """
     if not isinstance(value, str):
-        return ""
+        return None
     text = value.strip()
     if not text:
-        return ""
+        return None
     try:
         dt = datetime.datetime.fromisoformat(text.replace("Z", "+00:00"))
     except ValueError:
-        return ""
+        return None
     if dt.utcoffset() is None or dt.utcoffset().total_seconds() != 0:
-        return ""
-    return dt.strftime("%Y-%m-%dT%H:%M:%SZ")
+        return None
+    return dt
+
+
+def _strict_iso_utc(value) -> str:
+    """Strict ISO-8601 UTC (Z or +00:00, utcoffset == 0), else ''."""
+    dt = _strict_utc_datetime(value)
+    return dt.strftime("%Y-%m-%dT%H:%M:%SZ") if dt is not None else ""
 
 
 def _future_beyond_skew(ts_iso: str, now: datetime.datetime | None = None) -> bool:
     """§9: a timestamp in the future beyond the skew allowance is fabricated."""
-    norm = _strict_iso_utc(ts_iso)
-    if not norm:
+    dt = _strict_utc_datetime(ts_iso)
+    if dt is None:
         return False
-    dt = datetime.datetime.fromisoformat(norm.replace("Z", "+00:00"))
     ref = now or datetime.datetime.now(datetime.timezone.utc)
     return (dt - ref).total_seconds() > MAX_CLOCK_SKEW_SECONDS
 
@@ -802,13 +863,14 @@ def _update_receipt_index(
     (prior_receipt_dir_mtime_ns), delegate to the bounded conformance lineage
     advance. On bounded success the v2 lineage head and per-gate locators are
     written by the lineage module and this v1 index pass returns without
-    touching them. On refusal with a live v2 head the v1 index pass also
-    returns without touching anything: the lineage authority already exists,
-    the refusal means the head no longer represents the namespace the caller
-    saw (crash between receipt write and head publish, or an out-of-band
-    sibling), and the only honest recovery is the canonical deep rebuild --
-    this legacy writer must never clobber the v2 head/locator pair with a v1
-    bootstrap document (zero mutation on refusal).
+    touching them. On refusal with a live v2 head the lineage authority already
+    exists and the refusal means the head no longer represents the namespace
+    the caller saw (crash between receipt write and head publish, or an
+    out-of-band sibling). This legacy writer still never clobbers the v2
+    head/locator pair with a v1 bootstrap document; instead it runs the one
+    canonical deep rebuild (T-1898), which is the only honest recovery and the
+    only thing that gets later readers back onto the bounded path. If that
+    rebuild cannot publish, nothing is written at all.
     """
     root = Path(root)
     if prior_receipt_dir_mtime_ns is not None:
@@ -824,6 +886,23 @@ def _update_receipt_index(
         ):
             return
         if _cl._read_head(root) is not None:
+            # T-1898: the bounded fold refused because the head no longer
+            # describes the namespace -- a crash between the receipt write and
+            # the head publish, or an out-of-band sibling. Returning here left
+            # that head stale FOREVER: every later bounded lookup discarded
+            # itself, so `conformance.latest_receipt` fell back to
+            # `_receipt_content_inventory` and hashed the whole receipt
+            # namespace (measured on this repository: 3937 files / 8.6 MB /
+            # 1.49 s) on every `saipen status`, and no field reported it.
+            #
+            # This IS a write path (it is about to publish projection
+            # documents), and the canonical deep rebuild is exactly the
+            # "honest recovery" the docstring above names. Run it so the NEXT
+            # reader gets the bounded path back. It folds actual bytes; a
+            # corrupt sibling makes it refuse and publish nothing, and a head
+            # that is already current costs one stat.
+            if _cl.repair_stale_head(root):
+                return
             return
     appended = _receipt_matches_append(root, gate, receipt_id, timestamp, receipt_path)
     proof = _load_lineage_index(root)
@@ -1270,7 +1349,17 @@ _WORK_RE = re.compile(r"\AT-\d+\Z")
 
 
 def _parse_utc(value: object) -> datetime.datetime | None:
-    """Strict UTC parse of a receipt timestamp; None when unusable."""
+    """UTC instant a receipt timestamp denotes; None when unusable.
+
+    T-1891: one parser, not a third. A naive stamp is still read as UTC here
+    because this helper also orders reverify evidence, whose `created_at` may
+    predate the strict converter; the UTC-ness a receipt must PROVE is decided
+    by `_strict_utc_datetime` in `_strict_validate_receipt`, which runs before
+    this is ever consulted for a receipt.
+    """
+    dt = _strict_utc_datetime(value)
+    if dt is not None:
+        return dt
     if not isinstance(value, str) or not value.strip():
         return None
     try:
@@ -1417,6 +1506,7 @@ def conformance_status(
         return {
             "status": STATUS_STALE_FAIL,
             "gate": gate,
+            "stale_reason": STALE_REASON_FUTURE_TIMESTAMP,
             "reason": "conformance receipt timestamp is in the future beyond "
             "allowed skew (fabricated)",
             "receipt": receipt,
@@ -1431,6 +1521,7 @@ def conformance_status(
         return {
             "status": STATUS_STALE_FAIL,
             "gate": gate,
+            "stale_reason": STALE_REASON_SOURCE_IDENTITY_UNAVAILABLE,
             "reason": (
                 "current source identity is unavailable (empty source_head/"
                 "source_tree_fingerprint) -- the receipt cannot be proven bound "
@@ -1444,20 +1535,33 @@ def conformance_status(
         and receipt.get("source_tree_fingerprint") == current_fp
     )
     is_pass = receipt.get("verdict") == "PASS"
-    age_seconds = 0
-    try:
-        rdt = datetime.datetime.fromisoformat(receipt["timestamp_utc"].replace("Z", "+00:00"))
-        age_seconds = (ref - rdt).total_seconds()
-    except Exception:
-        pass
+    # T-1891: the SAME parser that validated the stamp computes its age. This
+    # used to parse the raw string inside `except Exception: pass`, so a stamp
+    # `_strict_iso_utc` accepted by stripping (a padded one) failed here and
+    # left age_seconds at 0 -- maximally fresh, window unreachable. The strict
+    # validator above has already proven this stamp parses, so a None here is
+    # an internal contradiction, never a receipt to age at zero.
+    rdt = _strict_utc_datetime(receipt.get("timestamp_utc"))
+    if rdt is None:
+        return {
+            "status": STATUS_INVALID,
+            "gate": gate,
+            "reason": "receipt timestamp parsed for validation but not for its age",
+            "receipt": receipt,
+            "validator": info.as_dict(),
+        }
+    age_seconds = (ref - rdt).total_seconds()
+    stale_reason = None
     if not bound:
         status = STATUS_STALE_PASS if is_pass else STATUS_STALE_FAIL
+        stale_reason = STALE_REASON_SOURCE_BINDING_STALE
         reason = (
             "conformance receipt is bound to a different source identity "
             "than the current checkpoint"
         )
     elif age_seconds > FRESHNESS_WINDOW_SECONDS:
         status = STATUS_STALE_PASS if is_pass else STATUS_STALE_FAIL
+        stale_reason = STALE_REASON_AGED_BEYOND_WINDOW
         reason = (
             f"conformance receipt is {int(age_seconds // 3600)}h old (older than "
             f"the {int(FRESHNESS_WINDOW_SECONDS // 3600)}h freshness window)"
@@ -1471,6 +1575,7 @@ def conformance_status(
             cp_err = _checkpoint_hash_mismatch(receipt, root)
             if cp_err:
                 status = STATUS_STALE_PASS
+                stale_reason = STALE_REASON_CHECKPOINT_HASHES_STALE
                 reason = f"receipt checkpoint hashes invalid: {cp_err}"
             else:
                 status = STATUS_CURRENT_PASS
@@ -1488,6 +1593,7 @@ def conformance_status(
             advanced = _remediation_evidence_after(receipt, root)
             if advanced:
                 status = STATUS_STALE_FAIL
+                stale_reason = STALE_REASON_REMEDIATION_EVIDENCE_ADVANCED
                 reason = (
                     f"remediation evidence {advanced['receipt_id']} for "
                     f"{advanced['work']} was executed after this receipt "
@@ -1501,6 +1607,9 @@ def conformance_status(
     return {
         "status": status,
         "gate": gate,
+        # T-1823: the typed condition travels beside the status; None for a
+        # CURRENT_*/NOT_RUN/INVALID verdict, which is not a staleness at all.
+        "stale_reason": stale_reason,
         "reason": reason,
         "receipt": receipt,
         "validator": info.as_dict(),
@@ -1629,10 +1738,35 @@ def conformance_decision(
                 "state or runtime changes. Missing findings require diagnostic repair."
             ),
         }
+        # SRC-276 R005 / F-11: ENGINEERING_REQUIRED is an ENGINEER'S obligation,
+        # and it used to travel to the host as one "needs you" item beside a
+        # genuinely operator-gated authority grant. The typed split is derived
+        # here -- never invented by the host -- and the operator count stays
+        # zero unless a witnessed decision actually names a subject.
+        #
+        # Only a COMPLETE finding set can be partitioned. An unavailable set
+        # publishes no ownership at all: zeroed counters over findings nobody
+        # read would be a fabricated measurement, not an empty one.
+        if blocking.get("status") == "complete":
+            try:
+                from . import finding_ownership
+
+                ownership = finding_ownership.partition(
+                    [item for item in (blocking.get("problems") or []) if isinstance(item, dict)]
+                )
+            except Exception:  # a projection never blocks the verdict
+                ownership = None
+            if ownership is not None:
+                diagnostic["ownership"] = ownership
+                diagnostic["engine_work_count"] = ownership["engine_work_count"]
+                diagnostic["operator_action_count"] = ownership["operator_action_count"]
     return {
         "status": kind,
         "gate": status.get("gate", gate),
         "healthy": healthy,
+        # T-1823: the typed staleness code, so a repair consumer decides from a
+        # value -- never from the prose in `reason`.
+        "stale_reason": status.get("stale_reason"),
         # SRC-085 M3: the routing meaning of this status, machine-readable, so
         # "CURRENT_FAIL" next to "CONTINUE" is explained by a value rather than
         # by historical LOG prose.

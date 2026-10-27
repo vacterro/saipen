@@ -59,9 +59,10 @@ from freshness import compute_role_revision, compute_source_identity
 from saipen_engine.journal import SETTLED_DIR
 from saipen_engine.knowledge import validate_knowledge, write_index
 from saipen_engine.retirement import bound_artifact_errors, load_ticket_retirement
-from saipen_engine.paths import project_lineage_identity
+from saipen_engine.paths import project_lineage_identity, safe_atomic_write_bytes
 from saipen_engine.subs import outbox_rel
 from saipen_engine.release_contract import locale_readme_paths
+from saipen_engine.registry import command_reference_path
 
 if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8")
@@ -85,7 +86,7 @@ REGISTRY = "saipen/REGISTRY.json"
 INDEX = "saipen/INDEX.md"
 ACTIVATION = "saipen/ACTIVATION_BLOCK.md"
 CONVERGE = "saipen/CONVERGE.md"
-COMMANDS = "saipen/COMMANDS.md"
+COMMANDS = command_reference_path(HOME / "saipen").relative_to(HOME).as_posix()
 STORAGE = "saipen/STORAGE.md"
 STORAGE_REGISTRY = ".saipen/STORAGE_REGISTRY.json"
 RUNTIME_SURFACE = "tools/saipen_engine/runtime_surface.py"
@@ -376,6 +377,7 @@ def release_ledger_probe(source: Path, destination: Path) -> str | None:
         ("init", "-q"),
         ("config", "user.name", "SAIPEN ledger probe"),
         ("config", "user.email", "ledger-probe@example.invalid"),
+        ("config", "core.longpaths", "true"),
         # The committed tree, not just present: the runtime
         # manifest now requires its files to be tracked, and a probe
         # whose repository contains one empty commit has every file
@@ -679,6 +681,9 @@ def warn_ownership_probe(source: Path, destination: Path) -> str | None:
     tree = destination / "warn-ownership"
     shutil.copytree(source, tree)
     rebind_synthetic_milestones(tree)
+    fresh_error = fresh_protocol_fixture(tree, destination, "warn-ownership")
+    if fresh_error:
+        return fresh_error
 
     baseline_path = tree / "tools" / "release_ledger_baseline.json"
     baseline = json.loads(baseline_path.read_text(encoding="utf-8"))
@@ -694,6 +699,7 @@ def warn_ownership_probe(source: Path, destination: Path) -> str | None:
     # ownership fixture a complete synthetic release ledger so that the
     # release validator does not mask its actual red control.
     version = (tree / "VERSION").read_text(encoding="utf-8").strip()
+    (tree / DIGEST).parent.mkdir(parents=True, exist_ok=True)
     (tree / DIGEST).write_text(
         f"done: ship v{version} (synthetic warn-ownership fixture)\n"
         "remaining: nothing\n"
@@ -705,6 +711,7 @@ def warn_ownership_probe(source: Path, destination: Path) -> str | None:
         ("init", "-q"),
         ("config", "user.name", "SAIPEN warn probe"),
         ("config", "user.email", "warn-probe@example.invalid"),
+        ("config", "core.longpaths", "true"),
         ("add", "-A"),
         ("commit", "--allow-empty", "-m", "warn ownership probe"),
     ):
@@ -750,23 +757,41 @@ def warn_ownership_probe(source: Path, destination: Path) -> str | None:
             errors="replace",
         )
 
-    # T-1359: and the ticket this probe files needs the allocation event
-    # CORE-003 requires of every BOARD record, or the control leg fails on the
-    # fixture's own hand-filed line instead of on warn ownership.
-    alloc_error = journal_probe_allocation(tree, WARN_PROBE_TICKET)
-    if alloc_error:
-        return alloc_error
-
-    # T-1247: file the ownership-neutral line first, so CONTROL, RED and GREEN
-    # all measure a board of the same size and the only thing the green leg
-    # changes is which slug that line names.
     board = tree / ".saipen" / "BOARD.md"
-    neutral_board = warn_probe_board(
-        board.read_text(encoding="utf-8-sig"), WARN_PROBE_NEUTRAL_SLUG
-    )
-    if neutral_board is None:
-        return "BOARD copy has no ## BLOCKED section to host the owning ticket"
-    board.write_text(neutral_board, encoding="utf-8", newline="\n")
+    neutral_field = f"`{WARN_PROBE_NEUTRAL_SLUG.ljust(WARN_PROBE_SLUG_FIELD)}`"
+    if (destination / "warn-ownership-history").is_dir():
+        # Native allocation supplies real operation provenance. No historical
+        # DONE proof or invented allocation operation enters this project.
+        def native(*args):
+            result = subprocess.run(
+                [sys.executable, str(tree / "tools/saipen.py"), "--project-root", str(tree),
+                 "--agent", "probe", *args, "--json"], cwd=tree,
+                env=hermetic_child_env(), capture_output=True, text=True,
+                encoding="utf-8", errors="replace", timeout=120,
+            )
+            value = json.loads(result.stdout)
+            if result.returncode or not value.get("ok"):
+                raise ValueError(f"native warn fixture refused: {value}")
+            return value
+
+        created = native("ticket", "add", "P2", f"Own persistent {neutral_field} warning",
+                         "--verify", "the warn ownership control passes while this owner lives")
+        native("ticket", "block", created["ticket"],
+               "warn-ownership-probe fixture -- permanently held")
+        neutral_board = board.read_text(encoding="utf-8-sig")
+    else:
+        # Keep small legacy fixtures usable without a native runtime.
+        alloc_error = journal_probe_allocation(tree, WARN_PROBE_TICKET)
+        if alloc_error:
+            return alloc_error
+        neutral_board = warn_probe_board(
+            board.read_text(encoding="utf-8-sig"), WARN_PROBE_NEUTRAL_SLUG
+        )
+        if neutral_board is None:
+            return "BOARD copy has no ## BLOCKED section to host the owning ticket"
+        board.write_text(neutral_board, encoding="utf-8", newline="\n")
+    if neutral_board.count(neutral_field) != 1:
+        return "warn fixture does not have exactly one neutral owner field"
 
     control = validate()
     if control.returncode:
@@ -839,8 +864,7 @@ def warn_ownership_probe(source: Path, destination: Path) -> str | None:
     # slug token moves: the line, its position and the board's byte size are
     # the ones CONTROL and RED already measured (T-1247).
     owned_board = neutral_board.replace(
-        warn_probe_ticket(WARN_PROBE_NEUTRAL_SLUG),
-        warn_probe_ticket(owner_slug),
+        neutral_field, f"`{owner_slug.ljust(WARN_PROBE_SLUG_FIELD)}`", 1,
     )
     if len(owned_board) != len(neutral_board):
         return (
@@ -871,10 +895,38 @@ def warn_ownership_probe(source: Path, destination: Path) -> str | None:
     return None
 
 
+def fresh_protocol_fixture(tree: Path, destination: Path, label: str) -> str | None:
+    """Initialize a real protocol fixture without borrowing unrelated closure proof."""
+    # A protocol rename is tested on a fresh native project, not by rewriting
+    # byte-bound operation history or opaque forensic evidence. Keep the whole
+    # copied history outside the new project's authority; the source is intact.
+    memory = tree / ".saipen"
+    if (tree / "tools/saipen.py").is_file() and (memory / "recovery").is_dir():
+        history = destination / (label + "-history")
+        if (not destination.resolve().is_relative_to(Path(tempfile.gettempdir()).resolve())
+                or memory.resolve().parent != tree.resolve()
+                or tree.resolve().parent != destination.resolve()
+                or history.exists()):
+            return "phase rename refuses an unverified disposable history target"
+        memory.rename(history)
+        initialized = subprocess.run(
+            [sys.executable, str(tree / "tools/saipen.py"), "--project-root", str(tree),
+             "--agent", "probe", "init", "--json"], cwd=tree,
+            env=hermetic_child_env(), capture_output=True, text=True, encoding="utf-8",
+            errors="replace", timeout=120,
+        )
+        if initialized.returncode:
+            return "phase rename native INIT refused: " + initialized.stdout[-500:]
+        for name in ("KNOWLEDGE", "saitranslate"):
+            if (history / name).is_dir():
+                shutil.copytree(history / name, memory / name)
+    return None
+
+
 def phase_rename_probe(source: Path, destination: Path) -> str | None:
     """T-426 verify: renaming a phase consistently across every copy the
     validator reads stays green. The new edge gates exist to catch drift,
-    not to forbid a deliberate rename: SCOUT -> SCOUTX (and scout -> scoutx,
+    not to forbid a deliberate rename: SCOUT -> TRACE (and scout -> trace,
     word-boundary, so the phase doc file and its citations move too) across
     the whole tree -- DFA, RFC table and enum sentence, schema enum, the
     phase doc and its exit line, STATE references -- must validate clean.
@@ -885,6 +937,9 @@ def phase_rename_probe(source: Path, destination: Path) -> str | None:
     if knowledge["errors"]:
         return "phase rename needs valid knowledge evidence: " + "; ".join(knowledge["errors"])
     rebind_synthetic_milestones(tree)
+    fresh_error = fresh_protocol_fixture(tree, destination, "phase-rename")
+    if fresh_error:
+        return fresh_error
     milestone_root = tree / ".saipen" / "milestones"
     immutable_source_roots = (
         tree / ".saipen" / "intake",
@@ -918,14 +973,14 @@ def phase_rename_probe(source: Path, destination: Path) -> str | None:
             text = path.read_text(encoding="utf-8-sig")
         except (UnicodeDecodeError, OSError):
             continue
-        new = re.sub(r"\bSCOUT\b", "SCOUTX", text)
-        new = re.sub(r"\bscout\b", "scoutx", new)
+        new = re.sub(r"\bSCOUT\b", "TRACE", text)
+        new = re.sub(r"\bscout\b", "trace", new)
         if new != text:
             path.write_text(new, encoding="utf-8", newline="\n")
             changed += 1
     old_doc = tree / "saipen" / "phases" / "scout.md"
     if old_doc.is_file():
-        old_doc.rename(tree / "saipen" / "phases" / "scoutx.md")
+        old_doc.rename(tree / "saipen" / "phases" / "trace.md")
     # Renamed card bodies change the generated projection's source digest.
     # Restamp only an index proven fresh before this synthetic mutation;
     # existing corrupt evidence must fail rather than be silently repaired.
@@ -995,7 +1050,7 @@ def phase_rename_probe(source: Path, destination: Path) -> str | None:
         output = proc.stdout + proc.stderr
         failures = [line for line in output.splitlines() if line.startswith("FAIL:")]
         return (
-            "consistent SCOUT->SCOUTX rename was rejected: "
+            "consistent SCOUT->TRACE rename was rejected: "
             + (" | ".join(failures[:4]) if failures else output.strip()[-400:])
         )
     return None
@@ -1909,7 +1964,14 @@ def inherit_from_nothing(text: str) -> str:
             # APPENDING a second one made the BOARD unparsable and the parse
             # error pre-empted the check this case exists to drive. Replace the
             # field the record already has instead of adding a rival copy.
-            body = re.sub(r"\s*\|\s*closure_mode:\s*[^|\n]*", "", line.rstrip("\n"))
+            # A row that already closed inherited_verified carries its own
+            # implementation_source; left in place it out-ranked the planted
+            # one and the check stayed green (T-1668, measured on T-1680).
+            body = re.sub(
+                r"\s*\|\s*(?:closure_mode|implementation_source|implementation_delta):\s*[^|\n]*",
+                "",
+                line.rstrip("\n"),
+            )
             lines[i] = (
                 body
                 + " | closure_mode: inherited_verified"
@@ -3296,13 +3358,13 @@ CASES: list[tuple[str, str, object, str]] = [
     (
         "verify.md loses the cheapest-first ordering claim",
         "saipen/phases/verify.md",
-        replace("That order is cheapest-first", "That order is a suggestion"),
+        replace("cheapest-first", "arbitrary order"),
         "borrowed-invariants",
     ),
     (
         "verify.md lets a later green restore a failed PASS claim",
         "saipen/phases/verify.md",
-        replace("ends the PASS claim for this pass", "is worth noting"),
+        replace("this pass cannot claim PASS", "this pass may claim PASS later"),
         "borrowed-invariants",
     ),
     (
@@ -4333,6 +4395,105 @@ _W4_RETIRED_PROSE_CONTROLS = frozenset(
 )
 CASES = [case for case in CASES if case[0] not in _W4_RETIRED_PROSE_CONTROLS]
 
+# T-1637. W4 retired the prose controls above when CORE was compacted, but the
+# validator kept pinning the old sentences, so each of those checks warned on
+# every run with no control able to turn it red on its own condition. The pins
+# now read CORE's compact statement of the same rule; each gets its control
+# back on that statement. The two set pins guard a prose COPY of a
+# REGISTRY-owned set: absent is correct, a disagreeing copy is drift.
+CASES.extend(
+    [
+        (
+            "T-1637 CORE 1.11 waits out an ahead-stamp",
+            "saipen/CORE.md",
+            replace("Do not wait for the clock", "Wait for the clock"),
+            "ahead-stamp-repair",
+        ),
+        (
+            "T-1637 CORE 1.10 lets a shortcut row be answered from recall",
+            "saipen/CORE.md",
+            replace("Recall is not authority", "Recall is usually enough"),
+            "shortcut-memory-ban",
+        ),
+        (
+            "T-1637 CORE 1.11 lets a deferred command live in chat only",
+            "saipen/CORE.md",
+            replace("never drop it into chat only", "it may be answered in chat"),
+            "command-not-dropped",
+        ),
+        (
+            "T-1637 CORE 1.10 loses the same-message plan-goal pair",
+            "saipen/CORE.md",
+            replace(
+                "followed by a bare goal key in the SAME message",
+                "followed later by a bare goal key",
+            ),
+            "plan-goal-pair",
+        ),
+        (
+            "T-1637 CORE 1.2 lets a permanent warning owner sit in TODO",
+            "saipen/CORE.md",
+            replace(
+                "This includes permanent warning owners", "This excludes permanent warning owners"
+            ),
+            "permanent-owner-section",
+        ),
+        (
+            "T-1637 CORE 1.10 restores length magic",
+            "saipen/CORE.md",
+            replace("Length grants no semantics", "Doubled is safe, tripled reaches a remote"),
+            "shortcut-rationale",
+        ),
+        (
+            "T-1637 CORE 1.10 lets a not-ready refusal write",
+            "saipen/CORE.md",
+            replace("Refusal changes no project file,", "Refusal may change a project file,"),
+            "package-handoffs",
+        ),
+        (
+            "T-1637 translate.md lets a missing handoff write main",
+            "saipen/phases/translate.md",
+            replace("**No ready handoff means no main", "**A stale handoff may still reach main"),
+            "package-handoffs",
+        ),
+        (
+            "T-1637 CORE 1.10 resets goal counters unconditionally",
+            "saipen/CORE.md",
+            replace("only at or above caps", "on every invocation"),
+            "goal-counter-reset",
+        ),
+        (
+            "T-1637 CORE 1.2 stops naming REGISTRY as the ticket-field owner",
+            "saipen/CORE.md",
+            replace(
+                "the closed list is owned by `REGISTRY.json`",
+                "the closed list is kept in this section",
+            ),
+            "ticket-fields",
+        ),
+        (
+            "T-1637 CORE copies the from-any-phase set and drops HUNT",
+            "saipen/CORE.md",
+            replace(
+                "### 1.11 Determinism Invariants",
+                "**From-any-phase set**: `VALIDATE`, `MARKHUNT`, `CLEAN`, `TRANSLATE`, "
+                "`PREPARE`, `PLAN`.\n\n### 1.11 Determinism Invariants",
+            ),
+            "any-from",
+        ),
+        (
+            "T-1637 CORE copies the ticket-bearing set and drops SHIP",
+            "saipen/CORE.md",
+            replace(
+                "### 1.11 Determinism Invariants",
+                "The five it **names as ticket-bearing** -- `SCOUT`, `BUILD`, `VERIFY`, "
+                "`REVIEW` -- and omitted.\n\n### 1.11 Determinism Invariants",
+            ),
+            "ticket-bearing",
+        ),
+    ]
+)
+
 CASES.append(
     (
         # T-1270. The condition needs a file the pristine tree does not have,
@@ -4553,6 +4714,12 @@ CASES.extend(
             "FUTURE GATE: ",
         ),
         (
+            "the registered command inventory disappears",
+            COMMANDS,
+            DELETE,
+            "Command reference unavailable:",
+        ),
+        (
             "future-gate owner loses its rule marker",
             FUTURE,
             replace("RULE-OWNER: FUTURE-GATE-01", "RULE-OWNER: FUTURE-GATE-99"),
@@ -4627,6 +4794,77 @@ CASES.extend(
     ]
 )
 
+
+def dangle_a_detail_ref(text: str) -> str:
+    """Point the first BOARD detail_ref field at a record the checkout lacks,
+    as a clone without `.saipen/recovery/board-compaction` reads it (T-1668)."""
+    return re.sub(
+        r"(\| detail_ref: \.saipen/recovery/board-compaction/)[^\s|]+",
+        r"\1T-0/T-0-not-in-this-checkout.json",
+        text,
+        count=1,
+    )
+
+
+dangle_a_detail_ref.anchor = "| detail_ref: .saipen/recovery/board-compaction/"
+
+CASES.append(
+    (
+        "a BOARD row cites a compacted record that is not in the checkout",
+        BOARD,
+        dangle_a_detail_ref,
+        "detail_ref does not resolve: .saipen/recovery/board-compaction/T-0/",
+    )
+)
+
+
+
+def _a01_replace_state_fields(text: str, fields: dict[str, str]) -> str:
+    """Mutate an isolated STATE fixture, never a live authority document.
+
+    Remove old values first so the fixture cannot rely on duplicate YAML keys.
+    """
+    lines = text.splitlines(keepends=True)
+    boundaries = [i for i, line in enumerate(lines) if line.strip() == "---"]
+    if len(boundaries) < 2:
+        raise ValueError("STATE fixture is missing its frontmatter boundary")
+    first, last = boundaries[:2]
+    prefixes = tuple(f"{field}:" for field in fields)
+    kept = [line for line in lines[first + 1:last] if not line.startswith(prefixes)]
+    updates = [f"{key}: {value}\n" for key, value in fields.items()]
+    return "".join(lines[:first + 1] + kept + updates + lines[last:])
+
+
+def _a01_bad_authority_source_pattern(text: str) -> str:
+    return _a01_replace_state_fields(text, {"authority_source": "NOT-A-SOURCE"})
+
+
+def _a01_unbacked_persistent_goal(text: str) -> str:
+    """Schema-valid persistent grant with no authentic supporting operation."""
+    return _a01_replace_state_fields(text, {
+        "execution_intent": "goal",
+        "goal_ingress": "goal-aaaaaaaaaaaaaaaa",
+        "continuation_authority": "operator_persistent",
+        "authority_source": "E-99999999",
+        "authority_until": "goal_complete",
+        "safety_valve_mode": "checkpoint",
+    })
+
+
+CASES.extend([
+    (
+        "T-1494 schema rejects malformed authority_source",
+        STATE,
+        _a01_bad_authority_source_pattern,
+        "field authority_source: 'NOT-A-SOURCE' does not match its schema pattern",
+    ),
+    (
+        "T-1494 goal authority rejects an unbacked persistent grant",
+        STATE,
+        _a01_unbacked_persistent_goal,
+        "goal-authority: persistent authority does not name the current goal pivot",
+    ),
+])
 
 
 def demote_amnesty_control(root: Path) -> bool:
@@ -5108,7 +5346,11 @@ def tag_query_probe(context: ProbeContext) -> str | None:
     in a `finally` -- this probe used to restore by hand after the check, so an
     early return between the two left the shared tree mutated.
     """
-    pristine = context.pristine
+    pristine = context.sandbox / "runtime-query"
+    shutil.copytree(context.pristine, pristine)
+    fresh_error = fresh_protocol_fixture(pristine, context.sandbox, "runtime-query")
+    if fresh_error:
+        return fresh_error
     query_count, query_error = observed_tag_queries(pristine)
     red_tree = context.sandbox / "duplicate-tag-query"
     shutil.copytree(pristine, red_tree)
@@ -5308,23 +5550,28 @@ def mutation_sweep_probe(context: ProbeContext) -> str | None:
             shutil.rmtree(worker_root, ignore_errors=True)
 
     worker_errors = []
-    # No chunk means no submit, and a pool starts its threads only on submit.
-    with ThreadPoolExecutor(max_workers=max(1, worker_count)) as executor:
-        futures = {
-            executor.submit(run_chunk, index, chunk): index
-            for index, chunk in enumerate(chunks)
-        }
-        for future in as_completed(futures):
-            index = futures[future]
-            try:
-                chunk_dead, chunk_skipped, chunk_error = future.result()
-            except Exception as exc:  # defensive: a worker failure is a gate failure
-                worker_errors.append(f"worker {index}: {type(exc).__name__}: {exc}")
-                continue
-            dead.extend(chunk_dead)
-            skipped.extend(chunk_skipped)
-            if chunk_error:
-                worker_errors.append(f"worker {index}: {chunk_error}")
+    # SRC-026:R011: zero runnable controls never reach the executor. A pool of
+    # one that is constructed and never started ran nothing either, but the
+    # formula above yields 0 for an empty selection, and the only thing that
+    # kept `max_workers=0` out of the constructor was a clamp inside the call.
+    # No chunk now means no pool at all.
+    if chunks:
+        with ThreadPoolExecutor(max_workers=worker_count) as executor:
+            futures = {
+                executor.submit(run_chunk, index, chunk): index
+                for index, chunk in enumerate(chunks)
+            }
+            for future in as_completed(futures):
+                index = futures[future]
+                try:
+                    chunk_dead, chunk_skipped, chunk_error = future.result()
+                except Exception as exc:  # defensive: a worker failure is a gate failure
+                    worker_errors.append(f"worker {index}: {type(exc).__name__}: {exc}")
+                    continue
+                dead.extend(chunk_dead)
+                skipped.extend(chunk_skipped)
+                if chunk_error:
+                    worker_errors.append(f"worker {index}: {chunk_error}")
 
     if worker_errors:
         return "parallel mutation worker -- " + "; ".join(sorted(worker_errors))
@@ -5468,7 +5715,7 @@ def always_on_probes() -> tuple[Probe, ...]:
             "case-availability",
             case_availability_probe,
             "every canonical mutation has its target, so the denominator holds still",
-            requires=("pristine-fixture",),
+            requires=("pristine-fixture", "validator-baseline"),
         ),
         Probe(
             "mutation-sweep",
@@ -5479,16 +5726,48 @@ def always_on_probes() -> tuple[Probe, ...]:
     )
 
 
+def canonical_suite_cache_key() -> str:
+    """Match the portable-parity consumer's existing canonical suite binding."""
+    digest = hashlib.sha256()
+    for relative in ("tools/validate.py", "tools/audit_checks.py"):
+        digest.update((HOME / relative).read_bytes())
+    return digest.hexdigest()[:16]
+
+
+def cache_completed_full_audit(key: str, probes: tuple[Probe, ...], verdicts: dict) -> None:
+    """Publish derived reuse only after every full-suite probe has a verdict."""
+    if set(verdicts) != {probe.name for probe in probes} or any(
+        verdict not in {"PASS", "UNPROVEN"} for verdict in verdicts.values()
+    ):
+        return
+    if canonical_suite_cache_key() != key:
+        print("NOTE: canonical audit inputs moved; completed proof was not cached")
+        return
+    target = HOME / ".saipen/cache/audit_checks_cache.json"
+    payload = {"key": key, "full_suite": True, "cases": FULL_CASE_COUNT,
+               "unproven": sorted(name for name, verdict in verdicts.items()
+                                  if verdict == "UNPROVEN")}
+    safe_atomic_write_bytes(target, (json.dumps(payload) + "\n").encode("utf-8"),
+                            kind="derived full-audit cache", ownership_root=HOME)
+
+
 def main() -> int:
     changed = scoped_paths(sys.argv[1:])
     cases = select_cases(CASES, changed) if changed is not None else CASES
+    canonical_key = None
+    if changed is None:
+        try:
+            canonical_key = canonical_suite_cache_key()
+        except OSError as error:
+            print(f"NOTE: canonical cache binding unavailable; running all probes: {error}")
     if changed is not None:
         for line in scoped_banner(len(cases), changed):
             print(line)
 
     tmp = Path(tempfile.mkdtemp(prefix="audit_checks_"))
     try:
-        verdicts = run_probes(always_on_probes(), ProbeContext(tmp, cases, changed))
+        probes = always_on_probes()
+        verdicts = run_probes(probes, ProbeContext(tmp, cases, changed))
     finally:
         shutil.rmtree(tmp, ignore_errors=True)
 
@@ -5508,6 +5787,11 @@ def main() -> int:
         )
     else:
         print(f"AUDIT: all {len(verdicts)} always-on probes passed")
+    if canonical_key is not None and not (failed or skipped):
+        try:
+            cache_completed_full_audit(canonical_key, probes, verdicts)
+        except (OSError, ValueError) as error:
+            print(f"NOTE: completed full audit could not be cached: {error}")
     return 0 if not (failed or skipped) else 1
 
 

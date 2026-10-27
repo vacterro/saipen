@@ -4,6 +4,14 @@ ZAICODE (a ZCode fork) runs with its own HOME -- `<workspace>/.zaicode/home` --
 and reads `<HOME>/.zcode/AGENTS.md` for user instructions and
 `<HOME>/.zcode/skills/<name>/SKILL.md` for skills. The registry names that HOME
 through ZAICODE_HOME; an unset variable means ZAICODE is not configured here.
+
+T-1935: the SKILL and INSTRUCTION surfaces stay in that isolated home, but the
+guard hook does not. ZAICODE loads its process hook from
+`~/.zcode/cli/config.json` under the operator profile, so that is the only file
+the running host reads; a hook installed into the isolated home would never
+execute. The registry therefore declares `install.hook` on the profile surface,
+and these tests assert the split explicitly instead of the old blanket
+"nothing at all may appear under the profile".
 """
 
 from __future__ import annotations
@@ -89,8 +97,20 @@ class ZaicodeInjectorTests(unittest.TestCase):
         agents = (zaicode_home / ".zcode" / "AGENTS.md").read_text(encoding="utf-8")
         self.assertIn("<!-- SAIPEN:BEGIN -->", agents)
         self.assertIn("<!-- SAIPEN:END -->", agents)
-        # The user's own profile is not ZAICODE's and receives nothing.
-        self.assertFalse((profile / ".zcode").exists())
+        # T-1935: the skill and instruction surfaces belong to the isolated home
+        # and nowhere else -- the operator profile must not receive a second copy.
+        self.assertFalse((profile / ".zcode" / "skills" / "saipen").exists())
+        self.assertFalse((profile / ".zcode" / "AGENTS.md").exists())
+        # The guard hook is the exception, and it is deliberate: ZAICODE runs
+        # the hook its own config.json names, and that config is under the
+        # operator profile. A hook in the isolated home would never execute.
+        hook = profile / ".zcode" / "hooks" / "saipen-guard.py"
+        self.assertTrue(hook.is_file(), proc.stdout)
+        self.assertEqual(
+            hook.read_bytes(),
+            (REPO / _adapter()["hook_artifact"]).read_bytes(),
+            "the injector must deploy the shipped hook bytes, not a stale copy",
+        )
 
     def test_unset_home_variable_is_not_configured_and_writes_nothing(self):
         proc, profile = self._inject()
@@ -127,7 +147,11 @@ class ZaicodeShellInjectorTests(unittest.TestCase):
         self.assertTrue((zaicode_home / ".zcode" / "skills" / "saipen" / "SKILL.md").is_file())
         agents = (zaicode_home / ".zcode" / "AGENTS.md").read_text(encoding="utf-8")
         self.assertIn("<!-- SAIPEN:BEGIN -->", agents)
-        self.assertFalse((profile / ".zcode").exists())
+        # Same split as the PowerShell path (T-1935): skill and instructions in
+        # the isolated home, the hook on the surface ZAICODE actually executes.
+        self.assertFalse((profile / ".zcode" / "skills" / "saipen").exists())
+        self.assertFalse((profile / ".zcode" / "AGENTS.md").exists())
+        self.assertTrue((profile / ".zcode" / "hooks" / "saipen-guard.py").is_file())
 
 
 if __name__ == "__main__":

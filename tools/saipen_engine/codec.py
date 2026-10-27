@@ -300,6 +300,21 @@ _CRED_PATTERNS = [
         r"\1:***\2",
     ),
     (_re.compile(r"(?i)(bearer\s+)[a-zA-Z0-9_\-\.]{30,}"), r"\1***"),
+    # T-1926 / SRC-333 ZC-01: SAIMAIL custodies X25519 private keys as RAW
+    # 64-hex under a named identity field (spec/20-LOCAL-KEY-CUSTODY-v0.md v1
+    # "raw" schema). A `cat identity.json` therefore prints live secrets, and
+    # the shapes above miss them because they carry no prefix. The FIELD NAME
+    # is what carries the certainty -- a bare 64-hex value elsewhere is a
+    # sha256 digest that evidence citations depend on -- so the rule keys on
+    # the name and then removes the whole value, whatever its encoding or
+    # width. Partial redaction would leave a truncated key behind.
+    (
+        _re.compile(
+            r"(?i)([\"']?[a-z0-9_]*private_key[\"']?\s*[:=]\s*)"
+            r"(\"[^\"]{8,}\"|'[^']{8,}'|[0-9a-f]{16,})"
+        ),
+        r"\1***",
+    ),
 ]
 
 
@@ -307,9 +322,10 @@ def redact_credentials(text: str) -> str:
     """Canonical credential redaction for the persistence boundary.
 
     High-confidence credential shapes (ghp_, AKIA, sk-, postgres URI
-    passwords, bearer tokens) are replaced with redacted placeholders
-    before any user-derived text is written to STATE, BOARD, LOG,
-    recovery, or sealed segments (CORE § 1.1, T-1015, T-1101).
+    passwords, bearer tokens, named SAIMAIL private-key fields) are replaced
+    with redacted placeholders before any user-derived text is written to
+    STATE, BOARD, LOG, recovery, or sealed segments (CORE § 1.1, T-1015,
+    T-1101, T-1926).
     """
     for pattern, repl in _CRED_PATTERNS:
         text = pattern.sub(repl, text)

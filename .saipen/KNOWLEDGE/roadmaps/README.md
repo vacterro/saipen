@@ -33,3 +33,20 @@ them from git history if a forensic need ever arises:
     git checkout 538eb8fe -- .saipen/KNOWLEDGE/roadmaps/current-stage-next
 
 Read the receipt, not a memory of the ZIP.
+
+- `conformance-admission-2026-10-09.md` -- SRC-195 / T-1689 architectural
+  incident record: Wintage receipt-417946d3e1da, the existing detector and
+  remediation owners, qualified consumer dependencies, and a bounded next
+  investigation. The admission-scope hypothesis remains unresolved; this
+  reference grants no speculative implementation or consumer repair.
+
+- `saihandoff-agent-drift-2026-10-09.md` -- SRC-196/SRC-197 / T-1691 incident
+  record: exact report retention, reproduced SAITULS two-DOING floor refusal,
+  qualified language/verbosity/ACL claims, rejected conflicting lock-in rules,
+  and existing lifecycle, delivery and managed-account acceptance owners.
+
+- `saispin-session-forensics-2026-10-09.md` -- SRC-198 / T-1692 forensic
+  intake: seven attributed findings, current source corrections and remaining
+  issuer-trust risk, honest test categories, preserved concurrent ownership,
+  and SAITULS SRC-093 append pending canonical admission after the exact
+  floor/allocation refusal. No product fix or live acceptance is claimed.

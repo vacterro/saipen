@@ -18,6 +18,7 @@ Two questions the surface answers mechanically:
 
 from __future__ import annotations
 
+import hashlib
 import re
 import shlex
 from collections import Counter
@@ -66,6 +67,30 @@ _AGENT_INSTRUCTION = re.compile(
 
 #: The values that mean "no action" for the two always-present action fields.
 NONE_VALUES = frozenset({"", "NONE"})
+
+_EXECUTABLE_COMMAND_PREFIXES = frozenset(
+    {
+        "saipen", "python", "py", "git", "uv", "ruff", "pytest", "npm", "node",
+        "powershell", "pwsh", "cmd", "bash", "cc", "ccc", "st", "sss", "gg",
+        "hh", "ff", "xx", "vv", "zz", "dd", "aa", "qq", "qqq", "ee", "eee",
+        "pp", "tt", "sc",
+    }
+)
+
+
+def is_executable_command(action: object) -> bool:
+    """True if action is an executable CLI command an engine/agent can run (T-1916)."""
+    if not isinstance(action, str) or _is_none(action):
+        return False
+    act = action.strip().strip("`").strip()
+    if not act or act.upper() in NONE_VALUES:
+        return False
+    if act.startswith(("./", "../", ".\\", "..\\")):
+        return True
+    if _AGENT_COMMAND.match(act):
+        return True
+    first = act.split()[0].lower()
+    return first in _EXECUTABLE_COMMAND_PREFIXES
 
 # ---------------------------------------------------------------------------
 # T-1556 #1: DETAILS AUTHORIZATION IS A MACHINE FACT, NOT A STYLE CHOICE.
@@ -145,6 +170,35 @@ _DETAIL_REQUEST_GRAMMARS = tuple(
             r"(?:anna|koosta)\s+(?:(?:täielik|detailne|põhjalik)\s+)+"
             r"(?:tehniline\s+)?(?:aruanne|raport)(?:\s+koos tõenditega)?",
         ),
+        # SRC-190: the operator's own short words for "show me more" -- details,
+        # evidence, a technical breakdown, verbose output. Still one whole
+        # affirmative clause. A bare `audit` stays a command name and grants
+        # nothing; a question about one thing is ordinary conversation.
+        (
+            DETAIL_MODE_REPORT,
+            r"(?:please\s+)?(?:give|show|send)\s+(?:(?:me|us)\s+)?(?:the\s+)?"
+            r"(?:(?:full|complete|all)\s+(?:the\s+)?)?(?:details|evidence)(?:\s+please)?",
+        ),
+        (
+            DETAIL_MODE_REPORT,
+            _EN_VERB + r"(?:(?:detailed|full|verbose|complete)\s+)*technical\s+breakdown",
+        ),
+        (DETAIL_MODE_REPORT, _EN_VERB + r"verbose\s+output"),
+        (
+            DETAIL_MODE_REPORT,
+            r"(?:(?:the\s+)?(?:full\s+)?details|full\s+report|detailed\s+report"
+            r"|verbose(?:\s+output)?|technical\s+breakdown)(?:\s+please)?",
+        ),
+        (
+            DETAIL_MODE_REPORT,
+            r"(?:näita|anna)\s+(?:kõik\s+)?"
+            r"(?:üksikasjad|üksikasju|detailid|detaile|tõendid|tõendeid)",
+        ),
+        (
+            DETAIL_MODE_REPORT,
+            r"(?:покажи|дай)\s+(?:все\s+)?(?:детали|подробности|доказательства)",
+        ),
+        (DETAIL_MODE_REPORT, r"(?:üksikasjad|detailid|подробности|детали)"),
     )
 )
 
@@ -211,6 +265,225 @@ REASON_BUDGETS = {
     EXPLICIT_DETAILED_REPORT: (16, DETAILED_RESPONSE_CHAR_BUDGET),
 }
 
+# ---------------------------------------------------------------------------
+# SRC-190 (T-1656): THE OPERATOR SURFACE AND THE EVIDENCE ARE TWO SURFACES.
+#
+# The budgets above were already the contract, and a reply could still arrive
+# as one field carrying three thousand characters: the refusal was a sentence
+# per broken rule, nothing a host could act on, and the compact form it was
+# offered named no place where the detail lives -- so the detail went into the
+# reply. Three additions, all owned here:
+#
+# * the overflow is DATA (`overflow_diagnostic`): which field, how large,
+#   against which budget;
+# * an ordinary boundary may POINT at evidence (`details_is_pointer`): one
+#   short line of canonical references needs no depth authority, because it
+#   carries no detail;
+# * a rejected reply has one content-addressed home (`rejected_reference`), so
+#   replacing it with the compact form loses nothing.
+OVERFLOW_CODE = "OPERATOR_OUTPUT_OVERFLOW"
+COMPACTION_SUCCEEDED = "SUCCEEDED"
+COMPACTION_FAILED = "FAILED"
+COMPACTION_NOT_ATTEMPTED = "NOT_ATTEMPTED"
+
+#: Where a reply the gate refused is kept, losslessly, named by its content.
+REJECTED_RESPONSE_DIR = ".saipen/evidence/response"
+
+#: A pointer is short by definition; a long one is an inventory.
+DETAILS_POINTER_CHAR_BUDGET = 120
+#: A path reference names project memory and nothing else: every segment
+#: starts with a letter, digit, `_` or `-`, so `.saipen/../x` is not a pointer.
+_POINTER_REF = (
+    r"(?:E-\d{1,8}(?:\.\.E-\d{1,8})?|T-\d{1,8}|SRC-\d{1,6}"
+    r"|\.saipen(?:/[A-Za-z0-9_-][A-Za-z0-9_.-]{0,60}){1,6})"
+)
+_POINTER_REF_RE = re.compile(_POINTER_REF)
+_DETAILS_POINTER = re.compile(rf"{_POINTER_REF}(?:[,;] {_POINTER_REF}){{0,5}}")
+#: How many references the machine digest names; the rest stay in the ledger.
+_DIGEST_POINTER_REFS = 4
+
+
+def details_is_pointer(value: object) -> bool:
+    """Is this DETAILS value only a short line of canonical references?
+
+    Event ids and ranges, ticket and receipt ids, and paths under `.saipen/`,
+    separated by `, ` or `; `. Any other word makes it prose, and prose in
+    DETAILS still needs the human's depth authority.
+    """
+    if not isinstance(value, str):
+        return False
+    text = value.strip()
+    return len(text) <= DETAILS_POINTER_CHAR_BUDGET and bool(_DETAILS_POINTER.fullmatch(text))
+
+
+def details_pointer(refs: object) -> str:
+    """One pointer line from machine-owned references, or `` when none is valid.
+
+    Every reference is re-checked against the closed grammar: a facts carrier
+    cannot smuggle prose into the reply through this field.
+    """
+    kept: list[str] = []
+    for ref in refs if isinstance(refs, (list, tuple)) else ():
+        text = str(ref).strip()
+        if _POINTER_REF_RE.fullmatch(text) and text not in kept:
+            kept.append(text)
+    while kept:
+        line = ", ".join(kept[:_DIGEST_POINTER_REFS])
+        if details_is_pointer(line):
+            return line
+        kept.pop()
+    return ""
+
+
+def rejected_reference(text: object) -> str:
+    """The one path a refused reply is preserved at, derived from its bytes."""
+    body = (text if isinstance(text, str) else "").replace("\r\n", "\n").replace("\r", "\n")
+    digest = hashlib.sha256(body.encode("utf-8")).hexdigest()[:16]
+    return f"{REJECTED_RESPONSE_DIR}/rejected-{digest}.txt"
+
+
+def rejected_diagnostic_reference(reference: str) -> str:
+    """Where the overflow account of a preserved reply is kept: beside it."""
+    return reference[: -len(".txt")] + ".json"
+
+
+def preserve_rejected(root, text: object) -> dict:
+    """Keep a refused reply, byte for byte, at its content-addressed path.
+
+    Called by whoever is about to replace the reply with the compact form, so
+    the replacement loses nothing. Idempotent: the same reply is the same
+    path, and a file already holding these bytes is not written again.
+    """
+    from pathlib import Path
+
+    from .paths import safe_atomic_write_bytes
+
+    base = Path(root)
+    body = (text if isinstance(text, str) else "").replace("\r\n", "\n").replace("\r", "\n")
+    if not body.strip():
+        return {"ok": False, "code": "VALIDATION_FAILED", "detail": "no reply text to preserve"}
+    if not (base / ".saipen").is_dir():
+        return {"ok": False, "code": "NOT_SAIPEN_PROJECT", "detail": f"no .saipen/ under {base}"}
+    reference = rejected_reference(body)
+    data = body.encode("utf-8")
+    target = base / reference
+    written = False
+    if not target.is_file() or target.read_bytes() != data:
+        safe_atomic_write_bytes(target, data, kind="rejected response", ownership_root=base)
+        written = True
+    # T-1657: the size account is kept beside the bytes it describes. A host
+    # that replaces or corrects a reply is handed this diagnostic by the
+    # checker and had nowhere to put it; written here, whoever preserves the
+    # reply keeps its account too. Derived from the reply alone, so the same
+    # reply is the same record and a second call writes nothing.
+    import json
+
+    overflow = overflow_diagnostic(body)
+    if overflow is not None:
+        # What became of the reply is the caller's fact, not this record's.
+        overflow = {key: value for key, value in overflow.items() if key != "compaction"}
+    record = {
+        "schema": 1,
+        "kind": "saipen-rejected-response",
+        "ref": reference,
+        "sha256": hashlib.sha256(data).hexdigest(),
+        "bytes": len(data),
+        "overflow": overflow,
+    }
+    diagnostic_ref = rejected_diagnostic_reference(reference)
+    account = (json.dumps(record, indent=2, ensure_ascii=False, sort_keys=True) + "\n").encode(
+        "utf-8"
+    )
+    account_target = base / diagnostic_ref
+    if not account_target.is_file() or account_target.read_bytes() != account:
+        safe_atomic_write_bytes(
+            account_target, account, kind="rejected response diagnostic", ownership_root=base
+        )
+        written = True
+    return {
+        "ok": True,
+        "code": "RESPONSE_PRESERVED",
+        "ref": reference,
+        "diagnostic_ref": diagnostic_ref,
+        "sha256": record["sha256"],
+        "bytes": len(data),
+        "overflow": overflow,
+        "written": written,
+    }
+
+
+def overflow_diagnostic(
+    rendered: object,
+    *,
+    detail_mode: str = DETAIL_MODE_NONE,
+    response_class: str | None = None,
+    operator_due: bool = False,
+) -> dict | None:
+    """`OPERATOR_OUTPUT_OVERFLOW` as data, or None when the reply fits.
+
+    Names every field over its own budget with its measured size, and the
+    whole reply against the budget of its boundary class. A reply that is not
+    a control surface at all has one offender, the reply itself (`RESPONSE`).
+    Measuring only: `response_errors` stays the rule, this is its account of
+    the size rules in a form a host or a test can read.
+    """
+    text = rendered if isinstance(rendered, str) else ""
+    if not text.strip():
+        return None
+    klass = response_class or response_reason(operator_due=operator_due, detail_mode=detail_mode)
+    line_budget, char_budget = REASON_BUDGETS.get(klass, REASON_BUDGETS[COMPACT_FINAL])
+    lines = text.splitlines()
+    values, problems = parse_surface(text)
+    is_surface = not any("STATUS" in problem for problem in problems)
+    offenders: list[dict] = []
+    if is_surface:
+        for name in FIELD_ORDER:
+            if name not in values:
+                continue
+            value = values[name]
+            content = [line for line in value.splitlines() if line.strip()]
+            char_limit = FIELD_CHAR_BUDGETS.get(name)
+            line_limit = FIELD_LINE_BUDGETS.get(name, 1)
+            if name == "DETAILS" and detail_mode == DETAIL_MODE_NONE:
+                char_limit, line_limit = DETAILS_POINTER_CHAR_BUDGET, 1
+            if (char_limit is not None and len(value) > char_limit) or len(content) > line_limit:
+                offenders.append(
+                    {
+                        "field": name,
+                        "chars": len(value),
+                        "lines": len(content),
+                        "char_budget": char_limit,
+                        "line_budget": line_limit,
+                    }
+                )
+    whole_over = len(lines) > line_budget or len(text) > char_budget
+    if not offenders and not whole_over:
+        return None
+    if not offenders:
+        offenders.append(
+            {
+                "field": "RESPONSE",
+                "chars": len(text),
+                "lines": len(lines),
+                "char_budget": char_budget,
+                "line_budget": line_budget,
+            }
+        )
+    return {
+        "code": OVERFLOW_CODE,
+        "response_class": klass,
+        "fields": offenders,
+        "total": {
+            "chars": len(text),
+            "lines": len(lines),
+            "char_budget": char_budget,
+            "line_budget": line_budget,
+        },
+        "detail_ref": rejected_reference(text),
+        "compaction": COMPACTION_NOT_ATTEMPTED,
+    }
+
+
 #: T-1556 #3: EXACTLY ONE ACTION. Chaining and sequencing are rejected by
 #: shape; a value that names a canonical SAIPEN command is additionally held to
 #: the canonical recognizer, so `saipen validate && saipen continue` and
@@ -247,6 +520,196 @@ _ACTION_COMMAND_WORDS = frozenset(
 )
 
 
+def _diagnosis_request(request: object) -> bool:
+    """Closed affirmative ingress, never keywords found in an outgoing report.
+
+    This recognizes a request, not the meaning or truth of its eventual answer.
+    Ambiguous free prose remains subject to semantic review.
+    """
+    if not isinstance(request, str):
+        return False
+    return bool(
+        re.fullmatch(
+            r"\s*(?:explain why (?:the |an? )?agent deviated from SAIPEN|"
+            r"(?:write|prepare) (?:a |an? )?handoff explaining why the agent deviated from SAIPEN|"
+            r"объясни[ ,]+почему агент отклонился от (?:SAIPEN|протокола)|"
+            r"(?:напиши|подготовь) хендофф[ ,]+почему агент отклонился от (?:SAIPEN|протокола)|"
+            r"selgita[ ,]+miks agent kaldus SAIPENist kõrvale)\s*[.!?]?\s*",
+            request,
+            re.IGNORECASE,
+        )
+    )
+
+
+def request_class_for_request(request: object) -> str:
+    """Candidate intent; human_response_authority separately settles authority."""
+    if _diagnosis_request(request):
+        return "PROTOCOL_DIAGNOSIS"
+    if isinstance(request, str) and request.strip().casefold() in {
+        "report the recovery refusal",
+        "report the operational wait",
+    }:
+        return "RECOVERY_REPORT"
+    artifact = artifact_for_request(request)
+    if artifact == "HANDOFF":
+        return "IMPLEMENTATION_HANDOFF"
+    if artifact == "AUDIT":
+        return "AUDIT"
+    if reason_for_request(request) == "summary":
+        return "ENGINEERING_STATUS"
+    return "ORDINARY"
+
+
+def _diagnosis_errors(rendered: object, request: str, root: object) -> list[str]:
+    """Bound structure and citations; DOES NOT prove semantic applicability.
+
+    A cited quote remains attributed evidence, not a recovered project, a
+    hidden motive, or verified host enforcement. Independent semantic review
+    must judge request/delivery mismatch and rule applicability. No keyword
+    score or a self-declared PASS stands in for that review.
+    """
+    import json
+    from pathlib import Path
+
+    from .paths import resolve_protocol_dir
+
+    try:
+        packet = json.loads(str(rendered))
+    except (ValueError, TypeError, RecursionError):
+        return [
+            "protocol diagnosis requires an evidence-bound record; an inventory is not a diagnosis"
+        ]
+    fields = {
+        "type",
+        "request",
+        "observed",
+        "rule",
+        "assessment",
+        "cause",
+        "correction",
+        "recovery",
+        "host",
+        "enforcement",
+        "semantic_review",
+    }
+    if not isinstance(packet, dict) or set(packet) != fields:
+        return [
+            "diagnosis must cover request, observation, evidence, rule/owner, "
+            "uncertainty, cause and proposed correction"
+        ]
+    if any(
+        not isinstance(packet[key], str)
+        for key in (
+            "type",
+            "request",
+            "assessment",
+            "recovery",
+            "host",
+            "enforcement",
+            "semantic_review",
+        )
+    ):
+        return ["diagnosis scalar fields must be text"]
+    if packet["type"] != "PROTOCOL_DIAGNOSIS" or packet["request"] != request:
+        return ["diagnosis is not bound to the witnessed request"]
+    if packet["semantic_review"] != "REQUIRED" or packet["assessment"] not in {
+        "UNVERIFIED",
+        "REPORTED",
+        "LEGITIMATE_REFUSAL",
+    }:
+        return ["structural verification cannot assert a proven semantic violation"]
+    cause = packet["cause"]
+    if (
+        not isinstance(cause, dict)
+        or set(cause) != {"kind", "reason"}
+        or cause["kind"] != "UNKNOWN"
+        or not isinstance(cause["reason"], str)
+        or not cause["reason"].strip()
+        or len(cause["reason"]) > 1024
+    ):
+        return ["this carrier cannot prove an internal motive or infer a cause from a quote"]
+    correction = packet["correction"]
+    if (
+        not isinstance(correction, dict)
+        or set(correction) != {"status", "text"}
+        or correction["status"] != "PROPOSED"
+        or not isinstance(correction["text"], str)
+        or not correction["text"].strip()
+    ):
+        return ["correction must be proposed; the diagnostic cannot claim it executed"]
+    if packet["recovery"] not in {"UNVERIFIED", "REFUSED", "NOT_REQUESTED"}:
+        return ["a diagnostic is not evidence of successful recovery"]
+    engine = Path(__file__).resolve().parents[2]
+    rule = packet["rule"]
+    if not isinstance(rule, dict) or set(rule) != {"id", "owner"}:
+        return ["an applicable rule needs its exact owner"]
+    if not all(isinstance(rule[key], str) for key in ("id", "owner")):
+        return ["rule identity and owner must be text"]
+    # Existing owners only; no arbitrary file-read API or invented rule ID.
+    owners = {
+        "EXEC-RESPONSE-01": "saipen/EXECUTION.md",
+        "PROTOCOL-ADMISSION-01": "saipen/EXECUTION.md",
+    }
+    if owners.get(rule.get("id")) != rule.get("owner"):
+        return ["rule does not name its existing response/admission owner"]
+    try:
+        owner_text = (resolve_protocol_dir(engine) / "EXECUTION.md").read_text(encoding="utf-8")
+        if f"RULE-OWNER: {rule['id']}" not in owner_text and rule["id"] != "PROTOCOL-ADMISSION-01":
+            return ["rule owner document is unavailable"]
+        registry = json.loads(
+            (engine / "extensions/adapters/registry.json").read_text(encoding="utf-8")
+        )
+        adapter = next((a for a in registry["adapters"] if a["id"] == packet["host"]), None)
+    except (OSError, ValueError, KeyError):
+        return ["diagnosis owner or host capability is unverified"]
+    # Registry is declared capability only; it cannot prove an active gate.
+    if (
+        adapter is None
+        or packet["enforcement"] not in {"ADVISORY", "UNAVAILABLE", "UNVERIFIED"}
+        or (
+            packet["enforcement"] == "ADVISORY"
+            and adapter.get("response_enforcement") != "ADVISORY"
+        )
+    ):
+        return ["diagnostic cannot assert unproven mechanical host enforcement"]
+    if not isinstance(root, (str, Path)):
+        return ["diagnosis needs the caller's bound evidence root"]
+    try:
+        base = Path(root).resolve()
+        evidence_root = (base / ".saipen/evidence").resolve()
+        evidence_root.relative_to(base)
+    except (OSError, ValueError):
+        return ["evidence root is not bound to this project"]
+    observed = packet["observed"]
+    if not isinstance(observed, list) or not observed or len(observed) > 32:
+        return ["diagnosis needs bounded cited observations"]
+    for item in observed:
+        if not isinstance(item, dict) or set(item) != {"ref", "sha256", "quote"}:
+            return ["observation needs a source reference, digest and exact quote"]
+        ref, quote = item["ref"], item["quote"]
+        if (
+            not isinstance(ref, str)
+            or not ref.startswith(".saipen/evidence/")
+            or not isinstance(quote, str)
+            or not quote.strip()
+        ):
+            return ["observation is not bound to project evidence"]
+        try:
+            path = (base / ref).resolve()
+            path.relative_to(evidence_root)
+            with path.open("rb") as stream:
+                raw = stream.read(256 * 1024 + 1)
+            if len(raw) > 256 * 1024:
+                return ["cited evidence exceeds its bounded reader"]
+            if hashlib.sha256(raw).hexdigest() != item["sha256"] or quote not in raw.decode(
+                "utf-8-sig"
+            ):
+                return ["observation quote or digest does not match its source"]
+        except (OSError, ValueError, UnicodeError):
+            return ["cited evidence is unavailable or outside the bound project"]
+    return []
+
+
 def detail_mode_for_request(request: object) -> str:
     """The authorized DETAILS mode for one human request, or DETAIL_MODE_NONE.
 
@@ -256,6 +719,8 @@ def detail_mode_for_request(request: object) -> str:
     """
     if not isinstance(request, str) or not request.strip():
         return DETAIL_MODE_NONE
+    if _diagnosis_request(request):
+        return DETAIL_MODE_REPORT
     for mode, grammar in _DETAIL_REQUEST_GRAMMARS:
         if grammar.fullmatch(request):
             return mode
@@ -266,7 +731,9 @@ def detail_mode_is_valid(mode: object) -> bool:
     return isinstance(mode, str) and mode in DETAIL_MODES
 
 
-def human_response_authority(request: object, provenance: object) -> bool:
+def human_response_authority(
+    request: object, provenance: object, *, root=None, receipt: str | None = None,
+) -> bool:
     """The original, exact HUMAN carrier is the sole response expansion grant."""
     from .operator_task import authority_for_provenance
     from .pending_ingress import ingress_digest
@@ -274,8 +741,10 @@ def human_response_authority(request: object, provenance: object) -> bool:
     return bool(
         isinstance(request, str)
         and isinstance(provenance, dict)
-        and authority_for_provenance(provenance)["detailed_response"]
         and provenance.get("compared_digest") == ingress_digest(request)
+        and authority_for_provenance(
+            provenance, root=root, receipt=receipt, existing_only=True,
+        )["detailed_response"]
     )
 
 
@@ -287,6 +756,8 @@ def artifact_for_request(request: object) -> str | None:
     """
     if not isinstance(request, str):
         return None
+    if _diagnosis_request(request):
+        return "PROTOCOL_DIAGNOSIS"
     mode = detail_mode_for_request(request)
     if mode == DETAIL_MODE_HANDOFF:
         return "HANDOFF"
@@ -377,6 +848,44 @@ def _machine_scalar(value: object, *, limit: int, fallback: str) -> str:
     """Do not truncate claims. Invalid unbounded facts receive a closed sentinel."""
     text = str(value or "").strip()
     return text if text and len(text) <= limit and not re.search(r"[\r\n\x00]", text) else fallback
+
+
+def _suite_validation(groups: object) -> str:
+    """The declared suite's totals for VALIDATION, from typed record facts only.
+
+    T-1658: the suite result of a project without the unit family existed as
+    LOG prose alone, so the checkpoint could not state it. Every value here is
+    an integer or a closed status read from an engine-written record; a
+    malformed carrier renders nothing rather than a guessed number.
+    """
+    if not isinstance(groups, list) or not groups or not isinstance(groups[0], dict):
+        return ""
+    group = groups[0]
+
+    def count(key: str) -> int | None:
+        value = group.get(key)
+        whole = isinstance(value, int) and not isinstance(value, bool)
+        return value if whole and value >= 0 else None
+
+    ran, red, skipped = count("ran"), count("red"), count("skipped")
+    if group.get("status") == "TIMEOUT":
+        return " | suite TIMEOUT"
+    if ran is None or red is None:
+        code = group.get("exit_code")
+        if isinstance(code, int) and not isinstance(code, bool):
+            return f" | suite exit {code}"
+        return ""
+    return f" | suite {ran} (red {red}" + (f", skipped {skipped}" if skipped else "") + ")"
+
+
+def _display_phase(phase: str, disposition: object) -> str:
+    """One rendering owner for idle lifecycle DONE; machine phase stays intact."""
+    if phase == "DONE":
+        return {
+            "BLOCKED": "BLOCKED", "WAIT_USER": "WAIT",
+            "WAIT_EXTERNAL": "BLOCKED", "INVALID": "INVALID",
+        }.get(disposition, phase)
+    return phase
 
 
 def digest_from_facts(facts: dict, *, reason: str = "final", language: str = "et") -> str:
@@ -475,7 +984,7 @@ def _digest_from_facts(facts: dict, *, reason: str, language: str) -> str:
         else words[2]
         if due
         else words[1]
-        if phase == "DONE"
+        if auto.get("disposition") == "COMPLETE"
         else words[3]
     )
     completed = facts.get("completed") or []
@@ -510,6 +1019,7 @@ def _digest_from_facts(facts: dict, *, reason: str, language: str) -> str:
         red = sum(max(0, int(g.get("red", 0))) for g in groups if isinstance(g, dict))
         new_red = sum(max(0, int(g.get("new_red", 0))) for g in groups if isinstance(g, dict))
         validation += f" | full core {ran} | red {red} | new_red {new_red}"
+    validation += _suite_validation(facts.get("suite_groups"))
     if facts.get("evidence"):
         validation += " | " + words[6]
     blocker = (
@@ -533,15 +1043,36 @@ def _digest_from_facts(facts: dict, *, reason: str, language: str) -> str:
     next_action = _machine_scalar(facts.get("next_action"), limit=240, fallback="NONE")
     if due and next_action.startswith("WAIT:"):
         next_action = "NONE"  # the human decision has exactly one owner: ACTION
-    boundary = OperationalBoundary(
-        phase + (" " + task if task != "none" else ""),
+    display_status = _display_phase(phase, auto.get("disposition"))
+    active_gate = facts.get("inflight") or {}
+    gate_pid = active_gate.get("pid")
+    if isinstance(gate_pid, int) and not isinstance(gate_pid, bool) and gate_pid > 0:
+        display_status += f"; core-unit PID {gate_pid}"
+    fields = (
+        display_status + (" " + task if task != "none" else ""),
         result,
         blocker,
         action,
         next_action,
         validation,
     )
-    return render_boundary(boundary, response_class=klass)
+    pointer = details_pointer(facts.get("detail_refs"))
+    if pointer:
+        # The pointer is where the detail lives, so a reader is never left to
+        # choose between a wall and nothing. It yields to the boundary's own
+        # line budget: the control fields come first.
+        try:
+            return render_boundary(OperationalBoundary(*fields, pointer), response_class=klass)
+        except ValueError:
+            pass
+    return render_boundary(OperationalBoundary(*fields), response_class=klass)
+
+
+#: The operations at which "what this run completed" starts over: a stop, and
+#: every operator ingress (a user request, a goal). T-1659: the window used to
+#: be the last stop alone, and a project that is never stopped never reset it
+#: -- one answered `133 completed` after a run that finished a single ticket.
+RUN_BOUNDARY_OPS = ("stop-", "userreq-", "goal-", "goal-entry-")
 
 
 def canonical_facts(root, *, status: dict | None = None) -> dict:
@@ -560,18 +1091,65 @@ def canonical_facts(root, *, status: dict | None = None) -> dict:
     since = max(
         (e["event"] for e in events if str(e.get("op_id") or "").startswith("stop-")), default=0
     )
+    # `since` stays the last STOP: it alone decides the stop reason below.
+    run_start = max(
+        (e["event"] for e in events if str(e.get("op_id") or "").startswith(RUN_BOUNDARY_OPS)),
+        default=0,
+    )
     completed = sorted(
         {
             e.get("ticket")
             for e in events
-            if e["event"] > since
+            if e["event"] > run_start
             and str(e.get("op_id") or "").startswith("finish-")
             and str(e.get("text") or "").startswith("ticket finished via SAIOPS")
             and e.get("taxonomy") == "DEC"
             and e.get("ticket")
         }
     )
-    record = core_unit.reusable_record(base, core_unit.tree_fingerprint(base))
+    # Where the detail of what was completed lives: for the ticket this run
+    # finished last, its last verification verdict and its finish event.
+    # Machine-written shapes only; the pointer never quotes what they say.
+    # The NEWEST completion, not the first by name: the detail a reader wants
+    # is of the last ticket the run finished.
+    finishes = sorted(
+        (e["event"], e.get("ticket"))
+        for e in events
+        if e["event"] > run_start
+        and str(e.get("op_id") or "").startswith("finish-")
+        and e.get("ticket") in completed
+    )
+    recent: list[str] = []
+    for _number, ticket in reversed(finishes):
+        if ticket not in recent:
+            recent.append(ticket)
+        if len(recent) == 1:
+            break
+    detail_refs: list[str] = []
+    for ticket in reversed(recent):
+        verified = [
+            e["event"]
+            for e in events
+            if e.get("ticket") == ticket
+            and e.get("taxonomy") == "RUN"
+            and str(e.get("text") or "").startswith("verify -> PASS")
+        ]
+        finished = [number for number, name in finishes if name == ticket]
+        for number in (verified[-1:] + finished[-1:]):
+            detail_refs.append(f"E-{int(number):03d}")
+    # The family record is found by hashing the whole tree. A project that
+    # declares no family can hold none, and hashing a large product tree to
+    # learn that cost 22 of the 25 seconds this function took there (measured
+    # 2026-10-07): a compact form nobody can afford to ask for is not used.
+    record = None
+    if core_unit.declared(base) and (base / core_unit.RECORD_DIR_REL).is_dir():
+        record = core_unit.reusable_record(base, core_unit.tree_fingerprint(base))
+    # T-1658: the project's own declared suite, for any project. Only a record
+    # of the declared command whose tree is the current tree; nothing is read
+    # from LOG text, and a project that declares none pays no git call.
+    from . import suite_record
+
+    suite = suite_record.current_record(base)
     current = (status or {}).get("conformance_status") or conformance_status(base, gate="core")
     auto = (status or {}).get("automation") or {}
     facts = {
@@ -585,7 +1163,9 @@ def canonical_facts(root, *, status: dict | None = None) -> dict:
             for t in board["tickets"].values()
             if t["section"] == "## BLOCKED"
         ],
-        "evidence": [record["path"]] if record else [],
+        "evidence": [found["path"] for found in (record, suite) if found],
+        "suite_groups": [suite_record.digest_group(suite["record"])] if suite else [],
+        "detail_refs": detail_refs,
         "test_groups": [
             {
                 "ran": record["record"].get("ran", 0),
@@ -601,18 +1181,56 @@ def canonical_facts(root, *, status: dict | None = None) -> dict:
         else [],
         "response_reason": "stop" if since and state.get("last_event") == since else "final",
     }
+    if auto.get("disposition") == "BLOCKED" and auto.get("reason_code") == "audit-inbox-unworkable":
+        # The router's diagnostic is a stop, never another synthetic cc or a
+        # request for operator authority. Preserve the actual lifecycle phase.
+        facts["blocker"] = "AUDIT_INBOX_UNWORKABLE -- ACTIVE audit"
+        facts["next_action"] = "NONE"
+    primary = auto.get("primary_blocker")
+    if isinstance(primary, dict) and primary.get("cause") == "publication-staging":
+        facts["blocker"] = (
+            "WAIT_USER_DECISION -- shared release index; foreign staging remains protected"
+        )
+        facts["operator_action"] = (primary.get("recovery_operation") or {}).get("operator_action")
+        facts["next_action"] = "NONE"
+    invalid_stops = {
+        "audit-inbox-invalid": "AUDIT_INBOX_INVALID -- unreadable audit layer",
+        "queued-source-invalid": "QUEUED_SOURCE_INVALID -- unreadable queued Source",
+    }
+    if auto.get("disposition") == "INVALID" and auto.get("reason_code") in invalid_stops:
+        facts["blocker"] = invalid_stops[auto["reason_code"]]
+        facts["next_action"] = "NONE"
     if facts["operator_due"]:
         # STATE's legal WAIT owns the actual required decision. Do not print
         # the router's generic prose or assign its command to the operator.
         wait = str(state.get("next_action") or "")
-        if wait.startswith("WAIT:"):
+        if auto.get("operator_action"):
+            facts["operator_action"] = auto["operator_action"]
+        elif wait.startswith("WAIT:"):
             facts["operator_action"] = wait[5:].strip()
+    from .inflight import lane
+
+    active_gate = (status or {}).get("inflight") or lane(base)
+    if active_gate and active_gate.get("ticket") == state.get("task"):
+        facts["inflight"] = active_gate
+        facts["next_action"] = f"await core-unit PID {active_gate['pid']} completion"
+    if auto.get("reason_code") in ("reconcile-decision", "reconcile-refused"):
+        # T-1751: no STATE WAIT carries a reconcile refusal; the automation
+        # block does, from its owner. The persisted next_action is the route
+        # the continuation refuses, so it is never printed as the next step.
+        code = str(auto.get("reconcile_code") or "RECONCILE_REFUSED")
+        facts["blocker"] = f"{code} -- recovery refuses the continuation; saipen recover --json"
+        if auto.get("operator_action"):
+            facts["operator_action"] = auto["operator_action"]
+        facts["next_action"] = "NONE"
     return facts
 
 
 def reason_for_request(request: object) -> str:
     if not isinstance(request, str):
         return "final"
+    if _diagnosis_request(request):
+        return "summary"
     if re.fullmatch(
         r"\s*(?:(?:saipen\s+)?(?:stop|st)|peatu|стоп|остановись)\s*[.!]?\s*", request, re.IGNORECASE
     ):
@@ -700,6 +1318,39 @@ class OperationalBoundary:
         return values
 
 
+#: T-1821: the separator between canonical fields is a MARKDOWN HARD BREAK
+#: (two spaces then a newline), not a bare newline. The surface is delivered into
+#: Markdown hosts, and CommonMark/GFM treats a newline inside a paragraph run as
+#: a soft break -- the fields collapse into one paragraph. Measured on the
+#: operator's own host (Streamdown: remark-gfm, no remark-breaks): the AST of
+#: `"a\nb"` is ONE text node, while `"a  \nb"` is text/`break`/text, and
+#: `parseMarkdownIntoBlocks` keeps both in one block either way. The report the
+#: operator called "one enormous paragraph" was this renderer's output: six
+#: correct fields delivered as one run of prose. A two-space hard break keeps
+#: one visible line per field, so the line budget in EXECUTION.md ("labels,
+#: blanks, fences included") is unchanged and nothing is granted.
+FIELD_SEPARATOR = "  \n"
+
+
+def _field_text(value: object) -> str:
+    """One field's value, with every internal line hard-broken for Markdown.
+
+    T-1821: the separator between fields was only half the collapse. An
+    authorized DETAILS value that carries its own newlines (a reference list,
+    an audit block) reintroduced exactly the same soft break one level down, so
+    a report the operator explicitly asked for still arrived as one paragraph.
+    The fix belongs to the value, not to the caller: normalize every line end
+    inside the value to the same hard break the separator uses. The visible
+    line count and the character budget are unchanged apart from the two spaces
+    per break, which is what makes the lines visibly separate.
+    """
+    text = str(value or "").strip()
+    if not text:
+        return ""
+    lines = [line.rstrip() for line in text.replace("\r\n", "\n").replace("\r", "\n").split("\n")]
+    return FIELD_SEPARATOR.join(lines)
+
+
 def render_boundary(
     boundary: OperationalBoundary,
     *,
@@ -709,8 +1360,8 @@ def render_boundary(
 ) -> str:
     """Assemble one operational handback from typed fields, then validate it."""
     fields = boundary.fields()
-    rendered = "\n".join(
-        f"{key}: {value.strip()}"
+    rendered = FIELD_SEPARATOR.join(
+        f"{key}: {_field_text(value)}"
         for key, value in fields.items()
         if key not in ("BLOCKER", "OPERATOR ACTION") or not _is_none(value)
     )
@@ -732,6 +1383,7 @@ def response_errors(
     response_boundary: bool = True,
     current_validation: str | None = None,
     current_phase: str | None = None,
+    current_idle_disposition: str | None = None,
     current_task: str | None = None,
     current_blocker: str | None = None,
     operator_due: bool = False,
@@ -761,7 +1413,23 @@ def response_errors(
         )
     if values.get("STATUS", "").upper().startswith("WAIT") and _is_none(operator_action):
         errors.append("WAIT without OPERATOR ACTION is invalid")
-    if should_continue(
+    status_upper = values.get("STATUS", "").upper()
+    is_terminal = status_upper.startswith(("DONE", "COMPLETE", "UNKNOWN", "IDLE"))
+    has_blocker = not _is_none(blocker) and bool(blocker.strip())
+    # Continuation discipline (T-1916): an agent that has named an executable next
+    # action must execute it in the same turn tool-to-tool. A COMPACT_FINAL handback
+    # naming an executable command without a human gate, blocker or terminal result
+    # is an invalid autonomous handback.
+    if (
+        is_executable_command(next_action)
+        and _is_none(operator_action)
+        and not operator_due
+        and not has_blocker
+        and not is_terminal
+        and not status_upper.startswith("WAIT")
+    ):
+        errors.append("eligible autonomous action remains; returning control is invalid")
+    elif should_continue(
         operator_action=operator_action,
         executable_action_remains=executable_action_remains,
         response_boundary=response_boundary,
@@ -788,10 +1456,15 @@ def response_errors(
     # T-1556 #1: DETAILS is authorization-gated before it is budgeted. A
     # forbidden field is refused whatever its size, and an authorized one is
     # still bounded.
-    if "DETAILS" in values and detail_mode == DETAIL_MODE_NONE:
+    if (
+        "DETAILS" in values
+        and detail_mode == DETAIL_MODE_NONE
+        and not details_is_pointer(values["DETAILS"])
+    ):
         errors.append(
             "DETAILS is not authorized on an ordinary response -- the detailed "
-            "path is an explicit report, audit, handoff or exceptional boundary"
+            "path is an explicit report, audit, handoff or exceptional boundary; "
+            "an ordinary response may carry one short line of references only"
         )
     # T-1576: EFFICIENCY is derived telemetry for the FINAL report. Silent
     # execution has no KPI heartbeat, so a STATUS that names an in-flight
@@ -864,6 +1537,7 @@ def response_errors(
             errors.append(f"VALIDATION must start with current {current_validation}")
     current_status = values.get("STATUS", "").upper()
     if current_phase:
+        expected_phase = _display_phase(current_phase.upper(), current_idle_disposition)
         raw_status = values.get("STATUS", "")
         status_tokens = set(re.findall(r"(?<![\w-])[A-Z][A-Z_]*(?![\w-])", raw_status))
         named_phases = status_tokens & ALL_PHASES
@@ -875,10 +1549,10 @@ def response_errors(
         leading_task = head.group(1) if head else None
         is_operator_wait = leading_task is None and leading_phase == "WAIT" and operator_due
         valid_head = (
-            leading_phase == current_phase.upper()
+            leading_phase == expected_phase
             and (leading_task is None or leading_task == current_task)
         ) or is_operator_wait
-        phase_matches = named_phases == {current_phase.upper()} or (
+        phase_matches = named_phases == ({expected_phase} & ALL_PHASES) or (
             is_operator_wait and not named_phases
         )
         if not valid_head or not phase_matches:
@@ -1060,7 +1734,12 @@ def classify_final_response(
         ]
     human_request = check_context.pop("human_request", "")
     request_authority = check_context.pop("request_authority", None)
-    witnessed = human_response_authority(human_request, request_authority)
+    diagnosis_root = check_context.pop("diagnosis_root", None)
+    witnessed = human_response_authority(human_request, request_authority, root=diagnosis_root)
+    if _diagnosis_request(human_request) and not witnessed:
+        return CLASS_INVALID_OPERATIONAL_PROSE, [
+            "protocol diagnosis needs independently verified operator ingress and caller project"
+        ]
     detail_mode = detail_mode_for_request(human_request) if witnessed else DETAIL_MODE_NONE
     if requested_mode != DETAIL_MODE_NONE and requested_mode != detail_mode:
         return CLASS_INVALID_OPERATIONAL_PROSE, [
@@ -1068,6 +1747,14 @@ def classify_final_response(
         ]
     check_context["detail_mode"] = detail_mode
     artifact = artifact_for_request(human_request) if witnessed else None
+    if artifact == "PROTOCOL_DIAGNOSIS":
+        text = rendered if isinstance(rendered, str) else ""
+        if len(text) > ARTIFACT_CHAR_BUDGET:
+            return CLASS_INVALID_OPERATIONAL_PROSE, [
+                "diagnosis exceeds its bounded artifact carrier"
+            ]
+        errors = _diagnosis_errors(text, human_request, diagnosis_root)
+        return (CLASS_INVALID_OPERATIONAL_PROSE, errors) if errors else (CLASS_ORDINARY_CHAT, [])
     if artifact and not operational_turn:
         text = rendered if isinstance(rendered, str) else ""
         if len(text) > ARTIFACT_CHAR_BUDGET:
@@ -1144,6 +1831,65 @@ def classify_final_response(
     return CLASS_INVALID_OPERATIONAL_PROSE, errors
 
 
+def gate_operator_question(tool_input: object, *, context: dict | None = None) -> dict:
+    """OPERATOR-QUESTION-01: a native question is the same control handback.
+
+    Context is supplied by the canonical status/response owners in the CLI,
+    never taken from the host's question payload, chat or session files.
+    Without typed choices in the canonical facts, no choice may be invented.
+    """
+    from . import automation
+
+    context = context if isinstance(context, dict) else {}
+    status = context.get("status") or {}
+    auto = status.get("automation") or {}
+    disposition = auto.get("disposition")
+    valid = (
+        status.get("ok") is True and auto.get("schema_version") == automation.SCHEMA_VERSION
+        and disposition in automation.DISPOSITIONS
+        and isinstance(auto.get("operator_action_due"), bool)
+    )
+    eligible = valid and disposition != automation.INVALID and (
+        auto.get("operator_action_due") is True
+    )
+    canonical = str(context.get("operator_action") or "").strip()
+    questions = tool_input.get("questions") if isinstance(tool_input, dict) else None
+    exact = (
+        isinstance(questions, list) and len(questions) == 1
+        and isinstance(questions[0], dict) and bool(canonical)
+        and questions[0].get("question") == canonical
+        and questions[0].get("options", []) == []
+        and not questions[0].get("multiSelect")
+        and not tool_input.get("answers")
+    )
+    admitted = bool(eligible and exact)
+    klass = (
+        CLASS_VALID_BOUNDARY if admitted else CLASS_AUTONOMOUS_HANDBACK
+        if valid and disposition == automation.CONTINUE and not eligible
+        else CLASS_INVALID_OPERATIONAL_PROSE
+    )
+    command = (
+        "saipen continue --json" if valid and disposition == automation.CONTINUE and not eligible
+        else "saipen status --json"
+    )
+    detail = (
+        "canonical operator control surface admitted" if admitted else
+        f"{klass} -- OPERATOR-QUESTION-01: "
+        + ("present canonical_surface only; no improvised question or choices; " if eligible
+           else "no canonical operator decision is due; " if valid
+           else "canonical question authority unavailable; ")
+        + f"use {command}"
+    )
+    return {
+        "schema_version": 1, "rule": "OPERATOR-QUESTION-01", "class": klass,
+        "eligible": bool(eligible), "admitted": admitted,
+        "disposition": disposition if valid else automation.INVALID,
+        "next_action": status.get("computed_next_action") if valid else None,
+        "canonical_next_command": command, "detail": detail,
+        "canonical_surface": context.get("canonical_surface") if eligible else None,
+    }
+
+
 def gate_final_response(
     text: object,
     *,
@@ -1193,7 +1939,9 @@ def gate_final_response(
         }
     ingress = check_context.get("human_request", "")
     provenance = check_context.get("request_authority")
-    authorized = human_response_authority(ingress, provenance)
+    authorized = human_response_authority(
+        ingress, provenance, root=check_context.get("diagnosis_root"),
+    )
     delivered_reason = (
         reason_for_request(ingress) if authorized else (facts or {}).get("response_reason", "final")
     )
@@ -1202,6 +1950,7 @@ def gate_final_response(
         # diagnostic --auto-eligibility flag. A runnable project must not emit
         # an empty digest and then reject it as an invalid empty boundary.
         auto = facts.get("automation") or {}
+        check_context["current_idle_disposition"] = auto.get("disposition")
         executable_action_remains = bool(
             facts.get("executable_action_remains")
             or (auto.get("disposition") == "CONTINUE" and auto.get("next_command"))
@@ -1276,6 +2025,23 @@ def gate_final_response(
         layers["exec_response"] = "PASS" if klass == CLASS_VALID_BOUNDARY else "NOT_APPLICABLE"
         layers["chat_style"] = "PASS" if style_contract is not None else "NOT_EVALUATED"
         layer = LAYER_NONE
+    overflow = None
+    if operational_turn or claims_operational_finality(text):
+        # The size rules as data, with what became of the reply: a capable
+        # host delivers the compact form, and the original has one home.
+        overflow = overflow_diagnostic(
+            text,
+            detail_mode=detail_mode_for_request(ingress) if authorized else DETAIL_MODE_NONE,
+            operator_due=bool(check_context.get("operator_due")),
+        )
+        if overflow is not None:
+            overflow["compaction"] = (
+                COMPACTION_SUCCEEDED
+                if delivery is not None and delivery_validation == "PASS"
+                else COMPACTION_FAILED
+                if delivery_validation == "COMPACT_FAILURE"
+                else COMPACTION_NOT_ATTEMPTED
+            )
     return {
         "ok": klass in (CLASS_VALID_BOUNDARY, CLASS_ORDINARY_CHAT),
         "layer": layer,
@@ -1283,8 +2049,12 @@ def gate_final_response(
         "errors": errors,
         "diagnostic": None,
         "layers": layers,
+        "overflow": overflow,
         # This is the delivery candidate, not an apology or a second model
         # attempt. A capable host replaces operational model output with it.
         "delivery": delivery,
         "delivery_validation": delivery_validation,
+        **({"diagnosis_verification": "STRUCTURE_AND_CITATIONS_ONLY",
+            "semantic_review": "REQUIRED"}
+           if authorized and artifact_for_request(ingress) == "PROTOCOL_DIAGNOSIS" else {}),
     }

@@ -11,7 +11,7 @@ import re
 from dataclasses import dataclass
 from pathlib import Path
 
-from . import intake
+from . import board, intake
 
 GRANT_HEADER = "This message supplies operator authority for Work supersession:"
 GRANT_TERMINATOR = "only."
@@ -29,7 +29,11 @@ _EVENT_RE = re.compile(r"^E-(\d+)$")
 _GRANT_ITEM_RE = re.compile(r"^[ \t]*(T-\d+)[ \t]+-[ \t]+(T-\d+)[ \t]*$")
 _FENCE_RE = re.compile(r"^[ \t]{0,3}(```|~~~)")
 _TARGET_PASS_RE = re.compile(r"^verify -> PASS \[target: (T-\d+)\](?:\s|$)")
-_COMPLETION_RE = re.compile(r"^ticket finished via SAIOPS -- completion(?: \(from SHIP\))?$")
+_COMPLETION_RE = re.compile(
+    r"^ticket finished via SAIOPS -- completion(?: \(from SHIP\))?"
+    + board.PUBLICATION_SUFFIX_RE
+    + r"$"
+)
 
 
 @dataclass(frozen=True)
@@ -119,6 +123,7 @@ def authority_error(
     *,
     old_ticket: str,
     successor_ticket: str,
+    historical: bool = False,
 ) -> tuple[str | None, dict | None]:
     """Return why stored operator authority does not grant this exact pair."""
     if not intake._valid_receipt_id(authority_receipt):
@@ -141,6 +146,14 @@ def authority_error(
     integrity = intake.verify_integrity(root, authority_receipt)
     if not integrity["ok"]:
         return f"authority receipt {authority_receipt}: {integrity['code']}", None
+    from .operator_task import authority_for_receipt, received_source_origin
+
+    permitted = (
+        received_source_origin(root, authority_receipt, action="supersede") if historical
+        else authority_for_receipt(root, authority_receipt)["work_supersession"]
+    )
+    if not permitted:
+        return f"authority receipt {authority_receipt} has no native Work supersession grant", None
     body = intake.read_body(root, authority_receipt)
     if not body.get("ok"):
         return f"authority receipt {authority_receipt} body unreadable", None

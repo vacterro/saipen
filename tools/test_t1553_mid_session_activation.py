@@ -748,8 +748,10 @@ class HostileResponseMatrix(unittest.TestCase):
 
     def _human_context(self, context):
         """Positive detail-budget controls carry the actual operator grant."""
+        from hashlib import sha256
         from saipen_engine.operator_task import witness
-        from test_fixture_support import operator_request_env
+        from test_operator_origin_support import native_operator
+        from test_t1363_zero_manual_entry import healthy
 
         requests = {
             DETAIL_MODE_REPORT: "write a detailed report of the change",
@@ -757,15 +759,16 @@ class HostileResponseMatrix(unittest.TestCase):
             DETAIL_MODE_HANDOFF: "write a complete implementation handoff",
         }
         request = requests.get(context.get("detail_mode"))
-        return (
-            {
-                **context,
-                "human_request": request,
-                "request_authority": witness(request, env=operator_request_env(request)),
-            }
-            if request
-            else context
-        )
+        if not request:
+            return context
+        root = context.get("diagnosis_root") or getattr(self, "_response_root", None)
+        if root is None:
+            root = self._response_root = healthy(self)
+        event = "detail-request-" + sha256(request.encode()).hexdigest()
+        with native_operator(root, request, action="report", event_id=event):
+            provenance = witness(request, root=root)
+        return {**context, "human_request": request, "request_authority": provenance,
+                "diagnosis_root": root}
 
     def _reject(self, rendered: str, **context) -> list[str]:
         errors = response_errors(rendered, **context)
@@ -1043,18 +1046,34 @@ class ResponseCliTransportTests(unittest.TestCase):
         from test_fixture_support import operator_request_env
 
         env = dict(os.environ)
+        project_flags = []
+        root = None
+        request = None
         if "--request" in flags:
-            env.update(operator_request_env(flags[flags.index("--request") + 1]))
-        proc = subprocess.run(
-            [
+            from test_operator_origin_support import cold_command
+            from test_orchestration_repair import OrchestrationFixture
+
+            fixture = OrchestrationFixture()
+            self.addCleanup(fixture.doCleanups)
+            root = fixture.make_project(phase="PLAN")
+            fixture.add(root, "response-check context fixture")
+            request = flags[flags.index("--request") + 1]
+            env.update(operator_request_env(request))
+            project_flags = ["--project-root", str(root)]
+        command = [
                 PYTHON,
                 str(REPO / "tools" / "saipen.py"),
                 "response",
                 "check",
                 "--stdin",
                 "--json",
+                *project_flags,
                 *flags,
-            ],
+        ]
+        if root is not None:
+            command = cold_command(root, command, env, operator_text=request, action="report")
+        proc = subprocess.run(
+            command,
             input=text,
             capture_output=True,
             text=True,

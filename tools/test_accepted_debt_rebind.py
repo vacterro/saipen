@@ -107,8 +107,14 @@ class RebindFixture(unittest.TestCase):
         )
         self.ad_path = self.root / AD_DIR / "AD-000001.json"
 
-    def _register(self, events: list[str], authority: str = "SRC-047") -> dict:
+    def _register(self, events: list[str], authority: str | None = None) -> dict:
         from saipen_engine.accepted_debt import register
+        from saipen_engine.journal import ensure_project_lineage
+        from test_accepted_debt import native_debt_authority
+
+        ensure_project_lineage(self.root)
+        if authority is None:
+            authority = native_debt_authority(self, events, REASON)
 
         result = register(
             self.root, agent="probe", events=events, reason=REASON, authority=authority

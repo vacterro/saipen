@@ -45,6 +45,8 @@ import tempfile
 import time
 import unittest
 from pathlib import Path
+
+from saipen_engine.process_tree import run as run_host
 from typing import ClassVar
 
 TOOLS = Path(__file__).resolve().parent
@@ -247,7 +249,7 @@ class OpenCodeLiveSession(unittest.TestCase):
         # script, and no `saipen` launcher exists on this machine's PATH. The
         # session must therefore succeed ONLY because the installed adapter
         # materialises and PATH-injects the launcher itself (T-1318 AC-05).
-        proc = subprocess.run(
+        proc = run_host(
             INJECT_COMMAND,
             capture_output=True, text=True, env=cls._host_env(), timeout=900,
         )
@@ -389,7 +391,7 @@ class OpenCodeLiveSession(unittest.TestCase):
                 "--model", model,
             ]
             began = int(time.time() * 1000)
-            proc = subprocess.run(
+            proc = run_host(
                 command, cwd=str(project), env=cls._host_env(),
                 capture_output=True, text=True, timeout=1800,
             )

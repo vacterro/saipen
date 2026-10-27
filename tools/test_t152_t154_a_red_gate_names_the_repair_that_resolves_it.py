@@ -142,7 +142,7 @@ class ProducerLifecycleRouteIsRecoverable(unittest.TestCase):
 class ImproveReportRouteNamesTheFailingCycle(unittest.TestCase):
     """T-152: the route set is the FAILING population, not the scanned one."""
 
-    CYCLES = [
+    CYCLES = [  # noqa: RUF012
         "imp-vacterro-saipal-20260916-1",
         "imp-vacterro-saipal-20260929-1",
         "imp-vacterro-saipal-20260929-2",
@@ -223,7 +223,7 @@ class OtherTruncationSitesCarryNoEmbeddedRepair(unittest.TestCase):
     elsewhere, this fails and names the site.
     """
 
-    SITES = [1477, 2357, 2382, 2398, 3040, 3620, 4507]
+    SITES = [1477, 2357, 2382, 2398, 3040, 3620, 4507]  # noqa: RUF012
 
     def test_no_other_site_embeds_a_command_in_a_truncated_element(self) -> None:
         lines = VALIDATOR.splitlines()

@@ -20,7 +20,8 @@ midagi. Olek kuulub projektil, mitte ühe mudeli tootjate mälestusele.
 **Üks käsk jätkamiseks. Lihtfaili olek. Masina kontrollitud lepingud.**
 
 Repo valideerib ise iga pushiga; install, olek, kontrollid ja
-eemaldamine on kohaline — ei ole ühtegi pilveteenust, ei daemoni, ei andmebaasi.
+eemaldamine on kohalikud — pilveteenust ega andmebaasi pole vaja.
+Claude Code’i esimene päring käivitab kohaliku abiprotsessi, mis sulgub, kui see on jõude ja ükski host enam ei tööta.
 
 [![Validation](https://github.com/vacterro/saipen/actions/workflows/validate.yml/badge.svg)](https://github.com/vacterro/saipen/actions/workflows/validate.yml)
 [![Release](https://img.shields.io/github/v/release/vacterro/saipen?sort=semver&label=release)](https://github.com/vacterro/saipen/releases)
@@ -84,7 +85,7 @@ bash bootstrap/inject.sh                                            # macOS / Li
 failid, mida sul juba on(`~/.claude/CLAUDE.md`, `~/.config/opencode/AGENTS.md`,
 `~/.codex/AGENTS.md`, `~/.gemini/GEMINI.md`)— kopeerimine igaühele`.bak`esimese —
 ja kopeerib protokollide failid vastavate oskustega kataloogidesse. Midagi väljaspool neid
-teed, ei deemoni, ei võrguühendusi.</sub>
+teed, ei võrguühendusi.</sub>
 
 **2. Alusta projektiga**— avage oma kataloogis agent, sisestage:
 

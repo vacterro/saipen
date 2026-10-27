@@ -20,7 +20,8 @@ anything. State belongs to the project, not to one model vendor's memory.
 **One command to resume. Plain-file state. Machine-checked contracts.**
 
 The repository validates itself on every push; install, state, checks, and
-uninstall are all local — no cloud service, no daemon, no database.
+uninstall are all local — no cloud service or database.
+For Claude Code, a local helper starts on the first prompt and exits when idle with no host running.
 
 [![Validation](https://github.com/vacterro/saipen/actions/workflows/validate.yml/badge.svg)](https://github.com/vacterro/saipen/actions/workflows/validate.yml)
 [![Release](https://img.shields.io/github/v/release/vacterro/saipen?sort=semver&label=release)](https://github.com/vacterro/saipen/releases)
@@ -75,7 +76,7 @@ session ends.
 ## Quick start
 
 Requires **Git, Python 3.11 or newer**, and a coding agent. No `pip` install,
-account, server, or daemon is needed. Keep the clone until you uninstall;
+SAIPEN account or manually managed server is needed. Keep the clone until you uninstall;
 the installed agent instructions and update checks refer to its location.
 
 **1. Clone once:**

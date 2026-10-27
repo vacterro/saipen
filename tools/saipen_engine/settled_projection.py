@@ -25,12 +25,25 @@ population and never with a lifetime namespace enumeration. The namespace
 freshness token (``settled_dir_mtime_ns``) is captured before the settlement
 move and republished with every head, so a crash between the receipt move and
 the projection advance is detected by a single stat instead of an O(N) scan.
+
+SRC-026:R009 / T-1304: production settlement advances this projection, and the
+monolithic index it replaces is gone. That index also cached every decoded
+record, which is what kept a WHOLE-history snapshot from decoding every receipt
+again; settlement paid for it by re-authenticating and rewriting the whole file
+(37 MB and 6 s per command at 10829 receipts, measured). The same service is
+kept here at bounded cost as a DECODE MEMO beside the segments (`rec/`): one
+file per segment, each entry a decoded record under the exact digests of the
+bytes it was decoded from. The memo is never authority and never needs to be
+fresh -- a reader keys it by the bytes it has just read, so a stale or missing
+entry costs one strict decode and can not return a wrong record.
 """
 
 from __future__ import annotations
 
+import contextlib
 import hashlib
 import json
+import time
 from pathlib import Path
 
 #: Fixed documented bound. Tests use it explicitly; it is never tuned from
@@ -53,6 +66,19 @@ _SETTLED_SKIP_NAMES = {".cleanup-needed", ".receipt-index.json"}
 _ROOT_DOMAIN = b"saipen-settled-projection-v2\0"
 _SEGMENT_DOMAIN = b"saipen-settled-segment-v2\0"
 _LOCATOR_DOMAIN = b"saipen-settled-locator-v2\0"
+_RECORDS_DOMAIN = b"saipen-settled-records-v1\0"
+
+#: The decode memo: one document per segment id, beside the segments.
+RECORDS_DIR_REL = f"{INDEX_DIR_REL}/rec"
+RECORDS_SCHEMA_VERSION = 1
+
+#: What `state` answers. ABSENT and STALE are honest conditions a reader
+#: answers from the receipts themselves; UNTRUSTED is bytes that exist and fail
+#: verification, which no reader may scan around.
+STATE_ABSENT = "ABSENT"
+STATE_CURRENT = "CURRENT"
+STATE_STALE = "STALE"
+STATE_UNTRUSTED = "UNTRUSTED"
 
 
 def _canonical(payload) -> bytes:
@@ -79,6 +105,33 @@ def _index_path(root: Path, rel: str) -> Path:
     return owned_target_path(root, rel, kind="settled projection")
 
 
+#: Looks a reader takes at a document a settlement is replacing: 5 ms doubling
+#: to a 50 ms cap, about 0.4 s in all. What clears the race is the number of
+#: looks, not the length of one sleep (KNOWLEDGE card
+#: windows-replace-read-sharing-race).
+_READ_ATTEMPTS = 12
+
+
+def _read_contended(path: Path) -> bytes:
+    """Read one projection document a settlement may be replacing right now.
+
+    Readers hold no lock, and since SRC-026:R009 a writer replaces these
+    documents on every settlement. On Windows a read that meets that replace
+    is refused as PermissionError: contention, never damage. A reader that
+    believed it at once would report a healthy projection as untrusted, and
+    the operation query would refuse over nothing. A missing file is answered
+    immediately.
+    """
+    for attempt in range(1, _READ_ATTEMPTS + 1):
+        try:
+            return path.read_bytes()
+        except PermissionError:
+            if attempt == _READ_ATTEMPTS:
+                raise
+            time.sleep(min(0.005 * 2 ** (attempt - 1), 0.05))
+    raise AssertionError("unreachable")
+
+
 def _read_authenticated(path: Path, payload_keys: tuple[str, ...], domain: bytes):
     """Read one root-authenticated projection document, or return None.
 
@@ -89,7 +142,7 @@ def _read_authenticated(path: Path, payload_keys: tuple[str, ...], domain: bytes
 
     try:
         prove_owned_regular(path, kind="settled projection")
-        document = json.loads(path.read_bytes().decode("utf-8-sig"))
+        document = json.loads(_read_contended(path).decode("utf-8-sig"))
     except (FileNotFoundError, OSError, ValueError, UnicodeDecodeError, json.JSONDecodeError):
         return None
     if not isinstance(document, dict):
@@ -149,6 +202,127 @@ def _settled_dir_token(root: Path) -> int | None:
         return 0
     except OSError:
         return None
+
+
+def namespace_token(root: Path) -> int | None:
+    """The freshness token settlement captures BEFORE it moves a receipt."""
+    return _settled_dir_token(Path(root))
+
+
+def state(root: Path) -> str:
+    """Whether the bounded path may answer: one head read and one stat.
+
+    CURRENT   the head binds the namespace as it is now;
+    STALE     an honestly published head the namespace has moved past (a crash
+              between a receipt move and the advance, or maintenance that
+              touched the namespace) -- the next settlement rebuilds it;
+    ABSENT    no head, or a head of an older projection generation;
+    UNTRUSTED head bytes that fail verification, a foreign lineage, or a
+              namespace that cannot be read.
+    """
+    root = Path(root)
+    head = _read_head(root)
+    if head is None:
+        if not _index_path(root, HEAD_REL).exists() or _head_is_legacy_v2(root):
+            return STATE_ABSENT
+        return STATE_UNTRUSTED
+    payload, _ = head
+    from .paths import project_lineage_identity
+
+    if payload.get("lineage") != project_lineage_identity(root):
+        return STATE_UNTRUSTED
+    token = _settled_dir_token(root)
+    if token is None:
+        return STATE_UNTRUSTED
+    return STATE_CURRENT if token == payload.get("settled_dir_mtime_ns") else STATE_STALE
+
+
+def _memo_entry(member: dict, record: dict) -> dict:
+    return {
+        "name": member["name"],
+        "manifest_sha256": member["manifest_sha256"],
+        "progress_sha256": member["progress_sha256"],
+        "record": record,
+    }
+
+
+def _write_record_memo(root: Path, segment_id: str, entries: list[dict]) -> None:
+    from .paths import safe_atomic_write_bytes
+
+    payload = {
+        "schema_version": RECORDS_SCHEMA_VERSION,
+        "segment_id": segment_id,
+        "entries": sorted(entries, key=lambda entry: entry["name"]),
+    }
+    document = dict(payload)
+    document["root"] = _content_root(_RECORDS_DOMAIN, payload)
+    safe_atomic_write_bytes(
+        _index_path(root, f"{RECORDS_DIR_REL}/{segment_id}.json"),
+        _canonical(document) + b"\n",
+        kind="settled projection record memo",
+        ownership_root=root,
+    )
+
+
+def _read_record_memo(root: Path, segment_id: str) -> list[dict] | None:
+    """One memo document, root-verified, or None."""
+    result = _read_authenticated(
+        _index_path(root, f"{RECORDS_DIR_REL}/{segment_id}.json"),
+        ("schema_version", "segment_id", "entries"),
+        _RECORDS_DOMAIN,
+    )
+    if result is None:
+        return None
+    payload, _ = result
+    entries = payload.get("entries")
+    if (
+        payload.get("schema_version") != RECORDS_SCHEMA_VERSION
+        or payload.get("segment_id") != segment_id
+        or not isinstance(entries, list)
+    ):
+        return None
+    if any(
+        not isinstance(entry, dict)
+        or not isinstance(entry.get("name"), str)
+        or not isinstance(entry.get("manifest_sha256"), str)
+        or not isinstance(entry.get("record"), dict)
+        for entry in entries
+    ):
+        return None
+    return entries
+
+
+def _publish_record_memo(root: Path, segment_id: str, entries: list[dict]) -> None:
+    """Write one memo document; a failure costs decodes later, never truth."""
+    with contextlib.suppress(OSError, ValueError, TypeError):
+        _write_record_memo(root, segment_id, entries)
+
+
+def record_memo(root: Path) -> dict[tuple[str, str, str | None], dict]:
+    """Every memoized decode, keyed `(name, manifest digest, progress digest)`.
+
+    The caller holds the exact bytes of a settled receipt and asks whether
+    THOSE bytes were already decoded. Freshness is therefore irrelevant and
+    never checked: an entry for bytes that no longer exist is simply never
+    asked for. A memo document that is missing or fails its own root is
+    skipped whole, and its receipts are decoded strictly by the caller.
+    """
+    root = Path(root)
+    try:
+        base = _index_path(root, RECORDS_DIR_REL)
+        names = sorted(entry.name for entry in base.iterdir() if entry.name.endswith(".json"))
+    except (OSError, ValueError):
+        return {}
+    memo: dict[tuple[str, str, str | None], dict] = {}
+    for name in names:
+        entries = _read_record_memo(root, name[: -len(".json")])
+        if entries is None:
+            continue
+        for entry in entries:
+            memo[(entry["name"], entry["manifest_sha256"], entry.get("progress_sha256"))] = entry[
+                "record"
+            ]
+    return memo
 
 
 def _head_is_legacy_v2(root: Path) -> bool:
@@ -345,11 +519,23 @@ def rebuild_projection(root: Path) -> dict:
     lock (settlement already does).
     """
     root = Path(root)
-    from .journal import SETTLED_DIR, _receipt_namespace_entries, decode_operation_record
+    from .journal import (
+        SETTLED_DIR,
+        SETTLED_INDEX_REL,
+        _receipt_namespace_entries,
+        decode_operation_record,
+    )
     from .paths import project_lineage_identity
 
     lineage = project_lineage_identity(root)
+    # The retired monolithic index (SRC-026:R009) is engine bookkeeping this
+    # rebuild supersedes: nothing reads it, and at 10829 receipts it is 37 MB.
+    # Removed here, before the freshness token is read, because this is the
+    # one writer-side pass that already owns the whole namespace.
+    with contextlib.suppress(OSError, ValueError):
+        _index_path(root, SETTLED_INDEX_REL).unlink()
     members: list[dict] = []
+    decoded_records: dict[str, dict] = {}
     for entry in _receipt_namespace_entries(root / SETTLED_DIR):
         if entry.structural_error is not None or entry.op_dir is None:
             return {
@@ -375,6 +561,7 @@ def rebuild_projection(root: Path) -> dict:
                 entry.name, decoded["record"], entry.manifest_raw, entry.progress_raw
             )
         )
+        decoded_records[entry.name] = decoded["record"]
     members.sort(key=lambda member: member["name"])
 
     # Locators from the FINAL membership so a locator never advertises a
@@ -409,6 +596,15 @@ def rebuild_projection(root: Path) -> dict:
     token = _settled_dir_token(root)
     if token is None:
         return {"ok": False, "code": "SETTLED_DIR_UNREADABLE"}
+    # The head is the COMMIT POINT: it is what makes a reader trust the
+    # segments and locators beside it, so it is written after them. Written
+    # first, a rebuild interrupted before its locators left a current head
+    # over no locators, and every operation query answered "no such receipt"
+    # -- an empty answer, not a refusal. Interrupted now, the old head (or
+    # none) is still there, the namespace has moved past it, and readers
+    # answer from the receipts until the next settlement rebuilds.
+    for operation, entries in locator_entries.items():
+        _write_locator(root, operation, entries)
     head_root = _write_head(
         root,
         lineage=lineage,
@@ -420,8 +616,19 @@ def rebuild_projection(root: Path) -> dict:
         latest_sealed_root=latest_sealed_root,
         prev_root=prev_root,
     )
-    for operation, entries in locator_entries.items():
-        _write_locator(root, operation, entries)
+    # The one pass that decodes every receipt also publishes the decode memo,
+    # so the whole-history snapshot never has to decode them a second time.
+    for index, chunk in enumerate(sealed):
+        _publish_record_memo(
+            root,
+            f"seg-{index:04d}",
+            [_memo_entry(member, decoded_records[member["name"]]) for member in chunk],
+        )
+    _publish_record_memo(
+        root,
+        ACTIVE_ID,
+        [_memo_entry(member, decoded_records[member["name"]]) for member in active_members],
+    )
     return {
         "ok": True,
         "code": "SETTLED_PROJECTION_REBUILT",
@@ -504,6 +711,7 @@ def advance_after_settlement(
     # never folded twice.
     projected_tail_names = {member.get("name") for member in tail_members}
     new_members: list[dict] = []
+    new_entries: list[dict] = []
     for name in moved_names or []:
         if name in projected_tail_names:
             continue
@@ -531,6 +739,7 @@ def advance_after_settlement(
         new_members.append(
             _member_from_record(name, decoded["record"], manifest_raw, progress_raw)
         )
+        new_entries.append(_memo_entry(new_members[-1], decoded["record"]))
 
     if not new_members:
         # Idempotent no-op: nothing (left) to fold. Republish the head so the
@@ -572,6 +781,9 @@ def advance_after_settlement(
         latest_sealed_root = _write_segment(root, segment_id, tail_members)
         sealed_count += 1
         _relocate_locators_for_seal(root, segment_id, tail_members)
+        # The memo of the tail that was just sealed becomes that segment's.
+        _publish_record_memo(root, segment_id, _read_record_memo(root, ACTIVE_ID) or [])
+        _publish_record_memo(root, ACTIVE_ID, [])
         tail_members = []
     tail_members.extend(new_members)
     tail_members.sort(key=lambda member: member["name"])
@@ -582,6 +794,20 @@ def advance_after_settlement(
     token = _settled_dir_token(root)
     if token is None:
         return rebuild_projection(root)
+    # Locators first, head last: the head is the commit point (see
+    # `rebuild_projection`). An operation that settles for the first time has
+    # no locator yet, and a head published before its locator would let a
+    # reader trust a projection in which that receipt cannot be found.
+    folded = [name for name in moved_names or [] if name not in projected_tail_names]
+    folded_operations = {
+        member["name"]: member.get("operation")
+        for member in new_members
+        if isinstance(member.get("operation"), str)
+    }
+    for name in folded:
+        operation = folded_operations.get(name)
+        if isinstance(operation, str) and operation:
+            _merge_locator_active(root, name, operation)
     head_root = _write_head(
         root,
         lineage=lineage,
@@ -593,16 +819,15 @@ def advance_after_settlement(
         latest_sealed_root=latest_sealed_root,
         prev_root=payload.get("prev_root"),
     )
-    folded = [name for name in moved_names or [] if name not in projected_tail_names]
-    folded_operations = {
-        member["name"]: member.get("operation")
-        for member in new_members
-        if isinstance(member.get("operation"), str)
+    # One bounded document: the tail's memo plus what this advance decoded.
+    tail_names = {member.get("name") for member in tail_members}
+    carried = {
+        entry["name"]: entry
+        for entry in _read_record_memo(root, ACTIVE_ID) or []
+        if entry["name"] in tail_names
     }
-    for name in folded:
-        operation = folded_operations.get(name)
-        if isinstance(operation, str) and operation:
-            _merge_locator_active(root, name, operation)
+    carried.update({entry["name"]: entry for entry in new_entries})
+    _publish_record_memo(root, ACTIVE_ID, list(carried.values()))
     return {
         "ok": True,
         "code": "SETTLED_PROJECTION_ADVANCED",

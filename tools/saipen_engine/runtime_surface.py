@@ -346,6 +346,28 @@ def identity_session() -> Iterator[None]:
             _SESSION = None
 
 
+@contextmanager
+def identity_memo(memo: dict) -> Iterator[None]:
+    """Run one projection against a CALLER-OWNED identity memo.
+
+    `identity_session` forgets everything when its block ends, which is right
+    for a one-shot report and wrong for a long-lived service: the host-authority
+    broker answered every prompt by re-hashing the whole shipped surface of two
+    roots, and that was most of a prompt's latency. A service passes its own
+    dict here and decides for itself how long an identity stays believed -- the
+    memo is the caller's, so its lifetime is a visible policy of that caller
+    instead of a hidden property of this module. An enclosing memo or session is
+    restored on exit.
+    """
+    global _SESSION  # noqa: PLW0603
+    outer = _SESSION
+    _SESSION = memo
+    try:
+        yield
+    finally:
+        _SESSION = outer
+
+
 def runtime_generation_identity(root: Path | str | None) -> str | None:
     """The content identity of the shipped runtime at `root`, or None (UNKNOWN).
 

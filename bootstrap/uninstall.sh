@@ -212,6 +212,20 @@ json_reader() {
   return 1
 }
 
+rm_path_launcher() {
+  # The launchers the engine recorded in ~/.saipen/path-launcher.json go only
+  # while their bytes are as written (T-1678); an edited one stays.
+  [ -f "$HOME/.saipen/path-launcher.json" ] || { echo "clean"; return 0; }
+  local reader
+  reader=$(json_reader) || { echo "remove FAILED: Python runtime unavailable"; return 1; }
+  if "$reader" -B "$SCRIPT_DIR/install_ownership.py" remove-launcher "$HOME"; then
+    echo "PATH launcher removed; edited files preserved"
+  else
+    echo "remove FAILED (PATH launcher)"
+    return 1
+  fi
+}
+
 remove_hooks() {
   # Hook surfaces come from the ONE adapter registry, never a second
   # handwritten host inventory. A machine with no JSON reader cannot prove
@@ -277,8 +291,8 @@ report() { # $1=label, remaining=function + args
 
 echo "saipen uninstaller"
 echo "------------------------------------------------------------"
-report "Claude Code skill" rm_skill "$HOME/.claude/skills/saipen"
-report "Claude Code CLAUDE.md" strip_block "$HOME/.claude/CLAUDE.md"
+report "Claude Code skill" rm_skill "${CLAUDE_CONFIG_DIR:-$HOME/.claude}/skills/saipen"
+report "Claude Code CLAUDE.md" strip_block "${CLAUDE_CONFIG_DIR:-$HOME/.claude}/CLAUDE.md"
 report "OpenCode skill" rm_skill "$HOME/.config/opencode/skills/saipen"
 report "OpenCode AGENTS.md" strip_block "$HOME/.config/opencode/AGENTS.md"
 # Removes every registry-declared guard hook surface, including the legacy
@@ -304,6 +318,7 @@ if [ -d "$PLUG_ROOT" ]; then
   done
 fi
 report "Aider conf" rm_aider "$HOME/.aider.conf.yml"
+report "PATH launcher" rm_path_launcher
 # Task Scheduler is Windows-only; runtime snapshot cleanup is portable.
 report "scheduled inject task" rm_task
 echo "------------------------------------------------------------"

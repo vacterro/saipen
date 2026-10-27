@@ -64,9 +64,15 @@ class EnqueueFixture(unittest.TestCase):
         )
 
     def allocator(self) -> dict:
-        return json.loads(
-            (self.root / ".saipen" / "intake" / "audit_allocator.json").read_text("utf-8")
-        )
+        """The AUTHORITATIVE allocator view, checkpoint folded with its journal.
+
+        PERF-001 made the checkpoint an amortised snapshot: a transition appends
+        to the journal and the checkpoint is rewritten only when compaction is
+        due, so the raw .json file is deliberately allowed to lag. Reading it
+        directly would assert on an implementation detail instead of on the
+        canonical state every caller actually sees.
+        """
+        return audit_enqueue.read_allocator(self.root)
 
     def consume(self, rel: str, sha256: str, state: str | None = None) -> None:
         """Record the downstream capture the journaled cleanup would leave, then
@@ -258,9 +264,20 @@ class AllocatorLoss(EnqueueFixture):
     def allocator_path(self) -> Path:
         return self.root / ".saipen" / "intake" / "audit_allocator.json"
 
+    def lose_allocator(self) -> None:
+        """Remove the checkpoint AND its journal -- the real SRC-019:R4 loss.
+
+        Deleting only the checkpoint is not a loss any more: the journal still
+        holds the operation records, so the idempotence memory survives. The
+        scenario this class is about is the idempotence memory being GONE, which
+        now takes both files.
+        """
+        self.allocator_path().unlink(missing_ok=True)
+        audit_enqueue.journal_path(self.root).unlink(missing_ok=True)
+
     def test_retry_after_the_allocator_is_lost_does_not_duplicate_the_layer(self) -> None:
         first = self.enqueue("op-1")
-        self.allocator_path().unlink()
+        self.lose_allocator()
 
         again = self.enqueue("op-1")
         self.assertTrue(again["ok"], again)
@@ -286,7 +303,7 @@ class AllocatorLoss(EnqueueFixture):
             state=audit_inbox.DELETED,
         )
         (self.root / "audit" / "1.md").unlink()
-        self.allocator_path().unlink()
+        self.lose_allocator()
 
         again = self.enqueue("op-1")
         self.assertTrue(again["ok"], again)
@@ -297,7 +314,7 @@ class AllocatorLoss(EnqueueFixture):
 
     def test_a_different_audit_still_gets_its_own_layer(self) -> None:
         self.enqueue("op-1")
-        self.allocator_path().unlink()
+        self.lose_allocator()
 
         other = self.enqueue("op-2", body=b"# a different finding\n")
         self.assertTrue(other["ok"], other)

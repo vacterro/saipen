@@ -25,6 +25,7 @@ from __future__ import annotations
 
 import datetime as dt
 import re
+import tempfile
 from pathlib import Path
 
 from .paths import identity_file_content, new_project_lineage
@@ -122,13 +123,23 @@ def bootstrap_project(
         },
     )
 
-    target.mkdir(parents=True)
-    (target / "IDENTITY.md").write_text(
-        identity_file_content(new_project_lineage()), encoding="utf-8"
-    )
-    (target / "STATE.md").write_text(state, encoding="utf-8")
-    for name in ("BOARD.md", "LOG.md"):
-        (target / name).write_text(_template(name), encoding="utf-8")
+    # Load every dependency before producing canonical bytes. Materialize in
+    # an owned sibling directory and publish the complete directory at once;
+    # a denied later write must not leave a half-created protocol project.
+    documents = {
+        "IDENTITY.md": identity_file_content(new_project_lineage()),
+        "STATE.md": state,
+        "BOARD.md": _template("BOARD.md"),
+        "LOG.md": _template("LOG.md"),
+    }
+    with tempfile.TemporaryDirectory(prefix=".saipen-init-", dir=root) as temporary:
+        staged = Path(temporary) / ".saipen"
+        staged.mkdir()
+        for name, text in documents.items():
+            (staged / name).write_text(text, encoding="utf-8")
+        if target.exists():
+            raise InitRefused(f"{target} appeared during INIT; existing memory is preserved")
+        staged.rename(target)
     return {
         "project_root": str(root),
         "identity": str(target / "IDENTITY.md"),

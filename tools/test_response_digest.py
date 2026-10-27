@@ -36,19 +36,21 @@ class DetailIntentTests(unittest.TestCase):
         self.assertFalse(verdict["ok"])
 
     def test_explicit_artifact_is_bounded_even_when_the_request_is_witnessed(self):
-        from saipen_engine import operator_task, pending_ingress
+        from saipen_engine import operator_task
+        from test_guard_hostile_matrix import fresh_project
+        from test_operator_origin_support import native_operator
 
         request = "write a specification"
-        authority = operator_task.witness(
-            request,
-            env={operator_task.ENV_TASK_SHA256: pending_ingress.ingress_digest(request)},
-        )
-        klass, errors = RS.classify_final_response(
-            "x" * (RS.ARTIFACT_CHAR_BUDGET + 1),
-            operational_turn=False,
-            human_request=request,
-            request_authority=authority,
-        )
+        root = fresh_project()
+        with native_operator(root, request, action="report"):
+            authority = operator_task.witness(request, root=root)
+            klass, errors = RS.classify_final_response(
+                "x" * (RS.ARTIFACT_CHAR_BUDGET + 1),
+                operational_turn=False,
+                human_request=request,
+                request_authority=authority,
+                diagnosis_root=root,
+            )
         self.assertEqual(klass, RS.CLASS_CHAT_STYLE_DRIFT)
         self.assertTrue(errors)
 

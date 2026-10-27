@@ -26,8 +26,6 @@
   ],
   "not_shell_canonical": [
     "init",
-    "clean",
-    "translate",
     "first-publish-confirm",
     "launch"
   ],
@@ -36,6 +34,7 @@
     "status": "DIAGNOSTIC",
     "next": "DIAGNOSTIC",
     "validate": "DIAGNOSTIC",
+    "policy": "DIAGNOSTIC",
     "search": "DIAGNOSTIC",
     "context": "DIAGNOSTIC",
     "mail": {
@@ -57,15 +56,60 @@
     "permissions": "DIAGNOSTIC",
     "explain-next": "DIAGNOSTIC",
     "stats": "DIAGNOSTIC",
+    "iteration": "DIAGNOSTIC",
     "guard": "DIAGNOSTIC",
-    "test": "DIAGNOSTIC",
+    "test": {
+      "default": "DIAGNOSTIC",
+      "subcommands": {
+        "suite": {
+          "class": "DIAGNOSTIC",
+          "actions": {
+            "declare": "EXECUTION",
+            "run": "EXECUTION",
+            "withdraw": "EXECUTION"
+          }
+        }
+      }
+    },
     "runtime": "DIAGNOSTIC",
     "host": {
       "default": "DIAGNOSTIC",
       "subcommands": {
         "bootstrap": "DIAGNOSTIC",
         "activation": "DIAGNOSTIC",
-        "entry": "DIAGNOSTIC"
+        "entry": "DIAGNOSTIC",
+        "doctor": "DIAGNOSTIC",
+        "repair": "RECOVERY",
+        "machine": {
+          "class": "DIAGNOSTIC",
+          "actions": {
+            "install": "RECOVERY",
+            "remove": "RECOVERY"
+          }
+        },
+        "launcher": {
+          "class": "DIAGNOSTIC",
+          "actions": {
+            "install": "RECOVERY",
+            "remove": "RECOVERY"
+          }
+        },
+        "instructions": {
+          "class": "DIAGNOSTIC",
+          "actions": {
+            "repair": "RECOVERY"
+          }
+        },
+        "mode": {
+          "class": "DIAGNOSTIC",
+          "actions": {
+            "strict": "RECOVERY",
+            "degraded": "RECOVERY",
+            "degraded_allowed": "RECOVERY",
+            "degraded-allowed": "RECOVERY",
+            "default": "RECOVERY"
+          }
+        }
       }
     },
     "fleet": {
@@ -95,13 +139,16 @@
           "operands": "one_ticket_id"
         },
         "resolve-external": "EXECUTION",
+        "renew-external": "EXECUTION",
         "reasoning": "EXECUTION",
-        "repair-metadata": "RECOVERY"
+        "repair-metadata": "RECOVERY",
+        "detach-needs": "RECOVERY"
       }
     },
     "work": {
       "default": "EXECUTION",
       "subcommands": {
+        "contracts": "DIAGNOSTIC",
         "reverify": "RECOVERY"
       }
     },
@@ -140,18 +187,18 @@
       }
     },
     "future": {
-   "default": "DIAGNOSTIC",
-   "subcommands": {
-    "status": "DIAGNOSTIC",
-    "list": "DIAGNOSTIC",
-    "next": "DIAGNOSTIC",
-    "refresh": "EXECUTION",
-    "refine": "EXECUTION",
-    "add": "INGRESS",
-    "promote": "INGRESS"
-   }
-  },
-  "knowledge": {
+      "default": "DIAGNOSTIC",
+      "subcommands": {
+        "status": "DIAGNOSTIC",
+        "list": "DIAGNOSTIC",
+        "next": "DIAGNOSTIC",
+        "refresh": "EXECUTION",
+        "refine": "EXECUTION",
+        "add": "INGRESS",
+        "promote": "INGRESS"
+      }
+    },
+    "knowledge": {
       "default": "DIAGNOSTIC",
       "subcommands": {
         "index": "EXECUTION"
@@ -170,10 +217,30 @@
       "subcommands": {
         "status": "DIAGNOSTIC",
         "classify": "DIAGNOSTIC",
-        "durable": {"class": "EXECUTION", "actions": {"show": "DIAGNOSTIC"}},
-        "ephemeral": {"class": "EXECUTION", "actions": {"show": "DIAGNOSTIC"}},
-        "scratch": {"class": "EXECUTION", "actions": {"show": "DIAGNOSTIC"}},
-        "store": {"class": "EXECUTION", "actions": {"list": "DIAGNOSTIC"}},
+        "durable": {
+          "class": "EXECUTION",
+          "actions": {
+            "show": "DIAGNOSTIC"
+          }
+        },
+        "ephemeral": {
+          "class": "EXECUTION",
+          "actions": {
+            "show": "DIAGNOSTIC"
+          }
+        },
+        "scratch": {
+          "class": "EXECUTION",
+          "actions": {
+            "show": "DIAGNOSTIC"
+          }
+        },
+        "store": {
+          "class": "EXECUTION",
+          "actions": {
+            "list": "DIAGNOSTIC"
+          }
+        },
         "verify": "DIAGNOSTIC",
         "promote": "EXECUTION",
         "migrate": "RECOVERY"
@@ -205,7 +272,8 @@
     "cohort": {
       "default": "EXECUTION",
       "subcommands": {
-        "status": "DIAGNOSTIC"
+        "status": "DIAGNOSTIC",
+        "reconcile": "RECOVERY"
       }
     },
     "cut": {
@@ -244,7 +312,22 @@
     "stop": "EXECUTION",
     "launch": "EXECUTION",
     "autonomy": "DIAGNOSTIC",
+    "campaign": {
+      "default": "EXECUTION",
+      "subcommands": {
+        "status": "DIAGNOSTIC",
+        "admit": "INGRESS",
+        "step": "EXECUTION",
+        "cancel": "RECOVERY"
+      }
+    },
     "gpu": "DIAGNOSTIC",
+    "lock": {
+      "default": "DIAGNOSTIC",
+      "subcommands": {
+        "status": "DIAGNOSTIC"
+      }
+    },
     "handoff": "EXECUTION"
   }
 }

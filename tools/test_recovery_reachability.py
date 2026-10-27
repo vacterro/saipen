@@ -100,7 +100,43 @@ class BlockerClassificationTests(unittest.TestCase):
                 self.assertNotIn("remove", repairs[0])
                 self.assertIn("OPERATOR_DECISION_REQUIRED", repairs[0]["reason"])
 
-    def test_a_live_board_block_refuses(self):
+    def test_a_related_live_board_block_refuses(self):
+        """SRC-308 (T-1883): presence was too broad; CAUSALITY is the gate.
+
+        This test used to assert that ANY ticket in `## BLOCKED` refused the
+        repair. Measured on the incident shape, that made a forgotten parked
+        ticket an immortal gate: four unrelated blocked tickets flipped a
+        proven-stale ACTIVE blocker into OPERATOR_DECISION_REQUIRED while the
+        gate and its evidence were unchanged. The protection this test owed is
+        the RELATED case -- the active work genuinely depends on the blocked
+        ticket -- which is asserted here and in
+        test_t1883_reconcile_causality.py, never dropped.
+        """
+        board = {
+            "tickets": {
+                "T-001": {
+                    "id": "T-001",
+                    "section": "## BLOCKED",
+                    "needs": ["T-000"],
+                    "fields": {"blocker": "HELD -- x"},
+                },
+                "T-000": {
+                    "id": "T-000",
+                    "section": "## DOING",
+                    "needs": ["T-001"],
+                    "fields": {},
+                },
+            }
+        }
+        repairs = _state_blocker_repairs(
+            {"phase": "SCOUT", "task": "T-000", "blocker": _STALE}, board
+        )
+        self.assertEqual(len(repairs), 1, repairs)
+        self.assertTrue(repairs[0]["refuse"], repairs)
+        self.assertIn("T-001", repairs[0]["reason"])
+
+    def test_an_unrelated_board_block_does_not_refuse(self):
+        """The measured defect: inventory alone never vetoes an ACTIVE repair."""
         board = {
             "tickets": {
                 "T-001": {
@@ -110,10 +146,13 @@ class BlockerClassificationTests(unittest.TestCase):
                 }
             }
         }
-        repairs = _state_blocker_repairs({"phase": "SCOUT", "blocker": _STALE}, board)
+        repairs = _state_blocker_repairs(
+            {"phase": "SCOUT", "task": "T-009", "blocker": _STALE}, board
+        )
         self.assertEqual(len(repairs), 1, repairs)
-        self.assertTrue(repairs[0]["refuse"], repairs)
-        self.assertIn("T-001", repairs[0]["reason"])
+        self.assertNotIn("refuse", repairs[0])
+        self.assertEqual(repairs[0]["to"], "none")
+        self.assertEqual(repairs[0]["classification"], "SAFE_CANONICAL_REPAIR")
 
 
 _LOG = (
@@ -397,7 +436,7 @@ class RemediationPreflightTests(unittest.TestCase):
             # T-1357: printed UNQUOTED. A quote character disqualifies the
             # whole line from the guard's canonical grammar, so the quoted form
             # was a command the engine advertised and its own guard refused.
-            "saipen recover resolve-blocker <decision>",
+            "saipen recover resolve-blocker <SRC-###>",
             result,
         )
         self.assertEqual(result["blocking_surface"], "state")
@@ -525,7 +564,7 @@ class LegacyNextActionRepairTests(unittest.TestCase):
         self.assertTrue(result["operator_decision_available"], result)
         self.assertEqual(
             result["canonical_next_command"],
-            "saipen recover resolve-next-action <next-action>",
+            "saipen recover resolve-next-action <SRC-###>",
             result,
         )
         self.assertEqual(result["blocking_surface"], "state", result)
@@ -561,7 +600,7 @@ class LegacyNextActionRepairTests(unittest.TestCase):
         self.assertTrue(result["operator_decision_available"], result)
         self.assertEqual(
             result["canonical_next_command"],
-            "saipen recover resolve-next-action <next-action>",
+            "saipen recover resolve-next-action <SRC-###>",
             result,
         )
         self.assertEqual(result["blocking_field"], "next_action", result)
@@ -600,7 +639,7 @@ class LegacyNextActionRepairTests(unittest.TestCase):
         self.assertTrue(result["operator_decision_available"], result)
         self.assertEqual(
             result["canonical_next_command"],
-            "saipen recover resolve-next-action <next-action>",
+            "saipen recover resolve-next-action <SRC-###>",
             result,
         )
         self.assertEqual(result["blocking_surface"], "state", result)
@@ -903,15 +942,14 @@ class OperatorBlockerDecisionTests(unittest.TestCase):
     def _read(self, root: Path, name: str) -> str:
         return (root / ".saipen" / name).read_text(encoding="utf-8")
 
-    def test_a_decision_turns_the_refusal_into_a_committing_repair(self):
+    def test_plain_decision_text_cannot_authorize_the_classifier(self):
         repairs = _state_blocker_repairs(
             {"phase": "SCOUT", "blocker": self._GATE}, {}, "vendor renewed"
         )
         self.assertEqual(len(repairs), 1, repairs)
-        self.assertEqual(repairs[0]["to"], "none")
-        self.assertTrue(repairs[0].get("operator_authorized"), repairs)
-        self.assertNotIn("refuse", repairs[0])
-        self.assertIn("vendor renewed", repairs[0]["reason"])
+        self.assertTrue(repairs[0]["refuse"], repairs)
+        self.assertFalse(repairs[0].get("operator_authorized"), repairs)
+        self.assertIsNone(repairs[0]["to"])
 
     def test_empty_authority_never_clears_a_gate(self):
         for blank in (None, "", "   "):
@@ -925,15 +963,17 @@ class OperatorBlockerDecisionTests(unittest.TestCase):
     def test_the_engine_records_the_authority_and_lifts_the_brake(self):
         root = self._make(blocker=self._GATE)
         original = (root / ".saipen" / "STATE.md").read_bytes()
+        from test_t1729_operator_gate import fixture_authority
+        receipt = fixture_authority(root, statement="TEST HARNESS: vendor renewed")
 
         planned = reconcile_protocol_state(
-            root, "tester", dry_run=True, resolve_blocker="vendor renewed"
+            root, "tester", dry_run=True, resolve_blocker=receipt
         )
         self.assertTrue(planned["ok"], planned)
         self.assertEqual(planned["code"], "REPAIR_REQUIRED", planned)
 
         applied = reconcile_protocol_state(
-            root, "tester", resolve_blocker="vendor renewed"
+            root, "tester", resolve_blocker=receipt
         )
         self.assertTrue(applied["ok"], applied)
         self.assertEqual(applied["code"], "REPAIRED", applied)
@@ -946,23 +986,27 @@ class OperatorBlockerDecisionTests(unittest.TestCase):
         self.assertIsNone(binding_brake(state))
         # The recorded DEC names the operator authority, and the original bytes
         # survive as the recovery-evidence artifact.
-        self.assertIn("vendor renewed", self._read(root, "LOG.md"))
+        self.assertIn(receipt, self._read(root, "LOG.md"))
+        from saipen_engine.intake import read_body
+        self.assertIn("vendor renewed", read_body(root, receipt)["body"])
         artifacts = sorted((root / ".saipen" / "recovery").rglob("*.STATE.md"))
         self.assertEqual(len(artifacts), 1, artifacts)
         self.assertEqual(artifacts[0].read_bytes(), original)
 
         self.assertEqual(
             reconcile_protocol_state(
-                root, "tester", resolve_blocker="vendor renewed"
+                root, "tester", resolve_blocker=receipt
             )["code"],
-            "CLEAN",
+            "ALREADY_APPLIED",
         )
 
     def test_a_live_board_gate_is_cleared_but_the_ticket_is_not_owned(self):
         root = self._make(blocker=self._GATE, board_blocked=True)
         board_before = self._read(root, "BOARD.md")
+        from test_t1729_operator_gate import fixture_authority
+        receipt = fixture_authority(root)
         applied = reconcile_protocol_state(
-            root, "tester", resolve_blocker="vendor renewed"
+            root, "tester", resolve_blocker=receipt
         )
         self.assertTrue(applied["ok"], applied)
         # Only STATE.blocker is owned; the parked ticket keeps its own block.
@@ -971,7 +1015,7 @@ class OperatorBlockerDecisionTests(unittest.TestCase):
             1,
         )
         self.assertEqual(self._read(root, "BOARD.md"), board_before)
-        self.assertIn("T-002", self._read(root, "LOG.md"))
+        self.assertIn("T-002", self._read(root, "BOARD.md"))
 
     def test_the_verb_does_not_own_phase_blocked(self):
         root = self._make(blocker=self._GATE)
@@ -981,8 +1025,10 @@ class OperatorBlockerDecisionTests(unittest.TestCase):
             encoding="utf-8",
         )
         before = state_path.read_bytes()
+        from test_t1729_operator_gate import fixture_authority
+        receipt = fixture_authority(root)
         result = reconcile_protocol_state(
-            root, "tester", resolve_blocker="vendor renewed"
+            root, "tester", resolve_blocker=receipt
         )
         self.assertFalse(result["ok"], result)
         self.assertEqual(result["code"], "RECONCILE_REAUTH_REQUIRED", result)
@@ -993,11 +1039,14 @@ class OperatorBlockerCliTests(unittest.TestCase):
     """The exact reachable verb: `saipen recover resolve-blocker "<decision>"`."""
 
     def _run(self, root: Path, *extra: str):
+        from test_operator_origin_support import cold_command
+
         env = {**os.environ}
         env.pop("PWD", None)
         env.pop("OLDPWD", None)
+        command = cold_command(root, [sys.executable, str(SAIPEN_CLI), "recover", *extra], env)
         return subprocess.run(
-            [sys.executable, str(SAIPEN_CLI), "recover", *extra],
+            command,
             cwd=str(root), capture_output=True, text=True, env=env, timeout=600,
         )
 
@@ -1008,10 +1057,11 @@ class OperatorBlockerCliTests(unittest.TestCase):
 
     def test_recover_resolves_the_gate_with_recorded_authority(self):
         root = self._make()
-        run = self._run(root, "resolve-blocker", "vendor cert renewed")
+        from test_t1729_operator_gate import fixture_authority
+        receipt = fixture_authority(root)
+        run = self._run(root, "resolve-blocker", receipt)
         self.assertEqual(run.returncode, 0, run.stdout + run.stderr)
-        first = (run.stdout + run.stderr).strip().splitlines()[0]
-        self.assertEqual(first, "code: REPAIRED", run.stdout + run.stderr)
+        self.assertIn("code: REPAIRED", (run.stdout + run.stderr).splitlines())
         state = (root / ".saipen" / "STATE.md").read_text(encoding="utf-8")
         self.assertIn("\nblocker: none\n", state)
 

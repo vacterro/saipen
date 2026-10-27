@@ -36,6 +36,7 @@ module stores only the classifier output).
 from __future__ import annotations
 
 import json
+import os
 import re
 import subprocess
 import sys
@@ -55,6 +56,13 @@ REVERIFY_SCHEMA_VERSION = 1
 REVERIFY_DIR = ".saipen/recovery/conformance/reverify"
 REVERIFY_ID_RE = re.compile(r"\ARV-(\d{6})\Z")
 VALIDATOR_CAPTURE_TIMEOUT = 1800
+#: T-1827 (SRC-282:R003/R006): the finding capture, the verification commands
+#: and the closed-contract measurement are EXTERNAL processes and run OUTSIDE
+#: the project writer lock. Only the cheap checkpoint re-check runs under it,
+#: so a concurrent writer waits seconds rather than the capture's minutes. A
+#: capture that moved the tree is retried OUTSIDE the lock -- never under it --
+#: and each acquisition attempt is bounded by the writer budget.
+_CAPTURE_ATTEMPTS = 2
 _SRC_RE = re.compile(r"\ASRC-\d+\Z")
 _WORK_RE = re.compile(r"\AT-\d+\Z")
 _EVENT_RE = re.compile(r"\AE-(\d+)\Z")
@@ -218,21 +226,86 @@ def _project_state_fingerprints(root: Path) -> dict:
     return {"board_sha256": board, "state_sha256": state, "log_fingerprint": log_digest}
 
 
-def _source_identity(root: Path) -> dict:
+def _source_identity_object(root: Path) -> tuple[object | None, dict]:
+    """Capture the source identity ONCE, returning the object and its public fields.
+
+    T-1827 (SRC-282:R003/R006): the object is what makes the under-lock
+    re-check cheap -- ``freshness.listing_token_unchanged`` needs its private
+    revalidation token -- while the fields are what the record persists. The
+    capture is read-only and belongs OUTSIDE the writer lock.
+    """
     try:
         from freshness import compute_source_identity
 
         identity = compute_source_identity(root)
-        return {
+        return identity, {
             "source_head": identity.source_head,
             "source_tree_fingerprint": identity.source_tree_fingerprint,
         }
     except Exception:
-        return {"source_head": None, "source_tree_fingerprint": None}
+        return None, {"source_head": None, "source_tree_fingerprint": None}
+
+
+def _source_identity(root: Path) -> dict:
+    return _source_identity_object(root)[1]
+
+
+def _checkpoint_still_current(
+    root: Path, identity, fingerprints: dict, *, timeout: float | None = None
+) -> str | None:
+    """Prove, without running any external process, that a capture is still live.
+
+    T-1827 (SRC-282:R003/R006): the finding capture, the verification commands
+    and the contract measurement run OUTSIDE the project writer lock. This is
+    the only work still done under it: compare the three project-state
+    fingerprints recorded BEFORE the capture and re-derive the source identity
+    from its own token. Git projects pay two HEAD reads and two changed-path
+    listings; the content re-hash that made the hold minutes long is gone.
+
+    Returns None when the capture still describes the live tree, or the reason
+    it does not. A caller that sees a reason re-captures OUTSIDE the lock --
+    never under it (SRC-282:R009).
+
+    A capture that produced NO source identity (a worktree whose first commit
+    does not exist yet) has nothing to re-derive: the three recorded project
+    fingerprints remain the whole guard, exactly as before this ticket. That
+    absence is not staleness, so it does not refuse.
+    """
+    live = _project_state_fingerprints(root)
+    moved = [key for key, value in sorted(fingerprints.items()) if live.get(key) != value]
+    if moved:
+        return "project checkpoint moved after the capture: " + ", ".join(moved)
+    if identity is None:
+        return None
+    from freshness import listing_token_unchanged
+
+    if getattr(identity, "discovery_model", "") == "git-delta-v1":
+        ok, detail = listing_token_unchanged(root, identity, timeout=timeout)
+    else:
+        # No-Git identity: this re-walk is in-process (no external command),
+        # so it does not lengthen any subprocess hold.
+        from freshness import revalidate_source_identity
+
+        ok, detail = revalidate_source_identity(root, identity)
+    if ok:
+        return None
+    return detail or "source tree moved after the capture"
+
+
+def _stale_capture_refusal(what: str, detail: str | None) -> dict:
+    return {
+        "ok": False,
+        "code": "STALE_STATE",
+        "detail": f"{what} moved after the capture on {_CAPTURE_ATTEMPTS} attempts: {detail}",
+    }
 
 
 def _regulated_snapshot(
-    root: Path, capture: dict, reason: str, bound_work: str | None = None
+    root: Path,
+    capture: dict,
+    reason: str,
+    bound_work: str | None = None,
+    identity: dict | None = None,
 ) -> tuple[dict | None, str]:
     """The dedup verdict for ONE regulated capture.
 
@@ -244,7 +317,7 @@ def _regulated_snapshot(
     problems = capture.get("problems", [])
     warnings = capture.get("warnings", [])
     digest = findings_mod.findings_digest(problems, warnings)
-    identity = _source_identity(root)
+    identity = identity if identity is not None else _source_identity(root)
     existing = None
     for path in _existing_snapshots(root):
         try:
@@ -301,12 +374,14 @@ def create_snapshot(
     internal ``--no-receipt`` validator capture, and fails closed (structured
     refusal) when that capture cannot determine the finding set.
 
-    WRITER BOUNDARY (W2-005): the mutating half runs under the canonical
-    project writer lock, so the snapshot-id allocation and the journaled write
-    are ONE critical section and two concurrent snapshots cannot collide on an
-    id. ``project_writer_lock`` is NOT reentrant, so the locked body is
-    :func:`_create_snapshot_apply`; callers that already hold the writer lock
-    (the baseline primitive) call it directly and never re-acquire.
+    WRITER BOUNDARY (W2-005, T-1827): the snapshot-id allocation and the
+    journaled write are ONE critical section, so two concurrent snapshots
+    cannot collide on an id. The finding capture that feeds them is an
+    EXTERNAL process (the validator) and runs OUTSIDE that section
+    (SRC-282:R003); the locked half re-checks the recorded checkpoint
+    fingerprints and source identity before it allocates an id or journals.
+    ``project_writer_lock`` is NOT reentrant, so the locked body is
+    :func:`_create_snapshot_apply`.
     """
     root = Path(root)
 
@@ -353,16 +428,42 @@ def create_snapshot(
 
     from .lock import project_writer_lock
 
-    with project_writer_lock(root):
-        return _create_snapshot_apply(root, agent, reason, bound_work)
+    # T-1827 (SRC-282:R003/R006): identity, fingerprints and the validator
+    # capture all happen OUTSIDE the writer lock. The fingerprints are read
+    # BEFORE the capture so the under-lock equality proves no protocol write
+    # intervened between them. A capture overtaken by a mutation is retried
+    # outside the lock, never under it (R009).
+    stale_detail = None
+    for _attempt in range(_CAPTURE_ATTEMPTS):
+        fingerprints = _project_state_fingerprints(root)
+        identity_object, identity = _source_identity_object(root)
+        capture = capture_findings(root)
+        if not capture.get("ok"):
+            return capture
+        with project_writer_lock(root):
+            stale_detail = _checkpoint_still_current(root, identity_object, fingerprints)
+            if stale_detail is None:
+                return _create_snapshot_apply(
+                    root, agent, reason, bound_work, capture=capture, identity=identity
+                )
+    return _stale_capture_refusal("project checkpoint", stale_detail)
 
 
-def _create_snapshot_apply(root: Path, agent: str, reason: str, bound_work: str | None) -> dict:
+def _create_snapshot_apply(
+    root: Path,
+    agent: str,
+    reason: str,
+    bound_work: str | None,
+    *,
+    capture: dict,
+    identity: dict,
+) -> dict:
     """The writer-serialized half of :func:`create_snapshot`.
 
     Unlocked on purpose: ``project_writer_lock`` is not reentrant, so a caller
     that already holds the writer lock (the baseline primitive) reaches the
-    same apply without deadlocking on itself.
+    same apply without deadlocking on itself. ``capture`` and ``identity``
+    were produced OUTSIDE the lock and re-checked by the caller.
     """
     # =====================================================================
     # MUTATING APPLY (SRC-026:R004): the ordinary journaled snapshot path.
@@ -376,14 +477,12 @@ def _create_snapshot_apply(root: Path, agent: str, reason: str, bound_work: str 
     # snapshot would bind a phantom lineage (None) that no later load can
     # match (T-1003 fail-closed bootstrap).
     lineage = ensure_project_lineage(root)
-    capture = capture_findings(root)
-    regulated, tagged = _regulated_snapshot(root, capture, reason, bound_work)
+    regulated, tagged = _regulated_snapshot(root, capture, reason, bound_work, identity)
     if regulated is not None:
         return regulated
     problems = capture.get("problems", [])
     warnings = capture.get("warnings", [])
     digest = tagged
-    identity = _source_identity(root)
 
     snapshot_id = _next_snapshot_id(root)
     record = {
@@ -456,16 +555,47 @@ def _create_snapshot_apply(root: Path, agent: str, reason: str, bound_work: str 
             "code": committed.get("code", "VALIDATION_FAILED"),
             "detail": committed.get("detail", committed.get("message", "plan apply failed")),
         }
+    # W2-005 / R008: the ordinary mutating result is a COMPACT operation
+    # envelope. The finding bodies are canonical in the persisted snapshot
+    # (DEBT-XXXXXX.json) and read through :func:`load_snapshot`; echoing them
+    # here would let a check consume the result and miss the stored record
+    # losing the finding.
     return {
         "ok": True,
         "code": "DEBT_SNAPSHOT_CREATED",
         "snapshot_id": snapshot_id,
         "problem_count": len(problems),
         "warning_count": len(warnings),
-        "problems": problems,
-        "warnings": warnings,
         "bound_work": bound_work,
     }
+
+
+def _reusable_baseline(root: Path, work: str) -> dict | None:
+    """The newest baseline snapshot for ``work`` still valid at THIS checkpoint.
+
+    W2-004: a baseline is evidence ABOUT a tree. Every record carries the
+    three project-state fingerprints it was captured from
+    (`_project_state_fingerprints`), so reuse is only honest while the
+    canonical BOARD/STATE/LOG still read the same. Without this the Work +
+    ruleset identity alone would happily hand back a baseline whose
+    "pre-BUILD checkpoint" the project has long since left.
+    """
+    for path in reversed(_existing_snapshots(root)):
+        try:
+            record = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            continue
+        if record.get("bound_work") != work:
+            continue
+        if record.get("ruleset_version") != findings_mod.RULESET_VERSION:
+            continue
+        if record.get("ruleset_fingerprint") != findings_mod.ruleset_fingerprint():
+            continue
+        live = _project_state_fingerprints(root)
+        if any(record.get(key) != value for key, value in live.items()):
+            continue
+        return record
+    return None
 
 
 def ensure_debt_baseline(root: Path | str, work: str, agent: str, utc: str) -> dict:
@@ -480,52 +610,47 @@ def ensure_debt_baseline(root: Path | str, work: str, agent: str, utc: str) -> d
     tree has moved is no longer pre-BUILD evidence. When the tree has already
     moved past the captured checkpoint, a fresh snapshot is created BEFORE this
     Work's first mutation, never pretended to be pre-work evidence (I2).
+
+    WRITER BOUNDARY (W2-005, T-1827 / SRC-282:R003/R006): the validator
+    capture runs OUTSIDE the project writer lock, so this transition no longer
+    holds the only writer mutex for minutes. Only the reuse scan, the id
+    allocation and the journaled mint are serialized; the locked half first
+    proves the checkpoint and source identity the capture saw are still live.
+    The lock is not reentrant, so the mint goes through the unlocked apply
+    helper rather than ``create_snapshot``.
     """
     root = Path(root)
     from .lock import project_writer_lock
 
-    # W2-005: the reuse scan and the fallback mint are ONE critical section, so
-    # two concurrent baseline establishments cannot both conclude "none
-    # exists" and race on the same snapshot id. The lock is not reentrant, so
-    # the mint goes through the unlocked apply helper rather than
-    # `create_snapshot`.
-    with project_writer_lock(root):
-        existing = None
-        for path in reversed(_existing_snapshots(root)):
-            try:
-                record = json.loads(path.read_text(encoding="utf-8"))
-            except (OSError, ValueError):
+    reason = f"pre-BUILD debt baseline for {work}"
+    stale_detail = None
+    for _attempt in range(_CAPTURE_ATTEMPTS):
+        fingerprints = _project_state_fingerprints(root)
+        identity_object, identity = _source_identity_object(root)
+        capture = capture_findings(root)
+        if not capture.get("ok"):
+            return capture
+        with project_writer_lock(root):
+            stale_detail = _checkpoint_still_current(root, identity_object, fingerprints)
+            if stale_detail is not None:
                 continue
-            if record.get("bound_work") != work:
-                continue
-            if record.get("ruleset_version") != findings_mod.RULESET_VERSION:
-                continue
-            if record.get("ruleset_fingerprint") != findings_mod.ruleset_fingerprint():
-                continue
-            # W2-004: a baseline is evidence ABOUT a tree. Every record carries
-            # the three project-state fingerprints it was captured from
-            # (`_project_state_fingerprints`), so reuse is only honest while the
-            # canonical BOARD/STATE/LOG still read the same. Without this the
-            # Work + ruleset identity alone would happily hand back a baseline
-            # whose "pre-BUILD checkpoint" the project has long since left.
-            live = _project_state_fingerprints(root)
-            if any(record.get(key) != value for key, value in live.items()):
-                continue
-            existing = record
-            break
-        if existing is not None:
-            return {
-                "ok": True,
-                "code": "DEBT_SNAPSHOT_REUSED",
-                "snapshot_id": existing.get("snapshot_id"),
-                "reuse": True,
-            }
-        return _create_snapshot_apply(
-            root,
-            agent,
-            f"pre-BUILD debt baseline for {work}",
-            work,
-        )
+            existing = _reusable_baseline(root, work)
+            if existing is not None:
+                return {
+                    "ok": True,
+                    "code": "DEBT_SNAPSHOT_REUSED",
+                    "snapshot_id": existing.get("snapshot_id"),
+                    "reuse": True,
+                }
+            return _create_snapshot_apply(
+                root,
+                agent,
+                reason,
+                work,
+                capture=capture,
+                identity=identity,
+            )
+    return _stale_capture_refusal("project checkpoint", stale_detail)
 
 
 def _bound_work_guard(root: Path, bound_work: str, agent: str) -> dict | None:
@@ -1358,10 +1483,15 @@ def _run_verification_command(root, command, timeout):
             "output_bytes": 0,
         }
     try:
+        env = os.environ.copy()
+        python_dir = str(Path(sys.executable).parent)
+        if python_dir not in env.get("PATH", ""):
+            env["PATH"] = f"{python_dir}{os.pathsep}{env.get('PATH', '')}"
         completed = subprocess.run(
             command,
             shell=True,
             cwd=str(root),
+            env=env,
             capture_output=True,
             text=True, encoding="utf-8",
             timeout=timeout,
@@ -1484,6 +1614,8 @@ def reverify_work(
     timeout=VALIDATOR_CAPTURE_TIMEOUT,
     derive_default=False,
     dry_run=False,
+    contract_path=None,
+    capture=None,
 ):
     """Official DONE-Work re-verification (T-158 Stage 2, T-1434 M1).
 
@@ -1537,11 +1669,13 @@ def reverify_work(
                 "detail": f"{work} is not on the board",
             }
         if ticket.get("section") != "## DONE":
+            rec_cmd = f"python tools/core_unit.py focused {work} --pattern test_*.py"
             return {
                 "ok": False,
                 "code": "REVERIFY_REFUSED",
                 "detail": f"{work} is under {ticket.get('section')}; only ## DONE Work "
-                "accepts re-verification (other states own their lifecycle paths)",
+                f"accepts re-verification (for live Work, run: {rec_cmd})",
+                "canonical_next_command": rec_cmd,
             }
     except (OSError, ValueError) as exc:
         return {"ok": False, "code": "VALIDATION_FAILED", "detail": str(exc)}
@@ -1552,53 +1686,77 @@ def reverify_work(
                 "code": "REVERIFY_REFUSED",
                 "detail": f"targeted verification not PASS: {entry.get('command')}",
             }
-    if not verification and not runs and not derive_default:
+    if not verification and not runs and not derive_default and not contract_path:
         return {
             "ok": False,
             "code": "REVERIFY_REFUSED",
             "detail": "no targeted verification evidence supplied",
         }
-    # W2-005: every mutating step below -- lineage, the receipt-emitting
-    # capture, the receipt-id allocation and the journaled write -- must run
-    # inside ONE writer critical section, or two concurrent reverifies race for
-    # the same RV-NNNNNN. A dry run is byte-pure, so it never acquires the lock
-    # (acquiring it creates .saipen/locks/core.lock).
-    from contextlib import nullcontext
-
+    # T-1827 (SRC-282:R003/R006): the finding capture, the verification
+    # commands and the closed-contract measurement are EXTERNAL processes and
+    # run OUTSIDE the writer lock. The locked half is the lineage carrier, the
+    # idempotency scan, the receipt-id allocation and the journaled write --
+    # and it first proves the checkpoint the capture saw is still live. A
+    # capture overtaken by a mutation is retried OUTSIDE the lock (R009); a
+    # dry run is byte-pure and never acquires it (acquiring creates
+    # .saipen/locks/core.lock).
     from .lock import project_writer_lock
 
-    with nullcontext() if dry_run else project_writer_lock(root):
-        return _reverify_body(
-            root, work, agent, ticket, verification, runs, timeout, derive_default, dry_run
-        )
-
-
-def _reverify_body(
-    root, work, agent, ticket, verification, runs, timeout, derive_default, dry_run
-):
-    """The writer-serialized body of :func:`reverify_work`.
-
-    Split out so the caller owns the writer boundary and a dry run reaches the
-    same code without ever acquiring the lock.
-    """
-    # READ-ONLY PREVIEW (W2-001): a dry run writes ZERO project bytes -- no
-    # lineage, no IDENTITY.md, no conformance receipt, no conformance index, no
-    # settled receipt. Its finding set is the REAL one, read through the
-    # explicit --no-receipt capture, never a fabricated empty one.
-    lineage = None
     if dry_run:
-        capture = _capture_findings_read_only(root)
-    else:
-        from .journal import ensure_project_lineage
+        capture = capture if capture is not None else _capture_findings_read_only(root)
+        probed = _reverify_probe(
+            root, work, capture, verification, runs, timeout, derive_default, contract_path,
+            dry_run=True,
+        )
+        if not probed.get("ok"):
+            return probed
+        return _reverify_body(root, work, agent, ticket, probed, None, None, True, contract_path)
 
-        lineage = ensure_project_lineage(root)
-        capture = capture_findings(root)
+    stale_detail = None
+    for _attempt in range(_CAPTURE_ATTEMPTS):
+        fingerprints = _project_state_fingerprints(root)
+        identity_object, identity = _source_identity_object(root)
+        capture = capture if capture is not None else capture_findings(root)
+        probed = _reverify_probe(
+            root, work, capture, verification, runs, timeout, derive_default, contract_path,
+            dry_run=False,
+        )
+        if not probed.get("ok"):
+            return probed
+        try:
+            with project_writer_lock(root):
+                stale_detail = _checkpoint_still_current(root, identity_object, fingerprints)
+                if stale_detail is None:
+                    from .journal import ensure_project_lineage
+
+                    lineage = ensure_project_lineage(root)
+                    return _reverify_body(
+                        root, work, agent, ticket, probed, identity, lineage, False, contract_path
+                    )
+        except PermissionError as exc:
+            if "WRITER_BUSY" not in str(exc):
+                raise
+            from .lock import writer_busy_payload
+
+            return {"ok": False, **writer_busy_payload(exc), "work": work}
+    return _stale_capture_refusal("project checkpoint", stale_detail)
+
+
+def _reverify_probe(
+    root, work, capture, verification, runs, timeout, derive_default, contract_path, *, dry_run
+):
+    """Everything :func:`reverify_work` measures OUTSIDE the writer lock.
+
+    Returns the failed capture unchanged, or ``{"ok": True, "probe": ...}``.
+    Nothing here writes project bytes: the commands run against the tree, the
+    closed contract measures inside its own sandbox, and contract inspection
+    only reads committed provenance.
+    """
     if not capture.get("ok"):
         return capture
     problems = capture.get("problems", [])
     warnings = capture.get("warnings", [])
     findings_digest = findings_mod.findings_digest(problems, warnings)
-    identity = _source_identity(root)
     gate = capture.get("gate", "core")
     own_problems = [
         f for f in problems if f.get("subject_kind") == "work" and f.get("subject_id") == work
@@ -1616,8 +1774,34 @@ def _reverify_body(
         if f.get("rule_id") != "work_closure_evidence"
     ]
     executed = [_run_verification_command(root, command, timeout) for command in runs]
+    closed_contract = None
+    if contract_path:
+        from .closed_contracts import measure
+
+        closed_contract = measure(root, work, contract_path, dry_run=dry_run)
+        executed.append({
+            "command": "closed-contract:" + str(contract_path),
+            "result": "PASS" if closed_contract["status"] == "CURRENT_PASS" else "FAIL",
+            "executed": closed_contract.get("executed", False),
+            "closed_contract_status": closed_contract["status"],
+        })
     entries = verification + executed
     verification_failed = any(entry.get("result") != "PASS" for entry in executed)
+    from .closed_contracts import inspect as inspect_contracts
+
+    observations = inspect_contracts(root, work, limit=100, include_scopes=False)
+    focused_failures = [
+        row for row in observations["rows"]
+        if row["status"] in ("CURRENT_REGRESSION", "CURRENT_CHECK_FAILED")
+        and not (
+            closed_contract and closed_contract.get("status") == "CURRENT_PASS"
+            and row.get("contract_path") == closed_contract.get("contract_path")
+        )
+    ]
+    verification_failed = (
+        verification_failed or bool(focused_failures)
+        or not observations["ok"] or observations["has_more"]
+    )
     if verification_failed:
         verdict = "FAIL"
     elif capture.get("exit_code") == 0:
@@ -1640,9 +1824,60 @@ def _reverify_body(
         ]
     evidence_class = evidence_class_of({"verification": entries})
     contract_digest = _verification_contract_digest(entries, gate)
+    if closed_contract:
+        binding = {key: closed_contract.get(key) for key in
+                   ("contract_sha256", "verifier", "dependencies")}
+        contract_digest = hash_bytes(
+            contract_digest.encode() + json.dumps(binding, sort_keys=True).encode()
+        )
+    return {
+        "ok": True,
+        "probe": {
+            "problems": problems,
+            "warnings": warnings,
+            "findings_digest": findings_digest,
+            "gate": gate,
+            "own_problems": own_problems,
+            "entries": entries,
+            "verdict": verdict,
+            "verification_failed": verification_failed,
+            "evidence_class": evidence_class,
+            "contract_digest": contract_digest,
+            "closed_contract": closed_contract,
+            "focused_failures": focused_failures,
+        },
+    }
 
-    # The preview returns here, before the idempotency scan, the receipt record
-    # and the journaled write: everything below this line is a mutation.
+
+def _reverify_body(
+    root, work, agent, ticket, probed, identity, lineage, dry_run, contract_path=None,
+):
+    """The writer-serialized half of :func:`reverify_work`.
+
+    Split out so the caller owns the writer boundary and a dry run reaches the
+    same code without ever acquiring the lock. ``probed`` was measured OUTSIDE
+    the lock; ``identity``/``lineage`` are the captured source identity and the
+    (possibly just-created) lineage carrier.
+    """
+    probe = probed["probe"]
+    problems = probe["problems"]
+    warnings = probe["warnings"]
+    findings_digest = probe["findings_digest"]
+    gate = probe["gate"]
+    own_problems = probe["own_problems"]
+    entries = probe["entries"]
+    verdict = probe["verdict"]
+    verification_failed = probe["verification_failed"]
+    evidence_class = probe["evidence_class"]
+    contract_digest = probe["contract_digest"]
+    closed_contract = probe["closed_contract"]
+    focused_failures = probe["focused_failures"]
+    from .closed_contracts import projection
+
+    # READ-ONLY PREVIEW (W2-001): a dry run writes ZERO project bytes -- no
+    # lineage, no IDENTITY.md, no conformance receipt, no conformance index, no
+    # settled receipt. Its finding set is the REAL one, read through the
+    # explicit --no-receipt capture, never a fabricated empty one.
     if dry_run:
         return {
             "ok": True,
@@ -1654,6 +1889,7 @@ def _reverify_body(
             "verification_contract_digest": contract_digest,
             "problem_count": len(problems),
             "warning_count": len(warnings),
+            **({"closed_contract": projection(closed_contract)} if closed_contract else {}),
         }
 
     # Idempotency: newest matching receipt decides. The KEY is the current
@@ -1697,6 +1933,8 @@ def _reverify_body(
                     "verdict": existing.get("verdict"),
                     "evidence_class": evidence_class_of(existing),
                     "reuse": True,
+                    **({"closed_contract": projection(existing["closed_contract"])}
+                       if existing.get("closed_contract") else {}),
                 }
             break
 
@@ -1730,6 +1968,8 @@ def _reverify_body(
         "own_problem_keys": sorted(f["finding_key"] for f in own_problems),
         "verdict": verdict,
         "gate": gate,
+        **({"closed_contract": closed_contract} if closed_contract else {}),
+        **({"closed_contract_failures": focused_failures} if focused_failures else {}),
     }
     canonical = json.dumps(record, sort_keys=True, separators=(",", ":")).encode("utf-8")
     record["integrity_digest"] = hash_bytes(canonical)
@@ -1769,6 +2009,7 @@ def _reverify_body(
         ],
         preconditions={rel: ""},
         verification_policy="none",
+        receipt_metadata={"closed_contract": bool(closed_contract), "work": work},
     )
     if not committed.get("ok"):
         return {
@@ -1780,12 +2021,15 @@ def _reverify_body(
         "ok": True,
         "code": "WORK_REVERIFIED",
         "receipt_id": receipt_id,
+        "record": rel,
         "work": work,
         "verdict": verdict,
         "evidence_class": evidence_class,
         "verification_contract_digest": contract_digest,
         "problem_count": len(problems),
         "warning_count": len(warnings),
+        **({"closed_contract": projection(closed_contract)} if closed_contract else {}),
+        **({"closed_contract_failures": focused_failures} if focused_failures else {}),
     }
 
 
@@ -1845,11 +2089,11 @@ def current_tree_reverify(root: Path | str, work: str) -> dict | None:
     """Closure-evidence view of ``latest_pass_reverify`` with a current-tree
     checkpoint check (T-158 Stage 2, D3).
 
-    A PASS receipt counts as closure evidence ONLY when it was captured
-    against THIS tree: project lineage (never the checkout path, T-1516),
-    ruleset and the current source fingerprint (HEAD + working-tree delta)
-    must all match the live project. A receipt from an older checkpoint is
-    stale evidence, never closure proof.
+    Legacy PASS requires the current source fingerprint. Focused executed
+    contracts may instead prove their exact current dependencies, recorded
+    verifier and environment; unrelated tree changes erase neither that proof
+    nor historical closure. Project lineage and ruleset still must match.
+    Suspect, missing or failed focused evidence never supplies closure proof.
 
     T-1434 M5.3: the receipt must also carry EXECUTABLE evidence. An
     attested-only contract (``--verification cmd:PASS`` and no ``--run``)
@@ -1864,11 +2108,22 @@ def current_tree_reverify(root: Path | str, work: str) -> dict | None:
         return None
     if evidence_class_of(receipt) == "attested":
         return None
+    from .closed_contracts import inspect as inspect_contracts
+
+    observations = inspect_contracts(root, work, limit=100, include_scopes=False)
+    if not observations["ok"] or observations["has_more"] or any(
+        row["status"] != "CURRENT_PASS" for row in observations["rows"]
+    ):
+        return None
     identity = _source_identity(root)
     if (
         receipt.get("source_head") != identity["source_head"]
         or receipt.get("source_tree_fingerprint")
         != identity["source_tree_fingerprint"]
     ):
-        return None
+        # A focused executed contract proves only its exact current dependencies.
+        # Unrelated source changes do not erase that proof or historical closure.
+        if not observations["rows"]:
+            return None
+        return {**receipt, "currentness_basis": "focused_dependencies"}
     return receipt

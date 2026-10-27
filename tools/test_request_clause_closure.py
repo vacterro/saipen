@@ -80,13 +80,12 @@ class TheEntryCommandsTicketClosesTests(unittest.TestCase):
         self.assertEqual(code, 0, text)
         self.assertEqual(payload["code"], "FINISHED", text)
 
-        receipts = receipts_of(root)
-        self.assertEqual(len(receipts), 1, receipts)
-        summary = intake.coverage_summary(root, receipts[0])
-        self.assertEqual(summary["actionable"], 1, summary)
-        self.assertEqual(summary["unresolved"], [], summary)
+        # The clause the finish settled was the receipt's last gate: it closed.
+        self.assertEqual(receipts_of(root), [])
+        receipts = payload["source_closed"]["closed"]
+        self.assertEqual(len(receipts), 1, payload)
         ledger = json.loads(
-            (root / ".saipen" / "intake" / "coverage" / f"{receipts[0]}.json").read_text(
+            (root / ".saipen" / "archive" / "source" / f"{receipts[0]}.coverage.json").read_text(
                 encoding="utf-8"
             )
         )
@@ -98,15 +97,16 @@ class TheEntryCommandsTicketClosesTests(unittest.TestCase):
     def test_the_seeded_clause_is_the_operator_text_not_a_summary(self):
         root = healthy(self)
         drive(self, root)
-        cli(root, "ticket", "done", "T-1", "--closure-mode", "own_patch", "--json")
         receipt = receipts_of(root)[0]
+        self.assertTrue(intake.ensure_request_clause(root, receipt).get("ok"))
+        self.assertTrue(intake.is_request_clause(root, receipt, f"{receipt}:R001"))
+        cli(root, "ticket", "done", "T-1", "--closure-mode", "own_patch", "--json")
         contract = json.loads(
-            (root / ".saipen" / "intake" / "contracts" / f"{receipt}.json").read_text(
+            (root / ".saipen" / "archive" / "source" / f"{receipt}.contract.json").read_text(
                 encoding="utf-8"
             )
         )
         self.assertEqual(contract["clauses"][f"{receipt}:R001"]["text"], TASK)
-        self.assertTrue(intake.is_request_clause(root, receipt, f"{receipt}:R001"))
 
 
 class NothingIsSettledWithoutTheWorksOwnProofTests(unittest.TestCase):

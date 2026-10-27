@@ -110,10 +110,13 @@ from saipen_engine.paths import (
     resolve_protocol_dir,
 )
 from saipen_engine.log import (
+    ACTIVE_LOG_MAX_BYTES,
+    ACTIVE_LOG_MAX_LINES,
     LOG_RE,
     HistoryOwnershipError,
     history_paths,
     read_history_snapshot,
+    seal_due,
 )
 from saipen_engine.fast_check import block_parked_evidence_error
 
@@ -614,17 +617,47 @@ def _uncommitted_symbols(rel: str) -> list[str]:
     for module, imported in re.findall(
         r"^[ \t]*from[ \t]+([\w.]+)[ \t]+import[ \t]+(\(?[^\n#]+)", source, re.MULTILINE
     ):
-        parts = module.split(".")
-        # Only a module that EXISTS IN THIS HOME can be one HEAD is missing. A
-        # stdlib or third-party name has no tools/ path at all and is present in
-        # every clone, so reporting it would fire on every ordinary file.
-        # ponytail: resolves repo modules under tools/ only; a manifest file
-        # outside that tree is not import-checked. Widen the root here if the
-        # manifest ever sweeps an importable tree.
-        candidates = [
-            f"tools/{(Path(*parts).with_suffix('.py')).as_posix()}",
-            f"tools/{(Path(*parts) / '__init__.py').as_posix()}",
-        ]
+        if module.startswith("."):
+            # T-1624. A RELATIVE import names a module beside the importing
+            # file, not one under `tools/` by its dotted path. Splitting `.` on
+            # dots gave two empty parts, `Path('', '')` is `Path('.')`, and
+            # `with_suffix` raised: the first untracked package module that
+            # imported a sibling (`from . import x`) crashed the whole gate and
+            # every transition that runs it. Resolve against the file's own
+            # package; `from . import a, b` names the modules a and b.
+            base = Path(rel).parent
+            for _ in range(len(module) - len(module.lstrip(".")) - 1):
+                base = base.parent
+            rest = [part for part in module.lstrip(".").split(".") if part]
+            if not rest:
+                for name in re.findall(r"[A-Za-z_]\w*", imported.split(" as ")[0]):
+                    key = (base / f"{name}.py").as_posix()
+                    if not Path(key).is_file():
+                        continue
+                    if key not in cache:
+                        rc, out = _git("show", f"HEAD:{key}")
+                        cache[key] = out if rc == 0 else None
+                    if cache[key] is None:
+                        orphans.add(f"module {module}{name}")
+                continue
+            target = base.joinpath(*rest)
+            candidates = [
+                target.with_suffix(".py").as_posix(),
+                (target / "__init__.py").as_posix(),
+            ]
+        else:
+            parts = module.split(".")
+            # Only a module that EXISTS IN THIS HOME can be one HEAD is missing.
+            # A stdlib or third-party name has no tools/ path at all and is
+            # present in every clone, so reporting it would fire on every
+            # ordinary file.
+            # ponytail: resolves repo modules under tools/ only; a manifest file
+            # outside that tree is not import-checked. Widen the root here if
+            # the manifest ever sweeps an importable tree.
+            candidates = [
+                f"tools/{(Path(*parts).with_suffix('.py')).as_posix()}",
+                f"tools/{(Path(*parts) / '__init__.py').as_posix()}",
+            ]
         present = [k for k in candidates if Path(k).is_file()]
         if not present:
             continue
@@ -1066,7 +1099,7 @@ TYPE_CHECKS = {
 # the docstring here said the interpreted subset "is everything the schema
 # actually uses", so `goal_waves: -1` passed the gate and handed the § 2.4
 # safety valve a budget below its own floor.
-SCHEMA_KEYWORDS_ENFORCED = frozenset({"type", "enum", "minimum", "items"})
+SCHEMA_KEYWORDS_ENFORCED = frozenset({"type", "enum", "minimum", "items", "pattern"})
 # Annotations. They constrain nothing, so nothing needs to enforce them.
 # `default` is deliberately here: JSON Schema `default` is documentation of an
 # omitted value, never an instruction to supply one, and a validator that
@@ -1098,6 +1131,7 @@ SCHEMA_KEYWORDS_DELEGATED = {
     "additionalProperties": "unknown-field FAIL in check_against_schema",
     # The required array is read directly by check_against_schema.
     "required": "required-field FAIL in check_against_schema",
+    "allOf": "GOAL-01 authority quartet in state_contract_errors and goal_authority.prove",
 }
 
 
@@ -1191,6 +1225,8 @@ def check_against_schema(fields, schema, label):
             )
         if "enum" in spec and value not in spec["enum"]:
             fail(f"{label} field {key}: {value!r} not one of {'|'.join(spec['enum'])}")
+        if "pattern" in spec and isinstance(value, str) and not re.search(spec["pattern"], value):
+            fail(f"{label} field {key}: {value!r} does not match its schema pattern")
         # `minimum` gates the floor of every counter STATE persists. Unenforced,
         # `goal_waves: -1` reads as valid and hands § 2.4's safety valve four
         # waves of budget instead of three; `last_event: 0` claims a LOG event
@@ -2018,6 +2054,11 @@ GOAL_TICKET_CAP = 20
 # after this many consecutive releases MUST be named by a live BOARD ticket.
 WARN_OWNER_SPAN = 3
 
+from saipen_engine import goal_authority as _goal_authority  # noqa: E402
+
+for _grant_error in _goal_authority.prove(PROJECT_ROOT, state):
+    fail("goal-authority: " + _grant_error)
+
 # RFC § 2.4: execution_intent: goal requires both persisted counters.
 if intent == "goal":
     missing_counters = [
@@ -2534,6 +2575,34 @@ for tid, t in tickets.items():
                 f"remembered"
             )
 
+    # T-1668: a compacted row is a projection; its full text lives where its
+    # detail_ref points. A store a clone lacks left 101 live rows citing
+    # nothing while this validator stayed green, so a citation is resolved.
+    _dr = (fields.get("detail_ref") or "").strip()
+    if _dr:
+        _dr_path = Path(_dr)
+        _dr_missing = None
+        if _dr_path.is_absolute() or ".." in _dr_path.parts or not _dr_path.is_file():
+            _dr_missing = _dr
+        else:
+            try:
+                _dr_meta = json.loads(_dr_path.read_text(encoding="utf-8"))
+            except (OSError, ValueError):
+                _dr_meta = None
+            _dr_original = (
+                str(_dr_meta.get("original_record_path") or "")
+                if isinstance(_dr_meta, dict)
+                else ""
+            )
+            if _dr_original and not Path(_dr_original).is_file():
+                _dr_missing = _dr_original
+        if _dr_missing:
+            fail(
+                f"BOARD.md:{line_no} ticket {tid} detail_ref does not resolve: "
+                f"{_dr_missing} -- the row is a compact projection and the full "
+                f"record it cites is not in this checkout (T-1668)"
+            )
+
     # An owner with no claim_time, or the reverse, is half a claim.
     if bool(fields.get("owner")) != bool(_ct):
         warn(
@@ -2808,20 +2877,38 @@ if state.get("phase") == "DONE":
                 f"deadlocks the board (§ 1.11 UNBLOCK exception)"
             )
 
-# RFC § 1.2 board soft cap. BOARD.md is read on every cold start (§ 1.1,
-# BOOT.md's fast path), so its size is a real per-session cost -- same reasoning
-# as the LOG cap below, minus the sealing machinery (the board is prunable,
-# not append-only; phases/clean.md's scrub is the mechanism). WARN only:
-# an oversized board is hygiene debt, never corruption.
-board_kb = board_path.stat().st_size / 1024
-if board_kb > 16:
-    done_chars = sum(len(bl) for bl in board_lines if bl.startswith("- [x]"))
+# Board soft cap. BOARD.md is read on every cold start, so its size is a real
+# per-session cost -- same reasoning as the LOG cap below, minus the sealing
+# machinery (the board is prunable, not append-only). WARN only: closed text
+# nobody reads is hygiene debt, never corruption.
+#
+# T-1640: this measured the WHOLE file against ~16 KB and said "scrub ## DONE
+# at the next CLEAN". No agent may write the BOARD and no verb pruned a
+# record, so nothing could act on it; and no scrub could have cleared it
+# either, because open work alone was 55 KB here. It now measures what a scrub
+# can clear -- the closed records `board_scrub.select` would prune, the same
+# rule entering CLEAN applies -- and names the command a guarded shell admits.
+from saipen_engine import board_scrub as _board_scrub  # noqa: E402
+from saipen_engine import intake as _scrub_intake  # noqa: E402
+
+try:
+    _scrub = _board_scrub.select(
+        tickets,
+        _canonical_history_snapshot.events if _canonical_history_snapshot else [],
+        *_scrub_intake.active_receipt_works(Path(".")),
+    )
+except (OSError, ValueError):
+    # Unreadable receipts are reported by the source-receipt gate; what they
+    # hold is unknown here, so nothing is called prunable.
+    _scrub = None
+if _scrub is not None and _scrub.due:
     warn(
         "board-soft-cap",
-        f"BOARD.md is {board_kb:.0f} KB (soft cap ~16 KB), of which "
-        f"{done_chars / 1024:.0f} KB is closed-ticket text -- that content "
-        f"already lives in LOG.md/CHANGELOG.md, so scrub ## DONE at the next "
-        f"CLEAN (RFC § 1.2, phases/clean.md step 1)",
+        f"BOARD.md is {board_path.stat().st_size / 1024:.0f} KB, of which "
+        f"{_scrub.pruned_bytes / 1024:.0f} KB is {len(_scrub.pruned)} closed "
+        f"record(s) nothing pins (soft cap {_board_scrub.SCRUB_DUE_BYTES // 1024} KB "
+        f"of such text) -- `saipen transition CLEAN` scrubs them into "
+        f"{_board_scrub.SCRUB_EVIDENCE_ROOT}/ (phases/clean.md step 1)",
     )
 
 for tid, t in tickets.items():
@@ -3111,6 +3198,8 @@ except Exception as _audit_route_exc:  # pragma: no cover - defensive
     )
 
 if _audit_route_projection is not None:
+    from saipen_engine.reconcile import _derived_goal_counters as _audit_goal_counters
+
     _audit_route_why = _audit_route_violation(
         _audit_route_projection,
         state.get("next_action") if isinstance(state.get("next_action"), str) else "",
@@ -3118,6 +3207,11 @@ if _audit_route_projection is not None:
         WAIT_CATEGORIES,
         tickets=tickets,
         agent=self_agent,
+        state=state,
+        goal_counters=(
+            _audit_goal_counters(_canonical_history_snapshot.events)
+            if _canonical_history_snapshot is not None else None
+        ),
     )
     if _audit_route_why:
         fail(f"STATE.md audit route not followed -- {_audit_route_why} (SOURCE-AUDIT-INBOX-01)")
@@ -3195,10 +3289,22 @@ if intent == "converge" and log_files and isinstance(next_action, str):
 
 if converge_target == "ship" and log_files:
     _ccc_lines = [line for path in log_files for line in read_doc(path).splitlines()]
+    # T-1760: a tree without Git has no commit to name. The engine's entry
+    # marker there carries the head `compute_source_identity` reports, the
+    # literal `no-git`, and this check failed the engine's own line. The same
+    # owner decides here: `@no-git` is a marker only while this tree is
+    # no-Git by that owner's rule, so a Git project still owes a commit id.
+    _ccc_no_git = False
+    if any("ccc converge target -> ship @no-git" in line for line in _ccc_lines):
+        try:
+            _ccc_no_git = compute_source_identity(Path(".")).source_head == "no-git"
+        except FreshnessError:
+            _ccc_no_git = False
+    _ccc_head = rf"{OID_RE}|no-git" if _ccc_no_git else OID_RE
     _ccc_markers = [
         (index, match.group(1))
         for index, line in enumerate(_ccc_lines)
-        if (match := re.search(rf"DEC: ccc converge target -> ship @({OID_RE})\b", line))
+        if (match := re.search(rf"DEC: ccc converge target -> ship @({_ccc_head})\b", line))
     ]
     if not _ccc_markers:
         fail(
@@ -3223,6 +3329,20 @@ if converge_target == "ship" and log_files:
             None,
         )
         _ship_at = _ship_result[0] if _ship_result else None
+        if _ship_at is None and _ccc_no_git:
+            # No push can exist without Git: SHIP's own line there is the
+            # skipped publish (phases/ship.md), and it is the boundary J-M
+            # must follow. A Git project is still judged by its pushed head.
+            _ship_at = next(
+                (
+                    index
+                    for index in range(len(_ccc_lines) - 1, _ccc_start, -1)
+                    if re.search(
+                        r"RUN: ship .* -> skipped publish \(no-publish: ", _ccc_lines[index]
+                    )
+                ),
+                None,
+            )
         _prepare_at = [
             index
             for index in range(_ccc_start + 1, len(_ccc_lines))
@@ -3783,16 +3903,48 @@ if log_files:
                 )
             _exempt = [row for row in _off_grammar if row not in _forged]
             if _exempt:
-                warn(
-                    "hand-authored-op-id",
-                    f"{len(_exempt)} event(s) carry an off-grammar "
-                    "`[op: ...]` id that no writer emits; exempt as history "
-                    "(sealed segment, at or below the resolved floor, or "
-                    "backed by a real operation record): "
-                    + "; ".join(f"{rel}:{ln} E-{eid} [op: {oid}]"
-                                for eid, oid, rel, ln, _n in _exempt[:3])
-                    + " (T-1577)",
+                # History, not a WARN (T-1642): every id here is sealed, at or
+                # below the floor, or backed by a real operation record, and
+                # the forged ones FAIL above.
+                ok(
+                    f"history: {len(_exempt)} event(s) carry an off-grammar "
+                    "`[op: ...]` id no writer emits, exempt as sealed, at or "
+                    "below the resolved floor, or backed by a real operation "
+                    "record (first "
+                    + "; ".join(f"{rel}:{ln} E-{eid}"
+                                for eid, oid, rel, ln, _n in _exempt[:1])
+                    + "; T-1577)"
                 )
+
+    # [lifecycle-authority] (T-1671, SRC-192): the three [saio] checks above
+    # read the LOG alone, so each one judges a TAG. None of them asks whether
+    # the canonical STATE and BOARD stand on an operation, and that is the
+    # question the hand-written lifecycle answered wrong: untagged
+    # `RUN: verify -> PASS` lines are legal semantic entries, a `## DONE` row
+    # with `closure_mode` parses, and a STATE whose `last_event` names the
+    # hand-typed tail is "fresh". `lifecycle_authority.assess` binds the two
+    # surfaces to the newest event an operation record stands behind. Same
+    # boundary as T-1282: no ledger on this checkout means UNAVAILABLE.
+    if log_ok and _canonical_history_snapshot is not None:
+        from saipen_engine import lifecycle_authority as _lifecycle_authority
+
+        _lifecycle_last_event = (state or {}).get("last_event")
+        if isinstance(_lifecycle_last_event, str) and _lifecycle_last_event.strip().isdigit():
+            _lifecycle_last_event = int(_lifecycle_last_event.strip())
+        _lifecycle = _lifecycle_authority.assess(
+            PROJECT_ROOT,
+            {"last_event": _lifecycle_last_event},
+            {"tickets": tickets},
+            _canonical_history_snapshot.events,
+        )
+        if _lifecycle["status"] == _lifecycle_authority.UNAUTHORIZED:
+            fail(
+                "lifecycle authority [saio] -- canonical lifecycle state stands "
+                "on no operation: "
+                + "; ".join(f["detail"] for f in _lifecycle["findings"][:4])
+                + " -- run `saipen recover`; it names the journaled repair "
+                "(T-1671)"
+            )
 
     # [gate-closure] (NITRO dogfood IV, T-602): a ticket's DONE state is
     # evidence of the phase chain that produced it, NEVER of a legal-looking
@@ -4593,10 +4745,36 @@ if log_files:
                 continue
             _outbox = _sub / "kitchen" / "OUTBOX.md"
             if _outbox.is_file():
-                _ot = _outbox.read_text(encoding="utf-8-sig")
-                if any(m in _ot for m in _main_canonical):
+                # T-607: the boundary rule names an ACTIONABLE TARGET, not a
+                # mere mention. A sub's payload/instructions that NAMES a
+                # main-project canonical path would integrate a file there --
+                # that is the violation. Prose descriptions, main_project_refs
+                # and reviewed evidence that merely discuss .saipen/LOG.md are
+                # not actionable. Comment blocks are excluded (matching the
+                # STATE check below), and only payload lines -- the schema's
+                # "Exact files or artifacts to integrate" field -- are scanned.
+                _ot_lines = []
+                _ot_in_comment = False
+                for _ol in _outbox.read_text(encoding="utf-8-sig").splitlines():
+                    if "<!--" in _ol:
+                        _ot_in_comment = True
+                        continue
+                    if "-->" in _ol:
+                        _ot_in_comment = False
+                        continue
+                    if not _ot_in_comment:
+                        _ot_lines.append(_ol)
+                _ot_payload = [
+                    _l for _l in _ot_lines
+                    if _l.strip().startswith("- **payload:**")
+                ]
+                if any(
+                    m in _l
+                    for _l in _ot_payload
+                    for m in _main_canonical
+                ):
                     _boundary_errors.append(
-                        f"{_sub.name} OUTBOX references a main-project "
+                        f"{_sub.name} OUTBOX payload targets a main-project "
                         "canonical path; a SubSaipen writes only inside its "
                         "own home -- a package may not target "
                         ".saipen/BOARD.md|STATE.md|LOG.md (red control 7)"
@@ -4711,14 +4889,13 @@ if log_files:
             )
         _sealed_bad = _bad_sealed + _stray_sealed
         if _sealed_bad:
-            warn(
-                "hunt-mark-unresolvable",
-                f"{len(_sealed_bad)} sealed hunt mark(s) name commits this "
-                f"repository does not have or that never reached the remote "
-                f"(earliest {_sealed_bad[0]}). Immutable by append-only; "
-                f"new marks are FAILed instead",
+            ok(
+                f"history: {len(_sealed_bad)} sealed hunt mark(s) name commits "
+                f"this repository does not have or that never reached the "
+                f"remote (earliest {_sealed_bad[0]}); immutable by append-only, "
+                f"and new marks are FAILed (T-1642)"
             )
-        if not (_bad_active or _stray_active or _sealed_bad):
+        if not (_bad_active or _stray_active):
             ok(
                 f"hunt skip marks resolve to real commits on the remote "
                 f"({len(_hunt_marks)} checked)"
@@ -4744,26 +4921,40 @@ if log_files:
         # both caps, nothing was re-authorized and the reset just handed out a
         # fresh budget nobody asked for -- the failure that made the most
         # convenient shortcut unsafe to type (RFC § 2.4 Entry, v7.148.0).
-        for _n, _m in enumerate(
-            re.finditer(
+        # A sealed occurrence is history (T-1642); one in the active log is
+        # still the writer's to explain, so it keeps warning.
+        _untripped_sealed: list[str] = []
+        _untripped_warned = False
+        for _reauth_file in log_files:
+            for _m in re.finditer(
                 r"\]\s+DEC: goal reauthorized -- goal_waves (\d+)->0, "
                 r"goal_tickets (\d+)->0",
-                "\n".join(ln for p in log_files for ln in read_doc(p).splitlines()),
+                read_doc(_reauth_file),
+            ):
+                _w, _t = int(_m.group(1)), int(_m.group(2))
+                if _w >= 3 or _t >= 20:
+                    continue
+                if _reauth_file != active_log:
+                    _untripped_sealed.append(_reauth_file.as_posix())
+                elif not _untripped_warned:
+                    _untripped_warned = True
+                    warn(
+                        "goal-reauth-untripped",
+                        f"a `DEC: goal reauthorized` line clears goal_waves {_w} "
+                        f"and goal_tickets {_t}, both under § 2.4's 3/20 caps -- "
+                        f"the valve had not tripped, so nothing needed "
+                        f"re-authorizing and the reset granted a fresh budget "
+                        f"instead (MAINTENANCE.md § 2.4 Entry)",
+                    )
+        if _untripped_sealed:
+            ok(
+                f"history: {len(_untripped_sealed)} sealed `DEC: goal "
+                f"reauthorized` line(s) cleared counters under the caps "
+                f"(first in {_untripped_sealed[0]}); immutable by append-only, "
+                f"and a new one in the active log warns"
             )
-        ):
-            _w, _t = int(_m.group(1)), int(_m.group(2))
-            if _w < 3 and _t < 20:
-                warn(
-                    "goal-reauth-untripped",
-                    f"a `DEC: goal reauthorized` line clears goal_waves {_w} "
-                    f"and goal_tickets {_t}, both under § 2.4's 3/20 caps -- "
-                    f"the valve had not tripped, so nothing needed "
-                    f"re-authorizing and the reset granted a fresh budget "
-                    f"instead (RFC § 2.4 Entry)",
-                )
-                break
 
-        _marker = re.compile(r"\]\s+DEC: goal (?:pivot|reauthorized)\b")
+        _marker = re.compile(r"\]\s+DEC: goal (?:pivot|reauthorized|checkpoint)\b")
         _log_lines = [ln for p in log_files for ln in read_doc(p).splitlines()]
         _last_marker = max(
             (i for i, ln in enumerate(_log_lines) if _marker.search(ln)), default=None
@@ -4845,20 +5036,22 @@ if log_files:
     # own rule is that a pattern repeated hundreds of times in immutable
     # history is a single finding, and 125 lines of it every run is how people
     # learn to scroll past warnings.
+    # Sealed history is a counted fact, not a WARN: append-only forbids the
+    # repair, so a WARN here could never be acted on and would teach readers
+    # to skip the WARN block. The active log is held to the rule above
+    # (T-1642).
     if sealed_dateless:
-        warn(
-            "log-missing-date",
-            f"{len(sealed_dateless)} sealed LOG entr(y/ies) predate the "
-            f"mandatory DATE (earliest {sealed_dateless[0]}). Immutable by "
-            f"append-only; new entries are FAILed instead",
+        ok(
+            f"history: {len(sealed_dateless)} sealed LOG entr(y/ies) predate the "
+            f"mandatory DATE (earliest {sealed_dateless[0]}); immutable by "
+            f"append-only, and the active log is FAILed for it"
         )
 
     if sealed_future:
-        warn(
-            "log-future-tense",
-            f"{len(sealed_future)} sealed LOG entr(y/ies) state their event "
-            f"in the future tense (earliest {sealed_future[0]}). Immutable "
-            f"by append-only; new entries are FAILed instead",
+        ok(
+            f"history: {len(sealed_future)} sealed LOG entr(y/ies) state their "
+            f"event in the future tense (earliest {sealed_future[0]}); immutable "
+            f"by append-only, and the active log is FAILed for it (T-1642)"
         )
 
     if seen_ids and not timestamp_events:
@@ -4910,21 +5103,26 @@ if log_files:
                 f"'%d.%m.%y %H:%M'))\" (RFC § 1.2)"
             )
 
-    # RFC § 1.2 segmentation soft cap (~300 lines / ~64 KB). Without a signal
-    # here the rule is purely aspirational -- nothing ever tells an agent the
-    # active tail has outgrown what § 1.1's "read the tail" can cheaply load.
-    # WARN, never FAIL: an oversized log is a hygiene debt, not corruption,
-    # and sealing is a CLEAN-time action, not something to force mid-ticket.
+    # CORE "LOG.md" segmentation cap. Without a signal here the rule is purely
+    # aspirational -- nothing ever tells an agent the active tail has outgrown
+    # what "read the tail" can cheaply load. WARN, never FAIL: an oversized log
+    # is a hygiene debt, not corruption, and sealing is a CLEAN-time action,
+    # not something to force mid-ticket.
+    # T-1640: the finding names the command that clears it. It used to say
+    # "seal it at the next checkpoint" to an agent the guard refuses on both
+    # paths a seal writes, so it was printed on every run for weeks (6113
+    # lines against 300) and taught its readers that the cap was decoration.
+    # The numbers come from the module whose operation enforces them.
     if active_log.is_file():
         active_lines = len(read_doc(active_log).splitlines())
-        active_kb = active_log.stat().st_size / 1024
-        if active_lines > 300 or active_kb > 64:
+        active_bytes = active_log.stat().st_size
+        if seal_due(active_lines, active_bytes):
             warn(
                 "log-soft-cap",
                 f"{active_log.as_posix()} is {active_lines} lines / "
-                f"{active_kb:.0f} KB, past the ~300 line / ~64 KB soft cap -- "
-                f"seal it into .saipen/logs/LOG-<NNN>.md at the next "
-                f"checkpoint (RFC § 1.2, phases/clean.md)",
+                f"{active_bytes / 1024:.0f} KB, past the {ACTIVE_LOG_MAX_LINES} line / "
+                f"{ACTIVE_LOG_MAX_BYTES // 1024} KB cap -- `saipen transition CLEAN` seals "
+                f"it into the next .saipen/logs/LOG-<NNN>.md (phases/clean.md step 4)",
             )
 
     # A third timestamp check lived here (feae149, CONFORMANCE 42) and was
@@ -6473,6 +6671,21 @@ if (
         # is the fallback for homes that predate the manifest (v7.190.0+).
         _manifest_json = home_path("MANIFEST.json")
         _runtime_tracked_set = None
+        # T-1879: `ls-files` answers "does the INDEX carry this name", which is
+        # not the question this check asks. `git add -N` (intent-to-add)
+        # registers the NAME with the empty blob and no content, so a file no
+        # commit will ever carry read as tracked. Measured 2026-10-27: a `-N`
+        # tools/ module beside one ordinary staged file made `--gate core` print
+        # "runtime manifest complete (617 files, all tracked)", and the commit
+        # that followed carried the ordinary file and NOT the intent-only one.
+        # Same gate, same PASS, and every clone gets a runtime PATH whose bytes
+        # exist on one disk only -- the exact defect this check exists to refuse.
+        #
+        # Reported as its own finding rather than folded into "git does not
+        # track": the name IS in the index, so that sentence would be false, and
+        # the repair differs -- `git add <path>` (content) instead of "commit the
+        # file", which is what the session already believes it did.
+        _runtime_intent_only: set[str] = set()
         if _manifest_json.is_file():
             try:
                 _mj = json.loads(_manifest_json.read_text("utf-8"))
@@ -6488,6 +6701,26 @@ if (
                     _runtime_rc, _runtime_out = _git("ls-files", "-z")
                     if _runtime_rc == 0:
                         _runtime_tracked_set = {path for path in _runtime_out.split("\x00") if path}
+                    # What the NEXT commit will actually carry: paths already in
+                    # HEAD, plus paths whose CONTENT is staged. `ls-files` alone
+                    # answers only which names the index lists. Deliberately a
+                    # separate set from `_runtime_tracked_set`, because that one
+                    # also scopes the SHIP-gate copy-tree surface to the release
+                    # index -- narrowing it would hide an intent-only member from
+                    # the verdict instead of reporting it (T-1879).
+                    _landed_rc, _landed_out = _git(
+                        "diff", "--cached", "--name-only", "--diff-filter=d", "-z"
+                    )
+                    _head_rc, _head_out = _git(
+                        "ls-tree", "-r", "--name-only", "-z", "HEAD"
+                    )
+                    if _landed_rc == 0 and _head_rc == 0:
+                        _runtime_landed_set = {
+                            path
+                            for path in _landed_out.split("\x00")
+                            if path
+                        } | {path for path in _head_out.split("\x00") if path}
+                        _runtime_intent_only = set(_runtime_tracked_set) - _runtime_landed_set
                 _mj_files = [f["src"] for f in _mj.get("files", [])]
                 _phase_dir = _mj.get("phase_docs", {}).get("src_dir", "")
                 for _pf in _mj.get("phase_docs", {}).get("files", []):
@@ -6576,6 +6809,21 @@ if (
             # entries still fail when merely present/untracked, while copy-tree
             # noise was excluded before it could enter the manifest.
             manifest_untracked = [f for f in manifest if f not in _runtime_tracked_set]
+        # T-1879: the third state, and the one the first two never reached. An
+        # intent-only member IS in the index, so it passed the `not in
+        # _runtime_tracked_set` filter and the check printed PASS. Scanned over
+        # the SAME expanded manifest, so a `-N` entry is reported exactly where
+        # the tracked/untracked halves report theirs.
+        manifest_intent_only = [f for f in manifest if f in _runtime_intent_only]
+        for f in manifest_intent_only:
+            fail(
+                f"runtime manifest names a file whose content is not staged: {f} "
+                f"-- the index carries the NAME (`git add -N`) and no bytes, so "
+                f"the next commit omits it while this gate reads it as tracked. "
+                f"An injector copies the on-disk tree, so every clone receives "
+                f"the path and none receives the content. Stage the content "
+                f"itself: `git add {f}`, then commit it"
+            )
         for f in manifest_untracked:
             fail(
                 f"runtime manifest names a file git does not track: {f} -- it "
@@ -6596,7 +6844,7 @@ if (
                     f"alone; it will fail in every clone. Ship the runtime it "
                     f"depends on first",
                 )
-        if not manifest_missing and not manifest_untracked:
+        if not manifest_missing and not manifest_untracked and not manifest_intent_only:
             ok(f"runtime manifest complete ({len(manifest)} files, all tracked)")
 
         # Injector behavior is executed by tools/run_scenarios.py for both
@@ -7226,12 +7474,15 @@ if "push" in _claim.lower():
 # in five documents at once and all five disagreed (v7.92.0); the from-any-phase
 # set lived in three and all three disagreed (v7.93.0). Each was found by a
 # human reading two files side by side, which is not a strategy -- it is luck
-# with extra steps. RFC.md is normative (§ 1.1), so every set below is PARSED
-# OUT OF RFC.md and compared against every other copy of it in the tree.
+# with extra steps. The cure is ONE copy: closed sets live in REGISTRY.json and
+# the engine derives them, and CORE (read here as `rfc`, CORE.md + MAINTENANCE.md)
+# points at that owner instead of restating it (T-1637). A prose sentence that
+# still enumerates a set must agree with the registry.
 #
-# A missing anchor is a FAIL, never a skip. If someone rewords RFC past these
-# patterns, this checker must be updated deliberately -- a drift detector that
-# silently stops detecting is worse than none, because it still reports PASS.
+# A rule pin reads the owner's current statement with `_says`. If someone
+# rewords that statement, the pin is updated in the same change together with
+# its audit_checks control -- a drift detector that silently stops detecting is
+# worse than none, and one that warns on every run is not heard either.
 
 
 def _ticks(text):
@@ -7244,17 +7495,18 @@ def _ticks(text):
     return out
 
 
-def _rfc_sentence(label, pattern, text):
-    m = re.search(pattern, text)
-    if not m:
-        warn(
-            "cross-doc-drift",
-            f"cross-doc check '{label}' cannot find its anchor in RFC.md -- "
-            f"the wording moved. Update tools/validate.py deliberately; a "
-            f"drift check that silently stops checking still prints PASS",
-        )
-        return None
-    return m.group(1)
+def _says(text, phrase):
+    """True when `text` states `phrase`, ignoring line wrap and bold markup.
+
+    A pin that breaks on a re-wrapped line or added emphasis reports drift for
+    a rule that is still stated, and an always-on drift WARN hides the real
+    one (T-1637).
+    """
+
+    def flat(value):
+        return " ".join(value.replace("**", "").split())
+
+    return flat(phrase) in flat(text)
 
 
 def _compare(label, rfc_set, other_set, other_name):
@@ -7263,12 +7515,12 @@ def _compare(label, rfc_set, other_set, other_name):
     if missing or extra:
         bits = []
         if missing:
-            bits.append(f"in RFC.md but not {other_name}: {sorted(missing)}")
+            bits.append(f"in CORE.md but not {other_name}: {sorted(missing)}")
         if extra:
-            bits.append(f"in {other_name} but not RFC.md: {sorted(extra)}")
+            bits.append(f"in {other_name} but not CORE.md: {sorted(extra)}")
         fail(
-            f"cross-doc drift [{label}] -- {'; '.join(bits)}. RFC.md is "
-            f"normative (§ 1.1); bring {other_name} to it, or change RFC "
+            f"cross-doc drift [{label}] -- {'; '.join(bits)}. CORE.md is "
+            f"normative (§ 1.1); bring {other_name} to it, or change CORE "
             f"deliberately and update both"
         )
         return False
@@ -7509,14 +7761,14 @@ else:
     _markers = [
         (
             rfc_path.parent / "phases" / "verify.md",
-            "That order is cheapest-first",
+            "cheapest-first",
             "phases/verify.md must say the ladder runs cheapest-first -- a parse "
             "error found by the full suite costs the whole suite to learn what "
             "the first rung says in a second",
         ),
         (
             rfc_path.parent / "phases" / "verify.md",
-            "ends the PASS claim for this pass",
+            "this pass cannot claim PASS",
             "phases/verify.md must say the first failed MANDATORY gate ends the "
             "PASS claim, so a green from a higher rung cannot read as repairing "
             "a red one below it",
@@ -7735,7 +7987,10 @@ else:
     #       record.
     _core_doc = rfc_path.parent / "CORE.md"
     _core_t = _core_doc.read_text(encoding="utf-8-sig") if _core_doc.is_file() else ""
-    if _core_t and "An ahead-stamp is repaired, not waited out" not in _core_t:
+    if _core_t and not (
+        _says(_core_t, "Prevent future-stamp deadlock: repair with a DEC")
+        and _says(_core_t, "Do not wait for the clock")
+    ):
         warn("cross-doc-drift",
             "cross-doc drift [ahead-stamp-repair] -- CORE.md must say a "
             "future-stamped LOG line is restamped to a defensible bound with "
@@ -7929,12 +8184,12 @@ else:
                 f"anyone actually reads",
             )
 
-    # 1c. Shortcuts are resolved by reading § 1.10, never from memory.
+    # 1c. Shortcuts resolve through the registry table, never from memory.
     if _boot_prio.is_file():
         if "Memory is never a source for it" not in _boot_prio_t:
             warn("cross-doc-drift",
                 "cross-doc drift [shortcut-memory-ban] -- BOOT.md step 7 "
-                "must order § 1.10's table read before acting on a shortcut "
+                "must resolve a shortcut through the registry table before acting "
                 "and explicitly state that memory is never a source for it. "
                 "An agent that believes it knows what a key means answers "
                 "from recall rather than reading the file"
@@ -7943,7 +8198,7 @@ else:
         if "a second copy drifts" not in _boot_prio_t:
             warn("cross-doc-drift",
                 "cross-doc drift [shortcut-memory-ban] -- BOOT.md step 7 "
-                "must explicitly forbid duplicating § 1.10's table into BOOT. "
+                "must explicitly forbid duplicating the shortcut table into BOOT. "
                 "A second copy drifts and defeats the read-the-source rule"
             )
             drift_ok = False
@@ -7951,11 +8206,15 @@ else:
     _s110_i = rfc.find("### 1.10")
     _s110 = rfc[_s110_i : rfc.find("### 1.11", _s110_i)] if _s110_i >= 0 else ""
     if _s110:
-        if "answering a row from recall is the same failure as inventing a command" not in _s110:
+        if not (
+            _says(_s110, "Prevent shortcut invention")
+            and _says(_s110, "Recall is not authority")
+        ):
             warn("cross-doc-drift",
-                "cross-doc drift [shortcut-memory-ban] -- RFC § 1.10 must state "
-                "that answering a row from recall is the same failure as "
-                "inventing a command, not a lesser one"
+                "cross-doc drift [shortcut-memory-ban] -- CORE.md § 1.10 must "
+                "state, under shortcut invention, that recall is not authority: "
+                "answering a row from recall is the same failure as inventing a "
+                "command, not a lesser one"
             )
             drift_ok = False
 
@@ -8088,9 +8347,12 @@ else:
     #      Proposal Mode at `goal_mode: false`, where a bare goal key is not
     #      a command at all, so `dd cc` could never complete.
     _s111b = rfc[_s111_i : rfc.find("## Part 2", _s111_i)] if _s111_i >= 0 else ""
-    if _s111b and "cannot execute now is written down, never dropped" not in _s111b:
+    if _s111b and not (
+        _says(_s111b, "Prevent lost deferred commands")
+        and _says(_s111b, "never drop it into chat only")
+    ):
         warn("cross-doc-drift",
-            "cross-doc drift [command-not-dropped] -- RFC 1.11's OBEY step "
+            "cross-doc drift [command-not-dropped] -- CORE.md 1.11's OBEY step "
             "must say a command in a multi-command message that cannot "
             "execute now is recorded rather than dropped, and name where: "
             "`next_action` when it will be legal at the next continue, the "
@@ -8098,9 +8360,9 @@ else:
             "second command answerable in chat and forgotten"
         )
         drift_ok = False
-    if "One carve-out, and it is a pair rather than a loosening" not in rfc:
+    if not _says(rfc, "followed by a bare goal key in the SAME message starts that plan"):
         warn("cross-doc-drift",
-            "cross-doc drift [plan-goal-pair] -- RFC 1.10 must carve out the "
+            "cross-doc drift [plan-goal-pair] -- CORE.md 1.10 must carve out the "
             "plan-then-bare-goal pair in the same message, which starts the "
             "plan just written. Without it the shortcut table invites "
             "`dd cc`, a combination that cannot complete: `dd` ends at "
@@ -8184,6 +8446,7 @@ else:
         "README.ee.md",
         "README.ja.md",
         "README.md",
+        "SAIHANDOFF_FREEBUFF_PROVENANCE.md",
         "SECURITY.md",
         "SPEC.md",
         "THIRD_PARTY_NOTICES.md",
@@ -8210,10 +8473,13 @@ else:
     # judging it against this one FAILs a healthy install. Caught by the
     # injector probes the first time this check ran, which is the same
     # install-layout blind spot T-413 names.
-    _is_repo_clone = (_tools_parent / "saipen" / "RFC.md").is_file()
+    # T-1749: this check judges the bound project. Runtime-home scratch must
+    # not fail a consumer; another source checkout still checks its own root.
+    _root_subject = PROJECT_ROOT
+    _is_repo_clone = (_root_subject / "saipen" / "RFC.md").is_file()
     _root_files = {
         p.name
-        for p in _tools_parent.iterdir()
+        for p in _root_subject.iterdir()
         if _is_repo_clone and p.is_file() and p.name != ".git"
     }
     try:
@@ -8227,7 +8493,7 @@ else:
         # than a crash.
         _ignored = subprocess.run(
             ["git", "check-ignore", "--stdin"],
-            cwd=str(_tools_parent),
+            cwd=str(_root_subject),
             input="\n".join(sorted(_root_files)),
             capture_output=True,
             text=True,
@@ -8250,7 +8516,7 @@ else:
     # from disk directly keeps [root-file-set] green in the same archive layout
     # the export produces (hostile-regression, P2#2). Git remains authoritative
     # whenever it is present; this only covers its absence.
-    _gi = _tools_parent / ".gitignore"
+    _gi = _root_subject / ".gitignore"
     if _gi.is_file():
 
         def _gitignored_root(name: str) -> bool:
@@ -8274,7 +8540,7 @@ else:
         # that writer when the host settings show one.
         from saipen_engine.host_hooks import stray_hint
 
-        _hint = stray_hint(_tools_parent)
+        _hint = stray_hint(_root_subject)
         fail(
             "cross-doc drift [root-file-set] -- file(s) at the repository "
             f"root that the closed set does not name: "
@@ -8350,11 +8616,11 @@ else:
     #       nothing, or skip it and break the topmost-workable rule) are the
     #       divergence this section exists to remove.
     if (
-        "That is also where a ticket goes when its completion" not in rfc
-        or "The same section holds a ticket whose work another" not in rfc
+        not _says(rfc, "A permanently unsatisfiable ticket, or Work owned by an isolated producer, stays BLOCKED")
+        or not _says(rfc, "This includes permanent warning owners")
     ):
         warn("cross-doc-drift",
-            "cross-doc drift [permanent-owner-section] -- RFC 1.2 must say "
+            "cross-doc drift [permanent-owner-section] -- CORE.md 1.2 must say "
             "that a ticket whose completion condition can never be met sits "
             "in `## BLOCKED` with the reason, not in `## TODO`. A permanent "
             "warning owner in `## TODO` passes every workability test the "
@@ -8534,28 +8800,23 @@ else:
         )
         drift_ok = False
 
-    # 2b. Ticket-bearing five: RFC § 1.2's `PHASE` pairing rule vs the copy
-    #     this file enforces with. Same shape as the phase enum -- the list is
-    #     hand-kept here and pinned to the sentence that owns it, so a
-    #     deliberate change to § 1.2 fails loudly instead of leaving the
-    #     validator quietly enforcing the previous protocol.
-    s = _rfc_sentence("ticket-bearing", r"names as ticket-bearing\*\* -- (.+?) -- and omitted", rfc)
-    if s is None:
-        drift_ok = False
-    else:
-        drift_ok &= _compare(
-            "ticket-bearing",
-            set(_ticks(s)),
-            set(TICKET_BEARING_PHASES),
-            "validate.py TICKET_BEARING_PHASES",
-        )
-
-    # 3. From-any-phase set: RFC § 1.6 vs ANY_FROM here.
-    s = _rfc_sentence("any-from", r"\*\*From-any-phase set\*\*: (.+?)\.\n", rfc)
-    if s is None:
-        drift_ok = False
-    else:
-        drift_ok &= _compare("any-from", set(_ticks(s)), ANY_FROM, "validate.py ANY_FROM")
+    # 2b/3. The ticket-bearing and from-any-phase sets are REGISTRY-owned
+    #       (`phases.ticket_bearing`, `phases.any_from`); saipen_engine.phases
+    #       derives TICKET_BEARING_PHASES and ANY_FROM from them. CORE says
+    #       closed sets live in REGISTRY.json and prose is never a runtime
+    #       database, so a pin parsing these sets out of CORE prose demanded
+    #       the duplicate the law forbids and warned on every run once CORE
+    #       obeyed (T-1637). A CORE sentence that DOES enumerate one must agree.
+    for _label, _pattern, _owned in (
+        ("ticket-bearing", r"names as ticket-bearing\*\* -- (.+?) -- and omitted",
+         TICKET_BEARING_PHASES),
+        ("any-from", r"\*\*From-any-phase set\*\*: (.+?)\.\n", ANY_FROM),
+    ):
+        _enumerated = re.search(_pattern, rfc)
+        if _enumerated:
+            drift_ok &= _compare(
+                _label, set(_ticks(_enumerated.group(1))), set(_owned), "REGISTRY.json"
+            )
 
     # Transition edges are consumed directly from REGISTRY by the runtime DFA.
 
@@ -9053,6 +9314,11 @@ else:
             "compact shortcut table cross-checked against saipen/REGISTRY.json (the machine authority)",
         ),
         (
+            "saipen/COMMANDS_REFERENCE.md",
+            "the routing table an agent reads: every registered verb and subcommand must have a "
+            "row, checked by tools/test_vocabulary_parity.py against COMMAND_EFFECTS.json",
+        ),
+        (
             "saipen/EXECUTION.md",
             "execution-policy Rule ID ownership checked against saipen/REGISTRY.json",
         ),
@@ -9067,6 +9333,10 @@ else:
         ("GUIDE.md", "guide WAIT-shape check"),
         ("tests/scenarios/*/README.md", "required-field-count check + expect/reason parsing"),
         (
+            "tests/fixtures/protocol-diagnosis/[ab].md",
+            "immutable response witnesses hash-checked by tools/test_response_surface_contract.py",
+        ),
+        (
             "tests/scenarios/*/.saipen/*.md",
             "run_scenarios.py runs this validator against each fixture",
         ),
@@ -9076,6 +9346,11 @@ else:
         # inert project data. Blanketing it cost nine releases of traps.md
         # teaching a WAIT-at-DONE rule that had been superseded.
         (".saipen/KNOWLEDGE/*.md", "citation + required-field-count checks"),
+        (
+            "docs/host_integration.md",
+            "the host dispatch contract: its typed receipt fields and lifecycle names are "
+            "enforced by tools/test_t1932_src338_closures.py and tools/saipen_engine/host_dispatch.py",
+        ),
     ]
     # EXEMPT means "no rule-CONTENT check applies", never "nothing looks at it".
     # Citations are verified across every shipped document below, exempt or
@@ -9119,6 +9394,10 @@ else:
             "architecture decision rationale for detached-handoff project binding and launch envelopes; enforced by paths.py and tools/test_project_root_session_binding.py",
         ),
         (
+            "KNOWLEDGE/ADR-0004-sink-mirror-for-diagnostics.md",
+            "a decision record about a DIFFERENT project's diagnostics sink (T-40/T-42, multi-sink durability) that was copied into this home's KNOWLEDGE root; it is not a SAIPEN rule source and no check in this tree can enforce it -- classified here so an unclassified-doc gate red cannot be read as protocol drift",
+        ),
+        (
             "KNOWLEDGE/HABITS-vs-buildtools-install-fix.md",
             "cross-agent habit note, not a rule source",
         ),
@@ -9139,6 +9418,10 @@ else:
             "recorded future-gate work: reference-only, explicitly not authorized for implementation while an active ticket holds the seat, and not a rule source",
         ),
         ("SPEC.md", "design intent and rationale, deliberately not normative"),
+        (
+            "SAIHANDOFF_FREEBUFF_PROVENANCE.md",
+            "cross-project implementation handoff addressed to the FreeBuff host (T-1818/T-1825); it specifies the other product's capture-and-transport obligations and states plainly that no FreeBuff path or symbol was inspected in this repository, so it is not a SAIPEN rule source",
+        ),
         ("audit/*.md", "user audit reference copies (mojibake re-encode of the SRC-009 roadmap); content owned by .saipen/intake/active/SRC-009.md"),
         ("CHANGELOG.md", "history; never read by an agent, never a rule source"),
         ("CHANGELOG_ARCHIVE.md", "sealed history, same as above"),
@@ -9149,6 +9432,10 @@ else:
         (".github/**/*.md", "issue/PR templates, not agent-facing"),
         (".github/*.md", "issue/PR templates, not agent-facing"),
         ("tests/scenarios/README.md", "scenario format documentation, not a fixture"),
+        (
+            "tests/fixtures/protocol-diagnosis/README.md",
+            "historical witness provenance and test assumptions, not a protocol rule source",
+        ),
         (".pytest_cache/*.md", "generated tool cache, never a shipped document"),
         ("**/.pytest_cache/*.md", "generated tool cache, never a shipped document"),
           (
@@ -9599,6 +9886,8 @@ else:
                 # the peeled object is a commit (a tag naming a tree or blob
                 # must be skipped the way `^{commit}`'s non-zero exit was).
                 _tag_peeled = {}
+                _tag_peel_failed = False
+                _tp = None
                 try:
                     _tp = subprocess.run(
                         [
@@ -9622,8 +9911,29 @@ else:
                                 _tag_peeled[_refname] = _peeled
                             elif _otype == "commit":
                                 _tag_peeled[_refname] = _obj
+                    else:
+                        # T-1885: `for-each-ref` refuses the WHOLE tag set when
+                        # any single tag names an object this clone cannot read
+                        # ("fatal: missing object ... for refs/tags/v1.0.0"),
+                        # returning 128 and no rows. Before this guard the peel
+                        # map stayed empty, every lookup yielded None, zero
+                        # candidates were built and the orphan-tag check below
+                        # reported nothing -- so 394 tags in a damaged clone
+                        # verified as cleanly as 0. The check cannot run over a
+                        # partial tag set; it must say so instead of passing.
+                        _tag_peel_failed = True
                 except (OSError, subprocess.SubprocessError):
                     _tag_peeled = {}
+                    _tag_peel_failed = True
+                _tag_verified = 0
+                _tag_unreadable = 0
+                _first_peel_error = ""
+                if _tag_peel_failed and _tp is not None:
+                    _err_lines = [
+                        ln.strip() for ln in (_tp.stderr or "").splitlines() if ln.strip()
+                    ]
+                    if _err_lines:
+                        _first_peel_error = f" (first error: {_err_lines[0][:200]})"
                 _reachable = None
                 try:
                     _rl = subprocess.run(
@@ -9636,17 +9946,22 @@ else:
                         _reachable = {ln.strip() for ln in _rl.stdout.splitlines() if ln.strip()}
                 except (OSError, subprocess.SubprocessError):
                     _reachable = None
-                if _reachable is not None:
+                if _reachable is not None and not _tag_peel_failed:
                     for _tag in sorted(_tag_list):
                         _full = "v" + _tag
                         _sha = _tag_peeled.get("refs/tags/" + _full)
-                        if _sha and _sha not in _reachable:
+                        if _sha is None:
+                            _tag_unreadable += 1
+                            continue
+                        _tag_verified += 1
+                        if _sha not in _reachable:
                             _orphan_candidates.append(_full)
                 else:
                     # rev-list cannot answer (missing objects, partial
-                    # clone): fall back to the per-(tag, branch) loop so the
-                    # decision stays identical instead of silently standing
-                    # down on data it can partially read.
+                    # clone) or the bulk peel is unavailable: fall back to the
+                    # per-(tag, branch) loop so the decision stays identical
+                    # instead of silently standing down on data it can
+                    # partially read.
                     for _tag in sorted(_tag_list):
                         _full = "v" + _tag
                         _rc = subprocess.run(
@@ -9656,7 +9971,9 @@ else:
                             check=False,
                         )
                         if _rc.returncode != 0:
+                            _tag_unreadable += 1
                             continue
+                        _tag_verified += 1
                         _sha = _rc.stdout.strip()
                         _on_branch = False
                         for _br in _remote_branches:
@@ -9670,6 +9987,26 @@ else:
                                 break
                         if not _on_branch:
                             _orphan_candidates.append(_full)
+                if _tag_unreadable:
+                    # T-1885: `for-each-ref` refuses the WHOLE tag set when any
+                    # single tag names an object this clone cannot read
+                    # ("fatal: missing object ... for refs/tags/v1.0.0"),
+                    # returning 128 and no rows. Before this guard the peel map
+                    # stayed empty, every lookup yielded None, zero candidates
+                    # were built and the check below reported nothing -- so 394
+                    # tags in a damaged clone verified as cleanly as 0. The
+                    # readable tags are still checked; the unreadable ones are
+                    # now counted instead of vanishing.
+                    warn(
+                        "release-ledger",
+                        f"{_tag_unreadable} of {len(_tag_list)} local tag(s) "
+                        "could not be peeled to commits, so the orphaned-"
+                        f"release-tag check verified {_tag_verified} of them and "
+                        f"none of the rest{_first_peel_error}. A tag whose object "
+                        "is absent cannot be distinguished from one whose commit "
+                        "rides no remote branch: restore the missing objects (a "
+                        "fetch from a remote that still has them) and re-run",
+                    )
         _orphan_tags = []
         if _orphan_candidates:
             _remote_names = []
@@ -10922,11 +11259,11 @@ else:
 
             _shortcut_section = _rfc_t[_i:_j]
             if (
-                "**Length has no global meaning.**" not in _shortcut_section
-                or "do not invent an undeclared repeated form" not in _shortcut_section
+                not _says(_shortcut_section, "Length grants no semantics")
+                or not _says(_shortcut_section, "repeated forms are distinct only when declared")
                 or "Doubled is safe, tripled reaches a remote" in _shortcut_section
-                or "never a greeting" not in _shortcut_section
-                or "MUST execute the exact row" not in _shortcut_section
+                or not _says(_shortcut_section, "activation beats greeting")
+                or not _says(_shortcut_section, "then execute it or its exact no-op")
             ):
                 warn("cross-doc-drift",
                     "cross-doc drift [shortcut-rationale] -- length must "
@@ -11070,11 +11407,12 @@ else:
             # goal`, which is the create/pivot usage line and must not touch a
             # counter.
             if (
-                "only when they are at or over the caps" not in _rfc_t[_i:_j]
+                not _says(_rfc_t[_i:_j], "resets `goal_waves`/`goal_tickets` only at or above caps")
+                or not _says(_rfc_t[_i:_j], "Bare `saipen goal` is create/pivot usage, never a counter reset")
                 or "deliberately does NOT preserve the counters" in _rfc_t[_i:_j]
             ):
                 warn("cross-doc-drift",
-                    "cross-doc drift [goal-counter-reset] -- RFC § 1.10's "
+                    "cross-doc drift [goal-counter-reset] -- CORE.md § 1.10's "
                     "`saipen stop` paragraph must defer to § 2.4 Entry and "
                     "say the resume command resets goal_waves/goal_tickets "
                     "ONLY when they are at or over the caps (and that bare "
@@ -11086,7 +11424,7 @@ else:
                 drift_ok = False
 
             _package_docs = {
-                "RFC.md": _rfc_t,
+                "CORE.md": _rfc_t,
                 "phases/prepare.md": home_path("phases/prepare.md").read_text(
                     encoding="utf-8-sig"
                 ),
@@ -11128,11 +11466,10 @@ else:
                 )
                 drift_ok = False
             _package_markers = {
-                "RFC.md": (
+                "CORE.md": (
                     "Not ready: run ee first.",
                     "Not ready: run qq first.",
-                    "No main-project file, checkpoint, Git ref, or "
-                    "remote may change on that refusal.",
+                    "Refusal changes no project file, checkpoint, Git ref or remote.",
                 ),
                 "phases/prepare.md": (
                     "saipen prepare saitranslate",
@@ -11152,7 +11489,7 @@ else:
             }
             for _doc_name, _markers in _package_markers.items():
                 _missing_markers = [
-                    marker for marker in _markers if marker not in _package_docs[_doc_name]
+                    marker for marker in _markers if not _says(_package_docs[_doc_name], marker)
                 ]
                 if _missing_markers:
                     warn("cross-doc-drift",
@@ -11219,24 +11556,35 @@ else:
                         )
                         drift_ok = False
 
-        _m = re.search(r"ticket-field list is closed.*?(?=\n- |\n#)", _rfc_t, re.DOTALL)
-        if not _m:
+        # T-1637: the closed ticket-field list is REGISTRY-owned
+        # (`ticket_states.known_fields`) and the board grammar derives
+        # KNOWN_FIELDS from it. CORE § 1.2 must point at that owner and must
+        # not enumerate a second copy.
+        _registry_fields = set(
+            require_string_list(
+                require_mapping(_MACHINE_REGISTRY, "ticket_states"), "known_fields"
+            )
+        )
+        if _registry_fields != set(KNOWN_FIELDS):
             warn("cross-doc-drift",
-                "cross-doc drift [ticket-fields] -- RFC § 1.2 no longer "
-                "states the closed ticket-field list. It went unstated until "
-                "v7.122.0 while the tool rejected everything outside it and "
-                "cited § 1.2 for the rule"
+                f"cross-doc drift [ticket-fields] -- REGISTRY.json "
+                f"ticket_states.known_fields {sorted(_registry_fields)} differs "
+                f"from the board grammar's {sorted(KNOWN_FIELDS)}"
             )
             drift_ok = False
-        else:
-            _doc_fields = set(re.findall(r"`([a-z_]+):`", _m.group(0)))
-            if _doc_fields != set(KNOWN_FIELDS):
-                warn("cross-doc-drift",
-                    f"cross-doc drift [ticket-fields] -- RFC § 1.2 lists "
-                    f"{sorted(_doc_fields)} but validate.py accepts "
-                    f"{sorted(KNOWN_FIELDS)}"
-                )
-                drift_ok = False
+        if not _says(_rfc_t, "the closed list is owned by `REGISTRY.json`"):
+            warn("cross-doc-drift",
+                "cross-doc drift [ticket-fields] -- CORE.md § 1.2 must name "
+                "REGISTRY.json as the owner of the closed ticket-field list"
+            )
+            drift_ok = False
+        _m = re.search(r"ticket-field list is closed.*?(?=\n- |\n#)", _rfc_t, re.DOTALL)
+        if _m:
+            warn("cross-doc-drift",
+                "cross-doc drift [ticket-fields] -- CORE.md § 1.2 enumerates "
+                "the ticket-field list REGISTRY.json owns; a second copy drifts"
+            )
+            drift_ok = False
 
     # 13l. Keep the one known Windows device-name artifact out of Git. This is
     #      an exact config identity contract: the behavioral half lives in

@@ -74,9 +74,13 @@ LINEAGE_MIGRATION_OP = "op-migrate-lineage"
 # corrupt or stale marker falls back to the strict manifest decode (correct,
 # legacy), never launders unresolved/corrupt evidence.
 SETTLED_DIR = ".saipen/recovery/settled"
+# The monolithic settled index, retired by SRC-026:R009 (T-1304): settlement
+# advances `settled_projection` instead, and nothing reads or writes this file
+# any more. The NAME stays because a project settled by an older engine still
+# holds one, and it is bookkeeping inside the settled namespace, never a
+# receipt; the next projection rebuild removes it.
 SETTLED_INDEX_NAME = ".receipt-index.json"
 SETTLED_INDEX_REL = SETTLED_DIR + "/" + SETTLED_INDEX_NAME
-SETTLED_INDEX_SCHEMA = 2
 # PERF-005: bounded cleanup-debt namespace. When a post-settlement staged-byte
 # deletion fails, the op_id is durably enqueued here so `compact_committed`
 # processes ONLY outstanding debt instead of re-scanning the whole lifetime
@@ -92,10 +96,13 @@ CLEANUP_QUEUE_DIR = SETTLED_DIR + "/.cleanup-needed"
 _ACCEPTED_DEBT_DIR_PREFIX = ".saipen/recovery/conformance/accepted_debt/"
 _ACCEPTED_DEBT_OPERATIONS = frozenset({"accepted_debt.register", "accepted_debt.rebind"})
 
+RETROSPECTIVE_POLICY = "improve_retrospective_v1"
+
 VERIFICATION_POLICIES = frozenset(
     {
         "core_fast",
         "improve_atomic_file",
+        RETROSPECTIVE_POLICY,
         "userperson",
         "sub_collect",
         "sub_disposition",
@@ -461,11 +468,14 @@ OP_CLASSES: dict[str, frozenset[int]] = {
             "attempt-open-",
             "bind-cohort-",
             "board-compact-",
+            "board-scrub-",
             "ccc-entry-",
             "clear-wait-role-",
+            "cohort-reconcile-",
             "convergence-",
             "crew-closure-",
             "goal-entry-",
+            "goal-authorize-",
             "handover-",
             "improve-hold-",
             "improve-unhold-",
@@ -478,8 +488,10 @@ OP_CLASSES: dict[str, frozenset[int]] = {
             "resolve-external-",
             "retire-",
             "retire-source-",
+            "seal-log-",
             "supersede-",
             "ticket-reasoning-",
+            "ticket-requires-",
             "ticket-verify-",
             "userreq-",
             # reconcile.py, release.py, plan.py (`build_plan` default name)
@@ -491,6 +503,8 @@ OP_CLASSES: dict[str, frozenset[int]] = {
             "improve-admit-",
             "improve-rebind-",
             "report-",
+            "regression-execution-",
+            "retrospective-",
             "run-",
             "seat-",
             "sweep-",
@@ -576,6 +590,27 @@ def op_id_provenance(op_id: str | None) -> str:
     return "canonical" if _OP_ID_GRAMMAR.match(op_id) else "hand_authored"
 
 
+def _release_closure_ids(record_dir: Path) -> set[str]:
+    """The closure op id one release record names (T-1681), as a set.
+
+    A release applies its closure -- the ship RUN line and the finish event --
+    inside its own journal, while those LOG lines carry the closure plan's own
+    `finish-`/crew id. The record names that id (`closure_op_id`), so the id
+    resolves to the release that wrote it. Only a well-formed id of a
+    registered class counts; a record that cannot be read names nothing. A
+    release compacted out of the settled directory takes its alias with it,
+    which leaves only lines far below any resolved floor unresolved.
+    """
+    try:
+        record = json.loads((record_dir / "operation.json").read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return set()
+    alias = record.get("closure_op_id") if isinstance(record, dict) else None
+    if isinstance(alias, str) and op_id_provenance(alias) == "canonical":
+        return {alias}
+    return set()
+
+
 def resolvable_op_ids(root: Path | str) -> set[str]:
     """Every op id that names a real operation record on THIS checkout (T-1282).
 
@@ -599,6 +634,8 @@ def resolvable_op_ids(root: Path | str) -> set[str]:
             if name == SETTLED_INDEX_NAME or name.startswith("."):
                 continue
             names.add(name)
+            if name.startswith("release-"):
+                names.update(_release_closure_ids(base_dir / name))
     index_dir = root / Path(SETTLED_INDEX_REL).parent
     try:
         index_files = list(index_dir.glob("*.json"))
@@ -850,28 +887,32 @@ def _settle_journal(journal: "Journal") -> None:
     to the strict manifest decode for this op (it reads status=COMMITTED and
     ignores it natively).
     """
+    from . import settled_projection
     from .safeid import InvalidIdError
 
     settled_base = journal.project_root / SETTLED_DIR
-    from .paths import project_lineage_identity
-
-    prior_index = _read_settled_index(
-        journal.project_root,
-        live_lineage=project_lineage_identity(journal.project_root),
-    )
     try:
         settled_base.mkdir(parents=True, exist_ok=True)
+        # SRC-026:R009 (T-1304). The projection is told WHAT moved and what
+        # the namespace looked like before the move, so it folds one receipt
+        # into a bounded tail. The monolithic index this replaces was
+        # re-authenticated and rewritten whole here -- every settled receipt
+        # stat'ed and re-hashed, then one JSON document of all of them written
+        # back -- which measured 6.06 s of a 7.3 s checkpoint at 10829
+        # receipts (T-1519 had revived it to spare snapshot readers a decode;
+        # the projection's decode memo now does that without the rewrite).
+        token = settled_projection.namespace_token(journal.project_root)
         settled_dir = safe_op_dir(journal.project_root, journal.op_id, SETTLED_DIR)
         os.rename(journal.dir, settled_dir)
         journal.dir = settled_dir
         journal.manifest = settled_dir / "operation.json"
-        with contextlib.suppress(OSError, ValueError, TypeError):
-            if prior_index is not None:
-                _extend_settled_index(journal.project_root, prior_index)
-            else:
-                # T-1519: a present-but-stale index is rebuilt too; rebuilding
-                # only an absent one left a dead index dead forever.
-                _bootstrap_settled_index(journal.project_root)
+        # An accelerator may never fail a settlement: a refused or broken
+        # advance leaves the projection stale, which every reader answers
+        # from the receipts themselves and the next settlement rebuilds.
+        with contextlib.suppress(OSError, ValueError, TypeError, KeyError):
+            settled_projection.advance_after_settlement(
+                journal.project_root, [settled_dir.name], token
+            )
     except (OSError, InvalidIdError):
         pass
 
@@ -889,6 +930,7 @@ def decode_operation_record(
     *,
     progress_raw: bytes | None = None,
     progress_captured: bool = False,
+    allow_settlement_fold: bool = False,
 ) -> dict:
     """STRICT single operation-record decoder (T-1003 hostile findings).
 
@@ -1155,6 +1197,7 @@ def decode_operation_record(
         record,
         progress_raw=progress_raw,
         progress_captured=progress_captured,
+        allow_settlement_fold=allow_settlement_fold,
     )
     if not merged["ok"]:
         return merged
@@ -1167,6 +1210,7 @@ def _decode_progress_sidecar(
     base_status: object,
     *,
     raw: bytes | None = None,
+    allow_settlement_fold: bool = False,
 ) -> dict:
     """Strict decode of the bounded-progress sidecar progress.json (CORE-001).
 
@@ -1175,6 +1219,13 @@ def _decode_progress_sidecar(
     {"ok": False, "code": ..., "detail": ...} with ZERO writes. A PRESENT
     sidecar that is unreadable, malformed, out-of-range or contradictory with
     the immutable manifest is refused -- never silently ignored.
+
+    ``allow_settlement_fold`` is for ONE caller: ``Journal.fold_progress``.
+    ``Journal.mark`` publishes a terminal status to the sidecar and only then
+    folds it into the manifest, so for that instant a terminal sidecar over an
+    unresolved manifest is this process's own in-flight settlement, not a
+    crash that skipped the fold. Every other reader keeps the contradiction as
+    a refusal (T-1892).
     """
     if raw is None:
         try:
@@ -1241,12 +1292,13 @@ def _decode_progress_sidecar(
     # manifest is still UNRESOLVED means fold_progress did not delete the
     # sidecar on settlement -- untrustworthy evidence, refuse rather than guess.
     if status in SETTLED and base_status not in SETTLED:
-        return {
-            "ok": False,
-            "code": "RECOVERY_CONFLICT",
-            "detail": f"progress.json claims terminal {status!r} but manifest "
-            f"is {base_status!r}; settlement did not fold",
-        }
+        if not allow_settlement_fold:
+            return {
+                "ok": False,
+                "code": "RECOVERY_CONFLICT",
+                "detail": f"progress.json claims terminal {status!r} but manifest "
+                f"is {base_status!r}; settlement did not fold",
+            }
     return {
         "ok": True,
         "status": status,
@@ -1261,6 +1313,7 @@ def _merge_progress_sidecar(
     *,
     progress_raw: bytes | None = None,
     progress_captured: bool = False,
+    allow_settlement_fold: bool = False,
 ) -> dict:
     """Merge progress.json into a decoded operation record (CORE-001).
 
@@ -1308,6 +1361,7 @@ def _merge_progress_sidecar(
         len(record.get("targets") or []),
         record.get("status"),
         raw=progress_raw,
+        allow_settlement_fold=allow_settlement_fold,
     )
     if not prog["ok"]:
         return prog
@@ -1729,6 +1783,28 @@ def recovery_preflight(project_root: Path | str, exclude_op_id: str | None = Non
     if not result["ok"]:
         return result
     return {"ok": True, "recovered": [pending[0]["op_id"]]}
+
+
+class JournalDecodeRefusal(ValueError):
+    """The canonical operation-record decoder refused a record on disk (T-1892).
+
+    ``Journal.read`` used to project the manifest and its ``progress.json``
+    sidecar with its own permissive merge, so a caller could see a status the
+    strict decoder refuses. It now delegates to ``decode_operation_record`` and
+    raises this refusal instead of handing back a record the rest of the engine
+    would not accept. It subclasses ``ValueError`` because callers that already
+    treat "this journal cannot be read" as a ``ValueError`` keep working
+    unchanged.
+
+    ``code`` is the decoder's stable refusal code (``RECOVERY_CONFLICT`` for
+    evidence that cannot be trusted, ``VALIDATION_FAILED`` for a structurally
+    invalid record); ``detail`` is the decoder's human explanation.
+    """
+
+    def __init__(self, code: str, detail: str) -> None:
+        super().__init__(f"{code}: {detail}")
+        self.code = code
+        self.detail = detail
 
 
 class Journal:
@@ -2169,29 +2245,37 @@ class Journal:
         record.update(fields)
         _atomic_json(self.manifest, record, ownership_root=self.project_root)
 
-    def read(self) -> dict:
-        record = json.loads(self.manifest.read_text(encoding="utf-8"))
-        progress_file = self.dir / "progress.json"
-        if progress_file.is_file():
-            try:
-                prog = json.loads(progress_file.read_text(encoding="utf-8"))
-                if "status" in prog:
-                    record["status"] = prog["status"]
-                if "progress_index" in prog:
-                    record["progress_index"] = prog["progress_index"]
-                frontier = prog.get("applied_frontier", -1)
-                targets = record.get("targets", [])
-                for i in range(min(frontier + 1, len(targets))):
-                    targets[i]["applied"] = True
-            except Exception:
-                pass
-        return record
+    def read(self, *, allow_settlement_fold: bool = False) -> dict:
+        """The effective operation record: manifest merged with its sidecar.
+
+        CORE-001: ONE strict decoder owns both files. ``decode_operation_record``
+        is that decoder, so this method delegates instead of keeping the second,
+        more permissive projection it used to have (T-1892). A present but
+        unreadable, malformed, out-of-range or contradictory sidecar now raises
+        ``JournalDecodeRefusal`` (a ``ValueError``, so existing callers that
+        catch ``ValueError`` keep working) rather than being silently merged or
+        silently dropped.
+
+        ``allow_settlement_fold`` exists only for ``fold_progress``: see
+        ``_decode_progress_sidecar``.
+        """
+        decoded = decode_operation_record(
+            self.project_root,
+            self.dir,
+            allow_settlement_fold=allow_settlement_fold,
+        )
+        if not decoded["ok"]:
+            raise JournalDecodeRefusal(decoded["code"], decoded["detail"])
+        return decoded["record"]
 
     def fold_progress(self) -> None:
         progress_file = self.dir / "progress.json"
         if progress_file.is_file():
             try:
-                record = self.read()
+                # This IS the fold: a terminal sidecar over an unresolved
+                # manifest is the state mark() just created for us to write
+                # down, so it must be readable here and refused everywhere else.
+                record = self.read(allow_settlement_fold=True)
                 _atomic_json(self.manifest, record, ownership_root=self.project_root)
                 progress_file.unlink()
             except OSError:
@@ -2835,6 +2919,7 @@ def run_mutation(
         # Finalizer-owned derived keys (resulting_*) are excluded because
         # they are generated only after apply.
         _REQUEST_METADATA_KEYS = (
+            "goal_authority_transition",
             "crew_epoch",
             "ticket_id",
             "producer",
@@ -3253,13 +3338,12 @@ def recover(project_root: Path | str, op_id: str) -> dict:
     try:
         with _recover_lock(root):
             return _recover_locked(root, op_id)
-    except PermissionError:
-        return {
-            "ok": False,
-            "code": "WRITER_BUSY",
-            "op_id": op_id,
-            "detail": "another live writer holds the project lock; retry after it releases",
-        }
+    except PermissionError as exc:
+        # T-1827 (SRC-282:R002/R010): name the recorded holder (or say it is
+        # unknown) and carry the orphan-cleanup remedy.
+        from .lock import writer_busy_payload
+
+        return {"ok": False, **writer_busy_payload(exc), "op_id": op_id}
 
 
 def _recover_locked(root: Path, op_id: str) -> dict:
@@ -3717,6 +3801,8 @@ def _verifier_for(policy: str):
         return _core_fast
     if policy == "improve_atomic_file":
         return verify_improve
+    if policy == RETROSPECTIVE_POLICY:
+        return verify_improve_retrospective
     if policy == "userperson":
         return lambda root, targets, receipt_metadata=None: _verify_userperson(
             root, receipt_metadata
@@ -3773,6 +3859,12 @@ def verify_accepted_debt(root, targets, receipt_metadata=None) -> list[str]:
             continue
         except FileNotFoundError:
             errors.append(f"{path}: the written record is absent")
+            continue
+        from .debt_authority import status as debt_authority_status
+
+        authority = debt_authority_status(base, record, pending=True)
+        if authority["authority_status"] != "KNOWN":
+            errors.append(f"{path}: {authority['authority_reason']}")
             continue
         located = {
             f"E-{parsed.get('event')}": (segment, line_no, raw)
@@ -3851,6 +3943,24 @@ def verify_improve(root, targets, receipt_metadata=None) -> list[str]:
                 pass  # no domain grammar for an unknown Improve file
     except Exception as exc:
         errors.append(f"improve verification failed: {exc}")
+    return errors
+
+
+def verify_improve_retrospective(root, targets, receipt_metadata=None) -> list[str]:
+    """Versioned policy: older kernels must refuse, never skip this grammar."""
+    from .improve_retrospective import validate_record
+
+    errors = []
+    if not targets:
+        return ["retrospective verification requires a coverage target"]
+    for target in targets:
+        if target.get("role") != "coverage":
+            errors.append("retrospective verification refuses a non-coverage target")
+            continue
+        errors.extend(validate_record(
+            root, root / target["path"],
+            allowed_operation=(receipt_metadata or {}).get("retrospective_operation"),
+        ))
     return errors
 
 
@@ -4526,13 +4636,12 @@ def resolve_conflict(
     try:
         with _resolver_lock(root):
             return _resolve_conflict_locked(root, op_id, resolution, agent)
-    except PermissionError:
-        return {
-            "ok": False,
-            "code": "WRITER_BUSY",
-            "op_id": op_id,
-            "detail": "another live writer holds the project lock; retry after it releases",
-        }
+    except PermissionError as exc:
+        # T-1827 (SRC-282:R002/R010): name the recorded holder (or say it is
+        # unknown) and carry the orphan-cleanup remedy.
+        from .lock import writer_busy_payload
+
+        return {"ok": False, **writer_busy_payload(exc), "op_id": op_id}
 
 
 def _resolve_conflict_locked(root: Path, op_id: str, resolution: str, agent: str) -> dict:
@@ -4807,12 +4916,10 @@ def auto_recover_pending(project_root: Path | str) -> dict:
                 "recovered": recovered,
                 "recovery_required": False,
             }
-    except PermissionError:
-        return {
-            "ok": False,
-            "code": "WRITER_BUSY",
-            "detail": "another live writer holds the project lock; retry after it releases",
-        }
+    except PermissionError as exc:
+        from .lock import writer_busy_payload
+
+        return {"ok": False, **writer_busy_payload(exc)}
 
 
 def _compact_drop_staged(entry: Path, compacted: list, skipped: list) -> None:
@@ -5099,245 +5206,6 @@ def _frame_receipts(digest, namespace: str, entries) -> None:
         _frame_receipt(digest, ns, entry)
 
 
-def _receipt_stat_atom(path: Path) -> list:
-    """Return a mutation hint for an authority node, never semantic proof."""
-    try:
-        info = os.lstat(path)
-    except FileNotFoundError:
-        return ["missing"]
-    except OSError as exc:
-        return ["error", type(exc).__name__]
-    return [
-        "node",
-        stat.S_IFMT(info.st_mode),
-        int(getattr(info, "st_file_attributes", 0)),
-        int(info.st_size),
-        int(info.st_mtime_ns),
-        int(info.st_ctime_ns),
-        int(getattr(info, "st_ino", 0)),
-    ]
-
-
-def _settled_stat_inventory(root: Path) -> list[dict]:
-    """Capture cheap per-authority change hints for the settled index.
-
-    The hints only decide whether the authenticated index may be consulted.
-    Any mismatch falls back to exact-byte reads and strict decoding; the
-    hints are never accepted as semantic or cryptographic proof by themselves.
-    """
-    settled = root / SETTLED_DIR
-    try:
-        entries = sorted(settled.iterdir(), key=lambda item: item.name)
-    except FileNotFoundError:
-        return []
-    except OSError:
-        return [{"name": "NAMESPACE", "stat": ["unreadable"]}]
-    inventory = []
-    for entry in entries:
-        if entry.name in {".cleanup-needed", SETTLED_INDEX_NAME}:
-            continue
-        inventory.append(
-            {
-                "name": entry.name,
-                "stat": [
-                    _receipt_stat_atom(entry),
-                    _receipt_stat_atom(entry / "operation.json"),
-                    _receipt_stat_atom(entry / "progress.json"),
-                ],
-            }
-        )
-    return inventory
-
-
-def _receipt_index_root(payload: dict) -> str:
-    encoded = json.dumps(payload, sort_keys=True, separators=(",", ":")).encode("utf-8")
-    return hashlib.sha256(b"saipen-settled-index-v1\0" + encoded).hexdigest()
-
-
-def _read_settled_index(root: Path, *, live_lineage: str | None) -> dict | None:
-    """Read the content-authenticated settled projection, or return None.
-
-    A missing, malformed, stale, or lineage-mismatched index is not positive
-    evidence. The caller then performs the canonical strict full scan.
-    """
-    try:
-        from .paths import prove_owned_regular
-
-        path = owned_target_path(root, SETTLED_INDEX_REL, kind="settled receipt index")
-        prove_owned_regular(path, kind="settled receipt index")
-        index = json.loads(path.read_bytes().decode("utf-8-sig"))
-    except (FileNotFoundError, OSError, ValueError, UnicodeDecodeError, json.JSONDecodeError):
-        return None
-    if not isinstance(index, dict) or index.get("schema_version") != SETTLED_INDEX_SCHEMA:
-        return None
-    entries = index.get("entries")
-    if not isinstance(entries, list) or not isinstance(index.get("digest"), str):
-        return None
-    payload = {
-        "schema_version": index.get("schema_version"),
-        "lineage": index.get("lineage"),
-        "entries": entries,
-        "digest": index.get("digest"),
-    }
-    if index.get("root") != _receipt_index_root(payload):
-        return None
-    if index.get("lineage") != live_lineage:
-        return None
-    names = [entry.get("name") for entry in entries if isinstance(entry, dict)]
-    if len(names) != len(entries) or names != sorted(names) or len(set(names)) != len(names):
-        return None
-    if any(
-        not isinstance(entry.get("record"), dict)
-        or not isinstance(entry.get("stat"), list)
-        for entry in entries
-    ):
-        return None
-    if [
-        {"name": entry["name"], "stat": entry["stat"]}
-        for entry in entries
-    ] != _settled_stat_inventory(root):
-        return None
-    for entry in entries:
-        op_dir = root / SETTLED_DIR / entry["name"]
-        try:
-            manifest = (op_dir / "operation.json").read_bytes()
-            progress_path = op_dir / "progress.json"
-            progress = progress_path.read_bytes() if progress_path.is_file() else None
-        except OSError:
-            return None
-        if hashlib.sha256(manifest).hexdigest() != entry.get("manifest_sha256"):
-            return None
-        expected_progress = entry.get("progress_sha256")
-        actual_progress = hashlib.sha256(progress).hexdigest() if progress is not None else None
-        if actual_progress != expected_progress:
-            return None
-    return index
-
-
-def _write_settled_index(
-    root: Path,
-    entries: list[_ReceiptEntry],
-    records: dict,
-    digest: str,
-    lineage,
-):
-    """Publish one atomic, content-authenticated settled projection."""
-    index_entries = []
-    stat_inventory = _settled_stat_inventory(root)
-    by_name = {item["name"]: item["stat"] for item in stat_inventory}
-    for entry in entries:
-        record = records.get(entry.name)
-        if entry.structural_error is not None or entry.op_dir is None or record is None:
-            raise ValueError("cannot index corrupt settled evidence")
-        index_entries.append(
-            {
-                "name": entry.name,
-                "stat": by_name.get(entry.name, []),
-                "manifest_sha256": hashlib.sha256(entry.manifest_raw).hexdigest(),
-                "progress_sha256": (
-                    hashlib.sha256(entry.progress_raw).hexdigest()
-                    if entry.progress_raw is not None
-                    else None
-                ),
-                "record": record,
-            }
-        )
-    index_entries.sort(key=lambda item: item["name"])
-    payload = {
-        "schema_version": SETTLED_INDEX_SCHEMA,
-        "lineage": lineage,
-        "entries": index_entries,
-        "digest": digest,
-    }
-    document = dict(payload)
-    document["root"] = _receipt_index_root(payload)
-    from .paths import safe_atomic_write_bytes
-
-    safe_atomic_write_bytes(
-        root / SETTLED_INDEX_REL,
-        (json.dumps(document, sort_keys=True, separators=(",", ":")) + "\n").encode("utf-8"),
-        kind="settled receipt index",
-        ownership_root=root,
-    )
-
-
-def _extend_settled_index(root: Path, prior_index: dict) -> None:
-    """Update an already-valid index after one terminal receipt move.
-
-    Existing settled records remain trusted only through their prior
-    content-authenticated entries; the newly moved receipt is decoded once.
-    The exact namespace digest is refreshed from the current authority bytes
-    before the new index is atomically published.
-    """
-    from .paths import project_lineage_identity
-
-    lineage = project_lineage_identity(root)
-    if lineage != prior_index.get("lineage"):
-        return
-    old_records = {
-        item["name"]: item["record"]
-        for item in prior_index.get("entries", [])
-        if isinstance(item, dict) and isinstance(item.get("record"), dict)
-    }
-    entries = list(_receipt_namespace_entries(root / SETTLED_DIR))
-    records = {}
-    for entry in entries:
-        if entry.structural_error is not None or entry.op_dir is None:
-            return
-        record = old_records.get(entry.name)
-        if record is None:
-            decoded = decode_operation_record(root, entry.op_dir, raw=entry.manifest_raw)
-            if not decoded["ok"]:
-                return
-            record = decoded["record"]
-        records[entry.name] = record
-    digest = hashlib.sha256(b"saipen-op-receipts-v3\0")
-    for entry in _receipt_namespace_entries(root / OPS_DIR):
-        _frame_receipt(digest, Path(OPS_DIR).name, entry)
-    for entry in entries:
-        _frame_receipt(digest, Path(SETTLED_DIR).name, entry)
-    _write_settled_index(
-        root,
-        entries,
-        records,
-        "ops-receipt-sha256:" + digest.hexdigest(),
-        lineage,
-    )
-
-
-def _bootstrap_settled_index(root: Path) -> None:
-    """Build the settled projection only from a writer-side terminal event."""
-    from .paths import project_lineage_identity
-
-    if next(_receipt_namespace_entries(root / OPS_DIR), None) is not None:
-        return
-    lineage = project_lineage_identity(root)
-    entries = list(_receipt_namespace_entries(root / SETTLED_DIR))
-    records = {}
-    for entry in entries:
-        if entry.structural_error is not None or entry.op_dir is None:
-            return
-        decoded = decode_operation_record(root, entry.op_dir, raw=entry.manifest_raw)
-        if not decoded["ok"]:
-            return
-        record = decoded["record"]
-        if record.get("project_lineage") is not None:
-            binding = _recovery_identity_binding(root, record, live_lineage=lineage)
-            if not binding["ok"]:
-                return
-        records[entry.name] = record
-    digest = hashlib.sha256(b"saipen-op-receipts-v3\0")
-    for entry in entries:
-        _frame_receipt(digest, Path(SETTLED_DIR).name, entry)
-    _write_settled_index(
-        root,
-        entries,
-        records,
-        "ops-receipt-sha256:" + digest.hexdigest(),
-        lineage,
-    )
-
-
 def _scan_receipt_namespace(
     root: Path,
     ns_dir: Path,
@@ -5345,6 +5213,7 @@ def _scan_receipt_namespace(
     errors: list[str],
     corrupt_op_ids: set[str],
     digest,
+    memo: dict | None = None,
 ) -> bool:
     """Scan one receipt namespace (ops or settled) and merge into results.
 
@@ -5355,6 +5224,13 @@ def _scan_receipt_namespace(
     duplicate collision is corrupt evidence UNLESS both sides are demonstrably
     equivalent terminal receipts (the same op settled under both namespaces
     after a crash re-scan), in which case the settled (current) record wins.
+
+    ``memo`` (`settled_projection.record_memo`) spares the decode, never the
+    read: every entry's exact bytes are still read and framed into the digest
+    here, and a memoized record is used only under the digests of THOSE bytes
+    and only for a terminal receipt, whose decode depends on nothing else. A
+    receipt the memo does not hold under those digests -- changed, new, or
+    never memoized -- goes through the strict decoder exactly as before.
     """
     has_entries = False
     for entry in _receipt_namespace_entries(ns_dir):
@@ -5368,26 +5244,41 @@ def _scan_receipt_namespace(
             corrupt_op_ids.add(entry.name)
             results.pop(entry.name, None)
             continue
-        # Decode the exact manifest + progress bytes already framed into the
-        # semantic digest. Reopening either authority would double lifetime
-        # receipt I/O and could parse bytes different from those authenticated.
-        decoded = decode_operation_record(
-            root,
-            entry.op_dir,
-            raw=entry.manifest_raw,
-            progress_raw=entry.progress_raw,
-            progress_captured=True,
-        )
-        if not decoded["ok"]:
-            # Preserve the corruption evidence instead of discarding it.
-            errors.append(
-                f"{entry.name}: {decoded.get('code', 'RECOVERY_CONFLICT')}: "
-                f"{decoded.get('detail', 'unparseable operation receipt')}"
+        record = None
+        if memo:
+            cached = memo.get(
+                (
+                    entry.name,
+                    hashlib.sha256(entry.manifest_raw).hexdigest(),
+                    hashlib.sha256(entry.progress_raw).hexdigest()
+                    if entry.progress_raw is not None
+                    else None,
+                )
             )
-            corrupt_op_ids.add(entry.name)
-            results.pop(entry.name, None)
-            continue
-        record = decoded["record"]
+            if cached is not None and cached.get("status") in SETTLED:
+                record = cached
+        if record is None:
+            # Decode the exact manifest + progress bytes already framed into
+            # the semantic digest. Reopening either authority would double
+            # lifetime receipt I/O and could parse bytes different from those
+            # authenticated.
+            decoded = decode_operation_record(
+                root,
+                entry.op_dir,
+                raw=entry.manifest_raw,
+                progress_raw=entry.progress_raw,
+                progress_captured=True,
+            )
+            if not decoded["ok"]:
+                # Preserve the corruption evidence instead of discarding it.
+                errors.append(
+                    f"{entry.name}: {decoded.get('code', 'RECOVERY_CONFLICT')}: "
+                    f"{decoded.get('detail', 'unparseable operation receipt')}"
+                )
+                corrupt_op_ids.add(entry.name)
+                results.pop(entry.name, None)
+                continue
+            record = decoded["record"]
         op_id = record.get("op_id") or entry.name
         if op_id in corrupt_op_ids:
             # A malformed sibling with this identity already exists.  The
@@ -5475,21 +5366,22 @@ def semantic_receipt_snapshot(
     live_lineage = project_lineage_identity(root)
 
     # Scan ops first (unresolved/current evidence)
-    ops_present = _scan_receipt_namespace(
-        root, root / OPS_DIR, results, errors, corrupt_op_ids, digest
+    _scan_receipt_namespace(root, root / OPS_DIR, results, errors, corrupt_op_ids, digest)
+    # Scan settled second (terminal receipts). Every receipt's bytes are read
+    # and framed; the projection's decode memo answers for the ones whose
+    # bytes it already decoded (SRC-026:R009), so a whole-history snapshot of
+    # a settled project decodes only what moved since the memo was written.
+    from .settled_projection import record_memo
+
+    _scan_receipt_namespace(
+        root,
+        root / SETTLED_DIR,
+        results,
+        errors,
+        corrupt_op_ids,
+        digest,
+        memo=record_memo(root),
     )
-    # Clean projects have a bounded active tail (normally empty). Reuse the
-    # authenticated settled projection in that case; any active operation or
-    # any index doubt forces the strict exact-byte scan below.
-    settled_index = None
-    if not errors and not ops_present:
-        settled_index = _read_settled_index(root, live_lineage=live_lineage)
-    if settled_index is not None:
-        for item in settled_index["entries"]:
-            results[item["record"].get("op_id", item["name"])] = item["record"]
-    else:
-        # Scan settled second (terminal receipts)
-        _scan_receipt_namespace(root, root / SETTLED_DIR, results, errors, corrupt_op_ids, digest)
 
     # W2-001 / CORE-003: enforce live project binding on every receipt before
     # consumers see it. A lineage-bearing receipt must match the live lineage;
@@ -5501,8 +5393,8 @@ def semantic_receipt_snapshot(
     # Explicit foreign lineage (record carries a lineage that mismatches live)
     # remains rejected.
     foreign: list[str] = []
-    # Indexed records were filtered before publication, but still pass through
-    # the same binding gate for a command-scoped live check.
+    # Memoized records were decoded strictly once; they still pass through the
+    # same binding gate for a command-scoped live check.
     for op_id, rec in list(results.items()):
         # CORE-003: settled legacy receipts are history, not recovery authority
         if rec.get("project_lineage") is None and rec.get("status") in SETTLED:
@@ -5534,16 +5426,11 @@ def semantic_receipt_snapshot(
         errors.append("project lineage changed during semantic receipt capture")
         results.clear()
         records = []
-    digest_value = (
-        settled_index["digest"]
-        if settled_index is not None and not errors
-        else "ops-receipt-sha256:" + digest.hexdigest()
-    )
     return SemanticReceiptSnapshot(
         tuple(records),
         tuple(errors),
         frozenset(corrupt_op_ids),
-        digest_value,
+        "ops-receipt-sha256:" + digest.hexdigest(),
     )
 
 
@@ -5561,14 +5448,7 @@ def semantic_receipt_digest(project_root: Path | str) -> str:
     budget.
     """
     root = Path(project_root)
-    from .paths import project_lineage_identity
-
-    live_lineage = project_lineage_identity(root)
     ops_entries = list(_receipt_namespace_entries(root / OPS_DIR))
-    if not ops_entries:
-        index = _read_settled_index(root, live_lineage=live_lineage)
-        if index is not None:
-            return index["digest"]
     digest = hashlib.sha256(b"saipen-op-receipts-v3\0")
     _frame_receipts(digest, OPS_DIR, ops_entries)
     settled_entries = list(_receipt_namespace_entries(root / SETTLED_DIR))
@@ -5601,8 +5481,36 @@ def semantic_receipts_for_operation(project_root: Path | str, operation: str) ->
     Callers that need to distinguish must catch this exception and return a
     CORRUPT_JOURNAL refusal; plain list filtering is safe only after the
     snapshot has been proven clean.
+
+    SRC-026:R009: answered from the bounded projection while it is CURRENT --
+    the operation's locator, the segments it names, the active tail and the
+    exact bytes of the matched receipts; a zero-match query opens no settled
+    receipt and lists nothing. An ABSENT or STALE projection is not damage:
+    the receipts themselves answer, through the canonical snapshot, and the
+    next settlement rebuilds the projection. Only bytes that exist and fail
+    verification refuse here, because a reader that scanned around a broken
+    accelerator could be steered by breaking it.
     """
-    snapshot = semantic_receipt_snapshot(project_root)
+    from . import settled_projection
+
+    root = Path(project_root)
+    honest = (settled_projection.STATE_ABSENT, settled_projection.STATE_STALE)
+    # Two looks: a reader holds no lock, and a settlement that lands between
+    # its head read and its segment read shows it one generation's head over
+    # the next one's tail. That is a moment, not corruption; a projection that
+    # fails twice running while its head still claims to bind the namespace is.
+    bounded_errors: list[str] = []
+    for _look in range(2):
+        if settled_projection.state(root) in honest:
+            break
+        records, bounded_errors, _used = settled_projection.operation_receipts_bounded(
+            root, operation
+        )
+        if not bounded_errors:
+            return records
+    else:
+        raise SemanticReceiptCorruptionError(tuple(bounded_errors), None)
+    snapshot = semantic_receipt_snapshot(root)
     if snapshot.errors:
         raise SemanticReceiptCorruptionError(snapshot.errors, snapshot)
     return [r for r in snapshot.records if r.get("operation") == operation]
@@ -5694,6 +5602,62 @@ def _compaction_queue_preflight(root: Path, cleanup_queue: Path) -> tuple[list[P
     return markers, None
 
 
+#: T-1667: present once this checkout's settled ledger was swept for staged
+#: bytes older than the cleanup queue. Machine-local, like the ledger.
+LEGACY_SWEEP_MARKER = ".saipen/recovery/legacy-staged-swept"
+
+
+def enqueue_legacy_staged(project_root: Path | str) -> list[str]:
+    """Queue settled COMMITTED/RESOLVED operations still holding staged bytes.
+
+    PERF-005 made compaction proportional to the cleanup queue, but bytes a
+    settlement left before the queue existed were never queued, so no bounded
+    pass could reach them. This walks the settled ledger ONCE per checkout,
+    reading only the directories that hold a `.staged` file, queues those
+    whose record is COMMITTED or RESOLVED, and leaves LEGACY_SWEEP_MARKER so
+    every later compaction is bounded by the queue again. Returns the op ids
+    it queued.
+    """
+    from .paths import safe_atomic_write_bytes
+    from .safeid import InvalidIdError
+
+    root = Path(project_root)
+    settled = root / SETTLED_DIR
+    marker = root / LEGACY_SWEEP_MARKER
+    if marker.exists() or not settled.is_dir() or settled.is_symlink():
+        return []
+    queued: list[str] = []
+    with os.scandir(settled) as entries:
+        for entry in entries:
+            if entry.name.startswith(".") or not entry.is_dir(follow_symlinks=False):
+                continue
+            try:
+                names = os.listdir(entry.path)
+            except OSError:
+                continue
+            if not any(name.endswith(".staged") for name in names):
+                continue
+            try:
+                decoded = decode_operation_record(root, safe_op_dir(root, entry.name, SETTLED_DIR))
+                if not decoded.get("ok") or decoded["record"].get("status") not in (
+                    "COMMITTED",
+                    "RESOLVED",
+                ):
+                    continue
+                (root / CLEANUP_QUEUE_DIR).mkdir(parents=True, exist_ok=True)
+                safe_atomic_write_bytes(
+                    safe_op_dir(root, entry.name, CLEANUP_QUEUE_DIR),
+                    b"",
+                    kind="cleanup-debt marker",
+                    ownership_root=root,
+                )
+            except (OSError, ValueError, InvalidIdError):
+                continue
+            queued.append(entry.name)
+    safe_atomic_write_bytes(marker, b"", kind="legacy staged sweep marker", ownership_root=root)
+    return sorted(queued)
+
+
 def compact_committed(project_root: Path | str) -> dict:
     """Bounded explicit maintenance compaction of SETTLED operation journals.
 
@@ -5737,7 +5701,9 @@ def compact_committed(project_root: Path | str) -> dict:
                 decoded = decode_operation_record(root, entry)
             except (OSError, InvalidIdError):
                 decoded = {"ok": False}
-            if decoded.get("ok") and decoded["record"].get("status") == "COMMITTED":
+            # phases/clean.md: COMMITTED and RESOLVED operations lose staged
+            # bytes, as the working-directory migration above already allows.
+            if decoded.get("ok") and decoded["record"].get("status") in ("COMMITTED", "RESOLVED"):
                 _compact_drop_staged(entry, compacted, skipped)
             elif op_id not in skipped:
                 skipped.append(op_id)

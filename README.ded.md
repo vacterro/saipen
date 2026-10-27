@@ -20,7 +20,8 @@
 **Один комманд для возобновления. Состояние в обычных файлах. Проверенные контракты.**
 
 Репозиторий проверяет себя при каждом push; установка, состояние, проверки и
-удаление — всё локальное — никакой облачной службы, никакого демона, никакой базы данных.
+удаление — всё локальное, без облачного сервиса и базы данных.
+Первый запрос Claude Code запускает местный помощник; без работающего хоста он завершается в простое.
 
 [![Validation](https://github.com/vacterro/saipen/actions/workflows/validate.yml/badge.svg)](https://github.com/vacterro/saipen/actions/workflows/validate.yml)
 [![Release](https://img.shields.io/github/v/release/vacterro/saipen?sort=semver&label=release)](https://github.com/vacterro/saipen/releases)
@@ -81,7 +82,7 @@ bash bootstrap/inject.sh                                            # macOS / Li
 `<!-- SAIPEN:BEGIN -->...<!-- SAIPEN:END -->` блок к инструкционным
 файлам агента, которые у вас уже есть (`~/.claude/CLAUDE.md`, `~/.config/opencode/AGENTS.md`,
 `~/.codex/AGENTS.md`, `~/.gemini/GEMINI.md`) — сначала создавая резервные копии в `.bak`] —
-и копирует протокол в соответствующие папки навыков. Ничего вне этих путей, никакого демона, никаких сетевых вызовов.</sub>
+и копирует протокол в соответствующие папки навыков. Ничего вне этих путей, никаких сетевых вызовов.</sub>
 
 **2. Запустите проект** — откройте агента в вашей папке, введите:
 

@@ -35,9 +35,12 @@ if str(TOOLS) not in sys.path:
 from saipen_engine import guard_events  # noqa: E402
 
 ENGINE = TOOLS / "saipen_engine"
-#: `<placeholder>` and `{interpolation}` both stand for a value the operator or
-#: the engine supplies; neither is what gets typed.
-_PLACEHOLDER = re.compile(r"<[^<>]{1,40}>|\{[^{}]{0,60}\}")
+#: `<placeholder>`, `{interpolation}` and printf `%s`/`%d` all stand for a value
+#: the operator or the engine supplies; none is what gets typed. The printf
+#: forms were missing, so `saipen source status %s` from handoff_reconciliation
+#: was judged as typed input no guard could accept -- the harvest reported the
+#: engine as printing unreachable routes when it was formatting reachable ones.
+_PLACEHOLDER = re.compile(r"<[^<>]{1,40}>|\{[^{}]{0,60}\}|%[sd]")
 #: What a substituted placeholder becomes: inside the canonical argument
 #: alphabet, so substitution itself never decides the verdict.
 _FILLER = "T-1"
@@ -112,7 +115,7 @@ class CanonicalCommandReachabilityTests(unittest.TestCase):
         """Guard: an empty harvest would pass this file silently."""
         found = harvested()
         self.assertGreater(len(found), 10, found)
-        self.assertIn("saipen recover resolve-blocker <decision>", found)
+        self.assertIn("saipen recover resolve-blocker <SRC-###>", found)
 
     def test_a_literal_is_harvested_whole(self):
         """T-1383: the harvest read a literal only up to its first quote of

@@ -685,6 +685,96 @@ def _project_root_of(path: Path) -> Path:
     raise ImproveError(f"cannot resolve a project root for {path}")
 
 
+def _unquote_identity(value: str) -> str:
+    """Strip one layer of YAML quoting from a provenance value.
+
+    `create_report` writes bare values, but a hand-edited header is as likely
+    to quote them, and `_field` returns the bytes it found. Comparing `"abc"`
+    against `abc` would report every quoted (honest) header as a repair --
+    the false accusation this bar must never make. Only the outer quotes of a
+    matching pair are removed; an unbalanced value is left alone.
+    """
+    if len(value) >= 2 and value[0] == value[-1] and value[0] in ("'", '"'):
+        return value[1:-1]
+    return value
+
+
+def _run_provenance_identities(report_text: str) -> list[tuple[int, str, str]]:
+    """`(run_number, head, tree)` for every RUN section that recorded one.
+
+    `append_run` writes `run_source_head` / `run_source_tree_fingerprint`
+    INSIDE each `## RUN N` section it owns, so these lines are producer-
+    attested evidence: a model can add a RUN through the verb and can never
+    choose what the verb recorded. A legacy report with no RUN sections (or a
+    pre-T-1816 one whose RUNs carry no provenance) yields an empty list, and
+    the checks that consume this stay silent rather than inventing a bar.
+    """
+    boundaries = [
+        (int(match.group(1)), match.start())
+        for match in re.finditer(r"(?m)^## RUN (\d+)\s*$", report_text)
+    ]
+    found: list[tuple[int, str, str]] = []
+    for index, (number, start) in enumerate(boundaries):
+        end = boundaries[index + 1][1] if index + 1 < len(boundaries) else len(report_text)
+        body = report_text[start:end]
+        head = _unquote_identity(_field(body, "run_source_head"))
+        tree = _unquote_identity(_field(body, "run_source_tree_fingerprint"))
+        if not head or not tree:
+            continue
+        if head == "UNAVAILABLE" or tree == "UNAVAILABLE":
+            continue
+        found.append((number, head, tree))
+    return found
+
+
+def _header_repair_errors(report_text: str) -> list[str]:
+    """Refuse a report whose header names an identity no RUN ever recorded.
+
+    THE MEASURED DEFECT (SRC-274:R001, F-01, 2026-10-18): an improve report
+    went stale, the engine refused it, and the header `source_head` /
+    `source_tree_fingerprint` were rewritten in place with the CURRENT
+    identity -- after which `improve complete` accepted the report. The audit
+    thereby bound fresh authority to bytes the audit never examined.
+
+    A header is an unaudited claim stamped at creation; a RUN's provenance
+    block is producer-attested evidence written by `append_run`, which a model
+    cannot choose. So the header must name an identity some RUN actually
+    recorded. When it names none, the only way it got there was a hand edit,
+    and completing it would seal a fabricated attestation.
+
+    One direction only, and deliberately so: a header OLDER than the newest
+    RUN is ordinary history (the tree moved, then a RUN measured the new one)
+    and stays admissible -- `_freshness_errors` still decides whether the
+    header describes the current tree. A header pointed at an OLD RUN is the
+    same stale claim by another route and is refused there, by currency, not
+    here. Legacy reports with no RUN provenance invent no bar at all.
+    """
+    errors: list[str] = []
+    identities = _run_provenance_identities(report_text)
+    if not identities:
+        return errors
+    header_head = _unquote_identity(_field(report_text, "source_head"))
+    header_tree = _unquote_identity(_field(report_text, "source_tree_fingerprint"))
+    if not header_head or not header_tree:
+        return errors
+    run_heads = {head for _number, head, _tree in identities}
+    run_trees = {tree for _number, _head, tree in identities}
+    if header_head in run_heads and header_tree in run_trees:
+        return errors
+    newest_number, newest_head, newest_tree = identities[-1]
+    errors.append(
+        f"report header claims source_head {header_head[:12]}... / "
+        f"tree {header_tree[:24]}..., but no RUN recorded that identity "
+        f"(the newest, RUN {newest_number}, recorded {newest_head[:12]}... / "
+        f"{newest_tree[:24]}...). A report header is not evidence: this shape "
+        "is a header-only freshness repair, and completing it would seal an "
+        "attestation for bytes no audit examined. Append a genuine RUN against "
+        "the current tree -- its provenance block is the authority completion "
+        "reads -- or capture a new seat/cycle"
+    )
+    return errors
+
+
 def _freshness_errors(
     project_root: Path, report_text: str, strict: bool, cycle_active: bool, *, current_source=None
 ) -> list[str]:
@@ -699,10 +789,16 @@ def _freshness_errors(
     single snapshot), it is used directly instead of computing a fresh one.
     This avoids duplicate compute_source_identity calls inside a single
     semantic resume decision. When omitted, a fresh snapshot is computed.
+
+    SRC-274:R001 (F-01): the comparison above reads the report HEADER, which
+    a writer can edit. `_header_repair_errors` anchors that header to the
+    producer-attested RUN provenance first, so a restamped header is refused
+    as the repair it is instead of being rewarded with a freshness PASS.
     """
     errors: list[str] = []
     if not strict or not cycle_active:
         return errors
+    errors.extend(_header_repair_errors(report_text))
     head = _field(report_text, "source_head")
     tree = _field(report_text, "source_tree_fingerprint")
     if not head or not tree:
@@ -955,6 +1051,10 @@ def write_sweep_entry(cycle_dir: Path, entry: dict) -> dict:
         raise ImproveError(
             f"disposition {disposition!r} outside the closed set {sorted(DISPOSITION)}"
         )
+    if entry.get("retrospective"):
+        from saipen_engine.improve_retrospective import write_disposition
+
+        return write_disposition(cycle_dir, entry)
     amend = bool(entry.get("amend"))
     if amend:
         return _amend_sweep_entry(cycle_dir, entry, disposition)
@@ -1102,7 +1202,11 @@ def write_sweep_entry(cycle_dir: Path, entry: dict) -> dict:
     return result
 
 
-def _journaled_write(path: Path, content: str, kind: str, base_hash: str | None = None) -> dict:
+def _journaled_write(
+    path: Path, content: str, kind: str, base_hash: str | None = None, *,
+    read_preconditions: dict | None = None, receipt_metadata: dict | None = None,
+    op_id: str | None = None, actor: str = "saipen",
+) -> dict:
     """Write one file through the common lock + journal + roll-forward
     machinery. Returns the transaction result; callers inspect and propagate.
 
@@ -1121,7 +1225,7 @@ def _journaled_write(path: Path, content: str, kind: str, base_hash: str | None 
     """
     import uuid
     from saipen_engine import codec
-    from saipen_engine.journal import _hash_file, hash_bytes, run_mutation
+    from saipen_engine.journal import RETROSPECTIVE_POLICY, _hash_file, hash_bytes, run_mutation
     from saipen_engine.lock import project_writer_lock
 
     root = path
@@ -1129,9 +1233,11 @@ def _journaled_write(path: Path, content: str, kind: str, base_hash: str | None 
         root = root.parent
     root = root.parent  # project root (parent of .saipen)
     rel = path.relative_to(root).as_posix()
-    op_id = f"{kind}-" + uuid.uuid4().hex
+    op_id = op_id or f"{kind}-" + uuid.uuid4().hex
     doc = codec.read_document(path)
-    content_bytes = doc.encode(content)
+    # The append-only successor has one versioned UTF-8/LF representation;
+    # existing Improve documents keep their established codec policy.
+    content_bytes = content.encode("utf-8") if kind == "retrospective" else doc.encode(content)
     live = _hash_file(path) if path.is_file() else ""
     before = base_hash if base_hash is not None else live
     # TARGET ROLE (NITRO dogfood IV, T-601): the journal target must name the
@@ -1145,13 +1251,14 @@ def _journaled_write(path: Path, content: str, kind: str, base_hash: str | None 
         "sweep": "sweep",
         "run": "report",
         "rebind": "report",
+        "retrospective": "coverage",
     }.get(kind, "generic")
     with project_writer_lock(root):
         return run_mutation(
             root,
             op_id,
             kind,
-            "saipen",
+            actor,
             _identity(root),
             hash_bytes(rel.encode("utf-8")),
             [
@@ -1164,7 +1271,11 @@ def _journaled_write(path: Path, content: str, kind: str, base_hash: str | None 
                 }
             ],
             preconditions={rel: before},
-            verification_policy="improve_atomic_file",
+            verification_policy=(
+                RETROSPECTIVE_POLICY if kind == "retrospective" else "improve_atomic_file"
+            ),
+            read_preconditions=read_preconditions,
+            receipt_metadata=receipt_metadata,
         )
 
 
@@ -2764,7 +2875,25 @@ def validate_superseded_seat(
     return errors
 
 
-def resolve_stale_complete_seat(cycle_dir: Path, seat_id: str, replacement_seat: str) -> dict:
+def _dry_run_plan(action: str, target: Path, detail: str, **identity) -> dict:
+    """T-1784: a mutator's dry run is its own verdict with the write withheld.
+
+    Every gate of the mutator has run when this is returned, so a plan can
+    never promise a transition the real call would refuse.
+    """
+    return {
+        "ok": True,
+        "code": "DRY_RUN_PLAN",
+        "action": action,
+        **identity,
+        "targets": [str(target)],
+        "detail": f"{detail}; no writes",
+    }
+
+
+def resolve_stale_complete_seat(
+    cycle_dir: Path, seat_id: str, replacement_seat: str, *, dry_run: bool = False
+) -> dict:
     """Supersede one stale immutable COMPLETE report with a fresh seat.
 
     The old report and SWEEP ledger are read-only evidence.  The sole write is
@@ -2939,6 +3068,15 @@ def resolve_stale_complete_seat(cycle_dir: Path, seat_id: str, replacement_seat:
         raise ImproveError(
             "supersession refuses its own proposed manifest: " + "; ".join(proposed_errors[:5])
         )
+    if dry_run:
+        return _dry_run_plan(
+            "retire",
+            manifest,
+            "planned stale COMPLETE -> superseded binding",
+            cycle_id=cycle_dir.name,
+            seat_id=seat,
+            replacement_seat=replacement,
+        )
     result = _journaled_write(manifest, proposed, "seat", base_hash=_base_hash(manifest))
     if not result.get("ok"):
         raise ImproveError(
@@ -3050,7 +3188,7 @@ def verify_cycle(cycle_dir: Path) -> list[str]:
     return errors
 
 
-def abort_cycle(cycle_dir: Path) -> dict:
+def abort_cycle(cycle_dir: Path, *, dry_run: bool = False) -> dict:
     """Mechanical abort for a STUCK DRAFT cycle (DOGFOOD V, T-621).
 
     An active cycle whose report fails the completion bar (a committed RUN
@@ -3075,11 +3213,75 @@ def abort_cycle(cycle_dir: Path) -> dict:
     text = _read_maybe(manifest)
     if not text.strip():
         raise ImproveError(f"cycle manifest missing: {manifest}")
-    snapshot = load_valid_manifest(cycle_dir, "abort", ("active",))
+    snapshot = load_valid_manifest(cycle_dir, "abort", ("active", "archived"))
+    if snapshot.status == "archived":
+        if dry_run:
+            return _dry_run_plan(
+                "abort",
+                manifest,
+                "cycle already archived",
+                cycle_id=cycle_dir.name,
+            )
+        return {
+            "ok": True,
+            "code": "ALREADY_ARCHIVED",
+            "cycle_id": cycle_dir.name,
+            "status": "archived",
+            "detail": "cycle is already archived",
+        }
     text = snapshot.text
     manifest = snapshot.path
     sweep = _read_maybe(cycle_dir / "SWEEP.md")
-    if _sweep_records(sweep):
+    sweep_records = _sweep_records(sweep)
+
+    has_complete = False
+    unswept_findings: list[str] = []
+    has_fresh = False
+    for block in _seat_blocks(text):
+        seat_id = _field(block, "seat_id")
+        report_path = _field(block, "report_path")
+        availability = _field(block, "availability") or "expected"
+        if availability == "unavailable":
+            continue
+        if not seat_id or not report_path:
+            continue
+        report = cycle_dir / seat_id / report_path
+        if not report.is_file():
+            continue
+        report_text = _read_maybe(report)
+        status = _field(report_text, "report_status")
+        if status == "complete":
+            has_complete = True
+            derived = derive_status(report_path, text, report_text, sweep, seat_id=seat_id)
+            for missing_ref in derived.get("missing", []):
+                unswept_findings.append(f"{seat_id}:{missing_ref}")
+            bound_errors = validate_bound_report(
+                cycle_dir,
+                seat_id,
+                report_text,
+                require_runs=True,
+                require_fresh=True,
+                cycle_active=True,
+            )
+            if not bound_errors:
+                has_fresh = True
+
+    if unswept_findings:
+        raise ImproveError(
+            "abort refuses: complete seat report has unswept finding(s): "
+            + "; ".join(unswept_findings)
+            + "; sweep every finding before aborting a cycle with complete reports"
+        )
+    if has_fresh and sweep_records:
+        raise ImproveError(
+            "abort refuses: the sweep ledger already carries dispositions; a "
+            "cycle whose Core sweep started is not abortable -- finish it. A "
+            "seat that can never complete is retired through `saipen improve "
+            "retire <cycle> <seat> --reason <CODE>`, and a seat whose draft "
+            "carries no committed RUN can resume and re-bind its header; "
+            "aborting would discard the dispositions the sweep already made"
+        )
+    if not has_complete and sweep_records:
         raise ImproveError(
             "abort refuses: the sweep ledger already carries dispositions; a "
             "cycle whose Core sweep started is not abortable -- finish it. A "
@@ -3093,8 +3295,9 @@ def abort_cycle(cycle_dir: Path) -> dict:
     # manifest unchanged (retry re-aborts idempotently) or an archived +
     # cycle_aborted manifest whose draft reports stay byte-identical -- there
     # is no intermediate state where a report moved but the manifest did not.
+    marker = "stale-complete-preserved" if has_complete else "draft-preserved"
     new_text = re.sub(r"(?m)^cycle_status:\s*[A-Za-z_]+", "cycle_status: archived", text, count=1)
-    new_text = new_text.rstrip() + "\ncycle_aborted: draft-preserved\n"
+    new_text = new_text.rstrip() + f"\ncycle_aborted: {marker}\n"
     # T-638/§2: the PROPOSED manifest (archived + cycle_aborted) must validate
     # before it is written -- a known-invalid proposed state never enters
     # PREPARED/APPLY.
@@ -3104,6 +3307,13 @@ def abort_cycle(cycle_dir: Path) -> dict:
             "abort refuses its own proposed manifest: "
             + "; ".join(_proposed_errors[:3])
             + " -- a known-INVALID proposed state is never written (T-638)"
+        )
+    if dry_run:
+        return _dry_run_plan(
+            "abort",
+            manifest,
+            f"planned cycle ACTIVE -> archived (cycle_aborted: {marker})",
+            cycle_id=cycle_dir.name,
         )
     result = _journaled_write(manifest, new_text, "cycle", base_hash=_base_hash(manifest))
     if not result.get("ok"):
@@ -3123,7 +3333,10 @@ def abort_cycle(cycle_dir: Path) -> dict:
     return result
 
 
-def retire_seat(cycle_dir: Path, seat_id: str, reason: str) -> dict:
+def retire_seat(
+    cycle_dir: Path, seat_id: str, reason: str, *, dry_run: bool = False,
+    retrospective: bool = False, actor: str | None = None,
+) -> dict:
     """Canonical bounded exit for a seat that can never complete (T-1406).
 
     A cycle can be stuck after its Core sweep started: one expected seat's
@@ -3139,6 +3352,10 @@ def retire_seat(cycle_dir: Path, seat_id: str, reason: str) -> dict:
     and when it would leave the roster with no expected seat -- a cycle is
     never completed into evidence-free history.
     """
+    if retrospective:
+        from saipen_engine.improve_retrospective import retire_archived
+
+        return retire_archived(cycle_dir, seat_id, reason, dry_run=dry_run, actor=actor)
     seat = _validate_safe_id(seat_id, "seat_id")
     if not isinstance(reason, str) or not _RETIRE_REASON_RE.fullmatch(reason):
         raise ImproveError("retire reason must match [A-Z][A-Z0-9_-]{0,63}")
@@ -3196,6 +3413,15 @@ def retire_seat(cycle_dir: Path, seat_id: str, reason: str) -> dict:
             "retire refuses its own proposed manifest: "
             + "; ".join(_proposed_errors[:3])
             + " -- a known-INVALID proposed state is never written (T-638)"
+        )
+    if dry_run:
+        return _dry_run_plan(
+            "retire",
+            manifest,
+            "planned seat availability -> unavailable",
+            cycle_id=cycle_dir.name,
+            seat_id=seat,
+            reason=reason,
         )
     result = _journaled_write(manifest, new_text, "seat", base_hash=_base_hash(manifest))
     if not result.get("ok"):
@@ -3365,7 +3591,7 @@ def _outcome_for_status(status: str) -> str:
     }.get(status, status.upper())
 
 
-def reconcile_cycle(cycle_dir: Path, *, dry_run: bool = False) -> dict:
+def reconcile_cycle(cycle_dir: Path, *, dry_run: bool = False, actor: str | None = None) -> dict:
     """ONE canonical finite exit for a strict Improve cycle (T-1434 M4).
 
     The operation inspects every roster seat, executes the deterministic
@@ -3396,15 +3622,9 @@ def reconcile_cycle(cycle_dir: Path, *, dry_run: bool = False) -> dict:
         "seat_classes": {record["seat_id"]: record["class"] for record in records},
     }
     if status in TERMINAL_CYCLE_STATUSES:
-        return {
-            "ok": True,
-            "code": "ALREADY_TERMINAL",
-            "outcome": _outcome_for_status(status),
-            **base,
-            "retired": [],
-            "superseded": [],
-            "bookkeeping": protocol_git_status(_project_root_of(cycle_dir), cycle_dir),
-        }
+        from saipen_engine.improve_retrospective import reconcile_archive
+
+        return reconcile_archive(cycle_dir, dry_run=dry_run, actor=actor)
     actionable = [record for record in records if record["class"] == "STILL_ACTIONABLE"]
     if actionable:
         raise ImproveError(
@@ -3416,6 +3636,31 @@ def reconcile_cycle(cycle_dir: Path, *, dry_run: bool = False) -> dict:
         )
     empty = [record for record in records if record["class"] == "EMPTY_DRAFT"]
     stale = [record for record in records if record["class"] == "STALE_COMPLETE"]
+    # T-1772 (SRC-248 R006): `retire_seat` may not empty the roster, so when
+    # every seat that could still report is an EMPTY_DRAFT there is no
+    # reconcile route, and planning one recommends an impossible transition.
+    # Such a cycle holds no audit evidence; its sanctioned exit is abort
+    # (manifest marker only, drafts byte-preserved), so that is the route
+    # named -- for the plan and the real call alike.
+    survivors = [
+        record
+        for record in records
+        if record["availability"] != "unavailable" and record["class"] != "EMPTY_DRAFT"
+    ]
+    if empty and not survivors:
+        return {
+            "ok": False,
+            "code": "VALIDATION_FAILED",
+            **base,
+            "detail": (
+                "reconcile cannot retire "
+                + ", ".join(record["seat_id"] for record in empty)
+                + ": every seat that could still report is an EMPTY_DRAFT, so the "
+                "cycle holds no audit evidence and retire may not empty its roster; "
+                "the sanctioned exit is abort (manifest marker only; drafts preserved)"
+            ),
+            "canonical_next_command": f"saipen improve abort {cycle_dir.name}",
+        }
     replacements: dict[str, str] = {}
     for record in stale:
         replacement = _replacement_for(cycle_dir, records, record)
@@ -3424,7 +3669,8 @@ def reconcile_cycle(cycle_dir: Path, *, dry_run: bool = False) -> dict:
                 "reconcile refuses: stale COMPLETE seat "
                 f"{record['seat_id']} has no current same-scope replacement seat; "
                 f"create one with `saipen improve --new-seat --role {record['role']}`, "
-                "complete its audit against the current tree, then run reconcile again"
+                "complete its audit against the current tree, then run reconcile again; "
+                f"or archive via `saipen improve abort {cycle_dir.name}`"
             )
         replacements[record["seat_id"]] = replacement
     if dry_run:
@@ -3626,7 +3872,7 @@ def protocol_git_status(project_root: Path, history_dir: Path) -> dict:
     }
 
 
-def complete_cycle(cycle_dir: Path) -> dict:
+def complete_cycle(cycle_dir: Path, *, dry_run: bool = False) -> dict:
     """Mark a cycle COMPLETE: no longer active, so the next cycle can start.
     The cycle's evidence stays in place (never deleted to admit the next
     cycle); only the lifecycle status changes, journaled (NITRO dogfood II).
@@ -3657,6 +3903,13 @@ def complete_cycle(cycle_dir: Path) -> dict:
             "complete_cycle refuses its own proposed manifest: "
             + "; ".join(_proposed_errors[:3])
             + " -- a known-INVALID proposed state is never written (T-638)"
+        )
+    if dry_run:
+        return _dry_run_plan(
+            "cycle-complete",
+            manifest,
+            "planned cycle ACTIVE -> COMPLETE",
+            cycle_id=cycle_dir.name,
         )
     result = _journaled_write(manifest, new_text, "cycle", base_hash=_base_hash(manifest))
     if not result.get("ok"):
@@ -3783,7 +4036,7 @@ def create_report(
     return report
 
 
-def complete_report(report_path: Path) -> dict:
+def complete_report(report_path: Path, *, dry_run: bool = False) -> dict:
     """Mark a DRAFT report COMPLETE, journaled and immutable thereafter
     (DOGFOOD V, T-616). The FULL report validation must pass first -- a report
     with only `report_status: complete` and nothing else REFUSES."""
@@ -3821,6 +4074,13 @@ def complete_report(report_path: Path) -> dict:
     new_text = re.sub(r"(?m)^report_status:\s*[A-Za-z]+", "report_status: complete", text, count=1)
     if new_text == text:
         new_text = text.rstrip() + "\nreport_status: complete\n"
+    if dry_run:
+        return _dry_run_plan(
+            "complete",
+            report_path,
+            "planned report draft -> complete",
+            report=str(report_path),
+        )
     result = _journaled_write(report_path, new_text, "report", base_hash=_base_hash(report_path))
     if not result.get("ok"):
         raise ImproveError(
@@ -3922,7 +4182,7 @@ def register_seat(
     return result
 
 
-def rebind_report_protocol(report_path: Path) -> dict:
+def rebind_report_protocol(report_path: Path, *, dry_run: bool = False) -> dict:
     """Re-stamp a DRAFT report's install-derived identity to the installed one.
 
     T-6. The protocol tree is writable by any process with file access while a
@@ -4007,6 +4267,13 @@ def rebind_report_protocol(report_path: Path) -> dict:
         )
     if proposed == text:
         raise ImproveError("rebind refuses: no install-identity scalar changed")
+    if dry_run:
+        return _dry_run_plan(
+            "rebind",
+            report_path,
+            "planned draft identity re-stamp to the installed protocol; RUN content untouched",
+            report=str(report_path),
+        )
     committed = _journaled_write(report_path, proposed, "report", base_hash=_base_hash(report_path))
     if not committed.get("ok"):
         raise ImproveError(
@@ -4024,7 +4291,38 @@ def rebind_report_protocol(report_path: Path) -> dict:
     }
 
 
-def append_run(report_path: Path, run_text: str) -> dict:
+def _run_provenance_block(report_path: Path) -> str:
+    """Source identity captured AT APPEND TIME, for this RUN alone (T-1816).
+
+    DRIFT-04 measured the alternative: a report-wide ``source_head`` is stamped
+    once at creation, so after a second run the only mechanical identity in the
+    file describes RUN 1. The tempting repair -- rewriting the header to the
+    newer identity -- ERASES the distinction between the run that was audited
+    and the tree that was later measured. That is why the header fields are
+    never touched here.
+
+    Instead every RUN records the identity it was produced against, in an
+    append-only line INSIDE its own section. Keys are deliberately prefixed:
+    ``_field`` is a whole-text ``^key:`` search, so ``run_source_head`` can
+    never shadow the report-level ``source_head``.
+
+    Failure to compute an identity is recorded as ``UNAVAILABLE`` rather than
+    omitted or guessed -- an honest hole is the point.
+    """
+    head = "UNAVAILABLE"
+    tree = "UNAVAILABLE"
+    try:
+        from freshness import compute_source_identity
+
+        source = compute_source_identity(_project_root_of(report_path))
+        head = source.source_head or "UNAVAILABLE"
+        tree = source.source_tree_fingerprint or "UNAVAILABLE"
+    except Exception:
+        pass
+    return f"run_source_head: {head}\nrun_source_tree_fingerprint: {tree}\n\n"
+
+
+def append_run(report_path: Path, run_text: str, *, dry_run: bool = False) -> dict:
     """Append an immutable RUN section to a seat report (T-551, migrated to
     the journal in NITRO M6; DOGFOOD V, T-616).
 
@@ -4123,7 +4421,7 @@ def append_run(report_path: Path, run_text: str) -> dict:
                 + " -- a known-INVALID base is never mutated (T-638)"
             )
     run_count = len(re.findall(r"(?m)^## RUN \d+\s*$", text))
-    run = f"## RUN {run_count + 1}\n\n{run_text.rstrip()}\n"
+    run = f"## RUN {run_count + 1}\n\n{_run_provenance_block(report_path)}{run_text.rstrip()}\n"
     proposed = text.rstrip() + "\n\n" + run
     # SRC-085 M2: the PROPOSED report is constructed in memory and must pass
     # the RUN-identity bar (unique / ascending / contiguous) before anything is
@@ -4155,6 +4453,13 @@ def append_run(report_path: Path, run_text: str) -> dict:
                 + " -- a known-INVALID proposed state is never written "
                 "(T-638)"
             )
+    if dry_run:
+        return _dry_run_plan(
+            "submit",
+            report_path,
+            "planned RUN append",
+            report=str(report_path),
+        )
     result = _journaled_write(report_path, proposed, "run", base_hash=_base_hash(report_path))
     if not result.get("ok"):
         raise ImproveError(f"RUN not committed: {result.get('code')} {result.get('message', '')}")
@@ -4419,10 +4724,10 @@ def validate_manifest(text: str, expected_cycle_id: str | None = None) -> list[s
             errors.append("cycle_aborted is legal ONLY with cycle_status: archived")
         if len(abort_markers) != 1:
             errors.append("cycle_aborted must appear exactly once")
-        elif abort_markers[0].strip() != "draft-preserved":
+        elif abort_markers[0].strip() not in ("draft-preserved", "stale-complete-preserved"):
             errors.append(
                 f"cycle_aborted value {abort_markers[0].strip()!r} "
-                "is not the canonical 'draft-preserved'"
+                "is not canonical ('draft-preserved' or 'stale-complete-preserved')"
             )
     seen: set[str] = set()
     for block in _seat_blocks(text):

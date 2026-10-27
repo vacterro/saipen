@@ -114,7 +114,11 @@ class OpenCodeEntryTests(unittest.TestCase):
             old_posix = competing / "saipen"
             old_posix.write_text("#!/bin/sh\necho STALE_CLI\n", encoding="utf-8")
             old_posix.chmod(0o755)
-            env = {**os.environ, "SAIPEN_SKILL_ROOT": str(skill), "SAIPEN_PYTHON": sys.executable}
+            profile = root / "strict-profile"
+            (profile / ".saipen").mkdir(parents=True)
+            (profile / ".saipen/authority.json").write_text('{"mode":"strict"}', encoding="utf-8")
+            env = {**os.environ, "SAIPEN_SKILL_ROOT": str(skill), "SAIPEN_PYTHON": sys.executable,
+                   "USERPROFILE": str(profile), "HOME": str(profile)}
             for key in ("SAIPEN_PROJECT_ROOT", "SAIPEN_PROJECT_LINEAGE", "SAIPEN_AGENT",
                         "SAIPEN_GUARD_STARTUP_PROBE"):
                 env.pop(key, None)
@@ -146,9 +150,11 @@ for (const tool of ["read", "skill", "grep", "question", "todowrite",
 }
 process.stdout.write(JSON.stringify(results));
 ''', stale=True)
-        for tool in ("read", "skill", "grep", "question", "todowrite"):
+        for tool in ("read", "skill", "grep", "todowrite"):
             self.assertEqual(out[tool], "ALLOWED", out)
-        for tool in ("edit", "bash", "task", "mcp__x__read", "plugin.skill"):
+        # SRC-185: Question is a control handback, so stale STRICT cannot
+        # bypass its authority gate by classifying it as a diagnostic read.
+        for tool in ("question", "edit", "bash", "task", "mcp__x__read", "plugin.skill"):
             self.assertIn("PLUGIN_RESTART_REQUIRED", out[tool], out)
 
     def test_current_launcher_precedes_competing_command_and_preserves_path(self):

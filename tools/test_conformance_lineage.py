@@ -8,6 +8,7 @@ validation still walks everything and exact receipt bytes stay the authority.
 
 from __future__ import annotations
 
+import contextlib
 import hashlib
 import json
 import shutil
@@ -420,6 +421,35 @@ class ConformanceLineageTests(unittest.TestCase):
         self.assertLess(receipt_hashes["n"], CL.GEN_BOUND)
         self.assertGreater(receipt_hashes["n"], 0)
 
+    def test_production_consumer_reads_the_bounded_lineage_not_the_legacy_scan(self) -> None:
+        """R010/PERF-002: the PRODUCTION consumer must obtain the answer through
+        the authenticated bounded lineage. Proving `latest_receipt_bounded` in
+        isolation never proves `conformance.latest_receipt` is still wired to
+        it, so every legacy fallback below is armed to explode: a healthy
+        current lineage that reaches one is the failure."""
+        for index in range(5):
+            gate = "core" if index % 2 else "crew"
+            _write_and_append(self.root, f"r{index}", gate, f"2026-01-01T00:00:0{index}Z")
+
+        def _legacy_scan_reached(*_args, **_kwargs):
+            raise AssertionError(
+                "conformance.latest_receipt left the bounded lineage for the legacy path"
+            )
+
+        legacy_paths = (
+            "_lookup_receipt_index",
+            "_read_indexed_receipt",
+            "_iter_receipts",
+            "_receipt_inventory",
+            "_receipt_content_inventory",
+        )
+        with contextlib.ExitStack() as armed:
+            for name in legacy_paths:
+                armed.enter_context(mock.patch.object(conformance, name, _legacy_scan_reached))
+            latest = conformance.latest_receipt(self.root, "core")
+        self.assertIsNotNone(latest)
+        self.assertEqual(latest["receipt_id"], "r3")
+
     def test_rebuild_then_bounded_latest_per_gate(self) -> None:
         for index in range(5):
             gate = "core" if index % 2 else "crew"
@@ -515,19 +545,35 @@ class ConformanceLineageTests(unittest.TestCase):
         head = CL._read_head(self.root)
         self.assertEqual(head[0]["sealed_count"], 1)
 
-    def test_out_of_band_sibling_refuses_advance_and_never_becomes_indexed(self) -> None:
+    def test_out_of_band_sibling_is_folded_truthfully_by_the_writer_rebuild(self) -> None:
+        """T-1898: the refusal still never ADVANCES the writer's own receipt to
+        latest, and the authority now recovers instead of freezing forever.
+
+        Before T-1898 this asserted zero mutation, which is what left the head
+        permanently stale: every later lookup degraded to the full-namespace
+        scan. The safety property was never "nothing is written" -- it is "the
+        out-of-band receipt is answered truthfully and the writer's own receipt
+        is never laundered into `latest`". A writer-side deep rebuild folds the
+        ACTUAL bytes of both, so the locator names the true latest
+        (`out-of-band`) and `r3` stays an ordinary member.
+        """
         for index in range(3):
             _write_and_append(self.root, f"r{index}", "core", f"2026-01-01T00:00:0{index}Z")
-        locator_before = CL._read_locator(self.root, "core")
-        head_before = CL._read_head(self.root)
         # A foreign writer lands a newer receipt WITHOUT telling the lineage.
         _write_receipt(self.root, "out-of-band", "core", "2026-01-01T00:00:59Z")
         _write_and_append(self.root, "r3", "core", "2026-01-01T00:00:04Z")
         locator_after = CL._read_locator(self.root, "core")
-        self.assertEqual(locator_after, locator_before)
-        self.assertEqual(CL._read_head(self.root), head_before)
+        self.assertEqual(
+            locator_after["receipt_id"],
+            "out-of-band",
+            "the writer advertised its OWN receipt as latest across a foreign sibling",
+        )
+        self.assertEqual(CL._read_head(self.root)[0]["receipt_count"], 5)
         latest = conformance.latest_receipt(self.root, "core")
         self.assertEqual(latest["receipt_id"], "out-of-band")
+        handled, record = CL.latest_receipt_bounded(self.root, "core")
+        self.assertTrue(handled)
+        self.assertEqual(record["receipt_id"], "out-of-band")
 
     def test_tampered_referenced_receipt_refuses_bounded_trust(self) -> None:
         path = _write_and_append(self.root, "r1", "core", "2026-01-01T00:00:00Z")

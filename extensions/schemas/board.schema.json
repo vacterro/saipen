@@ -90,6 +90,11 @@
         "type": "string",
         "description": "CORE-001: `required` declares that this ticket owes a regression PAIR -- a FAIL against the pre-fix subject and a PASS against the post-fix one under the SAME verifier -- and arms the extra gate in VERIFY -> REVIEW and finish. A machine-owned field, never inferred from prose."
       },
+      "regression_evidence": {
+        "type": "string",
+        "enum": ["executed"],
+        "description": "Monotonic native execution profile; requires regression: required and a current committed paired execution receipt. Absence retains legacy attested identity comparisons."
+      },
       "blocker_scope": {
         "type": "string",
         "enum": [
@@ -166,6 +171,10 @@
         "enum": ["operator_carrier", "transport_obligation", "model_supplied"],
         "description": "Original ingress witness, projected without promotion by operator_task. Only operator_carrier can accompany modern user_explicit:true; transport obligations prove tool-payload fidelity, not operator identity."
       },
+      "requires": {
+        "type": "string",
+        "description": "T-1663: what this ticket's steps need of an executor beyond the phase -- a comma list of name[@PHASE[+PHASE]] (no phase = every phase) plus the word read_only (reading and the control plane only). Read by saipen iteration; written by saipen ticket requires; a value the grammar cannot read is required and granted by nobody."
+      },
       "implementation_delta": {
         "type": "string",
         "enum": [
@@ -187,6 +196,16 @@
         "type": "string",
         "description": "Orchestration repair (T-1302 FINDING 4): comma-separated worktree paths this COHORT-mode member attributes to its C-### batch; publication belongs to the cohort authority, never to an imaginary per-ticket diff."
       },
+      "publication_state": {
+        "type": "string",
+        "enum": ["published", "pending"],
+        "description": "T-1866 / SRC-295 F-03: whether this own_patch closure's OWN delta reached publication. DERIVED by closure.publication_state from committed release evidence naming the ticket; a caller can never assert it. `pending` says the work is closed and its delta is not out yet, which is a real state the engine must be able to record -- refusing the closure instead would make every ticket wait on a release it does not control. Valid ONLY with closure_mode own_patch, because every other mode either adds no code or defers publication to a batch identity. closure.resolve_implementation_source still refuses to inherit a pending DONE as publication authority."
+      },
+      "publication": {
+        "type": "string",
+        "enum": ["forbidden"],
+        "description": "T-1881 / SRC-306:R004 (audit D-06): a ticket-scoped publication PROHIBITION -- an INPUT directive, not the DERIVED closure state in `publication_state`. Valid on any section, because the operator says it before the work starts and the release planner must still honour it while that work is in flight. release.plan_release refuses with RELEASE_FORBIDDEN before any network call when a ticket its plan would publish for carries this field. Deliberately one value: a field that could also say `allowed` would be a second, model-writable place to grant publication authority, which belongs only to the current session's negotiated capability. Absence means 'no prohibition', never 'granted'."
+      },
       "retry_not_before": {
         "type": "string",
         "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d+)?Z$",
@@ -205,6 +224,10 @@
       "resume_transition_from": {
         "type": "string",
         "description": "The parent's prior transition_from value, restored with resume_phase."
+      },
+      "verification_contract": {
+        "type": "string",
+        "description": "T-1705/SRC-225: relative path or identifier for the verification contract artifact validating external or debt resolution."
       }
     },
     "allOf": [
@@ -384,6 +407,13 @@
             "invalidation_evidence": {
               "type": "string",
               "pattern": "^E-\\d+$"
+            },
+            "publication_state": {
+              "type": "string",
+              "enum": [
+                "published",
+                "pending"
+              ]
             }
           }
         },
@@ -428,6 +458,11 @@
               {
                 "required": [
                   "invalidation_evidence"
+                ]
+              },
+              {
+                "required": [
+                  "publication_state"
                 ]
               }
             ]

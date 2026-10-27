@@ -131,13 +131,18 @@ class GrammarTests(unittest.TestCase):
 
 
 _SCOPE_EVENTS = [
-    {"event": 1, "ticket": "T-7", "taxonomy": "DEC", "text": "anything at all"},
-    {"event": 2, "ticket": "T-9", "taxonomy": "DEC", "text": "a stranger's event"},
+    {"event": 1, "ticket": "T-7", "taxonomy": "DEC", "text": "premise disproven at HEAD"},
+    {
+        "event": 2,
+        "ticket": "T-9",
+        "taxonomy": "DEC",
+        "text": "premise disproven at HEAD for stranger's ticket",
+    },
 ]
 
 
 class EvidenceScopeTests(unittest.TestCase):
-    """The gate is STRUCTURAL. Prose is never authority."""
+    """The gate enforces semantic premise invalidation (T-1795 / SRC-255)."""
 
     def test_own_event_is_admissible(self):
         self.assertIsNone(invalidation_error(_SCOPE_EVENTS, "E-1", ticket_id="T-7"))
@@ -150,13 +155,75 @@ class EvidenceScopeTests(unittest.TestCase):
     def test_an_absent_event_is_refused(self):
         self.assertIsNotNone(invalidation_error(_SCOPE_EVENTS, "E-99", ticket_id="T-7"))
 
-    def test_event_text_is_never_matched(self):
-        """Prose cannot decide this. Only identity can."""
-        # An event that SHOUTS about invalidity is still only admissible for
-        # its own ticket -- and one that says nothing is admissible for its
-        # own. That is the whole design.
-        events = [{"event": 5, "ticket": "T-7", "taxonomy": "DEC", "text": "PASS -- fine"}]
-        self.assertIsNone(invalidation_error(events, "E-5", ticket_id="T-7"))
+    def test_event_without_structured_disproof_is_refused(self):
+        """Preparation, progress, or unrelated checks cannot close a ticket (SRC-255:R007)."""
+        samples = [
+            "PASS -- fine",
+            "translation preparation",  # T-14 root cause in SAI_WEBSITE
+            "scale-test infrastructure exists",  # T-15 root cause in SAI_WEBSITE
+            "implementation progress 80%",
+            "reviewed translation draft",
+        ]
+        for idx, text in enumerate(samples, start=10):
+            events = [{"event": idx, "ticket": "T-7", "taxonomy": "DEC", "text": text}]
+            why = invalidation_error(events, f"E-{idx}", ticket_id="T-7")
+            self.assertIsNotNone(why, f"accepted non-disproof text: {text!r}")
+            self.assertIn("PREMISE_NOT_DISPROVEN", why)
+
+    def test_blocker_or_waiting_event_is_refused(self):
+        """An external blocker forbids finding_invalidated closure (SRC-255:R004)."""
+        events = [
+            {
+                "event": 20,
+                "ticket": "T-7",
+                "taxonomy": "WAIT",
+                "text": "waiting for external upstream fix",
+            },
+            {
+                "event": 21,
+                "ticket": "T-7",
+                "taxonomy": "BLOCKED",
+                "text": "BLOCKED_EXTERNAL: freebuff cwd bug",
+            },
+            {
+                "event": 22,
+                "ticket": "T-7",
+                "taxonomy": "DEC",
+                "text": "WAIT_USER_DECISION: awaiting operator choice",
+            },
+        ]
+        for ev in events:
+            why = invalidation_error(events, f"E-{ev['event']}", ticket_id="T-7")
+            self.assertIsNotNone(why, f"accepted blocker event: {ev}")
+            self.assertIn("PREMISE_NOT_DISPROVEN", why)
+            self.assertIn("blocker", why)
+
+    def test_lifecycle_transition_is_refused(self):
+        """Lifecycle transitions are not premise disproofs."""
+        events = [{"event": 30, "ticket": "T-7", "taxonomy": "RUN", "text": "transition to VERIFY"}]
+        why = invalidation_error(events, "E-30", ticket_id="T-7")
+        self.assertIsNotNone(why)
+        self.assertIn("PREMISE_NOT_DISPROVEN", why)
+        self.assertIn("lifecycle transition", why)
+
+    def test_genuine_typed_disproof_is_accepted(self):
+        """Typed premise invalidations with verifiable disproof are accepted (SRC-255:R008)."""
+        disproofs = [
+            "premise disproven at HEAD",
+            "PASS -- the vocabulary already exists at HEAD and this ticket's premise "
+            "is therefore refuted; conf: high",
+            "PREMISE-INVALIDATED: requirement superseded by protocol core",
+            "INVALIDATION-EVIDENCE: measurement proved zero performance regression",
+            "finding invalidated by benchmark results",
+            "premise was disproved after audit review",
+            "premise-disproof: feature redundant with native platform API",
+        ]
+        for idx, text in enumerate(disproofs, start=40):
+            events = [{"event": idx, "ticket": "T-7", "taxonomy": "DEC", "text": text}]
+            self.assertIsNone(
+                invalidation_error(events, f"E-{idx}", ticket_id="T-7"),
+                f"refused valid disproof: {text!r}",
+            )
 
 
 class FinishTests(unittest.TestCase):
@@ -171,9 +238,7 @@ class FinishTests(unittest.TestCase):
         return finish_ticket(self.project, "T-7", "tester", **kwargs)
 
     def test_a_premise_disproof_closes_the_ticket(self):
-        result = self._finish(
-            closure_mode="finding_invalidated", invalidation_evidence="E-1"
-        )
+        result = self._finish(closure_mode="finding_invalidated", invalidation_evidence="E-1")
         self.assertTrue(result.ok, result.to_dict())
         fields = _fields(self.project)
         self.assertEqual(fields.get("closure_mode"), "finding_invalidated")
@@ -181,9 +246,7 @@ class FinishTests(unittest.TestCase):
         self.assertEqual(fields.get("invalidation_evidence"), "E-1")
 
     def test_a_strangers_event_cannot_close_it(self):
-        result = self._finish(
-            closure_mode="finding_invalidated", invalidation_evidence="E-2"
-        )
+        result = self._finish(closure_mode="finding_invalidated", invalidation_evidence="E-2")
         self.assertFalse(result.ok)
         self.assertIn("T-9", result.to_dict()["message"])
 
@@ -192,11 +255,20 @@ class FinishTests(unittest.TestCase):
         self.assertFalse(result.ok)
         self.assertIn("--invalidated-by", result.to_dict()["message"])
 
+    def test_lifecycle_transition_is_refused_at_finish(self):
+        result = self._finish(closure_mode="finding_invalidated", invalidation_evidence="E-3")
+        self.assertFalse(result.ok)
+        self.assertEqual(result.code, "PREMISE_NOT_DISPROVEN")
+        self.assertIn("lifecycle transition", result.message)
+
     def test_the_ticket_is_still_doing_after_every_refusal(self):
         self._finish(closure_mode="finding_invalidated", invalidation_evidence="E-2")
-        board = parse_board(
-            (self.project / ".saipen" / "BOARD.md").read_text(encoding="utf-8")
-        )
+        board = parse_board((self.project / ".saipen" / "BOARD.md").read_text(encoding="utf-8"))
+        self.assertEqual(board["tickets"]["T-7"]["section"], "## DOING")
+        self.assertNotIn("closure_mode", board["tickets"]["T-7"]["fields"])
+
+        self._finish(closure_mode="finding_invalidated", invalidation_evidence="E-3")
+        board = parse_board((self.project / ".saipen" / "BOARD.md").read_text(encoding="utf-8"))
         self.assertEqual(board["tickets"]["T-7"]["section"], "## DOING")
         self.assertNotIn("closure_mode", board["tickets"]["T-7"]["fields"])
 
@@ -241,15 +313,17 @@ class PublicCliTests(unittest.TestCase):
     def test_the_flag_is_wired_into_the_parser_table(self):
         from saipen import _TICKET_DONE_OPTIONS
 
-        self.assertEqual(
-            _TICKET_DONE_OPTIONS.get("--invalidated-by"), "invalidation_evidence"
-        )
+        self.assertEqual(_TICKET_DONE_OPTIONS.get("--invalidated-by"), "invalidation_evidence")
 
     def test_the_cli_closes_the_ticket_on_a_named_disproof(self):
         rc, payload = self._run(
-            "ticket", "done", "T-7",
-            "--closure-mode", "finding_invalidated",
-            "--invalidated-by", "E-001",
+            "ticket",
+            "done",
+            "T-7",
+            "--closure-mode",
+            "finding_invalidated",
+            "--invalidated-by",
+            "E-001",
         )
         self.assertEqual(rc, 0, payload)
         self.assertTrue(payload.get("ok"), payload)
@@ -259,20 +333,41 @@ class PublicCliTests(unittest.TestCase):
 
     def test_the_cli_refuses_a_strangers_event(self):
         rc, payload = self._run(
-            "ticket", "done", "T-7",
-            "--closure-mode", "finding_invalidated",
-            "--invalidated-by", "E-002",
+            "ticket",
+            "done",
+            "T-7",
+            "--closure-mode",
+            "finding_invalidated",
+            "--invalidated-by",
+            "E-002",
         )
         self.assertNotEqual(rc, 0)
         self.assertIn("T-9", payload.get("message", ""))
 
     def test_the_cli_refuses_the_mode_without_evidence(self):
         rc, payload = self._run(
-            "ticket", "done", "T-7",
-            "--closure-mode", "finding_invalidated",
+            "ticket",
+            "done",
+            "T-7",
+            "--closure-mode",
+            "finding_invalidated",
         )
         self.assertNotEqual(rc, 0)
         self.assertIn("--invalidated-by", payload.get("message", ""))
+
+    def test_the_cli_refuses_non_disproof_event(self):
+        rc, payload = self._run(
+            "ticket",
+            "done",
+            "T-7",
+            "--closure-mode",
+            "finding_invalidated",
+            "--invalidated-by",
+            "E-003",
+        )
+        self.assertNotEqual(rc, 0)
+        self.assertEqual(payload.get("code"), "PREMISE_NOT_DISPROVEN")
+        self.assertIn("lifecycle transition", payload.get("message", ""))
 
 
 class BoardValidationTests(unittest.TestCase):

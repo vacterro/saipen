@@ -77,7 +77,16 @@ from .safeid import InvalidIdError, validate_safe_id
 RULE_ID = "SOURCE-AUDIT-ENQUEUE-01"
 SCHEMA_VERSION = 1
 ALLOCATOR_REL = ".saipen/intake/audit_allocator.json"
+JOURNAL_REL = ".saipen/intake/audit_allocator.journal"
 LOCK_REL = ".saipen/locks/audit-allocator.lock"
+
+# PERF-001: transitions append to a journal instead of rewriting the whole
+# allocator. The checkpoint is rebuilt only when the journal has grown past a
+# floor and past a multiple of the checkpoint itself, so each journal byte is
+# folded O(log N) times rather than every transition paying O(N).
+CHECKPOINT_MIN_COMPACT_BYTES = 64 * 1024
+CHECKPOINT_COMPACT_FACTOR = 2
+MAX_JOURNAL_ENTRY_BYTES = 1024 * 1024
 
 RESERVED = "RESERVED"
 COMMITTED = "COMMITTED"
@@ -193,6 +202,397 @@ ALLOCATOR_ABSENT = "ABSENT"
 ALLOCATOR_OK = "OK"
 ALLOCATOR_CORRUPT = "CORRUPT"
 
+_JOURNAL_ABSENT = "ABSENT"
+_JOURNAL_OK = "OK"
+_JOURNAL_CORRUPT = "CORRUPT"
+#: Verified end to end, but anchored to a digest the checkpoint no longer
+#: carries -- i.e. the checkpoint was lost. The records in it are complete and
+#: foldable; what is missing is the proof that no EARLIER entries existed, so
+#: the read is reported as ABSENT and every unrecorded operation falls into
+#: the existing "recover the operation from the layer bytes" path.
+_JOURNAL_PARTIAL = "PARTIAL"
+
+
+def journal_path(root: Path | str) -> Path:
+    return Path(root) / Path(JOURNAL_REL)
+
+
+def _journal_entry_digest(previous: str, payload: dict) -> str:
+    """Chain one entry to its predecessor so a lost or edited entry is visible.
+
+    PERF-001 keeps the journal append-only, which means the file can only grow
+    from the end. A chain is what makes "the tail is short" distinguishable
+    from "an entry was removed": every entry names the digest of the one before
+    it, so a gap breaks the chain and the whole journal is refused as corrupt.
+    """
+    body = json.dumps(payload, sort_keys=True, separators=(",", ":")).encode("utf-8")
+    return hashlib.sha256(previous.encode("ascii") + b"\n" + body).hexdigest()
+
+
+def _last_journal_line(path: Path) -> bytes:
+    """Return the final journal line without reading the whole journal.
+
+    PERF-001: an append must not pay O(journal) just to learn the previous
+    chain. Entries are bounded, so the last one is findable inside a bounded
+    tail window; a tail that is not newline-terminated is a torn append and is
+    refused rather than extended.
+    """
+    with path.open("rb") as stream:
+        stream.seek(0, os.SEEK_END)
+        size = stream.tell()
+        if size == 0:
+            return b""
+        window = min(size, MAX_JOURNAL_ENTRY_BYTES + 2)
+        stream.seek(size - window)
+        tail = stream.read(window)
+    if not tail.endswith(b"\n"):
+        raise ValueError("audit allocator journal ends mid-entry; refusing to append")
+    body = tail[:-1]
+    cut = body.rfind(b"\n")
+    last = body[cut + 1 :]
+    if not last.strip():
+        raise ValueError("audit allocator journal has an empty final entry")
+    if window < size and cut < 0:
+        raise ValueError(
+            "audit allocator journal's last entry exceeds the declared entry bound"
+        )
+    return last
+
+
+def _append_journal_entry(root: Path, payload: dict, base_chain: str = "") -> None:
+    """Append one chained entry; the caller already holds the allocator lock.
+
+    ``base_chain`` is the digest the current checkpoint absorbed, and it is
+    used when the journal is empty. Chaining to it rather than to "" keeps one
+    continuous chain across a compaction, so a reader can always tell whether
+    the checkpoint it holds already contains a given entry.
+    """
+    path = journal_path(root)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    prove_owned_dir_chain(path.parent, ownership_root=root, kind="audit allocator journal")
+    with contextlib.suppress(FileNotFoundError):
+        prove_owned_regular(path, kind="audit allocator journal")
+    previous = base_chain
+    if path.is_file():
+        last = _last_journal_line(path)
+        if last:
+            try:
+                previous = json.loads(last.decode("utf-8")).get("chain") or ""
+            except (ValueError, UnicodeDecodeError):
+                raise ValueError(
+                    "audit allocator journal holds an unreadable entry; arrange "
+                    "reconciliation before appending"
+                ) from None
+    entry = dict(payload)
+    entry["chain"] = _journal_entry_digest(previous, payload)
+    body = (json.dumps(entry, sort_keys=True, separators=(",", ":")) + "\n").encode("utf-8")
+    if len(body) > MAX_JOURNAL_ENTRY_BYTES:
+        raise ValueError(
+            f"allocator journal entry is {len(body)} bytes; the bound is "
+            f"{MAX_JOURNAL_ENTRY_BYTES}"
+        )
+    flags = os.O_WRONLY | os.O_APPEND | os.O_CREAT
+    flags |= getattr(os, "O_BINARY", 0) | getattr(os, "O_NOFOLLOW", 0)
+    descriptor = os.open(path, flags, 0o600)
+    with os.fdopen(descriptor, "ab") as stream:
+        stream.write(body)
+        stream.flush()
+        os.fsync(stream.fileno())
+
+
+def _verify_journal_chain(raw: bytes, base_chain: str) -> tuple[list[dict], str]:
+    """Parse and chain-verify every journal line starting at ``base_chain``.
+
+    Returns ``(entries, last_chain)``; raises ``ValueError`` when any line is
+    unreadable or the chain breaks. Chain verification is anchored rather than
+    self-referential, so an entry that was deleted from the middle, edited, or
+    spliced in from another journal all read as a break.
+
+    A journal written after a compaction continues the checkpoint's chain, so
+    verification is tried from BOTH anchors: "" (never compacted, or an
+    interrupted compaction) and the checkpoint's absorbed digest. Trying both
+    is what keeps "the checkpoint was deleted" distinguishable from "the
+    journal was edited": the first still verifies from one anchor, the second
+    verifies from neither.
+    """
+    entries: list[dict] = []
+    previous = base_chain
+    for line in raw.splitlines():
+        if not line.strip():
+            continue
+        try:
+            entry = json.loads(line.decode("utf-8"))
+        except (ValueError, UnicodeDecodeError):
+            raise ValueError("journal entry is not valid JSON") from None
+        if not isinstance(entry, dict):
+            raise ValueError("journal entry is not an object")
+        payload = dict(entry)
+        chain = payload.pop("chain", None)
+        if chain != _journal_entry_digest(previous, payload):
+            raise ValueError("journal chain does not match its contents")
+        previous = chain
+        entries.append(payload)
+    return entries, previous
+
+
+def _verify_internal_chain(raw: bytes) -> tuple[list[dict], str]:
+    """Verify each entry chains to its PREVIOUS ENTRY, without an outside anchor.
+
+    Used only when the checkpoint is gone. The first entry's starting digest is
+    unknowable, but every later entry must chain to its predecessor, so deleting
+    from the middle, editing an entry, or splicing two journals still breaks.
+    What this cannot prove is that no entries preceded the first one, which is
+    exactly why such a read is reported as ABSENT rather than OK.
+    """
+    entries: list[dict] = []
+    previous: str | None = None
+    for line in raw.splitlines():
+        if not line.strip():
+            continue
+        try:
+            entry = json.loads(line.decode("utf-8"))
+        except (ValueError, UnicodeDecodeError):
+            raise ValueError("journal entry is not valid JSON") from None
+        if not isinstance(entry, dict):
+            raise ValueError("journal entry is not an object")
+        payload = dict(entry)
+        chain = payload.pop("chain", None)
+        if not isinstance(chain, str) or not chain:
+            raise ValueError("journal entry carries no chain digest")
+        if previous is not None and chain != _journal_entry_digest(previous, payload):
+            raise ValueError("journal chain does not match its contents")
+        previous = chain
+        entries.append(payload)
+    return entries, previous or ""
+
+
+def _journal_entries(
+    root: Path, absorbed: str = ""
+) -> tuple[list[dict], str, str]:
+    """`(entries, last_chain, state)` for the entries the checkpoint lacks.
+
+    Three legal shapes:
+
+    * the journal chains from "" and the checkpoint absorbed nothing (or was
+      lost): every entry is new work;
+    * the journal chains from "" but the checkpoint absorbed one of its
+      entries (an interrupted compaction): resume after that entry;
+    * the journal chains from the digest the checkpoint absorbed: every entry
+      in it is new.
+
+    When the checkpoint is GONE (``absorbed`` is "" because there is no
+    checkpoint, not because it absorbed nothing) the chain cannot be anchored
+    from outside. The entries are still verified against each OTHER, and the
+    read is downgraded to PARTIAL so a caller that needs complete idempotence
+    cannot mistake a surviving fragment for the whole history.
+    """
+    path = journal_path(root)
+    try:
+        raw = path.read_bytes()
+    except FileNotFoundError:
+        return [], "", _JOURNAL_ABSENT
+    except OSError:
+        return [], "", _JOURNAL_CORRUPT
+
+    whole: list[dict] | None = None
+    whole_last = ""
+    try:
+        whole, whole_last = _verify_journal_chain(raw, "")
+    except ValueError:
+        whole = None
+
+    if whole is not None:
+        if not whole:
+            return [], "", _JOURNAL_OK
+        if not absorbed:
+            return whole, whole_last, _JOURNAL_OK
+        chains = [entry.get("chain") for entry in whole]
+        if absorbed in chains:
+            return whole, whole_last, _JOURNAL_OK
+        if absorbed == whole_last:
+            return [], whole_last, _JOURNAL_OK
+        # It verifies from the beginning but not from the checkpoint's
+        # generation: the checkpoint is from a different history entirely.
+        return whole, whole_last, _JOURNAL_PARTIAL
+
+    try:
+        tail, tail_last = _verify_journal_chain(raw, absorbed)
+    except ValueError:
+        try:
+            internal, internal_last = _verify_internal_chain(raw)
+        except ValueError:
+            return [], "", _JOURNAL_CORRUPT
+        return internal, internal_last, _JOURNAL_PARTIAL
+    return tail, tail_last, _JOURNAL_OK
+
+
+def _fold_journal(root: Path, doc: dict) -> tuple[dict, str]:
+    """Apply the journal onto the checkpoint in memory.
+
+    The journal is the newest durable truth, so entries it holds override the
+    checkpoint's operation records and raise `next_id`. Folding is pure: nothing
+    is written, so any read-only caller stays read-only. A broken chain, an
+    unparseable line or a malformed entry yields CORRUPT -- never a partial
+    fold, because a partial history is exactly the state that makes an
+    idempotent retry allocate a second layer.
+
+    A checkpoint names the chain digest it absorbed, which is what makes the
+    fold idempotent across a compaction. Without it, a crash after the
+    checkpoint replace but before the journal truncate would reapply entries
+    the checkpoint already contains -- harmless for operation records, but it
+    would also let an entry be applied out of order, so the absorbed digest is
+    recorded rather than assumed.
+    """
+    entries, last_chain, journal_state = _journal_entries(
+        root, doc.get("journal_chain") or ""
+    )
+    if journal_state == _JOURNAL_CORRUPT:
+        return doc, _JOURNAL_CORRUPT
+    absorbed = doc.get("journal_chain") or ""
+    folded = {
+        "schema_version": SCHEMA_VERSION,
+        "next_id": doc.get("next_id", 1),
+        "operations": dict(doc.get("operations") or {}),
+        "journal_chain": absorbed,
+    }
+    if journal_state == _JOURNAL_PARTIAL:
+        # The journal verified against its own links but not against the
+        # checkpoint's generation. Folding it is safe -- it can only ADD records
+        # and raise the floor -- while the caller is still told ABSENT, so an
+        # operation missing from BOTH files falls into byte-based recovery
+        # instead of being treated as a first attempt.
+        pass
+    if not entries:
+        return folded, _JOURNAL_OK
+    for entry in entries:
+        op = entry.get("operation")
+        if op is not None:
+            if not isinstance(op, dict):
+                return doc, _JOURNAL_CORRUPT
+            key = _op_key(
+                str(op.get("producer") or ""),
+                str(op.get("producer_operation_id") or ""),
+            )
+            if entry.get("kind") == "drop":
+                folded["operations"].pop(key, None)
+            else:
+                folded["operations"][key] = op
+        next_id = entry.get("next_id")
+        if isinstance(next_id, int) and not isinstance(next_id, bool):
+            folded["next_id"] = max(folded["next_id"], next_id)
+    folded["journal_chain"] = last_chain
+    return folded, _JOURNAL_OK
+
+
+def _checkpoint_bytes(folded: dict) -> bytes:
+    return (json.dumps(folded, indent=2, sort_keys=True) + "\n").encode("utf-8")
+
+
+def _journal_bytes(root: Path) -> int:
+    try:
+        return journal_path(root).stat().st_size
+    except OSError:
+        return 0
+
+
+def _journal_tail_chain(root: Path) -> str:
+    """The newest chain digest in the journal, or "" when it holds none."""
+    path = journal_path(root)
+    try:
+        last = _last_journal_line(path)
+    except (OSError, ValueError):
+        return ""
+    if not last:
+        return ""
+    try:
+        return json.loads(last.decode("utf-8")).get("chain") or ""
+    except (ValueError, UnicodeDecodeError):
+        return ""
+
+
+def _compact_if_due(root: Path, folded: dict) -> bool:
+    """Fold the journal into the checkpoint when it has earned it.
+
+    PERF-001 amortisation: the checkpoint is the expensive write (it is O(all
+    operations)), so it must happen O(log N) times over a growing history. The
+    rule is "at least a floor, and at least a factor of the checkpoint", which
+    means each checkpoint absorbs at least its own size in journal bytes and
+    the total folded work is bounded by a geometric series.
+
+    Crash safety comes from ordering plus idempotent replay: the checkpoint is
+    replaced atomically BEFORE the journal is truncated, and folding the same
+    entry twice produces the same document. A crash between the two steps
+    therefore re-folds entries the checkpoint already contains -- correct, just
+    slightly redundant -- while a crash before the replace leaves the old pair
+    untouched.
+    """
+    journal_size = _journal_bytes(root)
+    if journal_size == 0:
+        return False
+    root_path = Path(root)
+    path = allocator_path(root_path)
+    # The threshold compares the journal against the checkpoint it would
+    # replace, and the checkpoint's ON-DISK size is the cheap witness for that.
+    # Serialising `folded` here to measure it would reintroduce exactly the
+    # per-transition whole-history cost this function exists to remove: profile
+    # of the version that did showed `_checkpoint_bytes` as 2.05 s of a 4.04 s
+    # 100-enqueue run. A lagging underestimate is harmless -- the factor rule
+    # only decides WHEN to compact, and the next checkpoint re-establishes it.
+    try:
+        checkpoint_size = path.stat().st_size
+    except OSError:
+        checkpoint_size = 0
+    threshold = max(CHECKPOINT_MIN_COMPACT_BYTES, checkpoint_size * CHECKPOINT_COMPACT_FACTOR)
+    # A brand-new allocator gets its first checkpoint immediately: it is one
+    # small write, and it means the oldest history never lives ONLY in the
+    # journal, where a single lost file would take the whole idempotence
+    # memory with it.
+    if path.exists() and journal_size < threshold:
+        return False
+    path.parent.mkdir(parents=True, exist_ok=True)
+    # The checkpoint records the chain digest it absorbed, so a reader can tell
+    # whether the checkpoint already contains a given entry. Written BEFORE the
+    # truncate: an interrupted compaction then re-folds entries the checkpoint
+    # names, which is idempotent, instead of dropping entries it never absorbed.
+    checkpoint = dict(folded)
+    absorbed = _journal_tail_chain(root)
+    checkpoint["journal_chain"] = absorbed
+    _atomic_write(path, _checkpoint_bytes(checkpoint), ownership_root=root_path)
+    # The in-memory document must agree with the checkpoint it just wrote, or
+    # the NEXT append would chain to the pre-compaction digest and the reader
+    # would see a broken chain (reproduced as ALLOCATOR_CORRUPT on the second
+    # enqueue of an empty project).
+    folded["journal_chain"] = absorbed
+    try:
+        with open(journal_path(root_path), "wb") as stream:
+            stream.flush()
+            os.fsync(stream.fileno())
+    except OSError:
+        # The journal remains; replay is idempotent, so leaving it is safe.
+        return True
+    return True
+
+
+def _record_transition(
+    root: Path, folded: dict, *, op: dict | None = None, drop: bool = False
+) -> None:
+    """Durably record one allocator transition.
+
+    PERF-001: this replaced "rewrite the entire allocator twice per
+    publication". Measured at 20/40/80 operations the old shape wrote 136166 /
+    528806 / 2084486 bytes for the reservations and commits alone -- quadratic
+    in the operation count because every transition re-serialised the whole
+    historical collection. A transition now appends one bounded, chained entry
+    and pays the full-file cost only when compaction is due.
+    """
+    payload: dict = {"next_id": folded.get("next_id", 1)}
+    if op is not None:
+        payload["operation"] = op
+    if drop:
+        payload["kind"] = "drop"
+    _append_journal_entry(root, payload, base_chain=folded.get("journal_chain") or "")
+    _compact_if_due(root, folded)
+
 
 def read_allocator_state(root: Path | str) -> tuple[dict, str]:
     """`(document, state)` -- the allocator, and whether it was really read.
@@ -211,30 +611,51 @@ def read_allocator_state(root: Path | str) -> tuple[dict, str]:
     therefore reports which of the two situations it is in and lets the caller
     decide; `enqueue` refuses on CORRUPT rather than starting from an empty
     operation map.
+
+    PERF-001: the document returned here is the checkpoint FOLDED WITH the
+    journal. The journal is authoritative for anything it touches, and its
+    integrity is checked against a running digest chain, so a torn or edited
+    journal entry is a CORRUPT answer rather than a silently short history.
     """
     empty = {"schema_version": SCHEMA_VERSION, "next_id": 1, "operations": {}}
     path = Path(root) / Path(ALLOCATOR_REL)
     try:
         raw = path.read_bytes()
+        checkpoint_state = ALLOCATOR_OK
     except FileNotFoundError:
-        return empty, ALLOCATOR_ABSENT
+        raw = None
+        checkpoint_state = ALLOCATOR_ABSENT
     except OSError:
         # Present but unreadable is not absent: something is there and we
         # cannot see it, which is exactly the case that must not be guessed.
         return empty, ALLOCATOR_CORRUPT
-    try:
-        doc = json.loads(raw.decode("utf-8-sig"))
-    except (ValueError, UnicodeDecodeError):
+    if raw is None:
+        doc = dict(empty)
+        doc["operations"] = {}
+    else:
+        try:
+            loaded = json.loads(raw.decode("utf-8-sig"))
+        except (ValueError, UnicodeDecodeError):
+            return empty, ALLOCATOR_CORRUPT
+        if not isinstance(loaded, dict) or not isinstance(loaded.get("operations"), dict):
+            return empty, ALLOCATOR_CORRUPT
+        next_id = loaded.get("next_id")
+        if not isinstance(next_id, int) or isinstance(next_id, bool) or next_id < 1:
+            return empty, ALLOCATOR_CORRUPT
+        doc = loaded
+        doc["schema_version"] = SCHEMA_VERSION
+
+    folded, journal_state = _fold_journal(Path(root), doc)
+    if journal_state == _JOURNAL_CORRUPT:
         return empty, ALLOCATOR_CORRUPT
-    if not isinstance(doc, dict):
-        return empty, ALLOCATOR_CORRUPT
-    if not isinstance(doc.get("operations"), dict):
-        return empty, ALLOCATOR_CORRUPT
-    next_id = doc.get("next_id")
-    if not isinstance(next_id, int) or isinstance(next_id, bool) or next_id < 1:
-        return empty, ALLOCATOR_CORRUPT
-    doc["schema_version"] = SCHEMA_VERSION
-    return doc, ALLOCATOR_OK
+    if checkpoint_state == ALLOCATOR_ABSENT:
+        # No checkpoint: the journal's records are folded (they are real), but
+        # the read is ABSENT because completeness cannot be proven without the
+        # digest the checkpoint would have anchored. That keeps an operation
+        # missing from BOTH files inside byte-based recovery, which is the only
+        # honest answer for a history whose head is gone.
+        return folded, ALLOCATOR_ABSENT
+    return folded, ALLOCATOR_OK
 
 
 def read_allocator(root: Path | str) -> dict:
@@ -250,6 +671,12 @@ def read_allocator(root: Path | str) -> dict:
 
 
 def write_allocator(root: Path | str, doc: dict) -> None:
+    """Replace the whole allocator document.
+
+    This is the CHECKPOINT write: it is authoritative for everything the
+    journal currently holds, so the journal is truncated in the same call. Any
+    caller that wants the incremental path uses `_record_transition` instead.
+    """
     root = Path(root)
     path = allocator_path(root)
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -257,9 +684,12 @@ def write_allocator(root: Path | str, doc: dict) -> None:
     payload["schema_version"] = SCHEMA_VERSION
     _atomic_write(
         path,
-        (json.dumps(payload, indent=2, sort_keys=True) + "\n").encode("utf-8"),
+        _checkpoint_bytes(payload),
         ownership_root=root,
     )
+    with contextlib.suppress(OSError), open(journal_path(root), "wb") as stream:
+        stream.flush()
+        os.fsync(stream.fileno())
 
 
 def _op_key(producer: str, operation_id: str) -> str:
@@ -283,7 +713,8 @@ def _reconcile(root: Path, doc: dict) -> dict:
     """
     highest = 0
     for item in audit_inbox.scan_layers(root):
-        highest = max(highest, item["layer"])
+        if item["layer"] is not None:
+            highest = max(highest, item["layer"])
     for record in doc["operations"].values():
         layer = record.get("layer")
         if isinstance(layer, int) and not isinstance(layer, bool):
@@ -570,7 +1001,7 @@ def enqueue(
                         "state": COMMITTED,
                     }
                     doc["operations"][key] = record
-                    write_allocator(root, doc)
+                    _record_transition(root, doc, op=record)
                     result = _result(root, record, idempotent=True)
                     result["recovered_from"] = where
                     return result
@@ -597,7 +1028,7 @@ def enqueue(
                 if placed == digest:
                     if record.get("state") != COMMITTED:
                         record.update(state=COMMITTED, sha256=digest)
-                        write_allocator(root, doc)
+                        _record_transition(root, doc, op=record)
                     return _result(root, record, idempotent=True)
                 if placed is not None:
                     # Bytes are there and they are not the reserved ones. For a
@@ -653,7 +1084,7 @@ def enqueue(
                 if failure is not None:
                     return failure
                 record.update(state=COMMITTED, sha256=digest)
-                write_allocator(root, doc)
+                _record_transition(root, doc, op=record)
                 return _result(root, record, idempotent=True)
 
             layer = doc["next_id"]
@@ -668,7 +1099,7 @@ def enqueue(
             }
             doc["operations"][key] = record
             doc["next_id"] = layer + 1
-            write_allocator(root, doc)
+            _record_transition(root, doc, op=record)
 
             failure = _place(root, layer, body)
             if failure is not None:
@@ -678,10 +1109,10 @@ def enqueue(
                 # either way, and reuse is the one thing this allocator
                 # exists to prevent.
                 doc["operations"].pop(key, None)
-                write_allocator(root, doc)
+                _record_transition(root, doc, op=record, drop=True)
                 return failure
             record["state"] = COMMITTED
-            write_allocator(root, doc)
+            _record_transition(root, doc, op=record)
             return _result(root, record, idempotent=False)
     except _AllocatorBusy as exc:
         return _fail("WRITER_BUSY", str(exc))

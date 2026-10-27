@@ -121,9 +121,11 @@ class IntentAuditTests(unittest.TestCase):
 
     @staticmethod
     def _invoke_cli(root: Path, *args: str, as_json: bool = True):
-        argv = [*args, "--project-root", str(root)]
+        # Formatting and binding are real globals, not the missing operand
+        # in the malformed command this fixture is about (T-1631).
+        argv = ["--project-root", str(root), *args]
         if as_json:
-            argv.append("--json")
+            argv.insert(0, "--json")
         output = io.StringIO()
         with contextlib.redirect_stdout(output):
             rc = CLI.main(argv)
@@ -534,7 +536,11 @@ class IntentAuditTests(unittest.TestCase):
             },
         )
         state_path.write_text(text, encoding="utf-8", newline="\n")
-        rc, result = self._invoke_cli(root, "cc")
+        # SRC-112: the bounded routing control uses a fresh operator carrier.
+        from test_operator_origin_support import native_operator
+
+        with native_operator(root, "cc", action="continue"):
+            rc, result = self._invoke_cli(root, "cc")
         state = S.parse_state(state_path.read_text(encoding="utf-8"))
         self.assertEqual(rc, 0, result)
         self.assertEqual((state["goal_waves"], state["goal_tickets"]), (0, 0))

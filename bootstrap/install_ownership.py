@@ -17,6 +17,16 @@ import sys
 
 LEDGER = ".saipen_install.json"
 PROVENANCE = ".saipen_runtime.json"
+#: The sibling backup lives in the host's skill scan root, and every host
+#: registers a directory holding `SKILL.md` as a skill: a kept `SKILL.md` made
+#: the backup a second `saipen` skill claiming every shortcut (T-1786). Its
+#: bytes are kept under a name no host loads.
+SKILL_ENTRY = "SKILL.md"
+INERT_SUFFIX = ".user-backup"
+
+
+def backup_relpath(relative: str) -> str:
+    return relative + INERT_SUFFIX if relative == SKILL_ENTRY else relative
 
 
 def digest(path: Path) -> str:
@@ -104,7 +114,7 @@ def record(stage: Path, destination: Path) -> None:
             if relative in owned or legacy_managed:
                 # A legacy install has no per-file proof. Keep its existing
                 # generation separately; never overwrite user edits silently.
-                backup = safe_path(backup_root, relative)
+                backup = safe_path(backup_root, backup_relpath(relative))
                 backup.parent.mkdir(parents=True, exist_ok=True)
                 if not backup.exists():
                     shutil.copyfile(source, backup)
@@ -180,9 +190,51 @@ def remove_artifact(destination: Path, source: Path, home: Path) -> dict:
     return {"removed": 1, "preserved": 0}
 
 
+#: The per-user PATH launcher's ownership record and the directories it may
+#: name (`tools/saipen_engine/path_launcher.py` writes both; T-1678).
+LAUNCHER_RECORD = (".saipen", "path-launcher.json")
+LAUNCHER_DIRS = (("bin",), (".local", "bin"))
+LAUNCHER_NAMES = ("saipen", "saipen.cmd")
+
+
+def remove_launcher(home: Path) -> dict:
+    """Remove the PATH launchers the record names while their bytes are as
+    written, then the record. A path outside the declared directories, or a
+    file someone changed, stays."""
+    home = home.resolve()
+    record = home.joinpath(*LAUNCHER_RECORD)
+    if not record.is_file():
+        return {"removed": 0, "preserved": 0}
+    data = json.loads(record.read_text(encoding="utf-8"))
+    owned = data.get("files") if isinstance(data, dict) else None
+    if not isinstance(owned, dict):
+        raise ValueError("invalid PATH launcher record")
+    allowed = {home.joinpath(*parts) for parts in LAUNCHER_DIRS}
+    removed = preserved = 0
+    for name, checksum in owned.items():
+        path = Path(name)
+        if (
+            not path.is_absolute()
+            or path.parent.resolve() not in allowed
+            or path.name.lower() not in LAUNCHER_NAMES
+            or path.is_symlink()
+        ):
+            preserved += 1
+            continue
+        if path.is_file() and digest(path) == checksum:
+            path.unlink()
+            removed += 1
+        elif path.exists():
+            preserved += 1
+    record.unlink()
+    return {"removed": removed, "preserved": preserved}
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    parser.add_argument("action", choices=("record", "stamp", "remove", "remove-artifact"))
+    parser.add_argument(
+        "action", choices=("record", "stamp", "remove", "remove-artifact", "remove-launcher")
+    )
     parser.add_argument("destination", type=Path)
     parser.add_argument("--stage", type=Path)
     parser.add_argument("--source", type=Path)
@@ -197,6 +249,8 @@ def main() -> int:
         elif args.action == "stamp":
             stamp(args.destination)
             result = {"stamped": True}
+        elif args.action == "remove-launcher":
+            result = remove_launcher(args.destination)
         elif args.action == "remove-artifact":
             if args.source is None or args.home is None:
                 raise ValueError("remove-artifact requires --source and --home")

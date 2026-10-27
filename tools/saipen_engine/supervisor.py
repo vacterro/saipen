@@ -35,6 +35,19 @@ from pathlib import Path
 
 from . import watchdog
 from .board import operator_gates, parse_board, workable_tickets
+from .continuation_assessment import (
+    assess_continuation,
+    CONFORMANCE_STOP,
+    EXECUTABLE_CLASSIFICATIONS,
+    HUMAN_BOUNDARY_CLASSIFICATIONS,
+    INVALID_RUNTIME,
+    MAINTENANCE_AVAILABLE,
+    QUIESCENT,
+    SAFETY_STOP,
+    WAIT_AUTHORITY,
+    WAIT_EXTERNAL,
+    WAIT_OPERATOR,
+)
 
 #: Supervisor verdicts. One closed vocabulary, one owner.
 RUN_WORK = "RUN_WORK"
@@ -237,6 +250,16 @@ def observe(
     deferred = [gate["ticket"] for gate in gates if gate["state"] == "DEFERRED_OPERATOR"]
     claimed = state.get("task", "") or ""
     workable = workable_tickets(tickets, now=moment)
+    assessment = assess_continuation(
+        root,
+        now=moment,
+        state_text=state_text,
+        board_text=board_text,
+        parsed_board=board,
+    )
+    classification = assessment["classification"]
+    actionable = assessment["actionable"]
+    executable_item = assessment["executable_work"]
 
     return {
         "autonomy_run_id": run_id,
@@ -254,7 +277,13 @@ def observe(
         "heartbeat_at": lease.heartbeat_at,
         "heartbeat_age_seconds": lease.age_seconds,
         "workable_work": workable,
-        "executable_work": workable[0] if workable else None,
+        "executable_work": workable[0] if workable else (executable_item if actionable else None),
+        "continuation_classification": classification,
+        "continuation_actionable": actionable,
+        "continuation_reason": assessment["reason"],
+        "continuation_detail": assessment["detail"],
+        "continuation_assessment": assessment,
+        "operator_work": assessment.get("operator_work", []),
         "operator_gates": gates,
         "due_operator_actions": due,
         "deferred_operator_gates": deferred,
@@ -347,6 +376,13 @@ def decide(
             operator_work=picture["due_operator_actions"],
         )
 
+    if picture.get("continuation_classification") in (WAIT_AUTHORITY, SAFETY_STOP) and not executable:
+        return answer(
+            OPERATOR_ACTION_DUE,
+            picture.get("continuation_detail") or "operator authorization required",
+            operator_work=picture.get("operator_work") or ["OPERATOR_AUTHORITY"],
+        )
+
     if picture["progress_verdict"] == "NO_PROGRESS_LOOP":
         return answer(
             NO_PROGRESS_LOOP,
@@ -369,7 +405,13 @@ def decide(
 
     if lease_state in (watchdog.EXPIRED, watchdog.TERMINAL):
         if not executable and not picture["active_work"]:
-            return answer(IDLE, "no executable Work and no claimed Work to recover")
+            if picture.get("continuation_classification") == INVALID_RUNTIME:
+                return answer(
+                    AMBIGUOUS_AUTHORITY,
+                    picture.get("continuation_detail") or "runtime state is unreadable or malformed",
+                )
+            stop_reason = picture.get("continuation_detail") or "no executable Work and no claimed Work to recover"
+            return answer(IDLE, stop_reason)
         return answer(
             REPLACE_WORKER,
             f"generation {picture['lease_generation']} is {lease_state.lower()} -- "
@@ -386,7 +428,13 @@ def decide(
             "no lease exists yet -- acquire generation 1 and run the next Work",
             work=picture["active_work"] or executable,
         )
-    return answer(IDLE, "no lease, no executable Work, nothing claimed")
+    if picture.get("continuation_classification") == INVALID_RUNTIME:
+        return answer(
+            AMBIGUOUS_AUTHORITY,
+            picture.get("continuation_detail") or "runtime state is unreadable or malformed",
+        )
+    stop_reason = picture.get("continuation_detail") or "no lease, no executable Work, nothing claimed"
+    return answer(IDLE, stop_reason)
 
 
 def _lease_file_exists(root: Path | str) -> bool:

@@ -3809,8 +3809,17 @@ def sub_clean(
                 },
                 verification_policy="sub_clean",
             )
-    except PermissionError:
-        return _refuse("WRITER_BUSY", "another live writer holds the project lock", name=name)
+    except PermissionError as exc:
+        from .lock import writer_busy_payload
+
+        busy = writer_busy_payload(exc)
+        return _refuse(
+            "WRITER_BUSY",
+            busy["detail"],
+            name=name,
+            remediation=busy["remediation"],
+            **({"holder": busy["holder"]} if "holder" in busy else {}),
+        )
     if not commit.get("ok"):
         return _refuse(commit.get("code", "VALIDATION_FAILED"), commit.get("detail", ""), name=name)
     return Result(
@@ -4062,16 +4071,40 @@ def _collect_linkage(
     return collected, links
 
 
-def _terminal_tickets(root: Path) -> dict[str, bool]:
+def _terminal_tickets(root: Path, extra_ids: tuple[str, ...] = ()) -> dict[str, bool]:
     """Terminal state of every Core ticket: DONE or BLOCKED is a terminal
-    disposition; everything else is open review work."""
+    disposition; everything else is open review work.
+
+    `extra_ids` are ids the BOARD no longer carries -- a CLEAN scrub moved
+    their closed row to SCRUB_EVIDENCE_ROOT. They are resolved from the
+    durable LOG closing event instead, because a reviewed claim needs a
+    DURABLE disposition, not one that dies with a prunable row (T-925). A
+    live row always wins, so a reopened ticket is not terminal.
+    """
     from .board import parse_board
 
     board = parse_board(_read_maybe(root / ".saipen" / "BOARD.md"))
-    return {
+    tickets = board.get("tickets", {})
+    terminal = {
         tid: ticket["section"] in ("## DONE", "## BLOCKED")
-        for tid, ticket in board.get("tickets", {}).items()
+        for tid, ticket in tickets.items()
     }
+    missing = [tid for tid in dict.fromkeys(extra_ids) if tid and tid not in tickets]
+    if missing:
+        from .board_scrub import closed_in_history
+        from .log import read_history_snapshot
+
+        try:
+            events = read_history_snapshot(root).events
+        except Exception:
+            # An unreadable LOG is not evidence of closure: the answer stays
+            # "not terminal", which is the fail-closed direction -- a reviewed
+            # claim is refused, never accepted on missing proof.
+            events = ()
+        proven = closed_in_history(events, missing)
+        for tid in missing:
+            terminal[tid] = tid in proven
+    return terminal
 
 
 def _collect_review_state(
@@ -4110,7 +4143,7 @@ def _collect_review_state(
     if current_role is None:
         return out
     collected, links = _collect_linkage(root, records)
-    terminal = _terminal_tickets(root)
+    terminal = _terminal_tickets(root, tuple(links.values()))
     for package in model.packages:
         if package.legacy:
             continue
@@ -4166,7 +4199,7 @@ def sub_collect(
     """
     from .board import escape_ticket_description, parse_board
     from .fast_check import validate_texts
-    from .log import log_tail_event, prepare_bounded_event
+    from .log import log_tail_event, prepare_bounded_event, read_history_snapshot
     from .operations import next_ticket_id
 
     root = Path(project_root)
@@ -4249,8 +4282,20 @@ def sub_collect(
     log_doc = codec.read_document(root / ".saipen" / "LOG.md")
     board = parse_board(board_doc.text_norm)
     if board["errors"]:
+        from .board_compaction import unrecognized_field_ticket
+
+        foreign = [tid for err in board["errors"] if (tid := unrecognized_field_ticket(err))]
+        detail = "BOARD parse error(s): " + "; ".join(board["errors"][:3])
+        if foreign:
+            detail += f" -- repair with `saipen ticket compact {foreign[0]}`"
         return _refuse(
-            "VALIDATION_FAILED", "BOARD parse error(s): " + "; ".join(board["errors"][:3])
+            "VALIDATION_FAILED",
+            detail,
+            **(
+                {"canonical_next_command": f"saipen ticket compact {foreign[0]}"}
+                if foreign
+                else {}
+            ),
         )
     full_log, sealed_dependencies = _core_log_context(root, log_doc.text_norm)
 
@@ -4501,8 +4546,21 @@ def sub_collect(
     new_manifest = _manifest_with_collects(manifest_doc.text_norm, manifest_updates)
     # T-1006: the sub mutation validates under the SAME canonical actor it
     # writes, so claim/liveness checks can never disagree with LOG/STATE.
+    # CORE-005: pass the sealed+active HistorySnapshot (as ticket_move and the
+    # read-path do), so a canonical active-block DEC whose detail was
+    # externalized over the LOG cap still proves its detail integrity. An
+    # unreadable history means the proposal cannot be proved safe: fail closed
+    # with zero writes rather than validate against the active LOG alone.
+    try:
+        _history = read_history_snapshot(root)
+    except Exception as exc:
+        return _refuse(
+            "VALIDATION_FAILED",
+            f"cannot capture history for CORE-005 validation: {type(exc).__name__}: {exc}",
+        )
     proposed_errors = validate_texts(
-        new_state, new_board, new_log, current_agent=agent or "saipen-cli"
+        new_state, new_board, new_log, current_agent=agent or "saipen-cli",
+        sealed_events=_history,
     )
     _parsed_manifest, manifest_errors = parse_manifest(new_manifest)
     if proposed_errors or manifest_errors:
@@ -4620,7 +4678,7 @@ def sub_disposition(
     until then the role is REVIEW_PENDING.
     """
     from .fast_check import validate_texts
-    from .log import log_tail_event, prepare_bounded_event
+    from .log import log_tail_event, prepare_bounded_event, read_history_snapshot
 
     root = Path(project_root)
     try:
@@ -4721,7 +4779,7 @@ def sub_disposition(
             "reviewed claim",
             name=name,
         )
-    terminal = _terminal_tickets(root)
+    terminal = _terminal_tickets(root, (ticket,))
     if not terminal.get(ticket):
         return _refuse(
             "VALIDATION_FAILED",
@@ -4766,8 +4824,20 @@ def sub_disposition(
             "updated": now_iso,
         },
     )
+    # CORE-005 (T-907c): same contract as sub_collect/ticket_move -- the
+    # proposal is judged against the sealed+active HistorySnapshot, and an
+    # unreadable history refuses with zero writes rather than validating the
+    # active LOG alone.
+    try:
+        _history = read_history_snapshot(root)
+    except Exception as exc:
+        return _refuse(
+            "VALIDATION_FAILED",
+            f"cannot capture history for CORE-005 validation: {type(exc).__name__}: {exc}",
+        )
     errors = validate_texts(
-        new_state, board_doc.text_norm, new_log, current_agent=agent or "saipen-cli"
+        new_state, board_doc.text_norm, new_log, current_agent=agent or "saipen-cli",
+        sealed_events=_history,
     )
     if errors:
         return _refuse(

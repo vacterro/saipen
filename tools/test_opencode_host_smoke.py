@@ -30,7 +30,6 @@ import hashlib
 import os
 import re
 import shutil
-import subprocess
 import sys
 import tempfile
 import time
@@ -52,6 +51,7 @@ from test_guard_hostile_matrix import (  # noqa: E402
 )
 from test_opencode_adapter import PYTHON, run_cases  # noqa: E402
 from test_reconcile_valve import _t1318_project  # noqa: E402
+from saipen_engine.process_tree import run as run_host  # noqa: E402
 from saipen_engine.evidence import EvidenceRun, HARD_BYTES_PER_TICKET  # noqa: E402
 from saipen_engine.paths import identity_file_content, new_project_lineage  # noqa: E402
 
@@ -184,7 +184,7 @@ class OpenCodeHostSmoke(unittest.TestCase):
             legacy = cls.home / LEGACY_RELATIVE
             legacy.parent.mkdir(parents=True)
             legacy.write_text("// stale singular copy\n", encoding="utf-8")
-            proc = subprocess.run(
+            proc = run_host(
                 [BASH, str(REPO / "bootstrap" / "inject.sh")],
                 capture_output=True,
                 text=True,
@@ -256,7 +256,7 @@ class OpenCodeHostSmoke(unittest.TestCase):
             env["SAIPEN_GUARD_STARTUP_PROBE"] = str(probe)
         else:
             env.pop("SAIPEN_GUARD_STARTUP_PROBE", None)
-        proc = subprocess.run(
+        proc = run_host(
             [OPENCODE, "debug", "config"],
             capture_output=True,
             text=True,
@@ -668,7 +668,7 @@ class OpenCodeWindowsInjector(unittest.TestCase):
             legacy.parent.mkdir(parents=True, exist_ok=True)
             canonical.write_text("// old plural generation\n", encoding="utf-8")
             legacy.write_text("// old singular generation\n", encoding="utf-8")
-            proc = subprocess.run(
+            proc = run_host(
                 [POWERSHELL, "-NoProfile", "-File", str(REPO / "bootstrap" / "inject.ps1")],
                 capture_output=True, text=True, timeout=600,
                 env={**os.environ, "USERPROFILE": str(home), "HOME": str(home)},
@@ -696,7 +696,7 @@ class OpenCodeRealInstalledGeneration(unittest.TestCase):
         with tempfile.TemporaryDirectory(prefix="saipen-real-opencode-gen-") as temp:
             probe = Path(temp) / "factory.jsonl"
             started_ms = int(time.time() * 1000)
-            proc = subprocess.run(
+            proc = run_host(
                 [OPENCODE, "debug", "config"], cwd=temp,
                 env={**os.environ, "SAIPEN_GUARD_STARTUP_PROBE": str(probe)},
                 capture_output=True, text=True, timeout=300,

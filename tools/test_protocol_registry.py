@@ -17,6 +17,7 @@ if str(TOOLS) not in sys.path:
 
 from saipen_engine import commands, errors, phases, state  # noqa: E402
 from saipen_engine.registry import load_registry  # noqa: E402
+from saipen_engine import registry as registry_owner  # noqa: E402
 import protocol_budget  # noqa: E402
 
 
@@ -24,6 +25,46 @@ ROOT = TOOLS.parent
 PROTOCOL = ROOT / "saipen"
 GOLDEN = ROOT / "tests" / "protocol_semantic_golden.json"
 OWNER_RE = re.compile(r"<!-- RULE-OWNER: ([A-Z][A-Z0-9-]+) -->")
+
+
+class CommandReferenceTests(unittest.TestCase):
+    def reference(self, root):
+        owner = getattr(registry_owner, "command_reference_path", None)
+        self.assertIsNotNone(owner, "the conditional inventory has no machine-owned locator")
+        return owner(root)
+
+    def fixture(self, *, name="COMMANDS_REFERENCE.md", legacy=False):
+        temporary = tempfile.TemporaryDirectory(prefix="saipen-command-reference-")
+        self.addCleanup(temporary.cleanup)
+        root = Path(temporary.name)
+        data = load_registry(PROTOCOL)
+        data["commands"] = dict(data["commands"])
+        if legacy:
+            data["commands"].pop("reference_document", None)
+        else:
+            data["commands"]["reference_document"] = name
+        (root / "REGISTRY.json").write_text(json.dumps(data), encoding="utf-8")
+        (root / "COMMANDS.md").write_text("legacy inventory", encoding="utf-8")
+        return root
+
+    def test_inventory_location_is_registry_owned(self):
+        self.assertEqual(self.reference(PROTOCOL), PROTOCOL / "COMMANDS_REFERENCE.md")
+
+    def test_legacy_registry_keeps_original_inventory(self):
+        root = self.fixture(legacy=True)
+        self.assertEqual(self.reference(root), root / "COMMANDS.md")
+
+    def test_missing_declared_inventory_never_uses_legacy_prose(self):
+        root = self.fixture()
+        with self.assertRaises(registry_owner.RegistryError):
+            self.reference(root)
+
+    def test_unbounded_or_non_filename_inventory_refuses(self):
+        for name in ("../outside.md", "x/y.md", "x\\y.md", "/absolute.md", "C:drive.md", "", None):
+            with self.subTest(name=name):
+                root = self.fixture(name=name)
+                with self.assertRaises(registry_owner.RegistryError):
+                    self.reference(root)
 
 
 class ProtocolRegistryTests(unittest.TestCase):
@@ -204,21 +245,12 @@ class ProtocolRegistryTests(unittest.TestCase):
             self.assertIn(name, measured)
             self.assertLessEqual(measured[name], limit, name)
             self.assertTrue(measured["profiles"][name], name)
-                # T-1595: 300 KiB was re-derived to 301 KiB. Measured 307668 when
-        # T-1595 landed the `stats` verb: REGISTRY.json's verb list plus the
-        # OPS.md telemetry entry cost 12 + 539 bytes on a tree that had 6 and
-        # 905 bytes of slack. No rule or document was dropped to pay for it --
-        # see .saipen/evidence/T-1595-budget-rederivation.md.
-        # T-1605: the command catalog and closure-recovery contract add 1122
-        # bytes to the measured 308224-byte surface. 309346 bytes require
-        # 303 KiB; 302 KiB is 98 bytes short. No document/rule was dropped.
-        # See .saipen/evidence/T-1605-current/load-budget.md.
-        # T-1614: FUTURE.md lands as a rule owner (12274 bytes) beside the
-        # command rows committed with it (COMMANDS.md +5287, INDEX/MAINTENANCE
-        # +~1554): the measured surface is 329328, so the tripwire is re-derived
-        # one KiB step to 322 KiB. No document or rule was dropped to pay for it
-        # -- see .saipen/evidence/T-1614-budget-rederivation.md.
-        self.assertLessEqual(measured["human_markdown_total"], 322 * 1024)
+        # T-1670 (SRC-191): the routes above are the gate. The repository's
+        # total markdown is informational -- a document no route loads costs
+        # no context -- and check() adds the one global guard, single_doc per
+        # document.
+        self.assertIn("human_markdown_total", measured["informational"])
+        self.assertEqual(protocol_budget.check(PROTOCOL), [])
 
     def test_phase_metrics_measure_all_registry_phases_and_actual_bytes(self):
         phase_names = self.registry["phases"]["all"]

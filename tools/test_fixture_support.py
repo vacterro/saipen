@@ -3,9 +3,7 @@
 from __future__ import annotations
 
 import re
-import os
 from pathlib import Path
-from unittest.mock import patch
 
 from saipen_engine.state import running_style_token, style_contract_token
 
@@ -79,7 +77,7 @@ CURRENT_STYLE_CONTRACT = current_style_contract()
 
 
 def operator_request_env(text: str) -> dict[str, str]:
-    """An external fixture launcher witnesses these exact human-request bytes.
+    """Transport integrity only; these variables do not authenticate a human.
 
     Use only for a test's explicit operator ingress. Model-supplied and
     transport-obligation controls must keep their carrier-free environment.
@@ -90,6 +88,8 @@ def operator_request_env(text: str) -> dict[str, str]:
     return {ENV_TASK_SHA256: ingress_digest(text)}
 
 
-def witnessed_operator(text: str):
-    """Scoped operator carrier for direct engine calls in a disposable fixture."""
-    return patch.dict(os.environ, operator_request_env(text))
+def witnessed_operator(text: str, root: Path, *, action="goal", event_id=None):
+    """An explicitly simulated native event in the disposable project."""
+    from test_operator_origin_support import native_operator
+
+    return native_operator(root, text, action=action, event_id=event_id)

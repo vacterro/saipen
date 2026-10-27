@@ -419,6 +419,13 @@ Core sweep is the only path from report to canonical work:
    tree; same HEAD + dirty tree is stale). Fictional reports/runs/findings/
    tickets can never COMMIT, and stale evidence demands current reproduction
    (a new RUN) or a non-CONFIRMED disposition.
+6. a final sweep disposition of findings produced by a subSaipen OUTBOX
+   package OWES a second leg: once the disposition's linked Core ticket is
+   terminal, retire the producing package with `saipen sub dispose <name>`.
+   Disposition is not completion by itself -- a READY entry left behind keeps
+   WARN `subsaipen-uncollected` alive across cycles and re-fires the same
+   finding next cycle, so the sweep is only closed when the producer-side
+   package is retired too.
 
 ONE structured sweep record (`SweepRecord`) is shared by the writer, the
 parser, `derive_status`, the validator and ticket provenance:
@@ -656,10 +663,81 @@ Rules:
   reported, `superseded` when seats were canonically unavailable,
   `blocked_external` when an external blockage was explicitly recorded;
 - reports, SWEEP bytes and preserved report hashes are never rewritten;
-- an already-terminal cycle returns `ALREADY_TERMINAL` with ZERO writes.
+- an already-terminal cycle with no pending historical findings returns
+  `ALREADY_TERMINAL` with ZERO writes; section 15 owns unfinished strict
+  archives rather than rounding their lifecycle marker up to completion.
 
 Legacy (non-strict) cycles are sealed read-only history: reconcile refuses
 them and the historical exits (`retire`, `abort`) keep their meaning.
 
 A real IMPROVE phase may still be proposed only by first proving a failure the
 meta-control design cannot solve.
+
+## 15. Retrospective coverage of immutable strict archives (T-1803)
+
+Defect class: an archived lifecycle marker hid unfinished seat findings while
+ordinary writers correctly refused the same sealed cycle. An amendment could
+not create the first missing disposition, and liveness repeatedly advertised
+empty archived assignments or offered impossible submit routes. Historical
+coverage now has a canonical successor; original cycle bytes remain immutable.
+
+`saipen improve reconcile <cycle>` inspects all seats and exact composite
+findings before treating a strict terminal cycle as settled. Empty archived
+assignments contain no pending audit work; they are never called completed
+reports. Unadjudicated findings remain discoverable through the read-only
+`improve sweep-queue` route. Missing external evidence or corrupt provenance
+is an explicit blocker, not a repeated actionable submit/complete instruction.
+
+An admitted Core owner may append historical decisions with the existing
+`improve sweep` verb and explicit `--retrospective`. It still requires the
+exact `--report`, RUN/IMP identity and `--reproduced y|n`. A resolved decision
+requires `--verification <owned-project-file>`; its content hash is bound to
+the record. `ALREADY_FIXED` additionally requires `--fixed-by`. The finding
+must actually exist, with an unambiguous identity and evidence triple.
+Archived drafts cannot mint fresh `CONFIRMED` authority or new canonical
+Work. A current confirmation still requires the ordinary fresh active audit.
+
+The version-1 successor is
+`.saipen/improve-reconciliation/<cycle>.jsonl`, outside the original cycle
+directory. Its header binds portable project lineage and exact original
+manifest/report/SWEEP hashes, including an explicitly absent SWEEP. Every
+append preserves its prior byte prefix and hash chain, and names a genuinely
+COMMITTED native writer receipt binding that exact prefix. A digest alone is
+integrity data, never operator authority. Original reports, archive identity,
+prior SWEEP entries and producer ownership remain unchanged.
+
+Historical corrections use `--retrospective --amend`: prior records remain
+readable. Final committed authority cannot be replaced or re-pointed. An
+explicit pending `NEEDS_EXTERNAL_EVIDENCE` decision may advance with newly
+bound proof; it cannot be silently converted to success. Exact retries write
+nothing, and conflicting duplicate decisions refuse.
+
+Retrospective seat retirement uses the existing `improve retire` verb with
+`--retrospective`. `EMPTY_DRAFT` requires no committed audit content;
+`HISTORICAL_ADJUDICATED` requires resolved finding coverage;
+`BLOCKED_EXTERNAL` preserves unresolved findings visibly. No retirement
+changes the original draft to complete. Once every historical finding is
+adjudicated, reconcile appends the explicit retirement/outcome evidence using
+the existing COMPLETE / SUPERSEDED / BLOCKED_EXTERNAL lifecycle vocabulary.
+Successful sealed coverage stops stale-work advertisement; original report
+status remains truthful. Legacy non-strict history remains read-only.
+
+Every consequential retrospective write requires a current admitted owned
+Work, live writable capability, valid lineage and no binding WAIT/NO_GO,
+ownership conflict or overlapping pending transaction. Existing operator
+provenance, safety valves and continuation budgets are preserved. The common
+project writer lock, compare-and-swap base hash and read-only dependency
+bindings prevent stale or concurrent overwrites.
+
+The journal uses its existing `coverage` target role and the explicitly
+versioned `improve_retrospective_v1` verification policy. Apply and recovery
+run the same target-aware semantic validator. Older kernels refuse the
+unknown policy rather than silently replaying a successor they cannot verify.
+Untouched PREPARED work may abort safely; materialized interrupted work must
+converge or retain an explicit dependency/integrity conflict. No cleanup
+erases the original history or a committed correction.
+
+Audit-manifest contract v3 is unchanged: neither Improve tree becomes a broad
+default export. A bounded sanitized forensic adjunct requires an explicit
+producer/consumer contract transition and independent consumer admission;
+omitted original evidence remains unknown, never inferred from a snapshot.

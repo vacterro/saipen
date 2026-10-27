@@ -23,7 +23,7 @@ from pathlib import Path
 from . import fast_check
 from .errors import CODES
 from .journal import run_mutation
-from .lock import project_writer_lock
+from .lock import NOT_WRITABLE, project_writer_lock
 from .result import Result
 
 
@@ -204,13 +204,38 @@ def apply_plan(project_root: Path | str, plan: OperationPlan) -> Result:
                 verification_policy="core_fast",
                 receipt_metadata=plan.receipt_metadata,
             )
+            if commit.get("ok") and any(t.role == "board" for t in plan.targets):
+                # T-1673: still under the writer lock, the terminal baseline a
+                # later BOARD-only edit is judged by.
+                from . import lifecycle_authority
+
+                lifecycle_authority.record_terminal(root)
     except PermissionError as exc:
         if "WRITER_BUSY" in str(exc):
+            # T-1827 (SRC-282:R002/R010): the refusal names the recorded holder
+            # PID/command when readable, says "unknown" when it is not, and
+            # carries the orphan-cleanup remedy. `str(exc)` stays WRITER_BUSY so
+            # the exact-token branch above is unchanged.
+            from .lock import writer_busy_payload
+
+            busy = writer_busy_payload(exc)
             return Result(
                 ok=False,
                 code="WRITER_BUSY",
                 op_id=plan.op_id,
-                message="another live writer holds the project lock",
+                message=busy["detail"],
+                data={
+                    "detail": busy["detail"],
+                    "remediation": busy["remediation"],
+                    **({"holder": busy["holder"]} if "holder" in busy else {}),
+                },
+            )
+        if str(exc).startswith(NOT_WRITABLE):
+            return Result(
+                ok=False,
+                code="CAPABILITY_READ_ONLY",
+                op_id=plan.op_id,
+                message=str(exc).split(": ", 1)[1],
             )
         raise
 

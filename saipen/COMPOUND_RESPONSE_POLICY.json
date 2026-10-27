@@ -1,0 +1,161 @@
+{
+  "schema": 1,
+  "kind": "saipen-compound-response-policy",
+  "authority": "normative; every claim here is verified against its runtime by `saipen policy verify`",
+  "owner_clause": "SRC-274:R005",
+  "sources": {
+    "F-06": "compound-input resolver",
+    "F-09": "response/HUSH contract"
+  },
+  "why_one_file": "The three runtimes answered to three separate prose documents, and nothing checked that they agreed. A reader had to cross-read commands.py, hush.py and response_surface.py to learn whether a mixed command keeps its order. This file is the single machine-readable statement those runtimes must satisfy; prose in EXECUTION.md and CORE.md explains it but is not the authority.",
+  "segmentation": {
+    "separators": ["NEWLINE", "STANDALONE_PLUS"],
+    "opaque": [
+      "double-quoted payload",
+      "a plus inside a token (C++ , A+B)",
+      "arguments after --"
+    ],
+    "rules": [
+      {
+        "id": "SEG-NEVER-DROP",
+        "text": "a separator run yields no empty segment: repeated newlines, a doubled standalone plus and surrounding blanks all collapse, and an input that is only separators yields no segments"
+      },
+      {
+        "id": "SEG-UNBALANCED",
+        "text": "unbalanced quoting makes the whole input unresolvable rather than partially parsed"
+      },
+      {
+        "id": "SEG-PROSE-OPAQUE",
+        "text": "prose or a handoff is ONE segment, never split on its punctuation"
+      },
+      {
+        "id": "SEG-CLI-EMPTY-REFUSES",
+        "text": "on the CLI argv path an empty segment is a refusal, not a silent drop, because argv already carries shell word boundaries"
+      }
+    ],
+    "runtime": "tools/saipen_engine/commands.py:parse_compound_command",
+    "cli_runtime": "tools/saipen_engine/commands.py:split_cli_compound_argv"
+  },
+  "resolution": {
+    "segment_kinds": ["command", "shortcut", "unknown"],
+    "rules": [
+      {
+        "id": "RES-CANONICAL",
+        "text": "a segment starting with 'saipen ' is a canonical command"
+      },
+      {
+        "id": "RES-SLASH",
+        "text": "a leading slash before a REGISTRY-declared verb is the documented operator spelling of that verb (/goal == saipen goal); an undeclared verb stays unknown"
+      },
+      {
+        "id": "RES-SHORTCUT-PAYLOAD",
+        "text": "a whole first token matching the registry shortcut table owns its payload"
+      },
+      {
+        "id": "RES-BARE-UNKNOWN",
+        "text": "a bare token that matches nothing is unknown, never a guessed shortcut"
+      },
+      {
+        "id": "RES-FAIL-CLOSED",
+        "text": "no model interpretation exists on this path; an unresolved token fails closed with an empty command"
+      }
+    ],
+    "authority": "saipen/REGISTRY.json:commands",
+    "runtime": "tools/saipen_engine/commands.py:resolve_compound_command"
+  },
+  "ordering": {
+    "invariant": "resolved segments keep their input index; the index is never renumbered, sorted or merged",
+    "runtime": "tools/saipen_engine/commands.py:resolve_compound_command",
+    "field": "index"
+  },
+  "stop": {
+    "default_policy": "STOP_ON_FAILURE",
+    "closed_set": ["STOP_ON_FAILURE", "CONTINUE_WHEN_INDEPENDENT"],
+    "rule": "under the default, the first failing segment freezes every later segment to NOT_RUN; CONTINUE_WHEN_INDEPENDENT keeps a later segment only when it is provably independent",
+    "dispositions": [
+      "EXECUTED",
+      "REFUSED",
+      "BLOCKED",
+      "SKIPPED_BY_PROTOCOL",
+      "ALREADY_SATISFIED",
+      "NOT_RUN",
+      "FAILED"
+    ],
+    "failure_dispositions": ["REFUSED", "BLOCKED", "FAILED"],
+    "authority": "saipen/REGISTRY.json:chain_policies",
+    "runtime": "tools/saipen_engine/commands.py:chain_disposition"
+  },
+  "provenance": {
+    "invariant": "every recognized segment receives an explicit terminal disposition; no segment disappears",
+    "per_segment_fields": ["index", "segment", "command", "kind", "disposition"],
+    "forbidden": [
+      "narration replacing a disposition",
+      "a segment omitted because a model judged it unnecessary",
+      "a later segment running after an earlier failure under the default policy"
+    ],
+    "runtime": "tools/saipen_engine/commands.py:chain_disposition"
+  },
+  "response_surface": {
+    "rule_id": "EXEC-RESPONSE-01",
+    "mandatory_fields": [
+      "STATUS",
+      "RESULT",
+      "BLOCKER",
+      "OPERATOR ACTION",
+      "NEXT EXACT ACTION",
+      "VALIDATION"
+    ],
+    "optional_fields": ["EFFICIENCY", "DETAILS"],
+    "details_is_last": true,
+    "handback": "STOP_HANDBACK",
+    "runtime": "tools/saipen_engine/response_surface.py"
+  },
+  "hush": {
+    "rule_id": "EXEC-HUSH-01",
+    "modifier": "hush",
+    "scope": "TASK_LOCAL_NEVER_PERSISTED",
+    "lifecycle": "strip -> resolve -> run -> suppress discretionary -> bounded report -> eject",
+    "suppressible": [
+      "preamble",
+      "progress",
+      "plan",
+      "tool_narration",
+      "success_chatter",
+      "details"
+    ],
+    "mandatory": [
+      "safety_refusal",
+      "destructive_confirmation",
+      "missing_authority",
+      "terminal_failure",
+      "protocol_corruption",
+      "side_effect_acknowledgement",
+      "final_report",
+      "evidence"
+    ],
+    "fail_closed": "an output kind outside the mandatory set is treated as mandatory, never as suppressible",
+    "skill_mirror_exception": "a Skill load announcement is tool plumbing the host emits itself, not agent narration; hush never suppresses host-owned lines",
+    "precedence": ["user", "safety", "core", "execution_policy", "style"],
+    "authority": "saipen/REGISTRY.json:hush_precedence",
+    "runtime": "tools/saipen_engine/hush.py"
+  },
+  "mixed_command_contract": {
+    "example": "saipen clean + /goal cc all",
+    "must_hold": [
+      "ORDERING: the cleanup segment resolves at index 0 and the goal segment at index 1, unchanged",
+      "STOP: if the cleanup segment is REFUSED, BLOCKED or FAILED, the goal segment is NOT_RUN under the default policy",
+      "PROVENANCE: both segments carry a terminal disposition and neither is dropped",
+      "HUSH: a hush modifier suppresses narration only; the mandatory final report and every refusal still print"
+    ]
+  },
+  "verification": {
+    "command": "saipen policy verify --json",
+    "runtime": "tools/saipen_engine/policy_contract.py:verify",
+    "refuses_when": [
+      "a declared runtime module or symbol is absent",
+      "a declared closed set differs from the runtime's own derivation",
+      "the registry block this file defers to disagrees with what the file states",
+      "the mixed-command example does not reproduce ordering, STOP and provenance"
+    ]
+  }
+}

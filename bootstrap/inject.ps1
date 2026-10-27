@@ -496,6 +496,9 @@ function Copy-Skill([string]$dst) {
 
 function Expand-Home([string]$path) {
   if ([string]::IsNullOrWhiteSpace($path)) { return $null }
+  if ($env:CLAUDE_CONFIG_DIR -and ($path -eq '~/.claude' -or $path.StartsWith('~/.claude/'))) {
+    return Get-NativePath (Join-Path $env:CLAUDE_CONFIG_DIR $path.Substring(9).TrimStart('/'))
+  }
   # `$NAME/...`: a host whose HOME is not the user profile (ZAICODE isolates
   # its own) is named by an environment variable. Unset means the host is not
   # configured on this machine, so the caller skips it.
@@ -830,6 +833,39 @@ foreach ($adapter in @($AdapterRegistry.adapters)) {
     [void]$report.Add(@("$label guard hook", (Copy-Hook $adapter)))
     [void]$report.Add(@("$label legacy hook", (Remove-LegacyHook $adapter)))
   }
+}
+
+# --- PATH launcher (T-1678) ---
+# `saipen` typed in any shell is the first entry transport. The engine owns
+# it: it writes both launchers for this clone's engine into the first declared
+# per-user directory PATH already names, records them, and never edits PATH.
+# A machine where it cannot is not a failed install -- every home's own bin/
+# launcher still runs every command -- so this row never fails the run.
+function Install-PathLauncher {
+  try {
+    $pythonBin = Get-PythonBin
+    if ([string]::IsNullOrWhiteSpace($pythonBin)) { return "skip: no Python runtime" }
+    $cli = Get-SourcePath "tools/saipen.py"
+    $output = & $pythonBin -B $cli host launcher install --home $env:USERPROFILE --python $pythonBin --json 2>$null
+    $answer = ($output | Out-String) | ConvertFrom-Json
+    $where = [string]$answer.directory
+    switch ([string]$answer.code) {
+      'PATH_LAUNCHER_INSTALLED' { return "installed in $where" }
+      'PATH_LAUNCHER_CURRENT' { return "already in $where" }
+      default {
+        $why = [string]$answer.action
+        if ([string]::IsNullOrWhiteSpace($why)) { $why = [string]$answer.detail }
+        return ("skip: {0} -- {1}" -f $answer.code, $why)
+      }
+    }
+  } catch {
+    return ("skip: PATH launcher not installed ({0})" -f $_.Exception.Message)
+  }
+}
+if ([string]::IsNullOrWhiteSpace($AdapterId)) {
+  # The report treats any row naming a failure as fatal; this one is advisory.
+  $launcherRow = (Install-PathLauncher) -replace '(?i)failed', 'refused'
+  [void]$report.Add(@("PATH launcher", $launcherRow))
 }
 
 # --- Report ---

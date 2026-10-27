@@ -1,8 +1,8 @@
 {
   "corpus": {
     "absent": 0,
-    "documents": 45,
-    "machine_readable": 0
+    "documents": 54,
+    "machine_readable": 3
   },
   "gates": [
     {
@@ -671,13 +671,160 @@
       "reviewed": true,
       "state": "DEFERRED",
       "title": "future_gate/SAIPEN_FUTURE_WORKER_POOL.md"
+    },
+    {
+      "basis": "measured",
+      "digest": "c71c288b5def28242afdeaaa82bd83ea7da5ff508bec0a74612f76819bc0e73f",
+      "estimate": 1,
+      "evidence": [
+        ".saipen/intake/active/SRC-184.md"
+      ],
+      "id": "FG-0046",
+      "identity_source": "document-header",
+      "machine_readable": true,
+      "needs": [
+        "T-1635"
+      ],
+      "path": "future_gate/FG-0046_unified-provider-and-account-aware-saipen-launch-src-184.md",
+      "present": true,
+      "priority": "P2",
+      "slice": "read-only account discovery -- `saipen launch --list` names provider, alias, profile directory, installed, authenticated and managed/direct for every Claude, Codex and Antigravity account on the machine, reading no secret",
+      "slices": [
+        {
+          "closure": "done",
+          "digest": "c71c288b5def28242afdeaaa82bd83ea7da5ff508bec0a74612f76819bc0e73f",
+          "slice": "read-only account discovery -- `saipen launch --list` names provider, alias, profile directory, installed, authenticated and managed/direct for every Claude, Codex and Antigravity account on the machine, reading no secret",
+          "ticket": "T-1936"
+        }
+      ],
+      "state": "PROMOTED",
+      "title": "Unified provider- and account-aware saipen launch (SRC-184)"
+    },
+    {
+      "declared_status": "PROPOSAL_ONLY",
+      "digest": "67ebac3779cbba59b9e2e4015ec401a659a48d8e1ee6c6992ca0d450a0ceb460",
+      "id": "FG-0047",
+      "identity_source": "digest",
+      "machine_readable": false,
+      "path": "future_gate/SAIPEN_20261011_1022_2.md",
+      "present": true,
+      "reasons": [
+        "recorded, explicitly not authorized for implementation"
+      ],
+      "reviewed": true,
+      "state": "DEFERRED",
+      "title": "future_gate/SAIPEN_20261011_1022_2.md"
+    },
+    {
+      "digest": "72f187a570daec0eaf66f49db062ac64ed3c1c6fada60d5c9417c1c4e7842c8c",
+      "id": "FG-0048",
+      "identity_source": "digest",
+      "machine_readable": false,
+      "path": "future_gate/SAIPEN_FUTURE_GATE_TRIGGERDEV_DURABLE_RUNS_20261008/FUTURE_GATE_DURABLE_AUTONOMOUS_RUNS.md",
+      "present": true,
+      "problems": [
+        "no machine header; historical record needs review"
+      ],
+      "state": "NEEDS_REVIEW",
+      "title": "FUTURE GATE — DURABLE AUTONOMOUS RUNS"
+    },
+    {
+      "digest": "f9bd4a1286c87594db9123a5ddfd3e271e03c3b5698b1cf8d3ce5be665945e03",
+      "id": "FG-0049",
+      "identity_source": "digest",
+      "machine_readable": false,
+      "path": "future_gate/SAIPEN_FUTURE_GATE_TRIGGERDEV_DURABLE_RUNS_20261008/MUTATION_VECTORS.md",
+      "present": true,
+      "problems": [
+        "no machine header; historical record needs review"
+      ],
+      "state": "NEEDS_REVIEW",
+      "title": "Mutation Vectors After Durable Runs"
+    },
+    {
+      "digest": "6159eee4f45031f155549acf0b0d8639ee6c5ff880aa150d4aaa69c1e7998fad",
+      "id": "FG-0050",
+      "identity_source": "digest",
+      "machine_readable": false,
+      "path": "future_gate/SAIPEN_FUTURE_GATE_TRIGGERDEV_DURABLE_RUNS_20261008/README.md",
+      "present": true,
+      "problems": [
+        "no machine header; historical record needs review"
+      ],
+      "state": "NEEDS_REVIEW",
+      "title": "SAIPEN Future Gate — Durable Autonomous Runs"
+    },
+    {
+      "digest": "393e8149a739c04b216b4f52223305f69ca83924d0689c66d73d8cdb0eed2653",
+      "id": "FG-0051",
+      "identity_source": "digest",
+      "machine_readable": false,
+      "path": "future_gate/SAIPEN_FUTURE_GATE_TRIGGERDEV_DURABLE_RUNS_20261008/REFERENCE_TRIGGERDEV_IDEAS.md",
+      "present": true,
+      "problems": [
+        "no machine header; historical record needs review"
+      ],
+      "state": "NEEDS_REVIEW",
+      "title": "Trigger.dev Ideas Relevant to SAIPEN"
+    },
+    {
+      "basis": "measured",
+      "digest": "060741c2d1212827dbd857116404d80d7068b4a69051f0de89cdb1ce34343c1a",
+      "estimate": 1,
+      "evidence": [
+        "future_gate/SAIHANDOFF — SAIPEN_20261024_1647.md"
+      ],
+      "id": "FG-0052",
+      "identity_source": "document-header",
+      "machine_readable": true,
+      "path": "future_gate/FG-0052_architectural-simplification-and-causal-self-recovery.md",
+      "present": true,
+      "priority": "P1",
+      "reasons": [
+        "no bounded slice declared"
+      ],
+      "slice": "TODO -- name the ONE bounded unit this gate may promote",
+      "state": "DEFERRED",
+      "title": "Architectural Simplification and Causal Self-Recovery"
+    },
+    {
+      "declared_status": "FUTURE_GATE_RECORDED or EXISTING_GATE_UPDATED or BLOCKED",
+      "digest": "c8d0d8586d9a73245405b400898f6e446723192084d6f71d6616d1e63f491b40",
+      "id": "FG-0053",
+      "identity_source": "digest",
+      "machine_readable": false,
+      "path": "future_gate/SAIHANDOFF — SAIPEN_20261024_1647.md",
+      "present": true,
+      "reasons": [
+        "recorded, explicitly not authorized for implementation"
+      ],
+      "reviewed": true,
+      "state": "DEFERRED",
+      "title": "future_gate/SAIHANDOFF — SAIPEN_20261024_1647.md"
+    },
+    {
+      "basis": "measured",
+      "digest": "c4b8949dfa1a8c572e10582f85007d116312848fd7173a662faa1429e991a8c4",
+      "estimate": 1,
+      "evidence": [
+        "TODO -- reference an existing path"
+      ],
+      "id": "FG-0054",
+      "identity_source": "index-assigned",
+      "machine_readable": true,
+      "path": "future_gate/FG-0054_verifier-env-is-not-closed-regression-execution-execution-en.md",
+      "present": true,
+      "priority": "P2",
+      "slice": "TODO -- name the ONE bounded unit this gate may promote",
+      "state": "DEFERRED",
+      "title": "VERIFIER ENV IS NOT CLOSED: regression_execution.execution_environment() copies the inherited shell's `_` variable into the verifier environment, so the same regression pair hashed under a different p"
     }
   ],
   "marker": "saipen-future-index-v1",
   "schema": 2,
   "witness": {
-    "documents": 45,
-    "fingerprint": "bd4a4f005b096dbea91693a1212d194a15c2724602523350546e1116ce84cf2e",
+    "documents": 54,
+    "fingerprint": "2b3a9f95ce4612c98e5d24ece796dc18040362cb94a1458be25c7dbd05b36e5b",
     "schema": 2,
     "unreadable": 0
   }

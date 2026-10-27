@@ -34,6 +34,7 @@ if str(TOOLS) not in sys.path:
     sys.path.insert(0, str(TOOLS))
 
 from saipen_engine import board, cold_recovery, entry, intake, state, supervisor  # noqa: E402
+from saipen_engine.registry import command_reference_path  # noqa: E402
 
 REGISTRY = json.loads((ROOT / "saipen" / "REGISTRY.json").read_text(encoding="utf-8"))
 
@@ -63,7 +64,7 @@ class RoutingTableCoverageTests(unittest.TestCase):
         effects = json.loads(
             (ROOT / "saipen" / "COMMAND_EFFECTS.json").read_text(encoding="utf-8-sig")
         )
-        document = (ROOT / "saipen" / "COMMANDS.md").read_text(encoding="utf-8-sig")
+        document = command_reference_path(ROOT / "saipen").read_text(encoding="utf-8-sig")
         rows: dict[str, list[str]] = {}
         for match in _ROW_COMMAND.finditer(document):
             rows.setdefault(match.group(1), []).append(match.group(2))

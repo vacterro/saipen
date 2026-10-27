@@ -300,7 +300,7 @@ files or an effective cache are never copied into the worker tree.
 
 **Targeted complete-package path.** Core `saipen collect <producer>` is stricter than the backlog-oriented `saipen sub collect`: it consumes exactly one producer and requires one complete `status: ready` package carrying `producer`, `source_head`, `source_tree_fingerprint`, `role_revision`, `coverage`, `payload`, `verified`, and `instructions`. `saipen prepare saiwiki` must cover the whole maintained wiki, not one sampled page or a quick scan. If the package is missing, incomplete, non-ready, stale, or already reviewed, Core performs no main-project write and replies exactly `Not ready: run qq first.` Targeted collection then applies only the declared payload, creates/claims a normal Core ticket, and enters Core `VERIFY -> REVIEW -> SHIP`; it inherits the boundary check and crash-safe ordering below. The tripled `qqq` macro adds SHIP after collection. The doubled `qq` never integrates, commits, tags, or pushes.
 
-Whenever the main agent chooses to check (during `HUNT`, at the top of `saipen continue`, or via `saipen sub collect`):
+Whenever the main agent chooses to check (during `HUNT`, at the top of `saipen continue`, or via `saipen sub collect`), collection MUST run only through the canonical collector commands (`saipen collect <producer>` or `saipen sub collect`, the canonical writer that emits `[op:]`-backed journaled events) -- NEVER by hand-editing `BOARD.md` or `LOG.md`:
 0. **Boundary check first, before trusting anything an OUTBOX claims.** § 1
    says a subSaipen MUST NOT touch a file outside its own
    `.saipen/extensions/subs/<name>/` -- but that rule has no technical
@@ -343,23 +343,29 @@ Whenever the main agent chooses to check (during `HUNT`, at the top of `saipen c
    SHIP`), NOT an accepted fact. `critical`/`severity` only inform the
    generated ticket's `[P#]` priority; they never change the intake path.
    `critical: false` is NOT routed to `_shared/inbox.md` -- the inbox is a
-   historical backlog surface, not the collection sink. Intake is atomic: the
-   Core ticket, the main `LOG.md` collect event and the MANIFEST
-   `last_collect` identity land in ONE journaled plan with zero semantic
-   acceptance, and a durable collect receipt binds the package identity to
-   the ticket. **INTAKE != REVIEW**: intake leaves the OUTBOX entry `ready`;
-   the `reviewed` claim is a Core DISPOSITION written by `saipen sub dispose`
-   only after the linked review ticket is terminal. Between the two the role
-   derives health `REVIEW_PENDING`, never `CURRENT`. The main agent MAY skip
-   any individual entry and leave it `ready` for a later collect -- nothing
-   requires swallowing the whole OUTBOX in one pass.
+   historical backlog surface, not the collection sink. Intake is atomic and
+   owned exclusively by `saipen collect <producer>` / `saipen sub collect`
+   (never a hand edit to `BOARD.md` or `LOG.md`): the Core ticket, the main
+   `LOG.md` `[op:]`-backed collect event and the MANIFEST `last_collect`
+   identity land in ONE journaled plan with zero semantic acceptance, and a
+   durable collect receipt binds the package identity to the ticket. If the
+   target `BOARD.md` already carries an unrecognized field (such as a copied
+   `source: <name>-###`), `saipen sub collect` refuses before writing and names
+   `saipen ticket compact <T-###>`. **INTAKE != REVIEW**: intake leaves the
+   OUTBOX entry `ready`; the `reviewed` claim is a Core DISPOSITION written by
+   `saipen sub dispose` only after the linked review ticket is terminal.
+   Between the two the role derives health `REVIEW_PENDING`, never `CURRENT`.
+   The main agent MAY skip any individual entry and leave it `ready` for a
+   later collect -- nothing requires swallowing the whole OUTBOX in one pass.
 3. **Atomicity and dedup are structured, never prose.** A package_identity
    SHA mentioned inside an arbitrary BOARD description or LOG message is NOT
    collection evidence; the only durable witnesses are the MANIFEST
-   `last_collect` identity and the structured collect event the collector
-   itself journaled. Autonomous collected hypotheses are inserted at the END
-   of the main `## TODO` -- board order is priority, so an autonomous P2
-   finding must never preempt already-workable Core work.
+   `last_collect` identity and the structured `[op:]`-backed collect event the
+   canonical collector (`saipen collect` / `saipen sub collect`) itself
+   journaled (never a hand-written `LOG.md` line without `[op:]`). Autonomous
+   collected hypotheses are inserted at the END of the main `## TODO` -- board
+   order is priority, so an autonomous P2 finding must never preempt
+   already-workable Core work.
    That main-`LOG.md` line is an ordinary CORE.md §1.2 log line -- its shape
    is defined there and is not restated here (an earlier copy of the
    skeleton lived in this spot and showed every optional bracket as if it
@@ -368,12 +374,12 @@ Whenever the main agent chooses to check (during `HUNT`, at the top of `saipen c
    producer is structured provenance in the ticket and the collect receipt
    (package_identity, producer, source identity), and writer identity must
    not be overloaded with "where the evidence originated" (Wave 2 item 5).
-   Write the taxonomy text as `RUN: collect <name>-### -> T-###`. Naming
-   the subSaipen's own ID in that free text IS the traceability link between
-   the two event graphs, because CORE.md § 1.2's
-   `[parent: E-###]` cannot reach across files into the subSaipen's
-   separate `LOG.md` -- the text reference does that job instead, no RFC
-   change needed.
+   The canonical collector writes the taxonomy text as
+   `RUN: collect <name>-### -> T-###`. Naming the subSaipen's own ID in that
+   free text IS the traceability link between the two event graphs, because
+   CORE.md § 1.2's `[parent: E-###]` cannot reach across files into the
+   subSaipen's separate `LOG.md` -- the text reference does that job instead,
+   no RFC change needed.
    The subSaipen's own `LOG.md` MAY also get a mirrored one-line note when
    collected (`RUN: collected by main agent -> T-###`) for a complete
    trail on both sides -- optional, since the subSaipen's ticket already
@@ -389,6 +395,10 @@ invoked agent, not a daemon; nothing here needs liveness detection.
 
 - DATE | source: <name>-### | <one-line summary> | ref: [src/foo.py]
 ```
+`source: <name>-###` is ONLY the `_shared/inbox.md` row shape -- NEVER copy
+`source: <name>-###` onto a `BOARD.md` ticket row (`BOARD.md` has a closed
+field grammar; an unrecognized field on `BOARD.md` halts lifecycle verbs and
+`saipen sub collect` until repaired via `saipen ticket compact <T-###>`).
 Main-agent-owned: it's the one deciding what to do with these at the next
 `PLAN`, so it's the one that prunes. SubSaipens are append-only against
 this file -- add a new line, never edit an existing one, which sidesteps

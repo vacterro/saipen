@@ -705,6 +705,64 @@ def _verify_receipt_bytes(root: Path, receipt_path: str, expected_sha256: str):
     return record
 
 
+def repair_stale_head(root: Path) -> bool:
+    """Give a writer the ONE honest recovery for a stale lineage head (T-1898).
+
+    `advance_append`'s refusal is deliberate and stays: a receipt the lineage
+    was never told about must never ride in on a bounded guess. What was
+    missing is that the refusal had no recovery, so the fast path stayed dead
+    for the remaining life of the project.
+
+    This runs the canonical deep rebuild, which re-establishes the chain from
+    ACTUAL receipt bytes. It never invents a verdict, and malformed evidence
+    makes it refuse rather than publish.
+
+    CALLER CONTRACT -- this mutates, so only a WRITER may call it. `status` is
+    documented read-only, and `latest_receipt_bounded` stays read-only: it
+    refuses and the caller degrades to the strict scan, exactly as before. The
+    canonical receipt append (`conformance._update_receipt_index`) is the
+    writer that repairs, so the NEXT reader gets the bounded path back.
+
+    `rebuild_lineage` requires the project writer lock, so it is taken here.
+    The lock is NOT reentrant, but a same-process second acquisition refuses
+    at once instead of blocking, so a caller that already holds it gets
+    `WriterBusy` -- treated as "cannot repair now" (False), never as a
+    deadlock. The receipt is already durable by then; the next append repairs.
+
+    Returns True when a live v2 head exists after the call -- either it already
+    described the namespace (nothing to do), or the rebuild republished it for
+    the CURRENT one. False means no v2 authority can be established, and the
+    caller must leave the v1 bootstrap documents untouched.
+    """
+    from .lock import WriterBusy, project_writer_lock
+
+    head = _read_head(root)
+    if head is None:
+        return False
+    current = _receipt_dir_mtime_ns(root)
+    if current is not None and head[0].get("receipt_dir_mtime_ns") == current:
+        # The head already represents the namespace, so the refusal came from
+        # something else (an unreadable receipt, a corrupt generation). The
+        # authority is live; a rebuild would only cost a deep scan.
+        return True
+    try:
+        with project_writer_lock(root):
+            result = rebuild_lineage(root)
+    except WriterBusy:
+        return False
+    except (OSError, ValueError):
+        return False
+    if not result.get("ok"):
+        return False
+    head = _read_head(root)
+    current = _receipt_dir_mtime_ns(root)
+    return (
+        head is not None
+        and current is not None
+        and head[0].get("receipt_dir_mtime_ns") == current
+    )
+
+
 def latest_receipt_bounded(root: Path, gate: str):
     """The bounded authenticated latest lookup.
 
@@ -736,6 +794,14 @@ def latest_receipt_bounded(root: Path, gate: str):
     if mtime is None or mtime != payload.get("receipt_dir_mtime_ns"):
         # Directory changed after the head was published: the locator may
         # lag a newer receipt. Degrade to the strict scan.
+        #
+        # T-1898: this refusal is right and stays -- a bounded fold must never
+        # adopt a receipt the lineage was not told about -- but it must not be
+        # the END of the story. What was missing is the recovery, and it belongs
+        # to a WRITER: `status` is documented read-only and must not republish
+        # projection state. `conformance._update_receipt_index` is that writer;
+        # it calls `repair_stale_head`, which takes the project writer lock and
+        # rebuilds from actual bytes.
         return True, None
     locator = _read_locator(root, gate)
     if locator is None:

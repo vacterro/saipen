@@ -32,6 +32,9 @@ if str(TOOLS) not in sys.path:
 
 from saipen_engine.accepted_debt import _integrity_digest  # noqa: E402
 from test_hermetic_env import hermetic_env, isolate_host_session  # noqa: E402
+from test_operator_origin_support import (  # noqa: E402
+    cold_command, native_operator, use_case_owner,
+)
 
 SCENARIO = ROOT / "tests" / "scenarios" / "userperson-valid" / ".saipen"
 VALIDATOR = TOOLS / "validate.py"
@@ -56,6 +59,25 @@ def setUpModule() -> None:
     isolate_host_session()
 
 
+def native_debt_authority(case, events, reason=REASON):
+    """Real event-owner/Source/journal logic, explicitly simulated native identity."""
+    from saipen_engine.accepted_debt import preview
+    from saipen_engine.operations import authority_capture
+
+    planned = preview(case.root, events)
+    if not planned.get("ok"):
+        # Invalid-event tests retain their original domain refusal, no issuer positive.
+        return "SRC-047"
+    capsule = planned["capsule"]
+    capsule.update(statement=reason or REASON, expires_at="2099-01-01T00:00:00Z")
+    text = json.dumps(capsule)
+    case._debt_host = use_case_owner(case, case.root)
+    with native_operator(case.root, text, action="resolve-gate"):
+        captured = authority_capture(case.root, "probe", text)
+    case.assertTrue(captured.ok, captured.to_dict())
+    return captured.data["receipt"]
+
+
 class Fixture(unittest.TestCase):
     def setUp(self) -> None:
         self._tmp = tempfile.TemporaryDirectory(prefix="saipen-accepted-debt-")
@@ -72,17 +94,21 @@ class Fixture(unittest.TestCase):
         state = state_path.read_text(encoding="utf-8")
         state = state.replace("last_event: 1", "last_event: 4")
         state_path.write_text(state, encoding="utf-8")
+        from saipen_engine.journal import ensure_project_lineage
+
+        ensure_project_lineage(self.root)
 
     def run_validator(self) -> subprocess.CompletedProcess:
+        command = [sys.executable, str(VALIDATOR), "--project-root", str(self.root),
+                   "--gate", "core"]
+        if getattr(self, "_debt_host", None) is not None:
+            # Read-only proof queries also work in a lineage-preserving copy.
+            import test_operator_origin_support as support
+
+            command = [sys.executable, str(Path(support.__file__)), "--cold-cli",
+                       str(self._debt_host.runtime), *command[1:]]
         return subprocess.run(
-            [
-                sys.executable,
-                str(VALIDATOR),
-                "--project-root",
-                str(self.root),
-                "--gate",
-                "core",
-            ],
+            command,
             capture_output=True,
             text=True,
             encoding="utf-8",
@@ -94,11 +120,13 @@ class Fixture(unittest.TestCase):
         self,
         events: list[str],
         *,
-        authority: str = "SRC-047",
+        authority: str | None = None,
         reason: str = REASON,
     ) -> subprocess.CompletedProcess:
-        return subprocess.run(
-            [
+        if authority is None:
+            authority = native_debt_authority(self, events, reason)
+        environment = hermetic_env()
+        command = [
                 sys.executable,
                 str(REGISTRAR),
                 "--project-root",
@@ -109,11 +137,13 @@ class Fixture(unittest.TestCase):
                 authority,
                 "--reason",
                 reason,
-            ],
+            ]
+        return subprocess.run(
+            cold_command(self.root, command, environment),
             capture_output=True,
             text=True,
             encoding="utf-8",
-            env=hermetic_env(),
+            env=environment,
             timeout=120,
         )
 

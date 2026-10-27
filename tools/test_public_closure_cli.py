@@ -115,8 +115,10 @@ class PublicClosureCliTests(OrchestrationFixture):
             env.update(operator_request_env(args[1]))
         if capability:
             env["SAIPEN_CAPABILITY"] = capability
-        proc = subprocess.run(
-            [
+        from test_operator_origin_support import cold_command
+
+        command = cold_command(
+            project, [
                 sys.executable,
                 str(SAIPEN_PY),
                 "--project-root",
@@ -125,7 +127,11 @@ class PublicClosureCliTests(OrchestrationFixture):
                 "tester",
                 "--json",
                 *args,
-            ],
+            ], env,
+            operator_text=args[1] if len(args) > 1 and args[0] == "user-request" else None,
+        )
+        proc = subprocess.run(
+            command,
             capture_output=True,
             text=True,
             encoding="utf-8",

@@ -15,7 +15,6 @@ over the real inbox projection), not a restatement of it.
 from __future__ import annotations
 
 import datetime
-import inspect
 import os
 import shutil
 import sys
@@ -94,12 +93,14 @@ class ValveResumeFollowsTheAuditRoute(unittest.TestCase):
         layer.write_text("# audit\n\nfindings\n", encoding="utf-8")
 
     def reauthorize(self) -> str:
-        grant = {}
-        if "operator_authority_source" in inspect.signature(reauthorize_valve).parameters:
-            # T-1494 records WHICH authority reset the valve; a fresh operator
-            # grant is the case under test there, the resume value is the one here.
-            grant["operator_authority_source"] = "SRC-001"
-        done = reauthorize_valve(self.root, "probe", **grant)
+        # SRC-112: this routing control spends a fresh operator resume, not
+        # an invented SRC identity. The carrier is a disposable test double.
+        from saipen_engine.journal import ensure_project_lineage
+        from test_operator_origin_support import native_operator
+
+        ensure_project_lineage(self.root)
+        with native_operator(self.root, "cc", action="continue"):
+            done = reauthorize_valve(self.root, "probe")
         self.assertTrue(done.ok, done.to_dict())
         state = parse_state((self.root / ".saipen" / "STATE.md").read_text(encoding="utf-8"))
         self.assertEqual((state["goal_waves"], state["goal_tickets"]), (0, 0))

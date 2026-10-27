@@ -31,16 +31,16 @@ recoverable move can still break all consumers of the old path.
 
 1. **Board scrub**
 
-   - Prune old DONE entries only after their permanent LOG evidence exists.
-     A DONE ticket that any live ticket **still names in `needs:` MUST NOT be pruned**.
+   - Entering CLEAN prunes DONE entries itself, never an agent: past 16 KB of
+     closed text nothing pins, those lines move verbatim to
+     `.saipen/recovery/board-scrub/`. An entry the LOG never closed stays.
+     A DONE ticket that any kept ticket **still names in `needs:` MUST NOT be pruned**.
    - LOG evidence is necessary but NOT sufficient. A DONE ticket that any
      **active** source receipt still references MUST NOT be pruned either:
      the BOARD line is that Work's existence record, and retiring it ahead of
      the receipt fails the gate with `source receipts -- active receipt
-     SRC-NNN references missing Work T-NNN`, once per receipt. Pruning 61 of
-     82 well-evidenced DONE entries produced ten such failures at once
-     (imp-vacterro-zaicode-20261001-2 IMP-002). Retire the receipt first
-     (`saipen source retire SRC-NNN`), or keep the entry.
+     SRC-NNN references missing Work T-NNN` (imp-vacterro-zaicode-20261001-2
+     IMP-002). Retire the receipt first (`saipen source retire SRC-NNN`).
    - Prune TODO/BLOCKED only with cited evidence that it is superseded, already
      resolved or no longer applicable. Age alone proves nothing.
    - Re-evaluate blockers. Resolved -> TODO. A durable undecided item remains
@@ -68,14 +68,16 @@ recoverable move can still break all consumers of the old path.
      uses PROTOCOL.md §6's stricter five-class STALE verdict; age or collection
      count never qualifies. `saipen sub clean` also enforces live-work and
      recovery refusals.
-   - When active LOG exceeds its soft cap (~300 lines/~64 KB), move it verbatim
-     by whole lines to the next `.saipen/logs/LOG-<NNN>.md`; start a fresh
-     active tail continuing the same event sequence. Never edit sealed history.
-   - Run bounded journal compaction
-     (`saipen_engine.journal.compact_committed`). Remove staged bytes only for
-     COMMITTED/RESOLVED operations while retaining tombstone identity, status,
-     semantic payload hash, target final hashes and timestamp. Never compact
-     PREPARED/APPLYING/VERIFIED/CONFLICT/ABORTED evidence.
+   - Entering CLEAN seals the active LOG itself past 300 lines or 64 KB: it
+     moves it verbatim to the next `.saipen/logs/LOG-<NNN>.md` and starts a
+     fresh tail on the same event sequence. Never edit sealed history.
+   - Entering CLEAN runs bounded journal compaction itself
+     (`journal.compact_committed` under the writer lock) and reports
+     `journal_compaction`: what it dropped and what it left. It removes staged
+     bytes only for COMMITTED/RESOLVED operations while retaining tombstone
+     identity, status, semantic payload hash, target final hashes and
+     timestamp. Never compact PREPARED/APPLYING/VERIFIED/CONFLICT/ABORTED
+     evidence.
 
 5. **Freshness**
 

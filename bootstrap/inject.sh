@@ -476,6 +476,13 @@ expand_home() { # $1=registry path starting with ~ or $NAME
   # own) is named by an environment variable. Unset prints an empty line,
   # which the caller reads as "not configured on this machine".
   case "$1" in
+    '~/.claude'|'~/.claude/'*)
+      if [ -n "${CLAUDE_CONFIG_DIR:-}" ]; then
+        printf '%s%s\n' "$CLAUDE_CONFIG_DIR" "${1#\~/.claude}"
+      else
+        printf '%s\n' "${1/#\~/$HOME}"
+      fi
+      ;;
     '$'*)
       local _name="${1#\$}"
       _name="${_name#\{}"
@@ -689,6 +696,40 @@ while IFS='|' read -r id name home skill instruction hook artifact bespoke legac
     done
   fi
 done <<< "$ADAPTER_ROWS"
+
+# --- PATH launcher (T-1678) ---
+# `saipen` typed in any shell is the first entry transport. The engine owns
+# it: it writes the launchers for this clone's engine into the first declared
+# per-user directory PATH already names, records them, and never edits PATH.
+# A machine where it cannot is not a failed install -- every home's own bin/
+# launcher still runs every command -- so this row always returns 0.
+install_path_launcher() {
+  local answer
+  if [ -n "${SAIPEN_PYTHON:-}" ]; then
+    answer="$("$PYTHON_BIN" -B "$ROOT/tools/saipen.py" host launcher install --home "$HOME" --python "$SAIPEN_PYTHON" --json 2>/dev/null)"
+  else
+    answer="$("$PYTHON_BIN" -B "$ROOT/tools/saipen.py" host launcher install --home "$HOME" --json 2>/dev/null)"
+  fi
+  printf '%s' "$answer" | "$PYTHON_BIN" -c '
+import json, sys
+try:
+    a = json.load(sys.stdin)
+except ValueError:
+    print("skip: PATH launcher not installed (unreadable answer)")
+    raise SystemExit(0)
+code, where = str(a.get("code")), a.get("directory")
+if code == "PATH_LAUNCHER_INSTALLED":
+    print("installed in %s" % where)
+elif code == "PATH_LAUNCHER_CURRENT":
+    print("already in %s" % where)
+else:
+    print("skip: %s -- %s" % (code, a.get("action") or a.get("detail") or ""))
+' || echo "skip: PATH launcher not installed"
+  return 0
+}
+if [ -z "$ADAPTER_FILTER" ]; then
+  report "PATH launcher" install_path_launcher
+fi
 
 echo "------------------------------------------------------------"
 if [ "$FAILURES" -ne 0 ]; then

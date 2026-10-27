@@ -24,6 +24,7 @@ import re
 import stat
 import struct
 import subprocess
+from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Callable, Iterable
@@ -36,6 +37,14 @@ class FreshnessError(RuntimeError):
 #: The width ``phases/translate.md`` mandates for a locale
 #: ``source-digest`` marker. The digest it carries is a full sha256.
 SHORT_DIGEST_MARKER_HEX = 16
+
+#: T-1902: how many per-file reads inside one sampling pass may overlap. The
+#: measured ceiling is shallow -- the live tree's 482 content-bearing paths
+#: cost 0.188 s sequentially, 0.144 s at 4 workers, 0.131 s at 8 and 0.130 s
+#: at 16 -- so eight captures almost the whole win without opening 482 file
+#: handles against a V: network volume. Kept a constant so a fixture can pin
+#: the sequential path and prove both paths agree byte-for-byte.
+_READ_WORKERS = 8
 
 #: A version token: three numeric components plus the bare pre-release
 #: suffix this project actually ships (``1.2.3``, ``0.0.2a3``, ``0.0.2b1``).
@@ -122,18 +131,25 @@ _NO_GIT_EXCLUDED_DIRS = frozenset(
         ".ruff_cache",
         "__pycache__",
         "node_modules",
+        # Runtime output mirrors a git project's .gitignore: logs/ and state/
+        # change on every run (acceptance artifacts, locks, pids), so counting
+        # them as source makes the fingerprint move under a concurrent test
+        # suite and blocks every freshness check with the two-walk race.
+        "logs",
+        "state",
     }
 )
 _NO_GIT_EXCLUDED_ROOT_FILES = frozenset({"nul"})
 
 
-def _run_git(root: Path, *args: str) -> bytes:
+def _run_git(root: Path, *args: str, timeout: float | None = None) -> bytes:
     try:
         result = subprocess.run(
             ["git", "-C", os.fspath(root), *args],
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             check=False,
+            timeout=timeout,
         )
     except (OSError, subprocess.SubprocessError) as exc:
         raise FreshnessError(f"Git discovery failed: {exc}") from exc
@@ -337,6 +353,12 @@ def _content_digest(content: bytes) -> bytes:
     return hashlib.sha256(content).digest()
 
 
+#: A slot filled in after the reads finish. Only ever returned to the caller
+#: when a read raised, in which case the pass aborts before reading slots, so
+#: it can never leak into evidence.
+_PLACEHOLDER = _Evidence(b"F", b"", 0, b"", 0)
+
+
 def _record_evidence(
     root: Path,
     raw_path: bytes,
@@ -390,6 +412,7 @@ def _parse_git_delta_evidence(
     untracked: bytes,
     path_map: dict | None = None,
     record_observer: Callable[[_Record], None] | None = None,
+    parallel: bool = True,
 ) -> list[_Evidence]:
     """Evidence variant of ``_parse_git_delta`` (PERF-002)."""
     records: dict[bytes, tuple[bytes, int, int]] = {}
@@ -431,25 +454,81 @@ def _parse_git_delta_evidence(
         if not raw_path or _is_saipen_path(raw_path):
             continue
         records[raw_path] = (b"F", 0, 0)
-    evidence: list[_Evidence] = []
-    for raw_path in sorted(records):
-        kind, _old_mode, new_mode = records[raw_path]
-        if kind == b"D":
-            if record_observer is not None:
-                # Deletions have no live file to read, but they are still
-                # source identity evidence.  Omitting this frame made a
-                # tracked deletion change Git's delta listing without
-                # changing the resulting fingerprint.
-                record_observer(_Record(b"D", raw_path, _old_mode, b""))
-            evidence.append(_Evidence(b"D", raw_path, _old_mode, b"", 0))
-        else:
-            declared_mode = new_mode or None
-            evidence.append(
-                _record_evidence(
-                    root, raw_path, declared_mode, path_map, record_observer
+    # The output order is `sorted(records)`' order and is load-bearing: the
+    # confirming pass frames these records into the canonical digest in exactly
+    # this sequence, so the parallel path below must reproduce it byte-for-byte
+    # rather than re-sorting by kind or by completion time.
+    ordered_paths = sorted(records)
+
+    if record_observer is not None or not parallel or len(ordered_paths) < 2:
+        # The confirmed pass streams these frames into the canonical digest, so
+        # its call order IS part of the fingerprint. It therefore runs the
+        # original single loop, unchanged: one record at a time, in
+        # `sorted(records)` order, observer called at the record's own position.
+        # Reusing the slot machinery below would group the deletion frames ahead
+        # of the file frames and silently move `git-delta-v1`.
+        evidence: list[_Evidence] = []
+        for raw_path in ordered_paths:
+            kind, old_mode, new_mode = records[raw_path]
+            if kind == b"D":
+                if record_observer is not None:
+                    # Deletions have no live file to read, but they are still
+                    # source identity evidence.  Omitting this frame made a
+                    # tracked deletion change Git's delta listing without
+                    # changing the resulting fingerprint.
+                    record_observer(_Record(b"D", raw_path, old_mode, b""))
+                evidence.append(_Evidence(b"D", raw_path, old_mode, b"", 0))
+            else:
+                evidence.append(
+                    _record_evidence(
+                        root, raw_path, new_mode or None, path_map, record_observer
+                    )
                 )
-            )
-    return evidence
+        return evidence
+
+    # Observer-less sampling passes only. Each per-file read is independent, so
+    # they overlap; the returned list is still assembled in `sorted(records)`
+    # order, which is the order the confirming pass will frame it in.
+    slots: list[_Evidence] = []
+    read_slots: list[int] = []
+    pending: list[tuple[bytes, int | None]] = []
+    for raw_path in ordered_paths:
+        kind, old_mode, new_mode = records[raw_path]
+        if kind == b"D":
+            slots.append(_Evidence(b"D", raw_path, old_mode, b"", 0))
+        else:
+            read_slots.append(len(slots))
+            slots.append(_PLACEHOLDER)
+            pending.append((raw_path, new_mode or None))
+
+    if len(pending) > 1:
+        # T-1902: the per-file reads inside one sampling pass are independent,
+        # so they overlap. Bounded memory is unchanged: each read still returns
+        # a content digest, never the source bytes.
+        #
+        # `path_map` is filled on the main thread in sorted order, exactly as
+        # the sequential path fills it, so no two workers race for one raw
+        # path and the cache contents are identical. Results are read back in
+        # submission order, so a failing input raises the same FreshnessError
+        # for the same path a sequential pass would have raised first.
+        for raw_path, _declared in pending:
+            if path_map is not None and raw_path not in path_map:
+                path_map[raw_path] = _path_from_git(root, raw_path)
+        workers = min(_READ_WORKERS, len(pending))
+        with ThreadPoolExecutor(max_workers=workers) as pool:
+            futures = [
+                pool.submit(_record_evidence, root, raw_path, declared, path_map, None)
+                for raw_path, declared in pending
+            ]
+            read_results = [future.result() for future in futures]
+    else:
+        read_results = [
+            _record_evidence(root, raw_path, declared, path_map, None)
+            for raw_path, declared in pending
+        ]
+    for position, result in zip(read_slots, read_results):
+        slots[position] = result
+    return slots
 
 
 def _digest_capture(model: str) -> tuple[hashlib._Hash, Callable[[_Record], None]]:
@@ -606,7 +685,47 @@ def _walk_no_git_evidence(
     return _iter_no_git(root, full=False, record_observer=record_observer)
 
 
-def _git_delta_listing(root: Path) -> tuple[bytes, bytes]:
+#: The one boundary the source identity draws, expressed for Git as well as for
+#: `_is_saipen_path`. Exclusion-only, with no positive pathspec beside it: Git
+#: keeps its default selection (the whole repository as seen from the caller's
+#: directory) and then drops exactly this prefix. A positive pathspec such as
+#: "." would narrow that selection to the caller's subtree, which is NOT the
+#: same set for a project that lives in a subdirectory of a larger repository.
+_SAIPEN_PATHSPEC = (":(exclude).saipen",)
+
+
+def _git_delta_listing(root: Path, *, timeout: float | None = None) -> tuple[bytes, bytes]:
+    """The changed-path listing the source identity fingerprints.
+
+    T-1900 (SRC-318). Both Git calls ask for the `.saipen` boundary to be
+    excluded, because every reader of this listing either discards those paths
+    or should: `_parse_git_delta` and `_parse_git_delta_evidence` skip them,
+    `_filtered_git_listing` projects them out before every comparison, and
+    `_nested_binding` hashes the listing of a DECLARED nested repository -- a
+    project in its own right, whose `.saipen` is that project's runtime, not
+    the outer one's source. Leaving the exclusion to Python meant Git
+    generated and this process decoded the entire `.saipen` population on every
+    pass -- measured on the live tree, 42 572 untracked paths (4.18 MB) to keep
+    57, and three listings per `compute_source_identity`. The pathspec returns
+    the identical surviving set (byte-for-byte, same order) for 0.032 s instead
+    of 0.795 s per pass.
+
+    The boundary is exactly `_is_saipen_path`: `.saipenicious.py`,
+    `.saipen-src/` and `.saipenx/` stay ordinary source, proved against a
+    fixture. The same holds inside a declared nested repository, which this
+    function also serves through `_nested_binding`: the binding is
+    SHA256(raw_delta + b"\0" + untracked), so excluding the nested `.saipen`
+    here CHANGES the binding bytes relative to the pre-T-1900 function. That is
+    the intended meaning -- a nested repository's runtime churn is not the
+    outer project's source -- but it is a semantic change, so AC-05 pins it.
+    A Git that could not parse this pathspec exits non-zero and the capture
+    fails closed; `_parse_git_delta` and `_filtered_git_listing` keep their own
+    predicate, so a Git that somehow emitted the excluded paths anyway would
+    still produce the same fingerprint for a project that declares no nested
+    repositories (verified: pathspeced and unfiltered listings hash identically
+    on this tree). The residual exposure is a declared nested repository under
+    such a Git, where the binding would be the more sensitive pre-T-1900 one.
+    """
     raw = _run_git(
         root,
         "diff",
@@ -617,9 +736,53 @@ def _git_delta_listing(root: Path) -> tuple[bytes, bytes]:
         "--ignore-submodules=none",
         "HEAD",
         "--",
+        *_SAIPEN_PATHSPEC,
+        timeout=timeout,
     )
-    untracked = _run_git(root, "ls-files", "-z", "--others", "--exclude-standard", "--")
+    untracked = _run_git(
+        root,
+        "ls-files",
+        "-z",
+        "--others",
+        "--exclude-standard",
+        "--",
+        *_SAIPEN_PATHSPEC,
+        timeout=timeout,
+    )
     return raw, untracked
+
+
+def _filtered_git_listing(
+    listing: tuple[bytes, bytes],
+) -> tuple[tuple[bytes, ...], tuple[bytes, ...]]:
+    """Project a Git delta listing onto the paths source identity fingerprints.
+
+    T-1827 (SRC-282:R003). A protocol operation releases the writer lock around
+    a long external process and then re-proves the source it captured. Its own
+    journal, lock sidecar and recovery files live under ``.saipen`` and appear
+    in ``git diff --raw``/``ls-files`` as untracked, while the source identity
+    deliberately excludes every ``.saipen`` path. Comparing the RAW listing
+    bytes therefore reported the caller's own bookkeeping as source drift.
+    Both sides of a bounded comparison are filtered here -- the same path
+    space ``_parse_git_delta`` uses -- so only fingerprinted paths can trip it.
+    """
+    raw, untracked = listing
+    fields = raw.split(b"\0")
+    kept: list[bytes] = []
+    index = 0
+    while index < len(fields) and fields[index]:
+        header = fields[index]
+        index += 1
+        if index >= len(fields) or not fields[index]:
+            raise FreshnessError("Git returned a truncated --raw delta record")
+        raw_path = fields[index]
+        index += 1
+        if not _is_saipen_path(raw_path):
+            kept.extend((header, raw_path))
+    paths = tuple(
+        path for path in untracked.split(b"\0") if path and not _is_saipen_path(path)
+    )
+    return tuple(kept), paths
 
 
 def _parse_git_delta(root: Path, raw: bytes, untracked: bytes) -> list[_Record]:
@@ -709,8 +872,16 @@ def _git_identity(root: Path) -> SourceIdentity:
     model = "git-delta-v1"
     binding_before = _nested_binding(root)
     digest, observe = _digest_capture(model)
+    # T-1902: the confirming pass stays strictly sequential. Its frames feed
+    # the canonical digest in sorted order, so overlapping its reads would
+    # change the fingerprint; the two observer-less passes above and below are
+    # the only ones that may overlap.
     confirmed = _parse_git_delta_evidence(
-        root, *listing_after, path_map=_path_map, record_observer=observe
+        root,
+        *listing_after,
+        path_map=_path_map,
+        record_observer=observe,
+        parallel=False,
     )
     if first != second or second != confirmed:
         raise FreshnessError("source content changed while fingerprint inputs were being read")
@@ -906,8 +1077,50 @@ def compute_source_identity(project_root: Path | str) -> SourceIdentity:
     return SourceIdentity("no-git", fingerprint, model, token)
 
 
+def listing_token_unchanged(
+    project_root: Path | str, identity: SourceIdentity, *, timeout: float | None = None
+) -> tuple[bool, str | None]:
+    """The cheap half of revalidation: HEAD and the changed-path LISTING only.
+
+    T-1827 (SRC-282:R003/R006). The writer lock may hold this check, so it
+    re-derives only what Git reports (two HEAD reads, two delta listings) and
+    never re-hashes changed file contents: a 70k-entry working tree made the
+    full content confirmation take minutes, which is exactly the hold the
+    audit measured. Tracked edits are still caught because `git diff --raw`
+    carries the blob hashes; untracked content edits are not, and no
+    lock-respecting writer can cause those anyway.
+    """
+    root = Path(project_root).resolve()
+    token = identity._revalidation
+    if not isinstance(token, _RevalidationToken):
+        return False, "source identity has no bounded revalidation token"
+    if token.root != os.fspath(root) or token.model != identity.discovery_model:
+        return False, "source revalidation token is bound to another root/model"
+    if token.model != "git-delta-v1" or token.listing is None:
+        return False, "source identity has no bounded Git listing token"
+    try:
+        head_before = _run_git(
+            root, "rev-parse", "--verify", "HEAD", timeout=timeout
+        ).decode("ascii").strip()
+        listing_before = _git_delta_listing(root, timeout=timeout)
+        listing_after = _git_delta_listing(root, timeout=timeout)
+        head_after = _run_git(
+            root, "rev-parse", "--verify", "HEAD", timeout=timeout
+        ).decode("ascii").strip()
+        listing_stable = (
+            _filtered_git_listing(listing_before)
+            == _filtered_git_listing(listing_after)
+            == _filtered_git_listing(token.listing)
+        )
+    except (FreshnessError, OSError, UnicodeError) as exc:
+        return False, str(exc)
+    if not (head_before == head_after == token.head == identity.source_head and listing_stable):
+        return False, "source HEAD or changed-path listing moved after capture"
+    return True, None
+
+
 def revalidate_source_identity(
-    project_root: Path | str, identity: SourceIdentity
+    project_root: Path | str, identity: SourceIdentity, *, timeout: float | None = None
 ) -> tuple[bool, str | None]:
     """Confirm a captured identity without repeating the full capture.
 
@@ -915,6 +1128,10 @@ def revalidate_source_identity(
     subprocesses total) plus bounded content evidence, instead of another ten
     subprocess full identity.  No-Git confirmation performs one evidence walk
     and one checked streaming digest.  Any missing/foreign token fails closed.
+
+    ``timeout`` bounds each Git subprocess. T-1827 (SRC-282:R003): a caller
+    that runs this confirmation while holding the project writer lock passes
+    its declared bound, so no external process under that lock can outlast it.
     """
     root = Path(project_root).resolve()
     token = identity._revalidation
@@ -926,17 +1143,23 @@ def revalidate_source_identity(
         if token.model == "git-delta-v1":
             if token.listing is None:
                 return False, "Git source revalidation token has no listing"
-            head_before = _run_git(root, "rev-parse", "--verify", "HEAD").decode("ascii").strip()
-            listing_before = _git_delta_listing(root)
+            head_before = _run_git(
+                root, "rev-parse", "--verify", "HEAD", timeout=timeout
+            ).decode("ascii").strip()
+            listing_before = _git_delta_listing(root, timeout=timeout)
             digest, observe = _digest_capture(token.model)
             evidence = _parse_git_delta_evidence(
                 root, *listing_before, record_observer=observe
             )
-            listing_after = _git_delta_listing(root)
-            head_after = _run_git(root, "rev-parse", "--verify", "HEAD").decode("ascii").strip()
+            listing_after = _git_delta_listing(root, timeout=timeout)
+            head_after = _run_git(
+                root, "rev-parse", "--verify", "HEAD", timeout=timeout
+            ).decode("ascii").strip()
             if not (
                 head_before == head_after == token.head == identity.source_head
-                and listing_before == listing_after == token.listing
+                and _filtered_git_listing(listing_before)
+                == _filtered_git_listing(listing_after)
+                == _filtered_git_listing(token.listing)
                 and tuple(evidence) == token.evidence
             ):
                 return False, "source tree or HEAD changed after snapshot capture"

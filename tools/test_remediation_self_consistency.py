@@ -30,6 +30,7 @@ if str(TOOLS) not in sys.path:
 
 from saipen_engine import command_effects  # noqa: E402
 from saipen_engine import remediation  # noqa: E402
+from saipen_engine.registry import command_reference_path  # noqa: E402
 from test_hermetic_env import isolate_host_session  # noqa: E402
 from test_work_reverify_cli import (  # noqa: E402
     _make_project,
@@ -272,7 +273,7 @@ class RemediationTableTests(unittest.TestCase):
             text=True,
             encoding="utf-8",
         ).stdout
-        commands_md = (ROOT / "saipen" / "COMMANDS.md").read_text(encoding="utf-8-sig")
+        commands_md = command_reference_path(ROOT / "saipen").read_text(encoding="utf-8-sig")
         self.assertTrue(help_text)
         for spec in remediation.REMEDIATIONS:
             if spec.kind != "command" or not spec.extract:

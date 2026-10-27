@@ -21,6 +21,7 @@ from __future__ import annotations
 import sys
 import unittest
 from pathlib import Path
+from unittest import mock
 
 TOOLS = Path(__file__).resolve().parent
 if str(TOOLS) not in sys.path:
@@ -40,8 +41,8 @@ REQUEST = (
 
 
 class DuplicateIngressTests(ResumeFixture):
-    def _done(self, project: Path) -> str:
-        work = self.add(project, REQUEST)
+    def _done(self, project: Path, request: str = REQUEST) -> str:
+        work = self.add(project, request)
         self.assertTrue(apply_claim(project, work, AGENT, explicit=True).ok)
         self.to_ship(project, work)
         finished = finish_ticket(project, work, AGENT)
@@ -53,7 +54,11 @@ class DuplicateIngressTests(ResumeFixture):
         project = self.make_project()
         work = self._done(project)
         before = set(self.tickets(project))
-        started = start_work(project, AGENT, actor_source="explicit", text=REQUEST)
+        with mock.patch(
+            "saipen_engine.debt.current_tree_reverify",
+            return_value={"receipt_id": "RV-CURRENT"},
+        ):
+            started = start_work(project, AGENT, actor_source="explicit", text=REQUEST)
         self.assertEqual(started.get("code"), "TICKET_ALREADY_DONE", started)
         self.assertEqual(started.get("ticket"), work, started)
         self.assertEqual(set(self.tickets(project)), before, "no duplicate Work")
@@ -62,6 +67,18 @@ class DuplicateIngressTests(ResumeFixture):
         self.assertIn(work, intake.linked_works(meta))
         self.assertTrue(intake.coverage_complete(project, receipt))
         self.assertIsNone(queued_source_projection(project), "consumed ingress never re-queues")
+
+    def test_done_description_without_current_proof_remains_actionable(self):
+        project = self.make_project()
+        old = self._done(project)
+        started = start_work(project, AGENT, actor_source="explicit", text=REQUEST)
+        self.assertEqual(started.get("code"), "STARTED", started)
+        self.assertNotEqual(started.get("ticket"), old)
+        receipt = started["receipt"]
+        self.assertTrue(intake.ensure_request_clause(project, receipt)["ok"])
+        self.assertEqual(
+            intake.coverage_summary(project, receipt)["unresolved"], [f"{receipt}:R001"]
+        )
 
     def test_a_repeat_of_open_work_binds_to_it(self):
         project = self.make_project()
@@ -83,6 +100,30 @@ class DuplicateIngressTests(ResumeFixture):
         )
         self.assertEqual(started.get("code"), "STARTED", started)
         self.assertEqual(len(set(self.tickets(project)) - before), 1, started)
+
+    def test_matching_done_description_does_not_settle_new_compound_clauses(self):
+        project = self.make_project()
+        request = (
+            "Deliver the audit: 1. Publish the canonical audit artifact; "
+            "2. Bind the producer operation identity"
+        )
+        old = self._done(project, request)
+        started = start_work(project, AGENT, actor_source="explicit", text=request)
+        self.assertEqual(started.get("code"), "STARTED", started)
+        self.assertNotEqual(started.get("ticket"), old)
+        summary = intake.coverage_summary(project, started["receipt"])
+        self.assertEqual(
+            len(summary["unresolved"]), 2,
+            (summary, intake.read_body(project, started["receipt"])),
+        )
+        ledger = intake._read_coverage(project, started["receipt"])
+        self.assertTrue(
+            all(item["disposition"] == "UNKNOWN" for item in ledger["requirements"].values()),
+            ledger,
+        )
+        self.assertIn(
+            started["ticket"], intake.linked_works(intake._read_meta(project, started["receipt"]))
+        )
 
 
 if __name__ == "__main__":

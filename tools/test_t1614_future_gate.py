@@ -425,9 +425,16 @@ class FutureGateMatrixTests(unittest.TestCase):
     def test_O_live_work_owning_a_gate_blocks_a_second_ticket(self):
         """O: no duplicate Work for the same gate root cause."""
         project = self._proj()
-        tid = _add(project, "already implementing future gate FG-0001")
+        tid = _add(project, "the one bounded slice")
         _write_gate(project, "gate.md", _gate_doc("FG-0001"))
-        gates.refresh(project)
+        index, _ = gates.refresh(project)
+        # T-1641: ownership is the slice record. The ticket's text says nothing
+        # about the gate; the record binds it, here on a gate a rebuild left
+        # unpromoted.
+        index["gates"][0]["slices"] = [
+            {"ticket": tid, "slice": index["gates"][0]["slice"], "closure": "done"}
+        ]
+        gates.write_index(project, index)
         report = gates.evaluate(project, _tickets(project))
         self.assertIsNone(report["next"])
         self.assertTrue(
@@ -563,6 +570,24 @@ class FutureGateMatrixTests(unittest.TestCase):
         self.assertEqual(projection["index_state"], gates.MISSING)
         # Missing projection must not authorize the HUNT/ADD fallthrough.
         self.assertEqual(_route(project)["reason"], "future-gate-refresh")
+
+    def test_Y_an_empty_corpus_over_a_written_index_is_current(self):
+        """Y: zero documents is a fact, not schema drift.
+
+        The witness count was compared as `int(prior or -1)`, and `0 or -1` is
+        -1, so an empty corpus could never match itself: the projection stayed
+        STALE forever and every `continue` re-ran `saipen future refresh`
+        against the corpus it had just indexed (CONTINUE_FIXED_POINT).
+        """
+        project = self._proj()
+        gates.refresh(project)
+        fresh = gates.freshness(project)
+        self.assertEqual(fresh["state"], gates.CURRENT)
+        self.assertEqual(fresh["documents"], 0)
+        projection = gates.projection(project, _tickets(project))
+        self.assertFalse(projection["refresh_required"])
+        self.assertEqual(projection["eligible"], [])
+        self.assertNotEqual(_route(project)["reason"], "future-gate-refresh")
 
     # ------------------------------------------------------------ owner + shape
 
@@ -969,9 +994,20 @@ class FutureGateAutoDiscoveryTests(unittest.TestCase):
 
         indexed = gates.status(project)
         self.assertEqual(gates.freshness(project)["documents"], len(originals))
-        self.assertEqual(indexed["counts"][gates.NEEDS_REVIEW], len(originals))
+        # The historical corpus is every document without the v1 marker; a
+        # gate recorded through `saipen future add` is classified by its own
+        # header (T-1626, FG-0046).
+        legacy = {
+            relative
+            for relative, blob in originals.items()
+            if not blob.decode("utf-8", errors="replace").lstrip().startswith(gates.DOC_MARKER)
+        }
+        self.assertGreater(len(legacy), 1, "the historical corpus is the subject")
+        self.assertEqual(indexed["counts"][gates.NEEDS_REVIEW], len(legacy))
         # Nothing is READY by guess: every historical record is ambiguous first.
-        self.assertIsNone(gates.status(project, _tickets(project))["next"])
+        paths = {gate["id"]: gate["path"] for gate in indexed["gates"]}
+        routed = gates.status(project, _tickets(project))["next"]
+        self.assertNotIn(paths.get(routed), legacy, routed)
 
         while True:
             pending = [
@@ -985,7 +1021,7 @@ class FutureGateAutoDiscoveryTests(unittest.TestCase):
 
         after = gates.status(project, _tickets(project))
         self.assertEqual(sum(after["counts"].values()), len(originals))
-        self.assertIsNone(after["next"])
+        self.assertNotIn(paths.get(after["next"]), legacy, after["next"])
         self.assertEqual(list(_tickets(project)), [])
         for relative, blob in originals.items():
             self.assertEqual((project / relative).read_bytes(), blob, relative)

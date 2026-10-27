@@ -164,6 +164,9 @@ def upsert_member(
     cohort membership and the BOARD line that claims it commit together or not
     at all.
     """
+    existing = (registry.get("cohorts") or {}).get(cohort_id) or {}
+    if "reconciliation" in existing or "publication_successor" in existing:
+        raise ValueError("reconciled cohort membership is frozen; use a new reviewed batch")
     out = json.loads(json.dumps(registry))
     cohorts = out.setdefault("cohorts", {})
     cohort = cohorts.setdefault(
@@ -340,6 +343,20 @@ def cohort_readiness(root: Path | str, cohort: dict) -> dict:
             problems.append(
                 f"{tid} source coverage gate: {gate.get('code') or gate.get('detail')}"
             )
+    if "publication_successor" in cohort:
+        edge = cohort["publication_successor"]
+        next_cohort = edge.get("cohort") if isinstance(edge, dict) else None
+        if isinstance(next_cohort, str) and COHORT_ID_RE.fullmatch(next_cohort):
+            problems.append("cohort has a publication successor; use saipen cohort ship "
+                            + next_cohort)
+        else:
+            problems.append("cohort publication successor is malformed")
+    if "reconciliation" in cohort:
+        from .cohort_reconcile import target_problem
+
+        problem = target_problem(root, cohort)
+        if problem:
+            problems.append(problem)
     return {"ready": not problems, "problems": problems}
 
 
@@ -410,6 +427,41 @@ def _is_published(record: dict) -> bool:
     if record.get("commit") or record.get("release_commit"):
         return True
     return record.get("mode") == "no-publish" and bool(record.get("op_id"))
+
+
+def publication_state(root: Path | str, ticket_id: str) -> str:
+    """Is this Work's own delta PUBLISHED, or still waiting for a release?
+
+    T-1866 / SRC-295 F-03. `saipen ticket done --closure-mode own_patch` used to
+    answer FINISHED and leave the DONE line silent about publication, so the
+    line implied a shipment nobody had made: the measured case closed a ticket
+    whose implementation files were still modified in the worktree fifteen
+    minutes later. The two neighbouring gates do not cover it -- T-37 refuses
+    `own_patch` when BUILD declared NO delta, and `_resolve_work` refuses to
+    INHERIT an unpublished DONE -- so between them sat the case this answers:
+    a real delta that is not released.
+
+    The answer is DERIVED, never claimed by the caller: the same committed
+    release evidence `_resolve_work` trusts names the ticket or it does not.
+    Returned vocabulary is deliberately two-valued -- ``published`` and
+    ``pending`` -- because a third value would be a state no reader could act
+    on. This is read-only; it writes nothing and cannot be satisfied by prose.
+    """
+    root = Path(root)
+    ticket = (str(ticket_id) or "").strip()
+    if not ticket:
+        return "pending"
+    try:
+        records = _published_releases(root)
+    except (OSError, ValueError):
+        # Publication evidence that cannot be read proves nothing; the honest
+        # answer is the unshipped one, and the downstream resolver agrees.
+        return "pending"
+    for record in records:
+        if str(record.get("ticket_id") or "") == ticket:
+            return "published"
+    return "pending"
+
 
 
 def _release_matches(record: dict, wanted: str) -> bool:
@@ -650,6 +702,15 @@ def _resolve_work(root: Path, ticket_id: str, chain: tuple[str, ...]) -> SourceV
                 f"registry record -- BOARD prose is not cohort authority",
                 chain=chain,
             )
+        if "publication_successor" in cohort:
+            from .cohort_reconcile import successor
+
+            try:
+                cohort = successor(root, registry, cohort_id)
+                cohort_id = cohort["cohort_id"]
+            except (OSError, ValueError, KeyError, TypeError) as exc:
+                return SourceVerdict(False, ticket_id, "work",
+                    "cohort publication successor is unproven: " + str(exc), chain=chain)
         if cohort.get("publication_status") != "shipped":
             return SourceVerdict(
                 False,

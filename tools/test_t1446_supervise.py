@@ -61,6 +61,7 @@ BOARD = (
 AGENT = r'''
 import json, os, sys, time
 from pathlib import Path
+from saipen_engine.paths import safe_atomic_write_bytes
 
 root = Path.cwd()
 assert os.environ.get("PWD") == str(root), "PWD must name the project"
@@ -91,8 +92,10 @@ def bump(extra_phase=None, finish=False):
         rows = [row for row in rows if row != mission]
         rows.insert(rows.index("## DONE") + 1,
                     mission.replace("- [/]", "- [x]").split(" | owner:")[0])
-        board.write_text("\n".join(rows), encoding="utf-8")
-    state.write_text(text, encoding="utf-8")
+        safe_atomic_write_bytes(
+            board, "\n".join(rows).encode("utf-8"), kind="board", ownership_root=root
+        )
+    safe_atomic_write_bytes(state, text.encode("utf-8"), kind="state", ownership_root=root)
     with (root / ".saipen" / "LOG.md").open("a", encoding="utf-8") as log:
         log.write(f"- 22.09.26 12:00 [E-{event:03d}] [T-1] [agent: tester] RUN: {mode}\n")
 
@@ -201,7 +204,9 @@ class SuperviseFixture(unittest.TestCase):
         self.control = self.base / "control"
         self.control.mkdir()
         self.agent = self.base / "agent.py"
-        self.agent.write_text(AGENT, encoding="utf-8")
+        self.agent.write_text(
+            f"import sys\nsys.path.insert(0, {str(TOOLS)!r})\n" + AGENT, encoding="utf-8"
+        )
 
     def run_plan(self, plan: list[str], *, model=None, fallback=(), **kwargs) -> dict:
         (self.control / "plan.json").write_text(json.dumps(plan), encoding="utf-8")
@@ -311,13 +316,29 @@ class QualityOverTimeTests(SuperviseFixture):
         self.assertEqual(result["counters"]["crash_recovery_count"], 0, result)
 
     def test_the_host_bound_ends_a_progressing_slice_without_failure(self):
+        now = 0.0
+        seen = 7
+
+        def clock():
+            nonlocal now, seen
+            raw = worker._progress_marker(self.project).get("last_event", "")
+            event = int(raw) if str(raw).isdigit() else seen
+            if event > seen:
+                seen = event
+                now += 0.6
+            return now
+
         result = self.run_plan(
-            ["slow_forever", "finish"], slice_timeout=1.0, max_slice_seconds=2.5
+            ["slow_forever", "finish"],
+            slice_timeout=1.0,
+            max_slice_seconds=2.5,
+            clock=clock,
         )
         self.assertEqual(result["stop"], supervisor.IDLE, result)
         self.assertEqual(result["counters"]["slow_progress_slices"], 1, result)
         self.assertEqual(result["counters"]["failures"], {}, result)
         self.assertEqual(result["counters"]["worker_generation_count"], 2, result)
+        self.assertGreater(now, 2.5, result)
 
     def test_an_idle_generation_is_still_bounded(self):
         result = self.run_plan(["hang", "finish"], slice_timeout=1.0, max_slice_seconds=30.0)

@@ -6,6 +6,7 @@ import hashlib
 import importlib
 import json
 import os
+import re
 import shutil
 import sys
 import tempfile
@@ -55,6 +56,21 @@ def setUpModule() -> None:
     # An outer host session (SAIPEN_PROJECT_ROOT/LINEAGE, SAIPEN_AGENT, ...)
     # must never bind this module's disposable fixtures (test_hermetic_env).
     isolate_host_session()
+
+
+#: The capped LOG builder as a whole identifier (T-1782). A substring test
+#: flagged any name that merely contains it -- `no_delta_build_events`, a LOG
+#: reader -- and turned the declared family red for every ticket.
+_CAPPED_BUILDER = re.compile(r"(?<![A-Za-z0-9_])build_event(?![A-Za-z0-9_])")
+
+
+def capped_builder_offenders(name: str, text: str) -> list[str]:
+    """The lines of one engine module that reach the capped builder directly."""
+    return [
+        f"{name}:{number}: {line.strip()}"
+        for number, line in enumerate(text.splitlines(), 1)
+        if _CAPPED_BUILDER.search(line.split("#", 1)[0])
+    ]
 
 
 def _legacy_project() -> tuple[Path, bytes]:
@@ -1978,6 +1994,10 @@ class LogEventOversizeRecoveryTests(unittest.TestCase):
     def _read(self, root: Path, name: str) -> str:
         return (root / ".saipen" / name).read_text(encoding="utf-8")
 
+    def _authority(self, root, decision):
+        from test_t1729_operator_gate import fixture_authority
+        return fixture_authority(root, statement=decision)
+
     def test_the_raw_builder_still_refuses_the_unbounded_dec(self):
         blocker = f"{_BRAKE} -- " + ("vendor certification evidence pending " * 90)
         message = f"reconcile protocol state; operator-authorized STATE.blocker clear: {blocker}"
@@ -1987,54 +2007,51 @@ class LogEventOversizeRecoveryTests(unittest.TestCase):
     def test_a_three_kb_blocker_clears_losslessly(self):
         root = _braked_project()
         decision = f"{_DECISION}; reviewed by operator {('  audit ' * 60).strip()}"
+        receipt = self._authority(root, decision)
 
-        planned = reconcile_protocol_state(root, "tester", dry_run=True, resolve_blocker=decision)
+        planned = reconcile_protocol_state(root, "tester", dry_run=True, resolve_blocker=receipt)
         self.assertTrue(planned["ok"], planned)
         self.assertEqual(planned["code"], "REPAIR_REQUIRED", planned)
-        self.assertTrue(any("log-detail" in path for path in planned["targets"]), planned)
+        self.assertTrue(any("state-legacy-output" in path for path in planned["targets"]), planned)
 
-        applied = reconcile_protocol_state(root, "tester", resolve_blocker=decision)
+        applied = reconcile_protocol_state(root, "tester", resolve_blocker=receipt)
         self.assertTrue(applied["ok"], applied)
         self.assertEqual(applied["code"], "REPAIRED", applied)
 
         # The brake is gone and the decision is durable in the canonical DEC.
         self.assertIn("\nblocker: none\n", self._read(root, "STATE.md"))
         log = self._read(root, "LOG.md")
-        self.assertIn("detail_ref: .saipen/recovery/log-detail/", log)
-
-        artifacts = _detail_artifacts(root)
-        self.assertEqual(len(artifacts), 1, artifacts)
-        metadata = _verify_detail(root, artifacts[0])
-        detail = (root / metadata["original_event_path"]).read_text(encoding="utf-8")
-        # NOTHING was truncated: the operator's decision and the original
-        # blocker both survive byte-for-byte inside the externalized event.
-        self.assertIn(_DECISION, detail)
-        self.assertIn(decision, detail)
-        self.assertIn("vendor certification evidence pending", detail)
-        self.assertEqual(detail.count("audit"), decision.count("audit"))
-        # The compact live line stays under the cap.
-        live = [line for line in log.splitlines() if "detail_ref:" in line]
+        self.assertIn(receipt, log)
+        from saipen_engine.intake import read_body
+        authority = json.loads(read_body(root, receipt)["body"])
+        self.assertEqual(authority["statement"], decision)
+        self.assertIn("vendor certification evidence pending", authority["gate"]["blocker"])
+        # Authority bytes live in their original Source; the journal event
+        # binds that receipt and stays under the ordinary event cap.
+        live = [line for line in log.splitlines() if "operator gate decision --" in line]
         self.assertEqual(len(live), 1)
         self.assertLessEqual(len(live[0].encode("utf-8")), 1024)
 
     def test_the_retry_is_deterministic_and_idempotent(self):
         root = _braked_project()
+        receipt = self._authority(root, _DECISION)
         self.assertTrue(
-            reconcile_protocol_state(root, "tester", resolve_blocker=_DECISION)["ok"]
+            reconcile_protocol_state(root, "tester", resolve_blocker=receipt)["ok"]
         )
         log_after_first = self._read(root, "LOG.md")
         artifacts = _detail_artifacts(root)
 
-        again = reconcile_protocol_state(root, "tester", resolve_blocker=_DECISION)
-        self.assertEqual(again["code"], "CLEAN", again)
+        again = reconcile_protocol_state(root, "tester", resolve_blocker=receipt)
+        self.assertEqual(again["code"], "ALREADY_APPLIED", again)
         self.assertEqual(self._read(root, "LOG.md"), log_after_first)
         self.assertEqual(_detail_artifacts(root), artifacts)
 
     def test_the_original_state_bytes_survive_as_recovery_evidence(self):
         root = _braked_project()
         original = (root / ".saipen" / "STATE.md").read_bytes()
+        receipt = self._authority(root, _DECISION)
         self.assertTrue(
-            reconcile_protocol_state(root, "tester", resolve_blocker=_DECISION)["ok"]
+            reconcile_protocol_state(root, "tester", resolve_blocker=receipt)["ok"]
         )
         evidence = sorted((root / ".saipen" / "recovery").rglob("*.STATE.md"))
         self.assertEqual(len(evidence), 1, evidence)
@@ -2046,10 +2063,9 @@ class LogEventOversizeRecoveryTests(unittest.TestCase):
     def test_legacy_adoption_reconcile_externalizes_in_the_same_commit(self):
         root = _recovery_legacy_project()
         adopted = _legacy_fleet(root, 200)
-        decision = f"{_DECISION}; operator note {('legacy adoption approved ' * 20).strip()}"
 
         applied = reconcile_protocol_state(
-            root, "tester", adopt_legacy=adopted, resolve_blocker=decision
+            root, "tester", adopt_legacy=adopted
         )
         self.assertTrue(applied["ok"], applied.get("detail"))
         self.assertEqual(applied["code"], "REPAIRED", applied)
@@ -2112,11 +2128,7 @@ class CanonicalLogProducerTests(unittest.TestCase):
         for path in sorted((TOOLS / "saipen_engine").glob("*.py")):
             if path.name in self.ALLOWED:
                 continue
-            for number, line in enumerate(
-                path.read_text(encoding="utf-8").splitlines(), 1
-            ):
-                if "build_event" in line.split("#", 1)[0]:
-                    offenders.append(f"{path.name}:{number}: {line.strip()}")
+            offenders += capped_builder_offenders(path.name, path.read_text(encoding="utf-8"))
         self.assertEqual(
             offenders,
             [],

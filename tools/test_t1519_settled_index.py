@@ -1,19 +1,22 @@
-"""T-1519: the settled receipt index survives its own settlement.
+"""T-1519: a snapshot of a settled project does not decode its history again.
 
-Every committed mutation settles its receipt (moves it into
-`.saipen/recovery/settled/` and extends the content-authenticated index), and
-every `mark("COMMITTED")` site then dropped the `.staged` payloads from the
-already-settled directory. That moved the directory's mtime after the index
-had recorded it, the stat hint stopped matching, and `_settle_journal` rebuilt
-only an ABSENT index -- so the index died at the first settlement and every
-reader paid the strict scan (live: 6879 receipts, 6879 decodes, 5.9 s per
-snapshot). The payloads are now dropped before the receipt moves, and a stale
-index is rebuilt at the next settlement.
+Every committed mutation settles its receipt into `.saipen/recovery/settled/`.
+A whole-history receipt snapshot used to decode every one of them on every
+call (live: 6879 receipts, 6879 decodes, 5.9 s per snapshot), because the
+index that cached the decoded records died at the first settlement. T-1519
+kept that index alive by re-authenticating and rewriting it whole at every
+settlement.
+
+SRC-026:R009 (T-1304) measured what that cost -- 6.06 s of a 7.3 s checkpoint
+at 10829 receipts, one 37 MB document rewritten per command -- and moved the
+same service to the bounded projection: settlement folds one receipt into it,
+and the projection's decode memo answers for every receipt whose exact bytes
+were already decoded. The property this file holds is unchanged; the mechanism
+it names is the memo.
 """
 
 from __future__ import annotations
 
-import json
 import sys
 from pathlib import Path
 from unittest.mock import patch
@@ -23,8 +26,9 @@ if str(TOOLS) not in sys.path:
     sys.path.insert(0, str(TOOLS))
 
 from saipen_engine import journal as journal_mod  # noqa: E402
+from saipen_engine import settled_projection as SP  # noqa: E402
 from saipen_engine.operations import apply_claim, checkpoint  # noqa: E402
-from saipen_engine.paths import project_identity, project_lineage_identity  # noqa: E402
+from saipen_engine.paths import project_identity  # noqa: E402
 from test_hermetic_env import isolate_host_session  # noqa: E402
 from test_orchestration_repair import OrchestrationFixture  # noqa: E402
 
@@ -42,12 +46,6 @@ def settled_names(project: Path) -> list[str]:
     )
 
 
-def live_index(project: Path) -> dict | None:
-    return journal_mod._read_settled_index(
-        project.resolve(), live_lineage=project_lineage_identity(project)
-    )
-
-
 def settled_decodes(project: Path) -> int:
     """Strict decodes one receipt snapshot performs."""
     calls = []
@@ -62,6 +60,12 @@ def settled_decodes(project: Path) -> int:
     return len(calls)
 
 
+def strict_records(project: Path) -> list[dict]:
+    """The snapshot with the memo switched off: every receipt decoded."""
+    with patch.object(SP, "record_memo", lambda root: {}):
+        return list(journal_mod.semantic_receipt_snapshot(project).records)
+
+
 class SettledIndexTests(OrchestrationFixture):
     def busy_project(self) -> tuple[Path, str]:
         project = self.make_project()
@@ -71,42 +75,66 @@ class SettledIndexTests(OrchestrationFixture):
             self.assertTrue(checkpoint(project, "tester", "RUN", ticket, f"step {step}").ok)
         return project, ticket
 
-    def assert_index_covers_every_receipt(self, project: Path) -> None:
-        index = live_index(project)
-        self.assertIsNotNone(index, "the settled index does not validate")
-        self.assertEqual([entry["name"] for entry in index["entries"]], settled_names(project))
+    def assert_projection_covers_every_receipt(self, project: Path) -> None:
+        self.assertEqual(SP.state(project), SP.STATE_CURRENT)
+        self.assertEqual(SP.validate_projection_deep(project), (True, []))
+        memoized = sorted(name for name, _manifest, _progress in SP.record_memo(project))
+        self.assertEqual(memoized, settled_names(project))
 
-    def test_the_index_validates_after_every_settlement(self):
+    def test_the_projection_is_current_after_every_settlement(self):
         project = self.make_project()
         ticket = self.add(project, "settled index fixture")
-        self.assert_index_covers_every_receipt(project)
+        self.assert_projection_covers_every_receipt(project)
         self.assertTrue(apply_claim(project, ticket, "tester").ok)
-        self.assert_index_covers_every_receipt(project)
+        self.assert_projection_covers_every_receipt(project)
         for step in range(3):
             self.assertTrue(checkpoint(project, "tester", "RUN", ticket, f"step {step}").ok)
-            self.assert_index_covers_every_receipt(project)
+            self.assert_projection_covers_every_receipt(project)
 
-    def test_a_snapshot_over_a_valid_index_decodes_no_settled_receipt(self):
+    def test_a_snapshot_of_a_settled_project_decodes_no_settled_receipt(self):
         project, _ = self.busy_project()
         self.assertGreaterEqual(len(settled_names(project)), 4)
         self.assertEqual(settled_decodes(project), 0)
+        self.assertEqual(
+            list(journal_mod.semantic_receipt_snapshot(project).records), strict_records(project)
+        )
 
-    def test_a_stale_index_is_rebuilt_at_the_next_settlement(self):
+    def test_a_stale_projection_is_rebuilt_at_the_next_settlement(self):
         project, ticket = self.busy_project()
-        index_path = project / journal_mod.SETTLED_INDEX_REL
-        document = json.loads(index_path.read_text(encoding="utf-8"))
-        document["entries"] = document["entries"][:1]
-        index_path.write_text(json.dumps(document), encoding="utf-8")
-        self.assertIsNone(live_index(project))
+        # The crash-shaped state: the namespace moved and no advance followed.
+        stray = project / journal_mod.SETTLED_DIR / ".touched"
+        stray.write_bytes(b"")
+        stray.unlink()
+        self.assertEqual(SP.state(project), SP.STATE_STALE)
         self.assertTrue(checkpoint(project, "tester", "RUN", ticket, "heal").ok)
-        self.assert_index_covers_every_receipt(project)
+        self.assert_projection_covers_every_receipt(project)
 
-    def test_a_tampered_settled_receipt_still_forces_the_strict_scan(self):
+    def test_a_broken_memo_costs_decodes_and_never_a_wrong_record(self):
+        project, _ = self.busy_project()
+        expected = strict_records(project)
+        memo = project / SP.RECORDS_DIR_REL / "active.json"
+        memo.write_bytes(memo.read_bytes().replace(b'"COMMITTED"', b'"ABORTED"', 1))
+        self.assertEqual(SP.record_memo(project), {}, "a memo that fails its root is not used")
+        self.assertEqual(settled_decodes(project), len(settled_names(project)))
+        self.assertEqual(list(journal_mod.semantic_receipt_snapshot(project).records), expected)
+
+    def test_a_tampered_settled_receipt_is_never_answered_from_the_memo(self):
         project, _ = self.busy_project()
         victim = project / journal_mod.SETTLED_DIR / settled_names(project)[0] / "operation.json"
         victim.write_bytes(victim.read_bytes() + b"\n")
-        self.assertIsNone(live_index(project))
-        self.assertEqual(settled_decodes(project), len(settled_names(project)))
+        # Exactly the receipt whose bytes changed is decoded; the rest still
+        # match the digests they were memoized under.
+        self.assertEqual(settled_decodes(project), 1)
+        self.assertEqual(
+            list(journal_mod.semantic_receipt_snapshot(project).records), strict_records(project)
+        )
+
+    def test_settlement_never_rewrites_the_retired_whole_history_index(self):
+        project, ticket = self.busy_project()
+        retired = project / journal_mod.SETTLED_INDEX_REL
+        self.assertFalse(retired.exists())
+        self.assertTrue(checkpoint(project, "tester", "RUN", ticket, "one more").ok)
+        self.assertFalse(retired.exists())
 
     def test_a_failed_payload_drop_is_still_reported(self):
         project = self.make_project()

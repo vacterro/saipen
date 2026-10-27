@@ -101,9 +101,12 @@ def main() -> None:
         base_source_tree_fingerprint=identity.source_tree_fingerprint,
         base_discovery_model=identity.discovery_model,
         scope=(
-            "force-fresh-wiki-current-source-triple: transport/telegrams/autonomy/"
-            "QUALITY>TIME/supersession/crew-record truth mirrored from BOOT.md, "
-            "COMMANDS.md, CORE.md and RUNTIME.md"
+            "W-051 force-fresh-wiki-current-source-triple: engine-owned CLEAN "
+            "scrub/seal, the host doctor/instructions/machine surface, the "
+            "declared test-suite verb, the resolved launcher/transport and "
+            "routing-precedence truth mirrored from BOOT.md, COMMANDS.md, "
+            "CORE.md, EXECUTION.md and phases/clean.md, plus the conformance "
+            "row-40 mirror and a re-measured inventory"
         ),
         read_set=producer_api.read_set_from(ROOT, read_paths),
         write_set=producer_api.write_set_before(ROOT, write_paths),

@@ -34,6 +34,8 @@ import tempfile
 import time
 import unittest
 from pathlib import Path
+
+from saipen_engine.process_tree import run as run_host
 from typing import ClassVar
 
 TOOLS = Path(__file__).resolve().parent
@@ -186,7 +188,7 @@ class ZeroManualLiveAcceptance(unittest.TestCase):
     def _session(cls, prompt: str) -> dict:
         attempts = []
         for model in MODEL_CANDIDATES:
-            proc = subprocess.run(
+            proc = run_host(
                 [OPENCODE, "run", prompt, "--format", "json", "--auto", "--model", model],
                 cwd=str(cls.project), env=cls._host_env(),
                 capture_output=True, text=True, timeout=1800,

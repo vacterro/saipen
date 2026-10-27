@@ -1,5 +1,21 @@
 # OUTBOX
 
+## HUNT-015: two writer reachability claims re-measured at 025bf596 -- one retired, one orphan pair confirmed
+- **status:** ready
+- **summary:** Bounded six-signal pass at 025bf596: the earlier critical reachability claim is retired (both crew receipt writers are reachable), and signal 6 yields one new reproduced finding, an orphaned writer pair in operations.py with zero callers.
+- **main_project_refs:** [tools/saipen_engine/operations.py, tools/saipen_engine/producer.py, tools/saipen_engine/intent.py, tools/saipen_engine/crew.py, tools/test_t1430_crew_run_receipt.py]
+- **critical:** false
+- **severity:** P3
+- **producer:** saihunt
+- **source_head:** 025bf596c683464788ab698248e8a3c5eb44dfec
+- **source_tree_fingerprint:** git-delta-v1:177b9b9d5f524377258c331f5c11b006511a77f4271b29048d032cb46b3a9024
+- **role_revision:** sha256:4edb04181cb07e0946afd06fbe711166fa9dcc403e56b52e9be3844f0a71b0a5
+- **coverage:** six signals bounded to the crew receipt and reachability surfaces and their callers; signal 1 measured bounded (the receipt test module only); signals 2-6 over LOG and the tracked source under tools/
+- **payload:** []
+- **verified:** PASS -- bounded sensor work completed; source_head cross-checked against git rev-parse HEAD and the fingerprint taken from the engine own resolver; the caller census carried a positive control (record_crew_run -> crew.py:1529) against the suspect (record_producer_integration -> its definition only); signal 1 green under two runners (3 passed, exit 0)
+- **instructions:** Core review kitchen/HUNT-015.md. Retire the HUNT-013/HUNT-014 reachability claim wherever it is still carried, since its crew_run half is closed by T-1430 and its producer_integration half does not reproduce; then decide the orphan pair (tools/saipen_engine/operations.py:12194 and :12288) -- wire it as the one canonical writer or remove it -- so the live producer.py edge at :2155 is not shadowed by a second writer nobody calls. No payload is proposed: saihunt is read-only.
+- **details:** See kitchen/HUNT-015.md for each finding with file:line evidence, its verdict, the instrument controls and the limitations. A third reproduced observation sits there too: my own STATE.md carried style_contract ded-71fc58de against the installed marker ded-069a4c52 for eleven days, surfacing only as health INVALID from `saipen sub status` while `saipen sub list` read as ordinary STALE. No file in the main project was written or modified.
+
 ## HUNT-014: current continuation sweep — known test debt and receipt CLI gap
 - **status:** reviewed
 - **summary:** Bounded six-signal pass: six closure-readiness tests pass; four intent failures remain owned by T-1346; receipt writers still have no production CLI caller; the old timestamp claim lacks support after reading the strict decoder.

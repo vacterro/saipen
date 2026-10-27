@@ -82,6 +82,42 @@ class _InterlockCleared:
             os.environ[FORBID_HOST_SPAWN] = self._previous
 
 
+class _FakeClaudeHost:
+    """A real `claude` executable that records the envelope it was started with."""
+
+    def __init__(self, base: Path) -> None:
+        self.bin = base / "bin"
+        self.bin.mkdir(parents=True)
+        self.receipt = base / "claude-ran.txt"
+        self.envelope = base / "claude-envelope.txt"
+        if os.name == "nt":
+            script = self.bin / "claude.CMD"
+            script.write_text(
+                "@echo off\r\n"
+                f'> "{self.receipt}" echo ran\r\n'
+                f'> "{self.envelope}" echo %SAIPEN_AGENT%^|%SAIPEN_PROJECT_ROOT%\r\n',
+                encoding="ascii",
+            )
+        else:
+            script = self.bin / "claude"
+            script.write_text(
+                "#!/bin/sh\n"
+                f'printf ran > "{self.receipt}"\n'
+                f'printf "%s|%s" "$SAIPEN_AGENT" "$SAIPEN_PROJECT_ROOT" > "{self.envelope}"\n',
+                encoding="ascii",
+            )
+            script.chmod(script.stat().st_mode | stat.S_IXUSR | stat.S_IXGRP)
+        self.executable = script
+
+    def env(self) -> dict[str, str]:
+        env = dict(os.environ)
+        env["PATH"] = str(self.bin) + os.pathsep + env.get("PATH", "")
+        return env
+
+    def ran(self) -> bool:
+        return self.receipt.exists()
+
+
 def _project(base: Path) -> Path:
     root = base / "project"
     (root / ".saipen").mkdir(parents=True)
@@ -174,6 +210,62 @@ class HarnessArmsTheNetTests(unittest.TestCase):
             hermetic_env(**{FORBID_HOST_SPAWN: None}),
             "a deliberate real-host smoke must be able to clear it explicitly",
         )
+
+
+class ClaudeLaunchTargetTests(unittest.TestCase):
+    """Claude Code is a canonical launch target, through the same abstraction.
+
+    The registry already owns Claude as a first-class adapter; the launcher must
+    reach it by host id, never by a special case in the CLI dispatcher.
+    """
+
+    def test_claude_resolves_through_the_host_registry(self) -> None:
+        self.assertEqual(host_launch.SUPPORTED_HOSTS.get("claude"), "claude")
+        self.assertIn(
+            "claude",
+            host_launch._HOST_IDENTITIES,
+            "a host name is never a SAIPEN seat",
+        )
+
+    def test_the_interlock_refuses_claude_before_any_process_is_created(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="saipen-claude-launch-") as tmp:
+            base = Path(tmp)
+            host = _FakeClaudeHost(base)
+
+            with self.assertRaises(host_launch.HostLaunchRefusal) as caught:
+                host_launch.launch_host(
+                    "claude",
+                    _project(base),
+                    "claude1",
+                    base_env=host.env(),
+                    prelaunch=False,
+                )
+
+            message = str(caught.exception)
+            self.assertIn(FORBID_HOST_SPAWN, message)
+            self.assertIn("claude", message)
+            self.assertFalse(host.ran())
+
+    def test_a_cleared_interlock_launches_claude_with_the_seat_and_project(self) -> None:
+        with tempfile.TemporaryDirectory(prefix="saipen-claude-launch-") as tmp:
+            base = Path(tmp)
+            host = _FakeClaudeHost(base)
+            project = _project(base)
+
+            with _InterlockCleared():
+                returncode = host_launch.launch_host(
+                    "claude",
+                    project,
+                    "claude1",
+                    base_env=host.env(),
+                    prelaunch=False,
+                )
+
+            self.assertEqual(returncode, 0)
+            self.assertTrue(host.ran())
+            envelope = host.envelope.read_text(encoding="utf-8")
+            self.assertIn("claude1", envelope)
+            self.assertIn(str(project), envelope)
 
 
 if __name__ == "__main__":

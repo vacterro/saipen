@@ -25,7 +25,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "tools"))
 from test_fixture_support import CURRENT_STYLE_CONTRACT  # noqa: E402
 
-from saipen_engine import automation  # noqa: E402
+from saipen_engine import automation, response_surface as RS  # noqa: E402
 from saipen_engine.board import parse_board  # noqa: E402
 from saipen_engine.router import route_next  # noqa: E402
 from saipen_engine.state import parse_state_or_error  # noqa: E402
@@ -154,7 +154,7 @@ class AutomationFixture(unittest.TestCase):
             for i in range(1, layer_counts + 1):
                 (self.root / "audit" / f"{i}.md").write_text("# layer\n", encoding="utf-8")
         if residue:
-            (self.root / "audit" / "notes.md").write_text("x\n", encoding="utf-8")
+            (self.root / "audit" / "notes.bin").write_text("x\n", encoding="utf-8")
         return status(self.root)
 
 
@@ -251,10 +251,12 @@ class WaitOwnership(AutomationFixture):
         block = self._wait_route("WAIT: manual-verify -- double check the matrix")
         self.assertEqual(block["disposition"], automation.WAIT_USER)
 
-    def test_safety_valve_keeps_ordinary_cc_legal(self) -> None:
+    def test_bounded_safety_valve_requires_operator_cc(self) -> None:
+        # SRC-112: no persistent grant means no synthetic transport renewal.
         block = self._wait_route("WAIT: safety valve -- 3-waves exhausted; resume with cc")
-        self.assertEqual(block["disposition"], CONTINUE)
-        self.assertEqual(block["next_command"], "cc")
+        self.assertEqual(block["disposition"], automation.WAIT_USER)
+        self.assertTrue(block["operator_action_due"])
+        self.assertIsNone(block["next_command"])
 
     def test_blocked_wait_is_a_stop(self) -> None:
         block = self._wait_route("WAIT: blocked -- upstream job is red")
@@ -301,10 +303,153 @@ class WaitOwnership(AutomationFixture):
         block = self.block(routed=routed, audit_status=self.audit(residue=True))
         self.assertEqual(block["disposition"], automation.WAIT_USER)
 
+    def test_unworkable_audit_stops_without_inventing_operator_authority(self) -> None:
+        inbox = {"unworkable_active_only": True, "action": "saipen audit status"}
+        routed = route_next(_state(), BOARD_EMPTY, audit_inbox=inbox)
+        self.assertEqual(routed["executable_behavior"], "RESTATE_AND_STOP")
+        block = self.block(routed=routed, audit_status=self.audit(layer_counts=1))
+        self.assertEqual(block["disposition"], automation.BLOCKED)
+        self.assertEqual(block["reason_code"], "audit-inbox-unworkable")
+        self.assertIsNone(block["next_command"])
+        self.assertFalse(block["operator_action_due"])
+        self.assertFalse(block["closure_complete"])
+
+    def test_workable_ticket_outranks_unworkable_audit(self) -> None:
+        board = BOARD_EMPTY.replace(
+            "## TODO\n", "## TODO\n- [ ] T-900 [P1] runnable | verify: exact control\n"
+        )
+        inbox = {"unworkable_active_only": True, "action": "saipen audit status"}
+        routed = route_next(_state(), board, audit_inbox=inbox)
+        self.assertEqual(routed["action"], "PHASE SCOUT T-900")
+        block = self.block(
+            routed=routed, board=parse_board(board), audit_status=self.audit(layer_counts=1)
+        )
+        self.assertEqual(block["disposition"], CONTINUE)
+        self.assertEqual(block["next_command"], "cc")
+        self.assertFalse(block["operator_action_due"])
+
+    def test_unworkable_audit_has_truthful_final_facts(self) -> None:
+        routed = route_next(
+            _state(), BOARD_EMPTY,
+            audit_inbox={"unworkable_active_only": True, "action": "saipen audit status"},
+        )
+        block = self.block(routed=routed, audit_status=self.audit(layer_counts=1))
+        facts = RS.canonical_facts(
+            self.root,
+            status={"automation": block, "conformance_status": {"status": "CURRENT_PASS"}},
+        )
+        self.assertEqual(facts["blocker"], "AUDIT_INBOX_UNWORKABLE -- ACTIVE audit")
+        self.assertEqual(facts["next_action"], "NONE")
+        text = RS.digest_from_facts(facts, reason="final", language="et")
+        self.assertIn("RESULT: Töö säilitatud", text)
+        self.assertIn("BLOCKER: AUDIT_INBOX_UNWORKABLE", text)
+        self.assertNotIn("OPERATOR ACTION:", text)
+
 
 # ---------------------------------------------------------------------------
 # R5/R6: the closure gate
 # ---------------------------------------------------------------------------
+
+
+class InvalidDataStops(AutomationFixture):
+    def invalid_audit(self) -> tuple[dict, dict]:
+        from saipen_engine import audit_inbox
+
+        path = self.root / "audit" / "1.md"
+        path.parent.mkdir(exist_ok=True)
+        path.write_bytes(b"\xffinvalid UTF-8")
+        status = audit_inbox.status(self.root)
+        projection = audit_inbox.projection(self.root)
+        self.assertTrue(projection["invalid_only"])
+        return route_next(_state(), BOARD_EMPTY, audit_inbox=projection), status
+
+    def invalid_queue(self) -> dict:
+        return route_next(
+            _state(), BOARD_EMPTY,
+            queued_source={"invalid": True, "action": "saipen source status"},
+        )
+
+    def assert_invalid_stop(self, routed: dict, audit_status: dict) -> dict:
+        self.assertEqual(routed["executable_behavior"], "RESTATE_AND_STOP")
+        block = self.block(routed=routed, audit_status=audit_status)
+        self.assertEqual(block["disposition"], automation.INVALID)
+        self.assertEqual(block["reason_code"], routed["reason"])
+        self.assertIsNone(block["next_command"])
+        self.assertFalse(block["operator_action_due"])
+        self.assertFalse(block["closure_complete"])
+        return block
+
+    def test_invalid_audit_is_not_a_continuation(self) -> None:
+        routed, status = self.invalid_audit()
+        self.assertEqual(routed["reason"], "audit-inbox-invalid")
+        self.assert_invalid_stop(routed, status)
+
+    def test_invalid_queue_cannot_be_completed_by_clean_closure_evidence(self) -> None:
+        routed = self.invalid_queue()
+        self.assertEqual(routed["reason"], "queued-source-invalid")
+        status = self.audit()
+        state, board = _parsed(_state())
+        gate = automation.closure_gate(
+            status_out=status, convergence=CONVERGENCE_OK,
+            history_events=[], board=board, state=state, agent="probe",
+        )
+        self.assertTrue(gate["complete"], "control must independently permit closure")
+        self.assert_invalid_stop(routed, status)
+
+    def assert_invalid_facts(self, routed: dict, status: dict, code: str) -> None:
+        block = self.block(routed=routed, audit_status=status)
+        facts = RS.canonical_facts(
+            self.root,
+            status={"automation": block, "conformance_status": {"status": "CURRENT_PASS"}},
+        )
+        self.assertTrue(facts["blocker"].startswith(code + " -- "), facts)
+        self.assertEqual(facts["next_action"], "NONE")
+        text = RS.digest_from_facts(facts, reason="final", language="et")
+        self.assertIn("RESULT: Töö säilitatud", text)
+        self.assertIn("BLOCKER: " + code, text)
+        self.assertNotIn("OPERATOR ACTION:", text)
+
+    def test_invalid_audit_has_a_visible_diagnostic_without_cc(self) -> None:
+        routed, status = self.invalid_audit()
+        self.assert_invalid_facts(routed, status, "AUDIT_INBOX_INVALID")
+
+    def test_invalid_queue_has_a_visible_diagnostic_without_cc(self) -> None:
+        self.assert_invalid_facts(self.invalid_queue(), self.audit(), "QUEUED_SOURCE_INVALID")
+
+    def test_active_work_outranks_invalid_data(self) -> None:
+        state_text = _state(phase="BUILD", task="T-900", next_action="PHASE BUILD T-900")
+        state, _ = _parsed(state_text)
+        board = BOARD_EMPTY.replace(
+            "## DOING\n", "## DOING\n- [/] T-900 [P1] active | owner: probe"
+            " | claim_time: 2026-09-06T00:00:00Z\n"
+        )
+        for inputs in (
+            {"audit_inbox": {"invalid_only": True}},
+            {"queued_source": {"invalid": True}},
+        ):
+            with self.subTest(inputs=inputs):
+                routed = route_next(state_text, board, current_agent="probe", **inputs)
+                self.assertEqual(routed["action"], "PHASE BUILD T-900")
+                block = self.block(
+                    routed=routed, state=state, board=parse_board(board),
+                    audit_status=self.audit(), convergence={"ok": False},
+                )
+                self.assertEqual(block["disposition"], CONTINUE)
+                self.assertEqual(block["next_command"], "cc")
+                self.assertFalse(block["operator_action_due"])
+
+    def test_independent_workable_ticket_outranks_invalid_audit(self) -> None:
+        board = BOARD_EMPTY.replace(
+            "## TODO\n", "## TODO\n- [ ] T-900 [P1] runnable | verify: exact control\n"
+        )
+        routed = route_next(_state(), board, audit_inbox={"invalid_only": True})
+        self.assertEqual(routed["action"], "PHASE SCOUT T-900")
+        block = self.block(
+            routed=routed, board=parse_board(board), audit_status=self.audit(layer_counts=1)
+        )
+        self.assertEqual(block["disposition"], CONTINUE)
+        self.assertEqual(block["next_command"], "cc")
+        self.assertFalse(block["operator_action_due"])
 
 
 class ClosureGate(AutomationFixture):
@@ -476,12 +621,10 @@ class ClosureGate(AutomationFixture):
         second = self.block(routed=self._idle_route(), audit_status=self.audit())
         self.assertEqual(first, second)
 
-    def test_manual_semantics_unchanged_outside_rtc(self) -> None:
-        # SRC-023 (audit/10.md) §9 #17/#18: the block is additive. The
-        # router's own verdict for the same state is untouched, and the
-        # pre-authorized soft safety-valve WAIT still routes exactly as the
-        # router always routed it (CONTINUE carrier, valve reauthorization
-        # unchanged).
+    def test_bounded_wait_preserves_route_outside_rtc(self) -> None:
+        # SRC-112 updates the authority contract: the raw bounded WAIT stays
+        # unchanged and its projection requires an operator. A persistent
+        # checkpoint is exercised against committed Entry proof in T-1494.
         state, _ = _parsed(_state(phase="SHIP", next_action="WAIT: safety valve -- resume with cc"))
         routed = route_next(
             _state(phase="SHIP", next_action="WAIT: safety valve -- resume with cc"),
@@ -496,8 +639,8 @@ class ClosureGate(AutomationFixture):
             board=parse_board(BOARD_EMPTY),
             audit_status=self.audit(),
         )
-        self.assertEqual(block["disposition"], CONTINUE)
-        self.assertEqual(block["next_command"], "cc")
+        self.assertEqual(block["disposition"], automation.WAIT_USER)
+        self.assertIsNone(block["next_command"])
 
     def test_status_json_writes_zero_project_bytes(self) -> None:
         # SRC-023 (audit/10.md) §9 #20: `saipen status --json` mutates nothing.

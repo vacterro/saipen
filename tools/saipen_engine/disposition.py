@@ -126,13 +126,14 @@ def classify_carrier(carrier: dict[str, Any]) -> dict[str, Any]:
         wait_text = action
     if wait_text:
         # The closed WAIT grammar names its category; `user brake`,
-        # `manual-verify`, `destructive-op`, `first-publish` are genuine
-        # human boundaries. `blocked`/`safety valve` are NOT user questions.
+        # `manual-verify`, `destructive-op`, `first-publish` and a bounded
+        # `safety valve` require a human; a proved checkpoint is executable.
         user_owned = (
             "user brake" in wait_text
             or "manual-verify" in wait_text
             or "destructive-op" in wait_text
             or "first-publish" in wait_text
+            or "safety valve" in wait_text
         )
         return {
             "disposition": WAIT_USER if user_owned else BLOCKED,

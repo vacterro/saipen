@@ -59,6 +59,16 @@ def setUpModule() -> None:
     isolate_host_session()
 
 
+def witnessed_gate_command(root: Path, command: str) -> str:
+    """Supply explicit TEST HARNESS authority for the operator's scoped answer."""
+    if "<SRC-###>" not in command:
+        return command
+    from test_t1729_operator_gate import fixture_authority
+
+    receipt = fixture_authority(root, statement="TEST HARNESS operator clears this fixture gate")
+    return command.replace("<SRC-###>", receipt)
+
+
 # ---------------------------------------------------------------------------
 # Fixtures. Every project is written from bytes, never by mutating a live one:
 # a forged mid-run edit breaks the append-only ledger, and the refusal that
@@ -316,8 +326,15 @@ def cli(
         from test_fixture_support import operator_request_env
 
         env.update(operator_request_env(operator_text))
+    from test_operator_origin_support import cold_command
+
+    command = cold_command(
+        root, [PYTHON, str(CLI), "--project-root", str(root), "--agent", agent, *args],
+        env, operator_text=operator_text,
+    )
     proc = subprocess.run(
-        [PYTHON, str(CLI), *args, "--project-root", str(root), "--agent", agent],
+        command,
+        cwd=root,
         capture_output=True,
         text=True,
         timeout=timeout,
@@ -1048,7 +1065,8 @@ class ReauthProducerMatrixTests(unittest.TestCase):
                 )
 
     def test_continue_reauthorizes_only_a_proven_valve(self):
-        _rc, payload, text = cli(valve_project(self), "continue", "--json")
+        # SRC-112 distinguishes a fresh operator resume from an agent retry.
+        _rc, payload, text = cli(valve_project(self), "continue", "--json", operator_text="cc")
         self.assertIn(
             str(payload and payload.get("code")),
             ("VALVE_REAUTHORIZED", "REAUTHORIZED", "CONTINUE", "PHASE"),
@@ -1152,9 +1170,7 @@ class StartEntryTests(unittest.TestCase):
             operator_text="add a CSV export button",
         )
         self.assertEqual(first.get("code"), "WAIT_OPERATOR", text)
-        command = (first.get("decision") or {})["command"].replace(
-            "<decision>", "the upstream contract landed"
-        )
+        command = witnessed_gate_command(root, (first.get("decision") or {})["command"])
         rc, _payload, text = cli(root, *command.split(" ")[1:], "--json")
         self.assertEqual(rc, 0, text)
         rc, second, text = cli(root, "start", "--receipt", first["receipt"], "--json")
@@ -1688,9 +1704,7 @@ class LiveTranscriptConvergenceTests(unittest.TestCase):
         transcript.append(("saipen start", first.get("code")))
         self.assertEqual(first.get("code"), "WAIT_OPERATOR", text)
 
-        command = (first.get("decision") or {})["command"].replace(
-            "<decision>", "operator cleared the gate"
-        )
+        command = witnessed_gate_command(root, (first.get("decision") or {})["command"])
         rc, _answer, text = cli(root, *command.split(" ")[1:], "--json")
         transcript.append((command, rc))
         self.assertEqual(rc, 0, text)
@@ -1715,8 +1729,10 @@ class LiveTranscriptConvergenceTests(unittest.TestCase):
                     "command"
                 )
                 self.assertTrue(command, first)
-                named = command.replace("<decision>", "cleared").replace(
-                    "<next-action>", "saipen continue"
+                named = (
+                    witnessed_gate_command(root, command)
+                    .replace("<decision>", "cleared")
+                    .replace("<next-action>", "saipen continue")
                 )
                 # Every remaining `<a|b|c>` is a CLOSED CLASS VOCABULARY the
                 # refusal prints so the reader picks a member; fill it with its

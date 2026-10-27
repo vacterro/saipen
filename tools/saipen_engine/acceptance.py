@@ -43,6 +43,7 @@ EVIDENCE_MARKER = "AC-EVIDENCE "
 EVIDENCE_RE = re.compile(
     r"^(?P<ac>AC-\d{2,})\s+(?P<result>PASS|FAIL|UNKNOWN)\s+(?P<kind>[a-z]+)"
     r"(?:\s+witness=(?P<witness>[A-Z_]+)\s+surface=(?P<surface>[^\s]+))?"
+    r"(?:\s+source=(?P<source>SRC-\d+))?"
     r"(?:\s+--\s+(?P<detail>.*))?$",
     re.DOTALL,
 )
@@ -158,7 +159,7 @@ def parse_evidence_payload(text: str) -> dict | None:
         "inspection": "MANUAL",
         "manual": "MANUAL",
     }[match.group("kind")]
-    return {
+    result = {
         "ac": match.group("ac"),
         "result": match.group("result"),
         "kind": match.group("kind"),
@@ -167,6 +168,9 @@ def parse_evidence_payload(text: str) -> dict | None:
         "observed_surface": match.group("surface") or "legacy-unspecified",
         "detail": (match.group("detail") or "").strip(),
     }
+    if match.group("source"):
+        result["source"] = match.group("source")
+    return result
 
 
 def build_boundary(ticket_id: str, events) -> int:

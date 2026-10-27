@@ -394,9 +394,9 @@ def append(
             "code": "APPEND_SUPERSEDES_UNKNOWN",
             "detail": f"nothing to supersede at {', '.join(unknown)}",
         }
-    from .operator_task import witness
+    from .operator_task import authority_for_receipt, witness
 
-    provenance = witness(body)
+    provenance = witness(body, root=root)
     if provenance.get("code"):
         return {"ok": False, **provenance}
     captured = intake.capture(
@@ -405,6 +405,7 @@ def append(
     if not captured.get("ok"):
         return captured
     receipt = captured["receipt"]
+    authority_for_receipt(root, receipt, existing_only=False)
     if receipt == source:
         return {
             "ok": True,
@@ -565,7 +566,7 @@ def apply_append(root: Path | str, receipt: str, *, actor: str | None = None) ->
         return {**body, "receipt": receipt, "step": "read"}
     authority = authority_for_receipt(root, receipt)
     work, state = _live_work(root, source)
-    if not authority["user_explicit"]:
+    if not authority["amend_work"]:
         # Durability is not permission to replace live acceptance, supersede
         # prior intent or rewind Work. Keep an unwitnessed append usable as a
         # separate P2 candidate; retries reuse ONLY its own linked candidate.
@@ -590,7 +591,7 @@ def apply_append(root: Path | str, receipt: str, *, actor: str | None = None) ->
         added = ticket_add(
             root,
             actor or str(state.get("agent") or "saipen"),
-            "P1" if authority["user_explicit"] else "P2",
+            "P1" if authority["amend_work"] else "P2",
             f"Append {receipt} to {source}: {label}",
             [],
             f"every derived clause of {receipt} carries a terminal disposition with evidence",
@@ -650,7 +651,7 @@ def apply_append(root: Path | str, receipt: str, *, actor: str | None = None) ->
     _mark_step(root, source, receipt, "derived")
 
     superseded = (
-        _apply_supersession(root, source, entry, receipt) if authority["user_explicit"] else []
+        _apply_supersession(root, source, entry, receipt) if authority["amend_work"] else []
     )
     if isinstance(superseded, dict):
         return superseded
@@ -659,7 +660,7 @@ def apply_append(root: Path | str, receipt: str, *, actor: str | None = None) ->
     rewind = None
     target = minimum_rewind(str(state.get("phase") or ""), entry.get("delta", DELTA_IMPLEMENTATION))
     task = str(state.get("task") or "none")
-    if target and task == work and authority["user_explicit"]:
+    if target and task == work and authority["amend_work"]:
         moved = transition_phase(
             root,
             target,

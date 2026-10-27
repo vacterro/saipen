@@ -249,6 +249,67 @@ class AuditInboxClassificationCountTests(unittest.TestCase):
         self.assertEqual(answer["code"], "AUDIT_BINDING_CORRUPT")
         self.assertTrue(answer["next"]["binding_corrupt"], answer["next"])
 
+    def test_scan_layers_include_snapshots_avoids_redundant_layer_reads(self):
+        """SRC-322: classify uses include_snapshots so snapshot_layer is called once per layer."""
+        self._layers(3)
+        original = audit_inbox.snapshot_layer
+        calls = []
+
+        def counted(root, rel):
+            calls.append(rel)
+            return original(root, rel)
+
+        with patch.object(audit_inbox, "snapshot_layer", counted):
+            state = audit_inbox.classify(self.root)
+        self.assertEqual(len(state["layers"]), 3)
+        self.assertEqual(len(calls), 3, f"snapshot_layer called {len(calls)} times for 3 layers")
+
+    def test_reconcile_bootstrap_with_precomputed_state_avoids_reclassifying(self):
+        """SRC-322: reconcile_bootstrap accepts precomputed state to avoid re-classifying."""
+        self._layers(2)
+        state = audit_inbox.classify(self.root)
+        original = audit_inbox.classify
+        calls = []
+
+        def counted(root):
+            calls.append(root)
+            return original(root)
+
+        with patch.object(audit_inbox, "classify", counted):
+            res = audit_inbox.reconcile_bootstrap(self.root, state=state)
+        self.assertEqual(len(calls), 0, f"classify was called {len(calls)} times during reconcile_bootstrap")
+
+    def test_record_named_first_seen_with_entries_avoids_rescan(self):
+        """SRC-322: record_named_first_seen avoids scan_layers and re-snapping when entries supplied."""
+        (self.root / "audit").mkdir(exist_ok=True)
+        (self.root / "audit" / "custom.md").write_text("# custom\n", encoding="utf-8")
+        state = audit_inbox.classify(self.root)
+        original_scan = audit_inbox.scan_layers
+        original_snap = audit_inbox.snapshot_layer
+        scans = []
+        snaps = []
+
+        with patch.object(audit_inbox, "scan_layers", lambda r: scans.append(r) or original_scan(r)):
+            with patch.object(audit_inbox, "snapshot_layer", lambda r, rel: snaps.append(rel) or original_snap(r, rel)):
+                audit_inbox.record_named_first_seen(self.root, entries=state["layers"])
+        self.assertEqual(len(scans), 0, f"scan_layers called {len(scans)} times")
+        self.assertEqual(len(snaps), 0, f"snapshot_layer called {len(snaps)} times")
+
+    def test_perform_audit_ingest_settled_classifies_exactly_once(self):
+        """SRC-322: _perform_audit_ingest classifies once when settled and no new layers."""
+        from saipen import _perform_audit_ingest
+        original = audit_inbox.classify
+        calls = []
+
+        def counted(root):
+            calls.append(root)
+            return original(root)
+
+        with patch.object(audit_inbox, "classify", counted):
+            payload, rc = _perform_audit_ingest(self.root, "tester")
+        self.assertEqual(rc, 0)
+        self.assertEqual(len(calls), 1, f"_perform_audit_ingest classified {len(calls)} times")
+
 
 # ---------------------------------------------------------------------------
 # PERF-005 -- a routing-oriented one-pass history summary

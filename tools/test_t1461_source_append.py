@@ -27,8 +27,9 @@ if str(TOOLS) not in sys.path:
     sys.path.insert(0, str(TOOLS))
 
 from test_dependency_resume_liveness import AGENT, ResumeFixture  # noqa: E402
+from test_hermetic_env import hermetic_env, isolate_host_session  # noqa: E402
 
-from saipen_engine import intake, source_append, operator_task, pending_ingress  # noqa: E402
+from saipen_engine import intake, source_append, pending_ingress  # noqa: E402
 from saipen_engine.board import parse_board  # noqa: E402
 from saipen_engine.operations import (  # noqa: E402
     apply_claim,
@@ -40,6 +41,10 @@ from saipen_engine.operations import (  # noqa: E402
 from saipen_engine.router import pending_append_projection, route_next  # noqa: E402
 
 SAIPEN = TOOLS / "saipen.py"
+
+
+def setUpModule():
+    isolate_host_session()
 
 MISSION = (
     "# User request\n\n"
@@ -87,11 +92,10 @@ class AppendFixture(ResumeFixture):
 
     def append(self, project: Path, body: str, **kwargs) -> dict:
         # These are externally supplied operator updates, not model proposals.
-        with mock.patch.dict(
-            os.environ,
-            {operator_task.ENV_TASK_SHA256: pending_ingress.ingress_digest(body)},
-            clear=True,
-        ):
+        from test_operator_origin_support import native_operator
+
+        event = "append-" + pending_ingress.ingress_digest(body)
+        with native_operator(project, body, action="append", event_id=event):
             result = source_append.append(project, body, actor=AGENT, **kwargs)
         self.assertTrue(result.get("ok"), result)
         return result
@@ -108,9 +112,17 @@ class AppendFixture(ResumeFixture):
         contract = intake._read_contract(project, receipt) or {}
         return {clause["text"] for clause in (contract.get("clauses") or {}).values()}
 
-    def cli(self, project: Path, *args: str) -> dict:
+    def cli(self, project: Path, *args: str, operator_text=None) -> dict:
+        from test_operator_origin_support import cold_command
+
+        env = hermetic_env()
+        command = cold_command(
+            project, [sys.executable, str(SAIPEN), *args, "--json"], env,
+            operator_text=operator_text, action="append",
+        )
         done = subprocess.run(
-            [sys.executable, str(SAIPEN), *args, "--json"],
+            command,
+            env=env,
             cwd=str(project),
             capture_output=True,
             text=True,
@@ -118,7 +130,8 @@ class AppendFixture(ResumeFixture):
             errors="replace",
             timeout=300,
         )
-        return json.loads(done.stdout or "{}")
+        self.assertTrue(done.stdout, done.stderr)
+        return json.loads(done.stdout)
 
 
 class PhaseMatrixTests(AppendFixture):
@@ -271,8 +284,12 @@ class ContinuityTests(AppendFixture):
             "fragile error-code allowlists.\n",
             encoding="utf-8",
         )
-        with mock.patch.dict(os.environ, {operator_task.ENV_TASK_FILE: str(handoff)}, clear=True):
-            received = self.cli(project, "source", "append", "--file", str(handoff))
+        carrier = hermetic_env(SAIPEN_TASK_FILE=str(handoff), SAIPEN_TASK_SHA256=None)
+        with mock.patch.dict(os.environ, carrier, clear=True):
+            received = self.cli(
+                project, "source", "append", "--file", str(handoff),
+                operator_text=handoff.read_text(encoding="utf-8"),
+            )
         self.assertEqual(received.get("code"), "APPEND_RECEIVED", received)
         routed = self.cli(project, "next")
         self.assertEqual(routed.get("reason"), "unprojected-source-append", routed)

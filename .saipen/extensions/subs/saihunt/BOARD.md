@@ -24,5 +24,6 @@
 ## DONE
 
 - [x] HUNT-014 Bounded current closure/conformance/crew continuation sweep | verify: kitchen/HUNT-014.md; 47 tests, 4 known T-1346 failures, 6 closure tests PASS
+- [x] HUNT-015 Bounded six-signal pass at 025bf596: previous reachability claim retired, orphaned operations.py writer pair reproduced | verify: kitchen/HUNT-015.md; caller census with positive control; test_t1430_crew_run_receipt.py 3 passed exit 0
 
 ## BLOCKED

@@ -381,10 +381,13 @@ def _new_project(tmp: Path) -> Path:
         "agent: test\nmode: full\nupdated: \"2026-09-22T00:00:00Z\"\n---\n",
         encoding="utf-8",
     )
+    from saipen_engine.journal import ensure_project_lineage
+
+    ensure_project_lineage(project)
     return project
 
 
-def _run(project: Path, *args: str, env_extra: dict | None = None) -> dict:
+def _run(project: Path, *args: str, env_extra: dict | None = None, operator_text=None) -> dict:
     import os
 
     env = os.environ.copy()
@@ -396,8 +399,12 @@ def _run(project: Path, *args: str, env_extra: dict | None = None) -> dict:
         env.pop(carrier, None)
     if env_extra:
         env.update(env_extra)
+    from test_operator_origin_support import cold_command
+
+    command = cold_command(project, [sys.executable, str(SAIPEN), *args], env,
+                           operator_text=operator_text)
     done = subprocess.run(
-        [sys.executable, str(SAIPEN), *args],
+        command,
         cwd=str(project),
         capture_output=True,
         text=True,
@@ -434,6 +441,7 @@ class GoalIngressIdempotenceTests(unittest.TestCase):
         first = _run(
             self.project, "goal", "ship the recovery wave", "--json",
             env_extra=operator_request_env("ship the recovery wave"),
+            operator_text="ship the recovery wave",
         )
         self.assertTrue(first.get("ok"), first)
         self.assertEqual(first.get("code"), "GOAL_SET")
@@ -442,6 +450,7 @@ class GoalIngressIdempotenceTests(unittest.TestCase):
         second = _run(
             self.project, "goal", "ship the recovery wave", "--json",
             env_extra=operator_request_env("ship the recovery wave"),
+            operator_text="ship the recovery wave",
         )
         self.assertTrue(second.get("ok"), second)
         self.assertEqual(second.get("code"), "GOAL_ALREADY_CAPTURED", second)
@@ -461,11 +470,13 @@ class GoalIngressIdempotenceTests(unittest.TestCase):
         first = _run(
             self.project, "goal", "ship the recovery wave", "--json",
             env_extra=operator_request_env("ship the recovery wave"),
+            operator_text="ship the recovery wave",
         )
         self.assertEqual(first.get("code"), "GOAL_SET")
         second = _run(
             self.project, "goal", "ship the documentation wave", "--json",
             env_extra=operator_request_env("ship the documentation wave"),
+            operator_text="ship the documentation wave",
         )
         self.assertEqual(second.get("code"), "GOAL_SET", second)
 

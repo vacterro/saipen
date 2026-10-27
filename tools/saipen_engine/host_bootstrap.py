@@ -48,12 +48,14 @@ candidate the resolver would not also examine.
 from __future__ import annotations
 
 import hashlib
+import errno
 import json
 import os
 import shutil
 import sys
 from pathlib import Path
 
+from . import machine_runtime
 from .paths import (
     ENV_SKILL_ROOT,
     resolve_project_root,
@@ -77,6 +79,69 @@ BOUNDARY_RUNTIME = "canonical_runtime"
 BOUNDARY_ENTRYPOINT = "direct_entrypoint"
 BOUNDARY_BRIDGE = "host_bridge"
 BOUNDARY_HOST = "host_registry"
+BOUNDARY_FILESYSTEM = "project_filesystem"
+
+
+def execution_identity() -> dict:
+    """Diagnostic OS identity, never an actor, admission or authorization."""
+    if os.name == "nt":
+        sid = machine_runtime._current_sid()
+        return {"sid": sid, "source": "windows_process_token" if sid else "unavailable"}
+    effective = getattr(os, "geteuid", lambda: None)()
+    return {
+        "euid": effective,
+        "source": "effective_uid" if effective is not None else "unavailable",
+    }
+
+
+def filesystem_unavailable(
+    root: Path | str,
+    exc: OSError | ValueError,
+    *,
+    stage: str = "validation",
+    operation: str = "manifest_lifecycle",
+) -> dict:
+    """One structured, operation-scoped hard refusal for unavailable storage."""
+    from .paths import OwnedPathUnavailable
+
+    error = exc.os_error if isinstance(exc, OwnedPathUnavailable) else exc
+    path = str(getattr(error, "filename", None) or getattr(exc, "path", root))
+    winerror = getattr(error, "winerror", None)
+    denied = (
+        isinstance(error, PermissionError)
+        or winerror == 5
+        or getattr(error, "errno", None) in (errno.EACCES, errno.EPERM)
+    )
+    payload = {
+        "ok": False,
+        "code": UNAVAILABLE,
+        "boundary": BOUNDARY_FILESYSTEM,
+        "stage": stage,
+        "operation": operation,
+        "probe_operation": getattr(exc, "operation", None),
+        "project_root": str(root),
+        "offending_path": path,
+        "failure_kind": "permission_denied" if denied else "filesystem_unavailable",
+        "failure_scope": "operation",
+        "execution_identity": execution_identity(),
+        "os_error": {
+            "type": type(error).__name__, "errno": getattr(error, "errno", None),
+            "winerror": winerror, "strerror": getattr(error, "strerror", None),
+            "filename": getattr(error, "filename", None),
+            "filename2": getattr(error, "filename2", None),
+        },
+        "detail": str(exc),
+        "changed": False,
+        "remediation": (
+            "Preserve account isolation. An operator must authorize the minimum access "
+            "required for this path, or provide a supported project binding or broker route. "
+            "Retry only after that prerequisite changes; then run canonical validation."
+        ),
+    }
+    payload["fingerprint"] = hashlib.sha256(
+        json.dumps(payload, sort_keys=True, ensure_ascii=False).encode("utf-8")
+    ).hexdigest()
+    return payload
 
 #: Files an install must carry to be a usable SAIPEN home, layout-agnostic
 #: (`BOOT.md` at the root in a flattened install, under `saipen/` in a clone --
@@ -192,6 +257,23 @@ def replacement_candidates(
 
 
 def _prove_home(candidate: str) -> dict:
+    """`_prove_readable_home`, with a home this account may not read told
+    apart from one that is not there (T-1647): another user's install answers
+    ACCESS_DENIED at whichever file is asked first, and that is not absence."""
+    try:
+        return _prove_readable_home(candidate)
+    except PermissionError:
+        home = _expand(candidate)
+        return {
+            "source": None,
+            "home": str(home) if home else candidate,
+            "ok": False,
+            "inaccessible": True,
+            "why": "this account cannot read the path (access denied)",
+        }
+
+
+def _prove_readable_home(candidate: str) -> dict:
     """Prove one candidate is a usable SAIPEN home (activation + engine).
 
     Returns a record with `ok`, `home`, `protocol_dir`, `engine`, `boundary`
@@ -425,6 +507,9 @@ def resolve_bootstrap(
         start, explicit=project_root, honor_environment=honor_environment
     )
     if not resolved.ok:
+        if getattr(resolved, "filesystem_failure", None):
+            result.update(resolved.filesystem_failure)
+            return _finalize_host(result, host_refused)
         if getattr(resolved, "code", None) == "NOT_SAIPEN_PROJECT":
             result.update(
                 code=NOT_SAIPEN,
@@ -448,11 +533,20 @@ def resolve_bootstrap(
     root = Path(resolved.root)
     result["project_root"] = str(root)
     result["project_lineage"] = resolved.lineage
+    # The project's own instruction block can send an agent away from the
+    # runtime resolved below; its verdict rides the same answer (T-1654).
+    from . import project_block
+
+    result["instructions"] = project_block.projection(root)
 
     persisted_value, persisted_problem = _persisted_home(root)
+    from .state import HOME_INACCESSIBLE, persisted_home_access
+
+    inaccessible = persisted_home_access(persisted_value)[0] == HOME_INACCESSIBLE
     result["binding"] = {
         "persisted_home": persisted_value,
-        "persisted_home_dead": persisted_problem is not None,
+        "persisted_home_dead": persisted_problem is not None and not inaccessible,
+        "persisted_home_inaccessible": inaccessible,
         "reason": persisted_problem,
     }
 
@@ -501,6 +595,52 @@ def resolve_bootstrap(
         result["bridge_required"] = not reachable
         if result["binding"] is not None and result["binding"].get("persisted_home_dead"):
             result["binding"]["convergence_command"] = "saipen rebind-home --auto"
+        machine = machine_runtime.executing(home)
+        if machine is not None:
+            # The machine runtime stands in for a home this account may not
+            # read; the project's recorded pointer is left as it is (T-1647).
+            result["runtime_source"] = "MACHINE_RUNTIME"
+            result["machine_runtime"] = {
+                key: machine.get(key) for key in ("root", "generation", "saipen_version")
+            }
+            if result["binding"] is not None and result["binding"].get(
+                "persisted_home_inaccessible"
+            ):
+                # ...when it is the projection of that home, and of no other.
+                replaced = machine_runtime.projects(machine, persisted_value)
+                result["binding"]["legacy_saipen_home"] = (
+                    "INACCESSIBLE_BUT_REPLACED" if replaced else "INACCESSIBLE_NOT_THIS_RUNTIME"
+                )
+                if replaced:
+                    # Nothing is owed: the remedy text written for an unknown
+                    # home would send an agent to ask for an action that the
+                    # running runtime has already taken (T-1743).
+                    result["binding"]["reason"] = (
+                        f"STATE.saipen_home {persisted_value!r} is not readable by this "
+                        f"account; the machine runtime {machine.get('root')} serves this "
+                        "project in its place. No operator action is needed"
+                    )
+            # Its launchers live beside the generations, not inside one.
+            machine_bin = Path(machine["root"]) / "bin"
+            shim = machine_bin / ("saipen.cmd" if os.name == "nt" else "saipen")
+            if shim.is_file():
+                result["launcher"] = {
+                    "ok": True,
+                    "discovered": True,
+                    "executable": True,
+                    "dir": str(machine_bin),
+                    "posix": str(machine_bin / "saipen"),
+                    "windows": str(machine_bin / "saipen.cmd"),
+                    "transport": "direct_launcher",
+                    "why": "",
+                }
+                result["bridge"] = {
+                    "required": False,
+                    "transport": "path" if which else "direct_launcher",
+                    "cross_boundary": False,
+                    "why": "",
+                }
+                result["bridge_required"] = False
         result["ok"] = True
         result["code"] = BOUND
         result["boundary"] = None

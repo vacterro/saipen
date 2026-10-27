@@ -1,9 +1,9 @@
 <!-- SAIPEN KNOWLEDGE CARD v1 -->
 kind: trap
-scope: recovery repairs, downstream project reports, reconcile, regression fixtures
-trigger: fixing a recovery or reconcile defect from a report that describes a stranded downstream project
+scope: recovery repairs, release and crew closure repairs, downstream project reports, reconcile, regression fixtures
+trigger: fixing a recovery, reconcile, release or crew defect from a report that describes a stranded downstream project
 status: active
-evidence: T-1574, SRC-149, tools/test_t1572_ticket_scoped_recovery.py RealDownstreamShapeTests, .saipen/evidence/T-1574-three-reports/audapack-real-copy.txt
+evidence: T-1574, SRC-149, tools/test_t1572_ticket_scoped_recovery.py RealDownstreamShapeTests, .saipen/evidence/T-1574-three-reports/audapack-real-copy.txt, T-1746, SRC-240, .saipen/evidence/T-1746-crew-terminal/REPORT.md
 supersedes: none
 
 # A reported downstream shape is a hypothesis about bytes
@@ -17,3 +17,4 @@ How to apply:
 - Copy the downstream `.saipen/` into the scratchpad, `git init`, commit, and run the canonical verbs there.
 - Turn the real shape into a regression beside the report's fixture; keep both.
 - Never apply the repair to the real project unless its operator asks.
+- Rerun the whole route on the copy after EVERY fix: refusals are layered, and the report can only name the first. SRC-240 named four defects of a crew terminal closure; the copy showed three more, each reachable only once the one before it was gone (a scope hash width, a producer evidence reader, a validator path, an aborted sibling). When the remaining refusal is the project's own debt, discharge it in the copy, say so in the evidence, and keep going.

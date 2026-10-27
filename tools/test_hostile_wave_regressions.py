@@ -67,14 +67,33 @@ def _make_wait_fixture(tmp_root: Path, intent="normal", wait_text="WAIT: init --
     )
     (proj / ".saipen/BOARD.md").write_text("## DOING\n## TODO\n## DONE\n## BLOCKED\n", encoding="utf-8")
     (proj / ".saipen/LOG.md").write_text("# Log\n- 01.01.20 00:00 [E-001] [T-none] RUN: init\n", encoding="utf-8")
+    from saipen_engine.journal import ensure_project_lineage
+
+    ensure_project_lineage(proj)
     return proj
 
-def _cli(proj: Path, *args, dry_run=True):
+def _cli(proj: Path, *args, dry_run=True, operator_text=None):
     cmd = [sys.executable, str(SAIPEN_PY), "--project-root", str(proj), "--json"]
     if dry_run:
         cmd.append("--dry-run")
     cmd += list(args)
-    proc = subprocess.run(cmd, capture_output=True, text=True, encoding="utf-8", env={**os.environ, "PYTHONIOENCODING": "utf-8", "PYTHONUTF8": "1"}, timeout=30)
+    env = {**os.environ, "PYTHONIOENCODING": "utf-8", "PYTHONUTF8": "1"}
+    env.pop("SAIPEN_TASK_SHA256", None)
+    if operator_text is not None:
+        from test_fixture_support import operator_request_env
+
+        env.update(operator_request_env(operator_text))
+    from test_operator_origin_support import cold_command
+
+    cmd = cold_command(proj, cmd, env, operator_text=operator_text)
+    proc = subprocess.run(
+        cmd,
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
+        env=env,
+        timeout=30,
+    )
     payload = {}
     if proc.stdout.strip():
         try:
@@ -139,17 +158,62 @@ class Wave2ObeyTests(unittest.TestCase):
         self.assertIn("cc", payload.get("route", ""))
 
     def test_safety_valve_cc_reauthorizes(self):
-        td = tempfile.mkdtemp(prefix="saipen-obey-")
-        self.addCleanup(lambda: __import__("shutil").rmtree(td, ignore_errors=True))
-        proj = _make_wait_fixture(Path(td), intent="goal")
-        # patch state to have goal_waves=3 goal_tickets=20 (tripped)
-        state_path = proj / ".saipen/STATE.md"
-        text = state_path.read_text(encoding="utf-8")
-        text = text.replace("execution_intent: goal", "execution_intent: goal\ngoal_waves: 3\ngoal_tickets: 20")
-        state_path.write_text(text, encoding="utf-8")
-        rc, payload, raw = _cli(proj, "cc", dry_run=True)
-        self.assertEqual(rc, 0)
+        def tripped_fixture():
+            td = tempfile.mkdtemp(prefix="saipen-obey-")
+            self.addCleanup(lambda: __import__("shutil").rmtree(td, ignore_errors=True))
+            proj = _make_wait_fixture(Path(td), intent="goal")
+            state_path = proj / ".saipen/STATE.md"
+            text = state_path.read_text(encoding="utf-8")
+            text = text.replace(
+                "execution_intent: goal",
+                "execution_intent: goal\ngoal_waves: 3\ngoal_tickets: 20",
+            )
+            state_path.write_text(text, encoding="utf-8")
+            return proj
+
+        def snapshot(proj):
+            return {
+                str(path.relative_to(proj)): path.read_bytes()
+                for path in proj.rglob("*")
+                if path.is_file()
+            }
+
+        unwitnessed = tripped_fixture()
+        before = snapshot(unwitnessed)
+        rc, payload, raw = _cli(unwitnessed, "cc", dry_run=False)
+        self.assertEqual(rc, 1, raw)
+        self.assertEqual(payload.get("code"), "RECONCILE_REAUTH_REQUIRED")
+        self.assertTrue(payload.get("operator_action_due"), raw)
+        self.assertTrue(payload.get("next_action", "").startswith("WAIT:"), raw)
+        state_text = (unwitnessed / ".saipen/STATE.md").read_text(encoding="utf-8")
+        self.assertIn("goal_waves: 3", state_text)
+        self.assertIn("goal_tickets: 20", state_text)
+        self.assertEqual(snapshot(unwitnessed), before)
+
+        authorized = tripped_fixture()
+        rc, payload, raw = _cli(
+            authorized, "cc", dry_run=False, operator_text="cc"
+        )
+        self.assertEqual(rc, 0, raw)
         self.assertEqual(payload.get("code"), "VALVE_REAUTHORIZED")
+        state_text = (authorized / ".saipen/STATE.md").read_text(encoding="utf-8")
+        self.assertIn("goal_waves: 0", state_text)
+        self.assertIn("goal_tickets: 0", state_text)
+        log_text = (authorized / ".saipen/LOG.md").read_text(encoding="utf-8")
+        self.assertIn("DEC: goal reauthorized --", log_text)
+        operation_path = (
+            authorized
+            / ".saipen"
+            / "recovery"
+            / "settled"
+            / payload["op_id"]
+            / "operation.json"
+        )
+        self.assertTrue(operation_path.is_file())
+        operation = json.loads(operation_path.read_text(encoding="utf-8"))
+        self.assertEqual(operation["operation"], "valve")
+        self.assertEqual(operation["status"], "COMMITTED")
+        self.assertTrue(all(target["applied"] for target in operation["targets"]))
 
 class Wave1InjectorTests(unittest.TestCase):
     def test_injectors_contain_all_19_shortcuts(self):

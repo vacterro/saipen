@@ -104,13 +104,15 @@ def parse_identity(text: str) -> dict:
     """The identity tokens carried by an evidence line, in RECORD shape.
 
     The result is exactly what `regression_pair_verdict` consumes: keys
-    `verifier` and `subject`, never the wire spellings. A line carrying both
-    `verifier:` and `oracle:` keeps the first occurrence, so a second spelling
-    cannot quietly redefine the identity a reader already saw.
+    `verifier` and `subject`, never the wire spellings. Equal aliases remain
+    compatible. Contradictory declarations produce no identity.
     """
     found: dict[str, str] = {}
     for token, value in _TOKEN.findall(text or ""):
-        found.setdefault(_TOKEN_KEY[token], value)
+        key = _TOKEN_KEY[token]
+        if key in found and found[key] != value:
+            return {}
+        found[key] = value
     return found
 
 
@@ -150,18 +152,21 @@ def parse_evidence(text: str) -> dict | None:
 def regression_evidence_verdict(records) -> dict:
     """The verdict for a ticket's current-cycle evidence records.
 
-    Takes the LATEST FAIL and the LATEST PASS, because a cycle may legitimately
-    record several attempts and the pair that matters is the one that closed
-    it. Missing either half is `NO_REGRESSION_EVIDENCE` -- distinct from a pair
+    Takes the LATEST FAIL and the LATEST PASS in authoritative record order.
+    The PASS must follow the FAIL: a new failure invalidates an earlier pair.
+    Missing either half is `NO_REGRESSION_EVIDENCE` -- distinct from a pair
     that exists and is inadmissible, so the diagnostic can say which of the two
     an agent is actually looking at.
     """
     before = after = None
-    for record in records or ():
+    before_index = after_index = -1
+    for index, record in enumerate(records or ()):
         if record.get("result") == "FAIL":
             before = record
+            before_index = index
         elif record.get("result") == "PASS":
             after = record
+            after_index = index
     if before is None or after is None:
         missing = "FAIL" if before is None else "PASS"
         return _verdict(
@@ -170,6 +175,13 @@ def regression_evidence_verdict(records) -> dict:
             f"cycle. A ticket declaring `regression: required` owes both: the "
             f"SAME verifier red against the pre-fix subject and green against "
             f"the post-fix one",
+        )
+    if after_index <= before_index:
+        return _verdict(
+            NOT_A_REGRESSION_PAIR,
+            "the latest regression PASS precedes the latest FAIL in this VERIFY "
+            "cycle. A newer failure invalidates the earlier pair; record a "
+            "fresh PASS against the corrected subject with the same verifier",
         )
     return regression_pair_verdict(before, after)
 

@@ -9,10 +9,20 @@ downgrades exactly that finding to a visible warning; everything else stays
 blocking. Sealed history is never edited.
 
     python tools/accept_legacy_debt.py --project-root <path> \
-        --events E-964,E-981,E-1007,E-1114,E-1117,E-1124 \
-        --authority SRC-047 --reason "operator Decision B ..." [--agent NAME]
+        --events E-964,E-981 --preview
 
-Exit 0 only on ACCEPTED_DEBT_REGISTERED. Stdlib only.
+The native host presents the exact preview scope for operator approval, captures
+its completed Decision B capsule through the existing authority-only ingress,
+and supplies that original Source to registration:
+
+    python tools/accept_legacy_debt.py --project-root <path> \
+        --events E-964,E-981 --authority SRC-123 --reason "approved sealed debt"
+
+A preview, event/lineage token, model-written Source or journal grants nothing.
+UNKNOWN historical approval remains unaccepted. A new scoped decision appends
+a new record; rebind only relocates evidence of an already verified acceptance.
+
+Exit 0 only for a successful preview, registration, exact repeat or rebind. Stdlib only.
 """
 
 from __future__ import annotations
@@ -22,7 +32,7 @@ import json
 import sys
 from pathlib import Path
 
-from saipen_engine.accepted_debt import rebind, register
+from saipen_engine.accepted_debt import preview, rebind, register
 from saipen_engine.state import parse_state
 
 
@@ -45,9 +55,11 @@ def main(argv: list[str]) -> int:
     parser.add_argument(
         "--authority",
         default=None,
-        help="canonical authority token: SRC-### | E-### | lineage-<32hex>",
+        help="original independently witnessed Decision B Source SRC-###",
     )
-    parser.add_argument("--reason", required=True, help="why this debt is accepted immutable")
+    parser.add_argument("--reason", help="why this debt is accepted immutable")
+    parser.add_argument("--preview", action="store_true",
+                        help="read-only exact Decision B capsule for native operator approval")
     parser.add_argument(
         "--rebind",
         metavar="AD-######",
@@ -68,9 +80,17 @@ def main(argv: list[str]) -> int:
     if not args.rebind:
         if not args.events:
             parser.error("--events is required unless --rebind is used")
-        if not args.authority:
+        if not args.authority and not args.preview:
             parser.error("--authority is required unless --rebind is used")
     root = Path(args.project_root).resolve()
+    if args.preview:
+        if args.rebind or args.authority:
+            parser.error("--preview uses --events, not --rebind or --authority")
+        result = preview(root, [part.strip() for part in args.events.split(",") if part.strip()])
+        print(json.dumps(result, indent=2, sort_keys=True))
+        return 0 if result.get("ok") else 1
+    if not args.reason:
+        parser.error("--reason is required for a mutation")
     if args.rebind:
         if args.events:
             parser.error("--events and --rebind are mutually exclusive: a rebind never "

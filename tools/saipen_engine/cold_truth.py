@@ -69,7 +69,32 @@ def _read_prefix(path: Path, cap: int, *, label: str) -> tuple[bytes, int, bool]
     info = _regular_file(path, label=label)
     with path.open("rb") as handle:
         raw = handle.read(cap)
+    if len(raw) != min(cap, info.st_size):
+        raise OrientationError(f"{label} changed during bounded read")
     return raw, len(raw), info.st_size > len(raw)
+
+
+def _read_state(path: Path) -> tuple[bytes, int, bool]:
+    """Bound the complete authoritative frontmatter, not historical Markdown.
+
+    STATE's canonical parser stops at its first closing fence. Keep the
+    original whole-file behavior for small files; for a large body, pass only
+    a COMPLETE header to that same strict parser and disclose the omitted body.
+    This is a read-only projection, never mutation admission or file repair.
+    """
+    raw, count, truncated = _read_prefix(path, STATE_READ_CAP, label="STATE.md")
+    if not truncated:
+        return raw, count, False
+    lines = raw.splitlines(keepends=True)
+    if lines and lines[0].removeprefix(b"\xef\xbb\xbf").strip() == b"---":
+        end = len(lines[0])
+        for line in lines[1:]:
+            end += len(line)
+            # A fence cut at the byte cap could really be '---invalid'.
+            # Only a terminated complete line can close a truncated prefix.
+            if line.strip() == b"---" and line.endswith((b"\r", b"\n")):
+                return raw[:end], count, True
+    raise OrientationError(f"STATE.md frontmatter exceeds bounded cap {STATE_READ_CAP}")
 
 
 def _read_tail(path: Path, cap: int, *, label: str) -> tuple[bytes, int, bool]:
@@ -317,8 +342,8 @@ def orientation_projection(
         handoff, reads["handoff"] , handoff_problem = load_handoff(Path(handoff_path))
 
     try:
-        state_raw, reads["STATE.md"] = _read_small(
-            root / ".saipen" / "STATE.md", STATE_READ_CAP, label="STATE.md"
+        state_raw, reads["STATE.md"], state_body_omitted = _read_state(
+            root / ".saipen" / "STATE.md"
         )
         state, state_error = parse_state_or_error(state_raw.decode("utf-8-sig"))
         if state_error:
@@ -389,6 +414,7 @@ def orientation_projection(
             "actual_bytes": total,
             "within_budget": total <= ORIENTATION_READ_BUDGET,
             "sources": reads,
+            "state_body_omitted": state_body_omitted,
             "board_prefix_truncated": board_truncated,
             "log_tail_truncated": log_truncated,
             "repository_searches": 0,

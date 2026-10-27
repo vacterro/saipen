@@ -9,7 +9,6 @@ mode that killed the CHANGELOG-order control twice (T-1245).
 
 from __future__ import annotations
 
-import io
 import sys
 import unittest
 from pathlib import Path
@@ -18,13 +17,12 @@ from unittest import mock
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 import test_xpatch
+import test_hermetic_env as hermetic
 from saipen_engine import xpatch
 
 
 def _run(case_class, method: str) -> unittest.TestResult:
-    suite = unittest.TestSuite([case_class(method)])
-    with io.StringIO() as sink:
-        return unittest.TextTestRunner(stream=sink, verbosity=0).run(suite)
+    return hermetic.borrow(case_class(method))
 
 
 class ControlsAreRed(unittest.TestCase):

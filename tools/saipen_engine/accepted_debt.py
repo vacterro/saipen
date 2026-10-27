@@ -26,6 +26,12 @@ NARROW BINDING (fail-closed on every condition):
     forces conscious re-registration;
   * the record itself carries an integrity digest over its own body.
 
+T-1851: syntax/integrity is not permission. New registrations require an
+authority-only native Decision B Source and an exact reservation at the existing
+separated event owner. Readers classify unproved historical origin UNKNOWN and
+retain FAIL. Preview and scope live in debt_authority; native reservations bind
+the operation independently of model-writable journals. No new signer is used.
+
 Storage: `<project>/.saipen/recovery/conformance/accepted_debt/AD-NNNNNN.json`,
 written through the canonical journal (run_mutation) only -- never by hand.
 """
@@ -212,6 +218,7 @@ def evaluate_provenance(
             "record_id": None,
             "reason": "duplicate event ids in missing set",
         }
+    unknown = None
     for path in files:
         try:
             record = load_record(root, path.stem)
@@ -229,6 +236,12 @@ def evaluate_provenance(
                 "reason": f"{path.stem} accepted_missing_events malformed",
             }
         if set(accepted_events) != wanted or len(accepted_events) != len(wanted):
+            continue
+        from . import debt_authority
+
+        authority = debt_authority.status(root, record)
+        if authority["authority_status"] != "KNOWN":
+            unknown = authority["authority_reason"]
             continue
         evidence = record.get("evidence")
         if not isinstance(evidence, list):
@@ -264,14 +277,16 @@ def evaluate_provenance(
             return {
                 "accepted": True,
                 "record_id": path.stem,
-                "reason": "exact missing set and line evidence verified",
+                "reason": "exact missing set and line evidence verified; authority KNOWN",
+                "authority_status": "KNOWN",
             }
         return {
             "accepted": False,
             "record_id": None,
             "reason": f"{path.stem} does not cover the exact missing set/line evidence",
         }
-    return {"accepted": False, "record_id": None, "reason": "no covering accepted-debt record"}
+    return {"accepted": False, "record_id": None,
+            "reason": unknown or "no covering accepted-debt record", "authority_status": "UNKNOWN"}
 
 
 def _iter_history(root: Path):
@@ -302,218 +317,169 @@ def _iter_history(root: Path):
             yield rel_str, line_no, raw, parsed
 
 
-def register(
-    root: Path | str,
-    *,
-    agent: str,
-    events: list[str],
-    reason: str,
-    authority: str,
-) -> dict:
-    """Register ONE exact sealed historical missing-set as accepted legacy debt.
+def _event_material(root, events):
+    """Resolve eligible immutable lines once and pin their canonical carriers."""
+    from .journal import hash_file_dependency, hash_tree_dependency
+    from .log import history_paths
 
-    Fail-closed validation before any write: every event must exist, lack an
-    `[op: ...]` marker, and sit at/after the self-established provenance
-    boundary; no overlap with an existing record; authority must name a
-    canonical SRC/E/lineage token. The record is journaled through the
-    canonical operation layer (run_mutation) -- never a bare file write.
-    """
-    root = Path(root)
-    normalized = []
-    for event in events:
-        canonical = canonical_event_id(event)
-        if canonical is None:
-            return {
-                "ok": False,
-                "code": "VALIDATION_FAILED",
-                "detail": f"invalid event id {event!r} (expected E-###)",
-            }
-        if canonical not in normalized:
-            normalized.append(canonical)
-    if not normalized:
-        return {"ok": False, "code": "VALIDATION_FAILED", "detail": "no events supplied"}
+    def pins():
+        return {".saipen/IDENTITY.md": hash_file_dependency(root / ".saipen/IDENTITY.md"),
+                ".saipen/logs": hash_tree_dependency(root / ".saipen/logs"),
+                **{p.relative_to(root.resolve()).as_posix(): hash_file_dependency(p)
+                   for p in history_paths(root)}}
+
+    before = pins()
+    normalized = sorted({canonical_event_id(e) for e in events} - {None},
+                        key=lambda e: int(e[2:]))
+    if not normalized or any(canonical_event_id(e) is None for e in events):
+        raise AcceptedDebtRefusal("VALIDATION_FAILED",
+                                  "invalid or empty event set (expected E-###)")
+    found, first_op = {}, None
+    for file, line, raw, parsed in _iter_history(root):
+        if parsed.get("op_id") and first_op is None:
+            first_op = parsed["event"]
+        event = f"E-{parsed['event']}"
+        if event in normalized:
+            if event in found:
+                raise AcceptedDebtRefusal("VALIDATION_FAILED", f"ambiguous history event {event}")
+            found[event] = (file, line, raw, parsed)
+    absent = set(normalized) - set(found)
+    if absent:
+        raise AcceptedDebtRefusal(
+            "VALIDATION_FAILED",
+            "events not found in canonical history: " + ", ".join(sorted(absent)))
+    if first_op is None:
+        raise AcceptedDebtRefusal("VALIDATION_FAILED",
+                                  "project history carries no provenance boundary")
+    marked = [e for e in normalized if found[e][3].get("op_id")]
+    if marked:
+        raise AcceptedDebtRefusal("VALIDATION_FAILED", "events already carry [op:] provenance: "
+                                  + ", ".join(marked))
+    if any(found[e][3]["event"] < first_op for e in normalized):
+        raise AcceptedDebtRefusal("VALIDATION_FAILED", "events predate the provenance boundary")
+    evidence = [{"event": e, "file": found[e][0], "line_number": found[e][1],
+                 "line_sha256": _line_sha256(found[e][2])} for e in normalized]
+    if before != pins():
+        raise AcceptedDebtRefusal("STALE_PRECONDITION",
+                                  "historical carriers changed while being read")
+    return normalized, evidence, before
+
+
+def preview(root, events):
+    """Read-only exact Decision B capsule; the host supplies a real approval."""
+    from . import debt_authority
+
+    root = Path(root).resolve()
+    try:
+        normalized, evidence, _pins = _event_material(root, events)
+        lineage = project_lineage_identity(root)
+        if not lineage:
+            raise ValueError("a canonical project lineage is required")
+        capsule = {"kind": debt_authority.KIND, "schema": 1, "project_lineage": lineage,
+                   "check_id": RULE_ID, "check_version": CHECK_VERSION, "events": normalized,
+                   "event_hashes": {e["event"]: e["line_sha256"] for e in evidence},
+                   "decision": "ACCEPT_LEGACY_DEBT", "statement": "", "expires_at": ""}
+        candidates = []
+        for path in _record_files(root):
+            record = load_record(root, path.stem)
+            if (record.get("accepted_missing_events") == normalized
+                    and debt_authority.status(root, record)["authority_status"] == "UNKNOWN"):
+                candidates.append({"record_id": path.stem,
+                                   "sha256": hashlib.sha256(path.read_bytes()).hexdigest()})
+        if len(candidates) > 1:
+            raise ValueError("multiple unverified covering records require explicit reconciliation")
+        if candidates:
+            capsule["supersedes"] = candidates[0]
+        return {"ok": True, "code": "PLAN", "capsule": capsule, "read_only": True,
+                "authority_status": "UNKNOWN"}
+    except (OSError, ValueError, TypeError, AcceptedDebtRefusal) as exc:
+        return {"ok": False, "code": getattr(exc, "code", "VALIDATION_FAILED"), "detail": str(exc)}
+
+
+def register(root: Path | str, *, agent: str, events: list[str],
+             reason: str, authority: str) -> dict:
+    """Accept only one independently witnessed, exact historical Decision B."""
+    from . import debt_authority
+    from .capability import may_mutate, negotiate_capability
+    from .journal import hash_file_dependency, run_mutation, verify_accepted_debt
+
+    root = Path(root).resolve()
+    if not may_mutate(negotiate_capability()):
+        return {"ok": False, "code": "CAPABILITY_READ_ONLY", "detail": "registration is a mutation"}
     if not str(reason or "").strip():
         return {"ok": False, "code": "VALIDATION_FAILED", "detail": "reason is required"}
     authority = str(authority or "").strip()
-    if not AUTHORITY_RE.match(authority):
-        return {
-            "ok": False,
-            "code": "VALIDATION_FAILED",
-            "detail": "authority must be SRC-###, E-### or lineage-<32hex>",
-        }
-
-    wanted = set(normalized)
-    found: dict[str, tuple[str, int, str]] = {}
-    first_op: int | None = None
-    numbers: dict[str, int] = {}
-    for rel_str, line_no, raw, parsed in _iter_history(root):
-        event_id = f"E-{parsed['event']}"
-        if parsed.get("op_id") and first_op is None:
-            first_op = parsed["event"]
-        if event_id in wanted:
-            found[event_id] = (rel_str, line_no, raw)
-            numbers[event_id] = parsed["event"]
-    missing_ids = sorted(wanted - set(found))
-    if missing_ids:
-        return {
-            "ok": False,
-            "code": "VALIDATION_FAILED",
-            "detail": "events not found in canonical history: " + ", ".join(missing_ids),
-        }
-    if first_op is None:
-        return {
-            "ok": False,
-            "code": "VALIDATION_FAILED",
-            "detail": "project history carries no provenance boundary; nothing to accept",
-        }
-    with_marker = []
-    pre_boundary = []
-    from .log import parse_log_line
-
-    for event_id in normalized:
-        rel_str, line_no, raw = found[event_id]
-        # An event that already carries [op: ...] is mechanized, not debt.
-        parsed = parse_log_line(raw)
-        if parsed is None:
-            return {
-                "ok": False,
-                "code": "VALIDATION_FAILED",
-                "detail": f"{event_id} no longer parses as a LOG line",
-            }
-        if parsed.get("op_id"):
-            with_marker.append(event_id)
-        elif numbers[event_id] < first_op:
-            pre_boundary.append(event_id)
-    if with_marker:
-        return {
-            "ok": False,
-            "code": "VALIDATION_FAILED",
-            "detail": "events already carry [op: ...] provenance: " + ", ".join(with_marker),
-        }
-    if pre_boundary:
-        return {
-            "ok": False,
-            "code": "VALIDATION_FAILED",
-            "detail": "events predate the provenance boundary and are already exempt: "
-            + ", ".join(pre_boundary),
-        }
-
-    # No conflicting claims against an existing record for this check. A
-    # BROADER registration may subsume an earlier narrower one (the earlier
-    # exact-set record can never match the live set again anyway); a subset,
-    # identical or partial-overlap registration is refused so one event is
-    # never claimed by two conflicting records.
-    for path in _record_files(root):
-        try:
+    if not AUTHORITY_RE.fullmatch(authority):
+        return {"ok": False, "code": "VALIDATION_FAILED",
+                "detail": "authority must be SRC-###, E-### or lineage-<32hex>",
+                "authority_status": "UNKNOWN"}
+    try:
+        normalized, evidence, dependencies = _event_material(root, events)
+        lineage = project_lineage_identity(root)
+        if not lineage:
+            raise ValueError("authority UNKNOWN: a canonical project lineage is required")
+        record = {"schema_version": SCHEMA_VERSION, "kind": "accepted_legacy_debt",
+                  "record_id": next_record_id(root), "created_at": _utc(), "agent": str(agent),
+                  "project_identity": _project_identity(root), "project_lineage": lineage,
+                  "check_id": RULE_ID, "check_version": CHECK_VERSION, "authority": authority,
+                  "reason": str(reason), "accepted_missing_events": normalized,
+                  "evidence": evidence}
+        auth = debt_authority.source_shape(root, record, dependencies)
+        wanted = set(normalized)
+        for path in _record_files(root):
             existing = load_record(root, path.stem)
-        except AcceptedDebtRefusal:
-            continue
-        existing_set = set(existing.get("accepted_missing_events") or [])
-        intersection = wanted & existing_set
-        if not intersection:
-            continue
-        if existing_set == wanted:
-            return {
-                "ok": False,
-                "code": "ACCEPTED_DEBT_EXISTS",
-                "detail": f"{path.stem} already accepts exactly this set",
-            }
-        if not existing_set <= wanted:
-            return {
-                "ok": False,
-                "code": "ACCEPTED_DEBT_EXISTS",
-                "detail": f"{path.stem} already accepts: "
-                + ", ".join(sorted(existing_set & wanted)),
-            }
-
-    from .journal import ensure_project_lineage, run_mutation
-
-    lineage = ensure_project_lineage(root)
-    record = {
-        "schema_version": SCHEMA_VERSION,
-        "kind": "accepted_legacy_debt",
-        "record_id": next_record_id(root),
-        "created_at": _utc(),
-        "agent": str(agent or "unknown"),
-        "project_identity": _project_identity(root),
-        "project_lineage": lineage,
-        "check_id": RULE_ID,
-        "check_version": CHECK_VERSION,
-        "authority": authority,
-        "reason": str(reason),
-        "accepted_missing_events": sorted(
-            normalized, key=lambda e: int(EVENT_INPUT_RE.match(e).group(1))
-        ),
-        "evidence": [
-            {
-                "event": event_id,
-                "file": found[event_id][0],
-                "line_number": found[event_id][1],
-                "line_sha256": _line_sha256(found[event_id][2]),
-            }
-            for event_id in sorted(
-                normalized, key=lambda e: int(EVENT_INPUT_RE.match(e).group(1))
-            )
-        ],
-        "journal_op_id": None,
-    }
-    op_id = (
-        "accepted_debt.register-"
-        + hashlib.sha256(
-            f"{lineage}|{record['record_id']}|{record['accepted_missing_events']}".encode(
-                "utf-8"
-            )
-        ).hexdigest()[:12]
-    )
-    record["journal_op_id"] = op_id
-    record["integrity_digest"] = _integrity_digest(
-        {k: v for k, v in record.items() if k != "integrity_digest"}
-    )
-    content = json.dumps(record, indent=2, sort_keys=True).encode("utf-8")
-    rel = f"{ACCEPTED_DEBT_DIR}/{record['record_id']}.json"
-    committed = run_mutation(
-        root,
-        op_id=op_id,
-        operation="accepted_debt.register",
-        agent=str(agent or "unknown"),
-        project_identity=record["project_identity"],
-        semantic_payload_hash=hashlib.sha256(
-            json.dumps(
-                {
-                    "record": record["record_id"],
-                    "events": record["accepted_missing_events"],
-                    "authority": authority,
-                },
-                sort_keys=True,
-            ).encode("utf-8")
-        ).hexdigest(),
-        targets=[
-            {
-                "path": rel,
-                "role": "report",
-                "action": "write",
-                "content": content,
-                "before_hash": "",
-                "after_hash": hashlib.sha256(content).hexdigest(),
-            }
-        ],
-        preconditions={rel: ""},
-        verification_policy="none",
-    )
-    if not committed.get("ok"):
-        return {
-            "ok": False,
-            "code": committed.get("code", "VALIDATION_FAILED"),
-            "detail": committed.get("detail", committed.get("message", "journal apply failed")),
-        }
-    return {
-        "ok": True,
-        "code": "ACCEPTED_DEBT_REGISTERED",
-        "record_id": record["record_id"],
-        "events": record["accepted_missing_events"],
-        "journal_op_id": op_id,
-        "authority": authority,
-    }
+            prior = set(existing.get("accepted_missing_events") or [])
+            overlap = wanted & prior
+            if not overlap:
+                continue
+            if prior == wanted:
+                prior_authority = debt_authority.status(root, existing)
+                if (prior_authority["authority_status"] == "KNOWN"
+                        and existing.get("authority") == authority
+                        and existing.get("authorization") == auth):
+                    problems = verify_accepted_debt(
+                        root, [{"path": path.relative_to(root).as_posix()}])
+                    if problems:
+                        raise ValueError("existing acceptance is not current: "
+                                         + "; ".join(problems))
+                    return {"ok": True, "code": "ALREADY_APPLIED", "record_id": path.stem,
+                            "events": normalized, "authority_status": "KNOWN"}
+                replacement = auth["binding"].get("supersedes")
+                expected = {"record_id": path.stem,
+                            "sha256": hashlib.sha256(path.read_bytes()).hexdigest()}
+                if (replacement != expected
+                        or prior_authority["authority_status"] != "UNKNOWN"):
+                    return {"ok": False, "code": "ACCEPTED_DEBT_EXISTS",
+                            "detail": f"{path.stem} already accepts exactly this set"}
+                dependencies[path.relative_to(root).as_posix()] = hash_file_dependency(path)
+            elif not prior <= wanted:
+                return {"ok": False, "code": "ACCEPTED_DEBT_EXISTS",
+                        "detail": f"{path.stem} already accepts: " + ", ".join(sorted(overlap))}
+        debt_authority.authorize(root, record, dependencies)
+        content = debt_authority.record_bytes(record)
+        rel = f"{ACCEPTED_DEBT_DIR}/{record['record_id']}.json"
+        committed = run_mutation(
+            root, op_id=record["journal_op_id"], operation="accepted_debt.register",
+            agent=str(agent),
+            project_identity=record["project_identity"],
+            semantic_payload_hash=hashlib.sha256(content).hexdigest(),
+            targets=[{"path": rel, "role": "report", "action": "write", "content": content,
+                      "before_hash": "", "after_hash": hashlib.sha256(content).hexdigest()}],
+            preconditions={rel: ""}, read_preconditions=dependencies,
+            verification_policy="accepted_debt",
+        )
+        if not committed.get("ok"):
+            return {"ok": False, "code": committed.get("code", "VALIDATION_FAILED"),
+                    "detail": committed.get("detail", committed.get("message", "apply failed"))}
+        problems = verify_accepted_debt(root, [{"path": rel}])
+        if problems:
+            raise ValueError("acceptance postcondition failed: " + "; ".join(problems))
+        return {"ok": True, "code": "ACCEPTED_DEBT_REGISTERED", "record_id": record["record_id"],
+                "events": normalized, "journal_op_id": record["journal_op_id"],
+                "authority": authority, "authority_status": "KNOWN"}
+    except (OSError, ValueError, TypeError, KeyError, AcceptedDebtRefusal) as exc:
+        return {"ok": False, "code": getattr(exc, "code", "VALIDATION_FAILED"),
+                "detail": str(exc), "authority_status": "UNKNOWN"}
 
 
 # T-312: the closed rebind writer.
@@ -555,6 +521,10 @@ def rebind(
     attempt to change the accepted event set.
     """
     root = Path(root)
+    from .capability import may_mutate, negotiate_capability
+
+    if not may_mutate(negotiate_capability()):
+        return {"ok": False, "code": "CAPABILITY_READ_ONLY", "detail": "rebind is a mutation"}
     if not ACCEPTED_DEBT_ID_RE.match(ref or ""):
         return {
             "ok": False,
@@ -583,6 +553,13 @@ def rebind(
             "code": refusal.code,
             "detail": refusal.detail,
         }
+
+    from . import debt_authority
+
+    authority = debt_authority.status(root, record)
+    if authority["authority_status"] != "KNOWN":
+        return {"ok": False, "code": "VALIDATION_FAILED", "detail": authority["authority_reason"],
+                "authority_status": "UNKNOWN"}
 
     rel = f"{ACCEPTED_DEBT_DIR}/{ref}.json"
     path = root / rel

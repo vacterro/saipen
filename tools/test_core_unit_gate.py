@@ -120,6 +120,14 @@ class CoreUnitFixture(unittest.TestCase):
     DECLARE = True
 
     def setUp(self) -> None:
+        from saipen_engine import verification_cache
+
+        # These cases simulate execution records and test gate arithmetic,
+        # not the operator's installed host SDKs. Actual runtime/toolchain and
+        # real multi-process capture are covered by test_t1832_single_flight.
+        environment = mock.patch.object(verification_cache, "_TOOLS", ())
+        environment.start()
+        self.addCleanup(environment.stop)
         base = Path(tempfile.mkdtemp(prefix="saipen-core-unit-gate-"))
         self.addCleanup(lambda: shutil.rmtree(base, ignore_errors=True))
         self.project = base / "project"
@@ -482,6 +490,7 @@ class RealRunRedControlTests(unittest.TestCase):
             core_unit.FAMILY_NAME,
             (sys.executable, "-B", "-m", "unittest", "discover", "-s", "tools", "-p", "test_*.py"),
             120,
+            environment_tools=(),
         )
         patcher = mock.patch.object(core_unit, "family", return_value=small)
         patcher.start()

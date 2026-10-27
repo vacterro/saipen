@@ -59,14 +59,68 @@ def _literal_str(node: ast.AST) -> str | None:
     return None
 
 
-def _refusal_literals(tree: ast.AST) -> set[str]:
-    """Production refusal-code literals, by construction shape.
+def _module_constants(tree: ast.Module) -> dict[str, str]:
+    """Module-level `NAME = "literal"` assignments, for name-resolved codes.
 
-    Only code-shaped literals count (`[A-Z][A-Z0-9_]*`): a usage sentence
+    A refusal code written as a constant is not less of a refusal code than the
+    same string inlined: `_decision_wait` answers `WAIT_OPERATOR` from
+    `entry.WAIT_OPERATOR`, so a literal-only scan reported the registry complete
+    while eleven such codes reached callers marked `unregistered_code`.
+    """
+    constants: dict[str, str] = {}
+    for node in tree.body:
+        if not (isinstance(node, ast.Assign) and len(node.targets) == 1):
+            continue
+        target = node.targets[0]
+        value = _literal_str(node.value)
+        if isinstance(target, ast.Name) and value is not None:
+            constants[target.id] = value
+    return constants
+
+
+def _code_of(node: ast.AST | None, constants: dict[str, str]) -> str | None:
+    """The code a construction site names: a literal, or a module constant."""
+    if node is None:
+        return None
+    value = _literal_str(node)
+    if value is not None:
+        return value
+    if isinstance(node, ast.Name):
+        return constants.get(node.id)
+    return None
+
+
+def _code_first_helpers(tree: ast.Module) -> set[str]:
+    """Local helpers whose FIRST value parameter is the refusal code.
+
+    A helper named `refuse` is not automatically code-first:
+    `host_authority_identity.refuse(reason, detail)` returns a proof step, and
+    `saipen.refuse(detail)` is message-first. Reading the parameter name is the
+    only way to tell a refusal code from prose or a proof-step reason.
+    """
+    helpers: set[str] = set()
+    for node in ast.walk(tree):
+        if not isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+            continue
+        params = [arg.arg for arg in node.args.args]
+        if params[:1] == ["self"]:
+            params = params[1:]
+        if params[:1] == ["code"]:
+            helpers.add(node.name)
+    return helpers
+
+
+def _refusal_literals(tree: ast.AST, constants: dict[str, str] | None = None) -> set[str]:
+    """Production refusal codes, by construction shape.
+
+    Only code-shaped values count (`[A-Z][A-Z0-9_]*`): a usage sentence
     passed to a message-first local helper is not a refusal code, and the
     engine's `_refuse(code, detail)` plus the `{"ok": False, "code": ...}`
     dict shape are the two construction sites the measured crash travelled.
+    A code named through a module-level constant is resolved, never skipped.
     """
+    consts = constants or {}
+    code_first = _code_first_helpers(tree) if isinstance(tree, ast.Module) else set()
     found: set[str] = set()
     for node in ast.walk(tree):
         if isinstance(node, ast.Dict):
@@ -75,7 +129,7 @@ def _refusal_literals(tree: ast.AST) -> set[str]:
                 ok_value = node.values[keys.index("ok")]
                 code_value = node.values[keys.index("code")]
                 if isinstance(ok_value, ast.Constant) and ok_value.value is False:
-                    value = _literal_str(code_value)
+                    value = _code_of(code_value, consts)
                     if value is not None:
                         found.add(value)
             continue
@@ -84,11 +138,12 @@ def _refusal_literals(tree: ast.AST) -> set[str]:
         func = node.func
         name = func.attr if isinstance(func, ast.Attribute) else getattr(func, "id", "")
         if name in ("_refuse", "refuse"):
-            # `refuse(code, detail)` (engine/admission) and
-            # `Result.refuse(code, message)` are code-first; the code-shape
-            # filter below drops the message-first local helpers' prose.
+            # Two local helper shapes share these names; only a code-first one
+            # is a refusal, and the dict shape above already covers the rest.
+            if name not in code_first:
+                continue
             for arg in node.args:
-                value = _literal_str(arg)
+                value = _code_of(arg, consts)
                 if value is not None:
                     found.add(value)
                     break
@@ -96,12 +151,12 @@ def _refusal_literals(tree: ast.AST) -> set[str]:
             keywords = {kw.arg: kw.value for kw in node.keywords}
             ok = keywords.get("ok")
             if isinstance(ok, ast.Constant) and ok.value is False:
-                value = _literal_str(keywords.get("code")) if keywords.get("code") else None
+                value = _code_of(keywords.get("code"), consts)
                 if value is not None:
                     found.add(value)
         if name == "EngineError":
             keywords = {kw.arg: kw.value for kw in node.keywords}
-            value = _literal_str(keywords.get("code")) if keywords.get("code") else None
+            value = _code_of(keywords.get("code"), consts)
             if value is not None:
                 found.add(value)
     return {code for code in found if re.fullmatch(r"[A-Z][A-Z0-9_]*", code)}
@@ -111,7 +166,7 @@ def discovered_production_codes() -> set[str]:
     codes: set[str] = set()
     for path in _iter_sources():
         tree = ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
-        codes |= _refusal_literals(tree)
+        codes |= _refusal_literals(tree, _module_constants(tree))
     return codes
 
 
@@ -129,6 +184,30 @@ class RegistryCompletenessTests(unittest.TestCase):
     def test_the_scan_actually_sees_the_measured_case(self) -> None:
         """The discovery is not vacuously green: the SAITULS code is found."""
         self.assertIn("SOURCE_LINKAGE_DRIFT", discovered_production_codes())
+
+    def test_a_code_named_through_a_module_constant_is_discovered(self) -> None:
+        """The second measured case: a constant-shaped code, not a literal.
+
+        `entry._decision_wait` answers `WAIT_OPERATOR` through the module
+        constant, so a literal-only discovery called the registry complete
+        while that code reached callers marked `unregistered_code`.
+        """
+        discovered = discovered_production_codes()
+        self.assertIn("WAIT_OPERATOR", discovered)
+        self.assertIn("WAIT_FOREIGN_OWNER", discovered)
+
+    def test_the_constant_resolver_reads_the_name_not_the_shape(self) -> None:
+        """A name is resolved to its module value; an unknown name is silent."""
+        tree = ast.parse(
+            'CODE = "PROBE_UNREGISTERED"\n'
+            'OTHER = "not-a-code"\n'
+            'a = {"ok": False, "code": CODE}\n'
+            'b = {"ok": False, "code": OTHER}\n'
+            'c = {"ok": False, "code": UNKNOWN_NAME}\n'
+        )
+        self.assertEqual(
+            _refusal_literals(tree, _module_constants(tree)), {"PROBE_UNREGISTERED"}
+        )
 
 
 class StructuredRefusalTests(unittest.TestCase):

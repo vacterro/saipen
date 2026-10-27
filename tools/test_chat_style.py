@@ -355,25 +355,26 @@ class ClassifierTests(unittest.TestCase):
         self.assertEqual(klass, RS.CLASS_ORDINARY_CHAT)
 
     def test_an_authorized_detail_request_lifts_the_line_budget(self):
+        from saipen_engine import operator_task
+        from test_operator_origin_support import native_operator
+
         nine = "\n".join(f"Finding {n}." for n in range(9))
         klass, _e = RS.classify_final_response(
             nine, operational_turn=False, style_contract=contract_with("en")
         )
         self.assertEqual(klass, RS.CLASS_CHAT_STYLE_DRIFT)
-        klass, _e = RS.classify_final_response(
-            nine,
-            operational_turn=False,
-            style_contract=contract_with("en"),
-            detail_mode=RS.DETAIL_MODE_AUDIT,
-            human_request="produce a full technical audit",
-            request_authority={
-                "witness": "operator_carrier",
-                "declared_by": "SAIPEN_TASK_SHA256",
-                "compared_digest": __import__(
-                    "saipen_engine.pending_ingress", fromlist=["ingress_digest"]
-                ).ingress_digest("produce a full technical audit"),
-            },
-        )
+        request = "produce a full technical audit"
+        root = fresh_project()
+        with native_operator(root, request, action="report"):
+            klass, _e = RS.classify_final_response(
+                nine,
+                operational_turn=False,
+                style_contract=contract_with("en"),
+                detail_mode=RS.DETAIL_MODE_AUDIT,
+                human_request=request,
+                request_authority=operator_task.witness(request, root=root),
+                diagnosis_root=root,
+            )
         self.assertEqual(klass, RS.CLASS_ORDINARY_CHAT)
 
     def test_an_operational_turn_is_never_reclassified_as_chat_drift(self):

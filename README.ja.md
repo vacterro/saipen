@@ -20,7 +20,8 @@
 **リポジトリはプッシュされるたびに自分自身を検証します; インストール、状態、チェック、および**
 
 
-アンインストールはすべてローカルです — クラウドサービスもデーモンもデータベースもありません。
+アンインストールはすべてローカルで、クラウドサービスやデータベースは不要です。
+Claude Codeでは最初のプロンプトでローカル補助プロセスが起動し、動作中のホストがなく、アイドル状態になると終了します。
 
 [![Validation](https://github.com/vacterro/saipen/actions/workflows/validate.yml/badge.svg)](https://github.com/vacterro/saipen/actions/workflows/validate.yml)
 [![Release](https://img.shields.io/github/v/release/vacterro/saipen?sort=semver&label=release)](https://github.com/vacterro/saipen/releases)
@@ -84,7 +85,7 @@ bash bootstrap/inject.sh                                            # macOS / Li
 すでに持っているファイル(`~/.claude/CLAUDE.md`, `~/.config/opencode/AGENTS.md`,
 `~/.codex/AGENTS.md`, `~/.gemini/GEMINI.md`)— それぞれをバックアップして`.bak`まず —
 そしてプロトコルを対応するスキルフォルダにコピーします。それらの外には何もありません
-パス、デーモンなし、ネットワークコールなし。</sub>
+パス、ネットワークコールなし。</sub>
 
 **2. プロジェクトを開始**— フォルダ内のエージェントを開き、次を入力:
 

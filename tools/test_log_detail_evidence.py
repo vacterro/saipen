@@ -305,5 +305,36 @@ class CompactedVerdictTests(unittest.TestCase):
         )
 
 
+    def test_lineage_identity_is_proved_once_per_history_pass(self):
+        """T-1904: project_lineage_identity is called once per pass, not per compacted event."""
+        from unittest.mock import patch
+        import saipen_engine.paths as P
+
+        # Append multiple compacted events
+        self.append(VERDICT, tail=100)
+        self.append(VERDICT.replace("T-1 --", "T-1 -- second"), tail=101)
+        self.append(VERDICT.replace("T-1 --", "T-1 -- third"), tail=102)
+
+        L._DETAIL_CACHE.clear()
+        with patch.object(P, "project_lineage_identity", wraps=P.project_lineage_identity) as mock_pli:
+            snap = L.read_history_snapshot(self.root)
+            self.assertEqual(mock_pli.call_count, 1)
+            compacted = [e for e in snap.events if e.get("detail_ref")]
+            self.assertEqual(len(compacted), 3)
+            for e in compacted:
+                self.assertEqual(e.get("detail_integrity"), "valid")
+
+        L._DETAIL_CACHE.clear()
+        with patch.object(P, "project_lineage_identity", wraps=P.project_lineage_identity) as mock_pli:
+            summary = L.read_history_routing_summary(self.root)
+            self.assertEqual(mock_pli.call_count, 1)
+
+        L._DETAIL_CACHE.clear()
+        with patch.object(P, "project_lineage_identity", wraps=P.project_lineage_identity) as mock_pli:
+            snap2, digest = L.read_history_snapshot_and_logs_digest(self.root)
+            self.assertEqual(mock_pli.call_count, 1)
+            self.assertEqual(snap.hash, snap2.hash)
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

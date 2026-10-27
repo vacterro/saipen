@@ -53,6 +53,10 @@ STATES = frozenset({RECORDED, DEFERRED, INELIGIBLE, ELIGIBLE, PROMOTED, NEEDS_RE
 CANDIDATE_STATES = frozenset({RECORDED, DEFERRED, ELIGIBLE})
 #: Terminal once reached; never re-enters the candidate class.
 TERMINAL_STATES = frozenset({INELIGIBLE, PROMOTED})
+#: Prefix of the header values `add` writes for the author to replace. A
+#: placeholder declares nothing: readiness reads it as an absent field, so a
+#: gate cannot mature before its author names its slice and evidence (T-1638).
+PLACEHOLDER = "TODO --"
 
 #: Index freshness (FUTURE.md section 2). A STALE index is NOT an empty queue:
 #: it means the corpus moved and the projection has not caught up, and routing
@@ -137,6 +141,9 @@ class Gate:
     slices: list[dict] = field(default_factory=list)
     reasons: tuple[str, ...] = ()
     problems: tuple[str, ...] = ()
+    #: The document digest an `ELIGIBLE` state was proved on. A stored
+    #: maturation is valid only for those bytes (T-1638).
+    matured_digest: str | None = None
 
     @property
     def open_slices(self) -> list[dict]:
@@ -166,6 +173,7 @@ class Gate:
             "recorded_at",
             "declared_status",
             "digest",
+            "matured_digest",
         ):
             value = getattr(self, key)
             if value is not None:
@@ -205,6 +213,7 @@ class Gate:
             slices=list(raw.get("slices") or []),
             reasons=tuple(raw.get("reasons") or ()),
             problems=tuple(raw.get("problems") or []),
+            matured_digest=raw.get("matured_digest"),
         )
 
 
@@ -455,6 +464,11 @@ def _initial_state(doc: GateDocument, prior: dict | None) -> str:
     if doc.state == NEEDS_REVIEW:
         return NEEDS_REVIEW
     prior_state = str(prior.get("state")) if prior and prior.get("state") in STATES else None
+    if prior_state == ELIGIBLE and prior.get("matured_digest") != doc.digest:
+        # Maturation was proved on other bytes (or by an engine that bound
+        # none): the document's own declaration decides again, and the next
+        # evaluation re-proves readiness for these bytes.
+        prior_state = None
     if prior_state and prior_state not in (RECORDED, DEFERRED):
         return prior_state
     if doc.state in STATES:
@@ -528,9 +542,19 @@ def build_index(root: Path | str, *, previous: dict | None = None) -> dict:
                     "reviewed record is stale for current bytes; refine again"
                 ]
             elif record.get("verdict") in STATES:
-                state = str(record["verdict"])
                 reviewed = True
-                review_reasons = [str(record.get("reason") or "reviewed legacy record")]
+                if state in (ELIGIBLE, PROMOTED, INELIGIBLE):
+                    # Activation policy: a lived state outranks the historical
+                    # review verdict. The review classifies the bytes once; it
+                    # must not demote a matured (ELIGIBLE), promoted, or
+                    # retired gate back to DEFERRED on every refresh, or
+                    # maturation would flap forever instead of converging.
+                    review_reasons = []
+                else:
+                    state = str(record["verdict"])
+                    review_reasons = [
+                        str(record.get("reason") or "reviewed legacy record")
+                    ]
         if doc.problems and state == DEFERRED and not reviewed:
             state = NEEDS_REVIEW
         entry: dict = {
@@ -557,6 +581,13 @@ def build_index(root: Path | str, *, previous: dict | None = None) -> dict:
                 "evidence": list(doc.evidence),
                 "declared_status": doc.declared_status,
                 "recorded_at": (prior or {}).get("recorded_at"),
+                # Carried only while it binds these bytes; a declared or
+                # unbound ELIGIBLE is re-proved by `evaluate`, never laundered.
+                "matured_digest": (
+                    doc.digest
+                    if state == ELIGIBLE and (prior or {}).get("matured_digest") == doc.digest
+                    else None
+                ),
                 "slices": list((prior or {}).get("slices") or []),
                 "reasons": review_reasons or list((prior or {}).get("reasons") or []),
                 # A reviewed record IS the machine authority for an unmarked
@@ -600,12 +631,118 @@ def build_index(root: Path | str, *, previous: dict | None = None) -> dict:
     }
 
 
+def reconcile_slice_closures(
+    root: Path | str, board_tickets: dict | None = None
+) -> dict:
+    """Advance every promoted slice whose ticket is `## DONE` on BOARD.
+
+    T-1937. A promoted gate's slice carries `closure: open`, and FUTURE.md §1
+    says the gate closes when every slice is DONE/SUPERSEDED/REJECTED/OBSOLETE.
+    Nothing wrote that transition: `record_slice` is called only by
+    `saipen future promote` and with the default `open`, so a promoted gate was
+    INELIGIBLE for ever and its slice could never resolve. This is the missing
+    writer, and it is a DERIVATION, not a claim:
+
+    * the closure is read from the BOARD, never from a caller's prose -- a
+      ticket is either `[x]` under `## DONE` or it is not;
+    * a ticket that is merely absent from BOARD does NOT close a slice. Only a
+      proven DONE does, because absence could as easily be a corrupted parse;
+    * a superseded ticket closes as `superseded`; everything else stays `open`.
+    """
+    root = Path(root)
+    index = load_index(root)
+    if not index or index.get("corrupt"):
+        return {"ok": False, "code": "FUTURE_INDEX_UNREADABLE", "changes": []}
+
+    if board_tickets is None:
+        from .board import parse_board
+
+        board_path = root / ".saipen" / "BOARD.md"
+        try:
+            text = board_path.read_text(encoding="utf-8-sig")
+        except FileNotFoundError:
+            # A tree with no BOARD proves no ticket DONE, which is exactly the
+            # conservative answer: nothing closes. `refresh` must stay usable
+            # on a corpus-only fixture (it is the projection builder), so an
+            # absent memory file is not an error here.
+            board_tickets = {}
+        else:
+            board = parse_board(text)
+            if board.get("errors"):
+                return {
+                    "ok": False,
+                    "code": "BOARD_MALFORMED",
+                    "changes": [],
+                    "detail": "; ".join(board["errors"][:3]),
+                }
+            board_tickets = board["tickets"]
+
+    done: set[str] = set()
+    superseded: set[str] = set()
+    rejected: set[str] = set()
+    for ticket_id, ticket in (board_tickets or {}).items():
+        fields = ticket.get("fields") or {}
+        if str(ticket.get("section") or "") != "## DONE":
+            continue
+        done.add(str(ticket_id))
+        mode = str(fields.get("closure_mode") or "")
+        if mode == "superseded_verified":
+            superseded.add(str(ticket_id))
+        elif mode == "finding_invalidated":
+            # T-1938: `finding_invalidated` asserts NO delta was owed -- the
+            # finding was disproven and nothing was implemented (operations.py,
+            # `implementation_delta: none`). Recording that as `done` would tell
+            # every later reader the slice's work exists when it never did.
+            # `rejected` is the vocabulary FUTURE.md section 1 already defines
+            # for a slice that will not be implemented.
+            rejected.add(str(ticket_id))
+
+    changes: list[dict] = []
+    mutated = False
+    for gate in index.get("gates") or []:
+        if not isinstance(gate, dict) or not isinstance(gate.get("slices"), list):
+            continue
+        for slice_record in gate["slices"]:
+            if not isinstance(slice_record, dict):
+                continue
+            if str(slice_record.get("closure") or UNRESOLVED) != UNRESOLVED:
+                continue
+            ticket = str(slice_record.get("ticket") or "")
+            if not ticket or ticket not in done:
+                continue
+            if ticket in superseded:
+                resolved = "superseded"
+            elif ticket in rejected:
+                resolved = "rejected"
+            else:
+                resolved = "done"
+            slice_record["closure"] = resolved
+            changes.append({"gate": gate.get("id"), "ticket": ticket, "closure": resolved})
+            mutated = True
+
+    if mutated:
+        write_index(root, index)
+    return {
+        "ok": True,
+        "code": "FUTURE_SLICES_RECONCILED",
+        "changes": changes,
+        "mutation": "index" if mutated else "none",
+    }
+
+
 def refresh(root: Path | str) -> tuple[dict, Path]:
-    """Reconcile the index with the corpus and persist it."""
+    """Reconcile the index with the corpus and persist it.
+
+    T-1937: the rebuild carries BOARD's DONE truth into slice closures. A
+    rebuild that only re-hashed documents left every promoted slice `open`, so
+    a gate whose Work was long finished still answered INELIGIBLE for ever.
+    """
     root = Path(root).resolve()
     previous = load_index(root)
     index = build_index(root, previous=previous)
-    return index, write_index(root, index)
+    path = write_index(root, index)
+    reconcile_slice_closures(root)
+    return load_index(root) or index, path
 
 
 # ---------------------------------------------------------------- freshness
@@ -668,7 +805,12 @@ def freshness(root: Path | str) -> dict:
         return {**base, "state": STALE, "reason": "index schema drift; rebuild the projection"}
     if (
         prior.get("fingerprint") != witness["fingerprint"]
-        or int(prior.get("documents") or -1) != witness["documents"]
+        # No `or -1` sentinel here: it would swallow the honest zero. An empty
+        # corpus has no documents, so `0 or -1` is -1 and can never equal 0 --
+        # the projection would be STALE forever and routing would refresh it
+        # on every poll. An absent or non-integer count still fails this
+        # comparison, which is the STALE verdict it deserves.
+        or prior.get("documents") != witness["documents"]
     ):
         return {
             **base,
@@ -914,6 +1056,33 @@ def refine(
 # ---------------------------------------------------------------- readiness
 
 
+def bound_tickets(gate: Gate) -> list[str]:
+    """The tickets promotion bound to `gate`, read from its slice records.
+
+    Ownership of gate work is a machine fact (T-1641): the slice record
+    `record_slice` writes when promotion creates the Work. A ticket whose text
+    merely cites the gate id -- a defect report about the gate, a note -- binds
+    nothing. Reading a mention as ownership flagged every such report as a
+    duplicate implementation ticket and held the gate back for it.
+    """
+    bound: list[str] = []
+    for slice_record in gate.slices:
+        tid = str(slice_record.get("ticket") or "")
+        if tid and tid not in bound:
+            bound.append(tid)
+    return bound
+
+
+def _live_holders(gate: Gate, board_tickets: dict | None) -> list[tuple[str, str]]:
+    """`(ticket, section)` for every bound ticket that is on BOARD and not DONE."""
+    holders = []
+    for tid in bound_tickets(gate):
+        entry = (board_tickets or {}).get(tid)
+        if entry is not None and entry.get("section") != "## DONE":
+            holders.append((tid, str(entry.get("section"))))
+    return holders
+
+
 def readiness(
     gate: Gate, root: Path, board_tickets: dict | None = None
 ) -> tuple[str, tuple[str, ...]]:
@@ -932,12 +1101,13 @@ def readiness(
         return INELIGIBLE, ("no machine header; not routable",)
     if gate.open_slices:
         return INELIGIBLE, (f"{len(gate.open_slices)} slice(s) still open on a promoted gate",)
-    if not gate.slice:
+    if not gate.slice or gate.slice.startswith(PLACEHOLDER):
         reasons.append("no bounded slice declared")
-    if not gate.evidence:
+    evidence = [ref for ref in gate.evidence if not ref.startswith(PLACEHOLDER)]
+    if not evidence:
         reasons.append("no evidence reference")
     else:
-        for ref in gate.evidence:
+        for ref in evidence:
             if _TICKET_RE.match(ref):
                 continue
             if not (root / ref).exists():
@@ -948,12 +1118,8 @@ def readiness(
             reasons.append(f"prerequisite {ticket} is not on BOARD")
         elif entry.get("section") != "## DONE":
             reasons.append(f"prerequisite {ticket} is {entry.get('section')}, not DONE")
-    if board_tickets:
-        for tid, entry in sorted(board_tickets.items()):
-            if entry.get("section") == "## DONE":
-                continue
-            if gate.id in json.dumps(entry, ensure_ascii=False, default=str):
-                reasons.append(f"{tid} already records this gate and is {entry.get('section')}")
+    for tid, section in _live_holders(gate, board_tickets):
+        reasons.append(f"{tid} already holds a slice of this gate and is {section}")
     if gate.problems:
         reasons.extend(gate.problems)
     if reasons:
@@ -1175,6 +1341,18 @@ def evaluate(root: Path | str, board_tickets: dict | None = None, *, write: bool
     the terminal `INELIGIBLE` would retire a perfectly good candidate for one
     unmet condition. `INELIGIBLE` and `NEEDS_REVIEW` are classifications made
     at intake, never side effects of a readiness check.
+
+    Activation policy (T-1618). A reviewed `DEFERRED` gate whose conditions
+    become true matures deterministically: `select` already routes on live
+    readiness verdicts (never on stored state alone), so the gate is offered
+    before HUNT on the first routing pass after its last prerequisite closes,
+    and this function persists the `ELIGIBLE` state with cleared reasons.
+    Maturation is monotone for the bytes it was proved on -- `refresh` keeps a
+    lived `ELIGIBLE`/`PROMOTED`/terminal state over the historical review
+    verdict, so BOARD flips and repeated passes converge instead of
+    reconsidering forever. `ELIGIBLE` binds `matured_digest`: changed bytes, or
+    an `ELIGIBLE` no proof bound, are re-proved here (T-1638). A review
+    classifies its exact bytes once; it never demotes them on a later pass.
     """
     root = Path(root)
     index = load_index(root)
@@ -1185,11 +1363,19 @@ def evaluate(root: Path | str, board_tickets: dict | None = None, *, write: bool
     for gate in gates:
         if not gate.present or gate.state not in CANDIDATE_STATES:
             continue
+        touched = False
+        if gate.state == ELIGIBLE and gate.matured_digest != gate.digest:
+            # A maturation not bound to these bytes is re-proved, not trusted
+            # (T-1638): it re-matures below in this same pass when it holds.
+            gate.state = DEFERRED
+            gate.matured_digest = None
+            touched = True
         verdict, reasons = readiness(gate, root, board_tickets)
-        touched = gate.reasons != tuple(reasons)
+        touched = touched or gate.reasons != tuple(reasons)
         gate.reasons = reasons
         if verdict == ELIGIBLE and gate.state != ELIGIBLE:
             gate.state = ELIGIBLE
+            gate.matured_digest = gate.digest
             touched = True
         if touched:
             changed = True
@@ -1225,9 +1411,10 @@ def add(
         f"priority: {priority}",
         "basis: measured",
         "estimate: 1",
-        "slice: TODO -- name the ONE bounded unit this gate may promote",
+        f"slice: {PLACEHOLDER} name the ONE bounded unit this gate may promote",
         "needs: none",
-        "evidence: " + (", ".join(evidence) if evidence else "TODO -- reference an existing path"),
+        "evidence: "
+        + (", ".join(evidence) if evidence else f"{PLACEHOLDER} reference an existing path"),
         "",
         f"# {title}",
         "",
@@ -1340,7 +1527,9 @@ def validate_future_gate(
     4. a record's state agrees with what it proves (no contradictory pair);
     5. a resolved gate is not READY and never re-enters the candidate class;
     6. an unpromoted gate cannot own active implementation, and a promoted one
-       links to canonical Work that still exists on BOARD;
+       links to canonical Work that still exists on BOARD; ownership is the
+       slice record, so one live ticket holds one slice of one gate and a
+       ticket that only cites a gate id owns nothing;
     7. the historical corpus is classified truthfully and nothing was
        destroyed: every present record has its document, and every document on
        disk is in the index;
@@ -1472,18 +1661,34 @@ def validate_future_gate(
                     f"future gate {gate.id} names slice ticket {tid}, which is not on BOARD"
                 )
     if board_tickets:
-        by_id = {g.id: g for g in raw_gates}
-        for tid, entry in sorted(board_tickets.items()):
-            if entry.get("section") == "## DONE":
-                continue
-            raw_entry = json.dumps(entry, ensure_ascii=False, default=str)
-            for gid, gate in by_id.items():
-                if gid in raw_entry and gate.state != PROMOTED:
+        held: dict[str, list[str]] = {}
+        for gate in raw_gates:
+            live = [tid for tid, _section in _live_holders(gate, board_tickets)]
+            for tid in live:
+                held.setdefault(tid, []).append(gate.id)
+                if gate.state != PROMOTED:
                     errors.append(
-                        f"BOARD ticket {tid} works on future gate {gid}, which is "
+                        f"BOARD ticket {tid} works on future gate {gate.id}, which is "
                         f"{gate.state}: an unpromoted gate cannot own active "
                         "implementation (it is a duplicate ticket, not a second slice)"
                     )
+            by_slice: dict[str, list[str]] = {}
+            for slice_record in gate.open_slices:
+                tid = str(slice_record.get("ticket") or "")
+                if tid in live:
+                    by_slice.setdefault(str(slice_record.get("slice") or ""), []).append(tid)
+            for tids in by_slice.values():
+                if len(set(tids)) > 1:
+                    errors.append(
+                        f"future gate {gate.id} binds one slice to {', '.join(sorted(set(tids)))}: "
+                        "the later ticket is a duplicate, not a second slice"
+                    )
+        for tid, gate_ids in sorted(held.items()):
+            if len(gate_ids) > 1:
+                errors.append(
+                    f"BOARD ticket {tid} is bound as a slice of {', '.join(gate_ids)}: "
+                    "one ticket takes one bounded slice of one gate"
+                )
     return {
         "errors": errors,
         "warnings": warnings,

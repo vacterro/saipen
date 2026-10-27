@@ -35,7 +35,9 @@ Rules enforced here:
 from __future__ import annotations
 
 from pathlib import Path
+import re
 
+from .cli_grammar import option_value_positions
 from .registry import RegistryError
 from .registry import load_registry as _load_registry
 from .registry import require_mapping, require_string_list
@@ -133,6 +135,30 @@ def load_shortcut_table(protocol_dir: Path | str | None = None) -> dict[str, str
     }
 
 
+def resume_policy() -> dict:
+    """The shared payload/ingress policy; source bytes still need native proof."""
+    policy = require_mapping(require_mapping(_REGISTRY, "commands"), "resume")
+    arguments = policy.get("arguments")
+    if not isinstance(arguments, list) or [] not in arguments or any(
+        not isinstance(row, list) or any(not isinstance(word, str) for word in row)
+        for row in arguments
+    ):
+        raise RegistryError("commands.resume.arguments must include bare resume and string lists")
+    inputs = require_string_list(policy, "operator_inputs")
+    expanded = list(inputs)
+    shortcuts = require_mapping(_REGISTRY, "shortcuts")
+    for text in inputs:
+        token, separator, suffix = text.partition(" ")
+        if token in shortcuts:
+            expanded.extend(
+                twin + separator + suffix for twin in derive_cyrillic_twins([token])
+            )
+    return {
+        "arguments": tuple(tuple(row) for row in arguments),
+        "operator_inputs": tuple(dict.fromkeys(expanded)),
+    }
+
+
 def is_declared_shortcut(token: str, table: dict[str, str] | None = None) -> bool:
     """True when the whole token is a declared SAIPEN shortcut.
 
@@ -146,6 +172,42 @@ def is_declared_shortcut(token: str, table: dict[str, str] | None = None) -> boo
     return token.strip() in full or normalize_shortcut_token(token) in full
 
 
+_CONTINUATION_ALLOWED_PAYLOADS = frozenset(
+    {"", "all", "--all", "-a", "--json", "--dry-run", "--json --all", "--all --json"}
+)
+
+
+def is_prose_or_handoff(text: str) -> bool:
+    """True when text is natural-language prose, a handoff, or markdown document.
+
+    Such text must never be split on newlines into independent command segments,
+    and occurrences of 'cc' or other shortcut tokens within it remain payload.
+    """
+    raw = text.strip()
+    if not raw:
+        return False
+    if "```" in raw or "~~~" in raw:
+        return True
+    if any(
+        line.strip().startswith(("#", ">", "- ", "* ", "1.", "2.")) for line in raw.splitlines()
+    ):
+        return True
+    if any(
+        marker in raw
+        for marker in ("SAIHANDOFF", "## Request", "priority:", "verify:", "MISSION:", "OBSERVED")
+    ):
+        return True
+    if re.search(r'["\'][^"\']+\.(?:md|txt|json|py|js)["\']', raw) or re.search(
+        r"[A-Za-z]:\\[^\s]+\.(?:md|txt|json)", raw
+    ):
+        return True
+    return "\n" in raw and any(
+        line.strip().endswith((".", "!", "?", ":", ";"))
+        for line in raw.splitlines()
+        if len(line.strip()) > 20
+    )
+
+
 def parse_compound_command(message: str) -> list[str]:
     """Split a possibly-compound command message into ordered segments.
 
@@ -157,6 +219,8 @@ def parse_compound_command(message: str) -> list[str]:
     """
     if not message or not message.strip():
         return []
+    if is_prose_or_handoff(message):
+        return [message.strip()]
     raw = message.strip()
     parts: list[str] = []
     current: list[str] = []
@@ -221,7 +285,11 @@ def split_cli_compound_argv(argv: list[str]) -> list[list[str]]:
         return [[]]
     segments: list[list[str]] = [[]]
     opaque = False
-    for arg in argv:
+    values = option_value_positions(argv)
+    for index, arg in enumerate(argv):
+        if index in values:
+            segments[-1].append("+" if arg == r"\+" and not opaque else arg)
+            continue
         if arg == "--":
             opaque = True
         if arg == "+" and not opaque:
@@ -262,6 +330,22 @@ def resolve_compound_command(
     segments = parse_compound_command(message)
     resolved: list[dict] = []
     for index, segment in enumerate(segments):
+        slash = canonical_slash_command(segment)
+        if slash:
+            resolved.append(
+                {"index": index, "segment": segment, "command": slash, "kind": "command"}
+            )
+            continue
+        if is_prose_or_handoff(segment):
+            if segment.startswith("saipen "):
+                resolved.append(
+                    {"index": index, "segment": segment, "command": segment, "kind": "command"}
+                )
+            else:
+                resolved.append(
+                    {"index": index, "segment": segment, "command": "", "kind": "unknown"}
+                )
+            continue
         if segment.startswith("saipen "):
             resolved.append(
                 {"index": index, "segment": segment, "command": segment, "kind": "command"}
@@ -298,9 +382,7 @@ def resolve_compound_command(
             # Narrowed to the single normative idiom `build ccc` (CORE §1.10) --
             # arbitrary trailing shortcuts are NOT commands (Wave 4 payload safety).
             trailing = words[-1]
-            target = table.get(trailing) or table.get(
-                normalize_shortcut_token(trailing)
-            )
+            target = table.get(trailing) or table.get(normalize_shortcut_token(trailing))
             if target is not None and segment == "build ccc":
                 # Only `build ccc` is authorized trailing; twin `build ссс` same.
                 resolved.append(
@@ -342,6 +424,29 @@ def resolve_compound_command(
     return resolved
 
 
+#: A leading slash names a canonical SAIPEN verb: `/goal cc all` is documented
+#: in MAINTENANCE § 2.4 as the operator spelling of `saipen goal cc all`. It was
+#: never resolved, so the exact mixed command SRC-274:R005 names -- a cleanup
+#: command followed by `/goal cc all` -- produced one `unknown` segment and the
+#: second half of the operator's request was silently unroutable. The rewrite is
+#: ONE character position and the canonical verb must already exist in the
+#: registry command table, so an invented `/whatever` stays unknown.
+_SLASH_VERB = re.compile(r"\A/([a-z][a-z0-9-]*)(?=\s|\Z)")
+
+
+def canonical_slash_command(segment: str) -> str:
+    """`/goal cc all` -> `saipen goal cc all`, or "" when the verb is not canonical."""
+    match = _SLASH_VERB.match(segment.strip())
+    if not match:
+        return ""
+    verb = match.group(1)
+    table = require_mapping(_REGISTRY, "commands")
+    if verb not in require_string_list(table, "saipen"):
+        return ""
+    head = segment.strip()
+    return "saipen " + head[1:]
+
+
 # REGISTRY.json is the sole authority for chain/result vocabulary. Exported
 # names remain stable for callers, but values and failure membership are
 # derived at import time rather than maintained as a second closed set here.
@@ -363,9 +468,7 @@ _DISPOSITION_FACTS = require_mapping(_REGISTRY, "dispositions")
     DISPOSITION_NOT_RUN,
     DISPOSITION_FAILED,
 ) = require_string_list(_DISPOSITION_FACTS, "closed_set")
-_FAILURE_DISPOSITIONS = frozenset(
-    require_string_list(_DISPOSITION_FACTS, "failure")
-)
+_FAILURE_DISPOSITIONS = frozenset(require_string_list(_DISPOSITION_FACTS, "failure"))
 
 
 def chain_disposition(

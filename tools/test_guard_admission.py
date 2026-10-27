@@ -93,6 +93,12 @@ class TestAdmissionAuthority(unittest.TestCase):
             ".saipen/cache/admission/probe.json",
             ".saipen/cache/admission/nested/session.json",
             ".saipen/cache/admission/.transport.key",
+            # T-1658: only the engine that ran the suite writes these.
+            ".saipen/evidence/suite/declaration.json",
+            ".saipen/evidence/suite/0123456789abcdef-20261007T000000000000Z.json",
+            # T-1660: and only the process that ran the family writes these.
+            ".saipen/evidence/core-unit/0123456789abcdef-20261007T000000Z.json",
+            ".saipen/evidence/core-unit/nested/forged.json",
         ]
         for path in protected:
             self.assertTrue(
@@ -114,6 +120,10 @@ class TestAdmissionAuthority(unittest.TestCase):
             ".saipen/cache/core-unit/durations.json",
             ".saipen/cache/continuation-liveness.json",
             ".saipen/cache/autonomy-watchdog.json",
+            # The rest of the evidence tree stays an ordinary place to write.
+            ".saipen/evidence/T-1658-notes.md",
+            ".saipen/evidence/suite-notes/run.md",
+            ".saipen/evidence/core-unit-notes/triage.md",
         ]
         for path in normal:
             self.assertFalse(is_protected_canonical_path(path))
@@ -132,6 +142,48 @@ class TestAdmissionAuthority(unittest.TestCase):
             ".saipen/cache/autonomy-watchdog.json",
         ):
             self.assertFalse(is_protected_canonical_path(path), path)
+
+    def test_engine_record_directories_refuse_a_host_and_admit_the_engine(self):
+        """T-1658 / T-1660: a record the SHIP gate or the digest accepts is
+        written by the process that measured it. A host writing one -- with a
+        file tool, a redirect or a delete -- is refused through the same event
+        path a host uses; reading it, running the engine command that writes
+        it, and writing beside it stay admitted in an active ticket."""
+        from saipen_engine import guard_events
+
+        def verdict(tool: str, tool_input: dict) -> str:
+            event = {
+                "event": "before_tool",
+                "host": "opencode",
+                "cwd": str(self.root),
+                "tool_name": tool,
+                "tool_input": tool_input,
+                "session_id": "ses_t1660",
+            }
+            answer = guard_events.evaluate_event(guard_events.load_event(json.dumps(event)), None)
+            return answer["code"]
+
+        for directory in (".saipen/evidence/core-unit", ".saipen/evidence/suite"):
+            with self.subTest(directory):
+                record = f"{directory}/0123456789abcdef-20261007T000000Z.json"
+                for tool, tool_input in (
+                    ("write", {"filePath": str(self.root / record), "content": "{}"}),
+                    ("bash", {"command": f"echo x > {record}"}),
+                    ("bash", {"command": f"python make.py > {record}"}),
+                    ("bash", {"command": f"rm {record}"}),
+                ):
+                    self.assertEqual(
+                        verdict(tool, tool_input), "PROTECTED_CANONICAL_NAMESPACE", tool_input
+                    )
+                self.assertEqual(verdict("bash", {"command": f"cat {record}"}), "ADMITTED")
+        for command in (
+            "python tools/core_unit.py evidence T-1",
+            "saipen test suite run T-1",
+            "echo x > .saipen/evidence/notes.txt",
+            "echo x > .saipen/cache/core-unit/durations.json",
+        ):
+            with self.subTest(command):
+                self.assertEqual(verdict("bash", {"command": command}), "ADMITTED")
 
     def test_admitted_external_path(self):
         with tempfile.NamedTemporaryFile() as ext_file:

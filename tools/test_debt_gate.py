@@ -304,13 +304,27 @@ class DebtGateFixtureTests(unittest.TestCase):
         assert any(f["subject_id"] == "T-001" for f in delta["new"]), delta["new"]
         assert delta["strict_core"]["problems"] >= 1
         self.assertFalse(delta["release_ready"])
-        # the mid-work snapshot carries the problem the Work introduced
+        # the mid-work snapshot carries the problem the Work introduced. W2-005:
+        # asserted on the PERSISTED snapshot, which is what a later delta
+        # compares against; the create_snapshot result is the operation's
+        # answer, and a check that reads it cannot see the stored record lose
+        # the finding. The envelope's count is pinned to the stored one.
         mid_snapshot = debt_mod.create_snapshot(self.root, "probe", "mid-work")
         self.assertTrue(mid_snapshot["ok"], mid_snapshot)
+        mid = debt_mod.load_snapshot(self.root, mid_snapshot["snapshot_id"])
+        # R008: the ordinary mutating result is a COMPACT operation envelope;
+        # the finding bodies live only in the persisted snapshot. Proving one
+        # object is enough is exactly the mistake this checks against, so the
+        # envelope shape and the stored record are both pinned here.
+        self.assertEqual(mid_snapshot["code"], "DEBT_SNAPSHOT_CREATED")
+        self.assertNotIn("problems", mid_snapshot)
+        self.assertNotIn("warnings", mid_snapshot)
         assert any(
             f["rule_id"] == "source_receipt_unresolved_work" and f["subject_id"] == "T-001"
-            for f in mid_snapshot.get("problems", [])
-        ), mid_snapshot
+            for f in mid["problems"]
+        ), mid["problems"]
+        self.assertEqual(mid_snapshot["problem_count"], len(mid["problems"]))
+        self.assertEqual(mid_snapshot["warning_count"], len(mid["warnings"]))
         # repaired: coverage terminal -> problem RESOLVED, delta PASSes,
         # strict Core returns to its baseline and release stays truthful
         self.assertTrue(
