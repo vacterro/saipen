@@ -1,5 +1,5 @@
 ## DOING
-- [/] T-1946 [P2] commit the completed T-1944 and T-1945 repair work to GitHub | verify: the requested change is present and demonstrated against the user own description of it | request_witness: model_supplied | source_receipts: SRC-345 | owner: saipen-cli | claim_time: 2026-10-27T14:57:05Z
+- [/] T-1946 [P2] commit the completed T-1944 and T-1945 repair work to GitHub | verify: the requested change is present and demonstrated against the user own description of it | request_witness: model_supplied | source_receipts: SRC-345 | owner: saipen-cli | claim_time: 2026-10-27T18:35:18Z
 ## TODO
 ## DONE
 - [x] T-1945 [P1] Execute external audit inbox layer audit/28.md (SRC-344); source_receipt=SRC-344 | verify: every actionable clause of SRC-344 is terminal with evidence; linked Work DONE; source closure succeeds; audit/28.md consumed by the journaled audit inbox cleanup; source_receipt=SRC-344 | source_receipts: SRC-344 | owner: saipen-cli | claim_time: 2026-10-27T14:40:02Z | closure_mode: own_patch | publication_state: pending

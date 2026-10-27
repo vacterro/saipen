@@ -76,6 +76,8 @@ def deny_this_account(path: Path) -> None:
 
 
 def reset_access(path: Path) -> None:
+    if not WINDOWS:
+        return
     subprocess.run(["icacls", str(path), "/reset", "/T", "/C", "/Q"], capture_output=True)
 
 
