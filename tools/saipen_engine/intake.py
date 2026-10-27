@@ -4323,12 +4323,18 @@ def _settle_archive_commit(root: Path, receipt_id: str, index: dict) -> dict | N
     index["active"].pop(receipt_id, None)
     index["tombstones"][receipt_id] = tombstone
     _write_index(root, index)
+    # T-1817: settling an interrupted close is a REPAIR, and it has to say so.
+    # `recovered: True` alone could not distinguish this from the ordinary
+    # already-closed repeat, so a caller could not tell whether it had just
+    # finished a crash window or whether nothing had been wrong at all.
     return {
         "ok": True,
         "code": "SOURCE_CLOSED",
         "receipt": receipt_id,
         "status": CLOSED_STATUS,
         "archive_ref": tombstone["archive_ref"],
+        "outcome": "REPAIR_APPLIED",
+        "archive_verified": True,
         "recovered": True,
     }
 
@@ -4502,23 +4508,32 @@ def _settle_closed_residue_locked(root: Path, receipt_id: str, tomb: dict) -> di
     deletion of SRC-024. Proof is the archived body digest against the
     tombstone's recorded digest; a mismatch is corruption, not a cleanup.
     Caller holds the project writer lock.
+
+    T-1817: the body digest alone is not the archive. A receipt whose Contract,
+    coverage or metadata sidecar is missing or weakened is a LOST archive, not
+    a closed one, and reporting `ok: True` here hid that loss behind a body
+    that happened to survive. The tombstone's own projection is the authority,
+    so the whole bundle is proved against it before any residue is removed --
+    `_closed_archive_bundle` is the one reader for that, and it already fails
+    closed on every carrier it cannot prove.
     """
     try:
-        raw = _read_owned_file(
-            root,
-            _canonical_body_rel(
-                root, receipt_id, str(tomb.get("source_sha256") or ""), "archive"
-            ),
-            kind="source body",
-            max_bytes=_BODY_MAX,
+        _meta, _contract, _coverage, _summary = _closed_archive_bundle(
+            root, receipt_id, tomb
         )
-    except (FileNotFoundError, OSError, ValueError) as exc:
-        return {"ok": False, "code": "SOURCE_CORRUPTION", "detail": str(exc)}
-    if hashlib.sha256(raw).hexdigest() != tomb.get("source_sha256"):
+    except FileNotFoundError as exc:
         return {
             "ok": False,
             "code": "SOURCE_CORRUPTION",
-            "detail": f"closed receipt {receipt_id} archived body digest mismatch",
+            "receipt": receipt_id,
+            "detail": f"closed receipt {receipt_id} has an incomplete archive: {exc}",
+        }
+    except (OSError, ValueError) as exc:
+        return {
+            "ok": False,
+            "code": "SOURCE_CORRUPTION",
+            "receipt": receipt_id,
+            "detail": str(exc),
         }
     removed = False
     for rel, kind in (
@@ -4529,13 +4544,19 @@ def _settle_closed_residue_locked(root: Path, receipt_id: str, tomb: dict) -> di
         if path.is_file() and not _is_link_or_reparse(path):
             safe_unlink_owned(path, kind=kind, ownership_root=root)
             removed = True
+    # T-1817: the caller must be able to tell "nothing to do" from "I just
+    # cleaned up after a crash", and neither from "the archive itself is gone".
+    # `recovered` used to be unconditionally True, which reported every repeat
+    # close as a repair of damage that never happened.
     return {
         "ok": True,
         "code": "SOURCE_CLOSED",
         "receipt": receipt_id,
         "status": CLOSED_STATUS,
         "archive_ref": tomb.get("archive_ref"),
-        "recovered": True,
+        "outcome": "RESIDUE_SETTLED" if removed else "ALREADY_CLOSED",
+        "archive_verified": True,
+        "recovered": bool(removed),
         "residue_removed": removed,
     }
 
