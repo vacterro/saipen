@@ -61,6 +61,49 @@ def _board(tickets: list[str]) -> dict:
 class NeedsDetachProofTests(unittest.TestCase):
     """`prove_inversion` is the ONE decision; it must answer from project truth."""
 
+    def setUp(self) -> None:
+        # A ledger that states the premise, instead of borrowing one. SRC-274
+        # closed on 2026-10-27; its live ledger is gone and the archived copy
+        # marks all seven rows terminal, so reading the project would hand
+        # these tests an empty open-owner map -- the exact opposite of what
+        # they assert. The ledger content is part of the test, not of history.
+        self._tmp = tempfile.TemporaryDirectory(prefix="saipen-t1939-proof-")
+        self.addCleanup(self._tmp.cleanup)
+        self.root = Path(self._tmp.name) / "PROJECT"
+        (self.root / ".saipen" / "intake" / "coverage").mkdir(parents=True)
+        (self.root / ".saipen" / "intake" / "coverage" / f"{RECEIPT}.json").write_text(
+            json.dumps(
+                {
+                    "schema_version": 1,
+                    "requirements": {
+                        f"{RECEIPT}:R003": {
+                            "actionable": True,
+                            "class": "requirement",
+                            "disposition": "UNKNOWN",
+                            "work": "T-1853",
+                            "text": "the sibling's open clause",
+                        },
+                        f"{RECEIPT}:R004": {
+                            "actionable": True,
+                            "class": "requirement",
+                            "disposition": "UNKNOWN",
+                            "work": "T-1854",
+                            "text": "this ticket's open clause",
+                        },
+                        f"{RECEIPT}:R005": {
+                            "actionable": True,
+                            "class": "requirement",
+                            "disposition": "UNKNOWN",
+                            "work": "T-1855",
+                            "text": "the third sibling's open clause",
+                        },
+                    },
+                },
+                indent=1,
+            ),
+            encoding="utf-8",
+        )
+
     def _tickets(self, *, recipient_section="## TODO", need_section="## BLOCKED",
                  blocker="ACTIVE_DEPENDENCY:T-1 -- parked", needs="T-2",
                  receipts="SRC-274"):
@@ -108,7 +151,7 @@ class NeedsDetachProofTests(unittest.TestCase):
         board = parse_board(text)
         self.assertFalse(board["errors"], board["errors"])
         proof = needs_detach.prove_inversion(
-            TOOLS.parent, "T-1853", "T-1815", tickets=board["tickets"]
+            self.root, "T-1853", "T-1815", tickets=board["tickets"]
         )
         self.assertTrue(proof["inverted"], proof)
         owned = proof["facts"]["open_clauses_owned_by_ticket"]
@@ -171,7 +214,7 @@ class NeedsDetachProofTests(unittest.TestCase):
         board = parse_board(text)
         self.assertFalse(board["errors"], board["errors"])
         proof = needs_detach.prove_inversion(
-            TOOLS.parent, "T-1", "T-2", tickets=board["tickets"]
+            self.root, "T-1", "T-2", tickets=board["tickets"]
         )
         self.assertFalse(proof["inverted"], proof)
         self.assertEqual(
@@ -200,7 +243,7 @@ class NeedsDetachProofTests(unittest.TestCase):
         board = parse_board(text)
         self.assertFalse(board["errors"], board["errors"])
         proof = needs_detach.prove_inversion(
-            TOOLS.parent, "T-1854", "T-1815", tickets=board["tickets"]
+            self.root, "T-1854", "T-1815", tickets=board["tickets"]
         )
         self.assertTrue(proof["inverted"], proof)
         self.assertEqual(proof["facts"]["park_pin"], "receipt-scoped")
@@ -229,7 +272,7 @@ class NeedsDetachProofTests(unittest.TestCase):
         board = parse_board(text)
         self.assertFalse(board["errors"], board["errors"])
         proof = needs_detach.prove_inversion(
-            TOOLS.parent, "T-1854", "T-1815", tickets=board["tickets"]
+            self.root, "T-1854", "T-1815", tickets=board["tickets"]
         )
         self.assertFalse(proof["inverted"], proof)
         self.assertNotIn("T-1901", proof["facts"]["park_peer_owners"])
@@ -256,7 +299,7 @@ class NeedsDetachProofTests(unittest.TestCase):
         board = parse_board(text)
         self.assertFalse(board["errors"], board["errors"])
         proof = needs_detach.prove_inversion(
-            TOOLS.parent, "T-1", "T-2", tickets=board["tickets"]
+            self.root, "T-1", "T-2", tickets=board["tickets"]
         )
         self.assertFalse(proof["inverted"], proof)
         self.assertIn("only an unstarted TODO row may lose an edge", proof["reason"])
@@ -346,9 +389,43 @@ class NeedsDetachPlanTests(unittest.TestCase):
                 "## DONE\r\n\r\n"
             ).encode("utf-8")
         )
-        shutil.copyfile(
-            source / "intake" / "coverage" / f"{RECEIPT}.json",
-            self.root / ".saipen" / "intake" / "coverage" / f"{RECEIPT}.json",
+        # The ledger is SYNTHETIC for the same reason BOARD above is. SRC-274
+        # closed on 2026-10-27 and its ledger moved to
+        # `.saipen/archive/source/`, where every row is terminal, so copying
+        # the live file either fails outright or hands these tests a ledger
+        # with no open clause -- which is the premise they exist to exercise,
+        # silently inverted. Copying live state into a fixture makes the
+        # verdict depend on project history; stating it here makes it a fact.
+        (self.root / ".saipen" / "intake" / "coverage" / f"{RECEIPT}.json").write_bytes(
+            json.dumps(
+                {
+                    "schema_version": 1,
+                    "requirements": {
+                        f"{RECEIPT}:R003": {
+                            "actionable": True,
+                            "class": "requirement",
+                            "disposition": "UNKNOWN",
+                            "work": "T-1853",
+                            "text": "the sibling's open clause",
+                        },
+                        f"{RECEIPT}:R004": {
+                            "actionable": True,
+                            "class": "requirement",
+                            "disposition": "UNKNOWN",
+                            "work": "T-1854",
+                            "text": "this ticket's open clause",
+                        },
+                        f"{RECEIPT}:R005": {
+                            "actionable": True,
+                            "class": "requirement",
+                            "disposition": "UNKNOWN",
+                            "work": "T-1855",
+                            "text": "the third sibling's open clause",
+                        },
+                    },
+                },
+                indent=1,
+            ).encode("utf-8")
         )
         for name in ("STYLE.md", "EXECUTION.md"):
             if (source / name).is_file():
