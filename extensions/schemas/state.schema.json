@@ -205,9 +205,6 @@
         "hard_wait",
         "checkpoint"
       ]
-    },
-    "continuous_maintenance": {
-      "type": "string"
     }
   },
   "required": [
