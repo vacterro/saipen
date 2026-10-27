@@ -2334,15 +2334,42 @@ def set_disposition(
                         }
 
                     evidence_str = str(evidence or "")
-                    # Test F: Evidence reference with wrong source identity
+                    # Citing another Source is not the same claim as passing its
+                    # receipt off as this one's. A manual or upstream reconciliation
+                    # legitimately names the Source it amends; only a command-backed
+                    # proof turns that citation into an identity claim about this
+                    # receipt, so only that case is refused.
+                    v_str = str(verification or "")
+                    is_external_or_manual = any(
+                        token in evidence_str.lower() or token in v_str.lower()
+                        for token in (
+                            "external",
+                            "manual",
+                            "external_host",
+                            "external_provenance",
+                            "upstream",
+                            "ex-",
+                            "reconcile",
+                        )
+                    ) and not any(
+                        cmd_token in v_clean
+                        for cmd_token in (
+                            "python ",
+                            "unittest",
+                            "pytest",
+                            "test_runner",
+                            "run_tests",
+                        )
+                    )
                     foreign_rcpt = re.findall(r"\bSRC-\d+\b", evidence_str)
-                    for frcpt in foreign_rcpt:
-                        if frcpt != receipt_id:
-                            return {
-                                "ok": False,
-                                "code": "EVIDENCE_IDENTITY_MISMATCH",
-                                "detail": f"evidence references foreign source receipt {frcpt} instead of {receipt_id}",
-                            }
+                    if not is_external_or_manual:
+                        for frcpt in foreign_rcpt:
+                            if frcpt != receipt_id:
+                                return {
+                                    "ok": False,
+                                    "code": "EVIDENCE_IDENTITY_MISMATCH",
+                                    "detail": f"evidence references foreign source receipt {frcpt} instead of {receipt_id}",
+                                }
 
                     # Test G: Requirement source changed after interpretation
                     contract = _read_contract(root, receipt_id) or {}
@@ -2357,14 +2384,36 @@ def set_disposition(
                     clause = (contract.get("clauses") or {}).get(rid) or {}
                     clause_text = str(clause.get("text") or "").lower()
 
-                    # Test D: Generic Core PASS used to claim live host acceptance
-                    is_live_acceptance = any(term in clause_text for term in ("live acceptance", "live host", "host acceptance", "live session"))
+                    # Test D: Generic Core PASS used to claim live host acceptance.
+                    # A unit or core-suite run observes the code, not the host, so no
+                    # amount of it can satisfy a clause that asks for a live
+                    # observation. That is a SCOPE refusal, and it is decided before
+                    # the oracle files are looked up: "this proof cannot ever count"
+                    # outranks "the file you named is missing".
+                    is_live_acceptance = any(
+                        term in clause_text
+                        for term in (
+                            "live acceptance",
+                            "live vendor",
+                            "live host",
+                            "host acceptance",
+                            "live session",
+                        )
+                    )
                     is_generic_core_pass = any(term in v_clean for term in ("core-unit", "core_unit", "unittest discover", "core suite", "discover -s tools", "aggregate pass", "aggregate core pass"))
-                    if is_live_acceptance and is_generic_core_pass:
+                    is_unit_proof = is_generic_core_pass or any(
+                        term in v_clean
+                        for term in ("unittest", "pytest", "run_tests", "test_runner")
+                    )
+                    if is_live_acceptance and is_unit_proof:
                         return {
                             "ok": False,
-                            "code": "VALIDATION_FAILED",
-                            "detail": f"generic core PASS cannot satisfy live host acceptance clause {rid}",
+                            "code": "EVIDENCE_SCOPE_TOO_WEAK",
+                            "detail": (
+                                f"live vendor/host acceptance clause {rid} cannot be "
+                                f"satisfied by a unit or core-suite PASS: authentic "
+                                f"live receipt required"
+                            ),
                         }
 
                     # Test H: Partial fulfillment of one large section
@@ -2491,6 +2540,48 @@ def set_disposition(
                                 "ok": False,
                                 "code": "EVIDENCE_CORRUPTION",
                                 "detail": f"execution receipt {receipt_file.name} is corrupt: {exc}",
+                            }
+
+                        # A carrier that records its own invalidation is not evidence.
+                        # Both markers fail closed: they can only refuse a disposition,
+                        # never support one, so honouring them cannot widen any gate.
+                        if receipt_data.get("tampered") is True:
+                            return {
+                                "ok": False,
+                                "code": "EVIDENCE_CORRUPTION",
+                                "detail": (
+                                    f"execution receipt {receipt_file.name} is marked "
+                                    f"tampered; it cannot prove execution"
+                                ),
+                            }
+                        if receipt_data.get("stale") is True:
+                            return {
+                                "ok": False,
+                                "code": "EVIDENCE_STALE",
+                                "detail": (
+                                    f"execution receipt {receipt_file.name} is marked "
+                                    f"stale; it no longer describes the current tree"
+                                ),
+                            }
+                        # One execution discharges the clause it was bound to, not
+                        # every clause of the Source. A carrier that names its clause
+                        # cannot be reused for a sibling.
+                        bound_req = (
+                            receipt_data.get("requirement")
+                            or receipt_data.get("target_clause")
+                            or receipt_data.get("clause")
+                        )
+                        if bound_req and str(bound_req).strip() not in (
+                            rid,
+                            rid.split(":")[-1],
+                        ):
+                            return {
+                                "ok": False,
+                                "code": "EVIDENCE_UNRELATED",
+                                "detail": (
+                                    f"execution receipt is bound to requirement "
+                                    f"{bound_req}, not {rid}"
+                                ),
                             }
 
                         proven_oracles = None
@@ -2725,21 +2816,145 @@ def extract_request_clauses(body: str) -> list[str]:
 
     # Pattern 1: Major numbered sections delimited by === or markdown headers
     major_section_pat = (
-        r"(?:^|\n)\s*(?:={5,}|\#{1,3})\s*\n\s*(\d+)\.\s+([^\n=]+?)\s*\n+\s*(?:={5,}|\#{1,3})?\s*\n+(.*?)(?=(?:\n\s*(?:={5,}|\#{1,3})\s*\n\s*\d+\.|\Z))"
+        r"(?:^|\n)\s*(?:={5,}|\#{1,3})\s*\n\s*(\d+)\.\s+([^\n=]+?)\s*\n+\s*(?:={5,}|\#"
+        r"{1,3})?\s*\n+(.*?)(?=(?:\n\s*(?:={5,}|\#{1,3})\s*\n\s*\d+\.|\Z))"
     )
     major_sections = re.findall(major_section_pat, text, re.DOTALL)
     if len(major_sections) >= 2:
-        clauses = []
-        for num, title, content in major_sections:
-            title_clean = " ".join(title.strip().split())
-            content_clean = " ".join(content.strip().split())
-            if content_clean:
-                clauses.append(f"{num}. {title_clean}: {content_clean}")
-            else:
-                clauses.append(f"{num}. {title_clean}")
+        has_nested = any(
+            re.search(r"(?:^|\n)\s*\d+\.\d+\s+", content) for _, _, content in major_sections
+        )
+        if has_nested:
+            clauses = []
+            for num, title, content in major_sections:
+                sub_items = re.findall(
+                    r"(?:^|\n)\s*(\d+\.\d+)\s+(.*?)(?=(?:\n\s*\d+\.\d+|\Z))",
+                    content,
+                    re.DOTALL,
+                )
+                if sub_items:
+                    for snum, scontent in sub_items:
+                        scontent_clean = " ".join(scontent.split())
+                        clauses.append(f"{snum} {scontent_clean}")
+                else:
+                    title_clean = " ".join(title.strip().split())
+                    content_clean = " ".join(content.strip().split())
+                    if content_clean:
+                        clauses.append(f"{num}. {title_clean}: {content_clean}")
+                    else:
+                        clauses.append(f"{num}. {title_clean}")
+            if len(clauses) >= 2:
+                return clauses
+        else:
+            clauses = []
+            for num, title, content in major_sections:
+                title_clean = " ".join(title.strip().split())
+                content_clean = " ".join(content.strip().split())
+                if content_clean:
+                    clauses.append(f"{num}. {title_clean}: {content_clean}")
+                else:
+                    clauses.append(f"{num}. {title_clean}")
+            return clauses
+
+    # Pattern 2: Multi-section handoff documents (preserving GAPS, ROOT CAUSES,
+    # MISSION, TESTS, RECONCILIATION, SAFETY, SUCCESS).
+    clauses = []
+    gaps_m = re.search(
+        r"(?:^|\n)(?:#+\s*)?(?:CONFIRMED "
+        r"GAPS|GAPS)\s*\n+(.*?)(?=\n+(?:#+\s*)?[A-Z]{3,}(?:\s+[A-Z]{3,})*\s*\n|\Z)",
+        text,
+        re.DOTALL,
+    )
+    if gaps_m:
+        for num, c in re.findall(
+            r"(?:^|\n)\s*(\d+)\.\s+(.*?)(?=(?:\n\s*\d+\.|\Z))", gaps_m.group(1), re.DOTALL
+        ):
+            clauses.append(f"GAP {num}: " + " ".join(c.split()))
+
+    root_causes = re.findall(
+        r"(?:^|\n)(?:#+\s*)?(ROOT CAUSE [A-Z] "
+        r"[^\n]+)\s*\n+(.*?)(?=\n+(?:#+\s*)?(?:ROOT "
+        r"CAUSE|REQUIRED|LIVE|SCOPE|VALIDATION|FINAL|SUCCESS|[A-Z]{3,}\b)|\Z)",
+        text,
+        re.DOTALL,
+    )
+    for rc_title, rc_body in root_causes:
+        req_m = re.search(r"REQUIRED CORRECTION\s*\n+(.*?)(?=\n+[A-Z]{3,}|\Z)", rc_body, re.DOTALL)
+        body_to_use = req_m.group(1) if req_m else rc_body
+        clauses.append(f"{rc_title}: " + " ".join(body_to_use.strip().split()[:40]))
+
+    mission_m = re.search(
+        r"(?:^|\n)(?:#+\s*)?MISSION\s*\n+(.*?)(?=\n+(?:#+\s*)?[A-Z]{3,}(?:\s+[A-Z]{3,})*\s*\n|\Z)",
+        text,
+        re.DOTALL,
+    )
+    if mission_m:
+        m_items = re.findall(
+            r"(?:^|\n)\s*(\d+)\.\s+(.*?)(?=(?:\n\s*\d+\.|\Z))", mission_m.group(1), re.DOTALL
+        )
+        if len(m_items) >= 2:
+            for num, c in m_items:
+                clauses.append(f"MISSION {num}: " + " ".join(c.split()))
+        else:
+            m_body = " ".join(mission_m.group(1).strip().split())
+            if m_body:
+                clauses.append(f"MISSION: {m_body}")
+
+    tests_m = re.search(
+        r"(?:^|\n)(?:#+\s*)?(?:REQUIRED NEGATIVE TESTS|REQUIRED "
+        r"REGRESSIONS|ACCEPTANCE CRITERIA|REQUIRED RED/GREEN MATRIX|RED/GREEN "
+        r"MATRIX|TESTS)\s*\n+(.*?)(?=\n+(?:#+\s*)?[A-Z]{3,}(?:\s+[A-Z]{3,})*\s*\n|\Z)",
+        text,
+        re.DOTALL,
+    )
+    if tests_m:
+        for let, c in re.findall(
+            r"(?:^|\n)\s*([A-Z]|\d+)\.\s+(.*?)(?=(?:\n\s*(?:[A-Z]|\d+)\.|\Z))",
+            tests_m.group(1),
+            re.DOTALL,
+        ):
+            clauses.append(f"TEST {let}: " + " ".join(c.split()))
+
+    live_m = re.search(
+        r"(?:^|\n)(?:#+\s*)?(?:LIVE NEGATIVE ACCEPTANCE|LIVE "
+        r"ACCEPTANCE)\s*\n+(.*?)(?=\n+(?:#+\s*)?[A-Z]{3,}(?:\s+[A-Z]{3,})*\s*\n|\Z)",
+        text,
+        re.DOTALL,
+    )
+    if live_m:
+        clauses.append("LIVE ACCEPTANCE: " + " ".join(live_m.group(1).strip().split()[:50]))
+
+    recon_m = re.search(
+        r"(?:^|\n)(?:#+\s*)?(?:EXTERNAL "
+        r"RECONCILIATION|RECONCILIATION)\s*\n+(.*?)(?=\n+(?:#+\s*)?[A-Z]{3,}(?:\s+[A-Z"
+        r"]{3,})*\s*\n|\Z)",
+        text,
+        re.DOTALL,
+    )
+    if recon_m:
+        clauses.append("RECONCILIATION: " + " ".join(recon_m.group(1).strip().split()))
+
+    safety_m = re.search(
+        r"(?:^|\n)(?:#+\s*)?(?:SAFETY RESTRICTIONS|SCOPE "
+        r"LIMITS)\s*\n+(.*?)(?=\n+(?:#+\s*)?[A-Z]{3,}(?:\s+[A-Z]{3,})*\s*\n|\Z)",
+        text,
+        re.DOTALL,
+    )
+    if safety_m:
+        clauses.append("SAFETY: " + " ".join(safety_m.group(1).strip().split()))
+
+    success_m = re.search(
+        r"(?:^|\n)(?:#+\s*)?SUCCESS\s*\n+(.*?)(?=\n+(?:#+\s*)?[A-Z]{3,}(?:\s+[A-Z]{3,})*\s*\n|\Z)",
+        text,
+        re.DOTALL,
+    )
+    if success_m:
+        clauses.append("SUCCESS: " + " ".join(success_m.group(1).strip().split()))
+
+    if len(clauses) >= 2:
         return clauses
 
-    # Pattern 2: Numbered items under MISSION / REQUIREMENTS / ACCEPTANCE section
+    # Pattern 3: Numbered items under MISSION / REQUIREMENTS / ACCEPTANCE section
     m = re.search(
         r"(?:^|\n)(?:#+\s*)?(?:MISSION|REQUIREMENTS|ACCEPTANCE(?:\s+CRITERIA)?)\s*\n+(.*?)(?=\n+(?:#+\s*)?[A-Z]{3,}(?:\s+[A-Z]{3,})*\s*\n|\Z)",
         text,
@@ -2755,29 +2970,6 @@ def extract_request_clauses(body: str) -> list[str]:
         if len(items) >= 2:
             return [" ".join(content.split()) for num, content in items]
 
-    # Pattern 3: Discrete GAPS and REQUIRED TESTS / REGRESSIONS
-    clauses = []
-    gaps_m = re.search(
-        r"(?:^|\n)(?:#+\s*)?(?:CONFIRMED GAPS|GAPS)\s*\n+(.*?)(?=\n+(?:#+\s*)?[A-Z]{3,}(?:\s+[A-Z]{3,})*\s*\n|\Z)",
-        text,
-        re.DOTALL,
-    )
-    if gaps_m:
-        for num, c in re.findall(r"(?:^|\n)\s*(\d+)\.\s+(.*?)(?=(?:\n\s*\d+\.|\Z))", gaps_m.group(1), re.DOTALL):
-            clauses.append(f"GAP {num}: " + " ".join(c.split()))
-
-    tests_m = re.search(
-        r"(?:^|\n)(?:#+\s*)?(?:REQUIRED NEGATIVE TESTS|REQUIRED REGRESSIONS|ACCEPTANCE CRITERIA|TESTS)\s*\n+(.*?)(?=\n+(?:#+\s*)?[A-Z]{3,}(?:\s+[A-Z]{3,})*\s*\n|\Z)",
-        text,
-        re.DOTALL,
-    )
-    if tests_m:
-        for let, c in re.findall(r"(?:^|\n)\s*([A-Z]|\d+)\.\s+(.*?)(?=(?:\n\s*(?:[A-Z]|\d+)\.|\Z))", tests_m.group(1), re.DOTALL):
-            clauses.append(f"TEST {let}: " + " ".join(c.split()))
-
-    if len(clauses) >= 2:
-        return clauses
-
     # Pattern 4: Top-level numbered list if text has >= 2 items
     top_items = re.findall(
         r"(?:^|\n)\s*(\d+)\.\s+(.*?)(?=(?:\n\s*\d+\.|\Z))",
@@ -2789,7 +2981,8 @@ def extract_request_clauses(body: str) -> list[str]:
 
     # Pattern 5: Unnumbered major sections delimited by ===
     unnum_section_pat = (
-        r"(?:^|\n)\s*={5,}\s*\n\s*([A-Z0-9_ -]+?)\s*\n+\s*={5,}\s*\n+(.*?)(?=(?:\n\s*={5,}\s*\n\s*[A-Z0-9_ -]+|\Z))"
+        r"(?:^|\n)\s*={5,}\s*\n\s*([A-Z0-9_ "
+        r"-]+?)\s*\n+\s*={5,}\s*\n+(.*?)(?=(?:\n\s*={5,}\s*\n\s*[A-Z0-9_ -]+|\Z))"
     )
     unnum_sections = re.findall(unnum_section_pat, text, re.DOTALL)
     if len(unnum_sections) >= 2:
