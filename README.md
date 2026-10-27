@@ -50,8 +50,6 @@ Project
      next_action -> work -> checkpoint
 ```
 
-**Shortcut keys.** A shortcut is the whole message, never a prefix: `cc` continues, `sss` reports status, `st` stops. [Full key map](saipen/CORE.md#110-command-surface).
-
 ## What persists
 
 Live project memory lives in `.saipen/` — plain files you can read, diff, and
