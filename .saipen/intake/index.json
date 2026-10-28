@@ -823,10 +823,6 @@
     "SRC-342": {
       "linked_work": "T-1943",
       "source_sha256": "28acc06800d938620eb6ae4a70f78e856abfb9d4a0f444fe8e846e48801c4382"
-    },
-    "SRC-345": {
-      "linked_work": "T-1946",
-      "source_sha256": "23078904b1379ac0f7f9c101d0289fa4d1c6726d8a66e93f321f0fcfc316c33b"
     }
   },
   "next_id": 346,
@@ -3247,6 +3243,22 @@
       "requirements": 9,
       "schema_version": 1,
       "source_sha256": "ec9397a199f250daa4adf5a5258efe7aa04079ece508dacf0f83fb1ca911aeec",
+      "status": "CLOSED",
+      "unresolved": 0
+    },
+    "SRC-345": {
+      "actionable": 1,
+      "archive_ref": ".saipen/archive/source/SRC-345.md",
+      "closed_at": "2026-10-28T01:20:43Z",
+      "closure_event": null,
+      "linked_work": "T-1946",
+      "linked_works": [
+        "T-1946"
+      ],
+      "receipt_id": "SRC-345",
+      "requirements": 1,
+      "schema_version": 1,
+      "source_sha256": "23078904b1379ac0f7f9c101d0289fa4d1c6726d8a66e93f321f0fcfc316c33b",
       "status": "CLOSED",
       "unresolved": 0
     }
