@@ -5911,3 +5911,4 @@
 - 28.10.26 08:09 [E-19089] [parent: E-19088] [T-1951] [agent: saipen-cli] [op: finish-12e62a7ca29947b9835474b064c31aa3] DEC: ticket finished via SAIOPS -- completion (from SHIP); publication_state pending; release route: saipen cohort ship <C-###> (a released batch names this ticket, flipping the state to published)
 - 28.10.26 08:18 [E-19090] [parent: E-19089] [agent: saipen-cli] [op: checkpoint-75c89276ec31460eb4ecfa6a5f74397f] RUN: detail_ref: .saipen/recovery/log-detail/E-19090-c60d624905c5986f57f296ff.json
 - 28.10.26 08:34 [E-19091] [parent: E-19090] [agent: saipen-cli] [op: checkpoint-cf4aa08749a14db29c3892fc35cc3f5f] RUN: detail_ref: .saipen/recovery/log-detail/E-19091-a5cd9f99758aa324b3be3957.json
+- 28.10.26 08:35 [E-19092] [parent: E-19091] [agent: saipen-cli] [op: checkpoint-c63a8a13f2e447df86c943d29f5f60a4] DEC: detail_ref: .saipen/recovery/log-detail/E-19092-aabcb7c2106c11b720fd352c.json
