@@ -1,5 +1,5 @@
 ## DOING
-- [/] T-1946 [P2] commit the completed T-1944 and T-1945 repair work to GitHub | verify: the requested change is present and demonstrated against the user own description of it | request_witness: model_supplied | source_receipts: SRC-345 | owner: saipen-cli | claim_time: 2026-10-28T00:27:54Z
+- [/] T-1946 [P2] commit the completed T-1944 and T-1945 repair work to GitHub | verify: the requested change is present and demonstrated against the user own description of it | request_witness: model_supplied | source_receipts: SRC-345 | owner: saipen-cli | claim_time: 2026-10-28T01:11:11Z
 ## TODO
 - [ ] T-1947 [P2] T-1944/T-1945 introduced producer names into the neutral engine package: test_audit_dogfood reports 87 executable-code offenders (saipal_adapter.py 69, campaign.py 18), including three real 'producer != saipal' branches | verify: test_audit_dogfood.ProducerNeutrality.test_no_engine_module_branches_on_a_producer_name is green on the same tree, with no engine module branching on a producer name: the producer-specific backend lives outside tools/saipen_engine/ or reaches it only through a name-free interface, and the three allocator filters at saipal_adapter.py:1458,2122,2219 are expressed as a passed-in producer so the adapter cannot special-case one caller
 ## DONE
