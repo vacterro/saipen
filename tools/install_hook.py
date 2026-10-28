@@ -33,7 +33,10 @@ MARKER = "# saipen pre-commit hook"
 # out loud when it is red -- the failure mode where this repo's own CI sat red
 # for 30+ commits while every local gate stayed green (the badge is passive;
 # nothing in the commit loop ever looked at it). Warn-only, never blocks.
-HOOK_VERSION = 7
+# Generation 8 keeps the Python and shell validator results in separate
+# variables (T-1949). They shared one, and the shell floor's green overwrote a
+# failing tools/validate.py, so a red Python gate committed silently.
+HOOK_VERSION = 8
 
 home = Path(__file__).resolve().parent.parent
 hooks_dir = Path(".git/hooks")
@@ -88,10 +91,12 @@ fi
 if [ -f "$SAIPEN_HOME/tools/validate.py" ]; then
   if command -v python >/dev/null 2>&1; then
     python "$SAIPEN_HOME/tools/validate.py"
-    _validate_rc=$?
+    _validate_py=$?
+    _ran_python=1
   elif command -v py >/dev/null 2>&1; then
     py "$SAIPEN_HOME/tools/validate.py"
-    _validate_rc=$?
+    _validate_py=$?
+    _ran_python=1
   fi
 fi
 if [ -f "$SAIPEN_HOME/tests/validate.sh" ]; then
@@ -100,7 +105,8 @@ if [ -f "$SAIPEN_HOME/tests/validate.sh" ]; then
     exit 1
   fi
   bash "$SAIPEN_HOME/tests/validate.sh"
-  _validate_rc=$?
+  _validate_sh=$?
+  _ran_shell=1
 fi
 
 # Purity check: the gate MUST NOT mutate any tracked or untracked file.
@@ -119,8 +125,19 @@ fi
 # A validator that ran and failed blocks the commit -- the purity guard has
 # already been passed, so a mutating failure exits here with the mutation
 # diagnosed, and a clean validation failure exits with its own message.
-if [ -n "${{_validate_rc:-}}" ] && [ "$_validate_rc" != 0 ]; then
-  echo "saipen: validation failed -- fix .saipen/ or commit with --no-verify" >&2
+#
+# The two results are kept SEPARATE (T-1949). They used to share one variable
+# and the shell floor overwrote the Python gate's status, so a red Python
+# validation followed by the portable floor's green exited 0 and committed
+# silently -- an unvalidated commit that looks validated, which is the silent
+# PASS this hook exists to stop. A failing validator is named, because "the
+# commit was refused" is not actionable without knowing which one refused it.
+if [ "${{_ran_python:-0}}" = 1 ] && [ "$_validate_py" != 0 ]; then
+  echo "saipen: validation failed (tools/validate.py, exit $_validate_py) -- fix .saipen/ or commit with --no-verify" >&2
+  exit 1
+fi
+if [ "${{_ran_shell:-0}}" = 1 ] && [ "$_validate_sh" != 0 ]; then
+  echo "saipen: validation failed (tests/validate.sh, exit $_validate_sh) -- fix .saipen/ or commit with --no-verify" >&2
   exit 1
 fi
 
@@ -129,9 +146,10 @@ fi
 # longer be short-circuited past, and put nothing in its place, so every
 # healthy commit fell into the NOT VALIDATED line below and was told it had
 # not been validated. Exiting here is safe now precisely because the guard
-# above already ran. Keep this exit gated on `_validate_rc` being SET: an
-# unreachable validator leaves it unset and must still reach the diagnostic.
-if [ -n "${{_validate_rc:-}}" ]; then
+# above already ran. Keep this exit gated on a validator having actually run:
+# an unreachable validator leaves both flags unset and must still reach the
+# diagnostic below.
+if [ "${{_ran_python:-0}}" = 1 ] || [ "${{_ran_shell:-0}}" = 1 ]; then
   exit 0
 fi
 

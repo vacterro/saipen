@@ -1,0 +1,26 @@
+{
+  "schema": 1,
+  "command": [
+    "{python}",
+    "-B",
+    "tools/test_t1949_hook_validator_status.py"
+  ],
+  "format": "unittest",
+  "context": [
+    "tools",
+    "saipen",
+    "extensions",
+    "bootstrap",
+    "tests"
+  ],
+  "oracle_files": [
+    "tools/test_t1949_hook_validator_status.py"
+  ],
+  "subject_files": [
+    "tools/install_hook.py"
+  ],
+  "before": {
+    "tools/install_hook.py": ".saipen/evidence/T-1949-hook-mask/pre/install_hook.prefix.py"
+  },
+  "timeout": 300
+}
