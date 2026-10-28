@@ -1,7 +1,0 @@
-{
-  "before": "BINDING",
-  "result": "REFUSED",
-  "after": "BINDING",
-  "admitted": false,
-  "error": "AttributeError"
-}

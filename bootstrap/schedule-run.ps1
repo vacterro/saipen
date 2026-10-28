@@ -169,7 +169,9 @@ function Backup-Bindings([string[]]$sourceRoots, [string]$backupRoot) {
     $entry = [ordered]@{ live = $item.live; label = $item.label; existed = $false; backup = $null }
     if (Test-Path -LiteralPath $item.live -PathType Leaf) {
       $safe = ($item.label -replace '[^A-Za-z0-9._-]', '_')
-      $target = Join-Path $backupRoot $safe
+      # Two launcher directories can carry the same basename. Labels are
+      # diagnostic, not unique identities; each entry needs its own backup.
+      $target = Join-Path $backupRoot ("{0:D4}-{1}" -f $manifest.Count, $safe)
       try {
         [System.IO.Directory]::CreateDirectory($backupRoot) | Out-Null
         Copy-Item -LiteralPath $item.live -Destination $target -Force -ErrorAction Stop
@@ -177,6 +179,9 @@ function Backup-Bindings([string[]]$sourceRoots, [string]$backupRoot) {
         $entry.backup = $target
       } catch {
         Write-Log ("bindings: cannot back up {0} -- {1}" -f $item.live, $_.Exception.Message)
+        # An unreadable original is not an absent file. A partial manifest
+        # could otherwise erase it on rollback, so refuse before publication.
+        return $null
       }
     }
     [void]$manifest.Add($entry)
@@ -448,6 +453,9 @@ try {
   if (Test-Path -LiteralPath $published) { $bindingRoots += $published }
   $bindingRoots += $snapshot
   $bindingManifest = Backup-Bindings $bindingRoots (Join-Path $logDir ("bindings-{0}" -f $runId))
+  if (-not $bindingManifest) {
+    throw "Binding snapshot failed; publication not started"
+  }
 
   if (Test-Path -LiteralPath $published) {
     Move-Item -LiteralPath $published -Destination $previous -ErrorAction Stop
