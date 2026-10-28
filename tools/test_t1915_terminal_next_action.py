@@ -46,11 +46,20 @@ def _utc() -> str:
     return datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
 
 
-#: A live foreign seat: routing itself cannot proceed without a decision.
-DOING_FOREIGN = (
-    "- [/] T-69 [P1] repair launcher | verify: test | owner: other-agent | "
-    f"claim_time: {_utc()}\n"
-)
+def doing_foreign() -> str:
+    """A live foreign seat: routing itself cannot proceed without a decision.
+
+    The stamp is minted per call, not once at import. `claim_time` is read
+    against CLAIM_LIVENESS_WINDOW (15 minutes, board.py:1163), so a module-level
+    constant freezes the claim at discovery and a slow shard later sees
+    FOREIGN_STALE instead of the FOREIGN_LIVE seat this case is about. Measured
+    on the T-1946 full-family run: 899 s still gates, 901 s does not, and shard 2
+    ran 2274 s. The defect was the fixture's clock, not the router's rule.
+    """
+    return (
+        "- [/] T-69 [P1] repair launcher | verify: test | owner: other-agent | "
+        f"claim_time: {_utc()}\n"
+    )
 
 
 def _state(next_action: str = LEGACY) -> str:
@@ -228,7 +237,7 @@ class CompoundCheckpointTests(unittest.TestCase):
         self.assertEqual(board["tickets"]["T-69"]["section"], "## TODO")
 
     def test_a_foreign_live_seat_keeps_the_operator_gate(self) -> None:
-        root = project(self.base, doing=DOING_FOREIGN, todo="")
+        root = project(self.base, doing=doing_foreign(), todo="")
         record = reconcile.reconcile_protocol_state(root, "tester", dry_run=True)
         refusals = [r for r in self._next_action_repairs(record) if r.get("refuse")]
         self.assertEqual(len(refusals), 1, record)
