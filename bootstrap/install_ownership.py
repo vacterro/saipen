@@ -3,6 +3,15 @@
 The ledger is local bookkeeping, not authorization. Unknown files and edited
 files survive removal. An upgrade preserves extra files; edited runtime files
 from the previous owned generation are retained in a sibling backup.
+
+Preservation stops at the shipped surface (T-1951). A file INSIDE a manifest-
+declared runtime tree is not an extra: the runtime identity hashes every member
+of that tree, so resurrecting a retired module into the new generation makes
+the installed copy permanently unequal to the source it came from. The
+scheduled injector reads that inequality as a failed install and rolls the
+publication back, forever, because the next run resurrects the same file. Those
+bytes are kept in the sibling backup instead, where nothing reads them and the
+user still has them.
 """
 
 from __future__ import annotations
@@ -98,9 +107,25 @@ def record(stage: Path, destination: Path) -> None:
                 + hashlib.sha256(json.dumps(existing, sort_keys=True).encode()).hexdigest()[:16]
             )
         )
-        managed = json.loads((stage / "MANIFEST.json").read_text(encoding="utf-8")).get(
-            "managed_dirs", []
-        )
+        manifest = json.loads((stage / "MANIFEST.json").read_text(encoding="utf-8"))
+        managed = manifest.get("managed_dirs", [])
+        # Everything the new generation ships, not just the required entries:
+        # a copy tree lands whole, so every path under its src is shipped.
+        shipped = set(managed)
+        for tree in manifest.get("copy_trees", []):
+            src = tree.get("src") if isinstance(tree, dict) else None
+            if isinstance(src, str) and src:
+                shipped.add(src.rstrip("/"))
+        for entry in manifest.get("files", []):
+            src = entry.get("src") if isinstance(entry, dict) else None
+            if isinstance(src, str) and src:
+                shipped.add(src.rstrip("/"))
+
+        def inside_shipped_surface(relative: str) -> bool:
+            return any(
+                relative == path or relative.startswith(path + "/") for path in shipped
+            )
+
         for relative, checksum in existing.items():
             if relative == PROVENANCE:
                 continue
@@ -111,17 +136,26 @@ def record(stage: Path, destination: Path) -> None:
             legacy_managed = previous is None and any(
                 relative.startswith(str(p) + "/") for p in managed
             )
-            if relative in owned or legacy_managed:
-                # A legacy install has no per-file proof. Keep its existing
-                # generation separately; never overwrite user edits silently.
+            if relative in owned or legacy_managed or inside_shipped_surface(relative):
+                # A legacy install has no per-file proof, and a retired file
+                # inside the shipped surface would poison the identity. Keep
+                # the existing bytes separately; never drop them silently.
                 backup = safe_path(backup_root, backup_relpath(relative))
                 backup.parent.mkdir(parents=True, exist_ok=True)
                 if not backup.exists():
                     shutil.copyfile(source, backup)
             else:
+                # Outside every declared tree this is the user's own file, not
+                # part of what the identity hashes, so it travels with the
+                # install as the preservation contract promises.
                 target = safe_path(stage, relative)
                 target.parent.mkdir(parents=True, exist_ok=True)
                 shutil.copyfile(source, target)
+        # `owned` deliberately stays the PRE-merge set. A preserved file must
+        # not enter the ledger: the next run treats a ledger entry whose digest
+        # is unchanged as already installed and skips it, and the fresh stage
+        # never contains it, so recording it here would delete it one run later
+        # -- trading a resurrection for a disappearance.
     (stage / LEDGER).write_text(
         json.dumps({"schema_version": 1, "files": owned}, indent=2) + "\n", encoding="utf-8"
     )
