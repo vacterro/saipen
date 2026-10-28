@@ -21,7 +21,10 @@ from unittest import mock
 REPO = Path(__file__).resolve().parent
 sys.path.insert(0, str(REPO))
 
-from saipen_engine import audit_enqueue, campaign, saipal_adapter  # noqa: E402
+from saipen_engine import audit_enqueue, campaign  # noqa: E402
+
+# T-1947: the producer-specific backend lives outside the neutral engine.
+from producer_backends import saipal_adapter  # noqa: E402
 
 
 def _project() -> Path:
@@ -412,13 +415,13 @@ class W2_004DeliveryAggregateIsTruthful(unittest.TestCase):
 
     def _controller_with(self, delivery: dict, findings: list | None = None):
         ctrl = campaign.CampaignController(self.root)
-        ctrl.saipal = mock.Mock()
-        ctrl.saipal.discover.return_value = {
+        ctrl.backend = mock.Mock()
+        ctrl.backend.discover.return_value = {
             "ok": True,
             "status": saipal_adapter.NEW_QUALIFIED_FINDINGS,
             "findings": findings if findings is not None else [{"finding_id": "PAL-1"}],
         }
-        ctrl.saipal.deliver_finding_to_audit_inbox.return_value = delivery
+        ctrl.backend.deliver_finding_to_audit_inbox.return_value = delivery
         return ctrl
 
     def _admit(self, ctrl) -> None:
@@ -466,13 +469,13 @@ class W2_004DeliveryAggregateIsTruthful(unittest.TestCase):
 
     def test_a_mixed_batch_names_both_sides_exactly(self) -> None:
         ctrl = campaign.CampaignController(self.root)
-        ctrl.saipal = mock.Mock()
-        ctrl.saipal.discover.return_value = {
+        ctrl.backend = mock.Mock()
+        ctrl.backend.discover.return_value = {
             "ok": True,
             "status": saipal_adapter.NEW_QUALIFIED_FINDINGS,
             "findings": [{"finding_id": "PAL-OK"}, {"finding_id": "PAL-BAD"}],
         }
-        ctrl.saipal.deliver_finding_to_audit_inbox.side_effect = [
+        ctrl.backend.deliver_finding_to_audit_inbox.side_effect = [
             {"ok": True, "status": saipal_adapter.DELIVERED_PUBLICATION, "finding_id": "PAL-OK"},
             {"ok": False, "status": "ARTIFACT_MISSING", "finding_id": "PAL-BAD"},
         ]

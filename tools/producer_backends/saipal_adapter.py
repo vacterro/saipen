@@ -40,8 +40,8 @@ import time
 from contextlib import suppress
 from pathlib import Path
 
-from . import audit_enqueue, lock, paths, saipal_report_stream
-from .process_tree import ProcessTree
+from saipen_engine import audit_enqueue, lock, paths, saipal_report_stream
+from saipen_engine.process_tree import ProcessTree
 
 # Result classifications
 ANALYSIS_PROGRESS = "ANALYSIS_PROGRESS"
@@ -590,12 +590,16 @@ def _receipt_from_allocator(
     root: Path,
     row: dict,
     *,
+    producer: str,
     snapshot: dict | None = None,
     index: dict | None = None,
 ) -> dict | None:
     """Rebuild one publication receipt from the canonical enqueue allocator.
 
-    Only `saipal` operations carry publication receipts, and only a COMMITTED
+    Only operations this adapter enqueued carry publication receipts, so the
+    caller passes the producer it writes under instead of the lookup closing
+    over one name: a query that hardcoded a single caller's name could never be
+    reused, which is exactly the coupling T-1947 removed. Only a COMMITTED
     allocator record plus a matching on-disk layer digest proves the layer was
     durably placed. Anything weaker (RESERVED, absent, corrupt allocator)
     returns None: R021 says recovery must not invent records, so an
@@ -626,9 +630,9 @@ def _receipt_from_allocator(
     if allocator_state != audit_enqueue.ALLOCATOR_OK:
         return None
     if index is not None:
-        record = index.get(("saipal", op_id, layer))
+        record = index.get((producer, op_id, layer))
     else:
-        record = _allocator_find_operation(doc, "saipal", op_id, layer)
+        record = _allocator_find_operation(doc, producer, op_id, layer)
     if record is None or record.get("state") != audit_enqueue.COMMITTED:
         return None
     canonical_digest = record.get("sha256")
@@ -701,7 +705,7 @@ def _broker_verified(receipt: object) -> bool:
     False. A failure is never downgraded into an unauthenticated attempt:
     callers turn False into a refusal that names the missing broker.
     """
-    from . import host_authority_client
+    from saipen_engine import host_authority_client
 
     if not isinstance(receipt, dict):
         return False
@@ -1044,16 +1048,39 @@ DEFAULT_SAIPAL_PATHS = [
     Path(r"V:\___VAC\__K\__CODE\_AI_STUFF_AGENTIC\_SAIPAL"),
 ]
 
+#: The producer this adapter enqueues under. A deployment fact, not a protocol
+#: one: it is the DEFAULT a caller may override, and nothing in this module
+#: branches on the value.
+DEFAULT_PRODUCER = "saipal"
+
 
 def _utc_now() -> str:
     return _dt.datetime.now(_dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
 
 
 class SaipalAdapter:
-    """Logical and execution backend connecting SAIPEN campaign to SAIPAL."""
+    """Logical and execution backend connecting SAIPEN campaign to SAIPAL.
 
-    def __init__(self, saipal_home: Path | str | None = None) -> None:
+    T-1947: this backend used to live INSIDE `saipen_engine/`, which promises
+    producer neutrality, and it carried the producer's name into the engine's
+    executable code. It now lives outside that package; the engine holds it
+    only through `saipen_engine.backend_protocol.CampaignBackend`, and every
+    allocator query below takes the producer as an input instead of closing
+    over one name.
+    """
+
+    def __init__(
+        self,
+        saipal_home: Path | str | None = None,
+        *,
+        producer: str = DEFAULT_PRODUCER,
+    ) -> None:
         self.saipal_home = Path(saipal_home).resolve() if saipal_home else self._resolve_home()
+        # The allocator is keyed by producer and this adapter may only read
+        # back its OWN operations. Taking the name as an input is what keeps
+        # that rule true for any caller: a filter that never spells a name
+        # cannot special-case one deployment.
+        self.producer = producer
 
     def _resolve_home(self) -> Path | None:
         env_home = os.environ.get("SAIPAL_HOME")
@@ -1455,7 +1482,7 @@ class SaipalAdapter:
         for record in (doc.get("operations") or {}).values():
             if not isinstance(record, dict):
                 continue
-            if str(record.get("producer") or "") != "saipal":
+            if str(record.get("producer") or "") != self.producer:
                 continue
             if str(record.get("state") or "") != audit_enqueue.COMMITTED:
                 continue
@@ -1468,8 +1495,9 @@ class SaipalAdapter:
                 committed.add(item_id)
                 continue
             op_id = str(record.get("producer_operation_id") or "")
-            if op_id.startswith("saipal-") and len(op_id) > len("saipal-"):
-                committed.add(op_id[len("saipal-"):])
+            prefix = f"{self.producer}-"
+            if op_id.startswith(prefix) and len(op_id) > len(prefix):
+                committed.add(op_id[len(prefix):])
         return committed
 
     def load_page_checkpoint(self, project_root: Path | str) -> dict:
@@ -2119,7 +2147,7 @@ class SaipalAdapter:
                 for record in doc["operations"].values():
                     if not isinstance(record, dict):
                         continue
-                    if str(record.get("producer") or "") != "saipal":
+                    if str(record.get("producer") or "") != self.producer:
                         continue
                     recovered_one = _receipt_from_allocator(
                         root,
@@ -2128,6 +2156,7 @@ class SaipalAdapter:
                             "finding_id": record.get("producer_item_id"),
                             "layer": record.get("layer"),
                         },
+                        producer=self.producer,
                         snapshot=doc,
                         index=absent_index,
                     )
@@ -2216,7 +2245,7 @@ class SaipalAdapter:
                     for record in doc["operations"].values():
                         if not isinstance(record, dict):
                             continue
-                        if str(record.get("producer") or "") != "saipal":
+                        if str(record.get("producer") or "") != self.producer:
                             continue
                         op_id = str(record.get("producer_operation_id") or "")
                         if not op_id or op_id in seen:
@@ -2228,6 +2257,7 @@ class SaipalAdapter:
                                 "finding_id": record.get("producer_item_id"),
                                 "layer": record.get("layer"),
                             },
+                            producer=self.producer,
                             snapshot=doc,
                             index=damaged_index,
                         )
@@ -2557,10 +2587,13 @@ class SaipalAdapter:
                 "finding_id": fid,
             }
 
-        op_id = f"saipal-{fid.lower()}"
+        # The operation id keeps the producer prefix because the allocator rows
+        # written before this ticket already use it; the disk format is
+        # persisted state and renaming it would strand those records.
+        op_id = f"{self.producer}-{fid.lower()}"
         res = audit_enqueue.enqueue(
             root,
-            producer="saipal",
+            producer=self.producer,
             body=audit_body,
             producer_operation_id=op_id,
             producer_item_id=fid,
@@ -2679,7 +2712,7 @@ class SaipalAdapter:
                     "status": "DISPOSITION_UNVERIFIED",
                     "error": f"Cannot verify disposition: {board_file} does not exist",
                 }
-            from .board import parse_board
+            from saipen_engine.board import parse_board
 
             parsed = parse_board(board_file.read_text(encoding="utf-8"))
             ticket = parsed["tickets"].get(str(task_id).strip())

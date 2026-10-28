@@ -15218,6 +15218,10 @@ def main(argv: list[str] | None = None) -> int:
             return 1
     if command == "campaign":
         from saipen_engine import campaign as campaign_mod
+        # T-1947: the engine may not name a producer, so the deployment picks
+        # the backend here. This is the one place in shipped code that knows
+        # which analysis backend a campaign drives.
+        from producer_backends.saipal_adapter import SaipalAdapter
 
         sub = args[1] if len(args) > 1 else "status"
         if dry_run and sub != "status":
@@ -15226,7 +15230,7 @@ def main(argv: list[str] | None = None) -> int:
             return 2
         if sub != "status" and _negotiate_capability(project_root) == "read-only":
             return _capability_refusal(as_json)
-        ctrl = campaign_mod.CampaignController(project_root)
+        ctrl = campaign_mod.CampaignController(project_root, backend=SaipalAdapter())
         if sub == "status":
             # CORE-005: `load_campaign_state` answers None for BOTH "no campaign"
             # and "unreadable campaign", so a corrupt state.json was reported as

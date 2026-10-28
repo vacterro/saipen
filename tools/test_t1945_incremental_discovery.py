@@ -25,7 +25,7 @@ TOOLS = Path(__file__).resolve().parent
 if str(TOOLS) not in sys.path:
     sys.path.insert(0, str(TOOLS))
 
-from saipen_engine import saipal_adapter  # noqa: E402
+from producer_backends import saipal_adapter  # noqa: E402
 
 
 def _report_payload(rows: list[dict]) -> bytes:
@@ -173,7 +173,9 @@ class DiscoveryUsesThePagedTransportTest(unittest.TestCase):
     """Structural pin: the materialising call must not come back."""
 
     def test_discovery_source_calls_the_incremental_walk(self) -> None:
-        source = (TOOLS / "saipen_engine" / "saipal_adapter.py").read_text(encoding="utf-8")
+        source = (
+            TOOLS / "producer_backends" / "saipal_adapter.py"
+        ).read_text(encoding="utf-8")
         start = source.index("    def discover(self, project_root")
         end = source.index("    def checkpoint(self, project_root")
         body = source[start:end]

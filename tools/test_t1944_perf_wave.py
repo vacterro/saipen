@@ -29,7 +29,10 @@ from unittest import mock
 REPO = Path(__file__).resolve().parent
 sys.path.insert(0, str(REPO))
 
-from saipen_engine import audit_enqueue, saipal_adapter, saipal_report_stream  # noqa: E402
+from saipen_engine import audit_enqueue, saipal_report_stream  # noqa: E402
+
+# T-1947: the producer-specific backend lives outside the neutral engine.
+from producer_backends import saipal_adapter  # noqa: E402
 
 
 def _project(prefix: str = "t1944-perf-") -> Path:

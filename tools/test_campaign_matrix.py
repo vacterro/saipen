@@ -32,10 +32,12 @@ from saipen_engine import (
     host_iteration,
     iteration,
     lock,
-    saipal_adapter,
     supervisor,
     watchdog,
 )
+
+# T-1947: the producer-specific backend lives outside the neutral engine.
+from producer_backends import saipal_adapter  # noqa: E402
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 REAL_STATE = (REPO_ROOT / ".saipen" / "STATE.md").read_text(encoding="utf-8-sig")

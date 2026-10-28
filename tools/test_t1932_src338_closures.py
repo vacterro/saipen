@@ -31,9 +31,11 @@ from saipen_engine import (
     host_iteration,
     iteration,
     iteration_verdict,
-    saipal_adapter,
     supervisor,
 )
+
+# T-1947: the producer-specific backend lives outside the neutral engine.
+from producer_backends import saipal_adapter  # noqa: E402
 
 
 def make_project(root: Path, *, task: str = "T-1", phase: str = "BUILD") -> Path:

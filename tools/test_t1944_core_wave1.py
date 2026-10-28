@@ -20,7 +20,10 @@ from pathlib import Path
 REPO = Path(__file__).resolve().parent
 sys.path.insert(0, str(REPO))
 
-from saipen_engine import campaign, goal_authority, saipal_adapter  # noqa: E402
+from saipen_engine import campaign, goal_authority  # noqa: E402
+
+# T-1947: the producer-specific backend lives outside the neutral engine.
+from producer_backends import saipal_adapter  # noqa: E402
 
 
 def _project() -> Path:

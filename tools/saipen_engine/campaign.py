@@ -40,7 +40,7 @@ from collections.abc import Mapping
 from pathlib import Path
 
 from . import continuation_assessment as ca
-from . import campaign_authority, host_dispatch, lock, saipal_adapter, supervisor
+from . import backend_protocol, campaign_authority, host_dispatch, lock, supervisor
 from .paths import safe_atomic_write_bytes
 
 CAMPAIGN_SCHEMA_VERSION = 1
@@ -389,9 +389,18 @@ def _verify_state_grant(root, state, requested_scope=None):
 class CampaignController:
     """Supervises campaign lifecycle and successive bounded worker generations."""
 
-    def __init__(self, project_root: Path | str) -> None:
+    def __init__(self, project_root: Path | str, *, backend=None) -> None:
+        """`backend` is injected; the engine may not name a producer (T-1947).
+
+        A controller built without one still runs the whole campaign lifecycle
+        -- admission, worker generations, checkpoints, cancellation. Only the
+        discovery edge needs an analysis backend, and with none injected it
+        answers with a typed refusal instead of resolving a producer itself:
+        which backend this deployment drives is a caller fact, and a name the
+        engine cannot spell is a name it cannot branch on.
+        """
         self.root = Path(project_root).resolve()
-        self.saipal = saipal_adapter.SaipalAdapter()
+        self.backend = backend
 
     def _acquire_lock(self) -> lock.FileWriterLock:
         lock_file = self.root / LOCK_REL
@@ -583,7 +592,7 @@ class CampaignController:
                 "last_journal_event": "none",
                 "last_source_generation": 0,
                 "last_audit_generation": 0,
-                "last_saipal_generation": 0,
+                "last_analysis_generation": 0,
                 "last_productive_progress": now_str,
                 "last_verified_result": None,
                 "next_action": "start_campaign_worker" if executable else "operator_grant_required",
@@ -993,22 +1002,42 @@ class CampaignController:
                     }
 
                 state["campaign_state"] = DISCOVERING
-                disc_res = self.saipal.discover(self.root)
+                if self.backend is None:
+                    # No backend was injected, so there is nothing to ask. This
+                    # is a deployment fact, not a discovery failure: the typed
+                    # refusal keeps the campaign schedulable and names the one
+                    # thing the caller has to supply.
+                    state["campaign_state"] = EXTERNAL_BLOCKED
+                    state["last_discovery_failure"] = {
+                        "status": backend_protocol.RUNTIME_UNAVAILABLE,
+                        "error": "No analysis backend is configured for this campaign",
+                        "path": None,
+                    }
+                    state["next_action"] = "configure_analysis_backend"
+                    save_campaign_state(self.root, state)
+                    return {
+                        "ok": False,
+                        "event": "FORENSIC_DISCOVERY_FAILED",
+                        "status": backend_protocol.RUNTIME_UNAVAILABLE,
+                        "discovery": state["last_discovery_failure"],
+                        "state": state,
+                    }
+                disc_res = self.backend.discover(self.root)
                 if not isinstance(disc_res, dict) or disc_res.get("ok") is not True:
                     failure = (
                         disc_res
                         if isinstance(disc_res, dict)
                         else {
-                            "status": saipal_adapter.BACKEND_PROTOCOL_ERROR,
+                            "status": backend_protocol.BACKEND_PROTOCOL_ERROR,
                             "error": "Forensic discovery returned an invalid envelope",
                         }
                     )
-                    status = failure.get("status", saipal_adapter.PERMANENT_FAILURE)
+                    status = failure.get("status", backend_protocol.PERMANENT_FAILURE)
                     state["campaign_state"] = (
                         AUTHORITY_BLOCKED
-                        if status == saipal_adapter.AUTHORITY_REQUIRED
+                        if status == backend_protocol.AUTHORITY_REQUIRED
                         else RETRY_WAIT
-                        if status == saipal_adapter.RETRYABLE_FAILURE
+                        if status == backend_protocol.RETRYABLE_FAILURE
                         else EXTERNAL_BLOCKED
                     )
                     state["last_discovery_failure"] = {
@@ -1026,25 +1055,25 @@ class CampaignController:
                         "state": state,
                     }
                 if disc_res.get("status") in (
-                    saipal_adapter.NEW_QUALIFIED_FINDINGS,
-                    "ANALYSIS_PROGRESS",
+                    backend_protocol.NEW_QUALIFIED_FINDINGS,
+                    backend_protocol.ANALYSIS_PROGRESS,
                 ):
-                    state["last_saipal_generation"] = (
-                        int(state.get("last_saipal_generation", 0)) + 1
+                    state["last_analysis_generation"] = (
+                        int(state.get("last_analysis_generation", 0)) + 1
                     )
 
                 # AUT-007: one analysis slice is progress, not a finished
                 # objective. This branch used to fall through to the `else`
                 # below and report DISCOVERY_NO_NEW_FINDINGS into QUIESCENT_WAIT,
-                # so a SAIPAL objective with pending hot/cold sessions became
+                # so an analysis objective with pending hot/cold sessions became
                 # unschedulable after its first slice and the campaign slept
                 # through its own remaining work. A slice keeps the campaign in
                 # FORENSIC_ANALYSIS with an explicit next action.
-                if disc_res.get("status") == "ANALYSIS_PROGRESS":
+                if disc_res.get("status") == backend_protocol.ANALYSIS_PROGRESS:
                     state["campaign_state"] = FORENSIC_ANALYSIS
                     state["last_analysis_slice"] = {
                         "at": _utc_now(),
-                        "generation": state.get("last_saipal_generation"),
+                        "generation": state.get("last_analysis_generation"),
                         "slice": disc_res.get("slice"),
                     }
                     state["next_action"] = "forensic_analysis_slice"
@@ -1053,7 +1082,7 @@ class CampaignController:
                         "ok": True,
                         "event": "ANALYSIS_PROGRESS",
                         "detail": (
-                            "One bounded SAIPAL analysis slice executed; the "
+                            "One bounded forensic analysis slice executed; the "
                             "objective has further eligible slices, so the "
                             "campaign stays schedulable rather than quiescent."
                         ),
@@ -1061,7 +1090,7 @@ class CampaignController:
                         "state": state,
                     }
 
-                if disc_res.get("status") == saipal_adapter.NEW_QUALIFIED_FINDINGS:
+                if disc_res.get("status") == backend_protocol.NEW_QUALIFIED_FINDINGS:
                     state["campaign_state"] = FORENSIC_ANALYSIS
                     findings = disc_res.get("findings", [])
                     delivered = []
@@ -1070,7 +1099,7 @@ class CampaignController:
                             self.root, state, EXTERNAL_AUDIT_PUBLICATION
                         )
                         pub_auth = pub_grant.get("valid") is True
-                        d_res = self.saipal.deliver_finding_to_audit_inbox(
+                        d_res = self.backend.deliver_finding_to_audit_inbox(
                             self.root, f, publication_authorized=pub_auth
                         )
                         delivered.append(d_res)
@@ -1089,7 +1118,7 @@ class CampaignController:
                     staged = [
                         row
                         for row in delivered
-                        if row.get("status") == saipal_adapter.STAGED_PUBLICATION
+                        if row.get("status") == backend_protocol.STAGED_PUBLICATION
                     ]
                     authority_required = [
                         row
@@ -1106,7 +1135,7 @@ class CampaignController:
                         row
                         for row in delivered
                         if row.get("ok") is not True
-                        and row.get("status") != saipal_adapter.STAGED_PUBLICATION
+                        and row.get("status") != backend_protocol.STAGED_PUBLICATION
                         and row.get("receipt_reconciliation_required") is not True
                         and row.get("outcome_unknown") is not True
                     ]

@@ -318,10 +318,14 @@ class CampaignLifecycleTests(unittest.TestCase):
                 campaign.save_campaign_state(self.root, state)
                 self.assess.return_value = {"classification": ca.MAINTENANCE_AVAILABLE}
                 failure = {"ok": False, "status": status, "error": "original backend diagnosis"}
+                # T-1947: the controller holds an injected backend, so the
+                # discovery edge is stubbed by replacing that object -- there
+                # is no producer-named attribute for the engine to reach.
+                self.ctrl.backend = mock.Mock()
                 with mock.patch.object(
-                    self.ctrl.saipal, "discover", return_value=failure
+                    self.ctrl.backend, "discover", return_value=failure
                 ), mock.patch.object(
-                    self.ctrl.saipal,
+                    self.ctrl.backend,
                     "deliver_finding_to_audit_inbox",
                 ) as delivery:
                     result = self.ctrl.step()
@@ -329,7 +333,7 @@ class CampaignLifecycleTests(unittest.TestCase):
                 self.assertEqual(result["event"], "FORENSIC_DISCOVERY_FAILED")
                 self.assertEqual(result["status"], status)
                 self.assertEqual(result["state"]["campaign_state"], expected)
-                self.assertEqual(result["state"]["last_saipal_generation"], 0)
+                self.assertEqual(result["state"]["last_analysis_generation"], 0)
                 delivery.assert_not_called()
 
     def test_interrupted_generation_preserves_identity_across_restart(self):

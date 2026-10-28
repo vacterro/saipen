@@ -48,7 +48,7 @@ class AnalysisProgressStaysSchedulableTest(unittest.TestCase):
         patcher.start()
         self.addCleanup(patcher.stop)
         self.root = _make_project()
-        self.controller = campaign.CampaignController(self.root)
+        self.controller = campaign.CampaignController(self.root, backend=mock.Mock())
         admitted = self.controller.admit_campaign(
             campaign_id="CAMP-AUT007",
             authority_proof_reference=".saipen/authority/grant.json",
@@ -62,7 +62,7 @@ class AnalysisProgressStaysSchedulableTest(unittest.TestCase):
             "next_action": "forensic_analysis",
         }
         with mock.patch.object(ca, "assess_continuation", return_value=assessment), \
-             mock.patch.object(self.controller.saipal, "discover", return_value=discovery):
+             mock.patch.object(self.controller.backend, "discover", return_value=discovery):
             return self.controller.step()
 
     def test_analysis_progress_does_not_quiesce(self) -> None:
@@ -93,9 +93,9 @@ class AnalysisProgressStaysSchedulableTest(unittest.TestCase):
 
     def test_each_slice_advances_the_recorded_generation(self) -> None:
         self._step_with_discovery({"ok": True, "status": "ANALYSIS_PROGRESS"})
-        first = _read_state(self.root).get("last_saipal_generation")
+        first = _read_state(self.root).get("last_analysis_generation")
         self._step_with_discovery({"ok": True, "status": "ANALYSIS_PROGRESS"})
-        second = _read_state(self.root).get("last_saipal_generation")
+        second = _read_state(self.root).get("last_analysis_generation")
         self.assertEqual(second, first + 1, "each executed slice is a generation")
 
     def test_the_slice_is_recorded_with_its_identity(self) -> None:
@@ -127,7 +127,7 @@ class AnalysisProgressStaysSchedulableTest(unittest.TestCase):
             "findings": [{"finding_id": "PAL-1"}],
         }
         with mock.patch.object(
-            self.controller.saipal,
+            self.controller.backend,
             "deliver_finding_to_audit_inbox",
             return_value=published,
         ):
@@ -145,11 +145,68 @@ class AnalysisProgressOrderTest(unittest.TestCase):
 
     def test_progress_branch_precedes_the_findings_branch(self) -> None:
         source = (TOOLS / "saipen_engine" / "campaign.py").read_text(encoding="utf-8")
-        progress = source.index('if disc_res.get("status") == "ANALYSIS_PROGRESS"')
+        progress = source.index(
+            'if disc_res.get("status") == backend_protocol.ANALYSIS_PROGRESS'
+        )
         findings = source.index(
-            'if disc_res.get("status") == saipal_adapter.NEW_QUALIFIED_FINDINGS'
+            'if disc_res.get("status") == backend_protocol.NEW_QUALIFIED_FINDINGS'
         )
         self.assertLess(progress, findings, "progress must be handled on its own edge")
+
+
+class MissingBackendIsATypedRefusalTest(unittest.TestCase):
+    """T-1947: no backend injected is a deployment fact, not a silent skip.
+
+    The engine may not resolve a producer itself any more, so the one case it
+    cannot serve is a controller with no backend at all. That must stay a
+    refusal the campaign persists and can act on -- never a fake
+    NO_NEW_EVIDENCE, which would put a campaign to sleep on an unanswered
+    question.
+    """
+
+    def setUp(self) -> None:
+        patcher = mock.patch(
+            "saipen_engine.host_authority_client.inspect_operator_campaign",
+            side_effect=inspect_fixture_campaign,
+        )
+        patcher.start()
+        self.addCleanup(patcher.stop)
+        self.root = _make_project()
+        self.controller = campaign.CampaignController(self.root)
+        admitted = self.controller.admit_campaign(
+            campaign_id="CAMP-NOBACKEND",
+            authority_proof_reference=".saipen/authority/grant.json",
+        )
+        self.assertTrue(admitted.get("ok"), admitted)
+
+    def _maintenance_step(self) -> dict:
+        assessment = {"classification": ca.MAINTENANCE_AVAILABLE}
+        with mock.patch.object(ca, "assess_continuation", return_value=assessment), \
+             mock.patch.object(
+                 campaign, "_verify_state_grant", return_value={"valid": True}
+             ):
+            return self.controller.step()
+
+    def test_a_controller_without_a_backend_refuses_typed(self) -> None:
+        self.assertIsNone(self.controller.backend)
+        result = self._maintenance_step()
+        self.assertFalse(result["ok"], result)
+        self.assertEqual(result["event"], "FORENSIC_DISCOVERY_FAILED")
+        self.assertEqual(result["status"], "RUNTIME_UNAVAILABLE")
+
+    def test_the_refusal_is_persisted_with_a_recovery_action(self) -> None:
+        self._maintenance_step()
+        state = _read_state(self.root)
+        self.assertEqual(state.get("campaign_state"), campaign.EXTERNAL_BLOCKED)
+        self.assertEqual(state.get("next_action"), "configure_analysis_backend")
+        self.assertEqual(
+            (state.get("last_discovery_failure") or {}).get("status"),
+            "RUNTIME_UNAVAILABLE",
+        )
+        self.assertEqual(
+            state.get("last_analysis_generation"), 0,
+            "an unanswered question advances no generation",
+        )
 
 
 if __name__ == "__main__":

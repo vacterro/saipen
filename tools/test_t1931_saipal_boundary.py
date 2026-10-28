@@ -12,7 +12,7 @@ import unittest
 from pathlib import Path
 from unittest import mock
 
-from saipen_engine import saipal_adapter as adapter_module
+from producer_backends import saipal_adapter as adapter_module
 
 
 class SaipalBoundaryTests(unittest.TestCase):
