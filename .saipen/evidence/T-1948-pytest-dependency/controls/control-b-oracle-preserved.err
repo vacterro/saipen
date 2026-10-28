@@ -1,0 +1,44 @@
+.F
+======================================================================
+FAIL: test_the_four_downstream_fixtures_still_assert_their_layer (__main__.RegressionPairTests.test_the_four_downstream_fixtures_still_assert_their_layer)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "V:\_TEMP_\t1948-sim\tools\test_t1942_regression_pair.py", line 86, in test_the_four_downstream_fixtures_still_assert_their_layer
+    self.assertTrue(result.wasSuccessful(), detail)
+AssertionError: False is not true : test_autonomous_repair_is_not_a_response_boundary (_t1942_regression_subject.SurfaceBehaviourTests.test_autonomous_repair_is_not_a_response_boundary): Traceback (most recent call last):
+  File "V:\_TEMP_\t1948-sim\tools\test_response_surface_contract.py", line 194, in test_autonomous_repair_is_not_a_response_boundary
+    rendered = RS.render_boundary(
+               ^^^^^^^^^^^^^^^^^^^
+  File "V:\_TEMP_\t1948-sim\tools\saipen_engine\response_surface.py", line 1375, in render_boundary
+    raise ValueError("; ".join(errors))
+ValueError: eligible autonomous action remains; returning control is invalid
+
+test_public_autonomy_gate_reads_current_route (_t1942_regression_subject.SurfaceBehaviourTests.test_public_autonomy_gate_reads_current_route): Traceback (most recent call last):
+  File "V:\_TEMP_\t1948-sim\tools\test_response_surface_contract.py", line 300, in test_public_autonomy_gate_reads_current_route
+    rendered = RS.render_boundary(
+               ^^^^^^^^^^^^^^^^^^^
+  File "V:\_TEMP_\t1948-sim\tools\saipen_engine\response_surface.py", line 1375, in render_boundary
+    raise ValueError("; ".join(errors))
+ValueError: eligible autonomous action remains; returning control is invalid
+
+test_opencode_command_enforces_autonomy_on_its_followup_response (_t1942_regression_subject.SurfaceBehaviourTests.test_opencode_command_enforces_autonomy_on_its_followup_response): Traceback (most recent call last):
+  File "V:\_TEMP_\t1948-sim\tools\test_response_surface_contract.py", line 425, in test_opencode_command_enforces_autonomy_on_its_followup_response
+    valid = RS.render_boundary(
+            ^^^^^^^^^^^^^^^^^^^
+  File "V:\_TEMP_\t1948-sim\tools\saipen_engine\response_surface.py", line 1375, in render_boundary
+    raise ValueError("; ".join(errors))
+ValueError: eligible autonomous action remains; returning control is invalid
+
+test_opencode_explicit_status_request_keeps_the_control_surface (_t1942_regression_subject.SurfaceBehaviourTests.test_opencode_explicit_status_request_keeps_the_control_surface): Traceback (most recent call last):
+  File "V:\_TEMP_\t1948-sim\tools\test_response_surface_contract.py", line 489, in test_opencode_explicit_status_request_keeps_the_control_surface
+    valid = RS.render_boundary(
+            ^^^^^^^^^^^^^^^^^^^
+  File "V:\_TEMP_\t1948-sim\tools\saipen_engine\response_surface.py", line 1375, in render_boundary
+    raise ValueError("; ".join(errors))
+ValueError: eligible autonomous action remains; returning control is invalid
+
+
+----------------------------------------------------------------------
+Ran 2 tests in 0.243s
+
+FAILED (failures=1)
