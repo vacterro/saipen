@@ -235,6 +235,23 @@ def _authority_hosts() -> list[str]:
     ]
 
 
+def _policy_int(config: dict, key: str, default: int) -> int:
+    """Read an int policy field, honouring an explicit 0.
+
+    `config.get(key) or default` would turn a declared `max_shells: 0` -- the
+    ZAICODE shape, whose hook is spawned directly by the host with no shell
+    between -- back into the permissive default, admitting a chain the service
+    refuses.
+    """
+    value = config.get(key)
+    if value is None:
+        return default
+    try:
+        return int(value)
+    except (TypeError, ValueError):
+        return default
+
+
 def hook_invocation(host: str | None = None, home: object = None, limit: int = 16) -> dict:
     """Is THIS process a host application's own hook invocation?
 
@@ -257,19 +274,32 @@ def hook_invocation(host: str | None = None, home: object = None, limit: int = 1
     from . import host_authority_identity as identity_proof
     from .claude_profiles import hook_for_process
 
-    config = broker.settings()
     reason, detail = identity_proof.REASON_IDENTITY_UNAVAILABLE, ""
     for candidate in [str(host)] if host else _authority_hosts():
+        # The service resolves `hosts.<host>` before it decides (T-417), so this
+        # prediction must read the same block or it refuses a shape the broker
+        # would admit -- the T-1956 defect, where ZAICODE's own host block was
+        # declared and this path still answered NOT_HOST_DESCENDANT from the
+        # Claude-only global images.
+        config = broker.settings(host=candidate)
+        policy = identity_proof.IdentityPolicy(
+            host=candidate,
+            host_images=tuple(config.get("host_images") or ()),
+            hook_artifacts=broker.hook_artifacts(candidate, home),
+            # The signer stays out of this prediction on purpose: it is one of
+            # the two observations only the service makes authoritative. A
+            # caller whose shape is right but whose image is unsigned must
+            # still be worth a start, so the service can say so.
+            shells=tuple(config.get("hook_shells") or identity_proof.DEFAULT_SHELLS),
+            bridge_images=tuple(config.get("bridge_images") or ()),
+            max_shells=_policy_int(config, "max_shells", 4),
+            max_bridges=_policy_int(config, "max_bridges", 2),
+            profile_hook="hooks/saipen-guard.py" if candidate == "claude" else None,
+        )
         try:
             proof = identity_proof.prove_hook_invocation(
                 proc.ancestry(os.getpid(), limit),
-                identity_proof.IdentityPolicy(
-                    host=candidate,
-                    host_images=tuple(config.get("host_images") or ()),
-                    hook_artifacts=broker.hook_artifacts(candidate, home),
-                    shells=tuple(config.get("hook_shells") or identity_proof.DEFAULT_SHELLS),
-                    profile_hook="hooks/saipen-guard.py" if candidate == "claude" else None,
-                ),
+                policy,
                 hook_for_host=lambda pid: hook_for_process(pid, Path(home) if home else None),
             )
         except Exception as exc:  # pragma: no cover - defensive only
@@ -295,7 +325,8 @@ def identify_self(
     starting the service is worthwhile (`hook_invocation`). Neither proves
     anything to the service, which reads the same facts for itself.
     """
-    images = list(host_images or broker.settings().get("host_images") or [])
+    settings = broker.settings(host=host) if host else broker.settings()
+    images = list(host_images or settings.get("host_images") or [])
     report = proc.describe(os.getpid(), limit)
     ancestor = proc.host_ancestor(os.getpid(), images, limit)
     shape = hook_invocation(host, home, limit)

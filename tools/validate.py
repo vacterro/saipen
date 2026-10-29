@@ -781,6 +781,12 @@ def _phase_next_action_error(value):
             f"the uppercase § 1.6 enum value, and the phase doc is loaded "
             f"from its lowercased name, not from what the state says"
         )
+    if ph not in ALL_PHASES:
+        return (
+            f"{value!r} names phase {ph!r}, which is not in the § 1.6 enum "
+            f"({', '.join(sorted(ALL_PHASES))}) -- a reader would load "
+            f"phases/{ph.lower()}.md and find nothing to execute"
+        )
     _five = "/".join(sorted(TICKET_BEARING_PHASES))
     if ph in TICKET_BEARING_PHASES and not ref:
         return (

@@ -229,5 +229,92 @@ class NextActionDeadlockTests(unittest.TestCase):
         )
 
 
+class UnknownPhaseGrammarTests(unittest.TestCase):
+    """T-1606 / SRC-167:R002: the grammar must name a real phase.
+
+    The grammar matched `[A-Za-z_-]+` and then checked only casing and the
+    ticket-bearing rule, so `PHASE NO_SUCH_PHASE` passed: an uppercase single
+    token that is not in the § 1.6 enum. A cold reader would load
+    `phases/no_such_phase.md` and find nothing to execute, which is the same
+    dead end the ticket-attachment rule exists to prevent.
+    """
+
+    def test_an_unknown_uppercase_phase_is_refused(self) -> None:
+        from saipen_engine import phases
+
+        error = phases.phase_next_action_error("PHASE NO_SUCH_PHASE")
+        self.assertIsNotNone(error, "an unknown phase name passed the grammar")
+        self.assertIn("NO_SUCH_PHASE", error)
+
+    def test_every_enum_phase_is_still_accepted(self) -> None:
+        """The control: the gate must not narrow the legal set."""
+        from saipen_engine import phases
+
+        for name in sorted(phases.ALL_PHASES):
+            with self.subTest(phase=name):
+                value = (
+                    f"PHASE {name} T-1"
+                    if name in phases.TICKET_BEARING_PHASES
+                    else f"PHASE {name}"
+                )
+                self.assertIsNone(phases.phase_next_action_error(value), value)
+
+    def test_a_wait_payload_is_still_a_prefix_not_a_phase(self) -> None:
+        """`WAIT:` is its own next_action form; it never reaches this checker
+        because every caller gates on the `PHASE ` prefix first."""
+        from saipen_engine import phases
+
+        self.assertIsNotNone(phases.phase_next_action_error("PHASE WAIT"))
+        self.assertFalse("WAIT" in phases.ALL_PHASES)
+
+    def test_the_validator_agrees_with_the_engine_on_every_verdict(self) -> None:
+        """SRC-167:R002 requires ONE grammar across writer and validator.
+
+        `tools/validate.py` keeps its own copy of this rule (the constitution's
+        own ADD example once wrote the forbidden `PHASE PLAN T-###`, so the
+        check is spelled out there next to the sentence it enforces). A copy is
+        two things to change: the engine gained the enum check and the
+        validator did not, which is exactly the "enforced on only one surface"
+        defect the rule exists to prevent. Compare verdicts, not just the
+        unknown-phase case, so a future narrowing cannot pass on one side.
+        """
+        import ast
+        from saipen_engine import phases
+
+        source = (Path(__file__).parent / "validate.py").read_text(encoding="utf-8")
+        tree = ast.parse(source)
+        pieces = [
+            node
+            for node in tree.body
+            if isinstance(node, ast.Assign)
+            and getattr(node.targets[0], "id", None) == "_PHASE_NA_RE"
+        ] + [
+            node
+            for node in tree.body
+            if isinstance(node, ast.FunctionDef) and node.name == "_phase_next_action_error"
+        ]
+        self.assertEqual(len(pieces), 2, "validate.py's rule moved or was renamed")
+        namespace = {
+            "re": __import__("re"),
+            "ALL_PHASES": phases.ALL_PHASES,
+            "TICKET_BEARING_PHASES": phases.TICKET_BEARING_PHASES,
+        }
+        exec(compile(ast.Module(body=pieces, type_ignores=[]), "<validate>", "exec"), namespace)
+        validator = namespace["_phase_next_action_error"]
+
+        values = ["PHASE NO_SUCH_PHASE", "PHASE WAIT", "PHASE BANANA", "PHASE build"]
+        for name in sorted(phases.ALL_PHASES):
+            values.append(
+                f"PHASE {name} T-1" if name in phases.TICKET_BEARING_PHASES else f"PHASE {name}"
+            )
+        for value in values:
+            with self.subTest(value=value):
+                self.assertEqual(
+                    validator(value) is None,
+                    phases.phase_next_action_error(value) is None,
+                    f"engine and validator disagree about {value!r}",
+                )
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

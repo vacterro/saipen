@@ -34,8 +34,9 @@ if str(TOOLS) not in sys.path:
 from test_fixture_support import CURRENT_STYLE_CONTRACT  # noqa: E402
 
 from saipen_engine.admission import evaluate_admission  # noqa: E402
+from saipen_engine.board import RECORD_SEPARATORS, record_separator_in  # noqa: E402
 from saipen_engine.paths import identity_file_content, new_project_lineage  # noqa: E402
-from saipen_engine.state import coerce, parse_frontmatter  # noqa: E402
+from saipen_engine.state import coerce, parse_frontmatter, patch_state  # noqa: E402
 from test_hermetic_env import isolate_host_session  # noqa: E402
 
 
@@ -76,6 +77,53 @@ class SingleQuotedScalarTests(unittest.TestCase):
         )
         self.assertIsNone(error, error)
         self.assertEqual(fields["blocker"], "")
+
+
+class RecordSeparatorWriterTests(unittest.TestCase):
+    """T-1606: the writer accepted values its own reader splits the document on.
+
+    `parse_frontmatter` splits with `text.splitlines()`, which honours ten
+    physical record separators; `patch_state` split with `text.split("\\n")`
+    and quoted any value instead of rejecting it. A value carrying U+2028 was
+    therefore written back as one line and then read back by the parser as TWO
+    records: the quoted body reopened the frontmatter, and the field it
+    injected was refused as a duplicate. The writer's own output was
+    unreadable to its own reader.
+    """
+
+    BASE = "---\nphase: BUILD\nnext_action: PHASE BUILD T-1\n---\nbody\n"
+
+    def test_every_reader_boundary_is_refused_by_the_writer(self) -> None:
+        for separator in RECORD_SEPARATORS:
+            with self.subTest(separator=repr(separator)):
+                with self.assertRaises(ValueError) as caught:
+                    patch_state(
+                        self.BASE,
+                        {"next_action": "PHASE DONE T-999" + separator + "phase: CORRUPT"},
+                    )
+                self.assertIn("record separator", str(caught.exception))
+
+    def test_the_boundary_predicate_covers_the_same_set(self) -> None:
+        """One predicate, so writer and reader cannot drift apart."""
+        for separator in RECORD_SEPARATORS:
+            with self.subTest(separator=repr(separator)):
+                self.assertIsNotNone(record_separator_in("a" + separator + "b"))
+        self.assertIsNone(record_separator_in("PHASE DONE T-999"))
+
+    def test_a_clean_scalar_still_round_trips(self) -> None:
+        """The control: refusing separators must not refuse ordinary values."""
+        for value in ("PHASE DONE T-999", "saipen continue", 'a "quoted" word', "a\\b"):
+            with self.subTest(value=value):
+                fields, error = parse_frontmatter(
+                    patch_state(self.BASE, {"next_action": value})
+                )
+                self.assertIsNone(error, error)
+                self.assertEqual(fields["next_action"], value)
+
+    def test_list_items_are_refused_the_same_way(self) -> None:
+        """The block renderer feeds the same codec, so it inherits the gate."""
+        with self.assertRaises(ValueError):
+            patch_state(self.BASE, {"requires": ["filesystem", "git\u2028python"]})
 
 
 class NoPhantomBrakeTests(unittest.TestCase):

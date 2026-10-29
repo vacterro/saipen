@@ -9,7 +9,7 @@ import re
 from pathlib import Path
 
 from . import phases
-from .board import strict_iso_utc
+from .board import RECORD_SEPARATOR_NAMES, RECORD_SEPARATORS, record_separator_in, strict_iso_utc
 from .registry import load_registry, require_mapping, require_string_list
 
 
@@ -1098,6 +1098,21 @@ def _render_value(value) -> str:
     text = str(value)
     if text == "":
         return '""'
+    # A scalar must render as exactly one frontmatter LINE. Quoting is not a
+    # refuge here: `parse_frontmatter` splits the document on every boundary
+    # `str.splitlines()` honours (LF, CR, VT, FF, NEL, U+2028, U+2029), and the
+    # decoder collapses a quoted body only after that split, so a separator
+    # inside a value reopens the record no matter how it is quoted. The only
+    # honest answer is to refuse the value (T-1606).
+    separator = record_separator_in(text)
+    if separator is not None:
+        index = RECORD_SEPARATORS.index(separator)
+        raise ValueError(
+            f"STATE scalar carries a physical record separator "
+            f"({RECORD_SEPARATOR_NAMES[index]}); one STATE field must be one "
+            f"frontmatter line -- a separator would inject a field no writer "
+            f"set"
+        )
     would_retype = re.fullmatch(r"-?\d+", text) is not None or text in ("true", "false")
     needs_quote = (
         would_retype

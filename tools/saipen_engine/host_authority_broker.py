@@ -679,10 +679,7 @@ class Broker:
             return self._authenticator(peer, host, home)
         # Per-host policy (T-417): a host that declares its own image/signer/
         # shell shape overrides the global policy for this identify() call.
-        host_cfg = dict(self.config)
-        hosts = host_cfg.get("hosts")
-        if isinstance(hosts, dict) and isinstance(hosts.get(host), dict):
-            host_cfg.update(hosts.get(host) or {})
+        host_cfg = settings(self.config, host=host)
         limit = int(host_cfg.get("ancestry_limit") or DEFAULT_ANCESTRY_LIMIT)
         if peer is None or getattr(peer, "pid", None) is None or not proc.platform_supported():
             return (
@@ -703,8 +700,8 @@ class Broker:
             host_signers=signers,
             shells=tuple(host_cfg.get("hook_shells") or identity_proof.DEFAULT_SHELLS),
             bridge_images=tuple(host_cfg.get("bridge_images") or ()),
-            max_shells=int(host_cfg.get("max_shells") or 4),
-            max_bridges=int(host_cfg.get("max_bridges") or 2),
+            max_shells=host_cfg["max_shells"],
+            max_bridges=host_cfg["max_bridges"],
             profile_hook="hooks/saipen-guard.py" if host == "claude" else None,
         )
         from .claude_profiles import hook_for_process
