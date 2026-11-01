@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "operation": "release_receipt",
+  "op_id": "release-d8b2a7869ae540fcba3f2418d952fa51",
+  "version": "8.1.0",
+  "tag": "v8.1.0",
+  "ticket_id": "T-1991",
+  "source_head": "6d357a64e40fc389d8b33689a9236b6abe6be0a9",
+  "source_tree_fingerprint": "git-delta-v1:10a354e1aea012df6940425f29da2d94b023b770e80778690d55d74c6639372d",
+  "mode": "full",
+  "release_publish": "PUBLISHED",
+  "repository_push": "LOCAL_ONLY_UNPUSHED",
+  "crew_epoch": "",
+  "cohort_id": "",
+  "project_lineage": "lineage-b512942bac884a8691f6c98afcd6ddb9",
+  "recorded_at": "2026-11-01T12:02:56Z"
+}
