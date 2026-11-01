@@ -186,6 +186,18 @@ TRANSIENT_SEGMENTS = (
     ".translation-cache",
     ".cache",
     "__pycache__",
+    # T-1443: pytest's own `--basetemp` tree. Measured on FastPrompter at
+    # HEAD e1f0cad: `.saipen/evidence` held 25,453 files of which 24,783 were
+    # under `t1450_fullsuite/basetemp/`, against a CONDITIONAL_DIRS cap of
+    # 4000. The walk spent its whole budget on disposable fixtures and stopped
+    # before 36 DURABLE receipts, so the export reported PROTOCOL_INCOMPLETE
+    # with `truncated_required_dirs: ['.saipen/evidence']`. The same directory
+    # was also 56.9% of the archived `.saipen` payload. Excluding it by
+    # segment is the structural fix the other entries in this tuple already
+    # describe: the class is rebuilt on every run, so it can never be evidence.
+    # Nobody declares a basetemp directory as durable, because pytest deletes
+    # it; the risk is one-directional and this is the safe direction.
+    "basetemp",
     SAIPEN_DIR,
 )
 
@@ -862,10 +874,18 @@ def _status(root: Path | str, *, protocol_dir: Path | str | None = None) -> dict
         if not target.is_dir():
             continue
         try:
+            # Count what collection would actually TAKE, not what the disk
+            # happens to hold. A transient tree (pytest --basetemp, staging)
+            # is excluded from the snapshot by is_transient, so including it
+            # here reported `over_cap` for a directory whose durable contents
+            # fit comfortably -- and told the operator their evidence was too
+            # large when the real problem was disposable fixtures (T-1443).
             count = sum(
                 1
                 for entry in (target.rglob("*") if recursive else target.iterdir())
                 if entry.is_file()
+                and not is_transient(
+                    entry.relative_to(saipen_dir).as_posix())
             )
         except OSError:
             count = -1

@@ -1,0 +1,24 @@
+{
+  "clauses": {
+    "SRC-140:R001": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "Corrective authority SRC-142:R015: Ordinary direct Python import cannot mint host transport authority."
+    },
+    "SRC-140:R002": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "Corrective authority SRC-142:R016: The exact current bypass: bootstrap_transport_key -> _transport_mac -> establish is RED on the repaired implementation."
+    },
+    "SRC-140:R003": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "Corrective authority SRC-142:R017: Pre-fix/current vulnerable subject proves that same carrier previously reached ADMITTED."
+    }
+  },
+  "derived_at": "2026-09-29T20:41:51Z",
+  "derived_from": "SRC-140",
+  "interpretation_revision": 3,
+  "schema_version": 1,
+  "source_sha256": "3872253deebac3f144c6e79778de33d9a6f092b966794a402efc7608a6accecc"
+}

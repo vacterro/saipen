@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-093:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "SAITULS protocol repair: refusal-code registry completeness (SOURCE_LINKAGE_DRIFT crash), canonical multi-work source linkage model plus SRC-015 migration, user-wait seat release semantics (T-168 AWAITING_USER_LIVE_ACCEPTANCE), evidence-complete closure reconciliation (T-164, T-165, T-171, T-182) with focused regressions, then validate SAITULS end state"
+    }
+  },
+  "derived_at": "2026-09-21T03:30:00Z",
+  "derived_from": "SRC-093",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "f3e82b87b8abac6a1ecab6b9f1f0a6a90db2d5436f000228d71746ae88a761bf"
+}

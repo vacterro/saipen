@@ -1,0 +1,64 @@
+{
+  "clauses": {
+    "SRC-019:R1": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "CORE-001 P1: crew.py crew_release_context / _release_current / _post_ship -- pre-ship evidence is captured for applicable_roles(snapshot) while _release_current validates against the static CREW_ROLES, so a correctly NOT_APPLICABLE saiui makes a no-UI project reject its own release, and _post_ship recomputes applicability against the later mutable tree so release truth is never frozen. Freeze per-role applicability receipts as canonical pre-ship release evidence and validate and certify against that frozen manifest"
+    },
+    "SRC-019:R10": {
+      "actionable": false,
+      "class": "context",
+      "text": "Transport limitations recorded by the auditor: the archive carries .git/HEAD and refs but no usable object database, so git rev-parse and git status exit 128; validate.py --gate core and crew --dry-run could not be certified from the snapshot; sealed .saipen/logs segments were absent; ruff was unavailable in the sandbox. Every finding above was instead reproduced against unmodified production functions in temporary projects"
+    },
+    "SRC-019:R11": {
+      "actionable": false,
+      "class": "context",
+      "text": "The three per-wave CORE_DONE_WHEN / SECOND_WAVE_DONE_WHEN / PERFORMANCE_DONE_WHEN gates and the ALL_3_DONE_WHEN line aggregate R1-R9 and add no independent obligation; they are carried by the T-1288 verify clause rather than duplicated as separate actionable requirements"
+    },
+    "SRC-019:R2": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "CORE-002 P1: crew.py crew_snapshot / _project_facts -- stable = source_stable and dependencies_stable is decided at line 918 BEFORE project_facts=_project_facts(root) at line 924, so applicability facts sit outside the source stability barrier. Reproduced: an untracked late.css created between the two reads returned stable=True with facts_visual=True from a different tree state. Bind applicability collection to the same stable source observation, or recheck stability after collection, and forbid a NOT_APPLICABLE skip from an unstable snapshot"
+    },
+    "SRC-019:R3": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "CORE-003 P1: applicability.py GUI_IMPORT_RE / collect_facts / _imports_gui_toolkit -- the line regex can only inspect the FIRST module token after import, so import os, tkinter as tk and import sys, PySide6.QtWidgets as QtWidgets both yield gui_module_paths == () and VISUAL_SURFACE NOT_APPLICABLE on real Python UI projects. Unreadable files and the 64 KiB prefix bound are also converted to negative proof instead of uncertainty. Use a grammar-aware ast probe over the declared toolkit roots and propagate per-file indeterminacy to APPLICABLE"
+    },
+    "SRC-019:R4": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "W2-001 P1: audit_enqueue.py read_allocator_state / enqueue / _reconcile -- ALLOCATOR_ABSENT falls through to _reconcile with a virgin {next_id:1, operations:{}} even when layer history exists, and _reconcile can rebuild only the numeric floor, never the producer + producer_operation_id key. Reproduced: enqueue op-1 at layer 1, delete audit_allocator.json, retry the SAME op with the SAME bytes, got layer 2 and idempotent=false. ABSENT after history must fail closed, distinct from a genuinely virgin transport"
+    },
+    "SRC-019:R5": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "W2-002 P1: audit_enqueue.py enqueue COMMITTED retry branch / _placed_digest / _result -- when _placed_digest returns None the code unconditionally reads allocator COMMITTED plus absent layer as consumed by the journaled cleanup and returns ok=true, idempotent=true, present=false without any capture or consume receipt. Reproduced: enqueue op-1, delete audit/1.md before any inbox capture, retry the same op, got successful idempotent acknowledgement for a payload that exists nowhere. Require exact downstream binding proof, or re-place the same reserved layer, or refuse DELIVERY_LOST"
+    },
+    "SRC-019:R6": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "W2-003 P1: audit_inbox.py read_binding / classify / bind_layer / status / provenance_trace -- read_binding maps FileNotFoundError, any OSError, invalid UTF-8, invalid JSON and a wrong root shape to the same synthetic empty binding, so a following bind_layer LAUNDERS corrupt authority into a healthy document holding only the new record. Reproduced: {broken replaced by a valid file containing only audit/2.md; a persisted generation=oops crashes classify with ValueError. Add a strict BINDING_ABSENT/OK/CORRUPT decoder consumed by every read and mutate path, fail closed on mutation, never overwrite corrupt bytes"
+    },
+    "SRC-019:R7": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "PERF-001 P2: journal.py _settle_journal / _read_settled_index / semantic_receipt_snapshot / semantic_receipts_for_operation_safe -- the settled index is published before _drop_settled_staged mutates the directory stat token, so a normal run_mutation leaves an index that fails validation immediately, and even a valid index costs O(N) stat plus hash work while an operation-specific query decodes all 2595 lifetime receipts (a zero-match query still decodes every one). Bounded sealed segments plus an active tail; overlaps open T-1283"
+    },
+    "SRC-019:R8": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "PERF-002 P2: conformance.py latest_receipt / _receipt_content_inventory / _receipt_member_inventory / _update_receipt_index -- the per-gate direct locator authenticates itself through a lifetime-sized proof: latest_receipt content-hashes all 1054 receipts per call, and one append hashes the whole population again plus rewrites the full members list, so N validator runs cost O(N squared) historical hashing. Move to authenticated sealed segments with a bounded active tail and a lineage head; overlaps open T-1283"
+    },
+    "SRC-019:R9": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "PERF-003 P2: run_scenarios.py run_producer_gate_probes / validate.py producer_gate_is_hard -- 14 assertions about a tiny gate-to-severity truth table are proven with 13 full validator subprocesses, measured 10.212s, about 29 percent of the 34.77s performance wave. Extract a side-effect-free producer_gate_severity helper with a closed input contract, exercise the matrix in-process, and keep subprocesses only for genuine CLI and integration sentinels; overlaps open T-1284"
+    }
+  },
+  "derived_at": "2026-09-04T16:30:25Z",
+  "derived_from": "SRC-019",
+  "interpretation_revision": 11,
+  "schema_version": 1,
+  "source_sha256": "8b6783f72c34f7254a81d398c1afcc308a77cd07f60e7626df5cc0281c9e15d8"
+}

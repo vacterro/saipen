@@ -1,0 +1,104 @@
+{
+  "requirements": {
+    "SRC-359:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "NOT_APPLICABLE",
+      "evidence": "ZAICODE queue/runtime ownership: retry eligibility and unpause logic resides in ZAICODE v4-bridge.ts and queue runner",
+      "text": "AD-001 Retry-Eligibility: Do not permit auto-replay upon timeout or crash without durable reconciliation",
+      "verification": null,
+      "work": "T-1983"
+    },
+    "SRC-359:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "NOT_APPLICABLE",
+      "evidence": "ZAICODE diagnostic ownership: host ingress correlation and telemetry binding across queueItemId and launcher process",
+      "text": "AD-002 Diagnostic-Correlation: Linked correlation across operator input, launcher process, and final ACK",
+      "verification": null,
+      "work": "T-1983"
+    },
+    "SRC-359:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "NOT_APPLICABLE",
+      "evidence": "ZAICODE release ownership: canonical commit and delivery staging for ZAICODE repository",
+      "text": "AD-003 Delivery-Evidence: Ticket completion contract requires real canonical commit and delivery evidence",
+      "verification": null,
+      "work": "T-1983"
+    },
+    "SRC-359:R004": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "NOT_APPLICABLE",
+      "evidence": "ZAICODE / QA ownership: Windows PID and descendant tree cleanup for ZAICODE desktop runner",
+      "text": "AD-004 Process-Tree-Lifecycle: Verified Windows PID and descendant tree cleanup without orphan processes",
+      "verification": null,
+      "work": "T-1983"
+    },
+    "SRC-359:R005": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "SAIPEN protocol ownership: immutable evidence contracts, verification manifests, and evidence fitness enforced by tools/saipen_engine/evidence_fitness.py and acceptance.py",
+      "text": "AD-005 Immutable-Evidence-Manifest: Phase transitions require immutable evidence bindings and REVERIFY checks",
+      "verification": "test_premature_victory_prevention.py: PASS record:.saipen/evidence/focused-unit/d805dd267ed50722-20261031T233642554867Z.json",
+      "work": "T-1983"
+    },
+    "SRC-359:R006": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "SAIPEN protocol ownership: Premature Victory Prevention PV-001..PV-024 prohibits early completion or final success before all phases and validation are DONE",
+      "text": "AD-006 Premature-Handback-Prevention: Prohibit completion or final success before all phases and validation are DONE",
+      "verification": "test_premature_victory_prevention.py: PASS record:.saipen/evidence/focused-unit/d805dd267ed50722-20261031T233642554867Z.json",
+      "work": "T-1983"
+    },
+    "SRC-359:R007": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "NOT_APPLICABLE",
+      "evidence": "ZAICODE maintainer ownership: zcode-agent sandbox cross-project probe isolation proscribing running continue or mutating foreign live projects resides in ZAICODE repository runner",
+      "text": "AD-007 Sandbox-Isolation: Diagnostic probes must not invoke continue or mutate foreign live projects",
+      "verification": "test_premature_victory_prevention.py: PASS record:.saipen/evidence/focused-unit/570a3e2c0f43b27d-20261031T233023261730Z.json",
+      "work": "T-1983"
+    },
+    "SRC-359:R008": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "NOT_APPLICABLE",
+      "evidence": "ZAICODE release ownership: separation of dirty working tree from staged dist-next package",
+      "text": "AD-008 Artifact-Provenance: Distinguish dirty working tree files from staged and installed artifacts",
+      "verification": null,
+      "work": "T-1983"
+    },
+    "SRC-359:R009": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "NOT_APPLICABLE",
+      "evidence": "QA ownership: ZAICODE 24-scenario traceability matrix and grounded oracles",
+      "text": "AD-009 Scenario-Traceability-Matrix: Map tests to user scenarios with grounded oracles instead of raw counts",
+      "verification": null,
+      "work": "T-1983"
+    },
+    "SRC-359:R010": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "NOT_APPLICABLE",
+      "evidence": "ZAICODE host limitation: distinction of synthetic reminder origin from human operator approval in host UI",
+      "text": "AD-010 Response-Contract-Enforcement: Distinguish human authored from synthetic agent runtime messages",
+      "verification": null,
+      "work": "T-1983"
+    },
+    "SRC-359:R011": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "SAIPEN protocol ownership: outcome_truth.py separates QUEUE_DRAINED from CAMPAIGN_STATUS and OBJECTIVE_STATUS; preserves blocked tickets honestly without faking completion",
+      "text": "AD-011 Outcome-Truth-Distinction: Distinctly separate no currently admissible work from project complete",
+      "verification": "test_premature_victory_prevention.py: PASS record:.saipen/evidence/focused-unit/d805dd267ed50722-20261031T233642554867Z.json",
+      "work": "T-1983"
+    }
+  },
+  "schema_version": 1
+}

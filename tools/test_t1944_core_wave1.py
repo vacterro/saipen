@@ -36,17 +36,35 @@ def _project() -> Path:
     return root
 
 
-def _qualification(root: Path, receipt_id: str) -> dict:
+def _qualification(root: Path, receipt_id: str, finding_id: str = "") -> dict:
+    """Write the artifact AND record it as a producer qualification (T-1967).
+
+    T-1967 refuses a dict qualification this project's producer log does not
+    bind to the finding, its artifact digest and its publication scope. A
+    fixture that merely wrote the file was asking the publisher to trust a proof
+    the fixture itself minted, so the record is now made through the product's
+    own `record_qualification` -- the only writer of that log.
+    """
     rel = f".saipen/campaign/qualifications/{receipt_id}.json"
     path = root / rel
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(
         json.dumps({"receipt_id": receipt_id, "state": "QUALIFIED"}), encoding="utf-8"
     )
+    digest = hashlib.sha256(path.read_bytes()).hexdigest()
+    if finding_id:
+        recorded = saipal_adapter.SaipalAdapter(saipal_home=root).record_qualification(
+            root,
+            finding_id,
+            artifact_digest=digest,
+            publication_scope=saipal_adapter.PUBLICATION_SCOPE_DEFAULT,
+        )
+        if not recorded.get("ok"):
+            raise AssertionError(f"fixture qualification failed: {recorded}")
     return {
         "receipt_id": receipt_id,
         "artifact_path": rel,
-        "qualification_digest": hashlib.sha256(path.read_bytes()).hexdigest(),
+        "qualification_digest": digest,
     }
 
 
@@ -55,7 +73,7 @@ def _finding(root: Path, finding_id: str, **extra) -> dict:
     return {
         "finding_id": finding_id,
         "state": "QUALIFIED",
-        "qualification_receipt": _qualification(root, f"QUAL-{finding_id}"),
+        "qualification_receipt": _qualification(root, f"QUAL-{finding_id}", finding_id),
         "audit_body": body,
         "artifact_digest": hashlib.sha256(body.encode("utf-8")).hexdigest(),
         **extra,

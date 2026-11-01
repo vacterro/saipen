@@ -483,7 +483,6 @@ OP_CLASSES: dict[str, frozenset[int]] = {
             "migrate_generation-",
             "needs-detach-",
             "normalize-log-",
-            "producer-integration-",
             "quarantine-log-tail-",
             "rebind_home-",
             "resolve-external-",

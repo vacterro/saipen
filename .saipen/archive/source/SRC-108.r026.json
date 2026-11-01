@@ -1,0 +1,139 @@
+{
+  "clauses": {
+    "SRC-108:R001": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not create another broad architecture umbrella."
+    },
+    "SRC-108:R002": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not interrupt higher-priority active correctness / closure / field-gate work."
+    },
+    "SRC-108:R003": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "It must never independently decide:"
+    },
+    "SRC-108:R004": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "If the metrics cache disappears, SAIPEN must be able to reconstruct the useful statistics from canonical durable events where practical."
+    },
+    "SRC-108:R005": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not create a second lifecycle database."
+    },
+    "SRC-108:R006": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not create one opaque \"agent score\"."
+    },
+    "SRC-108:R007": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not create checkpoints solely to improve statistics."
+    },
+    "SRC-108:R008": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not invent dozens of micro-categories."
+    },
+    "SRC-108:R009": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not duplicate them into another independent taxonomy."
+    },
+    "SRC-108:R010": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not guess."
+    },
+    "SRC-108:R011": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not attempt to infer private model \"thinking time\" unless the host exposes a reliable measured value."
+    },
+    "SRC-108:R012": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not count:"
+    },
+    "SRC-108:R013": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not expose misleading precision when data is unavailable."
+    },
+    "SRC-108:R014": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not synthesize a value."
+    },
+    "SRC-108:R015": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Avoid averages alone."
+    },
+    "SRC-108:R016": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not require every historical ticket to have perfect telemetry before the feature can ship."
+    },
+    "SRC-108:R017": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not create many overlapping commands."
+    },
+    "SRC-108:R018": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not make the command mutating."
+    },
+    "SRC-108:R019": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not make metrics collection depend on the operator calling `stats`."
+    },
+    "SRC-108:R020": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not dump the full dashboard into:"
+    },
+    "SRC-108:R021": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "AUTO_RECALL must remain bounded and execution-oriented."
+    },
+    "SRC-108:R022": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "never make canonical lifecycle correctness depend on it"
+    },
+    "SRC-108:R023": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "A deleted metrics cache must not prevent:"
+    },
+    "SRC-108:R024": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "The system must degrade to:"
+    },
+    "SRC-108:R025": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not introduce mixed naive/local timestamp semantics."
+    },
+    "SRC-108:R026": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Daily grouping may render in the configured/local timezone, but duration calculation must not break across:"
+    }
+  },
+  "derived_at": "2026-09-23T01:13:11Z",
+  "derived_from": "SRC-108",
+  "interpretation_revision": 26,
+  "schema_version": 1,
+  "source_sha256": "5c498338f8d92e8d546eb7c7aa33d6cc792c476c1040af4c758acde7f45bf59d"
+}

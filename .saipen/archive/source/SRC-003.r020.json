@@ -1,0 +1,109 @@
+{
+  "clauses": {
+    "SRC-003:R0001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "CORE-001 \u2014 journaled and owned stop/ss CLI path"
+    },
+    "SRC-003:R0002": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "CORE-002 \u2014 claim-safe, BOARD-aware and valve-correct stop_checkpoint"
+    },
+    "SRC-003:R0003": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "CORE-003 \u2014 non-recursive complete read-only test orchestrator"
+    },
+    "SRC-003:R0004": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "CORE-004 \u2014 atomic ccc entry marker and active-work checkpoint"
+    },
+    "SRC-003:R0005": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "W2-001 \u2014 owned no-follow journal intermediates"
+    },
+    "SRC-003:R0006": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "W2-002 \u2014 owned no-follow liveness cache"
+    },
+    "SRC-003:R0007": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "W2-003 \u2014 owned no-follow producer descendants"
+    },
+    "SRC-003:R0008": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "W2-004 \u2014 crash-recoverable source close/archive/purge"
+    },
+    "SRC-003:R0009": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "W2-005 \u2014 unwind failed writer and producer lock reservations"
+    },
+    "SRC-003:R0010": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "W2-006 \u2014 owned no-follow final lock files"
+    },
+    "SRC-003:R0011": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "W2-007 \u2014 coherent STATE and BOARD before targeted producer integration"
+    },
+    "SRC-003:R0012": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "W2-008 \u2014 Git-compatible exclusive index rollback lock"
+    },
+    "SRC-003:R0013": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "W2-009 \u2014 canonical chronology for convergence predecessor selection"
+    },
+    "SRC-003:R0014": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "W2-010 \u2014 one coherent ProjectSnapshot for status/next/explain"
+    },
+    "SRC-003:R0015": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "W2-011 \u2014 structured chronological project-bound attribution claims"
+    },
+    "SRC-003:R0016": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "W2-012 \u2014 portable lineage binding for crew defer scope"
+    },
+    "SRC-003:R0017": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "W2-013 \u2014 non-fatal post-COMMITTED settlement failure and retry"
+    },
+    "SRC-003:R0018": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "W2-014 \u2014 consistent structured SubSaipen receipt corruption"
+    },
+    "SRC-003:R0019": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "W2-015 \u2014 source-identity APPLY CAS for source-bound evidence"
+    },
+    "SRC-003:R0020": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "W2-016 \u2014 serialized liveness cache read-modify-write"
+    }
+  },
+  "derived_at": "2026-08-27T17:53:45Z",
+  "derived_from": "SRC-003",
+  "interpretation_revision": 20,
+  "schema_version": 1,
+  "source_sha256": "6e02b189390aadbc91632e6e54d25ac291c9a570e4b8d5db24839133bb003e57"
+}

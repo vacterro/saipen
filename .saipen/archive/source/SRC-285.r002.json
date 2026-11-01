@@ -1,0 +1,19 @@
+{
+  "clauses": {
+    "SRC-285:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Measure historical cost A-N, distinguish historical/direct/estimated/unknown data, and rank preventable mechanisms without beginning with another full suite."
+    },
+    "SRC-285:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Implement canonical single-flight execution with environment/configuration/runtime-aware compatible evidence, ownership, provenance, crash recovery and cancellation safety."
+    }
+  },
+  "derived_at": "2026-10-20T14:38:58Z",
+  "derived_from": "SRC-285",
+  "interpretation_revision": 2,
+  "schema_version": 1,
+  "source_sha256": "8368c33bb655192afa79909514bc0f55d3e1b39ccb69c3eb1f1976ae20df4940"
+}

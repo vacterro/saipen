@@ -26,6 +26,7 @@ without claiming a live host event (that stays T-1859 AC-01 [LIVE]).
 from __future__ import annotations
 
 import json
+import os
 import subprocess
 import sys
 import tempfile
@@ -323,5 +324,224 @@ class TheHookKeepsItsTransportContract(unittest.TestCase):
         self.assertTrue(reply.get("ok"), reply)
 
 
-if __name__ == "__main__":
-    unittest.main()
+#: A client whose broker is down: the shape measured on 2026-10-30, when the
+#: live service had died and every genuine prompt was admitted unsealed.
+STUB_CLIENT_UNAVAILABLE = textwrap.dedent(
+    '''
+    import json, os, sys
+
+    RECORD = os.path.join(os.path.dirname(__file__), "record.json")
+
+    def _append(row):
+        rows = []
+        if os.path.isfile(RECORD):
+            with open(RECORD, encoding="utf-8") as handle:
+                rows = json.load(handle)
+        rows.append(row)
+        with open(RECORD, "w", encoding="utf-8") as handle:
+            json.dump(rows, handle)
+
+    def issue_operator_origin(**kwargs):
+        _append({"op": "issue", "kwargs": {k: str(v) for k, v in kwargs.items()}})
+        return None, "absent"
+
+    def register_operator_worker(*_args, **_kwargs):
+        raise AssertionError("registration must not be attempted without a proof")
+    '''
+)
+
+
+class AnUnsealedPromptReachesTheOperator(unittest.TestCase):
+    """T-1966: the verdict has to survive the host's own stdout schema.
+
+    ZAICODE validates hook stdout against `HookJSONOutputSchema`, which declares
+    eight keys and no others; a conforming parse keeps those and DROPS the rest.
+    The hook's `sealed`/`seal` fields were therefore written, parsed and
+    discarded, so a dead broker looked exactly like a healthy one on the
+    operator's surface.
+    """
+
+    FIELDS = {
+        "additionalContext", "additional_context", "continue", "decision",
+        "hookSpecificOutput", "reason", "stopReason", "suppressOutput",
+        "systemMessage",
+    }
+
+    def _unavailable_root(self):
+        holder, root = build_root()
+        self.addCleanup(holder.cleanup)
+        (root / "tools" / "saipen_engine" / "host_authority_client.py").write_text(
+            STUB_CLIENT_UNAVAILABLE, encoding="utf-8"
+        )
+        return root
+
+    def test_an_unsealed_prompt_names_the_reason_on_the_keys_the_host_reads(self):
+        reply, _record = run_hook(self._unavailable_root())
+        self.assertFalse(reply.get("sealed"), reply)
+        self.assertFalse(reply.get("authenticated"), reply)
+        notice = str(reply.get("systemMessage") or "")
+        self.assertIn("NOT authenticated", notice, reply)
+        self.assertIn("model_supplied", notice, reply)
+        self.assertTrue(str(reply.get("additionalContext") or "").strip(), reply)
+        # AC-02 is exact: the REFUSAL CODE itself must reach the hook output.
+        # "Something went wrong" is not actionable; the code is what `saipen
+        # host doctor` and the operator both key off.
+        code = str((reply.get("seal") or {}).get("code") or "")
+        self.assertTrue(code, reply)
+        self.assertIn(code, notice, reply)
+        self.assertIn(code, str(reply.get("additionalContext")), reply)
+
+    def test_the_notice_travels_only_on_schema_keys(self):
+        """Everything the host would show must be inside the declared schema."""
+        reply, _record = run_hook(self._unavailable_root())
+        declared = {k: v for k, v in reply.items() if k in self.FIELDS}
+        self.assertIn("systemMessage", declared, reply)
+        unknown = set(reply) - self.FIELDS
+        # Pre-fix the verdict lived only under these, so a conforming host kept
+        # an object with nothing on it the operator could read.
+        self.assertTrue(unknown, reply)
+        self.assertFalse(
+            [k for k in unknown if "NOT authenticated" in str(reply[k])],
+            "the verdict must not live only under a key the host drops",
+        )
+
+    def test_the_pre_fix_answer_carries_no_operator_visible_notice(self):
+        """Red control: the shipped hook must fail the notice assertion.
+
+        Restoring the shipped behaviour is the only honest control for a defect
+        that was "the reason never left the process".
+        """
+        source = HOOK.read_text(encoding="utf-8")
+        anchor = (
+            "    if not sealed:\n"
+            "        result.update(_seal_notice(result.get(\"seal\")))"
+        )
+        self.assertIn(anchor, source, "the notice call moved; update this control")
+        patched = source.replace(anchor, "    if False:\n        pass")
+        self.assertNotEqual(patched, source)
+        with tempfile.TemporaryDirectory(prefix="t1966-red-") as tmp:
+            red = Path(tmp) / "saipen-guard-pre-fix-notice.py"
+            red.write_text(patched, encoding="utf-8")
+            holder, root = build_root()
+            self.addCleanup(holder.cleanup)
+            (root / "tools" / "saipen_engine" / "host_authority_client.py").write_text(
+                STUB_CLIENT_UNAVAILABLE, encoding="utf-8"
+            )
+            reply, _record = run_hook(root, hook=red)
+        self.assertFalse(reply.get("sealed"), reply)
+        self.assertNotIn("systemMessage", reply, reply)
+
+
+class ABrokerRecordNamingADeadProcessIsNotRunning(unittest.TestCase):
+    """T-1966 AC-03: a stale `broker.json` must not read as a live service,
+    and its lock must be RECLAIMED rather than held by a pid that is gone."""
+
+    def test_a_record_for_a_dead_pid_is_not_reported_as_running(self):
+        sys.path.insert(0, str(TOOLS))
+        from saipen_engine import host_authority_broker as HB, host_authority_client as HC
+
+        with tempfile.TemporaryDirectory(prefix="t1966-lock-") as tmp:
+            runtime = Path(tmp)
+            self.assertFalse(HB.health(runtime))
+            # A pid that cannot be alive: above the platform maximum.
+            HB.write_status({"pid": 2**31 - 1, "instance": "broker-dead"}, runtime)
+            self.assertIsNone(HB.health(runtime), "a dead record must not answer health")
+            self.assertIsNotNone(HB.read_status(runtime))
+            self.assertFalse(HC.server_trusted(2**31 - 1))
+
+    def test_the_lock_of_a_dead_pid_is_reclaimed(self):
+        """The other half of AC-03, and the half that broke recovery.
+
+        A lock file naming a dead pid is what a killed or crashed service
+        leaves behind. If it were honoured, every later start would answer
+        "another broker is already running" for a process that no longer
+        exists -- the compound defect that kept the endpoint empty.
+        """
+        sys.path.insert(0, str(TOOLS))
+        from saipen_engine import host_authority_broker as HB
+
+        with tempfile.TemporaryDirectory(prefix="t1966-reclaim-") as tmp:
+            runtime = Path(tmp)
+            HB.lock_path(runtime).write_text(
+                json.dumps({"pid": 2**31 - 1, "started": 0.0}), encoding="utf-8"
+            )
+            acquired, detail = HB.acquire_lock(runtime)
+            self.addCleanup(HB.release_lock, runtime)
+            self.assertTrue(acquired, detail)
+            holder = json.loads(HB.lock_path(runtime).read_text(encoding="utf-8"))
+            self.assertEqual(holder.get("pid"), os.getpid())
+
+
+#: A stand-in engine whose `continue` refuses. The hook's renewal path reads
+#: this answer, so the notice that reports a failed renewal can be measured.
+ENGINE_STUB_REFUSING = textwrap.dedent(
+    '''
+    import json, os, sys
+
+    RECORD = os.path.join(os.path.dirname(os.path.dirname(__file__)), "engine.json")
+    with open(RECORD, "w", encoding="utf-8") as handle:
+        json.dump({"argv": sys.argv[1:], "own_pid": os.getpid()}, handle)
+    print(json.dumps({"ok": False, "code": "RENEWAL_REFUSED_BY_FIXTURE"}))
+    '''
+)
+
+
+class AFailedRenewalIsReportedNotSwallowed(unittest.TestCase):
+    """T-1966: a sealed prompt whose grant did not renew must say so.
+
+    The first revision of the notice was an `elif` on `result["renewal"]`
+    placed ABOVE the block that computes it, so the branch could never run and
+    a failed renewal stayed silent -- the same class of defect as the missing
+    seal notice itself, in the very fix for it. This case drives a tripped
+    safety valve with an engine that refuses, which is the only state in which
+    the notice has anything to report.
+    """
+
+    def test_a_refused_renewal_names_itself_on_the_operators_surface(self):
+        holder, root = build_root(state_counters=20, engine=ENGINE_STUB_REFUSING)
+        self.addCleanup(holder.cleanup)
+        reply, _record = run_hook(root)
+        # The premise: the valve really was tripped, so the hook really did
+        # try to renew. Without this the assertion below could pass vacuously
+        # on a project that never reached the renewal path at all.
+        self.assertTrue(reply.get("sealed"), reply)
+        self.assertIsInstance(reply.get("renewal"), dict, reply)
+        self.assertFalse(reply["renewal"].get("ok"), reply)
+        notice = str(reply.get("systemMessage") or "")
+        self.assertIn("was not renewed", notice, reply)
+        self.assertIn("RENEWAL_REFUSED_BY_FIXTURE", notice, reply)
+
+    def test_the_pre_fix_order_silences_the_same_failure(self):
+        """Red control: the ordering, not the wording, is what failed.
+
+        Restoring the pre-fix `elif` (evaluated before the renewal is computed)
+        produces the exact shape the operator saw: sealing fine, renewal
+        refusing, and an empty systemMessage.
+        """
+        source = HOOK.read_text(encoding="utf-8")
+        moved = (
+            "    if sealed and isinstance(result.get(\"renewal\"), dict) "
+            "and not result[\"renewal\"].get(\"ok\"):\n"
+            "        result[\"systemMessage\"] = (\n"
+            "            \"SAIPEN: the operator cc was sealed but the bounded grant was not \"\n"
+            "            f\"renewed ({result['renewal'].get('code') or 'no code'}). Do this: \"\n"
+            "            f\"{_launcher_text(root)} continue\"\n"
+            "        )\n"
+        )
+        self.assertIn(moved, source, "the renewal notice moved; update this control")
+        # Before the renewal block, which is where the first revision put it.
+        anchor = "    if sealed and result.get(\"destination_op\") == \"continue\""
+        self.assertIn(anchor, source)
+        red_source = source.replace(moved, "").replace(
+            anchor, moved + anchor, 1
+        )
+        self.assertNotEqual(red_source, source)
+        holder, root = build_root(state_counters=20, engine=ENGINE_STUB_REFUSING)
+        self.addCleanup(holder.cleanup)
+        with tempfile.TemporaryDirectory(prefix="t1966-order-") as tmp:
+            red = Path(tmp) / "saipen-guard-pre-fix-order.py"
+            red.write_text(red_source, encoding="utf-8")
+            reply, _record = run_hook(root, hook=red)
+        self.assertTrue(reply.get("sealed"), reply)
+        self.assertFalse((reply.get("renewal") or {}).get("ok"), reply)
+        self.assertNotIn("systemMessage", reply, reply)

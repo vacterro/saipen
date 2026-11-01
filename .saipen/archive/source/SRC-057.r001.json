@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-057:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "T-1385 is not done: carry the T-1385 corridor to truthful completion"
+    }
+  },
+  "derived_at": "2026-09-18T22:49:10Z",
+  "derived_from": "SRC-057",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "e2b6ed4d283cff29f47a1095284bd32f74eb35d4ec4113364e6c70c0d56d6f73"
+}

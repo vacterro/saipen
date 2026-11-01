@@ -1,0 +1,14 @@
+{
+  "requirements": {
+    "SRC-159:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "T-1583 closed with verification evidence in LOG: verify -> PASS [target: T-1583] conf: high -- python .saipen/evidence/T-1583-response-escape-20261001/incident.py: Ran 5 OK, rc=0, on the current tree. The forensic deliverable is present and complete: REPORT.md (four-part COMBINATION verdict answering SRC-159), ingress.txt sha256 fd7bed0e..., reply.txt sha256 d6c2c592..., incident.py 5/5. Deliverable is investigative prose + regression control; n",
+      "text": "Forensic response-enforcement investigation: why the long Estonian reply escaped the STYLE detail/chat ceilings on the live host",
+      "verification": "the Work this request created reached its own verification gate; see the T-1583 VERIFY cycle in .saipen/LOG.md",
+      "work": "T-1583"
+    }
+  },
+  "schema_version": 1
+}

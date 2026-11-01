@@ -1,0 +1,24 @@
+{
+  "clauses": {
+    "SRC-149:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Bind phase recovery to ticket lifecycle including claims and finish boundaries; no foreign phase evidence; distinguish CURRENT_DONE_JOURNAL_GAP from legacy done, block park and forged done."
+    },
+    "SRC-149:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Provide one executable content-bound approved recovery restoring last proven phase and active BOARD atomically; preserve original STATE BOARD LOG; no fabricated historical finish or manual edits; modern closure metadata must not hide the gap."
+    },
+    "SRC-149:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Advertised mutation route converges or refuses before writes when conditions change; next-action cannot mask stronger defects; downstream A-L matrix, interleaving, idempotency, every crash prefix, legacy and park tests; canonical CURRENT_PASS and full core new_red=0."
+    }
+  },
+  "derived_at": "2026-09-30T17:15:36Z",
+  "derived_from": "SRC-149",
+  "interpretation_revision": 3,
+  "schema_version": 1,
+  "source_sha256": "11ee20d6e7aed7cbf26fb48413a1a405b2ce919a201765093ea5429b4c2261f6"
+}

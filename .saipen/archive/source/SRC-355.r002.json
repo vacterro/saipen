@@ -1,0 +1,19 @@
+{
+  "clauses": {
+    "SRC-355:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Critical Path Identification: Identify dominant test runtime bottleneck (8,548 tests under jobs=6) and avoid redundant invocations."
+    },
+    "SRC-355:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Verification Reuse Invariants: Enforce exact fingerprint match, baseline digest match, and verification identity match in reusable_record."
+    }
+  },
+  "derived_at": "2026-10-31T18:25:21Z",
+  "derived_from": "SRC-355",
+  "interpretation_revision": 2,
+  "schema_version": 1,
+  "source_sha256": "b444355fef5577f6ed560454a1152108729dd93227dda8c933c0a9f252f57d09"
+}

@@ -1,0 +1,39 @@
+{
+  "clauses": {
+    "SRC-103:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Audit manifest distinguishes durable audit surfaces from runtime/transient surfaces at any nesting depth, without excluding whole durable families"
+    },
+    "SRC-103:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Release SOURCE_COVERAGE is scoped to the release being shipped; an unrelated BLOCKED_EXTERNAL source cannot freeze an independent release while a related unresolved source still blocks"
+    },
+    "SRC-103:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Contract clause derivation is reachable before finish for every ingress, idempotent, crash-safe, and never overwrites an interpreted contract"
+    },
+    "SRC-103:R004": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "SOURCE_COVERAGE refusals carry code, receipt, linked work, release-scope membership, missing-derivation state and the canonical next action; never a false MISROUTED_PROJECT_BINDING escape"
+    },
+    "SRC-103:R005": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "authoritative_state=true means the artifact satisfies the declared protocol contract, not merely that mandatory STATE/BOARD/LOG files exist"
+    },
+    "SRC-103:R006": {
+      "actionable": true,
+      "class": "non-goal",
+      "text": "No SAIPENVIEW product workaround, no dishonest T-850 closure, no SRC-007 history rewrite, no hand-authored operator authority, no universally valid empty coverage"
+    }
+  },
+  "derived_at": "2026-09-22T13:00:32Z",
+  "derived_from": "SRC-103",
+  "interpretation_revision": 6,
+  "schema_version": 1,
+  "source_sha256": "54b0d043ee94f239e43f7bb26c3bbaa23b634a67fbd1bf955888e6693149a3a1"
+}

@@ -1,0 +1,14 @@
+{
+  "requirements": {
+    "SRC-066:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "T-1396 closed with verification evidence in LOG: -- verify -> PASS [target: T-1396] conf: high -- python -B tools/test_saitranslate_charter_namespace.py -> 4/4 OK on adopted bytes (RED reproduced pre-adoption: charter write_scope .saipen/extensions/subs/saitranslate != engine .saipen/saitranslate); producer-parallelism 40 OK; autonomy-audit 13 OK; intent-audit 41 with 4 inherited T-001 reds proven pre-existing by A/B; core validate single FAIL =",
+      "text": "Adopt the current extensions/subs/saitranslate.md charter/namespace update under one narrow canonical ticket. Preserve the current bytes if the inquest confirms they match the existing engine namespace semantics. Do not revert it merely because its original writer is no longer active. After the adoption is committed and verified, resume T-1367 from its existing BUILD blocker and continue the installed-runtime field acceptance. No push, no tag, no public release.",
+      "verification": "the Work this request created reached its own verification gate; see the T-1396 VERIFY cycle in .saipen/LOG.md",
+      "work": "T-1396"
+    }
+  },
+  "schema_version": 1
+}

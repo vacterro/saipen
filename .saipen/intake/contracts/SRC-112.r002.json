@@ -1,0 +1,19 @@
+{
+  "clauses": {
+    "SRC-112:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "T-1493 is not closed in its current wording (an agent-run continue must leave the WAIT): that would degrade the autonomy an explicit operator /goal grants; T-1493 is re-scoped as separating persistent /goal authority from fresh cc authority"
+    },
+    "SRC-112:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "machine truth distinguishes persistent operator authorization from fresh operator reauthorization, e.g. continuation_authority operator_persistent|operator_required, authority_source (the SRC or goal event that granted it), authority_until (goal_complete or a budget), safety_valve_mode checkpoint|hard_wait"
+    }
+  },
+  "derived_at": "2026-09-23T16:47:56Z",
+  "derived_from": "SRC-112",
+  "interpretation_revision": 2,
+  "schema_version": 1,
+  "source_sha256": "e529a08ec14a8dd62150530f12ddf7935d72c1181d5e08bf3a37a8c6aa55ab4a"
+}

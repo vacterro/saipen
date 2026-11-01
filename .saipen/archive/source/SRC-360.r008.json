@@ -1,0 +1,49 @@
+{
+  "clauses": {
+    "SRC-360:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "D-01 Response-Contract-Enforcement: Typed rendering prevents model overwriting STALE_FAIL with PASS"
+    },
+    "SRC-360:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "D-02 Review-Revision-Discipline: Edits in REVIEW invalidate review approval and require BUILD->VERIFY->REVIEW loop"
+    },
+    "SRC-360:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "D-03 Test-Coordinator-Efficiency: Event-driven waiting replaces sleep-poll loops and marks canceled runs distinctly"
+    },
+    "SRC-360:R004": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "D-04 Delivery-Transparency: Distinct reporting of NOT_APPLICABLE vs VERIFIED with explicit external handoff"
+    },
+    "SRC-360:R005": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "D-05 Baseline-Red-Reporting: Engine reports ran, baseline red, and new red distinctly instead of masked PASS"
+    },
+    "SRC-360:R006": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "D-06 Stop-Reason-Classification: Operator-requested stop requires authenticated human ingress, not arbitrary flag"
+    },
+    "SRC-360:R007": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "D-07 Host-Admission-Contract: Admission contract provides mechanical response validation or explicit advisory taxonomy"
+    },
+    "SRC-360:R008": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "D-08 Transport-Integrity: Canonical transport entry enforced with runtime/BOOT hash verification"
+    }
+  },
+  "derived_at": "2026-10-31T23:42:28Z",
+  "derived_from": "SRC-360",
+  "interpretation_revision": 8,
+  "schema_version": 1,
+  "source_sha256": "8dc5a432a77e2af6cf3d710bdbd92a5079efd22e6af38c2a580e9cc9e509aeb8"
+}

@@ -1,0 +1,69 @@
+{
+  "clauses": {
+    "SRC-289:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Sections 0, 19: use canonical START and genuine host ingress; preserve the entire original request and honest original provenance. Never forge authority, reset hard_wait without trusted input, substitute persisted work, or cross a real admission or approval boundary."
+    },
+    "SRC-289:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Sections 1, 6: measure the live canonical state, dependency topology, source sizes and all five unchanged context budgets; distinguish historical snapshots from current evidence and separate context, code and storage metrics."
+    },
+    "SRC-289:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Sections 2, 3: one canonical machine-readable blocker projection exposes class, root cause, owner, shared identity, dependent IDs, internal recovery authority, external-input need, read-only eligibility, exact recovery operation and safe-resumption preconditions. Group the shared publication obstruction without erasing tickets or edges."
+    },
+    "SRC-289:R004": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Section 3: retain registered verdict semantics and distinguish all work complete, no runnable work, operator wait, external wait, recoverable blockers and unsafe continuation. 102 blocked plus three dependent TODO items must never imply completion; display the immediate actionable shared obstruction while preserving older Work."
+    },
+    "SRC-289:R005": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Section 4: inspect release scope, foreign staging, index capture and ownership, journal recovery, preflight and attribution. Preserve every existing strict protection; do not reset, stash, add all, clear or commit foreign staging, force-push, rewrite branches or replace history."
+    },
+    "SRC-289:R006": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Section 4: prove a canonical isolated publication mechanism commits only the exact reviewed source generation, preserves live index and foreign entries byte-for-byte and worktree contents, ancestry, history, evidence identity, concurrency safety and crash recovery. Use adversarial staged-file fixtures and executed red-before-green controls; explicitly amend and test the release contract if required, otherwise retain the refusal and exact missing operator action."
+    },
+    "SRC-289:R007": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Sections 5, 7: recursively remove proven duplicate knowledge and decisions through one authoritative owner, caller and contract maps, equivalence tests, redirected callers, dead-code removal and before/after measurements. Preserve all qualifications, errors, semantics and capabilities; never substitute physical archive compression or obscured side effects for simpler architecture."
+    },
+    "SRC-289:R008": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Section 8: build a rule-ownership graph across the named registry, protocol owners and phase documents; classify normative, derived, explanatory, compatibility, contradictory and obsolete occurrences. Each normative rule has one owner; preserve Rule IDs, observable meaning, conditional loads and acyclic references; measure actual loaded surfaces."
+    },
+    "SRC-289:R009": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Section 9: consolidate executable command, compound-order, admission, authority, lifecycle, blocker, response, HUSH, verification and publication facts into existing machine owners and schemas. Derive compatible runtime, validator, documentation and regression projections without another registry."
+    },
+    "SRC-289:R010": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Sections 9, 17: reuse existing T-1853, T-1854 and T-1855 Work and acceptance contracts; do not create competing implementations or duplicate tickets for their requirements."
+    },
+    "SRC-289:R011": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Section 10: inspect actual ownership in the listed engine modules and narrowly consolidate equivalent validation, transaction preparation, BOARD/registry reads, source and authority checks, classifications, hashes, Git probes, projections, recovery and repeated validation. Move cohesive subsystems with API/data parity and explicit safety."
+    },
+    "SRC-289:R012": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Section 11: classify active state, immutable evidence, derived indexes, disposable cache and historical archive from contracts. Investigate repeated snapshots, reports, outputs, indexes and serialization; do not delete evidence. Any dedupe or migration preserves hashes, attribution, references, exact reconstruction, rollback, old-reader compatibility and crash/partial-migration safety."
+    }
+  },
+  "derived_at": "2026-10-22T23:21:03Z",
+  "derived_from": "SRC-289",
+  "interpretation_revision": 12,
+  "schema_version": 1,
+  "source_sha256": "670e99c485634af1eaeb32d60b167e18ebf64cc7b908cdffc9be9dfeccbed358"
+}

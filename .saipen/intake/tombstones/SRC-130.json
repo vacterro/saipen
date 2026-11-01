@@ -1,0 +1,16 @@
+{
+  "actionable": 1,
+  "archive_ref": ".saipen/quarantine/source/SRC-130.md",
+  "closed_at": "2026-10-30T02:42:00Z",
+  "closure_event": null,
+  "linked_work": "T-1547",
+  "linked_works": [
+    "T-1547"
+  ],
+  "receipt_id": "SRC-130",
+  "requirements": 1,
+  "schema_version": 1,
+  "source_sha256": "d7cc41413c4c177451792a0341cb6af2a91e8f75f51d2f027ed906ac7913c907",
+  "status": "CLOSED",
+  "unresolved": 0
+}

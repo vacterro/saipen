@@ -1,0 +1,24 @@
+{
+  "clauses": {
+    "SRC-054:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Prove the root cause: name the canonical source that regenerates .saipen/MANIFEST.json and show why a local evidence/ declaration did not survive it."
+    },
+    "SRC-054:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "The canonical SAIPEN audit-evidence contract/generator (not a generated project MANIFEST.json) declares evidence/ as an authoritative conditional closure-evidence surface, recursive and bounded by an explicit max_files."
+    },
+    "SRC-054:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Newly initialized projects declare evidence/, existing manifests refreshed by SAIPEN retain or add it, and later lifecycle/reconcile/status/cc/converge operations cannot silently remove it."
+    }
+  },
+  "derived_at": "2026-09-16T20:14:31Z",
+  "derived_from": "SRC-054",
+  "interpretation_revision": 3,
+  "schema_version": 1,
+  "source_sha256": "7d3a491282feffa66002b8dfbfce6110f1c60d169e39702c7399904899e91d8d"
+}

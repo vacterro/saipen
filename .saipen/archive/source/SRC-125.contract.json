@@ -1,0 +1,74 @@
+{
+  "clauses": {
+    "SRC-125:R001": {
+      "actionable": false,
+      "class": "context",
+      "text": "Do not continue treating the previous 500+ red set as a currently reproducing mass fixture failure."
+    },
+    "SRC-125:R002": {
+      "actionable": false,
+      "class": "context",
+      "text": "Do not claim that the remaining 24 reds are caused by STYLE fixture authority without reproducing that relationship."
+    },
+    "SRC-125:R003": {
+      "actionable": false,
+      "class": "context",
+      "text": "current-valid fixtures must pass"
+    },
+    "SRC-125:R004": {
+      "actionable": false,
+      "class": "context",
+      "text": "intentionally stale fixtures must still fail"
+    },
+    "SRC-125:R005": {
+      "actionable": false,
+      "class": "context",
+      "text": "simulate a legitimate STYLE contract change"
+    },
+    "SRC-125:R006": {
+      "actionable": false,
+      "class": "context",
+      "text": "prove that fixtures representing \"current valid installation\" can derive the new token mechanically"
+    },
+    "SRC-125:R007": {
+      "actionable": false,
+      "class": "context",
+      "text": "prove that stale/pinned/historical fixtures remain intentionally pinned"
+    },
+    "SRC-125:R008": {
+      "actionable": false,
+      "class": "context",
+      "text": "do not modify the canonical project's STYLE.md again merely to exercise this test."
+    },
+    "SRC-125:R009": {
+      "actionable": false,
+      "class": "context",
+      "text": "Do not globally replace any STYLE token."
+    },
+    "SRC-125:R010": {
+      "actionable": false,
+      "class": "context",
+      "text": "Do not accept any of the 24 into baseline merely because they are unrelated to T-1538."
+    },
+    "SRC-125:R011": {
+      "actionable": false,
+      "class": "context",
+      "text": "do not manufacture a large refactor solely because the old temporary STYLE change exposed brittle tests."
+    },
+    "SRC-125:R012": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "For T-1538, prove current-valid fixtures derive the restored installed STYLE token through one shared helper; stale, wrong, and missing states still fail strict equality; historical and pinned fixtures stay unchanged; simulate a legitimate STYLE change only in an isolated install; do not weaken production validation or globally replace tokens."
+    },
+    "SRC-125:R013": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Before fixture changes, rerun the prior 24 jobs=6 new-red tests individually, then collect fresh jobs=1 core-unit evidence and compare jobs=6; accept no reds into baseline and classify only failures that reproduce."
+    }
+  },
+  "derived_at": "2026-09-27T22:58:25Z",
+  "derived_from": "SRC-125",
+  "interpretation_revision": 3,
+  "schema_version": 1,
+  "source_sha256": "b95b8411b32191cd1f1873eb7cd9b5a1e434ec609338b9564404dc21f936f053"
+}

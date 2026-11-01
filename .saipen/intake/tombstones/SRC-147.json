@@ -1,0 +1,16 @@
+{
+  "actionable": 1,
+  "archive_ref": ".saipen/archive/source/SRC-147.md",
+  "closed_at": "2026-10-30T02:42:00Z",
+  "closure_event": null,
+  "linked_work": "T-1574",
+  "linked_works": [
+    "T-1574"
+  ],
+  "receipt_id": "SRC-147",
+  "requirements": 1,
+  "schema_version": 1,
+  "source_sha256": "afa218794fecddd961e7a5cc42e6d99107004de0494e15e5e668695ab331b3d3",
+  "status": "CLOSED",
+  "unresolved": 0
+}

@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-189:R001": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "ADMISSION BEFORE HANDOFF: before executable Work is handed to an executor SAIPEN mechanically proves EXECUTOR_CAPABILITIES contains REQUIRED_CAPABILITIES; an incompatible executor never receives the Work, and the model is never relied on to discover missing tools after the handoff."
+    }
+  },
+  "derived_at": "2026-10-07T13:55:31Z",
+  "derived_from": "SRC-189",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "64429a852a21aa22dbb35505b57bfca7687d62eef0d9d52cf7cc961c7cd9b14c"
+}

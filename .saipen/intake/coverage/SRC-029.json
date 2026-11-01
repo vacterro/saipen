@@ -1,0 +1,113 @@
+{
+  "requirements": {
+    "SRC-029:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "tools/saipen_engine/paths.py: SAIPEN_PROJECT_ROOT carrier",
+      "text": "host/session project-root carrier",
+      "verification": "python -m unittest tools.test_project_root_session_binding -> 13 tests OK",
+      "work": "T-1317"
+    },
+    "SRC-029:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "tools/saipen_engine/paths.py: SAIPEN_PROJECT_LINEAGE identity verification",
+      "text": "lineage verification",
+      "verification": "python -m unittest tools.test_project_root_session_binding -> 13 tests OK",
+      "work": "T-1317"
+    },
+    "SRC-029:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "tools/saipen_engine/paths.py: 6-stage precedence explicit > host > worktree > common > ancestor > refuse",
+      "text": "root-resolution precedence",
+      "verification": "python -m unittest tools.test_project_root_session_binding -> 13 tests OK",
+      "work": "T-1317"
+    },
+    "SRC-029:R004": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "tools/saipen_engine/paths.py: detached staging cwd resolution without adopting staging dir",
+      "text": "detached staging cwd support",
+      "verification": "python -m unittest tools.test_project_root_session_binding:test_control_a_reported_fastprompter_incident -> PASS",
+      "work": "T-1317"
+    },
+    "SRC-029:R005": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "tools/saipen_engine/context.py: brief exposes project_lineage",
+      "text": "saipen brief project_lineage",
+      "verification": "python -m unittest tools.test_project_root_session_binding:test_control_h_portable_brief_carries_lineage -> PASS",
+      "work": "T-1317"
+    },
+    "SRC-029:R006": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "KNOWLEDGE/ADR-0003-detached-handoff-project-binding.md: local handoff transport envelope architecture",
+      "text": "local handoff transport envelope",
+      "verification": "ADR-0003 documented and verified",
+      "work": "T-1317"
+    },
+    "SRC-029:R007": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "SAIPEN_PROJECT_ROOT + SAIPEN_PROJECT_LINEAGE contract for launchers",
+      "text": "launcher cwd/root propagation contract",
+      "verification": "tools/test_project_root_session_binding.py -> 13 tests OK",
+      "work": "T-1317"
+    },
+    "SRC-029:R008": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "tools/saipen_engine/paths.py: host-session provenance activates SAIPEN on target project",
+      "text": "global activation from verified handoff binding",
+      "verification": "python -m unittest tools.test_project_root_session_binding -> 13 tests OK",
+      "work": "T-1317"
+    },
+    "SRC-029:R009": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "tools/saipen_engine/admission.py: evaluate_admission guards target project from detached cwd",
+      "text": "guard integration",
+      "verification": "python -m unittest tools.test_guard_admission:test_detached_staging_cwd_with_env -> PASS",
+      "work": "T-1317"
+    },
+    "SRC-029:R010": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "tools/saipen_engine/paths.py: PROJECT_LINEAGE_MISMATCH and PROJECT_BINDING_INVALID fail closed",
+      "text": "hostile foreign/stale/mismatched root controls",
+      "verification": "python -m unittest tools.test_project_root_session_binding:test_control_b_lineage_binding_controls -> PASS",
+      "work": "T-1317"
+    },
+    "SRC-029:R011": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "tools/saipen_engine/paths.py: no whole-drive scanning, strictly verified paths only",
+      "text": "no whole-drive guessing",
+      "verification": "python -m unittest tools.test_project_root_session_binding:test_control_l_no_drive_scanning -> PASS",
+      "work": "T-1317"
+    },
+    "SRC-029:R012": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "DEFERRED",
+      "evidence": "producer-side evidence unavailable: FastPrompter 0.8.67 source contains no SAIPEN launch carrier; SRC-031:R008 carries the read-only inspection evidence; explicit closure blocker preserved",
+      "text": "FastPrompter cross-project handoff requirement",
+      "verification": "cross-project handoff KNOWLEDGE/HANDOFF-fastprompter-detached-launch-carrier.md; no FastPrompter modification inside SAIPEN",
+      "work": "T-1317"
+    }
+  },
+  "schema_version": 1
+}

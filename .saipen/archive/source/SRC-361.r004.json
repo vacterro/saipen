@@ -1,0 +1,29 @@
+{
+  "clauses": {
+    "SRC-361:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "D-01 Export-Artifact-Completeness: Truncated session exports require chunked manifest and end marker verification"
+    },
+    "SRC-361:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "D-02 Outcome-Truth-Distinction: Terminal guard correctly refuses false completion when actionable tickets remain"
+    },
+    "SRC-361:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "D-03 Authority-Gate-Enforcement: Model-supplied sources rejected from privileged reconciliation without operator witness"
+    },
+    "SRC-361:R004": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "D-04 Operational-Scope-Separation: Ledger blocker must not halt independent operational application repairs"
+    }
+  },
+  "derived_at": "2026-10-31T23:45:29Z",
+  "derived_from": "SRC-361",
+  "interpretation_revision": 4,
+  "schema_version": 1,
+  "source_sha256": "d9c9ee829a233ee6b89e2c953e35c7f1650579422798ff58ebcb7c12b8cc9e06"
+}

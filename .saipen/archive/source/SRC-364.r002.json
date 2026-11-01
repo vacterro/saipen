@@ -1,0 +1,19 @@
+{
+  "clauses": {
+    "SRC-364:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "D-01 Verbatim-Source-Capture: Ingress authority requires verbatim capture of operator instructions without model paraphrasing"
+    },
+    "SRC-364:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "D-02 Premature-Handback-Prevention: Narrative handback prohibited while executable phases remain eligible on current ticket"
+    }
+  },
+  "derived_at": "2026-10-31T23:52:16Z",
+  "derived_from": "SRC-364",
+  "interpretation_revision": 2,
+  "schema_version": 1,
+  "source_sha256": "2d8976dac3f9facbdce7bcdfcd22910181ab595e6884ab4b42053f9e04fa30a4"
+}

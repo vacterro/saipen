@@ -1,0 +1,14 @@
+{
+  "requirements": {
+    "SRC-154:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "T-1579 closed with verification evidence in LOG: verify -> PASS [target: T-1579] conf: high -- SRC-153 acceptance verified this cycle. 1 first-class contract: saipen/STORAGE.md plus tools/saipen_engine/storage.py and storage_artifacts.py. 2 user-defined ephemeral roots: machine policy at C:/Users/vac34/AppData/Roaming/SAIPEN/STORAGE_POLICY.json registers V:/_TEMP_ as auto-cleaned and V:/___VAC/__K/__STATE/SAILEARN_HOME as durable. 3 durable-unde",
+      "text": "Satisfy the captured request SRC-154 in full; the authoritative text is the receipt body (sha256 5ad9e2995483): Jah, see on p\u00fcsiv",
+      "verification": "the Work this request created reached its own verification gate; see the T-1579 VERIFY cycle in .saipen/LOG.md",
+      "work": "T-1579"
+    }
+  },
+  "schema_version": 1
+}

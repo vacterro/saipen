@@ -1,0 +1,39 @@
+{
+  "clauses": {
+    "SRC-029:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "host/session project-root carrier"
+    },
+    "SRC-029:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "lineage verification"
+    },
+    "SRC-029:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "root-resolution precedence"
+    },
+    "SRC-029:R004": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "detached staging cwd support"
+    },
+    "SRC-029:R005": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "saipen brief project_lineage"
+    },
+    "SRC-029:R006": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "local handoff transport envelope"
+    }
+  },
+  "derived_at": "2026-09-12T03:33:28Z",
+  "derived_from": "SRC-029",
+  "interpretation_revision": 6,
+  "schema_version": 1,
+  "source_sha256": "78863db5d7ab7b63de1c2d6a514e046449044f929b7402f8e5a24315ac2d2861"
+}

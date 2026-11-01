@@ -1,0 +1,39 @@
+{
+  "clauses": {
+    "SRC-331:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Ingest and evaluate external audit report audit/SAIHANDOFF_FREEBUFF_PROVENANCE.md (T-1819 / SRC-278 receiving owner handoff)."
+    },
+    "SRC-331:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Verify operator origin interface: evaluate FreeBuff native input boundary and host authority broker contract in tools/saipen_engine/host_authority_client.py."
+    },
+    "SRC-331:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Verify worker registration boundary: native spawner must register spawned worker PID via register_operator_worker before model tool execution."
+    },
+    "SRC-331:R004": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Enforce ingress transport contract: verify host_ingress envelope preserves exact request text, digest, session, and message identity without model-forged provenance."
+    },
+    "SRC-331:R005": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Document forensic analysis artifact at .saipen/evidence/T-1922-freebuff-provenance/ANALYSIS.md."
+    },
+    "SRC-331:R006": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Cleanly consume audit/SAIHANDOFF_FREEBUFF_PROVENANCE.md via journaled audit inbox closure upon terminal settlement."
+    }
+  },
+  "derived_at": "2026-10-25T13:58:28Z",
+  "derived_from": "SRC-331",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "9f8f35055b400e901ab274b352c2c6bbb7452282eeb8f169f36da807820d9256"
+}

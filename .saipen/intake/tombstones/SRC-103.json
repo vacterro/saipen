@@ -1,0 +1,19 @@
+{
+  "actionable": 6,
+  "archive_ref": ".saipen/archive/source/SRC-103.md",
+  "closed_at": "2026-10-30T02:41:59Z",
+  "closure_event": null,
+  "linked_work": "T-1452",
+  "linked_works": [
+    "T-1452",
+    "T-1453",
+    "T-1454",
+    "T-1455"
+  ],
+  "receipt_id": "SRC-103",
+  "requirements": 6,
+  "schema_version": 1,
+  "source_sha256": "54b0d043ee94f239e43f7bb26c3bbaa23b634a67fbd1bf955888e6693149a3a1",
+  "status": "CLOSED",
+  "unresolved": 0
+}

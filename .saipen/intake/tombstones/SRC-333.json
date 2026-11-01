@@ -1,0 +1,16 @@
+{
+  "actionable": 6,
+  "archive_ref": ".saipen/archive/source/SRC-333.md",
+  "closed_at": "2026-10-25T14:05:56Z",
+  "closure_event": null,
+  "linked_work": "T-1925",
+  "linked_works": [
+    "T-1925"
+  ],
+  "receipt_id": "SRC-333",
+  "requirements": 6,
+  "schema_version": 1,
+  "source_sha256": "2aca86c2a18c1ba42ad18db535b5a1bfb1186df0c2a6fed1126042b5c0e56b39",
+  "status": "CLOSED",
+  "unresolved": 0
+}

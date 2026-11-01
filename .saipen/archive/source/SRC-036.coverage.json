@@ -1,0 +1,113 @@
+{
+  "requirements": {
+    "SRC-036:R001": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/T-1320-fleet-acceptance.md#AC-01",
+      "text": "Every inspected root receives one deterministic classification and ambiguous binding never falls back to another project.",
+      "verification": "Fleet focused unittest 151 PASS",
+      "work": "T-1320"
+    },
+    "SRC-036:R002": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/T-1320-fleet-acceptance.md#AC-02",
+      "text": "SAFE protocol drift invokes exactly the canonical T-1318 recovery path once and returns to BOUND_VALID.",
+      "verification": "151 focused tests PASS",
+      "work": "T-1320"
+    },
+    "SRC-036:R003": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/T-1320-fleet-acceptance.md#AC-03",
+      "text": "Unsafe ambiguous and conflicting recovery performs zero repair writes.",
+      "verification": "151 focused tests PASS",
+      "work": "T-1320"
+    },
+    "SRC-036:R004": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/T-1320-fleet-acceptance.md#AC-04",
+      "text": "No stale consequential operation is automatically replayed after recovery.",
+      "verification": "151 focused tests PASS and T-1320 real OpenCode proof",
+      "work": "T-1320"
+    },
+    "SRC-036:R005": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/T-1320-fleet-acceptance.md#AC-05",
+      "text": "Original product Work survives recovery and is neither replaced nor falsely completed.",
+      "verification": "151 focused tests PASS and T-1320 real OpenCode proof",
+      "work": "T-1320"
+    },
+    "SRC-036:R006": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/T-1320-fleet-acceptance.md#AC-06",
+      "text": "Read-only fleet scan mutates zero projects and does not scan arbitrary drives.",
+      "verification": "151 focused tests PASS",
+      "work": "T-1320"
+    },
+    "SRC-036:R007": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/T-1320-fleet-acceptance.md#AC-07",
+      "text": "Cross-project matrix proves project A cannot mutate project B through cwd binding stale envelope or recovery.",
+      "verification": "representative synthetic matrix PASS",
+      "work": "T-1320"
+    },
+    "SRC-036:R008": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/T-1320-fleet-acceptance.md#AC-08",
+      "text": "Non-SAIPEN contexts remain non-interfering.",
+      "verification": "151 focused tests PASS",
+      "work": "T-1320"
+    },
+    "SRC-036:R009": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/T-1320-fleet-acceptance.md#AC-09",
+      "text": "Unchanged failure cannot create a recovery loop one attempt then bounded stop.",
+      "verification": "151 focused tests PASS",
+      "work": "T-1320"
+    },
+    "SRC-036:R010": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/T-1320-fleet-acceptance.md#AC-10",
+      "text": "OpenCode fresh-process proof demonstrates binding preflight safe recovery fresh revalidation and concrete continuation.",
+      "verification": "7 fresh installed host tests PASS and T-1320 real OpenCode proof",
+      "work": "T-1320"
+    },
+    "SRC-036:R011": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/T-1320-fleet-acceptance.md#AC-11",
+      "text": "Canonical search fallback remains valid without rg.",
+      "verification": "46 search and runtime bootstrap tests PASS",
+      "work": "T-1320"
+    },
+    "SRC-036:R012": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/T-1320-fleet-acceptance.md#AC-12",
+      "text": "No new PATCH_OWNED broad failure remains.",
+      "verification": "runtime manifest 328 tracked and core red classification 18 preexisting",
+      "work": "T-1320"
+    }
+  },
+  "schema_version": 1
+}

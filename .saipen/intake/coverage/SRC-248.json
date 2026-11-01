@@ -1,0 +1,203 @@
+{
+  "requirements": {
+    "SRC-248:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "BLOCKED",
+      "evidence": "E-15480",
+      "text": "Resolve the five reproduced Improve findings of cycle imp-_sairelay-20261013-1 (saipen-cli-01 RUN-1 IMP-001..003, saipen-cli-02 RUN-1 IMP-001..002) and repair the continuation dead ends; the operator explicitly requests canonical admission and resolution of all five",
+      "verification": "four of five findings fixed and verified in SAIPEN (R004, R006, R007, R008) and the fifth by T-1770 (R005); their canonical admission in the source cycle waits on T-1783 (R017)",
+      "work": "T-1769"
+    },
+    "SRC-248:R002": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-15262",
+      "text": "First verify the authoritative SAIPEN installation, current Work ownership, admission and mutation gates",
+      "verification": "SCOUT E-15262: installation is this checkout (host entry PATH_LAUNCHER), Work ownership this seat's, mutation gate admits it; every repair claim re-proved by the engine's ownership gate (E-15313, E-15398 area claims)",
+      "work": "T-1769"
+    },
+    "SRC-248:R003": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-15262",
+      "text": "Use the normal workflow to create and claim bounded repair tickets; do not request separate operator approval merely because the previous Work is DONE",
+      "verification": "five bounded repair tickets T-1770/T-1762, T-1771, T-1772, T-1775, T-1774 created and claimed through SAIOPS and finished through their own lifecycles with no separate operator approval",
+      "work": "T-1769"
+    },
+    "SRC-248:R004": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-15366",
+      "text": "Repair 1: regression closure must not invalidate its own source_receipts execution binding",
+      "verification": "T-1771 DONE E-15369: tools/test_t1771_measure_then_finish.py -> PASS; pair regression-execution-845f524d55594c14ad40ac1642afaf26; family 62f16e4442874591 6514 ran 0 red; live: SRC-249's clause derived at measurement and T-1776 closed first time (E-15379..E-15388)",
+      "work": "T-1769"
+    },
+    "SRC-248:R005": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-15306",
+      "text": "Repair 2: a canonical verification PASS must not be vetoed by historical failure counts within the red half of an otherwise successful regression pair",
+      "verification": "tools/test_t1762_control_count_scope.py and tools/test_t1770_pair_stage_scope.py -> PASS; pairs regression-execution-8e41fdbb627642db964d34634a4cdbbe and regression-execution-c013bf4e46624795a10534c649708e87; family f3170f4057516648 6504 ran",
+      "work": "T-1770"
+    },
+    "SRC-248:R006": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-15431",
+      "text": "Repair 3: empty-draft reconciliation must expose a finite, lossless or explicitly sanctioned exit instead of recommending an impossible transition",
+      "verification": "T-1772 DONE E-15434: tools/test_t1772_empty_draft_exit.py -> PASS; pair regression-execution-7677a516a6204d4a89974b391b5febb4; family d96f2275eca7914e 6541 ran 0 red",
+      "work": "T-1769"
+    },
+    "SRC-248:R007": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-15450",
+      "text": "Repair 4: continue must resume an existing Improve seat using the correct session identity and must never grow the roster through an accidental bare improve",
+      "verification": "T-1775 DONE E-15453: tools/test_t1775_continue_never_admits_a_seat.py -> PASS; pair regression-execution-9e6b118cc3fa4582b63b21d9cccc1310; family 529e416d78636f7c 6548 ran 0 red",
+      "work": "T-1769"
+    },
+    "SRC-248:R008": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-15469",
+      "text": "Repair 5: sweep-queue human rendering must expose finding references, contents and precheck errors, preserving the machine-readable JSON contract",
+      "verification": "T-1774 DONE E-15472: tools/test_t1774_sweep_queue_human.py -> PASS; pair regression-execution-a5bbff0734e3481691b1a573c0e30dae; family 8dc82849d6fca2e8 6553 ran 0 red",
+      "work": "T-1769"
+    },
+    "SRC-248:R009": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-15450",
+      "text": "Investigate the existing continue router, Improve manager and CLI _emit implementation; reuse existing session resume and status rendering contracts rather than introducing another framework",
+      "verification": "resume_action reuses improve --session and improve status (T-1775); T-1774 keeps the shared _emit and adds human lines only; T-1771 reuses intake.ensure_request_clause; T-1772 reuses retire_seat's own survivor rule",
+      "work": "T-1769"
+    },
+    "SRC-248:R010": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-15450",
+      "text": "Regression: no repeated seat creation through continue",
+      "verification": "T-1775: obeying the router twice on a complete roster leaves its size unchanged (test_t1775 obey case) -> PASS",
+      "work": "T-1769"
+    },
+    "SRC-248:R011": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-15450",
+      "text": "Regression: deterministic and idempotent resume",
+      "verification": "T-1775: improve --session resumes the same seat twice, roster unchanged (test_t1775 draft case) -> PASS",
+      "work": "T-1769"
+    },
+    "SRC-248:R012": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-15366",
+      "text": "Regression: closure after successful measurement",
+      "verification": "T-1771: the first finish after one measurement closes (test_t1771) -> PASS; live T-1776 finished first time at E-15388 after its measurement derived SRC-249:R001",
+      "work": "T-1769"
+    },
+    "SRC-248:R013": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-15306",
+      "text": "Regression: correct red and green evidence classification",
+      "verification": "tools/test_t1762_control_count_scope.py and tools/test_t1770_pair_stage_scope.py -> PASS; pairs regression-execution-8e41fdbb627642db964d34634a4cdbbe and regression-execution-c013bf4e46624795a10534c649708e87; family f3170f4057516648 6504 ran",
+      "work": "T-1770"
+    },
+    "SRC-248:R014": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-15431",
+      "text": "Regression: recoverable empty-draft lifecycle",
+      "verification": "T-1772: reconcile names improve abort, the printed exit terminates the cycle with every report byte kept (test_t1772) -> PASS",
+      "work": "T-1769"
+    },
+    "SRC-248:R015": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-15469",
+      "text": "Regression: full human and JSON sweep-queue output",
+      "verification": "T-1774: human and JSON surfaces of one cycle (test_t1774) -> PASS",
+      "work": "T-1769"
+    },
+    "SRC-248:R016": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-15450",
+      "text": "Regression: no authority escalation or conflicting ownership",
+      "verification": "T-1771 refused calls write nothing (test_t1771 foreign-session and absent-contract cases); T-1772 names only the sanctioned abort (E-15431); T-1775 never admits a seat and leaves another family's seat to its owner (E-15450) -> PASS",
+      "work": "T-1769"
+    },
+    "SRC-248:R017": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "BLOCKED",
+      "evidence": "E-15474",
+      "text": "Then perform the canonical Core sweep of the original five composite findings and complete the cycle only after verified dispositions",
+      "verification": "dependency T-1783: _SAIRELAY's own seat works its T-10 (its E-150, 14.10 11:33Z) and the operator's SAIRELAY handoff requires a live preflight before any sweep there",
+      "work": "T-1769"
+    },
+    "SRC-248:R018": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-15474",
+      "text": "If cross-project ownership prevents modification, create the appropriate SAIPEN-owned Work and record the dependency without violating gates",
+      "verification": "T-1783 is the SAIPEN-owned Work for the cross-project Core sweep; this parent records the dependency (block-for) instead of writing _SAIRELAY",
+      "work": "T-1769"
+    },
+    "SRC-248:R019": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-15431",
+      "text": "Do not fabricate ticket closure or edit reports to suppress evidence",
+      "verification": "no report or SWEEP entry in _SAIRELAY was written by this Work (cycle files dated 13.10 21:17-21:27); every repair closed through its own regression pair and declared family; T-1772 pins report bytes kept",
+      "work": "T-1769"
+    },
+    "SRC-248:R020": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-15474",
+      "text": "Autonomous continuation is expected for every authorized step",
+      "verification": "after the protocol-home valve fix (T-1776, E-15388) the chain T-1771, T-1772, T-1775, T-1774 ran claim to DONE with no operator step",
+      "work": "T-1769"
+    },
+    "SRC-248:R021": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "BLOCKED",
+      "evidence": "E-15480",
+      "text": "Final report: under 150 words",
+      "verification": null,
+      "work": "T-1769"
+    },
+    "SRC-248:R022": {
+      "actionable": false,
+      "class": "context",
+      "disposition": "VERIFIED",
+      "evidence": "E-15476",
+      "text": "The reports of the source cycle contain full expected, actual and evidence triples and reproducible paths",
+      "verification": null,
+      "work": "T-1769"
+    }
+  },
+  "schema_version": 1
+}

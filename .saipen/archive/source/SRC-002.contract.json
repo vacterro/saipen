@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-002:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "superseded by subsequent audit waves"
+    }
+  },
+  "derived_at": "2026-08-29T03:43:02Z",
+  "derived_from": "SRC-002",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "7a71c770a02ef78911a5e9f629ca21f83a451e2908a939a3bad2cf1a85d41ee4"
+}

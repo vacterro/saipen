@@ -1,0 +1,29 @@
+{
+  "clauses": {
+    "SRC-014:R001": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "Audit Inbox discovers audit/N.md at <project-root>/audit/ before selecting ordinary queued BOARD work"
+    },
+    "SRC-014:R002": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "cc/continue notices the audit before ordinary TODO selection"
+    },
+    "SRC-014:R003": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "audit file is captured as durable source authority (source_kind=external_audit)"
+    },
+    "SRC-014:R004": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "normal Work is derived and linked from the captured source"
+    }
+  },
+  "derived_at": "2026-08-31T05:38:27Z",
+  "derived_from": "SRC-014",
+  "interpretation_revision": 4,
+  "schema_version": 1,
+  "source_sha256": "28e6b5d038cc19e3c854b3f3b0f1b35d6183ac4a959cd2f3df524365f85ce5d5"
+}

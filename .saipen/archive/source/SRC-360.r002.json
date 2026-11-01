@@ -1,0 +1,19 @@
+{
+  "clauses": {
+    "SRC-360:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "D-01 Response-Contract-Enforcement: Typed rendering prevents model overwriting STALE_FAIL with PASS"
+    },
+    "SRC-360:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "D-02 Review-Revision-Discipline: Edits in REVIEW invalidate review approval and require BUILD->VERIFY->REVIEW loop"
+    }
+  },
+  "derived_at": "2026-10-31T23:42:24Z",
+  "derived_from": "SRC-360",
+  "interpretation_revision": 2,
+  "schema_version": 1,
+  "source_sha256": "8dc5a432a77e2af6cf3d710bdbd92a5079efd22e6af38c2a580e9cc9e509aeb8"
+}

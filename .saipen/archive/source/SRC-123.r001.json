@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-123:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "audit/17 CORE-001: current BOARD scalar writers and parser must prevent every Python splitlines separator from creating or detaching ticket records; verify current bytes and tests, then link existing Work or disposition only from live evidence."
+    }
+  },
+  "derived_at": "2026-09-27T15:07:01Z",
+  "derived_from": "SRC-123",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "6d1ee46d9e8557da38b4ae294fb2cb296864014f01b732f4efb9585c83d015f1"
+}

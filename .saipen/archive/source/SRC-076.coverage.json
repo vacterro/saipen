@@ -1,0 +1,14 @@
+{
+  "requirements": {
+    "SRC-076:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "T-1419 closed with verification evidence in LOG: verify -> PASS [target: T-1419] conf: high -- python -m unittest tools.test_response_surface_contract -> Ran 20 tests OK; behavioural red control via tools/saipen_engine/response_surface.py refused a missing mandatory field, a WAIT with OPERATOR ACTION NONE, and out-of-order fields while the well-formed block was clean; tools.test_hush_runtime 21/21; protocol_budget BUDGET PASS; ruff 0.16.0 clean;",
+      "text": "Install EXEC-RESPONSE-01 default SAIPEN response surface: control block STATUS RESULT BLOCKER OPERATOR ACTION NEXT EXACT ACTION VALIDATION first, DETAILS optional and last; canonical owner saipen/EXECUTION.md, not a STYLE rule",
+      "verification": "the Work this request created reached its own verification gate; see the T-1419 VERIFY cycle in .saipen/LOG.md",
+      "work": "T-1419"
+    }
+  },
+  "schema_version": 1
+}

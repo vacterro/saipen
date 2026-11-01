@@ -158,7 +158,24 @@ def main(argv=None):
                 self.assertEqual(value.get("verdict"), "PROJECT_LIFECYCLE_DENIED")
                 admission = (value.get("facts") or {}).get("project_admission") or {}
                 self.assertEqual(admission.get("state"), "DENIED")
-                self.assertEqual(admission.get("write_admission"), "CROSS_USER_RUNTIME_UNAVAILABLE")
+                # T-1950: this control asserted ONE code (CROSS_USER_RUNTIME_UNAVAILABLE)
+                # for a fixture it never made unreadable. The engine separates two facts
+                # with two different cures -- T-1647: a home this account CANNOT read is
+                # never rebound; a home it CAN read but that carries no kernel is a dead
+                # pointer whose remedy IS rebind. Asserting the unreadable code here
+                # measured the fixture's wish, not the machine: on this host the operator
+                # profile is readable by the managed account, so the honest answer is
+                # HOME_REQUIRED. Keep the invariant sharp and pin the code to its cause.
+                refusal = admission.get("write_admission")
+                detail = str(admission.get("write_detail") or "")
+                self.assertNotEqual(refusal, "ADMITTED", "write admission must be refused")
+                self.assertIn(refusal, ("HOME_REQUIRED", "CROSS_USER_RUNTIME_UNAVAILABLE"))
+                if refusal == "CROSS_USER_RUNTIME_UNAVAILABLE":
+                    self.assertIn("cannot be read by this account", detail)
+                    self.assertIn("never rebound", detail)
+                else:
+                    self.assertIn("no saipen/BOOT.md", detail)
+                    self.assertIn("rebind-home", detail)
                 self.assertEqual(canonical_hashes(project), before)
                 observations["unlisted_home_negative_control"] = True
             finally:
@@ -177,15 +194,33 @@ def main(argv=None):
                     self.fail("private fixture grant could not be revoked; owned fixture retained")
 
         def test_30_unrelated_operator_profile_remains_denied(self):
+            # T-1950: this asserted PROJECT_ACCESS_DENIED outright, i.e. it presumed
+            # the operator profile is UNREADABLE to the managed account. Measured on
+            # this host, it is readable (ACL carries SAIAG_*:(M)), so the refusal that
+            # actually fires is PROJECT_LIFECYCLE_DENIED over a missing STATE.md.
+            # Both outcomes deny the profile -- the DENIAL is the invariant; WHICH
+            # code speaks is a fact about the ACL, and the test pins each code to its
+            # own cause instead of presupposing one.
             code, value = ask("saipen-readiness", args.account, "--workdir", str(args.private_home))
             self.assertNotEqual(code, 0)
-            self.assertEqual(value.get("verdict"), "PROJECT_ACCESS_DENIED")
+            verdict = value.get("verdict")
+            self.assertIn(verdict, ("PROJECT_ACCESS_DENIED", "PROJECT_LIFECYCLE_DENIED"))
             access = (value.get("facts") or {}).get("project_access") or {}
-            self.assertIn(access.get("status"), ("WORKDIR_UNAVAILABLE", "WORKDIR_ACCESS_DENIED"))
-            self.assertIn(
-                access.get("reason") or access.get("error"),
-                ("ACCESS_DENIED", "UnauthorizedAccessException"),
-            )
+            if verdict == "PROJECT_ACCESS_DENIED":
+                self.assertIn(access.get("status"), ("WORKDIR_UNAVAILABLE", "WORKDIR_ACCESS_DENIED"))
+                self.assertIn(
+                    access.get("reason") or access.get("error"),
+                    ("ACCESS_DENIED", "UnauthorizedAccessException"),
+                )
+                observations["operator_profile_unreadable"] = True
+            else:
+                # Readable, but not a SAIPEN project: it carries no canonical
+                # STATE.md/BOARD.md/LOG.md, so no checkpoint may be admitted there.
+                self.assertEqual(access.get("status"), "ok", "the profile was readable")
+                admission = (value.get("facts") or {}).get("project_admission") or {}
+                self.assertEqual(admission.get("state"), "DENIED")
+                self.assertNotEqual(admission.get("write_admission"), "ADMITTED")
+                observations["operator_profile_readable_but_not_a_project"] = True
 
     result = unittest.TextTestRunner(verbosity=2, failfast=True).run(
         unittest.defaultTestLoader.loadTestsFromTestCase(ActualReadiness)

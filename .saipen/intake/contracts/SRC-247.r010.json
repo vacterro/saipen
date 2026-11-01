@@ -1,0 +1,59 @@
+{
+  "clauses": {
+    "SRC-247:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Prevent recurrence of the proven admission, runtime-binding and verification-order drift from a ZAICODE-hosted 9router session"
+    },
+    "SRC-247:R002": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Admission: bind the live canonical SAIPEN root, runtime, HEAD, dirty tree, active STATE, BOARD and LOG, admission gates and ownership before any mutation; do not treat this handoff as execution authority; if admission is unavailable, perform read-only analysis and return BLOCKED with exact evidence"
+    },
+    "SRC-247:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Verify whether current BOOT and host entry deterministically resolve the correct launcher without unnecessary agent search"
+    },
+    "SRC-247:R004": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Verify installed runtime and protocol-home binding consistency before consequential commands"
+    },
+    "SRC-247:R005": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Audit whether provenance differentiates real user ingress from host-generated synthetic events"
+    },
+    "SRC-247:R006": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Preserve the existing VERIFY to REVIEW refusal behaviour"
+    },
+    "SRC-247:R007": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Add focused regression tests only for confirmed missing enforcement"
+    },
+    "SRC-247:R008": {
+      "actionable": true,
+      "class": "non-goal",
+      "text": "Do not invent new rule IDs or duplicate existing protocol owners"
+    },
+    "SRC-247:R009": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "Negative control: a synthetic reminder must not grant new user authority"
+    },
+    "SRC-247:R010": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "Negative control: a changed protocol home must not silently retain old admission"
+    }
+  },
+  "derived_at": "2026-10-14T01:10:06Z",
+  "derived_from": "SRC-247",
+  "interpretation_revision": 10,
+  "schema_version": 1,
+  "source_sha256": "dcb0df86fc458502eca0497c106d85a08e838332ad0a0e32384b6c1b44d802fb"
+}

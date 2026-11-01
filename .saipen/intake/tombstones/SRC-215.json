@@ -1,0 +1,16 @@
+{
+  "actionable": 16,
+  "archive_ref": ".saipen/archive/source/SRC-215.md",
+  "closed_at": "2026-10-11T14:52:11Z",
+  "closure_event": null,
+  "linked_work": "T-1716",
+  "linked_works": [
+    "T-1716"
+  ],
+  "receipt_id": "SRC-215",
+  "requirements": 16,
+  "schema_version": 1,
+  "source_sha256": "8d54708e5daccb690cc464918d4c81d7f1d2d4ed0f036a62a6e0c2f5ab0c2ce6",
+  "status": "CLOSED",
+  "unresolved": 0
+}

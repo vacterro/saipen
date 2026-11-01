@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-024:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Shortcut migration contract: st routes EXACTLY to saipen stop (same implementation path, no second STOP implementation); sss remains EXACTLY saipen status; saipen stop and saipen status long-form semantics unchanged --verification REGISTRY.json shortcuts row ss->stop becomes st->stop; dispatch tuple stop/ss becomes stop/st; COMMANDS.md/SKILL.md updated"
+    }
+  },
+  "derived_at": "2026-09-06T18:40:03Z",
+  "derived_from": "SRC-024",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "29382825df1167091bc5ca10c1983b5b3a4da608f6ddf28bdb247cf752b6be8c"
+}

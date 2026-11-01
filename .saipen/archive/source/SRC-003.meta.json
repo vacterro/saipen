@@ -1,0 +1,21 @@
+{
+  "amends": "SRC-001",
+  "archive_ref": ".saipen/archive/source/SRC-003.md",
+  "closed_at": "2026-08-29T03:48:19Z",
+  "closure_event": "E-4624",
+  "linked_work": "T-1171",
+  "receipt_id": "SRC-003",
+  "received_at": "2026-08-27T17:51:51Z",
+  "reread_at": "2026-08-29T03:48:19Z",
+  "schema_version": 1,
+  "sensitive": false,
+  "source_kind": "external_audit",
+  "source_sha256": "6e02b189390aadbc91632e6e54d25ac291c9a570e4b8d5db24839133bb003e57",
+  "status": "CLOSED",
+  "storage_status": "ARCHIVED",
+  "transport": {
+    "newline_normalization": "none",
+    "source_encoding": "utf-8",
+    "transport_transform": "none"
+  }
+}

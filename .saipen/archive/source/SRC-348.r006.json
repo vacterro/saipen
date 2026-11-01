@@ -1,0 +1,39 @@
+{
+  "clauses": {
+    "SRC-348:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "A new actionable attachment must route through START, not status or continue; preserve the original task bytes and refuse clearly when attachment transport is unavailable"
+    },
+    "SRC-348:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "A requirement disposition must be canonically validated: a test-run PASS is not a requirement VERIFIED, terminal dispositions require clause-specific evidence, and evidence that is absent, unrelated or a blanket aggregate may not verify a clause"
+    },
+    "SRC-348:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Under a blocked or reauthentication-required gate, strictly read-only investigation is permitted and every state-changing bypass is prohibited; CLI replay of operator ingress must fail and authenticated operator-carrier ingress must be verified"
+    },
+    "SRC-348:R004": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Audit ledgers must not be declarable as completely VERIFIED from aggregate pytest counts: test-node identities must be unique, bound to a source revision, and checked per mechanism with independently checkable terminal dispositions"
+    },
+    "SRC-348:R005": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "An operator requirement must be distinguishable from a requirement an agent derived from a larger specification: track operator_source, derived_requirement and agent_hypothesis as separate provenance classes and never present an inferred requirement as an original operator instruction"
+    },
+    "SRC-348:R006": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "The response contract must be enforced against actual output: the active reply language and style are bound to the session and validated, with no repeated tool execution on a format retry"
+    }
+  },
+  "derived_at": "2026-10-29T22:45:29Z",
+  "derived_from": "SRC-348",
+  "interpretation_revision": 6,
+  "schema_version": 1,
+  "source_sha256": "b907ad13b95eba7436dd367fb898f667e9f17ce2241cbacb3fc35624179f8b8c"
+}

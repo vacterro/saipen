@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-072:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "T-1407 PRESERVE STRUCTURAL BLOCK EVIDENCE ACROSS BOUNDED LOG EXTERNALIZATION"
+    }
+  },
+  "derived_at": "2026-10-02T07:41:18Z",
+  "derived_from": "SRC-072",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "bdbfee4e2f65bbec1d2574363c2b9cf5476be9156128b8572c5922b3b1be2011"
+}

@@ -1,0 +1,131 @@
+{
+  "requirements": {
+    "SRC-230:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-14833",
+      "text": "START/CONTINUE ordering is deterministic: new actionable ingress routes through START before CONTINUE",
+      "verification": "core-unit f01359647a05f1a9 PASS 6336/0 (E-14828); tools/test_t1732_protocol_hardening.py 6/6 re-run in REVIEW (E-14831); BOOT Entry table routes new input to START before CONTINUE; START-first rule restored and test_t1645 routing tests pass",
+      "work": "T-1732"
+    },
+    "SRC-230:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-14833",
+      "text": "Recorded user intent cannot masquerade as a claimed work item: USER_REQUEST_RECORDED reports work_claimed=false and preserves active ticket ownership",
+      "verification": "core-unit f01359647a05f1a9 PASS 6336/0 (E-14828); tools/test_t1732_protocol_hardening.py 6/6 re-run in REVIEW (E-14831); test_user_request_recorded_distinguished_from_claimed_work + test_resumed_work_reports_work_claimed_true",
+      "work": "T-1732"
+    },
+    "SRC-230:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-14833",
+      "text": "STOP has a documented and regression-tested execution boundary: handback-only semantics, mutation_authorized=false",
+      "verification": "core-unit f01359647a05f1a9 PASS 6336/0 (E-14828); tools/test_t1732_protocol_hardening.py 6/6 re-run in REVIEW (E-14831); test_stop_checkpoint_contract_and_handback_semantics",
+      "work": "T-1732"
+    },
+    "SRC-230:R004": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-14833",
+      "text": "Unsupported host-level enforcement is reported honestly: distinguish mechanical boundary from advisory/unavailable host tool cancellation",
+      "verification": "core-unit f01359647a05f1a9 PASS 6336/0 (E-14828); tools/test_t1732_protocol_hardening.py 6/6 re-run in REVIEW (E-14831); test_cli_stop_reports_truthful_host_enforcement: host_cancellation UNAVAILABLE, mechanical_boundary false",
+      "work": "T-1732"
+    },
+    "SRC-230:R005": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-14833",
+      "text": "Runnable work is HUSH-compliant within supported enforcement surfaces: discretionary progress narration suppressed by default",
+      "verification": "core-unit f01359647a05f1a9 PASS 6336/0 (E-14828); tools/test_t1732_protocol_hardening.py 6/6 re-run in REVIEW (E-14831); EXEC-HUSH-01 unchanged; response surface contract suite passes",
+      "work": "T-1732"
+    },
+    "SRC-230:R006": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-14833",
+      "text": "Detailed reports preserve information while respecting delivery contracts: use typed artifacts with bounded canonical chat digests",
+      "verification": "core-unit f01359647a05f1a9 PASS 6336/0 (E-14828); tools/test_t1732_protocol_hardening.py 6/6 re-run in REVIEW (E-14831); EXEC-RESPONSE-01 unchanged; REPORT.md typed artifact with bounded chat digest",
+      "work": "T-1732"
+    },
+    "SRC-230:R007": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-14833",
+      "text": "VERIFY evidence is correctly linked to ticket and subject: enforce linkage between ticket, subject, verifier, and results",
+      "verification": "core-unit f01359647a05f1a9 PASS 6336/0 (E-14828); tools/test_t1732_protocol_hardening.py 6/6 re-run in REVIEW (E-14831); VERIFY-ORACLE-01 unchanged; core-unit record cited by fingerprint in the T-1732 VERIFY cycle",
+      "work": "T-1732"
+    },
+    "SRC-230:R008": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-14833",
+      "text": "Negative controls demonstrate that the relevant gates detect violations",
+      "verification": "core-unit f01359647a05f1a9 PASS 6336/0 (E-14828); tools/test_t1732_protocol_hardening.py 6/6 re-run in REVIEW (E-14831); test_negative_controls covers four invariants A-D",
+      "work": "T-1732"
+    },
+    "SRC-230:R009": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-14833",
+      "text": "Existing recovery, ownership, and autonomous continuation behavior remains intact",
+      "verification": "core-unit f01359647a05f1a9 PASS 6336/0 (E-14828); tools/test_t1732_protocol_hardening.py 6/6 re-run in REVIEW (E-14831); neighbor suites core_ownership_routing, legacy_lifecycle_compat, t1504_zaicode_adapter, audit_inbox: 188 OK",
+      "work": "T-1732"
+    },
+    "SRC-230:R010": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-14833",
+      "text": "All relevant automated tests pass and core-unit family verified",
+      "verification": "core-unit f01359647a05f1a9 PASS 6336/0 (E-14828); tools/test_t1732_protocol_hardening.py 6/6 re-run in REVIEW (E-14831); full family green, 0 new red",
+      "work": "T-1732"
+    },
+    "SRC-230:R011": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-14833",
+      "text": "No unrelated files or evidence are lost",
+      "verification": "core-unit f01359647a05f1a9 PASS 6336/0 (E-14828); tools/test_t1732_protocol_hardening.py 6/6 re-run in REVIEW (E-14831); BOOT/COMMANDS loss caught by core-unit and restored from runtime snapshot (E-14833); no evidence deleted",
+      "work": "T-1732"
+    },
+    "SRC-230:R012": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-14833",
+      "text": "Every modified protocol rule has one clear owner across authoritative documentation",
+      "verification": "core-unit f01359647a05f1a9 PASS 6336/0 (E-14828); tools/test_t1732_protocol_hardening.py 6/6 re-run in REVIEW (E-14831); no protocol markdown rule changed; behavior owned by CMD-ROUTING-01 / OPS-EFFECT-01 in engine code",
+      "work": "T-1732"
+    },
+    "SRC-230:R013": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-14833",
+      "text": "Outstanding host-specific gaps are separated from completed SAIPEN fixes",
+      "verification": "core-unit f01359647a05f1a9 PASS 6336/0 (E-14828); tools/test_t1732_protocol_hardening.py 6/6 re-run in REVIEW (E-14831); REPORT.md section 6 limitations and section 7 ZAICODE requirements ZR-01/ZR-02 kept separate",
+      "work": "T-1732"
+    },
+    "SRC-230:R014": {
+      "actionable": true,
+      "class": "non-goal",
+      "disposition": "VERIFIED",
+      "evidence": "E-14833",
+      "text": "No rewriting protocol, parallel state machines, website/host source modifications, fabricated results, or deployment",
+      "verification": "non-goal honored: delta limited to tools/saipen_engine/entry.py, operations.py, tools/saipen.py, one new test and evidence; no website/host source, no new state machine, no deploy/commit/push; all cited results from recorded runs",
+      "work": "T-1732"
+    }
+  },
+  "schema_version": 1
+}

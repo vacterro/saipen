@@ -1,0 +1,24 @@
+{
+  "clauses": {
+    "SRC-061:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "The fixture contamination is proven from current bytes before any mutation"
+    },
+    "SRC-061:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "T-1391 is retired canonically with TEST_FIXTURE_CONTAMINATION authority SRC-065"
+    },
+    "SRC-061:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "T-1390 is retired canonically with TEST_FIXTURE_CONTAMINATION authority SRC-065"
+    }
+  },
+  "derived_at": "2026-09-18T21:03:19Z",
+  "derived_from": "SRC-061",
+  "interpretation_revision": 3,
+  "schema_version": 1,
+  "source_sha256": "8e5a1078f8f19b56ea69e3b3492c76828ae1b67c87661e2c2d0972c4695cda89"
+}

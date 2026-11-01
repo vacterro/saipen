@@ -1,0 +1,179 @@
+{
+  "clauses": {
+    "SRC-138:R001": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not substitute post-generation style checking for session admission."
+    },
+    "SRC-138:R002": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not discard those repairs."
+    },
+    "SRC-138:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "There must be one canonical runtime owner for session protocol admission."
+    },
+    "SRC-138:R004": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not place the admission truth separately in:"
+    },
+    "SRC-138:R005": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not create duplicate authorities."
+    },
+    "SRC-138:R006": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "Admission must prove current generations/fingerprints for at least:"
+    },
+    "SRC-138:R007": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Model prose is NEVER evidence."
+    },
+    "SRC-138:R008": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not merely remove the requirement or pretend invocation succeeded."
+    },
+    "SRC-138:R009": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "A. the skill is admission-critical and must be installed/resolved; B. the skill identity/path changed and canonical resolution is stale; C. the skill is decorative and should never have been admission-critical."
+    },
+    "SRC-138:R010": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "admission must not silently become ADMITTED."
+    },
+    "SRC-138:R011": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do NOT let the model print:"
+    },
+    "SRC-138:R012": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "The model whose admission failed must not author that diagnostic."
+    },
+    "SRC-138:R013": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "The old admission token must fail after invalidation."
+    },
+    "SRC-138:R014": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not collapse these into one heuristic classifier."
+    },
+    "SRC-138:R015": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "A green later layer must never compensate for a failed earlier layer."
+    },
+    "SRC-138:R016": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Codex, OpenCode, ZAICODE, generic, and other hosts must be classified from their actual mechanics."
+    },
+    "SRC-138:R017": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "CHAT_STYLE MUST NOT BECOME A SECOND PROTOCOL"
+    },
+    "SRC-138:R018": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "It must not independently invent:"
+    },
+    "SRC-138:R019": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "The checker may compile them into a runtime form, but must preserve one owner."
+    },
+    "SRC-138:R020": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not use locale-dependent default decoding."
+    },
+    "SRC-138:R021": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "The fix must not make Windows cp1251 legacy input silently corrupt elsewhere."
+    },
+    "SRC-138:R022": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "The repaired implementation must reject the same carriers through the same oracle."
+    },
+    "SRC-138:R023": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not accept tests that only verify newly written code in isolation."
+    },
+    "SRC-138:R024": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Admission acceptance must use admission-specific RED/GREEN controls and host interception evidence."
+    },
+    "SRC-138:R025": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not let roadmap creation interrupt the active hard-admission repair."
+    },
+    "SRC-138:R026": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "separate MUST / SHOULD / FUTURE"
+    },
+    "SRC-138:R027": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "do not turn the roadmap into execution authority"
+    },
+    "SRC-138:R028": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "do not automatically enqueue the entire future roadmap as Work."
+    },
+    "SRC-138:R029": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not leave temporary repair machinery in production surfaces accidentally."
+    },
+    "SRC-138:R030": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not delete unknown foreign WIP."
+    },
+    "SRC-138:R031": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not close from BUILD or from isolated green tests."
+    },
+    "SRC-138:R032": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Healthy user experience must be boring:"
+    },
+    "SRC-138:R033": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "The user must not need to read another explanation of why the model forgot the protocol."
+    },
+    "SRC-138:R034": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Failure must become:"
+    }
+  },
+  "derived_at": "2026-09-29T11:54:28Z",
+  "derived_from": "SRC-138",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "e83f3adb052623840463e7361dbe9414ee4c9cac52b128c5831d0df40b4fe30d"
+}

@@ -1,0 +1,86 @@
+{
+  "requirements": {
+    "SRC-354:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "BOARD.md and LOG.md enforce publication_state pending until bound to shipped cohort",
+      "text": "Release Cohort Membership: Affected source files must belong to an intended release cohort; tickets retain publication_state pending until bound.",
+      "verification": "python tools/core_unit.py focused T-1978 --pattern test_t1914_installed_runtime_parity.py: PASS record: .saipen/evidence/focused-unit/d27ecd1f63ca2b33-20261031T182254957084Z.json",
+      "work": "T-1978"
+    },
+    "SRC-354:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "tools/validate.py validates staged metadata matches working-tree without bulk git add",
+      "text": "Staged Release Metadata: Staged metadata must match approved source without unstaged divergence; bulk git add is prohibited.",
+      "verification": "python tools/core_unit.py focused T-1978 --pattern test_t1914_installed_runtime_parity.py: PASS record: .saipen/evidence/focused-unit/d27ecd1f63ca2b33-20261031T182254957084Z.json",
+      "work": "T-1978"
+    },
+    "SRC-354:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "tools/validate.py validates runtime manifest completeness across 955 tracked files",
+      "text": "Runtime Manifest Completeness: No unreviewed runtime files may be silently omitted from the tracked runtime manifest.",
+      "verification": "python tools/core_unit.py focused T-1978 --pattern test_t1914_installed_runtime_parity.py: PASS record: .saipen/evidence/focused-unit/d27ecd1f63ca2b33-20261031T182254957084Z.json",
+      "work": "T-1978"
+    },
+    "SRC-354:R004": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "EX-000032 provenance discrepancy captured and publication gated fail-closed pending re-resolution",
+      "text": "Installed Hook Digest Parity: Closure provenance must match running engine generation; stale external verification records require re-resolution before publication.",
+      "verification": "python tools/core_unit.py focused T-1978 --pattern test_t1914_installed_runtime_parity.py: PASS record: .saipen/evidence/focused-unit/d27ecd1f63ca2b33-20261031T182254957084Z.json",
+      "work": "T-1978"
+    },
+    "SRC-354:R005": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "PATH launcher resolves to bin/saipen.cmd matching local v8.1.0 codebase",
+      "text": "PATH Launcher Resolution: PATH launcher must resolve to the correct published generation in bin/saipen.",
+      "verification": "python tools/core_unit.py focused T-1978 --pattern test_t1914_installed_runtime_parity.py: PASS record: .saipen/evidence/focused-unit/d27ecd1f63ca2b33-20261031T182254957084Z.json",
+      "work": "T-1978"
+    },
+    "SRC-354:R006": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "extensions/adapters and autoinject reference local canonical engine entries",
+      "text": "Scheduled Injector Reference: Extension adapters and autoinject must reference project-local engine entries.",
+      "verification": "python tools/core_unit.py focused T-1978 --pattern test_t1914_installed_runtime_parity.py: PASS record: .saipen/evidence/focused-unit/d27ecd1f63ca2b33-20261031T182254957084Z.json",
+      "work": "T-1978"
+    },
+    "SRC-354:R007": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "fail-closed rollback integrity verified for all external verification records",
+      "text": "Rollback Consistency: Engine rollback restores a consistent published generation, and external verification records fail closed.",
+      "verification": "python tools/core_unit.py focused T-1978 --pattern test_t1914_installed_runtime_parity.py: PASS record: .saipen/evidence/focused-unit/d27ecd1f63ca2b33-20261031T182254957084Z.json",
+      "work": "T-1978"
+    },
+    "SRC-354:R008": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "NOT_APPLICABLE",
+      "evidence": "FreeBuff host ownership: host process cache reload requires host restart, out of SAIPEN repo scope",
+      "text": "Host Process Cache Freshness: Host process environment must not execute stale hooks across sessions.",
+      "verification": null,
+      "work": "T-1978"
+    },
+    "SRC-354:R009": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "standing publication policy strictly enforced, unauthorized publish refused, pending publication preserved",
+      "text": "Publication Authority Invariant: Do not publish unapproved repositories or bypass staging policies; maintain pending publication state.",
+      "verification": "python tools/core_unit.py focused T-1978 --pattern test_t1914_installed_runtime_parity.py: PASS record: .saipen/evidence/focused-unit/d27ecd1f63ca2b33-20261031T182254957084Z.json",
+      "work": "T-1978"
+    }
+  },
+  "schema_version": 1
+}

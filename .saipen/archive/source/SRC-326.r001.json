@@ -1,0 +1,79 @@
+{
+  "clauses": {
+    "SRC-326:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "MISSION Eliminate premature operator handbacks when an agent knows the next executable action and the canonical project still contains authorized work. A model finishing its current response must not be interpreted as completion of the engineering goal. A successful implementation slice must not automatically terminate an unfinished multi-ticket campaign. The agent must continue through the existing authorized execution lifecycle without requiring the operator to repeat the next task back to it. Do not solve this by adding another prompt saying \"continue autonomously\". Repair and enforce the actual model-turn-to-host-iteration boundary."
+    },
+    "SRC-326:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "FIELD EVIDENCE (measured 2026-10-25) FIRST HANDOFF \u2014 SRC-324, active implementation T-1911. Reported: BUILD T-1911, native ingress diagnostics + continuation normalization done; remaining P0: T-1912 (idempotent ingress retry), T-1913 (broker origin recovery), T-1914 (installed runtime acceptance). Reported \"NEXT EXACT ACTION: saipen continue\", then ended the model turn. Operator had to supply the next task (\"Gap D repair\"). SECOND HANDOFF \u2014 SRC-325, active implementation T-1915. Reported: BUILD T-1915, terminal next_action recovery + tests done; remaining: R07 partial settlement, urgent-work interruption, external implementation provenance, malformed-write prevention, installed-runtime acceptance. Reported \"NEXT EXACT ACTION: saipen continue\", named T-1912 as next important repair, then ended the model turn. Operator again had to supply the next task. Both responses are BUILD-stage reports. BUILD is not a proven terminal ticket outcome; a verified implementation slice does not supersede VERIFY, REVIEW and SHIP. The next action must derive from canonical state, not the model's ticket preferences. The journal establishes a premature handback pattern but does not prove which installed host callback was missing."
+    },
+    "SRC-326:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "EXISTING CONTRACTS Normative: saipen/CORE.md \u00a71.11 (determinism invariants), \u00a71.12 (default goal-driven execution); saipen/EXECUTION.md EXEC-RESPONSE-01, EXEC-HUSH-01. Implementation: tools/saipen_engine/iteration.py::decide_turn; iteration_verdict.py::project_iteration_verdict; host_iteration.py::HostIterationController, ::on_model_turn_finished; continue_loop.py::classify_route; saipen.py::_continue_chain, :: _continue; response_surface.py::should_continue, ::gate_final_response. Existing test: tools/test_t1619_iteration_boundary.py, specifically E2E01PrematureHandback::test_auto_kick_and_no_completion_ui \u2014 it establishes the reference controller behaviour (verdict AUTO_KICK, action KICK_NEXT_ITERATION, no goal-complete UI) but does NOT prove the deployed host schedules another turn."
+    },
+    "SRC-326:R004": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "ROOT CAUSE INVESTIGATION Trace: MODEL START \u2192 TOOL EXECUTION \u2192 CANONICAL CHECKPOINT \u2192 MODEL FINAL RESPONSE \u2192 HOST MODEL_TURN_FINISHED CALLBACK \u2192 SAIPEN ITERATION VERDICT \u2192 HOST CONTROLLER ACTION \u2192 NEXT MODEL TURN DISPATCH. Identify the first missing, skipped or misclassified transition. Test independently: H01 host never invokes the iteration controller. H02 controller calls the verdict API but ignores AUTO_KICK. H03 host treats a valid response digest as goal completion. H04 BUILD/VERIFY success misread as terminal Work. H05 host fails to enqueue the next iteration. H06 next iteration enqueued but not dispatched. H07 provider/model/tool-profile switch discards the continuation request. H08 runtime limit stops the turn but is reported as ordinary completion. H09 response hook runs only after final output and cannot resume execution. H10 host supports only advisory integration, not enforceable continuation. H11 the actual canonical verdict is OPERATOR_WAIT but the summary omits the gate. H12 live project has a valid active task but the controller reads stale identity. H13 an automation-disabled UI mode intentionally prevents automatic dispatch. Do not choose a hypothesis without runtime evidence."
+    },
+    "SRC-326:R005": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "MODEL-TURN TERMINATION CONTRACT At the end of every operational model turn the host must query the canonical verdict: `saipen iteration --json`, using the actual project root and the executor's independently observed capabilities. Never use the model's prose. Handle: AUTO_KICK (schedule next authorized iteration); VALID_TERMINAL (completion UI only when the canonical terminal contract holds); OPERATOR_WAIT (stop, surface the exact human decision); EXECUTOR_CAPABILITY_MISMATCH (reroute executor, do not change project Work); RUNTIME_PAUSED (preserve Work, report the runtime limit). Never invent authorization; never override explicit user cancellation."
+    },
+    "SRC-326:R006": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "CONTINUE THE CURRENT TICKET FIRST If phase BUILD / task T-1915, do not abandon it because T-1912 is another P0. Sequence: resume current BUILD \u2192 finish remaining obligations \u2192 VERIFY \u2192 REVIEW \u2192 legitimate SHIP/closure \u2192 preserve publication gates \u2192 route to next admissible Work \u2192 continue. Focused green tests are not a reason to skip lifecycle phases. If the current ticket is genuinely blocked, preserve its blocker and use canonical independent-work selection. The model must never jump tickets by prose."
+    },
+    "SRC-326:R007": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "HOST-CONTROLLED AUTO-KICK (complete the existing HostIterationController; do not create a competing decision engine) A01 invoke canonical projection after every operational turn termination. A02 use source/current-runtime identity for the exact project. A03 validate the verdict schema. A04 bind the verdict to active project, goal and execution generation. A05 run the corresponding controller action. A06 for AUTO_KICK submit the next turn through the trusted host scheduler. A07 never synthesize a fresh human operator event. A08 preserve the original authorized goal identity. A09 preserve active ticket and canonical phase. A10 preserve pending tool results and durable evidence. A11 a repeated callback must not schedule duplicate iterations. A12 a crash after scheduling but before dispatch must be recoverable. A13 provider rate limits trigger the supported runtime fallback, not false completion. A14 reassess executor capabilities after every model/provider/tool-profile switch. A15 keep genuine operator authorization gates intact. A16 respect explicit operator STOP and deliberately disabled automation. A17 keep normal engineering work above speculative maintenance. A18 preserve bounded resource and context budgets. A19 prevent endless loops that only repeat reports. A20 never treat tool success as user-goal success. A21 expose the actual controller outcome in machine-readable diagnostics. A22 capability mismatch is a runtime routing issue, never a canonical blocker."
+    },
+    "SRC-326:R008": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "TWO KINDS OF CONTINUATION INNER (saipen.py::_continue_chain): deterministic canonical operations, closed action vocabulary, does not execute engineering work or generate reasoning. Do not weaken its security classification to pretend it can BUILD. OUTER (HostIterationController + the actual host scheduler): starts a new model iteration on AUTO_KICK. This is where unfinished BUILD/VERIFY/REVIEW and newly selected Work continue. The requested repair is primarily OUTER. Do not recurse `saipen continue` inside the deterministic CLI loop."
+    },
+    "SRC-326:R009": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "PREMATURE FINAL-RESPONSE PREVENTION R01 a final digest is not goal completion. R02 a valid formatted response is not terminal evidence. R03 an executable next action cannot become an operator action because the model printed it. R04 on AUTO_KICK the host must schedule continuation or report the exact unsupported capability. R05 never ask the user to type the action the agent may already execute. R06 a report-only interruption cannot close the goal. R07 explicit status requests may yield status without granting or cancelling unrelated authority. R08 a completed ticket is not a completed campaign. R09 a runtime cap is persisted and resumed through an authorized scheduler. R10 with no scheduler, report RUNTIME_PAUSED rather than claiming completion. Do not implement a text loop that re-asks the same model with no canonical change."
+    },
+    "SRC-326:R010": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "LIVENESS AND ANTI-LOOP Track: project identity, goal identity, canonical event before/after, active ticket before/after, phase before/after, source fingerprint, model turn identity, controller decision, scheduled iteration identity, tool result, progress witness. A continuing iteration must produce real implementation progress, valid verification progress, canonical phase advancement, safe recovery, new diagnostic evidence, or a genuine terminal/operator boundary. Repeated unchanged digests are not progress. AUTO_KICK \u2192 unchanged report \u2192 AUTO_KICK must not run without a bounded stall detector. Use existing fixed-point/controller/recovery contracts; do not couple outer turn limits to the inner operation budget."
+    },
+    "SRC-326:R011": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "REGRESSION MATRIX AC-01 BUILD T-1911 unfinished + valid final digest \u2192 AUTO_KICK schedules a turn. AC-02 BUILD T-1915 unfinished + printed \"NEXT EXACT ACTION: saipen continue\" \u2192 no operator handback because the text looks final. AC-03 ticket completes BUILD with focused tests green \u2192 continue through VERIFY/REVIEW/SHIP. AC-04 ticket terminal, other authorized Work remains \u2192 select and execute next. AC-05 genuine full-goal terminal verdict \u2192 VALID_TERMINAL, completion UI once. AC-06 next action needs fresh operator authority \u2192 OPERATOR_WAIT, no bypass. AC-07 provider rate limit during BUILD \u2192 preserve Work, authorized fallback. AC-08 candidate executor lacks tools \u2192 capability mismatch + host reroute, not project BLOCKED. AC-09 all compatible executors unavailable \u2192 RUNTIME_PAUSED with recoverable checkpoint. AC-10 host restarts after an AUTO_KICK decision \u2192 no lost or duplicated iteration. AC-11 two final callbacks for one generation \u2192 one scheduled iteration. AC-12 repeated unchanged report \u2192 bounded stall diagnosis, no token loop. AC-13 active Work changes between verdict and dispatch \u2192 stale dispatch rejected, routing recomputed. AC-14 operator disables automation \u2192 no unauthorized dispatch. AC-15 live project still in BUILD after the model returns \u2192 no goal-complete UI. AC-16 multi-Work handoff \u2192 continue within the objective to real terminality or a genuine boundary. AC-17 host has only post-render advisory hooks \u2192 no fabricated enforcement claim; report the integration gap. AC-18 installed ZAICODE execution reaches the next model turn without another user message \u2192 live end-to-end PASS."
+    },
+    "SRC-326:R012": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "LIVE ACCEPTANCE (T-1619 is not sufficient) 1 start a real governed project under an authenticated host; 2 admit one operator-authorized multi-step goal; 3 start a BUILD task needing several turns; 4 let the model emit a final response after partial progress; 5 observe the real verdict; 6 verify AUTO_KICK; 7 verify the host enqueues and dispatches; 8 verify no new user input is required; 9 verify the current task is resumed before unrelated Work; 10 verify eventual legitimate terminal or bounded stop; 11 repeat across a provider switch; 12 repeat across process restart. Record: MODEL_TURN_ID, PROJECT_ID, GOAL_ID, ACTIVE_TICKET, PHASE, CANONICAL_EVENT, ITERATION_VERDICT, CONTROLLER_ACTION, QUEUE_OPERATION_ID, DISPATCH_RESULT, EXECUTOR_CAPABILITIES, NEXT_MODEL_TURN_ID, ACTUAL_TERMINAL_REASON. Never claim live success from mocked controller tests."
+    },
+    "SRC-326:R013": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "CROSS-PROJECT OWNERSHIP SAIPEN owns: canonical iteration verdict, execution and authority policy, reference controller contract, state and Work lifecycle, test fixtures, protocol continuation diagnostics. ZAICODE owns: native model-turn completion callback, host executor scheduling, queue persistence and dispatch, installed bundle integration, UI completion projection. Do not edit ZAICODE application code from SAIPEN. If SAIPEN is correct but the deployed callback is missing or defective: produce the exact host integration contract, identify the missing boundary, preserve the failure evidence, mark live acceptance pending, hand the host-owned implementation to its executor. Do not close the incident because unit tests pass."
+    },
+    "SRC-326:R014": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "FINAL ACCEPTANCE The operator must not type \"Gap D repair\" because the agent already knew. The operator must not type \"saipen continue\" because a BUILD turn ended. The controller distinguishes MODEL_TURN_FINISHED from SAIPEN_GOAL_FINISHED without weakening a security gate. A multi-ticket goal stays active while independently authorized executable work remains. A temporary provider or process interruption preserves the goal. No false operator request. No fake progress. No duplicated turns. No infinite retry. No premature DONE. FINAL REPORT: STATUS, ROOT_CAUSE, CURRENT_CONTROLLER_CONTRACT, DEPLOYED_HOST_WIRING, MODEL_FINAL_VERDICT, AUTO_KICK_DISPATCH, TEST_RESULTS, LIVE_ACCEPTANCE, AUTHORITY_BOUNDARIES, REMAINING_HOST_GAPS, NEXT_EXACT_ACTION. FINAL DIRECTIVE: repair the model-turn-to-execution-controller boundary. Do not add another prose-only instruction to continue. Do not build another deterministic CLI loop for work requiring model reasoning. Make the existing canonical AUTO_KICK verdict cause actual, authorized, durable next-turn execution. Continue through the current ticket's legitimate lifecycle before selecting the next Work. The objective is complete only when canonical acceptance says so, not when the model has finished talking."
+    }
+  },
+  "derived_at": "2026-10-25T11:02:00Z",
+  "derived_from": "SRC-326",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "6e58b4a8e16892d92eaf01604aabd5c522e11af526bcf5a2ae32b5e54d888fb6"
+}

@@ -1,0 +1,33 @@
+{
+  "appends": [
+    {
+      "class": "CLARIFICATION",
+      "created_work": "T-1802",
+      "delta": "implementation",
+      "derived_clauses": [
+        "SRC-260:R001"
+      ],
+      "label": "T-1765-compatibility-choice",
+      "projected_at": "2026-10-15T17:49:30Z",
+      "receipt": "SRC-260",
+      "received_at": "2026-10-15T17:46:01Z",
+      "request_witness": "model_supplied",
+      "rewind": null,
+      "seq": 1,
+      "source_sha256": "1c05ce08558e2c7c2635ece31404384a8990a358d3c718d98324ff9fb2cbca3c",
+      "state": "PROJECTED",
+      "steps": [
+        "linked",
+        "derived",
+        "superseded"
+      ],
+      "superseded": [],
+      "supersedes": [],
+      "work": [
+        "T-1802"
+      ]
+    }
+  ],
+  "schema_version": 1,
+  "source": "SRC-245"
+}

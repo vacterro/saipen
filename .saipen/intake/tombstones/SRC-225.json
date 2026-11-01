@@ -1,0 +1,17 @@
+{
+  "actionable": 8,
+  "archive_ref": ".saipen/archive/source/SRC-225.md",
+  "closed_at": "2026-10-13T06:46:04Z",
+  "closure_event": null,
+  "linked_work": "T-1726",
+  "linked_works": [
+    "T-1726",
+    "T-1730"
+  ],
+  "receipt_id": "SRC-225",
+  "requirements": 8,
+  "schema_version": 1,
+  "source_sha256": "534002a32de0a831c3e25b3b0c487488ef317397f583be14037ed56765d359b9",
+  "status": "CLOSED",
+  "unresolved": 0
+}

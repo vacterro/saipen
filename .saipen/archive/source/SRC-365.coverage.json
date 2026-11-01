@@ -1,0 +1,14 @@
+{
+  "requirements": {
+    "SRC-365:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "T-1989 closed with verification evidence in LOG: FOCUSED-UNIT-EVIDENCE PASS conf: high ran:36 record:.saipen/evidence/focused-unit/5cfa4a46e72ea132-20261101T050458410186Z.json sha256:0a38f2994f17035c14cb79a2fc21354553a220d048805e630775c774840e3066",
+      "text": "FIX CROSS-HOST HOOK OVERWRITE REGRESSION",
+      "verification": "the Work this request created reached its own verification gate; see the T-1989 VERIFY cycle in .saipen/LOG.md",
+      "work": "T-1989"
+    }
+  },
+  "schema_version": 1
+}

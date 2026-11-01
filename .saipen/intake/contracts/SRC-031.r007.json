@@ -1,0 +1,44 @@
+{
+  "clauses": {
+    "SRC-031:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Current lifecycle: checkpoint already-present partial BUILD work once, refresh owner lease, persist truthful next_action and human digest before further implementation; do not invent historical events."
+    },
+    "SRC-031:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "CLOSE-1: prove all 13 listed P0 controls, using real host runtime evidence for the OpenCode boundary where available."
+    },
+    "SRC-031:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "CLOSE-2: native Windows hostile matrix including junction must PASS; non-Windows junction explicitly SKIP; retain symlink and normalization coverage."
+    },
+    "SRC-031:R004": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "CLOSE-3: actual OpenCode global discovery, factory/startup probe, allowed effect, protected write block, multi-file patch block, exact standalone recovery usability."
+    },
+    "SRC-031:R005": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "CLOSE-4: reconcile SRC-028 R005-R015 against executable evidence; no mechanical VERIFIED for Kiro/Gemini."
+    },
+    "SRC-031:R006": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "CLOSE-5: executable Kiro PreToolUse translation, common guard, native refusal, fail closed, diagnostics, preserving idempotent installation, separate installed/current/effective fields; actual Kiro refused effect required for R010 VERIFIED."
+    },
+    "SRC-031:R007": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "CLOSE-6: executable Gemini BeforeTool translation to common guard and native hard block; actual Gemini refused effect required for R011 VERIFIED."
+    }
+  },
+  "derived_at": "2026-09-12T08:32:32Z",
+  "derived_from": "SRC-031",
+  "interpretation_revision": 7,
+  "schema_version": 1,
+  "source_sha256": "c88029e2b54b8d31b755686f2ec8f00429ced01f962198df45aab2a826469c14"
+}

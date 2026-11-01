@@ -1,0 +1,86 @@
+{
+  "requirements": {
+    "SRC-348:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/T-1959-agent-drift/findings-matrix.txt",
+      "text": "A new actionable attachment must route through START, not status or continue; preserve the original task bytes and refuse clearly when attachment transport is unavailable",
+      "verification": "BOOT.md First action routes NEW ACTIONABLE USER INPUT to START and says START FIRST with no status, continue, source or recover first; the start transport accepts a file carrier, hex bytes and a receipt id and refuses when attachment transport is unavailable. Measured on HEAD 66ef622a: test_entry_answer_agrees.py passed 9 tests on an authenticated focused record .saipen/evidence/focused-unit/80573d5680492f06-20261029T231213077740Z.json",
+      "work": "T-1959"
+    },
+    "SRC-348:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/T-1959-agent-drift/findings-matrix.txt",
+      "text": "A requirement disposition must be canonically validated: a test-run PASS is not a requirement VERIFIED, terminal dispositions require clause-specific evidence, and evidence that is absent, unrelated or a blanket aggregate may not verify a clause",
+      "verification": "Disposition handling is canonically validated in intake: a terminal actionable disposition without evidence refuses, an implemented or verified disposition without verification refuses, a referenced test file absent from disk is EVIDENCE_NOT_FOUND, a disjoint test topic is EVIDENCE_UNRELATED, a live-acceptance clause cited with a unit or core-suite PASS is EVIDENCE_SCOPE_TOO_WEAK, and a subset proof is PARTIAL_FULFILLMENT_REFUSED, so a test-run PASS cannot stand in for a requirement VERIFIED. Two of those refusals were reproduced live during this ticket. Measured on HEAD 66ef622a: test_source_contract_derivation.py and test_cold_agent_truth.py passed 34 tests on an authenticated focused record .saipen/evidence/focused-unit/80573d5680492f06-20261029T231405663501Z.json",
+      "work": "T-1959"
+    },
+    "SRC-348:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/T-1959-agent-drift/r003-r004-mechanisms.txt",
+      "text": "Under a blocked or reauthentication-required gate, strictly read-only investigation is permitted and every state-changing bypass is prohibited; CLI replay of operator ingress must fail and authenticated operator-carrier ingress must be verified",
+      "verification": "Read-only investigation stays permitted under a blocked or reauthentication-required gate while every state change is refused: fleet answers read only true with needs local mutation false, and gate decision returns RECONCILE_REAUTH_REQUIRED for a missing or invalid authority Source, a different project identity or a different gate version. CLI replay cannot renew bounded authority: the valve refusal names operator_carrier as the only required ingress, carries no canonical next command, and states that an agent CLI replay is refused; a replayed or transplanted carrier is not a fresh cc. Authenticated ingress is verified by a broker that accepts only a capability this process minted and refuses a written-down string as BROKER_CAPABILITY_REPLAY, which the host taxonomy registers as a blocking severity. Measured on HEAD 66ef622a: test_automation_block.py, test_capability_boundary.py and test_t1858_valve_guidance.py passed 57 tests on an authenticated focused record .saipen/evidence/focused-unit/80573d5680492f06-20261029T231610291842Z.json",
+      "work": "T-1959"
+    },
+    "SRC-348:R004": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/T-1959-agent-drift/r003-r004-mechanisms.txt",
+      "text": "Audit ledgers must not be declarable as completely VERIFIED from aggregate pytest counts: test-node identities must be unique, bound to a source revision, and checked per mechanism with independently checkable terminal dispositions",
+      "verification": "An audit ledger cannot be declared completely verified from aggregate pytest counts. Shard merging requires one shared inventory digest and selected position lists that cover every discovered occurrence exactly once, so a duplicate, omission or substitution sets a partition error; the partition proof is persisted in the run record. Each record is bound to the exact tested bytes by a tree fingerprint plus a verification identity, and the cache loader refuses a record whose fingerprint, identity or family differ, so a record cannot float to another revision. Coverage is derived per clause rather than in aggregate, and the generic-proof guard refuses core-suite, aggregate-pass and discovery-wide phrasing as proof of a live-acceptance clause. Measured on HEAD 66ef622a: test_t1472_core_unit_shards.py and test_t1837_ci_family_parity.py passed 29 tests on an authenticated focused record .saipen/evidence/focused-unit/80573d5680492f06-20261029T231810312380Z.json",
+      "work": "T-1959"
+    },
+    "SRC-348:R005": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/T-1959-agent-drift/findings-matrix.txt",
+      "text": "An operator requirement must be distinguishable from a requirement an agent derived from a larger specification: track operator_source, derived_requirement and agent_hypothesis as separate provenance classes and never present an inferred requirement as an original operator instruction",
+      "verification": "Requirement provenance is carried as separate witness classes and not blended. Each user instruction receipt records one witness among operator carrier, transport obligation and model supplied; an unwitnessed request is recorded as model supplied and that class is not itself a refusal, while only a carrier witness may project user explicit authority, preempt active Work or pivot a goal. SOURCES.md REQUEST-PROVENANCE-01 states the same rule as protocol text, so a derived clause written by an agent stays distinguishable from the operator's own words rather than being presented as an original instruction. Measured on HEAD 66ef622a: test_operator_task_witness.py and test_ingress_authority.py passed 30 tests on an authenticated focused record .saipen/evidence/focused-unit/80573d5680492f06-20261029T232023474270Z.json",
+      "work": "T-1959"
+    },
+    "SRC-348:R006": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/T-1959-agent-drift/r006-response-contract.txt",
+      "text": "The response contract must be enforced against actual output: the active reply language and style are bound to the session and validated, with no repeated tool execution on a format retry",
+      "verification": "The response contract is enforced against the reply text rather than asserted: the check and render commands are a single read-only renderer and checker that consume the reply on stdin and decide mandatory field presence, canonical order, last-position details and a wait that names a human action. The active reply language and style are bound to the session by resolving the running style contract, so the emitted digest uses the session language instead of the caller's. A format retry re-enters that pure read-only validator, which has no tool dispatch, so reformatting a reply cannot re-execute the work it describes. Measured on HEAD 66ef622a: test_response_surface_contract.py, test_response_digest.py, test_response_delivery.py and test_response_fact_binding.py passed 85 tests across two authenticated focused records .saipen/evidence/focused-unit/80573d5680492f06-20261029T232223012982Z.json and .saipen/evidence/focused-unit/80573d5680492f06-20261029T232420223418Z.json",
+      "work": "T-1959"
+    },
+    "SRC-348:R007": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/T-1959-agent-drift/findings-matrix.txt",
+      "text": "An authenticated native host adapter test must exist and the refusal must stay fail-closed when host identity or generation is unavailable",
+      "verification": "An authenticated native host adapter test exists and keeps refusal fail-closed when host identity or generation is unavailable. The host bootstrap suite proves that no proven candidate is answered as unavailable and that an unregistered explicit host is never reported green, so a missing identity or an unknown adapter generation refuses rather than defaulting to a working adapter. The adapter contract is recorded for the ZAICODE host, and the installed guard is byte-identical to the committed source at HEAD. Measured on HEAD 66ef622a: test_host_bootstrap.py passed 25 tests on an authenticated focused record .saipen/evidence/focused-unit/80573d5680492f06-20261029T232658155652Z.json",
+      "work": "T-1959"
+    },
+    "SRC-348:R008": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "export-completeness probe recorded as r008-export-probe.txt in the T-1959-agent-drift evidence directory",
+      "text": "The complete untruncated session export and the original handoff bytes must be obtained before full historical verification is claimed; declared versus actual message and part counts must be compared and missing records must never be read as proof that an action did not happen",
+      "verification": "Full historical verification is not claimed anywhere in this ticket, so the acquisition precondition was honoured rather than assumed: the declared 5096 messages and 18168 parts were compared against the 384 messages actually present in the 9486-byte capture, and no file of the declared 70777-byte size exists anywhere in the project tree, in the host application-data tree, or in the host blob store. A literal substring search for the part count was attempted and its hits were verified to be coincidental numeric noise in a git hash and an event identifier, so it was recorded as failed to locate rather than as proof. Absence of a record was never read as proof that an action did not happen: every finding was judged on the evidence that does exist, and the two findings the audit itself marks unproven were left unproven instead of being inferred as defects.",
+      "work": "T-1959"
+    },
+    "SRC-348:R009": {
+      "actionable": true,
+      "class": "non-goal",
+      "disposition": "VERIFIED",
+      "evidence": "non-goal compliance measurements recorded as r003-r004-mechanisms.txt and r008-export-probe.txt in the T-1959 agent-drift evidence directory",
+      "text": "Do not reopen a remediated ticket without evidence that the defect survives on current HEAD; do not push without destination-specific publication authorization; do not forge, replay or bypass operator credentials or reauthorization; run nonintrusive tests only and never inject real mouse or keyboard input into the operator workstation",
+      "verification": "The non-goal was honoured rather than implemented. No remediated ticket was reopened: every finding was re-measured on HEAD 66ef622a before being called a live defect, T-1943 was unblocked only on freshly measured evidence rather than on a historical report, and the two findings the audit itself marks unproven were left unproven. Nothing was committed or pushed, because publication here remains under a recorded user decision and the audit forbids a push without destination-specific authority. No operator credential was forged, replayed or bypassed, and no state file was edited to simulate an operator act; the replay refusal path itself was the thing measured. Every command used was a read-only probe, an isolated sandboxed unittest run or a SAIPEN CLI write, with no mouse, keyboard or desktop interference.",
+      "work": "T-1959"
+    }
+  },
+  "schema_version": 1
+}

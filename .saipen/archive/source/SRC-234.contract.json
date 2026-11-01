@@ -1,0 +1,59 @@
+{
+  "clauses": {
+    "SRC-234:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Inspect live repository, HEAD, dirty state, admission gates, and backlog"
+    },
+    "SRC-234:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Check existing execution, recovery, tool-use, and validation contracts without duplicating findings, rules, tasks, or mechanisms"
+    },
+    "SRC-234:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Evaluate recovery contract on tool schema validation failure: inspect available tool contract, correct argument types, avoid blind retries, stop and report after repeated failures"
+    },
+    "SRC-234:R004": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Evaluate recovery contract on read-before-write rejection: read target file, establish current content, retry against valid current state"
+    },
+    "SRC-234:R005": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Evaluate recovery contract on stale-write rejection: reread, reconcile concurrent changes, preserve optimistic concurrency guards"
+    },
+    "SRC-234:R006": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Evaluate recovery contract on completed task operations: distinguish idempotent terminal state from real failure without manufacturing false blockers"
+    },
+    "SRC-234:R007": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Strengthen protocol validation evidence handling: preserve actual validator exit status, preserve attributable conformance receipts, resolve installed instance identity"
+    },
+    "SRC-234:R008": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Add positive and negative regression controls covering schema correction, bounded retry, read-before-edit, stale edit, task stop, pipelined validator hiding, duplicate installations"
+    },
+    "SRC-234:R009": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Compare proposed normative change against existing authority: record host ownership boundary where enforcement belongs to ZAICODE and do not falsely claim SAIPEN enforces host behaviors"
+    },
+    "SRC-234:R010": {
+      "actionable": true,
+      "class": "non-goal",
+      "text": "No modification of ZAICODE or FREEBUFF_SAI source, no rewriting historical evidence, no inventing rule identifiers, no modifying DONE project without authorization"
+    }
+  },
+  "derived_at": "2026-10-13T04:48:00Z",
+  "derived_from": "SRC-234",
+  "interpretation_revision": 2,
+  "schema_version": 1,
+  "source_sha256": "3affe34eae1dfc5f550a758883fda0f3c5dc787b4940aaa8ba31de9cb101548a"
+}

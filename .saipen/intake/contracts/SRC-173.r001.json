@@ -1,0 +1,329 @@
+{
+  "clauses": {
+    "SRC-173:R001": {
+      "actionable": false,
+      "class": "context",
+      "text": "TITLE Cross-repository artifact-reference semantics: referenced FastPrompter bundles must never become accidental mandatory dependencies"
+    },
+    "SRC-173:R002": {
+      "actionable": false,
+      "class": "context",
+      "text": "Do not implement the ZAICODE requirements contained inside the specimen bundle."
+    },
+    "SRC-173:R003": {
+      "actionable": false,
+      "class": "context",
+      "text": "Do not create a duplicate Work merely because this handoff contains a fuller specification."
+    },
+    "SRC-173:R004": {
+      "actionable": false,
+      "class": "context",
+      "text": "Do not overwrite or bypass unrelated active Work."
+    },
+    "SRC-173:R005": {
+      "actionable": false,
+      "class": "context",
+      "text": "ADR-0003 separates transport location from execution/project identity."
+    },
+    "SRC-173:R006": {
+      "actionable": false,
+      "class": "context",
+      "text": "BOOT says handoff prose is not authority."
+    },
+    "SRC-173:R007": {
+      "actionable": false,
+      "class": "context",
+      "text": "audit_manifest.py explicitly states that a hypothetical path in a handoff is not proof that evidence exists."
+    },
+    "SRC-173:R008": {
+      "actionable": false,
+      "class": "context",
+      "text": "Source bodies are DATA and do not gain execution authority merely by containing command-looking or path-looking text."
+    },
+    "SRC-173:R009": {
+      "actionable": false,
+      "class": "context",
+      "text": "The exact identifier may differ if repository conventions indicate a better owner, but there must be one canonical owner and no duplicated prose implementations."
+    },
+    "SRC-173:R010": {
+      "actionable": false,
+      "class": "context",
+      "text": "The system must distinguish at least these meanings:"
+    },
+    "SRC-173:R011": {
+      "actionable": false,
+      "class": "context",
+      "text": "The exact enum names may differ, but the distinction must be durable and unambiguous."
+    },
+    "SRC-173:R012": {
+      "actionable": false,
+      "class": "context",
+      "text": "Untyped prose references MUST NOT become REQUIRED_INPUT."
+    },
+    "SRC-173:R013": {
+      "actionable": false,
+      "class": "context",
+      "text": "Do not infer requiredness from:"
+    },
+    "SRC-173:R014": {
+      "actionable": false,
+      "class": "context",
+      "text": "filename presence"
+    },
+    "SRC-173:R015": {
+      "actionable": false,
+      "class": "context",
+      "text": "an absolute or relative path appearing in prose"
+    },
+    "SRC-173:R016": {
+      "actionable": false,
+      "class": "context",
+      "text": "a .zip/.pdf/.png extension"
+    },
+    "SRC-173:R017": {
+      "actionable": false,
+      "class": "context",
+      "text": "words such as \"archive\", \"bundle\", \"attachment\", or \"file\""
+    },
+    "SRC-173:R018": {
+      "actionable": false,
+      "class": "context",
+      "text": "the fact that an upstream audit named the artifact"
+    },
+    "SRC-173:R019": {
+      "actionable": false,
+      "class": "context",
+      "text": "a previous machine-local location."
+    },
+    "SRC-173:R020": {
+      "actionable": false,
+      "class": "context",
+      "text": "The downstream implementation agent must work from the normalized handoff."
+    },
+    "SRC-173:R021": {
+      "actionable": false,
+      "class": "context",
+      "text": "It must not ask the user for the original artifact merely because the handoff names it."
+    },
+    "SRC-173:R022": {
+      "actionable": false,
+      "class": "context",
+      "text": "do not mistake a self-contained requirements bundle for a project repository merely because both are ZIP files."
+    },
+    "SRC-173:R023": {
+      "actionable": false,
+      "class": "context",
+      "text": "MUST NOT create WAIT_USER"
+    },
+    "SRC-173:R024": {
+      "actionable": false,
+      "class": "context",
+      "text": "MUST NOT create BLOCKED"
+    },
+    "SRC-173:R025": {
+      "actionable": false,
+      "class": "context",
+      "text": "MUST NOT create OPERATOR ACTION"
+    },
+    "SRC-173:R026": {
+      "actionable": false,
+      "class": "context",
+      "text": "MUST NOT ask for a local path"
+    },
+    "SRC-173:R027": {
+      "actionable": false,
+      "class": "context",
+      "text": "MUST NOT stop otherwise runnable Work."
+    },
+    "SRC-173:R028": {
+      "actionable": false,
+      "class": "context",
+      "text": "Do not recursively scan arbitrary drives, the user's home tree, Downloads, temporary folders, or unrelated repositories by basename."
+    },
+    "SRC-173:R029": {
+      "actionable": false,
+      "class": "context",
+      "text": "Do not guess paths."
+    },
+    "SRC-173:R030": {
+      "actionable": false,
+      "class": "context",
+      "text": "Do not require every external handoff producer to use it for safety: untyped references must still default non-required."
+    },
+    "SRC-173:R031": {
+      "actionable": false,
+      "class": "context",
+      "text": "Do not create a second parallel source-authority system."
+    },
+    "SRC-173:R032": {
+      "actionable": false,
+      "class": "context",
+      "text": "Do not spread the decision across unrelated modules."
+    },
+    "SRC-173:R033": {
+      "actionable": false,
+      "class": "context",
+      "text": "At minimum there must be executable regression coverage proving that an untyped artifact mention cannot create a user wait."
+    },
+    "SRC-173:R034": {
+      "actionable": false,
+      "class": "context",
+      "text": "Do not parse ordinary prose into fake strong authority."
+    },
+    "SRC-173:R035": {
+      "actionable": false,
+      "class": "context",
+      "text": "The artifact contract must agree with SAIPEN's closed disposition vocabulary."
+    },
+    "SRC-173:R036": {
+      "actionable": false,
+      "class": "context",
+      "text": "WAIT_USER must still satisfy the existing proof obligation."
+    },
+    "SRC-173:R037": {
+      "actionable": false,
+      "class": "context",
+      "text": "Do not make a short ID the integrity check."
+    },
+    "SRC-173:R038": {
+      "actionable": false,
+      "class": "context",
+      "text": "A locator must:"
+    },
+    "SRC-173:R039": {
+      "actionable": false,
+      "class": "context",
+      "text": "never be exported as portable archive metadata"
+    },
+    "SRC-173:R040": {
+      "actionable": false,
+      "class": "context",
+      "text": "avoid whole-drive scanning"
+    },
+    "SRC-173:R041": {
+      "actionable": false,
+      "class": "context",
+      "text": "Do not make SAIPEN correctness depend on FastPrompter being installed."
+    },
+    "SRC-173:R042": {
+      "actionable": false,
+      "class": "context",
+      "text": "Do not rely on changing filenames alone as the fix."
+    },
+    "SRC-173:R043": {
+      "actionable": false,
+      "class": "context",
+      "text": "Do not modify ZAICODE because of them."
+    },
+    "SRC-173:R044": {
+      "actionable": false,
+      "class": "context",
+      "text": "Untyped filename mention, artifact absent. Expected: non-required reference; continuation; requires_human=false."
+    },
+    "SRC-173:R045": {
+      "actionable": false,
+      "class": "context",
+      "text": "Untyped absolute-looking local path in handoff prose, artifact absent. Expected: no invented dependency; no path question."
+    },
+    "SRC-173:R046": {
+      "actionable": false,
+      "class": "context",
+      "text": "Explicit optional artifact, absent. Expected: continuation."
+    },
+    "SRC-173:R047": {
+      "actionable": false,
+      "class": "context",
+      "text": "Explicit replay-evidence artifact, absent, normalized findings embedded. Expected: continuation."
+    },
+    "SRC-173:R048": {
+      "actionable": false,
+      "class": "context",
+      "text": "Explicit required artifact, absent, equivalent authorized substitute embedded. Expected: continuation."
+    },
+    "SRC-173:R049": {
+      "actionable": false,
+      "class": "context",
+      "text": "Explicit required artifact, absent, no substitute and bytes truly needed. Expected: structured real blocker according to existing disposition law."
+    },
+    "SRC-173:R050": {
+      "actionable": false,
+      "class": "context",
+      "text": "Same FastPrompter logical bundle under original name and transport-renamed \"(2)\" name. Expected: fingerprint identity wins."
+    },
+    "SRC-173:R051": {
+      "actionable": false,
+      "class": "context",
+      "text": "Same basename with mismatching fingerprint/digest. Expected: reject candidate as wrong artifact."
+    },
+    "SRC-173:R052": {
+      "actionable": false,
+      "class": "context",
+      "text": "Resolver is not allowed to scan arbitrary drives or Downloads recursively."
+    },
+    "SRC-173:R053": {
+      "actionable": false,
+      "class": "context",
+      "text": "Exact incident regression. Input includes the specimen bundle name plus all normalized requirements/findings. Expected: the agent/protocol route never asks for the bundle's full local path."
+    },
+    "SRC-173:R054": {
+      "actionable": false,
+      "class": "context",
+      "text": "Primary project archive plus FastPrompter selection_bundle. Expected: project archive remains PRIMARY_TARGET unless operator explicitly selects the bundle itself."
+    },
+    "SRC-173:R055": {
+      "actionable": false,
+      "class": "context",
+      "text": "FastPrompter new artifact identity, if implemented. Expected: identity is stable across filename changes and does not expose a local path."
+    },
+    "SRC-173:R056": {
+      "actionable": false,
+      "class": "context",
+      "text": "FastPrompter backward compatibility, if manifest schema changes. Expected: legacy schema-6 bundle is classified honestly; no silent reinterpretation."
+    },
+    "SRC-173:R057": {
+      "actionable": false,
+      "class": "context",
+      "text": "FastPrompter reuse/retention suite remains green."
+    },
+    "SRC-173:R058": {
+      "actionable": false,
+      "class": "context",
+      "text": "Share-safe privacy tests remain green."
+    },
+    "SRC-173:R059": {
+      "actionable": false,
+      "class": "context",
+      "text": "Existing SAIPEN WAIT_USER proof tests remain green."
+    },
+    "SRC-173:R060": {
+      "actionable": false,
+      "class": "context",
+      "text": "Existing handoff/cold-orientation/source-intake tests remain green."
+    },
+    "SRC-173:R061": {
+      "actionable": false,
+      "class": "context",
+      "text": "Do not accept a test that merely checks documentation text."
+    },
+    "SRC-173:R062": {
+      "actionable": false,
+      "class": "context",
+      "text": "At least one executable test must exercise the routing/disposition/classification behavior responsible for preventing the unnecessary human question."
+    },
+    "SRC-173:R063": {
+      "actionable": false,
+      "class": "context",
+      "text": "Do not:"
+    },
+    "SRC-173:R064": {
+      "actionable": false,
+      "class": "context",
+      "text": "A truly required missing artifact must still fail truthfully."
+    }
+  },
+  "derived_at": "2026-10-04T14:31:47Z",
+  "derived_from": "SRC-173",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "9462b87350b891e1def749154532cb0b45609bf81b3c9e9a7e2aaae3200b888b"
+}

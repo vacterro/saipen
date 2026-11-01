@@ -1,0 +1,34 @@
+{
+  "clauses": {
+    "SRC-038:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Determine whether parked_work is a known field emitted by an older SAIPEN generation."
+    },
+    "SRC-038:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "If durable historical semantics prove an exact deterministic migration, add it to the existing canonical legacy recovery/migration owner."
+    },
+    "SRC-038:R003": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Preserve original bytes/evidence during migration."
+    },
+    "SRC-038:R004": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Migration must be journaled, idempotent and one-attempt."
+    },
+    "SRC-038:R005": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Unknown/unprovable semantics must remain fail-closed with a precise RECOVERY_BLOCKED reason."
+    }
+  },
+  "derived_at": "2026-09-13T20:35:31Z",
+  "derived_from": "SRC-038",
+  "interpretation_revision": 5,
+  "schema_version": 1,
+  "source_sha256": "4f25fa12ec117ef41687550f181d829f2b679ff71a51e02fa1ab51d5ca3bbb7d"
+}

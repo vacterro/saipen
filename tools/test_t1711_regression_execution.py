@@ -461,6 +461,98 @@ class ExecutionControls(RegressionGateFixture):
         self.assertNotEqual(first.data["record"], second.data["record"])
         self.assertTrue(self.to_review().ok)
 
+    def test_a_vanished_carrier_does_not_orphan_the_whole_family(self):
+        """T-1442: a lost carrier is degradation, not corruption.
+
+        The carrier is an ordinary working file and the journal outlives it.
+        Its digest lives in the journal, so it can never be honestly rebuilt --
+        and `execute_pair` reads the whole family BEFORE writing anything, so
+        raising on the first gap refused a HEALTHY carrier too and left every
+        `work regression` stuck at REGRESSION_EXECUTION_INVALID, unable to
+        write a replacement.  Losing one carrier then cost the project the
+        pairs it still had.
+        """
+        self.assertIsNotNone(EXECUTION)
+        first = self.execute()
+        self.assertTrue(first.ok, first.to_dict())
+
+        # A second, genuinely measured pair for the same ticket: a newer failure
+        # supersedes the first measurement without deleting it.
+        value = json.loads((self.project / first.data["record"]).read_text(encoding="utf-8"))
+        self.record(_evidence("FAIL", value["before"]["verifier"], value["before"]["subject"]))
+        second = self.execute()
+        self.assertTrue(second.ok, second.to_dict())
+        self.assertNotEqual(first.data["record"], second.data["record"])
+
+        survivor = self.project / second.data["record"]
+        lost = self.project / first.data["record"]
+        self.assertTrue(survivor.exists() and lost.exists())
+
+        # A working tree loses files; the journal does not.
+        lost.unlink()
+
+        # The header symptom: reading the family must not raise. Before the
+        # repair this raised FileNotFoundError naming the lost carrier, which
+        # is what refused a healthy pair elsewhere in the same family.
+        found = EXECUTION._records(self.project)
+        self.assertFalse(lost.exists(), "the engine must not rebuild lost evidence")
+        self.assertNotIn(first.data["record"], [carrier for _r, _v, carrier in found])
+
+        # The healthy carrier is still admitted: one gap does not cost the rest.
+        self.assertIn(second.data["record"], [carrier for _r, _v, carrier in found])
+
+        # The gap is also reportable by name for callers that surface it.
+        reported: list[str] = []
+        EXECUTION._records(self.project, problems=reported)
+        self.assertIn(first.data["record"], reported)
+
+        # And the family read no longer blocks a NEW measurement: a fresh pair
+        # for the same ticket still runs and still writes its own carrier.
+        # This is the header's second clause -- `work regression` used to refuse
+        # REGRESSION_EXECUTION_INVALID here, before it could write anything.
+        self.record(_evidence("FAIL", value["before"]["verifier"], value["before"]["subject"]))
+        third = self.execute()
+        self.assertTrue(third.ok, third.to_dict())
+        self.assertTrue((self.project / third.data["record"]).exists())
+        self.assertNotIn(third.data["record"], {first.data["record"], second.data["record"]})
+
+    def test_a_present_but_tampered_carrier_still_raises(self):
+        """T-1443/R008: the repair must forgive ABSENCE, never tampering.
+
+        `_records` now skips a carrier that is gone. That tolerance is only
+        safe if a carrier that is PRESENT but no longer matches its journal
+        digest still aborts the family: a degraded tree and a forged record are
+        different facts, and the second must never be skipped the way the first
+        is. Before this control the module's docstring promised the distinction
+        while nothing measured it.
+        """
+        self.assertIsNotNone(EXECUTION)
+        first = self.execute()
+        self.assertTrue(first.ok, first.to_dict())
+
+        value = json.loads((self.project / first.data["record"]).read_text(encoding="utf-8"))
+        self.record(_evidence("FAIL", value["before"]["verifier"], value["before"]["subject"]))
+        second = self.execute()
+        self.assertTrue(second.ok, second.to_dict())
+
+        # Rewrite a byte of a carrier that IS present, leaving the journal alone.
+        target = self.project / second.data["record"]
+        self.assertTrue(target.exists())
+        raw = target.read_bytes()
+        tampered = raw.replace(b'"PASS"', b'"FAIL"', 1)
+        self.assertNotEqual(tampered, raw, "the carrier must contain a PASS marker")
+        target.write_bytes(tampered)
+
+        with self.assertRaises(ValueError) as caught:
+            EXECUTION._records(self.project)
+        self.assertIn("integrity mismatch", str(caught.exception))
+
+        # A caller asking for the gap report must not get a laundered skip: the
+        # problems list is for ABSENT carriers, so a tampered one still raises.
+        reported: list[str] = []
+        with self.assertRaises(ValueError):
+            EXECUTION._records(self.project, problems=reported)
+
     def native(self, words, *, env=None):
         self.assertIsNotNone(EXECUTION)
         command = [

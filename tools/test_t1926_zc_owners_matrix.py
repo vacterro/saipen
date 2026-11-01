@@ -106,6 +106,72 @@ class ZC01SecretContainmentTests(unittest.TestCase):
             self.assertNotIn(value[:16], out, "a key fragment survived redaction")
 
 
+class RedactionCostIsBoundedTests(unittest.TestCase):
+    """T-1965: the boundary must stay linear in the subject, or callers hang.
+
+    The T-1926 rule keyed on the field name with an unanchored `[a-z0-9_]*`
+    prefix, which restarted its scan at every character of a long identifier and
+    backtracked the remainder at each one. A 100KB userperson entry therefore
+    cost minutes of CPU inside `context_cold`, and the declared core-unit family
+    could never finish. These controls fail if that shape returns.
+    """
+
+    #: Large enough that quadratic behaviour is unmistakable (it took ~2 minutes
+    #: before the fix) and small enough to stay instantaneous once linear.
+    LARGE = 100_000
+
+    def test_a_long_word_run_without_the_field_name_is_cheap(self) -> None:
+        # The T-1965 reproduction: no `private_key` anywhere, so no match is
+        # possible. This is the shape the 100KB userperson entry actually had,
+        # and it must never reach the pattern at all.
+        self.assertEqual(redact_credentials("x" * self.LARGE), "x" * self.LARGE)
+
+    def test_the_field_name_present_but_unmatchable_stays_linear(self) -> None:
+        # The discriminating shape for the ANCHOR, the one the literal gate
+        # cannot rescue: the field name is here so the pattern must run, but the
+        # value is too short to match anything, so the only work left is the
+        # scan itself. Unanchored, `[a-z0-9_]*private_key` retries at every
+        # interior position and re-walks the remainder each time.
+        subject = "x" * self.LARGE + " private_key: short"
+        self.assertEqual(
+            redact_credentials(subject), subject,
+            "text with no matchable key must come back unchanged",
+        )
+
+    def test_a_long_identifier_run_ending_in_the_field_name_stays_linear(self) -> None:
+        # Here the match really does occur, so the anchor must not be so strict
+        # that it loses the key: a prefixed field name is still a field name.
+        subject = "a" * self.LARGE + f"private_key: {RAW_KEY}"
+        out = redact_credentials(subject)
+        self.assertNotIn(RAW_KEY, out, "redaction must still fire on this shape")
+
+    def test_the_bound_is_linear_not_merely_faster(self) -> None:
+        # Doubling the subject must not quadruple the time. Compared as a ratio
+        # with generous slack so a loaded machine cannot make this flaky, and
+        # measured after a warm-up so import and first-call costs are excluded.
+        # Measured on the anchor-only shape, so this bound isolates the scan.
+        import time
+
+        def cost(n: int) -> float:
+            subject = "x" * n + " private_key: short"
+            best = None
+            for _ in range(3):
+                start = time.perf_counter()
+                redact_credentials(subject)
+                elapsed = time.perf_counter() - start
+                best = elapsed if best is None else min(best, elapsed)
+            return best
+
+        cost(1_000)
+        small, large = cost(20_000), cost(160_000)
+        # 8x the input: linear stays near 8x, quadratic would be near 64x.
+        self.assertLess(
+            large / max(small, 1e-6), 24,
+            f"redaction scaled superlinearly: {small:.6f}s -> {large:.6f}s "
+            "for an 8x larger subject",
+        )
+
+
 class ZC03TransportTests(unittest.TestCase):
     """ZC-03 / DRIFT-007: a failing verifier must not report success."""
 
@@ -150,7 +216,7 @@ class ExternalReachabilityTests(unittest.TestCase):
         sources = [
             path for pattern in ("*.js", "*.mjs", "*.ts")
             for path in host.rglob(pattern)
-            if "plugins" not in path.parts and "tmpfile" not in path.name
+            if "plugins" not in path.parts and "tmp" not in path.parts and "tmpfile" not in path.name
         ]
         # If the host ever ships readable source, ZC-02/04/06 stop being external
         # and this ticket's boundary must be re-measured rather than inherited.

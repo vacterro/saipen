@@ -73,15 +73,33 @@ def host_receipt(payload: dict, *, status: str = host_dispatch.HOST_ACCEPTED) ->
     }
 
 
-def qualification_artifact(root: Path, receipt_id: str) -> dict:
+def qualification_artifact(root: Path, receipt_id: str, finding_id: str = "") -> dict:
+    """Write the qualification artifact and, given a finding, record it.
+
+    T-1967 refuses a dict qualification the project's producer log does not bind
+    to the finding, its artifact digest and its publication scope. A fixture that
+    only writes the file is asking the publisher to trust a proof it minted
+    itself, so the record is made through `record_qualification`, the product's
+    only writer of that log.
+    """
     rel = f".saipen/campaign/qualifications/{receipt_id}.json"
     path = root / rel
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps({"receipt_id": receipt_id}), encoding="utf-8")
+    digest = hashlib.sha256(path.read_bytes()).hexdigest()
+    if finding_id:
+        recorded = saipal_adapter.SaipalAdapter(saipal_home=root).record_qualification(
+            root,
+            finding_id,
+            artifact_digest=digest,
+            publication_scope=saipal_adapter.PUBLICATION_SCOPE_DEFAULT,
+        )
+        if not recorded.get("ok"):
+            raise AssertionError(f"fixture qualification failed: {recorded}")
     return {
         "receipt_id": receipt_id,
         "artifact_path": rel,
-        "artifact_digest": hashlib.sha256(path.read_bytes()).hexdigest(),
+        "artifact_digest": digest,
     }
 
 
@@ -300,7 +318,9 @@ class PublicationReceiptIdentityTests(TsBase):
         return {
             "finding_id": finding_id,
             "state": "QUALIFIED",
-            "qualification_receipt": qualification_artifact(self.root, f"QUAL-{finding_id}"),
+            "qualification_receipt": qualification_artifact(
+                self.root, f"QUAL-{finding_id}", finding_id
+            ),
             "audit_body": body,
             "artifact_digest": hashlib.sha256(body.encode("utf-8")).hexdigest(),
         }

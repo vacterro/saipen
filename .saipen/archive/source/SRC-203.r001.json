@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-203:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Adjudicate LIMISAW IMP-001 against the current shared engine: canonical validate must refresh and enforce the same receipt-derived conformance truth used by the router; retain historical evidence and distinguish source behavior from installed deployment."
+    }
+  },
+  "derived_at": "2026-10-10T01:48:54Z",
+  "derived_from": "SRC-203",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "d9728ba4347d453f8eac37de866ef7bb17da4368e0aecb1dcb33bb6f64febf11"
+}

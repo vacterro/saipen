@@ -1,0 +1,59 @@
+{
+  "clauses": {
+    "SRC-167:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Register WAIT_OPERATOR in the canonical error registry; emitted entry refusals retain the code without unregistered_code, and registry consistency/inventory tests cover this construction."
+    },
+    "SRC-167:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Prevent newly supplied invalid next_action values at the authoritative STATE construction boundary. Reuse one canonical grammar across the writer, strict reader, checkpoint validation and reconciliation; preserve field ownership and refuse malformed PHASE/RUN/RESUME or arbitrary operator prose without coercion."
+    },
+    "SRC-167:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Canonical operator WAIT round-trips through strict STATE readers, status, continue and recovery without a spurious RECONCILE_REAUTH_REQUIRED; WAIT is not executable and cannot itself grant mutation or invent an operator decision. Existing valid PHASE/RUN/RESUME/saipen forms remain valid."
+    },
+    "SRC-167:R004": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Legacy malformed next_action remains boundedly recoverable through an explicit canonical WAIT replacement; preserve original STATE and decision evidence, keep executable grammar strict, and make printed recovery syntax directly executable with global flags in the documented position and spaces/punctuation preserved."
+    },
+    "SRC-167:R005": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "Prove deterministic controls A-F: original unregistered WAIT_OPERATOR and invalid STATE construction are red before repair; unchanged controls pass afterward; valid WAIT, no WAIT execution, valid action forms and an exact rendered recovery command are exercised. Keep verification independent from the production subject."
+    },
+    "SRC-167:R006": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "Relevant state/recovery/refusal tests, registry validation, canonical validator and declared full core family pass truthfully; report exact focused counts and any skip/capability limitations without baselining regressions."
+    },
+    "SRC-167:R007": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Use a proper claimed SAIPEN Work lifecycle and canonical operations throughout; preserve BOARD/STATE/LOG provenance, retain source integrity and perform source/audit cleanup only through their normal journaled closure gates."
+    },
+    "SRC-167:R008": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Persist a reviewable report of root causes, canonical grammar, legacy recovery, exact changed paths, same-oracle red/green evidence, focused/full validation, lifecycle evidence and remaining risks."
+    },
+    "SRC-167:R009": {
+      "actionable": true,
+      "class": "non-goal",
+      "text": "Do not modify SAIPAL, add release roots, resolve SAIPAL conflicts, weaken strict executable grammar, execute WAIT payloads, invent authority, redesign the whole state machine or rewrite historical evidence. Publication remains excluded by the controlling run source."
+    },
+    "SRC-167:R010": {
+      "actionable": false,
+      "class": "context",
+      "text": "The imported report describes a legitimate operator-only boundary with zero of 751 sessions runnable. A read-only current SAIPAL STATE observation is now DONE/saipen continue, so the historical operator prose is a reported shape, not a claim about its current bytes or an invitation to mutate that project."
+    }
+  },
+  "derived_at": "2026-10-04T00:08:25Z",
+  "derived_from": "SRC-167",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "e65de1f0c46a5857799fecdccfdd4f18961961805462d7b9cc053489c8e5f01c"
+}

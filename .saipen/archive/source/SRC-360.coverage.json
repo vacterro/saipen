@@ -1,0 +1,77 @@
+{
+  "requirements": {
+    "SRC-360:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "NOT_APPLICABLE",
+      "evidence": "ZAICODE response host limitation: typed rendering of machine response digest versus model chat output belongs to host UI adapter",
+      "text": "D-01 Response-Contract-Enforcement: Typed rendering prevents model overwriting STALE_FAIL with PASS",
+      "verification": null,
+      "work": "T-1984"
+    },
+    "SRC-360:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "SAIPEN phase engine ownership: phase progression enforces source/test/oracle hash binding; edits in REVIEW invalidate approval and require BUILD->VERIFY->REVIEW; verified by test_premature_victory_prevention.py",
+      "text": "D-02 Review-Revision-Discipline: Edits in REVIEW invalidate review approval and require BUILD->VERIFY->REVIEW loop",
+      "verification": "test_premature_victory_prevention.py: PASS record:.saipen/evidence/focused-unit/d805dd267ed50722-20261031T234040226671Z.json",
+      "work": "T-1984"
+    },
+    "SRC-360:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "SAIPEN test coordinator ownership: EXEC-HUSH-01 prohibits sleep-polling; event-driven reactive notification replaces busy-wait and distinguishes CANCELED from PASS/FAIL; verified by test_premature_victory_prevention.py",
+      "text": "D-03 Test-Coordinator-Efficiency: Event-driven waiting replaces sleep-poll loops and marks canceled runs distinctly",
+      "verification": "test_premature_victory_prevention.py: PASS record:.saipen/evidence/focused-unit/d805dd267ed50722-20261031T234040226671Z.json",
+      "work": "T-1984"
+    },
+    "SRC-360:R004": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "NOT_APPLICABLE",
+      "evidence": "FreeBuff integration / host ownership: distinct reporting and external handoff of foreign host integration requirements",
+      "text": "D-04 Delivery-Transparency: Distinct reporting of NOT_APPLICABLE vs VERIFIED with explicit external handoff",
+      "verification": null,
+      "work": "T-1984"
+    },
+    "SRC-360:R005": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "SAIPEN reporting ownership: outcome_truth.py and core_unit.py baseline accounting report ran, baseline red, and new red distinctly without masking; verified by test_premature_victory_prevention.py",
+      "text": "D-05 Baseline-Red-Reporting: Engine reports ran, baseline red, and new red distinctly instead of masked PASS",
+      "verification": "test_premature_victory_prevention.py: PASS record:.saipen/evidence/focused-unit/d805dd267ed50722-20261031T234040226671Z.json",
+      "work": "T-1984"
+    },
+    "SRC-360:R006": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "NOT_APPLICABLE",
+      "evidence": "ZAICODE response classifier ownership: distinguishing operator-requested stop from machine stop origin belongs to host admission layer",
+      "text": "D-06 Stop-Reason-Classification: Operator-requested stop requires authenticated human ingress, not arbitrary flag",
+      "verification": null,
+      "work": "T-1984"
+    },
+    "SRC-360:R007": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "NOT_APPLICABLE",
+      "evidence": "ZAICODE host admission limitation: structural and language enforcement at chat submission boundary belongs to host platform",
+      "text": "D-07 Host-Admission-Contract: Admission contract provides mechanical response validation or explicit advisory taxonomy",
+      "verification": null,
+      "work": "T-1984"
+    },
+    "SRC-360:R008": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "SAIPEN transport integrity: BOOT.md and runtime.py enforce canonical CLI transport and reject unauthenticated script invocation; verified by test_premature_victory_prevention.py",
+      "text": "D-08 Transport-Integrity: Canonical transport entry enforced with runtime/BOOT hash verification",
+      "verification": "test_premature_victory_prevention.py: PASS record:.saipen/evidence/focused-unit/d805dd267ed50722-20261031T234040226671Z.json",
+      "work": "T-1984"
+    }
+  },
+  "schema_version": 1
+}

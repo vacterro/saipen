@@ -1294,6 +1294,7 @@ def _ship_targeted_producer(root: Path, role: str, context: dict, capability: ob
             "code": getattr(exc, "code", "VALIDATION_FAILED"),
             "message": getattr(exc, "detail", str(exc)),
             "role": role,
+            "canonical_next_command": getattr(exc, "next_command", None),
             **context,
         }
     released = execute_release(root, release_plan)

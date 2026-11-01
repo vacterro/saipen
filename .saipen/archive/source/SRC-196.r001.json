@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-196:R001": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "V:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_SAIPEN\\audit\\SAIHANDOFF_AGENT_PROTOCOL_DRIFT_AUDIT.md - \u0432\u043e\u0442 \u044d\u0442\u043e \u0435\u0449\u0435 \u043f\u043e\u0447\u0438\u0442\u0430\u0439 \u043f\u043e\u0436\u0430\u043b\u0443\u0439\u0441\u0442\u0430 \u0438 \u0437\u0430\u0444\u0438\u043a\u0441\u0438\u0440\u0443\u0446\u0439."
+    }
+  },
+  "derived_at": "2026-10-08T23:56:21Z",
+  "derived_from": "SRC-196",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "9b1017423a34841c68fc3ea5471fc1c8e2d68c67604be624394449f1dfcfdc73"
+}

@@ -1,0 +1,89 @@
+{
+  "clauses": {
+    "SRC-253:R001": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "SAIPEN has a documented canonical Auto-Doctor contract (SELF_HEALING_CONTINUATION): typed failure classes that each produce a canonical action, reusing existing owners"
+    },
+    "SRC-253:R002": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "cc can invoke authorized recovery automatically inside the normal continuation path, without a separate operator command"
+    },
+    "SRC-253:R003": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "The reference STALE_PASS conformance condition recovers without a manual saipen validate"
+    },
+    "SRC-253:R004": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "CURRENT_PASS is verified after recovery rather than assumed; a zero exit code alone is insufficient"
+    },
+    "SRC-253:R005": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "The original Work resumes automatically after a successful recovery, without a second cc"
+    },
+    "SRC-253:R006": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "The recovery stays bound to the real original operator command: no new operator decision is synthesized"
+    },
+    "SRC-253:R007": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "No duplicate execution occurs across the original cc, the recovery, validation and the resumed Work"
+    },
+    "SRC-253:R008": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "Unsafe failures preserve STOP, NO_GO, operator and integrity boundaries and stop with an exact canonical reason"
+    },
+    "SRC-253:R009": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "Recovery attempts are bounded and idempotent: one automatic revalidation per chain, no cc-validate-cc loop"
+    },
+    "SRC-253:R010": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "Race conditions and restart behavior are tested (concurrent writer, crash between recovery and resume)"
+    },
+    "SRC-253:R011": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "Health checks add no unacceptable overhead to a healthy cc; expensive validation runs only when the contract requires it"
+    },
+    "SRC-253:R012": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "ZAICODE has a structured integration contract for Doctor stages; ZAICODE code itself changes only under its own admission"
+    },
+    "SRC-253:R013": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "A real host acceptance test proves the user-facing behavior when separately authorized"
+    },
+    "SRC-253:R014": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "Existing protocol regression gates remain passing"
+    },
+    "SRC-253:R015": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "Relevant recovery and provenance evidence is preserved and survives interruption"
+    },
+    "SRC-253:R016": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "Remaining unsupported failure conditions are explicitly classified with an owner and next action"
+    }
+  },
+  "derived_at": "2026-10-14T21:26:10Z",
+  "derived_from": "SRC-253",
+  "interpretation_revision": 16,
+  "schema_version": 1,
+  "source_sha256": "b2f054144a5ef75c56105ec53c6d4d01d29841324030c5a06e1b56ddccc17da2"
+}

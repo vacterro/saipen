@@ -1,0 +1,14 @@
+{
+  "requirements": {
+    "SRC-136:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-10685",
+      "text": "Satisfy the captured request SRC-136 in full; the authoritative text is the receipt body (sha256 6f264167722c): \u041f\u0440\u0438\u0447\u0451\u043c \u0441\u0432\u044f\u0437\u043a\u0430 ZAICODE - SAIMAIL - SAIPEN \u0434\u043e\u043b\u0436\u043d\u043e \u0431\u044b\u0442\u044c \u0436\u0435\u043b\u0430\u0442\u0435\u043b\u044c\u043d\u043e \u0435\u0434\u0438\u043d\u044b\u043c \u0446\u0435\u043b\u044b\u043c \u0442\u0435\u043f\u0435\u0440\u044c \u0447\u0442\u043e\u0431\u044b \u043d\u043e\u0432\u044b\u0439 \u044e\u0437\u0435\u0440 \u043c\u043e\u0433 \u043f\u043e\u043b\u044c\u0437\u043e\u0432\u0430\u0442\u044c\u0441\u044f \u0438 \u043f\u043e\u043b\u0443\u0447\u0430\u0442\u044c \u043f\u0438\u0441\u044c\u043c\u0430. \u0410, \u0432 SAIMAIL \u0442\u043e\u043b\u044c\u043a\u043e, \u044d\u043b\u0435\u043a\u0442\u0440\u043e\u043d\u043d\u0430\u044f \u0435\u0449\u0435 \u043d\u0435 \u043f\u0440\u0435\u0434\u0443\u0441\u043c\u043e\u0442\u0440\u0435\u043d\u0430",
+      "verification": "ZAICODE-SAIMAIL-SAIPEN unified first-run: per-user default mailbox, saipen mail init, init attach hook, env-override resolution; 12 canonical tests + real MAILBOX_BOUND smoke; internal letters only (E-10685)",
+      "work": "T-1557"
+    }
+  },
+  "schema_version": 1
+}

@@ -1,0 +1,113 @@
+{
+  "requirements": {
+    "SRC-006:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "implemented in intake.py/release.py/release_contract.py/producer.py/conformance.py/journal.py/test_runner.py/run_scenarios.py/crew.py/log.py/operations.py; hostile regressions added; 395 unit tests PASS; ruff clean; audit_checks 271/271 PASS; validate --gate core PASS; perf_wave 41/41 PASS",
+      "text": "CORE-001: credential containment at source-intake boundary; legacy sensitive fail-closed",
+      "verification": "395/395 unit tests; 119 focused audit tests; 41 perf wave; 271 audit checks; validate conformant",
+      "work": "T-1173"
+    },
+    "SRC-006:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "implemented in intake.py/release.py/release_contract.py/producer.py/conformance.py/journal.py/test_runner.py/run_scenarios.py/crew.py/log.py/operations.py; hostile regressions added; 395 unit tests PASS; ruff clean; audit_checks 271/271 PASS; validate --gate core PASS; perf_wave 41/41 PASS",
+      "text": "CORE-002: conformance append-race membership proof; TOCTOU fixed",
+      "verification": "395/395 unit tests; 119 focused audit tests; 41 perf wave; 271 audit checks; validate conformant",
+      "work": "T-1173"
+    },
+    "SRC-006:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "implemented in intake.py/release.py/release_contract.py/producer.py/conformance.py/journal.py/test_runner.py/run_scenarios.py/crew.py/log.py/operations.py; hostile regressions added; 395 unit tests PASS; ruff clean; audit_checks 271/271 PASS; validate --gate core PASS; perf_wave 41/41 PASS",
+      "text": "CORE-003: source-authority manifest bound into ReleasePlan canonical + preflight",
+      "verification": "395/395 unit tests; 119 focused audit tests; 41 perf wave; 271 audit checks; validate conformant",
+      "work": "T-1173"
+    },
+    "SRC-006:R004": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "implemented in intake.py/release.py/release_contract.py/producer.py/conformance.py/journal.py/test_runner.py/run_scenarios.py/crew.py/log.py/operations.py; hostile regressions added; 395 unit tests PASS; ruff clean; audit_checks 271/271 PASS; validate --gate core PASS; perf_wave 41/41 PASS",
+      "text": "CORE-004: strict archive close bundle proof (metadata/body/contract/coverage)",
+      "verification": "395/395 unit tests; 119 focused audit tests; 41 perf wave; 271 audit checks; validate conformant",
+      "work": "T-1173"
+    },
+    "SRC-006:R005": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "implemented in intake.py/release.py/release_contract.py/producer.py/conformance.py/journal.py/test_runner.py/run_scenarios.py/crew.py/log.py/operations.py; hostile regressions added; 395 unit tests PASS; ruff clean; audit_checks 271/271 PASS; validate --gate core PASS; perf_wave 41/41 PASS",
+      "text": "W2-001: immutable generation producer+epoch authority from begin through publish",
+      "verification": "395/395 unit tests; 119 focused audit tests; 41 perf wave; 271 audit checks; validate conformant",
+      "work": "T-1173"
+    },
+    "SRC-006:R006": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "implemented in intake.py/release.py/release_contract.py/producer.py/conformance.py/journal.py/test_runner.py/run_scenarios.py/crew.py/log.py/operations.py; hostile regressions added; 395 unit tests PASS; ruff clean; audit_checks 271/271 PASS; validate --gate core PASS; perf_wave 41/41 PASS",
+      "text": "W2-002: strict READY reuse; corrupt pre-existing artifact preserved",
+      "verification": "395/395 unit tests; 119 focused audit tests; 41 perf wave; 271 audit checks; validate conformant",
+      "work": "T-1173"
+    },
+    "SRC-006:R007": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "implemented in intake.py/release.py/release_contract.py/producer.py/conformance.py/journal.py/test_runner.py/run_scenarios.py/crew.py/log.py/operations.py; hostile regressions added; 395 unit tests PASS; ruff clean; audit_checks 271/271 PASS; validate --gate core PASS; perf_wave 41/41 PASS",
+      "text": "W2-003: partial-start recovery classification; marker-only/manifest-only states",
+      "verification": "395/395 unit tests; 119 focused audit tests; 41 perf wave; 271 audit checks; validate conformant",
+      "work": "T-1173"
+    },
+    "SRC-006:R008": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "implemented in intake.py/release.py/release_contract.py/producer.py/conformance.py/journal.py/test_runner.py/run_scenarios.py/crew.py/log.py/operations.py; hostile regressions added; 395 unit tests PASS; ruff clean; audit_checks 271/271 PASS; validate --gate core PASS; perf_wave 41/41 PASS",
+      "text": "W2-004: source-bound artifact identity; retirement CAS safe",
+      "verification": "395/395 unit tests; 119 focused audit tests; 41 perf wave; 271 audit checks; validate conformant",
+      "work": "T-1173"
+    },
+    "SRC-006:R009": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "implemented in intake.py/release.py/release_contract.py/producer.py/conformance.py/journal.py/test_runner.py/run_scenarios.py/crew.py/log.py/operations.py; hostile regressions added; 395 unit tests PASS; ruff clean; audit_checks 271/271 PASS; validate --gate core PASS; perf_wave 41/41 PASS",
+      "text": "PERF-001: hermetic scenario harness (disposable copy, ignore runtime)",
+      "verification": "395/395 unit tests; 119 focused audit tests; 41 perf wave; 271 audit checks; validate conformant",
+      "work": "T-1173"
+    },
+    "SRC-006:R010": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "implemented in intake.py/release.py/release_contract.py/producer.py/conformance.py/journal.py/test_runner.py/run_scenarios.py/crew.py/log.py/operations.py; hostile regressions added; 395 unit tests PASS; ruff clean; audit_checks 271/271 PASS; validate --gate core PASS; perf_wave 41/41 PASS",
+      "text": "PERF-002: receipt namespace streaming iterator; exact digest preserved",
+      "verification": "395/395 unit tests; 119 focused audit tests; 41 perf wave; 271 audit checks; validate conformant",
+      "work": "T-1173"
+    },
+    "SRC-006:R011": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "implemented in intake.py/release.py/release_contract.py/producer.py/conformance.py/journal.py/test_runner.py/run_scenarios.py/crew.py/log.py/operations.py; hostile regressions added; 395 unit tests PASS; ruff clean; audit_checks 271/271 PASS; validate --gate core PASS; perf_wave 41/41 PASS",
+      "text": "PERF-003: conformance constant-size write containment proof",
+      "verification": "395/395 unit tests; 119 focused audit tests; 41 perf wave; 271 audit checks; validate conformant",
+      "work": "T-1173"
+    },
+    "SRC-006:R012": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "implemented in intake.py/release.py/release_contract.py/producer.py/conformance.py/journal.py/test_runner.py/run_scenarios.py/crew.py/log.py/operations.py; hostile regressions added; 395 unit tests PASS; ruff clean; audit_checks 271/271 PASS; validate --gate core PASS; perf_wave 41/41 PASS",
+      "text": "PERF-004: bounded test-runner output capture via temp files",
+      "verification": "395/395 unit tests; 119 focused audit tests; 41 perf wave; 271 audit checks; validate conformant",
+      "work": "T-1173"
+    }
+  },
+  "schema_version": 1
+}

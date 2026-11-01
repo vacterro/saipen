@@ -1,0 +1,49 @@
+{
+  "clauses": {
+    "SRC-049:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Add ONE canonical retirement semantic: saipen ticket retire T-### --reason <code> --evidence <ref>, explicitly NOT ticket done and NOT source close, meaning the Work never belonged to this project's execution history."
+    },
+    "SRC-049:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Bound the reason class (MISROUTED_PROJECT_BINDING) and refuse an open-ended delete hatch: retirement requires strong proof plus explicit operator authority covering the named Work."
+    },
+    "SRC-049:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Reuse the existing source status model and invent no fake terminal coverage: retire to INVALID, preserving receipt id, exact source bytes, digest, original linked Work, reason, evidence, operator decision and the discovery/retirement events in forensic cold storage through one canonical owner; never purge the bodies."
+    },
+    "SRC-049:R004": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "BOARD semantics RETIRED != DONE: no fake DONE checkbox; the active BOARD row leaves schedulable Work through the SAIOPS-owned mechanical implementation of the CLEAN prune rule, with permanent evidence in LOG plus a retirement tombstone that still answers what the ticket was, why it disappeared, who retired it, which Source created it and what proved it invalid."
+    },
+    "SRC-049:R005": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Unwind the dependency chain atomically and honestly in causal order: retiring the child restores the parent to its saved phase tuple, retirement never means the dependency implementation succeeded, the removal/restoration is journaled, and a crash between ticket retirement and parent restoration recovers idempotently."
+    },
+    "SRC-049:R006": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Prove the pre-change surface RED on a fixture (parent P0 blocked for a bogus child that owns an ACTIVE user_instruction source), then GREEN through retirement, and hold the eight hostile controls: ordinary TODO refused without authority, completed Work not rewritable as misrouted, foreign live owner refused unless authority covers it, receipt digest mismatch fails closed, ticket/receipt linkage mismatch fails closed, unknown reason fails closed, a repeated retire is deterministic, and a crash mid-transaction converges to one result."
+    },
+    "SRC-049:R007": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Use the new canonical operation on the actual repository: retire T-1369/SRC-048 then T-1368/SRC-047 with reason MISROUTED_PROJECT_BINDING and evidence citing the measured polygon/PWD investigation, with no manual edits to BOARD/STATE/LOG/intake, after which T-1367 automatically resumes BUILD."
+    },
+    "SRC-049:R008": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Treat src/app.py as separate foreign residue: prove git history, pre-incident ownership, reference sweep and polygon session attribution before removal; classify proven residue FIELD_FIXTURE_RESIDUE and remove it through the CLEAN recoverable-deletion path; quarantine instead of deleting when provenance is ambiguous; the retirement operation must not become a generic file deleter."
+    }
+  },
+  "derived_at": "2026-09-16T14:00:23Z",
+  "derived_from": "SRC-049",
+  "interpretation_revision": 8,
+  "schema_version": 1,
+  "source_sha256": "af050bd0e97d165c6acd7c144e9f034c7b44148a733f517b475a5ef06f3d4738"
+}

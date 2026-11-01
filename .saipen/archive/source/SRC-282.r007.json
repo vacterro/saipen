@@ -1,0 +1,44 @@
+{
+  "clauses": {
+    "SRC-282:R001": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "On a fixture whose validator capture takes 60 s, saipen transition BUILD must not refuse a concurrent short mutation arriving 1 s later: it waits within the declared budget and succeeds; an unbounded holder is still refused in bounded time."
+    },
+    "SRC-282:R002": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "A WRITER_BUSY refusal names the holder PID and command when the holder is a SAIPEN process, and otherwise states plainly that the holder is unknown."
+    },
+    "SRC-282:R003": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "No protocol operation holds the project writer lock across an external process for more than a declared small bound."
+    },
+    "SRC-282:R004": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "saipen status remains lock-free: it answers while another writer holds the lock and never acquires it."
+    },
+    "SRC-282:R005": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "A held project writer lock is still released by process death; no PID-file lease may outlive its owner or gate acquisition."
+    },
+    "SRC-282:R006": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "The pre-BUILD debt baseline (debt.ensure_debt_baseline) and DONE-Work re-verification (debt.reverify_work) must not hold the project writer lock across their validator capture or verification-command subprocesses: they capture outside, then re-check the recorded board_sha256, state_sha256, log_fingerprint and source identity under the lock before journaling."
+    },
+    "SRC-282:R007": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "WriterLock.acquire's docstring must describe the real bounded acquisition, and the saipen/CORE.md writer-lock sentence must state the bounded wait, its environment override and the WRITER_BUSY refusal, so contract and engine agree."
+    }
+  },
+  "derived_at": "2026-10-20T03:15:59Z",
+  "derived_from": "SRC-282",
+  "interpretation_revision": 7,
+  "schema_version": 1,
+  "source_sha256": "f294a69669328aacd3f72997f9f8ccd0a204a36a481715630253b43a124221ed"
+}

@@ -1,0 +1,41 @@
+{
+  "requirements": {
+    "SRC-302:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/focused-unit/5a1d764097d8fa25-20261024T043158023419Z.json",
+      "text": "F02 Phase mutation guard: guard files against unanchored mutating edits prior to admitted BUILD",
+      "verification": "python -m unittest tools/test_t1873_protrail_drift.py -> PASS",
+      "work": "T-1873"
+    },
+    "SRC-302:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/focused-unit/5a1d764097d8fa25-20261024T043158023419Z.json",
+      "text": "F03 Host broker provenance: bind operator carrier tokens to prevent unwitnessed authority elevation",
+      "verification": "python -m unittest tools/test_t1873_protrail_drift.py -> PASS",
+      "work": "T-1873"
+    },
+    "SRC-302:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/focused-unit/5a1d764097d8fa25-20261024T043158023419Z.json",
+      "text": "F09 Push vs publish distinction: emit typed repository_push vs release_publish receipts to avoid ambiguous audit claims",
+      "verification": "python -m unittest tools/test_t1873_protrail_drift.py -> PASS",
+      "work": "T-1873"
+    },
+    "SRC-302:R004": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/focused-unit/5a1d764097d8fa25-20261024T043158023419Z.json",
+      "text": "F12 Conformance migration safety: preserve historical authority immutability without synthetic carrier forgery",
+      "verification": "python -m unittest tools/test_t1873_protrail_drift.py -> PASS",
+      "work": "T-1873"
+    }
+  },
+  "schema_version": 1
+}

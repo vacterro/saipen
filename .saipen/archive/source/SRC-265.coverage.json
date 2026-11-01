@@ -1,0 +1,113 @@
+{
+  "requirements": {
+    "SRC-265:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-16250",
+      "text": "Authenticate the actual operator command behind E-3221, including carrier, scope and precedence.",
+      "verification": ".saipen/evidence/T-1806-saituls-t263-reconciliation/RECONCILIATION.md \u00a7 2.1 + verify_reconciliation.py",
+      "work": "T-1806"
+    },
+    "SRC-265:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-16250",
+      "text": "Determine whether that authority permits bounded software security remediation independently from T-261 hardware acceptance.",
+      "verification": ".saipen/evidence/T-1806-saituls-t263-reconciliation/RECONCILIATION.md \u00a7 2.2 + verify_reconciliation.py",
+      "work": "T-1806"
+    },
+    "SRC-265:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-16250",
+      "text": "Verify whether later operator directives supersede or restrict the recorded authorization.",
+      "verification": ".saipen/evidence/T-1806-saituls-t263-reconciliation/RECONCILIATION.md \u00a7 2.3 + verify_reconciliation.py",
+      "work": "T-1806"
+    },
+    "SRC-265:R004": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-16250",
+      "text": "Inspect the canonical dependency semantics.",
+      "verification": ".saipen/evidence/T-1806-saituls-t263-reconciliation/RECONCILIATION.md \u00a7 3.1 + verify_reconciliation.py",
+      "work": "T-1806"
+    },
+    "SRC-265:R005": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-16250",
+      "text": "Do not silently remove needs: T-261.",
+      "verification": ".saipen/evidence/T-1806-saituls-t263-reconciliation/RECONCILIATION.md \u00a7 3.2 + verify_reconciliation.py",
+      "work": "T-1806"
+    },
+    "SRC-265:R006": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-16250",
+      "text": "If existing authority permits remediation, establish the correct canonical admission and ownership using supported SAIPEN operations.",
+      "verification": ".saipen/evidence/T-1806-saituls-t263-reconciliation/RECONCILIATION.md \u00a7 4.1 + verify_reconciliation.py",
+      "work": "T-1806"
+    },
+    "SRC-265:R007": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-16250",
+      "text": "Keep hardware acceptance and publication blocked.",
+      "verification": ".saipen/evidence/T-1806-saituls-t263-reconciliation/RECONCILIATION.md \u00a7 4.2 + verify_reconciliation.py",
+      "work": "T-1806"
+    },
+    "SRC-265:R008": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-16250",
+      "text": "Preserve the existing corrected source and test evidence without fabricating historical execution.",
+      "verification": ".saipen/evidence/T-1806-saituls-t263-reconciliation/RECONCILIATION.md \u00a7 4.3 + verify_reconciliation.py",
+      "work": "T-1806"
+    },
+    "SRC-265:R009": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-16250",
+      "text": "If valid authority is absent, produce exactly one precise operator decision request.",
+      "verification": ".saipen/evidence/T-1806-saituls-t263-reconciliation/RECONCILIATION.md \u00a7 4.4 + verify_reconciliation.py",
+      "work": "T-1806"
+    },
+    "SRC-265:R010": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-16250",
+      "text": "Do not make the operator manually edit BOARD, STATE, LOG or rerun ordinary diagnostic commands.",
+      "verification": ".saipen/evidence/T-1806-saituls-t263-reconciliation/RECONCILIATION.md \u00a7 5.1 + verify_reconciliation.py",
+      "work": "T-1806"
+    },
+    "SRC-265:R011": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-16250",
+      "text": "Verify conformance before and after any authorized canonical transition.",
+      "verification": ".saipen/evidence/T-1806-saituls-t263-reconciliation/RECONCILIATION.md \u00a7 5.2 + verify_reconciliation.py",
+      "work": "T-1806"
+    },
+    "SRC-265:R012": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-16250",
+      "text": "Preserve task ownership and all unrelated blockers.",
+      "verification": ".saipen/evidence/T-1806-saituls-t263-reconciliation/RECONCILIATION.md \u00a7 5.3 + verify_reconciliation.py",
+      "work": "T-1806"
+    }
+  },
+  "schema_version": 1
+}

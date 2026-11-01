@@ -1,0 +1,39 @@
+{
+  "archive_ref": ".saipen/archive/source/SRC-325.md",
+  "closed_at": "2026-10-25T11:54:14Z",
+  "closure_event": null,
+  "linked_work": "T-1915",
+  "receipt_id": "SRC-325",
+  "received_at": "2026-10-25T10:25:43Z",
+  "redaction": {
+    "applied": false,
+    "authoritative": false,
+    "original_sha256": "41f066dc62e9a42826ba4d73ab877eaac9786286e9ba1088bfbe0c650c22acca",
+    "sanitized_sha256": "41f066dc62e9a42826ba4d73ab877eaac9786286e9ba1088bfbe0c650c22acca"
+  },
+  "request_provenance": {
+    "compared_digest": "88f2463ea4dfb89aa57f1394b0a3cc37c870819f96cdc7bcfdc071ac50b140dd",
+    "diagnostic_code": "FREEBUFF_OPERATOR_PROVENANCE_MISSING",
+    "freebuff_provenance_missing": true,
+    "host_identity": "freebuff",
+    "note": "no operator carrier and no transport obligation: the stored bytes are what this session supplied, and nothing compared them with what the operator wrote",
+    "witness": "model_supplied"
+  },
+  "reread_at": "2026-10-25T11:54:14Z",
+  "schema_version": 1,
+  "sensitive": false,
+  "source_authority": {
+    "body_sha256": "41f066dc62e9a42826ba4d73ab877eaac9786286e9ba1088bfbe0c650c22acca",
+    "mode": "exact",
+    "original_available": true
+  },
+  "source_kind": "user_instruction",
+  "source_sha256": "41f066dc62e9a42826ba4d73ab877eaac9786286e9ba1088bfbe0c650c22acca",
+  "status": "CLOSED",
+  "storage_status": "ARCHIVED",
+  "transport": {
+    "newline_normalization": "none",
+    "source_encoding": "utf-8",
+    "transport_transform": "none"
+  }
+}

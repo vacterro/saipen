@@ -1,0 +1,24 @@
+{
+  "clauses": {
+    "SRC-348:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "A new actionable attachment must route through START, not status or continue; preserve the original task bytes and refuse clearly when attachment transport is unavailable"
+    },
+    "SRC-348:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "A requirement disposition must be canonically validated: a test-run PASS is not a requirement VERIFIED, terminal dispositions require clause-specific evidence, and evidence that is absent, unrelated or a blanket aggregate may not verify a clause"
+    },
+    "SRC-348:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Under a blocked or reauthentication-required gate, strictly read-only investigation is permitted and every state-changing bypass is prohibited; CLI replay of operator ingress must fail and authenticated operator-carrier ingress must be verified"
+    }
+  },
+  "derived_at": "2026-10-29T22:45:21Z",
+  "derived_from": "SRC-348",
+  "interpretation_revision": 3,
+  "schema_version": 1,
+  "source_sha256": "b907ad13b95eba7436dd367fb898f667e9f17ce2241cbacb3fc35624179f8b8c"
+}

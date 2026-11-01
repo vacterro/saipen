@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-040:R0001": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Every enumerated hard-stop fixture resolves to valid/runnable state, at least one admitted exact canonical repair/control operation, or an explicit external/forensic zero-local-mutation terminal result."
+    }
+  },
+  "derived_at": "2026-09-13T22:34:51Z",
+  "derived_from": "SRC-040",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "ec9066bafe79214f9dfbd661d3f87159117066c4a3f69f223968fa4a0712fe3b"
+}

@@ -1,0 +1,39 @@
+{
+  "clauses": {
+    "SRC-364:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "D-01 Verbatim-Source-Capture: Ingress authority requires verbatim capture of operator instructions without model paraphrasing"
+    },
+    "SRC-364:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "D-02 Premature-Handback-Prevention: Narrative handback prohibited while executable phases remain eligible on current ticket"
+    },
+    "SRC-364:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "D-03 Requirement-Traceability-Matrix: Generic test counts must not substitute for mapped clause-by-clause requirement verification"
+    },
+    "SRC-364:R004": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "D-04 Acceptance-Contract-Enforcement: Lifecycle completion requires non-empty verified acceptance criteria matching source claims"
+    },
+    "SRC-364:R005": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "D-05 Canonical-Commit-and-Release-Delivery: Canonical fix commit and staged package delivery for host repository"
+    },
+    "SRC-364:R006": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "D-06 Blocker-Truth-Classification: Distinct classification of technically verifiable, external, and unresolved blocker categories"
+    }
+  },
+  "derived_at": "2026-10-31T23:52:18Z",
+  "derived_from": "SRC-364",
+  "interpretation_revision": 6,
+  "schema_version": 1,
+  "source_sha256": "2d8976dac3f9facbdce7bcdfcd22910181ab595e6884ab4b42053f9e04fa30a4"
+}

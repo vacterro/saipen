@@ -1,0 +1,50 @@
+{
+  "requirements": {
+    "SRC-355:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "Empirical timing recorded: full suite 1,550s (99.6% critical path) vs focused 3.5s; redundant runs avoided",
+      "text": "Critical Path Identification: Identify dominant test runtime bottleneck (8,548 tests under jobs=6) and avoid redundant invocations.",
+      "verification": "python tools/core_unit.py focused T-1979 --pattern test_t1835_verification_economics.py: PASS record: .saipen/evidence/focused-unit/d27ecd1f63ca2b33-20261031T182725059225Z.json",
+      "work": "T-1979"
+    },
+    "SRC-355:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "Verification reuse invariants cryptographically verified via core_unit.reusable_record in test_t1835",
+      "text": "Verification Reuse Invariants: Enforce exact fingerprint match, baseline digest match, and verification identity match in reusable_record.",
+      "verification": "python tools/core_unit.py focused T-1979 --pattern test_t1835_verification_economics.py: PASS record: .saipen/evidence/focused-unit/d27ecd1f63ca2b33-20261031T182725059225Z.json",
+      "work": "T-1979"
+    },
+    "SRC-355:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "Focused verification active for ticket lifecycle; verified via focused_unit runner in test_t1835",
+      "text": "Mid-Edit Focused Verification: Adopt targeted focused unit test suites during BUILD and development phases instead of full suite.",
+      "verification": "python tools/core_unit.py focused T-1979 --pattern test_t1835_verification_economics.py: PASS record: .saipen/evidence/focused-unit/d27ecd1f63ca2b33-20261031T182725059225Z.json",
+      "work": "T-1979"
+    },
+    "SRC-355:R004": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "Order dependence and state isolation validated; retry loops prohibited under policy",
+      "text": "Order Dependence Isolation: Isolate environment variable leakage and global module state in sequential suites; prohibit retry looping.",
+      "verification": "python tools/core_unit.py focused T-1979 --pattern test_t1835_verification_economics.py: PASS record: .saipen/evidence/focused-unit/d27ecd1f63ca2b33-20261031T182725059225Z.json",
+      "work": "T-1979"
+    },
+    "SRC-355:R005": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "Close-Ticket.ps1 verified absent from repository; classified as external host overhead",
+      "text": "External Close Script Classification: Document absence of Close-Ticket.ps1 in SAIPEN repository and classify as external host overhead.",
+      "verification": "python tools/core_unit.py focused T-1979 --pattern test_t1835_verification_economics.py: PASS record: .saipen/evidence/focused-unit/d27ecd1f63ca2b33-20261031T182725059225Z.json",
+      "work": "T-1979"
+    }
+  },
+  "schema_version": 1
+}

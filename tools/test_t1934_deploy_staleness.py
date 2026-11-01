@@ -49,7 +49,7 @@ from test_hermetic_env import isolate_host_session  # noqa: E402
 #: Spelled here so a host the installer cannot act on never silently enters the
 #: matrix below; `test_the_matrix_covers_every_host_the_installer_accepts`
 #: pins this list against the installer itself.
-INSTALLER_HOSTS = ("claude", "codex", "gemini", "kiro", "zaicode")
+INSTALLER_HOSTS = ("antigravity", "claude", "codex", "gemini", "kiro", "zaicode")
 
 #: A source root that proves a generation needs the manifest-declared surface,
 #: not only the artifact under test (T-1342 compares generations, not paths).
@@ -76,7 +76,8 @@ def setUpModule() -> None:
 
 
 def _registry(root: Path) -> dict:
-    return json.loads((root / "extensions" / "adapters" / "registry.json").read_text(encoding="utf-8"))
+    reg_path = root / "extensions" / "adapters" / "registry.json"
+    return json.loads(reg_path.read_text(encoding="utf-8"))
 
 
 def _source_root(base: Path) -> Path:

@@ -215,5 +215,105 @@ class RuntimeValidatorTests(_DownstreamShape):
         self.assertFalse(verdict["ok"], verdict)
 
 
+class ReleaseTicketSelectionTests(unittest.TestCase):
+    """T-1962: one version can own dozens of receipts; the newest one wins.
+
+    A `no-publish` run still records a receipt, so v8.1.0 legitimately carries
+    33 of them here. The old first-match scan returned the oldest receipt, and
+    with it the oldest reviewed scope, so every later publish-mode attempt
+    refused STALE_PLAN against bytes recorded weeks earlier -- a release could
+    never be attempted again at all.
+    """
+
+    def _receipt(self, version, ticket, mode):
+        return {"operation": "release", "version": version, "ticket_id": ticket, "mode": mode}
+
+    def _find(self, receipts, version):
+        with patch.object(release, "_release_evidence", return_value=(receipts, ())):
+            return release._find_release_ticket(Path("."), version)
+
+    def test_the_newest_receipt_for_a_version_answers(self):
+        receipts = [
+            self._receipt("8.1.0", "T-1679", "no-publish"),
+            self._receipt("8.1.0", "T-1681", "no-publish"),
+            self._receipt("8.1.0", "T-1750", "full"),
+        ]
+        self.assertEqual(self._find(receipts, "8.1.0"), "T-1750")
+
+    def test_a_version_with_one_receipt_is_unaffected(self):
+        receipts = [self._receipt("8.1.0", "T-1679", "no-publish")]
+        self.assertEqual(self._find(receipts, "8.1.0"), "T-1679")
+
+    def test_another_version_still_answers_from_its_own_receipts(self):
+        receipts = [
+            self._receipt("8.1.0", "T-1679", "no-publish"),
+            self._receipt("8.0.1", "T-1298", "full"),
+        ]
+        self.assertEqual(self._find(receipts, "8.0.1"), "T-1298")
+
+    def test_a_version_nobody_released_still_answers_nothing(self):
+        receipts = [self._receipt("8.1.0", "T-1679", "no-publish")]
+        self.assertIsNone(self._find(receipts, "9.9.9"))
+
+
+class ReleaseTicketSelectionNoteTests(unittest.TestCase):
+    """T-1963: the corrected choice must stay legible in the refusal it causes.
+
+    T-1962 made the scan answer the newest receipt. That alone left a reader
+    unable to tell the repaired selection from the broken one: the STALE_PLAN
+    that follows a moved scope names only a path and two hashes. The note this
+    class measures is what carries "which ticket, chosen by what rule" into the
+    text a caller actually reads.
+    """
+
+    def _receipt(self, version, ticket, mode="no-publish"):
+        return {"operation": "release", "version": version, "ticket_id": ticket, "mode": mode}
+
+    def _select(self, receipts, version):
+        with patch.object(release, "_release_evidence", return_value=(receipts, ())):
+            return release._release_ticket_selection(Path("."), version)
+
+    def test_the_note_names_the_ticket_and_the_rule_that_chose_it(self):
+        receipts = [
+            self._receipt("8.1.0", "T-1679"),
+            self._receipt("8.1.0", "T-1750", "full"),
+        ]
+        ticket, note = self._select(receipts, "8.1.0")
+        self.assertEqual(ticket, "T-1750")
+        self.assertIn("T-1750", note)
+        self.assertIn("newest", note)
+        self.assertIn("8.1.0", note)
+
+    def test_the_note_counts_receipts_through_journal_order(self):
+        receipts = [
+            self._receipt("8.1.0", "T-1679"),
+            self._receipt("8.1.0", "T-1681"),
+            self._receipt("8.1.0", "T-1750"),
+        ]
+        _ticket, note = self._select(receipts, "8.1.0")
+        self.assertIn("receipt 3 of 3", note)
+
+    def test_a_log_only_selection_says_history_is_the_only_evidence(self):
+        events = (
+            {"ticket": "T-1296", "taxonomy": "RUN", "text": "shipped v7.257.0 to the remote"},
+        )
+        with patch.object(release, "_release_evidence", return_value=([], events)):
+            ticket, note = release._release_ticket_selection(Path("."), "7.257.0")
+        self.assertEqual(ticket, "T-1296")
+        self.assertIn("LOG", note)
+        self.assertIn("no committed release receipt", note)
+
+    def test_a_version_nobody_released_explains_the_absence(self):
+        with patch.object(release, "_release_evidence", return_value=([], ())):
+            ticket, note = release._release_ticket_selection(Path("."), "9.9.9")
+        self.assertIsNone(ticket)
+        self.assertIn("9.9.9", note)
+
+    def test_the_plain_selection_still_returns_only_the_ticket(self):
+        receipts = [self._receipt("8.1.0", "T-1750", "full")]
+        with patch.object(release, "_release_evidence", return_value=(receipts, ())):
+            self.assertEqual(release._find_release_ticket(Path("."), "8.1.0"), "T-1750")
+
+
 if __name__ == "__main__":
     unittest.main()

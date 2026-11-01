@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-365:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "FIX CROSS-HOST HOOK OVERWRITE REGRESSION"
+    }
+  },
+  "derived_at": "2026-11-01T05:06:32Z",
+  "derived_from": "SRC-365",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "c4310e52d034dd1bd7b42991f40d22bcdce4e3214ce68a2628281c93cdd4423a"
+}

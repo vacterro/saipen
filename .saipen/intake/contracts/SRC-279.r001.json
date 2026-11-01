@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-279:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "SAIHANDOFF T-301 live input acceptance and readable reporting: the receipt body is a single title line, so the only derivable requirement is that T-301 (whatever it turns out to be) demonstrate live input acceptance and produce readable reporting. No handoff document, acceptance criteria, target system, or failure description accompanies it on this machine."
+    }
+  },
+  "derived_at": "2026-10-20T11:46:04Z",
+  "derived_from": "SRC-279",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "b4ab2881934dcadd650d924968f6eeedb92ae56d6cdac6e1db66b06e40e0d537"
+}

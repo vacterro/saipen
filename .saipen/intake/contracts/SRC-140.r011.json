@@ -1,0 +1,64 @@
+{
+  "clauses": {
+    "SRC-140:R001": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "Corrective authority SRC-142:R015: Ordinary direct Python import cannot mint host transport authority."
+    },
+    "SRC-140:R002": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "Corrective authority SRC-142:R016: The exact current bypass: bootstrap_transport_key -> _transport_mac -> establish is RED on the repaired implementation."
+    },
+    "SRC-140:R003": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "Corrective authority SRC-142:R017: Pre-fix/current vulnerable subject proves that same carrier previously reached ADMITTED."
+    },
+    "SRC-140:R004": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "Corrective authority SRC-142:R018: Direct establish without authority remains refused."
+    },
+    "SRC-140:R005": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "Corrective authority SRC-142:R019: Direct invalidate without authority remains refused."
+    },
+    "SRC-140:R006": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "Corrective authority SRC-142:R020: Forged ordinary SHA256 ledger remains non-authoritative."
+    },
+    "SRC-140:R007": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "Corrective authority SRC-142:R021: Keyed provenance remains required."
+    },
+    "SRC-140:R008": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "Corrective authority SRC-142:R022: No ordinary project/file mutation route can alter protected admission state."
+    },
+    "SRC-140:R009": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "Corrective authority SRC-142:R023: Host adapter can still legitimately establish admission."
+    },
+    "SRC-140:R010": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "Corrective authority SRC-142:R024: Same-session init remains functional."
+    },
+    "SRC-140:R011": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "Corrective authority SRC-142:R025: Detailed T-1563 acceptance exists in canonical source clauses/coverage."
+    }
+  },
+  "derived_at": "2026-09-29T20:42:27Z",
+  "derived_from": "SRC-140",
+  "interpretation_revision": 11,
+  "schema_version": 1,
+  "source_sha256": "3872253deebac3f144c6e79778de33d9a6f092b966794a402efc7608a6accecc"
+}

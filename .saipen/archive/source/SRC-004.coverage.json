@@ -1,0 +1,95 @@
+{
+  "requirements": {
+    "SRC-004:R0001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "tools/test_audit_2026_08_28_all3.py::IntakeAuditTests.test_release_surface_preserves_source_authority_in_fresh_clone",
+      "text": "CORE-001 \u2014 release preserves linked source authority in fresh clones",
+      "verification": "python -m unittest tools.test_audit_2026_08_28_all3 -v",
+      "work": "T-1173"
+    },
+    "SRC-004:R0002": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "tools/test_audit_2026_08_28_all3.py::IntakeAuditTests.test_corrupt_partial_archive_refusal_is_zero_write",
+      "text": "CORE-002 \u2014 archive settlement verifies all evidence before destructive convergence",
+      "verification": "python -m unittest tools.test_audit_2026_08_28_all3 -v",
+      "work": "T-1173"
+    },
+    "SRC-004:R0003": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "tools/test_audit_2026_08_28_all3.py::IntakeAuditTests.test_source_body_limits_apply_before_write_and_during_recovery",
+      "text": "CORE-003 \u2014 source body admission and recovery share the 64 MiB contract",
+      "verification": "python -m unittest tools.test_audit_2026_08_28_all3 -v",
+      "work": "T-1173"
+    },
+    "SRC-004:R0004": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "tools/test_audit_2026_08_28_all3.py::JournalAuditTests.test_same_op_corrupt_journal_retry_preserves_evidence",
+      "text": "W2-001 \u2014 same-op corrupt journal retry preserves pre-manifest evidence",
+      "verification": "python -m unittest tools.test_audit_2026_08_28_all3 -v",
+      "work": "T-1173"
+    },
+    "SRC-004:R0005": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "tools/test_audit_2026_08_28_all3.py::UndoAuditTests",
+      "text": "W2-002 \u2014 deterministic undo idempotence proves semantic identity and live after-state",
+      "verification": "python -m unittest tools.test_audit_2026_08_28_all3 -v",
+      "work": "T-1173"
+    },
+    "SRC-004:R0006": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "tools/test_audit_2026_08_28_all3.py::JournalAuditTests.test_retry_semantics_include_causal_preconditions",
+      "text": "W2-003 \u2014 operation idempotence binds canonical preconditions and read dependencies",
+      "verification": "python -m unittest tools.test_audit_2026_08_28_all3 -v",
+      "work": "T-1173"
+    },
+    "SRC-004:R0007": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "tools/test_audit_2026_08_28_all3.py::PerformanceAuditTests.test_liveness_cache_lock_contention_is_non_blocking",
+      "text": "PERF-001 \u2014 optional liveness cache contention never blocks primary commands",
+      "verification": "python -m unittest tools.test_audit_2026_08_28_all3 -v",
+      "work": "T-1173"
+    },
+    "SRC-004:R0008": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "tools/test_audit_2026_08_28_all3.py::PerformanceAuditTests.test_focus_reads_are_prebounded_and_fingerprint_streams_stably",
+      "text": "PERF-002 \u2014 focus reads are pre-bounded and project fingerprints stream with stable digests",
+      "verification": "python -m unittest tools.test_audit_2026_08_28_all3 -v",
+      "work": "T-1173"
+    },
+    "SRC-004:R0009": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "tools/test_audit_2026_08_28_all3.py::PerformanceAuditTests.test_ready_publisher_and_reader_share_one_size_contract",
+      "text": "PERF-003 \u2014 every published READY package fits the shared reader bound after restart",
+      "verification": "python -m unittest tools.test_audit_2026_08_28_all3 -v",
+      "work": "T-1173"
+    },
+    "SRC-004:R0010": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "tools/test_audit_2026_08_28_all3.py::PerformanceAuditTests.test_conformance_index_bootstraps_once_then_appends_incrementally",
+      "text": "PERF-004 \u2014 healthy conformance receipt append is incremental without hiding corrupt history",
+      "verification": "python -m unittest tools.test_audit_2026_08_28_all3 -v",
+      "work": "T-1173"
+    }
+  },
+  "schema_version": 1
+}

@@ -1,0 +1,24 @@
+{
+  "clauses": {
+    "SRC-353:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "FB-01 Explicit Namespace Routing: Slash-command router must give /saipen priority over semantic/fuzzy skill discovery."
+    },
+    "SRC-353:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "FB-02 Skill Inventory Reload: Re-read ~/.agents/skills/ on each session start or workspace switch."
+    },
+    "SRC-353:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "FB-03 Foreign-Protocol Substitution Refusal: Command refusal terminates or prompts, never cds into another protocol repository."
+    }
+  },
+  "derived_at": "2026-10-31T17:40:38Z",
+  "derived_from": "SRC-353",
+  "interpretation_revision": 3,
+  "schema_version": 1,
+  "source_sha256": "f3908585a5b0eda272376e380e72032d5627121ac884618211dcef4bce850344"
+}

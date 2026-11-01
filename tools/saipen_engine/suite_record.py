@@ -70,7 +70,7 @@ _UNITTEST_RAN_RE = re.compile(r"^Ran (\d+) tests? in ", re.MULTILINE)
 _UNITTEST_TALLY_RE = re.compile(r"^(OK|FAILED)\b(?: \((.*)\))?\s*$", re.MULTILINE)
 _UNITTEST_FIELD_RE = re.compile(r"\b([a-z ]+)=(\d+)")
 _EVIDENCE_RE = re.compile(
-    r"^" + MARKER + r" (?P<verdict>PASS|FAIL)\b.*?"
+    r"^" + MARKER + r" (?P<verdict>PASS|FAIL)(?P<reused>-REUSED)?\b.*?"
     r"\brecord:(?P<record>\S+) sha256:(?P<sha>[0-9a-f]{64})\b"
 )
 
@@ -592,6 +592,51 @@ def current_record(root: Path | str) -> dict | None:
     return found
 
 
+def reusable_record(root: Path | str) -> tuple[dict | None, str]:
+    """The record that answers for THIS tree without running the suite again.
+
+    T-1953: ``current_record`` already knows whether a record describes the
+    tree in front of us, and ``_admissible`` already knows whether it is the
+    engine's record of the DECLARED command. Reuse is the conjunction of those
+    two facts plus the ones that make a PASS mean what it says: the verdict is
+    PASS, the runner tallied at least one test, and the tree did not move while
+    the suite was reading it.
+
+    The ELIGIBILITY decision lives here, in the engine -- a caller can ask to
+    reuse and cannot assert it. ``reason`` names the single fact that withheld
+    reuse, so a refusal to reuse is as legible as a reuse.
+    """
+    found = current_record(root)
+    if found is None:
+        return None, "no record of the declared suite describes the current tree"
+    record = found["record"]
+    if record.get("verdict") != "PASS" or record.get("status") != "PASS":
+        return None, f"the current record is {record.get('verdict')}, not PASS"
+    totals = record.get("totals")
+    if not isinstance(totals, dict) or not _count(totals.get("ran")):
+        return None, "the current record counts no test, so it proves no run"
+    if record.get("tree_changed_during_run"):
+        return None, "the tree changed while that record was being written"
+    return found, "the current record PASSed the same bytes of the same command"
+
+
+def reuse_line(written: dict) -> str:
+    """The anchored LOG text for a reuse, which cites and never restates.
+
+    A reuse is not a run. The line says so, names the record it borrows, and
+    carries that record's own digest, so a reader can open the immutable
+    receipt instead of trusting this sentence.
+    """
+    record = written["record"]
+    totals = record.get("totals") or {}
+    return (
+        f"{MARKER} PASS-REUSED runner:{totals.get('runner', 'unknown')} "
+        f"ran:{totals.get('ran')} red:{totals.get('red')} skipped:{totals.get('skipped')} "
+        f"exit:{record.get('exit_code')} command:{record['command_sha256'][:16]} "
+        f"record:{written['path']} sha256:{written['sha256']}"
+    )
+
+
 def digest_group(record: dict) -> dict:
     """The typed facts the operator digest renders; integers and a closed status."""
     totals = record.get("totals") or {}
@@ -752,7 +797,19 @@ def _declare(base: Path, words: list[str], agent: str, dry_run: bool) -> tuple[d
     }, 0 if logged.ok else 1
 
 
+def _take_reuse(words: list[str]) -> tuple[list[str], bool]:
+    """Remove `--reuse` from ``words``.
+
+    Opt-in on purpose. A caller that wants the freshness argument to be newly
+    made asks for a run; only a caller that can name the tree it is closing
+    asks the engine to reuse. The command that never re-runs is not the
+    default one.
+    """
+    return [word for word in words if word != "--reuse"], "--reuse" in words
+
+
 def _run(base: Path, words: list[str], agent: str, dry_run: bool) -> tuple[dict, int]:
+    words, reuse = _take_reuse(words)
     words, timeout, problem = _take_timeout(words)
     if problem or len(words) > 1 or (words and not _TICKET_RE.fullmatch(words[0])):
         return _refusal(problem or "run takes at most one ticket id")
@@ -777,6 +834,32 @@ def _run(base: Path, words: list[str], agent: str, dry_run: bool) -> tuple[dict,
     from .inflight import holding
 
     ticket = words[0] if words else None
+    if reuse:
+        found, reason = reusable_record(base)
+        if found is not None:
+            # Still a mutation, still serialized, still a journal entry: reuse
+            # removes the execution, never the evidence trail. The record is
+            # cited by path and digest, so this line can never be read as a
+            # fresh run of a tree that was not tested.
+            with holding(base, ticket or "", "test suite reuse"):
+                logged = operations.checkpoint(
+                    base, agent, "RUN", ticket, reuse_line(found)
+                )
+            return {
+                "ok": logged.ok,
+                "code": "SUITE_REUSED",
+                **_summary(found),
+                "sha256": found["sha256"],
+                "reuse_reason": reason,
+                "executed": False,
+                "checkpoint": logged.code,
+                "checkpoint_detail": logged.message or None,
+            }, 0 if logged.ok else 1
+        # No eligible record: fall through and run, and say which fact was
+        # missing so the refusal to reuse is not mistaken for a silent re-run.
+        reuse_withheld = reason
+    else:
+        reuse_withheld = None
     try:
         # The suite runs in the project itself, so the tree is frozen for the
         # run: an edit meanwhile would make the record describe neither tree.
@@ -810,6 +893,8 @@ def _run(base: Path, words: list[str], agent: str, dry_run: bool) -> tuple[dict,
         "tree_changed_during_run": record["tree_changed_during_run"],
         "stdout_tail": None if passed else record["stdout_tail"],
         "stderr_tail": None if passed else record["stderr_tail"],
+        "reuse_withheld": reuse_withheld,
+        "executed": True,
         "checkpoint": logged.code,
         "checkpoint_detail": logged.message or None,
     }, 0 if logged.ok and passed else 1

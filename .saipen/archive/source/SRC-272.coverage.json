@@ -1,0 +1,122 @@
+{
+  "requirements": {
+    "SRC-272:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "tools/saipen_engine/intake.py extract_request_clauses preserves full section text without character 160 truncation",
+      "text": "GAP 1: tools/saipen_engine/intake.py extract_request_clauses() truncates major-section contents to the first 160 characters. The resulting SRC-271 clauses omit material requirements present later in the authoritative section bodies.",
+      "verification": "python -m unittest tools/test_source_contract_derivation.py -k test_regression_a -> PASS",
+      "work": "T-1813"
+    },
+    "SRC-272:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "tools/saipen_engine/intake.py set_disposition validates bounded typed evidence matching requirements",
+      "text": "GAP 2: set_disposition() The verification quality check rejects a small set of placeholder strings, but does not establish that the provided evidence actually proves the selected clause.",
+      "verification": "python -m unittest tools/test_source_contract_derivation.py -> PASS 10/10",
+      "work": "T-1813"
+    },
+    "SRC-272:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "tools/test_source_contract_derivation.py implements explicit negative regression tests A..J",
+      "text": "GAP 3: tools/test_source_contract_derivation.py Regression G proves rejection of \"lifecycle progression\". It does not prove rejection of unrelated but properly formatted verification evidence.",
+      "verification": "python -m unittest tools/test_source_contract_derivation.py -> PASS 10/10",
+      "work": "T-1813"
+    },
+    "SRC-272:R004": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "tools/test_source_contract_derivation.py test_regression_a verifies requirement text beyond 160 chars is preserved",
+      "text": "TEST A: Requirement omitted after character 160.",
+      "verification": "python -m unittest tools/test_source_contract_derivation.py -k test_regression_a_requirement_omitted_after_char_160 -> PASS",
+      "work": "T-1813"
+    },
+    "SRC-272:R005": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "tools/test_source_contract_derivation.py test_regression_b verifies discrete GAP and TEST clauses extracted",
+      "text": "TEST B: Multi-section request with nested acceptance clauses.",
+      "verification": "python -m unittest tools/test_source_contract_derivation.py -k test_regression_b_multisection_with_nested_acceptance_clauses -> PASS",
+      "work": "T-1813"
+    },
+    "SRC-272:R006": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "tools/test_source_contract_derivation.py test_regression_c verifies unrelated test evidence is refused with EVIDENCE_UNRELATED",
+      "text": "TEST C: Correct test evidence bound to an unrelated requirement.",
+      "verification": "python -m unittest tools/test_source_contract_derivation.py -k test_regression_c_correct_test_evidence_bound_to_unrelated_requirement -> PASS",
+      "work": "T-1813"
+    },
+    "SRC-272:R007": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "tools/test_source_contract_derivation.py test_regression_d verifies generic core pass is refused for live acceptance",
+      "text": "TEST D: Generic Core PASS used to claim live host acceptance.",
+      "verification": "python -m unittest tools/test_source_contract_derivation.py -k test_regression_d_generic_core_pass_cannot_claim_live_host_acceptance -> PASS",
+      "work": "T-1813"
+    },
+    "SRC-272:R008": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "tools/test_source_contract_derivation.py test_regression_e verifies missing external runtime evidence is refused",
+      "text": "TEST E: Missing external runtime evidence.",
+      "verification": "python -m unittest tools/test_source_contract_derivation.py -k test_regression_e_missing_external_runtime_evidence -> PASS",
+      "work": "T-1813"
+    },
+    "SRC-272:R009": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "tools/test_source_contract_derivation.py test_regression_f verifies wrong source identity citation is refused with EVIDENCE_IDENTITY_MISMATCH",
+      "text": "TEST F: Evidence reference with wrong source identity.",
+      "verification": "python -m unittest tools/test_source_contract_derivation.py -k test_regression_f_evidence_reference_with_wrong_source_identity -> PASS",
+      "work": "T-1813"
+    },
+    "SRC-272:R010": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "tools/test_source_contract_derivation.py test_regression_g verifies source body drift after contract interpretation is refused with SOURCE_CORRUPTION",
+      "text": "TEST G: Requirement source changed after interpretation.",
+      "verification": "python -m unittest tools/test_source_contract_derivation.py -k test_regression_g_requirement_source_changed_after_interpretation -> PASS",
+      "work": "T-1813"
+    },
+    "SRC-272:R011": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "tools/test_source_contract_derivation.py test_regression_h enforces complete section fulfillment gate",
+      "text": "TEST H: Partial fulfillment of one large section.",
+      "verification": "python -m unittest tools/test_source_contract_derivation.py -k test_regression_h -> PASS",
+      "work": "T-1813"
+    },
+    "SRC-272:R012": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "tools/test_source_contract_derivation.py test_regression_i verifies matching genuine evidence succeeds with COVERAGE_UPDATED",
+      "text": "TEST I: Entire section verified using matching genuine evidence.",
+      "verification": "python -m unittest tools/test_source_contract_derivation.py -k test_regression_i_entire_section_verified_using_matching_genuine_evidence -> PASS",
+      "work": "T-1813"
+    },
+    "SRC-272:R013": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "tools/test_source_contract_derivation.py test_regression_j proves legacy source history contracts and tombstones remain closed and intact",
+      "text": "TEST J: Legacy source history preserved without rewriting. Do not invent evidence. Do not retroactively rewrite archived contracts. Where old coverage is demonstrably insufficient, create a narrow corrective receipt.",
+      "verification": "python -m unittest tools/test_source_contract_derivation.py -k test_regression_j_legacy_source_history_preserved -> PASS",
+      "work": "T-1813"
+    }
+  },
+  "schema_version": 1
+}

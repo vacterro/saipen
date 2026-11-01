@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-162:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "P1 recovery defect: stale closure metadata on non-DOWN row unreachable by canonical repair (FastPrompter T-1371 incident)"
+    }
+  },
+  "derived_at": "2026-10-02T02:34:55Z",
+  "derived_from": "SRC-162",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "c09c010ab1ac08975ca8c8a024ba41bdc7d74ec334acca8b1077d3617edc379b"
+}

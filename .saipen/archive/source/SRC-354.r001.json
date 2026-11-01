@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-354:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Release Cohort Membership: Affected source files must belong to an intended release cohort; tickets retain publication_state pending until bound."
+    }
+  },
+  "derived_at": "2026-10-31T18:20:19Z",
+  "derived_from": "SRC-354",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "84fe70d11cf7d6f44da87b810f842b138b672260bf6b76675baa7fda0272a325"
+}

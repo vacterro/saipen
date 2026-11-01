@@ -1,0 +1,59 @@
+{
+  "clauses": {
+    "SRC-361:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "D-01 Export-Artifact-Completeness: Truncated session exports require chunked manifest and end marker verification"
+    },
+    "SRC-361:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "D-02 Outcome-Truth-Distinction: Terminal guard correctly refuses false completion when actionable tickets remain"
+    },
+    "SRC-361:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "D-03 Authority-Gate-Enforcement: Model-supplied sources rejected from privileged reconciliation without operator witness"
+    },
+    "SRC-361:R004": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "D-04 Operational-Scope-Separation: Ledger blocker must not halt independent operational application repairs"
+    },
+    "SRC-361:R005": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "D-05 Out-of-Band-Mutation-Control: Application code repairs require operational exception tracking or protocol admission"
+    },
+    "SRC-361:R006": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "D-06 Premature-Reliability-Prevention: Reliability claims require comprehensive restart/update acceptance matrix"
+    },
+    "SRC-361:R007": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "D-07 Evidence-Semantics-Integrity: Beacon acknowledgment must not substitute for authentic DOM/CSS delivery proof"
+    },
+    "SRC-361:R008": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "D-08 State-Consistency-Enforcement: Phase DONE requires matching journaled ticket lifecycle and verification records"
+    },
+    "SRC-361:R009": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "D-09 Protocol-Lifecycle-Tracking: Discrete states for discovery, instruction load, and ledger admission prevent explanation drift"
+    },
+    "SRC-361:R010": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "D-10 Host-Response-Contract-Enforcement: Host admission must provide mechanical response validation or fail-closed warning"
+    }
+  },
+  "derived_at": "2026-10-31T23:45:33Z",
+  "derived_from": "SRC-361",
+  "interpretation_revision": 10,
+  "schema_version": 1,
+  "source_sha256": "d9c9ee829a233ee6b89e2c953e35c7f1650579422798ff58ebcb7c12b8cc9e06"
+}

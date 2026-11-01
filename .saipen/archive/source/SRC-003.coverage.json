@@ -1,0 +1,257 @@
+{
+  "requirements": {
+    "SRC-003:R0001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "tools/test_audit_2026_08_27_core.py::StopAuditTests",
+      "text": "CORE-001 \u2014 journaled and owned stop/ss CLI path",
+      "verification": "focused 10/10 + full unit discovery 338/338 PASS",
+      "work": "T-1171"
+    },
+    "SRC-003:R0002": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "tools/test_audit_2026_08_27_core.py::StopAuditTests",
+      "text": "CORE-002 \u2014 claim-safe, BOARD-aware and valve-correct stop_checkpoint",
+      "verification": "focused 10/10 + full unit discovery 338/338 PASS",
+      "work": "T-1171"
+    },
+    "SRC-003:R0003": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "tools/saipen_engine/test_runner.py + test_audit_2026_08_27_core.py::TestCommandAuditTests",
+      "text": "CORE-003 \u2014 non-recursive complete read-only test orchestrator",
+      "verification": "full unit discovery terminated: 338/338 PASS in 40.595s",
+      "work": "T-1171"
+    },
+    "SRC-003:R0004": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "tools/test_audit_2026_08_27_core.py::CccAuditTests",
+      "text": "CORE-004 \u2014 atomic ccc entry marker and active-work checkpoint",
+      "verification": "focused 10/10 + full unit discovery 338/338 PASS",
+      "work": "T-1171"
+    },
+    "SRC-003:R0005": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "tools/test_audit_2026_08_27_w2.py::JournalIntermediateOwnershipTests (staged symlink refused, deterministic temp links never used)",
+      "text": "W2-001 \u2014 owned no-follow journal intermediates",
+      "verification": "focused 2/2 + full suite 350/350 PASS",
+      "work": "T-1171"
+    },
+    "SRC-003:R0006": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "tools/test_audit_2026_08_27_w2.py + liveness.py owned/no-follow publication via safe_create_bytes_exclusive",
+      "text": "W2-002 \u2014 owned no-follow liveness cache",
+      "verification": "liveness race test + full suite 350/350 PASS",
+      "work": "T-1171"
+    },
+    "SRC-003:R0007": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "tools/test_audit_2026_08_27_w2.py::ProducerDescendantOwnershipTests (epoch/staging/payload/READY symlinks refused)",
+      "text": "W2-003 \u2014 owned no-follow producer descendants",
+      "verification": "focused 4/4 + full suite 350/350 PASS",
+      "work": "T-1171"
+    },
+    "SRC-003:R0008": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "tools/saipen_engine/intake.py::_settle_archive_commit idempotent close/archive/purge with digest verification",
+      "text": "W2-004 \u2014 crash-recoverable source close/archive/purge",
+      "verification": "intake tests + full suite 350/350 PASS",
+      "work": "T-1171"
+    },
+    "SRC-003:R0009": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "tools/test_audit_2026_08_27_w2.py::LockOwnershipTests (open/post-open failure unwinds reservations)",
+      "text": "W2-005 \u2014 unwind failed writer and producer lock reservations",
+      "verification": "focused 2/2 + full suite 350/350 PASS",
+      "work": "T-1171"
+    },
+    "SRC-003:R0010": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "tools/test_audit_2026_08_27_w2.py::LockOwnershipTests (core/producer/generic final symlink refused)",
+      "text": "W2-006 \u2014 owned no-follow final lock files",
+      "verification": "focused 3/3 + full suite 350/350 PASS",
+      "work": "T-1171"
+    },
+    "SRC-003:R0011": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "tools/saipen_engine/intent.py::_find_targeted_carriers rejects board errors; _targeted_producer_active_ticket requires coherent STATE/BOARD",
+      "text": "W2-007 \u2014 coherent STATE and BOARD before targeted producer integration",
+      "verification": "intent tests + full suite 350/350 PASS",
+      "work": "T-1171"
+    },
+    "SRC-003:R0012": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "tools/saipen_engine/release.py::_restore_index_bytes owns Git index.lock via safe_create_bytes_exclusive",
+      "text": "W2-008 \u2014 Git-compatible exclusive index rollback lock",
+      "verification": "release tests + full suite 350/350 PASS",
+      "work": "T-1171"
+    },
+    "SRC-003:R0013": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "tools/saipen_engine/convergence.py::_pick_latest uses _chrono_key (UTC+event+op_id), not event_number alone",
+      "text": "W2-009 \u2014 canonical chronology for convergence predecessor selection",
+      "verification": "convergence tests + full suite 350/350 PASS",
+      "work": "T-1171"
+    },
+    "SRC-003:R0014": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "tools/saipen_engine/snapshot.py::ProjectSnapshot carries state_text/board_text; validate_checkpoint_surface proves hash parity",
+      "text": "W2-010 \u2014 one coherent ProjectSnapshot for status/next/explain",
+      "verification": "snapshot tests + full suite 350/350 PASS",
+      "work": "T-1171"
+    },
+    "SRC-003:R0015": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "tools/saipen_engine/convergence.py::AttributionClaim structured; _attribution_snapshot canonical chronology/provenance/binding",
+      "text": "W2-011 \u2014 structured chronological project-bound attribution claims",
+      "verification": "convergence tests + full suite 350/350 PASS",
+      "work": "T-1171"
+    },
+    "SRC-003:R0016": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "tools/saipen_engine/operations.py::_plan_defer_for_crew binds by project_lineage (modern) / project_identity (legacy) matching release._load_scope",
+      "text": "W2-012 \u2014 portable lineage binding for crew defer scope",
+      "verification": "operations tests + full suite 350/350 PASS",
+      "work": "T-1171"
+    },
+    "SRC-003:R0017": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "tools/saipen_engine/journal.py::_settle_journal catches InvalidIdError+OSError, non-fatal, authoritative ops receipt",
+      "text": "W2-013 \u2014 non-fatal post-COMMITTED settlement failure and retry",
+      "verification": "journal tests + full suite 350/350 PASS",
+      "work": "T-1171"
+    },
+    "SRC-003:R0018": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "tools/saipen_engine/subs.py::sub_instance_health authority_errors channel; CORRUPT_JOURNAL/HEALTH_INVALID structured result",
+      "text": "W2-014 \u2014 consistent structured SubSaipen receipt corruption",
+      "verification": "subs tests + full suite 350/350 PASS",
+      "work": "T-1171"
+    },
+    "SRC-003:R0019": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "tools/saipen_engine/operations.py::_plan_record_scope + _plan_convergence_stage include source_identity_dependency(.) CAS precondition",
+      "text": "W2-015 \u2014 source-identity APPLY CAS for source-bound evidence",
+      "verification": "operations tests + full suite 350/350 PASS",
+      "work": "T-1171"
+    },
+    "SRC-003:R0020": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "tools/test_audit_2026_08_27_w2.py::LivenessRaceTests (two parallel observations preserve sequence)",
+      "text": "W2-016 \u2014 serialized liveness cache read-modify-write",
+      "verification": "focused 1/1 + full suite 350/350 PASS",
+      "work": "T-1171"
+    },
+    "SRC-003:R0021": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "tools/saipen_engine/producer.py::integrate_packages_core shared retirement helper; cleanup_pending truthful on idempotent retry",
+      "text": "W2-017 \u2014 truthful producer cleanup_pending on idempotent retry",
+      "verification": "producer tests + full suite 350/350 PASS",
+      "work": "T-1171"
+    },
+    "SRC-003:R0022": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "tools/saipen_engine/intake.py call-scoped snapshot; validate_project/release_gate parse BOARD once",
+      "text": "PERF-001 \u2014 call-scoped linear intake validation and release snapshot",
+      "verification": "perf_wave 41/41 + full suite 350/350 PASS",
+      "work": "T-1171"
+    },
+    "SRC-003:R0023": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "tools/perf_wave_regressions.py AUDIT PERF-002 (bounded Git calls, index lookup constant-I/O)",
+      "text": "PERF-002 \u2014 bounded indexed source duplicate lookup and ID allocation",
+      "verification": "perf_wave 41/41 + full suite 350/350 PASS",
+      "work": "T-1171"
+    },
+    "SRC-003:R0024": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "tools/perf_wave_regressions.py PERF-003 (disposable scenario fixture, _is_saipen_path excludes nested runtime)",
+      "text": "PERF-003 \u2014 disposable scenario validation and stable source identity",
+      "verification": "perf_wave 41/41 + full suite 350/350 PASS",
+      "work": "T-1171"
+    },
+    "SRC-003:R0025": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "tools/perf_wave_regressions.py PERF-004 (index lookup constant-I/O, convergence/release reuse one decode)",
+      "text": "PERF-004 \u2014 bounded semantic receipt decoding and indexed SubSaipen consumers",
+      "verification": "perf_wave 41/41 + full suite 350/350 PASS",
+      "work": "T-1171"
+    },
+    "SRC-003:R0026": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "tools/perf_wave_regressions.py PERF-005 (lightweight stability digest equals full-decode digest)",
+      "text": "PERF-005 \u2014 purpose-specific bounded-memory LOG history retention",
+      "verification": "perf_wave 41/41 + full suite 350/350 PASS",
+      "work": "T-1171"
+    },
+    "SRC-003:R0027": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "tools/run_scenarios.py process-tree cancellation; perf_wave T-1022 hermetic probes",
+      "text": "PERF-006 \u2014 owned cross-platform child process-tree cancellation",
+      "verification": "perf_wave 41/41 + full suite 350/350 PASS",
+      "work": "T-1171"
+    },
+    "SRC-003:R0028": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "tools/run_scenarios.py TemporaryDirectory context-managed fixtures; perf_wave T-1022 byte-identical HOME",
+      "text": "PERF-007 \u2014 suite-owned temporary directory cleanup",
+      "verification": "perf_wave 41/41 + full suite 350/350 PASS",
+      "work": "T-1171"
+    }
+  },
+  "schema_version": 1
+}

@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-071:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Continuation handoff V:\\_TEMP_\\fastprompter_drag\\SAIPEN_20260919_1728.md: park T-1408 truthfully, repair T-1371 current-vs-historical distribution truth, then install and field-prove T-1386. NO PUSH, NO TAG, NO PUBLIC RELEASE."
+    }
+  },
+  "derived_at": "2026-09-19T14:52:36Z",
+  "derived_from": "SRC-071",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "d4b3370c764f47433085ef0fd58153ab61e885ec671a57a6608a48fae11d7e90"
+}

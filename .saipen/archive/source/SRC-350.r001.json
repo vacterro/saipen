@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-350:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "SAIPAL publication suppresses a changed finding under an unchanged finding_id, and a legacy ack row with source_digest None matches every corpus: bind suppression to a validated revision identity and scope legacy acks through authoritative destination receipts"
+    }
+  },
+  "derived_at": "2026-10-31T06:23:06Z",
+  "derived_from": "SRC-350",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "cd76b80837926115cd9260c3d2dbb4e266fbebabef23e4cf79187f6459c155e5"
+}

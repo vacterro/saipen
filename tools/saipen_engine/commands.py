@@ -172,6 +172,42 @@ def is_declared_shortcut(token: str, table: dict[str, str] | None = None) -> boo
     return token.strip() in full or normalize_shortcut_token(token) in full
 
 
+def foreign_protocol_owner(token: str) -> dict | None:
+    """The foreign protocol that owns *token*, or None when none does.
+
+    EXACT-NAMESPACE-01 (T-1968). An explicit protocol command must never be
+    satisfied by a DIFFERENT protocol. The observed field failure: an agent
+    told to run `/saipen continue` in _BZ_REA found SAIPAL in its skill
+    inventory, loaded it, received NO_HOME (correct -- that project carries
+    `.saipen`, never `.saipal`), then changed into the SAIPAL repository and
+    worked there instead. Answering "whose command was that" with a bare
+    `unknown command` is what made the substitution look reasonable: a typo
+    and a foreign protocol command were byte-identical refusals.
+
+    Read from `REGISTRY.json.exact_namespace.foreign_protocols`; prose is
+    never parsed. A malformed or absent block yields None, so a damaged
+    registry degrades to the old refusal rather than inventing an owner.
+    """
+    registry = load_registry()
+    namespace = registry.get("exact_namespace") if registry else None
+    if not isinstance(namespace, dict):
+        return None
+    protocols = namespace.get("foreign_protocols")
+    if not isinstance(protocols, dict):
+        return None
+    wanted = token.strip().lower()
+    for name, entry in protocols.items():
+        if not isinstance(name, str) or not isinstance(entry, dict):
+            continue
+        declared = {name.lower()}
+        aliases = entry.get("aliases")
+        if isinstance(aliases, list):
+            declared |= {str(alias).lower() for alias in aliases if isinstance(alias, str)}
+        if wanted in declared:
+            return {"name": name, **entry}
+    return None
+
+
 _CONTINUATION_ALLOWED_PAYLOADS = frozenset(
     {"", "all", "--all", "-a", "--json", "--dry-run", "--json --all", "--all --json"}
 )

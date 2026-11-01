@@ -1,0 +1,64 @@
+{
+  "clauses": {
+    "SRC-210:R001": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not abandon or corrupt active canonical Work."
+    },
+    "SRC-210:R002": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "Determine the minimum safe recovery path supported by SAIPEN."
+    },
+    "SRC-210:R003": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "Preserve the original AUDAPACK journal, BOARD, STATE, source files, Git history, and forensic evidence."
+    },
+    "SRC-210:R004": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not invent missing events or fabricate successful lifecycle transitions."
+    },
+    "SRC-210:R005": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not directly edit canonical lifecycle files to bypass integrity checks."
+    },
+    "SRC-210:R006": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "If a supported recovery operation is possible, verify it with negative controls before execution."
+    },
+    "SRC-210:R007": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "If recovery requires a new lineage, destructive changes, or explicit operator authority, prepare the exact evidence-backed recovery plan and STOP for authorization."
+    },
+    "SRC-210:R008": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "Once authorized and safely recovered, independently verify AUDAPACK lifecycle integrity and report whether normal agent operations are permitted."
+    },
+    "SRC-210:R009": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "Resume the original audit-inbox fairness mission afterward."
+    },
+    "SRC-210:R010": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not treat this amendment as an independent generic task or create duplicate Work solely from its text."
+    },
+    "SRC-210:R011": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not declare recovery complete merely because SAIPEN regression tests pass."
+    }
+  },
+  "derived_at": "2026-10-10T14:21:50Z",
+  "derived_from": "SRC-210",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "67561060ad542edb552c3444662159cae3a58b2423f81facc918ad3e1c565508"
+}

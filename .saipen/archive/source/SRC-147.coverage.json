@@ -1,0 +1,14 @@
+{
+  "requirements": {
+    "SRC-147:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "T-1574 closed with verification evidence in LOG: review -> PASS [target: T-1574] conf: high -- actual REVIEW E-10974 independent rerun of the same 23-test oracle (verifier ea035e106ce20faf): pre-fix owners FAIL21, live owners PASS23 (review-red.txt/review-green.txt); live subject 7222c91dcf11d2e0 differs from VERIFY only by the concurrent foreign improve.py edit already inside the green family (tree fingerprint b011585b8601fd95 = PASS record). O",
+      "text": "\u0410\u0441\u0442\u0440\u0430, \u043f\u0440\u0438\u0432\u0435\u0442. \u0412\u043e\u0442 \u0435\u0449\u0435 3 \u043f\u0440\u043e\u0431\u043b\u0435\u043c\u043d\u044b\u0435 \u043c\u0435\u0441\u0442 \u0434\u043b\u044f \u0443\u043b\u0443\u0447\u0448\u0435\u043d\u0438\u044f: V:\\_TEMP_\\fastprompter_drag\\SAIPEN_20260930_2008.md V:\\_TEMP_\\fastprompter_drag\\SAIPEN_20260930_2008_2.md V:\\_TEMP_\\fastprompter_drag\\SAIPEN_20260930_2008_3.md - \u0414\u0430\u0432\u0430\u0439 \u0434\u043e \u043a\u043e\u043d\u0446\u0430.",
+      "verification": "the Work this request created reached its own verification gate; see the T-1574 VERIFY cycle in .saipen/LOG.md",
+      "work": "T-1574"
+    }
+  },
+  "schema_version": 1
+}

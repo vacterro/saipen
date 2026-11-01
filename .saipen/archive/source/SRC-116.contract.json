@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-116:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "\u0423\u0441\u0442\u0430\u043d\u043e\u0432\u0438 \u0432 \u0438\u043d\u0436\u0435\u043a\u0442\u043e\u0440 \u043f\u043e\u0434\u0434\u0435\u0440\u0436\u043a\u0443 ZAICODE \u0442\u043e\u0436\u0435 \u043f\u043e\u0436\u0430\u043b\u043e\u0443\u0439\u0441\u0442\u0430 v:\\___VAC\\__K\\__CODE\\_AI_STUFF_AGENTIC\\_ZAICODE"
+    }
+  },
+  "derived_at": "2026-09-24T02:22:15Z",
+  "derived_from": "SRC-116",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "7bb7eaf54df7d6e7e005343f2380e284318a0c9b2c65d7caa5d0e2b390175642"
+}

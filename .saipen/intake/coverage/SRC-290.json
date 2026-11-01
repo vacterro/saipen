@@ -1,0 +1,14 @@
+{
+  "requirements": {
+    "SRC-290:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "T-1858 closed with verification evidence in LOG: verify -> PASS [target: T-1858] conf: high -- FOCUSED-UNIT-EVIDENCE PASS ran:62 duration:150.485s record:.saipen/evidence/focused-unit/d1d2bab0ba5a6c92-20261030T073439673173Z.json -- four modules executed on live HEAD: test_t1858_valve_guidance (9, AC-01/02/04), test_operator_ingress_matrix (clause M pins carrier->reset_authority->operator_carrier), test_t1864_autonomous_valve, test_t1494_continua",
+      "text": "Satisfy the captured request SRC-290 in full; the authoritative text is the receipt body (sha256 3d76e7bccf06): \u0418 \u0440\u0430\u0437\u0431\u0435\u0440\u0438\u0441\u044c \u043f\u043e\u0436\u0430\u043b\u0443\u0439\u0441\u0442\u0430 \u0441 \u044d\u0442\u0438\u043c\u0438 STATUS: REVIEW T-1515 RESULT: Vajab operaatori otsust; T-1516 l\u00f5petatud; 3 blokeeritud OPERATOR ACTION: safety valve reached (3 waves / 25 tickets) -- run 'cc' to continue NEXT EXACT ACTION: NONE VALIDATION: C\u2026",
+      "verification": "the Work this request created reached its own verification gate; see the T-1858 VERIFY cycle in .saipen/LOG.md",
+      "work": "T-1858"
+    }
+  },
+  "schema_version": 1
+}

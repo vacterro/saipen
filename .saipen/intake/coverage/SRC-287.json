@@ -1,0 +1,50 @@
+{
+  "requirements": {
+    "SRC-287:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "BLOCKED",
+      "evidence": "E-16958",
+      "text": "Diagnose the actual line-break boundary across raw response, canonical SAIPEN render, stored host payload and host Markdown display; correct the SAIPEN-owned renderer when it owns the defect.",
+      "verification": "Stored report and Markdown boundary measured with exact carrier; separate pre-transport stream and physical application display remain unobserved.",
+      "work": "T-1821"
+    },
+    "SRC-287:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "IMPLEMENTED",
+      "evidence": "E-16958",
+      "text": "Produce deterministic readable canonical fields on separate visible lines, retain the existing schema and CORE-RESPONSE checks and budgets, and preserve full technical detail in durable evidence with a bounded summary/reference.",
+      "verification": "Native measured regression, current 158-test suite and actual installed Markdown component prove deterministic separate canonical field lines with unchanged checks and evidence bounds.",
+      "work": "T-1821"
+    },
+    "SRC-287:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-16958",
+      "text": "Prove regressions A, B, C and L for this SAIPEN corrective: multiline rendering remains visible, fields retain labels, canonical checks pass without relaxed budgets, and details do not flood normal output.",
+      "verification": "Regressions A/B/C/L and multiline field normalization pass in the current complete seven-pattern 158-test response selection.",
+      "work": "T-1821"
+    },
+    "SRC-287:R004": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-16958",
+      "text": "Preserve the existing T-301 implementation and journal, avoid false acceptance claims, foreign repository patches, unauthorized deployment or input injection, and keep Future Gates closed.",
+      "verification": "Original source and foreign T-301 journal were read only; no new vendor session, input injection, deployment, authority or Future Gate was created.",
+      "work": "T-1821"
+    },
+    "SRC-287:R005": {
+      "actionable": true,
+      "class": "non-goal",
+      "disposition": "VERIFIED",
+      "evidence": "E-16958",
+      "text": "Sections 1-4 and regressions D-K remain the existing SAITULS T-301 interactive-desktop, real input, runtime-generation and deployment work; this SAIPEN-owned corrective does not claim or simulate their completion.",
+      "verification": "SAITULS T-301 real vendor acceptance remains blocked with existing T-302; the local renderer work does not claim completion of sections 1-4 or regressions D-K.",
+      "work": "T-1821"
+    }
+  },
+  "schema_version": 1
+}

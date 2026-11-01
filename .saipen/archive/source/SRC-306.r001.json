@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-306:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "SAIPEN closure must enforce typed mandatory acceptance receipts: a ticket whose acceptance contract requires per-invariant, per-platform proof cannot reach DONE while a required receipt is absent. Record the outcome as Windows PASS / Linux NOT_RUN / real-media NOT_RUN rather than collapsing multi-platform acceptance into one green suite."
+    }
+  },
+  "derived_at": "2026-10-24T11:53:04Z",
+  "derived_from": "SRC-306",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "3e6056ba571e23858783da238ea7b102024f8feecb81896c25a9bd963f8a12c3"
+}

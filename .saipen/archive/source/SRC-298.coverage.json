@@ -1,0 +1,32 @@
+{
+  "requirements": {
+    "SRC-298:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-17620",
+      "text": "A ZAICODE session has a supported, verifiable way to deliver a genuine operator cc that renews a bounded run: a host adapter exists, is installed, and is dispatched on the operator's prompt event.",
+      "verification": "python -B -m unittest discover -s tools -p test_t1624_host_integration.py -v:PASS record:.saipen/evidence/core-unit/0e400703ae88e0e3-20261023T230606919378Z.json",
+      "work": "T-1869"
+    },
+    "SRC-298:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-17620",
+      "text": "An agent CLI replay, a shell call or another session's envelope cannot renew the bounded grant: an unsealed or wrong-session carrier retains hard_wait.",
+      "verification": "python -B -m unittest discover -s tools -p test_t1822_carrier_binding.py -v:PASS record:.saipen/evidence/core-unit/0e400703ae88e0e3-20261023T230606919378Z.json",
+      "work": "T-1869"
+    },
+    "SRC-298:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-17620",
+      "text": "When the native bridge is absent, the refusal names the infrastructure owner and the accurate recovery prerequisite, and never reports an advisory skill or a repeated cc as authenticated recovery.",
+      "verification": "python -B -m unittest discover -s tools -p test_admission_auto_doctor.py -v:PASS record:.saipen/evidence/core-unit/0e400703ae88e0e3-20261023T230606919378Z.json",
+      "work": "T-1869"
+    }
+  },
+  "schema_version": 1
+}

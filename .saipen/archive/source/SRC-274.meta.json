@@ -1,0 +1,36 @@
+{
+  "archive_ref": ".saipen/archive/source/SRC-274.md",
+  "closed_at": "2026-10-27T02:33:27Z",
+  "closure_event": null,
+  "linked_work": "T-1815",
+  "receipt_id": "SRC-274",
+  "received_at": "2026-10-18T15:26:45Z",
+  "redaction": {
+    "applied": false,
+    "authoritative": false,
+    "original_sha256": "083d54e599bc1fe53ce851c761444e01f4ef38ac98c46872fb85aebbfb6877c7",
+    "sanitized_sha256": "083d54e599bc1fe53ce851c761444e01f4ef38ac98c46872fb85aebbfb6877c7"
+  },
+  "request_provenance": {
+    "compared_digest": "65c42879ed593252fe0c906e4b94c5bf1cb5f8148919e61a1d884244720696c0",
+    "note": "no operator carrier and no transport obligation: the stored bytes are what this session supplied, and nothing compared them with what the operator wrote",
+    "witness": "model_supplied"
+  },
+  "reread_at": "2026-10-27T02:33:27Z",
+  "schema_version": 1,
+  "sensitive": false,
+  "source_authority": {
+    "body_sha256": "083d54e599bc1fe53ce851c761444e01f4ef38ac98c46872fb85aebbfb6877c7",
+    "mode": "exact",
+    "original_available": true
+  },
+  "source_kind": "user_instruction",
+  "source_sha256": "083d54e599bc1fe53ce851c761444e01f4ef38ac98c46872fb85aebbfb6877c7",
+  "status": "CLOSED",
+  "storage_status": "ARCHIVED",
+  "transport": {
+    "newline_normalization": "none",
+    "source_encoding": "utf-8",
+    "transport_transform": "none"
+  }
+}

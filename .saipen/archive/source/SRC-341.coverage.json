@@ -1,0 +1,14 @@
+{
+  "requirements": {
+    "SRC-341:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "T-1936 closed with verification evidence in LOG: FOCUSED-UNIT-EVIDENCE PASS conf: high ran:13 record:.saipen/evidence/focused-unit/5fe600807e9cf8dd-20261026T211156830083Z.json sha256:0440f1fea21f3770817ef55cf0f142449d610eab0af9a397635d311a84cecd09",
+      "text": "Unified provider- and account-aware saipen launch (SRC-184) -- future gate FG-0046, one bounded slice: read-only account discovery -- `saipen launch --list` names provider, alias, profile directory, installed, authenticated and managed/direct for every Claude, Codex and Antigravity account on the machine, reading no secret",
+      "verification": "the Work this request created reached its own verification gate; see the T-1936 VERIFY cycle in .saipen/LOG.md",
+      "work": "T-1936"
+    }
+  },
+  "schema_version": 1
+}

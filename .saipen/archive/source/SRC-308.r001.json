@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-308:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Execute SRC paste SAIHANDOFF P0 RECONCILIATION SELF-DEADLOCK / AUTOMATIC CAUSAL RECOVERY: (1) repair global BOARD-blocker contamination in tools/saipen_engine/reconcile.py _state_blocker_repairs() so an unrelated BLOCKED ticket cannot veto repair of a provably stale ACTIVE-phase STATE blocker, with causal classification by exact identifiers and journal evidence, never prose; (2) make an unsupported 40-50 char agent-authored STATE blocker a typed or refused condition instead of unowned authority; (3) automatic journaled, idempotent, CAS-protected canonical repair of a proven-stale blocker with the original bytes preserved; (4) Auto-Doctor runs one bounded structural diagnosis after a refusal and resumes rather than requiring another operator cc; (5) correct test_recovery_reachability.BlockerClassificationTests.test_a_live_board_block_refuses and add the AC-01..AC-24 matrix without weakening any real gate; (6) preserve genuine operator, publication and budget gates and never reset counters. Required result: ROOT_CAUSE, EXACT_CODE_CHANGES, REPRODUCTION_BEFORE/AFTER, REGRESSION_RESULTS, AUTHORITY_INVARIANTS, CANONICAL_REPAIR_EVIDENCE, DEPLOYMENT_PARITY, FASTPROMPTER_INCIDENT_STATUS, REMAINING_GENUINE_GATES, NEXT_EXACT_ACTION. FastPrompter live state may be unavailable; then close the engine repair and keep live acceptance pending."
+    }
+  },
+  "derived_at": "2026-10-24T14:50:48Z",
+  "derived_from": "SRC-308",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "5a5d5ecf941a65f5b2b453161bf77f8dd6e7a7c6ee9d460fc68ec7097bdd8e9c"
+}

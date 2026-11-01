@@ -1,0 +1,14 @@
+{
+  "requirements": {
+    "SRC-313:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "T-1895 closed with verification evidence in LOG: verify -> PASS [target: T-1895] conf: high -- 39 more modules declared after ran-equality proof: FULL 196.3s (315 tests) vs narrowed 67.2s (315 tests), compare.py EQUAL both batches, 46 transitively-heavy modules excluded",
+      "text": "Widen the T-1889 sandbox scope to the remaining 86 heavy-tree-free focused modules, proving per-module ran equality between FULL and narrowed runs in batched sandboxes",
+      "verification": "the Work this request created reached its own verification gate; see the T-1895 VERIFY cycle in .saipen/LOG.md",
+      "work": "T-1895"
+    }
+  },
+  "schema_version": 1
+}

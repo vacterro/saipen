@@ -1,0 +1,49 @@
+{
+  "clauses": {
+    "SRC-354:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Release Cohort Membership: Affected source files must belong to an intended release cohort; tickets retain publication_state pending until bound."
+    },
+    "SRC-354:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Staged Release Metadata: Staged metadata must match approved source without unstaged divergence; bulk git add is prohibited."
+    },
+    "SRC-354:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Runtime Manifest Completeness: No unreviewed runtime files may be silently omitted from the tracked runtime manifest."
+    },
+    "SRC-354:R004": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Installed Hook Digest Parity: Closure provenance must match running engine generation; stale external verification records require re-resolution before publication."
+    },
+    "SRC-354:R005": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "PATH Launcher Resolution: PATH launcher must resolve to the correct published generation in bin/saipen."
+    },
+    "SRC-354:R006": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Scheduled Injector Reference: Extension adapters and autoinject must reference project-local engine entries."
+    },
+    "SRC-354:R007": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Rollback Consistency: Engine rollback restores a consistent published generation, and external verification records fail closed."
+    },
+    "SRC-354:R008": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Host Process Cache Freshness: Host process environment must not execute stale hooks across sessions."
+    }
+  },
+  "derived_at": "2026-10-31T18:20:24Z",
+  "derived_from": "SRC-354",
+  "interpretation_revision": 8,
+  "schema_version": 1,
+  "source_sha256": "84fe70d11cf7d6f44da87b810f842b138b672260bf6b76675baa7fda0272a325"
+}

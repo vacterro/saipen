@@ -1,0 +1,14 @@
+{
+  "requirements": {
+    "SRC-115:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "T-1502 closed with verification evidence in LOG: verify -> PASS [target: T-1502] conf: high -- python -B -m unittest tools.test_t1502_ui_aa_contract tools.test_protocol_registry on committed fdb5f932: OK; declared family PASS ran 3676 red 26 new_red 0 (record c150798606df7f6f, E-9052); shipped fdb5f932",
+      "text": "\u0414\u0430, \u044d\u0442\u043e \u044f \u043f\u043e\u043f\u0440\u043e\u0441\u0438\u043b \u0443\u0441\u0438\u043b\u0438\u0442\u044c \u044d\u0442\u043e.\n\n(Operator reply, 2026-09-24, identifying the uncommitted saipen/UI.md antialiasing strengthening as their own request. Operator decision on the follow-up question \"UI.md tugevdus (+4921 B, veel commitimata) l\u00fckkab protokolli markdowni kogumahu 311002 > 307200 (300 KiB piir, test_protocol_registry) ... Kuidas lahendan?\": \"Tihendan, piir j\u00e4\u00e4b (Soovitatud)\" -- take the UI.md strengthening into its own ticket, rewrite the new passage compactly keeping every rule (antialiasing always OFF, the system ClearType setting does not apply, the proof is a pixel check), fit under the 300 KiB human_markdown_total budget, and commit it before T-1501.)",
+      "verification": "the Work this request created reached its own verification gate; see the T-1502 VERIFY cycle in .saipen/LOG.md",
+      "work": "T-1502"
+    }
+  },
+  "schema_version": 1
+}

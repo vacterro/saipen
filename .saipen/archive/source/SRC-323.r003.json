@@ -1,0 +1,24 @@
+{
+  "clauses": {
+    "SRC-323:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "A substantial handoff is evaluated against the current implementation and canonical history BEFORE redundant Work is created."
+    },
+    "SRC-323:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Already-satisfied clauses are supported by real current evidence, never by semantic similarity or an agent narrative."
+    },
+    "SRC-323:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Missing, defective or unverified clauses remain actionable and are not swallowed by a duplicate verdict."
+    }
+  },
+  "derived_at": "2026-10-25T06:10:14Z",
+  "derived_from": "SRC-323",
+  "interpretation_revision": 3,
+  "schema_version": 1,
+  "source_sha256": "abf632fde39d5233c3dd5479650db517408a07aed4a06b70d60dc35bdc08f9e1"
+}

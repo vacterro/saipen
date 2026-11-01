@@ -163,12 +163,22 @@ def execution_environment():
     No SAIPEN_* variable crosses into a verifier, bytecode writing is off and
     the capability is explicitly no-publish, so a check can neither observe
     nor inherit session authority.
+
+    `SHELL_BOOKKEEPING_ENV` (`_`) is dropped for the reason T-1856 measured on
+    the family runner: the shell rewrites it to the last command it executed,
+    so it describes HOW the engine was invoked, never what is being verified.
+    Leaving it in the identity made `work regression` report
+    STALE_REGRESSION_EVIDENCE against its own record the moment the operator's
+    next command changed the variable -- the pair had been executed correctly
+    and was then unreadable (T-1960).
     """
-    from .test_runner import VERIFIER_DIAGNOSTIC_ENV
+    from .test_runner import SHELL_BOOKKEEPING_ENV, VERIFIER_DIAGNOSTIC_ENV
 
     environment = {
         key: item for key, item in os.environ.items()
-        if not key.startswith("SAIPEN_") and key not in VERIFIER_DIAGNOSTIC_ENV
+        if not key.startswith("SAIPEN_")
+        and key not in VERIFIER_DIAGNOSTIC_ENV
+        and key not in SHELL_BOOKKEEPING_ENV
     }
     environment["PYTHONDONTWRITEBYTECODE"] = "1"
     environment["SAIPEN_CAPABILITY"] = "no-publish"
@@ -436,7 +446,23 @@ def _measure(material, stage, subject):
         }
 
 
-def _records(root):
+def _records(root, *, problems=None):
+    """Committed execution records whose owned carrier is still present.
+
+    A settled journal outlives the carrier it names, and the carrier is an
+    ordinary working file: losing one is how the tree degrades, not evidence of
+    corruption.  The carrier's digest is recorded in the journal, so a vanished
+    carrier can never be rebuilt, and rebuilding it would be forging evidence.
+    Skipping it is the honest answer; raising instead aborted the whole family
+    on the first gap, which refused a HEALTHY carrier and left every
+    `work regression` refusing REGRESSION_EXECUTION_INVALID before it could
+    write a replacement (T-1442).  Callers that must surface the gap pass
+    ``problems`` and get the carrier paths by name.
+
+    Integrity failures on a carrier that IS present still raise: those are
+    tampering, and they stay fatal.
+    """
+    root = Path(root)
     records, errors = semantic_receipts_for_operation_safe(root, OPERATION)
     if errors:
         raise ValueError("regression receipt journal is corrupt: " + "; ".join(errors[:2]))
@@ -448,7 +474,12 @@ def _records(root):
         relative = meta.get("regression_record")
         if not isinstance(relative, str) or not relative.startswith(".saipen/evidence/regression/"):
             raise ValueError("regression receipt has no owned evidence carrier")
-        raw = _read(root, relative)
+        try:
+            raw = _read(root, relative)
+        except FileNotFoundError:
+            if problems is not None:
+                problems.append(relative)
+            continue
         if _sha(raw) != meta.get("regression_sha256"):
             raise ValueError("regression execution receipt integrity mismatch")
         value = json.loads(raw.decode("utf-8"), object_pairs_hook=_unique)

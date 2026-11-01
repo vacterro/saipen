@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-051:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "finish T-1370 then T-1367: complete the T-1370 acceptance consolidation and carry T-1367 to its installed-runtime field acceptance; do not reopen the completed retirement design review"
+    }
+  },
+  "derived_at": "2026-09-18T22:49:08Z",
+  "derived_from": "SRC-051",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "c25394e0e4b00f863cb0f8b727d61e0a9b07a7ca8157636ad4afea2d3a1a2322"
+}

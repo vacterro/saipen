@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-202:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Allow named UTF-8 Markdown or text handoffs dropped into any bound project audit directory to enter normal continuation one source at a time after existing workable BOARD work, without interrupting active Work, retaining exact source and closure provenance."
+    }
+  },
+  "derived_at": "2026-10-10T00:44:23Z",
+  "derived_from": "SRC-202",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "dc3ea1403dbe155768200f54a479fe42ec443200a8e6c9c4a0145c485ad1723a"
+}

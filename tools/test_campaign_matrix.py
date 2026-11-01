@@ -254,7 +254,7 @@ class TestCampaignMatrix(unittest.TestCase):
             "root_cause": "Test defect reproduction",
             "rule_ids": ["PAL-TEST-01"],
             "change_target": "ENGINE",
-            "qualification_receipt": write_qualification_artifact(root, "QUAL-REC-PAL-9999"),
+            "qualification_receipt": write_qualification_artifact(root, "QUAL-REC-PAL-9999", "PAL-9999"),
             "audit_body": body,
             "artifact_digest": digest,
         }
@@ -308,7 +308,7 @@ class TestCampaignMatrix(unittest.TestCase):
             "root_cause": "Shared causal defect",
             "rule_ids": ["RULE-01"],
             "change_target": "ENGINE",
-            "qualification_receipt": write_qualification_artifact(root, "QUAL-REC-PAL-CAUSAL-1"),
+            "qualification_receipt": write_qualification_artifact(root, "QUAL-REC-PAL-CAUSAL-1", "PAL-CAUSAL-1"),
             "audit_body": body1,
             "artifact_digest": digest1,
         }

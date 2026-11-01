@@ -68,6 +68,21 @@ GENERATION_STATES = (
     MISSING_AFTER_CAPTURE,
 )
 
+#: Derived inbox eligibility classification (SOURCE-AUDIT-INBOX-01 / E-7318).
+#: ACTIONABLE: At least one source requirement has a valid authorized executable action.
+#: BLOCKED_EXTERNAL: No executable requirements, but external ownership, host integration,
+#: release, or operator action is required.
+#: RESOLVED: Source coverage and canonical lifecycle are properly closed.
+ELIGIBILITY_ACTIONABLE = "ACTIONABLE"
+ELIGIBILITY_BLOCKED_EXTERNAL = "BLOCKED_EXTERNAL"
+ELIGIBILITY_RESOLVED = "RESOLVED"
+
+INBOX_ELIGIBILITY_STATES = (
+    ELIGIBILITY_ACTIONABLE,
+    ELIGIBILITY_BLOCKED_EXTERNAL,
+    ELIGIBILITY_RESOLVED,
+)
+
 # The narrow migration class the EOL-only equivalence binding may consider.
 # A general source is never bound across a byte difference.
 _MIGRATION_KINDS = ("external_audit", "user_audit", "implementation_mission")
@@ -675,6 +690,7 @@ def classify(root: Path | str) -> dict:
             "receipt_id": receipt_id,
             "linked_work": None,
             "state": NEW,
+            "eligibility": ELIGIBILITY_ACTIONABLE,
         }
         if receipt_id is None:
             if receipts_by_digest is None:
@@ -699,6 +715,7 @@ def classify(root: Path | str) -> dict:
         receipt_status = status.get("status")
         if receipt_status == intake.CLOSED_STATUS:
             item["state"] = CLOSED_PENDING_DELETE
+            item["eligibility"] = ELIGIBILITY_RESOLVED
         elif status.get("location") == "retired":
             # T-135: the same reading `delete_gate` now uses. A verified
             # tombstone IS a closed receipt -- retirement is the only verb that
@@ -706,10 +723,13 @@ def classify(root: Path | str) -> dict:
             # everywhere else in this engine. Classifying that as a BLOCKED
             # layer made a finished inbox report "it is not idle" forever.
             item["state"] = CLOSED_PENDING_DELETE
+            item["eligibility"] = ELIGIBILITY_RESOLVED
         elif receipt_status == intake.ACTIVE_STATUS:
             item["state"] = ACTIVE
+            item["eligibility"] = ELIGIBILITY_ACTIONABLE
         else:
             item["state"] = BLOCKED
+            item["eligibility"] = ELIGIBILITY_BLOCKED_EXTERNAL
             item["detail"] = f"bound receipt is {receipt_status}"
         layers.append(item)
 
@@ -832,6 +852,7 @@ def projection_from_classification(
     }
     for item in layers:
         if item["state"] == CLOSED_PENDING_DELETE:
+            item["eligibility"] = ELIGIBILITY_RESOLVED
             return {
                 **base,
                 "action": "saipen audit ingest",
@@ -839,6 +860,8 @@ def projection_from_classification(
                 "path": item["rel"],
                 "receipt": item["receipt_id"],
                 "work": item.get("linked_work"),
+                "eligibility": ELIGIBILITY_RESOLVED,
+                "inbox_eligibility": ELIGIBILITY_RESOLVED,
                 "detail": (
                     f"{item['rel']} source {item['receipt_id']} is CLOSED and its "
                     "transport is already absent; settle the journaled binding"
@@ -854,12 +877,15 @@ def projection_from_classification(
         if item["state"] == ACTIVE:
             work = item.get("linked_work")
             if not work:
+                item["eligibility"] = ELIGIBILITY_ACTIONABLE
                 return {
                     **base,
                     "action": "saipen audit ingest",
                     "layer": item["layer"],
                     "path": item["rel"],
                     "receipt": item["receipt_id"],
+                    "eligibility": ELIGIBILITY_ACTIONABLE,
+                    "inbox_eligibility": ELIGIBILITY_ACTIONABLE,
                     "detail": (
                         f"{item['rel']} is captured as {item['receipt_id']} but carries no Work"
                     ),
@@ -905,6 +931,7 @@ def projection_from_classification(
                     rem_act = "saipen status"
                 else:
                     rem_act = "saipen status"
+                item["eligibility"] = ELIGIBILITY_BLOCKED_EXTERNAL
                 unworkable_active.append(
                     {
                         "layer": item["layer"],
@@ -912,6 +939,7 @@ def projection_from_classification(
                         "root_ticket": root_tid,
                         "blocker_class": root_cls,
                         "remediation_action": rem_act,
+                        "eligibility": ELIGIBILITY_BLOCKED_EXTERNAL,
                         "reason": (
                             board_error
                             or f"linked Work {work} is not currently workable ({root_cls})"
@@ -920,6 +948,7 @@ def projection_from_classification(
                 )
                 base["unworkable_active"] = unworkable_active
                 continue
+            item["eligibility"] = ELIGIBILITY_ACTIONABLE
             return {
                 **base,
                 "action": f"PHASE SCOUT {work}",
@@ -927,15 +956,20 @@ def projection_from_classification(
                 "path": item["rel"],
                 "receipt": item["receipt_id"],
                 "work": work,
+                "eligibility": ELIGIBILITY_ACTIONABLE,
+                "inbox_eligibility": ELIGIBILITY_ACTIONABLE,
                 "detail": f"{item['rel']} owns continuation through {work}",
             }
         if item["state"] == NEW:
+            item["eligibility"] = ELIGIBILITY_ACTIONABLE
             return {
                 **base,
                 **({"idle_only": True} if item["layer"] is None else {}),
                 "action": "saipen audit ingest",
                 "layer": item["layer"],
                 "path": item["rel"],
+                "eligibility": ELIGIBILITY_ACTIONABLE,
+                "inbox_eligibility": ELIGIBILITY_ACTIONABLE,
                 "detail": f"{item['rel']} is an unconsumed audit generation",
             }
     if invalid:
@@ -943,6 +977,8 @@ def projection_from_classification(
             **base,
             "action": "saipen audit status",
             "invalid_only": True,
+            "eligibility": ELIGIBILITY_BLOCKED_EXTERNAL,
+            "inbox_eligibility": ELIGIBILITY_BLOCKED_EXTERNAL,
             "detail": "audit inbox holds only invalid layer(s); it is not idle",
         }
     if unworkable_active:
@@ -960,6 +996,8 @@ def projection_from_classification(
             **base,
             "action": "saipen audit status",
             "unworkable_active_only": True,
+            "eligibility": ELIGIBILITY_BLOCKED_EXTERNAL,
+            "inbox_eligibility": ELIGIBILITY_BLOCKED_EXTERNAL,
             "unresolved_audit_count": unresolved_count,
             "idle_classification": idle_cls,
             "stop_reason": "NO_ADMISSIBLE_WORK",
@@ -1043,6 +1081,16 @@ def status_from_classification(
                 "receipt": item.get("receipt_id"),
                 "work": item.get("linked_work"),
                 "sha256": item.get("sha256"),
+                "eligibility": item.get(
+                    "eligibility",
+                    ELIGIBILITY_ACTIONABLE
+                    if item["state"] in (NEW, ACTIVE)
+                    else (
+                        ELIGIBILITY_RESOLVED
+                        if item["state"] == CLOSED_PENDING_DELETE
+                        else ELIGIBILITY_BLOCKED_EXTERNAL
+                    ),
+                ),
             }
             for item in layers
         ],

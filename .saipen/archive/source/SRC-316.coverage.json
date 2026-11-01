@@ -1,0 +1,14 @@
+{
+  "requirements": {
+    "SRC-316:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "T-1898 closed with verification evidence in LOG: FOCUSED-UNIT-EVIDENCE PASS conf: high ran:59 record:.saipen/evidence/focused-unit/4da497cd5e133a13-20261024T234808737159Z.json sha256:cf1600b72962ffa5deb18a9199deed78ec8b3dc9d1a3f6ed7f7e224741e0dd61",
+      "text": "Make the conformance lineage head advance after every canonical receipt write instead of freezing, so the bounded lookup keeps working and each status run stops paying a hidden 3935-file content hash",
+      "verification": "the Work this request created reached its own verification gate; see the T-1898 VERIFY cycle in .saipen/LOG.md",
+      "work": "T-1898"
+    }
+  },
+  "schema_version": 1
+}

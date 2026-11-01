@@ -1,0 +1,16 @@
+{
+  "actionable": 1,
+  "archive_ref": ".saipen/archive/source/SRC-345.md",
+  "closed_at": "2026-10-28T01:20:43Z",
+  "closure_event": null,
+  "linked_work": "T-1946",
+  "linked_works": [
+    "T-1946"
+  ],
+  "receipt_id": "SRC-345",
+  "requirements": 1,
+  "schema_version": 1,
+  "source_sha256": "23078904b1379ac0f7f9c101d0289fa4d1c6726d8a66e93f321f0fcfc316c33b",
+  "status": "CLOSED",
+  "unresolved": 0
+}

@@ -1,0 +1,16 @@
+{
+  "actionable": 1,
+  "archive_ref": ".saipen/archive/source/SRC-350.md",
+  "closed_at": "2026-10-31T06:23:08Z",
+  "closure_event": null,
+  "linked_work": "T-1969",
+  "linked_works": [
+    "T-1969"
+  ],
+  "receipt_id": "SRC-350",
+  "requirements": 1,
+  "schema_version": 1,
+  "source_sha256": "cd76b80837926115cd9260c3d2dbb4e266fbebabef23e4cf79187f6459c155e5",
+  "status": "CLOSED",
+  "unresolved": 0
+}

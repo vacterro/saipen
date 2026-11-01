@@ -55,7 +55,7 @@ source-text assertions (e.g. naive string inclusion) to verify runtime logic.
 
 import ast
 import datetime
-from saipen_engine.phases import ANY_FROM, TICKET_BEARING_PHASES, VALID_TRANSITIONS
+from saipen_engine.phases import ALL_PHASES, ANY_FROM, TICKET_BEARING_PHASES, VALID_TRANSITIONS
 from saipen_engine.commands import (
     CYRILLIC_CONFUSABLE_MAP,
     derive_cyrillic_twins as _derive_cyrillic_twins,
@@ -590,6 +590,45 @@ def _git(*args):
     return r.returncode, r.stdout
 
 
+def _imported_names(imported: str) -> list[str]:
+    """The names one `from ... import ...` clause actually BINDS (T-1974).
+
+    `(a, b as c)` binds `a` and `b`. Taking every identifier in the clause --
+    which is what both call sites did -- also yields `as` and `c`: a keyword and
+    a local alias, never symbols the imported module has to export. The
+    measured cost is in this ticket: `from saipen_engine import suite_record as
+    SR` was reported as two missing symbols, `saipen_engine.as` and
+    `saipen_engine.SR`, and the advice printed beside it told the reader not to
+    commit the file over a defect that did not exist.
+    """
+    names = []
+    for part in imported.strip().strip("()").split(","):
+        token = part.strip().split(" as ")[0].strip()
+        # A `*` re-export binds nothing nameable; anything else must be an
+        # identifier, so a multi-line or parenthesised clause cannot smuggle
+        # punctuation into the symbol list.
+        if token == "*":
+            continue
+        if token and re.fullmatch(r"[A-Za-z_]\w*", token):
+            names.append(token)
+    return names
+
+
+def _submodule_paths(module: str, name: str) -> list[str]:
+    """Where `from <module> import <name>` would put `<name>` as a SUBMODULE.
+
+    T-1974. `from saipen_engine import audit_manifest` is not "the symbol
+    `audit_manifest` inside `saipen_engine/__init__.py`" -- it is the module
+    `saipen_engine/audit_manifest.py`, and Python imports it without
+    `__init__.py` ever naming it. Reading only `__init__.py` made the advisor
+    report a module that IS in HEAD as missing, on this repository, for
+    `audit_manifest`, `identity_audit`, `core_unit`, `suite_record`,
+    `future_gate`, `commands` and `producer_backends.saipal_adapter`.
+    """
+    base = module.replace(".", "/")
+    return [f"tools/{base}/{name}.py", f"tools/{base}/{name}/__init__.py"]
+
+
 def _uncommitted_symbols(rel: str) -> list[str]:
     """Runtime symbols `rel` imports that HEAD does not carry.
 
@@ -630,7 +669,7 @@ def _uncommitted_symbols(rel: str) -> list[str]:
                 base = base.parent
             rest = [part for part in module.lstrip(".").split(".") if part]
             if not rest:
-                for name in re.findall(r"[A-Za-z_]\w*", imported.split(" as ")[0]):
+                for name in _imported_names(imported):
                     key = (base / f"{name}.py").as_posix()
                     if not Path(key).is_file():
                         continue
@@ -670,7 +709,21 @@ def _uncommitted_symbols(rel: str) -> list[str]:
             orphans.add(f"module {module}")
             continue
         blob = "\n".join(b for b in bodies if b is not None)
-        for name in re.findall(r"[A-Za-z_]\w*", imported):
+        for name in _imported_names(imported):
+            # T-1974: a submodule import needs no export in the parent, so it
+            # is proven by the file's existence rather than by a name in
+            # `__init__.py`. Checked against HEAD, not the working tree: the
+            # whole question is what a clone receives.
+            submodules = [k for k in _submodule_paths(module, name) if Path(k).is_file()]
+            if submodules:
+                for key in submodules:
+                    if key not in cache:
+                        rc, out = _git("show", f"HEAD:{key}")
+                        cache[key] = out if rc == 0 else None
+                if any(cache[k] is not None for k in submodules):
+                    continue
+                orphans.add(f"{module}.{name}")
+                continue
             if not re.search(rf"\b{re.escape(name)}\b", blob):
                 orphans.add(f"{module}.{name}")
     return sorted(orphans)
@@ -5897,7 +5950,15 @@ if _future_gate_dir.is_dir() or _future_gate_index.is_file():
         _future_board_tickets = _parse_future_board(
             _future_board_path.read_text(encoding="utf-8-sig")
         )["tickets"]
-    _future_report = _validate_future_gate(Path("."), _future_board_tickets)
+    # T-1961: the same durable history the scrub gate reads is what proves a
+    # slice ticket closed after CLEAN pruned its row -- without it, entering
+    # CLEAN would convert this gate's own green into a FAIL.
+    _future_history = (
+        _canonical_history_snapshot.events if _canonical_history_snapshot else None
+    )
+    _future_report = _validate_future_gate(
+        Path("."), _future_board_tickets, history_events=_future_history
+    )
     for _future_error in _future_report["errors"]:
         fail(f"FUTURE GATE: {_future_error}")
     for _future_warning in _future_report["warnings"]:

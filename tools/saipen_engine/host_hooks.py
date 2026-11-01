@@ -121,7 +121,17 @@ def stray_hint(
     home: Path | str | None = None,
     platform: str | None = None,
 ) -> str:
-    """One sentence naming the likely writer of a root stray, or ''."""
+    """One sentence naming a host hook that COULD write a root stray, or ''.
+
+    T-1971: this used to say "Likely writer", and that word did real damage. It
+    reports configuration -- a hook whose command form would run its payload --
+    and never observes a write. A 21 KB roadmap that appeared at the root was
+    attributed to this hint on that basis alone, when the shape this detector
+    predicts is an empty file named after a shell fragment: payload text
+    executed as commands, not 633 lines of coherent prose. Say what the
+    evidence supports. A configured hazard is a candidate the reader can rule
+    in or out; calling it the writer is a conclusion the parser cannot reach.
+    """
     found = hazards(project_root, home, platform)
     if not found:
         return ""
@@ -129,4 +139,9 @@ def stray_hint(
         f"{hook['settings']} {hook['event']}/{hook['matcher']}" for hook in found[:4]
     )
     more = f" and {len(found) - 4} more" if len(found) > 4 else ""
-    return f"Likely writer ({CODE}): host hook(s) {named}{more} -- {REMEDIATION}"
+    return (
+        f"One possible writer ({CODE}), not observed: host hook(s) {named}{more} "
+        f"are CONFIGURED to run their payload. This is configuration evidence, "
+        f"not authorship -- it predicts shell-fragment strays, not prose. "
+        f"{REMEDIATION}"
+    )

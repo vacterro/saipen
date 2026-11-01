@@ -1,0 +1,29 @@
+{
+  "clauses": {
+    "SRC-306:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "SAIPEN closure must enforce typed mandatory acceptance receipts: a ticket whose acceptance contract requires per-invariant, per-platform proof cannot reach DONE while a required receipt is absent. Record the outcome as Windows PASS / Linux NOT_RUN / real-media NOT_RUN rather than collapsing multi-platform acceptance into one green suite."
+    },
+    "SRC-306:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "SAIPEN must enforce ticket authority uniformly across every repository-mutating route (ticket add, claim, transition, closure), not only through continue/goal entry: a RECONCILE_REAUTH_REQUIRED or WAIT_OPERATOR state keeps read-only diagnosis available but refuses consequential mutations until a real operator decision."
+    },
+    "SRC-306:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "A phase shortcut must not overwrite a tripped bounded safety-valve WAIT. State transition and brake normalization are one atomic transaction; a regression proves that at the ticket cap the phase changes only as permitted while the canonical WAIT survives, and continue still refuses without witnessed operator reauthorization."
+    },
+    "SRC-306:R004": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "A ticket-scoped publication prohibition must be enforced independently of the generic goal SHIP exception: the write guard blocks push/tag/release before any network call, and the release attempt plus its outcome is recorded separately from ticket lifecycle closure."
+    }
+  },
+  "derived_at": "2026-10-24T11:53:11Z",
+  "derived_from": "SRC-306",
+  "interpretation_revision": 4,
+  "schema_version": 1,
+  "source_sha256": "3e6056ba571e23858783da238ea7b102024f8feecb81896c25a9bd963f8a12c3"
+}

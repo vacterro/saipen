@@ -1,0 +1,19 @@
+{
+  "clauses": {
+    "SRC-111:R001": {
+      "actionable": false,
+      "class": "context",
+      "text": "Future local-GPU roles (log/transcript summarization, SCOUT context preparation, incident clustering, diff triage, recovery-context compression, regression advisory, soak watcher, doc consistency, second review, eventually bounded Work execution) and the resource policy (yield to interactive GPU work, VRAM reserve, visible CPU offload, non-fatal failure, disposable cache), each an experiment adopted one at a time when measured value justifies it"
+    },
+    "SRC-111:R002": {
+      "actionable": true,
+      "class": "non-goal",
+      "text": "Implementing the listed SAIGPU roles immediately, interrupting higher-priority correctness/closure/field-gate/autonomy/proof work to expand SAIGPU, or creating a broad GPU architecture umbrella without measured Work proving it necessary"
+    }
+  },
+  "derived_at": "2026-09-23T13:03:43Z",
+  "derived_from": "SRC-111",
+  "interpretation_revision": 2,
+  "schema_version": 1,
+  "source_sha256": "47f5900e0100353a704177fc2f61073ce4f0c75abc5f0575e9ac7595bc3f636b"
+}

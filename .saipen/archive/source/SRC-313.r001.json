@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-313:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Widen the T-1889 sandbox scope to the remaining 86 heavy-tree-free focused modules, proving per-module ran equality between FULL and narrowed runs in batched sandboxes"
+    }
+  },
+  "derived_at": "2026-10-24T21:58:50Z",
+  "derived_from": "SRC-313",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "e43878e6c092fefb6047fb869b6672a52d0d696a4381ec160ff8a1ebe9e3f30b"
+}

@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-134:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "repair T-1553 review findings: enforce DETAILS authorization, field char budgets, single NEXT EXACT ACTION, init carrier claim"
+    }
+  },
+  "derived_at": "2026-09-28T20:48:42Z",
+  "derived_from": "SRC-134",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "ac71291aa5ada6a3038f759bda697e41ad4f0d09c55a079ea4b37c3807c9bda2"
+}

@@ -1,0 +1,29 @@
+{
+  "clauses": {
+    "SRC-344:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "AUT-001: host acceptance receipts must be authenticated by the live authority broker (host_authority_client.verify_record), not by caller-supplied field equality or a substring blacklist; matching fields that any caller can write are not host identity."
+    },
+    "SRC-344:R002": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "AUT-001: DISPATCH_REQUEST_PERSISTED must never satisfy acceptance; an accepted, turn-started or turn-completed receipt is required, and the receipt status is reported as it is."
+    },
+    "SRC-344:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "AUT-001: a malformed numeric receipt field (iteration_id, worker_generation) must be a typed refusal, never an uncaught exception, and a boolean is not an integer."
+    },
+    "SRC-344:R004": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "AUT-005: discovery must consume the bounded incremental report transport (iter_new_qualified_findings) so the paginated reader has a production caller, rather than materialising the whole corpus through _run_cmd report."
+    }
+  },
+  "derived_at": "2026-10-27T14:27:21Z",
+  "derived_from": "SRC-344",
+  "interpretation_revision": 4,
+  "schema_version": 1,
+  "source_sha256": "ec9397a199f250daa4adf5a5258efe7aa04079ece508dacf0f83fb1ca911aeec"
+}

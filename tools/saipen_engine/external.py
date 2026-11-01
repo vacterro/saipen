@@ -1001,7 +1001,28 @@ def revalidate_external_dependencies(
         other_problems = [
             p for p in problems if not ("engine generation" in p and "dependency moved" in p)
         ]
-        if engine_moved and not other_problems:
+        if not engine_moved and other_problems:
+            # T-1973: this branch used to be an implicit `continue`. A DONE
+            # closure whose problems do not include an engine move -- a moved
+            # external artifact, a changed verifier argv, a corrupted
+            # predecessor -- was dropped with no counter and no finding, so
+            # `--revalidate` answered `discovered 0 / inspected 0 / resolved []`
+            # over work it had just measured as non-green. The operator was
+            # told there was nothing to repair while `validate.py` reported the
+            # same closure as a FAIL. Name it instead: the surface may decline
+            # to re-execute, but it may not report a clean sweep over a defect.
+            inspected_count += 1
+            blocked_findings.append(
+                {
+                    "ticket": work,
+                    "code": "EXTERNAL_CLOSURE_DRIFTED",
+                    "detail": "; ".join(other_problems),
+                    "authority": record.get("external_authority"),
+                    "implementation": record.get("external_implementation"),
+                }
+            )
+            continue
+        if engine_moved:
             inspected_count += 1
             cand_key = (
                 f"{work}:engine_move:{record.get('external_authority')}:"

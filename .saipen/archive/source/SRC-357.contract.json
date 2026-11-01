@@ -1,0 +1,59 @@
+{
+  "clauses": {
+    "SRC-357:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Measured Verification Baseline: Quantify the 8,548-test full core-unit family bottleneck (T-1975 4 distinct runs, 7,496.9s total)."
+    },
+    "SRC-357:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Reuse Existing Capabilities: Leverage existing verification_cache, single_flight, core_unit.reusable_record without duplicating runners."
+    },
+    "SRC-357:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Evidence-Grade Telemetry: Capture structured wall-time profiling across request, discovery, execution, citation, and phase transitions."
+    },
+    "SRC-357:R004": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Explicit Full-Suite Triggers: Require auditable triggers (NEW_TESTED_SOURCE_BYTES, CHANGED_BASELINE, MANDATORY_FULL_ACCEPTANCE) for full-family runs."
+    },
+    "SRC-357:R005": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Tiered Verification Policy: Use DEV/LOCAL focused tests mid-edit and certified impact/full suites at mandatory SHIP boundaries."
+    },
+    "SRC-357:R006": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Stable Cohort Evidence Sharing: Reuse immutable verified full evidence across tickets sharing an identical final source generation."
+    },
+    "SRC-357:R007": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Red Result Flake Discipline: Diagnose verdict divergences, shard races, and test order-dependencies; prohibit retry-to-green looping."
+    },
+    "SRC-357:R008": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Performance Budgeting: Maintain 10-minute diagnostic thresholds without bypassing required safety gates."
+    },
+    "SRC-357:R009": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "External Close-Ticket Owner: Classify Close-Ticket.ps1 as external host script outside SAIPEN repository boundaries."
+    },
+    "SRC-357:R010": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Canonical SHIP Gate Integrity: Guarantee that no ticket ships on stale, unverified, or incompatible evidence records."
+    }
+  },
+  "derived_at": "2026-10-31T18:31:55Z",
+  "derived_from": "SRC-357",
+  "interpretation_revision": 10,
+  "schema_version": 1,
+  "source_sha256": "7b610d6b5a841a304af8fc5cea6688338a2f0a649af2e56ee626decd17628f52"
+}

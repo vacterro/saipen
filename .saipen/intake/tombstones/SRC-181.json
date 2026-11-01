@@ -1,0 +1,16 @@
+{
+  "actionable": 1,
+  "archive_ref": ".saipen/archive/source/SRC-181.md",
+  "closed_at": "2026-10-30T02:42:01Z",
+  "closure_event": null,
+  "linked_work": "T-1623",
+  "linked_works": [
+    "T-1623"
+  ],
+  "receipt_id": "SRC-181",
+  "requirements": 1,
+  "schema_version": 1,
+  "source_sha256": "bbf122eb80951a45900d1591856216d7f7c8d75b779dfbd117c07dc49a874c3d",
+  "status": "CLOSED",
+  "unresolved": 0
+}

@@ -1,0 +1,113 @@
+{
+  "requirements": {
+    "SRC-016:R001": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "IMPLEMENTED",
+      "evidence": "E-5178",
+      "text": "T-1229 prefers phase corpus <=72000 bytes; otherwise closure records exact size, largest phases, unique retained law, and semantic-floor harm.",
+      "verification": "protocol_budget phases_total=42078 <=72000",
+      "work": "T-1229"
+    },
+    "SRC-016:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "IMPLEMENTED",
+      "evidence": "E-5178",
+      "text": "protocol_budget reports bytes_by_phase, count, total, median, max, largest phase, and registry-owned non-enforced preference bands with focused tests.",
+      "verification": "72 focused tests OK; protocol_budget JSON exact",
+      "work": "T-1229"
+    },
+    "SRC-016:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "IMPLEMENTED",
+      "evidence": "E-5178",
+      "text": "Classify all 16 phase documents by semantic owner before deleting shared or historical prose.",
+      "verification": ".saipen/KNOWLEDGE/phase-ownership-T-1229.md",
+      "work": "T-1229"
+    },
+    "SRC-016:R004": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-5178",
+      "text": "VERIFY ADD HUNT and PREPARE retain every named unique retry, safety, routing, evidence, accounting, and exit behavior.",
+      "verification": "full executable scenarios PASS; core validator PASS",
+      "work": "T-1229"
+    },
+    "SRC-016:R005": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "IMPLEMENTED",
+      "evidence": "E-5178",
+      "text": "Compress remaining smaller phase documents by removing historical narrative and proven duplication without uniform size pressure.",
+      "verification": "bytes_by_phase records all 16 compressed deltas",
+      "work": "T-1229"
+    },
+    "SRC-016:R006": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-5178",
+      "text": "Revisit SHIP TRANSLATE MARKHUNT and CLEAN while preserving their release, isolation, brake, recovery, deletion, and audit red controls.",
+      "verification": "227/227 independent red controls; release and hunt probes PASS",
+      "work": "T-1229"
+    },
+    "SRC-016:R007": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "IMPLEMENTED",
+      "evidence": "E-5178",
+      "text": "After phase ownership stabilizes remove duplicated phase-local procedure from MAINTENANCE while preserving autonomous lifecycle ownership.",
+      "verification": "MAINTENANCE 23800->16517; core validator PASS",
+      "work": "T-1229"
+    },
+    "SRC-016:R008": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-5178",
+      "text": "Structured semantic regressions cover VERIFY REVIEW HUNT CLEAN SHIP TRANSLATE and MARKHUNT behavior; existing red controls remain independently red.",
+      "verification": "run_scenarios all executable probes PASS; audit 227/227",
+      "work": "T-1229"
+    },
+    "SRC-016:R009": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-5178",
+      "text": "Record repository baseline and introduce zero new validator or audit failures; do not weaken validators for pre-existing failures.",
+      "verification": "core validator PASS with same 20 warnings; audit/unit/scenarios PASS",
+      "work": "T-1229"
+    },
+    "SRC-016:R010": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-5178",
+      "text": "All 16 phase files remain, registry DFA is unchanged, ratified load profiles pass, and phase corpus materially drops from 100304 bytes.",
+      "verification": "16 docs; REGISTRY diff load_profiles only; all budgets PASS",
+      "work": "T-1229"
+    },
+    "SRC-016:R011": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "IMPLEMENTED",
+      "evidence": "E-5178",
+      "text": "Create the next ownership-compression wave for CORE MAINTENANCE IMPROVE and OPS, prioritizing actual runtime context.",
+      "verification": "T-1259 created at E-5177",
+      "work": "T-1229"
+    },
+    "SRC-016:R012": {
+      "actionable": false,
+      "class": "context",
+      "disposition": "VERIFIED",
+      "evidence": "E-5178",
+      "text": "SRC-013 R008 was already archived at repository HEAD with a premature 100304-byte local-slice variance; SRC-016 carries the corrective global completion contract.",
+      "verification": "SRC-013 archive inspected; SRC-016 corrective contract active",
+      "work": "T-1229"
+    }
+  },
+  "schema_version": 1
+}

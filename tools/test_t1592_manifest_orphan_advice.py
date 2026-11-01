@@ -26,19 +26,33 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "tools"))
 
 
+#: Every module-level helper `_uncommitted_symbols` is allowed to call. They are
+#: executed alongside it: slicing from the subject's `def` to the next `def`
+#: (T-1592's original loader) assumes the function is self-contained, and T-1974
+#: made it call `_imported_names` and `_submodule_paths`. Slicing alone then
+#: raised NameError, which the family run reported as two new red tests -- the
+#: commit that shipped it would have been red in every clone.
+_HELPERS = ("_imported_names", "_submodule_paths", "_uncommitted_symbols")
+
+
 def _run_uncommitted_symbols(fake_git, rel):
     """Exec the real `_uncommitted_symbols` out of validate.py against a stub git."""
-    lines = (ROOT / "tools" / "validate.py").read_text(encoding="utf-8").splitlines()
-    start = next(
-        i for i, ln in enumerate(lines) if ln.startswith("def _uncommitted_symbols")
-    )
-    end = start + 1
-    while end < len(lines) and not (
-        lines[end].startswith("#:") or lines[end].startswith("def ")
-    ):
-        end += 1
+    source = (ROOT / "tools" / "validate.py").read_text(encoding="utf-8")
+    lines = source.splitlines()
+    chunks = []
+    for helper in _HELPERS:
+        prefix = f"def {helper}"
+        if not any(ln.startswith(prefix) for ln in lines):
+            continue
+        start = next(i for i, ln in enumerate(lines) if ln.startswith(prefix))
+        end = start + 1
+        while end < len(lines) and not (
+            lines[end].startswith("#:") or lines[end].startswith("def ")
+        ):
+            end += 1
+        chunks.append("\n".join(lines[start:end]))
     namespace = {"re": re, "Path": Path, "_git": fake_git}
-    exec(compile("\n".join(lines[start:end]), "validate.py", "exec"), namespace)
+    exec(compile("\n\n".join(chunks), "validate.py", "exec"), namespace)
     return namespace["_uncommitted_symbols"](rel)
 
 

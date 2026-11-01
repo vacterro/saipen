@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-064:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "T-1391 / SRC-060; T-1390 / SRC-059"
+    }
+  },
+  "derived_at": "2026-09-18T17:21:33Z",
+  "derived_from": "SRC-064",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "60f9bfbca1633f213e61638702f2f694b0f711d140857653cbc4bcb1282663a6"
+}

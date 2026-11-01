@@ -1,0 +1,19 @@
+{
+  "clauses": {
+    "SRC-223:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Safely enable the agent to perform authorized work using every applicable supported runtime, binding and recovery route; explanation of refusal alone is insufficient."
+    },
+    "SRC-223:R002": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "Keep the affected continuation incident open until working authorized continuation is proven; test available safe alternatives and name exact residual prerequisites honestly without weakening identity, isolation or canonical authority."
+    }
+  },
+  "derived_at": "2026-10-12T08:46:36Z",
+  "derived_from": "SRC-223",
+  "interpretation_revision": 2,
+  "schema_version": 1,
+  "source_sha256": "d6efbe9a32cc03919340a7429244bbbe6037a50591fb7432c72474165f377e97"
+}

@@ -1,0 +1,19 @@
+{
+  "clauses": {
+    "SRC-324:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Authenticates and delivers a valid native operator event with a verified worker and correct continuation result, or"
+    },
+    "SRC-324:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Returns a precise actionable failure without falsely claiming operator authority. A recoverable infrastructure defect is repaired automatically when this can be done without inventing human authority. No unsealed event renews a bounded goal. No legitimate event is silently dropped during recoverable retry. Real installed-host acceptance is mandatory before declaring this incident completely solved."
+    }
+  },
+  "derived_at": "2026-10-25T10:16:47Z",
+  "derived_from": "SRC-324",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "028748bd43872736d3194f1649e1d1bd1b890e419db0127cffcf8ef8cd95be9b"
+}

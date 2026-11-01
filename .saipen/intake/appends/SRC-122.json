@@ -1,0 +1,79 @@
+{
+  "appends": [
+    {
+      "class": "APPEND",
+      "created_work": null,
+      "delta": "implementation",
+      "derived_clauses": [
+        "SRC-124:R001",
+        "SRC-124:R002",
+        "SRC-124:R003",
+        "SRC-124:R004",
+        "SRC-124:R005",
+        "SRC-124:R006",
+        "SRC-124:R007",
+        "SRC-124:R008",
+        "SRC-124:R009",
+        "SRC-124:R010",
+        "SRC-124:R011",
+        "SRC-124:R012"
+      ],
+      "label": "",
+      "projected_at": "2026-09-27T15:20:41Z",
+      "receipt": "SRC-124",
+      "received_at": "2026-09-27T15:20:19Z",
+      "rewind": null,
+      "seq": 1,
+      "source_sha256": "53b499d2bedfd24cd30e4a7e431c3c7ff579d6b5ae7ebc76d13c8933cead16fb",
+      "state": "PROJECTED",
+      "steps": [
+        "linked",
+        "derived",
+        "superseded"
+      ],
+      "superseded": [],
+      "supersedes": [],
+      "work": [
+        "T-1536"
+      ]
+    },
+    {
+      "class": "CLARIFICATION",
+      "created_work": null,
+      "delta": "implementation",
+      "derived_clauses": [
+        "SRC-125:R001",
+        "SRC-125:R002",
+        "SRC-125:R003",
+        "SRC-125:R004",
+        "SRC-125:R005",
+        "SRC-125:R006",
+        "SRC-125:R007",
+        "SRC-125:R008",
+        "SRC-125:R009",
+        "SRC-125:R010",
+        "SRC-125:R011"
+      ],
+      "label": "",
+      "projected_at": "2026-09-27T15:53:45Z",
+      "receipt": "SRC-125",
+      "received_at": "2026-09-27T15:53:22Z",
+      "rewind": null,
+      "seq": 2,
+      "source_sha256": "b95b8411b32191cd1f1873eb7cd9b5a1e434ec609338b9564404dc21f936f053",
+      "state": "PROJECTED",
+      "steps": [
+        "linked",
+        "derived",
+        "superseded"
+      ],
+      "superseded": [],
+      "supersedes": [],
+      "work": [
+        "T-1536"
+      ]
+    }
+  ],
+  "schema_version": 1,
+  "source": "SRC-122"
+}

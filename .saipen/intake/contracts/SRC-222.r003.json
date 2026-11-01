@@ -1,0 +1,24 @@
+{
+  "clauses": {
+    "SRC-222:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Determine from current evidence whether SMART_VAC_CLEANER AG3 and the prior SUNO_DOWNLOADER AG3 incidents share an actual root cause; do not assume the reports establish one."
+    },
+    "SRC-222:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Verify current SAIPEN runtime resolution and independently prove project-root and lineage binding."
+    },
+    "SRC-222:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Distinguish a runtime installed in another user's profile from each project's local canonical state."
+    }
+  },
+  "derived_at": "2026-10-12T08:46:19Z",
+  "derived_from": "SRC-222",
+  "interpretation_revision": 3,
+  "schema_version": 1,
+  "source_sha256": "f7689238d70eddb1225a20094f36135811357df34688e303a826d7a33b9b6274"
+}

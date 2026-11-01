@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-195:R001": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "Finding is recorded or explicitly reported as pending admission."
+    }
+  },
+  "derived_at": "2026-10-08T23:10:10Z",
+  "derived_from": "SRC-195",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "7b6a7a4689061de628583ac9f81050430f8b8d33f3af07ab71fd9e622f5784f2"
+}

@@ -251,7 +251,8 @@ def incompatibility(recorded: object) -> str | None:
     if rule != IDENTITY_RULE:
         return (
             f"record was captured under verification identity rule {rule or 'legacy (pre-rule)'}; "
-            f"this engine requires {IDENTITY_RULE} -- re-run the verifier to capture a current record"
+            f"this engine requires {IDENTITY_RULE} -- "
+            "re-run the verifier to capture a current record"
         )
     return None
 
@@ -460,6 +461,9 @@ def single_flight(
     request_started_ns=None,
     request_started_monotonic=None,
     consumer=None,
+    rerun_reason=None,
+    force_fresh_reason=None,
+    profiler=None,
 ):
     """One execution per compatible identity; OS death releases ownership.
 
@@ -487,9 +491,21 @@ def single_flight(
     }
     if consumer is not None:
         observation["ticket"] = consumer
+    if rerun_reason is not None:
+        observation["rerun_reason"] = rerun_reason
+    if force_fresh_reason is not None or rerun_reason is not None:
+        observation["force_fresh_reason"] = force_fresh_reason or rerun_reason
+    if profiler and isinstance(profiler, dict):
+        for k, v in profiler.get("timings", {}).items():
+            observation[k] = v
+        if "execution_trigger" in profiler:
+            observation["execution_trigger"] = profiler["execution_trigger"]
+        if "verification_decision" in profiler:
+            observation["verification_decision"] = profiler["verification_decision"]
     _observe(root, observation_path, observation)
     lock = FileWriterLock(root / ".saipen/locks" / f"verification-{key}.lock", root)
     executor = None
+    flight = None
     try:
         _acquire_observed(lock, deadline, observation)
         prior = _read_state(root, path)
@@ -561,12 +577,43 @@ def single_flight(
                 raise ValueError(
                     "verification exited without publishing a complete execution receipt"
                 )
+            rec = flight.written["record"]
+            fam = identity.get("family")
+            decision = (
+                "JOIN_IDENTICAL_IN_FLIGHT"
+                if flight.joined
+                else ("REUSE_VALID_RECORD" if flight.reused else (
+                    "RUN_TARGETED_REQUIRED" if fam == "focused-unit" else "RUN_FULL_REQUIRED"
+                ))
+            )
+            trigger = (
+                (profiler.get("execution_trigger") if profiler else None)
+                or rerun_reason
+                or ("NO_COMPATIBLE_VERIFIED_RECORD" if not flight.reused else None)
+            )
             observation.update(
                 status="COMPLETE",
                 reused=flight.reused,
                 joined=flight.joined,
-                verdict=flight.written["record"]["verdict"],
+                cache_reused=flight.reused,
+                single_flight_joined=flight.joined,
+                verdict=rec.get("verdict"),
+                judged_verdict=rec.get("verdict"),
+                raw_status=rec.get("status"),
                 record=flight.written["path"],
+                record_path=flight.written["path"],
+                record_sha256=flight.written.get("sha256"),
+                verification_decision=decision,
+                execution_trigger=trigger,
+                source_fingerprint=identity.get("fingerprint"),
+                verification_identity_digest=key,
+                single_flight_operation=key,
+                jobs=rec.get("jobs", 1),
+                selected_test_count=rec.get("ran"),
+                actual_executed_test_count=(
+                    rec.get("ran") if not (flight.reused or flight.joined) else 0
+                ),
+                source_change_generation=(identity.get("fingerprint") or "")[:16],
             )
         except BaseException:
             if flight.written is None:
@@ -576,7 +623,17 @@ def single_flight(
         finally:
             _ACTIVE.reset(token)
     finally:
-        observation.update(elapsed_wall_s=round(time.monotonic() - began, 6))
+        elapsed = round(time.monotonic() - began, 6)
+        if profiler and isinstance(profiler, dict):
+            for k, v in profiler.get("timings", {}).items():
+                observation[k] = v
+        observation.update(
+            elapsed_wall_s=elapsed,
+            request_wall_s=elapsed,
+            lock_wait_wall_s=observation.get("coordination_wait_wall_s", 0.0),
+        )
+        if flight is not None and flight.joined:
+            observation["single_flight_join_wall_s"] = elapsed
         if observation["status"] == "REQUESTED":
             observation["status"] = "INTERRUPTED"
         _observe(root, observation_path, observation)

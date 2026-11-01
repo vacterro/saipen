@@ -36,17 +36,35 @@ def _project() -> Path:
     return root
 
 
-def _qualification(root: Path, receipt_id: str) -> dict:
+def _qualification(root: Path, receipt_id: str, finding_id: str = "") -> dict:
+    """Write the artifact AND record it as a producer qualification (T-1967).
+
+    T-1967 refuses a dict qualification this project's producer log does not
+    bind to the finding, its artifact digest and its publication scope. A
+    fixture that merely wrote the file was asking the publisher to trust a proof
+    the fixture itself minted, so the record is now made through the product's
+    own `record_qualification` -- the only writer of that log.
+    """
     rel = f".saipen/campaign/qualifications/{receipt_id}.json"
     path = root / rel
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(
         json.dumps({"receipt_id": receipt_id, "state": "QUALIFIED"}), encoding="utf-8"
     )
+    digest = hashlib.sha256(path.read_bytes()).hexdigest()
+    if finding_id:
+        recorded = saipal_adapter.SaipalAdapter(saipal_home=root).record_qualification(
+            root,
+            finding_id,
+            artifact_digest=digest,
+            publication_scope=saipal_adapter.PUBLICATION_SCOPE_DEFAULT,
+        )
+        if not recorded.get("ok"):
+            raise AssertionError(f"fixture qualification failed: {recorded}")
     return {
         "receipt_id": receipt_id,
         "artifact_path": rel,
-        "qualification_digest": hashlib.sha256(path.read_bytes()).hexdigest(),
+        "qualification_digest": digest,
     }
 
 
@@ -55,7 +73,7 @@ def _finding(root: Path, finding_id: str, **extra) -> dict:
     return {
         "finding_id": finding_id,
         "state": "QUALIFIED",
-        "qualification_receipt": _qualification(root, f"QUAL-{finding_id}"),
+        "qualification_receipt": _qualification(root, f"QUAL-{finding_id}", finding_id),
         "audit_body": body,
         "artifact_digest": hashlib.sha256(body.encode("utf-8")).hexdigest(),
         **extra,
@@ -249,7 +267,15 @@ class W2_002YieldingIsNotDelivery(unittest.TestCase):
         self.assertEqual(after["findings"], [])
 
     def test_a_committed_allocator_operation_is_an_acknowledgment(self) -> None:
-        """The allocator is the durable truth, not the cursor file."""
+        """The allocator is the durable truth, not the cursor file.
+
+        T-1969: suppression is scoped to the finding's REVISION, so the reported
+        row must carry the digest of the bytes actually published. A row with no
+        `artifact_digest` is not publishable at all
+        (`deliver_finding_to_audit_inbox` answers ARTIFACT_DIGEST_MISSING), so a
+        fixture without one describes a row this producer can never emit -- and
+        treating its id as enough was exactly the suppression defect.
+        """
         body = "# PAL-1\nbody\n"
         audit_enqueue.enqueue(
             self.root,
@@ -258,6 +284,27 @@ class W2_002YieldingIsNotDelivery(unittest.TestCase):
             producer_operation_id="saipal-pal-1",
             producer_item_id="PAL-1",
         )
+        payload = {
+            "schema_version": 1,
+            "ok": True,
+            "command": "report",
+            "findings": [
+                {
+                    "finding_id": "PAL-1",
+                    "state": "QUALIFIED",
+                    "artifact_digest": hashlib.sha256(body.encode("utf-8")).hexdigest(),
+                }
+            ],
+            "counts": {"total": 1},
+        }
+        report_body = json.dumps(payload).encode("utf-8")
+        self.adapter._capture_report_spool = lambda: {
+            "ok": True,
+            "returncode": 0,
+            "stdout_file": io.BytesIO(report_body),
+            "stdout_bytes_len": len(report_body),
+            "stderr": b"",
+        }
         page = next(self.adapter.iter_new_qualified_findings(self.root))
         self.assertEqual(page["findings"], [])
 
@@ -266,7 +313,7 @@ class W2_002YieldingIsNotDelivery(unittest.TestCase):
         finding = {
             "finding_id": "PAL-1",
             "state": "QUALIFIED",
-            "qualification_receipt": _qualification(self.root, "QUAL-PAL-1"),
+            "qualification_receipt": _qualification(self.root, "QUAL-PAL-1", "PAL-1"),
             "audit_body": "# PAL-1\nbody\n",
             "artifact_digest": "deadbeef" * 8,
         }
@@ -313,6 +360,18 @@ class W2_003ReceiptDeduplicationIsAtomic(unittest.TestCase):
             "qualification_digest": hashlib.sha256(path.read_bytes()).hexdigest(),
             "materialized": str(path),
         }
+        # T-1967: publication now needs a producer record for the project being
+        # published INTO. The artifact is materialised into both a scratch tree
+        # and the real root, but the scratch root's qualification means nothing
+        # here, so the real root gets its own record.
+        recorded = saipal_adapter.SaipalAdapter(saipal_home=self.root).record_qualification(
+            self.root,
+            "PAL-777",
+            artifact_digest=self.finding["qualification_receipt"]["qualification_digest"],
+            publication_scope=saipal_adapter.PUBLICATION_SCOPE_DEFAULT,
+        )
+        if not recorded.get("ok"):
+            raise AssertionError(f"fixture qualification failed: {recorded}")
 
     def test_two_concurrent_lookups_cannot_both_see_absent(self) -> None:
         """W2-003: uniqueness has to be decided under the writer lock.

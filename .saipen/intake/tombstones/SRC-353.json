@@ -1,0 +1,16 @@
+{
+  "actionable": 12,
+  "archive_ref": ".saipen/archive/source/SRC-353.md",
+  "closed_at": "2026-10-31T18:19:28Z",
+  "closure_event": null,
+  "linked_work": "T-1977",
+  "linked_works": [
+    "T-1977"
+  ],
+  "receipt_id": "SRC-353",
+  "requirements": 12,
+  "schema_version": 1,
+  "source_sha256": "f3908585a5b0eda272376e380e72032d5627121ac884618211dcef4bce850344",
+  "status": "CLOSED",
+  "unresolved": 0
+}

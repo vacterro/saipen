@@ -1,0 +1,113 @@
+{
+  "requirements": {
+    "SRC-123:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/T-1537-audit17-triage.md#R001: board.py:1491 RECORD_SEPARATORS covers all ten splitlines separators, board.py:1537 assert_single_record raises, writers refuse at operations.py:6234-6242 and :6943-6946",
+      "text": "audit/17 CORE-001: current BOARD scalar writers and parser must prevent every Python splitlines separator from creating or detaching ticket records; verify current bytes and tests, then link existing Work or disposition only from live evidence.",
+      "verification": "tools/test_t1304_review_p0_repair.py RecordSeparatorPredicateTests + BoardScalarInjectionMatrixTests, 25 passed",
+      "work": "T-1304"
+    },
+    "SRC-123:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/T-1537-audit17-triage.md#R002: ownership.persisted_execution_agent is gone; operations.py:573-580 preserves the seated agent and raises OwnershipSplitError; ownership.py:197 preexisting_split_error",
+      "text": "audit/17 CORE-002: non-transfer operations must preserve STATE.agent and reject active ownership splits; verify current bytes and tests, then link existing Work or disposition only from live evidence.",
+      "verification": "tools/test_t1304_review_p0_repair.py SeatPreservationMatrixTests; tools/test_core_ownership_routing.py:298 CommittedSplitTests",
+      "work": "T-1304"
+    },
+    "SRC-123:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "IMPLEMENTED",
+      "evidence": ".saipen/evidence/T-1537-audit17-triage.md#R003: reverify_work hoisted its dry-run branch above ensure_project_lineage/capture_findings into _reverify_body (debt.py:1536-1555) and the branch now uses _capture_findings_read_only; reproduced before the change as four durable paths written under dry_run",
+      "text": "audit/17 W2-001: dry-run snapshot and reverify paths must write zero durable bytes and BUILD baseline establishment must fail closed; verify current bytes and tests before disposition.",
+      "verification": "tools/test_t1304_r004_dry_run_purity.py ReverifyDryRunPurityTests: pristine, already-migrated, hostile-patch and capture-failure cases assert IDENTITY.md, .receipt-index.json, op-migrate-lineage/operation.json and core.lock are absent or unchanged",
+      "work": "T-1537"
+    },
+    "SRC-123:R004": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "IMPLEMENTED",
+      "evidence": ".saipen/evidence/T-1537-audit17-triage.md#R004: journal.py:3808 wraps the verifier call in try/except Exception and returns a non-empty refusal naming the exception, never []; all four call sites already treat non-empty as refuse (CONFLICT at :3196 and :3637, NEEDS_REPAIR in reconcile and conflict resolution)",
+      "text": "audit/17 W2-002: semantic verifier exceptions during APPLY or recovery must produce structured recoverable outcomes and never strand an operation in APPLYING; verify current bytes and tests before disposition.",
+      "verification": "tools/test_t1316_recovery_already_applied.py RaisingVerifierTests, verified non-vacuous by re-running against the pre-fix body which raised RuntimeError raw",
+      "work": "T-1537"
+    },
+    "SRC-123:R005": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/T-1537-audit17-triage.md#R005: result.py:34-42 marks an unregistered refusal code instead of raising; every code the finding names is present in saipen/REGISTRY.json",
+      "text": "audit/17 W2-003: source-boundary diagnostics must map into the closed operation refusal vocabulary without exceptions or mutation; verify current bytes and tests before disposition.",
+      "verification": "tools/test_refusal_registry.py RegistryCompletenessTests, 4 passed",
+      "work": "T-1540"
+    },
+    "SRC-123:R006": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "IMPLEMENTED",
+      "evidence": ".saipen/evidence/T-1537-audit17-triage.md#R006: debt.py:511 compares the record's board_sha256/state_sha256/log_fingerprint against a fresh _project_state_fingerprints(root) and continues the reuse scan on any mismatch, so drift mints a new baseline",
+      "text": "audit/17 W2-004: pre-BUILD baseline reuse must bind to the exact current checkpoint identity and mint a fresh baseline after drift; verify current bytes and tests before disposition.",
+      "verification": "tools/test_t1304_r004_transition.py BaselineReuseFingerprintTests: all three keys present plus the four-case drift matrix (none, BOARD, STATE, LOG)",
+      "work": "T-1537"
+    },
+    "SRC-123:R007": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "IMPLEMENTED",
+      "evidence": ".saipen/evidence/T-1537-audit17-triage.md#R007: debt.py:356 and :1530 take project_writer_lock around the mutating entries (nullcontext on the dry-run path, because acquiring the lock mkdirs .saipen/locks), the unlocked apply body extracted to _create_snapshot_apply for ensure_debt_baseline since the lock is not reentrant; journal.py:3126 widened to except (OSError, ValueError) so the paths.py:354 ownership race becomes CONFLICT",
+      "text": "audit/17 W2-005: concurrent snapshot and reverify writers must serialize allocation and persistence without duplicate IDs, lost updates, or unjournaled bytes; verify current bytes and tests before disposition.",
+      "verification": "tools/test_debt_gate.py: id allocation observed inside the lock, a concurrent create_snapshot refused WRITER_BUSY writing no DEBT_DIR, and an injected ValueError settling at CONFLICT",
+      "work": "T-1537"
+    },
+    "SRC-123:R008": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "DUPLICATE",
+      "evidence": ".saipen/evidence/T-1537-audit17-triage.md#R008: the O(n^2) shape survives (journal.py:5590-5593 scans the whole lifetime set; advance_after_settlement has zero production callers) and T-1283 already holds this exact umbrella as AC-02",
+      "text": "audit/17 PERF-001: semantic receipt lookup and journal settlement must avoid repeated lifetime scans through the production reader and writer path; verify current bytes and measured evidence before disposition.",
+      "verification": "deferred to T-1283 AC-02; the audit's 509.2 ms figure must not be reused, .saipen/recovery/settled now holds 9197 entries against 2934",
+      "work": "T-1283"
+    },
+    "SRC-123:R009": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/T-1537-audit17-triage.md#R009: audit_checks.py:5116 takes max_workers=max(1, worker_count) and an empty runnable set submits nothing; stable diagnostic at :4767-4772",
+      "text": "audit/17 PERF-002: zero-runnable audit-check selections must exit successfully without scheduling empty work; verify current bytes and tests before disposition.",
+      "verification": "tools/test_audit_checks.py; the zero-runnable control asserts no cases-* tree is created",
+      "work": "T-1287"
+    },
+    "SRC-123:R010": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "IMPLEMENTED",
+      "evidence": ".saipen/evidence/T-1537-audit17-triage.md#R010: debt.py:1006 hoists current_problem_keys out of the baseline loop, and _claim_boundary now takes the already-read history while _first_ticket_event became _first_ticket_events, a single pass building first-appearance-per-ticket; cache is invocation-local with no memo",
+      "text": "audit/17 PERF-003: debt delta analysis must avoid repeated full-history scans while preserving complete-history semantics; verify current bytes and measured evidence before disposition.",
+      "verification": "tools/test_debt_gate.py Perf003SinglePassTests: the key set is built once per work_delta regardless of baseline size, read_history_snapshot is called exactly once per work_delta, and a two-call control pins that nothing is cached across calls; both counters verified to bite by reverting each hoist",
+      "work": "T-1537"
+    },
+    "SRC-123:R011": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/T-1537-audit17-triage.md#R011: tools/test_producer_gate_policy.py proves the matrix in process; the nested validate call count inside run_producer_gate_probes is 7, not 13",
+      "text": "audit/17 PERF-004: producer-gate probes must avoid redundant repeated scenario work while preserving every required verification result; verify current bytes and tests before disposition.",
+      "verification": "tools/test_producer_gate_policy.py, in-process matrix over saipen_engine.producer_gate",
+      "work": "T-1284"
+    },
+    "SRC-123:R012": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "IMPLEMENTED",
+      "evidence": ".saipen/evidence/T-1537-audit17-triage.md#Disposition: the captured generation 6d1ee46d was held from 2026-09-27 until clauses R001-R011 were all terminal and linked Work T-1537 was closed; nothing was removed by hand, and the audit/17.md transport is deleted only by the canonical journaled path",
+      "text": "audit/17 consumption invariant: keep the captured generation until every actionable clause and linked Work is terminal; then consume only through the canonical journaled operation after rechecking the exact source digest. Never delete manually.",
+      "verification": "tools/saipen_engine/audit_inbox.py:1187 consume_layer, which rechecks the exact source digest and refuses AUDIT_GENERATION_CHANGED on a layer replaced since closure, and performs the delete under run_mutation(operation=audit_inbox.consume) at :1331; classify() marks the layer CLOSED_PENDING_DELETE only once the bound receipt is closed, and saipen.py:4445 is the only caller",
+      "work": "T-1537"
+    }
+  },
+  "schema_version": 1
+}

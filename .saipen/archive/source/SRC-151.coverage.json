@@ -1,0 +1,14 @@
+{
+  "requirements": {
+    "SRC-151:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "T-1575 closed with verification evidence in LOG: verify -> PASS [target: T-1575] conf: high -- run_pair.py verify: verifier c01de31dd4ce3b3a, pre-fix subject d1e520b1b959404f behavioural red 4 assertions with 0 collection errors, live subject 2bb45388438fffe5 OK (evidence/T-1575-parallel-lane/verify-manifest.json); focused test_t1575_parallel_lane 7/7 OK; live guard on THIS root refuses write tools/saipen_engine/reconcile.py with TREE_UNDER_TEST",
+      "text": "\u041c\u043d\u0435 \u043e\u0447\u0435\u043d\u044c \u043d\u0440\u0430\u0432\u0438\u0442\u0441\u044f \u0442\u0432\u043e\u0439 \u043f\u043e\u0434\u0445\u043e\u0434 \u043d\u0435 \u0436\u0434\u0430\u0442\u044c \u043a\u043e\u0433\u0434\u0430 \u0438\u0434\u0443\u0442 \u0442\u0435\u0441\u0442\u044b \u0430 \u0441\u0430\u043c\u043e\u043c\u0443 \u0434\u0435\u043b\u0430\u0442\u044c \u043e\u0442\u0434\u0435\u043b\u044c\u043d\u043e \u0434\u0430\u043b\u044c\u0448\u0435 \u0443\u0432\u0435\u043b\u0438\u0447\u0438\u0432\u0430\u044f \u043a\u043f\u0434 \u0432 \u0434\u0435\u0441\u044f\u0442\u043a\u0438 \u0440\u0430\u0437. \u0421\u0434\u0435\u043b\u0430\u0439 \u044d\u0442\u043e SAIPEN \u0442\u043e\u0436\u0435 \u0447\u0442\u043e\u0431\u044b \u0430\u0433\u0435\u043d\u0442\u044b \u0442\u0430\u043a \u0443\u043c\u0435\u043b\u0438, \u044d\u0442\u043e \u043e\u0447\u0435\u043d\u044c \u0437\u0434\u043e\u0440\u043e\u0432\u0441\u043a\u0438\u0439 \u043f\u043e\u0434\u0445\u043e\u0434, \u041e\u043f\u0443\u0441. \u0417\u0430\u043f\u0438\u0448\u0438 \u044d\u0442\u043e \u0442\u043e\u0436\u0435 \u043f\u043e\u0442\u043e\u043c \u0442\u0430\u043a \u0447\u0442\u043e\u0431\u044b \u0440\u0435\u0430\u043b\u044c\u043d\u043e \u0430\u0433\u0435\u043d\u0442\u044b \u0431\u044b\u043b\u0438 \u0442\u0430\u043a\u0438\u043c\u0438 \u0436\u0435 \u0443\u043c\u043d\u044b\u043c\u0438 \u0438 \u0438\u043d\u0438\u0446\u0438\u0430\u0442\u0438\u0432\u043d\u044b\u043c\u0438 \u043a\u0430\u043a \u0442\u044b.\n\n## Context (observed practice this request names, 30.09.26, T-1574)\n\nWhile the ~40 min declared core-unit family ran in its sandbox, the agent did not idle-wait: it ran independent read-only analysis, drafted the next doc/code changes in scratchpad files, prepared the next ticket's evidence scripts, recorded knowledge, and planned the queued Work; the tree under test stayed untouched (the record binds the tree fingerprint), and completion arrived as a notification rather than by polling.",
+      "verification": "the Work this request created reached its own verification gate; see the T-1575 VERIFY cycle in .saipen/LOG.md",
+      "work": "T-1575"
+    }
+  },
+  "schema_version": 1
+}

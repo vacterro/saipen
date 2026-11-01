@@ -612,16 +612,36 @@ def instruction_contract_status(adapter: dict, skill_install_dir: Path) -> dict:
     Returns a structured decision: overall `status`, the per-loader
     `deliveries`, and one bounded `detail` sentence naming the first loader
     contract that is not current, with the surface it reads.
+
+    T-1957: a loader whose `scope` is `project` reads the PROJECT root, not a
+    home file, so this home-scoped verdict cannot measure it. It is reported
+    as `not-applicable` and excluded from the overall status -- claiming it
+    `current` from a home dotfile was a false statement about the loader named
+    (FreeBuff Desktop after its 2026-10-29 update), and claiming it `absent`
+    would report the installer broken when only the measurement is out of
+    reach. The project half is owned by `saipen_engine.project_block`.
     """
     rendered = rendered_activation_block(skill_install_dir)
     expected = _extract_block(rendered)
     template_block = _extract_block(activation_template_path().read_text(encoding="utf-8"))
     deliveries: list[dict] = []
     detail: str | None = None
-    saw_any_surface = False
+    # An install that exists but delivers nothing is STALE, not absent: the
+    # declared write surfaces are the evidence that the installer ran here.
+    # Keying this on a READ surface alone would report `absent` for a home the
+    # installer did write, just not where the loader looks (T-1957).
+    saw_any_surface = any(
+        _expand_home(str(surface)).is_file()
+        for surface in (adapter.get("instruction_surfaces") or [])
+    )
     for contract in adapter.get("instruction_loaders") or []:
         loader = str(contract.get("name") or "loader")
         surfaces = [str(item) for item in (contract.get("surfaces") or [])]
+        if str(contract.get("scope") or "home") == "project":
+            deliveries.append(
+                {"loader": loader, "surface": None, "status": "not-applicable"}
+            )
+            continue
         state = "absent"
         found: str | None = None
         for surface in surfaces:
@@ -629,7 +649,6 @@ def instruction_contract_status(adapter: dict, skill_install_dir: Path) -> dict:
             if not path.is_file():
                 continue
             found = surface
-            saw_any_surface = True
             try:
                 installed = _extract_block(
                     _content_bytes(path).decode("utf-8", errors="replace")
@@ -652,7 +671,7 @@ def instruction_contract_status(adapter: dict, skill_install_dir: Path) -> dict:
                 detail = f"{loader} surface {found} cannot be read"
             else:
                 detail = f"{loader} delivers a stale activation block from {found}"
-    states = [entry["status"] for entry in deliveries]
+    states = [entry["status"] for entry in deliveries if entry["status"] != "not-applicable"]
     if states and all(state == "current" for state in states):
         overall = "current"
     elif any(state == "unknown" for state in states):

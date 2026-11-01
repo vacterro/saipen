@@ -1,0 +1,149 @@
+{
+  "requirements": {
+    "SRC-247:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Prevent recurrence of the proven admission, runtime-binding and verification-order drift from a ZAICODE-hosted 9router session",
+      "verification": null,
+      "work": "T-1768"
+    },
+    "SRC-247:R002": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Admission: bind the live canonical SAIPEN root, runtime, HEAD, dirty tree, active STATE, BOARD and LOG, admission gates and ownership before any mutation; do not treat this handoff as execution authority; if admission is unavailable, perform read-only analysis and return BLOCKED with exact evidence",
+      "verification": null,
+      "work": "T-1768"
+    },
+    "SRC-247:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Verify whether current BOOT and host entry deterministically resolve the correct launcher without unnecessary agent search",
+      "verification": null,
+      "work": "T-1768"
+    },
+    "SRC-247:R004": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Verify installed runtime and protocol-home binding consistency before consequential commands",
+      "verification": null,
+      "work": "T-1768"
+    },
+    "SRC-247:R005": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Audit whether provenance differentiates real user ingress from host-generated synthetic events",
+      "verification": null,
+      "work": "T-1768"
+    },
+    "SRC-247:R006": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Preserve the existing VERIFY to REVIEW refusal behaviour",
+      "verification": null,
+      "work": "T-1768"
+    },
+    "SRC-247:R007": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Add focused regression tests only for confirmed missing enforcement",
+      "verification": null,
+      "work": "T-1768"
+    },
+    "SRC-247:R008": {
+      "actionable": true,
+      "class": "non-goal",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Do not invent new rule IDs or duplicate existing protocol owners",
+      "verification": null,
+      "work": "T-1768"
+    },
+    "SRC-247:R009": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Negative control: a synthetic reminder must not grant new user authority",
+      "verification": null,
+      "work": "T-1768"
+    },
+    "SRC-247:R010": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Negative control: a changed protocol home must not silently retain old admission",
+      "verification": null,
+      "work": "T-1768"
+    },
+    "SRC-247:R011": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Negative control: a missing verification record must refuse phase advancement",
+      "verification": null,
+      "work": "T-1768"
+    },
+    "SRC-247:R012": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Negative control: a missing runtime binding must not be repaired by arbitrary launcher discovery",
+      "verification": null,
+      "work": "T-1768"
+    },
+    "SRC-247:R013": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Acceptance: correct owner and rule references, focused tests, regression checks, no weakened existing refusal, and evidence of the actual runtime behaviour",
+      "verification": null,
+      "work": "T-1768"
+    },
+    "SRC-247:R014": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Stop on foreign active ownership, recovery-only admission, protocol corruption, unexpected lifecycle changes or failure to establish canonical binding",
+      "verification": null,
+      "work": "T-1768"
+    },
+    "SRC-247:R015": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Deliver: observed baseline, actual changes, tests, remaining gaps and next authorized action",
+      "verification": null,
+      "work": "T-1768"
+    },
+    "SRC-247:R016": {
+      "actionable": false,
+      "class": "context",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Evidence at handoff: on 2026-10-05 new user work was preceded by STATE inspection, CLI help and launcher discovery before the STARTED response for SRC-031 / T-71, though BOOT required NEW TASK then START FIRST; on 2026-10-13 the T-75 and T-77 VERIFY to REVIEW attempts were correctly refused as INCOMPLETE_TICKET, the CLI reported RUNTIME_DRIFT because the project's saipen_home differed from the invoked installed runtime, and synthetic host USER events existed with no proven authorization bypass",
+      "verification": null,
+      "work": "T-1768"
+    }
+  },
+  "schema_version": 1
+}

@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-211:R001": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "Operate only on the approved separate AUDAPACK_RECOVERY_20261010 root using a new canonical INIT lineage; preserve the original, unsupported historical claims and all exclusions: no reconstruction, cutover, publication, reset, clean or unrelated external change."
+    }
+  },
+  "derived_at": "2026-10-11T04:32:08Z",
+  "derived_from": "SRC-211",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "0d2e6c67d9723a3e350e66865a2b2fed5e366d7a87ffd9f294eeebcc931b68e3"
+}

@@ -1,0 +1,19 @@
+{
+  "clauses": {
+    "SRC-242:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Establish how the engine classifies the adopted and attested legacy tickets (SMART T-171/T-181) and validates the committed adoption/attestation carrier; legitimate modern-generation refusal stays, closure checks are never disabled globally"
+    },
+    "SRC-242:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "A valid committed legacy adoption plus attestation is recognized by repeated recovery without a new approval request; an invalid carrier returns its specific defect instead of being treated as a new allocation"
+    }
+  },
+  "derived_at": "2026-10-13T19:15:21Z",
+  "derived_from": "SRC-242",
+  "interpretation_revision": 2,
+  "schema_version": 1,
+  "source_sha256": "07427de3671195e5f84d27dc675869f2b9537265402ce4d306edadcf24d77336"
+}

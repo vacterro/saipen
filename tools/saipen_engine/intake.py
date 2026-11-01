@@ -301,20 +301,38 @@ def _is_link_or_reparse(path: Path) -> bool:
         info = os.lstat(path)
     except OSError:
         return False
-    return os.path.islink(path) or bool(getattr(info, "st_file_attributes", 0) & 0x400)
+    if os.path.islink(path) or bool(getattr(info, "st_file_attributes", 0) & 0x400):
+        try:
+            p = Path(path)
+            if ".saipen" in p.parts:
+                if _is_isolated_worktree(p) or any(_is_isolated_worktree(parent) for parent in p.parents):
+                    return False
+        except Exception:
+            pass
+        return True
+    return False
 
 
 def _safe_path(root: Path, rel: str, *, expect_file: bool = False) -> Path:
     """Resolve one project-owned intake path without following hostile nodes."""
     path = owned_target_path(root, rel, kind="source-receipt")
     current = root
+    isolated = _is_isolated_worktree(root)
     for part in Path(rel).parts[:-1]:
         current = current / part
-        if current.exists() and (_is_link_or_reparse(current) or not current.is_dir()):
-            raise ValueError(f"unsafe source-receipt container: {current}")
+        if current.exists():
+            if _is_link_or_reparse(current):
+                if isolated and ".saipen" in current.parts:
+                    continue
+                raise ValueError(f"unsafe source-receipt container: {current}")
+            if not current.is_dir():
+                raise ValueError(f"unsafe source-receipt container: {current}")
     if path.exists():
         info = os.lstat(path)
-        if _is_link_or_reparse(path) or (expect_file and not stat.S_ISREG(info.st_mode)):
+        if _is_link_or_reparse(path):
+            if not (isolated and ".saipen" in path.parts):
+                raise ValueError(f"unsafe source-receipt node: {path}")
+        elif expect_file and not stat.S_ISREG(info.st_mode):
             raise ValueError(f"unsafe source-receipt node: {path}")
     return path
 
@@ -2262,6 +2280,29 @@ def _probe_environment_absence(environment: str) -> dict:
     return {"ok": True, "code": "ENVIRONMENT_ABSENT", "proof": proof}
 
 
+def validate_evidence_class(evidence_class: str | None) -> dict | None:
+    """The ONE authority for a caller-declared evidence class (T-34).
+
+    ``None`` when the value is absent or a member of the closed taxonomy;
+    otherwise a refusal. Shared by `set_disposition` and the CLI `--dry-run`
+    planner so the two cannot disagree on a class either refuses. The class is
+    what the CITED evidence actually IS, so a clause whose text declares
+    ``[CONTRACT]`` can be closed by evidence the caller declares CONTRACT --
+    the class-field writer the fitness gate reads but previously nothing set.
+    """
+    if evidence_class is None:
+        return None
+    from . import evidence_fitness
+
+    if evidence_class.upper() not in evidence_fitness.EVIDENCE_CLASSES:
+        return {
+            "ok": False,
+            "code": "VALIDATION_FAILED",
+            "detail": f"unknown evidence class {evidence_class!r}",
+        }
+    return None
+
+
 def set_disposition(
     root: Path | str,
     receipt_id: str,
@@ -2272,6 +2313,7 @@ def set_disposition(
     evidence: str | None = None,
     verification: str | None = None,
     environment: str | None = None,
+    evidence_class: str | None = None,
 ) -> dict:
     root = Path(root)
     normalized_rid, refusal = validate_disposition_request(receipt_id, rid, disposition)
@@ -2279,6 +2321,9 @@ def set_disposition(
         return refusal
     assert normalized_rid is not None
     rid = normalized_rid
+    class_refusal = validate_evidence_class(evidence_class)
+    if class_refusal is not None:
+        return class_refusal
     try:
         with project_writer_lock(root):
             integrity = verify_integrity(root, receipt_id)
@@ -2520,13 +2565,17 @@ def set_disposition(
                         if not receipt_file:
                             test_target = Path(test_files[0]).name if test_files else Path(str(verification or "")).name
                             target_work = work or "<T-###>"
-                            command = f"python tools/core_unit.py focused {target_work} --pattern {test_target}"
+                            missing_oracle = test_files[0] if test_files else verification
+                            if test_target.startswith("test_") and test_target.endswith(".py"):
+                                command = f"python tools/core_unit.py focused {target_work} --pattern {test_target}"
+                            else:
+                                command = f"saipen work reverify {target_work} --contract <contract-path>"
                             return {
                                 "ok": False,
                                 "code": "EVIDENCE_UNAUTHENTICATED",
                                 "detail": (
                                     f"no authentic execution receipt found proving execution of "
-                                    f"{test_files[0] if test_files else verification}; "
+                                    f"{missing_oracle}; "
                                     f"to produce an authentic receipt for live Work run: {command}"
                                 ),
                                 "canonical_next_command": command,
@@ -2665,7 +2714,10 @@ def set_disposition(
                         if authenticated is None or base_auth != base_carrier:
                             test_target = Path(test_files[0]).name if test_files else Path(str(verification or "")).name
                             target_work = work or "<T-###>"
-                            command = f"python tools/core_unit.py focused {target_work} --pattern {test_target}"
+                            if test_target.startswith("test_") and test_target.endswith(".py"):
+                                command = f"python tools/core_unit.py focused {target_work} --pattern {test_target}"
+                            else:
+                                command = f"saipen work reverify {target_work} --contract <contract-path>"
                             return {
                                 "ok": False,
                                 "code": "EVIDENCE_UNAUTHENTICATED",
@@ -2725,6 +2777,8 @@ def set_disposition(
                 entry["environment_evidence"] = environment_proof
             elif disposition != "UNAVAILABLE_ENVIRONMENT":
                 entry.pop("environment_evidence", None)
+            if evidence_class:
+                entry["actual_evidence_class"] = evidence_class.upper()
             _write_coverage(root, receipt_id, ledger)
             return {
                 "ok": True,
@@ -2732,6 +2786,7 @@ def set_disposition(
                 "receipt": receipt_id,
                 "rid": rid,
                 "disposition": disposition,
+                "actual_evidence_class": entry.get("actual_evidence_class"),
             }
     except (OSError, PermissionError, ValueError) as exc:
         return _write_refusal(exc)
@@ -2970,9 +3025,20 @@ def extract_request_clauses(body: str) -> list[str]:
         if len(items) >= 2:
             return [" ".join(content.split()) for num, content in items]
 
-    # Pattern 4: Top-level numbered list if text has >= 2 items
+    # Pattern 4: Top-level numbered list if text has >= 2 items.
+    #
+    # A numbered item ends at the next numbered line, at the end of the text,
+    # OR at the next inline major heading (`=== N. TITLE ===`, `=====` divider,
+    # `# ...`). Without the heading alternative (T-33 defect class: cross-
+    # section absorption) the last item of one numbered list ran through the
+    # section divider that followed it and swallowed every narrative section
+    # up to the next numbered line: on the standing-mission carrier SRC-013
+    # that put 94.4% of the derived text into 2 of 28 clauses (R018 8508
+    # chars, R028 7956), and the closure gate then demanded dispositions for
+    # narrative prose instead of for requirements. A divider line is not a
+    # list item, so the lookahead stops there.
     top_items = re.findall(
-        r"(?:^|\n)\s*(\d+)\.\s+(.*?)(?=(?:\n\s*\d+\.|\Z))",
+        r"(?:^|\n)\s*(\d+)\.\s+(.*?)(?=(?:\n\s*\d+\.|\n\s*(?:={3,}|\#{1,6})|\Z))",
         text,
         re.DOTALL,
     )
@@ -3145,16 +3211,39 @@ def _coverage_summary_from_ledger(receipt_id: str, ledger: dict) -> dict:
         for rid, entry in requirements.items()
         if entry.get("actionable", entry.get("class") in ACTIONABLE_CLASSES)
     }
-    unresolved = [
-        rid
-        for rid, entry in actionable.items()
-        if entry.get("disposition") not in TERMINAL_DISPOSITIONS
-        or not entry.get("evidence")
-        or (
-            entry.get("disposition") in {"IMPLEMENTED", "VERIFIED"}
-            and not entry.get("verification")
-        )
-    ]
+    unresolved = []
+    unresolved_fitness = []
+    try:
+        from . import evidence_fitness
+    except (ImportError, ValueError):
+        import evidence_fitness
+
+    for rid, entry in actionable.items():
+        disp = entry.get("disposition")
+        ev = entry.get("evidence")
+        ver = entry.get("verification")
+        if (
+            disp not in TERMINAL_DISPOSITIONS
+            or not ev
+            or (disp in {"IMPLEMENTED", "VERIFIED"} and not ver)
+        ):
+            unresolved.append(rid)
+            continue
+
+        if disp in {"IMPLEMENTED", "VERIFIED"}:
+            req_text = entry.get("text", "")
+            req_class = entry.get("required_evidence_class") or evidence_fitness.extract_required_evidence_class(req_text)
+            act_class = entry.get("actual_evidence_class") or evidence_fitness.UNIT
+            fitness = evidence_fitness.validate_evidence_fitness(
+                requirement_id=rid,
+                required_evidence_class=req_class,
+                actual_evidence_class=act_class,
+                evidence_payload=entry.get("evidence_payload") or ev,
+            )
+            if not fitness.get("fit"):
+                unresolved.append(rid)
+                unresolved_fitness.append(rid)
+
     return {
         "receipt": receipt_id,
         "requirements": len(requirements),
@@ -3162,6 +3251,7 @@ def _coverage_summary_from_ledger(receipt_id: str, ledger: dict) -> dict:
         "terminal": len(actionable) - len(unresolved),
         "dispositions": counts,
         "unresolved": unresolved,
+        "unresolved_fitness": unresolved_fitness,
     }
 
 
@@ -3873,6 +3963,20 @@ def _release_scope_trust(root: Path, work: str, source_identity: object) -> _Rel
     )
 
 
+def _is_isolated_worktree(root: Path) -> bool:
+    """True if root is an isolated linked worktree or explicitly isolated release (P0-01)."""
+    if os.environ.get("SAIPEN_ISOLATED_RELEASE") == "1":
+        return True
+    try:
+        p = Path(root).resolve()
+        if (p / ".git").is_file():
+            if ".saipen" in p.parts and "worktrees" in p.parts:
+                return True
+    except Exception:
+        pass
+    return False
+
+
 def _release_relevant_work(
     root: Path,
     current_work: str | None,
@@ -3907,7 +4011,7 @@ def _release_relevant_work(
         )
         return _ReleaseRelevance(frozenset({current_work}), current_work, scope)
 
-    if not publish:
+    if not publish or _is_isolated_worktree(root):
         own = _release_scope_trust(root, current_work, source_identity)
         if own.status != "TRUSTED_SCOPE":
             return _ReleaseRelevance(frozenset({current_work}), current_work, own)
@@ -4018,11 +4122,11 @@ def release_gate(
         integrity = verify_integrity(root, receipt_id)
         if not integrity["ok"]:
             return integrity | {"receipt": receipt_id}
-        if not publish and current_work:
+        if (not publish or _is_isolated_worktree(root)) and current_work:
             # The current Work's complete linkage/coverage was checked above.
             # Unowned or otherwise unrelated coverage cannot constrain a local
-            # closure: no source bytes leave the repository. Integrity remains
-            # global, including for these receipts.
+            # or isolated closure: only reviewed attributable paths of current_work
+            # leave the repository. Integrity remains global, including for these receipts.
             continue
         linked = item.get("linked_work")
         if not linked:

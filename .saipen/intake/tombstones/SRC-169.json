@@ -1,0 +1,16 @@
+{
+  "actionable": 1,
+  "archive_ref": ".saipen/archive/source/SRC-169.md",
+  "closed_at": "2026-10-30T02:42:01Z",
+  "closure_event": null,
+  "linked_work": "T-1608",
+  "linked_works": [
+    "T-1608"
+  ],
+  "receipt_id": "SRC-169",
+  "requirements": 1,
+  "schema_version": 1,
+  "source_sha256": "8137c85ebe6e61c86c8b78e0848e2c04346c39a11387241d3b4c9dee037f276b",
+  "status": "CLOSED",
+  "unresolved": 0
+}

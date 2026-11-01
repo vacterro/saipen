@@ -1,0 +1,59 @@
+{
+  "requirements": {
+    "SRC-103:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "IMPLEMENTED",
+      "evidence": "E-7959",
+      "text": "Audit manifest distinguishes durable audit surfaces from runtime/transient surfaces at any nesting depth, without excluding whole durable families",
+      "verification": "python -m unittest tools.test_t1452_manifest_authority -> PASS 13; manifest+audit families PASS 66; red-check 15 fail on prefix-only contract",
+      "work": "T-1452"
+    },
+    "SRC-103:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "IMPLEMENTED",
+      "evidence": "E-7956",
+      "text": "Release SOURCE_COVERAGE is scoped to the release being shipped; an unrelated BLOCKED_EXTERNAL source cannot freeze an independent release while a related unresolved source still blocks",
+      "verification": "release_gate scopes WORK CLOSURE to release-overlapping work (intake.py:2720-2745); integrity stays global",
+      "work": "T-1452"
+    },
+    "SRC-103:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "IMPLEMENTED",
+      "evidence": "E-7958",
+      "text": "Contract clause derivation is reachable before finish for every ingress, idempotent, crash-safe, and never overwrites an interpreted contract",
+      "verification": "python -m unittest tools.test_t1453_ingress_clause -> PASS 9; source families PASS 99",
+      "work": "T-1453"
+    },
+    "SRC-103:R004": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "IMPLEMENTED",
+      "evidence": "E-7961",
+      "text": "SOURCE_COVERAGE refusals carry code, receipt, linked work, release-scope membership, missing-derivation state and the canonical next action; never a false MISROUTED_PROJECT_BINDING escape",
+      "verification": "python -m unittest tools.test_source_refusal_routing -> PASS 6; source families PASS 103",
+      "work": "T-1455"
+    },
+    "SRC-103:R005": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "IMPLEMENTED",
+      "evidence": "E-7959",
+      "text": "authoritative_state=true means the artifact satisfies the declared protocol contract, not merely that mandatory STATE/BOARD/LOG files exist",
+      "verification": "manifest contract 3 declares precedence + authority_note; saipen audit manifest -> CURRENT, mandatory_missing []",
+      "work": "T-1452"
+    },
+    "SRC-103:R006": {
+      "actionable": true,
+      "class": "non-goal",
+      "disposition": "NOT_APPLICABLE",
+      "evidence": "E-7966",
+      "text": "No SAIPENVIEW product workaround, no dishonest T-850 closure, no SRC-007 history rewrite, no hand-authored operator authority, no universally valid empty coverage",
+      "verification": null,
+      "work": "T-1452"
+    }
+  },
+  "schema_version": 1
+}

@@ -171,6 +171,23 @@ _INT_SETTINGS = (
 )
 
 
+def _policy_int(config: dict, key: str, default: int) -> int:
+    """Read an int policy field, honouring an explicit 0.
+
+    `config.get(key) or default` would turn a declared `max_shells: 0` back
+    into the permissive default -- for ZAICODE, whose hook the host spawns
+    with no shell in between, that would admit a chain that runs through a
+    shell tool, which is exactly the caller this boundary exists to refuse.
+    """
+    value = config.get(key)
+    if value is None:
+        return default
+    try:
+        return int(value)
+    except (TypeError, ValueError):
+        return default
+
+
 # ------------------------------------------------------------------ helpers
 
 
@@ -679,7 +696,10 @@ class Broker:
             return self._authenticator(peer, host, home)
         # Per-host policy (T-417): a host that declares its own image/signer/
         # shell shape overrides the global policy for this identify() call.
-        host_cfg = settings(self.config, host=host)
+        host_cfg = dict(self.config)
+        hosts = host_cfg.get("hosts")
+        if isinstance(hosts, dict) and isinstance(hosts.get(host), dict):
+            host_cfg.update(hosts.get(host) or {})
         limit = int(host_cfg.get("ancestry_limit") or DEFAULT_ANCESTRY_LIMIT)
         if peer is None or getattr(peer, "pid", None) is None or not proc.platform_supported():
             return (
@@ -700,8 +720,8 @@ class Broker:
             host_signers=signers,
             shells=tuple(host_cfg.get("hook_shells") or identity_proof.DEFAULT_SHELLS),
             bridge_images=tuple(host_cfg.get("bridge_images") or ()),
-            max_shells=host_cfg["max_shells"],
-            max_bridges=host_cfg["max_bridges"],
+            max_shells=_policy_int(host_cfg, "max_shells", 4),
+            max_bridges=_policy_int(host_cfg, "max_bridges", 2),
             profile_hook="hooks/saipen-guard.py" if host == "claude" else None,
         )
         from .claude_profiles import hook_for_process

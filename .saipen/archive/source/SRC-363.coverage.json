@@ -1,0 +1,104 @@
+{
+  "requirements": {
+    "SRC-363:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "SAIPEN protocol ownership: CORE \u00a71.2 LOG append-only event authority; direct text editing of LOG.md proscribed; verified by test_premature_victory_prevention.py",
+      "text": "DRIFT-001 Canonical-Log-Integrity: Direct manual edits to LOG.md strictly proscribed; all event mutations require saipen writer",
+      "verification": "test_premature_victory_prevention.py: PASS record:.saipen/evidence/focused-unit/d805dd267ed50722-20261031T234040226671Z.json",
+      "work": "T-1987"
+    },
+    "SRC-363:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "SAIPEN protocol ownership: CORE PICK-01 and baseline authentication reject surrogate archives and tree hash impersonation; verified by test_premature_victory_prevention.py",
+      "text": "DRIFT-002 Baseline-Identity-Provenance: Surrogate archive or working tree hash must not masquerade as audited baseline identity",
+      "verification": "test_premature_victory_prevention.py: PASS record:.saipen/evidence/focused-unit/d805dd267ed50722-20261031T234040226671Z.json",
+      "work": "T-1987"
+    },
+    "SRC-363:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "SAIPEN protocol ownership: regression attribution requires proof of pre-existing baseline red rather than assumed innocence; verified by test_premature_victory_prevention.py",
+      "text": "DRIFT-003 Diagnostic-Attribution-Honesty: Local regressions must not be classified as pre-existing without historical evidence",
+      "verification": "test_premature_victory_prevention.py: PASS record:.saipen/evidence/focused-unit/d805dd267ed50722-20261031T234040226671Z.json",
+      "work": "T-1987"
+    },
+    "SRC-363:R004": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "SAIPEN protocol ownership: terminal gates require all actionable requirements to possess terminal dispositions before ticket close; verified by test_premature_victory_prevention.py",
+      "text": "DRIFT-004 Terminal-Disposition-Discipline: Requirements must not remain unresolved or unverified when claiming ticket completion",
+      "verification": "test_premature_victory_prevention.py: PASS record:.saipen/evidence/focused-unit/d805dd267ed50722-20261031T234040226671Z.json",
+      "work": "T-1987"
+    },
+    "SRC-363:R005": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "NOT_APPLICABLE",
+      "evidence": "Wintage repository ownership: source file path corrections and shadow-root scan implementation in inject-wintage-web.js",
+      "text": "DRIFT-005 Contract-Locator-Precision: Source requirements must cite existing file paths and validated symbol locators",
+      "verification": null,
+      "work": "T-1987"
+    },
+    "SRC-363:R006": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "SAIPEN execution discipline: pipefail and direct process return code verification prevent masked pipeline failures; verified by test_premature_victory_prevention.py",
+      "text": "DRIFT-006 Pipeline-Exit-Observability: Shell pipelines must not mask non-zero failure exit codes via downstream commands",
+      "verification": "test_premature_victory_prevention.py: PASS record:.saipen/evidence/focused-unit/d805dd267ed50722-20261031T234040226671Z.json",
+      "work": "T-1987"
+    },
+    "SRC-363:R007": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "NOT_APPLICABLE",
+      "evidence": "ZAICODE goal runtime ownership: scheduler detection of identical no-progress verifier loops",
+      "text": "DRIFT-007 Loop-Detection-and-No-Progress: Scheduler must detect repeated identical verification attempts without durable delta",
+      "verification": null,
+      "work": "T-1987"
+    },
+    "SRC-363:R008": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "NOT_APPLICABLE",
+      "evidence": "ZAICODE host admission limitation: response contract enforcement and suppression of model identity preambles",
+      "text": "DRIFT-008 Response-Presentation-Discipline: Machine digest contract and style rules must suppress identity narration spam",
+      "verification": null,
+      "work": "T-1987"
+    },
+    "SRC-363:R009": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "NOT_APPLICABLE",
+      "evidence": "ZAICODE host telemetry limitation: consistency between cumulative session metrics and active turn projection",
+      "text": "DRIFT-009 Telemetry-Attribution-Consistency: Session token accounting must not display contradictory zero projection counts",
+      "verification": null,
+      "work": "T-1987"
+    },
+    "SRC-363:R010": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "SAIPEN protocol ownership: CORE \u00a71.11 explicit user instructions outrank persisted continuation; directory cleanup preserves historical records; verified by test_premature_victory_prevention.py",
+      "text": "DRIFT-010 Operator-Instruction-Precedence: Explicit user requests override persisted continuation with documented payload preservation",
+      "verification": "test_premature_victory_prevention.py: PASS record:.saipen/evidence/focused-unit/d805dd267ed50722-20261031T234040226671Z.json",
+      "work": "T-1987"
+    },
+    "SRC-363:R011": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "NOT_APPLICABLE",
+      "evidence": "Wintage project ownership: separation of local project documentation work from upstream protocol development",
+      "text": "DRIFT-011 Cross-Project-Seat-Boundary: Local project documentation work must be separated from upstream protocol tickets",
+      "verification": null,
+      "work": "T-1987"
+    }
+  },
+  "schema_version": 1
+}

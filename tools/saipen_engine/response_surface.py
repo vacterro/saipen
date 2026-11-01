@@ -1192,7 +1192,19 @@ def canonical_facts(root, *, status: dict | None = None) -> dict:
             "WAIT_USER_DECISION -- shared release index; foreign staging remains protected"
         )
         facts["operator_action"] = (primary.get("recovery_operation") or {}).get("operator_action")
-        facts["next_action"] = "NONE"
+        # P0-01: Differentiate blocked release from blocked engineering.
+        # Preserve an authorized, independent action when one exists.
+        eligible = auto.get("next_command")
+        if not eligible or eligible in ("NONE", "none"):
+            cand = auto.get("next_exact_action") or auto.get("next_action")
+            if (
+                cand
+                and cand not in ("NONE", "none")
+                and not str(cand).startswith("WAIT:")
+                and not str(cand).startswith("saipen ship")
+            ):
+                eligible = cand
+        facts["next_action"] = eligible if eligible else "NONE"
     invalid_stops = {
         "audit-inbox-invalid": "AUDIT_INBOX_INVALID -- unreadable audit layer",
         "queued-source-invalid": "QUEUED_SOURCE_INVALID -- unreadable queued Source",

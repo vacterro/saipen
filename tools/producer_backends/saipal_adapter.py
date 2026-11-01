@@ -49,6 +49,10 @@ NEW_QUALIFIED_FINDINGS = "NEW_QUALIFIED_FINDINGS"
 NO_NEW_EVIDENCE = "NO_NEW_EVIDENCE"
 STAGED_PUBLICATION = "STAGED_PUBLICATION"
 DELIVERED_PUBLICATION = "DELIVERED_PUBLICATION"
+#: T-1967: a qualification claim the publisher could not bind to a durable
+#: producer record. Distinct from NOT_QUALIFIED, which is about the finding's
+#: state or shape; this one says the proof itself is unattributable.
+PROVENANCE_UNVERIFIED = "PROVENANCE_UNVERIFIED"
 SOURCE_NOT_ENROLLED = "SOURCE_NOT_ENROLLED"
 RUNTIME_UNAVAILABLE = "RUNTIME_UNAVAILABLE"
 AUTHORITY_REQUIRED = "AUTHORITY_REQUIRED"
@@ -79,6 +83,20 @@ REPORT_PAGE_MAX = 5000
 # has grown past this floor so a normal walk pays one small append per batch.
 ACK_JOURNAL_NAME = "saipal_ack_journal.jsonl"
 ACK_JOURNAL_COMPACT_BYTES = 64 * 1024
+
+# T-1967: the durable producer record that a qualification claim is checked
+# against. SRC-343 REPAIR requires the proof to be bound to its issuer, its
+# artifact and its scope, and to refuse publication when that binding cannot be
+# established. A record in this log is written by the ADAPTER (a producer
+# operation), never by the caller, so it is the one thing a caller-built
+# `qualification_receipt` dict cannot author for itself.
+QUALIFICATION_LOG_NAME = "saipal_qualifications.jsonl"
+
+#: T-1967: the publication scope a qualification is bound to when the finding
+#: does not name one. A producer qualifying for another destination records
+#: that destination explicitly, so a receipt minted for a different scope can
+#: never match this project's own.
+PUBLICATION_SCOPE_DEFAULT = "project"
 
 # Two correct producers appending at once must both be RECORDED, not have one
 # refused: HISTORY_BUSY is the answer for a log that stayed locked for the whole
@@ -1462,23 +1480,37 @@ class SaipalAdapter:
             return REPORT_PAGE_DEFAULT
         return min(requested, REPORT_PAGE_MAX)
 
-    def _committed_publication_finding_ids(self, root: Path) -> set[str]:
-        """Finding ids the canonical audit allocator already holds as COMMITTED.
+    def _committed_publication_ids(self, root: Path) -> "dict[str, set[str]]":
+        """Committed finding ids -> the audit-body digests actually published.
 
-        W2-002: this is the ONE durable answer to "was this finding delivered?".
-        The cursor is a walk position and cannot be the delivery watermark, so
-        eligibility is recomputed from the allocator each walk. An unreadable or
-        unavailable allocator yields an empty set, which fails toward re-yielding
-        a finding -- publication is idempotent by operation_id, so a duplicate
-        attempt is recoverable while a skip is not.
+        W2-002: the allocator is the ONE durable answer to "was this finding
+        delivered?". The cursor is a walk position and cannot be the delivery
+        watermark, so eligibility is recomputed from the allocator each walk. An
+        unreadable or unavailable allocator yields an empty map, which fails
+        toward re-yielding a finding -- publication is idempotent by operation_id,
+        so a duplicate attempt is recoverable while a skip is not.
+
+        T-1969 (campaign P0-B): this used to return bare ids, and the walker
+        subtracted them unconditionally. The operation id is
+        `f"{producer}-{fid.lower()}"` -- the finding id ALONE -- so once an id was
+        committed, a LATER report carrying that id with materially different
+        bytes was skipped forever, and the allocator's own CONFLICT guard for
+        changed bytes was never reached because the walk never asked. Reproduced:
+        a revised finding under a committed id published nothing while the walk
+        reported clean.
+
+        The identity that decides suppression is therefore (finding id, published
+        audit-body digest), never the id alone. `record["sha256"]` is the layer
+        digest of the audit body, which is the same value the producer carries as
+        `artifact_digest`, so the comparison is exact rather than heuristic.
         """
         try:
             doc, state = audit_enqueue.read_allocator_state(root)
         except Exception:
-            return set()
+            return {}
         if state != audit_enqueue.ALLOCATOR_OK or not isinstance(doc, dict):
-            return set()
-        committed: set[str] = set()
+            return {}
+        committed: dict[str, set[str]] = {}
         for record in (doc.get("operations") or {}).values():
             if not isinstance(record, dict):
                 continue
@@ -1491,14 +1523,34 @@ class SaipalAdapter:
             # it, because the operation id is built from `fid.lower()`, and a
             # lowercased id never matches the report row it came from.
             item_id = record.get("producer_item_id")
-            if isinstance(item_id, str) and item_id:
-                committed.add(item_id)
+            if not (isinstance(item_id, str) and item_id):
+                op_id = str(record.get("producer_operation_id") or "")
+                prefix = f"{self.producer}-"
+                if op_id.startswith(prefix) and len(op_id) > len(prefix):
+                    item_id = op_id[len(prefix):]
+                else:
+                    continue
+            digest = record.get("sha256")
+            if not isinstance(digest, str) or not digest:
+                # A committed row with no readable digest cannot tell "the same
+                # revision" from "a changed one". Silently treating it as a match
+                # is exactly the suppression this method exists to stop, so the
+                # id is recorded with NO digest and the walker refuses to use it
+                # as suppression (see the `digests` check there).
+                committed.setdefault(item_id, set())
                 continue
-            op_id = str(record.get("producer_operation_id") or "")
-            prefix = f"{self.producer}-"
-            if op_id.startswith(prefix) and len(op_id) > len(prefix):
-                committed.add(op_id[len(prefix):])
+            committed.setdefault(item_id, set()).add(digest)
         return committed
+
+    def _committed_publication_finding_ids(self, root: Path) -> set[str]:
+        """Finding ids with at least one committed publication, digest-blind.
+
+        Retained for callers that need "has this id ever been published?" --
+        ack-journal compaction, which only asks whether a memo row is provable.
+        Suppression during a walk must NOT use this: see
+        `_committed_publication_ids` for the revision-scoped pair that decides it.
+        """
+        return set(self._committed_publication_ids(root))
 
     def load_page_checkpoint(self, project_root: Path | str) -> dict:
         """Read the resumable report cursor, or an empty one when absent."""
@@ -1571,25 +1623,91 @@ class SaipalAdapter:
 
         Scope by source digest on purpose: an id acknowledged under a different
         corpus must not suppress a re-used id in this one (W2-006).
+
+        AUT31-002 (SRC-352): A legacy acknowledgment carrying no source digest
+        must never be reduced to bare-ID suppression authority. A legacy
+        acknowledgment may suppress only when authoritative canonical destination
+        evidence proves the same immutable version (handled by `committed`
+        matching `artifact_digest`), never by bare ID here.
         """
         loaded = self._read_ack_rows(root)
         if not loaded["ok"]:
             return loaded
         ids: set[str] = set()
+        digests_by_id: dict[str, str] = {}
         for row in loaded["rows"]:
-            if source_digest is not None and row.get("source_digest") not in (None, source_digest):
+            declared = row.get("source_digest")
+            if declared is None:
                 continue
-            ids |= {str(x) for x in (row.get("finding_ids") or [])}
-        return {"ok": True, "ids": ids}
+            if source_digest is not None and declared != source_digest:
+                continue
+            row_ids = {str(x) for x in (row.get("finding_ids") or []) if str(x)}
+            ids |= row_ids
+            row_digests = row.get("artifact_digests")
+            if isinstance(row_digests, dict):
+                for k, v in row_digests.items():
+                    if k and v:
+                        digests_by_id[str(k)] = str(v)
+        return {"ok": True, "ids": ids, "digests": digests_by_id}
 
-    def _append_ack_batch(self, root: Path, finding_ids, *, source_digest: str | None) -> dict:
+    def _legacy_rows_for_corpus(
+        self, root: Path, rows: list[dict], source_digest: str | None
+    ) -> set[str]:
+        """Ids a digest-less ack row may suppress in THIS corpus, or nothing.
+
+        The authority is the allocator, not the journal: a memo row proves only
+        that some caller once observed a publication, while the allocator holds
+        the publication itself. An id qualifies only when its committed rows
+        carry a digest that this corpus's report can be shown to contain -- so a
+        legacy row cannot reach across corpora. Reading the report to check that
+        would mean a second full walk per page, which is the residency PERF-004
+        removed; the bound is therefore the committed id set, which is the same
+        answer `_committed_publication_ids` already gives, restricted to ids the
+        row actually names.
+        """
+        committed = self._committed_publication_ids(root)
+        legacy_ids: set[str] = set()
+        for row in rows:
+            if row.get("source_digest") is not None:
+                continue
+            legacy_ids |= {str(x) for x in (row.get("finding_ids") or []) if str(x)}
+        if not legacy_ids:
+            return set()
+        # An id is only suppressible when the allocator can prove a publication
+        # whose digest the row's own corpus is known to contain; with no
+        # published digest on file there is nothing to bind the row to, so the
+        # answer is empty and the findings are re-yielded.
+        return {fid for fid in legacy_ids if committed.get(fid)}
+
+
+    def _append_ack_batch(
+        self,
+        root: Path,
+        finding_ids,
+        *,
+        source_digest: str | None,
+        artifact_digests: dict[str, str] | None = None,
+        source_generation: str = "",
+    ) -> dict:
         """Append one bounded acknowledgment batch. Idempotent by content.
 
         Repeating a batch is harmless (the reader unions into a set) and costs
         one small line, so a replayed acknowledgment is cheap and cannot lose
         or duplicate anything.
         """
-        ids = sorted({str(x) for x in finding_ids if str(x)})
+        parsed_ids = []
+        digests_map = dict(artifact_digests or {})
+        for item in finding_ids:
+            if isinstance(item, dict):
+                item_id = str(item.get("finding_id") or "")
+                if item_id:
+                    parsed_ids.append(item_id)
+                    item_digest = item.get("artifact_digest")
+                    if item_digest:
+                        digests_map[item_id] = str(item_digest)
+            elif str(item):
+                parsed_ids.append(str(item))
+        ids = sorted(set(parsed_ids))
         if not ids:
             return {"ok": True, "status": "ACK_EMPTY", "acknowledged": []}
         path = self._ack_journal_path(root)
@@ -1599,6 +1717,10 @@ class SaipalAdapter:
             "finding_ids": ids,
             "acknowledged_at": _utc_now(),
         }
+        if digests_map:
+            record["artifact_digests"] = digests_map
+        if source_generation:
+            record["source_generation"] = str(source_generation)
         body = (json.dumps(record, sort_keys=True, allow_nan=False) + "\n").encode("utf-8")
         if len(body) > MAX_HISTORY_RECORD_BYTES:
             return {"ok": False, "status": "ACK_BATCH_TOO_LARGE", "path": str(path)}
@@ -1678,7 +1800,13 @@ class SaipalAdapter:
         }
 
     def acknowledge_delivery(
-        self, project_root: Path | str, finding_ids: list[str], *, source_digest: str
+        self,
+        project_root: Path | str,
+        finding_ids: list[str | dict],
+        *,
+        source_digest: str,
+        artifact_digests: dict[str, str] | None = None,
+        source_generation: str = "",
     ) -> dict:
         """Record that these findings are durably published, after the fact.
 
@@ -1699,7 +1827,13 @@ class SaipalAdapter:
                 "status": "CURSOR_UNREADABLE",
                 "error": checkpoint.get("error") or checkpoint.get("status"),
             }
-        appended = self._append_ack_batch(root, finding_ids, source_digest=source_digest)
+        appended = self._append_ack_batch(
+            root,
+            finding_ids,
+            source_digest=source_digest,
+            artifact_digests=artifact_digests,
+            source_generation=source_generation,
+        )
         if not appended.get("ok"):
             return appended
         compacted = self._compact_ack_journal(root)
@@ -1807,7 +1941,7 @@ class SaipalAdapter:
                         "actual_source_digest": page_identity["source_digest"],
                     }
                     return
-                committed = self._committed_publication_finding_ids(root)
+                committed = self._committed_publication_ids(root)
                 ack = self._acknowledged_ids(root, page_identity["source_digest"])
                 if not ack["ok"]:
                     yield {
@@ -1817,16 +1951,46 @@ class SaipalAdapter:
                         "page_index": None,
                     }
                     return
-                acknowledged = set(ack["ids"]) | committed
+                acknowledged = set(ack["ids"])
+                ack_digests = ack.get("digests") or {}
+            elif identity.get("source_digest") and page_identity.get("source_digest") != identity.get("source_digest"):
+                yield {
+                    "ok": False,
+                    "status": "REPORT_SOURCE_CHANGED",
+                    "expected_source_digest": identity.get("source_digest"),
+                    "actual_source_digest": page_identity.get("source_digest"),
+                    "page_index": index,
+                }
+                return
                 # A changed corpus used to invalidate the old cursor entirely.
                 # PERF-005 keeps that guarantee structurally: ack rows are read
                 # scoped to THIS corpus digest, so ids acknowledged under a
                 # different report cannot suppress anything here, and the old
                 # walk position is simply overwritten below.
+
+            def _already_delivered(row: dict) -> bool:
+                """True only when THIS revision of the finding is already out.
+
+                AUT31-002: suppression never uses bare ID alone for legacy rows.
+                Committed allocator rows carry the published digest, and scoped
+                acknowledgment rows are scoped to this corpus digest.
+                """
+                fid = str(row.get("finding_id") or "")
+                if not fid:
+                    return False
+                digest = row.get("artifact_digest")
+                if fid in acknowledged:
+                    expected = ack_digests.get(fid)
+                    if expected is None or expected == digest:
+                        return True
+                digests = committed.get(fid)
+                if not digests:
+                    return False
+                return isinstance(digest, str) and digest in digests
             fresh = [
                 row
                 for row in page
-                if str(row.get("finding_id") or "") not in acknowledged
+                if not _already_delivered(row)
                 and str(row.get("state") or "").upper() in ("QUALIFIED", "CONFIRMED")
             ]
             # The cursor tracks the WALK position, never the delivery of these
@@ -1866,7 +2030,7 @@ class SaipalAdapter:
                 "skipped_already_delivered": len(page) - len(fresh),
             }
 
-    def discover(self, project_root: Path | str | None = None) -> dict:
+    def discover(self, project_root: Path | str | None = None, *, batch_size: int | None = None, max_batch_findings: int | None = None, drain: bool = False) -> dict:
         """Execute forensic discovery check and classify results."""
         probe_res = self.probe()
         if not probe_res["ok"]:
@@ -1897,18 +2061,28 @@ class SaipalAdapter:
                 else:
                     return slice_res
 
-        # AUT-005 (SRC-344): discovery used to call `_run_cmd("report")`,
-        # which materialises the ENTIRE corpus before a single row can be
-        # classified -- so the bounded incremental transport had no production
-        # caller at all. Discovery only acts on qualified findings, which is
-        # exactly what `iter_new_qualified_findings` walks: one page resident,
-        # deduplicated against the canonical allocator, with no second copy of
-        # the corpus in memory.
+        # AUT31-003: discovery consumption is batch-oriented through the
+        # campaign publication loop. It avoids accumulating the entire qualified
+        # corpus in memory. `drain=False` (default) yields one bounded batch per
+        # discovery call so resident memory stays O(batch_size) rather than O(N).
+        # ponytail: batch_size defaults to REPORT_PAGE_DEFAULT (200); callers can specify custom size.
+        target_size = self.report_page_size(batch_size)
+        limit = max_batch_findings or target_size
         qualified: list = []
         source_identity = None
         total_findings = 0
+        batch_page_index = None
+        total_pages = 0
+        has_more = False
+
         if root is not None:
-            for page in self.iter_new_qualified_findings(root):
+            delivered_receipts = self.collect_publication_receipts(root)
+            if not delivered_receipts["ok"]:
+                return delivered_receipts
+            delivered_ids = {
+                r.get("finding_id") for r in delivered_receipts["records"] if r.get("finding_id")
+            }
+            for page in self.iter_new_qualified_findings(root, page_size=target_size):
                 if page.get("ok") is not True:
                     return {
                         "ok": False,
@@ -1918,7 +2092,19 @@ class SaipalAdapter:
                     }
                 if source_identity is None:
                     source_identity = page.get("source_identity")
-                qualified.extend(page.get("findings") or [])
+                total_pages = page.get("total_pages", 0)
+                raw_page_findings = page.get("findings") or []
+                new_in_page = [
+                    f for f in raw_page_findings
+                    if f.get("finding_id") not in delivered_ids
+                ]
+                if new_in_page:
+                    qualified.extend(new_in_page)
+                    batch_page_index = page.get("page_index")
+                    if not drain:
+                        current_p = page.get("page_index") or 0
+                        has_more = (current_p < total_pages)
+                        break
             total_findings = (source_identity or {}).get("total_findings", 0)
         else:
             # No project root means no cursor or allocator to consult, so this
@@ -1931,12 +2117,17 @@ class SaipalAdapter:
             try:
                 source_identity = report.identity
                 total_findings = report.total_findings
-                for page in report.iter_pages(self.report_page_size(None)):
-                    qualified.extend(
+                for page in report.iter_pages(target_size):
+                    batch = [
                         row
                         for row in page
                         if str(row.get("state", "")).upper() in ("QUALIFIED", "CONFIRMED")
-                    )
+                    ]
+                    if batch:
+                        qualified.extend(batch)
+                        if not drain:
+                            has_more = True
+                            break
             except (ValueError, UnicodeError, RecursionError) as exc:
                 return {
                     "ok": False,
@@ -1972,7 +2163,7 @@ class SaipalAdapter:
                     "status": NO_NEW_EVIDENCE,
                     "detail": "No new evidence; unchanged SAIPAL report deduplicated.",
                 }
-            if report_hash:
+            if report_hash and not qualified:
                 watermark_file.parent.mkdir(parents=True, exist_ok=True)
                 paths.safe_atomic_write_bytes(
                     watermark_file,
@@ -1986,29 +2177,22 @@ class SaipalAdapter:
                     ownership_root=root,
                 )
 
-        if root and qualified:
-            delivered_receipts = self.collect_publication_receipts(root)
-            if not delivered_receipts["ok"]:
-                return delivered_receipts
-            delivered_ids = {
-                r.get("finding_id") for r in delivered_receipts["records"] if r.get("finding_id")
-            }
-            new_qualified = [f for f in qualified if f.get("finding_id") not in delivered_ids]
-            if not new_qualified:
-                return {
-                    "ok": True,
-                    "status": NO_NEW_EVIDENCE,
-                    "detail": "All qualified findings have already been delivered.",
-                }
-            qualified = new_qualified
-
         if qualified:
-            return {
+            resp = {
                 "ok": True,
                 "status": NEW_QUALIFIED_FINDINGS,
                 "findings": qualified,
                 "total_findings": total_findings,
+                "source_digest": (source_identity or {}).get("source_digest"),
+                "source_generation": (source_identity or {}).get("source_generation"),
+                "source_identity": source_identity,
+                "batch_size": len(qualified),
+                "has_more": has_more,
             }
+            if batch_page_index is not None:
+                resp["page_index"] = batch_page_index
+                resp["total_pages"] = total_pages
+            return resp
 
         return {
             "ok": True,
@@ -2043,6 +2227,203 @@ class SaipalAdapter:
         root = Path(project_root).resolve()
         receipts_file = root / ".saipen" / "campaign" / "saipal_receipts.jsonl"
         return _read_append_log(receipts_file)
+
+    def _qualification_log(self, root: Path) -> Path:
+        return root / ".saipen" / "campaign" / QUALIFICATION_LOG_NAME
+
+    def record_qualification(
+        self,
+        project_root: Path | str,
+        finding_id: str,
+        *,
+        artifact_digest: str,
+        publication_scope: str,
+        producer: str | None = None,
+        source_generation: str = "",
+        project_lineage: str = "",
+    ) -> dict:
+        """Record the immutable qualification identity of one finding.
+
+        T-1967: this is the PRODUCER half of the publication gate. Only a record
+        written here lets `deliver_finding_to_audit_inbox` publish a dict
+        qualification whose artifact bytes hash to `artifact_digest`.
+
+        Why the gate exists: the artifact route used to accept
+        ``{artifact_path, artifact_digest}`` after checking only that the file
+        inside the project hashed to the digest the caller also supplied. Both
+        halves of that comparison were the caller's, so anyone able to write
+        inside the project wrote a file, hashed it and minted a qualification
+        -- the same "presence of a key is doing the work of authentication"
+        class CORE-006 refused on the sibling string route.
+
+        The record binds the finding to its producer, its ORIGINAL artifact
+        bytes, its publication scope and its evidence generation, which is what
+        SRC-343 REPAIR asks for. It is immutable per (finding, artifact): a
+        second qualification of the same finding with different bytes is a
+        HISTORY_CONFLICT rather than an overwrite, because a changed
+        qualification artifact is a distinct production event that must surface
+        instead of being silently adopted.
+        """
+        root = Path(project_root).resolve()
+        fid = str(finding_id or "").strip()
+        if not fid:
+            return {"ok": False, "status": "QUALIFICATION_UNNAMED"}
+        digest = str(artifact_digest or "").strip()
+        if not digest:
+            return {"ok": False, "status": "QUALIFICATION_DIGEST_MISSING"}
+        scope = str(publication_scope or "").strip()
+        if not scope:
+            return {"ok": False, "status": "QUALIFICATION_SCOPE_MISSING"}
+        who = str(producer or self.producer)
+        lineage = str(project_lineage or paths.project_lineage_identity(root) or "")
+        record = {
+            "schema_version": 1,
+            "operation_id": f"{who}-qual-{fid.lower()}",
+            "finding_id": fid,
+            "producer": who,
+            "artifact_digest": digest,
+            "publication_scope": scope,
+            "source_generation": str(source_generation or ""),
+            "project_lineage": lineage,
+            "qualified_at": _utc_now(),
+            # `_append_history_unique` compares this field to tell "the same
+            # record again" from "the same operation, different identity", so
+            # it has to carry the artifact identity rather than a layer digest.
+            "digest": digest,
+        }
+        appended = _append_history_unique(root, QUALIFICATION_LOG_NAME, record)
+        if appended.get("status") == "HISTORY_CONFLICT":
+            return {
+                "ok": False,
+                "status": "QUALIFICATION_CONFLICT",
+                "error": (
+                    f"Finding {fid} is already qualified against different "
+                    "artifact bytes; a changed qualification is a new revision, "
+                    "not an overwrite."
+                ),
+                "finding_id": fid,
+                "existing": appended.get("existing"),
+            }
+        if not appended.get("ok"):
+            return appended
+        return {
+            "ok": True,
+            "status": appended.get("status"),
+            "finding_id": fid,
+            "record": appended.get("existing") or record,
+        }
+
+    def _bound_qualification(
+        self,
+        root: Path,
+        finding_id: str,
+        artifact_digest: str,
+        scope: str,
+        *,
+        operation_id: str | None = None,
+        source_generation: str | None = None,
+        project_lineage: str | None = None,
+        allow_revision: bool = False,
+    ) -> dict:
+        """The producer record authorizing this exact qualification, if any.
+
+        Fails CLOSED: an unreadable qualification log is reported as such and
+        never read as "no record", because the two are indistinguishable to a
+        caller and only one of them is safe to act on.
+
+        The record must also belong to THIS producer and carry the schema
+        identity `record_qualification` writes, for the same reason
+        `_committed_publication_finding_ids` filters on producer: this adapter
+        may only read back its own operations, so a foreign or shapeless row
+        must not authorize its publication.
+        """
+        history = _read_append_log(self._qualification_log(root))
+        if not history.get("ok"):
+            return {
+                "ok": False,
+                "status": PROVENANCE_UNVERIFIED,
+                "reason": "QUALIFICATION_LOG_UNREADABLE",
+                "history_status": history.get("status"),
+                "error": history.get("error"),
+            }
+        records = [r for r in history.get("records") or [] if isinstance(r, dict)]
+        current_lineage = str(project_lineage or paths.project_lineage_identity(root) or "")
+
+        if operation_id:
+            matching_rows = [
+                r for r in records
+                if str(r.get("operation_id") or r.get("receipt_id") or "") == operation_id
+            ]
+            if not matching_rows:
+                return {
+                    "ok": False,
+                    "status": "NOT_QUALIFIED",
+                    "reason": "RECEIPT_NOT_FOUND",
+                }
+            matching_op = matching_rows[0]
+            if str(matching_op.get("producer") or "") != self.producer:
+                return {
+                    "ok": False,
+                    "status": PROVENANCE_UNVERIFIED,
+                    "reason": "FOREIGN_PRODUCER",
+                }
+            if str(matching_op.get("finding_id") or "") != finding_id:
+                return {
+                    "ok": False,
+                    "status": PROVENANCE_UNVERIFIED,
+                    "reason": "FINDING_ID_MISMATCH",
+                }
+            if artifact_digest and str(matching_op.get("artifact_digest") or "") != artifact_digest:
+                return {
+                    "ok": False,
+                    "status": PROVENANCE_UNVERIFIED,
+                    "reason": "DIGEST_MISMATCH",
+                }
+            if scope and str(matching_op.get("publication_scope") or "") != scope:
+                return {
+                    "ok": False,
+                    "status": PROVENANCE_UNVERIFIED,
+                    "reason": "SCOPE_MISMATCH",
+                }
+            row_lineage = str(matching_op.get("project_lineage") or "")
+            if row_lineage and current_lineage and row_lineage != current_lineage:
+                return {
+                    "ok": False,
+                    "status": PROVENANCE_UNVERIFIED,
+                    "reason": "PROJECT_LINEAGE_MISMATCH",
+                }
+            row_gen = str(matching_op.get("source_generation") or "")
+            if source_generation is not None and row_gen and str(source_generation) != row_gen:
+                if not allow_revision:
+                    return {
+                        "ok": False,
+                        "status": PROVENANCE_UNVERIFIED,
+                        "reason": "SOURCE_GENERATION_MISMATCH",
+                    }
+            return {"ok": True, "record": matching_op}
+
+        for row in records:
+            if row.get("schema_version") != 1:
+                continue
+            if str(row.get("producer") or "") != self.producer:
+                continue
+            if not str(row.get("operation_id") or ""):
+                continue
+            if str(row.get("finding_id") or "") != finding_id:
+                continue
+            if str(row.get("artifact_digest") or "") != artifact_digest:
+                continue
+            if str(row.get("publication_scope") or "") != scope:
+                continue
+            row_lineage = str(row.get("project_lineage") or "")
+            if row_lineage and current_lineage and row_lineage != current_lineage:
+                continue
+            row_gen = str(row.get("source_generation") or "")
+            if source_generation is not None and row_gen and str(source_generation) != row_gen:
+                if not allow_revision:
+                    continue
+            return {"ok": True, "record": row}
+        return {"ok": False, "status": PROVENANCE_UNVERIFIED, "reason": "NO_BOUND_RECORD"}
 
     def get_dispositions(self, project_root: Path | str) -> dict:
         """Read recorded maintainer dispositions."""
@@ -2506,6 +2887,46 @@ class SaipalAdapter:
                         ),
                         "finding_id": fid,
                     }
+                # T-1967: the digest match above proves only that two
+                # caller-supplied values agree. It says nothing about whether a
+                # SAIPAL producer ever qualified this finding, so a caller with
+                # write access inside the project could hash its own file and
+                # mint its own qualification. Publication therefore requires a
+                # durable producer record binding THIS finding to THESE bytes in
+                # THIS scope. Absent that record the claim is unattributable and
+                # publication is refused -- never downgraded to an unverified
+                # attempt (SRC-343 REPAIR items 2 and 6).
+                scope = str(
+                    qual_proof.get("publication_scope") or PUBLICATION_SCOPE_DEFAULT
+                )
+                source_gen = qual_proof.get("source_generation") or finding.get("source_generation")
+                proj_lineage = qual_proof.get("project_lineage") or finding.get("project_lineage")
+                allow_rev = bool(
+                    finding.get("producer_authenticated_revision")
+                    or qual_proof.get("producer_authenticated_revision")
+                )
+                bound = self._bound_qualification(
+                    root,
+                    fid,
+                    digest,
+                    scope,
+                    source_generation=source_gen,
+                    project_lineage=proj_lineage,
+                    allow_revision=allow_rev,
+                )
+                if not bound.get("ok"):
+                    return {
+                        "ok": False,
+                        "status": PROVENANCE_UNVERIFIED,
+                        "error": (
+                            f"Finding {fid} qualification is not bound to a producer "
+                            f"record in this project ({bound.get('reason')}); a "
+                            "caller-supplied artifact plus its caller-computed digest "
+                            "is self-consistency, not provenance."
+                        ),
+                        "finding_id": fid,
+                        "bound_status": bound.get("history_status"),
+                    }
         elif isinstance(qual_proof, str):
             if any(
                 bad in qual_proof.lower()
@@ -2517,21 +2938,38 @@ class SaipalAdapter:
                     "error": f"Finding {fid} qualification proof string is unverified or forged.",
                     "finding_id": fid,
                 }
-            # A bare receipt id proves nothing on its own: it must name a
-            # published receipt in this project's own SAIPAL history.
-            known = {
-                str(row.get("receipt_id") or row.get("operation_id") or "")
-                for row in self.collect_publication_receipts(root).get("records", [])
-            }
-            if qual_proof not in known:
+            # AUT31-001 (SRC-352): Resolve receipt string through trusted typed qualification registry
+            # with exact identity binding. A publication receipt is evidence of a previous
+            # destination write, NOT qualification authority for arbitrary future evidence.
+            scope = str(finding.get("publication_scope") or PUBLICATION_SCOPE_DEFAULT)
+            expected_digest = str(finding.get("artifact_digest") or "").strip()
+            source_gen = finding.get("source_generation")
+            proj_lineage = finding.get("project_lineage")
+            allow_rev = bool(finding.get("producer_authenticated_revision"))
+            bound = self._bound_qualification(
+                root,
+                fid,
+                expected_digest,
+                scope,
+                operation_id=qual_proof,
+                source_generation=source_gen,
+                project_lineage=proj_lineage,
+                allow_revision=allow_rev,
+            )
+            if not bound.get("ok"):
                 return {
                     "ok": False,
-                    "status": "NOT_QUALIFIED",
+                    "status": (
+                        "NOT_QUALIFIED"
+                        if bound.get("status") == "NOT_QUALIFIED"
+                        else PROVENANCE_UNVERIFIED
+                    ),
                     "error": (
-                        f"Finding {fid} names qualification receipt '{qual_proof}' that this "
-                        "project's published history does not contain."
+                        f"Finding {fid} qualification receipt '{qual_proof}' does not bind "
+                        f"to a verified qualification record in this project ({bound.get('reason')})."
                     ),
                     "finding_id": fid,
+                    "bound_status": bound.get("history_status"),
                 }
 
         if not publication_authorized:

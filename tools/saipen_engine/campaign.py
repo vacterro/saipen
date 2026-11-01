@@ -40,7 +40,7 @@ from collections.abc import Mapping
 from pathlib import Path
 
 from . import continuation_assessment as ca
-from . import backend_protocol, campaign_authority, host_dispatch, lock, supervisor
+from . import backend_protocol, campaign_authority, host_dispatch, lock, paths, supervisor
 from .paths import safe_atomic_write_bytes
 
 CAMPAIGN_SCHEMA_VERSION = 1
@@ -389,7 +389,7 @@ def _verify_state_grant(root, state, requested_scope=None):
 class CampaignController:
     """Supervises campaign lifecycle and successive bounded worker generations."""
 
-    def __init__(self, project_root: Path | str, *, backend=None) -> None:
+    def __init__(self, project_root: Path | str, *, backend=None, host_hook=None) -> None:
         """`backend` is injected; the engine may not name a producer (T-1947).
 
         A controller built without one still runs the whole campaign lifecycle
@@ -401,6 +401,7 @@ class CampaignController:
         """
         self.root = Path(project_root).resolve()
         self.backend = backend
+        self.host_hook = host_hook
 
     def _acquire_lock(self) -> lock.FileWriterLock:
         lock_file = self.root / LOCK_REL
@@ -1115,6 +1116,39 @@ class CampaignController:
                     published = [
                         row for row in delivered if row.get("ok") is True
                     ]
+
+                    # AUT31-003: Commit acknowledgment only after verifying canonical delivery.
+                    # Support partial success within a page: acknowledge only published findings.
+                    if published and hasattr(self.backend, "acknowledge_delivery"):
+                        pub_ids = [
+                            row.get("finding_id")
+                            for row in published
+                            if row.get("finding_id")
+                        ]
+                        pub_digests = {
+                            row.get("finding_id"): row.get("artifact_digest")
+                            for row in published
+                            if row.get("finding_id") and row.get("artifact_digest")
+                        }
+                        src_digest = (
+                            disc_res.get("source_digest")
+                            or (disc_res.get("source_identity") or {}).get("source_digest")
+                            or ""
+                        )
+                        src_gen = (
+                            disc_res.get("source_generation")
+                            or (disc_res.get("source_identity") or {}).get("source_generation")
+                            or ""
+                        )
+                        if pub_ids and src_digest:
+                            self.backend.acknowledge_delivery(
+                                self.root,
+                                pub_ids,
+                                source_digest=src_digest,
+                                artifact_digests=pub_digests,
+                                source_generation=src_gen,
+                            )
+
                     staged = [
                         row
                         for row in delivered
@@ -1492,6 +1526,21 @@ class CampaignController:
         else:
             state["no_progress_count"] = int(state.get("no_progress_count", 0)) + 1
         save_campaign_state(self.root, state)
+        dispatch_res = None
+        if self.host_hook is not None and state.get("campaign_state") not in (COMPLETE, CANCELLED):
+            from . import host_iteration
+            payload = host_dispatch.build_dispatch_payload(
+                self.root,
+                campaign_id=state.get("campaign_id"),
+                goal_binding=state.get("goal_binding"),
+                worker_generation=int(attempt.get("generation", 1)) + 1,
+                iteration_id=int(state.get("cycle_count", 1)),
+                authority_proof_reference=state.get("authority_proof_reference"),
+                action=host_iteration.KICK_NEXT_ITERATION,
+            )
+            dispatch_res = host_dispatch.dispatch_next_turn(
+                self.root, payload, host_hook=self.host_hook, print_advisory=False
+            )
         return {
             "ok": True,
             "event": "WORKER_GENERATION_EXECUTED",
@@ -1499,6 +1548,7 @@ class CampaignController:
             "worker_result": w_res,
             "progress": progress,
             "state": state,
+            "dispatch": dispatch_res,
         }
 
     def _execute_canonical_worker(self, *, generation: int, state: dict) -> dict:
@@ -1514,6 +1564,9 @@ class CampaignController:
             if cmd_parts and cmd_parts[0] == "saipen":
                 tool_py = self.root / "tools" / "saipen.py"
                 if not tool_py.is_file():
+                    with contextlib.suppress(Exception):
+                        tool_py = paths.resolve_tool_path("saipen.py")
+                if not tool_py or not tool_py.is_file():
                     return {
                         "ok": False,
                         "executed": False,

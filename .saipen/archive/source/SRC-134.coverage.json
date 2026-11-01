@@ -1,0 +1,14 @@
+{
+  "requirements": {
+    "SRC-134:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "T-1556 closed with verification evidence in LOG: verify -> PASS [target: T-1556] conf: high -- SHIP-cycle confirmation: core_unit db9904ecad590862 ran 4135, only the two inherited baseline reds remain, new_red 0; acceptance 188 green; validate CURRENT_PASS; the earlier family flakes (t1446_supervise timing, t1505 nested-shard reclaim) never reproduced standalone and are load artifacts of the concurrent soak workload",
+      "text": "repair T-1553 review findings: enforce DETAILS authorization, field char budgets, single NEXT EXACT ACTION, init carrier claim",
+      "verification": "the Work this request created reached its own verification gate; see the T-1556 VERIFY cycle in .saipen/LOG.md",
+      "work": "T-1556"
+    }
+  },
+  "schema_version": 1
+}

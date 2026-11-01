@@ -413,7 +413,11 @@
       "question_enforcement": "ADVISORY",
       "question_hook": null,
       "question_tools": [],
-      "question_enforcement_note": "No registered blocking question hook; canonical activation/EXECUTION instructions and available final-response guard apply. No native Question UI refusal is proved on this host."
+      "question_enforcement_note": "No registered blocking question hook; canonical activation/EXECUTION instructions and available final-response guard apply. No native Question UI refusal is proved on this host.",
+      "host_images": [
+        "agy.exe",
+        "sai-accounts.exe"
+      ]
     },
     {
       "id": "codebuddy",
@@ -478,17 +482,20 @@
       "instruction_loaders": [
         {
           "name": "freebuff CLI",
+          "scope": "home",
           "surfaces": [
-            "~/.knowledge.md",
             "~/.AGENTS.md",
-            "~/.claude.md"
+            "~/.CLAUDE.md"
           ]
         },
         {
           "name": "FreeBuff Desktop",
-          "surfaces": [
-            "~/.AGENTS.md",
-            "~/.CLAUDE.md"
+          "scope": "project",
+          "surfaces": [],
+          "project_surfaces": [
+            "AGENTS.md",
+            "CLAUDE.md",
+            ".claude/CLAUDE.md"
           ]
         }
       ],
@@ -604,31 +611,56 @@
     },
     {
       "id": "antigravity",
-      "name": "Antigravity plugins",
-      "instruction_surfaces": [],
+      "name": "Antigravity CLI",
+      "executable_candidates": [
+        "agy.exe",
+        "agy"
+      ],
+      "session_discovery_strategy": "cli_flag",
+      "hook_injection_method": "hooks_json",
+      "instruction_surfaces": [
+        "~/.gemini/GEMINI.md"
+      ],
       "skill_surfaces": [
-        "~/.gemini/config/plugins/*/skills/saipen"
+        "~/.gemini/skills/saipen"
       ],
       "blocking_capability": false,
-      "hook_install_surface": null,
-      "hook_artifact": null,
+      "hook_install_surface": "~/.gemini/hooks/antigravity-saipen-guard.py",
+      "hook_artifact": "extensions/adapters/antigravity/saipen-guard.py",
+      "hook_surface_note": "Native Antigravity hooks.json lifecycle transport; install_host_guard.py merges hook configuration idempotently.",
       "freshness_surfaces": [
-        "skill"
+        "skill",
+        "instruction",
+        "hook"
       ],
       "declared_strength": "ADVISORY",
+      "approval_flow": "ask",
+      "native_tool_event_names": [
+        "PreToolUse",
+        "PostToolUse",
+        "PreInvocation",
+        "PostInvocation",
+        "SessionStart",
+        "Stop"
+      ],
       "response_enforcement": "ADVISORY",
       "response_hook": null,
-      "response_enforcement_note": "No final-response hook surface is installed for this host.",
-      "artifact_version": null,
+      "response_enforcement_note": "PreInvocation injects instructions and seals operator origin; PreToolUse gates tool calls; Stop gates loop termination.",
+      "artifact_version": 1,
       "install": {
-        "home": "~/.gemini/config/plugins",
+        "home": "~/.gemini",
+        "skill": "~/.gemini/skills/saipen",
+        "instruction": "~/.gemini/GEMINI.md",
+        "hook": "~/.gemini/hooks/antigravity-saipen-guard.py",
         "bespoke": "antigravity-plugins"
       },
+      "hook_config_surface": "~/.gemini/config/hooks.json",
+      "hook_installer": "tools/install_host_guard.py",
       "pre_output_interception": "NONE",
       "stop_output_interception": "NONE",
       "admission_enforcement": "ADVISORY",
       "style_enforcement": "ADVISORY",
-      "admission_enforcement_note": "No final-response or delivery hook surface is installed for this host: protocol admission and chat style reach the model as instructions only.",
+      "admission_enforcement_note": "PreInvocation admits session and issues operator origin.",
       "execution_capabilities": {
         "silent_tool_continuation": "ADVISORY",
         "intermediate_text_suppression": "ADVISORY",
@@ -636,24 +668,31 @@
         "host_thought_visibility_control": "UNAVAILABLE",
         "final_response_gate": "ADVISORY"
       },
-      "execution_capability_note": "EXECUTION.md instructs silent tool continuation. No supported pre-render intermediate-text interception is installed; final/Stop hooks cannot retract streamed text. Machine progress uses canonical status and runtime heartbeat. Native thought UI is host-owned. Higher-priority host narration requirements take precedence and prevent a silence guarantee.",
+      "execution_capability_note": "EXECUTION.md instructs silent tool continuation. Native thought UI is host-owned. PreToolUse provides mechanical tool denial.",
       "operator_ingress_capability": {
         "exact_before_work_projection": "LAUNCH_CARRIER_ONLY",
-        "witness_without_launch_carrier": "model_supplied",
+        "witness_without_launch_carrier": "native_hook",
         "transport_obligation": "PAYLOAD_FIDELITY_NOT_OPERATOR_IDENTITY",
         "local_candidate_policy": "P2_OR_LOWER_NO_PREEMPTION_OR_GOAL_RESET",
-        "host_prompt_available": false,
-        "prompt_to_work_binding": "NOT_INSTALLED",
+        "host_prompt_available": true,
+        "prompt_to_work_binding": "NATIVE_HOOK",
         "response_depth_carrier": "LAUNCH_CARRIER_ONLY"
       },
-      "visible_prevention": "ADVISORY_OR_UNAVAILABLE",
-      "routine_launch": "native Antigravity plugins launch; no SAIPEN seat, wrapper or launcher is required",
+      "visible_prevention": "MECHANICAL",
+      "routine_launch": "native Antigravity CLI launch; no SAIPEN seat, wrapper or launcher is required",
       "auto_recovery": "NONE",
       "degraded_mode": "NOT_APPLICABLE",
       "question_enforcement": "ADVISORY",
       "question_hook": null,
       "question_tools": [],
-      "question_enforcement_note": "No registered blocking question hook; canonical activation/EXECUTION instructions and available final-response guard apply. No native Question UI refusal is proved on this host."
+      "question_enforcement_note": "PreToolUse can enforce tool permissions via ask or deny.",
+      "host_images": [
+        "agy.exe",
+        "agy"
+      ],
+      "host_signers": [
+        "Google LLC"
+      ]
     },
     {
       "id": "kiro",

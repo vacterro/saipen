@@ -1,0 +1,24 @@
+{
+  "clauses": {
+    "SRC-008:R001": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "CORE-001 -- counter reconciliation must never return CLEAN when STATE goal counters disagree with the canonical derived count"
+    },
+    "SRC-008:R002": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "CORE-002 -- add_requirement must be one journaled OperationPlan spanning contract, immutable revision and coverage"
+    },
+    "SRC-008:R003": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "CORE-003 -- dry-run must be a real semantic PLAN for source/recover/continue/improve, not an early exit"
+    }
+  },
+  "derived_at": "2026-08-31T11:39:07Z",
+  "derived_from": "SRC-008",
+  "interpretation_revision": 3,
+  "schema_version": 1,
+  "source_sha256": "69a4002182be80acd368f28e729aeb48b122dd9c30ba6c126e11fe90e55e1ca3"
+}

@@ -1,0 +1,41 @@
+{
+  "requirements": {
+    "SRC-221:R001": {
+      "actionable": false,
+      "class": "context",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Do not create another generic ticket from this directive.",
+      "verification": null,
+      "work": "T-1723"
+    },
+    "SRC-221:R002": {
+      "actionable": false,
+      "class": "context",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Do not invent historical events.",
+      "verification": null,
+      "work": "T-1723"
+    },
+    "SRC-221:R003": {
+      "actionable": false,
+      "class": "context",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Do not bypass immutable-ledger enforcement.",
+      "verification": null,
+      "work": "T-1723"
+    },
+    "SRC-221:R004": {
+      "actionable": false,
+      "class": "context",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Do not weaken acceptance checks.",
+      "verification": null,
+      "work": "T-1723"
+    }
+  },
+  "schema_version": 1
+}

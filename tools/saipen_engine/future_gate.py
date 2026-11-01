@@ -1514,8 +1514,33 @@ def record_slice(
 # ---------------------------------------------------------------- validation
 
 
+def _pruned_closed(history_events, board_tickets: dict | None, gate_ids) -> set[str]:
+    """Gate slice tickets that left the BOARD because CLEAN scrubbed them.
+
+    `phases/clean.md` step 1 moves a closed row to `SCRUB_EVIDENCE_ROOT`, and
+    the LOG closing event is then the only record that the Work closed at all
+    -- the same fact `subs._terminal_tickets` reads under T-925. A slice
+    ticket is resolved here by that durable proof, so the sanctioned hygiene
+    step cannot turn a green validator red.
+
+    Fail-closed in every direction: no history means nothing is proven, and an
+    id the history never closed stays an error below.
+    """
+    if history_events is None or board_tickets is None:
+        return set()
+    from .board_scrub import closed_in_history
+
+    missing = [tid for tid in gate_ids if tid not in board_tickets]
+    if not missing:
+        return set()
+    return closed_in_history(history_events, missing)
+
+
 def validate_future_gate(
-    root: Path | str, board_tickets: dict | None = None
+    root: Path | str,
+    board_tickets: dict | None = None,
+    *,
+    history_events=None,
 ) -> dict:
     """Check the future-gate surface against FUTURE.md; returns findings.
 
@@ -1652,11 +1677,18 @@ def validate_future_gate(
             if not gate.machine_readable:
                 continue
         # 6: implementation authority follows promotion.
+    _slice_ids = [
+        str(slice_record.get("ticket") or "")
+        for gate in raw_gates
+        for slice_record in gate.slices
+    ]
+    _pruned = _pruned_closed(history_events, board_tickets, _slice_ids)
+    for gate in raw_gates:
         for slice_record in gate.slices:
             tid = str(slice_record.get("ticket") or "")
             if not tid:
                 errors.append(f"future gate {gate.id} records a slice with no ticket")
-            elif board_tickets is not None and tid not in board_tickets:
+            elif board_tickets is not None and tid not in board_tickets and tid not in _pruned:
                 errors.append(
                     f"future gate {gate.id} names slice ticket {tid}, which is not on BOARD"
                 )

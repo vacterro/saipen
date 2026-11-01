@@ -1,0 +1,16 @@
+{
+  "actionable": 4,
+  "archive_ref": ".saipen/archive/source/SRC-135.md",
+  "closed_at": "2026-10-30T02:42:00Z",
+  "closure_event": null,
+  "linked_work": "T-1557",
+  "linked_works": [
+    "T-1557"
+  ],
+  "receipt_id": "SRC-135",
+  "requirements": 4,
+  "schema_version": 1,
+  "source_sha256": "cd38daeb95a27b54f3ae8f0c8c57f09d93e494756b2180d8b86864362ea34a13",
+  "status": "CLOSED",
+  "unresolved": 0
+}

@@ -1,0 +1,14 @@
+{
+  "requirements": {
+    "SRC-310:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "T-1885 closed with verification evidence in LOG: verify -> PASS [target: T-1885] conf: high -- tools/core_unit.py focused T-1885 --pattern test_t1885_tag_peel.py: verdict PASS ran=7 reused=false record=.saipen/evidence/focused-unit/8b19c31388a1aa8b-20261024T171518279476Z.json; red-control-module.log holds the pre-fix control verdict and green-control-module.log the post-fix OK 7/7; live-repo tag guard control RESULT: OK with unreadable 394 -> 39",
+      "text": "extended optimization campaign: source/runtime truth, future gate registration, measured test performance",
+      "verification": "the Work this request created reached its own verification gate; see the T-1885 VERIFY cycle in .saipen/LOG.md",
+      "work": "T-1885"
+    }
+  },
+  "schema_version": 1
+}

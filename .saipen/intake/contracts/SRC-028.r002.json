@@ -1,0 +1,19 @@
+{
+  "clauses": {
+    "SRC-028:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "repair canonical SRC-027/T-1316 truth"
+    },
+    "SRC-028:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "truthful R008 evidence"
+    }
+  },
+  "derived_at": "2026-09-12T03:33:19Z",
+  "derived_from": "SRC-028",
+  "interpretation_revision": 2,
+  "schema_version": 1,
+  "source_sha256": "77bdefd1848e99de604ffb93c8c4458be4d6227f8ad444646f9b89ed30ffe196"
+}

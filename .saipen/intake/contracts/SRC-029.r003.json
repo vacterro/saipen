@@ -1,0 +1,24 @@
+{
+  "clauses": {
+    "SRC-029:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "host/session project-root carrier"
+    },
+    "SRC-029:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "lineage verification"
+    },
+    "SRC-029:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "root-resolution precedence"
+    }
+  },
+  "derived_at": "2026-09-12T03:33:26Z",
+  "derived_from": "SRC-029",
+  "interpretation_revision": 3,
+  "schema_version": 1,
+  "source_sha256": "78863db5d7ab7b63de1c2d6a514e046449044f929b7402f8e5a24315ac2d2861"
+}

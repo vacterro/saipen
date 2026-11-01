@@ -1,0 +1,14 @@
+{
+  "requirements": {
+    "SRC-068:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "T-1405 closed with verification evidence in LOG: verify -> PASS conf: high -- HEAD 654056d6 original incident RED SOURCE_UNRESOLVED T-003; patched 11-control T-1399/T-1405 matrix and full receipt suite 50 PASS; adjacent global-integrity controls 5 PASS; ruff 0.16.0 full surface PASS; validate core 0 FAIL; diff-check PASS; audit 12/14 has inherited SRC-060/T-1391 retirement failures only, PATCH_OWNED=0 UNKNOWN=0",
+      "text": "CONTINUATION REPAIR T-1399 CLOSURE INTEGRITY, THEN ADVANCE T-1400",
+      "verification": "the Work this request created reached its own verification gate; see the T-1405 VERIFY cycle in .saipen/LOG.md",
+      "work": "T-1405"
+    }
+  },
+  "schema_version": 1
+}

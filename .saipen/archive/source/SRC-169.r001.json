@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-169:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Release readiness: converge working implementation into canonical main, green CI/validation, verify fresh clone install/uninstall/cold-start, README accurate, tag new release, push to vacterro/saipen"
+    }
+  },
+  "derived_at": "2026-10-05T05:41:41Z",
+  "derived_from": "SRC-169",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "8137c85ebe6e61c86c8b78e0848e2c04346c39a11387241d3b4c9dee037f276b"
+}

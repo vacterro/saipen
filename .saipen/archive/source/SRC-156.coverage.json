@@ -1,0 +1,32 @@
+{
+  "requirements": {
+    "SRC-156:R001": {
+      "actionable": false,
+      "class": "context",
+      "disposition": "NOT_APPLICABLE",
+      "evidence": null,
+      "text": "Target-free cc all continuation and review handoff: preserve T-1579 active, then resume T-1570 and the canonical backlog; archive observations remain unproven until live evidence.",
+      "verification": "class context, not an artifact requirement: the clause is a continuation directive rather than a testable condition. Its T-1579 half is now closed by this ticket; its remaining half (resume T-1570 and the canonical backlog) is carried as ticket state, not as a source clause.",
+      "work": "T-1579"
+    },
+    "SRC-156:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-11371",
+      "text": "Bring the new STORE-SAFETY-01 rule to the one-rule-one-owner registry contract, so test_protocol_registry reports no failure for it.",
+      "verification": "saipen/REGISTRY.json now carries STORE-SAFETY-01 as a single one-rule-one-owner entry with its rule text, source and owner recorded; test_protocol_registry runs 16 tests OK with no failure for it",
+      "work": "T-1579"
+    },
+    "SRC-156:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-11371",
+      "text": "Bring the cold protocol budget back inside its declared limit of 26880 bytes, so test_protocol_registry reports no failure for it.",
+      "verification": "tools/protocol_budget.py check() reports the cold budget at 26861 bytes, inside the declared 26880 limit; test_protocol_registry runs 16 tests OK with no budget failure",
+      "work": "T-1579"
+    }
+  },
+  "schema_version": 1
+}

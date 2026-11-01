@@ -1,0 +1,19 @@
+{
+  "clauses": {
+    "SRC-357:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Measured Verification Baseline: Quantify the 8,548-test full core-unit family bottleneck (T-1975 4 distinct runs, 7,496.9s total)."
+    },
+    "SRC-357:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Reuse Existing Capabilities: Leverage existing verification_cache, single_flight, core_unit.reusable_record without duplicating runners."
+    }
+  },
+  "derived_at": "2026-10-31T18:31:48Z",
+  "derived_from": "SRC-357",
+  "interpretation_revision": 2,
+  "schema_version": 1,
+  "source_sha256": "7b610d6b5a841a304af8fc5cea6688338a2f0a649af2e56ee626decd17628f52"
+}

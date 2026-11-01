@@ -1,0 +1,69 @@
+{
+  "clauses": {
+    "SRC-235:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Verify the live SAIPEN repository, validator and authoritative state before making changes"
+    },
+    "SRC-235:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Determine whether PAUSED is a supported durable lifecycle state or an unsupported project-side projection"
+    },
+    "SRC-235:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Repair the state-model and validator discrepancy through the authoritative protocol implementation"
+    },
+    "SRC-235:R004": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Preserve E-3002 and all previous events unchanged"
+    },
+    "SRC-235:R005": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Preserve T-260 ownership and T-282 partial evidence"
+    },
+    "SRC-235:R006": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Reconcile the existing SRC-100 receipt without creating another user request"
+    },
+    "SRC-235:R007": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Establish a real source contract and requirement coverage through supported protocol operations"
+    },
+    "SRC-235:R008": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Restore a supported admission route for independent queued work behind the current owner"
+    },
+    "SRC-235:R009": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Ensure admission refusal means no application source mutation, with no undocumented directive fallback"
+    },
+    "SRC-235:R010": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Do not fabricate historical transitions or retroactively legalize previous unauthorized source mutations"
+    },
+    "SRC-235:R011": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Keep SRC-100 pending until it can be admitted with explicit valid authority"
+    },
+    "SRC-235:R012": {
+      "actionable": true,
+      "class": "non-goal",
+      "text": "Do not implement the SAITULS application patch"
+    }
+  },
+  "derived_at": "2026-10-13T06:40:52Z",
+  "derived_from": "SRC-235",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "73d4366f9927e763a5ddd2a1b1f6826549239069460aea715c320a66838703fa"
+}

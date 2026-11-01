@@ -1,0 +1,14 @@
+{
+  "requirements": {
+    "SRC-194:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "T-1680 closed with verification evidence in LOG: verify -> PASS [target: T-1680] conf: high -- the user's own description, item by item: the Codex Stop hook no longer exits 2 on a command line it cannot read (CommandLineFaultTests: unknown argument, missing --saipen-root, foreign --host, re-entry -- exit 0, boundary recorded), the installer self-test refuses an artifact that exits 2 (BrokenArtifactInstallTests), and both are regression tests red",
+      "text": "T-1630 Codex Stop hook argparse exit-2 repair + installer self-test + regression tests",
+      "verification": "the Work this request created reached its own verification gate; see the T-1680 VERIFY cycle in .saipen/LOG.md",
+      "work": "T-1680"
+    }
+  },
+  "schema_version": 1
+}

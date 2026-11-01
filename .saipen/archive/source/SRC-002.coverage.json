@@ -1,0 +1,14 @@
+{
+  "requirements": {
+    "SRC-002:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "SUPERSEDED",
+      "evidence": "SRC-002 was standalone user_instruction with no linked work; no longer relevant",
+      "text": "superseded by subsequent audit waves",
+      "verification": "no active work references SRC-002",
+      "work": null
+    }
+  },
+  "schema_version": 1
+}

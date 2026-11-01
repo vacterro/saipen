@@ -1,0 +1,24 @@
+{
+  "clauses": {
+    "SRC-225:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Inspect closure evidence, source closure, post-verification changes, invalidation, knowledge/evidence dependencies, fingerprints, ownership/admission and current reconciliation. Distinguish classifications A-E only from evidence; preserve uncertainty about the FastPrompter incident and do not implement its application fixes."
+    },
+    "SRC-225:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Associate closed verified Work and its source requirements with meaningful implementation dependencies and reproducible focused verification. Detect affected dependencies, recheck focused behavior, distinguish CURRENT_REGRESSION from byte-change suspicion and inability to verify, and preserve original historical evidence unchanged."
+    },
+    "SRC-225:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Keep newly found defects under ordinary legal owned Work, reuse active successor repairs and create no duplicate tickets. Avoid rerunning every historical test after unrelated edits; bound record, path and byte work for large repositories; report exact unavailable-verification reasons; reuse existing vocabulary and RV journals rather than a parallel state machine."
+    }
+  },
+  "derived_at": "2026-10-12T12:21:34Z",
+  "derived_from": "SRC-225",
+  "interpretation_revision": 3,
+  "schema_version": 1,
+  "source_sha256": "534002a32de0a831c3e25b3b0c487488ef317397f583be14037ed56765d359b9"
+}

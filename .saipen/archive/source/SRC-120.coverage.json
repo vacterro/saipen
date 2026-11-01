@@ -1,0 +1,14 @@
+{
+  "requirements": {
+    "SRC-120:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "T-1529 closed with verification evidence in LOG: verify -> PASS [target: T-1529] conf: high -- python -m pytest tools/test_t1407_structural_log_compaction.py reported 9 passed; the deliverable SRC-120 names is present (0 project-attack branches, attacks tuple all reachable, each still asserting 'structural/detail integrity failure'). T-1525 already carried this ticket's red control (neutralized the live body tamper -> subtest red) at its own SHI",
+      "text": "Remove unreachable project attack branch from structural detail tampering test (T-1525)",
+      "verification": "the Work this request created reached its own verification gate; see the T-1529 VERIFY cycle in .saipen/LOG.md",
+      "work": "T-1529"
+    }
+  },
+  "schema_version": 1
+}

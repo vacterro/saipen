@@ -40,6 +40,29 @@ FAILING_SH = "#!/bin/sh\necho FLOOR-RED\nexit 1\n"
 
 def _sh():
     """The interpreter git itself would use to run a `#!/bin/sh` hook."""
+    if os.name == "nt":
+        git = shutil.which("git")
+        if git:
+            for cand in [
+                Path(git).resolve().parent.parent / "bin" / "sh.exe",
+                Path(git).resolve().parent.parent / "bin" / "bash.exe",
+                Path(git).resolve().parent.parent / "usr" / "bin" / "sh.exe",
+            ]:
+                if cand.is_file():
+                    return str(cand)
+        for var in ("ProgramFiles", "ProgramFiles(x86)"):
+            base = os.environ.get(var)
+            if base:
+                for cand in [
+                    Path(base) / "Git" / "bin" / "sh.exe",
+                    Path(base) / "Git" / "bin" / "bash.exe",
+                ]:
+                    if cand.is_file():
+                        return str(cand)
+    for cand_name in ("bash", "sh"):
+        p = shutil.which(cand_name)
+        if p and "system32" not in p.lower():
+            return p
     return shutil.which("bash") or shutil.which("sh")
 
 

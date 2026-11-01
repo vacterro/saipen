@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-016:R001": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "T-1229 prefers phase corpus <=72000 bytes; otherwise closure records exact size, largest phases, unique retained law, and semantic-floor harm."
+    }
+  },
+  "derived_at": "2026-09-01T13:59:50Z",
+  "derived_from": "SRC-016",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "dfb1edd8ce1ab61dd40f367bb84d467ed2780fdb3a89717b27895d6036b1a82e"
+}

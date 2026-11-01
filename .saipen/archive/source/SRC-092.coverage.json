@@ -1,0 +1,14 @@
+{
+  "requirements": {
+    "SRC-092:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "T-1436 closed with verification evidence in LOG: transition to SHIP -- REVIEW PASS conf: high -- implementation reviewed as ONE bounded recovery patch: resume-without-synthetic-claim, queued-source wake, continue-loop adoption, docs, 7 focused controls and 238-suite green. own_patch closure, local commit only; no push/tag/release (SRC-039 no-publish pause)",
+      "text": "DEPENDENCY RESUME MUST NOT SYNTHESIZE LIVE OWNERSHIP. The finish-child transaction that resumes a dependency-blocked parent must not fabricate live ownership. Measured E-7715/E-7716 (T-1434 finish -> T-1361 resume): the restore writes owner=agent and claim_time=<finish instant> and no claim_session, giving the parent a fresh 15-minute FOREIGN_LIVE window with no claim event and no live-session proof, so other agents wait WAIT_FOREIGN_OWNER for a session that never reclaimed the seat. Invariant: dependency completion may make the parent eligible/resumable but must never create or refresh a live claim. Regressions: (1) stale-session resume -> parent adoptable immediately; (2) genuinely live session retains protection only with mechanical session proof; (3) historical owner alone is insufficient for WAIT_FOREIGN_OWNER; (4) dependency completion is not a claim event; (5) queued explicit user Source wakes when the seat frees with no operator retype; (6) repeated start against a truly live foreign owner is a stable zero-mutation refusal. Verify: red controls fail on HEAD and pass after the fix; focused suites plus canonical validator green; relationship to T-1302/T-1384 recorded, not duplicated.",
+      "verification": "the Work this request created reached its own verification gate; see the T-1436 VERIFY cycle in .saipen/LOG.md",
+      "work": "T-1436"
+    }
+  },
+  "schema_version": 1
+}

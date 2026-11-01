@@ -92,6 +92,37 @@ EVIDENCE_SCOPE_TOO_WEAK = "EVIDENCE_SCOPE_TOO_WEAK"
 BUILD_BOUNDARY = "transition to BUILD"
 
 
+# A stated criterion boundary. `;` is the documented separator and stays
+# unconditional (T-1718: prose appended after one must never join a criterion
+# and cost an observation). The addition is the far more common shape where the
+# writer just starts the next `AC-NN` after a full stop. T-1964: splitting on
+# `;` alone collapsed four declared criteria of T-1858 into one whose text still
+# demanded AC-03's LIVE witness, so a lower-level record satisfied a floor
+# nobody had met.
+#
+# The lookbehind keeps a dotted range out of it: prose saying "AC-01..AC-04"
+# must not declare AC-04, or the parser invents a criterion nobody promised --
+# the same failure as swallowing one, from the other side.
+_STOP_BEFORE_CRITERION_RE = re.compile(r"(?<!\.)\.\s*(?=AC-\d{2,}\s)")
+
+
+def split_criterion_segments(verify_text: str) -> list[str]:
+    """Raw criterion segments: `;`-separated, then split again at a full stop
+    that introduces the next `AC-NN`.
+
+    A boundary is only claimed where the next unit starts with an `AC-NN` id and
+    at least one following character, so prose that merely mentions an id
+    (``this behaves like AC-01 does``) stays where it belongs. The `;` split is
+    unconditional: a trailing note is not part of the criterion it follows.
+    """
+    if not verify_text:
+        return []
+    segments: list[str] = []
+    for part in verify_text.split(";"):
+        segments.extend(_STOP_BEFORE_CRITERION_RE.split(part))
+    return segments
+
+
 def parse_criteria(verify_text: str) -> dict:
     """`{ac_id: text}` declared in a verify clause, in declaration order.
 
@@ -103,7 +134,7 @@ def parse_criteria(verify_text: str) -> dict:
     criteria: dict[str, str] = {}
     if not verify_text:
         return criteria
-    for raw in verify_text.split(";"):
+    for raw in split_criterion_segments(verify_text):
         match = CRITERION_RE.match(raw.strip())
         if not match:
             continue
@@ -120,7 +151,7 @@ def parse_criterion_specs(verify_text: str) -> dict:
     specs: dict[str, dict] = {}
     if not verify_text:
         return specs
-    for raw in verify_text.split(";"):
+    for raw in split_criterion_segments(verify_text):
         match = CRITERION_RE.match(raw.strip())
         if not match or match.group(1) in specs:
             continue

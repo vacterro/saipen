@@ -1,0 +1,113 @@
+{
+  "requirements": {
+    "SRC-018:R1": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "IMPLEMENTED",
+      "evidence": "E-5610",
+      "text": "CORE-001 P1: VERIFY-ORACLE-01 is documentation plus a detached helper and test, not an authoritative lifecycle invariant. regression_pair_verdict, oracle_digest and oracle parse_identity have zero production callers; operations.py gates VERIFY to REVIEW and finish solely through log.py verification_evidence, which decides from free-form RUN text carrying PASS and conf high. A bug may remain untouched, its oracle weakened, a normal PASS logged, and both canonical gates still accept it. Wire the authoritative transition and finish gates to a machine-owned regression-evidence path",
+      "verification": "CORE-001 confirmed by grep -- regression_pair_verdict, oracle_digest and the oracle parse_identity had ZERO production callers, so VERIFY-ORACLE-01 shipped in v7.250.0 as a norm plus a detached helper and both canonical gates still accepted a weakened oracle. Repaired in three pieces the audit asked for. A machine-owned requirement marker: regression: required is a new closed-set BOARD field, added to board.py KNOWN_FIELDS and the board schema, never inferred from a description. A machine-owned evidence path: anchored REGRESSION-EVIDENCE FAIL|PASS records carrying verifier and subject identity, parsed by oracle.parse_evidence into the exact record regression_pair_verdict consumes and scoped to the current VERIFY cycle by the same machine-owned boundary the ordinary classifier uses. And the gates: operations._regression_gate is consumed by BOTH _plan_transition on VERIFY to REVIEW and _plan_finish, so a green run alone no longer leaves VERIFY and no longer finishes. One integration defect was found and fixed while wiring it: a REGRESSION-EVIDENCE FAIL record is the REQUIRED red half of a pair, and the ordinary classifier read it as a failure claim on the word FAIL, so the two channels vetoed each other; verification_evidence and its bulk twin now step over anchored regression records, which nothing else reads. 13 tests drive the REAL transition and finish APIs rather than the verdict function in isolation, which is what the audit demanded and what the original gap was made of. Five red controls all go red: unwiring the transition gate on 6 cases, unwiring finish on 1, arming the gate for every ticket on 2, forcing the verdict ADMISSIBLE on 3, and merging the two evidence channels on 5. phases/verify.md, the rule owner, now states the field, the record shape and the refusal codes. Not done and stated rather than implied: the audit also asks that REVIEW, reconcile and status consume the same stored verdict; they currently do not, and only the two authoritative gates were wired",
+      "work": "T-1280"
+    },
+    "SRC-018:R10": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "SUPERSEDED",
+      "evidence": "E-5610",
+      "text": "PERF-001 P2: proven bottleneck in journal.py settled-index and semantic-receipt reads -- see the audit body for the measurement and repair",
+      "verification": "PERF-001 measured and diagnosed here, deeper than reported, and the optimisation is superseded by T-1283 rather than claimed. Live measurement: 2592 settled receipt directories, index holding 1567 entries and therefore stale, semantic_receipts_for_operation_safe returning 2 matches in 5.75s at 43.5 MiB, sub_list 6.35s. The audit attributes permanence to the branch in _settle_journal that extends only a VALID prior index and bootstraps only when the file does not EXIST. Widening that branch was implemented, measured and REVERTED because it is inert: instrumented, the settlement-time bootstrap runs and succeeds, the index appears with the right entry count and matching lineage, and _read_settled_index rejects it immediately, while an explicit rebuild over the same tree validates. The digest is therefore taken before the operation record is final and the repair belongs in the journal commit sequencing. Shipping a branch change that fires and achieves nothing, with two tests asserting a property that does not hold, would have been exactly the false completion this audit exists to catch. Nothing was optimised; the finding is carried by T-1283 with acceptance criteria that pin decode counts rather than timings",
+      "work": "T-1280"
+    },
+    "SRC-018:R11": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "SUPERSEDED",
+      "evidence": "E-5610",
+      "text": "PERF-002 P2: proven bottleneck in conformance.py receipt inventory and index update plus the perf_wave_regressions PERF-004 control -- see the audit body",
+      "verification": "PERF-002 has two halves and only the safety-critical half is done here; the optimisation is superseded by T-1283. The false oracle is REPAIRED. perf_wave_regressions counted only _iter_receipts and _find_receipt_by_id -- both of which the direct locator legitimately avoids -- and then printed constant-I/O no full scan. Verified live: one latest_receipt core call reports iter 0 and find 0 while invoking _receipt_content_token 1052 times over 1052 conformance receipts. The control now instruments the real work, states the claim truthfully as MEASURED rather than constant, and bounds the per-receipt hashing so it cannot get worse. Red control: a mutation that makes the read hash every receipt a second time turns the repaired control red, and the old control could not have seen it at all. The sealed-segment optimisation the audit prescribes is NOT done and is carried by T-1283",
+      "work": "T-1280"
+    },
+    "SRC-018:R12": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "SUPERSEDED",
+      "evidence": "E-5610",
+      "text": "PERF-003 P2: strongly evidenced waste in run_scenarios producer-gate probes and third-wave performance regression execution -- see the audit body",
+      "verification": "PERF-003 verified as reported and superseded by T-1284 rather than attempted. run_producer_gate_probes declares at its own head that its subject is the gate to producer severity mapping, then launches tools/validate.py in a fresh subprocess per case: 13 subprocesses for 14 assertions, 10.9s of a 34.3s performance-wave run. The prescribed repair is a side-effect-free policy helper tested in-process plus a small set of end-to-end sentinels, and it carries an explicit guardrail that coverage of unknown and misspelled gates, malformed OUTBOX parsing, stale producer identity and producer-specific collect routing must not be weakened. That guardrail is the reason this was not started at the end of a long session: a refactor whose failure mode is silently reduced coverage needs its own pass with its own red controls, which T-1284 carries as named acceptance criteria",
+      "work": "T-1280"
+    },
+    "SRC-018:R2": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "IMPLEMENTED",
+      "evidence": "E-5610",
+      "text": "CORE-002 P1: regression_pair_verdict is fail-open on subject identity. A missing verifier identity fails closed as ORACLE_CHANGED but a missing subject on either side falls through to ADMISSIBLE, so an absent subject is treated as proof the subject changed. Separately parse_identity returns keys oracle and subject while regression_pair_verdict consumes verifier and subject, so the parser output is not the verdict record shape without an undocumented remapping",
+      "verification": "reattributed from T-1279 to T-1280, the Work SRC-018 is actually linked to; the technical evidence is unchanged and recorded on the earlier disposition of this same requirement",
+      "work": "T-1280"
+    },
+    "SRC-018:R3": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "IMPLEMENTED",
+      "evidence": "E-5610",
+      "text": "CORE-003 P1: verification_evidence plus the transition and checkpoint command surface plus phases/verify.md -- see the audit body for the exact defect and repair",
+      "verification": "CORE-003 reproduced and worse than reported: not only did MANUAL-VERIFY steps recorded satisfy the gate, but arbitrary prose merely mentioning the token did -- some prose that merely mentions MANUAL-VERIFY in passing classified as successful verification. That is Narrative Authority Leakage, the class structural_marker_events in this same module already names and already prescribes the cure for; the verification grammar had simply never been held to its own rule. Repaired: the marker is now an ANCHORED result record, MANUAL-VERIFY RESULT: PASS or FAIL, matched at the start of the event text, and both consumers -- verification_evidence and bulk_verification_evidence -- share it, so transition, finish, reconcile and status keep one classifier. Steps, requests and prose classify as nothing. phases/verify.md, the norm owner, now states that steps are a REQUEST and names the RESULT record, with the reason: the steps record exists precisely when nobody has looked yet, so treating it as success made the instruction to wait for a person satisfy the gate waiting for that person. 5 tests replace the one that asserted the defect. Red control: ignoring the verdict and reverting to a bare token search goes red on 4 cases, and removing BOTH anchors -- the caret in the pattern and the match call -- goes red on the anchoring case; single-anchor mutations survive as equivalent mutants because the anchoring is deliberately double-guarded, which is stated rather than presented as extra coverage. Two limits recorded rather than implied: a recorded human FAIL is already negative evidence through the failure-claim rule because it contains the word FAIL, so the manual branch handling of FAIL is belt-and-braces and is not what the tests prove; and transition_phase still takes no live-capability parameter -- manual-verify cannot auto-leave VERIFY because the transition gate consumes the repaired classifier, not because capability was threaded into transition policy",
+      "work": "T-1280"
+    },
+    "SRC-018:R4": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "IMPLEMENTED",
+      "evidence": "E-5610",
+      "text": "CORE-004 P1: capability.negotiate_capability and saipen._negotiate_capability -- see the audit body for the exact defect and repair",
+      "verification": "reattributed from T-1279 to T-1280, the Work SRC-018 is actually linked to; the technical evidence is unchanged and recorded on the earlier disposition of this same requirement",
+      "work": "T-1280"
+    },
+    "SRC-018:R5": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-5586",
+      "text": "CORE-005 P1: corpus.py plus tests/conformance_cases.jsonl row 257 plus the validator conformance gate -- see the audit body for the exact defect and repair",
+      "verification": "CORE-005 repaired and shipped in v7.250.0 under T-1276, before this audit was ingested. Its own VERIFY list re-run now: conformance_corpus.py --check PASS with exactly 1..257; --write then --check stable with a byte-identical CONFORMANCE.md; VERIFY-ORACLE-01 and TEST-001 accepted while FAKE-RULE-01, VERIFYX-1 and lowercase are rejected, so the prefix widening is bounded; validate.py --gate core reports zero conformance-corpus and zero generated-view failures. The three literal 256 copies the audit names at corpus.py:21, :22-25 and :157-159 now derive from EXPECTED_IDS, and a fourth independent copy the audit did not see, test_conformance_corpus.py:21, was replaced by a contiguity assertion derived from the corpus itself. Row 257 coverage is sorted. Repair took the minimal option the audit explicitly permits, extending the accepted prefix set rather than reworking Rule-ID authority",
+      "work": "T-1276"
+    },
+    "SRC-018:R6": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "IMPLEMENTED",
+      "evidence": "E-5610",
+      "text": "W2-001 P0: audit_enqueue._place -- see the audit body for the exact defect and repair",
+      "verification": "reattributed from T-1279 to T-1280, the Work SRC-018 is actually linked to; the technical evidence is unchanged and recorded on the earlier disposition of this same requirement",
+      "work": "T-1280"
+    },
+    "SRC-018:R7": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "IMPLEMENTED",
+      "evidence": "E-5610",
+      "text": "W2-002 P1: audit_enqueue._place and enqueue retry promotion -- see the audit body for the exact defect and repair",
+      "verification": "reattributed from T-1279 to T-1280, the Work SRC-018 is actually linked to; the technical evidence is unchanged and recorded on the earlier disposition of this same requirement",
+      "work": "T-1280"
+    },
+    "SRC-018:R8": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "IMPLEMENTED",
+      "evidence": "E-5610",
+      "text": "W2-003 P1: audit_enqueue read_allocator, _reconcile and enqueue -- see the audit body for the exact defect and repair",
+      "verification": "reattributed from T-1279 to T-1280, the Work SRC-018 is actually linked to; the technical evidence is unchanged and recorded on the earlier disposition of this same requirement",
+      "work": "T-1280"
+    },
+    "SRC-018:R9": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "IMPLEMENTED",
+      "evidence": "E-5610",
+      "text": "W2-004 P1: saipen._audit plus audit_inbox classify, projection and reconcile_bootstrap -- see the audit body for the exact defect and repair",
+      "verification": "reattributed from T-1279 to T-1280, the Work SRC-018 is actually linked to; the technical evidence is unchanged and recorded on the earlier disposition of this same requirement",
+      "work": "T-1280"
+    }
+  },
+  "schema_version": 1
+}

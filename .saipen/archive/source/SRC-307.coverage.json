@@ -1,0 +1,14 @@
+{
+  "requirements": {
+    "SRC-307:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "T-1882 closed with verification evidence in LOG: FOCUSED-UNIT-EVIDENCE PASS conf: high ran:120 record:.saipen/evidence/focused-unit/969268460de5ebba-20261027T055547367689Z.json sha256:dfcb79db600701d238789c51b0b1e4c1ab2d214c5b3c07e30902115ded32f291",
+      "text": "P0: recover the 110-failure core-unit regression baseline, then measured optimization",
+      "verification": "the Work this request created reached its own verification gate; see the T-1882 VERIFY cycle in .saipen/LOG.md",
+      "work": "T-1882"
+    }
+  },
+  "schema_version": 1
+}

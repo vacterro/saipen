@@ -1,0 +1,24 @@
+{
+  "archive_ref": ".saipen/archive/retired/SRC-048.md",
+  "authority_grant": "T-1369 / SRC-048",
+  "authority_receipt": "SRC-049",
+  "authority_sha256": "af050bd0e97d165c6acd7c144e9f034c7b44148a733f517b475a5ef06f3d4738",
+  "discovery_event": "E-6798",
+  "evidence": {
+    "kind": "artifact",
+    "ref": ".saipen/evidence/T-1363-1367-zero-manual-entry-20260916/README.md",
+    "sha256": "e9baf0ac8932575c79112bb5bcf40fd224be1891ed0f39cf706e6d779408705b"
+  },
+  "evidence_bound_event": "E-6809",
+  "evidence_note": "field-fixture PWD incident: .saipen/evidence/T-1363-1367-zero-manual-entry-20260916/README.md 'Harness defect found by the same run'; fixture cwd + repository PWD minted this here; fixed at 306299cc (PWD bound to fixture, OLDPWD/INIT_CWD stripped)",
+  "linked_work": "T-1369",
+  "reason": "MISROUTED_PROJECT_BINDING",
+  "receipt_id": "SRC-048",
+  "retired_at": "2026-09-16T13:59:15Z",
+  "retired_by": "claude",
+  "retirement_event": "E-6803",
+  "schema_version": 2,
+  "source_sha256": "9a70e5fe7e0429d0a651567b8c5e95e8c19697c09da10fcb17304752b4cee8fa",
+  "status": "INVALID",
+  "ticket_ref": ".saipen/archive/retired/T-1369.json"
+}

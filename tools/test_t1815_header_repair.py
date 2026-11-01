@@ -217,6 +217,81 @@ class CompletionBarTests(unittest.TestCase):
         self.assertTrue(errors, "a restamped header must not complete")
         self.assertIn("header-only freshness repair", errors[0])
 
+    def test_audited_header_rebind_refuses_a_run_not_matching_current_source(self):
+        from types import SimpleNamespace
+
+        report = report_text(
+            header_head=HEAD_A,
+            header_tree=TREE_A,
+            runs=[(1, HEAD_A, TREE_A)],
+        )
+        current = SimpleNamespace(
+            source_head=HEAD_B,
+            source_tree_fingerprint=TREE_B,
+        )
+        self.assertIsNone(improve._rebind_audited_header_from_newest_run(report, current))
+        stale_current = SimpleNamespace(
+            source_head=HEAD_C,
+            source_tree_fingerprint="git-delta-v1:" + "3" * 64,
+        )
+        two_runs = report_text(
+            header_head=HEAD_A,
+            header_tree=TREE_A,
+            runs=[(1, HEAD_A, TREE_A), (2, HEAD_B, TREE_B)],
+        )
+        self.assertIsNone(improve._rebind_audited_header_from_newest_run(two_runs, stale_current))
+
+    def test_stale_audited_draft_rebinds_to_newest_run_and_completes(self):
+        cycle_id = self.cycle.name
+        cycle = self.cycle
+        improve.register_seat(cycle, "seat-resume", "core", "saipen_improve_RESUME.md")
+        report = improve.create_report(
+            self.root,
+            cycle_id,
+            "seat-resume",
+            "RESUME",
+            agent="seat-resume",
+            role="core",
+            model_or_runtime="probe",
+            context_scope="same bounded audit scope",
+        )
+        improve.append_run(report, "NO_FINDINGS -- first audited tree\n")
+        (self.root / "source.py").write_text("changed source\n", encoding="utf-8")
+        improve.append_run(report, "NO_FINDINGS -- current audited tree\n")
+
+        from unittest import mock
+
+        with mock.patch.object(
+            improve, "_rebind_audited_header_from_newest_run", return_value=None
+        ):
+            before_fix = improve.prepare_audit_seat(
+                self.root,
+                agent_family="seat",
+                role="core",
+                session_id="seat-resume",
+                project_name="RESUME",
+                model_or_runtime="probe",
+                context_scope="same bounded audit scope",
+            )
+        self.assertFalse(before_fix["ok"], before_fix)
+        self.assertEqual(before_fix["code"], "STALE_REPORT")
+        resumed = improve.prepare_audit_seat(
+            self.root,
+            agent_family="seat",
+            role="core",
+            session_id="seat-resume",
+            project_name="RESUME",
+            model_or_runtime="probe",
+            context_scope="same bounded audit scope",
+        )
+        self.assertTrue(resumed["ok"], resumed)
+        self.assertTrue(resumed.get("header_rebound"), resumed)
+        self.assertEqual(improve._field(report.read_text(encoding="utf-8"), "source_head"),
+                         improve._run_provenance_identities(report.read_text(encoding="utf-8"))[-1][1])
+        self.assertTrue(improve.complete_report(report)["ok"])
+        self.assertIn("## RUN 1", report.read_text(encoding="utf-8"))
+        self.assertIn("## RUN 2", report.read_text(encoding="utf-8"))
+
     def test_without_the_bar_the_same_restamp_looks_clean(self):
         """RED control: with the check disabled, the F-01 bytes pass silently.
 

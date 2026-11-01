@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-363:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "DRIFT-001 Canonical-Log-Integrity: Direct manual edits to LOG.md strictly proscribed; all event mutations require saipen writer"
+    }
+  },
+  "derived_at": "2026-10-31T23:50:12Z",
+  "derived_from": "SRC-363",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "adf10c64c0c821c507de3a15e89f966ca15d8c5cf73510a9fe7bfbc1adad4e7e"
+}

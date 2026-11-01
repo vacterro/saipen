@@ -1,0 +1,29 @@
+{
+  "linked_work": "T-1943",
+  "receipt_id": "SRC-342",
+  "received_at": "2026-10-27T10:32:10Z",
+  "redaction": {
+    "applied": false,
+    "authoritative": false,
+    "original_sha256": "28acc06800d938620eb6ae4a70f78e856abfb9d4a0f444fe8e846e48801c4382",
+    "sanitized_sha256": "28acc06800d938620eb6ae4a70f78e856abfb9d4a0f444fe8e846e48801c4382"
+  },
+  "request_provenance": {
+    "witness": "model_supplied"
+  },
+  "schema_version": 1,
+  "sensitive": false,
+  "source_authority": {
+    "body_sha256": "28acc06800d938620eb6ae4a70f78e856abfb9d4a0f444fe8e846e48801c4382",
+    "mode": "exact",
+    "original_available": true
+  },
+  "source_kind": "external_audit",
+  "source_sha256": "28acc06800d938620eb6ae4a70f78e856abfb9d4a0f444fe8e846e48801c4382",
+  "status": "ACTIVE",
+  "transport": {
+    "newline_normalization": "none",
+    "source_encoding": "utf-8",
+    "transport_transform": "none"
+  }
+}

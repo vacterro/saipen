@@ -1,0 +1,14 @@
+{
+  "requirements": {
+    "SRC-318:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "T-1900 closed with verification evidence in LOG: FOCUSED-UNIT-EVIDENCE PASS conf: high ran:18 record:.saipen/evidence/focused-unit/6cc4c239cb210f11-20261025T023235747657Z.json sha256:6c5a4edfdcc7de4e9493ea1ab323e67e4907a9a9747b879c5027467ca404aa40",
+      "text": "source identity capture: _git_delta_listing enumerates 42572 untracked files only to discard 42515 as .saipen; use the exact :(exclude).saipen pathspec so git never emits them",
+      "verification": "the Work this request created reached its own verification gate; see the T-1900 VERIFY cycle in .saipen/LOG.md",
+      "work": "T-1900"
+    }
+  },
+  "schema_version": 1
+}

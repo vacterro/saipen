@@ -1,0 +1,59 @@
+{
+  "requirements": {
+    "SRC-333:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "documentary analysis in T-1925-writing-block ANALYSIS.md",
+      "text": "Ingest and evaluate external audit report audit/writing-block.md (SMART VAC MEDIA COMPRESSOR session drift findings DRIFT-001..DRIFT-011).",
+      "verification": "verified against live codebase",
+      "work": "T-1925"
+    },
+    "SRC-333:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "documentary analysis in T-1925-writing-block ANALYSIS.md",
+      "text": "Enforce secret containment and security boundaries: protect SAIMAIL private key material from agent disclosure and export dumps (DRIFT-001 / ZC-01).",
+      "verification": "verified against live codebase",
+      "work": "T-1925"
+    },
+    "SRC-333:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "documentary analysis in T-1925-writing-block ANALYSIS.md",
+      "text": "Maintain authority verification invariants: cache presence or model-supplied ingress must never substitute for broker-verified operator authority (DRIFT-002, DRIFT-003 / SP-01, SP-02).",
+      "verification": "verified against live codebase",
+      "work": "T-1925"
+    },
+    "SRC-333:R004": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "documentary analysis in T-1925-writing-block ANALYSIS.md",
+      "text": "Maintain verification discipline and response truth: prohibit overclaims, enforce boundary stops on WAIT, and prevent cross-project scope contamination (DRIFT-004..DRIFT-009 / SP-03..SP-05).",
+      "verification": "verified against live codebase",
+      "work": "T-1925"
+    },
+    "SRC-333:R005": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "documentary analysis in T-1925-writing-block ANALYSIS.md",
+      "text": "Document forensic analysis artifact at .saipen/evidence/T-1925-writing-block/ANALYSIS.md.",
+      "verification": "verified against live codebase",
+      "work": "T-1925"
+    },
+    "SRC-333:R006": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "documentary analysis in T-1925-writing-block ANALYSIS.md",
+      "text": "Cleanly consume audit/writing-block.md via journaled audit inbox closure upon terminal settlement.",
+      "verification": "verified against live codebase",
+      "work": "T-1925"
+    }
+  },
+  "schema_version": 1
+}

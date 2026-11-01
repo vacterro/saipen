@@ -245,7 +245,7 @@ class TestProductionAcceptanceGates(unittest.TestCase):
             "root_cause": "Verified gate reproduction defect",
             "rule_ids": ["GATE-RULE-1"],
             "change_target": "ENGINE",
-            "qualification_receipt": write_qualification_artifact(root, "QUAL-REC-GATE-01"),
+            "qualification_receipt": write_qualification_artifact(root, "QUAL-REC-GATE-01", "PAL-GATE-01"),
             "audit_body": body,
             "artifact_digest": digest,
         }
@@ -551,7 +551,7 @@ class TestCampaignNegativeControls(unittest.TestCase):
         no_dig = {
             "finding_id": "PAL-NO-DIG",
             "state": "QUALIFIED",
-            "qualification_receipt": write_qualification_artifact(root, "QUAL-1"),
+            "qualification_receipt": write_qualification_artifact(root, "QUAL-1", "PAL-NO-DIG"),
             "audit_body": "# Body",
         }
         r2 = adapter.deliver_finding_to_audit_inbox(root, no_dig, publication_authorized=True)
@@ -576,7 +576,7 @@ class TestCampaignNegativeControls(unittest.TestCase):
         mismatch = {
             "finding_id": "PAL-MISMATCH",
             "state": "QUALIFIED",
-            "qualification_receipt": write_qualification_artifact(root, "QUAL-2"),
+            "qualification_receipt": write_qualification_artifact(root, "QUAL-2", "PAL-MISMATCH"),
             "audit_body": "# Body",
             "artifact_digest": "deadbeef" * 8,
         }

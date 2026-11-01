@@ -1946,7 +1946,29 @@ def project_blockers(tickets: dict) -> dict:
         identities = []
         for root, klass, raw in roots:
             staging = _publication_staging_blocker(raw)
-            identity = "release:shared-index" if staging else f"work:{root}"
+            raw_upper = str(raw or "").upper()
+            if staging:
+                identity = "release:shared-index"
+                owner = "tools/saipen_engine/release.py"
+            elif "PUBLICATION_BLOCKED_EXTERNAL" in raw_upper:
+                identity = "release:external-publication"
+                owner = "operator:external-publication"
+            elif "MARKHUNT_TRIAGE_REQUIRED" in raw_upper:
+                identity = "triage:markhunt"
+                owner = "human:triage"
+            elif "PERMANENT_WARNING_OWNER" in raw_upper:
+                identity = "observability:warning-owner"
+                owner = "observability:warning"
+            elif klass == "HELD" or "HELD" in raw_upper:
+                identity = "architecture:held-chain"
+                owner = "architecture:gate"
+            elif "[LIVE]" in raw_upper or "ACCEPTANCE_WITNESS" in raw_upper:
+                identity = "acceptance:operator-witness"
+                owner = "operator:acceptance"
+            else:
+                identity = f"work:{root}"
+                owner = "tools/saipen_engine/external.py" if klass == "BLOCKED_EXTERNAL" else "tools/saipen_engine/board.py"
+
             identities.append(identity)
             if identity not in groups:
                 command = (
@@ -1955,18 +1977,21 @@ def project_blockers(tickets: dict) -> dict:
                 )
                 groups[identity] = {
                     "shared_blocker_id": identity,
+                    "root_id": identity,
+                    "root_owner": owner,
                     "blocker_class": klass,
                     "cause": "publication-staging" if staging else klass.lower(),
                     "root_cause": raw or "No verified root-cause evidence is recorded",
-                    "owner": "tools/saipen_engine/release.py" if staging else (
-                        "tools/saipen_engine/external.py" if klass == "BLOCKED_EXTERNAL"
-                        else "tools/saipen_engine/board.py"
-                    ),
+                    "exact_missing_evidence": raw or "No verified root-cause evidence is recorded",
+                    "owner": owner,
                     "root_tickets": [],
                     "dependent_tickets": [],
                     "recovery_internally_authorized": False,
                     "external_input_required": True,
                     "read_only_work_may_proceed": True,
+                    "independent_work_allowed": True,
+                    "who_can_authorize": "operator" if ("operator" in owner or "human" in owner or "USER" in klass) else "root_owner",
+                    "automatic_recheck_condition": "source_generation_or_evidence_change",
                     "recovery_operation": {
                         "command": command,
                         "operator_action": (
@@ -2180,4 +2205,31 @@ def classify_idle_work(
     }
     if decision_req:
         res["decision_request"] = decision_req
+
+    try:
+        from .outcome_truth import compute_outcome_truth
+        from .work_exhaustion import certify_work_exhaustion
+
+        outcome = compute_outcome_truth(
+            None,
+            tickets=tickets,
+            state=state,
+            audit_inbox=audit_inbox,
+            future_gate=future_gate,
+            is_budget_exhausted=(state or {}).get("authority_until") == "budget",
+        )
+        res["outcome_truth"] = outcome
+        res["queue_status"] = outcome["queue_status"]
+        res["campaign_status"] = outcome["campaign_status"]
+        res["objective_status"] = outcome["objective_status"]
+        res["work_exhaustion"] = certify_work_exhaustion(
+            None,
+            tickets=tickets,
+            state=state,
+            audit_inbox=audit_inbox,
+            future_gate=future_gate,
+        )
+    except Exception:
+        pass
+
     return res

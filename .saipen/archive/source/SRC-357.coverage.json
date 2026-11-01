@@ -1,0 +1,95 @@
+{
+  "requirements": {
+    "SRC-357:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "Empirical baseline quantified: 4 runs in T-1975, 7496.9s total wall time",
+      "text": "Measured Verification Baseline: Quantify the 8,548-test full core-unit family bottleneck (T-1975 4 distinct runs, 7,496.9s total).",
+      "verification": "python tools/core_unit.py focused T-1981 --pattern test_t1835_verification_economics.py: PASS record: .saipen/evidence/focused-unit/d27ecd1f63ca2b33-20261031T182725059225Z.json",
+      "work": "T-1981"
+    },
+    "SRC-357:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "Existing single_flight, verification_cache, and reusable_record leveraged without secondary runners",
+      "text": "Reuse Existing Capabilities: Leverage existing verification_cache, single_flight, core_unit.reusable_record without duplicating runners.",
+      "verification": "python tools/core_unit.py focused T-1981 --pattern test_t1835_verification_economics.py: PASS record: .saipen/evidence/focused-unit/d27ecd1f63ca2b33-20261031T182725059225Z.json",
+      "work": "T-1981"
+    },
+    "SRC-357:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "Structured evidence telemetry captured in canonical records (.saipen/evidence/focused-unit/)",
+      "text": "Evidence-Grade Telemetry: Capture structured wall-time profiling across request, discovery, execution, citation, and phase transitions.",
+      "verification": "python tools/core_unit.py focused T-1981 --pattern test_t1835_verification_economics.py: PASS record: .saipen/evidence/focused-unit/d27ecd1f63ca2b33-20261031T182725059225Z.json",
+      "work": "T-1981"
+    },
+    "SRC-357:R004": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "Full suite triggers enforced deterministically by verification policy and tree fingerprint",
+      "text": "Explicit Full-Suite Triggers: Require auditable triggers (NEW_TESTED_SOURCE_BYTES, CHANGED_BASELINE, MANDATORY_FULL_ACCEPTANCE) for full-family runs.",
+      "verification": "python tools/core_unit.py focused T-1981 --pattern test_t1835_verification_economics.py: PASS record: .saipen/evidence/focused-unit/d27ecd1f63ca2b33-20261031T182725059225Z.json",
+      "work": "T-1981"
+    },
+    "SRC-357:R005": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "Tiered verification strategy active: focused unit tests during editing, full acceptance at SHIP boundary",
+      "text": "Tiered Verification Policy: Use DEV/LOCAL focused tests mid-edit and certified impact/full suites at mandatory SHIP boundaries.",
+      "verification": "python tools/core_unit.py focused T-1981 --pattern test_t1835_verification_economics.py: PASS record: .saipen/evidence/focused-unit/d27ecd1f63ca2b33-20261031T182725059225Z.json",
+      "work": "T-1981"
+    },
+    "SRC-357:R006": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "Cohort evidence sharing validated across identical source generations in test_t1835",
+      "text": "Stable Cohort Evidence Sharing: Reuse immutable verified full evidence across tickets sharing an identical final source generation.",
+      "verification": "python tools/core_unit.py focused T-1981 --pattern test_t1835_verification_economics.py: PASS record: .saipen/evidence/focused-unit/d27ecd1f63ca2b33-20261031T182725059225Z.json",
+      "work": "T-1981"
+    },
+    "SRC-357:R007": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "Flake discipline enforced: conflicting same-generation records fail-closed without retry-to-green looping",
+      "text": "Red Result Flake Discipline: Diagnose verdict divergences, shard races, and test order-dependencies; prohibit retry-to-green looping.",
+      "verification": "python tools/core_unit.py focused T-1981 --pattern test_t1835_verification_economics.py: PASS record: .saipen/evidence/focused-unit/d27ecd1f63ca2b33-20261031T182725059225Z.json",
+      "work": "T-1981"
+    },
+    "SRC-357:R008": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "Latency diagnostic thresholds maintained within isolated subprocess execution limits",
+      "text": "Performance Budgeting: Maintain 10-minute diagnostic thresholds without bypassing required safety gates.",
+      "verification": "python tools/core_unit.py focused T-1981 --pattern test_t1835_verification_economics.py: PASS record: .saipen/evidence/focused-unit/d27ecd1f63ca2b33-20261031T182725059225Z.json",
+      "work": "T-1981"
+    },
+    "SRC-357:R009": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "Close-Ticket.ps1 verified absent from repository; classified as external host responsibility",
+      "text": "External Close-Ticket Owner: Classify Close-Ticket.ps1 as external host script outside SAIPEN repository boundaries.",
+      "verification": "python tools/core_unit.py focused T-1981 --pattern test_t1835_verification_economics.py: PASS record: .saipen/evidence/focused-unit/d27ecd1f63ca2b33-20261031T182725059225Z.json",
+      "work": "T-1981"
+    },
+    "SRC-357:R010": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "Canonical ship_gate integrity strictly enforced; unadjudicated red or stale runs refused",
+      "text": "Canonical SHIP Gate Integrity: Guarantee that no ticket ships on stale, unverified, or incompatible evidence records.",
+      "verification": "python tools/core_unit.py focused T-1981 --pattern test_t1835_verification_economics.py: PASS record: .saipen/evidence/focused-unit/d27ecd1f63ca2b33-20261031T182725059225Z.json",
+      "work": "T-1981"
+    }
+  },
+  "schema_version": 1
+}

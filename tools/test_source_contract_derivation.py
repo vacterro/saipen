@@ -16,6 +16,9 @@ K. Legitimate external provenance is not rejected merely for containing another
    source receipt identifier.
 L. Existing T-1808/T-1810/T-1811/T-1812/T-1813 lifecycle and source integrity
    contracts remain valid.
+M. An inline `=== N. TITLE ===` divider between two numbered lists ends the
+   item before it, so cross-section absorption cannot fold narrative sections
+   into a list clause (T-33 defect class).
 
 Plus Live Negative Acceptance end-to-end 8-step verification.
 """
@@ -100,6 +103,28 @@ verify: docstring is added
 ## Request
 
 add a one-line docstring to the top of src/app.py
+"""
+
+#: T-33: two numbered lists separated by inline `=== N. TITLE ===` section
+#: headings, with narrative prose under each heading. Each numbered item must
+#: yield its own clause; the prose under a heading belongs to no clause.
+SAMPLE_INLINE_HEADING_LISTS = """=== 1. FIRST SECTION ===
+
+Preamble prose that must never appear in a clause.
+
+1. alpha requirement
+2. beta requirement
+
+=== 2. SECOND SECTION ===
+
+Middle narrative that must not be absorbed.
+
+1. gamma requirement
+2. delta requirement
+
+=== 3. THIRD SECTION ===
+
+Trailing narrative.
 """
 
 
@@ -698,6 +723,36 @@ class SourceContractDerivationTests(unittest.TestCase):
         done_res = operations.finish_ticket(self.base, ticket_id, "tester")
         self.assertTrue(done_res.ok, getattr(done_res, "message", done_res.data))
         self.assertEqual(done_res.code, "FINISHED")
+
+
+    def test_regression_m_inline_heading_between_numbered_lists_is_not_absorbed(self):
+        """An `=== N. TITLE ===` divider ends the numbered item before it.
+
+        The pre-T-33 extractor stopped a top-level numbered item only at the
+        next numbered line or at the end of the text, so the item ran through
+        the section divider and absorbed every narrative section up to the
+        next numbered line (cross-section absorption). On the standing-mission
+        carrier that class put 94.4% of the derived text into 2 of 28 clauses.
+        """
+        clauses = intake.extract_request_clauses(SAMPLE_INLINE_HEADING_LISTS)
+        self.assertEqual(
+            clauses,
+            [
+                "alpha requirement",
+                "beta requirement",
+                "gamma requirement",
+                "delta requirement",
+            ],
+        )
+        joined = "\n".join(clauses)
+        for absent in (
+            "Preamble prose that must never appear in a clause.",
+            "Middle narrative that must not be absorbed.",
+            "Trailing narrative.",
+            "=== 2. SECOND SECTION ===",
+            "=== 3. THIRD SECTION ===",
+        ):
+            self.assertNotIn(absent, joined)
 
 
 if __name__ == "__main__":

@@ -1,0 +1,49 @@
+{
+  "clauses": {
+    "SRC-123:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "audit/17 CORE-001: current BOARD scalar writers and parser must prevent every Python splitlines separator from creating or detaching ticket records; verify current bytes and tests, then link existing Work or disposition only from live evidence."
+    },
+    "SRC-123:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "audit/17 CORE-002: non-transfer operations must preserve STATE.agent and reject active ownership splits; verify current bytes and tests, then link existing Work or disposition only from live evidence."
+    },
+    "SRC-123:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "audit/17 W2-001: dry-run snapshot and reverify paths must write zero durable bytes and BUILD baseline establishment must fail closed; verify current bytes and tests before disposition."
+    },
+    "SRC-123:R004": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "audit/17 W2-002: semantic verifier exceptions during APPLY or recovery must produce structured recoverable outcomes and never strand an operation in APPLYING; verify current bytes and tests before disposition."
+    },
+    "SRC-123:R005": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "audit/17 W2-003: source-boundary diagnostics must map into the closed operation refusal vocabulary without exceptions or mutation; verify current bytes and tests before disposition."
+    },
+    "SRC-123:R006": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "audit/17 W2-004: pre-BUILD baseline reuse must bind to the exact current checkpoint identity and mint a fresh baseline after drift; verify current bytes and tests before disposition."
+    },
+    "SRC-123:R007": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "audit/17 W2-005: concurrent snapshot and reverify writers must serialize allocation and persistence without duplicate IDs, lost updates, or unjournaled bytes; verify current bytes and tests before disposition."
+    },
+    "SRC-123:R008": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "audit/17 PERF-001: semantic receipt lookup and journal settlement must avoid repeated lifetime scans through the production reader and writer path; verify current bytes and measured evidence before disposition."
+    }
+  },
+  "derived_at": "2026-09-27T15:08:18Z",
+  "derived_from": "SRC-123",
+  "interpretation_revision": 8,
+  "schema_version": 1,
+  "source_sha256": "6d1ee46d9e8557da38b4ae294fb2cb296864014f01b732f4efb9585c83d015f1"
+}

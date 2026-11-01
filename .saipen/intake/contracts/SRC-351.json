@@ -1,0 +1,74 @@
+{
+  "clauses": {
+    "SRC-351:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "A foreign protocol command is refused with a typed FOREIGN_PROTOCOL_COMMAND that names the protocol owner, the full invocation and the route to run instead, and is never refused as a bare unknown command.\r"
+    },
+    "SRC-351:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "The refusal names the owning protocol, the exact requested command, and carries next_action guidance, so the caller cannot read it as a typo.\r"
+    },
+    "SRC-351:R003": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "SAIPEN verbs and shortcuts (cc, continue, next, status) remain SAIPEN-owned and unaffected by foreign-protocol routing.\r"
+    },
+    "SRC-351:R004": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "A malformed or absent exact_namespace block degrades to the old refusal without inventing an owner.\r"
+    },
+    "SRC-351:R005": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "The router and registry suites are unaffected by the exact-namespace declaration.\r"
+    },
+    "SRC-351:R006": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Never present a foreign protocol as a candidate for an explicit SAIPEN command; an explicit /saipen <cmd> must never be dispatched to a skill whose name merely resembles it, and exact namespace ownership is decided before semantic skill matching.\r"
+    },
+    "SRC-351:R007": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "A NO_HOME or similar refusal from a foreign protocol must not trigger a working-directory change into another protocol repository, a sibling-repo search, or the creation of that protocol home.\r"
+    },
+    "SRC-351:R008": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "Re-read the installed skills directory on session start so a stale inventory cannot map a namespace to the wrong owner.\r"
+    },
+    "SRC-351:R009": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "The FreeBuff host stops offering a substitute protocol for an explicit SAIPEN command.\r"
+    },
+    "SRC-351:R010": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "A live /saipen continue in _BZ_REA on FreeBuff executes the SAIPEN route end to end.\r"
+    },
+    "SRC-351:R011": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Foreign-protocol side effects are reconciled by their owner through canonical append-only operations, preserving chronology and provenance, with no rewrite and no deletion.\r"
+    },
+    "SRC-351:R012": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "No native pre-render interception is claimed for a host that declares response enforcement ADVISORY and pre-output interception NONE.\r"
+    },
+    "SRC-351:R013": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "SAIPAL recognition is not authorization: a model-supplied witness is never upgraded to an authenticated operator-origin event.\r"
+    }
+  },
+  "derived_at": "2026-10-31T01:58:45Z",
+  "derived_from": "SRC-351",
+  "interpretation_revision": 13,
+  "schema_version": 1,
+  "source_sha256": "d72a8d2cdebdcf545d6b5e920038178625e70fd1d0a18c0426ff88f20491afa9"
+}

@@ -690,30 +690,6 @@ def route_next(
             ),
         }
 
-    if audit_inbox and audit_inbox.get("unworkable_active_only"):
-        idle_cls = audit_inbox.get("idle_classification") or "IDLE_BLOCKED_EXTERNAL"
-        next_act = audit_inbox.get("next_exact_action") or audit_inbox.get(
-            "action", "saipen audit status"
-        )
-        if "<decision>" in str(next_act):
-            next_act = "saipen status"
-        unresolved = audit_inbox.get("unresolved_audit_count", len(audit_inbox.get("pending", [])))
-        res = {
-            "ok": True,
-            "action": audit_inbox.get("action", "saipen audit status"),
-            "reason": "audit-inbox-unworkable",
-            "stop_reason": "NO_ADMISSIBLE_WORK",
-            "terminal_classification": idle_cls,
-            "idle_classification": idle_cls,
-            "primary_blocker": audit_inbox.get("primary_blocker"),
-            "unresolved_audit_count": unresolved,
-            "next_exact_action": next_act,
-            "executable_behavior": "RESTATE_AND_STOP",
-            "detail": audit_inbox.get("detail", "audit inbox has no currently workable layer"),
-        }
-        if audit_inbox.get("decision_request"):
-            res["decision_request"] = audit_inbox["decision_request"]
-        return res
     # Every layer settled, but `audit/` still holds bytes SAIPEN never
     # captured. The work is genuinely finished, so this is not a failure and
     # never a refusal -- it is the difference between "the audit is closed"
@@ -829,6 +805,45 @@ def route_next(
                 ),
                 "load": load_for_action("saipen future status"),
             }
+
+    # HUNT CONTINUATION (SOURCE-AUDIT-INBOX-01): when in HUNT phase without an active ticket,
+    # the HUNT cycle owns continuation over an unworkable/blocked audit inbox.
+    if phase == "HUNT" and (na.startswith("PHASE HUNT") or na == "PHASE HUNT" or na.startswith("saipen hunt")):
+        return {
+            "ok": True,
+            "action": "PHASE HUNT",
+            "reason": "hunt-continue",
+            "load": load_for_action("PHASE HUNT"),
+            "detail": "active HUNT phase owns continuation",
+        }
+
+    # UNWORKABLE AUDIT INBOX: An ACTIVE inbox layer whose linked Work is unworkable
+    # (BLOCKED_EXTERNAL / operator decision required). It sits below eligible FUTURE GATES
+    # and active HUNT continuation so external blockers do not starve independent work.
+    if audit_inbox and audit_inbox.get("unworkable_active_only"):
+        idle_cls = audit_inbox.get("idle_classification") or "IDLE_BLOCKED_EXTERNAL"
+        next_act = audit_inbox.get("next_exact_action") or audit_inbox.get(
+            "action", "saipen audit status"
+        )
+        if "<decision>" in str(next_act):
+            next_act = "saipen status"
+        unresolved = audit_inbox.get("unresolved_audit_count", len(audit_inbox.get("pending", [])))
+        res = {
+            "ok": True,
+            "action": audit_inbox.get("action", "saipen audit status"),
+            "reason": "audit-inbox-unworkable",
+            "stop_reason": "NO_ADMISSIBLE_WORK",
+            "terminal_classification": idle_cls,
+            "idle_classification": idle_cls,
+            "primary_blocker": audit_inbox.get("primary_blocker"),
+            "unresolved_audit_count": unresolved,
+            "next_exact_action": next_act,
+            "executable_behavior": "RESTATE_AND_STOP",
+            "detail": audit_inbox.get("detail", "audit inbox has no currently workable layer"),
+        }
+        if audit_inbox.get("decision_request"):
+            res["decision_request"] = audit_inbox["decision_request"]
+        return res
 
     # MAINTAIN: fall through to the persisted next_action only when it is a
     # legal non-ticket action (saipen continue / saipen <verb>), never a stale

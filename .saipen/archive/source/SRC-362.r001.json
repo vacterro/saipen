@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-362:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "A01 Direct-Ledger-Mutation-Proscription: Direct manual edits to .saipen/{STATE,BOARD,LOG} strictly proscribed outside canonical engine transactions"
+    }
+  },
+  "derived_at": "2026-10-31T23:47:59Z",
+  "derived_from": "SRC-362",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "dc2783cff341d3a62acc672de771ed78fdcb5d800fd8045eac00c3a174cf0958"
+}

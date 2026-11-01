@@ -1,0 +1,19 @@
+{
+  "clauses": {
+    "SRC-356:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Incident Root Cause: Diagnose RUNTIME_DRIFT trigger in _runtime_drift_payload when saipen_home differs from executing runtime."
+    },
+    "SRC-356:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Test Harness Isolation: Identify subprocess run_cli environment leakage (SAIPEN_PROJECT_ROOT / PWD) as root cause in test_t1968."
+    }
+  },
+  "derived_at": "2026-10-31T18:29:21Z",
+  "derived_from": "SRC-356",
+  "interpretation_revision": 2,
+  "schema_version": 1,
+  "source_sha256": "26d08cead83ea3b769e3235591976644807a35cd9dc6d44d11365b8999a88177"
+}

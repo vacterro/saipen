@@ -1,0 +1,59 @@
+{
+  "requirements": {
+    "SRC-330:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "documentary analysis in T-1921-audio-restoration ANALYSIS.md",
+      "text": "Ingest and evaluate external audit report audit/SAIHANDOFF_FASTPROMPTER_PERSONAL_AUDIO_RESTORATION.md for FastPrompter audio restoration and public cleanliness requirements.",
+      "verification": "verified against live codebase",
+      "work": "T-1921"
+    },
+    "SRC-330:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "documentary analysis in T-1921-audio-restoration ANALYSIS.md",
+      "text": "Preserve operator personal audio configuration: local application experience must not be altered by public compliance remediation; personal audio remains available locally.",
+      "verification": "verified against live codebase",
+      "work": "T-1921"
+    },
+    "SRC-330:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "documentary analysis in T-1921-audio-restoration ANALYSIS.md",
+      "text": "Resolver priority: personal override for legacy bare refs, explicit namespaces (user:, addon:, builtin:) resolved to correct roots.",
+      "verification": "verified against live codebase",
+      "work": "T-1921"
+    },
+    "SRC-330:R004": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "documentary analysis in T-1921-audio-restoration ANALYSIS.md",
+      "text": "Non-destructive settings migration: migrate_sound_settings must never erase valid personal selections or overwrite user-selected sound IDs during temporary fallback.",
+      "verification": "verified against live codebase",
+      "work": "T-1921"
+    },
+    "SRC-330:R005": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "documentary analysis in T-1921-audio-restoration ANALYSIS.md",
+      "text": "Ambience preservation: preserve existing selected computalk1.wav locally when original bytes exist; public distribution uses clean ambient_loop.wav.",
+      "verification": "verified against live codebase",
+      "work": "T-1921"
+    },
+    "SRC-330:R006": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "documentary analysis in T-1921-audio-restoration ANALYSIS.md",
+      "text": "Public GitHub cleanliness: keep public source, packaging, and archives free of restricted/proprietary audio; document analysis at .saipen/evidence/T-1921-audio-restoration/ANALYSIS.md and cleanly consume layer upon completion.",
+      "verification": "verified against live codebase",
+      "work": "T-1921"
+    }
+  },
+  "schema_version": 1
+}

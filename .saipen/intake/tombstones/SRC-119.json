@@ -1,0 +1,16 @@
+{
+  "actionable": 1,
+  "archive_ref": ".saipen/archive/source/SRC-119.md",
+  "closed_at": "2026-10-30T02:41:59Z",
+  "closure_event": null,
+  "linked_work": "T-1527",
+  "linked_works": [
+    "T-1527"
+  ],
+  "receipt_id": "SRC-119",
+  "requirements": 1,
+  "schema_version": 1,
+  "source_sha256": "8c7aa2ec48b2bee2c96c5e742212e737a1b30d2871b99ca60f4b2fe4c17811f9",
+  "status": "CLOSED",
+  "unresolved": 0
+}

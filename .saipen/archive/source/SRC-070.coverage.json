@@ -1,0 +1,14 @@
+{
+  "requirements": {
+    "SRC-070:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "T-1408 closed with verification evidence in LOG: verify -> PASS [target: T-1408] conf: high -- staged subject (index bytes) oracle t1406 5/5 rc=0, CLI retire SEAT_RETIRED, staged saipen.py compiles; harness SAIPEN_IMPROVE_PROBES_ONLY improve 192/192 env-cleared; regression pair anchored verifier b0ab2f82 with the pre-fix half red as designed and the working half green; ruff clean; git diff --cached --check clean; gate ship reports only the decla",
+      "text": "operator decision on T-1406: proceed with local commit only -- isolate the T-1406 hunks in tools/saipen.py, commit the five reviewed files locally, skip push/tag/public release per the SRC-039 pause, preserve T-1400 working-tree hunks, then finish T-1406 own_patch",
+      "verification": "the Work this request created reached its own verification gate; see the T-1408 VERIFY cycle in .saipen/LOG.md",
+      "work": "T-1408"
+    }
+  },
+  "schema_version": 1
+}

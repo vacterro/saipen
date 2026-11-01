@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-022:R001": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "SAIPEN-side work: Wave 1 only -- the authoritative saipen status --json automation contract is implemented, tested and shipped (v7.256.0); audit quiescence and post-empty convergence are exposed mechanically; SAITULS is out of scope and must not be touched; Wave 2 belongs to SAITULS reading the already-updated SAIPEN repository --verification v7.256.0 shipped: automation.py + 22 red controls live, contract fields R2-R7 of SRC-021 terminal; the audit's Wave-1 goal is literally the completed T-1294 work"
+    }
+  },
+  "derived_at": "2026-09-06T16:27:25Z",
+  "derived_from": "SRC-022",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "2fafdcbcbf7e5b653028d39f67856b81b25dc5313357402918a89219a4d30a9e"
+}

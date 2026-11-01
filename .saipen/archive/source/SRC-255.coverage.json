@@ -1,0 +1,104 @@
+{
+  "requirements": {
+    "SRC-255:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "IMPLEMENTED",
+      "evidence": "E-15786",
+      "text": "Separate IMPLEMENTATION_COMPLETE, ACCEPTANCE_COMPLETE, and EXTERNAL_GATE_PENDING so states do not silently collapse into one DONE verdict",
+      "verification": "python tools/test_finding_invalidated_closure.py -> PASS",
+      "work": "T-1795"
+    },
+    "SRC-255:R002": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "IMPLEMENTED",
+      "evidence": "E-15786",
+      "text": "Retain compatibility with legitimate no-publish SHIP completion when publication is held or not requested",
+      "verification": "python tools/test_finding_invalidated_closure.py -> PASS",
+      "work": "T-1795"
+    },
+    "SRC-255:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "IMPLEMENTED",
+      "evidence": "E-15786",
+      "text": "Strengthen finding_invalidated to require a typed premise-disproof record or structured invalidation reason rather than an arbitrary same-ticket E-### event",
+      "verification": "python tools/test_finding_invalidated_closure.py -> PASS",
+      "work": "T-1795"
+    },
+    "SRC-255:R004": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "IMPLEMENTED",
+      "evidence": "E-15786",
+      "text": "A requirement that is still valid but blocked externally must not be closed under finding_invalidated",
+      "verification": "python tools/test_finding_invalidated_closure.py -> PASS",
+      "work": "T-1795"
+    },
+    "SRC-255:R005": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "IMPLEMENTED",
+      "evidence": "E-15786",
+      "text": "If only part of a ticket is fulfilled, require an authorized scope split or durable continuation; never silently redefine the original verify field",
+      "verification": "python tools/test_finding_invalidated_closure.py -> PASS",
+      "work": "T-1795"
+    },
+    "SRC-255:R006": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "IMPLEMENTED",
+      "evidence": "E-15786",
+      "text": "Apply semantic closure enforcement through canonical finish_ticket and ticket done with zero-write refusal before invalid closure",
+      "verification": "python tools/test_finding_invalidated_closure.py -> PASS",
+      "work": "T-1795"
+    },
+    "SRC-255:R007": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "IMPLEMENTED",
+      "evidence": "E-15786",
+      "text": "A same-ticket event that merely records preparation, progress or unrelated checks without premise disproof is refused with an explicit diagnostic code",
+      "verification": "python tools/test_finding_invalidated_closure.py -> PASS",
+      "work": "T-1795"
+    },
+    "SRC-255:R008": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "IMPLEMENTED",
+      "evidence": "E-15786",
+      "text": "Genuine typed premise invalidation with verifiable disproof is accepted",
+      "verification": "python tools/test_finding_invalidated_closure.py -> PASS",
+      "work": "T-1795"
+    },
+    "SRC-255:R009": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "IMPLEMENTED",
+      "evidence": "E-15786",
+      "text": "Continuation and convergence reporting must distinguish unworked tasks, fulfilled acceptance, pending external gates, and publication prohibition",
+      "verification": "python tools/test_finding_invalidated_closure.py -> PASS",
+      "work": "T-1795"
+    },
+    "SRC-255:R010": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "IMPLEMENTED",
+      "evidence": "E-15786",
+      "text": "Executable regression tests prove refusals on invalid premise citations, acceptance on genuine disproof, and local SHIP compatibility",
+      "verification": "python tools/test_finding_invalidated_closure.py -> PASS",
+      "work": "T-1795"
+    },
+    "SRC-255:R011": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "IMPLEMENTED",
+      "evidence": "E-15786",
+      "text": "Historical valid closures and immutable logs are preserved without retroactive rewrites",
+      "verification": "python tools/test_finding_invalidated_closure.py -> PASS",
+      "work": "T-1795"
+    }
+  },
+  "schema_version": 1
+}

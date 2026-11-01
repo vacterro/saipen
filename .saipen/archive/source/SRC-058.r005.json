@@ -1,0 +1,34 @@
+{
+  "clauses": {
+    "SRC-058:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "T-1385 implementation stays proven: focused canonical-route families green and the live route proof preserved; no redo unless bytes differ"
+    },
+    "SRC-058:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Causality investigation of the repeated PCN refusals completes with per-pair classification from the host session store"
+    },
+    "SRC-058:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "The omitted T-1384 closure bytes in entry.py are allocated a narrow corrective ticket and committed under it, excluded from T-1385"
+    },
+    "SRC-058:R004": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "The foreign injector/runtime provenance delta is investigated and classified from evidence before any use"
+    },
+    "SRC-058:R005": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "The foreign delta is adopted under its own canonical ticket with bytes preserved and proven"
+    }
+  },
+  "derived_at": "2026-09-18T21:03:16Z",
+  "derived_from": "SRC-058",
+  "interpretation_revision": 5,
+  "schema_version": 1,
+  "source_sha256": "dc4d91943214122373df05a96109a26fa52eb8d9f0b02ce0fdf2e263dce1525b"
+}

@@ -1,0 +1,39 @@
+{
+  "clauses": {
+    "SRC-330:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Ingest and evaluate external audit report audit/SAIHANDOFF_FASTPROMPTER_PERSONAL_AUDIO_RESTORATION.md for FastPrompter audio restoration and public cleanliness requirements."
+    },
+    "SRC-330:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Preserve operator personal audio configuration: local application experience must not be altered by public compliance remediation; personal audio remains available locally."
+    },
+    "SRC-330:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Resolver priority: personal override for legacy bare refs, explicit namespaces (user:, addon:, builtin:) resolved to correct roots."
+    },
+    "SRC-330:R004": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Non-destructive settings migration: migrate_sound_settings must never erase valid personal selections or overwrite user-selected sound IDs during temporary fallback."
+    },
+    "SRC-330:R005": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Ambience preservation: preserve existing selected computalk1.wav locally when original bytes exist; public distribution uses clean ambient_loop.wav."
+    },
+    "SRC-330:R006": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Public GitHub cleanliness: keep public source, packaging, and archives free of restricted/proprietary audio; document analysis at .saipen/evidence/T-1921-audio-restoration/ANALYSIS.md and cleanly consume layer upon completion."
+    }
+  },
+  "derived_at": "2026-10-25T13:56:26Z",
+  "derived_from": "SRC-330",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "eee73aad905e76b0adef553fcef4938029393f7614606acb35b06e504d8ea41e"
+}

@@ -1,0 +1,23 @@
+{
+  "archive_ref": ".saipen/archive/retired/SRC-347.md",
+  "authority_grant": "system:INVALID_INVOCATION",
+  "authority_receipt": null,
+  "authority_sha256": null,
+  "discovery_event": null,
+  "evidence": {
+    "kind": "event",
+    "ref": "E-19243"
+  },
+  "evidence_bound_event": "E-19244",
+  "evidence_note": null,
+  "linked_work": "T-1958",
+  "reason": "INVALID_INVOCATION",
+  "receipt_id": "SRC-347",
+  "retired_at": "2026-10-29T21:38:07Z",
+  "retired_by": "saipen-cli",
+  "retirement_event": "E-19244",
+  "schema_version": 2,
+  "source_sha256": "c764c7d9547e2b3c0c58960ecc970031becdcd5b982fef41ac77de48e9caf0d2",
+  "status": "INVALID",
+  "ticket_ref": ".saipen/archive/retired/T-1958.json"
+}

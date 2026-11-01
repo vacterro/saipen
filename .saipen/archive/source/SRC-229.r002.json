@@ -1,0 +1,19 @@
+{
+  "clauses": {
+    "SRC-229:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Verify whether the sidecar is genuinely absent from the live authoritative project tree."
+    },
+    "SRC-229:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Identify the original ledger citation and any authorized recovery location."
+    }
+  },
+  "derived_at": "2026-10-13T00:54:45Z",
+  "derived_from": "SRC-229",
+  "interpretation_revision": 2,
+  "schema_version": 1,
+  "source_sha256": "fdacbb8bce13646bebc911d723cf01456c58fb7eeb72c971fdc07e8370e977df"
+}

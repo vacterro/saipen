@@ -1,0 +1,14 @@
+{
+  "requirements": {
+    "SRC-162:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "T-1587 closed with verification evidence in LOG: verify -> PASS [target: T-1587] conf: high -- cd tools && python -B -m unittest test_t1587_stale_closure_recovery -> Ran 23 tests, OK (focused suite green, matching the REVIEW-passed 23/23 recorded in the blocker); and python tools/validate.py --project-root . --gate core -> Validation complete. Agent is conformant. (33 warning(s))",
+      "text": "P1 recovery defect: stale closure metadata on non-DOWN row unreachable by canonical repair (FastPrompter T-1371 incident)",
+      "verification": "the Work this request created reached its own verification gate; see the T-1587 VERIFY cycle in .saipen/LOG.md",
+      "work": "T-1587"
+    }
+  },
+  "schema_version": 1
+}

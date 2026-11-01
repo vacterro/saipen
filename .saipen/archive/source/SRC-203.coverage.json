@@ -1,0 +1,32 @@
+{
+  "requirements": {
+    "SRC-203:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/T-1700-limisaw-handoff/REPORT.md#r001-canonical-validation-and-receipt-truth",
+      "text": "Adjudicate LIMISAW IMP-001 against the current shared engine: canonical validate must refresh and enforce the same receipt-derived conformance truth used by the router; retain historical evidence and distinguish source behavior from installed deployment.",
+      "verification": "python -B .saipen/evidence/T-1700-limisaw-handoff/triage.py verify:PASS; native validate CURRENT_FAIL then CURRENT_PASS after executed RV-000008",
+      "work": "T-1700"
+    },
+    "SRC-203:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/T-1700-limisaw-handoff/REPORT.md#r002-status-labels-authoritative-truth",
+      "text": "Adjudicate LIMISAW IMP-002 against the current shared engine: human and JSON status must present authoritative conformance truth and label legacy LOG PASS as history, never current acceptance.",
+      "verification": "python -B .saipen/evidence/T-1700-limisaw-handoff/triage.py verify:PASS; eight current matrix controls and live receipt-derived status",
+      "work": "T-1700"
+    },
+    "SRC-203:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/T-1700-limisaw-handoff/REPORT.md#r003-draft-provenance-recovery",
+      "text": "Adjudicate LIMISAW IMP-003: provide or identify a canonical provenance-preserving recovery for an active draft Improve report after installed protocol fingerprint drift; preserve RUN body and immutable completed/swept evidence; do not claim the foreign cycle repaired without live proof.",
+      "verification": "python -B .saipen/evidence/T-1700-limisaw-handoff/triage.py verify:PASS; stale append refusal, CLI REBIND_COMMITTED, unchanged RUN bytes, append and completion, immutable completed-report refusal",
+      "work": "T-1700"
+    }
+  },
+  "schema_version": 1
+}

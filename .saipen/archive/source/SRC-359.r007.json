@@ -1,0 +1,44 @@
+{
+  "clauses": {
+    "SRC-359:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "AD-001 Retry-Eligibility: Do not permit auto-replay upon timeout or crash without durable reconciliation"
+    },
+    "SRC-359:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "AD-002 Diagnostic-Correlation: Linked correlation across operator input, launcher process, and final ACK"
+    },
+    "SRC-359:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "AD-003 Delivery-Evidence: Ticket completion contract requires real canonical commit and delivery evidence"
+    },
+    "SRC-359:R004": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "AD-004 Process-Tree-Lifecycle: Verified Windows PID and descendant tree cleanup without orphan processes"
+    },
+    "SRC-359:R005": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "AD-005 Immutable-Evidence-Manifest: Phase transitions require immutable evidence bindings and REVERIFY checks"
+    },
+    "SRC-359:R006": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "AD-006 Premature-Handback-Prevention: Prohibit completion or final success before all phases and validation are DONE"
+    },
+    "SRC-359:R007": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "AD-007 Sandbox-Isolation: Diagnostic probes must not invoke continue or mutate foreign live projects"
+    }
+  },
+  "derived_at": "2026-10-31T23:24:40Z",
+  "derived_from": "SRC-359",
+  "interpretation_revision": 7,
+  "schema_version": 1,
+  "source_sha256": "1f3cf96d7a8e0e123eacf86cd6fe39fc5676e0dfe6998d5ff86480aa1ee777b1"
+}

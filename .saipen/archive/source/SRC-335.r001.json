@@ -1,0 +1,59 @@
+{
+  "clauses": {
+    "SRC-335:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "VERIFIED CURRENT BASELINE ===================================================================== STATE: phase: DONE task: none last_event: 18406 goal_tickets: 10 continuation_authority: operator_required authority_until: budget safety_valve_mode: hard_wait LATEST WORK: T-1928 \u2014 DONE source_receipt: SRC-334 request_witness: model_supplied Existing deferred TODO: T-1853 T-1854 T-1855 All depend on T-1815. Do not promote these tickets by bypassing the declared dependency. NEW IMPLEMENTATION MODULES: tools/saipen_engine/campaign.py tools/saipen_engine/host_dispatch.py tools/saipen_engine/saipal_adapter.py tools/saipen_engine/continuation_assessment.py MODIFIED INTEGRATION: tools/saipen_engine/host_iteration.py tools/saipen_engine/supervisor.py tools/saipen_engine/iteration_verdict.py tools/saipen.py TESTS: tools/test_campaign_continuation_assessment.py tools/test_campaign_matrix.py AUDIT RESULT: 33 selected tests PASS. However, the following negative controls reproduced defects:"
+    },
+    "SRC-335:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Admission succeeded without an existing grant witness."
+    },
+    "SRC-335:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "An unverified campaign published a forensic audit."
+    },
+    "SRC-335:R004": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "ACTIVE_WORK produced no actual worker execution."
+    },
+    "SRC-335:R005": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "SOURCE_AVAILABLE returned UNHANDLED_CLASSIFICATION."
+    },
+    "SRC-335:R006": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "INVALID_RUNTIME returned UNHANDLED_CLASSIFICATION."
+    },
+    "SRC-335:R007": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Two parallel host dispatches executed the same callback twice."
+    },
+    "SRC-335:R008": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "A rejected host hook was reported as successful dispatch."
+    },
+    "SRC-335:R009": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "A failed dispatch was not retried on the same controller callback."
+    },
+    "SRC-335:R010": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Corrupted campaign state was overwritten by new admission. All reproductions used isolated temporary project fixtures. No legitimate production acceptance has been demonstrated. ===================================================================== WAVE 1 \u2014 P0 AUTHORITY VALIDATION ===================================================================== TICKET: CAMP-AUTH-001 LOCATOR: tools/saipen_engine/campaign.py::admit_campaign LOCATOR: tools/saipen_engine/campaign.py::step"
+    }
+  },
+  "derived_at": "2026-10-25T19:18:27Z",
+  "derived_from": "SRC-335",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "b96ba624e939da0469193f27fc384d4897196f27fed725c5f7b2f7d3c777559f"
+}

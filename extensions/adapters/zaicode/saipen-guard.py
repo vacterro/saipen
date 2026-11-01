@@ -109,6 +109,44 @@ def seal_diagnostic(origin, fault, worker_result, worker_fault, sealed: bool) ->
     }
 
 
+def _launcher_text(root: Path | None) -> str:
+    """How the operator runs the engine for this project, in one token.
+
+    `saipen` is on PATH for an ordinary install; a source checkout is reached
+    through its own entry point. Both are one command, so the notice can end in
+    an action instead of a description.
+    """
+    if root is not None and (root / "tools" / "saipen.py").is_file():
+        return f'python "{root / "tools" / "saipen.py"}"'
+    return "saipen"
+
+
+def _seal_notice(seal: object) -> dict:
+    """The unsealed verdict on the keys the ZAICODE host actually reads.
+
+    `systemMessage` is shown to the operator; `additionalContext` reaches the
+    model. Both carry the same sentence, because either reader alone is a
+    silent leak: the model that sees only its own context would keep acting on
+    a prompt whose operator authority was never proven.
+    """
+    seal = seal if isinstance(seal, dict) else {}
+    code = str(seal.get("code") or "ORIGIN_UNREACHABLE")
+    stage = str(seal.get("stage") or "issue-origin")
+    category = str(seal.get("category") or "unavailable")
+    detail = str(seal.get("detail") or "the broker could not seal this prompt")
+    recovery = seal.get("recovery") if isinstance(seal.get("recovery"), dict) else {}
+    log = recovery.get("log")
+    notice = (
+        f"SAIPEN: this prompt was NOT authenticated ({code}, {category}, stage {stage}). "
+        f"{detail} It was recorded as model_supplied, so a bounded run will still ask for "
+        "authorization."
+    )
+    if isinstance(log, str) and log:
+        notice += f" Service log: {log}"
+    notice += " Do this: saipen host doctor"
+    return {"systemMessage": notice, "additionalContext": notice}
+
+
 def project_root(cwd: str | None) -> Path | None:
     if not cwd:
         return None
@@ -724,6 +762,18 @@ def main() -> int:
     result["seal"] = seal_diagnostic(origin, fault, worker_result, worker_fault, sealed)
     if sealed and isinstance(proof, dict):
         result["operator_origin"] = proof
+    # T-1966: everything above is this hook's OWN answer, and the host does not
+    # read it. ZAICODE validates stdout against `HookJSONOutputSchema`
+    # (`apps/zcode-cli/packages/contracts/src/hooks/index.ts`), which declares
+    # only additionalContext/continue/decision/hookSpecificOutput/reason/
+    # stopReason/suppressOutput/systemMessage; a conforming parse keeps those
+    # and DISCARDS the rest. So `sealed: false` plus a typed `seal` reason was
+    # written, parsed and thrown away on every genuine prompt, and a project
+    # whose broker was down recorded prompt after prompt as `model_supplied`
+    # with nothing on the operator's surface to say so. The verdict travels on
+    # the keys the host actually reads.
+    if not sealed:
+        result.update(_seal_notice(result.get("seal")))
 
     # A sealed cc that reached a project with a spent budget is the renewal the
     # operator already gave. Spend it from the engine THIS hook starts, because
@@ -735,6 +785,19 @@ def main() -> int:
         renewal = _renew(project, root, deadline=deadline)
         if renewal is not None:
             result["renewal"] = renewal
+
+    # Announced AFTER the attempt, because this is the only place the verdict
+    # exists: an earlier `elif` on `result["renewal"]` read a key nothing had
+    # written yet, so the branch was unreachable and a failed renewal stayed
+    # silent -- the same class of defect as the missing seal notice itself.
+    # A sealed prompt whose grant did not renew is still a bounded run that
+    # will stop at the valve, and the operator must be told why now.
+    if sealed and isinstance(result.get("renewal"), dict) and not result["renewal"].get("ok"):
+        result["systemMessage"] = (
+            "SAIPEN: the operator cc was sealed but the bounded grant was not "
+            f"renewed ({result['renewal'].get('code') or 'no code'}). Do this: "
+            f"{_launcher_text(root)} continue"
+        )
 
     # The same constraint decides the two actions this hook can now declare
     # (SRC-339). Sealing `goal`/`authorize-goal` without spending them from

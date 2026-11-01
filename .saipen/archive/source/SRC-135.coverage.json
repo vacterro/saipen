@@ -1,0 +1,41 @@
+{
+  "requirements": {
+    "SRC-135:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-10685",
+      "text": "Start with the most severe reproducible protocol defects; implement and verify a bounded repair wave that reduces unnecessary interruptions.",
+      "verification": "T-1557 VERIFY PASS conf: high E-10685: response-enforcement bypass repaired through canonical binding_brake, red control 2 of 5, focused suites green",
+      "work": "T-1557"
+    },
+    "SRC-135:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-10685",
+      "text": "Enforce the operational response contract through existing canonical runtime checks, with regression proof for any repaired bypass.",
+      "verification": "operational response contract enforced via canonical runtime checks; regression proof: pre-fix control fails 2 of 5 on the same oracle (E-10685)",
+      "work": "T-1557"
+    },
+    "SRC-135:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-10685",
+      "text": "Use coordinated subagents efficiently for independent work and repair the reproduced crew progress failure.",
+      "verification": "crew progress failure repaired: sub_spawn/sub_adopt stamp the running style_contract; pre-fix control 4 of 5 red (E-10685); coordinated scout used bounded parallel audits",
+      "work": "T-1557"
+    },
+    "SRC-135:R004": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-10685",
+      "text": "Inspect SAIMAIL availability and agent addressing, fix reproduced integration defects, and report actual messaging configuration or delivery evidence honestly.",
+      "verification": "SAIMAIL inspected and addressed: brief goes to the start actor seat, pre-fix control 2 of 2 red; real config reported honestly: workspace env-bound, saimail-local on PATH, turn-entry read OK unread 0 (E-10685)",
+      "work": "T-1557"
+    }
+  },
+  "schema_version": 1
+}

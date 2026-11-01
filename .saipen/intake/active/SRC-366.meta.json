@@ -1,0 +1,35 @@
+{
+  "linked_work": "T-1991",
+  "receipt_id": "SRC-366",
+  "received_at": "2026-11-01T06:19:51Z",
+  "redaction": {
+    "applied": false,
+    "authoritative": false,
+    "original_sha256": "76a92f4e4555824ea59545f9fd3423201229971426eb30818febced65cf1cc04",
+    "sanitized_sha256": "76a92f4e4555824ea59545f9fd3423201229971426eb30818febced65cf1cc04"
+  },
+  "request_provenance": {
+    "carrier_integrity": "MATCHED",
+    "compared_digest": "dfa9662ef24ae0932af9a6ff71da99336756dfb804019fd93b5428cc2dae1b7b",
+    "declared_by": "host_ingress",
+    "ingress_id": "ing-a146690301e07ed6",
+    "message_id": "4",
+    "session_id": "c85bf38d-081e-4c30-9df6-19844e4f64ff",
+    "witness": "model_supplied"
+  },
+  "schema_version": 1,
+  "sensitive": false,
+  "source_authority": {
+    "body_sha256": "76a92f4e4555824ea59545f9fd3423201229971426eb30818febced65cf1cc04",
+    "mode": "exact",
+    "original_available": true
+  },
+  "source_kind": "user_instruction",
+  "source_sha256": "76a92f4e4555824ea59545f9fd3423201229971426eb30818febced65cf1cc04",
+  "status": "ACTIVE",
+  "transport": {
+    "newline_normalization": "none",
+    "source_encoding": "utf-8",
+    "transport_transform": "none"
+  }
+}

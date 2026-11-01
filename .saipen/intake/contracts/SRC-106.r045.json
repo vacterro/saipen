@@ -1,0 +1,234 @@
+{
+  "clauses": {
+    "SRC-106:R001": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not create another autonomy umbrella."
+    },
+    "SRC-106:R002": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not replace SRC-100 or SRC-105."
+    },
+    "SRC-106:R003": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not interrupt the currently active T-1446 BUILD corridor."
+    },
+    "SRC-106:R004": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "QUALITY > TIME"
+    },
+    "SRC-106:R005": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "ACCEPTANCE QUALITY MUST NOT DECREASE BECAUSE THE CURRENT MODEL IS WEAKER"
+    },
+    "SRC-106:R006": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "provider model price tier reasoning tier session context size agent incarnation"
+    },
+    "SRC-106:R007": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not encode the false claim:"
+    },
+    "SRC-106:R008": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "What must not happen is:"
+    },
+    "SRC-106:R009": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "what must happen next"
+    },
+    "SRC-106:R010": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not trade larger speculative leaps for wall-clock speed."
+    },
+    "SRC-106:R011": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not persist statements such as:"
+    },
+    "SRC-106:R012": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not hard-code:"
+    },
+    "SRC-106:R013": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Canonical state must remain portable across provider/model replacement."
+    },
+    "SRC-106:R014": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "It must not make project truth vendor-specific."
+    },
+    "SRC-106:R015": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "It must not change WHAT counts as correct."
+    },
+    "SRC-106:R016": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not create five new canonical modes merely to encode these names."
+    },
+    "SRC-106:R017": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Avoid instructions that require the agent to reconstruct hidden orchestration policy from prose."
+    },
+    "SRC-106:R018": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not confuse latency with failure."
+    },
+    "SRC-106:R019": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "The supervisor must distinguish:"
+    },
+    "SRC-106:R020": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Elapsed time alone must never imply model failure."
+    },
+    "SRC-106:R021": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not turn a host timeout into lost Work."
+    },
+    "SRC-106:R022": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "load bounded recovery packet inspect current slice continue"
+    },
+    "SRC-106:R023": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "stronger model -> weaker model"
+    },
+    "SRC-106:R024": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Both must preserve:"
+    },
+    "SRC-106:R025": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do NOT yet claim that weak models achieve equal quality."
+    },
+    "SRC-106:R026": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "one misleading hypothesis where tests must overrule model confidence"
+    },
+    "SRC-106:R027": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not combine these into one opaque score initially."
+    },
+    "SRC-106:R028": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not make provider/model rankings canonical project truth."
+    },
+    "SRC-106:R029": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not implement speculative model routing from reputation."
+    },
+    "SRC-106:R030": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not route from:"
+    },
+    "SRC-106:R031": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Replacement must preserve the execution epoch."
+    },
+    "SRC-106:R032": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "do not reinterpret that as model stupidity."
+    },
+    "SRC-106:R033": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not guess support."
+    },
+    "SRC-106:R034": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "DO NOT OPTIMIZE AUTO_RECALL BELOW RELIABILITY T-1463 measured AUTO_RECALL at approximately 185 ms per model request before the new 30-second cache was added. The cache is a valid performance improvement because correctness remains bound to carrier plus STATE/BOARD/LOG identity. Preserve this ordering for future optimization:"
+    },
+    "SRC-106:R035": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Never weaken the recovery contract merely to save milliseconds."
+    },
+    "SRC-106:R036": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "DO NOT TURN QUALITY > TIME INTO PROCESS BLOAT More protocol is not automatically more quality. Every additional step must provide at least one of:"
+    },
+    "SRC-106:R037": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not duplicate the policy across many documents."
+    },
+    "SRC-106:R038": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "one canonical QUALITY > TIME invariant exists"
+    },
+    "SRC-106:R039": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "acceptance criteria remain identical across model incarnations"
+    },
+    "SRC-106:R040": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "no provider/model identity enters canonical Work truth"
+    },
+    "SRC-106:R041": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "supervisor distinguishes durable slow progress from NO_PROGRESS"
+    },
+    "SRC-106:R042": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "model downgrade preserves execution epoch and canonical Work"
+    },
+    "SRC-106:R043": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "weaker incarnation receives bounded reconstructable next action"
+    },
+    "SRC-106:R044": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "weaker incarnation cannot bypass verification or closure"
+    },
+    "SRC-106:R045": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "genuine capability absence is classified separately from reasoning failure"
+    }
+  },
+  "derived_at": "2026-09-22T18:26:04Z",
+  "derived_from": "SRC-106",
+  "interpretation_revision": 45,
+  "schema_version": 1,
+  "source_sha256": "3e74aaaefdadb6d3173ca8136a1df24227b30c4bfe39c15f262e2856fad4efa0"
+}

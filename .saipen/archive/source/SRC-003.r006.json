@@ -1,0 +1,39 @@
+{
+  "clauses": {
+    "SRC-003:R0001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "CORE-001 \u2014 journaled and owned stop/ss CLI path"
+    },
+    "SRC-003:R0002": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "CORE-002 \u2014 claim-safe, BOARD-aware and valve-correct stop_checkpoint"
+    },
+    "SRC-003:R0003": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "CORE-003 \u2014 non-recursive complete read-only test orchestrator"
+    },
+    "SRC-003:R0004": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "CORE-004 \u2014 atomic ccc entry marker and active-work checkpoint"
+    },
+    "SRC-003:R0005": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "W2-001 \u2014 owned no-follow journal intermediates"
+    },
+    "SRC-003:R0006": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "W2-002 \u2014 owned no-follow liveness cache"
+    }
+  },
+  "derived_at": "2026-08-27T17:53:40Z",
+  "derived_from": "SRC-003",
+  "interpretation_revision": 6,
+  "schema_version": 1,
+  "source_sha256": "6e02b189390aadbc91632e6e54d25ac291c9a570e4b8d5db24839133bb003e57"
+}

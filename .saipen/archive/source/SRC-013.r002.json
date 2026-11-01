@@ -1,0 +1,19 @@
+{
+  "clauses": {
+    "SRC-013:R001": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "all 16 phases remain"
+    },
+    "SRC-013:R002": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "legal DFA is unchanged unless separately ratified"
+    }
+  },
+  "derived_at": "2026-08-31T05:26:10Z",
+  "derived_from": "SRC-013",
+  "interpretation_revision": 2,
+  "schema_version": 1,
+  "source_sha256": "4264b5489fbbe4f40338cdb868f915b97ed4eac483bf4a16b68084f060a1eeb2"
+}

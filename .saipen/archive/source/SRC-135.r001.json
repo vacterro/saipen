@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-135:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Start with the most severe reproducible protocol defects; implement and verify a bounded repair wave that reduces unnecessary interruptions."
+    }
+  },
+  "derived_at": "2026-09-28T17:03:01Z",
+  "derived_from": "SRC-135",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "cd38daeb95a27b54f3ae8f0c8c57f09d93e494756b2180d8b86864362ea34a13"
+}

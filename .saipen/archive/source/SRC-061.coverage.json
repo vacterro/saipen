@@ -1,0 +1,50 @@
+{
+  "requirements": {
+    "SRC-061:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-7073/E-7074; evidence/T-1391-T-1390-fixture-contamination-20260917",
+      "text": "The fixture contamination is proven from current bytes before any mutation",
+      "verification": "SRC-059/SRC-060 bodies matched test strings; witness model_supplied; no operator carrier",
+      "work": "T-1385"
+    },
+    "SRC-061:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-7073",
+      "text": "T-1391 is retired canonically with TEST_FIXTURE_CONTAMINATION authority SRC-065",
+      "verification": "tombstone and forensic archive written; T-1390 restored by the same transaction",
+      "work": "T-1385"
+    },
+    "SRC-061:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-7074",
+      "text": "T-1390 is retired canonically with TEST_FIXTURE_CONTAMINATION authority SRC-065",
+      "verification": "tombstone and forensic archive written; T-1388 restored by the same transaction",
+      "work": "T-1385"
+    },
+    "SRC-061:R004": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-7102 through E-7113; commit 90395ddb",
+      "text": "T-1388 is restored automatically and finished narrowly with the corrective entry.py bytes",
+      "verification": "tools.test_session_binding Ran 17 OK on current bytes; scope exactly 1 path",
+      "work": "T-1385"
+    },
+    "SRC-061:R005": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-7129 auto-resume; E-7130 verify -> PASS; commit bf8b57f5",
+      "text": "Work returns automatically to T-1385 VERIFY and closes without unrelated follow-up",
+      "verification": "no unrelated ticket started; T-1367 resumes after T-1385 DONE",
+      "work": "T-1385"
+    }
+  },
+  "schema_version": 1
+}

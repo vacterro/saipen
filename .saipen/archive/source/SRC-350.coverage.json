@@ -1,0 +1,14 @@
+{
+  "requirements": {
+    "SRC-350:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "T-1969 closed with verification evidence in LOG: verify -> PASS [target: T-1969] conf: high -- python -B -m unittest tools.test_t1969_finding_revision_identity ran 4 of 4 green on the current tree: changed bytes under an unchanged finding id are still yielded, an unchanged committed finding is still suppressed, a legacy row does not suppress a different corpus, and a scoped row still suppresses its own",
+      "text": "SAIPAL publication suppresses a changed finding under an unchanged finding_id, and a legacy ack row with source_digest None matches every corpus: bind suppression to a validated revision identity and scope legacy acks through authoritative destination receipts",
+      "verification": "the Work this request created reached its own verification gate; see the T-1969 VERIFY cycle in .saipen/LOG.md",
+      "work": "T-1969"
+    }
+  },
+  "schema_version": 1
+}

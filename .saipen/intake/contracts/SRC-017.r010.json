@@ -1,0 +1,59 @@
+{
+  "clauses": {
+    "SRC-017:R1": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "A confirmed bug fix requires a causal A/B comparison: the SAME regression test, fixture, oracle and relevant verification configuration must FAIL against the pre-fix implementation and PASS against the post-fix one; the variable between red and green is the implementation under repair, never the definition of success"
+    },
+    "SRC-017:R10": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "The audit closes as ALREADY_COVERED with a proven chain, or as GAP_CONFIRMED naming the missing invariant, why current rules miss it, the minimal normative owner, a machine-testable scenario, a red control, the legitimate-test-change escape path, acceptance criteria and which existing mechanisms are reused"
+    },
+    "SRC-017:R2": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "SAIPEN must not allow VERIFY PASS, REVIEW SHIP, DONE or COMPLETE on the transition where the implementation is unfixed and the fixture, expected value or input domain was changed so the failing path is no longer executed"
+    },
+    "SRC-017:R3": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Legitimate test changes must remain possible: a changed verifier invalidates prior verifier evidence rather than being banned, and the agent re-establishes the chain with an independent reason, a new red control, and no pairing of the old FAIL with the new PASS"
+    },
+    "SRC-017:R4": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Cheap evidence binding: verifier identity is the test command plus the content identity of the relevant test, fixture and oracle, plus the subject revision"
+    },
+    "SRC-017:R5": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "A hash proves the verifier changed or did not change, never that it is semantically correct; verifier integrity and red-control capability are both required and neither is sufficient alone"
+    },
+    "SRC-017:R6": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "Mandatory three-way regression: buggy subject with the original fixture FAILs, fixed subject with the SAME fixture PASSes and is admissible fix evidence, buggy subject with a weakened fixture PASSes and MUST NOT count as fix evidence"
+    },
+    "SRC-017:R7": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "REVIEW must be able to see whether tests, fixtures or oracles changed, why, whether the previous FAIL belongs to the same verifier version, and whether the current verifier can still detect the original bug; all tests pass is not by itself evidence"
+    },
+    "SRC-017:R8": {
+      "actionable": true,
+      "class": "non-goal",
+      "text": "Do not build a large hash-ledger subsystem for one invariant, and do not create a second mechanism where the existing VERIFY regression rule, instrument-control rule, REVIEW independence and conformance red controls can be extended"
+    },
+    "SRC-017:R9": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "Mutation check: from the fixed state restore the buggy implementation, change nothing about the regression test, and confirm it goes RED again; a restored bug that stays green means the regression evidence is invalid and the fix was never necessary for it"
+    }
+  },
+  "derived_at": "2026-09-03T16:19:29Z",
+  "derived_from": "SRC-017",
+  "interpretation_revision": 10,
+  "schema_version": 1,
+  "source_sha256": "504306b4cf43ed1622e96909fec7f233bee124a718c99b42c3a530a2039c4a13"
+}

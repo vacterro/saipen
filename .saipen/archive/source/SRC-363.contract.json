@@ -1,0 +1,64 @@
+{
+  "clauses": {
+    "SRC-363:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "DRIFT-001 Canonical-Log-Integrity: Direct manual edits to LOG.md strictly proscribed; all event mutations require saipen writer"
+    },
+    "SRC-363:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "DRIFT-002 Baseline-Identity-Provenance: Surrogate archive or working tree hash must not masquerade as audited baseline identity"
+    },
+    "SRC-363:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "DRIFT-003 Diagnostic-Attribution-Honesty: Local regressions must not be classified as pre-existing without historical evidence"
+    },
+    "SRC-363:R004": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "DRIFT-004 Terminal-Disposition-Discipline: Requirements must not remain unresolved or unverified when claiming ticket completion"
+    },
+    "SRC-363:R005": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "DRIFT-005 Contract-Locator-Precision: Source requirements must cite existing file paths and validated symbol locators"
+    },
+    "SRC-363:R006": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "DRIFT-006 Pipeline-Exit-Observability: Shell pipelines must not mask non-zero failure exit codes via downstream commands"
+    },
+    "SRC-363:R007": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "DRIFT-007 Loop-Detection-and-No-Progress: Scheduler must detect repeated identical verification attempts without durable delta"
+    },
+    "SRC-363:R008": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "DRIFT-008 Response-Presentation-Discipline: Machine digest contract and style rules must suppress identity narration spam"
+    },
+    "SRC-363:R009": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "DRIFT-009 Telemetry-Attribution-Consistency: Session token accounting must not display contradictory zero projection counts"
+    },
+    "SRC-363:R010": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "DRIFT-010 Operator-Instruction-Precedence: Explicit user requests override persisted continuation with documented payload preservation"
+    },
+    "SRC-363:R011": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "DRIFT-011 Cross-Project-Seat-Boundary: Local project documentation work must be separated from upstream protocol tickets"
+    }
+  },
+  "derived_at": "2026-10-31T23:50:17Z",
+  "derived_from": "SRC-363",
+  "interpretation_revision": 11,
+  "schema_version": 1,
+  "source_sha256": "adf10c64c0c821c507de3a15e89f966ca15d8c5cf73510a9fe7bfbc1adad4e7e"
+}

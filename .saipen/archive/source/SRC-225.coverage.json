@@ -1,0 +1,77 @@
+{
+  "requirements": {
+    "SRC-225:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/T-1726-closed-contracts/R001-DIAGNOSIS-current-07.md",
+      "text": "Inspect closure evidence, source closure, post-verification changes, invalidation, knowledge/evidence dependencies, fingerprints, ownership/admission and current reconciliation. Distinguish classifications A-E only from evidence; preserve uncertainty about the FastPrompter incident and do not implement its application fixes.",
+      "verification": "Exact current and preserved closure/intake/debt/execution/status owners inspected. Manual --run existed; structured focused currentness was missing. Original FastPrompter classifications remain qualified unknown, without fraud or bypass attribution.",
+      "work": "T-1726"
+    },
+    "SRC-225:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/T-1726-closed-contracts/BEHAVIOR-EVIDENCE-current-08.md",
+      "text": "Associate closed verified Work and its source requirements with meaningful implementation dependencies and reproducible focused verification. Detect affected dependencies, recheck focused behavior, distinguish CURRENT_REGRESSION from byte-change suspicion and inability to verify, and preserve original historical evidence unchanged.",
+      "verification": "membership-regression-contract.json E-14782 FAIL E-14783 PASS; test_t1726_closed_contracts.py 33 tests PASS",
+      "work": "T-1726"
+    },
+    "SRC-225:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/T-1726-closed-contracts/REPORT.md",
+      "text": "Keep newly found defects under ordinary legal owned Work, reuse active successor repairs and create no duplicate tickets. Avoid rerunning every historical test after unrelated edits; bound record, path and byte work for large repositories; report exact unavailable-verification reasons; reuse existing vocabulary and RV journals rather than a parallel state machine.",
+      "verification": "closed_contracts.py bounded limits and active successor reuse verified in test_t1726_closed_contracts.py",
+      "work": "T-1726"
+    },
+    "SRC-225:R004": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/T-1726-closed-contracts/BEHAVIOR-EVIDENCE-current-08.md",
+      "text": "Exercise all eight negative controls: incorrect later implementation, removed dependency, deleted or weakened test, harmless formatting, behavior-preserving refactor, existing active successor repair, simultaneous agents, and immutable historical receipt with stale current validation. Changed bytes alone must not prove failure.",
+      "verification": "All eight requested controlled conditions execute in current complete6327/0 family; archived source/successor preservation and two distinct actor requests through actual writer lock are explicitly bounded, without live host authentication claims.",
+      "work": "T-1726"
+    },
+    "SRC-225:R005": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/T-1726-closed-contracts/BEHAVIOR-EVIDENCE-current-08.md",
+      "text": "Prefer safe degraded engineering operation. Suspected historical regression must not freeze unrelated Work, diagnostics or development. Block only the unsafe operation or violated integrity guarantee. Never silently treat confirmed regression as already VERIFIED; never rewrite source history.",
+      "verification": "Current source route/status integration and6327/0 native/read-only/dry-run/provenance/budget/failure controls preserve historical bytes, emit honest unavailable observations, create no duplicate Work and retain operation-specific safety without a new global admission brake.",
+      "work": "T-1726"
+    },
+    "SRC-225:R006": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/T-1726-closed-contracts/REPORT.md",
+      "text": "Run focused protocol tests, relevant lifecycle tests, unchanged before/after regression controls and supported full verification gates. Measure detection overhead. Document actual root cause, correction, false-positive and false-negative controls, limitations, and migration impact.",
+      "verification": "full 6,330 core-unit family PASS E-14788; regression pair E-14782/E-14783; overhead in performance-current-09.json",
+      "work": "T-1726"
+    },
+    "SRC-225:R007": {
+      "actionable": true,
+      "class": "non-goal",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/T-1730-verifier-fixtures/scope-preservation-current-08.json",
+      "text": "No FastPrompter production edits, mass historical reopening, global byte-change stop, evidence deletion, fabricated Work identifiers, commit, tag, push, release or deployment.",
+      "verification": "Main HEAD and semantic staged bytes remain exact original values. Owned writes stay in SAIPEN; no application edit, mass reopening, immutable evidence deletion, fabricated production Work ID or main-repository commit/tag/push/release/deploy. Temporary native gate fixtures remain separate.",
+      "work": "T-1726"
+    },
+    "SRC-225:R008": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/T-1726-closed-contracts/REPORT.md",
+      "text": "A historical verified requirement can become suspect and demonstrably regress without destroying historical closure or blocking unrelated safe engineering. Preserve the requested final report fields in a durable report: status, root cause, files, rule, red/green controls, false-positive rate, performance, remaining risks and next exact action.",
+      "verification": "durable REPORT.md contains all ten requested fields and limitations; proven in test_t1726_contract_oracle.py",
+      "work": "T-1726"
+    }
+  },
+  "schema_version": 1
+}

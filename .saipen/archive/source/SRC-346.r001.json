@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-346:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "ticket closure latency: measure real CLI launch + suite cost, reuse audit, batch economics"
+    }
+  },
+  "derived_at": "2026-10-29T07:46:19Z",
+  "derived_from": "SRC-346",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "7aa8cf8eb71d4486e1648019975b087a35b0a576c130dd5d9d68e496388f328b"
+}

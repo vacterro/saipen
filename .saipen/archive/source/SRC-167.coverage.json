@@ -1,0 +1,95 @@
+{
+  "requirements": {
+    "SRC-167:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-19113",
+      "text": "Register WAIT_OPERATOR in the canonical error registry; emitted entry refusals retain the code without unregistered_code, and registry consistency/inventory tests cover this construction.",
+      "verification": "python: Result(ok=False, code=WAIT_OPERATOR) has no unregistered_code and Result(TOTALLY_MADE_UP) does; test_refusal_registry Ran 6 tests OK; error_codes 332 entries contains WAIT_OPERATOR",
+      "work": "T-1606"
+    },
+    "SRC-167:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-19113",
+      "text": "Prevent newly supplied invalid next_action values at the authoritative STATE construction boundary. Reuse one canonical grammar across the writer, strict reader, checkpoint validation and reconciliation; preserve field ownership and refuse malformed PHASE/RUN/RESUME or arbitrary operator prose without coercion.",
+      "verification": "writer, validator, checkpoint and reconcile share ALL_PHASES; test_the_validator_agrees_with_the_engine_on_every_verdict OK after red control FAILED (failures=3) on PHASE BANANA; test_next_action_deadlock Ran 12 tests OK",
+      "work": "T-1606"
+    },
+    "SRC-167:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-19113",
+      "text": "Canonical operator WAIT round-trips through strict STATE readers, status, continue and recovery without a spurious RECONCILE_REAUTH_REQUIRED; WAIT is not executable and cannot itself grant mutation or invent an operator decision. Existing valid PHASE/RUN/RESUME/saipen forms remain valid.",
+      "verification": "scratch BLOCKED/task-none WAIT: status ok returns WAIT verbatim, continue ok action 'saipen status' reason unblock RESTATE_AND_STOP, reconciliation CLEAN, no RECONCILE_REAUTH_REQUIRED, no payload executed",
+      "work": "T-1606"
+    },
+    "SRC-167:R004": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-19113",
+      "text": "Legacy malformed next_action remains boundedly recoverable through an explicit canonical WAIT replacement; preserve original STATE and decision evidence, keep executable grammar strict, and make printed recovery syntax directly executable with global flags in the documented position and spaces/punctuation preserved.",
+      "verification": "freeform legacy next_action refused by status VALIDATION_FAILED then repaired by recover code REPAIRED event E-7 classification NEXT_ACTION_CANONICALLY_PROJECTABLE to 'saipen status'; historical bytes kept in .saipen/recovery/state-legacy-output/reconcile-20261028222523199458.STATE.md",
+      "work": "T-1606"
+    },
+    "SRC-167:R005": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-19113",
+      "text": "Prove deterministic controls A-F: original unregistered WAIT_OPERATOR and invalid STATE construction are red before repair; unchanged controls pass afterward; valid WAIT, no WAIT execution, valid action forms and an exact rendered recovery command are exercised. Keep verification independent from the production subject.",
+      "verification": "controls A-F each exercised: A marker absent for WAIT_OPERATOR and present for an unknown code, B five freeform values refused, C status/continue CLEAN round-trip, D continue RESTATE_AND_STOP with no execution, E four legal forms accepted and PHASE DONE T-999 still refused, F quotes/escaped comma/semicolon reach the checker byte for byte",
+      "work": "T-1606"
+    },
+    "SRC-167:R006": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-19113",
+      "text": "Relevant state/recovery/refusal tests, registry validation, canonical validator and declared full core family pass truthfully; report exact focused counts and any skip/capability limitations without baselining regressions.",
+      "verification": "core-unit 068d40626d14c9b0 status PASS ran 8387 red 0 jobs 1 duration 7954.5s; 11 focused suites re-run green 255 tests with 2 capability skips in test_t1363_zero_manual_entry; validator reports only the pre-existing EX-000022 closure-provenance FAIL",
+      "work": "T-1606"
+    },
+    "SRC-167:R007": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-19113",
+      "text": "Use a proper claimed SAIPEN Work lifecycle and canonical operations throughout; preserve BOARD/STATE/LOG provenance, retain source integrity and perform source/audit cleanup only through their normal journaled closure gates.",
+      "verification": "T-1606 claimed, blocked, unblocked with changed evidence, built, verified, reviewed and shipped only through saipen verbs: E-19110 verdict, E-19112 transition, E-19113 measurement, E-19114 scope; no BOARD/STATE/LOG byte hand-edited in this tree; probe project outside the checkout and deleted",
+      "work": "T-1606"
+    },
+    "SRC-167:R008": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-19113",
+      "text": "Persist a reviewable report of root causes, canonical grammar, legacy recovery, exact changed paths, same-oracle red/green evidence, focused/full validation, lifecycle evidence and remaining risks.",
+      "verification": "evidence dir holds REPORT.md and CLAUSE-MEASUREMENT.md with root causes, canonical grammar, legacy recovery, changed-path table, same-oracle red/green pairs, focused and full validation and remaining risks",
+      "work": "T-1606"
+    },
+    "SRC-167:R009": {
+      "actionable": true,
+      "class": "non-goal",
+      "disposition": "NOT_APPLICABLE",
+      "evidence": "E-19113",
+      "text": "Do not modify SAIPAL, add release roots, resolve SAIPAL conflicts, weaken strict executable grammar, execute WAIT payloads, invent authority, redesign the whole state machine or rewrite historical evidence. Publication remains excluded by the controlling run source.",
+      "verification": "no SAIPAL file, release root or historical evidence touched; the executable grammar was narrowed not weakened (Control E); no WAIT payload executed (Control D); publication excluded and not attempted",
+      "work": "T-1606"
+    },
+    "SRC-167:R010": {
+      "actionable": false,
+      "class": "context",
+      "disposition": "NOT_APPLICABLE",
+      "evidence": "E-19113",
+      "text": "The imported report describes a legitimate operator-only boundary with zero of 751 sessions runnable. A read-only current SAIPAL STATE observation is now DONE/saipen continue, so the historical operator prose is a reported shape, not a claim about its current bytes or an invitation to mutate that project.",
+      "verification": "the imported report is context about another project bytes; this run made no claim about SAIPAL's current STATE and did not read or mutate it",
+      "work": "T-1606"
+    }
+  },
+  "schema_version": 1
+}

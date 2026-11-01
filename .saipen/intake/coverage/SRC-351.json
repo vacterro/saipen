@@ -1,0 +1,122 @@
+{
+  "requirements": {
+    "SRC-351:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "refusal-separation.log: saipal continue returns code FOREIGN_PROTOCOL_COMMAND with protocol=saipal and requested_command='saipal continue' (the full invocation), not VALIDATION_FAILED/unknown command",
+      "text": "A foreign protocol command is refused with a typed FOREIGN_PROTOCOL_COMMAND that names the protocol owner, the full invocation and the route to run instead, and is never refused as a bare unknown command.\r",
+      "verification": "PYTHONPATH=tools python -m unittest tools.test_t1968_foreign_protocol_route -> Ran 15 tests, OK (t1968-module-fresh.log)",
+      "work": "T-1970"
+    },
+    "SRC-351:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "refusal-separation.log + registry-and-skills.log: the response carries protocol, requested_command (full invocation 'saipal continue' / 'pal') and next_action, plus the exact_namespace declaration naming rule EXACT-NAMESPACE-01, owner, test and refusal_code",
+      "text": "The refusal names the owning protocol, the exact requested command, and carries next_action guidance, so the caller cannot read it as a typo.\r",
+      "verification": "PYTHONPATH=tools python -m unittest tools.test_t1968_foreign_protocol_route -> Ran 15 tests, OK",
+      "work": "T-1970"
+    },
+    "SRC-351:R003": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "positive-controls.log: 'cc' exit=0 and 'continue' exit=0 returning action 'PHASE SCOUT T-1970' with code None -- neither is attributed to a foreign protocol",
+      "text": "SAIPEN verbs and shortcuts (cc, continue, next, status) remain SAIPEN-owned and unaffected by foreign-protocol routing.\r",
+      "verification": "PYTHONPATH=tools python -m unittest tools.test_t1968_foreign_protocol_route -> Ran 15 tests, OK; focused CONTRACT gate ran 52 PASS (record b77263370babbb58-20261031T015648891868Z)",
+      "work": "T-1970"
+    },
+    "SRC-351:R004": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "positive-controls.log: foreign_protocol_owner('saipal') returns the declaration with exact_namespace present, and None for all three damaged forms (block deleted / block not a dict / protocols not a dict) -- no owner is invented",
+      "text": "A malformed or absent exact_namespace block degrades to the old refusal without inventing an owner.\r",
+      "verification": "PYTHONPATH=tools python -m unittest tools.test_t1968_foreign_protocol_route -> Ran 15 tests, OK (degraded-registry control)",
+      "work": "T-1970"
+    },
+    "SRC-351:R005": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "focused CONTRACT gate over the router, refusal-registry and exact-namespace suites: verdict PASS ran 52 this cycle",
+      "text": "The router and registry suites are unaffected by the exact-namespace declaration.\r",
+      "verification": "python tools/core_unit.py focused T-1970 --pattern test_t1968_foreign_protocol_route.py --pattern test_router_closure_readiness.py --pattern test_refusal_registry.py --pattern test_refusal_routes.py:PASS record: .saipen/evidence/focused-unit/b77263370babbb58-20261031T020458777072Z.json",
+      "work": "T-1970"
+    },
+    "SRC-351:R006": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "BLOCKED",
+      "evidence": "exact-namespace ownership is implemented and proven SAIPEN-side (R001-R005), but the audit's SS11 clause requires it in the HOST dispatcher: 'an explicit /saipen <cmd> must never be dispatched to a skill whose name merely resembles it' is a FreeBuff skill-picker rule. SAIPAL remains visible in ~/.agents/skills/ while the host declares pre_output_interception NONE.",
+      "text": "Never present a foreign protocol as a candidate for an explicit SAIPEN command; an explicit /saipen <cmd> must never be dispatched to a skill whose name merely resembles it, and exact namespace ownership is decided before semantic skill matching.\r",
+      "verification": null,
+      "work": "T-1970"
+    },
+    "SRC-351:R007": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "BLOCKED",
+      "evidence": "the NO_HOME no-substitution rule is stated in REGISTRY.json exact_namespace.no_home_substitution and enforced in SAIPEN's refusal, but the audit's SS11 form requires the HOST to stop treating a protocol refusal as a cue to change working directory. That behaviour was observed on FreeBuff and is outside this repository's control.",
+      "text": "A NO_HOME or similar refusal from a foreign protocol must not trigger a working-directory change into another protocol repository, a sibling-repo search, or the creation of that protocol home.\r",
+      "verification": null,
+      "work": "T-1970"
+    },
+    "SRC-351:R008": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "BLOCKED",
+      "evidence": "the audit's SS11 item 4 requires the HOST to re-read ~/.agents/skills/ on session start. SAIPEN cannot control a host's session-start inventory load; the installed SAIPEN skill is byte-identical (sha256 8efc2010...) but the stale-inventory risk belongs to FreeBuff.",
+      "text": "Re-read the installed skills directory on session start so a stale inventory cannot map a namespace to the wrong owner.\r",
+      "verification": null,
+      "work": "T-1970"
+    },
+    "SRC-351:R009": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "BLOCKED",
+      "evidence": "audit SS8 criterion 'FreeBuff stops offering a substitute' is INSTALLED_HOST, BLOCKED: the live adapter registry declares freebuff declared_strength=ADVISORY response_enforcement=ADVISORY pre_output_interception=NONE (host-and-bzrea-state.log), so no SAIPEN-side change can prove or enforce the host skill picker. Needs FreeBuff implementation under SS11.",
+      "text": "The FreeBuff host stops offering a substitute protocol for an explicit SAIPEN command.\r",
+      "verification": null,
+      "work": "T-1970"
+    },
+    "SRC-351:R010": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "BLOCKED",
+      "evidence": "audit SS8 criterion 'live /saipen continue in _BZ_REA on FreeBuff' is LIVE_END_TO_END, BLOCKED: the SAIPEN-side route is proven (bzrea-host-entry.json code PATH_LAUNCHER, degraded [], command_allowed true) but no FreeBuff run has been performed, and no test in this repository can supply one.",
+      "text": "A live /saipen continue in _BZ_REA on FreeBuff executes the SAIPEN route end to end.\r",
+      "verification": null,
+      "work": "T-1970"
+    },
+    "SRC-351:R011": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "BLOCKED",
+      "evidence": "audit SS9: the claimed SAIPAL side effects (LOG 740..746, ~40 accepted bundles, five NO_DRIFT receipts, session index 1019) are unverifiable from this repository, which holds no authority over .saipal/. Reconciliation is the SAIPAL owner's work through its own append-only operations.",
+      "text": "Foreign-protocol side effects are reconciled by their owner through canonical append-only operations, preserving chronology and provenance, with no rewrite and no deletion.\r",
+      "verification": null,
+      "work": "T-1970"
+    },
+    "SRC-351:R012": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "host-and-bzrea-state.log: live adapter registry reports freebuff declared_strength=ADVISORY response_enforcement=ADVISORY pre_output_interception=NONE, and the audit SS10 claims no native pre-render interception and no INSTALLED_HOST acceptance for this host",
+      "text": "No native pre-render interception is claimed for a host that declares response enforcement ADVISORY and pre-output interception NONE.\r",
+      "verification": "registry read: extensions/adapters/registry.json adapters[freebuff] capability fields, host-and-bzrea-state.log measured this cycle",
+      "work": "T-1970"
+    },
+    "SRC-351:R013": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "SRC-351 meta records request_provenance.witness=model_supplied; saipen_engine/operator_task.py defines model_supplied as 'operator origin is unverified' and states a carrier may establish matching bytes but the receipt does not promote that into identity. This audit therefore claims no operator-origin upgrade for the incident request.",
+      "text": "SAIPAL recognition is not authorization: a model-supplied witness is never upgraded to an authenticated operator-origin event.\r",
+      "verification": "python tools/core_unit.py focused T-1970 --pattern test_operator_task_witness.py --pattern test_ingress_authority.py:PASS record: .saipen/evidence/focused-unit/b77263370babbb58-20261031T021107330283Z.json",
+      "work": "T-1970"
+    }
+  },
+  "schema_version": 1
+}

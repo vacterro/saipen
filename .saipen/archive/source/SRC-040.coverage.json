@@ -1,0 +1,59 @@
+{
+  "requirements": {
+    "SRC-040:R0001": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/T-1324-live-acceptance-20260914.md",
+      "text": "Every enumerated hard-stop fixture resolves to valid/runnable state, at least one admitted exact canonical repair/control operation, or an explicit external/forensic zero-local-mutation terminal result.",
+      "verification": "E-6174",
+      "work": "T-1324"
+    },
+    "SRC-040:R0002": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/T-1324-live-acceptance-20260914.md",
+      "text": "No fixture has needs_local_mutation=true together with all local repair operations refused.",
+      "verification": "E-6174",
+      "work": "T-1324"
+    },
+    "SRC-040:R0003": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/T-1324-live-acceptance-20260914.md",
+      "text": "AUDAPACK stale-blocker recovery reaches canonical repair or an exact operator-decision command with zero manual STATE edits and zero guard disabling.",
+      "verification": "E-6174",
+      "work": "T-1324"
+    },
+    "SRC-040:R0004": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/T-1324-live-acceptance-20260914.md",
+      "text": "SAITULS legacy next_action and unattested-ticket recovery fixtures reach canonical repair or an exact operator-decision command; immutable history failure remains a zero-write terminal path.",
+      "verification": "E-6174",
+      "work": "T-1324"
+    },
+    "SRC-040:R0005": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "273 focused recovery/reconcile/Fleet/guard/router tests PASS",
+      "text": "Focused recovery regression families pass.",
+      "verification": "E-6174",
+      "work": "T-1324"
+    },
+    "SRC-040:R0006": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "core boundary: PATCH_OWNED=0 PRE_EXISTING=15 ENVIRONMENTAL=0 UNKNOWN=0",
+      "text": "Broad/core validation classifies PATCH_OWNED=0 and UNKNOWN=0.",
+      "verification": "E-6174",
+      "work": "T-1324"
+    }
+  },
+  "schema_version": 1
+}

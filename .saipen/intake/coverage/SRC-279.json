@@ -1,0 +1,77 @@
+{
+  "requirements": {
+    "SRC-279:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "BLOCKED",
+      "evidence": ".saipen/evidence/T-1821-source-recovery/external-t301-20261021.json",
+      "text": "SAIHANDOFF T-301 live input acceptance and readable reporting: the receipt body is a single title line, so the only derivable requirement is that T-301 (whatever it turns out to be) demonstrate live input acceptance and produce readable reporting. No handoff document, acceptance criteria, target system, or failure description accompanies it on this machine.",
+      "verification": "Read-only real SAITULS BOARD still blocks T-301 on real vendor acceptance and has existing approval-dependent T-302; local rendering proof does not satisfy unconditional live input acceptance. Original R001 text and provenance preserved.",
+      "work": "T-1821"
+    },
+    "SRC-279:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "IMPLEMENTED",
+      "evidence": "E-16958",
+      "text": "Regression A: a raw multiline response remains multiline once delivered to a Markdown host -- every line a field occupies must be a CommonMark hard break (two spaces before the newline), because a bare newline inside a paragraph run is a soft break that joins the lines with a space.",
+      "verification": "Native seven-test same-oracle regression and actual installed Markdown component prove canonical field hard breaks; current response suite passes.",
+      "work": "T-1821"
+    },
+    "SRC-279:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "IMPLEMENTED",
+      "evidence": "E-16958",
+      "text": "Regression B: structured result fields are not concatenated -- each canonical field keeps its own line and its own LABEL: prefix when the reply is rendered, and the number of visible lines equals the number of fields emitted.",
+      "verification": "Current 158-test response selection and the seven-test renderer oracle retain each canonical label on its own line.",
+      "work": "T-1821"
+    },
+    "SRC-279:R004": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-16958",
+      "text": "Regression C: the canonical response checks still pass on the readable form -- render_boundary output validates with response_errors returning no errors, stays within its declared visible-line and character budget, and the existing response suites (contract, digest, delivery, fact binding, chat style, hush runtime) stay green.",
+      "verification": "All seven response patterns pass 158 tests under the bound native runtime; response checker, budgets, fact binding, delivery, chat style and hush remain enforced.",
+      "work": "T-1821"
+    },
+    "SRC-279:R005": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-16958",
+      "text": "Regression L: technical detail is preserved in durable evidence and not dumped into the operator-facing reply -- the surface carries only O(1) counts/categories and at most one reference line; a multi-line DETAILS value is hard-broken like every other line rather than collapsed.",
+      "verification": "Current renderer tests retain bounded summaries and durable evidence pointers, including internal multiline field hard breaks; no details-budget waiver.",
+      "work": "T-1821"
+    },
+    "SRC-279:R006": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "BLOCKED",
+      "evidence": "E-16958",
+      "text": "Section 5 diagnosis: identify exactly where line breaks are lost by comparing raw agent response, canonical SAIPEN rendering, stored host payload and the displayed text, and fix the actual owner. Measured for this repository: the canonical renderer separated fields with a single newline, which the operator's Markdown host (Streamdown, remark-gfm without remark-breaks) parses as one paragraph; raw reply and stored payload both retained their newlines.",
+      "verification": "Exact stored T-301 report and installed Markdown behavior are proven, but a separate pre-transport stream and physical application display are unobserved; the historical 9810/422 claim is not adopted.",
+      "work": "T-1821"
+    },
+    "SRC-279:R007": {
+      "actionable": true,
+      "class": "non-goal",
+      "disposition": "VERIFIED",
+      "evidence": "E-16958",
+      "text": "Section 6's illustrative COMPLETED / NOT VERIFIED / BLOCKERS block is not adopted verbatim as a new schema: the same section orders honoring the existing SAIPEN operational-response schema and its canonical renderer/checker, and section 7 C requires canonical checks to keep passing. The six canonical fields are the readable form.",
+      "verification": "Existing canonical schema and unchanged budgets are retained; illustrative handoff sections were not introduced as a new response schema.",
+      "work": "T-1821"
+    },
+    "SRC-279:R008": {
+      "actionable": true,
+      "class": "non-goal",
+      "disposition": "VERIFIED",
+      "evidence": "E-16958",
+      "text": "Sections 1-4 and regressions D-K belong to SAITULS T-301 (Windows input harness, interactive desktop probe, staged vs installed binary, deployment authority). This repository does not own that binary and does not patch foreign repositories; only the SAIPEN-owned half of the handoff (sections 5-6, regressions A-C and L) is implemented here.",
+      "verification": "No foreign input harness, installation or journal was patched and no live input acceptance was simulated; this non-goal does not waive unconditional R001.",
+      "work": "T-1821"
+    }
+  },
+  "schema_version": 1
+}

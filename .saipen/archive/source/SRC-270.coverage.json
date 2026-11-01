@@ -1,0 +1,95 @@
+{
+  "requirements": {
+    "SRC-270:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "Diagnosed root cause in intake.py: ensure_request_clause previously collapsed multi-section prompt drops into blanket R001; corrected with extract_request_clauses to derive discrete clauses for structured multi-item requests.",
+      "text": "Verify whether the source-contract interpretation improperly collapsed independently actionable acceptance clauses into one blanket requirement.",
+      "verification": "python tools/test_source_contract_derivation.py -> test_multisection_prompt_extracts_discrete_clauses PASS",
+      "work": "T-1811"
+    },
+    "SRC-270:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "Utilized canonical intake contract and coverage ledger mechanisms (.saipen/intake/contracts/SRC-270.json and .saipen/intake/coverage/SRC-270.json); zero competing registries or foreign tracking layers introduced.",
+      "text": "Use existing canonical source/coverage mechanisms. Do not create a competing requirements registry.",
+      "verification": "tools/saipen_engine/intake.py verify_integrity and coverage_summary pass with 10 actionable clauses.",
+      "work": "T-1811"
+    },
+    "SRC-270:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "Implemented is_compound_request in intake.py; prevents is_request_clause from matching multi-clause specifications, preventing discharge_request_clauses from blanket-verifying unrelated functional clauses on an aggregate test pass.",
+      "text": "Prevent aggregate test PASS from automatically proving unrelated functional outcomes.",
+      "verification": "python tools/test_source_contract_derivation.py -> test_discharge_request_clauses_refuses_to_blanket_settle_compound_request PASS",
+      "work": "T-1811"
+    },
+    "SRC-270:R004": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "Preserved full T-1810 implementation in tools/saipen_engine/external.py and 34 regression points in tools/test_external_revalidation.py.",
+      "text": "Preserve the valid T-1810 implementation and tests.",
+      "verification": "python tools/test_external_revalidation.py -> 34/34 PASS",
+      "work": "T-1811"
+    },
+    "SRC-270:R005": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "Produced durable individual reconciliation records covering all 16 historical external blockers in .saipen/evidence/external-reconciliation/reconciliation_matrix.json and matrix_report.md.",
+      "text": "Produce durable individual reconciliation evidence for the actual 16 historical external blockers.",
+      "verification": "python tools/test_source_contract_derivation.py -> test_durable_reconciliation_matrix_integrity PASS",
+      "work": "T-1811"
+    },
+    "SRC-270:R006": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "Audited each candidate against live filesystem fixtures, PATH binaries, private keys, and external daemons; confirmed no candidate meets required authoritative external evidence.",
+      "text": "Resolve a blocker only if real authoritative external evidence and local verification satisfy its contract.",
+      "verification": "reconciliation_matrix.json records 0 qualified candidates and 0 unblocks under trust boundary evaluation.",
+      "work": "T-1811"
+    },
+    "SRC-270:R007": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "Recorded truthful zero resolutions with precise refusal codes (CAPABILITY_UNAVAILABLE, HOST_AUTHORITY_UNAVAILABLE, UPSTREAM_LINEAGE_ABSENT, etc.) without fabricating progress.",
+      "text": "If no candidate qualifies, record zero resolutions with precise reasons, without inventing progress.",
+      "verification": "reconciliation_matrix.json verified: total_unblocked: 0, truthful_zero_confirmed: true.",
+      "work": "T-1811"
+    },
+    "SRC-270:R008": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "Followed live admission and existing canonical lifecycle (claim -> SCOUT -> transition BUILD -> checkpoint -> transition VERIFY -> finish) without synthetic operator bypasses or state corruption.",
+      "text": "Demonstrate normal cc all continuation only where actual admission and authority permit it.",
+      "verification": "saipen continue and work_closure_gate mechanically evaluate live state.",
+      "work": "T-1811"
+    },
+    "SRC-270:R009": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "Added 7 focused regression tests in tools/test_source_contract_derivation.py proving multi-clause extraction, compound protection, and unverified clause refusal.",
+      "text": "Add focused regressions for premature blanket VERIFIED and incomplete end-to-end acceptance.",
+      "verification": "python tools/test_source_contract_derivation.py -> 7/7 PASS",
+      "work": "T-1811"
+    },
+    "SRC-270:R010": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "Audited all 51 Future Gates in .saipen/future/index.json; verified 0 gates are PROMOTED.",
+      "text": "Keep Future Gates closed.",
+      "verification": "python tools/test_source_contract_derivation.py -> test_future_gates_remain_strictly_closed PASS",
+      "work": "T-1811"
+    }
+  },
+  "schema_version": 1
+}

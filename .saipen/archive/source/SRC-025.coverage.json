@@ -1,0 +1,122 @@
+{
+  "requirements": {
+    "SRC-025:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-5910",
+      "text": "Release publication must bind every release-owned path to the exact reviewed blob content hash or reviewed deletion from an immutable plan manifest: after write-tree the owned tree entries must equal the frozen reviewed identity and any same-path restage after the ship gate must refuse before commit or publication.",
+      "verification": "OwnedManifestTests + ScopeIdentityTests on real temp Git repositories: exact mode/blob/deletion post-gate index identity and immutable write-tree verification; same-bytes-after-gate passes, same-path-different-bytes/addition/deletion-resurrection/metadata/scope/crew-owned/mode substitution refuse before write-tree, foreign staged entry preserved, generated tree mismatch refuses before commit, v2 full SHA-256 with v1 legacy compatibility",
+      "work": "T-1298"
+    },
+    "SRC-025:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-5910",
+      "text": "Crew pre-ship certification must validate the frozen applicable role set semantically: declared probe against the role contract, ALWAYS role never NOT_APPLICABLE, source_head and source_tree_fingerprint both matching the release frozen source identity, and non-empty structurally valid evidence for every applicable role; malformed or mismatched authority refuses instead of certifying.",
+      "verification": "StrictReleaseAuthorityTests + crew applicability suite 64 OK: strict role/probe/source/evidence authority and preservation of valid legacy/no-UI semantics; ALWAYS+NOT_APPLICABLE, wrong/missing probe, wrong source identity, empty/malformed evidence all refuse; valid applicable manifest certifies; legacy pre-manifest full-roster path intact",
+      "work": "T-1298"
+    },
+    "SRC-025:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-5910",
+      "text": "Applicability filesystem enumeration must surface every unreadable included subtree as explicit uncertainty so relevant negative verdicts fail closed to APPLICABLE; unreadable descendants must never silently count as proof of absence while excluded-directory errors stay outside the observation.",
+      "verification": "EnumerationFailureTests: included-subtree enumeration failure no longer becoming a clean negative; unreadable included descendant forces fail-closed uncertainty, excluded descendant pruned, readable non-GUI tree stays NOT_APPLICABLE",
+      "work": "T-1298"
+    },
+    "SRC-025:R004": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-5910",
+      "text": "GUI applicability probing must classify constant __import__(toolkit) and importlib.import_module(toolkit) forms including aliased imports as GUI evidence, and unclassifiable import-like toolkit expressions must yield INDETERMINATE, while comments, docstrings and plain strings stay non-evidence.",
+      "verification": "DynamicImportTests: dynamic GUI importer matrix plus negative string/comment controls; constant __import__ tkinter, importlib.import_module PySide6.QtWidgets and aliases classify GUI, recognized nonconstant dynamic importer is INDETERMINATE, plain strings/comments/unrelated calls stay CLEAN",
+      "work": "T-1298"
+    },
+    "SRC-025:R005": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-5899",
+      "text": "Audit enqueue idempotency must be bound to durable producer + producer_operation_id authority: equal body digest alone must never synthesize operation identity or adopt an existing layer; allocator loss with existing audit history must recover only from durable operation records or fail closed with a bounded recoverable refusal while genuine first-use allocation stays fresh and spent layer numbers are never reused.",
+      "verification": "unittest:tools.test_audit_enqueue AllocatorLoss 18-case R005 matrix (pre-fix 7 FAIL + 6 ERROR red controls) + tools.test_audit_enqueue_boundary + tools.test_audit_inbox 174 OK; transport-loop/ingest families 37 OK; combined 211 OK; full unittest discover 1271 OK 1 skip; ruff PASS; tools/validate.py 0 FAIL 27 known warnings; live CLI repro: same-op retry after allocator loss recovers layer 1 idempotently, never a second layer",
+      "work": "T-1298"
+    },
+    "SRC-025:R006": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-5893",
+      "text": "A COMMITTED audit enqueue whose physical layer is missing succeeds idempotently only when exact same-layer same-digest downstream capture authority proves delivery: no binding requires restore or a recoverable refusal, same path with different digest is conflict, same digest on a different path proves nothing, corrupt binding fails closed.",
+      "verification": "unittest:tools.test_audit_enqueue+test_audit_enqueue_boundary+test_audit_inbox 163 OK; repro kitchen/t1298-w2-repro.py",
+      "work": "T-1298"
+    },
+    "SRC-025:R007": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-5893",
+      "text": "The audit inbox binding must decode strictly with ABSENT/OK/CORRUPT fail-closed semantics and corrupt bytes never overwritten, and its read-modify-write must be concurrency-safe: concurrent writers either serialize to both persisted or one receives a structured busy/retry result; never two successes with one durable record and never raw ValueError leakage.",
+      "verification": "unittest:tools.test_audit_enqueue+test_audit_enqueue_boundary+test_audit_inbox 163 OK; repro kitchen/t1298-w2-repro.py",
+      "work": "T-1298"
+    },
+    "SRC-025:R008": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-5893",
+      "text": "The allocator authority decoder must strictly validate schema version, canonical operation keys, producer and operation id tokens, positive non-bool integer layers, allowed states, canonical SHA-256 digests, duplicate layer ownership and coherent next_id; malformed records yield ALLOCATOR_CORRUPT and cannot authorize retry or placement, while _place independently rejects noncanonical layers before filename construction.",
+      "verification": "unittest:tools.test_audit_enqueue+test_audit_enqueue_boundary+test_audit_inbox 163 OK; repro kitchen/t1298-w2-repro.py",
+      "work": "T-1298"
+    },
+    "SRC-025:R009": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-5893",
+      "text": "Audit directory scanning must distinguish ABSENT / OK / UNSAFE / UNREADABLE topology: absent or owned-empty stays clean, symlink or reparse escape and unreadable enumeration must report explicit non-clean diagnostics in classify, status and projection without following, reading or repairing the unsafe object, and routing must surface the transport problem instead of an idle verdict.",
+      "verification": "unittest:tools.test_audit_enqueue+test_audit_enqueue_boundary+test_audit_inbox 163 OK; repro kitchen/t1298-w2-repro.py",
+      "work": "T-1298"
+    },
+    "SRC-025:R010": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-5932",
+      "text": "Settled journal operation-specific lookups and settlement appends must be bounded by operation or active segment rather than lifetime receipt volume, with a settlement that leaves a validating index; exact-byte deep audits remain reachable through the explicit validation path.",
+      "verification": "unittest:tools.test_settled_projection 19 OK + tools.test_audit_2026_08_28_all3 61 OK + full discover 1511 OK; structural counters: hot zero-match namespace enumeration 0 at 100/1k/10k, append across 1/4/8/32 sealed segments reads 0 sealed segments and enumerates 0 namespace entries; neither hot operation lookup nor normal settlement append performs lifetime namespace/segment traversal (E-5930)",
+      "work": "T-1298"
+    },
+    "SRC-025:R011": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-5932",
+      "text": "Conformance latest-receipt lookup and append must consult a compact bounded authenticated lineage generation instead of hashing the full historical population per lookup or append, while exact-byte leaf-by-leaf validation remains reachable through the explicit deep path.",
+      "verification": "unittest:tools.test_conformance_lineage 18 OK + full discover 1511 OK; canonical append enumerates 0 receipt-directory entries at 100/1k/10k with the passed pre-append token, prior-token mismatch refuses with zero mutation, and a latest locator is authenticated through the CURRENT lineage head (sealed_gate_bindings) to its referenced sealed generation -- locator over an unbound generation refuses; deep validation proves complete generation authority (E-5931)",
+      "work": "T-1298"
+    },
+    "SRC-025:R012": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-5915",
+      "text": "Producer-gate to severity mapping must be a closed side-effect-free policy helper exercised in-process across the full gate by producer by finding matrix, with a small set of end-to-end subprocess sentinels kept only where CLI or process behavior is the subject.",
+      "verification": "in-process policy matrix zero subprocess; red control inverts collect row and matrix goes red exactly there; validator delegates to the same helper with no second roster; CLI sentinels reduced 14 to 8 with refusal semantics preserved",
+      "work": "T-1298"
+    },
+    "SRC-025:R013": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-5912",
+      "text": "audit_checks --changed with a changed-path set selecting zero runnable controls must exit successfully reporting that no control targets the changed paths, and must never construct ThreadPoolExecutor with max_workers less than 1.",
+      "verification": "zero-runnable scoped selection exits 0 with one stable diagnostic; zero executors constructed (instrumented); preflight failures still exit nonzero; one-control scoped run executes its control; pre-fix formula ValueError pinned by red control",
+      "work": "T-1298"
+    }
+  },
+  "schema_version": 1
+}

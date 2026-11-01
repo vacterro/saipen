@@ -492,17 +492,24 @@ class AutoRebindTests(unittest.TestCase):
         self.assertEqual(verdict["code"], "ADMITTED")
 
 
-# The two FreeBuff home-knowledge loader contracts the activation backstop
-# must satisfy. Provenance: T-1426 live RED (2026-09-20) -- a fresh desktop
-# session sent exactly `cc` and the model, with zero command semantics in its
-# prompt, went on repository archaeology. Measured from the host's OWN code:
-#   * freebuff CLI (freebuff.exe 0.0.115, manicode) reads the FIRST existing
-#     of ~/.knowledge.md, ~/.AGENTS.md, ~/.claude.md;
-#   * FreeBuff Desktop (installed orchestrator `loadUserKnowledgeFiles`)
-#     scans the home for DOT-prefixed entries only and reads the FIRST of
-#     .AGENTS.md, .CLAUDE.md -- ~/.knowledge.md is not a home surface for it.
-FREEBUFF_CLI_HOME_SURFACES = (".knowledge.md", ".AGENTS.md", ".claude.md")
-FREEBUFF_DESKTOP_HOME_SURFACES = (".AGENTS.md", ".CLAUDE.md")
+# The FreeBuff HOME-knowledge loader contract the activation backstop must
+# satisfy. Provenance: T-1426 live RED (2026-09-20) -- a fresh desktop session
+# sent exactly `cc` and the model, with zero command semantics in its prompt,
+# went on repository archaeology. Re-measured for T-1957 out of the artifact
+# that runs (`~/.config/manicode/freebuff.exe`, 0.2.34, 123,988,736 bytes):
+# the CLI scans the home for DOT-prefixed entries, matches the stripped name
+# case-insensitively against `["agents.md","claude.md"]`, and reads the FIRST
+# it finds in that order. `~/.knowledge.md` is NOT a home surface: the only
+# `*.knowledge.md` rule in that binary is a PROJECT-file predicate (D8A).
+FREEBUFF_CLI_HOME_SURFACES = (".AGENTS.md", ".CLAUDE.md")
+
+#: FreeBuff Desktop has NO home surface since its 2026-10-29 update: the
+#: installed orchestrator reads `AGENTS.md`/`CLAUDE.md`/`.claude/CLAUDE.md`
+#: under the PROJECT root (`loadClaudeProjectInstructions(cwd)`, gated on
+#: `turn.projectInstructions`) and `loadUserKnowledgeFiles` no longer exists.
+#: Empty on purpose: any name here would be a claim about a file no running
+#: desktop code opens.
+FREEBUFF_DESKTOP_HOME_SURFACES: tuple[str, ...] = ()
 
 #: The pinned pre-fix bootstrap/inject.ps1 blob (git object) whose FreeBuff
 #: backstop chose ONE surface (`~/.knowledge.md`, fallback `~/.AGENTS.md`).
@@ -563,6 +570,12 @@ class ActivationDeliveryTests(unittest.TestCase):
             ("CLI", FREEBUFF_CLI_HOME_SURFACES),
             ("desktop", FREEBUFF_DESKTOP_HOME_SURFACES),
         ):
+            if not surfaces:
+                # T-1957: the 2026-10-29 desktop build reads the PROJECT root
+                # and no home file, so there is no home contract of its own to
+                # satisfy here. test_32 measures the project half against the
+                # installed bundle.
+                continue
             text = _block_on_first_surface(home, surfaces)
             self.assertIsNotNone(
                 text, f"{label} loader contract delivers no activation block"
@@ -597,95 +610,175 @@ class ActivationDeliveryTests(unittest.TestCase):
         self.assertEqual(proc.returncode, 0, proc.stdout + proc.stderr)
         self._assert_block(home)
 
-    def test_31_knowledge_md_alone_is_invisible_to_the_desktop_loader(self):
-        # The exact live pre-fix shape. The old file-presence check passed on
-        # this home; the desktop prompt still carried no command semantics.
+    def test_31_knowledge_md_alone_delivers_nothing_to_any_home_loader(self):
+        # The exact live pre-fix shape, re-measured for T-1957. The old
+        # file-presence check passed on this home; the desktop prompt still
+        # carried no command semantics. Stricter now: the 0.2.34 CLI does not
+        # read a home `*.knowledge.md` either -- that name is a PROJECT-file
+        # predicate in freebuff.exe -- so this home reaches NEITHER loader.
         home = self._home()
         (home / ".knowledge.md").write_text(
             "<!-- SAIPEN:BEGIN -->\n## saipen protocol\n"
             "`cc` and `сс` mean resume.\n<!-- SAIPEN:END -->\n",
             encoding="utf-8",
         )
-        self.assertIsNotNone(
-            _block_on_first_surface(home, FREEBUFF_CLI_HOME_SURFACES)
-        )
         self.assertIsNone(
-            _block_on_first_surface(home, FREEBUFF_DESKTOP_HOME_SURFACES),
-            "desktop contract must not be satisfied by ~/.knowledge.md alone",
+            _block_on_first_surface(home, FREEBUFF_CLI_HOME_SURFACES),
+            "the 0.2.34 CLI reads .AGENTS.md/.CLAUDE.md, never a home "
+            ".knowledge.md, so this home delivers no activation block",
         )
+        self.assertEqual(FREEBUFF_DESKTOP_HOME_SURFACES, ())
+
+    def _desktop_instruction_probe(self) -> Path:
+        """A node probe that executes the installed bundle's own loader.
+
+        T-1956: the bundle this ran against until 2026-10-29 exported
+        `loadUserKnowledgeFiles`, a HOME scanner, and this test executed it to
+        prove the activation block reached the desktop prompt through
+        `~/.AGENTS.md`. The desktop update shipped that morning removed it: in
+        the shipped `resources/orchestrator/orchestrator.js` the strings
+        `loadUserKnowledgeFiles` and `selectKnowledgeFilePaths` no longer
+        occur at all, `userKnowledgeFiles` survives ONLY as an unassigned
+        schema field, and the one instruction loader left is
+        `loadClaudeProjectInstructions(cwd)` -- a PROJECT-root reader that
+        takes the first existing `AGENTS.md`/`CLAUDE.md` under cwd plus
+        `.claude/CLAUDE.md`.
+
+        So the surface did not quietly keep working through another name; it
+        moved from the home to the project root. The probe therefore executes
+        the loader that exists, and the test asserts BOTH halves: the project
+        root still delivers the block, and a home-only `~/.AGENTS.md` is
+        delivered to nothing. That second assertion is what stops a future
+        reader from believing the old home contract holds.
+
+        The loader NAME is an argument, not a literal, so the red control can
+        point it at a symbol the bundle never defined and require a loud,
+        distinct failure instead of a vacuous pass.
+        """
+        script = _temp() / "desktop_instruction_probe.js"
+        script.write_text(
+            """
+const fs = require("fs");
+const pathMod = require("path");
+const [orchestratorPath, loaderName, cwd] = process.argv.slice(2);
+const source = fs.readFileSync(orchestratorPath, "utf8");
+
+const names = source.match(/var KNOWLEDGE_FILE_NAMES = \\[[^\\]]*\\]/);
+const start = source.indexOf("function isFile(");
+const marker = source.indexOf("function " + loaderName + "(", start);
+if (!names || start < 0 || marker < 0) {
+  console.error("EXTRACT_FAILED:" + loaderName);
+  process.exit(3);
+}
+// The loader ends at the next top-level `function ` after its own body.
+const end = source.indexOf("\\nfunction ", marker + 1);
+if (end < 0) {
+  console.error("EXTRACT_FAILED:unterminated");
+  process.exit(3);
+}
+const slice = source.slice(start, end);
+// Only the names the slice actually uses are injected; anything the slice
+// forgot would surface as a ReferenceError, not a silent empty answer.
+const get = (pattern, fallback) => {
+  const found = [...new Set(slice.match(pattern) || [])];
+  return found.map((name) => [name, fallback(name)]);
+};
+// The loader's own bounds come from the bundle, never from this probe: a
+// hardcoded limit would keep answering the old number after the host moved
+// it, which is the same class of drift this test exists to catch.
+const consts = ["PROJECT_INSTRUCTION_LIMIT", "PROJECT_INSTRUCTION_TRUNCATION_NOTE"];
+const declared = [];
+for (const name of consts) {
+  const match = source.match(new RegExp(name + " = ([^;]+)"));
+  if (!match) {
+    console.error("EXTRACT_FAILED:" + name);
+    process.exit(3);
+  }
+  declared.push("var " + name + " = " + match[1] + ";");
+}
+const params = [];
+const args = [];
+for (const [name, value] of get(/\\bjoin\\d+\\b/g, () => pathMod.join)) {
+  params.push(name); args.push(value);
+}
+for (const [name, value] of get(/\\breadFileSync\\d+\\b/g, () => fs.readFileSync)) {
+  params.push(name); args.push(value);
+}
+for (const [name, value] of get(/\\bstatSync\\d+\\b/g, () => fs.statSync)) {
+  params.push(name); args.push(value);
+}
+for (const [name, value] of get(/\\brelative\\d+\\b/g, () => pathMod.relative)) {
+  params.push(name); args.push(value);
+}
+const body =
+  names[0] + "\\n" +
+  declared.join("\\n") +
+  "\\n" + slice + "\\nreturn " + loaderName + ";";
+
+const loader = new Function(...params, body)(...args);
+const out = loader(cwd);
+process.stdout.write(JSON.stringify({ delivered: String(out || "") }));
+""",
+            encoding="utf-8",
+        )
+        return script
 
     @unittest.skipUnless(
         __import__("shutil").which("node") and _desktop_orchestrator() is not None,
         "FreeBuff Desktop orchestrator or node not installed",
     )
     def test_32_installed_desktop_loader_reads_the_injected_block(self):
-        # Executes the HOST's own loadUserKnowledgeFiles (extracted from the
-        # installed orchestrator bundle) against hermetic fixture homes: the
-        # layer that builds the first-turn prompt must deliver the block.
+        # Executes the HOST's own instruction loader, extracted from the
+        # installed orchestrator bundle, against hermetic fixtures: the layer
+        # that builds the first-turn prompt must deliver the block. Since the
+        # 2026-10-29 desktop update that layer reads the PROJECT root, not the
+        # home -- see `_desktop_instruction_probe` for the measurement and for
+        # why the name of the loader is a parameter.
         import autoinject
 
         node = shutil.which("node")
         assert node is not None
         orchestrator = _desktop_orchestrator()
         assert orchestrator is not None
+        script = self._desktop_instruction_probe()
         block = autoinject.rendered_activation_block(REPO / "saipen")
 
-        red = self._home()
-        (red / ".knowledge.md").write_text(block + "\n", encoding="utf-8")
-        green = self._home()
-        (green / ".knowledge.md").write_text(block + "\n", encoding="utf-8")
-        (green / ".AGENTS.md").write_text(
+        project = self._home()
+        (project / "AGENTS.md").write_text(
             "# existing user file\n\n" + block + "\n", encoding="utf-8"
         )
 
-        script = _temp() / "desktop_knowledge_probe.js"
-        script.write_text(
-            """
-const fs = require("fs");
-const path13 = require("path");
-const os6 = require("os");
-const [orchestratorPath, homeDir] = process.argv.slice(2);
-const source = fs.readFileSync(orchestratorPath, "utf8");
-const names = source.match(/var KNOWLEDGE_FILE_NAMES = \\[[^\\]]*\\]/);
-const start = source.indexOf("async function loadUserKnowledgeFiles(params) {");
-const end = source.indexOf("function selectKnowledgeFilePaths(", start);
-if (!names || start < 0 || end < 0) {
-  console.error("EXTRACT_FAILED");
-  process.exit(3);
-}
-const pathNames = [
-  ...new Set(source.slice(start, end).match(/\\bpath\\d+\\b/g) || []),
-];
-const factory = new Function(
-  "fs", ...pathNames, "os6", "getErrorObject",
-  names[0] +
-    "\\nconst KNOWLEDGE_FILE_NAMES_LOWERCASE = " +
-    "KNOWLEDGE_FILE_NAMES.map((n) => n.toLowerCase());\\n" +
-    source.slice(start, end) +
-    "\\nreturn loadUserKnowledgeFiles;"
-);
-const load = factory(fs, ...pathNames.map(() => path13), os6, (error) => error);
-const logger = { debug() {}, info() {}, warn() {}, error() {} };
-load({ homeDir, fs: fs.promises, logger })
-  .then((files) => { process.stdout.write(JSON.stringify(files)); })
-  .catch((error) => { console.error(String((error && error.stack) || error)); process.exit(4); });
-""",
-            encoding="utf-8",
-        )
+        # The surface the 2026-10-29 bundle dropped: a home carrying ONLY the
+        # old dotfile must reach nothing, or the contract silently regresses.
+        home_only = self._home()
+        (home_only / ".AGENTS.md").write_text(block + "\n", encoding="utf-8")
 
-        def probe(home: Path) -> dict:
+        def probe(cwd: Path, loader: str = "loadClaudeProjectInstructions") -> str:
             proc = subprocess.run(
-                [node, str(script), str(orchestrator), str(home)],
+                [node, str(script), str(orchestrator), loader, str(cwd)],
                 capture_output=True, text=True, timeout=120,
             )
             self.assertEqual(proc.returncode, 0, proc.stdout + proc.stderr)
-            return json.loads(proc.stdout)
+            return json.loads(proc.stdout)["delivered"]
 
-        self.assertEqual(probe(red), {}, "desktop loader saw ~/.knowledge.md")
-        delivered = probe(green)
-        self.assertIn("~/.AGENTS.md", delivered)
-        self.assertIn("<!-- SAIPEN:BEGIN -->", delivered["~/.AGENTS.md"])
-        self.assertIn("cc", delivered["~/.AGENTS.md"])
+        delivered = probe(project)
+        self.assertIn("<!-- SAIPEN:BEGIN -->", delivered)
+        self.assertIn("cc", delivered)
+        self.assertEqual(
+            probe(home_only), "",
+            "the home surface no longer reaches the desktop prompt, so a "
+            "home-only copy must not be reported as delivered",
+        )
+
+        # The extractor must not pass vacuously: a loader the bundle never
+        # defined has to fail loudly, not answer "" and satisfy the assertion
+        # above for the wrong reason.
+        mispointed = subprocess.run(
+            [node, str(script), str(orchestrator), "loadUserKnowledgeFiles", str(project)],
+            capture_output=True, text=True, timeout=120,
+        )
+        self.assertNotEqual(mispointed.returncode, 0, mispointed.stdout)
+        self.assertIn("EXTRACT_FAILED", mispointed.stderr)
 
     @unittest.skipUnless(
         __import__("shutil").which("powershell") or __import__("shutil").which("pwsh"),
@@ -724,13 +817,17 @@ load({ homeDir, fs: fs.promises, logger })
             env=_disposable_env(home), timeout=900,
         )
         self.assertEqual(run.returncode, 0, run.stdout + run.stderr)
-        self.assertIsNotNone(
-            _block_on_first_surface(home, FREEBUFF_CLI_HOME_SURFACES)
-        )
+        # The pinned pre-fix installer chose ONE surface, preferring
+        # ~/.knowledge.md. Under the measured 0.2.34 contract that home now
+        # reaches NO loader -- the CLI wants .AGENTS.md/.CLAUDE.md and the
+        # desktop reads the project root -- which is a strictly sharper red
+        # than T-1427 recorded, not a softer one.
         self.assertIsNone(
-            _block_on_first_surface(home, FREEBUFF_DESKTOP_HOME_SURFACES),
-            "pre-fix injector must fail the desktop contract",
+            _block_on_first_surface(home, FREEBUFF_CLI_HOME_SURFACES),
+            "the pre-fix injector wrote only ~/.knowledge.md, which the 0.2.34 "
+            "CLI never reads, so it must fail the CLI contract too",
         )
+        self.assertEqual(FREEBUFF_DESKTOP_HOME_SURFACES, ())
 
 
 

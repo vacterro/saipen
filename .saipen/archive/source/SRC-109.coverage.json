@@ -1,0 +1,14 @@
+{
+  "requirements": {
+    "SRC-109:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "future_gate/FUTURE GATE \u2014 OPER-SHARE AUTHOR IDEAS_20260924.md",
+      "text": "Satisfy the captured request SRC-109 in full; the authoritative text is the receipt body (sha256 594d2290d76b): append: \u042f \u0431\u044b \u0445\u043e\u0442\u0435\u043b \u0432\u0434\u043e\u0445\u043d\u043e\u0432\u0438\u0442\u044c\u0441\u044f \u0435\u0449\u0435 \u0438\u0434\u0435\u044f\u043c\u0438 \u044d\u0442\u043e\u0433\u043e \u0430\u0432\u0442\u043e\u0440\u0430 \u0438 \u0432\u043b\u043e\u0436\u0438\u0442\u044c \u0432 SAIPEN \u043a\u0430\u043a FUTURE GATE \u0435\u0441\u043b\u0438 \u0432\u043e\u0437\u043c\u043e\u0436\u043d\u043e \u043a\u043e\u0433\u0434\u0430 SAIPEN \u0441\u0430\u043c \u0431\u0443\u0434\u0435\u0442 \u0434\u043e\u0441\u0442\u0430\u0442\u043e\u0447\u043d\u043e \u0446\u0435\u043b\u044c\u043d\u044b\u043c. v:\\___VAC\\__K\\__CODE\\___GIT_HUB\\oper-share\\",
+      "verification": "T-1477 VERIFY: 13 idea sections each carry Source and SAIPEN today, Candidates also New and Defect class; Eligibility gate section present; operator condition 'when SAIPEN is whole enough' made mechanical",
+      "work": "T-1471"
+    }
+  },
+  "schema_version": 1
+}

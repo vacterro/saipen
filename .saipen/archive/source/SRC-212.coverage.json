@@ -1,0 +1,167 @@
+{
+  "requirements": {
+    "SRC-212:R001": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/T-1711-admission/ACCEPTANCE-FINAL-GENERATION.md",
+      "text": "Reproduce the active VERIFY admission incident in disposable protocol fixtures; distinguish reproduced behavior from the reported SAI_WEBSITE history, and preserve any newer live authority before mutation.",
+      "verification": ".saipen/evidence/T-1711-admission/REVIEW-FINAL.md",
+      "work": "T-1711"
+    },
+    "SRC-212:R002": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/T-1711-admission/ACCEPTANCE-FINAL-GENERATION.md",
+      "text": "Inspect the documented CLI and runtime contract before choosing the repair; never invent verbs merely because a consumer attempted them.",
+      "verification": ".saipen/evidence/T-1711-admission/REVIEW-FINAL.md",
+      "work": "T-1711"
+    },
+    "SRC-212:R003": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/T-1711-admission/ACCEPTANCE-FINAL-GENERATION.md",
+      "text": "Repair a supported evidence-admission route, or document a compatible operation only where the contract requires one, so genuine regression evidence is admissible while Work is active in VERIFY.",
+      "verification": ".saipen/evidence/T-1711-admission/REVIEW-FINAL.md",
+      "work": "T-1711"
+    },
+    "SRC-212:R004": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/T-1711-admission/ACCEPTANCE-FINAL-GENERATION.md",
+      "text": "Keep pre-fix failure and post-fix success distinct and bind their correct ticket, attempt, unchanged verifier, source identity and chronological execution.",
+      "verification": ".saipen/evidence/T-1711-admission/REVIEW-FINAL.md",
+      "work": "T-1711"
+    },
+    "SRC-212:R005": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/T-1711-admission/ACCEPTANCE-FINAL-GENERATION.md",
+      "text": "Make REVIEW evaluate current authoritative evidence; newer failure or authority must supersede stale approval.",
+      "verification": ".saipen/evidence/T-1711-admission/REVIEW-FINAL.md",
+      "work": "T-1711"
+    },
+    "SRC-212:R006": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/T-1711-admission/ACCEPTANCE-FINAL-GENERATION.md",
+      "text": "Reject forged, unrelated, out-of-order, contradictory and unrecognized-verifier evidence without weakening lifecycle gates.",
+      "verification": ".saipen/evidence/T-1711-admission/REVIEW-FINAL.md",
+      "work": "T-1711"
+    },
+    "SRC-212:R007": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/T-1711-admission/ACCEPTANCE-FINAL-GENERATION.md",
+      "text": "Preserve historical event chains and previously valid records and lifecycle flows.",
+      "verification": ".saipen/evidence/T-1711-admission/REVIEW-FINAL.md",
+      "work": "T-1711"
+    },
+    "SRC-212:R008": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/T-1711-admission/ACCEPTANCE-FINAL-GENERATION.md",
+      "text": "Return clear refusal codes and the permitted recovery route when admission is unavailable.",
+      "verification": ".saipen/evidence/T-1711-admission/REVIEW-FINAL.md",
+      "work": "T-1711"
+    },
+    "SRC-212:R009": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/T-1711-admission/ACCEPTANCE-FINAL-GENERATION.md",
+      "text": "Negative control: missing genuine regression pair refuses admission.",
+      "verification": ".saipen/evidence/T-1711-admission/REVIEW-FINAL.md",
+      "work": "T-1711"
+    },
+    "SRC-212:R010": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/T-1711-admission/ACCEPTANCE-FINAL-GENERATION.md",
+      "text": "Negative control: failure and success from unrelated attempts refuse admission.",
+      "verification": ".saipen/evidence/T-1711-admission/REVIEW-FINAL.md",
+      "work": "T-1711"
+    },
+    "SRC-212:R011": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/T-1711-admission/ACCEPTANCE-FINAL-GENERATION.md",
+      "text": "Negative control: stale evidence superseded by newer authority cannot approve REVIEW.",
+      "verification": ".saipen/evidence/T-1711-admission/REVIEW-FINAL.md",
+      "work": "T-1711"
+    },
+    "SRC-212:R012": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/T-1711-admission/ACCEPTANCE-FINAL-GENERATION.md",
+      "text": "Negative control: unrecognized verifier identity refuses admission.",
+      "verification": ".saipen/evidence/T-1711-admission/REVIEW-FINAL.md",
+      "work": "T-1711"
+    },
+    "SRC-212:R013": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/T-1711-admission/ACCEPTANCE-FINAL-GENERATION.md",
+      "text": "Positive control: a valid active-ticket pair is admitted through supported operations in a consumer-compatible disposable reproduction.",
+      "verification": ".saipen/evidence/T-1711-admission/REVIEW-FINAL.md",
+      "work": "T-1711"
+    },
+    "SRC-212:R014": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/T-1711-admission/ACCEPTANCE-FINAL-GENERATION.md",
+      "text": "Replay control: repeated or duplicate evidence creates no duplicated authority.",
+      "verification": ".saipen/evidence/T-1711-admission/REVIEW-FINAL.md",
+      "work": "T-1711"
+    },
+    "SRC-212:R015": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/T-1711-admission/ACCEPTANCE-FINAL-GENERATION.md",
+      "text": "Compatibility control: tickets without a regression requirement preserve their existing behavior.",
+      "verification": ".saipen/evidence/T-1711-admission/REVIEW-FINAL.md",
+      "work": "T-1711"
+    },
+    "SRC-212:R016": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/T-1711-admission/ACCEPTANCE-FINAL-GENERATION.md",
+      "text": "Safety: no manual consumer STATE/BOARD/LOG writes, fabricated historical events, weakened review gates, consumer product fixes or unsupported-verb workaround.",
+      "verification": ".saipen/evidence/T-1711-admission/REVIEW-FINAL.md",
+      "work": "T-1711"
+    },
+    "SRC-212:R017": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/T-1711-admission/ACCEPTANCE-FINAL-GENERATION.md",
+      "text": "Run focused protocol and relevant lifecycle tests, negative controls and the repository-supported complete verification gates; distinguish actual execution from attestation.",
+      "verification": ".saipen/evidence/T-1711-admission/REVIEW-FINAL.md",
+      "work": "T-1711"
+    },
+    "SRC-212:R018": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/T-1711-admission/ACCEPTANCE-FINAL-GENERATION.md",
+      "text": "Report exact changed runtime files/symbols, root cause and uncertainty, supported CLI/API, red/green identities and totals, compatibility limits and the next permitted operation for the blocked consumer.",
+      "verification": ".saipen/evidence/T-1711-admission/REVIEW-FINAL.md",
+      "work": "T-1711"
+    }
+  },
+  "schema_version": 1
+}

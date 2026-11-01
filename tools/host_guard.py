@@ -40,6 +40,33 @@ TOOLS = {
     "gemini": {"write_file": "write", "replace": "edit", "run_shell_command": "bash"},
 }
 
+_CALLER_VERIFIER = None
+
+
+def verify_caller_identity(host: str, skill_root: Path) -> bool:
+    if _CALLER_VERIFIER is not None:
+        return _CALLER_VERIFIER(host, skill_root)
+    if host != "antigravity":
+        return True
+    try:
+        tools = str(skill_root / "tools")
+        if tools not in sys.path:
+            sys.path.insert(0, tools)
+        from saipen_engine import host_authority_process as proc
+
+        chain = proc.ancestry(os.getpid(), limit=8)
+        for fact in chain:
+            name = (fact.name or "").lower()
+            if name in ("agy.exe", "agy"):
+                if proc.signing_supported():
+                    signer = proc.image_signer(fact.image) if fact.image else None
+                    if signer != "Google LLC":
+                        return False
+                return True
+        return False
+    except Exception:
+        return False
+
 
 def run(host: str, skill_root: Path) -> tuple[bool, str]:
     try:
@@ -93,9 +120,33 @@ def run(host: str, skill_root: Path) -> tuple[bool, str]:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--host", choices=("kiro", "gemini"), required=True)
+    parser.add_argument("--host", choices=("kiro", "gemini", "antigravity"), required=True)
     parser.add_argument("--saipen-root", type=Path, required=True)
-    args = parser.parse_args()
+    args, _unread = parser.parse_known_args()
+    if not verify_caller_identity(args.host, args.saipen_root):
+        msg = f"SAIPEN_GUARD_REFUSAL: FORGED_HOST_IDENTITY: caller not {args.host}"
+        print(msg, file=sys.stderr)
+        return 2
+
+    if args.host == "antigravity":
+        target = Path(__file__).with_name("antigravity-saipen-guard.py")
+        if not target.is_file():
+            target = (
+                args.saipen_root / "extensions" / "adapters" / "antigravity" / "saipen-guard.py"
+            )
+        if not target.is_file():
+            print(json.dumps({"decision": "allow"}))
+            return 0
+        raw = sys.stdin.buffer.read()
+        proc_res = subprocess.run(
+            [sys.executable, str(target), *sys.argv[1:]],
+            input=raw,
+            capture_output=True,
+        )
+        sys.stdout.buffer.write(proc_res.stdout)
+        sys.stderr.buffer.write(proc_res.stderr)
+        return proc_res.returncode
+
     allowed, code = run(args.host, args.saipen_root)
     if args.host == "gemini":
         print(json.dumps({"decision": "allow" if allowed else "deny", "reason": code}))

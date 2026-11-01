@@ -1,0 +1,158 @@
+{
+  "requirements": {
+    "SRC-190:R001": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-12949",
+      "text": "TWO SURFACES: the operator checkpoint and machine evidence are different surfaces; the default checkpoint answers state, material change, blocker, next action and validation, and detail stays behind canonical evidence, log and detail references. The rule is named OPERATOR-READABILITY-01 or its repository equivalent.",
+      "verification": "EXEC-RESPONSE-01 is the repository equivalent of the named rule and owns both surfaces: the checkpoint is the bounded control surface built from machine facts, and detail stays in LOG and evidence, reached through a pointer (FastPrompterIncidentTests, ReadabilityChecks) -> PASS",
+      "work": "T-1656"
+    },
+    "SRC-190:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-12949",
+      "text": "READABILITY BUDGET: every field of the default checkpoint and the whole checkpoint have a measurable default budget (one logical STATUS line, a short RESULT, one NEXT action, a compact VALIDATION, a bounded whole); thresholds are implementation-owned and the contract is machine-testable.",
+      "verification": "per-field and whole-reply budgets are machine data (FIELD_CHAR_BUDGETS, FIELD_LINE_BUDGETS, REASON_BUDGETS) and are asserted on the DONE, continue, waiting and blocked checkpoints (cases 01 to 04) -> PASS",
+      "work": "T-1656"
+    },
+    "SRC-190:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-12949",
+      "text": "SEMANTIC COMPRESSION: an oversized checkpoint is compressed semantically into verdicts, counts and categories, never cut by character count, and the limits never truncate away safety-critical information: the critical statement stays and supporting detail moves to references.",
+      "verification": "the compact form is built from machine facts as verdicts, counts and at most three categories, never by cutting the reply; an unbounded fact becomes a closed sentinel instead of being truncated; the blocker and the operator action keep their own lines (cases 03, 04, 06, 07) -> PASS",
+      "work": "T-1656"
+    },
+    "SRC-190:R004": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "E-12949",
+      "text": "MACHINE EVIDENCE IS NOT LOST: brevity of the operator surface never weakens traceability; exact commands, test identities, fingerprints, file and symbol lists, measurements and red and green controls remain in canonical machine storage.",
+      "verification": "a refused reply is kept byte for byte at a content-addressed path by saipen response preserve and that reference is part of the overflow diagnostic; LOG and evidence are untouched by the checkpoint (case 09, CommandSurfaceTests) -> PASS",
+      "work": "T-1656"
+    },
+    "SRC-190:R005": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-12949",
+      "text": "DETAIL POINTERS: when substantial evidence exists the checkpoint carries a short reference to it (events, ticket detail reference or the repository-native equivalent) instead of its content, unless the operator asked for detail, a safety-critical discrepancy must be visible at once, or evidence storage failed.",
+      "verification": "an ordinary checkpoint carries one line of canonical references (events, tickets, receipts, paths in project memory) built from engine-owned facts; prose in that field still needs the operator's request (PointerTests, case 05) -> PASS",
+      "work": "T-1656"
+    },
+    "SRC-190:R006": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-12949",
+      "text": "NO IMPLEMENTATION CHANGELOG IN RESULT: RESULT states outcomes by category, not a sequence of code changes; long file and symbol lists collapse into counts.",
+      "verification": "RESULT is assembled by the engine from counts and categories; a model-written RESULT over 300 characters or carrying more than three ids is refused and replaced; the file and symbol names of the incident reply do not appear in the delivery (cases 06, 07, FastPrompterIncidentTests) -> PASS",
+      "work": "T-1656"
+    },
+    "SRC-190:R007": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-12949",
+      "text": "PRIORITY ORDER: operator-visible information appears as current state, success or failure, blocker, next action, compact validation, optional evidence pointer; a terminal or waiting checkpoint is followed by no unsolicited mini-audit.",
+      "verification": "fields render in one canonical order (state, outcome, blocker, operator action, next action, validation, pointer) and an operational reply must equal the machine digest, so nothing follows it (cases 03, 04, test_the_compact_form_is_accepted_when_it_comes_back) -> PASS",
+      "work": "T-1656"
+    },
+    "SRC-190:R008": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-12949",
+      "text": "AUTONOMOUS CONTINUATION IS QUIET: while a goal run has no operator action due, full evidence is stored canonically, only the minimum progress checkpoint the host requires is emitted, and the run continues; a completed ticket does not earn a full report.",
+      "verification": "while executable work remains the digest for a final boundary is empty and a completed ticket earns no report; a status request still gets a compact answer (case 02) -> PASS",
+      "work": "T-1656"
+    },
+    "SRC-190:R009": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-12949",
+      "text": "WAIT_USER: when operator input is required the surface shows the status, why input is required and the exact decision or action, with no technical retrospective before it.",
+      "verification": "a checkpoint that waits for the operator renders STATUS, RESULT and OPERATOR ACTION first, within eight lines and 1200 characters, before validation and the pointer (case 03) -> PASS",
+      "work": "T-1656"
+    },
+    "SRC-190:R010": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-12949",
+      "text": "ERROR CASE: an error surfaces first as failure class, impact, one recovery action and an evidence reference; stack traces and test logs are not dumped into the operator surface unless requested or no evidence storage exists.",
+      "verification": "a blocked boundary states the blocker code with its reason and the one next action before validation and the evidence pointer; an invalid facts carrier yields the closed failure form, never the rejected text (case 04, review probe) -> PASS",
+      "work": "T-1656"
+    },
+    "SRC-190:R011": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-12949",
+      "text": "RENDERER OWNERSHIP: the canonical response renderer, not prompt wording alone, enforces the contract: it detects excessive field length, summarizes machine evidence, preserves canonical detail references, flags operator-surface overflow and produces a deterministic compact form; no second response-formatting subsystem is built.",
+      "verification": "the additions live in the existing renderer response_surface.py (overflow_diagnostic, the pointer grammar, preserve_rejected, the gate verdict) and no second formatter exists; adapters only transport (diff read; the response modules Ran 94 OK) -> PASS",
+      "work": "T-1656"
+    },
+    "SRC-190:R012": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-12949",
+      "text": "OVERFLOW DIAGNOSTIC: a diagnostic such as OPERATOR_OUTPUT_OVERFLOW identifies the offending field, its character and line count, the available detail reference and whether compaction succeeded; it normally triggers automatic compaction, not WAIT_USER.",
+      "verification": "OPERATOR_OUTPUT_OVERFLOW names each offending field with measured characters and lines against its budget, the whole reply against its class budget, the reference of the original and whether compaction succeeded; the gate answers it with a delivery, never with a wait (test_the_overflow_is_named_as_data, case 07) -> PASS",
+      "work": "T-1656"
+    },
+    "SRC-190:R013": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-12949",
+      "text": "FASTPROMPTER REGRESSION: a fixture representing the observed response (terminal T-1442 and SRC-101, 8 of 8 findings, many component, file and symbol descriptions, red and green evidence, performance values, a full-suite result near 4999 passed, 23 skipped, 0 failed, evidence ids, a next action) is one dense paragraph before the fix and renders after it as a compact checkpoint of equivalent readability, with every detail proven to exist in canonical storage.",
+      "verification": "the fixture is the incident reply transcribed from the operator's screenshot (one line, 3278 characters); against the pre-fix subject the module is red (event E-12947); after the fix the reply is diagnosed, compacted into a six-line checkpoint and preserved byte for byte; the same was measured read-only on the incident project (incident_gate_verdict.json) -> PASS",
+      "work": "T-1656"
+    },
+    "SRC-190:R014": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-12949",
+      "text": "READABILITY TESTS: machine checks cover a normal DONE checkpoint within budget, a normal CONTINUE checkpoint within budget, WAIT_USER decision before technical detail, BLOCKED blocker and recovery before evidence, large evidence sets referenced not dumped, long file and symbol lists collapsed into counts, no RESULT paragraph growing arbitrarily, validation summarizing totals, evidence lossless in canonical storage, and an explicit operator request for verbose detail expanding the output.",
+      "verification": "the ten checks are cases 01 to 10 of ReadabilityChecks in tools/test_t1656_operator_readability.py; the module Ran 29 OK -> PASS",
+      "work": "T-1656"
+    },
+    "SRC-190:R015": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-12949",
+      "text": "EXPLICIT VERBOSE MODE: an explicit operator request for details, a full report, an audit, evidence, a technical breakdown or verbose output allows a larger response; default autonomous checkpoints stay compact and operator-requested verbosity is separate from machine evidence storage.",
+      "verification": "a witnessed whole-clause request for a detailed or full report, audit or handoff, for details, evidence, a technical breakdown or verbose output grants the detailed class; a negation, a question about one thing and a bare audit grant nothing (cases 10 and 10b, test_detail_authorization) -> PASS",
+      "work": "T-1656"
+    },
+    "SRC-190:R016": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-12949",
+      "text": "HOST INDEPENDENCE: the same semantic output contract applies across FastPrompter, ZAICODE, FreeBuff, Claude, Codex, Antigravity and other compatible hosts; viewport size may change wrapping and is never the fix.",
+      "verification": "one renderer, one budget table, one diagnostic and one digest serve every host, and nothing in the delta depends on a host or a viewport; delivery strength per host stays a registry fact and a host with no installed final gate remains owned by T-1548 and T-1551 -> PASS",
+      "work": "T-1656"
+    },
+    "SRC-190:R017": {
+      "actionable": true,
+      "class": "non-goal",
+      "disposition": "VERIFIED",
+      "evidence": "E-12949",
+      "text": "NON-GOALS: deleting technical evidence, hiding failures, suppressing safety-critical information, forbidding requested verbose reports, reducing audit quality, truncating canonical logs, changing lifecycle semantics, enforcing one-line responses everywhere, relying only on text wrapping.",
+      "verification": "no evidence is deleted or truncated, failures and blockers keep their own fields, requested depth still expands, lifecycle operations are unchanged and nothing relies on wrapping (diff read; the family run at SHIP) -> PASS",
+      "work": "T-1656"
+    }
+  },
+  "schema_version": 1
+}

@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-353:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "FB-01 Explicit Namespace Routing: Slash-command router must give /saipen priority over semantic/fuzzy skill discovery."
+    }
+  },
+  "derived_at": "2026-10-31T17:40:30Z",
+  "derived_from": "SRC-353",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "f3908585a5b0eda272376e380e72032d5627121ac884618211dcef4bce850344"
+}

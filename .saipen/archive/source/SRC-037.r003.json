@@ -1,0 +1,24 @@
+{
+  "clauses": {
+    "SRC-037:R001": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "A later-ticket OpenCode smoke must not overwrite durable evidence owned by an earlier ticket."
+    },
+    "SRC-037:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Preserve original T-1317 native-smoke evidence if recoverable from archive or Git history."
+    },
+    "SRC-037:R003": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "Fresh OpenCode proof is retained under correct T-1320 evidence ownership."
+    }
+  },
+  "derived_at": "2026-09-13T17:21:49Z",
+  "derived_from": "SRC-037",
+  "interpretation_revision": 3,
+  "schema_version": 1,
+  "source_sha256": "b1393000bdf7f0b78d4e0ce970505b948059224c48d16b75fc3d14855db3656d"
+}

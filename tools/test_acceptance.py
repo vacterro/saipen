@@ -9,6 +9,7 @@ Every test here would pass just as well if the projection were generous, except
 the ones that check what it declines to say -- so those are most of the file.
 """
 
+import re
 import unittest
 
 from saipen_engine.acceptance import (
@@ -19,9 +20,11 @@ from saipen_engine.acceptance import (
     classify,
     collect_evidence,
     parse_criteria,
+    parse_criterion_specs,
     parse_evidence_payload,
     reconcile,
     render,
+    split_criterion_segments,
 )
 
 from test_hermetic_env import isolate_host_session
@@ -64,6 +67,100 @@ class CriterionParsingTests(unittest.TestCase):
 
     def test_prose_mentioning_an_ac_id_mid_sentence_is_not_a_criterion(self):
         self.assertEqual(parse_criteria("this behaves like AC-01 does; and more prose"), {})
+
+
+class CriterionBoundaryTests(unittest.TestCase):
+    """T-1964: a contract that starts each AC after a full stop declares them all.
+
+    Measured on T-1858: four declared criteria collapsed into one AC-01 whose
+    text still demanded AC-03's LIVE witness, so an INTEGRATION record satisfied
+    a LIVE floor. The floor is the property being defended here.
+    """
+
+    #: The archived T-1858 verify clause, byte-for-byte as the ticket declared it.
+    T1858 = (
+        "AC-01 [INTEGRATION] cc, saipen continue, continue and cc all preserve the "
+        "existing goal and the same bounded authorization semantics. "
+        "AC-02 [UNIT] model-issued or forged input never resets hard_wait. "
+        "AC-03 [LIVE] a genuine operator continuation from the reported FastPrompter "
+        "and ZAICODE native UI reaches the separated broker, is bound to the actual "
+        "event/session/worker/budget, and resumes canonical eligible Work. "
+        "AC-04 [INTEGRATION] absent trusted ingress or broker is identified as its "
+        "real infrastructure boundary; no instruction falsely promises that only bare "
+        "cc spelling will fix it. Disposable broker doubles do not satisfy AC-03."
+    )
+
+    def test_a_full_stop_before_the_next_id_is_a_boundary(self):
+        parsed = parse_criteria("AC-01 first thing. AC-02 second thing. AC-03 third")
+        self.assertEqual(list(parsed), ["AC-01", "AC-02", "AC-03"])
+        self.assertEqual(parsed["AC-02"], "second thing")
+
+    def test_the_semicolon_grammar_still_works(self):
+        parsed = parse_criteria("AC-01 first thing; AC-02 second thing; AC-03 third")
+        self.assertEqual(list(parsed), ["AC-01", "AC-02", "AC-03"])
+        self.assertEqual(parsed["AC-02"], "second thing")
+
+    def test_mixed_separators_declare_every_criterion_once(self):
+        parsed = parse_criteria("AC-01 first; AC-02 second. AC-03 third; AC-04 fourth")
+        self.assertEqual(list(parsed), ["AC-01", "AC-02", "AC-03", "AC-04"])
+
+    def test_the_t1858_contract_declares_four_floors_not_one(self):
+        specs = parse_criterion_specs(self.T1858)
+        self.assertEqual(list(specs), ["AC-01", "AC-02", "AC-03", "AC-04"])
+        self.assertEqual(
+            {ac: spec["minimum_witness"] for ac, spec in specs.items()},
+            {"AC-01": "INTEGRATION", "AC-02": "UNIT", "AC-03": "LIVE", "AC-04": "INTEGRATION"},
+        )
+
+    def test_no_criterion_text_carries_another_declared_id(self):
+        """The regression in one assertion: one criterion must not swallow the rest.
+
+        A bare mention is legitimate -- AC-04 names AC-03 on purpose -- so the
+        thing refused here is a second DECLARATION (an id carrying a witness
+        tag) inside one criterion's text.
+        """
+        declared = re.compile(r"AC-\d{2,}\s+\[(UNIT|INTEGRATION|EFFECT_PATH|LIVE|MANUAL)\]")
+        for ac_id, spec in parse_criterion_specs(self.T1858).items():
+            self.assertEqual(
+                declared.findall(spec["text"]), [],
+                f"{ac_id} text still declares another criterion: the contract collapsed",
+            )
+
+    def test_a_semicolon_inside_criterion_text_still_terminates_it(self):
+        """Established grammar, kept deliberately (T-1718 depends on it).
+
+        AC-04 contains a semicolon, so its text stops there. That truncation is
+        older than this ticket and unchanged; the boundary this ticket adds must
+        not be bought by weakening the `;` rule.
+        """
+        specs = parse_criterion_specs(self.T1858)
+        self.assertEqual(
+            specs["AC-04"]["text"],
+            "absent trusted ingress or broker is identified as its real infrastructure boundary",
+        )
+
+    def test_prose_mentioning_an_id_is_still_not_a_boundary(self):
+        self.assertEqual(
+            split_criterion_segments("this behaves like AC-01. and more prose"),
+            ["this behaves like AC-01. and more prose"],
+        )
+
+    def test_a_dotted_range_never_declares_the_endpoint(self):
+        """A parser must not invent a criterion, only refuse to lose one.
+
+        Prose saying the text yields ``AC-01..AC-04`` is a sentence ABOUT the
+        criteria; reading it as a declaration of AC-04 reports an UNVERIFIED
+        criterion nobody promised. Found on T-1964's own contract.
+        """
+        for prose in (
+            "the text yields AC-01..AC-04 as four criteria",
+            "yields AC-01...AC-04 here",
+        ):
+            with self.subTest(prose=prose):
+                self.assertEqual(parse_criteria(prose), {})
+
+    def test_an_empty_clause_has_no_segments(self):
+        self.assertEqual(split_criterion_segments(""), [])
 
 
 class EvidenceGrammarTests(unittest.TestCase):

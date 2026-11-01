@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-178:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Finish FUTURE GATE autonomous maturation: reviewed DEFERRED gates mature before HUNT with activation policy, no-spin witnesses, regression matrix, AUTO-14 perf fix"
+    }
+  },
+  "derived_at": "2026-10-05T23:55:53Z",
+  "derived_from": "SRC-178",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "1e2ba6e79d406c8d2aab65e9832b8f47eb84ba077974c93ec3e19fb804b8d281"
+}

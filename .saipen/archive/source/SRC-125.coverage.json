@@ -1,0 +1,122 @@
+{
+  "requirements": {
+    "SRC-125:R001": {
+      "actionable": false,
+      "class": "context",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Do not continue treating the previous 500+ red set as a currently reproducing mass fixture failure.",
+      "verification": null,
+      "work": "T-1536"
+    },
+    "SRC-125:R002": {
+      "actionable": false,
+      "class": "context",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Do not claim that the remaining 24 reds are caused by STYLE fixture authority without reproducing that relationship.",
+      "verification": null,
+      "work": "T-1536"
+    },
+    "SRC-125:R003": {
+      "actionable": false,
+      "class": "context",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "current-valid fixtures must pass",
+      "verification": null,
+      "work": "T-1536"
+    },
+    "SRC-125:R004": {
+      "actionable": false,
+      "class": "context",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "intentionally stale fixtures must still fail",
+      "verification": null,
+      "work": "T-1536"
+    },
+    "SRC-125:R005": {
+      "actionable": false,
+      "class": "context",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "simulate a legitimate STYLE contract change",
+      "verification": null,
+      "work": "T-1536"
+    },
+    "SRC-125:R006": {
+      "actionable": false,
+      "class": "context",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "prove that fixtures representing \"current valid installation\" can derive the new token mechanically",
+      "verification": null,
+      "work": "T-1536"
+    },
+    "SRC-125:R007": {
+      "actionable": false,
+      "class": "context",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "prove that stale/pinned/historical fixtures remain intentionally pinned",
+      "verification": null,
+      "work": "T-1536"
+    },
+    "SRC-125:R008": {
+      "actionable": false,
+      "class": "context",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "do not modify the canonical project's STYLE.md again merely to exercise this test.",
+      "verification": null,
+      "work": "T-1536"
+    },
+    "SRC-125:R009": {
+      "actionable": false,
+      "class": "context",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Do not globally replace any STYLE token.",
+      "verification": null,
+      "work": "T-1536"
+    },
+    "SRC-125:R010": {
+      "actionable": false,
+      "class": "context",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Do not accept any of the 24 into baseline merely because they are unrelated to T-1538.",
+      "verification": null,
+      "work": "T-1536"
+    },
+    "SRC-125:R011": {
+      "actionable": false,
+      "class": "context",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "do not manufacture a large refactor solely because the old temporary STYLE change exposed brittle tests.",
+      "verification": null,
+      "work": "T-1536"
+    },
+    "SRC-125:R012": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-10468",
+      "text": "For T-1538, prove current-valid fixtures derive the restored installed STYLE token through one shared helper; stale, wrong, and missing states still fail strict equality; historical and pinned fixtures stay unchanged; simulate a legitimate STYLE change only in an isolated install; do not weaken production validation or globally replace tokens.",
+      "verification": "python -B -m unittest -v tools.test_fixture_style_authority -> PASS 6/6; current/isolated STYLE controls pass; stale, missing, exact-equality, and historical digest controls remain strict.",
+      "work": "T-1538"
+    },
+    "SRC-125:R013": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-10461",
+      "text": "Before fixture changes, rerun the prior 24 jobs=6 new-red tests individually, then collect fresh jobs=1 core-unit evidence and compare jobs=6; accept no reds into baseline and classify only failures that reproduce.",
+      "verification": "all former 24 jobs=6 new-red tests individually PASS; fresh jobs=1 E-10461 and jobs=6 E-10462 each ran 3985, new_red=0, same fingerprint 55039e646153b91d; no reds accepted into baseline.",
+      "work": "T-1538"
+    }
+  },
+  "schema_version": 1
+}

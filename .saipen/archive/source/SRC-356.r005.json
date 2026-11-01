@@ -1,0 +1,34 @@
+{
+  "clauses": {
+    "SRC-356:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Incident Root Cause: Diagnose RUNTIME_DRIFT trigger in _runtime_drift_payload when saipen_home differs from executing runtime."
+    },
+    "SRC-356:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Test Harness Isolation: Identify subprocess run_cli environment leakage (SAIPEN_PROJECT_ROOT / PWD) as root cause in test_t1968."
+    },
+    "SRC-356:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Path Normalization Behavior: Validate Windows path resolution (8.3 short names, trailing slashes, OSError handling) in _same_install_path."
+    },
+    "SRC-356:R004": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Production Classification: Classify RUNTIME_DRIFT as intended protocol defense, not a production defect."
+    },
+    "SRC-356:R005": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Harness Remediation: Proscribe ambient environment leakage in test subprocesses by using unbound_environment."
+    }
+  },
+  "derived_at": "2026-10-31T18:29:23Z",
+  "derived_from": "SRC-356",
+  "interpretation_revision": 5,
+  "schema_version": 1,
+  "source_sha256": "26d08cead83ea3b769e3235591976644807a35cd9dc6d44d11365b8999a88177"
+}

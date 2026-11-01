@@ -1,0 +1,89 @@
+{
+  "clauses": {
+    "SRC-237:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Inspect live SAIPEN implementation and existing contracts; establish authority and meaning of blocker, next_action, continuation_authority, safety_valve_mode, claimedTicket, topWorkableTicket, actionable and disposition."
+    },
+    "SRC-237:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Build a deterministic read-only fixture matching captured T-260 state; compare SAIPEN projection and CLI continuation against the same snapshot."
+    },
+    "SRC-237:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Determine whether WAIT is non-executable and operator-required, and whether T-283 is independently eligible without inferring from actionable counts."
+    },
+    "SRC-237:R004": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Correct only a reproduced SAIPEN defect; if current SAIPEN contract is correct, preserve protocol and identify ZAICODE host responsibility with evidence for its agent."
+    },
+    "SRC-237:R005": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "Regression: operator-required WAIT remains non-executable."
+    },
+    "SRC-237:R006": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "Regression: blocked claimed ticket does not create false execution authority."
+    },
+    "SRC-237:R007": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "Regression: independent executable ticket is eligible when no session WAIT forbids it."
+    },
+    "SRC-237:R008": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "Regression: no executable work is distinguished from completion."
+    },
+    "SRC-237:R009": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "Regression: genuine completion requires current complete closure proof."
+    },
+    "SRC-237:R010": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "Regression: stale projection cannot certify current completion."
+    },
+    "SRC-237:R011": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "Regression: contradictory authority metadata fails closed."
+    },
+    "SRC-237:R012": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "Regression: existing safety gates remain enforced."
+    },
+    "SRC-237:R013": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Verify backward compatibility with existing CLI consumers; all relevant regressions pass; preserve exact observed and corrected behavior evidence."
+    },
+    "SRC-237:R014": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "No unauthorized operator decision, durability-ceiling acceptance or T-260 bypass; no silent closure, artificial real lifecycle transition or evidence-free reopening."
+    },
+    "SRC-237:R015": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "No unrelated rule changes, ZAICODE host code modifications or speculative finding tickets; missing historical contract never permits invention."
+    },
+    "SRC-237:R016": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Deliver verified authority-boundary result; runtime fix only for reproduced protocol defect; if contractually correct, report ZAICODE as required implementation owner."
+    }
+  },
+  "derived_at": "2026-10-13T07:38:29Z",
+  "derived_from": "SRC-237",
+  "interpretation_revision": 16,
+  "schema_version": 1,
+  "source_sha256": "5aac1699cf8f8919489dd7a1ff05d4800c67b789e56102efa076d5b88a8ac1ae"
+}

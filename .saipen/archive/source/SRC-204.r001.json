@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-204:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Execute the full AUDAPACK integrity investigation against the current verified live root: preserve exact originals and installation/HEAD/dirty state, prove task/event/writer provenance including compaction and retained journals, classify every conclusion without promoting engineering reports into lifecycle authority."
+    }
+  },
+  "derived_at": "2026-10-10T03:13:41Z",
+  "derived_from": "SRC-204",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "f03cbc8c86212164405f51a57cf67254ab701aceec389dadeb36d8ff504455b6"
+}

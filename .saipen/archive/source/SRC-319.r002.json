@@ -1,0 +1,19 @@
+{
+  "clauses": {
+    "SRC-319:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "test"
+    },
+    "SRC-319:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Decide, with live evidence, whether this project's SAIPEN protocol entry is claimable: canonical lifecycle running plus host proof, or not. Report the protocol-entry versus host-proof distinction, keep operator-selected DEGRADED_ALLOWED policy and stale installed runtime generations visible, never claim a mechanically verified host session from a style/skill read alone, and continue without re-asking the operator."
+    }
+  },
+  "derived_at": "2026-10-25T02:48:02Z",
+  "derived_from": "SRC-319",
+  "interpretation_revision": 2,
+  "schema_version": 1,
+  "source_sha256": "23524e865ca15c4eb5303e4b298c6fb28ddb282e43b341e66db2f61a907df7a9"
+}

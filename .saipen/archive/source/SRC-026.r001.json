@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-026:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "WAVE core / CORE-001 / P0 / tools/saipen_engine/operations.py::_fold_handover,ticket_add + tools/saipen_engine/fast_check.py::validate_texts. Active execution ownership must be one shared atomic authority: the cosmetic _fold_handover event-message helper must carry no ownership semantics; out-of-band operations by another actor (ticket add of future Work, user-intent persistence, audit/source persistence, checkpoint on unrelated future work, metadata-only future-intent registration) must never change STATE.agent, the active BOARD owner or its claim_time, and must record the acting actor only in journal event/receipt provenance; an authorized handover A to B must mutate STATE.agent, active BOARD owner and BOARD claim_time inside one journal transaction or reject before persistence with no transient committed split; a FOREIGN_LIVE unauthorized transfer must refuse with zero STATE change, zero BOARD change and zero committed event tail; and fast_check.validate_texts must enforce the same active-owner-vs-STATE.agent invariant as canonical validation through one shared classifier returning SELF/UNCLAIMED/FOREIGN_STALE/FOREIGN_LIVE/INVALID over active ticket, state task, state agent, board owner, claim_time, current actor and a fixed evaluation time. VERIFY: regression controls for out-of-band ticket-add and user-request preservation of the active seat; atomic authorized handover; FOREIGN_LIVE refusal with zero canonical mutation; injected committed STATE.agent different from active owner failing both fast and canonical validators; and journal failure injected between ownership projections leaving no half-transfer after recovery."
+    }
+  },
+  "derived_at": "2026-09-09T03:11:03Z",
+  "derived_from": "SRC-026",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "a3e683b3247f15098436bd9cc3431223308a6c0ae7088ea73dc1113b02ab0cca"
+}

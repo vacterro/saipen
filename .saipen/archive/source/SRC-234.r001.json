@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-234:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Inspect live repository, HEAD, dirty state, admission gates, and backlog"
+    }
+  },
+  "derived_at": "2026-10-13T04:47:48Z",
+  "derived_from": "SRC-234",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "3affe34eae1dfc5f550a758883fda0f3c5dc787b4940aaa8ba31de9cb101548a"
+}

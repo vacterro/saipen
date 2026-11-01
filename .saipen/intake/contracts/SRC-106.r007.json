@@ -1,0 +1,44 @@
+{
+  "clauses": {
+    "SRC-106:R001": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not create another autonomy umbrella."
+    },
+    "SRC-106:R002": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not replace SRC-100 or SRC-105."
+    },
+    "SRC-106:R003": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not interrupt the currently active T-1446 BUILD corridor."
+    },
+    "SRC-106:R004": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "QUALITY > TIME"
+    },
+    "SRC-106:R005": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "ACCEPTANCE QUALITY MUST NOT DECREASE BECAUSE THE CURRENT MODEL IS WEAKER"
+    },
+    "SRC-106:R006": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "provider model price tier reasoning tier session context size agent incarnation"
+    },
+    "SRC-106:R007": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Do not encode the false claim:"
+    }
+  },
+  "derived_at": "2026-09-22T18:25:35Z",
+  "derived_from": "SRC-106",
+  "interpretation_revision": 7,
+  "schema_version": 1,
+  "source_sha256": "3e74aaaefdadb6d3173ca8136a1df24227b30c4bfe39c15f262e2856fad4efa0"
+}

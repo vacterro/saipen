@@ -1,0 +1,32 @@
+{
+  "requirements": {
+    "SRC-149:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-10973",
+      "text": "Bind phase recovery to ticket lifecycle including claims and finish boundaries; no foreign phase evidence; distinguish CURRENT_DONE_JOURNAL_GAP from legacy done, block park and forged done.",
+      "verification": "tools/test_t1572_ticket_scoped_recovery.py::TicketScopeBindingTests",
+      "work": "T-1574"
+    },
+    "SRC-149:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-10973",
+      "text": "Provide one executable content-bound approved recovery restoring last proven phase and active BOARD atomically; preserve original STATE BOARD LOG; no fabricated historical finish or manual edits; modern closure metadata must not hide the gap.",
+      "verification": "tools/test_t1572_ticket_scoped_recovery.py::GapRecoveryRouteTests+RealDownstreamShapeTests",
+      "work": "T-1574"
+    },
+    "SRC-149:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "E-10973",
+      "text": "Advertised mutation route converges or refuses before writes when conditions change; next-action cannot mask stronger defects; downstream A-L matrix, interleaving, idempotency, every crash prefix, legacy and park tests; canonical CURRENT_PASS and full core new_red=0.",
+      "verification": "tools/test_t1572_ticket_scoped_recovery.py::GapCrashPrefixTests+matrix_J;core E-10971",
+      "work": "T-1574"
+    }
+  },
+  "schema_version": 1
+}

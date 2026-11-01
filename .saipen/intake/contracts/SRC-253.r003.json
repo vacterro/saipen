@@ -1,0 +1,24 @@
+{
+  "clauses": {
+    "SRC-253:R001": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "SAIPEN has a documented canonical Auto-Doctor contract (SELF_HEALING_CONTINUATION): typed failure classes that each produce a canonical action, reusing existing owners"
+    },
+    "SRC-253:R002": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "cc can invoke authorized recovery automatically inside the normal continuation path, without a separate operator command"
+    },
+    "SRC-253:R003": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "The reference STALE_PASS conformance condition recovers without a manual saipen validate"
+    }
+  },
+  "derived_at": "2026-10-14T21:25:53Z",
+  "derived_from": "SRC-253",
+  "interpretation_revision": 3,
+  "schema_version": 1,
+  "source_sha256": "b2f054144a5ef75c56105ec53c6d4d01d29841324030c5a06e1b56ddccc17da2"
+}

@@ -1,0 +1,122 @@
+{
+  "requirements": {
+    "SRC-008:R001": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-4998",
+      "text": "CORE-001 -- counter reconciliation must never return CLEAN when STATE goal counters disagree with the canonical derived count",
+      "verification": "reconcile.py _state_counter_repairs classifies below/ahead-under-cap/at-cap/malformed/absent and only equality yields CLEAN; Core001CounterReconciliation and Core002ReconciliationTests pass",
+      "work": "T-1196"
+    },
+    "SRC-008:R002": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-4998",
+      "text": "CORE-002 -- add_requirement must be one journaled OperationPlan spanning contract, immutable revision and coverage",
+      "verification": "intake.py add_requirement plans contract, immutable revision and coverage as one OperationPlan under the writer lock and refuses seeded drift with zero writes",
+      "work": "T-1197"
+    },
+    "SRC-008:R003": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-4998",
+      "text": "CORE-003 -- dry-run must be a real semantic PLAN for source/recover/continue/improve, not an early exit",
+      "verification": "saipen.py _source_dry_run_plan gives source/recover/continue/improve a real semantic PLAN; the SOURCE_DRY_RUN and DRY_RUN_UNSUPPORTED early exits are gone",
+      "work": "T-1198"
+    },
+    "SRC-008:R004": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-4998",
+      "text": "W2-001 -- orphan recovery must restore the allocator invariant before persisting recovered state",
+      "verification": "intake.py capture restores the allocator invariant next_id > max(receipt id) before persisting an adopted orphan; W2001OrphanAllocator passes",
+      "work": "T-1199"
+    },
+    "SRC-008:R005": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-4998",
+      "text": "W2-002 -- purge_receipt must be a journaled PLAN/APPLY with tombstone and index in the same recoverable operation",
+      "verification": "intake.py purge_receipt plans the full destructive delete set plus tombstone and index before the first delete",
+      "work": "T-1200"
+    },
+    "SRC-008:R006": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-4998",
+      "text": "W2-003 -- test_runner must guard the full child lifetime with cleanup that runs on every abnormal exit",
+      "verification": "test_runner.py reaps the child process tree from a finally block on every exit, not only on TimeoutExpired; W2003ProcessCleanup passes",
+      "work": "T-1201"
+    },
+    "SRC-008:R007": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-4998",
+      "text": "W2-004 -- parse_compound_command must use explicit quote/escape state and refuse malformed input structurally",
+      "verification": "commands.py parse_compound_command carries explicit escape state and returns no segments on an unterminated quote; W2004CompoundParser passes",
+      "work": "T-1202"
+    },
+    "SRC-008:R008": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-4998",
+      "text": "PERF-001 -- history snapshot and delete-tree digest must be computed from one validated traversal",
+      "verification": "log.py read_history_snapshot_and_logs_digest computes the snapshot and the sealed-log dependency digest from one validated traversal",
+      "work": "T-1203"
+    },
+    "SRC-008:R009": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-4998",
+      "text": "PERF-002 -- producer validation must separate strict READY checks from payload retention",
+      "verification": "producer.py validates every READY package strictly but retains decoded payload bytes only for the selected package",
+      "work": "T-1204"
+    },
+    "SRC-008:R010": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-4998",
+      "text": "PERF-003 -- fast_check must capture history once and feed one snapshot to both validators",
+      "verification": "fast_check.py captures history once and feeds the same HistorySnapshot to validate_texts and snapshot_contract_errors",
+      "work": "T-1205"
+    },
+    "SRC-008:R011": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-4998",
+      "text": "PERF-004 -- intake validate_project must parse BOARD once and read each coverage ledger once",
+      "verification": "intake.py validate_project parses BOARD once outside the loop and reads each receipt coverage once",
+      "work": "T-1206"
+    },
+    "SRC-008:R012": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-4998",
+      "text": "PERF-005 -- snapshot capture and status/next/explain must offer an explicit lean mode",
+      "verification": "snapshot.py ProjectSnapshot.capture takes lean=True and omits combined text and event-line retention for status/next/explain",
+      "work": "T-1207"
+    },
+    "SRC-008:R013": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "E-4996",
+      "text": "PERF-006 -- release authority inventory must be gathered once per PLAN",
+      "verification": "T-1208 is DONE on BOARD and shipped in v7.231.11: release authority inventory is gathered once per PLAN",
+      "work": "T-1208"
+    }
+  },
+  "schema_version": 1
+}

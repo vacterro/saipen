@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-120:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Remove unreachable project attack branch from structural detail tampering test (T-1525)"
+    }
+  },
+  "derived_at": "2026-09-25T19:55:48Z",
+  "derived_from": "SRC-120",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "456c60a0a59eae51422ee58ed540e9ad1360a395a827d27dd319586100bcb702"
+}

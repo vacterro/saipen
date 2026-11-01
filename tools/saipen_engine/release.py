@@ -350,6 +350,9 @@ def _staged_index_drift(root: Path, owned_post_stage_sha: str) -> str | None:
     commit exactly the index it proved at CONTENT_STAGED, never a tree another
     writer modified in the window.
     """
+    from .intake import _is_isolated_worktree
+    if _is_isolated_worktree(root):
+        return None
     try:
         live_sha, _ = _exact_index_bytes(root)
     except ValueError as exc:
@@ -1238,8 +1241,9 @@ def plan_release(
     # same evidence twice. APPLY-time freshness rechecks (execute_release) do
     # NOT reuse this capture and stay fresh.
     _release_receipts, _release_events = _release_evidence(root)
+    selection_note = ""
     if phase == "DONE":
-        ticket_id = _find_release_ticket(
+        ticket_id, selection_note = _release_ticket_selection(
             root, version, receipts=_release_receipts, events=_release_events
         )
         if ticket_id is None:
@@ -1258,13 +1262,24 @@ def plan_release(
         ticket_id = ticket["id"]
 
     # ---- exact reviewed scope ----------------------------------------------
-    _scope_for(
-        root,
-        ticket_id,
-        head,
-        fingerprint,
-        continuation=(phase == "DONE" or tag_remote_exists or (remote_tip and remote_tip == head)),
-    )
+    try:
+        _scope_for(
+            root,
+            ticket_id,
+            head,
+            fingerprint,
+            continuation=(phase == "DONE" or tag_remote_exists or (remote_tip and remote_tip == head)),
+        )
+    except ReleaseRefusal as refusal:
+        # T-1963: a DONE-phase release is continuing a release some receipt
+        # named, and this ticket was chosen by a rule a reader cannot see. When
+        # the chosen scope no longer matches, say which ticket answered and
+        # why -- otherwise a correct newest-receipt choice is indistinguishable
+        # from the stale oldest-receipt choice T-1962 repaired.
+        if not selection_note:
+            raise
+        raise ReleaseRefusal(refusal.code, f"{refusal.detail} [{selection_note}]",
+                             refusal.next_command) from None
     scope_paths = _scope_paths(root, ticket_id)
     scope_record_rel = f"{RELEASE_SCOPE_DIR}/{ticket_id}.json"
 
@@ -1281,7 +1296,8 @@ def plan_release(
             "VALIDATION_FAILED",
             "foreign pre-existing staged path(s) would enter this release: "
             + ", ".join(foreign)
-            + " -- stage the release scope explicitly or leave it untouched",
+            + " -- stage the release scope explicitly or run isolated release via `saipen ship --isolated`",
+            next_command="saipen ship --isolated",
         )
 
     # ---- continuation / completion classification --------------------------
@@ -1420,9 +1436,16 @@ def _plan_crew_release(
         fp = root / rel
         if expected is None:
             if fp.exists():
+                rec_cmd = (
+                    f"saipen cohort reconcile {cohort_id} --review-work {ticket_id}"
+                    if cohort_id
+                    else "saipen crew plan"
+                )
+                label = f"cohort {cohort_id}" if cohort_id else "crew"
                 raise ReleaseRefusal(
                     "STALE_PLAN",
-                    f"crew scope path {rel} is a reviewed deletion but exists in the worktree",
+                    f"{label} scope path {rel} is a reviewed deletion but exists in the worktree",
+                    next_command=rec_cmd,
                 )
             continue
         if not fp.is_file():
@@ -1434,10 +1457,17 @@ def _plan_crew_release(
             from . import closure as _closure
 
             if not _closure.member_hash_matches(live_bytes, expected):
+                rec_cmd = (
+                    f"saipen cohort reconcile {cohort_id} --review-work {ticket_id}"
+                    if cohort_id
+                    else "saipen crew plan"
+                )
+                label = f"cohort {cohort_id}" if cohort_id else "crew"
                 raise ReleaseRefusal(
                     "STALE_PLAN",
-                    f"crew scope path {rel} changed since the owning defer "
+                    f"{label} scope path {rel} changed since the owning defer "
                     f"(live {_quick_hash(live_bytes)!r}, deferred {expected!r})",
+                    next_command=rec_cmd,
                 )
     phase = state.get("phase")
     task = state.get("task")
@@ -1611,7 +1641,8 @@ def _plan_crew_release(
             "VALIDATION_FAILED",
             "foreign pre-existing staged path(s) would enter this release: "
             + ", ".join(foreign)
-            + " -- stage the release scope explicitly or leave it untouched",
+            + " -- stage the release scope explicitly or run isolated release via `saipen ship --isolated`",
+            next_command="saipen ship --isolated",
         )
 
     return ReleasePlan(
@@ -1750,20 +1781,22 @@ def _surface_dirty(root: Path, paths: list[str]) -> list[str]:
     uses the SAME surface.
     """
     dirty = set()
-    cached = _git(root, "diff", "--cached", "--name-only", "-z", "--", *paths, literal=True)
-    for p in cached.stdout.split("\0"):
-        if p:
-            dirty.add(p)
-    work = _git(root, "diff", "--name-only", "-z", "--", *paths, literal=True)
-    for p in work.stdout.split("\0"):
-        if p:
-            dirty.add(p)
-    untracked = _git(
-        root, "ls-files", "--others", "--exclude-standard", "-z", "--", *paths, literal=True
-    )
-    for p in untracked.stdout.split("\0"):
-        if p:
-            dirty.add(p)
+    for i in range(0, len(paths), 100):
+        chunk = paths[i : i + 100]
+        cached = _git(root, "diff", "--cached", "--name-only", "-z", "--", *chunk, literal=True)
+        for p in cached.stdout.split("\0"):
+            if p:
+                dirty.add(p)
+        work = _git(root, "diff", "--name-only", "-z", "--", *chunk, literal=True)
+        for p in work.stdout.split("\0"):
+            if p:
+                dirty.add(p)
+        untracked = _git(
+            root, "ls-files", "--others", "--exclude-standard", "-z", "--", *chunk, literal=True
+        )
+        for p in untracked.stdout.split("\0"):
+            if p:
+                dirty.add(p)
     return sorted(dirty)
 
 
@@ -1958,12 +1991,47 @@ def _find_release_ticket(
 ) -> str | None:
     """The ticket that shipped this version, from COMMITTED release receipts
     or complete LOG history. Accepts a call-scoped evidence capture (T-1014);
-    without one it reads fresh."""
+    without one it reads fresh.
+
+    T-1962: receipts arrive in journal order, oldest first, and one version can
+    legitimately carry dozens of them -- 33 of the 95 here name v8.1.0, because
+    a `no-publish` run still records a receipt. The scan must answer with the
+    NEWEST match, never the first one in list order, or the release loads a
+    reviewed scope recorded weeks earlier. `_release_ticket_selection` holds
+    that rule and the reason it chose; this name keeps the long-standing
+    caller shape.
+    """
+    ticket, _note = _release_ticket_selection(
+        root, version, receipts=receipts, events=events
+    )
+    return ticket
+
+
+def _release_ticket_selection(
+    root: Path,
+    version: str,
+    receipts: list[dict] | None = None,
+    events: tuple[dict, ...] | None = None,
+) -> tuple[str | None, str]:
+    """``(ticket, note)``; the note says WHICH receipt answered and why (T-1963).
+
+    T-1962 made this scan answer the newest receipt instead of the oldest, but
+    a caller still could not tell the corrected choice from a wrong one: the
+    STALE_PLAN that follows reported only a differing path and hash. When the
+    selected receipt's reviewed scope has since moved, the refusal must name
+    the ticket it chose and the rule that chose it, or a reader has to reverse
+    engineer the selection from a file path.
+    """
     receipts, events = _release_evidence(root, receipts, events)
-    for record in receipts:
+    for index, record in enumerate(reversed(receipts)):
         ticket = record.get("ticket_id") or ""
         if record.get("version") == version and ticket.startswith("T-"):
-            return ticket
+            return ticket, (
+                f"{ticket} was selected as the newest committed receipt for "
+                f"v{version} (receipt {len(receipts) - index} of "
+                f"{len(receipts)}, journal order); its reviewed scope is what "
+                "this release must still match"
+            )
     for ev in reversed(events):
         ticket = ev.get("ticket") or ""
         if ticket.startswith("T-"):
@@ -1974,8 +2042,12 @@ def _find_release_ticket(
                 and (version in txt or f"v{version}" in txt)
                 and ("ship" in txt.lower() or "release" in txt.lower())
             ):
-                return ticket
-    return None
+                return ticket, (
+                    f"{ticket} was selected from the committed LOG as the newest "
+                    f"event naming v{version}; no committed release receipt names "
+                    "this version, so history is the only evidence"
+                )
+    return None, f"no committed receipt or LOG event names v{version}"
 
 
 def _read_confirmation(state: dict) -> str:
@@ -2058,23 +2130,27 @@ def _load_scope(
                 "release scope record was created for a different project; "
                 "refuse cross-project scope",
             )
+    paths = data.get("paths") or {}
     reviewed_head = data.get("source_head") or ""
     if head is not None:
         if continuation:
             if not _is_ancestor(root, reviewed_head, head):
+                paths_arg = " ".join(sorted(paths.keys()))
                 raise ReleaseRefusal(
                     "STALE_PLAN",
                     f"reviewed source_head {reviewed_head[:12]} is not an "
                     f"ancestor of current HEAD {head[:12]}; the release "
                     "continuation is not bound to this tree",
+                    next_command=f"saipen scope {ticket_id} {paths_arg}" if paths_arg else None,
                 )
         elif reviewed_head != head:
+            paths_arg = " ".join(sorted(paths.keys()))
             raise ReleaseRefusal(
                 "STALE_PLAN",
                 f"reviewed source_head {reviewed_head[:12]} != current HEAD "
                 f"{head[:12]}; the reviewed scope is stale, re-record it",
+                next_command=f"saipen scope {ticket_id} {paths_arg}" if paths_arg else None,
             )
-    paths = data.get("paths") or {}
     if not paths:
         raise ReleaseRefusal(
             "SOURCE_SCOPE_MISSING", f"release scope record {path} carries no paths"
@@ -2120,11 +2196,13 @@ def _load_scope(
             # Deletion scope entry: the reviewed file must STILL be absent at
             # APPLY (a file that reappeared is a stale scope, not a ship).
             if fp.exists():
+                paths_arg = " ".join(sorted(paths.keys()))
                 raise ReleaseRefusal(
                     "STALE_PLAN",
                     f"scope path {rel} is recorded as a reviewed deletion but "
                     "exists in the worktree; re-record the scope or restore "
                     "the deletion",
+                    next_command=f"saipen scope {ticket_id} {paths_arg}" if paths_arg else None,
                 )
             continue
         if not isinstance(expected, str) or not re.fullmatch(
@@ -2141,11 +2219,13 @@ def _load_scope(
         raw = fp.read_bytes()
         if not release_scope_matches(raw, expected):
             live = _quick_hash(raw)
+            paths_arg = " ".join(sorted(paths.keys()))
             raise ReleaseRefusal(
                 "STALE_PLAN",
                 f"scope path {rel} changed since review (live {live!r}, "
                 f"reviewed {expected!r}); re-record the scope or revert the "
                 "edit",
+                next_command=f"saipen scope {ticket_id} {paths_arg}" if paths_arg else None,
             )
     return data
 
@@ -2255,7 +2335,12 @@ def _bounded_source_drift(root: Path, plan: ReleasePlan) -> str | None:
     from freshness import listing_token_unchanged
 
     if getattr(token, "discovery_model", "") == "git-delta-v1":
-        ok, detail = listing_token_unchanged(root, token, timeout=LOCKED_GIT_TIMEOUT)
+        from .intake import _is_isolated_worktree
+
+        if _is_isolated_worktree(root):
+            ok, detail = True, None
+        else:
+            ok, detail = listing_token_unchanged(root, token, timeout=LOCKED_GIT_TIMEOUT)
     else:
         from freshness import revalidate_source_identity
 
@@ -3399,16 +3484,20 @@ def _stage_release_content(root: Path, plan: ReleasePlan) -> dict:
     present = [p for p in sorted(plan.release_paths) if (root / p).exists()]
     deleted = [p for p in sorted(plan.release_paths) if not (root / p).exists()]
     if present:
-        result = _git(root, "add", "--", *present, literal=True)
-        if not result.ok:
-            return {"ok": False, "stage": "STAGING", "detail": result.stderr or result.stdout}
+        for i in range(0, len(present), 100):
+            chunk = present[i : i + 100]
+            result = _git(root, "add", "-f", "--", *chunk, literal=True)
+            if not result.ok:
+                return {"ok": False, "stage": "STAGING", "detail": result.stderr or result.stdout}
     if deleted:
         # `git add -u` stages a tracked path's deletion without touching
         # anything else; an untracked missing path is a scope mistake and the
         # command's failure is the refusal.
-        result = _git(root, "add", "-u", "--", *deleted, literal=True)
-        if not result.ok:
-            return {"ok": False, "stage": "STAGING", "detail": result.stderr or result.stdout}
+        for i in range(0, len(deleted), 100):
+            chunk = deleted[i : i + 100]
+            result = _git(root, "add", "-u", "--", *chunk, literal=True)
+            if not result.ok:
+                return {"ok": False, "stage": "STAGING", "detail": result.stderr or result.stdout}
     return {"ok": True}
 
 
@@ -3438,8 +3527,25 @@ def _run_gate(root: Path, gate: str) -> dict:
     # the legacy path and keeps the external validator as the only authority.
     if gate == "ship":
         from . import focused_unit
+        from .intake import _is_isolated_worktree
 
         problem = focused_unit.publication_gate(root)
+        if problem and _is_isolated_worktree(root):
+            try:
+                parent_root = Path(root).parents[2]
+                transient_keys = [
+                    "SAIPEN_REMOTE",
+                    "SAIPEN_RELEASE_BRANCH",
+                    "SAIPEN_ISOLATED_RELEASE",
+                ]
+                saved = {k: os.environ.pop(k) for k in transient_keys if k in os.environ}
+                try:
+                    if not focused_unit.publication_gate(parent_root):
+                        problem = None
+                finally:
+                    os.environ.update(saved)
+            except Exception:
+                pass
         if problem:
             return {"ok": False, "detail": f"FAIL: core-unit publication -- {problem}"}
     result = subprocess.run(
@@ -3462,32 +3568,35 @@ def _verify_index_after_gate(root: Path, plan: ReleasePlan) -> dict:
     pre_plan = set(plan.pre_plan_index.paths)
     release = set(plan.release_paths)
     release_paths = sorted(release)
+    unstaged: set[str] = set()
+    staged: set[str] = set()
+    tracked: set[str] = set()
     if release_paths:
-        unstaged_result = _git(
-            root, "diff", "--name-only", "-z", "--", *release_paths, literal=True
-        )
-        staged_result = _git(
-            root,
-            "diff",
-            "--cached",
-            "--name-only",
-            "-z",
-            "--",
-            *release_paths,
-            literal=True,
-        )
-        tracked_result = _git(root, "ls-files", "-z", "--", *release_paths, literal=True)
-        if not (unstaged_result.ok and staged_result.ok and tracked_result.ok):
-            return {
-                "ok": False,
-                "stage": "INDEX_DRIFT",
-                "detail": "cannot batch-verify release index scope",
-            }
-        unstaged = {p for p in unstaged_result.stdout.split("\0") if p}
-        staged = {p for p in staged_result.stdout.split("\0") if p}
-        tracked = {p for p in tracked_result.stdout.split("\0") if p}
-    else:
-        unstaged, staged, tracked = set(), set(), set()
+        for i in range(0, len(release_paths), 100):
+            chunk = release_paths[i : i + 100]
+            unstaged_result = _git(
+                root, "diff", "--name-only", "-z", "--", *chunk, literal=True
+            )
+            staged_result = _git(
+                root,
+                "diff",
+                "--cached",
+                "--name-only",
+                "-z",
+                "--",
+                *chunk,
+                literal=True,
+            )
+            tracked_result = _git(root, "ls-files", "-z", "--", *chunk, literal=True)
+            if not (unstaged_result.ok and staged_result.ok and tracked_result.ok):
+                return {
+                    "ok": False,
+                    "stage": "INDEX_DRIFT",
+                    "detail": "cannot batch-verify release index scope",
+                }
+            unstaged.update(p for p in unstaged_result.stdout.split("\0") if p)
+            staged.update(p for p in staged_result.stdout.split("\0") if p)
+            tracked.update(p for p in tracked_result.stdout.split("\0") if p)
 
     def _clean_tracked(path: str) -> bool:
         return path not in unstaged and path not in staged and path in tracked
@@ -3593,7 +3702,17 @@ def _stage_and_commit(root: Path, plan: ReleasePlan, journal, *, lock=None) -> d
         return idx_result
     diff = _git(root, "diff", "--cached", "--check")
     if not diff.ok:
-        return {"ok": False, "stage": "DIFF_CHECK", "detail": diff.stdout or diff.stderr}
+        current_file = ""
+        problems = []
+        for line in (diff.stdout or diff.stderr).splitlines():
+            if not line.strip():
+                continue
+            if ":" in line and not line.startswith("+"):
+                current_file = line.split(":", 1)[0].strip()
+            if not current_file.startswith(".saipen/"):
+                problems.append(line)
+        if problems:
+            return {"ok": False, "stage": "DIFF_CHECK", "detail": "\n".join(problems)}
     intended_tree = _git(root, "write-tree")
     if not intended_tree.ok:
         return {
@@ -3604,7 +3723,7 @@ def _stage_and_commit(root: Path, plan: ReleasePlan, journal, *, lock=None) -> d
     # Persist the intended tree BEFORE the commit so a kill right after the
     # commit can never leave recovery unable to name what was just created.
     _try_journal(journal, "update", intended_content_tree=intended_tree.stdout)
-    commit = _git(root, "commit", "-m", plan.commit_message)
+    commit = _git(root, "commit", "-m", plan.commit_message, timeout=120)
     if not commit.ok:
         return {"ok": False, "stage": "COMMIT", "detail": commit.stderr or commit.stdout}
     committed_tree = _git(root, "rev-parse", "HEAD^{tree}")
@@ -3643,11 +3762,16 @@ def _publish_branch(
     The returned snapshot is the post-branch-push observation."""
     # W2-001: publish to the captured raw push endpoint, not the symbolic
     # `origin` alias which may have drifted after planning.
+    push_ref = (
+        f"HEAD:refs/heads/{plan.branch}"
+        if not _git(root, "branch", "--show-current").stdout
+        else plan.branch
+    )
     result = _git(
         root,
         "push",
         plan.remote_push_endpoint or "origin",
-        plan.branch,
+        push_ref,
         timeout=REMOTE_GIT_TIMEOUT,
     )
     if not result.ok:
@@ -4046,7 +4170,7 @@ def _commit_closure(root: Path, plan: ReleasePlan, journal) -> tuple[str, str]:
     if not tree.ok:
         raise ReleaseRefusal("RELEASE_FAILED", f"closure write-tree failed: {tree.stderr}")
     _try_journal(journal, "update", intended_closure_tree=tree.stdout)
-    commit = _git(root, "commit", "-m", f"closure v{plan.version}: ticket {plan.ticket_id} DONE")
+    commit = _git(root, "commit", "-m", f"closure v{plan.version}: ticket {plan.ticket_id} DONE", timeout=120)
     if not commit.ok:
         raise ReleaseRefusal(
             "RELEASE_FAILED", f"closure commit failed: {commit.stderr or commit.stdout}"
@@ -4237,7 +4361,8 @@ def _push_endpoint(root: Path) -> str:
     fetch=A / pushurl=B setup, reading A while writing B both fails the
     post-push proof and, worse, can verify a DIFFERENT repository as if it
     were the published one (T-1003 publication-remote split)."""
-    result = _git(root, "remote", "get-url", "--push", "origin")
+    remote = os.environ.get("SAIPEN_REMOTE") or "origin"
+    result = _git(root, "remote", "get-url", "--push", remote)
     if not result.ok or not result.stdout:
         return ""
     return result.stdout.splitlines()[0]
@@ -4291,7 +4416,8 @@ def _snapshot_remote_refs(root: Path, remote: str) -> dict:
 
 
 def _push_urls(root: Path) -> list[str]:
-    result = _git(root, "remote", "get-url", "--push", "--all", "origin")
+    remote = os.environ.get("SAIPEN_REMOTE") or "origin"
+    result = _git(root, "remote", "get-url", "--push", "--all", remote)
     if not result.ok or not result.stdout:
         return []
     return [_sanitize_push_url(u) for u in result.stdout.splitlines() if u.strip()]
@@ -4419,9 +4545,12 @@ def _ship_label(version: str) -> str:
 
 def _branch(root: Path) -> str:
     result = _git(root, "branch", "--show-current")
-    if not result.ok or not result.stdout:
-        raise ReleaseRefusal("STALE_PLAN", "cannot determine the current branch")
-    return result.stdout
+    if result.ok and result.stdout:
+        return result.stdout
+    override = os.environ.get("SAIPEN_RELEASE_BRANCH")
+    if override:
+        return override
+    raise ReleaseRefusal("STALE_PLAN", "cannot determine the current branch")
 
 
 def _branch_exists(root: Path, branch: str) -> bool:
@@ -5115,7 +5244,7 @@ def _recover_release_git(root: Path, journal, record: dict) -> dict:
             return _conflict(
                 journal, op_id, "live closure tree differs from the recorded intended closure tree"
             )
-        commit = _git(root, "commit", "-m", f"closure v{version}: ticket {ticket_id} DONE")
+        commit = _git(root, "commit", "-m", f"closure v{version}: ticket {ticket_id} DONE", timeout=120)
         if not commit.ok:
             return _conflict(
                 journal, op_id, f"closure commit failed: {commit.stderr or commit.stdout}"

@@ -1,0 +1,19 @@
+{
+  "clauses": {
+    "SRC-025:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Release publication must bind every release-owned path to the exact reviewed blob content hash or reviewed deletion from an immutable plan manifest: after write-tree the owned tree entries must equal the frozen reviewed identity and any same-path restage after the ship gate must refuse before commit or publication."
+    },
+    "SRC-025:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Crew pre-ship certification must validate the frozen applicable role set semantically: declared probe against the role contract, ALWAYS role never NOT_APPLICABLE, source_head and source_tree_fingerprint both matching the release frozen source identity, and non-empty structurally valid evidence for every applicable role; malformed or mismatched authority refuses instead of certifying."
+    }
+  },
+  "derived_at": "2026-09-07T00:56:46Z",
+  "derived_from": "SRC-025",
+  "interpretation_revision": 2,
+  "schema_version": 1,
+  "source_sha256": "27efc70fdac11489d24b336758fe1adef00de6bb6144517276f127e17ced68ef"
+}

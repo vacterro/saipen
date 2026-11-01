@@ -35,6 +35,7 @@ import re
 import shutil
 import stat
 import subprocess
+import sys
 import tempfile
 import time
 from pathlib import Path
@@ -58,7 +59,22 @@ SCHEMA_VERSION = 1
 #: `.saipen/` is left out on purpose: every checkpoint rewrites it, so
 #: fingerprinting it would make any record stale the moment its own LOG line
 #: lands. `.git/` is history, not the tree under test.
-FINGERPRINT_EXCLUDED = (".git", ".saipen")
+#:
+#: `bin/` (T-1952) is GENERATED install plumbing: it is gitignored, carries the
+#: absolute paths of the machine that installed it, and the install identity
+#: already frames zero files under it. Leaving it in the subject digest meant
+#: two hosts with identical source and different install roots disagreed about
+#: the same tree, and it put a copy's rewritten pointers inside the identity it
+#: was being compared by. The launcher and `STATE.saipen_home` are rewritten in
+#: every sandbox to name the sandbox, so a run can no longer be answered by the
+#: source tree's engine.
+FINGERPRINT_EXCLUDED = (".git", ".saipen", "bin")
+
+#: Generated plumbing a copy always carries: two launcher files of a few
+#: hundred bytes that the family EXECUTES (T-1645 proves the PATH-miss route
+#: end to end). They are excluded from the fingerprint, so a declared sandbox
+#: scope must not also drop them from the copy the way it drops `.git`.
+COPY_ALWAYS = ("bin",)
 
 #: T-1779: top-level operator INPUT, not tested subject. The audit inbox takes
 #: handoff drops at any moment; inside the family it moved the fingerprint
@@ -241,7 +257,10 @@ def load_baseline(root: Path | str) -> tuple[dict | None, str | None]:
 
 
 def baseline_digest(root: Path | str) -> str:
-    return _sha256_file(Path(root) / BASELINE_REL)
+    p = Path(root) / BASELINE_REL
+    if not p.is_file():
+        return ""
+    return _sha256_file(p)
 
 
 #: The four files one checkpoint writes together. A copy that straddles a
@@ -316,6 +335,71 @@ def _copy_saipen_once(source: Path, target: Path, ignore, *, lock: bool,
             writer.release()
 
 
+def rebind_sandbox_pointers(sandbox: Path) -> dict:
+    """Point a copy's two install pointers at the COPY, never at its source.
+
+    T-1952. A sandbox is a copy of the working tree, and the family inside it
+    resolves its own install by two files that were copied verbatim:
+
+      * ``bin/saipen`` and ``bin/saipen.cmd`` name the engine by ABSOLUTE path.
+        A test that executes the copy's launcher (T-1645 proves the PATH-miss
+        route end to end) therefore ran the SOURCE tree's engine against the
+        source tree's STATE. Measured: with that tree drifted, the same copied
+        module answered ``assertEqual: None != 'T-1'`` -- the fixture project
+        was never read.
+      * ``.saipen/STATE.md``'s ``saipen_home:`` line names the source install.
+        Every mutation then compared the RUNNING home (the copy, by
+        ``state.running_home()``) against that line and refused with
+        ``home-dead: home-divergent`` as soon as the two trees differed --
+        which is exactly the state a tree under test is in.
+
+    Both are install GENERATED data: gitignored, machine-specific, and outside
+    the install fingerprint. Rewriting them makes the copy describe itself, so
+    agreement between the two pointers is a property of the copy and no longer
+    of whether the source tree happened to be clean. Neither file is part of
+    the subject fingerprint, so the record still describes the same bytes.
+
+    Returns what was rewritten, for the evidence record.
+    """
+    from . import machine_runtime
+
+    done: list[str] = []
+    target = sandbox.resolve()
+    launchers = machine_runtime.render_launchers(".", None, sys.executable)
+    for name, payload in launchers.items():
+        path = sandbox / "bin" / name
+        try:
+            if path.is_file() and path.read_bytes() == payload:
+                continue
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_bytes(payload)
+            done.append(f"bin/{name}")
+        except OSError:
+            # A missing launcher is already the honest answer (`launcher_problems`
+            # reports `missing:`); inventing one here would hide that.
+            continue
+    state = sandbox / ".saipen" / "STATE.md"
+    try:
+        text = state.read_text(encoding="utf-8")
+    except OSError:
+        return {"rewritten": done, "home": None}
+    home = f'saipen_home: "{target.as_posix()}"'
+    if re.search(r"(?m)^saipen_home:.*$", text):
+        rebound = re.sub(r"(?m)^saipen_home:.*$", lambda _: home, text)
+    else:
+        close = text.find("\n---", 3)
+        if close < 0:
+            return {"rewritten": done, "home": None}
+        rebound = text[:close] + "\n" + home + text[close:]
+    if rebound != text:
+        try:
+            state.write_text(rebound, encoding="utf-8")
+            done.append(".saipen/STATE.md")
+        except OSError:
+            return {"rewritten": done, "home": None}
+    return {"rewritten": done, "home": target.as_posix()}
+
+
 def _only_saipen_subtrees(canonical: Path, allowed, ignore):
     """Keep only the DECLARED child DIRECTORIES of `.saipen`; files always stay.
 
@@ -375,7 +459,8 @@ def copy_tree_consistent(source: Path, sandbox: Path, ignore, *, scope=None) -> 
                 # fingerprint never covered it, so a subject that does not read
                 # it must not pay 345 MiB to carry it.
                 ignored |= {name for name in names
-                            if name in FINGERPRINT_EXCLUDED and name not in extra_top}
+                            if name in FINGERPRINT_EXCLUDED and name not in extra_top
+                            and name not in COPY_ALWAYS}
             ignored |= set(FAMILY_INPUT_EXCLUDED) & set(names)
         return ignored
 
@@ -385,6 +470,7 @@ def copy_tree_consistent(source: Path, sandbox: Path, ignore, *, scope=None) -> 
                 "canonical_copy_s": 0.0, "canonical_copy_attempts": 0,
                 "trees": None if scope is None else sorted(scope["trees"])}
     if not (source / ".saipen").is_dir():
+        observed["pointers"] = rebind_sandbox_pointers(sandbox)
         return observed
     for attempt in range(CONSISTENT_COPY_ATTEMPTS):
         # Each attempt gets a fresh directory BESIDE the sandbox, never inside
@@ -401,6 +487,7 @@ def copy_tree_consistent(source: Path, sandbox: Path, ignore, *, scope=None) -> 
         if consistent:
             os.replace(staging, sandbox / ".saipen")
             observed["canonical_copy_s"] = round(observed["canonical_copy_s"], 6)
+            observed["pointers"] = rebind_sandbox_pointers(sandbox)
             return observed
         time.sleep(min(0.25 * (attempt + 1), 2.0))
     raise RuntimeError(
@@ -962,6 +1049,13 @@ def run_family(root: Path | str, *, timeout: int | None = None, jobs: int = 1) -
             with ThreadPoolExecutor(max_workers=count) as pool:
                 list(pool.map(lambda target: shutil.copytree(sandboxes[0], target, symlinks=True),
                               sandboxes[1:]))
+                # T-1952: a shard is copied FROM shard 0, which already names
+                # ITSELF, so every shard would otherwise inherit shard 0's
+                # `saipen_home` and launchers. Rebind each one to its own path
+                # before it runs, or 5 of 6 shards test a project that lives in
+                # another shard.
+                for target in sandboxes[1:]:
+                    rebind_sandbox_pointers(target)
                 copies = list(pool.map(tree_fingerprint, sandboxes[1:]))
             timings["shard_copy_wall_s"] = round(time.monotonic() - mark, 6)
             if any(item != tested for item in copies):
@@ -984,6 +1078,21 @@ def run_family(root: Path | str, *, timeout: int | None = None, jobs: int = 1) -
         mark = time.monotonic()
         leaked = reclaim_all(tmps)
         timings["cleanup_wall_s"] = round(time.monotonic() - mark, 6)
+    timings["sandbox_copy_wall_s"] = timings.get("copy_wall_s", 0.0)
+    timings["fingerprint_wall_s"] = timings.get("hash_wall_s", 0.0)
+    timings["identity_capture_wall_s"] = timings.get("environment_identity_wall_s", 0.0)
+    timings["actual_test_execution_wall_s"] = timings.get("execution_wall_s", 0.0)
+    timings["test_discovery_wall_s"] = round(float(run.get("discovery_process_s") or 0.0), 6)
+    proc_launches = (1 if shape else 0) + count
+    total_elapsed = round(time.monotonic() - started, 1)
+    latency_diag = None
+    if total_elapsed > 600.0:
+        latency_diag = {
+            "exceeded_10m": True,
+            "elapsed_s": total_elapsed,
+            "threshold_s": 600,
+            "reason": "full family execution exceeded 10 min alert threshold",
+        }
     return {
         **run,
         "sandboxes_swept": swept,
@@ -993,9 +1102,11 @@ def run_family(root: Path | str, *, timeout: int | None = None, jobs: int = 1) -
         "timings_s": timings,
         "copy_metrics": copy_metrics,
         "verification_identity": verification_identity,
-        "duration_s": round(time.monotonic() - started, 1),
+        "duration_s": total_elapsed,
         "timeout_s": declared_family.timeout,
         "command": ["python", *declared_family.command[1:]],
+        "process_launch_count": proc_launches,
+        "latency_diagnostic": latency_diag,
     }
 
 
@@ -1122,7 +1233,8 @@ def write_record(root: Path | str, run: dict, fingerprint: str) -> dict:
             key: run[key]
             for key in ("jobs", "discovered", "partition_error", "shards", "module_durations_s",
                         "timings_s", "copy_metrics", "membership_required", "membership_proof",
-                        "discovery_process_s")
+                        "discovery_process_s", "execution_trigger", "process_launch_count",
+                        "latency_diagnostic", "telemetry")
             if run.get(key) is not None
         },
         **verdict,
@@ -1147,8 +1259,97 @@ def verification_configuration(*, timeout=None, jobs=None) -> dict:
                                   if declared_family.environment_tools is not None else None)}
 
 
+VERIFICATION_DECISIONS = (
+    "REUSE_VALID_RECORD",
+    "JOIN_IDENTICAL_IN_FLIGHT",
+    "RUN_TARGETED_REQUIRED",
+    "RUN_CERTIFIED_IMPACT",
+    "RUN_FULL_REQUIRED",
+    "BLOCK_STALE_OR_INCOMPATIBLE",
+    "BLOCK_ORACLE_INCONSISTENCY",
+    "RECONCILE_UNKNOWN_OUTCOME",
+)
+
+EXECUTION_TRIGGERS = (
+    "NEW_TESTED_SOURCE_BYTES",
+    "CHANGED_BASELINE",
+    "CHANGED_TEST_SELECTION",
+    "CHANGED_VERIFICATION_CONFIGURATION",
+    "CHANGED_TOOL_OR_RUNTIME_IDENTITY",
+    "MANDATORY_FULL_ACCEPTANCE_GATE",
+    "NO_COMPATIBLE_VERIFIED_RECORD",
+    "EXPLICIT_AUTHORIZED_FRESH_PROBE",
+    "PRIOR_INCONSISTENCY_INVESTIGATION",
+    "REPLAY_UNSAFE",
+)
+
+
+def compatible_records(
+    base: Path,
+    fingerprint: str,
+    *,
+    digest: str,
+    expected: dict,
+    baseline_red: list,
+) -> list[dict]:
+    found = []
+    for path in sorted((base / RECORD_DIR_REL).glob(f"{fingerprint[:16]}-*.json"), reverse=True):
+        try:
+            record = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            continue
+        if not isinstance(record, dict):
+            continue
+        if (
+            record.get("fingerprint") == fingerprint
+            and record.get("baseline_sha256") == digest
+            and record.get("verification_identity") == expected
+            and not full_scope_problem(record)
+        ):
+            verdict = judge(record, baseline_red)["verdict"]
+            found.append({
+                "path": path.relative_to(base).as_posix(),
+                "sha256": _sha256_file(path),
+                "record": record,
+                "verdict": verdict,
+                "finished_utc": record.get("finished_utc"),
+            })
+    return found
+
+
+def oracle_conflict(
+    base: Path,
+    fingerprint: str,
+    *,
+    digest: str,
+    expected: dict,
+    baseline_red: list,
+) -> dict | None:
+    records = compatible_records(
+        base, fingerprint, digest=digest, expected=expected, baseline_red=baseline_red
+    )
+    passes = [r for r in records if r["verdict"] == "PASS"]
+    fails = [r for r in records if r["verdict"] == "FAIL"]
+    if passes and fails:
+        return {
+            "conflict": True,
+            "fingerprint": fingerprint,
+            "pass_records": [p["path"] for p in passes],
+            "fail_records": [f["path"] for f in fails],
+            "detail": (
+                f"identical fingerprint {fingerprint[:16]} produced both PASS and FAIL "
+                f"across {len(records)} runs"
+            ),
+        }
+    return None
+
+
 def reusable_record(
-    root: Path | str, fingerprint: str, *, verification_identity=None
+    root: Path | str,
+    fingerprint: str,
+    *,
+    verification_identity=None,
+    disallow_conflict: bool = False,
 ) -> dict | None:
     """The newest PASS record of exactly this tree and baseline, or None.
 
@@ -1160,36 +1361,187 @@ def reusable_record(
     baseline, error = load_baseline(base)
     if error:
         return None
-    from .verification_cache import capture
-
-    from .verification_cache import replay_supported
+    from .verification_cache import capture, replay_supported
 
     expected = verification_identity or capture(base, verification_configuration())
     if not replay_supported(expected):
         return None
     digest = baseline_digest(base)
-    for path in sorted((base / RECORD_DIR_REL).glob(f"{fingerprint[:16]}-*.json"), reverse=True):
-        try:
-            record = json.loads(path.read_text(encoding="utf-8"))
-        except (OSError, ValueError):
-            return None
-        if not isinstance(record, dict):
-            return None
-        if (
-            record.get("fingerprint") == fingerprint
-            and record.get("baseline_sha256") == digest
-            and record.get("verification_identity") == expected
-        ):
-            # Latest compatible outcome wins. A new red must not resurrect
-            # an older PASS of the same generation/environment/configuration.
-            if full_scope_problem(record) or judge(record, baseline["red"])["verdict"] != "PASS":
-                return None
+    if disallow_conflict and oracle_conflict(
+        base, fingerprint, digest=digest, expected=expected, baseline_red=baseline["red"]
+    ):
+        return None
+    records = compatible_records(
+        base, fingerprint, digest=digest, expected=expected, baseline_red=baseline["red"]
+    )
+    if not records:
+        return None
+    newest = records[0]
+    if newest["verdict"] != "PASS":
+        return None
+    return {
+        "record": newest["record"],
+        "path": newest["path"],
+        "sha256": newest["sha256"],
+    }
+
+
+def evaluate_verification_decision(
+    root: Path | str,
+    fingerprint: str,
+    *,
+    verification_identity=None,
+    fresh=False,
+    rerun_reason=None,
+    config=None,
+) -> dict:
+    base = Path(root)
+    baseline, error = load_baseline(base)
+    if error:
+        return {
+            "decision": "BLOCK_STALE_OR_INCOMPATIBLE",
+            "trigger": None,
+            "reason": f"the declared core-unit family has no usable baseline: {error}",
+            "available": None,
+        }
+    from .verification_cache import capture, replay_supported
+
+    expected = verification_identity or capture(base, config or verification_configuration())
+    if not replay_supported(expected):
+        return {
+            "decision": "RUN_FULL_REQUIRED" if fresh else "BLOCK_STALE_OR_INCOMPATIBLE",
+            "trigger": "REPLAY_UNSAFE",
+            "reason": "unresolved external verification runtime identity; replay refused",
+            "available": None,
+        }
+    digest = baseline_digest(base)
+    base_red = baseline.get("red", []) if isinstance(baseline, dict) else []
+    records = compatible_records(
+        base, fingerprint, digest=digest, expected=expected, baseline_red=base_red
+    )
+    conflict = oracle_conflict(
+        base, fingerprint, digest=digest, expected=expected, baseline_red=base_red
+    )
+
+    if conflict:
+        if fresh and rerun_reason in {
+            "PRIOR_INCONSISTENCY_INVESTIGATION",
+            "EXPLICIT_AUTHORIZED_FRESH_PROBE",
+        }:
             return {
-                "record": record,
-                "path": path.relative_to(base).as_posix(),
-                "sha256": _sha256_file(path),
+                "decision": "RUN_FULL_REQUIRED",
+                "trigger": rerun_reason,
+                "reason": (
+                    "fresh full run authorized to investigate oracle conflict: "
+                    f"{conflict['detail']}"
+                ),
+                "available": None,
+                "conflict": conflict,
             }
-    return None
+        return {
+            "decision": "BLOCK_ORACLE_INCONSISTENCY",
+            "trigger": None,
+            "reason": (
+                f"oracle inconsistency: {conflict['detail']}; investigate before reuse "
+                "or supply --rerun-reason PRIOR_INCONSISTENCY_INVESTIGATION"
+            ),
+            "available": None,
+            "conflict": conflict,
+        }
+
+    if records:
+        newest = records[0]
+        if newest["verdict"] == "PASS":
+            if not fresh:
+                return {
+                    "decision": "REUSE_VALID_RECORD",
+                    "trigger": None,
+                    "reason": "compatible PASS record describes the current tested bytes",
+                    "available": {
+                        "record": newest["record"],
+                        "path": newest["path"],
+                        "sha256": newest["sha256"],
+                    },
+                }
+            trigger = (
+                rerun_reason
+                if rerun_reason in EXECUTION_TRIGGERS
+                else "EXPLICIT_AUTHORIZED_FRESH_PROBE"
+            )
+            return {
+                "decision": "RUN_FULL_REQUIRED",
+                "trigger": trigger,
+                "reason": f"fresh run authorized: {trigger}",
+                "available": None,
+            }
+        else:
+            if not fresh:
+                return {
+                    "decision": "BLOCK_STALE_OR_INCOMPATIBLE",
+                    "trigger": None,
+                    "reason": (
+                        "latest compatible execution failed; "
+                        "rerun requires explicit reason and --fresh"
+                    ),
+                    "available": None,
+                }
+            if not rerun_reason:
+                return {
+                    "decision": "BLOCK_STALE_OR_INCOMPATIBLE",
+                    "trigger": None,
+                    "reason": (
+                        "repeated same-generation full run after FAIL requires an explicit "
+                        "machine-readable --rerun-reason"
+                    ),
+                    "available": None,
+                }
+            trigger = (
+                rerun_reason
+                if rerun_reason in EXECUTION_TRIGGERS
+                else "PRIOR_INCONSISTENCY_INVESTIGATION"
+            )
+            return {
+                "decision": "RUN_FULL_REQUIRED",
+                "trigger": trigger,
+                "reason": f"rerun authorized after FAIL: {trigger}",
+                "available": None,
+            }
+
+    all_records = sorted((base / RECORD_DIR_REL).glob("*.json"), reverse=True)
+    trigger = "NO_COMPATIBLE_VERIFIED_RECORD"
+    for prev_path in all_records:
+        try:
+            prev = json.loads(prev_path.read_text(encoding="utf-8"))
+            if not isinstance(prev, dict) or prev.get("family") != FAMILY_NAME:
+                continue
+            if prev.get("fingerprint") != fingerprint:
+                trigger = "NEW_TESTED_SOURCE_BYTES"
+                break
+            elif prev.get("baseline_sha256") != digest:
+                trigger = "CHANGED_BASELINE"
+                break
+            elif prev.get("verification_identity") != expected:
+                prev_ident = prev.get("verification_identity") or {}
+                if (
+                    prev_ident.get("toolchain") != expected.get("toolchain")
+                    or prev_ident.get("runtime") != expected.get("runtime")
+                ):
+                    trigger = "CHANGED_TOOL_OR_RUNTIME_IDENTITY"
+                else:
+                    trigger = "CHANGED_VERIFICATION_CONFIGURATION"
+                break
+        except (OSError, ValueError):
+            continue
+
+    if rerun_reason and rerun_reason in EXECUTION_TRIGGERS:
+        trigger = rerun_reason
+
+    return {
+        "decision": "RUN_FULL_REQUIRED",
+        "trigger": trigger,
+        "reason": f"full suite execution required (trigger: {trigger})",
+        "available": None,
+    }
 
 
 def evidence_line(written: dict) -> str:
@@ -1288,6 +1640,18 @@ def ship_gate(root: Path | str, ticket_id: str, events: list[dict]) -> str | Non
             "cited core-unit run tested a different tree: the working tree "
             f"(outside {', '.join(FINGERPRINT_EXCLUDED)}) changed after it ran"
         )
+    compat = compatible_records(
+        base,
+        record["fingerprint"],
+        digest=record["baseline_sha256"],
+        expected=record.get("verification_identity") or {},
+        baseline_red=baseline["red"],
+    )
+    if compat and compat[0]["verdict"] != "PASS":
+        return (
+            "cited core-unit run is superseded by a newer failing run of the same tree: "
+            f"{compat[0]['path']}"
+        )
     from .verification_cache import compatible, incompatibility, replay_supported
 
     if not compatible(base, record.get("verification_identity")):
@@ -1319,6 +1683,17 @@ def main(argv: list[str] | None = None) -> int:
     )
     evidence.add_argument(
         "--fresh", action="store_true", help="run even when a PASS record of this tree exists"
+    )
+    evidence.add_argument(
+        "--rerun-reason",
+        help=(
+            "machine-readable justification required when forcing a rerun "
+            "or investigating an inconsistency"
+        ),
+    )
+    evidence.add_argument(
+        "--force-fresh-reason",
+        help="alias/reason for forcing fresh verification",
     )
     focused = sub.add_parser(
         "focused", help="bounded ticket checks; full evidence is still required to publish"
@@ -1413,13 +1788,25 @@ class _EvidenceIncomplete(ValueError):
         self.payload = payload
 
 
-def _produce_evidence(root: Path, args, fingerprint: str, expected: dict) -> dict:
+def _produce_evidence(
+    root: Path,
+    args,
+    fingerprint: str,
+    expected: dict,
+    *,
+    trigger: str | None = None,
+    decision: str | None = None,
+) -> dict:
     from .inflight import holding
 
     with holding(root, args.ticket, "core_unit evidence"):
         for attempts in range(1, EVIDENCE_DRIFT_RETRIES + 1):
             run = run_family(root, timeout=args.timeout, jobs=args.jobs)
             run.setdefault("verification_identity", expected)
+            if trigger:
+                run["execution_trigger"] = trigger
+            if decision:
+                run["verification_decision"] = decision
             keep_durations(root, run.get("module_durations_s") or {})
             written = write_record(root, run, run.get("fingerprint") or fingerprint)
             keep_red_sections(root, written["path"], run.get("sections") or {})
@@ -1442,40 +1829,108 @@ def _produce_evidence(root: Path, args, fingerprint: str, expected: dict) -> dic
 def _evidence(root: Path, args) -> int:
     request_started = time.monotonic()
     request_started_ns = time.time_ns()
+    timings = {}
     from . import operations
     from .state import parse_state
     from .verification_cache import capture, compatible, single_flight
 
+    t0 = time.monotonic()
     _baseline_data, error = load_baseline(root)
     if error:
         return _emit({"ok": False, "detail": error})
     state = parse_state((root / ".saipen/STATE.md").read_text(encoding="utf-8"))
-    agent = args.agent or state.get("agent") or "unknown"
+    agent = getattr(args, "agent", None) or state.get("agent") or "unknown"
     board = (root / ".saipen/BOARD.md").read_text(encoding="utf-8")
+    timings["canonical_state_read_wall_s"] = round(time.monotonic() - t0, 6)
+
+    t0 = time.monotonic()
     refusal = operations._active_claim_refusal(state, board, agent)
     if refusal is not None:
         return _emit(refusal.to_dict())
+    timings["validation_and_conformance_wall_s"] = round(time.monotonic() - t0, 6)
+
+    t0 = time.monotonic()
     fingerprint = tree_fingerprint(root)
+    timings["fingerprint_wall_s"] = round(time.monotonic() - t0, 6)
+
     try:
-        expected = capture(root, verification_configuration(timeout=args.timeout, jobs=args.jobs))
-        written = None if args.fresh else reusable_record(
-            root, fingerprint, verification_identity=expected
+        t0 = time.monotonic()
+        config = verification_configuration(
+            timeout=getattr(args, "timeout", None),
+            jobs=getattr(args, "jobs", DEFAULT_JOBS),
         )
-        identity = {"family": FAMILY_NAME, "fingerprint": fingerprint,
-                    "verification_identity": expected}
-        with single_flight(root, identity, fresh=args.fresh, available=written,
-                           request_started_ns=request_started_ns,
-                           request_started_monotonic=request_started,
-                           consumer=args.ticket) as flight:
+        expected = capture(root, config)
+        timings["identity_capture_wall_s"] = round(time.monotonic() - t0, 6)
+
+        t0 = time.monotonic()
+        raw_rerun = getattr(args, "rerun_reason", None) or getattr(args, "force_fresh_reason", None)
+        rerun_reason = str(raw_rerun) if isinstance(raw_rerun, str) else None
+        raw_force = getattr(args, "force_fresh_reason", None)
+        force_fresh_reason = str(raw_force) if isinstance(raw_force, str) else None
+        fresh = bool(getattr(args, "fresh", False))
+        eval_result = evaluate_verification_decision(
+            root,
+            fingerprint,
+            verification_identity=expected,
+            fresh=fresh,
+            rerun_reason=rerun_reason,
+            config=config,
+        )
+        timings["evidence_lookup_wall_s"] = round(time.monotonic() - t0, 6)
+
+        if eval_result["decision"] in ("BLOCK_ORACLE_INCONSISTENCY", "BLOCK_STALE_OR_INCOMPATIBLE"):
+            return _emit({
+                "ok": False,
+                "verification_decision": eval_result["decision"],
+                "detail": eval_result["reason"],
+                "conflict": eval_result.get("conflict"),
+            })
+
+        written = eval_result["available"]
+        decision = eval_result["decision"]
+        trigger = eval_result.get("trigger")
+        identity = {
+            "family": FAMILY_NAME,
+            "fingerprint": fingerprint,
+            "verification_identity": expected,
+        }
+        profiler = {
+            "timings": timings,
+            "execution_trigger": trigger,
+            "verification_decision": decision,
+        }
+        with single_flight(
+            root,
+            identity,
+            fresh=fresh,
+            available=written,
+            request_started_ns=request_started_ns,
+            request_started_monotonic=request_started,
+            consumer=args.ticket,
+            rerun_reason=rerun_reason,
+            force_fresh_reason=force_fresh_reason,
+            profiler=profiler,
+        ) as flight:
             if flight.written is None:
                 if tree_fingerprint(root) != fingerprint:
                     raise ValueError("source generation changed while waiting for verification")
-                flight.publish(_produce_evidence(root, args, fingerprint, expected))
+                flight.publish(
+                    _produce_evidence(
+                        root,
+                        args,
+                        fingerprint,
+                        expected,
+                        trigger=trigger,
+                        decision=decision,
+                    )
+                )
             written = flight.written
             reused, joined = flight.reused, flight.joined
             if not compatible(root, written["record"].get("verification_identity")):
                 raise ValueError("verification environment changed before citation")
+            t_cite = time.monotonic()
             result = cite_evidence(root, agent, args.ticket, evidence_line(written))
+            timings["evidence_citation_wall_s"] = round(time.monotonic() - t_cite, 6)
     except _EvidenceIncomplete as exc:
         return _emit(exc.payload)
     except (OSError, ValueError, TimeoutError) as exc:
@@ -1493,6 +1948,8 @@ def _evidence(root: Path, args) -> int:
             "record": written["path"],
             "reused": reused,
             "shared": joined,
+            "verification_decision": decision,
+            "execution_trigger": trigger,
             "request_wall_s": round(time.monotonic() - request_started, 6),
             "checkpoint": result.code,
             "checkpoint_detail": result.message or None,

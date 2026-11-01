@@ -6092,6 +6092,30 @@ def _parse_value_options(tokens: list[str], spec: dict[str, str]) -> tuple[dict,
     return values, positionals, ""
 
 
+def _ticket_and_text(rest: list[str]) -> tuple[str | None, str]:
+    """Split positional args into ``(ticket, text)`` for checkpoint/transition.
+
+    T-31: the ticket id is a WHOLE argv token and may be written before OR
+    after the text. The historical parse read only ``rest[0]``, so
+    ``checkpoint RUN "<text>" T-27`` silently journaled a ticketless RUN and
+    folded the stray id into the text. A ``T-27`` mentioned inside quoted prose
+    is one argv element and can never satisfy the whole-token test, so lifting
+    the token here cannot misread prose. With no whole-token ticket the text is
+    passed through unchanged and the ticket is None.
+    """
+    ticket = None
+    parts: list[str] = []
+    for token in rest:
+        if ticket is None and re.fullmatch(r"T-\d+", token, re.IGNORECASE):
+            ticket = token.upper()
+        else:
+            parts.append(token)
+    if ticket is None and rest and re.match(r"^T-\d+", rest[0], re.IGNORECASE):
+        ticket = rest[0]
+        parts = rest[1:]
+    return ticket, " ".join(parts)
+
+
 def _cohort(project_root: Path, args: list[str], as_json: bool, dry_run: bool) -> int:
     """`saipen cohort status|reconcile|ship C-###` -- batch publication (CORE-003).
 
@@ -6129,7 +6153,7 @@ def _cohort(project_root: Path, args: list[str], as_json: bool, dry_run: bool) -
             review_work=options.get("review_work", ""), dry_run=dry_run)
         _emit(result.to_dict(), as_json)
         return 0 if result.ok else 1
-    if len(args) > 2:
+    if len(args) > 2 and action != "ship":
         _emit(
             {
                 "ok": False,
@@ -6205,6 +6229,43 @@ def _cohort(project_root: Path, args: list[str], as_json: bool, dry_run: bool) -
             as_json,
         )
         return 2
+    isolated = False
+    remote = "origin"
+    branch = "main"
+    extra = args[2:]
+    idx = 0
+    while idx < len(extra):
+        tok = extra[idx]
+        if tok == "--isolated":
+            isolated = True
+            idx += 1
+        elif tok == "--remote":
+            if idx + 1 < len(extra) and not extra[idx + 1].startswith("--"):
+                remote = extra[idx + 1]
+                idx += 2
+            else:
+                _emit({"ok": False, "code": "VALIDATION_FAILED", "detail": "--remote requires a remote name"}, as_json)
+                return 2
+        elif tok.startswith("--remote="):
+            remote = tok.split("=", 1)[1]
+            idx += 1
+        elif tok == "--branch":
+            if idx + 1 < len(extra) and not extra[idx + 1].startswith("--"):
+                branch = extra[idx + 1]
+                idx += 2
+            else:
+                _emit({"ok": False, "code": "VALIDATION_FAILED", "detail": "--branch requires a branch name"}, as_json)
+                return 2
+        elif tok.startswith("--branch="):
+            branch = tok.split("=", 1)[1]
+            idx += 1
+        elif tok.startswith("--"):
+            _emit({"ok": False, "code": "VALIDATION_FAILED", "detail": f"unknown option {tok}"}, as_json)
+            return 2
+        else:
+            _emit({"ok": False, "code": "VALIDATION_FAILED", "detail": f"cohort ship takes exactly one C-### id; surplus: {' '.join(extra[idx:])}"}, as_json)
+            return 2
+
     if not dry_run and _negotiate_capability(project_root) == "read-only":
         return _capability_refusal(as_json)
     from saipen_engine.operations import cohort_ship
@@ -6215,6 +6276,9 @@ def _cohort(project_root: Path, args: list[str], as_json: bool, dry_run: bool) -
         _agent_for(project_root),
         dry_run=dry_run,
         current_capability=_negotiate_capability(project_root),
+        isolated=isolated,
+        remote=remote,
+        branch=branch,
     )
     payload = result.to_dict()
     if not dry_run:
@@ -6400,7 +6464,12 @@ def _source(project_root: Path, args: list[str], as_json: bool, dry_run: bool) -
       recover           read-only orphan-receipt crash diagnostic
       req <SRC> <RID> <class> [--when-environment HOST] <text...>
       disp <SRC> <RID> <DISPOSITION> [--work T-x] [--evidence E-y]
-           [--environment HOST]
+           [--verification 'cmd -> PASS'] [--environment HOST]
+           [--evidence-class CLASS]
+                        CLASS (UNIT|CONTRACT|INTEGRATION|INSTALLED_RUNTIME|
+                        LIVE_END_TO_END|PERFORMANCE_BENCHMARK|REAL_SOAK|
+                        PUBLICATION_RECEIPT) declares what the cited evidence
+                        IS, so a [CLASS]-tagged clause can satisfy its class
       quarantine <SRC> [--reason CODE]
                         retain exact local authority; exclude body from export
       close <SRC>       close ONLY when coverage is terminal (mutating)
@@ -6855,7 +6924,7 @@ def _source(project_root: Path, args: list[str], as_json: bool, dry_run: bool) -
             )
             return 2
         receipt_id, rid, disposition = rest[0], rest[1], rest[2]
-        work = evidence = verification = environment = None
+        work = evidence = verification = environment = evidence_class = None
         i = 3
         while i < len(rest):
             if rest[i] == "--work" and i + 1 < len(rest):
@@ -6869,6 +6938,9 @@ def _source(project_root: Path, args: list[str], as_json: bool, dry_run: bool) -
                 i += 2
             elif rest[i] == "--environment" and i + 1 < len(rest):
                 environment = rest[i + 1]
+                i += 2
+            elif rest[i] == "--evidence-class" and i + 1 < len(rest):
+                evidence_class = rest[i + 1]
                 i += 2
             else:
                 _emit(
@@ -6889,6 +6961,7 @@ def _source(project_root: Path, args: list[str], as_json: bool, dry_run: bool) -
             evidence=evidence,
             verification=verification,
             environment=environment,
+            evidence_class=evidence_class,
         )
         if result.get("ok"):
             _close_finished_receipts(project_root, result, receipts=[receipt_id])
@@ -7085,10 +7158,10 @@ def _source_dry_run_plan(project_root: Path, action: str, rest: list[str], as_js
             )
             return 2
         receipt_id, rid, disposition = rest[0], rest[1], rest[2]
-        work = evidence = verification = environment = None
+        work = evidence = verification = environment = evidence_class = None
         i = 3
         while i < len(rest):
-            if rest[i] in ("--work", "--evidence", "--verification", "--environment"):
+            if rest[i] in ("--work", "--evidence", "--verification", "--environment", "--evidence-class"):
                 if i + 1 >= len(rest):
                     _emit(
                         {
@@ -7106,6 +7179,8 @@ def _source_dry_run_plan(project_root: Path, action: str, rest: list[str], as_js
                     evidence = value
                 elif rest[i] == "--verification":
                     verification = value
+                elif rest[i] == "--evidence-class":
+                    evidence_class = value
                 else:
                     environment = value
                 i += 2
@@ -7124,6 +7199,12 @@ def _source_dry_run_plan(project_root: Path, action: str, rest: list[str], as_js
         normalized_rid, refusal = intake.validate_disposition_request(receipt_id, rid, disposition)
         if refusal is not None:
             _emit(refusal, as_json)
+            return 1
+        # T-34: the same evidence-class authority the mutator uses, so an
+        # unknown --evidence-class refuses identically with and without --dry-run.
+        class_refusal = intake.validate_evidence_class(evidence_class)
+        if class_refusal is not None:
+            _emit(class_refusal, as_json)
             return 1
         assert normalized_rid is not None
         # T-1531: mirror the apply path's read-only STATE check. set_disposition
@@ -13303,8 +13384,7 @@ def main(argv: list[str] | None = None) -> int:
                 as_json,
             )
             return 2
-        ticket = args[2] if len(args) > 2 and args[2].upper().startswith("T-") else None
-        text = " ".join(args[3:] if ticket else args[2:])
+        ticket, text = _ticket_and_text(args[2:])
         if not dry_run and _negotiate_capability(project_root) == "read-only":
             return _capability_refusal(as_json)
         _ho = _ensure_handover(project_root, as_json, dry_run)
@@ -13329,8 +13409,7 @@ def main(argv: list[str] | None = None) -> int:
                 as_json,
             )
             return 2
-        ticket = args[2] if len(args) > 2 and args[2].upper().startswith("T-") else None
-        text = " ".join(args[3:] if ticket else args[2:])
+        ticket, text = _ticket_and_text(args[2:])
         if not dry_run and _negotiate_capability(project_root) == "read-only":
             return _capability_refusal(as_json)
         _ho = _ensure_handover(project_root, as_json, dry_run)
@@ -14789,16 +14868,62 @@ def main(argv: list[str] | None = None) -> int:
         _emit(result.to_dict(), as_json)
         return 0 if result.ok else 1
     if command in ("ship", "push"):
-        surplus = [a for a in args[1:] if not a.startswith("--")]
-        unknown_flags = [a for a in args[1:] if a.startswith("--")]
-        if surplus or unknown_flags:
+        isolated = False
+        remote = "origin"
+        branch = "main"
+        reconcile_remote_head = None
+        surplus = []
+        i = 1
+        while i < len(args):
+            arg = args[i]
+            if arg == "--isolated":
+                isolated = True
+                i += 1
+            elif arg == "--remote":
+                if i + 1 < len(args) and not args[i+1].startswith("--"):
+                    remote = args[i+1]
+                    i += 2
+                else:
+                    _emit({"ok": False, "code": "VALIDATION_FAILED", "detail": "--remote requires a remote name"}, as_json)
+                    return 2
+            elif arg.startswith("--remote="):
+                remote = arg.split("=", 1)[1]
+                i += 1
+            elif arg == "--branch":
+                if i + 1 < len(args) and not args[i+1].startswith("--"):
+                    branch = args[i+1]
+                    i += 2
+                else:
+                    _emit({"ok": False, "code": "VALIDATION_FAILED", "detail": "--branch requires a branch name"}, as_json)
+                    return 2
+            elif arg.startswith("--branch="):
+                branch = arg.split("=", 1)[1]
+                i += 1
+            elif arg == "--reconcile-remote-head":
+                if i + 1 < len(args) and not args[i+1].startswith("--"):
+                    reconcile_remote_head = args[i+1]
+                    i += 2
+                else:
+                    _emit({"ok": False, "code": "VALIDATION_FAILED", "detail": "--reconcile-remote-head requires a SHA"}, as_json)
+                    return 2
+            elif arg.startswith("--reconcile-remote-head="):
+                reconcile_remote_head = arg.split("=", 1)[1]
+                i += 1
+            elif arg.startswith("--"):
+                _emit({"ok": False, "code": "VALIDATION_FAILED", "detail": f"unknown option {arg}"}, as_json)
+                return 2
+            else:
+                surplus.append(arg)
+                i += 1
+
+        if surplus:
             _emit(
                 {
                     "ok": False,
                     "code": "VALIDATION_FAILED",
                     "detail": (
-                        f"{command} accepts no arguments; surplus: "
-                        f"{' '.join(surplus + unknown_flags)}"
+                        f"{command} accepts no positional arguments; surplus: "
+                        f"{' '.join(surplus)}"
                     ),
                 },
                 as_json,
@@ -14837,6 +14962,49 @@ def main(argv: list[str] | None = None) -> int:
                 # saying so is a lie (release_attempt's own contract). The
                 # release verdict itself is untouched.
                 verdict["attempt_record_error"] = logged.get("error", "unknown")
+
+        if isolated:
+            from saipen_engine.isolated_release import execute_isolated_release
+            try:
+                result = execute_isolated_release(
+                    project_root,
+                    command,
+                    remote=remote,
+                    branch=branch,
+                    current_capability=_negotiate_capability(project_root),
+                    current_agent=_agent_for(project_root),
+                    dry_run=dry_run,
+                    reconcile_remote_head=reconcile_remote_head,
+                )
+            except ReleaseRefusal as exc:
+                refusal = {
+                    "ok": False,
+                    "code": exc.code,
+                    "detail": exc.detail,
+                    "canonical_next_command": getattr(exc, "next_command", None),
+                }
+                _record_attempt(refusal, ticket=str(getattr(exc, "forbidden_ticket", "") or ""))
+                _emit(refusal, as_json)
+                return 1
+            except Exception as exc:
+                refusal = {
+                    "ok": False,
+                    "code": getattr(exc, "code", "ISOLATED_RELEASE_FAILED"),
+                    "detail": str(exc),
+                }
+                _record_attempt(refusal)
+                _emit(refusal, as_json)
+                return 1
+
+            _record_attempt(
+                result,
+                ticket=str(result.get("ticket_id") or ""),
+                mode=str(result.get("mode") or ""),
+            )
+            if result.get("ok") and result.get("ticket_id"):
+                _close_finished_receipts(project_root, result, works=[result["ticket_id"]])
+            _emit(result, as_json)
+            return 0 if result.get("ok") else 1
 
         try:
             # P0#4: inject the freshly negotiated current-session capability so
@@ -15450,6 +15618,51 @@ def main(argv: list[str] | None = None) -> int:
             print(f"Action: {drift['action']}")
         return 2
     from saipen_engine.command_effects import nested_routes
+
+    # EXACT-NAMESPACE-01 (T-1968): a token owned by a FOREIGN protocol is not a
+    # typo and must not be refused like one. The field failure: an agent told to
+    # run `/saipen continue` in a `.saipen` project loaded SAIPAL instead, got
+    # NO_HOME from it, then moved into the SAIPAL repository. Naming the owner,
+    # the route it answers, and the standing NO_HOME rule removes the ambiguity
+    # a bare "unknown command" left in place.
+    from saipen_engine.commands import foreign_protocol_owner
+
+    foreign = foreign_protocol_owner(command)
+    if foreign is not None:
+        name = str(foreign.get("name") or "another protocol")
+        invocation = " ".join(str(part) for part in args)
+        refusal = str(foreign.get("refusal") or "").strip()
+        if refusal and not refusal.endswith("."):
+            refusal += "."
+        foreign_payload = {
+            "ok": False,
+            "code": "FOREIGN_PROTOCOL_COMMAND",
+            "protocol": name,
+            "requested_command": invocation,
+            "foreign_protocol": foreign,
+            "detail": (
+                f"`{invocation}` is a {name} command, not a saipen command. "
+                f"{refusal} An explicit SAIPEN command is never satisfied by a "
+                "different protocol."
+            ).strip(),
+            "no_home_substitution": (
+                f"If {name} answers NO_HOME, that is expected in a .saipen "
+                "project: it is never repaired by changing directory, searching "
+                "for its home, or creating one."
+            ),
+            "next_action": (
+                "run the saipen command you actually need (for an explicit "
+                "`/saipen continue` that is `saipen continue`), or name "
+                f"{name} deliberately if that protocol is what you want"
+            ),
+        }
+        if as_json:
+            _emit(foreign_payload, as_json)
+        else:
+            print(foreign_payload["detail"])
+            print(foreign_payload["no_home_substitution"])
+            print(f"Action: {foreign_payload['next_action']}")
+        return 2
 
     detail = f"unknown command: {command}"
     routes = nested_routes(command)

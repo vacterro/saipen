@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-185:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Operator questions during an operational turn require a canonical human boundary; CONTINUE forbids lifecycle menus and continues canonically (OPERATOR-QUESTION-01)."
+    }
+  },
+  "derived_at": "2026-10-09T03:47:04Z",
+  "derived_from": "SRC-185",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "5fd854e17f66e3a305310ca6bce0fdbff04dad4b3b27e8929cb12f1de920e505"
+}

@@ -1,0 +1,14 @@
+{
+  "requirements": {
+    "SRC-119:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "T-1527 closed with verification evidence in LOG: verify -> PASS [target: T-1527] conf: high -- python -m pytest tools/test_t1527_runtime_provenance.py reported 5 passed; deliberate red control (broke capture_runtime_provenance so an invalid host context emitted spoofed provider/model/effort as complete) drove the expected red on the invalid-context test, and restoring the module returned all 5 green; python tools/core_unit.py evidence T-1527 ver",
+      "text": "Add immutable runtime provenance for model benchmarking without conflating identities: preserve executor_identity (the stable SAIPEN seat, e.g. astra) and record runtime_provider, runtime_model, and runtime_effort separately on canonical session evidence. These values may come only from an authoritative host launch context, never agent/user self-report or inferred defaults. If host metadata is unavailable, mark provenance and benchmark evidence unavailable/incomplete rather than guessing. Keep provenance append-only/tamper-evident across checkpoints and restarts.",
+      "verification": "the Work this request created reached its own verification gate; see the T-1527 VERIFY cycle in .saipen/LOG.md",
+      "work": "T-1527"
+    }
+  },
+  "schema_version": 1
+}

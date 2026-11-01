@@ -308,14 +308,26 @@ _CRED_PATTERNS = [
     # sha256 digest that evidence citations depend on -- so the rule keys on
     # the name and then removes the whole value, whatever its encoding or
     # width. Partial redaction would leave a truncated key behind.
+    # T-1965: the prefix must be anchored to the START of an identifier. Without
+    # that anchor `[a-z0-9_]*private_key` restarts its scan at every character of
+    # a long word run and backtracks the whole remainder at each one, which is
+    # quadratic: a 100KB entry of plain letters cost ~2 minutes of CPU inside
+    # context_cold and hung the declared core-unit family. The lookbehind
+    # rejects interior positions in O(1), leaving one linear scan per identifier.
     (
         _re.compile(
-            r"(?i)([\"']?[a-z0-9_]*private_key[\"']?\s*[:=]\s*)"
+            r"(?i)(?<![a-z0-9_])"
+            r"([\"']?[a-z0-9_]*private_key[\"']?\s*[:=]\s*)"
             r"(\"[^\"]{8,}\"|'[^']{8,}'|[0-9a-f]{16,})"
         ),
         r"\1***",
+        "private_key",
     ),
 ]
+
+#: Third field of a `_CRED_PATTERNS` row: a literal that must be present for the
+#: pattern to match at all. Only worth the branch where the subject can be large
+#: and the pattern has to scan for it anyway (T-1965); absent means "always run".
 
 
 def redact_credentials(text: str) -> str:
@@ -327,6 +339,10 @@ def redact_credentials(text: str) -> str:
     STATE, BOARD, LOG, recovery, or sealed segments (CORE § 1.1, T-1015,
     T-1101, T-1926).
     """
-    for pattern, repl in _CRED_PATTERNS:
+    for row in _CRED_PATTERNS:
+        pattern, repl = row[0], row[1]
+        needle = row[2] if len(row) > 2 else None
+        if needle is not None and needle not in text.lower():
+            continue
         text = pattern.sub(repl, text)
     return text

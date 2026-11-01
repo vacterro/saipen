@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-076:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Install EXEC-RESPONSE-01 default SAIPEN response surface: control block STATUS RESULT BLOCKER OPERATOR ACTION NEXT EXACT ACTION VALIDATION first, DETAILS optional and last; canonical owner saipen/EXECUTION.md, not a STYLE rule"
+    }
+  },
+  "derived_at": "2026-09-20T01:17:29Z",
+  "derived_from": "SRC-076",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "57f9ba8112f8c655980cd322fe75577e98edb185bb4ed08ff8724942f1a28aa0"
+}

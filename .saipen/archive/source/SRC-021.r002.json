@@ -1,0 +1,19 @@
+{
+  "clauses": {
+    "SRC-021:R1": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Ownership stays split and unduplicated: SAIPEN owns semantic truth (whether useful autonomous work remains, whether the project is genuinely complete, whether continuation requires a human or external event, and whether current convergence is valid for the latest audit generation), while SAIPATCH owns only transport automation (observing the OpenCode completed/idle boundary, querying SAIPEN machine status, enqueueing at most one synthetic cc, stopping at completion or any unsafe boundary). Neither side reimplements the other's logic."
+    },
+    "SRC-021:R2": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "The only machine surface SAIPATCH consumes is read-only 'saipen status --json', which must expose an 'automation' block carrying schema_version, disposition (CONTINUE|COMPLETE|WAIT_USER|WAIT_EXTERNAL|BLOCKED|INVALID), next_command, reason_code, reason, audit_quiescent, audit_epoch, convergence_current, closure_complete, source_fingerprint and completed_at."
+    }
+  },
+  "derived_at": "2026-09-05T18:56:36Z",
+  "derived_from": "SRC-021",
+  "interpretation_revision": 2,
+  "schema_version": 1,
+  "source_sha256": "9d0193bc5f3758ee6410a0d04a4d2266a8b8937bb4ffb8ee1c6f6909ec5927ce"
+}

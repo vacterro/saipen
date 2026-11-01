@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-129:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "audit/21 execution: determine every actionable clause of the SRC-129 layer; if the layer body reports none, the receipt's own determination is the clause and it is terminal with that evidence."
+    }
+  },
+  "derived_at": "2026-10-02T13:00:48Z",
+  "derived_from": "SRC-129",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "cc23e599db5a531fbace40a24319125b481b8b3d013c4e4f3befa6705758975d"
+}

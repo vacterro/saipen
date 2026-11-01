@@ -1,0 +1,34 @@
+{
+  "clauses": {
+    "SRC-303:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Refusal taxonomy: separate INGRESS_TASK_MISMATCH, HOST_PROVENANCE_UNAVAILABLE, and CONFORMANCE_UNHEALTHY into distinct machine-readable refusal causes"
+    },
+    "SRC-303:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Admission enforcement: block mutating operations following engine admission refusal to prevent out-of-protocol edits"
+    },
+    "SRC-303:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Historical debt preservation: preserve immutable historical LOG events and accepted debt records during conformance validation"
+    },
+    "SRC-303:R004": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Read-only probe allowance: allow read-only remote inspections without conflating them with publication/push authorization"
+    },
+    "SRC-303:R005": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Metadata cycle suppression: ignore pure .saipen/ metadata changes when calculating source tree fingerprint for improve audit loops"
+    }
+  },
+  "derived_at": "2026-10-24T04:33:37Z",
+  "derived_from": "SRC-303",
+  "interpretation_revision": 5,
+  "schema_version": 1,
+  "source_sha256": "07c7ff589448028dab74504a91f935d8fc0c13a99e4e1791b6d488cd3b75a4ea"
+}

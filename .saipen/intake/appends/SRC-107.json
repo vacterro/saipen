@@ -1,0 +1,103 @@
+{
+  "appends": [
+    {
+      "class": "APPEND",
+      "created_work": null,
+      "delta": "implementation",
+      "derived_clauses": [
+        "SRC-108:R001",
+        "SRC-108:R002",
+        "SRC-108:R003",
+        "SRC-108:R004",
+        "SRC-108:R005",
+        "SRC-108:R006",
+        "SRC-108:R007",
+        "SRC-108:R008",
+        "SRC-108:R009",
+        "SRC-108:R010",
+        "SRC-108:R011",
+        "SRC-108:R012",
+        "SRC-108:R013",
+        "SRC-108:R014",
+        "SRC-108:R015",
+        "SRC-108:R016",
+        "SRC-108:R017",
+        "SRC-108:R018",
+        "SRC-108:R019",
+        "SRC-108:R020",
+        "SRC-108:R021",
+        "SRC-108:R022",
+        "SRC-108:R023",
+        "SRC-108:R024",
+        "SRC-108:R025",
+        "SRC-108:R026",
+        "SRC-108:R027",
+        "SRC-108:R028",
+        "SRC-108:R029",
+        "SRC-108:R030",
+        "SRC-108:R031",
+        "SRC-108:R032",
+        "SRC-108:R033",
+        "SRC-108:R034",
+        "SRC-108:R035",
+        "SRC-108:R036",
+        "SRC-108:R037",
+        "SRC-108:R038",
+        "SRC-108:R039",
+        "SRC-108:R040",
+        "SRC-108:R041",
+        "SRC-108:R042",
+        "SRC-108:R043",
+        "SRC-108:R044",
+        "SRC-108:R045",
+        "SRC-108:R046"
+      ],
+      "label": "execution time / checkpoint / daily progress telemetry (saipen stats)",
+      "projected_at": "2026-09-23T01:13:32Z",
+      "receipt": "SRC-108",
+      "received_at": "2026-09-23T01:12:43Z",
+      "rewind": null,
+      "seq": 1,
+      "source_sha256": "5c498338f8d92e8d546eb7c7aa33d6cc792c476c1040af4c758acde7f45bf59d",
+      "state": "PROJECTED",
+      "steps": [
+        "linked",
+        "derived",
+        "superseded"
+      ],
+      "superseded": [],
+      "supersedes": [],
+      "work": [
+        "T-1471"
+      ]
+    },
+    {
+      "class": "APPEND",
+      "created_work": null,
+      "delta": "context",
+      "derived_clauses": [
+        "SRC-109:R001"
+      ],
+      "label": "oper-share author ideas as a FUTURE GATE, deferred until SAIPEN is whole",
+      "projected_at": "2026-09-23T01:34:49Z",
+      "receipt": "SRC-109",
+      "received_at": "2026-09-23T01:34:44Z",
+      "rewind": null,
+      "seq": 2,
+      "source_sha256": "594d2290d76b8f4415cb3f11be893dbf82fc2f48e335f5740016ccc09c4f1e3b",
+      "state": "PROJECTED",
+      "steps": [
+        "linked",
+        "derived",
+        "superseded"
+      ],
+      "superseded": [],
+      "supersedes": [],
+      "work": [
+        "T-1471"
+      ]
+    }
+  ],
+  "schema_version": 1,
+  "source": "SRC-107"
+}

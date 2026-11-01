@@ -13885,6 +13885,42 @@ def _retire_targets(
 
             )
 
+        elif state.get("phase") == "DONE" and state.get("transition_from") in (
+
+            "SCOUT",
+
+            "BUILD",
+
+            "VERIFY",
+
+            "REVIEW",
+
+            "SHIP",
+
+        ):
+
+            # The row being retired may BE the evidence for the one deliberate
+
+            # non-DFA pair: `transition_from: SCOUT -> phase: DONE` is legal
+
+            # only as the canonical active-ticket park, and that proof is the
+
+            # retired ticket still sitting in BOARD.BLOCKED. Retirement removes
+
+            # it in this same transaction, so the park it justified is gone by
+
+            # the time the proposal is validated -- the operation erased its
+
+            # own premise and then failed against it. `ticket_move` and
+
+            # `finish_ticket` already record the actual DONE -> DONE
+
+            # self-transition at exactly this point; retirement is the third
+
+            # writer of a neutral state and was the one that never did.
+
+            owned["transition_from"] = "DONE"
+
     new_state = patch_state(docs["state"].text_norm, owned)
 
     if parent_id is None:
@@ -17858,17 +17894,14 @@ def cohort_status(project_root: Path | str, cohort_id: str) -> Result:
 @_state_guard
 
 def cohort_ship(
-
     project_root: Path | str,
-
     cohort_id: str,
-
     agent: str,
-
     dry_run: bool = False,
-
     current_capability: str | None = None,
-
+    isolated: bool = False,
+    remote: str = "origin",
+    branch: str = "main",
 ) -> Result:
 
     """Publish ONE cohort batch through the EXISTING release machinery.
@@ -18011,6 +18044,50 @@ def cohort_ship(
 
     }
 
+    if isolated:
+        from .isolated_release import execute_isolated_release
+        try:
+            outcome = execute_isolated_release(
+                root,
+                "cohort-ship",
+                remote=remote,
+                branch=branch,
+                cohort_carrier=carrier,
+                current_capability=current_capability,
+                current_agent=agent,
+                dry_run=dry_run,
+            )
+        except Exception as exc:
+            return _refuse(getattr(exc, "code", "ISOLATED_RELEASE_FAILED"), str(exc), cohort=cohort_id)
+        if dry_run or not outcome.get("ok"):
+            if not outcome.get("ok"):
+                return _refuse(
+                    outcome.get("code", "RELEASE_FAILED"),
+                    str(outcome.get("detail") or outcome.get("message") or "cohort publication failed"),
+                    cohort=cohort_id,
+                )
+            return Result(
+                True,
+                "PLAN",
+                message="cohort " + cohort_id + " would publish one batch scope (isolated)",
+                data=outcome,
+            )
+        return Result(
+            True,
+            "COHORT_SHIPPED",
+            message="cohort " + cohort_id + " published as one batch (isolated)",
+            data={
+                "cohort": cohort_id,
+                "members": members,
+                "scope": sorted(scope),
+                "release_op_id": outcome.get("op_id", ""),
+                "version": outcome.get("version", ""),
+                "tag": outcome.get("tag", ""),
+                "mode": outcome.get("mode", ""),
+                "remote_head_after": outcome.get("remote_head_after", ""),
+                "github_sync_verified": outcome.get("github_sync_verified", False),
+            },
+        )
     try:
 
         plan = plan_release(
@@ -18030,15 +18107,13 @@ def cohort_ship(
         )
 
     except (ReleaseRefusal, ValueError) as exc:
-
+        next_cmd = getattr(exc, "next_command", None)
         return _refuse(
-
             getattr(exc, "code", "VALIDATION_FAILED"),
-
             getattr(exc, "detail", str(exc)),
-
             cohort=cohort_id,
-
+            next_command=next_cmd,
+            canonical_next_command=next_cmd,
         )
 
     if dry_run:
@@ -26248,270 +26323,6 @@ def record_crew_run(
         role_revision=role_revision,
 
         package_identities=package_identities,
-
-        now=now,
-
-        utc=utc,
-
-    )
-
-    if isinstance(plan, Result):
-
-        return plan
-
-    if dry_run:
-
-        return _render_plan(plan)
-
-    return apply_plan(root, plan)
-
-
-
-
-
-def _plan_producer_integration(
-
-    root: Path,
-
-    agent: str,
-
-    *,
-
-    crew_epoch: str,
-
-    producer: str,
-
-    package_identity: str,
-
-    input_source: str,
-
-    input_source_fingerprint: str,
-
-    resulting_source: str,
-
-    resulting_source_fingerprint: str,
-
-    core_ticket: str | None = None,
-
-    now: str = "",
-
-    utc: str = "",
-
-) -> OperationPlan | Result:
-
-    """PLAN a structured producer INTEGRATION EDGE (T-1003 findings 11/12).
-
-
-
-    The package was prepared against S0 (input_source) and its payload was
-
-    APPLIED, making the source S1 (resulting_source). The package truthfully
-
-    stays bound to S0 -- it is never rewritten to claim S1. SC-8/9 consume
-
-    this edge; the edge is the integration proof, and the natural staleness of
-
-    the S0 package against later sources is exactly what detects whether a
-
-    rerun is required."""
-
-    op_id = "producer-integration-" + uuid4_hex()
-
-    docs, _state, _board, log_tail = _read(root)
-
-    event, line = _event_line(
-
-        docs,
-
-        log_tail,
-
-        "DEC",
-
-        core_ticket,
-
-        producer,
-
-        f"producer integration -- {producer} {input_source[:12]} -> {resulting_source[:12]}",
-
-        now,
-
-        op_id,
-
-    )
-
-    new_log = docs["log"].text_norm.rstrip("\n") + "\n" + line + "\n"
-
-    new_state = patch_state(
-
-        docs["state"].text_norm,
-
-        {
-
-            "last_event": event,
-
-            "updated": utc,
-
-            "agent": agent,
-
-        },
-
-    )
-
-    errors = validate_texts(
-
-        new_state,
-
-        docs["board"].text_norm,
-
-        new_log,
-
-        current_agent=agent,
-
-        sealed_events=docs["_history"],
-
-    )
-
-    if errors:
-
-        return _refuse(
-
-            "VALIDATION_FAILED",
-
-            "proposed integration state fails fast validation: " + "; ".join(errors[:5]),
-
-        )
-
-    targets = [
-
-        *_log_targets(docs, new_log),
-
-        _target(docs["state"], ".saipen/STATE.md", "state", new_state),
-
-    ]
-
-    receipt_metadata = {
-
-        "operation": "producer_integration",
-
-        "status": "COMMITTED",
-
-        "crew_epoch": crew_epoch,
-
-        "producer": producer,
-
-        "package_identity": package_identity,
-
-        "input_source": input_source,
-
-        "input_source_fingerprint": input_source_fingerprint,
-
-        "resulting_source": resulting_source,
-
-        "resulting_source_fingerprint": resulting_source_fingerprint,
-
-        "core_ticket": core_ticket,
-
-        "project_identity": _identity(root),
-
-        "event_id": f"E-{event}",
-
-    }
-
-    return build_plan(
-
-        "producer_integration",
-
-        agent,
-
-        _identity(root),
-
-        {"operation": "producer_integration", "producer": producer},
-
-        _docs_preconditions(docs, "state", "board", "log"),
-
-        targets,
-
-        {
-
-            "ok": True,
-
-            "code": "INTEGRATION_RECORDED",
-
-            "producer": producer,
-
-            "crew_epoch": crew_epoch,
-
-            "event_id": f"E-{event}",
-
-        },
-
-        op_id=op_id,
-
-        receipt_metadata=receipt_metadata,
-
-    )
-
-
-
-
-
-@_state_guard
-
-def record_producer_integration(
-
-    project_root: Path | str,
-
-    agent: str,
-
-    *,
-
-    crew_epoch: str,
-
-    producer: str,
-
-    package_identity: str,
-
-    input_source: str,
-
-    input_source_fingerprint: str,
-
-    resulting_source: str,
-
-    resulting_source_fingerprint: str,
-
-    core_ticket: str | None = None,
-
-    dry_run: bool = False,
-
-) -> Result:
-
-    """Commit a structured producer integration edge (item 11)."""
-
-    root = Path(project_root)
-
-    now, utc = _now(), _utc_iso()
-
-    plan = _plan_producer_integration(
-
-        root,
-
-        agent,
-
-        crew_epoch=crew_epoch,
-
-        producer=producer,
-
-        package_identity=package_identity,
-
-        input_source=input_source,
-
-        input_source_fingerprint=input_source_fingerprint,
-
-        resulting_source=resulting_source,
-
-        resulting_source_fingerprint=resulting_source_fingerprint,
-
-        core_ticket=core_ticket,
 
         now=now,
 

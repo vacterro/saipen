@@ -1,0 +1,29 @@
+{
+  "clauses": {
+    "SRC-133:R0001": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "EXEC-RESPONSE-01 is enforced by active runtime/bootstrap architecture, not only prose documentation."
+    },
+    "SRC-133:R0002": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "Every operational boundary exposes the mandatory fields in canonical order."
+    },
+    "SRC-133:R0003": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "No free prose appears before the control surface."
+    },
+    "SRC-133:R0004": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "BLOCKER is always explicit."
+    }
+  },
+  "derived_at": "2026-09-28T07:16:52Z",
+  "derived_from": "SRC-133",
+  "interpretation_revision": 4,
+  "schema_version": 1,
+  "source_sha256": "3665ddad1668b57dd3944e019aff81436f4e9419da8a32218aef0b6f870610be"
+}

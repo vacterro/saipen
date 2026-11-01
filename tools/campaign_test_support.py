@@ -19,13 +19,17 @@ from saipen_engine.pending_ingress import ingress_digest
 _ISSUED = {}
 
 
-def write_qualification_artifact(root, receipt_id):
-    """Write a real qualification receipt file and return its digest-bound proof.
+def write_qualification_artifact(root, receipt_id, finding_id=None):
+    """Write a qualification artifact and record it as a producer qualification.
 
-    Publication now requires the qualification receipt to resolve to an artifact
-    whose bytes hash to the digest carried in the receipt. Fixtures that only
-    need a passing finding therefore have to produce that artifact rather than
-    name a receipt id, which is what CORE-006 proved was being accepted.
+    Publication requires the qualification receipt to resolve to an artifact
+    whose bytes hash to the digest in the receipt (CORE-006). T-1967 adds the
+    other half: the digest match alone is self-consistency, because both values
+    came from whoever built the finding, so a caller with write access could mint
+    its own qualification. A fixture therefore has to register the qualification
+    through `record_qualification`, the product's only writer of that log. When
+    `finding_id` is omitted the file is written but nothing is recorded, which
+    keeps the "unbound proof is refused" fixtures able to build exactly that.
     """
     rel = f".saipen/campaign/qualifications/{receipt_id}.json"
     path = root / rel
@@ -41,6 +45,17 @@ def write_qualification_artifact(root, receipt_id):
     )
     path.write_text(body + "\n", encoding="utf-8")
     digest = hashlib.sha256(path.read_bytes()).hexdigest()
+    if finding_id:
+        from producer_backends import saipal_adapter
+
+        recorded = saipal_adapter.SaipalAdapter(saipal_home=root).record_qualification(
+            root,
+            finding_id,
+            artifact_digest=digest,
+            publication_scope=saipal_adapter.PUBLICATION_SCOPE_DEFAULT,
+        )
+        if not recorded.get("ok"):
+            raise AssertionError(f"fixture qualification failed: {recorded}")
     return {
         "receipt_id": receipt_id,
         "artifact_path": rel,

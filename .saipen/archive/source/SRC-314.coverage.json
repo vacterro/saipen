@@ -1,0 +1,14 @@
+{
+  "requirements": {
+    "SRC-314:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "T-1896 closed with verification evidence in LOG: verify -> PASS [target: T-1896] conf: high -- 45 more modules declared: FULL 628.2s (411 tests) vs narrowed 382.5s (411 tests), compare.py EQUAL all three batches, copy ~52s -> ~0.4s per batch",
+      "text": "Widen the T-1889 sandbox scope to the last 45 filtered modules, correcting two static-filter false-positive classes and proving ran equality in three batches",
+      "verification": "the Work this request created reached its own verification gate; see the T-1896 VERIFY cycle in .saipen/LOG.md",
+      "work": "T-1896"
+    }
+  },
+  "schema_version": 1
+}

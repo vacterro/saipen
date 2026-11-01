@@ -259,6 +259,15 @@ def hook_argv(host: str, artifact: Path, root: Path) -> list[str]:
     an interpreter handed a missing script exits 2, which a host reads as a
     hook that blocks. `--saipen-root` stays the LAST argument.
     """
+    if host == "antigravity":
+        return [
+            sys.executable,
+            str(artifact),
+            "--host",
+            host,
+            "--saipen-root",
+            str(root),
+        ]
     return [
         sys.executable,
         "-c",
@@ -863,8 +872,61 @@ def _install(host: str, home: Path, root: Path, *, check: bool, verify: bool = T
         entry = adapter_for(entry, home, write_directory(home, profile))
     elif profile is not None:
         raise ValueError("--profile is only supported for Claude Code")
+    surfaces_ok = (
+        entry.get("hook_install_surface")
+        and entry.get("hook_config_surface")
+        and entry.get("hook_artifact")
+    )
+    if not surfaces_ok:
+        if check:
+            return {
+                "host": host,
+                "capability": False,
+                "installed": False,
+                "current": False,
+                "configured": False,
+                "saipen_root": None,
+                "root_current": False,
+                "problems": ["hook-not-supported-by-runtime"],
+                "health": None,
+                "effective": "UNAVAILABLE",
+                "artifact": None,
+                "config": None,
+            }
+        raise ValueError(f"{host} does not declare hook surfaces in {root}")
     artifact = home / entry["hook_install_surface"].removeprefix("~/")
     config = home / entry["hook_config_surface"].removeprefix("~/")
+
+    foreign_surface_owner = None
+    for item in registry.get("adapters", []):
+        if item.get("id") == host:
+            continue
+        surf = item.get("hook_install_surface")
+        if surf:
+            other_art = home / surf.removeprefix("~/")
+            if other_art == artifact and item.get("hook_artifact") != entry.get("hook_artifact"):
+                foreign_surface_owner = item.get("id")
+                break
+
+    foreign_guard_owner = None
+    if artifact.is_file():
+        try:
+            art_raw = artifact.read_bytes().replace(b"\r\n", b"\n")
+            for item in registry.get("adapters", []):
+                if item.get("id") == host:
+                    continue
+                other_art_rel = item.get("hook_artifact")
+                if other_art_rel and other_art_rel != entry.get("hook_artifact"):
+                    other_shipped = root / other_art_rel
+                    if (
+                        other_shipped.is_file()
+                        and other_shipped.read_bytes().replace(b"\r\n", b"\n") == art_raw
+                    ):
+                        foreign_guard_owner = item.get("id")
+                        break
+        except OSError:
+            pass
+
     delegate = delegated_root(entry, home, root)
     invocation = command(host, artifact, delegate)
     reasons: list[str] = []
@@ -1074,6 +1136,77 @@ def _install(host: str, home: Path, root: Path, *, check: bool, verify: bool = T
             preserved.append(expected_group)
         events["UserPromptSubmit"] = preserved
         style_conflicts = []
+    elif host == "antigravity":
+        # ~/.gemini/config/hooks.json is a shared hooks configuration.
+        # Top-level keys are hook names. We own `saipen-guard`.
+        # Event handlers:
+        # Flat: SessionStart, PreInvocation, Stop
+        # Grouped: PreToolUse, PostToolUse
+        handler = {"type": "command", "command": invocation, "timeout": 30}
+        grouped = {"matcher": ".*", "hooks": [handler]}
+        expected_hook = {
+            "enabled": True,
+            "SessionStart": [handler],
+            "PreInvocation": [handler],
+            "PreToolUse": [grouped],
+            "PostToolUse": [grouped],
+            "Stop": [handler],
+        }
+        existing = data.get(NAME)
+        configured = False
+        named_root = None
+        if isinstance(existing, dict):
+            for event in ("SessionStart", "PreInvocation", "Stop"):
+                handlers = existing.get(event)
+                if isinstance(handlers, list) and handlers and isinstance(handlers[0], dict):
+                    cmd = str(handlers[0].get("command", ""))
+                    if cmd:
+                        named_root = saipen_root_of(cmd)
+                        if named_root:
+                            break
+            if not named_root:
+                for event in ("PreToolUse", "PostToolUse"):
+                    groups = existing.get(event)
+                    if isinstance(groups, list) and groups and isinstance(groups[0], dict):
+                        subhooks = groups[0].get("hooks")
+                        if isinstance(subhooks, list) and subhooks:
+                            sub0 = subhooks[0]
+                            if isinstance(sub0, dict):
+                                cmd = str(sub0.get("command", ""))
+                            if cmd:
+                                named_root = saipen_root_of(cmd)
+                                if named_root:
+                                    break
+            cond1 = existing == expected_hook and named_root and _named_root_is_current(invocation)
+            cond2 = (
+                existing.get("enabled", True) is True
+                and all(
+                    isinstance(existing.get(ev), list)
+                    and len(existing[ev]) == 1
+                    and isinstance(existing[ev][0], dict)
+                    and _same_invocation(str(existing[ev][0].get("command", "")), invocation)
+                    for ev in ("SessionStart", "PreInvocation", "Stop")
+                )
+                and all(
+                    isinstance(existing.get(ev), list)
+                    and len(existing[ev]) == 1
+                    and isinstance(existing[ev][0], dict)
+                    and existing[ev][0].get("matcher") == ".*"
+                    and isinstance(existing[ev][0].get("hooks"), list)
+                    and len(existing[ev][0]["hooks"]) == 1
+                    and isinstance(existing[ev][0]["hooks"][0], dict)
+                    and _same_invocation(
+                        str(existing[ev][0]["hooks"][0].get("command", "")), invocation
+                    )
+                    for ev in ("PreToolUse", "PostToolUse")
+                )
+            )
+            if cond1 or cond2:
+                configured = True
+        if named_root is None and not check:
+            named_root = str(delegate)
+        data[NAME] = expected_hook
+        style_conflicts = []
     else:
         expected = {
             "version": "v1",
@@ -1116,17 +1249,32 @@ def _install(host: str, home: Path, root: Path, *, check: bool, verify: bool = T
     installed = artifact.is_file()
     root_current = named_root is not None and root_resolves(named_root)
     artifact_current = installed and content_bytes(artifact.read_bytes()) == content_bytes(shipped)
+    if foreign_surface_owner:
+        reasons.append(f"surface-owned-by-{foreign_surface_owner}")
+    if foreign_guard_owner:
+        reasons.append(f"artifact-owned-by-{foreign_guard_owner}")
     if not installed:
         reasons.append("artifact-missing")
-    elif not artifact_current:
+    elif not artifact_current and not foreign_guard_owner:
         reasons.append("artifact-stale")
     if not configured and not reasons:
         reasons.append("config-entry-differs")
     if named_root is not None and not root_current:
         reasons.append("delegated-root-stale")
-    current = artifact_current and configured
+    current = (
+        artifact_current
+        and configured
+        and not foreign_surface_owner
+        and not foreign_guard_owner
+    )
     activation = None
     if not check:
+        if foreign_surface_owner:
+            msg = f"surface conflict: {host} and {foreign_surface_owner} claim {artifact}"
+            raise ValueError(msg)
+        if foreign_guard_owner:
+            msg = f"refusing to overwrite {artifact}: file carries {foreign_guard_owner}'s guard"
+            raise ValueError(msg)
         # Preserve original settings once by content identity; never overwrite
         # a user's earlier backup. Malformed config is refused before writes.
         encoded = (json.dumps(data, indent=2) + "\n").encode("utf-8")
@@ -1368,6 +1516,10 @@ def uninstall(
             data["hooks"] = kept
             if removed and not kept and set(data) <= {"version", "hooks"}:
                 data = {}
+        elif host == "antigravity":
+            if NAME in data:
+                del data[NAME]
+                removed += 1
         else:
             if not isinstance(hooks, dict):
                 raise ValueError("hooks must be an object")
@@ -1458,7 +1610,8 @@ def uninstall(
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("host", choices=("kiro", "gemini", "codex", "claude", "zaicode"))
+    hosts = ("kiro", "gemini", "codex", "claude", "zaicode", "antigravity")
+    parser.add_argument("host", choices=hosts)
     parser.add_argument("--home", type=Path, default=Path.home())
     parser.add_argument("--profile", type=Path)
     parser.add_argument("--check", action="store_true")
@@ -1468,7 +1621,7 @@ def main() -> int:
     )
     args = parser.parse_args()
     try:
-        if args.profile is not None and args.host not in ("claude",):
+        if args.profile is not None and args.host != "claude":
             raise ValueError("--profile is only supported for Claude Code")
         if sum((args.uninstall, args.check, args.rollback)) > 1:
             raise ValueError("--check, --uninstall and --rollback are mutually exclusive")

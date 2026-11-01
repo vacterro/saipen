@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-314:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Widen the T-1889 sandbox scope to the last 45 filtered modules, correcting two static-filter false-positive classes and proving ran equality in three batches"
+    }
+  },
+  "derived_at": "2026-10-24T22:23:07Z",
+  "derived_from": "SRC-314",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "242dc1e86f7e3528b60e3574b73e34724a518bddb6a33820ca51f1a96df0aca2"
+}

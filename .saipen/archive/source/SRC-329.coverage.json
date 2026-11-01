@@ -1,0 +1,59 @@
+{
+  "requirements": {
+    "SRC-329:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "documentary analysis in T-1920-fastprompter-drift ANALYSIS.md",
+      "text": "Ingest and evaluate external audit report audit/SAIHANDOFF_AGENT_DRIFT_ZAICODE_2026-10-25.md across findings DRIFT-01 through DRIFT-12.",
+      "verification": "verified against live codebase",
+      "work": "T-1920"
+    },
+    "SRC-329:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "documentary analysis in T-1920-fastprompter-drift ANALYSIS.md",
+      "text": "Verify SAIPEN protocol invariant: canonical .saipen/ state is immutable via Git checkout/reset; mutations occur strictly through journaled CLI / engine operations.",
+      "verification": "verified against live codebase",
+      "work": "T-1920"
+    },
+    "SRC-329:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "documentary analysis in T-1920-fastprompter-drift ANALYSIS.md",
+      "text": "Enforce phase and effect guards: HUNT read-only boundary, blocked state commit guards, and regression requirements enforced without synthetic waivers.",
+      "verification": "verified against live codebase",
+      "work": "T-1920"
+    },
+    "SRC-329:R004": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "documentary analysis in T-1920-fastprompter-drift ANALYSIS.md",
+      "text": "Enforce ownership boundaries: ZAICODE host/adapter issues belong to host adapter; FastPrompter implementation work remains unadmitted without valid operator grant.",
+      "verification": "verified against live codebase",
+      "work": "T-1920"
+    },
+    "SRC-329:R005": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "documentary analysis in T-1920-fastprompter-drift ANALYSIS.md",
+      "text": "Document forensic analysis artifact at .saipen/evidence/T-1920-fastprompter-drift/ANALYSIS.md.",
+      "verification": "verified against live codebase",
+      "work": "T-1920"
+    },
+    "SRC-329:R006": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "documentary analysis in T-1920-fastprompter-drift ANALYSIS.md",
+      "text": "Cleanly consume audit/SAIHANDOFF_AGENT_DRIFT_ZAICODE_2026-10-25.md via journaled audit inbox closure upon terminal settlement.",
+      "verification": "verified against live codebase",
+      "work": "T-1920"
+    }
+  },
+  "schema_version": 1
+}

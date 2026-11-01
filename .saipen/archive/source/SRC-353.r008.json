@@ -1,0 +1,49 @@
+{
+  "clauses": {
+    "SRC-353:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "FB-01 Explicit Namespace Routing: Slash-command router must give /saipen priority over semantic/fuzzy skill discovery."
+    },
+    "SRC-353:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "FB-02 Skill Inventory Reload: Re-read ~/.agents/skills/ on each session start or workspace switch."
+    },
+    "SRC-353:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "FB-03 Foreign-Protocol Substitution Refusal: Command refusal terminates or prompts, never cds into another protocol repository."
+    },
+    "SRC-353:R004": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "FB-04 Native Operator-Origin Binding: Deliver an independently authenticated operator event transport with non-model-fabricated nonce."
+    },
+    "SRC-353:R005": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "FB-05 End-to-End Continuation Verification: Validate live /saipen continue execution from an active SAIPEN project root."
+    },
+    "SRC-353:R006": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "SP-01 Disputed Receipt Verification: Audit the 5 disputed NO_DRIFT receipts and session index 1019 against physical episode logs."
+    },
+    "SRC-353:R007": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "SP-02 Synthetic Fixture Classification: Explicitly label any episode originating from a synthetic smoke fixture."
+    },
+    "SRC-353:R008": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "SP-03 Immutable History Preservation: All corrections must be append-only with no rewriting or deleting historical entries."
+    }
+  },
+  "derived_at": "2026-10-31T17:40:41Z",
+  "derived_from": "SRC-353",
+  "interpretation_revision": 8,
+  "schema_version": 1,
+  "source_sha256": "f3908585a5b0eda272376e380e72032d5627121ac884618211dcef4bce850344"
+}

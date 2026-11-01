@@ -1,0 +1,104 @@
+{
+  "clauses": {
+    "SRC-012:R001": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "Current tree core validation is reproducibly green"
+    },
+    "SRC-012:R002": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "Fresh checkout core validation is green"
+    },
+    "SRC-012:R003": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "T-1210 implementation is durably represented rather than only dirty or staged work"
+    },
+    "SRC-012:R004": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "BOOT does not route command resolution to CORE section 1.10"
+    },
+    "SRC-012:R005": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "BOOT defines execution routing only"
+    },
+    "SRC-012:R006": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "BOOT is no larger than 7.5 KiB"
+    },
+    "SRC-012:R007": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "INDEX reflects the actual ownership graph"
+    },
+    "SRC-012:R008": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "INDEX is no larger than 3.5 KiB where practical"
+    },
+    "SRC-012:R009": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "Cold profile is no larger than 20 KiB"
+    },
+    "SRC-012:R010": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "protocol_budget measures every budget it declares"
+    },
+    "SRC-012:R011": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "Load-profile membership has one machine-readable owner"
+    },
+    "SRC-012:R012": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "Conformance corpus contains exactly all 256 current scenarios"
+    },
+    "SRC-012:R013": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "Malformed pseudo-rule IDs are separated from historical ticket references"
+    },
+    "SRC-012:R014": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "Machine corpus is the scenario-data owner"
+    },
+    "SRC-012:R015": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "CONFORMANCE.md is no larger than 15 KiB"
+    },
+    "SRC-012:R016": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "Routine execution never loads CONFORMANCE"
+    },
+    "SRC-012:R017": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "Stale CORE section 1.10 references are classified and corrected"
+    },
+    "SRC-012:R018": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "Human protocol Markdown falls to approximately 300 KiB or less"
+    },
+    "SRC-012:R019": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "Phase semantics remain unchanged except stale-reference corrections"
+    }
+  },
+  "derived_at": "2026-08-31T01:52:37Z",
+  "derived_from": "SRC-012",
+  "interpretation_revision": 19,
+  "schema_version": 1,
+  "source_sha256": "22ecac8c887ecc46ec574d31459e742aa2ad704fdf8126bf1b9db0b3b0baaccb"
+}

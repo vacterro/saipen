@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-170:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Provide a bounded upstream operator recovery route for the reported current DONE ticket lacking every canonical lifecycle event; preserve original bytes, require exact plan approval and fresh canonical claim/verification, and never fabricate historical REVIEW, SHIP or finish events."
+    }
+  },
+  "derived_at": "2026-10-04T13:56:31Z",
+  "derived_from": "SRC-170",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "feaab8b57c89fbdc87ade4c93ab6db069d014ada44ef191a8a29b4235ca5ee6a"
+}

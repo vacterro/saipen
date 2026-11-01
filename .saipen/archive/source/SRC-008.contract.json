@@ -1,0 +1,74 @@
+{
+  "clauses": {
+    "SRC-008:R001": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "CORE-001 -- counter reconciliation must never return CLEAN when STATE goal counters disagree with the canonical derived count"
+    },
+    "SRC-008:R002": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "CORE-002 -- add_requirement must be one journaled OperationPlan spanning contract, immutable revision and coverage"
+    },
+    "SRC-008:R003": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "CORE-003 -- dry-run must be a real semantic PLAN for source/recover/continue/improve, not an early exit"
+    },
+    "SRC-008:R004": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "W2-001 -- orphan recovery must restore the allocator invariant before persisting recovered state"
+    },
+    "SRC-008:R005": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "W2-002 -- purge_receipt must be a journaled PLAN/APPLY with tombstone and index in the same recoverable operation"
+    },
+    "SRC-008:R006": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "W2-003 -- test_runner must guard the full child lifetime with cleanup that runs on every abnormal exit"
+    },
+    "SRC-008:R007": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "W2-004 -- parse_compound_command must use explicit quote/escape state and refuse malformed input structurally"
+    },
+    "SRC-008:R008": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "PERF-001 -- history snapshot and delete-tree digest must be computed from one validated traversal"
+    },
+    "SRC-008:R009": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "PERF-002 -- producer validation must separate strict READY checks from payload retention"
+    },
+    "SRC-008:R010": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "PERF-003 -- fast_check must capture history once and feed one snapshot to both validators"
+    },
+    "SRC-008:R011": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "PERF-004 -- intake validate_project must parse BOARD once and read each coverage ledger once"
+    },
+    "SRC-008:R012": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "PERF-005 -- snapshot capture and status/next/explain must offer an explicit lean mode"
+    },
+    "SRC-008:R013": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "PERF-006 -- release authority inventory must be gathered once per PLAN"
+    }
+  },
+  "derived_at": "2026-08-31T11:39:12Z",
+  "derived_from": "SRC-008",
+  "interpretation_revision": 13,
+  "schema_version": 1,
+  "source_sha256": "69a4002182be80acd368f28e729aeb48b122dd9c30ba6c126e11fe90e55e1ca3"
+}

@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-067:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "T-1399 release-scope liveness: release gate must not block an independently releasable Work on unrelated unresolved Work"
+    }
+  },
+  "derived_at": "2026-10-02T07:38:46Z",
+  "derived_from": "SRC-067",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "f2f7676d5ab5b7bd5a84973e3160bdab6cd8db09937e5185d6c754d40f027e01"
+}

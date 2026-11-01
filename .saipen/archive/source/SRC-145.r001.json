@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-145:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "P1 recovery defect: phase repair must be ticket-scoped (unrelated ticket evidence cross-contamination) + current-generation DONE/journal terminal split needs canonical recovery route (AUDAPACK T-261-shaped fixture, full acceptance matrix A-L)"
+    }
+  },
+  "derived_at": "2026-10-02T08:26:46Z",
+  "derived_from": "SRC-145",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "b1381d5bc7b1664f7cb1fb91a2ff59637500edf9c8a95e3a91bb0a784e686ca8"
+}

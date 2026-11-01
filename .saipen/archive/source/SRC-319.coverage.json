@@ -1,0 +1,23 @@
+{
+  "requirements": {
+    "SRC-319:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "REJECTED",
+      "evidence": "Not a requirement of SRC-319. This clause was written by the executing agent at 2026-10-25T02:40:30Z while probing whether the canonical route 'saipen source req' named by the coverage gate existed; its text is the literal placeholder string. The receipt body (sha256 23524e865ca15c4e) asks for a protocol-entry audit, not for anything named by this clause. The receipt's real actionable clause is SRC-319:R002. Recorded here rather than deleted because canonical intake state has no clause-retraction verb and the log must show the mistake.",
+      "text": "test",
+      "verification": null,
+      "work": "T-1901"
+    },
+    "SRC-319:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/T-1901-protocol-entry/ANALYSIS.md reproduces every checkable claim of the receipt: BZDECOMP STATE names this home and style_contract ded-069a4c52; all 874 LOG events carry [op: ...]; T-325 moves BUILD->VERIFY (E-3911) then back to BUILD (E-3913) after MANUAL-VERIFY FAIL (E-3912); T-325 closes via E-3776/E-3777/E-3778; SRC-259 tombstone is CLOSED with unresolved 0. Host doctor independently reproduces operator-selected DEGRADED_ALLOWED, authority running:false, MACHINE_RUNTIME_STALE and 9 STALE_RUNTIME hosts, so ANALYSIS.md reports the protocol-entry versus host-proof distinction and claims no mechanically verified host session.",
+      "text": "Decide, with live evidence, whether this project's SAIPEN protocol entry is claimable: canonical lifecycle running plus host proof, or not. Report the protocol-entry versus host-proof distinction, keep operator-selected DEGRADED_ALLOWED policy and stale installed runtime generations visible, never claim a mechanically verified host session from a style/skill read alone, and continue without re-asking the operator.",
+      "verification": ".saipen/evidence/focused-unit/6cc4c239cb210f11-20261025T031055321374Z.json (FOCUSED-UNIT-EVIDENCE PASS, 113 tests, 140.093s, checkpoint CHECKPOINTED at E-18080, patterns test_audit_inbox.py test_source_refusal_routing.py test_request_clause_closure.py)",
+      "work": "T-1901"
+    }
+  },
+  "schema_version": 1
+}

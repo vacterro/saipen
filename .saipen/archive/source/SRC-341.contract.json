@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-341:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Unified provider- and account-aware saipen launch (SRC-184) -- future gate FG-0046, one bounded slice: read-only account discovery -- `saipen launch --list` names provider, alias, profile directory, installed, authenticated and managed/direct for every Claude, Codex and Antigravity account on the machine, reading no secret"
+    }
+  },
+  "derived_at": "2026-10-26T21:13:43Z",
+  "derived_from": "SRC-341",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "e910f1b9e603cc9f169dc8c5929a01864957976bcf1cab09ff466d565c02fff9"
+}

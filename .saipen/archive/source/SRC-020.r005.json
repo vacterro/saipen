@@ -1,0 +1,34 @@
+{
+  "clauses": {
+    "SRC-020:R1": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "Preserve the existing project-local .saipen/KNOWLEDGE authority: optional cards only; no new phase, STATE field, LOG taxonomy, database, daemon, network dependency, second state store, or mandatory full-tree cold load."
+    },
+    "SRC-020:R2": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Define a compact promotion gate requiring verified, reusable, decision-bearing, not cheaply derivable, non-duplicate, non-transient, safe knowledge; ordinary tickets default to zero and normally at most one card."
+    },
+    "SRC-020:R3": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Implement a stdlib-only structured card parser and validator for kind, scope, trigger, status, evidence, optional supersession linkage, title, concise claim and Why body, while legacy KNOWLEDGE files remain legal."
+    },
+    "SRC-020:R4": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Generate an explicit deterministic .saipen/KNOWLEDGE/INDEX.md projection with marker and content digest from card metadata and mechanically provable legacy path/title data; deletion must lose no authority and regeneration must restore exact bytes."
+    },
+    "SRC-020:R5": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Implement bounded retrieval from the current ticket or objective: use a fresh index when available, fall back safely to direct metadata discovery when stale or missing, return only the smallest relevant active card set, and never load all cards for an unrelated task."
+    }
+  },
+  "derived_at": "2026-09-04T23:26:53Z",
+  "derived_from": "SRC-020",
+  "interpretation_revision": 5,
+  "schema_version": 1,
+  "source_sha256": "c2bcebc0f31642d20985021d7f6076dc46a31a110b61fff54f0632fed6a00121"
+}

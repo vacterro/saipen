@@ -67,7 +67,7 @@ class IncrementalDiscoveryTest(unittest.TestCase):
             "stderr": b"",
         }
 
-    def _discover(self, project_root=True):
+    def _discover(self, project_root=True, **kwargs):
         """Run discovery with the ruler: `_run_cmd` must never be reached."""
         with mock.patch.object(
             self.adapter, "probe", return_value={"ok": True, "data": {"queue": {}}}
@@ -78,7 +78,7 @@ class IncrementalDiscoveryTest(unittest.TestCase):
                 "discovery must not use the materialising backend transport"
             ),
         ):
-            return self.adapter.discover(self.root if project_root else None)
+            return self.adapter.discover(self.root if project_root else None, **kwargs)
 
     def test_discovery_does_not_use_the_materialising_report_api(self) -> None:
         self._serve(_report_payload([_finding("PAL-1")]))
@@ -132,7 +132,7 @@ class IncrementalDiscoveryTest(unittest.TestCase):
                 yield page
 
         with mock.patch.object(self.adapter, "iter_finding_pages", counting_pages):
-            result = self._discover()
+            result = self._discover(drain=True)
         self.assertTrue(result["ok"], result)
         self.assertGreater(len(pages), 1, "a 600-row corpus must span several pages")
         self.assertLessEqual(
@@ -140,6 +140,24 @@ class IncrementalDiscoveryTest(unittest.TestCase):
             "no page may exceed the declared page bound",
         )
         self.assertEqual(len(result["findings"]), 600)
+
+    def test_the_bounded_walk_yields_one_batch_by_default(self) -> None:
+        rows = [_finding(f"PAL-{index:04d}") for index in range(600)]
+        self._serve(_report_payload(rows))
+        pages = []
+        original = self.adapter.iter_finding_pages
+
+        def counting_pages(*args, **kwargs):
+            for page in original(*args, **kwargs):
+                pages.append(len(page[2]))
+                yield page
+
+        with mock.patch.object(self.adapter, "iter_finding_pages", counting_pages):
+            result = self._discover()
+        self.assertTrue(result["ok"], result)
+        self.assertEqual(len(pages), 1, "default batch-oriented discovery does not walk remaining pages")
+        self.assertEqual(len(result["findings"]), saipal_adapter.REPORT_PAGE_DEFAULT)
+        self.assertTrue(result.get("has_more"))
 
     def test_an_unchanged_unqualified_corpus_is_deduplicated(self) -> None:
         self._serve(_report_payload([_finding("PAL-1", "OPEN")]))

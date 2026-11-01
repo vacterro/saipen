@@ -65,6 +65,8 @@ def audit_route_owns(
         projection.get("invalid_only")
         or projection.get("residue_only")
         or projection.get("unworkable_active_only")
+        or projection.get("eligibility") == "BLOCKED_EXTERNAL"
+        or projection.get("inbox_eligibility") == "BLOCKED_EXTERNAL"
     ):
         return False
     work = projection.get("work")

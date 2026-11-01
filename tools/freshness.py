@@ -217,6 +217,17 @@ _original_digest = _digest
 def _path_from_git(root: Path, raw_path: bytes) -> Path:
     if not raw_path or raw_path.startswith(b"/") or b"\0" in raw_path:
         raise FreshnessError(f"Git returned an invalid path: {raw_path!r}")
+    # T-1953: an untracked DIRECTORY is listed with exactly one trailing
+    # slash. That is git's own spelling of a real entry, not a malformed one:
+    # `-o` reports `contributions/.tooling/upstream-parser/` for a directory it
+    # does not enter. Rejecting it made the WHOLE source identity raise, which
+    # is how one nested untracked directory disabled every caller that needs an
+    # identity -- including the PERF-001 single-identity threading in `status`,
+    # where the exception degraded to None and four consumers each repeated
+    # the same failing walk. The slash is stripped before the canonicality test
+    # below, which still rejects `.` and `..` anywhere in the path.
+    if raw_path.endswith(b"/"):
+        raw_path = raw_path.rstrip(b"/")
     if any(part in (b"", b".", b"..") for part in raw_path.split(b"/")):
         raise FreshnessError(f"Git returned a non-canonical path: {raw_path!r}")
     rel = os.fsdecode(raw_path)
@@ -322,10 +333,17 @@ def _record_current(
             mode = declared_mode
         kind = b"F"
         content, _ = _read_regular_info(path)
+    elif stat.S_ISDIR(info.st_mode) and declared_mode is None:
+        # T-1953: see the parallel branch in `_record_current`. An untracked
+        # directory git did not enter is a presence, framed like any other
+        # record but with no bytes of its own.
+        mode = 0o040000
+        kind = b"D"
+        content = b""
     else:
         raise FreshnessError(
-            f"unsupported fingerprint input type at {path}; only regular files "
-            "and symlinks are supported"
+            f"unsupported fingerprint input type at {path}; only regular files, "
+            "symlinks and untracked directories are supported"
         )
 
     if declared_mode is not None and declared_mode not in (mode, 0):
@@ -393,10 +411,21 @@ def _record_evidence(
             mode = declared_mode
         kind = b"F"
         content, _ = _read_regular_info(path)
+    elif stat.S_ISDIR(info.st_mode) and declared_mode is None:
+        # T-1953: an untracked directory git did not enter -- it reports the
+        # directory itself, with a trailing slash, when that directory is a
+        # nested repository or otherwise opaque. Its PRESENCE is the fact this
+        # identity can vouch for; its contents belong to its own tree, and
+        # descending would hash a repository this one does not own. Same rule
+        # `suite_record._git_subject` already applies. Empty content keeps the
+        # ordinary framing, so the digest stays a function of the record set.
+        mode = 0o040000
+        kind = b"D"
+        content = b""
     else:
         raise FreshnessError(
-            f"unsupported fingerprint input type at {path}; only regular files "
-            "and symlinks are supported"
+            f"unsupported fingerprint input type at {path}; only regular files, "
+            "symlinks and untracked directories are supported"
         )
     if declared_mode is not None and declared_mode not in (mode, 0):
         raise FreshnessError(f"Git mode {declared_mode:o} disagrees with filesystem type at {path}")

@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-089:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Finish T-1434: execute SRC-088 milestones M1-M8 in order (canonical work reverify CLI, external implementation closure, stale source retirement, strict improve finite exit, validator remediation contract, cross-repo provenance audit, LIMISAW end-to-end recovery, cross-shape regression); then resume T-1361 and future_gate/ROADMAP_NEXT_20260920.md automatically."
+    }
+  },
+  "derived_at": "2026-09-22T17:46:33Z",
+  "derived_from": "SRC-089",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "8ff4f85642370c6aaac6dbebdeae5532d51242d97d0c19e3d8f05c33d9a42c56"
+}

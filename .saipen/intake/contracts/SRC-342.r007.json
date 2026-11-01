@@ -1,0 +1,44 @@
+{
+  "clauses": {
+    "SRC-342:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Repair native action classification in the canonical shortcut/command resolver: cc stays continue, a true single-command 'gg <objective>' becomes goal, a valid explicit capsule authorization becomes authorize-goal; a multiline handoff/prose is never silently promoted into a privileged command."
+    },
+    "SRC-342:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Bind goal proof to the objective bytes rather than the whole 'gg ...' command line, and bind authorize-goal verification to the exact capsule contents rather than a path string, preserving all canonical goal and capsule validation."
+    },
+    "SRC-342:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "An operator's native action must be distinguishable from agent-generated terminal commands, replayed receipts, spoofed process IDs and model-supplied source text; fix worker-registration and ancestry issues only if reproduced in the canonical ingress and broker contract."
+    },
+    "SRC-342:R004": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "All proof issuance and spending stays inside the trusted host/broker path; authority minting is never exposed to AI-accessible shell scripts or ordinary prompt text."
+    },
+    "SRC-342:R005": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "An intentional native user action establishes valid operator_persistent authority for the exact selected project and maintenance goal and it is verifiable through canonical status; the normal 20-ticket / three-wave checkpoints pass mechanically only under that existing valid grant, while missing, wrong-scope, revoked and expired grants continue to stop."
+    },
+    "SRC-342:R006": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Commit and verify the canonical adapter before refreshing any vendored bundle or installed hook; never publish an uncommitted working tree as the protocol source. Provide ZAICODE a stable integration contract naming supported native actions, exact expected input form, authority status response and known blocker codes."
+    },
+    "SRC-342:R007": {
+      "actionable": true,
+      "class": "non-goal",
+      "text": "Never edit .saipen/STATE.md to set goal_tickets: 0, alter authority_source, bypass hard_wait or simulate a user action; the fix must address authenticated ingress, not erase the symptom. Do not change ZAICODE product code in this SAIPEN ticket, do not deploy uncommitted canonical source, and do not declare success from code existence or a green unit test alone."
+    }
+  },
+  "derived_at": "2026-10-27T14:46:49Z",
+  "derived_from": "SRC-342",
+  "interpretation_revision": 7,
+  "schema_version": 1,
+  "source_sha256": "28acc06800d938620eb6ae4a70f78e856abfb9d4a0f444fe8e846e48801c4382"
+}

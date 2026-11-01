@@ -1,0 +1,24 @@
+{
+  "clauses": {
+    "SRC-012:R001": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "Current tree core validation is reproducibly green"
+    },
+    "SRC-012:R002": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "Fresh checkout core validation is green"
+    },
+    "SRC-012:R003": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "T-1210 implementation is durably represented rather than only dirty or staged work"
+    }
+  },
+  "derived_at": "2026-08-31T01:52:30Z",
+  "derived_from": "SRC-012",
+  "interpretation_revision": 3,
+  "schema_version": 1,
+  "source_sha256": "22ecac8c887ecc46ec574d31459e742aa2ad704fdf8126bf1b9db0b3b0baaccb"
+}

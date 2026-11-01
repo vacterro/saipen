@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-054:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Prove the root cause: name the canonical source that regenerates .saipen/MANIFEST.json and show why a local evidence/ declaration did not survive it."
+    }
+  },
+  "derived_at": "2026-09-16T20:14:29Z",
+  "derived_from": "SRC-054",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "7d3a491282feffa66002b8dfbfce6110f1c60d169e39702c7399904899e91d8d"
+}

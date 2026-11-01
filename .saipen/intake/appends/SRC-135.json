@@ -1,0 +1,32 @@
+{
+  "appends": [
+    {
+      "class": "APPEND",
+      "created_work": null,
+      "delta": "implementation",
+      "derived_clauses": [
+        "SRC-136:R001"
+      ],
+      "label": "",
+      "projected_at": "2026-09-28T17:10:47Z",
+      "receipt": "SRC-136",
+      "received_at": "2026-09-28T17:10:13Z",
+      "rewind": null,
+      "seq": 1,
+      "source_sha256": "6f264167722c841a6c341d8f74f4623458c6fdba15eac236e528baccfe9b16c6",
+      "state": "PROJECTED",
+      "steps": [
+        "linked",
+        "derived",
+        "superseded"
+      ],
+      "superseded": [],
+      "supersedes": [],
+      "work": [
+        "T-1557"
+      ]
+    }
+  ],
+  "schema_version": 1,
+  "source": "SRC-135"
+}

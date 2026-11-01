@@ -1,0 +1,19 @@
+{
+  "clauses": {
+    "SRC-036:R001": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "Every inspected root receives one deterministic classification and ambiguous binding never falls back to another project."
+    },
+    "SRC-036:R002": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "SAFE protocol drift invokes exactly the canonical T-1318 recovery path once and returns to BOUND_VALID."
+    }
+  },
+  "derived_at": "2026-09-13T17:21:31Z",
+  "derived_from": "SRC-036",
+  "interpretation_revision": 2,
+  "schema_version": 1,
+  "source_sha256": "5d3ef5467e40427175a373250fb5d4aa931305eec32ee3c91761c401006494b5"
+}

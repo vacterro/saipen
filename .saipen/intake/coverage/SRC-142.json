@@ -1,0 +1,266 @@
+{
+  "requirements": {
+    "SRC-142:R001": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/T-1563-authority/review.md",
+      "text": "DO NOT ENTER VERIFY.",
+      "verification": ".saipen/evidence/T-1563-authority/focused-results.json and exact paired carrier; source clause and coverage ledgers",
+      "work": "T-1563"
+    },
+    "SRC-142:R002": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/T-1563-authority/review.md",
+      "text": "Do not describe `bootstrap_transport_key()` as host-only while any ordinary Python process that imports the module can call it.",
+      "verification": ".saipen/evidence/T-1563-authority/focused-results.json and exact paired carrier; source clause and coverage ledgers",
+      "work": "T-1563"
+    },
+    "SRC-142:R003": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/T-1563-authority/review.md",
+      "text": "ordinary agent-accessible Python/shell code MUST NOT be able to mint the authority that proves host transport.",
+      "verification": ".saipen/evidence/T-1563-authority/focused-results.json and exact paired carrier; source clause and coverage ledgers",
+      "work": "T-1563"
+    },
+    "SRC-142:R004": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/T-1563-authority/review.md",
+      "text": "Do not claim cryptographic host provenance while the secret is retrievable through an importable function in the same ordinary execution surface.",
+      "verification": ".saipen/evidence/T-1563-authority/focused-results.json and exact paired carrier; source clause and coverage ledgers",
+      "work": "T-1563"
+    },
+    "SRC-142:R005": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/T-1563-authority/review.md",
+      "text": "must demonstrate ADMITTED",
+      "verification": ".saipen/evidence/T-1563-authority/focused-results.json and exact paired carrier; source clause and coverage ledgers",
+      "work": "T-1563"
+    },
+    "SRC-142:R006": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/T-1563-authority/review.md",
+      "text": "must be impossible to obtain a valid capability or admission.",
+      "verification": ".saipen/evidence/T-1563-authority/focused-results.json and exact paired carrier; source clause and coverage ledgers",
+      "work": "T-1563"
+    },
+    "SRC-142:R007": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/T-1563-authority/review.md",
+      "text": "Do not replace this test with:",
+      "verification": ".saipen/evidence/T-1563-authority/focused-results.json and exact paired carrier; source clause and coverage ledgers",
+      "work": "T-1563"
+    },
+    "SRC-142:R008": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/T-1563-authority/review.md",
+      "text": "It must not expose an ordinary runtime route that CREATES the host authority whose evidence it later verifies.",
+      "verification": ".saipen/evidence/T-1563-authority/focused-results.json and exact paired carrier; source clause and coverage ledgers",
+      "work": "T-1563"
+    },
+    "SRC-142:R009": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/T-1563-authority/review.md",
+      "text": "If a host adapter needs signing authority, the authority must originate from a surface that ordinary model-executed child processes cannot reproduce.",
+      "verification": ".saipen/evidence/T-1563-authority/focused-results.json and exact paired carrier; source clause and coverage ledgers",
+      "work": "T-1563"
+    },
+    "SRC-142:R010": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/T-1563-authority/review.md",
+      "text": "Do not store a reusable signing secret in ordinary project state and then rely only on path classification to call it inaccessible.",
+      "verification": ".saipen/evidence/T-1563-authority/focused-results.json and exact paired carrier; source clause and coverage ledgers",
+      "work": "T-1563"
+    },
+    "SRC-142:R011": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/T-1563-authority/review.md",
+      "text": "Do not leave a callable combination where ordinary Python can assemble the authority from individually \"internal\" helpers.",
+      "verification": ".saipen/evidence/T-1563-authority/focused-results.json and exact paired carrier; source clause and coverage ledgers",
+      "work": "T-1563"
+    },
+    "SRC-142:R012": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/T-1563-authority/review.md",
+      "text": "Do not allow T-1563 to close under the generic:",
+      "verification": ".saipen/evidence/T-1563-authority/focused-results.json and exact paired carrier; source clause and coverage ledgers",
+      "work": "T-1563"
+    },
+    "SRC-142:R013": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/T-1563-authority/review.md",
+      "text": "Do not lose the detailed acceptance just because `saipen start` was called with a one-line title.",
+      "verification": ".saipen/evidence/T-1563-authority/focused-results.json and exact paired carrier; source clause and coverage ledgers",
+      "work": "T-1563"
+    },
+    "SRC-142:R014": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "BLOCKED",
+      "evidence": ".saipen/evidence/T-1563-authority/review.md",
+      "text": "Must all be true:",
+      "verification": null,
+      "work": "T-1563"
+    },
+    "SRC-142:R015": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/T-1563-authority/acceptance.json",
+      "text": "Ordinary direct Python import cannot mint host transport authority.",
+      "verification": ".saipen/evidence/T-1563-authority/focused-results.json and paired pre/post oracle; canonical source and validator receipt",
+      "work": "T-1563"
+    },
+    "SRC-142:R016": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/T-1563-authority/acceptance.json",
+      "text": "The exact current bypass: bootstrap_transport_key -> _transport_mac -> establish is RED on the repaired implementation.",
+      "verification": ".saipen/evidence/T-1563-authority/focused-results.json and paired pre/post oracle; canonical source and validator receipt",
+      "work": "T-1563"
+    },
+    "SRC-142:R017": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/T-1563-authority/acceptance.json",
+      "text": "Pre-fix/current vulnerable subject proves that same carrier previously reached ADMITTED.",
+      "verification": ".saipen/evidence/T-1563-authority/focused-results.json and paired pre/post oracle; canonical source and validator receipt",
+      "work": "T-1563"
+    },
+    "SRC-142:R018": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/T-1563-authority/acceptance.json",
+      "text": "Direct establish without authority remains refused.",
+      "verification": ".saipen/evidence/T-1563-authority/focused-results.json and paired pre/post oracle; canonical source and validator receipt",
+      "work": "T-1563"
+    },
+    "SRC-142:R019": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/T-1563-authority/acceptance.json",
+      "text": "Direct invalidate without authority remains refused.",
+      "verification": ".saipen/evidence/T-1563-authority/focused-results.json and paired pre/post oracle; canonical source and validator receipt",
+      "work": "T-1563"
+    },
+    "SRC-142:R020": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/T-1563-authority/acceptance.json",
+      "text": "Forged ordinary SHA256 ledger remains non-authoritative.",
+      "verification": ".saipen/evidence/T-1563-authority/focused-results.json and paired pre/post oracle; canonical source and validator receipt",
+      "work": "T-1563"
+    },
+    "SRC-142:R021": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "BLOCKED",
+      "evidence": ".saipen/evidence/T-1563-authority/acceptance.json",
+      "text": "Keyed provenance remains required.",
+      "verification": null,
+      "work": "T-1563"
+    },
+    "SRC-142:R022": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "BLOCKED",
+      "evidence": ".saipen/evidence/T-1563-authority/acceptance.json",
+      "text": "No ordinary project/file mutation route can alter protected admission state.",
+      "verification": null,
+      "work": "T-1563"
+    },
+    "SRC-142:R023": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "BLOCKED",
+      "evidence": ".saipen/evidence/T-1566-reconciliation/reconciliation.md",
+      "text": "Host adapter can still legitimately establish admission.",
+      "verification": null,
+      "work": "T-1563"
+    },
+    "SRC-142:R024": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "BLOCKED",
+      "evidence": ".saipen/evidence/T-1563-authority/acceptance.json",
+      "text": "Same-session init remains functional.",
+      "verification": null,
+      "work": "T-1563"
+    },
+    "SRC-142:R025": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/T-1563-authority/acceptance.json",
+      "text": "Detailed T-1563 acceptance exists in canonical source clauses/coverage.",
+      "verification": ".saipen/evidence/T-1563-authority/focused-results.json and paired pre/post oracle; canonical source and validator receipt",
+      "work": "T-1563"
+    },
+    "SRC-142:R026": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "BLOCKED",
+      "evidence": ".saipen/evidence/T-1563-authority/acceptance.json",
+      "text": "Focused admission/guard/Claude tests pass.",
+      "verification": null,
+      "work": "T-1563"
+    },
+    "SRC-142:R027": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/T-1563-authority/acceptance.json",
+      "text": "Canonical validate is CURRENT_PASS.",
+      "verification": ".saipen/evidence/T-1563-authority/focused-results.json and paired pre/post oracle; canonical source and validator receipt",
+      "work": "T-1563"
+    },
+    "SRC-142:R028": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "BLOCKED",
+      "evidence": ".saipen/evidence/T-1563-authority/acceptance.json",
+      "text": "Full required core family has new_red=0.",
+      "verification": null,
+      "work": "T-1563"
+    },
+    "SRC-142:R029": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/T-1563-authority/review.md",
+      "text": "Do not claim HARD protocol admission while authority minting remains available to ordinary model-executed Python.",
+      "verification": ".saipen/evidence/T-1563-authority/focused-results.json and exact paired carrier; source clause and coverage ledgers",
+      "work": "T-1563"
+    }
+  },
+  "schema_version": 1
+}

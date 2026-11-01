@@ -93,6 +93,52 @@ def format_decision_request(request: dict[str, Any]) -> str:
     )
 
 
+
+
+def create_isolated_release_decision_request(
+    *,
+    action: str,
+    reviewed_scope: list[str] | dict[str, Any],
+    target_destination: str,
+    paths_changed: list[str],
+    paths_protected: list[str] | str,
+    expected_side_effects: str,
+    rollback: str,
+    reason_insufficient: str,
+    existing_authority: str | dict[str, Any] = "operator_required",
+    recording_mechanism: str = "saipen authority capture <signed-operator-capsule>",
+) -> dict[str, Any]:
+    """Create a structured isolated release decision request covering Section 4 requirements."""
+    scope_summary = ", ".join(sorted(reviewed_scope)) if isinstance(reviewed_scope, (list, set)) else str(reviewed_scope)
+    changed_summary = ", ".join(sorted(paths_changed))
+    protected_summary = (
+        f"{len(paths_protected)} staged paths"
+        if isinstance(paths_protected, (list, set))
+        else str(paths_protected)
+    )
+    req = {
+        "action": str(action).strip(),
+        "reviewed_scope": scope_summary,
+        "target_destination": str(target_destination).strip(),
+        "paths_changed": changed_summary,
+        "paths_protected": protected_summary,
+        "expected_side_effects": str(expected_side_effects).strip(),
+        "rollback": str(rollback).strip(),
+        "reason_insufficient": str(reason_insufficient).strip(),
+    }
+    req.update(
+        create_decision_request(
+            blocked_operation=f"{action} (target={target_destination})",
+            existing_authority=existing_authority,
+            missing_authorization=reason_insufficient,
+            consequences_approval=f"Execute {action} isolated to {target_destination}; {protected_summary} protected",
+            consequences_refusal="Publication remains blocked; foreign staging remains protected",
+            safe_default="Preserve existing live index and foreign staging without mutating repository",
+            recording_mechanism=recording_mechanism,
+        )
+    )
+    return req
+
 def validate_authority_escalation(
     proposed_reason: str,
     acting_agent: str,

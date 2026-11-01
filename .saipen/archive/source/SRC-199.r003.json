@@ -1,0 +1,24 @@
+{
+  "clauses": {
+    "SRC-199:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "A requested explanation of protocol deviation must answer that request; an engineering inventory or general handoff cannot substitute."
+    },
+    "SRC-199:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Use both supplied FreeBuff handoffs as fixed regression witnesses; separate verified deviations from genuine recovery/transport boundaries and unverified claims."
+    },
+    "SRC-199:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Diagnosis names actual evidence, violated rule and owner, cause, and corrective action; never invent an internal motive, successful recovery or ticket completion."
+    }
+  },
+  "derived_at": "2026-10-09T05:35:23Z",
+  "derived_from": "SRC-199",
+  "interpretation_revision": 3,
+  "schema_version": 1,
+  "source_sha256": "caefd1fbe6eb8d966f197408911f311b2193a4ea78b3cc50886cdf964f7f2242"
+}

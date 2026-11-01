@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-349:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "FreeBuff wrong-protocol routing: /saipen continue in _BZ_REA was hijacked by SAIPAL and no SAIPEN Work ran; find the earliest enforceable routing root cause, repair it, admit a SAIHANDOFF audit, and do not substitute chat prose for the artifact"
+    }
+  },
+  "derived_at": "2026-10-31T06:24:19Z",
+  "derived_from": "SRC-349",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "9f4ef0723bdfaae53ef3f2eecba4d38c4e7cd22e05e9b6cb3968ff2f9970cc4b"
+}

@@ -1,0 +1,23 @@
+{
+  "archive_ref": ".saipen/archive/retired/SRC-059.md",
+  "authority_grant": "T-1390 / SRC-059",
+  "authority_receipt": "SRC-065",
+  "authority_sha256": "688642993f7a3ebc87054ddbb939bc04f4f645ce8e497dd605b870d70fb44192",
+  "discovery_event": null,
+  "evidence": {
+    "kind": "event",
+    "ref": "E-7014"
+  },
+  "evidence_bound_event": "E-7074",
+  "evidence_note": "fixture contamination; proof dir T-1391-T-1390-fixture-contamination-20260917",
+  "linked_work": "T-1390",
+  "reason": "TEST_FIXTURE_CONTAMINATION",
+  "receipt_id": "SRC-059",
+  "retired_at": "2026-09-18T17:17:56Z",
+  "retired_by": "claude",
+  "retirement_event": "E-7074",
+  "schema_version": 2,
+  "source_sha256": "cb1d490e3e5db4157a79d25e8bd03670a36041e925e0b36ebfc02a5e18eb60d6",
+  "status": "INVALID",
+  "ticket_ref": ".saipen/archive/retired/T-1390.json"
+}

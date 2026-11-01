@@ -1,0 +1,19 @@
+{
+  "clauses": {
+    "SRC-150:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Silent execution is default for runnable work, phase changes and tool continuation; explicit request alone authorizes bounded progress; preserve immediate blockers human decisions safety capability boundaries and final response gates."
+    },
+    "SRC-150:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Separate model commentary from reasoning host-native thought and machine status; heartbeats use runtime logs not chat; adapters declare five actual silence capabilities; deterministic A-K red-green matrix canonical CURRENT_PASS and full core new_red=0."
+    }
+  },
+  "derived_at": "2026-09-30T17:15:46Z",
+  "derived_from": "SRC-150",
+  "interpretation_revision": 2,
+  "schema_version": 1,
+  "source_sha256": "5d6cd6822055cd4a1164c3b02228687d05c5420c2b1753dd924f3ba7d2bf216f"
+}

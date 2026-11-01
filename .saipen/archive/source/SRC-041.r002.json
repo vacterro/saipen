@@ -1,0 +1,19 @@
+{
+  "clauses": {
+    "SRC-041:R0001": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "Generated handoffs carry identity lineage based_on_event generated_at runtime generation and freshness; current STATE outranks stale or foreign input."
+    },
+    "SRC-041:R0002": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "Bounded cold orientation reports identity lineage phase task last_event next_action runtime generation blocker status handoff freshness and cheap workspace freshness."
+    }
+  },
+  "derived_at": "2026-09-13T23:04:01Z",
+  "derived_from": "SRC-041",
+  "interpretation_revision": 2,
+  "schema_version": 1,
+  "source_sha256": "ffadc172a9896c5657bb40b8cd531399c215f7c80d3ed31717cf00f931d119f4"
+}

@@ -1,0 +1,113 @@
+{
+  "requirements": {
+    "SRC-361:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "NOT_APPLICABLE",
+      "evidence": "ZAICODE host / export capture limitation: chunked transport and manifest verification belongs to session exporter",
+      "text": "D-01 Export-Artifact-Completeness: Truncated session exports require chunked manifest and end marker verification",
+      "verification": null,
+      "work": "T-1985"
+    },
+    "SRC-361:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "SAIPEN protocol ownership: outcome_truth.py separates QUEUE_DRAINED from CAMPAIGN_STATUS/OBJECTIVE_STATUS; preserves blocked tickets honestly without faking completion; verified by test_premature_victory_prevention.py",
+      "text": "D-02 Outcome-Truth-Distinction: Terminal guard correctly refuses false completion when actionable tickets remain",
+      "verification": "test_premature_victory_prevention.py: PASS record:.saipen/evidence/focused-unit/d805dd267ed50722-20261031T234040226671Z.json",
+      "work": "T-1985"
+    },
+    "SRC-361:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "SAIPEN protocol ownership: fail-closed authority gate rejects unverified model-supplied sources from privileged reconciliation; verified by test_premature_victory_prevention.py",
+      "text": "D-03 Authority-Gate-Enforcement: Model-supplied sources rejected from privileged reconciliation without operator witness",
+      "verification": "test_premature_victory_prevention.py: PASS record:.saipen/evidence/focused-unit/d805dd267ed50722-20261031T234040226671Z.json",
+      "work": "T-1985"
+    },
+    "SRC-361:R004": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "NOT_APPLICABLE",
+      "evidence": "FreeBuff integration / operational host ownership: distinction between protocol ledger gate and independent application launch/watchdog",
+      "text": "D-04 Operational-Scope-Separation: Ledger blocker must not halt independent operational application repairs",
+      "verification": null,
+      "work": "T-1985"
+    },
+    "SRC-361:R005": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "NOT_APPLICABLE",
+      "evidence": "FreeBuff application repository ownership: live code repairs on AHK/JS files during host outage",
+      "text": "D-05 Out-of-Band-Mutation-Control: Application code repairs require operational exception tracking or protocol admission",
+      "verification": null,
+      "work": "T-1985"
+    },
+    "SRC-361:R006": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "NOT_APPLICABLE",
+      "evidence": "FreeBuff QA / application ownership: restart, hotkey, crash recovery, and multi-scenario acceptance matrix",
+      "text": "D-06 Premature-Reliability-Prevention: Reliability claims require comprehensive restart/update acceptance matrix",
+      "verification": null,
+      "work": "T-1985"
+    },
+    "SRC-361:R007": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "NOT_APPLICABLE",
+      "evidence": "FreeBuff renderer ownership: distinguishing process alive/beacon from authentic DOM/CSS injection",
+      "text": "D-07 Evidence-Semantics-Integrity: Beacon acknowledgment must not substitute for authentic DOM/CSS delivery proof",
+      "verification": null,
+      "work": "T-1985"
+    },
+    "SRC-361:R008": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "SAIPEN protocol ownership: phase DONE requires complete verified lifecycle progression and matching LOG events; verified by test_premature_victory_prevention.py",
+      "text": "D-08 State-Consistency-Enforcement: Phase DONE requires matching journaled ticket lifecycle and verification records",
+      "verification": "test_premature_victory_prevention.py: PASS record:.saipen/evidence/focused-unit/d805dd267ed50722-20261031T234040226671Z.json",
+      "work": "T-1985"
+    },
+    "SRC-361:R009": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "SAIPEN protocol ownership: discrete bootstrap states for protocol discovery, loaded instructions, and ledger admission prevent explanation drift; verified by test_premature_victory_prevention.py",
+      "text": "D-09 Protocol-Lifecycle-Tracking: Discrete states for discovery, instruction load, and ledger admission prevent explanation drift",
+      "verification": "test_premature_victory_prevention.py: PASS record:.saipen/evidence/focused-unit/d805dd267ed50722-20261031T234040226671Z.json",
+      "work": "T-1985"
+    },
+    "SRC-361:R010": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "NOT_APPLICABLE",
+      "evidence": "ZAICODE host admission limitation: response contract structure and language verification at admission boundary",
+      "text": "D-10 Host-Response-Contract-Enforcement: Host admission must provide mechanical response validation or fail-closed warning",
+      "verification": null,
+      "work": "T-1985"
+    },
+    "SRC-361:R011": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "NOT_APPLICABLE",
+      "evidence": "ZAICODE host UI / telemetry limitation: distinguishing synthetic system reminders from real human authority",
+      "text": "D-11 Telemetry-Provenance-Attribution: Separate synthetic system messages from authenticated real human ingress",
+      "verification": null,
+      "work": "T-1985"
+    },
+    "SRC-361:R012": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "NOT_APPLICABLE",
+      "evidence": "FreeBuff host benchmarking: live user prompt roundtrip latency trace",
+      "text": "D-12 End-to-End-Latency-Verification: Service availability requires live prompt roundtrip latency benchmark",
+      "verification": null,
+      "work": "T-1985"
+    }
+  },
+  "schema_version": 1
+}

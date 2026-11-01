@@ -452,6 +452,80 @@ class GreenPathTests(RetirementFixture):
         self.assertEqual(intake.validate_project(project), [])
 
 
+class BlockParkedRetirementTests(RetirementFixture):
+    """Retiring the ticket whose block IS the STATE's phase evidence (T-1958).
+
+    `transition_from: SCOUT -> phase: DONE` is not a DFA edge. It is legal only
+    as the canonical active-ticket park, and its proof is the blocked ticket
+    still on BOARD. Retirement removes that row in the same transaction, so the
+    operation destroyed its own evidence and then failed validation against it:
+    every retirable section included `## BLOCKED`, yet no blocked ticket could
+    ever be retired. `unblock` does not open the way either -- a non-work
+    classification refuses it by design -- so the two doors blocked each other.
+    """
+
+    def parked_non_work(self, project: Path) -> tuple[str, str]:
+        """(ticket, blocking event) in the exact shape the incident created."""
+        parent = "T-7"
+        parked = ticket_move(project, "block", parent, AGENT, "park the parent for the probe")
+        self.assertTrue(parked.ok, parked.to_dict())
+
+        minted = user_request(project, AGENT, "a request this project never meant to receive")
+        self.assertTrue(minted.ok, minted.to_dict())
+        ticket = minted.data["ticket"]
+        claimed = apply_claim(project, ticket, AGENT, explicit=True)
+        self.assertTrue(claimed.ok, claimed.to_dict())
+
+        blocked = ticket_move(
+            project, "block", ticket, AGENT,
+            "probe: the goal grammar took this as an objective "
+            "-- INVALID_INVOCATION -- nothing built",
+        )
+        self.assertTrue(blocked.ok, blocked.to_dict())
+
+        state = self.state(project)
+        self.assertEqual(state["phase"], "DONE")
+        self.assertEqual(state["task"], "none")
+        return ticket, f"E-{state['last_event']}"
+
+    def test_the_park_shape_is_the_one_that_blocked_the_operation(self):
+        project = self.make_project()
+        self.parked_non_work(project)
+        state = self.state(project)
+        self.assertEqual(state["transition_from"], "SCOUT")
+        # Proves the test is aimed at the real defect: this pair is not an edge.
+        from saipen_engine import phases
+
+        self.assertFalse(phases.transition_legal(state["transition_from"], state["phase"]))
+
+    def test_retiring_the_blocked_ticket_succeeds_and_clears_the_park(self):
+        project = self.make_project()
+        ticket, evidence = self.parked_non_work(project)
+
+        result = retire_ticket(
+            project, ticket, AGENT,
+            reason="INVALID_INVOCATION", evidence=evidence, authority="",
+        )
+        self.assertTrue(result.ok, result.to_dict())
+        self.assertEqual(result.code, "RETIRED")
+
+        board = self.board(project)
+        self.assertNotIn(ticket, board["tickets"], "retired Work is still schedulable")
+        # The park is gone with the row it was bound to, so STATE must stop
+        # claiming a transition that only the park could justify.
+        state = self.state(project)
+        self.assertEqual(state["transition_from"], "DONE")
+        self.assertEqual(intake.validate_project(project), [])
+
+    def test_a_neutral_state_is_left_alone(self):
+        """The normalization is scoped to the park; it is not a blanket rewrite."""
+        project = self.make_project()
+        _parent, _child, _receipt, _authority = self.retired(project)
+        state = self.state(project)
+        self.assertEqual(state["phase"], "BUILD")
+        self.assertEqual(state["task"], "T-7")
+
+
 class HostileControlTests(RetirementFixture):
     """The eight controls that keep this from becoming `rm -rf ticket`."""
 

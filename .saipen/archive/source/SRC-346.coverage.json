@@ -1,0 +1,14 @@
+{
+  "requirements": {
+    "SRC-346:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "T-1953 closed with verification evidence in LOG: verify -> PASS [target: T-1953] conf: high -- focused record 718e780893093386 PASS 11 ran; RED control 4 failures without the reuse branch, 11 OK with it; freshness 12+7 OK, suite 44 OK, identity 4 modules OK; ruff clean",
+      "text": "ticket closure latency: measure real CLI launch + suite cost, reuse audit, batch economics",
+      "verification": "the Work this request created reached its own verification gate; see the T-1953 VERIFY cycle in .saipen/LOG.md",
+      "work": "T-1953"
+    }
+  },
+  "schema_version": 1
+}

@@ -1,0 +1,113 @@
+{
+  "requirements": {
+    "SRC-353:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "NOT_APPLICABLE",
+      "evidence": "FreeBuff host ownership: slash-command router out of SAIPEN repo scope (FB-01)",
+      "text": "FB-01 Explicit Namespace Routing: Slash-command router must give /saipen priority over semantic/fuzzy skill discovery.",
+      "verification": null,
+      "work": "T-1977"
+    },
+    "SRC-353:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "NOT_APPLICABLE",
+      "evidence": "FreeBuff host code: re-read ~/.agents/skills/ on session start (FB-02) out of SAIPEN scope",
+      "text": "FB-02 Skill Inventory Reload: Re-read ~/.agents/skills/ on each session start or workspace switch.",
+      "verification": null,
+      "work": "T-1977"
+    },
+    "SRC-353:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "NOT_APPLICABLE",
+      "evidence": "FreeBuff host execution policy: no foreign-protocol directory change (FB-03) out of SAIPEN scope",
+      "text": "FB-03 Foreign-Protocol Substitution Refusal: Command refusal terminates or prompts, never cds into another protocol repository.",
+      "verification": null,
+      "work": "T-1977"
+    },
+    "SRC-353:R004": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "NOT_APPLICABLE",
+      "evidence": "FreeBuff host transport: native operator-origin binding declared not installed (FB-04) out of SAIPEN scope",
+      "text": "FB-04 Native Operator-Origin Binding: Deliver an independently authenticated operator event transport with non-model-fabricated nonce.",
+      "verification": null,
+      "work": "T-1977"
+    },
+    "SRC-353:R005": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "NOT_APPLICABLE",
+      "evidence": "FreeBuff host verification: requires live installed FreeBuff run (FB-05) out of SAIPEN scope",
+      "text": "FB-05 End-to-End Continuation Verification: Validate live /saipen continue execution from an active SAIPEN project root.",
+      "verification": null,
+      "work": "T-1977"
+    },
+    "SRC-353:R006": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "NOT_APPLICABLE",
+      "evidence": "SAIPAL repository ownership: audit disputed NO_DRIFT receipts and session index 1019 (SP-01) out of SAIPEN scope",
+      "text": "SP-01 Disputed Receipt Verification: Audit the 5 disputed NO_DRIFT receipts and session index 1019 against physical episode logs.",
+      "verification": null,
+      "work": "T-1977"
+    },
+    "SRC-353:R007": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "NOT_APPLICABLE",
+      "evidence": "SAIPAL repository ownership: classify synthetic smoke fixtures (SP-02) out of SAIPEN scope",
+      "text": "SP-02 Synthetic Fixture Classification: Explicitly label any episode originating from a synthetic smoke fixture.",
+      "verification": null,
+      "work": "T-1977"
+    },
+    "SRC-353:R008": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "NOT_APPLICABLE",
+      "evidence": "SAIPAL repository ownership: immutable history preservation append-only (SP-03) out of SAIPEN scope",
+      "text": "SP-03 Immutable History Preservation: All corrections must be append-only with no rewriting or deleting historical entries.",
+      "verification": null,
+      "work": "T-1977"
+    },
+    "SRC-353:R009": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "NOT_APPLICABLE",
+      "evidence": "SAIPAL repository ownership: canonical disposition append (SP-04) out of SAIPEN scope",
+      "text": "SP-04 Canonical Disposition Append: Use SAIPAL native disposition command to mark template-derived candidates.",
+      "verification": null,
+      "work": "T-1977"
+    },
+    "SRC-353:R010": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "Read V:/___VAC/__K/__CODE/_MISC/_BZ_REA/.saipen/STATE.md: phase DONE, task none, event 510",
+      "text": "BZ-01 Read-Only Verification: Verify BZ REA project state read-only at phase DONE, task none, event 510.",
+      "verification": "python tools/core_unit.py focused T-1977 --pattern test_t1968_foreign_protocol_route.py: PASS record: .saipen/evidence/focused-unit/d27ecd1f63ca2b33-20261031T174232698351Z.json",
+      "work": "T-1977"
+    },
+    "SRC-353:R011": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "State event 510 supersedes REVIEW T-19, no duplicate work performed",
+      "text": "BZ-02 No Duplicate Work: Former incident state REVIEW T-19 in BZ REA is obsolete, no redundant ticket work performed.",
+      "verification": "python tools/core_unit.py focused T-1977 --pattern test_t1968_foreign_protocol_route.py: PASS record: .saipen/evidence/focused-unit/d27ecd1f63ca2b33-20261031T174232698351Z.json",
+      "work": "T-1977"
+    },
+    "SRC-353:R012": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "Router emits FOREIGN_PROTOCOL_COMMAND and REGISTRY declares exact_namespace.foreign_protocols",
+      "text": "SAIPEN-01 Internal Controls: Router refusal emits FOREIGN_PROTOCOL_COMMAND and REGISTRY machine-declares foreign protocols.",
+      "verification": "python tools/core_unit.py focused T-1977 --pattern test_t1968_foreign_protocol_route.py: PASS record: .saipen/evidence/focused-unit/d27ecd1f63ca2b33-20261031T174232698351Z.json",
+      "work": "T-1977"
+    }
+  },
+  "schema_version": 1
+}

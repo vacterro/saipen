@@ -1,0 +1,34 @@
+{
+  "clauses": {
+    "SRC-017:R1": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "A confirmed bug fix requires a causal A/B comparison: the SAME regression test, fixture, oracle and relevant verification configuration must FAIL against the pre-fix implementation and PASS against the post-fix one; the variable between red and green is the implementation under repair, never the definition of success"
+    },
+    "SRC-017:R2": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "SAIPEN must not allow VERIFY PASS, REVIEW SHIP, DONE or COMPLETE on the transition where the implementation is unfixed and the fixture, expected value or input domain was changed so the failing path is no longer executed"
+    },
+    "SRC-017:R3": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Legitimate test changes must remain possible: a changed verifier invalidates prior verifier evidence rather than being banned, and the agent re-establishes the chain with an independent reason, a new red control, and no pairing of the old FAIL with the new PASS"
+    },
+    "SRC-017:R4": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Cheap evidence binding: verifier identity is the test command plus the content identity of the relevant test, fixture and oracle, plus the subject revision"
+    },
+    "SRC-017:R5": {
+      "actionable": true,
+      "class": "invariant",
+      "text": "A hash proves the verifier changed or did not change, never that it is semantically correct; verifier integrity and red-control capability are both required and neither is sufficient alone"
+    }
+  },
+  "derived_at": "2026-09-03T16:19:26Z",
+  "derived_from": "SRC-017",
+  "interpretation_revision": 5,
+  "schema_version": 1,
+  "source_sha256": "504306b4cf43ed1622e96909fec7f233bee124a718c99b42c3a530a2039c4a13"
+}

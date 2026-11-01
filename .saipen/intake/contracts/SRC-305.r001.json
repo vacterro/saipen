@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-305:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "SAIPEN admission enforcement: a development Write/Edit or consequential Bash for SAIPEN-managed work must require an authoritative start/claim receipt and an active STATE-bound DOING owned by the actor BEFORE the first mutation. Retrospective phase replay is explicitly insufficient. Test a new request against phase:DONE task:none: tools refuse before claim, succeed after claim, and preserve non-mutating reads."
+    }
+  },
+  "derived_at": "2026-10-24T11:52:40Z",
+  "derived_from": "SRC-305",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "eef1f9fc0f2c76738528cddc85110a6bd38514cd1c33cf6ffdcd0abf87833f6d"
+}

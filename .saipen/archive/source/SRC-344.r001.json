@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-344:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "AUT-001: host acceptance receipts must be authenticated by the live authority broker (host_authority_client.verify_record), not by caller-supplied field equality or a substring blacklist; matching fields that any caller can write are not host identity."
+    }
+  },
+  "derived_at": "2026-10-27T14:27:14Z",
+  "derived_from": "SRC-344",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "ec9397a199f250daa4adf5a5258efe7aa04079ece508dacf0f83fb1ca911aeec"
+}

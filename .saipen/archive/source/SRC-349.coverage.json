@@ -1,0 +1,14 @@
+{
+  "requirements": {
+    "SRC-349:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "T-1968 closed with verification evidence in LOG: verify -> PASS [target: T-1968] conf: high -- python -B -m unittest tools.test_t1968_foreign_protocol_route ran 15 of 15 green on the current tree: a foreign protocol route is refused rather than hijacked, the deterministic routing boundary holds, and no SAIPAL shortcut claims an explicit SAIPEN command",
+      "text": "FreeBuff wrong-protocol routing: /saipen continue in _BZ_REA was hijacked by SAIPAL and no SAIPEN Work ran; find the earliest enforceable routing root cause, repair it, admit a SAIHANDOFF audit, and do not substitute chat prose for the artifact",
+      "verification": "the Work this request created reached its own verification gate; see the T-1968 VERIFY cycle in .saipen/LOG.md",
+      "work": "T-1968"
+    }
+  },
+  "schema_version": 1
+}

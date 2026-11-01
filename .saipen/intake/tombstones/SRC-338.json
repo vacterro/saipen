@@ -1,0 +1,16 @@
+{
+  "actionable": 32,
+  "archive_ref": ".saipen/archive/source/SRC-338.md",
+  "closed_at": "2026-10-26T17:26:37Z",
+  "closure_event": null,
+  "linked_work": "T-1932",
+  "linked_works": [
+    "T-1932"
+  ],
+  "receipt_id": "SRC-338",
+  "requirements": 32,
+  "schema_version": 1,
+  "source_sha256": "696ae4391a6894a9b01dfd86af7abbdd933283c1dd1a61657bcb0c1a80bc58c0",
+  "status": "CLOSED",
+  "unresolved": 0
+}

@@ -1,0 +1,113 @@
+{
+  "requirements": {
+    "SRC-041:R0001": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/T-1325-cold-agent-truth-20260914.md",
+      "text": "Generated handoffs carry identity lineage based_on_event generated_at runtime generation and freshness; current STATE outranks stale or foreign input.",
+      "verification": "E-6188",
+      "work": "T-1325"
+    },
+    "SRC-041:R0002": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/T-1325-cold-agent-truth-20260914.md",
+      "text": "Bounded cold orientation reports identity lineage phase task last_event next_action runtime generation blocker status handoff freshness and cheap workspace freshness.",
+      "verification": "E-6188",
+      "work": "T-1325"
+    },
+    "SRC-041:R0003": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/T-1325-cold-agent-truth-20260914.md",
+      "text": "Cold orientation is deterministic without file mtimes whole-repository search giant prose or system-authority injection; unknown freshness is explicit.",
+      "verification": "E-6188",
+      "work": "T-1325"
+    },
+    "SRC-041:R0004": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/T-1325-cold-agent-truth-20260914.md",
+      "text": "New LOG events obey a bounded byte cap while append-only identity and parent links remain intact; detail is externalized or refusal is actionable.",
+      "verification": "E-6188",
+      "work": "T-1325"
+    },
+    "SRC-041:R0005": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/T-1325-cold-agent-truth-20260914.md",
+      "text": "New or updated BOARD live records obey a bounded character cap while historical rows remain unchanged and detail is externalized or refusal is actionable.",
+      "verification": "E-6188",
+      "work": "T-1325"
+    },
+    "SRC-041:R0006": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/T-1325-cold-agent-truth-20260914.md",
+      "text": "Closed witness levels distinguish UNIT INTEGRATION EFFECT_PATH LIVE and MANUAL; criterion scope mismatch reconciles as EVIDENCE_SCOPE_TOO_WEAK.",
+      "verification": "E-6188",
+      "work": "T-1325"
+    },
+    "SRC-041:R0007": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/T-1325-cold-agent-truth-20260914.md",
+      "text": "Effect-path fixture proves a green helper UNIT witness cannot satisfy an end-to-end criterion while a real sink EFFECT_PATH witness can.",
+      "verification": "E-6188",
+      "work": "T-1325"
+    },
+    "SRC-041:R0008": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/T-1325-cold-agent-truth-20260914.md",
+      "text": "Historical PASS remains preserved and later escaped defects are represented as temporal contradiction or supersession, not rewritten history.",
+      "verification": "E-6188",
+      "work": "T-1325"
+    },
+    "SRC-041:R0009": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/T-1325-cold-agent-truth-20260914.md",
+      "text": "Zero-context cold-agent acceptance reconstructs current truth through documented bounded reads and does not require full LOG BOARD handoff or mtime authority.",
+      "verification": "E-6188",
+      "work": "T-1325"
+    },
+    "SRC-041:R0010": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/T-1325-cold-agent-truth-20260914.md",
+      "text": "Blocked orientation and recovery expose shared remediation fields, exact canonical commands, operator gates, and forbidden probes without a parallel diagnostic vocabulary.",
+      "verification": "E-6188",
+      "work": "T-1325"
+    },
+    "SRC-041:R0011": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/T-1325-cold-agent-truth-20260914.md",
+      "text": "Focused recovery, orientation, evidence, and bounded-growth regressions plus one core boundary run have PATCH_OWNED zero and UNKNOWN zero.",
+      "verification": "E-6188",
+      "work": "T-1325"
+    },
+    "SRC-041:R0012": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": ".saipen/evidence/T-1325-cold-agent-truth-20260914.md",
+      "text": "The routed BOOT STYLE STATE BOARD LOG design remains intact; no project prose is promoted into system authority.",
+      "verification": "E-6188",
+      "work": "T-1325"
+    }
+  },
+  "schema_version": 1
+}

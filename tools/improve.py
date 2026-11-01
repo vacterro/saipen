@@ -769,8 +769,10 @@ def _header_repair_errors(report_text: str) -> list[str]:
         f"{newest_tree[:24]}...). A report header is not evidence: this shape "
         "is a header-only freshness repair, and completing it would seal an "
         "attestation for bytes no audit examined. Append a genuine RUN against "
-        "the current tree -- its provenance block is the authority completion "
-        "reads -- or capture a new seat/cycle"
+        "the current tree, then resume; prepare re-derives the header only from "
+        "that newest RUN's producer-attested identity. If no usable current RUN "
+        "can be produced, capture a new seat/cycle or retire this seat with "
+        "`saipen improve retire <cycle> <seat> --reason <CODE>`"
     )
     return errors
 
@@ -1903,6 +1905,46 @@ def _rebind_un_audited_header(
     return "".join(lines)
 
 
+def _rebind_audited_header_from_newest_run(report_text: str, current_source) -> str | None:
+    """Re-derive source identity from the newest producer-attested RUN.
+
+    A stale draft may append a current RUN, but its creation-time header remains
+    old. Updating only the source identity to that RUN lets freshness validate
+    the audited tree without accepting a hand-stamped identity unsupported by a
+    RUN. Returns None when no usable RUN identity exists or the header is current.
+    """
+    identities = _run_provenance_identities(report_text)
+    run_numbers = [int(match.group(1)) for match in re.finditer(_RUN_RE, report_text)]
+    if not identities or not run_numbers or identities[-1][0] != run_numbers[-1]:
+        return None
+    _number, head, tree = identities[-1]
+    if head == "UNAVAILABLE" or tree == "UNAVAILABLE":
+        return None
+    if (
+        current_source.source_head not in (head, head[:7])
+        or current_source.source_tree_fingerprint != tree
+    ):
+        return None
+    values = {"source_head": head, "source_tree_fingerprint": tree}
+    lines: list[str] = []
+    seen: set[str] = set()
+    changed = False
+    for line in report_text.splitlines(keepends=True):
+        stripped = line.rstrip("\r\n")
+        ending = line[len(stripped) :]
+        key = stripped.split(":", 1)[0].strip() if ":" in stripped else ""
+        if key in values and not stripped.startswith("#"):
+            seen.add(key)
+            replacement = f"{key}: {values[key]}"
+            changed |= stripped != replacement
+            lines.append(replacement + ending)
+        else:
+            lines.append(line)
+    if set(values) - seen or not changed:
+        return None
+    return "".join(lines)
+
+
 def prepare_audit_seat(
     project_root: Path,
     *,
@@ -2299,9 +2341,10 @@ def prepare_audit_seat(
             # journaled re-bind of ONLY the mechanically known header fields;
             # assignment context (agent/role/model/scope) is never touched and
             # no RUN byte exists to rewrite. A draft with any committed RUN is
-            # evidence and is never re-bound -- it keeps the structured
-            # refusals below, and a seat that can never continue is retired
-            # through `saipen improve retire`.
+            # evidence. Its header may be re-derived ONLY from the newest
+            # producer-attested RUN when that RUN matches the current source;
+            # otherwise the structured stale refusals below remain, and the
+            # seat can be retired through `saipen improve retire`.
             _header_rebound = False
             _previous_fp = ""
             _previous_head = ""
@@ -2373,6 +2416,62 @@ def prepare_audit_seat(
                             }
                         report_text = _rebound
                         _header_rebound = True
+            elif _run_section_count(report_text):
+                _rebound = _rebind_audited_header_from_newest_run(
+                    report_text, _current_src
+                )
+                if _rebound is not None:
+                    _rebind_rel = report.relative_to(root).as_posix()
+                    if dry_run:
+                        return _rv(
+                            {
+                                "ok": True,
+                                "code": "DRY_RUN_PLAN",
+                                "action": "rebind",
+                                "cycle_id": active_cycle,
+                                "seat_id": seat,
+                                "role": selected_role,
+                                "report_path": _rebind_rel,
+                                "resumed": False,
+                                "targets": [_rebind_rel],
+                                "detail": (
+                                    "planned header re-derivation from newest RUN provenance; "
+                                    "no writes"
+                                ),
+                            }
+                        )
+                    _rebind_result = run_mutation(
+                        root,
+                        "improve-rebind-" + uuid.uuid4().hex,
+                        "improve_rebind",
+                        seat,
+                        _identity(root),
+                        hash_bytes(f"{active_cycle}:{seat}:rebind".encode("utf-8")),
+                        [
+                            {
+                                "path": _rebind_rel,
+                                "role": "report",
+                                "content": _rebound,
+                            }
+                        ],
+                        preconditions={_rebind_rel: _hash_file(report)},
+                        skip_preflight=True,
+                        verification_policy="improve_atomic_file",
+                    )
+                    if not _rebind_result.get("ok"):
+                        return {
+                            "ok": False,
+                            "code": "REBIND_FAILED",
+                            "cycle_id": active_cycle,
+                            "seat_id": seat,
+                            "role": selected_role,
+                            "report_path": _rebind_rel,
+                            "resumed": False,
+                            "detail": "RUN-attested source-header re-derivation did not commit: "
+                            f"{_rebind_result.get('code')} {_rebind_result.get('message', '')}",
+                        }
+                    report_text = _rebound
+                    _header_rebound = True
             _r_model = _field(report_text, "discovery_model")
             _r_head = _field(report_text, "source_head")
             _r_tree = _field(report_text, "source_tree_fingerprint")
@@ -2398,8 +2497,9 @@ def prepare_audit_seat(
                     "regenerate the draft) instead of resuming. "
                     "An un-audited draft is re-bound automatically; "
                     "this one already carries committed RUN evidence, "
-                    "which is never re-bound -- if this seat can never "
-                    "continue, retire it with `saipen improve retire "
+                    "which is re-bound only from the newest RUN when it "
+                    "matches the current source; otherwise, if this seat can "
+                    "never continue, retire it with `saipen improve retire "
                     "<cycle> <seat> --reason <CODE>` and complete the "
                     "cycle with the remaining seats",
                     "current_source_head": _current_src.source_head,

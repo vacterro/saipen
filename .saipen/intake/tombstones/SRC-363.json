@@ -1,0 +1,16 @@
+{
+  "actionable": 11,
+  "archive_ref": ".saipen/archive/source/SRC-363.md",
+  "closed_at": "2026-10-31T23:51:43Z",
+  "closure_event": null,
+  "linked_work": "T-1987",
+  "linked_works": [
+    "T-1987"
+  ],
+  "receipt_id": "SRC-363",
+  "requirements": 11,
+  "schema_version": 1,
+  "source_sha256": "adf10c64c0c821c507de3a15e89f966ca15d8c5cf73510a9fe7bfbc1adad4e7e",
+  "status": "CLOSED",
+  "unresolved": 0
+}

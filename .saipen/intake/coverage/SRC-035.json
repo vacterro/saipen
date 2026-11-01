@@ -1,0 +1,113 @@
+{
+  "requirements": {
+    "SRC-035:R001": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Provide a legal canonical active-parent to blocker handoff without weakening the single-DOING invariant",
+      "verification": null,
+      "work": "T-1317"
+    },
+    "SRC-035:R002": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Make the required blocker claimable while the parent remains honestly unfinished",
+      "verification": null,
+      "work": "T-1317"
+    },
+    "SRC-035:R003": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Resume the parent deterministically and atomically after the blocker reaches DONE",
+      "verification": null,
+      "work": "T-1317"
+    },
+    "SRC-035:R004": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Keep the parent BLOCKED when the blocker is failed or remains blocked",
+      "verification": null,
+      "work": "T-1317"
+    },
+    "SRC-035:R005": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Represent conditional environment absence explicitly with mechanical non-abusable evidence",
+      "verification": null,
+      "work": "T-1317"
+    },
+    "SRC-035:R006": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Keep discretionary DEFERRED nonterminal and distinct from environment absence",
+      "verification": null,
+      "work": "T-1317"
+    },
+    "SRC-035:R007": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Reconcile T-1318 against its actual acceptance and evidence",
+      "verification": null,
+      "work": "T-1317"
+    },
+    "SRC-035:R008": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Move T-1317 out of DOING to DONE or precise BLOCKED_EXTERNAL after blocker reconciliation",
+      "verification": null,
+      "work": "T-1317"
+    },
+    "SRC-035:R009": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Allow safe diagnostics and reads while Work is blocked",
+      "verification": null,
+      "work": "T-1317"
+    },
+    "SRC-035:R010": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Refuse consequential project mutation without active Work authority",
+      "verification": null,
+      "work": "T-1317"
+    },
+    "SRC-035:R011": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Preserve project root identity and lineage isolation for foreign mutations",
+      "verification": null,
+      "work": "T-1317"
+    },
+    "SRC-035:R012": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "Pass focused lifecycle source admission crash and cross-project regressions with no patch-owned broad-gate regression",
+      "verification": null,
+      "work": "T-1317"
+    }
+  },
+  "schema_version": 1
+}

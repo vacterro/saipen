@@ -1,0 +1,49 @@
+{
+  "clauses": {
+    "SRC-015:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Wave C/5 -- one shared audit enqueue producer API: monotonic allocator that never reuses deleted gaps, atomic temp-then-place write, idempotent retry on producer_operation_id, no arbitrary path and no overwrite of an existing layer"
+    },
+    "SRC-015:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Wave D/7 -- producer-neutral audit envelope: optional stable metadata header (audit_schema, producer, producer_version, producer_item_id, created_at, severity, confidence, observed_project, related/amends, maintainer_verdict) parsed without semantic interpretation of the body"
+    },
+    "SRC-015:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Wave E/7 -- maintainer disposition loop: producer identity survives intake, the audit->SRC->Work->disposition trace survives file deletion, and a compact read-only result projection is available to the producer"
+    },
+    "SRC-015:R004": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Wave F -- multi-producer/concurrency hardening: narrow writer lock around allocation and final placement only, no partial final bytes visible to the consumer, and an idempotent crash matrix"
+    },
+    "SRC-015:R005": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Wave G -- operator surface completion: `saipen status` carries a compact audit_inbox summary (pending, active layer, bound receipt, bound Work, closed-pending-delete, invalid, last allocated id) without dumping audit body text"
+    },
+    "SRC-015:R006": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Wave H/7 -- SAIPAL bridge contract: SAIPAL receives only the constrained enqueue capability plus the read-only disposition lookup, with no Core/BOARD/STATE/LOG write and no producer-specific semantic branch in SAIPEN"
+    },
+    "SRC-015:R007": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Wave 6 -- real HUSH runtime: `hush <task>` activates a task-local execution policy that suppresses discretionary narration only, leaves command meaning, phase lifecycle, tool effects and mandatory interaction unchanged, and does not leak into the next task"
+    },
+    "SRC-015:R008": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Wave I -- dogfood and final hardening: manual, AUDAPACK-style and SAIPAL-like producers each drive the full discover->capture->normalize->Work->evidence->close->delete loop, including changed-generation, active-Work precedence, concurrent enqueue, rejection and crash recovery"
+    }
+  },
+  "derived_at": "2026-08-31T07:37:23Z",
+  "derived_from": "SRC-015",
+  "interpretation_revision": 8,
+  "schema_version": 1,
+  "source_sha256": "33020883b18d9305a665ad103816ac737a785fa256cb10252749e085dc812065"
+}

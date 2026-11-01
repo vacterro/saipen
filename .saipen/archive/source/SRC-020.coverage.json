@@ -1,0 +1,104 @@
+{
+  "requirements": {
+    "SRC-020:R1": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "VERIFIED",
+      "evidence": "Optional cards extend .saipen/KNOWLEDGE. Existing legacy documents are unchanged; no phase, STATE field, LOG taxonomy, database, daemon or network dependency was added. Freshness internally reads the card tree and legacy titles; only selected card bodies are emitted into model context. Legacy INDEX.md remains valid and write_index refuses to replace it.",
+      "text": "Preserve the existing project-local .saipen/KNOWLEDGE authority: optional cards only; no new phase, STATE field, LOG taxonomy, database, daemon, network dependency, second state store, or mandatory full-tree cold load.",
+      "verification": "python -m unittest tools.test_knowledge -q: 39 PASS; four unchanged review controls failed pre-fix then passed post-fix. Full current gate results are recorded in the T-1291 VERIFY checkpoint and .saipen/kitchen/t1291-review.md.",
+      "work": "T-1291"
+    },
+    "SRC-020:R10": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "Dogfood cards: narrative-authority-leakage (prose cannot establish machine authority), red-control-before-green (proof that a verifier can fail), unattributed-tree-edit (attribute release scope). Three cards mirror already durable project lessons. Exact APIs, formats, file scope, measured protocol/context deltas and remaining limitations are recorded in .saipen/kitchen/t1291-review.md. Normal retrieval emits at most three highest-scoring active cards; internal freshness scans are O(tree size), not metadata-only IO.",
+      "text": "Dogfood at most three strong existing repository lessons; report exact files, APIs, formats, digest, compatibility, retrieval and anti-bloat evidence, context/protocol size deltas, runtimes and limitations.",
+      "verification": "python -m unittest tools.test_knowledge -q: 39 PASS; four unchanged review controls failed pre-fix then passed post-fix. Full current gate results are recorded in the T-1291 VERIFY checkpoint and .saipen/kitchen/t1291-review.md.",
+      "work": "T-1291"
+    },
+    "SRC-020:R11": {
+      "actionable": false,
+      "class": "context",
+      "disposition": "UNKNOWN",
+      "evidence": null,
+      "text": "README and phase documents are the smallest normative owners; translation machinery remains authoritative for localized copies, SHIP gains no memory lifecycle, and the extensive non-goals and supplied scenario examples add no independent architecture.",
+      "verification": null,
+      "work": "T-1291"
+    },
+    "SRC-020:R2": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "CORE's KNOWLEDGE clause defines all seven promotion criteria. evaluate_promotion requires seven explicit True inputs (verified, reusable, decision_bearing, not_cheaply_derivable, non_duplicate, non_transient, safe); it does not infer truth from English. Exact active scope/trigger identity selects reuse. Semantic verification and duplicate discovery remain agent responsibilities.",
+      "text": "Define a compact promotion gate requiring verified, reusable, decision-bearing, not cheaply derivable, non-duplicate, non-transient, safe knowledge; ordinary tickets default to zero and normally at most one card.",
+      "verification": "python -m unittest tools.test_knowledge -q: 39 PASS; four unchanged review controls failed pre-fix then passed post-fix. Full current gate results are recorded in the T-1291 VERIFY checkpoint and .saipen/kitchen/t1291-review.md.",
+      "work": "T-1291"
+    },
+    "SRC-020:R3": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "parse_card validates the marker, six allowed header keys, required metadata, kind/status enums, canonical slug, safe references, title, one claim paragraph and Why. Evidence is non-empty and syntactically bounded; reference existence/semantic truth is not automatically proven. Legacy unstructured documents need no card schema.",
+      "text": "Implement a stdlib-only structured card parser and validator for kind, scope, trigger, status, evidence, optional supersession linkage, title, concise claim and Why body, while legacy KNOWLEDGE files remain legal.",
+      "verification": "python -m unittest tools.test_knowledge -q: 39 PASS; four unchanged review controls failed pre-fix then passed post-fix. Full current gate results are recorded in the T-1291 VERIFY checkpoint and .saipen/kitchen/t1291-review.md.",
+      "work": "T-1291"
+    },
+    "SRC-020:R4": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "build_index emits a generated marker, sha256 source digest, counts, compact card metadata and mechanically derived legacy path/H1 rows. Digest input contains full-card content hashes and legacy path/title records. validate_knowledge and _quick_index compare exact regeneration, so row edits and source edits are detected even without timestamp changes. Explicit write_index is atomic and refuses unmarked legacy INDEX ownership.",
+      "text": "Generate an explicit deterministic .saipen/KNOWLEDGE/INDEX.md projection with marker and content digest from card metadata and mechanically provable legacy path/title data; deletion must lose no authority and regeneration must restore exact bytes.",
+      "verification": "python -m unittest tools.test_knowledge -q: 39 PASS; four unchanged review controls failed pre-fix then passed post-fix. Full current gate results are recorded in the T-1291 VERIFY checkpoint and .saipen/kitchen/t1291-review.md.",
+      "work": "T-1291"
+    },
+    "SRC-020:R5": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "retrieve scores ASCII token overlap over card path, scope and trigger; it returns top-scoring active ties up to limit=3. Zero overlap emits zero cards. Exact regeneration validates the index; stale/absent indexes fall back to read_cards plus _tree_errors. All card bodies may be read internally; only selected bodies enter the model surface. Legacy rows are navigation metadata, not automatic retrieval candidates. No hidden writes.",
+      "text": "Implement bounded retrieval from the current ticket or objective: use a fresh index when available, fall back safely to direct metadata discovery when stale or missing, return only the smallest relevant active card set, and never load all cards for an unrelated task.",
+      "verification": "python -m unittest tools.test_knowledge -q: 39 PASS; four unchanged review controls failed pre-fix then passed post-fix. Full current gate results are recorded in the T-1291 VERIFY checkpoint and .saipen/kitchen/t1291-review.md.",
+      "work": "T-1291"
+    },
+    "SRC-020:R6": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "context_cold inserts matching claim/Why/evidence and canonical card path into the decision surface. Tests reconstruct a fresh scenario without chat history, prove the standalone utility recommendation is present, and remove the card to prove the recommendation disappears. CLI retrieval errors now return ok=false and nonzero exit.",
+      "text": "Expose retrieved lessons and their Why/evidence to the cold decision context so a materially affected discretionary decision can name its source without noisy read logging or hidden session memory.",
+      "verification": "python -m unittest tools.test_knowledge -q: 39 PASS; four unchanged review controls failed pre-fix then passed post-fix. Full current gate results are recorded in the T-1291 VERIFY checkpoint and .saipen/kitchen/t1291-review.md.",
+      "work": "T-1291"
+    },
+    "SRC-020:R7": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "_tree_errors rejects missing/self targets, active replacements of active targets, orphaned superseded cards, and duplicate active scope/trigger identity. A superseded card requires exactly one active replacement. Retrieval validates this structure on fallback before returning evidence. Multi-generation chains require the newest active replacement to link each historical superseded card explicitly; no natural-language contradiction solver exists.",
+      "text": "Support explicit supersession without deletion: only active cards participate in normal retrieval; validate safe existing non-self targets and structurally coherent replacement linkage without pretending to solve natural-language contradictions.",
+      "verification": "python -m unittest tools.test_knowledge -q: 39 PASS; four unchanged review controls failed pre-fix then passed post-fix. Full current gate results are recorded in the T-1291 VERIFY checkpoint and .saipen/kitchen/t1291-review.md.",
+      "work": "T-1291"
+    },
+    "SRC-020:R8": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "VERIFIED",
+      "evidence": "validate.py retains journal-leak scanning and adds structured card/index validation. Card parsing rejects selected secret-like patterns; this is heuristic hygiene, not a complete secret detector. CLEAN owns explicit index hygiene and does not retire cards by age. Missing index is legal; legacy unmarked index is legal and preserved. Only explicit knowledge index writes the projection.",
+      "text": "Extend validator and CLEAN ownership for card/index structure and stale projection reporting while retaining existing leak/secret hygiene and never making ordinary continue a hidden writer.",
+      "verification": "python -m unittest tools.test_knowledge -q: 39 PASS; four unchanged review controls failed pre-fix then passed post-fix. Full current gate results are recorded in the T-1291 VERIFY checkpoint and .saipen/kitchen/t1291-review.md.",
+      "work": "T-1291"
+    },
+    "SRC-020:R9": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "VERIFIED",
+      "evidence": "tools/test_knowledge.py has 39 deterministic temporary-fixture tests: compatibility 01-04; card structure 05-11; projection 12-16; retrieval 17-20; promotion 21-25; secret/body hygiene 26-27; cold substrate 28-30; legacy projection 31-33; Why/evidence and removal control 34-35; four review regressions for legacy index ownership, stale/missing-index incoherent supersession and CLI failure. The four review tests failed unchanged against the pre-fix implementation and pass against the fixed implementation.",
+      "text": "Add deterministic backward-compatibility, card, index, retrieval, promotion, security, context-size and behavioral tests proving a past lesson changes the bounded substrate supplied to a later cold decision.",
+      "verification": "python -m unittest tools.test_knowledge -q: 39 PASS; four unchanged review controls failed pre-fix then passed post-fix. Full current gate results are recorded in the T-1291 VERIFY checkpoint and .saipen/kitchen/t1291-review.md.",
+      "work": "T-1291"
+    }
+  },
+  "schema_version": 1
+}

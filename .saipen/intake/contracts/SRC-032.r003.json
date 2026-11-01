@@ -1,0 +1,24 @@
+{
+  "clauses": {
+    "SRC-032:R001": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Add only the exact verified OpenCode built-in skill identity to the bounded adapter read fast-path so bootstrap works without Python or guard reachability."
+    },
+    "SRC-032:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Do not grant skill trust by suffix or namespace; plugin.skill, mcp__x__skill, and every unknown or namespaced identity still enter the guard and fail closed when unreachable."
+    },
+    "SRC-032:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "Keep exact built-in repository reads usable without actor binding or guard reachability and retain a red-green regression for the exact skill gap."
+    }
+  },
+  "derived_at": "2026-09-12T15:45:59Z",
+  "derived_from": "SRC-032",
+  "interpretation_revision": 3,
+  "schema_version": 1,
+  "source_sha256": "e2cd044681f15e97e6ffda4fecd5e645593ae59a9038bdefd7c526b4d5b6bed9"
+}

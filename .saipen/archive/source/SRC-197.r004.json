@@ -1,0 +1,29 @@
+{
+  "clauses": {
+    "SRC-197:R001": {
+      "actionable": false,
+      "class": "context",
+      "text": "1.1 reports a switch to Russian despite pinned reply_language: et and proposes LLM conditioning / missing STYLE read as causes; preserve these as reported claims without a supplied original host transcript."
+    },
+    "SRC-197:R002": {
+      "actionable": false,
+      "class": "context",
+      "text": "1.2 reports a multi-page response exceeding compression; preserve the incident claim without inventing delivered line/character measurements."
+    },
+    "SRC-197:R003": {
+      "actionable": false,
+      "class": "context",
+      "text": "1.3 reports T-273 manually inserted under DOING while STATE names T-271; independently assess the current contradictory consumer floor without inferring writer identity or repairing the consumer."
+    },
+    "SRC-197:R004": {
+      "actionable": false,
+      "class": "context",
+      "text": "1.4 reports antigravity_b ACL refusal at the private SAIPEN path; preserve the claim and separate it from unperformed same-account access verification."
+    }
+  },
+  "derived_at": "2026-10-08T23:56:25Z",
+  "derived_from": "SRC-197",
+  "interpretation_revision": 4,
+  "schema_version": 1,
+  "source_sha256": "df983dc9ba85b05cba06672a3ae516f4d553aad0874a79bbd99fb6525f35cfa9"
+}

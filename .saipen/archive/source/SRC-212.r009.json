@@ -1,0 +1,54 @@
+{
+  "clauses": {
+    "SRC-212:R001": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "Reproduce the active VERIFY admission incident in disposable protocol fixtures; distinguish reproduced behavior from the reported SAI_WEBSITE history, and preserve any newer live authority before mutation."
+    },
+    "SRC-212:R002": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "Inspect the documented CLI and runtime contract before choosing the repair; never invent verbs merely because a consumer attempted them."
+    },
+    "SRC-212:R003": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "Repair a supported evidence-admission route, or document a compatible operation only where the contract requires one, so genuine regression evidence is admissible while Work is active in VERIFY."
+    },
+    "SRC-212:R004": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "Keep pre-fix failure and post-fix success distinct and bind their correct ticket, attempt, unchanged verifier, source identity and chronological execution."
+    },
+    "SRC-212:R005": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "Make REVIEW evaluate current authoritative evidence; newer failure or authority must supersede stale approval."
+    },
+    "SRC-212:R006": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "Reject forged, unrelated, out-of-order, contradictory and unrecognized-verifier evidence without weakening lifecycle gates."
+    },
+    "SRC-212:R007": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "Preserve historical event chains and previously valid records and lifecycle flows."
+    },
+    "SRC-212:R008": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "Return clear refusal codes and the permitted recovery route when admission is unavailable."
+    },
+    "SRC-212:R009": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "text": "Negative control: missing genuine regression pair refuses admission."
+    }
+  },
+  "derived_at": "2026-10-11T05:02:50Z",
+  "derived_from": "SRC-212",
+  "interpretation_revision": 9,
+  "schema_version": 1,
+  "source_sha256": "4a93ed6345e47792e93d86087a641933a8e91ca176d4672d42eff6f8cd609d20"
+}

@@ -1,0 +1,14 @@
+{
+  "clauses": {
+    "SRC-019:R1": {
+      "actionable": true,
+      "class": "requirement",
+      "text": "CORE-001 P1: crew.py crew_release_context / _release_current / _post_ship -- pre-ship evidence is captured for applicable_roles(snapshot) while _release_current validates against the static CREW_ROLES, so a correctly NOT_APPLICABLE saiui makes a no-UI project reject its own release, and _post_ship recomputes applicability against the later mutable tree so release truth is never frozen. Freeze per-role applicability receipts as canonical pre-ship release evidence and validate and certify against that frozen manifest"
+    }
+  },
+  "derived_at": "2026-09-04T16:23:27Z",
+  "derived_from": "SRC-019",
+  "interpretation_revision": 1,
+  "schema_version": 1,
+  "source_sha256": "8b6783f72c34f7254a81d398c1afcc308a77cd07f60e7626df5cc0281c9e15d8"
+}

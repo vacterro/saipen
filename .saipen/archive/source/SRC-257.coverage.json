@@ -1,0 +1,167 @@
+{
+  "requirements": {
+    "SRC-257:R001": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "IMPLEMENTED",
+      "evidence": "E-15816",
+      "text": "Verify live SAIPEN root, lineage, execution admission, ownership, conformance, and authenticated operator intent",
+      "verification": "python -m unittest tools/test_admission_auto_doctor.py -> PASS (18 tests)",
+      "work": "T-1797"
+    },
+    "SRC-257:R002": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "IMPLEMENTED",
+      "evidence": "E-15816",
+      "text": "Authority and mechanism audit: locate and verify implementation of operator provenance verification, cc / continue / cc all dispatch, ticket intake, dependency resolution, ticket claim and admission, operator pause precedence, work ownership, protocol validation, state reconciliation, and Auto-Doctor recovery",
+      "verification": "python -m unittest tools/test_admission_auto_doctor.py -> PASS (18 tests)",
+      "work": "T-1797"
+    },
+    "SRC-257:R003": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "IMPLEMENTED",
+      "evidence": "E-15816",
+      "text": "Cross-project forensic analysis of SAITULS T-263 case: verify original operator-command provenance, source digest, directive precedence, scope of E-3221, canonical SAIOPS validity, and whether E-3221 legitimately superseded E-2691",
+      "verification": "python -m unittest tools/test_admission_auto_doctor.py -> PASS (18 tests)",
+      "work": "T-1797"
+    },
+    "SRC-257:R004": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "IMPLEMENTED",
+      "evidence": "E-15816",
+      "text": "Classify the T-263 authority conflict precisely from live canonical evidence into supported categories (A-G)",
+      "verification": "python -m unittest tools/test_admission_auto_doctor.py -> PASS (18 tests)",
+      "work": "T-1797"
+    },
+    "SRC-257:R005": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "IMPLEMENTED",
+      "evidence": "E-15816",
+      "text": "Separate software defect remediation and regression verification from hardware-dependent acceptance, release approval, and production deployment; prevent hardware dependencies from automatically blocking unrelated software corrections when authorized",
+      "verification": "python -m unittest tools/test_admission_auto_doctor.py -> PASS (18 tests)",
+      "work": "T-1797"
+    },
+    "SRC-257:R006": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "IMPLEMENTED",
+      "evidence": "E-15816",
+      "text": "Self-healing CC admission: enhance continuation mechanism to detect safely recoverable administrative drift (including unconsumed audit inbox generations) and apply authorized canonical corrections without manual operator CLI routing",
+      "verification": "python -m unittest tools/test_admission_auto_doctor.py -> PASS (18 tests)",
+      "work": "T-1797"
+    },
+    "SRC-257:R007": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "IMPLEMENTED",
+      "evidence": "E-15816",
+      "text": "Preserve the original verified operator command identity across internal repair and continuation; never manufacture an artificial operator command during retry",
+      "verification": "python -m unittest tools/test_admission_auto_doctor.py -> PASS (18 tests)",
+      "work": "T-1797"
+    },
+    "SRC-257:R008": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "IMPLEMENTED",
+      "evidence": "E-15816",
+      "text": "Non-blocking work scheduling: ensure a blocked ticket does not prevent unrelated authorized work from continuing; support queued work, independent remediation, and safe deferred admission",
+      "verification": "python -m unittest tools/test_admission_auto_doctor.py -> PASS (18 tests)",
+      "work": "T-1797"
+    },
+    "SRC-257:R009": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "IMPLEMENTED",
+      "evidence": "E-15816",
+      "text": "Preserve active T-220 ownership; maintain single execution seat and prevent concurrent writers against the same source files without canonical ownership and isolation",
+      "verification": "python -m unittest tools/test_admission_auto_doctor.py -> PASS (18 tests)",
+      "work": "T-1797"
+    },
+    "SRC-257:R010": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "IMPLEMENTED",
+      "evidence": "E-15816",
+      "text": "Human decision boundary: only request human decision when genuinely required (new auth, STOP reversal, dependency override, hardware interaction, destructive action, unrecoverable provenance); produce ONE minimal structured decision request",
+      "verification": "python -m unittest tools/test_admission_auto_doctor.py -> PASS (18 tests)",
+      "work": "T-1797"
+    },
+    "SRC-257:R011": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "IMPLEMENTED",
+      "evidence": "E-15816",
+      "text": "Never silently interpret cc all as unlimited authority, never treat agent prose as authenticated operator decision, and never fabricate carrier variables or provenance digests",
+      "verification": "python -m unittest tools/test_admission_auto_doctor.py -> PASS (18 tests)",
+      "work": "T-1797"
+    },
+    "SRC-257:R012": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "IMPLEMENTED",
+      "evidence": "E-15816",
+      "text": "Generalize fix across SAIPEN state machine without ticket-specific conditionals, magic event IDs, project-name allowlists, or blind blocker removal",
+      "verification": "python -m unittest tools/test_admission_auto_doctor.py -> PASS (18 tests)",
+      "work": "T-1797"
+    },
+    "SRC-257:R013": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "IMPLEMENTED",
+      "evidence": "E-15816",
+      "text": "Regression matrix covering minimum A-P scenarios (reuse of valid operator auth, distinguishing superseded vs active pause, active STOP enforcement, refusal on missing provenance, independent software remediation, hardware acceptance remaining blocked without hardware evidence, active seat untouched, no duplication on repeated cc, safe resume of interrupted repair, bounded refusal on failed validation, unrelated blocked task non-suppression, protected dependency non-tampering, goal survival, no-publish boundary, precise decision request on new authorization needed, directive scope non-inheritance)",
+      "verification": "python -m unittest tools/test_admission_auto_doctor.py -> PASS (18 tests)",
+      "work": "T-1797"
+    },
+    "SRC-257:R014": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "IMPLEMENTED",
+      "evidence": "E-15816",
+      "text": "Re-evaluate live SAITULS T-263 admission case through corrected canonical path, returning exact outcome (AUTHORIZED, PARTIALLY_AUTHORIZED, AUTHORITY_REQUIRED, DEPENDENCY_BLOCKED, or CONFORMANCE_BLOCKED) without mutating SAITULS source",
+      "verification": "python -m unittest tools/test_admission_auto_doctor.py -> PASS (18 tests)",
+      "work": "T-1797"
+    },
+    "SRC-257:R015": {
+      "actionable": true,
+      "class": "requirement",
+      "disposition": "IMPLEMENTED",
+      "evidence": "E-15816",
+      "text": "Assess SRC-078 traceability collision involving E-001..E-026 without rewriting historical LOG events and design canonical, non-destructive evidence-reference repair under valid independent authority",
+      "verification": "python -m unittest tools/test_admission_auto_doctor.py -> PASS (18 tests)",
+      "work": "T-1797"
+    },
+    "SRC-257:R016": {
+      "actionable": true,
+      "class": "invariant",
+      "disposition": "IMPLEMENTED",
+      "evidence": "E-15816",
+      "text": "Zero production source mutation in SAITULS; no deployment or publication",
+      "verification": "python -m unittest tools/test_admission_auto_doctor.py -> PASS (18 tests)",
+      "work": "T-1797"
+    },
+    "SRC-257:R017": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "IMPLEMENTED",
+      "evidence": "E-15816",
+      "text": "Executable unit and regression tests pass for all admission auto-doctor and decision request behavior",
+      "verification": "python -m unittest tools/test_admission_auto_doctor.py -> PASS (18 tests)",
+      "work": "T-1797"
+    },
+    "SRC-257:R018": {
+      "actionable": true,
+      "class": "acceptance-criterion",
+      "disposition": "IMPLEMENTED",
+      "evidence": "E-15816",
+      "text": "Emit final report adhering strictly to the specified schema",
+      "verification": "python -m unittest tools/test_admission_auto_doctor.py -> PASS (18 tests)",
+      "work": "T-1797"
+    }
+  },
+  "schema_version": 1
+}
